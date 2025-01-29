@@ -458,6 +458,16 @@ std::vector<Ref<PhysicalDeviceBase>> InstanceBase::EnumeratePhysicalDevices(
 
     std::vector<Ref<PhysicalDeviceBase>> discoveredPhysicalDevices;
     for (wgpu::BackendType b : IterateBitSet(backendsToFind)) {
+#if DAWN_PLATFORM_IS(WINDOWS) && defined(__has_feature)
+#if __has_feature(address_sanitizer)
+        if (b == wgpu::BackendType::OpenGLES) {
+            // TODO(crbug.com/347169607): Loading libEGL.dll causes an odr-violation in libc++
+            ConsumedErrorAndWarnOnce(
+                DAWN_INTERNAL_ERROR("OpenGLES backend disabled on Windows ASAN"));
+            continue;
+        }
+#endif
+#endif
         BackendConnection* backend = GetBackendConnection(b);
 
         if (backend != nullptr) {
