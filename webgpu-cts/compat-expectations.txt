@@ -128,7 +128,7 @@ crbug.com/dawn/0000 [ android arm ] webgpu:api,validation,error_scope:simple:err
 
 # textureSample() failures on Pixel 6
 # these are also failing on Vulkan (WebGPU Core) on the same device
-crbug.com/368241687 [ android-pixel-6 arm ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_2d_coords:* [ Skip ]
+crbug.com/368241687 [ android-pixel-6 arm ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_2d_coords:* [ Failure ]
 
 # textureSampleLevel() failures on Pixel 6
 # these are also failing on Vulkan (WebGPU Core) on the same device
@@ -172,7 +172,7 @@ crbug.com/373664069 [ android arm ] webgpu:api,operation,resource_init,texture_z
 crbug.com/364917742 [ android arm ] webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes:* [ Skip ]
 
 # Returns 0.
-crbug.com/374218148 [ android-Pixel-6 arm ] webgpu:shader,execution,expression,call,builtin,textureSample:depth_array_2d_coords:* [ Skip ]
+crbug.com/374218148 [ android-Pixel-6 arm ] webgpu:shader,execution,expression,call,builtin,textureSample:depth_array_2d_coords:* [ Failure ]
 
 # Buffer already has an outstanding map pending
 crbug.com/391414855 [ android-Pixel-6 arm ] webgpu:api,validation,buffer,mapping:getMappedRange,state,mappingPending:* [ Skip ]
@@ -3698,7 +3698,7 @@ crbug.com/364595481 [ android arm ] webgpu:shader,execution,expression,call,buil
 crbug.com/364595481 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_2d_coords:stage="v";format="depth32float";filt="nearest";modeU="m";modeV="r";offset=true [ Skip ]
 crbug.com/364595481 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_2d_coords:stage="v";format="depth32float";filt="nearest";modeU="m";modeV="m";offset=true [ Skip ]
 
-crbug.com/dawn/0000 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_2d_coords:* [ Skip ]
+crbug.com/dawn/0000 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_2d_coords:* [ Failure ]
 
 # Causes lots of build output
 crbug.com/dawn/0000 [ android-pixel-6 ] webgpu:api,validation,render_pass,attachment_compatibility:render_pass_and_bundle,color_sparse:* [ Skip ]
