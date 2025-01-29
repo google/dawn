@@ -19,9 +19,7 @@ void main() {
   Interface v = vert_main_inner();
   tint_interstage_location1 = v.col1;
   tint_interstage_location2 = v.col2;
-  gl_Position = v.pos;
-  gl_Position.y = -(gl_Position.y);
-  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
+  gl_Position = vec4(v.pos.x, -(v.pos.y), ((2.0f * v.pos.z) - v.pos.w), v.pos.w);
   gl_PointSize = 1.0f;
 }
 //

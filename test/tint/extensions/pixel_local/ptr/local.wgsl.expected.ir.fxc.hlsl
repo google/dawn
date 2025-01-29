@@ -17,6 +17,6 @@ void f(f_inputs inputs) {
   uint2 v = uint2(inputs.pos.xy);
   V.a = pixel_local_a.Load(v).x;
   f_inner();
-  pixel_local_a[v] = V.a.xxxx;
+  pixel_local_a[v] = uint4((V.a).xxxx);
 }
 

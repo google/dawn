@@ -5,8 +5,10 @@ cbuffer cbuffer_i : register(b0) {
 [numthreads(1, 1, 1)]
 void main() {
   float3 v1 = (0.0f).xxx;
-  float3 v = v1;
-  float3 v_1 = i[0u].x.xxx;
-  v1 = (((v_1 == float3(int(0), int(1), int(2)))) ? (1.0f.xxx) : (v));
+  uint v = i[0u].x;
+  float3 v_1 = v1;
+  float3 v_2 = float3((1.0f).xxx);
+  float3 v_3 = float3((v).xxx);
+  v1 = (((v_3 == float3(int(0), int(1), int(2)))) ? (v_2) : (v_1));
 }
 

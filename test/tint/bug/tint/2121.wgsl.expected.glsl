@@ -15,8 +15,7 @@ VSOut main_inner() {
   return v_1;
 }
 void main() {
-  gl_Position = main_inner().pos;
-  gl_Position.y = -(gl_Position.y);
-  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
+  vec4 v_2 = main_inner().pos;
+  gl_Position = vec4(v_2.x, -(v_2.y), ((2.0f * v_2.z) - v_2.w), v_2.w);
   gl_PointSize = 1.0f;
 }

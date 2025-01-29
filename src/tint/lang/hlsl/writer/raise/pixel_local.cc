@@ -183,7 +183,7 @@ struct State {
                     from = b.Convert(rov.subtype, from);
                 }
                 // Store requires a vec4
-                from = b.Swizzle(ty.vec4(rov.subtype), from, {0, 0, 0, 0});
+                from = b.Construct(ty.vec4(rov.subtype), from);
                 core::ir::Instruction* to = b.Load(rov.var);
                 b.Call<hlsl::ir::BuiltinCall>(  //
                     ty.void_(), hlsl::BuiltinFn::kTextureStore, to, coord, from);

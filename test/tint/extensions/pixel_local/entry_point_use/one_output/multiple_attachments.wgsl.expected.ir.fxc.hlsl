@@ -28,9 +28,9 @@ f_outputs f(f_inputs inputs) {
   P.b = pixel_local_b.Load(v).x;
   P.c = pixel_local_c.Load(v).x;
   f_outputs v_1 = {f_inner()};
-  pixel_local_a[v] = P.a.xxxx;
-  pixel_local_b[v] = P.b.xxxx;
-  pixel_local_c[v] = P.c.xxxx;
+  pixel_local_a[v] = uint4((P.a).xxxx);
+  pixel_local_b[v] = int4((P.b).xxxx);
+  pixel_local_c[v] = float4((P.c).xxxx);
   return v_1;
 }
 

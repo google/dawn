@@ -112,9 +112,8 @@ vec4 vertex_main_inner() {
   return vec4(0.0f);
 }
 void main() {
-  gl_Position = vertex_main_inner();
-  gl_Position.y = -(gl_Position.y);
-  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
+  vec4 v_16 = vertex_main_inner();
+  gl_Position = vec4(v_16.x, -(v_16.y), ((2.0f * v_16.z) - v_16.w), v_16.w);
   gl_PointSize = 1.0f;
 }
 //

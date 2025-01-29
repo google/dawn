@@ -11,8 +11,7 @@ vec4 main_inner(uint b) {
 }
 void main() {
   uint v = uint(gl_InstanceID);
-  gl_Position = main_inner((v + tint_push_constants.tint_first_instance));
-  gl_Position.y = -(gl_Position.y);
-  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
+  vec4 v_1 = main_inner((v + tint_push_constants.tint_first_instance));
+  gl_Position = vec4(v_1.x, -(v_1.y), ((2.0f * v_1.z) - v_1.w), v_1.w);
   gl_PointSize = 1.0f;
 }

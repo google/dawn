@@ -964,7 +964,7 @@ TEST_F(IR_ValidatorTest, Swizzle_MissingValue) {
     auto* f = b.Function("my_func", ty.void_());
     b.Append(f->Block(), [&] {
         auto* var = b.Var(ty.ptr(function, ty.vec4<f32>()));
-        auto* swizzle = b.Swizzle(ty.vec4<f32>(), var, {3, 2, 1, 0});
+        auto* swizzle = b.Swizzle(ty.vec4<f32>(), b.Load(var), {3, 2, 1, 0});
         swizzle->ClearOperands();
         b.Return(f);
     });
@@ -972,8 +972,8 @@ TEST_F(IR_ValidatorTest, Swizzle_MissingValue) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason.Str(),
-                testing::HasSubstr(R"(:4:20 error: swizzle: expected exactly 1 operands, got 0
-    %3:vec4<f32> = swizzle undef, wzyx
+                testing::HasSubstr(R"(:5:20 error: swizzle: expected exactly 1 operands, got 0
+    %4:vec4<f32> = swizzle undef, wzyx
                    ^^^^^^^
 )")) << res.Failure().reason.Str();
 }
@@ -982,7 +982,7 @@ TEST_F(IR_ValidatorTest, Swizzle_NullValue) {
     auto* f = b.Function("my_func", ty.void_());
     b.Append(f->Block(), [&] {
         auto* var = b.Var(ty.ptr(function, ty.vec4<f32>()));
-        auto* swizzle = b.Swizzle(ty.vec4<f32>(), var, {3, 2, 1, 0});
+        auto* swizzle = b.Swizzle(ty.vec4<f32>(), b.Load(var), {3, 2, 1, 0});
         swizzle->SetOperand(0, nullptr);
         b.Return(f);
     });
@@ -998,7 +998,7 @@ TEST_F(IR_ValidatorTest, Swizzle_MissingResult) {
     auto* f = b.Function("my_func", ty.void_());
     b.Append(f->Block(), [&] {
         auto* var = b.Var(ty.ptr(function, ty.vec4<f32>()));
-        auto* swizzle = b.Swizzle(ty.vec4<f32>(), var, {3, 2, 1, 0});
+        auto* swizzle = b.Swizzle(ty.vec4<f32>(), b.Load(var), {3, 2, 1, 0});
         swizzle->ClearResults();
         b.Return(f);
     });
@@ -1006,8 +1006,8 @@ TEST_F(IR_ValidatorTest, Swizzle_MissingResult) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason.Str(),
-                testing::HasSubstr(R"(:4:13 error: swizzle: expected exactly 1 results, got 0
-    undef = swizzle %2, wzyx
+                testing::HasSubstr(R"(:5:13 error: swizzle: expected exactly 1 results, got 0
+    undef = swizzle %3, wzyx
             ^^^^^^^
 )")) << res.Failure().reason.Str();
 }
@@ -1016,7 +1016,7 @@ TEST_F(IR_ValidatorTest, Swizzle_NullResult) {
     auto* f = b.Function("my_func", ty.void_());
     b.Append(f->Block(), [&] {
         auto* var = b.Var(ty.ptr(function, ty.vec4<f32>()));
-        auto* swizzle = b.Swizzle(ty.vec4<f32>(), var, {3, 2, 1, 0});
+        auto* swizzle = b.Swizzle(ty.vec4<f32>(), b.Load(var), {3, 2, 1, 0});
         swizzle->SetResults(Vector<ir::InstructionResult*, 1>{nullptr});
         b.Return(f);
     });
@@ -1024,8 +1024,8 @@ TEST_F(IR_ValidatorTest, Swizzle_NullResult) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason.Str(),
-                testing::HasSubstr(R"(:4:5 error: swizzle: result is undefined
-    undef = swizzle %2, wzyx
+                testing::HasSubstr(R"(:5:5 error: swizzle: result is undefined
+    undef = swizzle %3, wzyx
     ^^^^^
 )")) << res.Failure().reason.Str();
 }
@@ -1034,7 +1034,7 @@ TEST_F(IR_ValidatorTest, Swizzle_NoIndices) {
     auto* f = b.Function("my_func", ty.void_());
     b.Append(f->Block(), [&] {
         auto* var = b.Var(ty.ptr(function, ty.vec4<f32>()));
-        auto* swizzle = b.Swizzle(ty.vec4<f32>(), var, {3, 2, 1, 0});
+        auto* swizzle = b.Swizzle(ty.vec4<f32>(), b.Load(var), {3, 2, 1, 0});
         auto indices = Vector<uint32_t, 0>();
         swizzle->SetIndices(std::move(indices));
         b.Return(f);
@@ -1043,8 +1043,8 @@ TEST_F(IR_ValidatorTest, Swizzle_NoIndices) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason.Str(),
-                testing::HasSubstr(R"(:4:20 error: swizzle: expected at least 1 indices
-    %3:vec4<f32> = swizzle %2,
+                testing::HasSubstr(R"(:5:20 error: swizzle: expected at least 1 indices
+    %4:vec4<f32> = swizzle %3,
                    ^^^^^^^
 )")) << res.Failure().reason.Str();
 }
@@ -1053,7 +1053,7 @@ TEST_F(IR_ValidatorTest, Swizzle_TooManyIndices) {
     auto* f = b.Function("my_func", ty.void_());
     b.Append(f->Block(), [&] {
         auto* var = b.Var(ty.ptr(function, ty.vec4<f32>()));
-        auto* swizzle = b.Swizzle(ty.vec4<f32>(), var, {3, 2, 1, 0});
+        auto* swizzle = b.Swizzle(ty.vec4<f32>(), b.Load(var), {3, 2, 1, 0});
         auto indices = Vector<uint32_t, 5>{1, 1, 1, 1, 1};
         swizzle->SetIndices(std::move(indices));
         b.Return(f);
@@ -1062,8 +1062,8 @@ TEST_F(IR_ValidatorTest, Swizzle_TooManyIndices) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason.Str(),
-                testing::HasSubstr(R"(:4:20 error: swizzle: expected at most 4 indices
-    %3:vec4<f32> = swizzle %2, yyyyy
+                testing::HasSubstr(R"(:5:20 error: swizzle: expected at most 4 indices
+    %4:vec4<f32> = swizzle %3, yyyyy
                    ^^^^^^^
 )")) << res.Failure().reason.Str();
 }
@@ -1072,7 +1072,7 @@ TEST_F(IR_ValidatorTest, Swizzle_InvalidIndices) {
     auto* f = b.Function("my_func", ty.void_());
     b.Append(f->Block(), [&] {
         auto* var = b.Var(ty.ptr(function, ty.vec4<f32>()));
-        auto* swizzle = b.Swizzle(ty.vec4<f32>(), var, {3, 2, 1, 0});
+        auto* swizzle = b.Swizzle(ty.vec4<f32>(), b.Load(var), {3, 2, 1, 0});
         auto indices = Vector<uint32_t, 4>{4, 3, 2, 1};
         swizzle->SetIndices(std::move(indices));
         b.Return(f);
@@ -1081,8 +1081,100 @@ TEST_F(IR_ValidatorTest, Swizzle_InvalidIndices) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason.Str(),
-                testing::HasSubstr(R"(:4:20 error: swizzle: invalid index value
-    %3:vec4<f32> = swizzle %2, wzy
+                testing::HasSubstr(R"(:5:20 error: swizzle: invalid index value
+    %4:vec4<f32> = swizzle %3, wzy
+                   ^^^^^^^
+)")) << res.Failure().reason.Str();
+}
+
+TEST_F(IR_ValidatorTest, Swizzle_NotVector) {
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* var = b.Var(ty.ptr(function, ty.f32()));
+        b.Swizzle(ty.vec4<f32>(), b.Load(var), {3, 2, 1, 0});
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(
+                    R"(:5:20 error: swizzle: object of swizzle, %3, is not a vector, 'f32'
+    %4:vec4<f32> = swizzle %3, wzyx
+                   ^^^^^^^
+)")) << res.Failure().reason.Str();
+}
+
+TEST_F(IR_ValidatorTest, Swizzle_TooSmallResult) {
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* var = b.Var(ty.ptr(function, ty.vec4<f32>()));
+        b.Swizzle(ty.vec2<f32>(), b.Load(var), {3, 2, 1, 0});
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(
+            R"(:5:20 error: swizzle: result type 'vec2<f32>' does not match expected type, 'vec4<f32>'
+    %4:vec2<f32> = swizzle %3, wzyx
+                   ^^^^^^^
+)")) << res.Failure().reason.Str();
+}
+
+TEST_F(IR_ValidatorTest, Swizzle_TooLargeResult) {
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* var = b.Var(ty.ptr(function, ty.vec4<f32>()));
+        b.Swizzle(ty.vec4<f32>(), b.Load(var), {3, 2});
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(
+            R"(:5:20 error: swizzle: result type 'vec4<f32>' does not match expected type, 'vec2<f32>'
+    %4:vec4<f32> = swizzle %3, wz
+                   ^^^^^^^
+)")) << res.Failure().reason.Str();
+}
+
+TEST_F(IR_ValidatorTest, Swizzle_WrongTypeResult) {
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* var = b.Var(ty.ptr(function, ty.vec4<f32>()));
+        b.Swizzle(ty.vec2<u32>(), b.Load(var), {3, 2});
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(
+            R"(5:20 error: swizzle: result type 'vec2<u32>' does not match expected type, 'vec2<f32>'
+    %4:vec2<u32> = swizzle %3, wz
+                   ^^^^^^^
+)")) << res.Failure().reason.Str();
+}
+
+TEST_F(IR_ValidatorTest, Swizzle_OOBIndex) {
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* var = b.Var(ty.ptr(function, ty.vec2<f32>()));
+        b.Swizzle(ty.vec4<f32>(), b.Load(var), {3, 1, 1, 0});
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:5:20 error: swizzle: invalid index value
+    %4:vec4<f32> = swizzle %3, wyyx
                    ^^^^^^^
 )")) << res.Failure().reason.Str();
 }

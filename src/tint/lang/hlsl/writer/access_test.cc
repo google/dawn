@@ -227,7 +227,7 @@ TEST_F(HlslWriterTest, AccessSwizzle) {
 
     b.Append(f->Block(), [&] {
         auto* v = b.Var("v", b.Zero<vec3<f32>>());
-        b.Let("b", b.Swizzle(ty.f32(), v, {1u}));
+        b.Let("b", b.Swizzle(ty.f32(), b.Load(v), {1u}));
         b.Return(f);
     });
 
@@ -247,7 +247,7 @@ TEST_F(HlslWriterTest, AccessSwizzleMulti) {
 
     b.Append(f->Block(), [&] {
         auto* v = b.Var("v", b.Zero<vec4<f32>>());
-        b.Let("b", b.Swizzle(ty.vec4<f32>(), v, {3u, 2u, 1u, 0u}));
+        b.Let("b", b.Swizzle(ty.vec4<f32>(), b.Load(v), {3u, 2u, 1u, 0u}));
         b.Return(f);
     });
 

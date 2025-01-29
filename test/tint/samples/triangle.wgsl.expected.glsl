@@ -7,9 +7,8 @@ vec4 vtx_main_inner(uint VertexIndex) {
   return vec4(vec2[3](vec2(0.0f, 0.5f), vec2(-0.5f), vec2(0.5f, -0.5f))[min(VertexIndex, 2u)], 0.0f, 1.0f);
 }
 void main() {
-  gl_Position = vtx_main_inner(uint(gl_VertexID));
-  gl_Position.y = -(gl_Position.y);
-  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
+  vec4 v = vtx_main_inner(uint(gl_VertexID));
+  gl_Position = vec4(v.x, -(v.y), ((2.0f * v.z) - v.w), v.w);
   gl_PointSize = 1.0f;
 }
 //

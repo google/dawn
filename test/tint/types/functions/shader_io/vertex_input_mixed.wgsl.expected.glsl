@@ -34,8 +34,7 @@ void main() {
   uint v_3 = main_loc1_Input;
   uint v_4 = uint(gl_InstanceID);
   uint v_5 = (v_4 + tint_push_constants.tint_first_instance);
-  gl_Position = main_inner(v_2, v_3, v_5, VertexInputs1(main_loc2_Input, main_loc3_Input));
-  gl_Position.y = -(gl_Position.y);
-  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
+  vec4 v_6 = main_inner(v_2, v_3, v_5, VertexInputs1(main_loc2_Input, main_loc3_Input));
+  gl_Position = vec4(v_6.x, -(v_6.y), ((2.0f * v_6.z) - v_6.w), v_6.w);
   gl_PointSize = 1.0f;
 }

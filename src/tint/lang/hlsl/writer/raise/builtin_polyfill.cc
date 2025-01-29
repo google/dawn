@@ -809,7 +809,7 @@ struct State {
                     b.Access(ty.ptr<function, u32>(), out, 1_u)->Result(0),
                     b.Access(ty.ptr<function, u32>(), out, 2_u)->Result(0)});
 
-            out = b.Swizzle(ty.u32(), out, {2_u});
+            out = b.Swizzle(ty.u32(), b.Load(out), {2_u});
             call->Result(0)->ReplaceAllUsesWith(out->Result(0));
         });
         call->Destroy();
@@ -855,7 +855,7 @@ struct State {
             b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.void_(), hlsl::BuiltinFn::kGetDimensions,
                                                       tex, args);
 
-            out = b.Swizzle(ty.u32(), out, swizzle);
+            out = b.Swizzle(ty.u32(), b.Load(out), swizzle);
             call->Result(0)->ReplaceAllUsesWith(out->Result(0));
         });
         call->Destroy();
@@ -962,7 +962,7 @@ struct State {
                     b.Access(ty.ptr<function, u32>(), out, 1_u)->Result(0),
                     b.Access(ty.ptr<function, u32>(), out, 2_u)->Result(0)});
 
-            out = b.Swizzle(ty.u32(), out, {2_u});
+            out = b.Swizzle(ty.u32(), b.Load(out), {2_u});
             call->Result(0)->ReplaceAllUsesWith(out->Result(0));
         });
         call->Destroy();

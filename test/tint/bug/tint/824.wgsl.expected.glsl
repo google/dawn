@@ -25,9 +25,7 @@ void main() {
   uint v_1 = uint(gl_VertexID);
   uint v_2 = uint(gl_InstanceID);
   Output v_3 = main_inner(v_1, (v_2 + tint_push_constants.tint_first_instance));
-  gl_Position = v_3.Position;
-  gl_Position.y = -(gl_Position.y);
-  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
+  gl_Position = vec4(v_3.Position.x, -(v_3.Position.y), ((2.0f * v_3.Position.z) - v_3.Position.w), v_3.Position.w);
   tint_interstage_location0 = v_3.color;
   gl_PointSize = 1.0f;
 }

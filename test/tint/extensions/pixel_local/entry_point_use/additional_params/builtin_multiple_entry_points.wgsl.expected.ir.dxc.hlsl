@@ -31,9 +31,9 @@ void f(f_inputs inputs) {
   P.b = pixel_local_b.Load(v_1).x;
   P.c = pixel_local_c.Load(v_1).x;
   f_inner(float4(inputs.pos.xyz, (1.0f / inputs.pos.w)));
-  pixel_local_a[v_1] = P.a.xxxx;
-  pixel_local_b[v_1] = P.b.xxxx;
-  pixel_local_c[v_1] = P.c.xxxx;
+  pixel_local_a[v_1] = uint4((P.a).xxxx);
+  pixel_local_b[v_1] = int4((P.b).xxxx);
+  pixel_local_c[v_1] = float4((P.c).xxxx);
 }
 
 //
@@ -69,9 +69,9 @@ void f2(f2_inputs inputs) {
   P.b = pixel_local_b.Load(v_1).x;
   P.c = pixel_local_c.Load(v_1).x;
   f2_inner(float4(inputs.pos.xyz, (1.0f / inputs.pos.w)));
-  pixel_local_a[v_1] = P.a.xxxx;
-  pixel_local_b[v_1] = P.b.xxxx;
-  pixel_local_c[v_1] = P.c.xxxx;
+  pixel_local_a[v_1] = uint4((P.a).xxxx);
+  pixel_local_b[v_1] = int4((P.b).xxxx);
+  pixel_local_c[v_1] = float4((P.c).xxxx);
 }
 
 //
@@ -102,8 +102,8 @@ void f3(f3_inputs inputs) {
   P.b = pixel_local_b.Load(v).x;
   P.c = pixel_local_c.Load(v).x;
   f3_inner(float4(inputs.pos.xyz, (1.0f / inputs.pos.w)));
-  pixel_local_a[v] = P.a.xxxx;
-  pixel_local_b[v] = P.b.xxxx;
-  pixel_local_c[v] = P.c.xxxx;
+  pixel_local_a[v] = uint4((P.a).xxxx);
+  pixel_local_b[v] = int4((P.b).xxxx);
+  pixel_local_c[v] = float4((P.c).xxxx);
 }
 

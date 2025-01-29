@@ -25,9 +25,7 @@ void main() {
   tint_interstage_location1 = v.u;
   tint_interstage_location2 = v.vi;
   tint_interstage_location3 = v.vu;
-  gl_Position = v.pos;
-  gl_Position.y = -(gl_Position.y);
-  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
+  gl_Position = vec4(v.pos.x, -(v.pos.y), ((2.0f * v.pos.z) - v.pos.w), v.pos.w);
   gl_PointSize = 1.0f;
 }
 //

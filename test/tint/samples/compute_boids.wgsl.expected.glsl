@@ -12,9 +12,8 @@ vec4 vert_main_inner(vec2 a_particlePos, vec2 a_particleVel, vec2 a_pos) {
   return vec4((pos + a_particlePos), 0.0f, 1.0f);
 }
 void main() {
-  gl_Position = vert_main_inner(vert_main_loc0_Input, vert_main_loc1_Input, vert_main_loc2_Input);
-  gl_Position.y = -(gl_Position.y);
-  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
+  vec4 v = vert_main_inner(vert_main_loc0_Input, vert_main_loc1_Input, vert_main_loc2_Input);
+  gl_Position = vec4(v.x, -(v.y), ((2.0f * v.z) - v.w), v.w);
   gl_PointSize = 1.0f;
 }
 //

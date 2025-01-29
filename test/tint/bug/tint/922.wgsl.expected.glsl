@@ -184,8 +184,6 @@ void main() {
   VertexOutput v_6 = main_inner(main_loc0_Input, main_loc1_Input, main_loc2_Input, main_loc3_Input, main_loc4_Input);
   tint_interstage_location0 = v_6.v_Color;
   tint_interstage_location1 = v_6.v_TexCoord;
-  gl_Position = v_6.member;
-  gl_Position.y = -(gl_Position.y);
-  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
+  gl_Position = vec4(v_6.member.x, -(v_6.member.y), ((2.0f * v_6.member.z) - v_6.member.w), v_6.member.w);
   gl_PointSize = 1.0f;
 }

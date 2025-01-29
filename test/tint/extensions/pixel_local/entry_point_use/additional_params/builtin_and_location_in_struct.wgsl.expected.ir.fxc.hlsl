@@ -36,8 +36,8 @@ void f(f_inputs inputs) {
   float4 v_4 = float4(inputs.pos.xyz, (1.0f / inputs.pos.w));
   In v_5 = {inputs.In_uv};
   f_inner(v_4, v_5);
-  pixel_local_a[v_3] = P.a.xxxx;
-  pixel_local_b[v_3] = P.b.xxxx;
-  pixel_local_c[v_3] = P.c.xxxx;
+  pixel_local_a[v_3] = uint4((P.a).xxxx);
+  pixel_local_b[v_3] = int4((P.b).xxxx);
+  pixel_local_c[v_3] = float4((P.c).xxxx);
 }
 

@@ -494,8 +494,9 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureNumLevels) {
     %4:ptr<function, u32, read_write> = access %3, 0u
     %5:ptr<function, u32, read_write> = access %3, 1u
     %6:void = %t.GetDimensions 0u, %4, %5
-    %7:u32 = swizzle %3, y
-    ret %7
+    %7:vec2<u32> = load %3
+    %8:u32 = swizzle %7, y
+    ret %8
   }
 }
 )";
@@ -533,8 +534,9 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureNumLayers) {
     %5:ptr<function, u32, read_write> = access %3, 1u
     %6:ptr<function, u32, read_write> = access %3, 2u
     %7:void = %t.GetDimensions %4, %5, %6
-    %8:u32 = swizzle %3, z
-    ret %8
+    %8:vec3<u32> = load %3
+    %9:u32 = swizzle %8, z
+    ret %9
   }
 }
 )";
@@ -573,8 +575,9 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureNumSamples) {
     %5:ptr<function, u32, read_write> = access %3, 1u
     %6:ptr<function, u32, read_write> = access %3, 2u
     %7:void = %t.GetDimensions %4, %5, %6
-    %8:u32 = swizzle %3, z
-    ret %8
+    %8:vec3<u32> = load %3
+    %9:u32 = swizzle %8, z
+    ret %9
   }
 }
 )";

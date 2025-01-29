@@ -35,8 +35,8 @@ void f(f_inputs inputs) {
   P.c = pixel_local_c.Load(v_3).x;
   In v_4 = {float4(inputs.In_pos.xyz, (1.0f / inputs.In_pos.w))};
   f_inner(v_4, inputs.uv);
-  pixel_local_a[v_3] = P.a.xxxx;
-  pixel_local_b[v_3] = P.b.xxxx;
-  pixel_local_c[v_3] = P.c.xxxx;
+  pixel_local_a[v_3] = uint4((P.a).xxxx);
+  pixel_local_b[v_3] = int4((P.b).xxxx);
+  pixel_local_c[v_3] = float4((P.c).xxxx);
 }
 

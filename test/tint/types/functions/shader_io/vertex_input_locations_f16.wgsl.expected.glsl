@@ -17,8 +17,7 @@ vec4 main_inner(int loc0, uint loc1, float loc2, vec4 loc3, float16_t loc4, f16v
   return vec4(0.0f);
 }
 void main() {
-  gl_Position = main_inner(main_loc0_Input, main_loc1_Input, main_loc2_Input, main_loc3_Input, main_loc4_Input, main_loc5_Input);
-  gl_Position.y = -(gl_Position.y);
-  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
+  vec4 v_1 = main_inner(main_loc0_Input, main_loc1_Input, main_loc2_Input, main_loc3_Input, main_loc4_Input, main_loc5_Input);
+  gl_Position = vec4(v_1.x, -(v_1.y), ((2.0f * v_1.z) - v_1.w), v_1.w);
   gl_PointSize = 1.0f;
 }

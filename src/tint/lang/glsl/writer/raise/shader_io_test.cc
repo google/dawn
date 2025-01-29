@@ -454,15 +454,15 @@ $B1: {  # root
 %foo = @vertex func():void {
   $B3: {
     %6:vec4<f32> = call %foo_inner
-    store %foo_position, %6
-    %7:f32 = swizzle %foo_position, y
-    %8:f32 = negation %7
-    store_vector_element %foo_position, 1u, %8
-    %9:f32 = swizzle %foo_position, z
-    %10:f32 = swizzle %foo_position, w
-    %11:f32 = mul 2.0f, %9
-    %12:f32 = sub %11, %10
-    store_vector_element %foo_position, 2u, %12
+    %7:f32 = swizzle %6, x
+    %8:f32 = swizzle %6, y
+    %9:f32 = negation %8
+    %10:f32 = swizzle %6, z
+    %11:f32 = swizzle %6, w
+    %12:f32 = mul 2.0f, %10
+    %13:f32 = sub %12, %11
+    %14:vec4<f32> = construct %7, %9, %13, %11
+    store %foo_position, %14
     store %foo___point_size, 1.0f
     ret
   }
@@ -616,19 +616,19 @@ $B1: {  # root
   $B3: {
     %9:Outputs = call %foo_inner
     %10:vec4<f32> = access %9, 0u
-    store %foo_position, %10
-    %11:f32 = swizzle %foo_position, y
-    %12:f32 = negation %11
-    store_vector_element %foo_position, 1u, %12
-    %13:f32 = swizzle %foo_position, z
-    %14:f32 = swizzle %foo_position, w
-    %15:f32 = mul 2.0f, %13
-    %16:f32 = sub %15, %14
-    store_vector_element %foo_position, 2u, %16
-    %17:f32 = access %9, 1u
-    store %foo_loc0_Output, %17
-    %18:f32 = access %9, 2u
-    store %foo_loc1_Output, %18
+    %11:f32 = swizzle %10, x
+    %12:f32 = swizzle %10, y
+    %13:f32 = negation %12
+    %14:f32 = swizzle %10, z
+    %15:f32 = swizzle %10, w
+    %16:f32 = mul 2.0f, %14
+    %17:f32 = sub %16, %15
+    %18:vec4<f32> = construct %11, %13, %17, %15
+    store %foo_position, %18
+    %19:f32 = access %9, 1u
+    store %foo_loc0_Output, %19
+    %20:f32 = access %9, 2u
+    store %foo_loc1_Output, %20
     store %foo___point_size, 1.0f
     ret
   }
@@ -846,28 +846,28 @@ $B1: {  # root
   $B4: {
     %17:Interface = call %vert_inner
     %18:vec4<f32> = access %17, 0u
-    store %vert_position, %18
-    %19:f32 = swizzle %vert_position, y
-    %20:f32 = negation %19
-    store_vector_element %vert_position, 1u, %20
-    %21:f32 = swizzle %vert_position, z
-    %22:f32 = swizzle %vert_position, w
-    %23:f32 = mul 2.0f, %21
-    %24:f32 = sub %23, %22
-    store_vector_element %vert_position, 2u, %24
-    %25:vec4<f32> = access %17, 1u
-    store %vert_loc0_Output, %25
+    %19:f32 = swizzle %18, x
+    %20:f32 = swizzle %18, y
+    %21:f32 = negation %20
+    %22:f32 = swizzle %18, z
+    %23:f32 = swizzle %18, w
+    %24:f32 = mul 2.0f, %22
+    %25:f32 = sub %24, %23
+    %26:vec4<f32> = construct %19, %21, %25, %23
+    store %vert_position, %26
+    %27:vec4<f32> = access %17, 1u
+    store %vert_loc0_Output, %27
     store %vert___point_size, 1.0f
     ret
   }
 }
 %frag = @fragment func():void {
   $B5: {
-    %27:vec4<f32> = load %frag_position
-    %28:vec4<f32> = load %frag_loc0_Input
-    %29:Interface = construct %27, %28
-    %30:vec4<f32> = call %frag_inner, %29
-    store %frag_loc0_Output, %30
+    %29:vec4<f32> = load %frag_position
+    %30:vec4<f32> = load %frag_loc0_Input
+    %31:Interface = construct %29, %30
+    %32:vec4<f32> = call %frag_inner, %31
+    store %frag_loc0_Output, %32
     ret
   }
 }
@@ -963,17 +963,17 @@ $B1: {  # root
   $B3: {
     %8:Outputs = call %vert_inner
     %9:vec4<f32> = access %8, 0u
-    store %vert_position, %9
-    %10:f32 = swizzle %vert_position, y
-    %11:f32 = negation %10
-    store_vector_element %vert_position, 1u, %11
-    %12:f32 = swizzle %vert_position, z
-    %13:f32 = swizzle %vert_position, w
-    %14:f32 = mul 2.0f, %12
-    %15:f32 = sub %14, %13
-    store_vector_element %vert_position, 2u, %15
-    %16:vec4<f32> = access %8, 1u
-    store %vert_loc0_Output, %16
+    %10:f32 = swizzle %9, x
+    %11:f32 = swizzle %9, y
+    %12:f32 = negation %11
+    %13:f32 = swizzle %9, z
+    %14:f32 = swizzle %9, w
+    %15:f32 = mul 2.0f, %13
+    %16:f32 = sub %15, %14
+    %17:vec4<f32> = construct %10, %12, %16, %14
+    store %vert_position, %17
+    %18:vec4<f32> = access %8, 1u
+    store %vert_loc0_Output, %18
     store %vert___point_size, 1.0f
     ret
   }
@@ -1209,31 +1209,31 @@ $B1: {  # root
     %16:MyStruct = construct %15
     %17:i32 = load %vert_loc1_Input_1
     %18:vec4<f32> = call %vert_inner, %16, %17
-    store %vert_position, %18
-    %19:f32 = swizzle %vert_position, y
-    %20:f32 = negation %19
-    store_vector_element %vert_position, 1u, %20
-    %21:f32 = swizzle %vert_position, z
-    %22:f32 = swizzle %vert_position, w
-    %23:f32 = mul 2.0f, %21
-    %24:f32 = sub %23, %22
-    store_vector_element %vert_position, 2u, %24
+    %19:f32 = swizzle %18, x
+    %20:f32 = swizzle %18, y
+    %21:f32 = negation %20
+    %22:f32 = swizzle %18, z
+    %23:f32 = swizzle %18, w
+    %24:f32 = mul 2.0f, %22
+    %25:f32 = sub %24, %23
+    %26:vec4<f32> = construct %19, %21, %25, %23
+    store %vert_position, %26
     store %vert___point_size, 1.0f
     ret
   }
 }
 %frag1 = @fragment func():void {
   $B6: {
-    %26:MyStruct = call %frag1_inner
-    %27:f32 = access %26, 0u
-    store %frag1_loc1_Output, %27
+    %28:MyStruct = call %frag1_inner
+    %29:f32 = access %28, 0u
+    store %frag1_loc1_Output, %29
     ret
   }
 }
 %frag2 = @fragment func():void {
   $B7: {
-    %29:i32 = call %frag2_inner
-    store %frag2_loc0_Output, %29
+    %31:i32 = call %frag2_inner
+    store %frag2_loc0_Output, %31
     ret
   }
 }
@@ -1558,15 +1558,15 @@ $B1: {  # root
     %8:vec4<f32> = load %vert_loc0_Input
     %9:vec4<f32> = swizzle %8, zyxw
     %10:vec4<f32> = call %vert_inner, %9
-    store %vert_position, %10
-    %11:f32 = swizzle %vert_position, y
-    %12:f32 = negation %11
-    store_vector_element %vert_position, 1u, %12
-    %13:f32 = swizzle %vert_position, z
-    %14:f32 = swizzle %vert_position, w
-    %15:f32 = mul 2.0f, %13
-    %16:f32 = sub %15, %14
-    store_vector_element %vert_position, 2u, %16
+    %11:f32 = swizzle %10, x
+    %12:f32 = swizzle %10, y
+    %13:f32 = negation %12
+    %14:f32 = swizzle %10, z
+    %15:f32 = swizzle %10, w
+    %16:f32 = mul 2.0f, %14
+    %17:f32 = sub %16, %15
+    %18:vec4<f32> = construct %11, %13, %17, %15
+    store %vert_position, %18
     store %vert___point_size, 1.0f
     ret
   }
@@ -1654,15 +1654,15 @@ $B1: {  # root
     %23:vec4<f32> = load %vert_loc7_Input
     %24:vec4<f32> = swizzle %23, zyxw
     %25:vec4<f32> = call %vert_inner, %17, %19, %20, %22, %24
-    store %vert_position, %25
-    %26:f32 = swizzle %vert_position, y
-    %27:f32 = negation %26
-    store_vector_element %vert_position, 1u, %27
-    %28:f32 = swizzle %vert_position, z
-    %29:f32 = swizzle %vert_position, w
-    %30:f32 = mul 2.0f, %28
-    %31:f32 = sub %30, %29
-    store_vector_element %vert_position, 2u, %31
+    %26:f32 = swizzle %25, x
+    %27:f32 = swizzle %25, y
+    %28:f32 = negation %27
+    %29:f32 = swizzle %25, z
+    %30:f32 = swizzle %25, w
+    %31:f32 = mul 2.0f, %29
+    %32:f32 = sub %31, %30
+    %33:vec4<f32> = construct %26, %28, %32, %30
+    store %vert_position, %33
     store %vert___point_size, 1.0f
     ret
   }

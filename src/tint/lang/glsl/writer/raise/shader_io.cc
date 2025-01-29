@@ -193,23 +193,22 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
             auto* ptr = ty.ptr(core::AddressSpace::kOut, ty.i32(), core::Access::kWrite);
             to = builder.Access(ptr, to, 0_u)->Result(0);
             value = builder.Convert(ty.i32(), value)->Result(0);
+        } else if (outputs[idx].attributes.builtin == core::BuiltinValue::kPosition) {
+            auto* x = builder.Swizzle(ty.f32(), value, {0});
+
+            // Negate the gl_Position.y value
+            auto* y = builder.Swizzle(ty.f32(), value, {1});
+            auto* new_y = builder.Negation(ty.f32(), y);
+
+            // Recalculate gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
+            auto* z = builder.Swizzle(ty.f32(), value, {2});
+            auto* w = builder.Swizzle(ty.f32(), value, {3});
+            auto* mul = builder.Multiply(ty.f32(), 2_f, z);
+            auto* new_z = builder.Subtract(ty.f32(), mul, w);
+            value = builder.Construct(ty.vec4<f32>(), x, new_y, new_z, w)->Result(0);
         }
 
         builder.Store(to, value);
-
-        if (outputs[idx].attributes.builtin == core::BuiltinValue::kPosition) {
-            // Negate the gl_Position.y value
-            auto* y = builder.Swizzle(ty.f32(), output_vars[idx], {1});
-            auto* negate = builder.Negation(ty.f32(), y);
-            builder.StoreVectorElement(output_vars[idx], 1_u, negate);
-
-            // Recalculate gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
-            auto* z = builder.Swizzle(ty.f32(), output_vars[idx], {2});
-            auto* w = builder.Swizzle(ty.f32(), output_vars[idx], {3});
-            auto* mul = builder.Multiply(ty.f32(), 2_f, z);
-            auto* sub = builder.Subtract(ty.f32(), mul, w);
-            builder.StoreVectorElement(output_vars[idx], 2_u, sub);
-        }
     }
 
     /// Clamp a frag_depth builtin value if necessary.

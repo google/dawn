@@ -81,9 +81,7 @@ VertexOutput vertex_main_inner() {
 }
 void main() {
   VertexOutput v_6 = vertex_main_inner();
-  gl_Position = v_6.pos;
-  gl_Position.y = -(gl_Position.y);
-  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
+  gl_Position = vec4(v_6.pos.x, -(v_6.pos.y), ((2.0f * v_6.pos.z) - v_6.pos.w), v_6.pos.w);
   tint_interstage_location0 = v_6.prevent_dce;
   gl_PointSize = 1.0f;
 }

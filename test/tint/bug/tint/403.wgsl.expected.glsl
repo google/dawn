@@ -30,8 +30,7 @@ vec4 main_inner(uint v_2) {
   return vec4(x_52.x, x_52.y, 0.0f, 1.0f);
 }
 void main() {
-  gl_Position = main_inner(uint(gl_VertexID));
-  gl_Position.y = -(gl_Position.y);
-  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
+  vec4 v_3 = main_inner(uint(gl_VertexID));
+  gl_Position = vec4(v_3.x, -(v_3.y), ((2.0f * v_3.z) - v_3.w), v_3.w);
   gl_PointSize = 1.0f;
 }

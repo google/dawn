@@ -34,9 +34,7 @@ VertexOutput vtx_main_inner(VertexInput v_1) {
 void main() {
   VertexOutput v_3 = vtx_main_inner(VertexInput(vtx_main_loc0_Input, vtx_main_loc1_Input));
   tint_interstage_location0 = v_3.vtxFragColor;
-  gl_Position = v_3.Position;
-  gl_Position.y = -(gl_Position.y);
-  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
+  gl_Position = vec4(v_3.Position.x, -(v_3.Position.y), ((2.0f * v_3.Position.z) - v_3.Position.w), v_3.Position.w);
   gl_PointSize = 1.0f;
 }
 //

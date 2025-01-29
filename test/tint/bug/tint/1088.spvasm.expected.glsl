@@ -57,9 +57,7 @@ main_out main_inner(vec3 position_1_param, vec2 uv_param, vec3 normal_param) {
 }
 void main() {
   main_out v_3 = main_inner(main_loc0_Input, main_loc2_Input, main_loc1_Input);
-  gl_Position = v_3.member_0;
-  gl_Position.y = -(gl_Position.y);
-  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
+  gl_Position = vec4(v_3.member_0.x, -(v_3.member_0.y), ((2.0f * v_3.member_0.z) - v_3.member_0.w), v_3.member_0.w);
   tint_interstage_location0 = v_3.vUV_1;
   gl_PointSize = 1.0f;
 }

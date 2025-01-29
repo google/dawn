@@ -9,8 +9,7 @@ Out main_inner() {
   return Out(vec4(0.0f));
 }
 void main() {
-  gl_Position = main_inner().pos;
-  gl_Position.y = -(gl_Position.y);
-  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
+  vec4 v = main_inner().pos;
+  gl_Position = vec4(v.x, -(v.y), ((2.0f * v.z) - v.w), v.w);
   gl_PointSize = 1.0f;
 }

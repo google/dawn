@@ -34,9 +34,7 @@ VertexOutputs vs_main_inner(uint VertexIndex) {
 void main() {
   VertexOutputs v_2 = vs_main_inner(uint(gl_VertexID));
   tint_interstage_location0 = v_2.texcoords;
-  gl_Position = v_2.position;
-  gl_Position.y = -(gl_Position.y);
-  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
+  gl_Position = vec4(v_2.position.x, -(v_2.position.y), ((2.0f * v_2.position.z) - v_2.position.w), v_2.position.w);
   gl_PointSize = 1.0f;
 }
 //

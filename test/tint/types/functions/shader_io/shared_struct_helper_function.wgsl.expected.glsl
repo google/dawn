@@ -18,9 +18,7 @@ VertexOutput vert_main1_inner() {
 }
 void main() {
   VertexOutput v = vert_main1_inner();
-  gl_Position = v.pos;
-  gl_Position.y = -(gl_Position.y);
-  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
+  gl_Position = vec4(v.pos.x, -(v.pos.y), ((2.0f * v.pos.z) - v.pos.w), v.pos.w);
   tint_interstage_location0 = v.loc0;
   gl_PointSize = 1.0f;
 }
@@ -44,9 +42,7 @@ VertexOutput vert_main2_inner() {
 }
 void main() {
   VertexOutput v = vert_main2_inner();
-  gl_Position = v.pos;
-  gl_Position.y = -(gl_Position.y);
-  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
+  gl_Position = vec4(v.pos.x, -(v.pos.y), ((2.0f * v.pos.z) - v.pos.w), v.pos.w);
   tint_interstage_location0 = v.loc0;
   gl_PointSize = 1.0f;
 }
