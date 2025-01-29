@@ -137,6 +137,8 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 			return err
 		}
 
+		(&ex).RemoveExpectationsForUnknownTests(&testlist)
+
 		log.Printf("validating %s...\n", expectationsFilename)
 		if diag := ex.Validate(); diag.NumErrors() > 0 {
 			diag.Print(os.Stdout, expectationsFilename)
@@ -150,7 +152,7 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 			name = "compat"
 		}
 
-		err = ex.AddExpectationsForFailingResults(resultsByExecutionMode[name], testlist, c.flags.generateExplicitTags, c.flags.verbose)
+		err = ex.AddExpectationsForFailingResults(resultsByExecutionMode[name], c.flags.generateExplicitTags, c.flags.verbose)
 		// TODO(crbug.com/372730248): Report actual diagnostics.
 		diag := expectations.Diagnostics{}
 		if err != nil {

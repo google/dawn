@@ -32,8 +32,6 @@ import (
 	"strings"
 	"time"
 
-	"dawn.googlesource.com/dawn/tools/src/container"
-	"dawn.googlesource.com/dawn/tools/src/cts/query"
 	"dawn.googlesource.com/dawn/tools/src/cts/result"
 )
 
@@ -43,11 +41,12 @@ const (
 )
 
 // AddExpectationsForFailingResults adds new expectations for the provided
-// failing results, with the assumption that the provided results do not
-// have existing expectations.
+// failing results, with the following assumptions:
+//   - The provided results do not have existing expectations
+//   - Any expectations for invalid/non-existent tests have already been
+//     removed
 //
 // This will:
-//   - Remove expectations for non-existent tests.
 //   - Reduce result tags down to either:
 //     --- Only the most explicit tag from each set
 //     --- Only a few very broad tags
@@ -58,22 +57,11 @@ const (
 //
 // TODO(crbug.com/372730248): Return diagnostics.
 func (c *Content) AddExpectationsForFailingResults(results result.List,
-	testlist []query.Query, use_explicit_tags bool, verbose bool) error {
+	use_explicit_tags bool, verbose bool) error {
 	// Make a copy of the results. This code mutates the list.
 	results = append(result.List{}, results...)
 
 	startTime := time.Now()
-	// TODO(crbug.com/372730248): Do this once (instead of every patchset) and/or
-	// find a way to optimize this. This currently takes ~99% of the result
-	// processing time.
-	if err := c.removeExpectationsForUnknownTests(&testlist); err != nil {
-		return err
-	}
-	if verbose {
-		fmt.Printf("Removing unknown expectations took %s\n", time.Now().Sub(startTime).String())
-	}
-
-	startTime = time.Now()
 	if err := c.removeUnknownTags(&results); err != nil {
 		return err
 	}
@@ -109,54 +97,6 @@ func (c *Content) AddExpectationsForFailingResults(results result.List,
 	if verbose {
 		fmt.Printf("Adding expectations took %s\n", time.Now().Sub(startTime).String())
 	}
-	return nil
-}
-
-// removeExpectationsForUnknownTests modifies the Content in place so that all
-// contained Expectations apply to tests in the given testlist.
-func (c *Content) removeExpectationsForUnknownTests(testlist *[]query.Query) error {
-	// Converting into a set allows us to much more efficiently check if a
-	// non-wildcard expectation is for a valid test.
-	knownTestNames := container.NewSet[string]()
-	for _, testQuery := range *testlist {
-		knownTestNames.Add(testQuery.ExpectationFileString())
-	}
-
-	prunedChunkSlice := make([]Chunk, 0)
-	for _, chunk := range c.Chunks {
-		prunedChunk := chunk.Clone()
-		// If we don't have any expectations already, just add the chunk back
-		// immediately to avoid removing comments, especially the header.
-		if prunedChunk.IsCommentOnly() {
-			prunedChunkSlice = append(prunedChunkSlice, prunedChunk)
-			continue
-		}
-
-		prunedChunk.Expectations = make(Expectations, 0)
-		for _, expectation := range chunk.Expectations {
-			// We don't actually parse the query string into a Query since wildcards
-			// are treated differently between expectations and CTS queries.
-			if strings.HasSuffix(expectation.Query, "*") {
-				testPrefix := expectation.Query[:len(expectation.Query)-1]
-				for testName := range knownTestNames {
-					if strings.HasPrefix(testName, testPrefix) {
-						prunedChunk.Expectations = append(prunedChunk.Expectations, expectation)
-						break
-					}
-				}
-			} else {
-				if knownTestNames.Contains(expectation.Query) {
-					prunedChunk.Expectations = append(prunedChunk.Expectations, expectation)
-				}
-			}
-		}
-
-		if len(prunedChunk.Expectations) > 0 {
-			prunedChunkSlice = append(prunedChunkSlice, prunedChunk)
-		}
-	}
-
-	c.Chunks = prunedChunkSlice
 	return nil
 }
 

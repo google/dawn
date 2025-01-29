@@ -39,6 +39,8 @@ import (
 	"sort"
 	"strings"
 
+	"dawn.googlesource.com/dawn/tools/src/container"
+	"dawn.googlesource.com/dawn/tools/src/cts/query"
 	"dawn.googlesource.com/dawn/tools/src/cts/result"
 )
 
@@ -141,6 +143,54 @@ func (c *Content) Format() {
 	for _, chunk := range c.Chunks {
 		chunk.Expectations.Sort()
 	}
+}
+
+// RemoveExpectationsForUnknownTests modifies the Content in place so that all
+// contained Expectations apply to tests in the given testlist.
+func (c *Content) RemoveExpectationsForUnknownTests(testlist *[]query.Query) error {
+	// Converting into a set allows us to much more efficiently check if a
+	// non-wildcard expectation is for a valid test.
+	knownTestNames := container.NewSet[string]()
+	for _, testQuery := range *testlist {
+		knownTestNames.Add(testQuery.ExpectationFileString())
+	}
+
+	prunedChunkSlice := make([]Chunk, 0)
+	for _, chunk := range c.Chunks {
+		prunedChunk := chunk.Clone()
+		// If we don't have any expectations already, just add the chunk back
+		// immediately to avoid removing comments, especially the header.
+		if prunedChunk.IsCommentOnly() {
+			prunedChunkSlice = append(prunedChunkSlice, prunedChunk)
+			continue
+		}
+
+		prunedChunk.Expectations = make(Expectations, 0)
+		for _, expectation := range chunk.Expectations {
+			// We don't actually parse the query string into a Query since wildcards
+			// are treated differently between expectations and CTS queries.
+			if strings.HasSuffix(expectation.Query, "*") {
+				testPrefix := expectation.Query[:len(expectation.Query)-1]
+				for testName := range knownTestNames {
+					if strings.HasPrefix(testName, testPrefix) {
+						prunedChunk.Expectations = append(prunedChunk.Expectations, expectation)
+						break
+					}
+				}
+			} else {
+				if knownTestNames.Contains(expectation.Query) {
+					prunedChunk.Expectations = append(prunedChunk.Expectations, expectation)
+				}
+			}
+		}
+
+		if len(prunedChunk.Expectations) > 0 {
+			prunedChunkSlice = append(prunedChunkSlice, prunedChunk)
+		}
+	}
+
+	c.Chunks = prunedChunkSlice
+	return nil
 }
 
 // IsCommentOnly returns true if the Chunk contains comments and no expectations.

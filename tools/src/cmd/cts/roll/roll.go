@@ -315,6 +315,11 @@ func (r *roller) roll(ctx context.Context) error {
 		return list
 	}()
 
+	// Remove any expectations that are for tests that no longer exist.
+	for _, exInfo := range exInfos {
+		(&exInfo.expectations).RemoveExpectationsForUnknownTests(&testlist)
+	}
+
 	deletedFiles := []string{}
 	if currentWebTestFiles, err := r.gitiles.dawn.ListFiles(ctx, dawnHash, webTestsPath); err != nil {
 		// If there's an error, allow NotFound. It means the directory did not exist, so no files
@@ -433,7 +438,7 @@ func (r *roller) roll(ctx context.Context) error {
 			// the old code path is removed.
 			exInfo.newExpectations = exInfo.expectations.Clone()
 			err := exInfo.newExpectations.AddExpectationsForFailingResults(psResultsByExecutionMode[exInfo.executionMode],
-				testlist, r.flags.generateExplicitTags, r.flags.verbose)
+				r.flags.generateExplicitTags, r.flags.verbose)
 			if err != nil {
 				return err
 			}
