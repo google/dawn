@@ -316,8 +316,9 @@ bool EventManager::IsShutDown() const {
 
 FutureID EventManager::TrackEvent(Ref<TrackedEvent>&& event) {
     if (!ValidateCallbackMode(ToAPI(event->mCallbackMode))) {
-        // TODO: crbug.com/42241407 - Update to use instance logging callback.
-        dawn::ErrorLog() << "Invalid callback mode: " << ToAPI(event->mCallbackMode);
+        mInstance->EmitLog(WGPULoggingType_Error,
+                           absl::StrFormat("Invalid callback mode: %d",
+                                           static_cast<uint32_t>(event->mCallbackMode)));
         return kNullFutureID;
     }
 

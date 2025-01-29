@@ -72,7 +72,6 @@ EventManager::~EventManager() {
 
 std::pair<FutureID, bool> EventManager::TrackEvent(std::unique_ptr<TrackedEvent> event) {
     if (!ValidateCallbackMode(event->GetCallbackMode())) {
-        // TODO: crbug.com/42241407 - Update to use instance logging callback.
         dawn::ErrorLog() << "Invalid callback mode: " << event->GetCallbackMode();
         return {kNullFutureID, false};
     }
