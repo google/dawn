@@ -63,6 +63,7 @@ class PhysicalDevice : public PhysicalDeviceBase {
     bool IsAndroidARM() const;
     bool IsAndroidSamsung() const;
     bool IsIntelMesa() const;
+    bool IsAndroidHuawei() const;
 
     uint32_t GetDefaultComputeSubgroupSize() const;
 

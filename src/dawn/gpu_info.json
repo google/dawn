@@ -289,6 +289,19 @@
           "RDNA 3": ["0x02600200"]
         }
       }]
+    },
+
+    "Huawei": {
+      "id": "0x19e5",
+
+      "devices": [{
+        "_comment": [
+          "Add device ids in the future when they are available."
+        ],
+        "mask": "0xFFFFFFFF",
+        "architecture": {
+        }
+      }]
     }
 
   }
