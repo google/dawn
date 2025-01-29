@@ -356,6 +356,10 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
 
                 result = tint::msl::writer::Generate(ir.Get(), r.tintOptions);
 
+                DAWN_INVALID_IF(result != tint::Success,
+                                "An error occurred while generating MSL:\n%s",
+                                result.Failure().reason.Str());
+
                 // Workgroup validation has to come after `Generate` because it may require
                 // overrides to have been substituted.
                 if (r.stage == SingleShaderStage::Compute) {
@@ -376,10 +380,11 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
                 }
 
                 result = tint::msl::writer::Generate(program, r.tintOptions);
-            }
 
-            DAWN_INVALID_IF(result != tint::Success, "An error occurred while generating MSL:\n%s",
-                            result.Failure().reason.Str());
+                DAWN_INVALID_IF(result != tint::Success,
+                                "An error occurred while generating MSL:\n%s",
+                                result.Failure().reason.Str());
+            }
 
             // Metal uses Clang to compile the shader as C++14. Disable everything in the -Wall
             // category. -Wunused-variable in particular comes up a lot in generated code, and some
