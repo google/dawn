@@ -75,6 +75,9 @@ std::string Preamble() {
   %mat3v3half = OpTypeMatrix %v3half 3
   %mat4v4half = OpTypeMatrix %v4half 4
 
+  %modf_result_type = OpTypeStruct %float %float
+  %modf_v2_result_type = OpTypeStruct %v2float %v2float
+
   %v2uint_10_20 = OpConstantComposite %v2uint %uint_10 %uint_20
   %v2uint_20_10 = OpConstantComposite %v2uint %uint_20 %uint_10
   %v2uint_15_15 = OpConstantComposite %v2uint %uint_15 %uint_15
@@ -830,6 +833,62 @@ INSTANTIATE_TEST_SUITE_P(
         DeterminantData{"mat3v3half_50_60_70", "mat3x3<f16>(vec3<f16>(50.0h, 60.0h, 70.0h))", "f16",
                         "half"},
         DeterminantData{"mat4v4half_50_50_50_50", "mat4x4<f16>(vec4<f16>(50.0h))", "f16", "half"}));
+
+TEST_F(SpirvReaderTest, ModfStruct_Scalar) {
+    EXPECT_IR(Preamble() + R"(
+     %1 = OpExtInst %modf_result_type %glsl ModfStruct %float_50
+     %2 = OpCompositeExtract %float %1 0
+     OpReturn
+     OpFunctionEnd
+  )",
+              R"(
+tint_symbol_2 = struct @align(4) {
+  tint_symbol:f32 @offset(0)
+  tint_symbol_1:f32 @offset(4)
+}
+
+__modf_result_f32 = struct @align(4) {
+  fract:f32 @offset(0)
+  whole:f32 @offset(4)
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:__modf_result_f32 = modf 50.0f
+    %3:f32 = access %2, 0u
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvReaderTest, ModfStruct_Vector) {
+    EXPECT_IR(Preamble() + R"(
+     %1 = OpExtInst %modf_v2_result_type %glsl ModfStruct %v2float_50_60
+     %2 = OpCompositeExtract %v2float %1 0
+     OpReturn
+     OpFunctionEnd
+  )",
+              R"(
+tint_symbol_2 = struct @align(8) {
+  tint_symbol:vec2<f32> @offset(0)
+  tint_symbol_1:vec2<f32> @offset(8)
+}
+
+__modf_result_vec2_f32 = struct @align(8) {
+  fract:vec2<f32> @offset(0)
+  whole:vec2<f32> @offset(8)
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:__modf_result_vec2_f32 = modf vec2<f32>(50.0f, 60.0f)
+    %3:vec2<f32> = access %2, 0u
+    ret
+  }
+}
+)");
+}
 
 }  // namespace
 }  // namespace tint::spirv::reader

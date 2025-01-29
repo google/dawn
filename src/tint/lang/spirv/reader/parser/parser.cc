@@ -48,6 +48,7 @@ TINT_END_DISABLE_WARNING(NEWLINE_EOF);
 
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
+#include "src/tint/lang/core/type/builtin_structs.h"
 #include "src/tint/lang/spirv/builtin_fn.h"
 #include "src/tint/lang/spirv/ir/builtin_call.h"
 #include "src/tint/lang/spirv/validate/validate.h"
@@ -692,6 +693,8 @@ class Parser {
             case GLSLstd450NClamp:
             case GLSLstd450FClamp:  // FClamp is less prescriptive about NaN operands
                 return core::BuiltinFn::kClamp;
+            case GLSLstd450ModfStruct:
+                return core::BuiltinFn::kModf;
             case GLSLstd450NMin:
             case GLSLstd450FMin:  // FMin is less prescriptive about NaN operands
                 return core::BuiltinFn::kMin;
@@ -743,6 +746,7 @@ class Parser {
                 return core::BuiltinFn::kUnpack2X16Unorm;
             case GLSLstd450UnpackHalf2x16:
                 return core::BuiltinFn::kUnpack2X16Float;
+
             default:
                 break;
         }
@@ -817,6 +821,12 @@ class Parser {
 
         const auto wgsl_fn = GetGlslStd450WgslEquivalentFuncName(ext_opcode);
         if (wgsl_fn != core::BuiltinFn::kNone) {
+            // For modf we need to switch the result type from the SPIR-V struct to the builtin
+            // internal structure for Modf.
+            if (wgsl_fn == core::BuiltinFn::kModf) {
+                result_ty = core::type::CreateModfResult(ty_, ir_.symbols, operands[0]->Type());
+            }
+
             Emit(b_.Call(result_ty, wgsl_fn, operands), inst.result_id());
             return;
         }
