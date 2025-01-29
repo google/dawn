@@ -69,8 +69,7 @@ class MappedNamedConstantsTest {
         VertexFormat::class,
         VertexStepMode::class,
         WaitStatus::class,
-        WGSLLanguageFeatureName::class,
-        WGSLFeatureName::class
+        WGSLLanguageFeatureName::class
     )
 
     /**

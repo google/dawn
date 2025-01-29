@@ -304,16 +304,6 @@ WGPUStatus Instance::GetWGSLLanguageFeatures(WGPUSupportedWGSLLanguageFeatures* 
     return WGPUStatus_Success;
 }
 
-size_t Instance::EnumerateWGSLLanguageFeatures(WGPUWGSLFeatureName* features) const {
-    if (features != nullptr) {
-        for (WGPUWGSLLanguageFeatureName f : mWGSLFeatures) {
-            *features = static_cast<WGPUWGSLFeatureName>(f);
-            ++features;
-        }
-    }
-    return mWGSLFeatures.size();
-}
-
 WGPUSurface Instance::CreateSurface(const WGPUSurfaceDescriptor* desc) const {
     dawn::ErrorLog() << "Instance::CreateSurface is not supported in the wire. Use "
                         "dawn::wire::client::WireClient::InjectSurface instead.";

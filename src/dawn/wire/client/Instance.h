@@ -52,9 +52,6 @@ class Instance final : public RefCountedWithExternalCount<ObjectWithEventsBase> 
 
     bool HasWGSLLanguageFeature(WGPUWGSLLanguageFeatureName feature) const;
     WGPUStatus GetWGSLLanguageFeatures(WGPUSupportedWGSLLanguageFeatures* features) const;
-    // Always writes the full list when features is not nullptr.
-    // TODO(https://github.com/webgpu-native/webgpu-headers/issues/252): Add a count argument.
-    size_t EnumerateWGSLLanguageFeatures(WGPUWGSLFeatureName* features) const;
 
     WGPUSurface CreateSurface(const WGPUSurfaceDescriptor* desc) const;
 

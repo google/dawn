@@ -151,9 +151,6 @@ class InstanceBase final : public ErrorSink, public RefCountedWithExternalCount<
                                               uint64_t timeoutNS);
     bool APIHasWGSLLanguageFeature(wgpu::WGSLLanguageFeatureName feature) const;
     wgpu::Status APIGetWGSLLanguageFeatures(SupportedWGSLLanguageFeatures* features) const;
-    // Always writes the full list when features is not nullptr.
-    // TODO(https://github.com/webgpu-native/webgpu-headers/issues/252): Add a count argument.
-    size_t APIEnumerateWGSLLanguageFeatures(wgpu::WGSLFeatureName* features) const;
 
     void DisconnectDawnPlatform();
 

@@ -290,15 +290,15 @@ interop::GPUTextureFormat GPU::getPreferredCanvasFormat(Napi::Env) {
 }
 
 interop::Interface<interop::WGSLLanguageFeatures> GPU::getWgslLanguageFeatures(Napi::Env env) {
-    using InteropWGSLFeatureSet = std::unordered_set<interop::WGSLFeatureName>;
+    using InteropWGSLFeatureSet = std::unordered_set<interop::WGSLLanguageFeatureName>;
 
     struct Features : public interop::WGSLLanguageFeatures {
         explicit Features(InteropWGSLFeatureSet features) : features_(features) {}
         ~Features() = default;
 
         bool has(Napi::Env env, std::string name) {
-            interop::WGSLFeatureName feature;
-            if (!interop::Converter<interop::WGSLFeatureName>::FromString(name, feature)) {
+            interop::WGSLLanguageFeatureName feature;
+            if (!interop::Converter<interop::WGSLLanguageFeatureName>::FromString(name, feature)) {
                 return false;
             }
             return features_.count(feature);
@@ -307,7 +307,8 @@ interop::Interface<interop::WGSLLanguageFeatures> GPU::getWgslLanguageFeatures(N
             std::vector<std::string> out;
             out.reserve(features_.size());
             for (auto feature : features_) {
-                out.push_back(interop::Converter<interop::WGSLFeatureName>::ToString(feature));
+                out.push_back(
+                    interop::Converter<interop::WGSLLanguageFeatureName>::ToString(feature));
             }
             return out;
         }
@@ -320,21 +321,20 @@ interop::Interface<interop::WGSLLanguageFeatures> GPU::getWgslLanguageFeatures(N
     };
 
     wgpu::Instance instance = instance_->Get();
-    size_t count = instance.EnumerateWGSLLanguageFeatures(nullptr);
-
-    std::vector<wgpu::WGSLFeatureName> features(count);
-    instance.EnumerateWGSLLanguageFeatures(features.data());
+    wgpu::SupportedWGSLLanguageFeatures supportedFeatures = {};
+    instance.GetWGSLLanguageFeatures(&supportedFeatures);
 
     // Add all known WGSLLangaugeFeatures known by dawn.node but warn loudly when there are unknown
     // ones.
     InteropWGSLFeatureSet featureSet;
     Converter conv(env);
-    for (auto feature : features) {
-        interop::WGSLFeatureName wgslFeature;
+    for (size_t i = 0; i < supportedFeatures.featureCount; i++) {
+        wgpu::WGSLLanguageFeatureName feature = supportedFeatures.features[i];
+        interop::WGSLLanguageFeatureName wgslFeature;
         if (conv(wgslFeature, feature)) {
             featureSet.emplace(wgslFeature);
         } else {
-            LOG("Unknown WGSLFeatureName ", feature);
+            LOG("Unknown WGSLLanguageFeatureName ", feature);
         }
     }
 

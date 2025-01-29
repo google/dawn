@@ -239,7 +239,6 @@
             "DevicePopErrorScopeF",
             "DevicePopErrorScope2",
             "DeviceSetLoggingCallback",
-            "InstanceEnumerateWGSLLanguageFeatures",
             "InstanceGetWGSLLanguageFeatures",
             "InstanceHasWGSLLanguageFeature",
             "InstanceCreateSurface",

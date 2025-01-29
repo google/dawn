@@ -211,7 +211,6 @@ dawn_json_generator("kotlin_gen") {
     "java/android/dawn/VertexFormat.kt",
     "java/android/dawn/VertexState.kt",
     "java/android/dawn/VertexStepMode.kt",
-    "java/android/dawn/WGSLFeatureName.kt",
     "java/android/dawn/WGSLLanguageFeatureName.kt",
     "java/android/dawn/WaitStatus.kt",
   ]

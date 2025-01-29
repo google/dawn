@@ -2384,13 +2384,6 @@
                 ]
             },
             {
-                "name": "enumerate WGSL language features",
-                "returns": "size_t",
-                "args": [
-                    {"name": "features", "type": "WGSL feature name", "annotation": "*"}
-                ]
-            },
-            {
                 "name": "get WGSL language features",
                 "returns": "status",
                 "args": [
@@ -4087,21 +4080,6 @@
             {"value": 39, "name": "sint32x4"},
             {"value": 40, "name": "unorm 10_10_10_2", "jsrepr": "'unorm10-10-10-2'"},
             {"value": 41, "name": "unorm8x4 BGRA", "jsrepr": "'unorm8x4-bgra'"}
-        ]
-    },
-    "WGSL feature name": {
-        "category": "enum",
-        "values": [
-            {"value": 1, "name": "readonly and readwrite storage textures",  "jsrepr": "'readonly_and_readwrite_storage_textures'"},
-            {"value": 2, "name": "packed 4x8 integer dot product", "jsrepr": "'packed_4x8_integer_dot_product'"},
-            {"value": 3, "name": "unrestricted pointer parameters", "jsrepr": "'unrestricted_pointer_parameters'"},
-            {"value": 4, "name": "pointer composite access", "jsrepr": "'pointer_composite_access'"},
-
-            {"value": 0, "name": "chromium testing unimplemented", "jsrepr": "'chromium_testing_unimplemented'", "tags": ["dawn"]},
-            {"value": 1, "name": "chromium testing unsafe experimental", "jsrepr": "'chromium_testing_unsafe_experimental'", "tags": ["dawn"]},
-            {"value": 2, "name": "chromium testing experimental", "jsrepr": "'chromium_testing_experimental'", "tags": ["dawn"]},
-            {"value": 3, "name": "chromium testing shipped with killswitch", "jsrepr": "'chromium_testing_shipped_with_killswitch'", "tags": ["dawn"]},
-            {"value": 4, "name": "chromium testing shipped", "jsrepr": "'chromium_testing_shipped'", "tags": ["dawn"]}
         ]
     },
     "WGSL language feature name": {

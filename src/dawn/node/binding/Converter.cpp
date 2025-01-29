@@ -1621,44 +1621,44 @@ bool Converter::Convert(interop::GPUFeatureName& out, wgpu::FeatureName in) {
     return false;
 }
 
-bool Converter::Convert(wgpu::WGSLFeatureName& out, interop::WGSLFeatureName in) {
+bool Converter::Convert(wgpu::WGSLLanguageFeatureName& out, interop::WGSLLanguageFeatureName in) {
     switch (in) {
-        case interop::WGSLFeatureName::kReadonlyAndReadwriteStorageTextures:
-            out = wgpu::WGSLFeatureName::ReadonlyAndReadwriteStorageTextures;
+        case interop::WGSLLanguageFeatureName::kReadonlyAndReadwriteStorageTextures:
+            out = wgpu::WGSLLanguageFeatureName::ReadonlyAndReadwriteStorageTextures;
             return true;
-        case interop::WGSLFeatureName::kPacked4X8IntegerDotProduct:
-            out = wgpu::WGSLFeatureName::Packed4x8IntegerDotProduct;
+        case interop::WGSLLanguageFeatureName::kPacked4X8IntegerDotProduct:
+            out = wgpu::WGSLLanguageFeatureName::Packed4x8IntegerDotProduct;
             return true;
-        case interop::WGSLFeatureName::kUnrestrictedPointerParameters:
-            out = wgpu::WGSLFeatureName::UnrestrictedPointerParameters;
+        case interop::WGSLLanguageFeatureName::kUnrestrictedPointerParameters:
+            out = wgpu::WGSLLanguageFeatureName::UnrestrictedPointerParameters;
             return true;
-        case interop::WGSLFeatureName::kPointerCompositeAccess:
-            out = wgpu::WGSLFeatureName::PointerCompositeAccess;
+        case interop::WGSLLanguageFeatureName::kPointerCompositeAccess:
+            out = wgpu::WGSLLanguageFeatureName::PointerCompositeAccess;
             return true;
     }
     return false;
 }
 
-bool Converter::Convert(interop::WGSLFeatureName& out, wgpu::WGSLFeatureName in) {
+bool Converter::Convert(interop::WGSLLanguageFeatureName& out, wgpu::WGSLLanguageFeatureName in) {
     switch (in) {
-        case wgpu::WGSLFeatureName::ReadonlyAndReadwriteStorageTextures:
-            out = interop::WGSLFeatureName::kReadonlyAndReadwriteStorageTextures;
+        case wgpu::WGSLLanguageFeatureName::ReadonlyAndReadwriteStorageTextures:
+            out = interop::WGSLLanguageFeatureName::kReadonlyAndReadwriteStorageTextures;
             return true;
-        case wgpu::WGSLFeatureName::Packed4x8IntegerDotProduct:
-            out = interop::WGSLFeatureName::kPacked4X8IntegerDotProduct;
+        case wgpu::WGSLLanguageFeatureName::Packed4x8IntegerDotProduct:
+            out = interop::WGSLLanguageFeatureName::kPacked4X8IntegerDotProduct;
             return true;
-        case wgpu::WGSLFeatureName::UnrestrictedPointerParameters:
-            out = interop::WGSLFeatureName::kUnrestrictedPointerParameters;
+        case wgpu::WGSLLanguageFeatureName::UnrestrictedPointerParameters:
+            out = interop::WGSLLanguageFeatureName::kUnrestrictedPointerParameters;
             return true;
-        case wgpu::WGSLFeatureName::PointerCompositeAccess:
-            out = interop::WGSLFeatureName::kPointerCompositeAccess;
+        case wgpu::WGSLLanguageFeatureName::PointerCompositeAccess:
+            out = interop::WGSLLanguageFeatureName::kPointerCompositeAccess;
             return true;
 
-        case wgpu::WGSLFeatureName::ChromiumTestingUnimplemented:
-        case wgpu::WGSLFeatureName::ChromiumTestingUnsafeExperimental:
-        case wgpu::WGSLFeatureName::ChromiumTestingExperimental:
-        case wgpu::WGSLFeatureName::ChromiumTestingShippedWithKillswitch:
-        case wgpu::WGSLFeatureName::ChromiumTestingShipped:
+        case wgpu::WGSLLanguageFeatureName::ChromiumTestingUnimplemented:
+        case wgpu::WGSLLanguageFeatureName::ChromiumTestingUnsafeExperimental:
+        case wgpu::WGSLLanguageFeatureName::ChromiumTestingExperimental:
+        case wgpu::WGSLLanguageFeatureName::ChromiumTestingShippedWithKillswitch:
+        case wgpu::WGSLLanguageFeatureName::ChromiumTestingShipped:
             return false;
     }
     return false;

@@ -697,16 +697,6 @@ wgpu::Status InstanceBase::APIGetWGSLLanguageFeatures(
     return wgpu::Status::Success;
 }
 
-size_t InstanceBase::APIEnumerateWGSLLanguageFeatures(wgpu::WGSLFeatureName* features) const {
-    if (features != nullptr) {
-        for (wgpu::WGSLLanguageFeatureName f : mWGSLFeatures) {
-            *features = static_cast<wgpu::WGSLFeatureName>(f);
-            ++features;
-        }
-    }
-    return mWGSLFeatures.size();
-}
-
 void APISupportedWGSLLanguageFeaturesFreeMembers(
     WGPUSupportedWGSLLanguageFeatures supportedFeatures) {
     delete[] supportedFeatures.features;
