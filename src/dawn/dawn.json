@@ -2918,6 +2918,7 @@
     },
     "render pass depth stencil attachment": {
         "category": "structure",
+        "extensible": "in",
         "members": [
             {"name": "view", "type": "texture view"},
             {"name": "depth load op", "type": "load op", "default": "undefined"},
