@@ -307,7 +307,7 @@ type input_attachment<T>
 
 type __atomic_compare_exchange_result<T>
 
-type subgroup_matrix<S: subgroup_matrix_kind, T, M: num, K: num>
+type subgroup_matrix<S: subgroup_matrix_kind, T, C: num, R: num>
 
 ////////////////////////////////////////////////////////////////////////////////
 // Type matchers                                                              //
@@ -788,9 +788,9 @@ implicit(C: iu32) fn textureStore(texture: texture_storage_3d<u32_texel_format, 
 @must_use @const("Zero") ctor mat4x3<T: f32_f16>() -> mat4x3<T>
 @must_use @const("Zero") ctor mat4x4<T: f32_f16>() -> mat4x4<T>
 
-@must_use @stage("compute") ctor subgroup_matrix_left<T: subgroup_matrix_elements, M: num, K: num>() -> subgroup_matrix<subgroup_matrix_kind_left, T, M, K>
-@must_use @stage("compute") ctor subgroup_matrix_right<T: subgroup_matrix_elements, K: num, N: num>() -> subgroup_matrix<subgroup_matrix_kind_right, T, K, N>
-@must_use @stage("compute") ctor subgroup_matrix_result<T: subgroup_matrix_elements, M: num, N: num>() -> subgroup_matrix<subgroup_matrix_kind_result, T, M, N>
+@must_use @stage("compute") ctor subgroup_matrix_left<T: subgroup_matrix_elements, K: num, R: num>() -> subgroup_matrix<subgroup_matrix_kind_left, T, K, R>
+@must_use @stage("compute") ctor subgroup_matrix_right<T: subgroup_matrix_elements, C: num, K: num>() -> subgroup_matrix<subgroup_matrix_kind_right, T, C, K>
+@must_use @stage("compute") ctor subgroup_matrix_result<T: subgroup_matrix_elements, C: num, R: num>() -> subgroup_matrix<subgroup_matrix_kind_result, T, C, R>
 
 // Identity constructors
 @must_use @const("Identity") ctor i32(i32) -> i32

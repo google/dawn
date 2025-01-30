@@ -449,50 +449,50 @@ class Manager final {
 
     /// @param kind the subgroup matrix kind
     /// @param inner the inner type
-    /// @param rows the number of rows
     /// @param cols the number of columns
+    /// @param rows the number of rows
     /// @returns the subgroup_matrix type
     const core::type::SubgroupMatrix* subgroup_matrix(SubgroupMatrixKind kind,
                                                       const core::type::Type* inner,
-                                                      uint32_t rows,
-                                                      uint32_t cols);
+                                                      uint32_t cols,
+                                                      uint32_t rows);
 
     /// @param inner the inner type
-    /// @param rows the number of rows
     /// @param cols the number of columns
+    /// @param rows the number of rows
     /// @returns the subgroup_matrix type
     const core::type::SubgroupMatrix* subgroup_matrix_left(const core::type::Type* inner,
-                                                           uint32_t rows,
-                                                           uint32_t cols) {
-        return subgroup_matrix(SubgroupMatrixKind::kLeft, inner, rows, cols);
+                                                           uint32_t cols,
+                                                           uint32_t rows) {
+        return subgroup_matrix(SubgroupMatrixKind::kLeft, inner, cols, rows);
     }
 
     /// @param inner the inner type
-    /// @param rows the number of rows
     /// @param cols the number of columns
+    /// @param rows the number of rows
     /// @returns the subgroup_matrix type
     const core::type::SubgroupMatrix* subgroup_matrix_right(const core::type::Type* inner,
-                                                            uint32_t rows,
-                                                            uint32_t cols) {
-        return subgroup_matrix(SubgroupMatrixKind::kRight, inner, rows, cols);
+                                                            uint32_t cols,
+                                                            uint32_t rows) {
+        return subgroup_matrix(SubgroupMatrixKind::kRight, inner, cols, rows);
     }
 
     /// @param inner the inner type
-    /// @param rows the number of rows
     /// @param cols the number of columns
+    /// @param rows the number of rows
     /// @returns the subgroup_matrix type
     const core::type::SubgroupMatrix* subgroup_matrix_result(const core::type::Type* inner,
-                                                             uint32_t rows,
-                                                             uint32_t cols) {
-        return subgroup_matrix(SubgroupMatrixKind::kResult, inner, rows, cols);
+                                                             uint32_t cols,
+                                                             uint32_t rows) {
+        return subgroup_matrix(SubgroupMatrixKind::kResult, inner, cols, rows);
     }
 
     /// @tparam K the kind of the matrix
     /// @tparam T the element type
-    /// @tparam R the number of rows in the matrix
     /// @tparam C the number of columns in the matrix
+    /// @tparam R the number of rows in the matrix
     /// @returns a matrix with the given number of columns and rows
-    template <SubgroupMatrixKind K, typename T, uint32_t R, uint32_t C>
+    template <SubgroupMatrixKind K, typename T, uint32_t C, uint32_t R>
     const core::type::SubgroupMatrix* subgroup_matrix() {
         return subgroup_matrix(K, Get<T>(), C, R);
     }

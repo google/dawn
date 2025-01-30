@@ -280,8 +280,8 @@ inline bool MatchSubgroupMatrix(intrinsic::MatchState&,
         return true;
     }
     if (auto* sm = ty->As<type::SubgroupMatrix>()) {
-        A = sm->Rows();
-        B = sm->Columns();
+        A = sm->Columns();
+        B = sm->Rows();
         S = intrinsic::Number(static_cast<uint32_t>(sm->Kind()));
         T = sm->Type();
         return true;

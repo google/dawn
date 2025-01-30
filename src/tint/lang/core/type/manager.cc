@@ -202,9 +202,9 @@ const core::type::Matrix* Manager::mat4x4(const core::type::Type* inner) {
 
 const core::type::SubgroupMatrix* Manager::subgroup_matrix(SubgroupMatrixKind kind,
                                                            const core::type::Type* inner,
-                                                           uint32_t rows,
-                                                           uint32_t cols) {
-    return Get<core::type::SubgroupMatrix>(kind, inner, rows, cols);
+                                                           uint32_t cols,
+                                                           uint32_t rows) {
+    return Get<core::type::SubgroupMatrix>(kind, inner, cols, rows);
 }
 
 const core::type::Array* Manager::array(const core::type::Type* elem_ty,
