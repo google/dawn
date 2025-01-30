@@ -156,11 +156,11 @@ typedef struct {{API}}ChainedStruct {
 
 {% macro render_c_default_value(member) -%}
     {%- if member.annotation in ["*", "const*"] and member.optional or member.default_value == "nullptr" -%}
-        nullptr
+        NULL
     {%- elif member.type.category == "object" and member.optional -%}
-        nullptr
+        NULL
     {%- elif member.type.category == "callback function" -%}
-        nullptr
+        NULL
     {%- elif member.type.category in ["enum", "bitmask"] and member.default_value != None -%}
         {{as_cEnum(member.type.name, Name(member.default_value))}}
     {%- elif member.default_value != None -%}
@@ -192,12 +192,12 @@ typedef struct {{API}}ChainedStruct {
     } {{as_cType(type.name)}} {{API}}_STRUCTURE_ATTRIBUTE;
 
     #define {{API}}_{{type.name.SNAKE_CASE()}}_INIT {{API}}_MAKE_INIT_STRUCT({{as_cType(type.name)}}, { \
-        /*.nextInChain=*/nullptr {{API}}_COMMA \
+        /*.nextInChain=*/NULL {{API}}_COMMA \
         {% for member in type.members %}
             /*.{{as_varName(member.name)}}=*/{{render_c_default_value(member)}} {{API}}_COMMA \
         {% endfor %}
-        /*.userdata1=*/nullptr {{API}}_COMMA \
-        /*.userdata2=*/nullptr {{API}}_COMMA \
+        /*.userdata1=*/NULL {{API}}_COMMA \
+        /*.userdata2=*/NULL {{API}}_COMMA \
     })
 
 {% endfor %}
@@ -220,10 +220,10 @@ typedef struct {{API}}ChainedStruct {
 
     #define {{API}}_{{type.name.SNAKE_CASE()}}_INIT {{API}}_MAKE_INIT_STRUCT({{as_cType(type.name)}}, { \
         {% if type.extensible %}
-            /*.nextInChain=*/nullptr {{API}}_COMMA \
+            /*.nextInChain=*/NULL {{API}}_COMMA \
         {% endif %}
         {% if type.chained %}
-            /*.chain=*/{/*.nextInChain*/nullptr {{API}}_COMMA /*.sType*/{{API}}SType_{{type.name.CamelCase()}}} {{API}}_COMMA \
+            /*.chain=*/{/*.nextInChain*/NULL {{API}}_COMMA /*.sType*/{{API}}SType_{{type.name.CamelCase()}}} {{API}}_COMMA \
         {% endif %}
         {% for member in type.members %}
             /*.{{as_varName(member.name)}}=*/{{render_c_default_value(member)}} {{API}}_COMMA \
