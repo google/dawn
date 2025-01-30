@@ -788,12 +788,7 @@ ResultOrError<UnpackedPtr<RenderPassDescriptor>> ValidateRenderPassDescriptor(
     }
 
     if (descriptor->timestampWrites != nullptr) {
-        QuerySetBase* querySet = descriptor->timestampWrites->querySet;
-        DAWN_ASSERT(querySet != nullptr);
-        uint32_t beginningOfPassWriteIndex = descriptor->timestampWrites->beginningOfPassWriteIndex;
-        uint32_t endOfPassWriteIndex = descriptor->timestampWrites->endOfPassWriteIndex;
-        DAWN_TRY_CONTEXT(ValidatePassTimestampWrites(device, querySet, beginningOfPassWriteIndex,
-                                                     endOfPassWriteIndex),
+        DAWN_TRY_CONTEXT(ValidatePassTimestampWrites(device, descriptor->timestampWrites),
                          "validating timestampWrites.");
     }
 
@@ -854,12 +849,7 @@ MaybeError ValidateComputePassDescriptor(const DeviceBase* device,
     }
 
     if (descriptor->timestampWrites != nullptr) {
-        QuerySetBase* querySet = descriptor->timestampWrites->querySet;
-        DAWN_ASSERT(querySet != nullptr);
-        uint32_t beginningOfPassWriteIndex = descriptor->timestampWrites->beginningOfPassWriteIndex;
-        uint32_t endOfPassWriteIndex = descriptor->timestampWrites->endOfPassWriteIndex;
-        DAWN_TRY_CONTEXT(ValidatePassTimestampWrites(device, querySet, beginningOfPassWriteIndex,
-                                                     endOfPassWriteIndex),
+        DAWN_TRY_CONTEXT(ValidatePassTimestampWrites(device, descriptor->timestampWrites),
                          "validating timestampWrites.");
     }
 
