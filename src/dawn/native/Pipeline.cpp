@@ -205,6 +205,10 @@ ResultOrError<ShaderModuleEntryPoint> ValidateProgrammableStage(DeviceBase* devi
     return entryPoint;
 }
 
+uint32_t GetRawBits(ImmediateConstantMask bits) {
+    return static_cast<uint32_t>(bits.to_ulong());
+}
+
 // PipelineBase
 
 PipelineBase::PipelineBase(DeviceBase* device,
@@ -285,6 +289,10 @@ bool PipelineBase::HasStage(SingleShaderStage stage) const {
 
 wgpu::ShaderStage PipelineBase::GetStageMask() const {
     return mStageMask;
+}
+
+const ImmediateConstantMask& PipelineBase::GetPipelineMask() const {
+    return mPipelineMask;
 }
 
 MaybeError PipelineBase::ValidateGetBindGroupLayout(BindGroupIndex groupIndex) {
@@ -377,6 +385,10 @@ MaybeError PipelineBase::Initialize(std::optional<ScopedUseShaderPrograms> scope
     }
     DAWN_TRY_CONTEXT(InitializeImpl(), "initializing %s", this);
     return {};
+}
+
+void PipelineBase::SetPipelineMaskForTesting(ImmediateConstantMask immediateConstantMask) {
+    mPipelineMask = immediateConstantMask;
 }
 
 }  // namespace dawn::native

@@ -32,6 +32,18 @@ namespace dawn::native {
 RenderImmediateConstantsTrackerBase::RenderImmediateConstantsTrackerBase()
     : UserImmediateConstantsTrackerBase() {}
 
+// Render pipeline changes reset all pipeline related dirty bits and
+// keep frag depth dirty bits which related to viewport.
+// TODO(crbug.com/366291600): Support immediate data compatible.
+void RenderImmediateConstantsTrackerBase::OnPipelineChange(PipelineBase* pipeline) {
+    mPipelineMask = pipeline->GetPipelineMask();
+
+    // frag depth args are related to viewport instead of pipeline
+    static constexpr ImmediateConstantMask fragDepth = GetImmediateConstantBlockBits(
+        offsetof(RenderImmediateConstants, clampFragDepth), sizeof(ClampFragDepthArgs));
+    mDirty &= fragDepth;
+}
+
 void RenderImmediateConstantsTrackerBase::SetClampFragDepth(float minClampFragDepth,
                                                             float maxClampFragDepth) {
     // Put the data in the right layout to match the RenderImmediateConstants struct
@@ -58,6 +70,14 @@ void RenderImmediateConstantsTrackerBase::SetFirstInstance(uint32_t firstInstanc
 
 ComputeImmediateConstantsTrackerBase::ComputeImmediateConstantsTrackerBase()
     : UserImmediateConstantsTrackerBase() {}
+
+// Pipeline changes reset all dirty bits.
+// TODO(crbug.com/366291600): Support immediate data compatible.
+void ComputeImmediateConstantsTrackerBase::OnPipelineChange(PipelineBase* pipeline) {
+    mPipelineMask = pipeline->GetPipelineMask();
+    mDirty.reset();
+}
+
 void ComputeImmediateConstantsTrackerBase::SetNumWorkgroups(uint32_t numWorkgroupX,
                                                             uint32_t numWorkgroupY,
                                                             uint32_t numWorkgroupZ) {

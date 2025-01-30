@@ -33,6 +33,7 @@
 #include "dawn/common/BitSetIterator.h"
 #include "dawn/common/Enumerator.h"
 #include "dawn/common/ityp_array.h"
+#include "dawn/common/ityp_bitset.h"
 #include "dawn/common/ityp_span.h"
 #include "dawn/native/Adapter.h"
 #include "dawn/native/ChainUtils.h"
@@ -948,7 +949,8 @@ std::vector<StageAndDescriptor> GetRenderStagesAndSetPlaceholderShader(
 // RenderPipelineBase
 
 RenderPipelineBase::RenderPipelineBase(DeviceBase* device,
-                                       const UnpackedPtr<RenderPipelineDescriptor>& descriptor)
+                                       const UnpackedPtr<RenderPipelineDescriptor>& descriptor,
+                                       ImmediateConstantMask requiredInternalImmediateConstants)
     : PipelineBase(device,
                    descriptor->layout,
                    descriptor->label,

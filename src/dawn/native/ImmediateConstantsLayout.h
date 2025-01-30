@@ -28,9 +28,9 @@
 #ifndef SRC_DAWN_NATIVE_IMMEDIATECONSTANTSLAYOUT_H_
 #define SRC_DAWN_NATIVE_IMMEDIATECONSTANTSLAYOUT_H_
 
-#include <unordered_map>
-
+#include "dawn/common/Compiler.h"
 #include "dawn/common/ityp_bitset.h"
+#include "dawn/native/EnumClassBitmasks.h"
 #include "dawn/native/IntegerTypes.h"
 
 namespace dawn::native {
@@ -39,6 +39,7 @@ namespace dawn::native {
 // NOTE: 'offsetof' doesn't support non-standard-layout structs. So use
 // aggregate instead of inheritance for RenderImmediateConstants and
 // ComputeImmediateConstants.
+DAWN_ENABLE_STRUCT_PADDING_WARNINGS
 struct UserImmediateConstants {
     uint32_t userImmediateData[kMaxExternalImmediateConstantsPerPipeline];
 };
@@ -59,7 +60,6 @@ struct RenderImmediateConstants {
     uint32_t firstVertex;
     uint32_t firstInstance;
 };
-static_assert(sizeof(RenderImmediateConstants) == 32u);
 
 struct NumWorkgroupsDimensions {
     uint32_t numWorkgroupsX;
@@ -74,11 +74,16 @@ struct ComputeImmediateConstants {
 
     NumWorkgroupsDimensions numWorkgroups;
 };
-static_assert(sizeof(ComputeImmediateConstants) == 28u);
+DAWN_DISABLE_STRUCT_PADDING_WARNINGS
 
 // Convert byte sizes and offsets into immediate constant indices and offsets
 // (dividing everything by kImmediateConstantElementByteSize)
-ImmediateConstantMask GetImmediateConstantBlockBits(size_t byteOffset, size_t byteSize);
+constexpr ImmediateConstantMask GetImmediateConstantBlockBits(size_t byteOffset, size_t byteSize) {
+    size_t firstIndex = byteOffset / kImmediateConstantElementByteSize;
+    size_t constantCount = byteSize / kImmediateConstantElementByteSize;
+
+    return ((1u << constantCount) - 1u) << firstIndex;
+}
 
 }  // namespace dawn::native
 

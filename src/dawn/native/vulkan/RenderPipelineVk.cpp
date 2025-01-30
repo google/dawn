@@ -33,6 +33,7 @@
 #include <vector>
 
 #include "dawn/native/CreatePipelineAsyncEvent.h"
+#include "dawn/native/ImmediateConstantsLayout.h"
 #include "dawn/native/vulkan/DeviceVk.h"
 #include "dawn/native/vulkan/FencedDeleter.h"
 #include "dawn/native/vulkan/PipelineCacheVk.h"
@@ -345,7 +346,12 @@ VkStencilOp VulkanStencilOp(wgpu::StencilOperation op) {
 Ref<RenderPipeline> RenderPipeline::CreateUninitialized(
     Device* device,
     const UnpackedPtr<RenderPipelineDescriptor>& descriptor) {
-    return AcquireRef(new RenderPipeline(device, descriptor));
+    // Possible required internal immediate constants for RenderPipelineVk:
+    // - ClampFragDepth
+    const ImmediateConstantMask requiredInternalConstants = GetImmediateConstantBlockBits(
+        offsetof(RenderImmediateConstants, clampFragDepth), sizeof(ClampFragDepthArgs));
+
+    return AcquireRef(new RenderPipeline(device, descriptor, requiredInternalConstants));
 }
 
 MaybeError RenderPipeline::InitializeImpl() {
@@ -354,6 +360,17 @@ MaybeError RenderPipeline::InitializeImpl() {
 
     // Vulkan devices need cache UUID field to be serialized into pipeline cache keys.
     StreamIn(&mCacheKey, device->GetDeviceInfo().properties.pipelineCacheUUID);
+
+    // Set immediate constant status
+    mPipelineMask |=
+        GetImmediateConstantBlockBits(offsetof(RenderImmediateConstants, userConstants),
+                                      GetLayout()->GetImmediateDataRangeByteSize());
+
+    // Gather list of internal immediate constants used by this pipeline
+    if (UsesFragDepth() && !HasUnclippedDepth()) {
+        mPipelineMask |= GetImmediateConstantBlockBits(
+            offsetof(RenderImmediateConstants, clampFragDepth), sizeof(ClampFragDepthArgs));
+    }
 
     // There are at most 2 shader stages in render pipeline, i.e. vertex and fragment
     std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages;

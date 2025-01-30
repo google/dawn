@@ -64,6 +64,8 @@ struct ProgrammableStage {
     PipelineConstantEntries constants;
 };
 
+uint32_t GetRawBits(ImmediateConstantMask bits);
+
 class PipelineBase : public ApiObjectBase, public CachedObject {
   public:
     ~PipelineBase() override;
@@ -75,6 +77,7 @@ class PipelineBase : public ApiObjectBase, public CachedObject {
     const PerStage<ProgrammableStage>& GetAllStages() const;
     bool HasStage(SingleShaderStage stage) const;
     wgpu::ShaderStage GetStageMask() const;
+    const ImmediateConstantMask& GetPipelineMask() const;
 
     ResultOrError<Ref<BindGroupLayoutBase>> GetBindGroupLayout(uint32_t groupIndex);
 
@@ -91,12 +94,16 @@ class PipelineBase : public ApiObjectBase, public CachedObject {
     // Initialize() should only be called once by the frontend.
     MaybeError Initialize(std::optional<ScopedUseShaderPrograms> scopedUsePrograms = std::nullopt);
 
+    void SetPipelineMaskForTesting(ImmediateConstantMask immediateConstantMask);
+
   protected:
     PipelineBase(DeviceBase* device,
                  PipelineLayoutBase* layout,
                  StringView label,
                  std::vector<StageAndDescriptor> stages);
     PipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag, StringView label);
+
+    ImmediateConstantMask mPipelineMask = ImmediateConstantMask(0);
 
   private:
     MaybeError ValidateGetBindGroupLayout(BindGroupIndex group);

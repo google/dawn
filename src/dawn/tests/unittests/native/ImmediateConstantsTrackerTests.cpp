@@ -31,15 +31,84 @@
 #include "dawn/native/ImmediateConstantsTracker.h"
 #include "dawn/native/RenderPipeline.h"
 #include "dawn/tests/DawnNativeTest.h"
+#include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
 namespace dawn::native {
 namespace {
-class ImmediateConstantsTrackerTest : public DawnNativeTest {};
+class ImmediateConstantsTrackerTest : public DawnNativeTest {
+  protected:
+    wgpu::RenderPipeline MakeTestRenderPipeline() {
+        utils::ComboRenderPipelineDescriptor desc;
+        desc.vertex.module = utils::CreateShaderModule(device, R"(
+            @vertex fn main() -> @builtin(position) vec4f {
+                return vec4f(0.0, 0.0, 0.0, 0.0);
+            }
+        )");
+        desc.vertex.entryPoint = "main";
+        desc.cFragment.module = utils::CreateShaderModule(device, R"(
+            @fragment fn main() -> @location(0) vec4f {
+                return vec4f(0.1, 0.2, 0.3, 0.4);
+            }
+        )");
+        desc.cFragment.entryPoint = "main";
+        return device.CreateRenderPipeline(&desc);
+    }
+
+    wgpu::ComputePipeline MakeTestComputePipeline() {
+        wgpu::ComputePipelineDescriptor desc;
+        desc.compute.module = utils::CreateShaderModule(device, R"(
+        @compute @workgroup_size(1) fn main() {}
+    )");
+        desc.compute.entryPoint = "main";
+        return device.CreateComputePipeline(&desc);
+    }
+};
 
 class RenderImmediateConstantsTrackerTest : public ImmediateConstantsTrackerTest {};
 
 class ComputeImmediateConstantsTrackerTest : public ImmediateConstantsTrackerTest {};
+
+// Test pipeline change reset dirty bits and update tracked pipeline constants mask.
+TEST_F(ImmediateConstantsTrackerTest, OnPipelineChange) {
+    // RenderImmediateConstantsTrackerBase
+    {
+        RenderImmediateConstantsTrackerBase tracker;
+
+        // Control Case
+        tracker.SetDirtyBitsForTesting({0b00100101});
+        EXPECT_TRUE(tracker.GetDirtyBits() == ImmediateConstantMask(0b00100101));
+        EXPECT_TRUE(tracker.GetPipelineMask() == ImmediateConstantMask(0));
+
+        // Pipeline change should reset dirty bits
+        wgpu::RenderPipeline wgpuPipeline = MakeTestRenderPipeline();
+        RenderPipelineBase* pipeline = FromAPI(wgpuPipeline.Get());
+        pipeline->SetPipelineMaskForTesting({0b01010101});
+        tracker.OnPipelineChange(pipeline);
+        EXPECT_TRUE(tracker.GetDirtyBits() == ImmediateConstantMask(0b00100000));
+        EXPECT_TRUE(tracker.GetPipelineMask() == ImmediateConstantMask(0b01010101));
+    }
+
+    // ComputeImmediateConstantsTrackerBase
+    {
+        ComputeImmediateConstantsTrackerBase tracker;
+
+        // Control Case
+        tracker.SetDirtyBitsForTesting({0b00100101});
+        EXPECT_TRUE(tracker.GetDirtyBits() == ImmediateConstantMask(0b00100101));
+        EXPECT_TRUE(tracker.GetPipelineMask() == ImmediateConstantMask(0));
+
+        // Pipeline change should reset dirty bits
+        wgpu::ComputePipeline wgpuPipeline = MakeTestComputePipeline();
+        ComputePipelineBase* pipeline = FromAPI(wgpuPipeline.Get());
+        pipeline->SetPipelineMaskForTesting({0b01000101});
+        tracker.OnPipelineChange(pipeline);
+        EXPECT_TRUE(tracker.GetDirtyBits() == ImmediateConstantMask(0));
+        EXPECT_TRUE(tracker.GetPipelineMask() == ImmediateConstantMask(0b01000101));
+    }
+
+    device.Destroy();
+}
 
 // Test immediate setting update dirty bits and contents correctly.
 TEST_F(ImmediateConstantsTrackerTest, SetImmediateData) {
