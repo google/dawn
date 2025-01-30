@@ -40,6 +40,7 @@
 #include "src/tint/lang/core/constant/eval.h"
 #include "src/tint/lang/core/constant/value.h"
 #include "src/tint/lang/core/intrinsic/table.h"
+#include "src/tint/lang/core/subgroup_matrix_kind.h"
 #include "src/tint/lang/core/type/input_attachment.h"
 #include "src/tint/lang/wgsl/common/allowed_features.h"
 #include "src/tint/lang/wgsl/intrinsic/dialect.h"
@@ -226,6 +227,10 @@ class Resolver {
 
     /// @returns an input attachment resolved from the templated identifier @p ident
     core::type::InputAttachment* InputAttachment(const ast::Identifier* ident);
+
+    /// @returns a subgroup matrix resolved from the templated identifier @p ident
+    core::type::SubgroupMatrix* SubgroupMatrix(const ast::Identifier* ident,
+                                               core::SubgroupMatrixKind kind);
 
     /// @returns a packed vec3 resolved from the templated identifier @p ident.
     core::type::Vector* PackedVec3T(const ast::Identifier* ident);

@@ -145,6 +145,7 @@ tint_add_target(tint_lang_wgsl_resolver_test test
   lang/wgsl/resolver/struct_address_space_use_test.cc
   lang/wgsl/resolver/struct_layout_test.cc
   lang/wgsl/resolver/struct_pipeline_stage_use_test.cc
+  lang/wgsl/resolver/subgroup_matrix_test.cc
   lang/wgsl/resolver/subgroups_extension_test.cc
   lang/wgsl/resolver/type_validation_test.cc
   lang/wgsl/resolver/unresolved_identifier_test.cc

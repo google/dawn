@@ -169,6 +169,10 @@ enum builtin_type {
   texture_external
   // chromium_internal_input_attachments
   input_attachment
+  // chromium_experimental_subgroup_matrix
+  subgroup_matrix_left
+  subgroup_matrix_right
+  subgroup_matrix_result
 
   // Internal types.
   __packed_vec3  // note: not core type, but used by legacy MSL writer

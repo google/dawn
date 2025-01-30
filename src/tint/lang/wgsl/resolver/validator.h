@@ -467,6 +467,12 @@ class Validator {
                                        const core::type::Type* type,
                                        const Source& source) const;
 
+    /// Validates a subgroup matrix type
+    /// @param t the subgroup matrix type to validate
+    /// @param source the source of the subgroup matrix type
+    /// @returns true on success, false otherwise
+    bool SubgroupMatrix(const core::type::SubgroupMatrix* t, const Source& source) const;
+
     /// Validates a structure
     /// @param str the structure to validate
     /// @param stage the current pipeline stage

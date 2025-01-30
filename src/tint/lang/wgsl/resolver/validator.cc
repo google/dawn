@@ -46,6 +46,7 @@
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/sampler.h"
 #include "src/tint/lang/core/type/storage_texture.h"
+#include "src/tint/lang/core/type/subgroup_matrix.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
 #include "src/tint/lang/wgsl/ast/alias.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
@@ -211,8 +212,9 @@ diag::Diagnostic* Validator::MaybeAddDiagnostic(wgsl::DiagnosticRule rule,
 
 // https://gpuweb.github.io/gpuweb/wgsl/#plain-types-section
 bool Validator::IsPlain(const core::type::Type* type) const {
-    return type->IsAnyOf<core::type::Scalar, core::type::Atomic, core::type::Vector,
-                         core::type::Matrix, sem::Array, core::type::Struct>();
+    return type
+        ->IsAnyOf<core::type::Scalar, core::type::Atomic, core::type::Vector, core::type::Matrix,
+                  sem::Array, core::type::Struct, core::type::SubgroupMatrix>();
 }
 
 // https://gpuweb.github.io/gpuweb/wgsl/#fixed-footprint-types
@@ -495,6 +497,21 @@ bool Validator::InputAttachmentIndexAttribute(const ast::InputAttachmentIndexAtt
         AddNote(attr->source) << style::Attribute("@input_attachment_index")
                               << " must only be applied to declarations of "
                               << style::Type("input_attachment") << " type";
+        return false;
+    }
+
+    return true;
+}
+
+bool Validator::SubgroupMatrix(const core::type::SubgroupMatrix* t, const Source& source) const {
+    if (!enabled_extensions_.Contains(wgsl::Extension::kChromiumExperimentalSubgroupMatrix)) {
+        AddError(source) << "use of " << style::Type("subgroup_matrix_*")
+                         << " requires enabling extension "
+                         << style::Code("chromium_experimental_subgroup_matrix");
+        return false;
+    }
+    if (!t->Type()->IsAnyOf<core::type::F32, core::type::F16, core::type::I32, core::type::U32>()) {
+        AddError(source) << "subgroup_matrix element type must be f32, f16, i32, or u32";
         return false;
     }
 
