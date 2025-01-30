@@ -1140,7 +1140,7 @@ TEST_F(MslWriterTest, EmitType_SubgroupMatrixLeft) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate({}, validate::MslVersion::kMsl_2_3)) << err_ << output_.msl;
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
   simdgroup_float8x8 a = make_filled_simdgroup_matrix<float, 8, 8>(0.0f);
@@ -1156,7 +1156,7 @@ TEST_F(MslWriterTest, EmitType_SubgroupMatrixRight) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate({}, validate::MslVersion::kMsl_2_3)) << err_ << output_.msl;
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
   simdgroup_half8x8 a = make_filled_simdgroup_matrix<half, 8, 8>(0.0h);
@@ -1173,7 +1173,7 @@ TEST_F(MslWriterTest, EmitType_SubgroupMatrixResult) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate({}, validate::MslVersion::kMsl_2_3)) << err_ << output_.msl;
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
   simdgroup_float8x8 a = make_filled_simdgroup_matrix<float, 8, 8>(0.0f);

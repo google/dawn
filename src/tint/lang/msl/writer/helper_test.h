@@ -82,7 +82,7 @@ class MslWriterTestHelperBase : public BASE {
     /// @returns true if generation and validation succeeded
     bool Generate(
         Options options = {},
-        [[maybe_unused]] validate::MslVersion msl_version = validate::MslVersion::kMsl_2_2) {
+        [[maybe_unused]] validate::MslVersion msl_version = validate::MslVersion::kMsl_2_3) {
         auto result = writer::Generate(mod, options);
         if (result != Success) {
             err_ = result.Failure().reason.Str();

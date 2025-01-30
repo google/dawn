@@ -981,20 +981,8 @@ bool GenerateMsl([[maybe_unused]] Options& options,
         PrintHash(hash);
     }
 
-    // Default to validating against MSL 2.2, which corresponds to macOS 10.15.
-    // Check for extensions that bump the requirements.
-    auto msl_version = tint::msl::validate::MslVersion::kMsl_2_2;
-    for (auto* enable : input_program.AST().Enables()) {
-        if (enable->HasExtension(tint::wgsl::Extension::kChromiumExperimentalPixelLocal) ||
-            enable->HasExtension(tint::wgsl::Extension::kChromiumExperimentalFramebufferFetch)) {
-            msl_version = std::max(msl_version, tint::msl::validate::MslVersion::kMsl_2_3);
-        }
-    }
-
-    // The correct behavior for platform demote to helper in metal 2.3+.
-    if (options.disable_demote_to_helper) {
-        msl_version = std::max(msl_version, tint::msl::validate::MslVersion::kMsl_2_3);
-    }
+    // Default to validating against MSL 2.3, which corresponds to macOS 11.0.
+    auto msl_version = tint::msl::validate::MslVersion::kMsl_2_3;
 
     if (options.validate && options.skip_hash.count(hash) == 0) {
         tint::msl::validate::Result res;
