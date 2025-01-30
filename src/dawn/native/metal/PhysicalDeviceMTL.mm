@@ -250,40 +250,36 @@ enum class MTLGPUFamily {
 ResultOrError<MTLGPUFamily> GetMTLGPUFamily(id<MTLDevice> device) {
     // https://developer.apple.com/documentation/metal/mtldevice/detecting_gpu_features_and_metal_software_versions?language=objc
 
-    if (@available(macOS 11.0, iOS 14.0, *)) {
 #if !DAWN_PLATFORM_IS(IOS)
-        if ([device supportsFamily:MTLGPUFamilyMac2]) {
-            return MTLGPUFamily::Mac2;
-        }
-#endif
-        if ([device supportsFamily:MTLGPUFamilyApple7]) {
-            return MTLGPUFamily::Apple7;
-        }
-        if ([device supportsFamily:MTLGPUFamilyApple6]) {
-            return MTLGPUFamily::Apple6;
-        }
-        if ([device supportsFamily:MTLGPUFamilyApple5]) {
-            return MTLGPUFamily::Apple5;
-        }
-        if ([device supportsFamily:MTLGPUFamilyApple4]) {
-            return MTLGPUFamily::Apple4;
-        }
-        if ([device supportsFamily:MTLGPUFamilyApple3]) {
-            return MTLGPUFamily::Apple3;
-        }
-        if ([device supportsFamily:MTLGPUFamilyApple2]) {
-            return MTLGPUFamily::Apple2;
-        }
-        if ([device supportsFamily:MTLGPUFamilyApple1]) {
-            return MTLGPUFamily::Apple1;
-        }
-
-        // This family is no longer supported in the macOS 10.15 SDK but still exists so
-        // default to it.
-        return MTLGPUFamily::Mac1;
-    } else {
-        return DAWN_INTERNAL_ERROR("Unsupported Metal device");
+    if ([device supportsFamily:MTLGPUFamilyMac2]) {
+        return MTLGPUFamily::Mac2;
     }
+#endif
+    if ([device supportsFamily:MTLGPUFamilyApple7]) {
+        return MTLGPUFamily::Apple7;
+    }
+    if ([device supportsFamily:MTLGPUFamilyApple6]) {
+        return MTLGPUFamily::Apple6;
+    }
+    if ([device supportsFamily:MTLGPUFamilyApple5]) {
+        return MTLGPUFamily::Apple5;
+    }
+    if ([device supportsFamily:MTLGPUFamilyApple4]) {
+        return MTLGPUFamily::Apple4;
+    }
+    if ([device supportsFamily:MTLGPUFamilyApple3]) {
+        return MTLGPUFamily::Apple3;
+    }
+    if ([device supportsFamily:MTLGPUFamilyApple2]) {
+        return MTLGPUFamily::Apple2;
+    }
+    if ([device supportsFamily:MTLGPUFamilyApple1]) {
+        return MTLGPUFamily::Apple1;
+    }
+
+    // This family is no longer supported in the macOS 10.15 SDK but still exists so
+    // default to it.
+    return MTLGPUFamily::Mac1;
 }
 
 }  // anonymous namespace
