@@ -134,11 +134,6 @@ crbug.com/368241687 [ android-pixel-6 arm ] webgpu:shader,execution,expression,c
 # these are also failing on Vulkan (WebGPU Core) on the same device
 crbug.com/367807042 [ android-pixel-6 arm ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:* [ Skip ]
 
-# temp suppressions for 0 storage buffers / storage textures in vertex and fragment shaders
-crbug.com/381214210 webgpu:api,validation,encoding,programmable,pipeline_bind_group_compat:bgl_resource_type_mismatch:* [ Skip ]
-crbug.com/381214210 webgpu:api,validation,encoding,programmable,pipeline_bind_group_compat:bgl_resource_type_mismatch:* [ Skip ]
-crbug.com/381214210 webgpu:api,validation,resource_usages,texture,in_pass_encoder:* [ Skip ]
-
 # COMBINED_SHADER_OUTPUT_RESOURCES issue
 crbug.com/42241064 webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:* [ Skip ]
 crbug.com/42241064 webgpu:api,validation,capability_checks,limits,maxStorageTexturesPerShaderStage:* [ Skip ]
