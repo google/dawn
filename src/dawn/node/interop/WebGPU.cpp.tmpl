@@ -173,7 +173,7 @@ Wrappers* Wrappers::instance = nullptr;
 {{-   if not (HasAnnotation $a "SameObject")}}
         InstanceAccessor("{{$a.Name}}", &W{{$.Name}}::get{{Title $a.Name}},
 {{-    if $a.Readonly}} nullptr,{{else}} &W{{$.Name}}::set{{Title $a.Name}},{{end -}}
-        napi_enumerable),
+        napi_default_jsproperty),
 {{-   end}}
 {{-  end}}
 {{-  range $c := $constants}}
