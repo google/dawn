@@ -56,7 +56,7 @@ type vec3<T>
 type vec4<T>
 @display("vec{N}<{T}>")     type vec<N: num, T>
 
-type array<T>
+@display("array<{T}>") type runtime_array<T>
 
 type texture_2d<T>
 type texture_2d_array<T>
@@ -129,7 +129,7 @@ match i32_texel_format
 // Builtin Functions                                                          //
 ////////////////////////////////////////////////////////////////////////////////
 
-@member_function @must_use implicit(T, A: access) fn length(ptr<storage, array<T>, A>) -> i32
+@member_function @must_use implicit(T, A: access) fn length(ptr<storage, runtime_array<T>, A>) -> i32
 
 @stage("compute") fn barrier()
 @stage("compute") fn memoryBarrierBuffer()

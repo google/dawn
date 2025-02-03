@@ -520,22 +520,22 @@ constexpr TypeMatcher kAtomicMatcher {
 };
 
 
-/// TypeMatcher for 'type array'
-constexpr TypeMatcher kArrayMatcher {
+/// TypeMatcher for 'type runtime_array'
+constexpr TypeMatcher kRuntimeArrayMatcher {
 /* match */ [](MatchState& state, const Type* ty) -> const Type* {
   const Type* T = nullptr;
-    if (!MatchArray(state, ty, T)) {
+    if (!MatchRuntimeArray(state, ty, T)) {
       return nullptr;
     }
     T = state.Type(T);
     if (T == nullptr) {
       return nullptr;
     }
-    return BuildArray(state, ty, T);
+    return BuildRuntimeArray(state, ty, T);
   },
 /* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText T;
   state->PrintType(T);
-    out << style::Type("array", "<", T, ">");
+    out << style::Type("array<", T, ">");
   }
 };
 
@@ -1597,7 +1597,7 @@ constexpr TypeMatcher kTypeMatchers[] = {
   /* [24] */ kMatMatcher,
   /* [25] */ kPtrMatcher,
   /* [26] */ kAtomicMatcher,
-  /* [27] */ kArrayMatcher,
+  /* [27] */ kRuntimeArrayMatcher,
   /* [28] */ kSamplerMatcher,
   /* [29] */ kSamplerComparisonMatcher,
   /* [30] */ kTexture1DMatcher,
@@ -10023,7 +10023,7 @@ constexpr IntrinsicInfo kBuiltins[] = {
   },
   {
     /* [5] */
-    /* fn arrayLength[T, A : access](ptr<storage, array<T>, A>) -> u32 */
+    /* fn arrayLength[T, A : access](ptr<storage, runtime_array<T>, A>) -> u32 */
     /* num overloads */ 1,
     /* overloads */ OverloadIndex(443),
   },

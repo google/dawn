@@ -299,7 +299,7 @@ inline const type::SubgroupMatrix* BuildSubgroupMatrix(intrinsic::MatchState& st
                                        A.Value(), B.Value());
 }
 
-inline bool MatchArray(intrinsic::MatchState&, const type::Type* ty, const type::Type*& T) {
+inline bool MatchRuntimeArray(intrinsic::MatchState&, const type::Type* ty, const type::Type*& T) {
     if (ty->Is<intrinsic::Any>()) {
         T = ty;
         return true;
@@ -314,9 +314,9 @@ inline bool MatchArray(intrinsic::MatchState&, const type::Type* ty, const type:
     return false;
 }
 
-inline const type::Array* BuildArray(intrinsic::MatchState& state,
-                                     const type::Type*,
-                                     const type::Type* el) {
+inline const type::Array* BuildRuntimeArray(intrinsic::MatchState& state,
+                                            const type::Type*,
+                                            const type::Type* el) {
     return state.types.Get<type::Array>(el,
                                         /* count */ state.types.Get<type::RuntimeArrayCount>(),
                                         /* align */ 0u,

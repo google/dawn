@@ -363,6 +363,7 @@
 "rgba8unorm"
 "right"
 "round"
+"runtime_array"
 "sample"
 "sample_index"
 "sample_mask"

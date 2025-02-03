@@ -381,6 +381,7 @@ func validate(fqn sem.FullyQualifiedName, uses *sem.StageUses) bool {
 
 	switch fqn.Target.GetName() {
 	case "array":
+	case "runtime_array":
 		if !isStorable(fqn.TemplateArguments[0].(sem.FullyQualifiedName)) {
 			return false
 		}

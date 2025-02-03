@@ -147,7 +147,7 @@ type mat4x4<T>
 type ptr<S: address_space, T, A: access>
 type ref<S: address_space, T, A: access>
 type atomic<T>
-type array<T>
+@display("array<{T}>") type runtime_array<T>
 type sampler
 type sampler_comparison
 type texture_1d<T>
@@ -277,8 +277,8 @@ match workgroup
 @must_use @const implicit(N: num) fn all(vec<N, bool>) -> bool
 @must_use @const fn any(bool) -> bool
 @must_use @const implicit(N: num) fn any(vec<N, bool>) -> bool
-@must_use implicit(T, R: read) fn arrayLength(ptr<storage, array<T>, R>) -> u32
-@must_use @stage("fragment", "compute") implicit(T, W: writable) fn arrayLength(ptr<storage, array<T>, W>) -> u32
+@must_use implicit(T, R: read) fn arrayLength(ptr<storage, runtime_array<T>, R>) -> u32
+@must_use @stage("fragment", "compute") implicit(T, W: writable) fn arrayLength(ptr<storage, runtime_array<T>, W>) -> u32
 @must_use @const implicit(T: fa_f32_f16) fn asin(@test_value(0.479425538604) T) -> T
 @must_use @const implicit(N: num, T: fa_f32_f16) fn asin(@test_value(0.479425538604) vec<N, T>) -> vec<N, T>
 @must_use @const implicit(T: fa_f32_f16) fn asinh(T) -> T
