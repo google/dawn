@@ -67,7 +67,9 @@ func (cmd) Desc() string {
 }
 
 func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, error) {
-	c.flags.auth.Register(flag.CommandLine, auth.DefaultAuthOptions(sheets.SpreadsheetsScope))
+	c.flags.auth.Register(
+		flag.CommandLine,
+		auth.DefaultAuthOptions(cfg.OsWrapper, sheets.SpreadsheetsScope))
 	c.flags.results.RegisterFlags(cfg)
 	npmPath, _ := exec.LookPath("npm")
 	flag.StringVar(&c.flags.npmPath, "npm", npmPath, "path to npm")

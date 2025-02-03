@@ -78,7 +78,7 @@ func (cmd) Desc() string {
 
 func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, error) {
 	c.flags.results.RegisterFlags(cfg)
-	c.flags.auth.Register(flag.CommandLine, auth.DefaultAuthOptions())
+	c.flags.auth.Register(flag.CommandLine, auth.DefaultAuthOptions(cfg.OsWrapper))
 	flag.BoolVar(&c.flags.verbose, "verbose", false, "emit additional logging")
 	flag.BoolVar(&c.flags.generateExplicitTags, "generate-explicit-tags", false,
 		"Use the most explicit tags for expectations instead of several broad ones")

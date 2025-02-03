@@ -1,4 +1,4 @@
-// Copyright 2023 The Dawn & Tint Authors
+// Copyright 2025 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -28,22 +28,49 @@
 package auth
 
 import (
-	"dawn.googlesource.com/dawn/tools/src/fileutils"
+	"testing"
+
 	"dawn.googlesource.com/dawn/tools/src/oswrapper"
+	"github.com/stretchr/testify/require"
 	"go.chromium.org/luci/auth"
-	"go.chromium.org/luci/hardcoded/chromeinfra"
 )
 
-// DefaultAuthOptions returns the default authentication options for use by
-// command line arguments.
-func DefaultAuthOptions(
-	environProvider oswrapper.EnvironProvider, additionalScopes ...string) auth.Options {
+func TestDefaultAuthOptions_NoAdditionalScopes(t *testing.T) {
+	wrapper := oswrapper.CreateMemMapOSWrapper()
+	wrapper.Environment = map[string]string{
+		"HOME": "/home",
+	}
 
-	def := chromeinfra.DefaultAuthOptions()
-	def.SecretsDir = fileutils.ExpandHome("~/.config/dawn-cts", environProvider)
-	def.Scopes = append(def.Scopes,
-		"https://www.googleapis.com/auth/gerritcodereview",
-		auth.OAuthScopeEmail)
-	def.Scopes = append(def.Scopes, additionalScopes...)
-	return def
+	authOptions := DefaultAuthOptions(wrapper)
+
+	require.Equal(t, authOptions.SecretsDir, "/home/.config/dawn-cts")
+	require.GreaterOrEqual(t, len(authOptions.Scopes), 2)
+	require.Equal(
+		t,
+		[]string{
+			"https://www.googleapis.com/auth/gerritcodereview",
+			auth.OAuthScopeEmail,
+		},
+		authOptions.Scopes[len(authOptions.Scopes)-2:])
+}
+
+func TestDefaultAuthOptions_AdditionalScopes(t *testing.T) {
+	wrapper := oswrapper.CreateMemMapOSWrapper()
+	wrapper.Environment = map[string]string{
+		"HOME": "/home",
+	}
+
+	authOptions := DefaultAuthOptions(wrapper, "scope1", "scope2")
+
+	require.Equal(t, authOptions.SecretsDir, "/home/.config/dawn-cts")
+	require.GreaterOrEqual(t, len(authOptions.Scopes), 4)
+	require.Equal(
+		t,
+		[]string{
+			"https://www.googleapis.com/auth/gerritcodereview",
+			auth.OAuthScopeEmail,
+			"scope1",
+			"scope2",
+		},
+		authOptions.Scopes[len(authOptions.Scopes)-4:])
 }

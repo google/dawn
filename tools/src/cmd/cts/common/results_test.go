@@ -37,6 +37,7 @@ import (
 	"dawn.googlesource.com/dawn/tools/src/cts/query"
 	"dawn.googlesource.com/dawn/tools/src/cts/result"
 	"dawn.googlesource.com/dawn/tools/src/fileutils"
+	"dawn.googlesource.com/dawn/tools/src/gerrit"
 	"dawn.googlesource.com/dawn/tools/src/oswrapper"
 	"dawn.googlesource.com/dawn/tools/src/resultsdb"
 	"github.com/stretchr/testify/require"
@@ -45,12 +46,240 @@ import (
 // TODO(crbug.com/342554800): Add test coverage for:
 //   ResultSource.GetResults (requires breaking out into helper functions)
 //   ResultSource.GetUnsuppressedFailingResults (ditto)
-//   CacheResults (requires os abstraction crbug.com/344014313)
-//   CacheUnsuppressedFailingResults (ditto)
 //   LatestCTSRoll
 //   LatestPatchset
 //   MostRecentResultsForChange (requires os abstraction crbug.com/344014313)
 //   MostRecentUnsuppressedFailingResultsForChange (ditto)
+
+/*******************************************************************************
+ * CacheResults tests
+ ******************************************************************************/
+
+func getCacheResultsSharedSetupData() (
+	context.Context, Config, oswrapper.MemMapOSWrapper, gerrit.Patchset, string) {
+
+	ctx := context.Background()
+	wrapper := oswrapper.CreateMemMapOSWrapper()
+	patchset := gerrit.Patchset{
+		Change:   1,
+		Patchset: 2,
+	}
+	cacheDir := "/cache"
+	cfg := Config{
+		Tests: []TestConfig{
+			{
+				ExecutionMode: result.ExecutionMode("execution_mode"),
+				Prefixes:      []string{"prefix"},
+			},
+		},
+		OsWrapper: wrapper,
+	}
+	cfg.Tag.Remove = []string{"tag_to_remove"}
+
+	return ctx, cfg, wrapper, patchset, cacheDir
+}
+
+func TestCacheResults_CacheHit(t *testing.T) {
+	testCacheResults_CacheHit_Impl(t, false)
+}
+
+func TestCacheUnsuppressedFailingResults_CacheHit(t *testing.T) {
+	testCacheResults_CacheHit_Impl(t, true)
+}
+
+func testCacheResults_CacheHit_Impl(t *testing.T, unsuppressedOnly bool) {
+	client := resultsdb.MockBigQueryClient{}
+	var testedFunc cacheResultsFunc
+	var clientDataField *resultsdb.PrefixGroupedQueryResults
+	var partialCacheFilePath string
+	if unsuppressedOnly {
+		testedFunc = CacheUnsuppressedFailingResults
+		clientDataField = &client.UnsuppressedFailureReturnValues
+		partialCacheFilePath = filepath.Join("1", "ps-2-unsuppressed-failures.txt")
+	} else {
+		testedFunc = CacheResults
+		clientDataField = &client.ReturnValues
+		partialCacheFilePath = filepath.Join("1", "ps-2.txt")
+	}
+
+	ctx, cfg, wrapper, patchset, cacheDir := getCacheResultsSharedSetupData()
+
+	// Return bad data to ensure that no querying occurs when the cache is hit.
+	*clientDataField = resultsdb.PrefixGroupedQueryResults{
+		"prefix": []resultsdb.QueryResult{
+			{
+				TestId:   "bad_test",
+				Status:   "FAIL",
+				Tags:     []resultsdb.TagPair{},
+				Duration: 1.0,
+			},
+		},
+	}
+
+	cachedResults := result.ResultsByExecutionMode{
+		"execution_mode": result.List{
+			{
+				Query:        query.Parse("_test_1"),
+				Tags:         result.NewTags("tag_1"),
+				Status:       result.Failure,
+				Duration:     0,
+				MayExonerate: false,
+			},
+		},
+	}
+
+	cachePath := filepath.Join(cacheDir, partialCacheFilePath)
+	err := result.SaveWithWrapper(cachePath, cachedResults, wrapper)
+	require.NoErrorf(t, err, "Got error writing results: %v", err)
+
+	resultsByExecutionMode, err := testedFunc(ctx, cfg, patchset, cacheDir, client, BuildsByName{})
+	require.NoErrorf(t, err, "Got error caching results: %v", err)
+	require.Equal(t, cachedResults, resultsByExecutionMode)
+}
+
+func TestCacheResults_GetRawResultsError(t *testing.T) {
+	testCacheResults_GetRawResultsError_Impl(t, false)
+}
+
+func TestCacheUnsuppressedFailingResults_GetRawResultsError(t *testing.T) {
+	testCacheResults_GetRawResultsError_Impl(t, true)
+}
+
+func testCacheResults_GetRawResultsError_Impl(t *testing.T, unsuppressedOnly bool) {
+	client := resultsdb.MockBigQueryClient{}
+	var testedFunc cacheResultsFunc
+	var clientDataField *resultsdb.PrefixGroupedQueryResults
+	if unsuppressedOnly {
+		testedFunc = CacheUnsuppressedFailingResults
+		clientDataField = &client.UnsuppressedFailureReturnValues
+	} else {
+		testedFunc = CacheResults
+		clientDataField = &client.ReturnValues
+	}
+
+	ctx, cfg, _, patchset, cacheDir := getCacheResultsSharedSetupData()
+
+	*clientDataField = resultsdb.PrefixGroupedQueryResults{
+		"prefix": []resultsdb.QueryResult{
+			{
+				TestId:   "bad_test",
+				Status:   "FAIL",
+				Tags:     []resultsdb.TagPair{},
+				Duration: 1.0,
+			},
+		},
+	}
+
+	resultsByExecutionMode, err := testedFunc(ctx, cfg, patchset, cacheDir, client, BuildsByName{})
+	require.Nil(t, resultsByExecutionMode)
+	require.ErrorContains(t, err,
+		"Test ID bad_test did not start with prefix even though query should have filtered.")
+}
+
+func TestCacheResults_Success(t *testing.T) {
+	testCacheResults_Success_Impl(t, false)
+}
+
+func TestCacheUnsuppressedFailingResults_Success(t *testing.T) {
+	testCacheResults_Success_Impl(t, true)
+}
+
+func testCacheResults_Success_Impl(t *testing.T, unsuppressedOnly bool) {
+	client := resultsdb.MockBigQueryClient{}
+	var testedFunc cacheResultsFunc
+	var clientDataField *resultsdb.PrefixGroupedQueryResults
+	if unsuppressedOnly {
+		testedFunc = CacheUnsuppressedFailingResults
+		clientDataField = &client.UnsuppressedFailureReturnValues
+	} else {
+		testedFunc = CacheResults
+		clientDataField = &client.ReturnValues
+	}
+
+	ctx, cfg, _, patchset, cacheDir := getCacheResultsSharedSetupData()
+
+	*clientDataField = resultsdb.PrefixGroupedQueryResults{
+		"prefix": []resultsdb.QueryResult{
+			{
+				TestId: "prefix_test_2",
+				Status: "CRASH",
+				Tags: []resultsdb.TagPair{
+					{
+						Key:   "typ_tag",
+						Value: "tag_2",
+					},
+				},
+				Duration: 2,
+			},
+			{
+				TestId: "prefix_test_1",
+				Status: "FAIL",
+				Tags: []resultsdb.TagPair{
+					{
+						Key:   "typ_tag",
+						Value: "tag_1",
+					},
+					// This should be removed by CleanResults().
+					{
+						Key:   "typ_tag",
+						Value: "tag_to_remove",
+					},
+				},
+				Duration: 5,
+			},
+			// Should be merged into the above result by CleanResults()
+			{
+				TestId: "prefix_test_1",
+				Status: "PASS",
+				Tags: []resultsdb.TagPair{
+					{
+						Key:   "typ_tag",
+						Value: "tag_1",
+					},
+					// This should be removed by CleanResults().
+					{
+						Key:   "typ_tag",
+						Value: "tag_to_remove",
+					},
+				},
+				Duration: 1,
+			},
+		},
+	}
+
+	expectedResults := result.ResultsByExecutionMode{
+		"execution_mode": result.List{
+			{
+				Query:        query.Parse("_test_1"),
+				Tags:         result.NewTags("tag_1"),
+				Status:       result.Failure,
+				Duration:     3000000000,
+				MayExonerate: false,
+			},
+			{
+				Query:        query.Parse("_test_2"),
+				Tags:         result.NewTags("tag_2"),
+				Status:       result.Crash,
+				Duration:     2000000000,
+				MayExonerate: false,
+			},
+		},
+	}
+
+	// Check that the initial results are retrieved and cleaned properly.
+	resultsByExecutionMode, err := testedFunc(
+		ctx, cfg, patchset, cacheDir, client, BuildsByName{})
+	require.NoErrorf(t, err, "Got error caching results: %v", err)
+	require.Equal(t, expectedResults, resultsByExecutionMode)
+
+	// Check that the results were cached and that hitting the cache still results
+	// in cleaned data.
+	client = resultsdb.MockBigQueryClient{}
+	resultsByExecutionMode, err = testedFunc(
+		ctx, cfg, patchset, cacheDir, client, BuildsByName{})
+	require.NoErrorf(t, err, "Got error caching results: %v", err)
+	require.Equal(t, expectedResults, resultsByExecutionMode)
+}
 
 /*******************************************************************************
  * GetResults tests

@@ -65,7 +65,7 @@ func TestDawnRoot(t *testing.T) {
 	}
 }
 
-func TestExpandHomeWithWrapper(t *testing.T) {
+func TestExpandHome(t *testing.T) {
 	tests := []struct {
 		name  string
 		input string
@@ -105,7 +105,7 @@ func TestExpandHomeWithWrapper(t *testing.T) {
 				"HOME": "/home",
 			}
 
-			expandedPath := fileutils.ExpandHomeWithWrapper(testCase.input, wrapper)
+			expandedPath := fileutils.ExpandHome(testCase.input, wrapper)
 			require.Equal(t, testCase.want, expandedPath)
 		})
 	}

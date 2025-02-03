@@ -82,7 +82,7 @@ mode:
 
 func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, error) {
 	c.flags.source.RegisterFlags(cfg)
-	c.flags.auth.Register(flag.CommandLine, auth.DefaultAuthOptions())
+	c.flags.auth.Register(flag.CommandLine, auth.DefaultAuthOptions(cfg.OsWrapper))
 	flag.BoolVar(&c.flags.keepAlive, "keep-alive", false, "keep the server alive after the page has been closed")
 	return []string{"[cases | timing]"}, nil
 }

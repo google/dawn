@@ -64,7 +64,7 @@ func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, e
 	flag.StringVar(&c.flags.output, "o", "results.txt", "output file. '-' writes to stdout")
 	flag.BoolVar(&c.flags.unsuppressedFailuresOnly, "unsuppressed-failures-only", false, "only pull results for unsuppressed failures")
 	c.flags.source.RegisterFlags(cfg)
-	c.flags.auth.Register(flag.CommandLine, auth.DefaultAuthOptions())
+	c.flags.auth.Register(flag.CommandLine, auth.DefaultAuthOptions(cfg.OsWrapper))
 	return nil, nil
 }
 

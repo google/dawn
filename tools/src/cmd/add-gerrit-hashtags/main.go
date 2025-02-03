@@ -43,6 +43,7 @@ import (
 	"dawn.googlesource.com/dawn/tools/src/dawn"
 	"dawn.googlesource.com/dawn/tools/src/gerrit"
 	"dawn.googlesource.com/dawn/tools/src/git"
+	"dawn.googlesource.com/dawn/tools/src/oswrapper"
 	"go.chromium.org/luci/auth/client/authcli"
 )
 
@@ -78,7 +79,7 @@ func defaultUser() string {
 }
 
 func main() {
-	authFlags.Register(flag.CommandLine, auth.DefaultAuthOptions())
+	authFlags.Register(flag.CommandLine, auth.DefaultAuthOptions(oswrapper.GetRealOSWrapper()))
 
 	flag.Usage = func() {
 		out := flag.CommandLine.Output()

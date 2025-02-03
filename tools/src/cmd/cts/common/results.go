@@ -33,7 +33,6 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"os"
 	"path/filepath"
 	"sort"
 	"strconv"
@@ -179,6 +178,9 @@ func (r *ResultSource) getResultsImpl(ctx context.Context, cfg Config, auth auth
 	return resultsByExecutionMode, nil
 }
 
+// TODO(crbug.com/344014313): Switch to using the resultsdb.Querier contained
+// within the provided Config instead of taking a separate argument.
+
 // CacheResults looks in the cache at 'cacheDir' for the results for the given patchset.
 // If the cache contains the results, then these are loaded, transformed with CleanResults() and
 // returned.
@@ -226,11 +228,11 @@ func cacheResultsImpl(
 
 	var cachePath string
 	if cacheDir != "" {
-		dir := fileutils.ExpandHome(cacheDir)
+		dir := fileutils.ExpandHome(cacheDir, cfg.OsWrapper)
 		path := filepath.Join(dir, strconv.Itoa(ps.Change), fmt.Sprintf("ps-%v%v.txt", ps.Patchset, fileSuffix))
-		if _, err := os.Stat(path); err == nil {
+		if _, err := cfg.OsWrapper.Stat(path); err == nil {
 			log.Printf("loading cached results from cl %v ps %v...", ps.Change, ps.Patchset)
-			return result.Load(path)
+			return result.LoadWithWrapper(path, cfg.OsWrapper)
 		}
 		cachePath = path
 	}
@@ -241,15 +243,15 @@ func cacheResultsImpl(
 		return nil, err
 	}
 
-	if err := result.Save(cachePath, resultsByExecutionMode); err != nil {
-		log.Println("failed to save results to cache: %w", err)
-	}
-
 	// Expand aliased tags, remove specific tags
 	for i, results := range resultsByExecutionMode {
 		CleanResults(cfg, &results)
 		results.Sort()
 		resultsByExecutionMode[i] = results
+	}
+
+	if err := result.SaveWithWrapper(cachePath, resultsByExecutionMode, cfg.OsWrapper); err != nil {
+		log.Println("failed to save results to cache: %w", err)
 	}
 
 	return resultsByExecutionMode, nil
@@ -603,7 +605,7 @@ func CacheRecentUniqueSuppressedResults(
 	// Load cached results if they are available.
 	var cachePath string
 	if cacheDir != "" {
-		dir := fileutils.ExpandHomeWithWrapper(cacheDir, osWrapper)
+		dir := fileutils.ExpandHome(cacheDir, osWrapper)
 		year, month, day := time.Now().Date()
 		path := filepath.Join(dir, "expectation-affected-ci-results", fmt.Sprintf("%d-%d-%d.txt", year, month, day))
 		if _, err := osWrapper.Stat(path); err == nil {
