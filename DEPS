@@ -54,6 +54,8 @@ vars = {
   'reclient_package': 'infra/rbe/client/',
   # reclient CIPD package version
   'reclient_version': 're_client_version:0.143.0.518e369-gomaip',
+  # siso CIPD package version.
+  'siso_version': 'git_revision:0b6159c39573013a79a47f8544200df07a6a74fc',
 
   # 'magic' text to tell depot_tools that git submodules should be accepted
   # but parity with DEPS file is expected.
@@ -406,6 +408,16 @@ deps = {
     ],
     'dep_type': 'cipd',
   },
+  'third_party/siso/cipd': {
+    'packages': [
+      {
+        'package': 'infra/build/siso/${{platform}}',
+        'version': Var('siso_version'),
+      }
+    ],
+    'condition': 'dawn_standalone and non_git_source',
+    'dep_type': 'cipd',
+  },
 
   # RBE dependencies
   'buildtools/reclient': {
@@ -663,22 +675,34 @@ hooks = [
                 '-o', 'third_party/node/node.exe',
     ],
   },
- {
-   # Download remote exec cfg files
-   'name': 'fetch_reclient_cfgs',
-   'pattern': '.',
-   'condition': 'download_remoteexec_cfg and dawn_standalone',
-   'action': ['python3',
-              'buildtools/reclient_cfgs/fetch_reclient_cfgs.py',
-              '--rbe_instance',
-              Var('rbe_instance'),
-              '--reproxy_cfg_template',
-              'reproxy.cfg.template',
-              '--rewrapper_cfg_project',
-              Var('rewrapper_cfg_project'),
-              '--quiet',
-              ],
- },
+
+  # Download remote exec cfg files
+  {
+    'name': 'fetch_reclient_cfgs',
+    'pattern': '.',
+    'condition': 'download_remoteexec_cfg and dawn_standalone',
+    'action': ['python3',
+               'buildtools/reclient_cfgs/fetch_reclient_cfgs.py',
+               '--rbe_instance',
+               Var('rbe_instance'),
+               '--reproxy_cfg_template',
+               'reproxy.cfg.template',
+               '--rewrapper_cfg_project',
+               Var('rewrapper_cfg_project'),
+               '--quiet',
+               ],
+  },
+  # Configure Siso for developer builds.
+  {
+    'name': 'configure_siso',
+    'pattern': '.',
+    'condition': 'dawn_standalone',
+    'action': ['python3',
+               'build/config/siso/configure_siso.py',
+               '--rbe_instance',
+               Var('rbe_instance'),
+               ],
+  },
 ]
 
 recursedeps = [
