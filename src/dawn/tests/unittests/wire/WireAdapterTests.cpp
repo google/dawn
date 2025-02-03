@@ -246,8 +246,8 @@ TEST_P(WireAdapterTests, RequestDeviceSuccess) {
 // wire reject the callback.
 TEST_P(WireAdapterTests, RequestFeatureUnsupportedByWire) {
     std::initializer_list<WGPUFeatureName> fakeFeaturesList = {
-        // Some value that is not a valid feature
-        static_cast<WGPUFeatureName>(-2),
+        // Default feature is an undefined feature.
+        {},
         WGPUFeatureName_TextureCompressionASTC,
     };
     WGPUSupportedFeatures fakeFeatures = {fakeFeaturesList.size(), std::data(fakeFeaturesList)};

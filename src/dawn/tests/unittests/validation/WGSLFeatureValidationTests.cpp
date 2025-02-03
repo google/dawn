@@ -87,8 +87,7 @@ class WGSLFeatureValidationTest : public ValidationTest {
     }
 };
 
-wgpu::WGSLLanguageFeatureName kNonExistentFeature =
-    static_cast<wgpu::WGSLLanguageFeatureName>(0xFFFF'FFFF);
+wgpu::WGSLLanguageFeatureName kNonExistentFeature = {};
 
 // Check HasFeature for an Instance that doesn't have unsafe APIs.
 TEST_F(WGSLFeatureValidationTest, HasFeatureDefaultInstance) {

@@ -362,8 +362,8 @@ TEST_P(WireInstanceTests, RequestAdapterWireLacksFeatureSupport) {
 
     std::initializer_list<WGPUFeatureName> fakeFeaturesList = {
         WGPUFeatureName_Depth32FloatStencil8,
-        // Some value that is not a valid feature
-        static_cast<WGPUFeatureName>(-2),
+        // Default feature is an undefined feature.
+        {},
     };
     WGPUSupportedFeatures fakeFeatures = {fakeFeaturesList.size(), std::data(fakeFeaturesList)};
 
