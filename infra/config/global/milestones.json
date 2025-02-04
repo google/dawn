@@ -217,5 +217,15 @@
             "mac",
             "win"
         ]
+    },
+    "134": {
+        "name": "m134",
+        "chromium_project": "chromium-m134",
+        "ref": "refs/heads/chromium/6998",
+        "platforms": [
+            "linux",
+            "mac",
+            "win"
+        ]
     }
 }
