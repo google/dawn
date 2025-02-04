@@ -480,6 +480,9 @@ BuiltinFn ParseBuiltinFn(std::string_view name) {
     if (name == "subgroupMatrixStore") {
         return BuiltinFn::kSubgroupMatrixStore;
     }
+    if (name == "subgroupMatrixMultiply") {
+        return BuiltinFn::kSubgroupMatrixMultiply;
+    }
     return BuiltinFn::kNone;
 }
 
@@ -781,6 +784,8 @@ const char* str(BuiltinFn i) {
             return "subgroupMatrixLoad";
         case BuiltinFn::kSubgroupMatrixStore:
             return "subgroupMatrixStore";
+        case BuiltinFn::kSubgroupMatrixMultiply:
+            return "subgroupMatrixMultiply";
     }
     return "<unknown>";
 }

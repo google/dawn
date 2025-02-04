@@ -395,6 +395,7 @@
 "subgroupInclusiveAdd"
 "subgroupInclusiveMul"
 "subgroupMatrixLoad"
+"subgroupMatrixMultiply"
 "subgroupMatrixStore"
 "subgroupMax"
 "subgroupMin"

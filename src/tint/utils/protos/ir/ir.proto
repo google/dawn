@@ -668,4 +668,5 @@ enum BuiltinFn {
     subgroup_inclusive_mul = 144;
     subgroup_matrix_load = 145;
     subgroup_matrix_store = 146;
+    subgroup_matrix_multiply = 147;
 }

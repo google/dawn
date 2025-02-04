@@ -379,5 +379,74 @@ TEST_F(ResolverSubgroupMatrixTest, SubgroupMatrixLoad_MissingTemplateArg) {
                 testing::HasSubstr(R"(error: no matching call to 'subgroupMatrixLoad)"));
 }
 
+TEST_F(ResolverSubgroupMatrixTest, SubgroupMatrixMultiply) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+    auto* left = GlobalVar("left", private_, ty("subgroup_matrix_left", ty.f32(), 2_u, 4_u));
+    auto* right = GlobalVar("right", private_, ty("subgroup_matrix_right", ty.f32(), 8_u, 2_u));
+    auto* call = Call(wgsl::BuiltinFn::kSubgroupMatrixMultiply, left, right);
+    Func("foo", Empty, ty.void_(),
+         Vector{
+             Assign(Phony(), call),
+         });
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto call_sem = Sem().Get(call)->As<sem::Call>();
+    ASSERT_NE(call_sem, nullptr);
+    auto* target = call_sem->Target()->As<sem::BuiltinFn>();
+    ASSERT_NE(target, nullptr);
+    EXPECT_EQ(target->Fn(), wgsl::BuiltinFn::kSubgroupMatrixMultiply);
+    auto* result = target->ReturnType()->As<core::type::SubgroupMatrix>();
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->Kind(), core::SubgroupMatrixKind::kResult);
+    EXPECT_EQ(result->Columns(), 8u);
+    EXPECT_EQ(result->Rows(), 4u);
+}
+
+TEST_F(ResolverSubgroupMatrixTest, SubgroupMatrixMultiply_MismatchDimensions) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+    auto* left = GlobalVar("left", private_, ty("subgroup_matrix_left", ty.f32(), 4_u, 2_u));
+    auto* right = GlobalVar("right", private_, ty("subgroup_matrix_right", ty.f32(), 2_u, 8_u));
+    auto* call = Call(wgsl::BuiltinFn::kSubgroupMatrixMultiply, left, right);
+    Func("foo", Empty, ty.void_(),
+         Vector{
+             Assign(Phony(), call),
+         });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_THAT(r()->error(),
+                testing::HasSubstr(R"(error: no matching call to 'subgroupMatrixMultiply)"));
+}
+
+TEST_F(ResolverSubgroupMatrixTest, SubgroupMatrixMultiply_MismatchTypes) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+    auto* left = GlobalVar("left", private_, ty("subgroup_matrix_left", ty.u32(), 8_u, 8_u));
+    auto* right = GlobalVar("right", private_, ty("subgroup_matrix_right", ty.i32(), 8_u, 8_u));
+    auto* call = Call(wgsl::BuiltinFn::kSubgroupMatrixMultiply, left, right);
+    Func("foo", Empty, ty.void_(),
+         Vector{
+             Assign(Phony(), call),
+         });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_THAT(r()->error(),
+                testing::HasSubstr(R"(error: no matching call to 'subgroupMatrixMultiply)"));
+}
+
+TEST_F(ResolverSubgroupMatrixTest, SubgroupMatrixMultiply_MismatchKinds) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+    auto* left = GlobalVar("left", private_, ty("subgroup_matrix_left", ty.f32(), 8_u, 8_u));
+    auto* right = GlobalVar("right", private_, ty("subgroup_matrix_right", ty.f32(), 8_u, 8_u));
+    auto* call = Call(wgsl::BuiltinFn::kSubgroupMatrixMultiply, right, left);
+    Func("foo", Empty, ty.void_(),
+         Vector{
+             Assign(Phony(), call),
+         });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_THAT(r()->error(),
+                testing::HasSubstr(R"(error: no matching call to 'subgroupMatrixMultiply)"));
+}
+
 }  // namespace
 }  // namespace tint::resolver

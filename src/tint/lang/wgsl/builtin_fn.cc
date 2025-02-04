@@ -486,6 +486,9 @@ BuiltinFn ParseBuiltinFn(std::string_view name) {
     if (name == "subgroupMatrixStore") {
         return BuiltinFn::kSubgroupMatrixStore;
     }
+    if (name == "subgroupMatrixMultiply") {
+        return BuiltinFn::kSubgroupMatrixMultiply;
+    }
     if (name == "__tint_materialize") {
         return BuiltinFn::kTintMaterialize;
     }
@@ -794,6 +797,8 @@ const char* str(BuiltinFn i) {
             return "subgroupMatrixLoad";
         case BuiltinFn::kSubgroupMatrixStore:
             return "subgroupMatrixStore";
+        case BuiltinFn::kSubgroupMatrixMultiply:
+            return "subgroupMatrixMultiply";
         case BuiltinFn::kTintMaterialize:
             return "__tint_materialize";
     }

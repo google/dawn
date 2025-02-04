@@ -206,7 +206,7 @@ match fi32: f32 | i32
 match f32_f16: f32 | f16
 match iu32: i32 | u32
 
-match subgroup_matrix_elements: f32 | f16 | u32 | i32 | u8 | i8
+match subgroup_matrix_elements: f32 | f16 | u32 | i32
 match subgroup_matrix_kind_left : subgroup_matrix_kind.left
 match subgroup_matrix_kind_right : subgroup_matrix_kind.right
 match subgroup_matrix_kind_result : subgroup_matrix_kind.result
@@ -682,6 +682,10 @@ match workgroup
 
 @must_use @stage("compute") implicit(K: subgroup_matrix_kind, S: fiu32_f16, C: num, R: num, AC: num) fn subgroupMatrixLoad<T: subgroup_matrix<K, S, C, R> >(ptr<workgroup_or_storage, array<S, AC>, readable>, u32, bool, u32) -> T
 @stage("compute") implicit(K: subgroup_matrix_kind, S: fiu32_f16, C: num, R: num, AC: num) fn subgroupMatrixStore(ptr<workgroup_or_storage, array<S, AC>, writable>, u32, subgroup_matrix<K, S, C, R>, bool, u32)
+@must_use @stage("compute") implicit(S: subgroup_matrix_elements, C: num, R: num, K: num) fn subgroupMatrixMultiply(
+  subgroup_matrix<subgroup_matrix_kind_left, S, K, R>,
+  subgroup_matrix<subgroup_matrix_kind_right, S, C, K>)
+  -> subgroup_matrix<subgroup_matrix_kind_result, S, C, R>
 
 ////////////////////////////////////////////////////////////////////////////////
 // Value constructors                                                         //

@@ -196,6 +196,7 @@ enum class BuiltinFn : uint8_t {
     kQuadSwapDiagonal,
     kSubgroupMatrixLoad,
     kSubgroupMatrixStore,
+    kSubgroupMatrixMultiply,
     kTintMaterialize,
     kNone,
 };
@@ -368,6 +369,7 @@ constexpr BuiltinFn kBuiltinFns[] = {
     BuiltinFn::kQuadSwapDiagonal,
     BuiltinFn::kSubgroupMatrixLoad,
     BuiltinFn::kSubgroupMatrixStore,
+    BuiltinFn::kSubgroupMatrixMultiply,
     BuiltinFn::kTintMaterialize,
 };
 
@@ -522,6 +524,7 @@ constexpr const char* kBuiltinFnStrings[] = {
     "quadSwapDiagonal",
     "subgroupMatrixLoad",
     "subgroupMatrixStore",
+    "subgroupMatrixMultiply",
     "__tint_materialize",
 };
 
