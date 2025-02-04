@@ -27,6 +27,7 @@
 
 #include "src/tint/lang/wgsl/resolver/resolver.h"
 #include "src/tint/lang/wgsl/resolver/resolver_helper_test.h"
+#include "src/tint/lang/wgsl/sem/value_constructor.h"
 
 #include "gmock/gmock.h"
 
@@ -220,6 +221,70 @@ TEST_F(ResolverSubgroupMatrixTest, NegativeRowCount) {
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               R"(error: subgroup matrix row count must be a constant positive integer)");
+}
+
+TEST_F(ResolverSubgroupMatrixTest, ZeroValueConstructor) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+    auto* call = Call(Ident("subgroup_matrix_result", ty.f32(), 8_a, 8_a));
+    Func("foo", Empty, ty.void_(),
+         Vector{
+             Assign(Phony(), call),
+         });
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto call_sem = Sem().Get(call)->As<sem::Call>();
+    ASSERT_NE(call_sem, nullptr);
+    auto* target = call_sem->Target()->As<sem::ValueConstructor>();
+    ASSERT_NE(target, nullptr);
+    EXPECT_TRUE(target->ReturnType()->Is<core::type::SubgroupMatrix>());
+    EXPECT_EQ(target->Parameters().Length(), 0u);
+    EXPECT_EQ(target->Stage(), core::EvaluationStage::kRuntime);
+}
+
+TEST_F(ResolverSubgroupMatrixTest, SingleValueConstructor) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+    auto* call = Call(Ident("subgroup_matrix_result", ty.f32(), 8_a, 8_a), 1_a);
+    Func("foo", Empty, ty.void_(),
+         Vector{
+             Assign(Phony(), call),
+         });
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto call_sem = Sem().Get(call)->As<sem::Call>();
+    ASSERT_NE(call_sem, nullptr);
+    auto* target = call_sem->Target()->As<sem::ValueConstructor>();
+    ASSERT_NE(target, nullptr);
+    EXPECT_TRUE(target->ReturnType()->Is<core::type::SubgroupMatrix>());
+    EXPECT_EQ(target->Parameters().Length(), 1u);
+    EXPECT_EQ(target->Stage(), core::EvaluationStage::kRuntime);
+}
+
+TEST_F(ResolverSubgroupMatrixTest, ConstructorTooManyArgs) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+    auto* call = Call(Ident("subgroup_matrix_result", ty.f32(), 8_a, 8_a), 1_f, 2_f);
+    Func("foo", Empty, ty.void_(),
+         Vector{
+             Assign(Phony(), call),
+         });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(error: subgroup_matrix constructor can only have zero or one elements)");
+}
+
+TEST_F(ResolverSubgroupMatrixTest, ConstructorWrongType) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+    auto* call = Call(Ident("subgroup_matrix_result", ty.u32(), 8_a, 8_a), 1_f);
+    Func("foo", Empty, ty.void_(),
+         Vector{
+             Assign(Phony(), call),
+         });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(error: 'f32' cannot be used to construct a subgroup matrix of 'u32')");
 }
 
 }  // namespace

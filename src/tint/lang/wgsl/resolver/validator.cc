@@ -2323,6 +2323,29 @@ bool Validator::ArrayConstructor(const ast::CallExpression* ctor,
     return true;
 }
 
+bool Validator::SubgroupMatrixConstructor(
+    const ast::CallExpression* ctor,
+    const core::type::SubgroupMatrix* subgroup_matrix_type) const {
+    auto& values = ctor->args;
+    if (values.Length() == 1) {
+        auto* elem_ty = subgroup_matrix_type->Type();
+        auto* value_ty = sem_.TypeOf(values[0])->UnwrapRef();
+        if (core::type::Type::ConversionRank(value_ty, elem_ty) ==
+            core::type::Type::kNoConversion) {
+            AddError(values[0]->source) << style::Type(sem_.TypeNameOf(value_ty))
+                                        << " cannot be used to construct a subgroup matrix of "
+                                        << style::Type(sem_.TypeNameOf(elem_ty));
+            return false;
+        }
+    } else if (values.Length() > 1) {
+        AddError(ctor->target->source)
+            << "subgroup_matrix constructor can only have zero or one elements";
+        return false;
+    }
+
+    return true;
+}
+
 bool Validator::Vector(const core::type::Type* el_ty, const Source& source) const {
     if (!el_ty->Is<core::type::Scalar>()) {
         AddError(source) << "vector element type must be " << style::Type("bool") << ", "

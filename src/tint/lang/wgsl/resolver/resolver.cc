@@ -2270,6 +2270,36 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
 
                 return arr_or_str_init(str, call_target);
             },
+            [&](const core::type::SubgroupMatrix* m) -> sem::Call* {
+                auto* call_target = subgroup_matrix_ctors_.GetOrAdd(
+                    SubgroupMatrixConstructorSig{{m, args.Length()}},
+                    [&]() -> sem::ValueConstructor* {
+                        auto params = tint::Transform(args, [&](auto, size_t i) {
+                            return b.create<sem::Parameter>(nullptr,  // declaration
+                                                            static_cast<uint32_t>(i),  // index
+                                                            m->Type());
+                        });
+                        return b.create<sem::ValueConstructor>(m, std::move(params),
+                                                               core::EvaluationStage::kRuntime);
+                    });
+
+                if (DAWN_UNLIKELY(!MaybeMaterializeAndLoadArguments(args, call_target))) {
+                    return nullptr;
+                }
+
+                if (DAWN_UNLIKELY(!validator_.SubgroupMatrixConstructor(expr, m))) {
+                    return nullptr;
+                }
+
+                // Subgroup matrix constructors are never const-evaluated.
+                auto stage = core::EvaluationStage::kRuntime;
+                if (not_evaluated_.Contains(expr)) {
+                    stage = core::EvaluationStage::kNotEvaluated;
+                }
+
+                return b.create<sem::Call>(expr, call_target, stage, std::move(args),
+                                           current_statement_, nullptr, has_side_effects);
+            },
             [&](Default) {
                 AddError(expr->source) << "type is not constructible";
                 return nullptr;

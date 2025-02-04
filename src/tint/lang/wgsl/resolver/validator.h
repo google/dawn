@@ -529,10 +529,17 @@ class Validator {
     bool Vector(const core::type::Type* el_ty, const Source& source) const;
 
     /// Validates an array constructor
-    /// @param ctor the call expresion to validate
+    /// @param ctor the call expression to validate
     /// @param arr_type the type of the array
     /// @returns true on success, false otherwise
     bool ArrayConstructor(const ast::CallExpression* ctor, const sem::Array* arr_type) const;
+
+    /// Validates a subgroup matrix constructor
+    /// @param ctor the call expression to validate
+    /// @param subgroup_matrix_type the type of the subgroup matrix
+    /// @returns true on success, false otherwise
+    bool SubgroupMatrixConstructor(const ast::CallExpression* ctor,
+                                   const core::type::SubgroupMatrix* subgroup_matrix_type) const;
 
     /// Validates a subgroupShuffle builtin functions including Up,Down, and Xor.
     /// @param fn the builtin call type

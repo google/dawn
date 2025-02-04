@@ -662,6 +662,11 @@ class Resolver {
     using StructConstructorSig = tint::UnorderedKeyWrapper<
         std::tuple<const core::type::Struct*, size_t, core::EvaluationStage>>;
 
+    // SubgroupMatrixConstructorSig represents a unique subgroup matrix constructor signature.
+    // It is a tuple of the subgroup matrix type and the number of arguments provided.
+    using SubgroupMatrixConstructorSig =
+        tint::UnorderedKeyWrapper<std::tuple<const core::type::SubgroupMatrix*, size_t>>;
+
     /// ExprEvalStageConstraint describes a constraint on when expressions can be evaluated.
     struct ExprEvalStageConstraint {
         /// The latest stage that the expression can be evaluated
@@ -701,6 +706,7 @@ class Resolver {
     Hashmap<OverrideId, const sem::Variable*, 8> override_ids_;
     Hashmap<ArrayConstructorSig, sem::CallTarget*, 8> array_ctors_;
     Hashmap<StructConstructorSig, sem::CallTarget*, 8> struct_ctors_;
+    Hashmap<SubgroupMatrixConstructorSig, sem::CallTarget*, 8> subgroup_matrix_ctors_;
     sem::Function* current_function_ = nullptr;
     sem::Statement* current_statement_ = nullptr;
     sem::CompoundStatement* current_compound_statement_ = nullptr;
