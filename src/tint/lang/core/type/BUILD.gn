@@ -120,6 +120,8 @@ libtint_source_set("type") {
     "type.h",
     "u32.cc",
     "u32.h",
+    "u64.cc",
+    "u64.h",
     "u8.cc",
     "u8.h",
     "unique_node.cc",
@@ -174,6 +176,7 @@ if (tint_build_unittests) {
       "texture_test.cc",
       "type_test.cc",
       "u32_test.cc",
+      "u64_test.cc",
       "u8_test.cc",
       "vector_test.cc",
     ]

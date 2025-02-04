@@ -114,6 +114,8 @@ tint_add_target(tint_lang_core_type lib
   lang/core/type/type.h
   lang/core/type/u32.cc
   lang/core/type/u32.h
+  lang/core/type/u64.cc
+  lang/core/type/u64.h
   lang/core/type/u8.cc
   lang/core/type/u8.h
   lang/core/type/unique_node.cc
@@ -174,6 +176,7 @@ tint_add_target(tint_lang_core_type_test test
   lang/core/type/texture_test.cc
   lang/core/type/type_test.cc
   lang/core/type/u32_test.cc
+  lang/core/type/u64_test.cc
   lang/core/type/u8_test.cc
   lang/core/type/vector_test.cc
 )
