@@ -197,6 +197,8 @@ MaybeError PhysicalDevice::InitializeImpl() {
         SetCoreNotSupported(DAWN_INTERNAL_ERROR("Vulkan depthBiasClamp feature required."));
     }
     if (!mDeviceInfo.features.fragmentStoresAndAtomics) {
+        // Technically `fragmentStoresAndAtomics` isn't needed for compat mode. It's essentially
+        // always supported on Vulkan 1.1 devices so just leave it as required.
         return DAWN_INTERNAL_ERROR("Vulkan fragmentStoresAndAtomics feature required.");
     }
     if (!mDeviceInfo.features.fullDrawIndexUint32) {
@@ -208,8 +210,8 @@ MaybeError PhysicalDevice::InitializeImpl() {
     if (mSupportsCoreFeatureLevel && !mDeviceInfo.features.independentBlend) {
         SetCoreNotSupported(DAWN_INTERNAL_ERROR("Vulkan independentBlend feature required."));
     }
-    if (!mDeviceInfo.features.sampleRateShading) {
-        return DAWN_INTERNAL_ERROR("Vulkan sampleRateShading feature required.");
+    if (mSupportsCoreFeatureLevel && !mDeviceInfo.features.sampleRateShading) {
+        SetCoreNotSupported(DAWN_INTERNAL_ERROR("Vulkan sampleRateShading feature required."));
     }
 
     return {};

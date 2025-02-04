@@ -422,12 +422,11 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(wgpu::FeatureLevel feature
         usedKnobs.features.depthBiasClamp = VK_TRUE;
         usedKnobs.features.imageCubeArray = VK_TRUE;
         usedKnobs.features.independentBlend = VK_TRUE;
+        usedKnobs.features.sampleRateShading = VK_TRUE;
     }
     // Required for core and compat WebGPU features.
     usedKnobs.features.fullDrawIndexUint32 = VK_TRUE;
-    // TODO(crbug.com/391899124): Check if following features needs to be enabled in compat mode.
     usedKnobs.features.fragmentStoresAndAtomics = VK_TRUE;
-    usedKnobs.features.sampleRateShading = VK_TRUE;
 
     if (IsRobustnessEnabled()) {
         usedKnobs.features.robustBufferAccess = VK_TRUE;
