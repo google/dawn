@@ -1979,7 +1979,8 @@
         "tags": ["dawn", "native"],
         "_comment": "TODO(crbug.com/dawn/1745): improve type safety",
         "members": [
-            {"name": "io surface", "type": "void *"}
+            {"name": "io surface", "type": "void *"},
+            {"name": "allow storage binding", "type": "bool", "default": "true"}
         ]
     },
     "shared texture memory EGL image descriptor": {
