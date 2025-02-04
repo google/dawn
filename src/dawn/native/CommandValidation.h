@@ -73,24 +73,24 @@ ResultOrError<uint64_t> ComputeRequiredBytesInCopy(const TexelBlockInfo& blockIn
                                                    uint32_t bytesPerRow,
                                                    uint32_t rowsPerImage);
 
-void ApplyDefaultTextureDataLayoutOptions(TextureDataLayout* layout,
-                                          const TexelBlockInfo& blockInfo,
-                                          const Extent3D& copyExtent);
-MaybeError ValidateLinearTextureData(const TextureDataLayout& layout,
+void ApplyDefaultTexelCopyBufferLayoutOptions(TexelCopyBufferLayout* layout,
+                                              const TexelBlockInfo& blockInfo,
+                                              const Extent3D& copyExtent);
+MaybeError ValidateLinearTextureData(const TexelCopyBufferLayout& layout,
                                      uint64_t byteSize,
                                      const TexelBlockInfo& blockInfo,
                                      const Extent3D& copyExtent);
 MaybeError ValidateTextureCopyRange(DeviceBase const* device,
-                                    const ImageCopyTexture& imageCopyTexture,
+                                    const TexelCopyTextureInfo& TexelCopyTextureInfo,
                                     const Extent3D& copySize);
-ResultOrError<Aspect> SingleAspectUsedByImageCopyTexture(const ImageCopyTexture& view);
-MaybeError ValidateLinearToDepthStencilCopyRestrictions(const ImageCopyTexture& dst);
+ResultOrError<Aspect> SingleAspectUsedByTexelCopyTextureInfo(const TexelCopyTextureInfo& view);
+MaybeError ValidateLinearToDepthStencilCopyRestrictions(const TexelCopyTextureInfo& dst);
 
-MaybeError ValidateImageCopyBuffer(DeviceBase const* device,
-                                   const ImageCopyBuffer& imageCopyBuffer);
-MaybeError ValidateImageCopyTexture(DeviceBase const* device,
-                                    const ImageCopyTexture& imageCopyTexture,
-                                    const Extent3D& copySize);
+MaybeError ValidateTexelCopyBufferInfo(DeviceBase const* device,
+                                       const TexelCopyBufferInfo& texelCopyBufferInfo);
+MaybeError ValidateTexelCopyTextureInfo(DeviceBase const* device,
+                                        const TexelCopyTextureInfo& TexelCopyTextureInfo,
+                                        const Extent3D& copySize);
 
 MaybeError ValidateCopySizeFitsInBuffer(const Ref<BufferBase>& buffer,
                                         uint64_t offset,
@@ -100,12 +100,12 @@ MaybeError ValidateCopySizeFitsInBuffer(const Ref<BufferBase>& buffer,
 bool IsRangeOverlapped(uint32_t startA, uint32_t startB, uint32_t length);
 
 MaybeError ValidateTextureToTextureCopyCommonRestrictions(DeviceBase const* device,
-                                                          const ImageCopyTexture& src,
-                                                          const ImageCopyTexture& dst,
+                                                          const TexelCopyTextureInfo& src,
+                                                          const TexelCopyTextureInfo& dst,
                                                           const Extent3D& copySize);
 MaybeError ValidateTextureToTextureCopyRestrictions(DeviceBase const* device,
-                                                    const ImageCopyTexture& src,
-                                                    const ImageCopyTexture& dst,
+                                                    const TexelCopyTextureInfo& src,
+                                                    const TexelCopyTextureInfo& dst,
                                                     const Extent3D& copySize);
 
 MaybeError ValidateCanUseAs(const TextureBase* textureView,

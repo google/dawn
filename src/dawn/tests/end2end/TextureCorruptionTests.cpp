@@ -123,12 +123,12 @@ class TextureCorruptionTests : public DawnTestWithParams<TextureCorruptionTestsP
         wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
         wgpu::Buffer resultBuffer = device.CreateBuffer(&descriptor);
 
-        wgpu::ImageCopyTexture imageCopyTexture =
-            utils::CreateImageCopyTexture(texture, mipLevel, {0, 0, depthOrArrayLayer});
-        wgpu::ImageCopyBuffer imageCopyBuffer =
-            utils::CreateImageCopyBuffer(buffer, 0, bytesPerRow);
-        wgpu::ImageCopyBuffer imageCopyResult =
-            utils::CreateImageCopyBuffer(resultBuffer, 0, bytesPerRow);
+        wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(texture, mipLevel, {0, 0, depthOrArrayLayer});
+        wgpu::TexelCopyBufferInfo texelCopyBufferInfo =
+            utils::CreateTexelCopyBufferInfo(buffer, 0, bytesPerRow);
+        wgpu::TexelCopyBufferInfo imageCopyResult =
+            utils::CreateTexelCopyBufferInfo(resultBuffer, 0, bytesPerRow);
 
         WriteType type = GetParam().mWriteType;
 
@@ -172,14 +172,14 @@ class TextureCorruptionTests : public DawnTestWithParams<TextureCorruptionTestsP
         switch (type) {
             case WriteType::B2TCopy: {
                 queue.WriteBuffer(buffer, 0, data.data(), bufferSize);
-                encoder.CopyBufferToTexture(&imageCopyBuffer, &imageCopyTexture, &copySize);
+                encoder.CopyBufferToTexture(&texelCopyBufferInfo, &texelCopyTextureInfo, &copySize);
                 break;
             }
             case WriteType::WriteTexture: {
-                wgpu::TextureDataLayout textureDataLayout =
-                    utils::CreateTextureDataLayout(0, bytesPerRow);
-                queue.WriteTexture(&imageCopyTexture, data.data(), bufferSize, &textureDataLayout,
-                                   &copySize);
+                wgpu::TexelCopyBufferLayout texelCopyBufferLayout =
+                    utils::CreateTexelCopyBufferLayout(0, bytesPerRow);
+                queue.WriteTexture(&texelCopyTextureInfo, data.data(), bufferSize,
+                                   &texelCopyBufferLayout, &copySize);
                 break;
             }
             case WriteType::RenderConstant:
@@ -190,12 +190,12 @@ class TextureCorruptionTests : public DawnTestWithParams<TextureCorruptionTestsP
                 wgpu::TextureView tempView;
                 if (type != WriteType::RenderConstant) {
                     wgpu::Texture tempTexture = Create2DTexture(copySize, format, 1, 1);
-                    wgpu::ImageCopyTexture imageCopyTempTexture =
-                        utils::CreateImageCopyTexture(tempTexture, 0, {0, 0, 0});
-                    wgpu::TextureDataLayout textureDataLayout =
-                        utils::CreateTextureDataLayout(0, bytesPerRow);
+                    wgpu::TexelCopyTextureInfo imageCopyTempTexture =
+                        utils::CreateTexelCopyTextureInfo(tempTexture, 0, {0, 0, 0});
+                    wgpu::TexelCopyBufferLayout texelCopyBufferLayout =
+                        utils::CreateTexelCopyBufferLayout(0, bytesPerRow);
                     queue.WriteTexture(&imageCopyTempTexture, data.data(), bufferSize,
-                                       &textureDataLayout, &copySize);
+                                       &texelCopyBufferLayout, &copySize);
                     tempView = tempTexture.CreateView();
                 }
 
@@ -216,7 +216,7 @@ class TextureCorruptionTests : public DawnTestWithParams<TextureCorruptionTestsP
         }
 
         // Verify the data in texture via a T2B copy and comparison
-        encoder.CopyTextureToBuffer(&imageCopyTexture, &imageCopyResult, &copySize);
+        encoder.CopyTextureToBuffer(&texelCopyTextureInfo, &imageCopyResult, &copySize);
         wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
         return EXPECT_BUFFER_U32_RANGE_EQ(data.data(), resultBuffer, 0, elementNumInTotal);

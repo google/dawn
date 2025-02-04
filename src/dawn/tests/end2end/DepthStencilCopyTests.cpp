@@ -277,10 +277,10 @@ class DepthStencilCopyTests : public DawnTestWithParams<DepthStencilCopyTestPara
         // Perform a T2T copy of all aspects
         {
             wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
-            wgpu::ImageCopyTexture srcView =
-                utils::CreateImageCopyTexture(src, mipLevel, {0, 0, 0});
-            wgpu::ImageCopyTexture dstView =
-                utils::CreateImageCopyTexture(dst, mipLevel, {0, 0, 0});
+            wgpu::TexelCopyTextureInfo srcView =
+                utils::CreateTexelCopyTextureInfo(src, mipLevel, {0, 0, 0});
+            wgpu::TexelCopyTextureInfo dstView =
+                utils::CreateTexelCopyTextureInfo(dst, mipLevel, {0, 0, 0});
             wgpu::Extent3D copySize = {width >> mipLevel, height >> mipLevel, 1};
             commandEncoder.CopyTextureToTexture(&srcView, &dstView, &copySize);
 
@@ -545,11 +545,11 @@ class DepthCopyTests : public DepthStencilCopyTests {
         uint32_t bytesPerImage = bytesPerRow * copyHeight;
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        wgpu::ImageCopyTexture imageCopyTexture =
-            utils::CreateImageCopyTexture(texture, testLevel, {0, 0, 0}, aspect);
-        wgpu::ImageCopyBuffer imageCopyBuffer = utils::CreateImageCopyBuffer(
+        wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(texture, testLevel, {0, 0, 0}, aspect);
+        wgpu::TexelCopyBufferInfo texelCopyBufferInfo = utils::CreateTexelCopyBufferInfo(
             destinationBuffer, bufferCopyOffset, bytesPerRow, copyHeight);
-        encoder.CopyTextureToBuffer(&imageCopyTexture, &imageCopyBuffer, &copySize);
+        encoder.CopyTextureToBuffer(&texelCopyTextureInfo, &texelCopyBufferInfo, &copySize);
         wgpu::CommandBuffer commandBuffer = encoder.Finish();
         queue.Submit(1, &commandBuffer);
 
@@ -870,9 +870,9 @@ class DepthCopyFromBufferTests : public DepthStencilCopyTests {
         wgpu::Buffer srcBuffer = device.CreateBuffer(&descriptor);
 
         constexpr uint32_t kBytesPerRow = kTextureBytesPerRowAlignment;
-        wgpu::ImageCopyBuffer imageCopyBuffer =
-            utils::CreateImageCopyBuffer(srcBuffer, bufferCopyOffset, kBytesPerRow, kHeight);
-        wgpu::ImageCopyTexture imageCopyTexture = utils::CreateImageCopyTexture(
+        wgpu::TexelCopyBufferInfo texelCopyBufferInfo =
+            utils::CreateTexelCopyBufferInfo(srcBuffer, bufferCopyOffset, kBytesPerRow, kHeight);
+        wgpu::TexelCopyTextureInfo texelCopyTextureInfo = utils::CreateTexelCopyTextureInfo(
             destTexture, 0, {0, 0, 0}, wgpu::TextureAspect::DepthOnly);
         wgpu::Extent3D extent = {kWidth, kHeight, 1};
 
@@ -888,7 +888,7 @@ class DepthCopyFromBufferTests : public DepthStencilCopyTests {
             srcBuffer.Unmap();
 
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-            encoder.CopyBufferToTexture(&imageCopyBuffer, &imageCopyTexture, &extent);
+            encoder.CopyBufferToTexture(&texelCopyBufferInfo, &texelCopyTextureInfo, &extent);
             wgpu::CommandBuffer commands = encoder.Finish();
             queue.Submit(1, &commands);
 
@@ -905,7 +905,7 @@ class DepthCopyFromBufferTests : public DepthStencilCopyTests {
             srcBuffer.Unmap();
 
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-            encoder.CopyBufferToTexture(&imageCopyBuffer, &imageCopyTexture, &extent);
+            encoder.CopyBufferToTexture(&texelCopyBufferInfo, &texelCopyTextureInfo, &extent);
             wgpu::CommandBuffer commands = encoder.Finish();
             queue.Submit(1, &commands);
 
@@ -997,11 +997,11 @@ class StencilCopyTests : public DepthStencilCopyTests {
         uint32_t bytesPerImage = bytesPerRow * copyHeight;
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        wgpu::ImageCopyTexture imageCopyTexture =
-            utils::CreateImageCopyTexture(depthStencilTexture, testLevel, {0, 0, 0}, aspect);
-        wgpu::ImageCopyBuffer imageCopyBuffer = utils::CreateImageCopyBuffer(
+        wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(depthStencilTexture, testLevel, {0, 0, 0}, aspect);
+        wgpu::TexelCopyBufferInfo texelCopyBufferInfo = utils::CreateTexelCopyBufferInfo(
             destinationBuffer, bufferCopyOffset, bytesPerRow, copyHeight);
-        encoder.CopyTextureToBuffer(&imageCopyTexture, &imageCopyBuffer, &copySize);
+        encoder.CopyTextureToBuffer(&texelCopyTextureInfo, &texelCopyBufferInfo, &copySize);
         wgpu::CommandBuffer commandBuffer = encoder.Finish();
         queue.Submit(1, &commandBuffer);
 
@@ -1083,12 +1083,13 @@ class StencilCopyTests : public DepthStencilCopyTests {
             srcBuffer.Unmap();
 
             wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
-            wgpu::ImageCopyBuffer imageCopyBuffer =
-                utils::CreateImageCopyBuffer(srcBuffer, bufferCopyOffset, kBytesPerRow, kHeight);
-            wgpu::ImageCopyTexture imageCopyTexture = utils::CreateImageCopyTexture(
+            wgpu::TexelCopyBufferInfo texelCopyBufferInfo = utils::CreateTexelCopyBufferInfo(
+                srcBuffer, bufferCopyOffset, kBytesPerRow, kHeight);
+            wgpu::TexelCopyTextureInfo texelCopyTextureInfo = utils::CreateTexelCopyTextureInfo(
                 depthStencilTexture, 0, {0, 0, 0}, wgpu::TextureAspect::StencilOnly);
             wgpu::Extent3D copySize = {kWidth, kHeight, 1};
-            commandEncoder.CopyBufferToTexture(&imageCopyBuffer, &imageCopyTexture, &copySize);
+            commandEncoder.CopyBufferToTexture(&texelCopyBufferInfo, &texelCopyTextureInfo,
+                                               &copySize);
             wgpu::CommandBuffer commandBuffer = commandEncoder.Finish();
             queue.Submit(1, &commandBuffer);
         }
@@ -1363,15 +1364,15 @@ TEST_P(StencilCopyTests, CopyNonzeroMipThenReadWithStencilTest) {
 
     // Upload the stencil data.
     {
-        wgpu::TextureDataLayout dataLayout = {};
+        wgpu::TexelCopyBufferLayout dataLayout = {};
         dataLayout.bytesPerRow = kWidth >> kMipLevel;
 
-        wgpu::ImageCopyTexture imageCopyTexture = utils::CreateImageCopyTexture(
+        wgpu::TexelCopyTextureInfo texelCopyTextureInfo = utils::CreateTexelCopyTextureInfo(
             depthStencilTexture, 1, {0, 0, 0}, wgpu::TextureAspect::StencilOnly);
         wgpu::Extent3D copySize = {kWidth >> kMipLevel, kHeight >> kMipLevel, 1};
 
-        queue.WriteTexture(&imageCopyTexture, stencilData.data(), stencilData.size(), &dataLayout,
-                           &copySize);
+        queue.WriteTexture(&texelCopyTextureInfo, stencilData.data(), stencilData.size(),
+                           &dataLayout, &copySize);
     }
 
     // Check the stencil contents.
@@ -1492,10 +1493,10 @@ TEST_P(DepthStencilCopyTests_RegressionDawn1083, Run) {
                     // Perform a T2T copy
                     {
                         wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
-                        wgpu::ImageCopyTexture srcView =
-                            utils::CreateImageCopyTexture(src, mipLevel, {0, 0, srcArrayLayer});
-                        wgpu::ImageCopyTexture dstView =
-                            utils::CreateImageCopyTexture(dst, mipLevel, {0, 0, dstArrayLayer});
+                        wgpu::TexelCopyTextureInfo srcView =
+                            utils::CreateTexelCopyTextureInfo(src, mipLevel, {0, 0, srcArrayLayer});
+                        wgpu::TexelCopyTextureInfo dstView =
+                            utils::CreateTexelCopyTextureInfo(dst, mipLevel, {0, 0, dstArrayLayer});
                         wgpu::Extent3D copySize = {mipWidth, mipHeight, layerCount};
                         commandEncoder.CopyTextureToTexture(&srcView, &dstView, &copySize);
 

@@ -70,10 +70,10 @@ WireResult Server::DoQueueWriteBuffer(Known<WGPUQueue> queue,
 }
 
 WireResult Server::DoQueueWriteTexture(Known<WGPUQueue> queue,
-                                       const WGPUImageCopyTexture* destination,
+                                       const WGPUTexelCopyTextureInfo* destination,
                                        const uint8_t* data,
                                        uint64_t dataSize,
-                                       const WGPUTextureDataLayout* dataLayout,
+                                       const WGPUTexelCopyBufferLayout* dataLayout,
                                        const WGPUExtent3D* writeSize) {
     if (dataSize > std::numeric_limits<size_t>::max()) {
         return WireResult::FatalError;

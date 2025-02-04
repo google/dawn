@@ -685,7 +685,7 @@ MaybeError CommandBuffer::Execute() {
 
                 gl.BindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer->GetHandle());
 
-                TextureDataLayout dataLayout;
+                TexelCopyBufferLayout dataLayout;
                 dataLayout.offset = 0;
                 dataLayout.bytesPerRow = src.bytesPerRow;
                 dataLayout.rowsPerImage = src.rowsPerImage;
@@ -1416,7 +1416,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass) {
 void DoTexSubImage(const OpenGLFunctions& gl,
                    const TextureCopy& destination,
                    const void* data,
-                   const TextureDataLayout& dataLayout,
+                   const TexelCopyBufferLayout& dataLayout,
                    const Extent3D& copySize) {
     Texture* texture = ToBackend(destination.texture.Get());
 

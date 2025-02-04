@@ -578,16 +578,16 @@ TEST_P(MaxLimitTests, ReallyLargeBindGroup) {
         wgpu::Buffer textureData =
             utils::CreateBufferFromData(device, wgpu::BufferUsage::CopySrc, {value});
 
-        wgpu::ImageCopyBuffer imageCopyBuffer = {};
-        imageCopyBuffer.buffer = textureData;
-        imageCopyBuffer.layout.bytesPerRow = 256;
+        wgpu::TexelCopyBufferInfo texelCopyBufferInfo = {};
+        texelCopyBufferInfo.buffer = textureData;
+        texelCopyBufferInfo.layout.bytesPerRow = 256;
 
-        wgpu::ImageCopyTexture imageCopyTexture = {};
-        imageCopyTexture.texture = texture;
+        wgpu::TexelCopyTextureInfo texelCopyTextureInfo = {};
+        texelCopyTextureInfo.texture = texture;
 
         wgpu::Extent3D copySize = {1, 1, 1};
 
-        commandEncoder.CopyBufferToTexture(&imageCopyBuffer, &imageCopyTexture, &copySize);
+        commandEncoder.CopyBufferToTexture(&texelCopyBufferInfo, &texelCopyTextureInfo, &copySize);
         return texture;
     };
 

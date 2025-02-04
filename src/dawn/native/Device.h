@@ -295,7 +295,7 @@ class DeviceBase : public ErrorSink, public RefCountedWithExternalCount<RefCount
                                        uint64_t destinationOffset,
                                        uint64_t size);
     MaybeError CopyFromStagingToTexture(BufferBase* source,
-                                        const TextureDataLayout& src,
+                                        const TexelCopyBufferLayout& src,
                                         const TextureCopy& dst,
                                         const Extent3D& copySizePixels);
 
@@ -526,7 +526,7 @@ class DeviceBase : public ErrorSink, public RefCountedWithExternalCount<RefCount
                                                    uint64_t destinationOffset,
                                                    uint64_t size) = 0;
     virtual MaybeError CopyFromStagingToTextureImpl(const BufferBase* source,
-                                                    const TextureDataLayout& src,
+                                                    const TexelCopyBufferLayout& src,
                                                     const TextureCopy& dst,
                                                     const Extent3D& copySizePixels) = 0;
 

@@ -537,7 +537,7 @@ MaybeError Texture::ClearTexture(const SubresourceRange& range,
             textureCopy.origin = {};
             textureCopy.aspect = Aspect::Color;
 
-            TextureDataLayout dataLayout;
+            TexelCopyBufferLayout dataLayout;
             dataLayout.offset = 0;
             dataLayout.bytesPerRow = bytesPerRow;
             dataLayout.rowsPerImage = largestMipSize.height;

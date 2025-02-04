@@ -153,14 +153,14 @@ void UnalignDynamicUploader(wgpu::Device device) {
     descriptor.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc;
     wgpu::Texture texture = device.CreateTexture(&descriptor);
 
-    wgpu::ImageCopyTexture imageCopyTexture =
-        dawn::utils::CreateImageCopyTexture(texture, 0, {0, 0, 0});
-    wgpu::TextureDataLayout textureDataLayout =
-        dawn::utils::CreateTextureDataLayout(0, wgpu::kCopyStrideUndefined);
+    wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+        dawn::utils::CreateTexelCopyTextureInfo(texture, 0, {0, 0, 0});
+    wgpu::TexelCopyBufferLayout texelCopyBufferLayout =
+        dawn::utils::CreateTexelCopyBufferLayout(0, wgpu::kCopyStrideUndefined);
     wgpu::Extent3D copyExtent = {1, 1, 1};
 
     // WriteTexture with exactly 1 byte of data.
-    device.GetQueue().WriteTexture(&imageCopyTexture, data.data(), 1, &textureDataLayout,
+    device.GetQueue().WriteTexture(&texelCopyTextureInfo, data.data(), 1, &texelCopyBufferLayout,
                                    &copyExtent);
 }
 

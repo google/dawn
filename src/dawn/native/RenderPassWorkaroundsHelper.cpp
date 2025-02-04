@@ -60,22 +60,22 @@ struct TemporaryResolveAttachment {
 };
 
 void CopyTextureView(CommandEncoder* encoder, TextureViewBase* src, TextureViewBase* dst) {
-    ImageCopyTexture srcImageCopyTexture = {};
-    srcImageCopyTexture.texture = src->GetTexture();
-    srcImageCopyTexture.aspect = wgpu::TextureAspect::All;
-    srcImageCopyTexture.mipLevel = src->GetBaseMipLevel();
-    srcImageCopyTexture.origin = {0, 0, src->GetBaseArrayLayer()};
+    TexelCopyTextureInfo srcTexelCopyTextureInfo = {};
+    srcTexelCopyTextureInfo.texture = src->GetTexture();
+    srcTexelCopyTextureInfo.aspect = wgpu::TextureAspect::All;
+    srcTexelCopyTextureInfo.mipLevel = src->GetBaseMipLevel();
+    srcTexelCopyTextureInfo.origin = {0, 0, src->GetBaseArrayLayer()};
 
-    ImageCopyTexture dstImageCopyTexture = {};
-    dstImageCopyTexture.texture = dst->GetTexture();
-    dstImageCopyTexture.aspect = wgpu::TextureAspect::All;
-    dstImageCopyTexture.mipLevel = dst->GetBaseMipLevel();
-    dstImageCopyTexture.origin = {0, 0, dst->GetBaseArrayLayer()};
+    TexelCopyTextureInfo dstTexelCopyTextureInfo = {};
+    dstTexelCopyTextureInfo.texture = dst->GetTexture();
+    dstTexelCopyTextureInfo.aspect = wgpu::TextureAspect::All;
+    dstTexelCopyTextureInfo.mipLevel = dst->GetBaseMipLevel();
+    dstTexelCopyTextureInfo.origin = {0, 0, dst->GetBaseArrayLayer()};
 
     Extent3D extent3D = src->GetSingleSubresourceVirtualSize();
 
     auto internalUsageScope = encoder->MakeInternalUsageScope();
-    encoder->APICopyTextureToTexture(&srcImageCopyTexture, &dstImageCopyTexture, &extent3D);
+    encoder->APICopyTextureToTexture(&srcTexelCopyTextureInfo, &dstTexelCopyTextureInfo, &extent3D);
 }
 
 void ResolveWithRenderPass(CommandEncoder* encoder,

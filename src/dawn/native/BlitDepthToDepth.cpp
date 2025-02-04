@@ -162,13 +162,13 @@ MaybeError BlitDepthToDepth(DeviceBase* device,
 
             // Copy from the original texture source into the intermediate.
             {
-                ImageCopyTexture intermediateSrc;
+                TexelCopyTextureInfo intermediateSrc;
                 intermediateSrc.texture = src.texture.Get();
                 intermediateSrc.mipLevel = src.mipLevel;
                 intermediateSrc.origin = {0, 0, layer};
                 intermediateSrc.aspect = wgpu::TextureAspect::All;
 
-                ImageCopyTexture intermediateDst;
+                TexelCopyTextureInfo intermediateDst;
                 intermediateDst.texture = intermediateTexture.Get();
                 intermediateDst.mipLevel = 0u;
                 intermediateDst.origin = {0, 0, 0};

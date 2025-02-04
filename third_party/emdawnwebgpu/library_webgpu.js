@@ -229,34 +229,34 @@ var LibraryWebGPU = {
       };
     },
 
-    makeImageCopyTexture: (ptr) => {
+    makeTexelCopyTextureInfo: (ptr) => {
       {{{ gpu.makeCheck('ptr') }}}
       return {
         "texture": WebGPU.getJsObject(
-          {{{ makeGetValue('ptr', C_STRUCTS.WGPUImageCopyTexture.texture, '*') }}}),
-        "mipLevel": {{{ gpu.makeGetU32('ptr', C_STRUCTS.WGPUImageCopyTexture.mipLevel) }}},
-        "origin": WebGPU.makeOrigin3D(ptr + {{{ C_STRUCTS.WGPUImageCopyTexture.origin }}}),
-        "aspect": WebGPU.TextureAspect[{{{ gpu.makeGetU32('ptr', C_STRUCTS.WGPUImageCopyTexture.aspect) }}}],
+          {{{ makeGetValue('ptr', C_STRUCTS.WGPUTexelCopyTextureInfo.texture, '*') }}}),
+        "mipLevel": {{{ gpu.makeGetU32('ptr', C_STRUCTS.WGPUTexelCopyTextureInfo.mipLevel) }}},
+        "origin": WebGPU.makeOrigin3D(ptr + {{{ C_STRUCTS.WGPUTexelCopyTextureInfo.origin }}}),
+        "aspect": WebGPU.TextureAspect[{{{ gpu.makeGetU32('ptr', C_STRUCTS.WGPUTexelCopyTextureInfo.aspect) }}}],
       };
     },
 
-    makeTextureDataLayout: (ptr) => {
+    makeTexelCopyBufferLayout: (ptr) => {
       {{{ gpu.makeCheckDescriptor('ptr') }}}
-      var bytesPerRow = {{{ gpu.makeGetU32('ptr', C_STRUCTS.WGPUTextureDataLayout.bytesPerRow) }}};
-      var rowsPerImage = {{{ gpu.makeGetU32('ptr', C_STRUCTS.WGPUTextureDataLayout.rowsPerImage) }}};
+      var bytesPerRow = {{{ gpu.makeGetU32('ptr', C_STRUCTS.WGPUTexelCopyBufferLayout.bytesPerRow) }}};
+      var rowsPerImage = {{{ gpu.makeGetU32('ptr', C_STRUCTS.WGPUTexelCopyBufferLayout.rowsPerImage) }}};
       return {
-        "offset": {{{ gpu.makeGetU64('ptr', C_STRUCTS.WGPUTextureDataLayout.offset) }}},
+        "offset": {{{ gpu.makeGetU64('ptr', C_STRUCTS.WGPUTexelCopyBufferLayout.offset) }}},
         "bytesPerRow": bytesPerRow === {{{ gpu.COPY_STRIDE_UNDEFINED }}} ? undefined : bytesPerRow,
         "rowsPerImage": rowsPerImage === {{{ gpu.COPY_STRIDE_UNDEFINED }}} ? undefined : rowsPerImage,
       };
     },
 
-    makeImageCopyBuffer: (ptr) => {
+    makeTexelCopyBufferInfo: (ptr) => {
       {{{ gpu.makeCheck('ptr') }}}
-      var layoutPtr = ptr + {{{ C_STRUCTS.WGPUImageCopyBuffer.layout }}};
-      var bufferCopyView = WebGPU.makeTextureDataLayout(layoutPtr);
+      var layoutPtr = ptr + {{{ C_STRUCTS.WGPUTexelCopyBufferInfo.layout }}};
+      var bufferCopyView = WebGPU.makeTexelCopyBufferLayout(layoutPtr);
       bufferCopyView["buffer"] = WebGPU.getJsObject(
-        {{{ makeGetValue('ptr', C_STRUCTS.WGPUImageCopyBuffer.buffer, '*') }}});
+        {{{ makeGetValue('ptr', C_STRUCTS.WGPUTexelCopyBufferInfo.buffer, '*') }}});
       return bufferCopyView;
     },
 
@@ -1169,21 +1169,21 @@ var LibraryWebGPU = {
     var commandEncoder = WebGPU.getJsObject(encoderPtr);
     var copySize = WebGPU.makeExtent3D(copySizePtr);
     commandEncoder.copyBufferToTexture(
-      WebGPU.makeImageCopyBuffer(srcPtr), WebGPU.makeImageCopyTexture(dstPtr), copySize);
+      WebGPU.makeTexelCopyBufferInfo(srcPtr), WebGPU.makeTexelCopyTextureInfo(dstPtr), copySize);
   },
 
   wgpuCommandEncoderCopyTextureToBuffer: (encoderPtr, srcPtr, dstPtr, copySizePtr) => {
     var commandEncoder = WebGPU.getJsObject(encoderPtr);
     var copySize = WebGPU.makeExtent3D(copySizePtr);
     commandEncoder.copyTextureToBuffer(
-      WebGPU.makeImageCopyTexture(srcPtr), WebGPU.makeImageCopyBuffer(dstPtr), copySize);
+      WebGPU.makeTexelCopyTextureInfo(srcPtr), WebGPU.makeTexelCopyBufferInfo(dstPtr), copySize);
   },
 
   wgpuCommandEncoderCopyTextureToTexture: (encoderPtr, srcPtr, dstPtr, copySizePtr) => {
     var commandEncoder = WebGPU.getJsObject(encoderPtr);
     var copySize = WebGPU.makeExtent3D(copySizePtr);
     commandEncoder.copyTextureToTexture(
-      WebGPU.makeImageCopyTexture(srcPtr), WebGPU.makeImageCopyTexture(dstPtr), copySize);
+      WebGPU.makeTexelCopyTextureInfo(srcPtr), WebGPU.makeTexelCopyTextureInfo(dstPtr), copySize);
   },
 
   wgpuCommandEncoderFinish__deps: ['emwgpuCreateCommandBuffer'],
@@ -2056,8 +2056,8 @@ var LibraryWebGPU = {
   wgpuQueueWriteTexture: (queuePtr, destinationPtr, data, dataSize, dataLayoutPtr, writeSizePtr) => {
     var queue = WebGPU.getJsObject(queuePtr);
 
-    var destination = WebGPU.makeImageCopyTexture(destinationPtr);
-    var dataLayout = WebGPU.makeTextureDataLayout(dataLayoutPtr);
+    var destination = WebGPU.makeTexelCopyTextureInfo(destinationPtr);
+    var dataLayout = WebGPU.makeTexelCopyBufferLayout(dataLayoutPtr);
     var writeSize = WebGPU.makeExtent3D(writeSizePtr);
     // This subarray isn't strictly necessary, but helps work around an issue
     // where Chromium makes a copy of the entire heap. crbug.com/1134457

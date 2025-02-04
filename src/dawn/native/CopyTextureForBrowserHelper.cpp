@@ -399,7 +399,7 @@ template <typename T>
 MaybeError DoCopyForBrowser(DeviceBase* device,
                             const TextureInfo* sourceInfo,
                             T* sourceResource,
-                            const ImageCopyTexture* destination,
+                            const TexelCopyTextureInfo* destination,
                             const Extent3D* copySize,
                             const CopyTextureForBrowserOptions* options,
                             RenderPipelineBase* pipeline) {
@@ -603,13 +603,13 @@ MaybeError DoCopyForBrowser(DeviceBase* device,
 }
 
 MaybeError ValidateCopyForBrowserDestination(DeviceBase* device,
-                                             const ImageCopyTexture& destination,
+                                             const TexelCopyTextureInfo& destination,
                                              const Extent3D& copySize,
                                              const CopyTextureForBrowserOptions& options) {
     DAWN_TRY(device->ValidateObject(destination.texture));
     DAWN_TRY(destination.texture->ValidateCanUseInSubmitNow());
-    DAWN_TRY_CONTEXT(ValidateImageCopyTexture(device, destination, copySize),
-                     "validating the ImageCopyTexture for the destination");
+    DAWN_TRY_CONTEXT(ValidateTexelCopyTextureInfo(device, destination, copySize),
+                     "validating the TexelCopyTextureInfo for the destination");
     DAWN_TRY_CONTEXT(ValidateTextureCopyRange(device, destination, copySize),
                      "validating that the copy fits in the destination");
 
@@ -652,15 +652,15 @@ MaybeError ValidateCopyForBrowserOptions(const CopyTextureForBrowserOptions& opt
 }  // anonymous namespace
 
 MaybeError ValidateCopyTextureForBrowser(DeviceBase* device,
-                                         const ImageCopyTexture* source,
-                                         const ImageCopyTexture* destination,
+                                         const TexelCopyTextureInfo* source,
+                                         const TexelCopyTextureInfo* destination,
                                          const Extent3D* copySize,
                                          const CopyTextureForBrowserOptions* options) {
     // Validate source
     DAWN_TRY(device->ValidateObject(source->texture));
     DAWN_TRY(source->texture->ValidateCanUseInSubmitNow());
-    DAWN_TRY_CONTEXT(ValidateImageCopyTexture(device, *source, *copySize),
-                     "validating the ImageCopyTexture for the source");
+    DAWN_TRY_CONTEXT(ValidateTexelCopyTextureInfo(device, *source, *copySize),
+                     "validating the TexelCopyTextureInfo for the source");
     DAWN_TRY_CONTEXT(ValidateTextureCopyRange(device, *source, *copySize),
                      "validating that the copy fits in the source");
     DAWN_INVALID_IF(source->origin.z > 0, "Source has a non-zero z origin (%u).", source->origin.z);
@@ -693,7 +693,7 @@ MaybeError ValidateCopyTextureForBrowser(DeviceBase* device,
 
 MaybeError ValidateCopyExternalTextureForBrowser(DeviceBase* device,
                                                  const ImageCopyExternalTexture* source,
-                                                 const ImageCopyTexture* destination,
+                                                 const TexelCopyTextureInfo* destination,
                                                  const Extent3D* copySize,
                                                  const CopyTextureForBrowserOptions* options) {
     // Validate source
@@ -734,7 +734,7 @@ MaybeError ValidateCopyExternalTextureForBrowser(DeviceBase* device,
 
 MaybeError DoCopyExternalTextureForBrowser(DeviceBase* device,
                                            const ImageCopyExternalTexture* source,
-                                           const ImageCopyTexture* destination,
+                                           const TexelCopyTextureInfo* destination,
                                            const Extent3D* copySize,
                                            const CopyTextureForBrowserOptions* options) {
     TextureInfo info;
@@ -749,8 +749,8 @@ MaybeError DoCopyExternalTextureForBrowser(DeviceBase* device,
 }
 
 MaybeError DoCopyTextureForBrowser(DeviceBase* device,
-                                   const ImageCopyTexture* source,
-                                   const ImageCopyTexture* destination,
+                                   const TexelCopyTextureInfo* source,
+                                   const TexelCopyTextureInfo* destination,
                                    const Extent3D* copySize,
                                    const CopyTextureForBrowserOptions* options) {
     TextureInfo info;

@@ -784,24 +784,24 @@
             {
                 "name": "copy buffer to texture",
                 "args": [
-                    {"name": "source", "type": "image copy buffer", "annotation": "const*"},
-                    {"name": "destination", "type": "image copy texture", "annotation": "const*"},
+                    {"name": "source", "type": "texel copy buffer info", "annotation": "const*"},
+                    {"name": "destination", "type": "texel copy texture info", "annotation": "const*"},
                     {"name": "copy size", "type": "extent 3D", "annotation": "const*"}
                 ]
             },
             {
                 "name": "copy texture to buffer",
                 "args": [
-                    {"name": "source", "type": "image copy texture", "annotation": "const*"},
-                    {"name": "destination", "type": "image copy buffer", "annotation": "const*"},
+                    {"name": "source", "type": "texel copy texture info", "annotation": "const*"},
+                    {"name": "destination", "type": "texel copy buffer info", "annotation": "const*"},
                     {"name": "copy size", "type": "extent 3D", "annotation": "const*"}
                 ]
             },
             {
                 "name": "copy texture to texture",
                 "args": [
-                    {"name": "source", "type": "image copy texture", "annotation": "const*"},
-                    {"name": "destination", "type": "image copy texture", "annotation": "const*"},
+                    {"name": "source", "type": "texel copy texture info", "annotation": "const*"},
+                    {"name": "destination", "type": "texel copy texture info", "annotation": "const*"},
                     {"name": "copy size", "type": "extent 3D", "annotation": "const*"}
                 ]
             },
@@ -2310,13 +2310,29 @@
         ]
     },
     "image copy buffer": {
+        "category": "typedef",
+        "type": "texel copy buffer info"
+    },
+    "texel copy buffer info": {
         "category": "structure",
         "members": [
-            {"name": "layout", "type": "texture data layout"},
+            {"name": "layout", "type": "texel copy buffer layout"},
             {"name": "buffer", "type": "buffer"}
         ]
     },
+    "texel copy buffer layout": {
+        "category": "structure",
+        "members": [
+            {"name": "offset", "type": "uint64_t", "default": 0},
+            {"name": "bytes per row", "type": "uint32_t", "default": "WGPU_COPY_STRIDE_UNDEFINED"},
+            {"name": "rows per image", "type": "uint32_t", "default": "WGPU_COPY_STRIDE_UNDEFINED"}
+        ]
+    },
     "image copy texture": {
+        "category": "typedef",
+        "type": "texel copy texture info"
+    },
+    "texel copy texture info": {
         "category": "structure",
         "members": [
             {"name": "texture", "type": "texture"},
@@ -2689,10 +2705,10 @@
             {
                 "name": "write texture",
                 "args": [
-                    {"name": "destination", "type": "image copy texture", "annotation": "const*"},
+                    {"name": "destination", "type": "texel copy texture info", "annotation": "const*"},
                     {"name": "data", "type": "void", "annotation": "const*", "length": "data size"},
                     {"name": "data size", "type": "size_t"},
-                    {"name": "data layout", "type": "texture data layout", "annotation": "const*"},
+                    {"name": "data layout", "type": "texel copy buffer layout", "annotation": "const*"},
                     {"name": "write size", "type": "extent 3D", "annotation": "const*"}
                 ]
             },
@@ -2701,8 +2717,8 @@
                 "extensible": "in",
                 "tags": ["dawn"],
                 "args": [
-                    {"name": "source", "type": "image copy texture", "annotation": "const*"},
-                    {"name": "destination", "type": "image copy texture", "annotation": "const*"},
+                    {"name": "source", "type": "texel copy texture info", "annotation": "const*"},
+                    {"name": "destination", "type": "texel copy texture info", "annotation": "const*"},
                     {"name": "copy size", "type": "extent 3D", "annotation": "const*"},
                     {"name": "options", "type": "copy texture for browser options", "annotation": "const*"}
                 ]
@@ -2713,7 +2729,7 @@
                 "tags": ["dawn"],
                 "args": [
                     {"name": "source", "type": "image copy external texture", "annotation": "const*"},
-                    {"name": "destination", "type": "image copy texture", "annotation": "const*"},
+                    {"name": "destination", "type": "texel copy texture info", "annotation": "const*"},
                     {"name": "copy size", "type": "extent 3D", "annotation": "const*"},
                     {"name": "options", "type": "copy texture for browser options", "annotation": "const*"}
                 ]
@@ -3801,13 +3817,8 @@
         ]
     },
     "texture data layout": {
-        "category": "structure",
-        "extensible": "in",
-        "members": [
-            {"name": "offset", "type": "uint64_t", "default": 0},
-            {"name": "bytes per row", "type": "uint32_t", "default": "WGPU_COPY_STRIDE_UNDEFINED"},
-            {"name": "rows per image", "type": "uint32_t", "default": "WGPU_COPY_STRIDE_UNDEFINED"}
-        ]
+        "category": "typedef",
+        "type": "texel copy buffer layout"
     },
     "texture descriptor": {
         "category": "structure",

@@ -202,12 +202,12 @@ class TextureViewSamplingTest : public TextureViewTestBase {
                 wgpu::Buffer stagingBuffer = utils::CreateBufferFromData(
                     device, data.data(), data.size() * sizeof(utils::RGBA8),
                     wgpu::BufferUsage::CopySrc);
-                wgpu::ImageCopyBuffer imageCopyBuffer =
-                    utils::CreateImageCopyBuffer(stagingBuffer, 0, kTextureBytesPerRowAlignment);
-                wgpu::ImageCopyTexture imageCopyTexture =
-                    utils::CreateImageCopyTexture(mTexture, level, {0, 0, layer});
+                wgpu::TexelCopyBufferInfo texelCopyBufferInfo = utils::CreateTexelCopyBufferInfo(
+                    stagingBuffer, 0, kTextureBytesPerRowAlignment);
+                wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+                    utils::CreateTexelCopyTextureInfo(mTexture, level, {0, 0, layer});
                 wgpu::Extent3D copySize = {texWidth, texHeight, 1};
-                encoder.CopyBufferToTexture(&imageCopyBuffer, &imageCopyTexture, &copySize);
+                encoder.CopyBufferToTexture(&texelCopyBufferInfo, &texelCopyTextureInfo, &copySize);
             }
         }
         wgpu::CommandBuffer copy = encoder.Finish();
@@ -571,7 +571,7 @@ TEST_P(TextureViewSamplingTest, SRGBReinterpretation) {
     textureDesc.viewFormatCount = 1;
     wgpu::Texture texture = device.CreateTexture(&textureDesc);
 
-    wgpu::ImageCopyTexture dst = {};
+    wgpu::TexelCopyTextureInfo dst = {};
     dst.texture = texture;
     std::array<utils::RGBA8, 4> rgbaTextureData = {
         utils::RGBA8(180, 0, 0, 255),
@@ -580,7 +580,7 @@ TEST_P(TextureViewSamplingTest, SRGBReinterpretation) {
         utils::RGBA8(62, 180, 84, 90),
     };
 
-    wgpu::TextureDataLayout dataLayout = {};
+    wgpu::TexelCopyBufferLayout dataLayout = {};
     dataLayout.bytesPerRow = textureDesc.size.width * sizeof(utils::RGBA8);
 
     queue.WriteTexture(&dst, rgbaTextureData.data(), rgbaTextureData.size() * sizeof(utils::RGBA8),
@@ -924,8 +924,8 @@ TEST_P(TextureViewRenderingTest, SRGBReinterpretationRenderAttachment) {
         utils::RGBA8(13, 117, 24, 90),
     };
 
-    wgpu::ImageCopyTexture dst = {};
-    wgpu::TextureDataLayout dataLayout = {};
+    wgpu::TexelCopyTextureInfo dst = {};
+    wgpu::TexelCopyBufferLayout dataLayout = {};
 
     // Upload |rgbaTextureData| into |sampledTexture|.
     dst.texture = sampledTexture;
@@ -1037,8 +1037,8 @@ TEST_P(TextureViewRenderingTest, SRGBReinterpretionResolveAttachment) {
         utils::RGBA8(13, 117, 24, 90),
     };
 
-    wgpu::ImageCopyTexture dst = {};
-    wgpu::TextureDataLayout dataLayout = {};
+    wgpu::TexelCopyTextureInfo dst = {};
+    wgpu::TexelCopyBufferLayout dataLayout = {};
 
     // Upload |rgbaTextureData| into |sampledTexture|.
     dst.texture = sampledTexture;
@@ -1200,8 +1200,9 @@ TEST_P(TextureView1DTest, Sampling) {
 
     std::array<utils::RGBA8, 4> data = {utils::RGBA8::kGreen, utils::RGBA8::kRed,
                                         utils::RGBA8::kBlue, utils::RGBA8::kWhite};
-    wgpu::ImageCopyTexture target = utils::CreateImageCopyTexture(tex, 0, {});
-    wgpu::TextureDataLayout layout = utils::CreateTextureDataLayout(0, wgpu::kCopyStrideUndefined);
+    wgpu::TexelCopyTextureInfo target = utils::CreateTexelCopyTextureInfo(tex, 0, {});
+    wgpu::TexelCopyBufferLayout layout =
+        utils::CreateTexelCopyBufferLayout(0, wgpu::kCopyStrideUndefined);
     queue.WriteTexture(&target, &data, sizeof(data), &layout, &texDesc.size);
 
     // Create a pipeline that will sample from the 1D texture and output to an attachment.

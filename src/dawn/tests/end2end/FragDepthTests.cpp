@@ -147,12 +147,15 @@ TEST_P(FragDepthTests, ChangingPipelineLayoutDoesntInvalidateViewport) {
     texDesc.usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopyDst;
     wgpu::Texture texture = device.CreateTexture(&texDesc);
 
-    wgpu::ImageCopyTexture imageCopyTexture = utils::CreateImageCopyTexture(texture, 0, {0, 0, 0});
-    wgpu::TextureDataLayout textureDataLayout = utils::CreateTextureDataLayout(0, sizeof(float));
+    wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+        utils::CreateTexelCopyTextureInfo(texture, 0, {0, 0, 0});
+    wgpu::TexelCopyBufferLayout texelCopyBufferLayout =
+        utils::CreateTexelCopyBufferLayout(0, sizeof(float));
     wgpu::Extent3D copyExtent = {1, 1, 1};
 
     float one = 1.0;
-    queue.WriteTexture(&imageCopyTexture, &one, sizeof(float), &textureDataLayout, &copyExtent);
+    queue.WriteTexture(&texelCopyTextureInfo, &one, sizeof(float), &texelCopyBufferLayout,
+                       &copyExtent);
 
     wgpu::BindGroup textureBG = utils::MakeBindGroup(device, texturePipeline.GetBindGroupLayout(0),
                                                      {{0, texture.CreateView()}});

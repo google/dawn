@@ -46,11 +46,14 @@ class QueueMock : public QueueBase {
                 WriteBufferImpl,
                 (BufferBase*, uint64_t, const void*, size_t),
                 (override));
-    MOCK_METHOD(
-        MaybeError,
-        WriteTextureImpl,
-        (const ImageCopyTexture&, const void*, size_t, const TextureDataLayout&, const Extent3D&),
-        (override));
+    MOCK_METHOD(MaybeError,
+                WriteTextureImpl,
+                (const TexelCopyTextureInfo&,
+                 const void*,
+                 size_t,
+                 const TexelCopyBufferLayout&,
+                 const Extent3D&),
+                (override));
     MOCK_METHOD(void, DestroyImpl, (), (override));
 
     MOCK_METHOD(ResultOrError<ExecutionSerial>, CheckAndUpdateCompletedSerials, (), (override));

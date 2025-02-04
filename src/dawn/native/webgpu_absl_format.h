@@ -144,15 +144,15 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
     const absl::FormatConversionSpec& spec,
     absl::FormatSink* s);
 
-struct ImageCopyTexture;
+struct TexelCopyTextureInfo;
 absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
-    const ImageCopyTexture* value,
+    const TexelCopyTextureInfo* value,
     const absl::FormatConversionSpec& spec,
     absl::FormatSink* s);
 
-struct TextureDataLayout;
+struct TexelCopyBufferLayout;
 absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
-    const TextureDataLayout* value,
+    const TexelCopyBufferLayout* value,
     const absl::FormatConversionSpec& spec,
     absl::FormatSink* s);
 

@@ -83,10 +83,10 @@ MaybeError Queue::WriteBufferImpl(BufferBase* buffer,
     return {};
 }
 
-MaybeError Queue::WriteTextureImpl(const ImageCopyTexture& destination,
+MaybeError Queue::WriteTextureImpl(const TexelCopyTextureInfo& destination,
                                    const void* data,
                                    size_t dataSize,
-                                   const TextureDataLayout& dataLayout,
+                                   const TexelCopyBufferLayout& dataLayout,
                                    const Extent3D& writeSizePixel) {
     TextureCopy textureCopy;
     textureCopy.texture = destination.texture;
@@ -111,7 +111,7 @@ MaybeError Queue::WriteTextureImpl(const ImageCopyTexture& destination,
         Ref<TextureBase> dataTexture;
         DAWN_TRY_ASSIGN(dataTexture, device->CreateTexture(&dataTextureDesc));
         {
-            ImageCopyTexture destinationDataTexture;
+            TexelCopyTextureInfo destinationDataTexture;
             destinationDataTexture.texture = dataTexture.Get();
             destinationDataTexture.aspect = wgpu::TextureAspect::All;
             // The size of R8Uint texture equals to writeSizePixel and only has 1 mip level.

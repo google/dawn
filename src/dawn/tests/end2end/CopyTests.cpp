@@ -371,12 +371,12 @@ class CopyTests_T2B : public CopyTests, public DawnTestWithParams<CopyTextureFor
         const std::vector<uint8_t> textureArrayData =
             GetExpectedTextureData(textureSpec.format, copyLayout);
         {
-            wgpu::ImageCopyTexture imageCopyTexture =
-                utils::CreateImageCopyTexture(texture, textureSpec.copyLevel, {0, 0, 0});
-            wgpu::TextureDataLayout textureDataLayout =
-                utils::CreateTextureDataLayout(0, copyLayout.bytesPerRow, copyLayout.rowsPerImage);
-            queue.WriteTexture(&imageCopyTexture, textureArrayData.data(), copyLayout.byteLength,
-                               &textureDataLayout, &copyLayout.mipSize);
+            wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+                utils::CreateTexelCopyTextureInfo(texture, textureSpec.copyLevel, {0, 0, 0});
+            wgpu::TexelCopyBufferLayout texelCopyBufferLayout = utils::CreateTexelCopyBufferLayout(
+                0, copyLayout.bytesPerRow, copyLayout.rowsPerImage);
+            queue.WriteTexture(&texelCopyTextureInfo, textureArrayData.data(),
+                               copyLayout.byteLength, &texelCopyBufferLayout, &copyLayout.mipSize);
         }
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -396,11 +396,11 @@ class CopyTests_T2B : public CopyTests, public DawnTestWithParams<CopyTextureFor
         wgpu::Buffer buffer = device.CreateBuffer(&bufferDesc);
 
         {
-            wgpu::ImageCopyTexture imageCopyTexture = utils::CreateImageCopyTexture(
+            wgpu::TexelCopyTextureInfo texelCopyTextureInfo = utils::CreateTexelCopyTextureInfo(
                 texture, textureSpec.copyLevel, textureSpec.copyOrigin);
-            wgpu::ImageCopyBuffer imageCopyBuffer = utils::CreateImageCopyBuffer(
+            wgpu::TexelCopyBufferInfo texelCopyBufferInfo = utils::CreateTexelCopyBufferInfo(
                 buffer, bufferSpec.offset, bufferSpec.bytesPerRow, bufferSpec.rowsPerImage);
-            encoder.CopyTextureToBuffer(&imageCopyTexture, &imageCopyBuffer, &copySize);
+            encoder.CopyTextureToBuffer(&texelCopyTextureInfo, &texelCopyBufferInfo, &copySize);
         }
 
         wgpu::CommandBuffer commands = encoder.Finish();
@@ -523,11 +523,11 @@ class CopyTests_B2T : public CopyTests, public DawnTest {
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
-        wgpu::ImageCopyBuffer imageCopyBuffer = utils::CreateImageCopyBuffer(
+        wgpu::TexelCopyBufferInfo texelCopyBufferInfo = utils::CreateTexelCopyBufferInfo(
             buffer, bufferSpec.offset, bufferSpec.bytesPerRow, bufferSpec.rowsPerImage);
-        wgpu::ImageCopyTexture imageCopyTexture =
-            utils::CreateImageCopyTexture(texture, textureSpec.copyLevel, textureSpec.copyOrigin);
-        encoder.CopyBufferToTexture(&imageCopyBuffer, &imageCopyTexture, &copySize);
+        wgpu::TexelCopyTextureInfo texelCopyTextureInfo = utils::CreateTexelCopyTextureInfo(
+            texture, textureSpec.copyLevel, textureSpec.copyOrigin);
+        encoder.CopyBufferToTexture(&texelCopyBufferInfo, &texelCopyTextureInfo, &copySize);
 
         wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
@@ -628,26 +628,26 @@ class CopyTests_T2TBase : public CopyTests, public Parent {
         const std::vector<uint8_t> srcTextureCopyData =
             GetExpectedTextureData(format, srcDataCopyLayout);
         {
-            wgpu::ImageCopyTexture imageCopyTexture = utils::CreateImageCopyTexture(
+            wgpu::TexelCopyTextureInfo texelCopyTextureInfo = utils::CreateTexelCopyTextureInfo(
                 srcTexture, srcSpec.copyLevel, {0, 0, srcSpec.copyOrigin.z});
-            wgpu::TextureDataLayout textureDataLayout = utils::CreateTextureDataLayout(
+            wgpu::TexelCopyBufferLayout texelCopyBufferLayout = utils::CreateTexelCopyBufferLayout(
                 0, srcDataCopyLayout.bytesPerRow, srcDataCopyLayout.rowsPerImage);
-            this->queue.WriteTexture(&imageCopyTexture, srcTextureCopyData.data(),
-                                     srcDataCopyLayout.byteLength, &textureDataLayout,
+            this->queue.WriteTexture(&texelCopyTextureInfo, srcTextureCopyData.data(),
+                                     srcDataCopyLayout.byteLength, &texelCopyBufferLayout,
                                      &srcDataCopyLayout.mipSize);
         }
 
         wgpu::CommandEncoder encoder = this->device.CreateCommandEncoder();
 
         // Perform the texture to texture copy
-        wgpu::ImageCopyTexture srcImageCopyTexture =
-            utils::CreateImageCopyTexture(srcTexture, srcSpec.copyLevel, srcSpec.copyOrigin);
-        wgpu::ImageCopyTexture dstImageCopyTexture =
-            utils::CreateImageCopyTexture(dstTexture, dstSpec.copyLevel, dstSpec.copyOrigin);
+        wgpu::TexelCopyTextureInfo srcTexelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(srcTexture, srcSpec.copyLevel, srcSpec.copyOrigin);
+        wgpu::TexelCopyTextureInfo dstTexelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(dstTexture, dstSpec.copyLevel, dstSpec.copyOrigin);
         // (Off-topic) spot-test for defaulting of .aspect.
-        srcImageCopyTexture.aspect = wgpu::TextureAspect::Undefined;
-        dstImageCopyTexture.aspect = wgpu::TextureAspect::Undefined;
-        encoder.CopyTextureToTexture(&srcImageCopyTexture, &dstImageCopyTexture, &copySize);
+        srcTexelCopyTextureInfo.aspect = wgpu::TextureAspect::Undefined;
+        dstTexelCopyTextureInfo.aspect = wgpu::TextureAspect::Undefined;
+        encoder.CopyTextureToTexture(&srcTexelCopyTextureInfo, &dstTexelCopyTextureInfo, &copySize);
 
         // Create an output buffer and use it to completely populate the subresources of the dst
         // texture that will be copied to at the given mip level.
@@ -666,10 +666,11 @@ class CopyTests_T2TBase : public CopyTests, public Parent {
         const uint32_t bytesPerTexel = utils::GetTexelBlockSizeInBytes(format);
         const uint32_t expectedDstDataOffset = dstSpec.copyOrigin.x * bytesPerTexel +
                                                dstSpec.copyOrigin.y * dstDataCopyLayout.bytesPerRow;
-        wgpu::ImageCopyBuffer outputImageCopyBuffer = utils::CreateImageCopyBuffer(
+        wgpu::TexelCopyBufferInfo outputTexelCopyBufferInfo = utils::CreateTexelCopyBufferInfo(
             outputBuffer, expectedDstDataOffset, dstDataCopyLayout.bytesPerRow,
             dstDataCopyLayout.rowsPerImage);
-        encoder.CopyTextureToBuffer(&dstImageCopyTexture, &outputImageCopyBuffer, &copySize);
+        encoder.CopyTextureToBuffer(&dstTexelCopyTextureInfo, &outputTexelCopyBufferInfo,
+                                    &copySize);
 
         wgpu::CommandBuffer commands = encoder.Finish();
         this->queue.Submit(1, &commands);
@@ -1191,12 +1192,12 @@ TEST_P(CopyTests_T2B, MappableBufferBeforeAndAfterBytesNotOverwritten) {
         GetExpectedTextureData(texDesc.format, copyLayout);
     const uint32_t bytesPerTexel = utils::GetTexelBlockSizeInBytes(texDesc.format);
     {
-        wgpu::ImageCopyTexture imageCopyTexture =
-            utils::CreateImageCopyTexture(texture, 0, {0, 0, 0});
-        wgpu::TextureDataLayout textureDataLayout =
-            utils::CreateTextureDataLayout(0, copyLayout.bytesPerRow, copyLayout.rowsPerImage);
-        queue.WriteTexture(&imageCopyTexture, textureArrayData.data(), copyLayout.byteLength,
-                           &textureDataLayout, &copyLayout.mipSize);
+        wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(texture, 0, {0, 0, 0});
+        wgpu::TexelCopyBufferLayout texelCopyBufferLayout =
+            utils::CreateTexelCopyBufferLayout(0, copyLayout.bytesPerRow, copyLayout.rowsPerImage);
+        queue.WriteTexture(&texelCopyTextureInfo, textureArrayData.data(), copyLayout.byteLength,
+                           &texelCopyBufferLayout, &copyLayout.mipSize);
     }
 
     // Create a destination buffer and fill its before & after bytes with random data
@@ -1221,12 +1222,12 @@ TEST_P(CopyTests_T2B, MappableBufferBeforeAndAfterBytesNotOverwritten) {
     // Copy the texture to buffer at offset=bytesPerTexel and with tightly packed rows.
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        wgpu::ImageCopyTexture imageCopyTexture =
-            utils::CreateImageCopyTexture(texture, 0, {0, 0, 0});
-        wgpu::ImageCopyBuffer imageCopyBuffer =
-            utils::CreateImageCopyBuffer(buffer, /*offset=*/kCopyOffset,
-                                         /*bytesPerRow=*/256 * bytesPerTexel, /*rowsPerImage=*/1);
-        encoder.CopyTextureToBuffer(&imageCopyTexture, &imageCopyBuffer, &texDesc.size);
+        wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(texture, 0, {0, 0, 0});
+        wgpu::TexelCopyBufferInfo texelCopyBufferInfo = utils::CreateTexelCopyBufferInfo(
+            buffer, /*offset=*/kCopyOffset,
+            /*bytesPerRow=*/256 * bytesPerTexel, /*rowsPerImage=*/1);
+        encoder.CopyTextureToBuffer(&texelCopyTextureInfo, &texelCopyBufferInfo, &texDesc.size);
         wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
     }
@@ -1836,14 +1837,15 @@ TEST_P(CopyTests_T2B_No_Format_Param, CopyOneRowWithDepth32Float) {
     bufferDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
     wgpu::Buffer buffer = device.CreateBuffer(&bufferDescriptor);
 
-    wgpu::ImageCopyBuffer imageCopyBuffer =
-        utils::CreateImageCopyBuffer(buffer, kBufferCopyOffset, kTextureBytesPerRowAlignment);
-    wgpu::ImageCopyTexture imageCopyTexture = utils::CreateImageCopyTexture(texture, 0, {0, 0, 0});
+    wgpu::TexelCopyBufferInfo texelCopyBufferInfo =
+        utils::CreateTexelCopyBufferInfo(buffer, kBufferCopyOffset, kTextureBytesPerRowAlignment);
+    wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+        utils::CreateTexelCopyTextureInfo(texture, 0, {0, 0, 0});
     // (Off-topic) spot-test for defaulting of .aspect.
-    imageCopyTexture.aspect = wgpu::TextureAspect::Undefined;
+    texelCopyTextureInfo.aspect = wgpu::TextureAspect::Undefined;
 
     wgpu::Extent3D copySize = textureDescriptor.size;
-    encoder.CopyTextureToBuffer(&imageCopyTexture, &imageCopyBuffer, &copySize);
+    encoder.CopyTextureToBuffer(&texelCopyTextureInfo, &texelCopyBufferInfo, &copySize);
     wgpu::CommandBuffer commandBuffer = encoder.Finish();
     queue.Submit(1, &commandBuffer);
 
@@ -3288,11 +3290,13 @@ TEST_P(CopyToDepthStencilTextureAfterDestroyingBigBufferTests, DoTest) {
         memcpy(uploadData, expectedData.data(), expectedData.size());
         uploadBuffer.Unmap();
 
-        wgpu::ImageCopyBuffer imageCopyBuffer = utils::CreateImageCopyBuffer(uploadBuffer);
-        wgpu::ImageCopyTexture imageCopyTexture = utils::CreateImageCopyTexture(destinationTexture);
+        wgpu::TexelCopyBufferInfo texelCopyBufferInfo =
+            utils::CreateTexelCopyBufferInfo(uploadBuffer);
+        wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(destinationTexture);
         // (Off-topic) spot-test for defaulting of .aspect.
-        imageCopyTexture.aspect = wgpu::TextureAspect::Undefined;
-        encoder.CopyBufferToTexture(&imageCopyBuffer, &imageCopyTexture, &copySize);
+        texelCopyTextureInfo.aspect = wgpu::TextureAspect::Undefined;
+        encoder.CopyBufferToTexture(&texelCopyBufferInfo, &texelCopyTextureInfo, &copySize);
     };
 
     switch (GetParam().mInitializationMethod) {
@@ -3301,9 +3305,10 @@ TEST_P(CopyToDepthStencilTextureAfterDestroyingBigBufferTests, DoTest) {
             break;
         }
         case InitializationMethod::WriteTexture: {
-            wgpu::ImageCopyTexture imageCopyTexture = utils::CreateImageCopyTexture(texture);
-            wgpu::TextureDataLayout layout;
-            queue.WriteTexture(&imageCopyTexture, expectedData.data(), texelBlockSize, &layout,
+            wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+                utils::CreateTexelCopyTextureInfo(texture);
+            wgpu::TexelCopyBufferLayout layout;
+            queue.WriteTexture(&texelCopyTextureInfo, expectedData.data(), texelBlockSize, &layout,
                                &copySize);
             break;
         }
@@ -3311,10 +3316,12 @@ TEST_P(CopyToDepthStencilTextureAfterDestroyingBigBufferTests, DoTest) {
             wgpu::Texture stagingTexture = device.CreateTexture(&textureDescriptor);
             EncodeUploadDataToTexture(encoder, stagingTexture, expectedData);
 
-            wgpu::ImageCopyTexture imageCopyStagingTexture =
-                utils::CreateImageCopyTexture(stagingTexture);
-            wgpu::ImageCopyTexture imageCopyTexture = utils::CreateImageCopyTexture(texture);
-            encoder.CopyTextureToTexture(&imageCopyStagingTexture, &imageCopyTexture, &copySize);
+            wgpu::TexelCopyTextureInfo imageCopyStagingTexture =
+                utils::CreateTexelCopyTextureInfo(stagingTexture);
+            wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+                utils::CreateTexelCopyTextureInfo(texture);
+            encoder.CopyTextureToTexture(&imageCopyStagingTexture, &texelCopyTextureInfo,
+                                         &copySize);
             break;
         }
         default:
@@ -3327,10 +3334,10 @@ TEST_P(CopyToDepthStencilTextureAfterDestroyingBigBufferTests, DoTest) {
     destinationBufferDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
     wgpu::Buffer destinationBuffer = device.CreateBuffer(&destinationBufferDescriptor);
 
-    wgpu::ImageCopyTexture imageCopyTexture = utils::CreateImageCopyTexture(texture);
-    wgpu::ImageCopyBuffer imageCopyDestinationBuffer =
-        utils::CreateImageCopyBuffer(destinationBuffer);
-    encoder.CopyTextureToBuffer(&imageCopyTexture, &imageCopyDestinationBuffer, &copySize);
+    wgpu::TexelCopyTextureInfo texelCopyTextureInfo = utils::CreateTexelCopyTextureInfo(texture);
+    wgpu::TexelCopyBufferInfo imageCopyDestinationBuffer =
+        utils::CreateTexelCopyBufferInfo(destinationBuffer);
+    encoder.CopyTextureToBuffer(&texelCopyTextureInfo, &imageCopyDestinationBuffer, &copySize);
 
     wgpu::CommandBuffer commandBuffer = encoder.Finish();
     queue.Submit(1, &commandBuffer);
@@ -3431,10 +3438,10 @@ class T2TCopyFromDirtyHeapTests : public DawnTest {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         for (uint32_t layer = 0; layer < layerCount; ++layer) {
             for (uint32_t level = 0; level < levelCount; ++level) {
-                wgpu::ImageCopyBuffer uploadCopyBuffer =
-                    utils::CreateImageCopyBuffer(uploadBuffer, 0, kBytesPerRow, kTextureSize);
-                wgpu::ImageCopyTexture colorCopyTexture =
-                    utils::CreateImageCopyTexture(texture, level, {0, 0, layer});
+                wgpu::TexelCopyBufferInfo uploadCopyBuffer =
+                    utils::CreateTexelCopyBufferInfo(uploadBuffer, 0, kBytesPerRow, kTextureSize);
+                wgpu::TexelCopyTextureInfo colorCopyTexture =
+                    utils::CreateTexelCopyTextureInfo(texture, level, {0, 0, layer});
 
                 wgpu::Extent3D copySize = {kTextureSize >> level, kTextureSize >> level, 1};
                 encoder.CopyBufferToTexture(&uploadCopyBuffer, &colorCopyTexture, &copySize);
@@ -3453,11 +3460,12 @@ class T2TCopyFromDirtyHeapTests : public DawnTest {
 
         // Copy from miplevel = copyLevel and arrayLayer = copyLayer of sourceTexture into
         // stagingTexture
-        wgpu::ImageCopyTexture colorCopyTexture =
-            utils::CreateImageCopyTexture(sourceTexture, copyLevel, {0, 0, copyLayer});
+        wgpu::TexelCopyTextureInfo colorCopyTexture =
+            utils::CreateTexelCopyTextureInfo(sourceTexture, copyLevel, {0, 0, copyLayer});
         uint32_t stagingTextureSize = kTextureSize >> copyLevel;
         wgpu::Extent3D copySize = {stagingTextureSize, stagingTextureSize, 1};
-        wgpu::ImageCopyTexture stagingCopyTexture = utils::CreateImageCopyTexture(stagingTexture);
+        wgpu::TexelCopyTextureInfo stagingCopyTexture =
+            utils::CreateTexelCopyTextureInfo(stagingTexture);
         encoder.CopyTextureToTexture(&colorCopyTexture, &stagingCopyTexture, &copySize);
 
         // Copy from stagingTexture into readback buffer. Note that we don't use EXPECT_BUFFER_xxx()
@@ -3470,8 +3478,8 @@ class T2TCopyFromDirtyHeapTests : public DawnTest {
         readbackBufferDesc.size = kBufferSize;
         readbackBufferDesc.usage = wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst;
         wgpu::Buffer readbackBuffer = device.CreateBuffer(&readbackBufferDesc);
-        wgpu::ImageCopyBuffer readbackCopyBuffer =
-            utils::CreateImageCopyBuffer(readbackBuffer, 0, kBytesPerRow, kTextureSize);
+        wgpu::TexelCopyBufferInfo readbackCopyBuffer =
+            utils::CreateTexelCopyBufferInfo(readbackBuffer, 0, kBytesPerRow, kTextureSize);
         encoder.CopyTextureToBuffer(&stagingCopyTexture, &readbackCopyBuffer, &copySize);
 
         wgpu::CommandBuffer commandBuffer = encoder.Finish();

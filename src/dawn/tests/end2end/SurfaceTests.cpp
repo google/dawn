@@ -602,9 +602,9 @@ TEST_P(SurfaceTests, CopyTo) {
     surface.GetCurrentTexture(&t);
 
     wgpu::Extent3D writeSize = {1, 1, 1};
-    wgpu::ImageCopyTexture dest = {};
+    wgpu::TexelCopyTextureInfo dest = {};
     dest.texture = t.texture;
-    wgpu::TextureDataLayout dataLayout = {};
+    wgpu::TexelCopyBufferLayout dataLayout = {};
     queue.WriteTexture(&dest, &utils::RGBA8::kRed, sizeof(utils::RGBA8), &dataLayout, &writeSize);
 
     if (t.texture.GetUsage() & wgpu::TextureUsage::TextureBinding) {

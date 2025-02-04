@@ -2343,7 +2343,7 @@ MaybeError DeviceBase::CopyFromStagingToBuffer(BufferBase* source,
 }
 
 MaybeError DeviceBase::CopyFromStagingToTexture(BufferBase* source,
-                                                const TextureDataLayout& src,
+                                                const TexelCopyBufferLayout& src,
                                                 const TextureCopy& dst,
                                                 const Extent3D& copySizePixels) {
     if (dst.aspect == Aspect::Depth &&

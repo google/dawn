@@ -327,7 +327,7 @@ void SharedTextureMemoryTests::UseInRenderPass(wgpu::Device& deviceObj, wgpu::Te
 
 void SharedTextureMemoryTests::UseInCopy(wgpu::Device& deviceObj, wgpu::Texture& texture) {
     wgpu::CommandEncoder encoder = deviceObj.CreateCommandEncoder();
-    wgpu::ImageCopyTexture source;
+    wgpu::TexelCopyTextureInfo source;
     source.texture = texture;
 
     // Create a destination buffer, large enough for 1 texel of any format.
@@ -335,7 +335,7 @@ void SharedTextureMemoryTests::UseInCopy(wgpu::Device& deviceObj, wgpu::Texture&
     bufferDesc.size = 128;
     bufferDesc.usage = wgpu::BufferUsage::CopyDst;
 
-    wgpu::ImageCopyBuffer destination;
+    wgpu::TexelCopyBufferInfo destination;
     destination.buffer = deviceObj.CreateBuffer(&bufferDesc);
 
     wgpu::Extent3D size = {1, 1, 1};
@@ -514,10 +514,10 @@ void SharedTextureMemoryTests::WriteFourColorsToRGBA8Texture(wgpu::Device& devic
 
     wgpu::Extent3D writeSize = {width, height, 1};
 
-    wgpu::ImageCopyTexture dest;
+    wgpu::TexelCopyTextureInfo dest;
     dest.texture = texture;
 
-    wgpu::TextureDataLayout dataLayout = {
+    wgpu::TexelCopyBufferLayout dataLayout = {
         .offset = 0, .bytesPerRow = bytesPerRow, .rowsPerImage = height};
 
     for (uint32_t layer = 0; layer < texture.GetDepthOrArrayLayers(); ++layer) {
@@ -919,9 +919,9 @@ TEST_P(SharedTextureMemoryTests, ImportSharedFenceDeviceDestroyed) {
             UseInCopy(device, texture);
         } else if (properties.usage & wgpu::TextureUsage::CopyDst) {
             wgpu::Extent3D writeSize = {1, 1, 1};
-            wgpu::ImageCopyTexture dest = {};
+            wgpu::TexelCopyTextureInfo dest = {};
             dest.texture = texture;
-            wgpu::TextureDataLayout dataLayout = {};
+            wgpu::TexelCopyBufferLayout dataLayout = {};
             uint64_t data[2];
             device.GetQueue().WriteTexture(&dest, &data, sizeof(data), &dataLayout, &writeSize);
         }
@@ -1531,9 +1531,9 @@ TEST_P(SharedTextureMemoryTests, UseWithoutBegin) {
         }
         if (properties.usage & wgpu::TextureUsage::CopyDst) {
             wgpu::Extent3D writeSize = {1, 1, 1};
-            wgpu::ImageCopyTexture dest = {};
+            wgpu::TexelCopyTextureInfo dest = {};
             dest.texture = texture;
-            wgpu::TextureDataLayout dataLayout = {};
+            wgpu::TexelCopyBufferLayout dataLayout = {};
             uint64_t data[2];
             ASSERT_DEVICE_ERROR_MSG(
                 device.GetQueue().WriteTexture(&dest, &data, sizeof(data), &dataLayout, &writeSize),
@@ -1788,8 +1788,8 @@ TEST_P(SharedTextureMemoryTests, CopyToTextureThenSample) {
         // Copy from the source texture into `texture`.
         {
             wgpu::CommandEncoder encoder = devices[0].CreateCommandEncoder();
-            auto src = utils::CreateImageCopyTexture(srcTex);
-            auto dst = utils::CreateImageCopyTexture(texture);
+            auto src = utils::CreateTexelCopyTextureInfo(srcTex);
+            auto dst = utils::CreateTexelCopyTextureInfo(texture);
             for (uint32_t layer = 0; layer < texture.GetDepthOrArrayLayers(); ++layer) {
                 dst.origin.z = layer;
                 encoder.CopyTextureToTexture(&src, &dst, &texDesc.size);
@@ -1889,8 +1889,8 @@ TEST_P(SharedTextureMemoryTests, BeginEndWithoutUse) {
         // Copy from the source texture into `texture`.
         {
             wgpu::CommandEncoder encoder = devices[0].CreateCommandEncoder();
-            auto src = utils::CreateImageCopyTexture(srcTex);
-            auto dst = utils::CreateImageCopyTexture(texture);
+            auto src = utils::CreateTexelCopyTextureInfo(srcTex);
+            auto dst = utils::CreateTexelCopyTextureInfo(texture);
             for (uint32_t layer = 0; layer < texture.GetDepthOrArrayLayers(); ++layer) {
                 dst.origin.z = layer;
                 encoder.CopyTextureToTexture(&src, &dst, &texDesc.size);
@@ -1982,8 +1982,8 @@ TEST_P(SharedTextureMemoryTests, CopyToTextureThenSample2DArray) {
         // Copy from the source texture into `texture`.
         {
             wgpu::CommandEncoder encoder = devices[0].CreateCommandEncoder();
-            auto src = utils::CreateImageCopyTexture(srcTex);
-            auto dst = utils::CreateImageCopyTexture(texture);
+            auto src = utils::CreateTexelCopyTextureInfo(srcTex);
+            auto dst = utils::CreateTexelCopyTextureInfo(texture);
             for (uint32_t layer = 0; layer < texture.GetDepthOrArrayLayers(); ++layer) {
                 dst.origin.z = layer;
                 encoder.CopyTextureToTexture(&src, &dst, &texDesc.size);

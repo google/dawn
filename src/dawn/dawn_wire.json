@@ -92,10 +92,10 @@
         ],
         "queue write texture": [
             {"name": "queue id", "type": "ObjectId", "id_type": "queue" },
-            {"name": "destination", "type": "image copy texture", "annotation": "const*"},
+            {"name": "destination", "type": "texel copy texture info", "annotation": "const*"},
             {"name": "data", "type": "uint8_t", "annotation": "const*", "length": "data size", "wire_is_data_only": true},
             {"name": "data size", "type": "uint64_t"},
-            {"name": "data layout", "type": "texture data layout", "annotation": "const*"},
+            {"name": "data layout", "type": "texel copy buffer layout", "annotation": "const*"},
             {"name": "writeSize", "type": "extent 3D", "annotation": "const*"}
         ],
         "shader module get compilation info": [

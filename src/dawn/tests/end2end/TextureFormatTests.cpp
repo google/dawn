@@ -331,9 +331,10 @@ class TextureFormatTest : public DawnTest {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
         {
-            wgpu::ImageCopyBuffer bufferView = utils::CreateImageCopyBuffer(uploadBuffer, 0, 256);
-            wgpu::ImageCopyTexture textureView =
-                utils::CreateImageCopyTexture(sampleTexture, 0, {0, 0, 0});
+            wgpu::TexelCopyBufferInfo bufferView =
+                utils::CreateTexelCopyBufferInfo(uploadBuffer, 0, 256);
+            wgpu::TexelCopyTextureInfo textureView =
+                utils::CreateTexelCopyTextureInfo(sampleTexture, 0, {0, 0, 0});
             wgpu::Extent3D extent{width, 1, 1};
             encoder.CopyBufferToTexture(&bufferView, &textureView, &extent);
         }
@@ -346,9 +347,10 @@ class TextureFormatTest : public DawnTest {
         renderPass.End();
 
         {
-            wgpu::ImageCopyBuffer bufferView = utils::CreateImageCopyBuffer(readbackBuffer, 0, 256);
-            wgpu::ImageCopyTexture textureView =
-                utils::CreateImageCopyTexture(renderTarget, 0, {0, 0, 0});
+            wgpu::TexelCopyBufferInfo bufferView =
+                utils::CreateTexelCopyBufferInfo(readbackBuffer, 0, 256);
+            wgpu::TexelCopyTextureInfo textureView =
+                utils::CreateTexelCopyTextureInfo(renderTarget, 0, {0, 0, 0});
             wgpu::Extent3D extent{width, 1, 1};
             encoder.CopyTextureToBuffer(&textureView, &bufferView, &extent);
         }

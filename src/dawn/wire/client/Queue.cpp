@@ -121,10 +121,10 @@ void Queue::WriteBuffer(WGPUBuffer cBuffer, uint64_t bufferOffset, const void* d
     GetClient()->SerializeCommand(cmd);
 }
 
-void Queue::WriteTexture(const WGPUImageCopyTexture* destination,
+void Queue::WriteTexture(const WGPUTexelCopyTextureInfo* destination,
                          const void* data,
                          size_t dataSize,
-                         const WGPUTextureDataLayout* dataLayout,
+                         const WGPUTexelCopyBufferLayout* dataLayout,
                          const WGPUExtent3D* writeSize) {
     QueueWriteTextureCmd cmd;
     cmd.queueId = GetWireId();

@@ -105,7 +105,7 @@ ResultOrError<UploadHandle> UploadTextureDataAligningBytesPerRowAndOffset(
     uint32_t alignedBytesPerRow,
     uint32_t optimallyAlignedBytesPerRow,
     uint32_t alignedRowsPerImage,
-    const TextureDataLayout& dataLayout,
+    const TexelCopyBufferLayout& dataLayout,
     bool hasDepthOrStencil,
     const TexelBlockInfo& blockInfo,
     const Extent3D& writeSizePixel) {
@@ -389,10 +389,10 @@ MaybeError QueueBase::WriteBufferImpl(BufferBase* buffer,
     return buffer->UploadData(bufferOffset, data, size);
 }
 
-void QueueBase::APIWriteTexture(const ImageCopyTexture* destination,
+void QueueBase::APIWriteTexture(const TexelCopyTextureInfo* destination,
                                 const void* data,
                                 size_t dataSize,
-                                const TextureDataLayout* dataLayout,
+                                const TexelCopyBufferLayout* dataLayout,
                                 const Extent3D* writeSize) {
     [[maybe_unused]] bool hadError = GetDevice()->ConsumedError(
         WriteTextureInternal(destination, data, dataSize, *dataLayout, writeSize),
@@ -400,12 +400,12 @@ void QueueBase::APIWriteTexture(const ImageCopyTexture* destination,
         writeSize);
 }
 
-MaybeError QueueBase::WriteTextureInternal(const ImageCopyTexture* destinationOrig,
+MaybeError QueueBase::WriteTextureInternal(const TexelCopyTextureInfo* destinationOrig,
                                            const void* data,
                                            size_t dataSize,
-                                           const TextureDataLayout& dataLayout,
+                                           const TexelCopyBufferLayout& dataLayout,
                                            const Extent3D* writeSize) {
-    ImageCopyTexture destination = destinationOrig->WithTrivialFrontendDefaults();
+    TexelCopyTextureInfo destination = destinationOrig->WithTrivialFrontendDefaults();
 
     DAWN_TRY(ValidateWriteTexture(&destination, dataSize, dataLayout, writeSize));
 
@@ -415,15 +415,15 @@ MaybeError QueueBase::WriteTextureInternal(const ImageCopyTexture* destinationOr
 
     const TexelBlockInfo& blockInfo =
         destination.texture->GetFormat().GetAspectInfo(destination.aspect).block;
-    TextureDataLayout layout = dataLayout;
-    ApplyDefaultTextureDataLayoutOptions(&layout, blockInfo, *writeSize);
+    TexelCopyBufferLayout layout = dataLayout;
+    ApplyDefaultTexelCopyBufferLayoutOptions(&layout, blockInfo, *writeSize);
     return WriteTextureImpl(destination, data, dataSize, layout, *writeSize);
 }
 
-MaybeError QueueBase::WriteTextureImpl(const ImageCopyTexture& destination,
+MaybeError QueueBase::WriteTextureImpl(const TexelCopyTextureInfo& destination,
                                        const void* data,
                                        size_t dataSize,
-                                       const TextureDataLayout& dataLayout,
+                                       const TexelCopyBufferLayout& dataLayout,
                                        const Extent3D& writeSizePixel) {
     const Format& format = destination.texture->GetFormat();
     const TexelBlockInfo& blockInfo = format.GetAspectInfo(destination.aspect).block;
@@ -445,7 +445,7 @@ MaybeError QueueBase::WriteTextureImpl(const ImageCopyTexture& destination,
                                       optimallyAlignedBytesPerRow, alignedRowsPerImage, dataLayout,
                                       format.HasDepthOrStencil(), blockInfo, writeSizePixel));
 
-    TextureDataLayout passDataLayout = dataLayout;
+    TexelCopyBufferLayout passDataLayout = dataLayout;
     passDataLayout.offset = uploadHandle.startOffset;
     passDataLayout.bytesPerRow = optimallyAlignedBytesPerRow;
     passDataLayout.rowsPerImage = alignedRowsPerImage;
@@ -462,8 +462,8 @@ MaybeError QueueBase::WriteTextureImpl(const ImageCopyTexture& destination,
                                             writeSizePixel);
 }
 
-void QueueBase::APICopyTextureForBrowser(const ImageCopyTexture* source,
-                                         const ImageCopyTexture* destination,
+void QueueBase::APICopyTextureForBrowser(const TexelCopyTextureInfo* source,
+                                         const TexelCopyTextureInfo* destination,
                                          const Extent3D* copySize,
                                          const CopyTextureForBrowserOptions* options) {
     [[maybe_unused]] bool hadError = GetDevice()->ConsumedError(
@@ -471,19 +471,19 @@ void QueueBase::APICopyTextureForBrowser(const ImageCopyTexture* source,
 }
 
 void QueueBase::APICopyExternalTextureForBrowser(const ImageCopyExternalTexture* source,
-                                                 const ImageCopyTexture* destination,
+                                                 const TexelCopyTextureInfo* destination,
                                                  const Extent3D* copySize,
                                                  const CopyTextureForBrowserOptions* options) {
     [[maybe_unused]] bool hadError = GetDevice()->ConsumedError(
         CopyExternalTextureForBrowserInternal(source, destination, copySize, options));
 }
 
-MaybeError QueueBase::CopyTextureForBrowserInternal(const ImageCopyTexture* sourceOrig,
-                                                    const ImageCopyTexture* destinationOrig,
+MaybeError QueueBase::CopyTextureForBrowserInternal(const TexelCopyTextureInfo* sourceOrig,
+                                                    const TexelCopyTextureInfo* destinationOrig,
                                                     const Extent3D* copySize,
                                                     const CopyTextureForBrowserOptions* options) {
-    ImageCopyTexture source = sourceOrig->WithTrivialFrontendDefaults();
-    ImageCopyTexture destination = destinationOrig->WithTrivialFrontendDefaults();
+    TexelCopyTextureInfo source = sourceOrig->WithTrivialFrontendDefaults();
+    TexelCopyTextureInfo destination = destinationOrig->WithTrivialFrontendDefaults();
 
     if (GetDevice()->IsValidationEnabled()) {
         DAWN_TRY_CONTEXT(
@@ -496,10 +496,10 @@ MaybeError QueueBase::CopyTextureForBrowserInternal(const ImageCopyTexture* sour
 
 MaybeError QueueBase::CopyExternalTextureForBrowserInternal(
     const ImageCopyExternalTexture* source,
-    const ImageCopyTexture* destinationOrig,
+    const TexelCopyTextureInfo* destinationOrig,
     const Extent3D* copySize,
     const CopyTextureForBrowserOptions* options) {
-    ImageCopyTexture destination = destinationOrig->WithTrivialFrontendDefaults();
+    TexelCopyTextureInfo destination = destinationOrig->WithTrivialFrontendDefaults();
 
     if (GetDevice()->IsValidationEnabled()) {
         DAWN_TRY_CONTEXT(ValidateCopyExternalTextureForBrowser(GetDevice(), source, &destination,
@@ -574,15 +574,15 @@ MaybeError QueueBase::ValidateOnSubmittedWorkDone() const {
     return {};
 }
 
-MaybeError QueueBase::ValidateWriteTexture(const ImageCopyTexture* destination,
+MaybeError QueueBase::ValidateWriteTexture(const TexelCopyTextureInfo* destination,
                                            size_t dataSize,
-                                           const TextureDataLayout& dataLayout,
+                                           const TexelCopyBufferLayout& dataLayout,
                                            const Extent3D* writeSize) const {
     DAWN_TRY(GetDevice()->ValidateIsAlive());
     DAWN_TRY(GetDevice()->ValidateObject(this));
     DAWN_TRY(GetDevice()->ValidateObject(destination->texture));
 
-    DAWN_TRY(ValidateImageCopyTexture(GetDevice(), *destination, *writeSize));
+    DAWN_TRY(ValidateTexelCopyTextureInfo(GetDevice(), *destination, *writeSize));
 
     DAWN_INVALID_IF(dataLayout.offset > dataSize,
                     "Data offset (%u) is greater than the data size (%u).", dataLayout.offset,

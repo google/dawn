@@ -507,7 +507,7 @@ MaybeError BlitR8ToStencil(DeviceBase* device,
 
 MaybeError BlitStagingBufferToDepth(DeviceBase* device,
                                     BufferBase* buffer,
-                                    const TextureDataLayout& src,
+                                    const TexelCopyBufferLayout& src,
                                     const TextureCopy& dst,
                                     const Extent3D& copyExtent) {
     const Format& format = dst.texture->GetFormat();
@@ -546,7 +546,7 @@ MaybeError BlitStagingBufferToDepth(DeviceBase* device,
 MaybeError BlitBufferToDepth(DeviceBase* device,
                              CommandEncoder* commandEncoder,
                              BufferBase* buffer,
-                             const TextureDataLayout& src,
+                             const TexelCopyBufferLayout& src,
                              const TextureCopy& dst,
                              const Extent3D& copyExtent) {
     const Format& format = dst.texture->GetFormat();
@@ -560,11 +560,11 @@ MaybeError BlitBufferToDepth(DeviceBase* device,
     Ref<TextureBase> dataTexture;
     DAWN_TRY_ASSIGN(dataTexture, device->CreateTexture(&dataTextureDesc));
     {
-        ImageCopyBuffer bufferSrc;
+        TexelCopyBufferInfo bufferSrc;
         bufferSrc.buffer = buffer;
         bufferSrc.layout = src;
 
-        ImageCopyTexture textureDst;
+        TexelCopyTextureInfo textureDst;
         textureDst.texture = dataTexture.Get();
         commandEncoder->APICopyBufferToTexture(&bufferSrc, &textureDst, &copyExtent);
     }
@@ -575,7 +575,7 @@ MaybeError BlitBufferToDepth(DeviceBase* device,
 
 MaybeError BlitStagingBufferToStencil(DeviceBase* device,
                                       BufferBase* buffer,
-                                      const TextureDataLayout& src,
+                                      const TexelCopyBufferLayout& src,
                                       const TextureCopy& dst,
                                       const Extent3D& copyExtent) {
     TextureDescriptor dataTextureDesc = {};
@@ -610,7 +610,7 @@ MaybeError BlitStagingBufferToStencil(DeviceBase* device,
 MaybeError BlitBufferToStencil(DeviceBase* device,
                                CommandEncoder* commandEncoder,
                                BufferBase* buffer,
-                               const TextureDataLayout& src,
+                               const TexelCopyBufferLayout& src,
                                const TextureCopy& dst,
                                const Extent3D& copyExtent) {
     TextureDescriptor dataTextureDesc = {};
@@ -621,11 +621,11 @@ MaybeError BlitBufferToStencil(DeviceBase* device,
     Ref<TextureBase> dataTexture;
     DAWN_TRY_ASSIGN(dataTexture, device->CreateTexture(&dataTextureDesc));
     {
-        ImageCopyBuffer bufferSrc;
+        TexelCopyBufferInfo bufferSrc;
         bufferSrc.buffer = buffer;
         bufferSrc.layout = src;
 
-        ImageCopyTexture textureDst;
+        TexelCopyTextureInfo textureDst;
         textureDst.texture = dataTexture.Get();
         commandEncoder->APICopyBufferToTexture(&bufferSrc, &textureDst, &copyExtent);
     }

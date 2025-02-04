@@ -1204,7 +1204,7 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* recordingContext,
                     continue;
                 }
 
-                TextureDataLayout dataLayout;
+                TexelCopyBufferLayout dataLayout;
                 dataLayout.offset = uploadHandle.startOffset;
                 dataLayout.rowsPerImage = copySize.height / blockInfo.height;
                 dataLayout.bytesPerRow = bytesPerRow;

@@ -1542,8 +1542,8 @@ TEST_F(CompatValidationTest, CanNotCopyMultisampleTextureToTexture) {
     dstDescriptor.sampleCount = 4;
     wgpu::Texture dstTexture = device.CreateTexture(&dstDescriptor);
 
-    wgpu::ImageCopyTexture source = utils::CreateImageCopyTexture(srcTexture);
-    wgpu::ImageCopyTexture destination = utils::CreateImageCopyTexture(dstTexture);
+    wgpu::TexelCopyTextureInfo source = utils::CreateTexelCopyTextureInfo(srcTexture);
+    wgpu::TexelCopyTextureInfo destination = utils::CreateTexelCopyTextureInfo(dstTexture);
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     encoder.CopyTextureToTexture(&source, &destination, &srcDescriptor.size);
@@ -1829,8 +1829,8 @@ TEST_F(CompatCompressedCopyT2BAndCopyT2TValidationTests, CanNotCopyCompressedTex
         bufferDescriptor.usage = wgpu::BufferUsage::CopyDst;
         wgpu::Buffer buffer = device.CreateBuffer(&bufferDescriptor);
 
-        wgpu::ImageCopyTexture source = utils::CreateImageCopyTexture(texture);
-        wgpu::ImageCopyBuffer destination = utils::CreateImageCopyBuffer(buffer, 0, 256, 4);
+        wgpu::TexelCopyTextureInfo source = utils::CreateTexelCopyTextureInfo(texture);
+        wgpu::TexelCopyBufferInfo destination = utils::CreateTexelCopyBufferInfo(buffer, 0, 256, 4);
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         encoder.CopyTextureToBuffer(&source, &destination, &descriptor.size);
@@ -1854,8 +1854,8 @@ TEST_F(CompatCompressedCopyT2BAndCopyT2TValidationTests, CanNotCopyCompressedTex
         descriptor.usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopyDst;
         wgpu::Texture dstTexture = device.CreateTexture(&descriptor);
 
-        wgpu::ImageCopyTexture source = utils::CreateImageCopyTexture(srcTexture);
-        wgpu::ImageCopyTexture destination = utils::CreateImageCopyTexture(dstTexture);
+        wgpu::TexelCopyTextureInfo source = utils::CreateTexelCopyTextureInfo(srcTexture);
+        wgpu::TexelCopyTextureInfo destination = utils::CreateTexelCopyTextureInfo(dstTexture);
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         encoder.CopyTextureToTexture(&source, &destination, &descriptor.size);

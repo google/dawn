@@ -479,11 +479,11 @@ fn IsEqualTo(pixel : vec4f, expected : vec4f) -> bool {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
         const wgpu::Extent3D copyExtent = {kWidth, kHeight, sliceCount};
-        wgpu::ImageCopyBuffer imageCopyBuffer =
-            utils::CreateImageCopyBuffer(uploadBuffer, 0, kTextureBytesPerRowAlignment, kHeight);
-        wgpu::ImageCopyTexture imageCopyTexture;
-        imageCopyTexture.texture = outputTexture;
-        encoder.CopyBufferToTexture(&imageCopyBuffer, &imageCopyTexture, &copyExtent);
+        wgpu::TexelCopyBufferInfo texelCopyBufferInfo = utils::CreateTexelCopyBufferInfo(
+            uploadBuffer, 0, kTextureBytesPerRowAlignment, kHeight);
+        wgpu::TexelCopyTextureInfo texelCopyTextureInfo;
+        texelCopyTextureInfo.texture = outputTexture;
+        encoder.CopyBufferToTexture(&texelCopyBufferInfo, &texelCopyTextureInfo, &copyExtent);
 
         wgpu::CommandBuffer commandBuffer = encoder.Finish();
         queue.Submit(1, &commandBuffer);
@@ -677,11 +677,11 @@ fn IsEqualTo(pixel : vec4f, expected : vec4f) -> bool {
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         {
-            wgpu::ImageCopyTexture imageCopyTexture =
-                utils::CreateImageCopyTexture(storageTexture, mipLevel, {0, 0, 0});
-            wgpu::ImageCopyBuffer imageCopyBuffer = utils::CreateImageCopyBuffer(
+            wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+                utils::CreateTexelCopyTextureInfo(storageTexture, mipLevel, {0, 0, 0});
+            wgpu::TexelCopyBufferInfo texelCopyBufferInfo = utils::CreateTexelCopyBufferInfo(
                 resultBuffer, 0, kTextureBytesPerRowAlignment, size.height);
-            encoder.CopyTextureToBuffer(&imageCopyTexture, &imageCopyBuffer, &size);
+            encoder.CopyTextureToBuffer(&texelCopyTextureInfo, &texelCopyBufferInfo, &size);
         }
         wgpu::CommandBuffer commandBuffer = encoder.Finish();
         queue.Submit(1, &commandBuffer);
@@ -895,12 +895,13 @@ TEST_P(StorageTextureTests, SampledAndWriteonlyStorageTexturePingPong) {
     bufferDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
     wgpu::Buffer resultBuffer = device.CreateBuffer(&bufferDescriptor);
 
-    wgpu::ImageCopyTexture imageCopyTexture;
-    imageCopyTexture.texture = storageTexture1;
+    wgpu::TexelCopyTextureInfo texelCopyTextureInfo;
+    texelCopyTextureInfo.texture = storageTexture1;
 
-    wgpu::ImageCopyBuffer imageCopyBuffer = utils::CreateImageCopyBuffer(resultBuffer, 0, 256, 1);
+    wgpu::TexelCopyBufferInfo texelCopyBufferInfo =
+        utils::CreateTexelCopyBufferInfo(resultBuffer, 0, 256, 1);
     wgpu::Extent3D extent3D = {1, 1, 1};
-    encoder.CopyTextureToBuffer(&imageCopyTexture, &imageCopyBuffer, &extent3D);
+    encoder.CopyTextureToBuffer(&texelCopyTextureInfo, &texelCopyBufferInfo, &extent3D);
 
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
@@ -1506,21 +1507,21 @@ TEST_P(ReadWriteStorageTextureTests, ReadMipLevel0WriteMipLevel1) {
     computeEncoder.End();
 
     {
-        wgpu::ImageCopyTexture imageCopyTexture =
-            utils::CreateImageCopyTexture(texture, 0, {0, 0, 0});
-        wgpu::ImageCopyBuffer imageCopyBuffer =
-            utils::CreateImageCopyBuffer(resultBuffer0, 0, 256, 1);
+        wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(texture, 0, {0, 0, 0});
+        wgpu::TexelCopyBufferInfo texelCopyBufferInfo =
+            utils::CreateTexelCopyBufferInfo(resultBuffer0, 0, 256, 1);
         wgpu::Extent3D size({1, 1, 1});
-        encoder.CopyTextureToBuffer(&imageCopyTexture, &imageCopyBuffer, &size);
+        encoder.CopyTextureToBuffer(&texelCopyTextureInfo, &texelCopyBufferInfo, &size);
     }
 
     {
-        wgpu::ImageCopyTexture imageCopyTexture =
-            utils::CreateImageCopyTexture(texture, 1, {0, 0, 0});
-        wgpu::ImageCopyBuffer imageCopyBuffer =
-            utils::CreateImageCopyBuffer(resultBuffer1, 0, 256, 1);
+        wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(texture, 1, {0, 0, 0});
+        wgpu::TexelCopyBufferInfo texelCopyBufferInfo =
+            utils::CreateTexelCopyBufferInfo(resultBuffer1, 0, 256, 1);
         wgpu::Extent3D size({1, 1, 1});
-        encoder.CopyTextureToBuffer(&imageCopyTexture, &imageCopyBuffer, &size);
+        encoder.CopyTextureToBuffer(&texelCopyTextureInfo, &texelCopyBufferInfo, &size);
     }
 
     wgpu::CommandBuffer commandBuffer = encoder.Finish();
@@ -1583,11 +1584,12 @@ TEST_P(ReadWriteStorageTextureTests, ReadMipLevel2AsBothTextureBindingAndStorage
         uint32_t width = 4 >> mipLevel;
         uint32_t bytesPerRow = width * 4;
         wgpu::Extent3D copySize({width, 1, 1});
-        wgpu::ImageCopyTexture imageCopyTexture =
-            utils::CreateImageCopyTexture(texture, mipLevel, {0, 0, 0});
-        wgpu::TextureDataLayout textureDataLayout = utils::CreateTextureDataLayout(0, bytesPerRow);
+        wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(texture, mipLevel, {0, 0, 0});
+        wgpu::TexelCopyBufferLayout texelCopyBufferLayout =
+            utils::CreateTexelCopyBufferLayout(0, bytesPerRow);
         std::vector<uint8_t> data(bytesPerRow, mipLevel + 1);
-        queue.WriteTexture(&imageCopyTexture, data.data(), bytesPerRow, &textureDataLayout,
+        queue.WriteTexture(&texelCopyTextureInfo, data.data(), bytesPerRow, &texelCopyBufferLayout,
                            &copySize);
     }
 
@@ -1662,11 +1664,12 @@ TEST_P(ReadWriteStorageTextureTests, ReadMipLevel1AndWriteLevel2AtTheSameTime) {
         uint32_t width = 4 >> mipLevel;
         uint32_t bytesPerRow = width * 4;
         wgpu::Extent3D copySize({width, 1, 1});
-        wgpu::ImageCopyTexture imageCopyTexture =
-            utils::CreateImageCopyTexture(texture, mipLevel, {0, 0, 0});
-        wgpu::TextureDataLayout textureDataLayout = utils::CreateTextureDataLayout(0, bytesPerRow);
+        wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(texture, mipLevel, {0, 0, 0});
+        wgpu::TexelCopyBufferLayout texelCopyBufferLayout =
+            utils::CreateTexelCopyBufferLayout(0, bytesPerRow);
         std::vector<uint8_t> data(bytesPerRow, mipLevel + 1);
-        queue.WriteTexture(&imageCopyTexture, data.data(), bytesPerRow, &textureDataLayout,
+        queue.WriteTexture(&texelCopyTextureInfo, data.data(), bytesPerRow, &texelCopyBufferLayout,
                            &copySize);
     }
 
@@ -1695,12 +1698,12 @@ TEST_P(ReadWriteStorageTextureTests, ReadMipLevel1AndWriteLevel2AtTheSameTime) {
 
     // copy a texel from mip level 2
     {
-        wgpu::ImageCopyTexture imageCopyTexture =
-            utils::CreateImageCopyTexture(texture, 2, {0, 0, 0});
-        wgpu::ImageCopyBuffer imageCopyBuffer =
-            utils::CreateImageCopyBuffer(resultBuffer, 0, 256, 1);
+        wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(texture, 2, {0, 0, 0});
+        wgpu::TexelCopyBufferInfo texelCopyBufferInfo =
+            utils::CreateTexelCopyBufferInfo(resultBuffer, 0, 256, 1);
         wgpu::Extent3D size({1, 1, 1});
-        encoder.CopyTextureToBuffer(&imageCopyTexture, &imageCopyBuffer, &size);
+        encoder.CopyTextureToBuffer(&texelCopyTextureInfo, &texelCopyBufferInfo, &size);
     }
 
     wgpu::CommandBuffer commandBuffer = encoder.Finish();

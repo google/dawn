@@ -220,39 +220,39 @@ BasicRenderPass CreateBasicRenderPass(const wgpu::Device& device,
     return BasicRenderPass(width, height, color, format);
 }
 
-wgpu::ImageCopyBuffer CreateImageCopyBuffer(wgpu::Buffer buffer,
-                                            uint64_t offset,
-                                            uint32_t bytesPerRow,
-                                            uint32_t rowsPerImage) {
-    wgpu::ImageCopyBuffer imageCopyBuffer = {};
-    imageCopyBuffer.buffer = buffer;
-    imageCopyBuffer.layout = CreateTextureDataLayout(offset, bytesPerRow, rowsPerImage);
+wgpu::TexelCopyBufferInfo CreateTexelCopyBufferInfo(wgpu::Buffer buffer,
+                                                    uint64_t offset,
+                                                    uint32_t bytesPerRow,
+                                                    uint32_t rowsPerImage) {
+    wgpu::TexelCopyBufferInfo texelCopyBufferInfo = {};
+    texelCopyBufferInfo.buffer = buffer;
+    texelCopyBufferInfo.layout = CreateTexelCopyBufferLayout(offset, bytesPerRow, rowsPerImage);
 
-    return imageCopyBuffer;
+    return texelCopyBufferInfo;
 }
 
-wgpu::ImageCopyTexture CreateImageCopyTexture(wgpu::Texture texture,
-                                              uint32_t mipLevel,
-                                              wgpu::Origin3D origin,
-                                              wgpu::TextureAspect aspect) {
-    wgpu::ImageCopyTexture imageCopyTexture;
-    imageCopyTexture.texture = texture;
-    imageCopyTexture.mipLevel = mipLevel;
-    imageCopyTexture.origin = origin;
-    imageCopyTexture.aspect = aspect;
+wgpu::TexelCopyTextureInfo CreateTexelCopyTextureInfo(wgpu::Texture texture,
+                                                      uint32_t mipLevel,
+                                                      wgpu::Origin3D origin,
+                                                      wgpu::TextureAspect aspect) {
+    wgpu::TexelCopyTextureInfo texelCopyTextureInfo;
+    texelCopyTextureInfo.texture = texture;
+    texelCopyTextureInfo.mipLevel = mipLevel;
+    texelCopyTextureInfo.origin = origin;
+    texelCopyTextureInfo.aspect = aspect;
 
-    return imageCopyTexture;
+    return texelCopyTextureInfo;
 }
 
-wgpu::TextureDataLayout CreateTextureDataLayout(uint64_t offset,
-                                                uint32_t bytesPerRow,
-                                                uint32_t rowsPerImage) {
-    wgpu::TextureDataLayout textureDataLayout;
-    textureDataLayout.offset = offset;
-    textureDataLayout.bytesPerRow = bytesPerRow;
-    textureDataLayout.rowsPerImage = rowsPerImage;
+wgpu::TexelCopyBufferLayout CreateTexelCopyBufferLayout(uint64_t offset,
+                                                        uint32_t bytesPerRow,
+                                                        uint32_t rowsPerImage) {
+    wgpu::TexelCopyBufferLayout texelCopyBufferLayout;
+    texelCopyBufferLayout.offset = offset;
+    texelCopyBufferLayout.bytesPerRow = bytesPerRow;
+    texelCopyBufferLayout.rowsPerImage = rowsPerImage;
 
-    return textureDataLayout;
+    return texelCopyBufferLayout;
 }
 
 wgpu::PipelineLayout MakeBasicPipelineLayout(const wgpu::Device& device,

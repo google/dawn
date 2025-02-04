@@ -752,12 +752,12 @@ TEST_P(ExternalTextureTests, RotateAndOrFlipTextureLoadSinglePlaneNotSquare) {
         pass.End();
 
         {
-            wgpu::ImageCopyTexture imageCopyTexture =
-                utils::CreateImageCopyTexture(dimensionTexture, 0, {0, 0, 0});
-            wgpu::ImageCopyBuffer imageCopyBuffer =
-                utils::CreateImageCopyBuffer(dimensionBuffer, 0, 256, 1);
+            wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+                utils::CreateTexelCopyTextureInfo(dimensionTexture, 0, {0, 0, 0});
+            wgpu::TexelCopyBufferInfo texelCopyBufferInfo =
+                utils::CreateTexelCopyBufferInfo(dimensionBuffer, 0, 256, 1);
             wgpu::Extent3D size = {1, 1, 1};
-            encoder.CopyTextureToBuffer(&imageCopyTexture, &imageCopyBuffer, &size);
+            encoder.CopyTextureToBuffer(&texelCopyTextureInfo, &texelCopyBufferInfo, &size);
         }
 
         wgpu::CommandBuffer commands = encoder.Finish();
@@ -1127,12 +1127,12 @@ TEST_P(ExternalTextureTests, ApparentSizeEffect) {
     }
 
     {
-        wgpu::ImageCopyTexture imageCopyTexture =
-            utils::CreateImageCopyTexture(dimensionTexture, 0, {0, 0, 0});
-        wgpu::ImageCopyBuffer imageCopyBuffer =
-            utils::CreateImageCopyBuffer(dimensionBuffer, 0, 256, 1);
+        wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(dimensionTexture, 0, {0, 0, 0});
+        wgpu::TexelCopyBufferInfo texelCopyBufferInfo =
+            utils::CreateTexelCopyBufferInfo(dimensionBuffer, 0, 256, 1);
         wgpu::Extent3D size = {1, 1, 1};
-        encoder.CopyTextureToBuffer(&imageCopyTexture, &imageCopyBuffer, &size);
+        encoder.CopyTextureToBuffer(&texelCopyTextureInfo, &texelCopyBufferInfo, &size);
     }
 
     wgpu::CommandBuffer commands = encoder.Finish();

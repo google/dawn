@@ -216,8 +216,8 @@ class PixelLocalStorageTests : public DawnTest {
                 pass.End();
 
                 // Copy clearedTexture -> attachment.
-                wgpu::ImageCopyTexture src = utils::CreateImageCopyTexture(clearedTexture);
-                wgpu::ImageCopyTexture dst = utils::CreateImageCopyTexture(attachment);
+                wgpu::TexelCopyTextureInfo src = utils::CreateTexelCopyTextureInfo(clearedTexture);
+                wgpu::TexelCopyTextureInfo dst = utils::CreateTexelCopyTextureInfo(attachment);
                 wgpu::Extent3D copySize = {1, 1, 1};
                 encoder.CopyTextureToTexture(&src, &dst, &copySize);
 
