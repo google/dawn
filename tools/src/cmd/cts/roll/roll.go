@@ -149,15 +149,8 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 		}
 	}
 
-	// Create a temporary directory for local checkouts
-	tmpDir, err := os.MkdirTemp("", "dawn-cts-roll")
-	if err != nil {
-		return err
-	}
-	defer os.RemoveAll(tmpDir)
-	ctsDir := filepath.Join(tmpDir, "cts")
-
-	// Create the various service clients
+	// Create the various service clients and ensure required permissions are
+	// available.
 	git, err := git.New(c.flags.gitPath)
 	if err != nil {
 		return fmt.Errorf("failed to obtain authentication options: %w", err)
@@ -178,6 +171,24 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 	if err != nil {
 		return err
 	}
+
+	credCheckInput := common.CredCheckInputs{
+		GerritConfig:  gerrit,
+		GitilesConfig: dawn,
+		Querier:       client,
+	}
+	err = common.CheckAllRequiredCredentials(ctx, credCheckInput)
+	if err != nil {
+		return err
+	}
+
+	// Create a temporary directory for local checkouts
+	tmpDir, err := os.MkdirTemp("", "dawn-cts-roll")
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(tmpDir)
+	ctsDir := filepath.Join(tmpDir, "cts")
 
 	// Construct the roller, and roll
 	r := roller{
@@ -393,7 +404,7 @@ func (r *roller) roll(ctx context.Context) error {
 		if psResultsByExecutionMode != nil {
 			log.Println("exporting results...")
 			if err := common.Export(ctx, r.auth, r.cfg.Sheets.ID, r.ctsDir, r.flags.nodePath, r.flags.npmPath, psResultsByExecutionMode); err != nil {
-				log.Println("failed to update results spreadsheet: ", err)
+				log.Println("failed to update results spreadsheet (expected if running locally): ", err)
 			}
 		}
 	}()

@@ -43,6 +43,7 @@ import (
 	"dawn.googlesource.com/dawn/tools/src/subcmd"
 
 	// Register sub-commands
+	_ "dawn.googlesource.com/dawn/tools/src/cmd/cts/credentialscheck"
 	_ "dawn.googlesource.com/dawn/tools/src/cmd/cts/expectationcoverage"
 	_ "dawn.googlesource.com/dawn/tools/src/cmd/cts/export"
 	_ "dawn.googlesource.com/dawn/tools/src/cmd/cts/format"

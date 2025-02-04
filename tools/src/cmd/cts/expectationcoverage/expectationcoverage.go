@@ -52,17 +52,6 @@ func init() {
 	common.Register(&cmd{})
 }
 
-type arrayFlags []string
-
-func (i *arrayFlags) String() string {
-	return strings.Join((*i), " ")
-}
-
-func (i *arrayFlags) Set(value string) error {
-	*i = append(*i, value)
-	return nil
-}
-
 type cmd struct {
 	flags struct {
 		maxOutput               int
@@ -87,7 +76,7 @@ func (cmd) Desc() string {
 	return "checks how much test coverage is lost due to expectations"
 }
 
-func (c *cmd) RegisterFlags(cts context.Context, cfg common.Config) ([]string, error) {
+func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, error) {
 	flag.IntVar(
 		&c.flags.maxOutput,
 		"max-output",

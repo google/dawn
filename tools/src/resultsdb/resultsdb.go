@@ -90,6 +90,19 @@ func NewBigQueryClient(ctx context.Context, project string) (*BigQueryClient, er
 	return &BigQueryClient{client}, nil
 }
 
+// CheckIfResultDBCanBeQueried checks whether the BigQueryClient can successfully
+// run a query in public ResultDB data. Failure to do so typically indicates a
+// permission issue.
+func (bq BigQueryClient) CheckIfResultDBCanBeQueried(ctx context.Context) error {
+	query := `
+    SELECT
+      *
+    FROM ` + "`chrome-luci-data.chromium.gpu_try_test_results`" + ` tr
+    LIMIT 0`
+
+	return bq.runQuery(ctx, query, func(row *QueryResult) error { return nil })
+}
+
 // QueryTestResults fetches the test results for the given builds using
 // BigQuery.
 //
