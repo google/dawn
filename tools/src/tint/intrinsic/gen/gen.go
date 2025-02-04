@@ -520,6 +520,8 @@ func ElementType(fqn sem.FullyQualifiedName) sem.FullyQualifiedName {
 		return fqn.TemplateArguments[0].(sem.FullyQualifiedName)
 	case "runtime_array":
 		return fqn.TemplateArguments[0].(sem.FullyQualifiedName)
+	case "subgroup_matrix":
+		return fqn.TemplateArguments[1].(sem.FullyQualifiedName)
 	}
 	return fqn
 }
@@ -543,6 +545,8 @@ func DeepestElementType(fqn sem.FullyQualifiedName) sem.FullyQualifiedName {
 	case "runtime_array":
 		return DeepestElementType(fqn.TemplateArguments[0].(sem.FullyQualifiedName))
 	case "ptr":
+		return DeepestElementType(fqn.TemplateArguments[1].(sem.FullyQualifiedName))
+	case "subgroup_matrix":
 		return DeepestElementType(fqn.TemplateArguments[1].(sem.FullyQualifiedName))
 	}
 	return fqn

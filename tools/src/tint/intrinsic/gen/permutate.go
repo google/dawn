@@ -221,6 +221,16 @@ Increase hashLength in %v`,
 		case *sem.TemplateNumberParam:
 			// Currently all open numbers are used for vector / matrices
 			permutations := []int{2, 3, 4}
+
+			// Restrict the permutations for subgroup matrix builtins to avoid combinatorial explosion.
+			if overload.Decl.Name == "subgroupMatrixStore" {
+				if t.Name == "AC" {
+					permutations = []int{64}
+				} else {
+					permutations = []int{8}
+				}
+			}
+
 			permute = func() error {
 				for _, n := range permutations {
 					state.templateNumbers[t] = n

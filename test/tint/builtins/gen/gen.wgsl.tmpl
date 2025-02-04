@@ -288,8 +288,11 @@ fn vertex_main() -> VertexOutput {
 {{-   $overload := $permutation.Overload -}}
 {{-   $builtin_name := $permutation.Intrinsic.Name -}}
 
-{{- /* Emit 'enable subgroups' and 'enable subgroups_f16' if required */ -}}
-{{-   if or (HasPrefix $builtin_name "subgroup") (HasPrefix $builtin_name "quad")}}
+{{- /* Emit 'enable chromium_experimental_subgroup_matrix' if required */ -}}
+{{-   if (HasPrefix $builtin_name "subgroupMatrix")}}
+enable chromium_experimental_subgroup_matrix;
+{{/* Emit 'enable subgroups' and 'enable subgroups_f16' if required */ -}}
+{{-   else if or (HasPrefix $builtin_name "subgroup") (HasPrefix $builtin_name "quad")}}
 enable subgroups;
 {{    end -}}
 
@@ -433,6 +436,7 @@ enable chromium_internal_graphite;
 {{-     else if eq .Target.Name "vec"        -}}vec{{index .TemplateArguments 0}}<{{template "Type" (ElementType .)}}>
 {{-     else if eq .Target.Name "mat"        -}}mat{{index .TemplateArguments 0}}x{{index .TemplateArguments 1}}<{{template "Type" (ElementType .)}}>
 {{-     else if eq .Target.Name "runtime_array" -}}array<{{template "Type" (ElementType .)}}>
+{{-     else if eq .Target.Name "subgroup_matrix" -}}subgroup_matrix_{{index .TemplateArguments 0}}<{{template "Type" (ElementType .)}}, {{index .TemplateArguments 2}}, {{index .TemplateArguments 3}}>
 {{-     else if HasPrefix .Target.Name "vec" -}}{{.Target.Name}}<{{template "Type" (ElementType .)}}>
 {{-     else if HasPrefix .Target.Name "mat" -}}{{.Target.Name}}<{{template "Type" (ElementType .)}}>
 {{-     else                                 -}}{{.Target.Name}}{{template "TemplateArguments" .TemplateArguments}}

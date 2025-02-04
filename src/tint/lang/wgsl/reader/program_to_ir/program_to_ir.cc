@@ -98,6 +98,7 @@
 #include "src/tint/lang/wgsl/sem/member_accessor_expression.h"
 #include "src/tint/lang/wgsl/sem/module.h"
 #include "src/tint/lang/wgsl/sem/switch_statement.h"
+#include "src/tint/lang/wgsl/sem/type_expression.h"
 #include "src/tint/lang/wgsl/sem/value_constructor.h"
 #include "src/tint/lang/wgsl/sem/value_conversion.h"
 #include "src/tint/lang/wgsl/sem/value_expression.h"

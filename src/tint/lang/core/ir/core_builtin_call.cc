@@ -69,6 +69,7 @@ tint::core::ir::Instruction::Accesses CoreBuiltinCall::GetSideEffects() const {
         case BuiltinFn::kTextureLoad:
             return Accesses{Access::kLoad};
 
+        case BuiltinFn::kSubgroupMatrixStore:
         case BuiltinFn::kTextureStore:
             return Accesses{Access::kStore};
 

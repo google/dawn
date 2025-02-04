@@ -666,4 +666,5 @@ enum BuiltinFn {
     quad_swap_diagonal = 142;
     subgroup_inclusive_add = 143;
     subgroup_inclusive_mul = 144;
+    subgroup_matrix_store = 146;
 }

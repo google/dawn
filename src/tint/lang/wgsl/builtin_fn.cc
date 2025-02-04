@@ -480,6 +480,9 @@ BuiltinFn ParseBuiltinFn(std::string_view name) {
     if (name == "quadSwapDiagonal") {
         return BuiltinFn::kQuadSwapDiagonal;
     }
+    if (name == "subgroupMatrixStore") {
+        return BuiltinFn::kSubgroupMatrixStore;
+    }
     if (name == "__tint_materialize") {
         return BuiltinFn::kTintMaterialize;
     }
@@ -784,6 +787,8 @@ const char* str(BuiltinFn i) {
             return "quadSwapY";
         case BuiltinFn::kQuadSwapDiagonal:
             return "quadSwapDiagonal";
+        case BuiltinFn::kSubgroupMatrixStore:
+            return "subgroupMatrixStore";
         case BuiltinFn::kTintMaterialize:
             return "__tint_materialize";
     }

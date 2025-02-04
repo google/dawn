@@ -109,8 +109,7 @@ class BuiltinFn final : public Castable<BuiltinFn, CallTarget> {
     /// `packed_4x8_integer_dot_product`.
     bool IsPacked4x8IntegerDotProductBuiltin() const;
 
-    /// @returns true if builtin is a subgroup builtin (defined in the extension
-    /// chromium_experimental_subgroups)
+    /// @returns true if builtin is a subgroup builtin (defined in the extension `subgroups`).
     bool IsSubgroup() const;
 
     /// @returns true if builtin is a quadSwap builtin

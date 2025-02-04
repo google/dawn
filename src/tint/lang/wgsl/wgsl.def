@@ -40,6 +40,7 @@
 
 import "src/tint/lang/core/access.def"
 import "src/tint/lang/core/address_space.def"
+import "src/tint/lang/core/subgroup_matrix_kind.def"
 import "src/tint/lang/core/texel_format.def"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -148,6 +149,7 @@ type ptr<S: address_space, T, A: access>
 type ref<S: address_space, T, A: access>
 type atomic<T>
 @display("array<{T}>") type runtime_array<T>
+type array<T, N: num>
 type sampler
 type sampler_comparison
 type texture_1d<T>
@@ -177,6 +179,8 @@ type input_attachment<T>
 
 type __atomic_compare_exchange_result<T>
 
+type subgroup_matrix<S: subgroup_matrix_kind, T, C: num, R: num>
+
 ////////////////////////////////////////////////////////////////////////////////
 // Type matchers                                                              //
 ////////////////////////////////////////////////////////////////////////////////
@@ -201,6 +205,11 @@ match fi32_f16: f32 | i32 | f16
 match fi32: f32 | i32
 match f32_f16: f32 | f16
 match iu32: i32 | u32
+
+match subgroup_matrix_elements: f32 | f16 | u32 | i32 | u8 | i8
+match subgroup_matrix_kind_left : subgroup_matrix_kind.left
+match subgroup_matrix_kind_right : subgroup_matrix_kind.right
+match subgroup_matrix_kind_result : subgroup_matrix_kind.result
 
 ////////////////////////////////////////////////////////////////////////////////
 // Enum matchers                                                              //
@@ -670,6 +679,8 @@ match workgroup
 @must_use @stage("fragment", "compute") implicit(N: num, T: fiu32_f16) fn quadSwapY(e: vec<N, T>) -> vec<N, T>
 @must_use @stage("fragment", "compute") implicit(T: fiu32_f16) fn quadSwapDiagonal(e: T) -> T
 @must_use @stage("fragment", "compute") implicit(N: num, T: fiu32_f16) fn quadSwapDiagonal(e: vec<N, T>) -> vec<N, T>
+
+@stage("compute") implicit(K: subgroup_matrix_kind, S: fiu32_f16, C: num, R: num, AC: num) fn subgroupMatrixStore(ptr<workgroup_or_storage, array<S, AC>, writable>, u32, subgroup_matrix<K, S, C, R>, bool, u32)
 
 ////////////////////////////////////////////////////////////////////////////////
 // Value constructors                                                         //

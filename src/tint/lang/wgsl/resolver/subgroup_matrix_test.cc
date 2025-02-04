@@ -287,5 +287,43 @@ TEST_F(ResolverSubgroupMatrixTest, ConstructorWrongType) {
               R"(error: 'f32' cannot be used to construct a subgroup matrix of 'u32')");
 }
 
+TEST_F(ResolverSubgroupMatrixTest, SubgroupMatrixStore) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+    auto* buffer = GlobalVar("buffer", storage, read_write, ty.array(ty.f32(), 8_a),
+                             Vector{Group(0_u), Binding(0_u)});
+    auto* call = Call(wgsl::BuiltinFn::kSubgroupMatrixStore, AddressOf(buffer), 0_u,
+                      Call(ty.subgroup_matrix(core::SubgroupMatrixKind::kLeft, ty.f32(), 8u, 8u)),
+                      false, 32_u);
+    Func("foo", Empty, ty.void_(),
+         Vector{
+             CallStmt(call),
+         });
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto call_sem = Sem().Get(call)->As<sem::Call>();
+    ASSERT_NE(call_sem, nullptr);
+    auto* target = call_sem->Target()->As<sem::BuiltinFn>();
+    ASSERT_NE(target, nullptr);
+    EXPECT_EQ(target->Fn(), wgsl::BuiltinFn::kSubgroupMatrixStore);
+}
+
+TEST_F(ResolverSubgroupMatrixTest, SubgroupMatrixStore_MismatchedType) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+    auto* buffer = GlobalVar("buffer", storage, read_write, ty.array(ty.u32(), 8_a),
+                             Vector{Group(0_u), Binding(0_u)});
+    auto* call = Call(wgsl::BuiltinFn::kSubgroupMatrixStore, AddressOf(buffer), 0_u,
+                      Call(ty.subgroup_matrix(core::SubgroupMatrixKind::kLeft, ty.i32(), 8u, 8u)),
+                      false, 32_u);
+    Func("foo", Empty, ty.void_(),
+         Vector{
+             CallStmt(call),
+         });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_THAT(r()->error(),
+                testing::HasSubstr(R"(error: no matching call to 'subgroupMatrixStore)"));
+}
+
 }  // namespace
 }  // namespace tint::resolver
