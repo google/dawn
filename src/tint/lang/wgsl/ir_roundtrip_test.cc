@@ -3426,5 +3426,18 @@ fn a(f32_1 : f32) {
 )");
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// chromium_experimental_subgroup_matrix
+////////////////////////////////////////////////////////////////////////////////
+TEST_F(IRToProgramRoundtripTest, SubgroupMatrixConstruct) {
+    RUN_TEST(R"(
+enable chromium_experimental_subgroup_matrix;
+
+fn f() {
+  var m = subgroup_matrix_left<f32, 8, 8>>();
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::wgsl

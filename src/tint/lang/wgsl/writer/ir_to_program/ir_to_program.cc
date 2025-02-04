@@ -1050,6 +1050,11 @@ class State {
                 auto el = Type(i->Type());
                 return b.ty.input_attachment(el);
             },  //
+            [&](const core::type::SubgroupMatrix* m) {
+                Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+                auto el = Type(m->Type());
+                return b.ty.subgroup_matrix(m->Kind(), el, m->Columns(), m->Rows());
+            },  //
             TINT_ICE_ON_NO_MATCH);
     }
 
