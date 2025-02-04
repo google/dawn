@@ -66,7 +66,6 @@ using OptionalVertexPullingTransformConfig = std::optional<tint::VertexPullingCo
     X(std::string, entryPointName)                                                               \
     X(bool, disableSymbolRenaming)                                                               \
     X(tint::msl::writer::Options, tintOptions)                                                   \
-    X(bool, use_tint_ir)                                                                         \
     X(CacheKey::UnsafeUnkeyedValue<dawn::platform::Platform*>, platform)
 
 DAWN_MAKE_CACHE_REQUEST(MslCompilationRequest, MSL_COMPILATION_REQUEST_MEMBERS);
@@ -277,11 +276,8 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
     req.disableSymbolRenaming = device->IsToggleEnabled(Toggle::DisableSymbolRenaming);
     req.platform = UnsafeUnkeyedValue(device->GetPlatform());
 
-    req.use_tint_ir = device->IsToggleEnabled(Toggle::UseTintIR);
-    if (req.use_tint_ir) {
-        req.tintOptions.strip_all_names = !req.disableSymbolRenaming;
-        req.tintOptions.remapped_entry_point_name = kRemappedEntryPointName;
-    }
+    req.tintOptions.strip_all_names = !req.disableSymbolRenaming;
+    req.tintOptions.remapped_entry_point_name = kRemappedEntryPointName;
     req.tintOptions.disable_robustness = !device->IsRobustnessEnabled();
     req.tintOptions.buffer_size_ubo_index = kBufferLengthBufferSlot;
     req.tintOptions.fixed_sample_mask = sampleMask;
@@ -315,17 +311,6 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
             transformManager.Add<tint::ast::transform::SingleEntryPoint>();
             transformInputs.Add<tint::ast::transform::SingleEntryPoint::Config>(r.entryPointName);
 
-            if (!r.use_tint_ir) {
-                // Needs to run before other transforms so that they can use builtin names safely.
-                tint::ast::transform::Renamer::Remappings requestedNames = {
-                    {r.entryPointName, kRemappedEntryPointName}};
-                transformManager.Add<tint::ast::transform::Renamer>();
-                transformInputs.Add<tint::ast::transform::Renamer::Config>(
-                    r.disableSymbolRenaming ? tint::ast::transform::Renamer::Target::kMslKeywords
-                                            : tint::ast::transform::Renamer::Target::kAll,
-                    std::move(requestedNames));
-            }
-
             if (r.substituteOverrideConfig) {
                 // This needs to run after SingleEntryPoint transform which removes unused overrides
                 // for current entry point.
@@ -346,44 +331,26 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
             Extent3D localSize{0, 0, 0};
 
             TRACE_EVENT0(r.platform.UnsafeGetValue(), General, "tint::msl::writer::Generate");
-            tint::Result<tint::msl::writer::Output> result;
-            if (r.use_tint_ir) {
-                // Convert the AST program to an IR module.
-                auto ir = tint::wgsl::reader::ProgramToLoweredIR(program);
-                DAWN_INVALID_IF(ir != tint::Success,
-                                "An error occurred while generating Tint IR\n%s",
-                                ir.Failure().reason.Str());
 
-                result = tint::msl::writer::Generate(ir.Get(), r.tintOptions);
+            // Convert the AST program to an IR module.
+            auto ir = tint::wgsl::reader::ProgramToLoweredIR(program);
+            DAWN_INVALID_IF(ir != tint::Success, "An error occurred while generating Tint IR\n%s",
+                            ir.Failure().reason.Str());
 
-                DAWN_INVALID_IF(result != tint::Success,
-                                "An error occurred while generating MSL:\n%s",
-                                result.Failure().reason.Str());
+            // Generate MSL.
+            auto result = tint::msl::writer::Generate(ir.Get(), r.tintOptions);
+            DAWN_INVALID_IF(result != tint::Success, "An error occurred while generating MSL:\n%s",
+                            result.Failure().reason.Str());
 
-                // Workgroup validation has to come after `Generate` because it may require
-                // overrides to have been substituted.
-                if (r.stage == SingleShaderStage::Compute) {
-                    // Validate workgroup size and workgroup storage size.
-                    DAWN_TRY_ASSIGN(
-                        localSize,
-                        ValidateComputeStageWorkgroupSize(
-                            result->workgroup_info.x, result->workgroup_info.y,
-                            result->workgroup_info.z, result->workgroup_info.storage_size, r.limits,
-                            r.adapter.UnsafeGetValue()));
-                }
-            } else {
-                if (r.stage == SingleShaderStage::Compute) {
-                    // Validate workgroup size after program runs transforms.
-                    DAWN_TRY_ASSIGN(localSize, ValidateComputeStageWorkgroupSize(
-                                                   program, kRemappedEntryPointName, r.limits,
-                                                   r.adapter.UnsafeGetValue()));
-                }
-
-                result = tint::msl::writer::Generate(program, r.tintOptions);
-
-                DAWN_INVALID_IF(result != tint::Success,
-                                "An error occurred while generating MSL:\n%s",
-                                result.Failure().reason.Str());
+            // Workgroup validation has to come after `Generate` because it may require
+            // overrides to have been substituted.
+            if (r.stage == SingleShaderStage::Compute) {
+                // Validate workgroup size and workgroup storage size.
+                DAWN_TRY_ASSIGN(localSize,
+                                ValidateComputeStageWorkgroupSize(
+                                    result->workgroup_info.x, result->workgroup_info.y,
+                                    result->workgroup_info.z, result->workgroup_info.storage_size,
+                                    r.limits, r.adapter.UnsafeGetValue()));
             }
 
             // Metal uses Clang to compile the shader as C++14. Disable everything in the -Wall
