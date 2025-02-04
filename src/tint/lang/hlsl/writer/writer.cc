@@ -43,6 +43,13 @@
 namespace tint::hlsl::writer {
 
 Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& options) {
+    // Check for unsupported types.
+    for (auto* ty : ir.Types()) {
+        if (ty->Is<core::type::SubgroupMatrix>()) {
+            return Failure("subgroup matrices are not supported by the HLSL backend");
+        }
+    }
+
     // Check for unsupported module-scope variable address spaces and types.
     for (auto* inst : *ir.root_block) {
         auto* var = inst->As<core::ir::Var>();

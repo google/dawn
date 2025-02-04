@@ -42,6 +42,13 @@
 namespace tint::spirv::writer {
 
 Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& options) {
+    // Check for unsupported types.
+    for (auto* ty : ir.Types()) {
+        if (ty->Is<core::type::SubgroupMatrix>()) {
+            return Failure("subgroup matrices are not supported by the SPIR-V backend");
+        }
+    }
+
     // If a remapped entry point name is provided, it must not be empty, and must not contain
     // embedded null characters.
     if (!options.remapped_entry_point_name.empty()) {
