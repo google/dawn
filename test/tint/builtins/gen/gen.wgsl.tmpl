@@ -52,7 +52,9 @@ See:
 {{- /* Keep track of binding numbers to satisfy limitations of the MSL backend with the Tint executable interface: https://crbug.com/42250109 */ -}}
 {{- $b := 0 -}}
 {{- if and (or $overload.CanBeUsedInStage.Fragment $overload.CanBeUsedInStage.Compute) (and $overload.ReturnType (IsDeclarable $overload.ReturnType))}}
-{{-   if and (IsHostShareable $overload.ReturnType) (not (HasPrefix $overload.ReturnType.Target.Name "mat"))}}
+{{-   if (HasPrefix $overload.ReturnType.Target.Name "subgroup_matrix") -}}
+@group(0) @binding({{$b}}) var<storage, read_write> prevent_dce : array<{{ElementType $overload.ReturnType}}, 1024>;
+{{-   else if and (IsHostShareable $overload.ReturnType) (not (HasPrefix $overload.ReturnType.Target.Name "mat"))}}
 @group(0) @binding({{$b}}) var<storage, read_write> prevent_dce : {{template "Type" $overload.ReturnType -}};
 {{-   else}}
 @group(0) @binding({{$b}}) var<storage, read_write> prevent_dce : i32;
@@ -202,10 +204,14 @@ fn fragment_main() {
 {{- if $overload.CanBeUsedInStage.Compute }}
 @compute @workgroup_size(1)
 fn compute_main() {
-  {{   if and $overload.ReturnType (IsDeclarable $overload.ReturnType) -}}
+  {{   if and (HasPrefix $overload.Intrinsic.Name "subgroupMatrix") $overload.ReturnType (IsDeclarable $overload.ReturnType) -}}
+  subgroupMatrixStore(&prevent_dce, 0, {{$permutation}}(), false, 64);
+  {{-   else -}}
+    {{   if and $overload.ReturnType (IsDeclarable $overload.ReturnType) -}}
   prevent_dce = {{/* preserve space after = */ -}}
-  {{-   end -}}
+    {{-   end -}}
   {{$permutation}}();
+  {{-   end }}
 }
 {{ end -}}
 

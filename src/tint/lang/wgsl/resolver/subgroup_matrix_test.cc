@@ -325,5 +325,59 @@ TEST_F(ResolverSubgroupMatrixTest, SubgroupMatrixStore_MismatchedType) {
                 testing::HasSubstr(R"(error: no matching call to 'subgroupMatrixStore)"));
 }
 
+TEST_F(ResolverSubgroupMatrixTest, SubgroupMatrixLoad) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+    auto* buffer =
+        GlobalVar("buffer", storage, ty.array(ty.f32(), 8_a), Vector{Group(0_u), Binding(0_u)});
+    auto* call = Call(Ident(wgsl::BuiltinFn::kSubgroupMatrixLoad,
+                            ty.subgroup_matrix(core::SubgroupMatrixKind::kLeft, ty.f32(), 8u, 8u)),
+                      AddressOf(buffer), 0_u, false, 32_u);
+    Func("foo", Empty, ty.void_(),
+         Vector{
+             Assign(Phony(), call),
+         });
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto call_sem = Sem().Get(call)->As<sem::Call>();
+    ASSERT_NE(call_sem, nullptr);
+    auto* target = call_sem->Target()->As<sem::BuiltinFn>();
+    ASSERT_NE(target, nullptr);
+    EXPECT_EQ(target->Fn(), wgsl::BuiltinFn::kSubgroupMatrixLoad);
+    EXPECT_TRUE(target->ReturnType()->Is<core::type::SubgroupMatrix>());
+}
+
+TEST_F(ResolverSubgroupMatrixTest, SubgroupMatrixLoad_MismatchedType) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+    auto* buffer =
+        GlobalVar("buffer", storage, ty.array(ty.u32(), 8_a), Vector{Group(0_u), Binding(0_u)});
+    auto* call = Call(Ident(wgsl::BuiltinFn::kSubgroupMatrixLoad,
+                            ty.subgroup_matrix(core::SubgroupMatrixKind::kLeft, ty.i32(), 8u, 8u)),
+                      AddressOf(buffer), 0_u, false, 32_u);
+    Func("foo", Empty, ty.void_(),
+         Vector{
+             Assign(Phony(), call),
+         });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_THAT(r()->error(),
+                testing::HasSubstr(R"(error: no matching call to 'subgroupMatrixLoad)"));
+}
+
+TEST_F(ResolverSubgroupMatrixTest, SubgroupMatrixLoad_MissingTemplateArg) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+    auto* buffer =
+        GlobalVar("buffer", storage, ty.array(ty.f32(), 8_a), Vector{Group(0_u), Binding(0_u)});
+    auto* call = Call(wgsl::BuiltinFn::kSubgroupMatrixLoad, AddressOf(buffer), 0_u, false, 32_u);
+    Func("foo", Empty, ty.void_(),
+         Vector{
+             Assign(Phony(), call),
+         });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_THAT(r()->error(),
+                testing::HasSubstr(R"(error: no matching call to 'subgroupMatrixLoad)"));
+}
+
 }  // namespace
 }  // namespace tint::resolver

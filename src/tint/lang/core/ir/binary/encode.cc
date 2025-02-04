@@ -1240,6 +1240,8 @@ struct Encoder {
                 return pb::BuiltinFn::quad_swap_y;
             case core::BuiltinFn::kQuadSwapDiagonal:
                 return pb::BuiltinFn::quad_swap_diagonal;
+            case core::BuiltinFn::kSubgroupMatrixLoad:
+                return pb::BuiltinFn::subgroup_matrix_load;
             case core::BuiltinFn::kSubgroupMatrixStore:
                 return pb::BuiltinFn::subgroup_matrix_store;
             case core::BuiltinFn::kNone:

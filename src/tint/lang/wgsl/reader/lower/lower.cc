@@ -192,6 +192,7 @@ core::BuiltinFn Convert(wgsl::BuiltinFn fn) {
         CASE(kQuadSwapX)
         CASE(kQuadSwapY)
         CASE(kQuadSwapDiagonal)
+        CASE(kSubgroupMatrixLoad)
         CASE(kSubgroupMatrixStore)
 
         case tint::wgsl::BuiltinFn::kBitcast:               // should lower to ir::Bitcast
@@ -235,6 +236,9 @@ Result<SuccessType> Lower(core::ir::Module& mod) {
                     Vector<core::ir::Value*, 8> args(call->Args());
                     auto* replacement = b.CallWithResult(call->DetachResult(),
                                                          Convert(call->Func()), std::move(args));
+                    if (!call->ExplicitTemplateParams().IsEmpty()) {
+                        replacement->SetExplicitTemplateParams(call->ExplicitTemplateParams());
+                    }
                     call->ReplaceWith(replacement);
                     break;
                 }

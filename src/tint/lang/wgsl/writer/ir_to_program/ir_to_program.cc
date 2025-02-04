@@ -690,7 +690,17 @@ class State {
                         break;
                 }
 
-                auto* expr = b.Call(c->Func(), std::move(args));
+                const ast::CallExpression* expr = nullptr;
+                if (!c->ExplicitTemplateParams().IsEmpty()) {
+                    Vector<const ast::Expression*, 4> tmpl_args;
+                    for (auto* e : c->ExplicitTemplateParams()) {
+                        tmpl_args.Push(Type(e).expr);
+                    }
+                    expr = b.Call(b.Ident(c->Func(), std::move(tmpl_args)), std::move(args));
+                } else {
+                    expr = b.Call(c->Func(), std::move(args));
+                }
+
                 if (call->Results().IsEmpty() || !call->Result(0)->IsUsed()) {
                     Append(b.CallStmt(expr));
                     return;

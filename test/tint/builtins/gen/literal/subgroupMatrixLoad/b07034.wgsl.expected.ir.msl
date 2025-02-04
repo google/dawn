@@ -1,0 +1,11 @@
+SKIP: FAILED
+
+../../src/tint/lang/msl/writer/printer/printer.cc:1327 internal compiler error: TINT_ASSERT((sm->Type()->IsAnyOf<core::type::F32, core::type::F16>()))
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************
+
+tint executable returned error: signal: trace/BPT trap

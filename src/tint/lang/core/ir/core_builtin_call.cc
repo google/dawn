@@ -59,6 +59,7 @@ tint::core::ir::Instruction::Accesses CoreBuiltinCall::GetSideEffects() const {
     switch (func_) {
         case BuiltinFn::kAtomicLoad:
         case BuiltinFn::kInputAttachmentLoad:
+        case BuiltinFn::kSubgroupMatrixLoad:
         case BuiltinFn::kTextureSample:
         case BuiltinFn::kTextureSampleBias:
         case BuiltinFn::kTextureSampleCompare:

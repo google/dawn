@@ -223,7 +223,7 @@ Increase hashLength in %v`,
 			permutations := []int{2, 3, 4}
 
 			// Restrict the permutations for subgroup matrix builtins to avoid combinatorial explosion.
-			if overload.Decl.Name == "subgroupMatrixStore" {
+			if strings.HasPrefix(overload.Decl.Name, "subgroupMatrix") {
 				if t.Name == "AC" {
 					permutations = []int{64}
 				} else {
