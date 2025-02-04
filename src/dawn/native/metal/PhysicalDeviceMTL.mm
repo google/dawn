@@ -314,6 +314,9 @@ PhysicalDevice::PhysicalDevice(InstanceBase* instance,
 
     NSString* osVersion = [[NSProcessInfo processInfo] operatingSystemVersionString];
     mDriverDescription = "Metal driver on " + std::string(systemName) + [osVersion UTF8String];
+
+    mSubgroupMinSize = 4;   // The 4 comes from the minimum derivative group.
+    mSubgroupMaxSize = 64;  // In MSL, a ballot is a uint64, so the max subgroup size is 64.
 }
 
 bool PhysicalDevice::IsMetalValidationEnabled() const {

@@ -88,6 +88,8 @@ class PhysicalDeviceBase : public RefCounted {
     const std::string& GetDriverDescription() const;
     wgpu::AdapterType GetAdapterType() const;
     wgpu::BackendType GetBackendType() const;
+    uint32_t GetSubgroupMinSize() const;
+    uint32_t GetSubgroupMaxSize() const;
 
     MaybeError ResetInternalDeviceForTesting();
 
@@ -139,6 +141,8 @@ class PhysicalDeviceBase : public RefCounted {
     wgpu::AdapterType mAdapterType = wgpu::AdapterType::Unknown;
     gpu_info::DriverVersion mDriverVersion;
     std::string mDriverDescription;
+    uint32_t mSubgroupMinSize = 4;
+    uint32_t mSubgroupMaxSize = 128;
 
     // Juat a wrapper of ValidateFeatureSupportedWithToggles, return true if a feature is supported
     // by this adapter AND suitable with given toggles.

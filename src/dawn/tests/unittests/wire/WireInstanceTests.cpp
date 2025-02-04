@@ -127,6 +127,8 @@ TEST_P(WireInstanceTests, RequestAdapterSuccess) {
     fakeInfo.adapterType = WGPUAdapterType_IntegratedGPU;
     fakeInfo.vendorID = 0x134;
     fakeInfo.deviceID = 0x918;
+    fakeInfo.subgroupMinSize = 4;
+    fakeInfo.subgroupMaxSize = 128;
 
     wgpu::SupportedLimits fakeLimits = {};
     fakeLimits.limits.maxTextureDimension1D = 433;
@@ -186,6 +188,8 @@ TEST_P(WireInstanceTests, RequestAdapterSuccess) {
                 EXPECT_EQ(info.adapterType, fakeInfo.adapterType);
                 EXPECT_EQ(info.vendorID, fakeInfo.vendorID);
                 EXPECT_EQ(info.deviceID, fakeInfo.deviceID);
+                EXPECT_EQ(info.subgroupMinSize, fakeInfo.subgroupMinSize);
+                EXPECT_EQ(info.subgroupMaxSize, fakeInfo.subgroupMaxSize);
 
                 wgpu::SupportedLimits limits = {};
                 EXPECT_EQ(adapter.GetLimits(&limits), wgpu::Status::Success);

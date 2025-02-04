@@ -165,6 +165,9 @@ MaybeError PhysicalDevice::InitializeImpl() {
             break;
     }
 
+    mSubgroupMinSize = mDeviceInfo.subgroupSizeControlProperties.minSubgroupSize;
+    mSubgroupMaxSize = mDeviceInfo.subgroupSizeControlProperties.maxSubgroupSize;
+
     // Check for essential Vulkan extensions and features
     // Needed for viewport Y-flip.
     if (!mDeviceInfo.HasExt(DeviceExt::Maintenance1)) {

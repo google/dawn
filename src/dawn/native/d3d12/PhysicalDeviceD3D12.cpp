@@ -102,6 +102,13 @@ MaybeError PhysicalDevice::InitializeImpl() {
     if (mAdapterType == wgpu::AdapterType::DiscreteGPU && mDeviceInfo.isUMA) {
         mAdapterType = wgpu::AdapterType::IntegratedGPU;
     }
+
+    mSubgroupMinSize = mDeviceInfo.waveLaneCountMin;
+    // Currently the WaveLaneCountMax queried from D3D12 API is not reliable and the meaning is
+    // unclear. Use 128 instead, which is the largest possible size. Reference:
+    // https://github.com/Microsoft/DirectXShaderCompiler/wiki/Wave-Intrinsics#:~:text=UINT%20WaveLaneCountMax
+    mSubgroupMaxSize = 128u;
+
     return {};
 }
 

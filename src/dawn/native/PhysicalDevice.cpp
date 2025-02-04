@@ -118,6 +118,14 @@ wgpu::BackendType PhysicalDeviceBase::GetBackendType() const {
     return mBackend;
 }
 
+uint32_t PhysicalDeviceBase::GetSubgroupMinSize() const {
+    return mSubgroupMinSize;
+}
+
+uint32_t PhysicalDeviceBase::GetSubgroupMaxSize() const {
+    return mSubgroupMaxSize;
+}
+
 bool PhysicalDeviceBase::IsFeatureSupportedWithToggles(wgpu::FeatureName feature,
                                                        const TogglesState& toggles) const {
     return ValidateFeatureSupportedWithToggles(feature, toggles).success;

@@ -235,7 +235,14 @@ wgpu::Status AdapterBase::APIGetInfo(AdapterInfo* info) const {
     info->adapterType = mPhysicalDevice->GetAdapterType();
     info->vendorID = mPhysicalDevice->GetVendorId();
     info->deviceID = mPhysicalDevice->GetDeviceId();
+    info->subgroupMinSize = mPhysicalDevice->GetSubgroupMinSize();
+    info->subgroupMaxSize = mPhysicalDevice->GetSubgroupMaxSize();
     info->compatibilityMode = mFeatureLevel == wgpu::FeatureLevel::Compatibility;
+
+    if (mPhysicalDevice->GetBackendType() == wgpu::BackendType::D3D12 &&
+        mTogglesState.IsEnabled(Toggle::D3D12RelaxMinSubgroupSizeTo8)) {
+        info->subgroupMinSize = std::min(info->subgroupMinSize, 8u);
+    }
 
     return wgpu::Status::Success;
 }
