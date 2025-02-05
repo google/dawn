@@ -108,6 +108,7 @@ struct State {
                     case core::BuiltinFn::kQuadSwapY:
                     case core::BuiltinFn::kQuantizeToF16:
                     case core::BuiltinFn::kSign:
+                    case core::BuiltinFn::kSubgroupMatrixLoad:
                     case core::BuiltinFn::kSubgroupMatrixStore:
                     case core::BuiltinFn::kTextureDimensions:
                     case core::BuiltinFn::kTextureGather:
@@ -271,6 +272,9 @@ struct State {
                     break;
 
                 // Subgroup matrix builtins.
+                case core::BuiltinFn::kSubgroupMatrixLoad:
+                    SubgroupMatrixLoad(builtin);
+                    break;
                 case core::BuiltinFn::kSubgroupMatrixStore:
                     SubgroupMatrixStore(builtin);
                     break;
@@ -931,6 +935,43 @@ struct State {
         b.InsertBefore(builtin, [&] {
             auto* bitcast = b.Bitcast<vec2<f16>>(builtin->Args()[0]);
             b.ConvertWithResult(builtin->DetachResult(), bitcast);
+        });
+        builtin->Destroy();
+    }
+
+    /// Replace a subgroupMatrixLoad builtin.
+    /// @param builtin the builtin call instruction
+    void SubgroupMatrixLoad(core::ir::CoreBuiltinCall* builtin) {
+        b.InsertBefore(builtin, [&] {
+            auto* p = builtin->Args()[0];
+            auto* offset = builtin->Args()[1];
+            auto* col_major = builtin->Args()[2];
+            auto* stride = builtin->Args()[3];
+
+            auto* ptr = p->Type()->As<core::type::Pointer>();
+            auto* arr = ptr->StoreType()->As<core::type::Array>();
+
+            // Make a pointer to the first element of the array that we will read from.
+            auto* elem_ptr = ty.ptr(ptr->AddressSpace(), arr->ElemType(), ptr->Access());
+            auto* src = b.Access(elem_ptr, p, offset);
+
+            // The origin is always (0, 0), as we use `offset` to set the start of the data.
+            auto* matrix_origin = b.Zero<vec2<u64>>();
+
+            // Convert the u32 stride to the ulong that MSL expects.
+            auto* elements_per_row =
+                b.Call<msl::ir::BuiltinCall>(ty.u64(), msl::BuiltinFn::kConvert, stride);
+
+            // Declare a local variable to load the matrix into.
+            auto* tmp = b.Var(ty.ptr<function>(builtin->Result(0)->Type()));
+            // Note: We need to use a `load` instruction to pass the variable, as the intrinsic
+            // definition expects a value type (as we do not have reference types in the IR). The
+            // printer will just fold away the load, which achieves the pass-by-reference semantics
+            // that we want.
+            b.Call<msl::ir::BuiltinCall>(ty.void_(), msl::BuiltinFn::kSimdgroupLoad,
+                                         b.Load(tmp->Result(0)), src, elements_per_row,
+                                         matrix_origin, col_major);
+            b.LoadWithResult(builtin->DetachResult(), tmp);
         });
         builtin->Destroy();
     }

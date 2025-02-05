@@ -3314,6 +3314,88 @@ TEST_F(MslWriter_BuiltinPolyfillTest, Unpack2x16Float) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Storage_F32) {
+    auto* mat = ty.subgroup_matrix_result(ty.f32(), 8, 8);
+    auto* p = b.FunctionParam<ptr<storage, array<f32, 256>>>("p");
+    auto* func = b.Function("foo", mat);
+    func->SetParams({p});
+    b.Append(func->Block(), [&] {
+        auto* call = b.Call(mat, core::BuiltinFn::kSubgroupMatrixLoad, p, 64_u, false, 32_u);
+        call->SetExplicitTemplateParams(Vector{mat});
+        b.Return(func, call);
+    });
+
+    auto* src = R"(
+%foo = func(%p:ptr<storage, array<f32, 256>, read_write>):subgroup_matrix_result<f32, 8, 8> {
+  $B1: {
+    %3:subgroup_matrix_result<f32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 8>> %p, 64u, false, 32u
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%p:ptr<storage, array<f32, 256>, read_write>):subgroup_matrix_result<f32, 8, 8> {
+  $B1: {
+    %3:ptr<storage, f32, read_write> = access %p, 64u
+    %4:u64 = msl.convert 32u
+    %5:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var
+    %6:subgroup_matrix_result<f32, 8, 8> = load %5
+    %7:void = msl.simdgroup_load %6, %3, %4, vec2<u64>(0u64), false
+    %8:subgroup_matrix_result<f32, 8, 8> = load %5
+    ret %8
+  }
+}
+)";
+
+    capabilities.Add(core::ir::Capability::kAllow64BitIntegers);
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Workgroup_F16) {
+    auto* mat = ty.subgroup_matrix_result(ty.f16(), 8, 8);
+    auto* p = b.FunctionParam<ptr<workgroup, array<f16, 256>>>("p");
+    auto* func = b.Function("foo", mat);
+    func->SetParams({p});
+    b.Append(func->Block(), [&] {
+        auto* call = b.Call(mat, core::BuiltinFn::kSubgroupMatrixLoad, p, 64_u, false, 32_u);
+        call->SetExplicitTemplateParams(Vector{mat});
+        b.Return(func, call);
+    });
+
+    auto* src = R"(
+%foo = func(%p:ptr<workgroup, array<f16, 256>, read_write>):subgroup_matrix_result<f16, 8, 8> {
+  $B1: {
+    %3:subgroup_matrix_result<f16, 8, 8> = subgroupMatrixLoad<subgroup_matrix_result<f16, 8, 8>> %p, 64u, false, 32u
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%p:ptr<workgroup, array<f16, 256>, read_write>):subgroup_matrix_result<f16, 8, 8> {
+  $B1: {
+    %3:ptr<workgroup, f16, read_write> = access %p, 64u
+    %4:u64 = msl.convert 32u
+    %5:ptr<function, subgroup_matrix_result<f16, 8, 8>, read_write> = var
+    %6:subgroup_matrix_result<f16, 8, 8> = load %5
+    %7:void = msl.simdgroup_load %6, %3, %4, vec2<u64>(0u64), false
+    %8:subgroup_matrix_result<f16, 8, 8> = load %5
+    ret %8
+  }
+}
+)";
+
+    capabilities.Add(core::ir::Capability::kAllow64BitIntegers);
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixStore_Storage_F32) {
     auto* p = b.FunctionParam<ptr<storage, array<f32, 256>>>("p");
     auto* m = b.FunctionParam("m", ty.subgroup_matrix_result(ty.f32(), 8, 8));

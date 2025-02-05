@@ -52,6 +52,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kRead:
         case BuiltinFn::kSample:
         case BuiltinFn::kSampleCompare:
+        case BuiltinFn::kSimdgroupLoad:
             return core::ir::Instruction::Accesses{core::ir::Instruction::Access::kLoad};
 
         case BuiltinFn::kWrite:
