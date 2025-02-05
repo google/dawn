@@ -116,6 +116,8 @@ const char* str(BuiltinFn i) {
             return "simdgroup_load";
         case BuiltinFn::kSimdgroupStore:
             return "simdgroup_store";
+        case BuiltinFn::kSimdgroupMultiply:
+            return "simdgroup_multiply";
     }
     return "<unknown>";
 }
@@ -167,6 +169,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kSign:
         case BuiltinFn::kNone:
         case BuiltinFn::kConvert:
+        case BuiltinFn::kSimdgroupMultiply:
             break;
     }
     return core::ir::Instruction::Accesses{};

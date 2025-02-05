@@ -85,6 +85,7 @@ enum class BuiltinFn : uint8_t {
     kConvert,
     kSimdgroupLoad,
     kSimdgroupStore,
+    kSimdgroupMultiply,
     kNone,
 };
 

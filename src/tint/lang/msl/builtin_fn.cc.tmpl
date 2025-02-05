@@ -74,6 +74,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kSign:
         case BuiltinFn::kNone:
         case BuiltinFn::kConvert:
+        case BuiltinFn::kSimdgroupMultiply:
             break;
     }
     return core::ir::Instruction::Accesses{};
