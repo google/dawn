@@ -85,6 +85,7 @@
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/texture.h"
 #include "src/tint/lang/core/type/u32.h"
+#include "src/tint/lang/core/type/u64.h"
 #include "src/tint/lang/core/type/u8.h"
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/core/type/void.h"
@@ -127,6 +128,7 @@ class Printer : public tint::TextGenerator {
             ir_, "msl.Printer",
             core::ir::Capabilities{
                 core::ir::Capability::kAllow8BitIntegers,
+                core::ir::Capability::kAllow64BitIntegers,
                 core::ir::Capability::kAllowPointersAndHandlesInStructures,
                 core::ir::Capability::kAllowPrivateVarsInFunctions,
             });
@@ -1290,6 +1292,7 @@ class Printer : public tint::TextGenerator {
             [&](const core::type::F16*) { out << "half"; },   //
             [&](const core::type::I32*) { out << "int"; },    //
             [&](const core::type::U32*) { out << "uint"; },   //
+            [&](const core::type::U64*) { out << "ulong"; },  //
             [&](const core::type::I8*) { out << "char"; },    //
             [&](const core::type::U8*) { out << "uchar"; },   //
             [&](const core::type::Array* arr) { EmitArrayType(out, arr); },
@@ -1692,6 +1695,7 @@ class Printer : public tint::TextGenerator {
             [&](const core::type::Bool*) { out << (c->ValueAs<bool>() ? "true" : "false"); },
             [&](const core::type::I32*) { PrintI32(out, c->ValueAs<i32>()); },
             [&](const core::type::U32*) { out << c->ValueAs<u32>() << "u"; },
+            [&](const core::type::U64*) { out << c->ValueAs<u64>() << "ul"; },
             [&](const core::type::F32*) { PrintF32(out, c->ValueAs<f32>()); },
             [&](const core::type::F16*) { PrintF16(out, c->ValueAs<f16>()); },
             [&](const core::type::Vector* v) {
@@ -1755,6 +1759,7 @@ class Printer : public tint::TextGenerator {
             [&](const core::type::F32*) { out << "0.0f"; },                           //
             [&](const core::type::I32*) { out << "0"; },                              //
             [&](const core::type::U32*) { out << "0u"; },                             //
+            [&](const core::type::U64*) { out << "0u"; },                             //
             [&](const core::type::Vector* vec) { EmitZeroValue(out, vec->Type()); },  //
             [&](const core::type::Matrix* mat) {
                 EmitType(out, mat);

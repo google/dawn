@@ -142,6 +142,7 @@ if(TINT_BUILD_MSL_WRITER)
     tint_lang_msl_validate
     tint_lang_msl_writer
     tint_lang_msl_writer_common
+    tint_lang_msl_writer_printer
   )
 endif(TINT_BUILD_MSL_WRITER)
 

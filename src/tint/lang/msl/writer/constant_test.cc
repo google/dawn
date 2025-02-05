@@ -101,6 +101,23 @@ void foo() {
 )");
 }
 
+TEST_F(MslWriterTest, Constant_u64) {
+    auto* c = b.Constant(u64(UINT64_MAX));
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        b.Let("a", c);
+        b.Return(func);
+    });
+
+    // Use `Print()` as u64 types are only support after certain transforms have run.
+    ASSERT_TRUE(Print()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
+void foo() {
+  ulong const a = 18446744073709551615ul;
+}
+)");
+}
+
 TEST_F(MslWriterTest, Constant_F32) {
     auto* c = b.Constant(f32((1 << 30) - 4));
     auto* func = b.Function("foo", ty.void_());

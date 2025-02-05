@@ -209,6 +209,22 @@ void foo() {
 )");
 }
 
+TEST_F(MslWriterTest, EmitType_U64) {
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.u64()));
+        b.Return(func);
+    });
+
+    // Use `Print()` as u64 types are only support after certain transforms have run.
+    ASSERT_TRUE(Print()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
+void foo() {
+  ulong a = 0u;
+}
+)");
+}
+
 TEST_F(MslWriterTest, EmitType_Atomic_U32) {
     auto* func = b.Function("foo", ty.void_());
     auto* param = b.FunctionParam("a", ty.ptr(core::AddressSpace::kWorkgroup, ty.atomic<u32>()));
