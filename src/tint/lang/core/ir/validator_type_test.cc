@@ -745,4 +745,146 @@ TEST_F(IR_ValidatorTest, Int8Type_InstructionOperand_Allowed) {
     ASSERT_EQ(res, Success) << res.Failure();
 }
 
+using IR_Validator64BitIntTypeTest = IRTestParamHelper<std::tuple<
+    /* int64_allowed */ bool,
+    /* type_builder */ TypeBuilderFn>>;
+
+TEST_P(IR_Validator64BitIntTypeTest, Var) {
+    bool int64_allowed = std::get<0>(GetParam());
+    auto* type = std::get<1>(GetParam())(ty);
+
+    auto* fn = b.Function("my_func", ty.void_());
+    b.Append(fn->Block(), [&] {
+        b.Var(ty.ptr<function>(type));
+        b.Return(fn);
+    });
+
+    Capabilities caps;
+    if (int64_allowed) {
+        caps.Add(Capability::kAllow64BitIntegers);
+    }
+    auto res = ir::Validate(mod, caps);
+    if (int64_allowed) {
+        ASSERT_EQ(res, Success) << res.Failure();
+    } else {
+        ASSERT_NE(res, Success);
+        EXPECT_THAT(res.Failure().reason.Str(),
+                    testing::HasSubstr("3:5 error: var: 64-bit integer types are not permitted"))
+            << res.Failure().reason.Str();
+    }
+}
+
+TEST_P(IR_Validator64BitIntTypeTest, FnParam) {
+    bool int64_allowed = std::get<0>(GetParam());
+    auto* type = std::get<1>(GetParam())(ty);
+
+    auto* fn = b.Function("my_func", ty.void_());
+    fn->SetParams(Vector{b.FunctionParam(type)});
+    b.Append(fn->Block(), [&] { b.Return(fn); });
+
+    Capabilities caps;
+    if (int64_allowed) {
+        caps.Add(Capability::kAllow64BitIntegers);
+    }
+    auto res = ir::Validate(mod, caps);
+    if (int64_allowed) {
+        ASSERT_EQ(res, Success) << res.Failure();
+    } else {
+        ASSERT_NE(res, Success);
+        EXPECT_THAT(res.Failure().reason.Str(),
+                    testing::HasSubstr("64-bit integer types are not permitted"))
+            << res.Failure().reason.Str();
+    }
+}
+
+TEST_P(IR_Validator64BitIntTypeTest, FnRet) {
+    bool int64_allowed = std::get<0>(GetParam());
+    auto* type = std::get<1>(GetParam())(ty);
+
+    auto* fn = b.Function("my_func", type);
+    b.Append(fn->Block(), [&] { b.Unreachable(); });
+
+    Capabilities caps;
+    if (int64_allowed) {
+        caps.Add(Capability::kAllow64BitIntegers);
+    }
+    auto res = ir::Validate(mod, caps);
+    if (int64_allowed) {
+        ASSERT_EQ(res, Success) << res.Failure();
+    } else {
+        ASSERT_NE(res, Success);
+        EXPECT_THAT(res.Failure().reason.Str(),
+                    testing::HasSubstr("64-bit integer types are not permitted"))
+            << res.Failure().reason.Str();
+    }
+}
+
+TEST_P(IR_Validator64BitIntTypeTest, BlockParam) {
+    bool int64_allowed = std::get<0>(GetParam());
+    auto* type = std::get<1>(GetParam())(ty);
+
+    auto* fn = b.Function("my_func", ty.void_());
+    b.Append(fn->Block(), [&] {
+        auto* loop = b.Loop();
+        loop->Continuing()->SetParams({b.BlockParam(type)});
+        b.Append(loop->Body(), [&] {  //
+            b.Continue(loop, nullptr);
+        });
+        b.Append(loop->Continuing(), [&] {  //
+            b.NextIteration(loop);
+        });
+        b.Unreachable();
+    });
+
+    Capabilities caps;
+    if (int64_allowed) {
+        caps.Add(Capability::kAllow64BitIntegers);
+    }
+    auto res = ir::Validate(mod, caps);
+    if (int64_allowed) {
+        ASSERT_EQ(res, Success) << res.Failure();
+    } else {
+        ASSERT_NE(res, Success);
+        EXPECT_THAT(res.Failure().reason.Str(),
+                    testing::HasSubstr("64-bit integer types are not permitted"))
+            << res.Failure().reason.Str();
+    }
+}
+
+INSTANTIATE_TEST_SUITE_P(Int64Types,
+                         IR_Validator64BitIntTypeTest,
+                         testing::Combine(
+                             /* int64_allowed */ testing::Values(false, true),
+                             /* type_builder */
+                             testing::Values(TypeBuilder<u64>,  //
+                                             TypeBuilder<vec4<u64>>,
+                                             TypeBuilder<array<u64, 4>>)));
+
+TEST_F(IR_ValidatorTest, Int64Type_InstructionOperand_NotAllowed) {
+    auto* fn = b.Function("my_func", ty.void_());
+    b.Append(fn->Block(), [&] {
+        b.Let("l", u64(1));
+        b.Return(fn);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:3:5 error: let: 64-bit integer types are not permitted
+    %l:u64 = let 1u64
+    ^^^^^^
+)")) << res.Failure().reason.Str();
+}
+
+TEST_F(IR_ValidatorTest, Int64Type_InstructionOperand_Allowed) {
+    auto* fn = b.Function("my_func", ty.void_());
+    b.Append(fn->Block(), [&] {
+        b.Let("l", u64(1));
+        b.Return(fn);
+    });
+
+    auto res = ir::Validate(mod, Capabilities{Capability::kAllow64BitIntegers});
+    ASSERT_EQ(res, Success) << res.Failure();
+}
+
 }  // namespace tint::core::ir

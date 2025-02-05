@@ -91,6 +91,7 @@
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/type.h"
 #include "src/tint/lang/core/type/u32.h"
+#include "src/tint/lang/core/type/u64.h"
 #include "src/tint/lang/core/type/u8.h"
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/core/type/void.h"
@@ -1812,6 +1813,14 @@ void Validator::CheckType(const core::type::Type* root,
                         diag() << "nested pointer types are not permitted";
                         return false;
                     }
+                }
+                return true;
+            },
+            [&](const core::type::U64*) {
+                // u64 types are guarded by the Allow64BitIntegers capability.
+                if (!capabilities_.Contains(Capability::kAllow64BitIntegers)) {
+                    diag() << "64-bit integer types are not permitted";
+                    return false;
                 }
                 return true;
             },
