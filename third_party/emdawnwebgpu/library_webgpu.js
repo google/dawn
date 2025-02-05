@@ -241,7 +241,6 @@ var LibraryWebGPU = {
     },
 
     makeTexelCopyBufferLayout: (ptr) => {
-      {{{ gpu.makeCheckDescriptor('ptr') }}}
       var bytesPerRow = {{{ gpu.makeGetU32('ptr', C_STRUCTS.WGPUTexelCopyBufferLayout.bytesPerRow) }}};
       var rowsPerImage = {{{ gpu.makeGetU32('ptr', C_STRUCTS.WGPUTexelCopyBufferLayout.rowsPerImage) }}};
       return {
