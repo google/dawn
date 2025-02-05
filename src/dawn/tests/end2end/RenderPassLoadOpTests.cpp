@@ -486,10 +486,6 @@ TEST_P(RenderPassLoadOpTests, LoadOpClearNormalizedFormatsOutOfBound) {
 // Test clearing multiple color attachments with different big signed and unsigned integers can
 // still work correctly.
 TEST_P(RenderPassLoadOpTests, LoadOpClearWithBig32BitIntegralValuesOnMultipleColorAttachments) {
-    // TODO(crbug.com/388318201): investigate: framebuffer incomplete
-    DAWN_SUPPRESS_TEST_IF(IsCompatibilityMode() &&
-                          HasToggleEnabled("gl_force_es_31_and_no_extensions"));
-
     // TODO(383733873): ApplyClearBigIntegerColorValueWithDraw workaround doesn't work with multiple
     // outputs in compat mode.
     DAWN_TEST_UNSUPPORTED_IF(IsD3D11() && IsCompatibilityMode());

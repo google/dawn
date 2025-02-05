@@ -1178,7 +1178,7 @@ TEST_F(MultisampledRenderPassDescriptorValidationTest, ResolveTargetUsedTwice) {
 // Tests the texture format of the resolve target must support being used as resolve target.
 TEST_F(MultisampledRenderPassDescriptorValidationTest, ResolveTargetFormat) {
     for (wgpu::TextureFormat format : utils::kAllTextureFormats) {
-        if (!utils::TextureFormatSupportsMultisampling(device, format) ||
+        if (!utils::TextureFormatSupportsMultisampling(device, format, UseCompatibilityMode()) ||
             utils::IsDepthOrStencilFormat(format)) {
             continue;
         }

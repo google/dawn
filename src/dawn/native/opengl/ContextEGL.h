@@ -47,7 +47,7 @@ class ContextEGL : NonMovable {
                                                              wgpu::BackendType backend,
                                                              bool useRobustness,
                                                              bool useANGLETextureSharing,
-                                                             bool forceES31AndNoExtensionss);
+                                                             bool forceES31AndMinExtensions);
 
     explicit ContextEGL(Ref<DisplayEGL> display);
     ~ContextEGL();
@@ -55,7 +55,8 @@ class ContextEGL : NonMovable {
     MaybeError Initialize(wgpu::BackendType backend,
                           bool useRobustness,
                           bool useANGLETextureSharing,
-                          bool forceES31AndNoExtensionss);
+                          bool forceES31AndMinExtensions);
+    void RequestRequiredExtensionsExplicitly();
 
     // Make the surface used by all MakeCurrent until the scoper gets out of scope.
     class ScopedMakeSurfaceCurrent : NonMovable {
@@ -75,6 +76,7 @@ class ContextEGL : NonMovable {
     EGLContext mContext = EGL_NO_CONTEXT;
     EGLSurface mCurrentSurface = EGL_NO_SURFACE;
     EGLSurface mOffscreenSurface = EGL_NO_SURFACE;
+    bool mForceES31AndMinExtensions = false;
 };
 
 }  // namespace dawn::native::opengl

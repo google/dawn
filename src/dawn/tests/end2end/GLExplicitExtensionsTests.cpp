@@ -54,8 +54,6 @@ TEST_P(GLExplicitExtensionsTests, Toggles) {
     // Make sure this toggle is inherited correctly during re-initialization
     EXPECT_EQ(HasToggleEnabled("gl_force_es_31_and_no_extensions"), true);
 
-    // GL_OES_texture_stencil8
-    EXPECT_EQ(HasToggleEnabled("use_blit_for_stencil_texture_write"), true);
     // GL_EXT_read_format_bgra
     EXPECT_EQ(HasToggleEnabled("use_blit_for_bgra8unorm_texture_to_buffer_copy"), true);
 }

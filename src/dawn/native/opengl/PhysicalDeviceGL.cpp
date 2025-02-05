@@ -104,7 +104,7 @@ bool IsSwiftShader(std::string_view renderer) {
 // static
 ResultOrError<Ref<PhysicalDevice>> PhysicalDevice::Create(wgpu::BackendType backendType,
                                                           Ref<DisplayEGL> display,
-                                                          bool forceES31AndNoExtensions) {
+                                                          bool forceES31AndMinExtensions) {
     const EGLFunctions& egl = display->egl;
     EGLDisplay eglDisplay = display->GetDisplay();
 
@@ -115,13 +115,15 @@ ResultOrError<Ref<PhysicalDevice>> PhysicalDevice::Create(wgpu::BackendType back
     DAWN_TRY_ASSIGN(context,
                     ContextEGL::Create(display, backendType, /*useRobustness*/ false,
                                        /*useANGLETextureSharing*/ false,
-                                       /*forceES31AndNoExtensions*/ forceES31AndNoExtensions));
+                                       /*forceES31AndMinExtensions*/ forceES31AndMinExtensions));
 
     EGLSurface prevDrawSurface = egl.GetCurrentSurface(EGL_DRAW);
     EGLSurface prevReadSurface = egl.GetCurrentSurface(EGL_READ);
     EGLContext prevContext = egl.GetCurrentContext();
 
     context->MakeCurrent();
+    // Needed to request extensions here to initialize supported gl extensions set
+    context->RequestRequiredExtensionsExplicitly();
 
     Ref<PhysicalDevice> physicalDevice =
         AcquireRef(new PhysicalDevice(backendType, std::move(display)));
@@ -468,11 +470,11 @@ ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(
     }
 
     bool useRobustness = !deviceToggles.IsEnabled(Toggle::DisableRobustness);
-    bool forceES31AndNoExtensions = deviceToggles.IsEnabled(Toggle::GLForceES31AndNoExtensions);
+    bool forceES31AndMinExtensions = deviceToggles.IsEnabled(Toggle::GLForceES31AndNoExtensions);
 
     std::unique_ptr<ContextEGL> context;
     DAWN_TRY_ASSIGN(context, ContextEGL::Create(mDisplay, GetBackendType(), useRobustness,
-                                                useANGLETextureSharing, forceES31AndNoExtensions));
+                                                useANGLETextureSharing, forceES31AndMinExtensions));
 
     return Device::Create(adapter, descriptor, mFunctions, std::move(context), deviceToggles,
                           std::move(lostEvent));

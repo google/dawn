@@ -56,10 +56,10 @@ ResultOrError<std::unique_ptr<ContextEGL>> ContextEGL::Create(Ref<DisplayEGL> di
                                                               wgpu::BackendType backend,
                                                               bool useRobustness,
                                                               bool useANGLETextureSharing,
-                                                              bool forceES31AndNoExtensionss) {
+                                                              bool forceES31AndMinExtensions) {
     auto context = std::make_unique<ContextEGL>(std::move(display));
     DAWN_TRY(context->Initialize(backend, useRobustness, useANGLETextureSharing,
-                                 forceES31AndNoExtensionss));
+                                 forceES31AndMinExtensions));
     return std::move(context);
 }
 
@@ -79,7 +79,7 @@ ContextEGL::~ContextEGL() {
 MaybeError ContextEGL::Initialize(wgpu::BackendType backend,
                                   bool useRobustness,
                                   bool useANGLETextureSharing,
-                                  bool forceES31AndNoExtensionss) {
+                                  bool forceES31AndMinExtensions) {
     const EGLFunctions& egl = mDisplay->egl;
 
     // Unless EGL_KHR_no_config is present, we need to choose an EGLConfig on context creation that
@@ -139,7 +139,8 @@ MaybeError ContextEGL::Initialize(wgpu::BackendType backend,
         AddAttrib(EGL_DISPLAY_TEXTURE_SHARE_GROUP_ANGLE, EGL_TRUE);
     }
 
-    if (forceES31AndNoExtensionss) {
+    mForceES31AndMinExtensions = forceES31AndMinExtensions;
+    if (forceES31AndMinExtensions) {
         if (egl.HasExt(EGLExt::ANGLECreateContextBackwardsCompatible)) {
             AddAttrib(EGL_CONTEXT_OPENGL_BACKWARDS_COMPATIBLE_ANGLE, EGL_FALSE);
         }
@@ -181,6 +182,34 @@ MaybeError ContextEGL::Initialize(wgpu::BackendType backend,
     }
 
     return {};
+}
+
+// Request compat mode required extensions explicitly when mForceES31AndMinExtensions is true
+void ContextEGL::RequestRequiredExtensionsExplicitly() {
+    if (!mForceES31AndMinExtensions) {
+        return;
+    }
+
+    const EGLFunctions& egl = mDisplay->egl;
+    // Copied from third_party/angle/include/GLES/gl.h
+    typedef void(KHRONOS_APIENTRY * PFNGLREQUESTEXTENSIONANGLEPROC)(const GLchar* name);
+
+    auto proc = egl.GetProcAddress("glRequestExtensionANGLE");
+    if (!proc) {
+        return;
+    }
+
+    auto glRequestExtension = reinterpret_cast<PFNGLREQUESTEXTENSIONANGLEPROC>(proc);
+
+    // src/dawn/native/opengl/supported_extensions.json
+    glRequestExtension("GL_OES_texture_stencil8");
+    glRequestExtension("GL_EXT_texture_compression_s3tc");
+    glRequestExtension("GL_EXT_texture_compression_s3tc_srgb");
+    glRequestExtension("GL_OES_EGL_image");
+    glRequestExtension("GL_EXT_texture_format_BGRA8888");
+    glRequestExtension("GL_APPLE_texture_format_BGRA8888");
+    glRequestExtension("GL_EXT_color_buffer_float");
+    glRequestExtension("GL_EXT_color_buffer_half_float");
 }
 
 void ContextEGL::MakeCurrent() {

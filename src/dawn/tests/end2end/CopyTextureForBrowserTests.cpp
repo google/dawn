@@ -1141,16 +1141,6 @@ DAWN_INSTANTIATE_TEST(CopyTextureForBrowser_Basic,
 // Verify |CopyTextureForBrowser| doing color conversion correctly when
 // the source texture is RGBA8Unorm format.
 TEST_P(CopyTextureForBrowser_Formats, ColorConversion) {
-    // TODO(crbug.com/388318201): investigate: framebuffer incomplete
-    DAWN_SUPPRESS_TEST_IF(IsCompatibilityMode() &&
-                          HasToggleEnabled("gl_force_es_31_and_no_extensions") &&
-                          (GetParam().mSrcFormat == wgpu::TextureFormat::RGBA16Float ||
-                           GetParam().mSrcFormat == wgpu::TextureFormat::BGRA8Unorm ||
-                           GetParam().mSrcFormat == wgpu::TextureFormat::RGBA8Unorm ||
-                           GetParam().mDstFormat == wgpu::TextureFormat::RGBA16Float ||
-                           GetParam().mDstFormat == wgpu::TextureFormat::BGRA8Unorm ||
-                           GetParam().mDstFormat == wgpu::TextureFormat::RGBA8Unorm));
-
     // BGRA8UnormSrgb is unsupported in Compatibility mode.
     DAWN_SUPPRESS_TEST_IF(IsCompatibilityMode() &&
                           GetParam().mDstFormat == wgpu::TextureFormat::BGRA8UnormSrgb);
@@ -1224,13 +1214,6 @@ DAWN_INSTANTIATE_TEST_P(
 
 // Verify |CopyTextureForBrowser| doing color space conversion.
 TEST_P(CopyTextureForBrowser_ColorSpace, colorSpaceConversion) {
-    // TODO(crbug.com/381214487): float16-renderable and float32-renderable features. framebuffer
-    // incomplete.
-    DAWN_SUPPRESS_TEST_IF(IsCompatibilityMode() &&
-                          HasToggleEnabled("gl_force_es_31_and_no_extensions") &&
-                          (GetParam().mDstFormat == wgpu::TextureFormat::RGBA16Float ||
-                           GetParam().mDstFormat == wgpu::TextureFormat::RGBA32Float));
-
     DAWN_SUPPRESS_TEST_IF(IsOpenGL() && IsLinux());
 
     // Tests skip due to crbug.com/dawn/1104.

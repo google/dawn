@@ -200,7 +200,8 @@ bool IsRenderableFormat(const wgpu::Device& device, wgpu::TextureFormat textureF
 }
 
 bool TextureFormatSupportsMultisampling(const wgpu::Device& device,
-                                        wgpu::TextureFormat textureFormat) {
+                                        wgpu::TextureFormat textureFormat,
+                                        bool isCompatibilityMode) {
     if (IsBCTextureFormat(textureFormat) || IsETC2TextureFormat(textureFormat) ||
         IsASTCTextureFormat(textureFormat)) {
         return false;
@@ -233,6 +234,10 @@ bool TextureFormatSupportsMultisampling(const wgpu::Device& device,
 
         case wgpu::TextureFormat::RG11B10Ufloat:
             return device.HasFeature(wgpu::FeatureName::RG11B10UfloatRenderable);
+
+        case wgpu::TextureFormat::RGBA16Float:
+        case wgpu::TextureFormat::R32Float:
+            return !isCompatibilityMode;
 
         default:
             return true;
