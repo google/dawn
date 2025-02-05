@@ -1,8 +1,0 @@
-#include <metal_stdlib>
-
-using namespace metal;
-kernel void tint_symbol() {
-  float const a = 1.0f;
-  return;
-}
-

@@ -1,9 +1,0 @@
-#include <metal_stdlib>
-
-using namespace metal;
-kernel void f() {
-  float const a = 2.003662109375f;
-  uint const b = as_type<uint>(a);
-  return;
-}
-

@@ -1,9 +1,0 @@
-#include <metal_stdlib>
-
-using namespace metal;
-fragment void tint_symbol(texture2d<float, access::sample> tint_symbol_1 [[texture(0)]], sampler tint_symbol_2 [[sampler(0)]], depth2d<float, access::sample> tint_symbol_3 [[texture(1)]], sampler tint_symbol_4 [[sampler(1)]]) {
-  float4 a = tint_symbol_1.sample(tint_symbol_2, float2(1.0f));
-  float4 b = tint_symbol_3.gather_compare(tint_symbol_4, float2(1.0f), 1.0f);
-  return;
-}
-

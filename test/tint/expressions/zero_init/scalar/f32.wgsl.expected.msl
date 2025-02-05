@@ -1,7 +1,0 @@
-#include <metal_stdlib>
-
-using namespace metal;
-void f() {
-  float v = 0.0f;
-}
-

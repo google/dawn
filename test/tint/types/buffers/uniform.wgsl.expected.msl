@@ -1,8 +1,0 @@
-#include <metal_stdlib>
-
-using namespace metal;
-fragment void tint_symbol(const constant float2* tint_symbol_1 [[buffer(0)]]) {
-  float a = (*(tint_symbol_1))[0];
-  return;
-}
-

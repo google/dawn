@@ -1,9 +1,0 @@
-#include <metal_stdlib>
-
-using namespace metal;
-kernel void f(device half4x4* tint_symbol [[buffer(0)]]) {
-  half4x4 m = half4x4(half4(0.0h), half4(0.0h), half4(0.0h), half4(0.0h));
-  *(tint_symbol) = half4x4(m);
-  return;
-}
-

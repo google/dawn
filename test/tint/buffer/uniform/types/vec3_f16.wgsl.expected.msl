@@ -1,9 +1,0 @@
-#include <metal_stdlib>
-
-using namespace metal;
-kernel void tint_symbol(const constant packed_half3* tint_symbol_1 [[buffer(0)]], device packed_half3* tint_symbol_2 [[buffer(1)]]) {
-  half3 const x = half3(*(tint_symbol_1));
-  *(tint_symbol_2) = packed_half3(x);
-  return;
-}
-

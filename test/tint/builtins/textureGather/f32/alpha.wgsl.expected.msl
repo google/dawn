@@ -1,8 +1,0 @@
-#include <metal_stdlib>
-
-using namespace metal;
-fragment void tint_symbol(texture2d<float, access::sample> tint_symbol_1 [[texture(0)]], sampler tint_symbol_2 [[sampler(0)]]) {
-  float4 res = tint_symbol_1.gather(tint_symbol_2, float2(0.0f), int2(0), component::w);
-  return;
-}
-

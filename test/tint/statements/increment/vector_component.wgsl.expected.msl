@@ -1,9 +1,0 @@
-#include <metal_stdlib>
-
-using namespace metal;
-void tint_symbol(device uint4* const tint_symbol_3) {
-  int const tint_symbol_2 = 1;
-  (*(tint_symbol_3))[min(uint(tint_symbol_2), 3u)] = ((*(tint_symbol_3))[min(uint(tint_symbol_2), 3u)] + 1u);
-  (*(tint_symbol_3))[2] = ((*(tint_symbol_3))[2] + 1u);
-}
-

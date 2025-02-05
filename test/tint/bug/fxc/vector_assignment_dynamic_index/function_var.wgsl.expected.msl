@@ -1,9 +1,0 @@
-#include <metal_stdlib>
-
-using namespace metal;
-kernel void tint_symbol(const constant uint* tint_symbol_1 [[buffer(0)]]) {
-  float3 v1 = 0.0f;
-  v1[min(*(tint_symbol_1), 2u)] = 1.0f;
-  return;
-}
-

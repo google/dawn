@@ -1,9 +1,0 @@
-#include <metal_stdlib>
-
-using namespace metal;
-kernel void f(device float2x4* tint_symbol [[buffer(0)]]) {
-  float2x4 m = float2x4(float4(0.0f), float4(0.0f));
-  *(tint_symbol) = float2x4(m);
-  return;
-}
-

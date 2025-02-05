@@ -1,9 +1,0 @@
-#include <metal_stdlib>
-
-using namespace metal;
-kernel void f(const constant half2x2* tint_symbol [[buffer(0)]]) {
-  half2x2 const l_m = *(tint_symbol);
-  half2 const l_m_1 = (*(tint_symbol))[1];
-  return;
-}
-

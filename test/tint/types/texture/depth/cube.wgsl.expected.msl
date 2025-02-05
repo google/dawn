@@ -1,9 +1,0 @@
-#include <metal_stdlib>
-
-using namespace metal;
-kernel void tint_symbol(depthcube<float, access::sample> tint_symbol_1 [[texture(0)]]) {
-  uint const level_idx = min(0u, (tint_symbol_1.get_num_mip_levels() - 1u));
-  uint2 dims = uint2(tint_symbol_1.get_width(level_idx), tint_symbol_1.get_height(level_idx));
-  return;
-}
-

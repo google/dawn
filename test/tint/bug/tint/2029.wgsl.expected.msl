@@ -1,8 +1,0 @@
-#include <metal_stdlib>
-
-using namespace metal;
-kernel void tint_symbol(device packed_int3* tint_symbol_1 [[buffer(0)]]) {
-  *(tint_symbol_1) = packed_int3(1);
-  return;
-}
-

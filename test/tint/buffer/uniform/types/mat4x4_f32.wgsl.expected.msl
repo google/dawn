@@ -1,9 +1,0 @@
-#include <metal_stdlib>
-
-using namespace metal;
-kernel void tint_symbol(const constant float4x4* tint_symbol_1 [[buffer(0)]], device float4x4* tint_symbol_2 [[buffer(1)]]) {
-  float4x4 const x = *(tint_symbol_1);
-  *(tint_symbol_2) = x;
-  return;
-}
-

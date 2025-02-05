@@ -1,8 +1,0 @@
-#include <metal_stdlib>
-
-using namespace metal;
-fragment void f() {
-  int b = 0;
-  return;
-}
-

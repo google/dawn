@@ -1,8 +1,0 @@
-#include <metal_stdlib>
-
-using namespace metal;
-kernel void tint_symbol(device float3x2* tint_symbol_1 [[buffer(0)]], const device float3x2* tint_symbol_2 [[buffer(1)]]) {
-  *(tint_symbol_1) = *(tint_symbol_2);
-  return;
-}
-

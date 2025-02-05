@@ -1,8 +1,0 @@
-#include <metal_stdlib>
-
-using namespace metal;
-kernel void tint_symbol_3(device uint* tint_symbol_4 [[buffer(0)]]) {
-  *(tint_symbol_4) = 0u;
-  return;
-}
-

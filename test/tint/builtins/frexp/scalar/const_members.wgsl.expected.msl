@@ -1,9 +1,0 @@
-#include <metal_stdlib>
-
-using namespace metal;
-kernel void tint_symbol() {
-  float const fract = 0.625f;
-  int const exp = 1;
-  return;
-}
-

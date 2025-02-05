@@ -1,9 +1,0 @@
-#include <metal_stdlib>
-
-using namespace metal;
-struct tint_private_vars_struct {
-  float4 f;
-  int4 i;
-  uint4 u;
-};
-
