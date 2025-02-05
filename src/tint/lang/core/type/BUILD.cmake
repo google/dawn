@@ -51,6 +51,8 @@ tint_add_target(tint_lang_core_type lib
   lang/core/type/array_count.h
   lang/core/type/atomic.cc
   lang/core/type/atomic.h
+  lang/core/type/binding_array.cc
+  lang/core/type/binding_array.h
   lang/core/type/bool.cc
   lang/core/type/bool.h
   lang/core/type/builtin_structs.cc
@@ -152,6 +154,7 @@ tint_target_add_external_dependencies(tint_lang_core_type lib
 tint_add_target(tint_lang_core_type_test test
   lang/core/type/array_test.cc
   lang/core/type/atomic_test.cc
+  lang/core/type/binding_array_test.cc
   lang/core/type/bool_test.cc
   lang/core/type/builtin_structs_test.cc
   lang/core/type/depth_multisampled_texture_test.cc

@@ -32,6 +32,7 @@
 #include "src/tint/lang/core/type/abstract_float.h"
 #include "src/tint/lang/core/type/abstract_int.h"
 #include "src/tint/lang/core/type/array.h"
+#include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/bool.h"
 #include "src/tint/lang/core/type/f16.h"
 #include "src/tint/lang/core/type/f32.h"
@@ -244,6 +245,11 @@ const core::type::Array* Manager::runtime_array(const core::type::Type* elem_ty,
         /* array size */ stride,
         /* element stride */ stride,
         /* implicit stride */ implicit_stride);
+}
+
+const core::type::BindingArray* Manager::binding_array(const core::type::Type* elem_ty,
+                                                       uint32_t count) {
+    return Get<core::type::BindingArray>(elem_ty, count);
 }
 
 const core::type::Pointer* Manager::ptr(core::AddressSpace address_space,

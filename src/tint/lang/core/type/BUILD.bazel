@@ -45,6 +45,7 @@ cc_library(
     "array.cc",
     "array_count.cc",
     "atomic.cc",
+    "binding_array.cc",
     "bool.cc",
     "builtin_structs.cc",
     "depth_multisampled_texture.cc",
@@ -89,6 +90,7 @@ cc_library(
     "array.h",
     "array_count.h",
     "atomic.h",
+    "binding_array.h",
     "bool.h",
     "builtin_structs.h",
     "clone_context.h",
@@ -151,6 +153,7 @@ cc_library(
   srcs = [
     "array_test.cc",
     "atomic_test.cc",
+    "binding_array_test.cc",
     "bool_test.cc",
     "builtin_structs_test.cc",
     "depth_multisampled_texture_test.cc",

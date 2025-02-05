@@ -50,6 +50,7 @@ namespace tint::core::type {
 class AbstractFloat;
 class AbstractInt;
 class Array;
+class BindingArray;
 class Bool;
 class F16;
 class F32;
@@ -528,6 +529,11 @@ class Manager final {
             return array(Get<T>(), N, stride);
         }
     }
+
+    /// @param elem_ty the array element type
+    /// @param count the array element count
+    /// @returns the array type
+    const core::type::BindingArray* binding_array(const core::type::Type* elem_ty, uint32_t count);
 
     /// @param address_space the address space
     /// @param subtype the pointer subtype
