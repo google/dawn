@@ -33,6 +33,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Scalar<tint::core::AFloat>);
 TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Scalar<tint::core::i32>);
 TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Scalar<tint::core::i8>);
 TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Scalar<tint::core::u32>);
+TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Scalar<tint::core::u64>);
 TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Scalar<tint::core::u8>);
 TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Scalar<tint::core::f16>);
 TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Scalar<tint::core::f32>);

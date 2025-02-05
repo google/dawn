@@ -38,6 +38,7 @@
 #include "src/tint/lang/core/type/i8.h"
 #include "src/tint/lang/core/type/manager.h"
 #include "src/tint/lang/core/type/u32.h"
+#include "src/tint/lang/core/type/u64.h"
 #include "src/tint/lang/core/type/u8.h"
 
 namespace tint::core::constant {
@@ -130,6 +131,15 @@ TEST_F(ManagerTest, Get_u32) {
     static_assert(std::is_same_v<const Scalar<u32>*, decltype(c)>);
     ASSERT_TRUE(Is<core::type::U32>(c->Type()));
     EXPECT_EQ(c->value, 1_u);
+}
+
+TEST_F(ManagerTest, Get_u64) {
+    constant::Manager cm;
+
+    auto* c = cm.Get(u64(1));
+    static_assert(std::is_same_v<const Scalar<u64>*, decltype(c)>);
+    ASSERT_TRUE(Is<core::type::U64>(c->Type()));
+    EXPECT_EQ(c->value, u64(1));
 }
 
 TEST_F(ManagerTest, Get_u8) {
