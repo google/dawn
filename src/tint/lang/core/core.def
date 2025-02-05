@@ -243,6 +243,7 @@ enum usages {
   elements
   exp
   height
+  i
   insert
   level
   location
@@ -252,6 +253,7 @@ enum usages {
   samples
   result
   width
+  x
 }
 
 ////////////////////////////////////////////////////////////////////////////////

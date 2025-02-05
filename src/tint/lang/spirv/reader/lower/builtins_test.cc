@@ -2607,5 +2607,100 @@ TEST_F(SpirvParser_BuiltinsTest, Ldexp_VectorSigned) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(SpirvParser_BuiltinsTest, Modf_Scalar) {
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        auto* v = b.Var(ty.ptr<function, f32>());
+        auto* res = b.Call<spirv::ir::BuiltinCall>(ty.f32(), spirv::BuiltinFn::kModf, 50_f, v);
+        b.Let(b.Multiply(ty.f32(), res, res));
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:ptr<function, f32, read_write> = var
+    %3:f32 = spirv.modf 50.0f, %2
+    %4:f32 = mul %3, %3
+    %5:f32 = let %4
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+__modf_result_f32 = struct @align(4) {
+  fract:f32 @offset(0)
+  whole:f32 @offset(4)
+}
+
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:ptr<function, f32, read_write> = var
+    %3:__modf_result_f32 = modf 50.0f
+    %4:f32 = access %3, 1u
+    store %2, %4
+    %5:f32 = access %3, 0u
+    %6:f32 = mul %5, %5
+    %7:f32 = let %6
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvParser_BuiltinsTest, Modf_Vector) {
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        auto* v = b.Var(ty.ptr<function, vec2<f32>>());
+        auto* res = b.Call<spirv::ir::BuiltinCall>(ty.vec2<f32>(), spirv::BuiltinFn::kModf,
+                                                   b.Splat(ty.vec2<f32>(), 50_f), v);
+        b.Let(b.Multiply(ty.vec2<f32>(), res, res));
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:ptr<function, vec2<f32>, read_write> = var
+    %3:vec2<f32> = spirv.modf vec2<f32>(50.0f), %2
+    %4:vec2<f32> = mul %3, %3
+    %5:vec2<f32> = let %4
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+__modf_result_vec2_f32 = struct @align(8) {
+  fract:vec2<f32> @offset(0)
+  whole:vec2<f32> @offset(8)
+}
+
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:ptr<function, vec2<f32>, read_write> = var
+    %3:__modf_result_vec2_f32 = modf vec2<f32>(50.0f)
+    %4:vec2<f32> = access %3, 1u
+    store %2, %4
+    %5:vec2<f32> = access %3, 0u
+    %6:vec2<f32> = mul %5, %5
+    %7:vec2<f32> = let %6
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader::lower

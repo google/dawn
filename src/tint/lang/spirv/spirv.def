@@ -95,6 +95,12 @@ match workgroup_or_storage
   : address_space.workgroup
   | address_space.storage
 
+match function_private_workgroup_storage
+  : address_space.function
+  | address_space.private
+  | address_space.workgroup
+  | address_space.storage
+
 match samplers
   : sampler
   | sampler_comparison
@@ -362,6 +368,10 @@ implicit(T: f32_f16, N: num) fn faceForward(vec<N, T>, vec<N, T>, vec<N, T>) -> 
 
 implicit(T: f32_f16, U: iu32) fn ldexp(T, U) -> T
 implicit(N: num, T: f32_f16, U: iu32) fn ldexp(vec<N, T>, vec<N, U>) -> vec<N, T>
+
+implicit(T: f32_f16, S: function_private_workgroup_storage) fn modf(x: T, i: ptr<S, T, writable>) -> T
+implicit(T: f32_f16, N: num, S: function_private_workgroup_storage) fn modf(x: vec<N, T>,
+                                                                            i: ptr<S, vec<N, T>, writable>) -> vec<N, T>
 
 ////////////////////////////////////////////////////////////////////////////////
 // SPV_KHR_integer_dot_product instructions

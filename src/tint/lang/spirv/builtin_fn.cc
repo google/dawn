@@ -142,6 +142,8 @@ const char* str(BuiltinFn i) {
             return "faceForward";
         case BuiltinFn::kLdexp:
             return "ldexp";
+        case BuiltinFn::kModf:
+            return "modf";
         case BuiltinFn::kSdot:
             return "sdot";
         case BuiltinFn::kUdot:
@@ -165,6 +167,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
             return core::ir::Instruction::Accesses{core::ir::Instruction::Access::kLoad};
 
         case BuiltinFn::kImageWrite:
+        case BuiltinFn::kModf:
             return core::ir::Instruction::Accesses{core::ir::Instruction::Access::kStore};
 
         case BuiltinFn::kAtomicAnd:

@@ -43,6 +43,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
             return core::ir::Instruction::Accesses{core::ir::Instruction::Access::kLoad};
 
         case BuiltinFn::kImageWrite:
+        case BuiltinFn::kModf:
             return core::ir::Instruction::Accesses{core::ir::Instruction::Access::kStore};
 
         case BuiltinFn::kAtomicAnd:

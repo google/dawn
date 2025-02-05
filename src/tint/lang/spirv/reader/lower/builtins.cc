@@ -30,6 +30,7 @@
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/core/type/builtin_structs.h"
 #include "src/tint/lang/spirv/ir/builtin_call.h"
 
 namespace tint::spirv::reader::lower {
@@ -111,6 +112,9 @@ struct State {
                     break;
                 case spirv::BuiltinFn::kLdexp:
                     Ldexp(builtin);
+                    break;
+                case spirv::BuiltinFn::kModf:
+                    Modf(builtin);
                     break;
                 default:
                     TINT_UNREACHABLE() << "unknown spirv builtin: " << builtin->Func();
@@ -308,6 +312,22 @@ struct State {
             } else {
                 b.CallWithResult(call->DetachResult(), core::BuiltinFn::kFaceForward, N, I, Nref);
             }
+        });
+        call->Destroy();
+    }
+
+    void Modf(spirv::ir::BuiltinCall* call) {
+        auto* x = call->Args()[0];
+        auto* i = call->Args()[1];
+        auto* result_ty = call->Result(0)->Type();
+        auto* modf_result_ty = core::type::CreateModfResult(ty, ir.symbols, result_ty);
+
+        b.InsertBefore(call, [&] {
+            auto* c = b.Call(modf_result_ty, core::BuiltinFn::kModf, x);
+            auto* whole = b.Access(result_ty, c, 1_u);
+            b.Store(i, whole);
+
+            b.AccessWithResult(call->DetachResult(), c, 0_u);
         });
         call->Destroy();
     }

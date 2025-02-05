@@ -1378,6 +1378,9 @@ class Printer {
             case spirv::BuiltinFn::kMatrixTimesVector:
                 op = spv::Op::OpMatrixTimesVector;
                 break;
+            case spirv::BuiltinFn::kModf:
+                ext_inst(GLSLstd450Modf);
+                break;
             case spirv::BuiltinFn::kSmax:
                 ext_inst(GLSLstd450SMax);
                 break;

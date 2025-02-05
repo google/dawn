@@ -789,6 +789,8 @@ class Parser {
                 return spirv::BuiltinFn::kFaceForward;
             case GLSLstd450Ldexp:
                 return spirv::BuiltinFn::kLdexp;
+            case GLSLstd450Modf:
+                return spirv::BuiltinFn::kModf;
             default:
                 break;
         }
