@@ -595,15 +595,7 @@ Options:
                                  tint::ast::transform::DataMap& transform_inputs) {
     switch (options.format) {
         case Format::kMsl: {
-            if (options.use_ir) {
-                // Renaming is handled in the backend.
-                break;
-            }
-            if (!options.rename_all) {
-                transform_inputs.Add<tint::ast::transform::Renamer::Config>(
-                    tint::ast::transform::Renamer::Target::kMslKeywords);
-            }
-            transform_manager.Add<tint::ast::transform::Renamer>();
+            // Renaming is handled in the backend.
             break;
         }
         case Format::kGlsl: {
@@ -919,6 +911,13 @@ bool GenerateMsl([[maybe_unused]] Options& options,
         input_program = std::move(flattened.value());
     }
 
+    // Convert the AST program to an IR module.
+    auto ir = tint::wgsl::reader::ProgramToLoweredIR(input_program);
+    if (ir != tint::Success) {
+        std::cerr << "Failed to generate IR: " << ir << "\n";
+        return false;
+    }
+
     // Set up the backend options.
     tint::msl::writer::Options gen_options;
     if (options.rename_all) {
@@ -928,7 +927,7 @@ bool GenerateMsl([[maybe_unused]] Options& options,
     gen_options.disable_robustness = !options.enable_robustness;
     gen_options.disable_workgroup_init = options.disable_workgroup_init;
     gen_options.pixel_local_attachments = options.pixel_local_attachments;
-    gen_options.bindings = tint::msl::writer::GenerateBindings(input_program);
+    gen_options.bindings = tint::msl::writer::GenerateBindings(ir.Get());
     gen_options.array_length_from_uniform.ubo_binding = 30;
     gen_options.disable_demote_to_helper = options.disable_demote_to_helper;
 
@@ -945,27 +944,14 @@ bool GenerateMsl([[maybe_unused]] Options& options,
         }
     }
 
-    tint::Result<tint::msl::writer::Output> result;
-    if (options.use_ir) {
-        // Convert the AST program to an IR module.
-        auto ir = tint::wgsl::reader::ProgramToLoweredIR(input_program);
-        if (ir != tint::Success) {
-            std::cerr << "Failed to generate IR: " << ir << "\n";
-            return false;
-        }
-
-        // Check that the module and options are supported by the backend.
-        auto check = tint::msl::writer::CanGenerate(ir.Get(), gen_options);
-        if (check != tint::Success) {
-            std::cerr << check.Failure() << "\n";
-            return false;
-        }
-
-        result = tint::msl::writer::Generate(ir.Get(), gen_options);
-    } else {
-        result = tint::msl::writer::Generate(input_program, gen_options);
+    // Check that the module and options are supported by the backend.
+    auto check = tint::msl::writer::CanGenerate(ir.Get(), gen_options);
+    if (check != tint::Success) {
+        std::cerr << check.Failure() << "\n";
+        return false;
     }
 
+    auto result = tint::msl::writer::Generate(ir.Get(), gen_options);
     if (result != tint::Success) {
         tint::cmd::PrintWGSL(std::cerr, input_program);
         std::cerr << "Failed to generate: " << result.Failure() << "\n";

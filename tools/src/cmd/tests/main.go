@@ -73,7 +73,7 @@ const (
 )
 
 // allOutputFormats holds all the supported outputFormats
-var allOutputFormats = []outputFormat{wgsl, spvasm, msl, mslIR, hlslDXC, hlslDXCIR, hlslFXC, hlslFXCIR, glsl}
+var allOutputFormats = []outputFormat{wgsl, spvasm, msl, hlslDXC, hlslDXCIR, hlslFXC, hlslFXCIR, glsl}
 
 // The root directory of the dawn project
 var dawnRoot = fileutils.DawnRoot()
@@ -234,6 +234,10 @@ func run() error {
 			parsed, err := parseOutputFormat(strings.TrimSpace(f))
 			if err != nil {
 				return err
+			}
+			// TODO(388013849): Remove when CQ is updated to stop using this format.
+			if parsed[0] == mslIR {
+				continue
 			}
 			formats = append(formats, parsed...)
 		}
@@ -677,7 +681,7 @@ func (j job) run(cfg runConfig) {
 		// expectedFilePath is the path to the expected output file for the given test
 		expectedFilePath := j.file + ".expected."
 
-		useIr := j.format == hlslDXCIR || j.format == hlslFXCIR || j.format == mslIR
+		useIr := j.format == hlslDXCIR || j.format == hlslFXCIR
 
 		switch j.format {
 		case hlslDXC:
@@ -688,7 +692,8 @@ func (j job) run(cfg runConfig) {
 			expectedFilePath += "fxc.hlsl"
 		case hlslFXCIR:
 			expectedFilePath += "ir.fxc.hlsl"
-		case mslIR:
+		// TODO(crbug.com/388013849): Remove when IR expectations have been moved.
+		case msl:
 			expectedFilePath += "ir.msl"
 		default:
 			expectedFilePath += string(j.format)
@@ -763,7 +768,7 @@ func (j job) run(cfg runConfig) {
 				args = append(args, "--fxc", cfg.fxcPath)
 				validate = true
 			}
-		case msl, mslIR:
+		case msl:
 			if cfg.xcrunPath != "" {
 				args = append(args, "--xcrun", cfg.xcrunPath)
 				validate = true
