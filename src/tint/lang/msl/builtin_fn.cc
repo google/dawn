@@ -112,6 +112,8 @@ const char* str(BuiltinFn i) {
             return "quad_shuffle_xor";
         case BuiltinFn::kConvert:
             return "convert";
+        case BuiltinFn::kSimdgroupStore:
+            return "simdgroup_store";
     }
     return "<unknown>";
 }
@@ -144,6 +146,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
             return core::ir::Instruction::Accesses{core::ir::Instruction::Access::kLoad};
 
         case BuiltinFn::kWrite:
+        case BuiltinFn::kSimdgroupStore:
             return core::ir::Instruction::Accesses{core::ir::Instruction::Access::kStore};
 
         case BuiltinFn::kDistance:

@@ -83,6 +83,7 @@ enum class BuiltinFn : uint8_t {
     kSimdBallot,
     kQuadShuffleXor,
     kConvert,
+    kSimdgroupStore,
     kNone,
 };
 

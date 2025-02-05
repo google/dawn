@@ -41,6 +41,15 @@
 namespace tint::msl::writer {
 
 Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& options) {
+    // Check for unsupported types.
+    for (auto* ty : ir.Types()) {
+        if (auto* m = ty->As<core::type::SubgroupMatrix>()) {
+            if (!m->Type()->IsAnyOf<core::type::F16, core::type::F32>()) {
+                return Failure("non-float subgroup matrices are not supported by the MSL backend");
+            }
+        }
+    }
+
     // Check for unsupported module-scope variable address spaces and types.
     for (auto* inst : *ir.root_block) {
         auto* var = inst->As<core::ir::Var>();
