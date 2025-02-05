@@ -663,7 +663,7 @@ MaybeError Buffer::ClearBuffer(CommandRecordingContext* commandContext,
 
         memset(uploadHandle.mappedBuffer, clearValue, size);
 
-        device->CopyFromStagingToBufferHelper(commandContext, uploadHandle.stagingBuffer,
+        device->CopyFromStagingToBufferHelper(commandContext, uploadHandle.stagingBuffer.Get(),
                                               uploadHandle.startOffset, this, offset, size);
     }
 

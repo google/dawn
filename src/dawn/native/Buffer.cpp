@@ -807,8 +807,8 @@ MaybeError BufferBase::UploadData(uint64_t bufferOffset, const void* data, size_
 
     memcpy(uploadHandle.mappedBuffer, data, size);
 
-    return device->CopyFromStagingToBuffer(uploadHandle.stagingBuffer, uploadHandle.startOffset,
-                                           this, bufferOffset, size);
+    return device->CopyFromStagingToBuffer(uploadHandle.stagingBuffer.Get(),
+                                           uploadHandle.startOffset, this, bufferOffset, size);
 }
 
 ExecutionSerial BufferBase::OnEndAccess() {

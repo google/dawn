@@ -307,7 +307,7 @@ MaybeError Device::CreateZeroBuffer() {
 
     memset(uploadHandle.mappedBuffer, 0u, kZeroBufferSize);
 
-    CopyFromStagingToBufferHelper(commandContext, uploadHandle.stagingBuffer,
+    CopyFromStagingToBufferHelper(commandContext, uploadHandle.stagingBuffer.Get(),
                                   uploadHandle.startOffset, mZeroBuffer.Get(), 0, kZeroBufferSize);
 
     mZeroBuffer->SetInitialized(true);

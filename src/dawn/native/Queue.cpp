@@ -458,8 +458,8 @@ MaybeError QueueBase::WriteTextureImpl(const TexelCopyTextureInfo& destination,
 
     DeviceBase* device = GetDevice();
 
-    return device->CopyFromStagingToTexture(uploadHandle.stagingBuffer, passDataLayout, textureCopy,
-                                            writeSizePixel);
+    return device->CopyFromStagingToTexture(uploadHandle.stagingBuffer.Get(), passDataLayout,
+                                            textureCopy, writeSizePixel);
 }
 
 void QueueBase::APICopyTextureForBrowser(const TexelCopyTextureInfo* source,
