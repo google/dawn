@@ -36,6 +36,7 @@
 #include "src/tint/lang/core/type/i8.h"
 #include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/core/type/u32.h"
+#include "src/tint/lang/core/type/u64.h"
 #include "src/tint/lang/core/type/u8.h"
 
 namespace tint::core::type {
@@ -101,6 +102,10 @@ TEST_F(ManagerTest, CppToType) {
     const Type* u32_1 = tm.Get<u32>();
     const Type* u32_2 = tm.Get<U32>();
     ASSERT_EQ(u32_1, u32_2);
+
+    const Type* u64_1 = tm.Get<u64>();
+    const Type* u64_2 = tm.Get<U64>();
+    ASSERT_EQ(u64_1, u64_2);
 
     const Type* u8_1 = tm.Get<u8>();
     const Type* u8_2 = tm.Get<U8>();

@@ -63,6 +63,7 @@ class Reference;
 class StorageTexture;
 class U8;
 class U32;
+class U64;
 class Vector;
 class Void;
 }  // namespace tint::core::type
@@ -150,6 +151,8 @@ class Manager final {
             return Get<core::type::U8>(std::forward<ARGS>(args)...);
         } else if constexpr (std::is_same_v<T, tint::core::u32>) {
             return Get<core::type::U32>(std::forward<ARGS>(args)...);
+        } else if constexpr (std::is_same_v<T, tint::core::u64>) {
+            return Get<core::type::U64>(std::forward<ARGS>(args)...);
         } else if constexpr (std::is_same_v<T, tint::core::f32>) {
             return Get<core::type::F32>(std::forward<ARGS>(args)...);
         } else if constexpr (std::is_same_v<T, tint::core::f16>) {
@@ -210,6 +213,9 @@ class Manager final {
 
     /// @returns a u32 type
     const core::type::U32* u32();
+
+    /// @returns a u64 type
+    const core::type::U64* u64();
 
     /// @returns an f32 type
     const core::type::F32* f32();

@@ -45,6 +45,7 @@
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/type.h"
 #include "src/tint/lang/core/type/u32.h"
+#include "src/tint/lang/core/type/u64.h"
 #include "src/tint/lang/core/type/u8.h"
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/core/type/void.h"
@@ -90,6 +91,10 @@ const core::type::U8* Manager::u8() {
 
 const core::type::U32* Manager::u32() {
     return Get<core::type::U32>();
+}
+
+const core::type::U64* Manager::u64() {
+    return Get<core::type::U64>();
 }
 
 const core::type::F32* Manager::f32() {
