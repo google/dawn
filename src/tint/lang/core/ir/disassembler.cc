@@ -424,6 +424,9 @@ void Disassembler::EmitValue(const Value* val) {
                         [&](const core::constant::Scalar<u32>* scalar) {
                             out_ << StyleLiteral(scalar->ValueAs<u32>().value, "u");
                         },
+                        [&](const core::constant::Scalar<u64>* scalar) {
+                            out_ << StyleLiteral(scalar->ValueAs<u64>().value, "u64");
+                        },
                         [&](const core::constant::Scalar<u8>* scalar) {
                             out_ << StyleLiteral(u32(scalar->ValueAs<u8>().value), "u8");
                         },

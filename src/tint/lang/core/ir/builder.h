@@ -82,6 +82,7 @@
 #include "src/tint/lang/core/type/pointer.h"  // IWYU pragma: export
 #include "src/tint/lang/core/type/type.h"     // IWYU pragma: export
 #include "src/tint/lang/core/type/u32.h"      // IWYU pragma: export
+#include "src/tint/lang/core/type/u64.h"      // IWYU pragma: export
 #include "src/tint/lang/core/type/u8.h"       // IWYU pragma: export
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/core/type/void.h"  // IWYU pragma: export
@@ -366,6 +367,11 @@ class Builder {
     /// @returns the new constant
     ir::Constant* Constant(core::u32 v) { return Constant(ConstantValue(v)); }
 
+    /// Creates a ir::Constant for a u64 Scalar
+    /// @param v the value
+    /// @returns the new constant
+    ir::Constant* Constant(core::u64 v) { return Constant(ConstantValue(v)); }
+
     /// Creates a ir::Constant for a u8 Scalar
     /// @param v the value
     /// @returns the new constant
@@ -412,6 +418,11 @@ class Builder {
     /// @param v the value
     /// @returns the new constant
     const core::constant::Value* ConstantValue(core::u32 v) { return ir.constant_values.Get(v); }
+
+    /// Creates a core::constant::Value for a u64 Scalar
+    /// @param v the value
+    /// @returns the new constant
+    const core::constant::Value* ConstantValue(core::u64 v) { return ir.constant_values.Get(v); }
 
     /// Creates a core::constant::Value for a u8 Scalar
     /// @param v the value
