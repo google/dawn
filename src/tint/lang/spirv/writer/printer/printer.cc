@@ -2035,15 +2035,23 @@ class Printer {
     /// Emit a construct instruction.
     /// @param construct the construct instruction to emit
     void EmitConstruct(core::ir::Construct* construct) {
+        auto* result_ty = construct->Result(0)->Type();
+
         // If there is just a single argument with the same type as the result, this is an identity
         // constructor and we can just pass through the ID of the argument.
-        if (construct->Args().Length() == 1 &&
-            construct->Result(0)->Type() == construct->Args()[0]->Type()) {
+        if (construct->Args().Length() == 1 && result_ty == construct->Args()[0]->Type()) {
             values_.Add(construct->Result(0), Value(construct->Args()[0]));
             return;
         }
 
-        OperandList operands = {Type(construct->Result(0)->Type()), Value(construct)};
+        // Zero-value constructors for subgroup matrices are not folded into constants, so
+        // special-case them into OpConstantNull here.
+        if (result_ty->Is<core::type::SubgroupMatrix>() && construct->Operands().IsEmpty()) {
+            values_.Add(construct->Result(0), ConstantNull(result_ty));
+            return;
+        }
+
+        OperandList operands = {Type(result_ty), Value(construct)};
         for (auto* arg : construct->Args()) {
             operands.push_back(Value(arg));
         }
