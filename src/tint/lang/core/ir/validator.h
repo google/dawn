@@ -64,6 +64,8 @@ enum class Capability : uint8_t {
     kAllowPrivateVarsInFunctions,
     /// Allows phony assignment instructions to be used.
     kAllowPhonyInstructions,
+    /// Allows lets to have any type, used by MSL backend for module scoped vars
+    kAllowAnyLetType,
 };
 
 /// Capabilities is a set of Capability

@@ -583,7 +583,24 @@ TEST_F(IR_ValidatorTest, Let_WrongType) {
 )")) << res.Failure().reason.Str();
 }
 
-TEST_F(IR_ValidatorTest, Let_VoidResult) {
+TEST_F(IR_ValidatorTest, Let_VoidResultWithCapability) {
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* l = mod.CreateInstruction<ir::Let>(b.InstructionResult(ty.void_()), b.Constant(1_i));
+        b.Append(l);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod, Capabilities{ir::Capability::kAllowAnyLetType});
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason.Str(), testing::HasSubstr(
+                                                R"(:3:15 error: let: result type cannot be void
+    %2:void = let 1i
+              ^^^
+)")) << res.Failure().reason.Str();
+}
+
+TEST_F(IR_ValidatorTest, Let_VoidResultWithoutCapability) {
     auto* f = b.Function("my_func", ty.void_());
     b.Append(f->Block(), [&] {
         auto* l = mod.CreateInstruction<ir::Let>(b.InstructionResult(ty.void_()), b.Constant(1_i));
@@ -593,14 +610,36 @@ TEST_F(IR_ValidatorTest, Let_VoidResult) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason.Str(),
-                testing::HasSubstr(R"(:3:15 error: let: result type cannot be void
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(
+            R"(:3:15 error: let: result type, 'void', must be concrete constructible type or a pointer type
     %2:void = let 1i
               ^^^
 )")) << res.Failure().reason.Str();
 }
 
-TEST_F(IR_ValidatorTest, Let_VoidValue) {
+TEST_F(IR_ValidatorTest, Let_VoidValueWithCapability) {
+    auto* v = b.Function("void_func", ty.void_());
+    b.Append(v->Block(), [&] { b.Return(v); });
+
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* l = mod.CreateInstruction<ir::Let>(b.InstructionResult(ty.i32()), b.Value(b.Call(v)));
+        b.Append(l);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod, Capabilities{ir::Capability::kAllowAnyLetType});
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:9:14 error: let: value type cannot be void
+    %4:i32 = let %3
+             ^^^
+)")) << res.Failure().reason.Str();
+}
+
+TEST_F(IR_ValidatorTest, Let_VoidValueWithoutCapability) {
     auto* v = b.Function("void_func", ty.void_());
     b.Append(v->Block(), [&] { b.Return(v); });
 
@@ -613,11 +652,71 @@ TEST_F(IR_ValidatorTest, Let_VoidValue) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason.Str(),
-                testing::HasSubstr(R"(:9:14 error: let: value type cannot be void
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(
+            R"(:9:14 error: let: value type, 'void', must be concrete constructible type or a pointer type
     %4:i32 = let %3
              ^^^
 )")) << res.Failure().reason.Str();
+}
+
+TEST_F(IR_ValidatorTest, Let_NotConstructibleResult) {
+    auto* f = b.Function("my_func", ty.void_());
+    auto* p = b.FunctionParam("p", ty.sampler());
+    f->AppendParam(p);
+    b.Append(f->Block(), [&] {
+        auto* l =
+            mod.CreateInstruction<ir::Let>(b.InstructionResult(ty.sampler()), b.Constant(1_i));
+        b.Append(l);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(
+            R"(:3:18 error: let: result type, 'sampler', must be concrete constructible type or a pointer type
+    %3:sampler = let 1i
+                 ^^^
+)")) << res.Failure().reason.Str();
+}
+
+TEST_F(IR_ValidatorTest, Let_NotConstructibleValue) {
+    auto* f = b.Function("my_func", ty.void_());
+    auto* p = b.FunctionParam("p", ty.sampler());
+    f->AppendParam(p);
+    b.Append(f->Block(), [&] {
+        auto* l = mod.CreateInstruction<ir::Let>(b.InstructionResult(ty.i32()), p);
+        b.Append(l);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(
+            R"(:3:14 error: let: value type, 'sampler', must be concrete constructible type or a pointer type
+    %3:i32 = let %p
+             ^^^
+)")) << res.Failure().reason.Str();
+}
+
+TEST_F(IR_ValidatorTest, Let_CapabilityBypass) {
+    auto* f = b.Function("my_func", ty.void_());
+    auto* p = b.FunctionParam("p", ty.sampler());
+    f->AppendParam(p);
+
+    b.Append(f->Block(), [&] {
+        auto* l = mod.CreateInstruction<ir::Let>(b.InstructionResult(ty.sampler()), p);
+        b.Append(l);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod, Capabilities{ir::Capability::kAllowAnyLetType});
+    ASSERT_EQ(res, Success) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Phony_NullValue) {

@@ -2644,17 +2644,31 @@ void Validator::CheckLet(const Let* l) {
         return;
     }
 
-    if (l->Result(0)->Type()->Is<core::type::Void>()) {
-        AddError(l) << "result type cannot be void";
-        return;
+    auto* value_ty = l->Value()->Type();
+    if (capabilities_.Contains(Capability::kAllowAnyLetType)) {
+        if (value_ty->Is<core::type::Void>()) {
+            AddError(l) << "value type cannot be void";
+        }
+    } else {
+        if (!value_ty->IsConstructible() && !value_ty->Is<core::type::Pointer>()) {
+            AddError(l) << "value type, " << NameOf(value_ty)
+                        << ", must be concrete constructible type or a pointer type";
+        }
     }
 
-    if (l->Value()->Type()->Is<core::type::Void>()) {
-        AddError(l) << "value type cannot be void";
-        return;
+    auto* result_ty = l->Result(0)->Type();
+    if (capabilities_.Contains(Capability::kAllowAnyLetType)) {
+        if (result_ty->Is<core::type::Void>()) {
+            AddError(l) << "result type cannot be void";
+        }
+    } else {
+        if (!result_ty->IsConstructible() && !result_ty->Is<core::type::Pointer>()) {
+            AddError(l) << "result type, " << NameOf(result_ty)
+                        << ", must be concrete constructible type or a pointer type";
+        }
     }
 
-    if (l->Result(0)->Type() != l->Value()->Type()) {
+    if (value_ty != result_ty) {
         AddError(l) << "result type " << NameOf(l->Result(0)->Type())
                     << " does not match value type " << NameOf(l->Value()->Type());
     }

@@ -1039,6 +1039,7 @@ Result<SuccessType> BuiltinPolyfill(core::ir::Module& ir) {
                                 core::ir::Capabilities{
                                     core::ir::Capability::kAllowPointersAndHandlesInStructures,
                                     core::ir::Capability::kAllowPrivateVarsInFunctions,
+                                    core::ir::Capability::kAllowAnyLetType,
                                 });
     if (result != Success) {
         return result.Failure();
