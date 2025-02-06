@@ -378,5 +378,137 @@ TEST_F(SpirvParserTest, OpUnreachable_InNonVoidFunction) {
 )");
 }
 
+TEST_F(SpirvParserTest, OpKill_TopLevel) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main"
+               OpExecutionMode %main OriginUpperLeft
+       %void = OpTypeVoid
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+         %10 = OpLabel
+               OpKill
+               OpFunctionEnd)",
+              R"(
+%main = @fragment func():void {
+  $B1: {
+    discard
+    ret
+  }
+}
+)");
+}
+
+// TODO(dsinclair): Requires OpSelectionMerge and OpBranchConditional
+TEST_F(SpirvParserTest, DISABLED_OpKill_InsideIf) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main"
+               OpExecutionMode %main OriginUpperLeft
+       %void = OpTypeVoid
+       %bool = OpTypeBool
+    %ep_type = OpTypeFunction %void
+       %true = OpConstantTrue %bool
+       %main = OpFunction %void None %ep_type
+         %10 = OpLabel
+               OpSelectionMerge %99 None
+               OpBranchConditional %true %20 %99
+         %20 = OpLabel
+               OpKill
+         %99 = OpLabel
+               OpKill
+               OpFunctionEnd
+  )",
+              R"(
+%main = @fragment func():void {
+  $B1: {
+    %2:void = if true [t: $B2] {
+      discard
+      ret
+    }
+    discard
+    ret
+  }
+}
+)");
+}
+
+// TODO(dsinclair): Requires OpBranch
+TEST_F(SpirvParserTest, DISABLED_OpKill_InsideLoop) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main"
+               OpExecutionMode %main OriginUpperLeft
+       %void = OpTypeVoid
+       %bool = OpTypeBool
+    %ep_type = OpTypeFunction %void
+       %true = OpConstantTrue %bool
+       %main = OpFunction %void None %ep_type
+         %10 = OpLabel
+               OpBranch %20
+         %20 = OpLabel
+               OpLoopMerge %99 %80 None
+               OpBranchConditional %true %30 %30
+         %30 = OpLabel
+               OpKill
+         %80 = OpLabel
+               OpBranch %20
+         %99 = OpLabel
+               OpKill
+               OpFunctionEnd
+  )",
+              R"(
+%main = @fragment func():void {
+  $B1: {
+    %2:void = loop %true []
+      discard
+      ret
+    }
+    discard
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, OpKill_InNonVoidFunction) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main"
+               OpExecutionMode %main OriginUpperLeft
+       %void = OpTypeVoid
+       %bool = OpTypeBool
+    %ep_type = OpTypeFunction %void
+     %boolfn = OpTypeFunction %bool
+        %200 = OpFunction %bool None %boolfn
+        %210 = OpLabel
+               OpKill
+               OpFunctionEnd
+       %main = OpFunction %void None %ep_type
+         %10 = OpLabel
+         %11 = OpFunctionCall %bool %200
+               OpReturn
+               OpFunctionEnd
+  )",
+              R"(
+%1 = func():bool {
+  $B1: {
+    discard
+    ret false
+  }
+}
+%main = @fragment func():void {
+  $B2: {
+    %3:bool = call %1
+    ret
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader

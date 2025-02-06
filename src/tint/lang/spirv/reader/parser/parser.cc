@@ -113,8 +113,7 @@ class Parser {
         }
 
         EmitFunctions();
-
-        EmitEntryPoints();
+        EmitEntryPointAttributes();
 
         // TODO(crbug.com/tint/1907): Handle annotation instructions.
         // TODO(crbug.com/tint/1907): Handle names.
@@ -490,7 +489,7 @@ class Parser {
     }
 
     /// Emit entry point attributes.
-    void EmitEntryPoints() {
+    void EmitEntryPointAttributes() {
         // Handle OpEntryPoint declarations.
         for (auto& entry_point : spirv_context_->module()->entry_points()) {
             auto model = entry_point.GetSingleWordInOperand(0);
@@ -617,10 +616,34 @@ class Parser {
                 case spv::Op::OpUnreachable:
                     EmitWithoutResult(b_.Unreachable());
                     break;
+                case spv::Op::OpKill:
+                    EmitKill(inst);
+                    break;
                 default:
                     TINT_UNIMPLEMENTED()
                         << "unhandled SPIR-V instruction: " << static_cast<uint32_t>(inst.opcode());
             }
+        }
+    }
+
+    /// @param inst the SPIR-V instruction
+    /// Note: This isn't technically correct, but there is no `kill` equivalent in WGSL. The closets
+    /// we have is `discard` which maps to `OpDemoteToHelperInvocation` in SPIR-V.
+    void EmitKill([[maybe_unused]] const spvtools::opt::Instruction& inst) {
+        EmitWithoutResult(b_.Discard());
+
+        // An `OpKill` is a terminator in SPIR-V. `discard` is not a terminator in WGSL. After the
+        // `discard` we inject a `return` for the current function. This is similar in spirit to
+        // what `OpKill` does although not totally correct (i.e. we don't early return from calling
+        // functions, just the function where `OpKill` was emitted. There are also limited places in
+        // which `OpKill` can be used. So, we don't have to worry about it in a `continuing` block
+        // because the continuing must end with a branching terminator which `OpKill` does not
+        // branch.
+        if (current_function_->ReturnType()->Is<core::type::Void>()) {
+            EmitWithoutResult(b_.Return(current_function_));
+        } else {
+            EmitWithoutResult(
+                b_.Return(current_function_, b_.Zero(current_function_->ReturnType())));
         }
     }
 
