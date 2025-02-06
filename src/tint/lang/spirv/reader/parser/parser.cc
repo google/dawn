@@ -53,7 +53,8 @@ TINT_END_DISABLE_WARNING(NEWLINE_EOF);
 #include "src/tint/lang/spirv/ir/builtin_call.h"
 #include "src/tint/lang/spirv/validate/validate.h"
 
-using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
+using namespace tint::core::fluent_types;     // NOLINT
 
 namespace tint::spirv::reader {
 
@@ -429,13 +430,21 @@ class Parser {
     /// @param value the IR value
     void AddValue(uint32_t result_id, core::ir::Value* value) { values_.Add(result_id, value); }
 
-    /// Emit an instruction to the current block.
+    /// Emit an instruction to the current block and associates the result to
+    /// the spirv result id.
     /// @param inst the instruction to emit
     /// @param result_id the SPIR-V result ID to register the instruction result for
     void Emit(core::ir::Instruction* inst, uint32_t result_id) {
         current_block_->Append(inst);
         TINT_ASSERT(inst->Results().Length() == 1u);
         AddValue(result_id, inst->Result(0));
+    }
+
+    /// Emit an instruction to the current block.
+    /// @param inst the instruction to emit
+    void EmitWithoutSpvResult(core::ir::Instruction* inst) {
+        current_block_->Append(inst);
+        TINT_ASSERT(inst->Results().Length() == 1u);
     }
 
     /// Emit an instruction to the current block.
@@ -813,7 +822,7 @@ class Parser {
     /// @param inst the SPIR-V instruction for OpAccessChain
     void EmitGlslStd450ExtInst(const spvtools::opt::Instruction& inst) {
         const auto ext_opcode = inst.GetSingleWordInOperand(1);
-        auto* result_ty = Type(inst.type_id());
+        auto* spv_ty = Type(inst.type_id());
 
         Vector<core::ir::Value*, 4> operands;
         // All parameters to GLSL.std.450 extended instructions are IDs.
@@ -822,22 +831,37 @@ class Parser {
         }
 
         const auto wgsl_fn = GetGlslStd450WgslEquivalentFuncName(ext_opcode);
-        if (wgsl_fn != core::BuiltinFn::kNone) {
-            // For modf we need to switch the result type from the SPIR-V struct to the builtin
-            // internal structure for Modf.
-            if (wgsl_fn == core::BuiltinFn::kModf) {
-                result_ty = core::type::CreateModfResult(ty_, ir_.symbols, operands[0]->Type());
-            }
+        if (wgsl_fn == core::BuiltinFn::kModf) {
+            // For `ModfStruct`, which is, essentially, a WGSL `modf` instruction
+            // we need some special handling. The result type that we produce
+            // must be the SPIR-V type as we don't know how the result is used
+            // later. So, we need to make the WGSL query and re-construct an
+            // object of the right SPIR-V type. We can't, easily, do this later
+            // as we lose the SPIR-V type as soon as we replace the result of the
+            // `modf`. So, inline the work here to generate the correct results.
 
-            Emit(b_.Call(result_ty, wgsl_fn, operands), inst.result_id());
+            auto* mem_ty = operands[0]->Type();
+            auto* result_ty = core::type::CreateModfResult(ty_, ir_.symbols, mem_ty);
+
+            auto* call = b_.Call(result_ty, wgsl_fn, operands);
+            auto* fract = b_.Access(mem_ty, call, 0_u);
+            auto* whole = b_.Access(mem_ty, call, 1_u);
+
+            EmitWithoutSpvResult(call);
+            EmitWithoutSpvResult(fract);
+            EmitWithoutSpvResult(whole);
+            Emit(b_.Construct(spv_ty, fract, whole), inst.result_id());
+            return;
+        }
+        if (wgsl_fn != core::BuiltinFn::kNone) {
+            Emit(b_.Call(spv_ty, wgsl_fn, operands), inst.result_id());
             return;
         }
 
         const auto spv_fn = GetGlslStd450SpirvEquivalentFuncName(ext_opcode);
         if (spv_fn != spirv::BuiltinFn::kNone) {
-            auto explicit_params = GlslStd450ExplicitParams(ext_opcode, result_ty);
-            Emit(b_.CallExplicit<spirv::ir::BuiltinCall>(result_ty, spv_fn, explicit_params,
-                                                         operands),
+            auto explicit_params = GlslStd450ExplicitParams(ext_opcode, spv_ty);
+            Emit(b_.CallExplicit<spirv::ir::BuiltinCall>(spv_ty, spv_fn, explicit_params, operands),
                  inst.result_id());
             return;
         }
