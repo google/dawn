@@ -27,7 +27,7 @@ Helpful links:
 
  - [Dawn bug tracker](https://issues.chromium.org/savedsearches/6783309) if you find issues with Dawn. Create a new issue [here](https://issues.chromium.org/issues/new?noWizard=true&component=1570784).
  - [Tint bug tracker](https://issues.chromium.org/savedsearches/6783217) if you find issues with Tint. Create a new issue [here](https://issues.chromium.org/issues/new?noWizard=true&component=1571063).
- - [Dawn's mailing list](https://groups.google.com/forum/#!members/dawn-graphics) for other discussions related to Dawn.
+ - [Dawn's mailing list](https://groups.google.com/g/dawn-graphics) for other discussions related to Dawn.
  - [Dawn's source code](https://dawn.googlesource.com/dawn)
  - [Dawn's Matrix chatroom](https://matrix.to/#/#webgpu-dawn:matrix.org) for live discussion around contributing or using Dawn.
  - [WebGPU's Matrix chatroom](https://matrix.to/#/#WebGPU:matrix.org)
