@@ -1214,6 +1214,24 @@ wgpu::Device DawnTestBase::CreateDevice(std::string isolationKey) {
                 Call(CHandleIs(apiDevice.Get()), wgpu::DeviceLostReason::Destroyed, _))
         .Times(AtMost(1));
 
+    apiDevice.SetLoggingCallback([](wgpu::LoggingType type, wgpu::StringView message) {
+        std::string_view view = {message.data, message.length};
+        switch (type) {
+            case wgpu::LoggingType::Verbose:
+                DebugLog() << view;
+                break;
+            case wgpu::LoggingType::Warning:
+                WarningLog() << view;
+                break;
+            case wgpu::LoggingType::Error:
+                ErrorLog() << view;
+                break;
+            default:
+                InfoLog() << view;
+                break;
+        }
+    });
+
     return apiDevice;
 }
 
