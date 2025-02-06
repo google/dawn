@@ -620,4 +620,59 @@ TEST_F(IR_ValidatorTest, Let_VoidValue) {
 )")) << res.Failure().reason.Str();
 }
 
+TEST_F(IR_ValidatorTest, Phony_NullValue) {
+    auto* v = mod.CreateInstruction<ir::Phony>(nullptr);
+    auto* f = b.Function("my_func", ty.void_());
+
+    auto sb = b.Append(f->Block());
+    sb.Append(v);
+    sb.Return(f);
+
+    auto res = ir::Validate(mod, Capabilities{ir::Capability::kAllowPhonyInstructions});
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:3:19 error: phony: operand is undefined
+    undef = phony undef
+                  ^^^^^
+)")) << res.Failure().reason.Str();
+}
+
+TEST_F(IR_ValidatorTest, Phony_EmptyValue) {
+    auto* v = mod.CreateInstruction<ir::Phony>(b.Constant(1_i));
+    v->ClearOperands();
+
+    auto* f = b.Function("my_func", ty.void_());
+
+    auto sb = b.Append(f->Block());
+    sb.Append(v);
+    sb.Return(f);
+
+    auto res = ir::Validate(mod, Capabilities{ir::Capability::kAllowPhonyInstructions});
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:3:13 error: phony: expected exactly 1 operands, got 0
+    undef = phony
+            ^^^^^
+)")) << res.Failure().reason.Str();
+}
+
+TEST_F(IR_ValidatorTest, Phony_MissingCapability) {
+    auto* v = mod.CreateInstruction<ir::Phony>(b.Constant(1_i));
+
+    auto* f = b.Function("my_func", ty.void_());
+
+    auto sb = b.Append(f->Block());
+    sb.Append(v);
+    sb.Return(f);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(R"(:3:13 error: phony: missing capability 'kAllowPhonyInstructions'
+    undef = phony 1i
+            ^^^^^
+)")) << res.Failure().reason.Str();
+}
+
 }  // namespace tint::core::ir

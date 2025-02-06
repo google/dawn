@@ -128,6 +128,8 @@ libtint_source_set("ir") {
     "operand_instruction.h",
     "override.cc",
     "override.h",
+    "phony.cc",
+    "phony.h",
     "referenced_functions.h",
     "referenced_module_decls.h",
     "referenced_module_vars.h",

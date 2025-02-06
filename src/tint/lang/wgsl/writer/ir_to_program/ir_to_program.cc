@@ -58,6 +58,7 @@
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/multi_in_block.h"
 #include "src/tint/lang/core/ir/next_iteration.h"
+#include "src/tint/lang/core/ir/phony.h"
 #include "src/tint/lang/core/ir/return.h"
 #include "src/tint/lang/core/ir/store.h"
 #include "src/tint/lang/core/ir/store_vector_element.h"
@@ -112,7 +113,8 @@ class State {
     explicit State(const core::ir::Module& m) : mod(m) {}
 
     Program Run(const ProgramOptions& options) {
-        core::ir::Capabilities caps{core::ir::Capability::kAllowRefTypes};
+        core::ir::Capabilities caps{core::ir::Capability::kAllowRefTypes,
+                                    core::ir::Capability::kAllowPhonyInstructions};
         if (auto res = core::ir::Validate(mod, caps); res != Success) {
             // IR module failed validation.
             b.Diagnostics() = res.Failure().reason;
@@ -371,6 +373,7 @@ class State {
             [&](const core::ir::LoadVectorElement* i) { LoadVectorElement(i); },    //
             [&](const core::ir::Loop* l) { Loop(l); },                              //
             [&](const core::ir::NextIteration*) {},                                 //
+            [&](const core::ir::Phony* i) { Phony(i); },                            //
             [&](const core::ir::Return* i) { Return(i); },                          //
             [&](const core::ir::Store* i) { Store(i); },                            //
             [&](const core::ir::StoreVectorElement* i) { StoreVectorElement(i); },  //
@@ -621,6 +624,8 @@ class State {
             Append(b.Assign(b.Phony(), Expr(let->Value())));
         }
     }
+
+    void Phony(const core::ir::Phony* phony) { Append(b.Assign(b.Phony(), Expr(phony->Value()))); }
 
     void Store(const core::ir::Store* store) {
         auto* dst = Expr(store->To());

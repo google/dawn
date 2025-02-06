@@ -127,6 +127,8 @@ tint_add_target(tint_lang_core_ir lib
   lang/core/ir/operand_instruction.h
   lang/core/ir/override.cc
   lang/core/ir/override.h
+  lang/core/ir/phony.cc
+  lang/core/ir/phony.h
   lang/core/ir/referenced_functions.h
   lang/core/ir/referenced_module_decls.h
   lang/core/ir/referenced_module_vars.h

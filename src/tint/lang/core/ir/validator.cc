@@ -64,6 +64,7 @@
 #include "src/tint/lang/core/ir/multi_in_block.h"
 #include "src/tint/lang/core/ir/next_iteration.h"
 #include "src/tint/lang/core/ir/override.h"
+#include "src/tint/lang/core/ir/phony.h"
 #include "src/tint/lang/core/ir/referenced_module_vars.h"
 #include "src/tint/lang/core/ir/return.h"
 #include "src/tint/lang/core/ir/store.h"
@@ -1226,6 +1227,10 @@ class Validator {
     /// Validates the given store vector element
     /// @param s the store vector element to validate
     void CheckStoreVectorElement(const StoreVectorElement* s);
+
+    /// Validates the given phony assignment
+    /// @param p the phony assignment to validate
+    void CheckPhony(const Phony* p);
 
     /// Validates that the number and types of the source instruction operands match the target's
     /// values.
@@ -2406,6 +2411,7 @@ void Validator::CheckInstruction(const Instruction* inst) {
         [&](const Load* load) { CheckLoad(load); },                        //
         [&](const LoadVectorElement* l) { CheckLoadVectorElement(l); },    //
         [&](const Loop* l) { CheckLoop(l); },                              //
+        [&](const Phony* p) { CheckPhony(p); },                            //
         [&](const Store* s) { CheckStore(s); },                            //
         [&](const StoreVectorElement* s) { CheckStoreVectorElement(s); },  //
         [&](const Switch* s) { CheckSwitch(s); },                          //
@@ -3582,6 +3588,17 @@ void Validator::CheckStoreVectorElement(const StoreVectorElement* s) {
                     << " does not match vector pointer element type " << NameOf(el_ty);
             }
         }
+    }
+}
+
+void Validator::CheckPhony(const Phony* p) {
+    if (!capabilities_.Contains(Capability::kAllowPhonyInstructions)) {
+        AddError(p) << "missing capability 'kAllowPhonyInstructions'";
+        return;
+    }
+
+    if (!CheckResultsAndOperands(p, Phony::kNumResults, Phony::kNumOperands)) {
+        return;
     }
 }
 
