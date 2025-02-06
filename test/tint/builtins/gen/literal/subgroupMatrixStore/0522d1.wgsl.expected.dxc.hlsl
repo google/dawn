@@ -21,7 +21,9 @@ fn compute_main() {
 
 Failed to generate: <dawn>/test/tint/builtins/gen/literal/subgroupMatrixStore/0522d1.wgsl:51:3 error: no matching call to 'subgroupMatrixStore(array<f16, 64>, u32, subgroup_matrix_left<f16, 8, 8>, bool, u32)'
 
-1 candidate function:
+2 candidate functions:
+ • 'subgroupMatrixStore(ptr<storage, array<S>, write' or 'read_write>  ✗ , u32  ✓ , subgroup_matrix<K, S, C, R>  ✓ , bool  ✓ , u32  ✓ )' where:
+      ✓  'S' is 'f32', 'i32', 'u32' or 'f16'
  • 'subgroupMatrixStore(ptr<workgroup' or 'storage, array<S, AC>, write' or 'read_write>  ✗ , u32  ✓ , subgroup_matrix<K, S, C, R>  ✓ , bool  ✓ , u32  ✓ )' where:
       ✓  'S' is 'f32', 'i32', 'u32' or 'f16'
 

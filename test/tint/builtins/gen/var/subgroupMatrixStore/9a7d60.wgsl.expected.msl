@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 error: non-float subgroup matrices are not supported by the MSL backend
 
