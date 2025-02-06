@@ -790,6 +790,13 @@ bool GenerateSpirv([[maybe_unused]] Options& options,
 
     gen_options.bindings = tint::spirv::writer::GenerateBindings(ir.Get());
 
+    // Enable the Vulkan Memory Model if needed.
+    for (auto* enable : src_program.AST().Enables()) {
+        if (enable->HasExtension(tint::wgsl::Extension::kChromiumExperimentalSubgroupMatrix)) {
+            gen_options.use_vulkan_memory_model = true;
+        }
+    }
+
     // Check that the module and options are supported by the backend.
     auto check = tint::spirv::writer::CanGenerate(ir.Get(), gen_options);
     if (check != tint::Success) {

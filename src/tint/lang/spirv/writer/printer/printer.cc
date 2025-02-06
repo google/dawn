@@ -1488,6 +1488,9 @@ class Printer {
             case spirv::BuiltinFn::kVectorTimesScalar:
                 op = spv::Op::OpVectorTimesScalar;
                 break;
+            case spirv::BuiltinFn::kCooperativeMatrixStore:
+                op = spv::Op::OpCooperativeMatrixStoreKHR;
+                break;
             case spirv::BuiltinFn::kNone:
                 TINT_ICE() << "undefined spirv ir function";
         }

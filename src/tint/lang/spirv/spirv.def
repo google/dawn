@@ -37,6 +37,7 @@
 
 import "src/tint/lang/core/address_space.def"
 import "src/tint/lang/core/access.def"
+import "src/tint/lang/core/subgroup_matrix_kind.def"
 import "src/tint/lang/core/texel_format.def"
 
 type bool
@@ -83,9 +84,12 @@ type input_attachment<T>
 type struct_with_runtime_array
 type sampled_image<T>
 
+type subgroup_matrix<S: subgroup_matrix_kind, T, C: num, R: num>
+
 match f32_f16: f32 | f16
 match iu32: i32 | u32
 match fiu32: f32 | i32 | u32
+match fiu32_f16: f32 | i32 | u32 | f16
 match scalar: f32 | f16 | i32 | u32 | bool
 
 match read_write: access.read_write
@@ -133,6 +137,10 @@ match readable
 match writable
   : access.write
   | access.read_write
+
+match subgroup_matrix_kind_left : subgroup_matrix_kind.left
+match subgroup_matrix_kind_right : subgroup_matrix_kind.right
+match subgroup_matrix_kind_result : subgroup_matrix_kind.result
 
 ////////////////////////////////////////////////////////////////////////////////
 // Builtin Functions                                                          //
@@ -386,3 +394,9 @@ implicit(T: f32_f16,
 ////////////////////////////////////////////////////////////////////////////////
 fn sdot(u32, u32, u32) -> i32
 fn udot(u32, u32, u32) -> u32
+
+////////////////////////////////////////////////////////////////////////////////
+// SPV_KHR_cooperative_matrix instructions
+////////////////////////////////////////////////////////////////////////////////
+@stage("compute") implicit(K: subgroup_matrix_kind, S: fiu32_f16, C: num, R: num) fn cooperative_matrix_store(
+  ptr<workgroup_or_storage, S, writable>, subgroup_matrix<K, S, C, R>, u32, u32, u32)

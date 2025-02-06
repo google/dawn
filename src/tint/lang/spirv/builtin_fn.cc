@@ -150,6 +150,8 @@ const char* str(BuiltinFn i) {
             return "sdot";
         case BuiltinFn::kUdot:
             return "udot";
+        case BuiltinFn::kCooperativeMatrixStore:
+            return "cooperative_matrix_store";
     }
     return "<unknown>";
 }
@@ -171,6 +173,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kImageWrite:
         case BuiltinFn::kModf:
         case BuiltinFn::kFrexp:
+        case BuiltinFn::kCooperativeMatrixStore:
             return core::ir::Instruction::Accesses{core::ir::Instruction::Access::kStore};
 
         case BuiltinFn::kAtomicAnd:

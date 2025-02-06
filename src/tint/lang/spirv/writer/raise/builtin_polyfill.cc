@@ -107,6 +107,7 @@ struct State {
                     case core::BuiltinFn::kTextureSampleLevel:
                     case core::BuiltinFn::kTextureStore:
                     case core::BuiltinFn::kInputAttachmentLoad:
+                    case core::BuiltinFn::kSubgroupMatrixStore:
                         worklist.Push(builtin);
                         break;
                     case core::BuiltinFn::kQuantizeToF16:
@@ -187,6 +188,9 @@ struct State {
                     break;
                 case core::BuiltinFn::kInputAttachmentLoad:
                     InputAttachmentLoad(builtin);
+                    break;
+                case core::BuiltinFn::kSubgroupMatrixStore:
+                    SubgroupMatrixStore(builtin);
                     break;
                 default:
                     break;
@@ -953,6 +957,34 @@ struct State {
         if (id->Type()->IsSignedIntegerScalar()) {
             builtin->SetArg(1, b.Constant(id->As<core::ir::Constant>()->Value()->ValueAs<u32>()));
         }
+    }
+
+    /// Replace a subgroupMatrixStore builtin.
+    /// @param builtin the builtin call instruction
+    void SubgroupMatrixStore(core::ir::CoreBuiltinCall* builtin) {
+        b.InsertBefore(builtin, [&] {
+            auto* p = builtin->Args()[0];
+            auto* offset = builtin->Args()[1];
+            auto* value = builtin->Args()[2];
+            auto* col_major = builtin->Args()[3]->As<core::ir::Constant>();
+            auto* stride = builtin->Args()[4];
+
+            auto* ptr = p->Type()->As<core::type::Pointer>();
+            auto* arr = ptr->StoreType()->As<core::type::Array>();
+
+            // Make a pointer to the first element of the array that we will write to.
+            auto* elem_ptr = ty.ptr(ptr->AddressSpace(), arr->ElemType(), ptr->Access());
+            auto* dst = b.Access(elem_ptr, p, offset);
+
+            auto* layout = b.Constant(u32(col_major->Value()->ValueAs<bool>()
+                                              ? SpvCooperativeMatrixLayoutColumnMajorKHR
+                                              : SpvCooperativeMatrixLayoutRowMajorKHR));
+            auto* memory_operand = Literal(u32(SpvMemoryAccessNonPrivatePointerMask));
+
+            b.Call<spirv::ir::BuiltinCall>(ty.void_(), spirv::BuiltinFn::kCooperativeMatrixStore,
+                                           dst, value, layout, stride, memory_operand);
+        });
+        builtin->Destroy();
     }
 };
 
