@@ -1133,8 +1133,8 @@ TEST_F(GetBindGroupLayoutTests, OutOfRangeIndex) {
                             .GetBindGroupLayout(kMaxBindGroups + 1));
 }
 
-// Test that unused indices return the empty bind group layout if before the last used index, an
-// error otherwise.
+// Test that unused indices return the empty bind group layout if less than the maximum number of
+// bind groups, an error otherwise.
 TEST_F(GetBindGroupLayoutTests, UnusedIndex) {
     DAWN_SKIP_TEST_IF(UsesWire());
 
@@ -1162,7 +1162,11 @@ TEST_F(GetBindGroupLayoutTests, UnusedIndex) {
                 BindGroupLayoutCacheEq(emptyBindGroupLayout));  // Not used
     EXPECT_THAT(pipeline.GetBindGroupLayout(2),
                 Not(BindGroupLayoutCacheEq(emptyBindGroupLayout)));  // Used
-    ASSERT_DEVICE_ERROR(pipeline.GetBindGroupLayout(3));  // Past last defined BGL, error!
+    EXPECT_THAT(pipeline.GetBindGroupLayout(3),
+                BindGroupLayoutCacheEq(emptyBindGroupLayout));  // Past last defined BGL
+
+    // Equal to kMaxBindGroups, error!
+    ASSERT_DEVICE_ERROR(pipeline.GetBindGroupLayout(kMaxBindGroups));
 }
 
 // Test that after explicitly creating a pipeline with a pipeline layout, calling

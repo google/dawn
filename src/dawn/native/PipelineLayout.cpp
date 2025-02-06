@@ -139,7 +139,6 @@ PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device,
                                        const UnpackedPtr<PipelineLayoutDescriptor>& descriptor,
                                        ApiObjectBase::UntrackedByDeviceTag tag)
     : ApiObjectBase(device, descriptor->label),
-      mExplicitBindGroupLayoutsCount(static_cast<uint32_t>(descriptor->bindGroupLayoutCount)),
       mImmediateDataRangeByteSize(descriptor->immediateDataRangeByteSize) {
     DAWN_ASSERT(descriptor->bindGroupLayoutCount <= kMaxBindGroups);
 
@@ -450,7 +449,6 @@ ObjectType PipelineLayoutBase::GetType() const {
 const BindGroupLayoutBase* PipelineLayoutBase::GetFrontendBindGroupLayout(
     BindGroupIndex group) const {
     DAWN_ASSERT(!IsError());
-    DAWN_ASSERT(static_cast<uint32_t>(group) < mExplicitBindGroupLayoutsCount);
     if (mMask[group]) {
         const BindGroupLayoutBase* bgl = mBindGroupLayouts[group].Get();
         DAWN_ASSERT(bgl != nullptr);
@@ -462,7 +460,6 @@ const BindGroupLayoutBase* PipelineLayoutBase::GetFrontendBindGroupLayout(
 
 BindGroupLayoutBase* PipelineLayoutBase::GetFrontendBindGroupLayout(BindGroupIndex group) {
     DAWN_ASSERT(!IsError());
-    DAWN_ASSERT(static_cast<uint32_t>(group) < mExplicitBindGroupLayoutsCount);
     if (mMask[group]) {
         BindGroupLayoutBase* bgl = mBindGroupLayouts[group].Get();
         DAWN_ASSERT(bgl != nullptr);
@@ -519,7 +516,6 @@ size_t PipelineLayoutBase::ComputeContentHash() {
     ObjectContentHasher recorder;
     recorder.Record(mMask);
 
-    recorder.Record(mExplicitBindGroupLayoutsCount);
     for (BindGroupIndex group : IterateBitSet(mMask)) {
         recorder.Record(GetBindGroupLayout(group)->GetContentHash());
     }
@@ -539,10 +535,6 @@ size_t PipelineLayoutBase::ComputeContentHash() {
 bool PipelineLayoutBase::EqualityFunc::operator()(const PipelineLayoutBase* a,
                                                   const PipelineLayoutBase* b) const {
     if (a->mMask != b->mMask) {
-        return false;
-    }
-
-    if (a->mExplicitBindGroupLayoutsCount != b->mExplicitBindGroupLayoutsCount) {
         return false;
     }
 
@@ -571,10 +563,6 @@ bool PipelineLayoutBase::EqualityFunc::operator()(const PipelineLayoutBase* a,
     }
 
     return true;
-}
-
-uint32_t PipelineLayoutBase::GetExplicitBindGroupLayoutsCount() const {
-    return mExplicitBindGroupLayoutsCount;
 }
 
 uint32_t PipelineLayoutBase::GetImmediateDataRangeByteSize() const {

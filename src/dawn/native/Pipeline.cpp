@@ -302,10 +302,6 @@ MaybeError PipelineBase::ValidateGetBindGroupLayout(BindGroupIndex groupIndex) {
     DAWN_INVALID_IF(groupIndex >= kMaxBindGroupsTyped,
                     "Bind group layout index (%u) exceeds the maximum number of bind groups (%u).",
                     groupIndex, kMaxBindGroups);
-    DAWN_INVALID_IF(
-        static_cast<uint32_t>(groupIndex) >= mLayout->GetExplicitBindGroupLayoutsCount(),
-        "Bind group layout index (%u) doesn't correspond to a bind group for this pipeline.",
-        groupIndex);
     return {};
 }
 

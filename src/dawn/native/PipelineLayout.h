@@ -117,13 +117,10 @@ class PipelineLayoutBase : public ApiObjectBase,
 
     uint32_t GetImmediateDataRangeByteSize() const;
 
-    uint32_t GetExplicitBindGroupLayoutsCount() const;
-
   protected:
     PipelineLayoutBase(DeviceBase* device, ObjectBase::ErrorTag tag, StringView label);
     void DestroyImpl() override;
 
-    uint32_t mExplicitBindGroupLayoutsCount = 0;
     PerBindGroup<Ref<BindGroupLayoutBase>> mBindGroupLayouts;
     BindGroupMask mMask;
     bool mHasPLS = false;
