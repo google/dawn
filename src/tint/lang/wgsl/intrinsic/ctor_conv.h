@@ -63,7 +63,6 @@ enum class CtorConv : uint8_t {
     kMat4x2,
     kMat4x3,
     kMat4x4,
-    kPackedVec3,
     kNone,
 };
 

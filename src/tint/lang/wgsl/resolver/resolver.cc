@@ -2213,10 +2213,6 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
             [&](const core::type::F32*) { return ctor_or_conv(CtorConvIntrinsic::kF32, Empty); },
             [&](const core::type::Bool*) { return ctor_or_conv(CtorConvIntrinsic::kBool, Empty); },
             [&](const core::type::Vector* v) {
-                if (v->Packed()) {
-                    TINT_ASSERT(v->Width() == 3u);
-                    return ctor_or_conv(CtorConvIntrinsic::kPackedVec3, Vector{v->Type()});
-                }
                 return ctor_or_conv(wgsl::intrinsic::VectorCtorConv(v->Width()), Vector{v->Type()});
             },
             [&](const core::type::Matrix* m) {
@@ -2798,8 +2794,6 @@ core::type::Type* Resolver::BuiltinType(core::BuiltinType builtin_ty,
             return StorageTexture(ident, core::type::TextureDimension::k3d);
         case core::BuiltinType::kInputAttachment:
             return InputAttachment(ident);
-        case core::BuiltinType::kPackedVec3:
-            return PackedVec3T(ident);
         case core::BuiltinType::kAtomicCompareExchangeResultI32:
             return core::type::CreateAtomicCompareExchangeResult(b.Types(), b.Symbols(), I32());
         case core::BuiltinType::kAtomicCompareExchangeResultU32:
@@ -3164,23 +3158,6 @@ core::type::SubgroupMatrix* Resolver::SubgroupMatrix(const ast::Identifier* iden
     auto* out = b.create<core::type::SubgroupMatrix>(kind, ty_expr, cols->ValueAs<uint32_t>(),
                                                      rows->ValueAs<uint32_t>());
     return validator_.SubgroupMatrix(out, ident->source) ? out : nullptr;
-}
-
-core::type::Vector* Resolver::PackedVec3T(const ast::Identifier* ident) {
-    auto* tmpl_ident = TemplatedIdentifier(ident, 1);
-    if (DAWN_UNLIKELY(!tmpl_ident)) {
-        return nullptr;
-    }
-
-    auto* el_ty = sem_.GetType(tmpl_ident->arguments[0]);
-    if (DAWN_UNLIKELY(!el_ty)) {
-        return nullptr;
-    }
-
-    if (DAWN_UNLIKELY(!validator_.Vector(el_ty, ident->source))) {
-        return nullptr;
-    }
-    return b.create<core::type::Vector>(el_ty, 3u, true);
 }
 
 const ast::TemplatedIdentifier* Resolver::TemplatedIdentifier(const ast::Identifier* ident,

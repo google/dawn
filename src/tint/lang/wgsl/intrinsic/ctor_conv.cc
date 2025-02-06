@@ -76,8 +76,6 @@ const char* str(CtorConv i) {
             return "mat4x3";
         case CtorConv::kMat4x4:
             return "mat4x4";
-        case CtorConv::kPackedVec3:
-            return "packedVec3";
     }
     return "<unknown>";
 }

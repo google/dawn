@@ -170,7 +170,6 @@ type texture_storage_2d<F: texel_format, A: access>
 type texture_storage_2d_array<F: texel_format, A: access>
 type texture_storage_3d<F: texel_format, A: access>
 type texture_external
-type packedVec3<T>
 type input_attachment<T>
 
 @display("__modf_result_{T}")        type __modf_result<T>
@@ -926,10 +925,6 @@ implicit(T: fa_f32_f16) ctor mat4x4(T, T, T, T,
 @must_use @const conv mat4x3<T: f32>(mat4x3<f16>) -> mat4x3<T>
 @must_use @const conv mat4x4<T: f16>(mat4x4<f32>) -> mat4x4<T>
 @must_use @const conv mat4x4<T: f32>(mat4x4<f16>) -> mat4x4<T>
-
-// Conversion from vec3 to internal __packed_vec3 type.
-@must_use @const conv packedVec3<T: concrete_scalar>(vec3<T>) -> packedVec3<T>
-@must_use @const implicit(T: concrete_scalar) conv packedVec3(vec3<T>) -> packedVec3<T>
 
 ////////////////////////////////////////////////////////////////////////////////
 // Unary Operators                                                            //

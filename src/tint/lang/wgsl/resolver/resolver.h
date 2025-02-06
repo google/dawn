@@ -232,9 +232,6 @@ class Resolver {
     core::type::SubgroupMatrix* SubgroupMatrix(const ast::Identifier* ident,
                                                core::SubgroupMatrixKind kind);
 
-    /// @returns a packed vec3 resolved from the templated identifier @p ident.
-    core::type::Vector* PackedVec3T(const ast::Identifier* ident);
-
     /// @returns @p ident cast to an ast::TemplatedIdentifier, if the identifier is templated and
     /// the number of templated arguments are between @p min_args and @p max_args.
     const ast::TemplatedIdentifier* TemplatedIdentifier(const ast::Identifier* ident,

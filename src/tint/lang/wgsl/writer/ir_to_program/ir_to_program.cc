@@ -993,12 +993,7 @@ class State {
             },
             [&](const core::type::Vector* v) {
                 auto el = Type(v->Type());
-                if (v->Packed()) {
-                    TINT_ASSERT(v->Width() == 3u);
-                    return b.ty(core::BuiltinType::kPackedVec3, el);
-                } else {
-                    return b.ty.vec(el, v->Width());
-                }
+                return b.ty.vec(el, v->Width());
             },
             [&](const core::type::Array* a) {
                 if (ContainsBuiltinStruct(a)) {

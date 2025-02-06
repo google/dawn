@@ -175,7 +175,6 @@ enum builtin_type {
   subgroup_matrix_result
 
   // Internal types.
-  __packed_vec3  // note: not core type, but used by legacy MSL writer
   __atomic_compare_exchange_result_i32
   __atomic_compare_exchange_result_u32
   __frexp_result_abstract
