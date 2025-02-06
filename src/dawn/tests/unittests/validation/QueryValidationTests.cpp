@@ -267,9 +267,8 @@ class TimestampQueryValidationTest : public QuerySetValidationTest {
         return {wgpu::FeatureName::TimestampQuery};
     }
 
-    void EncodeRenderPassWithTimestampWrites(
-        wgpu::CommandEncoder encoder,
-        const wgpu::RenderPassTimestampWrites& timestampWrites) {
+    void EncodeRenderPassWithTimestampWrites(wgpu::CommandEncoder encoder,
+                                             const wgpu::PassTimestampWrites& timestampWrites) {
         PlaceholderRenderPass renderPass(device);
         renderPass.timestampWrites = &timestampWrites;
 
@@ -277,9 +276,8 @@ class TimestampQueryValidationTest : public QuerySetValidationTest {
         pass.End();
     }
 
-    void EncodeComputePassWithTimestampWrites(
-        wgpu::CommandEncoder encoder,
-        const wgpu::ComputePassTimestampWrites& timestampWrites) {
+    void EncodeComputePassWithTimestampWrites(wgpu::CommandEncoder encoder,
+                                              const wgpu::PassTimestampWrites& timestampWrites) {
         wgpu::ComputePassDescriptor descriptor;
         descriptor.timestampWrites = &timestampWrites;
 

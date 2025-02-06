@@ -682,7 +682,7 @@ class TimestampQueryTests : public QueryTests {
     }
 
     void EncodeComputeTimestampWrites(const wgpu::CommandEncoder& encoder,
-                                      const wgpu::ComputePassTimestampWrites& timestampWrites,
+                                      const wgpu::PassTimestampWrites& timestampWrites,
                                       bool hasPipeline = true) {
         wgpu::ComputePassDescriptor descriptor;
         descriptor.timestampWrites = &timestampWrites;
@@ -696,7 +696,7 @@ class TimestampQueryTests : public QueryTests {
     }
 
     void EncodeRenderTimestampWrites(const wgpu::CommandEncoder& encoder,
-                                     const wgpu::RenderPassTimestampWrites& timestampWrites,
+                                     const wgpu::PassTimestampWrites& timestampWrites,
                                      bool hasPipeline = true,
                                      bool hasFragmentStage = true) {
         wgpu::Texture depthTexture = CreateRenderTexture(kDepthStencilFormat);
@@ -717,8 +717,8 @@ class TimestampQueryTests : public QueryTests {
     }
 
     void TestTimestampWritesOnComputePass(
-        const wgpu::ComputePassTimestampWrites& timestampWrites,
-        const wgpu::ComputePassTimestampWrites& timestampWritesOnAnotherPass = {},
+        const wgpu::PassTimestampWrites& timestampWrites,
+        const wgpu::PassTimestampWrites& timestampWritesOnAnotherPass = {},
         bool hasPipeline = true) {
         bool hasAnotherPass =
             timestampWritesOnAnotherPass.beginningOfPassWriteIndex !=
@@ -778,8 +778,8 @@ class TimestampQueryTests : public QueryTests {
     }
 
     void TestTimestampWritesOnRenderPass(
-        const wgpu::RenderPassTimestampWrites& timestampWrites,
-        const wgpu::RenderPassTimestampWrites& timestampWritesOnAnotherPass = {},
+        const wgpu::PassTimestampWrites& timestampWrites,
+        const wgpu::PassTimestampWrites& timestampWritesOnAnotherPass = {},
         bool hasPipeline = true,
         bool hasFragmentStage = true) {
         bool hasAnotherPass =

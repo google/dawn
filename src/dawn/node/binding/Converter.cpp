@@ -1291,14 +1291,14 @@ bool Converter::Convert(wgpu::RenderPassDepthStencilAttachment& out,
            Convert(out.stencilReadOnly, in.stencilReadOnly);
 }
 
-bool Converter::Convert(wgpu::RenderPassTimestampWrites& out,
+bool Converter::Convert(wgpu::PassTimestampWrites& out,
                         const interop::GPURenderPassTimestampWrites& in) {
     return Convert(out.querySet, in.querySet) &&                                    //
            Convert(out.beginningOfPassWriteIndex, in.beginningOfPassWriteIndex) &&  //
            Convert(out.endOfPassWriteIndex, in.endOfPassWriteIndex);
 }
 
-bool Converter::Convert(wgpu::ComputePassTimestampWrites& out,
+bool Converter::Convert(wgpu::PassTimestampWrites& out,
                         const interop::GPUComputePassTimestampWrites& in) {
     return Convert(out.querySet, in.querySet) &&                                    //
            Convert(out.beginningOfPassWriteIndex, in.beginningOfPassWriteIndex) &&  //

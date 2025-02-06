@@ -470,9 +470,9 @@ void MatrixVectorMultiplyPerf::Step() {
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::ComputePassDescriptor computePassDesc;
-        wgpu::ComputePassTimestampWrites timestampWrites;
+        wgpu::PassTimestampWrites timestampWrites;
         if (useTimestamps) {
-            timestampWrites = GetComputePassTimestampWrites();
+            timestampWrites = GetPassTimestampWrites();
             computePassDesc.timestampWrites = &timestampWrites;
         }
         wgpu::ComputePassEncoder pass = encoder.BeginComputePass(&computePassDesc);
