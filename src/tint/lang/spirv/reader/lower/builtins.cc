@@ -116,6 +116,9 @@ struct State {
                 case spirv::BuiltinFn::kModf:
                     Modf(builtin);
                     break;
+                case spirv::BuiltinFn::kFrexp:
+                    Frexp(builtin);
+                    break;
                 default:
                     TINT_UNREACHABLE() << "unknown spirv builtin: " << builtin->Func();
             }
@@ -326,6 +329,26 @@ struct State {
             auto* c = b.Call(modf_result_ty, core::BuiltinFn::kModf, x);
             auto* whole = b.Access(result_ty, c, 1_u);
             b.Store(i, whole);
+
+            b.AccessWithResult(call->DetachResult(), c, 0_u);
+        });
+        call->Destroy();
+    }
+
+    void Frexp(spirv::ir::BuiltinCall* call) {
+        auto* x = call->Args()[0];
+        auto* i = call->Args()[1];
+        auto* result_ty = call->Result(0)->Type();
+        auto* frexp_result_ty = core::type::CreateFrexpResult(ty, ir.symbols, result_ty);
+
+        b.InsertBefore(call, [&] {
+            auto* c = b.Call(frexp_result_ty, core::BuiltinFn::kFrexp, x);
+            auto* exp = b.Access(ty.MatchWidth(ty.i32(), result_ty), c, 1_u)->Result(0);
+
+            if (i->Type()->UnwrapPtr()->DeepestElement()->IsUnsignedIntegerScalar()) {
+                exp = b.Bitcast(i->Type()->UnwrapPtr(), exp)->Result(0);
+            }
+            b.Store(i, exp);
 
             b.AccessWithResult(call->DetachResult(), c, 0_u);
         });

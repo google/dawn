@@ -802,6 +802,8 @@ class Parser {
                 return spirv::BuiltinFn::kLdexp;
             case GLSLstd450Modf:
                 return spirv::BuiltinFn::kModf;
+            case GLSLstd450Frexp:
+                return spirv::BuiltinFn::kFrexp;
             default:
                 break;
         }

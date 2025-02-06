@@ -57,6 +57,11 @@ std::string Preamble() {
   %ptr_function_float = OpTypePointer Function %float
   %ptr_function_v2float = OpTypePointer Function %v2float
 
+  %ptr_function_int = OpTypePointer Function %int
+  %ptr_function_v2int = OpTypePointer Function %v2int
+  %ptr_function_uint = OpTypePointer Function %uint
+  %ptr_function_v2uint = OpTypePointer Function %v2uint
+
   %int_10 = OpConstant %int 10
   %int_20 = OpConstant %int 20
 
@@ -729,6 +734,60 @@ TEST_F(SpirvParserTest, Modf_Vector) {
   $B1: {
     %2:ptr<function, vec2<f32>, read_write> = var
     %3:vec2<f32> = spirv.modf vec2<f32>(50.0f, 60.0f), %2
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, Frexp_ScalarSigned) {
+    EXPECT_IR(Preamble() + R"(
+     %1 = OpVariable %ptr_function_int Function
+     %2 = OpExtInst %float %glsl Frexp %float_50 %1
+     OpReturn
+     OpFunctionEnd
+  )",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:ptr<function, i32, read_write> = var
+    %3:f32 = spirv.frexp 50.0f, %2
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, Frexp_ScalarUnSigned) {
+    EXPECT_IR(Preamble() + R"(
+     %1 = OpVariable %ptr_function_uint Function
+     %2 = OpExtInst %float %glsl Frexp %float_50 %1
+     OpReturn
+     OpFunctionEnd
+  )",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:ptr<function, u32, read_write> = var
+    %3:f32 = spirv.frexp 50.0f, %2
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, Frexp_VectorUnSigned) {
+    EXPECT_IR(Preamble() + R"(
+     %1 = OpVariable %ptr_function_v2uint Function
+     %2 = OpExtInst %v2float %glsl Frexp %v2float_50_60 %1
+     OpReturn
+     OpFunctionEnd
+  )",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:ptr<function, vec2<u32>, read_write> = var
+    %3:vec2<f32> = spirv.frexp vec2<f32>(50.0f, 60.0f), %2
     ret
   }
 }

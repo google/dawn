@@ -2702,5 +2702,197 @@ __modf_result_vec2_f32 = struct @align(8) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(SpirvParser_BuiltinsTest, Frexp_ScalarSigned) {
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        auto* v = b.Var(ty.ptr<function, i32>());
+        auto* res = b.Call<spirv::ir::BuiltinCall>(ty.f32(), spirv::BuiltinFn::kFrexp, 50_f, v);
+        b.Let(b.Multiply(ty.f32(), res, res));
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:ptr<function, i32, read_write> = var
+    %3:f32 = spirv.frexp 50.0f, %2
+    %4:f32 = mul %3, %3
+    %5:f32 = let %4
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+__frexp_result_f32 = struct @align(4) {
+  fract:f32 @offset(0)
+  exp:i32 @offset(4)
+}
+
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:ptr<function, i32, read_write> = var
+    %3:__frexp_result_f32 = frexp 50.0f
+    %4:i32 = access %3, 1u
+    store %2, %4
+    %5:f32 = access %3, 0u
+    %6:f32 = mul %5, %5
+    %7:f32 = let %6
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvParser_BuiltinsTest, Frexp_ScalarUnSigned) {
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        auto* v = b.Var(ty.ptr<function, u32>());
+        auto* res = b.Call<spirv::ir::BuiltinCall>(ty.f32(), spirv::BuiltinFn::kFrexp, 50_f, v);
+        b.Let(b.Multiply(ty.f32(), res, res));
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:ptr<function, u32, read_write> = var
+    %3:f32 = spirv.frexp 50.0f, %2
+    %4:f32 = mul %3, %3
+    %5:f32 = let %4
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+__frexp_result_f32 = struct @align(4) {
+  fract:f32 @offset(0)
+  exp:i32 @offset(4)
+}
+
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:ptr<function, u32, read_write> = var
+    %3:__frexp_result_f32 = frexp 50.0f
+    %4:i32 = access %3, 1u
+    %5:u32 = bitcast %4
+    store %2, %5
+    %6:f32 = access %3, 0u
+    %7:f32 = mul %6, %6
+    %8:f32 = let %7
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvParser_BuiltinsTest, Frexp_VectorSigned) {
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        auto* v = b.Var(ty.ptr<function, vec2<i32>>());
+        auto* res = b.Call<spirv::ir::BuiltinCall>(ty.vec2<f32>(), spirv::BuiltinFn::kFrexp,
+                                                   b.Splat(ty.vec2<f32>(), 50_f), v);
+        b.Let(b.Multiply(ty.vec2<f32>(), res, res));
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:ptr<function, vec2<i32>, read_write> = var
+    %3:vec2<f32> = spirv.frexp vec2<f32>(50.0f), %2
+    %4:vec2<f32> = mul %3, %3
+    %5:vec2<f32> = let %4
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+__frexp_result_vec2_f32 = struct @align(8) {
+  fract:vec2<f32> @offset(0)
+  exp:vec2<i32> @offset(8)
+}
+
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:ptr<function, vec2<i32>, read_write> = var
+    %3:__frexp_result_vec2_f32 = frexp vec2<f32>(50.0f)
+    %4:vec2<i32> = access %3, 1u
+    store %2, %4
+    %5:vec2<f32> = access %3, 0u
+    %6:vec2<f32> = mul %5, %5
+    %7:vec2<f32> = let %6
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvParser_BuiltinsTest, Frexp_VectorUnsigned) {
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        auto* v = b.Var(ty.ptr<function, vec2<u32>>());
+        auto* res = b.Call<spirv::ir::BuiltinCall>(ty.vec2<f32>(), spirv::BuiltinFn::kFrexp,
+                                                   b.Splat(ty.vec2<f32>(), 50_f), v);
+        b.Let(b.Multiply(ty.vec2<f32>(), res, res));
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:ptr<function, vec2<u32>, read_write> = var
+    %3:vec2<f32> = spirv.frexp vec2<f32>(50.0f), %2
+    %4:vec2<f32> = mul %3, %3
+    %5:vec2<f32> = let %4
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+__frexp_result_vec2_f32 = struct @align(8) {
+  fract:vec2<f32> @offset(0)
+  exp:vec2<i32> @offset(8)
+}
+
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:ptr<function, vec2<u32>, read_write> = var
+    %3:__frexp_result_vec2_f32 = frexp vec2<f32>(50.0f)
+    %4:vec2<i32> = access %3, 1u
+    %5:vec2<u32> = bitcast %4
+    store %2, %5
+    %6:vec2<f32> = access %3, 0u
+    %7:vec2<f32> = mul %6, %6
+    %8:vec2<f32> = let %7
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader::lower
