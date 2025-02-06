@@ -253,5 +253,130 @@ tint_symbol_4 = struct @align(4) {
 )");
 }
 
+TEST_F(SpirvParserTest, OpUnreachable_TopLevel) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+         %10 = OpLabel
+               OpUnreachable
+               OpFunctionEnd
+  )",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    unreachable
+  }
+}
+)");
+}
+
+// TODO(dsinclair): Requires OpSelectionMerge and OpBranchConditional
+TEST_F(SpirvParserTest, DISABLED_OpUnreachable_InsideIf) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %bool = OpTypeBool
+    %ep_type = OpTypeFunction %void
+       %true = OpConstantTrue %bool
+       %main = OpFunction %void None %ep_type
+         %10 = OpLabel
+               OpSelectionMerge %99 None
+               OpBranchConditional %true %20 %99
+         %20 = OpLabel
+               OpUnreachable
+         %99 = OpLabel
+               OpReturn
+               OpFunctionEnd
+  )",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:void = if true [t: $B2] {
+      unreachable
+    }
+  }
+}
+)");
+}
+
+// TODO(dsinclair): Requires OpBranch
+TEST_F(SpirvParserTest, DISABLED_OpUnreachable_InsideLoop) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %bool = OpTypeBool
+    %ep_type = OpTypeFunction %void
+       %true = OpConstantTrue %bool
+       %main = OpFunction %void None %ep_type
+         %10 = OpLabel
+               OpBranch %20
+         %20 = OpLabel
+               OpLoopMerge %99 %80 None
+               OpBranchConditional %true %30 %30
+         %30 = OpLabel
+               OpUnreachable
+         %80 = OpLabel
+               OpBranch %20
+         %99 = OpLabel
+               OpReturn
+               OpFunctionEnd
+  )",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:void = loop %true []
+      unreachable
+    }
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, OpUnreachable_InNonVoidFunction) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %bool = OpTypeBool
+    %ep_type = OpTypeFunction %void
+     %boolfn = OpTypeFunction %bool
+        %200 = OpFunction %bool None %boolfn
+        %210 = OpLabel
+               OpUnreachable
+               OpFunctionEnd
+       %main = OpFunction %void None %ep_type
+         %10 = OpLabel
+         %11 = OpFunctionCall %bool %200
+               OpReturn
+               OpFunctionEnd
+  )",
+              R"(
+%1 = func():bool {
+  $B1: {
+    unreachable
+  }
+}
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:bool = call %1
+    ret
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader

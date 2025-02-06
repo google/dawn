@@ -614,6 +614,9 @@ class Parser {
                 case spv::Op::OpVariable:
                     EmitVar(inst);
                     break;
+                case spv::Op::OpUnreachable:
+                    EmitWithoutResult(b_.Unreachable());
+                    break;
                 default:
                     TINT_UNIMPLEMENTED()
                         << "unhandled SPIR-V instruction: " << static_cast<uint32_t>(inst.opcode());
