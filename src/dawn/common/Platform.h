@@ -45,6 +45,7 @@
 //      - CHROMEOS
 //    - APPLE
 //      - IOS
+//      - TVOS
 //      - MACOS
 //    - FUCHSIA
 //    - EMSCRIPTEN
@@ -76,6 +77,9 @@
 #include <TargetConditionals.h>
 #if TARGET_OS_IPHONE
 #define DAWN_PLATFORM_IS_IOS 1
+#if TARGET_OS_TV
+#define DAWN_PLATFORM_IS_TVOS 1
+#endif
 #elif TARGET_OS_MAC
 #define DAWN_PLATFORM_IS_MACOS 1
 #else
