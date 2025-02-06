@@ -89,6 +89,7 @@
 #include "src/tint/lang/core/type/sampler.h"
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/struct.h"
+#include "src/tint/lang/core/type/subgroup_matrix.h"
 #include "src/tint/lang/core/type/texture.h"
 #include "src/tint/lang/core/type/type.h"
 #include "src/tint/lang/core/type/u32.h"
@@ -538,6 +539,37 @@ class Printer {
                 [&](const core::type::Sampler*) { module_.PushType(spv::Op::OpTypeSampler, {id}); },
                 [&](const type::SampledImage* s) {
                     module_.PushType(spv::Op::OpTypeSampledImage, {id, Type(s->Image())});
+                },  //
+                [&](const core::type::SubgroupMatrix* sm) {
+                    TINT_ASSERT(options_.use_vulkan_memory_model);
+                    auto scope = Constant(ir_.constant_values.Get(u32(spv::Scope::Subgroup)));
+                    auto cols = Constant(ir_.constant_values.Get(u32(sm->Columns())));
+                    auto rows = Constant(ir_.constant_values.Get(u32(sm->Rows())));
+                    spv::CooperativeMatrixUse use = spv::CooperativeMatrixUse::Max;
+                    switch (sm->Kind()) {
+                        case core::SubgroupMatrixKind::kLeft:
+                            use = spv::CooperativeMatrixUse::MatrixAKHR;
+                            break;
+                        case core::SubgroupMatrixKind::kRight:
+                            use = spv::CooperativeMatrixUse::MatrixBKHR;
+                            break;
+                        case core::SubgroupMatrixKind::kResult:
+                            use = spv::CooperativeMatrixUse::MatrixAccumulatorKHR;
+                            break;
+                        case core::SubgroupMatrixKind::kUndefined:
+                            TINT_UNREACHABLE();
+                    }
+                    module_.PushExtension("SPV_KHR_cooperative_matrix");
+                    module_.PushCapability(SpvCapabilityCooperativeMatrixKHR);
+                    module_.PushType(spv::Op::OpTypeCooperativeMatrixKHR,
+                                     {
+                                         id,
+                                         Type(sm->Type()),
+                                         scope,
+                                         rows,
+                                         cols,
+                                         Constant(ir_.constant_values.Get(u32(use))),
+                                     });
                 },  //
                 TINT_ICE_ON_NO_MATCH);
             return id;
