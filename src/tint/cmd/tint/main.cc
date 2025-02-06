@@ -33,6 +33,7 @@
 #include <unordered_map>
 #include <vector>
 #include "src/tint/lang/wgsl/sem/variable.h"
+#include "src/tint/utils/command/args.h"
 #include "src/tint/utils/text/color_mode.h"
 
 #if TINT_BUILD_SPV_READER || TINT_BUILD_SPV_WRITER
@@ -97,8 +98,6 @@
 #if TINT_BUILD_GLSL_VALIDATOR
 #include "src/tint/lang/glsl/validate/validate.h"
 #endif  // TINT_BUILD_GLSL_VALIDATOR
-
-TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 
 namespace {
 
@@ -220,6 +219,9 @@ Format InferFormat(const std::string& filename) {
     return Format::kUnknown;
 }
 
+// The actual warning occurs on `std::from_chars(hash.data(), hash.data() + hash.size(), value,
+// base);`, but disabling/enabling warnings cannot be done within function scope
+TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 bool ParseArgs(tint::VectorRef<std::string_view> arguments, Options* opts) {
     using namespace tint::cli;  // NOLINT(build/namespaces)
 
@@ -366,6 +368,7 @@ of the hash codes in the comma separated list of hashes)");
                     hash = hash.substr(2);
                     base = 16;
                 }
+
                 std::from_chars(hash.data(), hash.data() + hash.size(), value, base);
                 opts->skip_hash.emplace(value);
             }
@@ -589,6 +592,7 @@ Options:
 
     return true;
 }
+TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 
 [[maybe_unused]] void AddRenamer(Options& options,
                                  tint::ast::transform::Manager& transform_manager,
@@ -1290,14 +1294,7 @@ bool DumpIR([[maybe_unused]] const tint::Program& program,
 }  // namespace
 
 int main(int argc, const char** argv) {
-    tint::Vector<std::string_view, 8> arguments;
-    for (int i = 1; i < argc; i++) {
-        std::string_view arg(argv[i]);
-        if (!arg.empty()) {
-            arguments.Push(argv[i]);
-        }
-    }
-
+    tint::Vector<std::string_view, 8> arguments = tint::args::Vectorize(argc, argv);
     Options options;
 
     tint::Initialize();
@@ -1434,5 +1431,3 @@ int main(int argc, const char** argv) {
     }
     return success ? 0 : 1;
 }
-
-TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);

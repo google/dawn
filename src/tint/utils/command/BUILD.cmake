@@ -39,6 +39,8 @@
 # Kind:      lib
 ################################################################################
 tint_add_target(tint_utils_command lib
+  utils/command/args.cc
+  utils/command/args.h
   utils/command/cli.cc
   utils/command/cli.h
   utils/command/command.h

@@ -40,10 +40,9 @@
 #include "src/tint/lang/msl/validate/validate.h"
 #endif
 
+#include "src/tint/utils/command/args.h"
 #include "src/tint/utils/macros/compiler.h"
 #include "src/tint/utils/socket.h"
-
-TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 
 namespace {
 
@@ -158,6 +157,7 @@ struct Stream {
         return error.empty();
     }
 
+    TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
     bool Read(void* data, size_t size) {
         auto buf = reinterpret_cast<uint8_t*>(data);
         while (size > 0 && error.empty()) {
@@ -174,6 +174,7 @@ struct Stream {
         }
         return error.empty();
     }
+    TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -309,7 +310,7 @@ bool RunClient(std::string address,
                int version_minor,
                bool verbose);
 
-int main(int argc, char* argv[]) {
+int main(int argc, const char** argv) {
     bool run_server = false;
     bool verbose = false;
     int version_major = 0;
@@ -318,17 +319,18 @@ int main(int argc, char* argv[]) {
 
     std::regex metal_version_re{"^-?-std=macos-metal([0-9]+)\\.([0-9]+)"};
 
-    std::vector<std::string> args;
-    for (int i = 1; i < argc; i++) {
-        std::string arg = argv[i];
+    auto args = tint::args::Vectorize(argc, argv);
+    std::vector<std::string> parsed_args;
+    for (size_t i = 0; i < args.Length(); i++) {
+        std::string arg = std::string(args[i]);
         if (arg == "-s" || arg == "--server") {
             run_server = true;
             continue;
         }
         if (arg == "-p" || arg == "--port") {
-            if (i < argc - 1) {
+            if (i < args.Length() - 1) {
                 i++;
-                port = argv[i];
+                port = args[i];
             } else {
                 printf("expected port number");
                 exit(1);
@@ -341,13 +343,13 @@ int main(int argc, char* argv[]) {
         }
 
         // xcrun flags are ignored so this executable can be used as a replacement for xcrun.
-        if ((arg == "-x" || arg == "-sdk") && (i < argc - 1)) {
+        if ((arg == "-x" || arg == "-sdk") && (i < args.Length() - 1)) {
             i++;
             continue;
         }
         if (arg == "metal") {
-            for (; i < argc; i++) {
-                arg = argv[i];
+            for (; i < args.Length(); i++) {
+                arg = args[i];
                 // metal_version_re
                 std::smatch metal_version_match;
                 if (std::regex_match(arg, metal_version_match, metal_version_re)) {
@@ -362,7 +364,7 @@ int main(int argc, char* argv[]) {
             continue;
         }
 
-        args.emplace_back(arg);
+        parsed_args.emplace_back(arg);
     }
 
     bool success = false;
@@ -372,21 +374,21 @@ int main(int argc, char* argv[]) {
     } else {
         std::string address;
         std::string file;
-        switch (args.size()) {
+        switch (parsed_args.size()) {
             case 1:
                 TINT_BEGIN_DISABLE_WARNING(DEPRECATED);
                 if (auto* addr = getenv("TINT_REMOTE_COMPILE_ADDRESS")) {
                     address = addr;
                 }
                 TINT_END_DISABLE_WARNING(DEPRECATED);
-                file = args[0];
+                file = parsed_args[0];
                 break;
             case 2:
-                address = args[0];
-                file = args[1];
+                address = parsed_args[0];
+                file = parsed_args[1];
                 break;
             default:
-                std::cerr << "Expected 1 or 2 arguments, got " << args.size() << "\n\n";
+                std::cerr << "Expected 1 or 2 arguments, got " << parsed_args.size() << "\n\n";
                 ShowUsage();
         }
         if (address.empty() || file.empty()) {
@@ -532,5 +534,3 @@ bool RunClient(std::string address,
     }
     return true;
 }
-
-TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
