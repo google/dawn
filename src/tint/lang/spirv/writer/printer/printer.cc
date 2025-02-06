@@ -1488,6 +1488,9 @@ class Printer {
             case spirv::BuiltinFn::kVectorTimesScalar:
                 op = spv::Op::OpVectorTimesScalar;
                 break;
+            case spirv::BuiltinFn::kCooperativeMatrixLoad:
+                op = spv::Op::OpCooperativeMatrixLoadKHR;
+                break;
             case spirv::BuiltinFn::kCooperativeMatrixStore:
                 op = spv::Op::OpCooperativeMatrixStoreKHR;
                 break;

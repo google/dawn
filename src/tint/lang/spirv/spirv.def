@@ -398,5 +398,8 @@ fn udot(u32, u32, u32) -> u32
 ////////////////////////////////////////////////////////////////////////////////
 // SPV_KHR_cooperative_matrix instructions
 ////////////////////////////////////////////////////////////////////////////////
+@stage("compute") implicit(K: subgroup_matrix_kind, S: fiu32_f16, C: num, R: num)
+  fn cooperative_matrix_load<T: subgroup_matrix<K, S, C, R> >(
+    ptr<workgroup_or_storage, S, readable>, u32, u32, u32) -> T
 @stage("compute") implicit(K: subgroup_matrix_kind, S: fiu32_f16, C: num, R: num) fn cooperative_matrix_store(
   ptr<workgroup_or_storage, S, writable>, subgroup_matrix<K, S, C, R>, u32, u32, u32)

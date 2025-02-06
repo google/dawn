@@ -107,6 +107,7 @@ struct State {
                     case core::BuiltinFn::kTextureSampleLevel:
                     case core::BuiltinFn::kTextureStore:
                     case core::BuiltinFn::kInputAttachmentLoad:
+                    case core::BuiltinFn::kSubgroupMatrixLoad:
                     case core::BuiltinFn::kSubgroupMatrixStore:
                         worklist.Push(builtin);
                         break;
@@ -188,6 +189,9 @@ struct State {
                     break;
                 case core::BuiltinFn::kInputAttachmentLoad:
                     InputAttachmentLoad(builtin);
+                    break;
+                case core::BuiltinFn::kSubgroupMatrixLoad:
+                    SubgroupMatrixLoad(builtin);
                     break;
                 case core::BuiltinFn::kSubgroupMatrixStore:
                     SubgroupMatrixStore(builtin);
@@ -957,6 +961,36 @@ struct State {
         if (id->Type()->IsSignedIntegerScalar()) {
             builtin->SetArg(1, b.Constant(id->As<core::ir::Constant>()->Value()->ValueAs<u32>()));
         }
+    }
+
+    /// Replace a subgroupMatrixLoad builtin.
+    /// @param builtin the builtin call instruction
+    void SubgroupMatrixLoad(core::ir::CoreBuiltinCall* builtin) {
+        b.InsertBefore(builtin, [&] {
+            auto* result_ty = builtin->Result(0)->Type();
+            auto* p = builtin->Args()[0];
+            auto* offset = builtin->Args()[1];
+            auto* col_major = builtin->Args()[2]->As<core::ir::Constant>();
+            auto* stride = builtin->Args()[3];
+
+            auto* ptr = p->Type()->As<core::type::Pointer>();
+            auto* arr = ptr->StoreType()->As<core::type::Array>();
+
+            // Make a pointer to the first element of the array that we will load from.
+            auto* elem_ptr = ty.ptr(ptr->AddressSpace(), arr->ElemType(), ptr->Access());
+            auto* src = b.Access(elem_ptr, p, offset);
+
+            auto* layout = b.Constant(u32(col_major->Value()->ValueAs<bool>()
+                                              ? SpvCooperativeMatrixLayoutColumnMajorKHR
+                                              : SpvCooperativeMatrixLayoutRowMajorKHR));
+            auto* memory_operand = Literal(u32(SpvMemoryAccessNonPrivatePointerMask));
+
+            auto* call = b.CallWithResult<spirv::ir::BuiltinCall>(
+                builtin->DetachResult(), spirv::BuiltinFn::kCooperativeMatrixLoad, src, layout,
+                stride, memory_operand);
+            call->SetExplicitTemplateParams(Vector{result_ty});
+        });
+        builtin->Destroy();
     }
 
     /// Replace a subgroupMatrixStore builtin.

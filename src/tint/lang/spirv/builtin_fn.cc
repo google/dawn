@@ -150,6 +150,8 @@ const char* str(BuiltinFn i) {
             return "sdot";
         case BuiltinFn::kUdot:
             return "udot";
+        case BuiltinFn::kCooperativeMatrixLoad:
+            return "cooperative_matrix_load";
         case BuiltinFn::kCooperativeMatrixStore:
             return "cooperative_matrix_store";
     }
@@ -168,6 +170,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kImageSampleDrefImplicitLod:
         case BuiltinFn::kImageSampleDrefExplicitLod:
         case BuiltinFn::kSampledImage:
+        case BuiltinFn::kCooperativeMatrixLoad:
             return core::ir::Instruction::Accesses{core::ir::Instruction::Access::kLoad};
 
         case BuiltinFn::kImageWrite:
