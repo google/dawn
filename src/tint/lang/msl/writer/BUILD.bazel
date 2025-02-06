@@ -51,11 +51,6 @@ cc_library(
     "//src/tint/lang/core/constant",
     "//src/tint/lang/core/ir",
     "//src/tint/lang/core/type",
-    "//src/tint/lang/wgsl",
-    "//src/tint/lang/wgsl/ast",
-    "//src/tint/lang/wgsl/features",
-    "//src/tint/lang/wgsl/program",
-    "//src/tint/lang/wgsl/sem",
     "//src/tint/utils",
     "//src/tint/utils/containers",
     "//src/tint/utils/diagnostic",
@@ -70,7 +65,6 @@ cc_library(
     "//src/utils",
   ] + select({
     ":tint_build_msl_writer": [
-      "//src/tint/lang/msl/writer/ast_printer",
       "//src/tint/lang/msl/writer/common",
       "//src/tint/lang/msl/writer/printer",
       "//src/tint/lang/msl/writer/raise",

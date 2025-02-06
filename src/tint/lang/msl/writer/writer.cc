@@ -32,8 +32,10 @@
 
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/var.h"
+#include "src/tint/lang/core/type/f16.h"
+#include "src/tint/lang/core/type/f32.h"
 #include "src/tint/lang/core/type/input_attachment.h"
-#include "src/tint/lang/msl/writer/ast_printer/ast_printer.h"
+#include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/msl/writer/common/option_helpers.h"
 #include "src/tint/lang/msl/writer/printer/printer.h"
 #include "src/tint/lang/msl/writer/raise/raise.h"
@@ -141,39 +143,6 @@ Result<Output> Generate(core::ir::Module& ir, const Options& options) {
 
     result->needs_storage_buffer_sizes = raise_result->needs_storage_buffer_sizes;
     return result;
-}
-
-Result<Output> Generate(const Program& program, const Options& options) {
-    if (!program.IsValid()) {
-        return Failure{program.Diagnostics()};
-    }
-
-    {
-        auto res = ValidateBindingOptions(options);
-        if (res != Success) {
-            return res.Failure();
-        }
-    }
-
-    Output output;
-
-    // Sanitize the program.
-    auto sanitized_result = Sanitize(program, options);
-    if (!sanitized_result.program.IsValid()) {
-        return Failure{sanitized_result.program.Diagnostics()};
-    }
-    output.needs_storage_buffer_sizes = sanitized_result.needs_storage_buffer_sizes;
-
-    // Generate the MSL code.
-    auto impl = std::make_unique<ASTPrinter>(sanitized_result.program, options);
-    if (!impl->Generate()) {
-        return Failure{impl->Diagnostics()};
-    }
-    output.msl = impl->Result();
-    output.has_invariant_attribute = impl->HasInvariant();
-    output.workgroup_info.allocations = impl->DynamicWorkgroupAllocations();
-
-    return output;
 }
 
 }  // namespace tint::msl::writer

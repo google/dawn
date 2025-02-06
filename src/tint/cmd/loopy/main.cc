@@ -270,20 +270,20 @@ bool GenerateMsl([[maybe_unused]] const tint::Program& program) {
         input_program = &*flattened;
     }
 
-    tint::msl::writer::Options gen_options;
-    gen_options.bindings = tint::msl::writer::GenerateBindings(program);
-    gen_options.array_length_from_uniform.ubo_binding = 30;
-    gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(tint::BindingPoint{0, 0},
-                                                                          0);
-    gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(tint::BindingPoint{0, 1},
-                                                                          1);
-
     // Convert the AST program to an IR module.
     auto ir = tint::wgsl::reader::ProgramToLoweredIR(*input_program);
     if (ir != tint::Success) {
         std::cerr << "Failed to generate IR: " << ir << "\n";
         return false;
     }
+
+    tint::msl::writer::Options gen_options;
+    gen_options.bindings = tint::msl::writer::GenerateBindings(ir.Get());
+    gen_options.array_length_from_uniform.ubo_binding = 30;
+    gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(tint::BindingPoint{0, 0},
+                                                                          0);
+    gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(tint::BindingPoint{0, 1},
+                                                                          1);
 
     // Generate MSL from Tint IR.
     auto result = tint::msl::writer::Generate(ir.Get(), gen_options);
