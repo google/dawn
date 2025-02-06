@@ -4103,6 +4103,7 @@
             {"value": 2, "name": "packed 4x8 integer dot product", "jsrepr": "'packed_4x8_integer_dot_product'"},
             {"value": 3, "name": "unrestricted pointer parameters", "jsrepr": "'unrestricted_pointer_parameters'"},
             {"value": 4, "name": "pointer composite access", "jsrepr": "'pointer_composite_access'"},
+            {"value": 5, "name": "sized binding array", "jsrepr": "'sized_binding_array'"},
 
             {"value": 0, "name": "chromium testing unimplemented", "jsrepr": "'chromium_testing_unimplemented'", "tags": ["dawn"]},
             {"value": 1, "name": "chromium testing unsafe experimental", "jsrepr": "'chromium_testing_unsafe_experimental'", "tags": ["dawn"]},

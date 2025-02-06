@@ -108,6 +108,7 @@ enum language_feature {
   pointer_composite_access
   readonly_and_readwrite_storage_textures
   unrestricted_pointer_parameters
+  sized_binding_array
 
   // Language features used only for testing whose status will never change.
   chromium_testing_unimplemented

@@ -1637,6 +1637,9 @@ bool Converter::Convert(wgpu::WGSLLanguageFeatureName& out, interop::WGSLLanguag
         case interop::WGSLLanguageFeatureName::kPointerCompositeAccess:
             out = wgpu::WGSLLanguageFeatureName::PointerCompositeAccess;
             return true;
+        case interop::WGSLLanguageFeatureName::kSizedBindingArray:
+            out = wgpu::WGSLLanguageFeatureName::SizedBindingArray;
+            return true;
     }
     return false;
 }
@@ -1654,6 +1657,9 @@ bool Converter::Convert(interop::WGSLLanguageFeatureName& out, wgpu::WGSLLanguag
             return true;
         case wgpu::WGSLLanguageFeatureName::PointerCompositeAccess:
             out = interop::WGSLLanguageFeatureName::kPointerCompositeAccess;
+            return true;
+        case wgpu::WGSLLanguageFeatureName::SizedBindingArray:
+            out = interop::WGSLLanguageFeatureName::kSizedBindingArray;
             return true;
 
         case wgpu::WGSLLanguageFeatureName::ChromiumTestingUnimplemented:

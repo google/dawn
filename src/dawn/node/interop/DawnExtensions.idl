@@ -60,6 +60,7 @@ enum WGSLLanguageFeatureName {
     "packed_4x8_integer_dot_product",
     "unrestricted_pointer_parameters",
     "pointer_composite_access",
+    "sized_binding_array",
 };
 
 // TODO(crbug.com/354751907) Move to GPUAdapterInfo
