@@ -616,13 +616,9 @@ class State {
 
     void Let(const core::ir::Let* let) {
         auto* result = let->Result(0);
-        if (mod.NameOf(result).IsValid() || result->NumUsages() > 0) {
-            Symbol name = NameFor(result);
-            Append(b.Decl(b.Let(name, Expr(let->Value()))));
-            Bind(result, name);
-        } else {
-            Append(b.Assign(b.Phony(), Expr(let->Value())));
-        }
+        Symbol name = NameFor(result);
+        Append(b.Decl(b.Let(name, Expr(let->Value()))));
+        Bind(result, name);
     }
 
     void Phony(const core::ir::Phony* phony) { Append(b.Assign(b.Phony(), Expr(phony->Value()))); }
