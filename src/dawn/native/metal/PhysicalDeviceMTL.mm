@@ -641,9 +641,11 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     // argument buffer features which are required for multi draw. However, multi draw end2end tests
     // fail on non-Apple GPUs. Disable the feature for non-Apple GPUs. Apple3 family is the minimum
     // requirement and only includes Apple GPUs.
-    if ([*mDevice supportsFamily:MTLGPUFamilyApple3]) {
-        EnableFeature(Feature::MultiDrawIndirect);
-    }
+
+    // TODO(crbug.com/393183837) - Re-enable this feature when we use argument buffers.
+    // if ([*mDevice supportsFamily:MTLGPUFamilyApple3]) {
+    //     EnableFeature(Feature::MultiDrawIndirect);
+    // }
 
     EnableFeature(Feature::IndirectFirstInstance);
     EnableFeature(Feature::ShaderF16);
