@@ -109,6 +109,7 @@ struct State {
                     case core::BuiltinFn::kInputAttachmentLoad:
                     case core::BuiltinFn::kSubgroupMatrixLoad:
                     case core::BuiltinFn::kSubgroupMatrixStore:
+                    case core::BuiltinFn::kSubgroupMatrixMultiply:
                         worklist.Push(builtin);
                         break;
                     case core::BuiltinFn::kQuantizeToF16:
@@ -195,6 +196,9 @@ struct State {
                     break;
                 case core::BuiltinFn::kSubgroupMatrixStore:
                     SubgroupMatrixStore(builtin);
+                    break;
+                case core::BuiltinFn::kSubgroupMatrixMultiply:
+                    SubgroupMatrixMultiply(builtin);
                     break;
                 default:
                     break;
@@ -1017,6 +1021,22 @@ struct State {
 
             b.Call<spirv::ir::BuiltinCall>(ty.void_(), spirv::BuiltinFn::kCooperativeMatrixStore,
                                            dst, value, layout, stride, memory_operand);
+        });
+        builtin->Destroy();
+    }
+
+    /// Replace a subgroupMatrixMultiply builtin.
+    /// @param builtin the builtin call instruction
+    void SubgroupMatrixMultiply(core::ir::CoreBuiltinCall* builtin) {
+        b.InsertBefore(builtin, [&] {
+            // SPIR-V only provides a multiply-accumulate instruction, so construct a zero-valued
+            // matrix to accumulate into.
+            auto* left = builtin->Args()[0];
+            auto* right = builtin->Args()[1];
+            auto* acc = b.Construct(builtin->Result(0)->Type());
+            b.CallWithResult<spirv::ir::BuiltinCall>(builtin->DetachResult(),
+                                                     spirv::BuiltinFn::kCooperativeMatrixMulAdd,
+                                                     left, right, acc);
         });
         builtin->Destroy();
     }

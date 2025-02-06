@@ -3352,5 +3352,77 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixStore_Workgroup_RowMajor_U
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixMultiply_F32) {
+    auto* left = b.FunctionParam("left", ty.subgroup_matrix_left(ty.f32(), 4, 8));
+    auto* right = b.FunctionParam("right", ty.subgroup_matrix_right(ty.f32(), 8, 4));
+    auto* result = ty.subgroup_matrix_result(ty.f32(), 8, 8);
+    auto* func = b.Function("foo", result);
+    func->SetParams({left, right});
+    b.Append(func->Block(), [&] {
+        auto* call = b.Call(result, core::BuiltinFn::kSubgroupMatrixMultiply, left, right);
+        b.Return(func, call);
+    });
+
+    auto* src = R"(
+%foo = func(%left:subgroup_matrix_left<f32, 4, 8>, %right:subgroup_matrix_right<f32, 8, 4>):subgroup_matrix_result<f32, 8, 8> {
+  $B1: {
+    %4:subgroup_matrix_result<f32, 8, 8> = subgroupMatrixMultiply %left, %right
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%left:subgroup_matrix_left<f32, 4, 8>, %right:subgroup_matrix_right<f32, 8, 4>):subgroup_matrix_result<f32, 8, 8> {
+  $B1: {
+    %4:subgroup_matrix_result<f32, 8, 8> = construct
+    %5:subgroup_matrix_result<f32, 8, 8> = spirv.cooperative_matrix_mul_add %left, %right, %4
+    ret %5
+  }
+}
+)";
+
+    Run(BuiltinPolyfill, true);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixMultiply_U32) {
+    auto* left = b.FunctionParam("left", ty.subgroup_matrix_left(ty.u32(), 8, 4));
+    auto* right = b.FunctionParam("right", ty.subgroup_matrix_right(ty.u32(), 2, 8));
+    auto* result = ty.subgroup_matrix_result(ty.u32(), 2, 4);
+    auto* func = b.Function("foo", result);
+    func->SetParams({left, right});
+    b.Append(func->Block(), [&] {
+        auto* call = b.Call(result, core::BuiltinFn::kSubgroupMatrixMultiply, left, right);
+        b.Return(func, call);
+    });
+
+    auto* src = R"(
+%foo = func(%left:subgroup_matrix_left<u32, 8, 4>, %right:subgroup_matrix_right<u32, 2, 8>):subgroup_matrix_result<u32, 2, 4> {
+  $B1: {
+    %4:subgroup_matrix_result<u32, 2, 4> = subgroupMatrixMultiply %left, %right
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%left:subgroup_matrix_left<u32, 8, 4>, %right:subgroup_matrix_right<u32, 2, 8>):subgroup_matrix_result<u32, 2, 4> {
+  $B1: {
+    %4:subgroup_matrix_result<u32, 2, 4> = construct
+    %5:subgroup_matrix_result<u32, 2, 4> = spirv.cooperative_matrix_mul_add %left, %right, %4
+    ret %5
+  }
+}
+)";
+
+    Run(BuiltinPolyfill, true);
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::spirv::writer::raise

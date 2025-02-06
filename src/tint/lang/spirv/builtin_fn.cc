@@ -154,6 +154,8 @@ const char* str(BuiltinFn i) {
             return "cooperative_matrix_load";
         case BuiltinFn::kCooperativeMatrixStore:
             return "cooperative_matrix_store";
+        case BuiltinFn::kCooperativeMatrixMulAdd:
+            return "cooperative_matrix_mul_add";
     }
     return "<unknown>";
 }
@@ -224,6 +226,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kReflect:
         case BuiltinFn::kFaceForward:
         case BuiltinFn::kLdexp:
+        case BuiltinFn::kCooperativeMatrixMulAdd:
             break;
     }
     return core::ir::Instruction::Accesses{};

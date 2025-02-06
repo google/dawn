@@ -104,6 +104,7 @@ enum class BuiltinFn : uint8_t {
     kUdot,
     kCooperativeMatrixLoad,
     kCooperativeMatrixStore,
+    kCooperativeMatrixMulAdd,
     kNone,
 };
 
