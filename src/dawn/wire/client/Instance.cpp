@@ -144,12 +144,11 @@ WireResult Instance::Initialize(const WGPUInstanceDescriptor* descriptor) {
         return WireResult::Success;
     }
 
-    if (descriptor->capabilities.timedWaitAnyEnable || descriptor->features.timedWaitAnyEnable) {
+    if (descriptor->capabilities.timedWaitAnyEnable) {
         dawn::ErrorLog() << "Wire client instance doesn't support timedWaitAnyEnable = true";
         return WireResult::FatalError;
     }
-    if (descriptor->capabilities.timedWaitAnyMaxCount > 0 ||
-        descriptor->features.timedWaitAnyMaxCount > 0) {
+    if (descriptor->capabilities.timedWaitAnyMaxCount > 0) {
         dawn::ErrorLog() << "Wire client instance doesn't support non-zero timedWaitAnyMaxCount";
         return WireResult::FatalError;
     }

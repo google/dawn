@@ -2451,8 +2451,7 @@
         "category": "structure",
         "extensible": "in",
         "members": [
-            {"name": "capabilities", "type": "instance capabilities"},
-            {"name": "features", "type": "instance capabilities"}
+            {"name": "capabilities", "type": "instance capabilities"}
         ]
     },
     "get instance capabilities": {

@@ -293,11 +293,9 @@ EventManager::~EventManager() {
 
 MaybeError EventManager::Initialize(const UnpackedPtr<InstanceDescriptor>& descriptor) {
     if (descriptor) {
-        mTimedWaitAnyEnable =
-            descriptor->capabilities.timedWaitAnyEnable || descriptor->features.timedWaitAnyEnable;
+        mTimedWaitAnyEnable = descriptor->capabilities.timedWaitAnyEnable;
         mTimedWaitAnyMaxCount =
-            std::max({kTimedWaitAnyMaxCountDefault, descriptor->capabilities.timedWaitAnyMaxCount,
-                      descriptor->features.timedWaitAnyMaxCount});
+            std::max(kTimedWaitAnyMaxCountDefault, descriptor->capabilities.timedWaitAnyMaxCount);
     }
     if (mTimedWaitAnyMaxCount > kTimedWaitAnyMaxCountDefault) {
         // We don't yet support a higher timedWaitAnyMaxCount because it would be complicated
