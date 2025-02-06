@@ -704,6 +704,8 @@ class Parser {
                 return core::BuiltinFn::kClamp;
             case GLSLstd450ModfStruct:
                 return core::BuiltinFn::kModf;
+            case GLSLstd450FrexpStruct:
+                return core::BuiltinFn::kFrexp;
             case GLSLstd450NMin:
             case GLSLstd450FMin:  // FMin is less prescriptive about NaN operands
                 return core::BuiltinFn::kMin;
@@ -851,6 +853,39 @@ class Parser {
             EmitWithoutSpvResult(fract);
             EmitWithoutSpvResult(whole);
             Emit(b_.Construct(spv_ty, fract, whole), inst.result_id());
+            return;
+        }
+        if (wgsl_fn == core::BuiltinFn::kFrexp) {
+            // For `FrexpStruct`, which is, essentially, a WGSL `frexp`
+            // instruction we need some special handling. The result type that we
+            // produce must be the SPIR-V type as we don't know how the result is
+            // used later. So, we need to make the WGSL query and re-construct an
+            // object of the right SPIR-V type. We can't, easily, do this later
+            // as we lose the SPIR-V type as soon as we replace the result of the
+            // `frexp`. So, inline the work here to generate the correct results.
+
+            auto* mem_ty = operands[0]->Type();
+            auto* result_ty = core::type::CreateFrexpResult(ty_, ir_.symbols, mem_ty);
+
+            auto* call = b_.Call(result_ty, wgsl_fn, operands);
+            auto* fract = b_.Access(mem_ty, call, 0_u);
+            auto* exp = b_.Access(ty_.MatchWidth(ty_.i32(), mem_ty), call, 1_u);
+            auto* exp_res = exp->Result(0);
+
+            EmitWithoutSpvResult(call);
+            EmitWithoutSpvResult(fract);
+            EmitWithoutSpvResult(exp);
+
+            if (auto* str = spv_ty->As<core::type::Struct>()) {
+                auto* exp_ty = str->Members()[1]->Type();
+                if (exp_ty->DeepestElement()->IsUnsignedIntegerScalar()) {
+                    auto* uexp = b_.Bitcast(exp_ty, exp);
+                    exp_res = uexp->Result(0);
+                    EmitWithoutSpvResult(uexp);
+                }
+            }
+
+            Emit(b_.Construct(spv_ty, fract, exp_res), inst.result_id());
             return;
         }
         if (wgsl_fn != core::BuiltinFn::kNone) {
