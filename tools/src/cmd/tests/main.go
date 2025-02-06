@@ -692,9 +692,6 @@ func (j job) run(cfg runConfig) {
 			expectedFilePath += "fxc.hlsl"
 		case hlslFXCIR:
 			expectedFilePath += "ir.fxc.hlsl"
-		// TODO(crbug.com/388013849): Remove when IR expectations have been moved.
-		case msl:
-			expectedFilePath += "ir.msl"
 		default:
 			expectedFilePath += string(j.format)
 		}
