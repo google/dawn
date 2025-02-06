@@ -67,7 +67,6 @@ const (
 	hlslDXC   = outputFormat("hlsl-dxc")
 	hlslDXCIR = outputFormat("hlsl-dxc-ir")
 	msl       = outputFormat("msl")
-	mslIR     = outputFormat("msl-ir")
 	spvasm    = outputFormat("spvasm")
 	wgsl      = outputFormat("wgsl")
 )
@@ -234,10 +233,6 @@ func run() error {
 			parsed, err := parseOutputFormat(strings.TrimSpace(f))
 			if err != nil {
 				return err
-			}
-			// TODO(388013849): Remove when CQ is updated to stop using this format.
-			if parsed[0] == mslIR {
-				continue
 			}
 			formats = append(formats, parsed...)
 		}
@@ -1058,8 +1053,6 @@ func parseOutputFormat(s string) ([]outputFormat, error) {
 		return []outputFormat{spvasm}, nil
 	case "msl":
 		return []outputFormat{msl}, nil
-	case "msl-ir":
-		return []outputFormat{mslIR}, nil
 	case "hlsl":
 		return []outputFormat{hlslDXC, hlslFXC}, nil
 	case "hlsl-dxc":
