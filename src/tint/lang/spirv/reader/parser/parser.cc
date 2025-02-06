@@ -619,6 +619,12 @@ class Parser {
                 case spv::Op::OpKill:
                     EmitKill(inst);
                     break;
+                case spv::Op::OpDot:
+                    Emit(b_.Call(Type(inst.type_id()), core::BuiltinFn::kDot,
+                                 Value(inst.GetSingleWordOperand(2)),
+                                 Value(inst.GetSingleWordOperand(3))),
+                         inst.result_id());
+                    break;
                 default:
                     TINT_UNIMPLEMENTED()
                         << "unhandled SPIR-V instruction: " << static_cast<uint32_t>(inst.opcode());
