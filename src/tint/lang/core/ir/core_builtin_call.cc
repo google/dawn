@@ -211,6 +211,7 @@ tint::core::ir::Instruction::Accesses CoreBuiltinCall::GetSideEffects() const {
         case BuiltinFn::kUnpack4XI8:
         case BuiltinFn::kUnpack4XU8:
         case BuiltinFn::kSubgroupMatrixMultiply:
+        case BuiltinFn::kSubgroupMatrixMultiplyAccumulate:
         case BuiltinFn::kNone:
             break;
     }

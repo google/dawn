@@ -1246,6 +1246,8 @@ struct Encoder {
                 return pb::BuiltinFn::subgroup_matrix_store;
             case core::BuiltinFn::kSubgroupMatrixMultiply:
                 return pb::BuiltinFn::subgroup_matrix_multiply;
+            case core::BuiltinFn::kSubgroupMatrixMultiplyAccumulate:
+                return pb::BuiltinFn::subgroup_matrix_multiply_accumulate;
             case core::BuiltinFn::kNone:
                 break;
         }

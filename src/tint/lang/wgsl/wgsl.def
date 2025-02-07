@@ -688,6 +688,11 @@ match workgroup
   subgroup_matrix<subgroup_matrix_kind_left, S, K, R>,
   subgroup_matrix<subgroup_matrix_kind_right, S, C, K>)
   -> subgroup_matrix<subgroup_matrix_kind_result, S, C, R>
+@must_use @stage("compute") implicit(S: subgroup_matrix_elements, C: num, R: num, K: num) fn subgroupMatrixMultiplyAccumulate(
+  subgroup_matrix<subgroup_matrix_kind_left, S, K, R>,
+  subgroup_matrix<subgroup_matrix_kind_right, S, C, K>,
+  subgroup_matrix<subgroup_matrix_kind_result, S, C, R>)
+  -> subgroup_matrix<subgroup_matrix_kind_result, S, C, R>
 
 ////////////////////////////////////////////////////////////////////////////////
 // Value constructors                                                         //
