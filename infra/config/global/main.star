@@ -235,12 +235,12 @@ def get_dimension(os, builder_name = None):
 
     return "Invalid Dimension"
 
-reclient = struct(
-    instance = struct(
+siso = struct(
+    project = struct(
         DEFAULT_TRUSTED = "rbe-chromium-trusted",
         DEFAULT_UNTRUSTED = "rbe-chromium-untrusted",
     ),
-    jobs = struct(
+    remote_jobs = struct(
         HIGH_JOBS_FOR_CI = 250,
         LOW_JOBS_FOR_CQ = 150,
     ),
@@ -356,7 +356,7 @@ def get_default_dimensions(os, builder_name):
 
     return dimensions
 
-def get_common_properties(os, clang, reclient_instance, reclient_jobs):
+def get_common_properties(os, clang, rbe_project, remote_jobs):
     """Add the common properties for a builder that don't depend on being CI vs Try
 
     Args:
@@ -368,14 +368,24 @@ def get_common_properties(os, clang, reclient_instance, reclient_jobs):
     properties = {}
     msvc = os.category == os_category.WINDOWS and not clang
 
+    properties = {
+        "$build/siso": {
+            "configs": ["builder"],
+            "enable_cloud_monitoring": True,
+            "enable_cloud_profiler": True,
+            "enable_cloud_trace": True,
+        },
+    }
     if not msvc:
         reclient_props = {
-            "instance": reclient_instance,
-            "jobs": reclient_jobs,
+            "instance": rbe_project,
+            "jobs": remote_jobs,
             "metrics_project": "chromium-reclient-metrics",
             "scandeps_server": True,
         }
         properties["$build/reclient"] = reclient_props
+        properties["$build/siso"]["remote_jobs"] = remote_jobs
+        properties["$build/siso"]["metrics_project"] = "chromium-reclient-metrics"
 
     return properties
 
@@ -395,10 +405,17 @@ def add_ci_builder(name, os, properties):
     properties_ci = get_common_properties(
         os,
         clang,
-        reclient.instance.DEFAULT_TRUSTED,
-        reclient.jobs.HIGH_JOBS_FOR_CI,
+        siso.project.DEFAULT_TRUSTED,
+        siso.remote_jobs.HIGH_JOBS_FOR_CI,
     )
     properties_ci.update(properties)
+    shadow_properties_ci = get_common_properties(
+        os,
+        clang,
+        siso.project.DEFAULT_UNTRUSTED,
+        siso.remote_jobs.HIGH_JOBS_FOR_CI,
+    )
+    shadow_properties_ci.update(properties)
     schedule_ci = None
     if fuzzer:
         schedule_ci = "0 0 0 * * * *"
@@ -417,6 +434,7 @@ def add_ci_builder(name, os, properties):
         notifies = ["gardener-notifier"],
         service_account = "dawn-ci-builder@chops-service-accounts.iam.gserviceaccount.com",
         shadow_service_account = "dawn-try-builder@chops-service-accounts.iam.gserviceaccount.com",
+        shadow_properties = shadow_properties_ci,
     )
 
 def add_try_builder(name, os, properties):
@@ -434,8 +452,8 @@ def add_try_builder(name, os, properties):
     properties_try = get_common_properties(
         os,
         clang,
-        reclient.instance.DEFAULT_UNTRUSTED,
-        reclient.jobs.LOW_JOBS_FOR_CQ,
+        siso.project.DEFAULT_UNTRUSTED,
+        siso.remote_jobs.LOW_JOBS_FOR_CQ,
     )
     properties_try.update(properties)
     luci.builder(
