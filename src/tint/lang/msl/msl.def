@@ -371,6 +371,11 @@ fn convert(u32) -> u64
   subgroup_matrix<subgroup_matrix_kind_result, S, C, R>,
   subgroup_matrix<subgroup_matrix_kind_left, S, K, R>,
   subgroup_matrix<subgroup_matrix_kind_right, S, C, K>)
+@stage("compute") implicit(S: f32_f16, C: num, R: num, K: num) fn simdgroup_multiply_accumulate(
+  subgroup_matrix<subgroup_matrix_kind_result, S, C, R>,
+  subgroup_matrix<subgroup_matrix_kind_left, S, K, R>,
+  subgroup_matrix<subgroup_matrix_kind_right, S, C, K>,
+  subgroup_matrix<subgroup_matrix_kind_result, S, C, R>)
 
 ////////////////////////////////////////////////////////////////////////////////
 // Binary Operators                                                           //

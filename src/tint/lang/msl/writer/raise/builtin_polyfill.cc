@@ -111,6 +111,7 @@ struct State {
                     case core::BuiltinFn::kSubgroupMatrixLoad:
                     case core::BuiltinFn::kSubgroupMatrixStore:
                     case core::BuiltinFn::kSubgroupMatrixMultiply:
+                    case core::BuiltinFn::kSubgroupMatrixMultiplyAccumulate:
                     case core::BuiltinFn::kTextureDimensions:
                     case core::BuiltinFn::kTextureGather:
                     case core::BuiltinFn::kTextureGatherCompare:
@@ -281,6 +282,9 @@ struct State {
                     break;
                 case core::BuiltinFn::kSubgroupMatrixMultiply:
                     SubgroupMatrixMultiply(builtin);
+                    break;
+                case core::BuiltinFn::kSubgroupMatrixMultiplyAccumulate:
+                    SubgroupMatrixMultiplyAccumulate(builtin);
                     break;
 
                 default:
@@ -1025,6 +1029,27 @@ struct State {
             // that we want.
             b.Call<msl::ir::BuiltinCall>(ty.void_(), msl::BuiltinFn::kSimdgroupMultiply,
                                          b.Load(tmp->Result(0)), left, right);
+            b.LoadWithResult(builtin->DetachResult(), tmp);
+        });
+        builtin->Destroy();
+    }
+
+    /// Replace a subgroupMatrixMultiplyAccumulate builtin.
+    /// @param builtin the builtin call instruction
+    void SubgroupMatrixMultiplyAccumulate(core::ir::CoreBuiltinCall* builtin) {
+        b.InsertBefore(builtin, [&] {
+            auto* left = builtin->Args()[0];
+            auto* right = builtin->Args()[1];
+            auto* acc = builtin->Args()[2];
+
+            // Declare a local variable to receive the result.
+            auto* tmp = b.Var(ty.ptr<function>(builtin->Result(0)->Type()));
+            // Note: We need to use a `load` instruction to pass the variable, as the intrinsic
+            // definition expects a value type (as we do not have reference types in the IR). The
+            // printer will just fold away the load, which achieves the pass-by-reference semantics
+            // that we want.
+            b.Call<msl::ir::BuiltinCall>(ty.void_(), msl::BuiltinFn::kSimdgroupMultiplyAccumulate,
+                                         b.Load(tmp->Result(0)), left, right, acc);
             b.LoadWithResult(builtin->DetachResult(), tmp);
         });
         builtin->Destroy();
