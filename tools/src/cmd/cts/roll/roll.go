@@ -172,7 +172,9 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 		return err
 	}
 
-	credCheckInput := common.CredCheckInputs{
+	// TODO(crbug.com/349798588): Re-enable this check once we figure out why the
+	// roller is reporting that it cannot upload to Gerrit.
+	/* credCheckInput := common.CredCheckInputs{
 		GerritConfig:  gerrit,
 		GitilesConfig: dawn,
 		Querier:       client,
@@ -180,7 +182,7 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 	err = common.CheckAllRequiredCredentials(ctx, credCheckInput)
 	if err != nil {
 		return err
-	}
+	} */
 
 	// Create a temporary directory for local checkouts
 	tmpDir, err := os.MkdirTemp("", "dawn-cts-roll")
