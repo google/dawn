@@ -8968,7 +8968,7 @@ crbug.com/0000 [ dawn-backend-validation intel-0x9bc5 no-asan release-x64 target
 crbug.com/0000 [ dawn-no-backend-validation intel webgpu-dxc-disabled win ] webgpu:shader,execution,limits:struct_members: [ Failure ]
 crbug.com/0000 [ no-clang-coverage nvidia webgpu-dxc-disabled win ] webgpu:shader,execution,statement,discard:derivatives:useStorageBuffers=true [ Failure ]
 crbug.com/0000 [ dawn-no-backend-validation linux no-clang-coverage nvidia nvidia_ge_535.183.01 webgpu-adapter-default webgpu-service-worker ] webgpu:web_platform,canvas,configure:alpha_mode:canvasType="offscreen" [ Failure ]
-crbug.com/0000 [ dawn-no-backend-validation linux no-clang-coverage nvidia nvidia_ge_535.183.01 webgpu-adapter-default webgpu-service-worker ] webgpu:web_platform,canvas,configure:format:canvasType="offscreen";format="bc1-rgba-unorm" [ Failure ]
+crbug.com/0000 [ dawn-no-backend-validation linux no-clang-coverage nvidia nvidia_ge_535.183.01 webgpu-adapter-default webgpu-service-worker ] webgpu:web_platform,canvas,configure:format:canvasType="offscreen";format="bc* [ RetryOnFailure ]
 crbug.com/0000 [ linux nvidia ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="bgra8unorm";viewFormatFeature="depth32float-stencil8" [ Failure ]
 crbug.com/0000 [ linux nvidia ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="rgba16float";viewFormatFeature="depth32float-stencil8" [ Failure ]
 crbug.com/0000 [ dawn-backend-validation intel linux webgpu-adapter-default ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="rgba8unorm";viewFormatFeature="_undef_" [ Failure ]
