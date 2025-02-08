@@ -70,8 +70,8 @@ layout(binding = 2, std140)
 uniform f_arg_0_params_block_std140_ubo {
   tint_ExternalTextureParams_std140 inner;
 } v_2;
-uniform highp sampler2D arg_0_plane0;
-uniform highp sampler2D arg_0_plane1;
+uniform highp sampler2D f_arg_0_plane0;
+uniform highp sampler2D f_arg_0_plane1;
 vec3 tint_GammaCorrection(vec3 v, tint_GammaTransferParams params) {
   vec3 v_3 = vec3(params.G);
   return mix((sign(v) * (pow(((params.A * abs(v)) + params.B), v_3) + params.E)), (sign(v) * ((params.C * abs(v)) + params.F)), lessThan(abs(v), vec3(params.D)));
@@ -83,14 +83,14 @@ vec4 tint_TextureLoadExternal(tint_ExternalTextureParams params, uvec2 coords) {
   float v_7 = 0.0f;
   if ((params.numPlanes == 1u)) {
     ivec2 v_8 = ivec2(v_5);
-    vec4 v_9 = texelFetch(arg_0_plane0, v_8, int(0u));
+    vec4 v_9 = texelFetch(f_arg_0_plane0, v_8, int(0u));
     v_6 = v_9.xyz;
     v_7 = v_9.w;
   } else {
     ivec2 v_10 = ivec2(v_5);
-    float v_11 = texelFetch(arg_0_plane0, v_10, int(0u)).x;
+    float v_11 = texelFetch(f_arg_0_plane0, v_10, int(0u)).x;
     ivec2 v_12 = ivec2(uvec2((v_4 * params.plane1CoordFactor)));
-    v_6 = (vec4(v_11, texelFetch(arg_0_plane1, v_12, int(0u)).xy, 1.0f) * params.yuvToRgbConversionMatrix);
+    v_6 = (vec4(v_11, texelFetch(f_arg_0_plane1, v_12, int(0u)).xy, 1.0f) * params.yuvToRgbConversionMatrix);
     v_7 = 1.0f;
   }
   vec3 v_13 = v_6;
@@ -302,8 +302,8 @@ layout(binding = 2, std140)
 uniform v_arg_0_params_block_std140_ubo {
   tint_ExternalTextureParams_std140 inner;
 } v_1;
-uniform highp sampler2D arg_0_plane0;
-uniform highp sampler2D arg_0_plane1;
+uniform highp sampler2D v_arg_0_plane0;
+uniform highp sampler2D v_arg_0_plane1;
 layout(location = 0) flat out vec4 tint_interstage_location0;
 vec3 tint_GammaCorrection(vec3 v, tint_GammaTransferParams params) {
   vec3 v_2 = vec3(params.G);
@@ -316,14 +316,14 @@ vec4 tint_TextureLoadExternal(tint_ExternalTextureParams params, uvec2 coords) {
   float v_6 = 0.0f;
   if ((params.numPlanes == 1u)) {
     ivec2 v_7 = ivec2(v_4);
-    vec4 v_8 = texelFetch(arg_0_plane0, v_7, int(0u));
+    vec4 v_8 = texelFetch(v_arg_0_plane0, v_7, int(0u));
     v_5 = v_8.xyz;
     v_6 = v_8.w;
   } else {
     ivec2 v_9 = ivec2(v_4);
-    float v_10 = texelFetch(arg_0_plane0, v_9, int(0u)).x;
+    float v_10 = texelFetch(v_arg_0_plane0, v_9, int(0u)).x;
     ivec2 v_11 = ivec2(uvec2((v_3 * params.plane1CoordFactor)));
-    v_5 = (vec4(v_10, texelFetch(arg_0_plane1, v_11, int(0u)).xy, 1.0f) * params.yuvToRgbConversionMatrix);
+    v_5 = (vec4(v_10, texelFetch(v_arg_0_plane1, v_11, int(0u)).xy, 1.0f) * params.yuvToRgbConversionMatrix);
     v_6 = 1.0f;
   }
   vec3 v_12 = v_5;

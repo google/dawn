@@ -18,7 +18,7 @@ layout(binding = 0, std140)
 uniform f_tint_symbol_ubo {
   TintTextureUniformData inner;
 } v_1;
-uniform highp sampler2DArray arg_0;
+uniform highp sampler2DArray f_arg_0;
 vec4 textureLoad_87be85() {
   ivec2 arg_1 = ivec2(1);
   int arg_2 = 1;
@@ -26,14 +26,14 @@ vec4 textureLoad_87be85() {
   ivec2 v_2 = arg_1;
   int v_3 = arg_2;
   int v_4 = arg_3;
-  uint v_5 = (uint(textureSize(arg_0, 0).z) - 1u);
+  uint v_5 = (uint(textureSize(f_arg_0, 0).z) - 1u);
   uint v_6 = min(uint(v_3), v_5);
   uint v_7 = (v_1.inner.tint_builtin_value_0 - 1u);
   uint v_8 = min(uint(v_4), v_7);
-  uvec2 v_9 = (uvec2(textureSize(arg_0, int(v_8)).xy) - uvec2(1u));
+  uvec2 v_9 = (uvec2(textureSize(f_arg_0, int(v_8)).xy) - uvec2(1u));
   ivec2 v_10 = ivec2(min(uvec2(v_2), v_9));
   ivec3 v_11 = ivec3(v_10, int(v_6));
-  vec4 res = texelFetch(arg_0, v_11, int(v_8));
+  vec4 res = texelFetch(f_arg_0, v_11, int(v_8));
   return res;
 }
 void main() {
@@ -98,7 +98,7 @@ layout(binding = 0, std140)
 uniform v_tint_symbol_ubo {
   TintTextureUniformData inner;
 } v;
-uniform highp sampler2DArray arg_0;
+uniform highp sampler2DArray v_arg_0;
 layout(location = 0) flat out vec4 tint_interstage_location0;
 vec4 textureLoad_87be85() {
   ivec2 arg_1 = ivec2(1);
@@ -107,14 +107,14 @@ vec4 textureLoad_87be85() {
   ivec2 v_1 = arg_1;
   int v_2 = arg_2;
   int v_3 = arg_3;
-  uint v_4 = (uint(textureSize(arg_0, 0).z) - 1u);
+  uint v_4 = (uint(textureSize(v_arg_0, 0).z) - 1u);
   uint v_5 = min(uint(v_2), v_4);
   uint v_6 = (v.inner.tint_builtin_value_0 - 1u);
   uint v_7 = min(uint(v_3), v_6);
-  uvec2 v_8 = (uvec2(textureSize(arg_0, int(v_7)).xy) - uvec2(1u));
+  uvec2 v_8 = (uvec2(textureSize(v_arg_0, int(v_7)).xy) - uvec2(1u));
   ivec2 v_9 = ivec2(min(uvec2(v_1), v_8));
   ivec3 v_10 = ivec3(v_9, int(v_5));
-  vec4 res = texelFetch(arg_0, v_10, int(v_7));
+  vec4 res = texelFetch(v_arg_0, v_10, int(v_7));
   return res;
 }
 VertexOutput vertex_main_inner() {

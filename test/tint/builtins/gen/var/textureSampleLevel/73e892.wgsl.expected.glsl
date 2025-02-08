@@ -9,13 +9,13 @@ layout(binding = 0, std430)
 buffer f_prevent_dce_block_ssbo {
   float inner;
 } v;
-uniform highp sampler2DShadow arg_0_arg_1;
+uniform highp sampler2DShadow f_arg_0_arg_1;
 float textureSampleLevel_73e892() {
   vec2 arg_2 = vec2(1.0f);
   uint arg_3 = 1u;
   uint v_1 = arg_3;
   vec3 v_2 = vec3(arg_2, 0.0f);
-  float res = textureLod(arg_0_arg_1, v_2, float(v_1));
+  float res = textureLod(f_arg_0_arg_1, v_2, float(v_1));
   return res;
 }
 void main() {
@@ -54,14 +54,14 @@ struct VertexOutput {
   float prevent_dce;
 };
 
-uniform highp sampler2DShadow arg_0_arg_1;
+uniform highp sampler2DShadow v_arg_0_arg_1;
 layout(location = 0) flat out float tint_interstage_location0;
 float textureSampleLevel_73e892() {
   vec2 arg_2 = vec2(1.0f);
   uint arg_3 = 1u;
   uint v = arg_3;
   vec3 v_1 = vec3(arg_2, 0.0f);
-  float res = textureLod(arg_0_arg_1, v_1, float(v));
+  float res = textureLod(v_arg_0_arg_1, v_1, float(v));
   return res;
 }
 VertexOutput vertex_main_inner() {

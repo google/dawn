@@ -5,7 +5,7 @@
 precision highp float;
 precision highp int;
 
-layout(binding = 0, rg32i) uniform highp writeonly iimage2DArray arg_0;
+layout(binding = 0, rg32i) uniform highp writeonly iimage2DArray f_arg_0;
 void textureStore_4c454f() {
   uvec2 arg_1 = uvec2(1u);
   uint arg_2 = 1u;
@@ -13,7 +13,7 @@ void textureStore_4c454f() {
   uint v = arg_2;
   ivec4 v_1 = arg_3;
   ivec2 v_2 = ivec2(arg_1);
-  imageStore(arg_0, ivec3(v_2, int(v)), v_1);
+  imageStore(f_arg_0, ivec3(v_2, int(v)), v_1);
 }
 void main() {
   textureStore_4c454f();

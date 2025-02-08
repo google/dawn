@@ -2616,6 +2616,75 @@ fn useCombos1() -> vec4f {
     device.CreateRenderPipeline(&desc);
 }
 
+// Regression test for crbug.com/dawn/388870480.
+TEST_P(ShaderTests, CollisionHandle) {
+    DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().limits.maxStorageTexturesInVertexStage < 2);
+    DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().limits.maxStorageTexturesInFragmentStage < 1);
+
+    // TODO(crbug.com/394915257): ANGLE D3D11 bug
+    DAWN_SUPPRESS_TEST_IF(IsANGLED3D11());
+
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+@group(0) @binding(1) var u0_1: texture_storage_2d<r32float, read>;
+@group(0) @binding(0) var u0_0: texture_storage_2d<r32float, read>;
+
+@group(0) @binding(0) var u1_0: texture_storage_2d<r32float, read>;
+
+@vertex fn vs() -> @builtin(position) vec4f {
+    _ = textureLoad(u0_0, vec2u(0));
+    _ = textureLoad(u0_1, vec2u(0));
+    return vec4f(0);
+}
+
+@fragment fn fs() -> @location(0) vec4f {
+    _ = textureLoad(u1_0, vec2u(0));
+    return vec4f(0);
+}
+)");
+
+    utils::ComboRenderPipelineDescriptor desc;
+    desc.vertex.module = module;
+    desc.cFragment.module = module;
+
+    device.CreateRenderPipeline(&desc);
+}
+
+// Regression test for crbug.com/dawn/388870480.
+// Trigger potential collision when disable_symbol_renaming is on
+TEST_P(ShaderTests, CollisionHandle_DifferentModules) {
+    DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().limits.maxStorageTexturesInVertexStage < 2);
+    DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().limits.maxStorageTexturesInFragmentStage < 1);
+
+    // TODO(crbug.com/394915257): ANGLE D3D11 bug
+    DAWN_SUPPRESS_TEST_IF(IsANGLED3D11());
+
+    wgpu::ShaderModule vmodule = utils::CreateShaderModule(device, R"(
+@group(0) @binding(1) var v1: texture_storage_2d<r32float, read>;
+@group(0) @binding(0) var v0: texture_storage_2d<r32float, read>;
+
+@vertex fn vs() -> @builtin(position) vec4f {
+    _ = textureLoad(v0, vec2u(0));
+    _ = textureLoad(v1, vec2u(0));
+    return vec4f(0);
+}
+)");
+
+    wgpu::ShaderModule fmodule = utils::CreateShaderModule(device, R"(
+@group(0) @binding(1) var v1: texture_storage_2d<r32float, read>;
+
+@fragment fn fs() -> @location(0) vec4f {
+    _ = textureLoad(v1, vec2u(0));
+    return vec4f(0);
+}
+)");
+
+    utils::ComboRenderPipelineDescriptor desc;
+    desc.vertex.module = vmodule;
+    desc.cFragment.module = fmodule;
+
+    device.CreateRenderPipeline(&desc);
+}
+
 DAWN_INSTANTIATE_TEST(ShaderTests,
                       D3D11Backend(),
                       D3D12Backend(),

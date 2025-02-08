@@ -9,10 +9,10 @@ layout(binding = 0, std430)
 buffer f_prevent_dce_block_ssbo {
   uvec4 inner;
 } v;
-layout(binding = 0, rg32ui) uniform highp readonly uimage3D arg_0;
+layout(binding = 0, rg32ui) uniform highp readonly uimage3D f_arg_0;
 uvec4 textureLoad_ef5405() {
-  uvec3 v_1 = (uvec3(imageSize(arg_0)) - uvec3(1u));
-  uvec4 res = imageLoad(arg_0, ivec3(min(uvec3(ivec3(1)), v_1)));
+  uvec3 v_1 = (uvec3(imageSize(f_arg_0)) - uvec3(1u));
+  uvec4 res = imageLoad(f_arg_0, ivec3(min(uvec3(ivec3(1)), v_1)));
   return res;
 }
 void main() {
@@ -48,11 +48,11 @@ struct VertexOutput {
   uvec4 prevent_dce;
 };
 
-layout(binding = 0, rg32ui) uniform highp readonly uimage3D arg_0;
+layout(binding = 0, rg32ui) uniform highp readonly uimage3D v_arg_0;
 layout(location = 0) flat out uvec4 tint_interstage_location0;
 uvec4 textureLoad_ef5405() {
-  uvec3 v = (uvec3(imageSize(arg_0)) - uvec3(1u));
-  uvec4 res = imageLoad(arg_0, ivec3(min(uvec3(ivec3(1)), v)));
+  uvec3 v = (uvec3(imageSize(v_arg_0)) - uvec3(1u));
+  uvec4 res = imageLoad(v_arg_0, ivec3(min(uvec3(ivec3(1)), v)));
   return res;
 }
 VertexOutput vertex_main_inner() {

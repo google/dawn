@@ -9,9 +9,9 @@ layout(binding = 0, std430)
 buffer f_prevent_dce_block_ssbo {
   float inner;
 } v;
-uniform highp sampler2DArrayShadow arg_0_arg_1;
+uniform highp sampler2DArrayShadow f_arg_0_arg_1;
 float textureSampleCompareLevel_bcb3dd() {
-  float res = textureGradOffset(arg_0_arg_1, vec4(vec2(1.0f), float(1u), 1.0f), vec2(0.0f), vec2(0.0f), ivec2(1));
+  float res = textureGradOffset(f_arg_0_arg_1, vec4(vec2(1.0f), float(1u), 1.0f), vec2(0.0f), vec2(0.0f), ivec2(1));
   return res;
 }
 void main() {
@@ -46,10 +46,10 @@ struct VertexOutput {
   float prevent_dce;
 };
 
-uniform highp sampler2DArrayShadow arg_0_arg_1;
+uniform highp sampler2DArrayShadow v_arg_0_arg_1;
 layout(location = 0) flat out float tint_interstage_location0;
 float textureSampleCompareLevel_bcb3dd() {
-  float res = textureGradOffset(arg_0_arg_1, vec4(vec2(1.0f), float(1u), 1.0f), vec2(0.0f), vec2(0.0f), ivec2(1));
+  float res = textureGradOffset(v_arg_0_arg_1, vec4(vec2(1.0f), float(1u), 1.0f), vec2(0.0f), vec2(0.0f), ivec2(1));
   return res;
 }
 VertexOutput vertex_main_inner() {

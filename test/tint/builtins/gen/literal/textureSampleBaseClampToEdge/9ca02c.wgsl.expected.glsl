@@ -9,10 +9,10 @@ layout(binding = 0, std430)
 buffer f_prevent_dce_block_ssbo {
   vec4 inner;
 } v;
-uniform highp sampler2D arg_0_arg_1;
+uniform highp sampler2D f_arg_0_arg_1;
 vec4 textureSampleBaseClampToEdge_9ca02c() {
-  vec2 v_1 = (vec2(0.5f) / vec2(uvec2(textureSize(arg_0_arg_1, 0))));
-  vec4 res = textureLod(arg_0_arg_1, clamp(vec2(1.0f), v_1, (vec2(1.0f) - v_1)), 0.0f);
+  vec2 v_1 = (vec2(0.5f) / vec2(uvec2(textureSize(f_arg_0_arg_1, 0))));
+  vec4 res = textureLod(f_arg_0_arg_1, clamp(vec2(1.0f), v_1, (vec2(1.0f) - v_1)), 0.0f);
   return res;
 }
 void main() {
@@ -48,11 +48,11 @@ struct VertexOutput {
   vec4 prevent_dce;
 };
 
-uniform highp sampler2D arg_0_arg_1;
+uniform highp sampler2D v_arg_0_arg_1;
 layout(location = 0) flat out vec4 tint_interstage_location0;
 vec4 textureSampleBaseClampToEdge_9ca02c() {
-  vec2 v = (vec2(0.5f) / vec2(uvec2(textureSize(arg_0_arg_1, 0))));
-  vec4 res = textureLod(arg_0_arg_1, clamp(vec2(1.0f), v, (vec2(1.0f) - v)), 0.0f);
+  vec2 v = (vec2(0.5f) / vec2(uvec2(textureSize(v_arg_0_arg_1, 0))));
+  vec4 res = textureLod(v_arg_0_arg_1, clamp(vec2(1.0f), v, (vec2(1.0f) - v)), 0.0f);
   return res;
 }
 VertexOutput vertex_main_inner() {

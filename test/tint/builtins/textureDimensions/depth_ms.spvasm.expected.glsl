@@ -9,10 +9,10 @@ struct vertex_main_out {
 };
 
 vec4 tint_symbol_1 = vec4(0.0f);
-uniform highp sampler2DMS arg_0;
+uniform highp sampler2DMS v_arg_0;
 void textureDimensions_f60bdb() {
   ivec2 res = ivec2(0);
-  res = ivec2(uvec2(textureSize(arg_0)));
+  res = ivec2(uvec2(textureSize(v_arg_0)));
 }
 void tint_symbol_2(vec4 tint_symbol) {
   tint_symbol_1 = tint_symbol;
@@ -37,10 +37,10 @@ void main() {
 precision highp float;
 precision highp int;
 
-uniform highp sampler2DMS arg_0;
+uniform highp sampler2DMS f_arg_0;
 void textureDimensions_f60bdb() {
   ivec2 res = ivec2(0);
-  res = ivec2(uvec2(textureSize(arg_0)));
+  res = ivec2(uvec2(textureSize(f_arg_0)));
 }
 void fragment_main_1() {
   textureDimensions_f60bdb();

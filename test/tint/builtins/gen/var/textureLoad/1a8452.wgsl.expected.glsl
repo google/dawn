@@ -9,12 +9,12 @@ layout(binding = 0, std430)
 buffer f_prevent_dce_block_ssbo {
   uvec4 inner;
 } v;
-layout(binding = 0, rgba8ui) uniform highp readonly uimage2D arg_0;
+layout(binding = 0, rgba8ui) uniform highp readonly uimage2D f_arg_0;
 uvec4 textureLoad_1a8452() {
   int arg_1 = 1;
   int v_1 = arg_1;
-  uint v_2 = (uvec2(imageSize(arg_0)).x - 1u);
-  uvec4 res = imageLoad(arg_0, ivec2(uvec2(min(uint(v_1), v_2), 0u)));
+  uint v_2 = (uvec2(imageSize(f_arg_0)).x - 1u);
+  uvec4 res = imageLoad(f_arg_0, ivec2(uvec2(min(uint(v_1), v_2), 0u)));
   return res;
 }
 void main() {
@@ -52,13 +52,13 @@ struct VertexOutput {
   uvec4 prevent_dce;
 };
 
-layout(binding = 0, rgba8ui) uniform highp readonly uimage2D arg_0;
+layout(binding = 0, rgba8ui) uniform highp readonly uimage2D v_arg_0;
 layout(location = 0) flat out uvec4 tint_interstage_location0;
 uvec4 textureLoad_1a8452() {
   int arg_1 = 1;
   int v = arg_1;
-  uint v_1 = (uvec2(imageSize(arg_0)).x - 1u);
-  uvec4 res = imageLoad(arg_0, ivec2(uvec2(min(uint(v), v_1), 0u)));
+  uint v_1 = (uvec2(imageSize(v_arg_0)).x - 1u);
+  uvec4 res = imageLoad(v_arg_0, ivec2(uvec2(min(uint(v), v_1), 0u)));
   return res;
 }
 VertexOutput vertex_main_inner() {

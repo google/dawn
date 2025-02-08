@@ -71,21 +71,21 @@ layout(binding = 1, std140)
 uniform f_b15_block_ubo {
   S inner;
 } v_15;
-uniform highp sampler2D t0;
-uniform highp sampler2D t1;
-uniform highp sampler2D t2;
-uniform highp sampler2D t3;
-uniform highp sampler2D t4;
-uniform highp sampler2D t5;
-uniform highp sampler2D t6;
-uniform highp sampler2D t7;
-uniform highp sampler2DShadow t8;
-uniform highp sampler2DShadow t9;
-uniform highp sampler2DShadow t10;
-uniform highp sampler2DShadow t11;
-uniform highp sampler2DShadow t12;
-uniform highp sampler2DShadow t13;
-uniform highp sampler2DShadow t14;
-uniform highp sampler2DShadow t15;
+uniform highp sampler2D f_t0;
+uniform highp sampler2D f_t1;
+uniform highp sampler2D f_t2;
+uniform highp sampler2D f_t3;
+uniform highp sampler2D f_t4;
+uniform highp sampler2D f_t5;
+uniform highp sampler2D f_t6;
+uniform highp sampler2D f_t7;
+uniform highp sampler2DShadow f_t8;
+uniform highp sampler2DShadow f_t9;
+uniform highp sampler2DShadow f_t10;
+uniform highp sampler2DShadow f_t11;
+uniform highp sampler2DShadow f_t12;
+uniform highp sampler2DShadow f_t13;
+uniform highp sampler2DShadow f_t14;
+uniform highp sampler2DShadow f_t15;
 void main() {
 }

@@ -9,9 +9,9 @@ layout(binding = 0, std430)
 buffer f_prevent_dce_block_ssbo {
   uvec2 inner;
 } v;
-uniform highp usampler2D arg_0;
+uniform highp usampler2D f_arg_0;
 uvec2 textureDimensions_4be71b() {
-  uvec2 res = uvec2(textureSize(arg_0, 0));
+  uvec2 res = uvec2(textureSize(f_arg_0, 0));
   return res;
 }
 void main() {
@@ -46,10 +46,10 @@ struct VertexOutput {
   uvec2 prevent_dce;
 };
 
-uniform highp usampler2D arg_0;
+uniform highp usampler2D v_arg_0;
 layout(location = 0) flat out uvec2 tint_interstage_location0;
 uvec2 textureDimensions_4be71b() {
-  uvec2 res = uvec2(textureSize(arg_0, 0));
+  uvec2 res = uvec2(textureSize(v_arg_0, 0));
   return res;
 }
 VertexOutput vertex_main_inner() {

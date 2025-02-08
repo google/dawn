@@ -9,12 +9,12 @@ layout(binding = 0, std430)
 buffer f_prevent_dce_block_ssbo {
   vec4 inner;
 } v;
-layout(binding = 0, rgba8) uniform highp readonly image2DArray arg_0;
+layout(binding = 0, rgba8) uniform highp readonly image2DArray f_arg_0;
 vec4 textureLoad_8a291b() {
-  uint v_1 = min(1u, (uint(imageSize(arg_0).z) - 1u));
-  uvec2 v_2 = (uvec2(imageSize(arg_0).xy) - uvec2(1u));
+  uint v_1 = min(1u, (uint(imageSize(f_arg_0).z) - 1u));
+  uvec2 v_2 = (uvec2(imageSize(f_arg_0).xy) - uvec2(1u));
   ivec2 v_3 = ivec2(min(uvec2(ivec2(1)), v_2));
-  vec4 res = imageLoad(arg_0, ivec3(v_3, int(v_1))).zyxw;
+  vec4 res = imageLoad(f_arg_0, ivec3(v_3, int(v_1))).zyxw;
   return res;
 }
 void main() {
@@ -52,13 +52,13 @@ struct VertexOutput {
   vec4 prevent_dce;
 };
 
-layout(binding = 0, rgba8) uniform highp readonly image2DArray arg_0;
+layout(binding = 0, rgba8) uniform highp readonly image2DArray v_arg_0;
 layout(location = 0) flat out vec4 tint_interstage_location0;
 vec4 textureLoad_8a291b() {
-  uint v = min(1u, (uint(imageSize(arg_0).z) - 1u));
-  uvec2 v_1 = (uvec2(imageSize(arg_0).xy) - uvec2(1u));
+  uint v = min(1u, (uint(imageSize(v_arg_0).z) - 1u));
+  uvec2 v_1 = (uvec2(imageSize(v_arg_0).xy) - uvec2(1u));
   ivec2 v_2 = ivec2(min(uvec2(ivec2(1)), v_1));
-  vec4 res = imageLoad(arg_0, ivec3(v_2, int(v))).zyxw;
+  vec4 res = imageLoad(v_arg_0, ivec3(v_2, int(v))).zyxw;
   return res;
 }
 VertexOutput vertex_main_inner() {

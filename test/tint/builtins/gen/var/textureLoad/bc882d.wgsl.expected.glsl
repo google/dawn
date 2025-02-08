@@ -9,16 +9,16 @@ layout(binding = 0, std430)
 buffer f_prevent_dce_block_ssbo {
   vec4 inner;
 } v;
-layout(binding = 0, r8) uniform highp image2DArray arg_0;
+layout(binding = 0, r8) uniform highp image2DArray f_arg_0;
 vec4 textureLoad_bc882d() {
   uvec2 arg_1 = uvec2(1u);
   int arg_2 = 1;
   uvec2 v_1 = arg_1;
   int v_2 = arg_2;
-  uint v_3 = (uint(imageSize(arg_0).z) - 1u);
+  uint v_3 = (uint(imageSize(f_arg_0).z) - 1u);
   uint v_4 = min(uint(v_2), v_3);
-  ivec2 v_5 = ivec2(min(v_1, (uvec2(imageSize(arg_0).xy) - uvec2(1u))));
-  vec4 res = imageLoad(arg_0, ivec3(v_5, int(v_4)));
+  ivec2 v_5 = ivec2(min(v_1, (uvec2(imageSize(f_arg_0).xy) - uvec2(1u))));
+  vec4 res = imageLoad(f_arg_0, ivec3(v_5, int(v_4)));
   return res;
 }
 void main() {

@@ -9,10 +9,10 @@ layout(binding = 0, std430)
 buffer f_prevent_dce_block_ssbo {
   ivec4 inner;
 } v;
-layout(binding = 0, rg32i) uniform highp iimage2D arg_0;
+layout(binding = 0, rg32i) uniform highp iimage2D f_arg_0;
 ivec4 textureLoad_aa6130() {
-  uvec2 v_1 = (uvec2(imageSize(arg_0)) - uvec2(1u));
-  ivec4 res = imageLoad(arg_0, ivec2(min(uvec2(ivec2(1)), v_1)));
+  uvec2 v_1 = (uvec2(imageSize(f_arg_0)) - uvec2(1u));
+  ivec4 res = imageLoad(f_arg_0, ivec2(min(uvec2(ivec2(1)), v_1)));
   return res;
 }
 void main() {

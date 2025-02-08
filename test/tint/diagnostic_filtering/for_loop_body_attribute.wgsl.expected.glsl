@@ -14,7 +14,7 @@
 precision highp float;
 precision highp int;
 
-uniform highp sampler2D t_s;
+uniform highp sampler2D f_t_s;
 layout(location = 0) in float tint_interstage_location0;
 void main_inner(float x) {
   vec4 v = vec4(0.0f);
@@ -28,7 +28,7 @@ void main_inner(float x) {
       } else {
         break;
       }
-      v = texture(t_s, vec2(0.0f));
+      v = texture(f_t_s, vec2(0.0f));
       {
         uint tint_low_inc = (tint_loop_idx.x + 1u);
         tint_loop_idx.x = tint_low_inc;

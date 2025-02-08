@@ -9,9 +9,9 @@ layout(binding = 0, std430)
 buffer f_prevent_dce_block_ssbo {
   uint inner;
 } v;
-layout(binding = 0, rgba32i) uniform highp readonly iimage2D arg_0;
+layout(binding = 0, rgba32i) uniform highp readonly iimage2D f_arg_0;
 uint textureDimensions_b9e7ef() {
-  uint res = uvec2(imageSize(arg_0)).x;
+  uint res = uvec2(imageSize(f_arg_0)).x;
   return res;
 }
 void main() {
@@ -46,10 +46,10 @@ struct VertexOutput {
   uint prevent_dce;
 };
 
-layout(binding = 0, rgba32i) uniform highp readonly iimage2D arg_0;
+layout(binding = 0, rgba32i) uniform highp readonly iimage2D v_arg_0;
 layout(location = 0) flat out uint tint_interstage_location0;
 uint textureDimensions_b9e7ef() {
-  uint res = uvec2(imageSize(arg_0)).x;
+  uint res = uvec2(imageSize(v_arg_0)).x;
   return res;
 }
 VertexOutput vertex_main_inner() {

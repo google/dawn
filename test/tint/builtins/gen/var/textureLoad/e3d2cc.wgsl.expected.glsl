@@ -9,14 +9,14 @@ layout(binding = 0, std430)
 buffer f_prevent_dce_block_ssbo {
   ivec4 inner;
 } v;
-uniform highp isampler2DMS arg_0;
+uniform highp isampler2DMS f_arg_0;
 ivec4 textureLoad_e3d2cc() {
   ivec2 arg_1 = ivec2(1);
   int arg_2 = 1;
   ivec2 v_1 = arg_1;
   int v_2 = arg_2;
-  uvec2 v_3 = (uvec2(textureSize(arg_0)) - uvec2(1u));
-  ivec4 res = texelFetch(arg_0, ivec2(min(uvec2(v_1), v_3)), v_2);
+  uvec2 v_3 = (uvec2(textureSize(f_arg_0)) - uvec2(1u));
+  ivec4 res = texelFetch(f_arg_0, ivec2(min(uvec2(v_1), v_3)), v_2);
   return res;
 }
 void main() {
@@ -56,15 +56,15 @@ struct VertexOutput {
   ivec4 prevent_dce;
 };
 
-uniform highp isampler2DMS arg_0;
+uniform highp isampler2DMS v_arg_0;
 layout(location = 0) flat out ivec4 tint_interstage_location0;
 ivec4 textureLoad_e3d2cc() {
   ivec2 arg_1 = ivec2(1);
   int arg_2 = 1;
   ivec2 v = arg_1;
   int v_1 = arg_2;
-  uvec2 v_2 = (uvec2(textureSize(arg_0)) - uvec2(1u));
-  ivec4 res = texelFetch(arg_0, ivec2(min(uvec2(v), v_2)), v_1);
+  uvec2 v_2 = (uvec2(textureSize(v_arg_0)) - uvec2(1u));
+  ivec4 res = texelFetch(v_arg_0, ivec2(min(uvec2(v), v_2)), v_1);
   return res;
 }
 VertexOutput vertex_main_inner() {

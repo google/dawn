@@ -9,9 +9,9 @@ layout(binding = 0, std430)
 buffer f_prevent_dce_block_ssbo {
   uint inner;
 } v;
-layout(binding = 0, rg32f) uniform highp image2D arg_0;
+layout(binding = 0, rg32f) uniform highp image2D f_arg_0;
 uint textureDimensions_c7ea63() {
-  uint res = uvec2(imageSize(arg_0)).x;
+  uint res = uvec2(imageSize(f_arg_0)).x;
   return res;
 }
 void main() {

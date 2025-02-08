@@ -18,9 +18,9 @@ layout(binding = 0, std140)
 uniform f_tint_symbol_ubo {
   TintTextureUniformData inner;
 } v_1;
-uniform highp usampler2D arg_0;
+uniform highp usampler2D f_arg_0;
 uvec2 textureDimensions_e18a8b() {
-  uvec2 res = uvec2(textureSize(arg_0, int(min(1u, (v_1.inner.tint_builtin_value_0 - 1u)))));
+  uvec2 res = uvec2(textureSize(f_arg_0, int(min(1u, (v_1.inner.tint_builtin_value_0 - 1u)))));
   return res;
 }
 void main() {
@@ -72,10 +72,10 @@ layout(binding = 0, std140)
 uniform v_tint_symbol_ubo {
   TintTextureUniformData inner;
 } v;
-uniform highp usampler2D arg_0;
+uniform highp usampler2D v_arg_0;
 layout(location = 0) flat out uvec2 tint_interstage_location0;
 uvec2 textureDimensions_e18a8b() {
-  uvec2 res = uvec2(textureSize(arg_0, int(min(1u, (v.inner.tint_builtin_value_0 - 1u)))));
+  uvec2 res = uvec2(textureSize(v_arg_0, int(min(1u, (v.inner.tint_builtin_value_0 - 1u)))));
   return res;
 }
 VertexOutput vertex_main_inner() {

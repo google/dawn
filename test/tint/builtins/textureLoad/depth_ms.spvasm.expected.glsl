@@ -9,11 +9,11 @@ struct vertex_main_out {
 };
 
 vec4 tint_symbol_1 = vec4(0.0f);
-uniform highp sampler2DMS arg_0;
+uniform highp sampler2DMS v_arg_0;
 void textureLoad_6273b1() {
   float res = 0.0f;
-  uvec2 v = (uvec2(textureSize(arg_0)) - uvec2(1u));
-  res = vec4(texelFetch(arg_0, ivec2(min(uvec2(ivec2(0)), v)), 1).x, 0.0f, 0.0f, 0.0f).x;
+  uvec2 v = (uvec2(textureSize(v_arg_0)) - uvec2(1u));
+  res = vec4(texelFetch(v_arg_0, ivec2(min(uvec2(ivec2(0)), v)), 1).x, 0.0f, 0.0f, 0.0f).x;
 }
 void tint_symbol_2(vec4 tint_symbol) {
   tint_symbol_1 = tint_symbol;
@@ -38,11 +38,11 @@ void main() {
 precision highp float;
 precision highp int;
 
-uniform highp sampler2DMS arg_0;
+uniform highp sampler2DMS f_arg_0;
 void textureLoad_6273b1() {
   float res = 0.0f;
-  uvec2 v = (uvec2(textureSize(arg_0)) - uvec2(1u));
-  res = vec4(texelFetch(arg_0, ivec2(min(uvec2(ivec2(0)), v)), 1).x, 0.0f, 0.0f, 0.0f).x;
+  uvec2 v = (uvec2(textureSize(f_arg_0)) - uvec2(1u));
+  res = vec4(texelFetch(f_arg_0, ivec2(min(uvec2(ivec2(0)), v)), 1).x, 0.0f, 0.0f, 0.0f).x;
 }
 void fragment_main_1() {
   textureLoad_6273b1();

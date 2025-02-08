@@ -37,7 +37,7 @@ layout(binding = 1, std430)
 buffer f_PointLights_ssbo {
   PointLight values[];
 } pointLights;
-uniform highp sampler2D myTexture;
+uniform highp sampler2D f_myTexture;
 layout(location = 0) in vec4 tint_interstage_location0;
 layout(location = 1) in vec4 tint_interstage_location1;
 layout(location = 2) in vec2 tint_interstage_location2;

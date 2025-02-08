@@ -5,9 +5,9 @@
 precision highp float;
 precision highp int;
 
-layout(binding = 0, rgba8ui) uniform highp writeonly uimage2D arg_0;
+layout(binding = 0, rgba8ui) uniform highp writeonly uimage2D f_arg_0;
 void textureStore_3c1937() {
-  imageStore(arg_0, ivec2(uvec2(1u, 0u)), uvec4(1u));
+  imageStore(f_arg_0, ivec2(uvec2(1u, 0u)), uvec4(1u));
 }
 void main() {
   textureStore_3c1937();

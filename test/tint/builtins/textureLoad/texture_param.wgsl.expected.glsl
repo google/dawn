@@ -12,12 +12,12 @@ layout(binding = 0, std140)
 uniform v_tint_symbol_ubo {
   TintTextureUniformData inner;
 } v;
-uniform highp isampler2D arg_0;
+uniform highp isampler2D v_arg_0;
 ivec4 textureLoad2d(ivec2 coords, int level, uint tint_tex_value) {
   uint v_1 = min(uint(level), (tint_tex_value - 1u));
-  uvec2 v_2 = (uvec2(textureSize(arg_0, int(v_1))) - uvec2(1u));
+  uvec2 v_2 = (uvec2(textureSize(v_arg_0, int(v_1))) - uvec2(1u));
   ivec2 v_3 = ivec2(min(uvec2(coords), v_2));
-  return texelFetch(arg_0, v_3, int(v_1));
+  return texelFetch(v_arg_0, v_3, int(v_1));
 }
 void doTextureLoad() {
   ivec4 res = textureLoad2d(ivec2(0), 0, v.inner.tint_builtin_value_0);
@@ -47,12 +47,12 @@ layout(binding = 0, std140)
 uniform f_tint_symbol_ubo {
   TintTextureUniformData inner;
 } v;
-uniform highp isampler2D arg_0;
+uniform highp isampler2D f_arg_0;
 ivec4 textureLoad2d(ivec2 coords, int level, uint tint_tex_value) {
   uint v_1 = min(uint(level), (tint_tex_value - 1u));
-  uvec2 v_2 = (uvec2(textureSize(arg_0, int(v_1))) - uvec2(1u));
+  uvec2 v_2 = (uvec2(textureSize(f_arg_0, int(v_1))) - uvec2(1u));
   ivec2 v_3 = ivec2(min(uvec2(coords), v_2));
-  return texelFetch(arg_0, v_3, int(v_1));
+  return texelFetch(f_arg_0, v_3, int(v_1));
 }
 void doTextureLoad() {
   ivec4 res = textureLoad2d(ivec2(0), 0, v.inner.tint_builtin_value_0);

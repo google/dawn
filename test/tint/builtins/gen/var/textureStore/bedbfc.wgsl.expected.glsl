@@ -5,11 +5,11 @@
 precision highp float;
 precision highp int;
 
-layout(binding = 0, rgba8) uniform highp writeonly image3D arg_0;
+layout(binding = 0, rgba8) uniform highp writeonly image3D f_arg_0;
 void textureStore_bedbfc() {
   ivec3 arg_1 = ivec3(1);
   vec4 arg_2 = vec4(1.0f);
-  imageStore(arg_0, arg_1, arg_2.zyxw);
+  imageStore(f_arg_0, arg_1, arg_2.zyxw);
 }
 void main() {
   textureStore_bedbfc();

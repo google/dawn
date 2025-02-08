@@ -9,9 +9,9 @@ layout(binding = 0, std430)
 buffer f_prevent_dce_block_ssbo {
   uvec2 inner;
 } v;
-layout(binding = 0, r32ui) uniform highp writeonly uimage2DArray arg_0;
+layout(binding = 0, r32ui) uniform highp writeonly uimage2DArray f_arg_0;
 uvec2 textureDimensions_41545f() {
-  uvec2 res = uvec2(imageSize(arg_0).xy);
+  uvec2 res = uvec2(imageSize(f_arg_0).xy);
   return res;
 }
 void main() {

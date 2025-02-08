@@ -14,11 +14,11 @@
 precision highp float;
 precision highp int;
 
-uniform highp sampler2D t_s;
+uniform highp sampler2D f_t_s;
 layout(location = 0) in float tint_interstage_location0;
 void main_inner(float x) {
   if ((x > 0.0f)) {
-    texture(t_s, vec2(0.0f));
+    texture(f_t_s, vec2(0.0f));
   }
 }
 void main() {

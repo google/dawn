@@ -5,12 +5,12 @@
 precision highp float;
 precision highp int;
 
-layout(binding = 0, rg32i) uniform highp iimage3D arg_0;
+layout(binding = 0, rg32i) uniform highp iimage3D f_arg_0;
 void textureStore_7792fa() {
   uvec3 arg_1 = uvec3(1u);
   ivec4 arg_2 = ivec4(1);
   ivec4 v = arg_2;
-  imageStore(arg_0, ivec3(arg_1), v);
+  imageStore(f_arg_0, ivec3(arg_1), v);
 }
 void main() {
   textureStore_7792fa();

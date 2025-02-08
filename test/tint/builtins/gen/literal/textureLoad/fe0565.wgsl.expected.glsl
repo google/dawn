@@ -9,9 +9,9 @@ layout(binding = 0, std430)
 buffer f_prevent_dce_block_ssbo {
   uvec4 inner;
 } v;
-uniform highp usampler2DMS arg_0;
+uniform highp usampler2DMS f_arg_0;
 uvec4 textureLoad_fe0565() {
-  uvec4 res = texelFetch(arg_0, ivec2(min(uvec2(1u), (uvec2(textureSize(arg_0)) - uvec2(1u)))), 1);
+  uvec4 res = texelFetch(f_arg_0, ivec2(min(uvec2(1u), (uvec2(textureSize(f_arg_0)) - uvec2(1u)))), 1);
   return res;
 }
 void main() {
@@ -46,10 +46,10 @@ struct VertexOutput {
   uvec4 prevent_dce;
 };
 
-uniform highp usampler2DMS arg_0;
+uniform highp usampler2DMS v_arg_0;
 layout(location = 0) flat out uvec4 tint_interstage_location0;
 uvec4 textureLoad_fe0565() {
-  uvec4 res = texelFetch(arg_0, ivec2(min(uvec2(1u), (uvec2(textureSize(arg_0)) - uvec2(1u)))), 1);
+  uvec4 res = texelFetch(v_arg_0, ivec2(min(uvec2(1u), (uvec2(textureSize(v_arg_0)) - uvec2(1u)))), 1);
   return res;
 }
 VertexOutput vertex_main_inner() {

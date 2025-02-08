@@ -5,9 +5,9 @@
 precision highp float;
 precision highp int;
 
-layout(binding = 0, r32i) uniform highp iimage2D arg_0;
+layout(binding = 0, r32i) uniform highp iimage2D f_arg_0;
 void textureStore_1fef04() {
-  imageStore(arg_0, ivec2(uvec2(1u, 0u)), ivec4(1));
+  imageStore(f_arg_0, ivec2(uvec2(1u, 0u)), ivec4(1));
 }
 void main() {
   textureStore_1fef04();

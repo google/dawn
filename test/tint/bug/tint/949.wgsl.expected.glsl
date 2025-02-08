@@ -54,8 +54,8 @@ uniform f_light0_block_ubo {
   Light0 inner;
 } v_2;
 vec4 glFragColor = vec4(0.0f);
-uniform highp sampler2D TextureSamplerTexture_TextureSamplerSampler;
-uniform highp sampler2D TextureSampler1Texture_TextureSampler1Sampler;
+uniform highp sampler2D f_TextureSamplerTexture_TextureSamplerSampler;
+uniform highp sampler2D f_TextureSampler1Texture_TextureSampler1Sampler;
 layout(location = 1) in vec2 tint_interstage_location1;
 layout(location = 0) in vec4 tint_interstage_location0;
 layout(location = 3) in vec2 tint_interstage_location3;
@@ -248,7 +248,7 @@ void main_1() {
   u_Float = 100.0f;
   u_Color = vec3(0.5f);
   vec2 x_261 = vMainuv;
-  vec4 x_262 = texture(TextureSamplerTexture_TextureSamplerSampler, x_261);
+  vec4 x_262 = texture(f_TextureSamplerTexture_TextureSamplerSampler, x_261);
   tempTextureRead = x_262;
   vec4 x_264 = tempTextureRead;
   float x_273 = v.inner.textureInfoName;
@@ -379,7 +379,7 @@ void main_1() {
   uvOffset = x_445;
   vec2 x_449 = v_uv;
   vec2 x_450 = uvOffset;
-  vec4 x_452 = texture(TextureSamplerTexture_TextureSamplerSampler, (x_449 + x_450));
+  vec4 x_452 = texture(f_TextureSamplerTexture_TextureSamplerSampler, (x_449 + x_450));
   float x_454 = v.inner.u_bumpStrength;
   mat3 x_457 = TBN;
   param_8 = x_457;
@@ -392,7 +392,7 @@ void main_1() {
   vec2 x_466 = uvOffset;
   output6 = (x_465 + x_466);
   vec2 x_474 = output6;
-  vec4 x_475 = texture(TextureSampler1Texture_TextureSampler1Sampler, x_474);
+  vec4 x_475 = texture(f_TextureSampler1Texture_TextureSampler1Sampler, x_474);
   tempTextureRead1 = x_475;
   vec4 x_477 = tempTextureRead1;
   rgb1 = vec3(x_477.x, x_477.y, x_477.z);

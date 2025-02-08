@@ -9,9 +9,9 @@ layout(binding = 0, std430)
 buffer f_prevent_dce_block_ssbo {
   uvec3 inner;
 } v;
-uniform highp usampler3D arg_0;
+uniform highp usampler3D f_arg_0;
 uvec3 textureDimensions_7a3890() {
-  uvec3 res = uvec3(textureSize(arg_0, 0));
+  uvec3 res = uvec3(textureSize(f_arg_0, 0));
   return res;
 }
 void main() {
@@ -46,10 +46,10 @@ struct VertexOutput {
   uvec3 prevent_dce;
 };
 
-uniform highp usampler3D arg_0;
+uniform highp usampler3D v_arg_0;
 layout(location = 0) flat out uvec3 tint_interstage_location0;
 uvec3 textureDimensions_7a3890() {
-  uvec3 res = uvec3(textureSize(arg_0, 0));
+  uvec3 res = uvec3(textureSize(v_arg_0, 0));
   return res;
 }
 VertexOutput vertex_main_inner() {

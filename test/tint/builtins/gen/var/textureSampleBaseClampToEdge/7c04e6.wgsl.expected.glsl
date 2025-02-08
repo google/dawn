@@ -70,8 +70,8 @@ layout(binding = 3, std140)
 uniform f_arg_0_params_block_std140_ubo {
   tint_ExternalTextureParams_std140 inner;
 } v_2;
-uniform highp sampler2D arg_0_plane0_arg_1;
-uniform highp sampler2D arg_0_plane1_arg_1;
+uniform highp sampler2D f_arg_0_plane0_arg_1;
+uniform highp sampler2D f_arg_0_plane1_arg_1;
 vec3 tint_GammaCorrection(vec3 v, tint_GammaTransferParams params) {
   vec3 v_3 = vec3(params.G);
   return mix((sign(v) * (pow(((params.A * abs(v)) + params.B), v_3) + params.E)), (sign(v) * ((params.C * abs(v)) + params.F)), lessThan(abs(v), vec3(params.D)));
@@ -81,11 +81,11 @@ vec4 tint_TextureSampleExternal(tint_ExternalTextureParams params, vec2 coords) 
   vec3 v_5 = vec3(0.0f);
   float v_6 = 0.0f;
   if ((params.numPlanes == 1u)) {
-    vec4 v_7 = textureLod(arg_0_plane0_arg_1, clamp(v_4, params.samplePlane0RectMin, params.samplePlane0RectMax), 0.0f);
+    vec4 v_7 = textureLod(f_arg_0_plane0_arg_1, clamp(v_4, params.samplePlane0RectMin, params.samplePlane0RectMax), 0.0f);
     v_5 = v_7.xyz;
     v_6 = v_7.w;
   } else {
-    v_5 = (vec4(textureLod(arg_0_plane0_arg_1, clamp(v_4, params.samplePlane0RectMin, params.samplePlane0RectMax), 0.0f).x, textureLod(arg_0_plane1_arg_1, clamp(v_4, params.samplePlane1RectMin, params.samplePlane1RectMax), 0.0f).xy, 1.0f) * params.yuvToRgbConversionMatrix);
+    v_5 = (vec4(textureLod(f_arg_0_plane0_arg_1, clamp(v_4, params.samplePlane0RectMin, params.samplePlane0RectMax), 0.0f).x, textureLod(f_arg_0_plane1_arg_1, clamp(v_4, params.samplePlane1RectMin, params.samplePlane1RectMax), 0.0f).xy, 1.0f) * params.yuvToRgbConversionMatrix);
     v_6 = 1.0f;
   }
   vec3 v_8 = v_5;
@@ -294,8 +294,8 @@ layout(binding = 3, std140)
 uniform v_arg_0_params_block_std140_ubo {
   tint_ExternalTextureParams_std140 inner;
 } v_1;
-uniform highp sampler2D arg_0_plane0_arg_1;
-uniform highp sampler2D arg_0_plane1_arg_1;
+uniform highp sampler2D v_arg_0_plane0_arg_1;
+uniform highp sampler2D v_arg_0_plane1_arg_1;
 layout(location = 0) flat out vec4 tint_interstage_location0;
 vec3 tint_GammaCorrection(vec3 v, tint_GammaTransferParams params) {
   vec3 v_2 = vec3(params.G);
@@ -306,11 +306,11 @@ vec4 tint_TextureSampleExternal(tint_ExternalTextureParams params, vec2 coords) 
   vec3 v_4 = vec3(0.0f);
   float v_5 = 0.0f;
   if ((params.numPlanes == 1u)) {
-    vec4 v_6 = textureLod(arg_0_plane0_arg_1, clamp(v_3, params.samplePlane0RectMin, params.samplePlane0RectMax), 0.0f);
+    vec4 v_6 = textureLod(v_arg_0_plane0_arg_1, clamp(v_3, params.samplePlane0RectMin, params.samplePlane0RectMax), 0.0f);
     v_4 = v_6.xyz;
     v_5 = v_6.w;
   } else {
-    v_4 = (vec4(textureLod(arg_0_plane0_arg_1, clamp(v_3, params.samplePlane0RectMin, params.samplePlane0RectMax), 0.0f).x, textureLod(arg_0_plane1_arg_1, clamp(v_3, params.samplePlane1RectMin, params.samplePlane1RectMax), 0.0f).xy, 1.0f) * params.yuvToRgbConversionMatrix);
+    v_4 = (vec4(textureLod(v_arg_0_plane0_arg_1, clamp(v_3, params.samplePlane0RectMin, params.samplePlane0RectMax), 0.0f).x, textureLod(v_arg_0_plane1_arg_1, clamp(v_3, params.samplePlane1RectMin, params.samplePlane1RectMax), 0.0f).xy, 1.0f) * params.yuvToRgbConversionMatrix);
     v_5 = 1.0f;
   }
   vec3 v_7 = v_4;

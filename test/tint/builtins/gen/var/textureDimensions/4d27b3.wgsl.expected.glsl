@@ -9,9 +9,9 @@ layout(binding = 0, std430)
 buffer f_prevent_dce_block_ssbo {
   uvec3 inner;
 } v;
-layout(binding = 0, r32i) uniform highp iimage3D arg_0;
+layout(binding = 0, r32i) uniform highp iimage3D f_arg_0;
 uvec3 textureDimensions_4d27b3() {
-  uvec3 res = uvec3(imageSize(arg_0));
+  uvec3 res = uvec3(imageSize(f_arg_0));
   return res;
 }
 void main() {

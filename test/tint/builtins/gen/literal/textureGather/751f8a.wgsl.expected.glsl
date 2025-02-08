@@ -9,9 +9,9 @@ layout(binding = 0, std430)
 buffer f_prevent_dce_block_ssbo {
   vec4 inner;
 } v;
-uniform highp samplerCubeArray arg_1_arg_2;
+uniform highp samplerCubeArray f_arg_1_arg_2;
 vec4 textureGather_751f8a() {
-  vec4 res = textureGather(arg_1_arg_2, vec4(vec3(1.0f), float(1)), 1);
+  vec4 res = textureGather(f_arg_1_arg_2, vec4(vec3(1.0f), float(1)), 1);
   return res;
 }
 void main() {
@@ -46,10 +46,10 @@ struct VertexOutput {
   vec4 prevent_dce;
 };
 
-uniform highp samplerCubeArray arg_1_arg_2;
+uniform highp samplerCubeArray v_arg_1_arg_2;
 layout(location = 0) flat out vec4 tint_interstage_location0;
 vec4 textureGather_751f8a() {
-  vec4 res = textureGather(arg_1_arg_2, vec4(vec3(1.0f), float(1)), 1);
+  vec4 res = textureGather(v_arg_1_arg_2, vec4(vec3(1.0f), float(1)), 1);
   return res;
 }
 VertexOutput vertex_main_inner() {

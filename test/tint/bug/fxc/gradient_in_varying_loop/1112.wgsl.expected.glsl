@@ -2,11 +2,11 @@
 precision highp float;
 precision highp int;
 
-uniform highp sampler2D randomTexture_Sampler;
+uniform highp sampler2D f_randomTexture_Sampler;
 layout(location = 0) in vec2 tint_interstage_location0;
 layout(location = 0) out vec4 main_loc0_Output;
 vec4 main_inner(vec2 vUV) {
-  vec3 random = texture(randomTexture_Sampler, vUV).xyz;
+  vec3 random = texture(f_randomTexture_Sampler, vUV).xyz;
   int i = 0;
   {
     uvec2 tint_loop_idx = uvec2(0u);

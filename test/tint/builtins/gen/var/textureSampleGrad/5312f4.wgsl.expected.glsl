@@ -9,12 +9,12 @@ layout(binding = 0, std430)
 buffer f_prevent_dce_block_ssbo {
   vec4 inner;
 } v;
-uniform highp samplerCube arg_0_arg_1;
+uniform highp samplerCube f_arg_0_arg_1;
 vec4 textureSampleGrad_5312f4() {
   vec3 arg_2 = vec3(1.0f);
   vec3 arg_3 = vec3(1.0f);
   vec3 arg_4 = vec3(1.0f);
-  vec4 res = textureGrad(arg_0_arg_1, arg_2, arg_3, arg_4);
+  vec4 res = textureGrad(f_arg_0_arg_1, arg_2, arg_3, arg_4);
   return res;
 }
 void main() {
@@ -52,13 +52,13 @@ struct VertexOutput {
   vec4 prevent_dce;
 };
 
-uniform highp samplerCube arg_0_arg_1;
+uniform highp samplerCube v_arg_0_arg_1;
 layout(location = 0) flat out vec4 tint_interstage_location0;
 vec4 textureSampleGrad_5312f4() {
   vec3 arg_2 = vec3(1.0f);
   vec3 arg_3 = vec3(1.0f);
   vec3 arg_4 = vec3(1.0f);
-  vec4 res = textureGrad(arg_0_arg_1, arg_2, arg_3, arg_4);
+  vec4 res = textureGrad(v_arg_0_arg_1, arg_2, arg_3, arg_4);
   return res;
 }
 VertexOutput vertex_main_inner() {

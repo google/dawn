@@ -9,9 +9,9 @@ layout(binding = 0, std430)
 buffer f_prevent_dce_block_ssbo {
   uint inner;
 } v;
-layout(binding = 0, rg32ui) uniform highp uimage2DArray arg_0;
+layout(binding = 0, rg32ui) uniform highp uimage2DArray f_arg_0;
 uint textureNumLayers_24d572() {
-  uint res = uint(imageSize(arg_0).z);
+  uint res = uint(imageSize(f_arg_0).z);
   return res;
 }
 void main() {

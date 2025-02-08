@@ -226,13 +226,26 @@ class Printer : public tint::TextGenerator {
 
     /// @returns the name of the given value, creating a new unique name if the value is unnamed in
     /// the module.
-    std::string NameOf(const core::ir::Value* value) {
+    std::string NameOf(const core::ir::Value* value, bool add_stage_prefix = false) {
         return names_.GetOrAdd(value, [&] {
             auto sym = ir_.NameOf(value);
+            std::string name;
             if (!sym || ShouldRename(sym.NameView())) {
-                return UniqueIdentifier("v");
+                name = UniqueIdentifier("v");
+            } else {
+                name = sym.Name();
             }
-            return sym.Name();
+
+            if (add_stage_prefix) {
+                // Prefix the name to avoid collisions between different stages in the same
+                // pipeline.
+                if (stage_ == core::ir::Function::PipelineStage::kFragment) {
+                    return "f_" + name;
+                } else if (stage_ == core::ir::Function::PipelineStage::kVertex) {
+                    return "v_" + name;
+                }
+            }
+            return name;
         });
     }
 
@@ -968,11 +981,11 @@ class Printer : public tint::TextGenerator {
         out << ";";
     }
 
-    void EmitVar(StringStream& out, const core::ir::Var* var) {
+    void EmitVar(StringStream& out, const core::ir::Var* var, bool add_stage_prefix = false) {
         auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
         auto space = ptr->AddressSpace();
 
-        EmitTypeAndName(out, var->Result(0)->Type(), NameOf(var->Result(0)));
+        EmitTypeAndName(out, var->Result(0)->Type(), NameOf(var->Result(0), add_stage_prefix));
         if (var->Initializer()) {
             out << " = ";
             EmitValue(out, var->Initializer());
@@ -1086,7 +1099,7 @@ class Printer : public tint::TextGenerator {
             }
         }
 
-        EmitVar(out, var);
+        EmitVar(out, var, true);
     }
 
     void EmitPushConstantVar(core::ir::Var* var) {

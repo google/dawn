@@ -18,14 +18,14 @@ layout(binding = 0, std140)
 uniform f_tint_symbol_ubo {
   TintTextureUniformData inner;
 } v_1;
-uniform highp sampler3D arg_0;
+uniform highp sampler3D f_arg_0;
 vec4 textureLoad_21d1c4() {
   uvec3 arg_1 = uvec3(1u);
   uint arg_2 = 1u;
   uvec3 v_2 = arg_1;
   uint v_3 = min(arg_2, (v_1.inner.tint_builtin_value_0 - 1u));
-  ivec3 v_4 = ivec3(min(v_2, (uvec3(textureSize(arg_0, int(v_3))) - uvec3(1u))));
-  vec4 res = texelFetch(arg_0, v_4, int(v_3));
+  ivec3 v_4 = ivec3(min(v_2, (uvec3(textureSize(f_arg_0, int(v_3))) - uvec3(1u))));
+  vec4 res = texelFetch(f_arg_0, v_4, int(v_3));
   return res;
 }
 void main() {
@@ -82,15 +82,15 @@ layout(binding = 0, std140)
 uniform v_tint_symbol_ubo {
   TintTextureUniformData inner;
 } v;
-uniform highp sampler3D arg_0;
+uniform highp sampler3D v_arg_0;
 layout(location = 0) flat out vec4 tint_interstage_location0;
 vec4 textureLoad_21d1c4() {
   uvec3 arg_1 = uvec3(1u);
   uint arg_2 = 1u;
   uvec3 v_1 = arg_1;
   uint v_2 = min(arg_2, (v.inner.tint_builtin_value_0 - 1u));
-  ivec3 v_3 = ivec3(min(v_1, (uvec3(textureSize(arg_0, int(v_2))) - uvec3(1u))));
-  vec4 res = texelFetch(arg_0, v_3, int(v_2));
+  ivec3 v_3 = ivec3(min(v_1, (uvec3(textureSize(v_arg_0, int(v_2))) - uvec3(1u))));
+  vec4 res = texelFetch(v_arg_0, v_3, int(v_2));
   return res;
 }
 VertexOutput vertex_main_inner() {

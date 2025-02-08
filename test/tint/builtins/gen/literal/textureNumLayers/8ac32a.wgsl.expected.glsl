@@ -9,9 +9,9 @@ layout(binding = 0, std430)
 buffer f_prevent_dce_block_ssbo {
   uint inner;
 } v;
-uniform highp usampler2DArray arg_0;
+uniform highp usampler2DArray f_arg_0;
 uint textureNumLayers_8ac32a() {
-  uint res = uint(textureSize(arg_0, 0).z);
+  uint res = uint(textureSize(f_arg_0, 0).z);
   return res;
 }
 void main() {
@@ -46,10 +46,10 @@ struct VertexOutput {
   uint prevent_dce;
 };
 
-uniform highp usampler2DArray arg_0;
+uniform highp usampler2DArray v_arg_0;
 layout(location = 0) flat out uint tint_interstage_location0;
 uint textureNumLayers_8ac32a() {
-  uint res = uint(textureSize(arg_0, 0).z);
+  uint res = uint(textureSize(v_arg_0, 0).z);
   return res;
 }
 VertexOutput vertex_main_inner() {

@@ -5,9 +5,9 @@
 precision highp float;
 precision highp int;
 
-layout(binding = 0, r32i) uniform highp writeonly iimage3D arg_0;
+layout(binding = 0, r32i) uniform highp writeonly iimage3D f_arg_0;
 void textureStore_eb78b9() {
-  imageStore(arg_0, ivec3(1), ivec4(1));
+  imageStore(f_arg_0, ivec3(1), ivec4(1));
 }
 void main() {
   textureStore_eb78b9();

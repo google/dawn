@@ -34,11 +34,11 @@ vec2 levelUnits = vec2(0.0f);
 vec2 stageUnits_1 = vec2(0.0f);
 vec3 vPosition = vec3(0.0f);
 vec2 vUV = vec2(0.0f);
-uniform highp sampler2D frameMapTexture_frameMapSampler;
-uniform highp sampler2D tileMapsTexture1_tileMapsSampler;
-uniform highp sampler2D tileMapsTexture0_tileMapsSampler;
-uniform highp sampler2D animationMapTexture_animationMapSampler;
-uniform highp sampler2D spriteSheetTexture_spriteSheetSampler;
+uniform highp sampler2D f_frameMapTexture_frameMapSampler;
+uniform highp sampler2D f_tileMapsTexture1_tileMapsSampler;
+uniform highp sampler2D f_tileMapsTexture0_tileMapsSampler;
+uniform highp sampler2D f_animationMapTexture_animationMapSampler;
+uniform highp sampler2D f_spriteSheetTexture_spriteSheetSampler;
 layout(location = 2) in vec2 tint_interstage_location2;
 layout(location = 5) in vec2 tint_interstage_location5;
 layout(location = 4) in vec2 tint_interstage_location4;
@@ -52,11 +52,11 @@ mat4 getFrameData_f1_(inout float frameID) {
   float x_25 = v.inner.spriteCount;
   fX = (x_15 / x_25);
   float x_37 = fX;
-  vec4 x_40 = texture(frameMapTexture_frameMapSampler, vec2(x_37, 0.0f), clamp(0.0f, -16.0f, 15.9899997711181640625f));
+  vec4 x_40 = texture(f_frameMapTexture_frameMapSampler, vec2(x_37, 0.0f), clamp(0.0f, -16.0f, 15.9899997711181640625f));
   float x_44 = fX;
-  vec4 x_47 = texture(frameMapTexture_frameMapSampler, vec2(x_44, 0.25f), clamp(0.0f, -16.0f, 15.9899997711181640625f));
+  vec4 x_47 = texture(f_frameMapTexture_frameMapSampler, vec2(x_44, 0.25f), clamp(0.0f, -16.0f, 15.9899997711181640625f));
   float x_51 = fX;
-  vec4 x_54 = texture(frameMapTexture_frameMapSampler, vec2(x_51, 0.5f), clamp(0.0f, -16.0f, 15.9899997711181640625f));
+  vec4 x_54 = texture(f_frameMapTexture_frameMapSampler, vec2(x_51, 0.5f), clamp(0.0f, -16.0f, 15.9899997711181640625f));
   vec4 v_1 = vec4(x_40.x, x_40.y, x_40.z, x_40.w);
   vec4 v_2 = vec4(x_47.x, x_47.y, x_47.z, x_47.w);
   return mat4(v_1, v_2, vec4(x_54.x, x_54.y, x_54.z, x_54.w), vec4(0.0f));
@@ -114,7 +114,7 @@ void main_1() {
         {
           vec2 x_150 = tileID;
           vec2 x_154 = v.inner.stageSize;
-          vec4 x_156 = texture(tileMapsTexture1_tileMapsSampler, ((x_150 + vec2(0.5f)) / x_154), clamp(0.0f, -16.0f, 15.9899997711181640625f));
+          vec4 x_156 = texture(f_tileMapsTexture1_tileMapsSampler, ((x_150 + vec2(0.5f)) / x_154), clamp(0.0f, -16.0f, 15.9899997711181640625f));
           frameID_1 = x_156.x;
           break;
         }
@@ -122,7 +122,7 @@ void main_1() {
         {
           vec2 x_136 = tileID;
           vec2 x_140 = v.inner.stageSize;
-          vec4 x_142 = texture(tileMapsTexture0_tileMapsSampler, ((x_136 + vec2(0.5f)) / x_140), clamp(0.0f, -16.0f, 15.9899997711181640625f));
+          vec4 x_142 = texture(f_tileMapsTexture0_tileMapsSampler, ((x_136 + vec2(0.5f)) / x_140), clamp(0.0f, -16.0f, 15.9899997711181640625f));
           frameID_1 = x_142.x;
           break;
         }
@@ -133,7 +133,7 @@ void main_1() {
       }
       float x_166 = frameID_1;
       float x_169 = v.inner.spriteCount;
-      vec4 x_172 = texture(animationMapTexture_animationMapSampler, vec2(((x_166 + 0.5f) / x_169), 0.0f), clamp(0.0f, -16.0f, 15.9899997711181640625f));
+      vec4 x_172 = texture(f_animationMapTexture_animationMapSampler, vec2(((x_166 + 0.5f) / x_169), 0.0f), clamp(0.0f, -16.0f, 15.9899997711181640625f));
       animationData = x_172;
       float x_174 = animationData.y;
       if ((x_174 > 0.0f)) {
@@ -200,13 +200,13 @@ void main_1() {
         vec2 x_263 = tileUV;
         vec2 x_264 = frameSize;
         vec2 x_266 = offset_1;
-        vec4 x_268 = texture(spriteSheetTexture_spriteSheetSampler, ((x_263 * x_264) + x_266));
+        vec4 x_268 = texture(f_spriteSheetTexture_spriteSheetSampler, ((x_263 * x_264) + x_266));
         color = x_268;
       } else {
         vec2 x_274 = tileUV;
         vec2 x_275 = frameSize;
         vec2 x_277 = offset_1;
-        vec4 x_279 = texture(spriteSheetTexture_spriteSheetSampler, ((x_274 * x_275) + x_277));
+        vec4 x_279 = texture(f_spriteSheetTexture_spriteSheetSampler, ((x_274 * x_275) + x_277));
         nc = x_279;
         float x_283 = color.w;
         float x_285 = nc.w;

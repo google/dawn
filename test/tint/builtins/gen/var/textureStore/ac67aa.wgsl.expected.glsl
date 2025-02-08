@@ -5,11 +5,11 @@
 precision highp float;
 precision highp int;
 
-layout(binding = 0, rg32ui) uniform highp writeonly uimage3D arg_0;
+layout(binding = 0, rg32ui) uniform highp writeonly uimage3D f_arg_0;
 void textureStore_ac67aa() {
   ivec3 arg_1 = ivec3(1);
   uvec4 arg_2 = uvec4(1u);
-  imageStore(arg_0, arg_1, arg_2);
+  imageStore(f_arg_0, arg_1, arg_2);
 }
 void main() {
   textureStore_ac67aa();
