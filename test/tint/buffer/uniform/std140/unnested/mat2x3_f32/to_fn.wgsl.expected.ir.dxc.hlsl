@@ -12,8 +12,7 @@ void c(float f_1) {
 }
 
 float2x3 v_1(uint start_byte_offset) {
-  float3 v_2 = asfloat(u[(start_byte_offset / 16u)].xyz);
-  return float2x3(v_2, asfloat(u[((16u + start_byte_offset) / 16u)].xyz));
+  return float2x3(asfloat(u[(start_byte_offset / 16u)].xyz), asfloat(u[((16u + start_byte_offset) / 16u)].xyz));
 }
 
 [numthreads(1, 1, 1)]
@@ -22,6 +21,6 @@ void f() {
   b(asfloat(u[1u].xyz));
   b(asfloat(u[1u].xyz).zxy);
   c(asfloat(u[1u].x));
-  c(asfloat(u[1u].xyz).zxy[0u]);
+  c(asfloat(u[1u].xyz).zxy.x);
 }
 

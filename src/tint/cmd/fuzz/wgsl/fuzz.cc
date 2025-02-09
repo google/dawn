@@ -150,7 +150,7 @@ void Run(std::string_view wgsl, const Options& options, Slice<const std::byte> d
 #endif
 
     if (options.dump) {
-        std::cout << "Dumping input WGSL:\n" << wgsl << std::endl;
+        std::cout << "Dumping input WGSL:\n" << wgsl << "\n";
     }
 
     // Ensure that fuzzers are sorted. Without this, the fuzzers may be registered in any order,

@@ -9,7 +9,7 @@ struct S {
 
 shared S wg;
 void compute_main_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     wg.x = 0;
     wg.y = 0u;
   }
@@ -29,7 +29,7 @@ void compute_main_inner(uint tint_local_index) {
     }
   }
   barrier();
-  atomicExchange(wg.a[4], 1u);
+  atomicExchange(wg.a[4u], 1u);
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

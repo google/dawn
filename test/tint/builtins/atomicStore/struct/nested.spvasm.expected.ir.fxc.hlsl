@@ -49,7 +49,7 @@ void compute_main_1() {
 }
 
 void compute_main_inner_1(uint local_invocation_index_1_param) {
-  if ((local_invocation_index_1_param == 0u)) {
+  if ((local_invocation_index_1_param < 1u)) {
     wg.x = int(0);
     wg.y = int(0);
     wg.z = int(0);

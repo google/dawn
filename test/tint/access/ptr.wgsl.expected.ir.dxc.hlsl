@@ -38,7 +38,7 @@ int tint_f32_to_i32(float value) {
 }
 
 int accept_ptr_vec_access_elements(inout float3 v1) {
-  v1[0u] = cross(v1, v1)[0u];
+  v1.x = cross(v1, v1).x;
   return tint_f32_to_i32(v1.x);
 }
 
@@ -49,7 +49,7 @@ int call_builtin_with_mod_scope_ptr() {
 }
 
 void main_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     int v_3 = int(0);
     InterlockedExchange(g1, int(0), v_3);
   }

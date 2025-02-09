@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 RWByteAddressBuffer prevent_dce : register(u0);
 Texture2DArray<float4> arg_0 : register(t0, space1);
 SamplerState arg_1 : register(s1, space1);
@@ -15,11 +18,40 @@ void fragment_main() {
   prevent_dce.Store4(0u, asuint(textureSampleGrad_d65515()));
   return;
 }
+//
+// compute_main
+//
+RWByteAddressBuffer prevent_dce : register(u0);
+Texture2DArray<float4> arg_0 : register(t0, space1);
+SamplerState arg_1 : register(s1, space1);
+
+float4 textureSampleGrad_d65515() {
+  float2 arg_2 = (1.0f).xx;
+  int arg_3 = 1;
+  float2 arg_4 = (1.0f).xx;
+  float2 arg_5 = (1.0f).xx;
+  float4 res = arg_0.SampleGrad(arg_1, float3(arg_2, float(arg_3)), arg_4, arg_5, int2((1).xx));
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store4(0u, asuint(textureSampleGrad_d65515()));
   return;
+}
+//
+// vertex_main
+//
+Texture2DArray<float4> arg_0 : register(t0, space1);
+SamplerState arg_1 : register(s1, space1);
+
+float4 textureSampleGrad_d65515() {
+  float2 arg_2 = (1.0f).xx;
+  int arg_3 = 1;
+  float2 arg_4 = (1.0f).xx;
+  float2 arg_5 = (1.0f).xx;
+  float4 res = arg_0.SampleGrad(arg_1, float3(arg_2, float(arg_3)), arg_4, arg_5, int2((1).xx));
+  return res;
 }
 
 struct VertexOutput {

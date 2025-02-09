@@ -1,6 +1,6 @@
 #include <metal_stdlib>
-
 using namespace metal;
+
 void d() {
 }
 
@@ -15,4 +15,3 @@ void b() {
 void a() {
   b();
 }
-

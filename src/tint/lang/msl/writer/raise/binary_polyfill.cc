@@ -157,10 +157,13 @@ struct State {
 }  // namespace
 
 Result<SuccessType> BinaryPolyfill(core::ir::Module& ir) {
-    auto result = ValidateAndDumpIfNeeded(ir, "msl.BinaryPolyfill",
-                                          core::ir::Capabilities{
-                                              core::ir::Capability::kAllowPointersInStructures,
-                                          });
+    auto result =
+        ValidateAndDumpIfNeeded(ir, "msl.BinaryPolyfill",
+                                core::ir::Capabilities{
+                                    core::ir::Capability::kAllowPointersAndHandlesInStructures,
+                                    core::ir::Capability::kAllowPrivateVarsInFunctions,
+                                    core::ir::Capability::kAllowAnyLetType,
+                                });
     if (result != Success) {
         return result.Failure();
     }

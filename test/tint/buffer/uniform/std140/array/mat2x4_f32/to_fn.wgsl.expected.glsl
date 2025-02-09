@@ -9,13 +9,13 @@ buffer s_block_1_ssbo {
   float inner;
 } v_2;
 float a(mat2x4 a_1[4]) {
-  return a_1[0][0][0u];
+  return a_1[0u][0u].x;
 }
 float b(mat2x4 m) {
-  return m[0][0u];
+  return m[0u].x;
 }
 float c(vec4 v) {
-  return v[0u];
+  return v.x;
 }
 float d(float f_1) {
   return f_1;
@@ -23,7 +23,7 @@ float d(float f_1) {
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   float v_3 = a(v_1.inner);
-  float v_4 = (v_3 + b(v_1.inner[1]));
-  float v_5 = (v_4 + c(v_1.inner[1][0].ywxz));
-  v_2.inner = (v_5 + d(v_1.inner[1][0].ywxz[0u]));
+  float v_4 = (v_3 + b(v_1.inner[1u]));
+  float v_5 = (v_4 + c(v_1.inner[1u][0u].ywxz));
+  v_2.inner = (v_5 + d(v_1.inner[1u][0u].ywxz.x));
 }

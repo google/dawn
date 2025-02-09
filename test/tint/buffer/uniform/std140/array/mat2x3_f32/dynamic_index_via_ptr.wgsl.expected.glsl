@@ -23,9 +23,9 @@ int i() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  int v_2 = i();
+  uint v_2 = min(uint(i()), 3u);
   mat2x3 v_3 = mat2x3(v.inner[v_2].col0, v.inner[v_2].col1);
-  vec3 v_4 = v_3[i()];
+  vec3 v_4 = v_3[min(uint(i()), 1u)];
   mat2x3_f32_std140 v_5[4] = v.inner;
   mat2x3 v_6[4] = mat2x3[4](mat2x3(vec3(0.0f), vec3(0.0f)), mat2x3(vec3(0.0f), vec3(0.0f)), mat2x3(vec3(0.0f), vec3(0.0f)), mat2x3(vec3(0.0f), vec3(0.0f)));
   {
@@ -46,5 +46,5 @@ void main() {
   mat2x3 l_a[4] = v_6;
   mat2x3 l_a_i = v_3;
   vec3 l_a_i_i = v_4;
-  v_1.inner = (((v_4[0u] + l_a[0][0][0u]) + l_a_i[0][0u]) + l_a_i_i[0u]);
+  v_1.inner = (((v_4.x + l_a[0u][0u].x) + l_a_i[0u].x) + l_a_i_i.x);
 }

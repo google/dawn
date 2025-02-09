@@ -26,7 +26,7 @@ buffer s_block_1_ssbo {
   TestData inner;
 } v_2;
 int runTest() {
-  uint v_3 = (0u + uint(v.inner.zero));
+  uint v_3 = min((0u + uint(v.inner.zero)), 2u);
   return atomicOr(v_2.inner.data[v_3], 0);
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;

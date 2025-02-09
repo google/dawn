@@ -62,10 +62,8 @@ class ShaderVisibleDescriptorAllocator;
 // Wraps sampler descriptor heap allocations in a cache.
 class SamplerHeapCacheEntry : public RefCounted {
   public:
-    explicit SamplerHeapCacheEntry(MutexProtected<StagingDescriptorAllocator>& allocator,
-                                   std::vector<Sampler*> samplers);
+    explicit SamplerHeapCacheEntry(std::vector<Sampler*> samplers);
     SamplerHeapCacheEntry(SamplerHeapCache* cache,
-                          MutexProtected<StagingDescriptorAllocator>& allocator,
                           std::vector<Sampler*> samplers,
                           CPUDescriptorHeapAllocation allocation);
     ~SamplerHeapCacheEntry() override;
@@ -74,7 +72,7 @@ class SamplerHeapCacheEntry : public RefCounted {
 
     std::vector<Sampler*>&& AcquireSamplers();
 
-    bool Populate(Device* device, MutexProtected<ShaderVisibleDescriptorAllocator>& allocator);
+    bool Populate(MutexProtected<ShaderVisibleDescriptorAllocator>& allocator);
 
     // Functors necessary for the unordered_map<SamplerHeapCacheEntry*>-based cache.
     struct HashFunc {
@@ -93,9 +91,6 @@ class SamplerHeapCacheEntry : public RefCounted {
     // by the device and will already be unique.
     std::vector<Sampler*> mSamplers;
 
-    // TODO(https://crbug.com/dawn/2361): Rewrite this member with raw_ref<T>.
-    // This is currently failing with MSVC cl.exe compiler.
-    RAW_PTR_EXCLUSION MutexProtected<StagingDescriptorAllocator>& mAllocator;
     raw_ptr<SamplerHeapCache> mCache = nullptr;
 };
 
@@ -106,11 +101,11 @@ class SamplerHeapCache {
     explicit SamplerHeapCache(Device* device);
     ~SamplerHeapCache();
 
-    ResultOrError<Ref<SamplerHeapCacheEntry>> GetOrCreate(
-        const BindGroup* group,
-        MutexProtected<StagingDescriptorAllocator>& samplerAllocator);
+    ResultOrError<Ref<SamplerHeapCacheEntry>> GetOrCreate(const BindGroup* group);
 
     void RemoveCacheEntry(SamplerHeapCacheEntry* entry);
+
+    Device* GetDevice() const;
 
   private:
     raw_ptr<Device> mDevice;

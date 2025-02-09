@@ -8,8 +8,8 @@ uniform my_uniform_block_1_ubo {
 uniform highp sampler2D my_texture_my_sampler;
 void foo_member_initialize() {
   bvec2 vb2 = bvec2(false);
-  vb2[0u] = (my_global.z != 0.0f);
-  vb2[0u] = (v.inner == -1.0f);
+  vb2.x = (my_global.z != 0.0f);
+  vb2.x = (v.inner == -1.0f);
   vb2 = bvec2((v.inner == -1.0f), false);
   if (vb2.x) {
     vec4 r = texture(my_texture_my_sampler, vec2(0.0f), clamp(0.0f, -16.0f, 15.9899997711181640625f));
@@ -17,8 +17,8 @@ void foo_member_initialize() {
 }
 void foo_default_initialize() {
   bvec2 vb2 = bvec2(false);
-  vb2[0u] = (my_global.z != 0.0f);
-  vb2[0u] = (v.inner == -1.0f);
+  vb2.x = (my_global.z != 0.0f);
+  vb2.x = (v.inner == -1.0f);
   vb2 = bvec2(false);
   if (vb2.x) {
     vec4 r = texture(my_texture_my_sampler, vec2(0.0f), clamp(0.0f, -16.0f, 15.9899997711181640625f));

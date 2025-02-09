@@ -55,8 +55,8 @@ void f() {
   S v_17[4] = v_12(0u);
   p = v_17;
   S v_18 = v_8(256u);
-  p[int(1)] = v_18;
-  p[int(3)].m = v(264u);
-  p[int(1)].m[int(0)] = asfloat(u[1u].xy).yx;
+  p[1u] = v_18;
+  p[3u].m = v(264u);
+  p[1u].m[0u] = asfloat(u[1u].xy).yx;
 }
 

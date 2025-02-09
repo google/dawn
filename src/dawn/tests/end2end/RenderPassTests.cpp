@@ -230,8 +230,8 @@ TEST_P(RenderPassTest_RegressionDawn1071, ClearLowestMipOfR8Unorm) {
     // Copy the texture in the buffer.
     {
         wgpu::Extent3D copySize = {1, 1};
-        wgpu::ImageCopyTexture src = utils::CreateImageCopyTexture(tex, kLastMipLevel);
-        wgpu::ImageCopyBuffer dst = utils::CreateImageCopyBuffer(buf);
+        wgpu::TexelCopyTextureInfo src = utils::CreateTexelCopyTextureInfo(tex, kLastMipLevel);
+        wgpu::TexelCopyBufferInfo dst = utils::CreateTexelCopyBufferInfo(buf);
 
         encoder.CopyTextureToBuffer(&src, &dst, &copySize);
     }
@@ -292,20 +292,20 @@ TEST_P(RenderPassTest_RegressionDawn1389, ClearMultisubresourceAfterWriteDepth16
             // Initialize all subresources with WriteTexture.
             for (uint32_t level = 0; level < mipLevelCount; ++level) {
                 for (uint32_t layer = 0; layer < arrayLayerCount; ++layer) {
-                    wgpu::ImageCopyTexture imageCopyTexture =
-                        utils::CreateImageCopyTexture(tex, level, {0, 0, layer});
+                    wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+                        utils::CreateTexelCopyTextureInfo(tex, level, {0, 0, layer});
                     wgpu::Extent3D copySize = {width >> level, height >> level, 1};
 
-                    wgpu::TextureDataLayout textureDataLayout;
-                    textureDataLayout.offset = 0;
-                    textureDataLayout.bytesPerRow = copySize.width * sizeof(uint16_t);
-                    textureDataLayout.rowsPerImage = copySize.height;
+                    wgpu::TexelCopyBufferLayout texelCopyBufferLayout;
+                    texelCopyBufferLayout.offset = 0;
+                    texelCopyBufferLayout.bytesPerRow = copySize.width * sizeof(uint16_t);
+                    texelCopyBufferLayout.rowsPerImage = copySize.height;
 
                     // Use a distinct value for each subresource.
                     uint16_t value = level * 10 + layer;
                     std::vector<uint16_t> data(copySize.width * copySize.height, value);
-                    queue.WriteTexture(&imageCopyTexture, data.data(),
-                                       data.size() * sizeof(uint16_t), &textureDataLayout,
+                    queue.WriteTexture(&texelCopyTextureInfo, data.data(),
+                                       data.size() * sizeof(uint16_t), &texelCopyBufferLayout,
                                        &copySize);
                 }
             }

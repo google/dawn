@@ -1,3 +1,37 @@
+//
+// fragment_main
+//
+
+RWByteAddressBuffer prevent_dce : register(u0);
+Texture3D<int4> arg_0 : register(t0, space1);
+int4 textureLoad_4fd803() {
+  int4 res = arg_0.Load(int4((int(1)).xxx, int(1)));
+  return res;
+}
+
+void fragment_main() {
+  prevent_dce.Store4(0u, asuint(textureLoad_4fd803()));
+}
+
+//
+// compute_main
+//
+
+RWByteAddressBuffer prevent_dce : register(u0);
+Texture3D<int4> arg_0 : register(t0, space1);
+int4 textureLoad_4fd803() {
+  int4 res = arg_0.Load(int4((int(1)).xxx, int(1)));
+  return res;
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  prevent_dce.Store4(0u, asuint(textureLoad_4fd803()));
+}
+
+//
+// vertex_main
+//
 struct VertexOutput {
   float4 pos;
   int4 prevent_dce;
@@ -9,28 +43,17 @@ struct vertex_main_outputs {
 };
 
 
-RWByteAddressBuffer prevent_dce : register(u0);
 Texture3D<int4> arg_0 : register(t0, space1);
 int4 textureLoad_4fd803() {
-  int3 v = int3((int(1)).xxx);
-  int4 res = int4(arg_0.Load(int4(v, int(int(1)))));
+  int4 res = arg_0.Load(int4((int(1)).xxx, int(1)));
   return res;
 }
 
-void fragment_main() {
-  prevent_dce.Store4(0u, asuint(textureLoad_4fd803()));
-}
-
-[numthreads(1, 1, 1)]
-void compute_main() {
-  prevent_dce.Store4(0u, asuint(textureLoad_4fd803()));
-}
-
 VertexOutput vertex_main_inner() {
-  VertexOutput tint_symbol = (VertexOutput)0;
-  tint_symbol.pos = (0.0f).xxxx;
-  tint_symbol.prevent_dce = textureLoad_4fd803();
-  VertexOutput v_1 = tint_symbol;
+  VertexOutput v = (VertexOutput)0;
+  v.pos = (0.0f).xxxx;
+  v.prevent_dce = textureLoad_4fd803();
+  VertexOutput v_1 = v;
   return v_1;
 }
 

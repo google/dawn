@@ -33,15 +33,8 @@
 namespace tint::core::ir::transform {
 namespace {
 
-void CombineAccessInstructionsFuzzer(Module& module) {
-    if (auto res = CombineAccessInstructions(module); res != Success) {
-        return;
-    }
-
-    Capabilities capabilities;
-    if (auto res = Validate(module, capabilities); res != Success) {
-        TINT_ICE() << "result of CombineAccessInstructions failed IR validation\n" << res.Failure();
-    }
+Result<SuccessType> CombineAccessInstructionsFuzzer(Module& ir, const fuzz::ir::Context&) {
+    return CombineAccessInstructions(ir);
 }
 
 }  // namespace

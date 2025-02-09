@@ -38,7 +38,7 @@
 #define SRC_TINT_LANG_WGSL_EXTENSION_H_
 
 #include "src/tint/utils/containers/unique_vector.h"
-#include "src/tint/utils/traits/traits.h"
+#include "src/tint/utils/rtti/traits.h"
 
 namespace tint::wgsl {
 
@@ -51,7 +51,6 @@ enum class Extension : uint8_t {
     kChromiumExperimentalPixelLocal,
     kChromiumExperimentalPushConstant,
     kChromiumExperimentalSubgroupMatrix,
-    kChromiumExperimentalSubgroups,
     kChromiumInternalGraphite,
     kChromiumInternalInputAttachments,
     kChromiumInternalRelaxedUniformLayout,
@@ -85,7 +84,6 @@ constexpr std::string_view kExtensionStrings[] = {
     "chromium_experimental_pixel_local",
     "chromium_experimental_push_constant",
     "chromium_experimental_subgroup_matrix",
-    "chromium_experimental_subgroups",
     "chromium_internal_graphite",
     "chromium_internal_input_attachments",
     "chromium_internal_relaxed_uniform_layout",
@@ -103,7 +101,6 @@ static constexpr Extension kAllExtensions[] = {
     Extension::kChromiumExperimentalPixelLocal,
     Extension::kChromiumExperimentalPushConstant,
     Extension::kChromiumExperimentalSubgroupMatrix,
-    Extension::kChromiumExperimentalSubgroups,
     Extension::kChromiumInternalGraphite,
     Extension::kChromiumInternalInputAttachments,
     Extension::kChromiumInternalRelaxedUniformLayout,

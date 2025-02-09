@@ -30,8 +30,10 @@
 
 #include <limits>
 #include <memory>
+#include <tuple>
 #include <utility>
 
+#include "absl/container/flat_hash_map.h"
 #include "dawn/common/ityp_array.h"
 #include "dawn/native/Buffer.h"
 #include "dawn/native/d3d/d3d_platform.h"
@@ -324,6 +326,11 @@ class GPUUsableBuffer final : public Buffer {
     // don't need both to exist.
     raw_ptr<Storage> mCPUWritableStorage;
     raw_ptr<Storage> mMappedStorage;
+
+    // TODO(dawn:381045722): Use LRU to limit number of cached entries.
+    using BufferViewKey = std::tuple<ID3D11Buffer*, uint64_t, uint64_t>;
+    absl::flat_hash_map<BufferViewKey, ComPtr<ID3D11ShaderResourceView>> mSRVCache;
+    absl::flat_hash_map<BufferViewKey, ComPtr<ID3D11UnorderedAccessView1>> mUAVCache;
 };
 
 static inline GPUUsableBuffer* ToGPUUsableBuffer(BufferBase* buffer) {

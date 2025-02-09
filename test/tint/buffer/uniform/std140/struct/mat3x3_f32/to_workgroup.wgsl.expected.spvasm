@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 108
+; Bound: 104
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -76,17 +76,13 @@
          %49 = OpConstantNull %_arr_S_uint_4
 %_ptr_Function_S = OpTypePointer Function %S
 %_ptr_Function_S_std140 = OpTypePointer Function %S_std140
-      %int_1 = OpConstant %int 1
 %_ptr_Uniform_S_std140 = OpTypePointer Uniform %S_std140
-      %int_2 = OpConstant %int 2
 %_ptr_Workgroup_mat3v3float = OpTypePointer Workgroup %mat3v3float
-      %int_3 = OpConstant %int 3
-%_ptr_Uniform_v3float = OpTypePointer Uniform %v3float
      %uint_3 = OpConstant %uint 3
+%_ptr_Uniform_v3float = OpTypePointer Uniform %v3float
 %_ptr_Workgroup_v3float = OpTypePointer Workgroup %v3float
-      %int_0 = OpConstant %int 0
-         %94 = OpTypeFunction %void
-         %99 = OpTypeFunction %S %S_std140
+         %90 = OpTypeFunction %void
+         %95 = OpTypeFunction %S %S_std140
     %f_inner = OpFunction %void None %21
 %tint_local_index = OpFunctionParameter %uint
          %22 = OpLabel
@@ -143,42 +139,42 @@
          %54 = OpLabel
          %67 = OpLoad %_arr_S_uint_4 %47 None
                OpStore %w %67 None
-         %68 = OpAccessChain %_ptr_Workgroup_S %w %int_1
-         %70 = OpAccessChain %_ptr_Uniform_S_std140 %1 %uint_0 %int_2
-         %73 = OpLoad %S_std140 %70 None
-         %74 = OpFunctionCall %S %tint_convert_S %73
-               OpStore %68 %74 None
-         %75 = OpAccessChain %_ptr_Workgroup_mat3v3float %w %int_3 %uint_1
-         %78 = OpAccessChain %_ptr_Uniform_v3float %1 %uint_0 %int_2 %uint_1
-         %80 = OpLoad %v3float %78 None
-         %81 = OpAccessChain %_ptr_Uniform_v3float %1 %uint_0 %int_2 %uint_2
+         %68 = OpAccessChain %_ptr_Workgroup_S %w %uint_1
+         %69 = OpAccessChain %_ptr_Uniform_S_std140 %1 %uint_0 %uint_2
+         %71 = OpLoad %S_std140 %69 None
+         %72 = OpFunctionCall %S %tint_convert_S %71
+               OpStore %68 %72 None
+         %73 = OpAccessChain %_ptr_Workgroup_mat3v3float %w %uint_3 %uint_1
+         %76 = OpAccessChain %_ptr_Uniform_v3float %1 %uint_0 %uint_2 %uint_1
+         %78 = OpLoad %v3float %76 None
+         %79 = OpAccessChain %_ptr_Uniform_v3float %1 %uint_0 %uint_2 %uint_2
+         %80 = OpLoad %v3float %79 None
+         %81 = OpAccessChain %_ptr_Uniform_v3float %1 %uint_0 %uint_2 %uint_3
          %82 = OpLoad %v3float %81 None
-         %83 = OpAccessChain %_ptr_Uniform_v3float %1 %uint_0 %int_2 %uint_3
-         %85 = OpLoad %v3float %83 None
-         %86 = OpCompositeConstruct %mat3v3float %80 %82 %85
-               OpStore %75 %86 None
-         %87 = OpAccessChain %_ptr_Workgroup_v3float %w %int_1 %uint_1 %int_0
-         %90 = OpAccessChain %_ptr_Uniform_v3float %1 %uint_0 %int_0 %uint_2
-         %91 = OpLoad %v3float %90 None
-         %92 = OpVectorShuffle %v3float %91 %91 2 0 1
-               OpStore %87 %92 None
+         %83 = OpCompositeConstruct %mat3v3float %78 %80 %82
+               OpStore %73 %83 None
+         %84 = OpAccessChain %_ptr_Workgroup_v3float %w %uint_1 %uint_1 %uint_0
+         %86 = OpAccessChain %_ptr_Uniform_v3float %1 %uint_0 %uint_0 %uint_2
+         %87 = OpLoad %v3float %86 None
+         %88 = OpVectorShuffle %v3float %87 %87 2 0 1
+               OpStore %84 %88 None
                OpReturn
                OpFunctionEnd
-          %f = OpFunction %void None %94
-         %95 = OpLabel
-         %96 = OpLoad %uint %f_local_invocation_index_Input None
-         %97 = OpFunctionCall %void %f_inner %96
+          %f = OpFunction %void None %90
+         %91 = OpLabel
+         %92 = OpLoad %uint %f_local_invocation_index_Input None
+         %93 = OpFunctionCall %void %f_inner %92
                OpReturn
                OpFunctionEnd
-%tint_convert_S = OpFunction %S None %99
+%tint_convert_S = OpFunction %S None %95
  %tint_input = OpFunctionParameter %S_std140
-        %100 = OpLabel
-        %101 = OpCompositeExtract %int %tint_input 0
-        %102 = OpCompositeExtract %v3float %tint_input 1
-        %103 = OpCompositeExtract %v3float %tint_input 2
-        %104 = OpCompositeExtract %v3float %tint_input 3
-        %105 = OpCompositeConstruct %mat3v3float %102 %103 %104
-        %106 = OpCompositeExtract %int %tint_input 4
-        %107 = OpCompositeConstruct %S %101 %105 %106
-               OpReturnValue %107
+         %96 = OpLabel
+         %97 = OpCompositeExtract %int %tint_input 0
+         %98 = OpCompositeExtract %v3float %tint_input 1
+         %99 = OpCompositeExtract %v3float %tint_input 2
+        %100 = OpCompositeExtract %v3float %tint_input 3
+        %101 = OpCompositeConstruct %mat3v3float %98 %99 %100
+        %102 = OpCompositeExtract %int %tint_input 4
+        %103 = OpCompositeConstruct %S %97 %101 %102
+               OpReturnValue %103
                OpFunctionEnd

@@ -58,8 +58,8 @@ void tint_store_and_preserve_padding(S value_param[4]) {
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   tint_store_and_preserve_padding(v.inner);
-  S v_4 = v.inner[2];
-  tint_store_and_preserve_padding_1(uint[1](uint(1)), v_4);
-  v_1.inner[3].m = v.inner[2].m;
-  v_1.inner[1].m[0] = v.inner[0].m[1].ywxz;
+  S v_4 = v.inner[2u];
+  tint_store_and_preserve_padding_1(uint[1](1u), v_4);
+  v_1.inner[3u].m = v.inner[2u].m;
+  v_1.inner[1u].m[0u] = v.inner[0u].m[1u].ywxz;
 }

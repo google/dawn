@@ -19,13 +19,13 @@ buffer s_block_1_ssbo {
   float inner;
 } v_2;
 float a(mat3 a_1[4]) {
-  return a_1[0][0][0u];
+  return a_1[0u][0u].x;
 }
 float b(mat3 m) {
-  return m[0][0u];
+  return m[0u].x;
 }
 float c(vec3 v) {
-  return v[0u];
+  return v.x;
 }
 float d(float f_1) {
   return f_1;
@@ -50,7 +50,7 @@ void main() {
     }
   }
   float v_7 = a(v_4);
-  float v_8 = (v_7 + b(mat3(v_1.inner[1].col0, v_1.inner[1].col1, v_1.inner[1].col2)));
-  float v_9 = (v_8 + c(v_1.inner[1].col0.zxy));
-  v_2.inner = (v_9 + d(v_1.inner[1].col0.zxy[0u]));
+  float v_8 = (v_7 + b(mat3(v_1.inner[1u].col0, v_1.inner[1u].col1, v_1.inner[1u].col2)));
+  float v_9 = (v_8 + c(v_1.inner[1u].col0.zxy));
+  v_2.inner = (v_9 + d(v_1.inner[1u].col0.zxy.x));
 }

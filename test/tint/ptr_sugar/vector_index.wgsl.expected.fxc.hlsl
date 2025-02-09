@@ -13,28 +13,28 @@ void no_deref_const() {
 void deref_let() {
   int3 a = int3(0, 0, 0);
   int i = 0;
-  int b = a[i];
+  int b = a[min(uint(i), 2u)];
   a[0] = 42;
 }
 
 void no_deref_let() {
   int3 a = int3(0, 0, 0);
   int i = 0;
-  int b = a[i];
+  int b = a[min(uint(i), 2u)];
   a[0] = 42;
 }
 
 void deref_var() {
   int3 a = int3(0, 0, 0);
   int i = 0;
-  int b = a[i];
+  int b = a[min(uint(i), 2u)];
   a[0] = 42;
 }
 
 void no_deref_var() {
   int3 a = int3(0, 0, 0);
   int i = 0;
-  int b = a[i];
+  int b = a[min(uint(i), 2u)];
   a[0] = 42;
 }
 

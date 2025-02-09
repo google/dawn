@@ -246,10 +246,10 @@ MaybeError Queue::WriteBufferImpl(BufferBase* buffer,
     return ToBackend(buffer)->Write(&commandContext, bufferOffset, data, size);
 }
 
-MaybeError Queue::WriteTextureImpl(const ImageCopyTexture& destination,
+MaybeError Queue::WriteTextureImpl(const TexelCopyTextureInfo& destination,
                                    const void* data,
                                    size_t dataSize,
-                                   const TextureDataLayout& dataLayout,
+                                   const TexelCopyBufferLayout& dataLayout,
                                    const Extent3D& writeSizePixel) {
     if (writeSizePixel.width == 0 || writeSizePixel.height == 0 ||
         writeSizePixel.depthOrArrayLayers == 0) {

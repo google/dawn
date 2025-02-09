@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void min_371bd6() {
   int3 res = (1).xxx;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   min_371bd6();
   return;
 }
+//
+// compute_main
+//
+void min_371bd6() {
+  int3 res = (1).xxx;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   min_371bd6();
   return;
+}
+//
+// vertex_main
+//
+void min_371bd6() {
+  int3 res = (1).xxx;
 }
 
 struct VertexOutput {

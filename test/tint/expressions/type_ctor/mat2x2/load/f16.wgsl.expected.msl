@@ -1,9 +1,12 @@
 #include <metal_stdlib>
-
 using namespace metal;
-kernel void f(device half2x2* tint_symbol [[buffer(0)]]) {
-  half2x2 m = half2x2(half2(0.0h), half2(0.0h));
-  *(tint_symbol) = half2x2(m);
-  return;
-}
 
+struct tint_module_vars_struct {
+  device half2x2* out;
+};
+
+kernel void f(device half2x2* out [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.out=out};
+  half2x2 m = half2x2(half2(0.0h), half2(0.0h));
+  (*tint_module_vars.out) = half2x2(m);
+}

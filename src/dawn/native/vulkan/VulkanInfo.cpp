@@ -304,6 +304,12 @@ ResultOrError<VulkanDeviceInfo> GatherDeviceInfo(const PhysicalDevice& device) {
                 VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ZERO_INITIALIZE_WORKGROUP_MEMORY_FEATURES);
         }
 
+        if (info.extensions[DeviceExt::DemoteToHelperInvocation]) {
+            featuresChain.Add(
+                &info.demoteToHelperInvocationFeatures,
+                VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_DEMOTE_TO_HELPER_INVOCATION_FEATURES_EXT);
+        }
+
         if (info.extensions[DeviceExt::Robustness2]) {
             featuresChain.Add(&info.robustness2Features,
                               VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ROBUSTNESS_2_FEATURES_EXT);
@@ -317,11 +323,6 @@ ResultOrError<VulkanDeviceInfo> GatherDeviceInfo(const PhysicalDevice& device) {
         // Check subgroup features and properties
         propertiesChain.Add(&info.subgroupProperties,
                             VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBGROUP_PROPERTIES);
-        if (info.extensions[DeviceExt::ShaderSubgroupUniformControlFlow]) {
-            featuresChain.Add(
-                &info.shaderSubgroupUniformControlFlowFeatures,
-                VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_SUBGROUP_UNIFORM_CONTROL_FLOW_FEATURES_KHR);
-        }
         if (info.extensions[DeviceExt::ShaderSubgroupExtendedTypes]) {
             featuresChain.Add(
                 &info.shaderSubgroupExtendedTypes,
@@ -332,6 +333,11 @@ ResultOrError<VulkanDeviceInfo> GatherDeviceInfo(const PhysicalDevice& device) {
             propertiesChain.Add(
                 &info.externalMemoryHostProperties,
                 VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTERNAL_MEMORY_HOST_PROPERTIES_EXT);
+        }
+
+        if (info.extensions[DeviceExt::VulkanMemoryModel]) {
+            featuresChain.Add(&info.vulkanMemoryModelFeatures,
+                              VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_MEMORY_MODEL_FEATURES);
         }
 
         // Use vkGetPhysicalDevice{Features,Properties}2 if required to gather information about

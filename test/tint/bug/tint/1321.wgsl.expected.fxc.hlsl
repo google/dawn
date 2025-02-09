@@ -7,7 +7,7 @@ void main() {
   int a_save = foo();
   {
     for(; ; ) {
-      float x = arr[a_save];
+      float x = arr[min(uint(a_save), 3u)];
       break;
     }
   }

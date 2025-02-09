@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 RWByteAddressBuffer prevent_dce : register(u0);
 
 vector<float16_t, 2> refract_570cb3() {
@@ -12,11 +15,33 @@ void fragment_main() {
   prevent_dce.Store<vector<float16_t, 2> >(0u, refract_570cb3());
   return;
 }
+//
+// compute_main
+//
+RWByteAddressBuffer prevent_dce : register(u0);
+
+vector<float16_t, 2> refract_570cb3() {
+  vector<float16_t, 2> arg_0 = (float16_t(1.0h)).xx;
+  vector<float16_t, 2> arg_1 = (float16_t(1.0h)).xx;
+  float16_t arg_2 = float16_t(1.0h);
+  vector<float16_t, 2> res = refract(arg_0, arg_1, arg_2);
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store<vector<float16_t, 2> >(0u, refract_570cb3());
   return;
+}
+//
+// vertex_main
+//
+vector<float16_t, 2> refract_570cb3() {
+  vector<float16_t, 2> arg_0 = (float16_t(1.0h)).xx;
+  vector<float16_t, 2> arg_1 = (float16_t(1.0h)).xx;
+  float16_t arg_2 = float16_t(1.0h);
+  vector<float16_t, 2> res = refract(arg_0, arg_1, arg_2);
+  return res;
 }
 
 struct VertexOutput {

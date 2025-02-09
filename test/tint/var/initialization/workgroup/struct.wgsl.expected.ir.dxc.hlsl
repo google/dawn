@@ -10,7 +10,7 @@ struct main_inputs {
 
 groupshared S v;
 void main_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     S v_1 = (S)0;
     v = v_1;
   }

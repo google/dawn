@@ -11,28 +11,32 @@
                ^
 
 #include <metal_stdlib>
-
 using namespace metal;
 
-#define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
-
-struct tint_symbol_2 {
+struct main_inputs {
   float x [[user(locn0)]];
 };
 
-void tint_symbol_inner(float x) {
-  while(true) {
-    TINT_ISOLATE_UB(tint_volatile_false);
-    float const tint_phony = dfdx(1.0f);
-    {
-      if ((x > 0.0f)) { break; }
+void main_inner(float x) {
+  {
+    uint2 tint_loop_idx = 0u;
+    while(true) {
+      if (all((tint_loop_idx == uint2(4294967295u)))) {
+        break;
+      }
+      dfdx(1.0f);
+      {
+        uint const tint_low_inc = (tint_loop_idx.x + 1u);
+        tint_loop_idx.x = tint_low_inc;
+        uint const tint_carry = uint((tint_low_inc == 0u));
+        tint_loop_idx.y = (tint_loop_idx.y + tint_carry);
+        if ((x > 0.0f)) { break; }
+      }
+      continue;
     }
   }
 }
 
-fragment void tint_symbol(tint_symbol_2 tint_symbol_1 [[stage_in]]) {
-  tint_symbol_inner(tint_symbol_1.x);
-  return;
+fragment void v(main_inputs inputs [[stage_in]]) {
+  main_inner(inputs.x);
 }
-

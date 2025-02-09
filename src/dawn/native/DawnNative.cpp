@@ -89,25 +89,8 @@ Adapter& Adapter::operator=(const Adapter& other) {
     return *this;
 }
 
-wgpu::Status Adapter::GetInfo(wgpu::AdapterInfo* info) const {
-    return GetInfo(reinterpret_cast<WGPUAdapterInfo*>(info));
-}
-
-wgpu::Status Adapter::GetInfo(WGPUAdapterInfo* info) const {
-    return mImpl->APIGetInfo(FromAPI(info));
-}
-
 WGPUAdapter Adapter::Get() const {
     return ToAPI(mImpl);
-}
-
-std::vector<const char*> Adapter::GetSupportedFeatures() const {
-    FeaturesSet supportedFeaturesSet = mImpl->GetSupportedFeatures();
-    return supportedFeaturesSet.GetEnabledFeatureNames();
-}
-
-wgpu::ConvertibleStatus Adapter::GetLimits(WGPUSupportedLimits* limits) const {
-    return mImpl->APIGetLimits(FromAPI(limits));
 }
 
 void Adapter::SetUseTieredLimits(bool useTieredLimits) {
@@ -128,20 +111,6 @@ WGPUDevice Adapter::CreateDevice(const wgpu::DeviceDescriptor* deviceDescriptor)
 
 WGPUDevice Adapter::CreateDevice(const WGPUDeviceDescriptor* deviceDescriptor) {
     return ToAPI(mImpl->APICreateDevice(FromAPI(deviceDescriptor)));
-}
-
-void Adapter::RequestDevice(const wgpu::DeviceDescriptor* descriptor,
-                            WGPURequestDeviceCallback callback,
-                            void* userdata) {
-    mImpl->APIRequestDevice(reinterpret_cast<const DeviceDescriptor*>(descriptor), callback,
-                            userdata);
-}
-
-void Adapter::RequestDevice(const WGPUDeviceDescriptor* descriptor,
-                            WGPURequestDeviceCallback callback,
-                            void* userdata) {
-    mImpl->APIRequestDevice(reinterpret_cast<const DeviceDescriptor*>(descriptor), callback,
-                            userdata);
 }
 
 void Adapter::ResetInternalDeviceForTesting() {
@@ -166,6 +135,11 @@ bool DawnInstanceDescriptor::operator==(const DawnInstanceDescriptor& rhs) const
 // Instance
 
 Instance::Instance(const WGPUInstanceDescriptor* desc)
+    : mImpl(APICreateInstance(reinterpret_cast<const InstanceDescriptor*>(desc))) {
+    tint::Initialize();
+}
+
+Instance::Instance(const wgpu::InstanceDescriptor* desc)
     : mImpl(APICreateInstance(reinterpret_cast<const InstanceDescriptor*>(desc))) {
     tint::Initialize();
 }

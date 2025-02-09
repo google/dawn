@@ -29,6 +29,7 @@
 #define SRC_DAWN_NATIVE_OPENGL_GLFORMAT_H_
 
 #include "dawn/native/Format.h"
+#include "dawn/native/opengl/OpenGLFunctions.h"
 #include "dawn/native/opengl/opengl_platform.h"
 
 namespace dawn::native::opengl {
@@ -38,6 +39,7 @@ struct GLFormat {
     GLenum format = 0;
     GLenum type = 0;
     bool isSupportedOnBackend = false;
+    bool isSupportedForTextureStorage = false;
 
     // OpenGL has different functions depending on the format component type, for example
     // glClearBufferfv is only valid on formats with the Float ComponentType
@@ -46,7 +48,7 @@ struct GLFormat {
 };
 
 using GLFormatTable = ityp::array<FormatIndex, GLFormat, kKnownFormatCount>;
-GLFormatTable BuildGLFormatTable(GLenum internalFormatForBGRA);
+GLFormatTable BuildGLFormatTable(const OpenGLFunctions& gl);
 
 }  // namespace dawn::native::opengl
 

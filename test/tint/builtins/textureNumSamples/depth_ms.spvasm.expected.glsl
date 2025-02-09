@@ -1,3 +1,6 @@
+//
+// vertex_main
+//
 #version 310 es
 
 
@@ -11,7 +14,7 @@ struct vertex_main_out {
 
 vec4 tint_symbol_1 = vec4(0.0f);
 layout(binding = 0, std140)
-uniform tint_symbol_3_1_ubo {
+uniform v_tint_symbol_3_ubo {
   TintTextureUniformData inner;
 } v;
 void textureNumSamples_a3c8a0() {
@@ -30,11 +33,13 @@ vertex_main_out vertex_main_inner() {
   return vertex_main_out(tint_symbol_1);
 }
 void main() {
-  gl_Position = vertex_main_inner().tint_symbol_1_1;
-  gl_Position[1u] = -(gl_Position.y);
-  gl_Position[2u] = ((2.0f * gl_Position.z) - gl_Position.w);
+  vec4 v_1 = vertex_main_inner().tint_symbol_1_1;
+  gl_Position = vec4(v_1.x, -(v_1.y), ((2.0f * v_1.z) - v_1.w), v_1.w);
   gl_PointSize = 1.0f;
 }
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
@@ -45,7 +50,7 @@ struct TintTextureUniformData {
 };
 
 layout(binding = 0, std140)
-uniform tint_symbol_3_1_ubo {
+uniform f_tint_symbol_ubo {
   TintTextureUniformData inner;
 } v;
 void textureNumSamples_a3c8a0() {
@@ -58,6 +63,9 @@ void fragment_main_1() {
 void main() {
   fragment_main_1();
 }
+//
+// compute_main
+//
 #version 310 es
 
 
@@ -66,7 +74,7 @@ struct TintTextureUniformData {
 };
 
 layout(binding = 0, std140)
-uniform tint_symbol_3_1_ubo {
+uniform tint_symbol_1_ubo {
   TintTextureUniformData inner;
 } v;
 void textureNumSamples_a3c8a0() {

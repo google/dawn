@@ -19,7 +19,7 @@ float3x3 m_load(uint offset) {
 void f() {
   int p_m_i_save = i();
   float3x3 l_m = m_load(0u);
-  const uint scalar_offset_3 = ((16u * uint(p_m_i_save))) / 4;
+  const uint scalar_offset_3 = ((16u * min(uint(p_m_i_save), 2u))) / 4;
   float3 l_m_i = asfloat(m[scalar_offset_3 / 4].xyz);
   return;
 }

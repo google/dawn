@@ -20,7 +20,7 @@ buffer s_block_1_ssbo {
 } v_1;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  mat3 v_2 = mat3(v.inner[2].col0, v.inner[2].col1, v.inner[2].col2);
+  mat3 v_2 = mat3(v.inner[2u].col0, v.inner[2u].col1, v.inner[2u].col2);
   mat3x3_f32_std140 v_3[4] = v.inner;
   mat3 v_4[4] = mat3[4](mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f)), mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f)), mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f)), mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f)));
   {
@@ -40,6 +40,6 @@ void main() {
   }
   mat3 l_a[4] = v_4;
   mat3 l_a_i = v_2;
-  vec3 l_a_i_i = v_2[1];
-  v_1.inner = (((v_2[1][0u] + l_a[0][0][0u]) + l_a_i[0][0u]) + l_a_i_i[0u]);
+  vec3 l_a_i_i = v_2[1u];
+  v_1.inner = (((v_2[1u].x + l_a[0u][0u].x) + l_a_i[0u].x) + l_a_i_i.x);
 }

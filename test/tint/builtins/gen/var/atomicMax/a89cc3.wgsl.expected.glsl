@@ -11,7 +11,7 @@ int atomicMax_a89cc3() {
   return res;
 }
 void compute_main_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     atomicExchange(arg_0, 0);
   }
   barrier();

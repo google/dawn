@@ -112,13 +112,14 @@ class SamplerTest : public DawnTest {
         wgpu::Buffer stagingBuffer =
             utils::CreateBufferFromData(device, pixels.data(), pixels.size() * sizeof(utils::RGBA8),
                                         wgpu::BufferUsage::CopySrc);
-        wgpu::ImageCopyBuffer imageCopyBuffer = utils::CreateImageCopyBuffer(stagingBuffer, 0, 256);
-        wgpu::ImageCopyTexture imageCopyTexture =
-            utils::CreateImageCopyTexture(texture, 0, {0, 0, 0});
+        wgpu::TexelCopyBufferInfo texelCopyBufferInfo =
+            utils::CreateTexelCopyBufferInfo(stagingBuffer, 0, 256);
+        wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(texture, 0, {0, 0, 0});
         wgpu::Extent3D copySize = {2, 2, 1};
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        encoder.CopyBufferToTexture(&imageCopyBuffer, &imageCopyTexture, &copySize);
+        encoder.CopyBufferToTexture(&texelCopyBufferInfo, &texelCopyTextureInfo, &copySize);
 
         wgpu::CommandBuffer copy = encoder.Finish();
         queue.Submit(1, &copy);

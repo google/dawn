@@ -1,36 +1,40 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
-
 using namespace metal;
-struct tint_private_vars_struct {
-  uint tint_msl_thread_index_in_quadgroup;
+
+struct tint_module_vars_struct {
+  device packed_float3* prevent_dce;
 };
 
-
-float3 tint_msl_quadSwapY(float3 e, thread tint_private_vars_struct* const tint_private_vars) {
-  return quad_shuffle(e,((*(tint_private_vars)).tint_msl_thread_index_in_quadgroup ^ 2u));
-}
-
-float3 quadSwapY_d1ab4d(thread tint_private_vars_struct* const tint_private_vars) {
+float3 quadSwapY_d1ab4d() {
   float3 arg_0 = float3(1.0f);
-  float3 res = tint_msl_quadSwapY(arg_0, tint_private_vars);
+  float3 res = quad_shuffle_xor(arg_0, 2u);
   return res;
 }
 
-fragment void fragment_main(device packed_float3* tint_symbol [[buffer(0)]], uint tint_thread_index_in_quadgroup [[thread_index_in_quadgroup]]) {
-  thread tint_private_vars_struct tint_private_vars = {};
-  {
-    tint_private_vars.tint_msl_thread_index_in_quadgroup = tint_thread_index_in_quadgroup;
-  }
-  *(tint_symbol) = packed_float3(quadSwapY_d1ab4d(&(tint_private_vars)));
-  return;
+fragment void fragment_main(device packed_float3* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  (*tint_module_vars.prevent_dce) = packed_float3(quadSwapY_d1ab4d());
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+struct tint_module_vars_struct {
+  device packed_float3* prevent_dce;
+};
+
+float3 quadSwapY_d1ab4d() {
+  float3 arg_0 = float3(1.0f);
+  float3 res = quad_shuffle_xor(arg_0, 2u);
+  return res;
 }
 
-kernel void compute_main(device packed_float3* tint_symbol_1 [[buffer(0)]], uint tint_thread_index_in_quadgroup_1 [[thread_index_in_quadgroup]]) {
-  thread tint_private_vars_struct tint_private_vars = {};
-  {
-    tint_private_vars.tint_msl_thread_index_in_quadgroup = tint_thread_index_in_quadgroup_1;
-  }
-  *(tint_symbol_1) = packed_float3(quadSwapY_d1ab4d(&(tint_private_vars)));
-  return;
+kernel void compute_main(device packed_float3* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  (*tint_module_vars.prevent_dce) = packed_float3(quadSwapY_d1ab4d());
 }
-

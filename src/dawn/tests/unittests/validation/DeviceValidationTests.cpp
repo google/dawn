@@ -247,44 +247,37 @@ TEST_F(RequestDeviceValidationTest, InvalidChainedStruct) {
 TEST_F(RequestDeviceValidationTest, SubgroupsF16FeatureDependency) {
     for (bool requireShaderF16 : {false, true}) {
         for (bool requireSubgroups : {false, true}) {
-            // TODO(349125474): Remove deprecated ChromiumExperimentalSubgroups.
-            for (bool requireChromiumExperimentalSubgroups : {false, true}) {
-                std::vector<wgpu::FeatureName> features;
-                if (requireShaderF16) {
-                    features.push_back(wgpu::FeatureName::ShaderF16);
-                }
-                if (requireSubgroups) {
-                    features.push_back(wgpu::FeatureName::Subgroups);
-                }
-                if (requireChromiumExperimentalSubgroups) {
-                    features.push_back(wgpu::FeatureName::ChromiumExperimentalSubgroups);
-                }
-                features.push_back(wgpu::FeatureName::SubgroupsF16);
-
-                wgpu::DeviceDescriptor descriptor;
-                descriptor.requiredFeatureCount = features.size();
-                descriptor.requiredFeatures = features.data();
-
-                // Device request with subgroups-f16 feature can only success if shader-f16 feature
-                // and subgroups or chromium-experimental-subgroups features are required as well.
-                const bool isSuccess =
-                    (requireSubgroups || requireChromiumExperimentalSubgroups) && requireShaderF16;
-
-                if (isSuccess) {
-                    EXPECT_CALL(mRequestDeviceCallback, Call(wgpu::RequestDeviceStatus::Success,
-                                                             NotNull(), EmptySizedString()))
-                        .Times(1);
-                } else {
-                    EXPECT_CALL(mRequestDeviceCallback, Call(wgpu::RequestDeviceStatus::Error,
-                                                             IsNull(), NonEmptySizedString()))
-                        .Times(1);
-                }
-
-                EXPECT_DEPRECATION_WARNINGS(
-                    adapter.RequestDevice(&descriptor, wgpu::CallbackMode::AllowSpontaneous,
-                                          mRequestDeviceCallback.Callback()),
-                    GetDeviceCreationDeprecationWarningExpectation(descriptor));
+            std::vector<wgpu::FeatureName> features;
+            if (requireShaderF16) {
+                features.push_back(wgpu::FeatureName::ShaderF16);
             }
+            if (requireSubgroups) {
+                features.push_back(wgpu::FeatureName::Subgroups);
+            }
+            features.push_back(wgpu::FeatureName::SubgroupsF16);
+
+            wgpu::DeviceDescriptor descriptor;
+            descriptor.requiredFeatureCount = features.size();
+            descriptor.requiredFeatures = features.data();
+
+            // Device request with subgroups-f16 feature can only success if shader-f16 feature
+            // and subgroups features are required as well.
+            const bool isSuccess = requireSubgroups && requireShaderF16;
+
+            if (isSuccess) {
+                EXPECT_CALL(mRequestDeviceCallback,
+                            Call(wgpu::RequestDeviceStatus::Success, NotNull(), EmptySizedString()))
+                    .Times(1);
+            } else {
+                EXPECT_CALL(mRequestDeviceCallback,
+                            Call(wgpu::RequestDeviceStatus::Error, IsNull(), NonEmptySizedString()))
+                    .Times(1);
+            }
+
+            EXPECT_DEPRECATION_WARNINGS(
+                adapter.RequestDevice(&descriptor, wgpu::CallbackMode::AllowSpontaneous,
+                                      mRequestDeviceCallback.Callback()),
+                GetDeviceCreationDeprecationWarningExpectation(descriptor));
         }
     }
 }

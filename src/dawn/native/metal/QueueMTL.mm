@@ -72,13 +72,11 @@ MaybeError Queue::Initialize() {
         return DAWN_INTERNAL_ERROR("Failed to allocate MTLCommandQueue.");
     }
 
-    if (@available(macOS 10.14, iOS 12.0, *)) {
-        mMtlSharedEvent.Acquire([mtlDevice newSharedEvent]);
-        if (mMtlSharedEvent == nil) {
-            return DAWN_INTERNAL_ERROR("Failed to create MTLSharedEvent.");
-        }
-        DAWN_TRY_ASSIGN(mSharedFence, GetOrCreateSharedFence());
+    mMtlSharedEvent.Acquire([mtlDevice newSharedEvent]);
+    if (mMtlSharedEvent == nil) {
+        return DAWN_INTERNAL_ERROR("Failed to create MTLSharedEvent.");
     }
+    DAWN_TRY_ASSIGN(mSharedFence, GetOrCreateSharedFence());
 
     return mCommandContext.PrepareNextCommandBuffer(*mCommandQueue);
 }
@@ -185,11 +183,11 @@ MaybeError Queue::SubmitPendingCommandBuffer() {
 
     TRACE_EVENT_ASYNC_BEGIN0(platform, GPUWork, "DeviceMTL::SubmitPendingCommandBuffer",
                              uint64_t(pendingSerial));
-    if (@available(macOS 10.14, iOS 12.0, *)) {
-        DAWN_ASSERT(mSharedFence);
-        [*pendingCommands encodeSignalEvent:mSharedFence->GetMTLSharedEvent()
-                                      value:static_cast<uint64_t>(pendingSerial)];
-    }
+
+    DAWN_ASSERT(mSharedFence);
+    [*pendingCommands encodeSignalEvent:mSharedFence->GetMTLSharedEvent()
+                                  value:static_cast<uint64_t>(pendingSerial)];
+
     [*pendingCommands commit];
 
     return mCommandContext.PrepareNextCommandBuffer(*mCommandQueue);

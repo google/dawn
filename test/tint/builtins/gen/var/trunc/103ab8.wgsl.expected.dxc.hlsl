@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 vector<float16_t, 3> tint_trunc(vector<float16_t, 3> param_0) {
   return param_0 < 0 ? ceil(param_0) : floor(param_0);
 }
@@ -14,11 +17,37 @@ void fragment_main() {
   prevent_dce.Store<vector<float16_t, 3> >(0u, trunc_103ab8());
   return;
 }
+//
+// compute_main
+//
+vector<float16_t, 3> tint_trunc(vector<float16_t, 3> param_0) {
+  return param_0 < 0 ? ceil(param_0) : floor(param_0);
+}
+
+RWByteAddressBuffer prevent_dce : register(u0);
+
+vector<float16_t, 3> trunc_103ab8() {
+  vector<float16_t, 3> arg_0 = (float16_t(1.5h)).xxx;
+  vector<float16_t, 3> res = tint_trunc(arg_0);
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store<vector<float16_t, 3> >(0u, trunc_103ab8());
   return;
+}
+//
+// vertex_main
+//
+vector<float16_t, 3> tint_trunc(vector<float16_t, 3> param_0) {
+  return param_0 < 0 ? ceil(param_0) : floor(param_0);
+}
+
+vector<float16_t, 3> trunc_103ab8() {
+  vector<float16_t, 3> arg_0 = (float16_t(1.5h)).xxx;
+  vector<float16_t, 3> res = tint_trunc(arg_0);
+  return res;
 }
 
 struct VertexOutput {

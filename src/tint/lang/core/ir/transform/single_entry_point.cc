@@ -31,7 +31,7 @@
 
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/referenced_functions.h"
-#include "src/tint/lang/core/ir/referenced_module_vars.h"
+#include "src/tint/lang/core/ir/referenced_module_decls.h"
 #include "src/tint/lang/core/ir/validator.h"
 
 namespace tint::core::ir::transform {
@@ -42,7 +42,7 @@ Result<SuccessType> Run(ir::Module& ir, std::string_view entry_point_name) {
     // Find the entry point.
     ir::Function* entry_point = nullptr;
     for (auto& func : ir.functions) {
-        if (func->Stage() == Function::PipelineStage::kUndefined) {
+        if (!func->IsEntryPoint()) {
             continue;
         }
         if (ir.NameOf(func).NameView() == entry_point_name) {
@@ -71,20 +71,21 @@ Result<SuccessType> Run(ir::Module& ir, std::string_view entry_point_name) {
     }
 
     // Remove unused module-scope variables.
-    ReferencedModuleVars<Module> referenced_var_cache(ir);
+    ReferencedModuleDecls<Module> referenced_var_cache(ir);
     auto& referenced_vars = referenced_var_cache.TransitiveReferences(entry_point);
-    auto* inst = ir.root_block->Front();
+    auto* inst = ir.root_block->Back();
+
+    // The instructions are removed in reverse order. This is in order to handle overrides which
+    // have an initializer. If the initializer is made of multiple instructions we need to delete
+    // the later one first to remove the usage from the earlier instruction.
     while (inst) {
-        // TODO(374971092): Handle removal of override instructions.
-        auto* var = inst->As<Var>();
-        TINT_ASSERT(var);
-        inst = var->next;
-        if (!referenced_vars.Contains(var)) {
+        auto prev = inst->prev;
+        if (!referenced_vars.Contains(inst)) {
             // There shouldn't be any remaining references to the variable.
-            // This will not always be the case once we have override support.
-            TINT_ASSERT(var->Result(0)->NumUsages() == 0);
-            var->Destroy();
+            TINT_ASSERT(inst->Result(0)->NumUsages() == 0);
+            inst->Destroy();
         }
+        inst = prev;
     }
 
     return Success;
@@ -93,7 +94,8 @@ Result<SuccessType> Run(ir::Module& ir, std::string_view entry_point_name) {
 }  // namespace
 
 Result<SuccessType> SingleEntryPoint(Module& ir, std::string_view entry_point_name) {
-    auto result = ValidateAndDumpIfNeeded(ir, "core.SingleEntryPoint");
+    auto result = ValidateAndDumpIfNeeded(
+        ir, "core.SingleEntryPoint", core::ir::Capabilities{core::ir::Capability::kAllowOverrides});
     if (result != Success) {
         return result.Failure();
     }

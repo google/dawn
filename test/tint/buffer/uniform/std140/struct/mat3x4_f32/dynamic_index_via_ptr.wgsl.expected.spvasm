@@ -1,9 +1,10 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 54
+; Bound: 65
 ; Schema: 0
                OpCapability Shader
+         %34 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %f "f"
                OpExecutionMode %f LocalSize 1 1 1
@@ -62,10 +63,12 @@
          %26 = OpTypeFunction %void
 %_ptr_Uniform__arr_Outer_uint_4 = OpTypePointer Uniform %_arr_Outer_uint_4
      %uint_0 = OpConstant %uint 0
+     %uint_3 = OpConstant %uint 3
 %_ptr_Uniform_Outer = OpTypePointer Uniform %Outer
 %_ptr_Uniform__arr_Inner_uint_4 = OpTypePointer Uniform %_arr_Inner_uint_4
 %_ptr_Uniform_Inner = OpTypePointer Uniform %Inner
 %_ptr_Uniform_mat3v4float = OpTypePointer Uniform %mat3v4float
+     %uint_2 = OpConstant %uint 2
 %_ptr_Uniform_v4float = OpTypePointer Uniform %v4float
 %_ptr_Uniform_float = OpTypePointer Uniform %float
           %i = OpFunction %int None %18
@@ -80,21 +83,29 @@
          %27 = OpLabel
         %p_a = OpAccessChain %_ptr_Uniform__arr_Outer_uint_4 %1 %uint_0
          %31 = OpFunctionCall %int %i
-      %p_a_i = OpAccessChain %_ptr_Uniform_Outer %p_a %31
+         %32 = OpBitcast %uint %31
+         %33 = OpExtInst %uint %34 UMin %32 %uint_3
+      %p_a_i = OpAccessChain %_ptr_Uniform_Outer %p_a %33
     %p_a_i_a = OpAccessChain %_ptr_Uniform__arr_Inner_uint_4 %p_a_i %uint_0
-         %36 = OpFunctionCall %int %i
-  %p_a_i_a_i = OpAccessChain %_ptr_Uniform_Inner %p_a_i_a %36
+         %40 = OpFunctionCall %int %i
+         %41 = OpBitcast %uint %40
+         %42 = OpExtInst %uint %34 UMin %41 %uint_3
+  %p_a_i_a_i = OpAccessChain %_ptr_Uniform_Inner %p_a_i_a %42
 %p_a_i_a_i_m = OpAccessChain %_ptr_Uniform_mat3v4float %p_a_i_a_i %uint_0
-         %41 = OpFunctionCall %int %i
-%p_a_i_a_i_m_i = OpAccessChain %_ptr_Uniform_v4float %p_a_i_a_i_m %41
+         %47 = OpFunctionCall %int %i
+         %48 = OpBitcast %uint %47
+         %49 = OpExtInst %uint %34 UMin %48 %uint_2
+%p_a_i_a_i_m_i = OpAccessChain %_ptr_Uniform_v4float %p_a_i_a_i_m %49
         %l_a = OpLoad %_arr_Outer_uint_4 %p_a None
       %l_a_i = OpLoad %Outer %p_a_i None
     %l_a_i_a = OpLoad %_arr_Inner_uint_4 %p_a_i_a None
   %l_a_i_a_i = OpLoad %Inner %p_a_i_a_i None
 %l_a_i_a_i_m = OpLoad %mat3v4float %p_a_i_a_i_m None
 %l_a_i_a_i_m_i = OpLoad %v4float %p_a_i_a_i_m_i None
-         %50 = OpFunctionCall %int %i
-         %51 = OpAccessChain %_ptr_Uniform_float %p_a_i_a_i_m_i %50
-%l_a_i_a_i_m_i_i = OpLoad %float %51 None
+         %59 = OpFunctionCall %int %i
+         %60 = OpBitcast %uint %59
+         %61 = OpExtInst %uint %34 UMin %60 %uint_3
+         %62 = OpAccessChain %_ptr_Uniform_float %p_a_i_a_i_m_i %61
+%l_a_i_a_i_m_i_i = OpLoad %float %62 None
                OpReturn
                OpFunctionEnd

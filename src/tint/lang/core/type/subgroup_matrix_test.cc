@@ -43,8 +43,8 @@ TEST_F(SubgroupMatrixTest, Creation) {
 
     EXPECT_EQ(l1->Type(), f32);
     EXPECT_EQ(l1->Kind(), SubgroupMatrixKind::kLeft);
-    EXPECT_EQ(l1->Rows(), 3u);
-    EXPECT_EQ(l1->Columns(), 4u);
+    EXPECT_EQ(l1->Columns(), 3u);
+    EXPECT_EQ(l1->Rows(), 4u);
 }
 
 TEST_F(SubgroupMatrixTest, Creation_TypeManager) {
@@ -55,8 +55,8 @@ TEST_F(SubgroupMatrixTest, Creation_TypeManager) {
         ASSERT_NE(l, nullptr);
         EXPECT_EQ(SubgroupMatrixKind::kRight, l->Kind());
         EXPECT_EQ(mgr.f32(), l->Type());
-        EXPECT_EQ(2u, l->Rows());
-        EXPECT_EQ(4u, l->Columns());
+        EXPECT_EQ(2u, l->Columns());
+        EXPECT_EQ(4u, l->Rows());
     }
 
     {
@@ -133,8 +133,8 @@ TEST_F(SubgroupMatrixTest, Clone) {
     auto* s = a->Clone(ctx);
     EXPECT_EQ(SubgroupMatrixKind::kResult, s->Kind());
     EXPECT_TRUE(s->Type()->Is<I32>());
-    EXPECT_EQ(s->Rows(), 3u);
-    EXPECT_EQ(s->Columns(), 4u);
+    EXPECT_EQ(s->Columns(), 3u);
+    EXPECT_EQ(s->Rows(), 4u);
 }
 
 }  // namespace

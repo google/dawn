@@ -43,6 +43,7 @@
 #include "dawn/native/Forward.h"
 #include "dawn/native/IntegerTypes.h"
 #include "dawn/native/SystemEvent.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::native {
 
@@ -59,7 +60,7 @@ struct InstanceDescriptor;
 //   serials advance, e.g. Submit, or when checking a later wait before an earlier wait.
 class EventManager final : NonMovable {
   public:
-    EventManager();
+    explicit EventManager(InstanceBase* instance);
     ~EventManager();
 
     MaybeError Initialize(const UnpackedPtr<InstanceDescriptor>& descriptor);
@@ -81,6 +82,10 @@ class EventManager final : NonMovable {
 
   private:
     bool IsShutDown() const;
+
+    // Raw pointer to the Instance to allow for logging. The Instance owns the EventManager, so a
+    // raw pointer here is always safe.
+    raw_ptr<const InstanceBase> mInstance;
 
     bool mTimedWaitAnyEnable = false;
     size_t mTimedWaitAnyMaxCount = kTimedWaitAnyMaxCountDefault;
@@ -130,7 +135,8 @@ class EventManager::TrackedEvent : public RefCounted {
     // EventCompletionType::Shutdown.
     ~TrackedEvent() override;
 
-    class WaitRef;
+    Future GetFuture() const;
+
     // Events may be one of two types:
     // - A queue and the ExecutionSerial after which the event will be completed.
     //   Used for queue completion.

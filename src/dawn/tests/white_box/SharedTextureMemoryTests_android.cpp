@@ -194,7 +194,8 @@ class SharedTextureMemoryTestAndroidOpenGLESBackend
     }
 
     std::vector<wgpu::FeatureName> RequiredFeatures(const wgpu::Adapter&) const override {
-        return {wgpu::FeatureName::SharedTextureMemoryAHardwareBuffer};
+        return {wgpu::FeatureName::SharedTextureMemoryAHardwareBuffer,
+                wgpu::FeatureName::SharedFenceSyncFD};
     }
 };
 
@@ -235,16 +236,20 @@ TEST_P(SharedTextureMemoryTests, GPUWriteThenCPURead) {
 
     wgpu::SharedTextureMemoryBeginAccessDescriptor beginDesc = {};
     wgpu::SharedTextureMemoryVkImageLayoutBeginState beginLayout{};
-    beginLayout.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    beginLayout.newLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    beginDesc.nextInChain = &beginLayout;
+    if (IsVulkan()) {
+        beginLayout.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        beginLayout.newLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        beginDesc.nextInChain = &beginLayout;
+    }
     memory.BeginAccess(texture, &beginDesc);
 
     device.GetQueue().Submit(1, &commandBuffer);
 
     wgpu::SharedTextureMemoryEndAccessState endState = {};
     wgpu::SharedTextureMemoryVkImageLayoutEndState endLayout{};
-    endState.nextInChain = &endLayout;
+    if (IsVulkan()) {
+        endState.nextInChain = &endLayout;
+    }
     memory.EndAccess(texture, &endState);
 
     wgpu::SharedFenceExportInfo exportInfo;
@@ -332,8 +337,11 @@ TEST_P(SharedTextureMemoryTests, CPUWriteThenGPURead) {
 
     wgpu::SharedTextureMemoryBeginAccessDescriptor beginDesc = {};
     beginDesc.initialized = true;
+
     wgpu::SharedTextureMemoryVkImageLayoutBeginState beginLayout{};
-    beginDesc.nextInChain = &beginLayout;
+    if (IsVulkan()) {
+        beginDesc.nextInChain = &beginLayout;
+    }
 
     memory.BeginAccess(texture, &beginDesc);
     EXPECT_TEXTURE_EQ(expected.data(), texture, {0, 0},

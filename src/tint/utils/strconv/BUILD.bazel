@@ -56,7 +56,6 @@ cc_library(
     "//src/tint/utils/result",
     "//src/tint/utils/rtti",
     "//src/tint/utils/text",
-    "//src/tint/utils/traits",
     "@abseil_cpp//absl/strings",
     "//src/utils",
   ],

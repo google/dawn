@@ -17,7 +17,11 @@ void zoo() {
 void bar(float a, float b) {
   p = a;
   w = b;
-  storages.Store(0u, asuint(asfloat(uniforms.Load(0u))));
+  uint v = 0u;
+  storages.GetDimensions(v);
+  uint v_1 = ((v / 4u) - 1u);
+  uint v_2 = (min(uint(int(0)), v_1) * 4u);
+  storages.Store((0u + v_2), asuint(asfloat(uniforms.Load(0u))));
   zoo();
 }
 
@@ -28,7 +32,7 @@ void foo(float a) {
 }
 
 void main_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     w = 0.0f;
   }
   GroupMemoryBarrierWithGroupSync();

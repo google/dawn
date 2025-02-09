@@ -108,10 +108,11 @@ TEST_P(Texture3DTests, Sampling) {
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
-    wgpu::ImageCopyBuffer imageCopyBuffer =
-        utils::CreateImageCopyBuffer(buffer, 0, bytesPerRow, copySize.height);
-    wgpu::ImageCopyTexture imageCopyTexture = utils::CreateImageCopyTexture(texture, 0, {0, 0, 0});
-    encoder.CopyBufferToTexture(&imageCopyBuffer, &imageCopyTexture, &copySize);
+    wgpu::TexelCopyBufferInfo texelCopyBufferInfo =
+        utils::CreateTexelCopyBufferInfo(buffer, 0, bytesPerRow, copySize.height);
+    wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+        utils::CreateTexelCopyTextureInfo(texture, 0, {0, 0, 0});
+    encoder.CopyBufferToTexture(&texelCopyBufferInfo, &texelCopyTextureInfo, &copySize);
 
     wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
                                                      {{0, sampler}, {1, textureView}});

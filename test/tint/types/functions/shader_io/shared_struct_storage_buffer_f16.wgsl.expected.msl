@@ -1,20 +1,19 @@
 #include <metal_stdlib>
-
 using namespace metal;
 
 template<typename T, size_t N>
 struct tint_array {
-    const constant T& operator[](size_t i) const constant { return elements[i]; }
-    device T& operator[](size_t i) device { return elements[i]; }
-    const device T& operator[](size_t i) const device { return elements[i]; }
-    thread T& operator[](size_t i) thread { return elements[i]; }
-    const thread T& operator[](size_t i) const thread { return elements[i]; }
-    threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-    const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-    T elements[N];
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
 };
 
-struct S_tint_packed_vec3 {
+struct S_packed_vec3 {
   /* 0x0000 */ float f;
   /* 0x0004 */ uint u;
   /* 0x0008 */ tint_array<int8_t, 120> tint_pad;
@@ -34,33 +33,35 @@ struct S {
   half3 y;
 };
 
-void assign_and_preserve_padding(device S_tint_packed_vec3* const dest, S value) {
-  (*(dest)).f = value.f;
-  (*(dest)).u = value.u;
-  (*(dest)).v = value.v;
-  (*(dest)).x = value.x;
-  (*(dest)).y = packed_half3(value.y);
-}
-
-struct tint_symbol_1 {
-  float f [[user(locn0)]];
-  uint u [[user(locn1)]] [[flat]];
-  half x [[user(locn2)]];
-  half3 y [[user(locn3)]];
+struct tint_module_vars_struct {
+  device S_packed_vec3* output;
 };
 
-void frag_main_inner(S input, device S_tint_packed_vec3* const tint_symbol_3) {
+struct frag_main_inputs {
+  float S_f [[user(locn0)]];
+  uint S_u [[user(locn1)]] [[flat]];
+  half S_x [[user(locn2)]];
+  half3 S_y [[user(locn3)]];
+};
+
+void tint_store_and_preserve_padding(device S_packed_vec3* const target, S value_param) {
+  (*target).f = value_param.f;
+  (*target).u = value_param.u;
+  (*target).v = value_param.v;
+  (*target).x = value_param.x;
+  (*target).y = packed_half3(value_param.y);
+}
+
+void frag_main_inner(S input, tint_module_vars_struct tint_module_vars) {
   float const f = input.f;
   uint const u = input.u;
   float4 const v = input.v;
   half const x = input.x;
   half3 const y = input.y;
-  assign_and_preserve_padding(tint_symbol_3, input);
+  tint_store_and_preserve_padding(tint_module_vars.output, input);
 }
 
-fragment void frag_main(device S_tint_packed_vec3* tint_symbol_4 [[buffer(0)]], float4 v [[position]], tint_symbol_1 tint_symbol [[stage_in]]) {
-  S const tint_symbol_2 = {.f=tint_symbol.f, .u=tint_symbol.u, .v=v, .x=tint_symbol.x, .y=tint_symbol.y};
-  frag_main_inner(tint_symbol_2, tint_symbol_4);
-  return;
+fragment void frag_main(frag_main_inputs inputs [[stage_in]], float4 S_v [[position]], device S_packed_vec3* output [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.output=output};
+  frag_main_inner(S{.f=inputs.S_f, .u=inputs.S_u, .v=S_v, .x=inputs.S_x, .y=inputs.S_y}, tint_module_vars);
 }
-

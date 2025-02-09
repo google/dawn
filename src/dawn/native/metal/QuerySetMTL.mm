@@ -39,8 +39,7 @@ namespace {
 ResultOrError<id<MTLCounterSampleBuffer>> CreateCounterSampleBuffer(Device* device,
                                                                     NSString* label,
                                                                     MTLCommonCounterSet counterSet,
-                                                                    uint32_t count)
-    API_AVAILABLE(macos(10.15), ios(14.0)) {
+                                                                    uint32_t count) {
     NSRef<MTLCounterSampleBufferDescriptor> descriptorRef =
         AcquireNSRef([MTLCounterSampleBufferDescriptor new]);
     MTLCounterSampleBufferDescriptor* descriptor = descriptorRef.Get();
@@ -105,18 +104,14 @@ MaybeError QuerySet::Initialize() {
             }
             break;
         }
-        case wgpu::QueryType::Timestamp:
-            if (@available(macOS 10.15, iOS 14.0, *)) {
-                NSRef<NSString> label = MakeDebugName(
-                    GetDevice(), "Dawn_QuerySet_TimestampCounterSampleBuffer", GetLabel());
-                DAWN_TRY_ASSIGN(
-                    mCounterSampleBuffer,
-                    CreateCounterSampleBuffer(device, label.Get(), MTLCommonCounterSetTimestamp,
-                                              GetQueryCount()));
-            } else {
-                DAWN_UNREACHABLE();
-            }
-            break;
+        case wgpu::QueryType::Timestamp: {
+            NSRef<NSString> label = MakeDebugName(
+                GetDevice(), "Dawn_QuerySet_TimestampCounterSampleBuffer", GetLabel());
+            DAWN_TRY_ASSIGN(
+                mCounterSampleBuffer,
+                CreateCounterSampleBuffer(device, label.Get(), MTLCommonCounterSetTimestamp,
+                                          GetQueryCount()));
+        } break;
         default:
             DAWN_UNREACHABLE();
             break;
@@ -129,8 +124,7 @@ id<MTLBuffer> QuerySet::GetVisibilityBuffer() const {
     return mVisibilityBuffer.Get();
 }
 
-id<MTLCounterSampleBuffer> QuerySet::GetCounterSampleBuffer() const
-    API_AVAILABLE(macos(10.15), ios(14.0)) {
+id<MTLCounterSampleBuffer> QuerySet::GetCounterSampleBuffer() const {
     return mCounterSampleBuffer;
 }
 
@@ -148,12 +142,8 @@ void QuerySet::DestroyImpl() {
 
     mVisibilityBuffer = nullptr;
 
-    // mCounterSampleBuffer isn't an NSRef because API_AVAILABLE doesn't work will with
-    // templates.
-    if (@available(macOS 10.15, iOS 14.0, *)) {
-        [mCounterSampleBuffer release];
-        mCounterSampleBuffer = nullptr;
-    }
+    [mCounterSampleBuffer release];
+    mCounterSampleBuffer = nullptr;
 }
 
 }  // namespace dawn::native::metal

@@ -55,9 +55,9 @@ void f_inner(uint tint_local_index) {
   GroupMemoryBarrierWithGroupSync();
   float2x2 v_10[4] = v_4(0u);
   w = v_10;
-  w[int(1)] = v(32u);
-  w[int(1)][int(0)] = asfloat(u[0u].zw).yx;
-  w[int(1)][int(0)][0u] = asfloat(u[0u].z);
+  w[1u] = v(32u);
+  w[1u][0u] = asfloat(u[0u].zw).yx;
+  w[1u][0u].x = asfloat(u[0u].z);
 }
 
 [numthreads(1, 1, 1)]

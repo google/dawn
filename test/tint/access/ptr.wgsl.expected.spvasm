@@ -150,7 +150,7 @@
          %v1 = OpVariable %_ptr_Function_int Function
          %v2 = OpVariable %_ptr_Function_S Function
          %v4 = OpVariable %_ptr_Function_v3float Function
-         %76 = OpIEqual %bool %tint_local_index %uint_0
+         %76 = OpULessThan %bool %tint_local_index %uint_1
                OpSelectionMerge %78 None
                OpBranchConditional %76 %79 %78
          %79 = OpLabel

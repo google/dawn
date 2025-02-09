@@ -757,7 +757,6 @@ const struct WGSLExtensionInfo kExtensions[] = {
     {"f16", false, {"shader-f16"}, {}},
     {"clip_distances", false, {"clip-distances"}, {}},
     {"dual_source_blending", false, {"dual-source-blending"}, {}},
-    {"chromium_experimental_subgroups", true, {"chromium-experimental-subgroups"}, {}},
     {"subgroups", false, {"subgroups"}, {}},
     {"subgroups_f16", false, {"shader-f16", "subgroups", "subgroups-f16"}, {"f16", "subgroups"}},
     {"chromium_experimental_pixel_local", true, {"pixel-local-storage-coherent"}, {}},
@@ -791,9 +790,11 @@ class ShaderModuleExtensionValidationTestBase : public ValidationTest {
 
     std::vector<wgpu::FeatureName> GetAllFeatures() {
         std::vector<wgpu::FeatureName> requiredFeatures;
-        const size_t featureCount = adapter.EnumerateFeatures(nullptr);
-        requiredFeatures.resize(featureCount);
-        adapter.EnumerateFeatures(requiredFeatures.data());
+        wgpu::SupportedFeatures supportedFeatures;
+        adapter.GetFeatures(&supportedFeatures);
+        for (uint32_t i = 0; i < supportedFeatures.featureCount; ++i) {
+            requiredFeatures.push_back(supportedFeatures.features[i]);
+        }
         return requiredFeatures;
     }
 };

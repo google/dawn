@@ -7,7 +7,8 @@ buffer Outputs_1_ssbo {
 } outputs;
 void push_output(uint value) {
   uint v = count;
-  outputs.data[v] = value;
+  uint v_1 = min(v, (uint(outputs.data.length()) - 1u));
+  outputs.data[v_1] = value;
   count = (count + 1u);
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;

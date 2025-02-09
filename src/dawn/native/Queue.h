@@ -73,21 +73,19 @@ class QueueBase : public ApiObjectBase, public ExecutionQueueBase {
 
     // Dawn API
     void APISubmit(uint32_t commandCount, CommandBufferBase* const* commands);
-    void APIOnSubmittedWorkDone(WGPUQueueWorkDoneCallback callback, void* userdata);
-    Future APIOnSubmittedWorkDoneF(const QueueWorkDoneCallbackInfo& callbackInfo);
-    Future APIOnSubmittedWorkDone2(const WGPUQueueWorkDoneCallbackInfo2& callbackInfo);
+    Future APIOnSubmittedWorkDone(const WGPUQueueWorkDoneCallbackInfo& callbackInfo);
     void APIWriteBuffer(BufferBase* buffer, uint64_t bufferOffset, const void* data, size_t size);
-    void APIWriteTexture(const ImageCopyTexture* destination,
+    void APIWriteTexture(const TexelCopyTextureInfo* destination,
                          const void* data,
                          size_t dataSize,
-                         const TextureDataLayout* dataLayout,
+                         const TexelCopyBufferLayout* dataLayout,
                          const Extent3D* writeSize);
-    void APICopyTextureForBrowser(const ImageCopyTexture* source,
-                                  const ImageCopyTexture* destination,
+    void APICopyTextureForBrowser(const TexelCopyTextureInfo* source,
+                                  const TexelCopyTextureInfo* destination,
                                   const Extent3D* copySize,
                                   const CopyTextureForBrowserOptions* options);
     void APICopyExternalTextureForBrowser(const ImageCopyExternalTexture* source,
-                                          const ImageCopyTexture* destination,
+                                          const TexelCopyTextureInfo* destination,
                                           const Extent3D* copySize,
                                           const CopyTextureForBrowserOptions* options);
 
@@ -121,32 +119,32 @@ class QueueBase : public ApiObjectBase, public ExecutionQueueBase {
                                        uint64_t bufferOffset,
                                        const void* data,
                                        size_t size);
-    virtual MaybeError WriteTextureImpl(const ImageCopyTexture& destination,
+    virtual MaybeError WriteTextureImpl(const TexelCopyTextureInfo& destination,
                                         const void* data,
                                         size_t dataSize,
-                                        const TextureDataLayout& dataLayout,
+                                        const TexelCopyBufferLayout& dataLayout,
                                         const Extent3D& writeSize);
 
   private:
-    MaybeError WriteTextureInternal(const ImageCopyTexture* destination,
+    MaybeError WriteTextureInternal(const TexelCopyTextureInfo* destination,
                                     const void* data,
                                     size_t dataSize,
-                                    const TextureDataLayout& dataLayout,
+                                    const TexelCopyBufferLayout& dataLayout,
                                     const Extent3D* writeSize);
-    MaybeError CopyTextureForBrowserInternal(const ImageCopyTexture* source,
-                                             const ImageCopyTexture* destination,
+    MaybeError CopyTextureForBrowserInternal(const TexelCopyTextureInfo* source,
+                                             const TexelCopyTextureInfo* destination,
                                              const Extent3D* copySize,
                                              const CopyTextureForBrowserOptions* options);
     MaybeError CopyExternalTextureForBrowserInternal(const ImageCopyExternalTexture* source,
-                                                     const ImageCopyTexture* destination,
+                                                     const TexelCopyTextureInfo* destination,
                                                      const Extent3D* copySize,
                                                      const CopyTextureForBrowserOptions* options);
 
     MaybeError ValidateSubmit(uint32_t commandCount, CommandBufferBase* const* commands) const;
-    MaybeError ValidateOnSubmittedWorkDone(wgpu::QueueWorkDoneStatus* status) const;
-    MaybeError ValidateWriteTexture(const ImageCopyTexture* destination,
+    MaybeError ValidateOnSubmittedWorkDone() const;
+    MaybeError ValidateWriteTexture(const TexelCopyTextureInfo* destination,
                                     size_t dataSize,
-                                    const TextureDataLayout& dataLayout,
+                                    const TexelCopyBufferLayout& dataLayout,
                                     const Extent3D* writeSize) const;
 
     MaybeError SubmitInternal(uint32_t commandCount, CommandBufferBase* const* commands);

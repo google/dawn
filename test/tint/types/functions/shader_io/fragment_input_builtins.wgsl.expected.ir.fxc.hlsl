@@ -14,6 +14,6 @@ void main_inner(float4 position, bool front_facing, uint sample_index, uint samp
 }
 
 void main(main_inputs inputs) {
-  main_inner(float4(inputs.position.xyz, (1.0f / inputs.position[3u])), inputs.front_facing, inputs.sample_index, inputs.sample_mask);
+  main_inner(float4(inputs.position.xyz, (1.0f / inputs.position.w)), inputs.front_facing, inputs.sample_index, inputs.sample_mask);
 }
 

@@ -1,9 +1,5 @@
 #include <metal_stdlib>
-
 using namespace metal;
-struct tint_private_vars_struct {
-  uint local_invocation_index_1;
-};
 
 struct S0_atomic {
   int x;
@@ -26,75 +22,55 @@ struct S2_atomic {
   S1_atomic a;
 };
 
-void tint_zero_workgroup_memory(uint local_idx, threadgroup S2_atomic* const tint_symbol) {
-  if ((local_idx < 1u)) {
-    (*(tint_symbol)).x = 0;
-    (*(tint_symbol)).y = 0;
-    (*(tint_symbol)).z = 0;
-    (*(tint_symbol)).a.x = 0;
-    (*(tint_symbol)).a.a.x = 0;
-    atomic_store_explicit(&((*(tint_symbol)).a.a.a), 0u, memory_order_relaxed);
-    (*(tint_symbol)).a.a.y = 0;
-    (*(tint_symbol)).a.a.z = 0;
-    (*(tint_symbol)).a.y = 0;
-    (*(tint_symbol)).a.z = 0;
+struct tint_module_vars_struct {
+  thread uint* local_invocation_index_1;
+  threadgroup S2_atomic* wg;
+};
+
+struct tint_symbol_1 {
+  S2_atomic tint_symbol;
+};
+
+void compute_main_inner(uint local_invocation_index_2, tint_module_vars_struct tint_module_vars) {
+  (*tint_module_vars.wg).x = 0;
+  (*tint_module_vars.wg).y = 0;
+  (*tint_module_vars.wg).z = 0;
+  (*tint_module_vars.wg).a.x = 0;
+  (*tint_module_vars.wg).a.a.x = 0;
+  atomic_store_explicit((&(*tint_module_vars.wg).a.a.a), 0u, memory_order_relaxed);
+  (*tint_module_vars.wg).a.a.y = 0;
+  (*tint_module_vars.wg).a.a.z = 0;
+  (*tint_module_vars.wg).a.y = 0;
+  (*tint_module_vars.wg).a.z = 0;
+  threadgroup_barrier(mem_flags::mem_threadgroup);
+  atomic_store_explicit((&(*tint_module_vars.wg).a.a.a), 1u, memory_order_relaxed);
+}
+
+void compute_main_1(tint_module_vars_struct tint_module_vars) {
+  uint const x_44 = (*tint_module_vars.local_invocation_index_1);
+  compute_main_inner(x_44, tint_module_vars);
+}
+
+void compute_main_inner_1(uint local_invocation_index_1_param, tint_module_vars_struct tint_module_vars) {
+  if ((local_invocation_index_1_param < 1u)) {
+    (*tint_module_vars.wg).x = 0;
+    (*tint_module_vars.wg).y = 0;
+    (*tint_module_vars.wg).z = 0;
+    (*tint_module_vars.wg).a.x = 0;
+    (*tint_module_vars.wg).a.a.x = 0;
+    atomic_store_explicit((&(*tint_module_vars.wg).a.a.a), 0u, memory_order_relaxed);
+    (*tint_module_vars.wg).a.a.y = 0;
+    (*tint_module_vars.wg).a.a.z = 0;
+    (*tint_module_vars.wg).a.y = 0;
+    (*tint_module_vars.wg).a.z = 0;
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
+  (*tint_module_vars.local_invocation_index_1) = local_invocation_index_1_param;
+  compute_main_1(tint_module_vars);
 }
 
-struct S0 {
-  int x;
-  uint a;
-  int y;
-  int z;
-};
-
-struct S1 {
-  int x;
-  S0 a;
-  int y;
-  int z;
-};
-
-struct S2 {
-  int x;
-  int y;
-  int z;
-  S1 a;
-};
-
-void compute_main_inner(uint local_invocation_index_2, threadgroup S2_atomic* const tint_symbol_1) {
-  (*(tint_symbol_1)).x = 0;
-  (*(tint_symbol_1)).y = 0;
-  (*(tint_symbol_1)).z = 0;
-  (*(tint_symbol_1)).a.x = 0;
-  (*(tint_symbol_1)).a.a.x = 0;
-  atomic_store_explicit(&((*(tint_symbol_1)).a.a.a), 0u, memory_order_relaxed);
-  (*(tint_symbol_1)).a.a.y = 0;
-  (*(tint_symbol_1)).a.a.z = 0;
-  (*(tint_symbol_1)).a.y = 0;
-  (*(tint_symbol_1)).a.z = 0;
-  threadgroup_barrier(mem_flags::mem_threadgroup);
-  atomic_store_explicit(&((*(tint_symbol_1)).a.a.a), 1u, memory_order_relaxed);
-  return;
+kernel void compute_main(uint local_invocation_index_1_param [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v [[threadgroup(0)]]) {
+  thread uint local_invocation_index_1 = 0u;
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.local_invocation_index_1=(&local_invocation_index_1), .wg=(&(*v).tint_symbol)};
+  compute_main_inner_1(local_invocation_index_1_param, tint_module_vars);
 }
-
-void compute_main_1(thread tint_private_vars_struct* const tint_private_vars, threadgroup S2_atomic* const tint_symbol_2) {
-  uint const x_44 = (*(tint_private_vars)).local_invocation_index_1;
-  compute_main_inner(x_44, tint_symbol_2);
-  return;
-}
-
-void compute_main_inner_1(uint local_invocation_index_1_param, thread tint_private_vars_struct* const tint_private_vars, threadgroup S2_atomic* const tint_symbol_3) {
-  tint_zero_workgroup_memory(local_invocation_index_1_param, tint_symbol_3);
-  (*(tint_private_vars)).local_invocation_index_1 = local_invocation_index_1_param;
-  compute_main_1(tint_private_vars, tint_symbol_3);
-}
-
-kernel void compute_main(uint local_invocation_index_1_param [[thread_index_in_threadgroup]]) {
-  thread tint_private_vars_struct tint_private_vars = {};
-  threadgroup S2_atomic tint_symbol_4;
-  compute_main_inner_1(local_invocation_index_1_param, &(tint_private_vars), &(tint_symbol_4));
-  return;
-}
-

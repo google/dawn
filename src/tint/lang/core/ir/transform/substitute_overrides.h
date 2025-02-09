@@ -32,7 +32,7 @@
 
 #include "src/tint/api/common/override_id.h"
 #include "src/tint/lang/core/ir/validator.h"
-#include "src/tint/utils/reflection/reflection.h"
+#include "src/tint/utils/reflection.h"
 #include "src/tint/utils/result/result.h"
 
 // Forward declarations.

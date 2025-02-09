@@ -38,12 +38,14 @@
 #include "src/tint/lang/core/ir/transform/demote_to_helper.h"
 #include "src/tint/lang/core/ir/transform/multiplanar_external_texture.h"
 #include "src/tint/lang/core/ir/transform/preserve_padding.h"
+#include "src/tint/lang/core/ir/transform/prevent_infinite_loops.h"
 #include "src/tint/lang/core/ir/transform/remove_continue_in_switch.h"
 #include "src/tint/lang/core/ir/transform/remove_terminator_args.h"
 #include "src/tint/lang/core/ir/transform/rename_conflicts.h"
 #include "src/tint/lang/core/ir/transform/robustness.h"
 #include "src/tint/lang/core/ir/transform/value_to_let.h"
 #include "src/tint/lang/core/ir/transform/vectorize_scalar_matrix_constructors.h"
+#include "src/tint/lang/core/ir/transform/vertex_pulling.h"
 #include "src/tint/lang/core/ir/transform/zero_init_workgroup_memory.h"
 #include "src/tint/lang/msl/writer/common/option_helpers.h"
 #include "src/tint/lang/msl/writer/raise/binary_polyfill.h"
@@ -67,12 +69,21 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
 
     RaiseResult raise_result;
 
+    // VertexPulling must come before BindingRemapper and Robustness.
+    if (options.vertex_pulling_config) {
+        RUN_TRANSFORM(core::ir::transform::VertexPulling, module, *options.vertex_pulling_config);
+    }
+
     tint::transform::multiplanar::BindingsMap multiplanar_map{};
     RemapperData remapper_data{};
     ArrayLengthFromUniformOptions array_length_from_uniform_options{};
     PopulateBindingRelatedOptions(options, remapper_data, multiplanar_map,
                                   array_length_from_uniform_options);
     RUN_TRANSFORM(core::ir::transform::BindingRemapper, module, remapper_data);
+
+    if (!options.disable_robustness) {
+        RUN_TRANSFORM(core::ir::transform::PreventInfiniteLoops, module);
+    }
 
     {
         core::ir::transform::BinaryPolyfillConfig binary_polyfills{};
@@ -129,7 +140,9 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
     RUN_TRANSFORM(core::ir::transform::RemoveContinueInSwitch, module);
 
     // DemoteToHelper must come before any transform that introduces non-core instructions.
-    RUN_TRANSFORM(core::ir::transform::DemoteToHelper, module);
+    if (!options.disable_demote_to_helper) {
+        RUN_TRANSFORM(core::ir::transform::DemoteToHelper, module);
+    }
 
     RUN_TRANSFORM(raise::ShaderIO, module,
                   raise::ShaderIOConfig{options.emit_vertex_point_size, options.fixed_sample_mask});

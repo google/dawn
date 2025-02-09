@@ -21,8 +21,6 @@ cbuffer cbuffer_light0 : register(b5) {
   uint4 light0[6];
 };
 static float4 glFragColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
-SamplerState bumpSamplerSampler : register(s4, space2);
-Texture2D<float4> bumpSamplerTexture : register(t5, space2);
 
 float3x3 cotangent_frame_vf3_vf3_vf2_vf2_(inout float3 normal_1, inout float3 p, inout float2 uv, inout float2 tangentSpaceParams) {
   float3 dp1 = float3(0.0f, 0.0f, 0.0f);

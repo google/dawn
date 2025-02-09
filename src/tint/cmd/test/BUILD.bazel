@@ -46,6 +46,7 @@ cc_binary(
     "//src/tint/api/common:test",
     "//src/tint/lang/core/constant:test",
     "//src/tint/lang/core/intrinsic:test",
+    "//src/tint/lang/core/ir/analysis:test",
     "//src/tint/lang/core/ir/transform:test",
     "//src/tint/lang/core/ir:test",
     "//src/tint/lang/core/type:test",
@@ -72,7 +73,6 @@ cc_binary(
     "//src/tint/lang/wgsl/writer/raise:test",
     "//src/tint/lang/wgsl:test",
     "//src/tint/utils/bytes:test",
-    "//src/tint/utils/cli:test",
     "//src/tint/utils/command:test",
     "//src/tint/utils/containers:test",
     "//src/tint/utils/diagnostic:test",
@@ -81,13 +81,12 @@ cc_binary(
     "//src/tint/utils/macros:test",
     "//src/tint/utils/math:test",
     "//src/tint/utils/memory:test",
-    "//src/tint/utils/reflection:test",
     "//src/tint/utils/result:test",
     "//src/tint/utils/rtti:test",
     "//src/tint/utils/strconv:test",
     "//src/tint/utils/symbol:test",
     "//src/tint/utils/text:test",
-    "//src/tint/utils/traits:test",
+    "//src/tint/utils:test",
     "@gtest",
   ] + select({
     ":tint_build_glsl_writer": [
@@ -118,15 +117,9 @@ cc_binary(
     "//conditions:default": [],
   }) + select({
     ":tint_build_msl_writer": [
-      "//src/tint/lang/msl/writer/ast_printer:test",
       "//src/tint/lang/msl/writer/common:test",
       "//src/tint/lang/msl/writer/raise:test",
       "//src/tint/lang/msl/writer:test",
-    ],
-    "//conditions:default": [],
-  }) + select({
-    ":tint_build_msl_writer_and_tint_build_wgsl_reader_and_tint_build_wgsl_writer": [
-      "//src/tint/lang/msl/writer/ast_raise:test",
     ],
     "//conditions:default": [],
   }) + select({
@@ -256,14 +249,6 @@ selects.config_setting_group(
     name = "tint_build_hlsl_writer_and_tint_build_wgsl_reader_and_tint_build_wgsl_writer",
     match_all = [
         ":tint_build_hlsl_writer",
-        ":tint_build_wgsl_reader",
-        ":tint_build_wgsl_writer",
-    ],
-)
-selects.config_setting_group(
-    name = "tint_build_msl_writer_and_tint_build_wgsl_reader_and_tint_build_wgsl_writer",
-    match_all = [
-        ":tint_build_msl_writer",
         ":tint_build_wgsl_reader",
         ":tint_build_wgsl_writer",
     ],

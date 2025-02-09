@@ -236,6 +236,7 @@ source_set("native_mocks_sources") {
 
   deps = [
     ":gmock_and_gtest",
+    ":test_infra_sources",
     "${dawn_root}/src/dawn:proc",
     "${dawn_root}/src/dawn/native:sources",
     "${dawn_root}/src/dawn/native:static",
@@ -286,6 +287,7 @@ dawn_test("dawn_unittests") {
     ":native_mocks_sources",
     ":partition_alloc_support",
     ":platform_mocks_sources",
+    ":test_infra_sources",
     "${dawn_root}/include/dawn:cpp_headers",
     "${dawn_root}/src/dawn:proc",
     "${dawn_root}/src/dawn/common",
@@ -314,11 +316,6 @@ dawn_test("dawn_unittests") {
     "${dawn_root}/src/dawn/wire/server/ServerMemoryTransferService_mock.h",
     "DawnNativeTest.cpp",
     "DawnNativeTest.h",
-    "MockCallback.h",
-    "ParamGenerator.h",
-    "StringViewMatchers.h",
-    "ToggleParser.cpp",
-    "ToggleParser.h",
     "unittests/AsyncTaskTests.cpp",
     "unittests/BitSetIteratorTests.cpp",
     "unittests/BuddyAllocatorTests.cpp",
@@ -372,6 +369,7 @@ dawn_test("dawn_unittests") {
     "unittests/native/DestroyObjectTests.cpp",
     "unittests/native/DeviceAsyncTaskTests.cpp",
     "unittests/native/DeviceCreationTests.cpp",
+    "unittests/native/ImmediateConstantsTrackerTests.cpp",
     "unittests/native/LimitsTests.cpp",
     "unittests/native/MemoryInstrumentationTests.cpp",
     "unittests/native/ObjectContentHasherTests.cpp",
@@ -515,6 +513,14 @@ source_set("test_infra_sources") {
     "${dawn_root}/src/dawn/wire",
   ]
 
+  public = [
+    "AdapterTestConfig.h",
+    "DawnTest.h",
+    "MockCallback.h",
+    "ParamGenerator.h",
+    "StringViewMatchers.h",
+    "ToggleParser.h",
+  ]
   public_deps = [
     ":gmock_and_gtest",
     "${dawn_root}/src/dawn/partition_alloc:raw_ptr",
@@ -526,14 +532,8 @@ source_set("test_infra_sources") {
 
   sources = [
     "AdapterTestConfig.cpp",
-    "AdapterTestConfig.h",
     "DawnTest.cpp",
-    "DawnTest.h",
-    "MockCallback.h",
-    "ParamGenerator.h",
-    "StringViewMatchers.h",
     "ToggleParser.cpp",
-    "ToggleParser.h",
   ]
 }
 
@@ -614,6 +614,7 @@ source_set("end2end_tests_sources") {
     "end2end/DeviceInitializationTests.cpp",
     "end2end/DeviceLifetimeTests.cpp",
     "end2end/DeviceLostTests.cpp",
+    "end2end/DiscardBasicTests.cpp",
     "end2end/DrawIndexedIndirectTests.cpp",
     "end2end/DrawIndexedTests.cpp",
     "end2end/DrawIndirectTests.cpp",
@@ -641,6 +642,7 @@ source_set("end2end_tests_sources") {
     "end2end/NonzeroBufferCreationTests.cpp",
     "end2end/NonzeroTextureCreationTests.cpp",
     "end2end/OpArrayLengthTests.cpp",
+    "end2end/PackUnpack4x8NormTests.cpp",
     "end2end/Packed4x8IntegerDotProductTests.cpp",
     "end2end/PipelineCachingTests.cpp",
     "end2end/PipelineLayoutTests.cpp",
@@ -741,6 +743,10 @@ source_set("end2end_tests_sources") {
   if (dawn_enable_vulkan && is_chromeos) {
     sources += [ "end2end/VideoViewsTests_gbm.cpp" ]
   }
+
+  if (dawn_enable_opengles) {
+    sources += [ "end2end/GLExplicitExtensionsTests.cpp" ]
+  }
 }
 
 source_set("white_box_tests_sources") {
@@ -762,6 +768,7 @@ source_set("white_box_tests_sources") {
   ]
 
   sources = [
+    "white_box/ImmediateConstantOffsetTests.cpp",
     "white_box/ShaderModuleTests.cpp",
     "white_box/SharedBufferMemoryTests.cpp",
     "white_box/SharedBufferMemoryTests.h",
@@ -849,8 +856,10 @@ source_set("white_box_tests_sources") {
   }
 
   if (dawn_enable_opengles) {
-    sources += [ "white_box/EGLImageWrappingTests.cpp" ]
-    sources += [ "white_box/GLTextureWrappingTests.cpp" ]
+    sources += [
+      "white_box/EGLImageWrappingTests.cpp",
+      "white_box/GLTextureWrappingTests.cpp",
+    ]
     include_dirs = [ "//third_party/khronos" ]
   }
 }

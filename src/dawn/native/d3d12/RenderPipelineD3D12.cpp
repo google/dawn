@@ -54,7 +54,6 @@ D3D12_INPUT_CLASSIFICATION VertexStepModeFunction(wgpu::VertexStepMode mode) {
             return D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
         case wgpu::VertexStepMode::Instance:
             return D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA;
-        case wgpu::VertexStepMode::VertexBufferNotUsed:
         case wgpu::VertexStepMode::Undefined:
             break;
     }
@@ -404,11 +403,15 @@ MaybeError RenderPipeline::InitializeImpl() {
     }
 
     static_assert(kMaxColorAttachments == 8);
+    auto highestColorAttachmentIndexPlusOne = GetHighestBitIndexPlusOne(GetColorAttachmentsMask());
     for (uint8_t i = 0; i < kMaxColorAttachments; i++) {
-        descriptorD3D12.RTVFormats[i] = DXGI_FORMAT_UNKNOWN;
+        if (i < static_cast<uint8_t>(highestColorAttachmentIndexPlusOne)) {
+            descriptorD3D12.RTVFormats[i] = GetNullRTVDXGIFormatForD3D12RenderPass();
+        } else {
+            descriptorD3D12.RTVFormats[i] = DXGI_FORMAT_UNKNOWN;
+        }
         descriptorD3D12.BlendState.RenderTarget[i].LogicOp = D3D12_LOGIC_OP_NOOP;
     }
-    auto highestColorAttachmentIndexPlusOne = GetHighestBitIndexPlusOne(GetColorAttachmentsMask());
     for (auto i : IterateBitSet(GetColorAttachmentsMask())) {
         descriptorD3D12.RTVFormats[static_cast<uint8_t>(i)] =
             d3d::DXGITextureFormat(device, GetColorAttachmentFormat(i));

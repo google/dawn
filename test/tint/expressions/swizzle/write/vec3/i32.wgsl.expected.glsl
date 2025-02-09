@@ -8,9 +8,9 @@ struct S {
 S P = S(ivec3(0));
 void f() {
   P.v = ivec3(1, 2, 3);
-  P.v[0u] = 1;
-  P.v[1u] = 2;
-  P.v[2u] = 3;
+  P.v.x = 1;
+  P.v.y = 2;
+  P.v.z = 3;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

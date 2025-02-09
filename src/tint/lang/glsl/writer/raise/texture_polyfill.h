@@ -39,10 +39,6 @@ class Module;
 namespace tint::glsl::writer::raise {
 
 struct TexturePolyfillConfig {
-    /// A map of SamplerTexturePair to combined sampler names for the
-    /// CombineSamplers transform
-    CombinedTextureSamplerInfo sampler_texture_to_name;
-
     /// The binding point to use for placeholder samplers.
     BindingPoint placeholder_sampler_bind_point;
 
@@ -53,7 +49,6 @@ struct TexturePolyfillConfig {
 
     /// Reflection for this class
     TINT_REFLECT(TexturePolyfillConfig,
-                 sampler_texture_to_name,
                  placeholder_sampler_bind_point,
                  texture_builtins_from_uniform);
 };

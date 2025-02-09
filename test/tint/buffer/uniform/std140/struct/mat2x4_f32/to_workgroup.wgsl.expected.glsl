@@ -52,9 +52,9 @@ void f_inner(uint tint_local_index) {
   }
   barrier();
   w = v.inner;
-  w[1] = v.inner[2];
-  w[3].m = v.inner[2].m;
-  w[1].m[0] = v.inner[0].m[1].ywxz;
+  w[1u] = v.inner[2u];
+  w[3u].m = v.inner[2u].m;
+  w[1u].m[0u] = v.inner[0u].m[1u].ywxz;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

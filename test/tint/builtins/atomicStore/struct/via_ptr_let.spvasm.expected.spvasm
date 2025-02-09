@@ -70,7 +70,7 @@
 %compute_main_inner_0 = OpFunction %void None %14
 %local_invocation_index_1_param = OpFunctionParameter %uint
          %38 = OpLabel
-         %39 = OpIEqual %bool %local_invocation_index_1_param %uint_0
+         %39 = OpULessThan %bool %local_invocation_index_1_param %uint_1
                OpSelectionMerge %41 None
                OpBranchConditional %39 %42 %41
          %42 = OpLabel

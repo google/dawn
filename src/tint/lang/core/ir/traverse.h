@@ -32,7 +32,7 @@
 #include "src/tint/lang/core/ir/control_instruction.h"
 #include "src/tint/utils/containers/reverse.h"
 #include "src/tint/utils/containers/vector.h"
-#include "src/tint/utils/traits/traits.h"
+#include "src/tint/utils/rtti/traits.h"
 
 namespace tint::core::ir {
 

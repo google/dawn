@@ -29,36 +29,24 @@
 
 #include "src/tint/cmd/fuzz/ir/fuzz.h"
 #include "src/tint/lang/core/ir/disassembler.h"
-#include "src/tint/lang/core/ir/var.h"
-#include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/spirv/validate/validate.h"
 #include "src/tint/lang/spirv/writer/helpers/generate_bindings.h"
 
 namespace tint::spirv::writer {
 namespace {
 
-bool CanRun(const core::ir::Module& module) {
-    // Check for unsupported module-scope variable address spaces and types.
-    for (auto* inst : *module.root_block) {
-        auto* var = inst->As<core::ir::Var>();
-        auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
-        if (ptr->AddressSpace() == core::AddressSpace::kPixelLocal) {
-            return false;
-        }
-    }
-    return true;
-}
-
-void IRFuzzer(core::ir::Module& module, Options options) {
-    if (!CanRun(module)) {
-        return;
+Result<SuccessType> IRFuzzer(core::ir::Module& module, const fuzz::ir::Context&, Options options) {
+    auto check = CanGenerate(module, options);
+    if (check != Success) {
+        return check;
     }
 
     options.bindings = GenerateBindings(module);
     auto output = Generate(module, options);
     if (output != Success) {
-        return;
+        return output.Failure();
     }
+
     auto& spirv = output->spirv;
     if (auto res = validate::Validate(Slice(spirv.data(), spirv.size()), SPV_ENV_VULKAN_1_1);
         res != Success) {
@@ -67,6 +55,8 @@ void IRFuzzer(core::ir::Module& module, Options options) {
                    << "IR:\n"
                    << core::ir::Disassembler(module).Plain();
     }
+
+    return Success;
 }
 
 }  // namespace

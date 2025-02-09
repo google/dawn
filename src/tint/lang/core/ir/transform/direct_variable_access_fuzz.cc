@@ -33,15 +33,10 @@
 namespace tint::core::ir::transform {
 namespace {
 
-void DirectVariableAccessFuzzer(Module& module, DirectVariableAccessOptions options) {
-    if (auto res = DirectVariableAccess(module, options); res != Success) {
-        return;
-    }
-
-    Capabilities capabilities;
-    if (auto res = Validate(module, capabilities); res != Success) {
-        TINT_ICE() << "result of DirectVariableAccess failed IR validation\n" << res.Failure();
-    }
+Result<SuccessType> DirectVariableAccessFuzzer(Module& ir,
+                                               const fuzz::ir::Context&,
+                                               const DirectVariableAccessOptions& options) {
+    return DirectVariableAccess(ir, options);
 }
 
 }  // namespace

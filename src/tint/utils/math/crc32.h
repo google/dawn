@@ -31,6 +31,49 @@
 #include <stdint.h>
 #include <cstddef>
 
+#include "src/tint/utils/macros/compiler.h"
+
+// This implementation of CRC32 uses C idioms that trigger '-Wunsafe-buffer-usage', but by
+// inspecting the code one can see that they are not actually unsafe or an acceptable compromise in
+// the design.
+//
+// First, all of the accesses to kCRC32LUT are considered unsafe, since it is a C-style array and
+// thus  does not do any meaningful bounds checking. Looking at the accesses below, they are all of
+// the form `kCRC32LUT[static_cast<uint8_t>(crc) ^ static_cast<uint8_t>(*p)]`, i.e. the XOR of two
+// u8s, which will always be a u8. kCRC32LUT has 256 entries, so this access will always be in
+// bounds.
+//
+// The other issue that triggers warnings is the use of pointer arithmetic, since with raw pointers
+// there is no bounds checking, though this is a standard C API idiom. Specifically for the
+// constexpr function it is explicitly stated that the input is a '\0' terminated string, and the
+// code  is checking for the '\0' value. So assuming well-formed inputs this code is safe. Similarly
+// for the  inline function, the API explicitly calls for the size of the data buffer, which is
+// assumed to be  valid. Both of these functions also assume the user isn't passing in null
+// pointers.
+//
+// This second issue could be mitigated via a combination of API changes, so only containers that
+// have bounds checking are allowed. Though that would only be moving the problem off to whatever
+// code is responsible for converting from the unsafe data formats.
+//
+// There is other checking that could be done to quite these warning, but all suffer from the fact
+// that they fundamentally  will be more costly to implement than the existing code.
+// Performance in this code is a very important, since it is heavily utilized code as part of the
+// Castable infrastructure in the code base, so any performance loss here would likely be
+// noticeable.
+//
+// Other drop-in solutions are not really fit for purpose since they don't have the same design
+// considerations. This implementation can be evaluated as a constexpr, which means that uses can
+// potentially be evaluated at compile-time, thus mitigating the cost of doing the calculations in
+// production.
+//
+// The simplicity of the implementation also means that one can visually inspect it and be
+// reasonably confident in its safety. Additionally, this code is heavily used in the Tint code
+// base which is tested via fuzzers and sanitizers, so has had significant indirect testing.
+//
+// A replacement implementing would need to be comparable in performance, be usable in constexpr,
+// and have our confidence in its safety.
+TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
+
 namespace tint {
 
 /// CRC32 immutable lookup table data.
@@ -94,5 +137,7 @@ inline uint32_t CRC32(const void* ptr, size_t size) {
 }
 
 }  // namespace tint
+
+TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 
 #endif  // SRC_TINT_UTILS_MATH_CRC32_H_

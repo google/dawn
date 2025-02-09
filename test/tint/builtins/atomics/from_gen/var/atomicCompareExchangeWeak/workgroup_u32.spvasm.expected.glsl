@@ -1,7 +1,7 @@
 #version 310 es
 
 
-struct tint_symbol {
+struct tint_struct {
   uint old_value;
   bool exchanged;
 };
@@ -16,7 +16,7 @@ shared uint arg_0;
 void atomicCompareExchangeWeak_83580d() {
   uint arg_1 = 0u;
   uint arg_2 = 0u;
-  tint_symbol res = tint_symbol(0u, false);
+  tint_struct res = tint_struct(0u, false);
   arg_1 = 1u;
   arg_2 = 1u;
   uint x_21 = arg_2;
@@ -24,7 +24,7 @@ void atomicCompareExchangeWeak_83580d() {
   uint v = atomicCompSwap(arg_0, x_22, x_21);
   uint old_value_1 = atomic_compare_exchange_result_u32(v, (v == x_22)).old_value;
   uint x_23 = old_value_1;
-  res = tint_symbol(x_23, (x_23 == x_21));
+  res = tint_struct(x_23, (x_23 == x_21));
 }
 void compute_main_inner(uint local_invocation_index_2) {
   atomicExchange(arg_0, 0u);
@@ -36,7 +36,7 @@ void compute_main_1() {
   compute_main_inner(x_40);
 }
 void compute_main_inner_1(uint local_invocation_index_1_param) {
-  if ((local_invocation_index_1_param == 0u)) {
+  if ((local_invocation_index_1_param < 1u)) {
     atomicExchange(arg_0, 0u);
   }
   barrier();

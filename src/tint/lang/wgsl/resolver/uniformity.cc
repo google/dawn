@@ -1645,6 +1645,14 @@ class UniformityGraph {
                         callsite_tag = {CallSiteTag::CallSiteNoRestriction};
                         function_tag = ReturnValueMayBeNonUniform;
                     }
+                } else if (builtin->IsSubgroup()) {
+                    // Get the severity of subgroup uniformity violations in this context.
+                    auto severity = sem_.DiagnosticSeverity(
+                        call, wgsl::CoreDiagnosticRule::kSubgroupUniformity);
+                    if (severity != wgsl::DiagnosticSeverity::kOff) {
+                        callsite_tag = {CallSiteTag::CallSiteRequiredToBeUniform, severity};
+                    }
+                    function_tag = ReturnValueMayBeNonUniform;
                 }
             },
             [&](const sem::Function* func) {
@@ -1742,6 +1750,19 @@ class UniformityGraph {
                 if (builtin && builtin->Fn() == wgsl::BuiltinFn::kWorkgroupUniformLoad) {
                     // The workgroupUniformLoad builtin requires its parameter to be uniform.
                     current_function_->RequiredToBeUniform(default_severity)->AddEdge(args[i]);
+                } else if (builtin &&
+                           (builtin->Fn() == wgsl::BuiltinFn::kSubgroupShuffleDown ||
+                            builtin->Fn() == wgsl::BuiltinFn::kSubgroupShuffleUp ||
+                            builtin->Fn() == wgsl::BuiltinFn::kSubgroupShuffleXor) &&
+                           i == 1) {
+                    // The subgroupShuffle{Down,Up,Xor} builtins require their `delta` parameters to
+                    // be uniform.
+                    // Get the severity of subgroup uniformity violations in this context.
+                    auto severity = sem_.DiagnosticSeverity(
+                        call->args[i], wgsl::CoreDiagnosticRule::kSubgroupUniformity);
+                    if (severity != wgsl::DiagnosticSeverity::kOff) {
+                        current_function_->RequiredToBeUniform(severity)->AddEdge(args[i]);
+                    }
                 } else {
                     // All other builtin function parameters are RequiredToBeUniformForReturnValue,
                     // as are parameters for value constructors and value conversions.
@@ -2003,14 +2024,22 @@ class UniformityGraph {
                 auto& param_info = next_function->parameters[cause->arg_index];
                 MakeError(*next_function,
                           is_value ? param_info.value : param_info.ptr_input_contents, severity);
-            }
 
-            // Show the place where the non-uniform argument was passed.
-            // If this is a builtin, this will be the trigger location for the failure.
-            StringStream ss;
-            ss << "possibly non-uniform value passed" << (is_value ? "" : " via pointer")
-               << " here";
-            report(call->args[cause->arg_index]->source, ss.str(), /* note */ user_func != nullptr);
+                // Show the place where the non-uniform argument was passed.
+                // If this is a builtin, this will be the trigger location for the failure.
+                StringStream ss;
+                ss << "possibly non-uniform value passed" << (is_value ? "" : " via pointer")
+                   << " here";
+                report(call->args[cause->arg_index]->source, ss.str(), /* note */ true);
+            } else {
+                // The uniformity requirement must come from a builtin function.
+                auto* builtin = target->As<sem::BuiltinFn>();
+                TINT_ASSERT(builtin);
+                StringStream ss;
+                ss << "'" << builtin->Fn() << "' requires argument " << cause->arg_index << " to "
+                   << (is_value ? "be uniform" : "have uniform contents");
+                report(call->args[cause->arg_index]->source, ss.str(), /* note */ false);
+            }
 
             // Show the origin of non-uniformity for the value or data that is being passed.
             ShowSourceOfNonUniformity(source_node->visited_from);

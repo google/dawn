@@ -2,12 +2,6 @@
 cbuffer cbuffer_m : register(b0) {
   uint4 m[1];
 };
-static int counter = int(0);
-int i() {
-  counter = (counter + int(1));
-  return counter;
-}
-
 vector<float16_t, 2> tint_bitcast_to_f16(uint src) {
   uint v = src;
   float t_low = f16tof32((v & 65535u));

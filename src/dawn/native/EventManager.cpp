@@ -32,11 +32,13 @@
 #include <utility>
 #include <vector>
 
+#include "absl/strings/str_format.h"
 #include "dawn/common/Assert.h"
 #include "dawn/common/FutureUtils.h"
 #include "dawn/common/Log.h"
 #include "dawn/native/ChainUtils.h"
 #include "dawn/native/Device.h"
+#include "dawn/native/Instance.h"
 #include "dawn/native/IntegerTypes.h"
 #include "dawn/native/Queue.h"
 #include "dawn/native/SystemEvent.h"
@@ -165,7 +167,9 @@ bool WaitQueueSerialsImpl(DeviceBase* device,
 }
 
 // We can replace the std::vector& when std::span is available via C++20.
-wgpu::WaitStatus WaitImpl(std::vector<TrackedFutureWaitInfo>& futures, Nanoseconds timeout) {
+wgpu::WaitStatus WaitImpl(const InstanceBase* instance,
+                          std::vector<TrackedFutureWaitInfo>& futures,
+                          Nanoseconds timeout) {
     auto begin = futures.begin();
     const auto end = futures.end();
     bool anySuccess = false;
@@ -213,7 +217,9 @@ wgpu::WaitStatus WaitImpl(std::vector<TrackedFutureWaitInfo>& futures, Nanosecon
                 // It should eventually gather the lowest serial from the queue(s), transform them
                 // into completion events, and wait on all of the events. Then for any queues that
                 // saw a completion, poll all futures related to that queue for completion.
-                return wgpu::WaitStatus::UnsupportedMixedSources;
+                instance->EmitLog(WGPULoggingType_Error,
+                                  "Mixed source waits with timeouts are not currently supported.");
+                return wgpu::WaitStatus::Error;
             }
         }
 
@@ -276,7 +282,7 @@ auto PrepareReadyCallbacks(std::vector<TrackedFutureWaitInfo>& futures) {
 
 // EventManager
 
-EventManager::EventManager() {
+EventManager::EventManager(InstanceBase* instance) : mInstance(instance) {
     // Construct the non-movable inner struct.
     mEvents.Use([&](auto events) { (*events).emplace(); });
 }
@@ -287,14 +293,14 @@ EventManager::~EventManager() {
 
 MaybeError EventManager::Initialize(const UnpackedPtr<InstanceDescriptor>& descriptor) {
     if (descriptor) {
-        if (descriptor->features.timedWaitAnyMaxCount > kTimedWaitAnyMaxCountDefault) {
-            // We don't yet support a higher timedWaitAnyMaxCount because it would be complicated
-            // to implement on Windows, and it isn't that useful to implement only on non-Windows.
-            return DAWN_VALIDATION_ERROR("Requested timedWaitAnyMaxCount is not supported");
-        }
-        mTimedWaitAnyEnable = descriptor->features.timedWaitAnyEnable;
+        mTimedWaitAnyEnable = descriptor->capabilities.timedWaitAnyEnable;
         mTimedWaitAnyMaxCount =
-            std::max(kTimedWaitAnyMaxCountDefault, descriptor->features.timedWaitAnyMaxCount);
+            std::max(kTimedWaitAnyMaxCountDefault, descriptor->capabilities.timedWaitAnyMaxCount);
+    }
+    if (mTimedWaitAnyMaxCount > kTimedWaitAnyMaxCountDefault) {
+        // We don't yet support a higher timedWaitAnyMaxCount because it would be complicated
+        // to implement on Windows, and it isn't that useful to implement only on non-Windows.
+        return DAWN_VALIDATION_ERROR("Requested timedWaitAnyMaxCount is not supported");
     }
 
     return {};
@@ -310,8 +316,9 @@ bool EventManager::IsShutDown() const {
 
 FutureID EventManager::TrackEvent(Ref<TrackedEvent>&& event) {
     if (!ValidateCallbackMode(ToAPI(event->mCallbackMode))) {
-        // TODO: crbug.com/42241407 - Update to use instance logging callback.
-        dawn::ErrorLog() << "Invalid callback mode: " << ToAPI(event->mCallbackMode);
+        mInstance->EmitLog(WGPULoggingType_Error,
+                           absl::StrFormat("Invalid callback mode: %d",
+                                           static_cast<uint32_t>(event->mCallbackMode)));
         return kNullFutureID;
     }
 
@@ -418,7 +425,7 @@ bool EventManager::ProcessPollEvents() {
     }
 
     // Wait and enforce callback ordering.
-    waitStatus = WaitImpl(futures, Nanoseconds(0));
+    waitStatus = WaitImpl(mInstance, futures, Nanoseconds(0));
     if (waitStatus == wgpu::WaitStatus::TimedOut) {
         return hasProgressingEvents;
     }
@@ -452,10 +459,16 @@ wgpu::WaitStatus EventManager::WaitAny(size_t count, FutureWaitInfo* infos, Nano
     // Validate for feature support.
     if (timeout > Nanoseconds(0)) {
         if (!mTimedWaitAnyEnable) {
-            return wgpu::WaitStatus::UnsupportedTimeout;
+            mInstance->EmitLog(WGPULoggingType_Error,
+                               "Timeout waits are either not enabled or not supported.");
+            return wgpu::WaitStatus::Error;
         }
         if (count > mTimedWaitAnyMaxCount) {
-            return wgpu::WaitStatus::UnsupportedCount;
+            mInstance->EmitLog(
+                WGPULoggingType_Error,
+                absl::StrFormat("Number of futures to wait on (%d) exceeds maximum (%d).", count,
+                                mTimedWaitAnyMaxCount));
+            return wgpu::WaitStatus::Error;
         }
         // UnsupportedMixedSources is validated later, in WaitImpl.
     }
@@ -496,7 +509,7 @@ wgpu::WaitStatus EventManager::WaitAny(size_t count, FutureWaitInfo* infos, Nano
     // Otherwise, we should have successfully looked up all of them.
     DAWN_ASSERT(futures.size() == count);
 
-    wgpu::WaitStatus waitStatus = WaitImpl(futures, timeout);
+    wgpu::WaitStatus waitStatus = WaitImpl(mInstance, futures, timeout);
     if (waitStatus != wgpu::WaitStatus::Success) {
         return waitStatus;
     }
@@ -539,6 +552,10 @@ EventManager::TrackedEvent::TrackedEvent(wgpu::CallbackMode callbackMode, Comple
 EventManager::TrackedEvent::~TrackedEvent() {
     DAWN_ASSERT(mFutureID != kNullFutureID);
     DAWN_ASSERT(mCompleted);
+}
+
+Future EventManager::TrackedEvent::GetFuture() const {
+    return {mFutureID};
 }
 
 const EventManager::TrackedEvent::CompletionData& EventManager::TrackedEvent::GetCompletionData()

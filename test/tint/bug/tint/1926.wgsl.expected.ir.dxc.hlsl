@@ -8,7 +8,7 @@ struct main_inputs {
 groupshared uint sh_atomic_failed;
 RWByteAddressBuffer output : register(u4);
 void main_inner(uint3 global_id, uint3 local_id, uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     sh_atomic_failed = 0u;
   }
   GroupMemoryBarrierWithGroupSync();
@@ -16,7 +16,7 @@ void main_inner(uint3 global_id, uint3 local_id, uint tint_local_index) {
   uint v = sh_atomic_failed;
   GroupMemoryBarrierWithGroupSync();
   uint failed = v;
-  if ((local_id[0u] == 0u)) {
+  if ((local_id.x == 0u)) {
     output.Store(0u, failed);
   }
 }

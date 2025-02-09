@@ -31,7 +31,7 @@ void main_inner(uint tint_local_index) {
     }
   }
   GroupMemoryBarrierWithGroupSync();
-  uint v_4[1] = {uint(int(2))};
+  uint v_4[1] = {2u};
   str r = func(v_4);
 }
 

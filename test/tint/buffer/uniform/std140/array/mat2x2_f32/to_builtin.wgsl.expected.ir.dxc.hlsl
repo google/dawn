@@ -14,8 +14,8 @@ float2x2 v(uint start_byte_offset) {
 void f() {
   float2x2 t = transpose(v(32u));
   float l = length(asfloat(u[0u].zw).yx);
-  float a = abs(asfloat(u[0u].zw).yx[0u]);
-  float v_4 = (t[int(0)][0u] + float(l));
+  float a = abs(asfloat(u[0u].zw).yx.x);
+  float v_4 = (t[0u].x + float(l));
   s.Store(0u, asuint((v_4 + float(a))));
 }
 

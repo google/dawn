@@ -83,7 +83,7 @@
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/core/type/void.h"
-#include "src/tint/utils/constants/internal_limits.h"
+#include "src/tint/utils/internal_limits.h"
 #include "src/tint/utils/macros/compiler.h"
 #include "src/tint/utils/rtti/switch.h"
 
@@ -910,6 +910,8 @@ struct Encoder {
         switch (in) {
             case core::BuiltinValue::kPointSize:
                 return pb::BuiltinValue::point_size;
+            case core::BuiltinValue::kCullDistance:
+                return pb::BuiltinValue::cull_distance;
             case core::BuiltinValue::kFragDepth:
                 return pb::BuiltinValue::frag_depth;
             case core::BuiltinValue::kFrontFacing:
@@ -1238,6 +1240,14 @@ struct Encoder {
                 return pb::BuiltinFn::quad_swap_y;
             case core::BuiltinFn::kQuadSwapDiagonal:
                 return pb::BuiltinFn::quad_swap_diagonal;
+            case core::BuiltinFn::kSubgroupMatrixLoad:
+                return pb::BuiltinFn::subgroup_matrix_load;
+            case core::BuiltinFn::kSubgroupMatrixStore:
+                return pb::BuiltinFn::subgroup_matrix_store;
+            case core::BuiltinFn::kSubgroupMatrixMultiply:
+                return pb::BuiltinFn::subgroup_matrix_multiply;
+            case core::BuiltinFn::kSubgroupMatrixMultiplyAccumulate:
+                return pb::BuiltinFn::subgroup_matrix_multiply_accumulate;
             case core::BuiltinFn::kNone:
                 break;
         }

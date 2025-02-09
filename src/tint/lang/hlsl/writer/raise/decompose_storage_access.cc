@@ -243,9 +243,9 @@ struct State {
             auto* original_value = b.Var(ty.ptr(function, type));
             original_value->SetInitializer(b.Zero(type));
 
-            b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.void_(), fn, var,
-                                                      b.Convert(type, OffsetToValue(offset)),
-                                                      args[1], original_value);
+            b.MemberCall<hlsl::ir::MemberBuiltinCall>(
+                ty.void_(), fn, var, b.InsertConvertIfNeeded(type, OffsetToValue(offset)), args[1],
+                original_value);
             b.LoadWithResult(call->DetachResult(), original_value);
         });
         call->Destroy();
@@ -291,9 +291,9 @@ struct State {
             original_value->SetInitializer(b.Zero(type));
 
             auto* val = b.Subtract(type, b.Zero(type), args[1]);
-            b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.void_(), BuiltinFn::kInterlockedAdd, var,
-                                                      b.Convert(type, OffsetToValue(offset)), val,
-                                                      original_value);
+            b.MemberCall<hlsl::ir::MemberBuiltinCall>(
+                ty.void_(), BuiltinFn::kInterlockedAdd, var,
+                b.InsertConvertIfNeeded(type, OffsetToValue(offset)), val, original_value);
             b.LoadWithResult(call->DetachResult(), original_value);
         });
         call->Destroy();
@@ -311,7 +311,7 @@ struct State {
             auto* cmp = args[1];
             b.MemberCall<hlsl::ir::MemberBuiltinCall>(
                 ty.void_(), BuiltinFn::kInterlockedCompareExchange, var,
-                b.Convert(type, OffsetToValue(offset)), cmp, args[2], original_value);
+                b.InsertConvertIfNeeded(type, OffsetToValue(offset)), cmp, args[2], original_value);
 
             auto* o = b.Load(original_value);
             b.ConstructWithResult(call->DetachResult(), o, b.Equal(ty.bool_(), o, cmp));
@@ -326,9 +326,9 @@ struct State {
             auto* original_value = b.Var(ty.ptr(function, type));
             original_value->SetInitializer(b.Zero(type));
 
-            b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.void_(), BuiltinFn::kInterlockedOr, var,
-                                                      b.Convert(type, OffsetToValue(offset)),
-                                                      b.Zero(type), original_value);
+            b.MemberCall<hlsl::ir::MemberBuiltinCall>(
+                ty.void_(), BuiltinFn::kInterlockedOr, var,
+                b.InsertConvertIfNeeded(type, OffsetToValue(offset)), b.Zero(type), original_value);
             b.LoadWithResult(call->DetachResult(), original_value);
         });
         call->Destroy();
@@ -344,9 +344,9 @@ struct State {
             auto* original_value = b.Var(ty.ptr(function, type));
             original_value->SetInitializer(b.Zero(type));
 
-            b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.void_(), BuiltinFn::kInterlockedExchange,
-                                                      var, b.Convert(type, OffsetToValue(offset)),
-                                                      args[1], original_value);
+            b.MemberCall<hlsl::ir::MemberBuiltinCall>(
+                ty.void_(), BuiltinFn::kInterlockedExchange, var,
+                b.InsertConvertIfNeeded(type, OffsetToValue(offset)), args[1], original_value);
         });
         call->Destroy();
     }
@@ -359,8 +359,11 @@ struct State {
                 offset->byte_offset += idx_value->Value()->ValueAs<uint32_t>() * elm_size;
             },
             [&](core::ir::Value* val) {
-                offset->expr.Push(
-                    b.Multiply(ty.u32(), b.Convert(ty.u32(), val), u32(elm_size))->Result(0));
+                auto* idx = val;
+                if (val->Type() != ty.u32()) {
+                    idx = b.Convert(ty.u32(), val)->Result(0);
+                }
+                offset->expr.Push(b.Multiply(ty.u32(), idx, u32(elm_size))->Result(0));
             },
             TINT_ICE_ON_NO_MATCH);
     }

@@ -28,6 +28,8 @@
 #include "dawn/native/ShaderModule.h"
 
 #include <algorithm>
+#include <limits>
+#include <set>
 #include <sstream>
 #include <utility>
 
@@ -179,7 +181,7 @@ wgpu::TextureSampleType TintSampledKindToSampleType(
             // Note that Float is compatible with both Float and UnfilterableFloat.
             return wgpu::TextureSampleType::Float;
         case tint::inspector::ResourceBinding::SampledKind::kUnknown:
-            return wgpu::TextureSampleType::Undefined;
+            return wgpu::TextureSampleType::BindingNotUsed;
     }
     DAWN_UNREACHABLE();
 }
@@ -669,6 +671,8 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
     }
 
     metadata->usesTextureLoadWithDepthTexture = entryPoint.has_texture_load_with_depth_texture;
+    metadata->usesDepthTextureWithNonComparisonSampler =
+        entryPoint.has_depth_texture_with_non_comparison_sampler;
 
     const CombinedLimits& limits = device->GetLimits();
     const uint32_t maxVertexAttributes = limits.v1.maxVertexAttributes;
@@ -676,6 +680,12 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
 
     metadata->usedInterStageVariables.resize(maxInterStageShaderVariables);
     metadata->interStageVariables.resize(maxInterStageShaderVariables);
+
+    // Immediate data byte size must be 4-byte aligned.
+    if (entryPoint.push_constant_size) {
+        DAWN_ASSERT(IsAligned(entryPoint.push_constant_size, 4u));
+        metadata->immediateDataRangeByteSize = entryPoint.push_constant_size;
+    }
 
     // Vertex shader specific reflection.
     if (metadata->stage == SingleShaderStage::Vertex) {
@@ -1023,8 +1033,51 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
                         resource.binding, resource.bind_group);
     }
 
+    // Compute the texture+sampler combination count.
+    if (device->IsCompatibilityMode()) {
+        tint::BindingPoint nonSamplerBindingPoint = {std::numeric_limits<uint32_t>::max()};
+        auto samplerAndNonSamplerTextureUses =
+            inspector->GetSamplerTextureUses(entryPoint.name, nonSamplerBindingPoint);
+
+        // separate sampled from non-sampled and put sampled in set
+        std::set<tint::BindingPoint> sampledTextures;
+        std::set<tint::BindingPoint> sampledExternalTextures;
+        std::vector<tint::BindingPoint> nonSampled;
+        uint32_t numSamplerTexturePairs = 0;
+        uint32_t numSamplerExternalTexturePairs = 0;
+
+        for (const auto& pair : samplerAndNonSamplerTextureUses) {
+            const auto& bindingGroupInfoMap =
+                metadata->bindings[BindGroupIndex(pair.texture_binding_point.group)];
+            const auto it =
+                bindingGroupInfoMap.find(BindingNumber(pair.texture_binding_point.binding));
+            auto isExternalTexture =
+                std::holds_alternative<ExternalTextureBindingInfo>(it->second.bindingInfo);
+            if (isExternalTexture) {
+                ++numSamplerExternalTexturePairs;
+                sampledExternalTextures.insert(pair.texture_binding_point);
+            } else if (pair.sampler_binding_point == nonSamplerBindingPoint) {
+                nonSampled.push_back(pair.texture_binding_point);
+            } else {
+                ++numSamplerTexturePairs;
+                sampledTextures.insert(pair.texture_binding_point);
+            }
+        }
+
+        // count the number of non-sampled that are not referenced by sampled pairs.
+        auto numNonSampled = std::count_if(
+            nonSampled.begin(), nonSampled.end(),
+            [&](const tint::BindingPoint& nonSampledBindingPoint) {
+                return sampledTextures.find(nonSampledBindingPoint) == sampledTextures.end();
+            });
+        metadata->numTextureSamplerCombinations = numSamplerTexturePairs + numNonSampled +
+                                                  numSamplerExternalTexturePairs * 3 +
+                                                  sampledExternalTextures.size();
+    }
+
     // Reflection of combined sampler and texture uses.
     auto samplerTextureUses = inspector->GetSamplerTextureUses(entryPoint.name);
+
     metadata->samplerTexturePairs.reserve(samplerTextureUses.Length());
     std::transform(samplerTextureUses.begin(), samplerTextureUses.end(),
                    std::back_inserter(metadata->samplerTexturePairs),
@@ -1066,53 +1119,81 @@ MaybeError ReflectShaderUsingTint(const DeviceBase* device,
 }
 }  // anonymous namespace
 
-ResultOrError<Extent3D> ValidateComputeStageWorkgroupSize(
-    const tint::Program& program,
-    const char* entryPointName,
-    const LimitsForCompilationRequest& limits,
-    std::optional<uint32_t> maxSubgroupSizeForFullSubgroups) {
+ResultOrError<Extent3D> ValidateComputeStageWorkgroupSize(const tint::Program& program,
+                                                          const char* entryPointName,
+                                                          const LimitsForCompilationRequest& limits,
+                                                          const AdapterBase* adapter) {
     tint::inspector::Inspector inspector(program);
+
     // At this point the entry point must exist and must have workgroup size values.
     tint::inspector::EntryPoint entryPoint = inspector.GetEntryPoint(entryPointName);
     DAWN_ASSERT(entryPoint.workgroup_size.has_value());
     const tint::inspector::WorkgroupSize& workgroup_size = entryPoint.workgroup_size.value();
 
-    DAWN_INVALID_IF(workgroup_size.x < 1 || workgroup_size.y < 1 || workgroup_size.z < 1,
+    return ValidateComputeStageWorkgroupSize(workgroup_size.x, workgroup_size.y, workgroup_size.z,
+                                             entryPoint.workgroup_storage_size, limits, adapter);
+}
+
+ResultOrError<Extent3D> ValidateComputeStageWorkgroupSize(uint32_t x,
+                                                          uint32_t y,
+                                                          uint32_t z,
+                                                          size_t workgroupStorageSize,
+                                                          const LimitsForCompilationRequest& limits,
+                                                          const AdapterBase* adapter) {
+    DAWN_INVALID_IF(x < 1 || y < 1 || z < 1,
                     "Entry-point uses workgroup_size(%u, %u, %u) that are below the "
                     "minimum allowed (1, 1, 1).",
-                    workgroup_size.x, workgroup_size.y, workgroup_size.z);
+                    x, y, z);
 
-    DAWN_INVALID_IF(workgroup_size.x > limits.maxComputeWorkgroupSizeX ||
-                        workgroup_size.y > limits.maxComputeWorkgroupSizeY ||
-                        workgroup_size.z > limits.maxComputeWorkgroupSizeZ,
-                    "Entry-point uses workgroup_size(%u, %u, %u) that exceeds the "
-                    "maximum allowed (%u, %u, %u).",
-                    workgroup_size.x, workgroup_size.y, workgroup_size.z,
-                    limits.maxComputeWorkgroupSizeX, limits.maxComputeWorkgroupSizeY,
-                    limits.maxComputeWorkgroupSizeZ);
+    if (DAWN_UNLIKELY(x > limits.maxComputeWorkgroupSizeX || y > limits.maxComputeWorkgroupSizeY ||
+                      z > limits.maxComputeWorkgroupSizeZ)) {
+        SupportedLimits adapterLimits;
+        wgpu::Status status = adapter->APIGetLimits(&adapterLimits);
+        DAWN_ASSERT(status == wgpu::Status::Success);
 
-    uint64_t numInvocations =
-        static_cast<uint64_t>(workgroup_size.x) * workgroup_size.y * workgroup_size.z;
-    DAWN_INVALID_IF(numInvocations > limits.maxComputeInvocationsPerWorkgroup,
-                    "The total number of workgroup invocations (%u) exceeds the "
-                    "maximum allowed (%u).",
-                    numInvocations, limits.maxComputeInvocationsPerWorkgroup);
+        uint32_t maxComputeWorkgroupSizeXAdapterLimit =
+            adapterLimits.limits.maxComputeWorkgroupSizeX;
+        uint32_t maxComputeWorkgroupSizeYAdapterLimit =
+            adapterLimits.limits.maxComputeWorkgroupSizeY;
+        uint32_t maxComputeWorkgroupSizeZAdapterLimit =
+            adapterLimits.limits.maxComputeWorkgroupSizeZ;
+        std::string increaseLimitAdvice =
+            (x <= maxComputeWorkgroupSizeXAdapterLimit &&
+             y <= maxComputeWorkgroupSizeYAdapterLimit && z <= maxComputeWorkgroupSizeZAdapterLimit)
+                ? absl::StrFormat(
+                      " This adapter supports higher maxComputeWorkgroupSizeX of %u, "
+                      "maxComputeWorkgroupSizeY of %u, and maxComputeWorkgroupSizeZ of %u, which "
+                      "can be specified in requiredLimits when calling requestDevice(). Limits "
+                      "differ by hardware, so always check the adapter limits prior to requesting "
+                      "a higher limit.",
+                      maxComputeWorkgroupSizeXAdapterLimit, maxComputeWorkgroupSizeYAdapterLimit,
+                      maxComputeWorkgroupSizeZAdapterLimit)
+                : "";
+        return DAWN_VALIDATION_ERROR(
+            "Entry-point uses workgroup_size(%u, %u, %u) that exceeds the "
+            "maximum allowed (%u, %u, %u).%s",
+            x, y, z, limits.maxComputeWorkgroupSizeX, limits.maxComputeWorkgroupSizeY,
+            limits.maxComputeWorkgroupSizeZ, increaseLimitAdvice);
+    }
 
-    const size_t workgroupStorageSize = entryPoint.workgroup_storage_size;
-    DAWN_INVALID_IF(workgroupStorageSize > limits.maxComputeWorkgroupStorageSize,
-                    "The total use of workgroup storage (%u bytes) is larger than "
-                    "the maximum allowed (%u bytes).",
-                    workgroupStorageSize, limits.maxComputeWorkgroupStorageSize);
+    uint64_t numInvocations = static_cast<uint64_t>(x) * y * z;
+    uint32_t maxComputeInvocationsPerWorkgroup = limits.maxComputeInvocationsPerWorkgroup;
+    DAWN_INVALID_IF(
+        numInvocations > maxComputeInvocationsPerWorkgroup,
+        "The total number of workgroup invocations (%u) exceeds the "
+        "maximum allowed (%u).%s",
+        numInvocations, maxComputeInvocationsPerWorkgroup,
+        DAWN_INCREASE_LIMIT_MESSAGE(adapter, maxComputeInvocationsPerWorkgroup, numInvocations));
 
-    // Validate workgroup_size.x is a multiple of maxSubgroupSizeForFullSubgroups if
-    // it holds a value.
-    DAWN_INVALID_IF(maxSubgroupSizeForFullSubgroups &&
-                        (workgroup_size.x % *maxSubgroupSizeForFullSubgroups != 0),
-                    "the X dimension of the workgroup size (%d) must be a multiple of "
-                    "maxSubgroupSize (%d) if full subgroups required in compute pipeline",
-                    workgroup_size.x, *maxSubgroupSizeForFullSubgroups);
+    uint32_t maxComputeWorkgroupStorageSize = limits.maxComputeWorkgroupStorageSize;
+    DAWN_INVALID_IF(
+        workgroupStorageSize > maxComputeWorkgroupStorageSize,
+        "The total use of workgroup storage (%u bytes) is larger than "
+        "the maximum allowed (%u bytes).%s",
+        workgroupStorageSize, maxComputeWorkgroupStorageSize,
+        DAWN_INCREASE_LIMIT_MESSAGE(adapter, maxComputeWorkgroupStorageSize, workgroupStorageSize));
 
-    return Extent3D{workgroup_size.x, workgroup_size.y, workgroup_size.z};
+    return Extent3D{x, y, z};
 }
 
 ShaderModuleParseResult::ShaderModuleParseResult() = default;
@@ -1509,58 +1590,17 @@ int ShaderModuleBase::GetTintProgramRecreateCountForTesting() const {
     return mTintData.Use([&](auto tintData) { return tintData->tintProgramRecreateCount; });
 }
 
-namespace {
-
-void DefaultGetCompilationInfoCallback(WGPUCompilationInfoRequestStatus status,
-                                       const WGPUCompilationInfo* compilationInfo,
-                                       void* callback,
-                                       void* userdata) {
-    if (callback == nullptr) {
-        DAWN_ASSERT(userdata == nullptr);
-        return;
-    }
-    auto cb = reinterpret_cast<WGPUCompilationInfoCallback>(callback);
-    cb(status, compilationInfo, userdata);
-}
-
-}  // anonymous namespace
-
-void ShaderModuleBase::APIGetCompilationInfo(wgpu::CompilationInfoCallback callback,
-                                             void* userdata) {
-    GetInstance()->EmitDeprecationWarning(
-        "Old GetCompilationInfo APIs are deprecated. If using C please pass a CallbackInfo struct "
-        "that has two userdatas. Otherwise, if using C++, please use templated helpers.");
-
-    if (callback == nullptr) {
-        return;
-    }
-    APIGetCompilationInfo2({nullptr, WGPUCallbackMode_AllowSpontaneous,
-                            &DefaultGetCompilationInfoCallback, reinterpret_cast<void*>(callback),
-                            userdata});
-}
-
-Future ShaderModuleBase::APIGetCompilationInfoF(const CompilationInfoCallbackInfo& callbackInfo) {
-    GetInstance()->EmitDeprecationWarning(
-        "Old GetCompilationInfo APIs are deprecated. If using C please pass a CallbackInfo struct "
-        "that has two userdatas. Otherwise, if using C++, please use templated helpers.");
-
-    return APIGetCompilationInfo2({ToAPI(callbackInfo.nextInChain), ToAPI(callbackInfo.mode),
-                                   &DefaultGetCompilationInfoCallback,
-                                   reinterpret_cast<void*>(callbackInfo.callback),
-                                   callbackInfo.userdata});
-}
-
-Future ShaderModuleBase::APIGetCompilationInfo2(
-    const WGPUCompilationInfoCallbackInfo2& callbackInfo) {
+Future ShaderModuleBase::APIGetCompilationInfo(
+    const WGPUCompilationInfoCallbackInfo& callbackInfo) {
     struct CompilationInfoEvent final : public EventManager::TrackedEvent {
-        WGPUCompilationInfoCallback2 mCallback;
+        WGPUCompilationInfoCallback mCallback;
         raw_ptr<void> mUserdata1;
         raw_ptr<void> mUserdata2;
         // Need to keep a Ref of the compilation messages in case the ShaderModule goes away before
         // the callback happens.
         Ref<ShaderModuleBase> mShaderModule;
 
-        CompilationInfoEvent(const WGPUCompilationInfoCallbackInfo2& callbackInfo,
+        CompilationInfoEvent(const WGPUCompilationInfoCallbackInfo& callbackInfo,
                              Ref<ShaderModuleBase> shaderModule)
             : TrackedEvent(static_cast<wgpu::CallbackMode>(callbackInfo.mode),
                            TrackedEvent::Completed{}),

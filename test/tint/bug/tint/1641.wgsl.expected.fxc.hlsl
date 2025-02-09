@@ -9,7 +9,7 @@ struct tint_symbol {
 float4 main_inner() {
   int zero = 0;
   Normals tint_symbol_1[1] = {{float3(0.0f, 0.0f, 1.0f)}};
-  return float4(tint_symbol_1[zero].f, 1.0f);
+  return float4(tint_symbol_1[min(uint(zero), 0u)].f, 1.0f);
 }
 
 tint_symbol main() {

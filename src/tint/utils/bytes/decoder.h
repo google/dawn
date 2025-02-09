@@ -39,7 +39,7 @@
 #include <vector>
 
 #include "src/tint/utils/bytes/reader.h"
-#include "src/tint/utils/reflection/reflection.h"
+#include "src/tint/utils/reflection.h"
 
 namespace tint::bytes {
 

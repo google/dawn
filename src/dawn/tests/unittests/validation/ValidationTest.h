@@ -173,6 +173,7 @@ class ValidationTest : public testing::Test {
     // Override these appropriately for different tests.
     virtual bool AllowUnsafeAPIs();
     virtual std::vector<wgpu::FeatureName> GetRequiredFeatures();
+    virtual wgpu::RequiredLimits GetRequiredLimits(const wgpu::SupportedLimits&);
     virtual std::vector<const char*> GetEnabledToggles();
     virtual std::vector<const char*> GetDisabledToggles();
 

@@ -17,8 +17,8 @@ float4x2 v(uint start_byte_offset) {
 [numthreads(1, 1, 1)]
 void f() {
   p = v(0u);
-  p[int(1)] = asfloat(u[0u].xy);
-  p[int(1)] = asfloat(u[0u].xy).yx;
-  p[int(0)][int(1)] = asfloat(u[0u].z);
+  p[1u] = asfloat(u[0u].xy);
+  p[1u] = asfloat(u[0u].xy).yx;
+  p[0u].y = asfloat(u[0u].z);
 }
 

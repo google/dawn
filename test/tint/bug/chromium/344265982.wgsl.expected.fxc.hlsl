@@ -5,13 +5,13 @@ void foo_buffer() {
   {
     for(int i = 0; (i < 4); i = (i + 1)) {
       tint_continue = false;
-      switch(asint(buffer.Load((4u * uint(i))))) {
+      switch(asint(buffer.Load((4u * min(uint(i), 3u))))) {
         case 1: {
           tint_continue = true;
           break;
         }
         default: {
-          buffer.Store((4u * uint(i)), asuint(2));
+          buffer.Store((4u * min(uint(i), 3u)), asuint(2));
           break;
         }
       }

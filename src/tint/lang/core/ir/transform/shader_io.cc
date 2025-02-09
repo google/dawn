@@ -76,7 +76,7 @@ struct State {
         auto functions = ir.functions;
         for (auto& func : functions) {
             // Only process entry points.
-            if (func->Stage() == Function::PipelineStage::kUndefined) {
+            if (!func->IsEntryPoint()) {
                 continue;
             }
 
@@ -106,7 +106,7 @@ struct State {
 
         // Add an output for the vertex point size if needed.
         std::optional<uint32_t> vertex_point_size_index;
-        if (ep->Stage() == Function::PipelineStage::kVertex && backend->NeedsVertexPointSize()) {
+        if (ep->IsVertex() && backend->NeedsVertexPointSize()) {
             vertex_point_size_index =
                 backend->AddOutput(ir.symbols.New("vertex_point_size"), ty.f32(),
                                    core::IOAttributes{
@@ -164,8 +164,7 @@ struct State {
                 for (auto* member : str->Members()) {
                     auto name = str->Name().Name() + "_" + member->Name().Name();
                     auto attributes = member->Attributes();
-                    if (attributes.interpolation &&
-                        ep->Stage() != Function::PipelineStage::kFragment) {
+                    if (attributes.interpolation && !ep->IsFragment()) {
                         // Strip interpolation on non-fragment inputs
                         attributes.interpolation = {};
                     }
@@ -175,7 +174,7 @@ struct State {
             } else {
                 // Pull out the IO attributes and remove them from the parameter.
                 auto attributes = param->Attributes();
-                if (attributes.interpolation && ep->Stage() != Function::PipelineStage::kFragment) {
+                if (attributes.interpolation && !ep->IsFragment()) {
                     // Strip interpolation on non-fragment inputs
                     attributes.interpolation = {};
                 }
@@ -197,7 +196,7 @@ struct State {
             for (auto* member : str->Members()) {
                 auto name = str->Name().Name() + "_" + member->Name().Name();
                 auto attributes = member->Attributes();
-                if (attributes.interpolation && ep->Stage() != Function::PipelineStage::kVertex) {
+                if (attributes.interpolation && !ep->IsVertex()) {
                     // Strip interpolation on non-vertex outputs
                     attributes.interpolation = {};
                 }
@@ -207,7 +206,7 @@ struct State {
         } else {
             // Pull out the IO attributes and remove them from the original function.
             auto attributes = ep->ReturnAttributes();
-            if (attributes.interpolation && ep->Stage() != Function::PipelineStage::kVertex) {
+            if (attributes.interpolation && !ep->IsVertex()) {
                 // Strip interpolation on non-vertex outputs
                 attributes.interpolation = {};
             }

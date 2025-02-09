@@ -20,11 +20,11 @@
        %void = OpTypeVoid
          %10 = OpTypeFunction %void
 %_ptr_Private_int = OpTypePointer Private %int
-      %int_0 = OpConstant %int 0
+     %uint_0 = OpConstant %uint 0
       %int_1 = OpConstant %int 1
           %f = OpFunction %void None %10
          %11 = OpLabel
-         %12 = OpAccessChain %_ptr_Private_int %A %int_0
+         %12 = OpAccessChain %_ptr_Private_int %A %uint_0
                OpStore %12 %int_1 None
                OpReturn
                OpFunctionEnd

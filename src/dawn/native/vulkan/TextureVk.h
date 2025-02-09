@@ -224,12 +224,7 @@ class ImportedTextureBase : public Texture {
     //   Now it can be acquired for access again, or directly exported.
     //   Released: The texture is not associated to any external resource and cannot be used. This
     //   can happen before initialization, or after destruction.
-    enum class ExternalState {
-        PendingAcquire,
-        Acquired,
-        EagerlyTransitioned,
-        Released
-    };
+    enum class ExternalState { PendingAcquire, Acquired, EagerlyTransitioned, Released };
     ExternalState mExternalState = ExternalState::Released;
     ExternalState mLastExternalState = ExternalState::Released;
 
@@ -313,6 +308,9 @@ class TextureView final : public TextureViewBase {
 
     ResultOrError<VkImageView> GetOrCreate2DViewOn3D(uint32_t depthSlice = 0u);
 
+    bool IsYCbCr() const override;
+    YCbCrVkDescriptor GetYCbCrVkDescriptor() const override;
+
   private:
     ~TextureView() override;
     void DestroyImpl() override;
@@ -329,6 +327,7 @@ class TextureView final : public TextureViewBase {
     VkImageView mHandle = VK_NULL_HANDLE;
     VkImageView mHandleForBGRA8UnormStorage = VK_NULL_HANDLE;
     VkSamplerYcbcrConversion mSamplerYCbCrConversion = VK_NULL_HANDLE;
+    bool mIsYCbCr = false;
     YCbCrVkDescriptor mYCbCrVkDescriptor;
     std::vector<VkImageView> mHandlesFor2DViewOn3D;
 };

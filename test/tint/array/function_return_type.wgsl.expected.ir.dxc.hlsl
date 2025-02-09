@@ -28,6 +28,6 @@ void main() {
   float a1[4] = f1();
   float a2[3][4] = f2();
   float a3[2][3][4] = f3();
-  s.Store(0u, asuint(((a1[int(0)] + a2[int(0)][int(0)]) + a3[int(0)][int(0)][int(0)])));
+  s.Store(0u, asuint(((a1[0u] + a2[0u][0u]) + a3[0u][0u][0u])));
 }
 

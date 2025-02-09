@@ -62,9 +62,9 @@ TEST_F(WireInjectInstanceTests, CallAfterReserveInject) {
     instance.RequestAdapter(nullptr, wgpu::CallbackMode::AllowSpontaneous, adapterCb.Callback(),
                             adapterCb.MakeUserdata(this));
 
-    EXPECT_CALL(api, OnInstanceRequestAdapter2(apiInstance, _, _)).WillOnce([&]() {
-        api.CallInstanceRequestAdapter2Callback(apiInstance, WGPURequestAdapterStatus_Error,
-                                                nullptr, ToOutputStringView("Some error message."));
+    EXPECT_CALL(api, OnInstanceRequestAdapter(apiInstance, _, _)).WillOnce([&]() {
+        api.CallInstanceRequestAdapterCallback(apiInstance, WGPURequestAdapterStatus_Error, nullptr,
+                                               ToOutputStringView("Some error message."));
     });
     FlushClient();
 

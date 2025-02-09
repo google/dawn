@@ -23,7 +23,7 @@ struct main_out {
 };
 
 layout(binding = 9, std140)
-uniform x_20_block_1_ubo {
+uniform f_x_20_block_ubo {
   LeftOver inner;
 } v;
 vec2 tUV = vec2(0.0f);
@@ -34,35 +34,32 @@ vec2 levelUnits = vec2(0.0f);
 vec2 stageUnits_1 = vec2(0.0f);
 vec3 vPosition = vec3(0.0f);
 vec2 vUV = vec2(0.0f);
-uniform highp sampler2D frameMapTexture_frameMapSampler;
-uniform highp sampler2D tileMapsTexture1_tileMapsSampler;
-uniform highp sampler2D tileMapsTexture0_tileMapsSampler;
-uniform highp sampler2D animationMapTexture_animationMapSampler;
-uniform highp sampler2D spriteSheetTexture_spriteSheetSampler;
-layout(location = 2) in vec2 tint_symbol_loc2_Input;
-layout(location = 5) in vec2 tint_symbol_loc5_Input;
-layout(location = 4) in vec2 tint_symbol_loc4_Input;
-layout(location = 3) in vec2 tint_symbol_loc3_Input;
-layout(location = 0) in vec3 tint_symbol_loc0_Input;
-layout(location = 1) in vec2 tint_symbol_loc1_Input;
-layout(location = 0) out vec4 tint_symbol_loc0_Output;
+uniform highp sampler2D f_frameMapTexture_frameMapSampler;
+uniform highp sampler2D f_tileMapsTexture1_tileMapsSampler;
+uniform highp sampler2D f_tileMapsTexture0_tileMapsSampler;
+uniform highp sampler2D f_animationMapTexture_animationMapSampler;
+uniform highp sampler2D f_spriteSheetTexture_spriteSheetSampler;
+layout(location = 2) in vec2 tint_interstage_location2;
+layout(location = 5) in vec2 tint_interstage_location5;
+layout(location = 4) in vec2 tint_interstage_location4;
+layout(location = 3) in vec2 tint_interstage_location3;
+layout(location = 0) in vec3 tint_interstage_location0;
+layout(location = 1) in vec2 tint_interstage_location1;
+layout(location = 0) out vec4 main_loc0_Output;
 mat4 getFrameData_f1_(inout float frameID) {
   float fX = 0.0f;
   float x_15 = frameID;
   float x_25 = v.inner.spriteCount;
   fX = (x_15 / x_25);
   float x_37 = fX;
-  vec2 v_1 = vec2(x_37, 0.0f);
-  vec4 x_40 = texture(frameMapTexture_frameMapSampler, v_1, clamp(0.0f, -16.0f, 15.9899997711181640625f));
+  vec4 x_40 = texture(f_frameMapTexture_frameMapSampler, vec2(x_37, 0.0f), clamp(0.0f, -16.0f, 15.9899997711181640625f));
   float x_44 = fX;
-  vec2 v_2 = vec2(x_44, 0.25f);
-  vec4 x_47 = texture(frameMapTexture_frameMapSampler, v_2, clamp(0.0f, -16.0f, 15.9899997711181640625f));
+  vec4 x_47 = texture(f_frameMapTexture_frameMapSampler, vec2(x_44, 0.25f), clamp(0.0f, -16.0f, 15.9899997711181640625f));
   float x_51 = fX;
-  vec2 v_3 = vec2(x_51, 0.5f);
-  vec4 x_54 = texture(frameMapTexture_frameMapSampler, v_3, clamp(0.0f, -16.0f, 15.9899997711181640625f));
-  vec4 v_4 = vec4(x_40[0u], x_40[1u], x_40[2u], x_40[3u]);
-  vec4 v_5 = vec4(x_47[0u], x_47[1u], x_47[2u], x_47[3u]);
-  return mat4(v_4, v_5, vec4(x_54[0u], x_54[1u], x_54[2u], x_54[3u]), vec4(0.0f));
+  vec4 x_54 = texture(f_frameMapTexture_frameMapSampler, vec2(x_51, 0.5f), clamp(0.0f, -16.0f, 15.9899997711181640625f));
+  vec4 v_1 = vec4(x_40.x, x_40.y, x_40.z, x_40.w);
+  vec4 v_2 = vec4(x_47.x, x_47.y, x_47.z, x_47.w);
+  return mat4(v_1, v_2, vec4(x_54.x, x_54.y, x_54.z, x_54.w), vec4(0.0f));
 }
 float tint_float_modulo(float x, float y) {
   return (x - (y * trunc((x / y))));
@@ -90,7 +87,7 @@ void main_1() {
   vec2 x_86 = tUV;
   tileUV = fract(x_86);
   float x_91 = tileUV.y;
-  tileUV[1u] = (1.0f - x_91);
+  tileUV.y = (1.0f - x_91);
   vec2 x_95 = tUV;
   tileID = floor(x_95);
   vec2 x_101 = v.inner.spriteMapSize;
@@ -101,7 +98,11 @@ void main_1() {
   stageUnits = (vec2(1.0f) / x_111);
   i = 0;
   {
+    uvec2 tint_loop_idx = uvec2(0u);
     while(true) {
+      if (all(equal(tint_loop_idx, uvec2(4294967295u)))) {
+        break;
+      }
       int x_122 = i;
       if ((x_122 < 2)) {
       } else {
@@ -113,16 +114,16 @@ void main_1() {
         {
           vec2 x_150 = tileID;
           vec2 x_154 = v.inner.stageSize;
-          vec4 x_156 = texture(tileMapsTexture1_tileMapsSampler, ((x_150 + vec2(0.5f)) / x_154), clamp(0.0f, -16.0f, 15.9899997711181640625f));
-          frameID_1 = x_156[0u];
+          vec4 x_156 = texture(f_tileMapsTexture1_tileMapsSampler, ((x_150 + vec2(0.5f)) / x_154), clamp(0.0f, -16.0f, 15.9899997711181640625f));
+          frameID_1 = x_156.x;
           break;
         }
         case 0:
         {
           vec2 x_136 = tileID;
           vec2 x_140 = v.inner.stageSize;
-          vec4 x_142 = texture(tileMapsTexture0_tileMapsSampler, ((x_136 + vec2(0.5f)) / x_140), clamp(0.0f, -16.0f, 15.9899997711181640625f));
-          frameID_1 = x_142[0u];
+          vec4 x_142 = texture(f_tileMapsTexture0_tileMapsSampler, ((x_136 + vec2(0.5f)) / x_140), clamp(0.0f, -16.0f, 15.9899997711181640625f));
+          frameID_1 = x_142.x;
           break;
         }
         default:
@@ -132,8 +133,7 @@ void main_1() {
       }
       float x_166 = frameID_1;
       float x_169 = v.inner.spriteCount;
-      vec2 v_6 = vec2(((x_166 + 0.5f) / x_169), 0.0f);
-      vec4 x_172 = texture(animationMapTexture_animationMapSampler, v_6, clamp(0.0f, -16.0f, 15.9899997711181640625f));
+      vec4 x_172 = texture(f_animationMapTexture_animationMapSampler, vec2(((x_166 + 0.5f) / x_169), 0.0f), clamp(0.0f, -16.0f, 15.9899997711181640625f));
       animationData = x_172;
       float x_174 = animationData.y;
       if ((x_174 > 0.0f)) {
@@ -142,7 +142,11 @@ void main_1() {
         mt = tint_float_modulo((x_181 * x_184), 1.0f);
         f = 0.0f;
         {
+          uvec2 tint_loop_idx_1 = uvec2(0u);
           while(true) {
+            if (all(equal(tint_loop_idx_1, uvec2(4294967295u)))) {
+              break;
+            }
             float x_193 = f;
             if ((x_193 < 8.0f)) {
             } else {
@@ -161,6 +165,10 @@ void main_1() {
             vec4 x_217 = vec4(0.0f);
             animationData = x_217;
             {
+              uint tint_low_inc_1 = (tint_loop_idx_1.x + 1u);
+              tint_loop_idx_1.x = tint_low_inc_1;
+              uint tint_carry_1 = uint((tint_low_inc_1 == 0u));
+              tint_loop_idx_1.y = (tint_loop_idx_1.y + tint_carry_1);
               float x_218 = f;
               f = (x_218 + 1.0f);
             }
@@ -172,33 +180,33 @@ void main_1() {
       param = (x_222 + 0.5f);
       mat4 x_225 = getFrameData_f1_(param);
       frameData = x_225;
-      vec4 x_228 = frameData[0];
+      vec4 x_228 = frameData[0u];
       vec2 x_231 = v.inner.spriteMapSize;
-      frameSize = (vec2(x_228[3u], x_228[2u]) / x_231);
-      vec4 x_235 = frameData[0];
+      frameSize = (vec2(x_228.w, x_228.z) / x_231);
+      vec4 x_235 = frameData[0u];
       vec2 x_237 = sheetUnits;
-      offset_1 = (vec2(x_235[0u], x_235[1u]) * x_237);
-      vec4 x_241 = frameData[2];
-      vec4 x_244 = frameData[0];
-      vec2 v_7 = vec2(x_241[0u], x_241[1u]);
-      ratio = (v_7 / vec2(x_244[3u], x_244[2u]));
-      float x_248 = frameData[2].z;
+      offset_1 = (vec2(x_235.x, x_235.y) * x_237);
+      vec4 x_241 = frameData[2u];
+      vec4 x_244 = frameData[0u];
+      vec2 v_3 = vec2(x_241.x, x_241.y);
+      ratio = (v_3 / vec2(x_244.w, x_244.z));
+      float x_248 = frameData[2u].z;
       if ((x_248 == 1.0f)) {
         vec2 x_252 = tileUV;
-        tileUV = vec2(x_252[1u], x_252[0u]);
+        tileUV = vec2(x_252.y, x_252.x);
       }
       int x_254 = i;
       if ((x_254 == 0)) {
         vec2 x_263 = tileUV;
         vec2 x_264 = frameSize;
         vec2 x_266 = offset_1;
-        vec4 x_268 = texture(spriteSheetTexture_spriteSheetSampler, ((x_263 * x_264) + x_266));
+        vec4 x_268 = texture(f_spriteSheetTexture_spriteSheetSampler, ((x_263 * x_264) + x_266));
         color = x_268;
       } else {
         vec2 x_274 = tileUV;
         vec2 x_275 = frameSize;
         vec2 x_277 = offset_1;
-        vec4 x_279 = texture(spriteSheetTexture_spriteSheetSampler, ((x_274 * x_275) + x_277));
+        vec4 x_279 = texture(f_spriteSheetTexture_spriteSheetSampler, ((x_274 * x_275) + x_277));
         nc = x_279;
         float x_283 = color.w;
         float x_285 = nc.w;
@@ -206,14 +214,18 @@ void main_1() {
         vec4 x_290 = color;
         vec4 x_292 = nc;
         float x_295 = nc.w;
-        vec3 v_8 = vec3(x_290[0u], x_290[1u], x_290[2u]);
-        vec3 v_9 = vec3(x_292[0u], x_292[1u], x_292[2u]);
-        mixed = mix(v_8, v_9, vec3(x_295, x_295, x_295));
+        vec3 v_4 = vec3(x_290.x, x_290.y, x_290.z);
+        vec3 v_5 = vec3(x_292.x, x_292.y, x_292.z);
+        mixed = mix(v_4, v_5, vec3(x_295, x_295, x_295));
         vec3 x_298 = mixed;
         float x_299 = alpha;
-        color = vec4(x_298[0u], x_298[1u], x_298[2u], x_299);
+        color = vec4(x_298.x, x_298.y, x_298.z, x_299);
       }
       {
+        uint tint_low_inc = (tint_loop_idx.x + 1u);
+        tint_loop_idx.x = tint_low_inc;
+        uint tint_carry = uint((tint_low_inc == 0u));
+        tint_loop_idx.y = (tint_loop_idx.y + tint_carry);
         int x_304 = i;
         i = (x_304 + 1);
       }
@@ -222,13 +234,13 @@ void main_1() {
   }
   vec3 x_310 = v.inner.colorMul;
   vec4 x_311 = color;
-  vec3 x_313 = (vec3(x_311[0u], x_311[1u], x_311[2u]) * x_310);
+  vec3 x_313 = (vec3(x_311.x, x_311.y, x_311.z) * x_310);
   vec4 x_314 = color;
-  color = vec4(x_313[0u], x_313[1u], x_313[2u], x_314[3u]);
+  color = vec4(x_313.x, x_313.y, x_313.z, x_314.w);
   vec4 x_318 = color;
   glFragColor = x_318;
 }
-main_out tint_symbol_inner(vec2 tUV_param, vec2 tileID_1_param, vec2 levelUnits_param, vec2 stageUnits_1_param, vec3 vPosition_param, vec2 vUV_param) {
+main_out main_inner(vec2 tUV_param, vec2 tileID_1_param, vec2 levelUnits_param, vec2 stageUnits_1_param, vec3 vPosition_param, vec2 vUV_param) {
   tUV = tUV_param;
   tileID_1 = tileID_1_param;
   levelUnits = levelUnits_param;
@@ -239,5 +251,5 @@ main_out tint_symbol_inner(vec2 tUV_param, vec2 tileID_1_param, vec2 levelUnits_
   return main_out(glFragColor);
 }
 void main() {
-  tint_symbol_loc0_Output = tint_symbol_inner(tint_symbol_loc2_Input, tint_symbol_loc5_Input, tint_symbol_loc4_Input, tint_symbol_loc3_Input, tint_symbol_loc0_Input, tint_symbol_loc1_Input).glFragColor_1;
+  main_loc0_Output = main_inner(tint_interstage_location2, tint_interstage_location5, tint_interstage_location4, tint_interstage_location3, tint_interstage_location0, tint_interstage_location1).glFragColor_1;
 }

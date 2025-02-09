@@ -115,7 +115,7 @@
                     } else {
                         out = nullptr;
                     }
-                {% elif member.type.category == 'structure' %}
+                {% elif member.type.category in ['callback info', 'structure'] %}
                     //* Mandatory structure.
                     ToNative(c, env, in, &out);
                 {% elif member.name.get() == "window" and member.type.name.get() == "void *" %}
@@ -125,20 +125,33 @@
                     out = reinterpret_cast<{{as_cType(member.type.name)}}>(static_cast<uintptr_t>(in));
                 {% elif member.type.category in ["native", "enum", "bitmask"] %}
                     out = static_cast<{{as_cType(member.type.name)}}>(in);
-                {% elif member.type.category == 'function pointer' %}
-                    //* Function pointers themselves require each argument converting.
+                {% elif member.type.category in ['callback function', 'function pointer'] %}
+                    //* Function pointers and callback functions require each argument converting.
                     //* A custom native callback is generated to wrap the Kotlin callback.
                     out = [](
                         {%- for callbackArg in member.type.arguments %}
-                            {{ as_annotated_cType(callbackArg) }}{{ ',' if not loop.last }}
-                        {%- endfor %}) {
-                        UserData* userData1 = static_cast<UserData *>(userdata);
+                            {{- as_annotated_cType(callbackArg) }}{{ ', ' if not loop.last }}
+                        {%- endfor -%}
+                        {%- if member.type.category == 'function pointer' -%}
+                            //* We rely on the function pointer definitions (dawn.json) always
+                            //* including a parameter named 'userdata' as the final parameter.
+                            {%- set userdata = 'userdata' -%}
+                        {%- else %}
+                            //* Callback functions do not specify user data params in dawn.json.
+                            //* However, the C API always supplements two parameters with the names
+                            //* below.
+                            , void* userdata1, void* userdata2
+                            {%- set userdata = 'userdata1' -%}
+                        {%- endif %}) {
+                        //* User data is used to carry the JNI context (env) for use by the
+                        //* callback.
+                        UserData* userData1 = static_cast<UserData *>({{ userdata }});
                         JNIEnv *env = userData1->env;
                         if (env->ExceptionCheck()) {
                             return;
                         }
 
-                        {%- for callbackArg in kotlin_record_members(member.type.arguments) -%}
+                        {% for callbackArg in kotlin_record_members(member.type.arguments) -%}
                             {{ convert_to_kotlin(callbackArg.name.camelCase(),
                                                  '_' + callbackArg.name.camelCase(),
                                                  'input->' + callbackArg.length.name.camelCase() if callbackArg.length.name,
@@ -155,11 +168,11 @@
                         //* Call the callback with all converted parameters.
                         env->CallVoidMethod(userData1->callback, callbackMethod
                         {%- for callbackArg in kotlin_record_members(member.type.arguments) %}
-                             ,_{{ callbackArg.name.camelCase() }}
+                             {{- ', ' }}_{{ callbackArg.name.camelCase() }}
                         {%- endfor %});
                     };
                     //* TODO(b/330293719): free associated resources.
-                    outStruct->userdata = new UserData(
+                    outStruct->{{ userdata }} = new UserData(
                             {.env = env, .callback = env->NewGlobalRef(in)});
 
                 {% else %}

@@ -45,6 +45,8 @@ tint_add_target(tint_lang_msl_writer_common lib
   lang/msl/writer/common/option_helpers.h
   lang/msl/writer/common/options.cc
   lang/msl/writer/common/options.h
+  lang/msl/writer/common/output.cc
+  lang/msl/writer/common/output.h
   lang/msl/writer/common/printer_support.cc
   lang/msl/writer/common/printer_support.h
 )
@@ -54,20 +56,18 @@ tint_target_add_dependencies(tint_lang_msl_writer_common lib
   tint_lang_core
   tint_lang_core_common
   tint_lang_core_type
+  tint_utils
   tint_utils_containers
   tint_utils_diagnostic
   tint_utils_ice
-  tint_utils_id
   tint_utils_macros
   tint_utils_math
   tint_utils_memory
-  tint_utils_reflection
   tint_utils_result
   tint_utils_rtti
   tint_utils_strconv
   tint_utils_symbol
   tint_utils_text
-  tint_utils_traits
 )
 
 tint_target_add_external_dependencies(tint_lang_msl_writer_common lib
@@ -90,17 +90,16 @@ tint_target_add_dependencies(tint_lang_msl_writer_common_test test
   tint_api_common
   tint_lang_core
   tint_lang_core_type
+  tint_utils
   tint_utils_containers
   tint_utils_diagnostic
   tint_utils_ice
   tint_utils_macros
   tint_utils_math
   tint_utils_memory
-  tint_utils_reflection
   tint_utils_result
   tint_utils_rtti
   tint_utils_text
-  tint_utils_traits
 )
 
 tint_target_add_external_dependencies(tint_lang_msl_writer_common_test test

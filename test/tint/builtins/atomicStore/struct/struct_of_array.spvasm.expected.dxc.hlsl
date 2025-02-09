@@ -34,7 +34,7 @@ void compute_main_inner(uint local_invocation_index_2) {
     }
     uint x_35 = idx;
     uint atomic_result_1 = 0u;
-    InterlockedExchange(wg.a[x_35], 0u, atomic_result_1);
+    InterlockedExchange(wg.a[min(x_35, 9u)], 0u, atomic_result_1);
     {
       idx = (idx + 1u);
     }

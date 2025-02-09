@@ -33,8 +33,8 @@
 #include <functional>
 
 #include "src/tint/utils/math/hash.h"
-#include "src/tint/utils/reflection/reflection.h"
-#include "src/tint/utils/traits/traits.h"
+#include "src/tint/utils/reflection.h"
+#include "src/tint/utils/rtti/traits.h"
 
 namespace tint {
 

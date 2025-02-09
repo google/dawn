@@ -1,21 +1,17 @@
 #include <metal_stdlib>
-
 using namespace metal;
 
 template<typename T, size_t N>
 struct tint_array {
-    const constant T& operator[](size_t i) const constant { return elements[i]; }
-    device T& operator[](size_t i) device { return elements[i]; }
-    const device T& operator[](size_t i) const device { return elements[i]; }
-    thread T& operator[](size_t i) thread { return elements[i]; }
-    const thread T& operator[](size_t i) const thread { return elements[i]; }
-    threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-    const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-    T elements[N];
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
 };
-
-#define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
 
 struct strided_arr {
   /* 0x0000 */ float el;
@@ -31,48 +27,82 @@ struct S {
   /* 0x0000 */ tint_array<strided_arr_1, 4> a;
 };
 
-void assign_and_preserve_padding_4(device strided_arr* const dest, strided_arr value) {
-  (*(dest)).el = value.el;
+struct tint_module_vars_struct {
+  device S* s;
+};
+
+void tint_store_and_preserve_padding_4(device strided_arr* const target, strided_arr value_param) {
+  (*target).el = value_param.el;
 }
 
-void assign_and_preserve_padding_3(device tint_array<strided_arr, 2>* const dest, tint_array<strided_arr, 2> value) {
-  for(uint i = 0u; (i < 2u); i = (i + 1u)) {
-    TINT_ISOLATE_UB(tint_volatile_false);
-    assign_and_preserve_padding_4(&((*(dest))[i]), value[i]);
+void tint_store_and_preserve_padding_3(device tint_array<strided_arr, 2>* const target, tint_array<strided_arr, 2> value_param) {
+  {
+    uint v = 0u;
+    v = 0u;
+    while(true) {
+      uint const v_1 = v;
+      if ((v_1 >= 2u)) {
+        break;
+      }
+      tint_store_and_preserve_padding_4((&(*target)[v_1]), value_param[v_1]);
+      {
+        v = (v_1 + 1u);
+      }
+      continue;
+    }
   }
 }
 
-void assign_and_preserve_padding_2(device tint_array<tint_array<strided_arr, 2>, 3>* const dest, tint_array<tint_array<strided_arr, 2>, 3> value) {
-  for(uint i = 0u; (i < 3u); i = (i + 1u)) {
-    TINT_ISOLATE_UB(tint_volatile_false_1);
-    assign_and_preserve_padding_3(&((*(dest))[i]), value[i]);
+void tint_store_and_preserve_padding_2(device tint_array<tint_array<strided_arr, 2>, 3>* const target, tint_array<tint_array<strided_arr, 2>, 3> value_param) {
+  {
+    uint v_2 = 0u;
+    v_2 = 0u;
+    while(true) {
+      uint const v_3 = v_2;
+      if ((v_3 >= 3u)) {
+        break;
+      }
+      tint_store_and_preserve_padding_3((&(*target)[v_3]), value_param[v_3]);
+      {
+        v_2 = (v_3 + 1u);
+      }
+      continue;
+    }
   }
 }
 
-void assign_and_preserve_padding_1(device strided_arr_1* const dest, strided_arr_1 value) {
-  assign_and_preserve_padding_2(&((*(dest)).el), value.el);
+void tint_store_and_preserve_padding_1(device strided_arr_1* const target, strided_arr_1 value_param) {
+  tint_store_and_preserve_padding_2((&(*target).el), value_param.el);
 }
 
-void assign_and_preserve_padding(device tint_array<strided_arr_1, 4>* const dest, tint_array<strided_arr_1, 4> value) {
-  for(uint i = 0u; (i < 4u); i = (i + 1u)) {
-    TINT_ISOLATE_UB(tint_volatile_false_2);
-    assign_and_preserve_padding_1(&((*(dest))[i]), value[i]);
+void tint_store_and_preserve_padding(device tint_array<strided_arr_1, 4>* const target, tint_array<strided_arr_1, 4> value_param) {
+  {
+    uint v_4 = 0u;
+    v_4 = 0u;
+    while(true) {
+      uint const v_5 = v_4;
+      if ((v_5 >= 4u)) {
+        break;
+      }
+      tint_store_and_preserve_padding_1((&(*target)[v_5]), value_param[v_5]);
+      {
+        v_4 = (v_5 + 1u);
+      }
+      continue;
+    }
   }
 }
 
-void f_1(device S* const tint_symbol_1) {
-  tint_array<strided_arr_1, 4> const x_19 = (*(tint_symbol_1)).a;
-  tint_array<tint_array<strided_arr, 2>, 3> const x_24 = (*(tint_symbol_1)).a[3].el;
-  tint_array<strided_arr, 2> const x_28 = (*(tint_symbol_1)).a[3].el[2];
-  float const x_32 = (*(tint_symbol_1)).a[3].el[2][1].el;
-  tint_array<strided_arr_1, 4> const tint_symbol = tint_array<strided_arr_1, 4>{};
-  assign_and_preserve_padding(&((*(tint_symbol_1)).a), tint_symbol);
-  (*(tint_symbol_1)).a[3].el[2][1].el = 5.0f;
-  return;
+void f_1(tint_module_vars_struct tint_module_vars) {
+  tint_array<strided_arr_1, 4> const x_19 = (*tint_module_vars.s).a;
+  tint_array<tint_array<strided_arr, 2>, 3> const x_24 = (*tint_module_vars.s).a[3u].el;
+  tint_array<strided_arr, 2> const x_28 = (*tint_module_vars.s).a[3u].el[2u];
+  float const x_32 = (*tint_module_vars.s).a[3u].el[2u][1u].el;
+  tint_store_and_preserve_padding((&(*tint_module_vars.s).a), tint_array<strided_arr_1, 4>{});
+  (*tint_module_vars.s).a[3u].el[2u][1u].el = 5.0f;
 }
 
-kernel void f(device S* tint_symbol_2 [[buffer(0)]]) {
-  f_1(tint_symbol_2);
-  return;
+kernel void f(device S* s [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.s=s};
+  f_1(tint_module_vars);
 }
-

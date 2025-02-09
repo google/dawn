@@ -38,10 +38,13 @@ int idx6() {
 
 void main() {
   {
+    uint tint_symbol_5 = 0u;
+    buffer.GetDimensions(tint_symbol_5);
+    uint tint_symbol_6 = (tint_symbol_5 / 64u);
     int tint_symbol_save = idx1();
     int tint_symbol_save_1 = idx2();
     int tint_symbol_1 = idx3();
-    buffer.Store((((64u * uint(tint_symbol_save)) + (16u * uint(tint_symbol_save_1))) + (4u * uint(tint_symbol_1))), asuint((asint(buffer.Load((((64u * uint(tint_symbol_save)) + (16u * uint(tint_symbol_save_1))) + (4u * uint(tint_symbol_1))))) + 1)));
+    buffer.Store((((64u * min(uint(tint_symbol_save), (tint_symbol_6 - 1u))) + (16u * min(uint(tint_symbol_save_1), 3u))) + (4u * min(uint(tint_symbol_1), 3u))), asuint((asint(buffer.Load((((64u * min(uint(tint_symbol_save), (tint_symbol_6 - 1u))) + (16u * min(uint(tint_symbol_save_1), 3u))) + (4u * min(uint(tint_symbol_1), 3u))))) + 1)));
     while (true) {
       if (!((v < 10u))) {
         break;
@@ -49,10 +52,13 @@ void main() {
       {
       }
       {
+        uint tint_symbol_7 = 0u;
+        buffer.GetDimensions(tint_symbol_7);
+        uint tint_symbol_8 = (tint_symbol_7 / 64u);
         int tint_symbol_2_save = idx4();
         int tint_symbol_2_save_1 = idx5();
         int tint_symbol_3 = idx6();
-        buffer.Store((((64u * uint(tint_symbol_2_save)) + (16u * uint(tint_symbol_2_save_1))) + (4u * uint(tint_symbol_3))), asuint((asint(buffer.Load((((64u * uint(tint_symbol_2_save)) + (16u * uint(tint_symbol_2_save_1))) + (4u * uint(tint_symbol_3))))) + 1)));
+        buffer.Store((((64u * min(uint(tint_symbol_2_save), (tint_symbol_8 - 1u))) + (16u * min(uint(tint_symbol_2_save_1), 3u))) + (4u * min(uint(tint_symbol_3), 3u))), asuint((asint(buffer.Load((((64u * min(uint(tint_symbol_2_save), (tint_symbol_8 - 1u))) + (16u * min(uint(tint_symbol_2_save_1), 3u))) + (4u * min(uint(tint_symbol_3), 3u))))) + 1)));
       }
     }
   }

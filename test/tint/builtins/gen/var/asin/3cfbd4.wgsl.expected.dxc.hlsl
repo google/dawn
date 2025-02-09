@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 RWByteAddressBuffer prevent_dce : register(u0);
 
 vector<float16_t, 4> asin_3cfbd4() {
@@ -10,11 +13,29 @@ void fragment_main() {
   prevent_dce.Store<vector<float16_t, 4> >(0u, asin_3cfbd4());
   return;
 }
+//
+// compute_main
+//
+RWByteAddressBuffer prevent_dce : register(u0);
+
+vector<float16_t, 4> asin_3cfbd4() {
+  vector<float16_t, 4> arg_0 = (float16_t(0.479248046875h)).xxxx;
+  vector<float16_t, 4> res = asin(arg_0);
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store<vector<float16_t, 4> >(0u, asin_3cfbd4());
   return;
+}
+//
+// vertex_main
+//
+vector<float16_t, 4> asin_3cfbd4() {
+  vector<float16_t, 4> arg_0 = (float16_t(0.479248046875h)).xxxx;
+  vector<float16_t, 4> res = asin(arg_0);
+  return res;
 }
 
 struct VertexOutput {

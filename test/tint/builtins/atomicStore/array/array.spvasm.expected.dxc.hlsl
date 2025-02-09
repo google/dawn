@@ -22,7 +22,7 @@ void compute_main_inner(uint local_invocation_index_2) {
     }
     uint x_26 = idx;
     uint atomic_result_1 = 0u;
-    InterlockedExchange(wg[x_26], 0u, atomic_result_1);
+    InterlockedExchange(wg[min(x_26, 3u)], 0u, atomic_result_1);
     {
       idx = (idx + 1u);
     }

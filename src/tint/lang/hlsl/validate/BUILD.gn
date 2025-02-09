@@ -56,7 +56,6 @@ if (tint_build_hlsl_writer) {
       "${tint_src_dir}/utils/memory",
       "${tint_src_dir}/utils/rtti",
       "${tint_src_dir}/utils/text",
-      "${tint_src_dir}/utils/traits",
     ]
 
     if (tint_build_hlsl_writer) {

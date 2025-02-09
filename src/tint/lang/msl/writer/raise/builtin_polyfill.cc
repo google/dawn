@@ -108,6 +108,10 @@ struct State {
                     case core::BuiltinFn::kQuadSwapY:
                     case core::BuiltinFn::kQuantizeToF16:
                     case core::BuiltinFn::kSign:
+                    case core::BuiltinFn::kSubgroupMatrixLoad:
+                    case core::BuiltinFn::kSubgroupMatrixStore:
+                    case core::BuiltinFn::kSubgroupMatrixMultiply:
+                    case core::BuiltinFn::kSubgroupMatrixMultiplyAccumulate:
                     case core::BuiltinFn::kTextureDimensions:
                     case core::BuiltinFn::kTextureGather:
                     case core::BuiltinFn::kTextureGatherCompare:
@@ -267,6 +271,20 @@ struct State {
                     break;
                 case core::BuiltinFn::kUnpack2X16Float:
                     Unpack2x16Float(builtin);
+                    break;
+
+                // Subgroup matrix builtins.
+                case core::BuiltinFn::kSubgroupMatrixLoad:
+                    SubgroupMatrixLoad(builtin);
+                    break;
+                case core::BuiltinFn::kSubgroupMatrixStore:
+                    SubgroupMatrixStore(builtin);
+                    break;
+                case core::BuiltinFn::kSubgroupMatrixMultiply:
+                    SubgroupMatrixMultiply(builtin);
+                    break;
+                case core::BuiltinFn::kSubgroupMatrixMultiplyAccumulate:
+                    SubgroupMatrixMultiplyAccumulate(builtin);
                     break;
 
                 default:
@@ -928,15 +946,126 @@ struct State {
         });
         builtin->Destroy();
     }
+
+    /// Replace a subgroupMatrixLoad builtin.
+    /// @param builtin the builtin call instruction
+    void SubgroupMatrixLoad(core::ir::CoreBuiltinCall* builtin) {
+        b.InsertBefore(builtin, [&] {
+            auto* p = builtin->Args()[0];
+            auto* offset = builtin->Args()[1];
+            auto* col_major = builtin->Args()[2];
+            auto* stride = builtin->Args()[3];
+
+            auto* ptr = p->Type()->As<core::type::Pointer>();
+            auto* arr = ptr->StoreType()->As<core::type::Array>();
+
+            // Make a pointer to the first element of the array that we will read from.
+            auto* elem_ptr = ty.ptr(ptr->AddressSpace(), arr->ElemType(), ptr->Access());
+            auto* src = b.Access(elem_ptr, p, offset);
+
+            // The origin is always (0, 0), as we use `offset` to set the start of the data.
+            auto* matrix_origin = b.Zero<vec2<u64>>();
+
+            // Convert the u32 stride to the ulong that MSL expects.
+            auto* elements_per_row =
+                b.Call<msl::ir::BuiltinCall>(ty.u64(), msl::BuiltinFn::kConvert, stride);
+
+            // Declare a local variable to load the matrix into.
+            auto* tmp = b.Var(ty.ptr<function>(builtin->Result(0)->Type()));
+            // Note: We need to use a `load` instruction to pass the variable, as the intrinsic
+            // definition expects a value type (as we do not have reference types in the IR). The
+            // printer will just fold away the load, which achieves the pass-by-reference semantics
+            // that we want.
+            b.Call<msl::ir::BuiltinCall>(ty.void_(), msl::BuiltinFn::kSimdgroupLoad,
+                                         b.Load(tmp->Result(0)), src, elements_per_row,
+                                         matrix_origin, col_major);
+            b.LoadWithResult(builtin->DetachResult(), tmp);
+        });
+        builtin->Destroy();
+    }
+
+    /// Replace a subgroupMatrixStore builtin.
+    /// @param builtin the builtin call instruction
+    void SubgroupMatrixStore(core::ir::CoreBuiltinCall* builtin) {
+        b.InsertBefore(builtin, [&] {
+            auto* p = builtin->Args()[0];
+            auto* offset = builtin->Args()[1];
+            auto* value = builtin->Args()[2];
+            auto* col_major = builtin->Args()[3];
+            auto* stride = builtin->Args()[4];
+
+            auto* ptr = p->Type()->As<core::type::Pointer>();
+            auto* arr = ptr->StoreType()->As<core::type::Array>();
+
+            // Make a pointer to the first element of the array that we will write to.
+            auto* elem_ptr = ty.ptr(ptr->AddressSpace(), arr->ElemType(), ptr->Access());
+            auto* dst = b.Access(elem_ptr, p, offset);
+
+            // Convert the u32 stride to the ulong that MSL expects.
+            auto* elements_per_row =
+                b.Call<msl::ir::BuiltinCall>(ty.u64(), msl::BuiltinFn::kConvert, stride);
+
+            // The origin is always (0, 0), as we use `offset` to set the start of the data.
+            auto* matrix_origin = b.Zero<vec2<u64>>();
+
+            b.Call<msl::ir::BuiltinCall>(ty.void_(), msl::BuiltinFn::kSimdgroupStore, value, dst,
+                                         elements_per_row, matrix_origin, col_major);
+        });
+        builtin->Destroy();
+    }
+
+    /// Replace a subgroupMatrixMultiply builtin.
+    /// @param builtin the builtin call instruction
+    void SubgroupMatrixMultiply(core::ir::CoreBuiltinCall* builtin) {
+        b.InsertBefore(builtin, [&] {
+            auto* left = builtin->Args()[0];
+            auto* right = builtin->Args()[1];
+
+            // Declare a local variable to receive the result.
+            auto* tmp = b.Var(ty.ptr<function>(builtin->Result(0)->Type()));
+            // Note: We need to use a `load` instruction to pass the variable, as the intrinsic
+            // definition expects a value type (as we do not have reference types in the IR). The
+            // printer will just fold away the load, which achieves the pass-by-reference semantics
+            // that we want.
+            b.Call<msl::ir::BuiltinCall>(ty.void_(), msl::BuiltinFn::kSimdgroupMultiply,
+                                         b.Load(tmp->Result(0)), left, right);
+            b.LoadWithResult(builtin->DetachResult(), tmp);
+        });
+        builtin->Destroy();
+    }
+
+    /// Replace a subgroupMatrixMultiplyAccumulate builtin.
+    /// @param builtin the builtin call instruction
+    void SubgroupMatrixMultiplyAccumulate(core::ir::CoreBuiltinCall* builtin) {
+        b.InsertBefore(builtin, [&] {
+            auto* left = builtin->Args()[0];
+            auto* right = builtin->Args()[1];
+            auto* acc = builtin->Args()[2];
+
+            // Declare a local variable to receive the result.
+            auto* tmp = b.Var(ty.ptr<function>(builtin->Result(0)->Type()));
+            // Note: We need to use a `load` instruction to pass the variable, as the intrinsic
+            // definition expects a value type (as we do not have reference types in the IR). The
+            // printer will just fold away the load, which achieves the pass-by-reference semantics
+            // that we want.
+            b.Call<msl::ir::BuiltinCall>(ty.void_(), msl::BuiltinFn::kSimdgroupMultiplyAccumulate,
+                                         b.Load(tmp->Result(0)), left, right, acc);
+            b.LoadWithResult(builtin->DetachResult(), tmp);
+        });
+        builtin->Destroy();
+    }
 };
 
 }  // namespace
 
 Result<SuccessType> BuiltinPolyfill(core::ir::Module& ir) {
-    auto result = ValidateAndDumpIfNeeded(ir, "msl.BuiltinPolyfill",
-                                          core::ir::Capabilities{
-                                              core::ir::Capability::kAllowPointersInStructures,
-                                          });
+    auto result =
+        ValidateAndDumpIfNeeded(ir, "msl.BuiltinPolyfill",
+                                core::ir::Capabilities{
+                                    core::ir::Capability::kAllowPointersAndHandlesInStructures,
+                                    core::ir::Capability::kAllowPrivateVarsInFunctions,
+                                    core::ir::Capability::kAllowAnyLetType,
+                                });
     if (result != Success) {
         return result.Failure();
     }

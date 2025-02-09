@@ -30,8 +30,8 @@ matrix<float16_t, 4, 3> v_4(uint start_byte_offset) {
 void f() {
   matrix<float16_t, 3, 4> t = transpose(v_4(64u));
   float16_t l = length(tint_bitcast_to_f16(u[0u].zw).xyz.zxy);
-  float16_t a = abs(tint_bitcast_to_f16(u[0u].zw).xyz.zxy[0u]);
-  float16_t v_12 = (t[int(0)][0u] + float16_t(l));
+  float16_t a = abs(tint_bitcast_to_f16(u[0u].zw).xyz.zxy.x);
+  float16_t v_12 = (t[0u].x + float16_t(l));
   s.Store<float16_t>(0u, (v_12 + float16_t(a)));
 }
 

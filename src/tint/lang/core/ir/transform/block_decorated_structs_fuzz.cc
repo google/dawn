@@ -33,15 +33,8 @@
 namespace tint::core::ir::transform {
 namespace {
 
-void BlockDecoratedStructsFuzzer(Module& module) {
-    if (auto res = BlockDecoratedStructs(module); res != Success) {
-        return;
-    }
-
-    Capabilities capabilities;
-    if (auto res = Validate(module, capabilities); res != Success) {
-        TINT_ICE() << "result of BlockDecoratedStructs failed IR validation\n" << res.Failure();
-    }
+Result<SuccessType> BlockDecoratedStructsFuzzer(Module& ir, const fuzz::ir::Context&) {
+    return BlockDecoratedStructs(ir);
 }
 
 }  // namespace

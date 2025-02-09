@@ -17,6 +17,9 @@ uint f0_arr() {
 
 [numthreads(1, 1, 1)]
 void main() {
-  arr.Store(0u, asuint(f0_arr()));
+  uint tint_symbol_3 = 0u;
+  arr.GetDimensions(tint_symbol_3);
+  uint tint_symbol_4 = (tint_symbol_3 / 4u);
+  arr.Store((4u * min(0u, (tint_symbol_4 - 1u))), asuint(f0_arr()));
   return;
 }

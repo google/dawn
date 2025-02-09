@@ -24,7 +24,7 @@ struct S2 {
 
 shared S2 wg;
 void compute_main_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     wg.x = 0;
     wg.y = 0;
     wg.z = 0;

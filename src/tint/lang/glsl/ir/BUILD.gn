@@ -47,6 +47,8 @@ libtint_source_set("ir") {
   sources = [
     "builtin_call.cc",
     "builtin_call.h",
+    "combined_texture_sampler_var.cc",
+    "combined_texture_sampler_var.h",
     "member_builtin_call.cc",
     "member_builtin_call.h",
   ]
@@ -60,25 +62,24 @@ libtint_source_set("ir") {
     "${tint_src_dir}/lang/core/type",
     "${tint_src_dir}/lang/glsl",
     "${tint_src_dir}/lang/glsl/intrinsic",
+    "${tint_src_dir}/utils",
     "${tint_src_dir}/utils/containers",
     "${tint_src_dir}/utils/diagnostic",
     "${tint_src_dir}/utils/ice",
-    "${tint_src_dir}/utils/id",
     "${tint_src_dir}/utils/macros",
     "${tint_src_dir}/utils/math",
     "${tint_src_dir}/utils/memory",
-    "${tint_src_dir}/utils/reflection",
     "${tint_src_dir}/utils/result",
     "${tint_src_dir}/utils/rtti",
     "${tint_src_dir}/utils/symbol",
     "${tint_src_dir}/utils/text",
-    "${tint_src_dir}/utils/traits",
   ]
 }
 if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {
     sources = [
       "builtin_call_test.cc",
+      "combined_texture_sampler_var_test.cc",
       "member_builtin_call_test.cc",
     ]
     deps = [
@@ -94,19 +95,17 @@ if (tint_build_unittests) {
       "${tint_src_dir}/lang/glsl",
       "${tint_src_dir}/lang/glsl/intrinsic",
       "${tint_src_dir}/lang/glsl/ir",
+      "${tint_src_dir}/utils",
       "${tint_src_dir}/utils/containers",
       "${tint_src_dir}/utils/diagnostic",
       "${tint_src_dir}/utils/ice",
-      "${tint_src_dir}/utils/id",
       "${tint_src_dir}/utils/macros",
       "${tint_src_dir}/utils/math",
       "${tint_src_dir}/utils/memory",
-      "${tint_src_dir}/utils/reflection",
       "${tint_src_dir}/utils/result",
       "${tint_src_dir}/utils/rtti",
       "${tint_src_dir}/utils/symbol",
       "${tint_src_dir}/utils/text",
-      "${tint_src_dir}/utils/traits",
     ]
   }
 }

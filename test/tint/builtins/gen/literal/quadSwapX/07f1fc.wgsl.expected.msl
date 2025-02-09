@@ -1,35 +1,38 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
-
 using namespace metal;
-struct tint_private_vars_struct {
-  uint tint_msl_thread_index_in_quadgroup;
+
+struct tint_module_vars_struct {
+  device uint4* prevent_dce;
 };
 
-
-uint4 tint_msl_quadSwapX(uint4 e, thread tint_private_vars_struct* const tint_private_vars) {
-  return quad_shuffle(e,((*(tint_private_vars)).tint_msl_thread_index_in_quadgroup ^ 1u));
-}
-
-uint4 quadSwapX_07f1fc(thread tint_private_vars_struct* const tint_private_vars) {
-  uint4 res = tint_msl_quadSwapX(uint4(1u), tint_private_vars);
+uint4 quadSwapX_07f1fc() {
+  uint4 res = quad_shuffle_xor(uint4(1u), 1u);
   return res;
 }
 
-fragment void fragment_main(device uint4* tint_symbol [[buffer(0)]], uint tint_thread_index_in_quadgroup [[thread_index_in_quadgroup]]) {
-  thread tint_private_vars_struct tint_private_vars = {};
-  {
-    tint_private_vars.tint_msl_thread_index_in_quadgroup = tint_thread_index_in_quadgroup;
-  }
-  *(tint_symbol) = quadSwapX_07f1fc(&(tint_private_vars));
-  return;
+fragment void fragment_main(device uint4* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  (*tint_module_vars.prevent_dce) = quadSwapX_07f1fc();
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+struct tint_module_vars_struct {
+  device uint4* prevent_dce;
+};
+
+uint4 quadSwapX_07f1fc() {
+  uint4 res = quad_shuffle_xor(uint4(1u), 1u);
+  return res;
 }
 
-kernel void compute_main(device uint4* tint_symbol_1 [[buffer(0)]], uint tint_thread_index_in_quadgroup_1 [[thread_index_in_quadgroup]]) {
-  thread tint_private_vars_struct tint_private_vars = {};
-  {
-    tint_private_vars.tint_msl_thread_index_in_quadgroup = tint_thread_index_in_quadgroup_1;
-  }
-  *(tint_symbol_1) = quadSwapX_07f1fc(&(tint_private_vars));
-  return;
+kernel void compute_main(device uint4* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  (*tint_module_vars.prevent_dce) = quadSwapX_07f1fc();
 }
-

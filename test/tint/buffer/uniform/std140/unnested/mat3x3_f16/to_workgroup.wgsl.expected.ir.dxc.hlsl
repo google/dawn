@@ -29,14 +29,14 @@ matrix<float16_t, 3, 3> v_4(uint start_byte_offset) {
 }
 
 void f_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     w = matrix<float16_t, 3, 3>((float16_t(0.0h)).xxx, (float16_t(0.0h)).xxx, (float16_t(0.0h)).xxx);
   }
   GroupMemoryBarrierWithGroupSync();
   w = v_4(0u);
-  w[int(1)] = tint_bitcast_to_f16(u[0u].xy).xyz;
-  w[int(1)] = tint_bitcast_to_f16(u[0u].xy).xyz.zxy;
-  w[int(0)][int(1)] = float16_t(f16tof32(u[0u].z));
+  w[1u] = tint_bitcast_to_f16(u[0u].xy).xyz;
+  w[1u] = tint_bitcast_to_f16(u[0u].xy).xyz.zxy;
+  w[0u].y = float16_t(f16tof32(u[0u].z));
 }
 
 [numthreads(1, 1, 1)]

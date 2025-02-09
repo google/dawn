@@ -11,7 +11,7 @@ void atomicStore_726882() {
 }
 
 void compute_main_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     uint v_1 = 0u;
     InterlockedExchange(arg_0, 0u, v_1);
   }

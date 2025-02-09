@@ -33,12 +33,14 @@ import (
 	"testing"
 
 	"dawn.googlesource.com/dawn/tools/src/fileutils"
+	"dawn.googlesource.com/dawn/tools/src/oswrapper"
 	"github.com/google/go-cmp/cmp"
+	"github.com/stretchr/testify/require"
 )
 
 func TestThisLine(t *testing.T) {
 	td := fileutils.ThisLine()
-	if !strings.HasSuffix(td, "paths_test.go:40") {
+	if !strings.HasSuffix(td, "paths_test.go:42") {
 		t.Errorf("TestThisLine() returned %v", td)
 	}
 }
@@ -60,6 +62,52 @@ func TestDawnRoot(t *testing.T) {
 	expect := `tools/src/fileutils`
 	if diff := cmp.Diff(got, expect); diff != "" {
 		t.Errorf("DawnRoot() returned %v.\n%v", dr, diff)
+	}
+}
+
+func TestExpandHome(t *testing.T) {
+	tests := []struct {
+		name  string
+		input string
+		want  string
+	}{
+		{
+			name:  "No substitution",
+			input: "/foo/bar",
+			want:  "/foo/bar",
+		},
+		{
+			name:  "Single substitution",
+			input: "~/foo",
+			want:  "/home/foo",
+		},
+		{
+			name:  "Multi substitution",
+			input: "~/foo/~",
+			want:  "/home/foo//home",
+		},
+		{
+			name:  "Trailing slash",
+			input: "~/foo/",
+			want:  "/home/foo/",
+		},
+		{
+			name:  "Only home",
+			input: "~",
+			want:  "/home",
+		},
+	}
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			wrapper := oswrapper.CreateMemMapOSWrapper()
+			wrapper.Environment = map[string]string{
+				"HOME": "/home",
+			}
+
+			expandedPath := fileutils.ExpandHome(testCase.input, wrapper)
+			require.Equal(t, testCase.want, expandedPath)
+		})
 	}
 }
 

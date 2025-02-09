@@ -6,8 +6,7 @@ void v_1(uint offset, float2x2 obj) {
 }
 
 float2x2 v_2(uint offset) {
-  float2 v_3 = asfloat(ssbo.Load2((offset + 0u)));
-  return float2x2(v_3, asfloat(ssbo.Load2((offset + 8u))));
+  return float2x2(asfloat(ssbo.Load2((offset + 0u))), asfloat(ssbo.Load2((offset + 8u))));
 }
 
 [numthreads(1, 1, 1)]

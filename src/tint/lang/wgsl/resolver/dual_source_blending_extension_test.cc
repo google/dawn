@@ -147,19 +147,6 @@ TEST_F(DualSourceBlendingExtensionTests, StructMemberBlendSrcAttribute_OnlyBlend
     EXPECT_EQ(r()->error(), "12:34 error: '@blend_src(0)' is missing when '@blend_src' is used");
 }
 
-// Using a @blend_src attribute on a global variable should pass. This is needed internally when
-// using @blend_src with the canonicalize_entry_point transform. This test uses an internal
-// attribute to ignore address space, which is how it is used with the canonicalize_entry_point
-// transform.
-TEST_F(DualSourceBlendingExtensionTests, GlobalVariableBlendSrcAttributeAfterInternalTransform) {
-    GlobalVar(
-        "var", ty.vec4<f32>(),
-        Vector{Location(0_a), BlendSrc(0_a), Disable(ast::DisabledValidation::kIgnoreAddressSpace)},
-        core::AddressSpace::kOut);
-
-    EXPECT_TRUE(r()->Resolve()) << r()->error();
-}
-
 // Using the a @blend_src attribute with a non-zero location should fail.
 TEST_F(DualSourceBlendingExtensionTests, BlendSrcWithNonZeroLocation_Struct) {
     Structure("Output", Vector{

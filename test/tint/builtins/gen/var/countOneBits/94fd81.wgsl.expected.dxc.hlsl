@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 RWByteAddressBuffer prevent_dce : register(u0);
 
 uint2 countOneBits_94fd81() {
@@ -10,11 +13,29 @@ void fragment_main() {
   prevent_dce.Store2(0u, asuint(countOneBits_94fd81()));
   return;
 }
+//
+// compute_main
+//
+RWByteAddressBuffer prevent_dce : register(u0);
+
+uint2 countOneBits_94fd81() {
+  uint2 arg_0 = (1u).xx;
+  uint2 res = countbits(arg_0);
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store2(0u, asuint(countOneBits_94fd81()));
   return;
+}
+//
+// vertex_main
+//
+uint2 countOneBits_94fd81() {
+  uint2 arg_0 = (1u).xx;
+  uint2 res = countbits(arg_0);
+  return res;
 }
 
 struct VertexOutput {

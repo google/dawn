@@ -16,7 +16,7 @@ void main() {
   uint p_save = uniforms[0].x;
   {
     InnerS tint_symbol_1[8] = s1.a1;
-    tint_symbol_1[p_save] = v;
+    tint_symbol_1[min(p_save, 7u)] = v;
     s1.a1 = tint_symbol_1;
   }
   return;

@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void ldexp_fdbc7b() {
   float res = 2.0f;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   ldexp_fdbc7b();
   return;
 }
+//
+// compute_main
+//
+void ldexp_fdbc7b() {
+  float res = 2.0f;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   ldexp_fdbc7b();
   return;
+}
+//
+// vertex_main
+//
+void ldexp_fdbc7b() {
+  float res = 2.0f;
 }
 
 struct VertexOutput {

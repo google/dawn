@@ -1,9 +1,10 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 37
+; Bound: 48
 ; Schema: 0
                OpCapability Shader
+         %30 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
@@ -55,26 +56,36 @@
          %12 = OpVariable %_ptr_Uniform_sim_block Uniform
        %void = OpTypeVoid
          %18 = OpTypeFunction %void
-%_ptr_StorageBuffer_Particle = OpTypePointer StorageBuffer %Particle
+%_ptr_StorageBuffer__runtimearr_Particle = OpTypePointer StorageBuffer %_runtimearr_Particle
      %uint_0 = OpConstant %uint 0
+     %uint_1 = OpConstant %uint 1
         %int = OpTypeInt 32 1
       %int_0 = OpConstant %int 0
+%_ptr_StorageBuffer_Particle = OpTypePointer StorageBuffer %Particle
 %_ptr_Function_Particle = OpTypePointer Function %Particle
 %_ptr_Uniform_uint = OpTypePointer Uniform %uint
+     %uint_7 = OpConstant %uint 7
 %_ptr_Function_v3float = OpTypePointer Function %v3float
        %main = OpFunction %void None %18
          %19 = OpLabel
    %particle = OpVariable %_ptr_Function_Particle Function
-         %20 = OpAccessChain %_ptr_StorageBuffer_Particle %particles %uint_0 %int_0
-         %25 = OpLoad %Particle %20 None
-               OpStore %particle %25
-         %28 = OpAccessChain %_ptr_Uniform_uint %12 %uint_0 %uint_0
-         %30 = OpLoad %uint %28 None
-         %31 = OpAccessChain %_ptr_Function_v3float %particle %uint_0 %30
-         %33 = OpAccessChain %_ptr_Uniform_uint %12 %uint_0 %uint_0
-         %34 = OpLoad %uint %33 None
-         %35 = OpAccessChain %_ptr_Function_v3float %particle %uint_0 %34
-         %36 = OpLoad %v3float %35 None
-               OpStore %31 %36 None
+         %20 = OpAccessChain %_ptr_StorageBuffer__runtimearr_Particle %particles %uint_0
+         %23 = OpArrayLength %uint %particles 0
+         %24 = OpISub %uint %23 %uint_1
+         %26 = OpBitcast %uint %int_0
+         %29 = OpExtInst %uint %30 UMin %26 %24
+         %31 = OpAccessChain %_ptr_StorageBuffer_Particle %particles %uint_0 %29
+         %33 = OpLoad %Particle %31 None
+               OpStore %particle %33
+         %36 = OpAccessChain %_ptr_Uniform_uint %12 %uint_0 %uint_0
+         %38 = OpLoad %uint %36 None
+         %39 = OpExtInst %uint %30 UMin %38 %uint_7
+         %41 = OpAccessChain %_ptr_Function_v3float %particle %uint_0 %39
+         %43 = OpAccessChain %_ptr_Uniform_uint %12 %uint_0 %uint_0
+         %44 = OpLoad %uint %43 None
+         %45 = OpExtInst %uint %30 UMin %44 %uint_7
+         %46 = OpAccessChain %_ptr_Function_v3float %particle %uint_0 %45
+         %47 = OpLoad %v3float %46 None
+               OpStore %41 %47 None
                OpReturn
                OpFunctionEnd

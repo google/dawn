@@ -1,6 +1,9 @@
 #include <metal_stdlib>
-
 using namespace metal;
+
+struct Out {
+  float4 pos;
+};
 
 #if __METAL_VERSION__ >= 210
 #define TINT_INVARIANT [[invariant]]
@@ -8,23 +11,17 @@ using namespace metal;
 #define TINT_INVARIANT
 #endif
 
-struct Out {
-  float4 pos;
+
+struct main_outputs {
+  float4 Out_pos [[position]] TINT_INVARIANT;
 };
 
-struct tint_symbol_1 {
-  float4 pos [[position]] TINT_INVARIANT;
-};
-
-Out tint_symbol_inner() {
-  Out const tint_symbol_2 = Out{};
-  return tint_symbol_2;
+Out main_inner() {
+  return Out{};
 }
 
-vertex tint_symbol_1 tint_symbol() {
-  Out const inner_result = tint_symbol_inner();
-  tint_symbol_1 wrapper_result = {};
-  wrapper_result.pos = inner_result.pos;
-  return wrapper_result;
+vertex main_outputs v() {
+  main_outputs tint_wrapper_result = {};
+  tint_wrapper_result.Out_pos = main_inner().pos;
+  return tint_wrapper_result;
 }
-

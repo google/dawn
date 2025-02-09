@@ -13,7 +13,7 @@ void f(inout OuterS p) {
   InnerS v = (InnerS)0;
   {
     InnerS tint_symbol_1[8] = p.a1;
-    tint_symbol_1[uniforms[0].x] = v;
+    tint_symbol_1[min(uniforms[0].x, 7u)] = v;
     p.a1 = tint_symbol_1;
   }
 }

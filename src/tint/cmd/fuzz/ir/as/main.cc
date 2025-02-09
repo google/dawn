@@ -39,7 +39,8 @@
 #include "src/tint/lang/wgsl/ast/module.h"
 #include "src/tint/lang/wgsl/helpers/apply_substitute_overrides.h"
 #include "src/tint/lang/wgsl/reader/reader.h"
-#include "src/tint/utils/cli/cli.h"
+#include "src/tint/utils/command/args.h"
+#include "src/tint/utils/command/cli.h"
 #include "src/tint/utils/containers/transform.h"
 #include "src/tint/utils/macros/defer.h"
 #include "src/tint/utils/text/color_mode.h"
@@ -278,14 +279,7 @@ bool ProcessFile(const Options& options) {
 }  // namespace
 
 int main(int argc, const char** argv) {
-    tint::Vector<std::string_view, 8> arguments;
-    for (int i = 1; i < argc; i++) {
-        std::string_view arg(argv[i]);
-        if (!arg.empty()) {
-            arguments.Push(argv[i]);
-        }
-    }
-
+    tint::Vector<std::string_view, 8> arguments = tint::args::Vectorize(argc, argv);
     Options options;
 
     tint::Initialize();

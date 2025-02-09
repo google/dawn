@@ -8,14 +8,14 @@ struct In {
 };
 
 in vec4 f_Input;
-layout(location = 0) in vec4 f_loc0_Input;
+layout(location = 0) in vec4 tint_interstage_location0;
 void g(float a, float b, float c) {
 }
-void f_inner(vec4 pos, vec4 fbf, In tint_symbol) {
-  g(pos[0u], fbf[0u], tint_symbol.uv[0u]);
+void f_inner(vec4 pos, vec4 fbf, In v) {
+  g(pos.x, fbf.x, v.uv.x);
 }
 void main() {
-  vec4 v = gl_FragCoord;
-  vec4 v_1 = f_Input;
-  f_inner(v, v_1, In(f_loc0_Input));
+  vec4 v_1 = gl_FragCoord;
+  vec4 v_2 = f_Input;
+  f_inner(v_1, v_2, In(tint_interstage_location0));
 }

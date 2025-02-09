@@ -10,7 +10,7 @@ struct S {
 
 uint f() {
   S a = (S)0;
-  return a.n[int(2)].k[int(1)];
+  return a.n[2u].k[1u];
 }
 
 [numthreads(1, 1, 1)]

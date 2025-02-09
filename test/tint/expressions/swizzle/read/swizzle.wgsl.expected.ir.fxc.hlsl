@@ -8,7 +8,7 @@ void a() {
   int b = a_1.x;
   int4 c = a_1.zzyy;
   S d = (S)0;
-  float3 e = d.val[int(2)].yzx;
+  float3 e = d.val[2u].yzx;
 }
 
 [numthreads(1, 1, 1)]

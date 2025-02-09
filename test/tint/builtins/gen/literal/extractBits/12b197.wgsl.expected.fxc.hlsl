@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 RWByteAddressBuffer prevent_dce : register(u0);
 
 uint3 extractBits_12b197() {
@@ -9,11 +12,27 @@ void fragment_main() {
   prevent_dce.Store3(0u, asuint(extractBits_12b197()));
   return;
 }
+//
+// compute_main
+//
+RWByteAddressBuffer prevent_dce : register(u0);
+
+uint3 extractBits_12b197() {
+  uint3 res = (0u).xxx;
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store3(0u, asuint(extractBits_12b197()));
   return;
+}
+//
+// vertex_main
+//
+uint3 extractBits_12b197() {
+  uint3 res = (0u).xxx;
+  return res;
 }
 
 struct VertexOutput {

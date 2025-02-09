@@ -32,7 +32,7 @@ void main_inner(FragmentInputs0 inputs0, bool front_facing, uint loc1, uint samp
 }
 
 void main(main_inputs inputs) {
-  FragmentInputs0 v_1 = {float4(inputs.FragmentInputs0_position.xyz, (1.0f / inputs.FragmentInputs0_position[3u])), inputs.FragmentInputs0_loc0};
+  FragmentInputs0 v_1 = {float4(inputs.FragmentInputs0_position.xyz, (1.0f / inputs.FragmentInputs0_position.w)), inputs.FragmentInputs0_loc0};
   FragmentInputs1 v_2 = {inputs.FragmentInputs1_loc3, inputs.FragmentInputs1_sample_mask};
   main_inner(v_1, inputs.front_facing, inputs.loc1, inputs.sample_index, v_2, inputs.loc2);
 }

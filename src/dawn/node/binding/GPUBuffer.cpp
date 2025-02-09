@@ -88,13 +88,12 @@ interop::Promise<void> GPUBuffer::mapAsync(Napi::Env env,
                     ctx->promise.Resolve();
                     mapped_ = true;
                     break;
-                case wgpu::MapAsyncStatus::InstanceDropped:
+                case wgpu::MapAsyncStatus::InstanceDropped:  // fallthrough
+                    assert(false);
                 case wgpu::MapAsyncStatus::Aborted:
                     async_->Reject(ctx->env, ctx->promise, Errors::AbortError(ctx->env));
                     break;
                 case wgpu::MapAsyncStatus::Error:
-                case wgpu::MapAsyncStatus::Unknown:
-                default:
                     async_->Reject(ctx->env, ctx->promise, Errors::OperationError(ctx->env));
                     break;
             }

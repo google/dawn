@@ -69,7 +69,7 @@ void main() {
     }
   }
   p = v_2;
-  p[1] = tint_convert_S(v.inner[2]);
-  p[3].m = f16mat2x4(v.inner[2].m_col0, v.inner[2].m_col1);
-  p[1].m[0] = v.inner[0].m_col1.ywxz;
+  p[1u] = tint_convert_S(v.inner[2u]);
+  p[3u].m = f16mat2x4(v.inner[2u].m_col0, v.inner[2u].m_col1);
+  p[1u].m[0u] = v.inner[0u].m_col1.ywxz;
 }

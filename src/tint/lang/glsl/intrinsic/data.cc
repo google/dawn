@@ -282,22 +282,22 @@ constexpr TypeMatcher kVecMatcher {
 };
 
 
-/// TypeMatcher for 'type array'
-constexpr TypeMatcher kArrayMatcher {
+/// TypeMatcher for 'type runtime_array'
+constexpr TypeMatcher kRuntimeArrayMatcher {
 /* match */ [](MatchState& state, const Type* ty) -> const Type* {
   const Type* T = nullptr;
-    if (!MatchArray(state, ty, T)) {
+    if (!MatchRuntimeArray(state, ty, T)) {
       return nullptr;
     }
     T = state.Type(T);
     if (T == nullptr) {
       return nullptr;
     }
-    return BuildArray(state, ty, T);
+    return BuildRuntimeArray(state, ty, T);
   },
 /* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText T;
   state->PrintType(T);
-    out << style::Type("array", "<", T, ">");
+    out << style::Type("array<", T, ">");
   }
 };
 
@@ -909,7 +909,7 @@ constexpr TypeMatcher kTypeMatchers[] = {
   /* [10] */ kVec3Matcher,
   /* [11] */ kVec4Matcher,
   /* [12] */ kVecMatcher,
-  /* [13] */ kArrayMatcher,
+  /* [13] */ kRuntimeArrayMatcher,
   /* [14] */ kTexture2DMatcher,
   /* [15] */ kTexture2DArrayMatcher,
   /* [16] */ kTexture3DMatcher,
@@ -4011,7 +4011,7 @@ static_assert(OverloadIndex::CanIndex(kOverloads),
 constexpr IntrinsicInfo kBuiltins[] = {
   {
     /* [0] */
-    /* fn length[T, A : access](ptr<storage, array<T>, A>) -> i32 */
+    /* fn length[T, A : access](ptr<storage, runtime_array<T>, A>) -> i32 */
     /* num overloads */ 1,
     /* overloads */ OverloadIndex(123),
   },

@@ -29,15 +29,18 @@ package auth
 
 import (
 	"dawn.googlesource.com/dawn/tools/src/fileutils"
+	"dawn.googlesource.com/dawn/tools/src/oswrapper"
 	"go.chromium.org/luci/auth"
 	"go.chromium.org/luci/hardcoded/chromeinfra"
 )
 
 // DefaultAuthOptions returns the default authentication options for use by
 // command line arguments.
-func DefaultAuthOptions(additionalScopes ...string) auth.Options {
+func DefaultAuthOptions(
+	environProvider oswrapper.EnvironProvider, additionalScopes ...string) auth.Options {
+
 	def := chromeinfra.DefaultAuthOptions()
-	def.SecretsDir = fileutils.ExpandHome("~/.config/dawn-cts")
+	def.SecretsDir = fileutils.ExpandHome("~/.config/dawn-cts", environProvider)
 	def.Scopes = append(def.Scopes,
 		"https://www.googleapis.com/auth/gerritcodereview",
 		auth.OAuthScopeEmail)

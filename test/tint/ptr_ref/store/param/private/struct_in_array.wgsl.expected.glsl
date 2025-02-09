@@ -11,5 +11,5 @@ void func(inout str pointer) {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  func(P[2]);
+  func(P[2u]);
 }

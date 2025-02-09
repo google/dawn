@@ -28,6 +28,7 @@
 #include "src/tint/lang/spirv/reader/lower/lower.h"
 
 #include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/spirv/reader/lower/builtins.h"
 #include "src/tint/lang/spirv/reader/lower/shader_io.h"
 #include "src/tint/lang/spirv/reader/lower/vector_element_pointer.h"
 
@@ -44,6 +45,7 @@ Result<SuccessType> Lower(core::ir::Module& mod) {
 
     RUN_TRANSFORM(lower::VectorElementPointer, mod);
     RUN_TRANSFORM(lower::ShaderIO, mod);
+    RUN_TRANSFORM(lower::Builtins, mod);
 
     if (auto res = core::ir::ValidateAndDumpIfNeeded(mod, "spirv.Lower"); res != Success) {
         return res.Failure();

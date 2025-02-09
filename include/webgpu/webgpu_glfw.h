@@ -28,9 +28,13 @@
 #ifndef INCLUDE_WEBGPU_WEBGPU_GLFW_H_
 #define INCLUDE_WEBGPU_WEBGPU_GLFW_H_
 
+#ifdef __cplusplus
 #include <memory>
 
 #include "webgpu/webgpu_cpp.h"
+#else
+#include "webgpu/webgpu.h"
+#endif
 
 #if defined(WGPU_GLFW_SHARED_LIBRARY)
 #if defined(_WIN32)
@@ -52,6 +56,16 @@
 
 struct GLFWwindow;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+WGPU_GLFW_EXPORT WGPUSurface wgpuGlfwCreateSurfaceForWindow(const WGPUInstance instance,
+                                                            struct GLFWwindow* window);
+
+#ifdef __cplusplus
+}
+
 namespace wgpu::glfw {
 
 // Does the necessary setup on the GLFWwindow to allow creating a wgpu::Surface with it and
@@ -63,9 +77,12 @@ WGPU_GLFW_EXPORT wgpu::Surface CreateSurfaceForWindow(const wgpu::Instance& inst
 // Use for testing only. Does everything that CreateSurfaceForWindow does except the call to
 // CreateSurface. Useful to be able to modify the descriptor for testing, or when trying to
 // avoid using the global proc table.
+// NOLINTNEXTLINE(build/include_what_you_use)
 WGPU_GLFW_EXPORT std::unique_ptr<wgpu::ChainedStruct, void (*)(wgpu::ChainedStruct*)>
 SetupWindowAndGetSurfaceDescriptor(GLFWwindow* window);
 
 }  // namespace wgpu::glfw
+
+#endif
 
 #endif  // INCLUDE_WEBGPU_WEBGPU_GLFW_H_

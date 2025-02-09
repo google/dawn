@@ -164,15 +164,16 @@ Wrappers* Wrappers::instance = nullptr;
         InstanceMethod("has", &W{{$.Name}}::has),
         InstanceMethod("keys", &W{{$.Name}}::keys),
         InstanceAccessor("size", &W{{$.Name}}::getSize, nullptr),
+        InstanceMethod(Napi::Symbol::WellKnown(env,"iterator"), &W{{$.Name}}::iterator),
 {{-  end}}
 {{-  range $m := $methods}}
-        InstanceMethod("{{$m.Name}}", &W{{$.Name}}::{{$m.Name}}, static_cast<napi_property_attributes>(napi_writable | napi_configurable)),
+        InstanceMethod("{{$m.Name}}", &W{{$.Name}}::{{$m.Name}}, static_cast<napi_property_attributes>(napi_default_jsproperty)),
 {{-  end}}
 {{-  range $a := $attributes}}
 {{-   if not (HasAnnotation $a "SameObject")}}
         InstanceAccessor("{{$a.Name}}", &W{{$.Name}}::get{{Title $a.Name}},
 {{-    if $a.Readonly}} nullptr,{{else}} &W{{$.Name}}::set{{Title $a.Name}},{{end -}}
-        napi_enumerable),
+        napi_default_jsproperty),
 {{-   end}}
 {{-  end}}
 {{-  range $c := $constants}}
@@ -198,6 +199,9 @@ Wrappers* Wrappers::instance = nullptr;
     }
     Napi::Value getSize(const Napi::CallbackInfo& info) {
       return ToJS(info.Env(), impl->getSize(info.Env()));
+    }
+    Napi::Value iterator(const Napi::CallbackInfo& info) {
+      return impl->iterator(info);
     }
 {{-  end}}
 {{-  range $m := $methods}}
@@ -370,7 +374,7 @@ Interface<{{$.Name}}> {{$.Name}}::Bind(Napi::Env env, std::unique_ptr<{{$.Name}}
 {{- range $a := AttributesOf $}}
 {{-   if HasAnnotation $a "SameObject"}}
   object.DefineProperty(Napi::PropertyDescriptor::Value(
-    "{{$a.Name}}", ToJS(env, wrapper->impl->get{{Title $a.Name}}(env))
+    "{{$a.Name}}", ToJS(env, wrapper->impl->get{{Title $a.Name}}(env)), napi_default_jsproperty
   ));
 {{-   end}}
 {{- end}}

@@ -34,17 +34,18 @@ ary_ret v(uint offset) {
 
 Particle v_4(uint offset) {
   float3 v_5[8] = v((offset + 0u));
-  float v_6 = asfloat(particles.Load((offset + 128u)));
-  float4 v_7 = asfloat(particles.Load4((offset + 144u)));
-  Particle v_8 = {v_5, v_6, v_7, asfloat(particles.Load3((offset + 160u)))};
-  return v_8;
+  Particle v_6 = {v_5, asfloat(particles.Load((offset + 128u))), asfloat(particles.Load4((offset + 144u))), asfloat(particles.Load3((offset + 160u)))};
+  return v_6;
 }
 
 [numthreads(1, 1, 1)]
 void main() {
-  Particle particle = v_4(0u);
-  uint v_9 = sim[0u].x;
-  uint v_10 = sim[0u].x;
+  uint v_7 = 0u;
+  particles.GetDimensions(v_7);
+  uint v_8 = ((v_7 / 176u) - 1u);
+  Particle particle = v_4((0u + (min(uint(int(0)), v_8) * 176u)));
+  uint v_9 = min(sim[0u].x, 7u);
+  uint v_10 = min(sim[0u].x, 7u);
   particle.position[v_9] = particle.position[v_10];
 }
 

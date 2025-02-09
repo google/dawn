@@ -1,17 +1,16 @@
 #include <metal_stdlib>
-
 using namespace metal;
-bool tint_workgroupUniformLoad(threadgroup bool* const p) {
-  threadgroup_barrier(mem_flags::mem_threadgroup);
-  bool const result = *(p);
-  threadgroup_barrier(mem_flags::mem_threadgroup);
-  return result;
-}
 
-int foo(threadgroup bool* const tint_symbol) {
-  if (tint_workgroupUniformLoad(tint_symbol)) {
+struct tint_module_vars_struct {
+  threadgroup bool* v;
+};
+
+int foo(tint_module_vars_struct tint_module_vars) {
+  threadgroup_barrier(mem_flags::mem_threadgroup);
+  bool const v_1 = (*tint_module_vars.v);
+  threadgroup_barrier(mem_flags::mem_threadgroup);
+  if (v_1) {
     return 42;
   }
   return 0;
 }
-

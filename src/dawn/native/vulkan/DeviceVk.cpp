@@ -110,7 +110,8 @@ MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
         VkPhysicalDevice vkPhysicalDevice = ToBackend(GetPhysicalDevice())->GetVkPhysicalDevice();
 
         VulkanDeviceKnobs usedDeviceKnobs = {};
-        DAWN_TRY_ASSIGN(usedDeviceKnobs, CreateDevice(vkPhysicalDevice));
+        DAWN_TRY_ASSIGN(usedDeviceKnobs,
+                        CreateDevice(GetAdapter()->GetFeatureLevel(), vkPhysicalDevice));
         *static_cast<VulkanDeviceKnobs*>(&mDeviceInfo) = usedDeviceKnobs;
 
         DAWN_TRY(functions->LoadDeviceProcs(mVkDevice, mDeviceInfo));
@@ -132,7 +133,6 @@ MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
     mExternalMemoryService = std::make_unique<external_memory::Service>(this);
 
     if (uint32_t(HasFeature(Feature::SharedFenceVkSemaphoreOpaqueFD)) +
-            uint32_t(HasFeature(Feature::SharedFenceVkSemaphoreSyncFD)) +
             uint32_t(HasFeature(Feature::SharedFenceSyncFD)) +
             uint32_t(HasFeature(Feature::SharedFenceVkSemaphoreZirconHandle)) >
         1) {
@@ -144,8 +144,7 @@ MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
     if (HasFeature(Feature::SharedFenceVkSemaphoreOpaqueFD)) {
         mExternalSemaphoreService = std::make_unique<external_semaphore::Service>(
             this, VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD_BIT_KHR);
-    } else if (HasFeature(Feature::SharedFenceSyncFD) ||
-               HasFeature(Feature::SharedFenceVkSemaphoreSyncFD)) {
+    } else if (HasFeature(Feature::SharedFenceSyncFD)) {
         mExternalSemaphoreService = std::make_unique<external_semaphore::Service>(
             this, VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_SYNC_FD_BIT);
     } else if (HasFeature(Feature::SharedFenceVkSemaphoreZirconHandle)) {
@@ -313,10 +312,8 @@ ResultOrError<Ref<SharedFenceBase>> Device::ImportSharedFenceImpl(
                 this, descriptor->label,
                 unpacked.Get<SharedFenceVkSemaphoreZirconHandleDescriptor>());
         case wgpu::SType::SharedFenceSyncFDDescriptor:
-            DAWN_INVALID_IF(!HasFeature(Feature::SharedFenceSyncFD) &&
-                                !HasFeature(Feature::SharedFenceVkSemaphoreSyncFD),
-                            "%s or %s are not enabled.", wgpu::FeatureName::SharedFenceSyncFD,
-                            wgpu::FeatureName::SharedFenceVkSemaphoreSyncFD);
+            DAWN_INVALID_IF(!HasFeature(Feature::SharedFenceSyncFD), "%s is not enabled.",
+                            wgpu::FeatureName::SharedFenceSyncFD);
             return SharedFence::Create(this, descriptor->label,
                                        unpacked.Get<SharedFenceSyncFDDescriptor>());
         case wgpu::SType::SharedFenceVkSemaphoreOpaqueFDDescriptor:
@@ -340,11 +337,11 @@ MaybeError Device::TickImpl() {
         for (Ref<DescriptorSetAllocator>& allocator : pending->IterateUpTo(completedSerial)) {
             allocator->FinishDeallocation(completedSerial);
         }
+        pending->ClearUpTo(completedSerial);
     });
 
     GetResourceMemoryAllocator()->Tick(completedSerial);
     GetFencedDeleter()->Tick(completedSerial);
-    mDescriptorAllocatorsPendingDeallocation->ClearUpTo(completedSerial);
 
     DAWN_TRY(queue->SubmitPendingCommands());
     DAWN_TRY(CheckDebugLayerAndGenerateErrors());
@@ -392,7 +389,8 @@ void Device::EnqueueDeferredDeallocation(DescriptorSetAllocator* allocator) {
                                                       GetQueue()->GetPendingCommandSerial());
 }
 
-ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysicalDevice) {
+ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(wgpu::FeatureLevel featureLevel,
+                                                      VkPhysicalDevice vkPhysicalDevice) {
     VulkanDeviceKnobs usedKnobs = {};
 
     // Default to asking for all available known extensions.
@@ -420,12 +418,15 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
     PNextChainBuilder featuresChain(&features2);
 
     // Required for core WebGPU features.
-    usedKnobs.features.depthBiasClamp = VK_TRUE;
-    usedKnobs.features.fragmentStoresAndAtomics = VK_TRUE;
+    if (featureLevel == wgpu::FeatureLevel::Core) {
+        usedKnobs.features.depthBiasClamp = VK_TRUE;
+        usedKnobs.features.imageCubeArray = VK_TRUE;
+        usedKnobs.features.independentBlend = VK_TRUE;
+        usedKnobs.features.sampleRateShading = VK_TRUE;
+    }
+    // Required for core and compat WebGPU features.
     usedKnobs.features.fullDrawIndexUint32 = VK_TRUE;
-    usedKnobs.features.imageCubeArray = VK_TRUE;
-    usedKnobs.features.independentBlend = VK_TRUE;
-    usedKnobs.features.sampleRateShading = VK_TRUE;
+    usedKnobs.features.fragmentStoresAndAtomics = VK_TRUE;
 
     if (IsRobustnessEnabled()) {
         usedKnobs.features.robustBufferAccess = VK_TRUE;
@@ -450,6 +451,12 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
         featuresChain.Add(&usedKnobs.zeroInitializeWorkgroupMemoryFeatures);
     }
 
+    if (mDeviceInfo.HasExt(DeviceExt::DemoteToHelperInvocation)) {
+        DAWN_ASSERT(usedKnobs.HasExt(DeviceExt::DemoteToHelperInvocation));
+        usedKnobs.demoteToHelperInvocationFeatures = mDeviceInfo.demoteToHelperInvocationFeatures;
+        featuresChain.Add(&usedKnobs.demoteToHelperInvocationFeatures);
+    }
+
     if (mDeviceInfo.HasExt(DeviceExt::ShaderIntegerDotProduct)) {
         DAWN_ASSERT(usedKnobs.HasExt(DeviceExt::ShaderIntegerDotProduct));
 
@@ -459,6 +466,12 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
 
     if (mDeviceInfo.features.samplerAnisotropy == VK_TRUE) {
         usedKnobs.features.samplerAnisotropy = VK_TRUE;
+    }
+
+    if (IsToggleEnabled(Toggle::UseVulkanMemoryModel)) {
+        DAWN_ASSERT(usedKnobs.HasExt(DeviceExt::VulkanMemoryModel));
+        usedKnobs.vulkanMemoryModelFeatures = mDeviceInfo.vulkanMemoryModelFeatures;
+        featuresChain.Add(&usedKnobs.vulkanMemoryModelFeatures);
     }
 
     if (HasFeature(Feature::TextureCompressionBC)) {
@@ -502,24 +515,15 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
     }
 
     // Set device feature for subgroups with f16 types.
-    // TODO(349125474): Remove deprecated ChromiumExperimentalSubgroups.
-    if (HasFeature(Feature::SubgroupsF16) || HasFeature(Feature::ChromiumExperimentalSubgroups)) {
-        // If ChromiumExperimentalSubgroups feature is required, set the shaderSubgroupExtendedTypes
-        // as-is, so that subgroups functions with f16 can be used if supported by backend.
-        if (HasFeature(Feature::ChromiumExperimentalSubgroups)) {
-            if (usedKnobs.HasExt(DeviceExt::ShaderSubgroupExtendedTypes)) {
-                usedKnobs.shaderSubgroupExtendedTypes = mDeviceInfo.shaderSubgroupExtendedTypes;
-                featuresChain.Add(&usedKnobs.shaderSubgroupExtendedTypes);
-            }
-        } else {
-            DAWN_ASSERT(usedKnobs.HasExt(DeviceExt::ShaderSubgroupExtendedTypes) &&
-                        mDeviceInfo.shaderSubgroupExtendedTypes.shaderSubgroupExtendedTypes ==
-                            VK_TRUE &&
-                        HasFeature(Feature::ShaderF16) && HasFeature(Feature::Subgroups));
+    if (HasFeature(Feature::SubgroupsF16) ||
+        (HasFeature(Feature::ShaderF16) && HasFeature(Feature::Subgroups))) {
+        DAWN_ASSERT(usedKnobs.HasExt(DeviceExt::ShaderSubgroupExtendedTypes) &&
+                    mDeviceInfo.shaderSubgroupExtendedTypes.shaderSubgroupExtendedTypes ==
+                        VK_TRUE &&
+                    HasFeature(Feature::ShaderF16) && HasFeature(Feature::Subgroups));
 
-            usedKnobs.shaderSubgroupExtendedTypes = mDeviceInfo.shaderSubgroupExtendedTypes;
-            featuresChain.Add(&usedKnobs.shaderSubgroupExtendedTypes);
-        }
+        usedKnobs.shaderSubgroupExtendedTypes = mDeviceInfo.shaderSubgroupExtendedTypes;
+        featuresChain.Add(&usedKnobs.shaderSubgroupExtendedTypes);
     }
 
     if (HasFeature(Feature::DualSourceBlending)) {
@@ -539,17 +543,6 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
 
         usedKnobs.robustness2Features = mDeviceInfo.robustness2Features;
         featuresChain.Add(&usedKnobs.robustness2Features);
-    }
-
-    if (HasFeature(Feature::ChromiumExperimentalSubgroupUniformControlFlow)) {
-        DAWN_ASSERT(
-            usedKnobs.HasExt(DeviceExt::ShaderSubgroupUniformControlFlow) &&
-            mDeviceInfo.shaderSubgroupUniformControlFlowFeatures.shaderSubgroupUniformControlFlow ==
-                VK_TRUE);
-
-        usedKnobs.shaderSubgroupUniformControlFlowFeatures =
-            mDeviceInfo.shaderSubgroupUniformControlFlowFeatures;
-        featuresChain.Add(&usedKnobs.shaderSubgroupUniformControlFlowFeatures);
     }
 
     if (HasFeature(Feature::YCbCrVulkanSamplers) &&
@@ -666,7 +659,7 @@ MaybeError Device::CopyFromStagingToBufferImpl(BufferBase* source,
 }
 
 MaybeError Device::CopyFromStagingToTextureImpl(const BufferBase* source,
-                                                const TextureDataLayout& src,
+                                                const TexelCopyBufferLayout& src,
                                                 const TextureCopy& dst,
                                                 const Extent3D& copySizePixels) {
     // There is no need of a barrier to make host writes available and visible to the copy
@@ -917,12 +910,12 @@ void Device::DestroyImpl() {
         for (Ref<DescriptorSetAllocator>& allocator : pending->IterateUpTo(kMaxExecutionSerial)) {
             allocator->FinishDeallocation(kMaxExecutionSerial);
         }
+        pending->ClearUpTo(kMaxExecutionSerial);
     });
 
     // Releasing the uploader enqueues buffers to be released.
     // Call Tick() again to clear them before releasing the deleter.
     GetResourceMemoryAllocator()->Tick(kMaxExecutionSerial);
-    mDescriptorAllocatorsPendingDeallocation->ClearUpTo(kMaxExecutionSerial);
 
     // Allow recycled memory to be deleted.
     GetResourceMemoryAllocator()->DestroyPool();
@@ -930,6 +923,9 @@ void Device::DestroyImpl() {
     // The VkRenderPasses in the cache can be destroyed immediately since all commands referring
     // to them are guaranteed to be finished executing.
     mRenderPassCache = nullptr;
+
+    // Destroy the VkPipelineCache before VkDevice.
+    mMonolithicPipelineCache = nullptr;
 
     // Delete all the remaining VkDevice child objects immediately since the GPU timeline is
     // finished.

@@ -76,7 +76,7 @@ TEST_F(SpirvWriterTest, Swizzle_FourElements) {
 }
 
 TEST_F(SpirvWriterTest, Swizzle_RepeatedElements) {
-    auto* vec = b.FunctionParam("vec", ty.vec2<i32>());
+    auto* vec = b.FunctionParam("vec", ty.vec4<i32>());
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({vec});
     b.Append(func->Block(), [&] {

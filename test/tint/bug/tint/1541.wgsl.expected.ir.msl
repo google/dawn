@@ -1,8 +1,0 @@
-#include <metal_stdlib>
-using namespace metal;
-
-kernel void tint_symbol() {
-  bool const a = true;
-  uint const v_1 = uint(a);
-  bool v = select(bool((v_1 & uint(true))), true, false);
-}

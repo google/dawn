@@ -11,6 +11,6 @@ uniform u_block_std140_1_ubo {
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   f16mat4 t = transpose(f16mat4(v.inner_col0, v.inner_col1, v.inner_col2, v.inner_col3));
-  float16_t l = length(f16mat4(v.inner_col0, v.inner_col1, v.inner_col2, v.inner_col3)[1]);
-  float16_t a = abs(f16mat4(v.inner_col0, v.inner_col1, v.inner_col2, v.inner_col3)[0].ywxz[0u]);
+  float16_t l = length(f16mat4(v.inner_col0, v.inner_col1, v.inner_col2, v.inner_col3)[1u]);
+  float16_t a = abs(f16mat4(v.inner_col0, v.inner_col1, v.inner_col2, v.inner_col3)[0u].ywxz.x);
 }

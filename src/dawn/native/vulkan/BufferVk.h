@@ -55,12 +55,9 @@ class Buffer final : public BufferBase {
     void TransitionUsageNow(CommandRecordingContext* recordingContext,
                             wgpu::BufferUsage usage,
                             wgpu::ShaderStage shaderStage = wgpu::ShaderStage::None);
-    bool TrackUsageAndGetResourceBarrier(CommandRecordingContext* recordingContext,
+    void TrackUsageAndGetResourceBarrier(CommandRecordingContext* recordingContext,
                                          wgpu::BufferUsage usage,
-                                         wgpu::ShaderStage shaderStage,
-                                         VkBufferMemoryBarrier* barrier,
-                                         VkPipelineStageFlags* srcStages,
-                                         VkPipelineStageFlags* dstStages);
+                                         wgpu::ShaderStage shaderStage);
 
     // All the Ensure methods return true if the buffer was initialized to zero.
     bool EnsureDataInitialized(CommandRecordingContext* recordingContext);
@@ -73,7 +70,7 @@ class Buffer final : public BufferBase {
     // Dawn API
     void SetLabelImpl() override;
 
-    static void TransitionMappableBuffersEagerly(const VulkanFunctions& fn,
+    static void TransitionMappableBuffersEagerly(Device* device,
                                                  CommandRecordingContext* recordingContext,
                                                  const absl::flat_hash_set<Ref<Buffer>>& buffers);
 

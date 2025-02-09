@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 RWByteAddressBuffer prevent_dce : register(u0);
 TextureCube<float4> arg_1 : register(t1, space1);
 SamplerState arg_2 : register(s2, space1);
@@ -11,11 +14,32 @@ void fragment_main() {
   prevent_dce.Store4(0u, asuint(textureGather_32c4e8()));
   return;
 }
+//
+// compute_main
+//
+RWByteAddressBuffer prevent_dce : register(u0);
+TextureCube<float4> arg_1 : register(t1, space1);
+SamplerState arg_2 : register(s2, space1);
+
+float4 textureGather_32c4e8() {
+  float4 res = arg_1.GatherGreen(arg_2, (1.0f).xxx);
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store4(0u, asuint(textureGather_32c4e8()));
   return;
+}
+//
+// vertex_main
+//
+TextureCube<float4> arg_1 : register(t1, space1);
+SamplerState arg_2 : register(s2, space1);
+
+float4 textureGather_32c4e8() {
+  float4 res = arg_1.GatherGreen(arg_2, (1.0f).xxx);
+  return res;
 }
 
 struct VertexOutput {

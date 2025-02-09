@@ -35,6 +35,7 @@
 #include "dawn/common/ContentLessObjectCacheable.h"
 #include "dawn/native/AttachmentState.h"
 #include "dawn/native/Forward.h"
+#include "dawn/native/ImmediateConstantsLayout.h"
 #include "dawn/native/IntegerTypes.h"
 #include "dawn/native/Pipeline.h"
 
@@ -88,7 +89,10 @@ struct VertexBufferInfo {
 class RenderPipelineBase : public PipelineBase,
                            public ContentLessObjectCacheable<RenderPipelineBase> {
   public:
-    RenderPipelineBase(DeviceBase* device, const UnpackedPtr<RenderPipelineDescriptor>& descriptor);
+    RenderPipelineBase(
+        DeviceBase* device,
+        const UnpackedPtr<RenderPipelineDescriptor>& descriptor,
+        ImmediateConstantMask requiredInternalImmediateConstants = ImmediateConstantMask(0u));
     ~RenderPipelineBase() override;
 
     static Ref<RenderPipelineBase> MakeError(DeviceBase* device, StringView label);

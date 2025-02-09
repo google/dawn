@@ -46,7 +46,9 @@ TEST_F(SpirvWriterTest, Loop_BreakIf) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << Error() << output_;
+    Options options;
+    options.disable_robustness = true;
+    ASSERT_TRUE(Generate(options)) << Error() << output_;
     EXPECT_INST(R"(
           %4 = OpLabel
                OpBranch %7
@@ -63,6 +65,62 @@ TEST_F(SpirvWriterTest, Loop_BreakIf) {
 )");
 }
 
+TEST_F(SpirvWriterTest, Loop_BreakIf_WithRobustness) {
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* loop = b.Loop();
+        b.Append(loop->Body(), [&] {  //
+            b.Continue(loop);
+
+            b.Append(loop->Continuing(), [&] {  //
+                b.BreakIf(loop, true);
+            });
+        });
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%17 = OpConstantComposite %v2uint %uint_4294967295 %uint_4294967295");
+    EXPECT_INST(R"(
+          %4 = OpLabel
+%tint_loop_idx = OpVariable %_ptr_Function_v2uint Function %14
+               OpBranch %5
+          %5 = OpLabel
+               OpBranch %8
+          %8 = OpLabel
+               OpLoopMerge %9 %7 None
+               OpBranch %6
+          %6 = OpLabel
+         %15 = OpLoad %v2uint %tint_loop_idx None
+         %16 = OpIEqual %v2bool %15 %17
+         %21 = OpAll %bool %16
+               OpSelectionMerge %22 None
+               OpBranchConditional %21 %23 %22
+         %23 = OpLabel
+               OpBranch %9
+         %22 = OpLabel
+               OpBranch %7
+          %7 = OpLabel
+         %24 = OpAccessChain %_ptr_Function_uint %tint_loop_idx %uint_0
+         %27 = OpLoad %uint %24 None
+%tint_low_inc = OpIAdd %uint %27 %uint_1
+         %30 = OpAccessChain %_ptr_Function_uint %tint_loop_idx %uint_0
+               OpStore %30 %tint_low_inc None
+         %31 = OpIEqual %bool %tint_low_inc %uint_0
+ %tint_carry = OpSelect %uint %31 %uint_1 %uint_0
+         %33 = OpAccessChain %_ptr_Function_uint %tint_loop_idx %uint_1
+         %34 = OpLoad %uint %33 None
+         %35 = OpIAdd %uint %34 %tint_carry
+         %36 = OpAccessChain %_ptr_Function_uint %tint_loop_idx %uint_1
+               OpStore %36 %35 None
+               OpBranchConditional %true %9 %8
+          %9 = OpLabel
+               OpReturn
+               OpFunctionEnd
+
+)");
+}
+
 // Test that we still emit the continuing block with a back-edge, even when it is unreachable.
 TEST_F(SpirvWriterTest, Loop_UnconditionalBreakInBody) {
     auto* func = b.Function("foo", ty.void_());
@@ -74,7 +132,9 @@ TEST_F(SpirvWriterTest, Loop_UnconditionalBreakInBody) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << Error() << output_;
+    Options options;
+    options.disable_robustness = true;
+    ASSERT_TRUE(Generate(options)) << Error() << output_;
     EXPECT_INST(R"(
           %4 = OpLabel
                OpBranch %7
@@ -112,7 +172,9 @@ TEST_F(SpirvWriterTest, Loop_ConditionalBreakInBody) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << Error() << output_;
+    Options options;
+    options.disable_robustness = true;
+    ASSERT_TRUE(Generate(options)) << Error() << output_;
     EXPECT_INST(R"(
           %4 = OpLabel
                OpBranch %7
@@ -155,7 +217,9 @@ TEST_F(SpirvWriterTest, Loop_ConditionalContinueInBody) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << Error() << output_;
+    Options options;
+    options.disable_robustness = true;
+    ASSERT_TRUE(Generate(options)) << Error() << output_;
     EXPECT_INST(R"(
           %4 = OpLabel
                OpBranch %7
@@ -189,7 +253,9 @@ TEST_F(SpirvWriterTest, Loop_UnconditionalReturnInBody) {
         b.Unreachable();
     });
 
-    ASSERT_TRUE(Generate()) << Error() << output_;
+    Options options;
+    options.disable_robustness = true;
+    ASSERT_TRUE(Generate(options)) << Error() << output_;
     EXPECT_INST(R"(
           %4 = OpLabel
                OpBranch %7
@@ -221,7 +287,9 @@ TEST_F(SpirvWriterTest, Loop_UseResultFromBodyInContinuing) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << Error() << output_;
+    Options options;
+    options.disable_robustness = true;
+    ASSERT_TRUE(Generate(options)) << Error() << output_;
     EXPECT_INST(R"(
           %4 = OpLabel
                OpBranch %7
@@ -262,7 +330,9 @@ TEST_F(SpirvWriterTest, Loop_NestedLoopInBody) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << Error() << output_;
+    Options options;
+    options.disable_robustness = true;
+    ASSERT_TRUE(Generate(options)) << Error() << output_;
     EXPECT_INST(R"(
           %4 = OpLabel
                OpBranch %7
@@ -310,7 +380,9 @@ TEST_F(SpirvWriterTest, Loop_NestedLoopInContinuing) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << Error() << output_;
+    Options options;
+    options.disable_robustness = true;
+    ASSERT_TRUE(Generate(options)) << Error() << output_;
     EXPECT_INST(R"(
           %4 = OpLabel
                OpBranch %7
@@ -369,7 +441,9 @@ TEST_F(SpirvWriterTest, Loop_NestedLoopInContinuing_UnreachableInNestedBody) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << Error() << output_;
+    Options options;
+    options.disable_robustness = true;
+    ASSERT_TRUE(Generate(options)) << Error() << output_;
     EXPECT_INST(R"(
           %4 = OpLabel
                OpBranch %7
@@ -435,7 +509,9 @@ TEST_F(SpirvWriterTest, Loop_NestedLoopInContinuing_UnreachableInNestedBody_With
         b.Return(func, outer_result);
     });
 
-    ASSERT_TRUE(Generate()) << Error() << output_;
+    Options options;
+    options.disable_robustness = true;
+    ASSERT_TRUE(Generate(options)) << Error() << output_;
     EXPECT_INST(R"(
           %4 = OpLabel
                OpBranch %7
@@ -504,7 +580,9 @@ TEST_F(SpirvWriterTest, Loop_Phi_SingleValue) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << Error() << output_;
+    Options options;
+    options.disable_robustness = true;
+    ASSERT_TRUE(Generate(options)) << Error() << output_;
     EXPECT_INST(R"(
           %5 = OpLabel
                OpBranch %8
@@ -556,7 +634,9 @@ TEST_F(SpirvWriterTest, Loop_Phi_MultipleValue) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << Error() << output_;
+    Options options;
+    options.disable_robustness = true;
+    ASSERT_TRUE(Generate(options)) << Error() << output_;
     EXPECT_INST(R"(
           %5 = OpLabel
                OpBranch %8
@@ -613,7 +693,9 @@ TEST_F(SpirvWriterTest, Loop_Phi_NestedIf) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << Error() << output_;
+    Options options;
+    options.disable_robustness = true;
+    ASSERT_TRUE(Generate(options)) << Error() << output_;
     EXPECT_INST(R"(
           %4 = OpLabel
                OpBranch %5
@@ -679,7 +761,9 @@ TEST_F(SpirvWriterTest, Loop_Phi_NestedLoop) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << Error() << output_;
+    Options options;
+    options.disable_robustness = true;
+    ASSERT_TRUE(Generate(options)) << Error() << output_;
     EXPECT_INST(R"(
           %4 = OpLabel
                OpBranch %5
@@ -735,7 +819,9 @@ TEST_F(SpirvWriterTest, Loop_Phi_NestedIfWithResultAndImplicitFalse_InContinuing
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << Error() << output_;
+    Options options;
+    options.disable_robustness = true;
+    ASSERT_TRUE(Generate(options)) << Error() << output_;
     EXPECT_INST("%15 = OpUndef %bool");
     EXPECT_INST(R"(
           %4 = OpLabel
@@ -786,7 +872,9 @@ TEST_F(SpirvWriterTest, Loop_ExitValue) {
 }
 )");
 
-    ASSERT_TRUE(Generate()) << Error() << output_;
+    Options options;
+    options.disable_robustness = true;
+    ASSERT_TRUE(Generate(options)) << Error() << output_;
     EXPECT_INST(R"(
           %4 = OpLabel
                OpBranch %7
@@ -845,7 +933,9 @@ TEST_F(SpirvWriterTest, Loop_ExitValue_BreakIf) {
 }
 )");
 
-    ASSERT_TRUE(Generate()) << Error() << output_;
+    Options options;
+    options.disable_robustness = true;
+    ASSERT_TRUE(Generate(options)) << Error() << output_;
     EXPECT_INST(R"(
           %4 = OpLabel
                OpBranch %7

@@ -62,7 +62,7 @@ static constexpr std::array<ExtensionInfo, kExtensionCount> kExtensionInfos{{
     //
     {EGLExt::ClientExtensions, "EGL_EXT_client_extensions", EGL1_5, ExtType::Client},
     {EGLExt::PlatformBase, "EGL_EXT_platform_base", EGL1_5, ExtType::Client},
-    // TODO(344606402): Mark as promoted again when ANGLE supports EGL_SYNC_FENCE in EGL 1.5
+    // EGL_KHR_fence_sync cannot be marked as promoted to core due to different function prototypes.
     {EGLExt::FenceSync, "EGL_KHR_fence_sync", NeverPromoted, ExtType::Display},
     {EGLExt::CLEvent2, "EGL_KHR_cl_event2", EGL1_5, ExtType::Display},
     {EGLExt::WaitSync, "EGL_KHR_wait_sync", EGL1_5, ExtType::Display},
@@ -79,6 +79,7 @@ static constexpr std::array<ExtensionInfo, kExtensionCount> kExtensionInfos{{
      ExtType::Client},
     {EGLExt::GLColorSpace, "EGL_KHR_gl_colorspace", EGL1_5, ExtType::Display},
     {EGLExt::SurfacelessContext, "EGL_KHR_surfaceless_context", EGL1_5, ExtType::Display},
+    {EGLExt::NativeFenceSync, "EGL_ANDROID_native_fence_sync", NeverPromoted, ExtType::Display},
 
     {EGLExt::DisplayTextureShareGroup, "EGL_ANGLE_display_texture_share_group", NeverPromoted,
      ExtType::Display},
@@ -89,6 +90,11 @@ static constexpr std::array<ExtensionInfo, kExtensionCount> kExtensionInfos{{
     {EGLExt::ImageNativeBuffer, "EGL_ANDROID_image_native_buffer", NeverPromoted, ExtType::Display},
     {EGLExt::GetNativeClientBuffer, "EGL_ANDROID_get_native_client_buffer", NeverPromoted,
      ExtType::Display},
+
+    {EGLExt::ANGLECreateContextBackwardsCompatible, "EGL_ANGLE_create_context_backwards_compatible",
+     NeverPromoted, ExtType::Display},
+    {EGLExt::ANGLECreateContextExtensionsEnabled, "EGL_ANGLE_create_context_extensions_enabled",
+     NeverPromoted, ExtType::Display},
     //
 }};
 
@@ -210,13 +216,6 @@ MaybeError EGLFunctions::LoadDisplayProcs(EGLDisplay display) {
     } else {
         // Load display extensions that would otherwise be promoted to EGL 1.5.
 
-        if (HasExt(EGLExt::FenceSync)) {
-            GET_PROC_WITH_NAME(ClientWaitSync, "eglClientWaitSyncKHR");
-            GET_PROC_WITH_NAME(CreateSync, "eglCreateSyncKHR");
-            GET_PROC_WITH_NAME(DestroySync, "eglDestroySyncKHR");
-            GET_PROC_WITH_NAME(ClientWaitSync, "eglClientWaitSyncKHR");
-        }
-
         if (HasExt(EGLExt::ImageBase)) {
             GET_PROC_WITH_NAME(CreateImage, "eglCreateImageKHR");
             GET_PROC_WITH_NAME(DestroyImage, "eglDestroyImageKHR");
@@ -234,12 +233,23 @@ MaybeError EGLFunctions::LoadDisplayProcs(EGLDisplay display) {
 
     // Other extensions
 
+    if (HasExt(EGLExt::FenceSync)) {
+        GET_PROC_WITH_NAME(ClientWaitSyncKHR, "eglClientWaitSyncKHR");
+        GET_PROC_WITH_NAME(CreateSyncKHR, "eglCreateSyncKHR");
+        GET_PROC_WITH_NAME(DestroySyncKHR, "eglDestroySyncKHR");
+        GET_PROC_WITH_NAME(ClientWaitSyncKHR, "eglClientWaitSyncKHR");
+    }
+
     if (HasExt(EGLExt::ReusableSync)) {
         GET_PROC_WITH_NAME(SignalSync, "eglSignalSyncKHR");
     }
 
     if (HasExt(EGLExt::GetNativeClientBuffer)) {
         GET_PROC_WITH_NAME(GetNativeClientBuffer, "eglGetNativeClientBufferANDROID");
+    }
+
+    if (HasExt(EGLExt::NativeFenceSync)) {
+        GET_PROC_WITH_NAME(DupNativeFenceFD, "eglDupNativeFenceFDANDROID");
     }
 
     return {};
@@ -251,6 +261,10 @@ uint32_t EGLFunctions::GetMajorVersion() const {
 
 uint32_t EGLFunctions::GetMinorVersion() const {
     return mMinorVersion;
+}
+
+bool EGLFunctions::IsAtLeastVersion(uint32_t major, uint32_t minor) const {
+    return std::tie(major, minor) >= std::tie(mMajorVersion, mMinorVersion);
 }
 
 bool EGLFunctions::HasExt(EGLExt extension) const {

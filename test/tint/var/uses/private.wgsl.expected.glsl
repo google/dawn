@@ -1,3 +1,6 @@
+//
+// main1
+//
 #version 310 es
 
 int a = 0;
@@ -9,6 +12,9 @@ void main() {
   a = 42;
   uses_a();
 }
+//
+// main2
+//
 #version 310 es
 
 int b = 0;
@@ -20,6 +26,9 @@ void main() {
   b = 7;
   uses_b();
 }
+//
+// main3
+//
 #version 310 es
 
 int a = 0;
@@ -47,6 +56,9 @@ void main() {
   outer();
   no_uses();
 }
+//
+// main4
+//
 #version 310 es
 
 void no_uses() {

@@ -59,11 +59,7 @@ ResultOrError<Ref<Buffer>> Buffer::Create(Device* device,
 
 // static
 uint64_t Buffer::QueryMaxBufferLength(id<MTLDevice> mtlDevice) {
-    if (@available(iOS 12, tvOS 12, macOS 10.14, *)) {
         return [mtlDevice maxBufferLength];
-    }
-    // 256Mb limit in versions without based on the data in the feature set tables.
-    return 256 * 1024 * 1024;
 }
 
 Buffer::Buffer(DeviceBase* dev, const UnpackedPtr<BufferDescriptor>& desc)

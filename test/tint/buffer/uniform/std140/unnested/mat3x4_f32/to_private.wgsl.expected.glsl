@@ -8,7 +8,7 @@ mat3x4 p = mat3x4(vec4(0.0f), vec4(0.0f), vec4(0.0f));
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   p = v.inner;
-  p[1] = v.inner[0];
-  p[1] = v.inner[0].ywxz;
-  p[0][1] = v.inner[1].x;
+  p[1u] = v.inner[0u];
+  p[1u] = v.inner[0u].ywxz;
+  p[0u].y = v.inner[1u].x;
 }

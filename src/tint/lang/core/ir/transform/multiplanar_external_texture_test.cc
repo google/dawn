@@ -103,7 +103,7 @@ tint_ExternalTextureParams = struct @align(16) {
   samplePlane0RectMax:vec2<f32> @offset(232)
   samplePlane1RectMin:vec2<f32> @offset(240)
   samplePlane1RectMax:vec2<f32> @offset(248)
-  visibleSize:vec2<u32> @offset(256)
+  apparentSize:vec2<u32> @offset(256)
   plane1CoordFactor:vec2<f32> @offset(264)
 }
 
@@ -176,7 +176,7 @@ tint_ExternalTextureParams = struct @align(16) {
   samplePlane0RectMax:vec2<f32> @offset(232)
   samplePlane1RectMin:vec2<f32> @offset(240)
   samplePlane1RectMax:vec2<f32> @offset(248)
-  visibleSize:vec2<u32> @offset(256)
+  apparentSize:vec2<u32> @offset(256)
   plane1CoordFactor:vec2<f32> @offset(264)
 }
 
@@ -255,7 +255,7 @@ tint_ExternalTextureParams = struct @align(16) {
   samplePlane0RectMax:vec2<f32> @offset(232)
   samplePlane1RectMin:vec2<f32> @offset(240)
   samplePlane1RectMax:vec2<f32> @offset(248)
-  visibleSize:vec2<u32> @offset(256)
+  apparentSize:vec2<u32> @offset(256)
   plane1CoordFactor:vec2<f32> @offset(264)
 }
 
@@ -338,7 +338,7 @@ tint_ExternalTextureParams = struct @align(16) {
   samplePlane0RectMax:vec2<f32> @offset(232)
   samplePlane1RectMin:vec2<f32> @offset(240)
   samplePlane1RectMax:vec2<f32> @offset(248)
-  visibleSize:vec2<u32> @offset(256)
+  apparentSize:vec2<u32> @offset(256)
   plane1CoordFactor:vec2<f32> @offset(264)
 }
 
@@ -499,7 +499,7 @@ tint_ExternalTextureParams = struct @align(16) {
   samplePlane0RectMax:vec2<f32> @offset(232)
   samplePlane1RectMin:vec2<f32> @offset(240)
   samplePlane1RectMax:vec2<f32> @offset(248)
-  visibleSize:vec2<u32> @offset(256)
+  apparentSize:vec2<u32> @offset(256)
   plane1CoordFactor:vec2<f32> @offset(264)
 }
 
@@ -663,7 +663,7 @@ tint_ExternalTextureParams = struct @align(16) {
   samplePlane0RectMax:vec2<f32> @offset(232)
   samplePlane1RectMin:vec2<f32> @offset(240)
   samplePlane1RectMax:vec2<f32> @offset(248)
-  visibleSize:vec2<u32> @offset(256)
+  apparentSize:vec2<u32> @offset(256)
   plane1CoordFactor:vec2<f32> @offset(264)
 }
 
@@ -845,7 +845,7 @@ tint_ExternalTextureParams = struct @align(16) {
   samplePlane0RectMax:vec2<f32> @offset(232)
   samplePlane1RectMin:vec2<f32> @offset(240)
   samplePlane1RectMax:vec2<f32> @offset(248)
-  visibleSize:vec2<u32> @offset(256)
+  apparentSize:vec2<u32> @offset(256)
   plane1CoordFactor:vec2<f32> @offset(264)
 }
 
@@ -1051,7 +1051,7 @@ tint_ExternalTextureParams = struct @align(16) {
   samplePlane0RectMax:vec2<f32> @offset(232)
   samplePlane1RectMin:vec2<f32> @offset(240)
   samplePlane1RectMax:vec2<f32> @offset(248)
-  visibleSize:vec2<u32> @offset(256)
+  apparentSize:vec2<u32> @offset(256)
   plane1CoordFactor:vec2<f32> @offset(264)
 }
 
@@ -1248,7 +1248,7 @@ tint_ExternalTextureParams = struct @align(16) {
   samplePlane0RectMax:vec2<f32> @offset(232)
   samplePlane1RectMin:vec2<f32> @offset(240)
   samplePlane1RectMax:vec2<f32> @offset(248)
-  visibleSize:vec2<u32> @offset(256)
+  apparentSize:vec2<u32> @offset(256)
   plane1CoordFactor:vec2<f32> @offset(264)
 }
 

@@ -1,4 +1,4 @@
-// flags:  --hlsl_shader_model 62
+// flags:  --hlsl-shader-model 62
 enable f16;
 struct S {
     matrix : mat4x3<f16>,

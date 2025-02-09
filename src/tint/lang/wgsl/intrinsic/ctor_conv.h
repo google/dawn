@@ -39,7 +39,7 @@
 
 #include <cstdint>
 
-#include "src/tint/utils/traits/traits.h"
+#include "src/tint/utils/rtti/traits.h"
 
 namespace tint::wgsl::intrinsic {
 
@@ -63,7 +63,6 @@ enum class CtorConv : uint8_t {
     kMat4x2,
     kMat4x3,
     kMat4x4,
-    kPackedVec3,
     kNone,
 };
 

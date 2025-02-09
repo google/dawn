@@ -37,6 +37,6 @@ void f() {
   float2x2 l_a[4] = v_4(0u);
   float2x2 l_a_i = v(32u);
   float2 l_a_i_i = asfloat(a[2u].zw);
-  s.Store(0u, asuint((((asfloat(a[2u].z) + l_a[int(0)][int(0)][0u]) + l_a_i[int(0)][0u]) + l_a_i_i[0u])));
+  s.Store(0u, asuint((((asfloat(a[2u].z) + l_a[0u][0u].x) + l_a_i[0u].x) + l_a_i_i.x)));
 }
 

@@ -29,6 +29,8 @@
 
 #include "gmock/gmock.h"
 
+TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
+
 namespace tint {
 namespace {
 
@@ -234,3 +236,5 @@ TEST(TintSliceTest, Equality) {
 
 }  // namespace
 }  // namespace tint
+
+TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);

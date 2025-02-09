@@ -248,7 +248,8 @@ TEST_F(LabelTest, ExternalTexture) {
     descriptor.gamutConversionMatrix = mPlaceholderConstantArray.data();
     descriptor.srcTransferFunctionParameters = mPlaceholderConstantArray.data();
     descriptor.dstTransferFunctionParameters = mPlaceholderConstantArray.data();
-    descriptor.visibleSize = {1, 1};
+    descriptor.cropSize = {1, 1};
+    descriptor.apparentSize = {1, 1};
 
     // The label should be empty if one was not set.
     {

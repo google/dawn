@@ -149,7 +149,7 @@ TEST_F(GlslWriterTest, VarIn) {
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
 precision highp int;
 
-layout(location = 1) flat in uint v;
+layout(location = 1) flat in uint tint_interstage_location1;
 void main() {
 }
 )");

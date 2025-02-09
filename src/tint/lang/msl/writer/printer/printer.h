@@ -32,6 +32,8 @@
 #include <unordered_map>
 #include <vector>
 
+#include "src/tint/lang/msl/writer/common/options.h"
+#include "src/tint/lang/msl/writer/common/output.h"
 #include "src/tint/utils/result/result.h"
 
 // Forward declarations
@@ -41,36 +43,9 @@ class Module;
 
 namespace tint::msl::writer {
 
-/// The output produced when printing MSL.
-struct PrintResult {
-    /// Constructor
-    PrintResult();
-
-    /// Destructor
-    ~PrintResult();
-
-    /// Copy constructor
-    PrintResult(const PrintResult&);
-
-    /// Copy assignment
-    /// @returns this
-    PrintResult& operator=(const PrintResult&);
-
-    /// The generated MSL.
-    std::string msl = "";
-
-    /// `true` if an invariant attribute was generated.
-    bool has_invariant_attribute = false;
-
-    /// A map from entry point name to a list of dynamic workgroup allocations.
-    /// Each element of the vector is the size of the workgroup allocation that should be created
-    /// for that index.
-    std::unordered_map<std::string, std::vector<uint32_t>> workgroup_allocations;
-};
-
 /// @param module the Tint IR module to generate
 /// @returns the result of printing the MSL shader on success, or failure
-Result<PrintResult> Print(core::ir::Module& module);
+Result<Output> Print(core::ir::Module& module, const Options& options);
 
 }  // namespace tint::msl::writer
 

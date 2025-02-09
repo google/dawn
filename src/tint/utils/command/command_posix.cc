@@ -37,10 +37,12 @@
 #include <sstream>
 #include <vector>
 
+#include "src/tint/utils/macros/compiler.h"
 #include "src/tint/utils/system/executable_path.h"
 
-namespace tint {
+TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 
+namespace tint {
 namespace {
 
 /// File is a simple wrapper around a POSIX file descriptor
@@ -296,3 +298,5 @@ Command::Output Command::Exec(std::initializer_list<std::string> arguments) cons
 }
 
 }  // namespace tint
+
+TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);

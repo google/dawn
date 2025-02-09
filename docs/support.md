@@ -34,12 +34,12 @@ Supported shader models are 5.1 and above. It is the preferred target API when a
 
 ## Apple's Metal
 
-Metal is supported and is the preferred target API when available.
+Metal 2.3 is supported and is the preferred target API when available.
 
 **Apple OS support:**
 
- - macOS: supported on version 10.15 and above.
- - iOS: supported, best effort.
+ - macOS: supported on version 11.0+.
+ - iOS: supported on version 14.0+, best effort.
  - tvOS/ipadOS/...: Not supported, contributions welcome.
 
 ## Khronos's OpenGL family

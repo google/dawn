@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 34
+; Bound: 35
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -30,11 +30,12 @@
      %uint_0 = OpConstant %uint 0
        %void = OpTypeVoid
          %18 = OpTypeFunction %void %uint
+     %uint_1 = OpConstant %uint 1
        %bool = OpTypeBool
-         %24 = OpConstantNull %str
+         %25 = OpConstantNull %str
      %uint_2 = OpConstant %uint 2
    %uint_264 = OpConstant %uint 264
-         %30 = OpTypeFunction %void
+         %31 = OpTypeFunction %void
        %func = OpFunction %int None %9
          %10 = OpLabel
          %11 = OpAccessChain %_ptr_Workgroup_int %S %uint_0
@@ -44,20 +45,20 @@
  %main_inner = OpFunction %void None %18
 %tint_local_index = OpFunctionParameter %uint
          %19 = OpLabel
-         %20 = OpIEqual %bool %tint_local_index %uint_0
-               OpSelectionMerge %22 None
-               OpBranchConditional %20 %23 %22
+         %20 = OpULessThan %bool %tint_local_index %uint_1
+               OpSelectionMerge %23 None
+               OpBranchConditional %20 %24 %23
+         %24 = OpLabel
+               OpStore %S %25 None
+               OpBranch %23
          %23 = OpLabel
-               OpStore %S %24 None
-               OpBranch %22
-         %22 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
           %r = OpFunctionCall %int %func
                OpReturn
                OpFunctionEnd
-       %main = OpFunction %void None %30
-         %31 = OpLabel
-         %32 = OpLoad %uint %main_local_invocation_index_Input None
-         %33 = OpFunctionCall %void %main_inner %32
+       %main = OpFunction %void None %31
+         %32 = OpLabel
+         %33 = OpLoad %uint %main_local_invocation_index_Input None
+         %34 = OpFunctionCall %void %main_inner %33
                OpReturn
                OpFunctionEnd

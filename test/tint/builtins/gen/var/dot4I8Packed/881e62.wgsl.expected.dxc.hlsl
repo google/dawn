@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 int tint_dot4I8Packed(uint param_0, uint param_1) {
   int accumulator = 0;
   return dot4add_i8packed(param_0, param_1, accumulator);
@@ -16,11 +19,41 @@ void fragment_main() {
   prevent_dce.Store(0u, asuint(dot4I8Packed_881e62()));
   return;
 }
+//
+// compute_main
+//
+int tint_dot4I8Packed(uint param_0, uint param_1) {
+  int accumulator = 0;
+  return dot4add_i8packed(param_0, param_1, accumulator);
+}
+
+RWByteAddressBuffer prevent_dce : register(u0);
+
+int dot4I8Packed_881e62() {
+  uint arg_0 = 1u;
+  uint arg_1 = 1u;
+  int res = tint_dot4I8Packed(arg_0, arg_1);
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store(0u, asuint(dot4I8Packed_881e62()));
   return;
+}
+//
+// vertex_main
+//
+int tint_dot4I8Packed(uint param_0, uint param_1) {
+  int accumulator = 0;
+  return dot4add_i8packed(param_0, param_1, accumulator);
+}
+
+int dot4I8Packed_881e62() {
+  uint arg_0 = 1u;
+  uint arg_1 = 1u;
+  int res = tint_dot4I8Packed(arg_0, arg_1);
+  return res;
 }
 
 struct VertexOutput {

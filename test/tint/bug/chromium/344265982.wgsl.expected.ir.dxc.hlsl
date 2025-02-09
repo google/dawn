@@ -9,7 +9,7 @@ void foo() {
         break;
       }
       bool tint_continue = false;
-      switch(asint(buffer.Load((0u + (uint(i) * 4u))))) {
+      switch(asint(buffer.Load((0u + (min(uint(i), 3u) * 4u))))) {
         case int(1):
         {
           tint_continue = true;
@@ -17,8 +17,7 @@ void foo() {
         }
         default:
         {
-          uint v = (0u + (uint(i) * 4u));
-          buffer.Store(v, asuint(int(2)));
+          buffer.Store((0u + (min(uint(i), 3u) * 4u)), asuint(int(2)));
           break;
         }
       }

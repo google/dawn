@@ -1,6 +1,9 @@
+//
+// vert_main
+//
 #include <metal_stdlib>
-
 using namespace metal;
+
 struct Interface {
   int i;
   uint u;
@@ -9,50 +12,59 @@ struct Interface {
   float4 pos;
 };
 
-struct tint_symbol {
-  int i [[user(locn0)]] [[flat]];
-  uint u [[user(locn1)]] [[flat]];
-  int4 vi [[user(locn2)]] [[flat]];
-  uint4 vu [[user(locn3)]] [[flat]];
-  float4 pos [[position]];
+struct vert_main_outputs {
+  int Interface_i [[user(locn0)]] [[flat]];
+  uint Interface_u [[user(locn1)]] [[flat]];
+  int4 Interface_vi [[user(locn2)]] [[flat]];
+  uint4 Interface_vu [[user(locn3)]] [[flat]];
+  float4 Interface_pos [[position]];
 };
 
 Interface vert_main_inner() {
-  Interface const tint_symbol_4 = Interface{};
-  return tint_symbol_4;
+  return Interface{};
 }
 
-vertex tint_symbol vert_main() {
-  Interface const inner_result = vert_main_inner();
-  tint_symbol wrapper_result = {};
-  wrapper_result.i = inner_result.i;
-  wrapper_result.u = inner_result.u;
-  wrapper_result.vi = inner_result.vi;
-  wrapper_result.vu = inner_result.vu;
-  wrapper_result.pos = inner_result.pos;
-  return wrapper_result;
+vertex vert_main_outputs vert_main() {
+  Interface const v = vert_main_inner();
+  vert_main_outputs tint_wrapper_result = {};
+  tint_wrapper_result.Interface_i = v.i;
+  tint_wrapper_result.Interface_u = v.u;
+  tint_wrapper_result.Interface_vi = v.vi;
+  tint_wrapper_result.Interface_vu = v.vu;
+  tint_wrapper_result.Interface_pos = v.pos;
+  return tint_wrapper_result;
 }
+//
+// frag_main
+//
+#include <metal_stdlib>
+using namespace metal;
 
-struct tint_symbol_2 {
-  int i [[user(locn0)]] [[flat]];
-  uint u [[user(locn1)]] [[flat]];
-  int4 vi [[user(locn2)]] [[flat]];
-  uint4 vu [[user(locn3)]] [[flat]];
+struct Interface {
+  int i;
+  uint u;
+  int4 vi;
+  uint4 vu;
+  float4 pos;
 };
 
-struct tint_symbol_3 {
-  int value [[color(0)]];
+struct frag_main_outputs {
+  int tint_symbol [[color(0)]];
+};
+
+struct frag_main_inputs {
+  int Interface_i [[user(locn0)]] [[flat]];
+  uint Interface_u [[user(locn1)]] [[flat]];
+  int4 Interface_vi [[user(locn2)]] [[flat]];
+  uint4 Interface_vu [[user(locn3)]] [[flat]];
 };
 
 int frag_main_inner(Interface inputs) {
   return inputs.i;
 }
 
-fragment tint_symbol_3 frag_main(float4 pos [[position]], tint_symbol_2 tint_symbol_1 [[stage_in]]) {
-  Interface const tint_symbol_5 = {.i=tint_symbol_1.i, .u=tint_symbol_1.u, .vi=tint_symbol_1.vi, .vu=tint_symbol_1.vu, .pos=pos};
-  int const inner_result_1 = frag_main_inner(tint_symbol_5);
-  tint_symbol_3 wrapper_result_1 = {};
-  wrapper_result_1.value = inner_result_1;
-  return wrapper_result_1;
+fragment frag_main_outputs frag_main(frag_main_inputs inputs [[stage_in]], float4 Interface_pos [[position]]) {
+  frag_main_outputs tint_wrapper_result = {};
+  tint_wrapper_result.tint_symbol = frag_main_inner(Interface{.i=inputs.Interface_i, .u=inputs.Interface_u, .vi=inputs.Interface_vi, .vu=inputs.Interface_vu, .pos=Interface_pos});
+  return tint_wrapper_result;
 }
-

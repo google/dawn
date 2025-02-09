@@ -51,7 +51,6 @@
 #include "dawn/native/d3d12/QueueD3D12.h"
 #include "dawn/native/d3d12/RenderPipelineD3D12.h"
 #include "dawn/native/d3d12/ResidencyManagerD3D12.h"
-#include "dawn/native/d3d12/ResourceAllocatorManagerD3D12.h"
 #include "dawn/native/d3d12/SamplerD3D12.h"
 #include "dawn/native/d3d12/SamplerHeapCacheD3D12.h"
 #include "dawn/native/d3d12/ShaderModuleD3D12.h"
@@ -71,7 +70,7 @@ namespace {
 static constexpr uint16_t kShaderVisibleDescriptorHeapSize = 1024;
 static constexpr uint8_t kAttachmentDescriptorHeapSize = 64;
 
-// Value may change in the future to better accomodate large clears.
+// Value may change in the future to better accommodate large clears.
 static constexpr uint64_t kZeroBufferSize = 1024 * 1024 * 4;  // 4 Mb
 
 static constexpr uint64_t kMaxDebugMessagesToPrint = 5;
@@ -308,7 +307,7 @@ MaybeError Device::CreateZeroBuffer() {
 
     memset(uploadHandle.mappedBuffer, 0u, kZeroBufferSize);
 
-    CopyFromStagingToBufferHelper(commandContext, uploadHandle.stagingBuffer,
+    CopyFromStagingToBufferHelper(commandContext, uploadHandle.stagingBuffer.Get(),
                                   uploadHandle.startOffset, mZeroBuffer.Get(), 0, kZeroBufferSize);
 
     mZeroBuffer->SetInitialized(true);
@@ -523,7 +522,7 @@ void Device::CopyFromStagingToBufferHelper(CommandRecordingContext* commandConte
 }
 
 MaybeError Device::CopyFromStagingToTextureImpl(const BufferBase* source,
-                                                const TextureDataLayout& src,
+                                                const TexelCopyBufferLayout& src,
                                                 const TextureCopy& dst,
                                                 const Extent3D& copySizePixels) {
     CommandRecordingContext* commandContext =
@@ -548,19 +547,23 @@ MaybeError Device::CopyFromStagingToTextureImpl(const BufferBase* source,
     return {};
 }
 
+uint32_t Device::GetResourceHeapTier() const {
+    return IsToggleEnabled(Toggle::UseD3D12ResourceHeapTier2) ? 2u : 1u;
+}
+
 void Device::DeallocateMemory(ResourceHeapAllocation& allocation) {
     (*mResourceAllocatorManager)->DeallocateMemory(allocation);
 }
 
 ResultOrError<ResourceHeapAllocation> Device::AllocateMemory(
-    D3D12_HEAP_TYPE heapType,
+    ResourceHeapKind resourceHeapKind,
     const D3D12_RESOURCE_DESC& resourceDescriptor,
     D3D12_RESOURCE_STATES initialUsage,
     uint32_t formatBytesPerBlock,
     bool forceAllocateAsCommittedResource) {
     // formatBytesPerBlock is needed only for color non-compressed formats for a workaround.
     return (*mResourceAllocatorManager)
-        ->AllocateMemory(heapType, resourceDescriptor, initialUsage, formatBytesPerBlock,
+        ->AllocateMemory(resourceHeapKind, resourceDescriptor, initialUsage, formatBytesPerBlock,
                          forceAllocateAsCommittedResource);
 }
 
@@ -744,16 +747,18 @@ Device::GetSamplerShaderVisibleDescriptorAllocator() const {
 MutexProtected<StagingDescriptorAllocator>* Device::GetViewStagingDescriptorAllocator(
     uint32_t descriptorCount) const {
     DAWN_ASSERT(descriptorCount <= kMaxViewDescriptorsPerBindGroup);
+    DAWN_ASSERT(descriptorCount > 0);
     // This is Log2 of the next power of two, plus 1.
-    uint32_t allocatorIndex = descriptorCount == 0 ? 0 : Log2Ceil(descriptorCount) + 1;
+    uint32_t allocatorIndex = Log2Ceil(descriptorCount) + 1;
     return mViewAllocators[allocatorIndex].get();
 }
 
 MutexProtected<StagingDescriptorAllocator>* Device::GetSamplerStagingDescriptorAllocator(
     uint32_t descriptorCount) const {
     DAWN_ASSERT(descriptorCount <= kMaxSamplerDescriptorsPerBindGroup);
+    DAWN_ASSERT(descriptorCount > 0);
     // This is Log2 of the next power of two, plus 1.
-    uint32_t allocatorIndex = descriptorCount == 0 ? 0 : Log2Ceil(descriptorCount) + 1;
+    uint32_t allocatorIndex = Log2Ceil(descriptorCount) + 1;
     return mSamplerAllocators[allocatorIndex].get();
 }
 

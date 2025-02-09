@@ -1,6 +1,6 @@
 #include <metal_stdlib>
-
 using namespace metal;
+
 struct S {
   int i;
   uint u;
@@ -11,4 +11,3 @@ struct S {
 void f() {
   S v = S{};
 }
-

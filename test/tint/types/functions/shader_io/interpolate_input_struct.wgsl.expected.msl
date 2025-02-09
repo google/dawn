@@ -1,6 +1,6 @@
 #include <metal_stdlib>
-
 using namespace metal;
+
 struct In {
   float none;
   float flat;
@@ -14,25 +14,22 @@ struct In {
   float linear_default;
 };
 
-struct tint_symbol_2 {
-  float none [[user(locn0)]];
-  float flat [[user(locn1)]] [[flat]];
-  float perspective_center [[user(locn2)]] [[center_perspective]];
-  float perspective_centroid [[user(locn3)]] [[centroid_perspective]];
-  float perspective_sample [[user(locn4)]] [[sample_perspective]];
-  float linear_center [[user(locn5)]] [[center_no_perspective]];
-  float linear_centroid [[user(locn6)]] [[centroid_no_perspective]];
-  float linear_sample [[user(locn7)]] [[sample_no_perspective]];
-  float perspective_default [[user(locn8)]] [[center_perspective]];
-  float linear_default [[user(locn9)]] [[center_no_perspective]];
+struct main_inputs {
+  float In_none [[user(locn0)]];
+  float In_flat [[user(locn1)]] [[flat]];
+  float In_perspective_center [[user(locn2)]] [[center_perspective]];
+  float In_perspective_centroid [[user(locn3)]] [[centroid_perspective]];
+  float In_perspective_sample [[user(locn4)]] [[sample_perspective]];
+  float In_linear_center [[user(locn5)]] [[center_no_perspective]];
+  float In_linear_centroid [[user(locn6)]] [[centroid_no_perspective]];
+  float In_linear_sample [[user(locn7)]] [[sample_no_perspective]];
+  float In_perspective_default [[user(locn8)]] [[center_perspective]];
+  float In_linear_default [[user(locn9)]] [[center_no_perspective]];
 };
 
-void tint_symbol_inner(In in) {
+void main_inner(In in) {
 }
 
-fragment void tint_symbol(tint_symbol_2 tint_symbol_1 [[stage_in]]) {
-  In const tint_symbol_3 = {.none=tint_symbol_1.none, .flat=tint_symbol_1.flat, .perspective_center=tint_symbol_1.perspective_center, .perspective_centroid=tint_symbol_1.perspective_centroid, .perspective_sample=tint_symbol_1.perspective_sample, .linear_center=tint_symbol_1.linear_center, .linear_centroid=tint_symbol_1.linear_centroid, .linear_sample=tint_symbol_1.linear_sample, .perspective_default=tint_symbol_1.perspective_default, .linear_default=tint_symbol_1.linear_default};
-  tint_symbol_inner(tint_symbol_3);
-  return;
+fragment void v(main_inputs inputs [[stage_in]]) {
+  main_inner(In{.none=inputs.In_none, .flat=inputs.In_flat, .perspective_center=inputs.In_perspective_center, .perspective_centroid=inputs.In_perspective_centroid, .perspective_sample=inputs.In_perspective_sample, .linear_center=inputs.In_linear_center, .linear_centroid=inputs.In_linear_centroid, .linear_sample=inputs.In_linear_sample, .perspective_default=inputs.In_perspective_default, .linear_default=inputs.In_linear_default});
 }
-

@@ -6,10 +6,9 @@ struct modf_result_f32 {
 
 [numthreads(1, 1, 1)]
 void main() {
-  float tint_symbol = 1.25f;
-  float v = 0.0f;
-  float v_1 = modf(tint_symbol, v);
-  modf_result_f32 res = {v_1, v};
+  float v = 1.25f;
+  float v_1 = 0.0f;
+  modf_result_f32 res = {modf(v, v_1), v_1};
   float fract = res.fract;
   float whole = res.whole;
 }

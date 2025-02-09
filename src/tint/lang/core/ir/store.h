@@ -65,13 +65,13 @@ class Store final : public Castable<Store, OperandInstruction<2, 0>> {
     /// @copydoc Instruction::Clone()
     Store* Clone(CloneContext& ctx) override;
 
-    /// @returns the value being stored too
+    /// @returns the value being stored to
     Value* To() { return Operand(kToOperandOffset); }
 
-    /// @returns the value being stored too
+    /// @returns the value being stored to
     const Value* To() const { return Operand(kToOperandOffset); }
 
-    /// @param to the value being stored too
+    /// @param to the value being stored to
     void SetTo(Value* to) { SetOperand(kToOperandOffset, to); }
 
     /// @returns the value being stored
@@ -82,6 +82,9 @@ class Store final : public Castable<Store, OperandInstruction<2, 0>> {
 
     /// @returns the friendly name for the instruction
     std::string FriendlyName() const override { return "store"; }
+
+    /// @returns the side effects for this instruction
+    Accesses GetSideEffects() const override { return Accesses{Access::kStore}; }
 };
 
 }  // namespace tint::core::ir

@@ -58,23 +58,20 @@ tint_target_add_dependencies(tint_cmd_fuzz_wgsl_fuzz_cmd fuzz_cmd
   tint_lang_wgsl_sem
   tint_lang_wgsl_writer_raise_fuzz
   tint_lang_wgsl_fuzz
+  tint_utils
   tint_utils_bytes
-  tint_utils_cli
   tint_utils_command
   tint_utils_containers
   tint_utils_diagnostic
   tint_utils_ice
-  tint_utils_id
   tint_utils_macros
   tint_utils_math
   tint_utils_memory
-  tint_utils_reflection
   tint_utils_result
   tint_utils_rtti
   tint_utils_strconv
   tint_utils_symbol
   tint_utils_text
-  tint_utils_traits
 )
 
 tint_target_add_external_dependencies(tint_cmd_fuzz_wgsl_fuzz_cmd fuzz_cmd
@@ -154,20 +151,18 @@ tint_target_add_dependencies(tint_cmd_fuzz_wgsl_fuzz fuzz
   tint_lang_wgsl_program
   tint_lang_wgsl_sem
   tint_lang_wgsl_writer_ir_to_program
+  tint_utils
   tint_utils_bytes
   tint_utils_containers
   tint_utils_diagnostic
   tint_utils_ice
-  tint_utils_id
   tint_utils_macros
   tint_utils_math
   tint_utils_memory
-  tint_utils_reflection
   tint_utils_result
   tint_utils_rtti
   tint_utils_symbol
   tint_utils_text
-  tint_utils_traits
 )
 
 tint_target_add_external_dependencies(tint_cmd_fuzz_wgsl_fuzz fuzz

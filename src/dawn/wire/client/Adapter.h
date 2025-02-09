@@ -47,25 +47,19 @@ class Adapter final : public ObjectWithEventsBase {
 
     WGPUStatus GetLimits(WGPUSupportedLimits* limits) const;
     bool HasFeature(WGPUFeatureName feature) const;
-    size_t EnumerateFeatures(WGPUFeatureName* features) const;
     void SetLimits(const WGPUSupportedLimits* limits);
     void SetFeatures(const WGPUFeatureName* features, uint32_t featuresCount);
     void SetInfo(const WGPUAdapterInfo* info);
     WGPUStatus GetInfo(WGPUAdapterInfo* info) const;
     void GetFeatures(WGPUSupportedFeatures* features) const;
-    void RequestDevice(const WGPUDeviceDescriptor* descriptor,
-                       WGPURequestDeviceCallback callback,
-                       void* userdata);
-    WGPUFuture RequestDeviceF(const WGPUDeviceDescriptor* descriptor,
-                              const WGPURequestDeviceCallbackInfo& callbackInfo);
-    WGPUFuture RequestDevice2(const WGPUDeviceDescriptor* descriptor,
-                              const WGPURequestDeviceCallbackInfo2& callbackInfo);
+    WGPUFuture RequestDevice(const WGPUDeviceDescriptor* descriptor,
+                             const WGPURequestDeviceCallbackInfo& callbackInfo);
 
     // Unimplementable. Only availale in dawn_native.
     WGPUInstance GetInstance() const;
     WGPUDevice CreateDevice(const WGPUDeviceDescriptor*);
     WGPUStatus GetFormatCapabilities(WGPUTextureFormat format,
-                                     WGPUFormatCapabilities* capabilities);
+                                     WGPUDawnFormatCapabilities* capabilities);
 
   private:
     LimitsAndFeatures mLimitsAndFeatures;
@@ -77,6 +71,13 @@ class Adapter final : public ObjectWithEventsBase {
     std::vector<WGPUMemoryHeapInfo> mMemoryHeapInfo;
     WGPUAdapterPropertiesD3D mD3DProperties;
     WGPUAdapterPropertiesVk mVkProperties;
+    // Initialize subgroup properties so they can be read even if adapter
+    // acquisition fails.
+    WGPUAdapterPropertiesSubgroups mSubgroupsProperties = {
+        {nullptr, WGPUSType_AdapterPropertiesSubgroups},
+        4u,   // subgroupMinSize
+        128u  // subgroupMaxSize
+    };
 };
 
 }  // namespace dawn::wire::client

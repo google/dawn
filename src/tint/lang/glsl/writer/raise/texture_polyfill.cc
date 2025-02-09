@@ -41,6 +41,7 @@
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/glsl/ir/builtin_call.h"
+#include "src/tint/lang/glsl/ir/combined_texture_sampler_var.h"
 #include "src/tint/lang/glsl/ir/member_builtin_call.h"
 
 namespace tint::glsl::writer::raise {
@@ -269,32 +270,29 @@ struct State {
                            core::ir::Var* tex,
                            core::ir::Var* sampler,
                            const core::type::Pointer* tex_ty) {
-        std::string name;
-        auto it = (cfg.sampler_texture_to_name.find(key));
-        if (it != cfg.sampler_texture_to_name.end()) {
-            name = it->second;
-        } else {
-            name = ir.NameOf(tex).Name();
-            if (name.empty()) {
-                name = "t";
-            }
+        // Create a combined texture sampler variable and insert it into the root block.
+        auto* result = b.InstructionResult(tex_ty);
+        auto* var = ir.CreateInstruction<glsl::ir::CombinedTextureSamplerVar>(result, key.texture,
+                                                                              key.sampler);
+        ir.root_block->Append(var);
 
-            if (sampler) {
-                auto sampler_name = ir.NameOf(sampler).Name();
-                if (sampler_name.empty()) {
-                    sampler_name = "s";
-                }
-                name += "_" + sampler_name;
-            }
-            if (name.empty()) {
-                name = "v";
+        // Set the variable name based on the original texture and sampler names if provided.
+        StringStream name;
+        if (auto texture_name = ir.NameOf(tex)) {
+            name << texture_name.NameView();
+        } else {
+            name << "t";
+        }
+        if (sampler) {
+            name << "_";
+            if (auto sampler_name = ir.NameOf(sampler)) {
+                name << sampler_name.NameView();
+            } else {
+                name << "s";
             }
         }
+        ir.SetName(var, name.str());
 
-        core::ir::Var* var = nullptr;
-        // We may already be inside an insert block, so make a new insert block instead of
-        // appending directly to the root block.
-        b.Append(ir.root_block, [&] { var = b.Var(name, tex_ty); });
         return var;
     }
 
@@ -599,31 +597,31 @@ struct State {
             Vector<core::ir::Value*, 3> call_args{tex};
             switch (tex_type->Dim()) {
                 case core::type::TextureDimension::k2d: {
-                    call_args.Push(b.Convert(ty.vec2<i32>(), args[idx++])->Result(0));
+                    call_args.Push(b.InsertConvertIfNeeded(ty.vec2<i32>(), args[idx++]));
                     if (is_ms) {
-                        call_args.Push(b.Convert(ty.i32(), args[idx++])->Result(0));
+                        call_args.Push(b.InsertConvertIfNeeded(ty.i32(), args[idx++]));
                     } else {
                         if (!is_storage) {
-                            call_args.Push(b.Convert(ty.i32(), args[idx++])->Result(0));
+                            call_args.Push(b.InsertConvertIfNeeded(ty.i32(), args[idx++]));
                         }
                     }
                     break;
                 }
                 case core::type::TextureDimension::k2dArray: {
-                    auto* coord = b.Convert(ty.vec2<i32>(), args[idx++]);
-                    auto* ary_idx = b.Convert(ty.i32(), args[idx++]);
+                    auto* coord = b.InsertConvertIfNeeded(ty.vec2<i32>(), args[idx++]);
+                    auto* ary_idx = b.InsertConvertIfNeeded(ty.i32(), args[idx++]);
                     call_args.Push(b.Construct(ty.vec3<i32>(), coord, ary_idx)->Result(0));
 
                     if (!is_storage) {
-                        call_args.Push(b.Convert(ty.i32(), args[idx++])->Result(0));
+                        call_args.Push(b.InsertConvertIfNeeded(ty.i32(), args[idx++]));
                     }
                     break;
                 }
                 case core::type::TextureDimension::k3d: {
-                    call_args.Push(b.Convert(ty.vec3<i32>(), args[idx++])->Result(0));
+                    call_args.Push(b.InsertConvertIfNeeded(ty.vec3<i32>(), args[idx++]));
 
                     if (!is_storage) {
-                        call_args.Push(b.Convert(ty.i32(), args[idx++])->Result(0));
+                        call_args.Push(b.InsertConvertIfNeeded(ty.i32(), args[idx++]));
                     }
                     break;
                 }
@@ -645,6 +643,7 @@ struct State {
             if (source_was_depth) {
                 new_call = b.Swizzle(ty.f32(), new_call, {0});
             }
+
             call->Result(0)->ReplaceAllUsesWith(new_call->Result(0));
         });
         call->Destroy();
@@ -667,7 +666,7 @@ struct State {
                     coords = b.Convert(ty.vec2<i32>(), coords)->Result(0);
                 }
 
-                auto* array = b.Convert(ty.i32(), args[idx++]);
+                auto* array = b.InsertConvertIfNeeded(ty.i32(), args[idx++]);
 
                 auto* coords_ty = coords->Type()->As<core::type::Vector>();
                 TINT_ASSERT(coords_ty);
@@ -747,7 +746,7 @@ struct State {
 
             // Push the component onto the end of the list if needed.
             if (component != nullptr) {
-                params.Push(b.Convert(ty.i32(), component)->Result(0));
+                params.Push(b.InsertConvertIfNeeded(ty.i32(), component));
             }
 
             b.CallWithResult<glsl::ir::BuiltinCall>(call->DetachResult(), fn, params);
@@ -1013,7 +1012,7 @@ struct State {
                     TINT_UNREACHABLE();
             }
 
-            params.Push(b.Convert(ty.f32(), args[idx++])->Result(0));
+            params.Push(b.InsertConvertIfNeeded(ty.f32(), args[idx++]));
 
             auto fn = needs_ext ? glsl::BuiltinFn::kExtTextureLod : glsl::BuiltinFn::kTextureLod;
             if (idx < args.Length()) {

@@ -44,13 +44,21 @@ using testing::Exactly;
 using testing::HasSubstr;
 using testing::MockCppCallback;
 
-using MockMapAsyncCallback = MockCppCallback<void (*)(wgpu::MapAsyncStatus, wgpu::StringView)>;
-using MockQueueWorkDoneCallback = MockCppCallback<void (*)(wgpu::QueueWorkDoneStatus)>;
-
-static const int fakeUserData = 0;
+using MockMapAsyncCallback = MockCppCallback<wgpu::BufferMapCallback<void>*>;
+using MockQueueWorkDoneCallback = MockCppCallback<wgpu::QueueWorkDoneCallback<void>*>;
 
 class DeviceLostTest : public DawnTest {
   protected:
+    wgpu::RequiredLimits GetRequiredLimits(const wgpu::SupportedLimits& supported) override {
+        // TODO(crbug.com/383593270): Enable all the limits.
+        wgpu::RequiredLimits required = {};
+        required.limits.maxStorageBuffersInFragmentStage =
+            supported.limits.maxStorageBuffersInFragmentStage;
+        required.limits.maxStorageBuffersPerShaderStage =
+            supported.limits.maxStorageBuffersPerShaderStage;
+        return required;
+    }
+
     void SetUp() override {
         DAWN_TEST_UNSUPPORTED_IF(UsesWire());
         DawnTest::SetUp();
@@ -61,11 +69,6 @@ class DeviceLostTest : public DawnTest {
             instance.ProcessEvents();  // Flush all callbacks.
             DawnTest::TearDown();
         }
-    }
-
-    static void MapFailCallback(WGPUBufferMapAsyncStatus status, void* userdata) {
-        EXPECT_EQ(WGPUBufferMapAsyncStatus_DeviceLost, status);
-        EXPECT_EQ(&fakeUserData, userdata);
     }
 
     template <typename T>
@@ -238,7 +241,7 @@ TEST_P(DeviceLostTest, BufferMapAsyncFailsForWriting) {
 
     LoseDeviceForTesting();
 
-    EXPECT_CALL(mMapAsyncCb, Call(wgpu::MapAsyncStatus::Error, HasSubstr("is lost"))).Times(1);
+    EXPECT_CALL(mMapAsyncCb, Call(wgpu::MapAsyncStatus::Aborted, HasSubstr("is lost"))).Times(1);
     buffer.MapAsync(wgpu::MapMode::Write, 0, 4, wgpu::CallbackMode::AllowProcessEvents,
                     mMapAsyncCb.Callback());
 }
@@ -292,7 +295,7 @@ TEST_P(DeviceLostTest, BufferMapAsyncFailsForReading) {
 
     LoseDeviceForTesting();
 
-    EXPECT_CALL(mMapAsyncCb, Call(wgpu::MapAsyncStatus::Error, HasSubstr("is lost"))).Times(1);
+    EXPECT_CALL(mMapAsyncCb, Call(wgpu::MapAsyncStatus::Aborted, HasSubstr("is lost"))).Times(1);
     buffer.MapAsync(wgpu::MapMode::Read, 0, 4, wgpu::CallbackMode::AllowProcessEvents,
                     mMapAsyncCb.Callback());
 }
@@ -461,6 +464,8 @@ TEST_P(DeviceLostTest, DeviceLostBeforeCreatePipelineAsyncCallback) {
 // references to bind group layouts such that the cache was non-empty at the end
 // of shut down.
 TEST_P(DeviceLostTest, FreeBindGroupAfterDeviceLossWithPendingCommands) {
+    DAWN_SUPPRESS_TEST_IF(GetSupportedLimits().limits.maxStorageBuffersInFragmentStage < 1);
+
     wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
         device, {{0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Storage}});
 

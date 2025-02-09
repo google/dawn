@@ -45,8 +45,6 @@ if (tint_build_unittests || tint_build_benchmarks) {
 if (tint_build_msl_writer) {
   libtint_source_set("writer") {
     sources = [
-      "output.cc",
-      "output.h",
       "writer.cc",
       "writer.h",
     ]
@@ -56,31 +54,23 @@ if (tint_build_msl_writer) {
       "${tint_src_dir}/lang/core",
       "${tint_src_dir}/lang/core/common",
       "${tint_src_dir}/lang/core/constant",
+      "${tint_src_dir}/lang/core/ir",
       "${tint_src_dir}/lang/core/type",
-      "${tint_src_dir}/lang/wgsl",
-      "${tint_src_dir}/lang/wgsl/ast",
-      "${tint_src_dir}/lang/wgsl/features",
-      "${tint_src_dir}/lang/wgsl/program",
-      "${tint_src_dir}/lang/wgsl/sem",
+      "${tint_src_dir}/utils",
       "${tint_src_dir}/utils/containers",
       "${tint_src_dir}/utils/diagnostic",
-      "${tint_src_dir}/utils/generator",
       "${tint_src_dir}/utils/ice",
-      "${tint_src_dir}/utils/id",
       "${tint_src_dir}/utils/macros",
       "${tint_src_dir}/utils/math",
       "${tint_src_dir}/utils/memory",
-      "${tint_src_dir}/utils/reflection",
       "${tint_src_dir}/utils/result",
       "${tint_src_dir}/utils/rtti",
       "${tint_src_dir}/utils/symbol",
       "${tint_src_dir}/utils/text",
-      "${tint_src_dir}/utils/traits",
     ]
 
     if (tint_build_msl_writer) {
       deps += [
-        "${tint_src_dir}/lang/msl/writer/ast_printer",
         "${tint_src_dir}/lang/msl/writer/common",
         "${tint_src_dir}/lang/msl/writer/printer",
         "${tint_src_dir}/lang/msl/writer/raise",
@@ -114,19 +104,17 @@ if (tint_build_unittests) {
         "${tint_src_dir}/lang/core/intrinsic",
         "${tint_src_dir}/lang/core/ir",
         "${tint_src_dir}/lang/core/type",
+        "${tint_src_dir}/utils",
         "${tint_src_dir}/utils/containers",
         "${tint_src_dir}/utils/diagnostic",
         "${tint_src_dir}/utils/ice",
-        "${tint_src_dir}/utils/id",
         "${tint_src_dir}/utils/macros",
         "${tint_src_dir}/utils/math",
         "${tint_src_dir}/utils/memory",
-        "${tint_src_dir}/utils/reflection",
         "${tint_src_dir}/utils/result",
         "${tint_src_dir}/utils/rtti",
         "${tint_src_dir}/utils/symbol",
         "${tint_src_dir}/utils/text",
-        "${tint_src_dir}/utils/traits",
       ]
 
       if (tint_build_msl_writer) {
@@ -134,6 +122,7 @@ if (tint_build_unittests) {
           "${tint_src_dir}/lang/msl/validate",
           "${tint_src_dir}/lang/msl/writer",
           "${tint_src_dir}/lang/msl/writer/common",
+          "${tint_src_dir}/lang/msl/writer/printer",
         ]
       }
     }
@@ -158,19 +147,17 @@ if (tint_build_benchmarks) {
         "${tint_src_dir}/lang/wgsl/helpers",
         "${tint_src_dir}/lang/wgsl/program",
         "${tint_src_dir}/lang/wgsl/sem",
+        "${tint_src_dir}/utils",
         "${tint_src_dir}/utils/containers",
         "${tint_src_dir}/utils/diagnostic",
         "${tint_src_dir}/utils/ice",
-        "${tint_src_dir}/utils/id",
         "${tint_src_dir}/utils/macros",
         "${tint_src_dir}/utils/math",
         "${tint_src_dir}/utils/memory",
-        "${tint_src_dir}/utils/reflection",
         "${tint_src_dir}/utils/result",
         "${tint_src_dir}/utils/rtti",
         "${tint_src_dir}/utils/symbol",
         "${tint_src_dir}/utils/text",
-        "${tint_src_dir}/utils/traits",
       ]
 
       if (tint_build_msl_writer) {
@@ -201,25 +188,18 @@ if (tint_build_msl_writer) {
       "${tint_src_dir}/lang/core/constant",
       "${tint_src_dir}/lang/core/ir",
       "${tint_src_dir}/lang/core/type",
-      "${tint_src_dir}/lang/wgsl",
-      "${tint_src_dir}/lang/wgsl/ast",
-      "${tint_src_dir}/lang/wgsl/features",
-      "${tint_src_dir}/lang/wgsl/program",
-      "${tint_src_dir}/lang/wgsl/sem",
+      "${tint_src_dir}/utils",
       "${tint_src_dir}/utils/bytes",
       "${tint_src_dir}/utils/containers",
       "${tint_src_dir}/utils/diagnostic",
       "${tint_src_dir}/utils/ice",
-      "${tint_src_dir}/utils/id",
       "${tint_src_dir}/utils/macros",
       "${tint_src_dir}/utils/math",
       "${tint_src_dir}/utils/memory",
-      "${tint_src_dir}/utils/reflection",
       "${tint_src_dir}/utils/result",
       "${tint_src_dir}/utils/rtti",
       "${tint_src_dir}/utils/symbol",
       "${tint_src_dir}/utils/text",
-      "${tint_src_dir}/utils/traits",
     ]
 
     if (tint_build_msl_writer) {
@@ -228,11 +208,6 @@ if (tint_build_msl_writer) {
         "${tint_src_dir}/lang/msl/writer/common",
         "${tint_src_dir}/lang/msl/writer/helpers",
       ]
-    }
-
-    if (tint_build_wgsl_reader) {
-      sources += [ "writer_ast_fuzz.cc" ]
-      deps += [ "${tint_src_dir}/cmd/fuzz/wgsl:fuzz" ]
     }
   }
 }

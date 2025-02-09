@@ -71,7 +71,7 @@ struct State {
     /// Process the function.
     /// @param fn the function to process
     void Process(core::ir::Function* fn) {
-        if (fn->Stage() != core::ir::Function::PipelineStage::kUndefined) {
+        if (fn->IsEntryPoint()) {
             // Entry points are not called and do not require this transformation to ensure
             // convergence.
             return;

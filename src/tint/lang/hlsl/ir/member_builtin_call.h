@@ -72,6 +72,9 @@ class MemberBuiltinCall final : public Castable<MemberBuiltinCall, core::ir::Mem
         return hlsl::intrinsic::Dialect::kData;
     }
 
+    /// @returns an access information for the function
+    Accesses GetSideEffects() const override;
+
   private:
     BuiltinFn func_;
 };

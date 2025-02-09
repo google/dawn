@@ -4,9 +4,9 @@ RWByteAddressBuffer output : register(u0);
 void foo() {
   int i = 0;
   while (true) {
-    int x = asint(output.Load((4u * uint(i))));
+    int x = asint(output.Load((4u * min(uint(i), 9u))));
     {
-      int x_1 = asint(output.Load((4u * uint(x))));
+      int x_1 = asint(output.Load((4u * min(uint(x), 9u))));
       i = (i + x_1);
       if ((i > 10)) { break; }
     }

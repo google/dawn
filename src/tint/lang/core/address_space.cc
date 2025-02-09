@@ -42,12 +42,6 @@ namespace tint::core {
 /// @param str the string to parse
 /// @returns the parsed enum, or AddressSpace::kUndefined if the string could not be parsed.
 AddressSpace ParseAddressSpace(std::string_view str) {
-    if (str == "__in") {
-        return AddressSpace::kIn;
-    }
-    if (str == "__out") {
-        return AddressSpace::kOut;
-    }
     if (str == "function") {
         return AddressSpace::kFunction;
     }

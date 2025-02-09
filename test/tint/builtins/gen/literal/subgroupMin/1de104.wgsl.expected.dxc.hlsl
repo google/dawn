@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 RWByteAddressBuffer prevent_dce : register(u0);
 
 int4 subgroupMin_1de104() {
@@ -8,6 +11,15 @@ int4 subgroupMin_1de104() {
 void fragment_main() {
   prevent_dce.Store4(0u, asuint(subgroupMin_1de104()));
   return;
+}
+//
+// compute_main
+//
+RWByteAddressBuffer prevent_dce : register(u0);
+
+int4 subgroupMin_1de104() {
+  int4 res = WaveActiveMin((1).xxxx);
+  return res;
 }
 
 [numthreads(1, 1, 1)]

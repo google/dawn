@@ -14,14 +14,14 @@ void main() {
     uint p_save = i;
     if ((tint_mod(i, 2u) == 0u)) {
       {
-        b.Store((4u + (4u * p_save)), asuint((b.Load((4u + (4u * p_save))) * 2u)));
+        b.Store((4u + (4u * min(p_save, 49u))), asuint((b.Load((4u + (4u * min(p_save, 49u)))) * 2u)));
         i = (i + 1u);
       }
       continue;
     }
-    b.Store((4u + (4u * p_save)), asuint(0u));
+    b.Store((4u + (4u * min(p_save, 49u))), asuint(0u));
     {
-      b.Store((4u + (4u * p_save)), asuint((b.Load((4u + (4u * p_save))) * 2u)));
+      b.Store((4u + (4u * min(p_save, 49u))), asuint((b.Load((4u + (4u * min(p_save, 49u)))) * 2u)));
       i = (i + 1u);
     }
   }

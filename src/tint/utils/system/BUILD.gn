@@ -53,7 +53,6 @@ libtint_source_set("system") {
     "${tint_src_dir}/utils/math",
     "${tint_src_dir}/utils/memory",
     "${tint_src_dir}/utils/rtti",
-    "${tint_src_dir}/utils/traits",
   ]
 
   if (!tint_build_is_linux && !tint_build_is_mac && !tint_build_is_win) {

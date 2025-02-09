@@ -1,9 +1,11 @@
 #include <metal_stdlib>
-
 using namespace metal;
-void tint_symbol(device uint4* const tint_symbol_3) {
-  int const tint_symbol_2 = 1;
-  (*(tint_symbol_3))[tint_symbol_2] = ((*(tint_symbol_3))[tint_symbol_2] + 1u);
-  (*(tint_symbol_3))[2] = ((*(tint_symbol_3))[2] + 1u);
-}
 
+struct tint_module_vars_struct {
+  device uint4* a;
+};
+
+void v(tint_module_vars_struct tint_module_vars) {
+  (*tint_module_vars.a).y = ((*tint_module_vars.a).y + 1u);
+  (*tint_module_vars.a).z = ((*tint_module_vars.a).z + 1u);
+}

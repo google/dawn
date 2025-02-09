@@ -254,6 +254,10 @@ class TextureViewBase : public ApiObjectBase {
     wgpu::TextureUsage GetUsage() const;
     wgpu::TextureUsage GetInternalUsage() const;
 
+    virtual bool IsYCbCr() const;
+    // Valid to call only if `IsYCbCr()` is true.
+    virtual YCbCrVkDescriptor GetYCbCrVkDescriptor() const;
+
   protected:
     void DestroyImpl() override;
 

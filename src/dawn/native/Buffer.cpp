@@ -59,34 +59,6 @@
 namespace dawn::native {
 
 namespace {
-struct MapRequestTask : TrackTaskCallback {
-    MapRequestTask(dawn::platform::Platform* platform, Ref<BufferBase> buffer, MapRequestID id)
-        : TrackTaskCallback(platform), buffer(std::move(buffer)), id(id) {}
-    ~MapRequestTask() override = default;
-
-  private:
-    void FinishImpl() override {
-        {
-            // This is called from a callback, and no lock will be held by default. Hence, we need
-            // to lock the mutex now because mSerial might be changed by another thread.
-            auto deviceLock(buffer->GetDevice()->GetScopedLock());
-            DAWN_ASSERT(mSerial != kMaxExecutionSerial);
-            TRACE_EVENT1(mPlatform, General, "Buffer::TaskInFlight::Finished", "serial",
-                         uint64_t(mSerial));
-        }
-        buffer->CallbackOnMapRequestCompleted(id, WGPUBufferMapAsyncStatus_Success);
-    }
-    void HandleDeviceLossImpl() override {
-        buffer->CallbackOnMapRequestCompleted(id, WGPUBufferMapAsyncStatus_DeviceLost);
-    }
-    void HandleShutDownImpl() override {
-        buffer->CallbackOnMapRequestCompleted(id, WGPUBufferMapAsyncStatus_DestroyedBeforeCallback);
-    }
-
-    Ref<BufferBase> buffer;
-    MapRequestID id;
-};
-
 class ErrorBuffer final : public BufferBase {
   public:
     ErrorBuffer(DeviceBase* device, const BufferDescriptor* descriptor)
@@ -157,6 +129,9 @@ wgpu::BufferUsage AddInternalUsages(const DeviceBase* device, wgpu::BufferUsage 
             device->IsToggleEnabled(Toggle::UseBlitForSnormTextureToBufferCopy) ||
             device->IsToggleEnabled(Toggle::UseBlitForBGRA8UnormTextureToBufferCopy) ||
             device->IsToggleEnabled(Toggle::UseBlitForRGB9E5UfloatTextureCopy) ||
+            device->IsToggleEnabled(Toggle::UseBlitForRG11B10UfloatTextureCopy) ||
+            device->IsToggleEnabled(Toggle::UseBlitForFloat16TextureCopy) ||
+            device->IsToggleEnabled(Toggle::UseBlitForFloat32TextureCopy) ||
             device->IsToggleEnabled(Toggle::UseBlitForT2B);
         if (useComputeForT2B) {
             if (!(usage & (kMappableBufferUsages | wgpu::BufferUsage::Uniform)) ||
@@ -183,106 +158,7 @@ static uint32_t sZeroSizedMappingData = 0xCAFED00D;
 
 }  // anonymous namespace
 
-struct BufferBase::MapAsyncEvent : public EventManager::TrackedEvent {
-    MapAsyncEvent(wgpu::CallbackMode mode, QueueBase* queue, ExecutionSerial serial)
-        : TrackedEvent(mode, queue, serial) {}
-    // TODO(crbug.com/42241006): Note that currently this constructor is used for errors because a
-    // dropped device can result in failure when trying to get the queue. While using this fixes the
-    // problem, it causes an unintentional side-effect where it is possible to run into a
-    // UnsupportedMixedSource error on WaitAny even if we are only using a single device with
-    // MapAsync calls. This will be fixed once we correctly implement mixed sources.
-    explicit MapAsyncEvent(wgpu::CallbackMode mode)
-        : TrackedEvent(mode, SystemEvent::CreateSignaled()) {}
-
-    virtual void UnmapEarly(wgpu::BufferMapAsyncStatus status) = 0;
-};
-
-struct BufferBase::MapAsyncEvent1 final : public BufferBase::MapAsyncEvent {
-    // MapAsyncEvent stores a raw pointer to the buffer so that it can
-    // update the buffer's map state when it completes.
-    // If the map completes early (error, unmap, destroy), then the buffer
-    // is no longer needed and we store the early status instead.
-    // The raw pointer is safe because the early status is set to destroyed
-    // before the buffer is dropped.
-    // Note: this could be an atomic + spin lock on a sentinel enum if the mutex
-    // cost is high.
-    MutexProtected<std::variant<BufferBase*, wgpu::BufferMapAsyncStatus>> mBufferOrEarlyStatus;
-
-    WGPUBufferMapCallback mCallback;
-    raw_ptr<void> mUserdata;
-
-    // Create an event backed by the given queue execution serial.
-    MapAsyncEvent1(DeviceBase* device,
-                   BufferBase* buffer,
-                   const BufferMapCallbackInfo& callbackInfo,
-                   ExecutionSerial serial)
-        : MapAsyncEvent(callbackInfo.mode, device->GetQueue(), serial),
-          mBufferOrEarlyStatus(buffer),
-          mCallback(callbackInfo.callback),
-          mUserdata(callbackInfo.userdata) {
-        TRACE_EVENT_ASYNC_BEGIN0(device->GetPlatform(), General, "Buffer::APIMapAsync",
-                                 uint64_t(serial));
-    }
-
-    // Create an event that's ready at creation (for errors, etc.)
-    MapAsyncEvent1(DeviceBase* device,
-                   const BufferMapCallbackInfo& callbackInfo,
-                   wgpu::BufferMapAsyncStatus earlyStatus)
-        : MapAsyncEvent(callbackInfo.mode, device->GetQueue(), kBeginningOfGPUTime),
-          mBufferOrEarlyStatus(earlyStatus),
-          mCallback(callbackInfo.callback),
-          mUserdata(callbackInfo.userdata) {
-        TRACE_EVENT_ASYNC_BEGIN0(device->GetPlatform(), General, "Buffer::APIMapAsync",
-                                 uint64_t(kBeginningOfGPUTime));
-    }
-
-    ~MapAsyncEvent1() override { EnsureComplete(EventCompletionType::Shutdown); }
-
-    void Complete(EventCompletionType completionType) override {
-        if (const auto* queueAndSerial = std::get_if<QueueAndSerial>(&GetCompletionData())) {
-            TRACE_EVENT_ASYNC_END0(queueAndSerial->queue->GetDevice()->GetPlatform(), General,
-                                   "Buffer::APIMapAsync",
-                                   uint64_t(queueAndSerial->completionSerial));
-        }
-
-        if (completionType == EventCompletionType::Shutdown) {
-            mCallback(ToAPI(wgpu::BufferMapAsyncStatus::InstanceDropped), mUserdata);
-            return;
-        }
-
-        wgpu::BufferMapAsyncStatus status = wgpu::BufferMapAsyncStatus::Success;
-        Ref<MapAsyncEvent> pendingMapEvent;
-
-        // Lock the buffer / early status. This may race with UnmapEarly which occurs
-        // when the buffer is unmapped or destroyed.
-        mBufferOrEarlyStatus.Use([&](auto bufferOrEarlyStatus) {
-            if (auto* earlyStatus =
-                    std::get_if<wgpu::BufferMapAsyncStatus>(&*bufferOrEarlyStatus)) {
-                // Assign the early status, if it was set.
-                status = *earlyStatus;
-            } else if (auto** buffer = std::get_if<BufferBase*>(&*bufferOrEarlyStatus)) {
-                // Set the buffer state to Mapped if this pending map succeeded.
-                // TODO(crbug.com/dawn/831): in order to be thread safe, mutation of the
-                // state and pending map event needs to be atomic w.r.t. UnmapInternal.
-                DAWN_ASSERT((*buffer)->mState == BufferState::PendingMap);
-                (*buffer)->mState = BufferState::Mapped;
-
-                pendingMapEvent = std::move((*buffer)->mPendingMapEvent);
-            }
-        });
-        mCallback(ToAPI(status), mUserdata);
-    }
-
-    // Set the buffer early status because it was unmapped early due to Unmap or Destroy.
-    // This can race with Complete such that the early status is ignored, but this is OK
-    // because we will still unmap the buffer. It will be as-if the application called
-    // Unmap/Destroy just after the map event completed.
-    void UnmapEarly(wgpu::BufferMapAsyncStatus status) override {
-        mBufferOrEarlyStatus.Use([&](auto bufferOrEarlyStatus) { *bufferOrEarlyStatus = status; });
-    }
-};
-
-struct BufferBase::MapAsyncEvent2 final : public BufferBase::MapAsyncEvent {
+struct BufferBase::MapAsyncEvent final : public EventManager::TrackedEvent {
     // MapAsyncEvent stores a raw pointer to the buffer so that it can update the buffer's map state
     // when it completes. If the map completes early (error, unmap, destroy), then the buffer is no
     // longer needed and we store the early status instead. The raw pointer is safe because the
@@ -294,18 +170,18 @@ struct BufferBase::MapAsyncEvent2 final : public BufferBase::MapAsyncEvent {
     };
     MutexProtected<std::variant<BufferBase*, BufferErrorData>> mBufferOrError;
 
-    WGPUBufferMapCallback2 mCallback;
+    WGPUBufferMapCallback mCallback;
     raw_ptr<void> mUserdata1;
     raw_ptr<void> mUserdata2;
 
     // Create an event backed by the given queue execution serial.
-    MapAsyncEvent2(DeviceBase* device,
-                   BufferBase* buffer,
-                   const WGPUBufferMapCallbackInfo2& callbackInfo,
-                   ExecutionSerial serial)
-        : MapAsyncEvent(static_cast<wgpu::CallbackMode>(callbackInfo.mode),
-                        device->GetQueue(),
-                        serial),
+    MapAsyncEvent(DeviceBase* device,
+                  BufferBase* buffer,
+                  const WGPUBufferMapCallbackInfo& callbackInfo,
+                  ExecutionSerial serial)
+        : TrackedEvent(static_cast<wgpu::CallbackMode>(callbackInfo.mode),
+                       device->GetQueue(),
+                       serial),
           mBufferOrError(buffer),
           mCallback(callbackInfo.callback),
           mUserdata1(callbackInfo.userdata1),
@@ -315,11 +191,13 @@ struct BufferBase::MapAsyncEvent2 final : public BufferBase::MapAsyncEvent {
     }
 
     // Create an event that's ready at creation (for errors, etc.)
-    MapAsyncEvent2(DeviceBase* device,
-                   const WGPUBufferMapCallbackInfo2& callbackInfo,
-                   const std::string& message)
-        : MapAsyncEvent(static_cast<wgpu::CallbackMode>(callbackInfo.mode)),
-          mBufferOrError(BufferErrorData{WGPUMapAsyncStatus_Error, message}),
+    MapAsyncEvent(DeviceBase* device,
+                  const WGPUBufferMapCallbackInfo& callbackInfo,
+                  const std::string& message,
+                  WGPUMapAsyncStatus status)
+        : TrackedEvent(static_cast<wgpu::CallbackMode>(callbackInfo.mode),
+                       SystemEvent::CreateSignaled()),
+          mBufferOrError(BufferErrorData{status, message}),
           mCallback(callbackInfo.callback),
           mUserdata1(callbackInfo.userdata1),
           mUserdata2(callbackInfo.userdata2) {
@@ -327,7 +205,7 @@ struct BufferBase::MapAsyncEvent2 final : public BufferBase::MapAsyncEvent {
                                  uint64_t(kBeginningOfGPUTime));
     }
 
-    ~MapAsyncEvent2() override { EnsureComplete(EventCompletionType::Shutdown); }
+    ~MapAsyncEvent() override { EnsureComplete(EventCompletionType::Shutdown); }
 
     void Complete(EventCompletionType completionType) override {
         if (const auto* queueAndSerial = std::get_if<QueueAndSerial>(&GetCompletionData())) {
@@ -380,21 +258,9 @@ struct BufferBase::MapAsyncEvent2 final : public BufferBase::MapAsyncEvent {
     // This can race with Complete such that the early status is ignored, but this is OK
     // because we will still unmap the buffer. It will be as-if the application called
     // Unmap/Destroy just after the map event completed.
-    void UnmapEarly(wgpu::BufferMapAsyncStatus status) override {
-        auto StatusToMessage = [](wgpu::BufferMapAsyncStatus status) {
-            switch (status) {
-                case wgpu::BufferMapAsyncStatus::DeviceLost:
-                    return "Device was lost.";
-                case wgpu::BufferMapAsyncStatus::DestroyedBeforeCallback:
-                    return "Buffer was destroyed before mapping was resolved.";
-                case wgpu::BufferMapAsyncStatus::UnmappedBeforeCallback:
-                    return "Buffer was unmapped before mapping was resolved.";
-                default:
-                    DAWN_UNREACHABLE();
-            }
-        };
+    void UnmapEarly(WGPUMapAsyncStatus status, std::string_view message) {
         mBufferOrError.Use([&](auto bufferOrError) {
-            *bufferOrError = BufferErrorData{WGPUMapAsyncStatus_Aborted, StatusToMessage(status)};
+            *bufferOrError = BufferErrorData{status, std::string(message)};
         });
     }
 };
@@ -456,9 +322,12 @@ ResultOrError<UnpackedPtr<BufferDescriptor>> ValidateBufferDescriptor(
                     "Buffer is mapped at creation but its size (%u) is not a multiple of 4.",
                     descriptor->size);
 
-    DAWN_INVALID_IF(descriptor->size > device->GetLimits().v1.maxBufferSize,
-                    "Buffer size (%u) exceeds the max buffer size limit (%u).", descriptor->size,
-                    device->GetLimits().v1.maxBufferSize);
+    uint64_t maxBufferSize = device->GetLimits().v1.maxBufferSize;
+    DAWN_INVALID_IF(
+        descriptor->size > maxBufferSize,
+        "Buffer size (%u) exceeds the max buffer size limit (%u).%s", descriptor->size,
+        maxBufferSize,
+        DAWN_INCREASE_LIMIT_MESSAGE(device->GetAdapter(), maxBufferSize, descriptor->size));
 
     return unpacked;
 }
@@ -502,12 +371,14 @@ void BufferBase::DestroyImpl() {
     //   is implicitly destroyed. This case is thread-safe because there are no
     //   other threads using the buffer since there are no other live refs.
     if (mState == BufferState::Mapped || mState == BufferState::PendingMap) {
-        UnmapInternal(WGPUBufferMapAsyncStatus_DestroyedBeforeCallback);
+        UnmapInternal(WGPUMapAsyncStatus_Aborted,
+                      "Buffer was destroyed before mapping was resolved.");
     } else if (mState == BufferState::MappedAtCreation) {
         if (mStagingBuffer != nullptr) {
             mStagingBuffer = nullptr;
         } else if (mSize != 0) {
-            UnmapInternal(WGPUBufferMapAsyncStatus_DestroyedBeforeCallback);
+            UnmapInternal(WGPUMapAsyncStatus_Aborted,
+                          "Buffer was destroyed before mapping was resolved.");
         }
     }
 
@@ -620,7 +491,7 @@ MaybeError BufferBase::MapAtCreationInternal() {
             DAWN_TRY(MapAtCreationImpl());
         } else {
             // If any of these fail, the buffer will be deleted and replaced with an error
-            // buffer. The staging buffer is used to return mappable data to inititalize the
+            // buffer. The staging buffer is used to return mappable data to initialize the
             // buffer contents. Allocate one as large as the real buffer size so that every byte
             // is initialized.
             // TODO(crbug.com/dawn/828): Suballocate and reuse memory from a larger staging
@@ -661,151 +532,10 @@ MaybeError BufferBase::ValidateCanUseOnQueueNow() const {
     DAWN_UNREACHABLE();
 }
 
-std::function<void()> BufferBase::PrepareMappingCallback(MapRequestID mapID,
-                                                         WGPUBufferMapAsyncStatus status) {
-    DAWN_ASSERT(!IsError());
-
-    if (mMapCallback != nullptr && mapID == mLastMapID) {
-        auto callback = std::move(mMapCallback);
-        void* userdata = std::move(mMapUserdata);
-        WGPUBufferMapAsyncStatus actualStatus;
-        if (GetDevice()->IsLost()) {
-            actualStatus = WGPUBufferMapAsyncStatus_DeviceLost;
-        } else {
-            actualStatus = status;
-        }
-
-        // Tag the callback as fired before firing it, otherwise it could fire a second time if
-        // for example buffer.Unmap() is called before the MapRequestTask completes.
-        mMapCallback = nullptr;
-        mMapUserdata = nullptr;
-
-        return std::bind(callback, actualStatus, userdata);
-    }
-
-    return [] {};
-}
-
-void BufferBase::APIMapAsync(wgpu::MapMode mode,
-                             size_t offset,
-                             size_t size,
-                             WGPUBufferMapCallback callback,
-                             void* userdata) {
-    GetInstance()->EmitDeprecationWarning(
-        "Old MapAsync APIs are deprecated. If using C please pass a CallbackInfo "
-        "struct that has two userdatas. Otherwise, if using C++, please use templated helpers.");
-
-    // Check for an existing pending map first because it just
-    // rejects the callback and doesn't produce a validation error.
-    if (mState == BufferState::PendingMap) {
-        if (callback) {
-            GetDevice()->GetCallbackTaskManager()->AddCallbackTask(
-                callback, WGPUBufferMapAsyncStatus_MappingAlreadyPending, userdata);
-        }
-        return;
-    }
-
-    // Handle the defaulting of size required by WebGPU, even if in webgpu_cpp.h it is not
-    // possible to default the function argument (because there is the callback later in the
-    // argument list)
-    if ((size == wgpu::kWholeMapSize) && (offset <= mSize)) {
-        size = mSize - offset;
-    }
-
-    WGPUBufferMapAsyncStatus status;
-    if (GetDevice()->ConsumedError(ValidateMapAsync(mode, offset, size, &status),
-                                   "calling %s.MapAsync(%s, %u, %u, ...).", this, mode, offset,
-                                   size)) {
-        if (callback) {
-            GetDevice()->GetCallbackTaskManager()->AddCallbackTask(callback, status, userdata);
-        }
-        return;
-    }
-    DAWN_ASSERT(!IsError());
-
-    mLastMapID++;
-    mMapMode = mode;
-    mMapOffset = offset;
-    mMapSize = size;
-    mMapCallback = callback;
-    mMapUserdata = userdata;
-    mState = BufferState::PendingMap;
-
-    if (GetDevice()->ConsumedError(MapAsyncImpl(mode, offset, size))) {
-        GetDevice()->GetCallbackTaskManager()->AddCallbackTask(
-            PrepareMappingCallback(mLastMapID, WGPUBufferMapAsyncStatus_DeviceLost));
-        return;
-    }
-    std::unique_ptr<MapRequestTask> request =
-        std::make_unique<MapRequestTask>(GetDevice()->GetPlatform(), this, mLastMapID);
-    TRACE_EVENT1(GetDevice()->GetPlatform(), General, "Buffer::APIMapAsync", "serial",
-                 uint64_t(mLastUsageSerial));
-    GetDevice()->GetQueue()->TrackTask(std::move(request), mLastUsageSerial);
-}
-
-Future BufferBase::APIMapAsyncF(wgpu::MapMode mode,
-                                size_t offset,
-                                size_t size,
-                                const BufferMapCallbackInfo& callbackInfo) {
-    GetInstance()->EmitDeprecationWarning(
-        "Old MapAsync APIs are deprecated. If using C please pass a CallbackInfo "
-        "struct that has two userdatas. Otherwise, if using C++, please use templated helpers.");
-
-    // TODO(crbug.com/dawn/2052): Once we always return a future, change this to log to the instance
-    // (note, not raise a validation error to the device) and return the null future.
-    DAWN_ASSERT(callbackInfo.nextInChain == nullptr);
-
-    Ref<EventManager::TrackedEvent> event;
-    std::optional<wgpu::BufferMapAsyncStatus> earlyStatus;
-    {
-        // TODO(crbug.com/dawn/831) Manually acquire device lock instead of relying on code-gen for
-        // re-entrancy.
-        auto deviceLock(GetDevice()->GetScopedLock());
-
-        // Handle the defaulting of size required by WebGPU, even if in webgpu_cpp.h it is not
-        // possible to default the function argument (because there is the callback later in the
-        // argument list)
-        if ((size == wgpu::kWholeMapSize) && (offset <= mSize)) {
-            size = mSize - offset;
-        }
-
-        earlyStatus = [&]() -> std::optional<wgpu::BufferMapAsyncStatus> {
-            if (mState == BufferState::PendingMap) {
-                return wgpu::BufferMapAsyncStatus::MappingAlreadyPending;
-            }
-            WGPUBufferMapAsyncStatus status;
-            if (GetDevice()->ConsumedError(ValidateMapAsync(mode, offset, size, &status),
-                                           "calling %s.MapAsync(%s, %u, %u, ...).", this, mode,
-                                           offset, size)) {
-                return static_cast<wgpu::BufferMapAsyncStatus>(status);
-            }
-            if (GetDevice()->ConsumedError(MapAsyncImpl(mode, offset, size))) {
-                return wgpu::BufferMapAsyncStatus::DeviceLost;
-            }
-            return std::nullopt;
-        }();
-
-        if (earlyStatus) {
-            event = AcquireRef(new MapAsyncEvent1(GetDevice(), callbackInfo, *earlyStatus));
-        } else {
-            mMapMode = mode;
-            mMapOffset = offset;
-            mMapSize = size;
-            mState = BufferState::PendingMap;
-            mPendingMapEvent =
-                AcquireRef(new MapAsyncEvent1(GetDevice(), this, callbackInfo, mLastUsageSerial));
-            event = mPendingMapEvent;
-        }
-    }
-
-    FutureID futureID = GetInstance()->GetEventManager()->TrackEvent(std::move(event));
-    return {futureID};
-}
-
-Future BufferBase::APIMapAsync2(wgpu::MapMode mode,
-                                size_t offset,
-                                size_t size,
-                                const WGPUBufferMapCallbackInfo2& callbackInfo) {
+Future BufferBase::APIMapAsync(wgpu::MapMode mode,
+                               size_t offset,
+                               size_t size,
+                               const WGPUBufferMapCallbackInfo& callbackInfo) {
     // TODO(crbug.com/dawn/2052): Once we always return a future, change this to log to the instance
     // (note, not raise a validation error to the device) and return the null future.
     DAWN_ASSERT(callbackInfo.nextInChain == nullptr);
@@ -823,10 +553,10 @@ Future BufferBase::APIMapAsync2(wgpu::MapMode mode,
             size = mSize - offset;
         }
 
+        WGPUMapAsyncStatus status = WGPUMapAsyncStatus_Error;
         MaybeError maybeError = [&]() -> MaybeError {
             DAWN_INVALID_IF(mState == BufferState::PendingMap,
                             "%s already has an outstanding map pending.", this);
-            WGPUBufferMapAsyncStatus status;
             DAWN_TRY(ValidateMapAsync(mode, offset, size, &status));
             DAWN_TRY(MapAsyncImpl(mode, offset, size));
             return {};
@@ -834,7 +564,8 @@ Future BufferBase::APIMapAsync2(wgpu::MapMode mode,
 
         if (maybeError.IsError()) {
             auto error = maybeError.AcquireError();
-            event = AcquireRef(new MapAsyncEvent2(GetDevice(), callbackInfo, error->GetMessage()));
+            event = AcquireRef(
+                new MapAsyncEvent(GetDevice(), callbackInfo, error->GetMessage(), status));
             [[maybe_unused]] bool hadError = GetDevice()->ConsumedError(
                 std::move(error), "calling %s.MapAsync(%s, %u, %u, ...).", this, mode, offset,
                 size);
@@ -844,7 +575,7 @@ Future BufferBase::APIMapAsync2(wgpu::MapMode mode,
             mMapSize = size;
             mState = BufferState::PendingMap;
             mPendingMapEvent =
-                AcquireRef(new MapAsyncEvent2(GetDevice(), this, callbackInfo, mLastUsageSerial));
+                AcquireRef(new MapAsyncEvent(GetDevice(), this, callbackInfo, mLastUsageSerial));
             event = mPendingMapEvent;
         }
     }
@@ -908,27 +639,22 @@ MaybeError BufferBase::Unmap() {
         return {};
     }
 
-    // Make sure writes are now visibile to the GPU if we used a staging buffer.
+    // Make sure writes are now visible to the GPU if we used a staging buffer.
     if (mState == BufferState::MappedAtCreation && mStagingBuffer != nullptr) {
         DAWN_TRY(CopyFromStagingBuffer());
     }
-    UnmapInternal(WGPUBufferMapAsyncStatus_UnmappedBeforeCallback);
+    UnmapInternal(WGPUMapAsyncStatus_Aborted, "Buffer was unmapped before mapping was resolved.");
     return {};
 }
 
-void BufferBase::UnmapInternal(WGPUBufferMapAsyncStatus callbackStatus) {
+void BufferBase::UnmapInternal(WGPUMapAsyncStatus status, std::string_view message) {
     // Unmaps resources on the backend.
     if (mState == BufferState::PendingMap) {
         // TODO(crbug.com/dawn/831): in order to be thread safe, mutation of the
         // state and pending map event needs to be atomic w.r.t. MapAsyncEvent::Complete.
         Ref<MapAsyncEvent> pendingMapEvent = std::move(mPendingMapEvent);
-        if (pendingMapEvent != nullptr) {
-            pendingMapEvent->UnmapEarly(static_cast<wgpu::BufferMapAsyncStatus>(callbackStatus));
-            GetInstance()->GetEventManager()->SetFutureReady(pendingMapEvent.Get());
-        } else {
-            GetDevice()->GetCallbackTaskManager()->AddCallbackTask(
-                PrepareMappingCallback(mLastMapID, callbackStatus));
-        }
+        pendingMapEvent->UnmapEarly(status, message);
+        GetInstance()->GetEventManager()->SetFutureReady(pendingMapEvent.Get());
         UnmapImpl();
     } else if (mState == BufferState::Mapped) {
         UnmapImpl();
@@ -944,11 +670,11 @@ void BufferBase::UnmapInternal(WGPUBufferMapAsyncStatus callbackStatus) {
 MaybeError BufferBase::ValidateMapAsync(wgpu::MapMode mode,
                                         size_t offset,
                                         size_t size,
-                                        WGPUBufferMapAsyncStatus* status) const {
-    *status = WGPUBufferMapAsyncStatus_DeviceLost;
+                                        WGPUMapAsyncStatus* status) const {
+    *status = WGPUMapAsyncStatus_Aborted;
     DAWN_TRY(GetDevice()->ValidateIsAlive());
 
-    *status = WGPUBufferMapAsyncStatus_ValidationError;
+    *status = WGPUMapAsyncStatus_Error;
     DAWN_TRY(GetDevice()->ValidateObject(this));
 
     DAWN_INVALID_IF(uint64_t(offset) > mSize,
@@ -993,7 +719,7 @@ MaybeError BufferBase::ValidateMapAsync(wgpu::MapMode mode,
                         wgpu::BufferUsage::MapWrite);
     }
 
-    *status = WGPUBufferMapAsyncStatus_Success;
+    *status = WGPUMapAsyncStatus_Success;
     return {};
 }
 
@@ -1052,22 +778,6 @@ MaybeError BufferBase::ValidateUnmap() const {
     return {};
 }
 
-void BufferBase::CallbackOnMapRequestCompleted(MapRequestID mapID,
-                                               WGPUBufferMapAsyncStatus status) {
-    {
-        // This is called from a callback, and no lock will be held by default. Hence, we need to
-        // lock the mutex now because this will modify the buffer's states.
-        auto deviceLock(GetDevice()->GetScopedLock());
-        if (mapID == mLastMapID && status == WGPUBufferMapAsyncStatus_Success &&
-            mState == BufferState::PendingMap) {
-            mState = BufferState::Mapped;
-        }
-    }
-
-    auto cb = PrepareMappingCallback(mapID, status);
-    cb();
-}
-
 bool BufferBase::NeedsInitialization() const {
     return !mIsDataInitialized && GetDevice()->IsToggleEnabled(Toggle::LazyClearResourceOnFirstUse);
 }
@@ -1097,8 +807,8 @@ MaybeError BufferBase::UploadData(uint64_t bufferOffset, const void* data, size_
 
     memcpy(uploadHandle.mappedBuffer, data, size);
 
-    return device->CopyFromStagingToBuffer(uploadHandle.stagingBuffer, uploadHandle.startOffset,
-                                           this, bufferOffset, size);
+    return device->CopyFromStagingToBuffer(uploadHandle.stagingBuffer.Get(),
+                                           uploadHandle.startOffset, this, bufferOffset, size);
 }
 
 ExecutionSerial BufferBase::OnEndAccess() {

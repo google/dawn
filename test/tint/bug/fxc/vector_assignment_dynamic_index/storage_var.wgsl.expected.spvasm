@@ -1,9 +1,10 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 23
+; Bound: 26
 ; Schema: 0
                OpCapability Shader
+         %19 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
@@ -35,6 +36,7 @@
          %12 = OpTypeFunction %void
 %_ptr_Uniform_uint = OpTypePointer Uniform %uint
      %uint_0 = OpConstant %uint 0
+     %uint_2 = OpConstant %uint 2
 %_ptr_StorageBuffer_v3float = OpTypePointer StorageBuffer %v3float
 %_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float
     %float_1 = OpConstant %float 1
@@ -42,8 +44,9 @@
          %13 = OpLabel
          %14 = OpAccessChain %_ptr_Uniform_uint %1 %uint_0
          %17 = OpLoad %uint %14 None
-         %18 = OpAccessChain %_ptr_StorageBuffer_v3float %5 %uint_0
-         %20 = OpAccessChain %_ptr_StorageBuffer_float %18 %17
-               OpStore %20 %float_1 None
+         %18 = OpExtInst %uint %19 UMin %17 %uint_2
+         %21 = OpAccessChain %_ptr_StorageBuffer_v3float %5 %uint_0
+         %23 = OpAccessChain %_ptr_StorageBuffer_float %21 %18
+               OpStore %23 %float_1 None
                OpReturn
                OpFunctionEnd

@@ -31,7 +31,7 @@
 #include <string>
 
 #include "src/tint/lang/glsl/writer/common/options.h"
-#include "src/tint/lang/glsl/writer/output.h"
+#include "src/tint/lang/glsl/writer/common/output.h"
 #include "src/tint/utils/diagnostic/diagnostic.h"
 #include "src/tint/utils/result/result.h"
 
@@ -44,6 +44,12 @@ class Module;
 }  // namespace tint::core::ir
 
 namespace tint::glsl::writer {
+
+/// Check if the module @p ir is supported by the GLSL backend with @p options.
+/// @param ir the module
+/// @param options the writer options
+/// @returns Success or a failure message indicating why GLSL generation would fail
+Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& options);
 
 /// Generate GLSL for a program, according to a set of configuration options.
 /// The result will contain the GLSL and supplementary information, or failure.

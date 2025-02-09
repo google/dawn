@@ -2,9 +2,9 @@
 precision highp float;
 precision highp int;
 
-layout(location = 2) in float tint_symbol_loc2_Input;
-void tint_symbol_inner(float none) {
+layout(location = 2) in float tint_interstage_location2;
+void main_inner(float none) {
 }
 void main() {
-  tint_symbol_inner(tint_symbol_loc2_Input);
+  main_inner(tint_interstage_location2);
 }

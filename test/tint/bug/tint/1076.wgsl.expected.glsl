@@ -9,19 +9,19 @@ struct FragIn {
   uint mask;
 };
 
-layout(location = 0) in float tint_symbol_loc0_Input;
-layout(location = 1) in float tint_symbol_loc1_Input;
-layout(location = 0) out float tint_symbol_loc0_Output;
-FragIn tint_symbol_inner(FragIn tint_symbol_1, float b) {
-  if ((tint_symbol_1.mask == 0u)) {
-    return tint_symbol_1;
+layout(location = 0) in float tint_interstage_location0;
+layout(location = 1) in float tint_interstage_location1;
+layout(location = 0) out float main_loc0_Output;
+FragIn main_inner(FragIn v, float b) {
+  if ((v.mask == 0u)) {
+    return v;
   }
   return FragIn(b, 1u);
 }
 void main() {
-  float v = tint_symbol_loc0_Input;
-  FragIn v_1 = FragIn(v, uint(gl_SampleMaskIn[0u]));
-  FragIn v_2 = tint_symbol_inner(v_1, tint_symbol_loc1_Input);
-  tint_symbol_loc0_Output = v_2.a;
-  gl_SampleMask[0u] = int(v_2.mask);
+  float v_1 = tint_interstage_location0;
+  FragIn v_2 = FragIn(v_1, uint(gl_SampleMaskIn[0u]));
+  FragIn v_3 = main_inner(v_2, tint_interstage_location1);
+  main_loc0_Output = v_3.a;
+  gl_SampleMask[0u] = int(v_3.mask);
 }

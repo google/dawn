@@ -1,3 +1,6 @@
+//
+// vert_main
+//
 struct Interface {
   int i;
   uint u;
@@ -14,8 +17,8 @@ struct tint_symbol {
 };
 
 Interface vert_main_inner() {
-  Interface tint_symbol_4 = (Interface)0;
-  return tint_symbol_4;
+  Interface tint_symbol_1 = (Interface)0;
+  return tint_symbol_1;
 }
 
 tint_symbol vert_main() {
@@ -28,15 +31,24 @@ tint_symbol vert_main() {
   wrapper_result.pos = inner_result.pos;
   return wrapper_result;
 }
-
-struct tint_symbol_2 {
+//
+// frag_main
+//
+struct Interface {
+  int i;
+  uint u;
+  int4 vi;
+  uint4 vu;
+  float4 pos;
+};
+struct tint_symbol_1 {
   nointerpolation int i : TEXCOORD0;
   nointerpolation uint u : TEXCOORD1;
   nointerpolation int4 vi : TEXCOORD2;
   nointerpolation uint4 vu : TEXCOORD3;
   float4 pos : SV_Position;
 };
-struct tint_symbol_3 {
+struct tint_symbol_2 {
   int value : SV_Target0;
 };
 
@@ -44,10 +56,10 @@ int frag_main_inner(Interface inputs) {
   return inputs.i;
 }
 
-tint_symbol_3 frag_main(tint_symbol_2 tint_symbol_1) {
-  Interface tint_symbol_5 = {tint_symbol_1.i, tint_symbol_1.u, tint_symbol_1.vi, tint_symbol_1.vu, float4(tint_symbol_1.pos.xyz, (1.0f / tint_symbol_1.pos.w))};
-  int inner_result_1 = frag_main_inner(tint_symbol_5);
-  tint_symbol_3 wrapper_result_1 = (tint_symbol_3)0;
-  wrapper_result_1.value = inner_result_1;
-  return wrapper_result_1;
+tint_symbol_2 frag_main(tint_symbol_1 tint_symbol) {
+  Interface tint_symbol_3 = {tint_symbol.i, tint_symbol.u, tint_symbol.vi, tint_symbol.vu, float4(tint_symbol.pos.xyz, (1.0f / tint_symbol.pos.w))};
+  int inner_result = frag_main_inner(tint_symbol_3);
+  tint_symbol_2 wrapper_result = (tint_symbol_2)0;
+  wrapper_result.value = inner_result;
+  return wrapper_result;
 }

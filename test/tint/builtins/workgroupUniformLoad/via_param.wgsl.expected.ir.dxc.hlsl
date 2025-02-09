@@ -8,7 +8,7 @@ int foo(uint p_indices[1]) {
 }
 
 int bar() {
-  uint v_2[1] = {uint(int(0))};
+  uint v_2[1] = {0u};
   return foo(v_2);
 }
 

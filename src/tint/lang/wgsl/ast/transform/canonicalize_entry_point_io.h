@@ -32,7 +32,7 @@
 
 #include "src/tint/lang/wgsl/ast/internal_attribute.h"
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
-#include "src/tint/utils/reflection/reflection.h"
+#include "src/tint/utils/reflection.h"
 
 namespace tint::ast::transform {
 

@@ -33,18 +33,13 @@
 namespace tint::wgsl::writer::raise {
 namespace {
 
-void RaiseFuzzer(core::ir::Module& module) {
-    if (auto res = Raise(module); res != Success) {
-        return;
-    }
-
-    core::ir::Capabilities capabilities{core::ir::Capability::kAllowRefTypes};
-    if (auto res = Validate(module, capabilities); res != Success) {
-        TINT_ICE() << "result of Raise failed IR validation\n" << res.Failure();
-    }
+Result<SuccessType> RaiseFuzzer(core::ir::Module& ir, const fuzz::ir::Context&) {
+    return Raise(ir);
 }
 
 }  // namespace
 }  // namespace tint::wgsl::writer::raise
 
-TINT_IR_MODULE_FUZZER(tint::wgsl::writer::raise::RaiseFuzzer, tint::core::ir::Capabilities{});
+TINT_IR_MODULE_FUZZER(tint::wgsl::writer::raise::RaiseFuzzer,
+                      tint::core::ir::Capabilities{},
+                      tint::core::ir::Capabilities{tint::core::ir::Capability::kAllowRefTypes});

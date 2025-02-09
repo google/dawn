@@ -28,7 +28,7 @@
 %main_local_invocation_index_Input = OpVariable %_ptr_Input_uint Input
        %void = OpTypeVoid
          %13 = OpTypeFunction %void %uint
-     %uint_0 = OpConstant %uint 0
+     %uint_1 = OpConstant %uint 1
        %bool = OpTypeBool
     %float_0 = OpConstant %float 0
      %uint_2 = OpConstant %uint 2
@@ -37,7 +37,7 @@
  %main_inner = OpFunction %void None %13
 %tint_local_index = OpFunctionParameter %uint
          %14 = OpLabel
-         %15 = OpIEqual %bool %tint_local_index %uint_0
+         %15 = OpULessThan %bool %tint_local_index %uint_1
                OpSelectionMerge %18 None
                OpBranchConditional %15 %19 %18
          %19 = OpLabel

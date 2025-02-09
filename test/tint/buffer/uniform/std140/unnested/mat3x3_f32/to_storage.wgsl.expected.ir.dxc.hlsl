@@ -10,9 +10,7 @@ void v(uint offset, float3x3 obj) {
 }
 
 float3x3 v_1(uint start_byte_offset) {
-  float3 v_2 = asfloat(u[(start_byte_offset / 16u)].xyz);
-  float3 v_3 = asfloat(u[((16u + start_byte_offset) / 16u)].xyz);
-  return float3x3(v_2, v_3, asfloat(u[((32u + start_byte_offset) / 16u)].xyz));
+  return float3x3(asfloat(u[(start_byte_offset / 16u)].xyz), asfloat(u[((16u + start_byte_offset) / 16u)].xyz), asfloat(u[((32u + start_byte_offset) / 16u)].xyz));
 }
 
 [numthreads(1, 1, 1)]

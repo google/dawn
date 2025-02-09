@@ -29,6 +29,7 @@ plugins {
     id 'com.android.library'
     id 'maven-publish'
     id 'org.jetbrains.kotlin.android'
+    id 'com.android.application' apply false
 }
 
 android {
@@ -41,24 +42,25 @@ android {
             cmake {
                 arguments '-DANDROID_STL=c++_shared'
                 version '3.22.1'
-                targets 'webgpu_c_bundled'
+                targets 'webgpu_c_bundled', 'webgpu_wrapper_tests'
             }
         }
     }
-
     externalNativeBuild {
         cmake {
             path file('src/main/cpp/CMakeLists.txt')
         }
     }
-
     buildFeatures {
+        prefab true
         prefabPublishing true
     }
-
     prefab {
         webgpu_c_bundled {
             headers "src/main/cpp/gen/include"
+        }
+        webgpu_wrapper_tests {
+            name "webgpu_wrapper_tests"
         }
     }
     kotlinOptions {
@@ -75,11 +77,19 @@ android {
             java.srcDirs += "$project.projectDir/../../../out/Debug/gen/java"
         }
     }
+    packagingOptions {
+        pickFirst 'lib/x86/libc++_shared.so'
+        pickFirst 'lib/x86_64/libc++_shared.so'
+        pickFirst 'lib/armeabi-v7a/libc++_shared.so'
+        pickFirst 'lib/arm64-v8a/libc++_shared.so'
+    }
     ndkVersion '27.0.12077973'
 }
 
 dependencies {
     implementation 'androidx.core:core-ktx:1.13.1'
+    implementation 'androidx.test.ext:junit-gtest:1.0.0-alpha01'
+    implementation 'com.android.ndk.thirdparty:googletest:1.11.0-beta-1'
 
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.reflections:reflections:0.10.2'

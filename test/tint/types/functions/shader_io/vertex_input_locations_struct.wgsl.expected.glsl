@@ -8,11 +8,11 @@ struct VertexInputs {
   vec4 loc3;
 };
 
-layout(location = 0) in int tint_symbol_loc0_Input;
-layout(location = 1) in uint tint_symbol_loc1_Input;
-layout(location = 2) in float tint_symbol_loc2_Input;
-layout(location = 3) in vec4 tint_symbol_loc3_Input;
-vec4 tint_symbol_inner(VertexInputs inputs) {
+layout(location = 0) in int main_loc0_Input;
+layout(location = 1) in uint main_loc1_Input;
+layout(location = 2) in float main_loc2_Input;
+layout(location = 3) in vec4 main_loc3_Input;
+vec4 main_inner(VertexInputs inputs) {
   int i = inputs.loc0;
   uint u = inputs.loc1;
   float f = inputs.loc2;
@@ -20,8 +20,7 @@ vec4 tint_symbol_inner(VertexInputs inputs) {
   return vec4(0.0f);
 }
 void main() {
-  gl_Position = tint_symbol_inner(VertexInputs(tint_symbol_loc0_Input, tint_symbol_loc1_Input, tint_symbol_loc2_Input, tint_symbol_loc3_Input));
-  gl_Position[1u] = -(gl_Position.y);
-  gl_Position[2u] = ((2.0f * gl_Position.z) - gl_Position.w);
+  vec4 v_1 = main_inner(VertexInputs(main_loc0_Input, main_loc1_Input, main_loc2_Input, main_loc3_Input));
+  gl_Position = vec4(v_1.x, -(v_1.y), ((2.0f * v_1.z) - v_1.w), v_1.w);
   gl_PointSize = 1.0f;
 }

@@ -1,6 +1,9 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
-
 using namespace metal;
+
 void select_9b478d() {
   bool arg_2 = true;
   int res = select(1, 1, arg_2);
@@ -8,21 +11,39 @@ void select_9b478d() {
 
 fragment void fragment_main() {
   select_9b478d();
-  return;
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void select_9b478d() {
+  bool arg_2 = true;
+  int res = select(1, 1, arg_2);
 }
 
 kernel void compute_main() {
   select_9b478d();
-  return;
 }
+//
+// vertex_main
+//
+#include <metal_stdlib>
+using namespace metal;
 
 struct VertexOutput {
   float4 pos;
 };
 
-struct tint_symbol {
-  float4 pos [[position]];
+struct vertex_main_outputs {
+  float4 VertexOutput_pos [[position]];
 };
+
+void select_9b478d() {
+  bool arg_2 = true;
+  int res = select(1, 1, arg_2);
+}
 
 VertexOutput vertex_main_inner() {
   VertexOutput out = {};
@@ -31,10 +52,8 @@ VertexOutput vertex_main_inner() {
   return out;
 }
 
-vertex tint_symbol vertex_main() {
-  VertexOutput const inner_result = vertex_main_inner();
-  tint_symbol wrapper_result = {};
-  wrapper_result.pos = inner_result.pos;
-  return wrapper_result;
+vertex vertex_main_outputs vertex_main() {
+  vertex_main_outputs tint_wrapper_result = {};
+  tint_wrapper_result.VertexOutput_pos = vertex_main_inner().pos;
+  return tint_wrapper_result;
 }
-

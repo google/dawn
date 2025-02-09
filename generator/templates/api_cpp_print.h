@@ -43,7 +43,7 @@ namespace {{metadata.namespace}} {
       template <typename CharT, typename Traits>
       std::basic_ostream<CharT, Traits>& operator<<(std::basic_ostream<CharT, Traits>& o, {{as_cppType(type.name)}} value) {
           switch (value) {
-            {% for value in type.values %}
+            {% for value in type.values if not is_enum_value_proxy(value) %}
               case {{as_cppType(type.name)}}::{{as_cppEnum(value.name)}}:
                 o << "{{as_cppType(type.name)}}::{{as_cppEnum(value.name)}}";
                 break;

@@ -33,15 +33,8 @@
 namespace tint::core::ir::transform {
 namespace {
 
-void AddEmptyEntryPointFuzzer(Module& module) {
-    if (auto res = AddEmptyEntryPoint(module); res != Success) {
-        return;
-    }
-
-    Capabilities capabilities;
-    if (auto res = Validate(module, capabilities); res != Success) {
-        TINT_ICE() << "result of AddEmptyEntryPoint failed IR validation\n" << res.Failure();
-    }
+Result<SuccessType> AddEmptyEntryPointFuzzer(Module& ir, const fuzz::ir::Context&) {
+    return AddEmptyEntryPoint(ir);
 }
 
 }  // namespace

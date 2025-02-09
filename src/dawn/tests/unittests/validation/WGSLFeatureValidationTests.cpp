@@ -87,24 +87,25 @@ class WGSLFeatureValidationTest : public ValidationTest {
     }
 };
 
-wgpu::WGSLFeatureName kNonExistentFeature = static_cast<wgpu::WGSLFeatureName>(0xFFFF'FFFF);
+wgpu::WGSLLanguageFeatureName kNonExistentFeature = {};
 
 // Check HasFeature for an Instance that doesn't have unsafe APIs.
 TEST_F(WGSLFeatureValidationTest, HasFeatureDefaultInstance) {
     SetUp({});
 
     // Shipped features are present.
-    ASSERT_TRUE(instance.HasWGSLLanguageFeature(wgpu::WGSLFeatureName::ChromiumTestingShipped));
+    ASSERT_TRUE(
+        instance.HasWGSLLanguageFeature(wgpu::WGSLLanguageFeatureName::ChromiumTestingShipped));
     ASSERT_TRUE(instance.HasWGSLLanguageFeature(
-        wgpu::WGSLFeatureName::ChromiumTestingShippedWithKillswitch));
+        wgpu::WGSLLanguageFeatureName::ChromiumTestingShippedWithKillswitch));
 
     // Experimental and unimplemented features are not present.
-    ASSERT_FALSE(
-        instance.HasWGSLLanguageFeature(wgpu::WGSLFeatureName::ChromiumTestingExperimental));
-    ASSERT_FALSE(
-        instance.HasWGSLLanguageFeature(wgpu::WGSLFeatureName::ChromiumTestingUnsafeExperimental));
-    ASSERT_FALSE(
-        instance.HasWGSLLanguageFeature(wgpu::WGSLFeatureName::ChromiumTestingUnimplemented));
+    ASSERT_FALSE(instance.HasWGSLLanguageFeature(
+        wgpu::WGSLLanguageFeatureName::ChromiumTestingExperimental));
+    ASSERT_FALSE(instance.HasWGSLLanguageFeature(
+        wgpu::WGSLLanguageFeatureName::ChromiumTestingUnsafeExperimental));
+    ASSERT_FALSE(instance.HasWGSLLanguageFeature(
+        wgpu::WGSLLanguageFeatureName::ChromiumTestingUnimplemented));
 
     // Non-existent features are not present.
     ASSERT_FALSE(instance.HasWGSLLanguageFeature(kNonExistentFeature));
@@ -115,17 +116,18 @@ TEST_F(WGSLFeatureValidationTest, HasFeatureExposeExperimental) {
     SetUp({.exposeExperimental = true});
 
     // Shipped and experimental features are present.
-    ASSERT_TRUE(instance.HasWGSLLanguageFeature(wgpu::WGSLFeatureName::ChromiumTestingShipped));
-    ASSERT_TRUE(instance.HasWGSLLanguageFeature(
-        wgpu::WGSLFeatureName::ChromiumTestingShippedWithKillswitch));
     ASSERT_TRUE(
-        instance.HasWGSLLanguageFeature(wgpu::WGSLFeatureName::ChromiumTestingExperimental));
+        instance.HasWGSLLanguageFeature(wgpu::WGSLLanguageFeatureName::ChromiumTestingShipped));
+    ASSERT_TRUE(instance.HasWGSLLanguageFeature(
+        wgpu::WGSLLanguageFeatureName::ChromiumTestingShippedWithKillswitch));
+    ASSERT_TRUE(instance.HasWGSLLanguageFeature(
+        wgpu::WGSLLanguageFeatureName::ChromiumTestingExperimental));
 
     // Unsafe and unimplemented features are not present.
-    ASSERT_FALSE(
-        instance.HasWGSLLanguageFeature(wgpu::WGSLFeatureName::ChromiumTestingUnsafeExperimental));
-    ASSERT_FALSE(
-        instance.HasWGSLLanguageFeature(wgpu::WGSLFeatureName::ChromiumTestingUnimplemented));
+    ASSERT_FALSE(instance.HasWGSLLanguageFeature(
+        wgpu::WGSLLanguageFeatureName::ChromiumTestingUnsafeExperimental));
+    ASSERT_FALSE(instance.HasWGSLLanguageFeature(
+        wgpu::WGSLLanguageFeatureName::ChromiumTestingUnimplemented));
 
     // Non-existent features are not present.
     ASSERT_FALSE(instance.HasWGSLLanguageFeature(kNonExistentFeature));
@@ -136,17 +138,18 @@ TEST_F(WGSLFeatureValidationTest, HasFeatureAllowUnsafeInstance) {
     SetUp({.allowUnsafeAPIs = true});
 
     // Shipped and experimental features are present.
-    ASSERT_TRUE(instance.HasWGSLLanguageFeature(wgpu::WGSLFeatureName::ChromiumTestingShipped));
+    ASSERT_TRUE(
+        instance.HasWGSLLanguageFeature(wgpu::WGSLLanguageFeatureName::ChromiumTestingShipped));
     ASSERT_TRUE(instance.HasWGSLLanguageFeature(
-        wgpu::WGSLFeatureName::ChromiumTestingShippedWithKillswitch));
-    ASSERT_TRUE(
-        instance.HasWGSLLanguageFeature(wgpu::WGSLFeatureName::ChromiumTestingExperimental));
-    ASSERT_TRUE(
-        instance.HasWGSLLanguageFeature(wgpu::WGSLFeatureName::ChromiumTestingUnsafeExperimental));
+        wgpu::WGSLLanguageFeatureName::ChromiumTestingShippedWithKillswitch));
+    ASSERT_TRUE(instance.HasWGSLLanguageFeature(
+        wgpu::WGSLLanguageFeatureName::ChromiumTestingExperimental));
+    ASSERT_TRUE(instance.HasWGSLLanguageFeature(
+        wgpu::WGSLLanguageFeatureName::ChromiumTestingUnsafeExperimental));
 
     // Unimplemented features are not present.
-    ASSERT_FALSE(
-        instance.HasWGSLLanguageFeature(wgpu::WGSLFeatureName::ChromiumTestingUnimplemented));
+    ASSERT_FALSE(instance.HasWGSLLanguageFeature(
+        wgpu::WGSLLanguageFeatureName::ChromiumTestingUnimplemented));
 
     // Non-existent features are not present.
     ASSERT_FALSE(instance.HasWGSLLanguageFeature(kNonExistentFeature));
@@ -157,51 +160,47 @@ TEST_F(WGSLFeatureValidationTest, HasFeatureWithoutExposeWGSLTestingFeatures) {
     SetUp({.useTestingFeatures = false});
 
     // None of the testing features are present.
-    ASSERT_FALSE(instance.HasWGSLLanguageFeature(wgpu::WGSLFeatureName::ChromiumTestingShipped));
+    ASSERT_FALSE(
+        instance.HasWGSLLanguageFeature(wgpu::WGSLLanguageFeatureName::ChromiumTestingShipped));
     ASSERT_FALSE(instance.HasWGSLLanguageFeature(
-        wgpu::WGSLFeatureName::ChromiumTestingShippedWithKillswitch));
-    ASSERT_FALSE(
-        instance.HasWGSLLanguageFeature(wgpu::WGSLFeatureName::ChromiumTestingExperimental));
-    ASSERT_FALSE(
-        instance.HasWGSLLanguageFeature(wgpu::WGSLFeatureName::ChromiumTestingUnsafeExperimental));
-    ASSERT_FALSE(
-        instance.HasWGSLLanguageFeature(wgpu::WGSLFeatureName::ChromiumTestingUnimplemented));
+        wgpu::WGSLLanguageFeatureName::ChromiumTestingShippedWithKillswitch));
+    ASSERT_FALSE(instance.HasWGSLLanguageFeature(
+        wgpu::WGSLLanguageFeatureName::ChromiumTestingExperimental));
+    ASSERT_FALSE(instance.HasWGSLLanguageFeature(
+        wgpu::WGSLLanguageFeatureName::ChromiumTestingUnsafeExperimental));
+    ASSERT_FALSE(instance.HasWGSLLanguageFeature(
+        wgpu::WGSLLanguageFeatureName::ChromiumTestingUnimplemented));
 }
 
-// Tests for the behavior of WGSL feature enumeration.
-TEST_F(WGSLFeatureValidationTest, EnumerateFeatures) {
+// Tests for the behavior of getting WGSL language features.
+TEST_F(WGSLFeatureValidationTest, GetFeatures) {
     SetUp({});
 
-    size_t featureCount = instance.EnumerateWGSLLanguageFeatures(nullptr);
-
-    std::vector<wgpu::WGSLFeatureName> features(featureCount + 1, kNonExistentFeature);
-    size_t secondFeatureCount = instance.EnumerateWGSLLanguageFeatures(features.data());
+    wgpu::SupportedWGSLLanguageFeatures supportedFeatures = {};
+    ASSERT_EQ(wgpu::Status::Success, instance.GetWGSLLanguageFeatures(&supportedFeatures));
+    ASSERT_NE(0u, supportedFeatures.featureCount);
+    const wgpu::WGSLLanguageFeatureName* features = supportedFeatures.features;
 
     // Exactly featureCount features should be written, and all return true in HasWGSLFeature.
-    ASSERT_EQ(secondFeatureCount, featureCount);
-    for (size_t i = 0; i < featureCount; i++) {
+    for (size_t i = 0; i < supportedFeatures.featureCount; i++) {
         ASSERT_TRUE(instance.HasWGSLLanguageFeature(features[i]));
-        ASSERT_NE(kNonExistentFeature, features[i]);
     }
-    ASSERT_EQ(kNonExistentFeature, features[featureCount]);
 
     // Test the presence / absence of some known testing features.
+    const wgpu::WGSLLanguageFeatureName* begin = features;
+    const wgpu::WGSLLanguageFeatureName* end = features + supportedFeatures.featureCount;
+    ASSERT_NE(std::find(begin, end, wgpu::WGSLLanguageFeatureName::ChromiumTestingShipped), end);
     ASSERT_NE(
-        std::find(features.begin(), features.end(), wgpu::WGSLFeatureName::ChromiumTestingShipped),
-        features.end());
-    ASSERT_NE(std::find(features.begin(), features.end(),
-                        wgpu::WGSLFeatureName::ChromiumTestingShippedWithKillswitch),
-              features.end());
+        std::find(begin, end, wgpu::WGSLLanguageFeatureName::ChromiumTestingShippedWithKillswitch),
+        end);
 
-    ASSERT_EQ(std::find(features.begin(), features.end(),
-                        wgpu::WGSLFeatureName::ChromiumTestingUnimplemented),
-              features.end());
-    ASSERT_EQ(std::find(features.begin(), features.end(),
-                        wgpu::WGSLFeatureName::ChromiumTestingUnsafeExperimental),
-              features.end());
-    ASSERT_EQ(std::find(features.begin(), features.end(),
-                        wgpu::WGSLFeatureName::ChromiumTestingExperimental),
-              features.end());
+    ASSERT_EQ(std::find(begin, end, wgpu::WGSLLanguageFeatureName::ChromiumTestingUnimplemented),
+              end);
+    ASSERT_EQ(
+        std::find(begin, end, wgpu::WGSLLanguageFeatureName::ChromiumTestingUnsafeExperimental),
+        end);
+    ASSERT_EQ(std::find(begin, end, wgpu::WGSLLanguageFeatureName::ChromiumTestingExperimental),
+              end);
 }
 
 // Check that the enabled / disabled features are used to validate the WGSL shaders.
@@ -232,14 +231,15 @@ TEST_F(WGSLFeatureValidationTest, BlockListOfKillswitchedFeatures) {
 
     // The blocklisted feature is not present.
     ASSERT_FALSE(instance.HasWGSLLanguageFeature(
-        wgpu::WGSLFeatureName::ChromiumTestingShippedWithKillswitch));
+        wgpu::WGSLLanguageFeatureName::ChromiumTestingShippedWithKillswitch));
 
     // The others are.
-    ASSERT_TRUE(instance.HasWGSLLanguageFeature(wgpu::WGSLFeatureName::ChromiumTestingShipped));
     ASSERT_TRUE(
-        instance.HasWGSLLanguageFeature(wgpu::WGSLFeatureName::ChromiumTestingExperimental));
-    ASSERT_TRUE(
-        instance.HasWGSLLanguageFeature(wgpu::WGSLFeatureName::ChromiumTestingUnsafeExperimental));
+        instance.HasWGSLLanguageFeature(wgpu::WGSLLanguageFeatureName::ChromiumTestingShipped));
+    ASSERT_TRUE(instance.HasWGSLLanguageFeature(
+        wgpu::WGSLLanguageFeatureName::ChromiumTestingExperimental));
+    ASSERT_TRUE(instance.HasWGSLLanguageFeature(
+        wgpu::WGSLLanguageFeatureName::ChromiumTestingUnsafeExperimental));
 
     // Using the blocklisted extension fails.
     ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(
@@ -254,11 +254,12 @@ TEST_F(WGSLFeatureValidationTest, BlockListOfAnyFeature) {
                          "chromium_testing_unsafe_experimental"}});
 
     // All blocklisted features aren't present.
-    ASSERT_FALSE(instance.HasWGSLLanguageFeature(wgpu::WGSLFeatureName::ChromiumTestingShipped));
     ASSERT_FALSE(
-        instance.HasWGSLLanguageFeature(wgpu::WGSLFeatureName::ChromiumTestingExperimental));
-    ASSERT_FALSE(
-        instance.HasWGSLLanguageFeature(wgpu::WGSLFeatureName::ChromiumTestingUnsafeExperimental));
+        instance.HasWGSLLanguageFeature(wgpu::WGSLLanguageFeatureName::ChromiumTestingShipped));
+    ASSERT_FALSE(instance.HasWGSLLanguageFeature(
+        wgpu::WGSLLanguageFeatureName::ChromiumTestingExperimental));
+    ASSERT_FALSE(instance.HasWGSLLanguageFeature(
+        wgpu::WGSLLanguageFeatureName::ChromiumTestingUnsafeExperimental));
 }
 
 // Test that DawnWGSLBlocklist can contain garbage names without causing problems.

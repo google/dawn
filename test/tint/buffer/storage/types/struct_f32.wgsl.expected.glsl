@@ -16,11 +16,11 @@ struct S {
 };
 
 layout(binding = 0, std430)
-buffer tint_symbol_block_1_ssbo {
+buffer in_block_1_ssbo {
   S inner;
 } v;
 layout(binding = 1, std430)
-buffer tint_symbol_1_block_1_ssbo {
+buffer out_block_1_ssbo {
   S inner;
 } v_1;
 void tint_store_and_preserve_padding_1(Inner value_param) {

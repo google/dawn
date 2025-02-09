@@ -95,7 +95,7 @@ class Disassembler {
     const std::shared_ptr<Source::File>& File() const { return file_; }
 
     /// @returns the disassembled name for the Type @p ty
-    StyledText NameOf(const type::Type* ty);
+    StyledText NameOf(const core::type::Type* ty);
 
     /// @returns the disassembled name for the Block @p blk
     StyledText NameOf(const Block* blk);

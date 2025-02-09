@@ -50,5 +50,16 @@ tint_add_target(tint_lang_hlsl lib
 )
 
 tint_target_add_dependencies(tint_lang_hlsl lib
-  tint_utils_traits
+  tint_lang_core_ir
+  tint_lang_core_type
+  tint_utils_containers
+  tint_utils_ice
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_rtti
+)
+
+tint_target_add_external_dependencies(tint_lang_hlsl lib
+  "src_utils"
 )

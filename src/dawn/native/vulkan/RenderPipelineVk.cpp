@@ -33,6 +33,7 @@
 #include <vector>
 
 #include "dawn/native/CreatePipelineAsyncEvent.h"
+#include "dawn/native/ImmediateConstantsLayout.h"
 #include "dawn/native/vulkan/DeviceVk.h"
 #include "dawn/native/vulkan/FencedDeleter.h"
 #include "dawn/native/vulkan/PipelineCacheVk.h"
@@ -54,7 +55,6 @@ VkVertexInputRate VulkanInputRate(wgpu::VertexStepMode stepMode) {
             return VK_VERTEX_INPUT_RATE_VERTEX;
         case wgpu::VertexStepMode::Instance:
             return VK_VERTEX_INPUT_RATE_INSTANCE;
-        case wgpu::VertexStepMode::VertexBufferNotUsed:
         case wgpu::VertexStepMode::Undefined:
             break;
     }
@@ -346,7 +346,12 @@ VkStencilOp VulkanStencilOp(wgpu::StencilOperation op) {
 Ref<RenderPipeline> RenderPipeline::CreateUninitialized(
     Device* device,
     const UnpackedPtr<RenderPipelineDescriptor>& descriptor) {
-    return AcquireRef(new RenderPipeline(device, descriptor));
+    // Possible required internal immediate constants for RenderPipelineVk:
+    // - ClampFragDepth
+    const ImmediateConstantMask requiredInternalConstants = GetImmediateConstantBlockBits(
+        offsetof(RenderImmediateConstants, clampFragDepth), sizeof(ClampFragDepthArgs));
+
+    return AcquireRef(new RenderPipeline(device, descriptor, requiredInternalConstants));
 }
 
 MaybeError RenderPipeline::InitializeImpl() {
@@ -355,6 +360,17 @@ MaybeError RenderPipeline::InitializeImpl() {
 
     // Vulkan devices need cache UUID field to be serialized into pipeline cache keys.
     StreamIn(&mCacheKey, device->GetDeviceInfo().properties.pipelineCacheUUID);
+
+    // Set immediate constant status
+    mPipelineMask |=
+        GetImmediateConstantBlockBits(offsetof(RenderImmediateConstants, userConstants),
+                                      GetLayout()->GetImmediateDataRangeByteSize());
+
+    // Gather list of internal immediate constants used by this pipeline
+    if (UsesFragDepth() && !HasUnclippedDepth()) {
+        mPipelineMask |= GetImmediateConstantBlockBits(
+            offsetof(RenderImmediateConstants, clampFragDepth), sizeof(ClampFragDepthArgs));
+    }
 
     // There are at most 2 shader stages in render pipeline, i.e. vertex and fragment
     std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages;
@@ -367,8 +383,7 @@ MaybeError RenderPipeline::InitializeImpl() {
         ShaderModule::ModuleAndSpirv moduleAndSpirv;
         DAWN_TRY_ASSIGN(moduleAndSpirv, ToBackend(programmableStage.module)
                                             ->GetHandleAndSpirv(stage, programmableStage, layout,
-                                                                clampFragDepth, emitPointSize,
-                                                                /* fullSubgroups */ {}));
+                                                                clampFragDepth, emitPointSize));
         mHasInputAttachment = mHasInputAttachment || moduleAndSpirv.hasInputAttachment;
         // Record cache key for each shader since it will become inaccessible later on.
         StreamIn(&mCacheKey, stream::Iterable(moduleAndSpirv.spirv, moduleAndSpirv.wordCount));
@@ -380,7 +395,7 @@ MaybeError RenderPipeline::InitializeImpl() {
         shaderStage->flags = 0;
         shaderStage->pSpecializationInfo = nullptr;
         shaderStage->stage = vkStage;
-        shaderStageEntryPoints[stageCount] = moduleAndSpirv.remappedEntryPoint;
+        shaderStageEntryPoints[stageCount] = kRemappedEntryPointName;
         shaderStage->pName = shaderStageEntryPoints[stageCount].c_str();
 
         stageCount++;

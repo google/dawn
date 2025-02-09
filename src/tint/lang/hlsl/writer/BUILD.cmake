@@ -48,8 +48,6 @@ if(TINT_BUILD_HLSL_WRITER)
 # Condition: TINT_BUILD_HLSL_WRITER
 ################################################################################
 tint_add_target(tint_lang_hlsl_writer lib
-  lang/hlsl/writer/output.cc
-  lang/hlsl/writer/output.h
   lang/hlsl/writer/writer.cc
   lang/hlsl/writer/writer.h
 )
@@ -69,20 +67,17 @@ tint_target_add_dependencies(tint_lang_hlsl_writer lib
   tint_lang_wgsl_features
   tint_lang_wgsl_program
   tint_lang_wgsl_sem
+  tint_utils
   tint_utils_containers
   tint_utils_diagnostic
-  tint_utils_generator
   tint_utils_ice
-  tint_utils_id
   tint_utils_macros
   tint_utils_math
   tint_utils_memory
-  tint_utils_reflection
   tint_utils_result
   tint_utils_rtti
   tint_utils_symbol
   tint_utils_text
-  tint_utils_traits
 )
 
 tint_target_add_external_dependencies(tint_lang_hlsl_writer lib
@@ -119,6 +114,7 @@ tint_add_target(tint_lang_hlsl_writer_test test
   lang/hlsl/writer/switch_test.cc
   lang/hlsl/writer/unary_test.cc
   lang/hlsl/writer/var_let_test.cc
+  lang/hlsl/writer/writer_test.cc
 )
 
 tint_target_add_dependencies(tint_lang_hlsl_writer_test test
@@ -130,20 +126,18 @@ tint_target_add_dependencies(tint_lang_hlsl_writer_test test
   tint_lang_core_type
   tint_lang_hlsl_writer_common
   tint_lang_wgsl_ast
+  tint_utils
   tint_utils_command
   tint_utils_containers
   tint_utils_diagnostic
   tint_utils_ice
-  tint_utils_id
   tint_utils_macros
   tint_utils_math
   tint_utils_memory
-  tint_utils_reflection
   tint_utils_result
   tint_utils_rtti
   tint_utils_symbol
   tint_utils_text
-  tint_utils_traits
 )
 
 tint_target_add_external_dependencies(tint_lang_hlsl_writer_test test
@@ -173,25 +167,27 @@ tint_target_add_dependencies(tint_lang_hlsl_writer_bench bench
   tint_api_common
   tint_lang_core
   tint_lang_core_constant
+  tint_lang_core_ir
   tint_lang_core_type
   tint_lang_hlsl_writer_common
+  tint_lang_hlsl_writer_helpers
   tint_lang_wgsl
   tint_lang_wgsl_ast
+  tint_lang_wgsl_common
+  tint_lang_wgsl_features
   tint_lang_wgsl_program
   tint_lang_wgsl_sem
+  tint_utils
   tint_utils_containers
   tint_utils_diagnostic
   tint_utils_ice
-  tint_utils_id
   tint_utils_macros
   tint_utils_math
   tint_utils_memory
-  tint_utils_reflection
   tint_utils_result
   tint_utils_rtti
   tint_utils_symbol
   tint_utils_text
-  tint_utils_traits
 )
 
 tint_target_add_external_dependencies(tint_lang_hlsl_writer_bench bench
@@ -208,6 +204,7 @@ endif(TINT_BUILD_HLSL_WRITER)
 if(TINT_BUILD_WGSL_READER)
   tint_target_add_dependencies(tint_lang_hlsl_writer_bench bench
     tint_cmd_bench_bench
+    tint_lang_wgsl_reader
   )
 endif(TINT_BUILD_WGSL_READER)
 
@@ -219,35 +216,37 @@ if(TINT_BUILD_HLSL_WRITER)
 # Condition: TINT_BUILD_HLSL_WRITER
 ################################################################################
 tint_add_target(tint_lang_hlsl_writer_fuzz fuzz
+  lang/hlsl/writer/writer_fuzz.cc
 )
 
 tint_target_add_dependencies(tint_lang_hlsl_writer_fuzz fuzz
   tint_api_common
+  tint_cmd_fuzz_ir_fuzz
   tint_lang_core
   tint_lang_core_constant
+  tint_lang_core_ir
   tint_lang_core_type
   tint_lang_hlsl_writer_common
+  tint_lang_hlsl_writer_helpers
   tint_lang_wgsl
   tint_lang_wgsl_ast
   tint_lang_wgsl_ast_transform
   tint_lang_wgsl_features
   tint_lang_wgsl_program
   tint_lang_wgsl_sem
+  tint_utils
   tint_utils_bytes
   tint_utils_command
   tint_utils_containers
   tint_utils_diagnostic
   tint_utils_ice
-  tint_utils_id
   tint_utils_macros
   tint_utils_math
   tint_utils_memory
-  tint_utils_reflection
   tint_utils_result
   tint_utils_rtti
   tint_utils_symbol
   tint_utils_text
-  tint_utils_traits
 )
 
 tint_target_add_external_dependencies(tint_lang_hlsl_writer_fuzz fuzz

@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 RWByteAddressBuffer prevent_dce : register(u0);
 
 uint3 subgroupMax_23f502() {
@@ -9,6 +12,16 @@ uint3 subgroupMax_23f502() {
 void fragment_main() {
   prevent_dce.Store3(0u, asuint(subgroupMax_23f502()));
   return;
+}
+//
+// compute_main
+//
+RWByteAddressBuffer prevent_dce : register(u0);
+
+uint3 subgroupMax_23f502() {
+  uint3 arg_0 = (1u).xxx;
+  uint3 res = WaveActiveMax(arg_0);
+  return res;
 }
 
 [numthreads(1, 1, 1)]

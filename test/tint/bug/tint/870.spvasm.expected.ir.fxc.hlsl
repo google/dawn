@@ -25,12 +25,12 @@ ary_ret v(uint offset) {
 void main_1() {
   int orientation[6] = (int[6])0;
   int x_23[6] = v(36u);
-  orientation[int(0)] = x_23[0u];
-  orientation[int(1)] = x_23[1u];
-  orientation[int(2)] = x_23[2u];
-  orientation[int(3)] = x_23[3u];
-  orientation[int(4)] = x_23[4u];
-  orientation[int(5)] = x_23[5u];
+  orientation[0u] = x_23[0u];
+  orientation[1u] = x_23[1u];
+  orientation[2u] = x_23[2u];
+  orientation[3u] = x_23[3u];
+  orientation[4u] = x_23[4u];
+  orientation[5u] = x_23[5u];
 }
 
 void main() {

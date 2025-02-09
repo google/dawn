@@ -1,3 +1,6 @@
+//
+// vert_main
+//
 struct tint_symbol_1 {
   float2 a_particlePos : TEXCOORD0;
   float2 a_particleVel : TEXCOORD1;
@@ -19,8 +22,10 @@ tint_symbol_2 vert_main(tint_symbol_1 tint_symbol) {
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
-
-struct tint_symbol_3 {
+//
+// frag_main
+//
+struct tint_symbol {
   float4 value : SV_Target0;
 };
 
@@ -28,20 +33,22 @@ float4 frag_main_inner() {
   return (1.0f).xxxx;
 }
 
-tint_symbol_3 frag_main() {
-  float4 inner_result_1 = frag_main_inner();
-  tint_symbol_3 wrapper_result_1 = (tint_symbol_3)0;
-  wrapper_result_1.value = inner_result_1;
-  return wrapper_result_1;
+tint_symbol frag_main() {
+  float4 inner_result = frag_main_inner();
+  tint_symbol wrapper_result = (tint_symbol)0;
+  wrapper_result.value = inner_result;
+  return wrapper_result;
 }
-
+//
+// comp_main
+//
 cbuffer cbuffer_params : register(b0) {
   uint4 params[2];
 };
 RWByteAddressBuffer particlesA : register(u1);
 RWByteAddressBuffer particlesB : register(u2);
 
-struct tint_symbol_5 {
+struct tint_symbol_1 {
   uint3 gl_GlobalInvocationID : SV_DispatchThreadID;
 };
 
@@ -50,8 +57,8 @@ void comp_main_inner(uint3 gl_GlobalInvocationID) {
   if ((index >= 5u)) {
     return;
   }
-  float2 vPos = asfloat(particlesA.Load2((16u * index)));
-  float2 vVel = asfloat(particlesA.Load2(((16u * index) + 8u)));
+  float2 vPos = asfloat(particlesA.Load2((16u * min(index, 4u))));
+  float2 vVel = asfloat(particlesA.Load2(((16u * min(index, 4u)) + 8u)));
   float2 cMass = (0.0f).xx;
   float2 cVel = (0.0f).xx;
   float2 colVel = (0.0f).xx;
@@ -64,8 +71,8 @@ void comp_main_inner(uint3 gl_GlobalInvocationID) {
       if ((i == index)) {
         continue;
       }
-      pos = asfloat(particlesA.Load2((16u * i))).xy;
-      vel = asfloat(particlesA.Load2(((16u * i) + 8u))).xy;
+      pos = asfloat(particlesA.Load2((16u * min(i, 4u)))).xy;
+      vel = asfloat(particlesA.Load2(((16u * min(i, 4u)) + 8u))).xy;
       if ((distance(pos, vPos) < asfloat(params[0].y))) {
         cMass = (cMass + pos);
         cMassCount = (cMassCount + 1);
@@ -100,12 +107,12 @@ void comp_main_inner(uint3 gl_GlobalInvocationID) {
   if ((vPos.y > 1.0f)) {
     vPos.y = -1.0f;
   }
-  particlesB.Store2((16u * index), asuint(vPos));
-  particlesB.Store2(((16u * index) + 8u), asuint(vVel));
+  particlesB.Store2((16u * min(index, 4u)), asuint(vPos));
+  particlesB.Store2(((16u * min(index, 4u)) + 8u), asuint(vVel));
 }
 
 [numthreads(1, 1, 1)]
-void comp_main(tint_symbol_5 tint_symbol_4) {
-  comp_main_inner(tint_symbol_4.gl_GlobalInvocationID);
+void comp_main(tint_symbol_1 tint_symbol) {
+  comp_main_inner(tint_symbol.gl_GlobalInvocationID);
   return;
 }

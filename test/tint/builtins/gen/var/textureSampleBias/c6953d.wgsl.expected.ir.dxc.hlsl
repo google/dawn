@@ -7,9 +7,8 @@ float4 textureSampleBias_c6953d() {
   uint arg_3 = 1u;
   float arg_4 = 1.0f;
   float3 v = arg_2;
-  uint v_1 = arg_3;
-  float v_2 = clamp(arg_4, -16.0f, 15.9899997711181640625f);
-  float4 res = arg_0.SampleBias(arg_1, float4(v, float(v_1)), v_2);
+  float v_1 = clamp(arg_4, -16.0f, 15.9899997711181640625f);
+  float4 res = arg_0.SampleBias(arg_1, float4(v, float(arg_3)), v_1);
   return res;
 }
 

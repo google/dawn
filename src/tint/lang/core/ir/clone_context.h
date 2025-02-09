@@ -31,7 +31,7 @@
 #include "src/tint/utils/containers/const_propagating_ptr.h"
 #include "src/tint/utils/containers/hashmap.h"
 #include "src/tint/utils/containers/transform.h"
-#include "src/tint/utils/traits/traits.h"
+#include "src/tint/utils/rtti/traits.h"
 
 namespace tint::core::ir {
 class Block;

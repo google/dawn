@@ -2,9 +2,7 @@
 
 vec3 u = vec3(1.0f);
 ivec3 tint_v3f32_to_v3i32(vec3 value) {
-  ivec3 v_1 = ivec3(value);
-  ivec3 v_2 = mix(ivec3((-2147483647 - 1)), v_1, greaterThanEqual(value, vec3(-2147483648.0f)));
-  return mix(ivec3(2147483647), v_2, lessThanEqual(value, vec3(2147483520.0f)));
+  return mix(ivec3(2147483647), mix(ivec3((-2147483647 - 1)), ivec3(value), greaterThanEqual(value, vec3(-2147483648.0f))), lessThanEqual(value, vec3(2147483520.0f)));
 }
 void f() {
   ivec3 v = tint_v3f32_to_v3i32(u);

@@ -63,12 +63,15 @@ class BuiltinCall final : public Castable<BuiltinCall, core::ir::BuiltinCall> {
     size_t FuncId() const override { return static_cast<size_t>(func_); }
 
     /// @returns the friendly name for the instruction
-    std::string FriendlyName() const override { return std::string("spirv.") + str(func_); }
+    std::string FriendlyName() const override;
 
     /// @returns the table data to validate this builtin
     const core::intrinsic::TableData& TableData() const override {
         return spirv::intrinsic::Dialect::kData;
     }
+
+    /// @returns an access information for the function
+    Accesses GetSideEffects() const override;
 
   private:
     BuiltinFn func_;

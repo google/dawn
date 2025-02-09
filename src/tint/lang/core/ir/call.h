@@ -28,7 +28,10 @@
 #ifndef SRC_TINT_LANG_CORE_IR_CALL_H_
 #define SRC_TINT_LANG_CORE_IR_CALL_H_
 
+#include <string>
+
 #include "src/tint/lang/core/ir/operand_instruction.h"
+#include "src/tint/lang/core/type/type.h"
 #include "src/tint/utils/rtti/castable.h"
 
 namespace tint::core::ir {
@@ -40,6 +43,15 @@ class Call : public Castable<Call, OperandInstruction<4, 1>> {
 
     /// @returns the offset of the arguments in Operands()
     virtual size_t ArgsOperandOffset() const { return 0; }
+
+    /// Sets the explicit template params for the call
+    void SetExplicitTemplateParams(VectorRef<const core::type::Type*> params) {
+        explicit_template_params_ = params;
+    }
+    /// Retrieves the explicit template params for the call
+    tint::VectorRef<const core::type::Type*> ExplicitTemplateParams() const {
+        return explicit_template_params_;
+    }
 
     /// @returns the call arguments
     tint::Slice<Value* const> Args() { return operands_.Slice().Offset(ArgsOperandOffset()); }
@@ -57,9 +69,14 @@ class Call : public Castable<Call, OperandInstruction<4, 1>> {
     /// @param arg the argument value to append
     void AppendArg(ir::Value* arg) { AddOperand(operands_.Length(), arg); }
 
+    /// @returns the side effects for this instruction
+    Accesses GetSideEffects() const override { return Accesses{Access::kLoad, Access::kStore}; }
+
   protected:
     /// Constructor
     explicit Call(Id id);
+
+    Vector<const core::type::Type*, 1> explicit_template_params_;
 };
 
 }  // namespace tint::core::ir

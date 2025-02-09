@@ -34,6 +34,7 @@
 #include "src/tint/lang/core/address_space.h"
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/number.h"
+#include "src/tint/lang/core/texel_format.h"
 #include "src/tint/lang/core/type/atomic.h"
 #include "src/tint/lang/core/type/external_texture.h"
 #include "src/tint/lang/core/type/sampler.h"
@@ -49,17 +50,21 @@ namespace tint::core::type {
 class AbstractFloat;
 class AbstractInt;
 class Array;
+class BindingArray;
 class Bool;
 class F16;
 class F32;
+class Function;
 class I8;
 class I32;
 class Invalid;
 class Matrix;
 class Pointer;
 class Reference;
+class StorageTexture;
 class U8;
 class U32;
+class U64;
 class Vector;
 class Void;
 }  // namespace tint::core::type
@@ -147,6 +152,8 @@ class Manager final {
             return Get<core::type::U8>(std::forward<ARGS>(args)...);
         } else if constexpr (std::is_same_v<T, tint::core::u32>) {
             return Get<core::type::U32>(std::forward<ARGS>(args)...);
+        } else if constexpr (std::is_same_v<T, tint::core::u64>) {
+            return Get<core::type::U64>(std::forward<ARGS>(args)...);
         } else if constexpr (std::is_same_v<T, tint::core::f32>) {
             return Get<core::type::F32>(std::forward<ARGS>(args)...);
         } else if constexpr (std::is_same_v<T, tint::core::f16>) {
@@ -187,6 +194,9 @@ class Manager final {
     /// @returns an invalid type
     const core::type::Invalid* invalid();
 
+    /// @returns an function type
+    const core::type::Function* function();
+
     /// @returns a void type
     const core::type::Void* void_();
 
@@ -204,6 +214,9 @@ class Manager final {
 
     /// @returns a u32 type
     const core::type::U32* u32();
+
+    /// @returns a u64 type
+    const core::type::U64* u64();
 
     /// @returns an f32 type
     const core::type::F32* f32();
@@ -249,6 +262,14 @@ class Manager final {
     /// @param inner the inner type
     /// @returns a vec4 type with the element type @p inner
     const core::type::Vector* vec4(const core::type::Type* inner);
+
+    /// @param dim the dimensionality of the texture
+    /// @param format the texel format of the texture
+    /// @param access the access control type of the texture
+    /// @returns a storage texture type with the provided params
+    const core::type::StorageTexture* storage_texture(TextureDimension dim,
+                                                      core::TexelFormat format,
+                                                      core::Access access);
 
     /// Return a type with element type `el_ty` that has the same number of vector components as
     /// `match`. If `match` is scalar just return `el_ty`.
@@ -435,50 +456,50 @@ class Manager final {
 
     /// @param kind the subgroup matrix kind
     /// @param inner the inner type
-    /// @param rows the number of rows
     /// @param cols the number of columns
+    /// @param rows the number of rows
     /// @returns the subgroup_matrix type
     const core::type::SubgroupMatrix* subgroup_matrix(SubgroupMatrixKind kind,
                                                       const core::type::Type* inner,
-                                                      uint32_t rows,
-                                                      uint32_t cols);
+                                                      uint32_t cols,
+                                                      uint32_t rows);
 
     /// @param inner the inner type
-    /// @param rows the number of rows
     /// @param cols the number of columns
+    /// @param rows the number of rows
     /// @returns the subgroup_matrix type
     const core::type::SubgroupMatrix* subgroup_matrix_left(const core::type::Type* inner,
-                                                           uint32_t rows,
-                                                           uint32_t cols) {
-        return subgroup_matrix(SubgroupMatrixKind::kLeft, inner, rows, cols);
+                                                           uint32_t cols,
+                                                           uint32_t rows) {
+        return subgroup_matrix(SubgroupMatrixKind::kLeft, inner, cols, rows);
     }
 
     /// @param inner the inner type
-    /// @param rows the number of rows
     /// @param cols the number of columns
+    /// @param rows the number of rows
     /// @returns the subgroup_matrix type
     const core::type::SubgroupMatrix* subgroup_matrix_right(const core::type::Type* inner,
-                                                            uint32_t rows,
-                                                            uint32_t cols) {
-        return subgroup_matrix(SubgroupMatrixKind::kRight, inner, rows, cols);
+                                                            uint32_t cols,
+                                                            uint32_t rows) {
+        return subgroup_matrix(SubgroupMatrixKind::kRight, inner, cols, rows);
     }
 
     /// @param inner the inner type
-    /// @param rows the number of rows
     /// @param cols the number of columns
+    /// @param rows the number of rows
     /// @returns the subgroup_matrix type
     const core::type::SubgroupMatrix* subgroup_matrix_result(const core::type::Type* inner,
-                                                             uint32_t rows,
-                                                             uint32_t cols) {
-        return subgroup_matrix(SubgroupMatrixKind::kResult, inner, rows, cols);
+                                                             uint32_t cols,
+                                                             uint32_t rows) {
+        return subgroup_matrix(SubgroupMatrixKind::kResult, inner, cols, rows);
     }
 
     /// @tparam K the kind of the matrix
     /// @tparam T the element type
-    /// @tparam R the number of rows in the matrix
     /// @tparam C the number of columns in the matrix
+    /// @tparam R the number of rows in the matrix
     /// @returns a matrix with the given number of columns and rows
-    template <SubgroupMatrixKind K, typename T, uint32_t R, uint32_t C>
+    template <SubgroupMatrixKind K, typename T, uint32_t C, uint32_t R>
     const core::type::SubgroupMatrix* subgroup_matrix() {
         return subgroup_matrix(K, Get<T>(), C, R);
     }
@@ -508,6 +529,11 @@ class Manager final {
             return array(Get<T>(), N, stride);
         }
     }
+
+    /// @param elem_ty the array element type
+    /// @param count the array element count
+    /// @returns the array type
+    const core::type::BindingArray* binding_array(const core::type::Type* elem_ty, uint32_t count);
 
     /// @param address_space the address space
     /// @param subtype the pointer subtype

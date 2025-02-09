@@ -66,10 +66,10 @@ def main():
     if len(args) != 3:
         parser.error("incorrect number of arguments")
 
-    ir_fuzz_as: str = os.path.abspath(args[0])
-    if not os.path.isfile(ir_fuzz_as) or not os.access(ir_fuzz_as, os.X_OK):
-        parser.error("Unable to run ir_fuzz_as cmd '" +
-                     os.path.abspath(args[0]) + "' (" + ir_fuzz_as + ")")
+    # Look for ir_fuzz_as in current directory, and make sure it exists and is executable
+    ir_fuzz_as: str = shutil.which(args[0], mode=os.F_OK | os.X_OK, path='.')
+    if not ir_fuzz_as:
+        parser.error("Unable to run ir_fuzz_as cmd: " + args[0])
 
     input_dir: str = os.path.abspath(args[1].rstrip(os.sep))
     output_dir: str = os.path.abspath(args[2])

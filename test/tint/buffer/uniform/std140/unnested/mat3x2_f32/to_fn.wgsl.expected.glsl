@@ -15,8 +15,8 @@ void c(float f_1) {
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   a(mat3x2(v_1.inner_col0, v_1.inner_col1, v_1.inner_col2));
-  b(mat3x2(v_1.inner_col0, v_1.inner_col1, v_1.inner_col2)[1]);
-  b(mat3x2(v_1.inner_col0, v_1.inner_col1, v_1.inner_col2)[1].yx);
-  c(mat3x2(v_1.inner_col0, v_1.inner_col1, v_1.inner_col2)[1][0u]);
-  c(mat3x2(v_1.inner_col0, v_1.inner_col1, v_1.inner_col2)[1].yx[0u]);
+  b(mat3x2(v_1.inner_col0, v_1.inner_col1, v_1.inner_col2)[1u]);
+  b(mat3x2(v_1.inner_col0, v_1.inner_col1, v_1.inner_col2)[1u].yx);
+  c(mat3x2(v_1.inner_col0, v_1.inner_col1, v_1.inner_col2)[1u].x);
+  c(mat3x2(v_1.inner_col0, v_1.inner_col1, v_1.inner_col2)[1u].yx.x);
 }

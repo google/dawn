@@ -1,9 +1,10 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 60
+; Bound: 71
 ; Schema: 0
                OpCapability Shader
+         %31 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
@@ -39,12 +40,14 @@
          %23 = OpTypeFunction %void
 %_ptr_Function_int = OpTypePointer Function %int
       %int_0 = OpConstant %int 0
+     %uint_1 = OpConstant %uint 1
 %_ptr_Private_float = OpTypePointer Private %float
     %float_1 = OpConstant %float 1
+     %uint_2 = OpConstant %uint 2
 %_ptr_Private_int = OpTypePointer Private %int
       %int_1 = OpConstant %int 1
+     %uint_3 = OpConstant %uint 3
 %_ptr_Private_uint = OpTypePointer Private %uint
-     %uint_1 = OpConstant %uint 1
 %_ptr_Private_bool = OpTypePointer Private %bool
        %true = OpConstantTrue %bool
       %int_2 = OpConstant %int 2
@@ -53,44 +56,52 @@
           %i = OpVariable %_ptr_Function_int Function
                OpStore %i %int_0
          %28 = OpLoad %int %i None
-         %29 = OpAccessChain %_ptr_Private_float %v2f %28
-               OpStore %29 %float_1 None
-         %32 = OpLoad %int %i None
-         %33 = OpAccessChain %_ptr_Private_int %v3i %32
-               OpStore %33 %int_1 None
+         %29 = OpBitcast %uint %28
+         %30 = OpExtInst %uint %31 UMin %29 %uint_1
+         %33 = OpAccessChain %_ptr_Private_float %v2f %30
+               OpStore %33 %float_1 None
          %36 = OpLoad %int %i None
-         %37 = OpAccessChain %_ptr_Private_uint %v4u %36
-               OpStore %37 %uint_1 None
-         %40 = OpLoad %int %i None
-         %41 = OpAccessChain %_ptr_Private_bool %v2b %40
-               OpStore %41 %true None
+         %37 = OpBitcast %uint %36
+         %38 = OpExtInst %uint %31 UMin %37 %uint_2
+         %40 = OpAccessChain %_ptr_Private_int %v3i %38
+               OpStore %40 %int_1 None
+         %43 = OpLoad %int %i None
+         %44 = OpBitcast %uint %43
+         %45 = OpExtInst %uint %31 UMin %44 %uint_3
+         %47 = OpAccessChain %_ptr_Private_uint %v4u %45
+               OpStore %47 %uint_1 None
+         %49 = OpLoad %int %i None
+         %50 = OpBitcast %uint %49
+         %51 = OpExtInst %uint %31 UMin %50 %uint_1
+         %52 = OpAccessChain %_ptr_Private_bool %v2b %51
+               OpStore %52 %true None
                OpReturn
                OpFunctionEnd
        %main = OpFunction %void None %23
-         %45 = OpLabel
-        %i_0 = OpVariable %_ptr_Function_int Function
-               OpBranch %46
-         %46 = OpLabel
-               OpStore %i_0 %int_0
-               OpBranch %49
-         %49 = OpLabel
-               OpLoopMerge %50 %48 None
-               OpBranch %47
-         %47 = OpLabel
-         %52 = OpLoad %int %i_0 None
-         %53 = OpSLessThan %bool %52 %int_2
-               OpSelectionMerge %55 None
-               OpBranchConditional %53 %55 %56
          %56 = OpLabel
-               OpBranch %50
-         %55 = OpLabel
-         %57 = OpFunctionCall %void %foo
-               OpBranch %48
-         %48 = OpLabel
-         %58 = OpLoad %int %i_0 None
-         %59 = OpIAdd %int %58 %int_1
-               OpStore %i_0 %59 None
-               OpBranch %49
-         %50 = OpLabel
+        %i_0 = OpVariable %_ptr_Function_int Function
+               OpBranch %57
+         %57 = OpLabel
+               OpStore %i_0 %int_0
+               OpBranch %60
+         %60 = OpLabel
+               OpLoopMerge %61 %59 None
+               OpBranch %58
+         %58 = OpLabel
+         %63 = OpLoad %int %i_0 None
+         %64 = OpSLessThan %bool %63 %int_2
+               OpSelectionMerge %66 None
+               OpBranchConditional %64 %66 %67
+         %67 = OpLabel
+               OpBranch %61
+         %66 = OpLabel
+         %68 = OpFunctionCall %void %foo
+               OpBranch %59
+         %59 = OpLabel
+         %69 = OpLoad %int %i_0 None
+         %70 = OpIAdd %int %69 %int_1
+               OpStore %i_0 %70 None
+               OpBranch %60
+         %61 = OpLabel
                OpReturn
                OpFunctionEnd

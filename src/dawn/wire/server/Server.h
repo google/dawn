@@ -129,7 +129,6 @@ struct MapUserdata : CallbackUserdata {
     uint64_t offset;
     uint64_t size;
     WGPUMapMode mode;
-    uint8_t userdataCount;
 };
 
 struct ErrorScopeUserdata : CallbackUserdata {
@@ -238,6 +237,17 @@ class Server : public ServerBase {
         return result;
     }
 
+    // Wrapper RAII helper for structs with FreeMember calls.
+    template <typename Struct>
+    class FreeMembers : public Struct {
+      public:
+        explicit FreeMembers(const DawnProcTable& procs) : Struct({}), mProcs(procs) {}
+        ~FreeMembers() { (mProcs.*WGPUTraits<Struct>::FreeMembers)(*this); }
+
+      private:
+        const DawnProcTable& mProcs;
+    };
+
     void SetForwardingDeviceCallbacks(Known<WGPUDevice> device);
     void ClearDeviceCallbacks(WGPUDevice device);
 
@@ -254,10 +264,9 @@ class Server : public ServerBase {
                                WGPUPopErrorScopeStatus status,
                                WGPUErrorType type,
                                WGPUStringView message);
-    void OnBufferMapAsyncCallback(MapUserdata* userdata, WGPUBufferMapAsyncStatus status);
-    void OnBufferMapAsyncCallback2(MapUserdata* userdata,
-                                   WGPUMapAsyncStatus status,
-                                   WGPUStringView message);
+    void OnBufferMapAsyncCallback(MapUserdata* userdata,
+                                  WGPUMapAsyncStatus status,
+                                  WGPUStringView message);
     void OnQueueWorkDone(QueueWorkDoneUserdata* userdata, WGPUQueueWorkDoneStatus status);
     void OnCreateComputePipelineAsyncCallback(CreatePipelineAsyncUserData* userdata,
                                               WGPUCreatePipelineAsyncStatus status,

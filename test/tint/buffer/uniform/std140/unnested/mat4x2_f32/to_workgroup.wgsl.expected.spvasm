@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 61
+; Bound: 58
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -39,25 +39,22 @@
 %f_local_invocation_index_Input = OpVariable %_ptr_Input_uint Input
        %void = OpTypeVoid
          %15 = OpTypeFunction %void %uint
-     %uint_0 = OpConstant %uint 0
+     %uint_1 = OpConstant %uint 1
        %bool = OpTypeBool
          %22 = OpConstantNull %mat4v2float
      %uint_2 = OpConstant %uint 2
    %uint_264 = OpConstant %uint 264
 %_ptr_Uniform_v2float = OpTypePointer Uniform %v2float
-     %uint_1 = OpConstant %uint 1
+     %uint_0 = OpConstant %uint 0
      %uint_3 = OpConstant %uint 3
 %_ptr_Workgroup_v2float = OpTypePointer Workgroup %v2float
-        %int = OpTypeInt 32 1
-      %int_1 = OpConstant %int 1
-      %int_0 = OpConstant %int 0
 %_ptr_Uniform_float = OpTypePointer Uniform %float
 %_ptr_Workgroup_float = OpTypePointer Workgroup %float
-         %57 = OpTypeFunction %void
+         %54 = OpTypeFunction %void
     %f_inner = OpFunction %void None %15
 %tint_local_index = OpFunctionParameter %uint
          %16 = OpLabel
-         %17 = OpIEqual %bool %tint_local_index %uint_0
+         %17 = OpULessThan %bool %tint_local_index %uint_1
                OpSelectionMerge %20 None
                OpBranchConditional %17 %21 %20
          %21 = OpLabel
@@ -66,35 +63,35 @@
          %20 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
          %26 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_0
-         %28 = OpLoad %v2float %26 None
-         %29 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_1
-         %31 = OpLoad %v2float %29 None
+         %29 = OpLoad %v2float %26 None
+         %30 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_1
+         %31 = OpLoad %v2float %30 None
          %32 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_2
          %33 = OpLoad %v2float %32 None
          %34 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_3
          %36 = OpLoad %v2float %34 None
-         %37 = OpCompositeConstruct %mat4v2float %28 %31 %33 %36
+         %37 = OpCompositeConstruct %mat4v2float %29 %31 %33 %36
                OpStore %w %37 None
-         %38 = OpAccessChain %_ptr_Workgroup_v2float %w %int_1
-         %42 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_0
-         %43 = OpLoad %v2float %42 None
-               OpStore %38 %43 None
-         %44 = OpAccessChain %_ptr_Workgroup_v2float %w %int_1
-         %45 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_0
-         %46 = OpLoad %v2float %45 None
-         %47 = OpVectorShuffle %v2float %46 %46 1 0
-               OpStore %44 %47 None
-         %48 = OpAccessChain %_ptr_Workgroup_v2float %w %int_0
-         %50 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_1
-         %51 = OpAccessChain %_ptr_Uniform_float %50 %int_0
-         %53 = OpLoad %float %51 None
-         %54 = OpAccessChain %_ptr_Workgroup_float %48 %int_1
-               OpStore %54 %53 None
+         %38 = OpAccessChain %_ptr_Workgroup_v2float %w %uint_1
+         %40 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_0
+         %41 = OpLoad %v2float %40 None
+               OpStore %38 %41 None
+         %42 = OpAccessChain %_ptr_Workgroup_v2float %w %uint_1
+         %43 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_0
+         %44 = OpLoad %v2float %43 None
+         %45 = OpVectorShuffle %v2float %44 %44 1 0
+               OpStore %42 %45 None
+         %46 = OpAccessChain %_ptr_Workgroup_v2float %w %uint_0
+         %47 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_1
+         %48 = OpAccessChain %_ptr_Uniform_float %47 %uint_0
+         %50 = OpLoad %float %48 None
+         %51 = OpAccessChain %_ptr_Workgroup_float %46 %uint_1
+               OpStore %51 %50 None
                OpReturn
                OpFunctionEnd
-          %f = OpFunction %void None %57
-         %58 = OpLabel
-         %59 = OpLoad %uint %f_local_invocation_index_Input None
-         %60 = OpFunctionCall %void %f_inner %59
+          %f = OpFunction %void None %54
+         %55 = OpLabel
+         %56 = OpLoad %uint %f_local_invocation_index_Input None
+         %57 = OpFunctionCall %void %f_inner %56
                OpReturn
                OpFunctionEnd

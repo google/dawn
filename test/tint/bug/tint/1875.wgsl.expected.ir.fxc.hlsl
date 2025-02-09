@@ -2,7 +2,9 @@
 static uint count = 0u;
 RWByteAddressBuffer outputs : register(u1);
 void push_output(uint value) {
-  outputs.Store((0u + (uint(count) * 4u)), value);
+  uint v = 0u;
+  outputs.GetDimensions(v);
+  outputs.Store((0u + (min(count, ((v / 4u) - 1u)) * 4u)), value);
   count = (count + 1u);
 }
 

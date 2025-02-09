@@ -11,6 +11,6 @@ str func(inout str pointer) {
 
 [numthreads(1, 1, 1)]
 void main() {
-  str r = func(P[int(2)]);
+  str r = func(P[2u]);
 }
 

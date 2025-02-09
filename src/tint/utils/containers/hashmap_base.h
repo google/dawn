@@ -39,7 +39,9 @@
 #include "src/tint/utils/math/hash.h"
 #include "src/tint/utils/math/math.h"
 #include "src/tint/utils/memory/aligned_storage.h"
-#include "src/tint/utils/traits/traits.h"
+#include "src/tint/utils/rtti/traits.h"
+
+TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 
 namespace tint {
 
@@ -680,5 +682,7 @@ class HashmapBase {
 };
 
 }  // namespace tint
+
+TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 
 #endif  // SRC_TINT_UTILS_CONTAINERS_HASHMAP_BASE_H_

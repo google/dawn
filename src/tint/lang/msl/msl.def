@@ -37,6 +37,7 @@
 
 import "src/tint/lang/core/access.def"
 import "src/tint/lang/core/address_space.def"
+import "src/tint/lang/core/subgroup_matrix_kind.def"
 import "src/tint/lang/core/texel_format.def"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -86,6 +87,7 @@ type bool
 type i32
 type i8
 type u32
+type u64
 type u8
 type f32
 type f16
@@ -114,12 +116,16 @@ type texture_storage_2d<F: texel_format, A: access>
 type texture_storage_2d_array<F: texel_format, A: access>
 type texture_storage_3d<F: texel_format, A: access>
 
+type subgroup_matrix<S: subgroup_matrix_kind, T, C: num, R: num>
+
 // sampling options types
 type bias
 type gradient2d
 type gradient3d
 type gradientcube
 type level
+
+type __packed_vec3<T>
 
 ////////////////////////////////////////////////////////////////////////////////
 // Type matchers                                                              //
@@ -130,6 +136,10 @@ match fiu32: f32 | i32 | u32
 match f32_f16: f32 | f16
 match fiu32_f16: f32 | i32 | u32 | f16
 match iu8: i8 | u8
+
+match subgroup_matrix_kind_left : subgroup_matrix_kind.left
+match subgroup_matrix_kind_right : subgroup_matrix_kind.right
+match subgroup_matrix_kind_result : subgroup_matrix_kind.result
 
 ////////////////////////////////////////////////////////////////////////////////
 // Builtin Functions                                                          //
@@ -343,6 +353,29 @@ implicit(N: num, T: f32_f16) fn sign(vec<N, T>) -> vec<N, T>
 @stage("fragment", "compute") fn simd_ballot(bool) -> vec2<u32>
 @stage("fragment", "compute") implicit(T: fiu32_f16) fn quad_shuffle_xor(T, u32) -> T
 @stage("fragment", "compute") implicit(N: num, T: fiu32_f16) fn quad_shuffle_xor(vec<N, T>, u32) -> vec<N, T>
+
+fn convert(__packed_vec3<u32>) -> vec3<u32>
+fn convert(__packed_vec3<i32>) -> vec3<i32>
+fn convert(__packed_vec3<f32>) -> vec3<f32>
+fn convert(__packed_vec3<f16>) -> vec3<f16>
+fn convert(vec3<u32>) -> __packed_vec3<u32>
+fn convert(vec3<i32>) -> __packed_vec3<i32>
+fn convert(vec3<f32>) -> __packed_vec3<f32>
+fn convert(vec3<f16>) -> __packed_vec3<f16>
+
+fn convert(u32) -> u64
+
+@stage("compute") implicit(K: subgroup_matrix_kind, S: f32_f16, C: num, R: num) fn simdgroup_load(subgroup_matrix<K, S, C, R>, ptr<workgroup_or_storage, S, readable>, u64, vec2<u64>, bool)
+@stage("compute") implicit(K: subgroup_matrix_kind, S: f32_f16, C: num, R: num) fn simdgroup_store(subgroup_matrix<K, S, C, R>, ptr<workgroup_or_storage, S, writable>, u64, vec2<u64>, bool)
+@stage("compute") implicit(S: f32_f16, C: num, R: num, K: num) fn simdgroup_multiply(
+  subgroup_matrix<subgroup_matrix_kind_result, S, C, R>,
+  subgroup_matrix<subgroup_matrix_kind_left, S, K, R>,
+  subgroup_matrix<subgroup_matrix_kind_right, S, C, K>)
+@stage("compute") implicit(S: f32_f16, C: num, R: num, K: num) fn simdgroup_multiply_accumulate(
+  subgroup_matrix<subgroup_matrix_kind_result, S, C, R>,
+  subgroup_matrix<subgroup_matrix_kind_left, S, K, R>,
+  subgroup_matrix<subgroup_matrix_kind_right, S, C, K>,
+  subgroup_matrix<subgroup_matrix_kind_result, S, C, R>)
 
 ////////////////////////////////////////////////////////////////////////////////
 // Binary Operators                                                           //

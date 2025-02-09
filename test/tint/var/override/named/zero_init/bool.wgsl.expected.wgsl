@@ -1,6 +1,6 @@
-const o : bool = false;
+override o : bool = bool();
 
-const j : bool = true;
+override j : bool = bool();
 
 @compute @workgroup_size(1)
 fn main() {

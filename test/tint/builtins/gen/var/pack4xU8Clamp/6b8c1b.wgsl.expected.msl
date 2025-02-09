@@ -1,42 +1,88 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
-
 using namespace metal;
 
-template<typename T>
-T tint_dot4(vec<T,4> a, vec<T,4> b) {
-  return a[0]*b[0] + a[1]*b[1] + a[2]*b[2] + a[3]*b[3];
-}
-uint tint_pack_4xu8_clamp(uint4 a) {
-  uint4 const a_clamp = clamp(a, uint4(0u), uint4(255u));
-  uint4 const a_u8 = uint4((a_clamp << uint4(0u, 8u, 16u, 24u)));
-  return tint_dot4(a_u8, uint4(1u));
+struct tint_module_vars_struct {
+  device uint* prevent_dce;
+};
+
+uint tint_dot(uint4 lhs, uint4 rhs) {
+  return ((((lhs * rhs).x + (lhs * rhs).y) + (lhs * rhs).z) + (lhs * rhs).w);
 }
 
 uint pack4xU8Clamp_6b8c1b() {
   uint4 arg_0 = uint4(1u);
-  uint res = tint_pack_4xu8_clamp(arg_0);
+  uint4 const v = arg_0;
+  uint4 const v_1 = uint4(0u, 8u, 16u, 24u);
+  uint4 const v_2 = uint4(0u);
+  uint4 const v_3 = (clamp(v, v_2, uint4(255u)) << v_1);
+  uint res = tint_dot(v_3, uint4(1u));
   return res;
 }
 
-fragment void fragment_main(device uint* tint_symbol_1 [[buffer(0)]]) {
-  *(tint_symbol_1) = pack4xU8Clamp_6b8c1b();
-  return;
+fragment void fragment_main(device uint* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  (*tint_module_vars.prevent_dce) = pack4xU8Clamp_6b8c1b();
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+struct tint_module_vars_struct {
+  device uint* prevent_dce;
+};
+
+uint tint_dot(uint4 lhs, uint4 rhs) {
+  return ((((lhs * rhs).x + (lhs * rhs).y) + (lhs * rhs).z) + (lhs * rhs).w);
 }
 
-kernel void compute_main(device uint* tint_symbol_2 [[buffer(0)]]) {
-  *(tint_symbol_2) = pack4xU8Clamp_6b8c1b();
-  return;
+uint pack4xU8Clamp_6b8c1b() {
+  uint4 arg_0 = uint4(1u);
+  uint4 const v = arg_0;
+  uint4 const v_1 = uint4(0u, 8u, 16u, 24u);
+  uint4 const v_2 = uint4(0u);
+  uint4 const v_3 = (clamp(v, v_2, uint4(255u)) << v_1);
+  uint res = tint_dot(v_3, uint4(1u));
+  return res;
 }
+
+kernel void compute_main(device uint* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  (*tint_module_vars.prevent_dce) = pack4xU8Clamp_6b8c1b();
+}
+//
+// vertex_main
+//
+#include <metal_stdlib>
+using namespace metal;
 
 struct VertexOutput {
   float4 pos;
   uint prevent_dce;
 };
 
-struct tint_symbol {
-  uint prevent_dce [[user(locn0)]] [[flat]];
-  float4 pos [[position]];
+struct vertex_main_outputs {
+  float4 VertexOutput_pos [[position]];
+  uint VertexOutput_prevent_dce [[user(locn0)]] [[flat]];
 };
+
+uint tint_dot(uint4 lhs, uint4 rhs) {
+  return ((((lhs * rhs).x + (lhs * rhs).y) + (lhs * rhs).z) + (lhs * rhs).w);
+}
+
+uint pack4xU8Clamp_6b8c1b() {
+  uint4 arg_0 = uint4(1u);
+  uint4 const v = arg_0;
+  uint4 const v_1 = uint4(0u, 8u, 16u, 24u);
+  uint4 const v_2 = uint4(0u);
+  uint4 const v_3 = (clamp(v, v_2, uint4(255u)) << v_1);
+  uint res = tint_dot(v_3, uint4(1u));
+  return res;
+}
 
 VertexOutput vertex_main_inner() {
   VertexOutput out = {};
@@ -45,11 +91,10 @@ VertexOutput vertex_main_inner() {
   return out;
 }
 
-vertex tint_symbol vertex_main() {
-  VertexOutput const inner_result = vertex_main_inner();
-  tint_symbol wrapper_result = {};
-  wrapper_result.pos = inner_result.pos;
-  wrapper_result.prevent_dce = inner_result.prevent_dce;
-  return wrapper_result;
+vertex vertex_main_outputs vertex_main() {
+  VertexOutput const v_4 = vertex_main_inner();
+  vertex_main_outputs tint_wrapper_result = {};
+  tint_wrapper_result.VertexOutput_pos = v_4.pos;
+  tint_wrapper_result.VertexOutput_prevent_dce = v_4.prevent_dce;
+  return tint_wrapper_result;
 }
-

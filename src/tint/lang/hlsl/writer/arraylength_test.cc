@@ -229,7 +229,7 @@ void foo() {
 }
 
 TEST_F(HlslWriterTest, ArrayLength_Robustness) {
-    auto* dst = b.Var("dst", ty.ptr(storage, ty.array<u32>()));
+    auto* dst = b.Var("dest", ty.ptr(storage, ty.array<u32>()));
     dst->SetBindingPoint(0, 1);
     b.ir.root_block->Append(dst);
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
@@ -243,18 +243,18 @@ TEST_F(HlslWriterTest, ArrayLength_Robustness) {
     options.disable_robustness = false;
     ASSERT_TRUE(Generate(options)) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
-RWByteAddressBuffer dst : register(u1);
+RWByteAddressBuffer dest : register(u1);
 void foo() {
   uint v = 0u;
-  dst.GetDimensions(v);
-  dst.Store((0u + (uint(min(0u, ((v / 4u) - 1u))) * 4u)), 123u);
+  dest.GetDimensions(v);
+  dest.Store((0u + (min(0u, ((v / 4u) - 1u)) * 4u)), 123u);
 }
 
 )");
 }
 
 TEST_F(HlslWriterTest, ArrayLength_RobustnessAndArrayLengthFromUniform) {
-    auto* dst = b.Var("dst", ty.ptr(storage, ty.array<u32>()));
+    auto* dst = b.Var("dest", ty.ptr(storage, ty.array<u32>()));
     dst->SetBindingPoint(0, 1);
     b.ir.root_block->Append(dst);
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
@@ -270,12 +270,12 @@ TEST_F(HlslWriterTest, ArrayLength_RobustnessAndArrayLengthFromUniform) {
     options.array_length_from_uniform.bindpoint_to_size_index[{0, 1}] = 0;
     ASSERT_TRUE(Generate(options)) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
-RWByteAddressBuffer dst : register(u1);
+RWByteAddressBuffer dest : register(u1);
 cbuffer cbuffer_tint_storage_buffer_sizes : register(b0, space30) {
   uint4 tint_storage_buffer_sizes[1];
 };
 void foo() {
-  dst.Store((0u + (uint(min(0u, ((tint_storage_buffer_sizes[0u].x / 4u) - 1u))) * 4u)), 123u);
+  dest.Store((0u + (min(0u, ((tint_storage_buffer_sizes[0u].x / 4u) - 1u)) * 4u)), 123u);
 }
 
 )");

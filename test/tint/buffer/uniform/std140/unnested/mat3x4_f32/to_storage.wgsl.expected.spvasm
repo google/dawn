@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 40
+; Bound: 38
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -42,10 +42,8 @@
      %uint_0 = OpConstant %uint 0
 %_ptr_StorageBuffer_mat3v4float = OpTypePointer StorageBuffer %mat3v4float
 %_ptr_StorageBuffer_v4float = OpTypePointer StorageBuffer %v4float
-        %int = OpTypeInt 32 1
-      %int_1 = OpConstant %int 1
+     %uint_1 = OpConstant %uint 1
 %_ptr_Uniform_v4float = OpTypePointer Uniform %v4float
-      %int_0 = OpConstant %int 0
 %_ptr_Uniform_float = OpTypePointer Uniform %float
 %_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float
           %f = OpFunction %void None %12
@@ -54,20 +52,20 @@
          %18 = OpLoad %mat3v4float %14 None
          %19 = OpAccessChain %_ptr_StorageBuffer_mat3v4float %7 %uint_0
                OpStore %19 %18 None
-         %21 = OpAccessChain %_ptr_StorageBuffer_v4float %7 %uint_0 %int_1
-         %25 = OpAccessChain %_ptr_Uniform_v4float %1 %uint_0 %int_0
-         %28 = OpLoad %v4float %25 None
-               OpStore %21 %28 None
-         %29 = OpAccessChain %_ptr_StorageBuffer_v4float %7 %uint_0 %int_1
-         %30 = OpAccessChain %_ptr_Uniform_v4float %1 %uint_0 %int_0
-         %31 = OpLoad %v4float %30 None
-         %32 = OpVectorShuffle %v4float %31 %31 1 3 0 2
-               OpStore %29 %32 None
-         %33 = OpAccessChain %_ptr_StorageBuffer_v4float %7 %uint_0 %int_0
-         %34 = OpAccessChain %_ptr_Uniform_v4float %1 %uint_0 %int_1
-         %35 = OpAccessChain %_ptr_Uniform_float %34 %int_0
-         %37 = OpLoad %float %35 None
-         %38 = OpAccessChain %_ptr_StorageBuffer_float %33 %int_1
-               OpStore %38 %37 None
+         %21 = OpAccessChain %_ptr_StorageBuffer_v4float %7 %uint_0 %uint_1
+         %24 = OpAccessChain %_ptr_Uniform_v4float %1 %uint_0 %uint_0
+         %26 = OpLoad %v4float %24 None
+               OpStore %21 %26 None
+         %27 = OpAccessChain %_ptr_StorageBuffer_v4float %7 %uint_0 %uint_1
+         %28 = OpAccessChain %_ptr_Uniform_v4float %1 %uint_0 %uint_0
+         %29 = OpLoad %v4float %28 None
+         %30 = OpVectorShuffle %v4float %29 %29 1 3 0 2
+               OpStore %27 %30 None
+         %31 = OpAccessChain %_ptr_StorageBuffer_v4float %7 %uint_0 %uint_0
+         %32 = OpAccessChain %_ptr_Uniform_v4float %1 %uint_0 %uint_1
+         %33 = OpAccessChain %_ptr_Uniform_float %32 %uint_0
+         %35 = OpLoad %float %33 None
+         %36 = OpAccessChain %_ptr_StorageBuffer_float %31 %uint_1
+               OpStore %36 %35 None
                OpReturn
                OpFunctionEnd

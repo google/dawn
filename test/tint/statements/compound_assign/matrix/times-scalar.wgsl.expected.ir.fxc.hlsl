@@ -8,10 +8,7 @@ void v_1(uint offset, float4x4 obj) {
 }
 
 float4x4 v_2(uint offset) {
-  float4 v_3 = asfloat(v.Load4((offset + 0u)));
-  float4 v_4 = asfloat(v.Load4((offset + 16u)));
-  float4 v_5 = asfloat(v.Load4((offset + 32u)));
-  return float4x4(v_3, v_4, v_5, asfloat(v.Load4((offset + 48u))));
+  return float4x4(asfloat(v.Load4((offset + 0u))), asfloat(v.Load4((offset + 16u))), asfloat(v.Load4((offset + 32u))), asfloat(v.Load4((offset + 48u))));
 }
 
 void foo() {

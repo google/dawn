@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void transpose_70ca11() {
   float3x2 res = float3x2((1.0f).xx, (1.0f).xx, (1.0f).xx);
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   transpose_70ca11();
   return;
 }
+//
+// compute_main
+//
+void transpose_70ca11() {
+  float3x2 res = float3x2((1.0f).xx, (1.0f).xx, (1.0f).xx);
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   transpose_70ca11();
   return;
+}
+//
+// vertex_main
+//
+void transpose_70ca11() {
+  float3x2 res = float3x2((1.0f).xx, (1.0f).xx, (1.0f).xx);
 }
 
 struct VertexOutput {

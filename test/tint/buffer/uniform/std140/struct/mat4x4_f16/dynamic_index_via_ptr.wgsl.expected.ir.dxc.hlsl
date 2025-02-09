@@ -98,9 +98,9 @@ ary_ret_1 v_22(uint start_byte_offset) {
 
 [numthreads(1, 1, 1)]
 void f() {
-  uint v_27 = (256u * uint(i()));
-  uint v_28 = (64u * uint(i()));
-  uint v_29 = (8u * uint(i()));
+  uint v_27 = (256u * min(uint(i()), 3u));
+  uint v_28 = (64u * min(uint(i()), 3u));
+  uint v_29 = (8u * min(uint(i()), 3u));
   Outer l_a[4] = v_22(0u);
   Outer l_a_i = v_19(v_27);
   Inner l_a_i_a[4] = v_14(v_27);
@@ -108,7 +108,7 @@ void f() {
   matrix<float16_t, 4, 4> l_a_i_a_i_m = v_4((v_27 + v_28));
   uint4 v_30 = a[(((v_27 + v_28) + v_29) / 16u)];
   vector<float16_t, 4> l_a_i_a_i_m_i = tint_bitcast_to_f16((((((((v_27 + v_28) + v_29) % 16u) / 4u) == 2u)) ? (v_30.zw) : (v_30.xy)));
-  uint v_31 = (((v_27 + v_28) + v_29) + (uint(i()) * 2u));
+  uint v_31 = (((v_27 + v_28) + v_29) + (min(uint(i()), 3u) * 2u));
   uint v_32 = a[(v_31 / 16u)][((v_31 % 16u) / 4u)];
   float16_t l_a_i_a_i_m_i_i = float16_t(f16tof32((v_32 >> ((((v_31 % 4u) == 0u)) ? (0u) : (16u)))));
 }

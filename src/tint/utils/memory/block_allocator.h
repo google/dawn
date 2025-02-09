@@ -32,8 +32,11 @@
 #include <cstring>
 #include <utility>
 
+#include "src/tint/utils/macros/compiler.h"
 #include "src/tint/utils/math/math.h"
 #include "src/tint/utils/memory/bitcast.h"
+
+TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 
 namespace tint {
 
@@ -315,5 +318,7 @@ class BlockAllocator {
 };
 
 }  // namespace tint
+
+TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 
 #endif  // SRC_TINT_UTILS_MEMORY_BLOCK_ALLOCATOR_H_

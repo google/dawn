@@ -47,11 +47,13 @@ struct ProgrammableStage;
 
 namespace vulkan {
 
+// The entry point name to use when generating SPIR-V.
+constexpr char kRemappedEntryPointName[] = "dawn_entry_point";
+
 struct TransformedShaderModuleCacheKey {
     uintptr_t layoutPtr;
     std::string entryPoint;
     PipelineConstantEntries constants;
-    std::optional<uint32_t> maxSubgroupSizeForFullSubgroups;
     bool emitPointSize;
 
     bool operator==(const TransformedShaderModuleCacheKey& other) const;
@@ -70,7 +72,6 @@ class ShaderModule final : public ShaderModuleBase {
         VkShaderModule module;
         const uint32_t* spirv;
         size_t wordCount;
-        std::string remappedEntryPoint;
         bool hasInputAttachment;
     };
 
@@ -81,13 +82,11 @@ class ShaderModule final : public ShaderModuleBase {
         ShaderModuleParseResult* parseResult,
         OwnedCompilationMessages* compilationMessages);
 
-    ResultOrError<ModuleAndSpirv> GetHandleAndSpirv(
-        SingleShaderStage stage,
-        const ProgrammableStage& programmableStage,
-        const PipelineLayout* layout,
-        bool clampFragDepth,
-        bool emitPointSize,
-        std::optional<uint32_t> maxSubgroupSizeForFullSubgroups);
+    ResultOrError<ModuleAndSpirv> GetHandleAndSpirv(SingleShaderStage stage,
+                                                    const ProgrammableStage& programmableStage,
+                                                    const PipelineLayout* layout,
+                                                    bool clampFragDepth,
+                                                    bool emitPointSize);
 
   private:
     ShaderModule(Device* device,

@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 RWByteAddressBuffer prevent_dce : register(u0);
 
 uint4 countLeadingZeros_f70103() {
@@ -9,11 +12,27 @@ void fragment_main() {
   prevent_dce.Store4(0u, asuint(countLeadingZeros_f70103()));
   return;
 }
+//
+// compute_main
+//
+RWByteAddressBuffer prevent_dce : register(u0);
+
+uint4 countLeadingZeros_f70103() {
+  uint4 res = (31u).xxxx;
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store4(0u, asuint(countLeadingZeros_f70103()));
   return;
+}
+//
+// vertex_main
+//
+uint4 countLeadingZeros_f70103() {
+  uint4 res = (31u).xxxx;
+  return res;
 }
 
 struct VertexOutput {

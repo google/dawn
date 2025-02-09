@@ -32,7 +32,7 @@
 #include <functional>
 
 #include "src/tint/api/common/binding_point.h"
-#include "src/tint/utils/reflection/reflection.h"
+#include "src/tint/utils/reflection.h"
 #include "src/tint/utils/text/string_stream.h"
 
 namespace tint::sem {

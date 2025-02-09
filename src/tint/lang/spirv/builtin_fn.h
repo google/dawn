@@ -40,7 +40,8 @@
 #include <cstdint>
 #include <string>
 
-#include "src/tint/utils/traits/traits.h"
+#include "src/tint/lang/core/ir/call.h"
+#include "src/tint/utils/rtti/traits.h"
 
 // \cond DO_NOT_DOCUMENT
 namespace tint::spirv {
@@ -80,8 +81,30 @@ enum class BuiltinFn : uint8_t {
     kSelect,
     kVectorTimesMatrix,
     kVectorTimesScalar,
+    kNormalize,
+    kInverse,
+    kSign,
+    kAbs,
+    kSmax,
+    kSmin,
+    kSclamp,
+    kUmax,
+    kUmin,
+    kUclamp,
+    kFindILsb,
+    kFindSMsb,
+    kFindUMsb,
+    kRefract,
+    kReflect,
+    kFaceForward,
+    kLdexp,
+    kModf,
+    kFrexp,
     kSdot,
     kUdot,
+    kCooperativeMatrixLoad,
+    kCooperativeMatrixStore,
+    kCooperativeMatrixMulAdd,
     kNone,
 };
 
@@ -95,6 +118,9 @@ template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
 auto& operator<<(STREAM& o, BuiltinFn i) {
     return o << str(i);
 }
+
+/// @returns access restrictions for a function
+tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn);
 
 }  // namespace tint::spirv
 // \endcond

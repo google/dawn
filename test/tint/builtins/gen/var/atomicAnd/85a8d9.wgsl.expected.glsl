@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
@@ -8,11 +11,11 @@ struct SB_RW {
 };
 
 layout(binding = 0, std430)
-buffer prevent_dce_block_1_ssbo {
+buffer f_prevent_dce_block_ssbo {
   uint inner;
 } v;
 layout(binding = 1, std430)
-buffer sb_rw_block_1_ssbo {
+buffer f_sb_rw_block_ssbo {
   SB_RW inner;
 } v_1;
 uint atomicAnd_85a8d9() {
@@ -23,6 +26,9 @@ uint atomicAnd_85a8d9() {
 void main() {
   v.inner = atomicAnd_85a8d9();
 }
+//
+// compute_main
+//
 #version 310 es
 
 

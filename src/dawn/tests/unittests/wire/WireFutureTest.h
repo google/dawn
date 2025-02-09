@@ -43,27 +43,19 @@
 
 namespace dawn::wire {
 
-enum class CallbackMode {
-    Async,  // Legacy mode that internally defers to Spontaneous.
-    WaitAny,
-    ProcessEvents,
-    Spontaneous,
-};
-WGPUCallbackMode ToWGPUCallbackMode(CallbackMode callbackMode);
-
 struct WireFutureTestParam {
-    CallbackMode mCallbackMode;
+    wgpu::CallbackMode callbackMode;
 };
 std::ostream& operator<<(std::ostream& os, const WireFutureTestParam& param);
-static constexpr std::array kCallbackModes = {WireFutureTestParam{CallbackMode::Async},
-                                              WireFutureTestParam{CallbackMode::WaitAny},
-                                              WireFutureTestParam{CallbackMode::ProcessEvents},
-                                              WireFutureTestParam{CallbackMode::Spontaneous}};
+static constexpr std::array kWgpuCallbackModes = {
+    WireFutureTestParam{wgpu::CallbackMode::WaitAnyOnly},
+    WireFutureTestParam{wgpu::CallbackMode::AllowProcessEvents},
+    WireFutureTestParam{wgpu::CallbackMode::AllowSpontaneous}};
 
 template <typename Param, typename... Params>
 auto MakeParamGenerator(std::initializer_list<Params>&&... params) {
     return ParamGenerator<Param, WireFutureTestParam, Params...>(
-        std::vector<WireFutureTestParam>(kCallbackModes.begin(), kCallbackModes.end()),
+        std::vector<WireFutureTestParam>(kWgpuCallbackModes.begin(), kWgpuCallbackModes.end()),
         std::forward<std::initializer_list<Params>&&>(params)...);
 }
 
@@ -90,15 +82,7 @@ class WireFutureTestWithParamsBase : public WireTest, public testing::WithParamI
   protected:
     using testing::WithParamInterface<Params>::GetParam;
 
-    // Events are considered spontaneous if either we are using the legacy Async or the new
-    // Spontaneous modes.
-    bool IsSpontaneous() {
-        CallbackMode callbackMode = GetParam().mCallbackMode;
-        return callbackMode == CallbackMode::Async || callbackMode == CallbackMode::Spontaneous;
-    }
-
-    // Returns true iff testing older Async entry points, i.e. not Future related entry points.
-    bool IsAsync() { return GetParam().mCallbackMode == CallbackMode::Async; }
+    bool IsSpontaneous() { return GetParam().callbackMode == wgpu::CallbackMode::AllowSpontaneous; }
 
     // Future suite adds the following flush mechanics for test writers so that they can have fine
     // grained control over when expectations should be set and verified.
@@ -126,16 +110,16 @@ class WireFutureTestWithParamsBase : public WireTest, public testing::WithParamI
         // For non-spontaneous callback modes, we need the flush the server in order for
         // the futures to become ready. For spontaneous modes, however, we don't flush the
         // server yet because that would also trigger the callback immediately.
-        if (!IsSpontaneous()) {
+        if (GetParam().callbackMode != wgpu::CallbackMode::AllowSpontaneous) {
             WireTest::FlushServer();
         }
     }
     void FlushCallbacks() {
-        // Flushing the server will cause Async and Spontaneous callbacks to trigger right away.
+        // Flushing the server will cause Spontaneous callbacks to trigger right away.
         WireTest::FlushServer();
 
-        CallbackMode callbackMode = GetParam().mCallbackMode;
-        if (callbackMode == CallbackMode::WaitAny) {
+        wgpu::CallbackMode callbackMode = GetParam().callbackMode;
+        if (callbackMode == wgpu::CallbackMode::WaitAnyOnly) {
             if (mFutureIDs.empty()) {
                 return;
             }
@@ -145,7 +129,7 @@ class WireFutureTestWithParamsBase : public WireTest, public testing::WithParamI
             }
             EXPECT_EQ(instance.WaitAny(mFutureIDs.size(), waitInfos.data(), 0),
                       wgpu::WaitStatus::Success);
-        } else if (callbackMode == CallbackMode::ProcessEvents) {
+        } else if (callbackMode == wgpu::CallbackMode::AllowProcessEvents) {
             instance.ProcessEvents();
         }
     }
@@ -153,32 +137,9 @@ class WireFutureTestWithParamsBase : public WireTest, public testing::WithParamI
     std::vector<FutureID> mFutureIDs;
 };
 
-template <typename Callback,
-          typename CallbackInfo,
-          auto& AsyncF,
-          auto& FutureF,
-          typename Params = WireFutureTestParam,
-          typename AsyncFT = decltype(AsyncF),
-          typename FutureFT = decltype(FutureF)>
+template <typename Callback, typename Params = WireFutureTestParam>
 class WireFutureTestWithParams : public WireFutureTestWithParamsBase<Params> {
   protected:
-    // Calls the actual API that the test suite is exercising given the callback mode. This should
-    // be used in favor of directly calling the API because the Async mode actually calls a
-    // different entry point.
-    template <typename... Args>
-    void CallImpl(void* userdata, Args&&... args) {
-        if (this->IsAsync()) {
-            mAsyncF(std::forward<Args>(args)..., mMockCb.Callback(),
-                    mMockCb.MakeUserdata(userdata));
-        } else {
-            CallbackInfo callbackInfo = {};
-            callbackInfo.mode = ToWGPUCallbackMode(this->GetParam().mCallbackMode);
-            callbackInfo.callback = mMockCb.Callback();
-            callbackInfo.userdata = mMockCb.MakeUserdata(userdata);
-            this->mFutureIDs.push_back(mFutureF(std::forward<Args>(args)..., callbackInfo).id);
-        }
-    }
-
     // In order to tightly bound when callbacks are expected to occur, test writers only have access
     // to the mock callback via the argument passed usually via a lamdba. The 'exp' lambda should
     // generally be a block of expectations on the mock callback followed by one statement where we
@@ -193,19 +154,16 @@ class WireFutureTestWithParams : public WireFutureTestWithParamsBase<Params> {
     //       // Call the statement where we want to ensure the callbacks occur.
     //       FlushCallbacks();
     //   });
-    void ExpectWireCallbacksWhen(std::function<void(testing::MockCallback<Callback>&)> exp) {
+    void ExpectWireCallbacksWhen(std::function<void(testing::MockCppCallback<Callback>&)> exp) {
         exp(mMockCb);
         ASSERT_TRUE(testing::Mock::VerifyAndClearExpectations(&mMockCb));
     }
 
-  private:
-    AsyncFT mAsyncF = AsyncF;
-    FutureFT mFutureF = FutureF;
-    testing::MockCallback<Callback> mMockCb;
+    testing::MockCppCallback<Callback> mMockCb;
 };
 
-template <typename Callback, typename CallbackInfo, auto& AsyncF, auto& FutureF>
-using WireFutureTest = WireFutureTestWithParams<Callback, CallbackInfo, AsyncF, FutureF>;
+template <typename Callback>
+using WireFutureTest = WireFutureTestWithParams<Callback>;
 
 }  // namespace dawn::wire
 

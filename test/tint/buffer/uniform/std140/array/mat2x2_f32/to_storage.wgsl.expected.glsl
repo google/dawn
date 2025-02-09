@@ -34,7 +34,7 @@ void main() {
     }
   }
   v_1.inner = v_3;
-  v_1.inner[1] = mat2(v.inner[2].col0, v.inner[2].col1);
-  v_1.inner[1][0] = v.inner[0].col1.yx;
-  v_1.inner[1][0][0u] = v.inner[0].col1.x;
+  v_1.inner[1u] = mat2(v.inner[2u].col0, v.inner[2u].col1);
+  v_1.inner[1u][0u] = v.inner[0u].col1.yx;
+  v_1.inner[1u][0u].x = v.inner[0u].col1.x;
 }

@@ -27,6 +27,7 @@
 
 #include "dawn/native/opengl/TextureGL.h"
 
+#include <algorithm>
 #include <limits>
 #include <utility>
 
@@ -34,10 +35,13 @@
 #include "dawn/common/Constants.h"
 #include "dawn/common/Math.h"
 #include "dawn/native/ChainUtils.h"
+#include "dawn/native/Device.h"
 #include "dawn/native/EnumMaskIterator.h"
+#include "dawn/native/Queue.h"
 #include "dawn/native/opengl/BufferGL.h"
 #include "dawn/native/opengl/CommandBufferGL.h"
 #include "dawn/native/opengl/DeviceGL.h"
+#include "dawn/native/opengl/SharedFenceGL.h"
 #include "dawn/native/opengl/SharedTextureMemoryGL.h"
 #include "dawn/native/opengl/UtilsGL.h"
 
@@ -128,28 +132,75 @@ void AllocateTexture(const OpenGLFunctions& gl,
                      GLenum target,
                      GLsizei samples,
                      GLuint levels,
-                     GLenum internalFormat,
+                     const GLFormat& format,
                      const Extent3D& size) {
-    // glTextureView() requires the value of GL_TEXTURE_IMMUTABLE_FORMAT for origtexture to
-    // be GL_TRUE, so the storage of the texture must be allocated with glTexStorage*D.
-    // https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glTextureView.xhtml
-    switch (target) {
-        case GL_TEXTURE_2D_ARRAY:
-        case GL_TEXTURE_CUBE_MAP_ARRAY:
-        case GL_TEXTURE_3D:
-            gl.TexStorage3D(target, levels, internalFormat, size.width, size.height,
-                            size.depthOrArrayLayers);
-            break;
-        case GL_TEXTURE_2D:
-        case GL_TEXTURE_CUBE_MAP:
-            gl.TexStorage2D(target, levels, internalFormat, size.width, size.height);
-            break;
-        case GL_TEXTURE_2D_MULTISAMPLE:
-            gl.TexStorage2DMultisample(target, samples, internalFormat, size.width, size.height,
-                                       true);
-            break;
-        default:
-            DAWN_UNREACHABLE();
+    if (format.isSupportedForTextureStorage || target == GL_TEXTURE_2D_MULTISAMPLE) {
+        // glTextureView() requires the value of GL_TEXTURE_IMMUTABLE_FORMAT for origtexture to
+        // be GL_TRUE, so the storage of the texture must be allocated with glTexStorage*D.
+        // https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glTextureView.xhtml
+
+        // There is no fallback for multisampled textures. They must be allocated with
+        // glTexStorage2DMultisample
+        switch (target) {
+            case GL_TEXTURE_2D_ARRAY:
+            case GL_TEXTURE_CUBE_MAP_ARRAY:
+            case GL_TEXTURE_3D:
+                gl.TexStorage3D(target, levels, format.internalFormat, size.width, size.height,
+                                size.depthOrArrayLayers);
+                break;
+            case GL_TEXTURE_2D:
+            case GL_TEXTURE_CUBE_MAP:
+                gl.TexStorage2D(target, levels, format.internalFormat, size.width, size.height);
+
+                break;
+            case GL_TEXTURE_2D_MULTISAMPLE:
+                gl.TexStorage2DMultisample(target, samples, format.internalFormat, size.width,
+                                           size.height, true);
+                break;
+            default:
+                DAWN_UNREACHABLE();
+        }
+    } else {
+        // Allocate the texture using multiple glTexImage. This should only happen in compat and the
+        // resulting texture will not be usable with glTextureView
+
+        // When using glTexImage, make sure there is no unpack buffer bound or data would be copied
+        // from whatever buffer happens to be bound.
+        gl.BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
+        // Array texture formats have the same depth for all mip levels.
+        bool constantSizeForAllLevels =
+            target == GL_TEXTURE_2D_ARRAY || target == GL_TEXTURE_CUBE_MAP_ARRAY;
+
+        for (GLuint level = 0; level < levels; level++) {
+            Extent3D levelSize{
+                std::max(size.width >> level, 1u), std::max(size.height >> level, 1u),
+                constantSizeForAllLevels ? size.depthOrArrayLayers
+                                         : std::max(size.depthOrArrayLayers >> level, 1u)};
+
+            switch (target) {
+                case GL_TEXTURE_2D_ARRAY:
+                case GL_TEXTURE_CUBE_MAP_ARRAY:
+                case GL_TEXTURE_3D:
+                    gl.TexImage3D(target, level, format.format, levelSize.width, levelSize.height,
+                                  levelSize.depthOrArrayLayers, 0, format.format, format.type,
+                                  nullptr);
+                    break;
+                case GL_TEXTURE_2D:
+                    gl.TexImage2D(target, level, format.format, levelSize.width, levelSize.height,
+                                  0, format.format, format.type, nullptr);
+                    break;
+                case GL_TEXTURE_CUBE_MAP:
+                    for (size_t faceIdx = 0; faceIdx < 6; faceIdx++) {
+                        GLenum faceTarget = GL_TEXTURE_CUBE_MAP_POSITIVE_X + faceIdx;
+                        gl.TexImage2D(faceTarget, level, format.format, levelSize.width,
+                                      levelSize.height, 0, format.format, format.type, nullptr);
+                    }
+                    break;
+                default:
+                    DAWN_UNREACHABLE();
+            }
+        }
     }
 }
 
@@ -218,7 +269,7 @@ Texture::Texture(Device* device, const UnpackedPtr<TextureDescriptor>& descripto
 
     gl.BindTexture(mTarget, mHandle);
 
-    AllocateTexture(gl, mTarget, GetSampleCount(), levels, glFormat.internalFormat, GetBaseSize());
+    AllocateTexture(gl, mTarget, GetSampleCount(), levels, glFormat, GetBaseSize());
 
     // The texture is not complete if it uses mipmapping and not all levels up to
     // MAX_LEVEL have been defined.
@@ -486,7 +537,7 @@ MaybeError Texture::ClearTexture(const SubresourceRange& range,
             textureCopy.origin = {};
             textureCopy.aspect = Aspect::Color;
 
-            TextureDataLayout dataLayout;
+            TexelCopyBufferLayout dataLayout;
             dataLayout.offset = 0;
             dataLayout.bytesPerRow = bytesPerRow;
             dataLayout.rowsPerImage = largestMipSize.height;
@@ -522,6 +573,21 @@ MaybeError Texture::EnsureSubresourceContentInitialized(const SubresourceRange& 
     if (!IsSubresourceContentInitialized(range)) {
         DAWN_TRY(ClearTexture(range, TextureBase::ClearValue::Zero));
     }
+    return {};
+}
+
+MaybeError Texture::SynchronizeTextureBeforeUse() {
+    SharedTextureMemoryBase::PendingFenceList fences;
+    SharedResourceMemoryContents* contents = GetSharedResourceMemoryContents();
+    if (contents != nullptr) {
+        contents->AcquirePendingFences(&fences);
+    }
+    for (const auto& fenceAndSignaledValue : fences) {
+        SharedFence* fence = ToBackend(fenceAndSignaledValue.object).Get();
+        DAWN_TRY(fence->ServerWait(fenceAndSignaledValue.signaledValue));
+    }
+
+    mLastSharedTextureMemoryUsageSerial = GetDevice()->GetQueue()->GetPendingCommandSerial();
     return {};
 }
 

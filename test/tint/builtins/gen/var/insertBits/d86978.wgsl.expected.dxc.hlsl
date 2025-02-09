@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 int4 tint_insert_bits(int4 v, int4 n, uint offset, uint count) {
   uint e = (offset + count);
   uint mask = ((((offset < 32u) ? (1u << offset) : 0u) - 1u) ^ (((e < 32u) ? (1u << e) : 0u) - 1u));
@@ -19,11 +22,47 @@ void fragment_main() {
   prevent_dce.Store4(0u, asuint(insertBits_d86978()));
   return;
 }
+//
+// compute_main
+//
+int4 tint_insert_bits(int4 v, int4 n, uint offset, uint count) {
+  uint e = (offset + count);
+  uint mask = ((((offset < 32u) ? (1u << offset) : 0u) - 1u) ^ (((e < 32u) ? (1u << e) : 0u) - 1u));
+  return ((((offset < 32u) ? (n << uint4((offset).xxxx)) : (0).xxxx) & int4((int(mask)).xxxx)) | (v & int4((int(~(mask))).xxxx)));
+}
+
+RWByteAddressBuffer prevent_dce : register(u0);
+
+int4 insertBits_d86978() {
+  int4 arg_0 = (1).xxxx;
+  int4 arg_1 = (1).xxxx;
+  uint arg_2 = 1u;
+  uint arg_3 = 1u;
+  int4 res = tint_insert_bits(arg_0, arg_1, arg_2, arg_3);
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store4(0u, asuint(insertBits_d86978()));
   return;
+}
+//
+// vertex_main
+//
+int4 tint_insert_bits(int4 v, int4 n, uint offset, uint count) {
+  uint e = (offset + count);
+  uint mask = ((((offset < 32u) ? (1u << offset) : 0u) - 1u) ^ (((e < 32u) ? (1u << e) : 0u) - 1u));
+  return ((((offset < 32u) ? (n << uint4((offset).xxxx)) : (0).xxxx) & int4((int(mask)).xxxx)) | (v & int4((int(~(mask))).xxxx)));
+}
+
+int4 insertBits_d86978() {
+  int4 arg_0 = (1).xxxx;
+  int4 arg_1 = (1).xxxx;
+  uint arg_2 = 1u;
+  uint arg_3 = 1u;
+  int4 res = tint_insert_bits(arg_0, arg_1, arg_2, arg_3);
+  return res;
 }
 
 struct VertexOutput {

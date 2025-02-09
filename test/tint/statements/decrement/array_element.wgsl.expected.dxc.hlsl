@@ -6,5 +6,8 @@ void unused_entry_point() {
 RWByteAddressBuffer a : register(u0);
 
 void main() {
-  a.Store(4u, asuint((a.Load(4u) - 1u)));
+  uint tint_symbol_2 = 0u;
+  a.GetDimensions(tint_symbol_2);
+  uint tint_symbol_3 = (tint_symbol_2 / 4u);
+  a.Store((4u * min(1u, (tint_symbol_3 - 1u))), asuint((a.Load((4u * min(1u, (tint_symbol_3 - 1u)))) - 1u)));
 }

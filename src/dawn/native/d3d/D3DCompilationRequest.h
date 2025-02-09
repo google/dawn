@@ -32,6 +32,7 @@
 
 #include <string_view>
 
+#include "dawn/native/Adapter.h"
 #include "dawn/native/CacheRequest.h"
 #include "dawn/native/Serializable.h"
 #include "dawn/native/d3d/d3d_platform.h"
@@ -75,10 +76,10 @@ using InterStageShaderVariablesMask = std::bitset<tint::hlsl::writer::kMaxInterS
     X(tint::hlsl::writer::Options, tintOptions)                                                  \
     X(std::optional<tint::ast::transform::SubstituteOverride::Config>, substituteOverrideConfig) \
     X(LimitsForCompilationRequest, limits)                                                       \
+    X(CacheKey::UnsafeUnkeyedValue<const AdapterBase*>, adapter)                                 \
     X(bool, disableSymbolRenaming)                                                               \
     X(bool, dumpShaders)                                                                         \
-    X(bool, useTintIR)                                                                           \
-    X(std::optional<uint32_t>, maxSubgroupSizeForFullSubgroups)
+    X(bool, useTintIR)
 
 #define D3D_BYTECODE_COMPILATION_REQUEST_MEMBERS(X) \
     X(bool, hasShaderF16Feature)                    \

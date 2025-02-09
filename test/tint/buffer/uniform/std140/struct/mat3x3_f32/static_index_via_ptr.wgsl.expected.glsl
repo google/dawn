@@ -54,7 +54,7 @@ Outer tint_convert_Outer(Outer_std140 tint_input) {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  mat3 v_4 = mat3(v.inner[3].a[2].m_col0, v.inner[3].a[2].m_col1, v.inner[3].a[2].m_col2);
+  mat3 v_4 = mat3(v.inner[3u].a[2u].m_col0, v.inner[3u].a[2u].m_col1, v.inner[3u].a[2u].m_col2);
   Outer_std140 v_5[4] = v.inner;
   Outer v_6[4] = Outer[4](Outer(Inner[4](Inner(mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f))), Inner(mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f))), Inner(mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f))), Inner(mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f))))), Outer(Inner[4](Inner(mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f))), Inner(mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f))), Inner(mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f))), Inner(mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f))))), Outer(Inner[4](Inner(mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f))), Inner(mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f))), Inner(mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f))), Inner(mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f))))), Outer(Inner[4](Inner(mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f))), Inner(mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f))), Inner(mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f))), Inner(mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f))))));
   {
@@ -73,8 +73,8 @@ void main() {
     }
   }
   Outer l_a[4] = v_6;
-  Outer l_a_3 = tint_convert_Outer(v.inner[3]);
-  Inner_std140 v_9[4] = v.inner[3].a;
+  Outer l_a_3 = tint_convert_Outer(v.inner[3u]);
+  Inner_std140 v_9[4] = v.inner[3u].a;
   Inner v_10[4] = Inner[4](Inner(mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f))), Inner(mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f))), Inner(mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f))), Inner(mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f))));
   {
     uint v_11 = 0u;
@@ -92,8 +92,8 @@ void main() {
     }
   }
   Inner l_a_3_a[4] = v_10;
-  Inner l_a_3_a_2 = tint_convert_Inner(v.inner[3].a[2]);
+  Inner l_a_3_a_2 = tint_convert_Inner(v.inner[3u].a[2u]);
   mat3 l_a_3_a_2_m = v_4;
-  vec3 l_a_3_a_2_m_1 = v_4[1];
-  float l_a_3_a_2_m_1_0 = v_4[1][0];
+  vec3 l_a_3_a_2_m_1 = v_4[1u];
+  float l_a_3_a_2_m_1_0 = v_4[1u].x;
 }

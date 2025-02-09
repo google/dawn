@@ -124,8 +124,8 @@ void GPUCommandEncoder::copyBufferToTexture(Napi::Env env,
                                             interop::GPUExtent3D copySize) {
     Converter conv(env);
 
-    wgpu::ImageCopyBuffer src{};
-    wgpu::ImageCopyTexture dst{};
+    wgpu::TexelCopyBufferInfo src{};
+    wgpu::TexelCopyTextureInfo dst{};
     wgpu::Extent3D size{};
     if (!conv(src, source) ||       //
         !conv(dst, destination) ||  //
@@ -142,8 +142,8 @@ void GPUCommandEncoder::copyTextureToBuffer(Napi::Env env,
                                             interop::GPUExtent3D copySize) {
     Converter conv(env);
 
-    wgpu::ImageCopyTexture src{};
-    wgpu::ImageCopyBuffer dst{};
+    wgpu::TexelCopyTextureInfo src{};
+    wgpu::TexelCopyBufferInfo dst{};
     wgpu::Extent3D size{};
     if (!conv(src, source) ||       //
         !conv(dst, destination) ||  //
@@ -160,8 +160,8 @@ void GPUCommandEncoder::copyTextureToTexture(Napi::Env env,
                                              interop::GPUExtent3D copySize) {
     Converter conv(env);
 
-    wgpu::ImageCopyTexture src{};
-    wgpu::ImageCopyTexture dst{};
+    wgpu::TexelCopyTextureInfo src{};
+    wgpu::TexelCopyTextureInfo dst{};
     wgpu::Extent3D size{};
     if (!conv(src, source) ||       //
         !conv(dst, destination) ||  //

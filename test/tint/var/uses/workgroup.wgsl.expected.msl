@@ -1,90 +1,127 @@
+//
+// main1
+//
 #include <metal_stdlib>
-
 using namespace metal;
-void tint_zero_workgroup_memory(uint local_idx, threadgroup int* const tint_symbol) {
-  if ((local_idx < 1u)) {
-    *(tint_symbol) = 0;
+
+struct tint_module_vars_struct {
+  threadgroup int* a;
+};
+
+struct tint_symbol_1 {
+  int tint_symbol;
+};
+
+void uses_a(tint_module_vars_struct tint_module_vars) {
+  (*tint_module_vars.a) = as_type<int>((as_type<uint>((*tint_module_vars.a)) + as_type<uint>(1)));
+}
+
+void main1_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
+  if ((tint_local_index < 1u)) {
+    (*tint_module_vars.a) = 0;
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
+  (*tint_module_vars.a) = 42;
+  uses_a(tint_module_vars);
 }
 
-void tint_zero_workgroup_memory_1(uint local_idx_1, threadgroup int* const tint_symbol_1) {
-  if ((local_idx_1 < 1u)) {
-    *(tint_symbol_1) = 0;
+kernel void main1(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v [[threadgroup(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=(&(*v).tint_symbol)};
+  main1_inner(tint_local_index, tint_module_vars);
+}
+//
+// main2
+//
+#include <metal_stdlib>
+using namespace metal;
+
+struct tint_module_vars_struct {
+  threadgroup int* b;
+};
+
+struct tint_symbol_1 {
+  int tint_symbol;
+};
+
+void uses_b(tint_module_vars_struct tint_module_vars) {
+  (*tint_module_vars.b) = as_type<int>((as_type<uint>((*tint_module_vars.b)) * as_type<uint>(2)));
+}
+
+void main2_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
+  if ((tint_local_index < 1u)) {
+    (*tint_module_vars.b) = 0;
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
+  (*tint_module_vars.b) = 7;
+  uses_b(tint_module_vars);
 }
 
-void tint_zero_workgroup_memory_2(uint local_idx_2, threadgroup int* const tint_symbol_2, threadgroup int* const tint_symbol_3) {
-  if ((local_idx_2 < 1u)) {
-    *(tint_symbol_2) = 0;
-    *(tint_symbol_3) = 0;
-  }
-  threadgroup_barrier(mem_flags::mem_threadgroup);
+kernel void main2(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v [[threadgroup(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.b=(&(*v).tint_symbol)};
+  main2_inner(tint_local_index, tint_module_vars);
+}
+//
+// main3
+//
+#include <metal_stdlib>
+using namespace metal;
+
+struct tint_module_vars_struct {
+  threadgroup int* a;
+  threadgroup int* b;
+};
+
+struct tint_symbol_2 {
+  int tint_symbol;
+  int tint_symbol_1;
+};
+
+void uses_a(tint_module_vars_struct tint_module_vars) {
+  (*tint_module_vars.a) = as_type<int>((as_type<uint>((*tint_module_vars.a)) + as_type<uint>(1)));
 }
 
-void uses_a(threadgroup int* const tint_symbol_4) {
-  *(tint_symbol_4) = as_type<int>((as_type<uint>(*(tint_symbol_4)) + as_type<uint>(1)));
+void uses_b(tint_module_vars_struct tint_module_vars) {
+  (*tint_module_vars.b) = as_type<int>((as_type<uint>((*tint_module_vars.b)) * as_type<uint>(2)));
 }
 
-void uses_b(threadgroup int* const tint_symbol_5) {
-  *(tint_symbol_5) = as_type<int>((as_type<uint>(*(tint_symbol_5)) * as_type<uint>(2)));
-}
-
-void uses_a_and_b(threadgroup int* const tint_symbol_6, threadgroup int* const tint_symbol_7) {
-  *(tint_symbol_6) = *(tint_symbol_7);
+void uses_a_and_b(tint_module_vars_struct tint_module_vars) {
+  (*tint_module_vars.b) = (*tint_module_vars.a);
 }
 
 void no_uses() {
 }
 
-void outer(threadgroup int* const tint_symbol_8, threadgroup int* const tint_symbol_9) {
-  *(tint_symbol_8) = 0;
-  uses_a(tint_symbol_8);
-  uses_a_and_b(tint_symbol_9, tint_symbol_8);
-  uses_b(tint_symbol_9);
+void outer(tint_module_vars_struct tint_module_vars) {
+  (*tint_module_vars.a) = 0;
+  uses_a(tint_module_vars);
+  uses_a_and_b(tint_module_vars);
+  uses_b(tint_module_vars);
   no_uses();
 }
 
-void main1_inner(uint local_invocation_index, threadgroup int* const tint_symbol_10) {
-  tint_zero_workgroup_memory(local_invocation_index, tint_symbol_10);
-  *(tint_symbol_10) = 42;
-  uses_a(tint_symbol_10);
-}
-
-kernel void main1(uint local_invocation_index [[thread_index_in_threadgroup]]) {
-  threadgroup int tint_symbol_11;
-  main1_inner(local_invocation_index, &(tint_symbol_11));
-  return;
-}
-
-void main2_inner(uint local_invocation_index_1, threadgroup int* const tint_symbol_12) {
-  tint_zero_workgroup_memory_1(local_invocation_index_1, tint_symbol_12);
-  *(tint_symbol_12) = 7;
-  uses_b(tint_symbol_12);
-}
-
-kernel void main2(uint local_invocation_index_1 [[thread_index_in_threadgroup]]) {
-  threadgroup int tint_symbol_13;
-  main2_inner(local_invocation_index_1, &(tint_symbol_13));
-  return;
-}
-
-void main3_inner(uint local_invocation_index_2, threadgroup int* const tint_symbol_14, threadgroup int* const tint_symbol_15) {
-  tint_zero_workgroup_memory_2(local_invocation_index_2, tint_symbol_14, tint_symbol_15);
-  outer(tint_symbol_14, tint_symbol_15);
+void main3_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
+  if ((tint_local_index < 1u)) {
+    (*tint_module_vars.a) = 0;
+    (*tint_module_vars.b) = 0;
+  }
+  threadgroup_barrier(mem_flags::mem_threadgroup);
+  outer(tint_module_vars);
   no_uses();
 }
 
-kernel void main3(uint local_invocation_index_2 [[thread_index_in_threadgroup]]) {
-  threadgroup int tint_symbol_16;
-  threadgroup int tint_symbol_17;
-  main3_inner(local_invocation_index_2, &(tint_symbol_16), &(tint_symbol_17));
-  return;
+kernel void main3(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_2* v [[threadgroup(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=(&(*v).tint_symbol), .b=(&(*v).tint_symbol_1)};
+  main3_inner(tint_local_index, tint_module_vars);
+}
+//
+// main4
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void no_uses() {
 }
 
 kernel void main4() {
   no_uses();
-  return;
 }
-

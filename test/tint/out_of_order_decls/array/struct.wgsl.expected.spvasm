@@ -24,12 +24,12 @@
        %void = OpTypeVoid
          %11 = OpTypeFunction %void
 %_ptr_Private_S = OpTypePointer Private %S
-      %int_0 = OpConstant %int 0
+     %uint_0 = OpConstant %uint 0
       %int_1 = OpConstant %int 1
          %16 = OpConstantComposite %S %int_1
           %f = OpFunction %void None %11
          %12 = OpLabel
-         %13 = OpAccessChain %_ptr_Private_S %A %int_0
+         %13 = OpAccessChain %_ptr_Private_S %A %uint_0
                OpStore %13 %16 None
                OpReturn
                OpFunctionEnd

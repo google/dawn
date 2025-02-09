@@ -161,7 +161,7 @@ TEST_F(TextureValidationTest, SampleCount) {
 
         for (wgpu::TextureFormat format : utils::kFormatsInCoreSpec) {
             descriptor.format = format;
-            if (utils::TextureFormatSupportsMultisampling(device, format)) {
+            if (utils::TextureFormatSupportsMultisampling(device, format, UseCompatibilityMode())) {
                 device.CreateTexture(&descriptor);
             } else {
                 ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
@@ -1034,12 +1034,12 @@ TEST_F(TextureValidationTest, CreationParameterReflectionForValidTextures) {
 TEST_F(TextureValidationTest, CreationParameterReflectionForErrorTextures) {
     // Fill a descriptor with a bunch of garbage values.
     wgpu::TextureDescriptor desc;
-    desc.size = {0, 0xFFFF'FFFF, 1};
+    desc.size = {0, 0xFFFF, 1};
     desc.mipLevelCount = 0;
     desc.sampleCount = 42;
-    desc.dimension = static_cast<wgpu::TextureDimension>(0xFFFF'FF00);
-    desc.usage = static_cast<wgpu::TextureUsage>(0xFFFF'FFFF);
-    desc.format = static_cast<wgpu::TextureFormat>(0xFFFF'FFF0);
+    desc.dimension = static_cast<wgpu::TextureDimension>(0xFF00);
+    desc.usage = static_cast<wgpu::TextureUsage>(0xFFFF);
+    desc.format = static_cast<wgpu::TextureFormat>(0xFFF0);
 
     // Error! Because the texture width is 0.
     wgpu::Texture tex;

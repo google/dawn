@@ -25,7 +25,7 @@
 %_ptr_Function_v3uint = OpTypePointer Function %v3uint
      %uint_1 = OpConstant %uint 1
 %_ptr_Function_uint = OpTypePointer Function %uint
-      %int_2 = OpConstant %int 2
+     %uint_2 = OpConstant %uint 2
        %void = OpTypeVoid
          %20 = OpTypeFunction %void
           %f = OpFunction %uint None %3
@@ -33,7 +33,7 @@
           %a = OpVariable %_ptr_Function_S Function
                OpStore %a %10
          %11 = OpAccessChain %_ptr_Function_v3uint %a %uint_1
-         %14 = OpAccessChain %_ptr_Function_uint %11 %int_2
+         %14 = OpAccessChain %_ptr_Function_uint %11 %uint_2
          %17 = OpLoad %uint %14 None
                OpReturnValue %17
                OpFunctionEnd

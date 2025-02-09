@@ -1,4 +1,4 @@
-const o : i32 = 0i;
+override o : i32 = 1;
 
 @compute @workgroup_size(1)
 fn main() {

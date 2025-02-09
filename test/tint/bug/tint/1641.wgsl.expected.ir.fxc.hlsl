@@ -10,7 +10,7 @@ struct main_outputs {
 float4 main_inner() {
   int zero = int(0);
   Normals v[1] = {{float3(0.0f, 0.0f, 1.0f)}};
-  return float4(v[zero].f, 1.0f);
+  return float4(v[min(uint(zero), 0u)].f, 1.0f);
 }
 
 main_outputs main() {

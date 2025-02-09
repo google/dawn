@@ -6,55 +6,45 @@
                OpCapability Shader
          %22 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
-               OpEntryPoint GLCompute %tint_symbol_1 "tint_symbol_1" %tint_symbol_1_local_invocation_index_Input
-               OpExecutionMode %tint_symbol_1 LocalSize 1 1 1
-               OpMemberName %tint_symbol_block 0 "inner"
-               OpName %tint_symbol_block "tint_symbol_block"
-               OpName %tint_symbol_1_local_invocation_index_Input "tint_symbol_1_local_invocation_index_Input"
-               OpName %tint_symbol_1_inner "tint_symbol_1_inner"
-               OpName %tint_symbol_2 "tint_symbol_2"
-               OpName %tint_symbol_3 "tint_symbol_3"
-               OpName %tint_symbol_3 "tint_symbol_4"
-               OpName %tint_symbol_3 "tint_symbol_5"
-               OpName %tint_symbol_6 "tint_symbol_6"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpEntryPoint GLCompute %26 "tint_entry_point" %gl_LocalInvocationIndex
+               OpExecutionMode %26 LocalSize 1 1 1
                OpDecorate %_runtimearr_uint ArrayStride 4
-               OpMemberDecorate %tint_symbol_block 0 Offset 0
-               OpDecorate %tint_symbol_block Block
+               OpMemberDecorate %_struct_3 0 Offset 0
+               OpDecorate %_struct_3 Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
-               OpDecorate %tint_symbol_1_local_invocation_index_Input BuiltIn LocalInvocationIndex
+               OpDecorate %gl_LocalInvocationIndex BuiltIn LocalInvocationIndex
        %uint = OpTypeInt 32 0
 %_runtimearr_uint = OpTypeRuntimeArray %uint
-%tint_symbol_block = OpTypeStruct %_runtimearr_uint
-%_ptr_StorageBuffer_tint_symbol_block = OpTypePointer StorageBuffer %tint_symbol_block
-          %1 = OpVariable %_ptr_StorageBuffer_tint_symbol_block StorageBuffer
+  %_struct_3 = OpTypeStruct %_runtimearr_uint
+%_ptr_StorageBuffer__struct_3 = OpTypePointer StorageBuffer %_struct_3
+          %1 = OpVariable %_ptr_StorageBuffer__struct_3 StorageBuffer
 %_ptr_Input_uint = OpTypePointer Input %uint
-%tint_symbol_1_local_invocation_index_Input = OpVariable %_ptr_Input_uint Input
+%gl_LocalInvocationIndex = OpVariable %_ptr_Input_uint Input
        %void = OpTypeVoid
          %11 = OpTypeFunction %void %uint
         %int = OpTypeInt 32 1
-%tint_symbol_3 = OpConstant %int 0
+      %int_0 = OpConstant %int 0
 %_ptr_StorageBuffer__runtimearr_uint = OpTypePointer StorageBuffer %_runtimearr_uint
      %uint_0 = OpConstant %uint 0
      %uint_1 = OpConstant %uint 1
 %_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
          %27 = OpTypeFunction %void
-%tint_symbol_1_inner = OpFunction %void None %11
-%tint_symbol_2 = OpFunctionParameter %uint
+          %8 = OpFunction %void None %11
+         %10 = OpFunctionParameter %uint
          %12 = OpLabel
          %15 = OpAccessChain %_ptr_StorageBuffer__runtimearr_uint %1 %uint_0
          %18 = OpArrayLength %uint %1 0
          %19 = OpISub %uint %18 %uint_1
-         %21 = OpExtInst %uint %22 UMin %tint_symbol_2 %19
+         %21 = OpExtInst %uint %22 UMin %10 %19
          %23 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0 %21
-%tint_symbol_6 = OpLoad %uint %23 None
+         %25 = OpLoad %uint %23 None
                OpReturn
                OpFunctionEnd
-%tint_symbol_1 = OpFunction %void None %27
+         %26 = OpFunction %void None %27
          %28 = OpLabel
-         %29 = OpLoad %uint %tint_symbol_1_local_invocation_index_Input None
-         %30 = OpFunctionCall %void %tint_symbol_1_inner %29
+         %29 = OpLoad %uint %gl_LocalInvocationIndex None
+         %30 = OpFunctionCall %void %8 %29
                OpReturn
                OpFunctionEnd

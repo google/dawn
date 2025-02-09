@@ -30,16 +30,24 @@ int idx3() {
 void foo() {
   float a[4] = float[4](0.0f, 0.0f, 0.0f, 0.0f);
   {
-    int v_2 = idx1();
+    uvec2 tint_loop_idx = uvec2(0u);
+    uint v_2 = min(uint(idx1()), 3u);
     a[v_2] = (a[v_2] * 2.0f);
     while(true) {
-      int v_3 = idx2();
+      if (all(equal(tint_loop_idx, uvec2(4294967295u)))) {
+        break;
+      }
+      uint v_3 = min(uint(idx2()), 3u);
       if ((a[v_3] < 10.0f)) {
       } else {
         break;
       }
       {
-        int v_4 = idx3();
+        uint tint_low_inc = (tint_loop_idx.x + 1u);
+        tint_loop_idx.x = tint_low_inc;
+        uint tint_carry = uint((tint_low_inc == 0u));
+        tint_loop_idx.y = (tint_loop_idx.y + tint_carry);
+        uint v_4 = min(uint(idx3()), 3u);
         a[v_4] = (a[v_4] + 1.0f);
       }
       continue;

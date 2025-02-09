@@ -38,7 +38,7 @@ TEST(Limits, GetDefaultLimits) {
     Limits limits = {};
     EXPECT_NE(limits.maxBindGroups, 4u);
 
-    GetDefaultLimits(&limits, FeatureLevel::Core);
+    GetDefaultLimits(&limits, wgpu::FeatureLevel::Core);
 
     EXPECT_EQ(limits.maxBindGroups, 4u);
 }
@@ -49,33 +49,41 @@ TEST(Limits, GetDefaultLimits_Compat) {
     Limits limits = {};
     EXPECT_NE(limits.maxColorAttachments, 4u);
 
-    GetDefaultLimits(&limits, FeatureLevel::Compatibility);
+    GetDefaultLimits(&limits, wgpu::FeatureLevel::Compatibility);
 
     EXPECT_EQ(limits.maxColorAttachments, 4u);
 }
 
-// Test |ReifyDefaultLimits| populates the default for FeatureLevel::Core
+// Test |ReifyDefaultLimits| populates the default for wgpu::FeatureLevel::Core
 // if values are undefined.
 TEST(Limits, ReifyDefaultLimits_PopulatesDefault) {
     Limits limits;
     limits.maxComputeWorkgroupStorageSize = wgpu::kLimitU32Undefined;
     limits.maxStorageBufferBindingSize = wgpu::kLimitU64Undefined;
 
-    Limits reified = ReifyDefaultLimits(limits, FeatureLevel::Core);
+    Limits reified = ReifyDefaultLimits(limits, wgpu::FeatureLevel::Core);
     EXPECT_EQ(reified.maxComputeWorkgroupStorageSize, 16384u);
     EXPECT_EQ(reified.maxStorageBufferBindingSize, 134217728ul);
+    EXPECT_EQ(reified.maxStorageBuffersInFragmentStage, 8u);
+    EXPECT_EQ(reified.maxStorageTexturesInFragmentStage, 4u);
+    EXPECT_EQ(reified.maxStorageBuffersInVertexStage, 8u);
+    EXPECT_EQ(reified.maxStorageTexturesInVertexStage, 4u);
 }
 
-// Test |ReifyDefaultLimits| populates the default for FeatureLevel::Compatibility
+// Test |ReifyDefaultLimits| populates the default for wgpu::FeatureLevel::Compatibility
 // if values are undefined. Compatibility default limits are lower than Core.
 TEST(Limits, ReifyDefaultLimits_PopulatesDefault_Compat) {
     Limits limits;
     limits.maxTextureDimension1D = wgpu::kLimitU32Undefined;
     limits.maxStorageBufferBindingSize = wgpu::kLimitU64Undefined;
 
-    Limits reified = ReifyDefaultLimits(limits, FeatureLevel::Compatibility);
+    Limits reified = ReifyDefaultLimits(limits, wgpu::FeatureLevel::Compatibility);
     EXPECT_EQ(reified.maxTextureDimension1D, 4096u);
     EXPECT_EQ(reified.maxStorageBufferBindingSize, 134217728ul);
+    EXPECT_EQ(reified.maxStorageBuffersInFragmentStage, 0u);
+    EXPECT_EQ(reified.maxStorageTexturesInFragmentStage, 0u);
+    EXPECT_EQ(reified.maxStorageBuffersInVertexStage, 0u);
+    EXPECT_EQ(reified.maxStorageTexturesInVertexStage, 0u);
 }
 
 // Test |ReifyDefaultLimits| clamps to the default if
@@ -85,7 +93,7 @@ TEST(Limits, ReifyDefaultLimits_Clamps) {
     limits.maxStorageBuffersPerShaderStage = 4;
     limits.minUniformBufferOffsetAlignment = 512;
 
-    Limits reified = ReifyDefaultLimits(limits, FeatureLevel::Core);
+    Limits reified = ReifyDefaultLimits(limits, wgpu::FeatureLevel::Core);
     EXPECT_EQ(reified.maxStorageBuffersPerShaderStage, 8u);
     EXPECT_EQ(reified.minUniformBufferOffsetAlignment, 256u);
 }
@@ -93,14 +101,15 @@ TEST(Limits, ReifyDefaultLimits_Clamps) {
 // Test |ValidateLimits| works to validate limits are not better
 // than supported.
 TEST(Limits, ValidateLimits) {
+    const wgpu::FeatureLevel featureLevel = wgpu::FeatureLevel::Core;
     // Start with the default for supported.
     Limits defaults;
-    GetDefaultLimits(&defaults, FeatureLevel::Core);
+    GetDefaultLimits(&defaults, featureLevel);
 
     // Test supported == required is valid.
     {
         Limits required = defaults;
-        EXPECT_TRUE(ValidateLimits(defaults, required).IsSuccess());
+        EXPECT_TRUE(ValidateLimits(featureLevel, defaults, required).IsSuccess());
     }
 
     // Test supported == required is valid, when they are not default.
@@ -109,20 +118,20 @@ TEST(Limits, ValidateLimits) {
         Limits required = defaults;
         supported.maxBindGroups += 1;
         required.maxBindGroups += 1;
-        EXPECT_TRUE(ValidateLimits(supported, required).IsSuccess());
+        EXPECT_TRUE(ValidateLimits(featureLevel, supported, required).IsSuccess());
     }
 
     // Test that default-initialized (all undefined) is valid.
     {
         Limits required = {};
-        EXPECT_TRUE(ValidateLimits(defaults, required).IsSuccess());
+        EXPECT_TRUE(ValidateLimits(featureLevel, defaults, required).IsSuccess());
     }
 
     // Test that better than supported is invalid for "maximum" limits.
     {
         Limits required = {};
         required.maxTextureDimension3D = defaults.maxTextureDimension3D + 1;
-        MaybeError err = ValidateLimits(defaults, required);
+        MaybeError err = ValidateLimits(featureLevel, defaults, required);
         EXPECT_TRUE(err.IsError());
         err.AcquireError();
     }
@@ -131,14 +140,14 @@ TEST(Limits, ValidateLimits) {
     {
         Limits required = {};
         required.maxComputeWorkgroupSizeX = defaults.maxComputeWorkgroupSizeX - 1;
-        EXPECT_TRUE(ValidateLimits(defaults, required).IsSuccess());
+        EXPECT_TRUE(ValidateLimits(featureLevel, defaults, required).IsSuccess());
     }
 
     // Test that better than min is invalid for "alignment" limits.
     {
         Limits required = {};
         required.minUniformBufferOffsetAlignment = defaults.minUniformBufferOffsetAlignment / 2;
-        MaybeError err = ValidateLimits(defaults, required);
+        MaybeError err = ValidateLimits(featureLevel, defaults, required);
         EXPECT_TRUE(err.IsError());
         err.AcquireError();
     }
@@ -147,14 +156,143 @@ TEST(Limits, ValidateLimits) {
     {
         Limits required = {};
         required.minStorageBufferOffsetAlignment = defaults.minStorageBufferOffsetAlignment * 2;
-        EXPECT_TRUE(ValidateLimits(defaults, required).IsSuccess());
+        EXPECT_TRUE(ValidateLimits(featureLevel, defaults, required).IsSuccess());
     }
 
     // Test that worse than min and not a power of two is invalid for "alignment" limits.
     {
         Limits required = {};
         required.minStorageBufferOffsetAlignment = defaults.minStorageBufferOffsetAlignment * 3;
-        MaybeError err = ValidateLimits(defaults, required);
+        MaybeError err = ValidateLimits(featureLevel, defaults, required);
+        EXPECT_TRUE(err.IsError());
+        err.AcquireError();
+    }
+}
+
+// Test that maxStorage(Buffers|Textures)In(Fragment/Vertex)Stage
+// must be less than the requested dependent maxStorage(Buffers|Textures)PerShaderStage
+TEST(Limits, PerStageDependentLimitsRequested) {
+    const wgpu::FeatureLevel featureLevel = wgpu::FeatureLevel::Core;
+    // Start with the default for supported.
+    Limits defaults;
+    GetDefaultLimits(&defaults, featureLevel);
+
+    // Test at least one works.
+    {
+        Limits required = {};
+        required.maxStorageBuffersInFragmentStage = 2;
+        required.maxStorageBuffersPerShaderStage = 2;
+        EXPECT_TRUE(ValidateLimits(featureLevel, defaults, required).IsSuccess());
+    }
+
+    // Test maxStorageBuffersInFragmentStage fails if greater than
+    // requested maxStorageBuffersPerShaderStage
+    {
+        Limits required = {};
+        required.maxStorageBuffersInFragmentStage = 2;
+        required.maxStorageBuffersPerShaderStage = 1;
+        MaybeError err = ValidateLimits(featureLevel, defaults, required);
+        EXPECT_TRUE(err.IsError());
+        err.AcquireError();
+    }
+
+    // Test maxStorageBuffersInVertexStage fails if greater than
+    // requested maxStorageBuffersPerShaderStage
+    {
+        Limits required = {};
+        required.maxStorageBuffersInVertexStage = 2;
+        required.maxStorageBuffersPerShaderStage = 1;
+        MaybeError err = ValidateLimits(featureLevel, defaults, required);
+        EXPECT_TRUE(err.IsError());
+        err.AcquireError();
+    }
+
+    // Test maxStorageTexturesInFragmentStage fails if greater than
+    // requested maxStorageTexturesPerShaderStage
+    {
+        Limits required = {};
+        required.maxStorageTexturesInFragmentStage = 2;
+        required.maxStorageTexturesPerShaderStage = 1;
+        MaybeError err = ValidateLimits(featureLevel, defaults, required);
+        EXPECT_TRUE(err.IsError());
+        err.AcquireError();
+    }
+
+    // Test maxStorageTexturesInVertexStage fails if greater than requested
+    // maxStorageTexturesPerShaderStage
+    {
+        Limits required = {};
+        required.maxStorageTexturesInVertexStage = 2;
+        required.maxStorageTexturesPerShaderStage = 1;
+        MaybeError err = ValidateLimits(featureLevel, defaults, required);
+        EXPECT_TRUE(err.IsError());
+        err.AcquireError();
+    }
+}
+
+// Test that maxStorage(Buffers|Textures)In(Fragment/Vertex)Stage
+// must be less than the default dependent maxStorage(Buffers|Textures)PerShaderStage
+// if the dependent limit is not requested.
+TEST(Limits, PerStageDependentLimitsDefault) {
+    const wgpu::FeatureLevel featureLevel = wgpu::FeatureLevel::Core;
+    // Start with the default for supported.
+    Limits supported;
+    GetDefaultLimits(&supported, featureLevel);
+
+    const uint32_t kLimit = 100;
+
+    // set the supported higher than the default
+    supported.maxStorageBuffersInFragmentStage = kLimit;
+    supported.maxStorageBuffersInVertexStage = kLimit;
+    supported.maxStorageBuffersPerShaderStage = kLimit;
+    supported.maxStorageTexturesInFragmentStage = kLimit;
+    supported.maxStorageTexturesInVertexStage = kLimit;
+    supported.maxStorageTexturesPerShaderStage = kLimit;
+
+    // Check at least one works when limits match.
+    {
+        Limits required = {};
+        required.maxStorageBuffersInFragmentStage = kLimit;
+        required.maxStorageBuffersPerShaderStage = kLimit;
+        EXPECT_TRUE(ValidateLimits(featureLevel, supported, required).IsSuccess());
+    }
+
+    // Test maxStorageBuffersInFragmentStage fails if greater than
+    // requested maxStorageBuffersPerShaderStage
+    {
+        Limits required = {};
+        required.maxStorageBuffersInFragmentStage = kLimit;
+        MaybeError err = ValidateLimits(featureLevel, supported, required);
+        EXPECT_TRUE(err.IsError());
+        err.AcquireError();
+    }
+
+    // Test maxStorageBuffersInVertexStage fails if greater than
+    // requested maxStorageBuffersPerShaderStage
+    {
+        Limits required = {};
+        required.maxStorageBuffersInVertexStage = kLimit;
+        MaybeError err = ValidateLimits(featureLevel, supported, required);
+        EXPECT_TRUE(err.IsError());
+        err.AcquireError();
+    }
+
+    // Test maxStorageTexturesInFragmentStage fails if greater than
+    // requested maxStorageTexturesPerShaderStage
+    {
+        Limits required = {};
+        required.maxStorageTexturesInFragmentStage = kLimit;
+        MaybeError err = ValidateLimits(featureLevel, supported, required);
+        EXPECT_TRUE(err.IsError());
+        err.AcquireError();
+    }
+
+    // Test maxStorageTexturesInVertexStage fails if greater than requested
+    // maxStorageTexturesPerShaderStage
+    {
+        Limits required = {};
+        required.maxStorageTexturesInVertexStage = kLimit;
+        MaybeError err = ValidateLimits(featureLevel, supported, required);
         EXPECT_TRUE(err.IsError());
         err.AcquireError();
     }
@@ -170,7 +308,7 @@ TEST(Limits, ApplyLimitTiers) {
         limits->maxBufferSize = 2147483648;
     };
     Limits limitsStorageBufferBindingSizeTier2;
-    GetDefaultLimits(&limitsStorageBufferBindingSizeTier2, FeatureLevel::Core);
+    GetDefaultLimits(&limitsStorageBufferBindingSizeTier2, wgpu::FeatureLevel::Core);
     SetLimitsStorageBufferBindingSizeTier2(&limitsStorageBufferBindingSizeTier2);
 
     auto SetLimitsStorageBufferBindingSizeTier3 = [](Limits* limits) {
@@ -181,21 +319,21 @@ TEST(Limits, ApplyLimitTiers) {
         limits->maxBufferSize = 2147483648;
     };
     Limits limitsStorageBufferBindingSizeTier3;
-    GetDefaultLimits(&limitsStorageBufferBindingSizeTier3, FeatureLevel::Core);
+    GetDefaultLimits(&limitsStorageBufferBindingSizeTier3, wgpu::FeatureLevel::Core);
     SetLimitsStorageBufferBindingSizeTier3(&limitsStorageBufferBindingSizeTier3);
 
     auto SetLimitsComputeWorkgroupStorageSizeTier1 = [](Limits* limits) {
         limits->maxComputeWorkgroupStorageSize = 16384;
     };
     Limits limitsComputeWorkgroupStorageSizeTier1;
-    GetDefaultLimits(&limitsComputeWorkgroupStorageSizeTier1, FeatureLevel::Core);
+    GetDefaultLimits(&limitsComputeWorkgroupStorageSizeTier1, wgpu::FeatureLevel::Core);
     SetLimitsComputeWorkgroupStorageSizeTier1(&limitsComputeWorkgroupStorageSizeTier1);
 
     auto SetLimitsComputeWorkgroupStorageSizeTier3 = [](Limits* limits) {
         limits->maxComputeWorkgroupStorageSize = 65536;
     };
     Limits limitsComputeWorkgroupStorageSizeTier3;
-    GetDefaultLimits(&limitsComputeWorkgroupStorageSizeTier3, FeatureLevel::Core);
+    GetDefaultLimits(&limitsComputeWorkgroupStorageSizeTier3, wgpu::FeatureLevel::Core);
     SetLimitsComputeWorkgroupStorageSizeTier3(&limitsComputeWorkgroupStorageSizeTier3);
 
     // Test that applying tiers to limits that are exactly
@@ -239,7 +377,7 @@ TEST(Limits, ApplyLimitTiers) {
     // Test that limits may be simultaneously degraded in two tiers independently.
     {
         Limits limits;
-        GetDefaultLimits(&limits, FeatureLevel::Core);
+        GetDefaultLimits(&limits, wgpu::FeatureLevel::Core);
         SetLimitsComputeWorkgroupStorageSizeTier3(&limits);
         SetLimitsStorageBufferBindingSizeTier3(&limits);
         limits.maxComputeWorkgroupStorageSize =
@@ -261,7 +399,7 @@ TEST(Limits, ApplyLimitTiers) {
 TEST(Limits, TieredMaxStorageBufferBindingSizeNoLargerThanMaxBufferSize) {
     // Start with the default for supported.
     Limits defaults;
-    GetDefaultLimits(&defaults, FeatureLevel::Core);
+    GetDefaultLimits(&defaults, wgpu::FeatureLevel::Core);
 
     // Test reported maxStorageBufferBindingSize around 128MB, 1GB, 2GB-4 and 4GB-4.
     constexpr uint64_t storageSizeTier1 = 134217728ull;   // 128MB
@@ -303,7 +441,7 @@ TEST(Limits, TieredMaxStorageBufferBindingSizeNoLargerThanMaxBufferSize) {
 TEST(Limits, TieredMaxUniformBufferBindingSizeNoLargerThanMaxBufferSize) {
     // Start with the default for supported.
     Limits defaults;
-    GetDefaultLimits(&defaults, FeatureLevel::Core);
+    GetDefaultLimits(&defaults, wgpu::FeatureLevel::Core);
 
     // Test reported maxStorageBufferBindingSize around 64KB, and a large 1GB.
     constexpr uint64_t uniformSizeTier1 = 65536ull;       // 64KB
@@ -340,7 +478,7 @@ TEST(Limits, TieredMaxUniformBufferBindingSizeNoLargerThanMaxBufferSize) {
 TEST(Limits, NormalizeLimits) {
     // Start with the default for supported.
     Limits defaults;
-    GetDefaultLimits(&defaults, FeatureLevel::Core);
+    GetDefaultLimits(&defaults, wgpu::FeatureLevel::Core);
 
     // Test specific limit values are clamped to internal Dawn constants.
     {

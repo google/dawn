@@ -6,7 +6,7 @@ struct S {
 
 uint f() {
   S a = (S)0;
-  return a.n[int(2)];
+  return a.n[2u];
 }
 
 [numthreads(1, 1, 1)]

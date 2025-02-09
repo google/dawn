@@ -1,3 +1,6 @@
+//
+// vtx_main
+//
 cbuffer cbuffer_uniforms : register(b0) {
   uint4 uniforms[4];
 };
@@ -35,18 +38,20 @@ VertexOutput vtx_main_inner(VertexInput input) {
 }
 
 tint_symbol_2 vtx_main(tint_symbol_1 tint_symbol) {
-  VertexInput tint_symbol_6 = {tint_symbol.cur_position, tint_symbol.color};
-  VertexOutput inner_result = vtx_main_inner(tint_symbol_6);
+  VertexInput tint_symbol_3 = {tint_symbol.cur_position, tint_symbol.color};
+  VertexOutput inner_result = vtx_main_inner(tint_symbol_3);
   tint_symbol_2 wrapper_result = (tint_symbol_2)0;
   wrapper_result.vtxFragColor = inner_result.vtxFragColor;
   wrapper_result.Position = inner_result.Position;
   return wrapper_result;
 }
-
-struct tint_symbol_4 {
+//
+// frag_main
+//
+struct tint_symbol_1 {
   float4 fragColor : TEXCOORD0;
 };
-struct tint_symbol_5 {
+struct tint_symbol_2 {
   float4 value : SV_Target0;
 };
 
@@ -54,9 +59,9 @@ float4 frag_main_inner(float4 fragColor) {
   return fragColor;
 }
 
-tint_symbol_5 frag_main(tint_symbol_4 tint_symbol_3) {
-  float4 inner_result_1 = frag_main_inner(tint_symbol_3.fragColor);
-  tint_symbol_5 wrapper_result_1 = (tint_symbol_5)0;
-  wrapper_result_1.value = inner_result_1;
-  return wrapper_result_1;
+tint_symbol_2 frag_main(tint_symbol_1 tint_symbol) {
+  float4 inner_result = frag_main_inner(tint_symbol.fragColor);
+  tint_symbol_2 wrapper_result = (tint_symbol_2)0;
+  wrapper_result.value = inner_result;
+  return wrapper_result;
 }

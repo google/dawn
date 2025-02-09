@@ -110,10 +110,10 @@ class RequiredBufferSizeInCopyTests
         texDesc.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc;
         wgpu::Texture texture = device.CreateTexture(&texDesc);
 
-        wgpu::ImageCopyTexture imageCopyTexture =
-            utils::CreateImageCopyTexture(texture, 0, {0, 0, 0});
-        wgpu::ImageCopyBuffer imageCopyBuffer =
-            utils::CreateImageCopyBuffer(buffer, kOffset, kBytesPerRow, rowsPerImage);
+        wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(texture, 0, {0, 0, 0});
+        wgpu::TexelCopyBufferInfo texelCopyBufferInfo =
+            utils::CreateTexelCopyBufferInfo(buffer, kOffset, kBytesPerRow, rowsPerImage);
 
         // Initialize copied data and set expected data for buffer and texture.
         DAWN_ASSERT(sizeof(uint32_t) == kBytesPerBlock);
@@ -135,18 +135,18 @@ class RequiredBufferSizeInCopyTests
         wgpu::CommandEncoder encoder = this->device.CreateCommandEncoder();
         switch (GetParam().mType) {
             case Type::T2BCopy: {
-                wgpu::TextureDataLayout textureDataLayout =
-                    utils::CreateTextureDataLayout(kOffset, kBytesPerRow, rowsPerImage);
+                wgpu::TexelCopyBufferLayout texelCopyBufferLayout =
+                    utils::CreateTexelCopyBufferLayout(kOffset, kBytesPerRow, rowsPerImage);
 
-                queue.WriteTexture(&imageCopyTexture, data.data(), bufferSize, &textureDataLayout,
-                                   &copySize);
+                queue.WriteTexture(&texelCopyTextureInfo, data.data(), bufferSize,
+                                   &texelCopyBufferLayout, &copySize);
 
-                encoder.CopyTextureToBuffer(&imageCopyTexture, &imageCopyBuffer, &copySize);
+                encoder.CopyTextureToBuffer(&texelCopyTextureInfo, &texelCopyBufferInfo, &copySize);
                 break;
             }
             case Type::B2TCopy:
                 queue.WriteBuffer(buffer, 0, data.data(), bufferSize);
-                encoder.CopyBufferToTexture(&imageCopyBuffer, &imageCopyTexture, &copySize);
+                encoder.CopyBufferToTexture(&texelCopyBufferInfo, &texelCopyTextureInfo, &copySize);
                 break;
         }
         wgpu::CommandBuffer commands = encoder.Finish();
@@ -211,15 +211,13 @@ TEST_P(RequiredBufferSizeInCopyTests, MinimumBufferSize) {
     DoTest(size, copySize, rowsPerImage);
 }
 
-DAWN_INSTANTIATE_TEST_P(
-    RequiredBufferSizeInCopyTests,
-    {D3D11Backend(), D3D12Backend(),
-     D3D12Backend({"d3d12_split_buffer_texture_copy_for_rows_per_image_paddings"}), MetalBackend(),
-     OpenGLBackend(), OpenGLESBackend(), VulkanBackend()},
-    {Type::T2BCopy, Type::B2TCopy},
-    {wgpu::TextureDimension::e3D, wgpu::TextureDimension::e2D},
-    {2u, 1u},
-    {1u, 0u});
+DAWN_INSTANTIATE_TEST_P(RequiredBufferSizeInCopyTests,
+                        {D3D11Backend(), D3D12Backend(), MetalBackend(), OpenGLBackend(),
+                         OpenGLESBackend(), VulkanBackend()},
+                        {Type::T2BCopy, Type::B2TCopy},
+                        {wgpu::TextureDimension::e3D, wgpu::TextureDimension::e2D},
+                        {2u, 1u},
+                        {1u, 0u});
 
 }  // anonymous namespace
 }  // namespace dawn

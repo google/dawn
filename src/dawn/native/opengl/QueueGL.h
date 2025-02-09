@@ -32,18 +32,24 @@
 #include <utility>
 
 #include "dawn/native/Queue.h"
+#include "dawn/native/opengl/UtilsEGL.h"
 #include "dawn/native/opengl/opengl_platform.h"
 
 namespace dawn::native::opengl {
 
 class Device;
+class SharedFence;
 
 class Queue final : public QueueBase {
   public:
     static ResultOrError<Ref<Queue>> Create(Device* device, const QueueDescriptor* descriptor);
 
     void OnGLUsed();
-    void SubmitFenceSync();
+    MaybeError SubmitFenceSync();
+
+    // Returns a shared fence which represents work done up to lastUsageSerial. It may be a cached
+    // fence or newly created.
+    ResultOrError<Ref<SharedFence>> GetOrCreateSharedFence(ExecutionSerial lastUsageSerial);
 
   private:
     Queue(Device* device, const QueueDescriptor* descriptor);
@@ -53,13 +59,11 @@ class Queue final : public QueueBase {
                                uint64_t bufferOffset,
                                const void* data,
                                size_t size) override;
-    MaybeError WriteTextureImpl(const ImageCopyTexture& destination,
+    MaybeError WriteTextureImpl(const TexelCopyTextureInfo& destination,
                                 const void* data,
                                 size_t dataSize,
-                                const TextureDataLayout& dataLayout,
+                                const TexelCopyBufferLayout& dataLayout,
                                 const Extent3D& writeSizePixel) override;
-
-    GLenum ClientWaitSync(EGLSyncKHR sync, Nanoseconds timeout);
 
     ResultOrError<bool> WaitForQueueSerial(ExecutionSerial serial, Nanoseconds timeout) override;
 
@@ -70,7 +74,7 @@ class Queue final : public QueueBase {
     MaybeError WaitForIdleForDestruction() override;
 
     uint32_t mEGLSyncType;
-    MutexProtected<std::deque<std::pair<EGLSyncKHR, ExecutionSerial>>> mFencesInFlight;
+    MutexProtected<std::deque<std::pair<Ref<WrappedEGLSync>, ExecutionSerial>>> mFencesInFlight;
 
     // Has pending GL commands which are not associated with a fence.
     bool mHasPendingCommands = false;

@@ -15,7 +15,7 @@ buffer s_block_1_ssbo {
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   v_1.inner = f16mat4x2(v.inner_col0, v.inner_col1, v.inner_col2, v.inner_col3);
-  v_1.inner[1] = f16mat4x2(v.inner_col0, v.inner_col1, v.inner_col2, v.inner_col3)[0];
-  v_1.inner[1] = f16mat4x2(v.inner_col0, v.inner_col1, v.inner_col2, v.inner_col3)[0].yx;
-  v_1.inner[0][1] = f16mat4x2(v.inner_col0, v.inner_col1, v.inner_col2, v.inner_col3)[1][0];
+  v_1.inner[1u] = f16mat4x2(v.inner_col0, v.inner_col1, v.inner_col2, v.inner_col3)[0u];
+  v_1.inner[1u] = f16mat4x2(v.inner_col0, v.inner_col1, v.inner_col2, v.inner_col3)[0u].yx;
+  v_1.inner[0u].y = f16mat4x2(v.inner_col0, v.inner_col1, v.inner_col2, v.inner_col3)[1u].x;
 }

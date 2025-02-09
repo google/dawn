@@ -19,7 +19,7 @@ static float arr_var[4] = (float[4])0;
 static S struct_var = (S)0;
 groupshared float wg_var;
 void main_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     wg_var = 0.0f;
   }
   GroupMemoryBarrierWithGroupSync();

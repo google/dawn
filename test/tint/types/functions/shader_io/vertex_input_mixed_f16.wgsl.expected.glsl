@@ -18,13 +18,13 @@ struct VertexInputs1 {
 };
 
 layout(location = 0) uniform tint_push_constant_struct tint_push_constants;
-layout(location = 0) in int tint_symbol_loc0_Input;
-layout(location = 1) in uint tint_symbol_loc1_Input;
-layout(location = 2) in float tint_symbol_loc2_Input;
-layout(location = 3) in vec4 tint_symbol_loc3_Input;
-layout(location = 5) in f16vec3 tint_symbol_loc5_Input;
-layout(location = 4) in float16_t tint_symbol_loc4_Input;
-vec4 tint_symbol_inner(VertexInputs0 inputs0, uint loc1, uint instance_index, VertexInputs1 inputs1, float16_t loc4) {
+layout(location = 0) in int main_loc0_Input;
+layout(location = 1) in uint main_loc1_Input;
+layout(location = 2) in float main_loc2_Input;
+layout(location = 3) in vec4 main_loc3_Input;
+layout(location = 5) in f16vec3 main_loc5_Input;
+layout(location = 4) in float16_t main_loc4_Input;
+vec4 main_inner(VertexInputs0 inputs0, uint loc1, uint instance_index, VertexInputs1 inputs1, float16_t loc4) {
   uint foo = (inputs0.vertex_index + instance_index);
   int i = inputs0.loc0;
   uint u = loc1;
@@ -36,13 +36,12 @@ vec4 tint_symbol_inner(VertexInputs0 inputs0, uint loc1, uint instance_index, Ve
 }
 void main() {
   uint v_1 = uint(gl_VertexID);
-  VertexInputs0 v_2 = VertexInputs0(v_1, tint_symbol_loc0_Input);
-  uint v_3 = tint_symbol_loc1_Input;
+  VertexInputs0 v_2 = VertexInputs0(v_1, main_loc0_Input);
+  uint v_3 = main_loc1_Input;
   uint v_4 = uint(gl_InstanceID);
   uint v_5 = (v_4 + tint_push_constants.tint_first_instance);
-  VertexInputs1 v_6 = VertexInputs1(tint_symbol_loc2_Input, tint_symbol_loc3_Input, tint_symbol_loc5_Input);
-  gl_Position = tint_symbol_inner(v_2, v_3, v_5, v_6, tint_symbol_loc4_Input);
-  gl_Position[1u] = -(gl_Position.y);
-  gl_Position[2u] = ((2.0f * gl_Position.z) - gl_Position.w);
+  VertexInputs1 v_6 = VertexInputs1(main_loc2_Input, main_loc3_Input, main_loc5_Input);
+  vec4 v_7 = main_inner(v_2, v_3, v_5, v_6, main_loc4_Input);
+  gl_Position = vec4(v_7.x, -(v_7.y), ((2.0f * v_7.z) - v_7.w), v_7.w);
   gl_PointSize = 1.0f;
 }

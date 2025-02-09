@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 RWByteAddressBuffer prevent_dce : register(u0);
 
 float3 faceForward_5afbd5() {
@@ -12,11 +15,33 @@ void fragment_main() {
   prevent_dce.Store3(0u, asuint(faceForward_5afbd5()));
   return;
 }
+//
+// compute_main
+//
+RWByteAddressBuffer prevent_dce : register(u0);
+
+float3 faceForward_5afbd5() {
+  float3 arg_0 = (1.0f).xxx;
+  float3 arg_1 = (1.0f).xxx;
+  float3 arg_2 = (1.0f).xxx;
+  float3 res = faceforward(arg_0, arg_1, arg_2);
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store3(0u, asuint(faceForward_5afbd5()));
   return;
+}
+//
+// vertex_main
+//
+float3 faceForward_5afbd5() {
+  float3 arg_0 = (1.0f).xxx;
+  float3 arg_1 = (1.0f).xxx;
+  float3 arg_2 = (1.0f).xxx;
+  float3 res = faceforward(arg_0, arg_1, arg_2);
+  return res;
 }
 
 struct VertexOutput {

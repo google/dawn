@@ -56,6 +56,9 @@ void unused_entry_point() {
 }
 
 )");
+    EXPECT_EQ(1u, output_.workgroup_info.x);
+    EXPECT_EQ(1u, output_.workgroup_info.y);
+    EXPECT_EQ(1u, output_.workgroup_info.z);
 }
 
 TEST_F(HlslWriterTest, FunctionWithParams) {
@@ -118,11 +121,14 @@ void main_inner(Interface p) {
 }
 
 void main(main_inputs inputs) {
-  Interface v = {float4(inputs.Interface_pos.xyz, (1.0f / inputs.Interface_pos[3u]))};
+  Interface v = {float4(inputs.Interface_pos.xyz, (1.0f / inputs.Interface_pos.w))};
   main_inner(v);
 }
 
 )");
+    EXPECT_EQ(0u, output_.workgroup_info.x);
+    EXPECT_EQ(0u, output_.workgroup_info.y);
+    EXPECT_EQ(0u, output_.workgroup_info.z);
 }
 
 TEST_F(HlslWriterTest, FunctionPtrParameter) {
@@ -214,7 +220,7 @@ float frag_main_inner(float4 coord) {
 }
 
 frag_main_outputs frag_main(frag_main_inputs inputs) {
-  frag_main_outputs v = {frag_main_inner(float4(inputs.coord.xyz, (1.0f / inputs.coord[3u])))};
+  frag_main_outputs v = {frag_main_inner(float4(inputs.coord.xyz, (1.0f / inputs.coord.w)))};
   return v;
 }
 
@@ -313,11 +319,14 @@ vert_main_outputs vert_main() {
 }
 
 void frag_main(frag_main_inputs inputs) {
-  Interface v_3 = {float4(inputs.Interface_pos.xyz, (1.0f / inputs.Interface_pos[3u])), inputs.Interface_col1, inputs.Interface_col2};
+  Interface v_3 = {float4(inputs.Interface_pos.xyz, (1.0f / inputs.Interface_pos.w)), inputs.Interface_col1, inputs.Interface_col2};
   frag_main_inner(v_3);
 }
 
 )");
+    EXPECT_EQ(0u, output_.workgroup_info.x);
+    EXPECT_EQ(0u, output_.workgroup_info.y);
+    EXPECT_EQ(0u, output_.workgroup_info.z);
 }
 
 TEST_F(HlslWriterTest, FunctionEntryPointSharedStructHelperFunction) {
@@ -790,6 +799,10 @@ void main() {
 }
 
 )");
+
+    EXPECT_EQ(2u, output_.workgroup_info.x);
+    EXPECT_EQ(4u, output_.workgroup_info.y);
+    EXPECT_EQ(6u, output_.workgroup_info.z);
 }
 
 TEST_F(HlslWriterTest, FunctionWithArrayParams) {
@@ -835,7 +848,7 @@ void unused_entry_point() {
 )");
 }
 
-TEST_F(HlslWriterTest, FunctionWithDiscardAndVoidReturn) {
+TEST_F(HlslWriterTest, FunctionWithDiscardAndVoidReturnWithContinueExecution) {
     // fn my_func(a: i32) {
     //   if (a == 0) {
     //     discard;
@@ -854,8 +867,10 @@ TEST_F(HlslWriterTest, FunctionWithDiscardAndVoidReturn) {
         });
         b.Return(func);
     });
-
-    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    tint::hlsl::writer::Options options;
+    // FXC must use demote to helper transform.
+    options.compiler = tint::hlsl::writer::Options::Compiler::kFXC;
+    ASSERT_TRUE(Generate(options)) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 static bool continue_execution = true;
 void my_func(int a) {
@@ -871,7 +886,43 @@ void unused_entry_point() {
 )");
 }
 
-TEST_F(HlslWriterTest, FunctionWithDiscardAndNonVoidReturn) {
+TEST_F(HlslWriterTest, FunctionWithDiscardAndVoidReturnWithPlatformDiscard) {
+    // fn my_func(a: i32) {
+    //   if (a == 0) {
+    //     discard;
+    //   }
+    // }
+
+    auto* func = b.Function("my_func", ty.void_());
+    auto* p = b.FunctionParam("a", ty.i32());
+    func->SetParams({p});
+
+    b.Append(func->Block(), [&] {
+        auto* i = b.If(b.Equal(ty.bool_(), p, 0_i));
+        b.Append(i->True(), [&] {
+            b.Discard();
+            b.ExitIf(i);
+        });
+        b.Return(func);
+    });
+    tint::hlsl::writer::Options options;
+    options.compiler = tint::hlsl::writer::Options::Compiler::kDXC;
+    ASSERT_TRUE(Generate(options)) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+void my_func(int a) {
+  if ((a == int(0))) {
+    discard;
+  }
+}
+
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+}
+
+)");
+}
+
+TEST_F(HlslWriterTest, FunctionWithDiscardAndNonVoidReturnWithContinueExecution) {
     // fn my_func(a: i32) -> i32 {
     //   if (a == 0) {
     //     discard;
@@ -892,12 +943,55 @@ TEST_F(HlslWriterTest, FunctionWithDiscardAndNonVoidReturn) {
         b.Return(func, 42_i);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    tint::hlsl::writer::Options options;
+    // FXC must use demote to helper transform.
+    options.compiler = tint::hlsl::writer::Options::Compiler::kFXC;
+
+    ASSERT_TRUE(Generate(options)) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 static bool continue_execution = true;
 int my_func(int a) {
   if ((a == int(0))) {
     continue_execution = false;
+  }
+  return int(42);
+}
+
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+}
+
+)");
+}
+
+TEST_F(HlslWriterTest, FunctionWithDiscardAndNonVoidReturnWithPlatformDiscard) {
+    // fn my_func(a: i32) -> i32 {
+    //   if (a == 0) {
+    //     discard;
+    //   }
+    //   return 42;
+    // }
+
+    auto* func = b.Function("my_func", ty.i32());
+    auto* a = b.FunctionParam("a", ty.i32());
+    func->SetParams({a});
+
+    b.Append(func->Block(), [&] {
+        auto* i = b.If(b.Equal(ty.bool_(), a, 0_i));
+        b.Append(i->True(), [&] {
+            b.Discard();
+            b.ExitIf(i);
+        });
+        b.Return(func, 42_i);
+    });
+
+    tint::hlsl::writer::Options options;
+    options.compiler = tint::hlsl::writer::Options::Compiler::kDXC;
+    ASSERT_TRUE(Generate(options)) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+int my_func(int a) {
+  if ((a == int(0))) {
+    discard;
   }
   return int(42);
 }
@@ -993,6 +1087,95 @@ void foo() {
 }
 
 )");
+}
+
+TEST_F(HlslWriterTest, WorkgroupStorageSizeEmpty) {
+    auto* func = b.ComputeFunction("main", 32_u, 4_u, 1_u);
+    b.Append(func->Block(), [&] {  //
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(0u, output_.workgroup_info.storage_size);
+}
+
+TEST_F(HlslWriterTest, WorkgroupStorageSizeSimple) {
+    auto* var = mod.root_block->Append(b.Var("var", ty.ptr(workgroup, ty.f32())));
+    auto* var2 = mod.root_block->Append(b.Var("var2", ty.ptr(workgroup, ty.i32())));
+
+    auto* func = b.ComputeFunction("main", 32_u, 4_u, 1_u);
+    b.Append(func->Block(), [&] {  //
+        b.Let("x", var);
+        b.Let("y", var2);
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(32u, output_.workgroup_info.storage_size);
+}
+
+TEST_F(HlslWriterTest, WorkgroupStorageSizeCompoundTypes) {
+    Vector members{
+        ty.Get<core::type::StructMember>(mod.symbols.New("a"), ty.i32(), 0u, 0u, 4u, 4u,
+                                         core::IOAttributes{}),
+        ty.Get<core::type::StructMember>(mod.symbols.New("b"), ty.array<i32, 4>(), 1u, 4u, 16u, 64u,
+                                         core::IOAttributes{}),
+    };
+
+    // This struct should occupy 68 bytes. 4 from the i32 field, and another 64
+    // from the 4-element array with 16-byte stride.
+    auto* wg_struct_ty = ty.Struct(mod.symbols.New("WgStruct"), members);
+    auto* str_var = mod.root_block->Append(b.Var("var_struct", ty.ptr(workgroup, wg_struct_ty)));
+
+    // Plus another 4 bytes from this other workgroup-class f32.
+    auto* f32_var = mod.root_block->Append(b.Var("var_f32", ty.ptr(workgroup, ty.f32())));
+
+    auto* func = b.ComputeFunction("main", 32_u, 4_u, 1_u);
+    b.Append(func->Block(), [&] {  //
+        b.Let("x", f32_var);
+        b.Let("y", str_var);
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(96u, output_.workgroup_info.storage_size);
+}
+
+TEST_F(HlslWriterTest, WorkgroupStorageSizeAlignmentPadding) {
+    // vec3<f32> has an alignment of 16 but a size of 12. We leverage this to test
+    // that our padded size calculation for workgroup storage is accurate.
+    auto* var = mod.root_block->Append(b.Var("var_f32", ty.ptr(workgroup, ty.vec3<f32>())));
+
+    auto* func = b.ComputeFunction("main", 32_u, 4_u, 1_u);
+    b.Append(func->Block(), [&] {  //
+        b.Let("x", var);
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(16u, output_.workgroup_info.storage_size);
+}
+
+TEST_F(HlslWriterTest, WorkgroupStorageSizeStructAlignment) {
+    // Per WGSL spec, a struct's size is the offset its last member plus the size
+    // of its last member, rounded up to the alignment of its largest member. So
+    // here the struct is expected to occupy 1024 bytes of workgroup storage.
+    Vector members{
+        ty.Get<core::type::StructMember>(mod.symbols.New("a"), ty.i32(), 0u, 0u, 1024u, 4u,
+                                         core::IOAttributes{}),
+    };
+
+    auto* wg_struct_ty = ty.Struct(mod.symbols.New("WgStruct"), members);
+    auto* var = mod.root_block->Append(b.Var("var_f32", ty.ptr(workgroup, wg_struct_ty)));
+
+    auto* func = b.ComputeFunction("main", 32_u, 4_u, 1_u);
+    b.Append(func->Block(), [&] {  //
+        b.Let("x", var);
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(1024u, output_.workgroup_info.storage_size);
 }
 
 }  // namespace

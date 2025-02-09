@@ -45,9 +45,9 @@ ary_ret v_6(uint start_byte_offset) {
 void f() {
   matrix<float16_t, 4, 2> v_10[4] = v_6(0u);
   p = v_10;
-  p[int(1)] = v_2(32u);
-  p[int(1)][int(0)] = tint_bitcast_to_f16(u[0u].y).yx;
-  p[int(1)][int(0)][0u] = float16_t(f16tof32(u[0u].y));
-  s.Store<float16_t>(0u, p[int(1)][int(0)].x);
+  p[1u] = v_2(32u);
+  p[1u][0u] = tint_bitcast_to_f16(u[0u].y).yx;
+  p[1u][0u].x = float16_t(f16tof32(u[0u].y));
+  s.Store<float16_t>(0u, p[1u][0u].x);
 }
 

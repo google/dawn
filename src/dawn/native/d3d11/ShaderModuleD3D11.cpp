@@ -88,13 +88,14 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
 
     ScopedTintICEHandler scopedICEHandler(device);
     const EntryPointMetadata& entryPoint = GetEntryPoint(programmableStage.entryPoint);
+    const bool useTintIR = device->IsToggleEnabled(Toggle::UseTintIR);
 
     d3d::D3DCompilationRequest req = {};
     req.tracePlatform = UnsafeUnkeyedValue(device->GetPlatform());
     req.hlsl.shaderModel = 50;
     req.hlsl.disableSymbolRenaming = device->IsToggleEnabled(Toggle::DisableSymbolRenaming);
     req.hlsl.dumpShaders = device->IsToggleEnabled(Toggle::DumpShaders);
-    req.hlsl.useTintIR = device->IsToggleEnabled(Toggle::UseTintIR);
+    req.hlsl.useTintIR = useTintIR;
 
     req.bytecode.hasShaderF16Feature = false;
     req.bytecode.compileFlags = compileFlags;
@@ -147,6 +148,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
                             srcBindingPoint, tint::hlsl::writer::binding::Storage{
                                                  dstBindingPoint.group, dstBindingPoint.binding});
                         break;
+                    case wgpu::BufferBindingType::BindingNotUsed:
                     case wgpu::BufferBindingType::Undefined:
                         DAWN_UNREACHABLE();
                         break;
@@ -195,25 +197,29 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     req.hlsl.stage = stage;
     // Put the firstIndex into the internally reserved group and binding to avoid conflicting with
     // any existing bindings.
-    req.hlsl.firstIndexOffsetRegisterSpace = PipelineLayout::kReservedConstantsBindGroupIndex;
-    req.hlsl.firstIndexOffsetShaderRegister = PipelineLayout::kFirstIndexOffsetBindingNumber;
-    // Remap to the desired space and binding, [0, kFirstIndexOffsetConstantBufferSlot].
-    {
-        tint::BindingPoint srcBindingPoint{req.hlsl.firstIndexOffsetRegisterSpace,
-                                           req.hlsl.firstIndexOffsetShaderRegister};
-        // D3D11 (HLSL SM5.0) doesn't support spaces, so we have to put the firstIndex in the
-        // default space(0)
-        tint::BindingPoint dstBindingPoint{0u, PipelineLayout::kFirstIndexOffsetConstantBufferSlot};
+    if (!useTintIR) {
+        req.hlsl.firstIndexOffsetRegisterSpace = PipelineLayout::kReservedConstantsBindGroupIndex;
+        req.hlsl.firstIndexOffsetShaderRegister = PipelineLayout::kFirstIndexOffsetBindingNumber;
+        // Remap to the desired space and binding, [0, kFirstIndexOffsetConstantBufferSlot].
+        {
+            tint::BindingPoint srcBindingPoint{req.hlsl.firstIndexOffsetRegisterSpace,
+                                               req.hlsl.firstIndexOffsetShaderRegister};
+            // D3D11 (HLSL SM5.0) doesn't support spaces, so we have to put the firstIndex in the
+            // default space(0)
+            tint::BindingPoint dstBindingPoint{0u,
+                                               PipelineLayout::kFirstIndexOffsetConstantBufferSlot};
 
-        bindings.uniform.emplace(
-            srcBindingPoint,
-            tint::hlsl::writer::binding::Uniform{dstBindingPoint.group, dstBindingPoint.binding});
+            bindings.uniform.emplace(srcBindingPoint,
+                                     tint::hlsl::writer::binding::Uniform{dstBindingPoint.group,
+                                                                          dstBindingPoint.binding});
+        }
     }
 
     req.hlsl.substituteOverrideConfig = std::move(substituteOverrideConfig);
 
     const CombinedLimits& limits = device->GetLimits();
     req.hlsl.limits = LimitsForCompilationRequest::Create(limits.v1);
+    req.hlsl.adapter = UnsafeUnkeyedValue(static_cast<const AdapterBase*>(device->GetAdapter()));
 
     req.hlsl.tintOptions.disable_robustness = !device->IsRobustnessEnabled();
     req.hlsl.tintOptions.disable_workgroup_init =
@@ -221,10 +227,13 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     req.hlsl.tintOptions.bindings = std::move(bindings);
 
     if (entryPoint.usesNumWorkgroups) {
-        // D3D11 (HLSL SM5.0) doesn't support spaces, so we have to put the numWorkgroups in the
-        // default space(0)
+        DAWN_ASSERT(stage == SingleShaderStage::Compute);
         req.hlsl.tintOptions.root_constant_binding_point =
             tint::BindingPoint{0, PipelineLayout::kNumWorkgroupsConstantBufferSlot};
+    } else if (useTintIR && stage == SingleShaderStage::Vertex) {
+        // For vertex shaders, use root constant to add FirstIndexOffset, if needed
+        req.hlsl.tintOptions.root_constant_binding_point =
+            tint::BindingPoint{0, PipelineLayout::kFirstIndexOffsetConstantBufferSlot};
     }
 
     if (stage == SingleShaderStage::Vertex) {
@@ -252,18 +261,11 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     req.hlsl.tintOptions.polyfill_pack_unpack_4x8 = true;
 
     CacheResult<d3d::CompiledShader> compiledShader;
-    MaybeError compileError = [&]() -> MaybeError {
-        DAWN_TRY_LOAD_OR_RUN(compiledShader, device, std::move(req), d3d::CompiledShader::FromBlob,
-                             d3d::CompileShader, "D3D11.CompileShader");
-        return {};
-    }();
+    DAWN_TRY_LOAD_OR_RUN(compiledShader, device, std::move(req), d3d::CompiledShader::FromBlob,
+                         d3d::CompileShader, "D3D11.CompileShader");
 
     if (device->IsToggleEnabled(Toggle::DumpShaders)) {
         d3d::DumpFXCCompiledShader(device, *compiledShader, compileFlags);
-    }
-
-    if (compileError.IsError()) {
-        return {compileError.AcquireError()};
     }
 
     device->GetBlobCache()->EnsureStored(compiledShader);

@@ -45,6 +45,8 @@ if (tint_build_unittests || tint_build_benchmarks) {
 
 libtint_source_set("lower") {
   sources = [
+    "builtins.cc",
+    "builtins.h",
     "lower.cc",
     "lower.h",
     "shader_io.cc",
@@ -60,24 +62,26 @@ libtint_source_set("lower") {
     "${tint_src_dir}/lang/core/intrinsic",
     "${tint_src_dir}/lang/core/ir",
     "${tint_src_dir}/lang/core/type",
+    "${tint_src_dir}/lang/spirv",
+    "${tint_src_dir}/lang/spirv/intrinsic",
+    "${tint_src_dir}/lang/spirv/ir",
+    "${tint_src_dir}/utils",
     "${tint_src_dir}/utils/containers",
     "${tint_src_dir}/utils/diagnostic",
     "${tint_src_dir}/utils/ice",
-    "${tint_src_dir}/utils/id",
     "${tint_src_dir}/utils/macros",
     "${tint_src_dir}/utils/math",
     "${tint_src_dir}/utils/memory",
-    "${tint_src_dir}/utils/reflection",
     "${tint_src_dir}/utils/result",
     "${tint_src_dir}/utils/rtti",
     "${tint_src_dir}/utils/symbol",
     "${tint_src_dir}/utils/text",
-    "${tint_src_dir}/utils/traits",
   ]
 }
 if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {
     sources = [
+      "builtins_test.cc",
       "shader_io_test.cc",
       "vector_element_pointer_test.cc",
     ]
@@ -91,20 +95,21 @@ if (tint_build_unittests) {
       "${tint_src_dir}/lang/core/ir",
       "${tint_src_dir}/lang/core/ir/transform:unittests",
       "${tint_src_dir}/lang/core/type",
+      "${tint_src_dir}/lang/spirv",
+      "${tint_src_dir}/lang/spirv/intrinsic",
+      "${tint_src_dir}/lang/spirv/ir",
       "${tint_src_dir}/lang/spirv/reader/lower",
+      "${tint_src_dir}/utils",
       "${tint_src_dir}/utils/containers",
       "${tint_src_dir}/utils/diagnostic",
       "${tint_src_dir}/utils/ice",
-      "${tint_src_dir}/utils/id",
       "${tint_src_dir}/utils/macros",
       "${tint_src_dir}/utils/math",
       "${tint_src_dir}/utils/memory",
-      "${tint_src_dir}/utils/reflection",
       "${tint_src_dir}/utils/result",
       "${tint_src_dir}/utils/rtti",
       "${tint_src_dir}/utils/symbol",
       "${tint_src_dir}/utils/text",
-      "${tint_src_dir}/utils/traits",
     ]
   }
 }

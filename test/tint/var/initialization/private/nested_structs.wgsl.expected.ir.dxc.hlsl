@@ -15,9 +15,9 @@ static const S1 v = {int(42)};
 static const S2 v_1 = {v};
 static const S3 v_2 = {v_1};
 static S3 P = v_2;
-RWByteAddressBuffer tint_symbol : register(u0);
+RWByteAddressBuffer v_3 : register(u0);
 [numthreads(1, 1, 1)]
 void main() {
-  tint_symbol.Store(0u, asuint(P.s2.s1.i));
+  v_3.Store(0u, asuint(P.s2.s1.i));
 }
 

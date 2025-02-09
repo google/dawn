@@ -19,9 +19,12 @@ void zoo() {
 }
 
 void bar(float a, float b) {
+  uint tint_symbol_3 = 0u;
+  storages.GetDimensions(tint_symbol_3);
+  uint tint_symbol_4 = (tint_symbol_3 / 4u);
   p = a;
   w = b;
-  storages.Store(0u, asuint(asfloat(uniforms.Load(0u))));
+  storages.Store((4u * min(0u, (tint_symbol_4 - 1u))), asuint(asfloat(uniforms.Load(0u))));
   zoo();
 }
 

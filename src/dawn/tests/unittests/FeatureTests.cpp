@@ -46,12 +46,12 @@ class FeatureTests : public testing::Test {
           mUnsafePhysicalDevice(),
           mAdapterBase(mInstanceBase.Get(),
                        &mPhysicalDevice,
-                       native::FeatureLevel::Core,
+                       wgpu::FeatureLevel::Core,
                        native::TogglesState(native::ToggleStage::Adapter),
                        wgpu::PowerPreference::Undefined),
           mUnsafeAdapterBase(mInstanceBase.Get(),
                              &mUnsafePhysicalDevice,
-                             native::FeatureLevel::Core,
+                             wgpu::FeatureLevel::Core,
                              native::TogglesState(native::ToggleStage::Adapter)
                                  .SetForTesting(native::Toggle::AllowUnsafeAPIs, true, true),
                              wgpu::PowerPreference::Undefined) {}

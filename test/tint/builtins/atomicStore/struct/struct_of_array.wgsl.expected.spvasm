@@ -32,53 +32,53 @@
 %compute_main_local_invocation_index_Input = OpVariable %_ptr_Input_uint Input
        %void = OpTypeVoid
          %13 = OpTypeFunction %void %uint
-     %uint_0 = OpConstant %uint 0
+     %uint_1 = OpConstant %uint 1
        %bool = OpTypeBool
 %_ptr_Workgroup_int = OpTypePointer Workgroup %int
+     %uint_0 = OpConstant %uint 0
       %int_0 = OpConstant %int 0
 %_ptr_Workgroup_uint = OpTypePointer Workgroup %uint
      %uint_2 = OpConstant %uint 2
 %_ptr_Workgroup_uint_0 = OpTypePointer Workgroup %uint
-     %uint_1 = OpConstant %uint 1
    %uint_264 = OpConstant %uint 264
-      %int_4 = OpConstant %int 4
+     %uint_4 = OpConstant %uint 4
          %46 = OpTypeFunction %void
 %compute_main_inner = OpFunction %void None %13
 %tint_local_index = OpFunctionParameter %uint
          %14 = OpLabel
-         %15 = OpIEqual %bool %tint_local_index %uint_0
+         %15 = OpULessThan %bool %tint_local_index %uint_1
                OpSelectionMerge %18 None
                OpBranchConditional %15 %19 %18
          %19 = OpLabel
          %20 = OpAccessChain %_ptr_Workgroup_int %wg %uint_0
                OpStore %20 %int_0 None
-         %23 = OpAccessChain %_ptr_Workgroup_uint %wg %uint_2
-               OpStore %23 %uint_0 None
+         %24 = OpAccessChain %_ptr_Workgroup_uint %wg %uint_2
+               OpStore %24 %uint_0 None
                OpBranch %18
          %18 = OpLabel
-               OpBranch %26
-         %26 = OpLabel
-               OpBranch %29
-         %29 = OpLabel
-         %31 = OpPhi %uint %tint_local_index %26 %32 %28
-               OpLoopMerge %30 %28 None
                OpBranch %27
          %27 = OpLabel
-         %33 = OpUGreaterThanEqual %bool %31 %uint_10
-               OpSelectionMerge %34 None
-               OpBranchConditional %33 %35 %34
-         %35 = OpLabel
                OpBranch %30
-         %34 = OpLabel
-         %36 = OpAccessChain %_ptr_Workgroup_uint_0 %wg %uint_1 %31
-               OpAtomicStore %36 %uint_2 %uint_0 %uint_0
+         %30 = OpLabel
+         %32 = OpPhi %uint %tint_local_index %27 %33 %29
+               OpLoopMerge %31 %29 None
                OpBranch %28
          %28 = OpLabel
-         %32 = OpIAdd %uint %31 %uint_1
+         %34 = OpUGreaterThanEqual %bool %32 %uint_10
+               OpSelectionMerge %35 None
+               OpBranchConditional %34 %36 %35
+         %36 = OpLabel
+               OpBranch %31
+         %35 = OpLabel
+         %37 = OpAccessChain %_ptr_Workgroup_uint_0 %wg %uint_1 %32
+               OpAtomicStore %37 %uint_2 %uint_0 %uint_0
                OpBranch %29
-         %30 = OpLabel
+         %29 = OpLabel
+         %33 = OpIAdd %uint %32 %uint_1
+               OpBranch %30
+         %31 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
-         %42 = OpAccessChain %_ptr_Workgroup_uint_0 %wg %uint_1 %int_4
+         %42 = OpAccessChain %_ptr_Workgroup_uint_0 %wg %uint_1 %uint_4
                OpAtomicStore %42 %uint_2 %uint_0 %uint_1
                OpReturn
                OpFunctionEnd

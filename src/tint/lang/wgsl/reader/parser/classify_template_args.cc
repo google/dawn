@@ -32,6 +32,8 @@
 #include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/ice/ice.h"
 
+TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
+
 namespace tint::wgsl::reader {
 
 namespace {
@@ -152,3 +154,5 @@ void ClassifyTemplateArguments(std::vector<Token>& tokens) {
 }
 
 }  // namespace tint::wgsl::reader
+
+TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);

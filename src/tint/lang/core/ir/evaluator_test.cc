@@ -161,20 +161,6 @@ TEST_F(IR_EvaluatorTest, ConstructVector_Access) {
     EXPECT_EQ(2, c->Value()->ValueAs<int32_t>());
 }
 
-TEST_F(IR_EvaluatorTest, ConstructMat_Swizzle) {
-    auto* obj = b.Construct(ty.mat2x2<f32>(), 1_f, 2_f, 3_f, 4_f);
-    auto* outer = b.Swizzle(mod.Types().vec2<f32>(), obj, {1});
-    auto* inst = b.Swizzle(mod.Types().f32(), outer, {1});
-    auto res = Eval(b, inst);
-    ASSERT_EQ(res, Success) << res.Failure().reason.Str();
-
-    auto* val = res.Get();
-    ASSERT_NE(val, nullptr);
-    auto* c = val->As<core::ir::Constant>();
-    ASSERT_NE(c, nullptr);
-    EXPECT_FLOAT_EQ(4.f, c->Value()->ValueAs<float>());
-}
-
 TEST_F(IR_EvaluatorTest, Convert) {
     auto* obj = b.Construct(ty.i32(), 1_i);
     auto* inst = b.Convert(ty.u32(), obj);

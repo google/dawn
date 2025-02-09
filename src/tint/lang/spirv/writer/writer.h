@@ -30,10 +30,16 @@
 
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/spirv/writer/common/options.h"
-#include "src/tint/lang/spirv/writer/output.h"
+#include "src/tint/lang/spirv/writer/common/output.h"
 #include "src/tint/utils/result/result.h"
 
 namespace tint::spirv::writer {
+
+/// Check if the module @p ir is supported by the SPIR-V backend with @p options.
+/// @param ir the module
+/// @param options the writer options
+/// @returns Success or a failure message indicating why SPIR-V generation would fail
+Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& options);
 
 /// Generate SPIR-V for a program, according to a set of configuration options.
 /// The result will contain the SPIR-V or failure.

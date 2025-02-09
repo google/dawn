@@ -38,7 +38,7 @@
 
 #include <string>
 
-#include "src/tint/utils/traits/traits.h"
+#include "src/tint/utils/rtti/traits.h"
 
 namespace tint::wgsl {
 
@@ -49,6 +49,9 @@ CoreDiagnosticRule ParseCoreDiagnosticRule(std::string_view str) {
     if (str == "derivative_uniformity") {
         return CoreDiagnosticRule::kDerivativeUniformity;
     }
+    if (str == "subgroup_uniformity") {
+        return CoreDiagnosticRule::kSubgroupUniformity;
+    }
     return CoreDiagnosticRule::kUndefined;
 }
 
@@ -58,6 +61,8 @@ std::string_view ToString(CoreDiagnosticRule value) {
             return "undefined";
         case CoreDiagnosticRule::kDerivativeUniformity:
             return "derivative_uniformity";
+        case CoreDiagnosticRule::kSubgroupUniformity:
+            return "subgroup_uniformity";
     }
     return "<unknown>";
 }

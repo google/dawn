@@ -30,7 +30,7 @@
 
 #include <string>
 
-#include "src/tint/utils/reflection/reflection.h"
+#include "src/tint/utils/reflection.h"
 #include "src/tint/utils/result/result.h"
 
 // Forward declarations.

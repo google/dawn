@@ -58,15 +58,15 @@ namespace wgpu::binding {
 namespace {
 
 // Returns a string representation of the WGPULoggingType
-const char* str(WGPULoggingType ty) {
+const char* str(wgpu::LoggingType ty) {
     switch (ty) {
-        case WGPULoggingType_Verbose:
+        case wgpu::LoggingType::Verbose:
             return "verbose";
-        case WGPULoggingType_Info:
+        case wgpu::LoggingType::Info:
             return "info";
-        case WGPULoggingType_Warning:
+        case wgpu::LoggingType::Warning:
             return "warning";
-        case WGPULoggingType_Error:
+        case wgpu::LoggingType::Error:
             return "error";
         default:
             return "unknown";
@@ -148,12 +148,10 @@ GPUDevice::GPUDevice(Napi::Env env,
       async_(async),
       lost_promise_(lost_promise),
       label_(CopyLabel(desc.label)) {
-    device_.SetLoggingCallback(
-        [](WGPULoggingType type, WGPUStringView message, void* userdata) {
-            printf("%s:\n", str(type));
-            chunkedWrite(message);
-        },
-        nullptr);
+    device_.SetLoggingCallback([](wgpu::LoggingType type, wgpu::StringView message) {
+        printf("%s:\n", str(type));
+        chunkedWrite(message);
+    });
 }
 
 GPUDevice::~GPUDevice() {
@@ -193,9 +191,7 @@ interop::Interface<interop::GPUSupportedLimits> GPUDevice::getLimits(Napi::Env e
     };
 
     // Query the subgroup limits only if subgroups feature is enabled on the device.
-    // TODO(349125474): Remove deprecated ChromiumExperimentalSubgroups.
-    if (device_.HasFeature(wgpu::FeatureName::Subgroups) ||
-        device_.HasFeature(wgpu::FeatureName::ChromiumExperimentalSubgroups)) {
+    if (device_.HasFeature(wgpu::FeatureName::Subgroups)) {
         InsertInChain(&subgroupLimits);
     }
 
@@ -572,15 +568,7 @@ interop::Promise<std::optional<interop::Interface<interop::GPUError>>> GPUDevice
                     break;
                 }
                 case wgpu::ErrorType::Unknown:
-                case wgpu::ErrorType::DeviceLost:
                     ctx->promise.Reject(Errors::OperationError(env, std::string(message)));
-                    break;
-                default:
-                    ctx->promise.Reject(
-                        "unhandled error type (" +
-                        std::to_string(
-                            static_cast<std::underlying_type<wgpu::ErrorType>::type>(type)) +
-                        ")");
                     break;
             }
         });

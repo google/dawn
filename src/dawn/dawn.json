@@ -39,7 +39,7 @@
         "copyright_year": "2019"
     },
 
-    "INTERNAL__HAVE_EMDAWNWEBGPU_HEADER": {
+    "INTERNAL_HAVE_EMDAWNWEBGPU_HEADER": {
         "category": "structure",
         "tags": ["emscripten"],
         "_comment": "TODO(issues.chromium.org/issues/366932309): The struct must have at least one field.",
@@ -74,22 +74,13 @@
         "extensible": "in",
         "members": [
             {"name": "compatible surface", "type": "surface", "optional": true},
+            {"name": "feature level", "type": "feature level", "default": "core"},
             {"name": "power preference", "type": "power preference", "default": "undefined"},
             {"name": "backend type", "type": "backend type", "default": "undefined"},
-            {"name": "force fallback adapter", "type": "bool", "default": "false"},
-            {"name": "compatibility mode", "type": "bool", "default": "false", "tags": ["dawn", "emscripten"]}
+            {"name": "force fallback adapter", "type": "bool", "default": "false"}
         ]
     },
     "request adapter callback": {
-        "category": "function pointer",
-        "args": [
-            {"name": "status", "type": "request adapter status"},
-            {"name": "adapter", "type": "adapter", "optional": true},
-            {"name": "message", "type": "string view"},
-            {"name": "userdata", "type": "void *"}
-        ]
-    },
-    "request adapter callback 2": {
         "category": "callback function",
         "args": [
             {"name": "status", "type": "request adapter status"},
@@ -98,19 +89,10 @@
         ]
     },
     "request adapter callback info": {
-         "category": "structure",
-         "extensible": "in",
-         "members": [
-            {"name": "mode", "type": "callback mode"},
-            {"name": "callback", "type": "request adapter callback"},
-            {"name": "userdata", "type": "void *"}
-         ]
-    },
-    "request adapter callback info 2": {
         "category": "callback info",
         "members": [
             {"name": "mode", "type": "callback mode"},
-            {"name": "callback", "type": "request adapter callback 2"}
+            {"name": "callback", "type": "request adapter callback"}
         ]
    },
     "request adapter status": {
@@ -120,8 +102,7 @@
             {"value": 1, "name": "success"},
             {"value": 2, "name": "instance dropped"},
             {"value": 3, "name": "unavailable"},
-            {"value": 4, "name": "error"},
-            {"value": 5, "name": "unknown"}
+            {"value": 4, "name": "error"}
         ]
     },
     "adapter": {
@@ -155,14 +136,6 @@
                 ]
             },
             {
-                "name": "enumerate features",
-                "tags": ["deprecated"],
-                "returns": "size_t",
-                "args": [
-                    {"name": "features", "type": "feature name", "annotation": "*"}
-                ]
-            },
-            {
                 "name": "get features",
                 "returns": "void",
                 "args": [
@@ -171,30 +144,10 @@
             },
             {
                 "name": "request device",
-                "args": [
-                    {"name": "descriptor", "type": "device descriptor", "annotation": "const*", "optional": true, "no_default": true},
-                    {"name": "callback", "type": "request device callback"},
-                    {"name": "userdata", "type": "void *"}
-                ]
-            },
-            {
-                "name": "request device f",
-                "_comment": "TODO(crbug.com/dawn/2021): This is dawn/emscripten-only until we rename it to replace the old API. See bug for details.",
-                "tags": ["dawn", "emscripten"],
                 "returns": "future",
                 "args": [
                     {"name": "options", "type": "device descriptor", "annotation": "const*", "optional": true, "no_default": true},
                     {"name": "callback info", "type": "request device callback info"}
-                ]
-            },
-            {
-                "name": "request device 2",
-                "_comment": "TODO(crbug.com/dawn/2021): This is dawn/emscripten-only until we rename it to replace the old API. See bug for details.",
-                "tags": ["dawn", "emscripten"],
-                "returns": "future",
-                "args": [
-                    {"name": "options", "type": "device descriptor", "annotation": "const*", "optional": true, "no_default": true},
-                    {"name": "callback info", "type": "request device callback info 2"}
                 ]
             },
             {
@@ -211,7 +164,7 @@
                 "returns": "status",
                 "args": [
                     {"name": "format", "type": "texture format"},
-                    {"name": "capabilities", "type": "format capabilities", "annotation": "*"}
+                    {"name": "capabilities", "type": "dawn format capabilities", "annotation": "*"}
                 ]
             }
         ]
@@ -228,6 +181,8 @@
             {"name": "adapter type", "type": "adapter type"},
             {"name": "vendor ID", "type": "uint32_t"},
             {"name": "device ID", "type": "uint32_t"},
+            {"name": "subgroup min size", "type": "uint32_t"},
+            {"name": "subgroup max size", "type": "uint32_t"},
             {"name": "compatibility mode", "type": "bool", "default": "false", "tags": ["dawn", "emscripten"]}
         ]
     },
@@ -250,12 +205,8 @@
             {"name": "required features", "type": "feature name", "annotation": "const*", "length": "required feature count", "default": "nullptr"},
             {"name": "required limits", "type": "required limits", "annotation": "const*", "optional": true},
             {"name": "default queue", "type": "queue descriptor"},
-            {"name": "device lost callback", "type": "device lost callback", "default": "nullptr", "tags": ["deprecated"]},
-            {"name": "device lost userdata", "type": "void *", "default": "nullptr", "tags": ["deprecated"]},
             {"name": "device lost callback info", "type": "device lost callback info"},
-            {"name": "uncaptured error callback info", "type": "uncaptured error callback info"},
-            {"name": "device lost callback info 2", "type": "device lost callback info 2"},
-            {"name": "uncaptured error callback info 2", "type": "uncaptured error callback info 2"}
+            {"name": "uncaptured error callback info", "type": "uncaptured error callback info"}
         ]
     },
     "dawn toggles descriptor": {
@@ -389,17 +340,18 @@
     "buffer binding type": {
         "category": "enum",
         "values": [
-            {"value": 0, "name": "undefined", "jsrepr": "undefined", "valid": false},
-            {"value": 1, "name": "uniform"},
-            {"value": 2, "name": "storage"},
-            {"value": 3, "name": "read only storage"}
+            {"value": 0, "name": "binding not used"},
+            {"value": 1, "name": "undefined", "jsrepr": "undefined", "valid": false},
+            {"value": 2, "name": "uniform"},
+            {"value": 3, "name": "storage"},
+            {"value": 4, "name": "read only storage"}
         ]
     },
     "buffer binding layout": {
         "category": "structure",
         "extensible": "in",
         "members": [
-            {"name": "type", "type": "buffer binding type", "default": "undefined"},
+            {"name": "type", "type": "buffer binding type", "default": "uniform"},
             {"name": "has dynamic offset", "type": "bool", "default": "false"},
             {"name": "min binding size", "type": "uint64_t", "default": "0"}
         ]
@@ -408,17 +360,18 @@
     "sampler binding type": {
         "category": "enum",
         "values": [
-            {"value": 0, "name": "undefined", "jsrepr": "undefined", "valid": false},
-            {"value": 1, "name": "filtering"},
-            {"value": 2, "name": "non filtering"},
-            {"value": 3, "name": "comparison"}
+            {"value": 0, "name": "binding not used"},
+            {"value": 1, "name": "undefined", "jsrepr": "undefined", "valid": false},
+            {"value": 2, "name": "filtering"},
+            {"value": 3, "name": "non filtering"},
+            {"value": 4, "name": "comparison"}
         ]
     },
     "sampler binding layout": {
         "category": "structure",
         "extensible": "in",
         "members": [
-            {"name": "type", "type": "sampler binding type", "default": "undefined"}
+            {"name": "type", "type": "sampler binding type", "default": "filtering"}
         ]
     },
     "static sampler binding layout": {
@@ -434,19 +387,20 @@
     "texture sample type": {
         "category": "enum",
         "values": [
-            {"value": 0, "name": "undefined", "jsrepr": "undefined", "valid": false},
-            {"value": 1, "name": "float"},
-            {"value": 2, "name": "unfilterable float"},
-            {"value": 3, "name": "depth"},
-            {"value": 4, "name": "sint"},
-            {"value": 5, "name": "uint"}
+            {"value": 0, "name": "binding not used"},
+            {"value": 1, "name": "undefined", "jsrepr": "undefined", "valid": false},
+            {"value": 2, "name": "float"},
+            {"value": 3, "name": "unfilterable float"},
+            {"value": 4, "name": "depth"},
+            {"value": 5, "name": "sint"},
+            {"value": 6, "name": "uint"}
         ]
     },
     "texture binding layout": {
         "category": "structure",
         "extensible": "in",
         "members": [
-            {"name": "sample type", "type": "texture sample type", "default": "undefined"},
+            {"name": "sample type", "type": "texture sample type", "default": "float"},
             {"name": "view dimension", "type": "texture view dimension", "default": "2D"},
             {"name": "multisampled", "type": "bool", "default": "false"}
         ]
@@ -507,17 +461,18 @@
     "storage texture access": {
         "category": "enum",
         "values": [
-            {"value": 0, "name": "undefined", "jsrepr": "undefined", "valid": false},
-            {"value": 1, "name": "write only"},
-            {"value": 2, "name": "read only"},
-            {"value": 3, "name": "read write"}
+            {"value": 0, "name": "binding not used"},
+            {"value": 1, "name": "undefined", "jsrepr": "undefined", "valid": false},
+            {"value": 2, "name": "write only"},
+            {"value": 3, "name": "read only"},
+            {"value": 4, "name": "read write"}
         ]
     },
     "storage texture binding layout": {
         "category": "structure",
         "extensible": "in",
         "members": [
-            {"name": "access", "type": "storage texture access", "default": "undefined"},
+            {"name": "access", "type": "storage texture access", "default": "write only"},
             {"name": "format", "type": "texture format", "default": "undefined"},
             {"name": "view dimension", "type": "texture view dimension", "default": "2D"}
         ]
@@ -611,36 +566,12 @@
         "methods": [
             {
                 "name": "map async",
-                "args": [
-                    {"name": "mode", "type": "map mode"},
-                    {"name": "offset", "type": "size_t"},
-                    {"name": "size", "type": "size_t"},
-                    {"name": "callback", "type": "buffer map callback"},
-                    {"name": "userdata", "type": "void *"}
-                ]
-            },
-            {
-                "name": "map async f",
-                "_comment": "TODO(crbug.com/dawn/2021): This is dawn/emscripten-only until we rename it to replace the old API. See bug for details.",
-                "tags": ["dawn", "emscripten"],
                 "returns": "future",
                 "args": [
                     {"name": "mode", "type": "map mode"},
                     {"name": "offset", "type": "size_t"},
                     {"name": "size", "type": "size_t"},
                     {"name": "callback info", "type": "buffer map callback info"}
-                ]
-            },
-            {
-                "name": "map async 2",
-                "_comment": "TODO(crbug.com/dawn/2021): This is dawn/emscripten-only until we rename it to replace the old API. See bug for details.",
-                "tags": ["dawn", "emscripten"],
-                "returns": "future",
-                "args": [
-                    {"name": "mode", "type": "map mode"},
-                    {"name": "offset", "type": "size_t"},
-                    {"name": "size", "type": "size_t"},
-                    {"name": "callback info", "type": "buffer map callback info 2"}
                 ]
             },
             {
@@ -717,13 +648,6 @@
         ]
     },
     "buffer map callback": {
-        "category": "function pointer",
-        "args": [
-            {"name": "status", "type": "buffer map async status"},
-            {"name": "userdata", "type": "void *"}
-        ]
-    },
-    "buffer map callback 2": {
         "category": "callback function",
         "args": [
             {"name": "status", "type": "map async status"},
@@ -731,35 +655,10 @@
         ]
     },
     "buffer map callback info": {
-        "category": "structure",
-        "extensible": "in",
-        "members": [
-            {"name": "mode", "type": "callback mode"},
-            {"name": "callback", "type": "buffer map callback"},
-            {"name": "userdata", "type": "void *"}
-        ]
-    },
-    "buffer map callback info 2": {
         "category": "callback info",
         "members": [
             {"name": "mode", "type": "callback mode"},
-            {"name": "callback", "type": "buffer map callback 2"}
-        ]
-    },
-    "buffer map async status": {
-        "category": "enum",
-        "emscripten_no_enum_table": true,
-        "values": [
-            {"value": 1, "name": "success"},
-            {"value": 2, "name": "instance dropped"},
-            {"value": 3, "name": "validation error"},
-            {"value": 4, "name": "unknown"},
-            {"value": 5, "name": "device lost"},
-            {"value": 6, "name": "destroyed before callback"},
-            {"value": 7, "name": "unmapped before callback"},
-            {"value": 8, "name": "mapping already pending"},
-            {"value": 9, "name": "offset out of range"},
-            {"value": 10, "name": "size out of range"}
+            {"name": "callback", "type": "buffer map callback"}
         ]
     },
     "map async status": {
@@ -769,8 +668,7 @@
             {"value": 1, "name": "success"},
             {"value": 2, "name": "instance dropped"},
             {"value": 3, "name": "error"},
-            {"value": 4, "name": "aborted"},
-            {"value": 5, "name": "unknown"}
+            {"value": 4, "name": "aborted"}
         ]
     },
     "buffer map state": {
@@ -886,24 +784,24 @@
             {
                 "name": "copy buffer to texture",
                 "args": [
-                    {"name": "source", "type": "image copy buffer", "annotation": "const*"},
-                    {"name": "destination", "type": "image copy texture", "annotation": "const*"},
+                    {"name": "source", "type": "texel copy buffer info", "annotation": "const*"},
+                    {"name": "destination", "type": "texel copy texture info", "annotation": "const*"},
                     {"name": "copy size", "type": "extent 3D", "annotation": "const*"}
                 ]
             },
             {
                 "name": "copy texture to buffer",
                 "args": [
-                    {"name": "source", "type": "image copy texture", "annotation": "const*"},
-                    {"name": "destination", "type": "image copy buffer", "annotation": "const*"},
+                    {"name": "source", "type": "texel copy texture info", "annotation": "const*"},
+                    {"name": "destination", "type": "texel copy buffer info", "annotation": "const*"},
                     {"name": "copy size", "type": "extent 3D", "annotation": "const*"}
                 ]
             },
             {
                 "name": "copy texture to texture",
                 "args": [
-                    {"name": "source", "type": "image copy texture", "annotation": "const*"},
-                    {"name": "destination", "type": "image copy texture", "annotation": "const*"},
+                    {"name": "source", "type": "texel copy texture info", "annotation": "const*"},
+                    {"name": "destination", "type": "texel copy texture info", "annotation": "const*"},
                     {"name": "copy size", "type": "extent 3D", "annotation": "const*"}
                 ]
             },
@@ -1004,14 +902,6 @@
         ]
     },
     "compilation info callback": {
-        "category": "function pointer",
-        "args": [
-            {"name": "status", "type": "compilation info request status"},
-            {"name": "compilation info", "type": "compilation info", "annotation": "const*"},
-            {"name": "userdata", "type": "void *"}
-        ]
-    },
-    "compilation info callback 2": {
         "category": "callback function",
         "args": [
             {"name": "status", "type": "compilation info request status"},
@@ -1019,29 +909,17 @@
         ]
     },
     "compilation info callback info": {
-        "category": "structure",
-        "extensible": "in",
-        "members": [
-            {"name": "mode", "type": "callback mode"},
-            {"name": "callback", "type": "compilation info callback"},
-            {"name": "userdata", "type": "void *", "default": "nullptr"}
-        ]
-    },
-    "compilation info callback info 2": {
         "category": "callback info",
         "members": [
             {"name": "mode", "type": "callback mode"},
-            {"name": "callback", "type": "compilation info callback 2"}
+            {"name": "callback", "type": "compilation info callback"}
         ]
     },
     "compilation info request status": {
         "category": "enum",
         "values": [
             {"value": 1, "name": "success"},
-            {"value": 2, "name": "instance dropped"},
-            {"value": 3, "name": "error"},
-            {"value": 4, "name": "device lost"},
-            {"value": 5, "name": "unknown"}
+            {"value": 2, "name": "instance dropped"}
         ]
     },
     "compilation message": {
@@ -1074,7 +952,7 @@
         "extensible": "in",
         "members": [
             {"name": "label", "type": "string view", "optional": true},
-            {"name": "timestamp writes", "type": "compute pass timestamp writes", "annotation": "const*", "optional": true}
+            {"name": "timestamp writes", "type": "pass timestamp writes", "annotation": "const*", "optional": true}
         ]
     },
     "compute pass encoder": {
@@ -1157,14 +1035,6 @@
             {"value": 4, "name": "inherit"}
         ]
     },
-    "compute pass timestamp writes": {
-        "category": "structure",
-        "members": [
-            {"name": "query set", "type": "query set"},
-            {"name": "beginning of pass write index", "type": "uint32_t", "default": "WGPU_QUERY_SET_INDEX_UNDEFINED"},
-            {"name": "end of pass write index", "type": "uint32_t", "default": "WGPU_QUERY_SET_INDEX_UNDEFINED"}
-        ]
-    },
     "compute pipeline": {
         "category": "object",
         "methods": [
@@ -1190,16 +1060,7 @@
         "members": [
             {"name": "label", "type": "string view", "optional": true},
             {"name": "layout", "type": "pipeline layout", "optional": true},
-            {"name": "compute", "type": "programmable stage descriptor"}
-        ]
-    },
-    "dawn compute pipeline full subgroups": {
-        "category": "structure",
-        "chained": "in",
-        "chain roots": ["compute pipeline descriptor"],
-        "tags": ["dawn"],
-        "members": [
-            {"name": "requires full subgroups", "type": "bool", "default": "false"}
+            {"name": "compute", "type": "compute state"}
         ]
     },
     "alpha mode": {
@@ -1230,15 +1091,6 @@
         ]
     },
     "create compute pipeline async callback": {
-        "category": "function pointer",
-        "args": [
-            {"name": "status", "type": "create pipeline async status"},
-            {"name": "pipeline", "type": "compute pipeline", "optional": true},
-            {"name": "message", "type": "string view"},
-            {"name": "userdata", "type": "void *"}
-        ]
-    },
-    "create compute pipeline async callback 2": {
         "category": "callback function",
         "args": [
             {"name": "status", "type": "create pipeline async status"},
@@ -1247,19 +1099,10 @@
         ]
     },
     "create compute pipeline async callback info": {
-        "category": "structure",
-        "extensible": "in",
-        "members": [
-            {"name": "mode", "type": "callback mode"},
-            {"name": "callback", "type": "create compute pipeline async callback"},
-            {"name": "userdata", "type": "void *"}
-        ]
-    },
-    "create compute pipeline async callback info 2": {
         "category": "callback info",
         "members": [
             {"name": "mode", "type": "callback mode"},
-            {"name": "callback", "type": "create compute pipeline async callback 2"}
+            {"name": "callback", "type": "create compute pipeline async callback"}
         ]
     },
     "create pipeline async status": {
@@ -1269,22 +1112,10 @@
             {"value": 1, "name": "success"},
             {"value": 2, "name": "instance dropped"},
             {"value": 3, "name": "validation error"},
-            {"value": 4, "name": "internal error"},
-            {"value": 5, "name": "device lost"},
-            {"value": 6, "name": "device destroyed"},
-            {"value": 7, "name": "unknown"}
+            {"value": 4, "name": "internal error"}
         ]
     },
     "create render pipeline async callback": {
-        "category": "function pointer",
-        "args": [
-            {"name": "status", "type": "create pipeline async status"},
-            {"name": "pipeline", "type": "render pipeline", "optional": true},
-            {"name": "message", "type": "string view"},
-            {"name": "userdata", "type": "void *"}
-        ]
-    },
-    "create render pipeline async callback 2": {
         "category": "callback function",
         "args": [
             {"name": "status", "type": "create pipeline async status"},
@@ -1293,19 +1124,10 @@
         ]
     },
     "create render pipeline async callback info": {
-        "category": "structure",
-        "extensible": "in",
-        "members": [
-            {"name": "mode", "type": "callback mode"},
-            {"name": "callback", "type": "create render pipeline async callback"},
-            {"name": "userdata", "type": "void *"}
-        ]
-    },
-    "create render pipeline async callback info 2": {
         "category": "callback info",
         "members": [
             {"name": "mode", "type": "callback mode"},
-            {"name": "callback", "type": "create render pipeline async callback 2"}
+            {"name": "callback", "type": "create render pipeline async callback"}
         ]
     },
     "cull mode": {
@@ -1374,31 +1196,10 @@
             },
             {
                 "name": "create compute pipeline async",
-                "returns": "void",
-                "args": [
-                    {"name": "descriptor", "type": "compute pipeline descriptor", "annotation": "const*"},
-                    {"name": "callback", "type": "create compute pipeline async callback"},
-                    {"name": "userdata", "type": "void *"}
-                ]
-            },
-            {
-                "name": "create compute pipeline async f",
-                "_comment": "TODO(crbug.com/dawn/2021): This is dawn/emscripten-only until we rename it to replace the old API. See bug for details.",
-                "tags": ["dawn", "emscripten"],
                 "returns": "future",
                 "args": [
                     {"name": "descriptor", "type": "compute pipeline descriptor", "annotation": "const*"},
                     {"name": "callback info", "type": "create compute pipeline async callback info"}
-                ]
-            },
-            {
-                "name": "create compute pipeline async 2",
-                "_comment": "TODO(crbug.com/dawn/2021): This is dawn/emscripten-only until we rename it to replace the old API. See bug for details.",
-                "tags": ["dawn", "emscripten"],
-                "returns": "future",
-                "args": [
-                    {"name": "descriptor", "type": "compute pipeline descriptor", "annotation": "const*"},
-                    {"name": "callback info", "type": "create compute pipeline async callback info 2"}
                 ]
             },
             {
@@ -1430,31 +1231,10 @@
             },
             {
                 "name": "create render pipeline async",
-                "returns": "void",
-                "args": [
-                    {"name": "descriptor", "type": "render pipeline descriptor", "annotation": "const*"},
-                    {"name": "callback", "type": "create render pipeline async callback"},
-                    {"name": "userdata", "type": "void *"}
-                ]
-            },
-            {
-                "name": "create render pipeline async f",
-                "_comment": "TODO(crbug.com/dawn/2021): This is dawn/emscripten-only until we rename it to replace the old API. See bug for details.",
-                "tags": ["dawn", "emscripten"],
                 "returns": "future",
                 "args": [
                     {"name": "descriptor", "type": "render pipeline descriptor", "annotation": "const*"},
                     {"name": "callback info", "type": "create render pipeline async callback info"}
-                ]
-            },
-            {
-                "name": "create render pipeline async 2",
-                "_comment": "TODO(crbug.com/dawn/2021): This is dawn/emscripten-only until we rename it to replace the old API. See bug for details.",
-                "tags": ["dawn", "emscripten"],
-                "returns": "future",
-                "args": [
-                    {"name": "descriptor", "type": "render pipeline descriptor", "annotation": "const*"},
-                    {"name": "callback info", "type": "create render pipeline async callback info 2"}
                 ]
             },
             {
@@ -1556,22 +1336,13 @@
             },
             {
                 "name": "get lost future",
-                "returns": "future",
-                "tags": ["emscripten"]
+                "returns": "future"
             },
             {
                 "name": "has feature",
                 "returns": "bool",
                 "args": [
                     {"name": "feature", "type": "feature name"}
-                ]
-            },
-            {
-                "name": "enumerate features",
-                "tags": ["deprecated"],
-                "returns": "size_t",
-                "args": [
-                    {"name": "features", "type": "feature name", "annotation": "*"}
                 ]
             },
             {
@@ -1619,29 +1390,11 @@
                 "tags": ["dawn"]
             },
             {
-                "name": "set uncaptured error callback",
-                "no autolock": true,
-                "args": [
-                    {"name": "callback", "type": "error callback"},
-                    {"name": "userdata", "type": "void *"}
-                ]
-            },
-            {
                 "name": "set logging callback",
                 "no autolock": true,
                 "tags": ["dawn"],
                 "args": [
-                    {"name": "callback", "type": "logging callback"},
-                    {"name": "userdata", "type": "void *"}
-                ]
-            },
-            {
-                "name": "set device lost callback",
-                "no autolock": true,
-                "tags": ["deprecated"],
-                "args": [
-                    {"name": "callback", "type": "device lost callback"},
-                    {"name": "userdata", "type": "void *"}
+                    {"name": "callback info", "type": "logging callback info"}
                 ]
             },
             {
@@ -1653,27 +1406,9 @@
             {
                 "name": "pop error scope",
                 "no autolock": true,
-                "args": [
-                    {"name": "old callback", "type": "error callback"},
-                    {"name": "userdata", "type": "void *"}
-                ]
-            },
-            {
-                "name": "pop error scope f",
-                "_comment": "TODO(crbug.com/dawn/2021): This is dawn/emscripten-only until we rename it to replace the old API. See bug for details.",
-                "tags": ["dawn", "emscripten"],
                 "returns": "future",
                 "args": [
                     {"name": "callback info", "type": "pop error scope callback info"}
-                ]
-            },
-            {
-                "name": "pop error scope 2",
-                "_comment": "TODO(crbug.com/dawn/2021): This is dawn/emscripten-only until we rename it to replace the old API. See bug for details.",
-                "tags": ["dawn", "emscripten"],
-                "returns": "future",
-                "args": [
-                    {"name": "callback info", "type": "pop error scope callback info 2"}
                 ]
             },
             {
@@ -1693,23 +1428,6 @@
         ]
     },
     "device lost callback": {
-        "category": "function pointer",
-        "args": [
-            {"name": "reason", "type": "device lost reason"},
-            {"name": "message", "type": "string view"},
-            {"name": "userdata", "type": "void *"}
-        ]
-    },
-    "device lost callback new": {
-        "category": "function pointer",
-        "args": [
-            {"name": "device", "type": "device", "annotation": "const*", "length": 1},
-            {"name": "reason", "type": "device lost reason"},
-            {"name": "message", "type": "string view"},
-            {"name": "userdata", "type": "void *"}
-        ]
-    },
-    "device lost callback 2": {
         "category": "callback function",
         "args": [
             {"name": "device", "type": "device", "annotation": "const*", "length": 1},
@@ -1718,19 +1436,10 @@
         ]
     },
     "device lost callback info": {
-        "category": "structure",
-        "extensible": "in",
-        "members": [
-            {"name": "mode", "type": "callback mode", "default": "wait any only", "_comment": "TODO(crbug.com/dawn/2458) Default should be removed."},
-            {"name": "callback", "type": "device lost callback new", "default": "nullptr"},
-            {"name": "userdata", "type": "void *", "default": "nullptr"}
-        ]
-    },
-    "device lost callback info 2": {
         "category": "callback info",
         "members": [
             {"name": "mode", "type": "callback mode"},
-            {"name": "callback", "type": "device lost callback 2", "default": "nullptr"}
+            {"name": "callback", "type": "device lost callback", "default": "nullptr"}
         ]
     },
     "device lost reason": {
@@ -1748,14 +1457,6 @@
         "category": "native",
         "wasm type": "d"
     },
-    "error callback": {
-        "category": "function pointer",
-        "args": [
-            {"name": "type", "type": "error type"},
-            {"name": "message", "type": "string view"},
-            {"name": "userdata", "type": "void *"}
-        ]
-    },
     "uncaptured error callback": {
         "category": "callback function",
         "args": [
@@ -1765,14 +1466,6 @@
         ]
     },
     "uncaptured error callback info": {
-        "category": "structure",
-        "extensible": "in",
-        "members": [
-            {"name": "callback", "type": "error callback", "default": "nullptr"},
-            {"name": "userdata", "type": "void *", "default": "nullptr"}
-        ]
-    },
-    "uncaptured error callback info 2": {
         "category": "callback info",
         "members": [
             {"name": "callback", "type": "uncaptured error callback", "default": "nullptr"}
@@ -1783,19 +1476,11 @@
         "emscripten_no_enum_table": true,
         "values": [
             {"value": 1, "name": "success"},
-            {"value": 2, "name": "instance dropped"}
+            {"value": 2, "name": "instance dropped"},
+            {"value": 3, "name": "empty stack"}
         ]
     },
     "pop error scope callback": {
-        "category": "function pointer",
-        "args": [
-            {"name": "status", "type": "pop error scope status"},
-            {"name": "type", "type": "error type"},
-            {"name": "message", "type": "string view"},
-            {"name": "userdata", "type": "void *"}
-        ]
-    },
-    "pop error scope callback 2": {
         "category": "callback function",
         "args": [
             {"name": "status", "type": "pop error scope status"},
@@ -1804,20 +1489,10 @@
         ]
     },
     "pop error scope callback info": {
-        "category": "structure",
-        "extensible": "in",
-        "members": [
-            {"name": "mode", "type": "callback mode", "default": "wait any only"},
-            {"name": "callback", "type": "pop error scope callback"},
-            {"name": "old callback", "type": "error callback", "_comment": "TODO(crbug.com/dawn/2021) Deprecate this field once we have moved callers to use the new callback signature."},
-            {"name": "userdata", "type": "void *", "default": "nullptr"}
-        ]
-    },
-    "pop error scope callback info 2": {
         "category": "callback info",
         "members": [
             {"name": "mode", "type": "callback mode"},
-            {"name": "callback", "type": "pop error scope callback 2"}
+            {"name": "callback", "type": "pop error scope callback"}
         ]
     },
     "limits": {
@@ -1854,7 +1529,20 @@
             {"name": "max compute workgroup size x", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
             {"name": "max compute workgroup size y", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
             {"name": "max compute workgroup size z", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
-            {"name": "max compute workgroups per dimension", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"}
+            {"name": "max compute workgroups per dimension", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
+            {"name": "max storage buffers in vertex stage", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
+            {"name": "max storage textures in vertex stage", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
+            {"name": "max storage buffers in fragment stage", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
+            {"name": "max storage textures in fragment stage", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"}
+        ]
+    },
+    "adapter properties subgroups": {
+        "category": "structure",
+        "chained": "out",
+        "chain roots": ["adapter info"],
+        "members": [
+            {"name": "subgroup min size", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
+            {"name": "subgroup max size", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"}
         ]
     },
     "dawn experimental subgroup limits": {
@@ -1874,6 +1562,15 @@
         "tags": ["dawn"],
         "members": [
             {"name": "max immediate data range byte size", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"}
+        ]
+    },
+    "dawn texel copy buffer row alignment limits": {
+        "category": "structure",
+        "chained": "out",
+        "chain roots": ["supported limits"],
+        "tags": ["dawn"],
+        "members": [
+            {"name": "min texel copy buffer row alignment", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"}
         ]
     },
     "required limits": {
@@ -1898,13 +1595,27 @@
             {"name": "features", "type": "feature name", "annotation": "const*", "length": "feature count"}
         ]
     },
+    "supported WGSL language features": {
+        "category": "structure",
+        "out": true,
+        "members": [
+            {"name": "feature count", "type": "size_t"},
+            {"name": "features", "type": "WGSL language feature name", "annotation": "const*", "length": "feature count"}
+        ]
+    },
     "logging callback": {
-        "category": "function pointer",
+        "category": "callback function",
         "tags": ["dawn"],
         "args": [
             {"name": "type", "type": "logging type"},
-            {"name": "message", "type": "string view"},
-            {"name": "userdata", "type": "void *"}
+            {"name": "message", "type": "string view"}
+        ]
+    },
+    "logging callback info": {
+        "category": "callback info",
+        "tags": ["dawn"],
+        "members": [
+            {"name": "callback", "type": "logging callback", "default": "nullptr"}
         ]
     },
     "error filter": {
@@ -1923,8 +1634,7 @@
             {"value": 2, "name": "validation"},
             {"value": 3, "name": "out of memory"},
             {"value": 4, "name": "internal"},
-            {"value": 5, "name": "unknown"},
-            {"value": 6, "name": "device lost"}
+            {"value": 5, "name": "unknown"}
         ]
     },
     "logging type": {
@@ -1998,8 +1708,6 @@
             {"name": "label", "type": "string view", "optional": true},
             {"name": "plane 0", "type": "texture view"},
             {"name": "plane 1", "type": "texture view", "optional": true},
-            {"name": "visible origin", "type": "origin 2D"},
-            {"name": "visible size", "type": "extent 2D"},
             {"name": "crop origin", "type": "origin 2D"},
             {"name": "crop size", "type": "extent 2D"},
             {"name": "apparent size", "type": "extent 2D"},
@@ -2267,7 +1975,8 @@
         "tags": ["dawn", "native"],
         "_comment": "TODO(crbug.com/dawn/1745): improve type safety",
         "members": [
-            {"name": "io surface", "type": "void *"}
+            {"name": "io surface", "type": "void *"},
+            {"name": "allow storage binding", "type": "bool", "default": "true"}
         ]
     },
     "shared texture memory EGL image descriptor": {
@@ -2373,11 +2082,6 @@
             {"name": "handle", "type": "int"}
         ]
     },
-    "shared fence vk semaphore sync FD descriptor": {
-        "category": "typedef",
-        "tags": ["dawn", "native"],
-        "type": "shared fence sync FD descriptor"
-    },
     "shared fence vk semaphore zircon handle descriptor": {
         "category": "structure",
         "chained": "in",
@@ -2443,11 +2147,6 @@
             {"name": "handle", "type": "int"}
         ]
     },
-    "shared fence vk semaphore sync FD export info": {
-        "category": "typedef",
-        "tags": ["dawn", "native"],
-        "type": "shared fence sync FD export info"
-    },
     "shared fence vk semaphore zircon handle export info": {
         "category": "structure",
         "chained": "out",
@@ -2474,6 +2173,14 @@
         "_comment": "TODO(crbug.com/dawn/1745): improve type safety",
         "members": [
             {"name": "shared event", "type": "void *"}
+        ]
+    },
+    "feature level": {
+        "category": "enum",
+        "values": [
+            {"value": 0, "name": "undefined", "jsrepr": "undefined"},
+            {"value": 1, "name": "compatibility"},
+            {"value": 2, "name": "core"}
         ]
     },
     "feature name": {
@@ -2505,55 +2212,54 @@
             {"value": 8, "name": "dual source blending", "tags": ["dawn"]},
             {"value": 9, "name": "D3D11 multithread protected", "tags": ["dawn", "native"]},
             {"value": 10, "name": "ANGLE texture sharing", "tags": ["dawn", "native"]},
-            {"value": 11, "name": "chromium experimental subgroups", "tags": ["dawn"]},
-            {"value": 12, "name": "chromium experimental subgroup uniform control flow", "tags": ["dawn"]},
-            {"value": 13, "name": "pixel local storage coherent", "tags": ["dawn"]},
-            {"value": 14, "name": "pixel local storage non coherent", "tags": ["dawn"]},
-            {"value": 15, "name": "unorm16 texture formats", "tags": ["dawn"]},
-            {"value": 16, "name": "snorm16 texture formats", "tags": ["dawn"]},
-            {"value": 17, "name": "multi planar format extended usages", "tags": ["dawn"]},
-            {"value": 18, "name": "multi planar format p010", "tags": ["dawn"]},
-            {"value": 19, "name": "host mapped pointer", "tags": ["dawn"]},
-            {"value": 20, "name": "multi planar render targets", "tags": ["dawn"]},
-            {"value": 21, "name": "multi planar format nv12a", "tags": ["dawn"]},
-            {"value": 22, "name": "framebuffer fetch", "tags": ["dawn"]},
-            {"value": 23, "name": "buffer map extended usages", "tags": ["dawn"]},
-            {"value": 24, "name": "adapter properties memory heaps", "tags": ["dawn"]},
-            {"value": 25, "name": "adapter properties D3D", "tags": ["dawn"]},
-            {"value": 26, "name": "adapter properties vk", "tags": ["dawn"]},
-            {"value": 27, "name": "r8 unorm storage", "tags": ["dawn"]},
-            {"value": 28, "name": "format capabilities", "tags": ["dawn"]},
-            {"value": 29, "name": "drm format capabilities", "tags": ["dawn"]},
-            {"value": 30, "name": "norm16 texture formats", "tags": ["dawn"]},
-            {"value": 31, "name": "multi planar format nv16", "tags": ["dawn"]},
-            {"value": 32, "name": "multi planar format nv24", "tags": ["dawn"]},
-            {"value": 33, "name": "multi planar format p210", "tags": ["dawn"]},
-            {"value": 34, "name": "multi planar format p410", "tags": ["dawn"]},
+            {"value": 11, "name": "pixel local storage coherent", "tags": ["dawn"]},
+            {"value": 12, "name": "pixel local storage non coherent", "tags": ["dawn"]},
+            {"value": 13, "name": "unorm16 texture formats", "tags": ["dawn"]},
+            {"value": 14, "name": "snorm16 texture formats", "tags": ["dawn"]},
+            {"value": 15, "name": "multi planar format extended usages", "tags": ["dawn"]},
+            {"value": 16, "name": "multi planar format p010", "tags": ["dawn"]},
+            {"value": 17, "name": "host mapped pointer", "tags": ["dawn"]},
+            {"value": 18, "name": "multi planar render targets", "tags": ["dawn"]},
+            {"value": 19, "name": "multi planar format nv12a", "tags": ["dawn"]},
+            {"value": 20, "name": "framebuffer fetch", "tags": ["dawn"]},
+            {"value": 21, "name": "buffer map extended usages", "tags": ["dawn"]},
+            {"value": 22, "name": "adapter properties memory heaps", "tags": ["dawn"]},
+            {"value": 23, "name": "adapter properties D3D", "tags": ["dawn"]},
+            {"value": 24, "name": "adapter properties vk", "tags": ["dawn"]},
+            {"value": 25, "name": "r8 unorm storage", "tags": ["dawn"]},
+            {"value": 26, "name": "dawn format capabilities", "tags": ["dawn"]},
+            {"value": 27, "name": "dawn drm format capabilities", "tags": ["dawn"]},
+            {"value": 28, "name": "norm16 texture formats", "tags": ["dawn"]},
+            {"value": 29, "name": "multi planar format nv16", "tags": ["dawn"]},
+            {"value": 30, "name": "multi planar format nv24", "tags": ["dawn"]},
+            {"value": 31, "name": "multi planar format p210", "tags": ["dawn"]},
+            {"value": 32, "name": "multi planar format p410", "tags": ["dawn"]},
 
-            {"value": 35, "name": "shared texture memory vk dedicated allocation", "tags": ["dawn", "native"]},
-            {"value": 36, "name": "shared texture memory a hardware buffer", "tags": ["dawn", "native"]},
-            {"value": 37, "name": "shared texture memory dma buf", "tags": ["dawn", "native"]},
-            {"value": 38, "name": "shared texture memory opaque FD", "tags": ["dawn", "native"]},
-            {"value": 39, "name": "shared texture memory zircon handle", "tags": ["dawn", "native"]},
-            {"value": 40, "name": "shared texture memory DXGI shared handle", "tags": ["dawn", "native"]},
-            {"value": 41, "name": "shared texture memory D3D11 texture 2D", "tags": ["dawn", "native"]},
-            {"value": 42, "name": "shared texture memory IO surface", "tags": ["dawn", "native"]},
-            {"value": 43, "name": "shared texture memory EGL image", "tags": ["dawn", "native"]},
-            {"value": 44, "name": "shared fence vk semaphore opaque FD", "tags": ["dawn", "native"]},
-            {"value": 45, "name": "shared fence sync FD", "tags": ["dawn", "native"]},
-            {"value": 46, "name": "shared fence vk semaphore zircon handle", "tags": ["dawn", "native"]},
-            {"value": 47, "name": "shared fence DXGI shared handle", "tags": ["dawn", "native"]},
-            {"value": 48, "name": "shared fence MTL shared event", "tags": ["dawn", "native"]},
-            {"value": 49, "name": "shared buffer memory D3D12 resource", "tags": ["dawn", "native"]},
-            {"value": 50, "name": "static samplers", "tags": ["dawn"]},
-            {"value": 51, "name": "y cb cr vulkan samplers", "tags": ["dawn"]},
-            {"value": 52, "name": "shader module compilation options", "tags": ["dawn"]},
+            {"value": 33, "name": "shared texture memory vk dedicated allocation", "tags": ["dawn", "native"]},
+            {"value": 34, "name": "shared texture memory a hardware buffer", "tags": ["dawn", "native"]},
+            {"value": 35, "name": "shared texture memory dma buf", "tags": ["dawn", "native"]},
+            {"value": 36, "name": "shared texture memory opaque FD", "tags": ["dawn", "native"]},
+            {"value": 37, "name": "shared texture memory zircon handle", "tags": ["dawn", "native"]},
+            {"value": 38, "name": "shared texture memory DXGI shared handle", "tags": ["dawn", "native"]},
+            {"value": 39, "name": "shared texture memory D3D11 texture 2D", "tags": ["dawn", "native"]},
+            {"value": 40, "name": "shared texture memory IO surface", "tags": ["dawn", "native"]},
+            {"value": 41, "name": "shared texture memory EGL image", "tags": ["dawn", "native"]},
+            {"value": 42, "name": "shared fence vk semaphore opaque FD", "tags": ["dawn", "native"]},
+            {"value": 43, "name": "shared fence sync FD", "tags": ["dawn", "native"]},
+            {"value": 44, "name": "shared fence vk semaphore zircon handle", "tags": ["dawn", "native"]},
+            {"value": 45, "name": "shared fence DXGI shared handle", "tags": ["dawn", "native"]},
+            {"value": 46, "name": "shared fence MTL shared event", "tags": ["dawn", "native"]},
+            {"value": 47, "name": "shared buffer memory D3D12 resource", "tags": ["dawn", "native"]},
+            {"value": 48, "name": "static samplers", "tags": ["dawn"]},
+            {"value": 49, "name": "y cb cr vulkan samplers", "tags": ["dawn"]},
+            {"value": 50, "name": "shader module compilation options", "tags": ["dawn"]},
 
-            {"value": 53, "name": "dawn load resolve texture", "tags": ["dawn"]},
-            {"value": 54, "name": "dawn partial load resolve texture", "tags": ["dawn"]},
-            {"value": 55, "name": "multi draw indirect", "tags": ["dawn"]},
-            {"value": 56, "name": "clip distances", "tags": ["dawn"]},
-            {"value": 57, "name": "shared fence vk semaphore sync FD", "tags": ["dawn", "native"]}
+            {"value": 51, "name": "dawn load resolve texture", "tags": ["dawn"]},
+            {"value": 52, "name": "dawn partial load resolve texture", "tags": ["dawn"]},
+            {"value": 53, "name": "multi draw indirect", "tags": ["dawn"]},
+            {"value": 54, "name": "clip distances", "tags": ["dawn"]},
+            {"value": 55, "name": "dawn texel copy buffer row alignment", "tags": ["dawn"]},
+            {"value": 56, "name": "flexible texture views", "tags": ["dawn"]}
         ]
     },
     "filter mode": {
@@ -2568,23 +2274,23 @@
         "category": "native",
         "wasm type": "f"
     },
-    "format capabilities": {
+    "dawn format capabilities": {
       "category": "structure",
       "tags": ["dawn"],
       "extensible": "out",
       "members": []
     },
-    "drm format capabilities": {
+    "dawn drm format capabilities": {
       "category": "structure",
       "tags": ["dawn"],
       "chained": "out",
-      "chain roots": ["format capabilities"],
+      "chain roots": ["dawn format capabilities"],
       "members": [
           {"name": "properties count", "type": "size_t"},
-          {"name": "properties", "type": "drm format properties", "annotation": "const*", "length": "properties count"}
+          {"name": "properties", "type": "dawn drm format properties", "annotation": "const*", "length": "properties count"}
       ]
     },
-    "drm format properties": {
+    "dawn drm format properties": {
       "category": "structure",
       "tags": ["dawn"],
       "members": [
@@ -2601,13 +2307,29 @@
         ]
     },
     "image copy buffer": {
+        "category": "typedef",
+        "type": "texel copy buffer info"
+    },
+    "texel copy buffer info": {
         "category": "structure",
         "members": [
-            {"name": "layout", "type": "texture data layout"},
+            {"name": "layout", "type": "texel copy buffer layout"},
             {"name": "buffer", "type": "buffer"}
         ]
     },
+    "texel copy buffer layout": {
+        "category": "structure",
+        "members": [
+            {"name": "offset", "type": "uint64_t", "default": 0},
+            {"name": "bytes per row", "type": "uint32_t", "default": "WGPU_COPY_STRIDE_UNDEFINED"},
+            {"name": "rows per image", "type": "uint32_t", "default": "WGPU_COPY_STRIDE_UNDEFINED"}
+        ]
+    },
     "image copy texture": {
+        "category": "typedef",
+        "type": "texel copy texture info"
+    },
+    "texel copy texture info": {
         "category": "structure",
         "members": [
             {"name": "texture", "type": "texture"},
@@ -2659,16 +2381,6 @@
             },
             {
                 "name": "request adapter",
-                "args": [
-                    {"name": "options", "type": "request adapter options", "annotation": "const*", "optional": true, "no_default": true},
-                    {"name": "callback", "type": "request adapter callback"},
-                    {"name": "userdata", "type": "void *"}
-                ]
-            },
-            {
-                "name": "request adapter f",
-                "_comment": "TODO(crbug.com/dawn/2021): This is dawn/emscripten-only until we rename it to replace the old API. See bug for details.",
-                "tags": ["dawn", "emscripten"],
                 "returns": "future",
                 "args": [
                     {"name": "options", "type": "request adapter options", "annotation": "const*", "optional": true, "no_default": true},
@@ -2676,27 +2388,17 @@
                 ]
             },
             {
-                "name": "request adapter 2",
-                "_comment": "TODO(crbug.com/dawn/2021): This is dawn/emscripten-only until we rename it to replace the old API. See bug for details.",
-                "tags": ["dawn", "emscripten"],
-                "returns": "future",
-                "args": [
-                    {"name": "options", "type": "request adapter options", "annotation": "const*", "optional": true, "no_default": true},
-                    {"name": "callback info", "type": "request adapter callback info 2"}
-                ]
-            },
-            {
                 "name": "has WGSL language feature",
                 "returns": "bool",
                 "args": [
-                    {"name": "feature", "type": "WGSL feature name"}
+                    {"name": "feature", "type": "WGSL language feature name"}
                 ]
             },
             {
-                "name": "enumerate WGSL language features",
-                "returns": "size_t",
+                "name": "get WGSL language features",
+                "returns": "status",
                 "args": [
-                    {"name": "features", "type": "WGSL feature name", "annotation": "*"}
+                    {"name": "features", "type": "supported WGSL language features", "annotation": "*"}
                 ]
             }
         ]
@@ -2723,10 +2425,7 @@
         "values": [
             {"value": 1, "name": "success"},
             {"value": 2, "name": "timed out"},
-            {"value": 3, "name": "unsupported timeout"},
-            {"value": 4, "name": "unsupported count"},
-            {"value": 5, "name": "unsupported mixed sources"},
-            {"value": 6, "name": "unknown"}
+            {"value": 3, "name": "error"}
         ]
     },
     "future wait info": {
@@ -2736,7 +2435,7 @@
             {"name": "completed", "type": "bool", "default": "false"}
         ]
     },
-    "instance features": {
+    "instance capabilities": {
         "category": "structure",
         "extensible": "in",
         "members": [
@@ -2748,14 +2447,14 @@
         "category": "structure",
         "extensible": "in",
         "members": [
-            {"name": "features", "type": "instance features"}
+            {"name": "capabilities", "type": "instance capabilities"}
         ]
     },
-    "get instance features": {
+    "get instance capabilities": {
         "category": "function",
         "returns": "status",
         "args": [
-            {"name": "features", "type": "instance features", "annotation": "*"}
+            {"name": "capabilities", "type": "instance capabilities", "annotation": "*"}
         ]
     },
     "dawn wire WGSL control": {
@@ -2771,7 +2470,7 @@
     },
     "vertex attribute": {
         "category": "structure",
-        "extensible": false,
+        "extensible": "in",
         "members": [
             {"name": "format", "type": "vertex format"},
             {"name": "offset", "type": "uint64_t"},
@@ -2780,10 +2479,10 @@
     },
     "vertex buffer layout": {
         "category": "structure",
-        "extensible": false,
+        "extensible": "in",
         "members": [
             {"name": "array stride", "type": "uint64_t"},
-            {"name": "step mode", "type": "vertex step mode", "default": "vertex"},
+            {"name": "step mode", "type": "vertex step mode"},
             {"name": "attribute count", "type": "size_t"},
             {"name": "attributes", "type": "vertex attribute", "annotation": "const*", "length": "attribute count"}
         ]
@@ -2792,9 +2491,8 @@
         "category": "enum",
         "values": [
             {"value": 0, "name": "undefined", "jsrepr": "undefined"},
-            {"value": 1, "name": "vertex buffer not used"},
-            {"value": 2, "name": "vertex"},
-            {"value": 3, "name": "instance"}
+            {"value": 1, "name": "vertex"},
+            {"value": 2, "name": "instance"}
         ]
     },
     "load op": {
@@ -2846,6 +2544,15 @@
             {"name": "y", "type": "uint32_t", "default": "0"}
         ]
     },
+    "pass timestamp writes": {
+        "category": "structure",
+        "extensible": "in",
+        "members": [
+            {"name": "query set", "type": "query set"},
+            {"name": "beginning of pass write index", "type": "uint32_t", "default": "WGPU_QUERY_SET_INDEX_UNDEFINED"},
+            {"name": "end of pass write index", "type": "uint32_t", "default": "WGPU_QUERY_SET_INDEX_UNDEFINED"}
+        ]
+    },
     "pipeline layout": {
         "category": "object",
         "methods": [
@@ -2864,7 +2571,7 @@
         "members": [
             {"name": "label", "type": "string view", "optional": true},
             {"name": "bind group layout count", "type": "size_t"},
-            {"name": "bind group layouts", "type": "bind group layout", "annotation": "const*", "length": "bind group layout count"},
+            {"name": "bind group layouts", "type": "bind group layout", "annotation": "const*", "length": "bind group layout count", "optional": true},
             {"name": "immediate data range byte size", "type": "uint32_t", "default": 0}
         ]
     },
@@ -2882,7 +2589,6 @@
     "pipeline layout storage attachment": {
         "category": "structure",
         "tags": ["dawn"],
-        "extensible": "in",
         "members": [
             {"name": "offset", "type": "uint64_t", "default": 0},
             {"name": "format", "type": "texture format"}
@@ -2906,7 +2612,7 @@
             {"value": 4, "name": "mailbox"}
         ]
     },
-    "programmable stage descriptor": {
+    "compute state": {
         "category": "structure",
         "extensible": "in",
         "members": [
@@ -2978,28 +2684,9 @@
             },
             {
                 "name": "on submitted work done",
-                "tags": ["dawn", "upstream"],
-                "args": [
-                    {"name": "callback", "type": "queue work done callback"},
-                    {"name": "userdata", "type": "void *"}
-                ]
-            },
-            {
-                "name": "on submitted work done f",
-                "_comment": "TODO(crbug.com/dawn/2021): This is dawn/emscripten-only until we rename it to replace the old API. See bug for details.",
-                "tags": ["dawn", "emscripten"],
                 "returns": "future",
                 "args": [
                     {"name": "callback info", "type": "queue work done callback info"}
-                ]
-            },
-            {
-                "name": "on submitted work done 2",
-                "_comment": "TODO(crbug.com/dawn/2021): This is dawn/emscripten-only until we rename it to replace the old API. See bug for details.",
-                "tags": ["dawn", "emscripten"],
-                "returns": "future",
-                "args": [
-                    {"name": "callback info", "type": "queue work done callback info 2"}
                 ]
             },
             {
@@ -3014,10 +2701,10 @@
             {
                 "name": "write texture",
                 "args": [
-                    {"name": "destination", "type": "image copy texture", "annotation": "const*"},
+                    {"name": "destination", "type": "texel copy texture info", "annotation": "const*"},
                     {"name": "data", "type": "void", "annotation": "const*", "length": "data size"},
                     {"name": "data size", "type": "size_t"},
-                    {"name": "data layout", "type": "texture data layout", "annotation": "const*"},
+                    {"name": "data layout", "type": "texel copy buffer layout", "annotation": "const*"},
                     {"name": "write size", "type": "extent 3D", "annotation": "const*"}
                 ]
             },
@@ -3026,8 +2713,8 @@
                 "extensible": "in",
                 "tags": ["dawn"],
                 "args": [
-                    {"name": "source", "type": "image copy texture", "annotation": "const*"},
-                    {"name": "destination", "type": "image copy texture", "annotation": "const*"},
+                    {"name": "source", "type": "texel copy texture info", "annotation": "const*"},
+                    {"name": "destination", "type": "texel copy texture info", "annotation": "const*"},
                     {"name": "copy size", "type": "extent 3D", "annotation": "const*"},
                     {"name": "options", "type": "copy texture for browser options", "annotation": "const*"}
                 ]
@@ -3038,7 +2725,7 @@
                 "tags": ["dawn"],
                 "args": [
                     {"name": "source", "type": "image copy external texture", "annotation": "const*"},
-                    {"name": "destination", "type": "image copy texture", "annotation": "const*"},
+                    {"name": "destination", "type": "texel copy texture info", "annotation": "const*"},
                     {"name": "copy size", "type": "extent 3D", "annotation": "const*"},
                     {"name": "options", "type": "copy texture for browser options", "annotation": "const*"}
                 ]
@@ -3060,32 +2747,16 @@
         ]
     },
     "queue work done callback": {
-        "category": "function pointer",
-        "args": [
-            {"name": "status", "type": "queue work done status"},
-            {"name": "userdata", "type": "void *"}
-        ]
-    },
-    "queue work done callback 2": {
         "category": "callback function",
         "args": [
             {"name": "status", "type": "queue work done status"}
         ]
     },
     "queue work done callback info": {
-        "category": "structure",
-        "extensible": "in",
-        "members": [
-            {"name": "mode", "type": "callback mode"},
-            {"name": "callback", "type": "queue work done callback"},
-            {"name": "userdata", "type": "void *"}
-        ]
-    },
-    "queue work done callback info 2": {
         "category": "callback info",
         "members": [
             {"name": "mode", "type": "callback mode"},
-            {"name": "callback", "type": "queue work done callback 2"}
+            {"name": "callback", "type": "queue work done callback"}
         ]
     },
     "queue work done status": {
@@ -3094,9 +2765,7 @@
         "values": [
             {"value": 1, "name": "success"},
             {"value": 2, "name": "instance dropped"},
-            {"value": 3, "name": "error"},
-            {"value": 4, "name": "unknown"},
-            {"value": 5, "name": "device lost"}
+            {"value": 3, "name": "error"}
         ]
     },
 
@@ -3261,6 +2930,7 @@
     },
     "render pass depth stencil attachment": {
         "category": "structure",
+        "extensible": "in",
         "members": [
             {"name": "view", "type": "texture view"},
             {"name": "depth load op", "type": "load op", "default": "undefined"},
@@ -3283,7 +2953,7 @@
             {"name": "color attachments", "type": "render pass color attachment", "annotation": "const*", "length": "color attachment count"},
             {"name": "depth stencil attachment", "type": "render pass depth stencil attachment", "annotation": "const*", "optional": true},
             {"name": "occlusion query set", "type": "query set", "optional": true},
-            {"name": "timestamp writes", "type": "render pass timestamp writes", "annotation": "const*", "optional": true}
+            {"name": "timestamp writes", "type": "pass timestamp writes", "annotation": "const*", "optional": true}
         ]
     },
     "render pass descriptor max draw count": {
@@ -3512,14 +3182,6 @@
             }
         ]
     },
-    "render pass timestamp writes": {
-        "category": "structure",
-        "members": [
-            {"name": "query set", "type": "query set"},
-            {"name": "beginning of pass write index", "type": "uint32_t", "default": "WGPU_QUERY_SET_INDEX_UNDEFINED"},
-            {"name": "end of pass write index", "type": "uint32_t", "default": "WGPU_QUERY_SET_INDEX_UNDEFINED"}
-        ]
-    },
     "render pipeline": {
         "category": "object",
         "methods": [
@@ -3541,16 +3203,6 @@
     },
 
     "request device callback": {
-        "category": "function pointer",
-        "_comment": "crbug.com/1234617: Revisit optional status of device once requestDevice can return lost devices",
-        "args": [
-            {"name": "status", "type": "request device status"},
-            {"name": "device", "type": "device", "optional": true},
-            {"name": "message", "type": "string view"},
-            {"name": "userdata", "type": "void *"}
-        ]
-    },
-    "request device callback 2": {
         "category": "callback function",
         "_comment": "crbug.com/1234617: Revisit optional status of device once requestDevice can return lost devices",
         "args": [
@@ -3560,19 +3212,10 @@
         ]
     },
     "request device callback info": {
-         "category": "structure",
-         "extensible": "in",
-         "members": [
-            {"name": "mode", "type": "callback mode"},
-            {"name": "callback", "type": "request device callback"},
-            {"name": "userdata", "type": "void *"}
-         ]
-    },
-    "request device callback info 2": {
         "category": "callback info",
         "members": [
             {"name": "mode", "type": "callback mode"},
-            {"name": "callback", "type": "request device callback 2"}
+            {"name": "callback", "type": "request device callback"}
         ]
    },
 
@@ -3582,8 +3225,7 @@
         "values": [
             {"value": 1, "name": "success"},
             {"value": 2, "name": "instance dropped"},
-            {"value": 3, "name": "error"},
-            {"value": 4, "name": "unknown"}
+            {"value": 3, "name": "error"}
         ]
     },
 
@@ -3726,27 +3368,9 @@
         "methods": [
             {
                 "name": "get compilation info",
-                "args": [
-                    {"name": "callback", "type": "compilation info callback"},
-                    {"name": "userdata", "type": "void *"}
-                ]
-            },
-            {
-                "name": "get compilation info f",
-                "_comment": "TODO(crbug.com/dawn/2021): This is dawn/emscripten-only until we rename it to replace the old API. See bug for details.",
-                "tags": ["dawn", "emscripten"],
                 "returns": "future",
                 "args": [
                     {"name": "callback info", "type": "compilation info callback info"}
-                ]
-            },
-            {
-                "name": "get compilation info 2",
-                "_comment": "TODO(crbug.com/dawn/2021): This is dawn/emscripten-only until we rename it to replace the old API. See bug for details.",
-                "tags": ["dawn", "emscripten"],
-                "returns": "future",
-                "args": [
-                    {"name": "callback info", "type": "compilation info callback info 2"}
                 ]
             },
             {
@@ -3907,12 +3531,7 @@
             {"name": "window", "type": "void *"}
         ]
     },
-    "surface descriptor from canvas HTML selector": {
-        "category": "typedef",
-        "type": "surface source canvas HTML selector _Emscripten",
-        "tags": ["emscripten"]
-    },
-    "surface source canvas HTML selector _Emscripten": {
+    "emscripten surface source canvas HTML selector": {
         "category": "structure",
         "chained": "in",
         "chain roots": ["surface descriptor"],
@@ -4034,10 +3653,11 @@
             {"value": 7, "name": "surface source wayland surface"},
             {"value": 8, "name": "surface source android native window"},
             {"value": 9, "name": "surface source XCB window"},
+            {"value": 10, "name": "adapter properties subgroups"},
 
             {"value": 0, "name": "texture binding view dimension descriptor", "tags": ["compat"]},
 
-            {"value": 0, "name": "surface source canvas HTML selector _Emscripten", "tags": ["emscripten"]},
+            {"value": 0, "name": "emscripten surface source canvas HTML selector", "tags": ["emscripten"]},
 
             {"value": 0, "name": "surface descriptor from windows core window", "tags": ["dawn"]},
             {"value": 1, "name": "external texture binding entry", "tags": ["dawn"]},
@@ -4062,45 +3682,44 @@
             {"value": 20, "name": "adapter properties memory heaps", "tags": ["dawn"]},
             {"value": 21, "name": "adapter properties D3D", "tags": ["dawn"]},
             {"value": 22, "name": "adapter properties vk", "tags": ["dawn"]},
-            {"value": 23, "name": "dawn compute pipeline full subgroups", "tags": ["dawn"]},
-            {"value": 24, "name": "dawn wire WGSL control", "tags": ["dawn"]},
-            {"value": 25, "name": "dawn WGSL blocklist", "tags": ["dawn", "native"]},
-            {"value": 26, "name": "drm format capabilities", "tags": ["dawn"]},
-            {"value": 27, "name": "shader module compilation options", "tags": ["dawn"]},
-            {"value": 28, "name": "color target state expand resolve texture dawn", "tags": ["dawn"]},
-            {"value": 29, "name": "render pass descriptor expand resolve rect", "tags": ["dawn"]},
+            {"value": 23, "name": "dawn wire WGSL control", "tags": ["dawn"]},
+            {"value": 24, "name": "dawn WGSL blocklist", "tags": ["dawn", "native"]},
+            {"value": 25, "name": "dawn drm format capabilities", "tags": ["dawn"]},
+            {"value": 26, "name": "shader module compilation options", "tags": ["dawn"]},
+            {"value": 27, "name": "color target state expand resolve texture dawn", "tags": ["dawn"]},
+            {"value": 28, "name": "render pass descriptor expand resolve rect", "tags": ["dawn"]},
 
-            {"value": 30, "name": "shared texture memory vk dedicated allocation descriptor", "tags": ["dawn", "native"]},
-            {"value": 31, "name": "shared texture memory a hardware buffer descriptor", "tags": ["dawn", "native"]},
-            {"value": 32, "name": "shared texture memory dma buf descriptor", "tags": ["dawn", "native"]},
-            {"value": 33, "name": "shared texture memory opaque FD descriptor", "tags": ["dawn", "native"]},
-            {"value": 34, "name": "shared texture memory zircon handle descriptor", "tags": ["dawn", "native"]},
-            {"value": 35, "name": "shared texture memory DXGI shared handle descriptor", "tags": ["dawn", "native"]},
-            {"value": 36, "name": "shared texture memory D3D11 texture 2D descriptor", "tags": ["dawn", "native"]},
-            {"value": 37, "name": "shared texture memory IO surface descriptor", "tags": ["dawn", "native"]},
-            {"value": 38, "name": "shared texture memory EGL image descriptor", "tags": ["dawn", "native"]},
-            {"value": 39, "name": "shared texture memory initialized begin state", "tags": ["dawn", "native"]},
-            {"value": 40, "name": "shared texture memory initialized end state", "tags": ["dawn", "native"]},
-            {"value": 41, "name": "shared texture memory vk image layout begin state", "tags": ["dawn", "native"]},
-            {"value": 42, "name": "shared texture memory vk image layout end state", "tags": ["dawn", "native"]},
-            {"value": 43, "name": "shared texture memory D3D swapchain begin state", "tags": ["dawn", "native"]},
-            {"value": 44, "name": "shared fence vk semaphore opaque FD descriptor", "tags": ["dawn", "native"]},
-            {"value": 45, "name": "shared fence vk semaphore opaque FD export info", "tags": ["dawn", "native"]},
-            {"value": 46, "name": "shared fence sync FD descriptor", "tags": ["dawn", "native"]},
-            {"value": 47, "name": "shared fence sync FD export info", "tags": ["dawn", "native"]},
-            {"value": 48, "name": "shared fence vk semaphore zircon handle descriptor", "tags": ["dawn", "native"]},
-            {"value": 49, "name": "shared fence vk semaphore zircon handle export info", "tags": ["dawn", "native"]},
-            {"value": 50, "name": "shared fence DXGI shared handle descriptor", "tags": ["dawn", "native"]},
-            {"value": 51, "name": "shared fence DXGI shared handle export info", "tags": ["dawn", "native"]},
-            {"value": 52, "name": "shared fence MTL shared event descriptor", "tags": ["dawn", "native"]},
-            {"value": 53, "name": "shared fence MTL shared event export info", "tags": ["dawn", "native"]},
-            {"value": 54, "name": "shared buffer memory D3D12 resource descriptor", "tags": ["dawn", "native"]},
-            {"value": 55, "name": "static sampler binding layout", "tags": ["dawn"]},
-            {"value": 56, "name": "y cb cr vk descriptor", "tags": ["dawn"]},
-            {"value": 57, "name": "shared texture memory a hardware buffer properties", "tags": ["dawn", "native"]},
-            {"value": 58, "name": "a hardware buffer properties", "tags": ["dawn", "native"]},
-            {"value": 59, "name": "dawn experimental immediate data limits", "tags": ["dawn"]}
-
+            {"value": 29, "name": "shared texture memory vk dedicated allocation descriptor", "tags": ["dawn", "native"]},
+            {"value": 30, "name": "shared texture memory a hardware buffer descriptor", "tags": ["dawn", "native"]},
+            {"value": 31, "name": "shared texture memory dma buf descriptor", "tags": ["dawn", "native"]},
+            {"value": 32, "name": "shared texture memory opaque FD descriptor", "tags": ["dawn", "native"]},
+            {"value": 33, "name": "shared texture memory zircon handle descriptor", "tags": ["dawn", "native"]},
+            {"value": 34, "name": "shared texture memory DXGI shared handle descriptor", "tags": ["dawn", "native"]},
+            {"value": 35, "name": "shared texture memory D3D11 texture 2D descriptor", "tags": ["dawn", "native"]},
+            {"value": 36, "name": "shared texture memory IO surface descriptor", "tags": ["dawn", "native"]},
+            {"value": 37, "name": "shared texture memory EGL image descriptor", "tags": ["dawn", "native"]},
+            {"value": 38, "name": "shared texture memory initialized begin state", "tags": ["dawn", "native"]},
+            {"value": 39, "name": "shared texture memory initialized end state", "tags": ["dawn", "native"]},
+            {"value": 40, "name": "shared texture memory vk image layout begin state", "tags": ["dawn", "native"]},
+            {"value": 41, "name": "shared texture memory vk image layout end state", "tags": ["dawn", "native"]},
+            {"value": 42, "name": "shared texture memory D3D swapchain begin state", "tags": ["dawn", "native"]},
+            {"value": 43, "name": "shared fence vk semaphore opaque FD descriptor", "tags": ["dawn", "native"]},
+            {"value": 44, "name": "shared fence vk semaphore opaque FD export info", "tags": ["dawn", "native"]},
+            {"value": 45, "name": "shared fence sync FD descriptor", "tags": ["dawn", "native"]},
+            {"value": 46, "name": "shared fence sync FD export info", "tags": ["dawn", "native"]},
+            {"value": 47, "name": "shared fence vk semaphore zircon handle descriptor", "tags": ["dawn", "native"]},
+            {"value": 48, "name": "shared fence vk semaphore zircon handle export info", "tags": ["dawn", "native"]},
+            {"value": 49, "name": "shared fence DXGI shared handle descriptor", "tags": ["dawn", "native"]},
+            {"value": 50, "name": "shared fence DXGI shared handle export info", "tags": ["dawn", "native"]},
+            {"value": 51, "name": "shared fence MTL shared event descriptor", "tags": ["dawn", "native"]},
+            {"value": 52, "name": "shared fence MTL shared event export info", "tags": ["dawn", "native"]},
+            {"value": 53, "name": "shared buffer memory D3D12 resource descriptor", "tags": ["dawn", "native"]},
+            {"value": 54, "name": "static sampler binding layout", "tags": ["dawn"]},
+            {"value": 55, "name": "y cb cr vk descriptor", "tags": ["dawn"]},
+            {"value": 56, "name": "shared texture memory a hardware buffer properties", "tags": ["dawn", "native"]},
+            {"value": 57, "name": "a hardware buffer properties", "tags": ["dawn", "native"]},
+            {"value": 58, "name": "dawn experimental immediate data limits", "tags": ["dawn"]},
+            {"value": 59, "name": "dawn texel copy buffer row alignment limits", "tags": ["dawn"]}
         ]
     },
     "texture": {
@@ -4190,13 +3809,8 @@
         ]
     },
     "texture data layout": {
-        "category": "structure",
-        "extensible": "in",
-        "members": [
-            {"name": "offset", "type": "uint64_t", "default": 0},
-            {"name": "bytes per row", "type": "uint32_t", "default": "WGPU_COPY_STRIDE_UNDEFINED"},
-            {"name": "rows per image", "type": "uint32_t", "default": "WGPU_COPY_STRIDE_UNDEFINED"}
-        ]
+        "category": "typedef",
+        "type": "texel copy buffer layout"
     },
     "texture descriptor": {
         "category": "structure",
@@ -4474,13 +4088,14 @@
             {"value": 41, "name": "unorm8x4 BGRA", "jsrepr": "'unorm8x4-bgra'"}
         ]
     },
-    "WGSL feature name": {
+    "WGSL language feature name": {
         "category": "enum",
         "values": [
             {"value": 1, "name": "readonly and readwrite storage textures",  "jsrepr": "'readonly_and_readwrite_storage_textures'"},
             {"value": 2, "name": "packed 4x8 integer dot product", "jsrepr": "'packed_4x8_integer_dot_product'"},
             {"value": 3, "name": "unrestricted pointer parameters", "jsrepr": "'unrestricted_pointer_parameters'"},
             {"value": 4, "name": "pointer composite access", "jsrepr": "'pointer_composite_access'"},
+            {"value": 5, "name": "sized binding array", "jsrepr": "'sized_binding_array'"},
 
             {"value": 0, "name": "chromium testing unimplemented", "jsrepr": "'chromium_testing_unimplemented'", "tags": ["dawn"]},
             {"value": 1, "name": "chromium testing unsafe experimental", "jsrepr": "'chromium_testing_unsafe_experimental'", "tags": ["dawn"]},

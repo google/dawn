@@ -1,7 +1,5 @@
 #include <metal_stdlib>
-
 using namespace metal;
-fragment void tint_symbol() {
-  return;
-}
 
+fragment void v() {
+}

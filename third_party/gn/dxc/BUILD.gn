@@ -506,6 +506,10 @@ config("common_config") {
       "-Wno-deprecated-enum-enum-conversion",
       "-Wno-deprecated-anon-enum-enum-conversion",
       "-Wno-ambiguous-reversed-operator",
+
+      # TODO(crbug.com/392929926): Remove invalid specializations of
+      # is_nothrow_constructible.
+      "-Wno-invalid-specialization",
     ]
   } else {
     # MSVC

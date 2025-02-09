@@ -29,6 +29,11 @@ import("build/config/rust.gni")
 import("scripts/dawn_overrides_with_defaults.gni")
 import("scripts/tint_overrides_with_defaults.gni")
 
+if (!is_clang && is_win) {
+  # libc++ cannot currently build with MSVC. See https://anglebug.com/376074941
+  assert(!use_custom_libcxx, "MSVC build requires use_custom_libcxx=false")
+}
+
 group("benchmarks") {
   testonly = true
   deps = [ "src/tint:benchmarks" ]
@@ -107,4 +112,18 @@ if (enable_rust) {
 group("default") {
   testonly = true
   deps = [ ":all" ]
+}
+
+# GN evaluates each .gn file once per toolchain, so restricting to default
+# toolchain will ensure write_file() is called only once.
+if (current_toolchain == default_toolchain) {
+  import("//build/gn_logs.gni")
+
+  # Write debug logs to gn_logs.txt.
+  _lines = [
+             "Generated during 'gn gen' by //BUILD.gn.",
+             "",
+           ] + build_gn_logs
+
+  write_file("$root_build_dir/gn_logs.txt", _lines)
 }

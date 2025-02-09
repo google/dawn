@@ -25,7 +25,7 @@
           %9 = OpTypeFunction %v4float
        %void = OpTypeVoid
          %15 = OpTypeFunction %void %uint
-     %uint_0 = OpConstant %uint 0
+     %uint_1 = OpConstant %uint 1
        %bool = OpTypeBool
          %22 = OpConstantNull %v4float
      %uint_2 = OpConstant %uint 2
@@ -39,7 +39,7 @@
  %main_inner = OpFunction %void None %15
 %tint_local_index = OpFunctionParameter %uint
          %16 = OpLabel
-         %17 = OpIEqual %bool %tint_local_index %uint_0
+         %17 = OpULessThan %bool %tint_local_index %uint_1
                OpSelectionMerge %20 None
                OpBranchConditional %17 %21 %20
          %21 = OpLabel

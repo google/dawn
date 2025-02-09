@@ -11,6 +11,6 @@ RWByteAddressBuffer result : register(u1);
 [numthreads(1, 1, 1)]
 void f() {
   S s = (S)0;
-  result.Store(0u, asuint(s.data[asint(ubo[0].x)]));
+  result.Store(0u, asuint(s.data[min(uint(asint(ubo[0].x)), 63u)]));
   return;
 }

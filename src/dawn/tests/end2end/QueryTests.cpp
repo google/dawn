@@ -431,8 +431,8 @@ TEST_P(OcclusionQueryTests, RewriteNoDrawToZero) {
 // Test setting an occlusion query to non-zero, then rewriting it without drawing, resolves to 0.
 // Do the two queries+resolves in separate submits.
 TEST_P(OcclusionQueryTests, RewriteNoDrawToZeroSeparateSubmit) {
-    // TODO(dawn:1870): D3D11_QUERY_OCCLUSION_PREDICATE doesn't work on Intel Gen12.
-    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsIntelGen12());
+    // TODO(dawn:1870): D3D11_QUERY_OCCLUSION_PREDICATE doesn't work on Intel Gen12 and Xe GPUs.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsIntelGen12OrLater());
 
     constexpr uint32_t kQueryCount = 1;
 
@@ -682,7 +682,7 @@ class TimestampQueryTests : public QueryTests {
     }
 
     void EncodeComputeTimestampWrites(const wgpu::CommandEncoder& encoder,
-                                      const wgpu::ComputePassTimestampWrites& timestampWrites,
+                                      const wgpu::PassTimestampWrites& timestampWrites,
                                       bool hasPipeline = true) {
         wgpu::ComputePassDescriptor descriptor;
         descriptor.timestampWrites = &timestampWrites;
@@ -696,7 +696,7 @@ class TimestampQueryTests : public QueryTests {
     }
 
     void EncodeRenderTimestampWrites(const wgpu::CommandEncoder& encoder,
-                                     const wgpu::RenderPassTimestampWrites& timestampWrites,
+                                     const wgpu::PassTimestampWrites& timestampWrites,
                                      bool hasPipeline = true,
                                      bool hasFragmentStage = true) {
         wgpu::Texture depthTexture = CreateRenderTexture(kDepthStencilFormat);
@@ -717,8 +717,8 @@ class TimestampQueryTests : public QueryTests {
     }
 
     void TestTimestampWritesOnComputePass(
-        const wgpu::ComputePassTimestampWrites& timestampWrites,
-        const wgpu::ComputePassTimestampWrites& timestampWritesOnAnotherPass = {},
+        const wgpu::PassTimestampWrites& timestampWrites,
+        const wgpu::PassTimestampWrites& timestampWritesOnAnotherPass = {},
         bool hasPipeline = true) {
         bool hasAnotherPass =
             timestampWritesOnAnotherPass.beginningOfPassWriteIndex !=
@@ -778,8 +778,8 @@ class TimestampQueryTests : public QueryTests {
     }
 
     void TestTimestampWritesOnRenderPass(
-        const wgpu::RenderPassTimestampWrites& timestampWrites,
-        const wgpu::RenderPassTimestampWrites& timestampWritesOnAnotherPass = {},
+        const wgpu::PassTimestampWrites& timestampWrites,
+        const wgpu::PassTimestampWrites& timestampWritesOnAnotherPass = {},
         bool hasPipeline = true,
         bool hasFragmentStage = true) {
         bool hasAnotherPass =
@@ -898,8 +898,8 @@ TEST_P(TimestampQueryTests, TimestampWritesQuerySetOnComputePass) {
     wgpu::QuerySet querySet0 = CreateQuerySetForTimestamp(1);
     wgpu::QuerySet querySet1 = CreateQuerySetForTimestamp(1);
 
-    TestTimestampWritesOnComputePass({querySet0, 0, wgpu::kQuerySetIndexUndefined},
-                                     {querySet1, wgpu::kQuerySetIndexUndefined, 0});
+    TestTimestampWritesOnComputePass({nullptr, querySet0, 0, wgpu::kQuerySetIndexUndefined},
+                                     {nullptr, querySet1, wgpu::kQuerySetIndexUndefined, 0});
 }
 
 // Test timestampWrites with query index in compute pass descriptor
@@ -908,8 +908,8 @@ TEST_P(TimestampQueryTests, TimestampWritesQueryIndexOnComputePass) {
     // query index due to it's not allowed on compute pass.
     wgpu::QuerySet querySet = CreateQuerySetForTimestamp(2);
 
-    TestTimestampWritesOnComputePass({querySet, 0, wgpu::kQuerySetIndexUndefined},
-                                     {querySet, wgpu::kQuerySetIndexUndefined, 1});
+    TestTimestampWritesOnComputePass({nullptr, querySet, 0, wgpu::kQuerySetIndexUndefined},
+                                     {nullptr, querySet, wgpu::kQuerySetIndexUndefined, 1});
 }
 
 // Test timestampWrites with timestamp location in compute pass descriptor
@@ -920,9 +920,9 @@ TEST_P(TimestampQueryTests, TimestampWritesLocationOnComputePass) {
     {
         wgpu::QuerySet querySet = CreateQuerySetForTimestamp(kQueryCount);
 
-        TestTimestampWritesOnComputePass({querySet, 0, wgpu::kQuerySetIndexUndefined});
+        TestTimestampWritesOnComputePass({nullptr, querySet, 0, wgpu::kQuerySetIndexUndefined});
 
-        TestTimestampWritesOnComputePass({querySet, wgpu::kQuerySetIndexUndefined, 1});
+        TestTimestampWritesOnComputePass({nullptr, querySet, wgpu::kQuerySetIndexUndefined, 1});
     }
 
     // Set timestampWrites with same location on different compute pass
@@ -930,8 +930,8 @@ TEST_P(TimestampQueryTests, TimestampWritesLocationOnComputePass) {
         wgpu::QuerySet querySet0 = CreateQuerySetForTimestamp(1);
         wgpu::QuerySet querySet1 = CreateQuerySetForTimestamp(1);
 
-        TestTimestampWritesOnComputePass({querySet0, 0, wgpu::kQuerySetIndexUndefined},
-                                         {querySet1, 0, wgpu::kQuerySetIndexUndefined});
+        TestTimestampWritesOnComputePass({nullptr, querySet0, 0, wgpu::kQuerySetIndexUndefined},
+                                         {nullptr, querySet1, 0, wgpu::kQuerySetIndexUndefined});
     }
 }
 
@@ -943,7 +943,7 @@ TEST_P(TimestampQueryTests, TimestampWritesOnComputePassWithNoPipline) {
 
     wgpu::QuerySet querySet = CreateQuerySetForTimestamp(2);
 
-    TestTimestampWritesOnComputePass({querySet, 0, 1}, {}, false);
+    TestTimestampWritesOnComputePass({nullptr, querySet, 0, 1}, {}, false);
 }
 
 // Test timestampWrites with query set in render pass descriptor
@@ -955,8 +955,8 @@ TEST_P(TimestampQueryTests, TimestampWritesQuerySetOnRenderPass) {
     wgpu::QuerySet querySet0 = CreateQuerySetForTimestamp(1);
     wgpu::QuerySet querySet1 = CreateQuerySetForTimestamp(1);
 
-    TestTimestampWritesOnRenderPass({querySet0, 0, wgpu::kQuerySetIndexUndefined},
-                                    {querySet1, 0, wgpu::kQuerySetIndexUndefined});
+    TestTimestampWritesOnRenderPass({nullptr, querySet0, 0, wgpu::kQuerySetIndexUndefined},
+                                    {nullptr, querySet1, 0, wgpu::kQuerySetIndexUndefined});
 }
 
 // Test timestampWrites with query index in render pass descriptor
@@ -965,8 +965,8 @@ TEST_P(TimestampQueryTests, TimestampWritesQueryIndexOnRenderPass) {
     // query index due to it's not allowed on render pass.
     wgpu::QuerySet querySet = CreateQuerySetForTimestamp(2);
 
-    TestTimestampWritesOnRenderPass({querySet, 0, wgpu::kQuerySetIndexUndefined},
-                                    {querySet, wgpu::kQuerySetIndexUndefined, 1});
+    TestTimestampWritesOnRenderPass({nullptr, querySet, 0, wgpu::kQuerySetIndexUndefined},
+                                    {nullptr, querySet, wgpu::kQuerySetIndexUndefined, 1});
 }
 
 // Test timestampWrites with timestamp location in render pass descriptor
@@ -975,9 +975,9 @@ TEST_P(TimestampQueryTests, TimestampWritesLocationOnRenderPass) {
     {
         wgpu::QuerySet querySet = CreateQuerySetForTimestamp(2);
 
-        TestTimestampWritesOnRenderPass({querySet, 0, wgpu::kQuerySetIndexUndefined});
+        TestTimestampWritesOnRenderPass({nullptr, querySet, 0, wgpu::kQuerySetIndexUndefined});
 
-        TestTimestampWritesOnRenderPass({querySet, wgpu::kQuerySetIndexUndefined, 1});
+        TestTimestampWritesOnRenderPass({nullptr, querySet, wgpu::kQuerySetIndexUndefined, 1});
     }
 
     // Set timestampWrites with same location on different render pass
@@ -985,15 +985,15 @@ TEST_P(TimestampQueryTests, TimestampWritesLocationOnRenderPass) {
         wgpu::QuerySet querySet0 = CreateQuerySetForTimestamp(1);
         wgpu::QuerySet querySet1 = CreateQuerySetForTimestamp(1);
 
-        TestTimestampWritesOnRenderPass({querySet0, 0, wgpu::kQuerySetIndexUndefined},
-                                        {querySet1, 0, wgpu::kQuerySetIndexUndefined});
+        TestTimestampWritesOnRenderPass({nullptr, querySet0, 0, wgpu::kQuerySetIndexUndefined},
+                                        {nullptr, querySet1, 0, wgpu::kQuerySetIndexUndefined});
     }
 }
 
 // Test timestampWrites on render pass without pipeline
 TEST_P(TimestampQueryTests, TimestampWritesOnRenderPassWithNoPipline) {
     wgpu::QuerySet querySet = CreateQuerySetForTimestamp(2);
-    TestTimestampWritesOnRenderPass({querySet, 0, 1}, {}, false);
+    TestTimestampWritesOnRenderPass({nullptr, querySet, 0, 1}, {}, false);
 }
 
 // Test timestampWrites on render pass with pipeline but no fragment stage
@@ -1001,7 +1001,7 @@ TEST_P(TimestampQueryTests, TimestampWritesOnRenderPassWithOnlyVertexStage) {
     DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("use_placeholder_fragment_in_vertex_only_pipeline"));
 
     wgpu::QuerySet querySet = CreateQuerySetForTimestamp(2);
-    TestTimestampWritesOnRenderPass({querySet, 0, 1}, {}, true, false);
+    TestTimestampWritesOnRenderPass({nullptr, querySet, 0, 1}, {}, true, false);
 }
 
 // Test resolving timestamp query from another different encoder

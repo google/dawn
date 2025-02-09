@@ -130,6 +130,7 @@ bool ExecutableExists(const std::string& path) {
     }
 
     void* addr_header = MapViewOfFileEx(map, FILE_MAP_READ, 0, 0, 0, nullptr);
+    TINT_DEFER(UnmapViewOfFile(addr_header));
 
     // Dynamically obtain the address of, and call ImageNtHeader. This is done to avoid tint.exe
     // needing to statically link Dbghelp.lib.

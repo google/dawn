@@ -10,7 +10,7 @@ struct UBO {
 };
 
 struct Result {
-  int tint_symbol;
+  int member_0;
 };
 
 layout(binding = 0, std140)
@@ -23,6 +23,6 @@ buffer result_block_1_ssbo {
 } v_1;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  int v_2 = v.inner.dynamic_idx;
-  v_1.inner.tint_symbol = v.inner.data[v_2].x;
+  uint v_2 = min(uint(v.inner.dynamic_idx), 3u);
+  v_1.inner.member_0 = v.inner.data[v_2].x;
 }

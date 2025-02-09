@@ -27,8 +27,6 @@
 
 #include "src/tint/lang/spirv/ir/builtin_call.h"
 
-#include <utility>
-
 #include "src/tint/lang/core/ir/clone_context.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/utils/ice/ice.h"
@@ -51,7 +49,21 @@ BuiltinCall::~BuiltinCall() = default;
 BuiltinCall* BuiltinCall::Clone(core::ir::CloneContext& ctx) {
     auto* new_result = ctx.Clone(Result(0));
     auto new_args = ctx.Clone<BuiltinCall::kDefaultNumOperands>(Args());
-    return ctx.ir.CreateInstruction<BuiltinCall>(new_result, func_, new_args);
+    auto new_explicit = ExplicitTemplateParams();
+
+    auto* inst = ctx.ir.CreateInstruction<BuiltinCall>(new_result, func_, new_args);
+    if (!new_explicit.IsEmpty()) {
+        inst->SetExplicitTemplateParams(new_explicit);
+    }
+    return inst;
+}
+
+tint::core::ir::Instruction::Accesses BuiltinCall::GetSideEffects() const {
+    return spirv::GetSideEffects(func_);
+}
+
+std::string BuiltinCall::FriendlyName() const {
+    return std::string("spirv.") + str(func_);
 }
 
 }  // namespace tint::spirv::ir

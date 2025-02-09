@@ -15,28 +15,6 @@ struct FragmentInput {
 struct FragmentOutput {
   float4 color;
 };
-
-float4 getColor(FragmentInput fragment) {
-  float4 color = float4(0.0f, 0.0f, 0.0f, 0.0f);
-  if ((uniforms[8].y == 0u)) {
-    color = fragment.color;
-  } else {
-    if ((uniforms[8].y == 1u)) {
-      color = fragment.normal;
-      color.a = 1.0f;
-    } else {
-      if ((uniforms[8].y == 2u)) {
-        color = asfloat(uniforms[9]);
-      } else {
-        if ((uniforms[8].y == 3u)) {
-          color = myTexture.Sample(mySampler, fragment.uv);
-        }
-      }
-    }
-  }
-  return color;
-}
-
 struct tint_symbol_1 {
   float4 view_position : TEXCOORD0;
   float4 normal : TEXCOORD1;

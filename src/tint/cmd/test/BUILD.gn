@@ -55,6 +55,7 @@ if (tint_build_unittests) {
       "${tint_src_dir}/lang/core/constant:unittests",
       "${tint_src_dir}/lang/core/intrinsic:unittests",
       "${tint_src_dir}/lang/core/ir:unittests",
+      "${tint_src_dir}/lang/core/ir/analysis:unittests",
       "${tint_src_dir}/lang/core/ir/transform:unittests",
       "${tint_src_dir}/lang/core/type:unittests",
       "${tint_src_dir}/lang/glsl/ir:unittests",
@@ -78,8 +79,8 @@ if (tint_build_unittests) {
       "${tint_src_dir}/lang/wgsl/sem:unittests",
       "${tint_src_dir}/lang/wgsl/writer/ir_to_program:unittests",
       "${tint_src_dir}/lang/wgsl/writer/raise:unittests",
+      "${tint_src_dir}/utils:unittests",
       "${tint_src_dir}/utils/bytes:unittests",
-      "${tint_src_dir}/utils/cli:unittests",
       "${tint_src_dir}/utils/command:unittests",
       "${tint_src_dir}/utils/containers:unittests",
       "${tint_src_dir}/utils/diagnostic:unittests",
@@ -88,13 +89,11 @@ if (tint_build_unittests) {
       "${tint_src_dir}/utils/macros:unittests",
       "${tint_src_dir}/utils/math:unittests",
       "${tint_src_dir}/utils/memory:unittests",
-      "${tint_src_dir}/utils/reflection:unittests",
       "${tint_src_dir}/utils/result:unittests",
       "${tint_src_dir}/utils/rtti:unittests",
       "${tint_src_dir}/utils/strconv:unittests",
       "${tint_src_dir}/utils/symbol:unittests",
       "${tint_src_dir}/utils/text:unittests",
-      "${tint_src_dir}/utils/traits:unittests",
     ]
 
     if (tint_build_glsl_writer) {
@@ -127,15 +126,9 @@ if (tint_build_unittests) {
     if (tint_build_msl_writer) {
       deps += [
         "${tint_src_dir}/lang/msl/writer:unittests",
-        "${tint_src_dir}/lang/msl/writer/ast_printer:unittests",
         "${tint_src_dir}/lang/msl/writer/common:unittests",
         "${tint_src_dir}/lang/msl/writer/raise:unittests",
       ]
-    }
-
-    if (tint_build_msl_writer && tint_build_wgsl_reader &&
-        tint_build_wgsl_writer) {
-      deps += [ "${tint_src_dir}/lang/msl/writer/ast_raise:unittests" ]
     }
 
     if (tint_build_spv_reader) {

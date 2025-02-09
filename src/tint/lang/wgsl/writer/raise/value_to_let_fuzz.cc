@@ -33,15 +33,8 @@
 namespace tint::wgsl::writer::raise {
 namespace {
 
-void ValueToLetFuzzer(core::ir::Module& module) {
-    if (auto res = ValueToLet(module); res != Success) {
-        return;
-    }
-
-    core::ir::Capabilities capabilities;
-    if (auto res = Validate(module, capabilities); res != Success) {
-        TINT_ICE() << "result of ValueToLet failed IR validation\n" << res.Failure();
-    }
+Result<SuccessType> ValueToLetFuzzer(core::ir::Module& ir, const fuzz::ir::Context&) {
+    return ValueToLet(ir);
 }
 
 }  // namespace

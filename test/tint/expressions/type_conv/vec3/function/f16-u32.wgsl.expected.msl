@@ -1,17 +1,19 @@
 #include <metal_stdlib>
-
 using namespace metal;
-struct tint_private_vars_struct {
-  half t;
+
+struct tint_module_vars_struct {
+  thread half* t;
 };
 
-half3 m(thread tint_private_vars_struct* const tint_private_vars) {
-  (*(tint_private_vars)).t = 1.0h;
-  return half3((*(tint_private_vars)).t);
+half3 m(tint_module_vars_struct tint_module_vars) {
+  (*tint_module_vars.t) = 1.0h;
+  return half3((*tint_module_vars.t));
 }
 
-void f(thread tint_private_vars_struct* const tint_private_vars) {
-  half3 const tint_symbol = m(tint_private_vars);
-  uint3 v = uint3(tint_symbol);
+uint3 tint_v3f16_to_v3u32(half3 value) {
+  return select(uint3(4294967295u), select(uint3(0u), uint3(value), (value >= half3(0.0h))), (value <= half3(65504.0h)));
 }
 
+void f(tint_module_vars_struct tint_module_vars) {
+  uint3 v = tint_v3f16_to_v3u32(m(tint_module_vars));
+}

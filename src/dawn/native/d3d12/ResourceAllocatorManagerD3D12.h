@@ -35,13 +35,14 @@
 #include "dawn/native/BuddyMemoryAllocator.h"
 #include "dawn/native/IntegerTypes.h"
 #include "dawn/native/PooledResourceMemoryAllocator.h"
-#include "dawn/native/d3d12/HeapAllocatorD3D12.h"
-#include "dawn/native/d3d12/ResourceHeapAllocationD3D12.h"
+#include "dawn/native/d3d12/d3d12_platform.h"
 #include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::native::d3d12 {
 
 class Device;
+class HeapAllocator;
+class ResourceHeapAllocation;
 
 // Resource heap types + flags combinations are named after the D3D constants.
 // https://docs.microsoft.com/en-us/windows/win32/api/d3d12/ne-d3d12-d3d12_heap_flags
@@ -49,7 +50,7 @@ class Device;
 enum ResourceHeapKind {
     // Resource heap tier 2
     // Allows resource heaps to contain all buffer and textures types.
-    // This enables better heap re-use by avoiding the need for separate heaps and
+    // This enables better heap reuse by avoiding the need for separate heaps and
     // also reduces fragmentation.
     Readback_AllBuffersAndTextures,
     Upload_AllBuffersAndTextures,
@@ -64,6 +65,9 @@ enum ResourceHeapKind {
     Default_OnlyNonRenderableOrDepthTextures,
     Default_OnlyRenderableOrDepthTextures,
 
+    // Allows custom resource heaps to contain the buffers that support write-back CPU property.
+    Custom_WriteBack_OnlyBuffers,
+
     EnumCount,
     InvalidEnum = EnumCount,
 };
@@ -76,7 +80,7 @@ class ResourceAllocatorManager {
     ~ResourceAllocatorManager();
 
     ResultOrError<ResourceHeapAllocation> AllocateMemory(
-        D3D12_HEAP_TYPE heapType,
+        ResourceHeapKind resourceHeapKind,
         const D3D12_RESOURCE_DESC& resourceDescriptor,
         D3D12_RESOURCE_STATES initialUsage,
         uint32_t colorFormatBytesPerBlock,
@@ -87,16 +91,16 @@ class ResourceAllocatorManager {
     void Tick(ExecutionSerial lastCompletedSerial);
 
   private:
-    void FreeMemory(ResourceHeapAllocation& allocation);
+    void FreeSubAllocatedMemory(ResourceHeapAllocation& allocation);
 
     ResultOrError<ResourceHeapAllocation> CreatePlacedResource(
-        D3D12_HEAP_TYPE heapType,
+        ResourceHeapKind resourceHeapKind,
         const D3D12_RESOURCE_DESC& requestedResourceDescriptor,
         const D3D12_CLEAR_VALUE* optimizedClearValue,
         D3D12_RESOURCE_STATES initialUsage);
 
     ResultOrError<ResourceHeapAllocation> CreateCommittedResource(
-        D3D12_HEAP_TYPE heapType,
+        ResourceHeapKind resourceHeapKind,
         const D3D12_RESOURCE_DESC& resourceDescriptor,
         const D3D12_CLEAR_VALUE* optimizedClearValue,
         D3D12_RESOURCE_STATES initialUsage);
@@ -104,7 +108,6 @@ class ResourceAllocatorManager {
     void DestroyPool();
 
     raw_ptr<Device> mDevice;
-    uint32_t mResourceHeapTier;
 
     static constexpr uint64_t kMaxHeapSize = 32ll * 1024ll * 1024ll * 1024ll;  // 32GB
     static constexpr uint64_t kMinHeapSize = 4ll * 1024ll * 1024ll;            // 4MB

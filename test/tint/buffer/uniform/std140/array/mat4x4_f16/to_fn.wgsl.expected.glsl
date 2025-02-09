@@ -18,13 +18,13 @@ buffer s_block_1_ssbo {
   float16_t inner;
 } v_2;
 float16_t a(f16mat4 a_1[4]) {
-  return a_1[0][0][0u];
+  return a_1[0u][0u].x;
 }
 float16_t b(f16mat4 m) {
-  return m[0][0u];
+  return m[0u].x;
 }
 float16_t c(f16vec4 v) {
-  return v[0u];
+  return v.x;
 }
 float16_t d(float16_t f_1) {
   return f_1;
@@ -49,7 +49,7 @@ void main() {
     }
   }
   float16_t v_7 = a(v_4);
-  float16_t v_8 = (v_7 + b(f16mat4(v_1.inner[1].col0, v_1.inner[1].col1, v_1.inner[1].col2, v_1.inner[1].col3)));
-  float16_t v_9 = (v_8 + c(v_1.inner[1].col0.ywxz));
-  v_2.inner = (v_9 + d(v_1.inner[1].col0.ywxz[0u]));
+  float16_t v_8 = (v_7 + b(f16mat4(v_1.inner[1u].col0, v_1.inner[1u].col1, v_1.inner[1u].col2, v_1.inner[1u].col3)));
+  float16_t v_9 = (v_8 + c(v_1.inner[1u].col0.ywxz));
+  v_2.inner = (v_9 + d(v_1.inner[1u].col0.ywxz.x));
 }

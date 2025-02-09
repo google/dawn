@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 RWByteAddressBuffer prevent_dce : register(u0);
 
 float distance_0657d4() {
@@ -11,11 +14,31 @@ void fragment_main() {
   prevent_dce.Store(0u, asuint(distance_0657d4()));
   return;
 }
+//
+// compute_main
+//
+RWByteAddressBuffer prevent_dce : register(u0);
+
+float distance_0657d4() {
+  float3 arg_0 = (1.0f).xxx;
+  float3 arg_1 = (1.0f).xxx;
+  float res = distance(arg_0, arg_1);
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store(0u, asuint(distance_0657d4()));
   return;
+}
+//
+// vertex_main
+//
+float distance_0657d4() {
+  float3 arg_0 = (1.0f).xxx;
+  float3 arg_1 = (1.0f).xxx;
+  float res = distance(arg_0, arg_1);
+  return res;
 }
 
 struct VertexOutput {

@@ -93,7 +93,7 @@ class Device final : public DeviceBase {
                                            uint64_t size) override;
 
     MaybeError CopyFromStagingToTextureImpl(const BufferBase* source,
-                                            const TextureDataLayout& src,
+                                            const TexelCopyBufferLayout& src,
                                             const TextureCopy& dst,
                                             const Extent3D& copySizePixels) override;
 
@@ -146,8 +146,9 @@ class Device final : public DeviceBase {
         const UnpackedPtr<RenderPipelineDescriptor>& descriptor) override;
     ResultOrError<Ref<SharedTextureMemoryBase>> ImportSharedTextureMemoryImpl(
         const SharedTextureMemoryDescriptor* descriptor) override;
+    ResultOrError<Ref<SharedFenceBase>> ImportSharedFenceImpl(
+        const SharedFenceDescriptor* descriptor) override;
 
-    GLenum GetBGRAInternalFormat(const OpenGLFunctions& gl) const;
     void DestroyImpl() override;
 
     const OpenGLFunctions mGL;

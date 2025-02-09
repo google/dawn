@@ -1,27 +1,28 @@
 #include <metal_stdlib>
-
 using namespace metal;
-struct tint_private_vars_struct {
-  float p;
+
+struct tint_module_vars_struct {
+  thread float* p;
+  threadgroup float* w;
 };
 
-void tint_zero_workgroup_memory(uint local_idx, threadgroup float* const tint_symbol_1) {
-  if ((local_idx < 1u)) {
-    *(tint_symbol_1) = 0.0f;
+struct tint_symbol_1 {
+  float tint_symbol;
+};
+
+void main_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
+  if ((tint_local_index < 1u)) {
+    (*tint_module_vars.w) = 0.0f;
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
+  thread float* const p_ptr = tint_module_vars.p;
+  threadgroup float* const w_ptr = tint_module_vars.w;
+  float const x = ((*p_ptr) + (*w_ptr));
+  (*p_ptr) = x;
 }
 
-void tint_symbol_inner(uint local_invocation_index, thread tint_private_vars_struct* const tint_private_vars, threadgroup float* const tint_symbol_2) {
-  tint_zero_workgroup_memory(local_invocation_index, tint_symbol_2);
-  float const x = ((*(tint_private_vars)).p + *(tint_symbol_2));
-  (*(tint_private_vars)).p = x;
+kernel void v(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v_1 [[threadgroup(0)]]) {
+  thread float p = 0.0f;
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.p=(&p), .w=(&(*v_1).tint_symbol)};
+  main_inner(tint_local_index, tint_module_vars);
 }
-
-kernel void tint_symbol(uint local_invocation_index [[thread_index_in_threadgroup]]) {
-  thread tint_private_vars_struct tint_private_vars = {};
-  threadgroup float tint_symbol_3;
-  tint_symbol_inner(local_invocation_index, &(tint_private_vars), &(tint_symbol_3));
-  return;
-}
-

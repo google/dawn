@@ -39,13 +39,29 @@
 # Kind:      lib
 ################################################################################
 tint_add_target(tint_utils_command lib
+  utils/command/args.cc
+  utils/command/args.h
+  utils/command/cli.cc
+  utils/command/cli.h
   utils/command/command.h
 )
 
 tint_target_add_dependencies(tint_utils_command lib
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_ice
   tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_result
+  tint_utils_rtti
+  tint_utils_strconv
   tint_utils_system
   tint_utils_text
+)
+
+tint_target_add_external_dependencies(tint_utils_command lib
+  "src_utils"
 )
 
 if((NOT TINT_BUILD_IS_LINUX) AND (NOT TINT_BUILD_IS_MAC) AND (NOT TINT_BUILD_IS_WIN))
@@ -71,13 +87,25 @@ endif(TINT_BUILD_IS_WIN)
 # Kind:      test
 ################################################################################
 tint_add_target(tint_utils_command_test test
+  utils/command/cli_test.cc
   utils/command/command_test.cc
 )
 
 tint_target_add_dependencies(tint_utils_command_test test
   tint_utils_command
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_ice
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_result
+  tint_utils_rtti
+  tint_utils_strconv
+  tint_utils_text
 )
 
 tint_target_add_external_dependencies(tint_utils_command_test test
   "gtest"
+  "src_utils"
 )

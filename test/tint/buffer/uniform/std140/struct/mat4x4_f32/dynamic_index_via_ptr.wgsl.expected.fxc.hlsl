@@ -61,17 +61,17 @@ void f() {
   int p_a_i_a_i_save = i();
   int p_a_i_a_i_m_i_save = i();
   Outer l_a[4] = a_load(0u);
-  Outer l_a_i = a_load_1((256u * uint(p_a_i_save)));
-  Inner l_a_i_a[4] = a_load_2((256u * uint(p_a_i_save)));
-  Inner l_a_i_a_i = a_load_3(((256u * uint(p_a_i_save)) + (64u * uint(p_a_i_a_i_save))));
-  float4x4 l_a_i_a_i_m = a_load_4(((256u * uint(p_a_i_save)) + (64u * uint(p_a_i_a_i_save))));
-  const uint scalar_offset_4 = ((((256u * uint(p_a_i_save)) + (64u * uint(p_a_i_a_i_save))) + (16u * uint(p_a_i_a_i_m_i_save)))) / 4;
+  Outer l_a_i = a_load_1((256u * min(uint(p_a_i_save), 3u)));
+  Inner l_a_i_a[4] = a_load_2((256u * min(uint(p_a_i_save), 3u)));
+  Inner l_a_i_a_i = a_load_3(((256u * min(uint(p_a_i_save), 3u)) + (64u * min(uint(p_a_i_a_i_save), 3u))));
+  float4x4 l_a_i_a_i_m = a_load_4(((256u * min(uint(p_a_i_save), 3u)) + (64u * min(uint(p_a_i_a_i_save), 3u))));
+  const uint scalar_offset_4 = ((((256u * min(uint(p_a_i_save), 3u)) + (64u * min(uint(p_a_i_a_i_save), 3u))) + (16u * min(uint(p_a_i_a_i_m_i_save), 3u)))) / 4;
   float4 l_a_i_a_i_m_i = asfloat(a[scalar_offset_4 / 4]);
   int tint_symbol = p_a_i_save;
   int tint_symbol_1 = p_a_i_a_i_save;
   int tint_symbol_2 = p_a_i_a_i_m_i_save;
   int tint_symbol_3 = i();
-  const uint scalar_offset_5 = (((((256u * uint(tint_symbol)) + (64u * uint(tint_symbol_1))) + (16u * uint(tint_symbol_2))) + (4u * uint(tint_symbol_3)))) / 4;
+  const uint scalar_offset_5 = (((((256u * min(uint(tint_symbol), 3u)) + (64u * min(uint(tint_symbol_1), 3u))) + (16u * min(uint(tint_symbol_2), 3u))) + (4u * min(uint(tint_symbol_3), 3u)))) / 4;
   float l_a_i_a_i_m_i_i = asfloat(a[scalar_offset_5 / 4][scalar_offset_5 % 4]);
   return;
 }

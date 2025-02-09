@@ -31,6 +31,8 @@
 
 #include "absl/strings/charconv.h"
 
+TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
+
 namespace tint::strconv {
 
 namespace {
@@ -109,3 +111,5 @@ Result<uint8_t, ParseNumberError> ParseUint8(std::string_view str) {
 }
 
 }  // namespace tint::strconv
+
+TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);

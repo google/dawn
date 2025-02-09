@@ -86,9 +86,9 @@ void f_inner(uint tint_local_index) {
     }
   }
   w = v_4;
-  w[1] = tint_convert_S(v.inner[2]);
-  w[3].m = f16mat4x2(v.inner[2].m_col0, v.inner[2].m_col1, v.inner[2].m_col2, v.inner[2].m_col3);
-  w[1].m[0] = v.inner[0].m_col1.yx;
+  w[1u] = tint_convert_S(v.inner[2u]);
+  w[3u].m = f16mat4x2(v.inner[2u].m_col0, v.inner[2u].m_col1, v.inner[2u].m_col2, v.inner[2u].m_col3);
+  w[1u].m[0u] = v.inner[0u].m_col1.yx;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

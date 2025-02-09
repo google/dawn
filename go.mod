@@ -9,16 +9,17 @@ require (
 	github.com/chromedp/cdproto v0.0.0-20231011050154-1d073bb38998
 	github.com/chromedp/chromedp v0.9.3
 	github.com/fatih/color v1.13.0
-	github.com/google/go-cmp v0.5.9
+	github.com/google/go-cmp v0.6.0
 	github.com/mattn/go-colorable v0.1.12
 	github.com/mattn/go-isatty v0.0.17
 	github.com/mzohreva/gographviz v0.0.0-20180226085351-533f4a37d9c6
 	github.com/sergi/go-diff v1.3.1
+	github.com/spf13/afero v1.9.2
 	github.com/stretchr/testify v1.8.2
 	github.com/tidwall/jsonc v0.3.2
 	go.chromium.org/luci v0.0.0-20230311013728-313c8e2205bc
-	golang.org/x/net v0.17.0
-	golang.org/x/term v0.14.0
+	golang.org/x/net v0.25.0
+	golang.org/x/term v0.27.0
 	google.golang.org/api v0.132.0
 	google.golang.org/grpc v1.56.3
 )
@@ -67,13 +68,13 @@ require (
 	github.com/texttheater/golang-levenshtein v1.0.1 // indirect
 	github.com/zeebo/xxh3 v1.0.2 // indirect
 	go.opencensus.io v0.24.0 // indirect
-	golang.org/x/crypto v0.14.0 // indirect
-	golang.org/x/mod v0.10.0 // indirect
+	golang.org/x/crypto v0.31.0 // indirect
+	golang.org/x/mod v0.17.0 // indirect
 	golang.org/x/oauth2 v0.10.0 // indirect
-	golang.org/x/sync v0.3.0 // indirect
-	golang.org/x/sys v0.14.0 // indirect
-	golang.org/x/text v0.13.0 // indirect
-	golang.org/x/tools v0.9.1 // indirect
+	golang.org/x/sync v0.10.0 // indirect
+	golang.org/x/sys v0.28.0 // indirect
+	golang.org/x/text v0.21.0 // indirect
+	golang.org/x/tools v0.21.1-0.20240508182429-e35e4ccd0d2d // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	google.golang.org/appengine v1.6.8-0.20221117013220-504804fb50de // indirect
 	google.golang.org/genproto v0.0.0-20230706204954-ccb25ca9f130 // indirect

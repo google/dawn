@@ -33,19 +33,13 @@
 #include <cstdint>
 #include <functional>
 
-namespace dawn::native {
-
-class Adapter;
-
-}  // namespace dawn::native
-
 namespace DawnWireServerFuzzer {
 
 int Initialize(int* argc, char*** argv);
 
 int Run(const uint8_t* data,
         size_t size,
-        bool (*AdapterSupported)(const dawn::native::Adapter&),
+        bool (*AdapterSupported)(const wgpu::Adapter&),
         bool supportsErrorInjection);
 
 }  // namespace DawnWireServerFuzzer

@@ -75,6 +75,6 @@ void f() {
   b(v_15);
   c(v_2(260u));
   d(tint_bitcast_to_f16(u[0u].z).yx);
-  e(tint_bitcast_to_f16(u[0u].z).yx[0u]);
+  e(tint_bitcast_to_f16(u[0u].z).yx.x);
 }
 

@@ -152,9 +152,8 @@ class ShaderBuiltinPartialConstLowHighTest
 
     bool BadCaseForBuiltin() {
         if (GetParam().mBuiltin == "smoothstep") {
-            // The more case is bad because low can't be more than high.
             // The equal case generates a divide by zero.
-            return GetParam().mCompare != Compare::kLess;
+            return GetParam().mCompare == Compare::kEqual;
         }
         if (GetParam().mBuiltin == "clamp") {
             return GetParam().mCompare == Compare::kMore;

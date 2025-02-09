@@ -276,12 +276,12 @@ SerialStorage<Derived>::ConstBeginEnd::ConstBeginEnd(
 template <typename Derived>
 typename SerialStorage<Derived>::ConstIterator SerialStorage<Derived>::ConstBeginEnd::begin()
     const {
-    return {mStartIt};
+    return SerialStorage::ConstIterator(mStartIt);
 }
 
 template <typename Derived>
 typename SerialStorage<Derived>::ConstIterator SerialStorage<Derived>::ConstBeginEnd::end() const {
-    return {mEndIt};
+    return SerialStorage::ConstIterator(mEndIt);
 }
 
 // SerialStorage::ConstIterator

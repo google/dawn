@@ -21,5 +21,5 @@ void main() {
   float a1[4] = f1();
   float a2[3][4] = f2();
   float a3[2][3][4] = f3();
-  v.inner = ((a1[0] + a2[0][0]) + a3[0][0][0]);
+  v.inner = ((a1[0u] + a2[0u][0u]) + a3[0u][0u][0u]);
 }

@@ -39,6 +39,7 @@
 #include "src/tint/lang/core/ir/transform/demote_to_helper.h"
 #include "src/tint/lang/core/ir/transform/direct_variable_access.h"
 #include "src/tint/lang/core/ir/transform/multiplanar_external_texture.h"
+#include "src/tint/lang/core/ir/transform/prevent_infinite_loops.h"
 #include "src/tint/lang/core/ir/transform/remove_continue_in_switch.h"
 #include "src/tint/lang/core/ir/transform/remove_terminator_args.h"
 #include "src/tint/lang/core/ir/transform/rename_conflicts.h"
@@ -79,6 +80,10 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
 
     RUN_TRANSFORM(core::ir::transform::BindingRemapper, module, remapper_data);
     RUN_TRANSFORM(core::ir::transform::MultiplanarExternalTexture, module, multiplanar_map);
+
+    if (!options.disable_robustness) {
+        RUN_TRANSFORM(core::ir::transform::PreventInfiniteLoops, module);
+    }
 
     {
         core::ir::transform::BinaryPolyfillConfig binary_polyfills{};
@@ -137,9 +142,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         // Direct3D guarantees to return zero for any resource that is accessed out of bounds, and
         // according to the description of the assembly store_uav_typed, out of bounds addressing
         // means nothing gets written to memory.
-        //
-        // TODO(crbug.com/377360326): Implement ignore for texture actions for performance
-        // config.texture_action = ast::transform::Robustness::Action::kIgnore;
+        config.clamp_texture = false;
 
         RUN_TRANSFORM(core::ir::transform::Robustness, module, config);
     }
@@ -161,13 +164,14 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         RUN_TRANSFORM(core::ir::transform::ZeroInitWorkgroupMemory, module);
     }
 
-    const bool pixel_local_enabled = !options.pixel_local.attachment_formats.empty();
+    const bool pixel_local_enabled = !options.pixel_local.attachments.empty();
 
     // ShaderIO must be run before DecomposeUniformAccess because it might
     // introduce a uniform buffer for kNumWorkgroups.
     {
         raise::ShaderIOConfig config;
         config.num_workgroups_binding = options.root_constant_binding_point;
+        config.first_index_offset_binding = options.root_constant_binding_point;
         config.add_input_position_member = pixel_local_enabled;
         config.truncate_interstage_variables = options.truncate_interstage_variables;
         config.interstage_locations = std::move(options.interstage_locations);
@@ -176,8 +180,10 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
 
     // DemoteToHelper must come before any transform that introduces non-core instructions.
     // Run after ShaderIO to ensure the discards are added to the entry point it introduces.
-    RUN_TRANSFORM(core::ir::transform::DemoteToHelper, module);
-
+    // TODO(crbug.com/42250787): This is only necessary when FXC is being used.
+    if (options.compiler == tint::hlsl::writer::Options::Compiler::kFXC) {
+        RUN_TRANSFORM(core::ir::transform::DemoteToHelper, module);
+    }
     RUN_TRANSFORM(core::ir::transform::DirectVariableAccess, module,
                   core::ir::transform::DirectVariableAccessOptions{});
     // DecomposeStorageAccess must come after Robustness and DirectVariableAccess

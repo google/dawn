@@ -485,7 +485,7 @@ TEST_F(DrawVertexAndIndexBufferOOBValidationTests, UnusedSlots) {
     {
         // The first slot it unused so valid even if vertex buffer is not set to it.
         wgpu::RenderPipeline pipeline = CreateRenderPipelineWithBufferDesc(
-            {{0, wgpu::VertexStepMode::VertexBufferNotUsed, {}},
+            {{0, wgpu::VertexStepMode::Undefined, {}},
              {kFloat32x4Stride, wgpu::VertexStepMode::Vertex, {}}});
         TestRenderPassDraw(pipeline, vertexBufferList, 3, 1, 0, 0, true);
     }
@@ -666,7 +666,7 @@ TEST_F(DrawVertexAndIndexBufferOOBValidationTests, DrawIndexedUnusedSlots) {
     {
         // The first slot it unused so valid even if vertex buffer is not set to it.
         wgpu::RenderPipeline pipeline = CreateRenderPipelineWithBufferDesc(
-            {{0, wgpu::VertexStepMode::VertexBufferNotUsed, {}},
+            {{0, wgpu::VertexStepMode::Undefined, {}},
              {kFloat32x4Stride, wgpu::VertexStepMode::Vertex, {}},
              {kFloat32x2Stride, wgpu::VertexStepMode::Instance, {}}});
         TestRenderPassDrawIndexed(pipeline, indexBufferDesc, vertexBufferList, 12, 3, 0, 0, 0,

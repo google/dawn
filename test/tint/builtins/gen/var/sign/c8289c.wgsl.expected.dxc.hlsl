@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void sign_c8289c() {
   float res = 1.0f;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   sign_c8289c();
   return;
 }
+//
+// compute_main
+//
+void sign_c8289c() {
+  float res = 1.0f;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   sign_c8289c();
   return;
+}
+//
+// vertex_main
+//
+void sign_c8289c() {
+  float res = 1.0f;
 }
 
 struct VertexOutput {

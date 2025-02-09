@@ -36,6 +36,6 @@ void f() {
   b(tint_bitcast_to_f16(u[0u].zw).xyz);
   b(tint_bitcast_to_f16(u[0u].zw).xyz.zxy);
   c(float16_t(f16tof32(u[0u].z)));
-  c(tint_bitcast_to_f16(u[0u].zw).xyz.zxy[0u]);
+  c(tint_bitcast_to_f16(u[0u].zw).xyz.zxy.x);
 }
 

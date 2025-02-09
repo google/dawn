@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 vector<float16_t, 4> tint_acosh(vector<float16_t, 4> x) {
   return log((x + sqrt(((x * x) - float16_t(1.0h)))));
 }
@@ -14,11 +17,37 @@ void fragment_main() {
   prevent_dce.Store<vector<float16_t, 4> >(0u, acosh_de60d8());
   return;
 }
+//
+// compute_main
+//
+vector<float16_t, 4> tint_acosh(vector<float16_t, 4> x) {
+  return log((x + sqrt(((x * x) - float16_t(1.0h)))));
+}
+
+RWByteAddressBuffer prevent_dce : register(u0);
+
+vector<float16_t, 4> acosh_de60d8() {
+  vector<float16_t, 4> arg_0 = (float16_t(1.54296875h)).xxxx;
+  vector<float16_t, 4> res = tint_acosh(arg_0);
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store<vector<float16_t, 4> >(0u, acosh_de60d8());
   return;
+}
+//
+// vertex_main
+//
+vector<float16_t, 4> tint_acosh(vector<float16_t, 4> x) {
+  return log((x + sqrt(((x * x) - float16_t(1.0h)))));
+}
+
+vector<float16_t, 4> acosh_de60d8() {
+  vector<float16_t, 4> arg_0 = (float16_t(1.54296875h)).xxxx;
+  vector<float16_t, 4> res = tint_acosh(arg_0);
+  return res;
 }
 
 struct VertexOutput {

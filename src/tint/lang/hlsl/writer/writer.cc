@@ -32,6 +32,8 @@
 
 #include "src/tint/lang/core/ir/function.h"
 #include "src/tint/lang/core/ir/module.h"
+#include "src/tint/lang/core/ir/var.h"
+#include "src/tint/lang/core/type/input_attachment.h"
 #include "src/tint/lang/hlsl/writer/ast_printer/ast_printer.h"
 #include "src/tint/lang/hlsl/writer/printer/printer.h"
 #include "src/tint/lang/hlsl/writer/raise/raise.h"
@@ -39,48 +41,47 @@
 #include "src/tint/utils/ice/ice.h"
 
 namespace tint::hlsl::writer {
-namespace {
 
-ast::PipelineStage ir_to_ast_stage(core::ir::Function::PipelineStage stage) {
-    switch (stage) {
-        case core::ir::Function::PipelineStage::kCompute:
-            return ast::PipelineStage::kCompute;
-        case core::ir::Function::PipelineStage::kFragment:
-            return ast::PipelineStage::kFragment;
-        case core::ir::Function::PipelineStage::kVertex:
-            return ast::PipelineStage::kVertex;
-        default:
-            break;
+Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& options) {
+    // Check for unsupported types.
+    for (auto* ty : ir.Types()) {
+        if (ty->Is<core::type::SubgroupMatrix>()) {
+            return Failure("subgroup matrices are not supported by the HLSL backend");
+        }
     }
-    TINT_UNREACHABLE();
+
+    // Check for unsupported module-scope variable address spaces and types.
+    for (auto* inst : *ir.root_block) {
+        auto* var = inst->As<core::ir::Var>();
+        auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
+        if (ptr->AddressSpace() == core::AddressSpace::kPushConstant) {
+            return Failure("push constants are not supported by the HLSL backend");
+        }
+        if (ptr->AddressSpace() == core::AddressSpace::kPixelLocal) {
+            // Check the pixel_local variables have corresponding entries in the PLS attachment map.
+            auto* str = ptr->StoreType()->As<core::type::Struct>();
+            for (uint32_t i = 0; i < str->Members().Length(); i++) {
+                if (options.pixel_local.attachments.count(i) == 0) {
+                    return Failure("missing pixel local attachment for member index " +
+                                   std::to_string(i));
+                }
+            }
+        }
+        if (ptr->StoreType()->Is<core::type::InputAttachment>()) {
+            return Failure("input attachments are not supported by the HLSL backend");
+        }
+    }
+    return Success;
 }
 
-}  // namespace
-
 Result<Output> Generate(core::ir::Module& ir, const Options& options) {
-    Output output;
-
     // Raise the core-dialect to HLSL-dialect
     auto res = Raise(ir, options);
     if (res != Success) {
         return res.Failure();
     }
 
-    auto result = Print(ir);
-    if (result != Success) {
-        return result.Failure();
-    }
-    output.hlsl = result->hlsl;
-
-    // Collect the list of entry points in the generated program.
-    for (auto func : ir.functions) {
-        if (func->Stage() != core::ir::Function::PipelineStage::kUndefined) {
-            auto name = ir.NameOf(func).Name();
-            output.entry_points.push_back({name, ir_to_ast_stage(func->Stage())});
-        }
-    }
-
-    return output;
+    return Print(ir, options);
 }
 
 Result<Output> Generate(const Program& program, const Options& options) {

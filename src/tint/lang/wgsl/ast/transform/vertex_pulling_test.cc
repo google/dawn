@@ -34,12 +34,6 @@
 namespace tint::ast::transform {
 namespace {
 
-TEST(TintCheckAllFieldsReflected, WgslAstTransformVertexPullingTest) {
-    TINT_ASSERT_ALL_FIELDS_REFLECTED(VertexAttributeDescriptor);
-    TINT_ASSERT_ALL_FIELDS_REFLECTED(VertexBufferLayoutDescriptor);
-    TINT_ASSERT_ALL_FIELDS_REFLECTED(VertexPulling::Config);
-}
-
 using VertexPullingTest = TransformTest;
 
 TEST_F(VertexPullingTest, Error_NoEntryPoint) {

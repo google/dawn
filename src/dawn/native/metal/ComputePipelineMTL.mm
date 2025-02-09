@@ -59,15 +59,10 @@ MaybeError ComputePipeline::InitializeImpl() {
     ShaderModule::MetalFunctionData computeData;
 
     DAWN_TRY(ToBackend(computeStage.module.Get())
-                 ->CreateFunction(
-                     SingleShaderStage::Compute, computeStage, ToBackend(GetLayout()), &computeData,
-                     /* sampleMask */ 0xFFFFFFFF,
-                     /* renderPipeline */ nullptr,
-                     /* maxSubgroupSizeForFullSubgroups */
-                     IsFullSubgroupsRequired()
-                         ? std::make_optional(
-                               GetDevice()->GetLimits().experimentalSubgroupLimits.maxSubgroupSize)
-                         : std::nullopt));
+                 ->CreateFunction(SingleShaderStage::Compute, computeStage, ToBackend(GetLayout()),
+                                  &computeData,
+                                  /* sampleMask */ 0xFFFFFFFF,
+                                  /* renderPipeline */ nullptr));
 
     NSError* error = nullptr;
     NSRef<NSString> label = MakeDebugName(GetDevice(), "Dawn_ComputePipeline", GetLabel());
@@ -77,10 +72,6 @@ MaybeError ComputePipeline::InitializeImpl() {
     MTLComputePipelineDescriptor* descriptor = descriptorRef.Get();
     descriptor.computeFunction = computeData.function.Get();
     descriptor.label = label.Get();
-
-    if (IsFullSubgroupsRequired()) {
-        descriptor.threadGroupSizeIsMultipleOfThreadExecutionWidth = true;
-    }
 
     platform::metrics::DawnHistogramTimer timer(GetDevice()->GetPlatform());
     mMtlComputePipelineState.Acquire([mtlDevice

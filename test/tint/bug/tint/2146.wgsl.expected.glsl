@@ -5,5 +5,5 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   f16vec4 a = f16vec4(0.0hf);
   float16_t b = 1.0hf;
-  a[0] = (a.x + b);
+  a.x = (a.x + b);
 }

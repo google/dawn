@@ -39,6 +39,7 @@ using ::testing::HasSubstr;
 std::string Preamble() {
     return R"(
   OpCapability Shader
+  OpCapability Float16
   OpMemoryModel Logical Simple
   OpEntryPoint Fragment %100 "main"
   OpExecutionMode %100 OriginUpperLeft
@@ -50,6 +51,7 @@ std::string Preamble() {
   %uint = OpTypeInt 32 0
   %int = OpTypeInt 32 1
   %float = OpTypeFloat 32
+  %half = OpTypeFloat 16
 
   %true = OpConstantTrue %bool
   %false = OpConstantFalse %bool
@@ -62,14 +64,18 @@ std::string Preamble() {
   %int_40 = OpConstant %int 40
   %float_50 = OpConstant %float 50
   %float_60 = OpConstant %float 60
+  %half_50 = OpConstant %half 50
+  %half_60 = OpConstant %half 60
 
   %ptr_uint = OpTypePointer Function %uint
   %ptr_int = OpTypePointer Function %int
   %ptr_float = OpTypePointer Function %float
+  %ptr_half = OpTypePointer Function %half
 
   %v2uint = OpTypeVector %uint 2
   %v2int = OpTypeVector %int 2
   %v2float = OpTypeVector %float 2
+  %v2half = OpTypeVector %half 2
 
   %v2uint_10_20 = OpConstantComposite %v2uint %uint_10 %uint_20
   %v2uint_20_10 = OpConstantComposite %v2uint %uint_20 %uint_10
@@ -77,6 +83,8 @@ std::string Preamble() {
   %v2int_40_30 = OpConstantComposite %v2int %int_40 %int_30
   %v2float_50_60 = OpConstantComposite %v2float %float_50 %float_60
   %v2float_60_50 = OpConstantComposite %v2float %float_60 %float_50
+  %v2half_50_60 = OpConstantComposite %v2half %half_50 %half_60
+  %v2half_60_50 = OpConstantComposite %v2half %half_60 %half_50
 )";
 }
 
@@ -621,9 +629,91 @@ OpFunctionEnd
     EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("let x_82 = u32(x_600);"));
 }
 
+TEST_F(SpvUnaryConversionTest, FConvert_BadArg) {
+    const auto assembly = Preamble() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpFConvert %float %void
+     OpReturn
+     OpFunctionEnd
+  )";
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_FALSE(fe.EmitBody());
+    EXPECT_THAT(p->error(), HasSubstr("unhandled expression for ID 2\n%2 = OpTypeVoid"));
+}
+
+TEST_F(SpvUnaryConversionTest, FConvertFToH_Scalar) {
+    const auto assembly = Preamble() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %30 = OpCopyObject %float %float_50
+     %1 = OpFConvert %half %30
+     OpReturn
+     OpFunctionEnd
+  )";
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("let x_1 = f16(x_30);"));
+}
+
+TEST_F(SpvUnaryConversionTest, FConvertHToF_Scalar) {
+    const auto assembly = Preamble() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %30 = OpCopyObject %half %half_50
+     %1 = OpFConvert %float %30
+     OpReturn
+     OpFunctionEnd
+  )";
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("let x_1 = f32(x_30);"));
+}
+
+TEST_F(SpvUnaryConversionTest, FConvertFToH_Vector) {
+    const auto assembly = Preamble() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %30 = OpCopyObject %v2float %v2float_50_60
+     %1 = OpFConvert %v2half %30
+     OpReturn
+     OpFunctionEnd
+  )";
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("let x_1 = vec2h(x_30);"));
+}
+
+TEST_F(SpvUnaryConversionTest, FConvertHToF_Vector) {
+    const auto assembly = Preamble() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %30 = OpCopyObject %v2half %v2half_50_60
+     %1 = OpFConvert %v2float %30
+     OpReturn
+     OpFunctionEnd
+  )";
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("let x_1 = vec2f(x_30);"));
+}
+
 // TODO(dneto): OpSConvert // only if multiple widths
 // TODO(dneto): OpUConvert // only if multiple widths
-// TODO(dneto): OpFConvert // only if multiple widths
 // TODO(dneto): OpSatConvertSToU // Kernel (OpenCL), not in WebGPU
 // TODO(dneto): OpSatConvertUToS // Kernel (OpenCL), not in WebGPU
 

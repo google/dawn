@@ -2591,9 +2591,9 @@ std::vector<Case> SmoothstepCases() {
         return "12:34 error: " + OverflowErrorMessage(a, op, b) + R"(
 12:34 note: when calculating smoothstep)";
     };
-    auto error_low_ge_high = [](auto a, auto b) {
+    auto error_low_equal_high = [](auto a, auto b) {
         StringStream ss;
-        ss << "12:34 error: smoothstep called with 'low' (" << a << ") not less than 'high' (" << b
+        ss << "12:34 error: smoothstep called with 'low' (" << a << ") equal to 'high' (" << b
            << ")";
         return ss.str();
     };
@@ -2614,10 +2614,10 @@ std::vector<Case> SmoothstepCases() {
         // `high - low` underflows
         E({T::Lowest(), T::Highest(), T(0)}, error_overflow(T::Highest(), "-", T::Lowest())),
         // low == high
-        E({T(0), T(0), T(0)}, error_low_ge_high(T(0), T(0))),
-        E({T(1), T(1), T(5)}, error_low_ge_high(T(1), T(1))),
+        E({T(0), T(0), T(0)}, error_low_equal_high(T(0), T(0))),
+        E({T(1), T(1), T(5)}, error_low_equal_high(T(1), T(1))),
         // low > high
-        E({T(1), T(0), T(5)}, error_low_ge_high(T(1), T(0))),
+        C({T(1), T(0), T(5)}, T(0)),
     };
 }
 INSTANTIATE_TEST_SUITE_P(  //

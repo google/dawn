@@ -1,10 +1,10 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 36
+; Bound: 34
 ; Schema: 0
                OpCapability Shader
-         %30 = OpExtInstImport "GLSL.std.450"
+         %28 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %f "f"
                OpExecutionMode %f LocalSize 1 1 1
@@ -44,24 +44,22 @@
          %14 = OpTypeFunction %void
 %_ptr_Uniform_mat4v4float = OpTypePointer Uniform %mat4v4float
      %uint_0 = OpConstant %uint 0
-      %int_2 = OpConstant %int 2
+     %uint_2 = OpConstant %uint 2
      %uint_1 = OpConstant %uint 1
 %_ptr_Uniform_v4float = OpTypePointer Uniform %v4float
-      %int_0 = OpConstant %int 0
-      %int_1 = OpConstant %int 1
           %f = OpFunction %void None %14
          %15 = OpLabel
-         %16 = OpAccessChain %_ptr_Uniform_mat4v4float %1 %uint_0 %int_2 %uint_1
+         %16 = OpAccessChain %_ptr_Uniform_mat4v4float %1 %uint_0 %uint_2 %uint_1
          %21 = OpLoad %mat4v4float %16 None
           %t = OpTranspose %mat4v4float %21
-         %23 = OpAccessChain %_ptr_Uniform_v4float %1 %uint_0 %int_0 %uint_1 %int_1
-         %27 = OpLoad %v4float %23 None
-         %28 = OpVectorShuffle %v4float %27 %27 1 3 0 2
-          %l = OpExtInst %float %30 Length %28
-         %31 = OpAccessChain %_ptr_Uniform_v4float %1 %uint_0 %int_0 %uint_1 %int_1
-         %32 = OpLoad %v4float %31 None
-         %33 = OpVectorShuffle %v4float %32 %32 1 3 0 2
-         %34 = OpCompositeExtract %float %33 0
-          %a = OpExtInst %float %30 FAbs %34
+         %23 = OpAccessChain %_ptr_Uniform_v4float %1 %uint_0 %uint_0 %uint_1 %uint_1
+         %25 = OpLoad %v4float %23 None
+         %26 = OpVectorShuffle %v4float %25 %25 1 3 0 2
+          %l = OpExtInst %float %28 Length %26
+         %29 = OpAccessChain %_ptr_Uniform_v4float %1 %uint_0 %uint_0 %uint_1 %uint_1
+         %30 = OpLoad %v4float %29 None
+         %31 = OpVectorShuffle %v4float %30 %30 1 3 0 2
+         %32 = OpCompositeExtract %float %31 0
+          %a = OpExtInst %float %28 FAbs %32
                OpReturn
                OpFunctionEnd

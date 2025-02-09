@@ -183,7 +183,7 @@ struct State {
                         // object.
                         auto* intermediate_source = b.Access(to_replace.dynamic_index_source_type,
                                                              source_object, partial_access.indices);
-                        b.InsertAfter(source_object, [&] { b.Append(intermediate_source); });
+                        b.InsertInBlockAfter(source_object, [&] { b.Append(intermediate_source); });
                         return intermediate_source->Result(0);
                     });
             }
@@ -199,7 +199,7 @@ struct State {
                                         core::Access::kReadWrite));
                     ir.root_block->Append(decl);
                 } else {
-                    b.InsertAfter(source_object, [&] {
+                    b.InsertInBlockAfter(source_object, [&] {
                         decl = b.Var(ty.ptr(core::AddressSpace::kFunction, source_object->Type(),
                                             core::Access::kReadWrite));
 

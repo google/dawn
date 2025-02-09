@@ -4,5 +4,5 @@ precision highp int;
 
 int A[4] = int[4](0, 0, 0, 0);
 void main() {
-  A[0] = 1;
+  A[0u] = 1;
 }

@@ -18,7 +18,7 @@ void compute_main_inner(uint tint_local_index) {
     }
   }
   barrier();
-  atomicExchange(wg[1], 1u);
+  atomicExchange(wg[1u], 1u);
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

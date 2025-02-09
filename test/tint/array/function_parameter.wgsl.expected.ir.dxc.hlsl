@@ -1,15 +1,15 @@
 
 RWByteAddressBuffer s : register(u0);
 float f1(float a[4]) {
-  return a[int(3)];
+  return a[3u];
 }
 
 float f2(float a[3][4]) {
-  return a[int(2)][int(3)];
+  return a[2u][3u];
 }
 
 float f3(float a[2][3][4]) {
-  return a[int(1)][int(2)][int(3)];
+  return a[1u][2u][3u];
 }
 
 [numthreads(1, 1, 1)]

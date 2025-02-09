@@ -35,9 +35,12 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"reflect"
 	"sort"
 	"strings"
 
+	"dawn.googlesource.com/dawn/tools/src/container"
+	"dawn.googlesource.com/dawn/tools/src/cts/query"
 	"dawn.googlesource.com/dawn/tools/src/cts/result"
 )
 
@@ -142,6 +145,54 @@ func (c *Content) Format() {
 	}
 }
 
+// RemoveExpectationsForUnknownTests modifies the Content in place so that all
+// contained Expectations apply to tests in the given testlist.
+func (c *Content) RemoveExpectationsForUnknownTests(testlist *[]query.Query) error {
+	// Converting into a set allows us to much more efficiently check if a
+	// non-wildcard expectation is for a valid test.
+	knownTestNames := container.NewSet[string]()
+	for _, testQuery := range *testlist {
+		knownTestNames.Add(testQuery.ExpectationFileString())
+	}
+
+	prunedChunkSlice := make([]Chunk, 0)
+	for _, chunk := range c.Chunks {
+		prunedChunk := chunk.Clone()
+		// If we don't have any expectations already, just add the chunk back
+		// immediately to avoid removing comments, especially the header.
+		if prunedChunk.IsCommentOnly() {
+			prunedChunkSlice = append(prunedChunkSlice, prunedChunk)
+			continue
+		}
+
+		prunedChunk.Expectations = make(Expectations, 0)
+		for _, expectation := range chunk.Expectations {
+			// We don't actually parse the query string into a Query since wildcards
+			// are treated differently between expectations and CTS queries.
+			if strings.HasSuffix(expectation.Query, "*") {
+				testPrefix := expectation.Query[:len(expectation.Query)-1]
+				for testName := range knownTestNames {
+					if strings.HasPrefix(testName, testPrefix) {
+						prunedChunk.Expectations = append(prunedChunk.Expectations, expectation)
+						break
+					}
+				}
+			} else {
+				if knownTestNames.Contains(expectation.Query) {
+					prunedChunk.Expectations = append(prunedChunk.Expectations, expectation)
+				}
+			}
+		}
+
+		if len(prunedChunk.Expectations) > 0 {
+			prunedChunkSlice = append(prunedChunkSlice, prunedChunk)
+		}
+	}
+
+	c.Chunks = prunedChunkSlice
+	return nil
+}
+
 // IsCommentOnly returns true if the Chunk contains comments and no expectations.
 func (c Chunk) IsCommentOnly() bool {
 	return len(c.Comments) > 0 && len(c.Expectations) == 0
@@ -158,6 +209,39 @@ func (c Chunk) Clone() Chunk {
 		expectations[i] = e.Clone()
 	}
 	return Chunk{comments, expectations}
+}
+
+func (c Chunk) ContainedWithinList(chunkList *[]Chunk) bool {
+	for _, otherChunk := range *chunkList {
+		if reflect.DeepEqual(c, otherChunk) {
+			return true
+		}
+	}
+	return false
+}
+
+// AppliesToResult returns whether the Expectation applies to the test + config
+// represented by the Result.
+func (e Expectation) AppliesToResult(r result.Result) bool {
+	// Tags apply as long as the Expectation's tags are a subset of the Result's
+	// tags.
+	tagsApply := r.Tags.ContainsAll(e.Tags)
+
+	// The query applies if it's an exact match or the Expectation has a wildcard
+	// and the Result's test name starts with the Expectation's test name.
+	var queryApplies bool
+	if strings.HasSuffix(e.Query, "*") && !strings.HasSuffix(e.Query, "\\*") {
+		// The expectation file format currently guarantees that wildcards are only
+		// ever at the end. If more generic wildcards are added in for WebGPU usage,
+		// this will need to be changed to a proper fnmatch check.
+		queryApplies = strings.HasPrefix(
+			r.Query.ExpectationFileString(),
+			e.Query[:len(e.Query)-1])
+	} else {
+		queryApplies = e.Query == r.Query.ExpectationFileString()
+	}
+
+	return tagsApply && queryApplies
 }
 
 // AsExpectationFileString returns the human-readable form of the expectation

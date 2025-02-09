@@ -80,6 +80,6 @@ void f() {
   b(v_18);
   c(v_4(264u));
   d(tint_bitcast_to_f16(u[1u].xy).xyz.zxy);
-  e(tint_bitcast_to_f16(u[1u].xy).xyz.zxy[0u]);
+  e(tint_bitcast_to_f16(u[1u].xy).xyz.zxy.x);
 }
 

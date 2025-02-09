@@ -33,14 +33,14 @@ int tint_f32_to_i32(float value) {
   return mix(2147483647, mix((-2147483647 - 1), int(value), (value >= -2147483648.0f)), (value <= 2147483520.0f));
 }
 int accept_ptr_vec_access_elements(inout vec3 v1) {
-  v1[0u] = cross(v1, v1)[0u];
+  v1.x = cross(v1, v1).x;
   return tint_f32_to_i32(v1.x);
 }
 int call_builtin_with_mod_scope_ptr() {
   return atomicOr(g1, 0);
 }
-void tint_symbol_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+void main_inner(uint tint_local_index) {
+  if ((tint_local_index < 1u)) {
     atomicExchange(g1, 0);
   }
   barrier();
@@ -57,5 +57,5 @@ void tint_symbol_inner(uint tint_local_index) {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  tint_symbol_inner(gl_LocalInvocationIndex);
+  main_inner(gl_LocalInvocationIndex);
 }

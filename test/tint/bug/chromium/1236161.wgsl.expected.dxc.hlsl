@@ -3,6 +3,6 @@ void unused_entry_point() {
   return;
 }
 
-void i() {
-  float s = 1.0f;
+void tint_symbol() {
+  float tint_symbol_1 = 1.0f;
 }

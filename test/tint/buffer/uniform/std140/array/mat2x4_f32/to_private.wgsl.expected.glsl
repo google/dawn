@@ -12,8 +12,8 @@ mat2x4 p[4] = mat2x4[4](mat2x4(vec4(0.0f), vec4(0.0f)), mat2x4(vec4(0.0f), vec4(
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   p = v.inner;
-  p[1] = v.inner[2];
-  p[1][0] = v.inner[0][1].ywxz;
-  p[1][0][0u] = v.inner[0][1].x;
-  v_1.inner = p[1][0].x;
+  p[1u] = v.inner[2u];
+  p[1u][0u] = v.inner[0u][1u].ywxz;
+  p[1u][0u].x = v.inner[0u][1u].x;
+  v_1.inner = p[1u][0u].x;
 }

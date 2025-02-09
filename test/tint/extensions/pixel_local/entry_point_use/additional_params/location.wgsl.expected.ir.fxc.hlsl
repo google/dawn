@@ -20,8 +20,8 @@ uint tint_f32_to_u32(float value) {
 }
 
 void f_inner(float4 a, float4 b) {
-  uint v = tint_f32_to_u32(a[0u]);
-  uint v_1 = (v + tint_f32_to_u32(b[1u]));
+  uint v = tint_f32_to_u32(a.x);
+  uint v_1 = (v + tint_f32_to_u32(b.y));
   P.a = (P.a + v_1);
 }
 
@@ -31,8 +31,8 @@ void f(f_inputs inputs) {
   P.b = pixel_local_b.Load(v_2).x;
   P.c = pixel_local_c.Load(v_2).x;
   f_inner(inputs.a, inputs.b);
-  pixel_local_a[v_2] = P.a.xxxx;
-  pixel_local_b[v_2] = P.b.xxxx;
-  pixel_local_c[v_2] = P.c.xxxx;
+  pixel_local_a[v_2] = uint4((P.a).xxxx);
+  pixel_local_b[v_2] = int4((P.b).xxxx);
+  pixel_local_c[v_2] = float4((P.c).xxxx);
 }
 

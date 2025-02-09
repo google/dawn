@@ -92,7 +92,8 @@ class BindGroupValidationTest : public ValidationTest {
         desc.gamutConversionMatrix = mPlaceholderConstantArray.data();
         desc.srcTransferFunctionParameters = mPlaceholderConstantArray.data();
         desc.dstTransferFunctionParameters = mPlaceholderConstantArray.data();
-        desc.visibleSize = {kWidth, kHeight};
+        desc.cropSize = {kWidth, kHeight};
+        desc.apparentSize = {kWidth, kHeight};
         return desc;
     }
 
@@ -2589,8 +2590,8 @@ TEST_F(SetBindGroupValidationTest, UnsetWithDynamicOffsetIsInvalid) {
     TestDynamicOffsetCount(0, offsets.data(), true);
 }
 
-// Test that a pipeline with empty bindgroups layouts requires empty bindgroups to be set.
-TEST_F(SetBindGroupValidationTest, EmptyBindGroupsAreRequired) {
+// Test that a pipeline with empty bindgroups layouts doesn't need empty bindgroups to be set.
+TEST_F(SetBindGroupValidationTest, EmptyBindGroupsAreNotRequired) {
     wgpu::BindGroupLayout emptyBGL = utils::MakeBindGroupLayout(device, {});
     wgpu::PipelineLayout pl =
         utils::MakePipelineLayout(device, {emptyBGL, emptyBGL, emptyBGL, emptyBGL});
@@ -2605,7 +2606,7 @@ TEST_F(SetBindGroupValidationTest, EmptyBindGroupsAreRequired) {
 
     wgpu::BindGroup emptyBindGroup = utils::MakeBindGroup(device, emptyBGL, {});
 
-    // Control case, setting 4 empty bindgroups works.
+    // Setting 4 empty bindgroups works.
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
@@ -2619,7 +2620,7 @@ TEST_F(SetBindGroupValidationTest, EmptyBindGroupsAreRequired) {
         encoder.Finish();
     }
 
-    // Error case, setting only the first three empty bindgroups.
+    // Setting only the first three empty bindgroups also works.
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
@@ -2629,7 +2630,19 @@ TEST_F(SetBindGroupValidationTest, EmptyBindGroupsAreRequired) {
         pass.SetBindGroup(2, emptyBindGroup);
         pass.DispatchWorkgroups(1);
         pass.End();
-        ASSERT_DEVICE_ERROR(encoder.Finish());
+        encoder.Finish();
+    }
+
+    // Mixedly setting and unsetting empty bindgroups also works.
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetPipeline(pipeline);
+        pass.SetBindGroup(1, emptyBindGroup);
+        pass.SetBindGroup(3, emptyBindGroup);
+        pass.DispatchWorkgroups(1);
+        pass.End();
+        encoder.Finish();
     }
 }
 
@@ -3643,6 +3656,167 @@ TEST_F(SamplerTypeBindingTest, SamplerAndBindGroupMatches) {
 
         // Test non-filtering sampler
         utils::MakeBindGroup(device, bindGroupLayout, {{0, device.CreateSampler()}});
+    }
+}
+
+class PipelineLayoutValidationTest : public ValidationTest {};
+
+// Test creating pipeline layout with null bind group layout works when unsafe APIs are allowed.
+TEST_F(PipelineLayoutValidationTest, CreateWithNullBindGroupLayout) {
+    for (uint32_t nullBGLIndex = 0; nullBGLIndex < 4; ++nullBGLIndex) {
+        std::vector<wgpu::BindGroupLayout> bgls(4);
+        for (uint32_t i = 0; i < 4; ++i) {
+            if (i == nullBGLIndex) {
+                continue;
+            }
+            bgls[i] = utils::MakeBindGroupLayout(
+                device, {{0, wgpu::ShaderStage::Compute, wgpu::StorageTextureAccess::WriteOnly,
+                          wgpu::TextureFormat::R32Float}});
+        }
+        utils::MakePipelineLayout(device, bgls);
+    }
+}
+
+// Test the pipeline layout with null bind group layout must match the corresponding binding in
+// shader.
+TEST_F(PipelineLayoutValidationTest, ShaderMatchesPipelineLayoutWithNullBindGroupLayout) {
+    for (uint32_t nullBGLIndex = 0; nullBGLIndex < 4; ++nullBGLIndex) {
+        std::vector<wgpu::BindGroupLayout> bgls(4);
+        for (uint32_t i = 0; i < 4; ++i) {
+            if (i == nullBGLIndex) {
+                continue;
+            }
+            bgls[i] = utils::MakeBindGroupLayout(
+                device, {{0, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Storage}});
+        }
+        wgpu::PipelineLayout pipelineLayout = utils::MakePipelineLayout(device, bgls);
+
+        for (uint32_t missedGroupIndex = 0; missedGroupIndex < 4; ++missedGroupIndex) {
+            std::ostringstream stream;
+            for (uint32_t i = 0; i < 4; ++i) {
+                if (i != missedGroupIndex) {
+                    stream << "@group(" << i << ") @binding(0) var<storage, read_write> outputData"
+                           << i << " : u32;\n";
+                }
+            }
+            stream << "@compute @workgroup_size(1, 1) fn main() {\n";
+            for (uint32_t i = 0; i < 4; ++i) {
+                if (i != missedGroupIndex) {
+                    stream << "outputData" << i << " = 1u;\n";
+                }
+            }
+            stream << "};";
+            wgpu::ComputePipelineDescriptor computePipelineDescriptor = {};
+            computePipelineDescriptor.compute.module =
+                utils::CreateShaderModule(device, stream.str());
+            computePipelineDescriptor.layout = pipelineLayout;
+            if (missedGroupIndex == nullBGLIndex) {
+                device.CreateComputePipeline(&computePipelineDescriptor);
+            } else {
+                ASSERT_DEVICE_ERROR(device.CreateComputePipeline(&computePipelineDescriptor));
+            }
+        }
+    }
+}
+
+// Test the null or empty bind group layout in a pipeline layout should be ignored when we check the
+// compatibility between the pipeline layout and the corresponding bind group.
+TEST_F(PipelineLayoutValidationTest, BindGroupSlotWithEmptyLayoutIsNotValidated) {
+    std::array<wgpu::BindGroupLayout, 2> nullOrEmptyBindGroupLayouts = {
+        nullptr, utils::MakeBindGroupLayout(device, {})};
+
+    wgpu::BindGroupLayout nonEmptyBGL = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Storage}});
+    wgpu::BufferDescriptor bufferDescForNonEmptyBGL = {};
+    bufferDescForNonEmptyBGL.size = 4;
+    bufferDescForNonEmptyBGL.usage = wgpu::BufferUsage::Storage;
+    wgpu::Buffer bufferForNonEmptyBGL = device.CreateBuffer(&bufferDescForNonEmptyBGL);
+    wgpu::BindGroup nonEmptyBindGroup =
+        utils::MakeBindGroup(device, nonEmptyBGL, {{0, bufferForNonEmptyBGL}});
+
+    for (uint32_t nullBGLIndex = 0; nullBGLIndex < 4; ++nullBGLIndex) {
+        for (wgpu::BindGroupLayout nullOrEmptyBindGroupLayout : nullOrEmptyBindGroupLayouts) {
+            std::vector<wgpu::BindGroupLayout> bgls(4);
+            std::vector<wgpu::BindGroup> bgs(4);
+
+            // Create compute pipeline with null or empty bind group layout and the bind groups.
+            // Note that the bind groups are all non-empty.
+            for (uint32_t i = 0; i < 4; ++i) {
+                if (i == nullBGLIndex) {
+                    bgls[i] = nullOrEmptyBindGroupLayout;
+                    bgs[i] = nonEmptyBindGroup;
+                } else {
+                    bgls[i] = utils::MakeBindGroupLayout(
+                        device,
+                        {{0, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Storage}});
+
+                    wgpu::BufferDescriptor bufferDesc = {};
+                    bufferDesc.size = 4;
+                    bufferDesc.usage = wgpu::BufferUsage::Storage;
+                    wgpu::Buffer buffer = device.CreateBuffer(&bufferDesc);
+                    bgs[i] = utils::MakeBindGroup(device, bgls[i], {{0, buffer}});
+                }
+            }
+            wgpu::PipelineLayout pipelineLayout = utils::MakePipelineLayout(device, bgls);
+
+            std::ostringstream stream;
+            for (uint32_t i = 0; i < 4; ++i) {
+                if (i != nullBGLIndex) {
+                    stream << "@group(" << i << ") @binding(0) var<storage, read_write> outputData"
+                           << i << " : u32;\n";
+                }
+            }
+            stream << "@compute @workgroup_size(1, 1) fn main() {\n";
+            for (uint32_t i = 0; i < 4; ++i) {
+                if (i != nullBGLIndex) {
+                    stream << "outputData" << i << " = 1u;\n";
+                }
+            }
+            stream << "};";
+            wgpu::ComputePipelineDescriptor computePipelineDescriptor = {};
+            computePipelineDescriptor.compute.module =
+                utils::CreateShaderModule(device, stream.str());
+            computePipelineDescriptor.layout = pipelineLayout;
+
+            wgpu::ComputePipeline computePipeline =
+                device.CreateComputePipeline(&computePipelineDescriptor);
+
+            // Set pipeline and bind groups. The null or empty bind group layout in the pipeline
+            // layout should be ignored in the check of the compatibility between pipeline layout
+            // and the bind group when encoding `SetBindGroup()`.
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::ComputePassEncoder computePass = encoder.BeginComputePass();
+            for (uint32_t i = 0; i < 4; ++i) {
+                computePass.SetBindGroup(i, bgs[i]);
+            }
+            computePass.SetPipeline(computePipeline);
+            computePass.DispatchWorkgroups(1);
+            computePass.End();
+            wgpu::CommandBuffer cmdbuf = encoder.Finish();
+            device.GetQueue().Submit(1, &cmdbuf);
+        }
+    }
+}
+
+class PipelineLayoutDontAllowUnsafeAPIValidationTest : public ValidationTest {
+  protected:
+    bool AllowUnsafeAPIs() override { return false; }
+};
+
+// Test currently creating pipeline layout with null bind group layout doesn't work when unsafe APIs
+// are not allowed.
+TEST_F(PipelineLayoutDontAllowUnsafeAPIValidationTest, CreateWithNullBindGroupLayout) {
+    for (uint32_t nullBGLIndex = 0; nullBGLIndex < 4; ++nullBGLIndex) {
+        std::vector<wgpu::BindGroupLayout> bgls(4);
+        for (uint32_t i = 0; i < 4; ++i) {
+            if (i == nullBGLIndex) {
+                continue;
+            }
+            bgls[i] = utils::MakeBindGroupLayout(
+                device, {{0, wgpu::ShaderStage::Compute, wgpu::StorageTextureAccess::WriteOnly,
+                          wgpu::TextureFormat::R32Float}});
+        }
+        ASSERT_DEVICE_ERROR(utils::MakePipelineLayout(device, bgls));
     }
 }
 

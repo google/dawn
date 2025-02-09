@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 RWByteAddressBuffer prevent_dce : register(u0);
 TextureCubeArray arg_0 : register(t0, space1);
 SamplerState arg_1 : register(s1, space1);
@@ -14,11 +17,38 @@ void fragment_main() {
   prevent_dce.Store(0u, asuint(textureSampleLevel_941a53()));
   return;
 }
+//
+// compute_main
+//
+RWByteAddressBuffer prevent_dce : register(u0);
+TextureCubeArray arg_0 : register(t0, space1);
+SamplerState arg_1 : register(s1, space1);
+
+float textureSampleLevel_941a53() {
+  float3 arg_2 = (1.0f).xxx;
+  uint arg_3 = 1u;
+  uint arg_4 = 1u;
+  float res = arg_0.SampleLevel(arg_1, float4(arg_2, float(arg_3)), arg_4).x;
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store(0u, asuint(textureSampleLevel_941a53()));
   return;
+}
+//
+// vertex_main
+//
+TextureCubeArray arg_0 : register(t0, space1);
+SamplerState arg_1 : register(s1, space1);
+
+float textureSampleLevel_941a53() {
+  float3 arg_2 = (1.0f).xxx;
+  uint arg_3 = 1u;
+  uint arg_4 = 1u;
+  float res = arg_0.SampleLevel(arg_1, float4(arg_2, float(arg_3)), arg_4).x;
+  return res;
 }
 
 struct VertexOutput {

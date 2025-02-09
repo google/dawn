@@ -106,12 +106,7 @@ Type Transform::CreateASTTypeFor(program::CloneContext& ctx, const core::type::T
     }
     if (auto* v = ty->As<core::type::Vector>()) {
         auto el = CreateASTTypeFor(ctx, v->Type());
-        if (v->Packed()) {
-            TINT_ASSERT(v->Width() == 3u);
-            return ctx.dst->ty(core::BuiltinType::kPackedVec3, el);
-        } else {
-            return ctx.dst->ty.vec(el, v->Width());
-        }
+        return ctx.dst->ty.vec(el, v->Width());
     }
     if (auto* a = ty->As<core::type::Array>()) {
         auto el = CreateASTTypeFor(ctx, a->ElemType());

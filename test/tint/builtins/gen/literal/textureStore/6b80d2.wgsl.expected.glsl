@@ -1,14 +1,20 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
 
-layout(binding = 0, r32i) uniform highp writeonly iimage2D arg_0;
+layout(binding = 0, r32i) uniform highp writeonly iimage2D f_arg_0;
 void textureStore_6b80d2() {
-  imageStore(arg_0, ivec2(1, 0), ivec4(1));
+  imageStore(f_arg_0, ivec2(1, 0), ivec4(1));
 }
 void main() {
   textureStore_6b80d2();
 }
+//
+// compute_main
+//
 #version 310 es
 
 layout(binding = 0, r32i) uniform highp writeonly iimage2D arg_0;

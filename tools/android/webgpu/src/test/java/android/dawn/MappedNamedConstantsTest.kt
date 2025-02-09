@@ -21,7 +21,6 @@ class MappedNamedConstantsTest {
         BlendFactor::class,
         BlendOperation::class,
         BufferBindingType::class,
-        BufferMapAsyncStatus::class,
         BufferMapState::class,
         BufferUsage::class,
         CallbackMode::class,
@@ -35,6 +34,7 @@ class MappedNamedConstantsTest {
         DeviceLostReason::class,
         ErrorFilter::class,
         ErrorType::class,
+        FeatureLevel::class,
         FeatureName::class,
         FilterMode::class,
         FrontFace::class,
@@ -69,7 +69,7 @@ class MappedNamedConstantsTest {
         VertexFormat::class,
         VertexStepMode::class,
         WaitStatus::class,
-        WGSLFeatureName::class
+        WGSLLanguageFeatureName::class
     )
 
     /**

@@ -24,8 +24,8 @@
 %_ptr_Function_mat2v3float = OpTypePointer Function %mat2v3float
          %10 = OpConstantNull %mat2v3float
 %_ptr_Function_v3float = OpTypePointer Function %v3float
-        %int = OpTypeInt 32 1
-      %int_0 = OpConstant %int 0
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
     %float_1 = OpConstant %float 1
     %float_2 = OpConstant %float 2
     %float_3 = OpConstant %float 3
@@ -34,10 +34,10 @@
           %4 = OpLabel
           %a = OpVariable %_ptr_Function_mat2v3float Function %10
           %b = OpVariable %_ptr_Function_v3float Function
-         %11 = OpAccessChain %_ptr_Function_v3float %a %int_0
+         %11 = OpAccessChain %_ptr_Function_v3float %a %uint_0
          %15 = OpLoad %v3float %11 None
                OpStore %b %15
-         %17 = OpAccessChain %_ptr_Function_v3float %a %int_0
+         %17 = OpAccessChain %_ptr_Function_v3float %a %uint_0
                OpStore %17 %18 None
                OpReturn
                OpFunctionEnd
@@ -45,10 +45,10 @@
          %23 = OpLabel
         %a_0 = OpVariable %_ptr_Function_mat2v3float Function %10
         %b_0 = OpVariable %_ptr_Function_v3float Function
-         %25 = OpAccessChain %_ptr_Function_v3float %a_0 %int_0
+         %25 = OpAccessChain %_ptr_Function_v3float %a_0 %uint_0
          %26 = OpLoad %v3float %25 None
                OpStore %b_0 %26
-         %28 = OpAccessChain %_ptr_Function_v3float %a_0 %int_0
+         %28 = OpAccessChain %_ptr_Function_v3float %a_0 %uint_0
                OpStore %28 %18 None
                OpReturn
                OpFunctionEnd

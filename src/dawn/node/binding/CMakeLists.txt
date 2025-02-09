@@ -82,6 +82,7 @@ add_library(dawn_node_binding STATIC
     "GPUTexture.h"
     "GPUTextureView.cpp"
     "GPUTextureView.h"
+    "IteratorHelper.h"
     "Split.cpp"
     "Split.h"
     "TogglesLoader.cpp"

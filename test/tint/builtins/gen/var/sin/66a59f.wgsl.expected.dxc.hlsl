@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 RWByteAddressBuffer prevent_dce : register(u0);
 
 float16_t sin_66a59f() {
@@ -10,11 +13,29 @@ void fragment_main() {
   prevent_dce.Store<float16_t>(0u, sin_66a59f());
   return;
 }
+//
+// compute_main
+//
+RWByteAddressBuffer prevent_dce : register(u0);
+
+float16_t sin_66a59f() {
+  float16_t arg_0 = float16_t(1.5703125h);
+  float16_t res = sin(arg_0);
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store<float16_t>(0u, sin_66a59f());
   return;
+}
+//
+// vertex_main
+//
+float16_t sin_66a59f() {
+  float16_t arg_0 = float16_t(1.5703125h);
+  float16_t res = sin(arg_0);
+  return res;
 }
 
 struct VertexOutput {

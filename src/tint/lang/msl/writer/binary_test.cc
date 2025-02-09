@@ -116,8 +116,7 @@ TEST_F(MslWriterTest, BinaryModU32) {
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
 uint tint_mod_u32(uint lhs, uint rhs) {
-  uint const v = select(rhs, 1u, (rhs == 0u));
-  return (lhs - ((lhs / v) * v));
+  return (lhs - ((lhs / select(rhs, 1u, (rhs == 0u))) * select(rhs, 1u, (rhs == 0u))));
 }
 
 void foo() {

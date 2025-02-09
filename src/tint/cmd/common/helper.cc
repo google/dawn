@@ -46,11 +46,11 @@
 #endif
 
 #include "src/tint/utils/diagnostic/formatter.h"
+#include "src/tint/utils/rtti/traits.h"
 #include "src/tint/utils/text/string.h"
 #include "src/tint/utils/text/styled_text.h"
 #include "src/tint/utils/text/styled_text_printer.h"
 #include "src/tint/utils/text/text_style.h"
-#include "src/tint/utils/traits/traits.h"
 
 namespace tint::cmd {
 namespace {
@@ -575,6 +575,10 @@ std::string OverrideTypeToString(tint::inspector::Override::Type type) {
             return "i32";
     }
     return "unknown";
+}
+
+bool IsStdout(const std::string& name) {
+    return name.empty() || name == "-";
 }
 
 }  // namespace tint::cmd

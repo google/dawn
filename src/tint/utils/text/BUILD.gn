@@ -73,7 +73,6 @@ libtint_source_set("text") {
     "${tint_src_dir}/utils/memory",
     "${tint_src_dir}/utils/rtti",
     "${tint_src_dir}/utils/system",
-    "${tint_src_dir}/utils/traits",
   ]
 
   if (!tint_build_is_linux && !tint_build_is_mac && !tint_build_is_win) {
@@ -108,7 +107,6 @@ if (tint_build_unittests) {
       "${tint_src_dir}/utils/memory",
       "${tint_src_dir}/utils/rtti",
       "${tint_src_dir}/utils/text",
-      "${tint_src_dir}/utils/traits",
     ]
   }
 }

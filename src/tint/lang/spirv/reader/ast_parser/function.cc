@@ -157,8 +157,9 @@
 using namespace tint::core::number_suffixes;  // NOLINT
 using namespace tint::core::fluent_types;     // NOLINT
 
-namespace tint::spirv::reader::ast_parser {
+TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 
+namespace tint::spirv::reader::ast_parser {
 namespace {
 
 constexpr uint32_t kMaxVectorLen = 4;
@@ -3962,7 +3963,7 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
     }
 
     if (op == spv::Op::OpConvertSToF || op == spv::Op::OpConvertUToF ||
-        op == spv::Op::OpConvertFToS || op == spv::Op::OpConvertFToU) {
+        op == spv::Op::OpConvertFToS || op == spv::Op::OpConvertFToU || op == spv::Op::OpFConvert) {
         return MakeNumericConversion(inst);
     }
 
@@ -3987,7 +3988,6 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
     //    OpSatConvertUToS // Only in Kernel (OpenCL), not in WebGPU
     //    OpUConvert // Only needed when multiple widths supported
     //    OpSConvert // Only needed when multiple widths supported
-    //    OpFConvert // Only needed when multiple widths supported
     //    OpConvertPtrToU // Not in WebGPU
     //    OpConvertUToPtr // Not in WebGPU
     //    OpPtrCastToGeneric // Not in Vulkan
@@ -5224,6 +5224,14 @@ TypedExpression FunctionEmitter::MakeNumericConversion(const spvtools::opt::Inst
             expr_type = parser_impl_.GetSignedIntMatchingShape(arg_expr.type);
         } else {
             Fail() << "operand for conversion to signed integer must be floating "
+                      "point scalar or vector: "
+                   << inst.PrettyPrint();
+        }
+    } else if (op == spv::Op::OpFConvert) {
+        if (arg_expr.type->IsFloatScalarOrVector()) {
+            expr_type = requested_type;
+        } else {
+            Fail() << "operand for conversion to float 16 must be floating "
                       "point scalar or vector: "
                    << inst.PrettyPrint();
         }
@@ -6467,3 +6475,5 @@ TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::ast_parser::StatementBuilder);
 TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::ast_parser::SwitchStatementBuilder);
 TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::ast_parser::IfStatementBuilder);
 TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::ast_parser::LoopStatementBuilder);
+
+TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);

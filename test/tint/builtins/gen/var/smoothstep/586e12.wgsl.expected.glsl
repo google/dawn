@@ -1,22 +1,30 @@
+//
+// fragment_main
+//
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float: require
 precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer prevent_dce_block_1_ssbo {
+buffer f_prevent_dce_block_ssbo {
   float16_t inner;
 } v;
 float16_t smoothstep_586e12() {
   float16_t arg_0 = 2.0hf;
   float16_t arg_1 = 4.0hf;
   float16_t arg_2 = 3.0hf;
-  float16_t res = smoothstep(arg_0, arg_1, arg_2);
+  float16_t v_1 = arg_0;
+  float16_t v_2 = clamp(((arg_2 - v_1) / (arg_1 - v_1)), 0.0hf, 1.0hf);
+  float16_t res = (v_2 * (v_2 * (3.0hf - (2.0hf * v_2))));
   return res;
 }
 void main() {
   v.inner = smoothstep_586e12();
 }
+//
+// compute_main
+//
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float: require
 
@@ -28,13 +36,18 @@ float16_t smoothstep_586e12() {
   float16_t arg_0 = 2.0hf;
   float16_t arg_1 = 4.0hf;
   float16_t arg_2 = 3.0hf;
-  float16_t res = smoothstep(arg_0, arg_1, arg_2);
+  float16_t v_1 = arg_0;
+  float16_t v_2 = clamp(((arg_2 - v_1) / (arg_1 - v_1)), 0.0hf, 1.0hf);
+  float16_t res = (v_2 * (v_2 * (3.0hf - (2.0hf * v_2))));
   return res;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   v.inner = smoothstep_586e12();
 }
+//
+// vertex_main
+//
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float: require
 
@@ -44,25 +57,25 @@ struct VertexOutput {
   float16_t prevent_dce;
 };
 
-layout(location = 0) flat out float16_t vertex_main_loc0_Output;
+layout(location = 0) flat out float16_t tint_interstage_location0;
 float16_t smoothstep_586e12() {
   float16_t arg_0 = 2.0hf;
   float16_t arg_1 = 4.0hf;
   float16_t arg_2 = 3.0hf;
-  float16_t res = smoothstep(arg_0, arg_1, arg_2);
+  float16_t v = arg_0;
+  float16_t v_1 = clamp(((arg_2 - v) / (arg_1 - v)), 0.0hf, 1.0hf);
+  float16_t res = (v_1 * (v_1 * (3.0hf - (2.0hf * v_1))));
   return res;
 }
 VertexOutput vertex_main_inner() {
-  VertexOutput tint_symbol = VertexOutput(vec4(0.0f), 0.0hf);
-  tint_symbol.pos = vec4(0.0f);
-  tint_symbol.prevent_dce = smoothstep_586e12();
-  return tint_symbol;
+  VertexOutput v_2 = VertexOutput(vec4(0.0f), 0.0hf);
+  v_2.pos = vec4(0.0f);
+  v_2.prevent_dce = smoothstep_586e12();
+  return v_2;
 }
 void main() {
-  VertexOutput v = vertex_main_inner();
-  gl_Position = v.pos;
-  gl_Position[1u] = -(gl_Position.y);
-  gl_Position[2u] = ((2.0f * gl_Position.z) - gl_Position.w);
-  vertex_main_loc0_Output = v.prevent_dce;
+  VertexOutput v_3 = vertex_main_inner();
+  gl_Position = vec4(v_3.pos.x, -(v_3.pos.y), ((2.0f * v_3.pos.z) - v_3.pos.w), v_3.pos.w);
+  tint_interstage_location0 = v_3.prevent_dce;
   gl_PointSize = 1.0f;
 }

@@ -37,7 +37,7 @@
 #include "src/tint/lang/core/type/manager.h"
 #include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/core/type/vector.h"
-#include "src/tint/utils/id/generation_id.h"
+#include "src/tint/utils/generation_id.h"
 #include "src/tint/utils/symbol/symbol_table.h"
 
 using namespace tint::core::number_suffixes;  // NOLINT

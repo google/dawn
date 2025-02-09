@@ -133,5 +133,47 @@ TEST_F(SpirvWriterTest, Construct_Vector_Identity) {
     EXPECT_INST("OpReturnValue %arg");
 }
 
+TEST_F(SpirvWriterTest, Construct_SubgroupMatrix_ZeroValue) {
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        b.Let("left", b.Construct(ty.subgroup_matrix_left(ty.f32(), 8, 4)));
+        b.Let("right", b.Construct(ty.subgroup_matrix_right(ty.f32(), 4, 8)));
+        b.Let("result", b.Construct(ty.subgroup_matrix_result(ty.f32(), 2, 2)));
+        b.Return(func);
+    });
+
+    Options options;
+    options.use_vulkan_memory_model = true;
+    ASSERT_TRUE(Generate(options)) << Error() << output_;
+    EXPECT_INST("%6 = OpTypeCooperativeMatrixKHR %float %uint_3 %uint_4 %uint_8 %uint_0");
+    EXPECT_INST("%left = OpConstantNull %6");
+    EXPECT_INST("%14 = OpTypeCooperativeMatrixKHR %float %uint_3 %uint_8 %uint_4 %uint_1");
+    EXPECT_INST("%right = OpConstantNull %14");
+    EXPECT_INST("%17 = OpTypeCooperativeMatrixKHR %float %uint_3 %uint_2 %uint_2 %uint_2");
+    EXPECT_INST("%result = OpConstantNull %17");
+}
+
+TEST_F(SpirvWriterTest, Construct_SubgroupMatrix_SingleValue) {
+    auto* func = b.Function("foo", ty.void_());
+    auto* arg = b.FunctionParam("arg", ty.i32());
+    func->SetParams({arg});
+    b.Append(func->Block(), [&] {
+        b.Let("left", b.Construct(ty.subgroup_matrix_left(ty.i32(), 8, 4), arg));
+        b.Let("right", b.Construct(ty.subgroup_matrix_right(ty.i32(), 4, 8), arg));
+        b.Let("result", b.Construct(ty.subgroup_matrix_result(ty.i32(), 2, 2), arg));
+        b.Return(func);
+    });
+
+    Options options;
+    options.use_vulkan_memory_model = true;
+    ASSERT_TRUE(Generate(options)) << Error() << output_;
+    EXPECT_INST("%7 = OpTypeCooperativeMatrixKHR %int %uint_3 %uint_4 %uint_8 %uint_0");
+    EXPECT_INST("%14 = OpTypeCooperativeMatrixKHR %int %uint_3 %uint_8 %uint_4 %uint_1");
+    EXPECT_INST("%17 = OpTypeCooperativeMatrixKHR %int %uint_3 %uint_2 %uint_2 %uint_2");
+    EXPECT_INST("%left = OpCompositeConstruct %7 %arg");
+    EXPECT_INST("%right = OpCompositeConstruct %14 %arg");
+    EXPECT_INST("%result = OpCompositeConstruct %17 %arg");
+}
+
 }  // namespace
 }  // namespace tint::spirv::writer

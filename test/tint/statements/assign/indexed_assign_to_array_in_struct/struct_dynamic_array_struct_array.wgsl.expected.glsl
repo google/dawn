@@ -27,5 +27,6 @@ void main() {
   InnerS v = InnerS(0);
   uint v_2 = v_1.inner.i;
   uint v_3 = v_1.inner.j;
-  s.a1[v_2].a2[v_3] = v;
+  uint v_4 = min(v_2, (uint(s.a1.length()) - 1u));
+  s.a1[v_4].a2[min(v_3, 7u)] = v;
 }

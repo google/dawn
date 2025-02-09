@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 struct frexp_result_f32 {
   float fract;
   int exp;
@@ -10,11 +13,31 @@ void fragment_main() {
   frexp_4b2200();
   return;
 }
+//
+// compute_main
+//
+struct frexp_result_f32 {
+  float fract;
+  int exp;
+};
+void frexp_4b2200() {
+  frexp_result_f32 res = {0.5f, 1};
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   frexp_4b2200();
   return;
+}
+//
+// vertex_main
+//
+struct frexp_result_f32 {
+  float fract;
+  int exp;
+};
+void frexp_4b2200() {
+  frexp_result_f32 res = {0.5f, 1};
 }
 
 struct VertexOutput {

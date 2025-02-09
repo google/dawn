@@ -115,13 +115,13 @@ class CopyCommandTest : public ValidationTest {
                      wgpu::Origin3D destOrigin,
                      wgpu::Extent3D extent3D,
                      wgpu::TextureAspect aspect = wgpu::TextureAspect::All) {
-        wgpu::ImageCopyBuffer imageCopyBuffer =
-            utils::CreateImageCopyBuffer(srcBuffer, srcOffset, srcBytesPerRow, srcRowsPerImage);
-        wgpu::ImageCopyTexture imageCopyTexture =
-            utils::CreateImageCopyTexture(destTexture, destLevel, destOrigin, aspect);
+        wgpu::TexelCopyBufferInfo texelCopyBufferInfo =
+            utils::CreateTexelCopyBufferInfo(srcBuffer, srcOffset, srcBytesPerRow, srcRowsPerImage);
+        wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(destTexture, destLevel, destOrigin, aspect);
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        encoder.CopyBufferToTexture(&imageCopyBuffer, &imageCopyTexture, &extent3D);
+        encoder.CopyBufferToTexture(&texelCopyBufferInfo, &texelCopyTextureInfo, &extent3D);
 
         ValidateExpectation(encoder, expectation);
     }
@@ -136,13 +136,13 @@ class CopyCommandTest : public ValidationTest {
                      uint32_t destRowsPerImage,
                      wgpu::Extent3D extent3D,
                      wgpu::TextureAspect aspect = wgpu::TextureAspect::All) {
-        wgpu::ImageCopyBuffer imageCopyBuffer =
-            utils::CreateImageCopyBuffer(destBuffer, destOffset, destBytesPerRow, destRowsPerImage);
-        wgpu::ImageCopyTexture imageCopyTexture =
-            utils::CreateImageCopyTexture(srcTexture, srcLevel, srcOrigin, aspect);
+        wgpu::TexelCopyBufferInfo texelCopyBufferInfo = utils::CreateTexelCopyBufferInfo(
+            destBuffer, destOffset, destBytesPerRow, destRowsPerImage);
+        wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(srcTexture, srcLevel, srcOrigin, aspect);
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        encoder.CopyTextureToBuffer(&imageCopyTexture, &imageCopyBuffer, &extent3D);
+        encoder.CopyTextureToBuffer(&texelCopyTextureInfo, &texelCopyBufferInfo, &extent3D);
 
         ValidateExpectation(encoder, expectation);
     }
@@ -156,13 +156,13 @@ class CopyCommandTest : public ValidationTest {
                      wgpu::Origin3D dstOrigin,
                      wgpu::Extent3D extent3D,
                      wgpu::TextureAspect aspect = wgpu::TextureAspect::All) {
-        wgpu::ImageCopyTexture srcImageCopyTexture =
-            utils::CreateImageCopyTexture(srcTexture, srcLevel, srcOrigin, aspect);
-        wgpu::ImageCopyTexture dstImageCopyTexture =
-            utils::CreateImageCopyTexture(dstTexture, dstLevel, dstOrigin, aspect);
+        wgpu::TexelCopyTextureInfo srcTexelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(srcTexture, srcLevel, srcOrigin, aspect);
+        wgpu::TexelCopyTextureInfo dstTexelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(dstTexture, dstLevel, dstOrigin, aspect);
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        encoder.CopyTextureToTexture(&srcImageCopyTexture, &dstImageCopyTexture, &extent3D);
+        encoder.CopyTextureToTexture(&srcTexelCopyTextureInfo, &dstTexelCopyTextureInfo, &extent3D);
 
         ValidateExpectation(encoder, expectation);
     }
@@ -780,20 +780,21 @@ TEST_F(CopyCommandTest_B2T, BufferOrTextureInErrorState) {
     errorTextureDescriptor.size.depthOrArrayLayers = 0;
     ASSERT_DEVICE_ERROR(wgpu::Texture errorTexture = device.CreateTexture(&errorTextureDescriptor));
 
-    wgpu::ImageCopyBuffer errorImageCopyBuffer = utils::CreateImageCopyBuffer(errorBuffer, 0, 0, 0);
-    wgpu::ImageCopyTexture errorImageCopyTexture =
-        utils::CreateImageCopyTexture(errorTexture, 0, {0, 0, 0});
+    wgpu::TexelCopyBufferInfo errorTexelCopyBufferInfo =
+        utils::CreateTexelCopyBufferInfo(errorBuffer, 0, 0, 0);
+    wgpu::TexelCopyTextureInfo errorTexelCopyTextureInfo =
+        utils::CreateTexelCopyTextureInfo(errorTexture, 0, {0, 0, 0});
 
     wgpu::Extent3D extent3D = {0, 0, 0};
 
     {
         wgpu::Texture destination = Create2DTexture(16, 16, 1, 1, wgpu::TextureFormat::RGBA8Unorm,
                                                     wgpu::TextureUsage::CopyDst);
-        wgpu::ImageCopyTexture imageCopyTexture =
-            utils::CreateImageCopyTexture(destination, 0, {0, 0, 0});
+        wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(destination, 0, {0, 0, 0});
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        encoder.CopyBufferToTexture(&errorImageCopyBuffer, &imageCopyTexture, &extent3D);
+        encoder.CopyBufferToTexture(&errorTexelCopyBufferInfo, &texelCopyTextureInfo, &extent3D);
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 
@@ -801,10 +802,11 @@ TEST_F(CopyCommandTest_B2T, BufferOrTextureInErrorState) {
         uint64_t bufferSize = BufferSizeForTextureCopy(4, 4, 1);
         wgpu::Buffer source = CreateBuffer(bufferSize, wgpu::BufferUsage::CopySrc);
 
-        wgpu::ImageCopyBuffer imageCopyBuffer = utils::CreateImageCopyBuffer(source, 0, 0, 0);
+        wgpu::TexelCopyBufferInfo texelCopyBufferInfo =
+            utils::CreateTexelCopyBufferInfo(source, 0, 0, 0);
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        encoder.CopyBufferToTexture(&imageCopyBuffer, &errorImageCopyTexture, &extent3D);
+        encoder.CopyBufferToTexture(&texelCopyBufferInfo, &errorTexelCopyTextureInfo, &extent3D);
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 }
@@ -1413,9 +1415,10 @@ TEST_F(CopyCommandTest_T2B, BufferOrTextureInErrorState) {
     errorTextureDescriptor.size.depthOrArrayLayers = 0;
     ASSERT_DEVICE_ERROR(wgpu::Texture errorTexture = device.CreateTexture(&errorTextureDescriptor));
 
-    wgpu::ImageCopyBuffer errorImageCopyBuffer = utils::CreateImageCopyBuffer(errorBuffer, 0, 0, 0);
-    wgpu::ImageCopyTexture errorImageCopyTexture =
-        utils::CreateImageCopyTexture(errorTexture, 0, {0, 0, 0});
+    wgpu::TexelCopyBufferInfo errorTexelCopyBufferInfo =
+        utils::CreateTexelCopyBufferInfo(errorBuffer, 0, 0, 0);
+    wgpu::TexelCopyTextureInfo errorTexelCopyTextureInfo =
+        utils::CreateTexelCopyTextureInfo(errorTexture, 0, {0, 0, 0});
 
     wgpu::Extent3D extent3D = {0, 0, 0};
 
@@ -1423,21 +1426,22 @@ TEST_F(CopyCommandTest_T2B, BufferOrTextureInErrorState) {
         uint64_t bufferSize = BufferSizeForTextureCopy(4, 4, 1);
         wgpu::Buffer source = CreateBuffer(bufferSize, wgpu::BufferUsage::CopySrc);
 
-        wgpu::ImageCopyBuffer imageCopyBuffer = utils::CreateImageCopyBuffer(source, 0, 0, 0);
+        wgpu::TexelCopyBufferInfo texelCopyBufferInfo =
+            utils::CreateTexelCopyBufferInfo(source, 0, 0, 0);
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        encoder.CopyTextureToBuffer(&errorImageCopyTexture, &imageCopyBuffer, &extent3D);
+        encoder.CopyTextureToBuffer(&errorTexelCopyTextureInfo, &texelCopyBufferInfo, &extent3D);
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 
     {
         wgpu::Texture destination = Create2DTexture(16, 16, 1, 1, wgpu::TextureFormat::RGBA8Unorm,
                                                     wgpu::TextureUsage::CopyDst);
-        wgpu::ImageCopyTexture imageCopyTexture =
-            utils::CreateImageCopyTexture(destination, 0, {0, 0, 0});
+        wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(destination, 0, {0, 0, 0});
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        encoder.CopyTextureToBuffer(&imageCopyTexture, &errorImageCopyBuffer, &extent3D);
+        encoder.CopyTextureToBuffer(&texelCopyTextureInfo, &errorTexelCopyBufferInfo, &extent3D);
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 }
@@ -1726,13 +1730,13 @@ TEST_F(CopyCommandTest_T2T, Success) {
         TestT2TCopy(utils::Expectation::Success, source, 0, {0, 0, 1}, destination, 0, {0, 0, 1},
                     {16, 16, 1});
 
-        // Copy multiple slices (srcImageCopyTexture.arrayLayer + copySize.depthOrArrayLayers ==
-        // srcImageCopyTexture.texture.arrayLayerCount)
+        // Copy multiple slices (srcTexelCopyTextureInfo.arrayLayer + copySize.depthOrArrayLayers ==
+        // srcTexelCopyTextureInfo.texture.arrayLayerCount)
         TestT2TCopy(utils::Expectation::Success, source, 0, {0, 0, 2}, destination, 0, {0, 0, 0},
                     {16, 16, 2});
 
-        // Copy multiple slices (dstImageCopyTexture.arrayLayer + copySize.depthOrArrayLayers ==
-        // dstImageCopyTexture.texture.arrayLayerCount)
+        // Copy multiple slices (dstTexelCopyTextureInfo.arrayLayer + copySize.depthOrArrayLayers ==
+        // dstTexelCopyTextureInfo.texture.arrayLayerCount)
         TestT2TCopy(utils::Expectation::Success, source, 0, {0, 0, 0}, destination, 0, {0, 0, 2},
                     {16, 16, 2});
     }

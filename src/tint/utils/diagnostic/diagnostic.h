@@ -35,8 +35,8 @@
 
 #include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/diagnostic/source.h"
+#include "src/tint/utils/rtti/traits.h"
 #include "src/tint/utils/text/styled_text.h"
-#include "src/tint/utils/traits/traits.h"
 
 namespace tint::diag {
 

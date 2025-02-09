@@ -1,16 +1,22 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
 
-layout(binding = 0, rgba8_snorm) uniform highp writeonly image3D arg_0;
+layout(binding = 0, rgba8_snorm) uniform highp writeonly image3D f_arg_0;
 void textureStore_dd7d81() {
   ivec3 arg_1 = ivec3(1);
   vec4 arg_2 = vec4(1.0f);
-  imageStore(arg_0, arg_1, arg_2);
+  imageStore(f_arg_0, arg_1, arg_2);
 }
 void main() {
   textureStore_dd7d81();
 }
+//
+// compute_main
+//
 #version 310 es
 
 layout(binding = 0, rgba8_snorm) uniform highp writeonly image3D arg_0;

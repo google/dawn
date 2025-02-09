@@ -13,7 +13,7 @@ void f() {
   S s = (S)0;
   {
     int tint_symbol_2[64] = s.data;
-    tint_symbol_2[asint(ubo[0].x)] = 1;
+    tint_symbol_2[min(uint(asint(ubo[0].x)), 63u)] = 1;
     s.data = tint_symbol_2;
   }
   result.Store(0u, asuint(s.data[3]));

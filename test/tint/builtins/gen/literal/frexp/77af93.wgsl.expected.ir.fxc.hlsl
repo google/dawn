@@ -1,3 +1,41 @@
+//
+// fragment_main
+//
+struct frexp_result_vec4_f32 {
+  float4 fract;
+  int4 exp;
+};
+
+
+void frexp_77af93() {
+  frexp_result_vec4_f32 res = {(0.5f).xxxx, (int(1)).xxxx};
+}
+
+void fragment_main() {
+  frexp_77af93();
+}
+
+//
+// compute_main
+//
+struct frexp_result_vec4_f32 {
+  float4 fract;
+  int4 exp;
+};
+
+
+void frexp_77af93() {
+  frexp_result_vec4_f32 res = {(0.5f).xxxx, (int(1)).xxxx};
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  frexp_77af93();
+}
+
+//
+// vertex_main
+//
 struct frexp_result_vec4_f32 {
   float4 fract;
   int4 exp;
@@ -16,26 +54,17 @@ void frexp_77af93() {
   frexp_result_vec4_f32 res = {(0.5f).xxxx, (int(1)).xxxx};
 }
 
-void fragment_main() {
-  frexp_77af93();
-}
-
-[numthreads(1, 1, 1)]
-void compute_main() {
-  frexp_77af93();
-}
-
 VertexOutput vertex_main_inner() {
-  VertexOutput tint_symbol = (VertexOutput)0;
-  tint_symbol.pos = (0.0f).xxxx;
+  VertexOutput v = (VertexOutput)0;
+  v.pos = (0.0f).xxxx;
   frexp_77af93();
-  VertexOutput v = tint_symbol;
-  return v;
+  VertexOutput v_1 = v;
+  return v_1;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_1 = vertex_main_inner();
-  vertex_main_outputs v_2 = {v_1.pos};
-  return v_2;
+  VertexOutput v_2 = vertex_main_inner();
+  vertex_main_outputs v_3 = {v_2.pos};
+  return v_3;
 }
 

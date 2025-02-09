@@ -6,7 +6,7 @@ RWByteAddressBuffer result : register(u1, space1);
 RWByteAddressBuffer s : register(u0);
 int runTest() {
   int v = int(0);
-  s.InterlockedOr(int((0u + (uint((0u + uint(constants[0u].x))) * 4u))), int(0), v);
+  s.InterlockedOr(int((0u + (min((0u + uint(constants[0u].x)), 2u) * 4u))), int(0), v);
   return v;
 }
 

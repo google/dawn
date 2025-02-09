@@ -28,10 +28,13 @@
 #ifndef SRC_TINT_LANG_MSL_WRITER_COMMON_OPTIONS_H_
 #define SRC_TINT_LANG_MSL_WRITER_COMMON_OPTIONS_H_
 
+#include <optional>
+#include <string>
 #include <unordered_map>
 
 #include "src/tint/api/common/binding_point.h"
-#include "src/tint/utils/reflection/reflection.h"
+#include "src/tint/api/common/vertex_pulling_config.h"
+#include "src/tint/utils/reflection.h"
 
 namespace tint::msl::writer {
 namespace binding {
@@ -135,11 +138,20 @@ struct Options {
     /// @returns this Options
     Options& operator=(const Options&);
 
+    /// An optional remapped name to use when emitting the entry point.
+    std::string remapped_entry_point_name = {};
+
+    /// Set to `true` to strip all user-declared identifiers from the module.
+    bool strip_all_names = false;
+
     /// Set to `true` to disable software robustness that prevents out-of-bounds accesses.
     bool disable_robustness = false;
 
     /// Set to `true` to disable workgroup memory zero initialization
     bool disable_workgroup_init = false;
+
+    /// Set to `true` to disable demote to helper transform
+    bool disable_demote_to_helper = false;
 
     /// Set to `true` to generate a [[point_size]] attribute which is set to 1.0
     /// for all vertex shaders in the module.
@@ -163,19 +175,26 @@ struct Options {
     /// from which to load buffer sizes.
     ArrayLengthFromUniformOptions array_length_from_uniform = {};
 
-    /// The bindings
+    /// The optional vertex pulling configuration.
+    std::optional<VertexPullingConfig> vertex_pulling_config = {};
+
+    /// The bindings.
     Bindings bindings;
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(Options,
+                 remapped_entry_point_name,
+                 strip_all_names,
                  disable_robustness,
                  disable_workgroup_init,
+                 disable_demote_to_helper,
                  emit_vertex_point_size,
                  disable_polyfill_integer_div_mod,
                  buffer_size_ubo_index,
                  fixed_sample_mask,
                  pixel_local_attachments,
                  array_length_from_uniform,
+                 vertex_pulling_config,
                  bindings);
 };
 

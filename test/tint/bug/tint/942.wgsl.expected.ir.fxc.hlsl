@@ -38,7 +38,7 @@ void main_inner(uint3 WorkGroupID, uint3 LocalInvocationID, uint tint_local_inde
   GroupMemoryBarrierWithGroupSync();
   uint filterOffset = tint_div_u32((params[0u].x - 1u), 2u);
   uint3 v_2 = (0u).xxx;
-  inputTex.GetDimensions(uint(int(0)), v_2[0u], v_2[1u], v_2[2u]);
+  inputTex.GetDimensions(uint(int(0)), v_2.x, v_2.y, v_2.z);
   uint2 dims = v_2.xy;
   uint2 v_3 = ((WorkGroupID.xy * uint2(params[0u].y, 4u)) + (LocalInvocationID.xy * uint2(4u, 1u)));
   uint2 baseIndex = (v_3 - uint2(filterOffset, 0u));
@@ -60,11 +60,10 @@ void main_inner(uint3 WorkGroupID, uint3 LocalInvocationID, uint tint_local_inde
           if ((flip[0u].x != 0u)) {
             loadIndex = loadIndex.yx;
           }
-          uint v_4 = r;
-          uint v_5 = ((4u * LocalInvocationID[0u]) + c);
+          uint v_4 = min(r, 3u);
+          uint v_5 = min(((4u * LocalInvocationID.x) + c), 255u);
           float2 v_6 = (float2(loadIndex) + (0.25f).xx);
-          float2 v_7 = (v_6 / float2(dims));
-          tile[v_4][v_5] = inputTex.SampleLevel(samp, v_7, float(0.0f)).xyz;
+          tile[v_4][v_5] = inputTex.SampleLevel(samp, (v_6 / float2(dims)), 0.0f).xyz;
           {
             c = (c + 1u);
           }
@@ -96,42 +95,50 @@ void main_inner(uint3 WorkGroupID, uint3 LocalInvocationID, uint tint_local_inde
           if ((flip[0u].x != 0u)) {
             writeIndex = writeIndex.yx;
           }
-          uint center = ((4u * LocalInvocationID[0u]) + c);
-          bool v_8 = false;
+          uint center = ((4u * LocalInvocationID.x) + c);
+          bool v_7 = false;
           if ((center >= filterOffset)) {
-            v_8 = (center < (256u - filterOffset));
+            v_7 = (center < (256u - filterOffset));
+          } else {
+            v_7 = false;
+          }
+          bool v_8 = false;
+          if (v_7) {
+            v_8 = all((writeIndex < dims));
           } else {
             v_8 = false;
           }
-          bool v_9 = false;
           if (v_8) {
-            v_9 = all((writeIndex < dims));
-          } else {
-            v_9 = false;
-          }
-          if (v_9) {
             float3 acc = (0.0f).xxx;
             {
+              uint2 tint_loop_idx = (0u).xx;
               uint f = 0u;
               while(true) {
+                if (all((tint_loop_idx == (4294967295u).xx))) {
+                  break;
+                }
                 if ((f < params[0u].x)) {
                 } else {
                   break;
                 }
                 uint i = ((center + f) - filterOffset);
-                float3 v_10 = acc;
-                float v_11 = (1.0f / float(params[0u].x));
-                uint v_12 = r;
-                uint v_13 = i;
-                acc = (v_10 + (v_11 * tile[v_12][v_13]));
+                float3 v_9 = acc;
+                float v_10 = (1.0f / float(params[0u].x));
+                uint v_11 = min(r, 3u);
+                uint v_12 = min(i, 255u);
+                acc = (v_9 + (v_10 * tile[v_11][v_12]));
                 {
+                  uint tint_low_inc = (tint_loop_idx.x + 1u);
+                  tint_loop_idx.x = tint_low_inc;
+                  uint tint_carry = uint((tint_low_inc == 0u));
+                  tint_loop_idx.y = (tint_loop_idx.y + tint_carry);
                   f = (f + 1u);
                 }
                 continue;
               }
             }
-            uint2 v_14 = writeIndex;
-            outputTex[v_14] = float4(acc, 1.0f);
+            uint2 v_13 = writeIndex;
+            outputTex[v_13] = float4(acc, 1.0f);
           }
           {
             c = (c + 1u);

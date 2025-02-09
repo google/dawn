@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 RWByteAddressBuffer prevent_dce : register(u0);
 
 float2 refract_cd905f() {
@@ -12,11 +15,33 @@ void fragment_main() {
   prevent_dce.Store2(0u, asuint(refract_cd905f()));
   return;
 }
+//
+// compute_main
+//
+RWByteAddressBuffer prevent_dce : register(u0);
+
+float2 refract_cd905f() {
+  float2 arg_0 = (1.0f).xx;
+  float2 arg_1 = (1.0f).xx;
+  float arg_2 = 1.0f;
+  float2 res = refract(arg_0, arg_1, arg_2);
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store2(0u, asuint(refract_cd905f()));
   return;
+}
+//
+// vertex_main
+//
+float2 refract_cd905f() {
+  float2 arg_0 = (1.0f).xx;
+  float2 arg_1 = (1.0f).xx;
+  float arg_2 = 1.0f;
+  float2 res = refract(arg_0, arg_1, arg_2);
+  return res;
 }
 
 struct VertexOutput {

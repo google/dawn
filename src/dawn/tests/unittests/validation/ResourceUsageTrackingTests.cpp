@@ -1385,8 +1385,8 @@ TEST_F(ResourceUsageTrackingTest, TextureCopyAndTextureUsageInPass) {
     wgpu::TextureView view0 = texture0.CreateView();
     wgpu::TextureView view1 = texture1.CreateView();
 
-    wgpu::ImageCopyTexture srcView = utils::CreateImageCopyTexture(texture0, 0, {0, 0, 0});
-    wgpu::ImageCopyTexture dstView = utils::CreateImageCopyTexture(texture1, 0, {0, 0, 0});
+    wgpu::TexelCopyTextureInfo srcView = utils::CreateTexelCopyTextureInfo(texture0, 0, {0, 0, 0});
+    wgpu::TexelCopyTextureInfo dstView = utils::CreateTexelCopyTextureInfo(texture1, 0, {0, 0, 0});
     wgpu::Extent3D copySize = {1, 1, 1};
 
     // Use the texture as both copy dst and render attachment in render pass

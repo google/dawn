@@ -964,7 +964,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOStructWithAttributes_NotUsedForInterface
                                  },
                              });
 
-    auto* var = b.Var(ty.ptr(storage, str_ty, read));
+    auto* var = b.Var(ty.ptr(storage, str_ty, core::Access::kWrite));
     var->SetBindingPoint(0, 0);
 
     auto* buffer = mod.root_block->Append(var);
@@ -983,7 +983,7 @@ Outputs = struct @align(16) {
 }
 
 $B1: {  # root
-  %1:ptr<storage, Outputs, read> = var @binding_point(0, 0)
+  %1:ptr<storage, Outputs, write> = var @binding_point(0, 0)
 }
 
 %frag = @fragment func():void {
@@ -1003,7 +1003,7 @@ Outputs = struct @align(16) {
 }
 
 $B1: {  # root
-  %1:ptr<storage, Outputs, read> = var @binding_point(0, 0)
+  %1:ptr<storage, Outputs, write> = var @binding_point(0, 0)
 }
 
 %frag = @fragment func():void {
@@ -3517,6 +3517,298 @@ foo2_outputs = struct @align(16) {
     config.truncate_interstage_variables = true;
     config.interstage_locations[2] = true;
     config.interstage_locations[3] = true;
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterTransformTest, ShaderIOParameters_FirstIndexOffset_VertexIndex) {
+    auto* vert_idx = b.FunctionParam("vert_idx", ty.u32());
+    vert_idx->SetBuiltin(core::BuiltinValue::kVertexIndex);
+
+    auto* ep = b.Function("foo", ty.vec4<f32>(), core::ir::Function::PipelineStage::kVertex);
+    ep->SetParams({vert_idx});
+    ep->SetReturnBuiltin(core::BuiltinValue::kPosition);
+
+    b.Append(ep->Block(), [&] {
+        b.Add(ty.u32(), vert_idx, vert_idx);
+        b.Return(ep, b.Construct(ty.vec4<f32>(), 0.5_f));
+    });
+
+    auto* src = R"(
+%foo = @vertex func(%vert_idx:u32 [@vertex_index]):vec4<f32> [@position] {
+  $B1: {
+    %3:u32 = add %vert_idx, %vert_idx
+    %4:vec4<f32> = construct 0.5f
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+tint_first_index_offset_struct = struct @align(4) {
+  vertex_index:u32 @offset(0)
+  instance_index:u32 @offset(4)
+}
+
+foo_inputs = struct @align(4) {
+  vert_idx:u32 @offset(0), @builtin(vertex_index)
+}
+
+foo_outputs = struct @align(16) {
+  tint_symbol:vec4<f32> @offset(0), @builtin(position)
+}
+
+$B1: {  # root
+  %tint_first_index_offset:ptr<uniform, tint_first_index_offset_struct, read> = var @binding_point(12, 34)
+}
+
+%foo_inner = func(%vert_idx:u32):vec4<f32> {
+  $B2: {
+    %4:u32 = add %vert_idx, %vert_idx
+    %5:vec4<f32> = construct 0.5f
+    ret %5
+  }
+}
+%foo = @vertex func(%inputs:foo_inputs):foo_outputs {
+  $B3: {
+    %8:u32 = access %inputs, 0u
+    %9:ptr<uniform, u32, read> = access %tint_first_index_offset, 0u
+    %10:u32 = load %9
+    %11:u32 = add %8, %10
+    %12:vec4<f32> = call %foo_inner, %11
+    %13:foo_outputs = construct %12
+    ret %13
+  }
+}
+)";
+
+    ShaderIOConfig config;
+    config.first_index_offset_binding = {12, 34};
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterTransformTest, ShaderIOParameters_FirstIndexOffset_InstanceIndex) {
+    auto* inst_idx = b.FunctionParam("inst_idx", ty.u32());
+    inst_idx->SetBuiltin(core::BuiltinValue::kInstanceIndex);
+
+    auto* ep = b.Function("foo", ty.vec4<f32>(), core::ir::Function::PipelineStage::kVertex);
+    ep->SetParams({inst_idx});
+    ep->SetReturnBuiltin(core::BuiltinValue::kPosition);
+
+    b.Append(ep->Block(), [&] {
+        b.Add(ty.u32(), inst_idx, inst_idx);
+        b.Return(ep, b.Construct(ty.vec4<f32>(), 0.5_f));
+    });
+
+    auto* src = R"(
+%foo = @vertex func(%inst_idx:u32 [@instance_index]):vec4<f32> [@position] {
+  $B1: {
+    %3:u32 = add %inst_idx, %inst_idx
+    %4:vec4<f32> = construct 0.5f
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+tint_first_index_offset_struct = struct @align(4) {
+  vertex_index:u32 @offset(0)
+  instance_index:u32 @offset(4)
+}
+
+foo_inputs = struct @align(4) {
+  inst_idx:u32 @offset(0), @builtin(instance_index)
+}
+
+foo_outputs = struct @align(16) {
+  tint_symbol:vec4<f32> @offset(0), @builtin(position)
+}
+
+$B1: {  # root
+  %tint_first_index_offset:ptr<uniform, tint_first_index_offset_struct, read> = var @binding_point(12, 34)
+}
+
+%foo_inner = func(%inst_idx:u32):vec4<f32> {
+  $B2: {
+    %4:u32 = add %inst_idx, %inst_idx
+    %5:vec4<f32> = construct 0.5f
+    ret %5
+  }
+}
+%foo = @vertex func(%inputs:foo_inputs):foo_outputs {
+  $B3: {
+    %8:u32 = access %inputs, 0u
+    %9:ptr<uniform, u32, read> = access %tint_first_index_offset, 1u
+    %10:u32 = load %9
+    %11:u32 = add %8, %10
+    %12:vec4<f32> = call %foo_inner, %11
+    %13:foo_outputs = construct %12
+    ret %13
+  }
+}
+)";
+
+    ShaderIOConfig config;
+    config.first_index_offset_binding = {12, 34};
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterTransformTest, ShaderIOParameters_FirstIndexOffset_Both) {
+    auto* vert_idx = b.FunctionParam("vert_idx", ty.u32());
+    vert_idx->SetBuiltin(core::BuiltinValue::kVertexIndex);
+
+    auto* inst_idx = b.FunctionParam("inst_idx", ty.u32());
+    inst_idx->SetBuiltin(core::BuiltinValue::kInstanceIndex);
+
+    auto* ep = b.Function("foo", ty.vec4<f32>(), core::ir::Function::PipelineStage::kVertex);
+    ep->SetParams({vert_idx, inst_idx});
+    ep->SetReturnBuiltin(core::BuiltinValue::kPosition);
+
+    b.Append(ep->Block(), [&] {
+        b.Add(ty.u32(), vert_idx, inst_idx);
+        b.Return(ep, b.Construct(ty.vec4<f32>(), 0.5_f));
+    });
+
+    auto* src = R"(
+%foo = @vertex func(%vert_idx:u32 [@vertex_index], %inst_idx:u32 [@instance_index]):vec4<f32> [@position] {
+  $B1: {
+    %4:u32 = add %vert_idx, %inst_idx
+    %5:vec4<f32> = construct 0.5f
+    ret %5
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+tint_first_index_offset_struct = struct @align(4) {
+  vertex_index:u32 @offset(0)
+  instance_index:u32 @offset(4)
+}
+
+foo_inputs = struct @align(4) {
+  vert_idx:u32 @offset(0), @builtin(vertex_index)
+  inst_idx:u32 @offset(4), @builtin(instance_index)
+}
+
+foo_outputs = struct @align(16) {
+  tint_symbol:vec4<f32> @offset(0), @builtin(position)
+}
+
+$B1: {  # root
+  %tint_first_index_offset:ptr<uniform, tint_first_index_offset_struct, read> = var @binding_point(12, 34)
+}
+
+%foo_inner = func(%vert_idx:u32, %inst_idx:u32):vec4<f32> {
+  $B2: {
+    %5:u32 = add %vert_idx, %inst_idx
+    %6:vec4<f32> = construct 0.5f
+    ret %6
+  }
+}
+%foo = @vertex func(%inputs:foo_inputs):foo_outputs {
+  $B3: {
+    %9:u32 = access %inputs, 0u
+    %10:ptr<uniform, u32, read> = access %tint_first_index_offset, 0u
+    %11:u32 = load %10
+    %12:u32 = add %9, %11
+    %13:u32 = access %inputs, 1u
+    %14:ptr<uniform, u32, read> = access %tint_first_index_offset, 1u
+    %15:u32 = load %14
+    %16:u32 = add %13, %15
+    %17:vec4<f32> = call %foo_inner, %12, %16
+    %18:foo_outputs = construct %17
+    ret %18
+  }
+}
+)";
+
+    ShaderIOConfig config;
+    config.first_index_offset_binding = {12, 34};
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterTransformTest, ShaderIOParameters_FirstIndexOffset_BothReorder) {
+    auto* inst_idx = b.FunctionParam("inst_idx", ty.u32());
+    inst_idx->SetBuiltin(core::BuiltinValue::kInstanceIndex);
+
+    auto* vert_idx = b.FunctionParam("vert_idx", ty.u32());
+    vert_idx->SetBuiltin(core::BuiltinValue::kVertexIndex);
+
+    auto* ep = b.Function("foo", ty.vec4<f32>(), core::ir::Function::PipelineStage::kVertex);
+    ep->SetParams({inst_idx, vert_idx});
+    ep->SetReturnBuiltin(core::BuiltinValue::kPosition);
+
+    b.Append(ep->Block(), [&] {
+        b.Add(ty.u32(), vert_idx, inst_idx);
+        b.Return(ep, b.Construct(ty.vec4<f32>(), 0.5_f));
+    });
+
+    auto* src = R"(
+%foo = @vertex func(%inst_idx:u32 [@instance_index], %vert_idx:u32 [@vertex_index]):vec4<f32> [@position] {
+  $B1: {
+    %4:u32 = add %vert_idx, %inst_idx
+    %5:vec4<f32> = construct 0.5f
+    ret %5
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+tint_first_index_offset_struct = struct @align(4) {
+  vertex_index:u32 @offset(0)
+  instance_index:u32 @offset(4)
+}
+
+foo_inputs = struct @align(4) {
+  vert_idx:u32 @offset(0), @builtin(vertex_index)
+  inst_idx:u32 @offset(4), @builtin(instance_index)
+}
+
+foo_outputs = struct @align(16) {
+  tint_symbol:vec4<f32> @offset(0), @builtin(position)
+}
+
+$B1: {  # root
+  %tint_first_index_offset:ptr<uniform, tint_first_index_offset_struct, read> = var @binding_point(12, 34)
+}
+
+%foo_inner = func(%inst_idx:u32, %vert_idx:u32):vec4<f32> {
+  $B2: {
+    %5:u32 = add %vert_idx, %inst_idx
+    %6:vec4<f32> = construct 0.5f
+    ret %6
+  }
+}
+%foo = @vertex func(%inputs:foo_inputs):foo_outputs {
+  $B3: {
+    %9:u32 = access %inputs, 1u
+    %10:ptr<uniform, u32, read> = access %tint_first_index_offset, 1u
+    %11:u32 = load %10
+    %12:u32 = add %9, %11
+    %13:u32 = access %inputs, 0u
+    %14:ptr<uniform, u32, read> = access %tint_first_index_offset, 0u
+    %15:u32 = load %14
+    %16:u32 = add %13, %15
+    %17:vec4<f32> = call %foo_inner, %12, %16
+    %18:foo_outputs = construct %17
+    ret %18
+  }
+}
+)";
+
+    ShaderIOConfig config;
+    config.first_index_offset_binding = {12, 34};
     Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());

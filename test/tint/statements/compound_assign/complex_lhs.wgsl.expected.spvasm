@@ -1,9 +1,10 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 43
+; Bound: 51
 ; Schema: 0
                OpCapability Shader
+         %33 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
                OpExecutionMode %unused_entry_point LocalSize 1 1 1
@@ -34,6 +35,7 @@
           %S = OpTypeStruct %_arr_v4int_uint_4
 %_ptr_Function_S = OpTypePointer Function %S
          %29 = OpConstantNull %S
+     %uint_3 = OpConstant %uint 3
 %_ptr_Function_v4int = OpTypePointer Function %v4int
      %uint_0 = OpConstant %uint 0
 %_ptr_Function_int = OpTypePointer Function %int
@@ -59,16 +61,22 @@
           %x = OpVariable %_ptr_Function_S Function
                OpStore %x %29
          %30 = OpFunctionCall %int %foo
-         %31 = OpAccessChain %_ptr_Function_v4int %x %uint_0 %30
-         %34 = OpFunctionCall %int %bar
-         %35 = OpAccessChain %_ptr_Function_int %31 %34
-         %37 = OpLoad %int %35 None
-         %38 = OpIAdd %int %37 %int_5
-         %40 = OpAccessChain %_ptr_Function_int %31 %34
-               OpStore %40 %38 None
+         %31 = OpBitcast %uint %30
+         %32 = OpExtInst %uint %33 UMin %31 %uint_3
+         %35 = OpAccessChain %_ptr_Function_v4int %x %uint_0 %32
+         %38 = OpFunctionCall %int %bar
+         %39 = OpBitcast %uint %38
+         %40 = OpExtInst %uint %33 UMin %39 %uint_3
+         %41 = OpAccessChain %_ptr_Function_int %35 %40
+         %43 = OpLoad %int %41 None
+         %44 = OpIAdd %int %43 %int_5
+         %46 = OpBitcast %uint %38
+         %47 = OpExtInst %uint %33 UMin %46 %uint_3
+         %48 = OpAccessChain %_ptr_Function_int %35 %47
+               OpStore %48 %44 None
                OpReturn
                OpFunctionEnd
 %unused_entry_point = OpFunction %void None %20
-         %42 = OpLabel
+         %50 = OpLabel
                OpReturn
                OpFunctionEnd

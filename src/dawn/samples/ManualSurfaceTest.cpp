@@ -409,7 +409,7 @@ int main(int argc, const char* argv[]) {
 
     wgpu::InstanceDescriptor instanceDescriptor{};
     instanceDescriptor.nextInChain = &toggles;
-    instanceDescriptor.features.timedWaitAnyEnable = true;
+    instanceDescriptor.capabilities.timedWaitAnyEnable = true;
     instance = wgpu::CreateInstance(&instanceDescriptor);
 
     // Choose an adapter we like.
@@ -417,7 +417,9 @@ int main(int argc, const char* argv[]) {
     wgpu::RequestAdapterOptions options = {};
     options.backendType = backendOpt.GetValue();
     if (options.backendType != wgpu::BackendType::Undefined) {
-        options.compatibilityMode = dawn::utils::BackendRequiresCompat(options.backendType);
+        options.featureLevel = dawn::utils::BackendRequiresCompat(options.backendType)
+                                   ? wgpu::FeatureLevel::Compatibility
+                                   : wgpu::FeatureLevel::Core;
     }
 
     wgpu::Future adapterFuture = instance.RequestAdapter(

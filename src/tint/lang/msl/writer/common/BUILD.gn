@@ -49,6 +49,8 @@ if (tint_build_msl_writer) {
       "option_helpers.h",
       "options.cc",
       "options.h",
+      "output.cc",
+      "output.h",
       "printer_support.cc",
       "printer_support.h",
     ]
@@ -58,20 +60,18 @@ if (tint_build_msl_writer) {
       "${tint_src_dir}/lang/core",
       "${tint_src_dir}/lang/core/common",
       "${tint_src_dir}/lang/core/type",
+      "${tint_src_dir}/utils",
       "${tint_src_dir}/utils/containers",
       "${tint_src_dir}/utils/diagnostic",
       "${tint_src_dir}/utils/ice",
-      "${tint_src_dir}/utils/id",
       "${tint_src_dir}/utils/macros",
       "${tint_src_dir}/utils/math",
       "${tint_src_dir}/utils/memory",
-      "${tint_src_dir}/utils/reflection",
       "${tint_src_dir}/utils/result",
       "${tint_src_dir}/utils/rtti",
       "${tint_src_dir}/utils/strconv",
       "${tint_src_dir}/utils/symbol",
       "${tint_src_dir}/utils/text",
-      "${tint_src_dir}/utils/traits",
     ]
   }
 }
@@ -88,17 +88,16 @@ if (tint_build_unittests) {
         "${tint_src_dir}/api/common",
         "${tint_src_dir}/lang/core",
         "${tint_src_dir}/lang/core/type",
+        "${tint_src_dir}/utils",
         "${tint_src_dir}/utils/containers",
         "${tint_src_dir}/utils/diagnostic",
         "${tint_src_dir}/utils/ice",
         "${tint_src_dir}/utils/macros",
         "${tint_src_dir}/utils/math",
         "${tint_src_dir}/utils/memory",
-        "${tint_src_dir}/utils/reflection",
         "${tint_src_dir}/utils/result",
         "${tint_src_dir}/utils/rtti",
         "${tint_src_dir}/utils/text",
-        "${tint_src_dir}/utils/traits",
       ]
 
       if (tint_build_msl_writer) {

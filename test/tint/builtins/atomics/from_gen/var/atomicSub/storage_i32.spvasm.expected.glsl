@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
@@ -8,7 +11,7 @@ struct SB_RW_atomic {
 };
 
 layout(binding = 0, std430)
-buffer sb_rw_block_1_ssbo {
+buffer f_sb_rw_block_ssbo {
   SB_RW_atomic inner;
 } v;
 void atomicSub_051100() {
@@ -25,6 +28,9 @@ void fragment_main_1() {
 void main() {
   fragment_main_1();
 }
+//
+// compute_main
+//
 #version 310 es
 
 

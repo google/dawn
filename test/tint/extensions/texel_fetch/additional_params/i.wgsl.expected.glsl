@@ -11,16 +11,16 @@ struct In {
   ivec4 fbf;
 };
 
-layout(location = 0) in vec4 f_loc0_Input;
-layout(location = 1) flat in vec4 f_loc1_Input;
+layout(location = 0) in vec4 tint_interstage_location0;
+layout(location = 1) flat in vec4 tint_interstage_location1;
 in ivec4 f_Input;
 void g(float a, float b, int c) {
 }
-void f_inner(In tint_symbol) {
-  g(tint_symbol.a[0u], tint_symbol.b[1u], tint_symbol.fbf[0u]);
+void f_inner(In v) {
+  g(v.a.x, v.b.y, v.fbf.x);
 }
 void main() {
-  f_inner(In(f_loc0_Input, f_loc1_Input, f_Input));
+  f_inner(In(tint_interstage_location0, tint_interstage_location1, f_Input));
 }
 error: Error parsing GLSL shader:
 ERROR: 0:14: 'int' : must be qualified as flat in

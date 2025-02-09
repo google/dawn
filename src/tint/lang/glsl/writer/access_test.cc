@@ -138,7 +138,7 @@ TEST_F(GlslWriterTest, AccessStoreVectorElementConstantIndex) {
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 void foo() {
   ivec4 vec = ivec4(0);
-  vec[1u] = 42;
+  vec.y = 42;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
@@ -222,7 +222,7 @@ TEST_F(GlslWriterTest, AccessSwizzle) {
 
     b.Append(f->Block(), [&] {
         auto* v = b.Var("v", b.Zero<vec3<f32>>());
-        b.Let("b", b.Swizzle(ty.f32(), v, {1u}));
+        b.Let("b", b.Swizzle(ty.f32(), b.Load(v), {1u}));
         b.Return(f);
     });
 
@@ -241,7 +241,7 @@ TEST_F(GlslWriterTest, AccessSwizzleMulti) {
 
     b.Append(f->Block(), [&] {
         auto* v = b.Var("v", b.Zero<vec4<f32>>());
-        b.Let("b", b.Swizzle(ty.vec4<f32>(), v, {3u, 2u, 1u, 0u}));
+        b.Let("b", b.Swizzle(ty.vec4<f32>(), b.Load(v), {3u, 2u, 1u, 0u}));
         b.Return(f);
     });
 
@@ -275,7 +275,7 @@ TEST_F(GlslWriterTest, AccessStorageVector) {
 precision highp int;
 
 layout(binding = 0, std430)
-buffer v_block_1_ssbo {
+buffer f_v_block_ssbo {
   vec4 inner;
 } v_1;
 void main() {
@@ -309,7 +309,7 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer v_block_1_ssbo {
+buffer f_v_block_ssbo {
   f16vec4 inner;
 } v_1;
 void main() {
@@ -341,7 +341,7 @@ TEST_F(GlslWriterTest, AccessStorageMatrix) {
 precision highp int;
 
 layout(binding = 0, std430)
-buffer v_block_1_ssbo {
+buffer f_v_block_ssbo {
   mat4 inner;
 } v_1;
 void main() {
@@ -369,7 +369,7 @@ TEST_F(GlslWriterTest, AccessStorageArray) {
 precision highp int;
 
 layout(binding = 0, std430)
-buffer v_block_1_ssbo {
+buffer f_v_block_ssbo {
   vec3 inner[5];
 } v_1;
 void main() {
@@ -407,7 +407,7 @@ struct SB {
 };
 
 layout(binding = 0, std430)
-buffer v_block_1_ssbo {
+buffer f_v_block_ssbo {
   SB inner;
 } v_1;
 void main() {
@@ -473,7 +473,7 @@ struct SB {
 };
 
 layout(binding = 0, std430)
-buffer v_block_1_ssbo {
+buffer f_v_block_ssbo {
   SB inner;
 } v_1;
 void main() {
@@ -502,14 +502,14 @@ TEST_F(GlslWriterTest, AccessStorageStoreVector) {
 precision highp int;
 
 layout(binding = 0, std430)
-buffer v_block_1_ssbo {
+buffer f_v_block_ssbo {
   vec4 inner;
 } v_1;
 void main() {
-  v_1.inner[0u] = 2.0f;
-  v_1.inner[1u] = 4.0f;
-  v_1.inner[2u] = 8.0f;
-  v_1.inner[3u] = 16.0f;
+  v_1.inner.x = 2.0f;
+  v_1.inner.y = 4.0f;
+  v_1.inner.z = 8.0f;
+  v_1.inner.w = 16.0f;
 }
 )");
 }
@@ -543,11 +543,11 @@ TEST_F(GlslWriterTest, AccessDirectVariable) {
 precision highp int;
 
 layout(binding = 0, std430)
-buffer v1_block_1_ssbo {
+buffer f_v1_block_ssbo {
   vec4 inner;
 } v;
 layout(binding = 1, std430)
-buffer v2_block_1_ssbo {
+buffer f_v2_block_ssbo {
   vec4 inner;
 } v_1;
 void bar() {
@@ -602,7 +602,7 @@ struct SB {
 };
 
 layout(binding = 0, std430)
-buffer v_block_1_ssbo {
+buffer f_v_block_ssbo {
   SB inner[4];
 } v_1;
 void main() {
@@ -650,7 +650,7 @@ struct SB {
 };
 
 layout(binding = 0, std430)
-buffer v_block_1_ssbo {
+buffer f_v_block_ssbo {
   SB inner;
 } v_1;
 void main() {
@@ -719,7 +719,7 @@ struct S2 {
 };
 
 layout(binding = 0, std430)
-buffer SB_1_ssbo {
+buffer f_SB_ssbo {
   int a_2;
   uint tint_pad_0;
   uint tint_pad_1;
@@ -735,8 +735,7 @@ void main() {
   int v_2 = k;
   uint v_3 = (uint(sb.b_2.length()) - 1u);
   uint v_4 = min(uint(v), v_3);
-  uint v_5 = min(v_1, 2u);
-  float x = sb.b_2[v_4].b_1[v_5].b[min(uint(v_2), 2u)];
+  float x = sb.b_2[v_4].b_1[min(v_1, 2u)].b[min(uint(v_2), 2u)];
 }
 )");
 }
@@ -798,7 +797,7 @@ struct S2 {
 };
 
 layout(binding = 0, std430)
-buffer SB_1_ssbo {
+buffer f_SB_ssbo {
   int a_2;
   uint tint_pad_0;
   uint tint_pad_1;
@@ -809,8 +808,7 @@ void main() {
   uint j = 1u;
   uint v = j;
   uint v_1 = min(4u, (uint(sb.b_2.length()) - 1u));
-  uint v_2 = min(v, 2u);
-  float x = sb.b_2[v_1].b_1[v_2].b.z;
+  float x = sb.b_2[v_1].b_1[min(v, 2u)].b.z;
 }
 )");
 }
@@ -860,7 +858,7 @@ struct SB {
 };
 
 layout(binding = 0, std140)
-uniform v_block_1_ubo {
+uniform f_v_block_ubo {
   SB inner[4];
 } v_1;
 void main() {
@@ -913,7 +911,7 @@ struct SB {
 };
 
 layout(binding = 0, std140)
-uniform v_block_1_ubo {
+uniform f_v_block_ubo {
   SB inner;
 } v_1;
 void main() {
@@ -938,7 +936,7 @@ TEST_F(GlslWriterTest, AccessUniformScalar) {
 precision highp int;
 
 layout(binding = 0, std140)
-uniform v_block_1_ubo {
+uniform f_v_block_ubo {
   float inner;
 } v_1;
 void main() {
@@ -964,7 +962,7 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std140)
-uniform v_block_1_ubo {
+uniform f_v_block_ubo {
   float16_t inner;
 } v_1;
 void main() {
@@ -993,7 +991,7 @@ TEST_F(GlslWriterTest, AccessUniformVector) {
 precision highp int;
 
 layout(binding = 0, std140)
-uniform v_block_1_ubo {
+uniform f_v_block_ubo {
   vec4 inner;
 } v_1;
 void main() {
@@ -1028,7 +1026,7 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std140)
-uniform v_block_1_ubo {
+uniform f_v_block_ubo {
   f16vec4 inner;
 } v_1;
 void main() {
@@ -1061,7 +1059,7 @@ TEST_F(GlslWriterTest, AccessUniformMatrix) {
 precision highp int;
 
 layout(binding = 0, std140)
-uniform v_block_1_ubo {
+uniform f_v_block_ubo {
   mat4 inner;
 } v_1;
 void main() {
@@ -1091,7 +1089,7 @@ TEST_F(GlslWriterTest, AccessUniformMatrix2x3) {
 precision highp int;
 
 layout(binding = 0, std140)
-uniform v_block_std140_1_ubo {
+uniform f_v_block_std140_ubo {
   vec3 inner_col0;
   uint tint_pad_0;
   vec3 inner_col1;
@@ -1099,7 +1097,7 @@ uniform v_block_std140_1_ubo {
 void main() {
   mat2x3 a = mat2x3(v_1.inner_col0, v_1.inner_col1);
   vec3 b = mat2x3(v_1.inner_col0, v_1.inner_col1)[1u];
-  float c = mat2x3(v_1.inner_col0, v_1.inner_col1)[1u][2u];
+  float c = mat2x3(v_1.inner_col0, v_1.inner_col1)[1u].z;
 }
 )");
 }
@@ -1123,14 +1121,14 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std140)
-uniform v_block_std140_1_ubo {
+uniform f_v_block_std140_ubo {
   f16vec3 inner_col0;
   f16vec3 inner_col1;
 } v_1;
 void main() {
   f16mat2x3 a = f16mat2x3(v_1.inner_col0, v_1.inner_col1);
   f16vec3 b = f16mat2x3(v_1.inner_col0, v_1.inner_col1)[1u];
-  float16_t c = f16mat2x3(v_1.inner_col0, v_1.inner_col1)[1u][2u];
+  float16_t c = f16mat2x3(v_1.inner_col0, v_1.inner_col1)[1u].z;
 }
 )");
 }
@@ -1154,7 +1152,7 @@ TEST_F(GlslWriterTest, AccessUniformMatrix3x2) {
 precision highp int;
 
 layout(binding = 0, std140)
-uniform v_block_std140_1_ubo {
+uniform f_v_block_std140_ubo {
   vec2 inner_col0;
   vec2 inner_col1;
   vec2 inner_col2;
@@ -1162,7 +1160,7 @@ uniform v_block_std140_1_ubo {
 void main() {
   mat3x2 a = mat3x2(v_1.inner_col0, v_1.inner_col1, v_1.inner_col2);
   vec2 b = mat3x2(v_1.inner_col0, v_1.inner_col1, v_1.inner_col2)[1u];
-  float c = mat3x2(v_1.inner_col0, v_1.inner_col1, v_1.inner_col2)[1u][1u];
+  float c = mat3x2(v_1.inner_col0, v_1.inner_col1, v_1.inner_col2)[1u].y;
 }
 )");
 }
@@ -1186,14 +1184,14 @@ TEST_F(GlslWriterTest, AccessUniformMatrix2x2) {
 precision highp int;
 
 layout(binding = 0, std140)
-uniform v_block_std140_1_ubo {
+uniform f_v_block_std140_ubo {
   vec2 inner_col0;
   vec2 inner_col1;
 } v_1;
 void main() {
   mat2 a = mat2(v_1.inner_col0, v_1.inner_col1);
   vec2 b = mat2(v_1.inner_col0, v_1.inner_col1)[1u];
-  float c = mat2(v_1.inner_col0, v_1.inner_col1)[1u][1u];
+  float c = mat2(v_1.inner_col0, v_1.inner_col1)[1u].y;
 }
 )");
 }
@@ -1218,14 +1216,14 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std140)
-uniform v_block_std140_1_ubo {
+uniform f_v_block_std140_ubo {
   f16vec2 inner_col0;
   f16vec2 inner_col1;
 } v_1;
 void main() {
   f16mat2 a = f16mat2(v_1.inner_col0, v_1.inner_col1);
   f16vec2 b = f16mat2(v_1.inner_col0, v_1.inner_col1)[1u];
-  float16_t c = f16mat2(v_1.inner_col0, v_1.inner_col1)[1u][1u];
+  float16_t c = f16mat2(v_1.inner_col0, v_1.inner_col1)[1u].y;
 }
 )");
 }
@@ -1247,7 +1245,7 @@ TEST_F(GlslWriterTest, AccessUniformArray) {
 precision highp int;
 
 layout(binding = 0, std140)
-uniform v_block_1_ubo {
+uniform f_v_block_ubo {
   vec3 inner[5];
 } v_1;
 void main() {
@@ -1275,7 +1273,7 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std140)
-uniform v_block_1_ubo {
+uniform f_v_block_ubo {
   f16vec3 inner[5];
 } v_1;
 void main() {
@@ -1302,7 +1300,7 @@ TEST_F(GlslWriterTest, AccessUniformArrayWhichCanHaveSizesOtherThenFive) {
 precision highp int;
 
 layout(binding = 0, std140)
-uniform v_block_1_ubo {
+uniform f_v_block_ubo {
   vec3 inner[42];
 } v_1;
 void main() {
@@ -1340,7 +1338,7 @@ struct SB {
 };
 
 layout(binding = 0, std140)
-uniform v_block_1_ubo {
+uniform f_v_block_ubo {
   SB inner;
 } v_1;
 void main() {
@@ -1379,7 +1377,7 @@ struct SB {
 };
 
 layout(binding = 0, std140)
-uniform v_block_1_ubo {
+uniform f_v_block_ubo {
   SB inner;
 } v_1;
 void main() {
@@ -1465,7 +1463,7 @@ struct SB {
 };
 
 layout(binding = 0, std140)
-uniform v_block_std140_1_ubo {
+uniform f_v_block_std140_ubo {
   SB_std140 inner;
 } v_1;
 Inner tint_convert_Inner(Inner_std140 tint_input) {
@@ -1500,7 +1498,7 @@ TEST_F(GlslWriterTest, AccessStoreScalar) {
 precision highp int;
 
 layout(binding = 0, std430)
-buffer v_block_1_ssbo {
+buffer f_v_block_ssbo {
   float inner;
 } v_1;
 void main() {
@@ -1526,7 +1524,7 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer v_block_1_ssbo {
+buffer f_v_block_ssbo {
   float16_t inner;
 } v_1;
 void main() {
@@ -1551,11 +1549,11 @@ TEST_F(GlslWriterTest, AccessStoreVectorElement) {
 precision highp int;
 
 layout(binding = 0, std430)
-buffer v_block_1_ssbo {
+buffer f_v_block_ssbo {
   vec3 inner;
 } v_1;
 void main() {
-  v_1.inner[1u] = 2.0f;
+  v_1.inner.y = 2.0f;
 }
 )");
 }
@@ -1577,11 +1575,11 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer v_block_1_ssbo {
+buffer f_v_block_ssbo {
   f16vec3 inner;
 } v_1;
 void main() {
-  v_1.inner[1u] = 2.0hf;
+  v_1.inner.y = 2.0hf;
 }
 )");
 }
@@ -1602,7 +1600,7 @@ TEST_F(GlslWriterTest, AccessStoreVector) {
 precision highp int;
 
 layout(binding = 0, std430)
-buffer v_block_1_ssbo {
+buffer f_v_block_ssbo {
   vec3 inner;
 } v_1;
 void main() {
@@ -1628,7 +1626,7 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer v_block_1_ssbo {
+buffer f_v_block_ssbo {
   f16vec3 inner;
 } v_1;
 void main() {
@@ -1654,11 +1652,11 @@ TEST_F(GlslWriterTest, AccessStoreMatrixElement) {
 precision highp int;
 
 layout(binding = 0, std430)
-buffer v_block_1_ssbo {
+buffer f_v_block_ssbo {
   mat4 inner;
 } v_1;
 void main() {
-  v_1.inner[1u][2u] = 5.0f;
+  v_1.inner[1u].z = 5.0f;
 }
 )");
 }
@@ -1681,11 +1679,11 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer v_block_1_ssbo {
+buffer f_v_block_ssbo {
   f16mat3x2 inner;
 } v_1;
 void main() {
-  v_1.inner[2u][1u] = 5.0hf;
+  v_1.inner[2u].y = 5.0hf;
 }
 )");
 }
@@ -1707,7 +1705,7 @@ TEST_F(GlslWriterTest, AccessStoreMatrixColumn) {
 precision highp int;
 
 layout(binding = 0, std430)
-buffer v_block_1_ssbo {
+buffer f_v_block_ssbo {
   mat4 inner;
 } v_1;
 void main() {
@@ -1734,7 +1732,7 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer v_block_1_ssbo {
+buffer f_v_block_ssbo {
   f16mat2x3 inner;
 } v_1;
 void main() {
@@ -1759,7 +1757,7 @@ TEST_F(GlslWriterTest, AccessStoreMatrix) {
 precision highp int;
 
 layout(binding = 0, std430)
-buffer v_block_1_ssbo {
+buffer f_v_block_ssbo {
   mat4 inner;
 } v_1;
 void main() {
@@ -1785,7 +1783,7 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer v_block_1_ssbo {
+buffer f_v_block_ssbo {
   f16mat4 inner;
 } v_1;
 void main() {
@@ -1810,7 +1808,7 @@ TEST_F(GlslWriterTest, AccessStoreArrayElement) {
 precision highp int;
 
 layout(binding = 0, std430)
-buffer v_block_1_ssbo {
+buffer f_v_block_ssbo {
   float inner[5];
 } v_1;
 void main() {
@@ -1836,7 +1834,7 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer v_block_1_ssbo {
+buffer f_v_block_ssbo {
   float16_t inner[5];
 } v_1;
 void main() {
@@ -1862,7 +1860,7 @@ TEST_F(GlslWriterTest, AccessStoreArray) {
 precision highp int;
 
 layout(binding = 0, std430)
-buffer v_block_1_ssbo {
+buffer f_v_block_ssbo {
   vec3 inner[5];
 } v_1;
 void tint_store_and_preserve_padding(vec3 value_param[5]) {
@@ -1916,7 +1914,7 @@ struct SB {
 };
 
 layout(binding = 0, std430)
-buffer v_block_1_ssbo {
+buffer f_v_block_ssbo {
   SB inner;
 } v_1;
 void main() {
@@ -1953,7 +1951,7 @@ struct SB {
 };
 
 layout(binding = 0, std430)
-buffer v_block_1_ssbo {
+buffer f_v_block_ssbo {
   SB inner;
 } v_1;
 void main() {
@@ -2015,7 +2013,7 @@ struct SB {
 };
 
 layout(binding = 0, std430)
-buffer v_block_1_ssbo {
+buffer f_v_block_ssbo {
   SB inner;
 } v_1;
 void main() {
@@ -2081,7 +2079,7 @@ struct SB {
 };
 
 layout(binding = 0, std430)
-buffer v_block_1_ssbo {
+buffer f_v_block_ssbo {
   SB inner;
 } v_1;
 void tint_store_and_preserve_padding_2(Inner value_param) {
@@ -2157,7 +2155,7 @@ struct SB {
 };
 
 layout(binding = 0, std430)
-buffer v_block_1_ssbo {
+buffer f_v_block_ssbo {
   SB inner;
 } v_1;
 void tint_store_and_preserve_padding_4(vec3 value_param[5]) {
@@ -2234,7 +2232,7 @@ struct SB {
 };
 
 layout(binding = 0, std430)
-buffer v_block_1_ssbo {
+buffer f_v_block_ssbo {
   SB inner;
 } v_1;
 void main() {
@@ -2277,7 +2275,7 @@ struct SB {
 };
 
 layout(binding = 0, std140)
-uniform v_block_1_ubo {
+uniform f_v_block_ubo {
   SB inner;
 } v_1;
 void main() {

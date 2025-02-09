@@ -47,6 +47,12 @@ struct ShaderIOConfig {
     /// group plus 1 is used if at least one resource is bound, otherwise group 0 binding 0 is used.
     std::optional<BindingPoint> num_workgroups_binding;
 
+    /// The binding point to use for the first_index_offset uniform buffer. If set, and if a vertex
+    /// entry point contains a vertex_index or instance_index input parameter (or both), this
+    /// transform will add a uniform buffer with both indices, and will add the offsets to the input
+    /// variables, respectively.
+    std::optional<BindingPoint> first_index_offset_binding;
+
     /// If one doesn't exist, adds a @position member to the input struct as the last member.
     /// This is used for PixelLocal, for which Dawn requires such a member in the final HLSL shader.
     bool add_input_position_member = false;

@@ -33,11 +33,11 @@ void f() {
   int p_a_i_save = i();
   int p_a_i_i_save = i();
   float2x2 l_a[4] = a_load(0u);
-  float2x2 l_a_i = a_load_1((16u * uint(p_a_i_save)));
-  const uint scalar_offset_2 = (((16u * uint(p_a_i_save)) + (8u * uint(p_a_i_i_save)))) / 4;
+  float2x2 l_a_i = a_load_1((16u * min(uint(p_a_i_save), 3u)));
+  const uint scalar_offset_2 = (((16u * min(uint(p_a_i_save), 3u)) + (8u * min(uint(p_a_i_i_save), 1u)))) / 4;
   uint4 ubo_load_2 = a[scalar_offset_2 / 4];
   float2 l_a_i_i = asfloat(((scalar_offset_2 & 2) ? ubo_load_2.zw : ubo_load_2.xy));
-  const uint scalar_offset_3 = (((16u * uint(p_a_i_save)) + (8u * uint(p_a_i_i_save)))) / 4;
+  const uint scalar_offset_3 = (((16u * min(uint(p_a_i_save), 3u)) + (8u * min(uint(p_a_i_i_save), 1u)))) / 4;
   s.Store(0u, asuint((((asfloat(a[scalar_offset_3 / 4][scalar_offset_3 % 4]) + l_a[0][0].x) + l_a_i[0].x) + l_a_i_i.x)));
   return;
 }

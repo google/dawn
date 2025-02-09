@@ -1,5 +1,3 @@
-; flags: --transform substitute_override
-;
 ; Test: SpvModuleScopeVarParserTest_ScalarSpecConstant_DeclareConst_False.spvasm
 ; SPIR-V
 ; Version: 1.0

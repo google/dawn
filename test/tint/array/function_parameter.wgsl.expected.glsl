@@ -5,13 +5,13 @@ buffer s_block_1_ssbo {
   float inner;
 } v;
 float f1(float a[4]) {
-  return a[3];
+  return a[3u];
 }
 float f2(float a[3][4]) {
-  return a[2][3];
+  return a[2u][3u];
 }
 float f3(float a[2][3][4]) {
-  return a[1][2][3];
+  return a[1u][2u][3u];
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

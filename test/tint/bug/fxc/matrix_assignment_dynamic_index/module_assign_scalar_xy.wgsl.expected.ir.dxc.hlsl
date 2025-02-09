@@ -5,7 +5,7 @@ cbuffer cbuffer_uniforms : register(b4, space1) {
 static float2x4 m1 = float2x4((0.0f).xxxx, (0.0f).xxxx);
 [numthreads(1, 1, 1)]
 void main() {
-  uint v = uniforms[0u].x;
-  m1[v][uniforms[0u].y] = 1.0f;
+  uint v = min(uniforms[0u].x, 1u);
+  m1[v][min(uniforms[0u].y, 3u)] = 1.0f;
 }
 

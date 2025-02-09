@@ -1,8 +1,4 @@
-cbuffer cbuffer_constants : register(b0) {
-  uint4 constants[1];
-};
 Texture2DArray<float4> myTexture : register(t1);
-
 RWByteAddressBuffer result : register(u3);
 
 struct tint_symbol_1 {
@@ -15,7 +11,10 @@ void main_inner(uint3 GlobalInvocationID) {
   float4 texel = myTexture.Load(int4(int3(int2(GlobalInvocationID.xy), 0), 0));
   {
     for(uint i = 0u; (i < 1u); i = (i + 1u)) {
-      result.Store((4u * (flatIndex + i)), asuint(texel.r));
+      uint tint_symbol_3 = 0u;
+      result.GetDimensions(tint_symbol_3);
+      uint tint_symbol_4 = ((tint_symbol_3 - 0u) / 4u);
+      result.Store((4u * min((flatIndex + i), (tint_symbol_4 - 1u))), asuint(texel.r));
     }
   }
 }

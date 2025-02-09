@@ -10,6 +10,6 @@ uniform u_block_std140_1_ubo {
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   mat2x4 t = transpose(mat4x2(v.inner_col0, v.inner_col1, v.inner_col2, v.inner_col3));
-  float l = length(mat4x2(v.inner_col0, v.inner_col1, v.inner_col2, v.inner_col3)[1]);
-  float a = abs(mat4x2(v.inner_col0, v.inner_col1, v.inner_col2, v.inner_col3)[0].yx[0u]);
+  float l = length(mat4x2(v.inner_col0, v.inner_col1, v.inner_col2, v.inner_col3)[1u]);
+  float a = abs(mat4x2(v.inner_col0, v.inner_col1, v.inner_col2, v.inner_col3)[0u].yx.x);
 }

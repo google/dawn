@@ -7,8 +7,8 @@ Texture2D<float4> my_texture : register(t1);
 SamplerState my_sampler : register(s2);
 void foo_member_initialize() {
   bool2 vb2 = (false).xx;
-  vb2[0u] = (my_global.z != 0.0f);
-  vb2[0u] = (asfloat(my_uniform[0u].x) == -1.0f);
+  vb2.x = (my_global.z != 0.0f);
+  vb2.x = (asfloat(my_uniform[0u].x) == -1.0f);
   vb2 = bool2((asfloat(my_uniform[0u].x) == -1.0f), false);
   if (vb2.x) {
     float4 r = my_texture.SampleBias(my_sampler, (0.0f).xx, clamp(0.0f, -16.0f, 15.9899997711181640625f));
@@ -17,8 +17,8 @@ void foo_member_initialize() {
 
 void foo_default_initialize() {
   bool2 vb2 = (false).xx;
-  vb2[0u] = (my_global.z != 0.0f);
-  vb2[0u] = (asfloat(my_uniform[0u].x) == -1.0f);
+  vb2.x = (my_global.z != 0.0f);
+  vb2.x = (asfloat(my_uniform[0u].x) == -1.0f);
   vb2 = (false).xx;
   if (vb2.x) {
     float4 r = my_texture.SampleBias(my_sampler, (0.0f).xx, clamp(0.0f, -16.0f, 15.9899997711181640625f));

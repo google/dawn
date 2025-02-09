@@ -34,10 +34,10 @@ class AdapterFormatCapabilitiesVkTest : public DawnTest {};
 
 // Query DRM format capabilities and check response is valid.
 TEST_P(AdapterFormatCapabilitiesVkTest, GetDrmFormatProperties) {
-    bool supported = adapter.HasFeature(wgpu::FeatureName::DrmFormatCapabilities);
+    bool supported = adapter.HasFeature(wgpu::FeatureName::DawnDrmFormatCapabilities);
 
-    wgpu::FormatCapabilities capabilities;
-    wgpu::DrmFormatCapabilities drmCapabilities;
+    wgpu::DawnFormatCapabilities capabilities;
+    wgpu::DawnDrmFormatCapabilities drmCapabilities;
     capabilities.nextInChain = &drmCapabilities;
 
     EXPECT_EQ(supported ? wgpu::Status::Success : wgpu::Status::Error,

@@ -1,13 +1,13 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 40
+; Bound: 38
 ; Schema: 0
                OpCapability Shader
                OpCapability Float16
                OpCapability UniformAndStorageBuffer16BitAccess
                OpCapability StorageBuffer16BitAccess
-         %34 = OpExtInstImport "GLSL.std.450"
+         %32 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %f "f"
                OpExecutionMode %f LocalSize 1 1 1
@@ -46,29 +46,27 @@
          %13 = OpTypeFunction %void
 %_ptr_Uniform_v3half = OpTypePointer Uniform %v3half
      %uint_0 = OpConstant %uint 0
-      %int_2 = OpConstant %int 2
-     %uint_1 = OpConstant %uint 1
      %uint_2 = OpConstant %uint 2
+     %uint_1 = OpConstant %uint 1
  %mat2v3half = OpTypeMatrix %v3half 2
      %v2half = OpTypeVector %half 2
  %mat3v2half = OpTypeMatrix %v2half 3
-      %int_0 = OpConstant %int 0
           %f = OpFunction %void None %13
          %14 = OpLabel
-         %15 = OpAccessChain %_ptr_Uniform_v3half %1 %uint_0 %int_2 %uint_1
+         %15 = OpAccessChain %_ptr_Uniform_v3half %1 %uint_0 %uint_2 %uint_1
          %20 = OpLoad %v3half %15 None
-         %21 = OpAccessChain %_ptr_Uniform_v3half %1 %uint_0 %int_2 %uint_2
-         %23 = OpLoad %v3half %21 None
-         %25 = OpCompositeConstruct %mat2v3half %20 %23
-          %t = OpTranspose %mat3v2half %25
-         %29 = OpAccessChain %_ptr_Uniform_v3half %1 %uint_0 %int_0 %uint_2
-         %31 = OpLoad %v3half %29 None
-         %32 = OpVectorShuffle %v3half %31 %31 2 0 1
-          %l = OpExtInst %half %34 Length %32
-         %35 = OpAccessChain %_ptr_Uniform_v3half %1 %uint_0 %int_0 %uint_2
-         %36 = OpLoad %v3half %35 None
-         %37 = OpVectorShuffle %v3half %36 %36 2 0 1
-         %38 = OpCompositeExtract %half %37 0
-          %a = OpExtInst %half %34 FAbs %38
+         %21 = OpAccessChain %_ptr_Uniform_v3half %1 %uint_0 %uint_2 %uint_2
+         %22 = OpLoad %v3half %21 None
+         %24 = OpCompositeConstruct %mat2v3half %20 %22
+          %t = OpTranspose %mat3v2half %24
+         %28 = OpAccessChain %_ptr_Uniform_v3half %1 %uint_0 %uint_0 %uint_2
+         %29 = OpLoad %v3half %28 None
+         %30 = OpVectorShuffle %v3half %29 %29 2 0 1
+          %l = OpExtInst %half %32 Length %30
+         %33 = OpAccessChain %_ptr_Uniform_v3half %1 %uint_0 %uint_0 %uint_2
+         %34 = OpLoad %v3half %33 None
+         %35 = OpVectorShuffle %v3half %34 %34 2 0 1
+         %36 = OpCompositeExtract %half %35 0
+          %a = OpExtInst %half %32 FAbs %36
                OpReturn
                OpFunctionEnd

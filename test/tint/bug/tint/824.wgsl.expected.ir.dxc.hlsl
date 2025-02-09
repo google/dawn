@@ -16,11 +16,11 @@ struct main_inputs {
 
 Output main_inner(uint VertexIndex, uint InstanceIndex) {
   float2 zv[4] = {(0.20000000298023223877f).xx, (0.30000001192092895508f).xx, (-0.10000000149011611938f).xx, (1.10000002384185791016f).xx};
-  float z = zv[InstanceIndex][0u];
+  float z = zv[min(InstanceIndex, 3u)].x;
   Output output = (Output)0;
   output.Position = float4(0.5f, 0.5f, z, 1.0f);
   float4 colors[4] = {float4(1.0f, 0.0f, 0.0f, 1.0f), float4(0.0f, 1.0f, 0.0f, 1.0f), float4(0.0f, 0.0f, 1.0f, 1.0f), (1.0f).xxxx};
-  output.color = colors[InstanceIndex];
+  output.color = colors[min(InstanceIndex, 3u)];
   Output v = output;
   return v;
 }

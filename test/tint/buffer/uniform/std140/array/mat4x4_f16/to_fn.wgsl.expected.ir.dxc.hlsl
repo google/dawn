@@ -4,15 +4,15 @@ cbuffer cbuffer_u : register(b0) {
 };
 RWByteAddressBuffer s : register(u1);
 float16_t a(matrix<float16_t, 4, 4> a_1[4]) {
-  return a_1[int(0)][int(0)][0u];
+  return a_1[0u][0u].x;
 }
 
 float16_t b(matrix<float16_t, 4, 4> m) {
-  return m[int(0)][0u];
+  return m[0u].x;
 }
 
 float16_t c(vector<float16_t, 4> v) {
-  return v[0u];
+  return v.x;
 }
 
 float16_t d(float16_t f_1) {
@@ -70,6 +70,6 @@ void f() {
   float16_t v_17 = a(v_16);
   float16_t v_18 = (v_17 + b(v_4(32u)));
   float16_t v_19 = (v_18 + c(tint_bitcast_to_f16(u[2u].xy).ywxz));
-  s.Store<float16_t>(0u, (v_19 + d(tint_bitcast_to_f16(u[2u].xy).ywxz[0u])));
+  s.Store<float16_t>(0u, (v_19 + d(tint_bitcast_to_f16(u[2u].xy).ywxz.x)));
 }
 

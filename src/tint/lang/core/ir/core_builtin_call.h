@@ -77,6 +77,9 @@ class CoreBuiltinCall final : public Castable<CoreBuiltinCall, BuiltinCall> {
         return core::intrinsic::Dialect::kData;
     }
 
+    /// @returns an access information for the function
+    Accesses GetSideEffects() const override;
+
   private:
     core::BuiltinFn func_;
 };

@@ -39,8 +39,8 @@ bool IsFeatureSupported(WGPUFeatureName feature) {
         case WGPUFeatureName_D3D11MultithreadProtected:
         case WGPUFeatureName_HostMappedPointer:
         case WGPUFeatureName_BufferMapExtendedUsages:
-        case WGPUFeatureName_FormatCapabilities:
-        case WGPUFeatureName_DrmFormatCapabilities:
+        case WGPUFeatureName_DawnFormatCapabilities:
+        case WGPUFeatureName_DawnDrmFormatCapabilities:
             return false;
         // NOTE: SharedTextureMemory/SharedFence are not actually intended
         // for usage over the wire (and are not exposed over the wire as
@@ -60,7 +60,6 @@ bool IsFeatureSupported(WGPUFeatureName feature) {
         case WGPUFeatureName_SharedTextureMemoryEGLImage:
         case WGPUFeatureName_SharedFenceVkSemaphoreOpaqueFD:
         case WGPUFeatureName_SharedFenceSyncFD:
-        case WGPUFeatureName_SharedFenceVkSemaphoreSyncFD:
         case WGPUFeatureName_SharedFenceVkSemaphoreZirconHandle:
         case WGPUFeatureName_SharedFenceDXGISharedHandle:
         case WGPUFeatureName_SharedFenceMTLSharedEvent:
@@ -94,8 +93,6 @@ bool IsFeatureSupported(WGPUFeatureName feature) {
         case WGPUFeatureName_MSAARenderToSingleSampled:
         case WGPUFeatureName_DualSourceBlending:
         case WGPUFeatureName_ANGLETextureSharing:
-        case WGPUFeatureName_ChromiumExperimentalSubgroups:
-        case WGPUFeatureName_ChromiumExperimentalSubgroupUniformControlFlow:
         case WGPUFeatureName_PixelLocalStorageCoherent:
         case WGPUFeatureName_PixelLocalStorageNonCoherent:
         case WGPUFeatureName_Norm16TextureFormats:
@@ -115,6 +112,8 @@ bool IsFeatureSupported(WGPUFeatureName feature) {
         case WGPUFeatureName_SubgroupsF16:
         case WGPUFeatureName_ClipDistances:
         case WGPUFeatureName_ChromiumExperimentalImmediateData:
+        case WGPUFeatureName_DawnTexelCopyBufferRowAlignment:
+        case WGPUFeatureName_FlexibleTextureViews:
             return true;
     }
 

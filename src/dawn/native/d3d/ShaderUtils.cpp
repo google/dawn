@@ -47,6 +47,9 @@ namespace dawn::native::d3d {
 
 namespace {
 
+// The remapped name to use when remapping shader entry point names.
+constexpr char kRemappedEntryPointName[] = "dawn_entry_point";
+
 // Be careful that the return vector may contain the pointers that point to non-static memory.
 std::vector<const wchar_t*> GetDXCArguments(std::wstring_view entryPointNameW,
                                             const d3d::D3DBytecodeCompilationRequest& r) {
@@ -143,7 +146,8 @@ std::vector<const wchar_t*> GetDXCArguments(std::wstring_view entryPointNameW,
 
 ResultOrError<ComPtr<IDxcBlob>> CompileShaderDXC(const d3d::D3DBytecodeCompilationRequest& r,
                                                  const std::string& entryPointName,
-                                                 const std::string& hlslSource) {
+                                                 const std::string& hlslSource,
+                                                 bool dumpShaders) {
     DxcBuffer dxcBuffer;
     dxcBuffer.Ptr = hlslSource.c_str();
     dxcBuffer.Size = hlslSource.length();
@@ -167,8 +171,12 @@ ResultOrError<ComPtr<IDxcBlob>> CompileShaderDXC(const d3d::D3DBytecodeCompilati
         ComPtr<IDxcBlobEncoding> errors;
         DAWN_TRY(CheckHRESULT(result->GetErrorBuffer(&errors), "DXC get error buffer"));
 
-        return DAWN_VALIDATION_ERROR("DXC compile failed with: %s",
-                                     static_cast<char*>(errors->GetBufferPointer()));
+        if (dumpShaders) {
+            return DAWN_VALIDATION_ERROR("DXC compile failed with: %s\n/* Generated HLSL: */\n%s\n",
+                                         static_cast<char*>(errors->GetBufferPointer()),
+                                         hlslSource.c_str());
+        }
+        return DAWN_VALIDATION_ERROR("DXC compile failed.");
     }
 
     ComPtr<IDxcBlob> compiledShader;
@@ -178,25 +186,28 @@ ResultOrError<ComPtr<IDxcBlob>> CompileShaderDXC(const d3d::D3DBytecodeCompilati
 
 ResultOrError<ComPtr<ID3DBlob>> CompileShaderFXC(const d3d::D3DBytecodeCompilationRequest& r,
                                                  const std::string& entryPointName,
-                                                 const std::string& hlslSource) {
+                                                 const std::string& hlslSource,
+                                                 bool dumpShaders) {
     ComPtr<ID3DBlob> compiledShader;
     ComPtr<ID3DBlob> errors;
 
-    DAWN_INVALID_IF(FAILED(r.d3dCompile(hlslSource.c_str(), hlslSource.length(), nullptr, nullptr,
-                                        nullptr, entryPointName.c_str(), r.fxcShaderProfile.data(),
-                                        r.compileFlags, 0, &compiledShader, &errors)),
-                    "D3D compile failed with: %s", static_cast<char*>(errors->GetBufferPointer()));
+    auto result = r.d3dCompile(hlslSource.c_str(), hlslSource.length(), nullptr, nullptr, nullptr,
+                               entryPointName.c_str(), r.fxcShaderProfile.data(), r.compileFlags, 0,
+                               &compiledShader, &errors);
+
+    if (dumpShaders) {
+        DAWN_INVALID_IF(FAILED(result), "FXC compile failed with: %s\n/* Generated HLSL: */\n%s\n",
+                        static_cast<char*>(errors->GetBufferPointer()), hlslSource.c_str());
+    } else {
+        DAWN_INVALID_IF(FAILED(result), "FXC compile failed.");
+    }
 
     return std::move(compiledShader);
 }
 
 MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
                            CacheKey::UnsafeUnkeyedValue<dawn::platform::Platform*> tracePlatform,
-                           std::string* remappedEntryPointName,
                            CompiledShader* compiledShader) {
-    std::ostringstream errorStream;
-    errorStream << "Tint HLSL failure:\n";
-
     tint::ast::transform::Manager transformManager;
     tint::ast::transform::DataMap transformInputs;
 
@@ -204,15 +215,21 @@ MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
     transformManager.Add<tint::ast::transform::SingleEntryPoint>();
     transformInputs.Add<tint::ast::transform::SingleEntryPoint::Config>(r.entryPointName.data());
 
-    // Needs to run before all other transforms so that they can use builtin names safely.
-    transformManager.Add<tint::ast::transform::Renamer>();
-    if (r.disableSymbolRenaming) {
-        // We still need to rename HLSL reserved keywords
+    if (r.useTintIR) {
+        r.tintOptions.strip_all_names = !r.disableSymbolRenaming;
+        r.tintOptions.remapped_entry_point_name = kRemappedEntryPointName;
+    } else {
+        // Needs to run before all other transforms so that they can use builtin names safely.
+        tint::ast::transform::Renamer::Remappings requestedNames = {
+            {std::string(r.entryPointName), kRemappedEntryPointName}};
+        transformManager.Add<tint::ast::transform::Renamer>();
         transformInputs.Add<tint::ast::transform::Renamer::Config>(
-            tint::ast::transform::Renamer::Target::kHlslKeywords);
+            r.disableSymbolRenaming ? tint::ast::transform::Renamer::Target::kHlslKeywords
+                                    : tint::ast::transform::Renamer::Target::kAll,
+            std::move(requestedNames));
     }
 
-    if (r.stage == SingleShaderStage::Vertex) {
+    if (!r.useTintIR && r.stage == SingleShaderStage::Vertex) {
         transformManager.Add<tint::ast::transform::FirstIndexOffset>();
         transformInputs.Add<tint::ast::transform::FirstIndexOffset::BindingPoint>(
             r.firstIndexOffsetShaderRegister, r.firstIndexOffsetRegisterSpace);
@@ -235,32 +252,9 @@ MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
                                       &transformOutputs, nullptr));
     }
 
-    // TODO(dawn:2180): refactor out.
-    if (auto* data = transformOutputs.Get<tint::ast::transform::Renamer::Data>()) {
-        auto it = data->remappings.find(r.entryPointName.data());
-        if (it != data->remappings.end()) {
-            *remappedEntryPointName = it->second;
-        } else {
-            DAWN_INVALID_IF(!r.disableSymbolRenaming,
-                            "Could not find remapped name for entry point.");
-
-            *remappedEntryPointName = r.entryPointName;
-        }
-    } else {
-        return DAWN_VALIDATION_ERROR("Transform output missing renamer data.");
-    }
-
-    // Validate workgroup size after program runs transforms.
-    if (r.stage == SingleShaderStage::Compute) {
-        Extent3D _;
-        DAWN_TRY_ASSIGN(
-            _, ValidateComputeStageWorkgroupSize(transformedProgram, remappedEntryPointName->data(),
-                                                 r.limits, r.maxSubgroupSizeForFullSubgroups));
-    }
-
     bool usesVertexIndex = false;
     bool usesInstanceIndex = false;
-    if (r.stage == SingleShaderStage::Vertex) {
+    if (!r.useTintIR && r.stage == SingleShaderStage::Vertex) {
         if (auto* data = transformOutputs.Get<tint::ast::transform::FirstIndexOffset::Data>()) {
             usesVertexIndex = data->has_vertex_index;
             usesInstanceIndex = data->has_instance_index;
@@ -278,12 +272,36 @@ MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
                         ir.Failure().reason.Str());
 
         result = tint::hlsl::writer::Generate(ir.Get(), r.tintOptions);
+
+        // Workgroup validation has to come after `Generate` because it may require overrides to
+        // have been substituted.
+        if (r.stage == SingleShaderStage::Compute) {
+            // Validate workgroup size and workgroup storage size.
+            Extent3D _;
+            DAWN_TRY_ASSIGN(
+                _, ValidateComputeStageWorkgroupSize(
+                       result->workgroup_info.x, result->workgroup_info.y, result->workgroup_info.z,
+                       result->workgroup_info.storage_size, r.limits, r.adapter.UnsafeGetValue()));
+        }
     } else {
+        // Validate workgroup size after program runs transforms.
+        if (r.stage == SingleShaderStage::Compute) {
+            Extent3D _;
+            DAWN_TRY_ASSIGN(
+                _, ValidateComputeStageWorkgroupSize(transformedProgram, kRemappedEntryPointName,
+                                                     r.limits, r.adapter.UnsafeGetValue()));
+        }
+
         result = tint::hlsl::writer::Generate(transformedProgram, r.tintOptions);
     }
 
     DAWN_INVALID_IF(result != tint::Success, "An error occurred while generating HLSL:\n%s",
                     result.Failure().reason.Str());
+
+    if (r.useTintIR && r.stage == SingleShaderStage::Vertex) {
+        usesVertexIndex = result->has_vertex_index;
+        usesInstanceIndex = result->has_instance_index;
+    }
 
     compiledShader->usesVertexIndex = usesVertexIndex;
     compiledShader->usesInstanceIndex = usesInstanceIndex;
@@ -357,26 +375,26 @@ std::string CompileFlagsToString(uint32_t compileFlags) {
 
 ResultOrError<CompiledShader> CompileShader(d3d::D3DCompilationRequest r) {
     CompiledShader compiledShader;
-    bool shouldDumpShader = r.hlsl.dumpShaders;
+    bool dumpShaders = r.hlsl.dumpShaders;
     // Compile the source shader to HLSL.
-    std::string remappedEntryPoint;
-    DAWN_TRY(
-        TranslateToHLSL(std::move(r.hlsl), r.tracePlatform, &remappedEntryPoint, &compiledShader));
+    DAWN_TRY(TranslateToHLSL(std::move(r.hlsl), r.tracePlatform, &compiledShader));
 
     switch (r.bytecode.compiler) {
         case d3d::Compiler::DXC: {
             TRACE_EVENT0(r.tracePlatform.UnsafeGetValue(), General, "CompileShaderDXC");
             ComPtr<IDxcBlob> compiledDXCShader;
-            DAWN_TRY_ASSIGN(compiledDXCShader, CompileShaderDXC(r.bytecode, remappedEntryPoint,
-                                                                compiledShader.hlslSource));
+            DAWN_TRY_ASSIGN(compiledDXCShader,
+                            CompileShaderDXC(r.bytecode, kRemappedEntryPointName,
+                                             compiledShader.hlslSource, dumpShaders));
             compiledShader.shaderBlob = CreateBlob(std::move(compiledDXCShader));
             break;
         }
         case d3d::Compiler::FXC: {
             TRACE_EVENT0(r.tracePlatform.UnsafeGetValue(), General, "CompileShaderFXC");
             ComPtr<ID3DBlob> compiledFXCShader;
-            DAWN_TRY_ASSIGN(compiledFXCShader, CompileShaderFXC(r.bytecode, remappedEntryPoint,
-                                                                compiledShader.hlslSource));
+            DAWN_TRY_ASSIGN(compiledFXCShader,
+                            CompileShaderFXC(r.bytecode, kRemappedEntryPointName,
+                                             compiledShader.hlslSource, dumpShaders));
             compiledShader.shaderBlob = CreateBlob(std::move(compiledFXCShader));
             break;
         }
@@ -384,7 +402,7 @@ ResultOrError<CompiledShader> CompileShader(d3d::D3DCompilationRequest r) {
 
     // If dumpShaders is false, we don't need the HLSL for logging. Clear the contents so it
     // isn't stored into the cache.
-    if (!shouldDumpShader) {
+    if (!dumpShaders) {
         compiledShader.hlslSource = "";
     }
     return compiledShader;
@@ -394,28 +412,24 @@ void DumpFXCCompiledShader(Device* device,
                            const CompiledShader& compiledShader,
                            uint32_t compileFlags) {
     std::ostringstream dumpedMsg;
-    // The HLSL may be empty if compilation failed.
-    if (!compiledShader.hlslSource.empty()) {
-        dumpedMsg << "/* Dumped generated HLSL */\n" << compiledShader.hlslSource << "\n";
-    }
+    DAWN_ASSERT(!compiledShader.hlslSource.empty());
+    dumpedMsg << "/* Dumped generated HLSL */\n" << compiledShader.hlslSource << "\n";
 
-    // The blob may be empty if FXC compilation failed.
     const Blob& shaderBlob = compiledShader.shaderBlob;
-    if (!shaderBlob.Empty()) {
-        dumpedMsg << "/* FXC compile flags */\n" << CompileFlagsToString(compileFlags) << "\n";
-        dumpedMsg << "/* Dumped disassembled DXBC */\n";
-        ComPtr<ID3DBlob> disassembly;
-        UINT flags =
-            // Some literals are printed as floats with precision(6) which is not enough
-            // precision for values very close to 0, so always print literals as hex values.
-            D3D_DISASM_PRINT_HEX_LITERALS;
-        if (FAILED(device->GetFunctions()->d3dDisassemble(shaderBlob.Data(), shaderBlob.Size(),
-                                                          flags, nullptr, &disassembly))) {
-            dumpedMsg << "D3D disassemble failed\n";
-        } else {
-            dumpedMsg << std::string_view(static_cast<const char*>(disassembly->GetBufferPointer()),
-                                          disassembly->GetBufferSize());
-        }
+    DAWN_ASSERT(!shaderBlob.Empty());
+    dumpedMsg << "/* FXC compile flags */\n" << CompileFlagsToString(compileFlags) << "\n";
+    dumpedMsg << "/* Dumped disassembled DXBC */\n";
+    ComPtr<ID3DBlob> disassembly;
+    UINT flags =
+        // Some literals are printed as floats with precision(6) which is not enough
+        // precision for values very close to 0, so always print literals as hex values.
+        D3D_DISASM_PRINT_HEX_LITERALS;
+    if (FAILED(device->GetFunctions()->d3dDisassemble(shaderBlob.Data(), shaderBlob.Size(), flags,
+                                                      nullptr, &disassembly))) {
+        dumpedMsg << "D3D disassemble failed\n";
+    } else {
+        dumpedMsg << std::string_view(static_cast<const char*>(disassembly->GetBufferPointer()),
+                                      disassembly->GetBufferSize());
     }
 
     std::string logMessage = dumpedMsg.str();

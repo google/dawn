@@ -32,7 +32,7 @@
 
 #include "src/tint/lang/wgsl/extension.h"
 #include "src/tint/lang/wgsl/features/language_feature.h"
-#include "src/tint/utils/reflection/reflection.h"
+#include "src/tint/utils/reflection.h"
 
 namespace tint::wgsl {
 

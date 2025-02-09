@@ -54,6 +54,7 @@
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
 #include "src/tint/lang/core/type/u32.h"
+#include "src/tint/lang/core/type/u64.h"
 #include "src/tint/lang/core/type/u8.h"
 #include "src/tint/lang/core/type/vector.h"
 
@@ -107,6 +108,14 @@ inline const type::U32* BuildU32(intrinsic::MatchState& state, const type::Type*
 
 inline bool MatchU32(intrinsic::MatchState&, const type::Type* ty) {
     return ty->IsAnyOf<intrinsic::Any, type::U32, type::AbstractInt>();
+}
+
+inline const type::U64* BuildU64(intrinsic::MatchState& state, const type::Type*) {
+    return state.types.u64();
+}
+
+inline bool MatchU64(intrinsic::MatchState&, const type::Type* ty) {
+    return ty->IsAnyOf<intrinsic::Any, type::U64, type::AbstractInt>();
 }
 
 inline const type::U8* BuildU8(intrinsic::MatchState& state, const type::Type*) {
@@ -280,8 +289,8 @@ inline bool MatchSubgroupMatrix(intrinsic::MatchState&,
         return true;
     }
     if (auto* sm = ty->As<type::SubgroupMatrix>()) {
-        A = sm->Rows();
-        B = sm->Columns();
+        A = sm->Columns();
+        B = sm->Rows();
         S = intrinsic::Number(static_cast<uint32_t>(sm->Kind()));
         T = sm->Type();
         return true;
@@ -299,7 +308,44 @@ inline const type::SubgroupMatrix* BuildSubgroupMatrix(intrinsic::MatchState& st
                                        A.Value(), B.Value());
 }
 
-inline bool MatchArray(intrinsic::MatchState&, const type::Type* ty, const type::Type*& T) {
+inline bool MatchArray(intrinsic::MatchState&,
+                       const type::Type* ty,
+                       const type::Type*& T,
+                       intrinsic::Number& C) {
+    if (ty->Is<intrinsic::Any>()) {
+        T = ty;
+        C = intrinsic::Number::any;
+        return true;
+    }
+
+    if (auto* a = ty->As<type::Array>()) {
+        if (auto count = a->Count()->As<type::ConstantArrayCount>()) {
+            T = a->ElemType();
+            C = intrinsic::Number(count->value);
+            return true;
+        }
+    }
+    return false;
+}
+
+inline const type::Array* BuildArray(intrinsic::MatchState& state,
+                                     const type::Type*,
+                                     const type::Type* el,
+                                     intrinsic::Number C) {
+    uint32_t el_align = el->Align();
+    uint32_t el_size = el->Size();
+    uint32_t stride = tint::RoundUp<uint32_t>(el_align, el_size);
+    uint32_t size = C.Value() * stride;
+    return state.types.Get<type::Array>(
+        el,
+        /* count */ state.types.Get<type::ConstantArrayCount>(C.Value()),
+        /* align */ el_align,
+        /* size */ size,
+        /* stride */ stride,
+        /* stride_implicit */ stride);
+}
+
+inline bool MatchRuntimeArray(intrinsic::MatchState&, const type::Type* ty, const type::Type*& T) {
     if (ty->Is<intrinsic::Any>()) {
         T = ty;
         return true;
@@ -314,9 +360,9 @@ inline bool MatchArray(intrinsic::MatchState&, const type::Type* ty, const type:
     return false;
 }
 
-inline const type::Array* BuildArray(intrinsic::MatchState& state,
-                                     const type::Type*,
-                                     const type::Type* el) {
+inline const type::Array* BuildRuntimeArray(intrinsic::MatchState& state,
+                                            const type::Type*,
+                                            const type::Type* el) {
     return state.types.Get<type::Array>(el,
                                         /* count */ state.types.Get<type::RuntimeArrayCount>(),
                                         /* align */ 0u,

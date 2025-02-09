@@ -15,7 +15,7 @@ struct main_inputs {
 
 
 void main_inner(ComputeInputs0 inputs0, uint local_invocation_index, uint3 global_invocation_id, ComputeInputs1 inputs1) {
-  uint foo = (((inputs0.local_invocation_id[0u] + local_invocation_index) + global_invocation_id[0u]) + inputs1.workgroup_id[0u]);
+  uint foo = (((inputs0.local_invocation_id.x + local_invocation_index) + global_invocation_id.x) + inputs1.workgroup_id.x);
 }
 
 [numthreads(1, 1, 1)]

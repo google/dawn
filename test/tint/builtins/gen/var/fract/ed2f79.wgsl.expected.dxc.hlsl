@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void fract_ed2f79() {
   float3 res = (0.25f).xxx;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   fract_ed2f79();
   return;
 }
+//
+// compute_main
+//
+void fract_ed2f79() {
+  float3 res = (0.25f).xxx;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   fract_ed2f79();
   return;
+}
+//
+// vertex_main
+//
+void fract_ed2f79() {
+  float3 res = (0.25f).xxx;
 }
 
 struct VertexOutput {

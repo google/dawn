@@ -9,12 +9,12 @@ void main() {
   switch(v) {
     case 0u:
     {
-      m1[0u][int(0)] = 1.0f;
+      m1[0u].x = 1.0f;
       break;
     }
     case 1u:
     {
-      m1[1u][int(0)] = 1.0f;
+      m1[1u].x = 1.0f;
       break;
     }
     default:

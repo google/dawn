@@ -1,7 +1,7 @@
 #include <metal_stdlib>
-
 using namespace metal;
-kernel void tint_symbol() {
+
+kernel void v() {
   if (false) {
   } else {
     if (false) {
@@ -376,6 +376,4 @@ kernel void tint_symbol() {
       }
     }
   }
-  return;
 }
-

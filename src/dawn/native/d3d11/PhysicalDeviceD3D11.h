@@ -47,7 +47,8 @@ class PhysicalDevice : public d3d::PhysicalDevice {
     // PhysicalDeviceBase Implementation
     bool SupportsExternalImages() const override;
 
-    bool SupportsFeatureLevel(FeatureLevel featureLevel) const override;
+    bool SupportsFeatureLevel(wgpu::FeatureLevel featureLevel,
+                              InstanceBase* instance) const override;
 
     const DeviceInfo& GetDeviceInfo() const;
     ResultOrError<ComPtr<ID3D11Device>> CreateD3D11Device(bool enableDebugLayer);

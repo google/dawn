@@ -30,6 +30,8 @@
 
 #include <string>
 
+#include "src/tint/lang/hlsl/writer/common/options.h"
+#include "src/tint/lang/hlsl/writer/common/output.h"
 #include "src/tint/utils/result/result.h"
 
 // Forward declarations
@@ -39,28 +41,10 @@ class Module;
 
 namespace tint::hlsl::writer {
 
-/// The output produced when printing HLSL.
-struct PrintResult {
-    /// Constructor
-    PrintResult();
-
-    /// Destructor
-    ~PrintResult();
-
-    /// Copy constructor
-    PrintResult(const PrintResult&);
-
-    /// Copy assignment
-    /// @returns this
-    PrintResult& operator=(const PrintResult&);
-
-    /// The generated HLSL.
-    std::string hlsl = "";
-};
-
 /// @param module the Tint IR module to generate
+/// @param options the printer options
 /// @returns the result of printing the HLSL shader on success, or failure
-Result<PrintResult> Print(core::ir::Module& module);
+Result<Output> Print(core::ir::Module& module, const Options& options);
 
 }  // namespace tint::hlsl::writer
 

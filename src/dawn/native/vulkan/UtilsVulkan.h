@@ -123,7 +123,7 @@ Extent3D ComputeTextureCopyExtent(const TextureCopy& textureCopy, const Extent3D
 VkBufferImageCopy ComputeBufferImageCopyRegion(const BufferCopy& bufferCopy,
                                                const TextureCopy& textureCopy,
                                                const Extent3D& copySize);
-VkBufferImageCopy ComputeBufferImageCopyRegion(const TextureDataLayout& dataLayout,
+VkBufferImageCopy ComputeBufferImageCopyRegion(const TexelCopyBufferLayout& dataLayout,
                                                const TextureCopy& textureCopy,
                                                const Extent3D& copySize);
 

@@ -10,10 +10,10 @@ struct In {
 in vec4 f_Input;
 void g(float a, float b) {
 }
-void f_inner(In tint_symbol, vec4 fbf) {
-  g(tint_symbol.pos[0u], fbf[1u]);
+void f_inner(In v, vec4 fbf) {
+  g(v.pos.x, fbf.y);
 }
 void main() {
-  In v = In(gl_FragCoord);
-  f_inner(v, f_Input);
+  In v_1 = In(gl_FragCoord);
+  f_inner(v_1, f_Input);
 }

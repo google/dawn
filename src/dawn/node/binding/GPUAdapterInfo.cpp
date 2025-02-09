@@ -40,7 +40,9 @@ GPUAdapterInfo::GPUAdapterInfo(const wgpu::AdapterInfo& info)
     : vendor_(info.vendor),
       architecture_(info.architecture),
       device_(info.device),
-      description_(info.description) {}
+      description_(info.description),
+      subgroup_min_size_(info.subgroupMinSize),
+      subgroup_max_size_(info.subgroupMaxSize) {}
 
 std::string GPUAdapterInfo::getVendor(Napi::Env) {
     return vendor_;
@@ -56,6 +58,14 @@ std::string GPUAdapterInfo::getDevice(Napi::Env) {
 
 std::string GPUAdapterInfo::getDescription(Napi::Env) {
     return description_;
+}
+
+uint32_t GPUAdapterInfo::getSubgroupMinSize(Napi::Env) {
+    return subgroup_min_size_;
+}
+
+uint32_t GPUAdapterInfo::getSubgroupMaxSize(Napi::Env) {
+    return subgroup_max_size_;
 }
 
 }  // namespace wgpu::binding

@@ -26,8 +26,10 @@ uniform sim_block_1_ubo {
 } v;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  Particle particle = particles.p[0];
-  uint v_1 = v.inner.i;
-  uint v_2 = v.inner.i;
-  particle.position[v_1] = particle.position[v_2];
+  uint v_1 = (uint(particles.p.length()) - 1u);
+  uint v_2 = min(uint(0), v_1);
+  Particle particle = particles.p[v_2];
+  uint v_3 = min(v.inner.i, 7u);
+  uint v_4 = min(v.inner.i, 7u);
+  particle.position[v_3] = particle.position[v_4];
 }

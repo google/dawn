@@ -40,8 +40,8 @@
 #include "src/tint/lang/hlsl/writer/common/options.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/utils/containers/scope_stack.h"
-#include "src/tint/utils/generator/text_generator.h"
 #include "src/tint/utils/math/hash.h"
+#include "src/tint/utils/text_generator.h"
 
 // Forward declarations
 namespace tint::sem {

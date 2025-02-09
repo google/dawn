@@ -1,3 +1,45 @@
+//
+// fragment_main
+//
+struct modf_result_vec4_f16 {
+  vector<float16_t, 4> fract;
+  vector<float16_t, 4> whole;
+};
+
+
+void modf_995934() {
+  vector<float16_t, 4> arg_0 = (float16_t(-1.5h)).xxxx;
+  vector<float16_t, 4> v = (float16_t(0.0h)).xxxx;
+  modf_result_vec4_f16 res = {modf(arg_0, v), v};
+}
+
+void fragment_main() {
+  modf_995934();
+}
+
+//
+// compute_main
+//
+struct modf_result_vec4_f16 {
+  vector<float16_t, 4> fract;
+  vector<float16_t, 4> whole;
+};
+
+
+void modf_995934() {
+  vector<float16_t, 4> arg_0 = (float16_t(-1.5h)).xxxx;
+  vector<float16_t, 4> v = (float16_t(0.0h)).xxxx;
+  modf_result_vec4_f16 res = {modf(arg_0, v), v};
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  modf_995934();
+}
+
+//
+// vertex_main
+//
 struct modf_result_vec4_f16 {
   vector<float16_t, 4> fract;
   vector<float16_t, 4> whole;
@@ -15,24 +57,14 @@ struct vertex_main_outputs {
 void modf_995934() {
   vector<float16_t, 4> arg_0 = (float16_t(-1.5h)).xxxx;
   vector<float16_t, 4> v = (float16_t(0.0h)).xxxx;
-  vector<float16_t, 4> v_1 = modf(arg_0, v);
-  modf_result_vec4_f16 res = {v_1, v};
-}
-
-void fragment_main() {
-  modf_995934();
-}
-
-[numthreads(1, 1, 1)]
-void compute_main() {
-  modf_995934();
+  modf_result_vec4_f16 res = {modf(arg_0, v), v};
 }
 
 VertexOutput vertex_main_inner() {
-  VertexOutput tint_symbol = (VertexOutput)0;
-  tint_symbol.pos = (0.0f).xxxx;
+  VertexOutput v_1 = (VertexOutput)0;
+  v_1.pos = (0.0f).xxxx;
   modf_995934();
-  VertexOutput v_2 = tint_symbol;
+  VertexOutput v_2 = v_1;
   return v_2;
 }
 

@@ -30,8 +30,10 @@
 #include <utility>
 
 #include "src/tint/lang/core/ir/transform/helper_test.h"
+#include "src/tint/lang/core/ir/type/array_count.h"
 
-using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::core::fluent_types;     // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
 
 namespace tint::core::ir::transform {
 namespace {
@@ -67,6 +69,18 @@ class IR_SingleEntryPointTest : public TransformTest {
         mod.root_block->Append(var);
         return var->Result(0);
     }
+
+    /// @returns a new module-scope override called `name` with override `id` and possible
+    /// `initializer`
+    InstructionResult* Override(const char* name, uint16_t id, Value* initializer = nullptr) {
+        auto* var = b.Override(name, ty.i32());
+        var->SetOverrideId(OverrideId{id});
+        if (initializer) {
+            var->SetInitializer(initializer);
+        }
+        mod.root_block->Append(var);
+        return var->Result(0);
+    }
 };
 using IR_SingleEntryPointDeathTest = IR_SingleEntryPointTest;
 
@@ -84,28 +98,6 @@ TEST_F(IR_SingleEntryPointTest, EntryPointNotFound) {
     EXPECT_EQ(src, str());
 
     EXPECT_DEATH_IF_SUPPORTED({ Run(SingleEntryPoint, "foo"); }, "internal compiler error");
-}
-
-TEST_F(IR_SingleEntryPointTest, MultipleEntryPointsMatch) {
-    EntryPoint("main");
-    EntryPoint("main");
-
-    auto* src = R"(
-%main = @fragment func():void {
-  $B1: {
-    ret
-  }
-}
-%main_1 = @fragment func():void {  # %main_1: 'main'
-  $B2: {
-    ret
-  }
-}
-)";
-
-    EXPECT_EQ(src, str());
-
-    EXPECT_DEATH_IF_SUPPORTED({ Run(SingleEntryPoint, "main"); }, "internal compiler error");
 }
 
 TEST_F(IR_SingleEntryPointTest, NoChangesNeeded) {
@@ -278,7 +270,133 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_SingleEntryPointTest, TransitiveReferences) {
+TEST_F(IR_SingleEntryPointTest, DirectOverrides) {
+    auto* o1 = Override("o1", 1);
+    auto* o2 = Override("o2", 2);
+    auto* o3 = Override("o3", 3);
+
+    EntryPoint("foo", {o1, o2});
+    EntryPoint("bar", {o3});
+
+    auto* src = R"(
+$B1: {  # root
+  %o1:i32 = override @id(1)
+  %o2:i32 = override @id(2)
+  %o3:i32 = override @id(3)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %5:i32 = let %o1
+    %6:i32 = let %o2
+    ret
+  }
+}
+%bar = @fragment func():void {
+  $B3: {
+    %8:i32 = let %o3
+    ret
+  }
+}
+)";
+
+    auto* expect = R"(
+$B1: {  # root
+  %o1:i32 = override @id(1)
+  %o2:i32 = override @id(2)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %4:i32 = let %o1
+    %5:i32 = let %o2
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    capabilities = core::ir::Capabilities{core::ir::Capability::kAllowOverrides};
+    Run(SingleEntryPoint, "foo");
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_SingleEntryPointTest, DirectOverridesWithInitializer) {
+    Value* init1 = nullptr;
+    Value* init2 = nullptr;
+    Value* init3 = nullptr;
+    b.Append(mod.root_block, [&] {
+        init1 = b.Multiply(ty.i32(), 2_i, 4_i)->Result(0);
+        auto* x = b.Multiply(ty.i32(), 2_i, 4_i);
+        init2 = b.Add(ty.i32(), x, 4_i)->Result(0);
+
+        auto* y = b.Multiply(ty.i32(), 3_i, 5_i);
+        init3 = b.Add(ty.i32(), y, 5_i)->Result(0);
+    });
+
+    auto* o1 = Override("o1", 1, init1);
+    auto* o2 = Override("o2", 2, init2);
+    auto* o3 = Override("o3", 3, init3);
+
+    EntryPoint("foo", {o1, o2});
+    EntryPoint("bar", {o3});
+
+    auto* src = R"(
+$B1: {  # root
+  %1:i32 = mul 2i, 4i
+  %2:i32 = mul 2i, 4i
+  %3:i32 = add %2, 4i
+  %4:i32 = mul 3i, 5i
+  %5:i32 = add %4, 5i
+  %o1:i32 = override, %1 @id(1)
+  %o2:i32 = override, %3 @id(2)
+  %o3:i32 = override, %5 @id(3)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %10:i32 = let %o1
+    %11:i32 = let %o2
+    ret
+  }
+}
+%bar = @fragment func():void {
+  $B3: {
+    %13:i32 = let %o3
+    ret
+  }
+}
+)";
+
+    auto* expect = R"(
+$B1: {  # root
+  %1:i32 = mul 2i, 4i
+  %2:i32 = mul 2i, 4i
+  %3:i32 = add %2, 4i
+  %o1:i32 = override, %1 @id(1)
+  %o2:i32 = override, %3 @id(2)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %7:i32 = let %o1
+    %8:i32 = let %o2
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    capabilities = core::ir::Capabilities{core::ir::Capability::kAllowOverrides};
+    Run(SingleEntryPoint, "foo");
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_SingleEntryPointTest, TransitiveVariableReferences) {
     Var("unused_var");
     Func("unused_func");
 
@@ -370,6 +488,104 @@ $B1: {  # root
 
     EXPECT_EQ(src, str());
 
+    Run(SingleEntryPoint, "foo");
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_SingleEntryPointTest, TransitiveOverrideReferences) {
+    Override("unused_override", 5);
+    Func("unused_func");
+
+    auto* o1 = Override("o1", 1);
+    auto* o2 = Override("o2", 2);
+    auto* o3 = Override("o3", 3);
+
+    auto* f1 = Func("f1", {o2, o3});
+    auto* f2 = Func("f2", {f1});
+    auto* f3 = Func("f3", {o1, f2});
+
+    EntryPoint("foo", {f3});
+
+    auto* src = R"(
+$B1: {  # root
+  %unused_override:i32 = override @id(5)
+  %o1:i32 = override @id(1)
+  %o2:i32 = override @id(2)
+  %o3:i32 = override @id(3)
+}
+
+%unused_func = func():void {
+  $B2: {
+    ret
+  }
+}
+%f1 = func():void {
+  $B3: {
+    %7:i32 = let %o2
+    %8:i32 = let %o3
+    ret
+  }
+}
+%f2 = func():void {
+  $B4: {
+    %10:void = call %f1
+    ret
+  }
+}
+%f3 = func():void {
+  $B5: {
+    %12:i32 = let %o1
+    %13:void = call %f2
+    ret
+  }
+}
+%foo = @fragment func():void {
+  $B6: {
+    %15:void = call %f3
+    ret
+  }
+}
+)";
+
+    auto* expect = R"(
+$B1: {  # root
+  %o1:i32 = override @id(1)
+  %o2:i32 = override @id(2)
+  %o3:i32 = override @id(3)
+}
+
+%f1 = func():void {
+  $B2: {
+    %5:i32 = let %o2
+    %6:i32 = let %o3
+    ret
+  }
+}
+%f2 = func():void {
+  $B3: {
+    %8:void = call %f1
+    ret
+  }
+}
+%f3 = func():void {
+  $B4: {
+    %10:i32 = let %o1
+    %11:void = call %f2
+    ret
+  }
+}
+%foo = @fragment func():void {
+  $B5: {
+    %13:void = call %f3
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    capabilities = core::ir::Capabilities{core::ir::Capability::kAllowOverrides};
     Run(SingleEntryPoint, "foo");
 
     EXPECT_EQ(expect, str());
@@ -530,6 +746,188 @@ $B1: {  # root
 
     EXPECT_EQ(src, str());
 
+    Run(SingleEntryPoint, "foo");
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_SingleEntryPointTest, RemoveMultipleOverrides) {
+    auto* o1 = Override("o1", 1);
+    auto* o2 = Override("o2", 2);
+    auto* o3 = Override("o3", 3);
+    auto* o4 = Override("o4", 4);
+    auto* o5 = Override("o5", 5);
+    auto* o6 = Override("o6", 6);
+    auto* o7 = Override("o7", 7);
+
+    EntryPoint("foo", {o1, o5});
+    EntryPoint("bar", {o1, o2, o3, o4, o5, o6, o7});
+
+    auto* src = R"(
+$B1: {  # root
+  %o1:i32 = override @id(1)
+  %o2:i32 = override @id(2)
+  %o3:i32 = override @id(3)
+  %o4:i32 = override @id(4)
+  %o5:i32 = override @id(5)
+  %o6:i32 = override @id(6)
+  %o7:i32 = override @id(7)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %9:i32 = let %o1
+    %10:i32 = let %o5
+    ret
+  }
+}
+%bar = @fragment func():void {
+  $B3: {
+    %12:i32 = let %o1
+    %13:i32 = let %o2
+    %14:i32 = let %o3
+    %15:i32 = let %o4
+    %16:i32 = let %o5
+    %17:i32 = let %o6
+    %18:i32 = let %o7
+    ret
+  }
+}
+)";
+
+    auto* expect = R"(
+$B1: {  # root
+  %o1:i32 = override @id(1)
+  %o5:i32 = override @id(5)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %4:i32 = let %o1
+    %5:i32 = let %o5
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    capabilities = core::ir::Capabilities{core::ir::Capability::kAllowOverrides};
+    Run(SingleEntryPoint, "foo");
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_SingleEntryPointTest, OverridesInWorkgroupSize) {
+    auto* o1 = Override("o1", 1);
+    auto* o2 = Override("o2", 2);
+    auto* o3 = Override("o3", 3);
+
+    auto* f1 = b.ComputeFunction("foo", o1, o2, o1);
+    b.Append(f1->Block(), [&] { b.Return(f1); });
+
+    auto* f2 = b.ComputeFunction("bar", o3, o3, o3);
+    b.Append(f2->Block(), [&] { b.Return(f2); });
+
+    auto* src = R"(
+$B1: {  # root
+  %o1:i32 = override @id(1)
+  %o2:i32 = override @id(2)
+  %o3:i32 = override @id(3)
+}
+
+%foo = @compute @workgroup_size(%o1, %o2, %o1) func():void {
+  $B2: {
+    ret
+  }
+}
+%bar = @compute @workgroup_size(%o3, %o3, %o3) func():void {
+  $B3: {
+    ret
+  }
+}
+)";
+
+    auto* expect = R"(
+$B1: {  # root
+  %o1:i32 = override @id(1)
+  %o2:i32 = override @id(2)
+}
+
+%foo = @compute @workgroup_size(%o1, %o2, %o1) func():void {
+  $B2: {
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    capabilities = core::ir::Capabilities{core::ir::Capability::kAllowOverrides};
+    Run(SingleEntryPoint, "foo");
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_SingleEntryPointTest, OverrideInArrayType) {
+    auto* o1 = Override("o1", 1);
+    auto* o2 = Override("o2", 2);
+
+    core::ir::Value* v1 = nullptr;
+    core::ir::Value* v2 = nullptr;
+    b.Append(mod.root_block, [&] {
+        auto* c1 = ty.Get<core::ir::type::ValueArrayCount>(o1);
+        auto* a1 = ty.Get<core::type::Array>(ty.i32(), c1, 4u, 4u, 4u, 4u);
+
+        auto* c2 = ty.Get<core::ir::type::ValueArrayCount>(o2);
+        auto* a2 = ty.Get<core::type::Array>(ty.i32(), c2, 4u, 4u, 4u, 4u);
+
+        v1 = b.Var("a", ty.ptr(workgroup, a1, read_write))->Result(0);
+        v2 = b.Var("b", ty.ptr(workgroup, a2, read_write))->Result(0);
+    });
+
+    EntryPoint("foo", {v1});
+    EntryPoint("bar", {v2});
+
+    auto* src = R"(
+$B1: {  # root
+  %o1:i32 = override @id(1)
+  %o2:i32 = override @id(2)
+  %a:ptr<workgroup, array<i32, %o1>, read_write> = var
+  %b:ptr<workgroup, array<i32, %o2>, read_write> = var
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %6:ptr<workgroup, array<i32, %o1>, read_write> = let %a
+    ret
+  }
+}
+%bar = @fragment func():void {
+  $B3: {
+    %8:ptr<workgroup, array<i32, %o2>, read_write> = let %b
+    ret
+  }
+}
+)";
+
+    auto* expect = R"(
+$B1: {  # root
+  %o1:i32 = override @id(1)
+  %a:ptr<workgroup, array<i32, %o1>, read_write> = var
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %4:ptr<workgroup, array<i32, %o1>, read_write> = let %a
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    capabilities = core::ir::Capabilities{core::ir::Capability::kAllowOverrides};
     Run(SingleEntryPoint, "foo");
 
     EXPECT_EQ(expect, str());

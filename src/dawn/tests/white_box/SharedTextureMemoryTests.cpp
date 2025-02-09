@@ -105,6 +105,7 @@ std::vector<wgpu::FeatureName> SharedTextureMemoryTests::GetRequiredFeatures() {
         wgpu::FeatureName::TransientAttachments,
         wgpu::FeatureName::Unorm16TextureFormats,
         wgpu::FeatureName::BGRA8UnormStorage,
+        wgpu::FeatureName::FlexibleTextureViews,
     };
     for (auto feature : kOptionalFeatures) {
         if (SupportsFeatures({feature})) {
@@ -113,7 +114,7 @@ std::vector<wgpu::FeatureName> SharedTextureMemoryTests::GetRequiredFeatures() {
     }
 
     return features;
-}
+}  // namespace dawn
 
 void SharedTextureMemoryTests::SetUp() {
     DAWN_TEST_UNSUPPORTED_IF(UsesWire());
@@ -122,6 +123,12 @@ void SharedTextureMemoryTests::SetUp() {
         !SupportsFeatures(GetParam().mBackend->RequiredFeatures(GetAdapter().Get())));
     // TODO(crbug.com/342213634): Crashes on ChromeOS volteer devices.
     DAWN_SUPPRESS_TEST_IF(IsChromeOS() && IsVulkan() && IsIntel() && IsBackendValidationEnabled());
+
+    // Compat cannot create 2D texture view from a 2D array texture.
+    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode() &&
+                             !SupportsFeatures({wgpu::FeatureName::FlexibleTextureViews}) &&
+                             GetParam().mLayerCount > 1);
+
     GetParam().mBackend->SetUp();
 }
 
@@ -320,7 +327,7 @@ void SharedTextureMemoryTests::UseInRenderPass(wgpu::Device& deviceObj, wgpu::Te
 
 void SharedTextureMemoryTests::UseInCopy(wgpu::Device& deviceObj, wgpu::Texture& texture) {
     wgpu::CommandEncoder encoder = deviceObj.CreateCommandEncoder();
-    wgpu::ImageCopyTexture source;
+    wgpu::TexelCopyTextureInfo source;
     source.texture = texture;
 
     // Create a destination buffer, large enough for 1 texel of any format.
@@ -328,7 +335,7 @@ void SharedTextureMemoryTests::UseInCopy(wgpu::Device& deviceObj, wgpu::Texture&
     bufferDesc.size = 128;
     bufferDesc.usage = wgpu::BufferUsage::CopyDst;
 
-    wgpu::ImageCopyBuffer destination;
+    wgpu::TexelCopyBufferInfo destination;
     destination.buffer = deviceObj.CreateBuffer(&bufferDesc);
 
     wgpu::Extent3D size = {1, 1, 1};
@@ -507,10 +514,10 @@ void SharedTextureMemoryTests::WriteFourColorsToRGBA8Texture(wgpu::Device& devic
 
     wgpu::Extent3D writeSize = {width, height, 1};
 
-    wgpu::ImageCopyTexture dest;
+    wgpu::TexelCopyTextureInfo dest;
     dest.texture = texture;
 
-    wgpu::TextureDataLayout dataLayout = {
+    wgpu::TexelCopyBufferLayout dataLayout = {
         .offset = 0, .bytesPerRow = bytesPerRow, .rowsPerImage = height};
 
     for (uint32_t layer = 0; layer < texture.GetDepthOrArrayLayers(); ++layer) {
@@ -829,9 +836,6 @@ TEST_P(SharedTextureMemoryTests, ImportSharedTextureMemoryNoChain) {
 // Test that it is an error to import a shared fence with no chained struct.
 // Also test that ExportInfo reports an Undefined type for the error fence.
 TEST_P(SharedTextureMemoryTests, ImportSharedFenceNoChain) {
-    // TODO(dawn/42241435): No shared texture memory extensions are supported yet.
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
-
     wgpu::SharedFenceDescriptor desc;
     ASSERT_DEVICE_ERROR_MSG(wgpu::SharedFence fence = device.ImportSharedFence(&desc),
                             HasSubstr("chain"));
@@ -915,9 +919,9 @@ TEST_P(SharedTextureMemoryTests, ImportSharedFenceDeviceDestroyed) {
             UseInCopy(device, texture);
         } else if (properties.usage & wgpu::TextureUsage::CopyDst) {
             wgpu::Extent3D writeSize = {1, 1, 1};
-            wgpu::ImageCopyTexture dest = {};
+            wgpu::TexelCopyTextureInfo dest = {};
             dest.texture = texture;
-            wgpu::TextureDataLayout dataLayout = {};
+            wgpu::TexelCopyBufferLayout dataLayout = {};
             uint64_t data[2];
             device.GetQueue().WriteTexture(&dest, &data, sizeof(data), &dataLayout, &writeSize);
         }
@@ -1527,9 +1531,9 @@ TEST_P(SharedTextureMemoryTests, UseWithoutBegin) {
         }
         if (properties.usage & wgpu::TextureUsage::CopyDst) {
             wgpu::Extent3D writeSize = {1, 1, 1};
-            wgpu::ImageCopyTexture dest = {};
+            wgpu::TexelCopyTextureInfo dest = {};
             dest.texture = texture;
-            wgpu::TextureDataLayout dataLayout = {};
+            wgpu::TexelCopyBufferLayout dataLayout = {};
             uint64_t data[2];
             ASSERT_DEVICE_ERROR_MSG(
                 device.GetQueue().WriteTexture(&dest, &data, sizeof(data), &dataLayout, &writeSize),
@@ -1784,8 +1788,8 @@ TEST_P(SharedTextureMemoryTests, CopyToTextureThenSample) {
         // Copy from the source texture into `texture`.
         {
             wgpu::CommandEncoder encoder = devices[0].CreateCommandEncoder();
-            auto src = utils::CreateImageCopyTexture(srcTex);
-            auto dst = utils::CreateImageCopyTexture(texture);
+            auto src = utils::CreateTexelCopyTextureInfo(srcTex);
+            auto dst = utils::CreateTexelCopyTextureInfo(texture);
             for (uint32_t layer = 0; layer < texture.GetDepthOrArrayLayers(); ++layer) {
                 dst.origin.z = layer;
                 encoder.CopyTextureToTexture(&src, &dst, &texDesc.size);
@@ -1885,8 +1889,8 @@ TEST_P(SharedTextureMemoryTests, BeginEndWithoutUse) {
         // Copy from the source texture into `texture`.
         {
             wgpu::CommandEncoder encoder = devices[0].CreateCommandEncoder();
-            auto src = utils::CreateImageCopyTexture(srcTex);
-            auto dst = utils::CreateImageCopyTexture(texture);
+            auto src = utils::CreateTexelCopyTextureInfo(srcTex);
+            auto dst = utils::CreateTexelCopyTextureInfo(texture);
             for (uint32_t layer = 0; layer < texture.GetDepthOrArrayLayers(); ++layer) {
                 dst.origin.z = layer;
                 encoder.CopyTextureToTexture(&src, &dst, &texDesc.size);
@@ -1978,8 +1982,8 @@ TEST_P(SharedTextureMemoryTests, CopyToTextureThenSample2DArray) {
         // Copy from the source texture into `texture`.
         {
             wgpu::CommandEncoder encoder = devices[0].CreateCommandEncoder();
-            auto src = utils::CreateImageCopyTexture(srcTex);
-            auto dst = utils::CreateImageCopyTexture(texture);
+            auto src = utils::CreateTexelCopyTextureInfo(srcTex);
+            auto dst = utils::CreateTexelCopyTextureInfo(texture);
             for (uint32_t layer = 0; layer < texture.GetDepthOrArrayLayers(); ++layer) {
                 dst.origin.z = layer;
                 encoder.CopyTextureToTexture(&src, &dst, &texDesc.size);
@@ -2245,9 +2249,6 @@ TEST_P(SharedTextureMemoryTests, RenderThenLoseOrDestroyDeviceBeforeEndAccessThe
     // Not supported if using the same device. Not possible to lose one without losing the other.
     DAWN_TEST_UNSUPPORTED_IF(GetParam().mBackend->UseSameDevice());
 
-    // TODO(dawn/42241435): No shared texture memory extensions are supported yet.
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
-
     // crbug.com/358166479
     DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && IsVulkan());
 
@@ -2314,9 +2315,6 @@ TEST_P(SharedTextureMemoryTests, RenderThenLoseOrDestroyDeviceBeforeEndAccessThe
 // Reads should happen strictly after the writes. The final write should wait for the reads.
 TEST_P(SharedTextureMemoryTests, SeparateDevicesWriteThenConcurrentReadThenWrite) {
     DAWN_TEST_UNSUPPORTED_IF(!GetParam().mBackend->SupportsConcurrentRead());
-
-    // TODO(dawn/42241435): No shared texture memory extensions are supported yet.
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
 
     // crbug.com/358166479
     DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && IsVulkan());

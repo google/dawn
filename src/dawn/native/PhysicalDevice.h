@@ -88,6 +88,8 @@ class PhysicalDeviceBase : public RefCounted {
     const std::string& GetDriverDescription() const;
     wgpu::AdapterType GetAdapterType() const;
     wgpu::BackendType GetBackendType() const;
+    uint32_t GetSubgroupMinSize() const;
+    uint32_t GetSubgroupMaxSize() const;
 
     MaybeError ResetInternalDeviceForTesting();
 
@@ -102,7 +104,9 @@ class PhysicalDeviceBase : public RefCounted {
 
     virtual bool SupportsExternalImages() const = 0;
 
-    virtual bool SupportsFeatureLevel(FeatureLevel featureLevel) const = 0;
+    // `instance` is an optional parameter used to log warnings but may be null.
+    virtual bool SupportsFeatureLevel(wgpu::FeatureLevel featureLevel,
+                                      InstanceBase* instance) const = 0;
 
     // Backend-specific force-setting and defaulting device toggles
     virtual void SetupBackendAdapterToggles(dawn::platform::Platform* platform,
@@ -122,7 +126,7 @@ class PhysicalDeviceBase : public RefCounted {
     // caller.
     virtual void PopulateBackendFormatCapabilities(
         wgpu::TextureFormat format,
-        UnpackedPtr<FormatCapabilities>& capabilities) const;
+        UnpackedPtr<DawnFormatCapabilities>& capabilities) const;
 
     virtual ResultOrError<PhysicalDeviceSurfaceCapabilities> GetSurfaceCapabilities(
         InstanceBase* instance,
@@ -137,6 +141,8 @@ class PhysicalDeviceBase : public RefCounted {
     wgpu::AdapterType mAdapterType = wgpu::AdapterType::Unknown;
     gpu_info::DriverVersion mDriverVersion;
     std::string mDriverDescription;
+    uint32_t mSubgroupMinSize = 4;
+    uint32_t mSubgroupMaxSize = 128;
 
     // Juat a wrapper of ValidateFeatureSupportedWithToggles, return true if a feature is supported
     // by this adapter AND suitable with given toggles.

@@ -47,7 +47,9 @@ void CoreDiagnosticRuleParser(::benchmark::State& state) {
     const char* kStrings[] = {
         "deriative_unccformity",   "dlivative_3iformiy",    "derivative_uniforVity",
         "derivative_uniformity",   "derivative_uniform1ty", "derivativeJunifqrmity",
-        "derivative_unifllrmit77",
+        "derivative_unifllrmit77", "subgopppqquniformitHH", "subgrou_cformity",
+        "subgGoup_unifombty",      "subgroup_uniformity",   "suvgroup_uniformiiiy",
+        "subgroWWp8uniformity",    "subgroup_uifoxxmiMy",
     };
     for (auto _ : state) {
         for (auto* str : kStrings) {
@@ -61,8 +63,8 @@ BENCHMARK(CoreDiagnosticRuleParser);
 
 void ChromiumDiagnosticRuleParser(::benchmark::State& state) {
     const char* kStrings[] = {
-        "pqnreachableHHcode", "unrechcbe_cov",     "unreachGblecode",  "unreachable_code",
-        "vnriiachable_code",  "unreac8ablWW_code", "unreMchablxxcode",
+        "unreahaXgge_code", "unreahale_Xodu",    "unrea3hable_code",  "unreachable_code",
+        "unrEachable_code", "uPPrTTacable_code", "uneddchaxxle_code",
     };
     for (auto _ : state) {
         for (auto* str : kStrings) {

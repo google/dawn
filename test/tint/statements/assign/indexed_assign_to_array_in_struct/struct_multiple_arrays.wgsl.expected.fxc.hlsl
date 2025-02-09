@@ -16,12 +16,12 @@ void main() {
   OuterS s1 = (OuterS)0;
   {
     InnerS tint_symbol_1[8] = s1.a1;
-    tint_symbol_1[uniforms[0].x] = v;
+    tint_symbol_1[min(uniforms[0].x, 7u)] = v;
     s1.a1 = tint_symbol_1;
   }
   {
     InnerS tint_symbol_3[8] = s1.a2;
-    tint_symbol_3[uniforms[0].x] = v;
+    tint_symbol_3[min(uniforms[0].x, 7u)] = v;
     s1.a2 = tint_symbol_3;
   }
   return;

@@ -11,7 +11,7 @@ buffer s_block_1_ssbo {
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   v_1.inner = v.inner;
-  v_1.inner[1] = v.inner[0];
-  v_1.inner[1] = v.inner[0].ywxz;
-  v_1.inner[0][1] = v.inner[1].x;
+  v_1.inner[1u] = v.inner[0u];
+  v_1.inner[1u] = v.inner[0u].ywxz;
+  v_1.inner[0u].y = v.inner[1u].x;
 }

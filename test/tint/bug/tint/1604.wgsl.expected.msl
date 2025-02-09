@@ -1,23 +1,29 @@
 #include <metal_stdlib>
-
 using namespace metal;
 
-#define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
+struct tint_module_vars_struct {
+  const constant int* x;
+};
 
-kernel void tint_symbol(const constant int* tint_symbol_1 [[buffer(0)]]) {
-  switch(*(tint_symbol_1)) {
-    case 0: {
-      while(true) {
-        TINT_ISOLATE_UB(tint_volatile_false);
-        return;
+kernel void v(const constant int* x [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.x=x};
+  switch((*tint_module_vars.x)) {
+    case 0:
+    {
+      {
+        uint2 tint_loop_idx = 0u;
+        while(true) {
+          if (all((tint_loop_idx == uint2(4294967295u)))) {
+            break;
+          }
+          return;
+        }
       }
       break;
     }
-    default: {
+    default:
+    {
       break;
     }
   }
-  return;
 }
-

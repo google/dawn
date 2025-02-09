@@ -13,7 +13,11 @@ void main() {
   if ((asfloat(output.Load(0u)) < 0.0f)) {
     int i = int(0);
     {
+      uint2 tint_loop_idx = (0u).xx;
       while(true) {
+        if (all((tint_loop_idx == (4294967295u).xx))) {
+          break;
+        }
         float v_1 = asfloat(output.Load(0u));
         if ((v_1 > float(i))) {
           float v_2 = float(i);
@@ -26,6 +30,10 @@ void main() {
           return;
         }
         {
+          uint tint_low_inc = (tint_loop_idx.x + 1u);
+          tint_loop_idx.x = tint_low_inc;
+          uint tint_carry = uint((tint_low_inc == 0u));
+          tint_loop_idx.y = (tint_loop_idx.y + tint_carry);
           i = (i + int(1));
           if ((i == int(5))) { break; }
         }

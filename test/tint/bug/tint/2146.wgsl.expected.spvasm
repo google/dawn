@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 35
+; Bound: 18
 ; Schema: 0
                OpCapability Shader
                OpCapability Float16
@@ -10,52 +10,27 @@
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
-               OpName %localId "localId"
-               OpName %localIndex "localIndex"
-               OpName %globalId "globalId"
-               OpName %numWorkgroups "numWorkgroups"
-               OpName %workgroupId "workgroupId"
-               OpName %globalId2Index "globalId2Index"
                OpName %main "main"
                OpName %a "a"
                OpName %b "b"
-       %uint = OpTypeInt 32 0
-     %v3uint = OpTypeVector %uint 3
-%_ptr_Private_v3uint = OpTypePointer Private %v3uint
-          %5 = OpConstantNull %v3uint
-    %localId = OpVariable %_ptr_Private_v3uint Private %5
-%_ptr_Private_uint = OpTypePointer Private %uint
-          %8 = OpConstantNull %uint
- %localIndex = OpVariable %_ptr_Private_uint Private %8
-   %globalId = OpVariable %_ptr_Private_v3uint Private %5
-%numWorkgroups = OpVariable %_ptr_Private_v3uint Private %5
-%workgroupId = OpVariable %_ptr_Private_v3uint Private %5
-         %13 = OpTypeFunction %uint
-     %uint_0 = OpConstant %uint 0
        %void = OpTypeVoid
-         %20 = OpTypeFunction %void
+          %3 = OpTypeFunction %void
        %half = OpTypeFloat 16
      %v4half = OpTypeVector %half 4
 %_ptr_Function_v4half = OpTypePointer Function %v4half
-         %26 = OpConstantNull %v4half
+          %9 = OpConstantNull %v4half
           %b = OpConstant %half 0x1p+0
 %_ptr_Function_half = OpTypePointer Function %half
-        %int = OpTypeInt 32 1
-      %int_0 = OpConstant %int 0
-%globalId2Index = OpFunction %uint None %13
-         %14 = OpLabel
-         %15 = OpAccessChain %_ptr_Private_uint %globalId %uint_0
-         %17 = OpLoad %uint %15 None
-               OpReturnValue %17
-               OpFunctionEnd
-       %main = OpFunction %void None %20
-         %21 = OpLabel
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+       %main = OpFunction %void None %3
+          %4 = OpLabel
           %a = OpVariable %_ptr_Function_v4half Function
-               OpStore %a %26
-         %28 = OpAccessChain %_ptr_Function_half %a %int_0
-         %32 = OpLoad %half %28 None
-         %33 = OpFAdd %half %32 %b
-         %34 = OpAccessChain %_ptr_Function_half %a %int_0
-               OpStore %34 %33 None
+               OpStore %a %9
+         %11 = OpAccessChain %_ptr_Function_half %a %uint_0
+         %15 = OpLoad %half %11 None
+         %16 = OpFAdd %half %15 %b
+         %17 = OpAccessChain %_ptr_Function_half %a %uint_0
+               OpStore %17 %16 None
                OpReturn
                OpFunctionEnd

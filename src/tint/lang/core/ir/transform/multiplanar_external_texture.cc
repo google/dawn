@@ -228,11 +228,11 @@ struct State {
                 },
                 [&](CoreBuiltinCall* call) {
                     if (call->Func() == core::BuiltinFn::kTextureDimensions) {
-                        // Use params.visibleSize + vec2u(1, 1) instead of the textureDimensions.
+                        // Use params.apparentSize + vec2u(1, 1) instead of the textureDimensions.
                         b.InsertBefore(call, [&] {
-                            auto* visible_size = b.Access<vec2<u32>>(params, 12_u);
+                            auto* apparent_size = b.Access<vec2<u32>>(params, 12_u);
                             auto* vec2u_1_1 = b.Splat<vec2<u32>>(1_u);
-                            auto* dimensions = b.Add<vec2<u32>>(visible_size, vec2u_1_1);
+                            auto* dimensions = b.Add<vec2<u32>>(apparent_size, vec2u_1_1);
                             dimensions->SetResults(Vector{call->DetachResult()});
                         });
                         call->Destroy();
@@ -316,7 +316,7 @@ struct State {
                            {sym.Register("samplePlane0RectMax"), ty.vec2<f32>()},
                            {sym.Register("samplePlane1RectMin"), ty.vec2<f32>()},
                            {sym.Register("samplePlane1RectMax"), ty.vec2<f32>()},
-                           {sym.Register("visibleSize"), ty.vec2<u32>()},
+                           {sym.Register("apparentSize"), ty.vec2<u32>()},
                            {sym.Register("plane1CoordFactor"), ty.vec2<f32>()}});
         }
         return external_texture_params_struct;
@@ -381,7 +381,7 @@ struct State {
         //                             plane1 : texture_2d<f32>,
         //                             coords : vec2<u32>,
         //                             params : ExternalTextureParams) ->vec4f {
-        //     let clampedCoords = min(coords, params.visibleSize);
+        //     let clampedCoords = min(coords, params.apparentSize);
         //     let plane0_clamped = vec2<u32>(
         //         round(params.loadTransform * vec3<f32>(vec2<f32>(clampedCoords), 1)));
         //     var color : vec4<f32>;
@@ -416,10 +416,10 @@ struct State {
             auto* yuv_to_rgb_conversion_only = b.Access(ty.u32(), params, 1_u);
             auto* yuv_to_rgb_conversion = b.Access(ty.mat3x4<f32>(), params, 2_u);
             auto* load_transform_matrix = b.Access(ty.mat3x2<f32>(), params, 7_u);
-            auto* visible_size = b.Access(ty.vec2<u32>(), params, 12_u);
+            auto* apparent_size = b.Access(ty.vec2<u32>(), params, 12_u);
             auto* plane1_coord_factor = b.Access(ty.vec2<f32>(), params, 13_u);
 
-            auto* clamped_coords = b.Call(vec2u, core::BuiltinFn::kMin, coords, visible_size);
+            auto* clamped_coords = b.Call(vec2u, core::BuiltinFn::kMin, coords, apparent_size);
             auto* clamped_coords_f = b.Convert(vec2f, clamped_coords);
             auto* modified_coords =
                 b.Multiply(vec2f, load_transform_matrix, b.Construct(vec3f, clamped_coords_f, 1_f));

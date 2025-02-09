@@ -39,14 +39,14 @@ void f() {
   int p_a_i_save = i();
   int p_a_i_i_save = i();
   matrix<float16_t, 2, 3> l_a[4] = a_load(0u);
-  matrix<float16_t, 2, 3> l_a_i = a_load_1((16u * uint(p_a_i_save)));
-  const uint scalar_offset_2 = (((16u * uint(p_a_i_save)) + (8u * uint(p_a_i_i_save)))) / 4;
+  matrix<float16_t, 2, 3> l_a_i = a_load_1((16u * min(uint(p_a_i_save), 3u)));
+  const uint scalar_offset_2 = (((16u * min(uint(p_a_i_save), 3u)) + (8u * min(uint(p_a_i_i_save), 1u)))) / 4;
   uint4 ubo_load_5 = a[scalar_offset_2 / 4];
   uint2 ubo_load_4 = ((scalar_offset_2 & 2) ? ubo_load_5.zw : ubo_load_5.xy);
   vector<float16_t, 2> ubo_load_4_xz = vector<float16_t, 2>(f16tof32(ubo_load_4 & 0xFFFF));
   float16_t ubo_load_4_y = f16tof32(ubo_load_4[0] >> 16);
   vector<float16_t, 3> l_a_i_i = vector<float16_t, 3>(ubo_load_4_xz[0], ubo_load_4_y, ubo_load_4_xz[1]);
-  const uint scalar_offset_bytes = (((16u * uint(p_a_i_save)) + (8u * uint(p_a_i_i_save))));
+  const uint scalar_offset_bytes = (((16u * min(uint(p_a_i_save), 3u)) + (8u * min(uint(p_a_i_i_save), 1u))));
   const uint scalar_offset_index = scalar_offset_bytes / 4;
   s.Store<float16_t>(0u, (((float16_t(f16tof32(((a[scalar_offset_index / 4][scalar_offset_index % 4] >> (scalar_offset_bytes % 4 == 0 ? 0 : 16)) & 0xFFFF))) + l_a[0][0].x) + l_a_i[0].x) + l_a_i_i.x));
   return;

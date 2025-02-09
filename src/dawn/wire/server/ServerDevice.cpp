@@ -72,9 +72,9 @@ WireResult Server::DoDevicePopErrorScope(Known<WGPUDevice> device,
     userdata->eventManager = eventManager;
     userdata->future = future;
 
-    mProcs.devicePopErrorScope2(device->handle, {nullptr, WGPUCallbackMode_AllowProcessEvents,
-                                                 ForwardToServer2<&Server::OnDevicePopErrorScope>,
-                                                 userdata.release(), nullptr});
+    mProcs.devicePopErrorScope(device->handle, {nullptr, WGPUCallbackMode_AllowProcessEvents,
+                                                ForwardToServer2<&Server::OnDevicePopErrorScope>,
+                                                userdata.release(), nullptr});
     return WireResult::Success;
 }
 
@@ -85,6 +85,7 @@ void Server::OnDevicePopErrorScope(ErrorScopeUserdata* userdata,
     ReturnDevicePopErrorScopeCallbackCmd cmd;
     cmd.eventManager = userdata->eventManager;
     cmd.future = userdata->future;
+    cmd.status = status;
     cmd.type = type;
     cmd.message = message;
 
@@ -107,7 +108,7 @@ WireResult Server::DoDeviceCreateComputePipelineAsync(
     userdata->future = future;
     userdata->pipelineObjectID = pipeline.id;
 
-    mProcs.deviceCreateComputePipelineAsync2(
+    mProcs.deviceCreateComputePipelineAsync(
         device->handle, descriptor,
         {nullptr, WGPUCallbackMode_AllowProcessEvents,
          ForwardToServer2<&Server::OnCreateComputePipelineAsyncCallback>, userdata.release(),
@@ -127,7 +128,7 @@ void Server::OnCreateComputePipelineAsyncCallback(CreatePipelineAsyncUserData* d
 
     if (status == WGPUCreatePipelineAsyncStatus_Success &&
         FillReservation(data->pipelineObjectID, pipeline) == WireResult::FatalError) {
-        cmd.status = WGPUCreatePipelineAsyncStatus_Unknown;
+        cmd.status = WGPUCreatePipelineAsyncStatus_InstanceDropped;
         cmd.message = ToOutputStringView("Destroyed before request was fulfilled.");
     }
     SerializeCommand(cmd);
@@ -149,7 +150,7 @@ WireResult Server::DoDeviceCreateRenderPipelineAsync(
     userdata->future = future;
     userdata->pipelineObjectID = pipeline.id;
 
-    mProcs.deviceCreateRenderPipelineAsync2(
+    mProcs.deviceCreateRenderPipelineAsync(
         device->handle, descriptor,
         {nullptr, WGPUCallbackMode_AllowProcessEvents,
          ForwardToServer2<&Server::OnCreateRenderPipelineAsyncCallback>, userdata.release(),
@@ -169,7 +170,7 @@ void Server::OnCreateRenderPipelineAsyncCallback(CreatePipelineAsyncUserData* da
 
     if (status == WGPUCreatePipelineAsyncStatus_Success &&
         FillReservation(data->pipelineObjectID, pipeline) == WireResult::FatalError) {
-        cmd.status = WGPUCreatePipelineAsyncStatus_Unknown;
+        cmd.status = WGPUCreatePipelineAsyncStatus_InstanceDropped;
         cmd.message = ToOutputStringView("Destroyed before request was fulfilled.");
     }
     SerializeCommand(cmd);

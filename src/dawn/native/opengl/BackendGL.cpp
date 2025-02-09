@@ -58,9 +58,18 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
     if (options->forceFallbackAdapter) {
         return {};
     }
-    if (!options->compatibilityMode) {
+    if (options->featureLevel != wgpu::FeatureLevel::Compatibility) {
         // Return an empty vector since GL physical devices can only support compatibility mode.
         return {};
+    }
+
+    bool forceES31AndMinExtensions = false;
+    if (auto* togglesDesc = options.Get<DawnTogglesDescriptor>()) {
+        TogglesState toggles =
+            TogglesState::CreateFromTogglesDescriptor(togglesDesc, ToggleStage::Adapter);
+        if (toggles.IsEnabled(Toggle::GLForceES31AndNoExtensions)) {
+            forceES31AndMinExtensions = true;
+        }
     }
 
     std::vector<Ref<PhysicalDeviceBase>> devices;
@@ -80,7 +89,8 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
         }
 
         Ref<PhysicalDevice> device;
-        DAWN_TRY_ASSIGN(device, PhysicalDevice::Create(GetType(), std::move(display)));
+        DAWN_TRY_ASSIGN(device, PhysicalDevice::Create(GetType(), std::move(display),
+                                                       forceES31AndMinExtensions));
         devices.push_back(device);
 
         return {};

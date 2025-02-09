@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 float3 tint_radians(float3 param_0) {
   return param_0 * 0.01745329251994329547;
 }
@@ -14,11 +17,37 @@ void fragment_main() {
   prevent_dce.Store3(0u, asuint(radians_f96258()));
   return;
 }
+//
+// compute_main
+//
+float3 tint_radians(float3 param_0) {
+  return param_0 * 0.01745329251994329547;
+}
+
+RWByteAddressBuffer prevent_dce : register(u0);
+
+float3 radians_f96258() {
+  float3 arg_0 = (1.0f).xxx;
+  float3 res = tint_radians(arg_0);
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store3(0u, asuint(radians_f96258()));
   return;
+}
+//
+// vertex_main
+//
+float3 tint_radians(float3 param_0) {
+  return param_0 * 0.01745329251994329547;
+}
+
+float3 radians_f96258() {
+  float3 arg_0 = (1.0f).xxx;
+  float3 res = tint_radians(arg_0);
+  return res;
 }
 
 struct VertexOutput {

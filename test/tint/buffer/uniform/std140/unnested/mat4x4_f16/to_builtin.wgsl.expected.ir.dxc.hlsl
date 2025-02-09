@@ -29,6 +29,6 @@ matrix<float16_t, 4, 4> v_4(uint start_byte_offset) {
 void f() {
   matrix<float16_t, 4, 4> t = transpose(v_4(0u));
   float16_t l = length(tint_bitcast_to_f16(u[0u].zw));
-  float16_t a = abs(tint_bitcast_to_f16(u[0u].xy).ywxz[0u]);
+  float16_t a = abs(tint_bitcast_to_f16(u[0u].xy).ywxz.x);
 }
 

@@ -34,6 +34,8 @@
 
 #include "dawn/common/CoreFoundationRef.h"
 #include "dawn/common/NSRef.h"
+#include "dawn/native/metal/Forward.h"
+#include "dawn/native/metal/SharedTextureMemoryMTL.h"
 #include "dawn/tests/white_box/SharedTextureMemoryTests.h"
 
 namespace dawn {
@@ -42,6 +44,25 @@ namespace {
 void AddIntegerValue(CFMutableDictionaryRef dictionary, const CFStringRef key, int32_t value) {
     auto number = AcquireCFRef(CFNumberCreate(nullptr, kCFNumberSInt32Type, &value));
     CFDictionaryAddValue(dictionary, key, number.Get());
+}
+
+wgpu::SharedTextureMemory CreateSharedTextureMemoryHelper(const wgpu::Device& device,
+                                                          bool allowStorageBinding = true) {
+    auto dict = AcquireCFRef(CFDictionaryCreateMutable(
+        kCFAllocatorDefault, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks));
+    AddIntegerValue(dict.Get(), kIOSurfaceWidth, 16);
+    AddIntegerValue(dict.Get(), kIOSurfaceHeight, 16);
+    AddIntegerValue(dict.Get(), kIOSurfacePixelFormat, kCVPixelFormatType_32RGBA);
+    AddIntegerValue(dict.Get(), kIOSurfaceBytesPerElement, 4);
+
+    wgpu::SharedTextureMemoryIOSurfaceDescriptor ioSurfaceDesc;
+    ioSurfaceDesc.ioSurface = IOSurfaceCreate(dict.Get());
+    ioSurfaceDesc.allowStorageBinding = allowStorageBinding;
+
+    wgpu::SharedTextureMemoryDescriptor desc;
+    desc.nextInChain = &ioSurfaceDesc;
+
+    return device.ImportSharedTextureMemory(&desc);
 }
 
 class Backend : public SharedTextureMemoryTestBackend {
@@ -86,21 +107,7 @@ class Backend : public SharedTextureMemoryTestBackend {
     // Create one basic shared texture memory. It should support most operations.
     wgpu::SharedTextureMemory CreateSharedTextureMemory(const wgpu::Device& device,
                                                         int layerCount) override {
-        auto dict = AcquireCFRef(CFDictionaryCreateMutable(kCFAllocatorDefault, 0,
-                                                           &kCFTypeDictionaryKeyCallBacks,
-                                                           &kCFTypeDictionaryValueCallBacks));
-        AddIntegerValue(dict.Get(), kIOSurfaceWidth, 16);
-        AddIntegerValue(dict.Get(), kIOSurfaceHeight, 16);
-        AddIntegerValue(dict.Get(), kIOSurfacePixelFormat, kCVPixelFormatType_32RGBA);
-        AddIntegerValue(dict.Get(), kIOSurfaceBytesPerElement, 4);
-
-        wgpu::SharedTextureMemoryIOSurfaceDescriptor ioSurfaceDesc;
-        ioSurfaceDesc.ioSurface = IOSurfaceCreate(dict.Get());
-
-        wgpu::SharedTextureMemoryDescriptor desc;
-        desc.nextInChain = &ioSurfaceDesc;
-
-        return device.ImportSharedTextureMemory(&desc);
+        return CreateSharedTextureMemoryHelper(device);
     }
 
     std::vector<std::vector<wgpu::SharedTextureMemory>> CreatePerDeviceSharedTextureMemories(
@@ -151,6 +158,7 @@ class Backend : public SharedTextureMemoryTestBackend {
 
                 wgpu::SharedTextureMemoryIOSurfaceDescriptor ioSurfaceDesc;
                 ioSurfaceDesc.ioSurface = IOSurfaceCreate(dict.Get());
+                ioSurfaceDesc.allowStorageBinding = true;
 
                 // Internally, the CV enums are defined as their fourcc values. Cast to that and use
                 // it as the label. The fourcc value is a four-character name that can be
@@ -276,6 +284,23 @@ TEST_P(SharedTextureMemoryTests, SharedFenceExportInfoInvalidChainedStruct) {
     exportInfo.nextInChain = &otherStruct;
 
     ASSERT_DEVICE_ERROR(fence.ExportInfo(&exportInfo));
+}
+
+TEST_P(SharedTextureMemoryTests, DisallowStorageBinding) {
+    wgpu::SharedTextureMemory memory =
+        CreateSharedTextureMemoryHelper(device, /*allowStorageBinding=*/false);
+
+    wgpu::SharedTextureMemoryProperties properties;
+    memory.GetProperties(&properties);
+
+    EXPECT_FALSE(properties.usage & wgpu::TextureUsage::StorageBinding);
+
+    const dawn::native::metal::SharedTextureMemory* memoryMtl =
+        dawn::native::metal::ToBackend(dawn::native::FromAPI(memory.Get()));
+
+    EXPECT_FALSE(memoryMtl->GetMtlTextureUsage() & MTLTextureUsageShaderWrite);
+    EXPECT_TRUE(memoryMtl->GetMtlPlaneTextures()[0]);
+    EXPECT_EQ(memoryMtl->GetMtlPlaneTextures()[0].Get().usage, memoryMtl->GetMtlTextureUsage());
 }
 
 DAWN_INSTANTIATE_PREFIXED_TEST_P(Metal,

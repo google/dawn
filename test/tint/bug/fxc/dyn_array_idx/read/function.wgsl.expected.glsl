@@ -6,7 +6,7 @@ struct UBO {
 };
 
 struct Result {
-  int tint_symbol;
+  int member_0;
 };
 
 struct S {
@@ -24,6 +24,6 @@ buffer result_block_1_ssbo {
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   S s = S(int[64](0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
-  int v_2 = v.inner.dynamic_idx;
-  v_1.inner.tint_symbol = s.data[v_2];
+  uint v_2 = min(uint(v.inner.dynamic_idx), 63u);
+  v_1.inner.member_0 = s.data[v_2];
 }

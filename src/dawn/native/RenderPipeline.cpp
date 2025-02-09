@@ -29,18 +29,17 @@
 
 #include <algorithm>
 #include <cmath>
-#include <string>
 
-#include "absl/strings/str_format.h"
 #include "dawn/common/BitSetIterator.h"
 #include "dawn/common/Enumerator.h"
 #include "dawn/common/ityp_array.h"
+#include "dawn/common/ityp_bitset.h"
 #include "dawn/common/ityp_span.h"
+#include "dawn/native/Adapter.h"
 #include "dawn/native/ChainUtils.h"
 #include "dawn/native/CommandValidation.h"
 #include "dawn/native/Commands.h"
 #include "dawn/native/Device.h"
-#include "dawn/native/Instance.h"
 #include "dawn/native/InternalPipelineStore.h"
 #include "dawn/native/ObjectContentHasher.h"
 #include "dawn/native/ObjectType_autogen.h"
@@ -178,11 +177,6 @@ MaybeError ValidateVertexBufferLayout(DeviceBase* device,
     DAWN_INVALID_IF(buffer->arrayStride % 4 != 0,
                     "Vertex buffer arrayStride (%u) is not a multiple of 4.", buffer->arrayStride);
 
-    DAWN_INVALID_IF(
-        buffer->stepMode == wgpu::VertexStepMode::VertexBufferNotUsed && buffer->attributeCount > 0,
-        "attributeCount (%u) is not zero although vertex buffer stepMode is %s.",
-        buffer->attributeCount, wgpu::VertexStepMode::VertexBufferNotUsed);
-
     for (uint32_t i = 0; i < buffer->attributeCount; ++i) {
         DAWN_TRY_CONTEXT(ValidateVertexAttribute(device, &buffer->attributes[i], metadata,
                                                  buffer->arrayStride, attributesSetMask),
@@ -201,9 +195,12 @@ ResultOrError<ShaderModuleEntryPoint> ValidateVertexState(
 
     const CombinedLimits& limits = device->GetLimits();
 
-    DAWN_INVALID_IF(descriptor->bufferCount > limits.v1.maxVertexBuffers,
-                    "Vertex buffer count (%u) exceeds the maximum number of vertex buffers (%u).",
-                    descriptor->bufferCount, limits.v1.maxVertexBuffers);
+    const uint32_t maxVertexBuffers = limits.v1.maxVertexBuffers;
+    DAWN_INVALID_IF(descriptor->bufferCount > maxVertexBuffers,
+                    "Vertex buffer count (%u) exceeds the maximum number of vertex buffers (%u).%s",
+                    descriptor->bufferCount, maxVertexBuffers,
+                    DAWN_INCREASE_LIMIT_MESSAGE(device->GetAdapter(), maxVertexBuffers,
+                                                descriptor->bufferCount));
 
     ShaderModuleEntryPoint entryPoint;
     DAWN_TRY_ASSIGN_CONTEXT(
@@ -522,17 +519,8 @@ MaybeError ValidateColorTargetState(
     DAWN_INVALID_IF(!format->IsColor() || !format->isRenderable,
                     "Color format (%s) is not color renderable.", format->format);
 
-    if (descriptor.blend && !format->isBlendable) {
-        DAWN_INVALID_IF(
-            !(format->GetAspectInfo(Aspect::Color).supportedSampleTypes & SampleTypeBit::Float),
-            "Blending is enabled but color format (%s) is not blendable.", format->format);
-
-        std::string warning = absl::StrFormat(
-            "Blending for color format (%s) requires the %s feature. Enabling "
-            "blendability with %s was an implementation bug and is deprecated.",
-            format->format, ToAPI(Feature::Float32Blendable), ToAPI(Feature::Float32Filterable));
-        device->EmitWarningOnce(warning.c_str());
-    }
+    DAWN_INVALID_IF(descriptor.blend && !format->isBlendable,
+                    "Blending is enabled but color format (%s) is not blendable.", format->format);
 
     if (!fragmentWritten) {
         DAWN_INVALID_IF(
@@ -671,8 +659,11 @@ ResultOrError<ShaderModuleEntryPoint> ValidateFragmentState(DeviceBase* device,
 
     uint32_t maxColorAttachments = device->GetLimits().v1.maxColorAttachments;
     DAWN_INVALID_IF(descriptor->targetCount > maxColorAttachments,
-                    "Number of targets (%u) exceeds the maximum (%u).", descriptor->targetCount,
-                    maxColorAttachments);
+                    "Number of targets (%u) exceeds the maximum (%u).%s", descriptor->targetCount,
+                    maxColorAttachments,
+                    DAWN_INCREASE_LIMIT_MESSAGE(device->GetAdapter(), maxColorAttachments,
+                                                descriptor->targetCount));
+
     auto targets =
         ityp::SpanFromUntyped<ColorAttachmentIndex>(descriptor->targets, descriptor->targetCount);
 
@@ -958,7 +949,8 @@ std::vector<StageAndDescriptor> GetRenderStagesAndSetPlaceholderShader(
 // RenderPipelineBase
 
 RenderPipelineBase::RenderPipelineBase(DeviceBase* device,
-                                       const UnpackedPtr<RenderPipelineDescriptor>& descriptor)
+                                       const UnpackedPtr<RenderPipelineDescriptor>& descriptor,
+                                       ImmediateConstantMask requiredInternalImmediateConstants)
     : PipelineBase(device,
                    descriptor->layout,
                    descriptor->label,
@@ -968,29 +960,26 @@ RenderPipelineBase::RenderPipelineBase(DeviceBase* device,
 
     auto buffers =
         ityp::SpanFromUntyped<VertexBufferSlot>(descriptor->vertex.buffers, mVertexBufferCount);
-    for (auto [slot, bufferOrig] : Enumerate(buffers)) {
+    for (auto [slot, buffer] : Enumerate(buffers)) {
         // Skip unused slots
-        if (bufferOrig.stepMode == wgpu::VertexStepMode::VertexBufferNotUsed) {
+        if (buffer.stepMode == wgpu::VertexStepMode::Undefined && buffer.attributeCount == 0) {
             continue;
         }
 
-        // Make a local copy with defaulting applied, before copying the
-        // now-defaulted values into mVertexBufferInfos.
-        VertexBufferLayout buffer = bufferOrig.WithTrivialFrontendDefaults();
-
         mVertexBuffersUsed.set(slot);
         mVertexBufferInfos[slot].arrayStride = buffer.arrayStride;
-        mVertexBufferInfos[slot].stepMode = buffer.stepMode;
+        mVertexBufferInfos[slot].stepMode = (buffer.stepMode == wgpu::VertexStepMode::Undefined)
+                                                ? wgpu::VertexStepMode::Vertex
+                                                : buffer.stepMode;
         mVertexBufferInfos[slot].usedBytesInStride = 0;
         mVertexBufferInfos[slot].lastStride = 0;
-        switch (buffer.stepMode) {
+        switch (mVertexBufferInfos[slot].stepMode) {
             case wgpu::VertexStepMode::Vertex:
                 mVertexBuffersUsedAsVertexBuffer.set(slot);
                 break;
             case wgpu::VertexStepMode::Instance:
                 mVertexBuffersUsedAsInstanceBuffer.set(slot);
                 break;
-            case wgpu::VertexStepMode::VertexBufferNotUsed:
             case wgpu::VertexStepMode::Undefined:
                 DAWN_UNREACHABLE();
         }

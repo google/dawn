@@ -52,8 +52,6 @@ wgpu::ErrorType ToWGPUErrorType(InternalErrorType type) {
             return wgpu::ErrorType::OutOfMemory;
         case InternalErrorType::Internal:
             return wgpu::ErrorType::Internal;
-        case InternalErrorType::DeviceLost:
-            return wgpu::ErrorType::DeviceLost;
 
         default:
             return wgpu::ErrorType::Unknown;
@@ -66,8 +64,6 @@ InternalErrorType FromWGPUErrorType(wgpu::ErrorType type) {
             return InternalErrorType::Validation;
         case wgpu::ErrorType::OutOfMemory:
             return InternalErrorType::OutOfMemory;
-        case wgpu::ErrorType::DeviceLost:
-            return InternalErrorType::DeviceLost;
         default:
             return InternalErrorType::Internal;
     }

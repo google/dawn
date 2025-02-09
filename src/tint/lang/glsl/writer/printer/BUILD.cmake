@@ -55,20 +55,22 @@ tint_target_add_dependencies(tint_lang_glsl_writer_printer lib
   tint_lang_glsl
   tint_lang_glsl_intrinsic
   tint_lang_glsl_ir
+  tint_lang_wgsl
+  tint_lang_wgsl_ast
+  tint_lang_wgsl_ast_transform
+  tint_lang_wgsl_program
+  tint_lang_wgsl_sem
+  tint_utils
   tint_utils_containers
   tint_utils_diagnostic
-  tint_utils_generator
   tint_utils_ice
-  tint_utils_id
   tint_utils_macros
   tint_utils_math
   tint_utils_memory
-  tint_utils_reflection
   tint_utils_result
   tint_utils_rtti
   tint_utils_symbol
   tint_utils_text
-  tint_utils_traits
 )
 
 tint_target_add_external_dependencies(tint_lang_glsl_writer_printer lib

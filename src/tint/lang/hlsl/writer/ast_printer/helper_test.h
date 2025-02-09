@@ -102,8 +102,7 @@ class TestHelperBase : public BODY, public ProgramBuilder {
         ast::transform::DataMap transform_data;
         ast::transform::DataMap outputs;
         transform_data.Add<ast::transform::Renamer::Config>(
-            ast::transform::Renamer::Target::kHlslKeywords,
-            /* preserve_unicode */ true);
+            ast::transform::Renamer::Target::kHlslKeywords);
         transform_manager.Add<tint::ast::transform::Renamer>();
         auto result = transform_manager.Run(sanitized_result.program, transform_data, outputs);
         if (!result.IsValid()) {

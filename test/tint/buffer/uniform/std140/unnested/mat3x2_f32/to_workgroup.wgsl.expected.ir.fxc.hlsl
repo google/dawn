@@ -17,14 +17,14 @@ float3x2 v(uint start_byte_offset) {
 }
 
 void f_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     w = float3x2((0.0f).xx, (0.0f).xx, (0.0f).xx);
   }
   GroupMemoryBarrierWithGroupSync();
   w = v(0u);
-  w[int(1)] = asfloat(u[0u].xy);
-  w[int(1)] = asfloat(u[0u].xy).yx;
-  w[int(0)][int(1)] = asfloat(u[0u].z);
+  w[1u] = asfloat(u[0u].xy);
+  w[1u] = asfloat(u[0u].xy).yx;
+  w[0u].y = asfloat(u[0u].z);
 }
 
 [numthreads(1, 1, 1)]

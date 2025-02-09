@@ -9,7 +9,7 @@ uint tint_mod_u32(uint lhs, uint rhs) {
 }
 
 void f_inner(uint3 v) {
-  uint l = (v[0u] << (tint_mod_u32(v[1u], 1u) & 31u));
+  uint l = (v.x << (tint_mod_u32(v.y, 1u) & 31u));
 }
 
 [numthreads(1, 1, 1)]

@@ -1,18 +1,5 @@
 #include <metal_stdlib>
-
 using namespace metal;
-
-template<typename T, size_t N>
-struct tint_array {
-    const constant T& operator[](size_t i) const constant { return elements[i]; }
-    device T& operator[](size_t i) device { return elements[i]; }
-    const device T& operator[](size_t i) const device { return elements[i]; }
-    thread T& operator[](size_t i) thread { return elements[i]; }
-    const thread T& operator[](size_t i) const thread { return elements[i]; }
-    threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-    const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-    T elements[N];
-};
 
 struct S1 {
   int a;
@@ -32,34 +19,38 @@ struct S3 {
   S2 i;
 };
 
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
+
 struct T {
   tint_array<int, 2> a;
 };
 
-kernel void tint_symbol() {
+kernel void v() {
   int const x = 42;
   S1 const empty = S1{};
   S1 const nonempty = S1{.a=1, .b=2, .c=3, .d=4};
-  S1 const nonempty_with_expr = {.a=1, .b=x, .c=as_type<int>((as_type<uint>(x) + as_type<uint>(1))), .d=nonempty.d};
+  S1 const nonempty_with_expr = S1{.a=1, .b=x, .c=as_type<int>((as_type<uint>(x) + as_type<uint>(1))), .d=nonempty.d};
   S3 const nested_empty = S3{};
   S3 const nested_nonempty = S3{.g=1, .h=S1{.a=2, .b=3, .c=4, .d=5}, .i=S2{.e=6, .f=S1{.a=7, .b=8, .c=9, .d=10}}};
-  S1 const tint_symbol_1 = {.a=2, .b=x, .c=as_type<int>((as_type<uint>(x) + as_type<uint>(1))), .d=nested_nonempty.i.f.d};
-  S2 const tint_symbol_2 = {.e=6, .f=nonempty};
-  S3 const nested_nonempty_with_expr = {.g=1, .h=tint_symbol_1, .i=tint_symbol_2};
+  S1 const v_1 = S1{.a=2, .b=x, .c=as_type<int>((as_type<uint>(x) + as_type<uint>(1))), .d=nested_nonempty.i.f.d};
+  S3 const nested_nonempty_with_expr = S3{.g=1, .h=v_1, .i=S2{.e=6, .f=nonempty}};
   int const subexpr_empty = 0;
   int const subexpr_nonempty = 2;
-  S1 const tint_symbol_3 = {.a=1, .b=x, .c=as_type<int>((as_type<uint>(x) + as_type<uint>(1))), .d=nonempty.d};
-  int const subexpr_nonempty_with_expr = tint_symbol_3.c;
+  int const subexpr_nonempty_with_expr = S1{.a=1, .b=x, .c=as_type<int>((as_type<uint>(x) + as_type<uint>(1))), .d=nonempty.d}.c;
   S1 const subexpr_nested_empty = S1{};
   S1 const subexpr_nested_nonempty = S1{.a=2, .b=3, .c=4, .d=5};
-  S1 const tint_symbol_4 = {.a=2, .b=x, .c=as_type<int>((as_type<uint>(x) + as_type<uint>(1))), .d=nested_nonempty.i.f.d};
-  S2 const tint_symbol_5 = {.e=1, .f=tint_symbol_4};
-  S1 const subexpr_nested_nonempty_with_expr = tint_symbol_5.f;
+  S1 const subexpr_nested_nonempty_with_expr = S2{.e=1, .f=S1{.a=2, .b=x, .c=as_type<int>((as_type<uint>(x) + as_type<uint>(1))), .d=nested_nonempty.i.f.d}}.f;
   tint_array<T, 2> const aosoa_empty = tint_array<T, 2>{};
   tint_array<T, 2> const aosoa_nonempty = tint_array<T, 2>{T{.a=tint_array<int, 2>{1, 2}}, T{.a=tint_array<int, 2>{3, 4}}};
-  tint_array<int, 2> const tint_symbol_6 = tint_array<int, 2>{1, as_type<int>((as_type<uint>(aosoa_nonempty[0].a[0]) + as_type<uint>(1)))};
-  T const tint_symbol_7 = {.a=tint_symbol_6};
-  tint_array<T, 2> const aosoa_nonempty_with_expr = tint_array<T, 2>{tint_symbol_7, aosoa_nonempty[1]};
-  return;
+  tint_array<T, 2> const aosoa_nonempty_with_expr = tint_array<T, 2>{T{.a=tint_array<int, 2>{1, as_type<int>((as_type<uint>(aosoa_nonempty[0u].a[0u]) + as_type<uint>(1)))}}, aosoa_nonempty[1u]};
 }
-

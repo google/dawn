@@ -6,9 +6,7 @@ vec4 m() {
   return vec4(t);
 }
 ivec4 tint_v4f32_to_v4i32(vec4 value) {
-  ivec4 v_1 = ivec4(value);
-  ivec4 v_2 = mix(ivec4((-2147483647 - 1)), v_1, greaterThanEqual(value, vec4(-2147483648.0f)));
-  return mix(ivec4(2147483647), v_2, lessThanEqual(value, vec4(2147483520.0f)));
+  return mix(ivec4(2147483647), mix(ivec4((-2147483647 - 1)), ivec4(value), greaterThanEqual(value, vec4(-2147483648.0f))), lessThanEqual(value, vec4(2147483520.0f)));
 }
 void f() {
   ivec4 v = tint_v4f32_to_v4i32(m());

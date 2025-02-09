@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 RWByteAddressBuffer prevent_dce : register(u0);
 
 int3 countTrailingZeros_acfacb() {
@@ -9,11 +12,27 @@ void fragment_main() {
   prevent_dce.Store3(0u, asuint(countTrailingZeros_acfacb()));
   return;
 }
+//
+// compute_main
+//
+RWByteAddressBuffer prevent_dce : register(u0);
+
+int3 countTrailingZeros_acfacb() {
+  int3 res = (0).xxx;
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store3(0u, asuint(countTrailingZeros_acfacb()));
   return;
+}
+//
+// vertex_main
+//
+int3 countTrailingZeros_acfacb() {
+  int3 res = (0).xxx;
+  return res;
 }
 
 struct VertexOutput {

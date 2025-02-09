@@ -57,8 +57,8 @@ void main() {
     }
   }
   tint_store_and_preserve_padding(v_5);
-  mat2x3 v_8 = mat2x3(v.inner[2].col0, v.inner[2].col1);
-  tint_store_and_preserve_padding_1(uint[1](uint(1)), v_8);
-  v_1.inner[1][0] = v.inner[0].col1.zxy;
-  v_1.inner[1][0][0u] = v.inner[0].col1.x;
+  mat2x3 v_8 = mat2x3(v.inner[2u].col0, v.inner[2u].col1);
+  tint_store_and_preserve_padding_1(uint[1](1u), v_8);
+  v_1.inner[1u][0u] = v.inner[0u].col1.zxy;
+  v_1.inner[1u][0u].x = v.inner[0u].col1.x;
 }

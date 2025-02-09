@@ -13,7 +13,10 @@ void s1_store(uint offset, InnerS value) {
 
 [numthreads(1, 1, 1)]
 void main() {
+  uint tint_symbol_1 = 0u;
+  s1.GetDimensions(tint_symbol_1);
+  uint tint_symbol_2 = ((tint_symbol_1 - 0u) / 4u);
   InnerS v = (InnerS)0;
-  s1_store((4u * uniforms[0].x), v);
+  s1_store((4u * min(uniforms[0].x, (tint_symbol_2 - 1u))), v);
   return;
 }

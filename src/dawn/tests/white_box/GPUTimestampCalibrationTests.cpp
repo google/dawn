@@ -165,7 +165,7 @@ class GPUTimestampCalibrationTests : public DawnTestWithParams<GPUTimestampCalib
                                            const wgpu::QuerySet& querySet) {
         switch (GetParam().mFeatureName) {
             case wgpu::FeatureName::TimestampQuery: {
-                wgpu::ComputePassTimestampWrites timestampWrites = {
+                wgpu::PassTimestampWrites timestampWrites = {
                     .querySet = querySet, .beginningOfPassWriteIndex = 0, .endOfPassWriteIndex = 1};
 
                 wgpu::ComputePassDescriptor descriptor;
@@ -198,7 +198,7 @@ class GPUTimestampCalibrationTests : public DawnTestWithParams<GPUTimestampCalib
 
         switch (GetParam().mFeatureName) {
             case wgpu::FeatureName::TimestampQuery: {
-                wgpu::RenderPassTimestampWrites timestampWrites = {
+                wgpu::PassTimestampWrites timestampWrites = {
                     .querySet = querySet, .beginningOfPassWriteIndex = 0, .endOfPassWriteIndex = 1};
                 renderPass.renderPassInfo.timestampWrites = &timestampWrites;
 

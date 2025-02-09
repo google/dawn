@@ -1,8 +1,11 @@
 #include <metal_stdlib>
-
 using namespace metal;
-fragment void tint_symbol(const constant float2* tint_symbol_1 [[buffer(0)]]) {
-  float a = (*(tint_symbol_1))[0];
-  return;
-}
 
+struct tint_module_vars_struct {
+  const constant float2* weights;
+};
+
+fragment void v(const constant float2* weights [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.weights=weights};
+  float a = (*tint_module_vars.weights).x;
+}

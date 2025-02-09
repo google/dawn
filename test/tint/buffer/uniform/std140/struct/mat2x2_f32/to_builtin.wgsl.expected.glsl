@@ -40,7 +40,7 @@ uniform u_block_std140_1_ubo {
 } v;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  mat2 t = transpose(mat2(v.inner[2].m_col0, v.inner[2].m_col1));
-  float l = length(v.inner[0].m_col1.yx);
-  float a = abs(v.inner[0].m_col1.yx[0u]);
+  mat2 t = transpose(mat2(v.inner[2u].m_col0, v.inner[2u].m_col1));
+  float l = length(v.inner[0u].m_col1.yx);
+  float a = abs(v.inner[0u].m_col1.yx.x);
 }

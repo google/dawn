@@ -1,20 +1,25 @@
+//
+// fragment_main
+//
 #version 460
 precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer prevent_dce_block_1_ssbo {
+buffer f_prevent_dce_block_ssbo {
   ivec4 inner;
 } v;
-uniform highp isamplerCubeArray arg_1_arg_2;
+uniform highp isamplerCubeArray f_arg_1_arg_2;
 ivec4 textureGather_c0640c() {
-  vec4 v_1 = vec4(vec3(1.0f), float(1));
-  ivec4 res = textureGather(arg_1_arg_2, v_1, int(1));
+  ivec4 res = textureGather(f_arg_1_arg_2, vec4(vec3(1.0f), float(1)), 1);
   return res;
 }
 void main() {
   v.inner = textureGather_c0640c();
 }
+//
+// compute_main
+//
 #version 460
 
 layout(binding = 0, std430)
@@ -23,14 +28,16 @@ buffer prevent_dce_block_1_ssbo {
 } v;
 uniform highp isamplerCubeArray arg_1_arg_2;
 ivec4 textureGather_c0640c() {
-  vec4 v_1 = vec4(vec3(1.0f), float(1));
-  ivec4 res = textureGather(arg_1_arg_2, v_1, int(1));
+  ivec4 res = textureGather(arg_1_arg_2, vec4(vec3(1.0f), float(1)), 1);
   return res;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   v.inner = textureGather_c0640c();
 }
+//
+// vertex_main
+//
 #version 460
 
 
@@ -39,24 +46,21 @@ struct VertexOutput {
   ivec4 prevent_dce;
 };
 
-uniform highp isamplerCubeArray arg_1_arg_2;
-layout(location = 0) flat out ivec4 vertex_main_loc0_Output;
+uniform highp isamplerCubeArray v_arg_1_arg_2;
+layout(location = 0) flat out ivec4 tint_interstage_location0;
 ivec4 textureGather_c0640c() {
-  vec4 v = vec4(vec3(1.0f), float(1));
-  ivec4 res = textureGather(arg_1_arg_2, v, int(1));
+  ivec4 res = textureGather(v_arg_1_arg_2, vec4(vec3(1.0f), float(1)), 1);
   return res;
 }
 VertexOutput vertex_main_inner() {
-  VertexOutput tint_symbol = VertexOutput(vec4(0.0f), ivec4(0));
-  tint_symbol.pos = vec4(0.0f);
-  tint_symbol.prevent_dce = textureGather_c0640c();
-  return tint_symbol;
+  VertexOutput v = VertexOutput(vec4(0.0f), ivec4(0));
+  v.pos = vec4(0.0f);
+  v.prevent_dce = textureGather_c0640c();
+  return v;
 }
 void main() {
   VertexOutput v_1 = vertex_main_inner();
-  gl_Position = v_1.pos;
-  gl_Position[1u] = -(gl_Position.y);
-  gl_Position[2u] = ((2.0f * gl_Position.z) - gl_Position.w);
-  vertex_main_loc0_Output = v_1.prevent_dce;
+  gl_Position = vec4(v_1.pos.x, -(v_1.pos.y), ((2.0f * v_1.pos.z) - v_1.pos.w), v_1.pos.w);
+  tint_interstage_location0 = v_1.prevent_dce;
   gl_PointSize = 1.0f;
 }

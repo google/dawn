@@ -1,16 +1,29 @@
+//
+// fragment_main
+//
 
 RWByteAddressBuffer prevent_dce : register(u0);
 int2 subgroupShuffleUp_db5bcb() {
   int2 arg_0 = (int(1)).xx;
   uint arg_1 = 1u;
-  int2 v = arg_0;
-  uint v_1 = arg_1;
-  int2 res = WaveReadLaneAt(v, (WaveGetLaneIndex() - v_1));
+  int2 res = WaveReadLaneAt(arg_0, (WaveGetLaneIndex() - arg_1));
   return res;
 }
 
 void fragment_main() {
   prevent_dce.Store2(0u, asuint(subgroupShuffleUp_db5bcb()));
+}
+
+//
+// compute_main
+//
+
+RWByteAddressBuffer prevent_dce : register(u0);
+int2 subgroupShuffleUp_db5bcb() {
+  int2 arg_0 = (int(1)).xx;
+  uint arg_1 = 1u;
+  int2 res = WaveReadLaneAt(arg_0, (WaveGetLaneIndex() - arg_1));
+  return res;
 }
 
 [numthreads(1, 1, 1)]

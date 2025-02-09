@@ -109,8 +109,7 @@ TEST_F(HlslWriterTest, BuiltinTrunc) {
 void foo() {
   float v = 0.0f;
   float v_1 = v;
-  float v_2 = floor(v_1);
-  float val = (((v_1 < 0.0f)) ? (ceil(v_1)) : (v_2));
+  float val = (((v_1 < 0.0f)) ? (ceil(v_1)) : (floor(v_1)));
 }
 
 )");
@@ -133,8 +132,7 @@ TEST_F(HlslWriterTest, BuiltinTruncVec) {
 void foo() {
   float3 v = (2.0f).xxx;
   float3 v_1 = v;
-  float3 v_2 = floor(v_1);
-  float3 val = (((v_1 < (0.0f).xxx)) ? (ceil(v_1)) : (v_2));
+  float3 val = (((v_1 < (0.0f).xxx)) ? (ceil(v_1)) : (floor(v_1)));
 }
 
 )");
@@ -157,8 +155,7 @@ TEST_F(HlslWriterTest, BuiltinTruncF16) {
 void foo() {
   float16_t v = float16_t(0.0h);
   float16_t v_1 = v;
-  float16_t v_2 = floor(v_1);
-  float16_t val = (((v_1 < float16_t(0.0h))) ? (ceil(v_1)) : (v_2));
+  float16_t val = (((v_1 < float16_t(0.0h))) ? (ceil(v_1)) : (floor(v_1)));
 }
 
 )");
@@ -498,7 +495,7 @@ struct foo_inputs {
 
 groupshared SB v;
 void foo_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     v.padding = (0.0f).xxxx;
     int v_1 = int(0);
     InterlockedExchange(v.a, int(0), v_1);
@@ -549,7 +546,7 @@ struct foo_inputs {
 
 groupshared SB v;
 void foo_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     v.padding = (0.0f).xxxx;
     int v_1 = int(0);
     InterlockedExchange(v.a, int(0), v_1);
@@ -603,7 +600,7 @@ struct foo_inputs {
 
 groupshared SB v;
 void foo_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     v.padding = (0.0f).xxxx;
     int v_1 = int(0);
     InterlockedExchange(v.a, int(0), v_1);
@@ -665,7 +662,7 @@ struct foo_inputs {
 
 groupshared SB v;
 void foo_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     v.padding = (0.0f).xxxx;
     int v_1 = int(0);
     InterlockedExchange(v.a, int(0), v_1);
@@ -708,7 +705,7 @@ TEST_P(HlslBuiltinWorkgroupAtomic, Access) {
 
 groupshared int v;
 void foo_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     int v_1 = int(0);
     InterlockedExchange(v, int(0), v_1);
   }
@@ -838,7 +835,7 @@ TEST_F(HlslWriterTest, BuiltinTextureNumLevels1D) {
     EXPECT_EQ(output_.hlsl, R"(
 void foo(Texture1D<float4> t) {
   uint2 v = (0u).xx;
-  t.GetDimensions(0u, v[0u], v[1u]);
+  t.GetDimensions(0u, v.x, v.y);
   uint d = v.y;
 }
 
@@ -865,7 +862,7 @@ TEST_F(HlslWriterTest, BuiltinTextureNumLevels2D) {
     EXPECT_EQ(output_.hlsl, R"(
 void foo(Texture2D<float4> t) {
   uint3 v = (0u).xxx;
-  t.GetDimensions(0u, v[0u], v[1u], v[2u]);
+  t.GetDimensions(0u, v.x, v.y, v.z);
   uint d = v.z;
 }
 
@@ -892,7 +889,7 @@ TEST_F(HlslWriterTest, BuiltinTextureNumLevels3D) {
     EXPECT_EQ(output_.hlsl, R"(
 void foo(Texture3D<float4> t) {
   uint4 v = (0u).xxxx;
-  t.GetDimensions(0u, v[0u], v[1u], v[2u], v[3u]);
+  t.GetDimensions(0u, v.x, v.y, v.z, v.w);
   uint d = v.w;
 }
 
@@ -946,7 +943,7 @@ TEST_F(HlslWriterTest, BuiltinTextureDimension2D) {
     EXPECT_EQ(output_.hlsl, R"(
 void foo(Texture2D<float4> t) {
   uint2 v = (0u).xx;
-  t.GetDimensions(v[0u], v[1u]);
+  t.GetDimensions(v.x, v.y);
   uint2 d = v;
 }
 
@@ -973,10 +970,8 @@ TEST_F(HlslWriterTest, BuiltinTextureDimension2dLOD) {
     EXPECT_EQ(output_.hlsl, R"(
 void foo(Texture2D<float4> t) {
   uint3 v = (0u).xxx;
-  t.GetDimensions(0u, v[0u], v[1u], v[2u]);
-  uint3 v_1 = (0u).xxx;
-  t.GetDimensions(uint(min(uint(int(1)), (v.z - 1u))), v_1[0u], v_1[1u], v_1[2u]);
-  uint2 d = v_1.xy;
+  t.GetDimensions(uint(int(1)), v.x, v.y, v.z);
+  uint2 d = v.xy;
 }
 
 [numthreads(1, 1, 1)]
@@ -1002,7 +997,7 @@ TEST_F(HlslWriterTest, BuiltinTextureDimension3D) {
     EXPECT_EQ(output_.hlsl, R"(
 void foo(Texture3D<float4> t) {
   uint3 v = (0u).xxx;
-  t.GetDimensions(v[0u], v[1u], v[2u]);
+  t.GetDimensions(v.x, v.y, v.z);
   uint3 d = v;
 }
 
@@ -1029,7 +1024,7 @@ TEST_F(HlslWriterTest, BuiltinTextureLayers2dArray) {
     EXPECT_EQ(output_.hlsl, R"(
 void foo(Texture2DArray<float4> t) {
   uint3 v = (0u).xxx;
-  t.GetDimensions(v[0u], v[1u], v[2u]);
+  t.GetDimensions(v.x, v.y, v.z);
   uint d = v.z;
 }
 
@@ -1056,7 +1051,7 @@ TEST_F(HlslWriterTest, BuiltinTextureNumLayersCubeArray) {
     EXPECT_EQ(output_.hlsl, R"(
 void foo(TextureCubeArray<float4> t) {
   uint3 v = (0u).xxx;
-  t.GetDimensions(v[0u], v[1u], v[2u]);
+  t.GetDimensions(v.x, v.y, v.z);
   uint d = v.z;
 }
 
@@ -1083,7 +1078,7 @@ TEST_F(HlslWriterTest, BuiltinTextureNumSamples) {
     EXPECT_EQ(output_.hlsl, R"(
 void foo(Texture2DMS<float4> t) {
   uint3 v = (0u).xxx;
-  t.GetDimensions(v[0u], v[1u], v[2u]);
+  t.GetDimensions(v.x, v.y, v.z);
   uint d = v.z;
 }
 
@@ -1115,7 +1110,7 @@ TEST_F(HlslWriterTest, BuiltinTextureLoad_1DF32) {
 Texture1D<float4> v : register(t0);
 void foo() {
   int v_1 = int(1u);
-  float4 x = float4(v.Load(int2(v_1, int(3u))));
+  float4 x = v.Load(int2(v_1, int(3u)));
 }
 
 )");
@@ -1142,7 +1137,7 @@ TEST_F(HlslWriterTest, BuiltinTextureLoad_2DLevelI32) {
 Texture2D<int4> v : register(t0);
 void foo() {
   int2 v_1 = int2(uint2(1u, 2u));
-  int4 x = int4(v.Load(int3(v_1, int(3u))));
+  int4 x = v.Load(int3(v_1, int(3u)));
 }
 
 )");
@@ -1168,8 +1163,7 @@ TEST_F(HlslWriterTest, BuiltinTextureLoad_3DLevelU32) {
     EXPECT_EQ(output_.hlsl, R"(
 Texture3D<float4> v : register(t0);
 void foo() {
-  int3 v_1 = int3(int3(int(1), int(2), int(3)));
-  float4 x = float4(v.Load(int4(v_1, int(4u))));
+  float4 x = v.Load(int4(int3(int(1), int(2), int(3)), int(4u)));
 }
 
 )");
@@ -1195,8 +1189,7 @@ TEST_F(HlslWriterTest, BuiltinTextureLoad_Multisampled2DI32) {
     EXPECT_EQ(output_.hlsl, R"(
 Texture2DMS<int4> v : register(t0);
 void foo() {
-  int2 v_1 = int2(int2(int(1), int(2)));
-  int4 x = int4(v.Load(v_1, int(int(3))));
+  int4 x = v.Load(int2(int(1), int(2)), int(3));
 }
 
 )");
@@ -1222,7 +1215,7 @@ TEST_F(HlslWriterTest, BuiltinTextureLoad_Depth2DLevelF32) {
     EXPECT_EQ(output_.hlsl, R"(
 Texture2D v : register(t0);
 void foo() {
-  int2 v_1 = int2(int2(int(1), int(2)));
+  int2 v_1 = int2(int(1), int(2));
   float x = v.Load(int3(v_1, int(3u))).x;
 }
 
@@ -1251,9 +1244,7 @@ TEST_F(HlslWriterTest, BuiltinTextureLoad_Depth2DArrayLevelF32) {
     EXPECT_EQ(output_.hlsl, R"(
 Texture2DArray v : register(t0);
 void foo() {
-  int2 v_1 = int2(int2(int(1), int(2)));
-  int v_2 = int(3u);
-  float x = v.Load(int4(v_1, v_2, int(int(4)))).x;
+  float x = v.Load(int4(int2(int(1), int(2)), int(3u), int(4))).x;
 }
 
 )");
@@ -1279,8 +1270,7 @@ TEST_F(HlslWriterTest, BuiltinTextureLoad_DepthMultisampledF32) {
     EXPECT_EQ(output_.hlsl, R"(
 Texture2DMS<float4> v : register(t0);
 void foo() {
-  int2 v_1 = int2(int2(int(1), int(2)));
-  float x = v.Load(v_1, int(3u)).x;
+  float x = v.Load(int2(int(1), int(2)), int(3u)).x;
 }
 
 )");
@@ -2049,9 +2039,8 @@ void foo() {
   int4 u = (int(2)).xxxx;
   int4 v = u;
   uint4 v_1 = uint4(0u, 8u, 16u, 24u);
-  uint4 v_2 = asuint(v);
-  uint4 v_3 = ((v_2 & uint4((255u).xxxx)) << v_1);
-  uint a = dot(v_3, uint4((1u).xxxx));
+  uint4 v_2 = ((asuint(v) & uint4((255u).xxxx)) << v_1);
+  uint a = dot(v_2, uint4((1u).xxxx));
 }
 
 )");
@@ -2772,8 +2761,7 @@ TEST_F(HlslWriterTest, BuiltinTextureSampleBias_2d) {
 Texture2D<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
-  float2 v_2 = float2(1.0f, 2.0f);
-  float4 x = v.SampleBias(v_1, v_2, clamp(3.0f, -16.0f, 15.9899997711181640625f));
+  float4 x = v.SampleBias(v_1, float2(1.0f, 2.0f), clamp(3.0f, -16.0f, 15.9899997711181640625f));
 }
 
 )");
@@ -2809,8 +2797,7 @@ TEST_F(HlslWriterTest, BuiltinTextureSampleBias_2d_Offset) {
 Texture2D<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
-  float2 v_2 = float2(1.0f, 2.0f);
-  float4 x = v.SampleBias(v_1, v_2, clamp(3.0f, -16.0f, 15.9899997711181640625f), int2(int(4), int(5)));
+  float4 x = v.SampleBias(v_1, float2(1.0f, 2.0f), clamp(3.0f, -16.0f, 15.9899997711181640625f), int2(int(4), int(5)));
 }
 
 )");
@@ -2847,8 +2834,7 @@ Texture2DArray<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
   float2 v_2 = float2(1.0f, 2.0f);
-  float v_3 = clamp(3.0f, -16.0f, 15.9899997711181640625f);
-  float4 x = v.SampleBias(v_1, float3(v_2, float(4u)), v_3);
+  float4 x = v.SampleBias(v_1, float3(v_2, float(4u)), clamp(3.0f, -16.0f, 15.9899997711181640625f));
 }
 
 )");
@@ -2886,8 +2872,7 @@ Texture2DArray<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
   float2 v_2 = float2(1.0f, 2.0f);
-  float v_3 = clamp(3.0f, -16.0f, 15.9899997711181640625f);
-  float4 x = v.SampleBias(v_1, float3(v_2, float(4u)), v_3, int2(int(4), int(5)));
+  float4 x = v.SampleBias(v_1, float3(v_2, float(4u)), clamp(3.0f, -16.0f, 15.9899997711181640625f), int2(int(4), int(5)));
 }
 
 )");
@@ -2921,8 +2906,7 @@ TEST_F(HlslWriterTest, BuiltinTextureSampleBias_3d) {
 Texture3D<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
-  float3 v_2 = float3(1.0f, 2.0f, 3.0f);
-  float4 x = v.SampleBias(v_1, v_2, clamp(3.0f, -16.0f, 15.9899997711181640625f));
+  float4 x = v.SampleBias(v_1, float3(1.0f, 2.0f, 3.0f), clamp(3.0f, -16.0f, 15.9899997711181640625f));
 }
 
 )");
@@ -2958,8 +2942,7 @@ TEST_F(HlslWriterTest, BuiltinTextureSampleBias_3d_Offset) {
 Texture3D<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
-  float3 v_2 = float3(1.0f, 2.0f, 3.0f);
-  float4 x = v.SampleBias(v_1, v_2, clamp(3.0f, -16.0f, 15.9899997711181640625f), int3(int(4), int(5), int(6)));
+  float4 x = v.SampleBias(v_1, float3(1.0f, 2.0f, 3.0f), clamp(3.0f, -16.0f, 15.9899997711181640625f), int3(int(4), int(5), int(6)));
 }
 
 )");
@@ -2993,8 +2976,7 @@ TEST_F(HlslWriterTest, BuiltinTextureSampleBias_Cube) {
 TextureCube<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
-  float3 v_2 = float3(1.0f, 2.0f, 3.0f);
-  float4 x = v.SampleBias(v_1, v_2, clamp(3.0f, -16.0f, 15.9899997711181640625f));
+  float4 x = v.SampleBias(v_1, float3(1.0f, 2.0f, 3.0f), clamp(3.0f, -16.0f, 15.9899997711181640625f));
 }
 
 )");
@@ -3031,8 +3013,7 @@ TextureCubeArray<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
   float3 v_2 = float3(1.0f, 2.0f, 3.0f);
-  float v_3 = clamp(3.0f, -16.0f, 15.9899997711181640625f);
-  float4 x = v.SampleBias(v_1, float4(v_2, float(4u)), v_3);
+  float4 x = v.SampleBias(v_1, float4(v_2, float(4u)), clamp(3.0f, -16.0f, 15.9899997711181640625f));
 }
 
 )");
@@ -3993,8 +3974,7 @@ TEST_F(HlslWriterTest, BuiltinTextureSampleLevel_2d) {
 Texture2D<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
-  float2 v_2 = float2(1.0f, 2.0f);
-  float4 x = v.SampleLevel(v_1, v_2, float(3.0f));
+  float4 x = v.SampleLevel(v_1, float2(1.0f, 2.0f), 3.0f);
 }
 
 )");
@@ -4030,8 +4010,7 @@ TEST_F(HlslWriterTest, BuiltinTextureSampleLevel_2d_Offset) {
 Texture2D<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
-  float2 v_2 = float2(1.0f, 2.0f);
-  float4 x = v.SampleLevel(v_1, v_2, float(3.0f), int2(int(4), int(5)));
+  float4 x = v.SampleLevel(v_1, float2(1.0f, 2.0f), 3.0f, int2(int(4), int(5)));
 }
 
 )");
@@ -4068,8 +4047,7 @@ Texture2DArray<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
   float2 v_2 = float2(1.0f, 2.0f);
-  float3 v_3 = float3(v_2, float(4u));
-  float4 x = v.SampleLevel(v_1, v_3, float(3.0f));
+  float4 x = v.SampleLevel(v_1, float3(v_2, float(4u)), 3.0f);
 }
 
 )");
@@ -4107,8 +4085,7 @@ Texture2DArray<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
   float2 v_2 = float2(1.0f, 2.0f);
-  float3 v_3 = float3(v_2, float(4u));
-  float4 x = v.SampleLevel(v_1, v_3, float(3.0f), int2(int(4), int(5)));
+  float4 x = v.SampleLevel(v_1, float3(v_2, float(4u)), 3.0f, int2(int(4), int(5)));
 }
 
 )");
@@ -4142,8 +4119,7 @@ TEST_F(HlslWriterTest, BuiltinTextureSampleLevel_3d) {
 Texture3D<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
-  float3 v_2 = float3(1.0f, 2.0f, 3.0f);
-  float4 x = v.SampleLevel(v_1, v_2, float(3.0f));
+  float4 x = v.SampleLevel(v_1, float3(1.0f, 2.0f, 3.0f), 3.0f);
 }
 
 )");
@@ -4179,8 +4155,7 @@ TEST_F(HlslWriterTest, BuiltinTextureSampleLevel_3d_Offset) {
 Texture3D<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
-  float3 v_2 = float3(1.0f, 2.0f, 3.0f);
-  float4 x = v.SampleLevel(v_1, v_2, float(3.0f), int3(int(4), int(5), int(6)));
+  float4 x = v.SampleLevel(v_1, float3(1.0f, 2.0f, 3.0f), 3.0f, int3(int(4), int(5), int(6)));
 }
 
 )");
@@ -4214,8 +4189,7 @@ TEST_F(HlslWriterTest, BuiltinTextureSampleLevel_Cube) {
 TextureCube<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
-  float3 v_2 = float3(1.0f, 2.0f, 3.0f);
-  float4 x = v.SampleLevel(v_1, v_2, float(3.0f));
+  float4 x = v.SampleLevel(v_1, float3(1.0f, 2.0f, 3.0f), 3.0f);
 }
 
 )");
@@ -4252,8 +4226,7 @@ TextureCubeArray<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
   float3 v_2 = float3(1.0f, 2.0f, 3.0f);
-  float4 v_3 = float4(v_2, float(4u));
-  float4 x = v.SampleLevel(v_1, v_3, float(3.0f));
+  float4 x = v.SampleLevel(v_1, float4(v_2, float(4u)), 3.0f);
 }
 
 )");

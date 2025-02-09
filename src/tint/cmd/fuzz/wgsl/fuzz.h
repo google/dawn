@@ -49,8 +49,7 @@ struct Options {
     bool run_concurrently = false;
     /// If true, print the fuzzer name to stdout before running.
     bool verbose = false;
-    /// If not empty, load DXC from this path when fuzzing HLSL generation, and fail the fuzzer if
-    /// not found, or if DXC fails to compile.
+    /// If not empty, load DXC from this path when fuzzing HLSL generation.
     std::string dxc;
     /// If true, dump shader input/output text to stdout
     bool dump = false;
@@ -105,8 +104,8 @@ struct ProgramFuzzer {
         } else {
             return ProgramFuzzer{
                 name,
-                [fn](const Program& program, const Context& options, Slice<const std::byte>) {
-                    fn(program, options);
+                [fn](const Program& program, const Context& context, Slice<const std::byte>) {
+                    fn(program, context);
                 },
             };
         }

@@ -1,3 +1,31 @@
+//
+// fragment_main
+//
+
+void transpose_32dd64() {
+  float4x3 res = float4x3((1.0f).xxx, (1.0f).xxx, (1.0f).xxx, (1.0f).xxx);
+}
+
+void fragment_main() {
+  transpose_32dd64();
+}
+
+//
+// compute_main
+//
+
+void transpose_32dd64() {
+  float4x3 res = float4x3((1.0f).xxx, (1.0f).xxx, (1.0f).xxx, (1.0f).xxx);
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  transpose_32dd64();
+}
+
+//
+// vertex_main
+//
 struct VertexOutput {
   float4 pos;
 };
@@ -11,26 +39,17 @@ void transpose_32dd64() {
   float4x3 res = float4x3((1.0f).xxx, (1.0f).xxx, (1.0f).xxx, (1.0f).xxx);
 }
 
-void fragment_main() {
-  transpose_32dd64();
-}
-
-[numthreads(1, 1, 1)]
-void compute_main() {
-  transpose_32dd64();
-}
-
 VertexOutput vertex_main_inner() {
-  VertexOutput tint_symbol = (VertexOutput)0;
-  tint_symbol.pos = (0.0f).xxxx;
+  VertexOutput v = (VertexOutput)0;
+  v.pos = (0.0f).xxxx;
   transpose_32dd64();
-  VertexOutput v = tint_symbol;
-  return v;
+  VertexOutput v_1 = v;
+  return v_1;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_1 = vertex_main_inner();
-  vertex_main_outputs v_2 = {v_1.pos};
-  return v_2;
+  VertexOutput v_2 = vertex_main_inner();
+  vertex_main_outputs v_3 = {v_2.pos};
+  return v_3;
 }
 

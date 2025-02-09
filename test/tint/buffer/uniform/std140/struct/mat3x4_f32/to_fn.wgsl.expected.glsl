@@ -42,8 +42,8 @@ void e(float f_1) {
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   a(v_1.inner);
-  b(v_1.inner[2]);
-  c(v_1.inner[2].m);
-  d(v_1.inner[0].m[1].ywxz);
-  e(v_1.inner[0].m[1].ywxz[0u]);
+  b(v_1.inner[2u]);
+  c(v_1.inner[2u].m);
+  d(v_1.inner[0u].m[1u].ywxz);
+  e(v_1.inner[0u].m[1u].ywxz.x);
 }

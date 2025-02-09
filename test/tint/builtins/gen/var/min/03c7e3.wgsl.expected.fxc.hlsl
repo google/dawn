@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 RWByteAddressBuffer prevent_dce : register(u0);
 
 int2 min_03c7e3() {
@@ -11,11 +14,31 @@ void fragment_main() {
   prevent_dce.Store2(0u, asuint(min_03c7e3()));
   return;
 }
+//
+// compute_main
+//
+RWByteAddressBuffer prevent_dce : register(u0);
+
+int2 min_03c7e3() {
+  int2 arg_0 = (1).xx;
+  int2 arg_1 = (1).xx;
+  int2 res = min(arg_0, arg_1);
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store2(0u, asuint(min_03c7e3()));
   return;
+}
+//
+// vertex_main
+//
+int2 min_03c7e3() {
+  int2 arg_0 = (1).xx;
+  int2 arg_1 = (1).xx;
+  int2 res = min(arg_0, arg_1);
+  return res;
 }
 
 struct VertexOutput {

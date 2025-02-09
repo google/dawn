@@ -1,3 +1,39 @@
+//
+// fragment_main
+//
+
+RWByteAddressBuffer prevent_dce : register(u0);
+vector<float16_t, 3> trunc_103ab8() {
+  vector<float16_t, 3> arg_0 = (float16_t(1.5h)).xxx;
+  vector<float16_t, 3> v = arg_0;
+  vector<float16_t, 3> res = (((v < (float16_t(0.0h)).xxx)) ? (ceil(v)) : (floor(v)));
+  return res;
+}
+
+void fragment_main() {
+  prevent_dce.Store<vector<float16_t, 3> >(0u, trunc_103ab8());
+}
+
+//
+// compute_main
+//
+
+RWByteAddressBuffer prevent_dce : register(u0);
+vector<float16_t, 3> trunc_103ab8() {
+  vector<float16_t, 3> arg_0 = (float16_t(1.5h)).xxx;
+  vector<float16_t, 3> v = arg_0;
+  vector<float16_t, 3> res = (((v < (float16_t(0.0h)).xxx)) ? (ceil(v)) : (floor(v)));
+  return res;
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  prevent_dce.Store<vector<float16_t, 3> >(0u, trunc_103ab8());
+}
+
+//
+// vertex_main
+//
 struct VertexOutput {
   float4 pos;
   vector<float16_t, 3> prevent_dce;
@@ -9,29 +45,18 @@ struct vertex_main_outputs {
 };
 
 
-RWByteAddressBuffer prevent_dce : register(u0);
 vector<float16_t, 3> trunc_103ab8() {
   vector<float16_t, 3> arg_0 = (float16_t(1.5h)).xxx;
   vector<float16_t, 3> v = arg_0;
-  vector<float16_t, 3> v_1 = floor(v);
-  vector<float16_t, 3> res = (((v < (float16_t(0.0h)).xxx)) ? (ceil(v)) : (v_1));
+  vector<float16_t, 3> res = (((v < (float16_t(0.0h)).xxx)) ? (ceil(v)) : (floor(v)));
   return res;
 }
 
-void fragment_main() {
-  prevent_dce.Store<vector<float16_t, 3> >(0u, trunc_103ab8());
-}
-
-[numthreads(1, 1, 1)]
-void compute_main() {
-  prevent_dce.Store<vector<float16_t, 3> >(0u, trunc_103ab8());
-}
-
 VertexOutput vertex_main_inner() {
-  VertexOutput tint_symbol = (VertexOutput)0;
-  tint_symbol.pos = (0.0f).xxxx;
-  tint_symbol.prevent_dce = trunc_103ab8();
-  VertexOutput v_2 = tint_symbol;
+  VertexOutput v_1 = (VertexOutput)0;
+  v_1.pos = (0.0f).xxxx;
+  v_1.prevent_dce = trunc_103ab8();
+  VertexOutput v_2 = v_1;
   return v_2;
 }
 

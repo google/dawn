@@ -27,22 +27,19 @@ struct main_out {
 };
 
 layout(binding = 0, std140)
-uniform x_4_block_std140_1_ubo {
+uniform f_x_4_block_std140_ubo {
   UniformBuffer_std140 inner;
 } v;
 vec4 sk_FragColor = vec4(0.0f);
 bool sk_Clockwise = false;
 vec4 vcolor_S0 = vec4(0.0f);
-layout(location = 0) in vec4 tint_symbol_loc0_Input;
-layout(location = 0) out vec4 tint_symbol_loc0_Output;
+layout(location = 0) in vec4 tint_interstage_location0;
+layout(location = 0) out vec4 main_loc0_Output;
 ivec4 tint_div_v4i32(ivec4 lhs, ivec4 rhs) {
-  bvec4 v_1 = equal(rhs, ivec4(0));
-  bvec4 v_2 = equal(lhs, ivec4((-2147483647 - 1)));
-  bvec4 v_3 = equal(rhs, ivec4(-1));
-  uvec4 v_4 = uvec4(v_2);
-  bvec4 v_5 = bvec4((v_4 & uvec4(v_3)));
-  uvec4 v_6 = uvec4(v_1);
-  return (lhs / mix(rhs, ivec4(1), bvec4((v_6 | uvec4(v_5)))));
+  uvec4 v_1 = uvec4(equal(lhs, ivec4((-2147483647 - 1))));
+  bvec4 v_2 = bvec4((v_1 & uvec4(equal(rhs, ivec4(-1)))));
+  uvec4 v_3 = uvec4(equal(rhs, ivec4(0)));
+  return (lhs / mix(rhs, ivec4(1), bvec4((v_3 | uvec4(v_2)))));
 }
 int tint_f32_to_i32(float value) {
   return mix(2147483647, mix((-2147483647 - 1), int(value), (value >= -2147483648.0f)), (value <= 2147483520.0f));
@@ -167,12 +164,12 @@ void main_1() {
   output_S1 = x_116;
   sk_FragColor = x_125;
 }
-main_out tint_symbol_inner(bool sk_Clockwise_param, vec4 vcolor_S0_param) {
+main_out main_inner(bool sk_Clockwise_param, vec4 vcolor_S0_param) {
   sk_Clockwise = sk_Clockwise_param;
   vcolor_S0 = vcolor_S0_param;
   main_1();
   return main_out(sk_FragColor);
 }
 void main() {
-  tint_symbol_loc0_Output = tint_symbol_inner(gl_FrontFacing, tint_symbol_loc0_Input).sk_FragColor_1;
+  main_loc0_Output = main_inner(gl_FrontFacing, tint_interstage_location0).sk_FragColor_1;
 }

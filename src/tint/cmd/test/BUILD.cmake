@@ -47,6 +47,7 @@ tint_target_add_dependencies(tint_cmd_test_test_cmd test_cmd
   tint_api_common_test
   tint_lang_core_constant_test
   tint_lang_core_intrinsic_test
+  tint_lang_core_ir_analysis_test
   tint_lang_core_ir_transform_test
   tint_lang_core_ir_test
   tint_lang_core_type_test
@@ -73,7 +74,6 @@ tint_target_add_dependencies(tint_cmd_test_test_cmd test_cmd
   tint_lang_wgsl_writer_raise_test
   tint_lang_wgsl_test
   tint_utils_bytes_test
-  tint_utils_cli_test
   tint_utils_command_test
   tint_utils_containers_test
   tint_utils_diagnostic_test
@@ -82,13 +82,12 @@ tint_target_add_dependencies(tint_cmd_test_test_cmd test_cmd
   tint_utils_macros_test
   tint_utils_math_test
   tint_utils_memory_test
-  tint_utils_reflection_test
   tint_utils_result_test
   tint_utils_rtti_test
   tint_utils_strconv_test
   tint_utils_symbol_test
   tint_utils_text_test
-  tint_utils_traits_test
+  tint_utils_test
 )
 
 tint_target_add_external_dependencies(tint_cmd_test_test_cmd test_cmd
@@ -129,18 +128,11 @@ endif(TINT_BUILD_IR_BINARY)
 
 if(TINT_BUILD_MSL_WRITER)
   tint_target_add_dependencies(tint_cmd_test_test_cmd test_cmd
-    tint_lang_msl_writer_ast_printer_test
     tint_lang_msl_writer_common_test
     tint_lang_msl_writer_raise_test
     tint_lang_msl_writer_test
   )
 endif(TINT_BUILD_MSL_WRITER)
-
-if(TINT_BUILD_MSL_WRITER AND TINT_BUILD_WGSL_READER AND TINT_BUILD_WGSL_WRITER)
-  tint_target_add_dependencies(tint_cmd_test_test_cmd test_cmd
-    tint_lang_msl_writer_ast_raise_test
-  )
-endif(TINT_BUILD_MSL_WRITER AND TINT_BUILD_WGSL_READER AND TINT_BUILD_WGSL_WRITER)
 
 if(TINT_BUILD_SPV_READER)
   tint_target_add_dependencies(tint_cmd_test_test_cmd test_cmd

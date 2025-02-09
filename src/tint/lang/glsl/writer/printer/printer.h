@@ -28,8 +28,7 @@
 #ifndef SRC_TINT_LANG_GLSL_WRITER_PRINTER_PRINTER_H_
 #define SRC_TINT_LANG_GLSL_WRITER_PRINTER_PRINTER_H_
 
-#include <string>
-
+#include "src/tint/lang/glsl/writer/common/output.h"
 #include "src/tint/utils/result/result.h"
 
 // Forward declarations
@@ -37,15 +36,15 @@ namespace tint::core::ir {
 class Module;
 }  // namespace tint::core::ir
 namespace tint::glsl::writer {
-struct Version;
+struct Options;
 }  // namespace tint::glsl::writer
 
 namespace tint::glsl::writer {
 
 /// @returns the generated GLSL shader on success, or failure
 /// @param module the Tint IR module to generate
-/// @param version the GLSL version information
-Result<std::string> Print(core::ir::Module& module, const Version& version);
+/// @param options the options to use
+Result<Output> Print(core::ir::Module& module, const Options& options);
 
 }  // namespace tint::glsl::writer
 

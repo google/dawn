@@ -423,7 +423,7 @@ std::unique_ptr<native::Instance> DawnTestEnvironment::CreateInstance(
 
     wgpu::InstanceDescriptor instanceDesc{};
     instanceDesc.nextInChain = &dawnInstanceDesc;
-    instanceDesc.features.timedWaitAnyEnable = !UsesWire();
+    instanceDesc.capabilities.timedWaitAnyEnable = !UsesWire();
 
     auto instance = std::make_unique<native::Instance>(
         reinterpret_cast<const WGPUInstanceDescriptor*>(&instanceDesc));
@@ -454,11 +454,14 @@ void DawnTestEnvironment::SelectPreferredAdapterProperties(const native::Instanc
     std::optional<wgpu::AdapterType> preferredDeviceType;
     [&] {
         for (wgpu::AdapterType devicePreference : mDevicePreferences) {
-            for (bool compatibilityMode : {false, true}) {
+            for (wgpu::FeatureLevel featureLevel :
+                 {wgpu::FeatureLevel::Core, wgpu::FeatureLevel::Compatibility}) {
                 wgpu::RequestAdapterOptions adapterOptions;
-                adapterOptions.compatibilityMode = compatibilityMode;
-                for (const native::Adapter& adapter :
+                adapterOptions.featureLevel = featureLevel;
+                // TODO(347047627): Use a webgpu.h version of enumerateAdapters
+                for (const native::Adapter& nativeAdapter :
                      instance->EnumerateAdapters(&adapterOptions)) {
+                    wgpu::Adapter adapter = wgpu::Adapter(nativeAdapter.Get());
                     wgpu::AdapterInfo info;
                     adapter.GetInfo(&info);
 
@@ -473,18 +476,20 @@ void DawnTestEnvironment::SelectPreferredAdapterProperties(const native::Instanc
     }();
 
     std::set<std::tuple<wgpu::BackendType, std::string, bool>> adapterNameSet;
-    for (bool compatibilityMode : {false, true}) {
+    for (wgpu::FeatureLevel featureLevel :
+         {wgpu::FeatureLevel::Core, wgpu::FeatureLevel::Compatibility}) {
         wgpu::RequestAdapterOptions adapterOptions;
-        adapterOptions.compatibilityMode = compatibilityMode;
-        for (const native::Adapter& adapter : instance->EnumerateAdapters(&adapterOptions)) {
+        adapterOptions.featureLevel = featureLevel;
+        // TODO(347047627): Use a webgpu.h version of enumerateAdapters
+        for (const native::Adapter& nativeAdapter : instance->EnumerateAdapters(&adapterOptions)) {
+            wgpu::Adapter adapter = wgpu::Adapter(nativeAdapter.Get());
             wgpu::AdapterInfo info;
             adapter.GetInfo(&info);
 
-            // Skip non-OpenGLES compat adapters. Metal/Vulkan/D3D12 support
+            // Skip non-OpenGLES/D3D11 compat adapters. Metal/Vulkan/D3D12 support
             // core WebGPU.
-            // D3D11 is in an experimental state where it may support core.
-            // See crbug.com/dawn/1820 for determining d3d11 capabilities.
-            if (info.compatibilityMode && info.backendType != wgpu::BackendType::OpenGLES) {
+            if (info.compatibilityMode && info.backendType != wgpu::BackendType::OpenGLES &&
+                info.backendType != wgpu::BackendType::D3D11) {
                 continue;
             }
 
@@ -722,8 +727,8 @@ DawnTestBase::DawnTestBase(const AdapterTestParam& param) : mParam(param) {
     // Override procs to provide harness-specific behavior to always select the adapter required in
     // testing parameter, and to allow fixture-specific overriding of the test device with
     // CreateDeviceImpl.
-    procs.instanceRequestAdapter2 = [](WGPUInstance cInstance, const WGPURequestAdapterOptions*,
-                                       WGPURequestAdapterCallbackInfo2 callbackInfo) -> WGPUFuture {
+    procs.instanceRequestAdapter = [](WGPUInstance cInstance, const WGPURequestAdapterOptions*,
+                                      WGPURequestAdapterCallbackInfo callbackInfo) -> WGPUFuture {
         DAWN_ASSERT(gCurrentTest);
         DAWN_ASSERT(callbackInfo.mode == WGPUCallbackMode_AllowSpontaneous);
 
@@ -733,21 +738,28 @@ DawnTestBase::DawnTestBase(const AdapterTestParam& param) : mParam(param) {
         wgpu::RequestAdapterOptions adapterOptions;
         adapterOptions.nextInChain = &deviceTogglesHelper.togglesDesc;
         adapterOptions.backendType = gCurrentTest->mParam.adapterProperties.backendType;
-        adapterOptions.compatibilityMode = gCurrentTest->mParam.adapterProperties.compatibilityMode;
+        adapterOptions.featureLevel = gCurrentTest->mParam.adapterProperties.compatibilityMode
+                                          ? wgpu::FeatureLevel::Compatibility
+                                          : wgpu::FeatureLevel::Core;
 
         // Find the adapter that exactly matches our adapter properties.
+        // TODO(347047627): Use a webgpu.h version of enumerateAdapters
         const auto& adapters = gTestEnv->GetInstance()->EnumerateAdapters(&adapterOptions);
         const auto& it =
             std::find_if(adapters.begin(), adapters.end(), [&](const native::Adapter& candidate) {
-                wgpu::AdapterInfo info;
-                candidate.GetInfo(&info);
+                WGPUAdapterInfo info = {};
+                native::GetProcs().adapterGetInfo(candidate.Get(), &info);
 
                 const auto& param = gCurrentTest->mParam;
-                return (param.adapterProperties.selected &&
-                        info.deviceID == param.adapterProperties.deviceID &&
-                        info.vendorID == param.adapterProperties.vendorID &&
-                        info.adapterType == param.adapterProperties.adapterType &&
-                        std::string_view(info.device) == param.adapterProperties.name);
+                bool result =
+                    (param.adapterProperties.selected &&
+                     info.deviceID == param.adapterProperties.deviceID &&
+                     info.vendorID == param.adapterProperties.vendorID &&
+                     info.adapterType == native::ToAPI(param.adapterProperties.adapterType) &&
+                     std::string_view(info.device.data, info.device.length) ==
+                         param.adapterProperties.name);
+                native::GetProcs().adapterInfoFreeMembers(info);
+                return result;
             });
         DAWN_ASSERT(it != adapters.end());
         gCurrentTest->mBackendAdapter = *it;
@@ -762,8 +774,8 @@ DawnTestBase::DawnTestBase(const AdapterTestParam& param) : mParam(param) {
         return {0};
     };
 
-    procs.adapterRequestDevice2 = [](WGPUAdapter cAdapter, const WGPUDeviceDescriptor* descriptor,
-                                     WGPURequestDeviceCallbackInfo2 callbackInfo) -> WGPUFuture {
+    procs.adapterRequestDevice = [](WGPUAdapter cAdapter, const WGPUDeviceDescriptor* descriptor,
+                                    WGPURequestDeviceCallbackInfo callbackInfo) -> WGPUFuture {
         DAWN_ASSERT(gCurrentTest);
         DAWN_ASSERT(callbackInfo.mode == WGPUCallbackMode_AllowSpontaneous);
 
@@ -914,6 +926,19 @@ bool DawnTestBase::IsIntelGen12() const {
                                     mParam.adapterProperties.deviceID);
 }
 
+bool DawnTestBase::IsIntelGen12OrLater() const {
+    return gpu_info::IsIntelGen12LP(mParam.adapterProperties.vendorID,
+                                    mParam.adapterProperties.deviceID) ||
+           gpu_info::IsIntelGen12HP(mParam.adapterProperties.vendorID,
+                                    mParam.adapterProperties.deviceID) ||
+           gpu_info::IsIntelXeLPG(mParam.adapterProperties.vendorID,
+                                  mParam.adapterProperties.deviceID) ||
+           gpu_info::IsIntelXe2LPG(mParam.adapterProperties.vendorID,
+                                   mParam.adapterProperties.deviceID) ||
+           gpu_info::IsIntelXe2HPG(mParam.adapterProperties.vendorID,
+                                   mParam.adapterProperties.deviceID);
+}
+
 bool DawnTestBase::IsWindows() const {
 #if DAWN_PLATFORM_IS(WINDOWS)
     return true;
@@ -988,6 +1013,10 @@ bool DawnTestBase::IsFullBackendValidationEnabled() const {
 
 bool DawnTestBase::IsCompatibilityMode() const {
     return mParam.adapterProperties.compatibilityMode;
+}
+
+bool DawnTestBase::IsCPU() const {
+    return mParam.adapterProperties.adapterType == wgpu::AdapterType::CPU;
 }
 
 bool DawnTestBase::RunSuppressedTests() const {
@@ -1107,11 +1136,6 @@ uint32_t DawnTestBase::GetDeviceCreationDeprecationWarningExpectation(
     for (uint32_t i = 0; i < descriptor.requiredFeatureCount; ++i) {
         requiredFeatureSet.insert(descriptor.requiredFeatures[i]);
     }
-    // ChromiumExperimentalSubgroups feature is deprecated.
-    // TODO(349125474): Remove deprecated ChromiumExperimentalSubgroups.
-    if (requiredFeatureSet.count(wgpu::FeatureName::ChromiumExperimentalSubgroups)) {
-        expectedDeprecatedCount++;
-    }
 
     return expectedDeprecatedCount;
 }
@@ -1125,7 +1149,8 @@ WGPUDevice DawnTestBase::CreateDeviceImpl(std::string isolationKey,
     }
 
     wgpu::SupportedLimits supportedLimits;
-    mBackendAdapter.GetLimits(reinterpret_cast<WGPUSupportedLimits*>(&supportedLimits));
+    native::GetProcs().adapterGetLimits(mBackendAdapter.Get(),
+                                        reinterpret_cast<WGPUSupportedLimits*>(&supportedLimits));
     wgpu::RequiredLimits requiredLimits = GetRequiredLimits(supportedLimits);
 
     wgpu::DeviceDescriptor deviceDescriptor =
@@ -1189,25 +1214,23 @@ wgpu::Device DawnTestBase::CreateDevice(std::string isolationKey) {
                 Call(CHandleIs(apiDevice.Get()), wgpu::DeviceLostReason::Destroyed, _))
         .Times(AtMost(1));
 
-    apiDevice.SetLoggingCallback(
-        [](WGPULoggingType type, WGPUStringView message, void*) {
-            std::string_view view = {message.data, message.length};
-            switch (type) {
-                case WGPULoggingType_Verbose:
-                    DebugLog() << view;
-                    break;
-                case WGPULoggingType_Warning:
-                    WarningLog() << view;
-                    break;
-                case WGPULoggingType_Error:
-                    ErrorLog() << view;
-                    break;
-                default:
-                    InfoLog() << view;
-                    break;
-            }
-        },
-        nullptr);
+    apiDevice.SetLoggingCallback([](wgpu::LoggingType type, wgpu::StringView message) {
+        std::string_view view = {message.data, message.length};
+        switch (type) {
+            case wgpu::LoggingType::Verbose:
+                DebugLog() << view;
+                break;
+            case wgpu::LoggingType::Warning:
+                WarningLog() << view;
+                break;
+            case wgpu::LoggingType::Error:
+                ErrorLog() << view;
+                break;
+            default:
+                InfoLog() << view;
+                break;
+        }
+    });
 
     return apiDevice;
 }
@@ -1345,13 +1368,13 @@ std::ostringstream& DawnTestBase::AddTextureExpectationImpl(const char* file,
 
     // We need to enqueue the copy immediately because by the time we resolve the expectation,
     // the texture might have been modified.
-    wgpu::ImageCopyTexture imageCopyTexture =
-        utils::CreateImageCopyTexture(texture, level, origin, aspect);
-    wgpu::ImageCopyBuffer imageCopyBuffer =
-        utils::CreateImageCopyBuffer(readback.buffer, readback.offset, bytesPerRow, rowsPerImage);
+    wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+        utils::CreateTexelCopyTextureInfo(texture, level, origin, aspect);
+    wgpu::TexelCopyBufferInfo texelCopyBufferInfo = utils::CreateTexelCopyBufferInfo(
+        readback.buffer, readback.offset, bytesPerRow, rowsPerImage);
 
     wgpu::CommandEncoder encoder = targetDevice.CreateCommandEncoder();
-    encoder.CopyTextureToBuffer(&imageCopyTexture, &imageCopyBuffer, &extent);
+    encoder.CopyTextureToBuffer(&texelCopyTextureInfo, &texelCopyBufferInfo, &extent);
 
     wgpu::CommandBuffer commands = encoder.Finish();
     targetDevice.GetQueue().Submit(1, &commands);
@@ -1556,14 +1579,15 @@ std::ostringstream& DawnTestBase::ExpectAttachmentDepthStencilTestData(
         depthDataTexture = device.CreateTexture(&depthDataDesc);
 
         // Upload the depth data.
-        wgpu::ImageCopyTexture imageCopyTexture =
-            utils::CreateImageCopyTexture(depthDataTexture, 0, {0, 0, 0});
-        wgpu::TextureDataLayout textureDataLayout =
-            utils::CreateTextureDataLayout(0, sizeof(float) * width);
+        wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(depthDataTexture, 0, {0, 0, 0});
+        wgpu::TexelCopyBufferLayout texelCopyBufferLayout =
+            utils::CreateTexelCopyBufferLayout(0, sizeof(float) * width);
         wgpu::Extent3D copyExtent = {width, height, 1};
 
-        queue.WriteTexture(&imageCopyTexture, expectedDepth.data(),
-                           sizeof(float) * expectedDepth.size(), &textureDataLayout, &copyExtent);
+        queue.WriteTexture(&texelCopyTextureInfo, expectedDepth.data(),
+                           sizeof(float) * expectedDepth.size(), &texelCopyBufferLayout,
+                           &copyExtent);
     }
 
     // Pipeline for a full screen quad.

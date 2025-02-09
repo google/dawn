@@ -12,6 +12,6 @@ cbuffer cbuffer_uniforms : register(b4, space1) {
 [numthreads(1, 1, 1)]
 void main() {
   float2x4 m1 = float2x4(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-  set_matrix_column(m1, uniforms[0].x, (1.0f).xxxx);
+  set_matrix_column(m1, min(uniforms[0].x, 1u), (1.0f).xxxx);
   return;
 }

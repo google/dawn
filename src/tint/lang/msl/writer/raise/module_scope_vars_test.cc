@@ -41,7 +41,11 @@ namespace {
 
 class MslWriter_ModuleScopeVarsTest : public core::ir::transform::TransformTest {
   public:
-    void SetUp() override { capabilities.Add(core::ir::Capability::kAllowPointersInStructures); }
+    void SetUp() override {
+        capabilities.Add(core::ir::Capability::kAllowPointersAndHandlesInStructures,
+                         core::ir::Capability::kAllowPrivateVarsInFunctions,
+                         core::ir::Capability::kAllowAnyLetType);
+    }
 };
 
 TEST_F(MslWriter_ModuleScopeVarsTest, NoModuleScopeVars) {

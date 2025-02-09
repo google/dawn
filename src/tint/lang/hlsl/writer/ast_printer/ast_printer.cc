@@ -102,6 +102,8 @@
 using namespace tint::core::number_suffixes;  // NOLINT
 using namespace tint::core::fluent_types;     // NOLINT
 
+TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
+
 namespace tint::hlsl::writer {
 namespace {
 
@@ -286,24 +288,26 @@ SanitizedResult Sanitize(const Program& in, const Options& options) {
     {
         PixelLocal::Config cfg;
         for (auto it : options.pixel_local.attachments) {
-            cfg.pls_member_to_rov_reg.Add(it.first, it.second);
-        }
-        for (auto it : options.pixel_local.attachment_formats) {
+            uint32_t member_index = it.first;
+            auto& attachment = it.second;
+
+            cfg.pls_member_to_rov_reg.Add(member_index, attachment.index);
+
             core::TexelFormat format = core::TexelFormat::kUndefined;
-            switch (it.second) {
-                case PixelLocalOptions::TexelFormat::kR32Sint:
+            switch (attachment.format) {
+                case PixelLocalAttachment::TexelFormat::kR32Sint:
                     format = core::TexelFormat::kR32Sint;
                     break;
-                case PixelLocalOptions::TexelFormat::kR32Uint:
+                case PixelLocalAttachment::TexelFormat::kR32Uint:
                     format = core::TexelFormat::kR32Uint;
                     break;
-                case PixelLocalOptions::TexelFormat::kR32Float:
+                case PixelLocalAttachment::TexelFormat::kR32Float:
                     format = core::TexelFormat::kR32Float;
                     break;
                 default:
                     TINT_ICE() << "missing texel format for pixel local storage attachment";
             }
-            cfg.pls_member_to_rov_format.Add(it.first, format);
+            cfg.pls_member_to_rov_format.Add(member_index, format);
         }
         cfg.rov_group_index = options.pixel_local.group_index;
         data.Add<PixelLocal::Config>(cfg);
@@ -340,8 +344,10 @@ SanitizedResult Sanitize(const Program& in, const Options& options) {
 
     // DemoteToHelper must come after CanonicalizeEntryPointIO, PromoteSideEffectsToDecl, and
     // ExpandCompoundAssignment.
-    // TODO(crbug.com/tint/1752): This is only necessary when FXC is being used.
-    manager.Add<ast::transform::DemoteToHelper>();
+    // TODO(crbug.com/42250787): This is only necessary when FXC is being used.
+    if (options.compiler == tint::hlsl::writer::Options::Compiler::kFXC) {
+        manager.Add<ast::transform::DemoteToHelper>();
+    }
 
     // ArrayLengthFromUniform must come after SimplifyPointers as it assumes that the form of the
     // array length argument is &var.array.
@@ -395,7 +401,6 @@ bool ASTPrinter::Generate() {
                 wgsl::Extension::kChromiumDisableUniformityAnalysis,
                 wgsl::Extension::kChromiumExperimentalPixelLocal,
                 wgsl::Extension::kChromiumExperimentalPushConstant,
-                wgsl::Extension::kChromiumExperimentalSubgroups,
                 wgsl::Extension::kChromiumInternalGraphite,
                 wgsl::Extension::kClipDistances,
                 wgsl::Extension::kF16,
@@ -4898,3 +4903,5 @@ std::string ASTPrinter::UniqueIdentifier(const std::string& prefix /* = "" */) {
 }
 
 }  // namespace tint::hlsl::writer
+
+TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);

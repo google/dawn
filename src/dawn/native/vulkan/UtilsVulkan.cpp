@@ -162,14 +162,14 @@ Extent3D ComputeTextureCopyExtent(const TextureCopy& textureCopy, const Extent3D
 VkBufferImageCopy ComputeBufferImageCopyRegion(const BufferCopy& bufferCopy,
                                                const TextureCopy& textureCopy,
                                                const Extent3D& copySize) {
-    TextureDataLayout passDataLayout;
+    TexelCopyBufferLayout passDataLayout;
     passDataLayout.offset = bufferCopy.offset;
     passDataLayout.rowsPerImage = bufferCopy.rowsPerImage;
     passDataLayout.bytesPerRow = bufferCopy.bytesPerRow;
     return ComputeBufferImageCopyRegion(passDataLayout, textureCopy, copySize);
 }
 
-VkBufferImageCopy ComputeBufferImageCopyRegion(const TextureDataLayout& dataLayout,
+VkBufferImageCopy ComputeBufferImageCopyRegion(const TexelCopyBufferLayout& dataLayout,
                                                const TextureCopy& textureCopy,
                                                const Extent3D& copySize) {
     const Texture* texture = ToBackend(textureCopy.texture.Get());

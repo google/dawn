@@ -218,9 +218,6 @@ std::string MatrixVectorMultiplyPerf::GenerateShader() const {
     if (mUsingSubgroups) {
         code << "enable subgroups;\n";
     }
-    if (mUsingSubgroupsF16) {
-        code << "enable subgroups_f16;\n";
-    }
     switch (GetParam().mStoreType) {
         case StoreType::F32:
             code << "alias StoreType = vec4<f32>;\n";
@@ -473,9 +470,9 @@ void MatrixVectorMultiplyPerf::Step() {
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::ComputePassDescriptor computePassDesc;
-        wgpu::ComputePassTimestampWrites timestampWrites;
+        wgpu::PassTimestampWrites timestampWrites;
         if (useTimestamps) {
-            timestampWrites = GetComputePassTimestampWrites();
+            timestampWrites = GetPassTimestampWrites();
             computePassDesc.timestampWrites = &timestampWrites;
         }
         wgpu::ComputePassEncoder pass = encoder.BeginComputePass(&computePassDesc);

@@ -82,6 +82,7 @@ VkDescriptorType VulkanDescriptorType(const BindingInfo& bindingInfo) {
                         return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
                     }
                     return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+                case wgpu::BufferBindingType::BindingNotUsed:
                 case wgpu::BufferBindingType::Undefined:
                     DAWN_UNREACHABLE();
                     return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;

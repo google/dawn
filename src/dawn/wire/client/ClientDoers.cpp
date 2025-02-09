@@ -42,7 +42,6 @@ WireResult Client::DoDeviceUncapturedErrorCallback(Device* device,
         case WGPUErrorType_OutOfMemory:
         case WGPUErrorType_Internal:
         case WGPUErrorType_Unknown:
-        case WGPUErrorType_DeviceLost:
             break;
         default:
             return WireResult::FatalError;

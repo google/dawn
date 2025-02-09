@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void transpose_7eb2c5() {
   float2x2 res = float2x2((1.0f).xx, (1.0f).xx);
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   transpose_7eb2c5();
   return;
 }
+//
+// compute_main
+//
+void transpose_7eb2c5() {
+  float2x2 res = float2x2((1.0f).xx, (1.0f).xx);
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   transpose_7eb2c5();
   return;
+}
+//
+// vertex_main
+//
+void transpose_7eb2c5() {
+  float2x2 res = float2x2((1.0f).xx, (1.0f).xx);
 }
 
 struct VertexOutput {

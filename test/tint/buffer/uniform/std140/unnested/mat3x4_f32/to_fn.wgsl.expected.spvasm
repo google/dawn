@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 49
+; Bound: 48
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -38,8 +38,7 @@
        %uint = OpTypeInt 32 0
      %uint_0 = OpConstant %uint 0
 %_ptr_Uniform_v4float = OpTypePointer Uniform %v4float
-        %int = OpTypeInt 32 1
-      %int_1 = OpConstant %int 1
+     %uint_1 = OpConstant %uint 1
 %_ptr_Uniform_float = OpTypePointer Uniform %float
           %a = OpFunction %void None %10
           %m = OpFunctionParameter %mat3v4float
@@ -61,21 +60,21 @@
          %23 = OpAccessChain %_ptr_Uniform_mat3v4float %1 %uint_0
          %27 = OpLoad %mat3v4float %23 None
          %28 = OpFunctionCall %void %a %27
-         %29 = OpAccessChain %_ptr_Uniform_v4float %1 %uint_0 %int_1
-         %33 = OpLoad %v4float %29 None
-         %34 = OpFunctionCall %void %b %33
-         %35 = OpAccessChain %_ptr_Uniform_v4float %1 %uint_0 %int_1
-         %36 = OpLoad %v4float %35 None
-         %37 = OpVectorShuffle %v4float %36 %36 1 3 0 2
-         %38 = OpFunctionCall %void %b %37
-         %39 = OpAccessChain %_ptr_Uniform_v4float %1 %uint_0 %int_1
-         %40 = OpAccessChain %_ptr_Uniform_float %39 %uint_0
-         %42 = OpLoad %float %40 None
-         %43 = OpFunctionCall %void %c %42
-         %44 = OpAccessChain %_ptr_Uniform_v4float %1 %uint_0 %int_1
-         %45 = OpLoad %v4float %44 None
-         %46 = OpVectorShuffle %v4float %45 %45 1 3 0 2
-         %47 = OpCompositeExtract %float %46 0
-         %48 = OpFunctionCall %void %c %47
+         %29 = OpAccessChain %_ptr_Uniform_v4float %1 %uint_0 %uint_1
+         %32 = OpLoad %v4float %29 None
+         %33 = OpFunctionCall %void %b %32
+         %34 = OpAccessChain %_ptr_Uniform_v4float %1 %uint_0 %uint_1
+         %35 = OpLoad %v4float %34 None
+         %36 = OpVectorShuffle %v4float %35 %35 1 3 0 2
+         %37 = OpFunctionCall %void %b %36
+         %38 = OpAccessChain %_ptr_Uniform_v4float %1 %uint_0 %uint_1
+         %39 = OpAccessChain %_ptr_Uniform_float %38 %uint_0
+         %41 = OpLoad %float %39 None
+         %42 = OpFunctionCall %void %c %41
+         %43 = OpAccessChain %_ptr_Uniform_v4float %1 %uint_0 %uint_1
+         %44 = OpLoad %v4float %43 None
+         %45 = OpVectorShuffle %v4float %44 %44 1 3 0 2
+         %46 = OpCompositeExtract %float %45 0
+         %47 = OpFunctionCall %void %c %46
                OpReturn
                OpFunctionEnd

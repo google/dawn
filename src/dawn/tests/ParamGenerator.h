@@ -110,10 +110,48 @@ void PrintParamStructField(std::ostream& o, const T& param, const char* type) {
     }                                                                                              \
     static_assert(true, "require semicolon")
 
+// Usage: DAWN_TEST_PARAM_STRUCT_TYPES(Foo, TypeA, TypeB, ...)
+// Generate a test param struct called Foo which extends generated struct _Dawn_Foo. _Dawn_Foo has
+// members of types TypeA, TypeB, etc. which are named mTypeA, mTypeB, etc. in the order they are
+// placed in the macro argument list. Struct Foo should be constructed with a list of values to
+// initialize the base _Dawn_Foo struct.
+// It is recommended to use alias declarations so that stringified types are more readable.
+// Example:
+//   using MyParam = unsigned int;
+//   DAWN_TEST_PARAM_STRUCT(FooParams, MyParam);
+struct Placeholder {};
+#define DAWN_TEST_PARAM_STRUCT_TYPES(StructName, ...)                                              \
+    struct DAWN_PP_CONCATENATE(_Dawn_, StructName) {                                               \
+        DAWN_PP_EXPAND(DAWN_PP_EXPAND(DAWN_PP_FOR_EACH)(DAWN_TEST_PARAM_STRUCT_DECL_STRUCT_FIELD,  \
+                                                        __VA_ARGS__))                              \
+    };                                                                                             \
+    inline std::ostream& operator<<(std::ostream& o,                                               \
+                                    const DAWN_PP_CONCATENATE(_Dawn_, StructName) & param) {       \
+        DAWN_PP_EXPAND(DAWN_PP_EXPAND(DAWN_PP_FOR_EACH)(DAWN_TEST_PARAM_STRUCT_PRINT_STRUCT_FIELD, \
+                                                        __VA_ARGS__))                              \
+        return o;                                                                                  \
+    }                                                                                              \
+    struct StructName : DAWN_PP_CONCATENATE(_Dawn_, StructName) {                                  \
+        template <typename... Args>                                                                \
+        StructName(Args&&... args) : DAWN_PP_CONCATENATE(_Dawn_, StructName) {                     \
+            std::forward<Args>(args)...                                                            \
+        }                                                                                          \
+        {}                                                                                         \
+    };                                                                                             \
+    inline std::ostream& operator<<(std::ostream& o, const StructName& param) {                    \
+        o << static_cast<const DAWN_PP_CONCATENATE(_Dawn_, StructName)&>(param);                   \
+        return o;                                                                                  \
+    }                                                                                              \
+    static_assert(true, "require semicolon")
+
 template <typename ParamStruct>
 std::string TestParamToString(const testing::TestParamInfo<ParamStruct>& info) {
     std::ostringstream output;
     output << info.param;
+    auto result = output.str();
+    if (result[0] == '_') {
+        return result.substr(1);
+    }
     return output.str();
 }
 

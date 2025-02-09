@@ -1,8 +1,5 @@
 #include <metal_stdlib>
-
 using namespace metal;
-void g(float a, float b, float c) {
-}
 
 struct In {
   float4 pos;
@@ -10,18 +7,18 @@ struct In {
   float4 fbf;
 };
 
-struct tint_symbol_1 {
-  float4 fbf [[color(0)]];
-  float4 uv [[user(locn0)]];
+struct f_inputs {
+  float4 In_uv [[user(locn0)]];
+  float4 In_fbf [[color(0)]];
 };
 
+void g(float a, float b, float c) {
+}
+
 void f_inner(In in) {
-  g(in.pos[0], in.uv[0], in.fbf[1]);
+  g(in.pos.x, in.uv.x, in.fbf.y);
 }
 
-fragment void f(float4 pos [[position]], tint_symbol_1 tint_symbol [[stage_in]]) {
-  In const tint_symbol_2 = {.pos=pos, .uv=tint_symbol.uv, .fbf=tint_symbol.fbf};
-  f_inner(tint_symbol_2);
-  return;
+fragment void f(float4 In_pos [[position]], f_inputs inputs [[stage_in]]) {
+  f_inner(In{.pos=In_pos, .uv=inputs.In_uv, .fbf=inputs.In_fbf});
 }
-

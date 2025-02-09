@@ -1,48 +1,47 @@
 #include <metal_stdlib>
-
 using namespace metal;
 
 struct atomic_compare_exchange_result_i32 {
   int old_value;
   bool exchanged;
 };
-atomic_compare_exchange_result_i32 atomicCompareExchangeWeak_1(device atomic_int* atomic, int compare, int value) {
-  int old_value = compare;
-  bool exchanged = atomic_compare_exchange_weak_explicit(atomic, &old_value, value, memory_order_relaxed, memory_order_relaxed);
-  return {old_value, exchanged};
+
+struct tint_module_vars_struct {
+  device atomic_int* a;
+  thread bool* continue_execution;
+};
+
+struct foo_outputs {
+  int tint_symbol [[color(0)]];
+};
+
+atomic_compare_exchange_result_i32 v(device atomic_int* const atomic_ptr, int cmp, int val) {
+  int old_value = cmp;
+  bool const v_1 = atomic_compare_exchange_weak_explicit(atomic_ptr, (&old_value), val, memory_order_relaxed, memory_order_relaxed);
+  return atomic_compare_exchange_result_i32{.old_value=old_value, .exchanged=v_1};
 }
 
-struct tint_private_vars_struct {
-  bool tint_discarded;
-};
-
-struct tint_symbol {
-  int value [[color(0)]];
-};
-
-int foo_inner(thread tint_private_vars_struct* const tint_private_vars, device atomic_int* const tint_symbol_2) {
-  (*(tint_private_vars)).tint_discarded = true;
+int foo_inner(tint_module_vars_struct tint_module_vars) {
+  (*tint_module_vars.continue_execution) = false;
   int x = 0;
-  atomic_compare_exchange_result_i32 tint_symbol_1 = {};
-  if (!((*(tint_private_vars)).tint_discarded)) {
-    tint_symbol_1 = atomicCompareExchangeWeak_1(tint_symbol_2, 0, 1);
+  atomic_compare_exchange_result_i32 v_2 = {};
+  if ((*tint_module_vars.continue_execution)) {
+    v_2 = v(tint_module_vars.a, 0, 1);
   }
-  atomic_compare_exchange_result_i32 const result = tint_symbol_1;
+  atomic_compare_exchange_result_i32 const result = v_2;
   if (result.exchanged) {
     x = result.old_value;
+  }
+  if (!((*tint_module_vars.continue_execution))) {
+    discard_fragment();
   }
   return x;
 }
 
-fragment tint_symbol foo(device atomic_int* tint_symbol_3 [[buffer(0)]]) {
-  thread tint_private_vars_struct tint_private_vars = {};
-  tint_private_vars.tint_discarded = false;
-  int const inner_result = foo_inner(&(tint_private_vars), tint_symbol_3);
-  tint_symbol wrapper_result = {};
-  wrapper_result.value = inner_result;
-  if (tint_private_vars.tint_discarded) {
-    discard_fragment();
-  }
-  return wrapper_result;
+fragment foo_outputs foo(device atomic_int* a [[buffer(0)]]) {
+  thread bool continue_execution = true;
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=a, .continue_execution=(&continue_execution)};
+  foo_outputs tint_wrapper_result = {};
+  tint_wrapper_result.tint_symbol = foo_inner(tint_module_vars);
+  return tint_wrapper_result;
 }
-

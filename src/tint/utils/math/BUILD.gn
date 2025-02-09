@@ -50,7 +50,10 @@ libtint_source_set("math") {
     "math.cc",
     "math.h",
   ]
-  deps = []
+  deps = [
+    "${dawn_root}/src/utils:utils",
+    "${tint_src_dir}/utils/macros",
+  ]
 }
 if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {
@@ -68,7 +71,6 @@ if (tint_build_unittests) {
       "${tint_src_dir}/utils/math",
       "${tint_src_dir}/utils/memory",
       "${tint_src_dir}/utils/rtti",
-      "${tint_src_dir}/utils/traits",
     ]
   }
 }

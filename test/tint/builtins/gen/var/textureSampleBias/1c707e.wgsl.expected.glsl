@@ -3,18 +3,17 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer prevent_dce_block_1_ssbo {
+buffer f_prevent_dce_block_ssbo {
   vec4 inner;
 } v;
-uniform highp sampler2DArray arg_0_arg_1;
+uniform highp sampler2DArray f_arg_0_arg_1;
 vec4 textureSampleBias_1c707e() {
   vec2 arg_2 = vec2(1.0f);
   uint arg_3 = 1u;
   float arg_4 = 1.0f;
   vec2 v_1 = arg_2;
-  uint v_2 = arg_3;
-  float v_3 = clamp(arg_4, -16.0f, 15.9899997711181640625f);
-  vec4 res = texture(arg_0_arg_1, vec3(v_1, float(v_2)), v_3);
+  float v_2 = clamp(arg_4, -16.0f, 15.9899997711181640625f);
+  vec4 res = texture(f_arg_0_arg_1, vec3(v_1, float(arg_3)), v_2);
   return res;
 }
 void main() {

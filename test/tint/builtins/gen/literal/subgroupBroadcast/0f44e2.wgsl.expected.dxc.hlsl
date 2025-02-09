@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 RWByteAddressBuffer prevent_dce : register(u0);
 
 vector<float16_t, 4> subgroupBroadcast_0f44e2() {
@@ -8,6 +11,15 @@ vector<float16_t, 4> subgroupBroadcast_0f44e2() {
 void fragment_main() {
   prevent_dce.Store<vector<float16_t, 4> >(0u, subgroupBroadcast_0f44e2());
   return;
+}
+//
+// compute_main
+//
+RWByteAddressBuffer prevent_dce : register(u0);
+
+vector<float16_t, 4> subgroupBroadcast_0f44e2() {
+  vector<float16_t, 4> res = WaveReadLaneAt((float16_t(1.0h)).xxxx, 1u);
+  return res;
 }
 
 [numthreads(1, 1, 1)]

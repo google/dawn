@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 58
+; Bound: 55
 ; Schema: 0
                OpCapability Shader
                OpCapability Float16
@@ -40,24 +40,21 @@
 %f_local_invocation_index_Input = OpVariable %_ptr_Input_uint Input
        %void = OpTypeVoid
          %15 = OpTypeFunction %void %uint
-     %uint_0 = OpConstant %uint 0
+     %uint_1 = OpConstant %uint 1
        %bool = OpTypeBool
          %22 = OpConstantNull %mat3v4half
      %uint_2 = OpConstant %uint 2
    %uint_264 = OpConstant %uint 264
 %_ptr_Uniform_v4half = OpTypePointer Uniform %v4half
-     %uint_1 = OpConstant %uint 1
+     %uint_0 = OpConstant %uint 0
 %_ptr_Workgroup_v4half = OpTypePointer Workgroup %v4half
-        %int = OpTypeInt 32 1
-      %int_1 = OpConstant %int 1
-      %int_0 = OpConstant %int 0
 %_ptr_Uniform_half = OpTypePointer Uniform %half
 %_ptr_Workgroup_half = OpTypePointer Workgroup %half
-         %54 = OpTypeFunction %void
+         %51 = OpTypeFunction %void
     %f_inner = OpFunction %void None %15
 %tint_local_index = OpFunctionParameter %uint
          %16 = OpLabel
-         %17 = OpIEqual %bool %tint_local_index %uint_0
+         %17 = OpULessThan %bool %tint_local_index %uint_1
                OpSelectionMerge %20 None
                OpBranchConditional %17 %21 %20
          %21 = OpLabel
@@ -66,33 +63,33 @@
          %20 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
          %26 = OpAccessChain %_ptr_Uniform_v4half %1 %uint_0
-         %28 = OpLoad %v4half %26 None
-         %29 = OpAccessChain %_ptr_Uniform_v4half %1 %uint_1
-         %31 = OpLoad %v4half %29 None
+         %29 = OpLoad %v4half %26 None
+         %30 = OpAccessChain %_ptr_Uniform_v4half %1 %uint_1
+         %31 = OpLoad %v4half %30 None
          %32 = OpAccessChain %_ptr_Uniform_v4half %1 %uint_2
          %33 = OpLoad %v4half %32 None
-         %34 = OpCompositeConstruct %mat3v4half %28 %31 %33
+         %34 = OpCompositeConstruct %mat3v4half %29 %31 %33
                OpStore %w %34 None
-         %35 = OpAccessChain %_ptr_Workgroup_v4half %w %int_1
-         %39 = OpAccessChain %_ptr_Uniform_v4half %1 %uint_0
-         %40 = OpLoad %v4half %39 None
-               OpStore %35 %40 None
-         %41 = OpAccessChain %_ptr_Workgroup_v4half %w %int_1
-         %42 = OpAccessChain %_ptr_Uniform_v4half %1 %uint_0
-         %43 = OpLoad %v4half %42 None
-         %44 = OpVectorShuffle %v4half %43 %43 1 3 0 2
-               OpStore %41 %44 None
-         %45 = OpAccessChain %_ptr_Workgroup_v4half %w %int_0
-         %47 = OpAccessChain %_ptr_Uniform_v4half %1 %uint_1
-         %48 = OpAccessChain %_ptr_Uniform_half %47 %int_0
-         %50 = OpLoad %half %48 None
-         %51 = OpAccessChain %_ptr_Workgroup_half %45 %int_1
-               OpStore %51 %50 None
+         %35 = OpAccessChain %_ptr_Workgroup_v4half %w %uint_1
+         %37 = OpAccessChain %_ptr_Uniform_v4half %1 %uint_0
+         %38 = OpLoad %v4half %37 None
+               OpStore %35 %38 None
+         %39 = OpAccessChain %_ptr_Workgroup_v4half %w %uint_1
+         %40 = OpAccessChain %_ptr_Uniform_v4half %1 %uint_0
+         %41 = OpLoad %v4half %40 None
+         %42 = OpVectorShuffle %v4half %41 %41 1 3 0 2
+               OpStore %39 %42 None
+         %43 = OpAccessChain %_ptr_Workgroup_v4half %w %uint_0
+         %44 = OpAccessChain %_ptr_Uniform_v4half %1 %uint_1
+         %45 = OpAccessChain %_ptr_Uniform_half %44 %uint_0
+         %47 = OpLoad %half %45 None
+         %48 = OpAccessChain %_ptr_Workgroup_half %43 %uint_1
+               OpStore %48 %47 None
                OpReturn
                OpFunctionEnd
-          %f = OpFunction %void None %54
-         %55 = OpLabel
-         %56 = OpLoad %uint %f_local_invocation_index_Input None
-         %57 = OpFunctionCall %void %f_inner %56
+          %f = OpFunction %void None %51
+         %52 = OpLabel
+         %53 = OpLoad %uint %f_local_invocation_index_Input None
+         %54 = OpFunctionCall %void %f_inner %53
                OpReturn
                OpFunctionEnd

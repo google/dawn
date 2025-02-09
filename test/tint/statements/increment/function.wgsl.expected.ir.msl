@@ -1,7 +1,0 @@
-#include <metal_stdlib>
-using namespace metal;
-
-void tint_symbol() {
-  int i = 0;
-  i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)));
-}

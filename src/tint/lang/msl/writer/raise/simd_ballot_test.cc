@@ -44,6 +44,9 @@ using MslWriter_SimdBallotTest = core::ir::transform::TransformTest;
 TEST_F(MslWriter_SimdBallotTest, SimdBallot_WithUserDeclaredSubgroupSize) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     auto* subgroup_size = b.FunctionParam("user_subgroup_size", ty.u32());
+    core::IOAttributes attr;
+    attr.location = 0;
+    subgroup_size->SetAttributes(attr);
     func->SetParams({subgroup_size});
     b.Append(func->Block(), [&] {  //
         b.Call<vec4<u32>>(core::BuiltinFn::kSubgroupBallot, true);
@@ -51,7 +54,7 @@ TEST_F(MslWriter_SimdBallotTest, SimdBallot_WithUserDeclaredSubgroupSize) {
     });
 
     auto* src = R"(
-%foo = @fragment func(%user_subgroup_size:u32):void {
+%foo = @fragment func(%user_subgroup_size:u32 [@location(0)]):void {
   $B1: {
     %3:vec4<u32> = subgroupBallot true
     ret
@@ -65,7 +68,7 @@ $B1: {  # root
   %tint_subgroup_size_mask:ptr<private, vec2<u32>, read_write> = var
 }
 
-%foo = @fragment func(%user_subgroup_size:u32, %tint_subgroup_size:u32 [@subgroup_size]):void {
+%foo = @fragment func(%user_subgroup_size:u32 [@location(0)], %tint_subgroup_size:u32 [@subgroup_size]):void {
   $B2: {
     %5:bool = gt %tint_subgroup_size, 32u
     %6:u32 = sub 32u, %tint_subgroup_size
@@ -160,6 +163,9 @@ TEST_F(MslWriter_SimdBallotTest, SimdBallot_InHelperFunction) {
 
     auto* ep1 = b.Function("ep1", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     auto* subgroup_size = b.FunctionParam("user_subgroup_size", ty.u32());
+    core::IOAttributes attr;
+    attr.location = 0;
+    subgroup_size->SetAttributes(attr);
     ep1->SetParams({subgroup_size});
     b.Append(ep1->Block(), [&] {  //
         b.Call<vec4<u32>>(foo, true);
@@ -179,7 +185,7 @@ TEST_F(MslWriter_SimdBallotTest, SimdBallot_InHelperFunction) {
     ret %3
   }
 }
-%ep1 = @fragment func(%user_subgroup_size:u32):void {
+%ep1 = @fragment func(%user_subgroup_size:u32 [@location(0)]):void {
   $B2: {
     %6:vec4<u32> = call %foo, true
     ret
@@ -205,7 +211,7 @@ $B1: {  # root
     ret %4
   }
 }
-%ep1 = @fragment func(%user_subgroup_size:u32, %tint_subgroup_size:u32 [@subgroup_size]):void {
+%ep1 = @fragment func(%user_subgroup_size:u32 [@location(0)], %tint_subgroup_size:u32 [@subgroup_size]):void {
   $B3: {
     %9:bool = gt %tint_subgroup_size, 32u
     %10:u32 = sub 32u, %tint_subgroup_size

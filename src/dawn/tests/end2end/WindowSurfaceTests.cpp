@@ -128,7 +128,7 @@ TEST_F(WindowSurfaceInstanceTests, BadChainedDescriptors) {
 
 // Test that a chained descriptor with HTMLCanvas produces an error.
 TEST_F(WindowSurfaceInstanceTests, HTMLCanvasDescriptor) {
-    wgpu::SurfaceSourceCanvasHTMLSelector_Emscripten chainedDescriptor;
+    wgpu::EmscriptenSurfaceSourceCanvasHTMLSelector chainedDescriptor;
     chainedDescriptor.selector = "#myCanvas";
 
     wgpu::SurfaceDescriptor descriptor;

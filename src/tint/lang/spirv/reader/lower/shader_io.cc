@@ -85,7 +85,7 @@ struct State {
         // Use a worklist as `ProcessEntryPointOutputs()` will add new functions.
         Vector<core::ir::Function*, 4> entry_points;
         for (auto& func : ir.functions) {
-            if (func->Stage() != core::ir::Function::PipelineStage::kUndefined) {
+            if (func->IsEntryPoint()) {
                 entry_points.Push(func);
             }
         }
@@ -196,8 +196,15 @@ struct State {
             auto var_attributes = var->Attributes();
             auto var_type = var->Result(0)->Type()->UnwrapPtr();
             if (auto* str = var_type->As<core::type::Struct>()) {
+                bool skipped_member_emission = false;
+
                 // Add an output for each member of the struct.
                 for (auto* member : str->Members()) {
+                    if (ShouldSkipMemberEmission(var, member)) {
+                        skipped_member_emission = true;
+                        continue;
+                    }
+
                     // Use the base variable attributes if not specified directly on the member.
                     auto member_attributes = member->Attributes();
                     if (auto base_loc = var_attributes.location) {
@@ -216,6 +223,15 @@ struct State {
                             b.Access(ty.ptr<private_>(member->Type()), var, u32(member->Index()));
                         results.Push(b.Load(access)->Result(0));
                     });
+                }
+
+                // If we skipped emission of any member, then we need to make sure the var is only
+                // used through `access` instructions, otherwise the members may no longer match due
+                // to the skipping.
+                if (skipped_member_emission) {
+                    for (auto& usage : var->Result(0)->UsagesUnsorted()) {
+                        TINT_ASSERT(usage->instruction->Is<core::ir::Access>());
+                    }
                 }
             } else {
                 // Load the final result from the original variable.
@@ -251,6 +267,70 @@ struct State {
                 b.Return(wrapper, b.Construct(str, std::move(results)));
             });
         }
+    }
+
+    /// Returns true if the struct member should be skipped on emission
+    /// @param var the var which references the structure
+    /// @param member the member to check
+    /// @returns true if the member should be skipped.
+    bool ShouldSkipMemberEmission(core::ir::Var* var, const core::type::StructMember* member) {
+        auto var_attributes = var->Attributes();
+        auto member_attributes = member->Attributes();
+
+        // If neither the var, nor the member has attributes, then skip
+        if (!var_attributes.builtin.has_value() && !var_attributes.color.has_value() &&
+            !var_attributes.location.has_value()) {
+            if (!member_attributes.builtin.has_value() && !member_attributes.color.has_value() &&
+                !member_attributes.location.has_value()) {
+                return true;
+            }
+        }
+
+        // The `gl_PerVertex` structure always gets emitted by glslang, but it may only be used by
+        // the `gl_Position` variable. The structure will also contain the `gl_PointSize`,
+        // `gl_ClipDistance` and `gl_CullDistance`.
+
+        if (member_attributes.builtin == core::BuiltinValue::kPointSize) {
+            // TODO(dsinclair): Validate that all accesses of this member are then used only to
+            // assign the value of 1.0.
+            return true;
+        }
+        if (member_attributes.builtin == core::BuiltinValue::kCullDistance) {
+            TINT_ASSERT(!IsIndexAccessed(var->Result(0), member->Index()));
+            return true;
+        }
+        if (member_attributes.builtin == core::BuiltinValue::kClipDistances) {
+            return !IsIndexAccessed(var->Result(0), member->Index());
+        }
+        return false;
+    }
+
+    /// Returns true if the `idx` member of `val` is accessed. The `val` must be of type
+    /// `Structure` which contains the given member index.
+    /// @param val the value to check
+    /// @param idx the index to look for
+    /// @returns true if `idx` is accessed.
+    bool IsIndexAccessed(core::ir::Value* val, uint32_t idx) {
+        for (auto& usage : val->UsagesUnsorted()) {
+            // Only care about access chains
+            auto* chain = usage->instruction->As<core::ir::Access>();
+            if (!chain) {
+                continue;
+            }
+            TINT_ASSERT(chain->Indices().Length() >= 1);
+
+            // A member access has to be a constant index
+            auto* cnst = chain->Indices()[0]->As<core::ir::Constant>();
+            if (!cnst) {
+                continue;
+            }
+
+            uint32_t v = cnst->Value()->ValueAs<uint32_t>();
+            if (v == idx) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /// Replace a use of an input pointer value.
@@ -309,7 +389,7 @@ struct State {
     /// @returns the function parameter
     core::ir::Value* GetParameter(core::ir::Function* func, core::ir::Var* var) {
         return function_parameter_map.GetOrAddZero(func).GetOrAdd(var, [&] {
-            const bool entry_point = func->Stage() != core::ir::Function::PipelineStage::kUndefined;
+            const bool entry_point = func->IsEntryPoint();
             auto* var_type = var->Result(0)->Type()->UnwrapPtr();
 
             // Use a scalar u32 for sample_mask builtins for entry point parameters.

@@ -66,6 +66,9 @@ LanguageFeature ParseLanguageFeature(std::string_view str) {
     if (str == "readonly_and_readwrite_storage_textures") {
         return LanguageFeature::kReadonlyAndReadwriteStorageTextures;
     }
+    if (str == "sized_binding_array") {
+        return LanguageFeature::kSizedBindingArray;
+    }
     if (str == "unrestricted_pointer_parameters") {
         return LanguageFeature::kUnrestrictedPointerParameters;
     }
@@ -92,6 +95,8 @@ std::string_view ToString(LanguageFeature value) {
             return "pointer_composite_access";
         case LanguageFeature::kReadonlyAndReadwriteStorageTextures:
             return "readonly_and_readwrite_storage_textures";
+        case LanguageFeature::kSizedBindingArray:
+            return "sized_binding_array";
         case LanguageFeature::kUnrestrictedPointerParameters:
             return "unrestricted_pointer_parameters";
     }

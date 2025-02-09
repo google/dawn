@@ -549,30 +549,6 @@ TEST_F(Float32BlendableValidationTest, Float32BlendableFormatsWithFeatureEnabled
     }
 }
 
-class Float32FilterableValidationTest : public RenderPipelineValidationTest {
-  protected:
-    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
-        return {wgpu::FeatureName::Float32Filterable};
-    }
-};
-
-// TODO(crbug.com/364987733): Remove this test once float filterable texture types
-// are not considered blendable.
-// Tests that blending a float32 color formats without the float32-blendable feature
-// is still valid with the float32-filterable feature.
-TEST_F(Float32FilterableValidationTest, Float32BlendableFormatsWithoutFeature) {
-    for (const auto f32Format : {wgpu::TextureFormat::R32Float, wgpu::TextureFormat::RG32Float,
-                                 wgpu::TextureFormat::RGBA32Float}) {
-        utils::ComboRenderPipelineDescriptor descriptor;
-        descriptor.vertex.module = vsModule;
-        descriptor.cFragment.module = fsModule;
-        descriptor.cTargets[0].blend = &descriptor.cBlends[0];
-        descriptor.cTargets[0].format = f32Format;
-
-        device.CreateRenderPipeline(&descriptor);
-    }
-}
-
 // Tests that the format of the color state descriptor must match the output of the fragment shader.
 TEST_F(RenderPipelineValidationTest, FragmentOutputFormatCompatibility) {
     std::vector<std::vector<std::string>> kScalarTypeLists = {// Float scalar types

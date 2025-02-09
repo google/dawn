@@ -29,7 +29,7 @@
 #include <string>
 
 #include "src/tint/cmd/fuzz/wgsl/fuzz.h"
-#include "src/tint/utils/cli/cli.h"
+#include "src/tint/utils/command/cli.h"
 #include "src/tint/utils/command/command.h"
 #include "src/tint/utils/text/base64.h"
 #include "src/tint/utils/text/string.h"
@@ -64,9 +64,9 @@ void print_dxc_path_found(const std::string& dxc_path) {
     // Log whether the DXC library was found or not once at initialization.
     auto dxc = tint::Command::LookPath(dxc_path);
     if (dxc.Found()) {
-        std::cout << "DXC library found: " << dxc.Path() << std::endl;
+        std::cout << "DXC library found: " << dxc.Path() << "\n";
     } else {
-        std::cout << "DXC library not found: " << dxc_path << std::endl;
+        std::cout << "DXC library not found: " << dxc_path << "\n";
     }
 #endif
 }
@@ -139,7 +139,7 @@ extern "C" int LLVMFuzzerInitialize(int* argc, char*** argv) {
     print_dxc_path_found(options.dxc);
 #if defined(TINT_ASAN_ENABLED) && !defined(NDEBUG)
     // TODO(crbug.com/352402877): Avoid DXC timeouts on asan + debug fuzzer builds
-    std::cout << "DXC validation disabled in asan + debug builds" << std::endl;
+    std::cout << "DXC validation disabled in asan + debug builds" << "\n";
     options.dxc = "";
 #endif
 

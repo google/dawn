@@ -1,3 +1,37 @@
+//
+// fragment_main
+//
+
+RWByteAddressBuffer prevent_dce : register(u0);
+int2 sign_926015() {
+  int2 arg_0 = (int(1)).xx;
+  int2 res = sign(arg_0);
+  return res;
+}
+
+void fragment_main() {
+  prevent_dce.Store2(0u, asuint(sign_926015()));
+}
+
+//
+// compute_main
+//
+
+RWByteAddressBuffer prevent_dce : register(u0);
+int2 sign_926015() {
+  int2 arg_0 = (int(1)).xx;
+  int2 res = sign(arg_0);
+  return res;
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  prevent_dce.Store2(0u, asuint(sign_926015()));
+}
+
+//
+// vertex_main
+//
 struct VertexOutput {
   float4 pos;
   int2 prevent_dce;
@@ -9,33 +43,23 @@ struct vertex_main_outputs {
 };
 
 
-RWByteAddressBuffer prevent_dce : register(u0);
 int2 sign_926015() {
   int2 arg_0 = (int(1)).xx;
-  int2 res = int2(sign(arg_0));
+  int2 res = sign(arg_0);
   return res;
 }
 
-void fragment_main() {
-  prevent_dce.Store2(0u, asuint(sign_926015()));
-}
-
-[numthreads(1, 1, 1)]
-void compute_main() {
-  prevent_dce.Store2(0u, asuint(sign_926015()));
-}
-
 VertexOutput vertex_main_inner() {
-  VertexOutput tint_symbol = (VertexOutput)0;
-  tint_symbol.pos = (0.0f).xxxx;
-  tint_symbol.prevent_dce = sign_926015();
-  VertexOutput v = tint_symbol;
-  return v;
+  VertexOutput v = (VertexOutput)0;
+  v.pos = (0.0f).xxxx;
+  v.prevent_dce = sign_926015();
+  VertexOutput v_1 = v;
+  return v_1;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_1 = vertex_main_inner();
-  vertex_main_outputs v_2 = {v_1.prevent_dce, v_1.pos};
-  return v_2;
+  VertexOutput v_2 = vertex_main_inner();
+  vertex_main_outputs v_3 = {v_2.prevent_dce, v_2.pos};
+  return v_3;
 }
 

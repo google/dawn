@@ -76,8 +76,8 @@ void main() {
     }
   }
   a(v_3);
-  b(tint_convert_S(v_1.inner[2]));
-  c(mat3x2(v_1.inner[2].m_col0, v_1.inner[2].m_col1, v_1.inner[2].m_col2));
-  d(v_1.inner[0].m_col1.yx);
-  e(v_1.inner[0].m_col1.yx[0u]);
+  b(tint_convert_S(v_1.inner[2u]));
+  c(mat3x2(v_1.inner[2u].m_col0, v_1.inner[2u].m_col1, v_1.inner[2u].m_col2));
+  d(v_1.inner[0u].m_col1.yx);
+  e(v_1.inner[0u].m_col1.yx.x);
 }

@@ -105,10 +105,10 @@
 #include "src/tint/lang/wgsl/sem/value_conversion.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
 #include "src/tint/lang/wgsl/sem/while_statement.h"
-#include "src/tint/utils/constants/internal_limits.h"
 #include "src/tint/utils/containers/reverse.h"
 #include "src/tint/utils/containers/transform.h"
 #include "src/tint/utils/containers/vector.h"
+#include "src/tint/utils/internal_limits.h"
 #include "src/tint/utils/macros/compiler.h"
 #include "src/tint/utils/macros/defer.h"
 #include "src/tint/utils/macros/scoped_assignment.h"
@@ -2213,10 +2213,6 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
             [&](const core::type::F32*) { return ctor_or_conv(CtorConvIntrinsic::kF32, Empty); },
             [&](const core::type::Bool*) { return ctor_or_conv(CtorConvIntrinsic::kBool, Empty); },
             [&](const core::type::Vector* v) {
-                if (v->Packed()) {
-                    TINT_ASSERT(v->Width() == 3u);
-                    return ctor_or_conv(CtorConvIntrinsic::kPackedVec3, Vector{v->Type()});
-                }
                 return ctor_or_conv(wgsl::intrinsic::VectorCtorConv(v->Width()), Vector{v->Type()});
             },
             [&](const core::type::Matrix* m) {
@@ -2269,6 +2265,36 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                 }
 
                 return arr_or_str_init(str, call_target);
+            },
+            [&](const core::type::SubgroupMatrix* m) -> sem::Call* {
+                auto* call_target = subgroup_matrix_ctors_.GetOrAdd(
+                    SubgroupMatrixConstructorSig{{m, args.Length()}},
+                    [&]() -> sem::ValueConstructor* {
+                        auto params = tint::Transform(args, [&](auto, size_t i) {
+                            return b.create<sem::Parameter>(nullptr,  // declaration
+                                                            static_cast<uint32_t>(i),  // index
+                                                            m->Type());
+                        });
+                        return b.create<sem::ValueConstructor>(m, std::move(params),
+                                                               core::EvaluationStage::kRuntime);
+                    });
+
+                if (DAWN_UNLIKELY(!MaybeMaterializeAndLoadArguments(args, call_target))) {
+                    return nullptr;
+                }
+
+                if (DAWN_UNLIKELY(!validator_.SubgroupMatrixConstructor(expr, m))) {
+                    return nullptr;
+                }
+
+                // Subgroup matrix constructors are never const-evaluated.
+                auto stage = core::EvaluationStage::kRuntime;
+                if (not_evaluated_.Contains(expr)) {
+                    stage = core::EvaluationStage::kNotEvaluated;
+                }
+
+                return b.create<sem::Call>(expr, call_target, stage, std::move(args),
+                                           current_statement_, nullptr, has_side_effects);
             },
             [&](Default) {
                 AddError(expr->source) << "type is not constructible";
@@ -2488,6 +2514,14 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
 
         case wgsl::BuiltinFn::kSubgroupBroadcast:
             if (!validator_.SubgroupBroadcast(call)) {
+                return nullptr;
+            }
+            break;
+        case wgsl::BuiltinFn::kSubgroupShuffle:
+        case wgsl::BuiltinFn::kSubgroupShuffleUp:
+        case wgsl::BuiltinFn::kSubgroupShuffleDown:
+        case wgsl::BuiltinFn::kSubgroupShuffleXor:
+            if (!validator_.SubgroupShuffleFunction(fn, call)) {
                 return nullptr;
             }
             break;
@@ -2713,6 +2747,12 @@ core::type::Type* Resolver::BuiltinType(core::BuiltinType builtin_ty,
         case core::BuiltinType::kSamplerComparison:
             return check_no_tmpl_args(
                 b.create<core::type::Sampler>(core::type::SamplerKind::kComparisonSampler));
+        case core::BuiltinType::kSubgroupMatrixLeft:
+            return SubgroupMatrix(ident, core::SubgroupMatrixKind::kLeft);
+        case core::BuiltinType::kSubgroupMatrixRight:
+            return SubgroupMatrix(ident, core::SubgroupMatrixKind::kRight);
+        case core::BuiltinType::kSubgroupMatrixResult:
+            return SubgroupMatrix(ident, core::SubgroupMatrixKind::kResult);
         case core::BuiltinType::kTexture1D:
             return SampledTexture(ident, core::type::TextureDimension::k1d);
         case core::BuiltinType::kTexture2D:
@@ -2754,8 +2794,6 @@ core::type::Type* Resolver::BuiltinType(core::BuiltinType builtin_ty,
             return StorageTexture(ident, core::type::TextureDimension::k3d);
         case core::BuiltinType::kInputAttachment:
             return InputAttachment(ident);
-        case core::BuiltinType::kPackedVec3:
-            return PackedVec3T(ident);
         case core::BuiltinType::kAtomicCompareExchangeResultI32:
             return core::type::CreateAtomicCompareExchangeResult(b.Types(), b.Symbols(), I32());
         case core::BuiltinType::kAtomicCompareExchangeResultU32:
@@ -3083,21 +3121,43 @@ core::type::InputAttachment* Resolver::InputAttachment(const ast::Identifier* id
     return validator_.InputAttachment(out, ident->source) ? out : nullptr;
 }
 
-core::type::Vector* Resolver::PackedVec3T(const ast::Identifier* ident) {
-    auto* tmpl_ident = TemplatedIdentifier(ident, 1);
+core::type::SubgroupMatrix* Resolver::SubgroupMatrix(const ast::Identifier* ident,
+                                                     core::SubgroupMatrixKind kind) {
+    auto* tmpl_ident = TemplatedIdentifier(ident, 3);
     if (DAWN_UNLIKELY(!tmpl_ident)) {
         return nullptr;
     }
 
-    auto* el_ty = sem_.GetType(tmpl_ident->arguments[0]);
-    if (DAWN_UNLIKELY(!el_ty)) {
+    auto* ty_expr = sem_.GetType(tmpl_ident->arguments[0]);
+    if (DAWN_UNLIKELY(!ty_expr)) {
         return nullptr;
     }
 
-    if (DAWN_UNLIKELY(!validator_.Vector(el_ty, ident->source))) {
+    auto get_dim = [&](const ast::Expression* arg,
+                       const char* dim) -> const core::constant::Value* {
+        const auto* cols_sem = Materialize(sem_.GetVal(arg));
+        if (!cols_sem) {
+            return nullptr;
+        }
+        if (!cols_sem->ConstantValue() || cols_sem->ConstantValue()->ValueAs<AInt>() < 1) {
+            AddError(arg->source) << "subgroup matrix " << dim
+                                  << " count must be a constant positive integer";
+            return nullptr;
+        }
+        return cols_sem->ConstantValue();
+    };
+    auto* cols = get_dim(tmpl_ident->arguments[1], "column");
+    if (!cols) {
         return nullptr;
     }
-    return b.create<core::type::Vector>(el_ty, 3u, true);
+    auto* rows = get_dim(tmpl_ident->arguments[2], "row");
+    if (!rows) {
+        return nullptr;
+    }
+
+    auto* out = b.create<core::type::SubgroupMatrix>(kind, ty_expr, cols->ValueAs<uint32_t>(),
+                                                     rows->ValueAs<uint32_t>());
+    return validator_.SubgroupMatrix(out, ident->source) ? out : nullptr;
 }
 
 const ast::TemplatedIdentifier* Resolver::TemplatedIdentifier(const ast::Identifier* ident,

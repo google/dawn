@@ -35,38 +35,10 @@
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/spirv/reader/common/helper_test.h"
+#include "src/tint/lang/spirv/reader/helper_test.h"
 
 namespace tint::spirv::reader {
 namespace {
-
-class SpirvReaderTest : public testing::Test {
-  protected:
-    /// Run the reader on a SPIR-V module and return the Tint IR or an error string.
-    /// @param spirv_asm the SPIR-V assembly to read
-    /// @returns the disassembled Tint IR or an error
-    Result<std::string> Run(std::string spirv_asm) {
-        // Assemble the SPIR-V input.
-        auto binary = Assemble(spirv_asm);
-        if (binary != Success) {
-            return binary.Failure();
-        }
-
-        // Read the SPIR-V to produce a core IR module.
-        auto ir = ReadIR(binary.Get());
-        if (ir != Success) {
-            return ir.Failure();
-        }
-
-        // Validate the IR module against the core dialect.
-        auto validated = core::ir::Validate(ir.Get());
-        if (validated != Success) {
-            return validated.Failure();
-        }
-
-        // Return the disassembled IR module.
-        return "\n" + core::ir::Disassembler(ir.Get()).Plain();
-    }
-};
 
 TEST_F(SpirvReaderTest, UnsupportedExtension) {
     auto got = Run(R"(

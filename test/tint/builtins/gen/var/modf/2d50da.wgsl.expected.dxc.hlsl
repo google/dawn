@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 struct modf_result_vec2_f32 {
   float2 fract;
   float2 whole;
@@ -17,11 +20,45 @@ void fragment_main() {
   modf_2d50da();
   return;
 }
+//
+// compute_main
+//
+struct modf_result_vec2_f32 {
+  float2 fract;
+  float2 whole;
+};
+modf_result_vec2_f32 tint_modf(float2 param_0) {
+  modf_result_vec2_f32 result;
+  result.fract = modf(param_0, result.whole);
+  return result;
+}
+
+void modf_2d50da() {
+  float2 arg_0 = (-1.5f).xx;
+  modf_result_vec2_f32 res = tint_modf(arg_0);
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   modf_2d50da();
   return;
+}
+//
+// vertex_main
+//
+struct modf_result_vec2_f32 {
+  float2 fract;
+  float2 whole;
+};
+modf_result_vec2_f32 tint_modf(float2 param_0) {
+  modf_result_vec2_f32 result;
+  result.fract = modf(param_0, result.whole);
+  return result;
+}
+
+void modf_2d50da() {
+  float2 arg_0 = (-1.5f).xx;
+  modf_result_vec2_f32 res = tint_modf(arg_0);
 }
 
 struct VertexOutput {

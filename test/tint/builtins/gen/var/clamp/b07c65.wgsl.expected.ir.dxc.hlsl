@@ -1,3 +1,41 @@
+//
+// fragment_main
+//
+
+RWByteAddressBuffer prevent_dce : register(u0);
+int clamp_b07c65() {
+  int arg_0 = int(1);
+  int arg_1 = int(1);
+  int arg_2 = int(1);
+  int res = min(max(arg_0, arg_1), arg_2);
+  return res;
+}
+
+void fragment_main() {
+  prevent_dce.Store(0u, asuint(clamp_b07c65()));
+}
+
+//
+// compute_main
+//
+
+RWByteAddressBuffer prevent_dce : register(u0);
+int clamp_b07c65() {
+  int arg_0 = int(1);
+  int arg_1 = int(1);
+  int arg_2 = int(1);
+  int res = min(max(arg_0, arg_1), arg_2);
+  return res;
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  prevent_dce.Store(0u, asuint(clamp_b07c65()));
+}
+
+//
+// vertex_main
+//
 struct VertexOutput {
   float4 pos;
   int prevent_dce;
@@ -9,30 +47,19 @@ struct vertex_main_outputs {
 };
 
 
-RWByteAddressBuffer prevent_dce : register(u0);
 int clamp_b07c65() {
   int arg_0 = int(1);
   int arg_1 = int(1);
   int arg_2 = int(1);
-  int v = arg_2;
-  int res = min(max(arg_0, arg_1), v);
+  int res = min(max(arg_0, arg_1), arg_2);
   return res;
 }
 
-void fragment_main() {
-  prevent_dce.Store(0u, asuint(clamp_b07c65()));
-}
-
-[numthreads(1, 1, 1)]
-void compute_main() {
-  prevent_dce.Store(0u, asuint(clamp_b07c65()));
-}
-
 VertexOutput vertex_main_inner() {
-  VertexOutput tint_symbol = (VertexOutput)0;
-  tint_symbol.pos = (0.0f).xxxx;
-  tint_symbol.prevent_dce = clamp_b07c65();
-  VertexOutput v_1 = tint_symbol;
+  VertexOutput v = (VertexOutput)0;
+  v.pos = (0.0f).xxxx;
+  v.prevent_dce = clamp_b07c65();
+  VertexOutput v_1 = v;
   return v_1;
 }
 

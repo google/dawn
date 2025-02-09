@@ -30,21 +30,27 @@ uint tileLightIdatomicAdd(uint offset, uint value) {
 
 
 void main_inner(uint3 GlobalInvocationID) {
+  uint tint_symbol_3 = 0u;
+  lightsBuffer.GetDimensions(tint_symbol_3);
+  uint tint_symbol_4 = ((tint_symbol_3 - 0u) / 32u);
   uint index = GlobalInvocationID.x;
   if ((index >= config[0].x)) {
     return;
   }
-  lightsBuffer.Store(((32u * index) + 4u), asuint(((asfloat(lightsBuffer.Load(((32u * index) + 4u))) - 0.10000000149011611938f) + (0.00100000004749745131f * (float(index) - (64.0f * floor((float(index) / 64.0f))))))));
-  if ((asfloat(lightsBuffer.Load(((32u * index) + 4u))) < asfloat(uniforms[0].y))) {
-    lightsBuffer.Store(((32u * index) + 4u), asuint(asfloat(uniforms[1].y)));
+  lightsBuffer.Store(((32u * min(index, (tint_symbol_4 - 1u))) + 4u), asuint(((asfloat(lightsBuffer.Load(((32u * min(index, (tint_symbol_4 - 1u))) + 4u))) - 0.10000000149011611938f) + (0.00100000004749745131f * (float(index) - (64.0f * floor((float(index) / 64.0f))))))));
+  if ((asfloat(lightsBuffer.Load(((32u * min(index, (tint_symbol_4 - 1u))) + 4u))) < asfloat(uniforms[0].y))) {
+    uint tint_symbol_5 = 0u;
+    lightsBuffer.GetDimensions(tint_symbol_5);
+    uint tint_symbol_6 = ((tint_symbol_5 - 0u) / 32u);
+    lightsBuffer.Store(((32u * min(index, (tint_symbol_6 - 1u))) + 4u), asuint(asfloat(uniforms[1].y)));
   }
   float4x4 M = uniforms_load_1(96u);
   float viewNear = (-(M[3][2]) / (-1.0f + M[2][2]));
   float viewFar = (-(M[3][2]) / (1.0f + M[2][2]));
-  float4 lightPos = asfloat(lightsBuffer.Load4((32u * index)));
+  float4 lightPos = asfloat(lightsBuffer.Load4((32u * min(index, (tint_symbol_4 - 1u)))));
   lightPos = mul(lightPos, uniforms_load_1(32u));
   lightPos = (lightPos / lightPos.w);
-  float lightRadius = asfloat(lightsBuffer.Load(((32u * index) + 28u)));
+  float lightRadius = asfloat(lightsBuffer.Load(((32u * min(index, (tint_symbol_4 - 1u))) + 28u)));
   float4 boxMin = (lightPos - float4(float3((lightRadius).xxx), 0.0f));
   float4 boxMax = (lightPos + float4(float3((lightRadius).xxx), 0.0f));
   float4 frustumPlanes[6] = (float4[6])0;
@@ -70,23 +76,23 @@ void main_inner(uint3 GlobalInvocationID) {
           {
             for(uint i = 0u; (i < 6u); i = (i + 1u)) {
               float4 p = float4(0.0f, 0.0f, 0.0f, 0.0f);
-              if ((frustumPlanes[i].x > 0.0f)) {
+              if ((frustumPlanes[min(i, 5u)].x > 0.0f)) {
                 p.x = boxMax.x;
               } else {
                 p.x = boxMin.x;
               }
-              if ((frustumPlanes[i].y > 0.0f)) {
+              if ((frustumPlanes[min(i, 5u)].y > 0.0f)) {
                 p.y = boxMax.y;
               } else {
                 p.y = boxMin.y;
               }
-              if ((frustumPlanes[i].z > 0.0f)) {
+              if ((frustumPlanes[min(i, 5u)].z > 0.0f)) {
                 p.z = boxMax.z;
               } else {
                 p.z = boxMin.z;
               }
               p.w = 1.0f;
-              dp = (dp + min(0.0f, dot(p, frustumPlanes[i])));
+              dp = (dp + min(0.0f, dot(p, frustumPlanes[min(i, 5u)])));
             }
           }
           if ((dp >= 0.0f)) {
@@ -98,11 +104,11 @@ void main_inner(uint3 GlobalInvocationID) {
             if ((tint_tmp)) {
               continue;
             }
-            uint offset = tileLightIdatomicAdd((260u * tileId), 1u);
+            uint offset = tileLightIdatomicAdd((260u * min(tileId, 3u)), 1u);
             if ((offset >= config[1].x)) {
               continue;
             }
-            tileLightId.Store((((260u * tileId) + 4u) + (4u * offset)), asuint(GlobalInvocationID.x));
+            tileLightId.Store((((260u * min(tileId, 3u)) + 4u) + (4u * min(offset, 63u))), asuint(GlobalInvocationID.x));
           }
         }
       }

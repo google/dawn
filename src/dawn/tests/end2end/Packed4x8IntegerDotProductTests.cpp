@@ -63,7 +63,8 @@ TEST_P(Packed4x8IntegerDotProductTests, Dot4x8Packed) {
         }
 )";
 
-    ASSERT_TRUE(instance.HasWGSLLanguageFeature(wgpu::WGSLFeatureName::Packed4x8IntegerDotProduct));
+    ASSERT_TRUE(
+        instance.HasWGSLLanguageFeature(wgpu::WGSLLanguageFeatureName::Packed4x8IntegerDotProduct));
 
     wgpu::BufferDescriptor bufferDesc;
     bufferDesc.size = 4 * sizeof(uint32_t);
@@ -134,7 +135,8 @@ TEST_P(Packed4x8IntegerDotProductTests, Pack4x8) {
         }
 )";
 
-    ASSERT_TRUE(instance.HasWGSLLanguageFeature(wgpu::WGSLFeatureName::Packed4x8IntegerDotProduct));
+    ASSERT_TRUE(
+        instance.HasWGSLLanguageFeature(wgpu::WGSLLanguageFeatureName::Packed4x8IntegerDotProduct));
 
     wgpu::BufferDescriptor bufferDesc;
     bufferDesc.size = 8 * sizeof(uint32_t);
@@ -205,7 +207,8 @@ TEST_P(Packed4x8IntegerDotProductTests, Unpack4x8) {
         }
 )";
 
-    ASSERT_TRUE(instance.HasWGSLLanguageFeature(wgpu::WGSLFeatureName::Packed4x8IntegerDotProduct));
+    ASSERT_TRUE(
+        instance.HasWGSLLanguageFeature(wgpu::WGSLLanguageFeatureName::Packed4x8IntegerDotProduct));
 
     wgpu::BufferDescriptor bufferDesc;
     bufferDesc.size = sizeof(uint32_t) * 4 * 8;

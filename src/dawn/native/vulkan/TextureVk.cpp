@@ -38,7 +38,7 @@
 #include "dawn/native/VulkanBackend.h"
 #include "dawn/native/vulkan/BufferVk.h"
 #include "dawn/native/vulkan/CommandBufferVk.h"
-#include "dawn/native/vulkan/CommandRecordingContext.h"
+#include "dawn/native/vulkan/CommandRecordingContextVk.h"
 #include "dawn/native/vulkan/DeviceVk.h"
 #include "dawn/native/vulkan/FencedDeleter.h"
 #include "dawn/native/vulkan/PhysicalDeviceVk.h"
@@ -365,7 +365,7 @@ void FillVulkanCreateInfoSizesAndType(const Texture& texture, VkImageCreateInfo*
 }
 
 Aspect ComputeCombinedAspect(Device* device, const Format& format) {
-    // In early Vulkan versions it is not possible to transition depth and stencil separetely so
+    // In early Vulkan versions it is not possible to transition depth and stencil separately so
     // textures with Depth|Stencil will be promoted to a single CombinedDepthStencil aspect
     // internally.
     if (format.aspects == (Aspect::Depth | Aspect::Stencil)) {
@@ -1204,7 +1204,7 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* recordingContext,
                     continue;
                 }
 
-                TextureDataLayout dataLayout;
+                TexelCopyBufferLayout dataLayout;
                 dataLayout.offset = uploadHandle.startOffset;
                 dataLayout.rowsPerImage = copySize.height / blockInfo.height;
                 dataLayout.bytesPerRow = bytesPerRow;
@@ -1873,6 +1873,7 @@ MaybeError TextureView::Initialize(const UnpackedPtr<TextureViewDescriptor>& des
 
     VkSamplerYcbcrConversionInfo samplerYCbCrInfo = {};
     if (auto* yCbCrVkDescriptor = descriptor.Get<YCbCrVkDescriptor>()) {
+        mIsYCbCr = true;
         mYCbCrVkDescriptor = *yCbCrVkDescriptor;
         mYCbCrVkDescriptor.nextInChain = nullptr;
 
@@ -2003,6 +2004,15 @@ ResultOrError<VkImageView> TextureView::GetOrCreate2DViewOn3D(uint32_t depthSlic
     mHandlesFor2DViewOn3D[depthSlice] = view;
 
     return view;
+}
+
+bool TextureView::IsYCbCr() const {
+    return mIsYCbCr;
+}
+
+YCbCrVkDescriptor TextureView::GetYCbCrVkDescriptor() const {
+    DAWN_ASSERT(IsYCbCr());
+    return mYCbCrVkDescriptor;
 }
 
 void TextureView::SetLabelImpl() {

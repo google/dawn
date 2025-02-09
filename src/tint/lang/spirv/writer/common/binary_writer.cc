@@ -30,6 +30,8 @@
 #include <cstring>
 #include <string>
 
+TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
+
 namespace tint::spirv::writer {
 namespace {
 
@@ -87,3 +89,5 @@ void BinaryWriter::ProcessOp(const Operand& op) {
 }
 
 }  // namespace tint::spirv::writer
+
+TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);

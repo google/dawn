@@ -22,16 +22,19 @@ particles_load_1_ret particles_load_1(uint offset) {
 }
 
 Particle particles_load(uint offset) {
-  Particle tint_symbol_2 = {particles_load_1((offset + 0u)), asfloat(particles.Load((offset + 128u))), asfloat(particles.Load4((offset + 144u))), asfloat(particles.Load3((offset + 160u)))};
-  return tint_symbol_2;
+  Particle tint_symbol_5 = {particles_load_1((offset + 0u)), asfloat(particles.Load((offset + 128u))), asfloat(particles.Load4((offset + 144u))), asfloat(particles.Load3((offset + 160u)))};
+  return tint_symbol_5;
 }
 
 [numthreads(1, 1, 1)]
 void main() {
-  Particle particle = particles_load(0u);
+  uint tint_symbol_3 = 0u;
+  particles.GetDimensions(tint_symbol_3);
+  uint tint_symbol_4 = ((tint_symbol_3 - 0u) / 176u);
+  Particle particle = particles_load((176u * min(0u, (tint_symbol_4 - 1u))));
   {
     float3 tint_symbol_1[8] = particle.position;
-    tint_symbol_1[sim[0].x] = particle.position[sim[0].x];
+    tint_symbol_1[min(sim[0].x, 7u)] = particle.position[min(sim[0].x, 7u)];
     particle.position = tint_symbol_1;
   }
   return;

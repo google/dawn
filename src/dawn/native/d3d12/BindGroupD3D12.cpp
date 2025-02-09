@@ -140,6 +140,7 @@ BindGroup::BindGroup(Device* device,
                                                       descriptorHeapOffsets[bindingIndex]));
                         break;
                     }
+                    case wgpu::BufferBindingType::BindingNotUsed:
                     case wgpu::BufferBindingType::Undefined:
                         DAWN_UNREACHABLE();
                 }
@@ -190,6 +191,7 @@ BindGroup::BindGroup(Device* device,
                                                       descriptorHeapOffsets[bindingIndex]));
                         break;
                     }
+                    case wgpu::StorageTextureAccess::BindingNotUsed:
                     case wgpu::StorageTextureAccess::Undefined:
                         DAWN_UNREACHABLE();
                 }
@@ -264,12 +266,11 @@ D3D12_GPU_DESCRIPTOR_HANDLE BindGroup::GetBaseSamplerDescriptor() const {
 }
 
 bool BindGroup::PopulateSamplers(
-    Device* device,
     MutexProtected<ShaderVisibleDescriptorAllocator>& samplerAllocator) {
     if (mSamplerAllocationEntry == nullptr) {
         return true;
     }
-    return mSamplerAllocationEntry->Populate(device, samplerAllocator);
+    return mSamplerAllocationEntry->Populate(samplerAllocator);
 }
 
 void BindGroup::SetSamplerAllocationEntry(Ref<SamplerHeapCacheEntry> entry) {

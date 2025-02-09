@@ -18,7 +18,9 @@ void zoo() {
 void bar(float a, float b) {
   p = a;
   w = b;
-  v_1.inner[0] = v.inner.x;
+  uint v_2 = (uint(v_1.inner.length()) - 1u);
+  uint v_3 = min(uint(0), v_2);
+  v_1.inner[v_3] = v.inner.x;
   zoo();
 }
 void foo(float a) {
@@ -26,8 +28,8 @@ void foo(float a) {
   bar(a, b);
   no_uses();
 }
-void tint_symbol_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+void main_inner(uint tint_local_index) {
+  if ((tint_local_index < 1u)) {
     w = 0.0f;
   }
   barrier();
@@ -35,5 +37,5 @@ void tint_symbol_inner(uint tint_local_index) {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  tint_symbol_inner(gl_LocalInvocationIndex);
+  main_inner(gl_LocalInvocationIndex);
 }

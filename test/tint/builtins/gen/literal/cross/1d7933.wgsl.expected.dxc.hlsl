@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void cross_1d7933() {
   float3 res = (0.0f).xxx;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   cross_1d7933();
   return;
 }
+//
+// compute_main
+//
+void cross_1d7933() {
+  float3 res = (0.0f).xxx;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   cross_1d7933();
   return;
+}
+//
+// vertex_main
+//
+void cross_1d7933() {
+  float3 res = (0.0f).xxx;
 }
 
 struct VertexOutput {

@@ -1,23 +1,41 @@
 #include <metal_stdlib>
-
 using namespace metal;
-kernel void tint_symbol(texture1d<float, access::write> tint_symbol_1 [[texture(0)]], texture1d<float, access::write> tint_symbol_2 [[texture(1)]], texture1d<uint, access::write> tint_symbol_3 [[texture(2)]], texture1d<int, access::write> tint_symbol_4 [[texture(3)]], texture1d<uint, access::write> tint_symbol_5 [[texture(4)]], texture1d<int, access::write> tint_symbol_6 [[texture(5)]], texture1d<float, access::write> tint_symbol_7 [[texture(6)]], texture1d<uint, access::write> tint_symbol_8 [[texture(7)]], texture1d<int, access::write> tint_symbol_9 [[texture(8)]], texture1d<float, access::write> tint_symbol_10 [[texture(9)]], texture1d<uint, access::write> tint_symbol_11 [[texture(10)]], texture1d<int, access::write> tint_symbol_12 [[texture(11)]], texture1d<float, access::write> tint_symbol_13 [[texture(12)]], texture1d<uint, access::write> tint_symbol_14 [[texture(13)]], texture1d<int, access::write> tint_symbol_15 [[texture(14)]], texture1d<float, access::write> tint_symbol_16 [[texture(15)]]) {
-  uint dim1 = tint_symbol_1.get_width(0);
-  uint dim2 = tint_symbol_2.get_width(0);
-  uint dim3 = tint_symbol_3.get_width(0);
-  uint dim4 = tint_symbol_4.get_width(0);
-  uint dim5 = tint_symbol_5.get_width(0);
-  uint dim6 = tint_symbol_6.get_width(0);
-  uint dim7 = tint_symbol_7.get_width(0);
-  uint dim8 = tint_symbol_8.get_width(0);
-  uint dim9 = tint_symbol_9.get_width(0);
-  uint dim10 = tint_symbol_10.get_width(0);
-  uint dim11 = tint_symbol_11.get_width(0);
-  uint dim12 = tint_symbol_12.get_width(0);
-  uint dim13 = tint_symbol_13.get_width(0);
-  uint dim14 = tint_symbol_14.get_width(0);
-  uint dim15 = tint_symbol_15.get_width(0);
-  uint dim16 = tint_symbol_16.get_width(0);
-  return;
-}
 
+struct tint_module_vars_struct {
+  texture1d<float, access::write> t_rgba8unorm;
+  texture1d<float, access::write> t_rgba8snorm;
+  texture1d<uint, access::write> t_rgba8uint;
+  texture1d<int, access::write> t_rgba8sint;
+  texture1d<uint, access::write> t_rgba16uint;
+  texture1d<int, access::write> t_rgba16sint;
+  texture1d<float, access::write> t_rgba16float;
+  texture1d<uint, access::write> t_r32uint;
+  texture1d<int, access::write> t_r32sint;
+  texture1d<float, access::write> t_r32float;
+  texture1d<uint, access::write> t_rg32uint;
+  texture1d<int, access::write> t_rg32sint;
+  texture1d<float, access::write> t_rg32float;
+  texture1d<uint, access::write> t_rgba32uint;
+  texture1d<int, access::write> t_rgba32sint;
+  texture1d<float, access::write> t_rgba32float;
+};
+
+kernel void v(texture1d<float, access::write> t_rgba8unorm [[texture(0)]], texture1d<float, access::write> t_rgba8snorm [[texture(1)]], texture1d<uint, access::write> t_rgba8uint [[texture(2)]], texture1d<int, access::write> t_rgba8sint [[texture(3)]], texture1d<uint, access::write> t_rgba16uint [[texture(4)]], texture1d<int, access::write> t_rgba16sint [[texture(5)]], texture1d<float, access::write> t_rgba16float [[texture(6)]], texture1d<uint, access::write> t_r32uint [[texture(7)]], texture1d<int, access::write> t_r32sint [[texture(8)]], texture1d<float, access::write> t_r32float [[texture(9)]], texture1d<uint, access::write> t_rg32uint [[texture(10)]], texture1d<int, access::write> t_rg32sint [[texture(11)]], texture1d<float, access::write> t_rg32float [[texture(12)]], texture1d<uint, access::write> t_rgba32uint [[texture(13)]], texture1d<int, access::write> t_rgba32sint [[texture(14)]], texture1d<float, access::write> t_rgba32float [[texture(15)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.t_rgba8unorm=t_rgba8unorm, .t_rgba8snorm=t_rgba8snorm, .t_rgba8uint=t_rgba8uint, .t_rgba8sint=t_rgba8sint, .t_rgba16uint=t_rgba16uint, .t_rgba16sint=t_rgba16sint, .t_rgba16float=t_rgba16float, .t_r32uint=t_r32uint, .t_r32sint=t_r32sint, .t_r32float=t_r32float, .t_rg32uint=t_rg32uint, .t_rg32sint=t_rg32sint, .t_rg32float=t_rg32float, .t_rgba32uint=t_rgba32uint, .t_rgba32sint=t_rgba32sint, .t_rgba32float=t_rgba32float};
+  uint dim1 = uint(tint_module_vars.t_rgba8unorm.get_width());
+  uint dim2 = uint(tint_module_vars.t_rgba8snorm.get_width());
+  uint dim3 = uint(tint_module_vars.t_rgba8uint.get_width());
+  uint dim4 = uint(tint_module_vars.t_rgba8sint.get_width());
+  uint dim5 = uint(tint_module_vars.t_rgba16uint.get_width());
+  uint dim6 = uint(tint_module_vars.t_rgba16sint.get_width());
+  uint dim7 = uint(tint_module_vars.t_rgba16float.get_width());
+  uint dim8 = uint(tint_module_vars.t_r32uint.get_width());
+  uint dim9 = uint(tint_module_vars.t_r32sint.get_width());
+  uint dim10 = uint(tint_module_vars.t_r32float.get_width());
+  uint dim11 = uint(tint_module_vars.t_rg32uint.get_width());
+  uint dim12 = uint(tint_module_vars.t_rg32sint.get_width());
+  uint dim13 = uint(tint_module_vars.t_rg32float.get_width());
+  uint dim14 = uint(tint_module_vars.t_rgba32uint.get_width());
+  uint dim15 = uint(tint_module_vars.t_rgba32sint.get_width());
+  uint dim16 = uint(tint_module_vars.t_rgba32float.get_width());
+}
