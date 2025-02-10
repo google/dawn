@@ -44,6 +44,7 @@
 #include "dawn/native/d3d12/QueueD3D12.h"
 #include "dawn/native/d3d12/ResidencyManagerD3D12.h"
 #include "dawn/native/d3d12/SharedBufferMemoryD3D12.h"
+#include "dawn/native/d3d12/SharedFenceD3D12.h"
 #include "dawn/native/d3d12/UtilsD3D12.h"
 #include "dawn/platform/DawnPlatform.h"
 #include "dawn/platform/tracing/TraceEvent.h"
@@ -422,6 +423,10 @@ bool Buffer::TrackUsageAndGetResourceBarrier(CommandRecordingContext* commandCon
 
 void Buffer::TrackUsageAndTransitionNow(CommandRecordingContext* commandContext,
                                         wgpu::BufferUsage newUsage) {
+    if (mResourceAllocation.GetInfo().mMethod == AllocationMethod::kExternal) {
+        commandContext->AddToSharedBufferList(this);
+    }
+
     D3D12_RESOURCE_BARRIER barrier;
 
     if (TrackUsageAndGetResourceBarrier(commandContext, &barrier, newUsage)) {
@@ -487,6 +492,9 @@ MaybeError Buffer::MapAtCreationImpl() {
 }
 
 MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) {
+    // Externally allocated buffers must be synchronized before any usage.
+    DAWN_TRY(SynchronizeBufferBeforeUse());
+
     // GetPendingCommandContext() call might create a new commandList. Dawn will handle
     // it in Tick() by execute the commandList and signal a fence for it even it is empty.
     // Skip the unnecessary GetPendingCommandContext() call saves an extra fence.
@@ -616,6 +624,49 @@ MaybeError Buffer::EnsureDataInitializedAsDestination(CommandRecordingContext* c
         SetInitialized(true);
     } else {
         DAWN_TRY(InitializeToZero(commandContext));
+    }
+
+    return {};
+}
+
+MaybeError Buffer::EndAccess() {
+    Queue* queue = ToBackend(GetDevice()->GetQueue());
+    // Synchronize here if the shared buffer hasn't already been synchronized due to a previous
+    // access.
+    if (mLastUsageSerial == kBeginningOfGPUTime) {
+        DAWN_TRY(SynchronizeBufferBeforeUse());
+        DAWN_ASSERT(mLastUsageSerial != kBeginningOfGPUTime);
+    }
+    // Make the queue signal the fence in finite time.
+    DAWN_TRY(queue->EnsureCommandsFlushed(mLastUsageSerial));
+
+    mLastUsageSerial = kBeginningOfGPUTime;
+    return {};
+}
+
+MaybeError Buffer::SynchronizeBufferBeforeUse() {
+    // Buffers imported with the SharedBufferMemory feature can include fences that must finish
+    // before Dawn can use the buffer. We acquire and wait for them here.
+    if (SharedResourceMemoryContents* contents = GetSharedResourceMemoryContents()) {
+        Device* device = ToBackend(GetDevice());
+        Queue* queue = ToBackend(device->GetQueue());
+
+        std::vector<FenceAndSignalValue> waitFences;
+        SharedBufferMemoryBase::PendingFenceList fences;
+        contents->AcquirePendingFences(&fences);
+        waitFences.insert(waitFences.end(), std::make_move_iterator(fences.begin()),
+                          std::make_move_iterator(fences.end()));
+
+        ID3D12CommandQueue* commandQueue = queue->GetCommandQueue();
+        for (const auto& fence : waitFences) {
+            DAWN_TRY(CheckHRESULT(commandQueue->Wait(ToBackend(fence.object)->GetD3DFence(),
+                                                     fence.signaledValue),
+                                  "D3D12 fence wait"););
+            // Keep D3D12 fence alive until commands complete.
+            device->ReferenceUntilUnused(ToBackend(fence.object)->GetD3DFence());
+        }
+
+        mLastUsageSerial = queue->GetPendingCommandSerial();
     }
 
     return {};
