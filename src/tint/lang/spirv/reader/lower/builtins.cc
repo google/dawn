@@ -119,6 +119,9 @@ struct State {
                 case spirv::BuiltinFn::kFrexp:
                     Frexp(builtin);
                     break;
+                case spirv::BuiltinFn::kBitCount:
+                    BitCount(builtin);
+                    break;
                 default:
                     TINT_UNREACHABLE() << "unknown spirv builtin: " << builtin->Func();
             }
@@ -351,6 +354,22 @@ struct State {
             b.Store(i, exp);
 
             b.AccessWithResult(call->DetachResult(), c, 0_u);
+        });
+        call->Destroy();
+    }
+
+    void BitCount(spirv::ir::BuiltinCall* call) {
+        auto arg = call->Args()[0];
+
+        b.InsertBefore(call, [&] {
+            auto* res_ty = call->Result(0)->Type();
+            auto* arg_ty = arg->Type();
+
+            auto* bc = b.Call(arg_ty, core::BuiltinFn::kCountOneBits, arg)->Result(0);
+            if (res_ty != arg_ty) {
+                bc = b.Bitcast(res_ty, bc)->Result(0);
+            }
+            call->Result(0)->ReplaceAllUsesWith(bc);
         });
         call->Destroy();
     }

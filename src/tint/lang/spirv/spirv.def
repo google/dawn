@@ -390,6 +390,9 @@ implicit(T: f32_f16,
          N: num,
          S: function_private_workgroup_storage) fn frexp(x: vec<N, T>, i: ptr<S, vec<N, R>, writable>) -> vec<N, T>
 
+implicit(T: iu32) fn bit_count<R: iu32>(T) -> R
+implicit(T: iu32, N: num) fn bit_count<R: iu32>(vec<N, T>) -> vec<N, R>
+
 ////////////////////////////////////////////////////////////////////////////////
 // SPV_KHR_integer_dot_product instructions
 ////////////////////////////////////////////////////////////////////////////////

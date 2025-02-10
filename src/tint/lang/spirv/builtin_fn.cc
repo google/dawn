@@ -146,6 +146,8 @@ const char* str(BuiltinFn i) {
             return "modf";
         case BuiltinFn::kFrexp:
             return "frexp";
+        case BuiltinFn::kBitCount:
+            return "bit_count";
         case BuiltinFn::kSdot:
             return "sdot";
         case BuiltinFn::kUdot:
@@ -227,6 +229,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kFaceForward:
         case BuiltinFn::kLdexp:
         case BuiltinFn::kCooperativeMatrixMulAdd:
+        case BuiltinFn::kBitCount:
             break;
     }
     return core::ir::Instruction::Accesses{};

@@ -59,5 +59,223 @@ TEST_F(SpirvParserTest, Dot) {
 )");
 }
 
+TEST_F(SpirvParserTest, BitCount_Scalar_UnsignedToUnsigned) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %uint = OpTypeInt 32 0
+    %uint_10 = OpConstant %uint 10
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+      %entry = OpLabel
+          %1 = OpBitCount %uint %uint_10
+               OpReturn
+               OpFunctionEnd)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = spirv.bit_count<u32> 10u
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, BitCount_Scalar_UnsignedToSigned) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %uint = OpTypeInt 32 0
+        %int = OpTypeInt 32 1
+    %uint_10 = OpConstant %uint 10
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+      %entry = OpLabel
+          %1 = OpBitCount %int %uint_10
+               OpReturn
+               OpFunctionEnd)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = spirv.bit_count<i32> 10u
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, BitCount_Scalar_SignedToUnsigned) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %uint = OpTypeInt 32 0
+        %int = OpTypeInt 32 1
+     %int_20 = OpConstant %int 20
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+      %entry = OpLabel
+          %1 = OpBitCount %uint %int_20
+               OpReturn
+               OpFunctionEnd)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = spirv.bit_count<u32> 20i
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, BitCount_Scalar_SignedToSigned) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+        %int = OpTypeInt 32 1
+     %int_20 = OpConstant %int 20
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+      %entry = OpLabel
+          %1 = OpBitCount %int %int_20
+               OpReturn
+               OpFunctionEnd)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = spirv.bit_count<i32> 20i
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, BitCount_Vector_UnsignedToUnsigned) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %uint = OpTypeInt 32 0
+    %v2_uint = OpTypeVector %uint 2
+    %uint_10 = OpConstant %uint 10
+    %uint_20 = OpConstant %uint 20
+%v2_uint_10_20 = OpConstantComposite %v2_uint %uint_10 %uint_20
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+      %entry = OpLabel
+          %1 = OpBitCount %v2_uint %v2_uint_10_20
+               OpReturn
+               OpFunctionEnd)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<u32> = spirv.bit_count<u32> vec2<u32>(10u, 20u)
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, BitCount_Vector_UnsignedToSigned) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+        %int = OpTypeInt 32 1
+       %uint = OpTypeInt 32 0
+     %v2_int = OpTypeVector %int 2
+    %v2_uint = OpTypeVector %uint 2
+    %uint_10 = OpConstant %uint 10
+    %uint_20 = OpConstant %uint 20
+%v2_uint_10_20 = OpConstantComposite %v2_uint %uint_10 %uint_20
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+      %entry = OpLabel
+          %1 = OpBitCount %v2_int %v2_uint_10_20
+               OpReturn
+               OpFunctionEnd)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<i32> = spirv.bit_count<i32> vec2<u32>(10u, 20u)
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, BitCount_Vector_SignedToUnsigned) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+        %int = OpTypeInt 32 1
+       %uint = OpTypeInt 32 0
+     %v2_int = OpTypeVector %int 2
+    %v2_uint = OpTypeVector %uint 2
+     %int_10 = OpConstant %int 10
+     %int_20 = OpConstant %int 20
+%v2_int_10_20 = OpConstantComposite %v2_int %int_10 %int_20
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+      %entry = OpLabel
+          %1 = OpBitCount %v2_uint %v2_int_10_20
+               OpReturn
+               OpFunctionEnd)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<u32> = spirv.bit_count<u32> vec2<i32>(10i, 20i)
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, BitCount_Vector_SignedToSigned) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+        %int = OpTypeInt 32 1
+     %v2_int = OpTypeVector %int 2
+     %int_10 = OpConstant %int 10
+     %int_20 = OpConstant %int 20
+%v2_int_10_20 = OpConstantComposite %v2_int %int_10 %int_20
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+      %entry = OpLabel
+          %1 = OpBitCount %v2_int %v2_int_10_20
+               OpReturn
+               OpFunctionEnd)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<i32> = spirv.bit_count<i32> vec2<i32>(10i, 20i)
+    ret
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader

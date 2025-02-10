@@ -625,11 +625,23 @@ class Parser {
                                  Value(inst.GetSingleWordOperand(3))),
                          inst.result_id());
                     break;
+                case spv::Op::OpBitCount:
+                    EmitBitCount(inst);
+                    break;
                 default:
                     TINT_UNIMPLEMENTED()
                         << "unhandled SPIR-V instruction: " << static_cast<uint32_t>(inst.opcode());
             }
         }
+    }
+
+    void EmitBitCount(const spvtools::opt::Instruction& inst) {
+        auto* res_ty = Type(inst.type_id());
+        Emit(b_.CallExplicit<spirv::ir::BuiltinCall>(
+                 res_ty, spirv::BuiltinFn::kBitCount,
+                 Vector<const core::type::Type*, 1>{res_ty->DeepestElement()},
+                 Value(inst.GetSingleWordOperand(2))),
+             inst.result_id());
     }
 
     /// @param inst the SPIR-V instruction
