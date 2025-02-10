@@ -1018,7 +1018,7 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
 
         if (DelayedInvalidIf(bindGroupIndex >= kMaxBindGroupsTyped,
                              "The entry-point uses a binding with a group decoration (%u) "
-                             "that exceeds the maximum (%u).",
+                             "that exceeds maxBindGroups (%u) - 1.",
                              resource.bind_group, kMaxBindGroups) ||
             DelayedInvalidIf(bindingNumber >= kMaxBindingsPerBindGroupTyped,
                              "Binding number (%u) exceeds the maxBindingsPerBindGroup limit (%u).",
