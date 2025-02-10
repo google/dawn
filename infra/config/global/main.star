@@ -370,6 +370,7 @@ def get_common_properties(os, clang, rbe_project, remote_jobs):
 
     properties = {
         "$build/siso": {
+            "project": rbe_project,
             "configs": ["builder"],
             "enable_cloud_monitoring": True,
             "enable_cloud_profiler": True,
