@@ -59,6 +59,7 @@ class MappedNamedConstantsTest {
         StorageTextureAccess::class,
         StoreOp::class,
         SType::class,
+        SubgroupMatrixComponentType::class,
         SurfaceGetCurrentTextureStatus::class,
         TextureAspect::class,
         TextureDimension::class,

@@ -3720,7 +3720,8 @@
             {"value": 56, "name": "shared texture memory a hardware buffer properties", "tags": ["dawn", "native"]},
             {"value": 57, "name": "a hardware buffer properties", "tags": ["dawn", "native"]},
             {"value": 58, "name": "dawn experimental immediate data limits", "tags": ["dawn"]},
-            {"value": 59, "name": "dawn texel copy buffer row alignment limits", "tags": ["dawn"]}
+            {"value": 59, "name": "dawn texel copy buffer row alignment limits", "tags": ["dawn"]},
+            {"value": 60, "name": "adapter properties subgroup matrix configs", "tags": ["dawn"]}
         ]
     },
     "texture": {
@@ -4287,6 +4288,37 @@
         "tags": ["dawn"],
         "members": [
             {"name": "out of memory", "type": "bool", "default": "false"}
+        ]
+    },
+    "subgroup matrix component type": {
+        "category": "enum",
+        "emscripten_no_enum_table": true,
+        "values": [
+            {"value": 1, "name": "f32"},
+            {"value": 2, "name": "f16"},
+            {"value": 3, "name": "u32"},
+            {"value": 4, "name": "i32"}
+        ]
+    },
+    "subgroup matrix config": {
+        "category": "structure",
+        "tags": ["dawn"],
+        "members": [
+            {"name": "component type", "type": "subgroup matrix component type"},
+            {"name": "result component type", "type": "subgroup matrix component type"},
+            {"name": "M", "type": "uint32_t"},
+            {"name": "N", "type": "uint32_t"},
+            {"name": "K", "type": "uint32_t"}
+        ]
+    },
+    "adapter properties subgroup matrix configs": {
+        "category": "structure",
+        "chained": "out",
+        "chain roots": ["adapter info"],
+        "tags": ["dawn"],
+        "members": [
+            {"name": "config count", "type": "size_t"},
+            {"name": "configs", "type": "subgroup matrix config", "annotation": "const*", "length": "config count"}
         ]
     }
 }

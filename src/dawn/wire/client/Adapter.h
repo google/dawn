@@ -78,6 +78,7 @@ class Adapter final : public ObjectWithEventsBase {
         4u,   // subgroupMinSize
         128u  // subgroupMaxSize
     };
+    std::vector<WGPUSubgroupMatrixConfig> mSubgroupMatrixConfigs;
 };
 
 }  // namespace dawn::wire::client

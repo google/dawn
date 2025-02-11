@@ -187,6 +187,11 @@ wgpu::Status AdapterBase::APIGetInfo(AdapterInfo* info) const {
         hadError |= mInstance->ConsumedError(
             DAWN_VALIDATION_ERROR("Feature AdapterPropertiesVk is not available."));
     }
+    if (unpacked.Get<AdapterPropertiesSubgroupMatrixConfigs>() != nullptr &&
+        !mSupportedFeatures.IsEnabled(wgpu::FeatureName::ChromiumExperimentalSubgroupMatrix)) {
+        hadError |= mInstance->ConsumedError(
+            DAWN_VALIDATION_ERROR("Feature ChromiumExperimentalSubgroupMatrix is not available."));
+    }
     if (hadError) {
         return wgpu::Status::Error;
     }
@@ -259,6 +264,11 @@ void APIAdapterPropertiesMemoryHeapsFreeMembers(
 
 void APIDawnDrmFormatCapabilitiesFreeMembers(WGPUDawnDrmFormatCapabilities capabilities) {
     delete[] capabilities.properties;
+}
+
+void APIAdapterPropertiesSubgroupMatrixConfigsFreeMembers(
+    WGPUAdapterPropertiesSubgroupMatrixConfigs subgroupMatrixConfigs) {
+    delete[] subgroupMatrixConfigs.configs;
 }
 
 bool AdapterBase::APIHasFeature(wgpu::FeatureName feature) const {
