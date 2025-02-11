@@ -620,22 +620,19 @@ class Parser {
                     EmitKill(inst);
                     break;
                 case spv::Op::OpDot:
-                    Emit(b_.Call(Type(inst.type_id()), core::BuiltinFn::kDot,
-                                 Value(inst.GetSingleWordOperand(2)),
-                                 Value(inst.GetSingleWordOperand(3))),
-                         inst.result_id());
+                    EmitBuiltinCall(inst, core::BuiltinFn::kDot);
                     break;
                 case spv::Op::OpBitCount:
                     EmitBitCount(inst);
                     break;
                 case spv::Op::OpBitFieldInsert:
-                    EmitBitFieldInsert(inst);
+                    EmitSpirvBuiltinCall(inst, spirv::BuiltinFn::kBitFieldInsert);
                     break;
                 case spv::Op::OpBitFieldSExtract:
-                    EmitBitFieldSExtract(inst);
+                    EmitSpirvBuiltinCall(inst, spirv::BuiltinFn::kBitFieldSExtract);
                     break;
                 case spv::Op::OpBitFieldUExtract:
-                    EmitBitFieldUExtract(inst);
+                    EmitSpirvBuiltinCall(inst, spirv::BuiltinFn::kBitFieldUExtract);
                     break;
                 case spv::Op::OpBitReverse:
                     EmitBuiltinCall(inst, core::BuiltinFn::kReverseBits);
@@ -653,35 +650,20 @@ class Parser {
         }
     }
 
-    void EmitBuiltinCall(const spvtools::opt::Instruction& inst, core::BuiltinFn fn) {
+    Vector<core::ir::Value*, 4> Args(const spvtools::opt::Instruction& inst, uint32_t start) {
         Vector<core::ir::Value*, 4> args;
-        for (uint32_t i = 2; i < inst.NumOperandWords(); i++) {
+        for (uint32_t i = start; i < inst.NumOperandWords(); i++) {
             args.Push(Value(inst.GetSingleWordOperand(i)));
         }
-        Emit(b_.Call(Type(inst.type_id()), fn, std::move(args)), inst.result_id());
+        return args;
     }
 
-    void EmitBitFieldSExtract(const spvtools::opt::Instruction& inst) {
-        Emit(b_.Call<spirv::ir::BuiltinCall>(
-                 Type(inst.type_id()), spirv::BuiltinFn::kBitFieldSExtract,
-                 Value(inst.GetSingleWordOperand(2)), Value(inst.GetSingleWordOperand(3)),
-                 Value(inst.GetSingleWordOperand(4))),
-             inst.result_id());
+    void EmitBuiltinCall(const spvtools::opt::Instruction& inst, core::BuiltinFn fn) {
+        Emit(b_.Call(Type(inst.type_id()), fn, Args(inst, 2)), inst.result_id());
     }
 
-    void EmitBitFieldUExtract(const spvtools::opt::Instruction& inst) {
-        Emit(b_.Call<spirv::ir::BuiltinCall>(
-                 Type(inst.type_id()), spirv::BuiltinFn::kBitFieldUExtract,
-                 Value(inst.GetSingleWordOperand(2)), Value(inst.GetSingleWordOperand(3)),
-                 Value(inst.GetSingleWordOperand(4))),
-             inst.result_id());
-    }
-
-    void EmitBitFieldInsert(const spvtools::opt::Instruction& inst) {
-        Emit(b_.Call<spirv::ir::BuiltinCall>(
-                 Type(inst.type_id()), spirv::BuiltinFn::kBitFieldInsert,
-                 Value(inst.GetSingleWordOperand(2)), Value(inst.GetSingleWordOperand(3)),
-                 Value(inst.GetSingleWordOperand(4)), Value(inst.GetSingleWordOperand(5))),
+    void EmitSpirvBuiltinCall(const spvtools::opt::Instruction& inst, spirv::BuiltinFn fn) {
+        Emit(b_.Call<spirv::ir::BuiltinCall>(Type(inst.type_id()), fn, Args(inst, 2)),
              inst.result_id());
     }
 
@@ -689,8 +671,7 @@ class Parser {
         auto* res_ty = Type(inst.type_id());
         Emit(b_.CallExplicit<spirv::ir::BuiltinCall>(
                  res_ty, spirv::BuiltinFn::kBitCount,
-                 Vector<const core::type::Type*, 1>{res_ty->DeepestElement()},
-                 Value(inst.GetSingleWordOperand(2))),
+                 Vector<const core::type::Type*, 1>{res_ty->DeepestElement()}, Args(inst, 2)),
              inst.result_id());
     }
 
@@ -1002,10 +983,7 @@ class Parser {
 
     /// @param inst the SPIR-V instruction for OpAccessChain
     void EmitAccess(const spvtools::opt::Instruction& inst) {
-        Vector<core::ir::Value*, 4> indices;
-        for (uint32_t i = 3; i < inst.NumOperandWords(); i++) {
-            indices.Push(Value(inst.GetSingleWordOperand(i)));
-        }
+        Vector<core::ir::Value*, 4> indices = Args(inst, 3);
         auto* base = Value(inst.GetSingleWordOperand(2));
 
         if (indices.IsEmpty()) {
@@ -1046,22 +1024,13 @@ class Parser {
 
     /// @param inst the SPIR-V instruction for OpCompositeConstruct
     void EmitConstruct(const spvtools::opt::Instruction& inst) {
-        Vector<core::ir::Value*, 4> values;
-        for (uint32_t i = 2; i < inst.NumOperandWords(); i++) {
-            values.Push(Value(inst.GetSingleWordOperand(i)));
-        }
-        auto* construct = b_.Construct(Type(inst.type_id()), std::move(values));
+        auto* construct = b_.Construct(Type(inst.type_id()), Args(inst, 2));
         Emit(construct, inst.result_id());
     }
 
     /// @param inst the SPIR-V instruction for OpFunctionCall
     void EmitFunctionCall(const spvtools::opt::Instruction& inst) {
-        // TODO(crbug.com/tint/1907): Capture result.
-        Vector<core::ir::Value*, 4> args;
-        for (uint32_t i = 3; i < inst.NumOperandWords(); i++) {
-            args.Push(Value(inst.GetSingleWordOperand(i)));
-        }
-        Emit(b_.Call(Function(inst.GetSingleWordInOperand(0)), std::move(args)), inst.result_id());
+        Emit(b_.Call(Function(inst.GetSingleWordInOperand(0)), Args(inst, 3)), inst.result_id());
     }
 
     /// @param inst the SPIR-V instruction for OpVariable
