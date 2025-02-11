@@ -262,9 +262,9 @@ TEST_F(IR_ValidatorTest, CallToBuiltin_MissingResult) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason.Str(),
-                testing::HasSubstr(R"(:3:13 error: abs: call to builtin does not have a return type
+                testing::HasSubstr(R"(:3:5 error: abs: result is undefined
     undef = abs 1.0f
-            ^^^
+    ^^^^^
 )")) << res.Failure().reason.Str();
 }
 
@@ -287,24 +287,44 @@ TEST_F(IR_ValidatorTest, CallToBuiltin_MismatchResultType) {
 )")) << res.Failure().reason.Str();
 }
 
-TEST_F(IR_ValidatorTest, CallToBuiltin_ArgNullType) {
+TEST_F(IR_ValidatorTest, CallToBuiltin_MissingArg) {
     auto* f = b.Function("f", ty.void_());
     b.Append(f->Block(), [&] {
         auto* i = b.Var<function, f32>("i");
         i->SetInitializer(b.Constant(0_f));
         auto* load = b.Load(i);
-        auto* load_ret = load->Result(0);
-        b.Call(ty.f32(), BuiltinFn::kAbs, load_ret);
-        load_ret->SetType(nullptr);
+        auto* c = b.Call(ty.f32(), BuiltinFn::kAbs, load->Result(0));
+        c->SetOperands(Vector{static_cast<ir::Value*>(nullptr)});
         b.Return(f);
     });
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason.Str(),
-                testing::HasSubstr(R"(:4:5 error: load: result type is undefined
-    %3:undef = load %i
-    ^^^^^^^^
+                testing::HasSubstr(R"(:5:18 error: abs: operand is undefined
+    %4:f32 = abs undef
+                 ^^^^^
+)")) << res.Failure().reason.Str();
+}
+
+TEST_F(IR_ValidatorTest, CallToBuiltin_OutOfScopeArg) {
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* i = b.Var<function, f32>("i");
+        i->SetInitializer(b.Constant(0_f));
+        auto* load = b.Load(i);
+        auto* c = b.Call(ty.f32(), BuiltinFn::kAbs, load->Result(0));
+        auto* new_load = b.Load(i);
+        c->SetOperands(Vector{new_load->Result(0)});
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:5:18 error: abs: %5 is not in scope
+    %4:f32 = abs %5
+                 ^^
 )")) << res.Failure().reason.Str();
 }
 
@@ -314,17 +334,15 @@ TEST_F(IR_ValidatorTest, CallToBuiltin_TooFewResults) {
         auto* i = b.Var<function, f32>("i");
         i->SetInitializer(b.Constant(0_f));
         auto* load = b.Load(i);
-        auto* load_ret = load->Result(0);
-        auto* too_few_call = b.Call(ty.f32(), BuiltinFn::kAbs, load_ret);
+        auto* too_few_call = b.Call(ty.f32(), BuiltinFn::kAbs, load->Result(0));
         too_few_call->ClearResults();
         b.Return(f);
     });
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(
-        res.Failure().reason.Str(),
-        testing::HasSubstr(R"(:5:13 error: abs: call to builtin has 0 results, when 1 is expected
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:5:13 error: abs: expected exactly 1 results, got 0
     undef = abs %3
             ^^^
 )")) << res.Failure().reason.Str();
@@ -336,20 +354,54 @@ TEST_F(IR_ValidatorTest, CallToBuiltin_TooManyResults) {
         auto* i = b.Var<function, f32>("i");
         i->SetInitializer(b.Constant(0_f));
         auto* load = b.Load(i);
-        auto* load_ret = load->Result(0);
-        auto* too_many_call = b.Call(ty.f32(), BuiltinFn::kAbs, load_ret);
-        too_many_call->SetResults(Vector{load_ret, load_ret});
+        auto* too_many_call = b.Call(ty.f32(), BuiltinFn::kAbs, load->Result(0));
+        too_many_call->SetResults(Vector{load->Result(0), load->Result(0)});
         b.Return(f);
     });
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(
-        res.Failure().reason.Str(),
-        testing::HasSubstr(R"(:5:14 error: abs: call to builtin has 2 results, when 1 is expected
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:5:14 error: abs: expected exactly 1 results, got 2
     %3:f32 = abs %3
              ^^^
 )")) << res.Failure().reason.Str();
+}
+
+TEST_F(IR_ValidatorTest, CallToBuiltin_TooFewArgs) {
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* i = b.Var<function, f32>("i");
+        i->SetInitializer(b.Constant(0_f));
+        auto* load = b.Load(i);
+        auto* too_few_call = b.Call(ty.f32(), BuiltinFn::kAbs, load->Result(0));
+        too_few_call->ClearOperands();
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:5:14 error: abs: no matching call to 'abs()')"))
+        << res.Failure().reason.Str();
+}
+
+TEST_F(IR_ValidatorTest, CallToBuiltin_TooManyArgs) {
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* i = b.Var<function, f32>("i");
+        i->SetInitializer(b.Constant(0_f));
+        auto* load = b.Load(i);
+        auto* too_many_call = b.Call(ty.f32(), BuiltinFn::kAbs, load->Result(0));
+        too_many_call->SetOperands(Vector{load->Result(0), load->Result(0)});
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:5:14 error: abs: no matching call to 'abs(f32, f32)')"))
+        << res.Failure().reason.Str();
 }
 
 }  // namespace tint::core::ir

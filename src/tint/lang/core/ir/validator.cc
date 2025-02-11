@@ -2803,12 +2803,15 @@ void Validator::CheckBitcastTypes(const Bitcast* bitcast) {
 }
 
 void Validator::CheckBuiltinCall(const BuiltinCall* call) {
-    auto args =
-        Transform<8>(call->Args(), [&](const ir::Value* v) { return v ? v->Type() : nullptr; });
-    if (args.Any([&](const core::type::Type* ty) { return ty == nullptr; })) {
-        AddError(call) << "argument to builtin has undefined type";
+    // This check cannot be more precise, since until intrinsic lookup below, it is unknown what
+    // number of operands are expected, but still need to enforce things are in scope,
+    // have types, etc.
+    if (!CheckResults(call, BuiltinCall::kNumResults) || !CheckOperands(call)) {
         return;
     }
+
+    // CheckOperands above ensures that all args are non-null and have a valid type
+    auto args = Transform<8>(call->Args(), [&](const ir::Value* v) { return v->Type(); });
 
     intrinsic::Context context{
         call->TableData(),
@@ -2825,17 +2828,6 @@ void Validator::CheckBuiltinCall(const BuiltinCall* call) {
     }
 
     TINT_ASSERT(builtin->return_type);
-
-    if (call->Results().Length() != 1) {
-        AddError(call) << "call to builtin has " << call->Results().Length()
-                       << " results, when 1 is expected";
-        return;
-    }
-
-    if (call->Result(0) == nullptr) {
-        AddError(call) << "call to builtin does not have a return type";
-        return;
-    }
 
     if (builtin->return_type != call->Result(0)->Type()) {
         AddError(call) << "call result type " << NameOf(call->Result(0)->Type())
