@@ -643,6 +643,9 @@ class Parser {
                 case spv::Op::OpAll:
                     EmitBuiltinCall(inst, core::BuiltinFn::kAll);
                     break;
+                case spv::Op::OpAny:
+                    EmitBuiltinCall(inst, core::BuiltinFn::kAny);
+                    break;
                 default:
                     TINT_UNIMPLEMENTED()
                         << "unhandled SPIR-V instruction: " << static_cast<uint32_t>(inst.opcode());

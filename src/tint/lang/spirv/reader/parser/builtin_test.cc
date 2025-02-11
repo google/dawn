@@ -1293,5 +1293,34 @@ TEST_F(SpirvParserTest, All) {
 )");
 }
 
+TEST_F(SpirvParserTest, Any) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %bool = OpTypeBool
+     %v2bool = OpTypeVector %bool 2
+       %true = OpConstantTrue %bool
+      %false = OpConstantFalse %bool
+ %v2bool_true_false = OpConstantComposite %v2bool %true %false
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+      %entry = OpLabel
+          %1 = OpAny %bool %v2bool_true_false
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:bool = any vec2<bool>(true, false)
+    ret
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader
