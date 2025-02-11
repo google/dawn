@@ -628,11 +628,22 @@ class Parser {
                 case spv::Op::OpBitCount:
                     EmitBitCount(inst);
                     break;
+                case spv::Op::OpBitFieldInsert:
+                    EmitBitfieldInsert(inst);
+                    break;
                 default:
                     TINT_UNIMPLEMENTED()
                         << "unhandled SPIR-V instruction: " << static_cast<uint32_t>(inst.opcode());
             }
         }
+    }
+
+    void EmitBitfieldInsert(const spvtools::opt::Instruction& inst) {
+        Emit(b_.Call<spirv::ir::BuiltinCall>(
+                 Type(inst.type_id()), spirv::BuiltinFn::kBitFieldInsert,
+                 Value(inst.GetSingleWordOperand(2)), Value(inst.GetSingleWordOperand(3)),
+                 Value(inst.GetSingleWordOperand(4)), Value(inst.GetSingleWordOperand(5))),
+             inst.result_id());
     }
 
     void EmitBitCount(const spvtools::opt::Instruction& inst) {

@@ -148,6 +148,8 @@ const char* str(BuiltinFn i) {
             return "frexp";
         case BuiltinFn::kBitCount:
             return "bit_count";
+        case BuiltinFn::kBitFieldInsert:
+            return "bit_field_insert";
         case BuiltinFn::kSdot:
             return "sdot";
         case BuiltinFn::kUdot:
@@ -230,6 +232,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kLdexp:
         case BuiltinFn::kCooperativeMatrixMulAdd:
         case BuiltinFn::kBitCount:
+        case BuiltinFn::kBitFieldInsert:
             break;
     }
     return core::ir::Instruction::Accesses{};

@@ -56,6 +56,8 @@ std::string_view ToString(ParameterUsage usage) {
             return "component";
         case ParameterUsage::kCoords:
             return "coords";
+        case ParameterUsage::kCount:
+            return "count";
         case ParameterUsage::kDdx:
             return "ddx";
         case ParameterUsage::kDdy:

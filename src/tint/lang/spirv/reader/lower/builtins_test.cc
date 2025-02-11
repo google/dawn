@@ -3158,5 +3158,306 @@ TEST_F(SpirvParser_BuiltinsTest, BitCount_Vector_SignedToSigned) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(SpirvParser_BuiltinsTest, BitFieldInsert_Int_UnsignedOffsetAndCount) {
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.Call<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kBitFieldInsert, 10_i, 20_i,
+                                       10_u, 20_u);
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = spirv.bit_field_insert 10i, 20i, 10u, 20u
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = insertBits 10i, 20i, 10u, 20u
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvParser_BuiltinsTest, BitFieldInsert_Int_SignedOffsetAndCount) {
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.Call<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kBitFieldInsert, 10_i, 20_i,
+                                       10_i, 20_i);
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = spirv.bit_field_insert 10i, 20i, 10i, 20i
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = bitcast 10i
+    %3:u32 = bitcast 20i
+    %4:i32 = insertBits 10i, 20i, %2, %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvParser_BuiltinsTest, BitFieldInsert_IntVector_UnsignedOffsetAndCount) {
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.Call<spirv::ir::BuiltinCall>(ty.vec2<i32>(), spirv::BuiltinFn::kBitFieldInsert,
+                                       b.Splat<vec2<i32>>(10_i), b.Splat<vec2<i32>>(20_i), 10_u,
+                                       20_u);
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<i32> = spirv.bit_field_insert vec2<i32>(10i), vec2<i32>(20i), 10u, 20u
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<i32> = insertBits vec2<i32>(10i), vec2<i32>(20i), 10u, 20u
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvParser_BuiltinsTest, BitFieldInsert_IntVector_SignedOffsetAndCount) {
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.Call<spirv::ir::BuiltinCall>(ty.vec2<i32>(), spirv::BuiltinFn::kBitFieldInsert,
+                                       b.Splat<vec2<i32>>(10_i), b.Splat<vec2<i32>>(20_i), 10_i,
+                                       20_i);
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<i32> = spirv.bit_field_insert vec2<i32>(10i), vec2<i32>(20i), 10i, 20i
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = bitcast 10i
+    %3:u32 = bitcast 20i
+    %4:vec2<i32> = insertBits vec2<i32>(10i), vec2<i32>(20i), %2, %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvParser_BuiltinsTest, BitFieldInsert_Uint_UnsignedOffsetAndCount) {
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.Call<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kBitFieldInsert, 10_u, 20_u,
+                                       10_u, 20_u);
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = spirv.bit_field_insert 10u, 20u, 10u, 20u
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = insertBits 10u, 20u, 10u, 20u
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvParser_BuiltinsTest, BitFieldInsert_Uint_SignedOffsetAndCount) {
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.Call<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kBitFieldInsert, 10_u, 20_u,
+                                       10_i, 20_i);
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = spirv.bit_field_insert 10u, 20u, 10i, 20i
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = bitcast 10i
+    %3:u32 = bitcast 20i
+    %4:u32 = insertBits 10u, 20u, %2, %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvParser_BuiltinsTest, BitFieldInsert_UintVector_UnsignedOffsetAndCount) {
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.Call<spirv::ir::BuiltinCall>(ty.vec2<u32>(), spirv::BuiltinFn::kBitFieldInsert,
+                                       b.Splat<vec2<u32>>(10_u), b.Splat<vec2<u32>>(20_u), 10_u,
+                                       20_u);
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<u32> = spirv.bit_field_insert vec2<u32>(10u), vec2<u32>(20u), 10u, 20u
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<u32> = insertBits vec2<u32>(10u), vec2<u32>(20u), 10u, 20u
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvParser_BuiltinsTest, BitFieldInsert_UintVector_SignedOffsetAndCount) {
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.Call<spirv::ir::BuiltinCall>(ty.vec2<u32>(), spirv::BuiltinFn::kBitFieldInsert,
+                                       b.Splat<vec2<u32>>(10_u), b.Splat<vec2<u32>>(20_u), 10_i,
+                                       20_i);
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<u32> = spirv.bit_field_insert vec2<u32>(10u), vec2<u32>(20u), 10i, 20i
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = bitcast 10i
+    %3:u32 = bitcast 20i
+    %4:vec2<u32> = insertBits vec2<u32>(10u), vec2<u32>(20u), %2, %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvParser_BuiltinsTest, BitFieldInsert_Uint_SignedOffsetAndUnsignedCount) {
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.Call<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kBitFieldInsert, 10_u, 20_u,
+                                       10_i, 20_u);
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = spirv.bit_field_insert 10u, 20u, 10i, 20u
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = bitcast 10i
+    %3:u32 = insertBits 10u, 20u, %2, 20u
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader::lower

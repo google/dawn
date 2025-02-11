@@ -95,6 +95,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kLdexp:
         case BuiltinFn::kCooperativeMatrixMulAdd:
         case BuiltinFn::kBitCount:
+        case BuiltinFn::kBitFieldInsert:
             break;
     }
     return core::ir::Instruction::Accesses{};

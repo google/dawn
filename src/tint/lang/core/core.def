@@ -237,6 +237,7 @@ enum attribute {
 enum usages {
   base
   bits
+  count
   depth
   compare_value
   elements

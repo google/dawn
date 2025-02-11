@@ -393,6 +393,9 @@ implicit(T: f32_f16,
 implicit(T: iu32) fn bit_count<R: iu32>(T) -> R
 implicit(T: iu32, N: num) fn bit_count<R: iu32>(vec<N, T>) -> vec<N, R>
 
+implicit(T: iu32) fn bit_field_insert(base: T, insert: T, offset: iu32, count: iu32) -> T
+implicit(T: iu32, N: num) fn bit_field_insert(base: vec<N, T>, insert: vec<N, T>, offset: iu32, count: iu32) -> vec<N, T>
+
 ////////////////////////////////////////////////////////////////////////////////
 // SPV_KHR_integer_dot_product instructions
 ////////////////////////////////////////////////////////////////////////////////

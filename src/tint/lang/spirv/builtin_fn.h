@@ -101,6 +101,7 @@ enum class BuiltinFn : uint8_t {
     kModf,
     kFrexp,
     kBitCount,
+    kBitFieldInsert,
     kSdot,
     kUdot,
     kCooperativeMatrixLoad,

@@ -181,6 +181,7 @@
 "continuing"
 "cos"
 "cosh"
+"count"
 "countLeadingZeros"
 "countOneBits"
 "countTrailingZeros"
