@@ -128,6 +128,12 @@ interop::Interface<interop::GPUSupportedLimits> GPUAdapter::getLimits(Napi::Env 
 
 interop::Interface<interop::GPUAdapterInfo> GPUAdapter::getInfo(Napi::Env env) {
     wgpu::AdapterInfo info = {};
+
+    wgpu::AdapterPropertiesSubgroupMatrixConfigs subgroupMatrixConfigs;
+    if (adapter_.HasFeature(FeatureName::ChromiumExperimentalSubgroupMatrix)) {
+        info.nextInChain = &subgroupMatrixConfigs;
+    }
+
     adapter_.GetInfo(&info);
 
     return interop::GPUAdapterInfo::Create<GPUAdapterInfo>(env, info);
