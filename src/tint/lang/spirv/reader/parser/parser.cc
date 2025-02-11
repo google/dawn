@@ -640,7 +640,9 @@ class Parser {
                 case spv::Op::OpBitReverse:
                     EmitBuiltinCall(inst, core::BuiltinFn::kReverseBits);
                     break;
-
+                case spv::Op::OpAll:
+                    EmitBuiltinCall(inst, core::BuiltinFn::kAll);
+                    break;
                 default:
                     TINT_UNIMPLEMENTED()
                         << "unhandled SPIR-V instruction: " << static_cast<uint32_t>(inst.opcode());
