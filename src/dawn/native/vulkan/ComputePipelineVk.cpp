@@ -58,11 +58,6 @@ MaybeError ComputePipeline::InitializeImpl() {
     // Vulkan devices need cache UUID field to be serialized into pipeline cache keys.
     StreamIn(&mCacheKey, device->GetDeviceInfo().properties.pipelineCacheUUID);
 
-    // Set Immediate Constants states
-    mPipelineMask |=
-        GetImmediateConstantBlockBits(offsetof(ComputeImmediateConstants, userConstants),
-                                      GetLayout()->GetImmediateDataRangeByteSize());
-
     // Compute pipeline doesn't have clamp depth feature.
     // TODO(crbug.com/366291600): Setting immediate data size if needed.
     DAWN_TRY(InitializeBase(layout, 0));
@@ -86,8 +81,7 @@ MaybeError ComputePipeline::InitializeImpl() {
     ShaderModule::ModuleAndSpirv moduleAndSpirv;
     DAWN_TRY_ASSIGN(moduleAndSpirv,
                     module->GetHandleAndSpirv(SingleShaderStage::Compute, computeStage, layout,
-                                              /*clampFragDepth*/ false,
-                                              /*emitPointSize*/ false));
+                                              /*emitPointSize*/ false, GetImmediateMask()));
 
     createInfo.stage.module = moduleAndSpirv.module;
     createInfo.stage.pName = kRemappedEntryPointName;

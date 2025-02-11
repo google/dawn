@@ -949,8 +949,7 @@ std::vector<StageAndDescriptor> GetRenderStagesAndSetPlaceholderShader(
 // RenderPipelineBase
 
 RenderPipelineBase::RenderPipelineBase(DeviceBase* device,
-                                       const UnpackedPtr<RenderPipelineDescriptor>& descriptor,
-                                       ImmediateConstantMask requiredInternalImmediateConstants)
+                                       const UnpackedPtr<RenderPipelineDescriptor>& descriptor)
     : PipelineBase(device,
                    descriptor->layout,
                    descriptor->label,

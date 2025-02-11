@@ -71,41 +71,17 @@ class ComputeImmediateConstantsTrackerTest : public ImmediateConstantsTrackerTes
 
 // Test pipeline change reset dirty bits and update tracked pipeline constants mask.
 TEST_F(ImmediateConstantsTrackerTest, OnPipelineChange) {
-    // RenderImmediateConstantsTrackerBase
-    {
-        RenderImmediateConstantsTrackerBase tracker;
+    RenderImmediateConstantsTrackerBase tracker;
 
-        // Control Case
-        tracker.SetDirtyBitsForTesting({0b00100101});
-        EXPECT_TRUE(tracker.GetDirtyBits() == ImmediateConstantMask(0b00100101));
-        EXPECT_TRUE(tracker.GetPipelineMask() == ImmediateConstantMask(0));
+    // Control Case
+    EXPECT_TRUE(tracker.GetDirtyBits() == ImmediateConstantMask(0));
 
-        // Pipeline change should reset dirty bits
-        wgpu::RenderPipeline wgpuPipeline = MakeTestRenderPipeline();
-        RenderPipelineBase* pipeline = FromAPI(wgpuPipeline.Get());
-        pipeline->SetPipelineMaskForTesting({0b01010101});
-        tracker.OnPipelineChange(pipeline);
-        EXPECT_TRUE(tracker.GetDirtyBits() == ImmediateConstantMask(0b00100000));
-        EXPECT_TRUE(tracker.GetPipelineMask() == ImmediateConstantMask(0b01010101));
-    }
-
-    // ComputeImmediateConstantsTrackerBase
-    {
-        ComputeImmediateConstantsTrackerBase tracker;
-
-        // Control Case
-        tracker.SetDirtyBitsForTesting({0b00100101});
-        EXPECT_TRUE(tracker.GetDirtyBits() == ImmediateConstantMask(0b00100101));
-        EXPECT_TRUE(tracker.GetPipelineMask() == ImmediateConstantMask(0));
-
-        // Pipeline change should reset dirty bits
-        wgpu::ComputePipeline wgpuPipeline = MakeTestComputePipeline();
-        ComputePipelineBase* pipeline = FromAPI(wgpuPipeline.Get());
-        pipeline->SetPipelineMaskForTesting({0b01000101});
-        tracker.OnPipelineChange(pipeline);
-        EXPECT_TRUE(tracker.GetDirtyBits() == ImmediateConstantMask(0));
-        EXPECT_TRUE(tracker.GetPipelineMask() == ImmediateConstantMask(0b01000101));
-    }
+    // Pipeline change should reset dirty bits
+    wgpu::RenderPipeline wgpuPipeline = MakeTestRenderPipeline();
+    RenderPipelineBase* pipeline = FromAPI(wgpuPipeline.Get());
+    pipeline->SetImmediateMaskForTesting({0b01010101});
+    tracker.OnSetPipeline(pipeline);
+    EXPECT_TRUE(tracker.GetDirtyBits() == ImmediateConstantMask(0b01010101));
 
     device.Destroy();
 }

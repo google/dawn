@@ -346,12 +346,7 @@ VkStencilOp VulkanStencilOp(wgpu::StencilOperation op) {
 Ref<RenderPipeline> RenderPipeline::CreateUninitialized(
     Device* device,
     const UnpackedPtr<RenderPipelineDescriptor>& descriptor) {
-    // Possible required internal immediate constants for RenderPipelineVk:
-    // - ClampFragDepth
-    const ImmediateConstantMask requiredInternalConstants = GetImmediateConstantBlockBits(
-        offsetof(RenderImmediateConstants, clampFragDepth), sizeof(ClampFragDepthArgs));
-
-    return AcquireRef(new RenderPipeline(device, descriptor, requiredInternalConstants));
+    return AcquireRef(new RenderPipeline(device, descriptor));
 }
 
 MaybeError RenderPipeline::InitializeImpl() {
@@ -361,14 +356,9 @@ MaybeError RenderPipeline::InitializeImpl() {
     // Vulkan devices need cache UUID field to be serialized into pipeline cache keys.
     StreamIn(&mCacheKey, device->GetDeviceInfo().properties.pipelineCacheUUID);
 
-    // Set immediate constant status
-    mPipelineMask |=
-        GetImmediateConstantBlockBits(offsetof(RenderImmediateConstants, userConstants),
-                                      GetLayout()->GetImmediateDataRangeByteSize());
-
     // Gather list of internal immediate constants used by this pipeline
     if (UsesFragDepth() && !HasUnclippedDepth()) {
-        mPipelineMask |= GetImmediateConstantBlockBits(
+        mImmediateMask |= GetImmediateConstantBlockBits(
             offsetof(RenderImmediateConstants, clampFragDepth), sizeof(ClampFragDepthArgs));
     }
 
@@ -378,12 +368,12 @@ MaybeError RenderPipeline::InitializeImpl() {
     uint32_t stageCount = 0;
 
     auto AddShaderStage = [&](SingleShaderStage stage, VkShaderStageFlagBits vkStage,
-                              bool clampFragDepth, bool emitPointSize) -> MaybeError {
+                              bool emitPointSize) -> MaybeError {
         const ProgrammableStage& programmableStage = GetStage(stage);
         ShaderModule::ModuleAndSpirv moduleAndSpirv;
         DAWN_TRY_ASSIGN(moduleAndSpirv, ToBackend(programmableStage.module)
                                             ->GetHandleAndSpirv(stage, programmableStage, layout,
-                                                                clampFragDepth, emitPointSize));
+                                                                emitPointSize, GetImmediateMask()));
         mHasInputAttachment = mHasInputAttachment || moduleAndSpirv.hasInputAttachment;
         // Record cache key for each shader since it will become inaccessible later on.
         StreamIn(&mCacheKey, stream::Iterable(moduleAndSpirv.spirv, moduleAndSpirv.wordCount));
@@ -404,14 +394,12 @@ MaybeError RenderPipeline::InitializeImpl() {
 
     // Add the vertex stage that's always present.
     DAWN_TRY(AddShaderStage(SingleShaderStage::Vertex, VK_SHADER_STAGE_VERTEX_BIT,
-                            /*clampFragDepth*/ false,
                             GetPrimitiveTopology() == wgpu::PrimitiveTopology::PointList));
 
     // Add the fragment stage if present.
     if (GetStageMask() & wgpu::ShaderStage::Fragment) {
-        bool clampFragDepth = UsesFragDepth() && !HasUnclippedDepth();
         DAWN_TRY(AddShaderStage(SingleShaderStage::Fragment, VK_SHADER_STAGE_FRAGMENT_BIT,
-                                clampFragDepth, /*emitPointSize*/ false));
+                                /*emitPointSize*/ false));
     }
 
     PipelineVertexInputStateCreateInfoTemporaryAllocations tempAllocations;
@@ -575,7 +563,12 @@ MaybeError RenderPipeline::InitializeImpl() {
     }
 
     // TODO(crbug.com/366291600): Add internal immediate data size when needed.
-    DAWN_TRY(InitializeBase(layout, kClampFragDepthArgsSize));
+    ImmediateConstantMask userConstantBits =
+        GetImmediateConstantBlockBits(offsetof(RenderImmediateConstants, userConstants),
+                                      GetLayout()->GetImmediateDataRangeByteSize());
+    uint32_t internalImmediateConstantsSize =
+        (mImmediateMask & userConstantBits.flip()).count() * kImmediateConstantElementByteSize;
+    DAWN_TRY(InitializeBase(layout, internalImmediateConstantsSize));
 
     // The create info chains in a bunch of things created on the stack here or inside state
     // objects.

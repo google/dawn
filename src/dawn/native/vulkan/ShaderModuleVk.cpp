@@ -38,6 +38,7 @@
 #include "dawn/common/MatchVariant.h"
 #include "dawn/native/Adapter.h"
 #include "dawn/native/CacheRequest.h"
+#include "dawn/native/ImmediateConstantsLayout.h"
 #include "dawn/native/PhysicalDevice.h"
 #include "dawn/native/Serializable.h"
 #include "dawn/native/TintUtils.h"
@@ -212,8 +213,8 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
     SingleShaderStage stage,
     const ProgrammableStage& programmableStage,
     const PipelineLayout* layout,
-    bool clampFragDepth,
-    bool emitPointSize) {
+    bool emitPointSize,
+    const ImmediateConstantMask& pipelineImmediateMask) {
     TRACE_EVENT0(GetDevice()->GetPlatform(), General, "ShaderModuleVk::GetHandleAndSpirv");
 
     ScopedTintICEHandler scopedICEHandler(GetDevice());
@@ -346,7 +347,6 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
 
     req.tintOptions.statically_paired_texture_binding_points =
         std::move(statically_paired_texture_binding_points);
-    req.tintOptions.clamp_frag_depth = clampFragDepth;
     req.tintOptions.disable_robustness = !GetDevice()->IsRobustnessEnabled();
     req.tintOptions.emit_vertex_point_size = emitPointSize;
 
@@ -381,6 +381,14 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
     // See crbug.com/tint/2045.
     if (ToBackend(GetDevice()->GetPhysicalDevice())->IsAndroidQualcomm()) {
         req.tintOptions.pass_matrix_by_pointer = true;
+    }
+
+    // Set internal immediate constant offsets
+    if (HasImmediateConstants(&RenderImmediateConstants::clampFragDepth, pipelineImmediateMask)) {
+        uint32_t offsetStartBytes = GetImmediateByteOffsetInPipeline(
+            &RenderImmediateConstants::clampFragDepth, pipelineImmediateMask);
+        req.tintOptions.depth_range_offsets = {
+            offsetStartBytes, offsetStartBytes + kImmediateConstantElementByteSize};
     }
 
     const CombinedLimits& limits = GetDevice()->GetLimits();
