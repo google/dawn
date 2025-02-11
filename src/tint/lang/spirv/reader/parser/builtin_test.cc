@@ -1154,5 +1154,115 @@ TEST_F(SpirvParserTest, BitFieldUExtract_IntVector_UnsignedOffsetAndSignedCount)
 )");
 }
 
+TEST_F(SpirvParserTest, BitReverse_Uint) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %uint = OpTypeInt 32 0
+    %uint_10 = OpConstant %uint 10
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+      %entry = OpLabel
+          %1 = OpBitReverse %uint %uint_10
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = reverseBits 10u
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, BitReverse_Int) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+        %int = OpTypeInt 32 1
+     %int_10 = OpConstant %int 10
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+      %entry = OpLabel
+          %1 = OpBitReverse %int %int_10
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = reverseBits 10i
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, BitReverse_UintVector) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %uint = OpTypeInt 32 0
+     %v2uint = OpTypeVector %uint 2
+    %uint_10 = OpConstant %uint 10
+    %uint_20 = OpConstant %uint 20
+ %v2uint_10_20 = OpConstantComposite %v2uint %uint_10 %uint_20
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+      %entry = OpLabel
+          %1 = OpBitReverse %v2uint %v2uint_10_20
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<u32> = reverseBits vec2<u32>(10u, 20u)
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, BitReverse_IntVector) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+        %int = OpTypeInt 32 1
+      %v2int = OpTypeVector %int 2
+     %int_10 = OpConstant %int 10
+     %int_20 = OpConstant %int 20
+ %v2int_10_20 = OpConstantComposite %v2int %int_10 %int_20
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+      %entry = OpLabel
+          %1 = OpBitReverse %v2int %v2int_10_20
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<i32> = reverseBits vec2<i32>(10i, 20i)
+    ret
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader

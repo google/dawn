@@ -637,11 +637,23 @@ class Parser {
                 case spv::Op::OpBitFieldUExtract:
                     EmitBitFieldUExtract(inst);
                     break;
+                case spv::Op::OpBitReverse:
+                    EmitBuiltinCall(inst, core::BuiltinFn::kReverseBits);
+                    break;
+
                 default:
                     TINT_UNIMPLEMENTED()
                         << "unhandled SPIR-V instruction: " << static_cast<uint32_t>(inst.opcode());
             }
         }
+    }
+
+    void EmitBuiltinCall(const spvtools::opt::Instruction& inst, core::BuiltinFn fn) {
+        Vector<core::ir::Value*, 4> args;
+        for (uint32_t i = 2; i < inst.NumOperandWords(); i++) {
+            args.Push(Value(inst.GetSingleWordOperand(i)));
+        }
+        Emit(b_.Call(Type(inst.type_id()), fn, std::move(args)), inst.result_id());
     }
 
     void EmitBitFieldSExtract(const spvtools::opt::Instruction& inst) {
