@@ -2259,7 +2259,8 @@
             {"value": 53, "name": "multi draw indirect", "tags": ["dawn"]},
             {"value": 54, "name": "clip distances", "tags": ["dawn"]},
             {"value": 55, "name": "dawn texel copy buffer row alignment", "tags": ["dawn"]},
-            {"value": 56, "name": "flexible texture views", "tags": ["dawn"]}
+            {"value": 56, "name": "flexible texture views", "tags": ["dawn"]},
+            {"value": 57, "name": "chromium experimental subgroup matrix", "tags": ["dawn"]}
         ]
     },
     "filter mode": {

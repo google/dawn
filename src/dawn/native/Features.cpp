@@ -395,7 +395,10 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
      {"Remove the texture view restrictions in Compat Mode.",
       "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
       "flexible_texture_views.md",
-      FeatureInfo::FeatureState::Stable}}};
+      FeatureInfo::FeatureState::Stable}},
+    {Feature::ChromiumExperimentalSubgroupMatrix,
+     {"Support the \"enable chromium_experimental_subgroup_matrix;\" directive in WGSL.",
+      "https://github.com/gpuweb/gpuweb/issues/4195", FeatureInfo::FeatureState::Experimental}}};
 }  // anonymous namespace
 
 void FeaturesSet::EnableFeature(Feature feature) {
