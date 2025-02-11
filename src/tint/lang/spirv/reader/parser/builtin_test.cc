@@ -555,5 +555,307 @@ TEST_F(SpirvParserTest, BitFieldInsert_UintVector_SignedOffsetAndUnsignedCount) 
 )");
 }
 
+TEST_F(SpirvParserTest, BitFieldSExtract_Int_UnsignedOffsetAndCount) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %uint = OpTypeInt 32 0
+        %int = OpTypeInt 32 1
+     %int_10 = OpConstant %int 10
+    %uint_10 = OpConstant %uint 10
+    %uint_20 = OpConstant %uint 20
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+      %entry = OpLabel
+          %1 = OpBitFieldSExtract %int %int_10 %uint_10 %uint_20
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = spirv.bit_field_s_extract 10i, 10u, 20u
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, BitFieldSExtract_Int_SignedOffsetAndCount) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+        %int = OpTypeInt 32 1
+     %int_10 = OpConstant %int 10
+     %int_20 = OpConstant %int 20
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+      %entry = OpLabel
+          %1 = OpBitFieldSExtract %int %int_10 %int_10 %int_20
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = spirv.bit_field_s_extract 10i, 10i, 20i
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, BitFieldSExtract_IntVector_UnsignedOffsetAndCount) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %uint = OpTypeInt 32 0
+        %int = OpTypeInt 32 1
+      %v2int = OpTypeVector %int 2
+     %int_10 = OpConstant %int 10
+     %int_20 = OpConstant %int 20
+    %uint_10 = OpConstant %uint 10
+    %uint_20 = OpConstant %uint 20
+%v2int_10_20 = OpConstantComposite %v2int %int_10 %int_20
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+      %entry = OpLabel
+          %1 = OpBitFieldSExtract %v2int %v2int_10_20 %uint_10 %uint_20
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<i32> = spirv.bit_field_s_extract vec2<i32>(10i, 20i), 10u, 20u
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, BitFieldSExtract_IntVector_SignedOffsetAndCount) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+        %int = OpTypeInt 32 1
+      %v2int = OpTypeVector %int 2
+     %int_10 = OpConstant %int 10
+     %int_20 = OpConstant %int 20
+%v2int_10_20 = OpConstantComposite %v2int %int_10 %int_20
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+      %entry = OpLabel
+          %1 = OpBitFieldSExtract %v2int %v2int_10_20 %int_10 %int_20
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<i32> = spirv.bit_field_s_extract vec2<i32>(10i, 20i), 10i, 20i
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, BitFieldSExtract_IntVector_SignedOffsetAndUnsignedCount) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %uint = OpTypeInt 32 0
+        %int = OpTypeInt 32 1
+      %v2int = OpTypeVector %int 2
+     %int_10 = OpConstant %int 10
+     %int_20 = OpConstant %int 20
+    %uint_20 = OpConstant %uint 20
+%v2int_10_20 = OpConstantComposite %v2int %int_10 %int_20
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+      %entry = OpLabel
+          %1 = OpBitFieldSExtract %v2int %v2int_10_20 %int_10 %uint_20
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<i32> = spirv.bit_field_s_extract vec2<i32>(10i, 20i), 10i, 20u
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, BitFieldSExtract_Uint_UnsignedOffsetAndCount) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %uint = OpTypeInt 32 0
+        %int = OpTypeInt 32 1
+     %int_10 = OpConstant %int 10
+    %uint_10 = OpConstant %uint 10
+    %uint_20 = OpConstant %uint 20
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+      %entry = OpLabel
+          %1 = OpBitFieldSExtract %uint %uint_10 %uint_10 %uint_20
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = spirv.bit_field_s_extract 10u, 10u, 20u
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, BitFieldSExtract_Uint_SignedOffsetAndCount) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %uint = OpTypeInt 32 0
+        %int = OpTypeInt 32 1
+    %uint_10 = OpConstant %uint 10
+     %int_10 = OpConstant %int 10
+     %int_20 = OpConstant %int 20
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+      %entry = OpLabel
+          %1 = OpBitFieldSExtract %uint %uint_10 %int_10 %int_20
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = spirv.bit_field_s_extract 10u, 10i, 20i
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, BitFieldSExtract_UintVector_UnsignedOffsetAndCount) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %uint = OpTypeInt 32 0
+        %int = OpTypeInt 32 1
+     %v2uint = OpTypeVector %uint 2
+     %int_10 = OpConstant %int 10
+     %int_20 = OpConstant %int 20
+    %uint_10 = OpConstant %uint 10
+    %uint_20 = OpConstant %uint 20
+%v2uint_10_20 = OpConstantComposite %v2uint %uint_10 %uint_20
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+      %entry = OpLabel
+          %1 = OpBitFieldSExtract %v2uint %v2uint_10_20 %uint_10 %uint_20
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<u32> = spirv.bit_field_s_extract vec2<u32>(10u, 20u), 10u, 20u
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, BitFieldSExtract_UintVector_SignedOffsetAndCount) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %uint = OpTypeInt 32 0
+        %int = OpTypeInt 32 1
+     %v2uint = OpTypeVector %uint 2
+     %int_10 = OpConstant %int 10
+     %int_20 = OpConstant %int 20
+    %uint_10 = OpConstant %uint 10
+    %uint_20 = OpConstant %uint 20
+%v2uint_10_20 = OpConstantComposite %v2uint %uint_10 %uint_20
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+      %entry = OpLabel
+          %1 = OpBitFieldSExtract %v2uint %v2uint_10_20 %int_10 %int_20
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<u32> = spirv.bit_field_s_extract vec2<u32>(10u, 20u), 10i, 20i
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, BitFieldSExtract_UintVector_SignedOffsetAndUnsignedCount) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %uint = OpTypeInt 32 0
+        %int = OpTypeInt 32 1
+     %v2uint = OpTypeVector %uint 2
+     %int_10 = OpConstant %int 10
+     %int_20 = OpConstant %int 20
+    %uint_10 = OpConstant %uint 10
+    %uint_20 = OpConstant %uint 20
+%v2uint_10_20 = OpConstantComposite %v2uint %uint_10 %uint_20
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+      %entry = OpLabel
+          %1 = OpBitFieldSExtract %v2uint %v2uint_10_20 %int_10 %uint_20
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<u32> = spirv.bit_field_s_extract vec2<u32>(10u, 20u), 10i, 20u
+    ret
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader

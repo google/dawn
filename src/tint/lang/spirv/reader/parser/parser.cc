@@ -629,7 +629,10 @@ class Parser {
                     EmitBitCount(inst);
                     break;
                 case spv::Op::OpBitFieldInsert:
-                    EmitBitfieldInsert(inst);
+                    EmitBitFieldInsert(inst);
+                    break;
+                case spv::Op::OpBitFieldSExtract:
+                    EmitBitFieldSExtract(inst);
                     break;
                 default:
                     TINT_UNIMPLEMENTED()
@@ -638,7 +641,15 @@ class Parser {
         }
     }
 
-    void EmitBitfieldInsert(const spvtools::opt::Instruction& inst) {
+    void EmitBitFieldSExtract(const spvtools::opt::Instruction& inst) {
+        Emit(b_.Call<spirv::ir::BuiltinCall>(
+                 Type(inst.type_id()), spirv::BuiltinFn::kBitFieldSExtract,
+                 Value(inst.GetSingleWordOperand(2)), Value(inst.GetSingleWordOperand(3)),
+                 Value(inst.GetSingleWordOperand(4))),
+             inst.result_id());
+    }
+
+    void EmitBitFieldInsert(const spvtools::opt::Instruction& inst) {
         Emit(b_.Call<spirv::ir::BuiltinCall>(
                  Type(inst.type_id()), spirv::BuiltinFn::kBitFieldInsert,
                  Value(inst.GetSingleWordOperand(2)), Value(inst.GetSingleWordOperand(3)),
