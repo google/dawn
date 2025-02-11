@@ -222,10 +222,9 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
      {"use_user_defined_labels_in_backend",
       "Enables setting labels on backend-specific APIs that label objects. The labels used will be "
       "those of the corresponding frontend objects if non-empty and default labels otherwise. "
-      "Defaults to false. NOTE: On Vulkan, backend labels are currently always set (with default "
-      "labels if this toggle is not set). The reason is that Dawn currently uses backend "
-      "object labels on Vulkan to map errors back to the device with which the backend objects "
-      "included in the error are associated.",
+      "Defaults to false unless backend validation is enabled in which case it defaults to true. "
+      "NOTE: On Vulkan, backend labels are required to map errors back to the device with which "
+      "the backend objects included in the error are associated.",
       "https://crbug.com/dawn/840", ToggleStage::Device}},
     {Toggle::UsePlaceholderFragmentInVertexOnlyPipeline,
      {"use_placeholder_fragment_in_vertex_only_pipeline",

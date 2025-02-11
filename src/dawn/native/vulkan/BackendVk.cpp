@@ -299,7 +299,7 @@ void LogCallbackData(LogSeverity severity,
 
 VKAPI_ATTR VkBool32 VKAPI_CALL
 OnDebugUtilsCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-                     VkDebugUtilsMessageTypeFlagsEXT /* messageTypes */,
+                     VkDebugUtilsMessageTypeFlagsEXT messageTypes,
                      const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
                      void* pUserData) {
     if (!ShouldReportDebugMessage(pCallbackData->pMessageIdName, pCallbackData->pMessage)) {
@@ -331,10 +331,12 @@ OnDebugUtilsCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
         }
     }
 
-    // We get to this line if no device was associated with the message. Crash so that the failure
-    // is loud and makes tests fail in Debug.
+    // We get to this line if no device was associated with the message. If the message is a backend
+    // validation error then crash as there should have been a debug label on the object. The
+    // driver can also produce errors even with backend validation disabled so those errors are
+    // just logged.
     LogCallbackData(LogSeverity::Error, pCallbackData);
-    DAWN_ASSERT(false);
+    DAWN_CHECK(!(messageTypes & VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT));
 
     return VK_FALSE;
 }
