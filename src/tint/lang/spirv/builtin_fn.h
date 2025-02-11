@@ -103,6 +103,7 @@ enum class BuiltinFn : uint8_t {
     kBitCount,
     kBitFieldInsert,
     kBitFieldSExtract,
+    kBitFieldUExtract,
     kSdot,
     kUdot,
     kCooperativeMatrixLoad,

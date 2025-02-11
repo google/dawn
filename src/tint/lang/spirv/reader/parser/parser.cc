@@ -634,6 +634,9 @@ class Parser {
                 case spv::Op::OpBitFieldSExtract:
                     EmitBitFieldSExtract(inst);
                     break;
+                case spv::Op::OpBitFieldUExtract:
+                    EmitBitFieldUExtract(inst);
+                    break;
                 default:
                     TINT_UNIMPLEMENTED()
                         << "unhandled SPIR-V instruction: " << static_cast<uint32_t>(inst.opcode());
@@ -644,6 +647,14 @@ class Parser {
     void EmitBitFieldSExtract(const spvtools::opt::Instruction& inst) {
         Emit(b_.Call<spirv::ir::BuiltinCall>(
                  Type(inst.type_id()), spirv::BuiltinFn::kBitFieldSExtract,
+                 Value(inst.GetSingleWordOperand(2)), Value(inst.GetSingleWordOperand(3)),
+                 Value(inst.GetSingleWordOperand(4))),
+             inst.result_id());
+    }
+
+    void EmitBitFieldUExtract(const spvtools::opt::Instruction& inst) {
+        Emit(b_.Call<spirv::ir::BuiltinCall>(
+                 Type(inst.type_id()), spirv::BuiltinFn::kBitFieldUExtract,
                  Value(inst.GetSingleWordOperand(2)), Value(inst.GetSingleWordOperand(3)),
                  Value(inst.GetSingleWordOperand(4))),
              inst.result_id());

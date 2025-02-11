@@ -3799,5 +3799,345 @@ TEST_F(SpirvParser_BuiltinsTest, BitFieldSExtract_UintVector_SignedOffsetAndUnsi
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(SpirvParser_BuiltinsTest, BitFieldUExtract_Uint_UnsignedOffsetAndCount) {
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.Call<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kBitFieldUExtract, 10_u, 10_u,
+                                       20_u);
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = spirv.bit_field_u_extract 10u, 10u, 20u
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = extractBits 10u, 10u, 20u
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvParser_BuiltinsTest, BitFieldUExtract_Uint_SignedOffsetAndCount) {
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.Call<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kBitFieldUExtract, 10_u, 10_i,
+                                       20_i);
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = spirv.bit_field_u_extract 10u, 10i, 20i
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = bitcast 10i
+    %3:u32 = bitcast 20i
+    %4:u32 = extractBits 10u, %2, %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvParser_BuiltinsTest, BitFieldUExtract_UintVector_UnsignedOffsetAndCount) {
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.Call<spirv::ir::BuiltinCall>(ty.vec2<u32>(), spirv::BuiltinFn::kBitFieldUExtract,
+                                       b.Splat<vec2<u32>>(10_u), 10_u, 20_u);
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<u32> = spirv.bit_field_u_extract vec2<u32>(10u), 10u, 20u
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<u32> = extractBits vec2<u32>(10u), 10u, 20u
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvParser_BuiltinsTest, BitFieldUExtract_UintVector_SignedOffsetAndCount) {
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.Call<spirv::ir::BuiltinCall>(ty.vec2<u32>(), spirv::BuiltinFn::kBitFieldUExtract,
+                                       b.Splat<vec2<u32>>(10_u), 10_i, 20_i);
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<u32> = spirv.bit_field_u_extract vec2<u32>(10u), 10i, 20i
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = bitcast 10i
+    %3:u32 = bitcast 20i
+    %4:vec2<u32> = extractBits vec2<u32>(10u), %2, %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvParser_BuiltinsTest, BitFieldUExtract_UintVector_UnsignedOffsetAndSignedCount) {
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.Call<spirv::ir::BuiltinCall>(ty.vec2<u32>(), spirv::BuiltinFn::kBitFieldUExtract,
+                                       b.Splat<vec2<u32>>(10_u), 10_u, 20_i);
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<u32> = spirv.bit_field_u_extract vec2<u32>(10u), 10u, 20i
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = bitcast 20i
+    %3:vec2<u32> = extractBits vec2<u32>(10u), 10u, %2
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvParser_BuiltinsTest, BitFieldUExtract_Int_UnsignedOffsetAndCount) {
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.Call<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kBitFieldUExtract, 10_i, 10_u,
+                                       20_u);
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = spirv.bit_field_u_extract 10i, 10u, 20u
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = bitcast 10i
+    %3:u32 = extractBits %2, 10u, 20u
+    %4:i32 = bitcast %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvParser_BuiltinsTest, BitFieldUExtract_Int_SignedOffsetAndCount) {
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.Call<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kBitFieldUExtract, 10_i, 10_i,
+                                       20_i);
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = spirv.bit_field_u_extract 10i, 10i, 20i
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = bitcast 10i
+    %3:u32 = bitcast 10i
+    %4:u32 = bitcast 20i
+    %5:u32 = extractBits %2, %3, %4
+    %6:i32 = bitcast %5
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvParser_BuiltinsTest, BitFieldUExtract_IntVector_UnsignedOffsetAndCount) {
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.Call<spirv::ir::BuiltinCall>(ty.vec2<i32>(), spirv::BuiltinFn::kBitFieldUExtract,
+                                       b.Splat<vec2<i32>>(10_i), 10_u, 20_u);
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<i32> = spirv.bit_field_u_extract vec2<i32>(10i), 10u, 20u
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<u32> = bitcast vec2<i32>(10i)
+    %3:vec2<u32> = extractBits %2, 10u, 20u
+    %4:vec2<i32> = bitcast %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvParser_BuiltinsTest, BitFieldUExtract_IntVector_SignedOffsetAndCount) {
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.Call<spirv::ir::BuiltinCall>(ty.vec2<i32>(), spirv::BuiltinFn::kBitFieldUExtract,
+                                       b.Splat<vec2<i32>>(10_i), 10_i, 20_i);
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<i32> = spirv.bit_field_u_extract vec2<i32>(10i), 10i, 20i
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<u32> = bitcast vec2<i32>(10i)
+    %3:u32 = bitcast 10i
+    %4:u32 = bitcast 20i
+    %5:vec2<u32> = extractBits %2, %3, %4
+    %6:vec2<i32> = bitcast %5
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvParser_BuiltinsTest, BitFieldUExtract_IntVector_UnsignedOffsetAndSignedCount) {
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.Call<spirv::ir::BuiltinCall>(ty.vec2<i32>(), spirv::BuiltinFn::kBitFieldUExtract,
+                                       b.Splat<vec2<i32>>(10_i), 10_u, 20_i);
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<i32> = spirv.bit_field_u_extract vec2<i32>(10i), 10u, 20i
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<u32> = bitcast vec2<i32>(10i)
+    %3:u32 = bitcast 20i
+    %4:vec2<u32> = extractBits %2, 10u, %3
+    %5:vec2<i32> = bitcast %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader::lower

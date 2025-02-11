@@ -97,6 +97,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kBitCount:
         case BuiltinFn::kBitFieldInsert:
         case BuiltinFn::kBitFieldSExtract:
+        case BuiltinFn::kBitFieldUExtract:
             break;
     }
     return core::ir::Instruction::Accesses{};

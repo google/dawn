@@ -152,6 +152,8 @@ const char* str(BuiltinFn i) {
             return "bit_field_insert";
         case BuiltinFn::kBitFieldSExtract:
             return "bit_field_s_extract";
+        case BuiltinFn::kBitFieldUExtract:
+            return "bit_field_u_extract";
         case BuiltinFn::kSdot:
             return "sdot";
         case BuiltinFn::kUdot:
@@ -236,6 +238,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kBitCount:
         case BuiltinFn::kBitFieldInsert:
         case BuiltinFn::kBitFieldSExtract:
+        case BuiltinFn::kBitFieldUExtract:
             break;
     }
     return core::ir::Instruction::Accesses{};

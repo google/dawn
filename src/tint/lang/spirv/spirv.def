@@ -378,26 +378,30 @@ implicit(T: f32_f16, N: num) fn faceForward(vec<N, T>, vec<N, T>, vec<N, T>) -> 
 implicit(T: f32_f16, U: iu32) fn ldexp(T, U) -> T
 implicit(N: num, T: f32_f16, U: iu32) fn ldexp(vec<N, T>, vec<N, U>) -> vec<N, T>
 
-implicit(T: f32_f16, S: function_private_workgroup_storage) fn modf(x: T, i: ptr<S, T, writable>) -> T
-implicit(T: f32_f16, N: num, S: function_private_workgroup_storage) fn modf(x: vec<N, T>,
-                                                                            i: ptr<S, vec<N, T>, writable>) -> vec<N, T>
+implicit(T: f32_f16, S: function_private_workgroup_storage)
+    fn modf(x: T, i: ptr<S, T, writable>) -> T
+implicit(T: f32_f16, N: num, S: function_private_workgroup_storage)
+    fn modf(x: vec<N, T>, i: ptr<S, vec<N, T>, writable>) -> vec<N, T>
 
-implicit(T: f32_f16,
-         R: iu32,
-         S: function_private_workgroup_storage) fn frexp(x: T, i: ptr<S, R, writable>) -> T
-implicit(T: f32_f16,
-         R: iu32,
-         N: num,
-         S: function_private_workgroup_storage) fn frexp(x: vec<N, T>, i: ptr<S, vec<N, R>, writable>) -> vec<N, T>
+implicit(T: f32_f16, R: iu32, S: function_private_workgroup_storage)
+    fn frexp(x: T, i: ptr<S, R, writable>) -> T
+implicit(T: f32_f16, R: iu32, N: num, S: function_private_workgroup_storage)
+    fn frexp(x: vec<N, T>, i: ptr<S, vec<N, R>, writable>) -> vec<N, T>
 
 implicit(T: iu32) fn bit_count<R: iu32>(T) -> R
 implicit(T: iu32, N: num) fn bit_count<R: iu32>(vec<N, T>) -> vec<N, R>
 
 implicit(T: iu32) fn bit_field_insert(base: T, insert: T, offset: iu32, count: iu32) -> T
-implicit(T: iu32, N: num) fn bit_field_insert(base: vec<N, T>, insert: vec<N, T>, offset: iu32, count: iu32) -> vec<N, T>
+implicit(T: iu32, N: num)
+    fn bit_field_insert(base: vec<N, T>, insert: vec<N, T>, offset: iu32, count: iu32) -> vec<N, T>
 
 implicit(T: iu32) fn bit_field_s_extract(base: T, offset: iu32, count: iu32) -> T
-implicit(T: iu32, N: num) fn bit_field_s_extract(base: vec<N, T>, offset: iu32, count: iu32) -> vec<N, T>
+implicit(T: iu32, N: num)
+    fn bit_field_s_extract(base: vec<N, T>, offset: iu32, count: iu32) -> vec<N, T>
+
+implicit(T: iu32) fn bit_field_u_extract(base: T, offset: iu32, count: iu32) -> T
+implicit(T: iu32, N: num)
+    fn bit_field_u_extract(base: vec<N, T>, offset: iu32, count: iu32) -> vec<N, T>
 
 ////////////////////////////////////////////////////////////////////////////////
 // SPV_KHR_integer_dot_product instructions
