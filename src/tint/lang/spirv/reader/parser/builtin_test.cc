@@ -1322,5 +1322,93 @@ TEST_F(SpirvParserTest, Any) {
 )");
 }
 
+struct BuiltinData {
+    const std::string spirv;
+    const std::string ir;
+};
+inline std::ostream& operator<<(std::ostream& out, BuiltinData data) {
+    out << data.spirv << "," << data.ir;
+    return out;
+}
+
+using SpirvParser_DerivativeTest = SpirvParserTestWithParam<BuiltinData>;
+
+TEST_P(SpirvParser_DerivativeTest, Scalar) {
+    auto& builtin = GetParam();
+
+    EXPECT_IR(R"(
+               OpCapability DerivativeControl
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main"
+               OpExecutionMode %main OriginUpperLeft
+       %void = OpTypeVoid
+      %float = OpTypeFloat 32
+   %float_50 = OpConstant %float 50
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+      %entry = OpLabel
+         %1 = )" + builtin.spirv +
+                  R"( %float %float_50
+     OpReturn
+     OpFunctionEnd
+)",
+              R"(
+%main = @fragment func():void {
+  $B1: {
+    %2:f32 = )" + builtin.ir +
+                  R"( 50.0f
+    ret
+  }
+}
+)");
+}
+
+TEST_P(SpirvParser_DerivativeTest, Vector) {
+    auto& builtin = GetParam();
+
+    EXPECT_IR(R"(
+                OpCapability DerivativeControl
+                OpCapability Shader
+                OpMemoryModel Logical GLSL450
+                OpEntryPoint Fragment %main "main"
+                OpExecutionMode %main OriginUpperLeft
+        %void = OpTypeVoid
+      %float = OpTypeFloat 32
+    %v2float = OpTypeVector %float 2
+   %float_50 = OpConstant %float 50
+   %float_60 = OpConstant %float 60
+ %v2float_50_60 = OpConstantComposite %v2float %float_50 %float_60
+     %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+       %entry = OpLabel
+          %1 = )" +
+                  builtin.spirv + R"( %v2float %v2float_50_60
+      OpReturn
+      OpFunctionEnd
+)",
+              R"(
+%main = @fragment func():void {
+  $B1: {
+    %2:vec2<f32> = )" +
+                  builtin.ir + R"( vec2<f32>(50.0f, 60.0f)
+    ret
+  }
+}
+)");
+}
+
+INSTANTIATE_TEST_SUITE_P(SpirvParserTest,
+                         SpirvParser_DerivativeTest,
+                         testing::Values(BuiltinData{"OpDPdx", "dpdx"},
+                                         BuiltinData{"OpDPdy", "dpdy"},
+                                         BuiltinData{"OpFwidth", "fwidth"},
+                                         BuiltinData{"OpDPdxFine", "dpdxFine"},
+                                         BuiltinData{"OpDPdyFine", "dpdyFine"},
+                                         BuiltinData{"OpFwidthFine", "fwidthFine"},
+                                         BuiltinData{"OpDPdxCoarse", "dpdxCoarse"},
+                                         BuiltinData{"OpDPdyCoarse", "dpdyCoarse"},
+                                         BuiltinData{"OpFwidthCoarse", "fwidthCoarse"}));
+
 }  // namespace
 }  // namespace tint::spirv::reader

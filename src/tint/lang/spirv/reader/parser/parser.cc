@@ -643,6 +643,33 @@ class Parser {
                 case spv::Op::OpAny:
                     EmitBuiltinCall(inst, core::BuiltinFn::kAny);
                     break;
+                case spv::Op::OpDPdx:
+                    EmitBuiltinCall(inst, core::BuiltinFn::kDpdx);
+                    break;
+                case spv::Op::OpDPdy:
+                    EmitBuiltinCall(inst, core::BuiltinFn::kDpdy);
+                    break;
+                case spv::Op::OpFwidth:
+                    EmitBuiltinCall(inst, core::BuiltinFn::kFwidth);
+                    break;
+                case spv::Op::OpDPdxFine:
+                    EmitBuiltinCall(inst, core::BuiltinFn::kDpdxFine);
+                    break;
+                case spv::Op::OpDPdyFine:
+                    EmitBuiltinCall(inst, core::BuiltinFn::kDpdyFine);
+                    break;
+                case spv::Op::OpFwidthFine:
+                    EmitBuiltinCall(inst, core::BuiltinFn::kFwidthFine);
+                    break;
+                case spv::Op::OpDPdxCoarse:
+                    EmitBuiltinCall(inst, core::BuiltinFn::kDpdxCoarse);
+                    break;
+                case spv::Op::OpDPdyCoarse:
+                    EmitBuiltinCall(inst, core::BuiltinFn::kDpdyCoarse);
+                    break;
+                case spv::Op::OpFwidthCoarse:
+                    EmitBuiltinCall(inst, core::BuiltinFn::kFwidthCoarse);
+                    break;
                 default:
                     TINT_UNIMPLEMENTED()
                         << "unhandled SPIR-V instruction: " << static_cast<uint32_t>(inst.opcode());
