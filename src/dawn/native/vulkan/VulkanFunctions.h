@@ -354,6 +354,10 @@ struct VulkanFunctions {
     VkFn<PFN_vkCmdDrawIndirectCount> CmdDrawIndirectCountKHR = nullptr;
     VkFn<PFN_vkCmdDrawIndexedIndirectCount> CmdDrawIndexedIndirectCountKHR = nullptr;
 
+    // VK_KHR_cooperative_matrix
+    VkFn<PFN_vkGetPhysicalDeviceCooperativeMatrixPropertiesKHR>
+        GetPhysicalDeviceCooperativeMatrixPropertiesKHR = nullptr;
+
 #if VK_USE_PLATFORM_FUCHSIA
     // VK_FUCHSIA_external_memory
     VkFn<PFN_vkGetMemoryZirconHandleFUCHSIA> GetMemoryZirconHandleFUCHSIA = nullptr;

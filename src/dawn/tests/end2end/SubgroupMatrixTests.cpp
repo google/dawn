@@ -84,7 +84,10 @@ TEST_P(SubgroupMatrixTest, QueryConfigsOnlyValidWithFeature) {
     }
 }
 
-DAWN_INSTANTIATE_TEST(SubgroupMatrixTest, D3D12Backend(), MetalBackend(), VulkanBackend());
+DAWN_INSTANTIATE_TEST(SubgroupMatrixTest,
+                      D3D12Backend(),
+                      MetalBackend(),
+                      VulkanBackend({"use_vulkan_memory_model"}));
 
 enum MatrixOp {
     MatrixMultiply,
@@ -266,7 +269,7 @@ DAWN_INSTANTIATE_TEST_P(SubgroupMatrix_MatrixMatrixArithmeticTest,
                         {
                             D3D12Backend(),
                             MetalBackend(),
-                            VulkanBackend(),
+                            VulkanBackend({"use_vulkan_memory_model"}),
                         },
                         {
                             MatrixOp::MatrixMultiply,
