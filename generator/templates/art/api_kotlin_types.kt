@@ -42,14 +42,14 @@
         {%- endif -%}
     {%- elif arg.length and arg.length != 'constant' %}
         {# * annotation can mean an array, e.g. an output argument #}
-        {%- if type.category in ['bitmask', 'enum', 'function pointer', 'object', 'structure'] -%}
+        {%- if type.category in ['bitmask', 'callback function', 'callback info', 'enum', 'function pointer', 'object', 'structure'] -%}
             Array<{{ type.name.CamelCase() }}>{{ ' = arrayOf()' if emit_defaults }}
         {%- elif type.name.get() in ['int', 'int32_t', 'uint32_t'] -%}
             IntArray{{ ' = intArrayOf()' if emit_defaults }}
         {%- else -%}
             {{ unreachable_code() }}
         {% endif %}
-    {%- elif type.category in ['function pointer', 'object'] %}
+    {%- elif type.category in ['callback function', 'function pointer', 'object'] %}
         {{- type.name.CamelCase() }}
         {%- if optional or default_value %}?{{ ' = null' if emit_defaults }}{% endif %}
     {%- elif type.category == 'structure' or type.category == 'callback info' %}

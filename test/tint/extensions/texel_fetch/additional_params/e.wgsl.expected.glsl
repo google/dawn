@@ -13,8 +13,8 @@ struct In {
 in ivec4 f_Input;
 void g(int a, float b) {
 }
-void f_inner(In tint_symbol) {
-  g(tint_symbol.fbf[3u], tint_symbol.pos[0u]);
+void f_inner(In v) {
+  g(v.fbf.w, v.pos.x);
 }
 void main() {
   f_inner(In(f_Input, gl_FragCoord));

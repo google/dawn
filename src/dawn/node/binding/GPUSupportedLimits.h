@@ -73,8 +73,14 @@ class GPUSupportedLimits final : public interop::GPUSupportedLimits {
     uint32_t getMaxComputeWorkgroupSizeY(Napi::Env) override;
     uint32_t getMaxComputeWorkgroupSizeZ(Napi::Env) override;
     uint32_t getMaxComputeWorkgroupsPerDimension(Napi::Env) override;
-    std::variant<uint32_t, interop::UndefinedType> getMinSubgroupSize(Napi::Env) override;
-    std::variant<uint32_t, interop::UndefinedType> getMaxSubgroupSize(Napi::Env) override;
+    std::variant<uint32_t, interop::UndefinedType> getMaxStorageBuffersInFragmentStage(
+        Napi::Env) override;
+    std::variant<uint32_t, interop::UndefinedType> getMaxStorageTexturesInFragmentStage(
+        Napi::Env) override;
+    std::variant<uint32_t, interop::UndefinedType> getMaxStorageBuffersInVertexStage(
+        Napi::Env) override;
+    std::variant<uint32_t, interop::UndefinedType> getMaxStorageTexturesInVertexStage(
+        Napi::Env) override;
 
   private:
     wgpu::SupportedLimits limits_;

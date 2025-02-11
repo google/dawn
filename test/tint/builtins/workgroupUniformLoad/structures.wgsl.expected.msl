@@ -1,37 +1,5 @@
 #include <metal_stdlib>
-
 using namespace metal;
-
-template<typename T, size_t N>
-struct tint_array {
-    const constant T& operator[](size_t i) const constant { return elements[i]; }
-    device T& operator[](size_t i) device { return elements[i]; }
-    const device T& operator[](size_t i) const device { return elements[i]; }
-    thread T& operator[](size_t i) thread { return elements[i]; }
-    const thread T& operator[](size_t i) const thread { return elements[i]; }
-    threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-    const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-    T elements[N];
-};
-
-struct tint_packed_vec3_f32_array_element {
-  packed_float3 elements;
-};
-
-struct Inner_tint_packed_vec3 {
-  bool b;
-  int4 v;
-  tint_array<tint_packed_vec3_f32_array_element, 3> m;
-};
-
-struct Outer_tint_packed_vec3 {
-  tint_array<Inner_tint_packed_vec3, 4> a;
-};
-
-float3x3 tint_unpack_vec3_in_composite(tint_array<tint_packed_vec3_f32_array_element, 3> in) {
-  float3x3 result = float3x3(float3(in[0].elements), float3(in[1].elements), float3(in[2].elements));
-  return result;
-}
 
 struct Inner {
   bool b;
@@ -39,37 +7,61 @@ struct Inner {
   float3x3 m;
 };
 
-Inner tint_unpack_vec3_in_composite_1(Inner_tint_packed_vec3 in) {
-  Inner result = {};
-  result.b = in.b;
-  result.v = in.v;
-  result.m = tint_unpack_vec3_in_composite(in.m);
-  return result;
-}
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
 
-tint_array<Inner, 4> tint_unpack_vec3_in_composite_2(tint_array<Inner_tint_packed_vec3, 4> in) {
-  tint_array<Inner, 4> result = tint_array<Inner, 4>{tint_unpack_vec3_in_composite_1(in[0]), tint_unpack_vec3_in_composite_1(in[1]), tint_unpack_vec3_in_composite_1(in[2]), tint_unpack_vec3_in_composite_1(in[3])};
-  return result;
-}
+struct tint_packed_vec3_f32_array_element {
+  packed_float3 packed;
+};
+
+struct Inner_packed_vec3 {
+  bool b;
+  int4 v;
+  tint_array<tint_packed_vec3_f32_array_element, 3> m;
+};
 
 struct Outer {
   tint_array<Inner, 4> a;
 };
 
-Outer tint_unpack_vec3_in_composite_3(Outer_tint_packed_vec3 in) {
-  Outer result = {};
-  result.a = tint_unpack_vec3_in_composite_2(in.a);
-  return result;
+struct Outer_packed_vec3 {
+  tint_array<Inner_packed_vec3, 4> a;
+};
+
+struct tint_module_vars_struct {
+  threadgroup Outer_packed_vec3* v;
+};
+
+Inner tint_load_struct_packed_vec3_1(threadgroup Inner_packed_vec3* const from) {
+  bool const v_1 = (*from).b;
+  int4 const v_2 = (*from).v;
+  tint_array<tint_packed_vec3_f32_array_element, 3> const v_3 = (*from).m;
+  return Inner{.b=v_1, .v=v_2, .m=float3x3(float3(v_3[0u].packed), float3(v_3[1u].packed), float3(v_3[2u].packed))};
 }
 
-Outer tint_workgroupUniformLoad(threadgroup Outer_tint_packed_vec3* const p) {
+tint_array<Inner, 4> tint_load_array_packed_vec3(threadgroup tint_array<Inner_packed_vec3, 4>* const from) {
+  Inner const v_4 = tint_load_struct_packed_vec3_1((&(*from)[0u]));
+  Inner const v_5 = tint_load_struct_packed_vec3_1((&(*from)[1u]));
+  Inner const v_6 = tint_load_struct_packed_vec3_1((&(*from)[2u]));
+  return tint_array<Inner, 4>{v_4, v_5, v_6, tint_load_struct_packed_vec3_1((&(*from)[3u]))};
+}
+
+Outer tint_load_struct_packed_vec3(threadgroup Outer_packed_vec3* const from) {
+  return Outer{.a=tint_load_array_packed_vec3((&(*from).a))};
+}
+
+Outer foo(tint_module_vars_struct tint_module_vars) {
   threadgroup_barrier(mem_flags::mem_threadgroup);
-  Outer const result = tint_unpack_vec3_in_composite_3(*(p));
+  Outer const v_7 = tint_load_struct_packed_vec3(tint_module_vars.v);
   threadgroup_barrier(mem_flags::mem_threadgroup);
-  return result;
+  return v_7;
 }
-
-Outer foo(threadgroup Outer_tint_packed_vec3* const tint_symbol) {
-  return tint_workgroupUniformLoad(tint_symbol);
-}
-

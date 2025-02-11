@@ -12,11 +12,11 @@ struct main_out {
 };
 
 layout(binding = 0, std140)
-uniform x_7_block_1_ubo {
+uniform f_x_7_block_ubo {
   buf0 inner;
 } v_1;
 vec4 x_GLF_color = vec4(0.0f);
-layout(location = 0) out vec4 tint_symbol_loc0_Output;
+layout(location = 0) out vec4 main_loc0_Output;
 void main_1() {
   float f = 0.0f;
   vec4 v = vec4(0.0f);
@@ -28,10 +28,10 @@ void main_1() {
     x_GLF_color = vec4(0.0f);
   }
 }
-main_out tint_symbol_inner() {
+main_out main_inner() {
   main_1();
   return main_out(x_GLF_color);
 }
 void main() {
-  tint_symbol_loc0_Output = tint_symbol_inner().x_GLF_color_1;
+  main_loc0_Output = main_inner().x_GLF_color_1;
 }

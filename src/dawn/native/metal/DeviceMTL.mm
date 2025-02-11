@@ -85,11 +85,11 @@ float KalmanFilter(KalmanInfo* info, float measuredValue) {
     return info->filterValue;
 }
 
-void API_AVAILABLE(macos(10.15), ios(14)) UpdateTimestampPeriod(id<MTLDevice> device,
-                                                                KalmanInfo* info,
-                                                                MTLTimestamp* cpuTimestampStart,
-                                                                MTLTimestamp* gpuTimestampStart,
-                                                                float* timestampPeriod) {
+void UpdateTimestampPeriod(id<MTLDevice> device,
+                           KalmanInfo* info,
+                           MTLTimestamp* cpuTimestampStart,
+                           MTLTimestamp* gpuTimestampStart,
+                           float* timestampPeriod) {
     // The filter value is converged to an optimal value when the kalman gain is less than
     // 0.01. At this time, the weight of the measured value is too small to change the next
     // filter value, the sampling and calculations do not need to continue anymore.
@@ -143,16 +143,11 @@ Device::Device(AdapterBase* adapter,
                Ref<DeviceBase::DeviceLostEvent>&& lostEvent)
     : DeviceBase(adapter, descriptor, deviceToggles, std::move(lostEvent)),
       mMtlDevice(std::move(mtlDevice)) {
-    // On macOS < 11.0, we only can check whether counter sampling is supported, and the counter
-    // only can be sampled between command boundary using sampleCountersInBuffer API if it's
+    // Counter only can be sampled between command boundary using sampleCountersInBuffer API if it's
     // supported.
-    if (@available(macOS 11.0, iOS 14.0, *)) {
-        mCounterSamplingAtCommandBoundary = SupportCounterSamplingAtCommandBoundary(GetMTLDevice());
-        mCounterSamplingAtStageBoundary = SupportCounterSamplingAtStageBoundary(GetMTLDevice());
-    } else {
-        mCounterSamplingAtCommandBoundary = true;
-        mCounterSamplingAtStageBoundary = false;
-    }
+
+    mCounterSamplingAtCommandBoundary = SupportCounterSamplingAtCommandBoundary(GetMTLDevice());
+    mCounterSamplingAtStageBoundary = SupportCounterSamplingAtStageBoundary(GetMTLDevice());
 
     mIsTimestampQueryEnabled = HasFeature(Feature::TimestampQuery) ||
                                HasFeature(Feature::ChromiumExperimentalTimestampQueryInsidePasses);
@@ -171,20 +166,18 @@ MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
         // an accurate value by the following calculations.
         mTimestampPeriod = gpu_info::IsIntel(GetPhysicalDevice()->GetVendorId()) ? 83.333f : 1.0f;
 
-        if (@available(macOS 10.15, iOS 14.0, *)) {
-            if (!IsToggleEnabled(Toggle::MetalDisableTimestampPeriodEstimation)) {
-                // Initialize kalman filter parameters
-                mKalmanInfo = std::make_unique<KalmanInfo>();
-                mKalmanInfo->filterValue = 0.0f;
-                mKalmanInfo->kalmanGain = 0.5f;
-                mKalmanInfo->R =
-                    0.0001f;  // The smaller this value is, the smaller the error of measured
-                              // value is, the more we can trust the measured value.
-                mKalmanInfo->P = 1.0f;
+        if (!IsToggleEnabled(Toggle::MetalDisableTimestampPeriodEstimation)) {
+            // Initialize kalman filter parameters
+            mKalmanInfo = std::make_unique<KalmanInfo>();
+            mKalmanInfo->filterValue = 0.0f;
+            mKalmanInfo->kalmanGain = 0.5f;
+            mKalmanInfo->R =
+                0.0001f;  // The smaller this value is, the smaller the error of measured
+                          // value is, the more we can trust the measured value.
+            mKalmanInfo->P = 1.0f;
 
-                // Sample CPU timestamp and GPU timestamp for first time at device creation
-                [*mMtlDevice sampleTimestamps:&mCpuTimestamp gpuTimestamp:&mGpuTimestamp];
-            }
+            // Sample CPU timestamp and GPU timestamp for first time at device creation
+            [*mMtlDevice sampleTimestamps:&mCpuTimestamp gpuTimestamp:&mGpuTimestamp];
         }
     }
 
@@ -301,10 +294,8 @@ ResultOrError<Ref<SharedFenceBase>> Device::ImportSharedFenceImpl(
 
     DAWN_INVALID_IF(!HasFeature(Feature::SharedFenceMTLSharedEvent), "%s is not enabled.",
                     wgpu::FeatureName::SharedFenceMTLSharedEvent);
-    if (@available(macOS 10.14, ios 12.0, *)) {
-        return SharedFence::Create(this, baseDescriptor->label, descriptor);
-    }
-    DAWN_UNREACHABLE();
+
+    return SharedFence::Create(this, baseDescriptor->label, descriptor);
 }
 
 MaybeError Device::TickImpl() {
@@ -314,10 +305,8 @@ MaybeError Device::TickImpl() {
     // conversion is not disabled and the estimation is not disabled.
     if (mIsTimestampQueryEnabled && !IsToggleEnabled(Toggle::DisableTimestampQueryConversion) &&
         !IsToggleEnabled(Toggle::MetalDisableTimestampPeriodEstimation)) {
-        if (@available(macOS 10.15, iOS 14.0, *)) {
-            UpdateTimestampPeriod(GetMTLDevice(), mKalmanInfo.get(), &mCpuTimestamp, &mGpuTimestamp,
-                                  &mTimestampPeriod);
-        }
+        UpdateTimestampPeriod(GetMTLDevice(), mKalmanInfo.get(), &mCpuTimestamp, &mGpuTimestamp,
+                              &mTimestampPeriod);
     }
 
     return {};
@@ -357,7 +346,7 @@ MaybeError Device::CopyFromStagingToBufferImpl(BufferBase* source,
 // replaceRegion function, because the function requires a non-private storage mode and Dawn
 // sets the private storage mode by default for all textures except IOSurfaces on macOS.
 MaybeError Device::CopyFromStagingToTextureImpl(const BufferBase* source,
-                                                const TextureDataLayout& dataLayout,
+                                                const TexelCopyBufferLayout& dataLayout,
                                                 const TextureCopy& dst,
                                                 const Extent3D& copySizePixels) {
     Texture* texture = ToBackend(dst.texture.Get());

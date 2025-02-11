@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 RWByteAddressBuffer prevent_dce : register(u0);
 
 int sign_3233fa() {
@@ -9,11 +12,27 @@ void fragment_main() {
   prevent_dce.Store(0u, asuint(sign_3233fa()));
   return;
 }
+//
+// compute_main
+//
+RWByteAddressBuffer prevent_dce : register(u0);
+
+int sign_3233fa() {
+  int res = 1;
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store(0u, asuint(sign_3233fa()));
   return;
+}
+//
+// vertex_main
+//
+int sign_3233fa() {
+  int res = 1;
+  return res;
 }
 
 struct VertexOutput {

@@ -1,30 +1,41 @@
 #include <metal_stdlib>
-
 using namespace metal;
-
-#define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
 
 int f() {
   int i = 0;
   int j = 0;
-  while(true) {
-    TINT_ISOLATE_UB(tint_volatile_false);
-    if ((i > 4)) {
-      return 1;
-    }
+  {
+    uint2 tint_loop_idx = 0u;
     while(true) {
-      TINT_ISOLATE_UB(tint_volatile_false_1);
-      if ((j > 4)) {
-        return 2;
+      if (all((tint_loop_idx == uint2(4294967295u)))) {
+        break;
+      }
+      if ((i > 4)) {
+        return 1;
       }
       {
-        j = as_type<int>((as_type<uint>(j) + as_type<uint>(1)));
+        uint2 tint_loop_idx_1 = 0u;
+        while(true) {
+          if (all((tint_loop_idx_1 == uint2(4294967295u)))) {
+            break;
+          }
+          if ((j > 4)) {
+            return 2;
+          }
+          {
+            uint const tint_low_inc_1 = (tint_loop_idx_1.x + 1u);
+            tint_loop_idx_1.x = tint_low_inc_1;
+            uint const tint_carry_1 = uint((tint_low_inc_1 == 0u));
+            tint_loop_idx_1.y = (tint_loop_idx_1.y + tint_carry_1);
+            j = as_type<int>((as_type<uint>(j) + as_type<uint>(1)));
+          }
+          continue;
+        }
       }
-    }
-    {
-      i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)));
+      /* unreachable */
+      return 0;
     }
   }
+  /* unreachable */
+  return 0;
 }
-

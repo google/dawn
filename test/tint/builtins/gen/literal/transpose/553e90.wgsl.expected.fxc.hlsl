@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void transpose_553e90() {
   float2x4 res = float2x4((1.0f).xxxx, (1.0f).xxxx);
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   transpose_553e90();
   return;
 }
+//
+// compute_main
+//
+void transpose_553e90() {
+  float2x4 res = float2x4((1.0f).xxxx, (1.0f).xxxx);
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   transpose_553e90();
   return;
+}
+//
+// vertex_main
+//
+void transpose_553e90() {
+  float2x4 res = float2x4((1.0f).xxxx, (1.0f).xxxx);
 }
 
 struct VertexOutput {

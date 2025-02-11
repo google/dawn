@@ -4,14 +4,7 @@ RWTexture2D<uint4> Dst : register(u1);
 [numthreads(1, 1, 1)]
 void main() {
   uint4 srcValue = (0u).xxxx;
-  uint3 v = (0u).xxx;
-  Src.GetDimensions(0u, v.x, v.y, v.z);
-  uint v_1 = min(uint(int(0)), (v.z - 1u));
-  uint3 v_2 = (0u).xxx;
-  Src.GetDimensions(uint(v_1), v_2.x, v_2.y, v_2.z);
-  uint2 v_3 = (v_2.xy - (1u).xx);
-  int2 v_4 = int2(min(uint2((int(0)).xx), v_3));
-  uint4 x_22 = uint4(Src.Load(int3(v_4, int(v_1))));
+  uint4 x_22 = Src.Load(int3((int(0)).xx, int(0)));
   srcValue = x_22;
   uint x_24 = srcValue.x;
   uint x_25 = (x_24 + 1u);

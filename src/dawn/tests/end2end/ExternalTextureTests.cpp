@@ -160,7 +160,7 @@ class ExternalTextureTestsBase : public Parent {
                 outside : vec4f,
                 scale : f32,
             }
-            @group(0) @binding(0) var<storage> quad : QuadData;
+            @group(0) @binding(0) var<uniform> quad : QuadData;
             @fragment fn fs(@interpolate(perspective) @location(0) ndc : vec4f)
                                      -> @location(0) vec4f {
                 if abs(ndc.x) > quad.scale || abs(ndc.y) > quad.scale {
@@ -186,7 +186,7 @@ class ExternalTextureTestsBase : public Parent {
 
         // Make the storage buffer and the bind group containing it.
         wgpu::Buffer quadData = utils::CreateBufferFromData(this->device, &quad, sizeof(quad),
-                                                            wgpu::BufferUsage::Storage);
+                                                            wgpu::BufferUsage::Uniform);
         wgpu::BindGroup bg =
             utils::MakeBindGroup(this->device, quadPipeline.GetBindGroupLayout(0), {{0, quadData}});
 
@@ -671,6 +671,9 @@ TEST_P(ExternalTextureTests, RotateAndOrFlipTextureLoadSinglePlaneNotSquare) {
 
     wgpu::Texture renderTexture = Create2DTexture(
         device, 2, 2, kFormat, wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment);
+    wgpu::Texture dimensionTexture =
+        Create2DTexture(device, 2, 2, wgpu::TextureFormat::RG32Uint,
+                        wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment);
 
     struct RotationExpectation {
         wgpu::ExternalTextureRotation rotation;
@@ -699,20 +702,23 @@ TEST_P(ExternalTextureTests, RotateAndOrFlipTextureLoadSinglePlaneNotSquare) {
           utils::RGBA8::kBlack, utils::RGBA8::kRed, utils::RGBA8::kGreen}}};
 
     wgpu::ShaderModule loadModule = utils::CreateShaderModule(device, R"(
-        @group(0) @binding(0) var<storage, read_write> dimension : vec2u;
-        @group(0) @binding(1) var t : texture_external;
+        @group(0) @binding(0) var t : texture_external;
+
+        struct FragOut {
+          @location(0) color: vec4f,
+          @location(1) dimension: vec2u,
+        };
 
         @fragment fn main(@builtin(position) FragCoord : vec4f)
-                                 -> @location(0) vec4f {
-            dimension = textureDimensions(t);
-
-            var coords = textureDimensions(t) / 2 + vec2u(FragCoord.xy) - vec2(1, 1);
-            return textureLoad(t, coords);
+                                 -> FragOut {
+            let dimension = textureDimensions(t);
+            let coords = textureDimensions(t) / 2 + vec2u(FragCoord.xy) - vec2(1, 1);
+            return FragOut(textureLoad(t, coords), dimension);
         })");
 
     wgpu::BufferDescriptor dimensionBufferDesc;
-    dimensionBufferDesc.size = 8;
-    dimensionBufferDesc.usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc;
+    dimensionBufferDesc.size = 256;
+    dimensionBufferDesc.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::CopySrc;
     wgpu::Buffer dimensionBuffer = device.CreateBuffer(&dimensionBufferDesc);
 
     for (const RotationExpectation& exp : expectations) {
@@ -720,7 +726,9 @@ TEST_P(ExternalTextureTests, RotateAndOrFlipTextureLoadSinglePlaneNotSquare) {
         utils::ComboRenderPipelineDescriptor descriptor;
         descriptor.vertex.module = vsModule;
         descriptor.cFragment.module = loadModule;
+        descriptor.cFragment.targetCount = 2;
         descriptor.cTargets[0].format = kFormat;
+        descriptor.cTargets[1].format = wgpu::TextureFormat::RG32Uint;
         wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 
         // Import the external texture and make the bindgroup.
@@ -729,18 +737,28 @@ TEST_P(ExternalTextureTests, RotateAndOrFlipTextureLoadSinglePlaneNotSquare) {
         externalDesc.mirrored = exp.mirrored;
 
         wgpu::ExternalTexture externalTexture = device.CreateExternalTexture(&externalDesc);
-        wgpu::BindGroup bindGroup = utils::MakeBindGroup(
-            device, pipeline.GetBindGroupLayout(0), {{1, externalTexture}, {0, dimensionBuffer}});
+        wgpu::BindGroup bindGroup =
+            utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0), {{0, externalTexture}});
 
         // Run the shader, which should sample from the external texture and draw a triangle into
         // the upper left corner of the render texture.
-        utils::ComboRenderPassDescriptor renderPass({renderTexture.CreateView()});
+        utils::ComboRenderPassDescriptor renderPass(
+            {renderTexture.CreateView(), dimensionTexture.CreateView()});
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetPipeline(pipeline);
         pass.SetBindGroup(0, bindGroup);
         pass.Draw(6);
         pass.End();
+
+        {
+            wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+                utils::CreateTexelCopyTextureInfo(dimensionTexture, 0, {0, 0, 0});
+            wgpu::TexelCopyBufferInfo texelCopyBufferInfo =
+                utils::CreateTexelCopyBufferInfo(dimensionBuffer, 0, 256, 1);
+            wgpu::Extent3D size = {1, 1, 1};
+            encoder.CopyTextureToBuffer(&texelCopyTextureInfo, &texelCopyBufferInfo, &size);
+        }
 
         wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
@@ -1047,18 +1065,24 @@ TEST_P(ExternalTextureTests, ApparentSizeEffect) {
     // Create the test pipeline
     wgpu::ShaderModule blitAndOutputSize = utils::CreateShaderModule(this->device, R"(
         @group(0) @binding(0) var t : texture_external;
-        @group(0) @binding(1) var<storage, read_write> dimensions : vec2u;
+
+        struct FragOut {
+          @location(0) color: vec4f,
+          @location(1) dimension: vec2u,
+        };
 
         @fragment fn main(@builtin(position) FragCoord : vec4f)
-                                 -> @location(0) vec4f {
-            dimensions = textureDimensions(t);
-            return textureLoad(t, vec2u(FragCoord.xy));
+                                 -> FragOut {
+            let dimensions = textureDimensions(t);
+            return FragOut(textureLoad(t, vec2u(FragCoord.xy)), dimensions);
         })");
 
     utils::ComboRenderPipelineDescriptor descriptor;
     descriptor.vertex.module = vsModule;
     descriptor.cFragment.module = blitAndOutputSize;
+    descriptor.cFragment.targetCount = 2;
     descriptor.cTargets[0].format = kFormat;
+    descriptor.cTargets[1].format = wgpu::TextureFormat::RG32Uint;
     wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 
     // The source texture will contain a quad and have a larger apparent size.
@@ -1076,18 +1100,23 @@ TEST_P(ExternalTextureTests, ApparentSizeEffect) {
     wgpu::Texture renderTexture = Create2DTexture(
         device, externalDesc.apparentSize.width, externalDesc.apparentSize.height, kFormat,
         wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment);
+    wgpu::Texture dimensionTexture =
+        Create2DTexture(device, externalDesc.apparentSize.width, externalDesc.apparentSize.height,
+                        wgpu::TextureFormat::RG32Uint,
+                        wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment);
 
     // The buffer that will receive the result of `textureDimensions`
     wgpu::BufferDescriptor bufDesc;
-    bufDesc.size = 8;
-    bufDesc.usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc;
+    bufDesc.size = 256;
+    bufDesc.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::CopySrc;
     wgpu::Buffer dimensionBuffer = device.CreateBuffer(&bufDesc);
 
-    wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
-                                                     {{0, externalTexture}, {1, dimensionBuffer}});
+    wgpu::BindGroup bindGroup =
+        utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0), {{0, externalTexture}});
 
     // Do the blit
-    utils::ComboRenderPassDescriptor renderPass({renderTexture.CreateView()});
+    utils::ComboRenderPassDescriptor renderPass(
+        {renderTexture.CreateView(), dimensionTexture.CreateView()});
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
     {
@@ -1095,6 +1124,15 @@ TEST_P(ExternalTextureTests, ApparentSizeEffect) {
         pass.SetBindGroup(0, bindGroup);
         pass.Draw(6);
         pass.End();
+    }
+
+    {
+        wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(dimensionTexture, 0, {0, 0, 0});
+        wgpu::TexelCopyBufferInfo texelCopyBufferInfo =
+            utils::CreateTexelCopyBufferInfo(dimensionBuffer, 0, 256, 1);
+        wgpu::Extent3D size = {1, 1, 1};
+        encoder.CopyTextureToBuffer(&texelCopyTextureInfo, &texelCopyBufferInfo, &size);
     }
 
     wgpu::CommandBuffer commands = encoder.Finish();
@@ -1352,7 +1390,7 @@ TEST_P(ExternalTextureTests, Regression346174896) {
             return vec4f(1);
         }
 
-        @group(0) @binding(1) var<storage, read_write> dimension : vec2u;
+        @group(0) @binding(1) var<uniform> dimension : vec2u;
         @group(0) @binding(0) var t : texture_external;
 
         @fragment fn main(@builtin(position) FragCoord : vec4f) -> @location(0) vec4f {

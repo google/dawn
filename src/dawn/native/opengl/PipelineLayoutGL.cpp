@@ -63,6 +63,7 @@ PipelineLayout::PipelineLayout(Device* device,
                             mIndexInfo[group][bindingIndex] = ssboIndex;
                             ssboIndex++;
                             break;
+                        case wgpu::BufferBindingType::BindingNotUsed:
                         case wgpu::BufferBindingType::Undefined:
                             DAWN_UNREACHABLE();
                     }

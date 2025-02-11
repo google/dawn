@@ -40,8 +40,8 @@ ary_ret v_4(uint start_byte_offset) {
 
 [numthreads(1, 1, 1)]
 void f() {
-  uint v_8 = (16u * uint(min(uint(i()), 3u)));
-  uint v_9 = (8u * uint(min(uint(i()), 1u)));
+  uint v_8 = (16u * min(uint(i()), 3u));
+  uint v_9 = (8u * min(uint(i()), 1u));
   float2x2 l_a[4] = v_4(0u);
   float2x2 l_a_i = v(v_8);
   uint4 v_10 = a[((v_8 + v_9) / 16u)];

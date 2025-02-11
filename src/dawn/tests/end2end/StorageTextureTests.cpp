@@ -41,6 +41,18 @@ namespace dawn {
 namespace {
 
 class StorageTextureTests : public DawnTest {
+  protected:
+    wgpu::RequiredLimits GetRequiredLimits(const wgpu::SupportedLimits& supported) override {
+        // Just copy all the limits, though all we really care about is
+        // maxStorageBuffersInFragmentStage
+        // maxStorageTexturesInFragmentStage
+        // maxStorageBuffersInVertexStage
+        // maxStorageTexturesInVertexStage
+        wgpu::RequiredLimits required = {};
+        required.limits = supported.limits;
+        return required;
+    }
+
   public:
     static void FillExpectedData(void* pixelValuePtr,
                                  wgpu::TextureFormat format,
@@ -467,11 +479,11 @@ fn IsEqualTo(pixel : vec4f, expected : vec4f) -> bool {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
         const wgpu::Extent3D copyExtent = {kWidth, kHeight, sliceCount};
-        wgpu::ImageCopyBuffer imageCopyBuffer =
-            utils::CreateImageCopyBuffer(uploadBuffer, 0, kTextureBytesPerRowAlignment, kHeight);
-        wgpu::ImageCopyTexture imageCopyTexture;
-        imageCopyTexture.texture = outputTexture;
-        encoder.CopyBufferToTexture(&imageCopyBuffer, &imageCopyTexture, &copyExtent);
+        wgpu::TexelCopyBufferInfo texelCopyBufferInfo = utils::CreateTexelCopyBufferInfo(
+            uploadBuffer, 0, kTextureBytesPerRowAlignment, kHeight);
+        wgpu::TexelCopyTextureInfo texelCopyTextureInfo;
+        texelCopyTextureInfo.texture = outputTexture;
+        encoder.CopyBufferToTexture(&texelCopyBufferInfo, &texelCopyTextureInfo, &copyExtent);
 
         wgpu::CommandBuffer commandBuffer = encoder.Finish();
         queue.Submit(1, &commandBuffer);
@@ -634,16 +646,25 @@ fn IsEqualTo(pixel : vec4f, expected : vec4f) -> bool {
         queue.Submit(1, &commandBuffer);
     }
 
-    void CheckOutputStorageTexture(wgpu::Texture writeonlyStorageTexture,
+    void CheckOutputStorageTexture(wgpu::Texture storageTexture,
                                    wgpu::TextureFormat format,
                                    const wgpu::Extent3D& size) {
         const std::vector<uint8_t>& expectedData = GetExpectedData(format, size.depthOrArrayLayers);
-        CheckOutputStorageTexture(writeonlyStorageTexture, format, size, expectedData.data(),
+        CheckOutputStorageTexture(storageTexture, format, size, expectedData.data(),
                                   expectedData.size());
     }
 
-    void CheckOutputStorageTexture(wgpu::Texture writeonlyStorageTexture,
+    void CheckOutputStorageTexture(wgpu::Texture storageTexture,
                                    wgpu::TextureFormat format,
+                                   const wgpu::Extent3D& size,
+                                   const uint8_t* expectedData,
+                                   size_t expectedDataSize) {
+        CheckOutputStorageTexture(storageTexture, format, 0, size, expectedData, expectedDataSize);
+    }
+
+    void CheckOutputStorageTexture(wgpu::Texture storageTexture,
+                                   wgpu::TextureFormat format,
+                                   uint32_t mipLevel,
                                    const wgpu::Extent3D& size,
                                    const uint8_t* expectedData,
                                    size_t expectedDataSize) {
@@ -656,11 +677,11 @@ fn IsEqualTo(pixel : vec4f, expected : vec4f) -> bool {
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         {
-            wgpu::ImageCopyTexture imageCopyTexture =
-                utils::CreateImageCopyTexture(writeonlyStorageTexture, 0, {0, 0, 0});
-            wgpu::ImageCopyBuffer imageCopyBuffer = utils::CreateImageCopyBuffer(
+            wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+                utils::CreateTexelCopyTextureInfo(storageTexture, mipLevel, {0, 0, 0});
+            wgpu::TexelCopyBufferInfo texelCopyBufferInfo = utils::CreateTexelCopyBufferInfo(
                 resultBuffer, 0, kTextureBytesPerRowAlignment, size.height);
-            encoder.CopyTextureToBuffer(&imageCopyTexture, &imageCopyBuffer, &size);
+            encoder.CopyTextureToBuffer(&texelCopyTextureInfo, &texelCopyBufferInfo, &size);
         }
         wgpu::CommandBuffer commandBuffer = encoder.Finish();
         queue.Submit(1, &commandBuffer);
@@ -696,6 +717,9 @@ fn IsEqualTo(pixel : vec4f, expected : vec4f) -> bool {
 
 // Test that write-only storage textures are supported in compute shader.
 TEST_P(StorageTextureTests, WriteonlyStorageTextureInComputeShader) {
+    // TODO(crbug.com/388318201): investigate
+    DAWN_SUPPRESS_TEST_IF(IsCompatibilityMode() &&
+                          HasToggleEnabled("gl_force_es_31_and_no_extensions"));
     for (wgpu::TextureFormat format : utils::kAllTextureFormats) {
         if (!utils::TextureFormatSupportsStorageTexture(format, device, IsCompatibilityMode())) {
             continue;
@@ -722,8 +746,14 @@ TEST_P(StorageTextureTests, WriteonlyStorageTextureInComputeShader) {
 
 // Test that write-only storage textures are supported in fragment shader.
 TEST_P(StorageTextureTests, WriteonlyStorageTextureInFragmentShader) {
+    // TODO(crbug.com/388318201): investigate
+    DAWN_SUPPRESS_TEST_IF(IsCompatibilityMode() &&
+                          HasToggleEnabled("gl_force_es_31_and_no_extensions"));
+
     // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+
+    DAWN_SUPPRESS_TEST_IF(GetSupportedLimits().limits.maxStorageTexturesInFragmentStage < 1);
 
     for (wgpu::TextureFormat format : utils::kAllTextureFormats) {
         if (!utils::TextureFormatSupportsStorageTexture(format, device, IsCompatibilityMode())) {
@@ -865,12 +895,13 @@ TEST_P(StorageTextureTests, SampledAndWriteonlyStorageTexturePingPong) {
     bufferDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
     wgpu::Buffer resultBuffer = device.CreateBuffer(&bufferDescriptor);
 
-    wgpu::ImageCopyTexture imageCopyTexture;
-    imageCopyTexture.texture = storageTexture1;
+    wgpu::TexelCopyTextureInfo texelCopyTextureInfo;
+    texelCopyTextureInfo.texture = storageTexture1;
 
-    wgpu::ImageCopyBuffer imageCopyBuffer = utils::CreateImageCopyBuffer(resultBuffer, 0, 256, 1);
+    wgpu::TexelCopyBufferInfo texelCopyBufferInfo =
+        utils::CreateTexelCopyBufferInfo(resultBuffer, 0, 256, 1);
     wgpu::Extent3D extent3D = {1, 1, 1};
-    encoder.CopyTextureToBuffer(&imageCopyTexture, &imageCopyBuffer, &extent3D);
+    encoder.CopyTextureToBuffer(&texelCopyTextureInfo, &texelCopyBufferInfo, &extent3D);
 
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
@@ -1063,6 +1094,8 @@ fn doTest() -> bool {
 // Verify that the texture is correctly cleared to 0 before its first usage as a write-only storage
 // storage texture in a render pass.
 TEST_P(StorageTextureZeroInitTests, WriteonlyStorageTextureClearsToZeroInRenderPass) {
+    DAWN_SUPPRESS_TEST_IF(GetSupportedLimits().limits.maxStorageTexturesInFragmentStage < 1);
+
     // Prepare the write-only storage texture.
     wgpu::Texture writeonlyStorageTexture = CreateTexture(
         wgpu::TextureFormat::R32Uint,
@@ -1146,6 +1179,8 @@ fn main(@builtin(local_invocation_id) local_id: vec3<u32>,) {
 
 // Verify read-write storage texture can work correctly in fragment shaders.
 TEST_P(ReadWriteStorageTextureTests, ReadWriteStorageTextureInFragmentShader) {
+    DAWN_SUPPRESS_TEST_IF(GetSupportedLimits().limits.maxStorageTexturesInFragmentStage < 1);
+
     std::array<uint32_t, kWidth * kHeight> inputData;
     std::array<uint32_t, kWidth * kHeight> expectedData;
     for (size_t i = 0; i < inputData.size(); ++i) {
@@ -1267,6 +1302,8 @@ TEST_P(ReadWriteStorageTextureTests, ReadOnlyStorageTextureInVertexShader) {
     // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
 
+    DAWN_SUPPRESS_TEST_IF(GetSupportedLimits().limits.maxStorageTexturesInVertexStage < 1);
+
     constexpr wgpu::TextureFormat kStorageTextureFormat = wgpu::TextureFormat::R32Uint;
     const std::vector<uint8_t> kInitialTextureData = GetExpectedData(kStorageTextureFormat);
     wgpu::Texture readonlyStorageTexture = CreateTextureWithTestData(
@@ -1313,6 +1350,8 @@ struct FragmentInput {
 
 // Verify read-only storage texture can work correctly in fragment shaders.
 TEST_P(ReadWriteStorageTextureTests, ReadOnlyStorageTextureInFragmentShader) {
+    DAWN_SUPPRESS_TEST_IF(GetSupportedLimits().limits.maxStorageTexturesInFragmentStage < 1);
+
     constexpr wgpu::TextureFormat kStorageTextureFormat = wgpu::TextureFormat::R32Uint;
     const std::vector<uint8_t> kInitialTextureData = GetExpectedData(kStorageTextureFormat);
     wgpu::Texture readonlyStorageTexture = CreateTextureWithTestData(
@@ -1389,6 +1428,298 @@ fn main(
     CheckOutputStorageTexture(storageTexture, wgpu::TextureFormat::R32Uint, {kWidth, kHeight},
                               reinterpret_cast<const uint8_t*>(expectedData.data()),
                               expectedData.size() * sizeof(uint32_t));
+}
+
+// Tests reading from mip level 0 of a mipLevelCount = 3 texture using a TEXTURE_BINDING
+// and then writing to mip level 1 as STORAGE_BINDING. This surfaced an issue in the GL
+// backend where the first usage sets TEXTURE_BASE_LEVEL and TEXTURE_MAX_LEVEL on the texture
+// and they end up affecting the 2nd usage.
+TEST_P(ReadWriteStorageTextureTests, ReadMipLevel0WriteMipLevel1) {
+    // https://crbug.com/392121637
+    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
+
+    wgpu::ShaderModule csModule = utils::CreateShaderModule(device, R"(
+        @binding(0) @group(0) var<storage, read_write> buf : array<f32>;
+        @binding(1) @group(0) var t_in: texture_2d<f32>;
+        @binding(2) @group(0) var t_out: texture_storage_2d<rgba8unorm, write>;
+
+        @compute @workgroup_size(1) fn csLoad() {
+          // just make sure we actually read (don't want this optimized out)
+          buf[0] = textureLoad(t_in, vec2u(0), 0).w;
+        }
+        @compute @workgroup_size(1) fn csStore() {
+         textureStore(t_out, vec2u(0), vec4f(64, 128, 192, 255) / 255);
+        }
+    )");
+
+    wgpu::ComputePipelineDescriptor pipelineDescriptor;
+    pipelineDescriptor.layout = nullptr;
+    pipelineDescriptor.compute.module = csModule;
+
+    pipelineDescriptor.compute.entryPoint = "csLoad";
+    wgpu::ComputePipeline loadPipeline = device.CreateComputePipeline(&pipelineDescriptor);
+
+    pipelineDescriptor.compute.entryPoint = "csStore";
+    wgpu::ComputePipeline storePipeline = device.CreateComputePipeline(&pipelineDescriptor);
+
+    wgpu::BufferDescriptor bufferDesc;
+    bufferDesc.size = 16;
+    bufferDesc.usage = wgpu::BufferUsage::Storage;
+    wgpu::Buffer storageBuffer = device.CreateBuffer(&bufferDesc);
+
+    bufferDesc.size = 4;
+    bufferDesc.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::CopySrc;
+    wgpu::Buffer resultBuffer0 = device.CreateBuffer(&bufferDesc);
+    wgpu::Buffer resultBuffer1 = device.CreateBuffer(&bufferDesc);
+
+    wgpu::TextureDescriptor textureDesc;
+    textureDesc.format = wgpu::TextureFormat::RGBA8Unorm;
+    textureDesc.size = {2, 1};
+    textureDesc.mipLevelCount = 2;
+    textureDesc.usage = wgpu::TextureUsage::StorageBinding | wgpu::TextureUsage::TextureBinding |
+                        wgpu::TextureUsage::CopySrc;
+    wgpu::Texture texture = device.CreateTexture(&textureDesc);
+
+    wgpu::TextureViewDescriptor textureViewDesc1;
+    textureViewDesc1.baseMipLevel = 0;
+    textureViewDesc1.mipLevelCount = 1;
+    wgpu::BindGroup loadBindGroup =
+        utils::MakeBindGroup(device, loadPipeline.GetBindGroupLayout(0),
+                             {{1, texture.CreateView(&textureViewDesc1)}, {0, storageBuffer}});
+
+    wgpu::TextureViewDescriptor textureViewDesc2;
+    textureViewDesc2.baseMipLevel = 1;
+    textureViewDesc2.mipLevelCount = 1;
+    wgpu::BindGroup storeBindGroup = utils::MakeBindGroup(
+        device, storePipeline.GetBindGroupLayout(0), {{2, texture.CreateView(&textureViewDesc2)}});
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder computeEncoder = encoder.BeginComputePass();
+
+    computeEncoder.SetBindGroup(0, loadBindGroup);
+    computeEncoder.SetPipeline(loadPipeline);
+    computeEncoder.DispatchWorkgroups(1);
+
+    computeEncoder.SetBindGroup(0, storeBindGroup);
+    computeEncoder.SetPipeline(storePipeline);
+    computeEncoder.DispatchWorkgroups(1);
+
+    computeEncoder.End();
+
+    {
+        wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(texture, 0, {0, 0, 0});
+        wgpu::TexelCopyBufferInfo texelCopyBufferInfo =
+            utils::CreateTexelCopyBufferInfo(resultBuffer0, 0, 256, 1);
+        wgpu::Extent3D size({1, 1, 1});
+        encoder.CopyTextureToBuffer(&texelCopyTextureInfo, &texelCopyBufferInfo, &size);
+    }
+
+    {
+        wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(texture, 1, {0, 0, 0});
+        wgpu::TexelCopyBufferInfo texelCopyBufferInfo =
+            utils::CreateTexelCopyBufferInfo(resultBuffer1, 0, 256, 1);
+        wgpu::Extent3D size({1, 1, 1});
+        encoder.CopyTextureToBuffer(&texelCopyTextureInfo, &texelCopyBufferInfo, &size);
+    }
+
+    wgpu::CommandBuffer commandBuffer = encoder.Finish();
+    queue.Submit(1, &commandBuffer);
+
+    static uint8_t expectedData0[]{0, 0, 0, 0};
+    EXPECT_BUFFER_U8_RANGE_EQ(expectedData0, resultBuffer0, 0, 4);
+
+    static uint8_t expectedData1[]{64, 128, 192, 255};
+    EXPECT_BUFFER_U8_RANGE_EQ(expectedData1, resultBuffer1, 0, 4);
+}
+
+// Tests reading from both a TEXTURE_BINDING and a STORAGE_BINDING from the same
+// texture at the same time. This test is to double check on a workaround for
+// fixing the previous test above where in the GL backend we try to reset the
+// TEXTURE_BASE_LEVEL and TEXTURE_MAX_LEVEL. If we mistakenly apply the workaround
+// to read only textures then this test will fail.
+TEST_P(ReadWriteStorageTextureTests, ReadMipLevel2AsBothTextureBindingAndStorageBinding) {
+    // This asserts in TextureVK.cpp, see https://crbug.com/392121643
+    DAWN_SUPPRESS_TEST_IF(IsVulkan());
+    // https://crbug.com/392121648
+    DAWN_SUPPRESS_TEST_IF(IsANGLED3D11());
+
+    wgpu::ShaderModule csModule = utils::CreateShaderModule(device, R"(
+        @binding(0) @group(0) var<storage, read_write> buf : array<vec4u>;
+        @binding(1) @group(0) var t_in: texture_2d<f32>;
+        @binding(2) @group(0) var s_in: texture_storage_2d<rgba8unorm, read>;
+
+        @compute @workgroup_size(1) fn cs() {
+          buf[0] = vec4u(
+            u32(textureLoad(t_in, vec2u(0), 0).r * 255),
+            u32(textureLoad(s_in, vec2u(0)).r * 255),
+            123,
+            456,
+          );
+        }
+    )");
+
+    wgpu::ComputePipelineDescriptor pipelineDescriptor;
+    pipelineDescriptor.layout = nullptr;
+    pipelineDescriptor.compute.module = csModule;
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDescriptor);
+
+    wgpu::BufferDescriptor bufferDesc;
+    bufferDesc.size = 16;
+    bufferDesc.usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc;
+    wgpu::Buffer storageBuffer = device.CreateBuffer(&bufferDesc);
+
+    // make a 3 mip level texture
+    wgpu::TextureDescriptor textureDesc;
+    textureDesc.format = wgpu::TextureFormat::RGBA8Unorm;
+    textureDesc.size = {4, 1};
+    textureDesc.mipLevelCount = 3;
+    textureDesc.usage = wgpu::TextureUsage::StorageBinding | wgpu::TextureUsage::TextureBinding |
+                        wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst;
+    wgpu::Texture texture = device.CreateTexture(&textureDesc);
+
+    // put 1 in first mip, 2 in 2nd, 3 in 3rd.
+    for (uint32_t mipLevel = 0; mipLevel < 3; ++mipLevel) {
+        uint32_t width = 4 >> mipLevel;
+        uint32_t bytesPerRow = width * 4;
+        wgpu::Extent3D copySize({width, 1, 1});
+        wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(texture, mipLevel, {0, 0, 0});
+        wgpu::TexelCopyBufferLayout texelCopyBufferLayout =
+            utils::CreateTexelCopyBufferLayout(0, bytesPerRow);
+        std::vector<uint8_t> data(bytesPerRow, mipLevel + 1);
+        queue.WriteTexture(&texelCopyTextureInfo, data.data(), bytesPerRow, &texelCopyBufferLayout,
+                           &copySize);
+    }
+
+    // View mip level 2
+    wgpu::TextureViewDescriptor textureViewDesc;
+    textureViewDesc.baseMipLevel = 2;
+    textureViewDesc.mipLevelCount = 1;
+    wgpu::TextureView view = texture.CreateView(&textureViewDesc);
+    wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                                     {{0, storageBuffer}, {1, view}, {2, view}});
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder computeEncoder = encoder.BeginComputePass();
+
+    computeEncoder.SetBindGroup(0, bindGroup);
+    computeEncoder.SetPipeline(pipeline);
+    computeEncoder.DispatchWorkgroups(1);
+
+    computeEncoder.End();
+
+    wgpu::CommandBuffer commandBuffer = encoder.Finish();
+    queue.Submit(1, &commandBuffer);
+
+    // expect 3 from reading through the texture binding and
+    // also 3 from reading through the storage binding.
+    static uint32_t expectedData[]{3, 3, 123, 456};
+    EXPECT_BUFFER_U32_RANGE_EQ(expectedData, storageBuffer, 0, 4);
+}
+
+// Tests reading from mip level 1 via TEXTURE_BINDING and write to mip level 2 via
+// STORAGE_BINDING at the same time.
+TEST_P(ReadWriteStorageTextureTests, ReadMipLevel1AndWriteLevel2AtTheSameTime) {
+    // Compat mode doesn't support different views of the same texture
+    DAWN_SUPPRESS_TEST_IF(IsCompatibilityMode());
+
+    wgpu::ShaderModule csModule = utils::CreateShaderModule(device, R"(
+        @binding(0) @group(0) var<storage, read_write> buf : array<vec4u>;
+        @binding(1) @group(0) var t_in: texture_2d<f32>;
+        @binding(2) @group(0) var s_out: texture_storage_2d<rgba8unorm, write>;
+
+        @compute @workgroup_size(1) fn cs() {
+          buf[0] = vec4u(textureLoad(t_in, vec2u(0), 0) * 255);
+          textureStore(s_out, vec2u(0), vec4f(64, 128, 192, 255) / 255);
+        }
+    )");
+
+    wgpu::ComputePipelineDescriptor pipelineDescriptor;
+    pipelineDescriptor.layout = nullptr;
+    pipelineDescriptor.compute.module = csModule;
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDescriptor);
+
+    wgpu::BufferDescriptor bufferDesc;
+    bufferDesc.size = 16;
+    bufferDesc.usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc;
+    wgpu::Buffer storageBuffer = device.CreateBuffer(&bufferDesc);
+
+    bufferDesc.size = 16;
+    bufferDesc.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::CopySrc;
+    wgpu::Buffer resultBuffer = device.CreateBuffer(&bufferDesc);
+
+    // make a 3 mip level texture
+    wgpu::TextureDescriptor textureDesc;
+    textureDesc.format = wgpu::TextureFormat::RGBA8Unorm;
+    textureDesc.size = {4, 1};
+    textureDesc.mipLevelCount = 3;
+    textureDesc.usage = wgpu::TextureUsage::StorageBinding | wgpu::TextureUsage::TextureBinding |
+                        wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst;
+    wgpu::Texture texture = device.CreateTexture(&textureDesc);
+
+    // put 1 in first mip, 2 in 2nd, 3 in 3rd.
+    for (uint32_t mipLevel = 0; mipLevel < 3; ++mipLevel) {
+        uint32_t width = 4 >> mipLevel;
+        uint32_t bytesPerRow = width * 4;
+        wgpu::Extent3D copySize({width, 1, 1});
+        wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(texture, mipLevel, {0, 0, 0});
+        wgpu::TexelCopyBufferLayout texelCopyBufferLayout =
+            utils::CreateTexelCopyBufferLayout(0, bytesPerRow);
+        std::vector<uint8_t> data(bytesPerRow, mipLevel + 1);
+        queue.WriteTexture(&texelCopyTextureInfo, data.data(), bytesPerRow, &texelCopyBufferLayout,
+                           &copySize);
+    }
+
+    // View mip level 1
+    wgpu::TextureViewDescriptor textureViewDesc;
+    textureViewDesc.baseMipLevel = 1;
+    textureViewDesc.mipLevelCount = 1;
+    wgpu::TextureView viewL1 = texture.CreateView(&textureViewDesc);
+
+    // View mip level 2
+    textureViewDesc.baseMipLevel = 2;
+    textureViewDesc.mipLevelCount = 1;
+    wgpu::TextureView viewL2 = texture.CreateView(&textureViewDesc);
+
+    wgpu::BindGroup bindGroup = utils::MakeBindGroup(
+        device, pipeline.GetBindGroupLayout(0), {{0, storageBuffer}, {1, viewL1}, {2, viewL2}});
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder computeEncoder = encoder.BeginComputePass();
+
+    computeEncoder.SetBindGroup(0, bindGroup);
+    computeEncoder.SetPipeline(pipeline);
+    computeEncoder.DispatchWorkgroups(1);
+
+    computeEncoder.End();
+
+    // copy a texel from mip level 2
+    {
+        wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(texture, 2, {0, 0, 0});
+        wgpu::TexelCopyBufferInfo texelCopyBufferInfo =
+            utils::CreateTexelCopyBufferInfo(resultBuffer, 0, 256, 1);
+        wgpu::Extent3D size({1, 1, 1});
+        encoder.CopyTextureToBuffer(&texelCopyTextureInfo, &texelCopyBufferInfo, &size);
+    }
+
+    wgpu::CommandBuffer commandBuffer = encoder.Finish();
+    queue.Submit(1, &commandBuffer);
+
+    // expect 2 from reading mip level 1.
+    {
+        static uint32_t expectedData[]{2, 2, 2, 2};
+        EXPECT_BUFFER_U32_RANGE_EQ(expectedData, storageBuffer, 0, 4);
+    }
+
+    // expect 0.25, 0.5, 0.75, 1 in mip level 2
+    {
+        static uint8_t expectedData[]{64, 128, 192, 255};
+        EXPECT_BUFFER_U8_RANGE_EQ(expectedData, resultBuffer, 0, 4);
+    }
 }
 
 DAWN_INSTANTIATE_TEST(ReadWriteStorageTextureTests,

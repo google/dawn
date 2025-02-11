@@ -47,6 +47,8 @@ cc_library(
     "math.h",
   ],
   deps = [
+    "//src/tint/utils/macros",
+    "//src/utils",
   ],
   copts = COPTS,
   visibility = ["//visibility:public"],

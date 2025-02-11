@@ -31,6 +31,7 @@
 #include <limits>
 
 #include "src/tint/lang/core/ir/builder.h"
+#include "src/tint/lang/core/ir/phony.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/utils/containers/reverse.h"
 
@@ -69,7 +70,7 @@ struct State {
             size_t n = std::min(count, pending_resolution.Length());
             if (n > 0) {
                 for (size_t i = 0; i < n; i++) {
-                    MaybeReplaceWithLet(pending_resolution[i]);
+                    MaybeReplaceWithLetOrPhony(pending_resolution[i]);
                 }
                 pending_resolution.Erase(0, n);
             }
@@ -130,7 +131,7 @@ struct State {
                     continue;
                 }
 
-                MaybeReplaceWithLet(result);
+                MaybeReplaceWithLetOrPhony(result);
             }
 
             // At this point the value has been ruled out for inlining.
@@ -159,9 +160,9 @@ struct State {
         return true;
     }
 
-    void MaybeReplaceWithLet(core::ir::InstructionResult* value) {
+    void MaybeReplaceWithLetOrPhony(core::ir::InstructionResult* value) {
         auto* inst = value->Instruction();
-        if (inst->IsAnyOf<core::ir::Var, core::ir::Let>()) {
+        if (inst->IsAnyOf<core::ir::Var, core::ir::Let, core::ir::Phony>()) {
             return;
         }
         if (inst->Is<core::ir::Call>() && !value->IsUsed()) {
@@ -170,6 +171,12 @@ struct State {
             if (!must_use) {
                 return;  // Call statement
             }
+        }
+
+        if (!value->IsUsed() && !ir.NameOf(value).IsValid()) {
+            auto* phony = b.Phony(value);
+            phony->InsertAfter(inst);
+            return;
         }
 
         auto* let = b.Let(value->Type());

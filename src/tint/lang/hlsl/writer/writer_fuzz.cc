@@ -25,53 +25,55 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <iostream>
+
 #include "src/tint/cmd/fuzz/ir/fuzz.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/var.h"
-#include "src/tint/lang/core/type/input_attachment.h"
 #include "src/tint/lang/core/type/pointer.h"
+#include "src/tint/lang/hlsl/validate/validate.h"
 #include "src/tint/lang/hlsl/writer/helpers/generate_bindings.h"
 #include "src/tint/lang/hlsl/writer/writer.h"
-
+#include "src/tint/utils/command/command.h"
 namespace tint::hlsl::writer {
 namespace {
 
-bool CanRun(const core::ir::Module& module, const Options& options) {
-    // Check for unsupported module-scope variable address spaces and types.
-    for (auto* inst : *module.root_block) {
-        auto* var = inst->As<core::ir::Var>();
-        auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
-        if (ptr->AddressSpace() == core::AddressSpace::kPushConstant) {
-            return false;
-        }
-        if (ptr->AddressSpace() == core::AddressSpace::kPixelLocal) {
-            return false;
-        }
-        if (ptr->StoreType()->Is<core::type::InputAttachment>()) {
-            return false;
-        }
-    }
+// Fuzzed options used to init tint::hlsl::writer::Options
+struct FuzzedOptions {
+    bool strip_all_names;
+    bool disable_robustness;
+    bool disable_workgroup_init;
+    bool polyfill_reflect_vec2_f32;
+    bool polyfill_dot_4x8_packed;
+    bool disable_polyfill_integer_div_mod;
+    bool polyfill_pack_unpack_4x8;
+    bool compiler_is_dxc;
 
-    for (auto& f : module.functions) {
-        if (f->IsEntryPoint()) {
-            // PixelLocal must only run for fragment shaders
-            if (!options.pixel_local.attachments.empty() && !f->IsFragment()) {
-                return false;
-            }
-            // Truncating interstage variables must only run for vertex shaders
-            if (options.truncate_interstage_variables && !f->IsVertex()) {
-                return false;
-            }
-        }
-    }
+    /// Reflect the fields of this class so that it can be used by tint::ForeachField()
+    TINT_REFLECT(FuzzedOptions,
+                 strip_all_names,
+                 disable_robustness,
+                 disable_workgroup_init,
+                 polyfill_reflect_vec2_f32,
+                 polyfill_dot_4x8_packed,
+                 disable_polyfill_integer_div_mod,
+                 polyfill_pack_unpack_4x8,
+                 compiler_is_dxc);
+};
 
-    return true;
-}
-
-Result<SuccessType> IRFuzzer(core::ir::Module& module, Options options) {
-    if (!CanRun(module, options)) {
-        return Failure{"Cannot run module"};
-    }
+Result<SuccessType> IRFuzzer(core::ir::Module& module,
+                             const fuzz::ir::Context& context,
+                             FuzzedOptions fuzzed_options) {
+    Options options;
+    options.strip_all_names = fuzzed_options.strip_all_names;
+    options.disable_robustness = fuzzed_options.disable_robustness;
+    options.disable_workgroup_init = fuzzed_options.disable_workgroup_init;
+    options.polyfill_reflect_vec2_f32 = fuzzed_options.polyfill_reflect_vec2_f32;
+    options.polyfill_dot_4x8_packed = fuzzed_options.polyfill_dot_4x8_packed;
+    options.disable_polyfill_integer_div_mod = fuzzed_options.disable_polyfill_integer_div_mod;
+    options.polyfill_pack_unpack_4x8 = fuzzed_options.polyfill_pack_unpack_4x8;
+    options.compiler =
+        fuzzed_options.compiler_is_dxc ? Options::Compiler::kDXC : Options::Compiler::kFXC;
 
     options.bindings = GenerateBindings(module);
     options.array_length_from_uniform.ubo_binding = {30, 0};
@@ -89,8 +91,32 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module, Options options) {
         }
     }
 
-    [[maybe_unused]] auto output = Generate(module, options);
-    // TODO(42251292): Fuzz DXC with HLSL output
+    auto check = CanGenerate(module, options);
+    if (check != Success) {
+        return check.Failure();
+    }
+
+    auto output = Generate(module, options);
+
+    if (output == Success && context.options.dump) {
+        std::cout << "Dumping generated HLSL:\n" << output->hlsl << "\n";
+    }
+
+    // Run DXC against generated HLSL in order to fuzz it. Note that we ignore whether it succeeds
+    // as DXC may fail on valid HLSL emitted by Tint. For example: post optimization infinite loops
+    // will fail to compile, but these are beyond Tint's analysis capabilities.
+    const char* dxc_path = validate::kDxcDLLName;
+    if (!context.options.dxc.empty()) {
+        dxc_path = context.options.dxc.c_str();
+    }
+    auto dxc = tint::Command::LookPath(dxc_path);
+    if (dxc.Found()) {
+        uint32_t hlsl_shader_model = 66;
+        bool require_16bit_types = true;
+        [[maybe_unused]] auto validate_res = validate::ValidateUsingDXC(
+            dxc.Path(), output->hlsl, output->entry_points, require_16bit_types, hlsl_shader_model);
+    }
+
     return Success;
 }
 

@@ -45,6 +45,7 @@
 #include "src/tint/lang/core/ir/transform/robustness.h"
 #include "src/tint/lang/core/ir/transform/value_to_let.h"
 #include "src/tint/lang/core/ir/transform/vectorize_scalar_matrix_constructors.h"
+#include "src/tint/lang/core/ir/transform/vertex_pulling.h"
 #include "src/tint/lang/core/ir/transform/zero_init_workgroup_memory.h"
 #include "src/tint/lang/msl/writer/common/option_helpers.h"
 #include "src/tint/lang/msl/writer/raise/binary_polyfill.h"
@@ -67,6 +68,11 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
     } while (false)
 
     RaiseResult raise_result;
+
+    // VertexPulling must come before BindingRemapper and Robustness.
+    if (options.vertex_pulling_config) {
+        RUN_TRANSFORM(core::ir::transform::VertexPulling, module, *options.vertex_pulling_config);
+    }
 
     tint::transform::multiplanar::BindingsMap multiplanar_map{};
     RemapperData remapper_data{};

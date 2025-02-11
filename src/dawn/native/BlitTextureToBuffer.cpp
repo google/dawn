@@ -655,10 +655,61 @@ fn encodeVectorInU32General(v: vec4f) -> u32 {
 }
 )";
 
-// Directly loading R32Float values into dst_buf
+// Storing rg11b10ufloat texel values
+// Reference:
+// https://www.khronos.org/opengl/wiki/Small_Float_Formats
+constexpr std::string_view kEncodeRG11B10UfloatInU32 = R"(
+fn encodeVectorInU32General(v: vec4f) -> u32 {
+    const n_rg = 6;    // number of mantissa bits (RG)
+    const n_b = 5;    // number of mantissa bits (B)
+    const e_max = 31;   // max exponent
+    const b = 15;    // exponent bias
+
+    // Calculate the exponent (biased)
+    let rbe = select(i32(floor(log2(v.r))), -b, v.r == 0.0);
+    let gbe = select(i32(floor(log2(v.g))), -b, v.g == 0.0);
+    let bbe = select(i32(floor(log2(v.b))), -b, v.b == 0.0);
+
+    // Calculate the exponent bits value.
+    let re = clamp(rbe + b, 0, e_max);
+    let ge = clamp(gbe + b, 0, e_max);
+    let be = clamp(bbe + b, 0, e_max);
+
+    // Calculate the mantissa for each component.
+    let rm = u32(round( select(v.r * exp2(-f32(re - b)) - 1.0, v.r * exp2(f32(b-1)), re == 0) * f32(1 << n_rg) ));
+    let gm = u32(round( select(v.g * exp2(-f32(ge - b)) - 1.0, v.g * exp2(f32(b-1)), ge == 0) * f32(1 << n_rg) ));
+    let bm = u32(round( select(v.b * exp2(-f32(be - b)) - 1.0, v.b * exp2(f32(b-1)), be == 0) * f32(1 << n_b) ));
+
+    let red = u32(re << n_rg) | rm;
+    let green = u32(ge << n_rg) | gm;
+    let blue = u32(be << n_b) | bm;
+
+    return (blue << 22) | (green << 11) | red;
+}
+)";
+
+// Directly loading float32 values into dst_buf
 // No bit manipulation and packing is needed.
 constexpr std::string_view kLoadR32Float = R"(
     dst_buf[dstOffset] = textureLoadGeneral(src_tex, coord0, params.mipLevel).r;
+}
+)";
+constexpr std::string_view kLoadRG32Float = R"(
+    let v = textureLoadGeneral(src_tex, coord0, params.mipLevel);
+    // dstOffset is based on 8 bytes so we need to multiply by 2 to get uint32 offset.
+    let uintOffset = dstOffset << 1;
+    dst_buf[uintOffset] = v.r;
+    dst_buf[uintOffset + 1u] = v.g;
+}
+)";
+constexpr std::string_view kLoadRGBA32Float = R"(
+    let v = textureLoadGeneral(src_tex, coord0, params.mipLevel);
+    // dstOffset is based on 16 bytes so we need to multiply by 4.
+    let uintOffset = dstOffset << 2;
+    dst_buf[uintOffset] = v.r;
+    dst_buf[uintOffset + 1u] = v.g;
+    dst_buf[uintOffset + 2u] = v.b;
+    dst_buf[uintOffset + 3u] = v.a;
 }
 )";
 
@@ -776,6 +827,16 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
             shader += kCommonEnd;
             textureSampleType = wgpu::TextureSampleType::Float;
             break;
+        case wgpu::TextureFormat::RG11B10Ufloat:
+            AppendFloatTextureHead();
+            shader += kDstBufferU32;
+            shader += kEncodeRG11B10UfloatInU32;
+            shader += kCommonHead;
+            shader += kCommonStart;
+            shader += kPackRGBAToU32;
+            shader += kCommonEnd;
+            textureSampleType = wgpu::TextureSampleType::Float;
+            break;
         case wgpu::TextureFormat::R16Float:
         case wgpu::TextureFormat::RG16Float:
             AppendFloatTextureHead();
@@ -817,6 +878,22 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
             shader += kCommonHead;
             shader += kCommonStart;
             shader += kLoadR32Float;
+            textureSampleType = wgpu::TextureSampleType::UnfilterableFloat;
+            break;
+        case wgpu::TextureFormat::RG32Float:
+            AppendFloatTextureHead();
+            shader += kDstBufferF32;
+            shader += kCommonHead;
+            shader += kCommonStart;
+            shader += kLoadRG32Float;
+            textureSampleType = wgpu::TextureSampleType::UnfilterableFloat;
+            break;
+        case wgpu::TextureFormat::RGBA32Float:
+            AppendFloatTextureHead();
+            shader += kDstBufferF32;
+            shader += kCommonHead;
+            shader += kCommonStart;
+            shader += kLoadRGBA32Float;
             textureSampleType = wgpu::TextureSampleType::UnfilterableFloat;
             break;
         case wgpu::TextureFormat::Stencil8:
@@ -908,13 +985,13 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
     const uint32_t bytesPerTexel = format.GetAspectInfo(src.aspect).block.byteSize;
     // Size of one unit for a thread to write to. For format < 4 bytes, we always write 4 bytes at a
     // time.
-    const uint32_t ouputUnitSize = std::max(bytesPerTexel, 4u);
+    const uint32_t outputUnitSize = std::max(bytesPerTexel, 4u);
     const uint32_t adjustedWorkGroupSizeY =
         (viewDimension == wgpu::TextureViewDimension::e1D) ? 1 : kWorkgroupSizeY;
     const std::array<ConstantEntry, 3> constants = {{
         {nullptr, "workgroupSizeX", kWorkgroupSizeX},
         {nullptr, "workgroupSizeY", static_cast<double>(adjustedWorkGroupSizeY)},
-        {nullptr, "gOutputUnitSize", static_cast<double>(ouputUnitSize)},
+        {nullptr, "gOutputUnitSize", static_cast<double>(outputUnitSize)},
     }};
     computePipelineDescriptor.compute.constantCount = constants.size();
     computePipelineDescriptor.compute.constants = constants.data();
@@ -940,10 +1017,13 @@ bool IsFormatSupportedByTextureToBufferBlit(wgpu::TextureFormat format) {
         case wgpu::TextureFormat::RGBA8Unorm:
         case wgpu::TextureFormat::BGRA8Unorm:
         case wgpu::TextureFormat::RGB9E5Ufloat:
+        case wgpu::TextureFormat::RG11B10Ufloat:
         case wgpu::TextureFormat::R16Float:
         case wgpu::TextureFormat::RG16Float:
         case wgpu::TextureFormat::RGBA16Float:
         case wgpu::TextureFormat::R32Float:
+        case wgpu::TextureFormat::RG32Float:
+        case wgpu::TextureFormat::RGBA32Float:
         case wgpu::TextureFormat::Depth16Unorm:
         case wgpu::TextureFormat::Depth32Float:
         case wgpu::TextureFormat::Stencil8:
@@ -962,7 +1042,7 @@ MaybeError BlitTextureToBuffer(DeviceBase* device,
                                const Extent3D& copyExtent) {
     wgpu::TextureViewDimension textureViewDimension;
     {
-        if (device->IsCompatibilityMode()) {
+        if (!device->HasFlexibleTextureViews()) {
             textureViewDimension = src.texture->GetCompatibilityTextureBindingViewDimension();
         } else {
             wgpu::TextureDimension dimension = src.texture->GetDimension();
@@ -1040,6 +1120,7 @@ MaybeError BlitTextureToBuffer(DeviceBase* device,
                 break;
             case 4:
             case 8:
+            case 16:
                 workgroupCountX = Align(copyExtent.width, kWorkgroupSizeX) / kWorkgroupSizeX;
                 break;
             default:

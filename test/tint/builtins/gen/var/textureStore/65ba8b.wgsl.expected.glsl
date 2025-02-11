@@ -1,16 +1,22 @@
+//
+// fragment_main
+//
 #version 460
 precision highp float;
 precision highp int;
 
-layout(binding = 0, r8) uniform highp image2D arg_0;
+layout(binding = 0, r8) uniform highp image2D f_arg_0;
 void textureStore_65ba8b() {
   ivec2 arg_1 = ivec2(1);
   vec4 arg_2 = vec4(1.0f);
-  imageStore(arg_0, arg_1, arg_2);
+  imageStore(f_arg_0, arg_1, arg_2);
 }
 void main() {
   textureStore_65ba8b();
 }
+//
+// compute_main
+//
 #version 460
 
 layout(binding = 0, r8) uniform highp image2D arg_0;

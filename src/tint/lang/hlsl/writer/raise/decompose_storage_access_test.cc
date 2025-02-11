@@ -2255,11 +2255,10 @@ $B1: {  # root
 %foo = @fragment func():void {
   $B2: {
     %3:ptr<function, u32, read_write> = var, 0u
-    %4:u32 = convert 0u
-    %5:void = %v.)" +
-                  std::string(param.interlock) + R"( %4, 123u, %3
-    %6:u32 = load %3
-    %x:u32 = let %6
+    %4:void = %v.)" +
+                  std::string(param.interlock) + R"( 0u, 123u, %3
+    %5:u32 = load %3
+    %x:u32 = let %5
     ret
   }
 }
@@ -2339,11 +2338,10 @@ $B1: {  # root
     %6:ptr<function, u32, read_write> = var, 0u
     %7:u32 = add 0u, %4
     %8:u32 = add %7, %5
-    %9:u32 = convert %8
-    %10:void = %v.)" +
-                  std::string(param.interlock) + R"( %9, 123u, %6
-    %11:u32 = load %6
-    %x:u32 = let %11
+    %9:void = %v.)" +
+                  std::string(param.interlock) + R"( %8, 123u, %6
+    %10:u32 = load %6
+    %x:u32 = let %10
     ret
   }
 }

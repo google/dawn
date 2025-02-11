@@ -39,11 +39,9 @@ load("@bazel_skylib//lib:selects.bzl", "selects")
 cc_library(
   name = "writer",
   srcs = [
-    "output.cc",
     "writer.cc",
   ],
   hdrs = [
-    "output.h",
     "writer.h",
   ],
   deps = [
@@ -102,6 +100,7 @@ cc_library(
     "switch_test.cc",
     "unary_test.cc",
     "var_let_test.cc",
+    "writer_test.cc",
   ],
   deps = [
     "//src/tint/api/common",

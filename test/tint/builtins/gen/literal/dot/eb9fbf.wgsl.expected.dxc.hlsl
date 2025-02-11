@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void dot_eb9fbf() {
   int res = 4;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   dot_eb9fbf();
   return;
 }
+//
+// compute_main
+//
+void dot_eb9fbf() {
+  int res = 4;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   dot_eb9fbf();
   return;
+}
+//
+// vertex_main
+//
+void dot_eb9fbf() {
+  int res = 4;
 }
 
 struct VertexOutput {

@@ -45,8 +45,6 @@ if (tint_build_unittests || tint_build_benchmarks) {
 if (tint_build_hlsl_writer) {
   libtint_source_set("writer") {
     sources = [
-      "output.cc",
-      "output.h",
       "writer.cc",
       "writer.h",
     ]
@@ -106,6 +104,7 @@ if (tint_build_unittests) {
         "switch_test.cc",
         "unary_test.cc",
         "var_let_test.cc",
+        "writer_test.cc",
       ]
       deps = [
         "${dawn_root}/src/utils:utils",

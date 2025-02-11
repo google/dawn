@@ -116,7 +116,7 @@ TEST_F(IR_BuilderTest, InsertAfter) {
 )");
 }
 
-TEST_F(IR_BuilderTest, InsertAfter_InstructionResult) {
+TEST_F(IR_BuilderTest, InsertInBlockAfter_InstructionResult) {
     auto* func = b.Function("foo", ty.void_());
     Instruction* ip = nullptr;
     b.Append(func->Block(), [&] {
@@ -124,7 +124,7 @@ TEST_F(IR_BuilderTest, InsertAfter_InstructionResult) {
         ip = b.Let("b", 2_u);
         b.Let("c", 3_u);
     });
-    b.InsertAfter(ip->Result(0), [&] {
+    b.InsertInBlockAfter(ip->Result(0), [&] {
         b.Let("d", 4_u);
         b.Let("e", 5_u);
         b.Let("f", 6_u);
@@ -143,7 +143,7 @@ TEST_F(IR_BuilderTest, InsertAfter_InstructionResult) {
 )");
 }
 
-TEST_F(IR_BuilderTest, InsertAfter_Param) {
+TEST_F(IR_BuilderTest, InsertInBlockAfter_Param) {
     auto* func = b.Function("foo", ty.void_());
     auto* param = b.FunctionParam("param", ty.u32());
     func->SetParams({param});
@@ -152,7 +152,7 @@ TEST_F(IR_BuilderTest, InsertAfter_Param) {
         b.Let("b", 2_u);
         b.Let("c", 3_u);
     });
-    b.InsertAfter(param, [&] {
+    b.InsertInBlockAfter(param, [&] {
         b.Let("d", 4_u);
         b.Let("e", 5_u);
         b.Let("f", 6_u);
@@ -171,11 +171,11 @@ TEST_F(IR_BuilderTest, InsertAfter_Param) {
 )");
 }
 
-TEST_F(IR_BuilderTest, InsertAfter_Param_EmptyFunction) {
+TEST_F(IR_BuilderTest, InsertInBlockAfter_Param_EmptyFunction) {
     auto* func = b.Function("foo", ty.void_());
     auto* param = b.FunctionParam("param", ty.u32());
     func->SetParams({param});
-    b.InsertAfter(param, [&] {
+    b.InsertInBlockAfter(param, [&] {
         b.Let("a", 1_u);
         b.Let("b", 2_u);
         b.Let("c", 3_u);
@@ -191,7 +191,7 @@ TEST_F(IR_BuilderTest, InsertAfter_Param_EmptyFunction) {
 )");
 }
 
-TEST_F(IR_BuilderTest, InsertAfter_BlockParam) {
+TEST_F(IR_BuilderTest, InsertInBlockAfter_BlockParam) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         auto* loop = b.Loop();
@@ -202,7 +202,7 @@ TEST_F(IR_BuilderTest, InsertAfter_BlockParam) {
             b.Let("b", 2_u);
             b.Let("c", 3_u);
         });
-        b.InsertAfter(param, [&] {
+        b.InsertInBlockAfter(param, [&] {
             b.Let("d", 4_u);
             b.Let("e", 5_u);
             b.Let("f", 6_u);
@@ -226,13 +226,13 @@ TEST_F(IR_BuilderTest, InsertAfter_BlockParam) {
 )");
 }
 
-TEST_F(IR_BuilderTest, InsertAfter_BlockParam_EmptyBlock) {
+TEST_F(IR_BuilderTest, InsertInBlockAfter_BlockParam_EmptyBlock) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         auto* loop = b.Loop();
         auto* param = b.BlockParam("param", ty.u32());
         loop->Body()->SetParams({param});
-        b.InsertAfter(param, [&] {
+        b.InsertInBlockAfter(param, [&] {
             b.Let("a", 1_u);
             b.Let("b", 2_u);
             b.Let("c", 3_u);

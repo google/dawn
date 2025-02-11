@@ -40,6 +40,7 @@
 #include "src/tint/lang/core/constant/eval.h"
 #include "src/tint/lang/core/constant/value.h"
 #include "src/tint/lang/core/intrinsic/table.h"
+#include "src/tint/lang/core/subgroup_matrix_kind.h"
 #include "src/tint/lang/core/type/input_attachment.h"
 #include "src/tint/lang/wgsl/common/allowed_features.h"
 #include "src/tint/lang/wgsl/intrinsic/dialect.h"
@@ -227,8 +228,9 @@ class Resolver {
     /// @returns an input attachment resolved from the templated identifier @p ident
     core::type::InputAttachment* InputAttachment(const ast::Identifier* ident);
 
-    /// @returns a packed vec3 resolved from the templated identifier @p ident.
-    core::type::Vector* PackedVec3T(const ast::Identifier* ident);
+    /// @returns a subgroup matrix resolved from the templated identifier @p ident
+    core::type::SubgroupMatrix* SubgroupMatrix(const ast::Identifier* ident,
+                                               core::SubgroupMatrixKind kind);
 
     /// @returns @p ident cast to an ast::TemplatedIdentifier, if the identifier is templated and
     /// the number of templated arguments are between @p min_args and @p max_args.
@@ -657,6 +659,11 @@ class Resolver {
     using StructConstructorSig = tint::UnorderedKeyWrapper<
         std::tuple<const core::type::Struct*, size_t, core::EvaluationStage>>;
 
+    // SubgroupMatrixConstructorSig represents a unique subgroup matrix constructor signature.
+    // It is a tuple of the subgroup matrix type and the number of arguments provided.
+    using SubgroupMatrixConstructorSig =
+        tint::UnorderedKeyWrapper<std::tuple<const core::type::SubgroupMatrix*, size_t>>;
+
     /// ExprEvalStageConstraint describes a constraint on when expressions can be evaluated.
     struct ExprEvalStageConstraint {
         /// The latest stage that the expression can be evaluated
@@ -696,6 +703,7 @@ class Resolver {
     Hashmap<OverrideId, const sem::Variable*, 8> override_ids_;
     Hashmap<ArrayConstructorSig, sem::CallTarget*, 8> array_ctors_;
     Hashmap<StructConstructorSig, sem::CallTarget*, 8> struct_ctors_;
+    Hashmap<SubgroupMatrixConstructorSig, sem::CallTarget*, 8> subgroup_matrix_ctors_;
     sem::Function* current_function_ = nullptr;
     sem::Statement* current_statement_ = nullptr;
     sem::CompoundStatement* current_compound_statement_ = nullptr;

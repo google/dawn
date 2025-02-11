@@ -102,7 +102,7 @@ ResultOrError<UnpackedPtr<PipelineLayoutDescriptor>> ValidatePipelineLayoutDescr
             descriptor->bindGroupLayouts[i]->GetInternalBindGroupLayout()->GetBindingCountInfo());
     }
 
-    DAWN_TRY(ValidateBindingCounts(device->GetLimits(), bindingCounts));
+    DAWN_TRY(ValidateBindingCounts(device->GetLimits(), bindingCounts, device->GetAdapter()));
 
     // Validate immediateDataRangeByteSize.
     if (descriptor->immediateDataRangeByteSize) {
@@ -145,7 +145,9 @@ PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device,
     auto bgls = ityp::SpanFromUntyped<BindGroupIndex>(descriptor->bindGroupLayouts,
                                                       descriptor->bindGroupLayoutCount);
     for (auto [group, bgl] : Enumerate(bgls)) {
-        if (bgl == nullptr) {
+        // According to WebGPU SPEC of CreatePipelineLayout(), if bindGroupLayouts[i] is not null
+        // and bindGroupLayouts[i].[[descriptor]].entries is empty, set bindGroupLayouts[i] to null.
+        if (bgl == nullptr || bgl->IsEmpty()) {
             continue;
         }
         mBindGroupLayouts[group] = bgl;
@@ -162,6 +164,23 @@ PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device,
             mStorageAttachmentSlots[slot] = pls->storageAttachments[i].format;
         }
     }
+
+    BindingCounts bindingCounts = {};
+    for (uint32_t i = 0; i < descriptor->bindGroupLayoutCount; ++i) {
+        if (descriptor->bindGroupLayouts[i]) {
+            AccumulateBindingCounts(&bindingCounts, descriptor->bindGroupLayouts[i]
+                                                        ->GetInternalBindGroupLayout()
+                                                        ->GetBindingCountInfo());
+        }
+    }
+    mNumStorageBufferBindingsInVertexStage =
+        bindingCounts.perStage[SingleShaderStage::Vertex].storageBufferCount;
+    mNumStorageTextureBindingsInVertexStage =
+        bindingCounts.perStage[SingleShaderStage::Vertex].storageTextureCount;
+    mNumStorageBufferBindingsInFragmentStage =
+        bindingCounts.perStage[SingleShaderStage::Fragment].storageBufferCount;
+    mNumStorageTextureBindingsInFragmentStage =
+        bindingCounts.perStage[SingleShaderStage::Fragment].storageTextureCount;
 }
 
 PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device,
@@ -202,17 +221,17 @@ ResultOrError<Ref<PipelineLayoutBase>> PipelineLayoutBase::CreateDefault(
             modifiedEntry->buffer.type == mergedEntry.buffer.type &&
             modifiedEntry->sampler.type == mergedEntry.sampler.type &&
             // Compatibility between these sample types is checked below.
-            (modifiedEntry->texture.sampleType != wgpu::TextureSampleType::Undefined) ==
-                (mergedEntry.texture.sampleType != wgpu::TextureSampleType::Undefined) &&
+            (modifiedEntry->texture.sampleType != wgpu::TextureSampleType::BindingNotUsed) ==
+                (mergedEntry.texture.sampleType != wgpu::TextureSampleType::BindingNotUsed) &&
             modifiedEntry->storageTexture.access == mergedEntry.storageTexture.access;
 
         // Minimum buffer binding size excluded because we take the maximum seen across stages.
-        if (modifiedEntry->buffer.type != wgpu::BufferBindingType::Undefined) {
+        if (modifiedEntry->buffer.type != wgpu::BufferBindingType::BindingNotUsed) {
             compatible = compatible && modifiedEntry->buffer.hasDynamicOffset ==
                                            mergedEntry.buffer.hasDynamicOffset;
         }
 
-        if (modifiedEntry->texture.sampleType != wgpu::TextureSampleType::Undefined) {
+        if (modifiedEntry->texture.sampleType != wgpu::TextureSampleType::BindingNotUsed) {
             // Sample types are compatible if they are exactly equal,
             // or if the |modifiedEntry| is Float and the |mergedEntry| is UnfilterableFloat.
             // Note that the |mergedEntry| never has type Float. Texture bindings all start
@@ -229,7 +248,7 @@ ResultOrError<Ref<PipelineLayoutBase>> PipelineLayoutBase::CreateDefault(
                 modifiedEntry->texture.multisampled == mergedEntry.texture.multisampled;
         }
 
-        if (modifiedEntry->storageTexture.access != wgpu::StorageTextureAccess::Undefined) {
+        if (modifiedEntry->storageTexture.access != wgpu::StorageTextureAccess::BindingNotUsed) {
             compatible =
                 compatible &&
                 modifiedEntry->storageTexture.format == mergedEntry.storageTexture.format &&
@@ -430,20 +449,24 @@ ObjectType PipelineLayoutBase::GetType() const {
 const BindGroupLayoutBase* PipelineLayoutBase::GetFrontendBindGroupLayout(
     BindGroupIndex group) const {
     DAWN_ASSERT(!IsError());
-    DAWN_ASSERT(group < kMaxBindGroupsTyped);
-    DAWN_ASSERT(mMask[group]);
-    const BindGroupLayoutBase* bgl = mBindGroupLayouts[group].Get();
-    DAWN_ASSERT(bgl != nullptr);
-    return bgl;
+    if (mMask[group]) {
+        const BindGroupLayoutBase* bgl = mBindGroupLayouts[group].Get();
+        DAWN_ASSERT(bgl != nullptr);
+        return bgl;
+    } else {
+        return GetDevice()->GetEmptyBindGroupLayout();
+    }
 }
 
 BindGroupLayoutBase* PipelineLayoutBase::GetFrontendBindGroupLayout(BindGroupIndex group) {
     DAWN_ASSERT(!IsError());
-    DAWN_ASSERT(group < kMaxBindGroupsTyped);
-    DAWN_ASSERT(mMask[group]);
-    BindGroupLayoutBase* bgl = mBindGroupLayouts[group].Get();
-    DAWN_ASSERT(bgl != nullptr);
-    return bgl;
+    if (mMask[group]) {
+        BindGroupLayoutBase* bgl = mBindGroupLayouts[group].Get();
+        DAWN_ASSERT(bgl != nullptr);
+        return bgl;
+    } else {
+        return GetDevice()->GetEmptyBindGroupLayout();
+    }
 }
 
 const BindGroupLayoutInternalBase* PipelineLayoutBase::GetBindGroupLayout(
@@ -544,6 +567,22 @@ bool PipelineLayoutBase::EqualityFunc::operator()(const PipelineLayoutBase* a,
 
 uint32_t PipelineLayoutBase::GetImmediateDataRangeByteSize() const {
     return mImmediateDataRangeByteSize;
+}
+
+uint32_t PipelineLayoutBase::GetNumStorageBufferBindingsInVertexStage() const {
+    return mNumStorageBufferBindingsInVertexStage;
+}
+
+uint32_t PipelineLayoutBase::GetNumStorageTextureBindingsInVertexStage() const {
+    return mNumStorageTextureBindingsInVertexStage;
+}
+
+uint32_t PipelineLayoutBase::GetNumStorageBufferBindingsInFragmentStage() const {
+    return mNumStorageBufferBindingsInFragmentStage;
+}
+
+uint32_t PipelineLayoutBase::GetNumStorageTextureBindingsInFragmentStage() const {
+    return mNumStorageTextureBindingsInFragmentStage;
 }
 
 }  // namespace dawn::native

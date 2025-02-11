@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 uint3 tint_first_leading_bit(uint3 v) {
   uint3 x = v;
   uint3 b16 = (bool3((x & (4294901760u).xxx)) ? (16u).xxx : (0u).xxx);
@@ -25,11 +28,59 @@ void fragment_main() {
   prevent_dce.Store3(0u, asuint(firstLeadingBit_3fd7d0()));
   return;
 }
+//
+// compute_main
+//
+uint3 tint_first_leading_bit(uint3 v) {
+  uint3 x = v;
+  uint3 b16 = (bool3((x & (4294901760u).xxx)) ? (16u).xxx : (0u).xxx);
+  x = (x >> b16);
+  uint3 b8 = (bool3((x & (65280u).xxx)) ? (8u).xxx : (0u).xxx);
+  x = (x >> b8);
+  uint3 b4 = (bool3((x & (240u).xxx)) ? (4u).xxx : (0u).xxx);
+  x = (x >> b4);
+  uint3 b2 = (bool3((x & (12u).xxx)) ? (2u).xxx : (0u).xxx);
+  x = (x >> b2);
+  uint3 b1 = (bool3((x & (2u).xxx)) ? (1u).xxx : (0u).xxx);
+  uint3 is_zero = ((x == (0u).xxx) ? (4294967295u).xxx : (0u).xxx);
+  return uint3((((((b16 | b8) | b4) | b2) | b1) | is_zero));
+}
+
+RWByteAddressBuffer prevent_dce : register(u0);
+
+uint3 firstLeadingBit_3fd7d0() {
+  uint3 arg_0 = (1u).xxx;
+  uint3 res = tint_first_leading_bit(arg_0);
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store3(0u, asuint(firstLeadingBit_3fd7d0()));
   return;
+}
+//
+// vertex_main
+//
+uint3 tint_first_leading_bit(uint3 v) {
+  uint3 x = v;
+  uint3 b16 = (bool3((x & (4294901760u).xxx)) ? (16u).xxx : (0u).xxx);
+  x = (x >> b16);
+  uint3 b8 = (bool3((x & (65280u).xxx)) ? (8u).xxx : (0u).xxx);
+  x = (x >> b8);
+  uint3 b4 = (bool3((x & (240u).xxx)) ? (4u).xxx : (0u).xxx);
+  x = (x >> b4);
+  uint3 b2 = (bool3((x & (12u).xxx)) ? (2u).xxx : (0u).xxx);
+  x = (x >> b2);
+  uint3 b1 = (bool3((x & (2u).xxx)) ? (1u).xxx : (0u).xxx);
+  uint3 is_zero = ((x == (0u).xxx) ? (4294967295u).xxx : (0u).xxx);
+  return uint3((((((b16 | b8) | b4) | b2) | b1) | is_zero));
+}
+
+uint3 firstLeadingBit_3fd7d0() {
+  uint3 arg_0 = (1u).xxx;
+  uint3 res = tint_first_leading_bit(arg_0);
+  return res;
 }
 
 struct VertexOutput {

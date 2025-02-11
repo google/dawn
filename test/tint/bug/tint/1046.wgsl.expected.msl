@@ -1,25 +1,28 @@
 #include <metal_stdlib>
-
 using namespace metal;
+
+struct FragmentOutput {
+  float4 color;
+};
+
+struct FragmentInput {
+  float4 position;
+  float4 view_position;
+  float4 normal;
+  float2 uv;
+  float4 color;
+};
 
 template<typename T, size_t N>
 struct tint_array {
-    const constant T& operator[](size_t i) const constant { return elements[i]; }
-    device T& operator[](size_t i) device { return elements[i]; }
-    const device T& operator[](size_t i) const device { return elements[i]; }
-    thread T& operator[](size_t i) thread { return elements[i]; }
-    const thread T& operator[](size_t i) const thread { return elements[i]; }
-    threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-    const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-    T elements[N];
-};
-
-struct PointLight {
-  float4 position;
-};
-
-struct PointLights {
-  tint_array<PointLight, 1> values;
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
 };
 
 struct Uniforms {
@@ -31,61 +34,41 @@ struct Uniforms {
   /* 0x0090 */ float4 color;
 };
 
-struct FragmentInput {
+struct PointLight {
   float4 position;
-  float4 view_position;
-  float4 normal;
-  float2 uv;
-  float4 color;
 };
 
-struct FragmentOutput {
-  float4 color;
+struct PointLights {
+  tint_array<PointLight, 1> values;
 };
 
-float4 getColor(FragmentInput tint_symbol, const constant Uniforms* const tint_symbol_6, texture2d<float, access::sample> tint_symbol_7, sampler tint_symbol_8) {
-  float4 color = 0.0f;
-  if (((*(tint_symbol_6)).color_source == 0u)) {
-    color = tint_symbol.color;
-  } else {
-    if (((*(tint_symbol_6)).color_source == 1u)) {
-      color = tint_symbol.normal;
-      color[3] = 1.0f;
-    } else {
-      if (((*(tint_symbol_6)).color_source == 2u)) {
-        color = (*(tint_symbol_6)).color;
-      } else {
-        if (((*(tint_symbol_6)).color_source == 3u)) {
-          color = tint_symbol_7.sample(tint_symbol_8, tint_symbol.uv);
-        }
-      }
-    }
-  }
-  return color;
-}
-
-struct tint_symbol_3 {
-  float4 view_position [[user(locn0)]];
-  float4 normal [[user(locn1)]];
-  float2 uv [[user(locn2)]];
-  float4 color [[user(locn3)]];
+struct tint_module_vars_struct {
+  const constant Uniforms* uniforms;
+  const device PointLights* pointLights;
+  sampler mySampler;
+  texture2d<float, access::sample> myTexture;
 };
 
-struct tint_symbol_4 {
-  float4 color [[color(0)]];
+struct main_outputs {
+  float4 FragmentOutput_color [[color(0)]];
 };
 
-FragmentOutput tint_symbol_1_inner(FragmentInput tint_symbol) {
+struct main_inputs {
+  float4 FragmentInput_view_position [[user(locn0)]];
+  float4 FragmentInput_normal [[user(locn1)]];
+  float2 FragmentInput_uv [[user(locn2)]];
+  float4 FragmentInput_color [[user(locn3)]];
+};
+
+FragmentOutput main_inner(FragmentInput v, tint_module_vars_struct tint_module_vars) {
   FragmentOutput output = {};
   output.color = float4(1.0f, 0.0f, 0.0f, 1.0f);
   return output;
 }
 
-fragment tint_symbol_4 tint_symbol_1(float4 position [[position]], tint_symbol_3 tint_symbol_2 [[stage_in]]) {
-  FragmentInput const tint_symbol_5 = FragmentInput{.position=position, .view_position=tint_symbol_2.view_position, .normal=tint_symbol_2.normal, .uv=tint_symbol_2.uv, .color=tint_symbol_2.color};
-  FragmentOutput const inner_result = tint_symbol_1_inner(tint_symbol_5);
-  tint_symbol_4 wrapper_result = {};
-  wrapper_result.color = inner_result.color;
-  return wrapper_result;
+fragment main_outputs v_1(float4 FragmentInput_position [[position]], main_inputs inputs [[stage_in]], const constant Uniforms* uniforms [[buffer(0)]], sampler mySampler [[sampler(0)]], texture2d<float, access::sample> myTexture [[texture(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.uniforms=uniforms, .mySampler=mySampler, .myTexture=myTexture};
+  main_outputs tint_wrapper_result = {};
+  tint_wrapper_result.FragmentOutput_color = main_inner(FragmentInput{.position=FragmentInput_position, .view_position=inputs.FragmentInput_view_position, .normal=inputs.FragmentInput_normal, .uv=inputs.FragmentInput_uv, .color=inputs.FragmentInput_color}, tint_module_vars).color;
+  return tint_wrapper_result;
 }
-

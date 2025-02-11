@@ -130,13 +130,10 @@ MaybeError EncodeMetalRenderPass(Device* device,
                                  EncodeInsideRenderPass encodeInside,
                                  BeginRenderPassCmd* renderPassCmd = nullptr);
 
-MTLStorageMode IOSurfaceStorageMode();
-
 id<MTLTexture> CreateTextureMtlForPlane(MTLTextureUsage mtlUsage,
                                         const Format& format,
                                         size_t plane,
                                         Device* device,
-                                        uint32_t sampleCount,
                                         IOSurfaceRef ioSurface);
 
 MaybeError EncodeEmptyMetalRenderPass(Device* device,
@@ -144,10 +141,8 @@ MaybeError EncodeEmptyMetalRenderPass(Device* device,
                                       MTLRenderPassDescriptor* mtlRenderPass,
                                       Extent3D size);
 
-bool SupportCounterSamplingAtCommandBoundary(id<MTLDevice> device)
-    API_AVAILABLE(macos(11.0), ios(14.0));
-bool SupportCounterSamplingAtStageBoundary(id<MTLDevice> device)
-    API_AVAILABLE(macos(11.0), ios(14.0));
+bool SupportCounterSamplingAtCommandBoundary(id<MTLDevice> device);
+bool SupportCounterSamplingAtStageBoundary(id<MTLDevice> device);
 
 }  // namespace dawn::native::metal
 

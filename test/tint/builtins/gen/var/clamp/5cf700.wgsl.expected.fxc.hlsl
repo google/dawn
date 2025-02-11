@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void clamp_5cf700() {
   float3 res = (1.0f).xxx;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   clamp_5cf700();
   return;
 }
+//
+// compute_main
+//
+void clamp_5cf700() {
+  float3 res = (1.0f).xxx;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   clamp_5cf700();
   return;
+}
+//
+// vertex_main
+//
+void clamp_5cf700() {
+  float3 res = (1.0f).xxx;
 }
 
 struct VertexOutput {

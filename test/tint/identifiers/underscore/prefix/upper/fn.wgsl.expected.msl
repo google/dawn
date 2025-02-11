@@ -1,6 +1,6 @@
 #include <metal_stdlib>
-
 using namespace metal;
+
 void A() {
 }
 
@@ -15,9 +15,7 @@ void _B() {
   _A();
 }
 
-kernel void tint_symbol() {
+kernel void v() {
   B();
   _B();
-  return;
 }
-

@@ -113,54 +113,27 @@ int DawnWireServerFuzzer::Run(const uint8_t* data,
     DawnProcTable procs = dawn::native::GetProcs();
 
     // Override requestAdapter to find an adapter that the fuzzer supports.
-    // TODO: crbug.com/42241461 - Remove overrides once older entry points are deprecated.
-    static constexpr auto RequestAdapter = [](WGPUInstance cInstance,
-                                              WGPURequestAdapterCallback2 callback, void* userdata1,
-                                              void* userdata2) -> WGPUFuture {
+    procs.instanceRequestAdapter = [](WGPUInstance cInstance, const WGPURequestAdapterOptions*,
+                                      WGPURequestAdapterCallbackInfo callbackInfo) -> WGPUFuture {
         std::vector<dawn::native::Adapter> adapters =
             dawn::native::Instance(reinterpret_cast<dawn::native::InstanceBase*>(cInstance))
                 .EnumerateAdapters();
         // TODO(347047627): Use a webgpu.h version of enumerateAdapters
         for (dawn::native::Adapter nativeAdapter : adapters) {
             WGPUAdapter cAdapter = nativeAdapter.Get();
-            wgpu::Adapter adapter = wgpu::Adapter::Acquire(cAdapter);
+            wgpu::Adapter adapter = cAdapter;
             if (sAdapterSupported(adapter)) {
                 dawn::native::GetProcs().adapterAddRef(cAdapter);
-                callback(WGPURequestAdapterStatus_Success, cAdapter, dawn::kEmptyOutputStringView,
-                         userdata1, userdata2);
+                callbackInfo.callback(WGPURequestAdapterStatus_Success, cAdapter,
+                                      dawn::kEmptyOutputStringView, callbackInfo.userdata1,
+                                      callbackInfo.userdata2);
                 return {};
             }
         }
-        callback(WGPURequestAdapterStatus_Unavailable, nullptr,
-                 dawn::ToOutputStringView("No supported adapter."), userdata1, userdata2);
+        callbackInfo.callback(WGPURequestAdapterStatus_Unavailable, nullptr,
+                              dawn::ToOutputStringView("No supported adapter."),
+                              callbackInfo.userdata1, callbackInfo.userdata2);
         return {};
-    };
-    procs.instanceRequestAdapter = [](WGPUInstance cInstance, const WGPURequestAdapterOptions*,
-                                      WGPURequestAdapterCallback callback, void* userdata) {
-        RequestAdapter(
-            cInstance,
-            [](WGPURequestAdapterStatus status, WGPUAdapter adapter, WGPUStringView message,
-               void* callback, void* userdata) {
-                auto cb = reinterpret_cast<WGPURequestAdapterCallback>(callback);
-                cb(status, adapter, message, userdata);
-            },
-            reinterpret_cast<void*>(callback), userdata);
-    };
-    procs.instanceRequestAdapterF = [](WGPUInstance cInstance, const WGPURequestAdapterOptions*,
-                                       WGPURequestAdapterCallbackInfo callbackInfo) -> WGPUFuture {
-        return RequestAdapter(
-            cInstance,
-            [](WGPURequestAdapterStatus status, WGPUAdapter adapter, WGPUStringView message,
-               void* callback, void* userdata) {
-                auto cb = reinterpret_cast<WGPURequestAdapterCallback>(callback);
-                cb(status, adapter, message, userdata);
-            },
-            reinterpret_cast<void*>(callbackInfo.callback), callbackInfo.userdata);
-    };
-    procs.instanceRequestAdapter2 = [](WGPUInstance cInstance, const WGPURequestAdapterOptions*,
-                                       WGPURequestAdapterCallbackInfo2 callbackInfo) -> WGPUFuture {
-        return RequestAdapter(cInstance, callbackInfo.callback, callbackInfo.userdata1,
-                              callbackInfo.userdata2);
     };
 
     dawnProcSetProcs(&procs);

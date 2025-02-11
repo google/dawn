@@ -41,6 +41,7 @@
 #include "src/tint/lang/core/ir/transform/multiplanar_external_texture.h"
 #include "src/tint/lang/core/ir/transform/prepare_push_constants.h"
 #include "src/tint/lang/core/ir/transform/preserve_padding.h"
+#include "src/tint/lang/core/ir/transform/prevent_infinite_loops.h"
 #include "src/tint/lang/core/ir/transform/remove_continue_in_switch.h"
 #include "src/tint/lang/core/ir/transform/remove_terminator_args.h"
 #include "src/tint/lang/core/ir/transform/rename_conflicts.h"
@@ -75,6 +76,8 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     if (!options.disable_robustness) {
         core::ir::transform::RobustnessConfig config{};
         RUN_TRANSFORM(core::ir::transform::Robustness, module, config);
+
+        RUN_TRANSFORM(core::ir::transform::PreventInfiniteLoops, module);
     }
 
     // PreparePushConstants must come before any transform that needs internal push constants.
@@ -176,7 +179,6 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     {
         // Must come after DirectVariableAccess
         raise::TexturePolyfillConfig tex_config;
-        tex_config.sampler_texture_to_name = options.bindings.sampler_texture_to_name;
         tex_config.placeholder_sampler_bind_point = options.bindings.placeholder_sampler_bind_point;
         tex_config.texture_builtins_from_uniform = options.bindings.texture_builtins_from_uniform;
         RUN_TRANSFORM(raise::TexturePolyfill, module, tex_config);

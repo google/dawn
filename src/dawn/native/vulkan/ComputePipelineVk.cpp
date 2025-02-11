@@ -32,6 +32,7 @@
 #include <vector>
 
 #include "dawn/native/CreatePipelineAsyncEvent.h"
+#include "dawn/native/ImmediateConstantsLayout.h"
 #include "dawn/native/vulkan/DeviceVk.h"
 #include "dawn/native/vulkan/FencedDeleter.h"
 #include "dawn/native/vulkan/PipelineCacheVk.h"
@@ -80,11 +81,10 @@ MaybeError ComputePipeline::InitializeImpl() {
     ShaderModule::ModuleAndSpirv moduleAndSpirv;
     DAWN_TRY_ASSIGN(moduleAndSpirv,
                     module->GetHandleAndSpirv(SingleShaderStage::Compute, computeStage, layout,
-                                              /*clampFragDepth*/ false,
-                                              /*emitPointSize*/ false));
+                                              /*emitPointSize*/ false, GetImmediateMask()));
 
     createInfo.stage.module = moduleAndSpirv.module;
-    createInfo.stage.pName = moduleAndSpirv.remappedEntryPoint.c_str();
+    createInfo.stage.pName = kRemappedEntryPointName;
     createInfo.stage.pSpecializationInfo = nullptr;
 
     VkPipelineShaderStageRequiredSubgroupSizeCreateInfoEXT subgroupSizeInfo = {};

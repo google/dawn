@@ -113,6 +113,8 @@ ResultOrError<D3D12DeviceInfo> GatherDeviceInfo(const PhysicalDevice& physicalDe
             D3D12_FEATURE_D3D12_OPTIONS13, &featureOptions13, sizeof(featureOptions13)))) {
         info.supportsTextureCopyBetweenDimensions =
             featureOptions13.TextureCopyBetweenDimensionsSupported;
+        info.supportsUnrestrictedBufferTextureCopyPitch =
+            featureOptions13.UnrestrictedBufferTextureCopyPitchSupported;
     }
 
     info.supportsRootSignatureVersion1_1 = false;

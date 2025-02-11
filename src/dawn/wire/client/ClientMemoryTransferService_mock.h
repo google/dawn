@@ -40,72 +40,29 @@ class MockMemoryTransferService : public MemoryTransferService {
   public:
     class MockReadHandle : public ReadHandle {
       public:
-        explicit MockReadHandle(MockMemoryTransferService* service);
         ~MockReadHandle() override;
+        MOCK_METHOD(void, Destroy, ());
 
-        size_t SerializeCreateSize() override;
-        void SerializeCreate(void* serializePointer) override;
-        const void* GetData() override;
-        bool DeserializeDataUpdate(const void* deserializePointer,
-                                   size_t deserializeSize,
-                                   size_t offset,
-                                   size_t size) override;
-
-      private:
-        raw_ptr<MockMemoryTransferService> mService;
+        MOCK_METHOD(size_t, SerializeCreateSize, (), (override));
+        MOCK_METHOD(void, SerializeCreate, (void*), (override));
+        MOCK_METHOD(const void*, GetData, (), (override));
+        MOCK_METHOD(bool, DeserializeDataUpdate, (const void*, size_t, size_t, size_t), (override));
     };
 
     class MockWriteHandle : public WriteHandle {
       public:
-        explicit MockWriteHandle(MockMemoryTransferService* service);
         ~MockWriteHandle() override;
+        MOCK_METHOD(void, Destroy, ());
 
-        size_t SerializeCreateSize() override;
-        void SerializeCreate(void* serializePointer) override;
-        void* GetData() override;
-        size_t SizeOfSerializeDataUpdate(size_t offset, size_t size) override;
-        void SerializeDataUpdate(void* serializePointer, size_t offset, size_t size) override;
-
-      private:
-        raw_ptr<MockMemoryTransferService> mService;
+        MOCK_METHOD(size_t, SerializeCreateSize, (), (override));
+        MOCK_METHOD(void, SerializeCreate, (void*), (override));
+        MOCK_METHOD(void*, GetData, (), (override));
+        MOCK_METHOD(size_t, SizeOfSerializeDataUpdate, (size_t, size_t), (override));
+        MOCK_METHOD(void, SerializeDataUpdate, (void*, size_t, size_t), (override));
     };
 
-    MockMemoryTransferService();
-    ~MockMemoryTransferService() override;
-
-    ReadHandle* CreateReadHandle(size_t) override;
-    WriteHandle* CreateWriteHandle(size_t) override;
-
-    MockReadHandle* NewReadHandle();
-    MockWriteHandle* NewWriteHandle();
-
-    MOCK_METHOD(ReadHandle*, OnCreateReadHandle, (size_t));
-    MOCK_METHOD(WriteHandle*, OnCreateWriteHandle, (size_t));
-
-    MOCK_METHOD(size_t, OnReadHandleSerializeCreateSize, (const ReadHandle*));
-    MOCK_METHOD(void, OnReadHandleSerializeCreate, (const ReadHandle*, void* serializePointer));
-    MOCK_METHOD((const void*), OnReadHandleGetData, (const ReadHandle*));
-    MOCK_METHOD(bool,
-                OnReadHandleDeserializeDataUpdate,
-                (const ReadHandle*,
-                 const uint32_t* deserializePointer,
-                 size_t deserializeSize,
-                 size_t offset,
-                 size_t size));
-    MOCK_METHOD(void, OnReadHandleDestroy, (const ReadHandle*));
-
-    MOCK_METHOD(size_t, OnWriteHandleSerializeCreateSize, (const void* WriteHandle));
-    MOCK_METHOD(void,
-                OnWriteHandleSerializeCreate,
-                (const void* WriteHandle, void* serializePointer));
-    MOCK_METHOD((void*), OnWriteHandleGetData, (const void* WriteHandle));
-    MOCK_METHOD(size_t,
-                OnWriteHandleSizeOfSerializeDataUpdate,
-                (const void* WriteHandle, size_t offset, size_t size));
-    MOCK_METHOD(size_t,
-                OnWriteHandleSerializeDataUpdate,
-                (const void* WriteHandle, void* serializePointer, size_t offset, size_t size));
-    MOCK_METHOD(void, OnWriteHandleDestroy, (const void* WriteHandle));
+    MOCK_METHOD(ReadHandle*, CreateReadHandle, (size_t), (override));
+    MOCK_METHOD(WriteHandle*, CreateWriteHandle, (size_t), (override));
 };
 
 }  // namespace dawn::wire::client

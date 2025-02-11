@@ -48,8 +48,6 @@ if(TINT_BUILD_HLSL_WRITER)
 # Condition: TINT_BUILD_HLSL_WRITER
 ################################################################################
 tint_add_target(tint_lang_hlsl_writer lib
-  lang/hlsl/writer/output.cc
-  lang/hlsl/writer/output.h
   lang/hlsl/writer/writer.cc
   lang/hlsl/writer/writer.h
 )
@@ -116,6 +114,7 @@ tint_add_target(tint_lang_hlsl_writer_test test
   lang/hlsl/writer/switch_test.cc
   lang/hlsl/writer/unary_test.cc
   lang/hlsl/writer/var_let_test.cc
+  lang/hlsl/writer/writer_test.cc
 )
 
 tint_target_add_dependencies(tint_lang_hlsl_writer_test test

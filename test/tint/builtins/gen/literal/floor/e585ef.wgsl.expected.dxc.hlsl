@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void floor_e585ef() {
   float2 res = (1.0f).xx;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   floor_e585ef();
   return;
 }
+//
+// compute_main
+//
+void floor_e585ef() {
+  float2 res = (1.0f).xx;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   floor_e585ef();
   return;
+}
+//
+// vertex_main
+//
+void floor_e585ef() {
+  float2 res = (1.0f).xx;
 }
 
 struct VertexOutput {

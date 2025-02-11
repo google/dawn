@@ -12,11 +12,11 @@ in Chromium-specific integration with Dawn.
 `dawn::native::Instance::EnumerateAdapters` is a Dawn native-only API that may be used to synchronously
 get a list of adapters according to the RequestAdapterOptions. The members are treated as follows:
  - `RequestAdapterOptions::compatibleSurface` is ignored.
+ - `RequestAdapterOptions::featureLevel` all returned adapters must support the features and limits in the requested feature level. Devices created from the adapter will default to the capabilities of this feature level.
  - `RequestAdapterOptions::powerPreference` adapters are sorted according to powerPreference such that
    preferred adapters are at the front of the list. It is a preference - so if
   wgpu::PowerPreference::LowPower is passed, the list may contain only integrated GPUs, fallback adapters, or a mix of everything. Implementations *should* try to avoid returning any discrete GPUs when low power is requested if at least one integrated GPU is available.
  - `RequestAdapterOptions::backendType` filters adapters such that only those on a particular backend are discovered. If `WGPURequestAdapterType_Undefined` is passed, all backends may be discovered.
- - `RequestAdapterOptions::compatibilityMode` all returned adapters must match the requested compatibility mode.
  - `RequestAdapterOptions::forceFallbackAdapter` all returned adapters must be fallback adapters.
 
 If no options are passed to EnumerateAdapters, then it is as if the default `RequestAdapterOptions` are passed.

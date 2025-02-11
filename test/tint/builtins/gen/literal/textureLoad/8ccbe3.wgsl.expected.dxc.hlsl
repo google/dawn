@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 RWByteAddressBuffer prevent_dce : register(u0);
 Texture2D arg_0 : register(t0, space1);
 
@@ -10,11 +13,30 @@ void fragment_main() {
   prevent_dce.Store(0u, asuint(textureLoad_8ccbe3()));
   return;
 }
+//
+// compute_main
+//
+RWByteAddressBuffer prevent_dce : register(u0);
+Texture2D arg_0 : register(t0, space1);
+
+float textureLoad_8ccbe3() {
+  float res = arg_0.Load(int3((1).xx, int(1u))).x;
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store(0u, asuint(textureLoad_8ccbe3()));
   return;
+}
+//
+// vertex_main
+//
+Texture2D arg_0 : register(t0, space1);
+
+float textureLoad_8ccbe3() {
+  float res = arg_0.Load(int3((1).xx, int(1u))).x;
+  return res;
 }
 
 struct VertexOutput {

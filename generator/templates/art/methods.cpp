@@ -40,14 +40,11 @@
 
 namespace dawn::kotlin_api {
 
-struct UserData {
-    JNIEnv *env;
-    jobject callback;
-};
-
 jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
     if (!address) {
-        return nullptr;
+      //* TODO(b/344805524): custom exception for Dawn.
+      env->ThrowNew(env->FindClass("java/lang/Error"), "Invalid byte buffer.");
+      return nullptr;
     }
     jclass byteBufferClass = env->FindClass("java/nio/ByteBuffer");
 

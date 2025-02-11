@@ -1,21 +1,12 @@
+//
+// vs_main
+//
 #include <metal_stdlib>
-
 using namespace metal;
 
-template<typename T, size_t N>
-struct tint_array {
-    const constant T& operator[](size_t i) const constant { return elements[i]; }
-    device T& operator[](size_t i) device { return elements[i]; }
-    const device T& operator[](size_t i) const device { return elements[i]; }
-    thread T& operator[](size_t i) thread { return elements[i]; }
-    const thread T& operator[](size_t i) const thread { return elements[i]; }
-    threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-    const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-    T elements[N];
-};
-
-struct tint_private_vars_struct {
-  bool tint_discarded;
+struct VertexOutputs {
+  float2 texcoords;
+  float4 position;
 };
 
 struct Uniforms {
@@ -23,63 +14,82 @@ struct Uniforms {
   /* 0x0008 */ float2 u_offset;
 };
 
-struct VertexOutputs {
-  float2 texcoords;
-  float4 position;
+struct tint_module_vars_struct {
+  const constant Uniforms* uniforms;
 };
 
-struct tint_symbol {
-  float2 texcoords [[user(locn0)]];
-  float4 position [[position]];
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
 };
 
-VertexOutputs vs_main_inner(uint VertexIndex, const constant Uniforms* const tint_symbol_4) {
+struct vs_main_outputs {
+  float2 VertexOutputs_texcoords [[user(locn0)]];
+  float4 VertexOutputs_position [[position]];
+};
+
+VertexOutputs vs_main_inner(uint VertexIndex, tint_module_vars_struct tint_module_vars) {
   tint_array<float2, 3> texcoord = tint_array<float2, 3>{float2(-0.5f, 0.0f), float2(1.5f, 0.0f), float2(0.5f, 2.0f)};
   VertexOutputs output = {};
   output.position = float4(((texcoord[min(VertexIndex, 2u)] * 2.0f) - float2(1.0f)), 0.0f, 1.0f);
-  bool flipY = ((*(tint_symbol_4)).u_scale[1] < 0.0f);
+  bool flipY = ((*tint_module_vars.uniforms).u_scale.y < 0.0f);
   if (flipY) {
-    output.texcoords = ((((texcoord[min(VertexIndex, 2u)] * (*(tint_symbol_4)).u_scale) + (*(tint_symbol_4)).u_offset) * float2(1.0f, -1.0f)) + float2(0.0f, 1.0f));
+    output.texcoords = ((((texcoord[min(VertexIndex, 2u)] * (*tint_module_vars.uniforms).u_scale) + (*tint_module_vars.uniforms).u_offset) * float2(1.0f, -1.0f)) + float2(0.0f, 1.0f));
   } else {
-    output.texcoords = ((((texcoord[min(VertexIndex, 2u)] * float2(1.0f, -1.0f)) + float2(0.0f, 1.0f)) * (*(tint_symbol_4)).u_scale) + (*(tint_symbol_4)).u_offset);
+    output.texcoords = ((((texcoord[min(VertexIndex, 2u)] * float2(1.0f, -1.0f)) + float2(0.0f, 1.0f)) * (*tint_module_vars.uniforms).u_scale) + (*tint_module_vars.uniforms).u_offset);
   }
   return output;
 }
 
-vertex tint_symbol vs_main(const constant Uniforms* tint_symbol_5 [[buffer(0)]], uint VertexIndex [[vertex_id]]) {
-  VertexOutputs const inner_result = vs_main_inner(VertexIndex, tint_symbol_5);
-  tint_symbol wrapper_result = {};
-  wrapper_result.texcoords = inner_result.texcoords;
-  wrapper_result.position = inner_result.position;
-  return wrapper_result;
+vertex vs_main_outputs vs_main(uint VertexIndex [[vertex_id]], const constant Uniforms* uniforms [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.uniforms=uniforms};
+  VertexOutputs const v = vs_main_inner(VertexIndex, tint_module_vars);
+  vs_main_outputs tint_wrapper_result = {};
+  tint_wrapper_result.VertexOutputs_texcoords = v.texcoords;
+  tint_wrapper_result.VertexOutputs_position = v.position;
+  return tint_wrapper_result;
 }
+//
+// fs_main
+//
+#include <metal_stdlib>
+using namespace metal;
 
-struct tint_symbol_2 {
+struct tint_module_vars_struct {
+  thread bool* continue_execution;
+};
+
+struct fs_main_outputs {
+  float4 tint_symbol [[color(0)]];
+};
+
+struct fs_main_inputs {
   float2 texcoord [[user(locn0)]];
 };
 
-struct tint_symbol_3 {
-  float4 value [[color(0)]];
-};
-
-float4 fs_main_inner(float2 texcoord, thread tint_private_vars_struct* const tint_private_vars) {
+float4 fs_main_inner(float2 texcoord, tint_module_vars_struct tint_module_vars) {
   float2 clampedTexcoord = clamp(texcoord, float2(0.0f), float2(1.0f));
   if (!(all((clampedTexcoord == texcoord)))) {
-    (*(tint_private_vars)).tint_discarded = true;
+    (*tint_module_vars.continue_execution) = false;
   }
   float4 srcColor = float4(0.0f);
+  if (!((*tint_module_vars.continue_execution))) {
+    discard_fragment();
+  }
   return srcColor;
 }
 
-fragment tint_symbol_3 fs_main(tint_symbol_2 tint_symbol_1 [[stage_in]]) {
-  thread tint_private_vars_struct tint_private_vars = {};
-  tint_private_vars.tint_discarded = false;
-  float4 const inner_result_1 = fs_main_inner(tint_symbol_1.texcoord, &(tint_private_vars));
-  tint_symbol_3 wrapper_result_1 = {};
-  wrapper_result_1.value = inner_result_1;
-  if (tint_private_vars.tint_discarded) {
-    discard_fragment();
-  }
-  return wrapper_result_1;
+fragment fs_main_outputs fs_main(fs_main_inputs inputs [[stage_in]]) {
+  thread bool continue_execution = true;
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.continue_execution=(&continue_execution)};
+  fs_main_outputs tint_wrapper_result = {};
+  tint_wrapper_result.tint_symbol = fs_main_inner(inputs.texcoord, tint_module_vars);
+  return tint_wrapper_result;
 }
-

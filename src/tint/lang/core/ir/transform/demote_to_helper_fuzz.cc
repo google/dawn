@@ -33,7 +33,9 @@
 namespace tint::core::ir::transform {
 namespace {
 
-constexpr auto& DemoteToHelperFuzzer = DemoteToHelper;
+Result<SuccessType> DemoteToHelperFuzzer(Module& ir, const fuzz::ir::Context&) {
+    return DemoteToHelper(ir);
+}
 
 }  // namespace
 }  // namespace tint::core::ir::transform

@@ -29,6 +29,8 @@
 
 #include "gtest/gtest.h"
 
+TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
+
 namespace tint::bytes {
 namespace {
 
@@ -52,3 +54,5 @@ TEST(BytesSwapTest, Sint) {
 
 }  // namespace
 }  // namespace tint::bytes
+
+TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);

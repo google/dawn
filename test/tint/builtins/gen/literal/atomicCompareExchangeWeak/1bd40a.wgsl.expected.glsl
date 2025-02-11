@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
@@ -13,7 +16,7 @@ struct atomic_compare_exchange_result_i32 {
 };
 
 layout(binding = 0, std430)
-buffer sb_rw_block_1_ssbo {
+buffer f_sb_rw_block_ssbo {
   SB_RW inner;
 } v;
 void atomicCompareExchangeWeak_1bd40a() {
@@ -23,6 +26,9 @@ void atomicCompareExchangeWeak_1bd40a() {
 void main() {
   atomicCompareExchangeWeak_1bd40a();
 }
+//
+// compute_main
+//
 #version 310 es
 
 

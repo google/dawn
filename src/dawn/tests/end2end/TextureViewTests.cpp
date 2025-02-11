@@ -47,6 +47,19 @@ constexpr uint32_t kBytesPerTexel = 4;
 
 class TextureViewTestBase : public DawnTest {
   protected:
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        std::vector<wgpu::FeatureName> requiredFeatures = {};
+        if (SupportsFeatures({wgpu::FeatureName::FlexibleTextureViews})) {
+            requiredFeatures.push_back(wgpu::FeatureName::FlexibleTextureViews);
+        }
+        return requiredFeatures;
+    }
+
+    bool HasFlexibleTextureViews() {
+        return !IsCompatibilityMode() ||
+               SupportsFeatures({wgpu::FeatureName::FlexibleTextureViews});
+    }
+
     wgpu::Texture Create2DTexture(uint32_t width,
                                   uint32_t height,
                                   uint32_t arrayLayerCount,
@@ -67,7 +80,7 @@ class TextureViewTestBase : public DawnTest {
         // Only set the textureBindingViewDimension in compat mode. It's not needed
         // nor used in non-compat.
         wgpu::TextureBindingViewDimensionDescriptor textureBindingViewDimensionDesc;
-        if (IsCompatibilityMode()) {
+        if (!HasFlexibleTextureViews()) {
             textureBindingViewDimensionDesc.textureBindingViewDimension =
                 textureBindingViewDimension;
             descriptor.nextInChain = &textureBindingViewDimensionDesc;
@@ -189,12 +202,12 @@ class TextureViewSamplingTest : public TextureViewTestBase {
                 wgpu::Buffer stagingBuffer = utils::CreateBufferFromData(
                     device, data.data(), data.size() * sizeof(utils::RGBA8),
                     wgpu::BufferUsage::CopySrc);
-                wgpu::ImageCopyBuffer imageCopyBuffer =
-                    utils::CreateImageCopyBuffer(stagingBuffer, 0, kTextureBytesPerRowAlignment);
-                wgpu::ImageCopyTexture imageCopyTexture =
-                    utils::CreateImageCopyTexture(mTexture, level, {0, 0, layer});
+                wgpu::TexelCopyBufferInfo texelCopyBufferInfo = utils::CreateTexelCopyBufferInfo(
+                    stagingBuffer, 0, kTextureBytesPerRowAlignment);
+                wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+                    utils::CreateTexelCopyTextureInfo(mTexture, level, {0, 0, layer});
                 wgpu::Extent3D copySize = {texWidth, texHeight, 1};
-                encoder.CopyBufferToTexture(&imageCopyBuffer, &imageCopyTexture, &copySize);
+                encoder.CopyBufferToTexture(&texelCopyBufferInfo, &texelCopyTextureInfo, &copySize);
             }
         }
         wgpu::CommandBuffer copy = encoder.Finish();
@@ -485,13 +498,13 @@ TEST_P(TextureViewSamplingTest, CubeArrayTextureSignedNegativeIndex) {
 
 // Test sampling from a 2D texture view created on a 2D array texture.
 TEST_P(TextureViewSamplingTest, Texture2DViewOn2DArrayTexture) {
-    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
+    DAWN_TEST_UNSUPPORTED_IF(!HasFlexibleTextureViews());
     Texture2DViewTest(6, 1, 4, 0);
 }
 
 // Test sampling from a 2D array texture view created on a 2D array texture.
 TEST_P(TextureViewSamplingTest, Texture2DArrayViewOn2DArrayTexture) {
-    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
+    DAWN_TEST_UNSUPPORTED_IF(!HasFlexibleTextureViews());
     Texture2DArrayViewTest(6, 1, 2, 0);
 }
 
@@ -531,13 +544,13 @@ TEST_P(TextureViewSamplingTest, Texture2DViewOnOneLevelOf2DTexture) {
 
 // Test sampling from a 2D texture view created on a mipmap level of a 2D array texture layer.
 TEST_P(TextureViewSamplingTest, Texture2DViewOnOneLevelOf2DArrayTexture) {
-    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
+    DAWN_TEST_UNSUPPORTED_IF(!HasFlexibleTextureViews());
     Texture2DViewTest(6, 6, 3, 4);
 }
 
 // Test sampling from a 2D array texture view created on a mipmap level of a 2D array texture.
 TEST_P(TextureViewSamplingTest, Texture2DArrayViewOnOneLevelOf2DArrayTexture) {
-    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
+    DAWN_TEST_UNSUPPORTED_IF(!HasFlexibleTextureViews());
     Texture2DArrayViewTest(6, 6, 2, 4);
 }
 
@@ -558,7 +571,7 @@ TEST_P(TextureViewSamplingTest, SRGBReinterpretation) {
     textureDesc.viewFormatCount = 1;
     wgpu::Texture texture = device.CreateTexture(&textureDesc);
 
-    wgpu::ImageCopyTexture dst = {};
+    wgpu::TexelCopyTextureInfo dst = {};
     dst.texture = texture;
     std::array<utils::RGBA8, 4> rgbaTextureData = {
         utils::RGBA8(180, 0, 0, 255),
@@ -567,7 +580,7 @@ TEST_P(TextureViewSamplingTest, SRGBReinterpretation) {
         utils::RGBA8(62, 180, 84, 90),
     };
 
-    wgpu::TextureDataLayout dataLayout = {};
+    wgpu::TexelCopyBufferLayout dataLayout = {};
     dataLayout.bytesPerRow = textureDesc.size.width * sizeof(utils::RGBA8);
 
     queue.WriteTexture(&dst, rgbaTextureData.data(), rgbaTextureData.size() * sizeof(utils::RGBA8),
@@ -641,7 +654,7 @@ TEST_P(TextureViewSamplingTest, TextureCubeMapOnWholeTexture) {
 
 // Test sampling from a cube map texture view that covers a sub part of a 2D array texture.
 TEST_P(TextureViewSamplingTest, TextureCubeMapViewOnPartOfTexture) {
-    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
+    DAWN_TEST_UNSUPPORTED_IF(!HasFlexibleTextureViews());
     // TODO(dawn:1935): Total layers have to be at least 12 on Intel D3D11 Gen12.
     DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsIntelGen12());
 
@@ -650,7 +663,7 @@ TEST_P(TextureViewSamplingTest, TextureCubeMapViewOnPartOfTexture) {
 
 // Test sampling from a cube map texture view that covers the last layer of a 2D array texture.
 TEST_P(TextureViewSamplingTest, TextureCubeMapViewCoveringLastLayer) {
-    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
+    DAWN_TEST_UNSUPPORTED_IF(!HasFlexibleTextureViews());
 
     // TODO(dawn:1812): the test fails with DXGI_ERROR_DEVICE_HUNG on Intel D3D11 driver.
     DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsIntel());
@@ -911,8 +924,8 @@ TEST_P(TextureViewRenderingTest, SRGBReinterpretationRenderAttachment) {
         utils::RGBA8(13, 117, 24, 90),
     };
 
-    wgpu::ImageCopyTexture dst = {};
-    wgpu::TextureDataLayout dataLayout = {};
+    wgpu::TexelCopyTextureInfo dst = {};
+    wgpu::TexelCopyBufferLayout dataLayout = {};
 
     // Upload |rgbaTextureData| into |sampledTexture|.
     dst.texture = sampledTexture;
@@ -1024,8 +1037,8 @@ TEST_P(TextureViewRenderingTest, SRGBReinterpretionResolveAttachment) {
         utils::RGBA8(13, 117, 24, 90),
     };
 
-    wgpu::ImageCopyTexture dst = {};
-    wgpu::TextureDataLayout dataLayout = {};
+    wgpu::TexelCopyTextureInfo dst = {};
+    wgpu::TexelCopyBufferLayout dataLayout = {};
 
     // Upload |rgbaTextureData| into |sampledTexture|.
     dst.texture = sampledTexture;
@@ -1187,8 +1200,9 @@ TEST_P(TextureView1DTest, Sampling) {
 
     std::array<utils::RGBA8, 4> data = {utils::RGBA8::kGreen, utils::RGBA8::kRed,
                                         utils::RGBA8::kBlue, utils::RGBA8::kWhite};
-    wgpu::ImageCopyTexture target = utils::CreateImageCopyTexture(tex, 0, {});
-    wgpu::TextureDataLayout layout = utils::CreateTextureDataLayout(0, wgpu::kCopyStrideUndefined);
+    wgpu::TexelCopyTextureInfo target = utils::CreateTexelCopyTextureInfo(tex, 0, {});
+    wgpu::TexelCopyBufferLayout layout =
+        utils::CreateTexelCopyBufferLayout(0, wgpu::kCopyStrideUndefined);
     queue.WriteTexture(&target, &data, sizeof(data), &layout, &texDesc.size);
 
     // Create a pipeline that will sample from the 1D texture and output to an attachment.

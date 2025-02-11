@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 RWByteAddressBuffer prevent_dce : register(u0);
 
 float smoothstep_6c4975() {
@@ -12,11 +15,33 @@ void fragment_main() {
   prevent_dce.Store(0u, asuint(smoothstep_6c4975()));
   return;
 }
+//
+// compute_main
+//
+RWByteAddressBuffer prevent_dce : register(u0);
+
+float smoothstep_6c4975() {
+  float arg_0 = 2.0f;
+  float arg_1 = 4.0f;
+  float arg_2 = 3.0f;
+  float res = smoothstep(arg_0, arg_1, arg_2);
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store(0u, asuint(smoothstep_6c4975()));
   return;
+}
+//
+// vertex_main
+//
+float smoothstep_6c4975() {
+  float arg_0 = 2.0f;
+  float arg_1 = 4.0f;
+  float arg_2 = 3.0f;
+  float res = smoothstep(arg_0, arg_1, arg_2);
+  return res;
 }
 
 struct VertexOutput {

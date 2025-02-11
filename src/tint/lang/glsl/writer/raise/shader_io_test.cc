@@ -108,8 +108,8 @@ TEST_F(GlslWriter_ShaderIOTest, Parameters_NonStruct) {
 
     auto* expect = R"(
 $B1: {  # root
-  %gl_FrontFacing:ptr<__in, bool, read> = var @builtin(front_facing)
-  %gl_FragCoord:ptr<__in, vec4<f32>, read> = var @invariant @builtin(position)
+  %foo_front_facing:ptr<__in, bool, read> = var @builtin(front_facing)
+  %foo_position:ptr<__in, vec4<f32>, read> = var @invariant @builtin(position)
   %foo_loc0_Input:ptr<__in, f32, read> = var @location(0)
   %foo_loc1_Input:ptr<__in, f32, read> = var @location(1) @interpolate(linear, sample)
 }
@@ -128,8 +128,8 @@ $B1: {  # root
 }
 %foo = @fragment func():void {
   $B4: {
-    %13:bool = load %gl_FrontFacing
-    %14:vec4<f32> = load %gl_FragCoord
+    %13:bool = load %foo_front_facing
+    %14:vec4<f32> = load %foo_position
     %15:f32 = load %foo_loc0_Input
     %16:f32 = load %foo_loc1_Input
     %17:void = call %foo_inner, %13, %14, %15, %16
@@ -255,8 +255,8 @@ Inputs = struct @align(16) {
 }
 
 $B1: {  # root
-  %gl_FrontFacing:ptr<__in, bool, read> = var @builtin(front_facing)
-  %gl_FragCoord:ptr<__in, vec4<f32>, read> = var @invariant @builtin(position)
+  %foo_front_facing:ptr<__in, bool, read> = var @builtin(front_facing)
+  %foo_position:ptr<__in, vec4<f32>, read> = var @invariant @builtin(position)
   %foo_loc0_Input:ptr<__in, f32, read> = var @location(0)
   %foo_loc1_Input:ptr<__in, f32, read> = var @location(1) @interpolate(linear, sample)
 }
@@ -279,8 +279,8 @@ $B1: {  # root
 }
 %foo = @fragment func():void {
   $B4: {
-    %14:bool = load %gl_FrontFacing
-    %15:vec4<f32> = load %gl_FragCoord
+    %14:bool = load %foo_front_facing
+    %15:vec4<f32> = load %foo_position
     %16:f32 = load %foo_loc0_Input
     %17:f32 = load %foo_loc1_Input
     %18:Inputs = construct %14, %15, %16, %17
@@ -379,8 +379,8 @@ Inputs = struct @align(16) {
 }
 
 $B1: {  # root
-  %gl_FrontFacing:ptr<__in, bool, read> = var @builtin(front_facing)
-  %gl_FragCoord:ptr<__in, vec4<f32>, read> = var @invariant @builtin(position)
+  %foo_front_facing:ptr<__in, bool, read> = var @builtin(front_facing)
+  %foo_position:ptr<__in, vec4<f32>, read> = var @invariant @builtin(position)
   %foo_loc0_Input:ptr<__in, f32, read> = var @location(0)
   %foo_loc1_Input:ptr<__in, f32, read> = var @location(1) @interpolate(linear, sample)
 }
@@ -401,8 +401,8 @@ $B1: {  # root
 }
 %foo = @fragment func():void {
   $B4: {
-    %14:bool = load %gl_FrontFacing
-    %15:vec4<f32> = load %gl_FragCoord
+    %14:bool = load %foo_front_facing
+    %15:vec4<f32> = load %foo_position
     %16:f32 = load %foo_loc0_Input
     %17:Inputs = construct %15, %16
     %18:f32 = load %foo_loc1_Input
@@ -441,8 +441,8 @@ TEST_F(GlslWriter_ShaderIOTest, ReturnValue_NonStructBuiltin) {
 
     auto* expect = R"(
 $B1: {  # root
-  %gl_Position:ptr<__out, vec4<f32>, write> = var @invariant @builtin(position)
-  %gl_PointSize:ptr<__out, f32, write> = var @builtin(__point_size)
+  %foo_position:ptr<__out, vec4<f32>, write> = var @invariant @builtin(position)
+  %foo___point_size:ptr<__out, f32, write> = var @builtin(__point_size)
 }
 
 %foo_inner = func():vec4<f32> {
@@ -454,16 +454,16 @@ $B1: {  # root
 %foo = @vertex func():void {
   $B3: {
     %6:vec4<f32> = call %foo_inner
-    store %gl_Position, %6
-    %7:f32 = swizzle %gl_Position, y
-    %8:f32 = negation %7
-    store_vector_element %gl_Position, 1u, %8
-    %9:f32 = swizzle %gl_Position, z
-    %10:f32 = swizzle %gl_Position, w
-    %11:f32 = mul 2.0f, %9
-    %12:f32 = sub %11, %10
-    store_vector_element %gl_Position, 2u, %12
-    store %gl_PointSize, 1.0f
+    %7:f32 = swizzle %6, x
+    %8:f32 = swizzle %6, y
+    %9:f32 = negation %8
+    %10:f32 = swizzle %6, z
+    %11:f32 = swizzle %6, w
+    %12:f32 = mul 2.0f, %10
+    %13:f32 = sub %12, %11
+    %14:vec4<f32> = construct %7, %9, %13, %11
+    store %foo_position, %14
+    store %foo___point_size, 1.0f
     ret
   }
 }
@@ -599,10 +599,10 @@ Outputs = struct @align(16) {
 }
 
 $B1: {  # root
-  %gl_Position:ptr<__out, vec4<f32>, write> = var @invariant @builtin(position)
+  %foo_position:ptr<__out, vec4<f32>, write> = var @invariant @builtin(position)
   %foo_loc0_Output:ptr<__out, f32, write> = var @location(0)
   %foo_loc1_Output:ptr<__out, f32, write> = var @location(1) @interpolate(linear, sample)
-  %gl_PointSize:ptr<__out, f32, write> = var @builtin(__point_size)
+  %foo___point_size:ptr<__out, f32, write> = var @builtin(__point_size)
 }
 
 %foo_inner = func():Outputs {
@@ -616,20 +616,20 @@ $B1: {  # root
   $B3: {
     %9:Outputs = call %foo_inner
     %10:vec4<f32> = access %9, 0u
-    store %gl_Position, %10
-    %11:f32 = swizzle %gl_Position, y
-    %12:f32 = negation %11
-    store_vector_element %gl_Position, 1u, %12
-    %13:f32 = swizzle %gl_Position, z
-    %14:f32 = swizzle %gl_Position, w
-    %15:f32 = mul 2.0f, %13
-    %16:f32 = sub %15, %14
-    store_vector_element %gl_Position, 2u, %16
-    %17:f32 = access %9, 1u
-    store %foo_loc0_Output, %17
-    %18:f32 = access %9, 2u
-    store %foo_loc1_Output, %18
-    store %gl_PointSize, 1.0f
+    %11:f32 = swizzle %10, x
+    %12:f32 = swizzle %10, y
+    %13:f32 = negation %12
+    %14:f32 = swizzle %10, z
+    %15:f32 = swizzle %10, w
+    %16:f32 = mul 2.0f, %14
+    %17:f32 = sub %16, %15
+    %18:vec4<f32> = construct %11, %13, %17, %15
+    store %foo_position, %18
+    %19:f32 = access %9, 1u
+    store %foo_loc0_Output, %19
+    %20:f32 = access %9, 2u
+    store %foo_loc1_Output, %20
+    store %foo___point_size, 1.0f
     ret
   }
 }
@@ -818,10 +818,10 @@ Interface = struct @align(16) {
 }
 
 $B1: {  # root
-  %gl_Position:ptr<__out, vec4<f32>, write> = var @builtin(position)
+  %vert_position:ptr<__out, vec4<f32>, write> = var @builtin(position)
   %vert_loc0_Output:ptr<__out, vec4<f32>, write> = var @location(0)
-  %gl_PointSize:ptr<__out, f32, write> = var @builtin(__point_size)
-  %gl_FragCoord:ptr<__in, vec4<f32>, read> = var @builtin(position)
+  %vert___point_size:ptr<__out, f32, write> = var @builtin(__point_size)
+  %frag_position:ptr<__in, vec4<f32>, read> = var @builtin(position)
   %frag_loc0_Input:ptr<__in, vec4<f32>, read> = var @location(0)
   %frag_loc0_Output:ptr<__out, vec4<f32>, write> = var @location(0)
 }
@@ -846,28 +846,28 @@ $B1: {  # root
   $B4: {
     %17:Interface = call %vert_inner
     %18:vec4<f32> = access %17, 0u
-    store %gl_Position, %18
-    %19:f32 = swizzle %gl_Position, y
-    %20:f32 = negation %19
-    store_vector_element %gl_Position, 1u, %20
-    %21:f32 = swizzle %gl_Position, z
-    %22:f32 = swizzle %gl_Position, w
-    %23:f32 = mul 2.0f, %21
-    %24:f32 = sub %23, %22
-    store_vector_element %gl_Position, 2u, %24
-    %25:vec4<f32> = access %17, 1u
-    store %vert_loc0_Output, %25
-    store %gl_PointSize, 1.0f
+    %19:f32 = swizzle %18, x
+    %20:f32 = swizzle %18, y
+    %21:f32 = negation %20
+    %22:f32 = swizzle %18, z
+    %23:f32 = swizzle %18, w
+    %24:f32 = mul 2.0f, %22
+    %25:f32 = sub %24, %23
+    %26:vec4<f32> = construct %19, %21, %25, %23
+    store %vert_position, %26
+    %27:vec4<f32> = access %17, 1u
+    store %vert_loc0_Output, %27
+    store %vert___point_size, 1.0f
     ret
   }
 }
 %frag = @fragment func():void {
   $B5: {
-    %27:vec4<f32> = load %gl_FragCoord
-    %28:vec4<f32> = load %frag_loc0_Input
-    %29:Interface = construct %27, %28
-    %30:vec4<f32> = call %frag_inner, %29
-    store %frag_loc0_Output, %30
+    %29:vec4<f32> = load %frag_position
+    %30:vec4<f32> = load %frag_loc0_Input
+    %31:Interface = construct %29, %30
+    %32:vec4<f32> = call %frag_inner, %31
+    store %frag_loc0_Output, %32
     ret
   }
 }
@@ -948,9 +948,9 @@ Outputs = struct @align(16) {
 
 $B1: {  # root
   %1:ptr<storage, Outputs, read> = var @binding_point(0, 0)
-  %gl_Position:ptr<__out, vec4<f32>, write> = var @builtin(position)
+  %vert_position:ptr<__out, vec4<f32>, write> = var @builtin(position)
   %vert_loc0_Output:ptr<__out, vec4<f32>, write> = var @location(0)
-  %gl_PointSize:ptr<__out, f32, write> = var @builtin(__point_size)
+  %vert___point_size:ptr<__out, f32, write> = var @builtin(__point_size)
 }
 
 %vert_inner = func():Outputs {
@@ -963,18 +963,18 @@ $B1: {  # root
   $B3: {
     %8:Outputs = call %vert_inner
     %9:vec4<f32> = access %8, 0u
-    store %gl_Position, %9
-    %10:f32 = swizzle %gl_Position, y
-    %11:f32 = negation %10
-    store_vector_element %gl_Position, 1u, %11
-    %12:f32 = swizzle %gl_Position, z
-    %13:f32 = swizzle %gl_Position, w
-    %14:f32 = mul 2.0f, %12
-    %15:f32 = sub %14, %13
-    store_vector_element %gl_Position, 2u, %15
-    %16:vec4<f32> = access %8, 1u
-    store %vert_loc0_Output, %16
-    store %gl_PointSize, 1.0f
+    %10:f32 = swizzle %9, x
+    %11:f32 = swizzle %9, y
+    %12:f32 = negation %11
+    %13:f32 = swizzle %9, z
+    %14:f32 = swizzle %9, w
+    %15:f32 = mul 2.0f, %13
+    %16:f32 = sub %15, %14
+    %17:vec4<f32> = construct %10, %12, %16, %14
+    store %vert_position, %17
+    %18:vec4<f32> = access %8, 1u
+    store %vert_loc0_Output, %18
+    store %vert___point_size, 1.0f
     ret
   }
 }
@@ -1050,9 +1050,9 @@ Outputs = struct @align(4) {
 }
 
 $B1: {  # root
-  %gl_SampleMaskIn:ptr<__in, array<i32, 1>, read> = var @builtin(sample_mask)
+  %foo_sample_mask:ptr<__in, array<i32, 1>, read> = var @builtin(sample_mask)
   %foo_loc0_Output:ptr<__out, f32, write> = var @location(0)
-  %gl_SampleMask:ptr<__out, array<i32, 1>, write> = var @builtin(sample_mask)
+  %foo_sample_mask_1:ptr<__out, array<i32, 1>, write> = var @builtin(sample_mask)  # %foo_sample_mask_1: 'foo_sample_mask'
 }
 
 %foo_inner = func(%mask_in:u32):Outputs {
@@ -1063,14 +1063,14 @@ $B1: {  # root
 }
 %foo = @fragment func():void {
   $B3: {
-    %8:array<i32, 1> = load %gl_SampleMaskIn
+    %8:array<i32, 1> = load %foo_sample_mask
     %9:i32 = access %8, 0u
     %10:u32 = convert %9
     %11:Outputs = call %foo_inner, %10
     %12:f32 = access %11, 0u
     store %foo_loc0_Output, %12
     %13:u32 = access %11, 1u
-    %14:ptr<__out, i32, write> = access %gl_SampleMask, 0u
+    %14:ptr<__out, i32, write> = access %foo_sample_mask_1, 0u
     %15:i32 = convert %13
     store %14, %15
     ret
@@ -1180,8 +1180,8 @@ MyStruct = struct @align(4) {
 $B1: {  # root
   %vert_loc1_Input:ptr<__in, f32, read> = var @location(1)
   %vert_loc1_Input_1:ptr<__in, i32, read> = var @location(1)  # %vert_loc1_Input_1: 'vert_loc1_Input'
-  %gl_Position:ptr<__out, vec4<f32>, write> = var @invariant @builtin(position)
-  %gl_PointSize:ptr<__out, f32, write> = var @builtin(__point_size)
+  %vert_position:ptr<__out, vec4<f32>, write> = var @invariant @builtin(position)
+  %vert___point_size:ptr<__out, f32, write> = var @builtin(__point_size)
   %frag1_loc1_Output:ptr<__out, f32, write> = var @location(1)
   %frag2_loc0_Output:ptr<__out, i32, write> = var @location(0)
 }
@@ -1209,31 +1209,31 @@ $B1: {  # root
     %16:MyStruct = construct %15
     %17:i32 = load %vert_loc1_Input_1
     %18:vec4<f32> = call %vert_inner, %16, %17
-    store %gl_Position, %18
-    %19:f32 = swizzle %gl_Position, y
-    %20:f32 = negation %19
-    store_vector_element %gl_Position, 1u, %20
-    %21:f32 = swizzle %gl_Position, z
-    %22:f32 = swizzle %gl_Position, w
-    %23:f32 = mul 2.0f, %21
-    %24:f32 = sub %23, %22
-    store_vector_element %gl_Position, 2u, %24
-    store %gl_PointSize, 1.0f
+    %19:f32 = swizzle %18, x
+    %20:f32 = swizzle %18, y
+    %21:f32 = negation %20
+    %22:f32 = swizzle %18, z
+    %23:f32 = swizzle %18, w
+    %24:f32 = mul 2.0f, %22
+    %25:f32 = sub %24, %23
+    %26:vec4<f32> = construct %19, %21, %25, %23
+    store %vert_position, %26
+    store %vert___point_size, 1.0f
     ret
   }
 }
 %frag1 = @fragment func():void {
   $B6: {
-    %26:MyStruct = call %frag1_inner
-    %27:f32 = access %26, 0u
-    store %frag1_loc1_Output, %27
+    %28:MyStruct = call %frag1_inner
+    %29:f32 = access %28, 0u
+    store %frag1_loc1_Output, %29
     ret
   }
 }
 %frag2 = @fragment func():void {
   $B7: {
-    %29:i32 = call %frag2_inner
-    store %frag2_loc0_Output, %29
+    %31:i32 = call %frag2_inner
+    store %frag2_loc0_Output, %31
     ret
   }
 }
@@ -1311,7 +1311,7 @@ tint_push_constant_struct = struct @align(4), @block {
 $B1: {  # root
   %tint_push_constants:ptr<push_constant, tint_push_constant_struct, read> = var
   %foo_loc0_Output:ptr<__out, f32, write> = var @location(0)
-  %gl_FragDepth:ptr<__out, f32, write> = var @builtin(frag_depth)
+  %foo_frag_depth:ptr<__out, f32, write> = var @builtin(frag_depth)
 }
 
 %foo_inner = func():Outputs {
@@ -1331,7 +1331,7 @@ $B1: {  # root
     %12:ptr<push_constant, f32, read> = access %tint_push_constants, 1u
     %13:f32 = load %12
     %14:f32 = clamp %9, %11, %13
-    store %gl_FragDepth, %14
+    store %foo_frag_depth, %14
     ret
   }
 }
@@ -1431,11 +1431,11 @@ tint_push_constant_struct = struct @align(4), @block {
 $B1: {  # root
   %tint_push_constants:ptr<push_constant, tint_push_constant_struct, read> = var
   %ep1_loc0_Output:ptr<__out, f32, write> = var @location(0)
-  %gl_FragDepth:ptr<__out, f32, write> = var @builtin(frag_depth)
+  %ep1_frag_depth:ptr<__out, f32, write> = var @builtin(frag_depth)
   %ep2_loc0_Output:ptr<__out, f32, write> = var @location(0)
-  %gl_FragDepth_1:ptr<__out, f32, write> = var @builtin(frag_depth)  # %gl_FragDepth_1: 'gl_FragDepth'
+  %ep2_frag_depth:ptr<__out, f32, write> = var @builtin(frag_depth)
   %ep3_loc0_Output:ptr<__out, f32, write> = var @location(0)
-  %gl_FragDepth_2:ptr<__out, f32, write> = var @builtin(frag_depth)  # %gl_FragDepth_2: 'gl_FragDepth'
+  %ep3_frag_depth:ptr<__out, f32, write> = var @builtin(frag_depth)
 }
 
 %ep1_inner = func():Outputs {
@@ -1467,7 +1467,7 @@ $B1: {  # root
     %20:ptr<push_constant, f32, read> = access %tint_push_constants, 1u
     %21:f32 = load %20
     %22:f32 = clamp %17, %19, %21
-    store %gl_FragDepth, %22
+    store %ep1_frag_depth, %22
     ret
   }
 }
@@ -1482,7 +1482,7 @@ $B1: {  # root
     %29:ptr<push_constant, f32, read> = access %tint_push_constants, 1u
     %30:f32 = load %29
     %31:f32 = clamp %26, %28, %30
-    store %gl_FragDepth_1, %31
+    store %ep2_frag_depth, %31
     ret
   }
 }
@@ -1497,7 +1497,7 @@ $B1: {  # root
     %38:ptr<push_constant, f32, read> = access %tint_push_constants, 1u
     %39:f32 = load %38
     %40:f32 = clamp %35, %37, %39
-    store %gl_FragDepth_2, %40
+    store %ep3_frag_depth, %40
     ret
   }
 }
@@ -1543,8 +1543,8 @@ TEST_F(GlslWriter_ShaderIOTest, BGRASwizzleSingleValue) {
     auto* expect = R"(
 $B1: {  # root
   %vert_loc0_Input:ptr<__in, vec4<f32>, read> = var @location(0)
-  %gl_Position:ptr<__out, vec4<f32>, write> = var @invariant @builtin(position)
-  %gl_PointSize:ptr<__out, f32, write> = var @builtin(__point_size)
+  %vert_position:ptr<__out, vec4<f32>, write> = var @invariant @builtin(position)
+  %vert___point_size:ptr<__out, f32, write> = var @builtin(__point_size)
 }
 
 %vert_inner = func(%val:vec4<f32>):vec4<f32> {
@@ -1558,16 +1558,16 @@ $B1: {  # root
     %8:vec4<f32> = load %vert_loc0_Input
     %9:vec4<f32> = swizzle %8, zyxw
     %10:vec4<f32> = call %vert_inner, %9
-    store %gl_Position, %10
-    %11:f32 = swizzle %gl_Position, y
-    %12:f32 = negation %11
-    store_vector_element %gl_Position, 1u, %12
-    %13:f32 = swizzle %gl_Position, z
-    %14:f32 = swizzle %gl_Position, w
-    %15:f32 = mul 2.0f, %13
-    %16:f32 = sub %15, %14
-    store_vector_element %gl_Position, 2u, %16
-    store %gl_PointSize, 1.0f
+    %11:f32 = swizzle %10, x
+    %12:f32 = swizzle %10, y
+    %13:f32 = negation %12
+    %14:f32 = swizzle %10, z
+    %15:f32 = swizzle %10, w
+    %16:f32 = mul 2.0f, %14
+    %17:f32 = sub %16, %15
+    %18:vec4<f32> = construct %11, %13, %17, %15
+    store %vert_position, %18
+    store %vert___point_size, 1.0f
     ret
   }
 }
@@ -1632,8 +1632,8 @@ $B1: {  # root
   %vert_loc4_Input:ptr<__in, vec4<f32>, read> = var @location(4)
   %vert_loc3_Input:ptr<__in, vec4<f32>, read> = var @location(3)
   %vert_loc7_Input:ptr<__in, vec4<f32>, read> = var @location(7)
-  %gl_Position:ptr<__out, vec4<f32>, write> = var @invariant @builtin(position)
-  %gl_PointSize:ptr<__out, f32, write> = var @builtin(__point_size)
+  %vert_position:ptr<__out, vec4<f32>, write> = var @invariant @builtin(position)
+  %vert___point_size:ptr<__out, f32, write> = var @builtin(__point_size)
 }
 
 %vert_inner = func(%val1:f32, %val2:vec2<f32>, %sentinel:vec4<f32>, %val3:vec3<f32>, %val4:vec4<f32>):vec4<f32> {
@@ -1654,16 +1654,16 @@ $B1: {  # root
     %23:vec4<f32> = load %vert_loc7_Input
     %24:vec4<f32> = swizzle %23, zyxw
     %25:vec4<f32> = call %vert_inner, %17, %19, %20, %22, %24
-    store %gl_Position, %25
-    %26:f32 = swizzle %gl_Position, y
-    %27:f32 = negation %26
-    store_vector_element %gl_Position, 1u, %27
-    %28:f32 = swizzle %gl_Position, z
-    %29:f32 = swizzle %gl_Position, w
-    %30:f32 = mul 2.0f, %28
-    %31:f32 = sub %30, %29
-    store_vector_element %gl_Position, 2u, %31
-    store %gl_PointSize, 1.0f
+    %26:f32 = swizzle %25, x
+    %27:f32 = swizzle %25, y
+    %28:f32 = negation %27
+    %29:f32 = swizzle %25, z
+    %30:f32 = swizzle %25, w
+    %31:f32 = mul 2.0f, %29
+    %32:f32 = sub %31, %30
+    %33:vec4<f32> = construct %26, %28, %32, %30
+    store %vert_position, %33
+    store %vert___point_size, 1.0f
     ret
   }
 }

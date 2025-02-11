@@ -1,35 +1,38 @@
 #include <metal_stdlib>
-
 using namespace metal;
-struct FragmentInput {
-  float2 vUv;
-};
 
 struct FragmentOutput {
   float4 color;
 };
 
-struct tint_symbol_2 {
-  float2 vUv [[user(locn2)]];
+struct FragmentInput {
+  float2 vUv;
 };
 
-struct tint_symbol_3 {
-  float4 color [[color(0)]];
+struct tint_module_vars_struct {
+  depth2d<float, access::sample> depthMap;
+  sampler texSampler;
 };
 
-FragmentOutput tint_symbol_inner(FragmentInput fIn, depth2d<float, access::sample> tint_symbol_5, sampler tint_symbol_6) {
-  float const sample = tint_symbol_5.sample(tint_symbol_6, fIn.vUv);
+struct main_outputs {
+  float4 FragmentOutput_color [[color(0)]];
+};
+
+struct main_inputs {
+  float2 FragmentInput_vUv [[user(locn2)]];
+};
+
+FragmentOutput main_inner(FragmentInput fIn, tint_module_vars_struct tint_module_vars) {
+  float const sample = tint_module_vars.depthMap.sample(tint_module_vars.texSampler, fIn.vUv);
   float3 const color = float3(sample, sample, sample);
   FragmentOutput fOut = {};
   fOut.color = float4(color, 1.0f);
   return fOut;
 }
 
-fragment tint_symbol_3 tint_symbol(depth2d<float, access::sample> tint_symbol_7 [[texture(0)]], sampler tint_symbol_8 [[sampler(0)]], tint_symbol_2 tint_symbol_1 [[stage_in]]) {
-  FragmentInput const tint_symbol_4 = FragmentInput{.vUv=tint_symbol_1.vUv};
-  FragmentOutput const inner_result = tint_symbol_inner(tint_symbol_4, tint_symbol_7, tint_symbol_8);
-  tint_symbol_3 wrapper_result = {};
-  wrapper_result.color = inner_result.color;
-  return wrapper_result;
+fragment main_outputs v(main_inputs inputs [[stage_in]], depth2d<float, access::sample> depthMap [[texture(0)]], sampler texSampler [[sampler(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.depthMap=depthMap, .texSampler=texSampler};
+  main_outputs tint_wrapper_result = {};
+  tint_wrapper_result.FragmentOutput_color = main_inner(FragmentInput{.vUv=inputs.FragmentInput_vUv}, tint_module_vars).color;
+  return tint_wrapper_result;
 }
-

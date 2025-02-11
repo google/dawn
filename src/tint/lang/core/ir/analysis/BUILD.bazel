@@ -39,9 +39,11 @@ load("@bazel_skylib//lib:selects.bzl", "selects")
 cc_library(
   name = "analysis",
   srcs = [
+    "integer_range_analysis.cc",
     "loop_analysis.cc",
   ],
   hdrs = [
+    "integer_range_analysis.h",
     "loop_analysis.h",
   ],
   deps = [
@@ -69,6 +71,7 @@ cc_library(
   name = "test",
   alwayslink = True,
   srcs = [
+    "integer_range_analysis_test.cc",
     "loop_analysis_test.cc",
   ],
   deps = [

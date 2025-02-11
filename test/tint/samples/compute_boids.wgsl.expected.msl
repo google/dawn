@@ -1,64 +1,54 @@
+//
+// vert_main
+//
 #include <metal_stdlib>
-
 using namespace metal;
 
-template<typename T, size_t N>
-struct tint_array {
-    const constant T& operator[](size_t i) const constant { return elements[i]; }
-    device T& operator[](size_t i) device { return elements[i]; }
-    const device T& operator[](size_t i) const device { return elements[i]; }
-    thread T& operator[](size_t i) thread { return elements[i]; }
-    const thread T& operator[](size_t i) const thread { return elements[i]; }
-    threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-    const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-    T elements[N];
+struct vert_main_outputs {
+  float4 tint_symbol [[position]];
 };
 
-#define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
-
-struct tint_symbol_1 {
+struct vert_main_inputs {
   float2 a_particlePos [[attribute(0)]];
   float2 a_particleVel [[attribute(1)]];
   float2 a_pos [[attribute(2)]];
 };
 
-struct tint_symbol_2 {
-  float4 value [[position]];
-};
-
 float4 vert_main_inner(float2 a_particlePos, float2 a_particleVel, float2 a_pos) {
-  float angle = -(atan2(a_particleVel[0], a_particleVel[1]));
-  float2 pos = float2(((a_pos[0] * cos(angle)) - (a_pos[1] * sin(angle))), ((a_pos[0] * sin(angle)) + (a_pos[1] * cos(angle))));
+  float angle = -(atan2(a_particleVel.x, a_particleVel.y));
+  float2 pos = float2(((a_pos.x * cos(angle)) - (a_pos.y * sin(angle))), ((a_pos.x * sin(angle)) + (a_pos.y * cos(angle))));
   return float4((pos + a_particlePos), 0.0f, 1.0f);
 }
 
-vertex tint_symbol_2 vert_main(tint_symbol_1 tint_symbol [[stage_in]]) {
-  float4 const inner_result = vert_main_inner(tint_symbol.a_particlePos, tint_symbol.a_particleVel, tint_symbol.a_pos);
-  tint_symbol_2 wrapper_result = {};
-  wrapper_result.value = inner_result;
-  return wrapper_result;
+vertex vert_main_outputs vert_main(vert_main_inputs inputs [[stage_in]]) {
+  vert_main_outputs tint_wrapper_result = {};
+  tint_wrapper_result.tint_symbol = vert_main_inner(inputs.a_particlePos, inputs.a_particleVel, inputs.a_pos);
+  return tint_wrapper_result;
 }
+//
+// frag_main
+//
+#include <metal_stdlib>
+using namespace metal;
 
-struct tint_symbol_3 {
-  float4 value [[color(0)]];
+struct frag_main_outputs {
+  float4 tint_symbol [[color(0)]];
 };
 
 float4 frag_main_inner() {
   return float4(1.0f);
 }
 
-fragment tint_symbol_3 frag_main() {
-  float4 const inner_result_1 = frag_main_inner();
-  tint_symbol_3 wrapper_result_1 = {};
-  wrapper_result_1.value = inner_result_1;
-  return wrapper_result_1;
+fragment frag_main_outputs frag_main() {
+  frag_main_outputs tint_wrapper_result = {};
+  tint_wrapper_result.tint_symbol = frag_main_inner();
+  return tint_wrapper_result;
 }
-
-struct Particle {
-  /* 0x0000 */ float2 pos;
-  /* 0x0008 */ float2 vel;
-};
+//
+// comp_main
+//
+#include <metal_stdlib>
+using namespace metal;
 
 struct SimParams {
   /* 0x0000 */ float deltaT;
@@ -70,17 +60,40 @@ struct SimParams {
   /* 0x0018 */ float rule3Scale;
 };
 
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
+
+struct Particle {
+  /* 0x0000 */ float2 pos;
+  /* 0x0008 */ float2 vel;
+};
+
 struct Particles {
   /* 0x0000 */ tint_array<Particle, 5> particles;
 };
 
-void comp_main_inner(uint3 gl_GlobalInvocationID, device Particles* const tint_symbol_4, const constant SimParams* const tint_symbol_5, device Particles* const tint_symbol_6) {
-  uint index = gl_GlobalInvocationID[0];
+struct tint_module_vars_struct {
+  const constant SimParams* params;
+  device Particles* particlesA;
+  device Particles* particlesB;
+};
+
+void comp_main_inner(uint3 gl_GlobalInvocationID, tint_module_vars_struct tint_module_vars) {
+  uint index = gl_GlobalInvocationID.x;
   if ((index >= 5u)) {
     return;
   }
-  float2 vPos = (*(tint_symbol_4)).particles[min(index, 4u)].pos;
-  float2 vVel = (*(tint_symbol_4)).particles[min(index, 4u)].vel;
+  float2 vPos = (*tint_module_vars.particlesA).particles[min(index, 4u)].pos;
+  float2 vVel = (*tint_module_vars.particlesA).particles[min(index, 4u)].vel;
   float2 cMass = float2(0.0f);
   float2 cVel = float2(0.0f);
   float2 colVel = float2(0.0f);
@@ -88,52 +101,69 @@ void comp_main_inner(uint3 gl_GlobalInvocationID, device Particles* const tint_s
   int cVelCount = 0;
   float2 pos = 0.0f;
   float2 vel = 0.0f;
-  for(uint i = 0u; (i < 5u); i = (i + 1u)) {
-    TINT_ISOLATE_UB(tint_volatile_false);
-    if ((i == index)) {
+  {
+    uint i = 0u;
+    while(true) {
+      if ((i < 5u)) {
+      } else {
+        break;
+      }
+      if ((i == index)) {
+        {
+          i = (i + 1u);
+        }
+        continue;
+      }
+      pos = (*tint_module_vars.particlesA).particles[min(i, 4u)].pos.xy;
+      vel = (*tint_module_vars.particlesA).particles[min(i, 4u)].vel.xy;
+      if ((distance(pos, vPos) < (*tint_module_vars.params).rule1Distance)) {
+        cMass = (cMass + pos);
+        cMassCount = as_type<int>((as_type<uint>(cMassCount) + as_type<uint>(1)));
+      }
+      if ((distance(pos, vPos) < (*tint_module_vars.params).rule2Distance)) {
+        colVel = (colVel - (pos - vPos));
+      }
+      if ((distance(pos, vPos) < (*tint_module_vars.params).rule3Distance)) {
+        cVel = (cVel + vel);
+        cVelCount = as_type<int>((as_type<uint>(cVelCount) + as_type<uint>(1)));
+      }
+      {
+        i = (i + 1u);
+      }
       continue;
-    }
-    pos = (*(tint_symbol_4)).particles[min(i, 4u)].pos.xy;
-    vel = (*(tint_symbol_4)).particles[min(i, 4u)].vel.xy;
-    if ((distance(pos, vPos) < (*(tint_symbol_5)).rule1Distance)) {
-      cMass = (cMass + pos);
-      cMassCount = as_type<int>((as_type<uint>(cMassCount) + as_type<uint>(1)));
-    }
-    if ((distance(pos, vPos) < (*(tint_symbol_5)).rule2Distance)) {
-      colVel = (colVel - (pos - vPos));
-    }
-    if ((distance(pos, vPos) < (*(tint_symbol_5)).rule3Distance)) {
-      cVel = (cVel + vel);
-      cVelCount = as_type<int>((as_type<uint>(cVelCount) + as_type<uint>(1)));
     }
   }
   if ((cMassCount > 0)) {
-    cMass = ((cMass / float2(float(cMassCount), float(cMassCount))) - vPos);
+    float2 const v = cMass;
+    float const v_1 = float(cMassCount);
+    float2 const v_2 = (v / float2(v_1, float(cMassCount)));
+    cMass = (v_2 - vPos);
   }
   if ((cVelCount > 0)) {
-    cVel = (cVel / float2(float(cVelCount), float(cVelCount)));
+    float2 const v_3 = cVel;
+    float const v_4 = float(cVelCount);
+    cVel = (v_3 / float2(v_4, float(cVelCount)));
   }
-  vVel = (((vVel + (cMass * (*(tint_symbol_5)).rule1Scale)) + (colVel * (*(tint_symbol_5)).rule2Scale)) + (cVel * (*(tint_symbol_5)).rule3Scale));
+  vVel = (((vVel + (cMass * (*tint_module_vars.params).rule1Scale)) + (colVel * (*tint_module_vars.params).rule2Scale)) + (cVel * (*tint_module_vars.params).rule3Scale));
   vVel = (normalize(vVel) * clamp(length(vVel), 0.0f, 0.10000000149011611938f));
-  vPos = (vPos + (vVel * (*(tint_symbol_5)).deltaT));
-  if ((vPos[0] < -1.0f)) {
-    vPos[0] = 1.0f;
+  vPos = (vPos + (vVel * (*tint_module_vars.params).deltaT));
+  if ((vPos.x < -1.0f)) {
+    vPos.x = 1.0f;
   }
-  if ((vPos[0] > 1.0f)) {
-    vPos[0] = -1.0f;
+  if ((vPos.x > 1.0f)) {
+    vPos.x = -1.0f;
   }
-  if ((vPos[1] < -1.0f)) {
-    vPos[1] = 1.0f;
+  if ((vPos.y < -1.0f)) {
+    vPos.y = 1.0f;
   }
-  if ((vPos[1] > 1.0f)) {
-    vPos[1] = -1.0f;
+  if ((vPos.y > 1.0f)) {
+    vPos.y = -1.0f;
   }
-  (*(tint_symbol_6)).particles[min(index, 4u)].pos = vPos;
-  (*(tint_symbol_6)).particles[min(index, 4u)].vel = vVel;
+  (*tint_module_vars.particlesB).particles[min(index, 4u)].pos = vPos;
+  (*tint_module_vars.particlesB).particles[min(index, 4u)].vel = vVel;
 }
 
-kernel void comp_main(device Particles* tint_symbol_7 [[buffer(1)]], const constant SimParams* tint_symbol_8 [[buffer(0)]], device Particles* tint_symbol_9 [[buffer(2)]], uint3 gl_GlobalInvocationID [[thread_position_in_grid]]) {
-  comp_main_inner(gl_GlobalInvocationID, tint_symbol_7, tint_symbol_8, tint_symbol_9);
-  return;
+kernel void comp_main(uint3 gl_GlobalInvocationID [[thread_position_in_grid]], const constant SimParams* params [[buffer(0)]], device Particles* particlesA [[buffer(1)]], device Particles* particlesB [[buffer(2)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.params=params, .particlesA=particlesA, .particlesB=particlesB};
+  comp_main_inner(gl_GlobalInvocationID, tint_module_vars);
 }
-

@@ -44,12 +44,7 @@ using Wgslreader_LowerTest = core::ir::transform::TransformTest;
 TEST_F(Wgslreader_LowerTest, BuiltinConversion) {
     auto* f = b.Function("f", ty.void_());
     b.Append(f->Block(), [&] {  //
-        auto* result = b.InstructionResult(ty.i32());
-        b.Append(b.ir.CreateInstruction<wgsl::ir::BuiltinCall>(result, wgsl::BuiltinFn::kMax,
-                                                               Vector{
-                                                                   b.Value(i32(1)),
-                                                                   b.Value(i32(2)),
-                                                               }));
+        b.Call<wgsl::ir::BuiltinCall>(ty.i32(), wgsl::BuiltinFn::kMax, 1_i, 2_i);
         b.Return(f);
     });
 
@@ -83,9 +78,8 @@ TEST_F(Wgslreader_LowerTest, WorkgroupUniformLoad) {
 
     auto* f = b.Function("f", ty.i32());
     b.Append(f->Block(), [&] {  //
-        auto* result = b.InstructionResult(ty.i32());
-        b.Append(b.ir.CreateInstruction<wgsl::ir::BuiltinCall>(
-            result, wgsl::BuiltinFn::kWorkgroupUniformLoad, Vector{wgvar->Result(0)}));
+        auto* result = b.Call<wgsl::ir::BuiltinCall>(
+            ty.i32(), wgsl::BuiltinFn::kWorkgroupUniformLoad, wgvar->Result(0));
         b.Return(f, result);
     });
 

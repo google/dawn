@@ -89,13 +89,13 @@ uint32_t GetDeviceIdFromRender(std::string_view render) {
     return deviceId;
 }
 
-bool IsANGLEDesktopGL(std::string renderer) {
+bool IsANGLEDesktopGL(std::string_view renderer) {
     return renderer.find("ANGLE") != std::string::npos &&
            renderer.find("OpenGL") != std::string::npos &&
            renderer.find("OpenGL ES") == std::string::npos;
 }
 
-bool IsSwiftShader(std::string renderer) {
+bool IsSwiftShader(std::string_view renderer) {
     return renderer.find("SwiftShader") != std::string::npos;
 }
 
@@ -103,7 +103,8 @@ bool IsSwiftShader(std::string renderer) {
 
 // static
 ResultOrError<Ref<PhysicalDevice>> PhysicalDevice::Create(wgpu::BackendType backendType,
-                                                          Ref<DisplayEGL> display) {
+                                                          Ref<DisplayEGL> display,
+                                                          bool forceES31AndMinExtensions) {
     const EGLFunctions& egl = display->egl;
     EGLDisplay eglDisplay = display->GetDisplay();
 
@@ -111,14 +112,18 @@ ResultOrError<Ref<PhysicalDevice>> PhysicalDevice::Create(wgpu::BackendType back
     // that we can query the limits and other properties. Assumes that the limit are the same
     // irrespective of the context creation options.
     std::unique_ptr<ContextEGL> context;
-    DAWN_TRY_ASSIGN(context, ContextEGL::Create(display, backendType, /*useRobustness*/ false,
-                                                /*useANGLETextureSharing*/ false));
+    DAWN_TRY_ASSIGN(context,
+                    ContextEGL::Create(display, backendType, /*useRobustness*/ false,
+                                       /*useANGLETextureSharing*/ false,
+                                       /*forceES31AndMinExtensions*/ forceES31AndMinExtensions));
 
     EGLSurface prevDrawSurface = egl.GetCurrentSurface(EGL_DRAW);
     EGLSurface prevReadSurface = egl.GetCurrentSurface(EGL_READ);
     EGLContext prevContext = egl.GetCurrentContext();
 
     context->MakeCurrent();
+    // Needed to request extensions here to initialize supported gl extensions set
+    context->RequestRequiredExtensionsExplicitly();
 
     Ref<PhysicalDevice> physicalDevice =
         AcquireRef(new PhysicalDevice(backendType, std::move(display)));
@@ -161,15 +166,6 @@ MaybeError PhysicalDevice::InitializeImpl() {
 
     if (mFunctions.GetVersion().IsES()) {
         DAWN_ASSERT(GetBackendType() == wgpu::BackendType::OpenGLES);
-
-        // WebGPU requires being able to render to f16 and being able to blend f16
-        // which EXT_color_buffer_half_float provides.
-        DAWN_INVALID_IF(!mFunctions.IsGLExtensionSupported("GL_EXT_color_buffer_half_float"),
-                        "GL_EXT_color_buffer_half_float is required");
-
-        // WebGPU requires being able to render to f32 but does not require being able to blend f32
-        DAWN_INVALID_IF(!mFunctions.IsGLExtensionSupported("GL_EXT_color_buffer_float"),
-                        "GL_EXT_color_buffer_float is required");
     } else {
         DAWN_ASSERT(GetBackendType() == wgpu::BackendType::OpenGL);
     }
@@ -329,7 +325,11 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
     limits->v1.maxStorageBuffersPerShaderStage = Get(gl, GL_MAX_SHADER_STORAGE_BUFFER_BINDINGS);
     // TODO(crbug.com/dawn/1834): Note that OpenGLES allows an implementation to have zero vertex
     // image uniforms, so this isn't technically correct for vertex shaders.
-    limits->v1.maxStorageTexturesPerShaderStage = Get(gl, GL_MAX_FRAGMENT_IMAGE_UNIFORMS);
+    limits->v1.maxStorageTexturesPerShaderStage = Get(gl, GL_MAX_COMPUTE_IMAGE_UNIFORMS);
+    limits->v1.maxStorageTexturesInFragmentStage = Get(gl, GL_MAX_FRAGMENT_IMAGE_UNIFORMS);
+    limits->v1.maxStorageBuffersInFragmentStage = Get(gl, GL_MAX_FRAGMENT_SHADER_STORAGE_BLOCKS);
+    limits->v1.maxStorageTexturesInVertexStage = Get(gl, GL_MAX_VERTEX_IMAGE_UNIFORMS);
+    limits->v1.maxStorageBuffersInVertexStage = Get(gl, GL_MAX_VERTEX_SHADER_STORAGE_BLOCKS);
 
     limits->v1.maxUniformBuffersPerShaderStage = Get(gl, GL_MAX_UNIFORM_BUFFER_BINDINGS);
     limits->v1.maxUniformBufferBindingSize = Get(gl, GL_MAX_UNIFORM_BLOCK_SIZE);
@@ -398,6 +398,12 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
     bool supportsStencilWriteTexture =
         gl.GetVersion().IsDesktop() || gl.IsGLExtensionSupported("GL_OES_texture_stencil8");
 
+    bool isFloat32Renderable = gl.GetVersion().IsDesktop() || gl.IsAtLeastGLES(3, 2) ||
+                               gl.IsGLExtensionSupported("GL_EXT_color_buffer_float");
+    bool isFloat16Renderable =
+        isFloat32Renderable || gl.IsGLExtensionSupported("GL_EXT_color_buffer_half_float");
+    bool isRG11B10UfloatRenderable = isFloat32Renderable;
+
     // TODO(crbug.com/dawn/343): Investigate emulation.
     deviceToggles->Default(Toggle::DisableIndexedDrawBuffers, !supportsIndexedDrawBuffers);
     deviceToggles->Default(Toggle::DisableSampleVariables, !supportsSampleVariables);
@@ -425,6 +431,16 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
 
     // For OpenGL ES, use compute shader blit to emulate rgb9e5ufloat texture to buffer copies.
     deviceToggles->Default(Toggle::UseBlitForRGB9E5UfloatTextureCopy, gl.GetVersion().IsES());
+
+    // Use compute shader blit to emulate rg11b10ufloat texture to buffer copies if not color
+    // renderable.
+    deviceToggles->Default(Toggle::UseBlitForRG11B10UfloatTextureCopy, !isRG11B10UfloatRenderable);
+
+    // Use compute shader blit to emulate float16 texture to buffer copies if not color renderable.
+    deviceToggles->Default(Toggle::UseBlitForFloat16TextureCopy, !isFloat16Renderable);
+
+    // Use compute shader blit to emulate float32 texture to buffer copies if not color renderable.
+    deviceToggles->Default(Toggle::UseBlitForFloat32TextureCopy, !isFloat32Renderable);
 
     // Use a blit to emulate stencil-only buffer-to-texture copies.
     deviceToggles->Default(Toggle::UseBlitForBufferToStencilTextureCopy, true);
@@ -454,17 +470,19 @@ ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(
     }
 
     bool useRobustness = !deviceToggles.IsEnabled(Toggle::DisableRobustness);
+    bool forceES31AndMinExtensions = deviceToggles.IsEnabled(Toggle::GLForceES31AndNoExtensions);
 
     std::unique_ptr<ContextEGL> context;
     DAWN_TRY_ASSIGN(context, ContextEGL::Create(mDisplay, GetBackendType(), useRobustness,
-                                                useANGLETextureSharing));
+                                                useANGLETextureSharing, forceES31AndMinExtensions));
 
     return Device::Create(adapter, descriptor, mFunctions, std::move(context), deviceToggles,
                           std::move(lostEvent));
 }
 
-bool PhysicalDevice::SupportsFeatureLevel(FeatureLevel featureLevel) const {
-    return featureLevel == FeatureLevel::Compatibility;
+bool PhysicalDevice::SupportsFeatureLevel(wgpu::FeatureLevel featureLevel,
+                                          InstanceBase* instance) const {
+    return featureLevel == wgpu::FeatureLevel::Compatibility;
 }
 
 ResultOrError<PhysicalDeviceSurfaceCapabilities> PhysicalDevice::GetSurfaceCapabilities(

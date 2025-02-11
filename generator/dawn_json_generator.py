@@ -142,6 +142,12 @@ class EnumType(Type):
             if prefix == 0 and 'native' in tags:
                 prefix = 0x0001_0000
 
+            if 'deprecated' not in tags:
+                if 'emscripten' in tags:
+                    assert value_name.startswith('emscripten')
+                else:
+                    assert not value_name.startswith('emscripten')
+
             value += prefix
 
             if value_name == "undefined":
@@ -152,12 +158,15 @@ class EnumType(Type):
             self.values.append(
                 EnumValue(Name(value_name), value, m.get('valid', True), m))
 
-        # Assert that all values are unique in enums
+        # Assert that all values except those with "enum_value_conflict": true are unique in enums
         all_values = set()
         for value in self.values:
             if value.value in all_values:
-                raise Exception("Duplicate value {} in enum {}".format(
-                    value.value, name))
+                #TODO(42241174) remove this condition once wgpu refactoring is complete.
+                if not value.json_data.get('enum_value_conflict', False):
+                    raise Exception(
+                        "Duplicate value {} for '{}' in enum '{}'".format(
+                            hex(value.value), value.name.get(), name))
             all_values.add(value.value)
         self.is_wire_transparent = True
 
@@ -292,6 +301,14 @@ class Record:
 
 class StructureType(Record, Type):
     def __init__(self, is_enabled, name, json_data):
+        tags = json_data.get('tags', [])
+        if 'deprecated' not in tags:
+            if 'emscripten' in tags:
+                if name != 'INTERNAL_HAVE_EMDAWNWEBGPU_HEADER':
+                    assert name.startswith('emscripten')
+            else:
+                assert not name.startswith('emscripten')
+
         Record.__init__(self, name)
         json_data_override = {}
         if 'members' in json_data:
@@ -712,11 +729,6 @@ def compute_kotlin_params(loaded_json, kotlin_json):
 
     def kotlin_record_members(members):
         for member in members:
-            # Skip over callback infos as we haven't implemented support for them yet.
-            # TODO(352710628) support converting callback info.
-            if member.type.category in ['callback info']:
-                continue
-
             # length parameters are omitted because Kotlin containers have 'length'.
             if member in [m.length for m in members]:
                 continue
@@ -763,9 +775,6 @@ def compute_kotlin_params(loaded_json, kotlin_json):
         return True
 
     def include_structure(structure):
-        # TODO(352710628) support converting callback info.
-        if structure.name.canonical_case().endswith(" callback info"):
-            return False
         if structure.name.canonical_case() == "string view":
             return False
         return True
@@ -981,7 +990,7 @@ def find_by_name(members, name):
     for member in members:
         if member.name.get() == name:
             return member
-    assert False
+    return None
 
 
 def has_callback_arguments(method):
@@ -1007,6 +1016,11 @@ def is_wire_serializable(type):
             and type.category != 'callback info'
             and type.category != 'callback function'
             and type.name.get() != 'void *')
+
+
+def is_enum_value_proxy(value):
+    return ('deprecated' in value.json_data.get('tags', [])
+            and value.json_data.get('enum_value_conflict', False))
 
 
 def unreachable_code(msg="unreachable_code"):
@@ -1072,6 +1086,7 @@ def make_base_render_params(metadata):
             'find_by_name': find_by_name,
             'print': print,
             'unreachable_code': unreachable_code,
+            'is_enum_value_proxy': is_enum_value_proxy,
         }
 
 
@@ -1431,7 +1446,8 @@ class MultiGeneratorFromDawnJSON(Generator):
             ]
 
             by_category = params_kotlin['by_category']
-            for structure in by_category['structure']:
+            for structure in by_category['structure'] + by_category[
+                    'callback info']:
                 if structure.name.get() != "string view":
                     renders.append(
                         FileRender('art/api_kotlin_structure.kt',
@@ -1448,7 +1464,8 @@ class MultiGeneratorFromDawnJSON(Generator):
                         [RENDER_PARAMS_BASE, params_kotlin, {
                             'obj': obj
                         }]))
-            for function_pointer in by_category['function pointer']:
+            for function_pointer in (by_category['function pointer'] +
+                                     by_category['callback function']):
                 renders.append(
                     FileRender('art/api_kotlin_function_pointer.kt',
                                'java/' + jni_name(function_pointer) + '.kt', [

@@ -34,6 +34,8 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+
+	"dawn.googlesource.com/dawn/tools/src/oswrapper"
 )
 
 // ThisLine returns the filepath and line number of the calling function
@@ -81,9 +83,9 @@ func pathOfFileInParentDirs(path string, name string) string {
 // ExpandHome returns the string with all occurrences of '~' replaced with the
 // user's home directory. The the user's home directory cannot be found, then
 // the input string is returned.
-func ExpandHome(path string) string {
+func ExpandHome(path string, environProvider oswrapper.EnvironProvider) string {
 	if strings.ContainsRune(path, '~') {
-		if home, err := os.UserHomeDir(); err == nil {
+		if home, err := environProvider.UserHomeDir(); err == nil {
 			return strings.ReplaceAll(path, "~", home)
 		}
 	}

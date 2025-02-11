@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void fma_466442() {
   float res = 2.0f;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   fma_466442();
   return;
 }
+//
+// compute_main
+//
+void fma_466442() {
+  float res = 2.0f;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   fma_466442();
   return;
+}
+//
+// vertex_main
+//
+void fma_466442() {
+  float res = 2.0f;
 }
 
 struct VertexOutput {

@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void select_9b478d() {
   bool arg_2 = true;
   int res = (arg_2 ? 1 : 1);
@@ -7,11 +10,25 @@ void fragment_main() {
   select_9b478d();
   return;
 }
+//
+// compute_main
+//
+void select_9b478d() {
+  bool arg_2 = true;
+  int res = (arg_2 ? 1 : 1);
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   select_9b478d();
   return;
+}
+//
+// vertex_main
+//
+void select_9b478d() {
+  bool arg_2 = true;
+  int res = (arg_2 ? 1 : 1);
 }
 
 struct VertexOutput {

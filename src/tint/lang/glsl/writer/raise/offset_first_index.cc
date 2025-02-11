@@ -79,7 +79,9 @@ struct State {
         // ShaderIO transforms these input builtins such that they are loaded a single time and then
         // converted to u32. We add the offset to the result of the conversion.
         auto* load = GetSingularUse<core::ir::Load>(var);
-        auto* index = GetSingularUse<core::ir::Convert>(load);
+        auto* index = load->Result(0)->Type()->Is<core::type::U32>()
+                          ? load
+                          : GetSingularUse<core::ir::Convert>(load);
 
         // Replace users of the original load with the result of the offset calculation.
         auto* offset_index = b.InstructionResult<u32>();

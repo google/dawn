@@ -40,9 +40,13 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kImageSampleDrefImplicitLod:
         case BuiltinFn::kImageSampleDrefExplicitLod:
         case BuiltinFn::kSampledImage:
+        case BuiltinFn::kCooperativeMatrixLoad:
             return core::ir::Instruction::Accesses{core::ir::Instruction::Access::kLoad};
 
         case BuiltinFn::kImageWrite:
+        case BuiltinFn::kModf:
+        case BuiltinFn::kFrexp:
+        case BuiltinFn::kCooperativeMatrixStore:
             return core::ir::Instruction::Accesses{core::ir::Instruction::Access::kStore};
 
         case BuiltinFn::kAtomicAnd:
@@ -72,6 +76,28 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kSdot:
         case BuiltinFn::kUdot:
         case BuiltinFn::kNone:
+        case BuiltinFn::kNormalize:
+        case BuiltinFn::kInverse:
+        case BuiltinFn::kSign:
+        case BuiltinFn::kAbs:
+        case BuiltinFn::kSmax:
+        case BuiltinFn::kSmin:
+        case BuiltinFn::kSclamp:
+        case BuiltinFn::kUmax:
+        case BuiltinFn::kUmin:
+        case BuiltinFn::kUclamp:
+        case BuiltinFn::kFindILsb:
+        case BuiltinFn::kFindSMsb:
+        case BuiltinFn::kFindUMsb:
+        case BuiltinFn::kRefract:
+        case BuiltinFn::kReflect:
+        case BuiltinFn::kFaceForward:
+        case BuiltinFn::kLdexp:
+        case BuiltinFn::kCooperativeMatrixMulAdd:
+        case BuiltinFn::kBitCount:
+        case BuiltinFn::kBitFieldInsert:
+        case BuiltinFn::kBitFieldSExtract:
+        case BuiltinFn::kBitFieldUExtract:
             break;
     }
     return core::ir::Instruction::Accesses{};

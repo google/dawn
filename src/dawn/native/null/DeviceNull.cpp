@@ -61,7 +61,7 @@ bool PhysicalDevice::SupportsExternalImages() const {
     return false;
 }
 
-bool PhysicalDevice::SupportsFeatureLevel(FeatureLevel) const {
+bool PhysicalDevice::SupportsFeatureLevel(wgpu::FeatureLevel, InstanceBase*) const {
     return true;
 }
 
@@ -111,6 +111,10 @@ ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(
 }
 
 void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info) const {
+    if (auto* subgroupProperties = info.Get<AdapterPropertiesSubgroups>()) {
+        subgroupProperties->subgroupMinSize = 4;
+        subgroupProperties->subgroupMaxSize = 128;
+    }
     if (auto* memoryHeapProperties = info.Get<AdapterPropertiesMemoryHeaps>()) {
         auto* heapInfo = new MemoryHeapInfo[1];
         memoryHeapProperties->heapCount = 1;
@@ -292,7 +296,7 @@ MaybeError Device::CopyFromStagingToBufferImpl(BufferBase* source,
 }
 
 MaybeError Device::CopyFromStagingToTextureImpl(const BufferBase* source,
-                                                const TextureDataLayout& src,
+                                                const TexelCopyBufferLayout& src,
                                                 const TextureCopy& dst,
                                                 const Extent3D& copySizePixels) {
     return {};
@@ -491,10 +495,10 @@ MaybeError ComputePipeline::InitializeImpl() {
     // Do the workgroup size validation.
     const CombinedLimits& limits = GetDevice()->GetLimits();
     Extent3D _;
-    DAWN_TRY_ASSIGN(
-        _, ValidateComputeStageWorkgroupSize(transformedProgram, computeStage.entryPoint.c_str(),
-                                             LimitsForCompilationRequest::Create(limits.v1)));
-
+    DAWN_TRY_ASSIGN(_, ValidateComputeStageWorkgroupSize(
+                           transformedProgram, computeStage.entryPoint.c_str(),
+                           LimitsForCompilationRequest::Create(limits.v1),
+                           static_cast<const AdapterBase*>(GetDevice()->GetAdapter())));
     return {};
 }
 

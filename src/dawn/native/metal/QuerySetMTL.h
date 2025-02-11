@@ -46,8 +46,7 @@ class QuerySet final : public QuerySetBase {
     QuerySet(DeviceBase* device, const QuerySetDescriptor* descriptor);
 
     id<MTLBuffer> GetVisibilityBuffer() const;
-    id<MTLCounterSampleBuffer> GetCounterSampleBuffer() const
-        API_AVAILABLE(macos(10.15), ios(14.0));
+    id<MTLCounterSampleBuffer> GetCounterSampleBuffer() const;
 
   private:
     using QuerySetBase::QuerySetBase;
@@ -59,10 +58,8 @@ class QuerySet final : public QuerySetBase {
     void DestroyImpl() override;
 
     NSPRef<id<MTLBuffer>> mVisibilityBuffer;
-    // Note that mCounterSampleBuffer cannot be an NSRef because the API_AVAILABLE macros don't
-    // propagate nicely through templates.
-    id<MTLCounterSampleBuffer> mCounterSampleBuffer API_AVAILABLE(macos(10.15),
-                                                                  ios(14.0)) = nullptr;
+
+    id<MTLCounterSampleBuffer> mCounterSampleBuffer = nullptr;
 };
 
 }  // namespace dawn::native::metal

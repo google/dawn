@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void tan_311400() {
   float res = 1.55740773677825927734f;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   tan_311400();
   return;
 }
+//
+// compute_main
+//
+void tan_311400() {
+  float res = 1.55740773677825927734f;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   tan_311400();
   return;
+}
+//
+// vertex_main
+//
+void tan_311400() {
+  float res = 1.55740773677825927734f;
 }
 
 struct VertexOutput {

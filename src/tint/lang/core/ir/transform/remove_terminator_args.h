@@ -41,11 +41,13 @@ namespace tint::core::ir::transform {
 /// The capabilities that the transform can support.
 const core::ir::Capabilities kRemoveTerminatorArgsCapabilities{
     core::ir::Capability::kAllow8BitIntegers,
-    core::ir::Capability::kAllowPointersInStructures,
+    core::ir::Capability::kAllow64BitIntegers,
+    core::ir::Capability::kAllowPointersAndHandlesInStructures,
     core::ir::Capability::kAllowVectorElementPointer,
     core::ir::Capability::kAllowHandleVarsWithoutBindings,
     core::ir::Capability::kAllowClipDistancesOnF32,
     core::ir::Capability::kAllowPrivateVarsInFunctions,
+    core::ir::Capability::kAllowAnyLetType,
 };
 
 /// RemoveTerminatorArgs is a transform that removes all arguments from terminator instructions and

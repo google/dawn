@@ -42,23 +42,6 @@ class Renamer final : public Castable<Renamer, Transform> {
     /// Remappings is a map of old symbol name to new symbol name
     using Remappings = std::unordered_map<std::string, std::string>;
 
-    /// Data is outputted by the Renamer transform.
-    /// Data holds information about shader usage and constant buffer offsets.
-    struct Data final : public Castable<Data, transform::Data> {
-        /// Constructor
-        /// @param remappings the symbol remappings
-        explicit Data(Remappings&& remappings);
-
-        /// Copy constructor
-        Data(const Data&);
-
-        /// Destructor
-        ~Data() override;
-
-        /// A map of old symbol name to new symbol name
-        const Remappings remappings;
-    };
-
     /// Target is an enumerator of rename targets that can be used
     enum class Target {
         /// Rename every symbol.

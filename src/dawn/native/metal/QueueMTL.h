@@ -50,7 +50,7 @@ class Queue final : public QueueBase {
     CommandRecordingContext* GetPendingCommandContext(SubmitMode submitMode = SubmitMode::Normal);
     MaybeError SubmitPendingCommandBuffer();
     void WaitForCommandsToBeScheduled();
-    id<MTLSharedEvent> GetMTLSharedEvent() const API_AVAILABLE(macos(10.14), ios(12.0));
+    id<MTLSharedEvent> GetMTLSharedEvent() const;
     ResultOrError<Ref<SharedFence>> GetOrCreateSharedFence();
 
     Ref<SystemEvent> CreateWorkDoneSystemEvent(ExecutionSerial serial);

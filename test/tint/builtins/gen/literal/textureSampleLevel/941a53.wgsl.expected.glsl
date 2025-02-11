@@ -1,21 +1,27 @@
+//
+// fragment_main
+//
 #version 460
 #extension GL_EXT_texture_shadow_lod: require
 precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer prevent_dce_block_1_ssbo {
+buffer f_prevent_dce_block_ssbo {
   float inner;
 } v;
-uniform highp samplerCubeArrayShadow arg_0_arg_1;
+uniform highp samplerCubeArrayShadow f_arg_0_arg_1;
 float textureSampleLevel_941a53() {
   vec4 v_1 = vec4(vec3(1.0f), float(1u));
-  float res = textureLod(arg_0_arg_1, v_1, 0.0f, float(1u));
+  float res = textureLod(f_arg_0_arg_1, v_1, 0.0f, float(1u));
   return res;
 }
 void main() {
   v.inner = textureSampleLevel_941a53();
 }
+//
+// compute_main
+//
 #version 460
 #extension GL_EXT_texture_shadow_lod: require
 
@@ -33,6 +39,9 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   v.inner = textureSampleLevel_941a53();
 }
+//
+// vertex_main
+//
 #version 460
 #extension GL_EXT_texture_shadow_lod: require
 
@@ -42,24 +51,22 @@ struct VertexOutput {
   float prevent_dce;
 };
 
-uniform highp samplerCubeArrayShadow arg_0_arg_1;
-layout(location = 0) flat out float vertex_main_loc0_Output;
+uniform highp samplerCubeArrayShadow v_arg_0_arg_1;
+layout(location = 0) flat out float tint_interstage_location0;
 float textureSampleLevel_941a53() {
   vec4 v = vec4(vec3(1.0f), float(1u));
-  float res = textureLod(arg_0_arg_1, v, 0.0f, float(1u));
+  float res = textureLod(v_arg_0_arg_1, v, 0.0f, float(1u));
   return res;
 }
 VertexOutput vertex_main_inner() {
-  VertexOutput tint_symbol = VertexOutput(vec4(0.0f), 0.0f);
-  tint_symbol.pos = vec4(0.0f);
-  tint_symbol.prevent_dce = textureSampleLevel_941a53();
-  return tint_symbol;
+  VertexOutput v_1 = VertexOutput(vec4(0.0f), 0.0f);
+  v_1.pos = vec4(0.0f);
+  v_1.prevent_dce = textureSampleLevel_941a53();
+  return v_1;
 }
 void main() {
-  VertexOutput v_1 = vertex_main_inner();
-  gl_Position = v_1.pos;
-  gl_Position.y = -(gl_Position.y);
-  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
-  vertex_main_loc0_Output = v_1.prevent_dce;
+  VertexOutput v_2 = vertex_main_inner();
+  gl_Position = vec4(v_2.pos.x, -(v_2.pos.y), ((2.0f * v_2.pos.z) - v_2.pos.w), v_2.pos.w);
+  tint_interstage_location0 = v_2.prevent_dce;
   gl_PointSize = 1.0f;
 }

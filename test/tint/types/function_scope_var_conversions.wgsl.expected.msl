@@ -1,12 +1,12 @@
 #include <metal_stdlib>
-
 using namespace metal;
+
 void constant_with_non_constant() {
   float a = 0.0f;
   float2 b = float2(1.0f, a);
 }
 
-kernel void tint_symbol() {
+kernel void v() {
   bool bool_var1 = true;
   bool bool_var2 = true;
   bool bool_var3 = true;
@@ -29,6 +29,4 @@ kernel void tint_symbol() {
   bool3 v3bool_var4 = bool3(true);
   bool4 v4bool_var5 = bool4(true, false, true, false);
   constant_with_non_constant();
-  return;
 }
-

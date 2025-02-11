@@ -177,12 +177,13 @@ struct State {
                 TINT_ASSERT(mem_ty->Is<core::type::Scalar>());
                 core::ir::Instruction* from =
                     b.Access(ty.ptr<private_>(mem_ty), pixel_local_var, u32(mem->Index()));
+                from = b.Load(from);
                 if (mem_ty != rov.subtype) {
                     // ROV and struct member types don't match
                     from = b.Convert(rov.subtype, from);
                 }
                 // Store requires a vec4
-                from = b.Swizzle(ty.vec4(rov.subtype), from, {0, 0, 0, 0});
+                from = b.Construct(ty.vec4(rov.subtype), from);
                 core::ir::Instruction* to = b.Load(rov.var);
                 b.Call<hlsl::ir::BuiltinCall>(  //
                     ty.void_(), hlsl::BuiltinFn::kTextureStore, to, coord, from);
@@ -232,7 +233,7 @@ struct State {
         auto rovs = CreateROVs(pixel_local_struct);
 
         for (auto f : ir.functions) {
-            if (f->Stage() == core::ir::Function::PipelineStage::kFragment) {
+            if (f->IsFragment()) {
                 ProcessFragmentEntryPoint(f, pixel_local_var, pixel_local_struct, rovs);
             }
         }

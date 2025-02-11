@@ -1,7 +1,7 @@
 #version 310 es
 
 layout(binding = 0, std430)
-buffer tint_symbol_block_1_ssbo {
+buffer buffer_block_1_ssbo {
   uint inner;
 } v_1;
 uint foo() {

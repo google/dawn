@@ -13,6 +13,5 @@ uniform highp sampler2DMS texture0;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   uvec2 v_1 = (uvec2(textureSize(texture0)) - uvec2(1u));
-  ivec2 v_2 = ivec2(min(uvec2(ivec2(0)), v_1));
-  v.inner.colorSamples[0u] = texelFetch(texture0, v_2, int(0)).x;
+  v.inner.colorSamples[0u] = texelFetch(texture0, ivec2(min(uvec2(ivec2(0)), v_1)), 0).x;
 }

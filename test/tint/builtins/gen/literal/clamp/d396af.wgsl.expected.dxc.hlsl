@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void clamp_d396af() {
   int4 res = (1).xxxx;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   clamp_d396af();
   return;
 }
+//
+// compute_main
+//
+void clamp_d396af() {
+  int4 res = (1).xxxx;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   clamp_d396af();
   return;
+}
+//
+// vertex_main
+//
+void clamp_d396af() {
+  int4 res = (1).xxxx;
 }
 
 struct VertexOutput {

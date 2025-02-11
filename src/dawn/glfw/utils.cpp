@@ -45,6 +45,12 @@
 #endif
 #include "GLFW/glfw3native.h"
 
+WGPU_GLFW_EXPORT WGPUSurface wgpuGlfwCreateSurfaceForWindow(const WGPUInstance instance,
+                                                            GLFWwindow* window) {
+    wgpu::Surface s = wgpu::glfw::CreateSurfaceForWindow(instance, window);
+    return s.MoveToCHandle();
+}
+
 namespace wgpu::glfw {
 
 wgpu::Surface CreateSurfaceForWindow(const wgpu::Instance& instance, GLFWwindow* window) {

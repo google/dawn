@@ -28,6 +28,8 @@
 #ifndef SRC_TINT_LANG_SPIRV_WRITER_COMMON_OPTIONS_H_
 #define SRC_TINT_LANG_SPIRV_WRITER_COMMON_OPTIONS_H_
 
+#include <optional>
+#include <string>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -129,6 +131,19 @@ struct Bindings {
 
 /// Configuration options used for generating SPIR-V.
 struct Options {
+    struct RangeOffsets {
+        /// The offset of the min_depth push constant
+        uint32_t min = 0;
+        /// The offset of the max_depth push constant
+        uint32_t max = 0;
+
+        /// Reflect the fields of this class so that it can be used by tint::ForeachField()
+        TINT_REFLECT(RangeOffsets, min, max);
+    };
+
+    /// An optional remapped name to use when emitting the entry point.
+    std::string remapped_entry_point_name = {};
+
     /// The bindings
     Bindings bindings;
 
@@ -137,6 +152,9 @@ struct Options {
     // duplicate spir-v bindings, since they must map to the spir-v bindings of
     // the samplers with which they are paired.
     std::unordered_set<BindingPoint> statically_paired_texture_binding_points = {};
+
+    /// Set to `true` to strip all user-declared identifiers from the module.
+    bool strip_all_names = false;
 
     /// Set to `true` to disable software robustness that prevents out-of-bounds accesses.
     bool disable_robustness = false;
@@ -173,16 +191,25 @@ struct Options {
     /// Set to `true` to generate polyfill for `dot4I8Packed` and `dot4U8Packed` builtins
     bool polyfill_dot_4x8_packed = false;
 
+    /// Set to `true` to generate polyfill for `pack4x8snorm`, `pack4x8unorm`, `unpack4x8snorm` and
+    /// `unpack4x8unorm` builtins
+    bool polyfill_pack_unpack_4x8_norm = false;
+
     /// Set to `true` to disable the polyfills on integer division and modulo.
     bool disable_polyfill_integer_div_mod = false;
 
     /// Set to `true` if the Vulkan Memory Model should be used
     bool use_vulkan_memory_model = false;
 
+    /// Offsets of the minDepth and maxDepth push constants.
+    std::optional<RangeOffsets> depth_range_offsets;
+
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(Options,
+                 remapped_entry_point_name,
                  bindings,
                  statically_paired_texture_binding_points,
+                 strip_all_names,
                  disable_robustness,
                  disable_image_robustness,
                  disable_runtime_sized_array_index_clamping,
@@ -194,8 +221,10 @@ struct Options {
                  clamp_frag_depth,
                  pass_matrix_by_pointer,
                  polyfill_dot_4x8_packed,
+                 polyfill_pack_unpack_4x8_norm,
                  disable_polyfill_integer_div_mod,
-                 use_vulkan_memory_model);
+                 use_vulkan_memory_model,
+                 depth_range_offsets);
 };
 
 }  // namespace tint::spirv::writer

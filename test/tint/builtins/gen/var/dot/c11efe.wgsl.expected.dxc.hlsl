@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void dot_c11efe() {
   int res = 3;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   dot_c11efe();
   return;
 }
+//
+// compute_main
+//
+void dot_c11efe() {
+  int res = 3;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   dot_c11efe();
   return;
+}
+//
+// vertex_main
+//
+void dot_c11efe() {
+  int res = 3;
 }
 
 struct VertexOutput {

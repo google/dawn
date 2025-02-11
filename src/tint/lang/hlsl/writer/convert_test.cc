@@ -36,7 +36,7 @@ namespace {
 TEST_F(HlslWriterTest, ConvertU32) {
     auto* f = b.Function("a", ty.u32());
     b.Append(f->Block(), [&] {
-        auto* v = b.Var("v", 2_i);
+        auto* v = b.Let("v", 2_i);
         b.Return(f, b.Convert(ty.u32(), v));
     });
 

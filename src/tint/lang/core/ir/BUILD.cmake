@@ -64,6 +64,8 @@ tint_add_target(tint_lang_core_ir lib
   lang/core/ir/call.h
   lang/core/ir/clone_context.cc
   lang/core/ir/clone_context.h
+  lang/core/ir/const_param_validator.cc
+  lang/core/ir/const_param_validator.h
   lang/core/ir/constant.cc
   lang/core/ir/constant.h
   lang/core/ir/construct.cc
@@ -125,6 +127,8 @@ tint_add_target(tint_lang_core_ir lib
   lang/core/ir/operand_instruction.h
   lang/core/ir/override.cc
   lang/core/ir/override.h
+  lang/core/ir/phony.cc
+  lang/core/ir/phony.h
   lang/core/ir/referenced_functions.h
   lang/core/ir/referenced_module_decls.h
   lang/core/ir/referenced_module_vars.h
@@ -194,6 +198,7 @@ tint_add_target(tint_lang_core_ir_test test
   lang/core/ir/block_test.cc
   lang/core/ir/break_if_test.cc
   lang/core/ir/builder_test.cc
+  lang/core/ir/const_param_validator_test.cc
   lang/core/ir/constant_test.cc
   lang/core/ir/construct_test.cc
   lang/core/ir/continue_test.cc
@@ -233,7 +238,15 @@ tint_add_target(tint_lang_core_ir_test test
   lang/core/ir/traverse_test.cc
   lang/core/ir/unreachable_test.cc
   lang/core/ir/user_call_test.cc
+  lang/core/ir/validator_access_test.cc
+  lang/core/ir/validator_builtin_test.cc
+  lang/core/ir/validator_call_test.cc
+  lang/core/ir/validator_flow_control_test.cc
+  lang/core/ir/validator_function_test.cc
   lang/core/ir/validator_test.cc
+  lang/core/ir/validator_test.h
+  lang/core/ir/validator_type_test.cc
+  lang/core/ir/validator_value_test.cc
   lang/core/ir/value_test.cc
   lang/core/ir/var_test.cc
 )

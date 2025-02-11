@@ -339,6 +339,7 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
                         case wgpu::BufferBindingType::ReadOnlyStorage:
                             target = GL_SHADER_STORAGE_BUFFER;
                             break;
+                        case wgpu::BufferBindingType::BindingNotUsed:
                         case wgpu::BufferBindingType::Undefined:
                             DAWN_UNREACHABLE();
                     }
@@ -409,6 +410,7 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
                         case wgpu::StorageTextureAccess::ReadOnly:
                             access = GL_READ_ONLY;
                             break;
+                        case wgpu::StorageTextureAccess::BindingNotUsed:
                         case wgpu::StorageTextureAccess::Undefined:
                             DAWN_UNREACHABLE();
                     }
@@ -683,7 +685,7 @@ MaybeError CommandBuffer::Execute() {
 
                 gl.BindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer->GetHandle());
 
-                TextureDataLayout dataLayout;
+                TexelCopyBufferLayout dataLayout;
                 dataLayout.offset = 0;
                 dataLayout.bytesPerRow = src.bytesPerRow;
                 dataLayout.rowsPerImage = src.rowsPerImage;
@@ -1414,7 +1416,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass) {
 void DoTexSubImage(const OpenGLFunctions& gl,
                    const TextureCopy& destination,
                    const void* data,
-                   const TextureDataLayout& dataLayout,
+                   const TexelCopyBufferLayout& dataLayout,
                    const Extent3D& copySize) {
     Texture* texture = ToBackend(destination.texture.Get());
 

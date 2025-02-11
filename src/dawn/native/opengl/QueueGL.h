@@ -59,10 +59,10 @@ class Queue final : public QueueBase {
                                uint64_t bufferOffset,
                                const void* data,
                                size_t size) override;
-    MaybeError WriteTextureImpl(const ImageCopyTexture& destination,
+    MaybeError WriteTextureImpl(const TexelCopyTextureInfo& destination,
                                 const void* data,
                                 size_t dataSize,
-                                const TextureDataLayout& dataLayout,
+                                const TexelCopyBufferLayout& dataLayout,
                                 const Extent3D& writeSizePixel) override;
 
     ResultOrError<bool> WaitForQueueSerial(ExecutionSerial serial, Nanoseconds timeout) override;

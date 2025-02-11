@@ -1,39 +1,58 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
-
 using namespace metal;
+
 struct SB_RW_atomic {
   /* 0x0000 */ atomic_int arg_0;
 };
 
-struct SB_RW {
-  int arg_0;
+struct tint_module_vars_struct {
+  device SB_RW_atomic* sb_rw;
 };
 
-void atomicStore_d1e9a6(device SB_RW_atomic* const tint_symbol) {
+void atomicStore_d1e9a6(tint_module_vars_struct tint_module_vars) {
   int arg_1 = 0;
   arg_1 = 1;
   int const x_20 = arg_1;
-  atomic_store_explicit(&((*(tint_symbol)).arg_0), x_20, memory_order_relaxed);
-  return;
+  atomic_store_explicit((&(*tint_module_vars.sb_rw).arg_0), x_20, memory_order_relaxed);
 }
 
-void fragment_main_1(device SB_RW_atomic* const tint_symbol_1) {
-  atomicStore_d1e9a6(tint_symbol_1);
-  return;
+void fragment_main_1(tint_module_vars_struct tint_module_vars) {
+  atomicStore_d1e9a6(tint_module_vars);
 }
 
-fragment void fragment_main(device SB_RW_atomic* tint_symbol_2 [[buffer(0)]]) {
-  fragment_main_1(tint_symbol_2);
-  return;
+fragment void fragment_main(device SB_RW_atomic* sb_rw [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sb_rw=sb_rw};
+  fragment_main_1(tint_module_vars);
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+struct SB_RW_atomic {
+  /* 0x0000 */ atomic_int arg_0;
+};
+
+struct tint_module_vars_struct {
+  device SB_RW_atomic* sb_rw;
+};
+
+void atomicStore_d1e9a6(tint_module_vars_struct tint_module_vars) {
+  int arg_1 = 0;
+  arg_1 = 1;
+  int const x_20 = arg_1;
+  atomic_store_explicit((&(*tint_module_vars.sb_rw).arg_0), x_20, memory_order_relaxed);
 }
 
-void compute_main_1(device SB_RW_atomic* const tint_symbol_3) {
-  atomicStore_d1e9a6(tint_symbol_3);
-  return;
+void compute_main_1(tint_module_vars_struct tint_module_vars) {
+  atomicStore_d1e9a6(tint_module_vars);
 }
 
-kernel void compute_main(device SB_RW_atomic* tint_symbol_4 [[buffer(0)]]) {
-  compute_main_1(tint_symbol_4);
-  return;
+kernel void compute_main(device SB_RW_atomic* sb_rw [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sb_rw=sb_rw};
+  compute_main_1(tint_module_vars);
 }
-

@@ -474,6 +474,18 @@ BuiltinFn ParseBuiltinFn(std::string_view name) {
     if (name == "quadSwapDiagonal") {
         return BuiltinFn::kQuadSwapDiagonal;
     }
+    if (name == "subgroupMatrixLoad") {
+        return BuiltinFn::kSubgroupMatrixLoad;
+    }
+    if (name == "subgroupMatrixStore") {
+        return BuiltinFn::kSubgroupMatrixStore;
+    }
+    if (name == "subgroupMatrixMultiply") {
+        return BuiltinFn::kSubgroupMatrixMultiply;
+    }
+    if (name == "subgroupMatrixMultiplyAccumulate") {
+        return BuiltinFn::kSubgroupMatrixMultiplyAccumulate;
+    }
     return BuiltinFn::kNone;
 }
 
@@ -771,6 +783,14 @@ const char* str(BuiltinFn i) {
             return "quadSwapY";
         case BuiltinFn::kQuadSwapDiagonal:
             return "quadSwapDiagonal";
+        case BuiltinFn::kSubgroupMatrixLoad:
+            return "subgroupMatrixLoad";
+        case BuiltinFn::kSubgroupMatrixStore:
+            return "subgroupMatrixStore";
+        case BuiltinFn::kSubgroupMatrixMultiply:
+            return "subgroupMatrixMultiply";
+        case BuiltinFn::kSubgroupMatrixMultiplyAccumulate:
+            return "subgroupMatrixMultiplyAccumulate";
     }
     return "<unknown>";
 }

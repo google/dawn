@@ -1,3 +1,6 @@
+//
+// main0
+//
 #version 310 es
 precision highp float;
 precision highp int;
@@ -9,6 +12,9 @@ int main0_inner() {
 void main() {
   main0_loc0_Output = main0_inner();
 }
+//
+// main1
+//
 #version 310 es
 precision highp float;
 precision highp int;
@@ -20,6 +26,9 @@ uint main1_inner() {
 void main() {
   main1_loc1_Output = main1_inner();
 }
+//
+// main2
+//
 #version 310 es
 precision highp float;
 precision highp int;
@@ -31,6 +40,9 @@ float main2_inner() {
 void main() {
   main2_loc2_Output = main2_inner();
 }
+//
+// main3
+//
 #version 310 es
 precision highp float;
 precision highp int;
@@ -42,6 +54,9 @@ vec4 main3_inner() {
 void main() {
   main3_loc3_Output = main3_inner();
 }
+//
+// main4
+//
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float: require
 precision highp float;
@@ -54,6 +69,9 @@ float16_t main4_inner() {
 void main() {
   main4_loc4_Output = main4_inner();
 }
+//
+// main5
+//
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float: require
 precision highp float;

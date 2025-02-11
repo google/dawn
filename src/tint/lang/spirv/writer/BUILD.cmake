@@ -46,8 +46,6 @@ if(TINT_BUILD_SPV_WRITER)
 # Condition: TINT_BUILD_SPV_WRITER
 ################################################################################
 tint_add_target(tint_lang_spirv_writer lib
-  lang/spirv/writer/output.cc
-  lang/spirv/writer/output.h
   lang/spirv/writer/writer.cc
   lang/spirv/writer/writer.h
 )

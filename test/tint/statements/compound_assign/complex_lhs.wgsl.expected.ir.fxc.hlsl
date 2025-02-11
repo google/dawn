@@ -20,7 +20,9 @@ void main() {
   int v_1 = bar();
   int v_2 = (x.a[v][min(uint(v_1), 3u)] + int(5));
   int4 v_3 = x.a[v];
-  x.a[v] = (((v_1.xxxx == int4(int(0), int(1), int(2), int(3)))) ? (v_2.xxxx) : (v_3));
+  int4 v_4 = int4((v_2).xxxx);
+  int4 v_5 = int4((v_1).xxxx);
+  x.a[v] = (((v_5 == int4(int(0), int(1), int(2), int(3)))) ? (v_4) : (v_3));
 }
 
 [numthreads(1, 1, 1)]

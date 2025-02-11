@@ -44,7 +44,13 @@ tint_add_target(tint_cmd_remote_compile_cmd cmd
 
 tint_target_add_dependencies(tint_cmd_remote_compile_cmd cmd
   tint_utils
+  tint_utils_command
+  tint_utils_containers
+  tint_utils_ice
   tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_rtti
 )
 
 tint_target_add_external_dependencies(tint_cmd_remote_compile_cmd cmd

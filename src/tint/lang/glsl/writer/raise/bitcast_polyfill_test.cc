@@ -437,9 +437,8 @@ TEST_F(GlslWriter_BitcastPolyfillTest, U32ToVec2F16) {
 }
 %tint_bitcast_to_f16 = func(%src:u32):vec2<f16> {
   $B2: {
-    %7:u32 = convert %src
-    %8:vec2<f16> = glsl.unpackFloat2x16 %7
-    ret %8
+    %7:vec2<f16> = glsl.unpackFloat2x16 %src
+    ret %7
   }
 }
 )";
@@ -482,8 +481,7 @@ TEST_F(GlslWriter_BitcastPolyfillTest, Vec2F16ToU32) {
 %tint_bitcast_from_f16 = func(%src:vec2<f16>):u32 {
   $B2: {
     %8:u32 = glsl.packFloat2x16 %src
-    %9:u32 = convert %8
-    ret %9
+    ret %8
   }
 }
 )";
@@ -707,13 +705,12 @@ TEST_F(GlslWriter_BitcastPolyfillTest, Vec2U32ToVec4F16) {
 }
 %tint_bitcast_to_f16 = func(%src:vec2<u32>):vec4<f16> {
   $B2: {
-    %8:vec2<u32> = convert %src
-    %9:u32 = swizzle %8, x
-    %10:vec2<f16> = glsl.unpackFloat2x16 %9
-    %11:u32 = swizzle %8, y
-    %12:vec2<f16> = glsl.unpackFloat2x16 %11
-    %13:vec4<f16> = construct %10, %12
-    ret %13
+    %8:u32 = swizzle %src, x
+    %9:vec2<f16> = glsl.unpackFloat2x16 %8
+    %10:u32 = swizzle %src, y
+    %11:vec2<f16> = glsl.unpackFloat2x16 %10
+    %12:vec4<f16> = construct %9, %11
+    ret %12
   }
 }
 )";
@@ -760,8 +757,7 @@ TEST_F(GlslWriter_BitcastPolyfillTest, Vec4F16ToVec2U32) {
     %10:vec2<f16> = swizzle %src, zw
     %11:u32 = glsl.packFloat2x16 %10
     %12:vec2<u32> = construct %9, %11
-    %13:vec2<u32> = convert %12
-    ret %13
+    ret %12
   }
 }
 )";

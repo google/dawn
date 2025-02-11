@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void normalize_4eaf61() {
   float4 res = (0.5f).xxxx;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   normalize_4eaf61();
   return;
 }
+//
+// compute_main
+//
+void normalize_4eaf61() {
+  float4 res = (0.5f).xxxx;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   normalize_4eaf61();
   return;
+}
+//
+// vertex_main
+//
+void normalize_4eaf61() {
+  float4 res = (0.5f).xxxx;
 }
 
 struct VertexOutput {

@@ -127,6 +127,7 @@ tint_target_add_dependencies(tint_lang_spirv_writer_raise_test test
   tint_lang_core_constant
   tint_lang_core_intrinsic
   tint_lang_core_ir
+  tint_lang_core_ir_transform
   tint_lang_core_ir_transform_test
   tint_lang_core_type
   tint_utils
@@ -149,6 +150,7 @@ tint_target_add_external_dependencies(tint_lang_spirv_writer_raise_test test
 
 if(TINT_BUILD_SPV_WRITER)
   tint_target_add_dependencies(tint_lang_spirv_writer_raise_test test
+    tint_lang_spirv_writer_common
     tint_lang_spirv_writer_raise
   )
 endif(TINT_BUILD_SPV_WRITER)

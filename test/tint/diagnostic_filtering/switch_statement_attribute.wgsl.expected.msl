@@ -11,27 +11,27 @@
               ^
 
 #include <metal_stdlib>
-
 using namespace metal;
-struct tint_symbol_4 {
+
+struct main_inputs {
   float x [[user(locn0)]];
 };
 
-void tint_symbol_inner(float x) {
-  bool tint_symbol_1 = (x == 0.0f);
-  if (tint_symbol_1) {
-    float const tint_symbol_2 = dfdx(1.0f);
-    tint_symbol_1 = (tint_symbol_2 == 0.0f);
+void main_inner(float x) {
+  bool v = false;
+  if ((x == 0.0f)) {
+    v = (dfdx(1.0f) == 0.0f);
+  } else {
+    v = false;
   }
-  switch(int(tint_symbol_1)) {
-    default: {
+  switch(int(v)) {
+    default:
+    {
       break;
     }
   }
 }
 
-fragment void tint_symbol(tint_symbol_4 tint_symbol_3 [[stage_in]]) {
-  tint_symbol_inner(tint_symbol_3.x);
-  return;
+fragment void v_1(main_inputs inputs [[stage_in]]) {
+  main_inner(inputs.x);
 }
-

@@ -103,9 +103,6 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
         return {};
     }
 
-    FeatureLevel featureLevel =
-        options->compatibilityMode ? FeatureLevel::Compatibility : FeatureLevel::Core;
-
     ComPtr<IDXGIAdapter> dxgiAdapter;
     ComPtr<ID3D11Device> d3d11Device;
     if (GetInstance()->ConsumedError(ValidateRequestOptions(options, &dxgiAdapter, &d3d11Device))) {
@@ -117,7 +114,7 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
         if (GetInstance()->ConsumedErrorAndWarnOnce(
                 CreatePhysicalDevice(std::move(dxgiAdapter), std::move(d3d11Device)),
                 &physicalDevice) ||
-            !physicalDevice->SupportsFeatureLevel(featureLevel)) {
+            !physicalDevice->SupportsFeatureLevel(options->featureLevel, GetInstance())) {
             return {};
         }
         return {std::move(physicalDevice)};

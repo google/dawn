@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 struct modf_result_vec2_f32 {
   float2 fract;
   float2 whole;
@@ -10,11 +13,31 @@ void fragment_main() {
   modf_732aa6();
   return;
 }
+//
+// compute_main
+//
+struct modf_result_vec2_f32 {
+  float2 fract;
+  float2 whole;
+};
+void modf_732aa6() {
+  modf_result_vec2_f32 res = {(-0.5f).xx, (-1.0f).xx};
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   modf_732aa6();
   return;
+}
+//
+// vertex_main
+//
+struct modf_result_vec2_f32 {
+  float2 fract;
+  float2 whole;
+};
+void modf_732aa6() {
+  modf_result_vec2_f32 res = {(-0.5f).xx, (-1.0f).xx};
 }
 
 struct VertexOutput {

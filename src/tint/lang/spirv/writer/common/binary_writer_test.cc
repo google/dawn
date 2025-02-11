@@ -28,6 +28,8 @@
 #include "src/tint/lang/spirv/writer/common/binary_writer.h"
 #include "gtest/gtest.h"
 
+TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
+
 namespace tint::spirv::writer {
 namespace {
 
@@ -138,3 +140,5 @@ TEST_F(SpirvWriterBinaryWriterTest, TestInstructionWriter) {
 
 }  // namespace
 }  // namespace tint::spirv::writer
+
+TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);

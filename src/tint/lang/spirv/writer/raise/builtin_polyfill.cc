@@ -107,6 +107,10 @@ struct State {
                     case core::BuiltinFn::kTextureSampleLevel:
                     case core::BuiltinFn::kTextureStore:
                     case core::BuiltinFn::kInputAttachmentLoad:
+                    case core::BuiltinFn::kSubgroupMatrixLoad:
+                    case core::BuiltinFn::kSubgroupMatrixStore:
+                    case core::BuiltinFn::kSubgroupMatrixMultiply:
+                    case core::BuiltinFn::kSubgroupMatrixMultiplyAccumulate:
                         worklist.Push(builtin);
                         break;
                     case core::BuiltinFn::kQuantizeToF16:
@@ -187,6 +191,18 @@ struct State {
                     break;
                 case core::BuiltinFn::kInputAttachmentLoad:
                     InputAttachmentLoad(builtin);
+                    break;
+                case core::BuiltinFn::kSubgroupMatrixLoad:
+                    SubgroupMatrixLoad(builtin);
+                    break;
+                case core::BuiltinFn::kSubgroupMatrixStore:
+                    SubgroupMatrixStore(builtin);
+                    break;
+                case core::BuiltinFn::kSubgroupMatrixMultiply:
+                    SubgroupMatrixMultiply(builtin);
+                    break;
+                case core::BuiltinFn::kSubgroupMatrixMultiplyAccumulate:
+                    SubgroupMatrixMultiplyAccumulate(builtin);
                     break;
                 default:
                     break;
@@ -953,6 +969,94 @@ struct State {
         if (id->Type()->IsSignedIntegerScalar()) {
             builtin->SetArg(1, b.Constant(id->As<core::ir::Constant>()->Value()->ValueAs<u32>()));
         }
+    }
+
+    /// Replace a subgroupMatrixLoad builtin.
+    /// @param builtin the builtin call instruction
+    void SubgroupMatrixLoad(core::ir::CoreBuiltinCall* builtin) {
+        b.InsertBefore(builtin, [&] {
+            auto* result_ty = builtin->Result(0)->Type();
+            auto* p = builtin->Args()[0];
+            auto* offset = builtin->Args()[1];
+            auto* col_major = builtin->Args()[2]->As<core::ir::Constant>();
+            auto* stride = builtin->Args()[3];
+
+            auto* ptr = p->Type()->As<core::type::Pointer>();
+            auto* arr = ptr->StoreType()->As<core::type::Array>();
+
+            // Make a pointer to the first element of the array that we will load from.
+            auto* elem_ptr = ty.ptr(ptr->AddressSpace(), arr->ElemType(), ptr->Access());
+            auto* src = b.Access(elem_ptr, p, offset);
+
+            auto* layout = b.Constant(u32(col_major->Value()->ValueAs<bool>()
+                                              ? SpvCooperativeMatrixLayoutColumnMajorKHR
+                                              : SpvCooperativeMatrixLayoutRowMajorKHR));
+            auto* memory_operand = Literal(u32(SpvMemoryAccessNonPrivatePointerMask));
+
+            auto* call = b.CallWithResult<spirv::ir::BuiltinCall>(
+                builtin->DetachResult(), spirv::BuiltinFn::kCooperativeMatrixLoad, src, layout,
+                stride, memory_operand);
+            call->SetExplicitTemplateParams(Vector{result_ty});
+        });
+        builtin->Destroy();
+    }
+
+    /// Replace a subgroupMatrixStore builtin.
+    /// @param builtin the builtin call instruction
+    void SubgroupMatrixStore(core::ir::CoreBuiltinCall* builtin) {
+        b.InsertBefore(builtin, [&] {
+            auto* p = builtin->Args()[0];
+            auto* offset = builtin->Args()[1];
+            auto* value = builtin->Args()[2];
+            auto* col_major = builtin->Args()[3]->As<core::ir::Constant>();
+            auto* stride = builtin->Args()[4];
+
+            auto* ptr = p->Type()->As<core::type::Pointer>();
+            auto* arr = ptr->StoreType()->As<core::type::Array>();
+
+            // Make a pointer to the first element of the array that we will write to.
+            auto* elem_ptr = ty.ptr(ptr->AddressSpace(), arr->ElemType(), ptr->Access());
+            auto* dst = b.Access(elem_ptr, p, offset);
+
+            auto* layout = b.Constant(u32(col_major->Value()->ValueAs<bool>()
+                                              ? SpvCooperativeMatrixLayoutColumnMajorKHR
+                                              : SpvCooperativeMatrixLayoutRowMajorKHR));
+            auto* memory_operand = Literal(u32(SpvMemoryAccessNonPrivatePointerMask));
+
+            b.Call<spirv::ir::BuiltinCall>(ty.void_(), spirv::BuiltinFn::kCooperativeMatrixStore,
+                                           dst, value, layout, stride, memory_operand);
+        });
+        builtin->Destroy();
+    }
+
+    /// Replace a subgroupMatrixMultiply builtin.
+    /// @param builtin the builtin call instruction
+    void SubgroupMatrixMultiply(core::ir::CoreBuiltinCall* builtin) {
+        b.InsertBefore(builtin, [&] {
+            // SPIR-V only provides a multiply-accumulate instruction, so construct a zero-valued
+            // matrix to accumulate into.
+            auto* left = builtin->Args()[0];
+            auto* right = builtin->Args()[1];
+            auto* acc = b.Construct(builtin->Result(0)->Type());
+            b.CallWithResult<spirv::ir::BuiltinCall>(builtin->DetachResult(),
+                                                     spirv::BuiltinFn::kCooperativeMatrixMulAdd,
+                                                     left, right, acc);
+        });
+        builtin->Destroy();
+    }
+
+    /// Replace a subgroupMatrixMultiplyAccumulate builtin.
+    /// @param builtin the builtin call instruction
+    void SubgroupMatrixMultiplyAccumulate(core::ir::CoreBuiltinCall* builtin) {
+        b.InsertBefore(builtin, [&] {
+            auto* left = builtin->Args()[0];
+            auto* right = builtin->Args()[1];
+            auto* acc = builtin->Args()[2];
+            b.CallWithResult<spirv::ir::BuiltinCall>(builtin->DetachResult(),
+                                                     spirv::BuiltinFn::kCooperativeMatrixMulAdd,
+                                                     left, right, acc);
+        });
+        builtin->Destroy();
     }
 };
 

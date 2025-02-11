@@ -1,12 +1,12 @@
 
-Texture2D<float4> tint_symbol : register(t0);
+Texture2D<float4> v : register(t0);
 [numthreads(6, 1, 1)]
 void e() {
   {
     uint2 tint_loop_idx = (0u).xx;
-    uint3 v = (0u).xxx;
-    tint_symbol.GetDimensions(0u, v.x, v.y, v.z);
-    uint level = v.z;
+    uint3 v_1 = (0u).xxx;
+    v.GetDimensions(0u, v_1.x, v_1.y, v_1.z);
+    uint level = v_1.z;
     while(true) {
       if (all((tint_loop_idx == (4294967295u).xx))) {
         break;

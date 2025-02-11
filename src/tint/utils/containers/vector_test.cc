@@ -40,6 +40,7 @@
 // MSVC claims there's unreachable code in some of the EXPECT_DEATH cases, but scoping the
 // DISABLE_WARNING to the test is not sufficient to suppress the warning.
 TINT_BEGIN_DISABLE_WARNING(UNREACHABLE_CODE);
+TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 
 namespace tint {
 namespace {
@@ -2463,4 +2464,5 @@ TINT_INSTANTIATE_TYPEINFO(tint::C1);
 TINT_INSTANTIATE_TYPEINFO(tint::C2a);
 TINT_INSTANTIATE_TYPEINFO(tint::C2b);
 
+TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 TINT_END_DISABLE_WARNING(UNREACHABLE_CODE);

@@ -6,7 +6,7 @@ struct UBO {
 };
 
 struct Result {
-  int tint_symbol;
+  int member_0;
 };
 
 struct S {
@@ -40,7 +40,7 @@ void f_inner(uint tint_local_index) {
   }
   barrier();
   uint v_4 = min(uint(v.inner.dynamic_idx), 63u);
-  v_1.inner.tint_symbol = s.data[v_4];
+  v_1.inner.member_0 = s.data[v_4];
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

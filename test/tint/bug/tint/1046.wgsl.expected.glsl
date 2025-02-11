@@ -13,6 +13,10 @@ struct Uniforms {
   vec4 color;
 };
 
+struct PointLight {
+  vec4 position;
+};
+
 struct FragmentOutput {
   vec4 color;
 };
@@ -26,20 +30,24 @@ struct FragmentInput {
 };
 
 layout(binding = 0, std140)
-uniform uniforms_block_1_ubo {
+uniform f_uniforms_block_ubo {
   Uniforms inner;
 } v;
-uniform highp sampler2D myTexture;
-layout(location = 0) in vec4 tint_symbol_loc0_Input;
-layout(location = 1) in vec4 tint_symbol_loc1_Input;
-layout(location = 2) in vec2 tint_symbol_loc2_Input;
-layout(location = 3) in vec4 tint_symbol_loc3_Input;
-layout(location = 0) out vec4 tint_symbol_loc0_Output;
-FragmentOutput tint_symbol_inner(FragmentInput fragment) {
-  FragmentOutput tint_symbol_1 = FragmentOutput(vec4(0.0f));
-  tint_symbol_1.color = vec4(1.0f, 0.0f, 0.0f, 1.0f);
-  return tint_symbol_1;
+layout(binding = 1, std430)
+buffer f_PointLights_ssbo {
+  PointLight values[];
+} pointLights;
+uniform highp sampler2D f_myTexture;
+layout(location = 0) in vec4 tint_interstage_location0;
+layout(location = 1) in vec4 tint_interstage_location1;
+layout(location = 2) in vec2 tint_interstage_location2;
+layout(location = 3) in vec4 tint_interstage_location3;
+layout(location = 0) out vec4 main_loc0_Output;
+FragmentOutput main_inner(FragmentInput fragment) {
+  FragmentOutput v_1 = FragmentOutput(vec4(0.0f));
+  v_1.color = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+  return v_1;
 }
 void main() {
-  tint_symbol_loc0_Output = tint_symbol_inner(FragmentInput(gl_FragCoord, tint_symbol_loc0_Input, tint_symbol_loc1_Input, tint_symbol_loc2_Input, tint_symbol_loc3_Input)).color;
+  main_loc0_Output = main_inner(FragmentInput(gl_FragCoord, tint_interstage_location0, tint_interstage_location1, tint_interstage_location2, tint_interstage_location3)).color;
 }

@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 Texture2D<float4> ext_tex_plane_1 : register(t1, space1);
 cbuffer cbuffer_ext_tex_params : register(b2, space1) {
   uint4 ext_tex_params[17];
@@ -14,11 +17,38 @@ void fragment_main() {
   prevent_dce.Store2(0u, asuint(textureDimensions_cdc6c9()));
   return;
 }
+//
+// compute_main
+//
+Texture2D<float4> ext_tex_plane_1 : register(t1, space1);
+cbuffer cbuffer_ext_tex_params : register(b2, space1) {
+  uint4 ext_tex_params[17];
+};
+RWByteAddressBuffer prevent_dce : register(u0);
+Texture2D<float4> arg_0 : register(t0, space1);
+
+uint2 textureDimensions_cdc6c9() {
+  uint2 res = (ext_tex_params[16].xy + (1u).xx);
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store2(0u, asuint(textureDimensions_cdc6c9()));
   return;
+}
+//
+// vertex_main
+//
+Texture2D<float4> ext_tex_plane_1 : register(t1, space1);
+cbuffer cbuffer_ext_tex_params : register(b2, space1) {
+  uint4 ext_tex_params[17];
+};
+Texture2D<float4> arg_0 : register(t0, space1);
+
+uint2 textureDimensions_cdc6c9() {
+  uint2 res = (ext_tex_params[16].xy + (1u).xx);
+  return res;
 }
 
 struct VertexOutput {

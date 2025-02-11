@@ -43,7 +43,13 @@ cc_binary(
   ],
   deps = [
     "//src/tint/utils",
+    "//src/tint/utils/command",
+    "//src/tint/utils/containers",
+    "//src/tint/utils/ice",
     "//src/tint/utils/macros",
+    "//src/tint/utils/math",
+    "//src/tint/utils/memory",
+    "//src/tint/utils/rtti",
     "//src/utils",
     
   ] + select({

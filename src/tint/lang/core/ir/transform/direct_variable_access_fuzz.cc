@@ -33,7 +33,11 @@
 namespace tint::core::ir::transform {
 namespace {
 
-constexpr auto& DirectVariableAccessFuzzer = DirectVariableAccess;
+Result<SuccessType> DirectVariableAccessFuzzer(Module& ir,
+                                               const fuzz::ir::Context&,
+                                               const DirectVariableAccessOptions& options) {
+    return DirectVariableAccess(ir, options);
+}
 
 }  // namespace
 }  // namespace tint::core::ir::transform

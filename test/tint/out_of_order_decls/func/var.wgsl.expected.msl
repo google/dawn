@@ -1,14 +1,12 @@
 #include <metal_stdlib>
-
 using namespace metal;
-struct tint_private_vars_struct {
-  int a;
+
+struct tint_module_vars_struct {
+  thread int* a;
 };
 
 fragment void f() {
-  thread tint_private_vars_struct tint_private_vars = {};
-  tint_private_vars.a = 1;
-  int const b = tint_private_vars.a;
-  return;
+  thread int a = 1;
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=(&a)};
+  int const b = (*tint_module_vars.a);
 }
-

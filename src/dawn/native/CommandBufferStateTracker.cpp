@@ -174,6 +174,7 @@ Return FindStorageBufferBindingAliasing(const PipelineLayoutBase* pipelineLayout
                     break;
                 case wgpu::StorageTextureAccess::ReadOnly:
                     continue;
+                case wgpu::StorageTextureAccess::BindingNotUsed:
                 case wgpu::StorageTextureAccess::Undefined:
                 default:
                     DAWN_UNREACHABLE();

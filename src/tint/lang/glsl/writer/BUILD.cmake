@@ -46,8 +46,6 @@ if(TINT_BUILD_GLSL_WRITER)
 # Condition: TINT_BUILD_GLSL_WRITER
 ################################################################################
 tint_add_target(tint_lang_glsl_writer lib
-  lang/glsl/writer/output.cc
-  lang/glsl/writer/output.h
   lang/glsl/writer/writer.cc
   lang/glsl/writer/writer.h
 )
@@ -56,6 +54,8 @@ tint_target_add_dependencies(tint_lang_glsl_writer lib
   tint_api_common
   tint_lang_core
   tint_lang_core_constant
+  tint_lang_core_intrinsic
+  tint_lang_core_ir
   tint_lang_core_type
   tint_lang_wgsl
   tint_lang_wgsl_ast
@@ -109,6 +109,7 @@ tint_add_target(tint_lang_glsl_writer_test test
   lang/glsl/writer/type_test.cc
   lang/glsl/writer/unary_test.cc
   lang/glsl/writer/var_and_let_test.cc
+  lang/glsl/writer/writer_test.cc
 )
 
 tint_target_add_dependencies(tint_lang_glsl_writer_test test

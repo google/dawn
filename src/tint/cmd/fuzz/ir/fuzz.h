@@ -53,6 +53,16 @@ struct Options {
     bool run_concurrently = false;
     /// If true, print the fuzzer name to stdout before running.
     bool verbose = false;
+    /// If not empty, load DXC from this path when fuzzing HLSL generation.
+    std::string dxc;
+    /// If true, dump shader input/output text to stdout
+    bool dump = false;
+};
+
+/// Context holds information about the fuzzer options and the input program.
+struct Context {
+    /// The options used for Run()
+    Options options;
 };
 
 /// IRFuzzer describes a fuzzer function that takes a IR module as input
@@ -65,11 +75,11 @@ struct IRFuzzer {
     /// additional arguments which are deserialized from the fuzzer input.
     template <typename... ARGS>
     static IRFuzzer Create(std::string_view name,
-                           Result<SuccessType> (*fn)(core::ir::Module&, ARGS...),
+                           Result<SuccessType> (*fn)(core::ir::Module&, const Context&, ARGS...),
                            core::ir::Capabilities pre_capabilities,
                            core::ir::Capabilities post_capabilities) {
         if constexpr (sizeof...(ARGS) > 0) {
-            auto fn_with_decode = [fn](core::ir::Module& module,
+            auto fn_with_decode = [fn](core::ir::Module& module, const Context& context,
                                        Slice<const std::byte> data) -> Result<SuccessType> {
                 if (!data.data) {
                     return Failure{"Invalid data"};
@@ -82,16 +92,16 @@ struct IRFuzzer {
                 }
 
                 auto all_args =
-                    std::tuple_cat(std::tuple<core::ir::Module&>{module}, data_args.Get());
+                    std::tuple_cat(std::tuple<core::ir::Module&, const Context&>{module, context},
+                                   data_args.Get());
                 return std::apply(*fn, all_args);
             };
             return IRFuzzer{name, std::move(fn_with_decode), pre_capabilities, post_capabilities};
         } else {
             return IRFuzzer{
                 name,
-                [fn](core::ir::Module& module, Slice<const std::byte>) -> Result<SuccessType> {
-                    return fn(module);
-                },
+                [fn](core::ir::Module& module, const Context& context,
+                     Slice<const std::byte>) -> Result<SuccessType> { return fn(module, context); },
                 pre_capabilities,
                 post_capabilities,
             };
@@ -105,7 +115,7 @@ struct IRFuzzer {
     /// additional arguments which are deserialized from the fuzzer input.
     template <typename... ARGS>
     static IRFuzzer Create(std::string_view name,
-                           Result<SuccessType> (*fn)(core::ir::Module&, ARGS...),
+                           Result<SuccessType> (*fn)(core::ir::Module&, const Context&, ARGS...),
                            core::ir::Capabilities capabilities) {
         return Create(name, fn, capabilities, capabilities);
     }
@@ -115,7 +125,9 @@ struct IRFuzzer {
     /// The fuzzer function
     /// Takes in the module and any sidecar data, returns true iff transform succeeded in running,
     /// otherwise false
-    std::function<Result<SuccessType>(core::ir::Module&, Slice<const std::byte> data)> fn;
+    std::function<
+        Result<SuccessType>(core::ir::Module&, const Context&, Slice<const std::byte> data)>
+        fn;
     /// The IR capabilities that are used before the fuzzer runs.
     core::ir::Capabilities pre_capabilities;
     /// The IR capabilities that are used after the fuzzer runs.

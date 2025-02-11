@@ -145,10 +145,19 @@ MaybeError ValidateCompatibilityWithPipelineLayout(DeviceBase* device,
 
 // Return extent3D with workgroup size dimension info if it is valid.
 // width = x, height = y, depthOrArrayLength = z.
-ResultOrError<Extent3D> ValidateComputeStageWorkgroupSize(
-    const tint::Program& program,
-    const char* entryPointName,
-    const LimitsForCompilationRequest& limits);
+ResultOrError<Extent3D> ValidateComputeStageWorkgroupSize(const tint::Program& program,
+                                                          const char* entryPointName,
+                                                          const LimitsForCompilationRequest& limits,
+                                                          const AdapterBase* adapter);
+
+// Return extent3D with workgroup size dimension info if it is valid.
+// width = x, height = y, depthOrArrayLength = z.
+ResultOrError<Extent3D> ValidateComputeStageWorkgroupSize(uint32_t x,
+                                                          uint32_t y,
+                                                          uint32_t z,
+                                                          size_t workgroupStorageSize,
+                                                          const LimitsForCompilationRequest& limits,
+                                                          const AdapterBase* adapter);
 
 RequiredBufferSizes ComputeRequiredBufferSizesForLayout(const EntryPointMetadata& entryPoint,
                                                         const PipelineLayoutBase* layout);
@@ -283,6 +292,12 @@ struct EntryPointMetadata {
 
     // Immediate Data block byte size
     uint32_t immediateDataRangeByteSize = 0;
+
+    // Number of texture+sampler combinations, computed as
+    // 1 for every texture+sampler combination + 1 for every texture used
+    // without a sampler that wasn't previously counted.
+    // Note: this is only set in compatibility mode.
+    uint32_t numTextureSamplerCombinations = 0;
 };
 
 class ShaderModuleBase : public RefCountedWithExternalCount<ApiObjectBase>,
@@ -333,9 +348,7 @@ class ShaderModuleBase : public RefCountedWithExternalCount<ApiObjectBase>,
     Ref<TintProgram> GetTintProgramForTesting() const;
     int GetTintProgramRecreateCountForTesting() const;
 
-    void APIGetCompilationInfo(wgpu::CompilationInfoCallback callback, void* userdata);
-    Future APIGetCompilationInfoF(const CompilationInfoCallbackInfo& callbackInfo);
-    Future APIGetCompilationInfo2(const WGPUCompilationInfoCallbackInfo2& callbackInfo);
+    Future APIGetCompilationInfo(const WGPUCompilationInfoCallbackInfo& callbackInfo);
 
     void InjectCompilationMessages(std::unique_ptr<OwnedCompilationMessages> compilationMessages);
     OwnedCompilationMessages* GetCompilationMessages() const;

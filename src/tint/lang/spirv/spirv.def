@@ -37,6 +37,7 @@
 
 import "src/tint/lang/core/address_space.def"
 import "src/tint/lang/core/access.def"
+import "src/tint/lang/core/subgroup_matrix_kind.def"
 import "src/tint/lang/core/texel_format.def"
 
 type bool
@@ -83,9 +84,12 @@ type input_attachment<T>
 type struct_with_runtime_array
 type sampled_image<T>
 
+type subgroup_matrix<S: subgroup_matrix_kind, T, C: num, R: num>
+
 match f32_f16: f32 | f16
 match iu32: i32 | u32
 match fiu32: f32 | i32 | u32
+match fiu32_f16: f32 | i32 | u32 | f16
 match scalar: f32 | f16 | i32 | u32 | bool
 
 match read_write: access.read_write
@@ -93,6 +97,12 @@ match storage
   : address_space.storage
 match workgroup_or_storage
   : address_space.workgroup
+  | address_space.storage
+
+match function_private_workgroup_storage
+  : address_space.function
+  | address_space.private
+  | address_space.workgroup
   | address_space.storage
 
 match samplers
@@ -127,6 +137,11 @@ match readable
 match writable
   : access.write
   | access.read_write
+
+match subgroup_matrix_elements: f32 | f16 | u32 | i32
+match subgroup_matrix_kind_left : subgroup_matrix_kind.left
+match subgroup_matrix_kind_right : subgroup_matrix_kind.right
+match subgroup_matrix_kind_result : subgroup_matrix_kind.result
 
 ////////////////////////////////////////////////////////////////////////////////
 // Builtin Functions                                                          //
@@ -318,8 +333,93 @@ implicit(N: num, T: scalar) fn select(vec<N, bool>, vec<N, T>, vec<N, T>) -> vec
 implicit(T: f32_f16, N: num, M: num) fn vector_times_matrix(vec<N, T>, mat<M, N, T>) -> vec<M, T>
 implicit(T: f32_f16, N: num) fn vector_times_scalar(vec<N, T>, T) -> vec<N, T>
 
+implicit(T: f32_f16) fn normalize(T) -> T
+implicit(N: num, T: f32_f16) fn normalize(vec<N, T>) -> vec<N, T>
+
+implicit(T: f32_f16) fn inverse(mat2x2<T>) -> mat2x2<T>
+implicit(T: f32_f16) fn inverse(mat3x3<T>) -> mat3x3<T>
+implicit(T: f32_f16) fn inverse(mat4x4<T>) -> mat4x4<T>
+
+implicit(T: iu32) fn sign<R: iu32>(T) -> R
+implicit(T: iu32, N: num) fn sign<R: iu32>(vec<N, T>) -> vec<N, R>
+
+implicit(T: iu32) fn abs<R: iu32>(T) -> R
+implicit(T: iu32, N: num) fn abs<R: iu32>(vec<N, T>) -> vec<N, R>
+
+implicit(T: iu32, U: iu32) fn smax<R: iu32>(T, U) -> R
+implicit(T: iu32, U: iu32, N: num) fn smax<R: iu32>(vec<N, T>, vec<N, U>) -> vec<N, R>
+implicit(T: iu32, U: iu32) fn smin<R: iu32>(T, U) -> R
+implicit(T: iu32, U: iu32, N: num) fn smin<R: iu32>(vec<N, T>, vec<N, U>) -> vec<N, R>
+implicit(T: iu32, U: iu32, V: iu32) fn sclamp<R: iu32>(T, U, V) -> R
+implicit(T: iu32, U: iu32, V: iu32, N: num) fn sclamp<R: iu32>(vec<N, T>, vec<N, U>,  vec<N, V>) -> vec<N, R>
+
+implicit(T: iu32, U: iu32) fn umax<R: iu32>(T, U) -> R
+implicit(T: iu32, U: iu32, N: num) fn umax<R: iu32>(vec<N, T>, vec<N, U>) -> vec<N, R>
+implicit(T: iu32, U: iu32) fn umin<R: iu32>(T, U) -> R
+implicit(T: iu32, U: iu32, N: num) fn umin<R: iu32>(vec<N, T>, vec<N, U>) -> vec<N, R>
+implicit(T: iu32, U: iu32, V: iu32) fn uclamp<R: iu32>(T, U, V) -> R
+implicit(T: iu32, U: iu32, V: iu32, N: num) fn uclamp<R: iu32>(vec<N, T>, vec<N, U>,  vec<N, V>) -> vec<N, R>
+
+implicit(T: iu32) fn findILsb<R: iu32>(T) -> R
+implicit(T: iu32, N: num) fn findILsb<R: iu32>(vec<N, T>) -> vec<N, R>
+implicit(T: iu32) fn findSMsb<R: iu32>(T) -> R
+implicit(T: iu32, N: num) fn findSMsb<R: iu32>(vec<N, T>) -> vec<N, R>
+implicit(T: iu32) fn findUMsb<R: iu32>(T) -> R
+implicit(T: iu32, N: num) fn findUMsb<R: iu32>(vec<N, T>) -> vec<N, R>
+
+implicit(T: f32_f16) fn refract(T, T, T) -> T
+implicit(T: f32_f16, N: num) fn refract(vec<N, T>, vec<N, T>, T) -> vec<N, T>
+implicit(T: f32_f16) fn reflect(T, T) -> T
+implicit(T: f32_f16, N: num) fn reflect(vec<N, T>, vec<N, T>) -> vec<N, T>
+
+implicit(T: f32_f16) fn faceForward(T, T, T) -> T
+implicit(T: f32_f16, N: num) fn faceForward(vec<N, T>, vec<N, T>, vec<N, T>) -> vec<N, T>
+
+implicit(T: f32_f16, U: iu32) fn ldexp(T, U) -> T
+implicit(N: num, T: f32_f16, U: iu32) fn ldexp(vec<N, T>, vec<N, U>) -> vec<N, T>
+
+implicit(T: f32_f16, S: function_private_workgroup_storage)
+    fn modf(x: T, i: ptr<S, T, writable>) -> T
+implicit(T: f32_f16, N: num, S: function_private_workgroup_storage)
+    fn modf(x: vec<N, T>, i: ptr<S, vec<N, T>, writable>) -> vec<N, T>
+
+implicit(T: f32_f16, R: iu32, S: function_private_workgroup_storage)
+    fn frexp(x: T, i: ptr<S, R, writable>) -> T
+implicit(T: f32_f16, R: iu32, N: num, S: function_private_workgroup_storage)
+    fn frexp(x: vec<N, T>, i: ptr<S, vec<N, R>, writable>) -> vec<N, T>
+
+implicit(T: iu32) fn bit_count<R: iu32>(T) -> R
+implicit(T: iu32, N: num) fn bit_count<R: iu32>(vec<N, T>) -> vec<N, R>
+
+implicit(T: iu32) fn bit_field_insert(base: T, insert: T, offset: iu32, count: iu32) -> T
+implicit(T: iu32, N: num)
+    fn bit_field_insert(base: vec<N, T>, insert: vec<N, T>, offset: iu32, count: iu32) -> vec<N, T>
+
+implicit(T: iu32) fn bit_field_s_extract(base: T, offset: iu32, count: iu32) -> T
+implicit(T: iu32, N: num)
+    fn bit_field_s_extract(base: vec<N, T>, offset: iu32, count: iu32) -> vec<N, T>
+
+implicit(T: iu32) fn bit_field_u_extract(base: T, offset: iu32, count: iu32) -> T
+implicit(T: iu32, N: num)
+    fn bit_field_u_extract(base: vec<N, T>, offset: iu32, count: iu32) -> vec<N, T>
+
 ////////////////////////////////////////////////////////////////////////////////
 // SPV_KHR_integer_dot_product instructions
 ////////////////////////////////////////////////////////////////////////////////
 fn sdot(u32, u32, u32) -> i32
 fn udot(u32, u32, u32) -> u32
+
+////////////////////////////////////////////////////////////////////////////////
+// SPV_KHR_cooperative_matrix instructions
+////////////////////////////////////////////////////////////////////////////////
+@stage("compute") implicit(K: subgroup_matrix_kind, S: fiu32_f16, C: num, R: num)
+  fn cooperative_matrix_load<T: subgroup_matrix<K, S, C, R> >(
+    ptr<workgroup_or_storage, S, readable>, u32, u32, u32) -> T
+@stage("compute") implicit(K: subgroup_matrix_kind, S: fiu32_f16, C: num, R: num) fn cooperative_matrix_store(
+  ptr<workgroup_or_storage, S, writable>, subgroup_matrix<K, S, C, R>, u32, u32, u32)
+@must_use @stage("compute") implicit(S: subgroup_matrix_elements, C: num, R: num, K: num) fn cooperative_matrix_mul_add(
+  subgroup_matrix<subgroup_matrix_kind_left, S, K, R>,
+  subgroup_matrix<subgroup_matrix_kind_right, S, C, K>,
+  subgroup_matrix<subgroup_matrix_kind_result, S, C, R>)
+  -> subgroup_matrix<subgroup_matrix_kind_result, S, C, R>
+

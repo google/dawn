@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 float16_t tint_atanh(float16_t x) {
   return (log(((float16_t(1.0h) + x) / (float16_t(1.0h) - x))) * float16_t(0.5h));
 }
@@ -14,11 +17,37 @@ void fragment_main() {
   prevent_dce.Store<float16_t>(0u, atanh_d2d8cd());
   return;
 }
+//
+// compute_main
+//
+float16_t tint_atanh(float16_t x) {
+  return (log(((float16_t(1.0h) + x) / (float16_t(1.0h) - x))) * float16_t(0.5h));
+}
+
+RWByteAddressBuffer prevent_dce : register(u0);
+
+float16_t atanh_d2d8cd() {
+  float16_t arg_0 = float16_t(0.5h);
+  float16_t res = tint_atanh(arg_0);
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store<float16_t>(0u, atanh_d2d8cd());
   return;
+}
+//
+// vertex_main
+//
+float16_t tint_atanh(float16_t x) {
+  return (log(((float16_t(1.0h) + x) / (float16_t(1.0h) - x))) * float16_t(0.5h));
+}
+
+float16_t atanh_d2d8cd() {
+  float16_t arg_0 = float16_t(0.5h);
+  float16_t res = tint_atanh(arg_0);
+  return res;
 }
 
 struct VertexOutput {

@@ -54,8 +54,6 @@ ResultOrError<ShaderModuleEntryPoint> ValidateProgrammableStage(DeviceBase* devi
                                                                 const PipelineLayoutBase* layout,
                                                                 SingleShaderStage stage);
 
-WGPUCreatePipelineAsyncStatus CreatePipelineAsyncStatusFromErrorType(InternalErrorType error);
-
 struct ProgrammableStage {
     Ref<ShaderModuleBase> module;
     std::string entryPoint;
@@ -65,6 +63,8 @@ struct ProgrammableStage {
 
     PipelineConstantEntries constants;
 };
+
+uint32_t GetRawBits(ImmediateConstantMask bits);
 
 class PipelineBase : public ApiObjectBase, public CachedObject {
   public:
@@ -77,6 +77,7 @@ class PipelineBase : public ApiObjectBase, public CachedObject {
     const PerStage<ProgrammableStage>& GetAllStages() const;
     bool HasStage(SingleShaderStage stage) const;
     wgpu::ShaderStage GetStageMask() const;
+    const ImmediateConstantMask& GetImmediateMask() const;
 
     ResultOrError<Ref<BindGroupLayoutBase>> GetBindGroupLayout(uint32_t groupIndex);
 
@@ -93,12 +94,16 @@ class PipelineBase : public ApiObjectBase, public CachedObject {
     // Initialize() should only be called once by the frontend.
     MaybeError Initialize(std::optional<ScopedUseShaderPrograms> scopedUsePrograms = std::nullopt);
 
+    void SetImmediateMaskForTesting(ImmediateConstantMask immediateConstantMask);
+
   protected:
     PipelineBase(DeviceBase* device,
                  PipelineLayoutBase* layout,
                  StringView label,
                  std::vector<StageAndDescriptor> stages);
     PipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag, StringView label);
+
+    ImmediateConstantMask mImmediateMask = ImmediateConstantMask(0);
 
   private:
     MaybeError ValidateGetBindGroupLayout(BindGroupIndex group);

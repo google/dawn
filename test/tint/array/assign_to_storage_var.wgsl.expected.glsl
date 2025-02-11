@@ -49,7 +49,7 @@ void foo(ivec4 src_param[4]) {
   int src_nested[4][3][2] = int[4][3][2](int[3][2](int[2](0, 0), int[2](0, 0), int[2](0, 0)), int[3][2](int[2](0, 0), int[2](0, 0), int[2](0, 0)), int[3][2](int[2](0, 0), int[2](0, 0), int[2](0, 0)), int[3][2](int[2](0, 0), int[2](0, 0), int[2](0, 0)));
   v_3.inner.arr = src_nested;
 }
-void tint_symbol_inner(uint tint_local_index) {
+void main_inner(uint tint_local_index) {
   {
     uint v_4 = 0u;
     v_4 = tint_local_index;
@@ -71,5 +71,5 @@ void tint_symbol_inner(uint tint_local_index) {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  tint_symbol_inner(gl_LocalInvocationIndex);
+  main_inner(gl_LocalInvocationIndex);
 }

@@ -59,9 +59,7 @@ if (TINT_BUILD_IR_BINARY)
 endif()
 
 if (TINT_BUILD_IR_FUZZER AND NOT TINT_BUILD_IR_BINARY)
-  message(FATAL_ERROR "Building IR fuzzer 'TINT_BUILD_IR_FUZZER' is enabled, "
-                      "but building IR binary format 'TINT_BUILD_IR_BINARY' is "
-                      "not")
+  message(FATAL_ERROR "TINT_BUILD_IR_FUZZER requires TINT_BUILD_IR_BINARY")
 endif()
 
 ################################################################################
@@ -114,14 +112,14 @@ function(tint_default_compile_options TARGET)
     -Wno-c++98-compat
     -Wno-c++98-compat-pedantic
     -Wno-format-pedantic
-    -Wno-gnu-zero-variadic-macro-arguments
     -Wno-poison-system-directories
     -Wno-return-std-move-in-c++11
     -Wno-undefined-var-template
     -Wno-unknown-warning-option
-    -Wno-unsafe-buffer-usage
     -Wno-used-but-marked-unused
     -Weverything
+    -Wunsafe-buffer-usage
+    -Wno-unsafe-buffer-usage-in-libc-call
   )
 
   if(COMPILER_IS_GNU)

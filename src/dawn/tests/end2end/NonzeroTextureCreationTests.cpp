@@ -241,13 +241,13 @@ class NonzeroTextureCreationTests : public DawnTestWithParams<Params> {
                 wgpu::Buffer bufferDst = utils::CreateBufferFromData(
                     device, data.data(), bufferSize, wgpu::BufferUsage::CopySrc);
 
-                wgpu::ImageCopyBuffer imageCopyBuffer =
-                    utils::CreateImageCopyBuffer(bufferDst, 0, bytesPerRow, rowsPerImage);
-                wgpu::ImageCopyTexture imageCopyTexture =
-                    utils::CreateImageCopyTexture(texture, mip, {0, 0, 0});
+                wgpu::TexelCopyBufferInfo texelCopyBufferInfo =
+                    utils::CreateTexelCopyBufferInfo(bufferDst, 0, bytesPerRow, rowsPerImage);
+                wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+                    utils::CreateTexelCopyTextureInfo(texture, mip, {0, 0, 0});
 
                 wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-                encoder.CopyTextureToBuffer(&imageCopyTexture, &imageCopyBuffer, &copySize);
+                encoder.CopyTextureToBuffer(&texelCopyTextureInfo, &texelCopyBufferInfo, &copySize);
                 wgpu::CommandBuffer commands = encoder.Finish();
                 queue.Submit(1, &commands);
 

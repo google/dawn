@@ -57,6 +57,7 @@ tint_executable("info") {
     "${tint_src_dir}/lang/wgsl/program",
     "${tint_src_dir}/lang/wgsl/sem",
     "${tint_src_dir}/utils",
+    "${tint_src_dir}/utils/command",
     "${tint_src_dir}/utils/containers",
     "${tint_src_dir}/utils/diagnostic",
     "${tint_src_dir}/utils/ice",

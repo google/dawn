@@ -63,6 +63,7 @@ tint_target_add_dependencies(tint_cmd_loopy_cmd cmd
   tint_lang_wgsl_sem
   tint_lang_wgsl_writer_ir_to_program
   tint_utils
+  tint_utils_command
   tint_utils_containers
   tint_utils_diagnostic
   tint_utils_ice

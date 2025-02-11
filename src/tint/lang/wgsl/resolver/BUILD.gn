@@ -145,6 +145,7 @@ if (tint_build_unittests) {
       "struct_address_space_use_test.cc",
       "struct_layout_test.cc",
       "struct_pipeline_stage_use_test.cc",
+      "subgroup_matrix_test.cc",
       "subgroups_extension_test.cc",
       "type_validation_test.cc",
       "unresolved_identifier_test.cc",

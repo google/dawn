@@ -11,18 +11,26 @@ void foo() {
       } else {
         break;
       }
-      float2 v = v2f;
-      float2 v_1 = i.xx;
-      v2f = (((v_1 == float2(int(0), int(1)))) ? (1.0f.xx) : (v));
-      int3 v_2 = v3i;
-      int3 v_3 = i.xxx;
-      v3i = (((v_3 == int3(int(0), int(1), int(2)))) ? (int(1).xxx) : (v_2));
-      uint4 v_4 = v4u;
-      uint4 v_5 = i.xxxx;
-      v4u = (((v_5 == uint4(int(0), int(1), int(2), int(3)))) ? (1u.xxxx) : (v_4));
-      bool2 v_6 = v2b;
-      bool2 v_7 = i.xx;
-      v2b = (((v_7 == bool2(int(0), int(1)))) ? (true.xx) : (v_6));
+      int v = i;
+      float2 v_1 = v2f;
+      float2 v_2 = float2((1.0f).xx);
+      float2 v_3 = float2((v).xx);
+      v2f = (((v_3 == float2(int(0), int(1)))) ? (v_2) : (v_1));
+      int v_4 = i;
+      int3 v_5 = v3i;
+      int3 v_6 = int3((int(1)).xxx);
+      int3 v_7 = int3((v_4).xxx);
+      v3i = (((v_7 == int3(int(0), int(1), int(2)))) ? (v_6) : (v_5));
+      int v_8 = i;
+      uint4 v_9 = v4u;
+      uint4 v_10 = uint4((1u).xxxx);
+      uint4 v_11 = uint4((v_8).xxxx);
+      v4u = (((v_11 == uint4(int(0), int(1), int(2), int(3)))) ? (v_10) : (v_9));
+      int v_12 = i;
+      bool2 v_13 = v2b;
+      bool2 v_14 = bool2((true).xx);
+      bool2 v_15 = bool2((v_12).xx);
+      v2b = (((v_15 == bool2(int(0), int(1)))) ? (v_14) : (v_13));
       {
         i = (i + int(1));
       }

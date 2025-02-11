@@ -43,8 +43,9 @@
 #include "src/tint/utils/text/unicode.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::Renamer);
-TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::Renamer::Data);
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::Renamer::Config);
+
+TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 
 namespace tint::ast::transform {
 
@@ -1262,12 +1263,6 @@ const char* const kReservedKeywordsMSL[] = {
 
 }  // namespace
 
-Renamer::Data::Data(Remappings&& r) : remappings(std::move(r)) {}
-
-Renamer::Data::Data(const Data&) = default;
-
-Renamer::Data::~Data() = default;
-
 Renamer::Config::Config() = default;
 
 Renamer::Config::Config(Target t) : target(t) {}
@@ -1282,9 +1277,7 @@ Renamer::Config::~Config() = default;
 Renamer::Renamer() = default;
 Renamer::~Renamer() = default;
 
-Transform::ApplyResult Renamer::Apply(const Program& src,
-                                      const DataMap& inputs,
-                                      DataMap& outputs) const {
+Transform::ApplyResult Renamer::Apply(const Program& src, const DataMap& inputs, DataMap&) const {
     Hashset<Symbol, 16> global_decls;
     for (auto* decl : src.AST().TypeDecls()) {
         global_decls.Add(decl->name->symbol);
@@ -1364,6 +1357,9 @@ Transform::ApplyResult Renamer::Apply(const Program& src,
         if (target == Target::kAll) {
             return true;
         }
+        if (requested_names->count(symbol.Name())) {
+            return true;
+        }
         auto name = symbol.Name();
         if (!tint::utf8::IsASCII(name)) {
             // name is non-ascii. All of the backend keywords are ascii, so rename.
@@ -1427,13 +1423,9 @@ Transform::ApplyResult Renamer::Apply(const Program& src,
 
     ctx.Clone();
 
-    Remappings out;
-    for (auto& it : remappings) {
-        out[it.key->Name()] = it.value.Name();
-    }
-    outputs.Add<Data>(std::move(out));
-
     return resolver::Resolve(b);
 }
 
 }  // namespace tint::ast::transform
+
+TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);

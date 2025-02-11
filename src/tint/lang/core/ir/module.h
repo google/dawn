@@ -28,8 +28,6 @@
 #ifndef SRC_TINT_LANG_CORE_IR_MODULE_H_
 #define SRC_TINT_LANG_CORE_IR_MODULE_H_
 
-#include <memory>
-#include <string>
 #include <utility>
 
 #include "src/tint/lang/core/constant/manager.h"
@@ -45,7 +43,6 @@
 #include "src/tint/utils/diagnostic/source.h"
 #include "src/tint/utils/generation_id.h"
 #include "src/tint/utils/memory/block_allocator.h"
-#include "src/tint/utils/result/result.h"
 #include "src/tint/utils/symbol/symbol_table.h"
 
 namespace tint::core::ir {

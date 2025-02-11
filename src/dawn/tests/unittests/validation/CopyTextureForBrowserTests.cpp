@@ -100,17 +100,17 @@ class CopyTextureForBrowserTest : public ValidationTest {
                                    wgpu::Extent3D extent3D,
                                    wgpu::TextureAspect aspect = wgpu::TextureAspect::All,
                                    wgpu::CopyTextureForBrowserOptions options = {}) {
-        wgpu::ImageCopyTexture srcImageCopyTexture =
-            utils::CreateImageCopyTexture(srcTexture, srcLevel, srcOrigin, aspect);
-        wgpu::ImageCopyTexture dstImageCopyTexture =
-            utils::CreateImageCopyTexture(dstTexture, dstLevel, dstOrigin, aspect);
+        wgpu::TexelCopyTextureInfo srcTexelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(srcTexture, srcLevel, srcOrigin, aspect);
+        wgpu::TexelCopyTextureInfo dstTexelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(dstTexture, dstLevel, dstOrigin, aspect);
 
         if (expectation == utils::Expectation::Success) {
-            device.GetQueue().CopyTextureForBrowser(&srcImageCopyTexture, &dstImageCopyTexture,
-                                                    &extent3D, &options);
+            device.GetQueue().CopyTextureForBrowser(&srcTexelCopyTextureInfo,
+                                                    &dstTexelCopyTextureInfo, &extent3D, &options);
         } else {
             ASSERT_DEVICE_ERROR(device.GetQueue().CopyTextureForBrowser(
-                &srcImageCopyTexture, &dstImageCopyTexture, &extent3D, &options));
+                &srcTexelCopyTextureInfo, &dstTexelCopyTextureInfo, &extent3D, &options));
         }
     }
 };
@@ -139,15 +139,15 @@ class CopyExternalTextureForBrowserTest : public ValidationTest {
         srcImageCopyExternalTexture.origin = srcOrigin;
         srcImageCopyExternalTexture.naturalSize = srcNaturalSize;
 
-        wgpu::ImageCopyTexture dstImageCopyTexture =
-            utils::CreateImageCopyTexture(dstTexture, dstLevel, dstOrigin, aspect);
+        wgpu::TexelCopyTextureInfo dstTexelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(dstTexture, dstLevel, dstOrigin, aspect);
 
         if (expectation == utils::Expectation::Success) {
             device.GetQueue().CopyExternalTextureForBrowser(
-                &srcImageCopyExternalTexture, &dstImageCopyTexture, &extent3D, &options);
+                &srcImageCopyExternalTexture, &dstTexelCopyTextureInfo, &extent3D, &options);
         } else {
             ASSERT_DEVICE_ERROR(device.GetQueue().CopyExternalTextureForBrowser(
-                &srcImageCopyExternalTexture, &dstImageCopyTexture, &extent3D, &options));
+                &srcImageCopyExternalTexture, &dstTexelCopyTextureInfo, &extent3D, &options));
         }
     }
 };

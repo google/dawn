@@ -121,6 +121,7 @@ if (tint_build_unittests) {
         "${tint_src_dir}/lang/core/constant",
         "${tint_src_dir}/lang/core/intrinsic",
         "${tint_src_dir}/lang/core/ir",
+        "${tint_src_dir}/lang/core/ir/transform",
         "${tint_src_dir}/lang/core/ir/transform:unittests",
         "${tint_src_dir}/lang/core/type",
         "${tint_src_dir}/utils",
@@ -137,7 +138,10 @@ if (tint_build_unittests) {
       ]
 
       if (tint_build_spv_writer) {
-        deps += [ "${tint_src_dir}/lang/spirv/writer/raise" ]
+        deps += [
+          "${tint_src_dir}/lang/spirv/writer/common",
+          "${tint_src_dir}/lang/spirv/writer/raise",
+        ]
       }
     }
   }

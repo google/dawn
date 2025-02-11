@@ -34,8 +34,6 @@
 #                       Do not modify this file directly
 ################################################################################
 
-include(lang/msl/writer/ast_printer/BUILD.cmake)
-include(lang/msl/writer/ast_raise/BUILD.cmake)
 include(lang/msl/writer/common/BUILD.cmake)
 include(lang/msl/writer/helpers/BUILD.cmake)
 include(lang/msl/writer/printer/BUILD.cmake)
@@ -48,8 +46,6 @@ if(TINT_BUILD_MSL_WRITER)
 # Condition: TINT_BUILD_MSL_WRITER
 ################################################################################
 tint_add_target(tint_lang_msl_writer lib
-  lang/msl/writer/output.cc
-  lang/msl/writer/output.h
   lang/msl/writer/writer.cc
   lang/msl/writer/writer.h
 )
@@ -59,12 +55,8 @@ tint_target_add_dependencies(tint_lang_msl_writer lib
   tint_lang_core
   tint_lang_core_common
   tint_lang_core_constant
+  tint_lang_core_ir
   tint_lang_core_type
-  tint_lang_wgsl
-  tint_lang_wgsl_ast
-  tint_lang_wgsl_features
-  tint_lang_wgsl_program
-  tint_lang_wgsl_sem
   tint_utils
   tint_utils_containers
   tint_utils_diagnostic
@@ -84,7 +76,6 @@ tint_target_add_external_dependencies(tint_lang_msl_writer lib
 
 if(TINT_BUILD_MSL_WRITER)
   tint_target_add_dependencies(tint_lang_msl_writer lib
-    tint_lang_msl_writer_ast_printer
     tint_lang_msl_writer_common
     tint_lang_msl_writer_printer
     tint_lang_msl_writer_raise
@@ -143,6 +134,7 @@ if(TINT_BUILD_MSL_WRITER)
     tint_lang_msl_validate
     tint_lang_msl_writer
     tint_lang_msl_writer_common
+    tint_lang_msl_writer_printer
   )
 endif(TINT_BUILD_MSL_WRITER)
 
@@ -221,11 +213,6 @@ tint_target_add_dependencies(tint_lang_msl_writer_fuzz fuzz
   tint_lang_core_constant
   tint_lang_core_ir
   tint_lang_core_type
-  tint_lang_wgsl
-  tint_lang_wgsl_ast
-  tint_lang_wgsl_features
-  tint_lang_wgsl_program
-  tint_lang_wgsl_sem
   tint_utils
   tint_utils_bytes
   tint_utils_containers
@@ -251,14 +238,5 @@ if(TINT_BUILD_MSL_WRITER)
     tint_lang_msl_writer_helpers
   )
 endif(TINT_BUILD_MSL_WRITER)
-
-if(TINT_BUILD_WGSL_READER)
-  tint_target_add_sources(tint_lang_msl_writer_fuzz fuzz
-    "lang/msl/writer/writer_ast_fuzz.cc"
-  )
-  tint_target_add_dependencies(tint_lang_msl_writer_fuzz fuzz
-    tint_cmd_fuzz_wgsl_fuzz
-  )
-endif(TINT_BUILD_WGSL_READER)
 
 endif(TINT_BUILD_MSL_WRITER)

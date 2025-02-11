@@ -1,13 +1,18 @@
 #include <metal_stdlib>
-
 using namespace metal;
-kernel void tint_symbol(texture1d<float, access::sample> tint_symbol_1 [[texture(0)]], texture1d<int, access::sample> tint_symbol_2 [[texture(1)]], texture1d<uint, access::sample> tint_symbol_3 [[texture(2)]]) {
-  uint const level_idx = min(1u, (tint_symbol_1.get_num_mip_levels() - 1u));
-  uint fdims = tint_symbol_1.get_width(0);
-  uint const level_idx_1 = min(1u, (tint_symbol_2.get_num_mip_levels() - 1u));
-  uint idims = tint_symbol_2.get_width(0);
-  uint const level_idx_2 = min(1u, (tint_symbol_3.get_num_mip_levels() - 1u));
-  uint udims = tint_symbol_3.get_width(0);
-  return;
-}
 
+struct tint_module_vars_struct {
+  texture1d<float, access::sample> t_f;
+  texture1d<int, access::sample> t_i;
+  texture1d<uint, access::sample> t_u;
+};
+
+kernel void v(texture1d<float, access::sample> t_f [[texture(0)]], texture1d<int, access::sample> t_i [[texture(1)]], texture1d<uint, access::sample> t_u [[texture(2)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.t_f=t_f, .t_i=t_i, .t_u=t_u};
+  min(uint(1), (tint_module_vars.t_f.get_num_mip_levels() - 1u));
+  uint fdims = uint(tint_module_vars.t_f.get_width());
+  min(uint(1), (tint_module_vars.t_i.get_num_mip_levels() - 1u));
+  uint idims = uint(tint_module_vars.t_i.get_width());
+  min(uint(1), (tint_module_vars.t_u.get_num_mip_levels() - 1u));
+  uint udims = uint(tint_module_vars.t_u.get_width());
+}

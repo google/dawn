@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 uint tint_pack2x16float(float2 param_0) {
   uint2 i = f32tof16(param_0);
   return i.x | (i.y << 16);
@@ -15,11 +18,39 @@ void fragment_main() {
   prevent_dce.Store(0u, asuint(pack2x16float_0e97b3()));
   return;
 }
+//
+// compute_main
+//
+uint tint_pack2x16float(float2 param_0) {
+  uint2 i = f32tof16(param_0);
+  return i.x | (i.y << 16);
+}
+
+RWByteAddressBuffer prevent_dce : register(u0);
+
+uint pack2x16float_0e97b3() {
+  float2 arg_0 = (1.0f).xx;
+  uint res = tint_pack2x16float(arg_0);
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store(0u, asuint(pack2x16float_0e97b3()));
   return;
+}
+//
+// vertex_main
+//
+uint tint_pack2x16float(float2 param_0) {
+  uint2 i = f32tof16(param_0);
+  return i.x | (i.y << 16);
+}
+
+uint pack2x16float_0e97b3() {
+  float2 arg_0 = (1.0f).xx;
+  uint res = tint_pack2x16float(arg_0);
+  return res;
 }
 
 struct VertexOutput {

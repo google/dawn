@@ -1,3 +1,6 @@
+//
+// vert_main
+//
 struct vert_main_outputs {
   float4 tint_symbol : SV_Position;
 };
@@ -8,10 +11,38 @@ struct vert_main_inputs {
   float2 a_pos : TEXCOORD2;
 };
 
+
+float4 vert_main_inner(float2 a_particlePos, float2 a_particleVel, float2 a_pos) {
+  float angle = -(atan2(a_particleVel.x, a_particleVel.y));
+  float2 pos = float2(((a_pos.x * cos(angle)) - (a_pos.y * sin(angle))), ((a_pos.x * sin(angle)) + (a_pos.y * cos(angle))));
+  return float4((pos + a_particlePos), 0.0f, 1.0f);
+}
+
+vert_main_outputs vert_main(vert_main_inputs inputs) {
+  vert_main_outputs v = {vert_main_inner(inputs.a_particlePos, inputs.a_particleVel, inputs.a_pos)};
+  return v;
+}
+
+//
+// frag_main
+//
 struct frag_main_outputs {
-  float4 tint_symbol_1 : SV_Target0;
+  float4 tint_symbol : SV_Target0;
 };
 
+
+float4 frag_main_inner() {
+  return (1.0f).xxxx;
+}
+
+frag_main_outputs frag_main() {
+  frag_main_outputs v = {frag_main_inner()};
+  return v;
+}
+
+//
+// comp_main
+//
 struct comp_main_inputs {
   uint3 gl_GlobalInvocationID : SV_DispatchThreadID;
 };
@@ -22,16 +53,6 @@ cbuffer cbuffer_params : register(b0) {
 };
 RWByteAddressBuffer particlesA : register(u1);
 RWByteAddressBuffer particlesB : register(u2);
-float4 vert_main_inner(float2 a_particlePos, float2 a_particleVel, float2 a_pos) {
-  float angle = -(atan2(a_particleVel.x, a_particleVel.y));
-  float2 pos = float2(((a_pos.x * cos(angle)) - (a_pos.y * sin(angle))), ((a_pos.x * sin(angle)) + (a_pos.y * cos(angle))));
-  return float4((pos + a_particlePos), 0.0f, 1.0f);
-}
-
-float4 frag_main_inner() {
-  return (1.0f).xxxx;
-}
-
 void comp_main_inner(uint3 gl_GlobalInvocationID) {
   uint index = gl_GlobalInvocationID.x;
   if ((index >= 5u)) {
@@ -106,16 +127,6 @@ void comp_main_inner(uint3 gl_GlobalInvocationID) {
   }
   particlesB.Store2((0u + (min(index, 4u) * 16u)), asuint(vPos));
   particlesB.Store2((8u + (min(index, 4u) * 16u)), asuint(vVel));
-}
-
-vert_main_outputs vert_main(vert_main_inputs inputs) {
-  vert_main_outputs v_5 = {vert_main_inner(inputs.a_particlePos, inputs.a_particleVel, inputs.a_pos)};
-  return v_5;
-}
-
-frag_main_outputs frag_main() {
-  frag_main_outputs v_6 = {frag_main_inner()};
-  return v_6;
 }
 
 [numthreads(1, 1, 1)]

@@ -56,6 +56,8 @@ std::string_view ToString(ParameterUsage usage) {
             return "component";
         case ParameterUsage::kCoords:
             return "coords";
+        case ParameterUsage::kCount:
+            return "count";
         case ParameterUsage::kDdx:
             return "ddx";
         case ParameterUsage::kDdy:
@@ -74,6 +76,8 @@ std::string_view ToString(ParameterUsage usage) {
             return "exp";
         case ParameterUsage::kHeight:
             return "height";
+        case ParameterUsage::kI:
+            return "i";
         case ParameterUsage::kId:
             return "id";
         case ParameterUsage::kInputAttachment:

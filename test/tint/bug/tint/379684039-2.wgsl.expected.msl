@@ -1,47 +1,51 @@
 #include <metal_stdlib>
-
 using namespace metal;
 
 template<typename T, size_t N>
 struct tint_array {
-    const constant T& operator[](size_t i) const constant { return elements[i]; }
-    device T& operator[](size_t i) device { return elements[i]; }
-    const device T& operator[](size_t i) const device { return elements[i]; }
-    thread T& operator[](size_t i) thread { return elements[i]; }
-    const thread T& operator[](size_t i) const thread { return elements[i]; }
-    threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-    const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-    T elements[N];
-};
-
-#define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
-
-struct tint_private_vars_struct {
-  uint idx;
-};
-
-struct TintArrayLengths {
-  /* 0x0000 */ tint_array<uint4, 1> array_lengths;
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
 };
 
 struct FSUniformData {
-  /* 0x0000 */ tint_array<float4, 7> k;
-  /* 0x0070 */ int2 size;
-  /* 0x0078 */ tint_array<int8_t, 8> tint_pad;
+  tint_array<float4, 7> k;
+  int2 size;
 };
 
 struct FSUniforms {
-  /* 0x0000 */ tint_array<FSUniformData, 1> fsUniformData;
+  tint_array<FSUniformData, 1> fsUniformData;
 };
 
-void tint_symbol(thread tint_private_vars_struct* const tint_private_vars, const device FSUniforms* const tint_symbol_2, const constant TintArrayLengths* const tint_symbol_3) {
-  int2 tint_symbol_1 = int2(0);
-  while(true) {
-    TINT_ISOLATE_UB(tint_volatile_false);
-    if ((tint_symbol_1[1] >= (*(tint_symbol_2)).fsUniformData[min((*(tint_private_vars)).idx, ((((*(tint_symbol_3)).array_lengths[0u][0u] - 0u) / 128u) - 1u))].size[1])) {
-      break;
+struct tint_module_vars_struct {
+  thread uint* idx;
+  const device FSUniforms* _storage;
+  const constant tint_array<uint4, 1>* tint_storage_buffer_sizes;
+};
+
+void v(tint_module_vars_struct tint_module_vars) {
+  int2 v_1 = int2(0);
+  {
+    uint2 tint_loop_idx = 0u;
+    while(true) {
+      if (all((tint_loop_idx == uint2(4294967295u)))) {
+        break;
+      }
+      if ((v_1.y >= (*tint_module_vars._storage).fsUniformData[min((*tint_module_vars.idx), ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 128u) - 1u))].size.y)) {
+        break;
+      }
+      {
+        uint const tint_low_inc = (tint_loop_idx.x + 1u);
+        tint_loop_idx.x = tint_low_inc;
+        uint const tint_carry = uint((tint_low_inc == 0u));
+        tint_loop_idx.y = (tint_loop_idx.y + tint_carry);
+      }
+      continue;
     }
   }
 }
-

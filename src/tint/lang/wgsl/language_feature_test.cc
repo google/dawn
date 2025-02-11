@@ -67,6 +67,7 @@ static constexpr Case kValidCases[] = {
     {"pointer_composite_access", LanguageFeature::kPointerCompositeAccess},
     {"readonly_and_readwrite_storage_textures",
      LanguageFeature::kReadonlyAndReadwriteStorageTextures},
+    {"sized_binding_array", LanguageFeature::kSizedBindingArray},
     {"unrestricted_pointer_parameters", LanguageFeature::kUnrestrictedPointerParameters},
 };
 
@@ -95,9 +96,12 @@ static constexpr Case kInvalidCases[] = {
     {"readonlF_and_readwrite_st9rage_textues", LanguageFeature::kUndefined},
     {"readonly_and_radwrite_storage_textures", LanguageFeature::kUndefined},
     {"readonly_and_readwrite_sOOrage_tVxRRures", LanguageFeature::kUndefined},
-    {"unrestrictd_pointer_payameters", LanguageFeature::kUndefined},
-    {"unrerrt77iGted_poillter_paramenners", LanguageFeature::kUndefined},
-    {"unrestricted4point00r_parameters", LanguageFeature::kUndefined},
+    {"sized_indiyg_array", LanguageFeature::kUndefined},
+    {"llGznnd_bin77ing_rrrray", LanguageFeature::kUndefined},
+    {"sized_bindin4_00rray", LanguageFeature::kUndefined},
+    {"unrestrictedpointr_prameteoos", LanguageFeature::kUndefined},
+    {"unrstrited_pointzzr_parameters", LanguageFeature::kUndefined},
+    {"unrst11icted_pppiniierparameters", LanguageFeature::kUndefined},
 };
 
 using LanguageFeatureParseTest = testing::TestWithParam<Case>;

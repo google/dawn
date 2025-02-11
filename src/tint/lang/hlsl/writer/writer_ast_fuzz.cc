@@ -80,9 +80,14 @@ void ASTFuzzer(const tint::Program& program,
     constexpr bool must_validate = false;
 
     const char* dxc_path = validate::kDxcDLLName;
-    Result<tint::hlsl::writer::Output> res;
     if (!context.options.dxc.empty()) {
         dxc_path = context.options.dxc.c_str();
+    }
+    auto dxc = tint::Command::LookPath(dxc_path);
+
+    Result<tint::hlsl::writer::Output> res;
+    if (dxc.Found()) {
+        // If validating with DXC, run renamer transform first to avoid DXC validation failures.
         ast::transform::DataMap inputs, outputs;
         inputs.Add<ast::transform::Renamer::Config>(ast::transform::Renamer::Target::kHlslKeywords);
         if (auto renamer_res = tint::ast::transform::Renamer{}.Apply(program, inputs, outputs)) {
@@ -91,7 +96,6 @@ void ASTFuzzer(const tint::Program& program,
             }
             res = tint::hlsl::writer::Generate(*renamer_res, options);
         }
-
     } else {
         res = tint::hlsl::writer::Generate(program, options);
     }
@@ -101,10 +105,9 @@ void ASTFuzzer(const tint::Program& program,
     }
 
     if (context.options.dump) {
-        std::cout << "Dumping generated HLSL:\n" << res->hlsl << std::endl;
+        std::cout << "Dumping generated HLSL:\n" << res->hlsl << "\n";
     }
 
-    auto dxc = tint::Command::LookPath(dxc_path);
     if (dxc.Found()) {
         uint32_t hlsl_shader_model = 60;
         bool require_16bit_types = false;

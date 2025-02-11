@@ -119,8 +119,7 @@ TEST_P(MultithreadTests, Device_DroppedOnAnotherThread) {
     // TODO(crbug.com/dawn/1779): This test seems to cause flakiness in other sampling tests on
     // NVIDIA.
     DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsNvidia());
-
-    // TODO(crbug.com/dawn/1922): Flaky on Linux TSAN Release
+    // TODO(crbug.com/42240870): Flaky on Linux TSAN Release
     DAWN_SUPPRESS_TEST_IF(IsLinux() && IsVulkan() && IsTsan());
 
     std::vector<wgpu::Device> devices(5);
@@ -888,12 +887,13 @@ class MultithreadTextureCopyTests : public MultithreadTests {
 
         wgpu::Extent3D textureSize = {width, height, 1};
 
-        wgpu::ImageCopyTexture imageCopyTexture =
-            utils::CreateImageCopyTexture(texture, 0, {0, 0, 0}, wgpu::TextureAspect::All);
-        wgpu::TextureDataLayout textureDataLayout =
-            utils::CreateTextureDataLayout(0, dataSize / height);
+        wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(texture, 0, {0, 0, 0}, wgpu::TextureAspect::All);
+        wgpu::TexelCopyBufferLayout texelCopyBufferLayout =
+            utils::CreateTexelCopyBufferLayout(0, dataSize / height);
 
-        queue.WriteTexture(&imageCopyTexture, data, dataSize, &textureDataLayout, &textureSize);
+        queue.WriteTexture(&texelCopyTextureInfo, data, dataSize, &texelCopyBufferLayout,
+                           &textureSize);
 
         return texture;
     }
@@ -905,12 +905,12 @@ class MultithreadTextureCopyTests : public MultithreadTests {
 
     void CopyTextureToTextureHelper(
         const wgpu::Texture& srcTexture,
-        const wgpu::ImageCopyTexture& dst,
+        const wgpu::TexelCopyTextureInfo& dst,
         const wgpu::Extent3D& dstSize,
         const wgpu::CommandEncoder& encoder,
         const wgpu::CopyTextureForBrowserOptions* copyForBrowerOptions = nullptr) {
-        wgpu::ImageCopyTexture srcView =
-            utils::CreateImageCopyTexture(srcTexture, 0, {0, 0, 0}, wgpu::TextureAspect::All);
+        wgpu::TexelCopyTextureInfo srcView =
+            utils::CreateTexelCopyTextureInfo(srcTexture, 0, {0, 0, 0}, wgpu::TextureAspect::All);
 
         if (copyForBrowerOptions == nullptr) {
             encoder.CopyTextureToTexture(&srcView, &dst, &dstSize);
@@ -926,11 +926,11 @@ class MultithreadTextureCopyTests : public MultithreadTests {
 
     void CopyBufferToTextureHelper(const wgpu::Buffer& srcBuffer,
                                    uint32_t srcBytesPerRow,
-                                   const wgpu::ImageCopyTexture& dst,
+                                   const wgpu::TexelCopyTextureInfo& dst,
                                    const wgpu::Extent3D& dstSize,
                                    const wgpu::CommandEncoder& encoder) {
-        wgpu::ImageCopyBuffer srcView =
-            utils::CreateImageCopyBuffer(srcBuffer, 0, srcBytesPerRow, dstSize.height);
+        wgpu::TexelCopyBufferInfo srcView =
+            utils::CreateTexelCopyBufferInfo(srcBuffer, 0, srcBytesPerRow, dstSize.height);
 
         encoder.CopyBufferToTexture(&srcView, &dst, &dstSize);
 
@@ -995,7 +995,7 @@ TEST_P(MultithreadTextureCopyTests, CopyDepthToDepthNoRace) {
 
         // Copy from depthTexture to destTexture.
         const wgpu::Extent3D dstSize = {kWidth, kHeight, 1};
-        wgpu::ImageCopyTexture dest = utils::CreateImageCopyTexture(
+        wgpu::TexelCopyTextureInfo dest = utils::CreateTexelCopyTextureInfo(
             destTexture, /*dstMipLevel=*/1, {0, 0, 0}, wgpu::TextureAspect::All);
         auto encoder = device.CreateCommandEncoder();
         lockStep.Wait(Step::WriteTexture);
@@ -1063,7 +1063,7 @@ TEST_P(MultithreadTextureCopyTests, CopyBufferToDepthNoRace) {
 
         auto encoder = device.CreateCommandEncoder();
 
-        wgpu::ImageCopyTexture dest = utils::CreateImageCopyTexture(
+        wgpu::TexelCopyTextureInfo dest = utils::CreateTexelCopyTextureInfo(
             destTexture, /*dstMipLevel=*/0, {0, 0, 0}, wgpu::TextureAspect::All);
 
         // Wait until src buffer is written.
@@ -1131,7 +1131,7 @@ TEST_P(MultithreadTextureCopyTests, CopyStencilToStencilNoRace) {
 
         // Copy from stencilTexture to destTexture.
         const wgpu::Extent3D dstSize = {kWidth, kHeight, 1};
-        wgpu::ImageCopyTexture dest = utils::CreateImageCopyTexture(
+        wgpu::TexelCopyTextureInfo dest = utils::CreateTexelCopyTextureInfo(
             destTexture, /*dstMipLevel=*/1, {0, 0, 0}, wgpu::TextureAspect::All);
         auto encoder = device.CreateCommandEncoder();
         lockStep.Wait(Step::WriteTexture);
@@ -1190,7 +1190,7 @@ TEST_P(MultithreadTextureCopyTests, CopyBufferToStencilNoRace) {
 
         auto encoder = device.CreateCommandEncoder();
 
-        wgpu::ImageCopyTexture dest = utils::CreateImageCopyTexture(
+        wgpu::TexelCopyTextureInfo dest = utils::CreateTexelCopyTextureInfo(
             destTexture, /*dstMipLevel=*/0, {0, 0, 0}, wgpu::TextureAspect::All);
 
         // Wait until src buffer is written.
@@ -1260,7 +1260,7 @@ TEST_P(MultithreadTextureCopyTests, CopyTextureForBrowserNoRace) {
 
         // Copy from srcTexture to destTexture.
         const wgpu::Extent3D dstSize = {kWidth, kHeight, 1};
-        wgpu::ImageCopyTexture dest = utils::CreateImageCopyTexture(
+        wgpu::TexelCopyTextureInfo dest = utils::CreateTexelCopyTextureInfo(
             destTexture, /*dstMipLevel=*/0, {0, 0, 0}, wgpu::TextureAspect::All);
         wgpu::CopyTextureForBrowserOptions options;
         options.flipY = true;
@@ -1325,7 +1325,7 @@ TEST_P(MultithreadTextureCopyTests, CopyTextureForBrowserErrorNoDeadLock) {
 
         // Copy from srcTexture to destTexture.
         const wgpu::Extent3D dstSize = {kWidth, kHeight, 1};
-        wgpu::ImageCopyTexture dest = utils::CreateImageCopyTexture(
+        wgpu::TexelCopyTextureInfo dest = utils::CreateTexelCopyTextureInfo(
             destTexture, /*dstMipLevel=*/0, {0, 0, 0}, wgpu::TextureAspect::All);
         wgpu::CopyTextureForBrowserOptions options = {};
 
@@ -1462,10 +1462,6 @@ class MultithreadDrawIndexedIndirectTests : public MultithreadTests {
 TEST_P(MultithreadDrawIndexedIndirectTests, IndirectOffsetInParallel) {
     // TODO(crbug.com/dawn/789): Test is failing after a roll on SwANGLE on Windows only.
     DAWN_SUPPRESS_TEST_IF(IsANGLE() && IsWindows());
-
-    // TODO(crbug.com/dawn/1292): Some Intel OpenGL drivers don't seem to like
-    // the offsets that Tint/GLSL produces.
-    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsLinux());
 
     utils::RGBA8 filled(0, 255, 0, 255);
     utils::RGBA8 notFilled(0, 0, 0, 0);

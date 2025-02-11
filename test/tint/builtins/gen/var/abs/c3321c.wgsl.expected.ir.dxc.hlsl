@@ -1,3 +1,31 @@
+//
+// fragment_main
+//
+
+void abs_c3321c() {
+  int3 res = (int(1)).xxx;
+}
+
+void fragment_main() {
+  abs_c3321c();
+}
+
+//
+// compute_main
+//
+
+void abs_c3321c() {
+  int3 res = (int(1)).xxx;
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  abs_c3321c();
+}
+
+//
+// vertex_main
+//
 struct VertexOutput {
   float4 pos;
 };
@@ -11,26 +39,17 @@ void abs_c3321c() {
   int3 res = (int(1)).xxx;
 }
 
-void fragment_main() {
-  abs_c3321c();
-}
-
-[numthreads(1, 1, 1)]
-void compute_main() {
-  abs_c3321c();
-}
-
 VertexOutput vertex_main_inner() {
-  VertexOutput tint_symbol = (VertexOutput)0;
-  tint_symbol.pos = (0.0f).xxxx;
+  VertexOutput v = (VertexOutput)0;
+  v.pos = (0.0f).xxxx;
   abs_c3321c();
-  VertexOutput v = tint_symbol;
-  return v;
+  VertexOutput v_1 = v;
+  return v_1;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_1 = vertex_main_inner();
-  vertex_main_outputs v_2 = {v_1.pos};
-  return v_2;
+  VertexOutput v_2 = vertex_main_inner();
+  vertex_main_outputs v_3 = {v_2.pos};
+  return v_3;
 }
 

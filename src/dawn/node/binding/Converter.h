@@ -129,15 +129,15 @@ class Converter {
 
     [[nodiscard]] bool Convert(wgpu::TextureAspect& out, const interop::GPUTextureAspect& in);
 
-    [[nodiscard]] bool Convert(wgpu::ImageCopyTexture& out,
+    [[nodiscard]] bool Convert(wgpu::TexelCopyTextureInfo& out,
                                const interop::GPUTexelCopyTextureInfo& in);
 
-    [[nodiscard]] bool Convert(wgpu::ImageCopyBuffer& out,
+    [[nodiscard]] bool Convert(wgpu::TexelCopyBufferInfo& out,
                                const interop::GPUTexelCopyBufferInfo& in);
 
     [[nodiscard]] bool Convert(BufferSource& out, interop::BufferSource in);
 
-    [[nodiscard]] bool Convert(wgpu::TextureDataLayout& out,
+    [[nodiscard]] bool Convert(wgpu::TexelCopyBufferLayout& out,
                                const interop::GPUTexelCopyBufferLayout& in);
 
     [[nodiscard]] bool Convert(wgpu::TextureFormat& out, const interop::GPUTextureFormat& in);
@@ -157,8 +157,7 @@ class Converter {
     [[nodiscard]] bool Convert(wgpu::TextureViewDimension& out,
                                const interop::GPUTextureViewDimension& in);
 
-    [[nodiscard]] bool Convert(wgpu::ProgrammableStageDescriptor& out,
-                               const interop::GPUProgrammableStage& in);
+    [[nodiscard]] bool Convert(wgpu::ComputeState& out, const interop::GPUProgrammableStage& in);
 
     [[nodiscard]] bool Convert(wgpu::ConstantEntry& out,
                                const std::string& in_name,
@@ -215,10 +214,10 @@ class Converter {
     [[nodiscard]] bool Convert(wgpu::RenderPassDepthStencilAttachment& out,
                                const interop::GPURenderPassDepthStencilAttachment& in);
 
-    [[nodiscard]] bool Convert(wgpu::RenderPassTimestampWrites& out,
+    [[nodiscard]] bool Convert(wgpu::PassTimestampWrites& out,
                                const interop::GPURenderPassTimestampWrites& in);
 
-    [[nodiscard]] bool Convert(wgpu::ComputePassTimestampWrites& out,
+    [[nodiscard]] bool Convert(wgpu::PassTimestampWrites& out,
                                const interop::GPUComputePassTimestampWrites& in);
 
     [[nodiscard]] bool Convert(wgpu::LoadOp& out, const interop::GPULoadOp& in);
@@ -291,8 +290,10 @@ class Converter {
     // https://gpuweb.github.io/gpuweb/#gpu-supportedfeatures)
     [[nodiscard]] bool Convert(wgpu::FeatureName& out, interop::GPUFeatureName in);
     [[nodiscard]] bool Convert(interop::GPUFeatureName& out, wgpu::FeatureName in);
-    [[nodiscard]] bool Convert(wgpu::WGSLFeatureName& out, interop::WGSLFeatureName in);
-    [[nodiscard]] bool Convert(interop::WGSLFeatureName& out, wgpu::WGSLFeatureName in);
+    [[nodiscard]] bool Convert(wgpu::WGSLLanguageFeatureName& out,
+                               interop::WGSLLanguageFeatureName in);
+    [[nodiscard]] bool Convert(interop::WGSLLanguageFeatureName& out,
+                               wgpu::WGSLLanguageFeatureName in);
 
     // std::string to C string / wgpu::StringView types
     [[nodiscard]] inline bool Convert(const char*& out, const std::string& in) {

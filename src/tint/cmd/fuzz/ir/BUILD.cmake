@@ -37,11 +37,11 @@
 include(cmd/fuzz/ir/as/BUILD.cmake)
 include(cmd/fuzz/ir/dis/BUILD.cmake)
 
-if(TINT_BUILD_IR_BINARY AND TINT_BUILD_IR_FUZZER AND ((NOT IS_ASAN) OR BUILD_WITH_CHROMIUM))
+if(TINT_BUILD_IR_BINARY AND TINT_BUILD_IR_FUZZER)
 ################################################################################
 # Target:    tint_cmd_fuzz_ir_fuzz_cmd
 # Kind:      fuzz_cmd
-# Condition: TINT_BUILD_IR_BINARY AND TINT_BUILD_IR_FUZZER AND ((NOT IS_ASAN) OR BUILD_WITH_CHROMIUM)
+# Condition: TINT_BUILD_IR_BINARY AND TINT_BUILD_IR_FUZZER
 ################################################################################
 tint_add_target(tint_cmd_fuzz_ir_fuzz_cmd fuzz_cmd
   cmd/fuzz/ir/main_fuzz.cc
@@ -131,7 +131,7 @@ endif(TINT_BUILD_WGSL_WRITER)
 
 tint_target_set_output_name(tint_cmd_fuzz_ir_fuzz_cmd fuzz_cmd "tint_ir_fuzzer")
 
-endif(TINT_BUILD_IR_BINARY AND TINT_BUILD_IR_FUZZER AND ((NOT IS_ASAN) OR BUILD_WITH_CHROMIUM))
+endif(TINT_BUILD_IR_BINARY AND TINT_BUILD_IR_FUZZER)
 ################################################################################
 # Target:    tint_cmd_fuzz_ir_fuzz
 # Kind:      fuzz

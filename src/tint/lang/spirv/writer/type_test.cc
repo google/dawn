@@ -528,6 +528,23 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              StorageTextureCase{" = OpTypeImage %float 2D 0 0 0 2 Rgba8",  //
                                                 Dim::k2d, Format::kRgba8Unorm}));
 
+TEST_F(SpirvWriterTest, Type_SubgroupMatrix) {
+    b.Append(b.ir.root_block, [&] {  //
+        b.Var("left", ty.ptr<private_>(ty.subgroup_matrix_left(ty.f32(), 8, 4)));
+        b.Var("right", ty.ptr<private_>(ty.subgroup_matrix_right(ty.u32(), 4, 8)));
+        b.Var("result", ty.ptr<private_>(ty.subgroup_matrix_result(ty.i32(), 2, 2)));
+    });
+
+    Options options;
+    options.use_vulkan_memory_model = true;
+    ASSERT_TRUE(Generate(options)) << Error() << output_;
+    EXPECT_INST("OpCapability CooperativeMatrixKHR");
+    EXPECT_INST("OpExtension \"SPV_KHR_cooperative_matrix\"");
+    EXPECT_INST("%3 = OpTypeCooperativeMatrixKHR %float %uint_3 %uint_4 %uint_8 %uint_0");
+    EXPECT_INST("%13 = OpTypeCooperativeMatrixKHR %uint %uint_3 %uint_8 %uint_4 %uint_1");
+    EXPECT_INST("%18 = OpTypeCooperativeMatrixKHR %int %uint_3 %uint_2 %uint_2 %uint_2");
+}
+
 // Test that we can emit multiple types.
 // Includes types with the same opcode but different parameters.
 TEST_F(SpirvWriterTest, Type_Multiple) {

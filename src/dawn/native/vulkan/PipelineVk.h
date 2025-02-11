@@ -49,6 +49,7 @@ class PipelineVk {
     uint32_t GetInternalImmediateDataSize() const;
 
   protected:
+    // TODO(crbug.com/366291600): Accept immediate data mask instead of size.
     MaybeError InitializeBase(PipelineLayout* layout, uint32_t internalImmediateDataSize);
     void DestroyImpl();
 

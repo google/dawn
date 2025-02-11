@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void clamp_9d731c() {
   float2 res = (1.0f).xx;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   clamp_9d731c();
   return;
 }
+//
+// compute_main
+//
+void clamp_9d731c() {
+  float2 res = (1.0f).xx;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   clamp_9d731c();
   return;
+}
+//
+// vertex_main
+//
+void clamp_9d731c() {
+  float2 res = (1.0f).xx;
 }
 
 struct VertexOutput {

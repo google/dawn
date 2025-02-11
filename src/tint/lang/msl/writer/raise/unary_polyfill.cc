@@ -88,11 +88,13 @@ struct State {
 }  // namespace
 
 Result<SuccessType> UnaryPolyfill(core::ir::Module& ir) {
-    auto result = ValidateAndDumpIfNeeded(ir, "msl.UnaryPolyfill",
-                                          core::ir::Capabilities{
-                                              core::ir::Capability::kAllowPointersInStructures,
-                                              core::ir::Capability::kAllowPrivateVarsInFunctions,
-                                          });
+    auto result =
+        ValidateAndDumpIfNeeded(ir, "msl.UnaryPolyfill",
+                                core::ir::Capabilities{
+                                    core::ir::Capability::kAllowPointersAndHandlesInStructures,
+                                    core::ir::Capability::kAllowPrivateVarsInFunctions,
+                                    core::ir::Capability::kAllowAnyLetType,
+                                });
     if (result != Success) {
         return result.Failure();
     }

@@ -39,6 +39,7 @@ load("@bazel_skylib//lib:selects.bzl", "selects")
 cc_library(
   name = "command",
   srcs = [
+    "args.cc",
     "cli.cc",
   ] + select({
     ":_not_tint_build_is_linux__and__not_tint_build_is_mac__and__not_tint_build_is_win_": [
@@ -57,6 +58,7 @@ cc_library(
     "//conditions:default": [],
   }),
   hdrs = [
+    "args.h",
     "cli.h",
     "command.h",
   ],

@@ -68,13 +68,13 @@ struct S {
 };
 
 layout(binding = 0, std430)
-buffer tint_symbol_block_1_ssbo {
+buffer f_output_block_ssbo {
   S inner;
 } v_1;
-layout(location = 0) in float frag_main_loc0_Input;
-layout(location = 1) flat in uint frag_main_loc1_Input;
-layout(location = 2) in float16_t frag_main_loc2_Input;
-layout(location = 3) in f16vec3 frag_main_loc3_Input;
+layout(location = 0) in float tint_interstage_location0;
+layout(location = 1) flat in uint tint_interstage_location1;
+layout(location = 2) in float16_t tint_interstage_location2;
+layout(location = 3) in f16vec3 tint_interstage_location3;
 void tint_store_and_preserve_padding(S value_param) {
   v_1.inner.f = value_param.f;
   v_1.inner.u = value_param.u;
@@ -82,14 +82,14 @@ void tint_store_and_preserve_padding(S value_param) {
   v_1.inner.x = value_param.x;
   v_1.inner.y = value_param.y;
 }
-void frag_main_inner(S tint_symbol_1) {
-  float f = tint_symbol_1.f;
-  uint u = tint_symbol_1.u;
-  vec4 v = tint_symbol_1.v;
-  float16_t x = tint_symbol_1.x;
-  f16vec3 y = tint_symbol_1.y;
-  tint_store_and_preserve_padding(tint_symbol_1);
+void frag_main_inner(S v_2) {
+  float f = v_2.f;
+  uint u = v_2.u;
+  vec4 v = v_2.v;
+  float16_t x = v_2.x;
+  f16vec3 y = v_2.y;
+  tint_store_and_preserve_padding(v_2);
 }
 void main() {
-  frag_main_inner(S(frag_main_loc0_Input, frag_main_loc1_Input, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, gl_FragCoord, 0u, 0u, 0u, 0u, frag_main_loc2_Input, 0u, 0u, 0u, 0u, 0u, 0u, 0u, frag_main_loc3_Input, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u));
+  frag_main_inner(S(tint_interstage_location0, tint_interstage_location1, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, gl_FragCoord, 0u, 0u, 0u, 0u, tint_interstage_location2, 0u, 0u, 0u, 0u, 0u, 0u, 0u, tint_interstage_location3, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u));
 }

@@ -32,7 +32,7 @@ f_outputs f(f_inputs inputs) {
   P.a = pixel_local_a.Load(v_1).x;
   Out v_2 = f_inner();
   f_outputs v_3 = {v_2.x, v_2.y, v_2.z};
-  pixel_local_a[v_1] = P.a.xxxx;
+  pixel_local_a[v_1] = uint4((P.a).xxxx);
   return v_3;
 }
 

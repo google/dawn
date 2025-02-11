@@ -1,14 +1,20 @@
+//
+// fragment_main
+//
 #version 460
 precision highp float;
 precision highp int;
 
-layout(binding = 0, rg32ui) uniform highp uimage2DArray arg_0;
+layout(binding = 0, rg32ui) uniform highp uimage2DArray f_arg_0;
 void textureStore_75bbd5() {
-  imageStore(arg_0, ivec3(ivec2(1), int(1u)), uvec4(1u));
+  imageStore(f_arg_0, ivec3(ivec2(1), int(1u)), uvec4(1u));
 }
 void main() {
   textureStore_75bbd5();
 }
+//
+// compute_main
+//
 #version 460
 
 layout(binding = 0, rg32ui) uniform highp uimage2DArray arg_0;

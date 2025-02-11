@@ -55,6 +55,10 @@
     X(maxDynamicStorageBuffersPerPipelineLayout) \
     X(maxSampledTexturesPerShaderStage)          \
     X(maxSamplersPerShaderStage)                 \
+    X(maxStorageBuffersInFragmentStage)          \
+    X(maxStorageTexturesInFragmentStage)         \
+    X(maxStorageBuffersInVertexStage)            \
+    X(maxStorageTexturesInVertexStage)           \
     X(maxStorageBuffersPerShaderStage)           \
     X(maxStorageTexturesPerShaderStage)          \
     X(maxUniformBuffersPerShaderStage)           \
@@ -82,10 +86,10 @@ namespace wgpu::binding {
 // wgpu::bindings::GPUAdapter
 // TODO(crbug.com/dawn/1133): This is a stub implementation. Properly implement.
 ////////////////////////////////////////////////////////////////////////////////
-GPUAdapter::GPUAdapter(dawn::native::Adapter a,
+GPUAdapter::GPUAdapter(wgpu::Adapter adapter,
                        const Flags& flags,
                        std::shared_ptr<AsyncRunner> async)
-    : nativeAdapter_(a), adapter_(a.Get()), flags_(flags), async_(async) {}
+    : adapter_(adapter), flags_(flags), async_(async) {}
 
 interop::Interface<interop::GPUSupportedFeatures> GPUAdapter::getFeatures(Napi::Env env) {
     wgpu::SupportedFeatures features{};
@@ -141,6 +145,16 @@ bool GPUAdapter::getIsCompatibilityMode(Napi::Env) {
     return adapterInfo.compatibilityMode;
 }
 
+std::string GPUAdapter::getFeatureLevel(Napi::Env) {
+    wgpu::AdapterInfo adapterInfo = {};
+    // TODO(crbug.com/382291443): Report feature level from wgpu::Adapter.
+    adapter_.GetInfo(&adapterInfo);
+    if (adapterInfo.compatibilityMode) {
+        return "compatibility";
+    }
+    return "core";
+}
+
 namespace {
 // Returns a string representation of the wgpu::ErrorType
 const char* str(wgpu::ErrorType ty) {
@@ -153,8 +167,6 @@ const char* str(wgpu::ErrorType ty) {
             return "out of memory";
         case wgpu::ErrorType::Internal:
             return "internal";
-        case wgpu::ErrorType::DeviceLost:
-            return "device lost";
         case wgpu::ErrorType::Unknown:
         default:
             return "unknown";
@@ -201,7 +213,9 @@ interop::Promise<interop::Interface<interop::GPUDevice>> GPUAdapter::requestDevi
         return {env, interop::kUnusedPromise};
     }
 
-    interop::Promise<interop::Interface<interop::GPUDevice>> promise(env, PROMISE_INFO);
+    auto ctx = std::make_unique<AsyncContext<interop::Interface<interop::GPUDevice>>>(
+        env, PROMISE_INFO, async_);
+    auto promise = ctx->promise;
 
     wgpu::RequiredLimits limits;
 #define COPY_LIMIT(LIMIT)                                                                        \
@@ -269,21 +283,28 @@ interop::Promise<interop::Interface<interop::GPUDevice>> GPUAdapter::requestDevi
     DawnTogglesDescriptor deviceTogglesDesc = togglesLoader.GetDescriptor();
     desc.nextInChain = &deviceTogglesDesc;
 
-    auto wgpu_device = nativeAdapter_.CreateDevice(&desc);
-    if (wgpu_device == nullptr) {
-        promise.Reject(binding::Errors::OperationError(env, "failed to create device"));
-        return promise;
-    }
+    std::unique_ptr<GPUDevice> gpu_device;
+    adapter_.RequestDevice(
+        &desc, wgpu::CallbackMode::AllowSpontaneous,
+        [ctx = std::move(ctx), desc, device_lost_promise, this, &gpu_device](
+            wgpu::RequestDeviceStatus status, wgpu::Device wgpu_device, wgpu::StringView message) {
+            switch (status) {
+                case wgpu::RequestDeviceStatus::Success:
+                    gpu_device = std::make_unique<GPUDevice>(ctx->env, desc, wgpu_device,
+                                                             device_lost_promise, async_);
+                    if (!valid_) {
+                        gpu_device->ForceLoss(wgpu::DeviceLostReason::Unknown,
+                                              "Device was marked as lost due to a stale adapter.");
+                    }
+                    valid_ = false;
 
-    auto gpu_device =
-        std::make_unique<GPUDevice>(env, desc, wgpu_device, device_lost_promise, async_);
-    if (!valid_) {
-        gpu_device->ForceLoss(wgpu::DeviceLostReason::Unknown,
-                              "Device was marked as lost due to a stale adapter.");
-    }
-    valid_ = false;
-
-    promise.Resolve(interop::GPUDevice::Bind(env, std::move(gpu_device)));
+                    ctx->promise.Resolve(interop::GPUDevice::Bind(ctx->env, std::move(gpu_device)));
+                    break;
+                default:
+                    ctx->promise.Reject(Errors::OperationError(ctx->env, std::string(message)));
+                    break;
+            }
+        });
     return promise;
 }
 

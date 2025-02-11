@@ -136,7 +136,7 @@ void main_inner(uint3 GlobalInvocationID) {
               continue;
             }
             uint v_23 = 0u;
-            tileLightId.InterlockedAdd(uint((0u + (min(tileId, 3u) * 260u))), 1u, v_23);
+            tileLightId.InterlockedAdd((0u + (min(tileId, 3u) * 260u)), 1u, v_23);
             uint offset = v_23;
             if ((offset >= config[1u].x)) {
               {

@@ -170,6 +170,7 @@ static constexpr std::array<DeviceExtInfo, kDeviceExtCount> sDeviceExtInfos{{
     {DeviceExt::ShaderSubgroupExtendedTypes, "VK_KHR_shader_subgroup_extended_types",
      VulkanVersion_1_2},
     {DeviceExt::DrawIndirectCount, "VK_KHR_draw_indirect_count", NeverPromoted},
+    {DeviceExt::VulkanMemoryModel, "VK_KHR_vulkan_memory_model", VulkanVersion_1_2},
 
     {DeviceExt::ShaderIntegerDotProduct, "VK_KHR_shader_integer_dot_product", VulkanVersion_1_3},
     {DeviceExt::ZeroInitializeWorkgroupMemory, "VK_KHR_zero_initialize_workgroup_memory",
@@ -289,6 +290,7 @@ DeviceExtSet EnsureDependencies(const DeviceExtSet& advertisedExts,
             case DeviceExt::Robustness2:
             case DeviceExt::SubgroupSizeControl:
             case DeviceExt::ShaderSubgroupExtendedTypes:
+            case DeviceExt::VulkanMemoryModel:
                 hasDependencies = HasDep(DeviceExt::GetPhysicalDeviceProperties2);
                 break;
 

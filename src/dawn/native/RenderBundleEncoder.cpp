@@ -27,8 +27,10 @@
 
 #include "dawn/native/RenderBundleEncoder.h"
 
+#include <string>
 #include <utility>
 
+#include "dawn/native/Adapter.h"
 #include "dawn/native/CommandValidation.h"
 #include "dawn/native/Commands.h"
 #include "dawn/native/Device.h"
@@ -70,8 +72,10 @@ MaybeError ValidateRenderBundleEncoderDescriptor(DeviceBase* device,
 
     uint32_t maxColorAttachments = device->GetLimits().v1.maxColorAttachments;
     DAWN_INVALID_IF(descriptor->colorFormatCount > maxColorAttachments,
-                    "Color formats count (%u) exceeds maximum number of color attachements (%u).",
-                    descriptor->colorFormatCount, maxColorAttachments);
+                    "Color formats count (%u) exceeds maximum number of color attachments (%u).%s",
+                    descriptor->colorFormatCount, maxColorAttachments,
+                    DAWN_INCREASE_LIMIT_MESSAGE(device->GetAdapter(), maxColorAttachments,
+                                                descriptor->colorFormatCount));
 
     bool allColorFormatsUndefined = true;
     ColorAttachmentFormats colorAttachmentFormats;

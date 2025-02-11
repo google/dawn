@@ -215,6 +215,9 @@ if (tint_has_fuzzers) {
       forward_variables_from(invoker, "*", [ "output_name" ])
       exclude_main = false
 
+      # TODO(https://crbug.com/394563978): Remove once experiment ends.
+      high_end_job_required = true
+
       if (target_name == "wgsl") {
         dict = "dictionary.txt"
         libfuzzer_options = [

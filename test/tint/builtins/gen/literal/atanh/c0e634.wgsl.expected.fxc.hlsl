@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 RWByteAddressBuffer prevent_dce : register(u0);
 
 float2 atanh_c0e634() {
@@ -9,11 +12,27 @@ void fragment_main() {
   prevent_dce.Store2(0u, asuint(atanh_c0e634()));
   return;
 }
+//
+// compute_main
+//
+RWByteAddressBuffer prevent_dce : register(u0);
+
+float2 atanh_c0e634() {
+  float2 res = (0.54930615425109863281f).xx;
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store2(0u, asuint(atanh_c0e634()));
   return;
+}
+//
+// vertex_main
+//
+float2 atanh_c0e634() {
+  float2 res = (0.54930615425109863281f).xx;
+  return res;
 }
 
 struct VertexOutput {

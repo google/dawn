@@ -53,7 +53,6 @@ D3D11_INPUT_CLASSIFICATION VertexStepModeFunction(wgpu::VertexStepMode mode) {
             return D3D11_INPUT_PER_VERTEX_DATA;
         case wgpu::VertexStepMode::Instance:
             return D3D11_INPUT_PER_INSTANCE_DATA;
-        case wgpu::VertexStepMode::VertexBufferNotUsed:
         case wgpu::VertexStepMode::Undefined:
             break;
     }

@@ -45,6 +45,14 @@ tint_add_target(tint_utils_math lib
   utils/math/math.h
 )
 
+tint_target_add_dependencies(tint_utils_math lib
+  tint_utils_macros
+)
+
+tint_target_add_external_dependencies(tint_utils_math lib
+  "src_utils"
+)
+
 ################################################################################
 # Target:    tint_utils_math_test
 # Kind:      test

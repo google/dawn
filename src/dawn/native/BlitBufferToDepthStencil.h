@@ -48,14 +48,14 @@ struct TextureCopy;
 
 MaybeError BlitStagingBufferToDepth(DeviceBase* device,
                                     BufferBase* buffer,
-                                    const TextureDataLayout& src,
+                                    const TexelCopyBufferLayout& src,
                                     const TextureCopy& dst,
                                     const Extent3D& copyExtent);
 
 MaybeError BlitBufferToDepth(DeviceBase* device,
                              CommandEncoder* commandEncoder,
                              BufferBase* buffer,
-                             const TextureDataLayout& src,
+                             const TexelCopyBufferLayout& src,
                              const TextureCopy& dst,
                              const Extent3D& copyExtent);
 
@@ -84,14 +84,14 @@ MaybeError BlitR8ToStencil(DeviceBase* device,
 
 MaybeError BlitStagingBufferToStencil(DeviceBase* device,
                                       BufferBase* buffer,
-                                      const TextureDataLayout& src,
+                                      const TexelCopyBufferLayout& src,
                                       const TextureCopy& dst,
                                       const Extent3D& copyExtent);
 
 MaybeError BlitBufferToStencil(DeviceBase* device,
                                CommandEncoder* commandEncoder,
                                BufferBase* buffer,
-                               const TextureDataLayout& src,
+                               const TexelCopyBufferLayout& src,
                                const TextureCopy& dst,
                                const Extent3D& copyExtent);
 

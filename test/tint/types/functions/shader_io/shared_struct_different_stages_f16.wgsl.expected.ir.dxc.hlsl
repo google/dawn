@@ -1,3 +1,6 @@
+//
+// vert_main
+//
 struct Interface {
   float col1;
   float16_t col2;
@@ -10,21 +13,10 @@ struct vert_main_outputs {
   float4 Interface_pos : SV_Position;
 };
 
-struct frag_main_inputs {
-  float Interface_col1 : TEXCOORD1;
-  float16_t Interface_col2 : TEXCOORD2;
-  float4 Interface_pos : SV_Position;
-};
-
 
 Interface vert_main_inner() {
   Interface v = {0.40000000596046447754f, float16_t(0.599609375h), (0.0f).xxxx};
   return v;
-}
-
-void frag_main_inner(Interface colors) {
-  float r = colors.col1;
-  float16_t g = colors.col2;
 }
 
 vert_main_outputs vert_main() {
@@ -33,8 +25,29 @@ vert_main_outputs vert_main() {
   return v_2;
 }
 
+//
+// frag_main
+//
+struct Interface {
+  float col1;
+  float16_t col2;
+  float4 pos;
+};
+
+struct frag_main_inputs {
+  float Interface_col1 : TEXCOORD1;
+  float16_t Interface_col2 : TEXCOORD2;
+  float4 Interface_pos : SV_Position;
+};
+
+
+void frag_main_inner(Interface colors) {
+  float r = colors.col1;
+  float16_t g = colors.col2;
+}
+
 void frag_main(frag_main_inputs inputs) {
-  Interface v_3 = {inputs.Interface_col1, inputs.Interface_col2, float4(inputs.Interface_pos.xyz, (1.0f / inputs.Interface_pos.w))};
-  frag_main_inner(v_3);
+  Interface v = {inputs.Interface_col1, inputs.Interface_col2, float4(inputs.Interface_pos.xyz, (1.0f / inputs.Interface_pos.w))};
+  frag_main_inner(v);
 }
 

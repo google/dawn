@@ -58,6 +58,7 @@
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/multi_in_block.h"
 #include "src/tint/lang/core/ir/next_iteration.h"
+#include "src/tint/lang/core/ir/phony.h"
 #include "src/tint/lang/core/ir/return.h"
 #include "src/tint/lang/core/ir/store.h"
 #include "src/tint/lang/core/ir/store_vector_element.h"
@@ -94,6 +95,8 @@
 #include "src/tint/utils/math/math.h"
 #include "src/tint/utils/rtti/switch.h"
 
+TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
+
 // Helper for incrementing nesting_depth_ and then decrementing nesting_depth_ at the end
 // of the scope that holds the call.
 #define SCOPED_NESTING() \
@@ -110,7 +113,8 @@ class State {
     explicit State(const core::ir::Module& m) : mod(m) {}
 
     Program Run(const ProgramOptions& options) {
-        core::ir::Capabilities caps{core::ir::Capability::kAllowRefTypes};
+        core::ir::Capabilities caps{core::ir::Capability::kAllowRefTypes,
+                                    core::ir::Capability::kAllowPhonyInstructions};
         if (auto res = core::ir::Validate(mod, caps); res != Success) {
             // IR module failed validation.
             b.Diagnostics() = res.Failure().reason;
@@ -369,6 +373,7 @@ class State {
             [&](const core::ir::LoadVectorElement* i) { LoadVectorElement(i); },    //
             [&](const core::ir::Loop* l) { Loop(l); },                              //
             [&](const core::ir::NextIteration*) {},                                 //
+            [&](const core::ir::Phony* i) { Phony(i); },                            //
             [&](const core::ir::Return* i) { Return(i); },                          //
             [&](const core::ir::Store* i) { Store(i); },                            //
             [&](const core::ir::StoreVectorElement* i) { StoreVectorElement(i); },  //
@@ -611,14 +616,12 @@ class State {
 
     void Let(const core::ir::Let* let) {
         auto* result = let->Result(0);
-        if (mod.NameOf(result).IsValid() || result->NumUsages() > 0) {
-            Symbol name = NameFor(result);
-            Append(b.Decl(b.Let(name, Expr(let->Value()))));
-            Bind(result, name);
-        } else {
-            Append(b.Assign(b.Phony(), Expr(let->Value())));
-        }
+        Symbol name = NameFor(result);
+        Append(b.Decl(b.Let(name, Expr(let->Value()))));
+        Bind(result, name);
     }
+
+    void Phony(const core::ir::Phony* phony) { Append(b.Assign(b.Phony(), Expr(phony->Value()))); }
 
     void Store(const core::ir::Store* store) {
         auto* dst = Expr(store->To());
@@ -683,13 +686,22 @@ class State {
                     case wgsl::BuiltinFn::kQuadSwapDiagonal:
                         Enable(wgsl::Extension::kF16);
                         Enable(wgsl::Extension::kSubgroups);
-                        Enable(wgsl::Extension::kSubgroupsF16);
                         break;
                     default:
                         break;
                 }
 
-                auto* expr = b.Call(c->Func(), std::move(args));
+                const ast::CallExpression* expr = nullptr;
+                if (!c->ExplicitTemplateParams().IsEmpty()) {
+                    Vector<const ast::Expression*, 4> tmpl_args;
+                    for (auto* e : c->ExplicitTemplateParams()) {
+                        tmpl_args.Push(Type(e).expr);
+                    }
+                    expr = b.Call(b.Ident(c->Func(), std::move(tmpl_args)), std::move(args));
+                } else {
+                    expr = b.Call(c->Func(), std::move(args));
+                }
+
                 if (call->Results().IsEmpty() || !call->Result(0)->IsUsed()) {
                     Append(b.CallStmt(expr));
                     return;
@@ -981,20 +993,15 @@ class State {
             },
             [&](const core::type::Vector* v) {
                 auto el = Type(v->Type());
-                if (v->Packed()) {
-                    TINT_ASSERT(v->Width() == 3u);
-                    return b.ty(core::BuiltinType::kPackedVec3, el);
-                } else {
-                    return b.ty.vec(el, v->Width());
-                }
+                return b.ty.vec(el, v->Width());
             },
             [&](const core::type::Array* a) {
-                auto el = Type(a->ElemType());
-                if (!el) {
+                if (ContainsBuiltinStruct(a)) {
                     // The element type is untypeable, so we need to infer it instead.
                     return ast::Type{b.Expr(b.Ident("array"))};
                 }
 
+                auto el = Type(a->ElemType());
                 Vector<const ast::Attribute*, 1> attrs;
                 if (!a->IsStrideImplicit()) {
                     attrs.Push(b.Stride(a->Stride()));
@@ -1049,13 +1056,17 @@ class State {
                 auto el = Type(i->Type());
                 return b.ty.input_attachment(el);
             },  //
+            [&](const core::type::SubgroupMatrix* m) {
+                Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+                auto el = Type(m->Type());
+                return b.ty.subgroup_matrix(m->Kind(), el, m->Columns(), m->Rows());
+            },  //
             TINT_ICE_ON_NO_MATCH);
     }
 
     ast::Type Struct(const core::type::Struct* s) {
         // Skip builtin structures.
-        // TODO(350778507): Consider using a struct flag for builtin structures instead.
-        if (tint::HasPrefix(s->Name().NameView(), "__")) {
+        if (ContainsBuiltinStruct(s)) {
             return ast::Type{};
         }
 
@@ -1107,6 +1118,20 @@ class State {
         });
 
         return b.ty(n);
+    }
+
+    bool ContainsBuiltinStruct(const core::type::Type* ty) {
+        if (auto* s = ty->As<core::type::Struct>()) {
+            // Note: We don't need to check the members of the struct, as builtin structures cannot
+            // be nested inside other structures.
+            // TODO(350778507): Consider using a struct flag for builtin structures instead.
+            if (tint::HasPrefix(s->Name().NameView(), "__")) {
+                return true;
+            }
+        } else if (auto* a = ty->As<core::type::Array>()) {
+            return ContainsBuiltinStruct(a->ElemType());
+        }
+        return false;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1285,3 +1310,5 @@ Program IRToProgram(const core::ir::Module& i, const ProgramOptions& options) {
 }
 
 }  // namespace tint::wgsl::writer
+
+TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);

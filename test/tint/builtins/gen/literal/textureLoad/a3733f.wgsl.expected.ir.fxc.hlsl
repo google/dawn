@@ -1,16 +1,27 @@
+//
+// fragment_main
+//
 
 RWByteAddressBuffer prevent_dce : register(u0);
 RWTexture2D<uint4> arg_0 : register(u0, space1);
 uint4 textureLoad_a3733f() {
-  uint2 v = (0u).xx;
-  arg_0.GetDimensions(v.x, v.y);
-  uint2 v_1 = (v - (1u).xx);
-  uint4 res = uint4(arg_0.Load(int3(int2(min(uint2((int(1)).xx), v_1)), int(0))));
+  uint4 res = arg_0.Load(int3((int(1)).xx, int(0)));
   return res;
 }
 
 void fragment_main() {
   prevent_dce.Store4(0u, textureLoad_a3733f());
+}
+
+//
+// compute_main
+//
+
+RWByteAddressBuffer prevent_dce : register(u0);
+RWTexture2D<uint4> arg_0 : register(u0, space1);
+uint4 textureLoad_a3733f() {
+  uint4 res = arg_0.Load(int3((int(1)).xx, int(0)));
+  return res;
 }
 
 [numthreads(1, 1, 1)]

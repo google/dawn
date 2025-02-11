@@ -28,12 +28,14 @@
 #ifndef SRC_TINT_UTILS_TEXT_STRING_STREAM_H_
 #define SRC_TINT_UTILS_TEXT_STRING_STREAM_H_
 
+#include <algorithm>
 #include <functional>
 #include <iomanip>
 #include <iterator>
 #include <limits>
 #include <sstream>
 #include <string>
+#include <type_traits>
 #include <utility>
 
 #include "src/tint/utils/text/unicode.h"

@@ -17,9 +17,6 @@ struct main_inputs {
 };
 
 
-cbuffer cbuffer__uniform0 : register(b0) {
-  uint4 _uniform0[2];
-};
 ByteAddressBuffer _storage1 : register(t2);
 static uint shadingSsboIndex = 0u;
 SamplerState permutationsSampler_1_Sampler : register(s0, space1);
@@ -75,7 +72,7 @@ void _skslMain(FSIn _stageIn, inout FSOut _stageOut) {
         float4 _67_p = _66_j;
         float2 _skTemp5 = frac(_57_k);
         float2 _68_d = _skTemp5;
-        float2 _skTemp6 = smoothstep((0.0f).xx, (1.0f).xx, _68_d);
+        float2 _skTemp6 = (clamp(((_68_d - (0.0f).xx) / ((1.0f).xx - (0.0f).xx)), (0.0f).xx, (1.0f).xx) * (clamp(((_68_d - (0.0f).xx) / ((1.0f).xx - (0.0f).xx)), (0.0f).xx, (1.0f).xx) * ((3.0f).xx - ((2.0f).xx * clamp(((_68_d - (0.0f).xx) / ((1.0f).xx - (0.0f).xx)), (0.0f).xx, (1.0f).xx)))));
         float2 _69_e = _skTemp6;
         float4 _71_g = (0.0f).xxxx;
         int _72_h = int(0);

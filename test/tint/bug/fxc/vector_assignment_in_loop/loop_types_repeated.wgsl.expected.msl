@@ -1,11 +1,7 @@
 #include <metal_stdlib>
-
 using namespace metal;
 
-#define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
-
-kernel void tint_symbol() {
+kernel void v() {
   float2 v2f = 0.0f;
   float2 v2f_2 = 0.0f;
   int3 v3i = 0;
@@ -14,17 +10,25 @@ kernel void tint_symbol() {
   uint4 v4u_2 = 0u;
   bool2 v2b = false;
   bool2 v2b_2 = false;
-  for(int i = 0; (i < 2); i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)))) {
-    TINT_ISOLATE_UB(tint_volatile_false);
-    v2f[min(uint(i), 1u)] = 1.0f;
-    v3i[min(uint(i), 2u)] = 1;
-    v4u[min(uint(i), 3u)] = 1u;
-    v2b[min(uint(i), 1u)] = true;
-    v2f_2[min(uint(i), 1u)] = 1.0f;
-    v3i_2[min(uint(i), 2u)] = 1;
-    v4u_2[min(uint(i), 3u)] = 1u;
-    v2b_2[min(uint(i), 1u)] = true;
+  {
+    int i = 0;
+    while(true) {
+      if ((i < 2)) {
+      } else {
+        break;
+      }
+      v2f[min(uint(i), 1u)] = 1.0f;
+      v3i[min(uint(i), 2u)] = 1;
+      v4u[min(uint(i), 3u)] = 1u;
+      v2b[min(uint(i), 1u)] = true;
+      v2f_2[min(uint(i), 1u)] = 1.0f;
+      v3i_2[min(uint(i), 2u)] = 1;
+      v4u_2[min(uint(i), 3u)] = 1u;
+      v2b_2[min(uint(i), 1u)] = true;
+      {
+        i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)));
+      }
+      continue;
+    }
   }
-  return;
 }
-

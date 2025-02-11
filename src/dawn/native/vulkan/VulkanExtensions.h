@@ -108,6 +108,7 @@ enum class DeviceExt {
     ShaderFloat16Int8,
     ShaderSubgroupExtendedTypes,
     DrawIndirectCount,
+    VulkanMemoryModel,
 
     // Promoted to 1.3
     ShaderIntegerDotProduct,

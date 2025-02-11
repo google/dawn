@@ -40,7 +40,11 @@ void main_1() {
   uint x_52 = x_3.x;
   x_54 = 0u;
   {
+    uvec2 tint_loop_idx = uvec2(0u);
     while(true) {
+      if (all(equal(tint_loop_idx, uvec2(4294967295u)))) {
+        break;
+      }
       uint x_55 = 0u;
       x_58 = v.inner.field0.field0;
       if ((x_54 < x_58)) {
@@ -54,6 +58,10 @@ void main_1() {
         x_28[min(x_62, 4095u)] = S(((x_67.xy + x_67.zw) * 0.5f), x_62);
       }
       {
+        uint tint_low_inc = (tint_loop_idx.x + 1u);
+        tint_loop_idx.x = tint_low_inc;
+        uint tint_carry = uint((tint_low_inc == 0u));
+        tint_loop_idx.y = (tint_loop_idx.y + tint_carry);
         x_55 = (x_54 + 32u);
         x_54 = x_55;
       }
@@ -75,7 +83,11 @@ void main_1() {
   x_85 = x_76.xyxy;
   x_88 = 1u;
   {
+    uvec2 tint_loop_idx = uvec2(0u);
     while(true) {
+      if (all(equal(tint_loop_idx, uvec2(4294967295u)))) {
+        break;
+      }
       vec4 x_111 = vec4(0.0f);
       vec4 x_86 = vec4(0.0f);
       uint x_89 = 0u;
@@ -103,6 +115,10 @@ void main_1() {
         x_86 = x_111;
       }
       {
+        uint tint_low_inc_1 = (tint_loop_idx.x + 1u);
+        tint_loop_idx.x = tint_low_inc_1;
+        uint tint_carry_1 = uint((tint_low_inc_1 == 0u));
+        tint_loop_idx.y = (tint_loop_idx.y + tint_carry_1);
         x_89 = (x_88 + 32u);
         x_85 = x_86;
         x_88 = x_89;
@@ -123,7 +139,7 @@ void main_1() {
   float v_6 = uintBitsToFloat(atomicOr(x_36, 0u));
   x_12.field0[v_3] = vec4(v_4, v_5, v_6, uintBitsToFloat(atomicOr(x_37, 0u)));
 }
-void tint_symbol_inner(uvec3 x_3_param, uint tint_local_index) {
+void main_inner(uvec3 x_3_param, uint tint_local_index) {
   if ((tint_local_index < 1u)) {
     atomicExchange(x_34, 0u);
     atomicExchange(x_35, 0u);
@@ -151,5 +167,5 @@ void tint_symbol_inner(uvec3 x_3_param, uint tint_local_index) {
 }
 layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  tint_symbol_inner(gl_LocalInvocationID, gl_LocalInvocationIndex);
+  main_inner(gl_LocalInvocationID, gl_LocalInvocationIndex);
 }

@@ -1,9 +1,9 @@
 struct foo_outputs {
-  int tint_symbol_1 : SV_Target0;
+  int tint_symbol : SV_Target0;
 };
 
 struct foo_inputs {
-  float tint_symbol : TEXCOORD0;
+  float tint_member : TEXCOORD0;
   float2 coord : TEXCOORD1;
 };
 
@@ -15,8 +15,8 @@ int tint_f32_to_i32(float value) {
   return (((value <= 2147483520.0f)) ? ((((value >= -2147483648.0f)) ? (int(value)) : (int(-2147483648)))) : (int(2147483647)));
 }
 
-int foo_inner(float tint_symbol, float2 coord) {
-  if ((tint_symbol == 0.0f)) {
+int foo_inner(float v, float2 coord) {
+  if ((v == 0.0f)) {
     discard;
   }
   int result = tint_f32_to_i32(t.Sample(s, coord).x);
@@ -37,9 +37,9 @@ int foo_inner(float tint_symbol, float2 coord) {
         tint_loop_idx.x = tint_low_inc;
         uint tint_carry = uint((tint_low_inc == 0u));
         tint_loop_idx.y = (tint_loop_idx.y + tint_carry);
-        int v = int(0);
-        a.InterlockedAdd(int(0u), int(1), v);
-        i = v;
+        int v_1 = int(0);
+        a.InterlockedAdd(int(0u), int(1), v_1);
+        i = v_1;
       }
       continue;
     }
@@ -48,7 +48,7 @@ int foo_inner(float tint_symbol, float2 coord) {
 }
 
 foo_outputs foo(foo_inputs inputs) {
-  foo_outputs v_1 = {foo_inner(inputs.tint_symbol, inputs.coord)};
-  return v_1;
+  foo_outputs v_2 = {foo_inner(inputs.tint_member, inputs.coord)};
+  return v_2;
 }
 

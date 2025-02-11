@@ -45,6 +45,7 @@ cc_library(
     "module.cc",
     "operand.cc",
     "option_helper.cc",
+    "output.cc",
   ],
   hdrs = [
     "binary_writer.h",
@@ -54,6 +55,7 @@ cc_library(
     "operand.h",
     "option_helpers.h",
     "options.h",
+    "output.h",
   ],
   deps = [
     "//src/tint/api/common",

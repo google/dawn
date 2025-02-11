@@ -35,6 +35,7 @@
 #include "dawn/common/Enumerator.h"
 #include "dawn/native/BindGroupLayout.h"
 #include "dawn/native/Device.h"
+#include "dawn/native/ImmediateConstantsLayout.h"
 #include "dawn/native/ObjectBase.h"
 #include "dawn/native/ObjectContentHasher.h"
 #include "dawn/native/PipelineLayout.h"
@@ -105,6 +106,15 @@ ResultOrError<ShaderModuleEntryPoint> ValidateProgrammableStage(DeviceBase* devi
         "texture_depth_xx can not be used with non-comparison samplers in compatibility mode in "
         "stage (%s), entry point \"%s\"",
         metadata.stage, entryPoint.name);
+
+    const CombinedLimits& limits = device->GetLimits();
+    uint32_t maxCombos =
+        std::min(limits.v1.maxSampledTexturesPerShaderStage, limits.v1.maxSamplersPerShaderStage);
+    DAWN_INVALID_IF(
+        device->IsCompatibilityMode() && metadata.numTextureSamplerCombinations > maxCombos,
+        "Entry-point uses %u texture+sampler combinations which is more than the maximum of %u "
+        "combinations in compatibility mode",
+        metadata.numTextureSamplerCombinations, maxCombos);
 
     // Validate if overridable constants exist in shader module
     // pipelineBase is not yet constructed at this moment so iterate constants from descriptor
@@ -196,21 +206,8 @@ ResultOrError<ShaderModuleEntryPoint> ValidateProgrammableStage(DeviceBase* devi
     return entryPoint;
 }
 
-WGPUCreatePipelineAsyncStatus CreatePipelineAsyncStatusFromErrorType(InternalErrorType error) {
-    switch (error) {
-        case InternalErrorType::None:
-            return WGPUCreatePipelineAsyncStatus_Success;
-        case InternalErrorType::Validation:
-            return WGPUCreatePipelineAsyncStatus_ValidationError;
-        case InternalErrorType::DeviceLost:
-            return WGPUCreatePipelineAsyncStatus_DeviceLost;
-        case InternalErrorType::Internal:
-        case InternalErrorType::OutOfMemory:
-            return WGPUCreatePipelineAsyncStatus_InternalError;
-        default:
-            DAWN_UNREACHABLE();
-            return WGPUCreatePipelineAsyncStatus_Unknown;
-    }
+uint32_t GetRawBits(ImmediateConstantMask bits) {
+    return static_cast<uint32_t>(bits.to_ulong());
 }
 
 // PipelineBase
@@ -295,6 +292,10 @@ wgpu::ShaderStage PipelineBase::GetStageMask() const {
     return mStageMask;
 }
 
+const ImmediateConstantMask& PipelineBase::GetImmediateMask() const {
+    return mImmediateMask;
+}
+
 MaybeError PipelineBase::ValidateGetBindGroupLayout(BindGroupIndex groupIndex) {
     DAWN_TRY(GetDevice()->ValidateIsAlive());
     DAWN_TRY(GetDevice()->ValidateObject(this));
@@ -302,10 +303,6 @@ MaybeError PipelineBase::ValidateGetBindGroupLayout(BindGroupIndex groupIndex) {
     DAWN_INVALID_IF(groupIndex >= kMaxBindGroupsTyped,
                     "Bind group layout index (%u) exceeds the maximum number of bind groups (%u).",
                     groupIndex, kMaxBindGroups);
-    DAWN_INVALID_IF(
-        !mLayout->GetBindGroupLayoutsMask()[groupIndex],
-        "Bind group layout index (%u) doesn't correspond to a bind group for this pipeline.",
-        groupIndex);
     return {};
 }
 
@@ -383,8 +380,19 @@ MaybeError PipelineBase::Initialize(std::optional<ScopedUseShaderPrograms> scope
     if (!scopedUsePrograms) {
         scopedUsePrograms = UseShaderPrograms();
     }
+
+    // Set immediate constant status. userConstants is the first element in both
+    // RenderImmediateConstants and ComputeImmediateConstants.
+    ImmediateConstantMask userConstantsBits =
+        GetImmediateConstantBlockBits(0, GetLayout()->GetImmediateDataRangeByteSize());
+    mImmediateMask |= userConstantsBits;
+
     DAWN_TRY_CONTEXT(InitializeImpl(), "initializing %s", this);
     return {};
+}
+
+void PipelineBase::SetImmediateMaskForTesting(ImmediateConstantMask immediateConstantMask) {
+    mImmediateMask = immediateConstantMask;
 }
 
 }  // namespace dawn::native

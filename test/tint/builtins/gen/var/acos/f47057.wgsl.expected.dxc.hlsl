@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 RWByteAddressBuffer prevent_dce : register(u0);
 
 vector<float16_t, 3> acos_f47057() {
@@ -10,11 +13,29 @@ void fragment_main() {
   prevent_dce.Store<vector<float16_t, 3> >(0u, acos_f47057());
   return;
 }
+//
+// compute_main
+//
+RWByteAddressBuffer prevent_dce : register(u0);
+
+vector<float16_t, 3> acos_f47057() {
+  vector<float16_t, 3> arg_0 = (float16_t(0.96875h)).xxx;
+  vector<float16_t, 3> res = acos(arg_0);
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store<vector<float16_t, 3> >(0u, acos_f47057());
   return;
+}
+//
+// vertex_main
+//
+vector<float16_t, 3> acos_f47057() {
+  vector<float16_t, 3> arg_0 = (float16_t(0.96875h)).xxx;
+  vector<float16_t, 3> res = acos(arg_0);
+  return res;
 }
 
 struct VertexOutput {

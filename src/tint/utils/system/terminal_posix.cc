@@ -45,6 +45,8 @@
 #include "src/tint/utils/system/env.h"
 #include "src/tint/utils/system/terminal.h"
 
+TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
+
 namespace tint {
 namespace {
 
@@ -93,6 +95,7 @@ std::optional<bool> TerminalIsDarkImpl(FILE* out) {
         fd_set rfds{};
         FD_ZERO(&rfds);
         FD_SET(STDIN_FILENO, &rfds);
+
         timeval tv{};
         tv.tv_sec = 0;
         tv.tv_usec = 100'000;
@@ -227,3 +230,5 @@ std::optional<bool> TerminalIsDark(FILE* out) {
 }
 
 }  // namespace tint
+
+TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);

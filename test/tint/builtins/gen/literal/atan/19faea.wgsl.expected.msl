@@ -1,30 +1,61 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
-
 using namespace metal;
+
+struct tint_module_vars_struct {
+  device half4* prevent_dce;
+};
+
 half4 atan_19faea() {
   half4 res = half4(0.78515625h);
   return res;
 }
 
-fragment void fragment_main(device half4* tint_symbol_1 [[buffer(0)]]) {
-  *(tint_symbol_1) = atan_19faea();
-  return;
+fragment void fragment_main(device half4* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  (*tint_module_vars.prevent_dce) = atan_19faea();
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+struct tint_module_vars_struct {
+  device half4* prevent_dce;
+};
+
+half4 atan_19faea() {
+  half4 res = half4(0.78515625h);
+  return res;
 }
 
-kernel void compute_main(device half4* tint_symbol_2 [[buffer(0)]]) {
-  *(tint_symbol_2) = atan_19faea();
-  return;
+kernel void compute_main(device half4* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  (*tint_module_vars.prevent_dce) = atan_19faea();
 }
+//
+// vertex_main
+//
+#include <metal_stdlib>
+using namespace metal;
 
 struct VertexOutput {
   float4 pos;
   half4 prevent_dce;
 };
 
-struct tint_symbol {
-  half4 prevent_dce [[user(locn0)]] [[flat]];
-  float4 pos [[position]];
+struct vertex_main_outputs {
+  float4 VertexOutput_pos [[position]];
+  half4 VertexOutput_prevent_dce [[user(locn0)]] [[flat]];
 };
+
+half4 atan_19faea() {
+  half4 res = half4(0.78515625h);
+  return res;
+}
 
 VertexOutput vertex_main_inner() {
   VertexOutput out = {};
@@ -33,11 +64,10 @@ VertexOutput vertex_main_inner() {
   return out;
 }
 
-vertex tint_symbol vertex_main() {
-  VertexOutput const inner_result = vertex_main_inner();
-  tint_symbol wrapper_result = {};
-  wrapper_result.pos = inner_result.pos;
-  wrapper_result.prevent_dce = inner_result.prevent_dce;
-  return wrapper_result;
+vertex vertex_main_outputs vertex_main() {
+  VertexOutput const v = vertex_main_inner();
+  vertex_main_outputs tint_wrapper_result = {};
+  tint_wrapper_result.VertexOutput_pos = v.pos;
+  tint_wrapper_result.VertexOutput_prevent_dce = v.prevent_dce;
+  return tint_wrapper_result;
 }
-

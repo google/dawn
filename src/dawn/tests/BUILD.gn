@@ -369,6 +369,7 @@ dawn_test("dawn_unittests") {
     "unittests/native/DestroyObjectTests.cpp",
     "unittests/native/DeviceAsyncTaskTests.cpp",
     "unittests/native/DeviceCreationTests.cpp",
+    "unittests/native/ImmediateConstantsTrackerTests.cpp",
     "unittests/native/LimitsTests.cpp",
     "unittests/native/MemoryInstrumentationTests.cpp",
     "unittests/native/ObjectContentHasherTests.cpp",
@@ -641,6 +642,7 @@ source_set("end2end_tests_sources") {
     "end2end/NonzeroBufferCreationTests.cpp",
     "end2end/NonzeroTextureCreationTests.cpp",
     "end2end/OpArrayLengthTests.cpp",
+    "end2end/PackUnpack4x8NormTests.cpp",
     "end2end/Packed4x8IntegerDotProductTests.cpp",
     "end2end/PipelineCachingTests.cpp",
     "end2end/PipelineLayoutTests.cpp",
@@ -741,6 +743,10 @@ source_set("end2end_tests_sources") {
   if (dawn_enable_vulkan && is_chromeos) {
     sources += [ "end2end/VideoViewsTests_gbm.cpp" ]
   }
+
+  if (dawn_enable_opengles) {
+    sources += [ "end2end/GLExplicitExtensionsTests.cpp" ]
+  }
 }
 
 source_set("white_box_tests_sources") {
@@ -762,6 +768,7 @@ source_set("white_box_tests_sources") {
   ]
 
   sources = [
+    "white_box/ImmediateConstantOffsetTests.cpp",
     "white_box/ShaderModuleTests.cpp",
     "white_box/SharedBufferMemoryTests.cpp",
     "white_box/SharedBufferMemoryTests.h",
@@ -849,8 +856,10 @@ source_set("white_box_tests_sources") {
   }
 
   if (dawn_enable_opengles) {
-    sources += [ "white_box/EGLImageWrappingTests.cpp" ]
-    sources += [ "white_box/GLTextureWrappingTests.cpp" ]
+    sources += [
+      "white_box/EGLImageWrappingTests.cpp",
+      "white_box/GLTextureWrappingTests.cpp",
+    ]
     include_dirs = [ "//third_party/khronos" ]
   }
 }

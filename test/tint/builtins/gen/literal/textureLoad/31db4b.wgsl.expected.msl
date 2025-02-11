@@ -1,43 +1,80 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
-
 using namespace metal;
-uint4 textureLoad_31db4b(texture1d<uint, access::read> tint_symbol_1) {
-  uint4 res = tint_symbol_1.read(uint(min(1u, (tint_symbol_1.get_width(0) - 1u))));
+
+struct tint_module_vars_struct {
+  device uint4* prevent_dce;
+  texture1d<uint, access::read> arg_0;
+};
+
+uint4 textureLoad_31db4b(tint_module_vars_struct tint_module_vars) {
+  uint4 res = tint_module_vars.arg_0.read(min(1u, (uint(tint_module_vars.arg_0.get_width()) - 1u)));
   return res;
 }
 
-fragment void fragment_main(device uint4* tint_symbol_2 [[buffer(0)]], texture1d<uint, access::read> tint_symbol_3 [[texture(0)]]) {
-  *(tint_symbol_2) = textureLoad_31db4b(tint_symbol_3);
-  return;
+fragment void fragment_main(device uint4* prevent_dce [[buffer(0)]], texture1d<uint, access::read> arg_0 [[texture(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce, .arg_0=arg_0};
+  (*tint_module_vars.prevent_dce) = textureLoad_31db4b(tint_module_vars);
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+struct tint_module_vars_struct {
+  device uint4* prevent_dce;
+  texture1d<uint, access::read> arg_0;
+};
+
+uint4 textureLoad_31db4b(tint_module_vars_struct tint_module_vars) {
+  uint4 res = tint_module_vars.arg_0.read(min(1u, (uint(tint_module_vars.arg_0.get_width()) - 1u)));
+  return res;
 }
 
-kernel void compute_main(device uint4* tint_symbol_4 [[buffer(0)]], texture1d<uint, access::read> tint_symbol_5 [[texture(0)]]) {
-  *(tint_symbol_4) = textureLoad_31db4b(tint_symbol_5);
-  return;
+kernel void compute_main(device uint4* prevent_dce [[buffer(0)]], texture1d<uint, access::read> arg_0 [[texture(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce, .arg_0=arg_0};
+  (*tint_module_vars.prevent_dce) = textureLoad_31db4b(tint_module_vars);
 }
+//
+// vertex_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+struct tint_module_vars_struct {
+  texture1d<uint, access::read> arg_0;
+};
 
 struct VertexOutput {
   float4 pos;
   uint4 prevent_dce;
 };
 
-struct tint_symbol {
-  uint4 prevent_dce [[user(locn0)]] [[flat]];
-  float4 pos [[position]];
+struct vertex_main_outputs {
+  float4 VertexOutput_pos [[position]];
+  uint4 VertexOutput_prevent_dce [[user(locn0)]] [[flat]];
 };
 
-VertexOutput vertex_main_inner(texture1d<uint, access::read> tint_symbol_6) {
+uint4 textureLoad_31db4b(tint_module_vars_struct tint_module_vars) {
+  uint4 res = tint_module_vars.arg_0.read(min(1u, (uint(tint_module_vars.arg_0.get_width()) - 1u)));
+  return res;
+}
+
+VertexOutput vertex_main_inner(tint_module_vars_struct tint_module_vars) {
   VertexOutput out = {};
   out.pos = float4(0.0f);
-  out.prevent_dce = textureLoad_31db4b(tint_symbol_6);
+  out.prevent_dce = textureLoad_31db4b(tint_module_vars);
   return out;
 }
 
-vertex tint_symbol vertex_main(texture1d<uint, access::read> tint_symbol_7 [[texture(0)]]) {
-  VertexOutput const inner_result = vertex_main_inner(tint_symbol_7);
-  tint_symbol wrapper_result = {};
-  wrapper_result.pos = inner_result.pos;
-  wrapper_result.prevent_dce = inner_result.prevent_dce;
-  return wrapper_result;
+vertex vertex_main_outputs vertex_main(texture1d<uint, access::read> arg_0 [[texture(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0=arg_0};
+  VertexOutput const v = vertex_main_inner(tint_module_vars);
+  vertex_main_outputs tint_wrapper_result = {};
+  tint_wrapper_result.VertexOutput_pos = v.pos;
+  tint_wrapper_result.VertexOutput_prevent_dce = v.prevent_dce;
+  return tint_wrapper_result;
 }
-

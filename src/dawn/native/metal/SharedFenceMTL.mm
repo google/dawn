@@ -40,17 +40,14 @@ ResultOrError<Ref<SharedFence>> SharedFence::Create(
     StringView label,
     const SharedFenceMTLSharedEventDescriptor* descriptor) {
     DAWN_INVALID_IF(descriptor->sharedEvent == nullptr, "MTLSharedEvent is missing.");
-    if (@available(macOS 10.14, iOS 12.0, *)) {
-        return AcquireRef(new SharedFence(device, label,
+
+    return AcquireRef(new SharedFence(device, label,
 #if DAWN_PLATFORM_IS(IOS)
-                                          (__bridge id<MTLSharedEvent>)(descriptor->sharedEvent)
+                                      (__bridge id<MTLSharedEvent>)(descriptor->sharedEvent)
 #else   // DAWN_PLATFORM_IS(IOS)
-                                          static_cast<id<MTLSharedEvent>>(descriptor->sharedEvent)
+                                      static_cast<id<MTLSharedEvent>>(descriptor->sharedEvent)
 #endif  // DAWN_PLATFORM_IS(IOS)
-                                              ));
-    } else {
-        return DAWN_INTERNAL_ERROR("MTLSharedEvent not supported.");
-    }
+                                          ));
 }
 
 SharedFence::SharedFence(Device* device, StringView label, id<MTLSharedEvent> sharedEvent)

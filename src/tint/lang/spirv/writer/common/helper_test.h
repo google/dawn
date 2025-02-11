@@ -38,11 +38,6 @@
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/disassembler.h"
 #include "src/tint/lang/core/ir/validator.h"
-#include "src/tint/lang/core/type/array.h"
-#include "src/tint/lang/core/type/depth_texture.h"
-#include "src/tint/lang/core/type/matrix.h"
-#include "src/tint/lang/core/type/multisampled_texture.h"
-#include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/spirv/writer/common/spv_dump_test.h"
 #include "src/tint/lang/spirv/writer/writer.h"
@@ -103,6 +98,9 @@ class SpirvWriterTestHelperBase : public BASE {
     /// SPIR-V output.
     std::string output_;
 
+    /// Workgroup info
+    Output::WorkgroupInfo workgroup_info;
+
     /// @returns the error string from the validation
     std::string Error() const { return err_; }
 
@@ -124,6 +122,8 @@ class SpirvWriterTestHelperBase : public BASE {
         if (!Validate(result->spirv)) {
             return false;
         }
+        workgroup_info = result->workgroup_info;
+
         return true;
     }
 

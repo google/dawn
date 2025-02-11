@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void sqrt_9c5cbe() {
   float2 res = (1.0f).xx;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   sqrt_9c5cbe();
   return;
 }
+//
+// compute_main
+//
+void sqrt_9c5cbe() {
+  float2 res = (1.0f).xx;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   sqrt_9c5cbe();
   return;
+}
+//
+// vertex_main
+//
+void sqrt_9c5cbe() {
+  float2 res = (1.0f).xx;
 }
 
 struct VertexOutput {

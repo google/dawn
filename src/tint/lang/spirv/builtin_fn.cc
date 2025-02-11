@@ -108,10 +108,62 @@ const char* str(BuiltinFn i) {
             return "vector_times_matrix";
         case BuiltinFn::kVectorTimesScalar:
             return "vector_times_scalar";
+        case BuiltinFn::kNormalize:
+            return "normalize";
+        case BuiltinFn::kInverse:
+            return "inverse";
+        case BuiltinFn::kSign:
+            return "sign";
+        case BuiltinFn::kAbs:
+            return "abs";
+        case BuiltinFn::kSmax:
+            return "smax";
+        case BuiltinFn::kSmin:
+            return "smin";
+        case BuiltinFn::kSclamp:
+            return "sclamp";
+        case BuiltinFn::kUmax:
+            return "umax";
+        case BuiltinFn::kUmin:
+            return "umin";
+        case BuiltinFn::kUclamp:
+            return "uclamp";
+        case BuiltinFn::kFindILsb:
+            return "findILsb";
+        case BuiltinFn::kFindSMsb:
+            return "findSMsb";
+        case BuiltinFn::kFindUMsb:
+            return "findUMsb";
+        case BuiltinFn::kRefract:
+            return "refract";
+        case BuiltinFn::kReflect:
+            return "reflect";
+        case BuiltinFn::kFaceForward:
+            return "faceForward";
+        case BuiltinFn::kLdexp:
+            return "ldexp";
+        case BuiltinFn::kModf:
+            return "modf";
+        case BuiltinFn::kFrexp:
+            return "frexp";
+        case BuiltinFn::kBitCount:
+            return "bit_count";
+        case BuiltinFn::kBitFieldInsert:
+            return "bit_field_insert";
+        case BuiltinFn::kBitFieldSExtract:
+            return "bit_field_s_extract";
+        case BuiltinFn::kBitFieldUExtract:
+            return "bit_field_u_extract";
         case BuiltinFn::kSdot:
             return "sdot";
         case BuiltinFn::kUdot:
             return "udot";
+        case BuiltinFn::kCooperativeMatrixLoad:
+            return "cooperative_matrix_load";
+        case BuiltinFn::kCooperativeMatrixStore:
+            return "cooperative_matrix_store";
+        case BuiltinFn::kCooperativeMatrixMulAdd:
+            return "cooperative_matrix_mul_add";
     }
     return "<unknown>";
 }
@@ -128,9 +180,13 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kImageSampleDrefImplicitLod:
         case BuiltinFn::kImageSampleDrefExplicitLod:
         case BuiltinFn::kSampledImage:
+        case BuiltinFn::kCooperativeMatrixLoad:
             return core::ir::Instruction::Accesses{core::ir::Instruction::Access::kLoad};
 
         case BuiltinFn::kImageWrite:
+        case BuiltinFn::kModf:
+        case BuiltinFn::kFrexp:
+        case BuiltinFn::kCooperativeMatrixStore:
             return core::ir::Instruction::Accesses{core::ir::Instruction::Access::kStore};
 
         case BuiltinFn::kAtomicAnd:
@@ -161,6 +217,28 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kSdot:
         case BuiltinFn::kUdot:
         case BuiltinFn::kNone:
+        case BuiltinFn::kNormalize:
+        case BuiltinFn::kInverse:
+        case BuiltinFn::kSign:
+        case BuiltinFn::kAbs:
+        case BuiltinFn::kSmax:
+        case BuiltinFn::kSmin:
+        case BuiltinFn::kSclamp:
+        case BuiltinFn::kUmax:
+        case BuiltinFn::kUmin:
+        case BuiltinFn::kUclamp:
+        case BuiltinFn::kFindILsb:
+        case BuiltinFn::kFindSMsb:
+        case BuiltinFn::kFindUMsb:
+        case BuiltinFn::kRefract:
+        case BuiltinFn::kReflect:
+        case BuiltinFn::kFaceForward:
+        case BuiltinFn::kLdexp:
+        case BuiltinFn::kCooperativeMatrixMulAdd:
+        case BuiltinFn::kBitCount:
+        case BuiltinFn::kBitFieldInsert:
+        case BuiltinFn::kBitFieldSExtract:
+        case BuiltinFn::kBitFieldUExtract:
             break;
     }
     return core::ir::Instruction::Accesses{};

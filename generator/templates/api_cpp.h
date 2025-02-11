@@ -297,8 +297,10 @@ class ObjectBase {
     CType mHandle = nullptr;
 };
 
-{% macro render_cpp_default_value(member, is_struct, force_default=False) -%}
-    {%- if member.json_data.get("no_default", false) -%}
+{% macro render_cpp_default_value(member, is_struct, force_default=False, forced_default_value="") -%}
+    {%- if forced_default_value -%}
+        {{" "}}= {{forced_default_value}}
+    {%- elif member.json_data.get("no_default", false) -%}
     {%- elif member.annotation in ["*", "const*"] and member.optional or member.default_value == "nullptr" -%}
         {{" "}}= nullptr
     {%- elif member.type.category == "object" and member.optional and is_struct -%}
@@ -358,7 +360,10 @@ class ObjectBase {
                 {{as_annotated_cppType(arg)}}{{ ", "}}
             {%- endif -%}
         {%- endfor -%}
-    {{as_cppType(types["callback mode"].name)}} callbackMode, F callback, T userdata) const
+        {%- if find_by_name(CallbackInfoType.members, "mode") -%}
+            {{as_cppType(types["callback mode"].name)}} callbackMode,
+        {%- endif -%}
+    F callback, T userdata) const
 {%- endmacro %}
 
 //* This rendering macro should ONLY be used for callback info type functions.
@@ -401,7 +406,10 @@ class ObjectBase {
                 {{as_annotated_cppType(arg)}}{{ ", "}}
             {%- endif -%}
         {%- endfor -%}
-    {{as_cppType(types["callback mode"].name)}} callbackMode, L callback) const
+    {%- if find_by_name(CallbackInfoType.members, "mode") -%}
+            {{as_cppType(types["callback mode"].name)}} callbackMode,
+        {%- endif -%}
+    L callback) const
 {%- endmacro %}
 
 //* This rendering macro should NOT be used for callback info type functions.
@@ -522,7 +530,7 @@ struct CallbackTypeBase<std::tuple<Args...>, T> {
 }  // namespace detail
 
 //* Special callbacks that require some custom code generation.
-{% set SpecialCallbacks = ["device lost callback 2", "uncaptured error callback"] %}
+{% set SpecialCallbacks = ["device lost callback", "uncaptured error callback"] %}
 
 {% for type in by_category["callback function"] if type.name.get() not in SpecialCallbacks %}
     template <typename... T>
@@ -534,7 +542,7 @@ struct CallbackTypeBase<std::tuple<Args...>, T> {
     >, T...>::Callback;
 {% endfor %}
 template <typename... T>
-using DeviceLostCallback2 = typename detail::CallbackTypeBase<std::tuple<const Device&, DeviceLostReason, StringView>, T...>::Callback;
+using DeviceLostCallback = typename detail::CallbackTypeBase<std::tuple<const Device&, DeviceLostReason, StringView>, T...>::Callback;
 template <typename... T>
 using UncapturedErrorCallback = typename detail::CallbackTypeBase<std::tuple<const Device&, ErrorType, StringView>, T...>::Callback;
 
@@ -543,19 +551,21 @@ using UncapturedErrorCallback = typename detail::CallbackTypeBase<std::tuple<con
         {% set CallbackInfoType = (method.arguments|last).type %}
         {% set CallbackType = find_by_name(CallbackInfoType.members, "callback").type %}
         {{as_cType(CallbackInfoType.name)}} callbackInfo = {};
-        callbackInfo.mode = static_cast<{{as_cType(types["callback mode"].name)}}>(callbackMode);
+        {% if find_by_name(CallbackInfoType.members, "mode") %}
+            callbackInfo.mode = static_cast<{{as_cType(types["callback mode"].name)}}>(callbackMode);
+        {% endif %}
         if constexpr (std::is_convertible_v<F, Cb*>) {
             callbackInfo.callback = [](
                 {%- for arg in CallbackType.arguments -%}
                     {{as_annotated_cType(arg)}}{{", "}}
                 {%- endfor -%}
-            void* callback, void* userdata) {
-                auto cb = reinterpret_cast<Cb*>(callback);
+            void* callback_param, void* userdata_param) {
+                auto cb = reinterpret_cast<Cb*>(callback_param);
                 (*cb)(
                     {%- for arg in CallbackType.arguments -%}
                         {{convert_cType_to_cppType(arg.type, arg.annotation, as_varName(arg.name))}}{{", "}}
                     {%- endfor -%}
-                static_cast<T>(userdata));
+                static_cast<T>(userdata_param));
             };
         } else {
             //* Handle functors that take in const char* instead of StringView.
@@ -565,8 +575,8 @@ using UncapturedErrorCallback = typename detail::CallbackTypeBase<std::tuple<con
                 {%- for arg in CallbackType.arguments -%}
                     {{as_annotated_cType(arg)}}{{", "}}
                 {%- endfor -%}
-            void* callback, void* userdata) {
-                auto cb = reinterpret_cast<CbChar*>(callback);
+            void* callback_param, void* userdata_param) {
+                auto cb = reinterpret_cast<CbChar*>(callback_param);
                 (*cb)(
                     {%- for arg in CallbackType.arguments -%}
                         {%- if arg.type.name.canonical_case() == "string view" -%}
@@ -575,17 +585,25 @@ using UncapturedErrorCallback = typename detail::CallbackTypeBase<std::tuple<con
                             {{convert_cType_to_cppType(arg.type, arg.annotation, as_varName(arg.name))}}{{", "}}
                         {%- endif -%}
                     {%- endfor -%}
-                static_cast<T>(userdata));
+                static_cast<T>(userdata_param));
             };
         }
         callbackInfo.userdata1 = reinterpret_cast<void*>(+callback);
         callbackInfo.userdata2 = reinterpret_cast<void*>(userdata);
-        auto result = {{as_cMethodNamespaced(type.name, method.name, c_namespace)}}(Get(){{", "}}
-            {%- for arg in method.arguments if arg.type.category != "callback info" -%}
-                {{render_c_actual_arg(arg)}}{{", "}}
-            {%- endfor -%}
-        callbackInfo);
-        return {{convert_cType_to_cppType(method.return_type, 'value', 'result') | indent(4)}};
+        {% if method.return_type.name.get() == "future" %}
+            auto result = {{as_cMethodNamespaced(type.name, method.name, c_namespace)}}(Get(){{", "}}
+                {%- for arg in method.arguments if arg.type.category != "callback info" -%}
+                    {{render_c_actual_arg(arg)}}{{", "}}
+                {%- endfor -%}
+            callbackInfo);
+            return {{convert_cType_to_cppType(method.return_type, 'value', 'result') | indent(4)}};
+        {% else %}
+            return {{as_cMethodNamespaced(type.name, method.name, c_namespace)}}(Get(){{", "}}
+                {%- for arg in method.arguments if arg.type.category != "callback info" -%}
+                    {{render_c_actual_arg(arg)}}{{", "}}
+                {%- endfor -%}
+            callbackInfo);
+        {% endif %}
     }
 {%- endmacro %}
 
@@ -596,14 +614,16 @@ using UncapturedErrorCallback = typename detail::CallbackTypeBase<std::tuple<con
         using F = {{as_cppType(CallbackType.name)}}<void>;
 
         {{as_cType(CallbackInfoType.name)}} callbackInfo = {};
-        callbackInfo.mode = static_cast<{{as_cType(types["callback mode"].name)}}>(callbackMode);
+        {% if find_by_name(CallbackInfoType.members, "mode") %}
+            callbackInfo.mode = static_cast<{{as_cType(types["callback mode"].name)}}>(callbackMode);
+        {% endif %}
         if constexpr (std::is_convertible_v<L, F*>) {
             callbackInfo.callback = [](
             {%- for arg in CallbackType.arguments -%}
                 {{as_annotated_cType(arg)}}{{", "}}
             {%- endfor -%}
-            void* callback, void*) {
-                auto cb = reinterpret_cast<F*>(callback);
+            void* callback_param, void*) {
+                auto cb = reinterpret_cast<F*>(callback_param);
                 (*cb)(
                     {%- for arg in CallbackType.arguments -%}
                         {%- if not loop.first %}, {% endif -%}
@@ -612,21 +632,15 @@ using UncapturedErrorCallback = typename detail::CallbackTypeBase<std::tuple<con
             };
             callbackInfo.userdata1 = reinterpret_cast<void*>(+callback);
             callbackInfo.userdata2 = nullptr;
-            auto result = {{as_cMethodNamespaced(type.name, method.name, c_namespace)}}(Get(){{", "}}
-            {%- for arg in method.arguments if arg.type.category != "callback info" -%}
-                {{render_c_actual_arg(arg)}}{{", "}}
-            {%- endfor -%}
-            callbackInfo);
-            return {{convert_cType_to_cppType(method.return_type, 'value', 'result') | indent(8)}};
         } else {
             auto* lambda = new L(std::move(callback));
             callbackInfo.callback = [](
                 {%- for arg in CallbackType.arguments -%}
                     {{as_annotated_cType(arg)}}{{", "}}
                 {%- endfor -%}
-            void* callback, void*) {
-                std::unique_ptr<L> lambda(reinterpret_cast<L*>(callback));
-                (*lambda)(
+            void* callback_param, void*) {
+                std::unique_ptr<L> the_lambda(reinterpret_cast<L*>(callback_param));
+                (*the_lambda)(
                     {%- for arg in CallbackType.arguments -%}
                         {%- if not loop.first %}, {% endif -%}
                         //* Handle functors that take in const char* instead of StringView.
@@ -641,13 +655,21 @@ using UncapturedErrorCallback = typename detail::CallbackTypeBase<std::tuple<con
             };
             callbackInfo.userdata1 = reinterpret_cast<void*>(lambda);
             callbackInfo.userdata2 = nullptr;
+        }
+        {% if method.return_type.name.get() == "future" %}
             auto result = {{as_cMethodNamespaced(type.name, method.name, c_namespace)}}(Get(){{", "}}
             {%- for arg in method.arguments if arg.type.category != "callback info" -%}
                 {{render_c_actual_arg(arg)}}{{", "}}
             {%- endfor -%}
             callbackInfo);
             return {{convert_cType_to_cppType(method.return_type, 'value', 'result') | indent(8)}};
-        }
+        {% else %}
+            return {{as_cMethodNamespaced(type.name, method.name, c_namespace)}}(Get(){{", "}}
+            {%- for arg in method.arguments if arg.type.category != "callback info" -%}
+                {{render_c_actual_arg(arg)}}{{", "}}
+            {%- endfor -%}
+            callbackInfo);
+        {% endif %}
     }
 {%- endmacro %}
 
@@ -739,7 +761,18 @@ static_assert(offsetof(ChainedStruct, sType) == offsetof({{c_prefix}}ChainedStru
             ChainedStruct{{Out}} {{const}} * nextInChain = nullptr;
         {% endif %}
         {% for member in type.members %}
-            {% set member_declaration = as_annotated_cppType(member, type.has_free_members_function) + render_cpp_default_value(member, True, type.has_free_members_function) %}
+            {% if type.name.get() == "bind group layout entry" %}
+                {% if member.name.canonical_case() == "buffer" %}
+                    {% set forced_default_value = "{ nullptr, BufferBindingType::BindingNotUsed, false, 0 }" %}
+                {% elif member.name.canonical_case() == "sampler" %}
+                    {% set forced_default_value = "{ nullptr, SamplerBindingType::BindingNotUsed }" %}
+                {% elif member.name.canonical_case() == "texture" %}
+                    {% set forced_default_value = "{ nullptr, TextureSampleType::BindingNotUsed, TextureViewDimension::e2D, false }" %}
+                {% elif member.name.canonical_case() == "storage texture" %}
+                    {% set forced_default_value = "{ nullptr, StorageTextureAccess::BindingNotUsed, TextureFormat::Undefined, TextureViewDimension::e2D }" %}
+                {% endif %}
+            {% endif %}
+            {% set member_declaration = as_annotated_cppType(member, type.has_free_members_function) + render_cpp_default_value(member, True, type.has_free_members_function, forced_default_value) %}
             {% if type.chained and loop.first %}
                 //* Align the first member after ChainedStruct to match the C struct layout.
                 //* It has to be aligned both to its natural and ChainedStruct's alignment.
@@ -792,29 +825,21 @@ struct {{CppType}} : protected detail::{{CppType}} {
     inline {{CppType}}(Init&& init);
 
     template <typename F, typename T,
-              typename Cb = DeviceLostCallback2<T>,
-              //* TODO(42241188): Remove once all clients use StringView versions of the callbacks
-              typename CbChar = void (const Device& device, DeviceLostReason reason, const char* message, T userdata),
-              typename = std::enable_if_t<std::is_convertible_v<F, Cb*> || std::is_convertible_v<F, CbChar*>>>
+              typename Cb = DeviceLostCallback<T>,
+              typename = std::enable_if_t<std::is_convertible_v<F, Cb*>>>
     void SetDeviceLostCallback(CallbackMode callbackMode, F callback, T userdata);
     template <typename L,
-              typename Cb = DeviceLostCallback2<>,
-              //* TODO(42241188): Remove once all clients use StringView versions of the callbacks
-              typename CbChar = std::function<void(const Device& device, DeviceLostReason reason, const char* message)>,
-              typename = std::enable_if_t<std::is_convertible_v<L, Cb> || std::is_convertible_v<L, CbChar>>>
+              typename Cb = DeviceLostCallback<>,
+              typename = std::enable_if_t<std::is_convertible_v<L, Cb>>>
     void SetDeviceLostCallback(CallbackMode callbackMode, L callback);
 
     template <typename F, typename T,
               typename Cb = UncapturedErrorCallback<T>,
-              //* TODO(42241188): Remove once all clients use StringView versions of the callbacks
-              typename CbChar = void (const Device& device, ErrorType type, const char* message, T userdata),
-              typename = std::enable_if_t<std::is_convertible_v<F, Cb*> || std::is_convertible_v<F, CbChar*>>>
+              typename = std::enable_if_t<std::is_convertible_v<F, Cb*>>>
     void SetUncapturedErrorCallback(F callback, T userdata);
     template <typename L,
               typename Cb = UncapturedErrorCallback<>,
-              //* TODO(42241188): Remove once all clients use StringView versions of the callbacks
-              typename CbChar = std::function<void(const Device& device, ErrorType type, const char* message)>,
-              typename = std::enable_if_t<std::is_convertible_v<L, Cb> || std::is_convertible_v<L, CbChar>>>
+              typename = std::enable_if_t<std::is_convertible_v<L, Cb>>>
     void SetUncapturedErrorCallback(L callback);
 };
 
@@ -955,113 +980,82 @@ struct {{CppType}}::Init {
 static_assert(sizeof({{CppType}}) == sizeof({{CType}}), "sizeof mismatch for {{CppType}}");
 static_assert(alignof({{CppType}}) == alignof({{CType}}), "alignof mismatch for {{CppType}}");
 
-template <typename F, typename T, typename Cb, typename CbChar, typename>
+template <typename F, typename T, typename Cb, typename>
 void {{CppType}}::SetDeviceLostCallback(CallbackMode callbackMode, F callback, T userdata) {
-    assert(deviceLostCallbackInfo2.callback == nullptr);
+    assert(deviceLostCallbackInfo.callback == nullptr);
 
-    deviceLostCallbackInfo2.mode = static_cast<WGPUCallbackMode>(callbackMode);
-    if constexpr (std::is_convertible_v<F, Cb*>) {
-        deviceLostCallbackInfo2.callback = [](WGPUDevice const * device, WGPUDeviceLostReason reason, WGPUStringView message, void* callback, void* userdata) {
-            auto cb = reinterpret_cast<Cb*>(callback);
-            // We manually acquire and release the device to avoid changing any ref counts.
-            auto apiDevice = Device::Acquire(*device);
-            (*cb)(apiDevice, static_cast<DeviceLostReason>(reason), message, static_cast<T>(userdata));
-            apiDevice.MoveToCHandle();
-        };
-    } else {
-         //* TODO(42241188): Remove once all clients use StringView versions of the callbacks
-        deviceLostCallbackInfo2.callback = [](WGPUDevice const * device, WGPUDeviceLostReason reason, WGPUStringView message, void* callback, void* userdata) {
-            auto cb = reinterpret_cast<CbChar*>(callback);
-            // We manually acquire and release the device to avoid changing any ref counts.
-            auto apiDevice = Device::Acquire(*device);
-            (*cb)(apiDevice, static_cast<DeviceLostReason>(reason), detail::StringViewAdapter(message), static_cast<T>(userdata));
-            apiDevice.MoveToCHandle();
-        };
-    }
-    deviceLostCallbackInfo2.userdata1 = reinterpret_cast<void*>(+callback);
-    deviceLostCallbackInfo2.userdata2 = reinterpret_cast<void*>(userdata);
+    deviceLostCallbackInfo.mode = static_cast<WGPUCallbackMode>(callbackMode);
+    deviceLostCallbackInfo.callback = [](WGPUDevice const * device, WGPUDeviceLostReason reason, WGPUStringView message, void* callback_param, void* userdata_param) {
+        auto cb = reinterpret_cast<Cb*>(callback_param);
+        // We manually acquire and release the device to avoid changing any ref counts.
+        auto apiDevice = Device::Acquire(*device);
+        (*cb)(apiDevice, static_cast<DeviceLostReason>(reason), message, static_cast<T>(userdata_param));
+        apiDevice.MoveToCHandle();
+    };
+    deviceLostCallbackInfo.userdata1 = reinterpret_cast<void*>(+callback);
+    deviceLostCallbackInfo.userdata2 = reinterpret_cast<void*>(userdata);
 }
 
-template <typename L, typename Cb, typename CbChar, typename>
+template <typename L, typename Cb, typename>
 void {{CppType}}::SetDeviceLostCallback(CallbackMode callbackMode, L callback) {
-    assert(deviceLostCallbackInfo2.callback == nullptr);
-    using F = DeviceLostCallback2<void>;
+    assert(deviceLostCallbackInfo.callback == nullptr);
+    using F = DeviceLostCallback<void>;
 
-    deviceLostCallbackInfo2.mode = static_cast<WGPUCallbackMode>(callbackMode);
+    deviceLostCallbackInfo.mode = static_cast<WGPUCallbackMode>(callbackMode);
     if constexpr (std::is_convertible_v<L, F*>) {
-        deviceLostCallbackInfo2.callback = [](WGPUDevice const * device, WGPUDeviceLostReason reason, WGPUStringView message, void* callback, void*) {
-            auto cb = reinterpret_cast<F*>(callback);
+        deviceLostCallbackInfo.callback = [](WGPUDevice const * device, WGPUDeviceLostReason reason, WGPUStringView message, void* callback_param, void*) {
+            auto cb = reinterpret_cast<F*>(callback_param);
             // We manually acquire and release the device to avoid changing any ref counts.
             auto apiDevice = Device::Acquire(*device);
             (*cb)(apiDevice, static_cast<DeviceLostReason>(reason), message);
             apiDevice.MoveToCHandle();
         };
-        deviceLostCallbackInfo2.userdata1 = reinterpret_cast<void*>(+callback);
-        deviceLostCallbackInfo2.userdata2 = nullptr;
+        deviceLostCallbackInfo.userdata1 = reinterpret_cast<void*>(+callback);
+        deviceLostCallbackInfo.userdata2 = nullptr;
     } else {
         auto* lambda = new L(std::move(callback));
-        deviceLostCallbackInfo2.callback = [](WGPUDevice const * device, WGPUDeviceLostReason reason, WGPUStringView message, void* callback, void*) {
-            std::unique_ptr<L> lambda(reinterpret_cast<L*>(callback));
+        deviceLostCallbackInfo.callback = [](WGPUDevice const * device, WGPUDeviceLostReason reason, WGPUStringView message, void* callback_param, void*) {
+            std::unique_ptr<L> the_lambda(reinterpret_cast<L*>(callback_param));
             // We manually acquire and release the device to avoid changing any ref counts.
             auto apiDevice = Device::Acquire(*device);
-            (*lambda)(apiDevice, static_cast<DeviceLostReason>(reason), detail::StringViewAdapter(message));
+            (*the_lambda)(apiDevice, static_cast<DeviceLostReason>(reason), message);
             apiDevice.MoveToCHandle();
         };
-        deviceLostCallbackInfo2.userdata1 = reinterpret_cast<void*>(lambda);
-        deviceLostCallbackInfo2.userdata2 = nullptr;
+        deviceLostCallbackInfo.userdata1 = reinterpret_cast<void*>(lambda);
+        deviceLostCallbackInfo.userdata2 = nullptr;
     }
 }
 
-template <typename F, typename T, typename Cb, typename CbChar, typename>
+template <typename F, typename T, typename Cb, typename>
 void {{CppType}}::SetUncapturedErrorCallback(F callback, T userdata) {
-    if constexpr (std::is_convertible_v<F, Cb*>) {
-        uncapturedErrorCallbackInfo2.callback = [](WGPUDevice const * device, WGPUErrorType type, WGPUStringView message, void* callback, void* userdata) {
-            auto cb = reinterpret_cast<Cb*>(callback);
-            // We manually acquire and release the device to avoid changing any ref counts.
-            auto apiDevice = Device::Acquire(*device);
-            (*cb)(apiDevice, static_cast<ErrorType>(type), message, static_cast<T>(userdata));
-            apiDevice.MoveToCHandle();
-        };
-    } else {
-        //* TODO(42241188): Remove once all clients use StringView versions of the callbacks
-        uncapturedErrorCallbackInfo2.callback = [](WGPUDevice const * device, WGPUErrorType type, WGPUStringView message, void* callback, void* userdata) {
-            auto cb = reinterpret_cast<CbChar*>(callback);
-            // We manually acquire and release the device to avoid changing any ref counts.
-            auto apiDevice = Device::Acquire(*device);
-            (*cb)(apiDevice, static_cast<ErrorType>(type), detail::StringViewAdapter(message), static_cast<T>(userdata));
-            apiDevice.MoveToCHandle();
-        };
-    }
-    uncapturedErrorCallbackInfo2.userdata1 = reinterpret_cast<void*>(+callback);
-    uncapturedErrorCallbackInfo2.userdata2 = reinterpret_cast<void*>(userdata);
+    assert(uncapturedErrorCallbackInfo.callback == nullptr);
+
+    uncapturedErrorCallbackInfo.callback = [](WGPUDevice const * device, WGPUErrorType type, WGPUStringView message, void* callback_param, void* userdata_param) {
+        auto cb = reinterpret_cast<Cb*>(callback_param);
+        // We manually acquire and release the device to avoid changing any ref counts.
+        auto apiDevice = Device::Acquire(*device);
+        (*cb)(apiDevice, static_cast<ErrorType>(type), message, static_cast<T>(userdata_param));
+        apiDevice.MoveToCHandle();
+    };
+    uncapturedErrorCallbackInfo.userdata1 = reinterpret_cast<void*>(+callback);
+    uncapturedErrorCallbackInfo.userdata2 = reinterpret_cast<void*>(userdata);
 }
 
-template <typename L, typename Cb, typename CbChar, typename>
+template <typename L, typename Cb, typename>
 void {{CppType}}::SetUncapturedErrorCallback(L callback) {
+    assert(uncapturedErrorCallbackInfo.callback == nullptr);
     using F = UncapturedErrorCallback<void>;
-    using FChar = void (const Device& device, ErrorType type, const char* message);
-    static_assert(std::is_convertible_v<L, F*> || std::is_convertible_v<L, FChar*>, "Uncaptured error callback cannot be a binding lambda");
+    static_assert(std::is_convertible_v<L, F*>, "Uncaptured error callback cannot be a binding lambda");
 
-    if constexpr (std::is_convertible_v<L, F*>) {
-        uncapturedErrorCallbackInfo2.callback = [](WGPUDevice const * device, WGPUErrorType type, WGPUStringView message, void* callback, void*) {
-            auto cb = reinterpret_cast<F*>(callback);
-            // We manually acquire and release the device to avoid changing any ref counts.
-            auto apiDevice = Device::Acquire(*device);
-            (*cb)(apiDevice, static_cast<ErrorType>(type), message);
-            apiDevice.MoveToCHandle();
-        };
-    } else {
-        //* TODO(42241188): Remove once all clients use StringView versions of the callbacks
-        uncapturedErrorCallbackInfo2.callback = [](WGPUDevice const * device, WGPUErrorType type, WGPUStringView message, void* callback, void*) {
-            auto cb = reinterpret_cast<FChar*>(callback);
-            // We manually acquire and release the device to avoid changing any ref counts.
-            auto apiDevice = Device::Acquire(*device);
-            (*cb)(apiDevice, static_cast<ErrorType>(type), detail::StringViewAdapter(message));
-            apiDevice.MoveToCHandle();
-        };
-    }
-    uncapturedErrorCallbackInfo2.userdata1 = reinterpret_cast<void*>(+callback);
-    uncapturedErrorCallbackInfo2.userdata2 = nullptr;
+    uncapturedErrorCallbackInfo.callback = [](WGPUDevice const * device, WGPUErrorType type, WGPUStringView message, void* callback_param, void*) {
+        auto cb = reinterpret_cast<F*>(callback_param);
+        // We manually acquire and release the device to avoid changing any ref counts.
+        auto apiDevice = Device::Acquire(*device);
+        (*cb)(apiDevice, static_cast<ErrorType>(type), message);
+        apiDevice.MoveToCHandle();
+    };
+    uncapturedErrorCallbackInfo.userdata1 = reinterpret_cast<void*>(+callback);
+    uncapturedErrorCallbackInfo.userdata2 = nullptr;
 }
 
 #if defined(__GNUC__) || defined(__clang__)

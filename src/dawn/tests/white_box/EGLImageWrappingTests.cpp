@@ -140,6 +140,9 @@ class EGLImageTestBase : public DawnTest {
         DawnTest::SetUp();
         // TODO(crbug.com/dawn/2206): remove this check if possible.
         DAWN_TEST_UNSUPPORTED_IF(!HasExtension("KHR_gl_texture_2D_image"));
+        // TODO(crbug.com/388318201): EGL extension not available
+        DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode() &&
+                                 HasToggleEnabled("gl_force_es_31_and_no_extensions"));
     }
 
   public:

@@ -209,6 +209,22 @@ void foo() {
 )");
 }
 
+TEST_F(MslWriterTest, EmitType_U64) {
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.u64()));
+        b.Return(func);
+    });
+
+    // Use `Print()` as u64 types are only support after certain transforms have run.
+    ASSERT_TRUE(Print()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
+void foo() {
+  ulong a = 0u;
+}
+)");
+}
+
 TEST_F(MslWriterTest, EmitType_Atomic_U32) {
     auto* func = b.Function("foo", ty.void_());
     auto* param = b.FunctionParam("a", ty.ptr(core::AddressSpace::kWorkgroup, ty.atomic<u32>()));
@@ -819,32 +835,23 @@ struct tint_module_vars_struct {
 };
 
 tint_array<float3, 4> tint_load_array_packed_vec3(device tint_array<tint_packed_vec3_f32_array_element, 4>* const from) {
-  float3 const v = float3((*from)[0u].packed);
-  float3 const v_1 = float3((*from)[1u].packed);
-  float3 const v_2 = float3((*from)[2u].packed);
-  return tint_array<float3, 4>{v, v_1, v_2, float3((*from)[3u].packed)};
+  return tint_array<float3, 4>{float3((*from)[0u].packed), float3((*from)[1u].packed), float3((*from)[2u].packed), float3((*from)[3u].packed)};
 }
 
 S tint_load_struct_packed_vec3(device S_packed_vec3* const from) {
-  int const v_3 = (*from).a;
-  uint3 const v_4 = uint3((*from).b);
-  float3 const v_5 = float3((*from).c);
-  float const v_6 = (*from).d;
-  tint_array<tint_packed_vec3_f32_array_element, 2> const v_7 = (*from).e;
-  float3 const v_8 = float3(v_7[0u].packed);
-  float2x3 const v_9 = float2x3(v_8, float3(v_7[1u].packed));
-  tint_array<tint_packed_vec3_f32_array_element, 3> const v_10 = (*from).f;
-  float3 const v_11 = float3(v_10[0u].packed);
-  float3 const v_12 = float3(v_10[1u].packed);
-  float3x3 const v_13 = float3x3(v_11, v_12, float3(v_10[2u].packed));
-  tint_array<tint_packed_vec3_f32_array_element, 4> const v_14 = (*from).g;
-  float3 const v_15 = float3(v_14[0u].packed);
-  float3 const v_16 = float3(v_14[1u].packed);
-  float3 const v_17 = float3(v_14[2u].packed);
-  float4x3 const v_18 = float4x3(v_15, v_16, v_17, float3(v_14[3u].packed));
-  float const v_19 = (*from).h;
-  tint_array<float3, 4> const v_20 = tint_load_array_packed_vec3((&(*from).i));
-  return S{.a=v_3, .b=v_4, .c=v_5, .d=v_6, .e=v_9, .f=v_13, .g=v_18, .h=v_19, .i=v_20, .j=(*from).j};
+  int const v = (*from).a;
+  uint3 const v_1 = uint3((*from).b);
+  float3 const v_2 = float3((*from).c);
+  float const v_3 = (*from).d;
+  tint_array<tint_packed_vec3_f32_array_element, 2> const v_4 = (*from).e;
+  float2x3 const v_5 = float2x3(float3(v_4[0u].packed), float3(v_4[1u].packed));
+  tint_array<tint_packed_vec3_f32_array_element, 3> const v_6 = (*from).f;
+  float3x3 const v_7 = float3x3(float3(v_6[0u].packed), float3(v_6[1u].packed), float3(v_6[2u].packed));
+  tint_array<tint_packed_vec3_f32_array_element, 4> const v_8 = (*from).g;
+  float4x3 const v_9 = float4x3(float3(v_8[0u].packed), float3(v_8[1u].packed), float3(v_8[2u].packed), float3(v_8[3u].packed));
+  float const v_10 = (*from).h;
+  tint_array<float3, 4> const v_11 = tint_load_array_packed_vec3((&(*from).i));
+  return S{.a=v, .b=v_1, .c=v_2, .d=v_3, .e=v_5, .f=v_7, .g=v_9, .h=v_10, .i=v_11, .j=(*from).j};
 }
 
 kernel void foo(device S_packed_vec3* a [[buffer(0)]]) {
@@ -1149,7 +1156,7 @@ TEST_F(MslWriterTest, EmitType_SubgroupMatrixLeft) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate({}, validate::MslVersion::kMsl_2_3)) << err_ << output_.msl;
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
   simdgroup_float8x8 a = make_filled_simdgroup_matrix<float, 8, 8>(0.0f);
@@ -1165,7 +1172,7 @@ TEST_F(MslWriterTest, EmitType_SubgroupMatrixRight) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate({}, validate::MslVersion::kMsl_2_3)) << err_ << output_.msl;
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
   simdgroup_half8x8 a = make_filled_simdgroup_matrix<half, 8, 8>(0.0h);
@@ -1182,7 +1189,7 @@ TEST_F(MslWriterTest, EmitType_SubgroupMatrixResult) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate({}, validate::MslVersion::kMsl_2_3)) << err_ << output_.msl;
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
   simdgroup_float8x8 a = make_filled_simdgroup_matrix<float, 8, 8>(0.0f);

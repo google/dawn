@@ -1,3 +1,6 @@
+//
+// vs_main
+//
 struct VertexOutputs {
   float2 texcoords;
   float4 position;
@@ -12,21 +15,10 @@ struct vs_main_inputs {
   uint VertexIndex : SV_VertexID;
 };
 
-struct fs_main_outputs {
-  float4 tint_symbol : SV_Target0;
-};
-
-struct fs_main_inputs {
-  float2 texcoord : TEXCOORD0;
-};
-
 
 cbuffer cbuffer_uniforms : register(b0) {
   uint4 uniforms[1];
 };
-SamplerState mySampler : register(s1);
-Texture2D<float4> myTexture : register(t2);
-static bool continue_execution = true;
 VertexOutputs vs_main_inner(uint VertexIndex) {
   float2 texcoord[3] = {float2(-0.5f, 0.0f), float2(1.5f, 0.0f), float2(0.5f, 2.0f)};
   VertexOutputs output = (VertexOutputs)0;
@@ -41,6 +33,25 @@ VertexOutputs vs_main_inner(uint VertexIndex) {
   return v;
 }
 
+vs_main_outputs vs_main(vs_main_inputs inputs) {
+  VertexOutputs v_1 = vs_main_inner(inputs.VertexIndex);
+  vs_main_outputs v_2 = {v_1.texcoords, v_1.position};
+  return v_2;
+}
+
+//
+// fs_main
+//
+struct fs_main_outputs {
+  float4 tint_symbol : SV_Target0;
+};
+
+struct fs_main_inputs {
+  float2 texcoord : TEXCOORD0;
+};
+
+
+static bool continue_execution = true;
 float4 fs_main_inner(float2 texcoord) {
   float2 clampedTexcoord = clamp(texcoord, (0.0f).xx, (1.0f).xx);
   if (!(all((clampedTexcoord == texcoord)))) {
@@ -50,17 +61,11 @@ float4 fs_main_inner(float2 texcoord) {
   return srcColor;
 }
 
-vs_main_outputs vs_main(vs_main_inputs inputs) {
-  VertexOutputs v_1 = vs_main_inner(inputs.VertexIndex);
-  vs_main_outputs v_2 = {v_1.texcoords, v_1.position};
-  return v_2;
-}
-
 fs_main_outputs fs_main(fs_main_inputs inputs) {
-  fs_main_outputs v_3 = {fs_main_inner(inputs.texcoord)};
+  fs_main_outputs v = {fs_main_inner(inputs.texcoord)};
   if (!(continue_execution)) {
     discard;
   }
-  return v_3;
+  return v;
 }
 

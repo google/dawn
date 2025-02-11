@@ -1,7 +1,6 @@
 #include <metal_stdlib>
-
 using namespace metal;
-void f(int a_1) {
-  int const b = a_1;
-}
 
+void f(int a) {
+  int const b = a;
+}

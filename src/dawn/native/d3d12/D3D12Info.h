@@ -54,6 +54,7 @@ struct D3D12DeviceInfo {
     bool use64KBAlignedMSAATexture;
     bool supportsHeapFlagCreateNotZeroed;
     bool supportsTextureCopyBetweenDimensions;
+    bool supportsUnrestrictedBufferTextureCopyPitch;
     // Whether the device support wave intrinsics
     bool supportsWaveOps;
     uint32_t waveLaneCountMin;

@@ -29,6 +29,8 @@
 
 #include <algorithm>
 #include <memory>
+#include <string>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -36,7 +38,9 @@ TINT_BEGIN_DISABLE_WARNING(NEWLINE_EOF);
 TINT_BEGIN_DISABLE_WARNING(OLD_STYLE_CAST);
 TINT_BEGIN_DISABLE_WARNING(SIGN_CONVERSION);
 TINT_BEGIN_DISABLE_WARNING(WEAK_VTABLES);
+TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 #include "source/opt/build_module.h"
+TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 TINT_END_DISABLE_WARNING(WEAK_VTABLES);
 TINT_END_DISABLE_WARNING(SIGN_CONVERSION);
 TINT_END_DISABLE_WARNING(OLD_STYLE_CAST);
@@ -44,9 +48,13 @@ TINT_END_DISABLE_WARNING(NEWLINE_EOF);
 
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
+#include "src/tint/lang/core/type/builtin_structs.h"
+#include "src/tint/lang/spirv/builtin_fn.h"
+#include "src/tint/lang/spirv/ir/builtin_call.h"
 #include "src/tint/lang/spirv/validate/validate.h"
 
-using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
+using namespace tint::core::fluent_types;     // NOLINT
 
 namespace tint::spirv::reader {
 
@@ -79,8 +87,23 @@ class Parser {
         // Check for unsupported extensions.
         for (const auto& ext : spirv_context_->extensions()) {
             auto name = ext.GetOperand(0).AsString();
-            if (name != "SPV_KHR_storage_buffer_storage_class") {
+            if (name != "SPV_KHR_storage_buffer_storage_class" &&
+                name != "SPV_KHR_non_semantic_info") {
                 return Failure("SPIR-V extension '" + name + "' is not supported");
+            }
+        }
+
+        // Register imported instruction sets
+        for (const auto& import : spirv_context_->ext_inst_imports()) {
+            auto name = import.GetInOperand(0).AsString();
+
+            // TODO(dneto): Handle other extended instruction sets when needed.
+            if (name == "GLSL.std.450") {
+                glsl_std_450_imports_.insert(import.result_id());
+            } else if (name.find("NonSemantic.") == 0) {
+                ignored_imports_.insert(import.result_id());
+            } else {
+                return Failure("Unrecognized extended instruction set: " + name);
             }
         }
 
@@ -90,8 +113,7 @@ class Parser {
         }
 
         EmitFunctions();
-
-        EmitEntryPoints();
+        EmitEntryPointAttributes();
 
         // TODO(crbug.com/tint/1907): Handle annotation instructions.
         // TODO(crbug.com/tint/1907): Handle names.
@@ -115,6 +137,8 @@ class Parser {
                 return core::AddressSpace::kStorage;
             case spv::StorageClass::Uniform:
                 return core::AddressSpace::kUniform;
+            case spv::StorageClass::UniformConstant:
+                return core::AddressSpace::kHandle;
             default:
                 TINT_UNIMPLEMENTED()
                     << "unhandled SPIR-V storage class: " << static_cast<uint32_t>(sc);
@@ -155,6 +179,8 @@ class Parser {
                 return core::BuiltinValue::kWorkgroupId;
             case spv::BuiltIn::ClipDistance:
                 return core::BuiltinValue::kClipDistances;
+            case spv::BuiltIn::CullDistance:
+                return core::BuiltinValue::kCullDistance;
             default:
                 TINT_UNIMPLEMENTED() << "unhandled SPIR-V BuiltIn: " << static_cast<uint32_t>(b);
         }
@@ -210,6 +236,10 @@ class Parser {
                     auto* ptr_ty = type->AsPointer();
                     return ty_.ptr(AddressSpace(ptr_ty->storage_class()),
                                    Type(ptr_ty->pointee_type()), access_mode);
+                }
+                case spvtools::opt::analysis::Type::kSampler: {
+                    // TODO(dsinclair): How to determine comparison samplers ...
+                    return ty_.sampler();
                 }
                 default:
                     TINT_UNIMPLEMENTED() << "unhandled SPIR-V type: " << type->str();
@@ -399,22 +429,42 @@ class Parser {
     /// @param value the IR value
     void AddValue(uint32_t result_id, core::ir::Value* value) { values_.Add(result_id, value); }
 
+    /// Emit an instruction to the current block and associates the result to
+    /// the spirv result id.
+    /// @param inst the instruction to emit
+    /// @param result_id the SPIR-V result ID to register the instruction result for
+    void Emit(core::ir::Instruction* inst, uint32_t result_id) {
+        current_block_->Append(inst);
+        TINT_ASSERT(inst->Results().Length() == 1u);
+        AddValue(result_id, inst->Result(0));
+    }
+
     /// Emit an instruction to the current block.
     /// @param inst the instruction to emit
-    /// @param result_id an optional SPIR-V result ID to register the instruction result for
-    void Emit(core::ir::Instruction* inst, uint32_t result_id = 0) {
+    void EmitWithoutSpvResult(core::ir::Instruction* inst) {
         current_block_->Append(inst);
-        if (result_id != 0) {
-            TINT_ASSERT(inst->Results().Length() == 1u);
-            AddValue(result_id, inst->Result(0));
-        }
+        TINT_ASSERT(inst->Results().Length() == 1u);
+    }
+
+    /// Emit an instruction to the current block.
+    /// @param inst the instruction to emit
+    void EmitWithoutResult(core::ir::Instruction* inst) {
+        TINT_ASSERT(inst->Results().IsEmpty());
+        current_block_->Append(inst);
     }
 
     /// Emit the module-scope variables.
     void EmitModuleScopeVariables() {
         for (auto& inst : spirv_context_->module()->types_values()) {
-            if (inst.opcode() == spv::Op::OpVariable) {
-                EmitVar(inst);
+            switch (inst.opcode()) {
+                case spv::Op::OpVariable:
+                    EmitVar(inst);
+                    break;
+                case spv::Op::OpUndef:
+                    AddValue(inst.result_id(), b_.Zero(Type(inst.type_id())));
+                    break;
+                default:
+                    break;
             }
         }
     }
@@ -439,7 +489,7 @@ class Parser {
     }
 
     /// Emit entry point attributes.
-    void EmitEntryPoints() {
+    void EmitEntryPointAttributes() {
         // Handle OpEntryPoint declarations.
         for (auto& entry_point : spirv_context_->module()->entry_points()) {
             auto model = entry_point.GetSingleWordInOperand(0);
@@ -494,6 +544,17 @@ class Parser {
         TINT_SCOPED_ASSIGNMENT(current_block_, dst);
         for (auto& inst : src) {
             switch (inst.opcode()) {
+                case spv::Op::OpNop:
+                    break;
+                case spv::Op::OpUndef:
+                    AddValue(inst.result_id(), b_.Zero(Type(inst.type_id())));
+                    break;
+                case spv::Op::OpExtInst:
+                    EmitExtInst(inst);
+                    break;
+                case spv::Op::OpCopyObject:
+                    EmitCopyObject(inst);
+                    break;
                 case spv::Op::OpAccessChain:
                 case spv::Op::OpInBoundsAccessChain:
                     EmitAccess(inst);
@@ -505,32 +566,109 @@ class Parser {
                     EmitCompositeExtract(inst);
                     break;
                 case spv::Op::OpFAdd:
+                case spv::Op::OpIAdd:
                     EmitBinary(inst, core::BinaryOp::kAdd);
                     break;
+                case spv::Op::OpFDiv:
+                case spv::Op::OpSDiv:
+                case spv::Op::OpUDiv:
+                    EmitBinary(inst, core::BinaryOp::kDivide);
+                    break;
                 case spv::Op::OpFMul:
+                case spv::Op::OpIMul:
+                case spv::Op::OpVectorTimesScalar:
+                case spv::Op::OpMatrixTimesScalar:
+                case spv::Op::OpVectorTimesMatrix:
+                case spv::Op::OpMatrixTimesVector:
+                case spv::Op::OpMatrixTimesMatrix:
                     EmitBinary(inst, core::BinaryOp::kMultiply);
+                    break;
+                case spv::Op::OpFRem:
+                case spv::Op::OpUMod:
+                case spv::Op::OpSMod:
+                case spv::Op::OpSRem:
+                    EmitBinary(inst, core::BinaryOp::kModulo);
+                    break;
+                case spv::Op::OpFSub:
+                case spv::Op::OpISub:
+                    EmitBinary(inst, core::BinaryOp::kSubtract);
                     break;
                 case spv::Op::OpFunctionCall:
                     EmitFunctionCall(inst);
-                    break;
-                case spv::Op::OpIAdd:
-                    EmitBinary(inst, core::BinaryOp::kAdd);
                     break;
                 case spv::Op::OpLoad:
                     Emit(b_.Load(Value(inst.GetSingleWordOperand(2))), inst.result_id());
                     break;
                 case spv::Op::OpReturn:
-                    Emit(b_.Return(current_function_));
+                    EmitWithoutResult(b_.Return(current_function_));
                     break;
                 case spv::Op::OpReturnValue:
-                    Emit(b_.Return(current_function_, Value(inst.GetSingleWordOperand(0))));
+                    EmitWithoutResult(
+                        b_.Return(current_function_, Value(inst.GetSingleWordOperand(0))));
                     break;
                 case spv::Op::OpStore:
-                    Emit(b_.Store(Value(inst.GetSingleWordOperand(0)),
-                                  Value(inst.GetSingleWordOperand(1))));
+                    EmitWithoutResult(b_.Store(Value(inst.GetSingleWordOperand(0)),
+                                               Value(inst.GetSingleWordOperand(1))));
                     break;
                 case spv::Op::OpVariable:
                     EmitVar(inst);
+                    break;
+                case spv::Op::OpUnreachable:
+                    EmitWithoutResult(b_.Unreachable());
+                    break;
+                case spv::Op::OpKill:
+                    EmitKill(inst);
+                    break;
+                case spv::Op::OpDot:
+                    EmitBuiltinCall(inst, core::BuiltinFn::kDot);
+                    break;
+                case spv::Op::OpBitCount:
+                    EmitBitCount(inst);
+                    break;
+                case spv::Op::OpBitFieldInsert:
+                    EmitSpirvBuiltinCall(inst, spirv::BuiltinFn::kBitFieldInsert);
+                    break;
+                case spv::Op::OpBitFieldSExtract:
+                    EmitSpirvBuiltinCall(inst, spirv::BuiltinFn::kBitFieldSExtract);
+                    break;
+                case spv::Op::OpBitFieldUExtract:
+                    EmitSpirvBuiltinCall(inst, spirv::BuiltinFn::kBitFieldUExtract);
+                    break;
+                case spv::Op::OpBitReverse:
+                    EmitBuiltinCall(inst, core::BuiltinFn::kReverseBits);
+                    break;
+                case spv::Op::OpAll:
+                    EmitBuiltinCall(inst, core::BuiltinFn::kAll);
+                    break;
+                case spv::Op::OpAny:
+                    EmitBuiltinCall(inst, core::BuiltinFn::kAny);
+                    break;
+                case spv::Op::OpDPdx:
+                    EmitBuiltinCall(inst, core::BuiltinFn::kDpdx);
+                    break;
+                case spv::Op::OpDPdy:
+                    EmitBuiltinCall(inst, core::BuiltinFn::kDpdy);
+                    break;
+                case spv::Op::OpFwidth:
+                    EmitBuiltinCall(inst, core::BuiltinFn::kFwidth);
+                    break;
+                case spv::Op::OpDPdxFine:
+                    EmitBuiltinCall(inst, core::BuiltinFn::kDpdxFine);
+                    break;
+                case spv::Op::OpDPdyFine:
+                    EmitBuiltinCall(inst, core::BuiltinFn::kDpdyFine);
+                    break;
+                case spv::Op::OpFwidthFine:
+                    EmitBuiltinCall(inst, core::BuiltinFn::kFwidthFine);
+                    break;
+                case spv::Op::OpDPdxCoarse:
+                    EmitBuiltinCall(inst, core::BuiltinFn::kDpdxCoarse);
+                    break;
+                case spv::Op::OpDPdyCoarse:
+                    EmitBuiltinCall(inst, core::BuiltinFn::kDpdyCoarse);
+                    break;
+                case spv::Op::OpFwidthCoarse:
+                    EmitBuiltinCall(inst, core::BuiltinFn::kFwidthCoarse);
                     break;
                 default:
                     TINT_UNIMPLEMENTED()
@@ -539,12 +677,340 @@ class Parser {
         }
     }
 
+    Vector<core::ir::Value*, 4> Args(const spvtools::opt::Instruction& inst, uint32_t start) {
+        Vector<core::ir::Value*, 4> args;
+        for (uint32_t i = start; i < inst.NumOperandWords(); i++) {
+            args.Push(Value(inst.GetSingleWordOperand(i)));
+        }
+        return args;
+    }
+
+    void EmitBuiltinCall(const spvtools::opt::Instruction& inst, core::BuiltinFn fn) {
+        Emit(b_.Call(Type(inst.type_id()), fn, Args(inst, 2)), inst.result_id());
+    }
+
+    void EmitSpirvBuiltinCall(const spvtools::opt::Instruction& inst, spirv::BuiltinFn fn) {
+        Emit(b_.Call<spirv::ir::BuiltinCall>(Type(inst.type_id()), fn, Args(inst, 2)),
+             inst.result_id());
+    }
+
+    void EmitBitCount(const spvtools::opt::Instruction& inst) {
+        auto* res_ty = Type(inst.type_id());
+        Emit(b_.CallExplicit<spirv::ir::BuiltinCall>(
+                 res_ty, spirv::BuiltinFn::kBitCount,
+                 Vector<const core::type::Type*, 1>{res_ty->DeepestElement()}, Args(inst, 2)),
+             inst.result_id());
+    }
+
+    /// @param inst the SPIR-V instruction
+    /// Note: This isn't technically correct, but there is no `kill` equivalent in WGSL. The closets
+    /// we have is `discard` which maps to `OpDemoteToHelperInvocation` in SPIR-V.
+    void EmitKill([[maybe_unused]] const spvtools::opt::Instruction& inst) {
+        EmitWithoutResult(b_.Discard());
+
+        // An `OpKill` is a terminator in SPIR-V. `discard` is not a terminator in WGSL. After the
+        // `discard` we inject a `return` for the current function. This is similar in spirit to
+        // what `OpKill` does although not totally correct (i.e. we don't early return from calling
+        // functions, just the function where `OpKill` was emitted. There are also limited places in
+        // which `OpKill` can be used. So, we don't have to worry about it in a `continuing` block
+        // because the continuing must end with a branching terminator which `OpKill` does not
+        // branch.
+        if (current_function_->ReturnType()->Is<core::type::Void>()) {
+            EmitWithoutResult(b_.Return(current_function_));
+        } else {
+            EmitWithoutResult(
+                b_.Return(current_function_, b_.Zero(current_function_->ReturnType())));
+        }
+    }
+
+    /// @param inst the SPIR-V instruction for OpCopyObject
+    void EmitCopyObject(const spvtools::opt::Instruction& inst) {
+        // Make the result Id a pointer to the original copied value.
+        auto* l = b_.Let(Value(inst.GetSingleWordOperand(2)));
+        Emit(l, inst.result_id());
+    }
+
+    /// @param inst the SPIR-V instruction for OpExtInst
+    void EmitExtInst(const spvtools::opt::Instruction& inst) {
+        auto inst_set = inst.GetSingleWordInOperand(0);
+        if (ignored_imports_.count(inst_set) > 0) {
+            // Ignore it but don't error out.
+            return;
+        }
+        if (glsl_std_450_imports_.count(inst_set) > 0) {
+            EmitGlslStd450ExtInst(inst);
+            return;
+        }
+
+        TINT_UNIMPLEMENTED() << "unhandled extended instruction import with ID "
+                             << inst.GetSingleWordInOperand(0);
+    }
+
+    // Returns the WGSL standard library function for the given GLSL.std.450 extended instruction
+    // operation code. This handles GLSL functions which directly translate to the WGSL equivalent.
+    // Any non-direct translation is returned as `kNone`.
+    core::BuiltinFn GetGlslStd450WgslEquivalentFuncName(uint32_t ext_opcode) {
+        switch (ext_opcode) {
+            case GLSLstd450Acos:
+                return core::BuiltinFn::kAcos;
+            case GLSLstd450Acosh:
+                return core::BuiltinFn::kAcosh;
+            case GLSLstd450Asin:
+                return core::BuiltinFn::kAsin;
+            case GLSLstd450Asinh:
+                return core::BuiltinFn::kAsinh;
+            case GLSLstd450Atan:
+                return core::BuiltinFn::kAtan;
+            case GLSLstd450Atanh:
+                return core::BuiltinFn::kAtanh;
+            case GLSLstd450Atan2:
+                return core::BuiltinFn::kAtan2;
+            case GLSLstd450Ceil:
+                return core::BuiltinFn::kCeil;
+            case GLSLstd450Cos:
+                return core::BuiltinFn::kCos;
+            case GLSLstd450Cosh:
+                return core::BuiltinFn::kCosh;
+            case GLSLstd450Cross:
+                return core::BuiltinFn::kCross;
+            case GLSLstd450Degrees:
+                return core::BuiltinFn::kDegrees;
+            case GLSLstd450Determinant:
+                return core::BuiltinFn::kDeterminant;
+            case GLSLstd450Distance:
+                return core::BuiltinFn::kDistance;
+            case GLSLstd450Exp:
+                return core::BuiltinFn::kExp;
+            case GLSLstd450Exp2:
+                return core::BuiltinFn::kExp2;
+            case GLSLstd450FAbs:
+                return core::BuiltinFn::kAbs;
+            case GLSLstd450FSign:
+                return core::BuiltinFn::kSign;
+            case GLSLstd450Floor:
+                return core::BuiltinFn::kFloor;
+            case GLSLstd450Fract:
+                return core::BuiltinFn::kFract;
+            case GLSLstd450Fma:
+                return core::BuiltinFn::kFma;
+            case GLSLstd450InverseSqrt:
+                return core::BuiltinFn::kInverseSqrt;
+            case GLSLstd450Length:
+                return core::BuiltinFn::kLength;
+            case GLSLstd450Log:
+                return core::BuiltinFn::kLog;
+            case GLSLstd450Log2:
+                return core::BuiltinFn::kLog2;
+            case GLSLstd450NClamp:
+            case GLSLstd450FClamp:  // FClamp is less prescriptive about NaN operands
+                return core::BuiltinFn::kClamp;
+            case GLSLstd450ModfStruct:
+                return core::BuiltinFn::kModf;
+            case GLSLstd450FrexpStruct:
+                return core::BuiltinFn::kFrexp;
+            case GLSLstd450NMin:
+            case GLSLstd450FMin:  // FMin is less prescriptive about NaN operands
+                return core::BuiltinFn::kMin;
+            case GLSLstd450NMax:
+            case GLSLstd450FMax:  // FMax is less prescriptive about NaN operands
+                return core::BuiltinFn::kMax;
+            case GLSLstd450FMix:
+                return core::BuiltinFn::kMix;
+            case GLSLstd450PackSnorm4x8:
+                return core::BuiltinFn::kPack4X8Snorm;
+            case GLSLstd450PackUnorm4x8:
+                return core::BuiltinFn::kPack4X8Unorm;
+            case GLSLstd450PackSnorm2x16:
+                return core::BuiltinFn::kPack2X16Snorm;
+            case GLSLstd450PackUnorm2x16:
+                return core::BuiltinFn::kPack2X16Unorm;
+            case GLSLstd450PackHalf2x16:
+                return core::BuiltinFn::kPack2X16Float;
+            case GLSLstd450Pow:
+                return core::BuiltinFn::kPow;
+            case GLSLstd450Radians:
+                return core::BuiltinFn::kRadians;
+            case GLSLstd450Round:
+            case GLSLstd450RoundEven:
+                return core::BuiltinFn::kRound;
+            case GLSLstd450Sin:
+                return core::BuiltinFn::kSin;
+            case GLSLstd450Sinh:
+                return core::BuiltinFn::kSinh;
+            case GLSLstd450SmoothStep:
+                return core::BuiltinFn::kSmoothstep;
+            case GLSLstd450Sqrt:
+                return core::BuiltinFn::kSqrt;
+            case GLSLstd450Step:
+                return core::BuiltinFn::kStep;
+            case GLSLstd450Tan:
+                return core::BuiltinFn::kTan;
+            case GLSLstd450Tanh:
+                return core::BuiltinFn::kTanh;
+            case GLSLstd450Trunc:
+                return core::BuiltinFn::kTrunc;
+            case GLSLstd450UnpackSnorm4x8:
+                return core::BuiltinFn::kUnpack4X8Snorm;
+            case GLSLstd450UnpackUnorm4x8:
+                return core::BuiltinFn::kUnpack4X8Unorm;
+            case GLSLstd450UnpackSnorm2x16:
+                return core::BuiltinFn::kUnpack2X16Snorm;
+            case GLSLstd450UnpackUnorm2x16:
+                return core::BuiltinFn::kUnpack2X16Unorm;
+            case GLSLstd450UnpackHalf2x16:
+                return core::BuiltinFn::kUnpack2X16Float;
+
+            default:
+                break;
+        }
+        return core::BuiltinFn::kNone;
+    }
+
+    spirv::BuiltinFn GetGlslStd450SpirvEquivalentFuncName(uint32_t ext_opcode) {
+        switch (ext_opcode) {
+            case GLSLstd450SAbs:
+                return spirv::BuiltinFn::kAbs;
+            case GLSLstd450SSign:
+                return spirv::BuiltinFn::kSign;
+            case GLSLstd450Normalize:
+                return spirv::BuiltinFn::kNormalize;
+            case GLSLstd450MatrixInverse:
+                return spirv::BuiltinFn::kInverse;
+            case GLSLstd450SMax:
+                return spirv::BuiltinFn::kSmax;
+            case GLSLstd450SMin:
+                return spirv::BuiltinFn::kSmin;
+            case GLSLstd450SClamp:
+                return spirv::BuiltinFn::kSclamp;
+            case GLSLstd450UMax:
+                return spirv::BuiltinFn::kUmax;
+            case GLSLstd450UMin:
+                return spirv::BuiltinFn::kUmin;
+            case GLSLstd450UClamp:
+                return spirv::BuiltinFn::kUclamp;
+            case GLSLstd450FindILsb:
+                return spirv::BuiltinFn::kFindILsb;
+            case GLSLstd450FindSMsb:
+                return spirv::BuiltinFn::kFindSMsb;
+            case GLSLstd450FindUMsb:
+                return spirv::BuiltinFn::kFindUMsb;
+            case GLSLstd450Refract:
+                return spirv::BuiltinFn::kRefract;
+            case GLSLstd450Reflect:
+                return spirv::BuiltinFn::kReflect;
+            case GLSLstd450FaceForward:
+                return spirv::BuiltinFn::kFaceForward;
+            case GLSLstd450Ldexp:
+                return spirv::BuiltinFn::kLdexp;
+            case GLSLstd450Modf:
+                return spirv::BuiltinFn::kModf;
+            case GLSLstd450Frexp:
+                return spirv::BuiltinFn::kFrexp;
+            default:
+                break;
+        }
+        return spirv::BuiltinFn::kNone;
+    }
+
+    Vector<const core::type::Type*, 1> GlslStd450ExplicitParams(uint32_t ext_opcode,
+                                                                const core::type::Type* result_ty) {
+        if (ext_opcode == GLSLstd450SSign || ext_opcode == GLSLstd450SAbs ||
+            ext_opcode == GLSLstd450SMax || ext_opcode == GLSLstd450SMin ||
+            ext_opcode == GLSLstd450SClamp || ext_opcode == GLSLstd450UMax ||
+            ext_opcode == GLSLstd450UMin || ext_opcode == GLSLstd450UClamp ||
+            ext_opcode == GLSLstd450FindILsb || ext_opcode == GLSLstd450FindSMsb ||
+            ext_opcode == GLSLstd450FindUMsb) {
+            return {result_ty->DeepestElement()};
+        }
+        return {};
+    }
+
+    /// @param inst the SPIR-V instruction for OpAccessChain
+    void EmitGlslStd450ExtInst(const spvtools::opt::Instruction& inst) {
+        const auto ext_opcode = inst.GetSingleWordInOperand(1);
+        auto* spv_ty = Type(inst.type_id());
+
+        Vector<core::ir::Value*, 4> operands;
+        // All parameters to GLSL.std.450 extended instructions are IDs.
+        for (uint32_t idx = 2; idx < inst.NumInOperands(); ++idx) {
+            operands.Push(Value(inst.GetSingleWordInOperand(idx)));
+        }
+
+        const auto wgsl_fn = GetGlslStd450WgslEquivalentFuncName(ext_opcode);
+        if (wgsl_fn == core::BuiltinFn::kModf) {
+            // For `ModfStruct`, which is, essentially, a WGSL `modf` instruction
+            // we need some special handling. The result type that we produce
+            // must be the SPIR-V type as we don't know how the result is used
+            // later. So, we need to make the WGSL query and re-construct an
+            // object of the right SPIR-V type. We can't, easily, do this later
+            // as we lose the SPIR-V type as soon as we replace the result of the
+            // `modf`. So, inline the work here to generate the correct results.
+
+            auto* mem_ty = operands[0]->Type();
+            auto* result_ty = core::type::CreateModfResult(ty_, ir_.symbols, mem_ty);
+
+            auto* call = b_.Call(result_ty, wgsl_fn, operands);
+            auto* fract = b_.Access(mem_ty, call, 0_u);
+            auto* whole = b_.Access(mem_ty, call, 1_u);
+
+            EmitWithoutSpvResult(call);
+            EmitWithoutSpvResult(fract);
+            EmitWithoutSpvResult(whole);
+            Emit(b_.Construct(spv_ty, fract, whole), inst.result_id());
+            return;
+        }
+        if (wgsl_fn == core::BuiltinFn::kFrexp) {
+            // For `FrexpStruct`, which is, essentially, a WGSL `frexp`
+            // instruction we need some special handling. The result type that we
+            // produce must be the SPIR-V type as we don't know how the result is
+            // used later. So, we need to make the WGSL query and re-construct an
+            // object of the right SPIR-V type. We can't, easily, do this later
+            // as we lose the SPIR-V type as soon as we replace the result of the
+            // `frexp`. So, inline the work here to generate the correct results.
+
+            auto* mem_ty = operands[0]->Type();
+            auto* result_ty = core::type::CreateFrexpResult(ty_, ir_.symbols, mem_ty);
+
+            auto* call = b_.Call(result_ty, wgsl_fn, operands);
+            auto* fract = b_.Access(mem_ty, call, 0_u);
+            auto* exp = b_.Access(ty_.MatchWidth(ty_.i32(), mem_ty), call, 1_u);
+            auto* exp_res = exp->Result(0);
+
+            EmitWithoutSpvResult(call);
+            EmitWithoutSpvResult(fract);
+            EmitWithoutSpvResult(exp);
+
+            if (auto* str = spv_ty->As<core::type::Struct>()) {
+                auto* exp_ty = str->Members()[1]->Type();
+                if (exp_ty->DeepestElement()->IsUnsignedIntegerScalar()) {
+                    auto* uexp = b_.Bitcast(exp_ty, exp);
+                    exp_res = uexp->Result(0);
+                    EmitWithoutSpvResult(uexp);
+                }
+            }
+
+            Emit(b_.Construct(spv_ty, fract, exp_res), inst.result_id());
+            return;
+        }
+        if (wgsl_fn != core::BuiltinFn::kNone) {
+            Emit(b_.Call(spv_ty, wgsl_fn, operands), inst.result_id());
+            return;
+        }
+
+        const auto spv_fn = GetGlslStd450SpirvEquivalentFuncName(ext_opcode);
+        if (spv_fn != spirv::BuiltinFn::kNone) {
+            auto explicit_params = GlslStd450ExplicitParams(ext_opcode, spv_ty);
+            Emit(b_.CallExplicit<spirv::ir::BuiltinCall>(spv_ty, spv_fn, explicit_params, operands),
+                 inst.result_id());
+            return;
+        }
+
+        TINT_UNIMPLEMENTED() << "unhandled GLSL.std.450 instruction " << ext_opcode;
+    }
+
     /// @param inst the SPIR-V instruction for OpAccessChain
     void EmitAccess(const spvtools::opt::Instruction& inst) {
-        Vector<core::ir::Value*, 4> indices;
-        for (uint32_t i = 3; i < inst.NumOperandWords(); i++) {
-            indices.Push(Value(inst.GetSingleWordOperand(i)));
-        }
+        Vector<core::ir::Value*, 4> indices = Args(inst, 3);
         auto* base = Value(inst.GetSingleWordOperand(2));
 
         if (indices.IsEmpty()) {
@@ -585,22 +1051,13 @@ class Parser {
 
     /// @param inst the SPIR-V instruction for OpCompositeConstruct
     void EmitConstruct(const spvtools::opt::Instruction& inst) {
-        Vector<core::ir::Value*, 4> values;
-        for (uint32_t i = 2; i < inst.NumOperandWords(); i++) {
-            values.Push(Value(inst.GetSingleWordOperand(i)));
-        }
-        auto* construct = b_.Construct(Type(inst.type_id()), std::move(values));
+        auto* construct = b_.Construct(Type(inst.type_id()), Args(inst, 2));
         Emit(construct, inst.result_id());
     }
 
     /// @param inst the SPIR-V instruction for OpFunctionCall
     void EmitFunctionCall(const spvtools::opt::Instruction& inst) {
-        // TODO(crbug.com/tint/1907): Capture result.
-        Vector<core::ir::Value*, 4> args;
-        for (uint32_t i = 3; i < inst.NumOperandWords(); i++) {
-            args.Push(Value(inst.GetSingleWordOperand(i)));
-        }
-        Emit(b_.Call(Function(inst.GetSingleWordInOperand(0)), std::move(args)), inst.result_id());
+        Emit(b_.Call(Function(inst.GetSingleWordInOperand(0)), Args(inst, 3)), inst.result_id());
     }
 
     /// @param inst the SPIR-V instruction for OpVariable
@@ -711,6 +1168,12 @@ class Parser {
 
     /// The SPIR-V context containing the SPIR-V tools intermediate representation.
     std::unique_ptr<spvtools::opt::IRContext> spirv_context_;
+
+    // The set of IDs that are imports of the GLSL.std.450 extended instruction sets.
+    std::unordered_set<uint32_t> glsl_std_450_imports_;
+    // The set of IDs of imports that are ignored. For example, any "NonSemanticInfo." import is
+    // ignored.
+    std::unordered_set<uint32_t> ignored_imports_;
 };
 
 }  // namespace

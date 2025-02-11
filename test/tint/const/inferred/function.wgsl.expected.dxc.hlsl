@@ -1,6 +1,3 @@
-void const_decls() {
-}
-
 struct tint_symbol {
   float4 value : SV_Target0;
 };

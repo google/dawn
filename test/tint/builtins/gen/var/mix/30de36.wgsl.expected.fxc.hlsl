@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void mix_30de36() {
   float res = 1.0f;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   mix_30de36();
   return;
 }
+//
+// compute_main
+//
+void mix_30de36() {
+  float res = 1.0f;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   mix_30de36();
   return;
+}
+//
+// vertex_main
+//
+void mix_30de36() {
+  float res = 1.0f;
 }
 
 struct VertexOutput {

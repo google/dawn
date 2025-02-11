@@ -40,6 +40,8 @@
 #include "src/tint/utils/text/styled_text.h"
 #include "src/tint/utils/text/text_style.h"
 
+TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
+
 /// Forward declaration
 namespace tint::core::intrinsic {
 struct TableData;
@@ -672,5 +674,7 @@ struct TemplateNumberMatcher {
 };
 
 }  // namespace tint::core::intrinsic
+
+TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 
 #endif  // SRC_TINT_LANG_CORE_INTRINSIC_TABLE_DATA_H_

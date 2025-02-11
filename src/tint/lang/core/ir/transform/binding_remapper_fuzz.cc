@@ -33,7 +33,12 @@
 namespace tint::core::ir::transform {
 namespace {
 
-constexpr auto& BindingRemapperFuzzer = BindingRemapper;
+Result<SuccessType> BindingRemapperFuzzer(
+    Module& ir,
+    const fuzz::ir::Context&,
+    const std::unordered_map<BindingPoint, BindingPoint>& binding_points) {
+    return BindingRemapper(ir, binding_points);
+}
 
 }  // namespace
 }  // namespace tint::core::ir::transform

@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void clamp_8b1eaa() {
   int3 res = (1).xxx;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   clamp_8b1eaa();
   return;
 }
+//
+// compute_main
+//
+void clamp_8b1eaa() {
+  int3 res = (1).xxx;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   clamp_8b1eaa();
   return;
+}
+//
+// vertex_main
+//
+void clamp_8b1eaa() {
+  int3 res = (1).xxx;
 }
 
 struct VertexOutput {

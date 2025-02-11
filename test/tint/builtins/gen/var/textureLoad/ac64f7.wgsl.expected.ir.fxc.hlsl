@@ -1,3 +1,45 @@
+//
+// fragment_main
+//
+
+RWByteAddressBuffer prevent_dce : register(u0);
+Texture2DArray<float4> arg_0 : register(t0, space1);
+float4 textureLoad_ac64f7() {
+  uint2 arg_1 = (1u).xx;
+  uint arg_2 = 1u;
+  uint v = arg_2;
+  int2 v_1 = int2(arg_1);
+  float4 res = arg_0.Load(int4(v_1, int(v), int(0)));
+  return res;
+}
+
+void fragment_main() {
+  prevent_dce.Store4(0u, asuint(textureLoad_ac64f7()));
+}
+
+//
+// compute_main
+//
+
+RWByteAddressBuffer prevent_dce : register(u0);
+Texture2DArray<float4> arg_0 : register(t0, space1);
+float4 textureLoad_ac64f7() {
+  uint2 arg_1 = (1u).xx;
+  uint arg_2 = 1u;
+  uint v = arg_2;
+  int2 v_1 = int2(arg_1);
+  float4 res = arg_0.Load(int4(v_1, int(v), int(0)));
+  return res;
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  prevent_dce.Store4(0u, asuint(textureLoad_ac64f7()));
+}
+
+//
+// vertex_main
+//
 struct VertexOutput {
   float4 pos;
   float4 prevent_dce;
@@ -9,41 +51,27 @@ struct vertex_main_outputs {
 };
 
 
-RWByteAddressBuffer prevent_dce : register(u0);
 Texture2DArray<float4> arg_0 : register(t0, space1);
 float4 textureLoad_ac64f7() {
   uint2 arg_1 = (1u).xx;
   uint arg_2 = 1u;
-  uint3 v = (0u).xxx;
-  arg_0.GetDimensions(v.x, v.y, v.z);
-  uint v_1 = min(arg_2, (v.z - 1u));
-  uint3 v_2 = (0u).xxx;
-  arg_0.GetDimensions(v_2.x, v_2.y, v_2.z);
-  int2 v_3 = int2(min(arg_1, (v_2.xy - (1u).xx)));
-  float4 res = float4(arg_0.Load(int4(v_3, int(v_1), int(0))));
+  uint v = arg_2;
+  int2 v_1 = int2(arg_1);
+  float4 res = arg_0.Load(int4(v_1, int(v), int(0)));
   return res;
 }
 
-void fragment_main() {
-  prevent_dce.Store4(0u, asuint(textureLoad_ac64f7()));
-}
-
-[numthreads(1, 1, 1)]
-void compute_main() {
-  prevent_dce.Store4(0u, asuint(textureLoad_ac64f7()));
-}
-
 VertexOutput vertex_main_inner() {
-  VertexOutput tint_symbol = (VertexOutput)0;
-  tint_symbol.pos = (0.0f).xxxx;
-  tint_symbol.prevent_dce = textureLoad_ac64f7();
-  VertexOutput v_4 = tint_symbol;
-  return v_4;
+  VertexOutput v_2 = (VertexOutput)0;
+  v_2.pos = (0.0f).xxxx;
+  v_2.prevent_dce = textureLoad_ac64f7();
+  VertexOutput v_3 = v_2;
+  return v_3;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_5 = vertex_main_inner();
-  vertex_main_outputs v_6 = {v_5.prevent_dce, v_5.pos};
-  return v_6;
+  VertexOutput v_4 = vertex_main_inner();
+  vertex_main_outputs v_5 = {v_4.prevent_dce, v_4.pos};
+  return v_5;
 }
 

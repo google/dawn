@@ -58,6 +58,8 @@ if (tint_build_spv_writer) {
       "option_helper.cc",
       "option_helpers.h",
       "options.h",
+      "output.cc",
+      "output.h",
     ]
     deps = [
       "${dawn_root}/src/utils:utils",

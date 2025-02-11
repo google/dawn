@@ -40,6 +40,19 @@ namespace {
 
 class GpuMemorySyncTests : public DawnTest {
   protected:
+    wgpu::RequiredLimits GetRequiredLimits(const wgpu::SupportedLimits& supported) override {
+        // Just copy all the limits, though all we really care about is
+        // maxStorageBuffersInFragmentStage
+        wgpu::RequiredLimits required = {};
+        required.limits = supported.limits;
+        return required;
+    }
+
+    void SetUp() override {
+        DawnTest::SetUp();
+        DAWN_SUPPRESS_TEST_IF(GetSupportedLimits().limits.maxStorageBuffersInFragmentStage < 1);
+    }
+
     wgpu::Buffer CreateBuffer() {
         wgpu::BufferDescriptor srcDesc;
         srcDesc.size = 4;
@@ -110,6 +123,8 @@ class GpuMemorySyncTests : public DawnTest {
 // dependency chain. The test verifies that data in buffer among iterations in compute passes is
 // correctly synchronized.
 TEST_P(GpuMemorySyncTests, ComputePass) {
+    DAWN_SUPPRESS_TEST_IF(GetSupportedLimits().limits.maxStorageBuffersInFragmentStage < 1);
+
     // Create pipeline, bind group, and buffer for compute pass.
     wgpu::Buffer buffer = CreateBuffer();
     auto [compute, bindGroup] = CreatePipelineAndBindGroupForCompute(buffer);
@@ -165,6 +180,10 @@ TEST_P(GpuMemorySyncTests, RenderPass) {
 // Write into a storage buffer in a render pass. Then read that data in a compute
 // pass. And verify the data flow is correctly synchronized.
 TEST_P(GpuMemorySyncTests, RenderPassToComputePass) {
+    // TODO(crbug.com/388318201): assert failed in setSerial libANGLE/renderer/vulkan/vk_resource.h
+    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode() &&
+                             HasToggleEnabled("gl_force_es_31_and_no_extensions"));
+
     // Create pipeline, bind group, and buffer for render pass and compute pass.
     wgpu::Buffer buffer = CreateBuffer();
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
@@ -413,6 +432,20 @@ constexpr int kRTSize = 8;
 constexpr int kVertexBufferStride = 4 * sizeof(float);
 
 class MultipleWriteThenMultipleReadTests : public DawnTest {
+  protected:
+    wgpu::RequiredLimits GetRequiredLimits(const wgpu::SupportedLimits& supported) override {
+        // Just copy all the limits, though all we really care about is
+        // maxStorageBuffersInFragmentStage
+        wgpu::RequiredLimits required = {};
+        required.limits = supported.limits;
+        return required;
+    }
+
+    void SetUp() override {
+        DawnTest::SetUp();
+        DAWN_SUPPRESS_TEST_IF(GetSupportedLimits().limits.maxStorageBuffersInFragmentStage < 1);
+    }
+
   protected:
     wgpu::Buffer CreateZeroedBuffer(uint64_t size, wgpu::BufferUsage usage) {
         wgpu::BufferDescriptor srcDesc;

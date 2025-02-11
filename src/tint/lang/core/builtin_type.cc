@@ -120,9 +120,6 @@ BuiltinType ParseBuiltinType(std::string_view str) {
     if (str == "__modf_result_vec4_f32") {
         return BuiltinType::kModfResultVec4F32;
     }
-    if (str == "__packed_vec3") {
-        return BuiltinType::kPackedVec3;
-    }
     if (str == "array") {
         return BuiltinType::kArray;
     }
@@ -233,6 +230,15 @@ BuiltinType ParseBuiltinType(std::string_view str) {
     }
     if (str == "sampler_comparison") {
         return BuiltinType::kSamplerComparison;
+    }
+    if (str == "subgroup_matrix_left") {
+        return BuiltinType::kSubgroupMatrixLeft;
+    }
+    if (str == "subgroup_matrix_result") {
+        return BuiltinType::kSubgroupMatrixResult;
+    }
+    if (str == "subgroup_matrix_right") {
+        return BuiltinType::kSubgroupMatrixRight;
     }
     if (str == "texture_1d") {
         return BuiltinType::kTexture1D;
@@ -392,8 +398,6 @@ std::string_view ToString(BuiltinType value) {
             return "__modf_result_vec4_f16";
         case BuiltinType::kModfResultVec4F32:
             return "__modf_result_vec4_f32";
-        case BuiltinType::kPackedVec3:
-            return "__packed_vec3";
         case BuiltinType::kArray:
             return "array";
         case BuiltinType::kAtomic:
@@ -468,6 +472,12 @@ std::string_view ToString(BuiltinType value) {
             return "sampler";
         case BuiltinType::kSamplerComparison:
             return "sampler_comparison";
+        case BuiltinType::kSubgroupMatrixLeft:
+            return "subgroup_matrix_left";
+        case BuiltinType::kSubgroupMatrixResult:
+            return "subgroup_matrix_result";
+        case BuiltinType::kSubgroupMatrixRight:
+            return "subgroup_matrix_right";
         case BuiltinType::kTexture1D:
             return "texture_1d";
         case BuiltinType::kTexture2D:

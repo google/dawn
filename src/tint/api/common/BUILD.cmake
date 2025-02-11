@@ -42,6 +42,8 @@ tint_add_target(tint_api_common lib
   api/common/binding_point.h
   api/common/common.cc
   api/common/override_id.h
+  api/common/vertex_pulling_config.cc
+  api/common/vertex_pulling_config.h
 )
 
 tint_target_add_dependencies(tint_api_common lib
@@ -68,6 +70,7 @@ tint_target_add_external_dependencies(tint_api_common lib
 tint_add_target(tint_api_common_test test
   api/common/binding_point_test.cc
   api/common/override_id_test.cc
+  api/common/vertex_pulling_config_test.cc
 )
 
 tint_target_add_dependencies(tint_api_common_test test

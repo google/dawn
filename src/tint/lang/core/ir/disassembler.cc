@@ -40,6 +40,7 @@
 #include "src/tint/lang/core/ir/block.h"
 #include "src/tint/lang/core/ir/block_param.h"
 #include "src/tint/lang/core/ir/break_if.h"
+#include "src/tint/lang/core/ir/builtin_call.h"
 #include "src/tint/lang/core/ir/continue.h"
 #include "src/tint/lang/core/ir/discard.h"
 #include "src/tint/lang/core/ir/exit_if.h"
@@ -327,7 +328,7 @@ void Disassembler::EmitFunction(const Function* func) {
     }
     out_ << " =";
 
-    if (func->Stage() != Function::PipelineStage::kUndefined) {
+    if (func->IsEntryPoint()) {
         out_ << " " << StyleAttribute("@", func->Stage());
     }
     if (func->WorkgroupSize()) {
@@ -423,6 +424,9 @@ void Disassembler::EmitValue(const Value* val) {
                         [&](const core::constant::Scalar<u32>* scalar) {
                             out_ << StyleLiteral(scalar->ValueAs<u32>().value, "u");
                         },
+                        [&](const core::constant::Scalar<u64>* scalar) {
+                            out_ << StyleLiteral(scalar->ValueAs<u64>().value, "u64");
+                        },
                         [&](const core::constant::Scalar<u8>* scalar) {
                             out_ << StyleLiteral(u32(scalar->ValueAs<u8>().value), "u8");
                         },
@@ -507,6 +511,28 @@ void Disassembler::EmitInstruction(const Instruction* inst) {
                 out_ << ", ";
             }
             EmitOperandList(uc, UserCall::kArgsOperandOffset);
+        },
+        [&](const BuiltinCall* c) {
+            EmitValueWithType(c);
+            out_ << " = ";
+            EmitInstructionName(c);
+
+            auto ep = c->ExplicitTemplateParams();
+            if (!ep.IsEmpty()) {
+                out_ << "<";
+                for (size_t i = 0; i < ep.Length(); ++i) {
+                    if (i > 0) {
+                        out_ << ", ";
+                    }
+                    out_ << ep[i]->FriendlyName();
+                }
+                out_ << ">";
+            }
+
+            if (!c->Args().IsEmpty()) {
+                out_ << " ";
+                EmitOperandList(c, BuiltinCall::kArgsOperandOffset);
+            }
         },
         [&](const MemberBuiltinCall* c) {
             EmitValueWithType(c);

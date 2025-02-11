@@ -3,14 +3,14 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer prevent_dce_block_1_ssbo {
+buffer f_prevent_dce_block_ssbo {
   float inner;
 } v;
-uniform highp samplerCubeShadow arg_0_arg_1;
+uniform highp samplerCubeShadow f_arg_0_arg_1;
 float textureSampleCompare_63fb83() {
   vec3 arg_2 = vec3(1.0f);
   float arg_3 = 1.0f;
-  float res = texture(arg_0_arg_1, vec4(arg_2, arg_3));
+  float res = texture(f_arg_0_arg_1, vec4(arg_2, arg_3));
   return res;
 }
 void main() {

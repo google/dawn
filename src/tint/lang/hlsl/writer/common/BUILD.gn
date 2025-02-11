@@ -49,12 +49,15 @@ libtint_source_set("common") {
     "option_helpers.h",
     "options.cc",
     "options.h",
+    "output.cc",
+    "output.h",
   ]
   deps = [
     "${dawn_root}/src/utils:utils",
     "${tint_src_dir}/api/common",
     "${tint_src_dir}/lang/core",
     "${tint_src_dir}/lang/core/common",
+    "${tint_src_dir}/lang/wgsl/ast",
     "${tint_src_dir}/utils",
     "${tint_src_dir}/utils/containers",
     "${tint_src_dir}/utils/diagnostic",

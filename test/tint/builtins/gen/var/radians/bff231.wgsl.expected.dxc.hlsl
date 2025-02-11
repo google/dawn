@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void radians_bff231() {
   float res = 0.01745329238474369049f;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   radians_bff231();
   return;
 }
+//
+// compute_main
+//
+void radians_bff231() {
+  float res = 0.01745329238474369049f;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   radians_bff231();
   return;
+}
+//
+// vertex_main
+//
+void radians_bff231() {
+  float res = 0.01745329238474369049f;
 }
 
 struct VertexOutput {

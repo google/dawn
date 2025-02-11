@@ -17,12 +17,12 @@ public fun Bitmap.createGpuTexture(device: Device): Texture {
         ByteBuffer.allocateDirect(height * width * Int.SIZE_BYTES).let { pixels ->
             copyPixelsToBuffer(pixels)
             device.queue.writeTexture(
-                dataLayout = TextureDataLayout(
+                dataLayout = TexelCopyBufferLayout(
                     bytesPerRow = width * Int.SIZE_BYTES,
                     rowsPerImage = height
                 ),
                 data = pixels,
-                destination = ImageCopyTexture(texture = texture),
+                destination = TexelCopyTextureInfo(texture = texture),
                 writeSize = size
             )
         }
@@ -43,9 +43,9 @@ public suspend fun Texture.createBitmap(device: Device): Bitmap {
     )
     device.queue.submit(arrayOf(device.createCommandEncoder().let {
         it.copyTextureToBuffer(
-            source = ImageCopyTexture(texture = this),
-            destination = ImageCopyBuffer(
-                layout = TextureDataLayout(
+            source = TexelCopyTextureInfo(texture = this),
+            destination = TexelCopyBufferInfo(
+                layout = TexelCopyBufferLayout(
                     offset = 0,
                     bytesPerRow = width * Int.SIZE_BYTES,
                     rowsPerImage = height

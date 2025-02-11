@@ -1,4 +1,4 @@
-// flags: --hlsl_shader_model 62
+// flags: --hlsl-shader-model 62
 enable chromium_disable_uniformity_analysis, f16;
 
 @fragment

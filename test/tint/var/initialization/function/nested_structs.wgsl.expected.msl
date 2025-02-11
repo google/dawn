@@ -1,6 +1,6 @@
 #include <metal_stdlib>
-
 using namespace metal;
+
 struct S1 {
   int i;
 };
@@ -13,13 +13,15 @@ struct S3 {
   S2 s2;
 };
 
+struct tint_module_vars_struct {
+  device int* out;
+};
+
 int f(S3 s3) {
   return s3.s2.s1.i;
 }
 
-kernel void tint_symbol(device int* tint_symbol_2 [[buffer(0)]]) {
-  S3 const tint_symbol_1 = S3{.s2=S2{.s1=S1{.i=42}}};
-  *(tint_symbol_2) = f(tint_symbol_1);
-  return;
+kernel void v(device int* out [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.out=out};
+  (*tint_module_vars.out) = f(S3{.s2=S2{.s1=S1{.i=42}}});
 }
-

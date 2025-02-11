@@ -162,6 +162,11 @@ bool Server::IsDeviceKnown(WGPUDevice device) const {
     return Objects<WGPUDevice>().IsKnown(device);
 }
 
+namespace {
+static constexpr WGPULoggingCallbackInfo kEmptyLoggingCallbackInfo = {nullptr, nullptr, nullptr,
+                                                                      nullptr};
+}  // namespace
+
 void Server::SetForwardingDeviceCallbacks(Known<WGPUDevice> device) {
     // Note: these callbacks are manually inlined here since they do not acquire and
     // free their userdata. Also unlike other callbacks, these are cleared and unset when
@@ -173,17 +178,17 @@ void Server::SetForwardingDeviceCallbacks(Known<WGPUDevice> device) {
 
     // Set callback to post warning and other information to client.
     mProcs.deviceSetLoggingCallback(
-        device->handle,
-        [](WGPULoggingType type, WGPUStringView message, void* userdata) {
-            DeviceInfo* info = static_cast<DeviceInfo*>(userdata);
-            info->server->OnLogging(info->self, type, message);
-        },
-        device->info.get());
+        device->handle, {nullptr,
+                         [](WGPULoggingType type, WGPUStringView message, void* userdata, void*) {
+                             DeviceInfo* info = static_cast<DeviceInfo*>(userdata);
+                             info->server->OnLogging(info->self, type, message);
+                         },
+                         device->info.get(), nullptr});
 }
 
 void Server::ClearDeviceCallbacks(WGPUDevice device) {
     // Un-set the logging callback since we cannot forward them after the server has been destroyed.
-    mProcs.deviceSetLoggingCallback(device, nullptr, nullptr);
+    mProcs.deviceSetLoggingCallback(device, kEmptyLoggingCallbackInfo);
 }
 
 }  // namespace dawn::wire::server

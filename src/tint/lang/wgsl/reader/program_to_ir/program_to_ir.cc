@@ -98,6 +98,7 @@
 #include "src/tint/lang/wgsl/sem/member_accessor_expression.h"
 #include "src/tint/lang/wgsl/sem/module.h"
 #include "src/tint/lang/wgsl/sem/switch_statement.h"
+#include "src/tint/lang/wgsl/sem/type_expression.h"
 #include "src/tint/lang/wgsl/sem/value_constructor.h"
 #include "src/tint/lang/wgsl/sem/value_conversion.h"
 #include "src/tint/lang/wgsl/sem/value_expression.h"
@@ -983,9 +984,25 @@ class Impl {
                     if (b->Fn() == wgsl::BuiltinFn::kBitcast) {
                         inst = impl.builder_.Bitcast(ty, args[0]);
                     } else {
-                        auto* res = impl.builder_.InstructionResult(ty);
-                        inst = impl.builder_.ir.CreateInstruction<wgsl::ir::BuiltinCall>(
-                            res, b->Fn(), std::move(args));
+                        auto* call =
+                            impl.builder_.Call<wgsl::ir::BuiltinCall>(ty, b->Fn(), std::move(args));
+
+                        // Set explicit template parameters if present.
+                        if (b->Overload().num_explicit_templates > 0) {
+                            auto* tmpl = expr->target->identifier->As<ast::TemplatedIdentifier>();
+                            TINT_ASSERT(tmpl);
+                            Vector<const core::type::Type*, 1> explicit_types;
+                            for (uint32_t i = 0; i < b->Overload().num_explicit_templates; i++) {
+                                auto* tmpl_sem = impl.program_.Sem().Get(tmpl->arguments[i]);
+                                auto* tmpl_ty = tmpl_sem->As<sem::TypeExpression>();
+                                TINT_ASSERT(tmpl_ty);
+                                auto* cloned_ty = tmpl_ty->Type()->Clone(impl.clone_ctx_.type_ctx);
+                                explicit_types.Push(cloned_ty);
+                            }
+                            call->SetExplicitTemplateParams(std::move(explicit_types));
+                        }
+
+                        inst = call;
                     }
                 } else if (sem->Target()->As<sem::ValueConstructor>()) {
                     inst = impl.builder_.Construct(ty, std::move(args));

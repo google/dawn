@@ -59,6 +59,7 @@ tint::core::ir::Instruction::Accesses CoreBuiltinCall::GetSideEffects() const {
     switch (func_) {
         case BuiltinFn::kAtomicLoad:
         case BuiltinFn::kInputAttachmentLoad:
+        case BuiltinFn::kSubgroupMatrixLoad:
         case BuiltinFn::kTextureSample:
         case BuiltinFn::kTextureSampleBias:
         case BuiltinFn::kTextureSampleCompare:
@@ -69,6 +70,7 @@ tint::core::ir::Instruction::Accesses CoreBuiltinCall::GetSideEffects() const {
         case BuiltinFn::kTextureLoad:
             return Accesses{Access::kLoad};
 
+        case BuiltinFn::kSubgroupMatrixStore:
         case BuiltinFn::kTextureStore:
             return Accesses{Access::kStore};
 
@@ -208,6 +210,8 @@ tint::core::ir::Instruction::Accesses CoreBuiltinCall::GetSideEffects() const {
         case BuiltinFn::kUnpack4X8Unorm:
         case BuiltinFn::kUnpack4XI8:
         case BuiltinFn::kUnpack4XU8:
+        case BuiltinFn::kSubgroupMatrixMultiply:
+        case BuiltinFn::kSubgroupMatrixMultiplyAccumulate:
         case BuiltinFn::kNone:
             break;
     }

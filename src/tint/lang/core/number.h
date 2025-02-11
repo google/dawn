@@ -286,6 +286,8 @@ using i32 = Number<int32_t>;
 using u8 = Number<uint8_t>;
 /// `u32` is a type alias to `Number<uint32_t>`.
 using u32 = Number<uint32_t>;
+/// `u64` is a type alias to `Number<uint64_t>`.
+using u64 = Number<uint64_t>;
 /// `f32` is a type alias to `Number<float>`
 using f32 = Number<float>;
 /// `f16` is a type alias to `Number<detail::NumberKindF16>`, which should be IEEE 754 binary16.
@@ -365,17 +367,29 @@ tint::Result<TO, ConversionFailure> CheckedConvert(Number<FROM> num) {
     // Float to integral conversions clamp to the target range.
     // https://gpuweb.github.io/gpuweb/wgsl/#scalar-floating-point-to-integral-conversion
     constexpr auto float_to_integral = IsFloatingPoint<FROM> && IsIntegral<UnwrapNumber<TO>>;
-    if (value > static_cast<T>(TO::kHighestValue)) {
-        if (float_to_integral) {
-            return TO(TO::kHighestValue);
+    if constexpr (std::is_same_v<TO, u64>) {
+        // Special case checks for u64 as its range does not fit into an AInt.
+        if (value < 0) {
+            if constexpr (float_to_integral) {
+                return TO(0);
+            }
+            if constexpr (IsSignedIntegral<FROM>) {
+                return ConversionFailure::kExceedsNegativeLimit;
+            }
         }
-        return ConversionFailure::kExceedsPositiveLimit;
-    }
-    if (value < static_cast<T>(TO::kLowestValue)) {
-        if (float_to_integral) {
-            return TO(TO::kLowestValue);
+    } else {
+        if (value > static_cast<T>(TO::kHighestValue)) {
+            if (float_to_integral) {
+                return TO(TO::kHighestValue);
+            }
+            return ConversionFailure::kExceedsPositiveLimit;
         }
-        return ConversionFailure::kExceedsNegativeLimit;
+        if (value < static_cast<T>(TO::kLowestValue)) {
+            if (float_to_integral) {
+                return TO(TO::kLowestValue);
+            }
+            return ConversionFailure::kExceedsNegativeLimit;
+        }
     }
     return TO(value);  // Success
 }

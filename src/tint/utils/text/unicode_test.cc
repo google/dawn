@@ -36,6 +36,8 @@
 #include "gmock/gmock.h"
 #include "src/tint/utils/text/string.h"
 
+TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
+
 /// Helper for constructing a CodePoint
 #define C(x) CodePoint(x)
 
@@ -558,6 +560,8 @@ INSTANTIATE_TEST_SUITE_P(Invalid,
                              {0xf4, 0xff, 0x8f, 0x8f},  // 4-bytes, second byte's second-MSB set
                              {0xf4, 0x8f, 0xff, 0x8f},  // 4-bytes, third byte's second-MSB set
                              {0xf4, 0x8f, 0x8f, 0xff},  // 4-bytes, fourth byte's second-MSB set
+
+                             {0xe0, 0x9d, 0x81},  // Value out of range for 3-byte
                          }));
 
 }  // namespace utf8_tests
@@ -846,3 +850,5 @@ INSTANTIATE_TEST_SUITE_P(Invalid,
 
 }  // namespace utf16_tests
 }  // namespace tint
+
+TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);

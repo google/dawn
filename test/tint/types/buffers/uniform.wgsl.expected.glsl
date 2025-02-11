@@ -3,7 +3,7 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std140)
-uniform weights_block_1_ubo {
+uniform f_weights_block_ubo {
   vec2 inner;
 } v;
 void main() {

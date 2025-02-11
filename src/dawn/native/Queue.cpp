@@ -105,7 +105,7 @@ ResultOrError<UploadHandle> UploadTextureDataAligningBytesPerRowAndOffset(
     uint32_t alignedBytesPerRow,
     uint32_t optimallyAlignedBytesPerRow,
     uint32_t alignedRowsPerImage,
-    const TextureDataLayout& dataLayout,
+    const TexelCopyBufferLayout& dataLayout,
     bool hasDepthOrStencil,
     const TexelBlockInfo& blockInfo,
     const Extent3D& writeSizePixel) {
@@ -154,33 +154,6 @@ ResultOrError<UploadHandle> UploadTextureDataAligningBytesPerRowAndOffset(
 
     return uploadHandle;
 }
-
-struct SubmittedWorkDone : TrackTaskCallback {
-    SubmittedWorkDone(dawn::platform::Platform* platform,
-                      WGPUQueueWorkDoneCallback callback,
-                      void* userdata)
-        : TrackTaskCallback(platform), mCallback(callback), mUserdata(userdata) {}
-    ~SubmittedWorkDone() override = default;
-
-  private:
-    void FinishImpl() override {
-        DAWN_ASSERT(mCallback != nullptr);
-        DAWN_ASSERT(mSerial != kMaxExecutionSerial);
-        TRACE_EVENT1(mPlatform, General, "Queue::SubmittedWorkDone::Finished", "serial",
-                     uint64_t(mSerial));
-        mCallback(WGPUQueueWorkDoneStatus_Success, mUserdata.ExtractAsDangling());
-        mCallback = nullptr;
-    }
-    void HandleDeviceLossImpl() override {
-        DAWN_ASSERT(mCallback != nullptr);
-        mCallback(WGPUQueueWorkDoneStatus_DeviceLost, mUserdata.ExtractAsDangling());
-        mCallback = nullptr;
-    }
-    void HandleShutDownImpl() override { HandleDeviceLossImpl(); }
-
-    WGPUQueueWorkDoneCallback mCallback = nullptr;
-    raw_ptr<void> mUserdata;
-};
 
 class ErrorQueue : public QueueBase {
   public:
@@ -257,55 +230,15 @@ void QueueBase::APISubmit(uint32_t commandCount, CommandBufferBase* const* comma
         ityp::span<uint32_t, CommandBufferBase* const>(commands, commandCount));
 }
 
-void QueueBase::APIOnSubmittedWorkDone(WGPUQueueWorkDoneCallback callback, void* userdata) {
-    GetInstance()->EmitDeprecationWarning(
-        "Old OnSubmittedWorkDone APIs are deprecated. If using C please pass a CallbackInfo "
-        "struct that has two userdatas. Otherwise, if using C++, please use templated helpers.");
-
-    // The error status depends on the type of error so we let the validation function choose it
-    wgpu::QueueWorkDoneStatus status;
-    if (GetDevice()->ConsumedError(ValidateOnSubmittedWorkDone(&status))) {
-        GetDevice()->GetCallbackTaskManager()->AddCallbackTask(
-            [callback, status, userdata] { callback(ToAPI(status), userdata); });
-        return;
-    }
-
-    std::unique_ptr<SubmittedWorkDone> task =
-        std::make_unique<SubmittedWorkDone>(GetDevice()->GetPlatform(), callback, userdata);
-
-    // Technically we only need to wait for previously submitted work but OnSubmittedWorkDone is
-    // also used to make sure ALL queue work is finished in tests, so we also wait for pending
-    // commands (this is non-observable outside of tests so it's ok to do deviate a bit from the
-    // spec).
-    TrackTaskAfterEventualFlush(std::move(task));
-
-    TRACE_EVENT1(GetDevice()->GetPlatform(), General, "Queue::APIOnSubmittedWorkDone", "serial",
-                 uint64_t(GetPendingCommandSerial()));
-}
-
-Future QueueBase::APIOnSubmittedWorkDoneF(const QueueWorkDoneCallbackInfo& callbackInfo) {
-    GetInstance()->EmitDeprecationWarning(
-        "Old OnSubmittedWorkDone APIs are deprecated. If using C please pass a CallbackInfo "
-        "struct that has two userdatas. Otherwise, if using C++, please use templated helpers.");
-
-    return APIOnSubmittedWorkDone2(
-        {ToAPI(callbackInfo.nextInChain), ToAPI(callbackInfo.mode),
-         [](WGPUQueueWorkDoneStatus status, void* callback, void* userdata) {
-             auto cb = reinterpret_cast<WGPUQueueWorkDoneCallback>(callback);
-             cb(status, userdata);
-         },
-         reinterpret_cast<void*>(callbackInfo.callback), callbackInfo.userdata});
-}
-
-Future QueueBase::APIOnSubmittedWorkDone2(const WGPUQueueWorkDoneCallbackInfo2& callbackInfo) {
+Future QueueBase::APIOnSubmittedWorkDone(const WGPUQueueWorkDoneCallbackInfo& callbackInfo) {
     struct WorkDoneEvent final : public EventManager::TrackedEvent {
         std::optional<WGPUQueueWorkDoneStatus> mEarlyStatus;
-        WGPUQueueWorkDoneCallback2 mCallback;
+        WGPUQueueWorkDoneCallback mCallback;
         raw_ptr<void> mUserdata1;
         raw_ptr<void> mUserdata2;
 
         // Create an event backed by the given queue execution serial.
-        WorkDoneEvent(const WGPUQueueWorkDoneCallbackInfo2& callbackInfo,
+        WorkDoneEvent(const WGPUQueueWorkDoneCallbackInfo& callbackInfo,
                       QueueBase* queue,
                       ExecutionSerial serial)
             : TrackedEvent(static_cast<wgpu::CallbackMode>(callbackInfo.mode), queue, serial),
@@ -314,7 +247,7 @@ Future QueueBase::APIOnSubmittedWorkDone2(const WGPUQueueWorkDoneCallbackInfo2& 
               mUserdata2(callbackInfo.userdata2) {}
 
         // Create an event that's ready at creation (for errors, etc.)
-        WorkDoneEvent(const WGPUQueueWorkDoneCallbackInfo2& callbackInfo,
+        WorkDoneEvent(const WGPUQueueWorkDoneCallbackInfo& callbackInfo,
                       QueueBase* queue,
                       wgpu::QueueWorkDoneStatus earlyStatus)
             : TrackedEvent(static_cast<wgpu::CallbackMode>(callbackInfo.mode),
@@ -350,17 +283,13 @@ Future QueueBase::APIOnSubmittedWorkDone2(const WGPUQueueWorkDoneCallbackInfo2& 
         // re-entrancy.
         auto deviceLock(GetDevice()->GetScopedLock());
 
-        wgpu::QueueWorkDoneStatus validationEarlyStatus;
-        if (GetDevice()->ConsumedError(ValidateOnSubmittedWorkDone(&validationEarlyStatus))) {
-            // TODO(crbug.com/dawn/2021): This is here to pretend that things succeed when the
-            // device is lost. When the old OnSubmittedWorkDone is removed then we can update
-            // ValidateOnSubmittedWorkDone to just return the correct thing here.
-            if (validationEarlyStatus == wgpu::QueueWorkDoneStatus::DeviceLost) {
-                validationEarlyStatus = wgpu::QueueWorkDoneStatus::Success;
-            }
-
-            // Note: if the callback is spontaneous, it'll get called in here.
-            event = AcquireRef(new WorkDoneEvent(callbackInfo, this, validationEarlyStatus));
+        // Note: if the callback is spontaneous, it may get called in here.
+        if (GetDevice()->ConsumedError(GetDevice()->ValidateIsAlive())) {
+            event = AcquireRef(
+                new WorkDoneEvent(callbackInfo, this, wgpu::QueueWorkDoneStatus::Success));
+        } else if (GetDevice()->ConsumedError(ValidateOnSubmittedWorkDone())) {
+            event =
+                AcquireRef(new WorkDoneEvent(callbackInfo, this, wgpu::QueueWorkDoneStatus::Error));
         } else {
             event = AcquireRef(new WorkDoneEvent(callbackInfo, this, GetScheduledWorkDoneSerial()));
         }
@@ -460,10 +389,10 @@ MaybeError QueueBase::WriteBufferImpl(BufferBase* buffer,
     return buffer->UploadData(bufferOffset, data, size);
 }
 
-void QueueBase::APIWriteTexture(const ImageCopyTexture* destination,
+void QueueBase::APIWriteTexture(const TexelCopyTextureInfo* destination,
                                 const void* data,
                                 size_t dataSize,
-                                const TextureDataLayout* dataLayout,
+                                const TexelCopyBufferLayout* dataLayout,
                                 const Extent3D* writeSize) {
     [[maybe_unused]] bool hadError = GetDevice()->ConsumedError(
         WriteTextureInternal(destination, data, dataSize, *dataLayout, writeSize),
@@ -471,12 +400,12 @@ void QueueBase::APIWriteTexture(const ImageCopyTexture* destination,
         writeSize);
 }
 
-MaybeError QueueBase::WriteTextureInternal(const ImageCopyTexture* destinationOrig,
+MaybeError QueueBase::WriteTextureInternal(const TexelCopyTextureInfo* destinationOrig,
                                            const void* data,
                                            size_t dataSize,
-                                           const TextureDataLayout& dataLayout,
+                                           const TexelCopyBufferLayout& dataLayout,
                                            const Extent3D* writeSize) {
-    ImageCopyTexture destination = destinationOrig->WithTrivialFrontendDefaults();
+    TexelCopyTextureInfo destination = destinationOrig->WithTrivialFrontendDefaults();
 
     DAWN_TRY(ValidateWriteTexture(&destination, dataSize, dataLayout, writeSize));
 
@@ -486,15 +415,15 @@ MaybeError QueueBase::WriteTextureInternal(const ImageCopyTexture* destinationOr
 
     const TexelBlockInfo& blockInfo =
         destination.texture->GetFormat().GetAspectInfo(destination.aspect).block;
-    TextureDataLayout layout = dataLayout;
-    ApplyDefaultTextureDataLayoutOptions(&layout, blockInfo, *writeSize);
+    TexelCopyBufferLayout layout = dataLayout;
+    ApplyDefaultTexelCopyBufferLayoutOptions(&layout, blockInfo, *writeSize);
     return WriteTextureImpl(destination, data, dataSize, layout, *writeSize);
 }
 
-MaybeError QueueBase::WriteTextureImpl(const ImageCopyTexture& destination,
+MaybeError QueueBase::WriteTextureImpl(const TexelCopyTextureInfo& destination,
                                        const void* data,
                                        size_t dataSize,
-                                       const TextureDataLayout& dataLayout,
+                                       const TexelCopyBufferLayout& dataLayout,
                                        const Extent3D& writeSizePixel) {
     const Format& format = destination.texture->GetFormat();
     const TexelBlockInfo& blockInfo = format.GetAspectInfo(destination.aspect).block;
@@ -516,7 +445,7 @@ MaybeError QueueBase::WriteTextureImpl(const ImageCopyTexture& destination,
                                       optimallyAlignedBytesPerRow, alignedRowsPerImage, dataLayout,
                                       format.HasDepthOrStencil(), blockInfo, writeSizePixel));
 
-    TextureDataLayout passDataLayout = dataLayout;
+    TexelCopyBufferLayout passDataLayout = dataLayout;
     passDataLayout.offset = uploadHandle.startOffset;
     passDataLayout.bytesPerRow = optimallyAlignedBytesPerRow;
     passDataLayout.rowsPerImage = alignedRowsPerImage;
@@ -529,12 +458,12 @@ MaybeError QueueBase::WriteTextureImpl(const ImageCopyTexture& destination,
 
     DeviceBase* device = GetDevice();
 
-    return device->CopyFromStagingToTexture(uploadHandle.stagingBuffer, passDataLayout, textureCopy,
-                                            writeSizePixel);
+    return device->CopyFromStagingToTexture(uploadHandle.stagingBuffer.Get(), passDataLayout,
+                                            textureCopy, writeSizePixel);
 }
 
-void QueueBase::APICopyTextureForBrowser(const ImageCopyTexture* source,
-                                         const ImageCopyTexture* destination,
+void QueueBase::APICopyTextureForBrowser(const TexelCopyTextureInfo* source,
+                                         const TexelCopyTextureInfo* destination,
                                          const Extent3D* copySize,
                                          const CopyTextureForBrowserOptions* options) {
     [[maybe_unused]] bool hadError = GetDevice()->ConsumedError(
@@ -542,19 +471,19 @@ void QueueBase::APICopyTextureForBrowser(const ImageCopyTexture* source,
 }
 
 void QueueBase::APICopyExternalTextureForBrowser(const ImageCopyExternalTexture* source,
-                                                 const ImageCopyTexture* destination,
+                                                 const TexelCopyTextureInfo* destination,
                                                  const Extent3D* copySize,
                                                  const CopyTextureForBrowserOptions* options) {
     [[maybe_unused]] bool hadError = GetDevice()->ConsumedError(
         CopyExternalTextureForBrowserInternal(source, destination, copySize, options));
 }
 
-MaybeError QueueBase::CopyTextureForBrowserInternal(const ImageCopyTexture* sourceOrig,
-                                                    const ImageCopyTexture* destinationOrig,
+MaybeError QueueBase::CopyTextureForBrowserInternal(const TexelCopyTextureInfo* sourceOrig,
+                                                    const TexelCopyTextureInfo* destinationOrig,
                                                     const Extent3D* copySize,
                                                     const CopyTextureForBrowserOptions* options) {
-    ImageCopyTexture source = sourceOrig->WithTrivialFrontendDefaults();
-    ImageCopyTexture destination = destinationOrig->WithTrivialFrontendDefaults();
+    TexelCopyTextureInfo source = sourceOrig->WithTrivialFrontendDefaults();
+    TexelCopyTextureInfo destination = destinationOrig->WithTrivialFrontendDefaults();
 
     if (GetDevice()->IsValidationEnabled()) {
         DAWN_TRY_CONTEXT(
@@ -567,10 +496,10 @@ MaybeError QueueBase::CopyTextureForBrowserInternal(const ImageCopyTexture* sour
 
 MaybeError QueueBase::CopyExternalTextureForBrowserInternal(
     const ImageCopyExternalTexture* source,
-    const ImageCopyTexture* destinationOrig,
+    const TexelCopyTextureInfo* destinationOrig,
     const Extent3D* copySize,
     const CopyTextureForBrowserOptions* options) {
-    ImageCopyTexture destination = destinationOrig->WithTrivialFrontendDefaults();
+    TexelCopyTextureInfo destination = destinationOrig->WithTrivialFrontendDefaults();
 
     if (GetDevice()->IsValidationEnabled()) {
         DAWN_TRY_CONTEXT(ValidateCopyExternalTextureForBrowser(GetDevice(), source, &destination,
@@ -640,25 +569,20 @@ MaybeError QueueBase::ValidateSubmit(uint32_t commandCount,
     return {};
 }
 
-MaybeError QueueBase::ValidateOnSubmittedWorkDone(wgpu::QueueWorkDoneStatus* status) const {
-    *status = wgpu::QueueWorkDoneStatus::DeviceLost;
-    DAWN_TRY(GetDevice()->ValidateIsAlive());
-
-    *status = wgpu::QueueWorkDoneStatus::Error;
+MaybeError QueueBase::ValidateOnSubmittedWorkDone() const {
     DAWN_TRY(GetDevice()->ValidateObject(this));
-
     return {};
 }
 
-MaybeError QueueBase::ValidateWriteTexture(const ImageCopyTexture* destination,
+MaybeError QueueBase::ValidateWriteTexture(const TexelCopyTextureInfo* destination,
                                            size_t dataSize,
-                                           const TextureDataLayout& dataLayout,
+                                           const TexelCopyBufferLayout& dataLayout,
                                            const Extent3D* writeSize) const {
     DAWN_TRY(GetDevice()->ValidateIsAlive());
     DAWN_TRY(GetDevice()->ValidateObject(this));
     DAWN_TRY(GetDevice()->ValidateObject(destination->texture));
 
-    DAWN_TRY(ValidateImageCopyTexture(GetDevice(), *destination, *writeSize));
+    DAWN_TRY(ValidateTexelCopyTextureInfo(GetDevice(), *destination, *writeSize));
 
     DAWN_INVALID_IF(dataLayout.offset > dataSize,
                     "Data offset (%u) is greater than the data size (%u).", dataLayout.offset,

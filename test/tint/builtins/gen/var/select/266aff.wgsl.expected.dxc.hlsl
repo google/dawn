@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 RWByteAddressBuffer prevent_dce : register(u0);
 
 float2 select_266aff() {
@@ -12,11 +15,33 @@ void fragment_main() {
   prevent_dce.Store2(0u, asuint(select_266aff()));
   return;
 }
+//
+// compute_main
+//
+RWByteAddressBuffer prevent_dce : register(u0);
+
+float2 select_266aff() {
+  float2 arg_0 = (1.0f).xx;
+  float2 arg_1 = (1.0f).xx;
+  bool2 arg_2 = (true).xx;
+  float2 res = (arg_2 ? arg_1 : arg_0);
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store2(0u, asuint(select_266aff()));
   return;
+}
+//
+// vertex_main
+//
+float2 select_266aff() {
+  float2 arg_0 = (1.0f).xx;
+  float2 arg_1 = (1.0f).xx;
+  bool2 arg_2 = (true).xx;
+  float2 res = (arg_2 ? arg_1 : arg_0);
+  return res;
 }
 
 struct VertexOutput {

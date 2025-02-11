@@ -35,9 +35,9 @@ namespace tint::core::type {
 
 SubgroupMatrix::SubgroupMatrix(SubgroupMatrixKind kind,
                                const type::Type* subtype,
-                               uint32_t rows,
-                               uint32_t columns)
-    : Base(Hash(tint::TypeCode::Of<SubgroupMatrix>().bits, kind, rows, columns, subtype),
+                               uint32_t columns,
+                               uint32_t rows)
+    : Base(Hash(tint::TypeCode::Of<SubgroupMatrix>().bits, kind, columns, rows, subtype),
            core::type::Flags{
                Flag::kConstructable,
                Flag::kCreationFixedFootprint,
@@ -45,8 +45,8 @@ SubgroupMatrix::SubgroupMatrix(SubgroupMatrixKind kind,
            }),
       kind_(kind),
       subtype_(subtype),
-      rows_(rows),
-      columns_(columns) {}
+      columns_(columns),
+      rows_(rows) {}
 
 SubgroupMatrix::~SubgroupMatrix() = default;
 
@@ -78,13 +78,13 @@ std::string SubgroupMatrix::FriendlyName() const {
         case SubgroupMatrixKind::kUndefined:
             TINT_UNREACHABLE();
     }
-    out << "<" << subtype_->FriendlyName() << ", " << rows_ << ", " << columns_ << ">";
+    out << "<" << subtype_->FriendlyName() << ", " << columns_ << ", " << rows_ << ">";
     return out.str();
 }
 
 SubgroupMatrix* SubgroupMatrix::Clone(CloneContext& ctx) const {
     auto* ty = subtype_->Clone(ctx);
-    return ctx.dst.mgr->Get<SubgroupMatrix>(kind_, ty, rows_, columns_);
+    return ctx.dst.mgr->Get<SubgroupMatrix>(kind_, ty, columns_, rows_);
 }
 
 }  // namespace tint::core::type

@@ -36,8 +36,11 @@ namespace dawn::native::d3d12 {
 ResourceHeapAllocation::ResourceHeapAllocation(const AllocationInfo& info,
                                                uint64_t offset,
                                                ComPtr<ID3D12Resource> resource,
-                                               Heap* heap)
-    : ResourceMemoryAllocation(info, offset, heap), mResource(std::move(resource)) {
+                                               Heap* heap,
+                                               ResourceHeapKind resourceHeapKind)
+    : ResourceMemoryAllocation(info, offset, heap),
+      mResource(std::move(resource)),
+      mResourceHeapKind(resourceHeapKind) {
     DAWN_ASSERT((info.mMethod == AllocationMethod::kExternal) == (heap == nullptr));
 }
 
@@ -53,4 +56,9 @@ ID3D12Resource* ResourceHeapAllocation::GetD3D12Resource() const {
 D3D12_GPU_VIRTUAL_ADDRESS ResourceHeapAllocation::GetGPUPointer() const {
     return mResource->GetGPUVirtualAddress();
 }
+
+ResourceHeapKind ResourceHeapAllocation::GetResourceHeapKind() const {
+    return mResourceHeapKind;
+}
+
 }  // namespace dawn::native::d3d12

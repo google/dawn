@@ -50,9 +50,6 @@ Result ValidateUsingMetal(const std::string& src, MslVersion version) {
     MTLCompileOptions* compileOptions = [MTLCompileOptions new];
     compileOptions.fastMathEnabled = true;
     switch (version) {
-        case MslVersion::kMsl_2_2:
-            compileOptions.languageVersion = MTLLanguageVersion2_2;
-            break;
         case MslVersion::kMsl_2_3:
             compileOptions.languageVersion = MTLLanguageVersion2_3;
             break;

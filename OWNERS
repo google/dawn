@@ -10,6 +10,12 @@ per-file DEPS=*
 per-file .gitignore=*
 per-file README.md=file://docs/OWNERS
 
+
+# Allows approving build rule changes, without giving owners for
+# everything
+per-file CMake*=rharrison@chromium.org,amaiorano@google.com
+per-file BUILD.*=rharrison@chromium.org,amaiorano@google.com
+
 # gitlinks that anyone can update just like DEPS
 per-file build=*
 per-file buildtools=*

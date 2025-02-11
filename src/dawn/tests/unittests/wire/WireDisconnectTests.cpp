@@ -93,8 +93,8 @@ TEST_F(WireDisconnectTests, CallsDeviceLostCallback) {
 // Check that disconnecting the wire client after a device loss does not trigger the callback
 // again.
 TEST_F(WireDisconnectTests, ServerLostThenDisconnect) {
-    api.CallDeviceSetDeviceLostCallbackCallback(apiDevice, WGPUDeviceLostReason_Unknown,
-                                                ToOutputStringView("some reason"));
+    api.CallDeviceLostCallback(apiDevice, WGPUDeviceLostReason_Unknown,
+                               ToOutputStringView("some reason"));
 
     // Flush the device lost return command.
     EXPECT_CALL(deviceLostCallback, Call(CHandleIs(device.Get()), wgpu::DeviceLostReason::Unknown,
@@ -109,8 +109,8 @@ TEST_F(WireDisconnectTests, ServerLostThenDisconnect) {
 // Check that disconnecting the wire client inside the device loss callback does not trigger the
 // callback again.
 TEST_F(WireDisconnectTests, ServerLostThenDisconnectInCallback) {
-    api.CallDeviceSetDeviceLostCallbackCallback(apiDevice, WGPUDeviceLostReason_Unknown,
-                                                ToOutputStringView("lost reason"));
+    api.CallDeviceLostCallback(apiDevice, WGPUDeviceLostReason_Unknown,
+                               ToOutputStringView("lost reason"));
 
     // Disconnect the client inside the lost callback. We should see the callback
     // only once.
@@ -130,8 +130,8 @@ TEST_F(WireDisconnectTests, DisconnectThenServerLost) {
 
     // Lose the device on the server. The client callback shouldn't be
     // called again.
-    api.CallDeviceSetDeviceLostCallbackCallback(apiDevice, WGPUDeviceLostReason_Unknown,
-                                                ToOutputStringView("lost reason"));
+    api.CallDeviceLostCallback(apiDevice, WGPUDeviceLostReason_Unknown,
+                               ToOutputStringView("lost reason"));
     FlushServer();
 }
 
@@ -152,7 +152,7 @@ TEST_F(WireDisconnectTests, DeleteClientDestroysObjects) {
     DeleteClient();
 
     // Expect release on all objects created by the client.
-    EXPECT_CALL(api, OnDeviceSetLoggingCallback(apiDevice, nullptr, nullptr)).Times(1);
+    EXPECT_CALL(api, OnDeviceSetLoggingCallback(apiDevice, _)).Times(1);
     EXPECT_CALL(api, DeviceRelease(apiDevice)).Times(1);
     EXPECT_CALL(api, QueueRelease(apiQueue)).Times(1);
     EXPECT_CALL(api, CommandEncoderRelease(apiCommandEncoder)).Times(1);

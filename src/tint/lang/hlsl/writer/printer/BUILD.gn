@@ -56,6 +56,8 @@ libtint_source_set("printer") {
     "${tint_src_dir}/lang/hlsl/intrinsic",
     "${tint_src_dir}/lang/hlsl/ir",
     "${tint_src_dir}/lang/hlsl/type",
+    "${tint_src_dir}/lang/hlsl/writer/common",
+    "${tint_src_dir}/lang/wgsl/ast",
     "${tint_src_dir}/utils",
     "${tint_src_dir}/utils/containers",
     "${tint_src_dir}/utils/diagnostic",

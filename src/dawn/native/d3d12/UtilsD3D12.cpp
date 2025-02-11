@@ -68,9 +68,8 @@ uint64_t RequiredCopySizeByD3D12(const uint32_t bytesPerRow,
     return requiredCopySizeByD3D12;
 }
 
-// This function is used to access whether we need a workaround for D3D12's wrong algorithm
-// of calculating required buffer size for B2T/T2B copy. The workaround is needed only when
-//   - The corresponding toggle is enabled.
+// This function is used to access whether we need a workaround for D3D12's algorithm of
+// calculating required buffer size for B2T/T2B copy. The workaround is needed only when
 //   - It is a 3D texture (so the format is uncompressed).
 //   - There are multiple depth images to be copied (copySize.depthOrArrayLayers > 1).
 //   - It has rowsPerImage paddings (rowsPerImage > copySize.height).
@@ -79,10 +78,7 @@ bool NeedBufferSizeWorkaroundForBufferTextureCopyOnD3D12(const BufferCopy& buffe
                                                          const TextureCopy& textureCopy,
                                                          const Extent3D& copySize) {
     TextureBase* texture = textureCopy.texture.Get();
-    Device* device = ToBackend(texture->GetDevice());
-
-    if (!device->IsToggleEnabled(Toggle::D3D12SplitBufferTextureCopyForRowsPerImagePaddings) ||
-        texture->GetDimension() != wgpu::TextureDimension::e3D ||
+    if (texture->GetDimension() != wgpu::TextureDimension::e3D ||
         copySize.depthOrArrayLayers <= 1 || bufferCopy.rowsPerImage <= copySize.height) {
         return false;
     }
@@ -234,6 +230,31 @@ void Record2DBufferTextureCopyWithSplit(BufferTextureCopyDirection direction,
     }
 }
 
+void Record2DBufferTextureCopyWithRelaxedOffsetAndPitch(BufferTextureCopyDirection direction,
+                                                        ID3D12GraphicsCommandList* commandList,
+                                                        ID3D12Resource* bufferResource,
+                                                        const uint64_t offset,
+                                                        const uint32_t bytesPerRow,
+                                                        const uint32_t rowsPerImage,
+                                                        const TextureCopy& textureCopy,
+                                                        const TexelBlockInfo& blockInfo,
+                                                        const Extent3D& copySize) {
+    TextureCopySubresource copySubresource =
+        Compute2DTextureCopySubresourceWithRelaxedRowPitchAndOffset(
+            direction, textureCopy.origin, copySize, blockInfo, offset, bytesPerRow);
+
+    uint64_t bytesPerLayer = bytesPerRow * rowsPerImage;
+    uint64_t bufferOffsetForNextLayer = 0;
+    for (uint32_t copyLayer = 0; copyLayer < copySize.depthOrArrayLayers; ++copyLayer) {
+        uint32_t copyTextureLayer = copyLayer + textureCopy.origin.z;
+        RecordBufferTextureCopyFromSplits(direction, commandList, copySubresource, bufferResource,
+                                          bufferOffsetForNextLayer, bytesPerRow,
+                                          textureCopy.texture.Get(), textureCopy.mipLevel,
+                                          copyTextureLayer, textureCopy.aspect);
+        bufferOffsetForNextLayer += bytesPerLayer;
+    }
+}
+
 void RecordBufferTextureCopyWithBufferHandle(BufferTextureCopyDirection direction,
                                              ID3D12GraphicsCommandList* commandList,
                                              ID3D12Resource* bufferResource,
@@ -247,6 +268,9 @@ void RecordBufferTextureCopyWithBufferHandle(BufferTextureCopyDirection directio
     TextureBase* texture = textureCopy.texture.Get();
     const TexelBlockInfo& blockInfo = texture->GetFormat().GetAspectInfo(textureCopy.aspect).block;
 
+    bool useRelaxedRowPitchAndOffset = texture->GetDevice()->IsToggleEnabled(
+        Toggle::D3D12RelaxBufferTextureCopyPitchAndOffsetAlignment);
+
     switch (texture->GetDimension()) {
         case wgpu::TextureDimension::Undefined:
             DAWN_UNREACHABLE();
@@ -255,9 +279,14 @@ void RecordBufferTextureCopyWithBufferHandle(BufferTextureCopyDirection directio
             // 1D textures copy splits are a subset of the single-layer 2D texture copy splits,
             // at least while 1D textures can only have a single array layer.
             DAWN_ASSERT(texture->GetArrayLayers() == 1);
-
-            TextureCopySubresource copyRegions = Compute2DTextureCopySubresource(
-                direction, textureCopy.origin, copySize, blockInfo, offset, bytesPerRow);
+            TextureCopySubresource copyRegions;
+            if (useRelaxedRowPitchAndOffset) {
+                copyRegions = Compute2DTextureCopySubresourceWithRelaxedRowPitchAndOffset(
+                    direction, textureCopy.origin, copySize, blockInfo, offset, bytesPerRow);
+            } else {
+                copyRegions = Compute2DTextureCopySubresource(
+                    direction, textureCopy.origin, copySize, blockInfo, offset, bytesPerRow);
+            }
             RecordBufferTextureCopyFromSplits(direction, commandList, copyRegions, bufferResource,
                                               0, bytesPerRow, texture, textureCopy.mipLevel, 0,
                                               textureCopy.aspect);
@@ -267,17 +296,29 @@ void RecordBufferTextureCopyWithBufferHandle(BufferTextureCopyDirection directio
         // Record the CopyTextureRegion commands for 2D textures, with special handling of array
         // layers since each require their own set of copies.
         case wgpu::TextureDimension::e2D:
-            Record2DBufferTextureCopyWithSplit(direction, commandList, bufferResource, offset,
-                                               bytesPerRow, rowsPerImage, textureCopy, blockInfo,
-                                               copySize);
+            if (useRelaxedRowPitchAndOffset) {
+                Record2DBufferTextureCopyWithRelaxedOffsetAndPitch(
+                    direction, commandList, bufferResource, offset, bytesPerRow, rowsPerImage,
+                    textureCopy, blockInfo, copySize);
+            } else {
+                Record2DBufferTextureCopyWithSplit(direction, commandList, bufferResource, offset,
+                                                   bytesPerRow, rowsPerImage, textureCopy,
+                                                   blockInfo, copySize);
+            }
             break;
 
         case wgpu::TextureDimension::e3D: {
-            // See comments in Compute3DTextureCopySplits() for more details.
-            TextureCopySubresource copyRegions =
-                Compute3DTextureCopySplits(direction, textureCopy.origin, copySize, blockInfo,
-                                           offset, bytesPerRow, rowsPerImage);
-
+            TextureCopySubresource copyRegions;
+            if (useRelaxedRowPitchAndOffset) {
+                copyRegions = Compute3DTextureCopySubresourceWithRelaxedRowPitchAndOffset(
+                    direction, textureCopy.origin, copySize, blockInfo, offset, bytesPerRow,
+                    rowsPerImage);
+            } else {
+                // See comments in Compute3DTextureCopySplits() for more details.
+                copyRegions =
+                    Compute3DTextureCopySplits(direction, textureCopy.origin, copySize, blockInfo,
+                                               offset, bytesPerRow, rowsPerImage);
+            }
             RecordBufferTextureCopyFromSplits(direction, commandList, copyRegions, bufferResource,
                                               0, bytesPerRow, texture, textureCopy.mipLevel, 0,
                                               textureCopy.aspect);
@@ -342,6 +383,50 @@ void SetDebugName(Device* device, ID3D12Object* object, const char* prefix, std:
     objectName += "_";
     objectName += label;
     object->SetPrivateData(WKPDID_D3DDebugObjectName, objectName.length(), objectName.c_str());
+}
+
+D3D12_HEAP_TYPE GetD3D12HeapType(ResourceHeapKind resourceHeapKind) {
+    switch (resourceHeapKind) {
+        case ResourceHeapKind::Readback_OnlyBuffers:
+        case ResourceHeapKind::Readback_AllBuffersAndTextures:
+            return D3D12_HEAP_TYPE_READBACK;
+        case ResourceHeapKind::Default_AllBuffersAndTextures:
+        case ResourceHeapKind::Default_OnlyBuffers:
+        case ResourceHeapKind::Default_OnlyNonRenderableOrDepthTextures:
+        case ResourceHeapKind::Default_OnlyRenderableOrDepthTextures:
+            return D3D12_HEAP_TYPE_DEFAULT;
+        case ResourceHeapKind::Upload_OnlyBuffers:
+        case ResourceHeapKind::Upload_AllBuffersAndTextures:
+            return D3D12_HEAP_TYPE_UPLOAD;
+        case ResourceHeapKind::Custom_WriteBack_OnlyBuffers:
+            return D3D12_HEAP_TYPE_CUSTOM;
+        case EnumCount:
+            DAWN_UNREACHABLE();
+    }
+}
+
+D3D12_HEAP_PROPERTIES GetD3D12HeapProperties(ResourceHeapKind resourceHeapKind) {
+    D3D12_HEAP_PROPERTIES heapProperties = {};
+
+    heapProperties.Type = GetD3D12HeapType(resourceHeapKind);
+
+    // Now we only use `Custom_WriteBack_OnlyBuffers` resource heap on cache coherent UMA
+    // architecture, where applications can more strongly entertain abandoning the attribution of
+    // heaps and using the custom heap equivalent of upload heaps everywhere, and the upload heaps
+    // are actually write-back on CacheCoherentUMA. See below link for more details:
+    // https://learn.microsoft.com/en-us/windows/win32/api/d3d12/ns-d3d12-d3d12_feature_data_architecture
+    if (resourceHeapKind == Custom_WriteBack_OnlyBuffers) {
+        heapProperties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_WRITE_BACK;
+        heapProperties.MemoryPoolPreference = D3D12_MEMORY_POOL_L0;
+    } else {
+        heapProperties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+        heapProperties.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+    }
+
+    heapProperties.CreationNodeMask = 0;
+    heapProperties.VisibleNodeMask = 0;
+
+    return heapProperties;
 }
 
 }  // namespace dawn::native::d3d12

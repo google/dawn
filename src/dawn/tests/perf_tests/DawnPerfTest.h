@@ -167,8 +167,8 @@ class DawnPerfTestWithParams : public DawnTestWithParams<Params>, public DawnPer
         ResolveTimestamps(encoder);
     }
 
-    wgpu::ComputePassTimestampWrites GetComputePassTimestampWrites() const {
-        wgpu::ComputePassTimestampWrites timestampWrites;
+    wgpu::PassTimestampWrites GetPassTimestampWrites() const {
+        wgpu::PassTimestampWrites timestampWrites;
         timestampWrites.querySet = mTimestampQuerySet;
         timestampWrites.beginningOfPassWriteIndex = 0;
         timestampWrites.endOfPassWriteIndex = 1;

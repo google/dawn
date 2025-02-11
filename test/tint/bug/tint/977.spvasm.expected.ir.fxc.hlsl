@@ -5,11 +5,6 @@ struct main_inputs {
 
 static uint3 gl_GlobalInvocationID = (0u).xxx;
 RWByteAddressBuffer resultMatrix : register(u2);
-ByteAddressBuffer firstMatrix : register(t0);
-ByteAddressBuffer secondMatrix : register(t1);
-cbuffer cbuffer_x_46 : register(b3) {
-  uint4 x_46[1];
-};
 float binaryOperation_f1_f1_(inout float a, inout float b) {
   float x_26 = 0.0f;
   if ((b == 0.0f)) {

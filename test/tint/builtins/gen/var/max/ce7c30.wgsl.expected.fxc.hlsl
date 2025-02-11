@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 RWByteAddressBuffer prevent_dce : register(u0);
 
 int max_ce7c30() {
@@ -11,11 +14,31 @@ void fragment_main() {
   prevent_dce.Store(0u, asuint(max_ce7c30()));
   return;
 }
+//
+// compute_main
+//
+RWByteAddressBuffer prevent_dce : register(u0);
+
+int max_ce7c30() {
+  int arg_0 = 1;
+  int arg_1 = 1;
+  int res = max(arg_0, arg_1);
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store(0u, asuint(max_ce7c30()));
   return;
+}
+//
+// vertex_main
+//
+int max_ce7c30() {
+  int arg_0 = 1;
+  int arg_1 = 1;
+  int res = max(arg_0, arg_1);
+  return res;
 }
 
 struct VertexOutput {

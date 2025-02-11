@@ -68,7 +68,7 @@ struct S {
 };
 
 layout(binding = 0, std430)
-buffer tint_symbol_block_1_ssbo {
+buffer f_output_block_ssbo {
   S inner;
 } v_1;
 void tint_store_and_preserve_padding(S value_param) {

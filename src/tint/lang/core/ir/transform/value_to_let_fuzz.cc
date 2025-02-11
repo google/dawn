@@ -44,7 +44,9 @@ bool CanRun(Module& module) {
     return true;
 }
 
-Result<SuccessType> ValueToLetFuzzer(Module& module, ValueToLetConfig config) {
+Result<SuccessType> ValueToLetFuzzer(Module& module,
+                                     const fuzz::ir::Context&,
+                                     ValueToLetConfig config) {
     if (!CanRun(module)) {
         return Failure{"Cannot run module"};
     }

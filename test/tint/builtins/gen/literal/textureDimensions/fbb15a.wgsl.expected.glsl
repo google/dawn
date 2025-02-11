@@ -1,19 +1,25 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer prevent_dce_block_1_ssbo {
+buffer f_prevent_dce_block_ssbo {
   uvec2 inner;
 } v;
-layout(binding = 0, rgba8) uniform highp writeonly image2D arg_0;
+layout(binding = 0, rgba8) uniform highp writeonly image2D f_arg_0;
 uvec2 textureDimensions_fbb15a() {
-  uvec2 res = uvec2(imageSize(arg_0));
+  uvec2 res = uvec2(imageSize(f_arg_0));
   return res;
 }
 void main() {
   v.inner = textureDimensions_fbb15a();
 }
+//
+// compute_main
+//
 #version 310 es
 
 layout(binding = 0, std430)

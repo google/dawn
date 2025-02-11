@@ -1,3 +1,6 @@
+//
+// vertex_main
+//
 Texture2D<int4> arg_0 : register(t0, space1);
 
 int4 textureLoad2d(Texture2D<int4> tint_symbol, int2 coords, int level) {
@@ -23,10 +26,34 @@ tint_symbol_1 vertex_main() {
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
+//
+// fragment_main
+//
+Texture2D<int4> arg_0 : register(t0, space1);
+
+int4 textureLoad2d(Texture2D<int4> tint_symbol, int2 coords, int level) {
+  return tint_symbol.Load(int3(coords, level));
+}
+
+void doTextureLoad() {
+  int4 res = textureLoad2d(arg_0, (0).xx, 0);
+}
 
 void fragment_main() {
   doTextureLoad();
   return;
+}
+//
+// compute_main
+//
+Texture2D<int4> arg_0 : register(t0, space1);
+
+int4 textureLoad2d(Texture2D<int4> tint_symbol, int2 coords, int level) {
+  return tint_symbol.Load(int3(coords, level));
+}
+
+void doTextureLoad() {
+  int4 res = textureLoad2d(arg_0, (0).xx, 0);
 }
 
 [numthreads(1, 1, 1)]

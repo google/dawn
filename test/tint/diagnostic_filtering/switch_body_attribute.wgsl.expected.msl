@@ -11,27 +11,26 @@
               ^
 
 #include <metal_stdlib>
-
 using namespace metal;
-int tint_ftoi(float v) {
-  return select(2147483647, select(int(v), (-2147483647 - 1), (v < -2147483648.0f)), (v <= 2147483520.0f));
-}
 
-struct tint_symbol_2 {
+struct main_inputs {
   float x [[user(locn0)]];
 };
 
-void tint_symbol_inner(float x) {
-  switch(tint_ftoi(x)) {
-    default: {
-      float const tint_phony = dfdx(1.0f);
+int tint_f32_to_i32(float value) {
+  return select(2147483647, select((-2147483647 - 1), int(value), (value >= -2147483648.0f)), (value <= 2147483520.0f));
+}
+
+void main_inner(float x) {
+  switch(tint_f32_to_i32(x)) {
+    default:
+    {
+      dfdx(1.0f);
       break;
     }
   }
 }
 
-fragment void tint_symbol(tint_symbol_2 tint_symbol_1 [[stage_in]]) {
-  tint_symbol_inner(tint_symbol_1.x);
-  return;
+fragment void v(main_inputs inputs [[stage_in]]) {
+  main_inner(inputs.x);
 }
-

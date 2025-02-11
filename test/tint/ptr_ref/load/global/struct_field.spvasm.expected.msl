@@ -1,23 +1,21 @@
 #include <metal_stdlib>
-
 using namespace metal;
+
 struct S {
   int i;
 };
 
-struct tint_private_vars_struct {
-  S V;
+struct tint_module_vars_struct {
+  thread S* V;
 };
 
-void main_1(thread tint_private_vars_struct* const tint_private_vars) {
+void main_1(tint_module_vars_struct tint_module_vars) {
   int i = 0;
-  i = (*(tint_private_vars)).V.i;
-  return;
+  i = (*tint_module_vars.V).i;
 }
 
-kernel void tint_symbol() {
-  thread tint_private_vars_struct tint_private_vars = {};
-  main_1(&(tint_private_vars));
-  return;
+kernel void v() {
+  thread S V = {};
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.V=(&V)};
+  main_1(tint_module_vars);
 }
-

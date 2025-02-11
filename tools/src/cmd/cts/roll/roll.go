@@ -77,21 +77,21 @@ const (
 )
 
 type rollerFlags struct {
-	gitPath               string
-	npmPath               string
-	nodePath              string
-	auth                  authcli.Flags
-	cacheDir              string
-	ctsGitURL             string
-	ctsRevision           string
-	force                 bool // Create a new roll, even if CTS is up to date
-	rebuild               bool // Rebuild the expectations file from scratch
-	preserve              bool // If false, abandon past roll changes
-	sendToGardener        bool // If true, automatically send to the gardener for review
-	verbose               bool
-	useSimplifiedCodepath bool
-	parentSwarmingRunID   string
-	maxAttempts           int
+	gitPath              string
+	npmPath              string
+	nodePath             string
+	auth                 authcli.Flags
+	cacheDir             string
+	ctsGitURL            string
+	ctsRevision          string
+	force                bool // Create a new roll, even if CTS is up to date
+	rebuild              bool // Rebuild the expectations file from scratch
+	preserve             bool // If false, abandon past roll changes
+	sendToGardener       bool // If true, automatically send to the gardener for review
+	verbose              bool
+	generateExplicitTags bool // If true, the most explicit tags will be used instead of several broad ones
+	parentSwarmingRunID  string
+	maxAttempts          int
 }
 
 type cmd struct {
@@ -109,7 +109,7 @@ func (cmd) Desc() string {
 func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, error) {
 	gitPath, _ := exec.LookPath("git")
 	npmPath, _ := exec.LookPath("npm")
-	c.flags.auth.Register(flag.CommandLine, commonAuth.DefaultAuthOptions(sheets.SpreadsheetsScope))
+	c.flags.auth.Register(flag.CommandLine, commonAuth.DefaultAuthOptions(cfg.OsWrapper, sheets.SpreadsheetsScope))
 	flag.StringVar(&c.flags.gitPath, "git", gitPath, "path to git")
 	flag.StringVar(&c.flags.npmPath, "npm", npmPath, "path to npm")
 	flag.StringVar(&c.flags.nodePath, "node", fileutils.NodePath(), "path to node")
@@ -121,8 +121,10 @@ func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, e
 	flag.BoolVar(&c.flags.preserve, "preserve", false, "do not abandon existing rolls")
 	flag.BoolVar(&c.flags.sendToGardener, "send-to-gardener", false, "send the CL to the WebGPU gardener for review")
 	flag.BoolVar(&c.flags.verbose, "verbose", false, "emit additional logging")
-	flag.BoolVar(&c.flags.useSimplifiedCodepath, "use-simplified-codepath", false, "use the simplified codepath that only looks at unexpected failures")
-	flag.StringVar(&c.flags.parentSwarmingRunID, "parent-swarming-run-id", "", "parent swarming run id. All triggered tasks will be children of this task and will be canceled if the parent is canceled.")
+	flag.BoolVar(&c.flags.generateExplicitTags, "generate-explicit-tags", false,
+		"Use the most explicit tags for expectations instead of several broad ones")
+	flag.StringVar(&c.flags.parentSwarmingRunID, "parent-swarming-run-id", "",
+		"parent swarming run id. All triggered tasks will be children of this task and will be canceled if the parent is canceled.")
 	flag.IntVar(&c.flags.maxAttempts, "max-attempts", 3, "number of update attempts before giving up")
 	return nil, nil
 }
@@ -147,15 +149,8 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 		}
 	}
 
-	// Create a temporary directory for local checkouts
-	tmpDir, err := os.MkdirTemp("", "dawn-cts-roll")
-	if err != nil {
-		return err
-	}
-	defer os.RemoveAll(tmpDir)
-	ctsDir := filepath.Join(tmpDir, "cts")
-
-	// Create the various service clients
+	// Create the various service clients and ensure required permissions are
+	// available.
 	git, err := git.New(c.flags.gitPath)
 	if err != nil {
 		return fmt.Errorf("failed to obtain authentication options: %w", err)
@@ -176,6 +171,26 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 	if err != nil {
 		return err
 	}
+
+	// TODO(crbug.com/349798588): Re-enable this check once we figure out why the
+	// roller is reporting that it cannot upload to Gerrit.
+	/* credCheckInput := common.CredCheckInputs{
+		GerritConfig:  gerrit,
+		GitilesConfig: dawn,
+		Querier:       client,
+	}
+	err = common.CheckAllRequiredCredentials(ctx, credCheckInput)
+	if err != nil {
+		return err
+	} */
+
+	// Create a temporary directory for local checkouts
+	tmpDir, err := os.MkdirTemp("", "dawn-cts-roll")
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(tmpDir)
+	ctsDir := filepath.Join(tmpDir, "cts")
 
 	// Construct the roller, and roll
 	r := roller{
@@ -313,6 +328,11 @@ func (r *roller) roll(ctx context.Context) error {
 		return list
 	}()
 
+	// Remove any expectations that are for tests that no longer exist.
+	for _, exInfo := range exInfos {
+		(&exInfo.expectations).RemoveExpectationsForUnknownTests(&testlist)
+	}
+
 	deletedFiles := []string{}
 	if currentWebTestFiles, err := r.gitiles.dawn.ListFiles(ctx, dawnHash, webTestsPath); err != nil {
 		// If there's an error, allow NotFound. It means the directory did not exist, so no files
@@ -386,7 +406,7 @@ func (r *roller) roll(ctx context.Context) error {
 		if psResultsByExecutionMode != nil {
 			log.Println("exporting results...")
 			if err := common.Export(ctx, r.auth, r.cfg.Sheets.ID, r.ctsDir, r.flags.nodePath, r.flags.npmPath, psResultsByExecutionMode); err != nil {
-				log.Println("failed to update results spreadsheet: ", err)
+				log.Println("failed to update results spreadsheet (expected if running locally): ", err)
 			}
 		}
 	}()
@@ -414,11 +434,7 @@ func (r *roller) roll(ctx context.Context) error {
 
 		// Gather the build results
 		log.Println("gathering results...")
-		if r.flags.useSimplifiedCodepath {
-			psResultsByExecutionMode, err = common.CacheUnsuppressedFailingResults(ctx, r.cfg, ps, r.flags.cacheDir, r.client, builds)
-		} else {
-			psResultsByExecutionMode, err = common.CacheResults(ctx, r.cfg, ps, r.flags.cacheDir, r.client, builds)
-		}
+		psResultsByExecutionMode, err = common.CacheUnsuppressedFailingResults(ctx, r.cfg, ps, r.flags.cacheDir, r.client, builds)
 		if err != nil {
 			return err
 		}
@@ -431,26 +447,15 @@ func (r *roller) roll(ctx context.Context) error {
 		// Rebuild the expectations with the accumulated results
 		log.Println("building new expectations...")
 		for _, exInfo := range exInfos {
-			if r.flags.useSimplifiedCodepath {
-				// TODO(crbug.com/372730248): Modify exInfo.expectations in place once
-				// the old code path is removed.
-				exInfo.newExpectations = exInfo.expectations.Clone()
-				err := exInfo.newExpectations.AddExpectationsForFailingResults(psResultsByExecutionMode[exInfo.executionMode], testlist, r.flags.verbose)
-				if err != nil {
-					return err
-				}
-				exInfo.expectations = exInfo.newExpectations
-			} else {
-				// Merge the new results into the accumulated results
-				log.Printf("merging results for %s ...\n", exInfo.executionMode)
-				exInfo.results = result.Merge(exInfo.results, psResultsByExecutionMode[exInfo.executionMode])
-
-				exInfo.newExpectations = exInfo.expectations.Clone()
-				_, err := exInfo.newExpectations.Update(exInfo.results, testlist, r.flags.verbose)
-				if err != nil {
-					return err
-				}
+			// TODO(crbug.com/372730248): Modify exInfo.expectations in place once
+			// the old code path is removed.
+			exInfo.newExpectations = exInfo.expectations.Clone()
+			err := exInfo.newExpectations.AddExpectationsForFailingResults(psResultsByExecutionMode[exInfo.executionMode],
+				r.flags.generateExplicitTags, r.flags.verbose)
+			if err != nil {
+				return err
 			}
+			exInfo.expectations = exInfo.newExpectations
 		}
 
 		// Otherwise, push the updated expectations, and try again

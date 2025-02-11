@@ -35,6 +35,7 @@
 #include "dawn/common/ContentLessObjectCacheable.h"
 #include "dawn/native/AttachmentState.h"
 #include "dawn/native/Forward.h"
+#include "dawn/native/ImmediateConstantsLayout.h"
 #include "dawn/native/IntegerTypes.h"
 #include "dawn/native/Pipeline.h"
 

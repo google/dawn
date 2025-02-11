@@ -73,13 +73,6 @@ class FirstIndexOffsetTests : public DawnTest {
     void TestBothIndices(DrawMode mode, uint32_t firstVertex, uint32_t firstInstance);
 
   protected:
-    void SetUp() override {
-        DawnTest::SetUp();
-        // TODO(crbug.com/dawn/1292): Some Intel OpenGL drivers don't seem to like
-        // the offsets that Tint/GLSL produces.
-        DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsLinux());
-    }
-
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
         if (!SupportsFeatures({wgpu::FeatureName::IndirectFirstInstance})) {
             return {};

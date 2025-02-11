@@ -67,7 +67,7 @@ class Device final : public d3d::Device {
                                            uint64_t destinationOffset,
                                            uint64_t size) override;
     MaybeError CopyFromStagingToTextureImpl(const BufferBase* source,
-                                            const TextureDataLayout& src,
+                                            const TexelCopyBufferLayout& src,
                                             const TextureCopy& dst,
                                             const Extent3D& copySizePixels) override;
     uint32_t GetOptimalBytesPerRowAlignment() const override;

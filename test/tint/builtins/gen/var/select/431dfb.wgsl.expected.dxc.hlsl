@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void select_431dfb() {
   bool2 arg_2 = (true).xx;
   int2 res = (arg_2 ? (1).xx : (1).xx);
@@ -7,11 +10,25 @@ void fragment_main() {
   select_431dfb();
   return;
 }
+//
+// compute_main
+//
+void select_431dfb() {
+  bool2 arg_2 = (true).xx;
+  int2 res = (arg_2 ? (1).xx : (1).xx);
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   select_431dfb();
   return;
+}
+//
+// vertex_main
+//
+void select_431dfb() {
+  bool2 arg_2 = (true).xx;
+  int2 res = (arg_2 ? (1).xx : (1).xx);
 }
 
 struct VertexOutput {

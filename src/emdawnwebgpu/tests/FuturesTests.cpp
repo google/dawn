@@ -101,7 +101,7 @@ TEST_F(AdapterLevelTests, RequestDevice) {
 
 TEST_F(AdapterLevelTests, RequestDeviceThenDestroy) {
     wgpu::Device device = nullptr;
-    wgpu::DeviceLostReason reason = wgpu::DeviceLostReason::Unknown;
+    wgpu::DeviceLostReason reason;
 
     wgpu::DeviceDescriptor descriptor = {};
     descriptor.SetDeviceLostCallback(
@@ -119,7 +119,7 @@ TEST_F(AdapterLevelTests, RequestDeviceThenDestroy) {
 }
 
 TEST_F(AdapterLevelTests, RequestDeviceThenDrop) {
-    wgpu::DeviceLostReason reason = wgpu::DeviceLostReason::Unknown;
+    wgpu::DeviceLostReason reason;
 
     wgpu::DeviceDescriptor descriptor = {};
     descriptor.SetDeviceLostCallback(
@@ -231,7 +231,7 @@ TEST_F(DeviceLevelTests, BufferMapAndWorkDone) {
     }
 
     // Map the writable buffer and write to it.
-    wgpu::MapAsyncStatus writeStatus = wgpu::MapAsyncStatus::Unknown;
+    wgpu::MapAsyncStatus writeStatus;
     EXPECT_EQ(instance.WaitAny(
                   src.MapAsync(wgpu::MapMode::Write, 0, kSize, wgpu::CallbackMode::AllowSpontaneous,
                                [&writeStatus](wgpu::MapAsyncStatus status, wgpu::StringView) {
@@ -265,7 +265,7 @@ TEST_F(DeviceLevelTests, BufferMapAndWorkDone) {
     ASSERT_EQ(copyStatus, wgpu::QueueWorkDoneStatus::Success);
 
     // Map the readable buffer and verify the contents.
-    wgpu::MapAsyncStatus readStatus = wgpu::MapAsyncStatus::Unknown;
+    wgpu::MapAsyncStatus readStatus;
     EXPECT_EQ(instance.WaitAny(
                   dst.MapAsync(wgpu::MapMode::Read, 0, kSize, wgpu::CallbackMode::AllowSpontaneous,
                                [&readStatus](wgpu::MapAsyncStatus status, wgpu::StringView) {
@@ -286,7 +286,7 @@ TEST_F(DeviceLevelTests, CreateComputePipelineAsync) {
         @compute @workgroup_size(1) fn main() {}
     )");
 
-    wgpu::CreatePipelineAsyncStatus status = wgpu::CreatePipelineAsyncStatus::Unknown;
+    wgpu::CreatePipelineAsyncStatus status;
     wgpu::ComputePipeline pipeline = nullptr;
     EXPECT_EQ(instance.WaitAny(device.CreateComputePipelineAsync(
                                    &desc, wgpu::CallbackMode::AllowSpontaneous,
@@ -321,7 +321,7 @@ TEST_F(DeviceLevelTests, CreateRenderPipelineAsync) {
     frag.targets = &target;
     desc.fragment = &frag;
 
-    wgpu::CreatePipelineAsyncStatus status = wgpu::CreatePipelineAsyncStatus::Unknown;
+    wgpu::CreatePipelineAsyncStatus status;
     wgpu::RenderPipeline pipeline = nullptr;
     EXPECT_EQ(instance.WaitAny(device.CreateRenderPipelineAsync(
                                    &desc, wgpu::CallbackMode::AllowSpontaneous,

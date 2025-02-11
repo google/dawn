@@ -59,9 +59,9 @@ using ::testing::StrictMock;
 using ::testing::Test;
 
 using MockComputePipelineAsyncCallback =
-    MockCppCallback<wgpu::CreateComputePipelineAsyncCallback2<void>*>;
+    MockCppCallback<wgpu::CreateComputePipelineAsyncCallback<void>*>;
 using MockRenderPipelineAsyncCallback =
-    MockCppCallback<wgpu::CreateRenderPipelineAsyncCallback2<void>*>;
+    MockCppCallback<wgpu::CreateRenderPipelineAsyncCallback<void>*>;
 
 static constexpr char kOomErrorMessage[] = "Out of memory error";
 static constexpr char kInternalErrorMessage[] = "Internal error";
@@ -131,9 +131,9 @@ TEST_F(AllowedErrorTests, QueueWriteTexture) {
         .Times(1);
 
     constexpr uint8_t data[] = {1, 2, 4, 8};
-    wgpu::ImageCopyTexture dest = {};
+    wgpu::TexelCopyTextureInfo dest = {};
     dest.texture = texture;
-    wgpu::TextureDataLayout layout = {};
+    wgpu::TexelCopyBufferLayout layout = {};
     wgpu::Extent3D size = {1, 1};
     device.GetQueue().WriteTexture(&dest, &data, 4, &layout, &size);
 }
@@ -147,9 +147,9 @@ TEST_F(AllowedErrorTests, QueueCopyTextureForBrowserOomBuffer) {
                  wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TextureBinding;
     desc.format = wgpu::TextureFormat::RGBA8Unorm;
 
-    wgpu::ImageCopyTexture src = {};
+    wgpu::TexelCopyTextureInfo src = {};
     src.texture = device.CreateTexture(&desc);
-    wgpu::ImageCopyTexture dst = {};
+    wgpu::TexelCopyTextureInfo dst = {};
     dst.texture = device.CreateTexture(&desc);
     wgpu::Extent3D size = {4, 4};
     wgpu::CopyTextureForBrowserOptions options = {};
@@ -191,7 +191,7 @@ TEST_F(AllowedErrorTests, QueueCopyExternalTextureForBrowserOomBuffer) {
     wgpu::ImageCopyExternalTexture src = {};
     src.externalTexture = device.CreateExternalTexture(&externalTextureDesc);
     src.naturalSize = {4, 4};
-    wgpu::ImageCopyTexture dst = {};
+    wgpu::TexelCopyTextureInfo dst = {};
     dst.texture = device.CreateTexture(&textureDesc);
     wgpu::Extent3D size = {4, 4};
     wgpu::CopyTextureForBrowserOptions options = {};

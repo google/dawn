@@ -52,12 +52,6 @@ class RequestAdapterEvent : public TrackedEvent {
     RequestAdapterEvent(const WGPURequestAdapterCallbackInfo& callbackInfo, Ref<Adapter> adapter)
         : TrackedEvent(callbackInfo.mode),
           mCallback(callbackInfo.callback),
-          mUserdata1(callbackInfo.userdata),
-          mAdapter(std::move(adapter)) {}
-
-    RequestAdapterEvent(const WGPURequestAdapterCallbackInfo2& callbackInfo, Ref<Adapter> adapter)
-        : TrackedEvent(callbackInfo.mode),
-          mCallback2(callbackInfo.callback),
           mUserdata1(callbackInfo.userdata1),
           mUserdata2(callbackInfo.userdata2),
           mAdapter(std::move(adapter)) {}
@@ -84,35 +78,22 @@ class RequestAdapterEvent : public TrackedEvent {
 
   private:
     void CompleteImpl(FutureID futureID, EventCompletionType completionType) override {
-        if (mCallback == nullptr && mCallback2 == nullptr) {
-            // If there's no callback, just clean up the resources.
-            mUserdata1.ExtractAsDangling();
-            mUserdata2.ExtractAsDangling();
-            return;
-        }
-
         if (completionType == EventCompletionType::Shutdown) {
             mStatus = WGPURequestAdapterStatus_InstanceDropped;
             mMessage = "A valid external Instance reference no longer exists.";
         }
 
+        void* userdata1 = mUserdata1.ExtractAsDangling();
+        void* userdata2 = mUserdata2.ExtractAsDangling();
         if (mCallback) {
             mCallback(mStatus,
                       mStatus == WGPURequestAdapterStatus_Success ? ReturnToAPI(std::move(mAdapter))
                                                                   : nullptr,
-                      ToOutputStringView(mMessage), mUserdata1.ExtractAsDangling());
-        } else {
-            mCallback2(mStatus,
-                       mStatus == WGPURequestAdapterStatus_Success
-                           ? ReturnToAPI(std::move(mAdapter))
-                           : nullptr,
-                       ToOutputStringView(mMessage), mUserdata1.ExtractAsDangling(),
-                       mUserdata2.ExtractAsDangling());
+                      ToOutputStringView(mMessage), userdata1, userdata2);
         }
     }
 
     WGPURequestAdapterCallback mCallback = nullptr;
-    WGPURequestAdapterCallback2 mCallback2 = nullptr;
     raw_ptr<void> mUserdata1;
     raw_ptr<void> mUserdata2;
 
@@ -128,11 +109,11 @@ class RequestAdapterEvent : public TrackedEvent {
     Ref<Adapter> mAdapter;
 };
 
-WGPUWGSLFeatureName ToWGPUFeature(tint::wgsl::LanguageFeature f) {
+WGPUWGSLLanguageFeatureName ToWGPUWGSLLanguageFeature(tint::wgsl::LanguageFeature f) {
     switch (f) {
 #define CASE(WgslName, WgpuName)                \
     case tint::wgsl::LanguageFeature::WgslName: \
-        return WGPUWGSLFeatureName_##WgpuName;
+        return WGPUWGSLLanguageFeatureName_##WgpuName;
         DAWN_FOREACH_WGSL_FEATURE(CASE)
 #undef CASE
         case tint::wgsl::LanguageFeature::kUndefined:
@@ -163,11 +144,11 @@ WireResult Instance::Initialize(const WGPUInstanceDescriptor* descriptor) {
         return WireResult::Success;
     }
 
-    if (descriptor->features.timedWaitAnyEnable) {
+    if (descriptor->capabilities.timedWaitAnyEnable) {
         dawn::ErrorLog() << "Wire client instance doesn't support timedWaitAnyEnable = true";
         return WireResult::FatalError;
     }
-    if (descriptor->features.timedWaitAnyMaxCount > 0) {
+    if (descriptor->capabilities.timedWaitAnyMaxCount > 0) {
         dawn::ErrorLog() << "Wire client instance doesn't support non-zero timedWaitAnyMaxCount";
         return WireResult::FatalError;
     }
@@ -196,18 +177,8 @@ WireResult Instance::Initialize(const WGPUInstanceDescriptor* descriptor) {
     return WireResult::Success;
 }
 
-void Instance::RequestAdapter(const WGPURequestAdapterOptions* options,
-                              WGPURequestAdapterCallback callback,
-                              void* userdata) {
-    WGPURequestAdapterCallbackInfo callbackInfo = {};
-    callbackInfo.mode = WGPUCallbackMode_AllowSpontaneous;
-    callbackInfo.callback = callback;
-    callbackInfo.userdata = userdata;
-    RequestAdapterF(options, callbackInfo);
-}
-
-WGPUFuture Instance::RequestAdapterF(const WGPURequestAdapterOptions* options,
-                                     const WGPURequestAdapterCallbackInfo& callbackInfo) {
+WGPUFuture Instance::RequestAdapter(const WGPURequestAdapterOptions* options,
+                                    const WGPURequestAdapterCallbackInfo& callbackInfo) {
     Client* client = GetClient();
     Ref<Adapter> adapter = client->Make<Adapter>(GetEventManagerHandle());
     auto [futureIDInternal, tracked] =
@@ -222,29 +193,6 @@ WGPUFuture Instance::RequestAdapterF(const WGPURequestAdapterOptions* options,
     cmd.future = {futureIDInternal};
     cmd.adapterObjectHandle = adapter->GetWireHandle();
     cmd.options = options;
-    cmd.userdataCount = 1;
-
-    client->SerializeCommand(cmd);
-    return {futureIDInternal};
-}
-
-WGPUFuture Instance::RequestAdapter2(const WGPURequestAdapterOptions* options,
-                                     const WGPURequestAdapterCallbackInfo2& callbackInfo) {
-    Client* client = GetClient();
-    Ref<Adapter> adapter = client->Make<Adapter>(GetEventManagerHandle());
-    auto [futureIDInternal, tracked] =
-        GetEventManager().TrackEvent(std::make_unique<RequestAdapterEvent>(callbackInfo, adapter));
-    if (!tracked) {
-        return {futureIDInternal};
-    }
-
-    InstanceRequestAdapterCmd cmd;
-    cmd.instanceId = GetWireId();
-    cmd.eventManagerHandle = GetEventManagerHandle();
-    cmd.future = {futureIDInternal};
-    cmd.adapterObjectHandle = adapter->GetWireHandle();
-    cmd.options = options;
-    cmd.userdataCount = 2;
 
     client->SerializeCommand(cmd);
     return {futureIDInternal};
@@ -315,7 +263,7 @@ void Instance::GatherWGSLFeatures(const WGPUDawnWireWGSLControl* wgslControl,
         }
 
         if (enable && wgslFeature != tint::wgsl::LanguageFeature::kUndefined) {
-            mWGSLFeatures.emplace(ToWGPUFeature(wgslFeature));
+            mWGSLFeatures.emplace(ToWGPUWGSLLanguageFeature(wgslFeature));
         }
     }
 
@@ -328,23 +276,31 @@ void Instance::GatherWGSLFeatures(const WGPUDawnWireWGSLControl* wgslControl,
                 // Ignore unknown features in the blocklist.
                 continue;
             }
-            mWGSLFeatures.erase(ToWGPUFeature(tintFeature));
+            mWGSLFeatures.erase(ToWGPUWGSLLanguageFeature(tintFeature));
         }
     }
 }
 
-bool Instance::HasWGSLLanguageFeature(WGPUWGSLFeatureName feature) const {
+bool Instance::HasWGSLLanguageFeature(WGPUWGSLLanguageFeatureName feature) const {
     return mWGSLFeatures.contains(feature);
 }
 
-size_t Instance::EnumerateWGSLLanguageFeatures(WGPUWGSLFeatureName* features) const {
-    if (features != nullptr) {
-        for (WGPUWGSLFeatureName f : mWGSLFeatures) {
-            *features = f;
-            ++features;
-        }
+WGPUStatus Instance::GetWGSLLanguageFeatures(WGPUSupportedWGSLLanguageFeatures* features) const {
+    if (features == nullptr) {
+        return WGPUStatus_Error;
     }
-    return mWGSLFeatures.size();
+
+    size_t featureCount = mWGSLFeatures.size();
+    WGPUWGSLLanguageFeatureName* wgslFeatures = new WGPUWGSLLanguageFeatureName[featureCount];
+    uint32_t index = 0;
+    for (WGPUWGSLLanguageFeatureName feature : mWGSLFeatures) {
+        wgslFeatures[index++] = feature;
+    }
+    DAWN_ASSERT(index == featureCount);
+
+    features->featureCount = featureCount;
+    features->features = wgslFeatures;
+    return WGPUStatus_Success;
 }
 
 WGPUSurface Instance::CreateSurface(const WGPUSurfaceDescriptor* desc) const {
@@ -357,13 +313,14 @@ WGPUSurface Instance::CreateSurface(const WGPUSurfaceDescriptor* desc) const {
 
 // Free-standing API functions
 
-DAWN_WIRE_EXPORT WGPUStatus wgpuDawnWireClientGetInstanceFeatures(WGPUInstanceFeatures* features) {
-    if (features->nextInChain != nullptr) {
+DAWN_WIRE_EXPORT WGPUStatus
+wgpuDawnWireClientGetInstanceCapabilities(WGPUInstanceCapabilities* capabilities) {
+    if (capabilities->nextInChain != nullptr) {
         return WGPUStatus_Error;
     }
 
-    features->timedWaitAnyEnable = false;
-    features->timedWaitAnyMaxCount = dawn::kTimedWaitAnyMaxCountDefault;
+    capabilities->timedWaitAnyEnable = false;
+    capabilities->timedWaitAnyMaxCount = dawn::kTimedWaitAnyMaxCountDefault;
     return WGPUStatus_Success;
 }
 
@@ -371,4 +328,9 @@ DAWN_WIRE_EXPORT WGPUInstance
 wgpuDawnWireClientCreateInstance(WGPUInstanceDescriptor const* descriptor) {
     DAWN_UNREACHABLE();
     return nullptr;
+}
+
+DAWN_WIRE_EXPORT void wgpuDawnWireClientSupportedWGSLLanguageFeaturesFreeMembers(
+    WGPUSupportedWGSLLanguageFeatures supportedFeatures) {
+    delete[] supportedFeatures.features;
 }

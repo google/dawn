@@ -46,6 +46,7 @@
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/sampler.h"
 #include "src/tint/lang/core/type/storage_texture.h"
+#include "src/tint/lang/core/type/subgroup_matrix.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
 #include "src/tint/lang/wgsl/ast/alias.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
@@ -211,8 +212,9 @@ diag::Diagnostic* Validator::MaybeAddDiagnostic(wgsl::DiagnosticRule rule,
 
 // https://gpuweb.github.io/gpuweb/wgsl/#plain-types-section
 bool Validator::IsPlain(const core::type::Type* type) const {
-    return type->IsAnyOf<core::type::Scalar, core::type::Atomic, core::type::Vector,
-                         core::type::Matrix, sem::Array, core::type::Struct>();
+    return type
+        ->IsAnyOf<core::type::Scalar, core::type::Atomic, core::type::Vector, core::type::Matrix,
+                  sem::Array, core::type::Struct, core::type::SubgroupMatrix>();
 }
 
 // https://gpuweb.github.io/gpuweb/wgsl/#fixed-footprint-types
@@ -495,6 +497,21 @@ bool Validator::InputAttachmentIndexAttribute(const ast::InputAttachmentIndexAtt
         AddNote(attr->source) << style::Attribute("@input_attachment_index")
                               << " must only be applied to declarations of "
                               << style::Type("input_attachment") << " type";
+        return false;
+    }
+
+    return true;
+}
+
+bool Validator::SubgroupMatrix(const core::type::SubgroupMatrix* t, const Source& source) const {
+    if (!enabled_extensions_.Contains(wgsl::Extension::kChromiumExperimentalSubgroupMatrix)) {
+        AddError(source) << "use of " << style::Type("subgroup_matrix_*")
+                         << " requires enabling extension "
+                         << style::Code("chromium_experimental_subgroup_matrix");
+        return false;
+    }
+    if (!t->Type()->IsAnyOf<core::type::F32, core::type::F16, core::type::I32, core::type::U32>()) {
+        AddError(source) << "subgroup_matrix element type must be f32, f16, i32, or u32";
         return false;
     }
 
@@ -1238,10 +1255,7 @@ bool Validator::Function(const sem::Function* func, ast::PipelineStage stage) co
         }
 
         if (decl->body) {
-            sem::Behaviors behaviors{sem::Behavior::kNext};
-            if (auto* last = decl->body->Last()) {
-                behaviors = sem_.Get(last)->Behaviors();
-            }
+            auto behaviors = sem_.Get(decl->body)->Behaviors();
             if (behaviors.Contains(sem::Behavior::kNext)) {
                 auto end_source = decl->body->source.End();
                 end_source.range.begin.column--;
@@ -2103,14 +2117,11 @@ bool Validator::RequiredFeaturesForBuiltinFn(const sem::Call* call) const {
     }
 
     if (builtin->IsSubgroup()) {
-        auto ext = wgsl::Extension::kSubgroups;
-        if (builtin->ReturnType()->DeepestElement()->Is<core::type::F16>()) {
-            ext = wgsl::Extension::kSubgroupsF16;
-        }
-        if (!enabled_extensions_.Contains(ext)) {
+        if (!enabled_extensions_.Contains(wgsl::Extension::kSubgroups)) {
             AddError(call->Declaration()->source)
                 << "cannot call built-in function " << style::Function(builtin->Fn())
-                << " without extension " << style::Code(wgsl::ToString(ext));
+                << " without extension "
+                << style::Code(wgsl::ToString(wgsl::Extension::kSubgroups));
             return false;
         }
     }
@@ -2309,6 +2320,29 @@ bool Validator::ArrayConstructor(const ast::CallExpression* ctor,
                                << count << ", found " << values.Length();
         return false;
     }
+    return true;
+}
+
+bool Validator::SubgroupMatrixConstructor(
+    const ast::CallExpression* ctor,
+    const core::type::SubgroupMatrix* subgroup_matrix_type) const {
+    auto& values = ctor->args;
+    if (values.Length() == 1) {
+        auto* elem_ty = subgroup_matrix_type->Type();
+        auto* value_ty = sem_.TypeOf(values[0])->UnwrapRef();
+        if (core::type::Type::ConversionRank(value_ty, elem_ty) ==
+            core::type::Type::kNoConversion) {
+            AddError(values[0]->source) << style::Type(sem_.TypeNameOf(value_ty))
+                                        << " cannot be used to construct a subgroup matrix of "
+                                        << style::Type(sem_.TypeNameOf(elem_ty));
+            return false;
+        }
+    } else if (values.Length() > 1) {
+        AddError(ctor->target->source)
+            << "subgroup_matrix constructor can only have zero or one elements";
+        return false;
+    }
+
     return true;
 }
 

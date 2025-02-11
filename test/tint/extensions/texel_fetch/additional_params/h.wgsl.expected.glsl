@@ -15,7 +15,7 @@ in ivec4 f_Input_1;
 void g(float a, float b, int c) {
 }
 void f_inner(vec4 pos, FBF fbf) {
-  g(fbf.c1[0u], pos[1u], fbf.c3[2u]);
+  g(fbf.c1.x, pos.y, fbf.c3.z);
 }
 void main() {
   vec4 v = gl_FragCoord;

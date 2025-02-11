@@ -55,7 +55,7 @@ MaybeError ValidateSamplerDescriptor(DeviceBase* device, const SamplerDescriptor
                             descriptor->mipmapFilter != wgpu::MipmapFilterMode::Linear,
                         "One of minFilter (%s), magFilter (%s) or mipmapFilter (%s) is not %s "
                         "while using anisotropic filter (maxAnisotropy is %f)",
-                        descriptor->magFilter, descriptor->minFilter, descriptor->mipmapFilter,
+                        descriptor->minFilter, descriptor->magFilter, descriptor->mipmapFilter,
                         wgpu::FilterMode::Linear, descriptor->maxAnisotropy);
     } else if (descriptor->maxAnisotropy == 0u) {
         return DAWN_VALIDATION_ERROR("Max anisotropy (%f) is less than 1.",
@@ -136,6 +136,11 @@ bool SamplerBase::IsFiltering() const {
 
 bool SamplerBase::IsYCbCr() const {
     return mIsYCbCr;
+}
+
+YCbCrVkDescriptor SamplerBase::GetYCbCrVkDescriptor() const {
+    DAWN_ASSERT(IsYCbCr());
+    return mYCbCrVkDescriptor;
 }
 
 size_t SamplerBase::ComputeContentHash() {

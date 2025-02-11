@@ -122,6 +122,8 @@ config("tint_public_config") {
   }
 
   if (tint_build_ir_fuzzer) {
+    assert(tint_build_ir_binary,
+           "tint_build_ir_fuzzer requires tint_build_ir_binary")
     defines += [ "TINT_BUILD_IR_FUZZER=1" ]
   } else {
     defines += [ "TINT_BUILD_IR_FUZZER=0" ]
@@ -317,7 +319,7 @@ if (tint_has_fuzzers) {
   }
 
   if (tint_build_ir_fuzzer) {
-    if (tint_build_cmds && tint_build_wgsl_reader && tint_build_ir_binary) {
+    if (tint_build_cmds && tint_build_wgsl_reader) {
       action("tint_generate_ir_corpus") {
         script = "${tint_src_dir}/cmd/fuzz/ir/generate_ir_corpus.py"
         sources = [ "${script}" ]
@@ -353,7 +355,7 @@ group("cmds") {
   if (tint_build_tintd) {
     deps += [ "${tint_src_dir}/cmd/tintd" ]
   }
-  if (tint_build_ir_fuzzer && tint_build_ir_binary) {
+  if (tint_build_ir_fuzzer) {
     if (tint_build_wgsl_reader) {
       deps += [ "${tint_src_dir}/cmd/fuzz/ir/as" ]
     }
@@ -370,7 +372,7 @@ group("fuzzers") {
     deps += [ "${tint_src_dir}/cmd/fuzz/wgsl" ]
   }
 
-  if (tint_build_ir_fuzzer && (!is_asan || build_with_chromium)) {
+  if (tint_build_ir_fuzzer) {
     deps += [ "${tint_src_dir}/cmd/fuzz/ir" ]
   }
 }

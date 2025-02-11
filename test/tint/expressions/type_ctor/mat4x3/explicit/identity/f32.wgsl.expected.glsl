@@ -2,7 +2,7 @@
 
 mat4x3 m = mat4x3(vec3(0.0f, 1.0f, 2.0f), vec3(3.0f, 4.0f, 5.0f), vec3(6.0f, 7.0f, 8.0f), vec3(9.0f, 10.0f, 11.0f));
 layout(binding = 0, std430)
-buffer tint_symbol_block_1_ssbo {
+buffer out_block_1_ssbo {
   mat4x3 inner;
 } v;
 void tint_store_and_preserve_padding(mat4x3 value_param) {

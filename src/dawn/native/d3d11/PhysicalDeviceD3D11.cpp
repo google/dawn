@@ -56,16 +56,20 @@ bool PhysicalDevice::SupportsExternalImages() const {
     return true;
 }
 
-bool PhysicalDevice::SupportsFeatureLevel(FeatureLevel featureLevel) const {
+bool PhysicalDevice::SupportsFeatureLevel(wgpu::FeatureLevel featureLevel,
+                                          InstanceBase* instance) const {
     // TODO(dawn:1820): compare D3D11 feature levels with Dawn feature levels.
     switch (featureLevel) {
-        case FeatureLevel::Core: {
+        case wgpu::FeatureLevel::Core: {
             return mFeatureLevel >= D3D_FEATURE_LEVEL_11_1;
         }
-        case FeatureLevel::Compatibility: {
-            return true;
+        case wgpu::FeatureLevel::Compatibility: {
+            return mFeatureLevel >= D3D_FEATURE_LEVEL_11_0;
         }
+        case wgpu::FeatureLevel::Undefined:
+            break;
     }
+    DAWN_UNREACHABLE();
 }
 
 const DeviceInfo& PhysicalDevice::GetDeviceInfo() const {
@@ -128,6 +132,10 @@ MaybeError PhysicalDevice::InitializeImpl() {
     mFeatureLevel = mD3D11Device->GetFeatureLevel();
     DAWN_TRY_ASSIGN(mDeviceInfo, GatherDeviceInfo(GetHardwareAdapter(), mD3D11Device));
 
+    // TODO(chromium:390441217): Handle the case when neither fence type is supported.
+    DAWN_INVALID_IF(!mDeviceInfo.supportsMonitoredFence && !mDeviceInfo.supportsNonMonitoredFence,
+                    "Either Monitored Fences or Non-monitored Fences must be supported.");
+
     // Base::InitializeImpl() cannot distinguish between discrete and integrated GPUs, so we need to
     // overwrite it.
     if (mAdapterType == wgpu::AdapterType::DiscreteGPU && mDeviceInfo.isUMA) {
@@ -185,6 +193,9 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     if (formatSupport & D3D11_FORMAT_SUPPORT_TYPED_UNORDERED_ACCESS_VIEW) {
         EnableFeature(Feature::BGRA8UnormStorage);
     }
+
+    EnableFeature(Feature::DawnTexelCopyBufferRowAlignment);
+    EnableFeature(Feature::FlexibleTextureViews);
 }
 
 MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits) {
@@ -203,11 +214,27 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
     // Both SV_VertexID and SV_InstanceID will consume vertex input slots.
     limits->v1.maxVertexAttributes = D3D11_IA_VERTEX_INPUT_RESOURCE_SLOT_COUNT - 2;
 
-    uint32_t maxUAVsAllStages = mFeatureLevel == D3D_FEATURE_LEVEL_11_1
-                                    ? D3D11_1_UAV_SLOT_COUNT
-                                    : D3D11_PS_CS_UAV_REGISTER_COUNT;
+    uint32_t maxUAVsAllStages;
+    uint32_t maxUAVsPerStage;
+    uint32_t maxUAVsPerVertexStage;
+
+    if (mFeatureLevel >= D3D_FEATURE_LEVEL_11_1) {
+        // In D3D 11.1, max UAV slots are shared between fragment & vertex stage so divide it by 2
+        // to get per stage limit.
+        maxUAVsAllStages = D3D11_1_UAV_SLOT_COUNT;
+        maxUAVsPerStage = maxUAVsAllStages / 2;
+        maxUAVsPerVertexStage = maxUAVsPerStage;
+    } else {
+        // We don't support feature level < 11.0
+        DAWN_INVALID_IF(mFeatureLevel < D3D_FEATURE_LEVEL_11_0, "Unsupported D3D feature level %u",
+                        mFeatureLevel);
+        // In D3D 11.0, only fragment and compute have UAVs. Vertex doesn't have UAV so we don't
+        // need to divide the slot count between fragment & vertex.
+        maxUAVsAllStages = D3D11_PS_CS_UAV_REGISTER_COUNT;
+        maxUAVsPerStage = maxUAVsAllStages;
+        maxUAVsPerVertexStage = 0;
+    }
     mUAVSlotCount = maxUAVsAllStages;
-    uint32_t maxUAVsPerStage = maxUAVsAllStages / 2;
 
     // Reserve one slot for builtin constants.
     constexpr uint32_t kReservedCBVSlots = 1;
@@ -217,6 +244,10 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
     // Allocate half of the UAVs to storage buffers, and half to storage textures.
     limits->v1.maxStorageTexturesPerShaderStage = maxUAVsPerStage / 2;
     limits->v1.maxStorageBuffersPerShaderStage = maxUAVsPerStage / 2;
+    limits->v1.maxStorageTexturesInFragmentStage = limits->v1.maxStorageTexturesPerShaderStage;
+    limits->v1.maxStorageBuffersInFragmentStage = limits->v1.maxStorageBuffersPerShaderStage;
+    limits->v1.maxStorageTexturesInVertexStage = maxUAVsPerVertexStage / 2;
+    limits->v1.maxStorageBuffersInVertexStage = maxUAVsPerVertexStage / 2;
     limits->v1.maxSampledTexturesPerShaderStage = D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT;
     limits->v1.maxSamplersPerShaderStage = D3D11_COMMONSHADER_SAMPLER_SLOT_COUNT;
     limits->v1.maxColorAttachments = D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT;
@@ -264,6 +295,9 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
     limits->v1.maxInterStageShaderVariables = D3D11_PS_INPUT_REGISTER_COUNT - 2;
     limits->v1.maxInterStageShaderComponents =
         limits->v1.maxInterStageShaderVariables * D3D11_PS_INPUT_REGISTER_COMPONENTS;
+
+    // The BlitTextureToBuffer helper requires the alignment to be 4.
+    limits->texelCopyBufferRowAlignmentLimits.minTexelCopyBufferRowAlignment = 4;
 
     return {};
 }

@@ -30,7 +30,7 @@
 
 #include "dawn/native/Error.h"
 #include "dawn/native/ResourceMemoryAllocation.h"
-#include "dawn/native/d3d12/d3d12_platform.h"
+#include "dawn/native/d3d12/ResourceAllocatorManagerD3D12.h"
 
 namespace dawn::native::d3d12 {
 
@@ -42,7 +42,8 @@ class ResourceHeapAllocation : public ResourceMemoryAllocation {
     ResourceHeapAllocation(const AllocationInfo& info,
                            uint64_t offset,
                            ComPtr<ID3D12Resource> resource,
-                           Heap* heap);
+                           Heap* heap,
+                           ResourceHeapKind resourceHeapKind);
     ~ResourceHeapAllocation() override = default;
     ResourceHeapAllocation(const ResourceHeapAllocation&) = default;
     ResourceHeapAllocation& operator=(const ResourceHeapAllocation&) = default;
@@ -51,9 +52,11 @@ class ResourceHeapAllocation : public ResourceMemoryAllocation {
 
     ID3D12Resource* GetD3D12Resource() const;
     D3D12_GPU_VIRTUAL_ADDRESS GetGPUPointer() const;
+    ResourceHeapKind GetResourceHeapKind() const;
 
   private:
     ComPtr<ID3D12Resource> mResource;
+    ResourceHeapKind mResourceHeapKind;
 };
 
 }  // namespace dawn::native::d3d12

@@ -39,17 +39,17 @@ load("@bazel_skylib//lib:selects.bzl", "selects")
 cc_library(
   name = "writer",
   srcs = [
-    "output.cc",
     "writer.cc",
   ],
   hdrs = [
-    "output.h",
     "writer.h",
   ],
   deps = [
     "//src/tint/api/common",
     "//src/tint/lang/core",
     "//src/tint/lang/core/constant",
+    "//src/tint/lang/core/intrinsic",
+    "//src/tint/lang/core/ir",
     "//src/tint/lang/core/type",
     "//src/tint/lang/wgsl",
     "//src/tint/lang/wgsl/ast",
@@ -97,6 +97,7 @@ cc_library(
     "type_test.cc",
     "unary_test.cc",
     "var_and_let_test.cc",
+    "writer_test.cc",
   ] + select({
     ":tint_build_glsl_validator": [
       "helper_test.h",

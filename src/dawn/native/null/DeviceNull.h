@@ -126,7 +126,7 @@ class Device final : public DeviceBase {
                                            uint64_t destinationOffset,
                                            uint64_t size) override;
     MaybeError CopyFromStagingToTextureImpl(const BufferBase* source,
-                                            const TextureDataLayout& src,
+                                            const TexelCopyBufferLayout& src,
                                             const TextureCopy& dst,
                                             const Extent3D& copySizePixels) override;
 
@@ -189,7 +189,8 @@ class PhysicalDevice : public PhysicalDeviceBase {
     // PhysicalDeviceBase Implementation
     bool SupportsExternalImages() const override;
 
-    bool SupportsFeatureLevel(FeatureLevel featureLevel) const override;
+    bool SupportsFeatureLevel(wgpu::FeatureLevel featureLevel,
+                              InstanceBase* instance) const override;
 
     ResultOrError<PhysicalDeviceSurfaceCapabilities> GetSurfaceCapabilities(
         InstanceBase* instance,

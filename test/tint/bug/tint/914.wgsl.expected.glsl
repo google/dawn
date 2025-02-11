@@ -71,7 +71,7 @@ void mm_write(uint row, uint col, float value) {
 uint tint_div_u32(uint lhs, uint rhs) {
   return (lhs / mix(rhs, 1u, (rhs == 0u)));
 }
-void tint_symbol_inner(uvec3 local_id, uvec3 global_id, uint tint_local_index) {
+void main_inner(uvec3 local_id, uvec3 global_id, uint tint_local_index) {
   {
     uint v_9 = 0u;
     v_9 = tint_local_index;
@@ -285,5 +285,5 @@ void tint_symbol_inner(uvec3 local_id, uvec3 global_id, uint tint_local_index) {
 }
 layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
 void main() {
-  tint_symbol_inner(gl_LocalInvocationID, gl_GlobalInvocationID, gl_LocalInvocationIndex);
+  main_inner(gl_LocalInvocationID, gl_GlobalInvocationID, gl_LocalInvocationIndex);
 }

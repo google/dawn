@@ -1,6 +1,6 @@
 #include <metal_stdlib>
-
 using namespace metal;
+
 struct VertexInputs {
   int loc0;
   uint loc1;
@@ -8,18 +8,18 @@ struct VertexInputs {
   float4 loc3;
 };
 
-struct tint_symbol_2 {
-  int loc0 [[attribute(0)]];
-  uint loc1 [[attribute(1)]];
-  float loc2 [[attribute(2)]];
-  float4 loc3 [[attribute(3)]];
+struct main_outputs {
+  float4 tint_symbol [[position]];
 };
 
-struct tint_symbol_3 {
-  float4 value [[position]];
+struct main_inputs {
+  int VertexInputs_loc0 [[attribute(0)]];
+  uint VertexInputs_loc1 [[attribute(1)]];
+  float VertexInputs_loc2 [[attribute(2)]];
+  float4 VertexInputs_loc3 [[attribute(3)]];
 };
 
-float4 tint_symbol_inner(VertexInputs inputs) {
+float4 main_inner(VertexInputs inputs) {
   int const i = inputs.loc0;
   uint const u = inputs.loc1;
   float const f = inputs.loc2;
@@ -27,11 +27,8 @@ float4 tint_symbol_inner(VertexInputs inputs) {
   return float4(0.0f);
 }
 
-vertex tint_symbol_3 tint_symbol(tint_symbol_2 tint_symbol_1 [[stage_in]]) {
-  VertexInputs const tint_symbol_4 = VertexInputs{.loc0=tint_symbol_1.loc0, .loc1=tint_symbol_1.loc1, .loc2=tint_symbol_1.loc2, .loc3=tint_symbol_1.loc3};
-  float4 const inner_result = tint_symbol_inner(tint_symbol_4);
-  tint_symbol_3 wrapper_result = {};
-  wrapper_result.value = inner_result;
-  return wrapper_result;
+vertex main_outputs v_1(main_inputs inputs [[stage_in]]) {
+  main_outputs tint_wrapper_result = {};
+  tint_wrapper_result.tint_symbol = main_inner(VertexInputs{.loc0=inputs.VertexInputs_loc0, .loc1=inputs.VertexInputs_loc1, .loc2=inputs.VertexInputs_loc2, .loc3=inputs.VertexInputs_loc3});
+  return tint_wrapper_result;
 }
-

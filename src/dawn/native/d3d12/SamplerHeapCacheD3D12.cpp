@@ -42,17 +42,14 @@
 
 namespace dawn::native::d3d12 {
 
-SamplerHeapCacheEntry::SamplerHeapCacheEntry(MutexProtected<StagingDescriptorAllocator>& allocator,
-                                             std::vector<Sampler*> samplers)
-    : mSamplers(std::move(samplers)), mAllocator(allocator) {}
+SamplerHeapCacheEntry::SamplerHeapCacheEntry(std::vector<Sampler*> samplers)
+    : mSamplers(std::move(samplers)) {}
 
 SamplerHeapCacheEntry::SamplerHeapCacheEntry(SamplerHeapCache* cache,
-                                             MutexProtected<StagingDescriptorAllocator>& allocator,
                                              std::vector<Sampler*> samplers,
                                              CPUDescriptorHeapAllocation allocation)
     : mCPUAllocation(std::move(allocation)),
       mSamplers(std::move(samplers)),
-      mAllocator(allocator),
       mCache(cache) {
     DAWN_ASSERT(mCache != nullptr);
     DAWN_ASSERT(mCPUAllocation.IsValid());
@@ -60,6 +57,8 @@ SamplerHeapCacheEntry::SamplerHeapCacheEntry(SamplerHeapCache* cache,
 }
 
 std::vector<Sampler*>&& SamplerHeapCacheEntry::AcquireSamplers() {
+    // This function should only be called when SamplerHeapCacheEntry is created for blueprint.
+    DAWN_ASSERT(!mCPUAllocation.IsValid());
     return std::move(mSamplers);
 }
 
@@ -67,19 +66,24 @@ SamplerHeapCacheEntry::~SamplerHeapCacheEntry() {
     // If this is a blueprint then the CPU allocation cannot exist and has no entry to remove.
     if (mCPUAllocation.IsValid()) {
         mCache->RemoveCacheEntry(this);
-        mAllocator->Deallocate(&mCPUAllocation);
+        DAWN_ASSERT(!mSamplers.empty());
+        auto* allocator = mCache->GetDevice()->GetSamplerStagingDescriptorAllocator(
+            static_cast<uint32_t>(mSamplers.size()));
+        DAWN_ASSERT(allocator != nullptr);
+        (*allocator)->Deallocate(&mCPUAllocation);
     }
 
     DAWN_ASSERT(!mCPUAllocation.IsValid());
 }
 
-bool SamplerHeapCacheEntry::Populate(Device* device,
-                                     MutexProtected<ShaderVisibleDescriptorAllocator>& allocator) {
+bool SamplerHeapCacheEntry::Populate(MutexProtected<ShaderVisibleDescriptorAllocator>& allocator) {
     if (allocator->IsAllocationStillValid(mGPUAllocation)) {
         return true;
     }
 
     DAWN_ASSERT(!mSamplers.empty());
+
+    Device* device = allocator->GetDevice();
 
     // Attempt to allocate descriptors for the currently bound shader-visible heaps.
     // If either failed, return early to re-allocate and switch the heaps.
@@ -105,17 +109,16 @@ D3D12_GPU_DESCRIPTOR_HANDLE SamplerHeapCacheEntry::GetBaseDescriptor() const {
     return mGPUAllocation.GetBaseDescriptor();
 }
 
-ResultOrError<Ref<SamplerHeapCacheEntry>> SamplerHeapCache::GetOrCreate(
-    const BindGroup* group,
-    MutexProtected<StagingDescriptorAllocator>& samplerAllocator) {
+ResultOrError<Ref<SamplerHeapCacheEntry>> SamplerHeapCache::GetOrCreate(const BindGroup* group) {
     const BindGroupLayout* bgl = ToBackend(group->GetLayout());
 
     // If a previously created bindgroup used the same samplers, the backing sampler heap
     // allocation can be reused. The packed list of samplers acts as the key to lookup the
     // allocation in a cache.
     // TODO(dawn:155): Avoid re-allocating the vector each lookup.
+    uint32_t samplerCount = bgl->GetSamplerDescriptorCount();
     std::vector<Sampler*> samplers;
-    samplers.reserve(bgl->GetSamplerDescriptorCount());
+    samplers.reserve(samplerCount);
 
     for (BindingIndex bindingIndex = bgl->GetDynamicBufferCount();
          bindingIndex < bgl->GetBindingCount(); ++bindingIndex) {
@@ -127,7 +130,7 @@ ResultOrError<Ref<SamplerHeapCacheEntry>> SamplerHeapCache::GetOrCreate(
 
     // Check the cache if there exists a sampler heap allocation that corresponds to the
     // samplers.
-    SamplerHeapCacheEntry blueprint(samplerAllocator, std::move(samplers));
+    SamplerHeapCacheEntry blueprint(std::move(samplers));
     auto iter = mCache.find(&blueprint);
     if (iter != mCache.end()) {
         return Ref<SamplerHeapCacheEntry>(*iter);
@@ -139,7 +142,9 @@ ResultOrError<Ref<SamplerHeapCacheEntry>> SamplerHeapCache::GetOrCreate(
 
     uint32_t samplerSizeIncrement = 0;
     CPUDescriptorHeapAllocation allocation;
-    DAWN_TRY(samplerAllocator.Use([&](auto allocator) -> MaybeError {
+    Device* device = ToBackend(group->GetDevice());
+    auto* samplerAllocator = device->GetSamplerStagingDescriptorAllocator(samplerCount);
+    DAWN_TRY(samplerAllocator->Use([&](auto allocator) -> MaybeError {
         DAWN_TRY_ASSIGN(allocation, allocator->AllocateCPUDescriptors());
         samplerSizeIncrement = allocator->GetSizeIncrement();
         return {};
@@ -152,8 +157,8 @@ ResultOrError<Ref<SamplerHeapCacheEntry>> SamplerHeapCache::GetOrCreate(
         d3d12Device->CreateSampler(&samplerDesc, allocation.OffsetFrom(samplerSizeIncrement, i));
     }
 
-    Ref<SamplerHeapCacheEntry> entry = AcquireRef(new SamplerHeapCacheEntry(
-        this, samplerAllocator, std::move(samplers), std::move(allocation)));
+    Ref<SamplerHeapCacheEntry> entry =
+        AcquireRef(new SamplerHeapCacheEntry(this, std::move(samplers), std::move(allocation)));
     mCache.insert(entry.Get());
     return std::move(entry);
 }
@@ -162,6 +167,10 @@ SamplerHeapCache::SamplerHeapCache(Device* device) : mDevice(device) {}
 
 SamplerHeapCache::~SamplerHeapCache() {
     DAWN_ASSERT(mCache.empty());
+}
+
+Device* SamplerHeapCache::GetDevice() const {
+    return mDevice;
 }
 
 void SamplerHeapCache::RemoveCacheEntry(SamplerHeapCacheEntry* entry) {

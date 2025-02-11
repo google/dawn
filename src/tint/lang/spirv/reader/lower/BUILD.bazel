@@ -39,11 +39,13 @@ load("@bazel_skylib//lib:selects.bzl", "selects")
 cc_library(
   name = "lower",
   srcs = [
+    "builtins.cc",
     "lower.cc",
     "shader_io.cc",
     "vector_element_pointer.cc",
   ],
   hdrs = [
+    "builtins.h",
     "lower.h",
     "shader_io.h",
     "vector_element_pointer.h",
@@ -55,6 +57,9 @@ cc_library(
     "//src/tint/lang/core/intrinsic",
     "//src/tint/lang/core/ir",
     "//src/tint/lang/core/type",
+    "//src/tint/lang/spirv",
+    "//src/tint/lang/spirv/intrinsic",
+    "//src/tint/lang/spirv/ir",
     "//src/tint/utils",
     "//src/tint/utils/containers",
     "//src/tint/utils/diagnostic",
@@ -75,6 +80,7 @@ cc_library(
   name = "test",
   alwayslink = True,
   srcs = [
+    "builtins_test.cc",
     "shader_io_test.cc",
     "vector_element_pointer_test.cc",
   ],
@@ -86,6 +92,9 @@ cc_library(
     "//src/tint/lang/core/ir",
     "//src/tint/lang/core/ir/transform:test",
     "//src/tint/lang/core/type",
+    "//src/tint/lang/spirv",
+    "//src/tint/lang/spirv/intrinsic",
+    "//src/tint/lang/spirv/ir",
     "//src/tint/lang/spirv/reader/lower",
     "//src/tint/utils",
     "//src/tint/utils/containers",

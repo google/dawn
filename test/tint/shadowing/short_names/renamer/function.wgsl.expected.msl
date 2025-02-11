@@ -1,35 +1,28 @@
 #include <metal_stdlib>
-
 using namespace metal;
-int tint_symbol() {
+
+struct tint_struct {
+  float4 tint_member [[position]];
+};
+
+int v() {
   return 0;
 }
 
-float tint_symbol_1(int tint_symbol_2) {
-  return float(tint_symbol_2);
+float v_1(int v_2) {
+  return float(v_2);
 }
 
-bool tint_symbol_3(float tint_symbol_4) {
-  return bool(tint_symbol_4);
+bool v_3(float v_4) {
+  return bool(v_4);
 }
 
-struct tint_symbol_12 {
-  float4 value [[position]];
-};
-
-float4 tint_symbol_5_inner(uint tint_symbol_6) {
-  float4 const tint_symbol_7 = float4(0.0f);
-  float4 const tint_symbol_8 = float4(1.0f);
-  int const tint_symbol_9 = tint_symbol();
-  float const tint_symbol_10 = tint_symbol_1(tint_symbol_9);
-  bool const tint_symbol_11 = tint_symbol_3(tint_symbol_10);
-  return select(tint_symbol_7, tint_symbol_8, tint_symbol_11);
+float4 v_5(uint v_6) {
+  return select(float4(0.0f), float4(1.0f), v_3(v_1(v())));
 }
 
-vertex tint_symbol_12 tint_symbol_5(uint tint_symbol_6 [[vertex_id]]) {
-  float4 const inner_result = tint_symbol_5_inner(tint_symbol_6);
-  tint_symbol_12 wrapper_result = {};
-  wrapper_result.value = inner_result;
-  return wrapper_result;
+vertex tint_struct tint_entry_point(uint v_8 [[vertex_id]]) {
+  tint_struct v_9 = {};
+  v_9.tint_member = v_5(v_8);
+  return v_9;
 }
-

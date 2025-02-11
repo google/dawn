@@ -97,7 +97,7 @@ MaybeError ValidateBindGroupLayoutEntry(DeviceBase* device,
 
     int bindingMemberCount = 0;
 
-    if (entry->buffer.type != wgpu::BufferBindingType::Undefined) {
+    if (entry->buffer.type != wgpu::BufferBindingType::BindingNotUsed) {
         bindingMemberCount++;
         const BufferBindingLayout& buffer = entry->buffer;
 
@@ -119,12 +119,12 @@ MaybeError ValidateBindGroupLayoutEntry(DeviceBase* device,
         }
     }
 
-    if (entry->sampler.type != wgpu::SamplerBindingType::Undefined) {
+    if (entry->sampler.type != wgpu::SamplerBindingType::BindingNotUsed) {
         bindingMemberCount++;
         DAWN_TRY(ValidateSamplerBindingType(entry->sampler.type));
     }
 
-    if (entry->texture.sampleType != wgpu::TextureSampleType::Undefined) {
+    if (entry->texture.sampleType != wgpu::TextureSampleType::BindingNotUsed) {
         bindingMemberCount++;
         const TextureBindingLayout& texture = entry->texture;
         // The kInternalResolveAttachmentSampleType is used internally and not a value
@@ -166,7 +166,7 @@ MaybeError ValidateBindGroupLayoutEntry(DeviceBase* device,
             "Sample type for multisampled texture binding was %s.", wgpu::TextureSampleType::Float);
     }
 
-    if (entry->storageTexture.access != wgpu::StorageTextureAccess::Undefined) {
+    if (entry->storageTexture.access != wgpu::StorageTextureAccess::BindingNotUsed) {
         bindingMemberCount++;
         const StorageTextureBindingLayout& storageTexture = entry->storageTexture;
         DAWN_TRY(ValidateStorageTextureAccess(storageTexture.access));
@@ -257,7 +257,7 @@ MaybeError ValidateStaticSamplersWithTextureBindings(
                         samplerBinding, sampledTextureBinding);
 
         auto& textureEntry = descriptor->entries[bindingNumberToIndexMap.at(sampledTextureBinding)];
-        DAWN_INVALID_IF(textureEntry.texture.sampleType == wgpu::TextureSampleType::Undefined,
+        DAWN_INVALID_IF(textureEntry.texture.sampleType == wgpu::TextureSampleType::BindingNotUsed,
                         "For static sampler binding (%u) the sampled texture binding (%u) is not a "
                         "texture binding.",
                         samplerBinding, sampledTextureBinding);
@@ -300,7 +300,8 @@ struct UnpackedExpandedBglEntries {
 UnpackedExpandedBglEntries ExtractAndExpandBglEntries(
     const BindGroupLayoutDescriptor* descriptor,
     BindingCounts* bindingCounts,
-    ExternalTextureBindingExpansionMap* externalTextureBindingExpansions) {
+    ExternalTextureBindingExpansionMap* externalTextureBindingExpansions,
+    bool* needsCrossBindingValidation) {
     UnpackedExpandedBglEntries result;
     std::list<BindGroupLayoutEntry>& additionalEntries = result.additionalEntries;
     std::vector<UnpackedPtr<BindGroupLayoutEntry>>& expandedOutput = result.unpackedEntries;
@@ -352,6 +353,12 @@ UnpackedExpandedBglEntries ExtractAndExpandBglEntries(
             externalTextureBindingExpansions->insert(
                 {BindingNumber(entry->binding), bindingExpansion});
         } else {
+            if (auto* staticSamplerBindingLayout = entry.Get<StaticSamplerBindingLayout>()) {
+                if (staticSamplerBindingLayout->sampledTextureBinding != WGPU_LIMIT_U32_UNDEFINED) {
+                    *needsCrossBindingValidation = true;
+                }
+            }
+
             expandedOutput.push_back(entry);
         }
     }
@@ -392,8 +399,9 @@ MaybeError ValidateBindGroupLayoutDescriptor(DeviceBase* device,
     // as static samplers can have associated texture entries that need to be validated first.
     DAWN_TRY(ValidateStaticSamplersWithTextureBindings(device, descriptor, bindingMap));
 
-    DAWN_TRY_CONTEXT(ValidateBindingCounts(device->GetLimits(), bindingCounts),
-                     "validating binding counts");
+    DAWN_TRY_CONTEXT(
+        ValidateBindingCounts(device->GetLimits(), bindingCounts, device->GetAdapter()),
+        "validating binding counts");
 
     return {};
 }
@@ -443,11 +451,11 @@ bool operator!=(const BindingInfo& a, const BindingInfo& b) {
 }
 
 bool IsBufferBinding(const UnpackedPtr<BindGroupLayoutEntry>& binding) {
-    return binding->buffer.type != wgpu::BufferBindingType::Undefined;
+    return binding->buffer.type != wgpu::BufferBindingType::BindingNotUsed;
 }
 
 bool BindingHasDynamicOffset(const UnpackedPtr<BindGroupLayoutEntry>& binding) {
-    if (binding->buffer.type != wgpu::BufferBindingType::Undefined) {
+    if (binding->buffer.type != wgpu::BufferBindingType::BindingNotUsed) {
         return binding->buffer.hasDynamicOffset;
     }
     return false;
@@ -458,18 +466,21 @@ BindingInfo CreateBindGroupLayoutInfo(const UnpackedPtr<BindGroupLayoutEntry>& b
     bindingInfo.binding = BindingNumber(binding->binding);
     bindingInfo.visibility = binding->visibility;
 
-    if (binding->buffer.type != wgpu::BufferBindingType::Undefined) {
-        bindingInfo.bindingLayout = BufferBindingInfo(binding->buffer);
-    } else if (binding->sampler.type != wgpu::SamplerBindingType::Undefined) {
-        bindingInfo.bindingLayout = SamplerBindingInfo(binding->sampler);
-    } else if (binding->texture.sampleType != wgpu::TextureSampleType::Undefined) {
+    if (binding->buffer.type != wgpu::BufferBindingType::BindingNotUsed) {
+        bindingInfo.bindingLayout =
+            BufferBindingInfo(binding->buffer.WithTrivialFrontendDefaults());
+    } else if (binding->sampler.type != wgpu::SamplerBindingType::BindingNotUsed) {
+        bindingInfo.bindingLayout =
+            SamplerBindingInfo(binding->sampler.WithTrivialFrontendDefaults());
+    } else if (binding->texture.sampleType != wgpu::TextureSampleType::BindingNotUsed) {
+        auto textureBindingInfo =
+            TextureBindingInfo(binding->texture.WithTrivialFrontendDefaults());
         if (binding->texture.viewDimension == kInternalInputAttachmentDim) {
-            bindingInfo.bindingLayout = InputAttachmentBindingInfo(binding->texture.sampleType);
+            bindingInfo.bindingLayout = InputAttachmentBindingInfo(textureBindingInfo.sampleType);
         } else {
-            bindingInfo.bindingLayout =
-                TextureBindingInfo(binding->texture.WithTrivialFrontendDefaults());
+            bindingInfo.bindingLayout = textureBindingInfo;
         }
-    } else if (binding->storageTexture.access != wgpu::StorageTextureAccess::Undefined) {
+    } else if (binding->storageTexture.access != wgpu::StorageTextureAccess::BindingNotUsed) {
         bindingInfo.bindingLayout =
             StorageTextureBindingInfo(binding->storageTexture.WithTrivialFrontendDefaults());
     } else if (auto* staticSamplerBindingLayout = binding.Get<StaticSamplerBindingLayout>()) {
@@ -623,7 +634,8 @@ BindGroupLayoutInternalBase::BindGroupLayoutInternalBase(
     ApiObjectBase::UntrackedByDeviceTag tag)
     : ApiObjectBase(device, descriptor->label), mUnexpandedBindingCount(descriptor->entryCount) {
     auto unpackedBindings = ExtractAndExpandBglEntries(descriptor, &mBindingCounts,
-                                                       &mExternalTextureBindingExpansionMap);
+                                                       &mExternalTextureBindingExpansionMap,
+                                                       &mNeedsCrossBindingValidation);
     auto& sortedBindings = unpackedBindings.unpackedEntries;
 
     std::sort(sortedBindings.begin(), sortedBindings.end(), SortBindingsCompare);
@@ -734,6 +746,10 @@ bool BindGroupLayoutInternalBase::EqualityFunc::operator()(
     return a->IsLayoutEqual(b);
 }
 
+bool BindGroupLayoutInternalBase::IsEmpty() const {
+    return mBindingInfo.empty();
+}
+
 BindingIndex BindGroupLayoutInternalBase::GetBindingCount() const {
     return mBindingInfo.size();
 }
@@ -768,6 +784,10 @@ const BindingCounts& BindGroupLayoutInternalBase::GetBindingCountInfo() const {
 const ExternalTextureBindingExpansionMap&
 BindGroupLayoutInternalBase::GetExternalTextureBindingExpansionMap() const {
     return mExternalTextureBindingExpansionMap;
+}
+
+bool BindGroupLayoutInternalBase::NeedsCrossBindingValidation() const {
+    return mNeedsCrossBindingValidation;
 }
 
 uint32_t BindGroupLayoutInternalBase::GetUnexpandedBindingCount() const {
@@ -825,6 +845,7 @@ bool BindGroupLayoutInternalBase::IsStorageBufferBinding(BindingIndex bindingInd
         case wgpu::BufferBindingType::Storage:
         case wgpu::BufferBindingType::ReadOnlyStorage:
             return true;
+        case wgpu::BufferBindingType::BindingNotUsed:
         case wgpu::BufferBindingType::Undefined:
             break;
     }

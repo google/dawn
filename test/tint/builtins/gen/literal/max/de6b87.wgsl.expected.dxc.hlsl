@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void max_de6b87() {
   float2 res = (1.0f).xx;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   max_de6b87();
   return;
 }
+//
+// compute_main
+//
+void max_de6b87() {
+  float2 res = (1.0f).xx;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   max_de6b87();
   return;
+}
+//
+// vertex_main
+//
+void max_de6b87() {
+  float2 res = (1.0f).xx;
 }
 
 struct VertexOutput {

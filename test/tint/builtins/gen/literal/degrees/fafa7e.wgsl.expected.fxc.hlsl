@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void degrees_fafa7e() {
   float res = 57.295780181884765625f;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   degrees_fafa7e();
   return;
 }
+//
+// compute_main
+//
+void degrees_fafa7e() {
+  float res = 57.295780181884765625f;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   degrees_fafa7e();
   return;
+}
+//
+// vertex_main
+//
+void degrees_fafa7e() {
+  float res = 57.295780181884765625f;
 }
 
 struct VertexOutput {

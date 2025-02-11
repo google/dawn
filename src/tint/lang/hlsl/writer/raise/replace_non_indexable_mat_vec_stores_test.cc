@@ -86,8 +86,8 @@ $B1: {  # root
     %v:ptr<function, vec3<f32>, read_write> = var
     %5:u32 = load %dyn_index
     %6:vec3<f32> = load %v
-    %7:vec3<f32> = swizzle 1.0f, xxx
-    %8:vec3<f32> = swizzle %5, xxx
+    %7:vec3<f32> = construct 1.0f
+    %8:vec3<f32> = construct %5
     %9:vec3<f32> = construct 0i, 1i, 2i
     %10:vec3<bool> = eq %8, %9
     %11:vec3<f32> = select %6, %7, %10
@@ -160,8 +160,8 @@ $B1: {  # root
     %5:ptr<function, vec3<f32>, read_write> = access %v, 0u
     %6:u32 = load %dyn_index
     %7:vec3<f32> = load %5
-    %8:vec3<f32> = swizzle 1.0f, xxx
-    %9:vec3<f32> = swizzle %6, xxx
+    %8:vec3<f32> = construct 1.0f
+    %9:vec3<f32> = construct %6
     %10:vec3<f32> = construct 0i, 1i, 2i
     %11:vec3<bool> = eq %9, %10
     %12:vec3<f32> = select %7, %8, %11
@@ -225,8 +225,8 @@ $B1: {  # root
     %5:ptr<function, vec3<f32>, read_write> = access %v, 0u
     %6:u32 = load %dyn_index
     %7:vec3<f32> = load %5
-    %8:vec3<f32> = swizzle 1.0f, xxx
-    %9:vec3<f32> = swizzle %6, xxx
+    %8:vec3<f32> = construct 1.0f
+    %9:vec3<f32> = construct %6
     %10:vec3<f32> = construct 0i, 1i, 2i
     %11:vec3<bool> = eq %9, %10
     %12:vec3<f32> = select %7, %8, %11
@@ -300,8 +300,8 @@ $B1: {  # root
     %5:ptr<function, vec3<f32>, read_write> = access %v, 0u, 0u
     %6:u32 = load %dyn_index
     %7:vec3<f32> = load %5
-    %8:vec3<f32> = swizzle 1.0f, xxx
-    %9:vec3<f32> = swizzle %6, xxx
+    %8:vec3<f32> = construct 1.0f
+    %9:vec3<f32> = construct %6
     %10:vec3<f32> = construct 0i, 1i, 2i
     %11:vec3<bool> = eq %9, %10
     %12:vec3<f32> = select %7, %8, %11
@@ -386,16 +386,16 @@ $B1: {  # root
     %v:ptr<function, vec3<f32>, read_write> = var
     %7:u32 = call %get_dynamic
     %8:vec3<f32> = load %v
-    %9:vec3<f32> = swizzle 1.0f, xxx
-    %10:vec3<f32> = swizzle %7, xxx
+    %9:vec3<f32> = construct 1.0f
+    %10:vec3<f32> = construct %7
     %11:vec3<f32> = construct 0i, 1i, 2i
     %12:vec3<bool> = eq %10, %11
     %13:vec3<f32> = select %8, %9, %12
     store %v, %13
     %14:u32 = call %get_static
     %15:vec3<f32> = load %v
-    %16:vec3<f32> = swizzle 1.0f, xxx
-    %17:vec3<f32> = swizzle %14, xxx
+    %16:vec3<f32> = construct 1.0f
+    %17:vec3<f32> = construct %14
     %18:vec3<f32> = construct 0i, 1i, 2i
     %19:vec3<bool> = eq %17, %18
     %20:vec3<f32> = select %15, %16, %19
@@ -456,8 +456,8 @@ $B1: {  # root
     %v:ptr<function, vec3<f32>, read_write> = var
     %5:u32 = load %dyn_index
     %6:vec3<f32> = load %v
-    %7:vec3<f32> = swizzle 1.0f, xxx
-    %8:vec3<f32> = swizzle %5, xxx
+    %7:vec3<f32> = construct 1.0f
+    %8:vec3<f32> = construct %5
     %9:vec3<f32> = construct 0i, 1i, 2i
     %10:vec3<bool> = eq %8, %9
     %11:vec3<f32> = select %6, %7, %10
@@ -518,8 +518,8 @@ $B1: {  # root
     %static_index:u32 = let 0u
     %5:u32 = load %dyn_index
     %6:vec3<f32> = load %v
-    %7:vec3<f32> = swizzle 1.0f, xxx
-    %8:vec3<f32> = swizzle %5, xxx
+    %7:vec3<f32> = construct 1.0f
+    %8:vec3<f32> = construct %5
     %9:vec3<f32> = construct 0i, 1i, 2i
     %10:vec3<bool> = eq %8, %9
     %11:vec3<f32> = select %6, %7, %10
@@ -665,8 +665,8 @@ $B1: {  # root
     %5:ptr<function, vec4<f32>, read_write> = access %v, 1u
     %6:u32 = load %dyn_index
     %7:vec4<f32> = load %5
-    %8:vec4<f32> = swizzle 1.0f, xxxx
-    %9:vec4<f32> = swizzle %6, xxxx
+    %8:vec4<f32> = construct 1.0f
+    %9:vec4<f32> = construct %6
     %10:vec4<f32> = construct 0i, 1i, 2i, 3i
     %11:vec4<bool> = eq %9, %10
     %12:vec4<f32> = select %7, %8, %11
@@ -739,8 +739,8 @@ $B1: {  # root
     %5:ptr<function, vec4<f32>, read_write> = access %v, 0u, 1u
     %6:u32 = load %dyn_index
     %7:vec4<f32> = load %5
-    %8:vec4<f32> = swizzle 1.0f, xxxx
-    %9:vec4<f32> = swizzle %6, xxxx
+    %8:vec4<f32> = construct 1.0f
+    %9:vec4<f32> = construct %6
     %10:vec4<f32> = construct 0i, 1i, 2i, 3i
     %11:vec4<bool> = eq %9, %10
     %12:vec4<f32> = select %7, %8, %11
@@ -803,8 +803,8 @@ $B1: {  # root
     %5:ptr<function, vec4<f32>, read_write> = access %v, 7u, 1u
     %6:u32 = load %dyn_index
     %7:vec4<f32> = load %5
-    %8:vec4<f32> = swizzle 1.0f, xxxx
-    %9:vec4<f32> = swizzle %6, xxxx
+    %8:vec4<f32> = construct 1.0f
+    %9:vec4<f32> = construct %6
     %10:vec4<f32> = construct 0i, 1i, 2i, 3i
     %11:vec4<bool> = eq %9, %10
     %12:vec4<f32> = select %7, %8, %11
@@ -878,8 +878,8 @@ $B1: {  # root
     %5:ptr<function, vec4<f32>, read_write> = access %v, 0u, 7u, 1u
     %6:u32 = load %dyn_index
     %7:vec4<f32> = load %5
-    %8:vec4<f32> = swizzle 1.0f, xxxx
-    %9:vec4<f32> = swizzle %6, xxxx
+    %8:vec4<f32> = construct 1.0f
+    %9:vec4<f32> = construct %6
     %10:vec4<f32> = construct 0i, 1i, 2i, 3i
     %11:vec4<bool> = eq %9, %10
     %12:vec4<f32> = select %7, %8, %11
@@ -968,16 +968,16 @@ $B1: {  # root
     %7:ptr<function, vec4<f32>, read_write> = access %v, 1u
     %8:u32 = call %get_dynamic
     %9:vec4<f32> = load %7
-    %10:vec4<f32> = swizzle 1.0f, xxxx
-    %11:vec4<f32> = swizzle %8, xxxx
+    %10:vec4<f32> = construct 1.0f
+    %11:vec4<f32> = construct %8
     %12:vec4<f32> = construct 0i, 1i, 2i, 3i
     %13:vec4<bool> = eq %11, %12
     %14:vec4<f32> = select %9, %10, %13
     store %7, %14
     %15:u32 = call %get_static
     %16:vec4<f32> = load %7
-    %17:vec4<f32> = swizzle 1.0f, xxxx
-    %18:vec4<f32> = swizzle %15, xxxx
+    %17:vec4<f32> = construct 1.0f
+    %18:vec4<f32> = construct %15
     %19:vec4<f32> = construct 0i, 1i, 2i, 3i
     %20:vec4<bool> = eq %18, %19
     %21:vec4<f32> = select %16, %17, %20
@@ -1041,8 +1041,8 @@ $B1: {  # root
     %5:ptr<function, vec4<f32>, read_write> = access %v, 1u
     %6:u32 = load %dyn_index
     %7:vec4<f32> = load %5
-    %8:vec4<f32> = swizzle 1.0f, xxxx
-    %9:vec4<f32> = swizzle %6, xxxx
+    %8:vec4<f32> = construct 1.0f
+    %9:vec4<f32> = construct %6
     %10:vec4<f32> = construct 0i, 1i, 2i, 3i
     %11:vec4<bool> = eq %9, %10
     %12:vec4<f32> = select %7, %8, %11
@@ -1106,8 +1106,8 @@ $B1: {  # root
     %5:ptr<private, vec4<f32>, read_write> = access %v, 1u
     %6:u32 = load %dyn_index
     %7:vec4<f32> = load %5
-    %8:vec4<f32> = swizzle 1.0f, xxxx
-    %9:vec4<f32> = swizzle %6, xxxx
+    %8:vec4<f32> = construct 1.0f
+    %9:vec4<f32> = construct %6
     %10:vec4<f32> = construct 0i, 1i, 2i, 3i
     %11:vec4<bool> = eq %9, %10
     %12:vec4<f32> = select %7, %8, %11
@@ -1974,8 +1974,8 @@ $B1: {  # root
       $B3: {  # case
         %8:ptr<function, vec4<f32>, read_write> = access %v, 0u
         %9:vec4<f32> = load %8
-        %10:vec4<f32> = swizzle 1.0f, xxxx
-        %11:vec4<f32> = swizzle %7, xxxx
+        %10:vec4<f32> = construct 1.0f
+        %11:vec4<f32> = construct %7
         %12:vec4<f32> = construct 0i, 1i, 2i, 3i
         %13:vec4<bool> = eq %11, %12
         %14:vec4<f32> = select %9, %10, %13
@@ -1985,8 +1985,8 @@ $B1: {  # root
       $B4: {  # case
         %15:ptr<function, vec4<f32>, read_write> = access %v, 1u
         %16:vec4<f32> = load %15
-        %17:vec4<f32> = swizzle 1.0f, xxxx
-        %18:vec4<f32> = swizzle %7, xxxx
+        %17:vec4<f32> = construct 1.0f
+        %18:vec4<f32> = construct %7
         %19:vec4<f32> = construct 0i, 1i, 2i, 3i
         %20:vec4<bool> = eq %18, %19
         %21:vec4<f32> = select %16, %17, %20

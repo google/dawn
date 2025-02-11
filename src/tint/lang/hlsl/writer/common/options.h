@@ -30,6 +30,7 @@
 
 #include <bitset>
 #include <optional>
+#include <string>
 #include <unordered_map>
 #include <vector>
 
@@ -199,6 +200,12 @@ struct Options {
     /// @returns this Options
     Options& operator=(const Options&);
 
+    /// An optional remapped name to use when emitting the entry point.
+    std::string remapped_entry_point_name = {};
+
+    /// Set to `true` to strip all user-declared identifiers from the module.
+    bool strip_all_names = false;
+
     /// Set to `true` to disable software robustness that prevents out-of-bounds accesses.
     bool disable_robustness = false;
 
@@ -243,6 +250,8 @@ struct Options {
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(Options,
+                 remapped_entry_point_name,
+                 strip_all_names,
                  disable_robustness,
                  disable_workgroup_init,
                  truncate_interstage_variables,

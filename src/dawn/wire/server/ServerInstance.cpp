@@ -39,8 +39,7 @@ WireResult Server::DoInstanceRequestAdapter(Known<WGPUInstance> instance,
                                             ObjectHandle eventManager,
                                             WGPUFuture future,
                                             ObjectHandle adapterHandle,
-                                            const WGPURequestAdapterOptions* options,
-                                            uint8_t userdataCount) {
+                                            const WGPURequestAdapterOptions* options) {
     Reserved<WGPUAdapter> adapter;
     WIRE_TRY(Objects<WGPUAdapter>().Allocate(&adapter, adapterHandle, AllocationState::Reserved));
 
@@ -49,16 +48,10 @@ WireResult Server::DoInstanceRequestAdapter(Known<WGPUInstance> instance,
     userdata->future = future;
     userdata->adapterObjectId = adapter.id;
 
-    if (userdataCount == 1) {
-        mProcs.instanceRequestAdapter(instance->handle, options,
-                                      ForwardToServer<&Server::OnRequestAdapterCallback>,
-                                      userdata.release());
-    } else {
-        mProcs.instanceRequestAdapter2(
-            instance->handle, options,
-            {nullptr, WGPUCallbackMode_AllowSpontaneous,
-             ForwardToServer2<&Server::OnRequestAdapterCallback>, userdata.release(), nullptr});
-    }
+    mProcs.instanceRequestAdapter(
+        instance->handle, options,
+        {nullptr, WGPUCallbackMode_AllowSpontaneous,
+         ForwardToServer2<&Server::OnRequestAdapterCallback>, userdata.release(), nullptr});
     return WireResult::Success;
 }
 
@@ -80,7 +73,7 @@ void Server::OnRequestAdapterCallback(RequestAdapterUserdata* data,
 
     // Assign the handle and allocated status if the adapter is created successfully.
     if (FillReservation(data->adapterObjectId, adapter) == WireResult::FatalError) {
-        cmd.status = WGPURequestAdapterStatus_Unknown;
+        cmd.status = WGPURequestAdapterStatus_InstanceDropped;
         cmd.message = ToOutputStringView("Destroyed before request was fulfilled.");
         SerializeCommand(cmd);
         return;
@@ -94,7 +87,7 @@ void Server::OnRequestAdapterCallback(RequestAdapterUserdata* data,
 
     // Query and report the adapter info.
     FreeMembers<WGPUAdapterInfo> info(mProcs);
-    WGPUChainedStructOut** propertiesChain = &info.nextInChain;
+    WGPUChainedStruct** propertiesChain = &info.nextInChain;
 
     // Query AdapterPropertiesMemoryHeaps if the feature is supported.
     FreeMembers<WGPUAdapterPropertiesMemoryHeaps> memoryHeapProperties(mProcs);
@@ -120,13 +113,22 @@ void Server::OnRequestAdapterCallback(RequestAdapterUserdata* data,
         propertiesChain = &(*propertiesChain)->next;
     }
 
+    // Query AdapterPropertiesSubgroups if the feature is supported.
+    WGPUAdapterPropertiesSubgroups subgroupsProperties = {};
+    subgroupsProperties.chain.sType = WGPUSType_AdapterPropertiesSubgroups;
+    if (mProcs.adapterHasFeature(adapter, WGPUFeatureName_Subgroups)) {
+        *propertiesChain = &subgroupsProperties.chain;
+        propertiesChain = &(*propertiesChain)->next;
+    }
+
     mProcs.adapterGetInfo(adapter, &info);
     cmd.info = &info;
 
-    // Query and report the adapter limits, including DawnExperimentalSubgroupLimits and
-    // DawnExperimentalImmediateDataLimits.
+    // Query and report the adapter limits, including DawnExperimentalSubgroupLimits,
+    // DawnExperimentalImmediateDataLimits, and DawnTexelCopyBufferRowAlignmentLimits.
     WGPUSupportedLimits limits = {};
 
+    // TODO(crbug.com/354751907) Remove this, as it is now in AdapterInfo.
     WGPUDawnExperimentalSubgroupLimits experimentalSubgroupLimits = {};
     experimentalSubgroupLimits.chain.sType = WGPUSType_DawnExperimentalSubgroupLimits;
     limits.nextInChain = &experimentalSubgroupLimits.chain;
@@ -135,6 +137,11 @@ void Server::OnRequestAdapterCallback(RequestAdapterUserdata* data,
     WGPUDawnExperimentalImmediateDataLimits experimentalImmediateDataLimits = {};
     experimentalImmediateDataLimits.chain.sType = WGPUSType_DawnExperimentalImmediateDataLimits;
     experimentalSubgroupLimits.chain.next = &experimentalImmediateDataLimits.chain;
+
+    // Chained DawnTexelCopyBufferRowAlignmentLimits.
+    WGPUDawnTexelCopyBufferRowAlignmentLimits texelCopyBufferRowAlignmentLimits = {};
+    texelCopyBufferRowAlignmentLimits.chain.sType = WGPUSType_DawnTexelCopyBufferRowAlignmentLimits;
+    experimentalImmediateDataLimits.chain.next = &texelCopyBufferRowAlignmentLimits.chain;
 
     mProcs.adapterGetLimits(adapter, &limits);
     cmd.limits = &limits;

@@ -958,7 +958,7 @@ TEST_F(IRToProgramTest, TypeConvert_Inlining) {
     b.Append(fn_g->Block(), [&] { b.Return(fn_g); });
 
     auto* fn_f = b.Function("f", ty.void_());
-    auto* v = b.FunctionParam("v", ty.i32());
+    auto* v = b.FunctionParam("v", ty.f16());
     fn_f->SetParams({v});
     b.Append(fn_f->Block(), [&] {
         auto* u = b.Convert<u32>(v);
@@ -969,10 +969,12 @@ TEST_F(IRToProgramTest, TypeConvert_Inlining) {
     });
 
     EXPECT_WGSL(R"(
+enable f16;
+
 fn g(a : i32, b : u32, c : f32) {
 }
 
-fn f(v : i32) {
+fn f(v : f16) {
   g(i32(v), u32(v), f32(v));
 }
 )");

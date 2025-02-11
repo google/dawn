@@ -1,37 +1,73 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
-
 using namespace metal;
-int4 tint_unpack_4xi8(uint a) {
-  uint4 const a_vec4u = uint4(a);
-  int4 const a_vec4i = as_type<int4>((a_vec4u << uint4(24u, 16u, 8u, 0u)));
-  return (a_vec4i >> uint4(24u));
-}
+
+struct tint_module_vars_struct {
+  device int4* prevent_dce;
+};
 
 int4 unpack4xI8_830900() {
   uint arg_0 = 1u;
-  int4 res = tint_unpack_4xi8(arg_0);
+  uint const v = arg_0;
+  uint4 const v_1 = uint4(24u, 16u, 8u, 0u);
+  int4 const v_2 = as_type<int4>((uint4(v) << v_1));
+  int4 res = (v_2 >> uint4(24u));
   return res;
 }
 
-fragment void fragment_main(device int4* tint_symbol_1 [[buffer(0)]]) {
-  *(tint_symbol_1) = unpack4xI8_830900();
-  return;
+fragment void fragment_main(device int4* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  (*tint_module_vars.prevent_dce) = unpack4xI8_830900();
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+struct tint_module_vars_struct {
+  device int4* prevent_dce;
+};
+
+int4 unpack4xI8_830900() {
+  uint arg_0 = 1u;
+  uint const v = arg_0;
+  uint4 const v_1 = uint4(24u, 16u, 8u, 0u);
+  int4 const v_2 = as_type<int4>((uint4(v) << v_1));
+  int4 res = (v_2 >> uint4(24u));
+  return res;
 }
 
-kernel void compute_main(device int4* tint_symbol_2 [[buffer(0)]]) {
-  *(tint_symbol_2) = unpack4xI8_830900();
-  return;
+kernel void compute_main(device int4* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  (*tint_module_vars.prevent_dce) = unpack4xI8_830900();
 }
+//
+// vertex_main
+//
+#include <metal_stdlib>
+using namespace metal;
 
 struct VertexOutput {
   float4 pos;
   int4 prevent_dce;
 };
 
-struct tint_symbol {
-  int4 prevent_dce [[user(locn0)]] [[flat]];
-  float4 pos [[position]];
+struct vertex_main_outputs {
+  float4 VertexOutput_pos [[position]];
+  int4 VertexOutput_prevent_dce [[user(locn0)]] [[flat]];
 };
+
+int4 unpack4xI8_830900() {
+  uint arg_0 = 1u;
+  uint const v = arg_0;
+  uint4 const v_1 = uint4(24u, 16u, 8u, 0u);
+  int4 const v_2 = as_type<int4>((uint4(v) << v_1));
+  int4 res = (v_2 >> uint4(24u));
+  return res;
+}
 
 VertexOutput vertex_main_inner() {
   VertexOutput out = {};
@@ -40,11 +76,10 @@ VertexOutput vertex_main_inner() {
   return out;
 }
 
-vertex tint_symbol vertex_main() {
-  VertexOutput const inner_result = vertex_main_inner();
-  tint_symbol wrapper_result = {};
-  wrapper_result.pos = inner_result.pos;
-  wrapper_result.prevent_dce = inner_result.prevent_dce;
-  return wrapper_result;
+vertex vertex_main_outputs vertex_main() {
+  VertexOutput const v_3 = vertex_main_inner();
+  vertex_main_outputs tint_wrapper_result = {};
+  tint_wrapper_result.VertexOutput_pos = v_3.pos;
+  tint_wrapper_result.VertexOutput_prevent_dce = v_3.prevent_dce;
+  return tint_wrapper_result;
 }
-

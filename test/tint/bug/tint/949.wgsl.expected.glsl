@@ -42,25 +42,25 @@ float u_Float = 0.0f;
 vec3 u_Color = vec3(0.0f);
 vec2 vMainuv = vec2(0.0f);
 layout(binding = 6, std140)
-uniform x_269_block_1_ubo {
+uniform f_x_269_block_ubo {
   LeftOver inner;
 } v;
 vec4 v_output1 = vec4(0.0f);
-bool tint_symbol = false;
+bool v_1 = false;
 vec2 v_uv = vec2(0.0f);
 vec4 v_output2 = vec4(0.0f);
 layout(binding = 5, std140)
-uniform light0_block_1_ubo {
+uniform f_light0_block_ubo {
   Light0 inner;
-} v_1;
+} v_2;
 vec4 glFragColor = vec4(0.0f);
-uniform highp sampler2D TextureSamplerTexture_TextureSamplerSampler;
-uniform highp sampler2D TextureSampler1Texture_TextureSampler1Sampler;
-layout(location = 1) in vec2 tint_symbol_1_loc1_Input;
-layout(location = 0) in vec4 tint_symbol_1_loc0_Input;
-layout(location = 3) in vec2 tint_symbol_1_loc3_Input;
-layout(location = 2) in vec4 tint_symbol_1_loc2_Input;
-layout(location = 0) out vec4 tint_symbol_1_loc0_Output;
+uniform highp sampler2D f_TextureSamplerTexture_TextureSamplerSampler;
+uniform highp sampler2D f_TextureSampler1Texture_TextureSampler1Sampler;
+layout(location = 1) in vec2 tint_interstage_location1;
+layout(location = 0) in vec4 tint_interstage_location0;
+layout(location = 3) in vec2 tint_interstage_location3;
+layout(location = 2) in vec4 tint_interstage_location2;
+layout(location = 0) out vec4 main_loc0_Output;
 mat3 cotangent_frame_vf3_vf3_vf2_vf2_(inout vec3 normal_1, inout vec3 p, inout vec2 uv, inout vec2 tangentSpaceParams) {
   vec3 dp1 = vec3(0.0f);
   vec3 dp2 = vec3(0.0f);
@@ -113,9 +113,9 @@ mat3 cotangent_frame_vf3_vf3_vf2_vf2_(inout vec3 normal_1, inout vec3 p, inout v
   float x_193 = invmax;
   vec3 x_194 = (x_192 * x_193);
   vec3 x_195 = normal_1;
-  vec3 v_2 = vec3(x_191.x, x_191.y, x_191.z);
-  vec3 v_3 = vec3(x_194.x, x_194.y, x_194.z);
-  return mat3(v_2, v_3, vec3(x_195.x, x_195.y, x_195.z));
+  vec3 v_3 = vec3(x_191.x, x_191.y, x_191.z);
+  vec3 v_4 = vec3(x_194.x, x_194.y, x_194.z);
+  return mat3(v_3, v_4, vec3(x_195.x, x_195.y, x_195.z));
 }
 mat3 transposeMat3_mf33_(inout mat3 inMatrix) {
   vec3 i0 = vec3(0.0f);
@@ -140,9 +140,9 @@ mat3 transposeMat3_mf33_(inout mat3 inMatrix) {
   float x_91 = i1.z;
   float x_93 = i2.z;
   vec3 x_94 = vec3(x_89, x_91, x_93);
-  vec3 v_4 = vec3(x_78.x, x_78.y, x_78.z);
-  vec3 v_5 = vec3(x_86.x, x_86.y, x_86.z);
-  outMatrix = mat3(v_4, v_5, vec3(x_94.x, x_94.y, x_94.z));
+  vec3 v_5 = vec3(x_78.x, x_78.y, x_78.z);
+  vec3 v_6 = vec3(x_86.x, x_86.y, x_86.z);
+  outMatrix = mat3(v_5, v_6, vec3(x_94.x, x_94.y, x_94.z));
   mat3 x_110 = outMatrix;
   return x_110;
 }
@@ -248,7 +248,7 @@ void main_1() {
   u_Float = 100.0f;
   u_Color = vec3(0.5f);
   vec2 x_261 = vMainuv;
-  vec4 x_262 = texture(TextureSamplerTexture_TextureSamplerSampler, x_261);
+  vec4 x_262 = texture(f_TextureSamplerTexture_TextureSamplerSampler, x_261);
   tempTextureRead = x_262;
   vec4 x_264 = tempTextureRead;
   float x_273 = v.inner.textureInfoName;
@@ -260,7 +260,7 @@ void main_1() {
   uvOffset = vec2(0.0f);
   float x_292 = v.inner.u_bumpStrength;
   normalScale = (1.0f / x_292);
-  bool x_298 = tint_symbol;
+  bool x_298 = v_1;
   if (x_298) {
     vec2 x_303 = v_uv;
     x_299 = x_303;
@@ -315,7 +315,11 @@ void main_1() {
   currSampledHeight = 1.0f;
   i = 0;
   {
+    uvec2 tint_loop_idx = uvec2(0u);
     while(true) {
+      if (all(equal(tint_loop_idx, uvec2(4294967295u)))) {
+        break;
+      }
       int x_388 = i;
       if ((x_388 < 15)) {
       } else {
@@ -359,6 +363,10 @@ void main_1() {
         lastSampledHeight = x_440;
       }
       {
+        uint tint_low_inc = (tint_loop_idx.x + 1u);
+        tint_loop_idx.x = tint_low_inc;
+        uint tint_carry = uint((tint_low_inc == 0u));
+        tint_loop_idx.y = (tint_loop_idx.y + tint_carry);
         int x_441 = i;
         i = (x_441 + 1);
       }
@@ -371,7 +379,7 @@ void main_1() {
   uvOffset = x_445;
   vec2 x_449 = v_uv;
   vec2 x_450 = uvOffset;
-  vec4 x_452 = texture(TextureSamplerTexture_TextureSamplerSampler, (x_449 + x_450));
+  vec4 x_452 = texture(f_TextureSamplerTexture_TextureSamplerSampler, (x_449 + x_450));
   float x_454 = v.inner.u_bumpStrength;
   mat3 x_457 = TBN;
   param_8 = x_457;
@@ -384,7 +392,7 @@ void main_1() {
   vec2 x_466 = uvOffset;
   output6 = (x_465 + x_466);
   vec2 x_474 = output6;
-  vec4 x_475 = texture(TextureSampler1Texture_TextureSampler1Sampler, x_474);
+  vec4 x_475 = texture(f_TextureSampler1Texture_TextureSampler1Sampler, x_474);
   tempTextureRead1 = x_475;
   vec4 x_477 = tempTextureRead1;
   rgb1 = vec3(x_477.x, x_477.y, x_477.z);
@@ -402,13 +410,13 @@ void main_1() {
   param_11 = x_501;
   vec3 x_503 = normalW;
   param_12 = x_503;
-  vec4 x_507 = v_1.inner.vLightData;
+  vec4 x_507 = v_2.inner.vLightData;
   param_13 = x_507;
-  vec4 x_510 = v_1.inner.vLightDiffuse;
+  vec4 x_510 = v_2.inner.vLightDiffuse;
   param_14 = vec3(x_510.x, x_510.y, x_510.z);
-  vec4 x_514 = v_1.inner.vLightSpecular;
+  vec4 x_514 = v_2.inner.vLightSpecular;
   param_15 = vec3(x_514.x, x_514.y, x_514.z);
-  vec3 x_518 = v_1.inner.vLightGround;
+  vec3 x_518 = v_2.inner.vLightGround;
   param_16 = x_518;
   float x_520 = glossiness_1;
   param_17 = x_520;
@@ -435,15 +443,15 @@ void main_1() {
   vec3 x_548 = output3;
   glFragColor = vec4(x_548.x, x_548.y, x_548.z, 1.0f);
 }
-main_out tint_symbol_1_inner(vec2 vMainuv_param, vec4 v_output1_param, bool tint_symbol_2, vec2 v_uv_param, vec4 v_output2_param) {
+main_out main_inner(vec2 vMainuv_param, vec4 v_output1_param, bool v_7, vec2 v_uv_param, vec4 v_output2_param) {
   vMainuv = vMainuv_param;
   v_output1 = v_output1_param;
-  tint_symbol = tint_symbol_2;
+  v_1 = v_7;
   v_uv = v_uv_param;
   v_output2 = v_output2_param;
   main_1();
   return main_out(glFragColor);
 }
 void main() {
-  tint_symbol_1_loc0_Output = tint_symbol_1_inner(tint_symbol_1_loc1_Input, tint_symbol_1_loc0_Input, gl_FrontFacing, tint_symbol_1_loc3_Input, tint_symbol_1_loc2_Input).glFragColor_1;
+  main_loc0_Output = main_inner(tint_interstage_location1, tint_interstage_location0, gl_FrontFacing, tint_interstage_location3, tint_interstage_location2).glFragColor_1;
 }

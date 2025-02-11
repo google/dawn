@@ -1,3 +1,41 @@
+//
+// fragment_main
+//
+
+RWByteAddressBuffer prevent_dce : register(u0);
+Texture2DArray<int4> arg_0 : register(t0, space1);
+uint2 textureDimensions_e4e310() {
+  uint4 v = (0u).xxxx;
+  arg_0.GetDimensions(1u, v.x, v.y, v.z, v.w);
+  uint2 res = v.xy;
+  return res;
+}
+
+void fragment_main() {
+  prevent_dce.Store2(0u, textureDimensions_e4e310());
+}
+
+//
+// compute_main
+//
+
+RWByteAddressBuffer prevent_dce : register(u0);
+Texture2DArray<int4> arg_0 : register(t0, space1);
+uint2 textureDimensions_e4e310() {
+  uint4 v = (0u).xxxx;
+  arg_0.GetDimensions(1u, v.x, v.y, v.z, v.w);
+  uint2 res = v.xy;
+  return res;
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  prevent_dce.Store2(0u, textureDimensions_e4e310());
+}
+
+//
+// vertex_main
+//
 struct VertexOutput {
   float4 pos;
   uint2 prevent_dce;
@@ -9,31 +47,19 @@ struct vertex_main_outputs {
 };
 
 
-RWByteAddressBuffer prevent_dce : register(u0);
 Texture2DArray<int4> arg_0 : register(t0, space1);
 uint2 textureDimensions_e4e310() {
   uint4 v = (0u).xxxx;
-  arg_0.GetDimensions(0u, v.x, v.y, v.z, v.w);
-  uint4 v_1 = (0u).xxxx;
-  arg_0.GetDimensions(uint(min(1u, (v.w - 1u))), v_1.x, v_1.y, v_1.z, v_1.w);
-  uint2 res = v_1.xy;
+  arg_0.GetDimensions(1u, v.x, v.y, v.z, v.w);
+  uint2 res = v.xy;
   return res;
 }
 
-void fragment_main() {
-  prevent_dce.Store2(0u, textureDimensions_e4e310());
-}
-
-[numthreads(1, 1, 1)]
-void compute_main() {
-  prevent_dce.Store2(0u, textureDimensions_e4e310());
-}
-
 VertexOutput vertex_main_inner() {
-  VertexOutput tint_symbol = (VertexOutput)0;
-  tint_symbol.pos = (0.0f).xxxx;
-  tint_symbol.prevent_dce = textureDimensions_e4e310();
-  VertexOutput v_2 = tint_symbol;
+  VertexOutput v_1 = (VertexOutput)0;
+  v_1.pos = (0.0f).xxxx;
+  v_1.prevent_dce = textureDimensions_e4e310();
+  VertexOutput v_2 = v_1;
   return v_2;
 }
 

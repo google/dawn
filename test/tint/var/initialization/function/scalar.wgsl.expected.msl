@@ -1,8 +1,6 @@
 #include <metal_stdlib>
-
 using namespace metal;
-kernel void tint_symbol() {
-  int v = 0;
-  return;
-}
 
+kernel void v_1() {
+  int v = 0;
+}

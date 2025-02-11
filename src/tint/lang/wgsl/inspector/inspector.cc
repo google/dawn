@@ -51,20 +51,13 @@
 #include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/core/type/void.h"
-#include "src/tint/lang/wgsl/ast/blend_src_attribute.h"
-#include "src/tint/lang/wgsl/ast/bool_literal_expression.h"
 #include "src/tint/lang/wgsl/ast/call_expression.h"
-#include "src/tint/lang/wgsl/ast/float_literal_expression.h"
 #include "src/tint/lang/wgsl/ast/id_attribute.h"
 #include "src/tint/lang/wgsl/ast/identifier.h"
 #include "src/tint/lang/wgsl/ast/input_attachment_index_attribute.h"
-#include "src/tint/lang/wgsl/ast/int_literal_expression.h"
 #include "src/tint/lang/wgsl/ast/interpolate_attribute.h"
-#include "src/tint/lang/wgsl/ast/location_attribute.h"
 #include "src/tint/lang/wgsl/ast/module.h"
 #include "src/tint/lang/wgsl/ast/override.h"
-#include "src/tint/lang/wgsl/ast/var.h"
-#include "src/tint/lang/wgsl/extension.h"
 #include "src/tint/lang/wgsl/sem/builtin_enum_expression.h"
 #include "src/tint/lang/wgsl/sem/call.h"
 #include "src/tint/lang/wgsl/sem/function.h"
@@ -603,6 +596,126 @@ VectorRef<SamplerTexturePair> Inspector::GetSamplerTextureUses(const std::string
     return it->second;
 }
 
+void Inspector::GenerateSamplerTargets() {
+    // Do not re-generate, since |program_| should not change during the lifetime
+    // of the inspector.
+    if (sampler_targets_ != nullptr) {
+        return;
+    }
+
+    sampler_targets_ =
+        std::make_unique<std::unordered_map<std::string, UniqueVector<SamplerTexturePair, 4>>>();
+
+    auto& sem = program_.Sem();
+
+    for (auto* node : program_.ASTNodes().Objects()) {
+        auto* c = node->As<ast::CallExpression>();
+        if (!c) {
+            continue;
+        }
+
+        auto* call = sem.Get(c)->UnwrapMaterialize()->As<sem::Call>();
+        if (!call) {
+            continue;
+        }
+
+        auto* i = call->Target()->As<sem::BuiltinFn>();
+        if (!i) {
+            continue;
+        }
+
+        const auto& signature = i->Signature();
+        int sampler_index = signature.IndexOf(core::ParameterUsage::kSampler);
+        if (sampler_index == -1) {
+            continue;
+        }
+
+        int texture_index = signature.IndexOf(core::ParameterUsage::kTexture);
+        if (texture_index == -1) {
+            continue;
+        }
+
+        auto* t = c->args[static_cast<size_t>(texture_index)];
+        auto* s = c->args[static_cast<size_t>(sampler_index)];
+
+        GetOriginatingResources(
+            std::array<const ast::Expression*, 2>{t, s}, c,
+            [&](std::array<const sem::GlobalVariable*, 2> globals, const sem::Function* fn) {
+                Vector<const sem::Function*, 4> entry_points;
+                if (fn->Declaration()->IsEntryPoint()) {
+                    entry_points = {fn};
+                } else {
+                    entry_points = fn->AncestorEntryPoints();
+                }
+
+                auto texture_binding_point = *globals[0]->Attributes().binding_point;
+                auto sampler_binding_point = *globals[1]->Attributes().binding_point;
+
+                for (auto* entry_point : entry_points) {
+                    const auto& ep_name = entry_point->Declaration()->name->symbol.Name();
+                    (*sampler_targets_)[ep_name].Add(
+                        {sampler_binding_point, texture_binding_point});
+                }
+            });
+    }
+}
+
+template <size_t N, typename F>
+void Inspector::GetOriginatingResources(std::array<const ast::Expression*, N> exprs,
+                                        const ast::CallExpression* callsite,
+                                        F&& callback) {
+    if (DAWN_UNLIKELY(!program_.IsValid())) {
+        TINT_ICE() << "attempting to get originating resources in invalid program";
+        return;
+    }
+
+    auto& sem = program_.Sem();
+
+    std::array<const sem::GlobalVariable*, N> globals{};
+    std::array<const sem::Parameter*, N> parameters{};
+    UniqueVector<const ast::CallExpression*, 8> callsites;
+
+    for (size_t i = 0; i < N; i++) {
+        const sem::Variable* root_ident = sem.GetVal(exprs[i])->RootIdentifier();
+        if (auto* global = root_ident->As<sem::GlobalVariable>()) {
+            globals[i] = global;
+        } else if (auto* param = root_ident->As<sem::Parameter>()) {
+            auto* func = tint::As<sem::Function>(param->Owner());
+            if (func->CallSites().IsEmpty()) {
+                // One or more of the expressions is a parameter, but this function
+                // is not called. Ignore.
+                return;
+            }
+            for (auto* call : func->CallSites()) {
+                callsites.Add(call->Declaration());
+            }
+            parameters[i] = param;
+        } else {
+            TINT_ICE() << "cannot resolve originating resource with expression type "
+                       << exprs[i]->TypeInfo().name;
+            return;
+        }
+    }
+
+    if (!callsites.IsEmpty()) {
+        for (auto* call_expr : callsites) {
+            // Make a copy of the expressions for this callsite
+            std::array<const ast::Expression*, N> call_exprs = exprs;
+            // Patch all the parameter expressions with their argument
+            for (size_t i = 0; i < N; i++) {
+                if (auto* param = parameters[i]) {
+                    call_exprs[i] = call_expr->args[param->Index()];
+                }
+            }
+            // Now call GetOriginatingResources() with from the callsite
+            GetOriginatingResources(call_exprs, call_expr, callback);
+        }
+    } else {
+        // All the expressions resolved to globals
+        callback(globals, sem.Get(callsite)->Stmt()->Function());
+    }
+}
+
 std::vector<SamplerTexturePair> Inspector::GetSamplerTextureUses(const std::string& entry_point,
                                                                  const BindingPoint& placeholder) {
     auto* func = FindEntryPointByName(entry_point);
@@ -879,75 +992,6 @@ std::vector<ResourceBinding> Inspector::GetStorageTextureResourceBindingsImpl(
     return result;
 }
 
-void Inspector::GenerateSamplerTargets() {
-    // Do not re-generate, since |program_| should not change during the lifetime
-    // of the inspector.
-    if (sampler_targets_ != nullptr) {
-        return;
-    }
-
-    sampler_targets_ =
-        std::make_unique<std::unordered_map<std::string, UniqueVector<SamplerTexturePair, 4>>>();
-
-    auto& sem = program_.Sem();
-
-    for (auto* node : program_.ASTNodes().Objects()) {
-        auto* c = node->As<ast::CallExpression>();
-        if (!c) {
-            continue;
-        }
-
-        auto* call = sem.Get(c)->UnwrapMaterialize()->As<sem::Call>();
-        if (!call) {
-            continue;
-        }
-
-        auto* i = call->Target()->As<sem::BuiltinFn>();
-        if (!i) {
-            continue;
-        }
-
-        const auto& signature = i->Signature();
-        int sampler_index = signature.IndexOf(core::ParameterUsage::kSampler);
-        if (sampler_index == -1) {
-            continue;
-        }
-
-        int texture_index = signature.IndexOf(core::ParameterUsage::kTexture);
-        if (texture_index == -1) {
-            continue;
-        }
-
-        auto* call_func = call->Stmt()->Function();
-        Vector<const sem::Function*, 4> entry_points;
-        if (call_func->Declaration()->IsEntryPoint()) {
-            entry_points = {call_func};
-        } else {
-            entry_points = call_func->AncestorEntryPoints();
-        }
-
-        if (entry_points.IsEmpty()) {
-            continue;
-        }
-
-        auto* t = c->args[static_cast<size_t>(texture_index)];
-        auto* s = c->args[static_cast<size_t>(sampler_index)];
-
-        GetOriginatingResources(
-            std::array<const ast::Expression*, 2>{t, s},
-            [&](std::array<const sem::GlobalVariable*, 2> globals) {
-                auto texture_binding_point = *globals[0]->Attributes().binding_point;
-                auto sampler_binding_point = *globals[1]->Attributes().binding_point;
-
-                for (auto* entry_point : entry_points) {
-                    const auto& ep_name = entry_point->Declaration()->name->symbol.Name();
-                    (*sampler_targets_)[ep_name].Add(
-                        {sampler_binding_point, texture_binding_point});
-                }
-            });
-    }
-}
-
 std::tuple<InterpolationType, InterpolationSampling> Inspector::CalculateInterpolationData(
     VectorRef<const ast::Attribute*> attributes) const {
     auto* interpolation_attribute = ast::GetAttribute<ast::InterpolateAttribute>(attributes);
@@ -1065,60 +1109,6 @@ std::vector<PixelLocalMemberType> Inspector::ComputePixelLocalMemberTypes(
     }
 
     return {};
-}
-
-template <size_t N, typename F>
-void Inspector::GetOriginatingResources(std::array<const ast::Expression*, N> exprs, F&& callback) {
-    if (DAWN_UNLIKELY(!program_.IsValid())) {
-        TINT_ICE() << "attempting to get originating resources in invalid program";
-        return;
-    }
-
-    auto& sem = program_.Sem();
-
-    std::array<const sem::GlobalVariable*, N> globals{};
-    std::array<const sem::Parameter*, N> parameters{};
-    UniqueVector<const ast::CallExpression*, 8> callsites;
-
-    for (size_t i = 0; i < N; i++) {
-        const sem::Variable* root_ident = sem.GetVal(exprs[i])->RootIdentifier();
-        if (auto* global = root_ident->As<sem::GlobalVariable>()) {
-            globals[i] = global;
-        } else if (auto* param = root_ident->As<sem::Parameter>()) {
-            auto* func = tint::As<sem::Function>(param->Owner());
-            if (func->CallSites().IsEmpty()) {
-                // One or more of the expressions is a parameter, but this function
-                // is not called. Ignore.
-                return;
-            }
-            for (auto* call : func->CallSites()) {
-                callsites.Add(call->Declaration());
-            }
-            parameters[i] = param;
-        } else {
-            TINT_ICE() << "cannot resolve originating resource with expression type "
-                       << exprs[i]->TypeInfo().name;
-            return;
-        }
-    }
-
-    if (callsites.Length()) {
-        for (auto* call_expr : callsites) {
-            // Make a copy of the expressions for this callsite
-            std::array<const ast::Expression*, N> call_exprs = exprs;
-            // Patch all the parameter expressions with their argument
-            for (size_t i = 0; i < N; i++) {
-                if (auto* param = parameters[i]) {
-                    call_exprs[i] = call_expr->args[param->Index()];
-                }
-            }
-            // Now call GetOriginatingResources() with from the callsite
-            GetOriginatingResources(call_exprs, callback);
-        }
-    } else {
-        // All the expressions resolved to globals
-        callback(globals);
-    }
 }
 
 std::vector<Inspector::LevelSampleInfo> Inspector::GetTextureQueries(const std::string& ep_name) {

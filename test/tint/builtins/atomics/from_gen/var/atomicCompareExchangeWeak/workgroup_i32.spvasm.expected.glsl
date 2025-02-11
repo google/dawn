@@ -1,7 +1,7 @@
 #version 310 es
 
 
-struct tint_symbol {
+struct tint_struct {
   int old_value;
   bool exchanged;
 };
@@ -16,7 +16,7 @@ shared int arg_0;
 void atomicCompareExchangeWeak_e88938() {
   int arg_1 = 0;
   int arg_2 = 0;
-  tint_symbol res = tint_symbol(0, false);
+  tint_struct res = tint_struct(0, false);
   arg_1 = 1;
   arg_2 = 1;
   int x_22 = arg_2;
@@ -24,7 +24,7 @@ void atomicCompareExchangeWeak_e88938() {
   int v = atomicCompSwap(arg_0, x_23, x_22);
   int old_value_1 = atomic_compare_exchange_result_i32(v, (v == x_23)).old_value;
   int x_24 = old_value_1;
-  res = tint_symbol(x_24, (x_24 == x_22));
+  res = tint_struct(x_24, (x_24 == x_22));
 }
 void compute_main_inner(uint local_invocation_index_2) {
   atomicExchange(arg_0, 0);

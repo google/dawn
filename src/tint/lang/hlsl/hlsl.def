@@ -194,6 +194,11 @@ fn pack_u8(vec4<u32>) -> uint8_t4_packed
 fn pack_s8(vec4<i32>) -> int8_t4_packed
 fn pack_clamp_s8(vec4<i32>) -> int8_t4_packed
 
+fn convert(int8_t4_packed) -> u32
+fn convert(uint8_t4_packed) -> u32
+fn convert<T: int8_t4_packed>(u32) -> T
+fn convert<T: uint8_t4_packed>(u32) -> T
+
 implicit(T: fi32_f16) fn sign(T) -> i32
 implicit(N: num, T: fi32_f16) fn sign(vec<N, T>) -> vec<N, i32>
 

@@ -50,7 +50,8 @@ class PhysicalDevice : public PhysicalDeviceBase {
 
     // PhysicalDeviceBase Implementation
     bool SupportsExternalImages() const override;
-    bool SupportsFeatureLevel(FeatureLevel featureLevel) const override;
+    bool SupportsFeatureLevel(wgpu::FeatureLevel featureLevel,
+                              InstanceBase* instance) const override;
 
     const VulkanDeviceInfo& GetDeviceInfo() const;
     VkPhysicalDevice GetVkPhysicalDevice() const;
@@ -62,6 +63,7 @@ class PhysicalDevice : public PhysicalDeviceBase {
     bool IsAndroidARM() const;
     bool IsAndroidSamsung() const;
     bool IsIntelMesa() const;
+    bool IsAndroidHuawei() const;
 
     uint32_t GetDefaultComputeSubgroupSize() const;
 
@@ -74,6 +76,9 @@ class PhysicalDevice : public PhysicalDeviceBase {
     MaybeError InitializeImpl() override;
     void InitializeSupportedFeaturesImpl() override;
     MaybeError InitializeSupportedLimitsImpl(CombinedLimits* limits) override;
+
+    MaybeError InitializeSupportedLimitsInternal(wgpu::FeatureLevel featureLevel,
+                                                 CombinedLimits* limits);
 
     FeatureValidationResult ValidateFeatureSupportedWithTogglesImpl(
         wgpu::FeatureName feature,
@@ -96,13 +101,19 @@ class PhysicalDevice : public PhysicalDeviceBase {
     void PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info) const override;
     void PopulateBackendFormatCapabilities(
         wgpu::TextureFormat format,
-        UnpackedPtr<FormatCapabilities>& capabilities) const override;
+        UnpackedPtr<DawnFormatCapabilities>& capabilities) const override;
+
+    // Sets core feature level as not being supported and stores `error` with
+    // reason why core isn't supported.
+    void SetCoreNotSupported(std::unique_ptr<ErrorData> error);
 
     VkPhysicalDevice mVkPhysicalDevice;
     Ref<VulkanInstance> mVulkanInstance;
     VulkanDeviceInfo mDeviceInfo = {};
 
     uint32_t mDefaultComputeSubgroupSize = 0;
+    bool mSupportsCoreFeatureLevel = true;
+    mutable std::unique_ptr<ErrorData> mCoreError;
 
 #if DAWN_PLATFORM_IS(ANDROID)
     std::unique_ptr<AHBFunctions> mAHBFunctions;

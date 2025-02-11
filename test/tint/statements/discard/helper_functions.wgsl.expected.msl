@@ -1,31 +1,31 @@
 #include <metal_stdlib>
-
 using namespace metal;
-struct tint_private_vars_struct {
-  bool tint_discarded;
+
+struct tint_module_vars_struct {
+  device int* non_uniform_global;
+  device float* output;
+  thread bool* continue_execution;
 };
 
-void foo(thread tint_private_vars_struct* const tint_private_vars, device int* const tint_symbol_2) {
-  if ((*(tint_symbol_2) < 0)) {
-    (*(tint_private_vars)).tint_discarded = true;
+void foo(tint_module_vars_struct tint_module_vars) {
+  if (((*tint_module_vars.non_uniform_global) < 0)) {
+    (*tint_module_vars.continue_execution) = false;
   }
 }
 
-void bar(thread tint_private_vars_struct* const tint_private_vars, device float* const tint_symbol_3) {
-  float const tint_symbol_1 = dfdx(1.0f);
-  if (!((*(tint_private_vars)).tint_discarded)) {
-    *(tint_symbol_3) = tint_symbol_1;
+void bar(tint_module_vars_struct tint_module_vars) {
+  float const v = dfdx(1.0f);
+  if ((*tint_module_vars.continue_execution)) {
+    (*tint_module_vars.output) = v;
   }
 }
 
-fragment void tint_symbol(device int* tint_symbol_4 [[buffer(0)]], device float* tint_symbol_5 [[buffer(1)]]) {
-  thread tint_private_vars_struct tint_private_vars = {};
-  tint_private_vars.tint_discarded = false;
-  foo(&(tint_private_vars), tint_symbol_4);
-  bar(&(tint_private_vars), tint_symbol_5);
-  if (tint_private_vars.tint_discarded) {
+fragment void v_1(device int* non_uniform_global [[buffer(0)]], device float* output [[buffer(1)]]) {
+  thread bool continue_execution = true;
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.non_uniform_global=non_uniform_global, .output=output, .continue_execution=(&continue_execution)};
+  foo(tint_module_vars);
+  bar(tint_module_vars);
+  if (!((*tint_module_vars.continue_execution))) {
     discard_fragment();
   }
-  return;
 }
-

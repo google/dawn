@@ -33,7 +33,9 @@
 namespace tint::core::ir::transform {
 namespace {
 
-constexpr auto& AddEmptyEntryPointFuzzer = AddEmptyEntryPoint;
+Result<SuccessType> AddEmptyEntryPointFuzzer(Module& ir, const fuzz::ir::Context&) {
+    return AddEmptyEntryPoint(ir);
+}
 
 }  // namespace
 }  // namespace tint::core::ir::transform

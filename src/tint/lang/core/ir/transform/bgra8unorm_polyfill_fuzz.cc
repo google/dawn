@@ -33,7 +33,9 @@
 namespace tint::core::ir::transform {
 namespace {
 
-constexpr auto& Bgra8UnormPolyfillFuzzer = Bgra8UnormPolyfill;
+Result<SuccessType> Bgra8UnormPolyfillFuzzer(Module& ir, const fuzz::ir::Context&) {
+    return Bgra8UnormPolyfill(ir);
+}
 
 }  // namespace
 }  // namespace tint::core::ir::transform

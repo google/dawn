@@ -27,6 +27,7 @@
 
 #include "src/tint/lang/spirv/writer/printer/printer.h"
 
+#include <string>
 #include <utility>
 
 #include "spirv/unified1/GLSL.std.450.h"
@@ -88,6 +89,7 @@
 #include "src/tint/lang/core/type/sampler.h"
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/struct.h"
+#include "src/tint/lang/core/type/subgroup_matrix.h"
 #include "src/tint/lang/core/type/texture.h"
 #include "src/tint/lang/core/type/type.h"
 #include "src/tint/lang/core/type/u32.h"
@@ -115,6 +117,7 @@ namespace tint::spirv::writer {
 namespace {
 
 constexpr uint32_t kWriterVersion = 1;
+constexpr const char* kGLSLstd450 = "GLSL.std.450";
 
 SpvStorageClass StorageClass(core::AddressSpace addrspace) {
     switch (addrspace) {
@@ -193,7 +196,7 @@ class Printer {
     }
 
     /// @returns the generated SPIR-V code on success, or failure
-    Result<std::vector<uint32_t>> Code() {
+    Result<Output> Code() {
         if (auto res = Generate(); res != Success) {
             return res.Failure();
         }
@@ -202,7 +205,9 @@ class Printer {
         BinaryWriter writer;
         writer.WriteHeader(module_.IdBound(), kWriterVersion);
         writer.WriteModule(module_);
-        return std::move(writer.Result());
+
+        output_.spirv = std::move(writer.Result());
+        return output_;
     }
 
   private:
@@ -211,6 +216,8 @@ class Printer {
     Options options_;
     writer::Module module_;
     BinaryWriter writer_;
+
+    Output output_;
 
     /// A function type used for an OpTypeFunction declaration.
     struct FunctionType {
@@ -321,6 +328,8 @@ class Printer {
         switch (builtin) {
             case core::BuiltinValue::kPointSize:
                 return SpvBuiltInPointSize;
+            case core::BuiltinValue::kCullDistance:
+                return SpvBuiltInCullDistance;
             case core::BuiltinValue::kFragDepth:
                 return SpvBuiltInFragDepth;
             case core::BuiltinValue::kFrontFacing:
@@ -379,9 +388,7 @@ class Printer {
         auto id = Constant(constant->Value());
 
         // Set the name for the SPIR-V result ID if provided in the module.
-        if (auto name = ir_.NameOf(constant)) {
-            module_.PushDebug(spv::Op::OpName, {id, Operand(name.Name())});
-        }
+        PushName(id, constant);
 
         return id;
     }
@@ -533,6 +540,37 @@ class Printer {
                 [&](const type::SampledImage* s) {
                     module_.PushType(spv::Op::OpTypeSampledImage, {id, Type(s->Image())});
                 },  //
+                [&](const core::type::SubgroupMatrix* sm) {
+                    TINT_ASSERT(options_.use_vulkan_memory_model);
+                    auto scope = Constant(ir_.constant_values.Get(u32(spv::Scope::Subgroup)));
+                    auto cols = Constant(ir_.constant_values.Get(u32(sm->Columns())));
+                    auto rows = Constant(ir_.constant_values.Get(u32(sm->Rows())));
+                    spv::CooperativeMatrixUse use = spv::CooperativeMatrixUse::Max;
+                    switch (sm->Kind()) {
+                        case core::SubgroupMatrixKind::kLeft:
+                            use = spv::CooperativeMatrixUse::MatrixAKHR;
+                            break;
+                        case core::SubgroupMatrixKind::kRight:
+                            use = spv::CooperativeMatrixUse::MatrixBKHR;
+                            break;
+                        case core::SubgroupMatrixKind::kResult:
+                            use = spv::CooperativeMatrixUse::MatrixAccumulatorKHR;
+                            break;
+                        case core::SubgroupMatrixKind::kUndefined:
+                            TINT_UNREACHABLE();
+                    }
+                    module_.PushExtension("SPV_KHR_cooperative_matrix");
+                    module_.PushCapability(SpvCapabilityCooperativeMatrixKHR);
+                    module_.PushType(spv::Op::OpTypeCooperativeMatrixKHR,
+                                     {
+                                         id,
+                                         Type(sm->Type()),
+                                         scope,
+                                         rows,
+                                         cols,
+                                         Constant(ir_.constant_values.Get(u32(use))),
+                                     });
+                },  //
                 TINT_ICE_ON_NO_MATCH);
             return id;
         });
@@ -594,10 +632,7 @@ class Printer {
                                    Operand(effective_row_count * matrix_type->Type()->Size())});
             }
 
-            if (member->Name().IsValid()) {
-                module_.PushDebug(spv::Op::OpMemberName,
-                                  {operands[0], member->Index(), Operand(member->Name().Name())});
-            }
+            PushMemberName(id, member->Index(), member->Name());
         }
         module_.PushType(spv::Op::OpTypeStruct, std::move(operands));
 
@@ -606,9 +641,7 @@ class Printer {
             module_.PushAnnot(spv::Op::OpDecorate, {id, U32Operand(SpvDecorationBlock)});
         }
 
-        if (str->Name().IsValid()) {
-            module_.PushDebug(spv::Op::OpName, {operands[0], Operand(str->Name().Name())});
-        }
+        PushName(id, str->Name());
     }
 
     /// Emit a texture type.
@@ -710,10 +743,10 @@ class Printer {
         auto id = Value(func);
 
         // Emit the function name.
-        module_.PushDebug(spv::Op::OpName, {id, Operand(ir_.NameOf(func).Name())});
+        PushName(id, func);
 
         // Emit OpEntryPoint and OpExecutionMode declarations if needed.
-        if (func->Stage() != core::ir::Function::PipelineStage::kUndefined) {
+        if (func->IsEntryPoint()) {
             EmitEntryPoint(func, id);
         }
 
@@ -730,9 +763,7 @@ class Printer {
             auto param_id = Value(param);
             params.push_back(Instruction(spv::Op::OpFunctionParameter, {param_type_id, param_id}));
             function_type.param_type_ids.Push(param_type_id);
-            if (auto name = ir_.NameOf(param)) {
-                module_.PushDebug(spv::Op::OpName, {param_id, Operand(name.Name())});
-            }
+            PushName(param_id, param);
         }
 
         // Get the ID for the function type (creating it if needed).
@@ -775,6 +806,12 @@ class Printer {
 
                 auto const_wg_size = func->WorkgroupSizeAsConst();
                 TINT_ASSERT(const_wg_size);
+                auto wg_size = *const_wg_size;
+
+                // Store the workgroup information away to return from the generator.
+                output_.workgroup_info.x = wg_size[0];
+                output_.workgroup_info.y = wg_size[1];
+                output_.workgroup_info.z = wg_size[2];
 
                 module_.PushExecutionMode(
                     spv::Op::OpExecutionMode,
@@ -796,7 +833,16 @@ class Printer {
                 TINT_ICE() << "undefined pipeline stage for entry point";
         }
 
-        OperandList operands = {U32Operand(stage), id, ir_.NameOf(func).Name()};
+        // Use the remapped entry point name if requested, otherwise use the original name.
+        std::string name;
+        if (!options_.remapped_entry_point_name.empty()) {
+            name = options_.remapped_entry_point_name;
+        } else {
+            name = ir_.NameOf(func).Name();
+        }
+        TINT_ASSERT(!name.empty());
+
+        OperandList operands = {U32Operand(stage), id, name};
 
         // Add the list of all referenced shader IO variables.
         for (auto* global : *ir_.root_block) {
@@ -843,8 +889,8 @@ class Printer {
     void EmitRootBlock(core::ir::Block* root_block) {
         for (auto* inst : *root_block) {
             Switch(
-                inst,                                   //
-                [&](core::ir::Var* v) { EmitVar(v); },  //
+                inst,                                         //
+                [&](core::ir::Var* v) { EmitGlobalVar(v); },  //
                 TINT_ICE_ON_NO_MATCH);
         }
     }
@@ -928,9 +974,7 @@ class Printer {
 
             // Set the name for the SPIR-V result ID if provided in the module.
             if (inst->Result(0) && !inst->Is<core::ir::Var>()) {
-                if (auto name = ir_.NameOf(inst)) {
-                    module_.PushDebug(spv::Op::OpName, {Value(inst), Operand(name.Name())});
-                }
+                PushName(Value(inst), inst);
             }
         }
     }
@@ -1260,8 +1304,23 @@ class Printer {
     void EmitSpirvBuiltinCall(spirv::ir::BuiltinCall* builtin) {
         auto id = Value(builtin);
 
+        OperandList operands;
+        if (!builtin->Result(0)->Type()->Is<core::type::Void>()) {
+            operands = {Type(builtin->Result(0)->Type()), id};
+        }
+
         spv::Op op = spv::Op::Max;
+
+        auto ext_inst = [&](enum GLSLstd450 inst) {
+            op = spv::Op::OpExtInst;
+            operands.push_back(ImportGlslStd450());
+            operands.push_back(U32Operand(inst));
+        };
+
         switch (builtin->Func()) {
+            case spirv::BuiltinFn::kAbs:
+                ext_inst(GLSLstd450SAbs);
+                break;
             case spirv::BuiltinFn::kArrayLength:
                 op = spv::Op::OpArrayLength;
                 break;
@@ -1351,6 +1410,33 @@ class Printer {
             case spirv::BuiltinFn::kMatrixTimesVector:
                 op = spv::Op::OpMatrixTimesVector;
                 break;
+            case spirv::BuiltinFn::kModf:
+                ext_inst(GLSLstd450Modf);
+                break;
+            case spirv::BuiltinFn::kFrexp:
+                ext_inst(GLSLstd450Frexp);
+                break;
+            case spirv::BuiltinFn::kSmax:
+                ext_inst(GLSLstd450SMax);
+                break;
+            case spirv::BuiltinFn::kSmin:
+                ext_inst(GLSLstd450SMin);
+                break;
+            case spirv::BuiltinFn::kSclamp:
+                ext_inst(GLSLstd450SClamp);
+                break;
+            case spirv::BuiltinFn::kUmax:
+                ext_inst(GLSLstd450UMax);
+                break;
+            case spirv::BuiltinFn::kUmin:
+                ext_inst(GLSLstd450UMin);
+                break;
+            case spirv::BuiltinFn::kUclamp:
+                ext_inst(GLSLstd450UClamp);
+                break;
+            case spirv::BuiltinFn::kNormalize:
+                ext_inst(GLSLstd450Normalize);
+                break;
             case spirv::BuiltinFn::kSampledImage:
                 op = spv::Op::OpSampledImage;
                 break;
@@ -1362,6 +1448,33 @@ class Printer {
                 break;
             case spirv::BuiltinFn::kSelect:
                 op = spv::Op::OpSelect;
+                break;
+            case spirv::BuiltinFn::kSign:
+                ext_inst(GLSLstd450SSign);
+                break;
+            case spirv::BuiltinFn::kInverse:
+                ext_inst(GLSLstd450MatrixInverse);
+                break;
+            case spirv::BuiltinFn::kFindILsb:
+                ext_inst(GLSLstd450FindILsb);
+                break;
+            case spirv::BuiltinFn::kFindSMsb:
+                ext_inst(GLSLstd450FindSMsb);
+                break;
+            case spirv::BuiltinFn::kFindUMsb:
+                ext_inst(GLSLstd450FindUMsb);
+                break;
+            case spirv::BuiltinFn::kRefract:
+                ext_inst(GLSLstd450Refract);
+                break;
+            case spirv::BuiltinFn::kReflect:
+                ext_inst(GLSLstd450Reflect);
+                break;
+            case spirv::BuiltinFn::kFaceForward:
+                ext_inst(GLSLstd450FaceForward);
+                break;
+            case spirv::BuiltinFn::kLdexp:
+                ext_inst(GLSLstd450Ldexp);
                 break;
             case spirv::BuiltinFn::kUdot:
                 module_.PushExtension("SPV_KHR_integer_dot_product");
@@ -1375,18 +1488,44 @@ class Printer {
             case spirv::BuiltinFn::kVectorTimesScalar:
                 op = spv::Op::OpVectorTimesScalar;
                 break;
+            case spirv::BuiltinFn::kCooperativeMatrixLoad:
+                op = spv::Op::OpCooperativeMatrixLoadKHR;
+                break;
+            case spirv::BuiltinFn::kCooperativeMatrixMulAdd:
+                op = spv::Op::OpCooperativeMatrixMulAddKHR;
+                break;
+            case spirv::BuiltinFn::kCooperativeMatrixStore:
+                op = spv::Op::OpCooperativeMatrixStoreKHR;
+                break;
+            case spirv::BuiltinFn::kBitCount:
+                op = spv::Op::OpBitCount;
+                break;
+            case spirv::BuiltinFn::kBitFieldInsert:
+                op = spv::Op::OpBitFieldInsert;
+                break;
+            case spirv::BuiltinFn::kBitFieldSExtract:
+                op = spv::Op::OpBitFieldSExtract;
+                break;
+            case spirv::BuiltinFn::kBitFieldUExtract:
+                op = spv::Op::OpBitFieldUExtract;
+                break;
             case spirv::BuiltinFn::kNone:
                 TINT_ICE() << "undefined spirv ir function";
         }
 
-        OperandList operands;
-        if (!builtin->Result(0)->Type()->Is<core::type::Void>()) {
-            operands = {Type(builtin->Result(0)->Type()), id};
-        }
         for (auto* arg : builtin->Args()) {
             operands.push_back(Value(arg));
         }
         current_function_.PushInst(op, operands);
+    }
+
+    uint32_t ImportGlslStd450() {
+        return imports_.GetOrAdd(kGLSLstd450, [&] {
+            // Import the instruction set the first time it is requested.
+            auto import = module_.NextId();
+            module_.PushExtImport(spv::Op::OpExtInstImport, {import, Operand(kGLSLstd450)});
+            return import;
+        });
     }
 
     /// Emit a builtin function call instruction.
@@ -1415,14 +1554,8 @@ class Printer {
 
         // Helper to set up the opcode and operand list for a GLSL extended instruction.
         auto glsl_ext_inst = [&](enum GLSLstd450 inst) {
-            constexpr const char* kGLSLstd450 = "GLSL.std.450";
             op = spv::Op::OpExtInst;
-            operands.push_back(imports_.GetOrAdd(kGLSLstd450, [&] {
-                // Import the instruction set the first time it is requested.
-                auto import = module_.NextId();
-                module_.PushExtImport(spv::Op::OpExtInstImport, {import, Operand(kGLSLstd450)});
-                return import;
-            }));
+            operands.push_back(ImportGlslStd450());
             operands.push_back(U32Operand(inst));
         };
 
@@ -1923,15 +2056,23 @@ class Printer {
     /// Emit a construct instruction.
     /// @param construct the construct instruction to emit
     void EmitConstruct(core::ir::Construct* construct) {
+        auto* result_ty = construct->Result(0)->Type();
+
         // If there is just a single argument with the same type as the result, this is an identity
         // constructor and we can just pass through the ID of the argument.
-        if (construct->Args().Length() == 1 &&
-            construct->Result(0)->Type() == construct->Args()[0]->Type()) {
+        if (construct->Args().Length() == 1 && result_ty == construct->Args()[0]->Type()) {
             values_.Add(construct->Result(0), Value(construct->Args()[0]));
             return;
         }
 
-        OperandList operands = {Type(construct->Result(0)->Type()), Value(construct)};
+        // Zero-value constructors for subgroup matrices are not folded into constants, so
+        // special-case them into OpConstantNull here.
+        if (result_ty->Is<core::type::SubgroupMatrix>() && construct->Operands().IsEmpty()) {
+            values_.Add(construct->Result(0), ConstantNull(result_ty));
+            return;
+        }
+
+        OperandList operands = {Type(result_ty), Value(construct)};
         for (auto* arg : construct->Args()) {
             operands.push_back(Value(arg));
         }
@@ -2278,6 +2419,20 @@ class Printer {
         }
     }
 
+    void EmitGlobalVar(core::ir::Var* var) {
+        auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
+        if (ptr->AddressSpace() == core::AddressSpace::kWorkgroup) {
+            auto* ty = ptr->StoreType();
+            uint32_t align = ty->Align();
+            uint32_t size = ty->Size();
+
+            // This essentially matches std430 layout rules from GLSL, which are in
+            // turn specified as an upper bound for Vulkan layout sizing.
+            output_.workgroup_info.storage_size += tint::RoundUp(16u, tint::RoundUp(align, size));
+        }
+        EmitVar(var);
+    }
+
     /// Emit a var instruction.
     /// @param var the var instruction to emit
     void EmitVar(core::ir::Var* var) {
@@ -2388,9 +2543,7 @@ class Printer {
         }
 
         // Set the name if present.
-        if (auto name = ir_.NameOf(var)) {
-            module_.PushDebug(spv::Op::OpName, {id, Operand(name.Name())});
-        }
+        PushName(id, var);
     }
 
     /// Emit a let instruction.
@@ -2519,11 +2672,30 @@ class Printer {
         }
         return SpvImageFormatUnknown;
     }
+
+    /// Set the debug name of an instruction.
+    void PushName(uint32_t id, core::ir::Instruction* inst) { PushName(id, ir_.NameOf(inst)); }
+    /// Set the debug name of a value.
+    void PushName(uint32_t id, core::ir::Value* value) { PushName(id, ir_.NameOf(value)); }
+    /// Set the debug name for a SPIR-V ID.
+    void PushName(uint32_t id, const Symbol& name) {
+        // Only set the name if it is valid and if we are not stripping user identifiers.
+        if (name && !options_.strip_all_names) {
+            module_.PushDebug(spv::Op::OpName, {id, Operand(name.Name())});
+        }
+    }
+    /// Set the debug member name for a SPIR-V ID.
+    void PushMemberName(uint32_t id, uint32_t index, const Symbol& name) {
+        // Only set the name if it is valid and if we are not stripping user identifiers.
+        if (name && !options_.strip_all_names) {
+            module_.PushDebug(spv::Op::OpMemberName, {id, index, Operand(name.Name())});
+        }
+    }
 };
 
 }  // namespace
 
-tint::Result<std::vector<uint32_t>> Print(core::ir::Module& module, const Options& options) {
+tint::Result<Output> Print(core::ir::Module& module, const Options& options) {
     return Printer{module, options}.Code();
 }
 

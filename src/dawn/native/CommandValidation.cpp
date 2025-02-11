@@ -38,6 +38,7 @@
 #include "dawn/common/Numeric.h"
 #include "dawn/native/BindGroup.h"
 #include "dawn/native/Buffer.h"
+#include "dawn/native/ChainUtils.h"
 #include "dawn/native/CommandBufferStateTracker.h"
 #include "dawn/native/Commands.h"
 #include "dawn/native/Device.h"
@@ -187,35 +188,37 @@ MaybeError ValidateTimestampQuery(const DeviceBase* device,
 }
 
 MaybeError ValidatePassTimestampWrites(const DeviceBase* device,
-                                       const QuerySetBase* querySet,
-                                       uint32_t beginningOfPassWriteIndex,
-                                       uint32_t endOfPassWriteIndex) {
-    DAWN_TRY(device->ValidateObject(querySet));
-
+                                       const PassTimestampWrites* timestampWrites) {
     DAWN_INVALID_IF(!device->HasFeature(Feature::TimestampQuery),
                     "Timestamp queries used without the timestamp-query feature enabled.");
 
+    UnpackedPtr<PassTimestampWrites> unpacked;
+    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(timestampWrites));
+
+    QuerySetBase* querySet = unpacked->querySet;
+    DAWN_ASSERT(unpacked->querySet != nullptr);
+    DAWN_TRY(device->ValidateObject(querySet));
     DAWN_INVALID_IF(querySet->GetQueryType() != wgpu::QueryType::Timestamp,
                     "The type of %s is not %s.", querySet, wgpu::QueryType::Timestamp);
 
-    if (beginningOfPassWriteIndex != wgpu::kQuerySetIndexUndefined) {
-        DAWN_INVALID_IF(beginningOfPassWriteIndex >= querySet->GetQueryCount(),
+    if (unpacked->beginningOfPassWriteIndex != wgpu::kQuerySetIndexUndefined) {
+        DAWN_INVALID_IF(unpacked->beginningOfPassWriteIndex >= querySet->GetQueryCount(),
                         "beginningOfPassWriteIndex (%u) exceeds the number of queries (%u) in %s.",
-                        beginningOfPassWriteIndex, querySet->GetQueryCount(), querySet);
+                        unpacked->beginningOfPassWriteIndex, querySet->GetQueryCount(), querySet);
     }
-    if (endOfPassWriteIndex != wgpu::kQuerySetIndexUndefined) {
-        DAWN_INVALID_IF(endOfPassWriteIndex >= querySet->GetQueryCount(),
+    if (unpacked->endOfPassWriteIndex != wgpu::kQuerySetIndexUndefined) {
+        DAWN_INVALID_IF(unpacked->endOfPassWriteIndex >= querySet->GetQueryCount(),
                         "endOfPassWriteIndex (%u) exceeds the number of queries (%u) in %s.",
-                        endOfPassWriteIndex, querySet->GetQueryCount(), querySet);
+                        unpacked->endOfPassWriteIndex, querySet->GetQueryCount(), querySet);
     }
 
-    DAWN_INVALID_IF(beginningOfPassWriteIndex == wgpu::kQuerySetIndexUndefined &&
-                        endOfPassWriteIndex == wgpu::kQuerySetIndexUndefined,
+    DAWN_INVALID_IF(unpacked->beginningOfPassWriteIndex == wgpu::kQuerySetIndexUndefined &&
+                        unpacked->endOfPassWriteIndex == wgpu::kQuerySetIndexUndefined,
                     "Both beginningOfPassWriteIndex and endOfPassWriteIndex are undefined.");
 
-    DAWN_INVALID_IF(beginningOfPassWriteIndex == endOfPassWriteIndex,
+    DAWN_INVALID_IF(unpacked->beginningOfPassWriteIndex == unpacked->endOfPassWriteIndex,
                     "beginningOfPassWriteIndex (%u) is equal to endOfPassWriteIndex (%u).",
-                    beginningOfPassWriteIndex, endOfPassWriteIndex);
+                    unpacked->beginningOfPassWriteIndex, unpacked->endOfPassWriteIndex);
 
     return {};
 }
@@ -322,9 +325,9 @@ MaybeError ValidateCopySizeFitsInBuffer(const Ref<BufferBase>& buffer,
 
 // Replace wgpu::kCopyStrideUndefined with real values, so backends don't have to think about
 // it.
-void ApplyDefaultTextureDataLayoutOptions(TextureDataLayout* layout,
-                                          const TexelBlockInfo& blockInfo,
-                                          const Extent3D& copyExtent) {
+void ApplyDefaultTexelCopyBufferLayoutOptions(TexelCopyBufferLayout* layout,
+                                              const TexelBlockInfo& blockInfo,
+                                              const Extent3D& copyExtent) {
     DAWN_ASSERT(layout != nullptr);
     DAWN_ASSERT(copyExtent.height % blockInfo.height == 0);
     uint32_t heightInBlocks = copyExtent.height / blockInfo.height;
@@ -343,7 +346,7 @@ void ApplyDefaultTextureDataLayoutOptions(TextureDataLayout* layout,
     }
 }
 
-MaybeError ValidateLinearTextureData(const TextureDataLayout& layout,
+MaybeError ValidateLinearTextureData(const TexelCopyBufferLayout& layout,
                                      uint64_t byteSize,
                                      const TexelBlockInfo& blockInfo,
                                      const Extent3D& copyExtent) {
@@ -400,21 +403,26 @@ MaybeError ValidateLinearTextureData(const TextureDataLayout& layout,
     return {};
 }
 
-MaybeError ValidateImageCopyBuffer(DeviceBase const* device,
-                                   const ImageCopyBuffer& imageCopyBuffer) {
-    DAWN_TRY(device->ValidateObject(imageCopyBuffer.buffer));
-    if (imageCopyBuffer.layout.bytesPerRow != wgpu::kCopyStrideUndefined) {
-        DAWN_INVALID_IF(imageCopyBuffer.layout.bytesPerRow % kTextureBytesPerRowAlignment != 0,
+MaybeError ValidateTexelCopyBufferInfo(DeviceBase const* device,
+                                       const TexelCopyBufferInfo& texelCopyBufferInfo) {
+    DAWN_TRY(device->ValidateObject(texelCopyBufferInfo.buffer));
+    auto alignment = kTextureBytesPerRowAlignment;
+    if (device->HasFeature(Feature::DawnTexelCopyBufferRowAlignment)) {
+        alignment =
+            device->GetLimits().texelCopyBufferRowAlignmentLimits.minTexelCopyBufferRowAlignment;
+    }
+    if (texelCopyBufferInfo.layout.bytesPerRow != wgpu::kCopyStrideUndefined) {
+        DAWN_INVALID_IF(texelCopyBufferInfo.layout.bytesPerRow % alignment != 0,
                         "bytesPerRow (%u) is not a multiple of %u.",
-                        imageCopyBuffer.layout.bytesPerRow, kTextureBytesPerRowAlignment);
+                        texelCopyBufferInfo.layout.bytesPerRow, alignment);
     }
 
     return {};
 }
 
-MaybeError ValidateImageCopyTexture(DeviceBase const* device,
-                                    const ImageCopyTexture& textureCopy,
-                                    const Extent3D& copySize) {
+MaybeError ValidateTexelCopyTextureInfo(DeviceBase const* device,
+                                        const TexelCopyTextureInfo& textureCopy,
+                                        const Extent3D& copySize) {
     const TextureBase* texture = textureCopy.texture;
     DAWN_TRY(device->ValidateObject(texture));
 
@@ -448,7 +456,7 @@ MaybeError ValidateImageCopyTexture(DeviceBase const* device,
 }
 
 MaybeError ValidateTextureCopyRange(DeviceBase const* device,
-                                    const ImageCopyTexture& textureCopy,
+                                    const TexelCopyTextureInfo& textureCopy,
                                     const Extent3D& copySize) {
     const TextureBase* texture = textureCopy.texture;
     const Format& format = textureCopy.texture->GetFormat();
@@ -507,7 +515,7 @@ MaybeError ValidateTextureCopyRange(DeviceBase const* device,
 
 // Always returns a single aspect (color, stencil, depth, or ith plane for multi-planar
 // formats).
-ResultOrError<Aspect> SingleAspectUsedByImageCopyTexture(const ImageCopyTexture& view) {
+ResultOrError<Aspect> SingleAspectUsedByTexelCopyTextureInfo(const TexelCopyTextureInfo& view) {
     const Format& format = view.texture->GetFormat();
     switch (view.aspect) {
         case wgpu::TextureAspect::All: {
@@ -538,9 +546,9 @@ ResultOrError<Aspect> SingleAspectUsedByImageCopyTexture(const ImageCopyTexture&
     DAWN_UNREACHABLE();
 }
 
-MaybeError ValidateLinearToDepthStencilCopyRestrictions(const ImageCopyTexture& dst) {
+MaybeError ValidateLinearToDepthStencilCopyRestrictions(const TexelCopyTextureInfo& dst) {
     Aspect aspectUsed;
-    DAWN_TRY_ASSIGN(aspectUsed, SingleAspectUsedByImageCopyTexture(dst));
+    DAWN_TRY_ASSIGN(aspectUsed, SingleAspectUsedByTexelCopyTextureInfo(dst));
 
     const Format& format = dst.texture->GetFormat();
     switch (format.format) {
@@ -557,8 +565,8 @@ MaybeError ValidateLinearToDepthStencilCopyRestrictions(const ImageCopyTexture& 
 }
 
 MaybeError ValidateTextureToTextureCopyCommonRestrictions(DeviceBase const* device,
-                                                          const ImageCopyTexture& src,
-                                                          const ImageCopyTexture& dst,
+                                                          const TexelCopyTextureInfo& src,
+                                                          const TexelCopyTextureInfo& dst,
                                                           const Extent3D& copySize) {
     const uint32_t srcSamples = src.texture->GetSampleCount();
     const uint32_t dstSamples = dst.texture->GetSampleCount();
@@ -617,8 +625,8 @@ MaybeError ValidateTextureToTextureCopyCommonRestrictions(DeviceBase const* devi
 }
 
 MaybeError ValidateTextureToTextureCopyRestrictions(DeviceBase const* device,
-                                                    const ImageCopyTexture& src,
-                                                    const ImageCopyTexture& dst,
+                                                    const TexelCopyTextureInfo& src,
+                                                    const TexelCopyTextureInfo& dst,
                                                     const Extent3D& copySize) {
     // Metal requires texture-to-texture copies happens between texture formats that equal to
     // each other or only have diff on srgb-ness.
@@ -704,8 +712,11 @@ MaybeError ValidateColorAttachmentBytesPerSample(DeviceBase* device,
         device->GetLimits().v1.maxColorAttachmentBytesPerSample;
     DAWN_INVALID_IF(
         totalByteSize > maxColorAttachmentBytesPerSample,
-        "Total color attachment bytes per sample (%u) exceeds maximum (%u) with formats (%s).",
-        totalByteSize, maxColorAttachmentBytesPerSample, TextureFormatsToString(formats));
+        "Total color attachment bytes per sample (%u) exceeds maximum (%u) with formats "
+        "(%s).%s",
+        totalByteSize, maxColorAttachmentBytesPerSample, TextureFormatsToString(formats),
+        DAWN_INCREASE_LIMIT_MESSAGE(device->GetAdapter(), maxColorAttachmentBytesPerSample,
+                                    totalByteSize));
 
     return {};
 }

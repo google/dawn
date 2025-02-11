@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void mix_98007a() {
   float4 res = (1.0f).xxxx;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   mix_98007a();
   return;
 }
+//
+// compute_main
+//
+void mix_98007a() {
+  float4 res = (1.0f).xxxx;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   mix_98007a();
   return;
+}
+//
+// vertex_main
+//
+void mix_98007a() {
+  float4 res = (1.0f).xxxx;
 }
 
 struct VertexOutput {

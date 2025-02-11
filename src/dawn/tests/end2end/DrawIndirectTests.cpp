@@ -109,10 +109,6 @@ class DrawIndirectTest : public DawnTest {
 
 // The basic triangle draw.
 TEST_P(DrawIndirectTest, Uint32) {
-    // TODO(crbug.com/dawn/1292): Some Intel OpenGL drivers don't seem to like
-    // the offsets that Tint/GLSL produces.
-    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsLinux());
-
     // Test a draw with no indices.
     Test({0, 0, 0, 0}, 0, notFilled, notFilled);
 
@@ -127,10 +123,6 @@ TEST_P(DrawIndirectTest, Uint32) {
 }
 
 TEST_P(DrawIndirectTest, IndirectOffset) {
-    // TODO(crbug.com/dawn/1292): Some Intel OpenGL drivers don't seem to like
-    // the offsets that Tint/GLSL produces.
-    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsLinux());
-
     // Test an offset draw call, with indirect buffer containing 2 calls:
     // 1) only the first 3 indices (bottom left triangle)
     // 2) only the last 3 indices (top right triangle)
@@ -266,9 +258,6 @@ class DrawIndirectUsingFirstVertexTest : public DawnTest {
 };
 
 TEST_P(DrawIndirectUsingFirstVertexTest, IndirectOffset) {
-    // TODO(crbug.com/dawn/1292): Some Intel OpenGL drivers don't seem to like
-    // the offsets that Tint/GLSL produces.
-    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsLinux());
     // Won't fix for OpenGLES + ANGLE D3D11
     DAWN_SUPPRESS_TEST_IF(IsANGLED3D11());
 
@@ -325,10 +314,6 @@ class DrawIndirectUsingInstanceIndexTest : public DrawIndirectUsingFirstVertexTe
 };
 
 TEST_P(DrawIndirectUsingInstanceIndexTest, IndirectOffset) {
-    // TODO(crbug.com/dawn/1292): Some Intel OpenGL drivers don't seem to like
-    // the offsets that Tint/GLSL produces.
-    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsLinux());
-
     // Test an offset draw call, with indirect buffer containing 2 calls:
     // 1) only the first 3 indices (bottom left triangle)
     // 2) only the last 3 indices (top right triangle)

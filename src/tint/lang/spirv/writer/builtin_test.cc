@@ -1444,16 +1444,13 @@ TEST_P(Builtin_3arg, Vector) {
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(params.spirv_inst);
 }
-INSTANTIATE_TEST_SUITE_P(
-    SpirvWriterTest,
-    Builtin_3arg,
-    testing::Values(BuiltinTestCase{kF32, core::BuiltinFn::kClamp, "NClamp"},
-                    BuiltinTestCase{kF32, core::BuiltinFn::kFma, "Fma"},
-                    BuiltinTestCase{kF16, core::BuiltinFn::kFma, "Fma"},
-                    BuiltinTestCase{kF32, core::BuiltinFn::kMix, "Mix"},
-                    BuiltinTestCase{kF16, core::BuiltinFn::kMix, "Mix"},
-                    BuiltinTestCase{kF32, core::BuiltinFn::kSmoothstep, "SmoothStep"},
-                    BuiltinTestCase{kF16, core::BuiltinFn::kSmoothstep, "SmoothStep"}));
+INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
+                         Builtin_3arg,
+                         testing::Values(BuiltinTestCase{kF32, core::BuiltinFn::kClamp, "NClamp"},
+                                         BuiltinTestCase{kF32, core::BuiltinFn::kFma, "Fma"},
+                                         BuiltinTestCase{kF16, core::BuiltinFn::kFma, "Fma"},
+                                         BuiltinTestCase{kF32, core::BuiltinFn::kMix, "Mix"},
+                                         BuiltinTestCase{kF16, core::BuiltinFn::kMix, "Mix"}));
 
 TEST_F(SpirvWriterTest, Builtin_Clamp_Scalar_I32) {
     auto* value = b.FunctionParam("value", ty.i32());
@@ -1557,6 +1554,57 @@ TEST_F(SpirvWriterTest, Builtin_ExtractBits_Scalar_I32) {
 )");
 }
 
+TEST_F(SpirvWriterTest, Builtin_Smoothstep_F32) {
+    auto* value = b.FunctionParam("value", ty.f32());
+    auto* low = b.FunctionParam("low", ty.f32());
+    auto* high = b.FunctionParam("high", ty.f32());
+    auto* func = b.Function("foo", ty.f32());
+    func->SetParams({value, low, high});
+
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call(ty.f32(), core::BuiltinFn::kSmoothstep, value, low, high);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+          %8 = OpFSub %float %high %value
+          %9 = OpFSub %float %low %value
+         %10 = OpFDiv %float %8 %9
+         %11 = OpExtInst %float %12 NClamp %10 %float_0 %float_1
+         %15 = OpFMul %float %float_2 %11
+         %17 = OpFSub %float %float_3 %15
+         %19 = OpFMul %float %11 %17
+     %result = OpFMul %float %11 %19
+)");
+}
+
+TEST_F(SpirvWriterTest, Builtin_Smoothstep_F16) {
+    auto* value = b.FunctionParam("value", ty.f16());
+    auto* low = b.FunctionParam("low", ty.f16());
+    auto* high = b.FunctionParam("high", ty.f16());
+    auto* func = b.Function("foo", ty.f16());
+    func->SetParams({value, low, high});
+
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call(ty.f16(), core::BuiltinFn::kSmoothstep, value, low, high);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+          %8 = OpFSub %half %high %value
+          %9 = OpFSub %half %low %value
+         %10 = OpFDiv %half %8 %9
+         %11 = OpExtInst %half %12 NClamp %10 %half_0x0p_0 %half_0x1p_0
+         %15 = OpFMul %half %half_0x1p_1 %11
+         %17 = OpFSub %half %half_0x1_8p_1 %15
+         %19 = OpFMul %half %11 %17
+     %result = OpFMul %half %11 %19
+)");
+}
 TEST_F(SpirvWriterTest, Builtin_ExtractBits_Scalar_U32) {
     auto* arg = b.FunctionParam("arg", ty.u32());
     auto* offset = b.FunctionParam("offset", ty.u32());

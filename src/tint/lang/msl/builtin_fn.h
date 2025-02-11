@@ -82,6 +82,11 @@ enum class BuiltinFn : uint8_t {
     kThreadgroupBarrier,
     kSimdBallot,
     kQuadShuffleXor,
+    kConvert,
+    kSimdgroupLoad,
+    kSimdgroupStore,
+    kSimdgroupMultiply,
+    kSimdgroupMultiplyAccumulate,
     kNone,
 };
 

@@ -92,7 +92,8 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
      {"Allows the STORAGE usage on textures with format \"bgra8unorm\".",
       "https://gpuweb.github.io/gpuweb/#bgra8unorm-storage", FeatureInfo::FeatureState::Stable}},
     {Feature::Float32Filterable,
-     {"Allows textures with formats \"r32float\" \"rg32float\" and \"rgba32float\" to be filtered.",
+     {"Allows textures with formats \"r32float\" \"rg32float\" and \"rgba32float\" to be "
+      "filtered.",
       "https://gpuweb.github.io/gpuweb/#float32-filterable", FeatureInfo::FeatureState::Stable}},
     {Feature::Float32Blendable,
      {"Allows textures with formats \"r32float\" \"rg32float\" and \"rgba32float\" to be "
@@ -325,12 +326,12 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
       "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
       "r8unorm_storage.md",
       FeatureInfo::FeatureState::Experimental}},
-    {Feature::FormatCapabilities,
+    {Feature::DawnFormatCapabilities,
      {"Supports querying the capabilities of a texture format.",
       "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
       "format_capabilities.md",
       FeatureInfo::FeatureState::Stable}},
-    {Feature::DrmFormatCapabilities,
+    {Feature::DawnDrmFormatCapabilities,
      {"Supports querying the DRM-related capabilities of a texture format.",
       "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
       "format_capabilities.md",
@@ -368,7 +369,7 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
       "https://github.com/gpuweb/gpuweb/blob/main/proposals/subgroups.md",
       FeatureInfo::FeatureState::Stable}},
     {Feature::SubgroupsF16,
-     {"Supports the \"enable subgroups_f16;\" directive in WGSL.",
+     {"Supports the \"enable subgroups_f16;\" directive in WGSL (deprecated).",
       "https://github.com/gpuweb/gpuweb/blob/main/proposals/subgroups.md",
       FeatureInfo::FeatureState::Stable}},
     {Feature::MultiDrawIndirect,
@@ -384,8 +385,20 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
     {Feature::ChromiumExperimentalImmediateData,
      {"Support the \"enable chromium_experimental_immediate_data;\" directive in WGSL.",
       "https://github.com/gpuweb/gpuweb/blob/main/proposals/push-constants.md",
-      FeatureInfo::FeatureState::Experimental}}};
-
+      FeatureInfo::FeatureState::Experimental}},
+    {Feature::DawnTexelCopyBufferRowAlignment,
+     {"Expose the min row alignment in buffer for texel copy operations.",
+      "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
+      "dawn_texel_copy_buffer_row_alignment.md",
+      FeatureInfo::FeatureState::Stable}},
+    {Feature::FlexibleTextureViews,
+     {"Remove the texture view restrictions in Compat Mode.",
+      "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
+      "flexible_texture_views.md",
+      FeatureInfo::FeatureState::Stable}},
+    {Feature::ChromiumExperimentalSubgroupMatrix,
+     {"Support the \"enable chromium_experimental_subgroup_matrix;\" directive in WGSL.",
+      "https://github.com/gpuweb/gpuweb/issues/4195", FeatureInfo::FeatureState::Experimental}}};
 }  // anonymous namespace
 
 void FeaturesSet::EnableFeature(Feature feature) {

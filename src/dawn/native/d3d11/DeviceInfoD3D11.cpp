@@ -67,11 +67,13 @@ ResultOrError<DeviceInfo> GatherDeviceInfo(const ComPtr<IDXGIAdapter4>& adapter,
     // requires at-least D3D11_SHARED_RESOURCE_TIER_2 support.
     // https://docs.microsoft.com/en-us/windows/win32/api/d3d11/ne-d3d11-d3d11_shared_resource_tier
     D3D11_FEATURE_DATA_D3D11_OPTIONS5 featureOptions5{};
-    DAWN_TRY(CheckHRESULT(device->CheckFeatureSupport(D3D11_FEATURE_D3D11_OPTIONS5,
-                                                      &featureOptions5, sizeof(featureOptions5)),
-                          "D3D11_FEATURE_D3D11_OPTIONS5"));
-    info.supportsSharedResourceCapabilityTier2 =
-        featureOptions5.SharedResourceTier >= D3D11_SHARED_RESOURCE_TIER_2;
+    if (SUCCEEDED(device->CheckFeatureSupport(D3D11_FEATURE_D3D11_OPTIONS5, &featureOptions5,
+                                              sizeof(featureOptions5)))) {
+        info.supportsSharedResourceCapabilityTier2 =
+            featureOptions5.SharedResourceTier >= D3D11_SHARED_RESOURCE_TIER_2;
+    } else {
+        info.supportsSharedResourceCapabilityTier2 = false;
+    }
 
     DXGI_ADAPTER_DESC3 adapterDesc3;
     DAWN_TRY(CheckHRESULT(adapter->GetDesc3(&adapterDesc3), "IDXGIAdapter4::GetDesc3()"));

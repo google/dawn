@@ -45,7 +45,7 @@ buffer s_block_1_ssbo {
 int tint_f32_to_i32(float value) {
   return mix(2147483647, mix((-2147483647 - 1), int(value), (value >= -2147483648.0f)), (value <= 2147483520.0f));
 }
-void tint_symbol_inner(uint idx) {
+void main_inner(uint idx) {
   uint v_1 = min(idx, (uint(sb.arr.length()) - 1u));
   float scalar_f32 = sb.arr[v_1].scalar_f32;
   uint v_2 = min(idx, (uint(sb.arr.length()) - 1u));
@@ -111,5 +111,5 @@ void tint_symbol_inner(uint idx) {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  tint_symbol_inner(gl_LocalInvocationIndex);
+  main_inner(gl_LocalInvocationIndex);
 }

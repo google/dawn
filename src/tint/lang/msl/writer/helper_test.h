@@ -35,6 +35,7 @@
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/msl/validate/validate.h"
+#include "src/tint/lang/msl/writer/printer/printer.h"
 #include "src/tint/lang/msl/writer/writer.h"
 
 namespace tint::msl::writer {
@@ -82,7 +83,7 @@ class MslWriterTestHelperBase : public BASE {
     /// @returns true if generation and validation succeeded
     bool Generate(
         Options options = {},
-        [[maybe_unused]] validate::MslVersion msl_version = validate::MslVersion::kMsl_2_2) {
+        [[maybe_unused]] validate::MslVersion msl_version = validate::MslVersion::kMsl_2_3) {
         auto result = writer::Generate(mod, options);
         if (result != Success) {
             err_ = result.Failure().reason.Str();
@@ -90,6 +91,28 @@ class MslWriterTestHelperBase : public BASE {
         }
         output_ = result.Get();
 
+        return Validate(msl_version);
+    }
+
+    /// Run the printer on the MSL IR module and validate the result.
+    /// @param options the writer options
+    /// @returns true if generation and validation succeeded
+    bool Print(Options options = {},
+               [[maybe_unused]] validate::MslVersion msl_version = validate::MslVersion::kMsl_2_3) {
+        auto result = writer::Print(mod, options);
+        if (result != Success) {
+            err_ = result.Failure().reason.Str();
+            return false;
+        }
+        output_ = result.Get();
+
+        return Validate(msl_version);
+    }
+
+    /// Validate the output.
+    /// @param msl_version the MSL version to validate against
+    /// @returns true if validation succeeded
+    bool Validate([[maybe_unused]] validate::MslVersion msl_version) {
 #if TINT_BUILD_IS_MAC
         auto msl_validation = validate::ValidateUsingMetal(output_.msl, msl_version);
         if (msl_validation.failed) {
@@ -97,7 +120,6 @@ class MslWriterTestHelperBase : public BASE {
             return false;
         }
 #endif
-
         return true;
     }
 

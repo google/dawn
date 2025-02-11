@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void asin_0bac07() {
   float3 res = (0.5f).xxx;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   asin_0bac07();
   return;
 }
+//
+// compute_main
+//
+void asin_0bac07() {
+  float3 res = (0.5f).xxx;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   asin_0bac07();
   return;
+}
+//
+// vertex_main
+//
+void asin_0bac07() {
+  float3 res = (0.5f).xxx;
 }
 
 struct VertexOutput {

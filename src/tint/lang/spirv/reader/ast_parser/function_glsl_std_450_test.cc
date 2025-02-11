@@ -1367,8 +1367,9 @@ TEST_F(SpirvASTParserTest, GlslStd450_Ldexp_Vector_Floatvec_Uintvec) {
     EXPECT_THAT(body, HasSubstr(expected)) << body;
 }
 
-using GlslStd450_Determinant = SpirvASTParserTestBase<::testing::TestWithParam<std::string>>;
-TEST_P(GlslStd450_Determinant, Test) {
+using SpirvASTParserTest_GlslStd450_Determinant =
+    SpirvASTParserTestBase<::testing::TestWithParam<std::string>>;
+TEST_P(SpirvASTParserTest_GlslStd450_Determinant, Test) {
     const auto assembly = Preamble() + R"(
      %1 = OpExtInst %float %glsl Determinant %)" +
                           GetParam() + R"(
@@ -1386,7 +1387,7 @@ TEST_P(GlslStd450_Determinant, Test) {
     EXPECT_THAT(body, HasSubstr(expected)) << body;
 }
 INSTANTIATE_TEST_SUITE_P(Test,
-                         GlslStd450_Determinant,
+                         SpirvASTParserTest_GlslStd450_Determinant,
                          ::testing::Values("m2x2f1", "m3x3f1", "m4x4f1"));
 
 TEST_F(SpirvASTParserTest, GlslStd450_MatrixInverse_mat2x2) {

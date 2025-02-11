@@ -101,18 +101,6 @@ class DAWN_NATIVE_EXPORT Adapter {
     WGPUDevice CreateDevice(const wgpu::DeviceDescriptor* deviceDescriptor);
     WGPUDevice CreateDevice(const WGPUDeviceDescriptor* deviceDescriptor = nullptr);
 
-    void RequestDevice(const wgpu::DeviceDescriptor* descriptor,
-                       WGPURequestDeviceCallback callback,
-                       void* userdata);
-    void RequestDevice(const WGPUDeviceDescriptor* descriptor,
-                       WGPURequestDeviceCallback callback,
-                       void* userdata);
-    void RequestDevice(std::nullptr_t descriptor,
-                       WGPURequestDeviceCallback callback,
-                       void* userdata) {
-        RequestDevice(static_cast<const wgpu::DeviceDescriptor*>(descriptor), callback, userdata);
-    }
-
     // Returns the underlying WGPUAdapter object.
     WGPUAdapter Get() const;
 
@@ -135,8 +123,40 @@ struct DAWN_NATIVE_EXPORT DawnInstanceDescriptor : wgpu::ChainedStruct {
     BackendValidationLevel backendValidationLevel = BackendValidationLevel::Disabled;
     bool beginCaptureOnStartup = false;
 
-    WGPULoggingCallback loggingCallback = nullptr;
-    void* loggingCallbackUserdata = nullptr;
+    WGPULoggingCallbackInfo loggingCallbackInfo = WGPU_LOGGING_CALLBACK_INFO_INIT;
+
+    template <typename F,
+              typename T,
+              typename Cb = wgpu::LoggingCallback<T>,
+              typename = std::enable_if_t<std::is_convertible_v<F, Cb*>>>
+    void SetLoggingCallback(F callback, T userdata) {
+        assert(loggingCallbackInfo.callback == nullptr);
+
+        loggingCallbackInfo.callback = [](WGPULoggingType type, struct WGPUStringView message,
+                                          void* callback_param, void* userdata_param) {
+            auto cb = reinterpret_cast<Cb*>(callback_param);
+            (*cb)(static_cast<wgpu::LoggingType>(type), message, static_cast<T>(userdata_param));
+        };
+        loggingCallbackInfo.userdata1 = reinterpret_cast<void*>(+callback);
+        loggingCallbackInfo.userdata2 = reinterpret_cast<void*>(userdata);
+    }
+
+    template <typename L,
+              typename Cb = wgpu::LoggingCallback<>,
+              typename = std::enable_if_t<std::is_convertible_v<L, Cb>>>
+    void SetLoggingCallback(L callback) {
+        assert(loggingCallbackInfo.callback == nullptr);
+        using F = wgpu::LoggingCallback<void>;
+        static_assert(std::is_convertible_v<L, F*>, "Logging callback cannot be a binding lambda");
+
+        loggingCallbackInfo.callback = [](WGPULoggingType type, struct WGPUStringView message,
+                                          void* callback_param, void*) {
+            auto cb = reinterpret_cast<F*>(callback_param);
+            (*cb)(static_cast<wgpu::LoggingType>(type), message);
+        };
+        loggingCallbackInfo.userdata1 = reinterpret_cast<void*>(+callback);
+        loggingCallbackInfo.userdata2 = nullptr;
+    }
 
     // Equality operators, mostly for testing. Note that this tests
     // strict pointer-pointer equality if the struct contains member pointers.
@@ -151,6 +171,7 @@ struct DAWN_NATIVE_EXPORT DawnInstanceDescriptor : wgpu::ChainedStruct {
 class DAWN_NATIVE_EXPORT Instance {
   public:
     explicit Instance(const WGPUInstanceDescriptor* desc = nullptr);
+    explicit Instance(const wgpu::InstanceDescriptor* desc);
     explicit Instance(InstanceBase* impl);
     ~Instance();
 

@@ -716,6 +716,74 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_BuiltinMatrix_ShadowedBy_Param) 
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(IRToProgramRenameConflictsTest, Conflict_BuiltinArray_ShadowedBy_Param) {
+    auto* fn = b.Function("f", ty.void_());
+    auto* p = b.FunctionParam("array", ty.array<i32, 4>());
+    fn->SetParams({p});
+
+    b.Append(fn->Block(), [&] {
+        b.Let("x", b.Splat(ty.array<i32, 4>(), 0_i));
+        b.Return(fn);
+    });
+
+    auto* src = R"(
+%f = func(%array:array<i32, 4>):void {
+  $B1: {
+    %x:array<i32, 4> = let array<i32, 4>(0i)
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%f = func(%array_1:array<i32, 4>):void {
+  $B1: {
+    %x:array<i32, 4> = let array<i32, 4>(0i)
+    ret
+  }
+}
+)";
+
+    Run();
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IRToProgramRenameConflictsTest, Conflict_ArrayElement_ShadowedBy_Param) {
+    auto* fn = b.Function("f", ty.void_());
+    auto* p = b.FunctionParam("f32", ty.f32());
+    fn->SetParams({p});
+
+    b.Append(fn->Block(), [&] {
+        b.Let("x", b.Splat(ty.array<f32, 4>(), 0_f));
+        b.Return(fn);
+    });
+
+    auto* src = R"(
+%f = func(%f32:f32):void {
+  $B1: {
+    %x:array<f32, 4> = let array<f32, 4>(0.0f)
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%f = func(%f32_1:f32):void {
+  $B1: {
+    %x:array<f32, 4> = let array<f32, 4>(0.0f)
+    ret
+  }
+}
+)";
+
+    Run();
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(IRToProgramRenameConflictsTest, NoModify_BuiltinScalar_ShadowedBy_FnVar) {
     auto* fn = b.Function("f", ty.i32());
     b.Append(fn->Block(), [&] {

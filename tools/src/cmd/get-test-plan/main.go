@@ -798,7 +798,7 @@ func testName(id string, desc string, section string) (testName, builtinName str
 	testName = id + ",rule" + strconv.Itoa(globalRuleCounter)
 	if testNamesSet[testName] {
 		testName = "error-unable-to-generate-unique-file-name"
-		return testName, "", fmt.Errorf("unable to generate unique test name\n" + desc)
+		return testName, "", fmt.Errorf("unable to generate unique test name\n%s", desc)
 	}
 	testNamesSet[testName] = true
 	return testName, "", nil

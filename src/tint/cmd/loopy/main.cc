@@ -29,6 +29,7 @@
 
 #include "src/tint/api/tint.h"
 #include "src/tint/cmd/common/helper.h"
+#include "src/tint/utils/command/args.h"
 
 #if TINT_BUILD_GLSL_WRITER
 #include "src/tint/lang/glsl/writer/helpers/generate_bindings.h"
@@ -100,7 +101,7 @@ const char kUsage[] = R"(Usage: tint-loopy [options] <input-file>
   --loop-count <num>                   -- Number of loops to run, default 100.
 )";
 
-Format parse_format(const std::string& fmt) {
+Format parse_format(const std::string_view fmt) {
     (void)fmt;
 
 #if TINT_BUILD_SPV_WRITER
@@ -140,12 +141,12 @@ Format parse_format(const std::string& fmt) {
     return Format::kUnknown;
 }
 
-bool ParseArgs(const std::vector<std::string>& args, Options* opts) {
-    for (size_t i = 1; i < args.size(); ++i) {
-        const std::string& arg = args[i];
+bool ParseArgs(tint::VectorRef<std::string_view> args, Options* opts) {
+    for (size_t i = 1; i < args.Length(); ++i) {
+        auto arg = args[i];
         if (arg == "--format") {
             ++i;
-            if (i >= args.size()) {
+            if (i >= args.Length()) {
                 std::cerr << "Missing value for --format argument.\n";
                 return false;
             }
@@ -159,7 +160,7 @@ bool ParseArgs(const std::vector<std::string>& args, Options* opts) {
             opts->show_help = true;
         } else if (arg == "--loop") {
             ++i;
-            if (i >= args.size()) {
+            if (i >= args.Length()) {
                 std::cerr << "Missing value for --loop argument.\n";
                 return false;
             }
@@ -175,11 +176,11 @@ bool ParseArgs(const std::vector<std::string>& args, Options* opts) {
             }
         } else if (arg == "--loop-count") {
             ++i;
-            if (i >= args.size()) {
+            if (i >= args.Length()) {
                 std::cerr << "Missing value for --loop-count argument.\n";
                 return false;
             }
-            int32_t val = atoi(args[i].c_str());
+            int32_t val = atoi(std::string(args[i]).c_str());
             if (val <= 0) {
                 std::cerr << "Loop count must be greater then 0\n";
                 return false;
@@ -268,14 +269,23 @@ bool GenerateMsl([[maybe_unused]] const tint::Program& program) {
         input_program = &*flattened;
     }
 
+    // Convert the AST program to an IR module.
+    auto ir = tint::wgsl::reader::ProgramToLoweredIR(*input_program);
+    if (ir != tint::Success) {
+        std::cerr << "Failed to generate IR: " << ir << "\n";
+        return false;
+    }
+
     tint::msl::writer::Options gen_options;
-    gen_options.bindings = tint::msl::writer::GenerateBindings(program);
+    gen_options.bindings = tint::msl::writer::GenerateBindings(ir.Get());
     gen_options.array_length_from_uniform.ubo_binding = 30;
     gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(tint::BindingPoint{0, 0},
                                                                           0);
     gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(tint::BindingPoint{0, 1},
                                                                           1);
-    auto result = tint::msl::writer::Generate(*input_program, gen_options);
+
+    // Generate MSL from Tint IR.
+    auto result = tint::msl::writer::Generate(ir.Get(), gen_options);
     if (result != tint::Success) {
         tint::cmd::PrintWGSL(std::cerr, program);
         std::cerr << "Failed to generate: " << result.Failure() << "\n";
@@ -342,7 +352,7 @@ bool GenerateGlsl(const tint::Program& program) {
 }  // namespace
 
 int main(int argc, const char** argv) {
-    std::vector<std::string> args(argv, argv + argc);
+    tint::Vector<std::string_view, 8> args = tint::args::Vectorize(argc, argv);
     Options options;
 
     tint::Initialize();

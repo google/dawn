@@ -40,7 +40,7 @@
 namespace tint::core::ir {
 
 /// A var instruction in the IR.
-class Var final : public Castable<Var, OperandInstruction<1, 1>> {
+class Var : public Castable<Var, OperandInstruction<1, 1>> {
   public:
     /// The offset in Operands() for the initializer
     static constexpr size_t kInitializerOperandOffset = 0;

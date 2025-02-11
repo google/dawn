@@ -1,3 +1,6 @@
+//
+// main1
+//
 #version 310 es
 
 shared int a;
@@ -16,6 +19,9 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   main1_inner(gl_LocalInvocationIndex);
 }
+//
+// main2
+//
 #version 310 es
 
 shared int b;
@@ -34,6 +40,9 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   main2_inner(gl_LocalInvocationIndex);
 }
+//
+// main3
+//
 #version 310 es
 
 shared int a;
@@ -69,6 +78,9 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   main3_inner(gl_LocalInvocationIndex);
 }
+//
+// main4
+//
 #version 310 es
 
 void no_uses() {

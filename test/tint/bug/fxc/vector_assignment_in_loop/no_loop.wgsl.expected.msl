@@ -1,7 +1,7 @@
 #include <metal_stdlib>
-
 using namespace metal;
-kernel void tint_symbol() {
+
+kernel void v() {
   float2 v2f = 0.0f;
   float3 v3f = 0.0f;
   float4 v4f = 0.0f;
@@ -27,6 +27,4 @@ kernel void tint_symbol() {
   v2b[min(uint(i), 1u)] = true;
   v3b[min(uint(i), 2u)] = true;
   v4b[min(uint(i), 3u)] = true;
-  return;
 }
-

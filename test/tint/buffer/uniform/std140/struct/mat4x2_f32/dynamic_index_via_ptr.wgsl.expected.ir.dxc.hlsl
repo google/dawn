@@ -86,9 +86,9 @@ ary_ret_1 v_18(uint start_byte_offset) {
 
 [numthreads(1, 1, 1)]
 void f() {
-  uint v_23 = (256u * uint(min(uint(i()), 3u)));
-  uint v_24 = (64u * uint(min(uint(i()), 3u)));
-  uint v_25 = (8u * uint(min(uint(i()), 3u)));
+  uint v_23 = (256u * min(uint(i()), 3u));
+  uint v_24 = (64u * min(uint(i()), 3u));
+  uint v_25 = (8u * min(uint(i()), 3u));
   Outer l_a[4] = v_18(0u);
   Outer l_a_i = v_15(v_23);
   Inner l_a_i_a[4] = v_10(v_23);
@@ -96,7 +96,7 @@ void f() {
   float4x2 l_a_i_a_i_m = v((v_23 + v_24));
   uint4 v_26 = a[(((v_23 + v_24) + v_25) / 16u)];
   float2 l_a_i_a_i_m_i = asfloat((((((((v_23 + v_24) + v_25) % 16u) / 4u) == 2u)) ? (v_26.zw) : (v_26.xy)));
-  uint v_27 = (((v_23 + v_24) + v_25) + (uint(min(uint(i()), 1u)) * 4u));
+  uint v_27 = (((v_23 + v_24) + v_25) + (min(uint(i()), 1u) * 4u));
   float l_a_i_a_i_m_i_i = asfloat(a[(v_27 / 16u)][((v_27 % 16u) / 4u)]);
 }
 

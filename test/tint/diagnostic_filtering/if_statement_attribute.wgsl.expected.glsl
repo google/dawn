@@ -14,8 +14,8 @@
 precision highp float;
 precision highp int;
 
-layout(location = 0) in float tint_symbol_loc0_Input;
-void tint_symbol_inner(float x) {
+layout(location = 0) in float tint_interstage_location0;
+void main_inner(float x) {
   if ((x > 0.0f)) {
   } else {
     if ((dFdx(1.0f) > 0.0f)) {
@@ -23,5 +23,5 @@ void tint_symbol_inner(float x) {
   }
 }
 void main() {
-  tint_symbol_inner(tint_symbol_loc0_Input);
+  main_inner(tint_interstage_location0);
 }

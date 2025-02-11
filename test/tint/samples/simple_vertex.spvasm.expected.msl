@@ -1,34 +1,31 @@
 #include <metal_stdlib>
-
 using namespace metal;
-struct tint_private_vars_struct {
-  float4 gl_Position;
-};
 
-void main_1(thread tint_private_vars_struct* const tint_private_vars) {
-  (*(tint_private_vars)).gl_Position = float4(0.0f);
-  return;
-}
+struct tint_module_vars_struct {
+  thread float4* gl_Position;
+};
 
 struct main_out {
   float4 gl_Position;
 };
 
-struct tint_symbol_1 {
-  float4 gl_Position [[position]];
+struct main_outputs {
+  float4 main_out_gl_Position [[position]];
 };
 
-main_out tint_symbol_inner(thread tint_private_vars_struct* const tint_private_vars) {
-  main_1(tint_private_vars);
-  main_out const tint_symbol_2 = main_out{.gl_Position=(*(tint_private_vars)).gl_Position};
-  return tint_symbol_2;
+void main_1(tint_module_vars_struct tint_module_vars) {
+  (*tint_module_vars.gl_Position) = float4(0.0f);
 }
 
-vertex tint_symbol_1 tint_symbol() {
-  thread tint_private_vars_struct tint_private_vars = {};
-  main_out const inner_result = tint_symbol_inner(&(tint_private_vars));
-  tint_symbol_1 wrapper_result = {};
-  wrapper_result.gl_Position = inner_result.gl_Position;
-  return wrapper_result;
+main_out main_inner(tint_module_vars_struct tint_module_vars) {
+  main_1(tint_module_vars);
+  return main_out{.gl_Position=(*tint_module_vars.gl_Position)};
 }
 
+vertex main_outputs v() {
+  thread float4 gl_Position = 0.0f;
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.gl_Position=(&gl_Position)};
+  main_outputs tint_wrapper_result = {};
+  tint_wrapper_result.main_out_gl_Position = main_inner(tint_module_vars).gl_Position;
+  return tint_wrapper_result;
+}

@@ -682,4 +682,133 @@ TextureCopySubresource Compute3DTextureCopySplits(BufferTextureCopyDirection dir
 
     return copySubresource;
 }
+
+TextureCopySubresource Compute2DTextureCopySubresourceWithRelaxedRowPitchAndOffset(
+    BufferTextureCopyDirection direction,
+    Origin3D origin,
+    Extent3D copySize,
+    const TexelBlockInfo& blockInfo,
+    uint64_t offset,
+    uint32_t bytesPerRow) {
+    TextureCopySubresource copy;
+    auto* copyInfo = copy.AddCopy();
+
+    // You can visualize the data in the buffer (bufferLocation) like this:
+    // * copy data is visualized as '+'.
+    //
+    //                bufferOffset(0, 0, 0)
+    //                        ^
+    //                        |
+    // |<-------Offset------->|<-----------RowPitch----------->|----------|
+    // |----------------------|++++++++++++++++++++++~~~~~~~~~~|    |     |
+    //                        |++++++++++++++++++++++~~~~~~~~~~|CopyHeight|
+    //                        |++++++++++++++++++++++|         |    |     |
+    //                        |<-----CopyWidth------>|         |----------|
+    //
+    Origin3D textureOffset = {origin.x, origin.y, 0};
+    Origin3D bufferOffset = {0, 0, 0};
+    Extent3D copySizeOneLayer = {copySize.width, copySize.height, 1};
+    ComputeSourceRegionForCopyInfo(copyInfo, direction, bufferOffset, textureOffset,
+                                   copySizeOneLayer);
+
+    Extent3D bufferSize = {copySize.width, copySize.height, 1};
+
+    FillFootprintAndOffsetOfBufferLocation(&copyInfo->bufferLocation, offset, bufferSize,
+                                           bytesPerRow);
+
+    return copy;
+}
+
+TextureCopySubresource Compute3DTextureCopySubresourceWithRelaxedRowPitchAndOffset(
+    BufferTextureCopyDirection direction,
+    Origin3D origin,
+    Extent3D copySize,
+    const TexelBlockInfo& blockInfo,
+    uint64_t offset,
+    uint32_t bytesPerRow,
+    uint32_t rowsPerImage) {
+    TextureCopySubresource copy;
+
+    Origin3D bufferOffset = {0, 0, 0};
+
+    // You can visualize the data in the buffer (bufferLocation) like the inline comments.
+    // * copy data is visualized as '+'.
+    uint32_t depthInCopy1 = copySize.depthOrArrayLayers - 1;
+    if (depthInCopy1 > 0) {
+        // `bufferLocation` in the 1st copy (first `depthInCopy1` images, optional):
+        //
+        //                bufferOffset(0, 0, 0)
+        //                        ^
+        //                        |
+        // |<-------Offset1------>|<-----------RowPitch----------->|----------|------------|
+        // |----------------------|++++++++++++++++++++++~~~~~~~~~~|    |     |     |      |
+        //                        |++++++++++++++++++++++~~~~~~~~~~|CopyHeight|     |      |
+        //                        |++++++++++++++++++++++~~~~~~~~~~|    |     |RowsPerImage|
+        //                        |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|----------|     |      |
+        //                        |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|          |     |      |
+        // |---End of 1st image-->|--------------------------------|----------|------------|
+        //                        |++++++++++++++++++++++~~~~~~~~~~|          |     |      |
+        //                        |++++++++++++++++++++++~~~~~~~~~~|          |     |      |
+        //                        |++++++++++++++++++++++~~~~~~~~~~|          |RowsPerImage|
+        //                        |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|          |     |      |
+        //                        |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|          |     |      |
+        // |---End of 2nd image-->|--------------------------------|----------|------------|
+        //                        |<-----CopyWidth------>|
+        //
+
+        Origin3D textureOffset1 = origin;
+        uint32_t offset1 = offset;
+
+        uint32_t rowsPerImage1 = rowsPerImage;
+
+        auto* copyInfo1 = copy.AddCopy();
+        Extent3D copySize1 = {copySize.width, copySize.height, depthInCopy1};
+        ComputeSourceRegionForCopyInfo(copyInfo1, direction, bufferOffset, textureOffset1,
+                                       copySize1);
+
+        Extent3D bufferSize1 = {copySize.width, rowsPerImage1, depthInCopy1};
+
+        FillFootprintAndOffsetOfBufferLocation(&copyInfo1->bufferLocation, offset1, bufferSize1,
+                                               bytesPerRow);
+    }
+
+    {
+        // We have to use the 2nd copy because there may not be enough memory to hold
+        // (RowPitch * RowsPerImage) data for the last image in the buffer.
+        //
+        // `bufferLocation` in the 2nd copy (the last image):
+        //
+        //                bufferOffset (0, 0, 0)
+        //                Begin of the last image
+        //                        ^
+        //                        |
+        // |<-------Offset2------>|<-----------RowPitch----------->|----------|
+        // |----------------------|++++++++++++++++++++++~~~~~~~~~~|    |     |
+        //                        |++++++++++++++++++++++~~~~~~~~~~|CopyHeight|
+        //                        |++++++++++++++++++++++|         |    |     |
+        //                        |----------------------|---------|----------|
+        //                        |<-----CopyWidth------>|
+        //                                               ^
+        //                                     End of all buffer data
+        //
+        DAWN_ASSERT(copySize.depthOrArrayLayers >= 1);
+        Origin3D textureOffset2 = {origin.x, origin.y, origin.z + depthInCopy1};
+        uint32_t offset2 = offset + bytesPerRow * rowsPerImage * depthInCopy1;
+        uint32_t depthInCopy2 = 1;
+        uint32_t rowsPerImage2 = copySize.height;
+
+        auto* copyInfo2 = copy.AddCopy();
+        Extent3D copySize2 = {copySize.width, copySize.height, depthInCopy2};
+        ComputeSourceRegionForCopyInfo(copyInfo2, direction, bufferOffset, textureOffset2,
+                                       copySize2);
+
+        Extent3D bufferSize2 = {copySize.width, rowsPerImage2, depthInCopy2};
+
+        FillFootprintAndOffsetOfBufferLocation(&copyInfo2->bufferLocation, offset2, bufferSize2,
+                                               bytesPerRow);
+    }
+
+    return copy;
+}
+
 }  // namespace dawn::native::d3d12

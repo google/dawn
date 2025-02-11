@@ -1,19 +1,25 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer prevent_dce_block_1_ssbo {
+buffer f_prevent_dce_block_ssbo {
   uint inner;
 } v;
-layout(binding = 0, rgba32f) uniform highp writeonly image2DArray arg_0;
+layout(binding = 0, rgba32f) uniform highp writeonly image2DArray f_arg_0;
 uint textureNumLayers_d75a0b() {
-  uint res = uint(imageSize(arg_0).z);
+  uint res = uint(imageSize(f_arg_0).z);
   return res;
 }
 void main() {
   v.inner = textureNumLayers_d75a0b();
 }
+//
+// compute_main
+//
 #version 310 es
 
 layout(binding = 0, std430)

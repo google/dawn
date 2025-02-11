@@ -34,13 +34,26 @@
 namespace dawn {
 namespace {
 
-class PipelineLayoutTests : public DawnTest {};
+class PipelineLayoutTests : public DawnTest {
+  protected:
+    wgpu::RequiredLimits GetRequiredLimits(const wgpu::SupportedLimits& supported) override {
+        // TODO(crbug.com/383593270): Enable all the limits.
+        wgpu::RequiredLimits required = {};
+        required.limits.maxStorageBuffersInFragmentStage =
+            supported.limits.maxStorageBuffersInFragmentStage;
+        required.limits.maxStorageBuffersPerShaderStage =
+            supported.limits.maxStorageBuffersPerShaderStage;
+        return required;
+    }
+};
 
 // Test creating a PipelineLayout with multiple BGLs where the first BGL uses the max number of
 // dynamic buffers. This is a regression test for crbug.com/dawn/449 which would overflow when
 // dynamic offset bindings were at max. Test is successful if the pipeline layout is created
 // without error.
 TEST_P(PipelineLayoutTests, DynamicBuffersOverflow) {
+    DAWN_SUPPRESS_TEST_IF(GetSupportedLimits().limits.maxStorageBuffersInFragmentStage < 1);
+
     // Create the first bind group layout which uses max number of dynamic buffers bindings.
     wgpu::BindGroupLayout bglA;
     {

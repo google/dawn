@@ -42,6 +42,7 @@
 #include "src/tint/lang/core/type/struct.h"
 #include "src/tint/lang/core/type/texture.h"
 #include "src/tint/lang/core/type/u32.h"
+#include "src/tint/lang/core/type/u64.h"
 #include "src/tint/lang/core/type/u8.h"
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/utils/rtti/switch.h"
@@ -111,7 +112,7 @@ bool Type::IsFloatScalarOrVector() const {
 }
 
 bool Type::IsIntegerScalar() const {
-    return IsAnyOf<U32, I32, U8, I8>();
+    return IsAnyOf<U32, I32, U64, U8, I8>();
 }
 
 bool Type::IsIntegerVector() const {
@@ -119,27 +120,27 @@ bool Type::IsIntegerVector() const {
 }
 
 bool Type::IsSignedIntegerScalar() const {
-    return IsAnyOf<I32, AbstractInt>();
+    return IsAnyOf<I32, I8, AbstractInt>();
 }
 
 bool Type::IsUnsignedIntegerScalar() const {
-    return Is<U32>();
+    return IsAnyOf<U32, U64, U8>();
 }
 
 bool Type::IsSignedIntegerVector() const {
-    return Is([](const Vector* v) { return v->Type()->IsAnyOf<I32, AbstractInt>(); });
+    return Is([](const Vector* v) { return v->Type()->IsSignedIntegerScalar(); });
 }
 
 bool Type::IsUnsignedIntegerVector() const {
-    return Is([](const Vector* v) { return v->Type()->Is<U32>(); });
+    return Is([](const Vector* v) { return v->Type()->IsUnsignedIntegerScalar(); });
 }
 
 bool Type::IsUnsignedIntegerScalarOrVector() const {
-    return Is<U32>() || IsUnsignedIntegerVector();
+    return IsUnsignedIntegerScalar() || IsUnsignedIntegerVector();
 }
 
 bool Type::IsSignedIntegerScalarOrVector() const {
-    return IsAnyOf<I32, AbstractInt>() || IsSignedIntegerVector();
+    return IsSignedIntegerScalar() || IsSignedIntegerVector();
 }
 
 bool Type::IsIntegerScalarOrVector() const {

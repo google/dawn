@@ -16,7 +16,7 @@ mat2x3 m2x3_var = mat2x3(vec3(0.0f), vec3(0.0f));
 float arr_var[4] = float[4](0.0f, 0.0f, 0.0f, 0.0f);
 S struct_var = S(0.0f);
 shared float wg_var;
-void tint_symbol_inner(uint tint_local_index) {
+void main_inner(uint tint_local_index) {
   if ((tint_local_index < 1u)) {
     wg_var = 0.0f;
   }
@@ -35,5 +35,5 @@ void tint_symbol_inner(uint tint_local_index) {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  tint_symbol_inner(gl_LocalInvocationIndex);
+  main_inner(gl_LocalInvocationIndex);
 }

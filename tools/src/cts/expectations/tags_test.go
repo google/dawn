@@ -84,3 +84,54 @@ func TestRemoveLowerPriorityTags(t *testing.T) {
 		}
 	}
 }
+
+func TestRemoveHigherPriorityTags(t *testing.T) {
+	tags := expectations.Tags{
+		Sets: []expectations.TagSet{
+			{
+				Name: "OS",
+				Tags: container.NewSet(
+					"os_a",
+					"os_b",
+					"os_c",
+				),
+			},
+			{
+				Name: "GPU",
+				Tags: container.NewSet(
+					"gpu_a",
+					"gpu_b",
+					"gpu_c",
+				),
+			},
+		},
+		ByName: map[string]expectations.TagSetAndPriority{
+			"os_a":  {Set: "OS", Priority: 0},
+			"os_b":  {Set: "OS", Priority: 1},
+			"os_c":  {Set: "OS", Priority: 2},
+			"gpu_a": {Set: "GPU", Priority: 0},
+			"gpu_b": {Set: "GPU", Priority: 1},
+			"gpu_c": {Set: "GPU", Priority: 2},
+		},
+	}
+	type Test struct {
+		in       []string
+		expected []string
+	}
+	for _, test := range []Test{
+		{in: []string{"os_a"}, expected: []string{"os_a"}},
+		{in: []string{"gpu_b"}, expected: []string{"gpu_b"}},
+		{in: []string{"gpu_b", "os_a"}, expected: []string{"gpu_b", "os_a"}},
+		{in: []string{"gpu_a", "gpu_b"}, expected: []string{"gpu_a"}},
+		{in: []string{"gpu_b", "gpu_c"}, expected: []string{"gpu_b"}},
+		{in: []string{"os_a", "os_b"}, expected: []string{"os_a"}},
+		{in: []string{"os_b", "os_c"}, expected: []string{"os_b"}},
+		{in: []string{"gpu_a", "gpu_c", "os_b", "os_c"}, expected: []string{"gpu_a", "os_b"}},
+		{in: []string{"gpu_c", "gpu_a", "os_c", "os_b"}, expected: []string{"gpu_a", "os_b"}},
+	} {
+		got := tags.RemoveHigherPriorityTags(container.NewSet(test.in...)).List()
+		if diff := cmp.Diff(got, test.expected); diff != "" {
+			t.Errorf("TestRemoveHigherPriorityTags(%v) returned %v:\n%v", test.in, got, diff)
+		}
+	}
+}

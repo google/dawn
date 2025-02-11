@@ -1,3 +1,31 @@
+//
+// fragment_main
+//
+
+void pow_a8f6b2() {
+  float4 res = (1.0f).xxxx;
+}
+
+void fragment_main() {
+  pow_a8f6b2();
+}
+
+//
+// compute_main
+//
+
+void pow_a8f6b2() {
+  float4 res = (1.0f).xxxx;
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  pow_a8f6b2();
+}
+
+//
+// vertex_main
+//
 struct VertexOutput {
   float4 pos;
 };
@@ -11,26 +39,17 @@ void pow_a8f6b2() {
   float4 res = (1.0f).xxxx;
 }
 
-void fragment_main() {
-  pow_a8f6b2();
-}
-
-[numthreads(1, 1, 1)]
-void compute_main() {
-  pow_a8f6b2();
-}
-
 VertexOutput vertex_main_inner() {
-  VertexOutput tint_symbol = (VertexOutput)0;
-  tint_symbol.pos = (0.0f).xxxx;
+  VertexOutput v = (VertexOutput)0;
+  v.pos = (0.0f).xxxx;
   pow_a8f6b2();
-  VertexOutput v = tint_symbol;
-  return v;
+  VertexOutput v_1 = v;
+  return v_1;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_1 = vertex_main_inner();
-  vertex_main_outputs v_2 = {v_1.pos};
-  return v_2;
+  VertexOutput v_2 = vertex_main_inner();
+  vertex_main_outputs v_3 = {v_2.pos};
+  return v_3;
 }
 

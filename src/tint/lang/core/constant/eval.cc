@@ -62,6 +62,8 @@
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
+TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
+
 namespace tint::core::constant {
 namespace {
 
@@ -3701,9 +3703,9 @@ Eval::Result Eval::smoothstep(const core::type::Type* ty,
         auto create = [&](auto low, auto high, auto x) -> Eval::Result {
             using NumberT = decltype(low);
 
-            if (low >= high) {
-                AddError(source) << "smoothstep called with 'low' (" << low
-                                 << ") not less than 'high' (" << high << ")";
+            if (low == high) {
+                AddError(source) << "smoothstep called with 'low' (" << low << ") equal to 'high' ("
+                                 << high << ")";
                 if (!use_runtime_semantics_) {
                     return error;
                 }
@@ -4028,3 +4030,5 @@ diag::Diagnostic& Eval::AddNote(const Source& source) const {
 }
 
 }  // namespace tint::core::constant
+
+TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);

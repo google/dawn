@@ -40,10 +40,12 @@ cc_library(
   name = "common",
   srcs = [
     "common.cc",
+    "vertex_pulling_config.cc",
   ],
   hdrs = [
     "binding_point.h",
     "override_id.h",
+    "vertex_pulling_config.h",
   ],
   deps = [
     "//src/tint/utils",
@@ -67,6 +69,7 @@ cc_library(
   srcs = [
     "binding_point_test.cc",
     "override_id_test.cc",
+    "vertex_pulling_config_test.cc",
   ],
   deps = [
     "//src/tint/api/common",

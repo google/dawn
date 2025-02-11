@@ -30,7 +30,6 @@
 #include <algorithm>
 #include <cstdint>
 #include <functional>
-#include <memory>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -65,6 +64,7 @@
 #include "src/tint/lang/core/ir/multi_in_block.h"
 #include "src/tint/lang/core/ir/next_iteration.h"
 #include "src/tint/lang/core/ir/override.h"
+#include "src/tint/lang/core/ir/phony.h"
 #include "src/tint/lang/core/ir/referenced_module_vars.h"
 #include "src/tint/lang/core/ir/return.h"
 #include "src/tint/lang/core/ir/store.h"
@@ -80,15 +80,19 @@
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/bool.h"
+#include "src/tint/lang/core/type/f16.h"
 #include "src/tint/lang/core/type/f32.h"
+#include "src/tint/lang/core/type/function.h"
 #include "src/tint/lang/core/type/i32.h"
 #include "src/tint/lang/core/type/i8.h"
 #include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/core/type/memory_view.h"
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/reference.h"
+#include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/type.h"
 #include "src/tint/lang/core/type/u32.h"
+#include "src/tint/lang/core/type/u64.h"
 #include "src/tint/lang/core/type/u8.h"
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/core/type/void.h"
@@ -346,6 +350,17 @@ constexpr BuiltinChecker kPointSizeChecker{
     /* type_error */ "__point_size must be a f32",
 };
 
+constexpr BuiltinChecker kCullDistanceChecker{
+    /* name */ "__cull_distance",
+    /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kVertex),
+    /* direction */ BuiltinChecker::IODirection::kOutput,
+    /* type_check */
+    [](const core::type::Type* ty) -> bool {
+        return ty->Is<core::type::Array>() && ty->DeepestElement()->Is<core::type::F32>();
+    },
+    /* type_error */ "__cull_distance must be an array of f32",
+};
+
 constexpr BuiltinChecker kFragDepthChecker{
     /* name */ "frag_depth",
     /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kFragment),
@@ -463,6 +478,8 @@ const BuiltinChecker& BuiltinCheckerFor(BuiltinValue builtin) {
     switch (builtin) {
         case BuiltinValue::kPointSize:
             return kPointSizeChecker;
+        case BuiltinValue::kCullDistance:
+            return kCullDistanceChecker;
         case BuiltinValue::kFragDepth:
             return kFragDepthChecker;
         case BuiltinValue::kFrontFacing:
@@ -1083,6 +1100,10 @@ class Validator {
     /// @param bitcast the bitcast to validate
     void CheckBitcast(const Bitcast* bitcast);
 
+    /// Validates that there exists the required bitcast override
+    /// @param bitcast the bitcast to validate types of
+    void CheckBitcastTypes(const Bitcast* bitcast);
+
     /// Validates the given builtin call
     /// @param call the call to validate
     void CheckBuiltinCall(const BuiltinCall* call);
@@ -1207,6 +1228,10 @@ class Validator {
     /// @param s the store vector element to validate
     void CheckStoreVectorElement(const StoreVectorElement* s);
 
+    /// Validates the given phony assignment
+    /// @param p the phony assignment to validate
+    void CheckPhony(const Phony* p);
+
     /// Validates that the number and types of the source instruction operands match the target's
     /// values.
     /// @param source_inst the source instruction
@@ -1249,6 +1274,10 @@ class Validator {
     /// @param inst the instruction
     /// @returns the function
     const ir::Function* ContainingFunction(const ir::Instruction* inst) {
+        if (inst->Block() == mod_.root_block) {
+            return nullptr;
+        }
+
         return block_to_function_.GetOrAdd(inst->Block(), [&] {  //
             return ContainingFunction(inst->Block()->Parent());
         });
@@ -1258,6 +1287,10 @@ class Validator {
     /// @param f the function
     /// @returns all end points that call the function
     Hashset<const ir::Function*, 4> ContainingEndPoints(const ir::Function* f) {
+        if (!f) {
+            return {};
+        }
+
         Hashset<const ir::Function*, 4> result{};
         Hashset<const ir::Function*, 4> visited{f};
 
@@ -1265,12 +1298,16 @@ class Validator {
         while (!call_sites.IsEmpty()) {
             auto call_site = call_sites.Pop();
             auto calling_function = ContainingFunction(call_site);
+            if (!calling_function) {
+                continue;
+            }
+
             if (visited.Contains(calling_function)) {
                 continue;
             }
             visited.Add(calling_function);
 
-            if (calling_function->Stage() != Function::PipelineStage::kUndefined) {
+            if (calling_function->IsEntryPoint()) {
                 result.Add(calling_function);
             }
 
@@ -1315,6 +1352,7 @@ class Validator {
     Hashset<const ir::Discard*, 4> discards_;
     core::ir::ReferencedModuleVars<const Module> referenced_module_vars_;
     Hashset<OverrideId, 8> seen_override_ids_;
+    Hashset<std::string, 4> entry_point_names_;
 
     Hashset<ValidatedType, 16> validated_types_{};
 };
@@ -1334,8 +1372,13 @@ Disassembler& Validator::Disassemble() {
 Result<SuccessType> Validator::Run() {
     RunStructuralSoundnessChecks();
 
-    CheckForOrphanedInstructions();
-    CheckForNonFragmentDiscards();
+    if (!diagnostics_.ContainsErrors()) {
+        CheckForOrphanedInstructions();
+    }
+
+    if (!diagnostics_.ContainsErrors()) {
+        CheckForNonFragmentDiscards();
+    }
 
     if (diagnostics_.ContainsErrors()) {
         diagnostics_.AddNote(Source{}) << "# Disassembly\n" << Disassemble().Text();
@@ -1366,7 +1409,7 @@ void Validator::CheckForNonFragmentDiscards() {
     for (const auto& d : discards_) {
         const auto* f = ContainingFunction(d);
         for (const Function* ep : ContainingEndPoints(f)) {
-            if (ep->Stage() != Function::PipelineStage::kFragment) {
+            if (!ep->IsFragment()) {
                 AddError(d) << "cannot be called in non-fragment end point";
             }
         }
@@ -1628,9 +1671,7 @@ bool Validator::CheckOperand(const Instruction* inst, size_t idx) {
         return true;
     }
 
-    // ir::Function does not have a meaningful type, so does not override the default Type()
-    // behaviour.
-    if (DAWN_UNLIKELY(!operand->Is<ir::Function>() && operand->Type() == nullptr)) {
+    if (DAWN_UNLIKELY(operand->Type() == nullptr)) {
         AddError(inst, idx) << "operand type is undefined";
         return false;
     }
@@ -1738,9 +1779,19 @@ void Validator::CheckType(const core::type::Type* root,
     }
 
     auto visit = [&](const core::type::Type* type) {
+        if (type->IsAbstract()) {
+            diag() << "abstracts are not permitted";
+            return false;
+        }
+
         return tint::Switch(
             type,
-            [&](const core::type::Reference*) {
+            [&](const core::type::Reference* ref) {
+                if (ref->StoreType()->Is<core::type::Void>()) {
+                    diag() << "references to void are not permitted";
+                    return false;
+                }
+
                 // Reference types are guarded by the AllowRefTypes capability.
                 if (!capabilities_.Contains(Capability::kAllowRefTypes) ||
                     ignore_caps.Contains(Capability::kAllowRefTypes)) {
@@ -1753,14 +1804,28 @@ void Validator::CheckType(const core::type::Type* root,
                 }
                 return true;
             },
-            [&](const core::type::Pointer*) {
+            [&](const core::type::Pointer* ptr) {
+                if (ptr->StoreType()->Is<core::type::Void>()) {
+                    diag() << "pointers to void are not permitted";
+                    return false;
+                }
+
                 if (type != root) {
                     // Nesting pointer types inside structures is guarded by a capability.
                     if (!(root->Is<core::type::Struct>() &&
-                          capabilities_.Contains(Capability::kAllowPointersInStructures))) {
+                          capabilities_.Contains(
+                              Capability::kAllowPointersAndHandlesInStructures))) {
                         diag() << "nested pointer types are not permitted";
                         return false;
                     }
+                }
+                return true;
+            },
+            [&](const core::type::U64*) {
+                // u64 types are guarded by the Allow64BitIntegers capability.
+                if (!capabilities_.Contains(Capability::kAllow64BitIntegers)) {
+                    diag() << "64-bit integer types are not permitted";
+                    return false;
                 }
                 return true;
             },
@@ -1782,17 +1847,32 @@ void Validator::CheckType(const core::type::Type* root,
             },
             [&](const core::type::Vector* v) {
                 if (!v->Type()->IsScalar()) {
-                    diag() << "vector elements must be scalars";
+                    diag() << "vector elements, " << NameOf(type) << ", must be scalars";
                     return false;
                 }
                 return true;
             },
             [&](const core::type::Matrix* m) {
                 if (!m->Type()->IsFloatScalar()) {
-                    diag() << "matrix elements must be float scalars";
+                    diag() << "matrix elements, " << NameOf(type) << ", must be float scalars";
                     return false;
                 }
                 return true;
+            },
+            [&](const core::type::StorageTexture* s) {
+                switch (s->Dim()) {
+                    case core::type::TextureDimension::kCube:
+                    case core::type::TextureDimension::kCubeArray:
+                        diag() << "dimension " << style::Literal(ToString(s->Dim()))
+                               << " for storage textures does not in WGSL yet";
+                        return false;
+                    case core::type::TextureDimension::kNone:
+                        diag() << "invalid texture dimension "
+                               << style::Literal(ToString(s->Dim()));
+                        return false;
+                    default:
+                        return true;
+                }
             },
             [](Default) { return true; });
     };
@@ -1857,17 +1937,25 @@ void Validator::CheckRootBlock(const Block* blk) {
             [&](const core::ir::Construct* c) {
                 if (capabilities_.Contains(Capability::kAllowModuleScopeLets)) {
                     CheckInstruction(c);
+                    CheckOnlyUsedInRootBlock(inst);
                 } else {
                     AddError(inst) << "root block: invalid instruction: " << inst->TypeInfo().name;
                 }
             },
             [&](Default) {
-                // Note, this validation is looser then it could be. There are only certain
-                // expressions and builtins which can be used in an override. We can tighten this up
-                // later to a constrained set of instructions and builtins if necessary.
-                if (capabilities_.Contains(Capability::kAllowOverrides)) {
-                    // If overrides are allowed we can have regular instructions in the root block,
-                    // with the caveat that those instructions can _only_ be used in the root block.
+                // Note, this validation around kAllowOverrides is looser than it could be. There
+                // are only certain expressions and builtins which can be used in an override, but
+                // the current checks are only doing type level checking. To tighten this up will
+                // require walking up the tree to make sure that operands are const/override and
+                // builtins are allowed.
+                if (capabilities_.Contains(Capability::kAllowOverrides) &&
+                    inst->IsAnyOf<core::ir::Unary, core::ir::Binary, core::ir::CoreBuiltinCall,
+                                  core::ir::Convert, core::ir::Swizzle, core::ir::Access,
+                                  core::ir::Bitcast>()) {
+                    CheckInstruction(inst);
+                    // If overrides are allowed we can have certain regular instructions in the root
+                    // block, with the caveat that those instructions can _only_ be used in the root
+                    // block.
                     CheckOnlyUsedInRootBlock(inst);
                 } else {
                     AddError(inst) << "root block: invalid instruction: " << inst->TypeInfo().name;
@@ -1893,6 +1981,19 @@ void Validator::CheckFunction(const Function* func) {
     // Scope holds the parameters and block
     scope_stack_.Push();
     TINT_DEFER(scope_stack_.Pop());
+
+    // Checking the name early, so its usage can be recorded, even if the function is malformed.
+    if (func->IsEntryPoint()) {
+        const auto name = mod_.NameOf(func).Name();
+        if (!entry_point_names_.Add(name)) {
+            AddError(func) << "entry point name " << style::Function(name) << " is not unique";
+        }
+    }
+
+    if (!func->Type() || !func->Type()->Is<core::type::Function>()) {
+        AddError(func) << "functions must have type '<function>'";
+        return;
+    }
 
     if (!func->Block()) {
         AddError(func) << "root block for function is undefined";
@@ -1936,11 +2037,12 @@ void Validator::CheckFunction(const Function* func) {
 
         if (!IsValidFunctionParamType(param->Type())) {
             auto struct_ty = param->Type()->As<core::type::Struct>();
-            if (!capabilities_.Contains(Capability::kAllowPointersInStructures) || !struct_ty ||
-                struct_ty->Members().Any([](const core::type::StructMember* m) {
+            if (!capabilities_.Contains(Capability::kAllowPointersAndHandlesInStructures) ||
+                !struct_ty || struct_ty->Members().Any([](const core::type::StructMember* m) {
                     return !IsValidFunctionParamType(m->Type());
                 })) {
-                AddError(param) << "function parameter type must be constructible, a pointer, a "
+                AddError(param) << "function parameter type, " << NameOf(param->Type())
+                                << ", must be constructible, a pointer, a "
                                    "texture, or a sampler";
             }
         }
@@ -1955,16 +2057,16 @@ void Validator::CheckFunction(const Function* func) {
                 "invariant can only decorate a param member iff it is also "
                 "decorated with position"));
 
-        if (func->Stage() == Function::PipelineStage::kFragment) {
+        if (func->IsFragment()) {
             CheckFunctionParamAttributesAndType(
                 param,
                 CheckFrontFacingIfBoolFunc<FunctionParam>(
                     "fragment entry point params can only be a bool if decorated with "
                     "@builtin(front_facing)"),
                 CheckFrontFacingIfBoolFunc<FunctionParam>(
-                    "fragment entry point param memebers can only be a bool if "
+                    "fragment entry point param members can only be a bool if "
                     "decorated with @builtin(front_facing)"));
-        } else if (func->Stage() != Function::PipelineStage::kUndefined) {
+        } else if (func->IsEntryPoint()) {
             CheckFunctionParamAttributesAndType(
                 param, CheckNotBool<FunctionParam>(
                            "entry point params can only be a bool for fragment shaders"));
@@ -1981,7 +2083,7 @@ void Validator::CheckFunction(const Function* func) {
             }
         }
 
-        if (func->Stage() != Function::PipelineStage::kUndefined) {
+        if (func->IsEntryPoint()) {
             {
                 auto result = ValidateShaderIOAnnotations(param->Type(), param->BindingPoint(),
                                                           param->Attributes(), "input param");
@@ -2026,7 +2128,7 @@ void Validator::CheckFunction(const Function* func) {
         AddError(func) << "function return type must be constructible";
     }
 
-    if (func->Stage() != Function::PipelineStage::kUndefined) {
+    if (func->IsEntryPoint()) {
         if (DAWN_UNLIKELY(mod_.NameOf(func).Name().empty())) {
             AddError(func) << "entry points must have names";
         }
@@ -2036,11 +2138,12 @@ void Validator::CheckFunction(const Function* func) {
 
     if (func->Stage() == Function::PipelineStage::kCompute) {
         if (DAWN_UNLIKELY(func->ReturnType() && !func->ReturnType()->Is<core::type::Void>())) {
-            AddError(func) << "compute entry point must not have a return type";
+            AddError(func) << "compute entry point must not have a return type, found "
+                           << NameOf(func->ReturnType());
         }
     }
 
-    if (func->Stage() != Function::PipelineStage::kUndefined) {
+    if (func->IsEntryPoint()) {
         auto result = ValidateShaderIOAnnotations(func->ReturnType(), std::nullopt,
                                                   func->ReturnAttributes(), "return values");
         if (result != Success) {
@@ -2048,8 +2151,8 @@ void Validator::CheckFunction(const Function* func) {
         }
 
         CheckFunctionReturnAttributesAndType(
-            func, CheckFrontFacingIfBoolFunc<Function>("entry point returns can not be bool"),
-            CheckFrontFacingIfBoolFunc<Function>("entry point return members can not be bool"));
+            func, CheckFrontFacingIfBoolFunc<Function>("entry point returns can not be 'bool'"),
+            CheckFrontFacingIfBoolFunc<Function>("entry point return members can not be 'bool'"));
 
         for (auto var : referenced_module_vars_.TransitiveReferences(func)) {
             const auto* mv = var->Result(0)->Type()->As<core::type::MemoryView>();
@@ -2064,27 +2167,25 @@ void Validator::CheckFunction(const Function* func) {
                 continue;
             }
 
-            if (func->Stage() == Function::PipelineStage::kFragment &&
-                mv->AddressSpace() == AddressSpace::kIn) {
+            if (func->IsFragment() && mv->AddressSpace() == AddressSpace::kIn) {
                 CheckIOAttributesAndType(
                     func, attr, ty,
-                    CheckFrontFacingIfBoolFunc<Function>("input address space values referenced by "
-                                                         "fragment shaders can only be a bool if "
-                                                         "decorated with @builtin(front_facing)"));
+                    CheckFrontFacingIfBoolFunc<Function>(
+                        "input address space values referenced by fragment shaders can only be "
+                        "'bool' if decorated with @builtin(front_facing)"));
 
             } else {
                 CheckIOAttributesAndType(
                     func, attr, ty,
                     CheckNotBool<Function>(
                         "IO address space values referenced by shader entry points can only be "
-                        "bool if "
-                        "in the input space, used only by fragment shaders and decorated with "
-                        "@builtin(front_facing)"));
+                        "'bool' if in the input space, used only by fragment shaders and decorated "
+                        "with @builtin(front_facing)"));
             }
         }
     }
 
-    if (func->Stage() == Function::PipelineStage::kVertex) {
+    if (func->IsVertex()) {
         CheckVertexEntryPoint(func);
     }
 
@@ -2093,7 +2194,7 @@ void Validator::CheckFunction(const Function* func) {
 }
 
 void Validator::CheckWorkgroupSize(const Function* func) {
-    if (func->Stage() != Function::PipelineStage::kCompute) {
+    if (!func->IsCompute()) {
         if (func->WorkgroupSize().has_value()) {
             AddError(func) << "@workgroup_size only valid on compute entry point";
         }
@@ -2119,7 +2220,8 @@ void Validator::CheckWorkgroupSize(const Function* func) {
 
         auto* ty = size->Type();
         if (!ty->IsAnyOf<core::type::I32, core::type::U32>()) {
-            AddError(func) << "@workgroup_size params must be an i32 or u32";
+            AddError(func) << "@workgroup_size params must be an 'i32' or 'u32', received "
+                           << NameOf(ty);
             return;
         }
 
@@ -2128,7 +2230,7 @@ void Validator::CheckWorkgroupSize(const Function* func) {
         }
 
         if (sizes_ty != ty) {
-            AddError(func) << "@workgroup_size params must be all i32s or all u32s";
+            AddError(func) << "@workgroup_size params must be all 'i32's or all 'u32's";
             return;
         }
 
@@ -2147,7 +2249,17 @@ void Validator::CheckWorkgroupSize(const Function* func) {
         }
 
         if (auto* r = size->As<ir::InstructionResult>()) {
-            if (r->Instruction() && r->Instruction()->Is<core::ir::Override>()) {
+            if (!r->Instruction()) {
+                AddError(func) << "instruction for @workgroup_size param is not defined";
+                return;
+            }
+
+            if (r->Instruction()->Block() != mod_.root_block) {
+                AddError(func) << "@workgroup_size param defined by non-module scope value";
+                return;
+            }
+
+            if (r->Instruction()->Is<core::ir::Override>()) {
                 continue;
             }
 
@@ -2299,6 +2411,7 @@ void Validator::CheckInstruction(const Instruction* inst) {
         [&](const Load* load) { CheckLoad(load); },                        //
         [&](const LoadVectorElement* l) { CheckLoadVectorElement(l); },    //
         [&](const Loop* l) { CheckLoop(l); },                              //
+        [&](const Phony* p) { CheckPhony(p); },                            //
         [&](const Store* s) { CheckStore(s); },                            //
         [&](const StoreVectorElement* s) { CheckStoreVectorElement(s); },  //
         [&](const Switch* s) { CheckSwitch(s); },                          //
@@ -2326,8 +2439,7 @@ void Validator::CheckOverride(const Override* o) {
     }
 
     if (!o->Result(0)->Type()->IsScalar()) {
-        AddError(o) << "override type " << style::Type(o->Result(0)->Type()->FriendlyName())
-                    << " is not a scalar";
+        AddError(o) << "override type " << NameOf(o->Result(0)->Type()) << " is not a scalar";
         return;
     }
 
@@ -2336,9 +2448,8 @@ void Validator::CheckOverride(const Override* o) {
             return;
         }
         if (o->Initializer()->Type() != o->Result(0)->Type()) {
-            AddError(o) << "override type " << style::Type(o->Result(0)->Type()->FriendlyName())
-                        << " does not match initializer type "
-                        << style::Type(o->Initializer()->Type()->FriendlyName());
+            AddError(o) << "override type " << NameOf(o->Result(0)->Type())
+                        << " does not match initializer type " << NameOf(o->Initializer()->Type());
             return;
         }
     }
@@ -2358,7 +2469,8 @@ void Validator::CheckVar(const Var* var) {
 
     auto* mv = result_type->As<core::type::MemoryView>();
     if (!mv) {
-        AddError(var) << "result type must be a pointer or a reference";
+        AddError(var) << "result type " << NameOf(result_type)
+                      << " must be a pointer or a reference";
         return;
     }
 
@@ -2383,19 +2495,10 @@ void Validator::CheckVar(const Var* var) {
             return;
         }
 
-        if (var->Operand(ir::Var::kInitializerOperandOffset)->Is<ir::Function>()) {
-            // ir::Function has a null ->Type(), and won't be filtered by CheckOperand, so needs
-            // special handling here
-            AddError(var) << "initializer type 'function' does not match store type "
-                          << style::Type(var->Result(0)->Type()->UnwrapPtrOrRef()->FriendlyName());
-            return;
-        }
-
         if (var->Initializer()->Type() != var->Result(0)->Type()->UnwrapPtrOrRef()) {
-            AddError(var) << "initializer type "
-                          << style::Type(var->Initializer()->Type()->FriendlyName())
+            AddError(var) << "initializer type " << NameOf(var->Initializer()->Type())
                           << " does not match store type "
-                          << style::Type(var->Result(0)->Type()->UnwrapPtrOrRef()->FriendlyName());
+                          << NameOf(var->Result(0)->Type()->UnwrapPtrOrRef());
             return;
         }
     }
@@ -2505,7 +2608,7 @@ Result<SuccessType, std::string> Validator::ValidateShaderIOAnnotations(
                        ToString(add_result.Failure()) + "'";
             }
 
-            if (capabilities_.Contains(Capability::kAllowPointersInStructures)) {
+            if (capabilities_.Contains(Capability::kAllowPointersAndHandlesInStructures)) {
                 if (auto* mv = mem->Type()->As<core::type::MemoryView>()) {
                     if (mv->AddressSpace() == AddressSpace::kWorkgroup) {
                         mem_annotations.Add(IOAnnotation::kWorkgroup);
@@ -2541,15 +2644,33 @@ void Validator::CheckLet(const Let* l) {
         return;
     }
 
-    if (l->Result(0) && l->Value()) {
-        if (l->Result(0)->Type() != l->Value()->Type()) {
-            auto result_type_name =
-                l->Result(0)->Type() ? l->Result(0)->Type()->FriendlyName() : "undef";
-            auto value_type_name =
-                l->Value()->Type() ? l->Value()->Type()->FriendlyName() : "undef";
-            AddError(l) << "result type " << style::Type(result_type_name)
-                        << " does not match value type " << style::Type(value_type_name);
+    auto* value_ty = l->Value()->Type();
+    if (capabilities_.Contains(Capability::kAllowAnyLetType)) {
+        if (value_ty->Is<core::type::Void>()) {
+            AddError(l) << "value type cannot be void";
         }
+    } else {
+        if (!value_ty->IsConstructible() && !value_ty->Is<core::type::Pointer>()) {
+            AddError(l) << "value type, " << NameOf(value_ty)
+                        << ", must be concrete constructible type or a pointer type";
+        }
+    }
+
+    auto* result_ty = l->Result(0)->Type();
+    if (capabilities_.Contains(Capability::kAllowAnyLetType)) {
+        if (result_ty->Is<core::type::Void>()) {
+            AddError(l) << "result type cannot be void";
+        }
+    } else {
+        if (!result_ty->IsConstructible() && !result_ty->Is<core::type::Pointer>()) {
+            AddError(l) << "result type, " << NameOf(result_ty)
+                        << ", must be concrete constructible type or a pointer type";
+        }
+    }
+
+    if (value_ty != result_ty) {
+        AddError(l) << "result type " << NameOf(l->Result(0)->Type())
+                    << " does not match value type " << NameOf(l->Value()->Type());
     }
 }
 
@@ -2581,16 +2702,116 @@ void Validator::CheckCall(const Call* call) {
 }
 
 void Validator::CheckBitcast(const Bitcast* bitcast) {
-    CheckResultsAndOperands(bitcast, Bitcast::kNumResults, Bitcast::kNumOperands);
+    if (!CheckResultsAndOperands(bitcast, Bitcast::kNumResults, Bitcast::kNumOperands)) {
+        return;
+    }
+
+    CheckBitcastTypes(bitcast);
+}
+
+void Validator::CheckBitcastTypes(const Bitcast* bitcast) {
+    // Caller is responsible for checking results and operands
+    const auto* val_type = bitcast->Operand(Bitcast::kValueOperandOffset)->Type();
+    const auto* result_type = bitcast->Result(0)->Type();
+
+    const auto add_error = [&]() {
+        AddError(bitcast) << "bitcast is not defined for " << NameOf(val_type) << " -> "
+                          << NameOf(result_type);
+    };
+
+    // Check that there exists an overload for the provided types
+    if (val_type->IsAnyOf<core::type::U32, core::type::I32, core::type::F32>()) {
+        // S, where S is i32, u32, or f32
+        // S -> S, identity and reinterpretation
+        if (result_type->IsAnyOf<core::type::U32, core::type::I32, core::type::F32>()) {
+            return;
+        }
+
+        // S -> vec2<f16>
+        if (auto* vec_type = result_type->As<core::type::Vector>()) {
+            auto elements = vec_type->Elements();
+            if (elements.count == 2 && Is<core::type::F16>(elements.type)) {
+                return;
+            }
+        }
+    } else if (val_type->Is<core::type::F16>()) {
+        // f16 -> f16, identity
+        if (result_type->Is<core::type::F16>()) {
+            return;
+        }
+    } else if (val_type->Is<core::type::Vector>()) {
+        auto val_elements = val_type->Elements();
+        if (!val_elements.type) {
+            // Malformed vector
+            add_error();
+            return;
+        }
+
+        std::optional<core::type::TypeAndCount> result_elements;
+        if (result_type->As<core::type::Vector>()) {
+            result_elements = result_type->Elements();
+            if (!result_elements->type) {
+                // Malformed vector
+                add_error();
+                return;
+            }
+        }
+
+        if (val_elements.type->IsAnyOf<core::type::U32, core::type::I32, core::type::F32>()) {
+            // vecN<S>, where S is i32, u32, or f32
+            // vecN<S> -> vecN<s>, identity and reinterpretation cases
+            if (result_elements.has_value() && val_elements.count == result_elements->count &&
+                result_elements->type
+                    ->IsAnyOf<core::type::U32, core::type::I32, core::type::F32>()) {
+                return;
+            }
+
+            // vec2<S> -> vec4<f16>
+            if (val_elements.count == 2) {
+                if (result_elements.has_value() && result_elements->count == 4 &&
+                    result_elements->type->Is<core::type::F16>()) {
+                    return;
+                }
+            }
+        } else if (val_elements.type->Is<core::type::F16>()) {
+            if (result_elements.has_value()) {
+                if (result_elements->type->Is<core::type::F16>()) {
+                    // vecN<f16> -> vecN<f16>, identity
+                    if (val_elements.count == result_elements->count) {
+                        return;
+                    }
+                } else {
+                    // vec4<f16> -> vec2<S>, where S is i32, u32, or f32
+                    if (val_elements.count == 4 && result_elements->count == 2 &&
+                        result_elements->type
+                            ->IsAnyOf<core::type::U32, core::type::I32, core::type::F32>()) {
+                        return;
+                    }
+                }
+            } else {
+                // vec2<f16> -> i32, u32, or f32
+                if (val_elements.count == 2 &&
+                    result_type->IsAnyOf<core::type::U32, core::type::I32, core::type::F32>()) {
+                    return;
+                }
+            }
+        }
+    }
+
+    // No matching case for val and result type combination
+    add_error();
 }
 
 void Validator::CheckBuiltinCall(const BuiltinCall* call) {
-    auto args =
-        Transform<8>(call->Args(), [&](const ir::Value* v) { return v ? v->Type() : nullptr; });
-    if (args.Any([&](const core::type::Type* ty) { return ty == nullptr; })) {
-        AddError(call) << "argument to builtin has undefined type";
+    // This check cannot be more precise, since until intrinsic lookup below, it is unknown what
+    // number of operands are expected, but still need to enforce things are in scope,
+    // have types, etc.
+    if (!CheckResults(call, BuiltinCall::kNumResults) || !CheckOperands(call)) {
         return;
     }
+
+    // CheckOperands above ensures that all args are non-null and have a valid type
+    auto args = Transform<8>(call->Args(), [&](const ir::Value* v) { return v->Type(); });
 
     intrinsic::Context context{
         call->TableData(),
@@ -2599,7 +2820,8 @@ void Validator::CheckBuiltinCall(const BuiltinCall* call) {
     };
 
     auto builtin = core::intrinsic::LookupFn(context, call->FriendlyName().c_str(), call->FuncId(),
-                                             Empty, args, core::EvaluationStage::kRuntime);
+                                             call->ExplicitTemplateParams(), args,
+                                             core::EvaluationStage::kRuntime);
     if (builtin != Success) {
         AddError(call) << builtin.Failure();
         return;
@@ -2607,13 +2829,9 @@ void Validator::CheckBuiltinCall(const BuiltinCall* call) {
 
     TINT_ASSERT(builtin->return_type);
 
-    if (call->Result(0) == nullptr) {
-        AddError(call) << "call to builtin does not have a return type";
-        return;
-    }
-
     if (builtin->return_type != call->Result(0)->Type()) {
-        AddError(call) << "call result type does not match builtin return type";
+        AddError(call) << "call result type " << NameOf(call->Result(0)->Type())
+                       << "does not match builtin return type " << NameOf(builtin->return_type);
         return;
     }
 }
@@ -2629,19 +2847,17 @@ void Validator::CheckMemberBuiltinCall(const MemberBuiltinCall* call) {
         symbols_,
     };
 
-    auto result =
-        core::intrinsic::LookupMemberFn(context, call->FriendlyName().c_str(), call->FuncId(),
-                                        Empty, std::move(args), core::EvaluationStage::kRuntime);
+    auto result = core::intrinsic::LookupMemberFn(context, call->FriendlyName().c_str(),
+                                                  call->FuncId(), call->ExplicitTemplateParams(),
+                                                  std::move(args), core::EvaluationStage::kRuntime);
     if (result != Success) {
         AddError(call) << result.Failure();
         return;
     }
 
     if (result->return_type != call->Result(0)->Type()) {
-        AddError(call) << "member call result type ("
-                       << style::Type(call->Result(0)->Type()->FriendlyName())
-                       << ") does not match builtin return type ("
-                       << style::Type(result->return_type->FriendlyName()) << ")";
+        AddError(call) << "member call result type " << NameOf(call->Result(0)->Type())
+                       << " does not match builtin return type " << NameOf(result->return_type);
     }
 }
 
@@ -2670,16 +2886,53 @@ void Validator::CheckConstruct(const Construct* construct) {
             }
             if (args[i]->Type() != members[i]->Type()) {
                 AddError(construct, Construct::kArgsOperandOffset + i)
-                    << "structure member " << i << " is of type "
-                    << style::Type(members[i]->Type()->FriendlyName())
-                    << ", but argument is of type " << style::Type(args[i]->Type()->FriendlyName());
+                    << "type " << NameOf(args[i]->Type()) << " of argument " << i
+                    << " does not match type " << NameOf(members[i]->Type()) << " of struct member";
             }
         }
     }
 }
 
 void Validator::CheckConvert(const Convert* convert) {
-    CheckResultsAndOperands(convert, Convert::kNumResults, Convert::kNumOperands);
+    if (!CheckResultsAndOperands(convert, Convert::kNumResults, Convert::kNumOperands)) {
+        return;
+    }
+
+    auto* result_type = convert->Result(0)->Type();
+    auto* value_type = convert->Operand(Convert::kValueOperandOffset)->Type();
+
+    intrinsic::CtorConv conv_ty;
+    Vector<const core::type::Type*, 1> template_type;
+    tint::Switch(
+        result_type,                                                             //
+        [&](const core::type::I32*) { conv_ty = intrinsic::CtorConv::kI32; },    //
+        [&](const core::type::U32*) { conv_ty = intrinsic::CtorConv::kU32; },    //
+        [&](const core::type::F32*) { conv_ty = intrinsic::CtorConv::kF32; },    //
+        [&](const core::type::F16*) { conv_ty = intrinsic::CtorConv::kF16; },    //
+        [&](const core::type::Bool*) { conv_ty = intrinsic::CtorConv::kBool; },  //
+        [&](const core::type::Vector* v) {
+            conv_ty = intrinsic::VectorCtorConv(v->Width());
+            template_type.Push(v->Type());
+        },
+        [&](const core::type::Matrix* m) {
+            conv_ty = intrinsic::MatrixCtorConv(m->Columns(), m->Rows());
+            template_type.Push(m->Type());
+        },
+        [&](Default) { conv_ty = intrinsic::CtorConv::kNone; });
+
+    if (conv_ty == intrinsic::CtorConv::kNone) {
+        AddError(convert) << "not defined for result type, " << NameOf(result_type);
+        return;
+    }
+
+    auto table = intrinsic::Table<intrinsic::Dialect>(type_mgr_, symbols_);
+    auto match =
+        table.Lookup(conv_ty, template_type, Vector{value_type}, core::EvaluationStage::kOverride);
+    if (match != Success || !match->info->flags.Contains(intrinsic::OverloadFlag::kIsConverter)) {
+        AddError(convert) << "No defined converter for " << NameOf(value_type) << " -> "
+                          << NameOf(result_type);
+        return;
+    }
 }
 
 void Validator::CheckDiscard(const tint::core::ir::Discard* discard) {
@@ -2696,7 +2949,7 @@ void Validator::CheckUserCall(const UserCall* call) {
         return;
     }
 
-    if (call->Target()->Stage() != Function::PipelineStage::kUndefined) {
+    if (call->Target()->IsEntryPoint()) {
         AddError(call, UserCall::kFunctionOperandOffset)
             << "call target must not have a pipeline stage";
     }
@@ -2713,9 +2966,8 @@ void Validator::CheckUserCall(const UserCall* call) {
     for (size_t i = 0; i < args.Length(); i++) {
         if (args[i]->Type() != params[i]->Type()) {
             AddError(call, UserCall::kArgsOperandOffset + i)
-                << "function parameter " << i << " is of type "
-                << style::Type(params[i]->Type()->FriendlyName()) << ", but argument is of type "
-                << style::Type(args[i]->Type()->FriendlyName());
+                << "type " << NameOf(params[i]->Type()) << " of function parameter " << i
+                << " does not match argument type " << NameOf(args[i]->Type());
         }
     }
 }
@@ -2750,7 +3002,7 @@ void Validator::CheckAccess(const Access* a) {
                        << style::Type("ref<", obj_view->AddressSpace(), ", ", type->FriendlyName(),
                                       ", ", obj_view->Access(), ">");
             default:
-                return StyledText{} << style::Type(type->FriendlyName());
+                return NameOf(type);
         }
     };
 
@@ -2764,8 +3016,7 @@ void Validator::CheckAccess(const Access* a) {
 
         auto* index = a->Indices()[i];
         if (DAWN_UNLIKELY(!index->Type() || !index->Type()->IsIntegerScalar())) {
-            auto name = index->Type() ? index->Type()->FriendlyName() : "undef";
-            err() << "index must be integer, got " << name;
+            err() << "index type " << NameOf(index->Type()) << " must be an integer";
             return;
         }
 
@@ -2829,7 +3080,7 @@ void Validator::CheckAccess(const Access* a) {
     }
     if (DAWN_UNLIKELY(!ok)) {
         AddError(a) << "result of access chain is type " << desc_of(in_kind, ty)
-                    << " but instruction type is " << style::Type(want->FriendlyName());
+                    << " but instruction type is " << NameOf(want);
     }
 }
 
@@ -2851,10 +3102,9 @@ void Validator::CheckBinary(const Binary* b) {
 
         if (auto* result = b->Result(0)) {
             if (overload->return_type != result->Type()) {
-                AddError(b) << "result value type " << style::Type(result->Type()->FriendlyName())
-                            << " does not match "
+                AddError(b) << "result value type " << NameOf(result->Type()) << " does not match "
                             << style::Instruction(Disassemble().NameOf(b->Op())) << " result type "
-                            << style::Type(overload->return_type->FriendlyName());
+                            << NameOf(overload->return_type);
             }
         }
     }
@@ -2877,10 +3127,9 @@ void Validator::CheckUnary(const Unary* u) {
 
         if (auto* result = u->Result(0)) {
             if (overload->return_type != result->Type()) {
-                AddError(u) << "result value type " << style::Type(result->Type()->FriendlyName())
-                            << " does not match "
+                AddError(u) << "result value type " << NameOf(result->Type()) << " does not match "
                             << style::Instruction(Disassemble().NameOf(u->Op())) << " result type "
-                            << style::Type(overload->return_type->FriendlyName());
+                            << NameOf(overload->return_type);
             }
         }
     }
@@ -2891,8 +3140,7 @@ void Validator::CheckIf(const If* if_) {
     CheckOperand(if_, If::kConditionOperandOffset);
 
     if (if_->Condition() && !if_->Condition()->Type()->Is<core::type::Bool>()) {
-        AddError(if_, If::kConditionOperandOffset)
-            << "condition type must be " << style::Type("bool");
+        AddError(if_, If::kConditionOperandOffset) << "condition type must be 'bool'";
     }
 
     tasks_.Push([this] { control_stack_.Pop(); });
@@ -2973,8 +3221,7 @@ void Validator::CheckLoopContinuing(const Loop* loop) {
                     if (TransitivelyHolds(loop->Continuing(), use.instruction)) {
                         AddError(use.instruction, use.operand_index)
                             << NameOf(result)
-                            << " cannot be used in continuing block as it is declared after "
-                               "the "
+                            << " cannot be used in continuing block as it is declared after the "
                                "first "
                             << style::Instruction("continue") << " in the loop's body";
                         AddDeclarationNote(result);
@@ -2991,7 +3238,9 @@ void Validator::CheckSwitch(const Switch* s) {
     CheckOperand(s, Switch::kConditionOperandOffset);
 
     if (s->Condition() && !s->Condition()->Type()->IsIntegerScalar()) {
-        AddError(s, Switch::kConditionOperandOffset) << "condition type must be an integer scalar";
+        auto* cond_ty = s->Condition() ? s->Condition()->Type() : nullptr;
+        AddError(s, Switch::kConditionOperandOffset)
+            << "condition type " << NameOf(cond_ty) << " must be an integer scalar";
     }
 
     tasks_.Push([this] { control_stack_.Pop(); });
@@ -3019,23 +3268,48 @@ void Validator::CheckSwizzle(const Swizzle* s) {
         return;
     }
 
+    auto* src_vec = s->Object()->Type()->As<core::type::Vector>();
+    if (!src_vec) {
+        AddError(s) << "object of swizzle, " << NameOf(s->Object()) << ", is not a vector, "
+                    << NameOf(s->Object()->Type());
+        return;
+    }
+
     auto indices = s->Indices();
     if (indices.Length() < Swizzle::kMinNumIndices) {
         AddError(s) << "expected at least " << Swizzle::kMinNumIndices << " indices";
+        return;
     }
 
     if (indices.Length() > Swizzle::kMaxNumIndices) {
         AddError(s) << "expected at most " << Swizzle::kMaxNumIndices << " indices";
+        return;
     }
 
+    auto elem_count = src_vec->Elements().count;
     for (auto& idx : indices) {
-        if (idx > Swizzle::kMaxIndexValue) {
+        if (idx > Swizzle::kMaxIndexValue || idx >= elem_count) {
             AddError(s) << "invalid index value";
+            return;
         }
+    }
+
+    auto* elem_ty = src_vec->Elements().type;
+    auto* expected_ty = type_mgr_.MatchWidth(elem_ty, indices.Length());
+    auto* result_ty = s->Result(0)->Type();
+    if (result_ty != expected_ty) {
+        AddError(s) << "result type " << NameOf(result_ty) << " does not match expected type, "
+                    << NameOf(expected_ty);
+        return;
     }
 }
 
 void Validator::CheckTerminator(const Terminator* b) {
+    // All terminators should have zero results
+    if (!CheckResults(b, 0)) {
+        return;
+    }
+
     // Note, transforms create `undef` terminator arguments (this is done in MergeReturn and
     // DemoteToHelper) so we can't add validation.
 
@@ -3150,8 +3424,7 @@ void Validator::CheckExitIf(const ExitIf* e) {
 }
 
 void Validator::CheckReturn(const Return* ret) {
-    if (!CheckResultsAndOperandRange(ret, Return::kNumResults, Return::kMinOperands,
-                                     Return::kMaxOperands)) {
+    if (!CheckOperands(ret, Return::kMinOperands, Return::kMaxOperands)) {
         return;
     }
 
@@ -3238,14 +3511,22 @@ void Validator::CheckLoad(const Load* l) {
     if (auto* from = l->From()) {
         auto* mv = from->Type()->As<core::type::MemoryView>();
         if (!mv) {
-            AddError(l, Load::kFromOperandOffset) << "load source operand is not a memory view";
+            AddError(l, Load::kFromOperandOffset)
+                << "load source operand " << NameOf(from->Type()) << " is not a memory view";
             return;
         }
+
+        if (mv->Access() != core::Access::kRead && mv->Access() != core::Access::kReadWrite) {
+            AddError(l, Load::kFromOperandOffset)
+                << "load source operand has a non-readable access type, "
+                << style::Literal(ToString(mv->Access()));
+            return;
+        }
+
         if (l->Result(0)->Type() != mv->StoreType()) {
             AddError(l, Load::kFromOperandOffset)
-                << "result type " << style::Type(l->Result(0)->Type()->FriendlyName())
-                << " does not match source store type "
-                << style::Type(mv->StoreType()->FriendlyName());
+                << "result type " << NameOf(l->Result(0)->Type())
+                << " does not match source store type " << NameOf(mv->StoreType());
         }
     }
 }
@@ -3259,15 +3540,24 @@ void Validator::CheckStore(const Store* s) {
         if (auto* to = s->To()) {
             auto* mv = As<core::type::MemoryView>(to->Type());
             if (!mv) {
-                AddError(s, Store::kToOperandOffset) << "store target operand is not a memory view";
+                AddError(s, Store::kToOperandOffset)
+                    << "store target operand " << NameOf(to->Type()) << " is not a memory view";
                 return;
             }
+
+            if (mv->Access() != core::Access::kWrite && mv->Access() != core::Access::kReadWrite) {
+                AddError(s, Store::kToOperandOffset)
+                    << "store target operand has a non-writeable access type, "
+                    << style::Literal(ToString(mv->Access()));
+                return;
+            }
+
             auto* value_type = from->Type();
             auto* store_type = mv->StoreType();
             if (value_type != store_type) {
                 AddError(s, Store::kFromOperandOffset)
-                    << "value type " << style::Type(value_type->FriendlyName())
-                    << " does not match store type " << style::Type(store_type->FriendlyName());
+                    << "value type " << NameOf(value_type) << " does not match store type "
+                    << NameOf(store_type);
             }
         }
     }
@@ -3282,9 +3572,9 @@ void Validator::CheckLoadVectorElement(const LoadVectorElement* l) {
     if (auto* res = l->Result(0)) {
         if (auto* el_ty = GetVectorPtrElementType(l, LoadVectorElement::kFromOperandOffset)) {
             if (res->Type() != el_ty) {
-                AddResultError(l, 0) << "result type " << style::Type(res->Type()->FriendlyName())
-                                     << " does not match vector pointer element type "
-                                     << style::Type(el_ty->FriendlyName());
+                AddResultError(l, 0)
+                    << "result type " << NameOf(res->Type())
+                    << " does not match vector pointer element type " << NameOf(el_ty);
             }
         }
     }
@@ -3300,11 +3590,21 @@ void Validator::CheckStoreVectorElement(const StoreVectorElement* s) {
         if (auto* el_ty = GetVectorPtrElementType(s, StoreVectorElement::kToOperandOffset)) {
             if (value->Type() != el_ty) {
                 AddError(s, StoreVectorElement::kValueOperandOffset)
-                    << "value type " << style::Type(value->Type()->FriendlyName())
-                    << " does not match vector pointer element type "
-                    << style::Type(el_ty->FriendlyName());
+                    << "value type " << NameOf(value->Type())
+                    << " does not match vector pointer element type " << NameOf(el_ty);
             }
         }
+    }
+}
+
+void Validator::CheckPhony(const Phony* p) {
+    if (!capabilities_.Contains(Capability::kAllowPhonyInstructions)) {
+        AddError(p) << "missing capability 'kAllowPhonyInstructions'";
+        return;
+    }
+
+    if (!CheckResultsAndOperands(p, Phony::kNumResults, Phony::kNumOperands)) {
+        return;
     }
 }
 
@@ -3331,9 +3631,8 @@ void Validator::CheckOperandsMatchTarget(const Instruction* source_inst,
         auto* target_type = target_value->Type();
         if (source_type != target_type) {
             AddError(source_inst, source_operand_offset + i)
-                << "operand with type " << style::Type(source_type->FriendlyName())
-                << " does not match " << NameOf(target) << " target type "
-                << style::Type(target_type->FriendlyName());
+                << "operand with type " << NameOf(source_type) << " does not match "
+                << NameOf(target) << " target type " << NameOf(target_type);
             AddDeclarationNote(target_value);
         }
     }
@@ -3358,8 +3657,7 @@ const core::type::Type* Validator::GetVectorPtrElementType(const Instruction* in
         }
     }
 
-    AddError(inst, idx) << "operand must be a pointer to vector, got "
-                        << style::Type(type->FriendlyName());
+    AddError(inst, idx) << "operand " << NameOf(type) << " must be a pointer to a vector";
     return nullptr;
 }
 

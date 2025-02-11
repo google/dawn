@@ -1,17 +1,15 @@
 #include <metal_stdlib>
-
 using namespace metal;
+
 struct str {
   int i;
 };
 
 int func(thread int* const pointer) {
-  return *(pointer);
+  return (*pointer);
 }
 
-kernel void tint_symbol() {
+kernel void v() {
   str F = {};
-  int const r = func(&(F.i));
-  return;
+  int const r = func((&F.i));
 }
-

@@ -33,7 +33,9 @@
 namespace tint::core::ir::transform {
 namespace {
 
-constexpr auto& RemoveTerminatorArgsFuzzer = RemoveTerminatorArgs;
+Result<SuccessType> RemoveTerminatorArgsFuzzer(Module& ir, const fuzz::ir::Context&) {
+    return RemoveTerminatorArgs(ir);
+}
 
 }  // namespace
 }  // namespace tint::core::ir::transform

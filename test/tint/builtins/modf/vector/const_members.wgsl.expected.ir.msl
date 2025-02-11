@@ -1,7 +1,0 @@
-#include <metal_stdlib>
-using namespace metal;
-
-kernel void tint_symbol() {
-  float2 const fract = float2(0.25f, 0.75f);
-  float2 const whole = float2(1.0f, 3.0f);
-}

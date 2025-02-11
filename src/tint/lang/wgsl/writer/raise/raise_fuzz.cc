@@ -33,7 +33,9 @@
 namespace tint::wgsl::writer::raise {
 namespace {
 
-constexpr auto& RaiseFuzzer = Raise;
+Result<SuccessType> RaiseFuzzer(core::ir::Module& ir, const fuzz::ir::Context&) {
+    return Raise(ir);
+}
 
 }  // namespace
 }  // namespace tint::wgsl::writer::raise

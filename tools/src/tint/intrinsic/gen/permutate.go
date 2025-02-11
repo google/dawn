@@ -221,6 +221,16 @@ Increase hashLength in %v`,
 		case *sem.TemplateNumberParam:
 			// Currently all open numbers are used for vector / matrices
 			permutations := []int{2, 3, 4}
+
+			// Restrict the permutations for subgroup matrix builtins to avoid combinatorial explosion.
+			if strings.HasPrefix(overload.Decl.Name, "subgroupMatrix") {
+				if t.Name == "AC" {
+					permutations = []int{64}
+				} else {
+					permutations = []int{8}
+				}
+			}
+
 			permute = func() error {
 				for _, n := range permutations {
 					state.templateNumbers[t] = n
@@ -381,6 +391,7 @@ func validate(fqn sem.FullyQualifiedName, uses *sem.StageUses) bool {
 
 	switch fqn.Target.GetName() {
 	case "array":
+	case "runtime_array":
 		if !isStorable(fqn.TemplateArguments[0].(sem.FullyQualifiedName)) {
 			return false
 		}

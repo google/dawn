@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void max_a1b196() {
   float3 res = (1.0f).xxx;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   max_a1b196();
   return;
 }
+//
+// compute_main
+//
+void max_a1b196() {
+  float3 res = (1.0f).xxx;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   max_a1b196();
   return;
+}
+//
+// vertex_main
+//
+void max_a1b196() {
+  float3 res = (1.0f).xxx;
 }
 
 struct VertexOutput {

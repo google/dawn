@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 RWByteAddressBuffer prevent_dce : register(u0);
 
 int all_353d6a() {
@@ -9,11 +12,27 @@ void fragment_main() {
   prevent_dce.Store(0u, asuint(all_353d6a()));
   return;
 }
+//
+// compute_main
+//
+RWByteAddressBuffer prevent_dce : register(u0);
+
+int all_353d6a() {
+  bool res = true;
+  return (all((res == false)) ? 1 : 0);
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store(0u, asuint(all_353d6a()));
   return;
+}
+//
+// vertex_main
+//
+int all_353d6a() {
+  bool res = true;
+  return (all((res == false)) ? 1 : 0);
 }
 
 struct VertexOutput {

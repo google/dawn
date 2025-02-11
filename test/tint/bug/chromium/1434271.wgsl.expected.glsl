@@ -1,3 +1,6 @@
+//
+// vertex_main
+//
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float: require
 
@@ -10,11 +13,13 @@ vec4 vertex_main_inner() {
   return vec4(0.0f);
 }
 void main() {
-  gl_Position = vertex_main_inner();
-  gl_Position.y = -(gl_Position.y);
-  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
+  vec4 v = vertex_main_inner();
+  gl_Position = vec4(v.x, -(v.y), ((2.0f * v.z) - v.w), v.w);
   gl_PointSize = 1.0f;
 }
+//
+// fragment_main
+//
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float: require
 precision highp float;
@@ -27,6 +32,9 @@ void asinh_468a48() {
 void main() {
   asinh_468a48();
 }
+//
+// rgba32uintin
+//
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float: require
 
@@ -38,6 +46,9 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   asinh_468a48();
 }
+//
+// vs_main
+//
 #version 310 es
 
 
@@ -62,33 +73,34 @@ struct VertexInput {
 };
 
 layout(binding = 5, std140)
-uniform render_params_block_1_ubo {
+uniform v_render_params_block_ubo {
   RenderParams inner;
 } v;
 layout(location = 0) in vec3 vs_main_loc0_Input;
 layout(location = 1) in vec4 vs_main_loc1_Input;
 layout(location = 2) in vec2 vs_main_loc2_Input;
-layout(location = 0) out vec4 vs_main_loc0_Output;
-layout(location = 1) out vec2 vs_main_loc1_Output;
-VertexOutput vs_main_inner(VertexInput tint_symbol) {
-  vec3 quad_pos = (mat2x3(v.inner.right, v.inner.up) * tint_symbol.quad_pos);
-  vec3 position = (tint_symbol.position - (quad_pos + 0.00999999977648258209f));
-  VertexOutput tint_symbol_1 = VertexOutput(vec4(0.0f), vec4(0.0f), vec2(0.0f));
-  mat4 v_1 = v.inner.modelViewProjectionMatrix;
-  tint_symbol_1.position = (v_1 * vec4(position, 1.0f));
-  tint_symbol_1.color = tint_symbol.color;
-  tint_symbol_1.quad_pos = tint_symbol.quad_pos;
-  return tint_symbol_1;
+layout(location = 0) out vec4 tint_interstage_location0;
+layout(location = 1) out vec2 tint_interstage_location1;
+VertexOutput vs_main_inner(VertexInput v_1) {
+  vec3 quad_pos = (mat2x3(v.inner.right, v.inner.up) * v_1.quad_pos);
+  vec3 position = (v_1.position - (quad_pos + 0.00999999977648258209f));
+  VertexOutput v_2 = VertexOutput(vec4(0.0f), vec4(0.0f), vec2(0.0f));
+  mat4 v_3 = v.inner.modelViewProjectionMatrix;
+  v_2.position = (v_3 * vec4(position, 1.0f));
+  v_2.color = v_1.color;
+  v_2.quad_pos = v_1.quad_pos;
+  return v_2;
 }
 void main() {
-  VertexOutput v_2 = vs_main_inner(VertexInput(vs_main_loc0_Input, vs_main_loc1_Input, vs_main_loc2_Input));
-  gl_Position = v_2.position;
-  gl_Position.y = -(gl_Position.y);
-  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
-  vs_main_loc0_Output = v_2.color;
-  vs_main_loc1_Output = v_2.quad_pos;
+  VertexOutput v_4 = vs_main_inner(VertexInput(vs_main_loc0_Input, vs_main_loc1_Input, vs_main_loc2_Input));
+  gl_Position = vec4(v_4.position.x, -(v_4.position.y), ((2.0f * v_4.position.z) - v_4.position.w), v_4.position.w);
+  tint_interstage_location0 = v_4.color;
+  tint_interstage_location1 = v_4.quad_pos;
   gl_PointSize = 1.0f;
 }
+//
+// simulate
+//
 #version 310 es
 
 
@@ -139,6 +151,9 @@ layout(local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 void main() {
   simulate_inner(gl_GlobalInvocationID);
 }
+//
+// export_level
+//
 #version 310 es
 
 

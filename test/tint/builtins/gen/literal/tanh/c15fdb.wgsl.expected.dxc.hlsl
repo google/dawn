@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 RWByteAddressBuffer prevent_dce : register(u0);
 
 float tanh_c15fdb() {
@@ -9,11 +12,27 @@ void fragment_main() {
   prevent_dce.Store(0u, asuint(tanh_c15fdb()));
   return;
 }
+//
+// compute_main
+//
+RWByteAddressBuffer prevent_dce : register(u0);
+
+float tanh_c15fdb() {
+  float res = 0.76159417629241943359f;
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store(0u, asuint(tanh_c15fdb()));
   return;
+}
+//
+// vertex_main
+//
+float tanh_c15fdb() {
+  float res = 0.76159417629241943359f;
+  return res;
 }
 
 struct VertexOutput {

@@ -29,6 +29,10 @@
 
 #include <algorithm>
 
+#include "src/tint/utils/macros/compiler.h"
+
+TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
+
 namespace tint {
 namespace {
 
@@ -419,6 +423,17 @@ std::pair<CodePoint, size_t> Decode(const uint8_t* ptr, size_t len) {
         n = 0;
         c = 0;
     }
+
+    // Validate code point range. After decoding, each byte count utf8 character must fall within
+    // the available range of code points.
+    uint32_t v = c;
+    if ((n == 1 && (v > 0x0000'007f)) ||                     //
+        (n == 2 && (v < 0x0000'0080 || v > 0x0000'07ff)) ||  //
+        (n == 3 && (v < 0x0000'0800 || v > 0x0000'ffff)) ||  //
+        (n == 4 && (v < 0x0001'0000 || v > 0x0010'ffff))) {
+        return {};
+    }
+
     return {c, n};
 }
 
@@ -517,3 +532,5 @@ size_t Encode(CodePoint code_point, uint16_t* ptr) {
 
 }  // namespace utf16
 }  // namespace tint
+
+TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);

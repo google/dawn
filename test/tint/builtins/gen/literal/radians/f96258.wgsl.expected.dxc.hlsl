@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 RWByteAddressBuffer prevent_dce : register(u0);
 
 float3 radians_f96258() {
@@ -9,11 +12,27 @@ void fragment_main() {
   prevent_dce.Store3(0u, asuint(radians_f96258()));
   return;
 }
+//
+// compute_main
+//
+RWByteAddressBuffer prevent_dce : register(u0);
+
+float3 radians_f96258() {
+  float3 res = (0.01745329238474369049f).xxx;
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store3(0u, asuint(radians_f96258()));
   return;
+}
+//
+// vertex_main
+//
+float3 radians_f96258() {
+  float3 res = (0.01745329238474369049f).xxx;
+  return res;
 }
 
 struct VertexOutput {

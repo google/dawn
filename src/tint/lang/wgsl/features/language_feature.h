@@ -54,6 +54,7 @@ enum class LanguageFeature : uint8_t {
     kPacked4X8IntegerDotProduct,
     kPointerCompositeAccess,
     kReadonlyAndReadwriteStorageTextures,
+    kSizedBindingArray,
     kUnrestrictedPointerParameters,
 };
 
@@ -75,6 +76,7 @@ constexpr std::string_view kLanguageFeatureStrings[] = {
     "packed_4x8_integer_dot_product",
     "pointer_composite_access",
     "readonly_and_readwrite_storage_textures",
+    "sized_binding_array",
     "unrestricted_pointer_parameters",
 };
 
@@ -88,6 +90,7 @@ static constexpr LanguageFeature kAllLanguageFeatures[] = {
     LanguageFeature::kPacked4X8IntegerDotProduct,
     LanguageFeature::kPointerCompositeAccess,
     LanguageFeature::kReadonlyAndReadwriteStorageTextures,
+    LanguageFeature::kSizedBindingArray,
     LanguageFeature::kUnrestrictedPointerParameters,
 };
 

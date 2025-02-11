@@ -37,6 +37,8 @@
 #include "src/tint/utils/rtti/castable.h"
 #include "src/tint/utils/rtti/traits.h"
 
+TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
+
 namespace tint {
 
 /// A type used to indicate an empty array.
@@ -292,5 +294,7 @@ template <typename T, size_t N>
 Slice(T (&elements)[N]) -> Slice<T>;
 
 }  // namespace tint
+
+TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 
 #endif  // SRC_TINT_UTILS_CONTAINERS_SLICE_H_

@@ -45,8 +45,6 @@ if (tint_build_unittests || tint_build_benchmarks) {
 if (tint_build_spv_writer) {
   libtint_source_set("writer") {
     sources = [
-      "output.cc",
-      "output.h",
       "writer.cc",
       "writer.h",
     ]

@@ -6,8 +6,11 @@ Note: This code is currently WIP. There are a number of [known issues](#known-is
 
 ### System requirements
 
-- [CMake 3.10](https://cmake.org/download/) or greater
-- [Go 1.13](https://golang.org/dl/) or greater
+- [CMake 3.16](https://cmake.org/download/) or greater.
+  (Check `cmake_minimum_required` in the [CMakeLists.txt](../../../CMakeLists.txt)
+  file in the project root.)
+- [Go 1.18](https://golang.org/dl/) or greater.
+  (Check the [go.mod](../../../go.mod) file in the project root.)
 
 ### Install `depot_tools`
 

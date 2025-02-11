@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 RWByteAddressBuffer prevent_dce : register(u0);
 
 float4 abs_002533() {
@@ -10,11 +13,29 @@ void fragment_main() {
   prevent_dce.Store4(0u, asuint(abs_002533()));
   return;
 }
+//
+// compute_main
+//
+RWByteAddressBuffer prevent_dce : register(u0);
+
+float4 abs_002533() {
+  float4 arg_0 = (1.0f).xxxx;
+  float4 res = abs(arg_0);
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store4(0u, asuint(abs_002533()));
   return;
+}
+//
+// vertex_main
+//
+float4 abs_002533() {
+  float4 arg_0 = (1.0f).xxxx;
+  float4 res = abs(arg_0);
+  return res;
 }
 
 struct VertexOutput {

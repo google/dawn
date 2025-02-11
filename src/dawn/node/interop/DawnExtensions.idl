@@ -29,19 +29,14 @@
 // upstream webgpu.idl.
 
 enum GPUFeatureName {
-    // subgroups, subgroups-f16 and multi-draw-indirect features are not in webgpu.idl yet.
-    "subgroups",
-    "subgroups-f16",
     "multi-draw-indirect",
     "chromium-experimental-immediate-data",
-};
-
-dictionary GPURequestAdapterOptions {
-    boolean compatibilityMode = false;
+    "chromium-experimental-subgroup-matrix",
 };
 
 interface GPUAdapter {
     readonly attribute boolean isCompatibilityMode;
+    readonly attribute DOMString featureLevel;
 };
 
 interface GPUCommandEncoder {
@@ -61,14 +56,18 @@ dictionary GPUTextureDescriptor {
     GPUTextureViewDimension? textureBindingViewDimension;
 };
 
-enum WGSLFeatureName {
+enum WGSLLanguageFeatureName {
     "readonly_and_readwrite_storage_textures",
     "packed_4x8_integer_dot_product",
     "unrestricted_pointer_parameters",
     "pointer_composite_access",
+    "sized_binding_array",
 };
 
+// TODO(crbug.com/354751907) Move to GPUAdapterInfo
 interface GPUSupportedLimits {
-    readonly attribute (unsigned long or undefined) minSubgroupSize;
-    readonly attribute (unsigned long or undefined) maxSubgroupSize;
+    readonly attribute (unsigned long or undefined) maxStorageBuffersInFragmentStage;
+    readonly attribute (unsigned long or undefined) maxStorageTexturesInFragmentStage;
+    readonly attribute (unsigned long or undefined) maxStorageBuffersInVertexStage;
+    readonly attribute (unsigned long or undefined) maxStorageTexturesInVertexStage;
 };

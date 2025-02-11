@@ -39,6 +39,145 @@
 namespace dawn {
 namespace {
 
+enum class RequestSubgroups {
+    WhenAvailable,
+    Never,
+};
+std::ostream& operator<<(std::ostream& o, const RequestSubgroups& r) {
+    switch (r) {
+        case RequestSubgroups::WhenAvailable:
+            o << "when_supported";
+            break;
+        case RequestSubgroups::Never:
+            o << "never";
+            break;
+    }
+    return o;
+}
+
+DAWN_TEST_PARAM_STRUCT(SubgroupsAdapterInfoParams, RequestSubgroups);
+
+template <class Params>
+class SubgroupsAdapterInfoTestBase : public DawnTestWithParams<Params> {
+  public:
+    using DawnTestWithParams<Params>::GetParam;
+    using DawnTestWithParams<Params>::SupportsFeatures;
+
+  protected:
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        if (GetParam().mRequestSubgroups == RequestSubgroups::WhenAvailable &&
+            SupportsFeatures({wgpu::FeatureName::Subgroups})) {
+            return {wgpu::FeatureName::Subgroups};
+        }
+        return {};
+    }
+
+    // Checks valid values for min and max subgroup sizes, per spec.
+    void CheckValidSizes(uint32_t subgroupMinSize, uint32_t subgroupMaxSize) {
+        EXPECT_GE(subgroupMinSize, 4u) << subgroupMinSize;
+        EXPECT_TRUE(IsPowerOfTwo(subgroupMinSize)) << subgroupMinSize;
+
+        EXPECT_LE(subgroupMaxSize, 128u) << subgroupMaxSize;
+        EXPECT_TRUE(IsPowerOfTwo(subgroupMaxSize));
+
+        EXPECT_LE(subgroupMinSize, subgroupMaxSize)
+            << subgroupMinSize << " should be less equal than " << subgroupMaxSize;
+    }
+};
+
+using SubgroupsPropertiesTests = SubgroupsAdapterInfoTestBase<SubgroupsAdapterInfoParams>;
+
+// Test that subgroupMinSize and subgroupMaxSize in wgpu::AdapterPropertiesSubgroups are valid.
+TEST_P(SubgroupsPropertiesTests, FromAdapter) {
+    wgpu::AdapterPropertiesSubgroups subgroup_properties;
+
+    // Write invalid values to start with, to make sure they are overwritten.
+    subgroup_properties.subgroupMinSize = 3;
+    subgroup_properties.subgroupMaxSize = 443;
+
+    wgpu::AdapterInfo info;
+    info.nextInChain = &subgroup_properties;
+
+    adapter.GetInfo(&info);
+
+    // Check the integrity of the struct.
+    EXPECT_EQ(subgroup_properties.sType, wgpu::SType::AdapterPropertiesSubgroups);
+    EXPECT_EQ(subgroup_properties.nextInChain, nullptr);
+
+    CheckValidSizes(subgroup_properties.subgroupMinSize, subgroup_properties.subgroupMaxSize);
+}
+
+// Test that subgroupMinSize and subgroupMaxSize in wgpu::AdapterPropertiesSubgroups are valid.
+TEST_P(SubgroupsPropertiesTests, FromDevice) {
+    wgpu::AdapterPropertiesSubgroups subgroup_properties;
+    wgpu::AdapterInfo info;
+    info.nextInChain = &subgroup_properties;
+
+    device.GetAdapterInfo(&info);
+
+    CheckValidSizes(subgroup_properties.subgroupMinSize, subgroup_properties.subgroupMaxSize);
+}
+
+// Test that subgroupMinSize and subgroupMaxSize in wgpu::AdapterPropertiesSubgroups are the same
+// between adapter and device.
+TEST_P(SubgroupsPropertiesTests, DeviceAndAdapterAgree) {
+    wgpu::AdapterPropertiesSubgroups adapter_subgroup_properties;
+    wgpu::AdapterInfo adapter_info;
+    adapter_info.nextInChain = &adapter_subgroup_properties;
+    adapter.GetInfo(&adapter_info);
+
+    wgpu::AdapterPropertiesSubgroups device_subgroup_properties;
+    wgpu::AdapterInfo device_info;
+    device_info.nextInChain = &device_subgroup_properties;
+    device.GetAdapterInfo(&device_info);
+
+    EXPECT_EQ(device_subgroup_properties.subgroupMinSize,
+              adapter_subgroup_properties.subgroupMinSize);
+    EXPECT_EQ(device_subgroup_properties.subgroupMaxSize,
+              adapter_subgroup_properties.subgroupMaxSize);
+}
+
+DAWN_INSTANTIATE_TEST_P(SubgroupsPropertiesTests,
+                        {D3D12Backend(), D3D12Backend({}, {"use_dxc"}), MetalBackend(),
+                         VulkanBackend()},
+                        {RequestSubgroups::WhenAvailable, RequestSubgroups::Never});
+
+using SubgroupsAdapterInfoTests = SubgroupsAdapterInfoTestBase<SubgroupsAdapterInfoParams>;
+
+// Test that subgroupMinSize and subgroupMaxSize in wgpu::AdapterInfo are valid.
+TEST_P(SubgroupsAdapterInfoTests, FromAdapter) {
+    wgpu::AdapterInfo info;
+    adapter.GetInfo(&info);
+
+    CheckValidSizes(info.subgroupMinSize, info.subgroupMaxSize);
+}
+
+// Test that subgroupMinSize and subgroupMaxSize in wgpu::AdapterInfo are valid.
+TEST_P(SubgroupsAdapterInfoTests, FromDevice) {
+    wgpu::AdapterInfo info;
+    device.GetAdapterInfo(&info);
+
+    CheckValidSizes(info.subgroupMinSize, info.subgroupMaxSize);
+}
+
+// Test that subgroupMinSize and subgroupMaxSize in wgpu::AdapterInfo are the same between adapter
+// and device.
+TEST_P(SubgroupsAdapterInfoTests, DeviceAndAdapterAgree) {
+    wgpu::AdapterInfo adapter_info;
+    adapter.GetInfo(&adapter_info);
+
+    wgpu::AdapterInfo device_info;
+    device.GetAdapterInfo(&device_info);
+
+    EXPECT_EQ(device_info.subgroupMinSize, adapter_info.subgroupMinSize);
+    EXPECT_EQ(device_info.subgroupMaxSize, adapter_info.subgroupMaxSize);
+}
+
+DAWN_INSTANTIATE_TEST_P(SubgroupsAdapterInfoTests,
+                        {D3D12Backend(), D3D12Backend({}, {"use_dxc"}), MetalBackend(),
+                         VulkanBackend()},
+                        {RequestSubgroups::WhenAvailable, RequestSubgroups::Never});
+
 template <class Params>
 class SubgroupsTestsBase : public DawnTestWithParams<Params> {
   public:
@@ -389,8 +528,7 @@ DAWN_TEST_PARAM_STRUCT(SubgroupsBroadcastTestsParams,
 constexpr int32_t SubgroupBroadcastConstantValueForInvocation0 = 1;
 constexpr int32_t SubgroupRegisterInitializer = 555;
 
-class SubgroupsBroadcastTests
-    : public SubgroupsTestsBase<SubgroupsBroadcastTestsParams> {
+class SubgroupsBroadcastTests : public SubgroupsTestsBase<SubgroupsBroadcastTestsParams> {
   protected:
     // Testing subgroup broadcasting. The shader declares a workgroup size of [workgroupSize, 1, 1],
     // in which each invocation hold a register initialized to SubgroupRegisterInitializer, then
@@ -603,7 +741,6 @@ DAWN_INSTANTIATE_TEST_P(SubgroupsBroadcastTests,
                          SubgroupBroadcastValueOfInvocation0::SubgroupSize}
                         // SubgroupBroadcastValueOfInvocation0
 );
-
 
 // Core functions that may be polyfilled
 enum class SubgroupIntrinsicOp : uint8_t {

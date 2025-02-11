@@ -136,8 +136,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
     /// @copydoc ShaderIO::BackendState::FinalizeOutputs
     const core::type::Type* FinalizeOutputs() override {
         // Add a fixed sample mask builtin for fragment shaders if needed.
-        if (config.fixed_sample_mask != UINT32_MAX &&
-            func->Stage() == core::ir::Function::PipelineStage::kFragment) {
+        if (config.fixed_sample_mask != UINT32_MAX && func->IsFragment()) {
             AddFixedSampleMaskOutput();
         }
 

@@ -91,6 +91,9 @@ struct State {
                             worklist.Push(builtin);
                         }
                         break;
+                    case core::BuiltinFn::kSmoothstep:
+                        worklist.Push(builtin);
+                        break;
                     case core::BuiltinFn::kExtractBits:
                         if (config.extract_bits != BuiltinPolyfillLevel::kNone) {
                             worklist.Push(builtin);
@@ -171,6 +174,14 @@ struct State {
                         }
                         break;
                     }
+                    case core::BuiltinFn::kPack4X8Snorm:
+                    case core::BuiltinFn::kPack4X8Unorm:
+                    case core::BuiltinFn::kUnpack4X8Snorm:
+                    case core::BuiltinFn::kUnpack4X8Unorm:
+                        if (config.pack_unpack_4x8_norm) {
+                            worklist.Push(builtin);
+                        }
+                        break;
                     default:
                         break;
                 }
@@ -191,6 +202,9 @@ struct State {
                     break;
                 case core::BuiltinFn::kDegrees:
                     Degrees(builtin);
+                    break;
+                case core::BuiltinFn::kSmoothstep:
+                    SmoothStep(builtin);
                     break;
                 case core::BuiltinFn::kExtractBits:
                     ExtractBits(builtin);
@@ -246,10 +260,130 @@ struct State {
                 case core::BuiltinFn::kUnpack4XU8:
                     Unpack4xU8(builtin);
                     break;
+                case core::BuiltinFn::kPack4X8Snorm:
+                    Pack4x8Snorm(builtin);
+                    break;
+                case core::BuiltinFn::kPack4X8Unorm:
+                    Pack4x8Unorm(builtin);
+                    break;
+                case core::BuiltinFn::kUnpack4X8Snorm:
+                    Unpack4x8Snorm(builtin);
+                    break;
+                case core::BuiltinFn::kUnpack4X8Unorm:
+                    Unpack4x8Unorm(builtin);
+                    break;
                 default:
                     break;
             }
         }
+    }
+
+    /// Polyfill a `pack4x8snorm` builtin call
+    void Pack4x8Snorm(ir::CoreBuiltinCall* call) {
+        auto* arg = call->Args()[0];
+
+        b.InsertBefore(call, [&] {
+            auto* vec4f = ty.vec4<f32>();
+            auto* vec4u = ty.vec4<u32>();
+
+            auto* neg_one = b.Splat(vec4f, -1_f);
+            auto* one = b.Splat(vec4f, 1_f);
+
+            core::ir::Value* v =
+                b.Call(vec4f, core::BuiltinFn::kClamp, Vector{arg, neg_one, one})->Result(0);
+            v = b.Multiply(vec4f, b.Splat(vec4f, 127_f), v)->Result(0);
+            v = b.Add(vec4f, b.Splat(vec4f, 0.5_f), v)->Result(0);
+            v = b.Call(vec4f, core::BuiltinFn::kFloor, Vector{v})->Result(0);
+            v = b.Convert(ty.vec4<i32>(), v)->Result(0);
+            v = b.Bitcast(vec4u, v)->Result(0);
+            v = b.And(vec4u, v, b.Splat(vec4u, 0xff_u))->Result(0);
+            v = b.ShiftLeft(vec4u, v, b.Construct(vec4u, 0_u, 8_u, 16_u, 24_u))->Result(0);
+
+            auto* x = b.Access(ty.u32(), v, 0_u);
+            auto* y = b.Access(ty.u32(), v, 1_u);
+            auto* z = b.Access(ty.u32(), v, 2_u);
+            auto* w = b.Access(ty.u32(), v, 3_u);
+
+            v = b.Or(ty.u32(), x, b.Or(ty.u32(), y, b.Or(ty.u32(), z, w)))->Result(0);
+
+            call->Result(0)->ReplaceAllUsesWith(v);
+        });
+        call->Destroy();
+    }
+
+    /// Polyfill a `pack4x8unorm` builtin call
+    void Pack4x8Unorm(ir::CoreBuiltinCall* call) {
+        auto* arg = call->Args()[0];
+
+        b.InsertBefore(call, [&] {
+            auto* vec4f = ty.vec4<f32>();
+            auto* vec4u = ty.vec4<u32>();
+
+            auto* zero = b.Zero(vec4f);
+            auto* one = b.Splat(vec4f, 1_f);
+
+            auto* v = b.Call(vec4f, core::BuiltinFn::kClamp, Vector{arg, zero, one})->Result(0);
+            v = b.Multiply(vec4f, b.Splat(vec4f, 255_f), v)->Result(0);
+            v = b.Add(vec4f, b.Splat(vec4f, 0.5_f), v)->Result(0);
+            v = b.Call(vec4f, core::BuiltinFn::kFloor, Vector{v})->Result(0);
+            v = b.Convert(vec4u, v)->Result(0);
+            v = b.And(vec4u, v, b.Splat(vec4u, 0xff_u))->Result(0);
+            v = b.ShiftLeft(vec4u, v, b.Construct(vec4u, 0_u, 8_u, 16_u, 24_u))->Result(0);
+
+            auto* x = b.Access(ty.u32(), v, 0_u);
+            auto* y = b.Access(ty.u32(), v, 1_u);
+            auto* z = b.Access(ty.u32(), v, 2_u);
+            auto* w = b.Access(ty.u32(), v, 3_u);
+
+            v = b.Or(ty.u32(), x, b.Or(ty.u32(), y, b.Or(ty.u32(), z, w)))->Result(0);
+
+            call->Result(0)->ReplaceAllUsesWith(v);
+        });
+        call->Destroy();
+    }
+
+    /// Polyfill a `unpack4x8snorm` builtin call
+    void Unpack4x8Snorm(ir::CoreBuiltinCall* call) {
+        auto* arg = call->Args()[0];
+
+        b.InsertBefore(call, [&] {
+            auto* vec4f = ty.vec4<f32>();
+            auto* vec4u = ty.vec4<u32>();
+            auto* vec4i = ty.vec4<i32>();
+
+            auto* v = b.Construct(vec4u, arg)->Result(0);
+            // Shift left to put the 8th bit of each number into the sign bit location, we then
+            // convert to an i32 and shift back, so the sign bit will be set as needed. The bits
+            // outside the bottom 8 are then masked off.
+            v = b.ShiftLeft(vec4u, v, b.Construct(vec4u, 24_u, 16_u, 8_u, 0_u))->Result(0);
+            v = b.Bitcast(vec4i, v)->Result(0);
+            v = b.ShiftRight(vec4i, v, b.Splat(vec4u, 24_u))->Result(0);
+            v = b.Convert(vec4f, v)->Result(0);
+            v = b.Divide(vec4f, v, b.Splat(vec4f, 127_f))->Result(0);
+            v = b.Call(vec4f, core::BuiltinFn::kMax, v, b.Splat(vec4f, -1_f))->Result(0);
+
+            call->Result(0)->ReplaceAllUsesWith(v);
+        });
+        call->Destroy();
+    }
+
+    /// Polyfill a `unpack4x8unorm` builtin call
+    void Unpack4x8Unorm(ir::CoreBuiltinCall* call) {
+        auto* arg = call->Args()[0];
+
+        b.InsertBefore(call, [&] {
+            auto* vec4f = ty.vec4<f32>();
+            auto* vec4u = ty.vec4<u32>();
+
+            auto* v = b.Construct(vec4u, arg)->Result(0);
+            v = b.ShiftRight(vec4u, v, b.Construct(vec4u, 0_u, 8_u, 16_u, 24_u))->Result(0);
+            v = b.And(vec4u, v, b.Splat(vec4u, 0xff_u))->Result(0);
+            v = b.Convert(vec4f, v)->Result(0);
+            v = b.Divide(vec4f, v, b.Splat(vec4f, 255_f))->Result(0);
+
+            call->Result(0)->ReplaceAllUsesWith(v);
+        });
+        call->Destroy();
     }
 
     /// Polyfill a `clamp()` builtin call for integers.
@@ -403,6 +537,46 @@ struct State {
         b.InsertBefore(call, [&] {
             auto* mul = b.Multiply(arg->Type(), arg, value);
             mul->SetResults(Vector{call->DetachResult()});
+        });
+        call->Destroy();
+    }
+
+    /// Polyfill an `smoothStep()` builtin call.
+    /// @param call the builtin call instruction
+    void SmoothStep(ir::CoreBuiltinCall* call) {
+        auto* edge0_arg = call->Args()[0];
+        auto* edge1_arg = call->Args()[1];
+        auto* x_arg = call->Args()[2];
+        auto* type = x_arg->Type();
+        ir::Constant* zero = nullptr;
+        ir::Constant* one = nullptr;
+        ir::Constant* two = nullptr;
+        ir::Constant* three = nullptr;
+        if (type->DeepestElement()->Is<core::type::F32>()) {
+            zero = b.MatchWidth(0_f, type);
+            one = b.MatchWidth(1_f, type);
+            two = b.MatchWidth(2_f, type);
+            three = b.MatchWidth(3_f, type);
+        } else if (type->DeepestElement()->Is<core::type::F16>()) {
+            zero = b.MatchWidth(0_h, type);
+            one = b.MatchWidth(1_h, type);
+            two = b.MatchWidth(2_h, type);
+            three = b.MatchWidth(3_h, type);
+        }
+
+        b.InsertBefore(call, [&] {
+            auto* dividend = b.Subtract(type, x_arg, edge0_arg);
+            auto* divisor = b.Subtract(type, edge1_arg, edge0_arg);
+            auto* quotient = b.Divide(type, dividend, divisor);
+            auto* t_clamped = b.Call(type, core::BuiltinFn::kClamp, quotient, zero, one);
+
+            // Smoothstep is a well defined function.
+            // result = t * t * (3.0 - 2.0 * t);
+            auto* smooth_result =
+                b.Multiply(type, t_clamped,
+                           b.Multiply(type, t_clamped,
+                                      b.Subtract(type, three, b.Multiply(type, two, t_clamped))));
+            smooth_result->SetResults(Vector{call->DetachResult()});
         });
         call->Destroy();
     }

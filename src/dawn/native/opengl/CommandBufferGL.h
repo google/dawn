@@ -55,7 +55,7 @@ class CommandBuffer final : public CommandBufferBase {
 void DoTexSubImage(const OpenGLFunctions& gl,
                    const TextureCopy& destination,
                    const void* data,
-                   const TextureDataLayout& dataLayout,
+                   const TexelCopyBufferLayout& dataLayout,
                    const Extent3D& copySize);
 }  // namespace dawn::native::opengl
 

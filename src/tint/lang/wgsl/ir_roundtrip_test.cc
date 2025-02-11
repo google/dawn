@@ -3401,5 +3401,56 @@ fn a(x : f32) {
 )");
 }
 
+// Test that we do not try to name the unnameable builtin structure types in nested array
+// declarations. See crbug.com/380898799.
+TEST_F(IRToProgramRoundtripTest, BuiltinStructInInferredNestedArrayType) {
+    RUN_TEST(R"(
+fn a(x : f32) {
+  let y = array(array(frexp(x)));
+}
+)");
+}
+
+// Test that we rename declarations that shadow builtin types when they are used in arrays.
+// See crbug.com/380903161.
+TEST_F(IRToProgramRoundtripTest, BuiltinTypeNameShadowedAndUsedInArray) {
+    RUN_TEST(R"(
+fn a(f32 : f32) {
+  let x = array(1.0f);
+}
+)",
+             R"(
+fn a(f32_1 : f32) {
+  let x = array<f32, 1u>(1.0f);
+}
+)");
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// chromium_experimental_subgroup_matrix
+////////////////////////////////////////////////////////////////////////////////
+TEST_F(IRToProgramRoundtripTest, SubgroupMatrixConstruct) {
+    RUN_TEST(R"(
+enable chromium_experimental_subgroup_matrix;
+
+fn f() {
+  var m = subgroup_matrix_left<f32, 8, 8>>();
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, SubgroupMatrixLoad) {
+    RUN_TEST(R"(
+enable chromium_experimental_subgroup_matrix;
+
+@group(0u) @binding(0u) var<storage, read_write> buffer : array<f32, 64u>;
+
+fn f() {
+  let l = subgroupMatrixLoad<subgroup_matrix_left<f32, 4, 2>>(&(buffer), 0u, false, 4u);
+  let r = subgroupMatrixLoad<subgroup_matrix_right<f32, 2, 4>>(&(buffer), 32u, true, 8u);
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::wgsl

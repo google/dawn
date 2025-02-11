@@ -45,6 +45,8 @@ if (tint_build_unittests || tint_build_benchmarks) {
 
 libtint_source_set("command") {
   sources = [
+    "args.cc",
+    "args.h",
     "cli.cc",
     "cli.h",
     "command.h",

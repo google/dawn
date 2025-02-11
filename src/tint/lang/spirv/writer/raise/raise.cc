@@ -29,6 +29,7 @@
 
 #include <utility>
 
+#include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/transform/add_empty_entry_point.h"
 #include "src/tint/lang/core/ir/transform/bgra8unorm_polyfill.h"
 #include "src/tint/lang/core/ir/transform/binary_polyfill.h"
@@ -40,12 +41,14 @@
 #include "src/tint/lang/core/ir/transform/demote_to_helper.h"
 #include "src/tint/lang/core/ir/transform/direct_variable_access.h"
 #include "src/tint/lang/core/ir/transform/multiplanar_external_texture.h"
+#include "src/tint/lang/core/ir/transform/prepare_push_constants.h"
 #include "src/tint/lang/core/ir/transform/preserve_padding.h"
 #include "src/tint/lang/core/ir/transform/prevent_infinite_loops.h"
 #include "src/tint/lang/core/ir/transform/robustness.h"
 #include "src/tint/lang/core/ir/transform/std140.h"
 #include "src/tint/lang/core/ir/transform/vectorize_scalar_matrix_constructors.h"
 #include "src/tint/lang/core/ir/transform/zero_init_workgroup_memory.h"
+#include "src/tint/lang/core/type/f32.h"
 #include "src/tint/lang/spirv/writer/common/option_helpers.h"
 #include "src/tint/lang/spirv/writer/raise/builtin_polyfill.h"
 #include "src/tint/lang/spirv/writer/raise/expand_implicit_splats.h"
@@ -77,6 +80,22 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         RUN_TRANSFORM(core::ir::transform::PreventInfiniteLoops, module);
     }
 
+    // PreparePushConstants must come before any transform that needs internal push constants.
+    core::ir::transform::PreparePushConstantsConfig push_constant_config;
+    if (options.depth_range_offsets) {
+        push_constant_config.AddInternalConstant(options.depth_range_offsets.value().min,
+                                                 module.symbols.New("tint_frag_depth_min"),
+                                                 module.Types().f32());
+        push_constant_config.AddInternalConstant(options.depth_range_offsets.value().max,
+                                                 module.symbols.New("tint_frag_depth_max"),
+                                                 module.Types().f32());
+    }
+    auto push_constant_layout =
+        core::ir::transform::PreparePushConstants(module, push_constant_config);
+    if (push_constant_layout != Success) {
+        return push_constant_layout.Failure();
+    }
+
     core::ir::transform::BinaryPolyfillConfig binary_polyfills;
     binary_polyfills.bitshift_modulo = true;
     binary_polyfills.int_div_mod = !options.disable_polyfill_integer_div_mod;
@@ -95,6 +114,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     core_polyfills.dot_4x8_packed = options.polyfill_dot_4x8_packed;
     core_polyfills.pack_unpack_4x8 = true;
     core_polyfills.pack_4xu8_clamp = true;
+    core_polyfills.pack_unpack_4x8_norm = options.polyfill_pack_unpack_4x8_norm;
     RUN_TRANSFORM(core::ir::transform::BuiltinPolyfill, module, core_polyfills);
 
     core::ir::transform::ConversionPolyfillConfig conversion_polyfills;
@@ -151,9 +171,11 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     RUN_TRANSFORM(raise::HandleMatrixArithmetic, module);
     RUN_TRANSFORM(raise::MergeReturn, module);
     RUN_TRANSFORM(raise::RemoveUnreachableInLoopContinuing, module);
-    RUN_TRANSFORM(raise::ShaderIO, module,
-                  raise::ShaderIOConfig{options.clamp_frag_depth, options.emit_vertex_point_size,
-                                        !options.use_storage_input_output_16});
+    RUN_TRANSFORM(
+        raise::ShaderIO, module,
+        raise::ShaderIOConfig{push_constant_layout.Get(), options.clamp_frag_depth,
+                              options.emit_vertex_point_size, !options.use_storage_input_output_16,
+                              options.depth_range_offsets});
     RUN_TRANSFORM(core::ir::transform::Std140, module);
     RUN_TRANSFORM(raise::VarForDynamicIndex, module);
 

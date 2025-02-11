@@ -1,29 +1,27 @@
 #include <metal_stdlib>
-
 using namespace metal;
+
 struct VSOut {
   float4 pos;
 };
 
-void foo(thread VSOut* const out) {
-  float4 pos = float4(1.0f, 2.0f, 3.0f, 4.0f);
-  (*(out)).pos = pos;
-}
-
-struct tint_symbol_1 {
-  float4 pos [[position]];
+struct main_outputs {
+  float4 VSOut_pos [[position]];
 };
 
-VSOut tint_symbol_inner() {
+void foo(thread VSOut* const out) {
+  float4 pos = float4(1.0f, 2.0f, 3.0f, 4.0f);
+  (*out).pos = pos;
+}
+
+VSOut main_inner() {
   VSOut out = {};
-  foo(&(out));
+  foo((&out));
   return out;
 }
 
-vertex tint_symbol_1 tint_symbol() {
-  VSOut const inner_result = tint_symbol_inner();
-  tint_symbol_1 wrapper_result = {};
-  wrapper_result.pos = inner_result.pos;
-  return wrapper_result;
+vertex main_outputs v() {
+  main_outputs tint_wrapper_result = {};
+  tint_wrapper_result.VSOut_pos = main_inner().pos;
+  return tint_wrapper_result;
 }
-

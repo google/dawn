@@ -41,6 +41,8 @@
 tint_add_target(tint_lang_glsl_ir lib
   lang/glsl/ir/builtin_call.cc
   lang/glsl/ir/builtin_call.h
+  lang/glsl/ir/combined_texture_sampler_var.cc
+  lang/glsl/ir/combined_texture_sampler_var.h
   lang/glsl/ir/member_builtin_call.cc
   lang/glsl/ir/member_builtin_call.h
 )
@@ -77,6 +79,7 @@ tint_target_add_external_dependencies(tint_lang_glsl_ir lib
 ################################################################################
 tint_add_target(tint_lang_glsl_ir_test test
   lang/glsl/ir/builtin_call_test.cc
+  lang/glsl/ir/combined_texture_sampler_var_test.cc
   lang/glsl/ir/member_builtin_call_test.cc
 )
 
