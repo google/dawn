@@ -439,25 +439,7 @@ MaybeError DeviceBase::Initialize(Ref<QueueBase> defaultQueue) {
         mMutex = nullptr;
     }
 
-    if (!IsCompatibilityMode()) {
-        // In core mode the maxStorageXXXInYYYStage are always set to maxStorageXXXPerShaderStage
-        // In compat they can vary but validation will fail if usage is >
-        // maxStorageXXXPerShaderStage In other words:
-        //   In compat, user requests 5 and 4 respectively so result:
-        //     device.limits.maxStorageBuffersInFragmentStage = 5;
-        //     device.limits.maxStorageBuffersPerShaderStage = 4;
-        //     It's ok to use 4 storage buffers in fragment stage but fails if 5 used.
-        //   In core, user requests 5 and 4 respectively so result:
-        //     device.limits.maxStorageBuffersInFragmentStage = 4;
-        //     device.limits.maxStorageBuffersPerShaderStage = 4;
-        //     It's ok to use 4 storage buffers in fragment stage but fails if 5 used.
-        //
-        // Note: these 4 limits are ignored in core validation.
-        mLimits.v1.maxStorageBuffersInFragmentStage = mLimits.v1.maxStorageBuffersPerShaderStage;
-        mLimits.v1.maxStorageTexturesInFragmentStage = mLimits.v1.maxStorageTexturesPerShaderStage;
-        mLimits.v1.maxStorageBuffersInVertexStage = mLimits.v1.maxStorageBuffersPerShaderStage;
-        mLimits.v1.maxStorageTexturesInVertexStage = mLimits.v1.maxStorageTexturesPerShaderStage;
-    }
+    EnforceLimitSpecInvariants(&mLimits.v1, mAdapter->GetFeatureLevel());
 
     mAdapter->GetInstance()->AddDevice(this);
 

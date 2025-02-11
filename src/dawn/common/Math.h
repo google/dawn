@@ -153,6 +153,16 @@ constexpr bool IsSubset(T1 subset, T2 set) {
     return bitsAlsoInSet == subset;
 }
 
+template <typename T>
+constexpr T Max(T a, T b) {
+    return (a > b) ? a : b;
+}
+
+template <typename T, typename... Args>
+constexpr T Max(T first, Args... rest) {
+    return Max(first, Max(rest...));
+}
+
 }  // namespace dawn
 
 #endif  // SRC_DAWN_COMMON_MATH_H_
