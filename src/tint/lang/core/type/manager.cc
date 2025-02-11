@@ -249,7 +249,7 @@ const core::type::Array* Manager::runtime_array(const core::type::Type* elem_ty,
 
 const core::type::BindingArray* Manager::binding_array(const core::type::Type* elem_ty,
                                                        uint32_t count) {
-    return Get<core::type::BindingArray>(elem_ty, count);
+    return Get<core::type::BindingArray>(elem_ty, Get<ConstantArrayCount>(count));
 }
 
 const core::type::Pointer* Manager::ptr(core::AddressSpace address_space,
