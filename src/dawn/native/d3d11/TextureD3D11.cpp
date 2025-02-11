@@ -420,12 +420,21 @@ ResultOrError<ComPtr<ID3D11DepthStencilView>> Texture::CreateD3D11DepthStencilVi
 MaybeError Texture::SynchronizeTextureBeforeUse(
     const ScopedCommandRecordingContext* commandContext) {
     if (auto* contents = GetSharedResourceMemoryContents()) {
+        const auto& queueFence = ToBackend(GetDevice()->GetQueue())->GetSharedFence();
+
         SharedTextureMemoryBase::PendingFenceList fences;
         contents->AcquirePendingFences(&fences);
         for (const auto& fence : fences) {
-            DAWN_TRY(CheckHRESULT(
-                commandContext->Wait(ToBackend(fence.object)->GetD3DFence(), fence.signaledValue),
-                "ID3D11DeviceContext4::Wait"));
+            auto d3dFence = ToBackend(fence.object);
+            if (d3dFence.Get() == queueFence.Get()) {
+                // We don't need to wait on the fence that we signaled (self-wait).
+                DAWN_ASSERT(ExecutionSerial(fence.signaledValue) <=
+                            GetDevice()->GetQueue()->GetLastSubmittedCommandSerial());
+                continue;
+            }
+            DAWN_TRY(
+                CheckHRESULT(commandContext->Wait(d3dFence->GetD3DFence(), fence.signaledValue),
+                             "ID3D11DeviceContext4::Wait"));
         }
         commandContext->SetNeedsFence();
     }
