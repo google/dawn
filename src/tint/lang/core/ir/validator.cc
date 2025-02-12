@@ -1637,6 +1637,12 @@ bool Validator::CheckResult(const Instruction* inst, size_t idx) {
         return false;
     }
 
+    if (DAWN_UNLIKELY(result->Instruction() != inst)) {
+        AddResultError(inst, idx)
+            << "result instruction does not match instruction (possible double usage)";
+        return false;
+    }
+
     return true;
 }
 

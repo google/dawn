@@ -909,7 +909,7 @@ note: # Disassembly
     EXPECT_EQ(res.Failure().reason.Str(), expected);
 }
 
-TEST_F(IR_ValidatorTest, Instruction_NullInstruction) {
+TEST_F(IR_ValidatorTest, Instruction_NullInstructionResultInstruction) {
     auto* f = b.Function("my_func", ty.void_());
 
     auto sb = b.Append(f->Block());
@@ -922,6 +922,27 @@ TEST_F(IR_ValidatorTest, Instruction_NullInstruction) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason.Str(),
                 testing::HasSubstr(R"(:3:5 error: var: result instruction is undefined
+    %2:ptr<function, f32, read_write> = var
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+)")) << res.Failure().reason.Str();
+}
+
+TEST_F(IR_ValidatorTest, Instruction_WrongInstructionResultInstruction) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    auto sb = b.Append(f->Block());
+    auto* v = sb.Var(ty.ptr<function, f32>());
+    auto* v2 = sb.Var(ty.ptr<function, f32>());
+    sb.Return(f);
+
+    v->SetResults(v2->Results());
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(
+            R"(:4:5 error: var: result instruction does not match instruction (possible double usage)
     %2:ptr<function, f32, read_write> = var
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure().reason.Str();
