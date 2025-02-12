@@ -2843,6 +2843,13 @@ void Validator::CheckBuiltinCall(const BuiltinCall* call) {
 }
 
 void Validator::CheckMemberBuiltinCall(const MemberBuiltinCall* call) {
+    // This check cannot be more precise, since until intrinsic lookup below, it is unknown what
+    // number of operands are expected, but still need to enforce things are in scope,
+    // have types, etc.
+    if (!CheckResults(call, MemberBuiltinCall::kNumResults) || !CheckOperands(call)) {
+        return;
+    }
+
     auto args = Vector<const core::type::Type*, 8>({call->Object()->Type()});
     for (auto* arg : call->Args()) {
         args.Push(arg->Type());
