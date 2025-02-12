@@ -430,7 +430,7 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "Workaround for OpenGLES.",
       "https://crbug.com/dawn/2079", ToggleStage::Device}},
     {Toggle::UseBlitForRG11B10UfloatTextureCopy,
-     {"use_blit_for_rgb9e5ufloat_texture_copy",
+     {"use_blit_for_rg11b10ufloat_texture_copy",
       "Use a blit instead of a copy command to copy rg11b10ufloat texture to a texture or a buffer."
       "Workaround for OpenGLES.",
       "https://crbug.com/381214487", ToggleStage::Device}},
