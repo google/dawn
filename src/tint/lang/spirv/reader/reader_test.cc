@@ -334,14 +334,14 @@ $B1: {  # root
   %3:ptr<private, f32, read_write> = var
 }
 
-%4 = func():VertexOutputs {
+%main_inner = func():VertexOutputs {
   $B2: {
     ret VertexOutputs(vec4<f32>(0.0f), array<f32, 1>(0.0f))
   }
 }
-%main_inner = func():void {
+%main_inner_1 = func():void {  # %main_inner_1: 'main_inner'
   $B3: {
-    %6:VertexOutputs = call %4
+    %6:VertexOutputs = call %main_inner
     %7:vec4<f32> = access %6, 0u
     store %1, %7
     %8:array<f32, 1> = access %6, 1u
@@ -352,7 +352,7 @@ $B1: {  # root
 }
 %main = @vertex func():tint_symbol_3 {
   $B4: {
-    %10:void = call %main_inner
+    %10:void = call %main_inner_1
     %11:vec4<f32> = load %1
     %12:array<f32, 1> = load %2
     %13:f32 = load %3
@@ -583,7 +583,7 @@ $B1: {  # root
   %2:ptr<private, vec4<f32>, read_write> = var
 }
 
-%3 = func():FragOutput {
+%frag_main_inner = func():FragOutput {
   $B2: {
     %output:ptr<function, FragOutput, read_write> = var, FragOutput(vec4<f32>(0.0f))
     %5:ptr<function, vec4<f32>, read_write> = access %output, 0u
@@ -594,9 +594,9 @@ $B1: {  # root
     ret %7
   }
 }
-%frag_main_inner = func():void {
+%frag_main_inner_1 = func():void {  # %frag_main_inner_1: 'frag_main_inner'
   $B3: {
-    %9:FragOutput = call %3
+    %9:FragOutput = call %frag_main_inner
     %10:vec4<f32> = access %9, 0u
     store %1, %10
     %11:vec4<f32> = access %9, 1u
@@ -606,7 +606,7 @@ $B1: {  # root
 }
 %frag_main = @fragment func():tint_symbol_2 {
   $B4: {
-    %13:void = call %frag_main_inner
+    %13:void = call %frag_main_inner_1
     %14:vec4<f32> = load %1
     %15:vec4<f32> = load %2
     %16:tint_symbol_2 = construct %14, %15

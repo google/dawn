@@ -111,7 +111,7 @@ TEST_F(SpirvParserTest, Name_Duplicate) {
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %vanilla:i32 = let 1i
-    %vanilla_1:i32 = let 2i  # %vanilla_1: 'vanilla'
+    %vanilla_1:i32 = let 2i
     ret
   }
 }
@@ -304,6 +304,81 @@ Desert = struct @align(4) {
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:Desert = let Desert(1i)
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, Name_FunctionName) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %foo "my_function"
+       %void = OpTypeVoid
+    %ep_type = OpTypeFunction %void
+
+        %foo = OpFunction %void None %ep_type
+  %foo_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%my_function = func():void {
+  $B1: {
+    ret
+  }
+}
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, Name_FunctionParamName) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %foo "my_function"
+               OpName %bar "param1"
+               OpName %baz "terrapin"
+       %void = OpTypeVoid
+        %i32 = OpTypeInt 32 1
+    %ep_type = OpTypeFunction %void
+    %fn_type = OpTypeFunction %void %i32 %i32 %i32
+
+        %foo = OpFunction %void None %fn_type
+        %bar = OpFunctionParameter %i32
+        %baz = OpFunctionParameter %i32
+          %1 = OpFunctionParameter %i32
+  %foo_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%my_function = func(%param1:i32, %terrapin:i32, %4:i32):void {
+  $B1: {
+    ret
+  }
+}
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
     ret
   }
 }

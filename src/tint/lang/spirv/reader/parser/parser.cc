@@ -392,14 +392,19 @@ class Parser {
             current_size = offset + member_ty->Size();
         }
 
-        Symbol name;
-        auto iter = id_to_name_.find(struct_id);
-        if (iter != id_to_name_.end()) {
-            name = ir_.symbols.New(iter->second);
-        } else {
+        Symbol name = GetSymbolFor(struct_id);
+        if (!name.IsValid()) {
             name = ir_.symbols.New();
         }
         return ty_.Struct(name, std::move(members));
+    }
+
+    Symbol GetSymbolFor(uint32_t id) {
+        auto iter = id_to_name_.find(id);
+        if (iter != id_to_name_.end()) {
+            return ir_.symbols.New(iter->second);
+        }
+        return Symbol{};
     }
 
     /// @param id a SPIR-V result ID for a function declaration instruction
@@ -494,9 +499,9 @@ class Parser {
         TINT_ASSERT(inst->Results().Length() == 1u);
         AddValue(result_id, inst->Result(0));
 
-        auto iter = id_to_name_.find(result_id);
-        if (iter != id_to_name_.end()) {
-            ir_.SetName(inst, iter->second);
+        Symbol name = GetSymbolFor(result_id);
+        if (name.IsValid()) {
+            ir_.SetName(inst, name);
         }
     }
 
@@ -537,12 +542,23 @@ class Parser {
             func.ForEachParam([&](spvtools::opt::Instruction* spirv_param) {
                 auto* param = b_.FunctionParam(Type(spirv_param->type_id()));
                 values_.Add(spirv_param->result_id(), param);
+
+                Symbol name = GetSymbolFor(spirv_param->result_id());
+                if (name.IsValid()) {
+                    ir_.SetName(param, name);
+                }
+
                 params.Push(param);
             });
 
             current_function_ = Function(func.result_id());
             current_function_->SetParams(std::move(params));
             current_function_->SetReturnType(Type(func.type_id()));
+
+            Symbol name = GetSymbolFor(func.result_id());
+            if (name.IsValid()) {
+                ir_.SetName(current_function_, name);
+            }
 
             functions_.Add(func.result_id(), current_function_);
             EmitBlock(current_function_->Block(), *func.entry());
