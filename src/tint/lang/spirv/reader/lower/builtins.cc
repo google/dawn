@@ -131,10 +131,89 @@ struct State {
                 case spirv::BuiltinFn::kBitFieldUExtract:
                     BitFieldUExtract(builtin);
                     break;
+                case spirv::BuiltinFn::kAdd:
+                    Add(builtin);
+                    break;
+                case spirv::BuiltinFn::kSub:
+                    Sub(builtin);
+                    break;
+                case spirv::BuiltinFn::kMul:
+                    Mul(builtin);
+                    break;
+                case spirv::BuiltinFn::kSDiv:
+                    SDiv(builtin);
+                    break;
+                case spirv::BuiltinFn::kSMod:
+                    SMod(builtin);
+                    break;
                 default:
                     TINT_UNREACHABLE() << "unknown spirv builtin: " << builtin->Func();
             }
         }
+    }
+
+    void EmitBinaryWrappedAsFirstArg(spirv::ir::BuiltinCall* call, core::BinaryOp op) {
+        const auto& args = call->Args();
+        auto* lhs = args[0];
+        auto* rhs = args[1];
+
+        auto* op_ty = lhs->Type();
+        auto* res_ty = call->Result(0)->Type();
+
+        b.InsertBefore(call, [&] {
+            if (rhs->Type() != op_ty) {
+                rhs = b.Bitcast(op_ty, rhs)->Result(0);
+            }
+
+            auto* c = b.Binary(op, op_ty, lhs, rhs)->Result(0);
+            if (res_ty != op_ty) {
+                c = b.Bitcast(res_ty, c)->Result(0);
+            }
+            call->Result(0)->ReplaceAllUsesWith(c);
+        });
+        call->Destroy();
+    }
+
+    void Add(spirv::ir::BuiltinCall* call) {
+        EmitBinaryWrappedAsFirstArg(call, core::BinaryOp::kAdd);
+    }
+    void Sub(spirv::ir::BuiltinCall* call) {
+        EmitBinaryWrappedAsFirstArg(call, core::BinaryOp::kSubtract);
+    }
+    void Mul(spirv::ir::BuiltinCall* call) {
+        EmitBinaryWrappedAsFirstArg(call, core::BinaryOp::kMultiply);
+    }
+
+    void EmitBinaryWrappedSignedSpirvMethods(spirv::ir::BuiltinCall* call, core::BinaryOp op) {
+        const auto& args = call->Args();
+        auto* lhs = args[0];
+        auto* rhs = args[1];
+
+        auto* res_ty = call->Result(0)->Type();
+        auto* op_ty = ty.MatchWidth(ty.i32(), res_ty);
+
+        b.InsertBefore(call, [&] {
+            if (lhs->Type() != op_ty) {
+                lhs = b.Bitcast(op_ty, lhs)->Result(0);
+            }
+            if (rhs->Type() != op_ty) {
+                rhs = b.Bitcast(op_ty, rhs)->Result(0);
+            }
+
+            auto* c = b.Binary(op, op_ty, lhs, rhs)->Result(0);
+            if (res_ty != op_ty) {
+                c = b.Bitcast(res_ty, c)->Result(0);
+            }
+            call->Result(0)->ReplaceAllUsesWith(c);
+        });
+        call->Destroy();
+    }
+
+    void SDiv(spirv::ir::BuiltinCall* call) {
+        EmitBinaryWrappedSignedSpirvMethods(call, core::BinaryOp::kDivide);
+    }
+    void SMod(spirv::ir::BuiltinCall* call) {
+        EmitBinaryWrappedSignedSpirvMethods(call, core::BinaryOp::kModulo);
     }
 
     // The SPIR-V Signed methods all interpret their arguments as signed (regardless of the type of

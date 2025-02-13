@@ -4139,5 +4139,955 @@ TEST_F(SpirvParser_BuiltinsTest, BitFieldUExtract_IntVector_UnsignedOffsetAndSig
     EXPECT_EQ(expect, str());
 }
 
+struct BinaryCase {
+    spirv::BuiltinFn fn;
+    std::string ir;
+};
+
+using SpirvParser_BuiltinsMixedSignTest = core::ir::transform::TransformTestWithParam<BinaryCase>;
+
+TEST_P(SpirvParser_BuiltinsMixedSignTest, Scalar_Signed_SignedUnsigned) {
+    auto params = GetParam();
+
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.i32(), params.fn, Vector<const core::type::Type*, 1>{ty.i32()}, 50_i, 10_u);
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = spirv.)" +
+               params.ir + R"(<i32> 50i, 10u
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = bitcast 10u
+    %3:i32 = )" + params.ir +
+                  R"( 50i, %2
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_P(SpirvParser_BuiltinsMixedSignTest, Scalar_Signed_UnsignedSigned) {
+    auto params = GetParam();
+
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.i32(), params.fn, Vector<const core::type::Type*, 1>{ty.i32()}, 10_u, 50_i);
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = spirv.)" +
+               params.ir + R"(<i32> 10u, 50i
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = bitcast 50i
+    %3:u32 = )" + params.ir +
+                  R"( 10u, %2
+    %4:i32 = bitcast %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_P(SpirvParser_BuiltinsMixedSignTest, Scalar_Signed_UnsignedUnsigned) {
+    auto params = GetParam();
+
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.i32(), params.fn, Vector<const core::type::Type*, 1>{ty.i32()}, 10_u, 20_u);
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = spirv.)" +
+               params.ir + R"(<i32> 10u, 20u
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = )" + params.ir +
+                  R"( 10u, 20u
+    %3:i32 = bitcast %2
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_P(SpirvParser_BuiltinsMixedSignTest, Scalar_Unsigned_SignedUnsigned) {
+    auto params = GetParam();
+
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.u32(), params.fn, Vector<const core::type::Type*, 1>{ty.u32()}, 50_i, 10_u);
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = spirv.)" +
+               params.ir + R"(<u32> 50i, 10u
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = bitcast 10u
+    %3:i32 = )" + params.ir +
+                  R"( 50i, %2
+    %4:u32 = bitcast %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_P(SpirvParser_BuiltinsMixedSignTest, Scalar_Unsigned_UnsignedSigned) {
+    auto params = GetParam();
+
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.u32(), params.fn, Vector<const core::type::Type*, 1>{ty.u32()}, 10_u, 50_i);
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = spirv.)" +
+               params.ir + R"(<u32> 10u, 50i
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = bitcast 50i
+    %3:u32 = )" + params.ir +
+                  R"( 10u, %2
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_P(SpirvParser_BuiltinsMixedSignTest, Scalar_Unsigned_SignedSigned) {
+    auto params = GetParam();
+
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.u32(), params.fn, Vector<const core::type::Type*, 1>{ty.u32()}, 50_i, 60_i);
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = spirv.)" +
+               params.ir + R"(<u32> 50i, 60i
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = )" + params.ir +
+                  R"( 50i, 60i
+    %3:u32 = bitcast %2
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_P(SpirvParser_BuiltinsMixedSignTest, Vector_Signed_SignedUnsigned) {
+    auto params = GetParam();
+
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2<i32>(), params.fn,
+                                               Vector<const core::type::Type*, 1>{ty.i32()},
+                                               b.Splat<vec2<i32>>(50_i), b.Splat<vec2<u32>>(10_u));
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<i32> = spirv.)" +
+               params.ir + R"(<i32> vec2<i32>(50i), vec2<u32>(10u)
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<i32> = bitcast vec2<u32>(10u)
+    %3:vec2<i32> = )" +
+                  params.ir +
+                  R"( vec2<i32>(50i), %2
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_P(SpirvParser_BuiltinsMixedSignTest, Vector_Signed_UnsignedSigned) {
+    auto params = GetParam();
+
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2<i32>(), params.fn,
+                                               Vector<const core::type::Type*, 1>{ty.i32()},
+                                               b.Splat<vec2<u32>>(10_u), b.Splat<vec2<i32>>(50_i));
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<i32> = spirv.)" +
+               params.ir + R"(<i32> vec2<u32>(10u), vec2<i32>(50i)
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<u32> = bitcast vec2<i32>(50i)
+    %3:vec2<u32> = )" +
+                  params.ir +
+                  R"( vec2<u32>(10u), %2
+    %4:vec2<i32> = bitcast %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_P(SpirvParser_BuiltinsMixedSignTest, Vector_Signed_UnsignedUnsigned) {
+    auto params = GetParam();
+
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2<i32>(), params.fn,
+                                               Vector<const core::type::Type*, 1>{ty.i32()},
+                                               b.Splat<vec2<u32>>(10_u), b.Splat<vec2<u32>>(20_u));
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<i32> = spirv.)" +
+               params.ir + R"(<i32> vec2<u32>(10u), vec2<u32>(20u)
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<u32> = )" +
+                  params.ir +
+                  R"( vec2<u32>(10u), vec2<u32>(20u)
+    %3:vec2<i32> = bitcast %2
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_P(SpirvParser_BuiltinsMixedSignTest, Vector_Unsigned_SignedUnsigned) {
+    auto params = GetParam();
+
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2<u32>(), params.fn,
+                                               Vector<const core::type::Type*, 1>{ty.u32()},
+                                               b.Splat<vec2<i32>>(50_i), b.Splat<vec2<u32>>(10_u));
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<u32> = spirv.)" +
+               params.ir + R"(<u32> vec2<i32>(50i), vec2<u32>(10u)
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<i32> = bitcast vec2<u32>(10u)
+    %3:vec2<i32> = )" +
+                  params.ir +
+                  R"( vec2<i32>(50i), %2
+    %4:vec2<u32> = bitcast %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_P(SpirvParser_BuiltinsMixedSignTest, Vector_Unsigned_UnsignedSigned) {
+    auto params = GetParam();
+
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2<u32>(), params.fn,
+                                               Vector<const core::type::Type*, 1>{ty.u32()},
+                                               b.Splat<vec2<u32>>(10_u), b.Splat<vec2<i32>>(50_i));
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<u32> = spirv.)" +
+               params.ir + R"(<u32> vec2<u32>(10u), vec2<i32>(50i)
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<u32> = bitcast vec2<i32>(50i)
+    %3:vec2<u32> = )" +
+                  params.ir +
+                  R"( vec2<u32>(10u), %2
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_P(SpirvParser_BuiltinsMixedSignTest, Vector_Unsigned_SignedSigned) {
+    auto params = GetParam();
+
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2<u32>(), params.fn,
+                                               Vector<const core::type::Type*, 1>{ty.u32()},
+                                               b.Splat<vec2<i32>>(50_i), b.Splat<vec2<i32>>(60_i));
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<u32> = spirv.)" +
+               params.ir + R"(<u32> vec2<i32>(50i), vec2<i32>(60i)
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<i32> = )" +
+                  params.ir +
+                  R"( vec2<i32>(50i), vec2<i32>(60i)
+    %3:vec2<u32> = bitcast %2
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+INSTANTIATE_TEST_SUITE_P(SpirvReader,
+                         SpirvParser_BuiltinsMixedSignTest,
+                         testing::Values(BinaryCase{spirv::BuiltinFn::kAdd, "add"},
+                                         BinaryCase{spirv::BuiltinFn::kSub, "sub"},
+                                         BinaryCase{spirv::BuiltinFn::kMul, "mul"}));
+
+struct SignedBinaryCase {
+    spirv::BuiltinFn fn;
+    std::string ir;
+    std::string wgsl;
+};
+
+using SpirvParser_BuiltinsSignedTest =
+    core::ir::transform::TransformTestWithParam<SignedBinaryCase>;
+
+TEST_P(SpirvParser_BuiltinsSignedTest, Scalar_Signed_SignedUnsigned) {
+    auto params = GetParam();
+
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.i32(), params.fn, Vector<const core::type::Type*, 1>{ty.i32()}, 50_i, 10_u);
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = spirv.)" +
+               params.ir + R"(<i32> 50i, 10u
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = bitcast 10u
+    %3:i32 = )" + params.wgsl +
+                  R"( 50i, %2
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_P(SpirvParser_BuiltinsSignedTest, Scalar_Signed_UnsignedSigned) {
+    auto params = GetParam();
+
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.i32(), params.fn, Vector<const core::type::Type*, 1>{ty.i32()}, 10_u, 50_i);
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = spirv.)" +
+               params.ir + R"(<i32> 10u, 50i
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = bitcast 10u
+    %3:i32 = )" + params.wgsl +
+                  R"( %2, 50i
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_P(SpirvParser_BuiltinsSignedTest, Scalar_Signed_UnsignedUnsigned) {
+    auto params = GetParam();
+
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.i32(), params.fn, Vector<const core::type::Type*, 1>{ty.i32()}, 10_u, 20_u);
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = spirv.)" +
+               params.ir + R"(<i32> 10u, 20u
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = bitcast 10u
+    %3:i32 = bitcast 20u
+    %4:i32 = )" + params.wgsl +
+                  R"( %2, %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_P(SpirvParser_BuiltinsSignedTest, Scalar_Unsigned_SignedUnsigned) {
+    auto params = GetParam();
+
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.u32(), params.fn, Vector<const core::type::Type*, 1>{ty.u32()}, 50_i, 10_u);
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = spirv.)" +
+               params.ir + R"(<u32> 50i, 10u
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = bitcast 10u
+    %3:i32 = )" + params.wgsl +
+                  R"( 50i, %2
+    %4:u32 = bitcast %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_P(SpirvParser_BuiltinsSignedTest, Scalar_Unsigned_UnsignedSigned) {
+    auto params = GetParam();
+
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.u32(), params.fn, Vector<const core::type::Type*, 1>{ty.u32()}, 10_u, 50_i);
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = spirv.)" +
+               params.ir + R"(<u32> 10u, 50i
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = bitcast 10u
+    %3:i32 = )" + params.wgsl +
+                  R"( %2, 50i
+    %4:u32 = bitcast %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_P(SpirvParser_BuiltinsSignedTest, Scalar_Unsigned_SignedSigned) {
+    auto params = GetParam();
+
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.u32(), params.fn, Vector<const core::type::Type*, 1>{ty.u32()}, 50_i, 60_i);
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = spirv.)" +
+               params.ir + R"(<u32> 50i, 60i
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = )" + params.wgsl +
+                  R"( 50i, 60i
+    %3:u32 = bitcast %2
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_P(SpirvParser_BuiltinsSignedTest, Vector_Signed_SignedUnsigned) {
+    auto params = GetParam();
+
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2<i32>(), params.fn,
+                                               Vector<const core::type::Type*, 1>{ty.i32()},
+                                               b.Splat<vec2<i32>>(50_i), b.Splat<vec2<u32>>(10_u));
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<i32> = spirv.)" +
+               params.ir + R"(<i32> vec2<i32>(50i), vec2<u32>(10u)
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<i32> = bitcast vec2<u32>(10u)
+    %3:vec2<i32> = )" +
+                  params.wgsl +
+                  R"( vec2<i32>(50i), %2
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_P(SpirvParser_BuiltinsSignedTest, Vector_Signed_UnsignedSigned) {
+    auto params = GetParam();
+
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2<i32>(), params.fn,
+                                               Vector<const core::type::Type*, 1>{ty.i32()},
+                                               b.Splat<vec2<u32>>(10_u), b.Splat<vec2<i32>>(50_i));
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<i32> = spirv.)" +
+               params.ir + R"(<i32> vec2<u32>(10u), vec2<i32>(50i)
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<i32> = bitcast vec2<u32>(10u)
+    %3:vec2<i32> = )" +
+                  params.wgsl +
+                  R"( %2, vec2<i32>(50i)
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_P(SpirvParser_BuiltinsSignedTest, Vector_Signed_UnsignedUnsigned) {
+    auto params = GetParam();
+
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2<i32>(), params.fn,
+                                               Vector<const core::type::Type*, 1>{ty.i32()},
+                                               b.Splat<vec2<u32>>(10_u), b.Splat<vec2<u32>>(20_u));
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<i32> = spirv.)" +
+               params.ir + R"(<i32> vec2<u32>(10u), vec2<u32>(20u)
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<i32> = bitcast vec2<u32>(10u)
+    %3:vec2<i32> = bitcast vec2<u32>(20u)
+    %4:vec2<i32> = )" +
+                  params.wgsl +
+                  R"( %2, %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_P(SpirvParser_BuiltinsSignedTest, Vector_Unsigned_SignedUnsigned) {
+    auto params = GetParam();
+
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2<u32>(), params.fn,
+                                               Vector<const core::type::Type*, 1>{ty.u32()},
+                                               b.Splat<vec2<i32>>(50_i), b.Splat<vec2<u32>>(10_u));
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<u32> = spirv.)" +
+               params.ir + R"(<u32> vec2<i32>(50i), vec2<u32>(10u)
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<i32> = bitcast vec2<u32>(10u)
+    %3:vec2<i32> = )" +
+                  params.wgsl +
+                  R"( vec2<i32>(50i), %2
+    %4:vec2<u32> = bitcast %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_P(SpirvParser_BuiltinsSignedTest, Vector_Unsigned_UnsignedSigned) {
+    auto params = GetParam();
+
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2<u32>(), params.fn,
+                                               Vector<const core::type::Type*, 1>{ty.u32()},
+                                               b.Splat<vec2<u32>>(10_u), b.Splat<vec2<i32>>(50_i));
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<u32> = spirv.)" +
+               params.ir + R"(<u32> vec2<u32>(10u), vec2<i32>(50i)
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<i32> = bitcast vec2<u32>(10u)
+    %3:vec2<i32> = )" +
+                  params.wgsl +
+                  R"( %2, vec2<i32>(50i)
+    %4:vec2<u32> = bitcast %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_P(SpirvParser_BuiltinsSignedTest, Vector_Unsigned_SignedSigned) {
+    auto params = GetParam();
+
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2<u32>(), params.fn,
+                                               Vector<const core::type::Type*, 1>{ty.u32()},
+                                               b.Splat<vec2<i32>>(50_i), b.Splat<vec2<i32>>(60_i));
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<u32> = spirv.)" +
+               params.ir + R"(<u32> vec2<i32>(50i), vec2<i32>(60i)
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<i32> = )" +
+                  params.wgsl +
+                  R"( vec2<i32>(50i), vec2<i32>(60i)
+    %3:vec2<u32> = bitcast %2
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+INSTANTIATE_TEST_SUITE_P(SpirvReader,
+                         SpirvParser_BuiltinsSignedTest,
+                         testing::Values(SignedBinaryCase{spirv::BuiltinFn::kSDiv, "s_div", "div"},
+                                         SignedBinaryCase{spirv::BuiltinFn::kSMod, "s_mod",
+                                                          "mod"}));
+
 }  // namespace
 }  // namespace tint::spirv::reader::lower
