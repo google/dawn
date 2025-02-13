@@ -49,7 +49,7 @@
 %subgroupMatrixMultiply_da556f = OpFunction %8 None %12
          %13 = OpLabel
         %res = OpVariable %_ptr_Function_8 Function
-         %21 = OpCooperativeMatrixMulAddKHR %8 %14 %17 %20
+         %21 = OpCooperativeMatrixMulAddKHR %8 %14 %17 %20 NoneKHR
                OpStore %res %21
          %24 = OpLoad %8 %res None
                OpReturnValue %24

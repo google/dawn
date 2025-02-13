@@ -420,6 +420,7 @@ fn udot(u32, u32, u32) -> u32
 @must_use @stage("compute") implicit(T: subgroup_matrix_elements, TR: subgroup_matrix_elements, C: num, R: num, K: num) fn cooperative_matrix_mul_add(
   subgroup_matrix<subgroup_matrix_kind_left, T, K, R>,
   subgroup_matrix<subgroup_matrix_kind_right, T, C, K>,
-  subgroup_matrix<subgroup_matrix_kind_result, TR, C, R>)
+  subgroup_matrix<subgroup_matrix_kind_result, TR, C, R>,
+  u32)
   -> subgroup_matrix<subgroup_matrix_kind_result, TR, C, R>
 

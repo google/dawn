@@ -64,7 +64,7 @@
          %28 = OpLoad %16 %arg_0 None
          %29 = OpLoad %21 %arg_1 None
          %30 = OpLoad %9 %arg_2 None
-         %31 = OpCooperativeMatrixMulAddKHR %9 %28 %29 %30
+         %31 = OpCooperativeMatrixMulAddKHR %9 %28 %29 %30 MatrixCSignedComponentsKHR|MatrixResultSignedComponentsKHR
                OpStore %res %31
          %33 = OpLoad %9 %res None
                OpReturnValue %33
