@@ -155,7 +155,7 @@ fn main() {
 )";
         switch (op) {
             case MatrixMultiply:
-                shader << "let result = subgroupMatrixMultiply(lhs, rhs);\n";
+                shader << "let result = subgroupMatrixMultiply<ResultComponentType>(lhs, rhs);\n";
                 break;
             case MatrixMultiplyAccumulate:
                 // Perform the multiplication twice, accumulating into a zero matrix the first time.

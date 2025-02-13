@@ -1206,6 +1206,21 @@ class Builder {
                                              Values(std::forward<ARGS>(args)...));
     }
 
+    /// Creates a core builtin call instruction with explicit parameters
+    /// @param type the return type of the call
+    /// @param func the builtin function to call
+    /// @param explicit_params the explicit parameters
+    /// @param args the call arguments
+    /// @returns the instruction
+    template <typename... ARGS>
+    ir::CoreBuiltinCall* CallExplicit(const core::type::Type* type,
+                                      core::BuiltinFn func,
+                                      VectorRef<const core::type::Type*> explicit_params,
+                                      ARGS&&... args) {
+        return CallExplicitWithResult<core::ir::CoreBuiltinCall>(
+            InstructionResult(type), func, explicit_params, Values(std::forward<ARGS>(args)...));
+    }
+
     /// Creates a builtin call instruction
     /// @param type the return type of the call
     /// @param func the builtin function to call
