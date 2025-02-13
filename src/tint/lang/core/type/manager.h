@@ -619,7 +619,10 @@ class Manager final {
     /// @param members the list of structure member descriptors
     /// @note a structure must not already exist with the same name
     /// @returns the structure type
-    core::type::Struct* Struct(Symbol name, VectorRef<StructMemberDesc> members);
+    core::type::Struct* Struct(Symbol name, VectorRef<StructMemberDesc> members) {
+        return Struct(name, /* is_wgsl_internal */ false,
+                      tint::Vector<StructMemberDesc, 4>(members));
+    }
 
     /// Create a new structure declaration.
     /// @param name the name of the structure
@@ -628,6 +631,17 @@ class Manager final {
     /// @returns the structure type
     core::type::Struct* Struct(Symbol name, std::initializer_list<StructMemberDesc> members) {
         return Struct(name, tint::Vector<StructMemberDesc, 4>(members));
+    }
+
+    /// Create a new WGSL internal structure declaration.
+    /// @param name the name of the structure
+    /// @param members the list of structure member descriptors
+    /// @note an internal structure must not already exist with the same name
+    /// @returns the structure type
+    core::type::Struct* WgslInternalStruct(Symbol name,
+                                           std::initializer_list<StructMemberDesc> members) {
+        return Struct(name, /* is_wgsl_internal */ true,
+                      tint::Vector<StructMemberDesc, 4>(members));
     }
 
     /// @returns the external texture type
@@ -645,6 +659,16 @@ class Manager final {
     UniqueAllocator<UniqueNode> unique_nodes_;
     /// Non-unique nodes owned by the manager
     BlockAllocator<Node> nodes_;
+
+    /// Create a new structure declaration.
+    /// @param name the name of the structure
+    /// @param is_wgsl_internal `true` if the structure is internally defined in WGSL
+    /// @param members the list of structure member descriptors
+    /// @note a structure must not already exist with the same name
+    /// @returns the structure type
+    core::type::Struct* Struct(Symbol name,
+                               bool is_wgsl_internal,
+                               VectorRef<StructMemberDesc> members);
 };
 
 }  // namespace tint::core::type

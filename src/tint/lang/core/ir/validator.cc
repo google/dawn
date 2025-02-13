@@ -2837,7 +2837,7 @@ void Validator::CheckBuiltinCall(const BuiltinCall* call) {
 
     if (builtin->return_type != call->Result(0)->Type()) {
         AddError(call) << "call result type " << NameOf(call->Result(0)->Type())
-                       << "does not match builtin return type " << NameOf(builtin->return_type);
+                       << " does not match builtin return type " << NameOf(builtin->return_type);
         return;
     }
 }
