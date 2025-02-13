@@ -30,6 +30,7 @@
 #include <algorithm>
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <unordered_set>
 #include <utility>
 #include <vector>
@@ -112,13 +113,46 @@ class Parser {
             EmitModuleScopeVariables();
         }
 
+        RegisterNames();
+
         EmitFunctions();
         EmitEntryPointAttributes();
 
         // TODO(crbug.com/tint/1907): Handle annotation instructions.
-        // TODO(crbug.com/tint/1907): Handle names.
 
         return std::move(ir_);
+    }
+
+    void RegisterNames() {
+        // Register names from OpName
+        for (const auto& inst : spirv_context_->debugs2()) {
+            switch (inst.opcode()) {
+                case spv::Op::OpName: {
+                    const auto name = inst.GetInOperand(1).AsString();
+                    if (!name.empty()) {
+                        id_to_name_[inst.GetSingleWordInOperand(0)] = name;
+                    }
+                    break;
+                }
+                case spv::Op::OpMemberName: {
+                    const auto name = inst.GetInOperand(2).AsString();
+                    if (!name.empty()) {
+                        uint32_t struct_id = inst.GetSingleWordInOperand(0);
+                        uint32_t member_idx = inst.GetSingleWordInOperand(1);
+                        auto iter = struct_to_member_names_.insert({struct_id, {}});
+                        auto& members = (*(iter.first)).second;
+
+                        if (members.size() < (member_idx + 1)) {
+                            members.resize(member_idx + 1);
+                        }
+                        members[member_idx] = name;
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
     }
 
     /// @param sc a SPIR-V storage class
@@ -282,6 +316,15 @@ class Parser {
             TINT_ICE() << "empty structures are not supported";
         }
 
+        auto* type_mgr = spirv_context_->get_type_mgr();
+        auto struct_id = type_mgr->GetId(struct_ty);
+
+        std::vector<std::string>* member_names = nullptr;
+        auto struct_to_member_iter = struct_to_member_names_.find(struct_id);
+        if (struct_to_member_iter != struct_to_member_names_.end()) {
+            member_names = &((*struct_to_member_iter).second);
+        }
+
         // Build a list of struct members.
         uint32_t current_size = 0u;
         Vector<core::type::StructMember*, 4> members;
@@ -335,15 +378,28 @@ class Parser {
                 }
             }
 
-            // TODO(crbug.com/tint/1907): Use OpMemberName to name it.
-            members.Push(ty_.Get<core::type::StructMember>(ir_.symbols.New(), member_ty, i, offset,
-                                                           align, member_ty->Size(),
-                                                           std::move(attributes)));
+            Symbol name;
+            if (member_names && member_names->size() > i) {
+                auto n = (*member_names)[i];
+                name = ir_.symbols.New(n);
+            } else {
+                name = ir_.symbols.New();
+            }
+
+            members.Push(ty_.Get<core::type::StructMember>(
+                name, member_ty, i, offset, align, member_ty->Size(), std::move(attributes)));
 
             current_size = offset + member_ty->Size();
         }
-        // TODO(crbug.com/tint/1907): Use OpName to name it.
-        return ty_.Struct(ir_.symbols.New(), std::move(members));
+
+        Symbol name;
+        auto iter = id_to_name_.find(struct_id);
+        if (iter != id_to_name_.end()) {
+            name = ir_.symbols.New(iter->second);
+        } else {
+            name = ir_.symbols.New();
+        }
+        return ty_.Struct(name, std::move(members));
     }
 
     /// @param id a SPIR-V result ID for a function declaration instruction
@@ -437,6 +493,11 @@ class Parser {
         current_block_->Append(inst);
         TINT_ASSERT(inst->Results().Length() == 1u);
         AddValue(result_id, inst->Result(0));
+
+        auto iter = id_to_name_.find(result_id);
+        if (iter != id_to_name_.end()) {
+            ir_.SetName(inst, iter->second);
+        }
     }
 
     /// Emit an instruction to the current block.
@@ -1191,6 +1252,11 @@ class Parser {
     // The set of IDs of imports that are ignored. For example, any "NonSemanticInfo." import is
     // ignored.
     std::unordered_set<uint32_t> ignored_imports_;
+
+    // Map of SPIR-V IDs to string names
+    std::unordered_map<uint32_t, std::string> id_to_name_;
+    // Map of SPIR-V Struct IDs to a list of member string names
+    std::unordered_map<uint32_t, std::vector<std::string>> struct_to_member_names_;
 };
 
 }  // namespace

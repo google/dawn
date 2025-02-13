@@ -99,6 +99,7 @@ if (tint_build_unittests) {
         "import_test.cc",
         "memory_test.cc",
         "misc_test.cc",
+        "name_test.cc",
         "struct_test.cc",
         "var_test.cc",
       ]

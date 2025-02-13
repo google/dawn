@@ -317,15 +317,15 @@ TEST_F(SpirvReaderTest, ClipDistances) {
 )");
     ASSERT_EQ(got, Success);
     EXPECT_EQ(got, R"(
-tint_symbol_2 = struct @align(16) {
-  tint_symbol:vec4<f32> @offset(0)
-  tint_symbol_1:array<f32, 1> @offset(16)
+VertexOutputs = struct @align(16) {
+  position:vec4<f32> @offset(0)
+  clipDistance:array<f32, 1> @offset(16)
 }
 
-tint_symbol_6 = struct @align(16) {
-  tint_symbol_3:vec4<f32> @offset(0), @builtin(position)
-  tint_symbol_4:array<f32, 1> @offset(16), @builtin(clip_distances)
-  tint_symbol_5:f32 @offset(20), @builtin(__point_size)
+tint_symbol_3 = struct @align(16) {
+  tint_symbol:vec4<f32> @offset(0), @builtin(position)
+  tint_symbol_1:array<f32, 1> @offset(16), @builtin(clip_distances)
+  tint_symbol_2:f32 @offset(20), @builtin(__point_size)
 }
 
 $B1: {  # root
@@ -334,14 +334,14 @@ $B1: {  # root
   %3:ptr<private, f32, read_write> = var
 }
 
-%4 = func():tint_symbol_2 {
+%4 = func():VertexOutputs {
   $B2: {
-    ret tint_symbol_2(vec4<f32>(0.0f), array<f32, 1>(0.0f))
+    ret VertexOutputs(vec4<f32>(0.0f), array<f32, 1>(0.0f))
   }
 }
 %main_inner = func():void {
   $B3: {
-    %6:tint_symbol_2 = call %4
+    %6:VertexOutputs = call %4
     %7:vec4<f32> = access %6, 0u
     store %1, %7
     %8:array<f32, 1> = access %6, 1u
@@ -350,13 +350,13 @@ $B1: {  # root
     ret
   }
 }
-%main = @vertex func():tint_symbol_6 {
+%main = @vertex func():tint_symbol_3 {
   $B4: {
     %10:void = call %main_inner
     %11:vec4<f32> = load %1
     %12:array<f32, 1> = load %2
     %13:f32 = load %3
-    %14:tint_symbol_6 = construct %11, %12, %13
+    %14:tint_symbol_3 = construct %11, %12, %13
     ret %14
   }
 }
@@ -568,14 +568,14 @@ TEST_F(SpirvReaderTest, BlendSrc) {
 
     ASSERT_EQ(got, Success);
     EXPECT_EQ(got, R"(
-tint_symbol_2 = struct @align(16) {
-  tint_symbol:vec4<f32> @offset(0)
-  tint_symbol_1:vec4<f32> @offset(16)
+FragOutput = struct @align(16) {
+  color:vec4<f32> @offset(0)
+  blend:vec4<f32> @offset(16)
 }
 
-tint_symbol_5 = struct @align(16) {
-  tint_symbol_3:vec4<f32> @offset(0), @location(0), @blend_src(0)
-  tint_symbol_4:vec4<f32> @offset(16), @location(0), @blend_src(1)
+tint_symbol_2 = struct @align(16) {
+  tint_symbol:vec4<f32> @offset(0), @location(0), @blend_src(0)
+  tint_symbol_1:vec4<f32> @offset(16), @location(0), @blend_src(1)
 }
 
 $B1: {  # root
@@ -583,20 +583,20 @@ $B1: {  # root
   %2:ptr<private, vec4<f32>, read_write> = var
 }
 
-%3 = func():tint_symbol_2 {
+%3 = func():FragOutput {
   $B2: {
-    %4:ptr<function, tint_symbol_2, read_write> = var, tint_symbol_2(vec4<f32>(0.0f))
-    %5:ptr<function, vec4<f32>, read_write> = access %4, 0u
+    %output:ptr<function, FragOutput, read_write> = var, FragOutput(vec4<f32>(0.0f))
+    %5:ptr<function, vec4<f32>, read_write> = access %output, 0u
     store %5, vec4<f32>(0.5f, 0.5f, 0.5f, 1.0f)
-    %6:ptr<function, vec4<f32>, read_write> = access %4, 1u
+    %6:ptr<function, vec4<f32>, read_write> = access %output, 1u
     store %6, vec4<f32>(0.5f, 0.5f, 0.5f, 1.0f)
-    %7:tint_symbol_2 = load %4
+    %7:FragOutput = load %output
     ret %7
   }
 }
 %frag_main_inner = func():void {
   $B3: {
-    %9:tint_symbol_2 = call %3
+    %9:FragOutput = call %3
     %10:vec4<f32> = access %9, 0u
     store %1, %10
     %11:vec4<f32> = access %9, 1u
@@ -604,12 +604,12 @@ $B1: {  # root
     ret
   }
 }
-%frag_main = @fragment func():tint_symbol_5 {
+%frag_main = @fragment func():tint_symbol_2 {
   $B4: {
     %13:void = call %frag_main_inner
     %14:vec4<f32> = load %1
     %15:vec4<f32> = load %2
-    %16:tint_symbol_5 = construct %14, %15
+    %16:tint_symbol_2 = construct %14, %15
     ret %16
   }
 }
