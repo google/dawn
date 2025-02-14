@@ -491,6 +491,36 @@ TEST_F(IR_ValidatorTest, Var_Struct_MissingIOAnnotations) {
 )")) << res.Failure().reason.Str();
 }
 
+TEST_F(IR_ValidatorTest, Var_Sampler_NonHandleAddressSpace) {
+    auto* v = b.Var(ty.ptr(AddressSpace::kPrivate, ty.sampler(), read_write));
+    mod.root_block->Append(v);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(
+            R"(:2:42 error: var: samplers and textures can only be declared in the 'handle' address space
+  %1:ptr<private, sampler, read_write> = var
+                                         ^^^
+)")) << res.Failure().reason.Str();
+}
+
+TEST_F(IR_ValidatorTest, Var_Texture_NonHandleAddressSpace) {
+    auto* v = b.Var(ty.ptr(AddressSpace::kPrivate, ty.sampler(), read_write));
+    mod.root_block->Append(v);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(
+            R"(:2:42 error: var: samplers and textures can only be declared in the 'handle' address space
+  %1:ptr<private, sampler, read_write> = var
+                                         ^^^
+)")) << res.Failure().reason.Str();
+}
+
 TEST_F(IR_ValidatorTest, Let_NullResult) {
     auto* v = mod.CreateInstruction<ir::Let>(nullptr, b.Constant(1_i));
 

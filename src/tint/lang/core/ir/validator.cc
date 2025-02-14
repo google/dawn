@@ -2468,16 +2468,19 @@ void Validator::CheckVar(const Var* var) {
     }
 
     auto* result_type = var->Result(0)->Type();
-    if (result_type == nullptr) {
-        AddError(var) << "result type is undefined";
-        return;
-    }
-
     auto* mv = result_type->As<core::type::MemoryView>();
     if (!mv) {
         AddError(var) << "result type " << NameOf(result_type)
                       << " must be a pointer or a reference";
         return;
+    }
+
+    if (mv->UnwrapPtrOrRef()->IsAnyOf<core::type::Texture, core::type::Sampler>()) {
+        if (mv->AddressSpace() != AddressSpace::kHandle) {
+            AddError(var)
+                << "samplers and textures can only be declared in the 'handle' address space";
+            return;
+        }
     }
 
     if (var->Block() != mod_.root_block && mv->AddressSpace() != AddressSpace::kFunction) {
@@ -2501,10 +2504,9 @@ void Validator::CheckVar(const Var* var) {
             return;
         }
 
-        if (var->Initializer()->Type() != var->Result(0)->Type()->UnwrapPtrOrRef()) {
+        if (var->Initializer()->Type() != result_type->UnwrapPtrOrRef()) {
             AddError(var) << "initializer type " << NameOf(var->Initializer()->Type())
-                          << " does not match store type "
-                          << NameOf(var->Result(0)->Type()->UnwrapPtrOrRef());
+                          << " does not match store type " << NameOf(result_type->UnwrapPtrOrRef());
             return;
         }
     }
