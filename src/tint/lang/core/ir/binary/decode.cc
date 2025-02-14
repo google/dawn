@@ -35,6 +35,7 @@
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/control_instruction.h"
 #include "src/tint/lang/core/ir/module.h"
+#include "src/tint/lang/core/type/builtin_structs.h"
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
 #include "src/tint/lang/core/type/depth_texture.h"
 #include "src/tint/lang/core/type/external_texture.h"
@@ -701,6 +702,8 @@ struct Decoder {
             case pb::Type::KindCase::kSubgroupMatrixResult:
                 Error() << "SubgroupMatrix is currently not implemented";
                 return mod_out_.Types().invalid();
+            case pb::Type::KindCase::kBuiltinStruct:
+                return CreateTypeBuiltinStruct(type_in.builtin_struct());
             case pb::Type::KindCase::KIND_NOT_SET:
                 break;
         }
@@ -935,6 +938,55 @@ struct Decoder {
     //                                                          subgroup_matrix.rows(),
     //                                                          subgroup_matrix.columns());
     //    }
+
+    const type::Type* CreateTypeBuiltinStruct(pb::TypeBuiltinStruct builtin_struct_in) {
+        auto& ty = mod_out_.Types();
+        switch (builtin_struct_in) {
+            case pb::TypeBuiltinStruct::AtomicCompareExchangeResultI32:
+                return type::CreateAtomicCompareExchangeResult(ty, mod_out_.symbols, ty.i32());
+            case pb::TypeBuiltinStruct::AtomicCompareExchangeResultU32:
+                return type::CreateAtomicCompareExchangeResult(ty, mod_out_.symbols, ty.u32());
+            case pb::TypeBuiltinStruct::FrexpResultF16:
+                return type::CreateFrexpResult(ty, mod_out_.symbols, ty.f16());
+            case pb::TypeBuiltinStruct::FrexpResultF32:
+                return type::CreateFrexpResult(ty, mod_out_.symbols, ty.f32());
+            case pb::TypeBuiltinStruct::FrexpResultVec2F16:
+                return type::CreateFrexpResult(ty, mod_out_.symbols, ty.vec2<f16>());
+            case pb::TypeBuiltinStruct::FrexpResultVec2F32:
+                return type::CreateFrexpResult(ty, mod_out_.symbols, ty.vec2<f32>());
+            case pb::TypeBuiltinStruct::FrexpResultVec3F16:
+                return type::CreateFrexpResult(ty, mod_out_.symbols, ty.vec3<f16>());
+            case pb::TypeBuiltinStruct::FrexpResultVec3F32:
+                return type::CreateFrexpResult(ty, mod_out_.symbols, ty.vec3<f32>());
+            case pb::TypeBuiltinStruct::FrexpResultVec4F16:
+                return type::CreateFrexpResult(ty, mod_out_.symbols, ty.vec4<f16>());
+            case pb::TypeBuiltinStruct::FrexpResultVec4F32:
+                return type::CreateFrexpResult(ty, mod_out_.symbols, ty.vec4<f32>());
+            case pb::TypeBuiltinStruct::ModfResultF16:
+                return type::CreateModfResult(ty, mod_out_.symbols, ty.f16());
+            case pb::TypeBuiltinStruct::ModfResultF32:
+                return type::CreateModfResult(ty, mod_out_.symbols, ty.f32());
+            case pb::TypeBuiltinStruct::ModfResultVec2F16:
+                return type::CreateModfResult(ty, mod_out_.symbols, ty.vec2<f16>());
+            case pb::TypeBuiltinStruct::ModfResultVec2F32:
+                return type::CreateModfResult(ty, mod_out_.symbols, ty.vec2<f32>());
+            case pb::TypeBuiltinStruct::ModfResultVec3F16:
+                return type::CreateModfResult(ty, mod_out_.symbols, ty.vec2<f16>());
+            case pb::TypeBuiltinStruct::ModfResultVec3F32:
+                return type::CreateModfResult(ty, mod_out_.symbols, ty.vec3<f32>());
+            case pb::TypeBuiltinStruct::ModfResultVec4F16:
+                return type::CreateModfResult(ty, mod_out_.symbols, ty.vec2<f16>());
+            case pb::TypeBuiltinStruct::ModfResultVec4F32:
+                return type::CreateModfResult(ty, mod_out_.symbols, ty.vec4<f32>());
+
+            case pb::TypeBuiltinStruct::TypeBuiltinStruct_INT_MIN_SENTINEL_DO_NOT_USE_:
+            case pb::TypeBuiltinStruct::TypeBuiltinStruct_INT_MAX_SENTINEL_DO_NOT_USE_:
+                break;
+        }
+
+        Error() << "invalid TypeBuiltinStruct: " << std::to_string(builtin_struct_in);
+        return mod_out_.Types().invalid();
+    }
 
     const type::Type* Type(size_t id) {
         if (DAWN_UNLIKELY(id >= types_.Length())) {
