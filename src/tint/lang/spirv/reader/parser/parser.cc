@@ -538,6 +538,8 @@ class Parser {
     /// Emit the functions.
     void EmitFunctions() {
         for (auto& func : *spirv_context_->module()) {
+            current_spirv_function_ = &func;
+
             Vector<core::ir::FunctionParam*, 4> params;
             func.ForEachParam([&](spvtools::opt::Instruction* spirv_param) {
                 auto* param = b_.FunctionParam(Type(spirv_param->type_id()));
@@ -563,6 +565,7 @@ class Parser {
             functions_.Add(func.result_id(), current_function_);
             EmitBlock(current_function_->Block(), *func.entry());
         }
+        current_spirv_function_ = nullptr;
     }
 
     /// Emit entry point attributes.
@@ -625,6 +628,9 @@ class Parser {
                     break;
                 case spv::Op::OpUndef:
                     AddValue(inst.result_id(), b_.Zero(Type(inst.type_id())));
+                    break;
+                case spv::Op::OpBranch:
+                    EmitBranch(inst);
                     break;
                 case spv::Op::OpExtInst:
                     EmitExtInst(inst);
@@ -762,6 +768,15 @@ class Parser {
                         << "unhandled SPIR-V instruction: " << static_cast<uint32_t>(inst.opcode());
             }
         }
+    }
+
+    void EmitBranch(const spvtools::opt::Instruction& inst) {
+        auto dest_id = inst.GetSingleWordInOperand(0);
+
+        TINT_ASSERT(current_spirv_function_);
+        const auto& bb = current_spirv_function_->FindBlock(dest_id);
+
+        EmitBlock(current_function_->Block(), *bb);
     }
 
     Vector<core::ir::Value*, 4> Args(const spvtools::opt::Instruction& inst, uint32_t start) {
@@ -1262,6 +1277,8 @@ class Parser {
 
     /// The SPIR-V context containing the SPIR-V tools intermediate representation.
     std::unique_ptr<spvtools::opt::IRContext> spirv_context_;
+    /// The current SPIR-V function being emitted
+    spvtools::opt::Function* current_spirv_function_ = nullptr;
 
     // The set of IDs that are imports of the GLSL.std.450 extended instruction sets.
     std::unordered_set<uint32_t> glsl_std_450_imports_;
