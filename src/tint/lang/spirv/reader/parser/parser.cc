@@ -632,6 +632,12 @@ class Parser {
                 case spv::Op::OpBranch:
                     EmitBranch(inst);
                     break;
+                case spv::Op::OpBranchConditional:
+                    EmitBranchConditional(inst);
+                    break;
+                case spv::Op::OpSelectionMerge:
+                    HandleSelectionMerge(inst, src);
+                    break;
                 case spv::Op::OpExtInst:
                     EmitExtInst(inst);
                     break;
@@ -770,13 +776,65 @@ class Parser {
         }
     }
 
+    void HandleSelectionMerge(const spvtools::opt::Instruction& inst,
+                              const spvtools::opt::BasicBlock& src) {
+        merge_stack_.push_back(MergeInfo{inst.GetSingleWordOperand(0), src.terminator()});
+    }
+
     void EmitBranch(const spvtools::opt::Instruction& inst) {
         auto dest_id = inst.GetSingleWordInOperand(0);
+
+        // If this is branching to the current merge block then nothing to do.
+        if (!merge_stack_.empty() && dest_id == merge_stack_.back().id) {
+            return;
+        }
 
         TINT_ASSERT(current_spirv_function_);
         const auto& bb = current_spirv_function_->FindBlock(dest_id);
 
-        EmitBlock(current_function_->Block(), *bb);
+        EmitBlock(current_block_, *bb);
+    }
+
+    void EmitBranchConditional(const spvtools::opt::Instruction& inst) {
+        auto cond = Value(inst.GetSingleWordInOperand(0));
+        auto true_id = inst.GetSingleWordInOperand(1);
+        auto false_id = inst.GetSingleWordInOperand(2);
+
+        std::optional<uint32_t> merge_id = std::nullopt;
+        if (!merge_stack_.empty()) {
+            merge_id = merge_stack_.back().id;
+        }
+
+        TINT_ASSERT(current_spirv_function_);
+
+        auto* if_ = b_.If(cond);
+        EmitWithoutResult(if_);
+
+        if (true_id != merge_id) {
+            const auto& bb_true = current_spirv_function_->FindBlock(true_id);
+            EmitBlock(if_->True(), *bb_true);
+        }
+        if (!if_->True()->Terminator()) {
+            if_->True()->Append(b_.ExitIf(if_));
+        }
+
+        if (false_id != merge_id) {
+            const auto& bb_false = current_spirv_function_->FindBlock(false_id);
+            EmitBlock(if_->False(), *bb_false);
+        }
+        if (!if_->False()->Terminator()) {
+            if_->False()->Append(b_.ExitIf(if_));
+        }
+
+        if (merge_id.has_value()) {
+            if (&inst == merge_stack_.back().merge_inst) {
+                merge_stack_.pop_back();
+                const auto& bb_merge = current_spirv_function_->FindBlock(merge_id.value());
+                EmitBlock(current_block_, *bb_merge);
+            }
+        } else {
+            EmitWithoutResult(b_.Unreachable());
+        }
     }
 
     Vector<core::ir::Value*, 4> Args(const spvtools::opt::Instruction& inst, uint32_t start) {
@@ -1290,6 +1348,14 @@ class Parser {
     std::unordered_map<uint32_t, std::string> id_to_name_;
     // Map of SPIR-V Struct IDs to a list of member string names
     std::unordered_map<uint32_t, std::vector<std::string>> struct_to_member_names_;
+
+    struct MergeInfo {
+        uint32_t id;
+        const spvtools::opt::Instruction* merge_inst;
+    };
+
+    // Stack of merge blocks
+    std::vector<MergeInfo> merge_stack_;
 };
 
 }  // namespace
