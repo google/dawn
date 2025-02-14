@@ -138,6 +138,26 @@ static constexpr WGPUUncapturedErrorCallbackInfo kEmptyUncapturedErrorCallbackIn
 static constexpr WGPULoggingCallbackInfo kEmptyLoggingCallbackInfo = {nullptr, nullptr, nullptr,
                                                                       nullptr};
 
+std::string GetCompilationLog(const ShaderModuleBase* module) {
+    if (module == nullptr) {
+        return "";
+    }
+
+    const OwnedCompilationMessages* messages = module->GetCompilationMessages();
+    if (!messages->HasWarningsOrErrors()) {
+        return "";
+    }
+
+    // Emit the formatted Tint errors and warnings.
+    std::ostringstream t;
+    t << absl::StrFormat("Compilation log for %s:", module);
+    for (const auto& pMessage : messages->GetFormattedTintMessages()) {
+        t << "\n" << pMessage;
+    }
+
+    return t.str();
+}
+
 }  // anonymous namespace
 
 DeviceBase::DeviceLostEvent::DeviceLostEvent(const WGPUDeviceLostCallbackInfo& callbackInfo)
@@ -1390,8 +1410,9 @@ ShaderModuleBase* DeviceBase::APICreateShaderModule(const ShaderModuleDescriptor
     // Acquire the device lock for error handling.
     auto deviceLock(GetScopedLock());
     Ref<ShaderModuleBase> result;
-    if (ConsumedError(std::move(resultOrError), &result, "calling %s.CreateShaderModule(%s).", this,
-                      descriptor)) {
+    auto log = GetCompilationLog(result.Get());
+    if (ConsumedError(std::move(resultOrError), &result, "calling %s.CreateShaderModule(%s).\n%s",
+                      this, descriptor, log)) {
         DAWN_ASSERT(result == nullptr);
         result = ShaderModuleBase::MakeError(this, descriptor ? descriptor->label : nullptr);
         // Emit Tint errors and warnings for the error shader module.
@@ -1399,7 +1420,6 @@ ShaderModuleBase* DeviceBase::APICreateShaderModule(const ShaderModuleDescriptor
         // retrieve it with GetCompilationInfo.
         result->InjectCompilationMessages(std::move(compilationMessages));
     }
-    EmitCompilationLog(result.Get());
     return ReturnToAPI(std::move(result));
 }
 
@@ -1411,10 +1431,10 @@ ShaderModuleBase* DeviceBase::APICreateErrorShaderModule(const ShaderModuleDescr
         std::make_unique<OwnedCompilationMessages>());
     compilationMessages->AddUnanchoredMessage(errorMessage, wgpu::CompilationMessageType::Error);
     result->InjectCompilationMessages(std::move(compilationMessages));
-    EmitCompilationLog(result.Get());
+    auto log = GetCompilationLog(result.Get());
 
-    std::unique_ptr<ErrorData> errorData =
-        DAWN_VALIDATION_ERROR("Error in calling %s.CreateShaderModule(%s).", this, descriptor);
+    std::unique_ptr<ErrorData> errorData = DAWN_VALIDATION_ERROR(
+        "Error in calling %s.CreateShaderModule(%s).\n%s", this, descriptor, log);
     ConsumeError(std::move(errorData));
 
     return ReturnToAPI(std::move(result));
@@ -1688,11 +1708,6 @@ void DeviceBase::EmitWarningOnce(std::string_view message) {
 }
 
 void DeviceBase::EmitCompilationLog(const ShaderModuleBase* module) {
-    const OwnedCompilationMessages* messages = module->GetCompilationMessages();
-    if (!messages->HasWarningsOrErrors()) {
-        return;
-    }
-
     // Limit the number of compilation error emitted to avoid spamming the devtools console hard.
     constexpr uint32_t kCompilationLogSpamLimit = 20;
     if (mEmittedCompilationLogCount.load(std::memory_order_acquire) > kCompilationLogSpamLimit) {
@@ -1704,19 +1719,15 @@ void DeviceBase::EmitCompilationLog(const ShaderModuleBase* module) {
         // Note: if there are multiple threads emitting logs, this may not actually be the exact
         // last message. This is probably not a huge problem since this message will be emitted
         // somewhere near the end.
-        return EmitLog(WGPULoggingType_Warning,
-                       "Reached the WGSL compilation log warning limit. To see all the compilation "
-                       "logs, query them directly on the ShaderModule objects.");
+        EmitLog(WGPULoggingType_Warning,
+                "Reached the WGSL compilation log warning limit. To see all the compilation "
+                "logs, query them directly on the ShaderModule objects.");
     }
 
-    // Emit the formatted Tint errors and warnings.
-    std::ostringstream t;
-    t << absl::StrFormat("Compilation log for %s:", module);
-    for (const auto& pMessage : messages->GetFormattedTintMessages()) {
-        t << "\n" << pMessage;
+    auto msg = GetCompilationLog(module);
+    if (!msg.empty()) {
+        EmitLog(WGPULoggingType_Warning, msg.c_str());
     }
-
-    EmitLog(WGPULoggingType_Warning, t.str().c_str());
 }
 
 void DeviceBase::EmitLog(std::string_view message) {
