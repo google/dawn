@@ -69,6 +69,8 @@ libtint_source_set("ir") {
     "const_param_validator.h",
     "constant.cc",
     "constant.h",
+    "constexpr_if.cc",
+    "constexpr_if.h",
     "construct.cc",
     "construct.h",
     "continue.cc",

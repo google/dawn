@@ -407,14 +407,6 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
             transformInputs.Add<tint::ast::transform::SingleEntryPoint::Config>(
                 std::string(r.entryPointName));
 
-            if (r.substituteOverrideConfig) {
-                // This needs to run after SingleEntryPoint transform which removes unused overrides
-                // for current entry point.
-                transformManager.Add<tint::ast::transform::SubstituteOverride>();
-                transformInputs.Add<tint::ast::transform::SubstituteOverride::Config>(
-                    std::move(r.substituteOverrideConfig).value());
-            }
-
             tint::Program program;
             tint::ast::transform::DataMap transformOutputs;
             {
@@ -430,6 +422,18 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
             auto ir = tint::wgsl::reader::ProgramToLoweredIR(program);
             DAWN_INVALID_IF(ir != tint::Success, "An error occurred while generating Tint IR\n%s",
                             ir.Failure().reason.Str());
+
+            if (r.substituteOverrideConfig) {
+                // this needs to run after SingleEntryPoint transform which removes unused overrides
+                // for the current entry point.
+                tint::core::ir::transform::SubstituteOverridesConfig cfg;
+                cfg.map = r.substituteOverrideConfig->map;
+                auto substituteOverridesResult =
+                    tint::core::ir::transform::SubstituteOverrides(ir.Get(), cfg);
+                DAWN_INVALID_IF(substituteOverridesResult != tint::Success,
+                                "Pipeline override substitution (IR) failed:\n%s",
+                                substituteOverridesResult.Failure().reason.Str());
+            }
 
             // Generate SPIR-V from Tint IR.
             auto tintResult = tint::spirv::writer::Generate(ir.Get(), r.tintOptions);

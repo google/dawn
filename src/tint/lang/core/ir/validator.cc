@@ -41,6 +41,7 @@
 #include "src/tint/lang/core/ir/block_param.h"
 #include "src/tint/lang/core/ir/break_if.h"
 #include "src/tint/lang/core/ir/constant.h"
+#include "src/tint/lang/core/ir/constexpr_if.h"
 #include "src/tint/lang/core/ir/construct.h"
 #include "src/tint/lang/core/ir/continue.h"
 #include "src/tint/lang/core/ir/control_instruction.h"
@@ -1941,7 +1942,8 @@ void Validator::CheckRootBlock(const Block* blk) {
                 }
             },
             [&](const core::ir::Construct* c) {
-                if (capabilities_.Contains(Capability::kAllowModuleScopeLets)) {
+                if (capabilities_.Contains(Capability::kAllowModuleScopeLets) ||
+                    capabilities_.Contains(Capability::kAllowOverrides)) {
                     CheckInstruction(c);
                     CheckOnlyUsedInRootBlock(inst);
                 } else {
@@ -1955,9 +1957,9 @@ void Validator::CheckRootBlock(const Block* blk) {
                 // require walking up the tree to make sure that operands are const/override and
                 // builtins are allowed.
                 if (capabilities_.Contains(Capability::kAllowOverrides) &&
-                    inst->IsAnyOf<core::ir::Unary, core::ir::Binary, core::ir::CoreBuiltinCall,
+                    inst->IsAnyOf<core::ir::Unary, core::ir::Binary, core::ir::BuiltinCall,
                                   core::ir::Convert, core::ir::Swizzle, core::ir::Access,
-                                  core::ir::Bitcast>()) {
+                                  core::ir::Bitcast, core::ir::ConstExprIf>()) {
                     CheckInstruction(inst);
                     // If overrides are allowed we can have certain regular instructions in the root
                     // block, with the caveat that those instructions can _only_ be used in the root
@@ -1968,6 +1970,8 @@ void Validator::CheckRootBlock(const Block* blk) {
                 }
             });
     }
+    // Our ConstExprIfs in the root require us to process tasks here.
+    ProcessTasks();
 }
 
 void Validator::CheckOnlyUsedInRootBlock(const Instruction* inst) {

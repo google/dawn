@@ -41,6 +41,7 @@
 #include "src/tint/lang/core/ir/block_param.h"
 #include "src/tint/lang/core/ir/break_if.h"
 #include "src/tint/lang/core/ir/builtin_call.h"
+#include "src/tint/lang/core/ir/constexpr_if.h"
 #include "src/tint/lang/core/ir/continue.h"
 #include "src/tint/lang/core/ir/discard.h"
 #include "src/tint/lang/core/ir/exit_if.h"
@@ -692,7 +693,9 @@ void Disassembler::EmitIf(const If* if_) {
         }
         out_ << " = ";
     }
-    out_ << StyleInstruction("if") << " ";
+
+    out_ << StyleInstruction(if_->FriendlyName()) << " ";
+
     EmitOperand(if_, If::kConditionOperandOffset);
 
     bool has_false = if_->False() != nullptr && !if_->False()->IsEmpty();
@@ -1066,7 +1069,8 @@ StyledText Disassembler::NameOf(const If* inst) {
         return StyledText{} << StyleError("undef");
     }
 
-    auto name = if_names_.GetOrAdd(inst, [&] { return "if_" + std::to_string(if_names_.Count()); });
+    auto name = if_names_.GetOrAdd(
+        inst, [&] { return inst->FriendlyName() + "_" + std::to_string(if_names_.Count()); });
     return StyledText{} << StyleInstruction(name);
 }
 

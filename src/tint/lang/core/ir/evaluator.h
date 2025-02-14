@@ -31,9 +31,11 @@
 #include "src/tint/lang/core/constant/eval.h"
 #include "src/tint/lang/core/intrinsic/table.h"
 #include "src/tint/lang/core/ir/builder.h"
+#include "src/tint/lang/core/ir/constexpr_if.h"
 #include "src/tint/lang/core/ir/convert.h"
 #include "src/tint/lang/core/ir/core_binary.h"
 #include "src/tint/lang/core/ir/core_unary.h"
+#include "src/tint/lang/core/ir/override.h"
 #include "src/tint/lang/core/ir/swizzle.h"
 #include "src/tint/lang/core/ir/value.h"
 
@@ -65,9 +67,11 @@ class Evaluator {
     EvalResult EvalConvert(core::ir::Convert* c);
     EvalResult EvalConstruct(core::ir::Construct* c);
     EvalResult EvalSwizzle(core::ir::Swizzle* s);
+    EvalResult EvalOverride(core::ir::Override* o);
     EvalResult EvalUnary(core::ir::CoreUnary* u);
     EvalResult EvalBinary(core::ir::CoreBinary* cb);
     EvalResult EvalCoreBuiltinCall(core::ir::CoreBuiltinCall* c);
+    EvalResult EvalConstExprIf(core::ir::ConstExprIf* c);
 
     ir::Builder& b_;
     diag::List diagnostics_;
