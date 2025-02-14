@@ -59,7 +59,6 @@ TEST_F(SpirvWriter_ShaderIOTest, NoInputsOrOutputs) {
 
     core::ir::transform::PushConstantLayout push_constants;
     ShaderIOConfig config{push_constants};
-    config.clamp_frag_depth = false;
     Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
@@ -141,7 +140,6 @@ $B1: {  # root
 
     core::ir::transform::PushConstantLayout push_constants;
     ShaderIOConfig config{push_constants};
-    config.clamp_frag_depth = false;
     Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
@@ -294,7 +292,6 @@ $B1: {  # root
 
     core::ir::transform::PushConstantLayout push_constants;
     ShaderIOConfig config{push_constants};
-    config.clamp_frag_depth = false;
     Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
@@ -417,7 +414,6 @@ $B1: {  # root
 
     core::ir::transform::PushConstantLayout push_constants;
     ShaderIOConfig config{push_constants};
-    config.clamp_frag_depth = false;
     Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
@@ -465,7 +461,6 @@ $B1: {  # root
 
     core::ir::transform::PushConstantLayout push_constants;
     ShaderIOConfig config{push_constants};
-    config.clamp_frag_depth = false;
     Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
@@ -512,7 +507,6 @@ $B1: {  # root
 
     core::ir::transform::PushConstantLayout push_constants;
     ShaderIOConfig config{push_constants};
-    config.clamp_frag_depth = false;
     Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
@@ -623,7 +617,6 @@ $B1: {  # root
 
     core::ir::transform::PushConstantLayout push_constants;
     ShaderIOConfig config{push_constants};
-    config.clamp_frag_depth = false;
     Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
@@ -711,7 +704,6 @@ $B1: {  # root
 
     core::ir::transform::PushConstantLayout push_constants;
     ShaderIOConfig config{push_constants};
-    config.clamp_frag_depth = false;
     Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
@@ -853,7 +845,6 @@ $B1: {  # root
 
     core::ir::transform::PushConstantLayout push_constants;
     ShaderIOConfig config{push_constants};
-    config.clamp_frag_depth = false;
     Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
@@ -951,7 +942,6 @@ $B1: {  # root
 
     core::ir::transform::PushConstantLayout push_constants;
     ShaderIOConfig config{push_constants};
-    config.clamp_frag_depth = false;
     Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
@@ -1048,7 +1038,6 @@ $B1: {  # root
 
     core::ir::transform::PushConstantLayout push_constants;
     ShaderIOConfig config{push_constants};
-    config.clamp_frag_depth = false;
     Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
@@ -1200,269 +1189,12 @@ $B1: {  # root
 
     core::ir::transform::PushConstantLayout push_constants;
     ShaderIOConfig config{push_constants};
-    config.clamp_frag_depth = false;
     Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
 }
 
 TEST_F(SpirvWriter_ShaderIOTest, ClampFragDepth) {
-    auto* str_ty = ty.Struct(mod.symbols.New("Outputs"),
-                             {
-                                 {
-                                     mod.symbols.New("color"),
-                                     ty.f32(),
-                                     core::IOAttributes{
-                                         /* location */ 0u,
-                                         /* blend_src */ std::nullopt,
-                                         /* color */ std::nullopt,
-                                         /* builtin */ std::nullopt,
-                                         /* interpolation */ std::nullopt,
-                                         /* invariant */ false,
-                                     },
-                                 },
-                                 {
-                                     mod.symbols.New("depth"),
-                                     ty.f32(),
-                                     core::IOAttributes{
-                                         /* location */ std::nullopt,
-                                         /* blend_src */ std::nullopt,
-                                         /* color */ std::nullopt,
-                                         /* builtin */ core::BuiltinValue::kFragDepth,
-                                         /* interpolation */ std::nullopt,
-                                         /* invariant */ false,
-                                     },
-                                 },
-                             });
-
-    auto* ep = b.Function("foo", str_ty);
-    ep->SetStage(core::ir::Function::PipelineStage::kFragment);
-
-    b.Append(ep->Block(), [&] {  //
-        b.Return(ep, b.Construct(str_ty, 0.5_f, 2_f));
-    });
-
-    auto* src = R"(
-Outputs = struct @align(4) {
-  color:f32 @offset(0), @location(0)
-  depth:f32 @offset(4), @builtin(frag_depth)
-}
-
-%foo = @fragment func():Outputs {
-  $B1: {
-    %2:Outputs = construct 0.5f, 2.0f
-    ret %2
-  }
-}
-)";
-    EXPECT_EQ(src, str());
-
-    auto* expect = R"(
-Outputs = struct @align(4) {
-  color:f32 @offset(0)
-  depth:f32 @offset(4)
-}
-
-FragDepthClampArgs = struct @align(4), @block {
-  min:f32 @offset(0)
-  max:f32 @offset(4)
-}
-
-$B1: {  # root
-  %foo_loc0_Output:ptr<__out, f32, write> = var @location(0)
-  %foo_frag_depth_Output:ptr<__out, f32, write> = var @builtin(frag_depth)
-  %tint_frag_depth_clamp_args:ptr<push_constant, FragDepthClampArgs, read> = var
-}
-
-%foo_inner = func():Outputs {
-  $B2: {
-    %5:Outputs = construct 0.5f, 2.0f
-    ret %5
-  }
-}
-%foo = @fragment func():void {
-  $B3: {
-    %7:Outputs = call %foo_inner
-    %8:f32 = access %7, 0u
-    store %foo_loc0_Output, %8
-    %9:f32 = access %7, 1u
-    %10:FragDepthClampArgs = load %tint_frag_depth_clamp_args
-    %11:f32 = access %10, 0u
-    %12:f32 = access %10, 1u
-    %13:f32 = clamp %9, %11, %12
-    store %foo_frag_depth_Output, %13
-    ret
-  }
-}
-)";
-
-    core::ir::transform::PushConstantLayout push_constants;
-    ShaderIOConfig config{push_constants};
-    config.clamp_frag_depth = true;
-    Run(ShaderIO, config);
-
-    EXPECT_EQ(expect, str());
-}
-
-TEST_F(SpirvWriter_ShaderIOTest, ClampFragDepth_MultipleFragmentShaders) {
-    auto* str_ty = ty.Struct(mod.symbols.New("Outputs"),
-                             {
-                                 {
-                                     mod.symbols.New("color"),
-                                     ty.f32(),
-                                     core::IOAttributes{
-                                         /* location */ 0u,
-                                         /* blend_src */ std::nullopt,
-                                         /* color */ std::nullopt,
-                                         /* builtin */ std::nullopt,
-                                         /* interpolation */ std::nullopt,
-                                         /* invariant */ false,
-                                     },
-                                 },
-                                 {
-                                     mod.symbols.New("depth"),
-                                     ty.f32(),
-                                     core::IOAttributes{
-                                         /* location */ std::nullopt,
-                                         /* blend_src */ std::nullopt,
-                                         /* color */ std::nullopt,
-                                         /* builtin */ core::BuiltinValue::kFragDepth,
-                                         /* interpolation */ std::nullopt,
-                                         /* invariant */ false,
-                                     },
-                                 },
-                             });
-
-    auto make_entry_point = [&](std::string_view name) {
-        auto* ep = b.Function(name, str_ty);
-        ep->SetStage(core::ir::Function::PipelineStage::kFragment);
-        b.Append(ep->Block(), [&] {  //
-            b.Return(ep, b.Construct(str_ty, 0.5_f, 2_f));
-        });
-    };
-    make_entry_point("ep1");
-    make_entry_point("ep2");
-    make_entry_point("ep3");
-
-    auto* src = R"(
-Outputs = struct @align(4) {
-  color:f32 @offset(0), @location(0)
-  depth:f32 @offset(4), @builtin(frag_depth)
-}
-
-%ep1 = @fragment func():Outputs {
-  $B1: {
-    %2:Outputs = construct 0.5f, 2.0f
-    ret %2
-  }
-}
-%ep2 = @fragment func():Outputs {
-  $B2: {
-    %4:Outputs = construct 0.5f, 2.0f
-    ret %4
-  }
-}
-%ep3 = @fragment func():Outputs {
-  $B3: {
-    %6:Outputs = construct 0.5f, 2.0f
-    ret %6
-  }
-}
-)";
-    EXPECT_EQ(src, str());
-
-    auto* expect = R"(
-Outputs = struct @align(4) {
-  color:f32 @offset(0)
-  depth:f32 @offset(4)
-}
-
-FragDepthClampArgs = struct @align(4), @block {
-  min:f32 @offset(0)
-  max:f32 @offset(4)
-}
-
-$B1: {  # root
-  %ep1_loc0_Output:ptr<__out, f32, write> = var @location(0)
-  %ep1_frag_depth_Output:ptr<__out, f32, write> = var @builtin(frag_depth)
-  %tint_frag_depth_clamp_args:ptr<push_constant, FragDepthClampArgs, read> = var
-  %ep2_loc0_Output:ptr<__out, f32, write> = var @location(0)
-  %ep2_frag_depth_Output:ptr<__out, f32, write> = var @builtin(frag_depth)
-  %ep3_loc0_Output:ptr<__out, f32, write> = var @location(0)
-  %ep3_frag_depth_Output:ptr<__out, f32, write> = var @builtin(frag_depth)
-}
-
-%ep1_inner = func():Outputs {
-  $B2: {
-    %9:Outputs = construct 0.5f, 2.0f
-    ret %9
-  }
-}
-%ep2_inner = func():Outputs {
-  $B3: {
-    %11:Outputs = construct 0.5f, 2.0f
-    ret %11
-  }
-}
-%ep3_inner = func():Outputs {
-  $B4: {
-    %13:Outputs = construct 0.5f, 2.0f
-    ret %13
-  }
-}
-%ep1 = @fragment func():void {
-  $B5: {
-    %15:Outputs = call %ep1_inner
-    %16:f32 = access %15, 0u
-    store %ep1_loc0_Output, %16
-    %17:f32 = access %15, 1u
-    %18:FragDepthClampArgs = load %tint_frag_depth_clamp_args
-    %19:f32 = access %18, 0u
-    %20:f32 = access %18, 1u
-    %21:f32 = clamp %17, %19, %20
-    store %ep1_frag_depth_Output, %21
-    ret
-  }
-}
-%ep2 = @fragment func():void {
-  $B6: {
-    %23:Outputs = call %ep2_inner
-    %24:f32 = access %23, 0u
-    store %ep2_loc0_Output, %24
-    %25:f32 = access %23, 1u
-    %26:FragDepthClampArgs = load %tint_frag_depth_clamp_args
-    %27:f32 = access %26, 0u
-    %28:f32 = access %26, 1u
-    %29:f32 = clamp %25, %27, %28
-    store %ep2_frag_depth_Output, %29
-    ret
-  }
-}
-%ep3 = @fragment func():void {
-  $B7: {
-    %31:Outputs = call %ep3_inner
-    %32:f32 = access %31, 0u
-    store %ep3_loc0_Output, %32
-    %33:f32 = access %31, 1u
-    %34:FragDepthClampArgs = load %tint_frag_depth_clamp_args
-    %35:f32 = access %34, 0u
-    %36:f32 = access %34, 1u
-    %37:f32 = clamp %33, %35, %36
-    store %ep3_frag_depth_Output, %37
-    ret
-  }
-}
-)";
-
-    core::ir::transform::PushConstantLayout push_constants;
-    ShaderIOConfig config{push_constants};
-    config.clamp_frag_depth = true;
-    Run(ShaderIO, config);
-
-    EXPECT_EQ(expect, str());
-}
-
-TEST_F(SpirvWriter_ShaderIOTest, ClampFragDepth_With_Prepared_Push_Constants) {
     auto* str_ty = ty.Struct(mod.symbols.New("Outputs"),
                              {
                                  {
@@ -1566,8 +1298,7 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvWriter_ShaderIOTest,
-       ClampFragDepth_With_Prepared_Push_Constants_MultipleFragmentShaders) {
+TEST_F(SpirvWriter_ShaderIOTest, ClampFragDepth_MultipleFragmentShaders) {
     auto* str_ty = ty.Struct(mod.symbols.New("Outputs"),
                              {
                                  {

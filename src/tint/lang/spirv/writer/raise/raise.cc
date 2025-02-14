@@ -173,9 +173,8 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     RUN_TRANSFORM(raise::RemoveUnreachableInLoopContinuing, module);
     RUN_TRANSFORM(
         raise::ShaderIO, module,
-        raise::ShaderIOConfig{push_constant_layout.Get(), options.clamp_frag_depth,
-                              options.emit_vertex_point_size, !options.use_storage_input_output_16,
-                              options.depth_range_offsets});
+        raise::ShaderIOConfig{push_constant_layout.Get(), options.emit_vertex_point_size,
+                              !options.use_storage_input_output_16, options.depth_range_offsets});
     RUN_TRANSFORM(core::ir::transform::Std140, module);
     RUN_TRANSFORM(raise::VarForDynamicIndex, module);
 
