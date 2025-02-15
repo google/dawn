@@ -186,7 +186,7 @@ static constexpr std::array<DeviceExtInfo, kDeviceExtCount> sDeviceExtInfos{{
     {DeviceExt::QueueFamilyForeign, "VK_EXT_queue_family_foreign", NeverPromoted},
     {DeviceExt::Robustness2, "VK_EXT_robustness2", NeverPromoted},
     {DeviceExt::DisplayTiming, "VK_GOOGLE_display_timing", NeverPromoted},
-    {DeviceExt::DisplayTiming, "VK_KHR_cooperative_matrix", NeverPromoted},
+    {DeviceExt::CooperativeMatrix, "VK_KHR_cooperative_matrix", NeverPromoted},
 
     {DeviceExt::ExternalMemoryAndroidHardwareBuffer,
      "VK_ANDROID_external_memory_android_hardware_buffer", NeverPromoted},
