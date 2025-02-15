@@ -111,7 +111,7 @@ TEST_F(SpirvParserTest, Name_Duplicate) {
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %vanilla:i32 = let 1i
-    %vanilla_1:i32 = let 2i
+    %vanilla_1:i32 = let 2i  # %vanilla_1: 'vanilla'
     ret
   }
 }
@@ -151,6 +151,55 @@ Desert = struct @align(4) {
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:Desert = let Desert(1i)
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, Name_DuplicateStructNames) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %S "Desert"
+               OpName %D "Desert"
+       %void = OpTypeVoid
+        %i32 = OpTypeInt 32 1
+        %f32 = OpTypeFloat 32
+          %S = OpTypeStruct %i32 %i32 %i32
+          %D = OpTypeStruct %i32 %i32 %f32
+        %one = OpConstant %i32 1
+        %two = OpConstant %f32 2
+          %s = OpConstantComposite %S %one %one %one
+          %d = OpConstantComposite %D %one %one %two
+    %ep_type = OpTypeFunction %void
+
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+          %2 = OpCopyObject %S %s
+          %3 = OpCopyObject %D %d
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+Desert = struct @align(4) {
+  tint_symbol:i32 @offset(0)
+  tint_symbol_1:i32 @offset(4)
+  tint_symbol_2:i32 @offset(8)
+}
+
+Desert_1 = struct @align(4) {
+  tint_symbol_3:i32 @offset(0)
+  tint_symbol_4:i32 @offset(4)
+  tint_symbol_5:f32 @offset(8)
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:Desert = let Desert(1i)
+    %3:Desert_1 = let Desert_1(1i, 1i, 2.0f)
     ret
   }
 }
