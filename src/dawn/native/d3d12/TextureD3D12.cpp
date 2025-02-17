@@ -323,32 +323,6 @@ void Texture::DestroyImpl() {
     mSwapChainTexture = false;
 }
 
-ResultOrError<ExecutionSerial> Texture::EndAccess() {
-    DAWN_ASSERT(mD3D12ResourceFlags & D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS);
-
-    NotifySwapChainPresentToPIX();
-
-    // Synchronize if texture access wasn't synchronized already due to ExecuteCommandLists. If
-    // there were pending commands that used this texture mLastSharedTextureMemoryUsageSerial will
-    // be set, but if it's still not set, generate a signal fence after waiting on wait fences.
-    Queue* queue = ToBackend(GetDevice()->GetQueue());
-    if (mLastSharedTextureMemoryUsageSerial == kBeginningOfGPUTime) {
-        // Even though we aren't recording any commands here, asking for a command context ensures
-        // that the device fence is signaled eventually even if no commands were recorded before
-        // EndAccess. This is a little sub-optimal, but shouldn't occur often in practice.
-        CommandRecordingContext* context =
-            queue->GetPendingCommandContext(ExecutionQueueBase::SubmitMode::Passive);
-        DAWN_TRY(SynchronizeTextureBeforeUse(context));
-        DAWN_ASSERT(mLastSharedTextureMemoryUsageSerial != kBeginningOfGPUTime);
-    }
-    // Make the queue signal the fence in finite time.
-    DAWN_TRY(queue->EnsureCommandsFlushed(mLastSharedTextureMemoryUsageSerial));
-
-    ExecutionSerial ret = mLastSharedTextureMemoryUsageSerial;
-    mLastSharedTextureMemoryUsageSerial = kBeginningOfGPUTime;
-    return ret;
-}
-
 DXGI_FORMAT Texture::GetD3D12Format() const {
     return d3d::DXGITextureFormat(GetDevice(), GetFormat().format);
 }

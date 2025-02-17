@@ -475,8 +475,6 @@ source_set("sources") {
       "d3d/SharedTextureMemoryD3D.h",
       "d3d/SwapChainD3D.cpp",
       "d3d/SwapChainD3D.h",
-      "d3d/TextureD3D.cpp",
-      "d3d/TextureD3D.h",
       "d3d/UtilsD3D.cpp",
       "d3d/UtilsD3D.h",
       "d3d/d3d_platform.h",

@@ -1074,18 +1074,6 @@ MaybeError Texture::CopyInternal(const ScopedCommandRecordingContext* commandCon
     return {};
 }
 
-ResultOrError<ExecutionSerial> Texture::EndAccess() {
-    // TODO(dawn:1705): submit pending commands if deferred context is used.
-    if (mLastSharedTextureMemoryUsageSerial != kBeginningOfGPUTime) {
-        // Make the queue signal the fence in finite time.
-        DAWN_TRY(
-            GetDevice()->GetQueue()->EnsureCommandsFlushed(mLastSharedTextureMemoryUsageSerial));
-    }
-    ExecutionSerial ret = mLastSharedTextureMemoryUsageSerial;
-    mLastSharedTextureMemoryUsageSerial = kBeginningOfGPUTime;
-    return ret;
-}
-
 ResultOrError<ComPtr<ID3D11ShaderResourceView>> Texture::GetStencilSRV(
     const ScopedCommandRecordingContext* commandContext,
     const TextureView* view) {
