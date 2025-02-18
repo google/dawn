@@ -148,5 +148,64 @@ TEST_F(SpirvParserTest, ConvertFToS_VectorUnsigned) {
 )");
 }
 
+TEST_F(SpirvParserTest, ConvertFToU_ScalarUnsigned) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %uint = OpTypeInt 32 0
+      %float = OpTypeFloat 32
+        %two = OpConstant %float 2
+    %void_fn = OpTypeFunction %void
+
+       %main = OpFunction %void None %void_fn
+ %main_start = OpLabel
+               %1 = OpConvertFToU %uint %two
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = convert 2.0f
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, ConvertFToU_VectorUnsigned) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %uint = OpTypeInt 32 0
+     %v2uint = OpTypeVector %uint 2
+      %float = OpTypeFloat 32
+    %v2float = OpTypeVector %float 2
+        %two = OpConstant %float 2
+     %v2_two = OpConstantComposite %v2float %two %two
+    %void_fn = OpTypeFunction %void
+
+       %main = OpFunction %void None %void_fn
+ %main_start = OpLabel
+               %1 = OpConvertFToU %v2uint %v2_two
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<u32> = convert vec2<f32>(2.0f)
+    ret
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader
