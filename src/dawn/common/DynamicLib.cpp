@@ -90,7 +90,12 @@ void DynamicLib::Close() {
     }
 
 #if DAWN_PLATFORM_IS(WINDOWS)
+#if !DAWN_ASAN_ENABLED()
+    // Freeing and reloading a DLL on Windows causes ASAN to detect ODR violations.
+    // https://github.com/google/sanitizers/issues/89
+    // In ASAN builds, we have to leak the DLL instead in case it gets loaded again later.
     FreeLibrary(static_cast<HMODULE>(mHandle));
+#endif
 #elif DAWN_PLATFORM_IS(POSIX)
     dlclose(mHandle);
 #else
