@@ -445,6 +445,10 @@ class DeviceBase : public ErrorSink, public RefCountedWithExternalCount<RefCount
     Ref<DeviceLostEvent> mLostEvent = nullptr;
     Future mLostFuture = {kNullFutureID};
 
+    // Returns a pair of a filename and a boolean indicating whether to start tracing
+    // and if so, what filename to save the trace under.
+    std::pair<std::string, bool> GetTraceInfo();
+
   private:
     void WillDropLastExternalRef() override;
 
