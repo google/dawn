@@ -552,8 +552,8 @@ struct Encoder {
     //        subgroup_matrix_out.set_rows(subgroup_matrix_in->Rows());
     //    }
 
-    void TypeBuitinStruct(pb::Type& builtin_struct_out,
-                          const core::type::Struct* builtin_struct_in) {
+    [[maybe_unused]] void TypeBuitinStruct(pb::Type& builtin_struct_out,
+                                           const core::type::Struct* builtin_struct_in) {
         auto name = builtin_struct_in->Name().NameView();
         auto builtin = ParseBuiltinType(name);
         switch (builtin) {
