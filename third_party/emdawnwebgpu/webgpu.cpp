@@ -642,6 +642,7 @@ struct WGPUBufferImpl final : public EventSource,
                               public RefCountedWithExternalCount {
  public:
   WGPUBufferImpl(const EventSource* source, bool mappedAtCreation);
+  ~WGPUBufferImpl();
 
   void Destroy();
   const void* GetConstMappedRange(size_t offset, size_t size);
@@ -1282,6 +1283,10 @@ WGPUBufferImpl::WGPUBufferImpl(const EventSource* source, bool mappedAtCreation)
   if (mappedAtCreation) {
     mPendingMapRequest = {kNullFutureId, WGPUMapMode_Write};
   }
+}
+
+WGPUBufferImpl::~WGPUBufferImpl() {
+  Destroy();
 }
 
 void WGPUBufferImpl::Destroy() {
