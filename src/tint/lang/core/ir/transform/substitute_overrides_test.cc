@@ -364,7 +364,7 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     SubstituteOverridesConfig cfg{};
-    cfg.map[OverrideId{2}] = -133.0;
+    cfg.map[OverrideId{2}] = 125.0;
     auto result = RunWithFailure(SubstituteOverrides, cfg);
     ASSERT_NE(result, Success);
     EXPECT_EQ(result.Failure().reason.Str(),
