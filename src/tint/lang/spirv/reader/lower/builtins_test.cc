@@ -5089,5 +5089,131 @@ INSTANTIATE_TEST_SUITE_P(SpirvReader,
                                          SignedBinaryCase{spirv::BuiltinFn::kSMod, "s_mod",
                                                           "mod"}));
 
+TEST_F(SpirvParser_BuiltinsTest, ConvertFToS_ScalarSigned) {
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kConvertFToS,
+                                               Vector{ty.i32()}, 10_f);
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = spirv.convertFToS<i32> 10.0f
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto* expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = convert 10.0f
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvParser_BuiltinsTest, ConvertFToS_ScalarUnsigned) {
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kConvertFToS,
+                                               Vector{ty.u32()}, 10_f);
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = spirv.convertFToS<u32> 10.0f
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto* expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = convert 10.0f
+    %3:u32 = bitcast %2
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvParser_BuiltinsTest, ConvertFToS_VectorSigned) {
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2<i32>(), spirv::BuiltinFn::kConvertFToS,
+                                               Vector{ty.i32()}, b.Splat<vec2<f32>>(10_f));
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<i32> = spirv.convertFToS<i32> vec2<f32>(10.0f)
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto* expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<i32> = convert vec2<f32>(10.0f)
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvParser_BuiltinsTest, ConvertFToS_VectorUnsigned) {
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2<u32>(), spirv::BuiltinFn::kConvertFToS,
+                                               Vector{ty.u32()}, b.Splat<vec2<f32>>(10_f));
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<u32> = spirv.convertFToS<u32> vec2<f32>(10.0f)
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto* expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<i32> = convert vec2<f32>(10.0f)
+    %3:vec2<u32> = bitcast %2
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader::lower

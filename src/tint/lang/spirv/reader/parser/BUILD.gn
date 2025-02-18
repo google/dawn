@@ -94,6 +94,7 @@ if (tint_build_unittests) {
         "builtin_test.cc",
         "composite_test.cc",
         "constant_test.cc",
+        "convert_test.cc",
         "function_test.cc",
         "helper_test.h",
         "import_glsl_std450_test.cc",

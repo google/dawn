@@ -146,10 +146,27 @@ struct State {
                 case spirv::BuiltinFn::kSMod:
                     SMod(builtin);
                     break;
+                case spirv::BuiltinFn::kConvertFToS:
+                    ConvertFToS(builtin);
+                    break;
                 default:
                     TINT_UNREACHABLE() << "unknown spirv builtin: " << builtin->Func();
             }
         }
+    }
+
+    void ConvertFToS(spirv::ir::BuiltinCall* call) {
+        b.InsertBefore(call, [&] {
+            auto* res_ty = call->Result(0)->Type();
+            auto deepest = res_ty->DeepestElement();
+
+            auto* res = b.Convert(ty.MatchWidth(ty.i32(), res_ty), call->Args()[0])->Result(0);
+            if (deepest->IsUnsignedIntegerScalar()) {
+                res = b.Bitcast(res_ty, res)->Result(0);
+            }
+            call->Result(0)->ReplaceAllUsesWith(res);
+        });
+        call->Destroy();
     }
 
     void EmitBinaryWrappedAsFirstArg(spirv::ir::BuiltinCall* call, core::BinaryOp op) {

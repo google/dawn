@@ -414,6 +414,9 @@ implicit(A: iu32, B: iu32, N: num) fn mul<R: iu32>(vec<N, A>, vec<N, B>) -> vec<
 implicit(A: iu32, B: iu32, N: num) fn s_div<R: iu32>(vec<N, A>, vec<N, B>) -> vec<N, R>
 implicit(A: iu32, B: iu32, N: num) fn s_mod<R: iu32>(vec<N, A>, vec<N, B>) -> vec<N, R>
 
+implicit(T: f32_f16) fn convertFToS<R: iu32>(T) -> R
+implicit(T: f32_f16, N: num) fn convertFToS<R: iu32>(vec<N, T>) -> vec<N, R>
+
 ////////////////////////////////////////////////////////////////////////////////
 // SPV_KHR_integer_dot_product instructions
 ////////////////////////////////////////////////////////////////////////////////
