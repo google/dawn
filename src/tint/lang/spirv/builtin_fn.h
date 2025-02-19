@@ -113,6 +113,7 @@ enum class BuiltinFn : uint8_t {
     kConvertSToF,
     kConvertUToF,
     kBitwiseAnd,
+    kBitwiseOr,
     kSdot,
     kUdot,
     kCooperativeMatrixLoad,

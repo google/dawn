@@ -38,9 +38,9 @@ namespace {
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
-using SpirvParser_BuiltinsTest = core::ir::transform::TransformTest;
+using SpirvReader_BuiltinsTest = core::ir::transform::TransformTest;
 
-TEST_F(SpirvParser_BuiltinsTest, Normalize_Scalar) {
+TEST_F(SpirvReader_BuiltinsTest, Normalize_Scalar) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -70,7 +70,7 @@ TEST_F(SpirvParser_BuiltinsTest, Normalize_Scalar) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, Normalize_Vector) {
+TEST_F(SpirvReader_BuiltinsTest, Normalize_Vector) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -101,7 +101,7 @@ TEST_F(SpirvParser_BuiltinsTest, Normalize_Vector) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, Inverse_Mat2x2f) {
+TEST_F(SpirvReader_BuiltinsTest, Inverse_Mat2x2f) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -148,7 +148,7 @@ TEST_F(SpirvParser_BuiltinsTest, Inverse_Mat2x2f) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, Inverse_Mat2x2h) {
+TEST_F(SpirvReader_BuiltinsTest, Inverse_Mat2x2h) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -195,7 +195,7 @@ TEST_F(SpirvParser_BuiltinsTest, Inverse_Mat2x2h) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, Inverse_Mat3x3f) {
+TEST_F(SpirvReader_BuiltinsTest, Inverse_Mat3x3f) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -272,7 +272,7 @@ TEST_F(SpirvParser_BuiltinsTest, Inverse_Mat3x3f) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, Inverse_Mat3x3h) {
+TEST_F(SpirvReader_BuiltinsTest, Inverse_Mat3x3h) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -349,7 +349,7 @@ TEST_F(SpirvParser_BuiltinsTest, Inverse_Mat3x3h) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, Inverse_Mat4x4f) {
+TEST_F(SpirvReader_BuiltinsTest, Inverse_Mat4x4f) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -545,7 +545,7 @@ TEST_F(SpirvParser_BuiltinsTest, Inverse_Mat4x4f) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, Inverse_Mat4x4h) {
+TEST_F(SpirvReader_BuiltinsTest, Inverse_Mat4x4h) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -741,7 +741,7 @@ TEST_F(SpirvParser_BuiltinsTest, Inverse_Mat4x4h) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, SSign_Scalar_UnsignedArg) {
+TEST_F(SpirvReader_BuiltinsTest, SSign_Scalar_UnsignedArg) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -774,7 +774,7 @@ TEST_F(SpirvParser_BuiltinsTest, SSign_Scalar_UnsignedArg) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, SSign_Scalar_UnsignedResult) {
+TEST_F(SpirvReader_BuiltinsTest, SSign_Scalar_UnsignedResult) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -807,7 +807,7 @@ TEST_F(SpirvParser_BuiltinsTest, SSign_Scalar_UnsignedResult) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, SSign_Scalar_UnsignedArgAndResult) {
+TEST_F(SpirvReader_BuiltinsTest, SSign_Scalar_UnsignedArgAndResult) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -841,7 +841,7 @@ TEST_F(SpirvParser_BuiltinsTest, SSign_Scalar_UnsignedArgAndResult) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, SSign_Scalar_SignedArgAndResult) {
+TEST_F(SpirvReader_BuiltinsTest, SSign_Scalar_SignedArgAndResult) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -873,7 +873,7 @@ TEST_F(SpirvParser_BuiltinsTest, SSign_Scalar_SignedArgAndResult) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, SSign_Vector_UnsignedArg) {
+TEST_F(SpirvReader_BuiltinsTest, SSign_Vector_UnsignedArg) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -906,7 +906,7 @@ TEST_F(SpirvParser_BuiltinsTest, SSign_Vector_UnsignedArg) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, SSign_Vector_UnsignedResult) {
+TEST_F(SpirvReader_BuiltinsTest, SSign_Vector_UnsignedResult) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -939,7 +939,7 @@ TEST_F(SpirvParser_BuiltinsTest, SSign_Vector_UnsignedResult) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, SSign_Vector_UnsignedArgAndResult) {
+TEST_F(SpirvReader_BuiltinsTest, SSign_Vector_UnsignedArgAndResult) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -973,7 +973,7 @@ TEST_F(SpirvParser_BuiltinsTest, SSign_Vector_UnsignedArgAndResult) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, SSign_Vector_SignedArgAndResult) {
+TEST_F(SpirvReader_BuiltinsTest, SSign_Vector_SignedArgAndResult) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -1015,10 +1015,10 @@ struct SpirvReaderParams {
     return out;
 }
 
-using SpirvParser_BuiltinsTest_OneParamSigned =
+using SpirvReader_BuiltinsTest_OneParamSigned =
     core::ir::transform::TransformTestWithParam<SpirvReaderParams>;
 
-TEST_P(SpirvParser_BuiltinsTest_OneParamSigned, UnsignedToUnsigned) {
+TEST_P(SpirvReader_BuiltinsTest_OneParamSigned, UnsignedToUnsigned) {
     auto params = GetParam();
 
     auto* ep = b.ComputeFunction("foo");
@@ -1065,7 +1065,7 @@ TEST_P(SpirvParser_BuiltinsTest_OneParamSigned, UnsignedToUnsigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_P(SpirvParser_BuiltinsTest_OneParamSigned, UnsignedToSigned) {
+TEST_P(SpirvReader_BuiltinsTest_OneParamSigned, UnsignedToSigned) {
     auto params = GetParam();
 
     auto* ep = b.ComputeFunction("foo");
@@ -1110,7 +1110,7 @@ TEST_P(SpirvParser_BuiltinsTest_OneParamSigned, UnsignedToSigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_P(SpirvParser_BuiltinsTest_OneParamSigned, SignedToSigned) {
+TEST_P(SpirvReader_BuiltinsTest_OneParamSigned, SignedToSigned) {
     auto params = GetParam();
 
     auto* ep = b.ComputeFunction("foo");
@@ -1153,7 +1153,7 @@ TEST_P(SpirvParser_BuiltinsTest_OneParamSigned, SignedToSigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_P(SpirvParser_BuiltinsTest_OneParamSigned, SignedToUnsigned) {
+TEST_P(SpirvReader_BuiltinsTest_OneParamSigned, SignedToUnsigned) {
     auto params = GetParam();
 
     auto* ep = b.ComputeFunction("foo");
@@ -1199,15 +1199,15 @@ TEST_P(SpirvParser_BuiltinsTest_OneParamSigned, SignedToUnsigned) {
 }
 
 INSTANTIATE_TEST_SUITE_P(SpirvReader,
-                         SpirvParser_BuiltinsTest_OneParamSigned,
+                         SpirvReader_BuiltinsTest_OneParamSigned,
                          ::testing::Values(SpirvReaderParams{spirv::BuiltinFn::kAbs, "abs", "abs"},
                                            SpirvReaderParams{spirv::BuiltinFn::kFindSMsb,
                                                              "findSMsb", "firstLeadingBit"}));
 
-using SpirvParser_BuiltinsTest_OneParamUnsigned =
+using SpirvReader_BuiltinsTest_OneParamUnsigned =
     core::ir::transform::TransformTestWithParam<SpirvReaderParams>;
 
-TEST_P(SpirvParser_BuiltinsTest_OneParamUnsigned, UnsignedToUnsigned) {
+TEST_P(SpirvReader_BuiltinsTest_OneParamUnsigned, UnsignedToUnsigned) {
     auto params = GetParam();
 
     auto* ep = b.ComputeFunction("foo");
@@ -1250,7 +1250,7 @@ TEST_P(SpirvParser_BuiltinsTest_OneParamUnsigned, UnsignedToUnsigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_P(SpirvParser_BuiltinsTest_OneParamUnsigned, UnsignedToSigned) {
+TEST_P(SpirvReader_BuiltinsTest_OneParamUnsigned, UnsignedToSigned) {
     auto params = GetParam();
 
     auto* ep = b.ComputeFunction("foo");
@@ -1295,7 +1295,7 @@ TEST_P(SpirvParser_BuiltinsTest_OneParamUnsigned, UnsignedToSigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_P(SpirvParser_BuiltinsTest_OneParamUnsigned, SignedToSigned) {
+TEST_P(SpirvReader_BuiltinsTest_OneParamUnsigned, SignedToSigned) {
     auto params = GetParam();
 
     auto* ep = b.ComputeFunction("foo");
@@ -1342,7 +1342,7 @@ TEST_P(SpirvParser_BuiltinsTest_OneParamUnsigned, SignedToSigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_P(SpirvParser_BuiltinsTest_OneParamUnsigned, SignedToUnsigned) {
+TEST_P(SpirvReader_BuiltinsTest_OneParamUnsigned, SignedToUnsigned) {
     auto params = GetParam();
 
     auto* ep = b.ComputeFunction("foo");
@@ -1388,14 +1388,14 @@ TEST_P(SpirvParser_BuiltinsTest_OneParamUnsigned, SignedToUnsigned) {
 }
 
 INSTANTIATE_TEST_SUITE_P(SpirvReader,
-                         SpirvParser_BuiltinsTest_OneParamUnsigned,
+                         SpirvReader_BuiltinsTest_OneParamUnsigned,
                          ::testing::Values(SpirvReaderParams{spirv::BuiltinFn::kFindUMsb,
                                                              "findUMsb", "firstLeadingBit"}));
 
-using SpirvParser_BuiltinsTest_TwoParamSigned =
+using SpirvReader_BuiltinsTest_TwoParamSigned =
     core::ir::transform::TransformTestWithParam<SpirvReaderParams>;
 
-TEST_P(SpirvParser_BuiltinsTest_TwoParamSigned, UnsignedToUnsigned) {
+TEST_P(SpirvReader_BuiltinsTest_TwoParamSigned, UnsignedToUnsigned) {
     auto& params = GetParam();
 
     auto* ep = b.ComputeFunction("foo");
@@ -1444,7 +1444,7 @@ TEST_P(SpirvParser_BuiltinsTest_TwoParamSigned, UnsignedToUnsigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_P(SpirvParser_BuiltinsTest_TwoParamSigned, SignedToSigned) {
+TEST_P(SpirvReader_BuiltinsTest_TwoParamSigned, SignedToSigned) {
     auto params = GetParam();
 
     auto* ep = b.ComputeFunction("foo");
@@ -1487,7 +1487,7 @@ TEST_P(SpirvParser_BuiltinsTest_TwoParamSigned, SignedToSigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_P(SpirvParser_BuiltinsTest_TwoParamSigned, MixedToUnsigned) {
+TEST_P(SpirvReader_BuiltinsTest_TwoParamSigned, MixedToUnsigned) {
     auto params = GetParam();
 
     auto* ep = b.ComputeFunction("foo");
@@ -1534,7 +1534,7 @@ TEST_P(SpirvParser_BuiltinsTest_TwoParamSigned, MixedToUnsigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_P(SpirvParser_BuiltinsTest_TwoParamSigned, MixedToSigned) {
+TEST_P(SpirvReader_BuiltinsTest_TwoParamSigned, MixedToSigned) {
     auto params = GetParam();
 
     auto* ep = b.ComputeFunction("foo");
@@ -1580,15 +1580,15 @@ TEST_P(SpirvParser_BuiltinsTest_TwoParamSigned, MixedToSigned) {
 }
 
 INSTANTIATE_TEST_SUITE_P(SpirvReader,
-                         SpirvParser_BuiltinsTest_TwoParamSigned,
+                         SpirvReader_BuiltinsTest_TwoParamSigned,
                          ::testing::Values(SpirvReaderParams{spirv::BuiltinFn::kSmax, "max", "max"},
                                            SpirvReaderParams{spirv::BuiltinFn::kSmin, "min",
                                                              "min"}));
 
-using SpirvParser_BuiltinsTest_TwoParamUnsigned =
+using SpirvReader_BuiltinsTest_TwoParamUnsigned =
     core::ir::transform::TransformTestWithParam<SpirvReaderParams>;
 
-TEST_P(SpirvParser_BuiltinsTest_TwoParamUnsigned, UnsignedToUnsigned) {
+TEST_P(SpirvReader_BuiltinsTest_TwoParamUnsigned, UnsignedToUnsigned) {
     auto& params = GetParam();
 
     auto* ep = b.ComputeFunction("foo");
@@ -1631,7 +1631,7 @@ TEST_P(SpirvParser_BuiltinsTest_TwoParamUnsigned, UnsignedToUnsigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_P(SpirvParser_BuiltinsTest_TwoParamUnsigned, SignedToSigned) {
+TEST_P(SpirvReader_BuiltinsTest_TwoParamUnsigned, SignedToSigned) {
     auto params = GetParam();
 
     auto* ep = b.ComputeFunction("foo");
@@ -1680,7 +1680,7 @@ TEST_P(SpirvParser_BuiltinsTest_TwoParamUnsigned, SignedToSigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_P(SpirvParser_BuiltinsTest_TwoParamUnsigned, MixedToUnsigned) {
+TEST_P(SpirvReader_BuiltinsTest_TwoParamUnsigned, MixedToUnsigned) {
     auto params = GetParam();
 
     auto* ep = b.ComputeFunction("foo");
@@ -1725,7 +1725,7 @@ TEST_P(SpirvParser_BuiltinsTest_TwoParamUnsigned, MixedToUnsigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_P(SpirvParser_BuiltinsTest_TwoParamUnsigned, MixedToSigned) {
+TEST_P(SpirvReader_BuiltinsTest_TwoParamUnsigned, MixedToSigned) {
     auto params = GetParam();
 
     auto* ep = b.ComputeFunction("foo");
@@ -1773,12 +1773,12 @@ TEST_P(SpirvParser_BuiltinsTest_TwoParamUnsigned, MixedToSigned) {
 }
 
 INSTANTIATE_TEST_SUITE_P(SpirvReader,
-                         SpirvParser_BuiltinsTest_TwoParamUnsigned,
+                         SpirvReader_BuiltinsTest_TwoParamUnsigned,
                          ::testing::Values(SpirvReaderParams{spirv::BuiltinFn::kUmax, "max", "max"},
                                            SpirvReaderParams{spirv::BuiltinFn::kUmin, "min",
                                                              "min"}));
 
-TEST_F(SpirvParser_BuiltinsTest, SClamp_UnsignedToUnsigned) {
+TEST_F(SpirvReader_BuiltinsTest, SClamp_UnsignedToUnsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -1825,7 +1825,7 @@ TEST_F(SpirvParser_BuiltinsTest, SClamp_UnsignedToUnsigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, SClamp_SignedToSigned) {
+TEST_F(SpirvReader_BuiltinsTest, SClamp_SignedToSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -1864,7 +1864,7 @@ TEST_F(SpirvParser_BuiltinsTest, SClamp_SignedToSigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, SClamp_MixedToUnsigned) {
+TEST_F(SpirvReader_BuiltinsTest, SClamp_MixedToUnsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -1907,7 +1907,7 @@ TEST_F(SpirvParser_BuiltinsTest, SClamp_MixedToUnsigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, SClamp_MixedToSigned) {
+TEST_F(SpirvReader_BuiltinsTest, SClamp_MixedToSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -1950,7 +1950,7 @@ TEST_F(SpirvParser_BuiltinsTest, SClamp_MixedToSigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, UClamp_UnsignedToUnsigned) {
+TEST_F(SpirvReader_BuiltinsTest, UClamp_UnsignedToUnsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -1989,7 +1989,7 @@ TEST_F(SpirvParser_BuiltinsTest, UClamp_UnsignedToUnsigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, UClamp_SignedToSigned) {
+TEST_F(SpirvReader_BuiltinsTest, UClamp_SignedToSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -2036,7 +2036,7 @@ TEST_F(SpirvParser_BuiltinsTest, UClamp_SignedToSigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, UClamp_MixedToUnsigned) {
+TEST_F(SpirvReader_BuiltinsTest, UClamp_MixedToUnsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -2079,7 +2079,7 @@ TEST_F(SpirvParser_BuiltinsTest, UClamp_MixedToUnsigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, UClamp_MixedToSigned) {
+TEST_F(SpirvReader_BuiltinsTest, UClamp_MixedToSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -2122,7 +2122,7 @@ TEST_F(SpirvParser_BuiltinsTest, UClamp_MixedToSigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, FindILsb_SignedToSigned) {
+TEST_F(SpirvReader_BuiltinsTest, FindILsb_SignedToSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -2159,7 +2159,7 @@ TEST_F(SpirvParser_BuiltinsTest, FindILsb_SignedToSigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, FindILsb_UnsignedToUnsigned) {
+TEST_F(SpirvReader_BuiltinsTest, FindILsb_UnsignedToUnsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -2196,7 +2196,7 @@ TEST_F(SpirvParser_BuiltinsTest, FindILsb_UnsignedToUnsigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, FindILsb_SignedToUnsigned) {
+TEST_F(SpirvReader_BuiltinsTest, FindILsb_SignedToUnsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -2235,7 +2235,7 @@ TEST_F(SpirvParser_BuiltinsTest, FindILsb_SignedToUnsigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, FindILsb_UnsignedToSigned) {
+TEST_F(SpirvReader_BuiltinsTest, FindILsb_UnsignedToSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -2274,7 +2274,7 @@ TEST_F(SpirvParser_BuiltinsTest, FindILsb_UnsignedToSigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, Refract_Scalar) {
+TEST_F(SpirvReader_BuiltinsTest, Refract_Scalar) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -2309,7 +2309,7 @@ TEST_F(SpirvParser_BuiltinsTest, Refract_Scalar) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, Refract_Vector) {
+TEST_F(SpirvReader_BuiltinsTest, Refract_Vector) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -2342,7 +2342,7 @@ TEST_F(SpirvParser_BuiltinsTest, Refract_Vector) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, FaceForward_Scalar) {
+TEST_F(SpirvReader_BuiltinsTest, FaceForward_Scalar) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -2377,7 +2377,7 @@ TEST_F(SpirvParser_BuiltinsTest, FaceForward_Scalar) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, FaceForward_Vector) {
+TEST_F(SpirvReader_BuiltinsTest, FaceForward_Vector) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -2410,7 +2410,7 @@ TEST_F(SpirvParser_BuiltinsTest, FaceForward_Vector) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, Reflect_Scalar) {
+TEST_F(SpirvReader_BuiltinsTest, Reflect_Scalar) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -2445,7 +2445,7 @@ TEST_F(SpirvParser_BuiltinsTest, Reflect_Scalar) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, Reflect_Vector) {
+TEST_F(SpirvReader_BuiltinsTest, Reflect_Vector) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -2478,7 +2478,7 @@ TEST_F(SpirvParser_BuiltinsTest, Reflect_Vector) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, Ldexp_ScalarSigned) {
+TEST_F(SpirvReader_BuiltinsTest, Ldexp_ScalarSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -2509,7 +2509,7 @@ TEST_F(SpirvParser_BuiltinsTest, Ldexp_ScalarSigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, Ldexp_ScalarUnsigned) {
+TEST_F(SpirvReader_BuiltinsTest, Ldexp_ScalarUnsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -2541,7 +2541,7 @@ TEST_F(SpirvParser_BuiltinsTest, Ldexp_ScalarUnsigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, Ldexp_VectorUnsigned) {
+TEST_F(SpirvReader_BuiltinsTest, Ldexp_VectorUnsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -2574,7 +2574,7 @@ TEST_F(SpirvParser_BuiltinsTest, Ldexp_VectorUnsigned) {
 )";
     EXPECT_EQ(expect, str());
 }
-TEST_F(SpirvParser_BuiltinsTest, Ldexp_VectorSigned) {
+TEST_F(SpirvReader_BuiltinsTest, Ldexp_VectorSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -2607,7 +2607,7 @@ TEST_F(SpirvParser_BuiltinsTest, Ldexp_VectorSigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, Modf_Scalar) {
+TEST_F(SpirvReader_BuiltinsTest, Modf_Scalar) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -2654,7 +2654,7 @@ __modf_result_f32 = struct @align(4) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, Modf_Vector) {
+TEST_F(SpirvReader_BuiltinsTest, Modf_Vector) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -2702,7 +2702,7 @@ __modf_result_vec2_f32 = struct @align(8) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, Frexp_ScalarSigned) {
+TEST_F(SpirvReader_BuiltinsTest, Frexp_ScalarSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -2749,7 +2749,7 @@ __frexp_result_f32 = struct @align(4) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, Frexp_ScalarUnSigned) {
+TEST_F(SpirvReader_BuiltinsTest, Frexp_ScalarUnSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -2797,7 +2797,7 @@ __frexp_result_f32 = struct @align(4) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, Frexp_VectorSigned) {
+TEST_F(SpirvReader_BuiltinsTest, Frexp_VectorSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -2845,7 +2845,7 @@ __frexp_result_vec2_f32 = struct @align(8) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, Frexp_VectorUnsigned) {
+TEST_F(SpirvReader_BuiltinsTest, Frexp_VectorUnsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -2894,7 +2894,7 @@ __frexp_result_vec2_f32 = struct @align(8) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, BitCount_Scalar_UnsignedToUnsigned) {
+TEST_F(SpirvReader_BuiltinsTest, BitCount_Scalar_UnsignedToUnsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -2926,7 +2926,7 @@ TEST_F(SpirvParser_BuiltinsTest, BitCount_Scalar_UnsignedToUnsigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, BitCount_Scalar_UnsignedToSigned) {
+TEST_F(SpirvReader_BuiltinsTest, BitCount_Scalar_UnsignedToSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -2959,7 +2959,7 @@ TEST_F(SpirvParser_BuiltinsTest, BitCount_Scalar_UnsignedToSigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, BitCount_Scalar_SignedToUnsigned) {
+TEST_F(SpirvReader_BuiltinsTest, BitCount_Scalar_SignedToUnsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -2992,7 +2992,7 @@ TEST_F(SpirvParser_BuiltinsTest, BitCount_Scalar_SignedToUnsigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, BitCount_Scalar_SignedToSigned) {
+TEST_F(SpirvReader_BuiltinsTest, BitCount_Scalar_SignedToSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -3024,7 +3024,7 @@ TEST_F(SpirvParser_BuiltinsTest, BitCount_Scalar_SignedToSigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, BitCount_Vector_UnsignedToUnsigned) {
+TEST_F(SpirvReader_BuiltinsTest, BitCount_Vector_UnsignedToUnsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -3057,7 +3057,7 @@ TEST_F(SpirvParser_BuiltinsTest, BitCount_Vector_UnsignedToUnsigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, BitCount_Vector_UnsignedToSigned) {
+TEST_F(SpirvReader_BuiltinsTest, BitCount_Vector_UnsignedToSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -3091,7 +3091,7 @@ TEST_F(SpirvParser_BuiltinsTest, BitCount_Vector_UnsignedToSigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, BitCount_Vector_SignedToUnsigned) {
+TEST_F(SpirvReader_BuiltinsTest, BitCount_Vector_SignedToUnsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -3125,7 +3125,7 @@ TEST_F(SpirvParser_BuiltinsTest, BitCount_Vector_SignedToUnsigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, BitCount_Vector_SignedToSigned) {
+TEST_F(SpirvReader_BuiltinsTest, BitCount_Vector_SignedToSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -3158,7 +3158,7 @@ TEST_F(SpirvParser_BuiltinsTest, BitCount_Vector_SignedToSigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, BitFieldInsert_Int_UnsignedOffsetAndCount) {
+TEST_F(SpirvReader_BuiltinsTest, BitFieldInsert_Int_UnsignedOffsetAndCount) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -3190,7 +3190,7 @@ TEST_F(SpirvParser_BuiltinsTest, BitFieldInsert_Int_UnsignedOffsetAndCount) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, BitFieldInsert_Int_SignedOffsetAndCount) {
+TEST_F(SpirvReader_BuiltinsTest, BitFieldInsert_Int_SignedOffsetAndCount) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -3224,7 +3224,7 @@ TEST_F(SpirvParser_BuiltinsTest, BitFieldInsert_Int_SignedOffsetAndCount) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, BitFieldInsert_IntVector_UnsignedOffsetAndCount) {
+TEST_F(SpirvReader_BuiltinsTest, BitFieldInsert_IntVector_UnsignedOffsetAndCount) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -3257,7 +3257,7 @@ TEST_F(SpirvParser_BuiltinsTest, BitFieldInsert_IntVector_UnsignedOffsetAndCount
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, BitFieldInsert_IntVector_SignedOffsetAndCount) {
+TEST_F(SpirvReader_BuiltinsTest, BitFieldInsert_IntVector_SignedOffsetAndCount) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -3292,7 +3292,7 @@ TEST_F(SpirvParser_BuiltinsTest, BitFieldInsert_IntVector_SignedOffsetAndCount) 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, BitFieldInsert_Uint_UnsignedOffsetAndCount) {
+TEST_F(SpirvReader_BuiltinsTest, BitFieldInsert_Uint_UnsignedOffsetAndCount) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -3324,7 +3324,7 @@ TEST_F(SpirvParser_BuiltinsTest, BitFieldInsert_Uint_UnsignedOffsetAndCount) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, BitFieldInsert_Uint_SignedOffsetAndCount) {
+TEST_F(SpirvReader_BuiltinsTest, BitFieldInsert_Uint_SignedOffsetAndCount) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -3358,7 +3358,7 @@ TEST_F(SpirvParser_BuiltinsTest, BitFieldInsert_Uint_SignedOffsetAndCount) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, BitFieldInsert_UintVector_UnsignedOffsetAndCount) {
+TEST_F(SpirvReader_BuiltinsTest, BitFieldInsert_UintVector_UnsignedOffsetAndCount) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -3391,7 +3391,7 @@ TEST_F(SpirvParser_BuiltinsTest, BitFieldInsert_UintVector_UnsignedOffsetAndCoun
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, BitFieldInsert_UintVector_SignedOffsetAndCount) {
+TEST_F(SpirvReader_BuiltinsTest, BitFieldInsert_UintVector_SignedOffsetAndCount) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -3426,7 +3426,7 @@ TEST_F(SpirvParser_BuiltinsTest, BitFieldInsert_UintVector_SignedOffsetAndCount)
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, BitFieldInsert_Uint_SignedOffsetAndUnsignedCount) {
+TEST_F(SpirvReader_BuiltinsTest, BitFieldInsert_Uint_SignedOffsetAndUnsignedCount) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -3459,7 +3459,7 @@ TEST_F(SpirvParser_BuiltinsTest, BitFieldInsert_Uint_SignedOffsetAndUnsignedCoun
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, BitFieldSExtract_Int_UnsignedOffsetAndCount) {
+TEST_F(SpirvReader_BuiltinsTest, BitFieldSExtract_Int_UnsignedOffsetAndCount) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -3491,7 +3491,7 @@ TEST_F(SpirvParser_BuiltinsTest, BitFieldSExtract_Int_UnsignedOffsetAndCount) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, BitFieldSExtract_Int_SignedOffsetAndCount) {
+TEST_F(SpirvReader_BuiltinsTest, BitFieldSExtract_Int_SignedOffsetAndCount) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -3525,7 +3525,7 @@ TEST_F(SpirvParser_BuiltinsTest, BitFieldSExtract_Int_SignedOffsetAndCount) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, BitFieldSExtract_IntVector_UnsignedOffsetAndCount) {
+TEST_F(SpirvReader_BuiltinsTest, BitFieldSExtract_IntVector_UnsignedOffsetAndCount) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -3557,7 +3557,7 @@ TEST_F(SpirvParser_BuiltinsTest, BitFieldSExtract_IntVector_UnsignedOffsetAndCou
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, BitFieldSExtract_IntVector_SignedOffsetAndCount) {
+TEST_F(SpirvReader_BuiltinsTest, BitFieldSExtract_IntVector_SignedOffsetAndCount) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -3591,7 +3591,7 @@ TEST_F(SpirvParser_BuiltinsTest, BitFieldSExtract_IntVector_SignedOffsetAndCount
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, BitFieldSExtract_IntVector_SignedOffsetAndUnsignedCount) {
+TEST_F(SpirvReader_BuiltinsTest, BitFieldSExtract_IntVector_SignedOffsetAndUnsignedCount) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -3624,7 +3624,7 @@ TEST_F(SpirvParser_BuiltinsTest, BitFieldSExtract_IntVector_SignedOffsetAndUnsig
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, BitFieldSExtract_Uint_UnsignedOffsetAndCount) {
+TEST_F(SpirvReader_BuiltinsTest, BitFieldSExtract_Uint_UnsignedOffsetAndCount) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -3658,7 +3658,7 @@ TEST_F(SpirvParser_BuiltinsTest, BitFieldSExtract_Uint_UnsignedOffsetAndCount) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, BitFieldSExtract_Uint_SignedOffsetAndCount) {
+TEST_F(SpirvReader_BuiltinsTest, BitFieldSExtract_Uint_SignedOffsetAndCount) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -3694,7 +3694,7 @@ TEST_F(SpirvParser_BuiltinsTest, BitFieldSExtract_Uint_SignedOffsetAndCount) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, BitFieldSExtract_UintVector_UnsignedOffsetAndCount) {
+TEST_F(SpirvReader_BuiltinsTest, BitFieldSExtract_UintVector_UnsignedOffsetAndCount) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -3728,7 +3728,7 @@ TEST_F(SpirvParser_BuiltinsTest, BitFieldSExtract_UintVector_UnsignedOffsetAndCo
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, BitFieldSExtract_UintVector_SignedOffsetAndCount) {
+TEST_F(SpirvReader_BuiltinsTest, BitFieldSExtract_UintVector_SignedOffsetAndCount) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -3764,7 +3764,7 @@ TEST_F(SpirvParser_BuiltinsTest, BitFieldSExtract_UintVector_SignedOffsetAndCoun
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, BitFieldSExtract_UintVector_SignedOffsetAndUnsignedCount) {
+TEST_F(SpirvReader_BuiltinsTest, BitFieldSExtract_UintVector_SignedOffsetAndUnsignedCount) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -3799,7 +3799,7 @@ TEST_F(SpirvParser_BuiltinsTest, BitFieldSExtract_UintVector_SignedOffsetAndUnsi
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, BitFieldUExtract_Uint_UnsignedOffsetAndCount) {
+TEST_F(SpirvReader_BuiltinsTest, BitFieldUExtract_Uint_UnsignedOffsetAndCount) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -3831,7 +3831,7 @@ TEST_F(SpirvParser_BuiltinsTest, BitFieldUExtract_Uint_UnsignedOffsetAndCount) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, BitFieldUExtract_Uint_SignedOffsetAndCount) {
+TEST_F(SpirvReader_BuiltinsTest, BitFieldUExtract_Uint_SignedOffsetAndCount) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -3865,7 +3865,7 @@ TEST_F(SpirvParser_BuiltinsTest, BitFieldUExtract_Uint_SignedOffsetAndCount) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, BitFieldUExtract_UintVector_UnsignedOffsetAndCount) {
+TEST_F(SpirvReader_BuiltinsTest, BitFieldUExtract_UintVector_UnsignedOffsetAndCount) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -3897,7 +3897,7 @@ TEST_F(SpirvParser_BuiltinsTest, BitFieldUExtract_UintVector_UnsignedOffsetAndCo
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, BitFieldUExtract_UintVector_SignedOffsetAndCount) {
+TEST_F(SpirvReader_BuiltinsTest, BitFieldUExtract_UintVector_SignedOffsetAndCount) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -3931,7 +3931,7 @@ TEST_F(SpirvParser_BuiltinsTest, BitFieldUExtract_UintVector_SignedOffsetAndCoun
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, BitFieldUExtract_UintVector_UnsignedOffsetAndSignedCount) {
+TEST_F(SpirvReader_BuiltinsTest, BitFieldUExtract_UintVector_UnsignedOffsetAndSignedCount) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -3964,7 +3964,7 @@ TEST_F(SpirvParser_BuiltinsTest, BitFieldUExtract_UintVector_UnsignedOffsetAndSi
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, BitFieldUExtract_Int_UnsignedOffsetAndCount) {
+TEST_F(SpirvReader_BuiltinsTest, BitFieldUExtract_Int_UnsignedOffsetAndCount) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -3998,7 +3998,7 @@ TEST_F(SpirvParser_BuiltinsTest, BitFieldUExtract_Int_UnsignedOffsetAndCount) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, BitFieldUExtract_Int_SignedOffsetAndCount) {
+TEST_F(SpirvReader_BuiltinsTest, BitFieldUExtract_Int_SignedOffsetAndCount) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -4034,7 +4034,7 @@ TEST_F(SpirvParser_BuiltinsTest, BitFieldUExtract_Int_SignedOffsetAndCount) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, BitFieldUExtract_IntVector_UnsignedOffsetAndCount) {
+TEST_F(SpirvReader_BuiltinsTest, BitFieldUExtract_IntVector_UnsignedOffsetAndCount) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -4068,7 +4068,7 @@ TEST_F(SpirvParser_BuiltinsTest, BitFieldUExtract_IntVector_UnsignedOffsetAndCou
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, BitFieldUExtract_IntVector_SignedOffsetAndCount) {
+TEST_F(SpirvReader_BuiltinsTest, BitFieldUExtract_IntVector_SignedOffsetAndCount) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -4104,7 +4104,7 @@ TEST_F(SpirvParser_BuiltinsTest, BitFieldUExtract_IntVector_SignedOffsetAndCount
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, BitFieldUExtract_IntVector_UnsignedOffsetAndSignedCount) {
+TEST_F(SpirvReader_BuiltinsTest, BitFieldUExtract_IntVector_UnsignedOffsetAndSignedCount) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -4144,9 +4144,9 @@ struct BinaryCase {
     std::string ir;
 };
 
-using SpirvParser_BuiltinsMixedSignTest = core::ir::transform::TransformTestWithParam<BinaryCase>;
+using SpirvReader_BuiltinsMixedSignTest = core::ir::transform::TransformTestWithParam<BinaryCase>;
 
-TEST_P(SpirvParser_BuiltinsMixedSignTest, Scalar_Signed_SignedUnsigned) {
+TEST_P(SpirvReader_BuiltinsMixedSignTest, Scalar_Signed_SignedUnsigned) {
     auto params = GetParam();
 
     auto* ep = b.ComputeFunction("foo");
@@ -4183,7 +4183,7 @@ TEST_P(SpirvParser_BuiltinsMixedSignTest, Scalar_Signed_SignedUnsigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_P(SpirvParser_BuiltinsMixedSignTest, Scalar_Signed_UnsignedSigned) {
+TEST_P(SpirvReader_BuiltinsMixedSignTest, Scalar_Signed_UnsignedSigned) {
     auto params = GetParam();
 
     auto* ep = b.ComputeFunction("foo");
@@ -4221,7 +4221,7 @@ TEST_P(SpirvParser_BuiltinsMixedSignTest, Scalar_Signed_UnsignedSigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_P(SpirvParser_BuiltinsMixedSignTest, Scalar_Signed_UnsignedUnsigned) {
+TEST_P(SpirvReader_BuiltinsMixedSignTest, Scalar_Signed_UnsignedUnsigned) {
     auto params = GetParam();
 
     auto* ep = b.ComputeFunction("foo");
@@ -4258,7 +4258,7 @@ TEST_P(SpirvParser_BuiltinsMixedSignTest, Scalar_Signed_UnsignedUnsigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_P(SpirvParser_BuiltinsMixedSignTest, Scalar_Unsigned_SignedUnsigned) {
+TEST_P(SpirvReader_BuiltinsMixedSignTest, Scalar_Unsigned_SignedUnsigned) {
     auto params = GetParam();
 
     auto* ep = b.ComputeFunction("foo");
@@ -4296,7 +4296,7 @@ TEST_P(SpirvParser_BuiltinsMixedSignTest, Scalar_Unsigned_SignedUnsigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_P(SpirvParser_BuiltinsMixedSignTest, Scalar_Unsigned_UnsignedSigned) {
+TEST_P(SpirvReader_BuiltinsMixedSignTest, Scalar_Unsigned_UnsignedSigned) {
     auto params = GetParam();
 
     auto* ep = b.ComputeFunction("foo");
@@ -4333,7 +4333,7 @@ TEST_P(SpirvParser_BuiltinsMixedSignTest, Scalar_Unsigned_UnsignedSigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_P(SpirvParser_BuiltinsMixedSignTest, Scalar_Unsigned_SignedSigned) {
+TEST_P(SpirvReader_BuiltinsMixedSignTest, Scalar_Unsigned_SignedSigned) {
     auto params = GetParam();
 
     auto* ep = b.ComputeFunction("foo");
@@ -4370,7 +4370,7 @@ TEST_P(SpirvParser_BuiltinsMixedSignTest, Scalar_Unsigned_SignedSigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_P(SpirvParser_BuiltinsMixedSignTest, Vector_Signed_SignedUnsigned) {
+TEST_P(SpirvReader_BuiltinsMixedSignTest, Vector_Signed_SignedUnsigned) {
     auto params = GetParam();
 
     auto* ep = b.ComputeFunction("foo");
@@ -4409,7 +4409,7 @@ TEST_P(SpirvParser_BuiltinsMixedSignTest, Vector_Signed_SignedUnsigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_P(SpirvParser_BuiltinsMixedSignTest, Vector_Signed_UnsignedSigned) {
+TEST_P(SpirvReader_BuiltinsMixedSignTest, Vector_Signed_UnsignedSigned) {
     auto params = GetParam();
 
     auto* ep = b.ComputeFunction("foo");
@@ -4449,7 +4449,7 @@ TEST_P(SpirvParser_BuiltinsMixedSignTest, Vector_Signed_UnsignedSigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_P(SpirvParser_BuiltinsMixedSignTest, Vector_Signed_UnsignedUnsigned) {
+TEST_P(SpirvReader_BuiltinsMixedSignTest, Vector_Signed_UnsignedUnsigned) {
     auto params = GetParam();
 
     auto* ep = b.ComputeFunction("foo");
@@ -4488,7 +4488,7 @@ TEST_P(SpirvParser_BuiltinsMixedSignTest, Vector_Signed_UnsignedUnsigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_P(SpirvParser_BuiltinsMixedSignTest, Vector_Unsigned_SignedUnsigned) {
+TEST_P(SpirvReader_BuiltinsMixedSignTest, Vector_Unsigned_SignedUnsigned) {
     auto params = GetParam();
 
     auto* ep = b.ComputeFunction("foo");
@@ -4528,7 +4528,7 @@ TEST_P(SpirvParser_BuiltinsMixedSignTest, Vector_Unsigned_SignedUnsigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_P(SpirvParser_BuiltinsMixedSignTest, Vector_Unsigned_UnsignedSigned) {
+TEST_P(SpirvReader_BuiltinsMixedSignTest, Vector_Unsigned_UnsignedSigned) {
     auto params = GetParam();
 
     auto* ep = b.ComputeFunction("foo");
@@ -4567,7 +4567,7 @@ TEST_P(SpirvParser_BuiltinsMixedSignTest, Vector_Unsigned_UnsignedSigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_P(SpirvParser_BuiltinsMixedSignTest, Vector_Unsigned_SignedSigned) {
+TEST_P(SpirvReader_BuiltinsMixedSignTest, Vector_Unsigned_SignedSigned) {
     auto params = GetParam();
 
     auto* ep = b.ComputeFunction("foo");
@@ -4607,7 +4607,7 @@ TEST_P(SpirvParser_BuiltinsMixedSignTest, Vector_Unsigned_SignedSigned) {
 }
 
 INSTANTIATE_TEST_SUITE_P(SpirvReader,
-                         SpirvParser_BuiltinsMixedSignTest,
+                         SpirvReader_BuiltinsMixedSignTest,
                          testing::Values(BinaryCase{spirv::BuiltinFn::kAdd, "add"},
                                          BinaryCase{spirv::BuiltinFn::kSub, "sub"},
                                          BinaryCase{spirv::BuiltinFn::kMul, "mul"}));
@@ -4618,10 +4618,10 @@ struct SignedBinaryCase {
     std::string wgsl;
 };
 
-using SpirvParser_BuiltinsSignedTest =
+using SpirvReader_BuiltinsSignedTest =
     core::ir::transform::TransformTestWithParam<SignedBinaryCase>;
 
-TEST_P(SpirvParser_BuiltinsSignedTest, Scalar_Signed_SignedUnsigned) {
+TEST_P(SpirvReader_BuiltinsSignedTest, Scalar_Signed_SignedUnsigned) {
     auto params = GetParam();
 
     auto* ep = b.ComputeFunction("foo");
@@ -4658,7 +4658,7 @@ TEST_P(SpirvParser_BuiltinsSignedTest, Scalar_Signed_SignedUnsigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_P(SpirvParser_BuiltinsSignedTest, Scalar_Signed_UnsignedSigned) {
+TEST_P(SpirvReader_BuiltinsSignedTest, Scalar_Signed_UnsignedSigned) {
     auto params = GetParam();
 
     auto* ep = b.ComputeFunction("foo");
@@ -4695,7 +4695,7 @@ TEST_P(SpirvParser_BuiltinsSignedTest, Scalar_Signed_UnsignedSigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_P(SpirvParser_BuiltinsSignedTest, Scalar_Signed_UnsignedUnsigned) {
+TEST_P(SpirvReader_BuiltinsSignedTest, Scalar_Signed_UnsignedUnsigned) {
     auto params = GetParam();
 
     auto* ep = b.ComputeFunction("foo");
@@ -4733,7 +4733,7 @@ TEST_P(SpirvParser_BuiltinsSignedTest, Scalar_Signed_UnsignedUnsigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_P(SpirvParser_BuiltinsSignedTest, Scalar_Unsigned_SignedUnsigned) {
+TEST_P(SpirvReader_BuiltinsSignedTest, Scalar_Unsigned_SignedUnsigned) {
     auto params = GetParam();
 
     auto* ep = b.ComputeFunction("foo");
@@ -4771,7 +4771,7 @@ TEST_P(SpirvParser_BuiltinsSignedTest, Scalar_Unsigned_SignedUnsigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_P(SpirvParser_BuiltinsSignedTest, Scalar_Unsigned_UnsignedSigned) {
+TEST_P(SpirvReader_BuiltinsSignedTest, Scalar_Unsigned_UnsignedSigned) {
     auto params = GetParam();
 
     auto* ep = b.ComputeFunction("foo");
@@ -4809,7 +4809,7 @@ TEST_P(SpirvParser_BuiltinsSignedTest, Scalar_Unsigned_UnsignedSigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_P(SpirvParser_BuiltinsSignedTest, Scalar_Unsigned_SignedSigned) {
+TEST_P(SpirvReader_BuiltinsSignedTest, Scalar_Unsigned_SignedSigned) {
     auto params = GetParam();
 
     auto* ep = b.ComputeFunction("foo");
@@ -4846,7 +4846,7 @@ TEST_P(SpirvParser_BuiltinsSignedTest, Scalar_Unsigned_SignedSigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_P(SpirvParser_BuiltinsSignedTest, Vector_Signed_SignedUnsigned) {
+TEST_P(SpirvReader_BuiltinsSignedTest, Vector_Signed_SignedUnsigned) {
     auto params = GetParam();
 
     auto* ep = b.ComputeFunction("foo");
@@ -4885,7 +4885,7 @@ TEST_P(SpirvParser_BuiltinsSignedTest, Vector_Signed_SignedUnsigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_P(SpirvParser_BuiltinsSignedTest, Vector_Signed_UnsignedSigned) {
+TEST_P(SpirvReader_BuiltinsSignedTest, Vector_Signed_UnsignedSigned) {
     auto params = GetParam();
 
     auto* ep = b.ComputeFunction("foo");
@@ -4924,7 +4924,7 @@ TEST_P(SpirvParser_BuiltinsSignedTest, Vector_Signed_UnsignedSigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_P(SpirvParser_BuiltinsSignedTest, Vector_Signed_UnsignedUnsigned) {
+TEST_P(SpirvReader_BuiltinsSignedTest, Vector_Signed_UnsignedUnsigned) {
     auto params = GetParam();
 
     auto* ep = b.ComputeFunction("foo");
@@ -4964,7 +4964,7 @@ TEST_P(SpirvParser_BuiltinsSignedTest, Vector_Signed_UnsignedUnsigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_P(SpirvParser_BuiltinsSignedTest, Vector_Unsigned_SignedUnsigned) {
+TEST_P(SpirvReader_BuiltinsSignedTest, Vector_Unsigned_SignedUnsigned) {
     auto params = GetParam();
 
     auto* ep = b.ComputeFunction("foo");
@@ -5004,7 +5004,7 @@ TEST_P(SpirvParser_BuiltinsSignedTest, Vector_Unsigned_SignedUnsigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_P(SpirvParser_BuiltinsSignedTest, Vector_Unsigned_UnsignedSigned) {
+TEST_P(SpirvReader_BuiltinsSignedTest, Vector_Unsigned_UnsignedSigned) {
     auto params = GetParam();
 
     auto* ep = b.ComputeFunction("foo");
@@ -5044,7 +5044,7 @@ TEST_P(SpirvParser_BuiltinsSignedTest, Vector_Unsigned_UnsignedSigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_P(SpirvParser_BuiltinsSignedTest, Vector_Unsigned_SignedSigned) {
+TEST_P(SpirvReader_BuiltinsSignedTest, Vector_Unsigned_SignedSigned) {
     auto params = GetParam();
 
     auto* ep = b.ComputeFunction("foo");
@@ -5084,12 +5084,12 @@ TEST_P(SpirvParser_BuiltinsSignedTest, Vector_Unsigned_SignedSigned) {
 }
 
 INSTANTIATE_TEST_SUITE_P(SpirvReader,
-                         SpirvParser_BuiltinsSignedTest,
+                         SpirvReader_BuiltinsSignedTest,
                          testing::Values(SignedBinaryCase{spirv::BuiltinFn::kSDiv, "s_div", "div"},
                                          SignedBinaryCase{spirv::BuiltinFn::kSMod, "s_mod",
                                                           "mod"}));
 
-TEST_F(SpirvParser_BuiltinsTest, ConvertFToS_ScalarSigned) {
+TEST_F(SpirvReader_BuiltinsTest, ConvertFToS_ScalarSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -5120,7 +5120,7 @@ TEST_F(SpirvParser_BuiltinsTest, ConvertFToS_ScalarSigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, ConvertFToS_ScalarUnsigned) {
+TEST_F(SpirvReader_BuiltinsTest, ConvertFToS_ScalarUnsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -5152,7 +5152,7 @@ TEST_F(SpirvParser_BuiltinsTest, ConvertFToS_ScalarUnsigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, ConvertFToS_VectorSigned) {
+TEST_F(SpirvReader_BuiltinsTest, ConvertFToS_VectorSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -5183,7 +5183,7 @@ TEST_F(SpirvParser_BuiltinsTest, ConvertFToS_VectorSigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, ConvertFToS_VectorUnsigned) {
+TEST_F(SpirvReader_BuiltinsTest, ConvertFToS_VectorUnsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -5215,7 +5215,7 @@ TEST_F(SpirvParser_BuiltinsTest, ConvertFToS_VectorUnsigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, ConvertSToF_ScalarSigned) {
+TEST_F(SpirvReader_BuiltinsTest, ConvertSToF_ScalarSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -5246,7 +5246,7 @@ TEST_F(SpirvParser_BuiltinsTest, ConvertSToF_ScalarSigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, ConvertSToF_ScalarUnsigned) {
+TEST_F(SpirvReader_BuiltinsTest, ConvertSToF_ScalarUnsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -5278,7 +5278,7 @@ TEST_F(SpirvParser_BuiltinsTest, ConvertSToF_ScalarUnsigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, ConvertSToF_VectorSigned) {
+TEST_F(SpirvReader_BuiltinsTest, ConvertSToF_VectorSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -5309,7 +5309,7 @@ TEST_F(SpirvParser_BuiltinsTest, ConvertSToF_VectorSigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, ConvertSToF_VectorUnsigned) {
+TEST_F(SpirvReader_BuiltinsTest, ConvertSToF_VectorUnsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -5341,7 +5341,7 @@ TEST_F(SpirvParser_BuiltinsTest, ConvertSToF_VectorUnsigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, ConvertUToF_ScalarSigned) {
+TEST_F(SpirvReader_BuiltinsTest, ConvertUToF_ScalarSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -5373,7 +5373,7 @@ TEST_F(SpirvParser_BuiltinsTest, ConvertUToF_ScalarSigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, ConvertUToF_ScalarUnsigned) {
+TEST_F(SpirvReader_BuiltinsTest, ConvertUToF_ScalarUnsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -5404,7 +5404,7 @@ TEST_F(SpirvParser_BuiltinsTest, ConvertUToF_ScalarUnsigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, ConvertUToF_VectorSigned) {
+TEST_F(SpirvReader_BuiltinsTest, ConvertUToF_VectorSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -5436,7 +5436,7 @@ TEST_F(SpirvParser_BuiltinsTest, ConvertUToF_VectorSigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, ConvertUToF_VectorUnsigned) {
+TEST_F(SpirvReader_BuiltinsTest, ConvertUToF_VectorUnsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
@@ -5467,19 +5467,22 @@ TEST_F(SpirvParser_BuiltinsTest, ConvertUToF_VectorUnsigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, BitwiseAnd_Scalar_SignedSigned_Signed) {
+using SpirvReader_BitwiseTest = core::ir::transform::TransformTestWithParam<SpirvReaderParams>;
+
+TEST_P(SpirvReader_BitwiseTest, Scalar_SignedSigned_Signed) {
+    auto& params = GetParam();
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kBitwiseAnd,
-                                               Vector{ty.i32()}, 1_i, 2_i);
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), params.fn, Vector{ty.i32()}, 1_i, 2_i);
         b.Return(ep);
     });
 
-    auto* src = R"(
+    auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = spirv.bitwiseAnd<i32> 1i, 2i
+    %2:i32 = spirv.)" +
+               params.spv_name + R"(<i32> 1i, 2i
     ret
   }
 }
@@ -5487,10 +5490,11 @@ TEST_F(SpirvParser_BuiltinsTest, BitwiseAnd_Scalar_SignedSigned_Signed) {
     EXPECT_EQ(src, str());
     Run(Builtins);
 
-    auto* expect = R"(
+    auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = and 1i, 2i
+    %2:i32 = )" + params.wgsl_name +
+                  R"( 1i, 2i
     ret
   }
 }
@@ -5498,19 +5502,20 @@ TEST_F(SpirvParser_BuiltinsTest, BitwiseAnd_Scalar_SignedSigned_Signed) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, BitwiseAnd_Scalar_SignedUnsigned_Signed) {
+TEST_P(SpirvReader_BitwiseTest, Scalar_SignedUnsigned_Signed) {
+    auto& params = GetParam();
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kBitwiseAnd,
-                                               Vector{ty.i32()}, 1_i, 8_u);
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), params.fn, Vector{ty.i32()}, 1_i, 8_u);
         b.Return(ep);
     });
 
-    auto* src = R"(
+    auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = spirv.bitwiseAnd<i32> 1i, 8u
+    %2:i32 = spirv.)" +
+               params.spv_name + R"(<i32> 1i, 8u
     ret
   }
 }
@@ -5518,11 +5523,12 @@ TEST_F(SpirvParser_BuiltinsTest, BitwiseAnd_Scalar_SignedUnsigned_Signed) {
     EXPECT_EQ(src, str());
     Run(Builtins);
 
-    auto* expect = R"(
+    auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:i32 = bitcast 8u
-    %3:i32 = and 1i, %2
+    %3:i32 = )" + params.wgsl_name +
+                  R"( 1i, %2
     ret
   }
 }
@@ -5530,19 +5536,20 @@ TEST_F(SpirvParser_BuiltinsTest, BitwiseAnd_Scalar_SignedUnsigned_Signed) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, BitwiseAnd_Scalar_UnsignedSigned_Signed) {
+TEST_P(SpirvReader_BitwiseTest, Scalar_UnsignedSigned_Signed) {
+    auto& params = GetParam();
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kBitwiseAnd,
-                                               Vector{ty.i32()}, 8_u, 1_i);
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), params.fn, Vector{ty.i32()}, 8_u, 1_i);
         b.Return(ep);
     });
 
-    auto* src = R"(
+    auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = spirv.bitwiseAnd<i32> 8u, 1i
+    %2:i32 = spirv.)" +
+               params.spv_name + R"(<i32> 8u, 1i
     ret
   }
 }
@@ -5550,11 +5557,12 @@ TEST_F(SpirvParser_BuiltinsTest, BitwiseAnd_Scalar_UnsignedSigned_Signed) {
     EXPECT_EQ(src, str());
     Run(Builtins);
 
-    auto* expect = R"(
+    auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:u32 = bitcast 1i
-    %3:u32 = and 8u, %2
+    %3:u32 = )" + params.wgsl_name +
+                  R"( 8u, %2
     %4:i32 = bitcast %3
     ret
   }
@@ -5563,19 +5571,20 @@ TEST_F(SpirvParser_BuiltinsTest, BitwiseAnd_Scalar_UnsignedSigned_Signed) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, BitwiseAnd_Scalar_UnsignedUnsigned_Signed) {
+TEST_P(SpirvReader_BitwiseTest, Scalar_UnsignedUnsigned_Signed) {
+    auto& params = GetParam();
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kBitwiseAnd,
-                                               Vector{ty.i32()}, 8_u, 9_u);
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), params.fn, Vector{ty.i32()}, 8_u, 9_u);
         b.Return(ep);
     });
 
-    auto* src = R"(
+    auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = spirv.bitwiseAnd<i32> 8u, 9u
+    %2:i32 = spirv.)" +
+               params.spv_name + R"(<i32> 8u, 9u
     ret
   }
 }
@@ -5583,10 +5592,11 @@ TEST_F(SpirvParser_BuiltinsTest, BitwiseAnd_Scalar_UnsignedUnsigned_Signed) {
     EXPECT_EQ(src, str());
     Run(Builtins);
 
-    auto* expect = R"(
+    auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = and 8u, 9u
+    %2:u32 = )" + params.wgsl_name +
+                  R"( 8u, 9u
     %3:i32 = bitcast %2
     ret
   }
@@ -5595,19 +5605,20 @@ TEST_F(SpirvParser_BuiltinsTest, BitwiseAnd_Scalar_UnsignedUnsigned_Signed) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, BitwiseAnd_Scalar_UnsignedUnsigned_Unsigned) {
+TEST_P(SpirvReader_BitwiseTest, Scalar_UnsignedUnsigned_Unsigned) {
+    auto& params = GetParam();
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kBitwiseAnd,
-                                               Vector{ty.u32()}, 8_u, 9_u);
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), params.fn, Vector{ty.u32()}, 8_u, 9_u);
         b.Return(ep);
     });
 
-    auto* src = R"(
+    auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = spirv.bitwiseAnd<u32> 8u, 9u
+    %2:u32 = spirv.)" +
+               params.spv_name + R"(<u32> 8u, 9u
     ret
   }
 }
@@ -5615,10 +5626,11 @@ TEST_F(SpirvParser_BuiltinsTest, BitwiseAnd_Scalar_UnsignedUnsigned_Unsigned) {
     EXPECT_EQ(src, str());
     Run(Builtins);
 
-    auto* expect = R"(
+    auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = and 8u, 9u
+    %2:u32 = )" + params.wgsl_name +
+                  R"( 8u, 9u
     ret
   }
 }
@@ -5626,19 +5638,20 @@ TEST_F(SpirvParser_BuiltinsTest, BitwiseAnd_Scalar_UnsignedUnsigned_Unsigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, BitwiseAnd_Scalar_UnsignedSigned_Unsigned) {
+TEST_P(SpirvReader_BitwiseTest, Scalar_UnsignedSigned_Unsigned) {
+    auto& params = GetParam();
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kBitwiseAnd,
-                                               Vector{ty.u32()}, 8_u, 1_i);
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), params.fn, Vector{ty.u32()}, 8_u, 1_i);
         b.Return(ep);
     });
 
-    auto* src = R"(
+    auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = spirv.bitwiseAnd<u32> 8u, 1i
+    %2:u32 = spirv.)" +
+               params.spv_name + R"(<u32> 8u, 1i
     ret
   }
 }
@@ -5646,11 +5659,12 @@ TEST_F(SpirvParser_BuiltinsTest, BitwiseAnd_Scalar_UnsignedSigned_Unsigned) {
     EXPECT_EQ(src, str());
     Run(Builtins);
 
-    auto* expect = R"(
+    auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:u32 = bitcast 1i
-    %3:u32 = and 8u, %2
+    %3:u32 = )" + params.wgsl_name +
+                  R"( 8u, %2
     ret
   }
 }
@@ -5658,19 +5672,20 @@ TEST_F(SpirvParser_BuiltinsTest, BitwiseAnd_Scalar_UnsignedSigned_Unsigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, BitwiseAnd_Scalar_SignedUnsigned_Unsigned) {
+TEST_P(SpirvReader_BitwiseTest, Scalar_SignedUnsigned_Unsigned) {
+    auto& params = GetParam();
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kBitwiseAnd,
-                                               Vector{ty.u32()}, 1_i, 8_u);
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), params.fn, Vector{ty.u32()}, 1_i, 8_u);
         b.Return(ep);
     });
 
-    auto* src = R"(
+    auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = spirv.bitwiseAnd<u32> 1i, 8u
+    %2:u32 = spirv.)" +
+               params.spv_name + R"(<u32> 1i, 8u
     ret
   }
 }
@@ -5678,11 +5693,12 @@ TEST_F(SpirvParser_BuiltinsTest, BitwiseAnd_Scalar_SignedUnsigned_Unsigned) {
     EXPECT_EQ(src, str());
     Run(Builtins);
 
-    auto* expect = R"(
+    auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:i32 = bitcast 8u
-    %3:i32 = and 1i, %2
+    %3:i32 = )" + params.wgsl_name +
+                  R"( 1i, %2
     %4:u32 = bitcast %3
     ret
   }
@@ -5691,19 +5707,20 @@ TEST_F(SpirvParser_BuiltinsTest, BitwiseAnd_Scalar_SignedUnsigned_Unsigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, BitwiseAnd_Scalar_SignedSigned_Unsigned) {
+TEST_P(SpirvReader_BitwiseTest, Scalar_SignedSigned_Unsigned) {
+    auto& params = GetParam();
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kBitwiseAnd,
-                                               Vector{ty.u32()}, 1_i, 2_i);
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), params.fn, Vector{ty.u32()}, 1_i, 2_i);
         b.Return(ep);
     });
 
-    auto* src = R"(
+    auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = spirv.bitwiseAnd<u32> 1i, 2i
+    %2:u32 = spirv.)" +
+               params.spv_name + R"(<u32> 1i, 2i
     ret
   }
 }
@@ -5711,10 +5728,11 @@ TEST_F(SpirvParser_BuiltinsTest, BitwiseAnd_Scalar_SignedSigned_Unsigned) {
     EXPECT_EQ(src, str());
     Run(Builtins);
 
-    auto* expect = R"(
+    auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = and 1i, 2i
+    %2:i32 = )" + params.wgsl_name +
+                  R"( 1i, 2i
     %3:u32 = bitcast %2
     ret
   }
@@ -5723,20 +5741,21 @@ TEST_F(SpirvParser_BuiltinsTest, BitwiseAnd_Scalar_SignedSigned_Unsigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, BitwiseAnd_Vector_SignedSigned_Signed) {
+TEST_P(SpirvReader_BitwiseTest, Vector_SignedSigned_Signed) {
+    auto& params = GetParam();
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2<i32>(), spirv::BuiltinFn::kBitwiseAnd,
-                                               Vector{ty.i32()}, b.Splat<vec2<i32>>(1_i),
-                                               b.Splat<vec2<i32>>(2_i));
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2<i32>(), params.fn, Vector{ty.i32()},
+                                               b.Splat<vec2<i32>>(1_i), b.Splat<vec2<i32>>(2_i));
         b.Return(ep);
     });
 
-    auto* src = R"(
+    auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = spirv.bitwiseAnd<i32> vec2<i32>(1i), vec2<i32>(2i)
+    %2:vec2<i32> = spirv.)" +
+               params.spv_name + R"(<i32> vec2<i32>(1i), vec2<i32>(2i)
     ret
   }
 }
@@ -5744,10 +5763,11 @@ TEST_F(SpirvParser_BuiltinsTest, BitwiseAnd_Vector_SignedSigned_Signed) {
     EXPECT_EQ(src, str());
     Run(Builtins);
 
-    auto* expect = R"(
+    auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = and vec2<i32>(1i), vec2<i32>(2i)
+    %2:vec2<i32> = )" +
+                  params.wgsl_name + R"( vec2<i32>(1i), vec2<i32>(2i)
     ret
   }
 }
@@ -5755,20 +5775,21 @@ TEST_F(SpirvParser_BuiltinsTest, BitwiseAnd_Vector_SignedSigned_Signed) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, BitwiseAnd_Vector_SignedUnsigned_Signed) {
+TEST_P(SpirvReader_BitwiseTest, Vector_SignedUnsigned_Signed) {
+    auto& params = GetParam();
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2<i32>(), spirv::BuiltinFn::kBitwiseAnd,
-                                               Vector{ty.i32()}, b.Splat<vec2<i32>>(1_i),
-                                               b.Splat<vec2<u32>>(8_u));
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2<i32>(), params.fn, Vector{ty.i32()},
+                                               b.Splat<vec2<i32>>(1_i), b.Splat<vec2<u32>>(8_u));
         b.Return(ep);
     });
 
-    auto* src = R"(
+    auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = spirv.bitwiseAnd<i32> vec2<i32>(1i), vec2<u32>(8u)
+    %2:vec2<i32> = spirv.)" +
+               params.spv_name + R"(<i32> vec2<i32>(1i), vec2<u32>(8u)
     ret
   }
 }
@@ -5776,11 +5797,12 @@ TEST_F(SpirvParser_BuiltinsTest, BitwiseAnd_Vector_SignedUnsigned_Signed) {
     EXPECT_EQ(src, str());
     Run(Builtins);
 
-    auto* expect = R"(
+    auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:vec2<i32> = bitcast vec2<u32>(8u)
-    %3:vec2<i32> = and vec2<i32>(1i), %2
+    %3:vec2<i32> = )" +
+                  params.wgsl_name + R"( vec2<i32>(1i), %2
     ret
   }
 }
@@ -5788,20 +5810,21 @@ TEST_F(SpirvParser_BuiltinsTest, BitwiseAnd_Vector_SignedUnsigned_Signed) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, BitwiseAnd_Vector_UnsignedSigned_Signed) {
+TEST_P(SpirvReader_BitwiseTest, Vector_UnsignedSigned_Signed) {
+    auto& params = GetParam();
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2<i32>(), spirv::BuiltinFn::kBitwiseAnd,
-                                               Vector{ty.i32()}, b.Splat<vec2<u32>>(8_u),
-                                               b.Splat<vec2<i32>>(1_i));
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2<i32>(), params.fn, Vector{ty.i32()},
+                                               b.Splat<vec2<u32>>(8_u), b.Splat<vec2<i32>>(1_i));
         b.Return(ep);
     });
 
-    auto* src = R"(
+    auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = spirv.bitwiseAnd<i32> vec2<u32>(8u), vec2<i32>(1i)
+    %2:vec2<i32> = spirv.)" +
+               params.spv_name + R"(<i32> vec2<u32>(8u), vec2<i32>(1i)
     ret
   }
 }
@@ -5809,11 +5832,12 @@ TEST_F(SpirvParser_BuiltinsTest, BitwiseAnd_Vector_UnsignedSigned_Signed) {
     EXPECT_EQ(src, str());
     Run(Builtins);
 
-    auto* expect = R"(
+    auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:vec2<u32> = bitcast vec2<i32>(1i)
-    %3:vec2<u32> = and vec2<u32>(8u), %2
+    %3:vec2<u32> = )" +
+                  params.wgsl_name + R"( vec2<u32>(8u), %2
     %4:vec2<i32> = bitcast %3
     ret
   }
@@ -5822,20 +5846,21 @@ TEST_F(SpirvParser_BuiltinsTest, BitwiseAnd_Vector_UnsignedSigned_Signed) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, BitwiseAnd_Vector_UnsignedUnsigned_Signed) {
+TEST_P(SpirvReader_BitwiseTest, Vector_UnsignedUnsigned_Signed) {
+    auto& params = GetParam();
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2<i32>(), spirv::BuiltinFn::kBitwiseAnd,
-                                               Vector{ty.i32()}, b.Splat<vec2<u32>>(8_u),
-                                               b.Splat<vec2<u32>>(9_u));
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2<i32>(), params.fn, Vector{ty.i32()},
+                                               b.Splat<vec2<u32>>(8_u), b.Splat<vec2<u32>>(9_u));
         b.Return(ep);
     });
 
-    auto* src = R"(
+    auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = spirv.bitwiseAnd<i32> vec2<u32>(8u), vec2<u32>(9u)
+    %2:vec2<i32> = spirv.)" +
+               params.spv_name + R"(<i32> vec2<u32>(8u), vec2<u32>(9u)
     ret
   }
 }
@@ -5843,10 +5868,11 @@ TEST_F(SpirvParser_BuiltinsTest, BitwiseAnd_Vector_UnsignedUnsigned_Signed) {
     EXPECT_EQ(src, str());
     Run(Builtins);
 
-    auto* expect = R"(
+    auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = and vec2<u32>(8u), vec2<u32>(9u)
+    %2:vec2<u32> = )" +
+                  params.wgsl_name + R"( vec2<u32>(8u), vec2<u32>(9u)
     %3:vec2<i32> = bitcast %2
     ret
   }
@@ -5855,20 +5881,21 @@ TEST_F(SpirvParser_BuiltinsTest, BitwiseAnd_Vector_UnsignedUnsigned_Signed) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, BitwiseAnd_Vector_UnsignedUnsigned_Unsigned) {
+TEST_P(SpirvReader_BitwiseTest, Vector_UnsignedUnsigned_Unsigned) {
+    auto& params = GetParam();
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2<u32>(), spirv::BuiltinFn::kBitwiseAnd,
-                                               Vector{ty.u32()}, b.Splat<vec2<u32>>(8_u),
-                                               b.Splat<vec2<u32>>(9_u));
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2<u32>(), params.fn, Vector{ty.u32()},
+                                               b.Splat<vec2<u32>>(8_u), b.Splat<vec2<u32>>(9_u));
         b.Return(ep);
     });
 
-    auto* src = R"(
+    auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = spirv.bitwiseAnd<u32> vec2<u32>(8u), vec2<u32>(9u)
+    %2:vec2<u32> = spirv.)" +
+               params.spv_name + R"(<u32> vec2<u32>(8u), vec2<u32>(9u)
     ret
   }
 }
@@ -5876,10 +5903,11 @@ TEST_F(SpirvParser_BuiltinsTest, BitwiseAnd_Vector_UnsignedUnsigned_Unsigned) {
     EXPECT_EQ(src, str());
     Run(Builtins);
 
-    auto* expect = R"(
+    auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = and vec2<u32>(8u), vec2<u32>(9u)
+    %2:vec2<u32> = )" +
+                  params.wgsl_name + R"( vec2<u32>(8u), vec2<u32>(9u)
     ret
   }
 }
@@ -5887,20 +5915,21 @@ TEST_F(SpirvParser_BuiltinsTest, BitwiseAnd_Vector_UnsignedUnsigned_Unsigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, BitwiseAnd_Vector_UnsignedSigned_Unsigned) {
+TEST_P(SpirvReader_BitwiseTest, Vector_UnsignedSigned_Unsigned) {
+    auto& params = GetParam();
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2<u32>(), spirv::BuiltinFn::kBitwiseAnd,
-                                               Vector{ty.u32()}, b.Splat<vec2<u32>>(8_u),
-                                               b.Splat<vec2<i32>>(1_i));
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2<u32>(), params.fn, Vector{ty.u32()},
+                                               b.Splat<vec2<u32>>(8_u), b.Splat<vec2<i32>>(1_i));
         b.Return(ep);
     });
 
-    auto* src = R"(
+    auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = spirv.bitwiseAnd<u32> vec2<u32>(8u), vec2<i32>(1i)
+    %2:vec2<u32> = spirv.)" +
+               params.spv_name + R"(<u32> vec2<u32>(8u), vec2<i32>(1i)
     ret
   }
 }
@@ -5908,11 +5937,12 @@ TEST_F(SpirvParser_BuiltinsTest, BitwiseAnd_Vector_UnsignedSigned_Unsigned) {
     EXPECT_EQ(src, str());
     Run(Builtins);
 
-    auto* expect = R"(
+    auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:vec2<u32> = bitcast vec2<i32>(1i)
-    %3:vec2<u32> = and vec2<u32>(8u), %2
+    %3:vec2<u32> = )" +
+                  params.wgsl_name + R"( vec2<u32>(8u), %2
     ret
   }
 }
@@ -5920,20 +5950,21 @@ TEST_F(SpirvParser_BuiltinsTest, BitwiseAnd_Vector_UnsignedSigned_Unsigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, BitwiseAnd_Vector_SignedUnsigned_Unsigned) {
+TEST_P(SpirvReader_BitwiseTest, Vector_SignedUnsigned_Unsigned) {
+    auto& params = GetParam();
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2<u32>(), spirv::BuiltinFn::kBitwiseAnd,
-                                               Vector{ty.u32()}, b.Splat<vec2<i32>>(1_i),
-                                               b.Splat<vec2<u32>>(8_u));
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2<u32>(), params.fn, Vector{ty.u32()},
+                                               b.Splat<vec2<i32>>(1_i), b.Splat<vec2<u32>>(8_u));
         b.Return(ep);
     });
 
-    auto* src = R"(
+    auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = spirv.bitwiseAnd<u32> vec2<i32>(1i), vec2<u32>(8u)
+    %2:vec2<u32> = spirv.)" +
+               params.spv_name + R"(<u32> vec2<i32>(1i), vec2<u32>(8u)
     ret
   }
 }
@@ -5941,11 +5972,12 @@ TEST_F(SpirvParser_BuiltinsTest, BitwiseAnd_Vector_SignedUnsigned_Unsigned) {
     EXPECT_EQ(src, str());
     Run(Builtins);
 
-    auto* expect = R"(
+    auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:vec2<i32> = bitcast vec2<u32>(8u)
-    %3:vec2<i32> = and vec2<i32>(1i), %2
+    %3:vec2<i32> = )" +
+                  params.wgsl_name + R"( vec2<i32>(1i), %2
     %4:vec2<u32> = bitcast %3
     ret
   }
@@ -5954,20 +5986,21 @@ TEST_F(SpirvParser_BuiltinsTest, BitwiseAnd_Vector_SignedUnsigned_Unsigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvParser_BuiltinsTest, BitwiseAnd_Vector_SignedSigned_Unsigned) {
+TEST_P(SpirvReader_BitwiseTest, Vector_SignedSigned_Unsigned) {
+    auto& params = GetParam();
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2<u32>(), spirv::BuiltinFn::kBitwiseAnd,
-                                               Vector{ty.u32()}, b.Splat<vec2<i32>>(1_i),
-                                               b.Splat<vec2<i32>>(2_i));
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2<u32>(), params.fn, Vector{ty.u32()},
+                                               b.Splat<vec2<i32>>(1_i), b.Splat<vec2<i32>>(2_i));
         b.Return(ep);
     });
 
-    auto* src = R"(
+    auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = spirv.bitwiseAnd<u32> vec2<i32>(1i), vec2<i32>(2i)
+    %2:vec2<u32> = spirv.)" +
+               params.spv_name + R"(<u32> vec2<i32>(1i), vec2<i32>(2i)
     ret
   }
 }
@@ -5975,10 +6008,11 @@ TEST_F(SpirvParser_BuiltinsTest, BitwiseAnd_Vector_SignedSigned_Unsigned) {
     EXPECT_EQ(src, str());
     Run(Builtins);
 
-    auto* expect = R"(
+    auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = and vec2<i32>(1i), vec2<i32>(2i)
+    %2:vec2<i32> = )" +
+                  params.wgsl_name + R"( vec2<i32>(1i), vec2<i32>(2i)
     %3:vec2<u32> = bitcast %2
     ret
   }
@@ -5986,6 +6020,11 @@ TEST_F(SpirvParser_BuiltinsTest, BitwiseAnd_Vector_SignedSigned_Unsigned) {
 )";
     EXPECT_EQ(expect, str());
 }
+INSTANTIATE_TEST_SUITE_P(
+    SpirvReader,
+    SpirvReader_BitwiseTest,
+    ::testing::Values(SpirvReaderParams{spirv::BuiltinFn::kBitwiseAnd, "bitwiseAnd", "and"},
+                      SpirvReaderParams{spirv::BuiltinFn::kBitwiseOr, "bitwiseOr", "or"}));
 
 }  // namespace
 }  // namespace tint::spirv::reader::lower
