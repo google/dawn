@@ -110,7 +110,6 @@ ShaderModule::~ShaderModule() = default;
 
 MaybeError ShaderModule::Initialize(ShaderModuleParseResult* parseResult,
                                     OwnedCompilationMessages* compilationMessages) {
-    ScopedTintICEHandler scopedICEHandler(GetDevice());
     return InitializeBase(parseResult, compilationMessages);
 }
 
@@ -213,7 +212,6 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
     uint32_t sampleMask,
     const RenderPipeline* renderPipeline,
     const BindingInfoArray& moduleBindingInfo) {
-    ScopedTintICEHandler scopedICEHandler(device);
 
     std::ostringstream errorStream;
     errorStream << "Tint MSL failure:\n";
@@ -299,83 +297,91 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
     req.adapter = UnsafeUnkeyedValue(static_cast<const AdapterBase*>(device->GetAdapter()));
 
     CacheResult<MslCompilation> mslCompilation;
-    DAWN_TRY_LOAD_OR_RUN(
-        mslCompilation, device, std::move(req), MslCompilation::FromBlob,
-        [](MslCompilationRequest r) -> ResultOrError<MslCompilation> {
-            tint::ast::transform::Manager transformManager;
-            tint::ast::transform::DataMap transformInputs;
+    {
+        ScopedTintICEHandler scopedICEHandler(device);
+        DAWN_TRY_LOAD_OR_RUN(
+            mslCompilation, device, std::move(req), MslCompilation::FromBlob,
+            [](MslCompilationRequest r) -> ResultOrError<MslCompilation> {
+                tint::ast::transform::Manager transformManager;
+                tint::ast::transform::DataMap transformInputs;
 
-            // We only remap bindings for the target entry point, so we need to strip all other
-            // entry points to avoid generating invalid bindings for them.
-            // Run before the renamer so that the entry point name matches `entryPointName` still.
-            transformManager.Add<tint::ast::transform::SingleEntryPoint>();
-            transformInputs.Add<tint::ast::transform::SingleEntryPoint::Config>(r.entryPointName);
+                // We only remap bindings for the target entry point, so we need to strip all other
+                // entry points to avoid generating invalid bindings for them.
+                // Run before the renamer so that the entry point name matches `entryPointName`
+                // still.
+                transformManager.Add<tint::ast::transform::SingleEntryPoint>();
+                transformInputs.Add<tint::ast::transform::SingleEntryPoint::Config>(
+                    r.entryPointName);
 
-            if (r.substituteOverrideConfig) {
-                // This needs to run after SingleEntryPoint transform which removes unused overrides
-                // for current entry point.
-                transformManager.Add<tint::ast::transform::SubstituteOverride>();
-                transformInputs.Add<tint::ast::transform::SubstituteOverride::Config>(
-                    std::move(r.substituteOverrideConfig).value());
-            }
+                if (r.substituteOverrideConfig) {
+                    // This needs to run after SingleEntryPoint transform which removes unused
+                    // overrides for current entry point.
+                    transformManager.Add<tint::ast::transform::SubstituteOverride>();
+                    transformInputs.Add<tint::ast::transform::SubstituteOverride::Config>(
+                        std::move(r.substituteOverrideConfig).value());
+                }
 
-            tint::Program program;
-            tint::ast::transform::DataMap transformOutputs;
-            {
-                TRACE_EVENT0(r.platform.UnsafeGetValue(), General, "RunTransforms");
-                DAWN_TRY_ASSIGN(program,
-                                RunTransforms(&transformManager, r.inputProgram, transformInputs,
-                                              &transformOutputs, nullptr));
-            }
+                tint::Program program;
+                tint::ast::transform::DataMap transformOutputs;
+                {
+                    TRACE_EVENT0(r.platform.UnsafeGetValue(), General, "RunTransforms");
+                    DAWN_TRY_ASSIGN(
+                        program, RunTransforms(&transformManager, r.inputProgram, transformInputs,
+                                               &transformOutputs, nullptr));
+                }
 
-            Extent3D localSize{0, 0, 0};
+                Extent3D localSize{0, 0, 0};
 
-            TRACE_EVENT0(r.platform.UnsafeGetValue(), General, "tint::msl::writer::Generate");
+                TRACE_EVENT0(r.platform.UnsafeGetValue(), General, "tint::msl::writer::Generate");
 
-            // Convert the AST program to an IR module.
-            auto ir = tint::wgsl::reader::ProgramToLoweredIR(program);
-            DAWN_INVALID_IF(ir != tint::Success, "An error occurred while generating Tint IR\n%s",
-                            ir.Failure().reason.Str());
+                // Convert the AST program to an IR module.
+                auto ir = tint::wgsl::reader::ProgramToLoweredIR(program);
+                DAWN_INVALID_IF(ir != tint::Success,
+                                "An error occurred while generating Tint IR\n%s",
+                                ir.Failure().reason.Str());
 
-            // Generate MSL.
-            auto result = tint::msl::writer::Generate(ir.Get(), r.tintOptions);
-            DAWN_INVALID_IF(result != tint::Success, "An error occurred while generating MSL:\n%s",
-                            result.Failure().reason.Str());
+                // Generate MSL.
+                auto result = tint::msl::writer::Generate(ir.Get(), r.tintOptions);
+                DAWN_INVALID_IF(result != tint::Success,
+                                "An error occurred while generating MSL:\n%s",
+                                result.Failure().reason.Str());
 
-            // Workgroup validation has to come after `Generate` because it may require
-            // overrides to have been substituted.
-            if (r.stage == SingleShaderStage::Compute) {
-                // Validate workgroup size and workgroup storage size.
-                DAWN_TRY_ASSIGN(localSize,
-                                ValidateComputeStageWorkgroupSize(
-                                    result->workgroup_info.x, result->workgroup_info.y,
-                                    result->workgroup_info.z, result->workgroup_info.storage_size,
-                                    r.limits, r.adapter.UnsafeGetValue()));
-            }
+                // Workgroup validation has to come after `Generate` because it may require
+                // overrides to have been substituted.
+                if (r.stage == SingleShaderStage::Compute) {
+                    // Validate workgroup size and workgroup storage size.
+                    DAWN_TRY_ASSIGN(
+                        localSize,
+                        ValidateComputeStageWorkgroupSize(
+                            result->workgroup_info.x, result->workgroup_info.y,
+                            result->workgroup_info.z, result->workgroup_info.storage_size, r.limits,
+                            r.adapter.UnsafeGetValue()));
+                }
 
-            // Metal uses Clang to compile the shader as C++14. Disable everything in the -Wall
-            // category. -Wunused-variable in particular comes up a lot in generated code, and some
-            // (old?) Metal drivers accidentally treat it as a MTLLibraryErrorCompileError instead
-            // of a warning.
-            auto msl = std::move(result->msl);
-            msl = R"(
-                #ifdef __clang__
-                #pragma clang diagnostic ignored "-Wall"
-                #endif
-            )" + msl;
+                // Metal uses Clang to compile the shader as C++14. Disable everything in the -Wall
+                // category. -Wunused-variable in particular comes up a lot in generated code, and
+                // some (old?) Metal drivers accidentally treat it as a MTLLibraryErrorCompileError
+                // instead of a warning.
+                auto msl = std::move(result->msl);
+                msl = R"(
+                    #ifdef __clang__
+                    #pragma clang diagnostic ignored "-Wall"
+                    #endif
+                )" + msl;
 
-            auto workgroupAllocations =
-                std::move(result->workgroup_info.allocations.at(kRemappedEntryPointName));
-            return MslCompilation{{
-                std::move(msl),
-                std::move(kRemappedEntryPointName),
-                result->needs_storage_buffer_sizes,
-                result->has_invariant_attribute,
-                std::move(workgroupAllocations),
-                localSize,
-            }};
-        },
-        "Metal.CompileShaderToMSL");
+                auto workgroupAllocations =
+                    std::move(result->workgroup_info.allocations.at(kRemappedEntryPointName));
+                return MslCompilation{{
+                    std::move(msl),
+                    std::move(kRemappedEntryPointName),
+                    result->needs_storage_buffer_sizes,
+                    result->has_invariant_attribute,
+                    std::move(workgroupAllocations),
+                    localSize,
+                }};
+            },
+            "Metal.CompileShaderToMSL");
+    }
 
     if (device->IsToggleEnabled(Toggle::DumpShaders)) {
         std::ostringstream dumpedMsg;

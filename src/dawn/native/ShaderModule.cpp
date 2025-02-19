@@ -1094,11 +1094,12 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
     return std::move(metadata);
 }
 
-MaybeError ReflectShaderUsingTint(const DeviceBase* device,
+MaybeError ReflectShaderUsingTint(DeviceBase* device,
                                   const tint::Program* program,
                                   OwnedCompilationMessages* compilationMessages,
                                   EntryPointMetadataTable* entryPointMetadataTable) {
     DAWN_ASSERT(program->IsValid());
+    ScopedTintICEHandler scopedICEHandler(device);
 
     tint::inspector::Inspector inspector(*program);
 
