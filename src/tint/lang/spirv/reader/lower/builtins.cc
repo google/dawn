@@ -152,6 +152,9 @@ struct State {
                 case spirv::BuiltinFn::kConvertSToF:
                     ConvertSToF(builtin);
                     break;
+                case spirv::BuiltinFn::kConvertUToF:
+                    ConvertUToF(builtin);
+                    break;
                 default:
                     TINT_UNREACHABLE() << "unknown spirv builtin: " << builtin->Func();
             }
@@ -165,6 +168,20 @@ struct State {
             auto* arg = call->Args()[0];
             if (arg->Type()->IsUnsignedIntegerScalarOrVector()) {
                 arg = b.Bitcast(ty.MatchWidth(ty.i32(), result_ty), arg)->Result(0);
+            }
+
+            b.ConvertWithResult(call->DetachResult(), arg);
+        });
+        call->Destroy();
+    }
+
+    void ConvertUToF(spirv::ir::BuiltinCall* call) {
+        b.InsertBefore(call, [&] {
+            auto* result_ty = call->Result(0)->Type();
+
+            auto* arg = call->Args()[0];
+            if (arg->Type()->IsSignedIntegerScalarOrVector()) {
+                arg = b.Bitcast(ty.MatchWidth(ty.u32(), result_ty), arg)->Result(0);
             }
 
             b.ConvertWithResult(call->DetachResult(), arg);

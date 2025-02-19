@@ -168,6 +168,8 @@ const char* str(BuiltinFn i) {
             return "convertFToS";
         case BuiltinFn::kConvertSToF:
             return "convertSToF";
+        case BuiltinFn::kConvertUToF:
+            return "convertUToF";
         case BuiltinFn::kSdot:
             return "sdot";
         case BuiltinFn::kUdot:
@@ -260,6 +262,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kSMod:
         case BuiltinFn::kConvertFToS:
         case BuiltinFn::kConvertSToF:
+        case BuiltinFn::kConvertUToF:
             break;
     }
     return core::ir::Instruction::Accesses{};

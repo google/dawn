@@ -665,6 +665,9 @@ class Parser {
                 case spv::Op::OpConvertSToF:
                     EmitSpirvExplicitBuiltinCall(inst, spirv::BuiltinFn::kConvertSToF);
                     break;
+                case spv::Op::OpConvertUToF:
+                    EmitSpirvExplicitBuiltinCall(inst, spirv::BuiltinFn::kConvertUToF);
+                    break;
                 case spv::Op::OpAccessChain:
                 case spv::Op::OpInBoundsAccessChain:
                     EmitAccess(inst);
