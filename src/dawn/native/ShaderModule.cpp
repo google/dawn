@@ -1532,18 +1532,25 @@ bool ShaderModuleBase::EqualityFunc::operator()(const ShaderModuleBase* a,
 }
 
 ShaderModuleBase::ScopedUseTintProgram ShaderModuleBase::UseTintProgram() {
-    return mTintData.Use([&](auto tintData) {
-        if (tintData->tintProgram) {
-            return ScopedUseTintProgram(this);
-        }
+    // Directly return ScopedUseTintProgram to add ref count. If the mTintProgram is valid,
+    // this will prevent it from being released before using. If it is already released,
+    // it will be recreated in the GetTintProgram, right before actually using it.
+    return ScopedUseTintProgram(this);
+}
 
-        // When the ShaderModuleBase is not referenced externally, and not used for initializing
-        // any pipeline, the mTintProgram will be released. However the ShaderModuleBase itself
-        // may still alive due to being referenced by some pipelines. In this case, when
-        // DeviceBase::APICreateShaderModule() with the same shader source code, Dawn will look
-        // up from the cache and return the same ShaderModuleBase. In this case, we have to
-        // recreate mTintProgram, when the mTintProgram is required for initializing new
-        // pipelines.
+Ref<TintProgram> ShaderModuleBase::GetTintProgram() {
+    return mTintData.Use([&](auto tintData) {
+        // If the tintProgram is valid, just return it.
+        if (tintData->tintProgram) {
+            return tintData->tintProgram;
+        }
+        // Otherwise, recreate the tintProgram. When the ShaderModuleBase is not referenced
+        // externally, and not used for initializing any pipeline, the mTintProgram will be
+        // released. However the ShaderModuleBase itself may still alive due to being referenced by
+        // some pipelines. In this case, when DeviceBase::APICreateShaderModule() with the same
+        // shader source code, Dawn will look up from the cache and return the same
+        // ShaderModuleBase. In this case, we have to recreate the released mTintProgram for
+        // initializing new pipelines.
         ShaderModuleDescriptor descriptor;
         ShaderSourceWGSL wgslDescriptor;
         ShaderSourceSPIRV sprivDescriptor;
@@ -1565,25 +1572,18 @@ ShaderModuleBase::ScopedUseTintProgram ShaderModuleBase::UseTintProgram() {
         ShaderModuleParseResult parseResult;
         ValidateAndParseShaderModule(GetDevice(), Unpack(&descriptor), mInternalExtensions,
                                      &parseResult,
-                                     /*compilationMessages=*/nullptr)
+                                     /*compilationMessages*/ nullptr)
             .AcquireSuccess();
         DAWN_ASSERT(parseResult.tintProgram != nullptr);
 
         tintData->tintProgram = std::move(parseResult.tintProgram);
         tintData->tintProgramRecreateCount++;
 
-        return ScopedUseTintProgram(this);
-    });
-}
-
-Ref<TintProgram> ShaderModuleBase::GetTintProgram() const {
-    return mTintData.Use([&](auto tintData) {
-        DAWN_ASSERT(tintData->tintProgram != nullptr);
         return tintData->tintProgram;
     });
 }
 
-Ref<TintProgram> ShaderModuleBase::GetTintProgramForTesting() const {
+Ref<TintProgram> ShaderModuleBase::GetNullableTintProgramForTesting() const {
     return mTintData.Use([&](auto tintData) { return tintData->tintProgram; });
 }
 
@@ -1675,6 +1675,9 @@ MaybeError ShaderModuleBase::InitializeBase(ShaderModuleParseResult* parseResult
 }
 
 void ShaderModuleBase::WillDropLastExternalRef() {
+    // The last external ref being dropped indicates that the application is not currently using,
+    // and no pending task will use the shader module. In this case we can free the memory for the
+    // parsed module.
     mTintData.Use([&](auto tintData) { tintData->tintProgram = nullptr; });
 }
 

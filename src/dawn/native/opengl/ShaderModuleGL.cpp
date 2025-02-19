@@ -398,7 +398,7 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
     const PipelineLayout* layout,
     bool* needsPlaceholderSampler,
     bool* needsTextureBuiltinUniformBuffer,
-    BindingPointToFunctionAndOffset* bindingPointToData) const {
+    BindingPointToFunctionAndOffset* bindingPointToData) {
     TRACE_EVENT0(GetDevice()->GetPlatform(), General, "TranslateToGLSL");
 
     const OpenGLVersion& version = ToBackend(GetDevice())->GetGL().GetVersion();
