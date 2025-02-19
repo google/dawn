@@ -131,7 +131,6 @@ class RefCounted : NonMovable {
   bool Release() {
     if (mRefCount.fetch_sub(1u, std::memory_order_release) == 1u) {
       std::atomic_thread_fence(std::memory_order_acquire);
-      emwgpuDelete(this);
       return true;
     }
     return false;
@@ -234,6 +233,11 @@ class Ref {
   static void Release(T value) {
     if (value != nullptr && value->RefCounted::Release()) {
       delete value;
+      // emwgpuDelete() removes the pointer from the jsObjects mapping.
+      // Considering some class implementation may need to use it in
+      // destructor, we call emwgpuDelete() after the pointer delete.
+      // This also applies to implementation of `wgpu{Type}Release`.
+      emwgpuDelete(value);
     }
   }
 
@@ -1509,6 +1513,7 @@ WGPUFuture WGPUShaderModuleImpl::GetCompilationInfo(
   void wgpu##Name##Release(WGPU##Name o) {       \
     if (o->Release()) {                          \
       delete o;                                  \
+      emwgpuDelete(o);                           \
     }                                            \
   }
 WGPU_OBJECTS(DEFINE_WGPU_DEFAULT_ADDREF_RELEASE)
