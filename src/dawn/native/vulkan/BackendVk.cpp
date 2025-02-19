@@ -31,6 +31,7 @@
 #include <string>
 #include <utility>
 
+#include "dawn/common/Assert.h"
 #include "dawn/common/BitSetIterator.h"
 #include "dawn/common/Log.h"
 #include "dawn/common/SystemUtils.h"
@@ -336,7 +337,7 @@ OnDebugUtilsCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
     // driver can also produce errors even with backend validation disabled so those errors are
     // just logged.
     LogCallbackData(LogSeverity::Error, pCallbackData);
-    DAWN_CHECK(!(messageTypes & VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT));
+    DAWN_ASSERT(!(messageTypes & VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT));
 
     return VK_FALSE;
 }
