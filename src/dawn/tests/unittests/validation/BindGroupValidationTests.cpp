@@ -3434,20 +3434,18 @@ TEST_F(SamplerTypeBindingTest, ShaderAndBGLMatches) {
             })");
     }
 
-    // TODO(crbug.com/376497143): switch this to an error. depth with filtering sampler is
-    // deprecated. Test that a filtering sampler can be used to sample a depth texture.
+    // Test that a filtering sampler can not be used to sample a depth texture.
     {
-        ++mLastWarningCount;
         wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
             device, {{0, wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::Filtering},
                      {1, wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::Depth}});
 
-        CreateFragmentPipeline(&bindGroupLayout, R"(
+        ASSERT_DEVICE_ERROR(CreateFragmentPipeline(&bindGroupLayout, R"(
             @group(0) @binding(0) var mySampler: sampler;
             @group(0) @binding(1) var myTexture: texture_depth_2d;
             @fragment fn main() {
                 _ = textureSample(myTexture, mySampler, vec2f(0.0, 0.0));
-            })");
+            })"));
     }
 
     // Test that a non-filtering sampler can be used to sample a depth texture.
