@@ -108,6 +108,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kConvertUToF:
         case BuiltinFn::kBitwiseAnd:
         case BuiltinFn::kBitwiseOr:
+        case BuiltinFn::kBitwiseXor:
             break;
     }
     return core::ir::Instruction::Accesses{};

@@ -674,6 +674,9 @@ class Parser {
                 case spv::Op::OpBitwiseOr:
                     EmitSpirvExplicitBuiltinCall(inst, spirv::BuiltinFn::kBitwiseOr);
                     break;
+                case spv::Op::OpBitwiseXor:
+                    EmitSpirvExplicitBuiltinCall(inst, spirv::BuiltinFn::kBitwiseXor);
+                    break;
                 case spv::Op::OpAccessChain:
                 case spv::Op::OpInBoundsAccessChain:
                     EmitAccess(inst);

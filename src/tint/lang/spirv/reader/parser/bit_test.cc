@@ -632,7 +632,8 @@ TEST_P(SpirvParser_BitwiseTest, Vector_SignedSigned_Unsigned) {
 INSTANTIATE_TEST_SUITE_P(SpirvParser,
                          SpirvParser_BitwiseTest,
                          testing::Values(SpirvBitwiseParam{"And"},  //
-                                         SpirvBitwiseParam{"Or"}));
+                                         SpirvBitwiseParam{"Or"},   //
+                                         SpirvBitwiseParam{"Xor"}));
 
 }  // namespace
 }  // namespace tint::spirv::reader

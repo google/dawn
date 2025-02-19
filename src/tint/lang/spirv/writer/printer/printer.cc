@@ -1539,6 +1539,9 @@ class Printer {
             case BuiltinFn::kBitwiseOr:
                 op = spv::Op::OpBitwiseOr;
                 break;
+            case BuiltinFn::kBitwiseXor:
+                op = spv::Op::OpBitwiseXor;
+                break;
             case spirv::BuiltinFn::kNone:
                 TINT_ICE() << "undefined spirv ir function";
         }

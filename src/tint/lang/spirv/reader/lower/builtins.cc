@@ -161,6 +161,9 @@ struct State {
                 case spirv::BuiltinFn::kBitwiseOr:
                     BitwiseOr(builtin);
                     break;
+                case spirv::BuiltinFn::kBitwiseXor:
+                    BitwiseXor(builtin);
+                    break;
                 default:
                     TINT_UNREACHABLE() << "unknown spirv builtin: " << builtin->Func();
             }
@@ -236,6 +239,9 @@ struct State {
     }
     void BitwiseOr(spirv::ir::BuiltinCall* call) {
         EmitBinaryWrappedAsFirstArg(call, core::BinaryOp::kOr);
+    }
+    void BitwiseXor(spirv::ir::BuiltinCall* call) {
+        EmitBinaryWrappedAsFirstArg(call, core::BinaryOp::kXor);
     }
 
     void Add(spirv::ir::BuiltinCall* call) {

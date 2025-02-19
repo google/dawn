@@ -6024,7 +6024,8 @@ INSTANTIATE_TEST_SUITE_P(
     SpirvReader,
     SpirvReader_BitwiseTest,
     ::testing::Values(SpirvReaderParams{spirv::BuiltinFn::kBitwiseAnd, "bitwiseAnd", "and"},
-                      SpirvReaderParams{spirv::BuiltinFn::kBitwiseOr, "bitwiseOr", "or"}));
+                      SpirvReaderParams{spirv::BuiltinFn::kBitwiseOr, "bitwiseOr", "or"},
+                      SpirvReaderParams{spirv::BuiltinFn::kBitwiseXor, "bitwiseXor", "xor"}));
 
 }  // namespace
 }  // namespace tint::spirv::reader::lower
