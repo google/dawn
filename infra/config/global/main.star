@@ -375,6 +375,7 @@ def get_common_properties(os, clang, rbe_project, remote_jobs):
             "enable_cloud_monitoring": True,
             "enable_cloud_profiler": True,
             "enable_cloud_trace": True,
+            "metrics_project": "chromium-reclient-metrics",
         },
     }
     if not msvc:
@@ -386,7 +387,6 @@ def get_common_properties(os, clang, rbe_project, remote_jobs):
         }
         properties["$build/reclient"] = reclient_props
         properties["$build/siso"]["remote_jobs"] = remote_jobs
-        properties["$build/siso"]["metrics_project"] = "chromium-reclient-metrics"
 
     return properties
 
