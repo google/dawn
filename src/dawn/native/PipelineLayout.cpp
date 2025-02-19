@@ -138,16 +138,23 @@ PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device,
       mImmediateDataRangeByteSize(descriptor->immediateDataRangeByteSize) {
     DAWN_ASSERT(descriptor->bindGroupLayoutCount <= kMaxBindGroups);
 
+    // According to WebGPU SPEC of CreatePipelineLayout(), if bindGroupLayouts[i] is null or
+    // bindGroupLayouts[i].[[descriptor]].entries is empty, treat bindGroupLayouts[i] as an
+    // empty bind group layout. So here unspecified or null bind group layouts can be set to
+    // `device->GetEmptyBindGroupLayout()`.
+    mBindGroupLayouts.fill(device->GetEmptyBindGroupLayout());
     auto bgls = ityp::SpanFromUntyped<BindGroupIndex>(descriptor->bindGroupLayouts,
                                                       descriptor->bindGroupLayoutCount);
     for (auto [group, bgl] : Enumerate(bgls)) {
-        // According to WebGPU SPEC of CreatePipelineLayout(), if bindGroupLayouts[i] is not null
-        // and bindGroupLayouts[i].[[descriptor]].entries is empty, set bindGroupLayouts[i] to null.
-        if (bgl == nullptr || bgl->IsEmpty()) {
+        // Keep the default empty bind group layouts for nullptr bind group layouts
+        if (bgl == nullptr) {
             continue;
         }
+
+        // Set the bind group layout even if it is empty to copy over the empty bind group layouts
+        // that have a pipeline compatibility token.
         mBindGroupLayouts[group] = bgl;
-        mMask.set(group);
+        mMask.set(group, !bgl->IsEmpty());
     }
 
     // Gather the PLS information.
@@ -162,12 +169,10 @@ PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device,
     }
 
     BindingCounts bindingCounts = {};
-    for (uint32_t i = 0; i < descriptor->bindGroupLayoutCount; ++i) {
-        if (descriptor->bindGroupLayouts[i]) {
-            AccumulateBindingCounts(&bindingCounts, descriptor->bindGroupLayouts[i]
-                                                        ->GetInternalBindGroupLayout()
-                                                        ->GetBindingCountInfo());
-        }
+    for (BindGroupIndex i : IterateBitSet(mMask)) {
+        AccumulateBindingCounts(
+            &bindingCounts,
+            mBindGroupLayouts[i]->GetInternalBindGroupLayout()->GetBindingCountInfo());
     }
     mNumStorageBufferBindingsInVertexStage =
         bindingCounts.perStage[SingleShaderStage::Vertex].storageBufferCount;
@@ -396,14 +401,13 @@ ResultOrError<Ref<PipelineLayoutBase>> PipelineLayoutBase::CreateDefault(
             std::max(immediateDataRangeByteSize, metadata.immediateDataRangeByteSize);
     }
 
-    // Create the bind group layouts.
+    // Create the bind group layouts, including the empty ones as all the bind group layouts should
+    // be created with `pipelineCompatibilityToken` whether they are empty or not.
     PerBindGroup<Ref<BindGroupLayoutBase>> bindGroupLayouts = {};
     for (auto group : Range(kMaxBindGroupsTyped)) {
-        if (!entryData[group].empty()) {
-            DAWN_TRY_ASSIGN(bindGroupLayouts[group],
-                            CreateBGL(device, entryData[group], pipelineCompatibilityToken,
-                                      allowInternalBinding));
-        }
+        DAWN_TRY_ASSIGN(
+            bindGroupLayouts[group],
+            CreateBGL(device, entryData[group], pipelineCompatibilityToken, allowInternalBinding));
     }
 
     // Create the deduced pipeline layout, validating if it is valid.
@@ -440,33 +444,21 @@ ObjectType PipelineLayoutBase::GetType() const {
 const BindGroupLayoutBase* PipelineLayoutBase::GetFrontendBindGroupLayout(
     BindGroupIndex group) const {
     DAWN_ASSERT(!IsError());
-    if (mMask[group]) {
-        const BindGroupLayoutBase* bgl = mBindGroupLayouts[group].Get();
-        DAWN_ASSERT(bgl != nullptr);
-        return bgl;
-    } else {
-        return GetDevice()->GetEmptyBindGroupLayout();
-    }
+    const BindGroupLayoutBase* bgl = mBindGroupLayouts[group].Get();
+    DAWN_ASSERT(bgl != nullptr);
+    return bgl;
 }
 
 BindGroupLayoutBase* PipelineLayoutBase::GetFrontendBindGroupLayout(BindGroupIndex group) {
     DAWN_ASSERT(!IsError());
-    if (mMask[group]) {
-        BindGroupLayoutBase* bgl = mBindGroupLayouts[group].Get();
-        DAWN_ASSERT(bgl != nullptr);
-        return bgl;
-    } else {
-        return GetDevice()->GetEmptyBindGroupLayout();
-    }
+    BindGroupLayoutBase* bgl = mBindGroupLayouts[group].Get();
+    DAWN_ASSERT(bgl != nullptr);
+    return bgl;
 }
 
 const BindGroupLayoutInternalBase* PipelineLayoutBase::GetBindGroupLayout(
     BindGroupIndex group) const {
-    if (mMask[group]) {
         return GetFrontendBindGroupLayout(group)->GetInternalBindGroupLayout();
-    } else {
-        return GetDevice()->GetEmptyBindGroupLayout()->GetInternalBindGroupLayout();
-    }
 }
 
 const BindGroupMask& PipelineLayoutBase::GetBindGroupLayoutsMask() const {

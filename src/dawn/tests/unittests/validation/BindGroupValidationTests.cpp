@@ -3798,5 +3798,37 @@ TEST_F(PipelineLayoutValidationTest, BindGroupSlotWithEmptyLayoutIsNotValidated)
     }
 }
 
+// Test the empty bind group layout returned by calling `getBindGroupLayout()` on a pipeline created
+// with `auto` pipeline layout cannot be used to create other pipeline layouts.
+TEST_F(PipelineLayoutValidationTest, ReuseEmptyBindGroupLayoutCreatedwithAutoPipelineLayout) {
+    // The empty bind group layout comes from a pipeline created with an explicit pipeline layout.
+    {
+        wgpu::PipelineLayout pipelineLayout = utils::MakePipelineLayout(device, {});
+        wgpu::ComputePipelineDescriptor computePipelineDescriptor = {};
+        computePipelineDescriptor.compute.module = utils::CreateShaderModule(device, R"(
+                @compute @workgroup_size(1, 1) fn main() {})");
+        computePipelineDescriptor.layout = pipelineLayout;
+        wgpu::ComputePipeline computePipeline =
+            device.CreateComputePipeline(&computePipelineDescriptor);
+
+        wgpu::BindGroupLayout emptyBindGroupLayout = computePipeline.GetBindGroupLayout(3);
+        std::vector<wgpu::BindGroupLayout> bindGroupLayouts = {{emptyBindGroupLayout}};
+        utils::MakePipelineLayout(device, bindGroupLayouts);
+    }
+
+    // The empty bind group layout comes from a pipeline created with an 'auto' pipeline layout.
+    {
+        wgpu::ComputePipelineDescriptor computePipelineDescriptor = {};
+        computePipelineDescriptor.compute.module = utils::CreateShaderModule(device, R"(
+                @compute @workgroup_size(1, 1) fn main() {})");
+        wgpu::ComputePipeline computePipeline =
+            device.CreateComputePipeline(&computePipelineDescriptor);
+
+        wgpu::BindGroupLayout emptyBindGroupLayout = computePipeline.GetBindGroupLayout(3);
+        std::vector<wgpu::BindGroupLayout> bindGroupLayouts = {{emptyBindGroupLayout}};
+        ASSERT_DEVICE_ERROR(utils::MakePipelineLayout(device, bindGroupLayouts));
+    }
+}
+
 }  // anonymous namespace
 }  // namespace dawn
