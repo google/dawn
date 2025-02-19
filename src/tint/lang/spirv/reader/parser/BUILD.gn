@@ -90,6 +90,7 @@ if (tint_build_unittests) {
     tint_unittests_source_set("unittests") {
       sources = [
         "binary_test.cc",
+        "bit_test.cc",
         "branch_test.cc",
         "builtin_test.cc",
         "composite_test.cc",

@@ -82,6 +82,7 @@ cc_library(
   alwayslink = True,
   srcs = [
     "binary_test.cc",
+    "bit_test.cc",
     "branch_test.cc",
     "builtin_test.cc",
     "composite_test.cc",

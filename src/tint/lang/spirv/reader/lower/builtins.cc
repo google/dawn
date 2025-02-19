@@ -155,6 +155,9 @@ struct State {
                 case spirv::BuiltinFn::kConvertUToF:
                     ConvertUToF(builtin);
                     break;
+                case spirv::BuiltinFn::kBitwiseAnd:
+                    BitwiseAnd(builtin);
+                    break;
                 default:
                     TINT_UNREACHABLE() << "unknown spirv builtin: " << builtin->Func();
             }
@@ -223,6 +226,10 @@ struct State {
             call->Result(0)->ReplaceAllUsesWith(c);
         });
         call->Destroy();
+    }
+
+    void BitwiseAnd(spirv::ir::BuiltinCall* call) {
+        EmitBinaryWrappedAsFirstArg(call, core::BinaryOp::kAnd);
     }
 
     void Add(spirv::ir::BuiltinCall* call) {
