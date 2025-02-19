@@ -149,10 +149,27 @@ struct State {
                 case spirv::BuiltinFn::kConvertFToS:
                     ConvertFToS(builtin);
                     break;
+                case spirv::BuiltinFn::kConvertSToF:
+                    ConvertSToF(builtin);
+                    break;
                 default:
                     TINT_UNREACHABLE() << "unknown spirv builtin: " << builtin->Func();
             }
         }
+    }
+
+    void ConvertSToF(spirv::ir::BuiltinCall* call) {
+        b.InsertBefore(call, [&] {
+            auto* result_ty = call->Result(0)->Type();
+
+            auto* arg = call->Args()[0];
+            if (arg->Type()->IsUnsignedIntegerScalarOrVector()) {
+                arg = b.Bitcast(ty.MatchWidth(ty.i32(), result_ty), arg)->Result(0);
+            }
+
+            b.ConvertWithResult(call->DetachResult(), arg);
+        });
+        call->Destroy();
     }
 
     void ConvertFToS(spirv::ir::BuiltinCall* call) {

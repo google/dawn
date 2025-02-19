@@ -166,6 +166,8 @@ const char* str(BuiltinFn i) {
             return "s_mod";
         case BuiltinFn::kConvertFToS:
             return "convertFToS";
+        case BuiltinFn::kConvertSToF:
+            return "convertSToF";
         case BuiltinFn::kSdot:
             return "sdot";
         case BuiltinFn::kUdot:
@@ -257,6 +259,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kSDiv:
         case BuiltinFn::kSMod:
         case BuiltinFn::kConvertFToS:
+        case BuiltinFn::kConvertSToF:
             break;
     }
     return core::ir::Instruction::Accesses{};

@@ -662,6 +662,9 @@ class Parser {
                     Emit(b_.Convert(Type(inst.type_id()), Value(inst.GetSingleWordOperand(2))),
                          inst.result_id());
                     break;
+                case spv::Op::OpConvertSToF:
+                    EmitSpirvExplicitBuiltinCall(inst, spirv::BuiltinFn::kConvertSToF);
+                    break;
                 case spv::Op::OpAccessChain:
                 case spv::Op::OpInBoundsAccessChain:
                     EmitAccess(inst);
