@@ -706,16 +706,15 @@ MaybeError Buffer::ClearBuffer(CommandRecordingContext* commandContext,
     } else {
         // TODO(crbug.com/dawn/852): use ClearUnorderedAccessView*() when the buffer usage
         // includes STORAGE.
-        DynamicUploader* uploader = device->GetDynamicUploader();
-        UploadHandle uploadHandle;
-        DAWN_TRY_ASSIGN(uploadHandle,
-                        uploader->Allocate(size, device->GetQueue()->GetPendingCommandSerial(),
-                                           kCopyBufferToBufferOffsetAlignment));
-
-        memset(uploadHandle.mappedBuffer, clearValue, size);
-
-        device->CopyFromStagingToBufferHelper(commandContext, uploadHandle.stagingBuffer.Get(),
-                                              uploadHandle.startOffset, this, offset, size);
+        DAWN_TRY(device->GetDynamicUploader()->WithUploadReservation(
+            size, kCopyBufferToBufferOffsetAlignment,
+            [&](UploadReservation reservation) -> MaybeError {
+                memset(reservation.mappedPointer, clearValue, size);
+                device->CopyFromStagingToBufferHelper(commandContext, reservation.buffer.Get(),
+                                                      reservation.offsetInBuffer, this, offset,
+                                                      size);
+                return {};
+            }));
     }
 
     return {};

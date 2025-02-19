@@ -1278,23 +1278,21 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
                 uint8_t* data = mCommands.NextData<uint8_t>(size);
                 Device* device = ToBackend(GetDevice());
 
-                UploadHandle uploadHandle;
-                DAWN_TRY_ASSIGN(uploadHandle,
-                                device->GetDynamicUploader()->Allocate(
-                                    size, device->GetQueue()->GetPendingCommandSerial(),
-                                    kCopyBufferToBufferOffsetAlignment));
-                DAWN_ASSERT(uploadHandle.mappedBuffer != nullptr);
-                memcpy(uploadHandle.mappedBuffer, data, size);
+                DAWN_TRY(device->GetDynamicUploader()->WithUploadReservation(
+                    size, kCopyBufferToBufferOffsetAlignment,
+                    [&](UploadReservation reservation) -> MaybeError {
+                        memcpy(reservation.mappedPointer, data, size);
+                        dstBuffer->EnsureDataInitializedAsDestination(commandContext, offset, size);
 
-                dstBuffer->EnsureDataInitializedAsDestination(commandContext, offset, size);
-
-                dstBuffer->TrackUsage();
-                [commandContext->EnsureBlit()
-                       copyFromBuffer:ToBackend(uploadHandle.stagingBuffer)->GetMTLBuffer()
-                         sourceOffset:uploadHandle.startOffset
-                             toBuffer:dstBuffer->GetMTLBuffer()
-                    destinationOffset:offset
-                                 size:size];
+                        dstBuffer->TrackUsage();
+                        [commandContext->EnsureBlit()
+                               copyFromBuffer:ToBackend(reservation.buffer)->GetMTLBuffer()
+                                 sourceOffset:reservation.offsetInBuffer
+                                     toBuffer:dstBuffer->GetMTLBuffer()
+                            destinationOffset:offset
+                                         size:size];
+                        return {};
+                    }));
                 break;
             }
 

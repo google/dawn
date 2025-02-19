@@ -1183,23 +1183,22 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
                 Buffer* dstBuffer = ToBackend(write->buffer.Get());
                 uint8_t* data = mCommands.NextData<uint8_t>(size);
 
-                UploadHandle uploadHandle;
-                DAWN_TRY_ASSIGN(uploadHandle,
-                                device->GetDynamicUploader()->Allocate(
-                                    size, device->GetQueue()->GetPendingCommandSerial(),
-                                    kCopyBufferToBufferOffsetAlignment));
-                DAWN_ASSERT(uploadHandle.mappedBuffer != nullptr);
-                memcpy(uploadHandle.mappedBuffer, data, size);
+                DAWN_TRY(device->GetDynamicUploader()->WithUploadReservation(
+                    size, kCopyBufferToBufferOffsetAlignment,
+                    [&](UploadReservation reservation) -> MaybeError {
+                        memcpy(reservation.mappedPointer, data, size);
+                        [[maybe_unused]] bool cleared;
+                        DAWN_TRY_ASSIGN(cleared, dstBuffer->EnsureDataInitializedAsDestination(
+                                                     commandContext, offset, size));
 
-                [[maybe_unused]] bool cleared;
-                DAWN_TRY_ASSIGN(cleared, dstBuffer->EnsureDataInitializedAsDestination(
-                                             commandContext, offset, size));
-
-                dstBuffer->TrackUsageAndTransitionNow(commandContext, wgpu::BufferUsage::CopyDst);
-                commandList->CopyBufferRegion(
-                    dstBuffer->GetD3D12Resource(), offset,
-                    ToBackend(uploadHandle.stagingBuffer)->GetD3D12Resource(),
-                    uploadHandle.startOffset, size);
+                        dstBuffer->TrackUsageAndTransitionNow(commandContext,
+                                                              wgpu::BufferUsage::CopyDst);
+                        commandList->CopyBufferRegion(
+                            dstBuffer->GetD3D12Resource(), offset,
+                            ToBackend(reservation.buffer)->GetD3D12Resource(),
+                            reservation.offsetInBuffer, size);
+                        return {};
+                    }));
                 break;
             }
 

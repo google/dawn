@@ -1181,45 +1181,49 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* recordingContext,
 
         uint32_t bytesPerRow = Align((largestMipSize.width / blockInfo.width) * blockInfo.byteSize,
                                      device->GetOptimalBytesPerRowAlignment());
-        uint64_t bufferSize = bytesPerRow * (largestMipSize.height / blockInfo.height) *
+        uint64_t uploadSize = bytesPerRow * (largestMipSize.height / blockInfo.height) *
                               largestMipSize.depthOrArrayLayers;
-        DynamicUploader* uploader = device->GetDynamicUploader();
-        UploadHandle uploadHandle;
-        DAWN_TRY_ASSIGN(uploadHandle, uploader->Allocate(
-                                          bufferSize, device->GetQueue()->GetPendingCommandSerial(),
-                                          blockInfo.byteSize));
-        memset(uploadHandle.mappedBuffer, uClearColor, bufferSize);
 
-        std::vector<VkBufferImageCopy> regions;
-        for (uint32_t level = range.baseMipLevel; level < range.baseMipLevel + range.levelCount;
-             ++level) {
-            Extent3D copySize = GetMipLevelSingleSubresourcePhysicalSize(level, range.aspects);
-            imageRange.baseMipLevel = level;
-            for (uint32_t layer = range.baseArrayLayer;
-                 layer < range.baseArrayLayer + range.layerCount; ++layer) {
-                if (clearValue == TextureBase::ClearValue::Zero &&
-                    IsSubresourceContentInitialized(
-                        SubresourceRange::SingleMipAndLayer(level, layer, range.aspects))) {
-                    // Skip lazy clears if already initialized.
-                    continue;
+        DAWN_TRY(device->GetDynamicUploader()->WithUploadReservation(
+            uploadSize, blockInfo.byteSize, [&](UploadReservation reservation) -> MaybeError {
+                memset(reservation.mappedPointer, uClearColor, uploadSize);
+
+                std::vector<VkBufferImageCopy> regions;
+                for (uint32_t level = range.baseMipLevel;
+                     level < range.baseMipLevel + range.levelCount; ++level) {
+                    Extent3D copySize =
+                        GetMipLevelSingleSubresourcePhysicalSize(level, range.aspects);
+                    imageRange.baseMipLevel = level;
+                    for (uint32_t layer = range.baseArrayLayer;
+                         layer < range.baseArrayLayer + range.layerCount; ++layer) {
+                        if (clearValue == TextureBase::ClearValue::Zero &&
+                            IsSubresourceContentInitialized(
+                                SubresourceRange::SingleMipAndLayer(level, layer, range.aspects))) {
+                            // Skip lazy clears if already initialized.
+                            continue;
+                        }
+
+                        TexelCopyBufferLayout dataLayout;
+                        dataLayout.offset = reservation.offsetInBuffer;
+                        dataLayout.rowsPerImage = copySize.height / blockInfo.height;
+                        dataLayout.bytesPerRow = bytesPerRow;
+                        TextureCopy textureCopy;
+                        textureCopy.aspect = range.aspects;
+                        textureCopy.mipLevel = level;
+                        textureCopy.origin = {0, 0, layer};
+                        textureCopy.texture = this;
+
+                        regions.push_back(
+                            ComputeBufferImageCopyRegion(dataLayout, textureCopy, copySize));
+                    }
                 }
 
-                TexelCopyBufferLayout dataLayout;
-                dataLayout.offset = uploadHandle.startOffset;
-                dataLayout.rowsPerImage = copySize.height / blockInfo.height;
-                dataLayout.bytesPerRow = bytesPerRow;
-                TextureCopy textureCopy;
-                textureCopy.aspect = range.aspects;
-                textureCopy.mipLevel = level;
-                textureCopy.origin = {0, 0, layer};
-                textureCopy.texture = this;
-
-                regions.push_back(ComputeBufferImageCopyRegion(dataLayout, textureCopy, copySize));
-            }
-        }
-        device->fn.CmdCopyBufferToImage(
-            recordingContext->commandBuffer, ToBackend(uploadHandle.stagingBuffer)->GetHandle(),
-            GetHandle(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, regions.size(), regions.data());
+                device->fn.CmdCopyBufferToImage(recordingContext->commandBuffer,
+                                                ToBackend(reservation.buffer)->GetHandle(),
+                                                GetHandle(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                                                regions.size(), regions.data());
+                return {};
+            }));
     }
 
     if (clearValue == TextureBase::ClearValue::Zero) {

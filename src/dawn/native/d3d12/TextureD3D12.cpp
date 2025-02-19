@@ -824,42 +824,41 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* commandContext,
             uint32_t bytesPerRow =
                 Align((largestMipSize.width / blockInfo.width) * blockInfo.byteSize,
                       kTextureBytesPerRowAlignment);
-            uint64_t bufferSize = bytesPerRow * (largestMipSize.height / blockInfo.height) *
+            uint64_t uploadSize = bytesPerRow * (largestMipSize.height / blockInfo.height) *
                                   largestMipSize.depthOrArrayLayers;
-            DynamicUploader* uploader = device->GetDynamicUploader();
-            UploadHandle uploadHandle;
-            DAWN_TRY_ASSIGN(
-                uploadHandle,
-                uploader->Allocate(bufferSize, device->GetQueue()->GetPendingCommandSerial(),
-                                   blockInfo.byteSize));
-            memset(uploadHandle.mappedBuffer, clearColor, bufferSize);
 
-            for (uint32_t level = range.baseMipLevel; level < range.baseMipLevel + range.levelCount;
-                 ++level) {
-                // compute d3d12 texture copy locations for texture and buffer
-                Extent3D copySize = GetMipLevelSingleSubresourcePhysicalSize(level, aspect);
+            DAWN_TRY(device->GetDynamicUploader()->WithUploadReservation(
+                uploadSize, blockInfo.byteSize, [&](UploadReservation reservation) -> MaybeError {
+                    memset(reservation.mappedPointer, clearColor, uploadSize);
 
-                for (uint32_t layer = range.baseArrayLayer;
-                     layer < range.baseArrayLayer + range.layerCount; ++layer) {
-                    if (clearValue == TextureBase::ClearValue::Zero &&
-                        IsSubresourceContentInitialized(
-                            SubresourceRange::SingleMipAndLayer(level, layer, aspect))) {
-                        // Skip lazy clears if already initialized.
-                        continue;
+                    for (uint32_t level = range.baseMipLevel;
+                         level < range.baseMipLevel + range.levelCount; ++level) {
+                        // compute d3d12 texture copy locations for texture and buffer
+                        Extent3D copySize = GetMipLevelSingleSubresourcePhysicalSize(level, aspect);
+
+                        for (uint32_t layer = range.baseArrayLayer;
+                             layer < range.baseArrayLayer + range.layerCount; ++layer) {
+                            if (clearValue == TextureBase::ClearValue::Zero &&
+                                IsSubresourceContentInitialized(
+                                    SubresourceRange::SingleMipAndLayer(level, layer, aspect))) {
+                                // Skip lazy clears if already initialized.
+                                continue;
+                            }
+
+                            TextureCopy textureCopy;
+                            textureCopy.texture = this;
+                            textureCopy.origin = {0, 0, layer};
+                            textureCopy.mipLevel = level;
+                            textureCopy.aspect = aspect;
+                            RecordBufferTextureCopyWithBufferHandle(
+                                BufferTextureCopyDirection::B2T, commandList,
+                                ToBackend(reservation.buffer)->GetD3D12Resource(),
+                                reservation.offsetInBuffer, bytesPerRow, largestMipSize.height,
+                                textureCopy, copySize);
+                        }
                     }
-
-                    TextureCopy textureCopy;
-                    textureCopy.texture = this;
-                    textureCopy.origin = {0, 0, layer};
-                    textureCopy.mipLevel = level;
-                    textureCopy.aspect = aspect;
-                    RecordBufferTextureCopyWithBufferHandle(
-                        BufferTextureCopyDirection::B2T, commandList,
-                        ToBackend(uploadHandle.stagingBuffer)->GetD3D12Resource(),
-                        uploadHandle.startOffset, bytesPerRow, largestMipSize.height, textureCopy,
-                        copySize);
-                }
-            }
+                    return {};
+                }));
         }
     }
     if (clearValue == TextureBase::ClearValue::Zero) {

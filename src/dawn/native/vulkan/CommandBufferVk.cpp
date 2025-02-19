@@ -1033,26 +1033,25 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* recordingConte
                 Buffer* dstBuffer = ToBackend(write->buffer.Get());
                 uint8_t* data = mCommands.NextData<uint8_t>(size);
 
-                UploadHandle uploadHandle;
-                DAWN_TRY_ASSIGN(uploadHandle,
-                                device->GetDynamicUploader()->Allocate(
-                                    size, device->GetQueue()->GetPendingCommandSerial(),
-                                    kCopyBufferToBufferOffsetAlignment));
-                DAWN_ASSERT(uploadHandle.mappedBuffer != nullptr);
-                memcpy(uploadHandle.mappedBuffer, data, size);
+                DAWN_TRY(device->GetDynamicUploader()->WithUploadReservation(
+                    size, kCopyBufferToBufferOffsetAlignment,
+                    [&](UploadReservation reservation) -> MaybeError {
+                        memcpy(reservation.mappedPointer, data, size);
 
-                dstBuffer->EnsureDataInitializedAsDestination(recordingContext, offset, size);
+                        dstBuffer->EnsureDataInitializedAsDestination(recordingContext, offset,
+                                                                      size);
+                        dstBuffer->TransitionUsageNow(recordingContext, wgpu::BufferUsage::CopyDst);
 
-                dstBuffer->TransitionUsageNow(recordingContext, wgpu::BufferUsage::CopyDst);
+                        VkBufferCopy copy;
+                        copy.srcOffset = reservation.offsetInBuffer;
+                        copy.dstOffset = offset;
+                        copy.size = size;
 
-                VkBufferCopy copy;
-                copy.srcOffset = uploadHandle.startOffset;
-                copy.dstOffset = offset;
-                copy.size = size;
-
-                device->fn.CmdCopyBuffer(commands,
-                                         ToBackend(uploadHandle.stagingBuffer)->GetHandle(),
-                                         dstBuffer->GetHandle(), 1, &copy);
+                        device->fn.CmdCopyBuffer(commands,
+                                                 ToBackend(reservation.buffer)->GetHandle(),
+                                                 dstBuffer->GetHandle(), 1, &copy);
+                        return {};
+                    }));
                 break;
             }
 

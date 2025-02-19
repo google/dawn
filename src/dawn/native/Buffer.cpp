@@ -37,6 +37,7 @@
 #include "absl/strings/str_format.h"
 #include "dawn/common/Alloc.h"
 #include "dawn/common/Assert.h"
+#include "dawn/common/Constants.h"
 #include "dawn/common/StringViewUtils.h"
 #include "dawn/native/Adapter.h"
 #include "dawn/native/CallbackTaskManager.h"
@@ -797,18 +798,12 @@ MaybeError BufferBase::UploadData(uint64_t bufferOffset, const void* data, size_
         return {};
     }
 
-    DeviceBase* device = GetDevice();
-
-    UploadHandle uploadHandle;
-    DAWN_TRY_ASSIGN(uploadHandle, device->GetDynamicUploader()->Allocate(
-                                      size, device->GetQueue()->GetPendingCommandSerial(),
-                                      kCopyBufferToBufferOffsetAlignment));
-    DAWN_ASSERT(uploadHandle.mappedBuffer != nullptr);
-
-    memcpy(uploadHandle.mappedBuffer, data, size);
-
-    return device->CopyFromStagingToBuffer(uploadHandle.stagingBuffer.Get(),
-                                           uploadHandle.startOffset, this, bufferOffset, size);
+    return GetDevice()->GetDynamicUploader()->WithUploadReservation(
+        size, kCopyBufferToBufferOffsetAlignment, [&](UploadReservation reservation) -> MaybeError {
+            memcpy(reservation.mappedPointer, data, size);
+            return GetDevice()->CopyFromStagingToBuffer(
+                reservation.buffer.Get(), reservation.offsetInBuffer, this, bufferOffset, size);
+        });
 }
 
 ExecutionSerial BufferBase::OnEndAccess() {
