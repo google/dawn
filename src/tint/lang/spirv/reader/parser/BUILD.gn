@@ -100,6 +100,7 @@ if (tint_build_unittests) {
         "helper_test.h",
         "import_glsl_std450_test.cc",
         "import_test.cc",
+        "logical_test.cc",
         "memory_test.cc",
         "misc_test.cc",
         "name_test.cc",

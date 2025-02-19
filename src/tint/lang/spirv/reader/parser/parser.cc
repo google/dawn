@@ -722,6 +722,9 @@ class Parser {
                 case spv::Op::OpFSub:
                     EmitBinary(inst, core::BinaryOp::kSubtract);
                     break;
+                case spv::Op::OpFOrdEqual:
+                    EmitBinary(inst, core::BinaryOp::kEqual);
+                    break;
                 case spv::Op::OpISub:
                     EmitSpirvExplicitBuiltinCall(inst, spirv::BuiltinFn::kSub);
                     break;
