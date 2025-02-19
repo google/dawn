@@ -71,7 +71,9 @@ using VkFn = typename VkFnImpl<F>::type;
 struct VulkanFunctions {
     MaybeError LoadGlobalProcs(const DynamicLib& vulkanLib);
     MaybeError LoadInstanceProcs(VkInstance instance, const VulkanGlobalInfo& globalInfo);
-    MaybeError LoadDeviceProcs(VkDevice device, const VulkanDeviceInfo& deviceInfo);
+    MaybeError LoadDeviceProcs(VkInstance instance,
+                               VkDevice device,
+                               const VulkanDeviceInfo& deviceInfo);
 
     // ---------- Global procs
 

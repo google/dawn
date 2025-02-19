@@ -242,7 +242,9 @@ MaybeError VulkanFunctions::LoadInstanceProcs(VkInstance instance,
         }                                                                            \
     } while (0)
 
-MaybeError VulkanFunctions::LoadDeviceProcs(VkDevice device, const VulkanDeviceInfo& deviceInfo) {
+MaybeError VulkanFunctions::LoadDeviceProcs(VkInstance instance,
+                                            VkDevice device,
+                                            const VulkanDeviceInfo& deviceInfo) {
     GET_DEVICE_PROC(AllocateCommandBuffers);
     GET_DEVICE_PROC(AllocateDescriptorSets);
     GET_DEVICE_PROC(AllocateMemory);
@@ -420,8 +422,10 @@ MaybeError VulkanFunctions::LoadDeviceProcs(VkDevice device, const VulkanDeviceI
     }
 #endif  // DAWN_PLATFORM_IS(ANDROID)
 
+    // TODO(crbug.com/397448368): This should be queried with GET_DEVICE_PROC instead, but Mali and
+    // Intel drivers seem to only provide a non-null function pointer via the instance query.
     if (deviceInfo.HasExt(DeviceExt::CooperativeMatrix)) {
-        GET_DEVICE_PROC(GetPhysicalDeviceCooperativeMatrixPropertiesKHR);
+        GET_INSTANCE_PROC(GetPhysicalDeviceCooperativeMatrixPropertiesKHR);
     }
 
     return {};
