@@ -1344,6 +1344,9 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* commandCont
                 break;
             }
 
+            case Command::SetImmediateData:
+                return DAWN_UNIMPLEMENTED_ERROR("SetImmediateData unimplemented");
+
             default:
                 DAWN_UNREACHABLE();
         }
@@ -1869,6 +1872,9 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
                 RecordWriteTimestampCmd(commandList, cmd->querySet.Get(), cmd->queryIndex);
                 break;
             }
+
+            case Command::SetImmediateData:
+                return DAWN_UNIMPLEMENTED_ERROR("SetImmediateData unimplemented");
 
             default: {
                 DAWN_TRY(EncodeRenderBundleCommand(&mCommands, type));

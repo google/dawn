@@ -552,6 +552,9 @@ MaybeError CommandBuffer::ExecuteComputePass(
                 break;
             }
 
+            case Command::SetImmediateData:
+                return DAWN_UNIMPLEMENTED_ERROR("SetImmediateData unimplemented");
+
             default:
                 DAWN_UNREACHABLE();
         }
@@ -915,6 +918,9 @@ MaybeError CommandBuffer::ExecuteRenderPass(
 
             case Command::WriteTimestamp:
                 return DAWN_UNIMPLEMENTED_ERROR("WriteTimestamp unimplemented");
+
+            case Command::SetImmediateData:
+                return DAWN_UNIMPLEMENTED_ERROR("SetImmediateData unimplemented");
 
             default: {
                 DAWN_TRY(DoRenderBundleCommand(&mCommands, type));

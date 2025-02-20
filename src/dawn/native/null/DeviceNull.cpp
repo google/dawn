@@ -92,7 +92,8 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
     // Set the subgroups limit, as DeviceNull should support subgroups feature.
     limits->experimentalSubgroupLimits.minSubgroupSize = 4;
     limits->experimentalSubgroupLimits.maxSubgroupSize = 128;
-    limits->experimentalImmediateDataLimits.maxImmediateDataRangeByteSize = 16;
+    limits->experimentalImmediateDataLimits.maxImmediateDataRangeByteSize =
+        kMaxExternalImmediateConstantsPerPipeline * kImmediateConstantElementByteSize;
     return {};
 }
 

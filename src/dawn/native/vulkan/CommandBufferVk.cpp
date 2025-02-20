@@ -1207,6 +1207,9 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* recordingCo
                 break;
             }
 
+            case Command::SetImmediateData:
+                return DAWN_UNIMPLEMENTED_ERROR("SetImmediateData unimplemented");
+
             default:
                 DAWN_UNREACHABLE();
         }
@@ -1587,6 +1590,9 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
                                         cmd->queryIndex, true, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT);
                 break;
             }
+
+            case Command::SetImmediateData:
+                return DAWN_UNIMPLEMENTED_ERROR("SetImmediateData unimplemented");
 
             default: {
                 EncodeRenderBundleCommand(&mCommands, type);
