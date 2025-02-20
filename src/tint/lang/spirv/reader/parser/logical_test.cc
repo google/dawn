@@ -112,7 +112,7 @@ TEST_P(SpirvParser_FOrdLogicalTest, Vector) {
 )");
 }
 
-INSTANTIATE_TEST_SUITE_P(SpirvParser,
+INSTANTIATE_TEST_SUITE_P(SpirvParserTest,
                          SpirvParser_FOrdLogicalTest,
                          testing::Values(SpirvLogicalParam{"Equal", "eq"},
                                          SpirvLogicalParam{"NotEqual", "neq"},
@@ -196,7 +196,7 @@ TEST_P(SpirvParser_FUnordLogicalTest, FOrd_Vector) {
 )");
 }
 
-INSTANTIATE_TEST_SUITE_P(SpirvParser,
+INSTANTIATE_TEST_SUITE_P(SpirvParserTest,
                          SpirvParser_FUnordLogicalTest,
                          testing::Values(SpirvLogicalParam{"Equal", "neq"},
                                          SpirvLogicalParam{"NotEqual", "eq"},
@@ -204,6 +204,318 @@ INSTANTIATE_TEST_SUITE_P(SpirvParser,
                                          SpirvLogicalParam{"GreaterThanEqual", "lt"},
                                          SpirvLogicalParam{"LessThan", "gte"},
                                          SpirvLogicalParam{"LessThanEqual", "gt"}));
+
+TEST_F(SpirvParserTest, IEqual_Scalar_SignedSigned) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpCapability Float16
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %bool = OpTypeBool
+        %int = OpTypeInt 32 1
+       %uint = OpTypeInt 32 0
+     %v2bool = OpTypeVector %bool 2
+      %v2int = OpTypeVector %int 2
+     %v2uint = OpTypeVector %uint 2
+        %one = OpConstant %int 1
+        %two = OpConstant %int 2
+      %eight = OpConstant %uint 8
+       %nine = OpConstant %uint 9
+      %v2one = OpConstantComposite %v2int %one %one
+      %v2two = OpConstantComposite %v2int %two %two
+      %v2eight = OpConstantComposite %v2uint %eight %eight
+      %v2nine = OpConstantComposite %v2uint %nine %nine
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+          %1 = OpIEqual %bool %one %two
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:bool = spirv.equal 1i, 2i
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, IEqual_Scalar_SignedUnsigned) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpCapability Float16
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %bool = OpTypeBool
+        %int = OpTypeInt 32 1
+       %uint = OpTypeInt 32 0
+     %v2bool = OpTypeVector %bool 2
+      %v2int = OpTypeVector %int 2
+     %v2uint = OpTypeVector %uint 2
+        %one = OpConstant %int 1
+        %two = OpConstant %int 2
+      %eight = OpConstant %uint 8
+       %nine = OpConstant %uint 9
+      %v2one = OpConstantComposite %v2int %one %one
+      %v2two = OpConstantComposite %v2int %two %two
+      %v2eight = OpConstantComposite %v2uint %eight %eight
+      %v2nine = OpConstantComposite %v2uint %nine %nine
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+          %1 = OpIEqual %bool %one %eight
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:bool = spirv.equal 1i, 8u
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, IEqual_Scalar_UnsignedSigned) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpCapability Float16
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %bool = OpTypeBool
+        %int = OpTypeInt 32 1
+       %uint = OpTypeInt 32 0
+     %v2bool = OpTypeVector %bool 2
+      %v2int = OpTypeVector %int 2
+     %v2uint = OpTypeVector %uint 2
+        %one = OpConstant %int 1
+        %two = OpConstant %int 2
+      %eight = OpConstant %uint 8
+       %nine = OpConstant %uint 9
+      %v2one = OpConstantComposite %v2int %one %one
+      %v2two = OpConstantComposite %v2int %two %two
+      %v2eight = OpConstantComposite %v2uint %eight %eight
+      %v2nine = OpConstantComposite %v2uint %nine %nine
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+          %1 = OpIEqual %bool %eight %one
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:bool = spirv.equal 8u, 1i
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, IEqual_Scalar_UnsignedUnsigned) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpCapability Float16
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %bool = OpTypeBool
+        %int = OpTypeInt 32 1
+       %uint = OpTypeInt 32 0
+     %v2bool = OpTypeVector %bool 2
+      %v2int = OpTypeVector %int 2
+     %v2uint = OpTypeVector %uint 2
+        %one = OpConstant %int 1
+        %two = OpConstant %int 2
+      %eight = OpConstant %uint 8
+       %nine = OpConstant %uint 9
+      %v2one = OpConstantComposite %v2int %one %one
+      %v2two = OpConstantComposite %v2int %two %two
+      %v2eight = OpConstantComposite %v2uint %eight %eight
+      %v2nine = OpConstantComposite %v2uint %nine %nine
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+          %1 = OpIEqual %bool %eight %nine
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:bool = spirv.equal 8u, 9u
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, IEqual_Vector_SignedSigned) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpCapability Float16
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %bool = OpTypeBool
+        %int = OpTypeInt 32 1
+       %uint = OpTypeInt 32 0
+     %v2bool = OpTypeVector %bool 2
+      %v2int = OpTypeVector %int 2
+     %v2uint = OpTypeVector %uint 2
+        %one = OpConstant %int 1
+        %two = OpConstant %int 2
+      %eight = OpConstant %uint 8
+       %nine = OpConstant %uint 9
+      %v2one = OpConstantComposite %v2int %one %one
+      %v2two = OpConstantComposite %v2int %two %two
+      %v2eight = OpConstantComposite %v2uint %eight %eight
+      %v2nine = OpConstantComposite %v2uint %nine %nine
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+          %1 = OpIEqual %v2bool %v2one %v2two
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<bool> = spirv.equal vec2<i32>(1i), vec2<i32>(2i)
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, IEqual_Vector_SignedUnsigned) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpCapability Float16
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %bool = OpTypeBool
+        %int = OpTypeInt 32 1
+       %uint = OpTypeInt 32 0
+     %v2bool = OpTypeVector %bool 2
+      %v2int = OpTypeVector %int 2
+     %v2uint = OpTypeVector %uint 2
+        %one = OpConstant %int 1
+        %two = OpConstant %int 2
+      %eight = OpConstant %uint 8
+       %nine = OpConstant %uint 9
+      %v2one = OpConstantComposite %v2int %one %one
+      %v2two = OpConstantComposite %v2int %two %two
+      %v2eight = OpConstantComposite %v2uint %eight %eight
+      %v2nine = OpConstantComposite %v2uint %nine %nine
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+          %1 = OpIEqual %v2bool %v2one %v2eight
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<bool> = spirv.equal vec2<i32>(1i), vec2<u32>(8u)
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, IEqual_Vector_UnsignedSigned) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpCapability Float16
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %bool = OpTypeBool
+        %int = OpTypeInt 32 1
+       %uint = OpTypeInt 32 0
+     %v2bool = OpTypeVector %bool 2
+      %v2int = OpTypeVector %int 2
+     %v2uint = OpTypeVector %uint 2
+        %one = OpConstant %int 1
+        %two = OpConstant %int 2
+      %eight = OpConstant %uint 8
+       %nine = OpConstant %uint 9
+      %v2one = OpConstantComposite %v2int %one %one
+      %v2two = OpConstantComposite %v2int %two %two
+      %v2eight = OpConstantComposite %v2uint %eight %eight
+      %v2nine = OpConstantComposite %v2uint %nine %nine
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+          %1 = OpIEqual %v2bool %v2eight %v2one
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<bool> = spirv.equal vec2<u32>(8u), vec2<i32>(1i)
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, IEqual_Vector_UnsignedUnsigned) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpCapability Float16
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %bool = OpTypeBool
+        %int = OpTypeInt 32 1
+       %uint = OpTypeInt 32 0
+     %v2bool = OpTypeVector %bool 2
+      %v2int = OpTypeVector %int 2
+     %v2uint = OpTypeVector %uint 2
+        %one = OpConstant %int 1
+        %two = OpConstant %int 2
+      %eight = OpConstant %uint 8
+       %nine = OpConstant %uint 9
+      %v2one = OpConstantComposite %v2int %one %one
+      %v2two = OpConstantComposite %v2int %two %two
+      %v2eight = OpConstantComposite %v2uint %eight %eight
+      %v2nine = OpConstantComposite %v2uint %nine %nine
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+          %1 = OpIEqual %v2bool %v2eight %v2nine
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<bool> = spirv.equal vec2<u32>(8u), vec2<u32>(9u)
+    ret
+  }
+}
+)");
+}
 
 }  // namespace
 }  // namespace tint::spirv::reader

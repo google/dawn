@@ -428,6 +428,9 @@ implicit(A: iu32, B: iu32, N: num) fn bitwiseOr<R: iu32>(vec<N, A>, vec<N, B>) -
 implicit(A: iu32, B: iu32) fn bitwiseXor<R: iu32>(A, B) -> R
 implicit(A: iu32, B: iu32, N: num) fn bitwiseXor<R: iu32>(vec<N, A>, vec<N, B>) -> vec<N, R>
 
+implicit(A: iu32, B: iu32) fn equal(A, B) -> bool
+implicit(A: iu32, B: iu32, N: num) fn equal(vec<N, A>, vec<N, B>) -> vec<N, bool>
+
 ////////////////////////////////////////////////////////////////////////////////
 // SPV_KHR_integer_dot_product instructions
 ////////////////////////////////////////////////////////////////////////////////

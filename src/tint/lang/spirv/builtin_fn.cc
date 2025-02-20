@@ -176,6 +176,8 @@ const char* str(BuiltinFn i) {
             return "bitwiseOr";
         case BuiltinFn::kBitwiseXor:
             return "bitwiseXor";
+        case BuiltinFn::kEqual:
+            return "equal";
         case BuiltinFn::kSdot:
             return "sdot";
         case BuiltinFn::kUdot:
@@ -272,6 +274,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kBitwiseAnd:
         case BuiltinFn::kBitwiseOr:
         case BuiltinFn::kBitwiseXor:
+        case BuiltinFn::kEqual:
             break;
     }
     return core::ir::Instruction::Accesses{};

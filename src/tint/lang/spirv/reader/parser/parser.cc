@@ -758,6 +758,9 @@ class Parser {
                 case spv::Op::OpFUnordLessThanEqual:
                     EmitInvertedBinary(inst, core::BinaryOp::kGreaterThan);
                     break;
+                case spv::Op::OpIEqual:
+                    EmitSpirvBuiltinCall(inst, spirv::BuiltinFn::kEqual);
+                    break;
                 case spv::Op::OpISub:
                     EmitSpirvExplicitBuiltinCall(inst, spirv::BuiltinFn::kSub);
                     break;

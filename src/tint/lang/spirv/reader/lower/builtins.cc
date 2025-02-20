@@ -164,6 +164,9 @@ struct State {
                 case spirv::BuiltinFn::kBitwiseXor:
                     BitwiseXor(builtin);
                     break;
+                case spirv::BuiltinFn::kEqual:
+                    Equal(builtin);
+                    break;
                 default:
                     TINT_UNREACHABLE() << "unknown spirv builtin: " << builtin->Func();
             }
@@ -284,6 +287,21 @@ struct State {
     }
     void SMod(spirv::ir::BuiltinCall* call) {
         EmitBinaryWrappedSignedSpirvMethods(call, core::BinaryOp::kModulo);
+    }
+
+    void Equal(spirv::ir::BuiltinCall* call) {
+        const auto& args = call->Args();
+        auto* lhs = args[0];
+        auto* rhs = args[1];
+
+        b.InsertBefore(call, [&] {
+            if (rhs->Type() != lhs->Type()) {
+                rhs = b.Bitcast(lhs->Type(), rhs)->Result(0);
+            }
+
+            b.BinaryWithResult(call->DetachResult(), core::BinaryOp::kEqual, lhs, rhs)->Result(0);
+        });
+        call->Destroy();
     }
 
     // The SPIR-V Signed methods all interpret their arguments as signed (regardless of the type of
