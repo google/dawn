@@ -1574,5 +1574,93 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(IR_SubstituteOverridesTest, OverrideInvalidRepresentationU32) {
+    b.Append(mod.root_block, [&] {
+        auto* x = b.Override("x", ty.u32());
+        x->SetOverrideId({2});
+    });
+    auto* src = R"(
+$B1: {  # root
+  %x:u32 = override @id(2)
+}
+
+)";
+    EXPECT_EQ(src, str());
+
+    SubstituteOverridesConfig cfg{};
+    cfg.map[OverrideId{2}] = -100.0;
+    auto result = RunWithFailure(SubstituteOverrides, cfg);
+    ASSERT_NE(result, Success);
+    EXPECT_EQ(
+        result.Failure().reason.Str(),
+        R"(error: Pipeline overridable constant 2 with value (-100.0)  is not representable in type (u32))");
+}
+
+TEST_F(IR_SubstituteOverridesTest, OverrideInvalidRepresentationI32) {
+    b.Append(mod.root_block, [&] {
+        auto* x = b.Override("x", ty.i32());
+        x->SetOverrideId({2});
+    });
+    auto* src = R"(
+$B1: {  # root
+  %x:i32 = override @id(2)
+}
+
+)";
+    EXPECT_EQ(src, str());
+
+    SubstituteOverridesConfig cfg{};
+    cfg.map[OverrideId{2}] = 8'000'000'000.0;
+    auto result = RunWithFailure(SubstituteOverrides, cfg);
+    ASSERT_NE(result, Success);
+    EXPECT_EQ(
+        result.Failure().reason.Str(),
+        R"(error: Pipeline overridable constant 2 with value (8000000000.0)  is not representable in type (i32))");
+}
+
+TEST_F(IR_SubstituteOverridesTest, OverrideInvalidRepresentationF32) {
+    b.Append(mod.root_block, [&] {
+        auto* x = b.Override("x", ty.f32());
+        x->SetOverrideId({2});
+    });
+    auto* src = R"(
+$B1: {  # root
+  %x:f32 = override @id(2)
+}
+
+)";
+    EXPECT_EQ(src, str());
+
+    SubstituteOverridesConfig cfg{};
+    cfg.map[OverrideId{2}] = 3.14e40;
+    auto result = RunWithFailure(SubstituteOverrides, cfg);
+    ASSERT_NE(result, Success);
+    EXPECT_EQ(
+        result.Failure().reason.Str(),
+        R"(error: Pipeline overridable constant 2 with value (31399999999999998802000170346751583059968.0)  is not representable in type (f32))");
+}
+
+TEST_F(IR_SubstituteOverridesTest, OverrideInvalidRepresentationF16) {
+    b.Append(mod.root_block, [&] {
+        auto* x = b.Override("x", ty.f16());
+        x->SetOverrideId({2});
+    });
+    auto* src = R"(
+$B1: {  # root
+  %x:f16 = override @id(2)
+}
+
+)";
+    EXPECT_EQ(src, str());
+
+    SubstituteOverridesConfig cfg{};
+    cfg.map[OverrideId{2}] = 65505;
+    auto result = RunWithFailure(SubstituteOverrides, cfg);
+    ASSERT_NE(result, Success);
+    EXPECT_EQ(
+        result.Failure().reason.Str(),
+        R"(error: Pipeline overridable constant 2 with value (65505.0)  is not representable in type (f16))");
+}
+
 }  // namespace
 }  // namespace tint::core::ir::transform

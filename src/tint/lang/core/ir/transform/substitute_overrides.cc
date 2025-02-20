@@ -27,10 +27,12 @@
 
 #include "src/tint/lang/core/ir/transform/substitute_overrides.h"
 
+#include <cstdint>
 #include <functional>
 #include <utility>
 
 #include "src/tint/lang/core/binary_op.h"
+#include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/ir/binary.h"
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/const_param_validator.h"
@@ -46,6 +48,7 @@
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/ir/value.h"
 #include "src/tint/utils/result/result.h"
+#include "src/utils/numeric.h"
 
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
@@ -96,6 +99,33 @@ struct State {
             // Check if the user provided an override for the given ID.
             auto iter = cfg.map.find(override->OverrideId());
             if (iter != cfg.map.end()) {
+                bool substitution_representation_valid = tint::Switch(
+                    override->Result(0)->Type(),  //
+                    [&](const core::type::Bool*) { return true; },
+                    [&](const core::type::I32*) {
+                        return dawn::IsDoubleValueRepresentable<int32_t>(iter->second);
+                    },
+                    [&](const core::type::U32*) {
+                        return dawn::IsDoubleValueRepresentable<uint32_t>(iter->second);
+                    },
+                    [&](const core::type::F32*) {
+                        return dawn::IsDoubleValueRepresentable<float>(iter->second);
+                    },
+                    [&](const core::type::F16*) {
+                        return dawn::IsDoubleValueRepresentableAsF16(iter->second);
+                    },
+                    TINT_ICE_ON_NO_MATCH);
+
+                if (!substitution_representation_valid) {
+                    diag::Diagnostic error{};
+                    error.severity = diag::Severity::Error;
+                    error.source = ir.SourceOf(override);
+                    error << "Pipeline overridable constant " << iter->first.value
+                          << " with value (" << iter->second << ")  is not representable in type ("
+                          << override->Result(0)->Type()->FriendlyName() << ")";
+                    return Failure(error);
+                }
+
                 auto* replacement = CreateConstant(override->Result(0)->Type(), iter->second);
                 override->SetInitializer(replacement);
             }
