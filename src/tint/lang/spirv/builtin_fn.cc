@@ -172,6 +172,14 @@ const char* str(BuiltinFn i) {
             return "s_less_than";
         case BuiltinFn::kSLessThanEqual:
             return "s_less_than_equal";
+        case BuiltinFn::kUGreaterThan:
+            return "u_greater_than";
+        case BuiltinFn::kUGreaterThanEqual:
+            return "u_greater_than_equal";
+        case BuiltinFn::kULessThan:
+            return "u_less_than";
+        case BuiltinFn::kULessThanEqual:
+            return "u_less_than_equal";
         case BuiltinFn::kConvertFToS:
             return "convertFToS";
         case BuiltinFn::kConvertSToF:
@@ -290,6 +298,10 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kSGreaterThanEqual:
         case BuiltinFn::kSLessThan:
         case BuiltinFn::kSLessThanEqual:
+        case BuiltinFn::kUGreaterThan:
+        case BuiltinFn::kUGreaterThanEqual:
+        case BuiltinFn::kULessThan:
+        case BuiltinFn::kULessThanEqual:
             break;
     }
     return core::ir::Instruction::Accesses{};

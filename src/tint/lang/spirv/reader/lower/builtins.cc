@@ -182,6 +182,18 @@ struct State {
                 case spirv::BuiltinFn::kSLessThanEqual:
                     SLessThanEqual(builtin);
                     break;
+                case spirv::BuiltinFn::kUGreaterThan:
+                    UGreaterThan(builtin);
+                    break;
+                case spirv::BuiltinFn::kUGreaterThanEqual:
+                    UGreaterThanEqual(builtin);
+                    break;
+                case spirv::BuiltinFn::kULessThan:
+                    ULessThan(builtin);
+                    break;
+                case spirv::BuiltinFn::kULessThanEqual:
+                    ULessThanEqual(builtin);
+                    break;
                 default:
                     TINT_UNREACHABLE() << "unknown spirv builtin: " << builtin->Func();
             }
@@ -354,6 +366,37 @@ struct State {
     }
     void SLessThanEqual(spirv::ir::BuiltinCall* call) {
         EmitBinaryWithSignedArgs(call, core::BinaryOp::kLessThanEqual);
+    }
+
+    void EmitBinaryWithUnsignedArgs(spirv::ir::BuiltinCall* call, core::BinaryOp op) {
+        const auto& args = call->Args();
+        auto* lhs = args[0];
+        auto* rhs = args[1];
+
+        auto* arg_ty = ty.MatchWidth(ty.u32(), call->Result(0)->Type());
+        b.InsertBefore(call, [&] {
+            if (lhs->Type() != arg_ty) {
+                lhs = b.Bitcast(arg_ty, lhs)->Result(0);
+            }
+            if (rhs->Type() != arg_ty) {
+                rhs = b.Bitcast(arg_ty, rhs)->Result(0);
+            }
+
+            b.BinaryWithResult(call->DetachResult(), op, lhs, rhs)->Result(0);
+        });
+        call->Destroy();
+    }
+    void UGreaterThan(spirv::ir::BuiltinCall* call) {
+        EmitBinaryWithUnsignedArgs(call, core::BinaryOp::kGreaterThan);
+    }
+    void UGreaterThanEqual(spirv::ir::BuiltinCall* call) {
+        EmitBinaryWithUnsignedArgs(call, core::BinaryOp::kGreaterThanEqual);
+    }
+    void ULessThan(spirv::ir::BuiltinCall* call) {
+        EmitBinaryWithUnsignedArgs(call, core::BinaryOp::kLessThan);
+    }
+    void ULessThanEqual(spirv::ir::BuiltinCall* call) {
+        EmitBinaryWithUnsignedArgs(call, core::BinaryOp::kLessThanEqual);
     }
 
     // The SPIR-V Signed methods all interpret their arguments as signed (regardless of the type of

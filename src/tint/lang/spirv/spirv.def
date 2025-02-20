@@ -423,6 +423,15 @@ implicit(A: iu32, B: iu32, N: num) fn s_less_than(vec<N, A>, vec<N, B>) -> vec<N
 implicit(A: iu32, B: iu32) fn s_less_than_equal(A, B) -> bool
 implicit(A: iu32, B: iu32, N: num) fn s_less_than_equal(vec<N, A>, vec<N, B>) -> vec<N, bool>
 
+implicit(A: iu32, B: iu32) fn u_greater_than(A, B) -> bool
+implicit(A: iu32, B: iu32, N: num) fn u_greater_than(vec<N, A>, vec<N, B>) -> vec<N, bool>
+implicit(A: iu32, B: iu32) fn u_greater_than_equal(A, B) -> bool
+implicit(A: iu32, B: iu32, N: num) fn u_greater_than_equal(vec<N, A>, vec<N, B>) -> vec<N, bool>
+implicit(A: iu32, B: iu32) fn u_less_than(A, B) -> bool
+implicit(A: iu32, B: iu32, N: num) fn u_less_than(vec<N, A>, vec<N, B>) -> vec<N, bool>
+implicit(A: iu32, B: iu32) fn u_less_than_equal(A, B) -> bool
+implicit(A: iu32, B: iu32, N: num) fn u_less_than_equal(vec<N, A>, vec<N, B>) -> vec<N, bool>
+
 implicit(T: f32_f16) fn convertFToS<R: iu32>(T) -> R
 implicit(T: f32_f16, N: num) fn convertFToS<R: iu32>(vec<N, T>) -> vec<N, R>
 implicit(T: iu32) fn convertSToF<R: f32_f16>(T) -> R

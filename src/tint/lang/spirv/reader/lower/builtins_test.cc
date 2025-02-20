@@ -6591,5 +6591,291 @@ INSTANTIATE_TEST_SUITE_P(
         SpirvReaderParams{spirv::BuiltinFn::kSLessThan, "s_less_than", "lt"},
         SpirvReaderParams{spirv::BuiltinFn::kSLessThanEqual, "s_less_than_equal", "lte"}));
 
+using SpirvReader_UnsignedIntegerTest =
+    core::ir::transform::TransformTestWithParam<SpirvReaderParams>;
+TEST_P(SpirvReader_UnsignedIntegerTest, Scalar_SignedSigned) {
+    auto param = GetParam();
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.Call<spirv::ir::BuiltinCall>(ty.bool_(), param.fn, 1_i, 2_i);
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:bool = spirv.)" +
+               param.spv_name + R"( 1i, 2i
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = bitcast 1i
+    %3:u32 = bitcast 2i
+    %4:bool = )" + param.wgsl_name +
+                  R"( %2, %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_P(SpirvReader_UnsignedIntegerTest, Scalar_SignedUnsigned) {
+    auto param = GetParam();
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.Call<spirv::ir::BuiltinCall>(ty.bool_(), param.fn, 1_i, 8_u);
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:bool = spirv.)" +
+               param.spv_name + R"( 1i, 8u
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = bitcast 1i
+    %3:bool = )" + param.wgsl_name +
+                  R"( %2, 8u
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_P(SpirvReader_UnsignedIntegerTest, Scalar_UnsignedSigned) {
+    auto param = GetParam();
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.Call<spirv::ir::BuiltinCall>(ty.bool_(), param.fn, 8_u, 1_i);
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:bool = spirv.)" +
+               param.spv_name + R"( 8u, 1i
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = bitcast 1i
+    %3:bool = )" + param.wgsl_name +
+                  R"( 8u, %2
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_P(SpirvReader_UnsignedIntegerTest, Scalar_UnsignedUnsigned) {
+    auto param = GetParam();
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.Call<spirv::ir::BuiltinCall>(ty.bool_(), param.fn, 8_u, 9_u);
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:bool = spirv.)" +
+               param.spv_name + R"( 8u, 9u
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:bool = )" + param.wgsl_name +
+                  R"( 8u, 9u
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_P(SpirvReader_UnsignedIntegerTest, Vector_SignedSigned) {
+    auto param = GetParam();
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.Call<spirv::ir::BuiltinCall>(ty.vec2<bool>(), param.fn, b.Splat<vec2<i32>>(1_i),
+                                       b.Splat<vec2<i32>>(2_i));
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<bool> = spirv.)" +
+               param.spv_name + R"( vec2<i32>(1i), vec2<i32>(2i)
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<u32> = bitcast vec2<i32>(1i)
+    %3:vec2<u32> = bitcast vec2<i32>(2i)
+    %4:vec2<bool> = )" +
+                  param.wgsl_name + R"( %2, %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_P(SpirvReader_UnsignedIntegerTest, Vector_SignedUnsigned) {
+    auto param = GetParam();
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.Call<spirv::ir::BuiltinCall>(ty.vec2<bool>(), param.fn, b.Splat<vec2<i32>>(1_i),
+                                       b.Splat<vec2<u32>>(8_u));
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<bool> = spirv.)" +
+               param.spv_name + R"( vec2<i32>(1i), vec2<u32>(8u)
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<u32> = bitcast vec2<i32>(1i)
+    %3:vec2<bool> = )" +
+                  param.wgsl_name + R"( %2, vec2<u32>(8u)
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_P(SpirvReader_UnsignedIntegerTest, Vector_UnsignedSigned) {
+    auto param = GetParam();
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.Call<spirv::ir::BuiltinCall>(ty.vec2<bool>(), param.fn, b.Splat<vec2<u32>>(8_u),
+                                       b.Splat<vec2<i32>>(1_i));
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<bool> = spirv.)" +
+               param.spv_name + R"( vec2<u32>(8u), vec2<i32>(1i)
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<u32> = bitcast vec2<i32>(1i)
+    %3:vec2<bool> = )" +
+                  param.wgsl_name + R"( vec2<u32>(8u), %2
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_P(SpirvReader_UnsignedIntegerTest, Vector_UnsignedUnsigned) {
+    auto param = GetParam();
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.Call<spirv::ir::BuiltinCall>(ty.vec2<bool>(), param.fn, b.Splat<vec2<u32>>(8_u),
+                                       b.Splat<vec2<u32>>(9_u));
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<bool> = spirv.)" +
+               param.spv_name + R"( vec2<u32>(8u), vec2<u32>(9u)
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<bool> = )" +
+                  param.wgsl_name + R"( vec2<u32>(8u), vec2<u32>(9u)
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+INSTANTIATE_TEST_SUITE_P(
+    SpirvReader,
+    SpirvReader_UnsignedIntegerTest,
+    ::testing::Values(
+        SpirvReaderParams{spirv::BuiltinFn::kUGreaterThan, "u_greater_than", "gt"},
+        SpirvReaderParams{spirv::BuiltinFn::kUGreaterThanEqual, "u_greater_than_equal", "gte"},
+        SpirvReaderParams{spirv::BuiltinFn::kULessThan, "u_less_than", "lt"},
+        SpirvReaderParams{spirv::BuiltinFn::kULessThanEqual, "u_less_than_equal", "lte"}));
+
 }  // namespace
 }  // namespace tint::spirv::reader::lower

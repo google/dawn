@@ -115,6 +115,10 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kSGreaterThanEqual:
         case BuiltinFn::kSLessThan:
         case BuiltinFn::kSLessThanEqual:
+        case BuiltinFn::kUGreaterThan:
+        case BuiltinFn::kUGreaterThanEqual:
+        case BuiltinFn::kULessThan:
+        case BuiltinFn::kULessThanEqual:
             break;
     }
     return core::ir::Instruction::Accesses{};

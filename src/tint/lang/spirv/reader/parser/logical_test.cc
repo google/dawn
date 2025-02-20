@@ -542,15 +542,19 @@ TEST_P(SpirvParser_IntegerTest, Vector_UnsignedUnsigned) {
 )");
 }
 
-INSTANTIATE_TEST_SUITE_P(SpirvParserTest,
-                         SpirvParser_IntegerTest,
-                         testing::Values(SpirvLogicalParam{"IEqual", "equal"},
-                                         SpirvLogicalParam{"INotEqual", "not_equal"},
-                                         SpirvLogicalParam{"SGreaterThan", "s_greater_than"},
-                                         SpirvLogicalParam{"SGreaterThanEqual",
-                                                           "s_greater_than_equal"},
-                                         SpirvLogicalParam{"SLessThan", "s_less_than"},
-                                         SpirvLogicalParam{"SLessThanEqual", "s_less_than_equal"}));
+INSTANTIATE_TEST_SUITE_P(
+    SpirvParserTest,
+    SpirvParser_IntegerTest,
+    testing::Values(SpirvLogicalParam{"IEqual", "equal"},
+                    SpirvLogicalParam{"INotEqual", "not_equal"},
+                    SpirvLogicalParam{"SGreaterThan", "s_greater_than"},
+                    SpirvLogicalParam{"SGreaterThanEqual", "s_greater_than_equal"},
+                    SpirvLogicalParam{"SLessThan", "s_less_than"},
+                    SpirvLogicalParam{"SLessThanEqual", "s_less_than_equal"},
+                    SpirvLogicalParam{"UGreaterThan", "u_greater_than"},
+                    SpirvLogicalParam{"UGreaterThanEqual", "u_greater_than_equal"},
+                    SpirvLogicalParam{"ULessThan", "u_less_than"},
+                    SpirvLogicalParam{"ULessThanEqual", "u_less_than_equal"}));
 
 using SpirvParser_LogicalTest = SpirvParserTestWithParam<SpirvLogicalParam>;
 TEST_P(SpirvParser_LogicalTest, Scalar) {
