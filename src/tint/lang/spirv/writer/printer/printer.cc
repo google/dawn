@@ -1548,6 +1548,18 @@ class Printer {
             case BuiltinFn::kNotEqual:
                 op = spv::Op::OpINotEqual;
                 break;
+            case BuiltinFn::kSGreaterThan:
+                op = spv::Op::OpSGreaterThan;
+                break;
+            case BuiltinFn::kSGreaterThanEqual:
+                op = spv::Op::OpSGreaterThanEqual;
+                break;
+            case BuiltinFn::kSLessThan:
+                op = spv::Op::OpSLessThan;
+                break;
+            case BuiltinFn::kSLessThanEqual:
+                op = spv::Op::OpSLessThanEqual;
+                break;
             case spirv::BuiltinFn::kNone:
                 TINT_ICE() << "undefined spirv ir function";
         }

@@ -5949,23 +5949,23 @@ constexpr OverloadInfo kOverloads[] = {
   {
     /* [178] */
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
-    /* num_parameters */ 1,
-    /* num_explicit_templates */ 1,
+    /* num_parameters */ 2,
+    /* num_explicit_templates */ 0,
     /* num_templates   */ 2,
-    /* templates */ TemplateIndex(79),
-    /* parameters */ ParameterIndex(1),
-    /* return_matcher_indices */ MatcherIndicesIndex(4),
+    /* templates */ TemplateIndex(22),
+    /* parameters */ ParameterIndex(6),
+    /* return_matcher_indices */ MatcherIndicesIndex(17),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
     /* [179] */
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
-    /* num_parameters */ 1,
-    /* num_explicit_templates */ 1,
+    /* num_parameters */ 2,
+    /* num_explicit_templates */ 0,
     /* num_templates   */ 3,
-    /* templates */ TemplateIndex(79),
-    /* parameters */ ParameterIndex(362),
-    /* return_matcher_indices */ MatcherIndicesIndex(149),
+    /* templates */ TemplateIndex(52),
+    /* parameters */ ParameterIndex(361),
+    /* return_matcher_indices */ MatcherIndicesIndex(179),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -5974,7 +5974,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_parameters */ 1,
     /* num_explicit_templates */ 1,
     /* num_templates   */ 2,
-    /* templates */ TemplateIndex(82),
+    /* templates */ TemplateIndex(79),
     /* parameters */ ParameterIndex(1),
     /* return_matcher_indices */ MatcherIndicesIndex(4),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
@@ -5985,7 +5985,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_parameters */ 1,
     /* num_explicit_templates */ 1,
     /* num_templates   */ 3,
-    /* templates */ TemplateIndex(82),
+    /* templates */ TemplateIndex(79),
     /* parameters */ ParameterIndex(362),
     /* return_matcher_indices */ MatcherIndicesIndex(149),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
@@ -5993,23 +5993,23 @@ constexpr OverloadInfo kOverloads[] = {
   {
     /* [182] */
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
-    /* num_parameters */ 2,
-    /* num_explicit_templates */ 0,
+    /* num_parameters */ 1,
+    /* num_explicit_templates */ 1,
     /* num_templates   */ 2,
-    /* templates */ TemplateIndex(22),
-    /* parameters */ ParameterIndex(6),
-    /* return_matcher_indices */ MatcherIndicesIndex(17),
+    /* templates */ TemplateIndex(82),
+    /* parameters */ ParameterIndex(1),
+    /* return_matcher_indices */ MatcherIndicesIndex(4),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
     /* [183] */
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
-    /* num_parameters */ 2,
-    /* num_explicit_templates */ 0,
+    /* num_parameters */ 1,
+    /* num_explicit_templates */ 1,
     /* num_templates   */ 3,
-    /* templates */ TemplateIndex(52),
-    /* parameters */ ParameterIndex(361),
-    /* return_matcher_indices */ MatcherIndicesIndex(179),
+    /* templates */ TemplateIndex(82),
+    /* parameters */ ParameterIndex(362),
+    /* return_matcher_indices */ MatcherIndicesIndex(149),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -6727,86 +6727,114 @@ constexpr IntrinsicInfo kBuiltins[] = {
   },
   {
     /* [61] */
-    /* fn convertFToS<R : iu32>[T : f32_f16](T) -> R */
-    /* fn convertFToS<R : iu32>[T : f32_f16, N : num](vec<N, T>) -> vec<N, R> */
+    /* fn s_greater_than[A : iu32, B : iu32](A, B) -> bool */
+    /* fn s_greater_than[A : iu32, B : iu32, N : num](vec<N, A>, vec<N, B>) -> vec<N, bool> */
     /* num overloads */ 2,
     /* overloads */ OverloadIndex(178),
   },
   {
     /* [62] */
-    /* fn convertSToF<R : f32_f16>[T : iu32](T) -> R */
-    /* fn convertSToF<R : f32_f16>[T : iu32, N : num](vec<N, T>) -> vec<N, R> */
+    /* fn s_greater_than_equal[A : iu32, B : iu32](A, B) -> bool */
+    /* fn s_greater_than_equal[A : iu32, B : iu32, N : num](vec<N, A>, vec<N, B>) -> vec<N, bool> */
     /* num overloads */ 2,
-    /* overloads */ OverloadIndex(180),
+    /* overloads */ OverloadIndex(178),
   },
   {
     /* [63] */
-    /* fn convertUToF<R : f32_f16>[T : iu32](T) -> R */
-    /* fn convertUToF<R : f32_f16>[T : iu32, N : num](vec<N, T>) -> vec<N, R> */
+    /* fn s_less_than[A : iu32, B : iu32](A, B) -> bool */
+    /* fn s_less_than[A : iu32, B : iu32, N : num](vec<N, A>, vec<N, B>) -> vec<N, bool> */
+    /* num overloads */ 2,
+    /* overloads */ OverloadIndex(178),
+  },
+  {
+    /* [64] */
+    /* fn s_less_than_equal[A : iu32, B : iu32](A, B) -> bool */
+    /* fn s_less_than_equal[A : iu32, B : iu32, N : num](vec<N, A>, vec<N, B>) -> vec<N, bool> */
+    /* num overloads */ 2,
+    /* overloads */ OverloadIndex(178),
+  },
+  {
+    /* [65] */
+    /* fn convertFToS<R : iu32>[T : f32_f16](T) -> R */
+    /* fn convertFToS<R : iu32>[T : f32_f16, N : num](vec<N, T>) -> vec<N, R> */
     /* num overloads */ 2,
     /* overloads */ OverloadIndex(180),
   },
   {
-    /* [64] */
+    /* [66] */
+    /* fn convertSToF<R : f32_f16>[T : iu32](T) -> R */
+    /* fn convertSToF<R : f32_f16>[T : iu32, N : num](vec<N, T>) -> vec<N, R> */
+    /* num overloads */ 2,
+    /* overloads */ OverloadIndex(182),
+  },
+  {
+    /* [67] */
+    /* fn convertUToF<R : f32_f16>[T : iu32](T) -> R */
+    /* fn convertUToF<R : f32_f16>[T : iu32, N : num](vec<N, T>) -> vec<N, R> */
+    /* num overloads */ 2,
+    /* overloads */ OverloadIndex(182),
+  },
+  {
+    /* [68] */
     /* fn bitwiseAnd<R : iu32>[A : iu32, B : iu32](A, B) -> R */
     /* fn bitwiseAnd<R : iu32>[A : iu32, B : iu32, N : num](vec<N, A>, vec<N, B>) -> vec<N, R> */
     /* num overloads */ 2,
     /* overloads */ OverloadIndex(176),
   },
   {
-    /* [65] */
+    /* [69] */
     /* fn bitwiseOr<R : iu32>[A : iu32, B : iu32](A, B) -> R */
     /* fn bitwiseOr<R : iu32>[A : iu32, B : iu32, N : num](vec<N, A>, vec<N, B>) -> vec<N, R> */
     /* num overloads */ 2,
     /* overloads */ OverloadIndex(176),
   },
   {
-    /* [66] */
+    /* [70] */
     /* fn bitwiseXor<R : iu32>[A : iu32, B : iu32](A, B) -> R */
     /* fn bitwiseXor<R : iu32>[A : iu32, B : iu32, N : num](vec<N, A>, vec<N, B>) -> vec<N, R> */
     /* num overloads */ 2,
     /* overloads */ OverloadIndex(176),
   },
   {
-    /* [67] */
+    /* [71] */
     /* fn equal[A : iu32, B : iu32](A, B) -> bool */
     /* fn equal[A : iu32, B : iu32, N : num](vec<N, A>, vec<N, B>) -> vec<N, bool> */
     /* num overloads */ 2,
-    /* overloads */ OverloadIndex(182),
+    /* overloads */ OverloadIndex(178),
   },
   {
-    /* [68] */
+    /* [72] */
     /* fn not_equal[A : iu32, B : iu32](A, B) -> bool */
     /* fn not_equal[A : iu32, B : iu32, N : num](vec<N, A>, vec<N, B>) -> vec<N, bool> */
     /* num overloads */ 2,
-    /* overloads */ OverloadIndex(182),
+    /* overloads */ OverloadIndex(178),
   },
   {
-    /* [69] */
+    /* [73] */
     /* fn sdot(u32, u32, u32) -> i32 */
     /* num overloads */ 1,
     /* overloads */ OverloadIndex(195),
   },
   {
-    /* [70] */
+    /* [74] */
     /* fn udot(u32, u32, u32) -> u32 */
     /* num overloads */ 1,
     /* overloads */ OverloadIndex(196),
   },
   {
-    /* [71] */
+    /* [75] */
     /* fn cooperative_matrix_load<T : subgroup_matrix<K, S, C, R>>[K : subgroup_matrix_kind, S : fiu32_f16, C : num, R : num](ptr<workgroup_or_storage, S, readable>, u32, u32, u32) -> T */
     /* num overloads */ 1,
     /* overloads */ OverloadIndex(197),
   },
   {
-    /* [72] */
+    /* [76] */
     /* fn cooperative_matrix_store[K : subgroup_matrix_kind, S : fiu32_f16, C : num, R : num](ptr<workgroup_or_storage, S, writable>, subgroup_matrix<K, S, C, R>, u32, u32, u32) */
     /* num overloads */ 1,
     /* overloads */ OverloadIndex(198),
   },
   {
-    /* [73] */
+    /* [77] */
     /* fn cooperative_matrix_mul_add[T : subgroup_matrix_elements, TR : subgroup_matrix_elements, C : num, R : num, K : num](subgroup_matrix<subgroup_matrix_kind_left, T, K, R>, subgroup_matrix<subgroup_matrix_kind_right, T, C, K>, subgroup_matrix<subgroup_matrix_kind_result, TR, C, R>, u32) -> subgroup_matrix<subgroup_matrix_kind_result, TR, C, R> */
     /* num overloads */ 1,
     /* overloads */ OverloadIndex(199),

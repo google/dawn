@@ -232,7 +232,7 @@ TEST_P(SpirvParser_IntegerTest, Scalar_SignedSigned) {
     %ep_type = OpTypeFunction %void
        %main = OpFunction %void None %ep_type
  %main_start = OpLabel
-          %1 = OpI)" +
+          %1 = Op)" +
                   params.spv_name + R"( %bool %one %two
                OpReturn
                OpFunctionEnd
@@ -274,7 +274,7 @@ TEST_P(SpirvParser_IntegerTest, Scalar_SignedUnsigned) {
     %ep_type = OpTypeFunction %void
        %main = OpFunction %void None %ep_type
  %main_start = OpLabel
-          %1 = OpI)" +
+          %1 = Op)" +
                   params.spv_name + R"( %bool %one %eight
                OpReturn
                OpFunctionEnd
@@ -316,7 +316,7 @@ TEST_P(SpirvParser_IntegerTest, Scalar_UnsignedSigned) {
     %ep_type = OpTypeFunction %void
        %main = OpFunction %void None %ep_type
  %main_start = OpLabel
-          %1 = OpI)" +
+          %1 = Op)" +
                   params.spv_name + R"( %bool %eight %one
                OpReturn
                OpFunctionEnd
@@ -358,7 +358,7 @@ TEST_P(SpirvParser_IntegerTest, Scalar_UnsignedUnsigned) {
     %ep_type = OpTypeFunction %void
        %main = OpFunction %void None %ep_type
  %main_start = OpLabel
-          %1 = OpI)" +
+          %1 = Op)" +
                   params.spv_name + R"( %bool %eight %nine
                OpReturn
                OpFunctionEnd
@@ -400,7 +400,7 @@ TEST_P(SpirvParser_IntegerTest, Vector_SignedSigned) {
     %ep_type = OpTypeFunction %void
        %main = OpFunction %void None %ep_type
  %main_start = OpLabel
-          %1 = OpI)" +
+          %1 = Op)" +
                   params.spv_name + R"( %v2bool %v2one %v2two
                OpReturn
                OpFunctionEnd
@@ -442,7 +442,7 @@ TEST_P(SpirvParser_IntegerTest, Vector_SignedUnsigned) {
     %ep_type = OpTypeFunction %void
        %main = OpFunction %void None %ep_type
  %main_start = OpLabel
-          %1 = OpI)" +
+          %1 = Op)" +
                   params.spv_name + R"( %v2bool %v2one %v2eight
                OpReturn
                OpFunctionEnd
@@ -484,7 +484,7 @@ TEST_P(SpirvParser_IntegerTest, Vector_UnsignedSigned) {
     %ep_type = OpTypeFunction %void
        %main = OpFunction %void None %ep_type
  %main_start = OpLabel
-          %1 = OpI)" +
+          %1 = Op)" +
                   params.spv_name + R"( %v2bool %v2eight %v2one
                OpReturn
                OpFunctionEnd
@@ -526,7 +526,7 @@ TEST_P(SpirvParser_IntegerTest, Vector_UnsignedUnsigned) {
     %ep_type = OpTypeFunction %void
        %main = OpFunction %void None %ep_type
  %main_start = OpLabel
-          %1 = OpI)" +
+          %1 = Op)" +
                   params.spv_name + R"( %v2bool %v2eight %v2nine
                OpReturn
                OpFunctionEnd
@@ -544,8 +544,13 @@ TEST_P(SpirvParser_IntegerTest, Vector_UnsignedUnsigned) {
 
 INSTANTIATE_TEST_SUITE_P(SpirvParserTest,
                          SpirvParser_IntegerTest,
-                         testing::Values(SpirvLogicalParam{"Equal", "equal"},
-                                         SpirvLogicalParam{"NotEqual", "not_equal"}));
+                         testing::Values(SpirvLogicalParam{"IEqual", "equal"},
+                                         SpirvLogicalParam{"INotEqual", "not_equal"},
+                                         SpirvLogicalParam{"SGreaterThan", "s_greater_than"},
+                                         SpirvLogicalParam{"SGreaterThanEqual",
+                                                           "s_greater_than_equal"},
+                                         SpirvLogicalParam{"SLessThan", "s_less_than"},
+                                         SpirvLogicalParam{"SLessThanEqual", "s_less_than_equal"}));
 
 using SpirvParser_LogicalTest = SpirvParserTestWithParam<SpirvLogicalParam>;
 TEST_P(SpirvParser_LogicalTest, Scalar) {

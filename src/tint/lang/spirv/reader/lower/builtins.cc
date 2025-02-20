@@ -170,6 +170,18 @@ struct State {
                 case spirv::BuiltinFn::kNotEqual:
                     NotEqual(builtin);
                     break;
+                case spirv::BuiltinFn::kSGreaterThan:
+                    SGreaterThan(builtin);
+                    break;
+                case spirv::BuiltinFn::kSGreaterThanEqual:
+                    SGreaterThanEqual(builtin);
+                    break;
+                case spirv::BuiltinFn::kSLessThan:
+                    SLessThan(builtin);
+                    break;
+                case spirv::BuiltinFn::kSLessThanEqual:
+                    SLessThanEqual(builtin);
+                    break;
                 default:
                     TINT_UNREACHABLE() << "unknown spirv builtin: " << builtin->Func();
             }
@@ -311,6 +323,37 @@ struct State {
     }
     void NotEqual(spirv::ir::BuiltinCall* call) {
         EmitBinaryMatchedArgs(call, core::BinaryOp::kNotEqual);
+    }
+
+    void EmitBinaryWithSignedArgs(spirv::ir::BuiltinCall* call, core::BinaryOp op) {
+        const auto& args = call->Args();
+        auto* lhs = args[0];
+        auto* rhs = args[1];
+
+        auto* arg_ty = ty.MatchWidth(ty.i32(), call->Result(0)->Type());
+        b.InsertBefore(call, [&] {
+            if (lhs->Type() != arg_ty) {
+                lhs = b.Bitcast(arg_ty, lhs)->Result(0);
+            }
+            if (rhs->Type() != arg_ty) {
+                rhs = b.Bitcast(arg_ty, rhs)->Result(0);
+            }
+
+            b.BinaryWithResult(call->DetachResult(), op, lhs, rhs)->Result(0);
+        });
+        call->Destroy();
+    }
+    void SGreaterThan(spirv::ir::BuiltinCall* call) {
+        EmitBinaryWithSignedArgs(call, core::BinaryOp::kGreaterThan);
+    }
+    void SGreaterThanEqual(spirv::ir::BuiltinCall* call) {
+        EmitBinaryWithSignedArgs(call, core::BinaryOp::kGreaterThanEqual);
+    }
+    void SLessThan(spirv::ir::BuiltinCall* call) {
+        EmitBinaryWithSignedArgs(call, core::BinaryOp::kLessThan);
+    }
+    void SLessThanEqual(spirv::ir::BuiltinCall* call) {
+        EmitBinaryWithSignedArgs(call, core::BinaryOp::kLessThanEqual);
     }
 
     // The SPIR-V Signed methods all interpret their arguments as signed (regardless of the type of

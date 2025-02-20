@@ -764,6 +764,18 @@ class Parser {
                 case spv::Op::OpINotEqual:
                     EmitSpirvBuiltinCall(inst, spirv::BuiltinFn::kNotEqual);
                     break;
+                case spv::Op::OpSGreaterThan:
+                    EmitSpirvBuiltinCall(inst, spirv::BuiltinFn::kSGreaterThan);
+                    break;
+                case spv::Op::OpSGreaterThanEqual:
+                    EmitSpirvBuiltinCall(inst, spirv::BuiltinFn::kSGreaterThanEqual);
+                    break;
+                case spv::Op::OpSLessThan:
+                    EmitSpirvBuiltinCall(inst, spirv::BuiltinFn::kSLessThan);
+                    break;
+                case spv::Op::OpSLessThanEqual:
+                    EmitSpirvBuiltinCall(inst, spirv::BuiltinFn::kSLessThanEqual);
+                    break;
                 case spv::Op::OpISub:
                     EmitSpirvExplicitBuiltinCall(inst, spirv::BuiltinFn::kSub);
                     break;
