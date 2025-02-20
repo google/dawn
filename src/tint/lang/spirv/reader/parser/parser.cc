@@ -856,6 +856,9 @@ class Parser {
                 case spv::Op::OpLogicalNotEqual:
                     EmitBinary(inst, core::BinaryOp::kNotEqual);
                     break;
+                case spv::Op::OpLogicalNot:
+                    EmitUnary(inst, core::UnaryOp::kNot);
+                    break;
                 default:
                     TINT_UNIMPLEMENTED()
                         << "unhandled SPIR-V instruction: " << static_cast<uint32_t>(inst.opcode());
@@ -1281,6 +1284,14 @@ class Parser {
 
         auto* access = b_.Access(Type(inst.type_id(), access_mode), base, std::move(indices));
         Emit(access, inst.result_id());
+    }
+
+    /// @param inst the SPIR-V instruction
+    /// @param op the unary operator to use
+    void EmitUnary(const spvtools::opt::Instruction& inst, core::UnaryOp op) {
+        auto* val = Value(inst.GetSingleWordOperand(2));
+        auto* unary = b_.Unary(op, Type(inst.type_id()), val);
+        Emit(unary, inst.result_id());
     }
 
     /// @param inst the SPIR-V instruction

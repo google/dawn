@@ -622,5 +622,63 @@ INSTANTIATE_TEST_SUITE_P(SpirvParserTest,
                                          SpirvLogicalParam{"Equal", "eq"},
                                          SpirvLogicalParam{"NotEqual", "neq"}));
 
+TEST_F(SpirvParserTest, LogicalNot_Scalar) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpCapability Float16
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %bool = OpTypeBool
+     %v2bool = OpTypeVector %bool 2
+       %true = OpConstantTrue %bool
+     %v2true = OpConstantComposite %v2bool %true %true
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+          %1 = OpLogicalNot %bool %true
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:bool = not true
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, LogicalNot_Vector) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpCapability Float16
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %bool = OpTypeBool
+     %v2bool = OpTypeVector %bool 2
+       %true = OpConstantTrue %bool
+     %v2true = OpConstantComposite %v2bool %true %true
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+          %1 = OpLogicalNot %v2bool %v2true
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<bool> = not vec2<bool>(true)
+    ret
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader
