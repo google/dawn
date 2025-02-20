@@ -1709,6 +1709,11 @@ void DeviceBase::EmitWarningOnce(std::string_view message) {
 }
 
 void DeviceBase::EmitCompilationLog(const ShaderModuleBase* module) {
+    const OwnedCompilationMessages* messages = module->GetCompilationMessages();
+    if (!messages->HasWarningsOrErrors()) {
+        return;
+    }
+
     // Limit the number of compilation error emitted to avoid spamming the devtools console hard.
     constexpr uint32_t kCompilationLogSpamLimit = 20;
     if (mEmittedCompilationLogCount.load(std::memory_order_acquire) > kCompilationLogSpamLimit) {
