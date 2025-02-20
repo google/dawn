@@ -725,6 +725,21 @@ class Parser {
                 case spv::Op::OpFOrdEqual:
                     EmitBinary(inst, core::BinaryOp::kEqual);
                     break;
+                case spv::Op::OpFOrdNotEqual:
+                    EmitBinary(inst, core::BinaryOp::kNotEqual);
+                    break;
+                case spv::Op::OpFOrdGreaterThan:
+                    EmitBinary(inst, core::BinaryOp::kGreaterThan);
+                    break;
+                case spv::Op::OpFOrdGreaterThanEqual:
+                    EmitBinary(inst, core::BinaryOp::kGreaterThanEqual);
+                    break;
+                case spv::Op::OpFOrdLessThan:
+                    EmitBinary(inst, core::BinaryOp::kLessThan);
+                    break;
+                case spv::Op::OpFOrdLessThanEqual:
+                    EmitBinary(inst, core::BinaryOp::kLessThanEqual);
+                    break;
                 case spv::Op::OpISub:
                     EmitSpirvExplicitBuiltinCall(inst, spirv::BuiltinFn::kSub);
                     break;
