@@ -39,8 +39,8 @@ struct SpirvLogicalParam {
     return out;
 }
 
-using SpirvParser_LogicalTest = SpirvParserTestWithParam<SpirvLogicalParam>;
-TEST_P(SpirvParser_LogicalTest, FOrd_Scalar) {
+using SpirvParser_FOrdLogicalTest = SpirvParserTestWithParam<SpirvLogicalParam>;
+TEST_P(SpirvParser_FOrdLogicalTest, Scalar) {
     auto params = GetParam();
     EXPECT_IR(R"(
                OpCapability Shader
@@ -76,7 +76,7 @@ TEST_P(SpirvParser_LogicalTest, FOrd_Scalar) {
 )");
 }
 
-TEST_P(SpirvParser_LogicalTest, FOrd_Vector) {
+TEST_P(SpirvParser_FOrdLogicalTest, Vector) {
     auto params = GetParam();
     EXPECT_IR(R"(
                OpCapability Shader
@@ -113,13 +113,97 @@ TEST_P(SpirvParser_LogicalTest, FOrd_Vector) {
 }
 
 INSTANTIATE_TEST_SUITE_P(SpirvParser,
-                         SpirvParser_LogicalTest,
+                         SpirvParser_FOrdLogicalTest,
                          testing::Values(SpirvLogicalParam{"Equal", "eq"},
                                          SpirvLogicalParam{"NotEqual", "neq"},
                                          SpirvLogicalParam{"GreaterThan", "gt"},
                                          SpirvLogicalParam{"GreaterThanEqual", "gte"},
                                          SpirvLogicalParam{"LessThan", "lt"},
                                          SpirvLogicalParam{"LessThanEqual", "lte"}));
+
+using SpirvParser_FUnordLogicalTest = SpirvParserTestWithParam<SpirvLogicalParam>;
+TEST_P(SpirvParser_FUnordLogicalTest, FOrd_Scalar) {
+    auto params = GetParam();
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpCapability Float16
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %bool = OpTypeBool
+        %f32 = OpTypeFloat 32
+        %one = OpConstant %f32 1
+        %two = OpConstant %f32 2
+     %v2bool = OpTypeVector %bool 2
+    %v2float = OpTypeVector %f32 2
+      %v2one = OpConstantComposite %v2float %one %one
+      %v2two = OpConstantComposite %v2float %two %two
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+          %1 = OpFUnord)" +
+                  params.spv_name + R"( %bool %one %two
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:bool = )" + params.wgsl_name +
+                  R"( 1.0f, 2.0f
+    %3:bool = not %2
+    ret
+  }
+}
+)");
+}
+
+TEST_P(SpirvParser_FUnordLogicalTest, FOrd_Vector) {
+    auto params = GetParam();
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpCapability Float16
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %bool = OpTypeBool
+        %f32 = OpTypeFloat 32
+        %one = OpConstant %f32 1
+        %two = OpConstant %f32 2
+     %v2bool = OpTypeVector %bool 2
+    %v2float = OpTypeVector %f32 2
+      %v2one = OpConstantComposite %v2float %one %one
+      %v2two = OpConstantComposite %v2float %two %two
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+          %1 = OpFUnord)" +
+                  params.spv_name + R"( %v2bool %v2one %v2two
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<bool> = )" +
+                  params.wgsl_name + R"( vec2<f32>(1.0f), vec2<f32>(2.0f)
+    %3:vec2<bool> = not %2
+    ret
+  }
+}
+)");
+}
+
+INSTANTIATE_TEST_SUITE_P(SpirvParser,
+                         SpirvParser_FUnordLogicalTest,
+                         testing::Values(SpirvLogicalParam{"Equal", "neq"},
+                                         SpirvLogicalParam{"NotEqual", "eq"},
+                                         SpirvLogicalParam{"GreaterThan", "lte"},
+                                         SpirvLogicalParam{"GreaterThanEqual", "lt"},
+                                         SpirvLogicalParam{"LessThan", "gte"},
+                                         SpirvLogicalParam{"LessThanEqual", "gt"}));
 
 }  // namespace
 }  // namespace tint::spirv::reader

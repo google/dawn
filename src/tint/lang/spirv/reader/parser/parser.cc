@@ -740,6 +740,24 @@ class Parser {
                 case spv::Op::OpFOrdLessThanEqual:
                     EmitBinary(inst, core::BinaryOp::kLessThanEqual);
                     break;
+                case spv::Op::OpFUnordEqual:
+                    EmitInvertedBinary(inst, core::BinaryOp::kNotEqual);
+                    break;
+                case spv::Op::OpFUnordNotEqual:
+                    EmitInvertedBinary(inst, core::BinaryOp::kEqual);
+                    break;
+                case spv::Op::OpFUnordGreaterThan:
+                    EmitInvertedBinary(inst, core::BinaryOp::kLessThanEqual);
+                    break;
+                case spv::Op::OpFUnordGreaterThanEqual:
+                    EmitInvertedBinary(inst, core::BinaryOp::kLessThan);
+                    break;
+                case spv::Op::OpFUnordLessThan:
+                    EmitInvertedBinary(inst, core::BinaryOp::kGreaterThanEqual);
+                    break;
+                case spv::Op::OpFUnordLessThanEqual:
+                    EmitInvertedBinary(inst, core::BinaryOp::kGreaterThan);
+                    break;
                 case spv::Op::OpISub:
                     EmitSpirvExplicitBuiltinCall(inst, spirv::BuiltinFn::kSub);
                     break;
@@ -1254,6 +1272,18 @@ class Parser {
         auto* rhs = Value(inst.GetSingleWordOperand(3));
         auto* binary = b_.Binary(op, Type(inst.type_id()), lhs, rhs);
         Emit(binary, inst.result_id());
+    }
+
+    /// @param inst the SPIR-V instruction
+    /// @param op the binary operator to use
+    void EmitInvertedBinary(const spvtools::opt::Instruction& inst, core::BinaryOp op) {
+        auto* lhs = Value(inst.GetSingleWordOperand(2));
+        auto* rhs = Value(inst.GetSingleWordOperand(3));
+        auto* binary = b_.Binary(op, Type(inst.type_id()), lhs, rhs);
+        EmitWithoutSpvResult(binary);
+
+        auto* res = b_.Not(Type(inst.type_id()), binary);
+        Emit(res, inst.result_id());
     }
 
     /// @param inst the SPIR-V instruction for OpCompositeExtract
