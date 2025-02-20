@@ -205,7 +205,9 @@ INSTANTIATE_TEST_SUITE_P(SpirvParserTest,
                                          SpirvLogicalParam{"LessThan", "gte"},
                                          SpirvLogicalParam{"LessThanEqual", "gt"}));
 
-TEST_F(SpirvParserTest, IEqual_Scalar_SignedSigned) {
+using SpirvParser_IntegerTest = SpirvParserTestWithParam<SpirvLogicalParam>;
+TEST_P(SpirvParser_IntegerTest, Scalar_SignedSigned) {
+    auto params = GetParam();
     EXPECT_IR(R"(
                OpCapability Shader
                OpCapability Float16
@@ -230,21 +232,24 @@ TEST_F(SpirvParserTest, IEqual_Scalar_SignedSigned) {
     %ep_type = OpTypeFunction %void
        %main = OpFunction %void None %ep_type
  %main_start = OpLabel
-          %1 = OpIEqual %bool %one %two
+          %1 = OpI)" +
+                  params.spv_name + R"( %bool %one %two
                OpReturn
                OpFunctionEnd
 )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:bool = spirv.equal 1i, 2i
+    %2:bool = spirv.)" +
+                  params.wgsl_name + R"( 1i, 2i
     ret
   }
 }
 )");
 }
 
-TEST_F(SpirvParserTest, IEqual_Scalar_SignedUnsigned) {
+TEST_P(SpirvParser_IntegerTest, Scalar_SignedUnsigned) {
+    auto params = GetParam();
     EXPECT_IR(R"(
                OpCapability Shader
                OpCapability Float16
@@ -269,21 +274,24 @@ TEST_F(SpirvParserTest, IEqual_Scalar_SignedUnsigned) {
     %ep_type = OpTypeFunction %void
        %main = OpFunction %void None %ep_type
  %main_start = OpLabel
-          %1 = OpIEqual %bool %one %eight
+          %1 = OpI)" +
+                  params.spv_name + R"( %bool %one %eight
                OpReturn
                OpFunctionEnd
 )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:bool = spirv.equal 1i, 8u
+    %2:bool = spirv.)" +
+                  params.wgsl_name + R"( 1i, 8u
     ret
   }
 }
 )");
 }
 
-TEST_F(SpirvParserTest, IEqual_Scalar_UnsignedSigned) {
+TEST_P(SpirvParser_IntegerTest, Scalar_UnsignedSigned) {
+    auto params = GetParam();
     EXPECT_IR(R"(
                OpCapability Shader
                OpCapability Float16
@@ -308,21 +316,24 @@ TEST_F(SpirvParserTest, IEqual_Scalar_UnsignedSigned) {
     %ep_type = OpTypeFunction %void
        %main = OpFunction %void None %ep_type
  %main_start = OpLabel
-          %1 = OpIEqual %bool %eight %one
+          %1 = OpI)" +
+                  params.spv_name + R"( %bool %eight %one
                OpReturn
                OpFunctionEnd
 )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:bool = spirv.equal 8u, 1i
+    %2:bool = spirv.)" +
+                  params.wgsl_name + R"( 8u, 1i
     ret
   }
 }
 )");
 }
 
-TEST_F(SpirvParserTest, IEqual_Scalar_UnsignedUnsigned) {
+TEST_P(SpirvParser_IntegerTest, Scalar_UnsignedUnsigned) {
+    auto params = GetParam();
     EXPECT_IR(R"(
                OpCapability Shader
                OpCapability Float16
@@ -347,21 +358,24 @@ TEST_F(SpirvParserTest, IEqual_Scalar_UnsignedUnsigned) {
     %ep_type = OpTypeFunction %void
        %main = OpFunction %void None %ep_type
  %main_start = OpLabel
-          %1 = OpIEqual %bool %eight %nine
+          %1 = OpI)" +
+                  params.spv_name + R"( %bool %eight %nine
                OpReturn
                OpFunctionEnd
 )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:bool = spirv.equal 8u, 9u
+    %2:bool = spirv.)" +
+                  params.wgsl_name + R"( 8u, 9u
     ret
   }
 }
 )");
 }
 
-TEST_F(SpirvParserTest, IEqual_Vector_SignedSigned) {
+TEST_P(SpirvParser_IntegerTest, Vector_SignedSigned) {
+    auto params = GetParam();
     EXPECT_IR(R"(
                OpCapability Shader
                OpCapability Float16
@@ -386,21 +400,24 @@ TEST_F(SpirvParserTest, IEqual_Vector_SignedSigned) {
     %ep_type = OpTypeFunction %void
        %main = OpFunction %void None %ep_type
  %main_start = OpLabel
-          %1 = OpIEqual %v2bool %v2one %v2two
+          %1 = OpI)" +
+                  params.spv_name + R"( %v2bool %v2one %v2two
                OpReturn
                OpFunctionEnd
 )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<bool> = spirv.equal vec2<i32>(1i), vec2<i32>(2i)
+    %2:vec2<bool> = spirv.)" +
+                  params.wgsl_name + R"( vec2<i32>(1i), vec2<i32>(2i)
     ret
   }
 }
 )");
 }
 
-TEST_F(SpirvParserTest, IEqual_Vector_SignedUnsigned) {
+TEST_P(SpirvParser_IntegerTest, Vector_SignedUnsigned) {
+    auto params = GetParam();
     EXPECT_IR(R"(
                OpCapability Shader
                OpCapability Float16
@@ -425,21 +442,24 @@ TEST_F(SpirvParserTest, IEqual_Vector_SignedUnsigned) {
     %ep_type = OpTypeFunction %void
        %main = OpFunction %void None %ep_type
  %main_start = OpLabel
-          %1 = OpIEqual %v2bool %v2one %v2eight
+          %1 = OpI)" +
+                  params.spv_name + R"( %v2bool %v2one %v2eight
                OpReturn
                OpFunctionEnd
 )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<bool> = spirv.equal vec2<i32>(1i), vec2<u32>(8u)
+    %2:vec2<bool> = spirv.)" +
+                  params.wgsl_name + R"( vec2<i32>(1i), vec2<u32>(8u)
     ret
   }
 }
 )");
 }
 
-TEST_F(SpirvParserTest, IEqual_Vector_UnsignedSigned) {
+TEST_P(SpirvParser_IntegerTest, Vector_UnsignedSigned) {
+    auto params = GetParam();
     EXPECT_IR(R"(
                OpCapability Shader
                OpCapability Float16
@@ -464,21 +484,24 @@ TEST_F(SpirvParserTest, IEqual_Vector_UnsignedSigned) {
     %ep_type = OpTypeFunction %void
        %main = OpFunction %void None %ep_type
  %main_start = OpLabel
-          %1 = OpIEqual %v2bool %v2eight %v2one
+          %1 = OpI)" +
+                  params.spv_name + R"( %v2bool %v2eight %v2one
                OpReturn
                OpFunctionEnd
 )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<bool> = spirv.equal vec2<u32>(8u), vec2<i32>(1i)
+    %2:vec2<bool> = spirv.)" +
+                  params.wgsl_name + R"( vec2<u32>(8u), vec2<i32>(1i)
     ret
   }
 }
 )");
 }
 
-TEST_F(SpirvParserTest, IEqual_Vector_UnsignedUnsigned) {
+TEST_P(SpirvParser_IntegerTest, Vector_UnsignedUnsigned) {
+    auto params = GetParam();
     EXPECT_IR(R"(
                OpCapability Shader
                OpCapability Float16
@@ -503,19 +526,26 @@ TEST_F(SpirvParserTest, IEqual_Vector_UnsignedUnsigned) {
     %ep_type = OpTypeFunction %void
        %main = OpFunction %void None %ep_type
  %main_start = OpLabel
-          %1 = OpIEqual %v2bool %v2eight %v2nine
+          %1 = OpI)" +
+                  params.spv_name + R"( %v2bool %v2eight %v2nine
                OpReturn
                OpFunctionEnd
 )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<bool> = spirv.equal vec2<u32>(8u), vec2<u32>(9u)
+    %2:vec2<bool> = spirv.)" +
+                  params.wgsl_name + R"( vec2<u32>(8u), vec2<u32>(9u)
     ret
   }
 }
 )");
 }
+
+INSTANTIATE_TEST_SUITE_P(SpirvParserTest,
+                         SpirvParser_IntegerTest,
+                         testing::Values(SpirvLogicalParam{"Equal", "equal"},
+                                         SpirvLogicalParam{"NotEqual", "not_equal"}));
 
 }  // namespace
 }  // namespace tint::spirv::reader

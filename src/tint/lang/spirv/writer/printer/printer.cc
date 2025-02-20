@@ -1545,6 +1545,9 @@ class Printer {
             case BuiltinFn::kEqual:
                 op = spv::Op::OpIEqual;
                 break;
+            case BuiltinFn::kNotEqual:
+                op = spv::Op::OpINotEqual;
+                break;
             case spirv::BuiltinFn::kNone:
                 TINT_ICE() << "undefined spirv ir function";
         }

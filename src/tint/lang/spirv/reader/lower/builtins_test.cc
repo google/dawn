@@ -6027,18 +6027,21 @@ INSTANTIATE_TEST_SUITE_P(
                       SpirvReaderParams{spirv::BuiltinFn::kBitwiseOr, "bitwiseOr", "or"},
                       SpirvReaderParams{spirv::BuiltinFn::kBitwiseXor, "bitwiseXor", "xor"}));
 
-TEST_F(SpirvReader_BuiltinsTest, IEqual_Scalar_SignedSigned) {
+using SpirvReader_IntegerTest = core::ir::transform::TransformTestWithParam<SpirvReaderParams>;
+TEST_P(SpirvReader_IntegerTest, Scalar_SignedSigned) {
+    auto param = GetParam();
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.Call<spirv::ir::BuiltinCall>(ty.bool_(), spirv::BuiltinFn::kEqual, 1_i, 2_i);
+        b.Call<spirv::ir::BuiltinCall>(ty.bool_(), param.fn, 1_i, 2_i);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:bool = spirv.equal 1i, 2i
+    %2:bool = spirv.)" +
+               param.spv_name + R"( 1i, 2i
     ret
   }
 }
@@ -6049,7 +6052,8 @@ TEST_F(SpirvReader_BuiltinsTest, IEqual_Scalar_SignedSigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:bool = eq 1i, 2i
+    %2:bool = )" + param.wgsl_name +
+                  R"( 1i, 2i
     ret
   }
 }
@@ -6057,18 +6061,20 @@ TEST_F(SpirvReader_BuiltinsTest, IEqual_Scalar_SignedSigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvReader_BuiltinsTest, IEqual_Scalar_SignedUnsigned) {
+TEST_P(SpirvReader_IntegerTest, Scalar_SignedUnsigned) {
+    auto param = GetParam();
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.Call<spirv::ir::BuiltinCall>(ty.bool_(), spirv::BuiltinFn::kEqual, 1_i, 8_u);
+        b.Call<spirv::ir::BuiltinCall>(ty.bool_(), param.fn, 1_i, 8_u);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:bool = spirv.equal 1i, 8u
+    %2:bool = spirv.)" +
+               param.spv_name + R"( 1i, 8u
     ret
   }
 }
@@ -6080,7 +6086,8 @@ TEST_F(SpirvReader_BuiltinsTest, IEqual_Scalar_SignedUnsigned) {
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:i32 = bitcast 8u
-    %3:bool = eq 1i, %2
+    %3:bool = )" + param.wgsl_name +
+                  R"( 1i, %2
     ret
   }
 }
@@ -6088,18 +6095,20 @@ TEST_F(SpirvReader_BuiltinsTest, IEqual_Scalar_SignedUnsigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvReader_BuiltinsTest, IEqual_Scalar_UnsignedSigned) {
+TEST_P(SpirvReader_IntegerTest, Scalar_UnsignedSigned) {
+    auto param = GetParam();
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.Call<spirv::ir::BuiltinCall>(ty.bool_(), spirv::BuiltinFn::kEqual, 8_u, 1_i);
+        b.Call<spirv::ir::BuiltinCall>(ty.bool_(), param.fn, 8_u, 1_i);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:bool = spirv.equal 8u, 1i
+    %2:bool = spirv.)" +
+               param.spv_name + R"( 8u, 1i
     ret
   }
 }
@@ -6111,7 +6120,8 @@ TEST_F(SpirvReader_BuiltinsTest, IEqual_Scalar_UnsignedSigned) {
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:u32 = bitcast 1i
-    %3:bool = eq 8u, %2
+    %3:bool = )" + param.wgsl_name +
+                  R"( 8u, %2
     ret
   }
 }
@@ -6119,18 +6129,20 @@ TEST_F(SpirvReader_BuiltinsTest, IEqual_Scalar_UnsignedSigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvReader_BuiltinsTest, IEqual_Scalar_UnsignedUnsigned) {
+TEST_P(SpirvReader_IntegerTest, Scalar_UnsignedUnsigned) {
+    auto param = GetParam();
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.Call<spirv::ir::BuiltinCall>(ty.bool_(), spirv::BuiltinFn::kEqual, 8_u, 9_u);
+        b.Call<spirv::ir::BuiltinCall>(ty.bool_(), param.fn, 8_u, 9_u);
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:bool = spirv.equal 8u, 9u
+    %2:bool = spirv.)" +
+               param.spv_name + R"( 8u, 9u
     ret
   }
 }
@@ -6141,7 +6153,8 @@ TEST_F(SpirvReader_BuiltinsTest, IEqual_Scalar_UnsignedUnsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:bool = eq 8u, 9u
+    %2:bool = )" + param.wgsl_name +
+                  R"( 8u, 9u
     ret
   }
 }
@@ -6149,19 +6162,21 @@ TEST_F(SpirvReader_BuiltinsTest, IEqual_Scalar_UnsignedUnsigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvReader_BuiltinsTest, IEqual_Vector_SignedSigned) {
+TEST_P(SpirvReader_IntegerTest, Vector_SignedSigned) {
+    auto param = GetParam();
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.Call<spirv::ir::BuiltinCall>(ty.vec2<bool>(), spirv::BuiltinFn::kEqual,
-                                       b.Splat<vec2<i32>>(1_i), b.Splat<vec2<i32>>(2_i));
+        b.Call<spirv::ir::BuiltinCall>(ty.vec2<bool>(), param.fn, b.Splat<vec2<i32>>(1_i),
+                                       b.Splat<vec2<i32>>(2_i));
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<bool> = spirv.equal vec2<i32>(1i), vec2<i32>(2i)
+    %2:vec2<bool> = spirv.)" +
+               param.spv_name + R"( vec2<i32>(1i), vec2<i32>(2i)
     ret
   }
 }
@@ -6172,7 +6187,8 @@ TEST_F(SpirvReader_BuiltinsTest, IEqual_Vector_SignedSigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<bool> = eq vec2<i32>(1i), vec2<i32>(2i)
+    %2:vec2<bool> = )" +
+                  param.wgsl_name + R"( vec2<i32>(1i), vec2<i32>(2i)
     ret
   }
 }
@@ -6180,19 +6196,21 @@ TEST_F(SpirvReader_BuiltinsTest, IEqual_Vector_SignedSigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvReader_BuiltinsTest, IEqual_Vector_SignedUnsigned) {
+TEST_P(SpirvReader_IntegerTest, Vector_SignedUnsigned) {
+    auto param = GetParam();
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.Call<spirv::ir::BuiltinCall>(ty.vec2<bool>(), spirv::BuiltinFn::kEqual,
-                                       b.Splat<vec2<i32>>(1_i), b.Splat<vec2<u32>>(8_u));
+        b.Call<spirv::ir::BuiltinCall>(ty.vec2<bool>(), param.fn, b.Splat<vec2<i32>>(1_i),
+                                       b.Splat<vec2<u32>>(8_u));
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<bool> = spirv.equal vec2<i32>(1i), vec2<u32>(8u)
+    %2:vec2<bool> = spirv.)" +
+               param.spv_name + R"( vec2<i32>(1i), vec2<u32>(8u)
     ret
   }
 }
@@ -6204,7 +6222,8 @@ TEST_F(SpirvReader_BuiltinsTest, IEqual_Vector_SignedUnsigned) {
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:vec2<i32> = bitcast vec2<u32>(8u)
-    %3:vec2<bool> = eq vec2<i32>(1i), %2
+    %3:vec2<bool> = )" +
+                  param.wgsl_name + R"( vec2<i32>(1i), %2
     ret
   }
 }
@@ -6212,19 +6231,21 @@ TEST_F(SpirvReader_BuiltinsTest, IEqual_Vector_SignedUnsigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvReader_BuiltinsTest, IEqual_Vector_UnsignedSigned) {
+TEST_P(SpirvReader_IntegerTest, Vector_UnsignedSigned) {
+    auto param = GetParam();
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.Call<spirv::ir::BuiltinCall>(ty.vec2<bool>(), spirv::BuiltinFn::kEqual,
-                                       b.Splat<vec2<u32>>(8_u), b.Splat<vec2<i32>>(1_i));
+        b.Call<spirv::ir::BuiltinCall>(ty.vec2<bool>(), param.fn, b.Splat<vec2<u32>>(8_u),
+                                       b.Splat<vec2<i32>>(1_i));
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<bool> = spirv.equal vec2<u32>(8u), vec2<i32>(1i)
+    %2:vec2<bool> = spirv.)" +
+               param.spv_name + R"( vec2<u32>(8u), vec2<i32>(1i)
     ret
   }
 }
@@ -6236,7 +6257,8 @@ TEST_F(SpirvReader_BuiltinsTest, IEqual_Vector_UnsignedSigned) {
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:vec2<u32> = bitcast vec2<i32>(1i)
-    %3:vec2<bool> = eq vec2<u32>(8u), %2
+    %3:vec2<bool> = )" +
+                  param.wgsl_name + R"( vec2<u32>(8u), %2
     ret
   }
 }
@@ -6244,19 +6266,21 @@ TEST_F(SpirvReader_BuiltinsTest, IEqual_Vector_UnsignedSigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvReader_BuiltinsTest, IEqual_Vector_UnsignedUnsigned) {
+TEST_P(SpirvReader_IntegerTest, Vector_UnsignedUnsigned) {
+    auto param = GetParam();
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.Call<spirv::ir::BuiltinCall>(ty.vec2<bool>(), spirv::BuiltinFn::kEqual,
-                                       b.Splat<vec2<u32>>(8_u), b.Splat<vec2<u32>>(9_u));
+        b.Call<spirv::ir::BuiltinCall>(ty.vec2<bool>(), param.fn, b.Splat<vec2<u32>>(8_u),
+                                       b.Splat<vec2<u32>>(9_u));
         b.Return(ep);
     });
 
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<bool> = spirv.equal vec2<u32>(8u), vec2<u32>(9u)
+    %2:vec2<bool> = spirv.)" +
+               param.spv_name + R"( vec2<u32>(8u), vec2<u32>(9u)
     ret
   }
 }
@@ -6267,13 +6291,19 @@ TEST_F(SpirvReader_BuiltinsTest, IEqual_Vector_UnsignedUnsigned) {
     auto expect = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<bool> = eq vec2<u32>(8u), vec2<u32>(9u)
+    %2:vec2<bool> = )" +
+                  param.wgsl_name + R"( vec2<u32>(8u), vec2<u32>(9u)
     ret
   }
 }
 )";
     EXPECT_EQ(expect, str());
 }
+INSTANTIATE_TEST_SUITE_P(
+    SpirvReader,
+    SpirvReader_IntegerTest,
+    ::testing::Values(SpirvReaderParams{spirv::BuiltinFn::kEqual, "equal", "eq"},
+                      SpirvReaderParams{spirv::BuiltinFn::kNotEqual, "not_equal", "neq"}));
 
 }  // namespace
 }  // namespace tint::spirv::reader::lower
