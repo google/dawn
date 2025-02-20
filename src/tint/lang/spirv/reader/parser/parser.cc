@@ -844,6 +844,18 @@ class Parser {
                 case spv::Op::OpFwidthCoarse:
                     EmitBuiltinCall(inst, core::BuiltinFn::kFwidthCoarse);
                     break;
+                case spv::Op::OpLogicalAnd:
+                    EmitBinary(inst, core::BinaryOp::kAnd);
+                    break;
+                case spv::Op::OpLogicalOr:
+                    EmitBinary(inst, core::BinaryOp::kOr);
+                    break;
+                case spv::Op::OpLogicalEqual:
+                    EmitBinary(inst, core::BinaryOp::kEqual);
+                    break;
+                case spv::Op::OpLogicalNotEqual:
+                    EmitBinary(inst, core::BinaryOp::kNotEqual);
+                    break;
                 default:
                     TINT_UNIMPLEMENTED()
                         << "unhandled SPIR-V instruction: " << static_cast<uint32_t>(inst.opcode());

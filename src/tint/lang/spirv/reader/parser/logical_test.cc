@@ -547,5 +547,80 @@ INSTANTIATE_TEST_SUITE_P(SpirvParserTest,
                          testing::Values(SpirvLogicalParam{"Equal", "equal"},
                                          SpirvLogicalParam{"NotEqual", "not_equal"}));
 
+using SpirvParser_LogicalTest = SpirvParserTestWithParam<SpirvLogicalParam>;
+TEST_P(SpirvParser_LogicalTest, Scalar) {
+    auto params = GetParam();
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpCapability Float16
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %bool = OpTypeBool
+     %v2bool = OpTypeVector %bool 2
+       %true = OpConstantTrue %bool
+      %false = OpConstantFalse %bool
+     %v2true = OpConstantComposite %v2bool %true %true
+    %v2false = OpConstantComposite %v2bool %false %false
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+          %1 = OpLogical)" +
+                  params.spv_name + R"( %bool %true %false
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:bool = )" + params.wgsl_name +
+                  R"( true, false
+    ret
+  }
+}
+)");
+}
+
+TEST_P(SpirvParser_LogicalTest, Vector) {
+    auto params = GetParam();
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpCapability Float16
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %bool = OpTypeBool
+     %v2bool = OpTypeVector %bool 2
+       %true = OpConstantTrue %bool
+      %false = OpConstantFalse %bool
+     %v2true = OpConstantComposite %v2bool %true %true
+    %v2false = OpConstantComposite %v2bool %false %false
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+          %1 = OpLogical)" +
+                  params.spv_name + R"( %v2bool %v2true %v2false
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<bool> = )" +
+                  params.wgsl_name + R"( vec2<bool>(true), vec2<bool>(false)
+    ret
+  }
+}
+)");
+}
+INSTANTIATE_TEST_SUITE_P(SpirvParserTest,
+                         SpirvParser_LogicalTest,
+                         testing::Values(SpirvLogicalParam{"And", "and"},
+                                         SpirvLogicalParam{"Or", "or"},
+                                         SpirvLogicalParam{"Equal", "eq"},
+                                         SpirvLogicalParam{"NotEqual", "neq"}));
+
 }  // namespace
 }  // namespace tint::spirv::reader
