@@ -405,15 +405,16 @@ class EventManager : NonMovable {
   void UnregisterInstance(InstanceID instance) {
     assert(instance);
     std::unique_lock<std::mutex> lock(mMutex);
-    auto it = mPerInstanceEvents.find(instance);
-    assert(it != mPerInstanceEvents.end());
+    auto instanceIt = mPerInstanceEvents.find(instance);
+    assert(instanceIt != mPerInstanceEvents.end());
 
     // When unregistering the Instance, resolve all non-spontaneous callbacks
     // with Shutdown.
-    for (const FutureID futureId : it->second) {
-      if (auto it = mEvents.find(futureId); it != mEvents.end()) {
-        it->second->Complete(futureId, EventCompletionType::Shutdown);
-        mEvents.erase(it);
+    for (const FutureID futureId : instanceIt->second) {
+      if (auto futureIdsIt = mEvents.find(futureId);
+          futureIdsIt != mEvents.end()) {
+        futureIdsIt->second->Complete(futureId, EventCompletionType::Shutdown);
+        mEvents.erase(futureIdsIt);
       }
     }
     mPerInstanceEvents.erase(instance);
