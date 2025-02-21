@@ -2118,6 +2118,15 @@
             {"name": "shared event", "type": "void *"}
         ]
     },
+    "shared fence EGL sync descriptor": {
+        "category": "structure",
+        "chained": "in",
+        "chain roots": ["shared fence descriptor"],
+        "tags": ["dawn", "native"],
+        "members": [
+            {"name": "sync", "type": "void *"}
+        ]
+    },
     "shared fence type": {
         "category": "enum",
         "tags": ["dawn", "native"],
@@ -2126,7 +2135,8 @@
             {"value": 2, "name": "sync FD"},
             {"value": 3, "name": "vk semaphore zircon handle"},
             {"value": 4, "name": "DXGI shared handle"},
-            {"value": 5, "name": "MTL shared event"}
+            {"value": 5, "name": "MTL shared event"},
+            {"value": 6, "name": "EGL sync"}
         ]
     },
     "shared fence export info": {
@@ -2181,6 +2191,15 @@
         "_comment": "TODO(crbug.com/dawn/1745): improve type safety",
         "members": [
             {"name": "shared event", "type": "void *"}
+        ]
+    },
+    "shared fence EGL sync export info": {
+        "category": "structure",
+        "chained": "out",
+        "chain roots": ["shared fence export info"],
+        "tags": ["dawn", "native"],
+        "members": [
+            {"name": "sync", "type": "void *"}
         ]
     },
     "feature level": {
@@ -2268,7 +2287,8 @@
             {"value": 54, "name": "clip distances", "tags": ["dawn"]},
             {"value": 55, "name": "dawn texel copy buffer row alignment", "tags": ["dawn"]},
             {"value": 56, "name": "flexible texture views", "tags": ["dawn"]},
-            {"value": 57, "name": "chromium experimental subgroup matrix", "tags": ["dawn"]}
+            {"value": 57, "name": "chromium experimental subgroup matrix", "tags": ["dawn"]},
+            {"value": 58, "name": "shared fence EGL sync", "tags": ["dawn", "native"]}
         ]
     },
     "filter mode": {
@@ -3745,7 +3765,9 @@
             {"value": 57, "name": "a hardware buffer properties", "tags": ["dawn", "native"]},
             {"value": 58, "name": "dawn experimental immediate data limits", "tags": ["dawn"]},
             {"value": 59, "name": "dawn texel copy buffer row alignment limits", "tags": ["dawn"]},
-            {"value": 60, "name": "adapter properties subgroup matrix configs", "tags": ["dawn"]}
+            {"value": 60, "name": "adapter properties subgroup matrix configs", "tags": ["dawn"]},
+            {"value": 61, "name": "shared fence EGL sync descriptor", "tags": ["dawn", "native"]},
+            {"value": 62, "name": "shared fence EGL sync export info", "tags": ["dawn", "native"]}
         ]
     },
     "texture": {
