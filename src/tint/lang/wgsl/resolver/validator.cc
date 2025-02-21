@@ -224,6 +224,7 @@ bool Validator::IsFixedFootprint(const core::type::Type* type) const {
         [&](const core::type::Vector*) { return true; },  //
         [&](const core::type::Matrix*) { return true; },  //
         [&](const core::type::Atomic*) { return true; },
+        [&](const core::type::SubgroupMatrix*) { return true; },
         [&](const sem::Array* arr) {
             return !arr->Count()->Is<core::type::RuntimeArrayCount>() &&
                    IsFixedFootprint(arr->ElemType());

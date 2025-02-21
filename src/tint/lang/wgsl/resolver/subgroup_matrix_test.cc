@@ -463,5 +463,182 @@ TEST_F(ResolverSubgroupMatrixTest, SubgroupMatrixMultiply_MismatchKinds) {
                 testing::HasSubstr(R"(error: no matching call to 'subgroupMatrixMultiply)"));
 }
 
+TEST_F(ResolverSubgroupMatrixTest, Let_Valid) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+    Func("foo", Empty, ty.void_(),
+         Vector{
+             Decl(Let("result", ty("subgroup_matrix_result", ty.f32(), 8_a, 8_a),
+                      Call(Ident("subgroup_matrix_result", ty.f32(), 8_a, 8_a)))),
+         });
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverSubgroupMatrixTest, FunctionVar_Valid) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+    Func("foo", Empty, ty.void_(),
+         Vector{
+             Decl(Var("result", function, ty("subgroup_matrix_result", ty.f32(), 8_a, 8_a))),
+         });
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverSubgroupMatrixTest, PrivateVar_Valid) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+    GlobalVar("result", private_, ty("subgroup_matrix_result", ty.f32(), 8_a, 8_a));
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverSubgroupMatrixTest, StorageVar_Invalid) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+    GlobalVar("result", storage, ty("subgroup_matrix_result", ty.f32(), 8_a, 8_a), Group(0_a),
+              Binding(0_a));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_THAT(
+        r()->error(),
+        testing::HasSubstr(
+            R"(error: subgroup matrix types cannot be declared in the 'storage' address space)"));
+}
+
+TEST_F(ResolverSubgroupMatrixTest, UniformVar_Invalid) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+    GlobalVar("result", uniform, ty("subgroup_matrix_result", ty.f32(), 8_a, 8_a), Group(0_a),
+              Binding(0_a));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_THAT(
+        r()->error(),
+        testing::HasSubstr(
+            R"(error: subgroup matrix types cannot be declared in the 'uniform' address space)"));
+}
+
+TEST_F(ResolverSubgroupMatrixTest, WorkgroupVar_Invalid) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+    GlobalVar("result", workgroup, ty("subgroup_matrix_result", ty.f32(), 8_a, 8_a));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_THAT(
+        r()->error(),
+        testing::HasSubstr(
+            R"(error: subgroup matrix types cannot be declared in the 'workgroup' address space)"));
+}
+
+TEST_F(ResolverSubgroupMatrixTest, PrivateVar_ArrayElement_Valid) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+    GlobalVar("result", private_, ty.array(ty("subgroup_matrix_result", ty.f32(), 8_a, 8_a), 8_a));
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverSubgroupMatrixTest, WorkgroupVar_ArrayElement_Invalid) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+    GlobalVar("result", workgroup, ty.array(ty("subgroup_matrix_result", ty.f32(), 8_a, 8_a), 8_a));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_THAT(
+        r()->error(),
+        testing::HasSubstr(
+            R"(error: subgroup matrix types cannot be declared in the 'workgroup' address space)"));
+}
+
+TEST_F(ResolverSubgroupMatrixTest, PrivateVar_StructMember_Valid) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+
+    auto* s = Structure("S", Vector{
+                                 Member("m", ty("subgroup_matrix_result", ty.f32(), 8_a, 8_a)),
+                             });
+    GlobalVar("result", private_, ty.Of(s));
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverSubgroupMatrixTest, WorkgroupVar_StructMember_Invalid) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+
+    auto* s = Structure("S", Vector{
+                                 Member("m", ty("subgroup_matrix_result", ty.f32(), 8_a, 8_a)),
+                             });
+    GlobalVar("result", workgroup, ty.Of(s));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_THAT(
+        r()->error(),
+        testing::HasSubstr(
+            R"(error: subgroup matrix types cannot be declared in the 'workgroup' address space)"));
+}
+
+TEST_F(ResolverSubgroupMatrixTest, ConstVar_Invalid) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+    GlobalConst("result", ty("subgroup_matrix_result", ty.f32(), 8_a, 8_a),
+                Call(Ident("subgroup_matrix_result", ty.f32(), 8_a, 8_a)));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_THAT(
+        r()->error(),
+        testing::HasSubstr(
+            R"(error: const initializer requires a const-expression, but expression is a runtime-expression)"));
+}
+
+TEST_F(ResolverSubgroupMatrixTest, OverrideVar_Invalid) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+    Override("result", ty("subgroup_matrix_result", ty.f32(), 8_a, 8_a));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_THAT(
+        r()->error(),
+        testing::HasSubstr(
+            R"(error: subgroup_matrix_result<f32, 8, 8> cannot be used as the type of a 'override')"));
+}
+
+TEST_F(ResolverSubgroupMatrixTest, FunctionParameter_Valid) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+    Func("foo",
+         Vector{
+             Param("result", ty("subgroup_matrix_result", ty.f32(), 8_a, 8_a)),
+         },
+         ty.void_(), Empty);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverSubgroupMatrixTest, FunctionParameter_FunctionPointer_Valid) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+    Func("foo",
+         Vector{
+             Param("result", ty.ptr<function>(ty("subgroup_matrix_result", ty.f32(), 8_a, 8_a))),
+         },
+         ty.void_(), Empty);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverSubgroupMatrixTest, FunctionParameter_WorkgroupPointer_Invalid) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+    Func("foo",
+         Vector{
+             Param("result", ty.ptr<workgroup>(ty("subgroup_matrix_result", ty.f32(), 8_a, 8_a))),
+         },
+         ty.void_(), Empty);
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_THAT(
+        r()->error(),
+        testing::HasSubstr(
+            R"(error: subgroup matrix types cannot be declared in the 'workgroup' address space)"));
+}
+
+TEST_F(ResolverSubgroupMatrixTest, ReturnType_Valid) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+    Func("foo", Empty, ty("subgroup_matrix_result", ty.f32(), 8_a, 8_a),
+         Vector{
+             Return(Call(Ident("subgroup_matrix_result", ty.f32(), 8_a, 8_a))),
+         });
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
 }  // namespace
 }  // namespace tint::resolver

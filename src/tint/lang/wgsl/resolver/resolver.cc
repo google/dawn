@@ -5045,6 +5045,16 @@ bool Resolver::ApplyAddressSpaceUsageToType(core::AddressSpace address_space,
                                             const_cast<core::type::Type*>(arr->ElemType()), usage);
     }
 
+    // Subgroup matrix types can only be declared in the `function` and `private` address space, or
+    // in value declarations (the `undefined` address space).
+    if (ty->Is<core::type::SubgroupMatrix>() && address_space != core::AddressSpace::kUndefined &&
+        address_space != core::AddressSpace::kFunction &&
+        address_space != core::AddressSpace::kPrivate) {
+        AddError(usage) << "subgroup matrix types cannot be declared in the "
+                        << style::Enum(address_space) << " address space";
+        return false;
+    }
+
     if (core::IsHostShareable(address_space) && !validator_.IsHostShareable(ty)) {
         AddError(usage) << "type " << style::Type(sem_.TypeNameOf(ty))
                         << " cannot be used in address space " << style::Enum(address_space)
