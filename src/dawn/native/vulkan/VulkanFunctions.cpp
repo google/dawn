@@ -104,9 +104,11 @@ MaybeError VulkanFunctions::LoadGlobalProcs(const DynamicLib& vulkanLib) {
     return {};
 }
 
+#define GET_INSTANCE_PROC_NO_ERROR_BASE(name, procName) \
+    name = AsVkFn<PFN_vk##name>(GetInstanceProcAddr(instance, "vk" #procName))
 #define GET_INSTANCE_PROC_BASE(name, procName)                                           \
     do {                                                                                 \
-        name = AsVkFn<PFN_vk##name>(GetInstanceProcAddr(instance, "vk" #procName));      \
+        GET_INSTANCE_PROC_NO_ERROR_BASE(name, procName);                                 \
         if (name == nullptr) {                                                           \
             return DAWN_INTERNAL_ERROR(std::string("Couldn't get proc vk") + #procName); \
         }                                                                                \
@@ -114,6 +116,7 @@ MaybeError VulkanFunctions::LoadGlobalProcs(const DynamicLib& vulkanLib) {
 
 #define GET_INSTANCE_PROC(name) GET_INSTANCE_PROC_BASE(name, name)
 #define GET_INSTANCE_PROC_VENDOR(name, vendor) GET_INSTANCE_PROC_BASE(name, name##vendor)
+#define GET_INSTANCE_PROC_NO_ERROR(name) GET_INSTANCE_PROC_NO_ERROR_BASE(name, name)
 
 MaybeError VulkanFunctions::LoadInstanceProcs(VkInstance instance,
                                               const VulkanGlobalInfo& globalInfo) {
@@ -231,6 +234,16 @@ MaybeError VulkanFunctions::LoadInstanceProcs(VkInstance instance,
         GET_INSTANCE_PROC(GetPhysicalDeviceXcbPresentationSupportKHR);
     }
 #endif  // defined(DAWN_USE_X11)
+
+    // Some device extensions expose instance procs to query information from the vkPhysicalDevice.
+    // Always try loading them as we don't know yet what extensions are available on the device.
+    // The more proper solution to load them only if the extension is available would require
+    // unnecessary roundtrips between info gathering and proc loading, and this approach is well
+    // specified as well.
+
+    // VK_KHR_cooperative_matrix
+    GET_INSTANCE_PROC_NO_ERROR(GetPhysicalDeviceCooperativeMatrixPropertiesKHR);
+
     return {};
 }
 
@@ -421,12 +434,6 @@ MaybeError VulkanFunctions::LoadDeviceProcs(VkInstance instance,
         GET_DEVICE_PROC(GetMemoryAndroidHardwareBufferANDROID);
     }
 #endif  // DAWN_PLATFORM_IS(ANDROID)
-
-    // TODO(crbug.com/397448368): This should be queried with GET_DEVICE_PROC instead, but Mali and
-    // Intel drivers seem to only provide a non-null function pointer via the instance query.
-    if (deviceInfo.HasExt(DeviceExt::CooperativeMatrix)) {
-        GET_INSTANCE_PROC(GetPhysicalDeviceCooperativeMatrixPropertiesKHR);
-    }
 
     return {};
 }
