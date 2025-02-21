@@ -76,15 +76,18 @@ void emwgpuBufferMapAsync(WGPUBuffer buffer,
 void emwgpuDeviceCreateComputePipelineAsync(
     WGPUDevice device,
     FutureID futureId,
-    const WGPUComputePipelineDescriptor* descriptor);
+    const WGPUComputePipelineDescriptor* descriptor,
+    WGPUComputePipeline pipeline);
 void emwgpuDeviceCreateRenderPipelineAsync(
     WGPUDevice device,
     FutureID futureId,
-    const WGPURenderPipelineDescriptor* descriptor);
+    const WGPURenderPipelineDescriptor* descriptor,
+    WGPURenderPipeline pipeline);
 void emwgpuDevicePopErrorScope(WGPUDevice device, FutureID futureId);
 void emwgpuInstanceRequestAdapter(WGPUInstance instance,
                                   FutureID futureId,
-                                  const WGPURequestAdapterOptions* options);
+                                  const WGPURequestAdapterOptions* options,
+                                  WGPUAdapter adapter);
 void emwgpuQueueOnSubmittedWorkDone(WGPUQueue queue, FutureID futureId);
 void emwgpuShaderModuleGetCompilationInfo(WGPUShaderModule shader,
                                           FutureID futureId,
@@ -1196,6 +1199,11 @@ void emwgpuOnCreateComputePipelineCompleted(
     WGPUCreatePipelineAsyncStatus status,
     WGPUComputePipeline pipeline,
     const char* message) {
+  assert(pipeline);
+  if (status != WGPUCreatePipelineAsyncStatus_Success) {
+    delete pipeline;
+    pipeline = nullptr;
+  }
   GetEventManager().SetFutureReady<CreateComputePipelineEvent>(
       futureId, status, pipeline, message);
 }
@@ -1203,6 +1211,11 @@ void emwgpuOnCreateRenderPipelineCompleted(double futureId,
                                            WGPUCreatePipelineAsyncStatus status,
                                            WGPURenderPipeline pipeline,
                                            const char* message) {
+  assert(pipeline);
+  if (status != WGPUCreatePipelineAsyncStatus_Success) {
+    delete pipeline;
+    pipeline = nullptr;
+  }
   GetEventManager().SetFutureReady<CreateRenderPipelineEvent>(
       futureId, status, pipeline, message);
 }
@@ -1227,6 +1240,11 @@ void emwgpuOnRequestAdapterCompleted(double futureId,
                                      WGPURequestAdapterStatus status,
                                      WGPUAdapter adapter,
                                      const char* message) {
+  assert(adapter);
+  if (status != WGPURequestAdapterStatus_Success) {
+    delete adapter;
+    adapter = nullptr;
+  }
   GetEventManager().SetFutureReady<RequestAdapterEvent>(futureId, status,
                                                         adapter, message);
 }
@@ -1660,7 +1678,9 @@ WGPUFuture wgpuDeviceCreateComputePipelineAsync(
     return WGPUFuture{kNullFutureId};
   }
 
-  emwgpuDeviceCreateComputePipelineAsync(device, futureId, descriptor);
+  WGPUComputePipeline pipeline = emwgpuCreateComputePipeline(nullptr);
+  emwgpuDeviceCreateComputePipelineAsync(device, futureId, descriptor,
+                                         pipeline);
   return WGPUFuture{futureId};
 }
 
@@ -1675,7 +1695,8 @@ WGPUFuture wgpuDeviceCreateRenderPipelineAsync(
     return WGPUFuture{kNullFutureId};
   }
 
-  emwgpuDeviceCreateRenderPipelineAsync(device, futureId, descriptor);
+  WGPURenderPipeline pipeline = emwgpuCreateRenderPipeline(nullptr);
+  emwgpuDeviceCreateRenderPipelineAsync(device, futureId, descriptor, pipeline);
   return WGPUFuture{futureId};
 }
 
@@ -1731,7 +1752,8 @@ WGPUFuture wgpuInstanceRequestAdapter(
     return WGPUFuture{kNullFutureId};
   }
 
-  emwgpuInstanceRequestAdapter(instance, futureId, options);
+  WGPUAdapter adapter = emwgpuCreateAdapter(instance);
+  emwgpuInstanceRequestAdapter(instance, futureId, options, adapter);
   return WGPUFuture{futureId};
 }
 
