@@ -27,6 +27,7 @@
 
 #include "src/dawn/node/binding/GPUAdapterInfo.h"
 
+#include <cctype>
 #include <iomanip>
 #include <sstream>
 
@@ -76,12 +77,36 @@ struct GPUSubgroupMatrixConfig : public interop::GPUSubgroupMatrixConfig {
     uint32_t getN(Napi::Env) override { return N; }
     uint32_t getK(Napi::Env) override { return K; }
 };
+
+// Normalize according to https://gpuweb.github.io/gpuweb/#normalized-identifier-string
+std::string NormalizeIdentifierString(wgpu::StringView s) {
+    std::ostringstream o;
+
+    // Used to concatenate multiple non-alnum into a single dash.
+    bool lastWasDash = false;
+    // Used to start adding dashes only after we had one alnum.
+    bool hadAlnum = false;
+
+    for (char c : std::string_view(s)) {
+        if (std::isalnum(c)) {
+            o << std::tolower(c);
+            lastWasDash = false;
+            hadAlnum = true;
+        } else if (!lastWasDash && hadAlnum) {
+            o << '-';
+            lastWasDash = true;
+        }
+    }
+
+    return o.str();
+}
+
 }  // namespace
 
 GPUAdapterInfo::GPUAdapterInfo(const wgpu::AdapterInfo& info)
-    : vendor_(info.vendor),
-      architecture_(info.architecture),
-      device_(info.device),
+    : vendor_(NormalizeIdentifierString(info.vendor)),
+      architecture_(NormalizeIdentifierString(info.architecture)),
+      device_(NormalizeIdentifierString(info.device)),
       description_(info.description),
       subgroup_min_size_(info.subgroupMinSize),
       subgroup_max_size_(info.subgroupMaxSize) {

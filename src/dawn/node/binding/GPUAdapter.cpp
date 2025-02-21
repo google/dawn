@@ -204,6 +204,7 @@ interop::Promise<interop::Interface<interop::GPUDevice>> GPUAdapter::requestDevi
         // requiredFeatures is a "sequence<GPUFeatureName>" so a Javascript exception should be
         // thrown if one of the strings isn't one of the known features.
         if (!conv(feature, required)) {
+            Napi::TypeError::New(env, "Unknown GPUFeatureName.").ThrowAsJavaScriptException();
             return {env, interop::kUnusedPromise};
         }
 
@@ -237,9 +238,11 @@ interop::Promise<interop::Interface<interop::GPUDevice>> GPUAdapter::requestDevi
     FOR_EACH_LIMIT(COPY_LIMIT)
 #undef COPY_LIMIT
 
-    for (auto [key, _] : descriptor.requiredLimits) {
-        promise.Reject(binding::Errors::OperationError(env, "Unknown limit \"" + key + "\""));
-        return promise;
+    for (auto [key, limit] : descriptor.requiredLimits) {
+        if (!std::holds_alternative<interop::UndefinedType>(limit)) {
+            promise.Reject(binding::Errors::OperationError(env, "Unknown limit \"" + key + "\""));
+            return promise;
+        }
     }
 
     desc.requiredFeatureCount = requiredFeatures.size();
