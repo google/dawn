@@ -13,6 +13,7 @@
 #include <array>
 #include <atomic>
 #include <cassert>
+#include <cinttypes>
 #include <cstdlib>
 #include <map>
 #include <memory>
@@ -22,6 +23,15 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
+
+// Used for "implementation-defined logging" per webgpu.h spec.
+// This is a no-op in Release, to reduce code-size.
+#ifndef NDEBUG
+#include <cstdio>
+#define DEBUG_PRINTF(...) fprintf(stderr, __VA_ARGS__)
+#else
+#define DEBUG_PRINTF(...)
+#endif
 
 using FutureID = uint64_t;
 static constexpr FutureID kNullFutureId = 0;
@@ -35,8 +45,8 @@ extern "C" {
 void emwgpuDelete(void* ptr);
 void emwgpuSetLabel(void* ptr, const char* data, size_t length);
 
-// Note that for the JS entry points, we pass uint64_t as pointer and decode it
-// on the other side.
+// Note that for the JS entry points, we pass uint64_t as pointer and deref it
+// in JS on the other side.
 double emwgpuWaitAny(FutureID const* futurePtr,
                      size_t futureCount,
                      uint64_t const* timeoutNSPtr);
@@ -474,10 +484,8 @@ class EventManager : NonMovable {
 
     // To handle timeouts, use Asyncify and proxy back into JS.
     if (timeoutNS > 0) {
-      // Cannot handle timeouts if we are not using Asyncify.
-      if (!emscripten_has_asyncify()) {
-        return WGPUWaitStatus_Error;
-      }
+      // Should have already been validated in WGPUInstanceImpl::WaitAny.
+      assert(emscripten_has_asyncify());
 
       std::vector<FutureID> futures;
       std::unordered_map<FutureID, WGPUFutureWaitInfo*> futureIdToInfo;
@@ -715,7 +723,7 @@ struct WGPUDeviceImpl final : public EventSource,
 // Instance is specially implemented in order to handle Futures implementation.
 struct WGPUInstanceImpl final : public EventSource, public RefCounted {
  public:
-  WGPUInstanceImpl();
+  WGPUInstanceImpl(const WGPUInstanceDescriptor* desc);
   ~WGPUInstanceImpl();
 
   void ProcessEvents();
@@ -725,6 +733,8 @@ struct WGPUInstanceImpl final : public EventSource, public RefCounted {
 
  private:
   static InstanceID GetNextInstanceId();
+
+  WGPUInstanceCapabilities mCapabilities = {};
 };
 
 struct WGPUShaderModuleImpl final : public EventSource, public RefCounted {
@@ -1446,7 +1456,14 @@ void WGPUDeviceImpl::WillDropLastExternalRef() {
 // WGPUInstanceImpl implementations.
 // ----------------------------------------------------------------------------
 
-WGPUInstanceImpl::WGPUInstanceImpl() : EventSource(GetNextInstanceId()) {
+WGPUInstanceImpl::WGPUInstanceImpl(const WGPUInstanceDescriptor* desc)
+    : EventSource(GetNextInstanceId()) {
+  if (desc) {
+    mCapabilities = desc->capabilities;
+    if (mCapabilities.timedWaitAnyMaxCount < 64) {
+      mCapabilities.timedWaitAnyMaxCount = 64;
+    }
+  }
   GetEventManager().RegisterInstance(GetInstanceId());
 }
 WGPUInstanceImpl::~WGPUInstanceImpl() {
@@ -1460,6 +1477,30 @@ void WGPUInstanceImpl::ProcessEvents() {
 WGPUWaitStatus WGPUInstanceImpl::WaitAny(size_t count,
                                          WGPUFutureWaitInfo* infos,
                                          uint64_t timeoutNS) {
+  if (timeoutNS > 0) {
+    if (!mCapabilities.timedWaitAnyEnable) {
+      // Timed wait not valid unless enabled on the instance.
+      DEBUG_PRINTF(
+          "WaitAny timeoutNS (%" PRIu64
+          ") > 0, but timedWaitAnyEnable not enabled at wgpuCreateInstance\n",
+          timeoutNS);
+      return WGPUWaitStatus_Error;
+    }
+    // Cannot handle timeouts without Asyncify. Assert should never fail,
+    // because wgpuCreateInstance should disallow timedWaitAnyEnable.
+    // TODO(crbug.com/377760848): Use the preprocessor to remove all this code
+    // (and emwgpuWaitAny) when building without Asyncify.
+    assert(emscripten_has_asyncify());
+
+    if (count > mCapabilities.timedWaitAnyMaxCount) {
+      DEBUG_PRINTF(
+          "WaitAny count (%zu) > the timedWaitAnyMaxCount (%zu) which was "
+          "enabled at wgpuCreateInstance\n",
+          count, mCapabilities.timedWaitAnyMaxCount);
+      return WGPUWaitStatus_Error;
+    }
+  }
+
   return GetEventManager().WaitAny(GetInstanceId(), count, infos, timeoutNS);
 }
 
@@ -1560,10 +1601,22 @@ void wgpuSurfaceCapabilitiesFreeMembers(WGPUSurfaceCapabilities) {
 // Standalone (non-method) functions
 // ----------------------------------------------------------------------------
 
+bool ValidateInstanceDescriptor(const WGPUInstanceDescriptor& descriptor) {
+  if (descriptor.capabilities.timedWaitAnyEnable &&
+      !emscripten_has_asyncify()) {
+    DEBUG_PRINTF(
+        "timedWaitAnyEnable requested, but requires Asyncify or JSPI.");
+    return false;
+  }
+  return true;
+}
+
 WGPUInstance wgpuCreateInstance(
     [[maybe_unused]] const WGPUInstanceDescriptor* descriptor) {
-  // TODO: descriptor not implemented yet.
-  return new WGPUInstanceImpl();
+  if (descriptor && !ValidateInstanceDescriptor(*descriptor)) {
+    return nullptr;
+  }
+  return new WGPUInstanceImpl(descriptor);
 }
 
 // ----------------------------------------------------------------------------
