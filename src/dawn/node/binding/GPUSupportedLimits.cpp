@@ -36,15 +36,6 @@ namespace wgpu::binding {
 ////////////////////////////////////////////////////////////////////////////////
 
 GPUSupportedLimits::GPUSupportedLimits(wgpu::SupportedLimits limits) : limits_(std::move(limits)) {
-    // Unpack the reported limits.
-    for (wgpu::ChainedStructOut* chain = limits_.nextInChain; chain; chain = chain->nextInChain) {
-        if (chain->sType == wgpu::SType::DawnExperimentalSubgroupLimits) {
-            subgroup_limits_ = *static_cast<wgpu::DawnExperimentalSubgroupLimits*>(chain);
-            // Clear to prevent using invalid pointer.
-            subgroup_limits_->nextInChain = nullptr;
-            break;
-        }
-    }
     // Clear to prevent using invalid pointer.
     limits_.nextInChain = nullptr;
 }

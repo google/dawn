@@ -1247,6 +1247,109 @@ TEST_F(IR_FromProgramTest, OverrideWithAddInitializer) {
 )");
 }
 
+TEST_F(IR_FromProgramTest, OverrideWithShortCircuitExpression) {
+    auto* o0 = Override(Source{{1, 2}}, "a", ty.u32());
+    auto* o1 = Override(Source{{2, 3}}, "b", ty.bool_());
+    Override("c", LogicalAnd(o1, Equal(Div(1_u, o0), 0_u)));
+
+    auto res = Build();
+    ASSERT_EQ(res, Success);
+
+    auto m = res.Move();
+
+    EXPECT_EQ(core::ir::Disassembler(m).Plain(), R"($B1: {  # root
+  %a:u32 = override @id(0)
+  %b:bool = override @id(1)
+  %3:bool = constexpr_if %b [t: $B2, f: $B3] {  # constexpr_if_1
+    $B2: {  # true
+      %4:u32 = div 1u, %a
+      %5:bool = eq %4, 0u
+      exit_if %5  # constexpr_if_1
+    }
+    $B3: {  # false
+      exit_if false  # constexpr_if_1
+    }
+  }
+  %c:bool = override, %3 @id(2)
+}
+
+)");
+}
+
+TEST_F(IR_FromProgramTest, OverrideShortCircuitStatementInFunction) {
+    auto* o0 = Override(Source{{1, 2}}, "a", ty.u32());
+    auto* o1 = Override(Source{{2, 3}}, "b", ty.bool_());
+    auto* logical = LogicalAnd(o1, Equal(Div(1_u, o0), 0_u));
+    WrapInFunction(logical);
+
+    auto res = Build();
+    ASSERT_EQ(res, Success);
+
+    auto m = res.Move();
+
+    ASSERT_EQ(1u, m.functions.Length());
+
+    EXPECT_EQ(core::ir::Disassembler(m).Plain(), R"($B1: {  # root
+  %a:u32 = override @id(0)
+  %b:bool = override @id(1)
+}
+
+%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %4:bool = constexpr_if %b [t: $B3, f: $B4] {  # constexpr_if_1
+      $B3: {  # true
+        %5:u32 = div 1u, %a
+        %6:bool = eq %5, 0u
+        exit_if %6  # constexpr_if_1
+      }
+      $B4: {  # false
+        exit_if false  # constexpr_if_1
+      }
+    }
+    %tint_symbol:bool = let %4
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_FromProgramTest, NonOverrideShortCircuitStatementInFunction) {
+    auto* o0 = Override(Source{{1, 2}}, "a", ty.u32());
+    auto* o1 = Decl(Let("x", Expr(true)));
+    auto* logical = LogicalAnd(o1->variable, Equal(Div(1_u, o0), 0_u));
+    WrapInFunction(o1, logical);
+
+    auto res = Build();
+    ASSERT_EQ(res, Success);
+
+    auto m = res.Move();
+
+    ASSERT_EQ(1u, m.functions.Length());
+
+    EXPECT_EQ(core::ir::Disassembler(m).Plain(), R"($B1: {  # root
+  %a:u32 = override @id(0)
+}
+
+%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %x:bool = let true
+    %4:bool = if %x [t: $B3, f: $B4] {  # if_1
+      $B3: {  # true
+        %5:u32 = div 1u, %a
+        %6:bool = eq %5, 0u
+        exit_if %6  # if_1
+      }
+      $B4: {  # false
+        exit_if false  # if_1
+      }
+    }
+    %tint_symbol:bool = let %4
+    ret
+  }
+}
+)");
+}
+
 TEST_F(IR_FromProgramTest, OverrideWithOverrideAddInitializer) {
     auto* z = Override("z", ty.u32());
     Override("a", Add(z, 2_u));

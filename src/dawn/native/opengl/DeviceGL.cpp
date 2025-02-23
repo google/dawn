@@ -307,7 +307,8 @@ ResultOrError<Ref<SharedFenceBase>> Device::ImportSharedFenceImpl(
     DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
 
     wgpu::SType type;
-    DAWN_TRY_ASSIGN(type, (unpacked.ValidateBranches<Branch<SharedFenceSyncFDDescriptor>>()));
+    DAWN_TRY_ASSIGN(type, (unpacked.ValidateBranches<Branch<SharedFenceSyncFDDescriptor>,
+                                                     Branch<SharedFenceEGLSyncDescriptor>>()));
 
     switch (type) {
         case wgpu::SType::SharedFenceSyncFDDescriptor:
@@ -315,6 +316,11 @@ ResultOrError<Ref<SharedFenceBase>> Device::ImportSharedFenceImpl(
                             wgpu::FeatureName::SharedFenceSyncFD);
             return SharedFenceEGL::Create(this, descriptor->label,
                                           unpacked.Get<SharedFenceSyncFDDescriptor>());
+        case wgpu::SType::SharedFenceEGLSyncDescriptor:
+            DAWN_INVALID_IF(!HasFeature(Feature::SharedFenceEGLSync), "%s is not enabled.",
+                            wgpu::FeatureName::SharedFenceEGLSync);
+            return SharedFenceEGL::Create(this, descriptor->label,
+                                          unpacked.Get<SharedFenceEGLSyncDescriptor>());
         default:
             DAWN_UNREACHABLE();
     }

@@ -98,6 +98,27 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kBitFieldInsert:
         case BuiltinFn::kBitFieldSExtract:
         case BuiltinFn::kBitFieldUExtract:
+        case BuiltinFn::kAdd:
+        case BuiltinFn::kSub:
+        case BuiltinFn::kMul:
+        case BuiltinFn::kSDiv:
+        case BuiltinFn::kSMod:
+        case BuiltinFn::kConvertFToS:
+        case BuiltinFn::kConvertSToF:
+        case BuiltinFn::kConvertUToF:
+        case BuiltinFn::kBitwiseAnd:
+        case BuiltinFn::kBitwiseOr:
+        case BuiltinFn::kBitwiseXor:
+        case BuiltinFn::kEqual:
+        case BuiltinFn::kNotEqual:
+        case BuiltinFn::kSGreaterThan:
+        case BuiltinFn::kSGreaterThanEqual:
+        case BuiltinFn::kSLessThan:
+        case BuiltinFn::kSLessThanEqual:
+        case BuiltinFn::kUGreaterThan:
+        case BuiltinFn::kUGreaterThanEqual:
+        case BuiltinFn::kULessThan:
+        case BuiltinFn::kULessThanEqual:
             break;
     }
     return core::ir::Instruction::Accesses{};

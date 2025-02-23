@@ -1,0 +1,74 @@
+SKIP: FAILED
+
+
+enable chromium_experimental_subgroup_matrix;
+enable f16;
+
+@internal(disable_validation__binding_point_collision) @group(0) @binding(0) var<storage, read_write> prevent_dce : array<f32, 1024>;
+
+fn subgroupMatrixMultiplyAccumulate_071472() -> subgroup_matrix_result<f32, 8, 8> {
+  var arg_0 = subgroup_matrix_left<f16, 8, 8>();
+  var arg_1 = subgroup_matrix_right<f16, 8, 8>();
+  var arg_2 = subgroup_matrix_result<f32, 8, 8>();
+  var res : subgroup_matrix_result<f32, 8, 8> = subgroupMatrixMultiplyAccumulate(arg_0, arg_1, arg_2);
+  return res;
+}
+
+@compute @workgroup_size(1)
+fn compute_main() {
+  subgroupMatrixStore(&(prevent_dce), 0, subgroupMatrixMultiplyAccumulate_071472(), false, 64);
+}
+
+Failed to generate: :18:16 error: msl.simdgroup_multiply_accumulate: no matching call to 'msl.simdgroup_multiply_accumulate(subgroup_matrix_result<f32, 8, 8>, subgroup_matrix_left<f16, 8, 8>, subgroup_matrix_right<f16, 8, 8>, subgroup_matrix_result<f32, 8, 8>)'
+
+1 candidate function:
+ • 'msl.simdgroup_multiply_accumulate(subgroup_matrix<result, S, C, R>  ✓ , subgroup_matrix<left, S, K, R>  ✗ , subgroup_matrix<right, S, C, K>  ✗ , subgroup_matrix<result, S, C, R>  ✓ )' where:
+      ✓  'S' is 'f32' or 'f16'
+
+    %13:void = msl.simdgroup_multiply_accumulate %12, %8, %9, %10
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:6:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+tint_module_vars_struct = struct @align(1) {
+  prevent_dce:ptr<storage, array<f32, 1024>, read_write> @offset(0)
+}
+
+%subgroupMatrixMultiplyAccumulate_071472 = func():subgroup_matrix_result<f32, 8, 8> {
+  $B1: {
+    %2:subgroup_matrix_left<f16, 8, 8> = construct
+    %arg_0:ptr<function, subgroup_matrix_left<f16, 8, 8>, read_write> = var, %2
+    %4:subgroup_matrix_right<f16, 8, 8> = construct
+    %arg_1:ptr<function, subgroup_matrix_right<f16, 8, 8>, read_write> = var, %4
+    %6:subgroup_matrix_result<f32, 8, 8> = construct
+    %arg_2:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var, %6
+    %8:subgroup_matrix_left<f16, 8, 8> = load %arg_0
+    %9:subgroup_matrix_right<f16, 8, 8> = load %arg_1
+    %10:subgroup_matrix_result<f32, 8, 8> = load %arg_2
+    %11:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var
+    %12:subgroup_matrix_result<f32, 8, 8> = load %11
+    %13:void = msl.simdgroup_multiply_accumulate %12, %8, %9, %10
+    %14:subgroup_matrix_result<f32, 8, 8> = load %11
+    %res:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var, %14
+    %16:subgroup_matrix_result<f32, 8, 8> = load %res
+    ret %16
+  }
+}
+%compute_main = @compute @workgroup_size(1u, 1u, 1u) func(%prevent_dce:ptr<storage, array<f32, 1024>, read_write> [@binding_point(0, 0)]):void {
+  $B2: {
+    %19:tint_module_vars_struct = construct %prevent_dce
+    %tint_module_vars:tint_module_vars_struct = let %19
+    %21:subgroup_matrix_result<f32, 8, 8> = call %subgroupMatrixMultiplyAccumulate_071472
+    %22:ptr<storage, array<f32, 1024>, read_write> = access %tint_module_vars, 0u
+    %23:ptr<storage, f32, read_write> = access %22, 0u
+    %24:u64 = msl.convert 64u
+    %25:void = msl.simdgroup_store %21, %23, %24, vec2<u64>(0u64), false
+    ret
+  }
+}
+
+
+tint executable returned error: exit status 1

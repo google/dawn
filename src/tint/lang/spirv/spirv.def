@@ -403,6 +403,54 @@ implicit(T: iu32) fn bit_field_u_extract(base: T, offset: iu32, count: iu32) -> 
 implicit(T: iu32, N: num)
     fn bit_field_u_extract(base: vec<N, T>, offset: iu32, count: iu32) -> vec<N, T>
 
+implicit(A: iu32, B: iu32) fn add<R: iu32>(A, B) -> R
+implicit(A: iu32, B: iu32) fn sub<R: iu32>(A, B) -> R
+implicit(A: iu32, B: iu32) fn mul<R: iu32>(A, B) -> R
+implicit(A: iu32, B: iu32) fn s_div<R: iu32>(A, B) -> R
+implicit(A: iu32, B: iu32) fn s_mod<R: iu32>(A, B) -> R
+implicit(A: iu32, B: iu32, N: num) fn add<R: iu32>(vec<N, A>, vec<N, B>) -> vec<N, R>
+implicit(A: iu32, B: iu32, N: num) fn sub<R: iu32>(vec<N, A>, vec<N, B>) -> vec<N, R>
+implicit(A: iu32, B: iu32, N: num) fn mul<R: iu32>(vec<N, A>, vec<N, B>) -> vec<N, R>
+implicit(A: iu32, B: iu32, N: num) fn s_div<R: iu32>(vec<N, A>, vec<N, B>) -> vec<N, R>
+implicit(A: iu32, B: iu32, N: num) fn s_mod<R: iu32>(vec<N, A>, vec<N, B>) -> vec<N, R>
+
+implicit(A: iu32, B: iu32) fn s_greater_than(A, B) -> bool
+implicit(A: iu32, B: iu32, N: num) fn s_greater_than(vec<N, A>, vec<N, B>) -> vec<N, bool>
+implicit(A: iu32, B: iu32) fn s_greater_than_equal(A, B) -> bool
+implicit(A: iu32, B: iu32, N: num) fn s_greater_than_equal(vec<N, A>, vec<N, B>) -> vec<N, bool>
+implicit(A: iu32, B: iu32) fn s_less_than(A, B) -> bool
+implicit(A: iu32, B: iu32, N: num) fn s_less_than(vec<N, A>, vec<N, B>) -> vec<N, bool>
+implicit(A: iu32, B: iu32) fn s_less_than_equal(A, B) -> bool
+implicit(A: iu32, B: iu32, N: num) fn s_less_than_equal(vec<N, A>, vec<N, B>) -> vec<N, bool>
+
+implicit(A: iu32, B: iu32) fn u_greater_than(A, B) -> bool
+implicit(A: iu32, B: iu32, N: num) fn u_greater_than(vec<N, A>, vec<N, B>) -> vec<N, bool>
+implicit(A: iu32, B: iu32) fn u_greater_than_equal(A, B) -> bool
+implicit(A: iu32, B: iu32, N: num) fn u_greater_than_equal(vec<N, A>, vec<N, B>) -> vec<N, bool>
+implicit(A: iu32, B: iu32) fn u_less_than(A, B) -> bool
+implicit(A: iu32, B: iu32, N: num) fn u_less_than(vec<N, A>, vec<N, B>) -> vec<N, bool>
+implicit(A: iu32, B: iu32) fn u_less_than_equal(A, B) -> bool
+implicit(A: iu32, B: iu32, N: num) fn u_less_than_equal(vec<N, A>, vec<N, B>) -> vec<N, bool>
+
+implicit(T: f32_f16) fn convertFToS<R: iu32>(T) -> R
+implicit(T: f32_f16, N: num) fn convertFToS<R: iu32>(vec<N, T>) -> vec<N, R>
+implicit(T: iu32) fn convertSToF<R: f32_f16>(T) -> R
+implicit(T: iu32, N: num) fn convertSToF<R: f32_f16>(vec<N, T>) -> vec<N, R>
+implicit(T: iu32) fn convertUToF<R: f32_f16>(T) -> R
+implicit(T: iu32, N: num) fn convertUToF<R: f32_f16>(vec<N, T>) -> vec<N, R>
+
+implicit(A: iu32, B: iu32) fn bitwiseAnd<R: iu32>(A, B) -> R
+implicit(A: iu32, B: iu32, N: num) fn bitwiseAnd<R: iu32>(vec<N, A>, vec<N, B>) -> vec<N, R>
+implicit(A: iu32, B: iu32) fn bitwiseOr<R: iu32>(A, B) -> R
+implicit(A: iu32, B: iu32, N: num) fn bitwiseOr<R: iu32>(vec<N, A>, vec<N, B>) -> vec<N, R>
+implicit(A: iu32, B: iu32) fn bitwiseXor<R: iu32>(A, B) -> R
+implicit(A: iu32, B: iu32, N: num) fn bitwiseXor<R: iu32>(vec<N, A>, vec<N, B>) -> vec<N, R>
+
+implicit(A: iu32, B: iu32) fn equal(A, B) -> bool
+implicit(A: iu32, B: iu32, N: num) fn equal(vec<N, A>, vec<N, B>) -> vec<N, bool>
+implicit(A: iu32, B: iu32) fn not_equal(A, B) -> bool
+implicit(A: iu32, B: iu32, N: num) fn not_equal(vec<N, A>, vec<N, B>) -> vec<N, bool>
+
 ////////////////////////////////////////////////////////////////////////////////
 // SPV_KHR_integer_dot_product instructions
 ////////////////////////////////////////////////////////////////////////////////
@@ -417,9 +465,10 @@ fn udot(u32, u32, u32) -> u32
     ptr<workgroup_or_storage, S, readable>, u32, u32, u32) -> T
 @stage("compute") implicit(K: subgroup_matrix_kind, S: fiu32_f16, C: num, R: num) fn cooperative_matrix_store(
   ptr<workgroup_or_storage, S, writable>, subgroup_matrix<K, S, C, R>, u32, u32, u32)
-@must_use @stage("compute") implicit(S: subgroup_matrix_elements, C: num, R: num, K: num) fn cooperative_matrix_mul_add(
-  subgroup_matrix<subgroup_matrix_kind_left, S, K, R>,
-  subgroup_matrix<subgroup_matrix_kind_right, S, C, K>,
-  subgroup_matrix<subgroup_matrix_kind_result, S, C, R>)
-  -> subgroup_matrix<subgroup_matrix_kind_result, S, C, R>
+@must_use @stage("compute") implicit(T: subgroup_matrix_elements, TR: subgroup_matrix_elements, C: num, R: num, K: num) fn cooperative_matrix_mul_add(
+  subgroup_matrix<subgroup_matrix_kind_left, T, K, R>,
+  subgroup_matrix<subgroup_matrix_kind_right, T, C, K>,
+  subgroup_matrix<subgroup_matrix_kind_result, TR, C, R>,
+  u32)
+  -> subgroup_matrix<subgroup_matrix_kind_result, TR, C, R>
 

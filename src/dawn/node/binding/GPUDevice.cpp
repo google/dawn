@@ -182,7 +182,6 @@ interop::Interface<interop::GPUSupportedFeatures> GPUDevice::getFeatures(Napi::E
 
 interop::Interface<interop::GPUSupportedLimits> GPUDevice::getLimits(Napi::Env env) {
     wgpu::SupportedLimits limits{};
-    wgpu::DawnExperimentalSubgroupLimits subgroupLimits{};
     wgpu::DawnExperimentalImmediateDataLimits immediateDataLimits{};
 
     auto InsertInChain = [&](wgpu::ChainedStructOut* node) {
@@ -190,15 +189,10 @@ interop::Interface<interop::GPUSupportedLimits> GPUDevice::getLimits(Napi::Env e
         limits.nextInChain = node;
     };
 
-    // Query the subgroup limits only if subgroups feature is enabled on the device.
-    if (device_.HasFeature(wgpu::FeatureName::Subgroups)) {
-        InsertInChain(&subgroupLimits);
-    }
-
     // Query the immediate data limits only if ChromiumExperimentalImmediateData feature
     // is available on device.
     if (device_.HasFeature(FeatureName::ChromiumExperimentalImmediateData)) {
-        InsertInChain(&subgroupLimits);
+        InsertInChain(&immediateDataLimits);
     }
 
     if (!device_.GetLimits(&limits)) {

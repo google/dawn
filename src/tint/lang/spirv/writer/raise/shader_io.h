@@ -47,8 +47,6 @@ struct ShaderIOConfig {
     /// push constant layout information
     const core::ir::transform::PushConstantLayout& push_constant_layout;
 
-    /// true if frag_depth builtin outputs should be clamped
-    bool clamp_frag_depth = false;
     /// true if a vertex point size builtin output should be added
     bool emit_vertex_point_size = false;
     /// true if f16 IO types should be replaced with f32 types and converted

@@ -41,6 +41,7 @@
 #include "src/tint/lang/core/ir/block_param.h"
 #include "src/tint/lang/core/ir/break_if.h"
 #include "src/tint/lang/core/ir/constant.h"
+#include "src/tint/lang/core/ir/constexpr_if.h"
 #include "src/tint/lang/core/ir/construct.h"
 #include "src/tint/lang/core/ir/continue.h"
 #include "src/tint/lang/core/ir/control_instruction.h"
@@ -1637,6 +1638,12 @@ bool Validator::CheckResult(const Instruction* inst, size_t idx) {
         return false;
     }
 
+    if (DAWN_UNLIKELY(result->Instruction() != inst)) {
+        AddResultError(inst, idx)
+            << "result instruction does not match instruction (possible double usage)";
+        return false;
+    }
+
     return true;
 }
 
@@ -1935,7 +1942,8 @@ void Validator::CheckRootBlock(const Block* blk) {
                 }
             },
             [&](const core::ir::Construct* c) {
-                if (capabilities_.Contains(Capability::kAllowModuleScopeLets)) {
+                if (capabilities_.Contains(Capability::kAllowModuleScopeLets) ||
+                    capabilities_.Contains(Capability::kAllowOverrides)) {
                     CheckInstruction(c);
                     CheckOnlyUsedInRootBlock(inst);
                 } else {
@@ -1949,9 +1957,9 @@ void Validator::CheckRootBlock(const Block* blk) {
                 // require walking up the tree to make sure that operands are const/override and
                 // builtins are allowed.
                 if (capabilities_.Contains(Capability::kAllowOverrides) &&
-                    inst->IsAnyOf<core::ir::Unary, core::ir::Binary, core::ir::CoreBuiltinCall,
+                    inst->IsAnyOf<core::ir::Unary, core::ir::Binary, core::ir::BuiltinCall,
                                   core::ir::Convert, core::ir::Swizzle, core::ir::Access,
-                                  core::ir::Bitcast>()) {
+                                  core::ir::Bitcast, core::ir::ConstExprIf>()) {
                     CheckInstruction(inst);
                     // If overrides are allowed we can have certain regular instructions in the root
                     // block, with the caveat that those instructions can _only_ be used in the root
@@ -1962,6 +1970,8 @@ void Validator::CheckRootBlock(const Block* blk) {
                 }
             });
     }
+    // Our ConstExprIfs in the root require us to process tasks here.
+    ProcessTasks();
 }
 
 void Validator::CheckOnlyUsedInRootBlock(const Instruction* inst) {
@@ -2462,16 +2472,19 @@ void Validator::CheckVar(const Var* var) {
     }
 
     auto* result_type = var->Result(0)->Type();
-    if (result_type == nullptr) {
-        AddError(var) << "result type is undefined";
-        return;
-    }
-
     auto* mv = result_type->As<core::type::MemoryView>();
     if (!mv) {
         AddError(var) << "result type " << NameOf(result_type)
                       << " must be a pointer or a reference";
         return;
+    }
+
+    if (mv->UnwrapPtrOrRef()->IsAnyOf<core::type::Texture, core::type::Sampler>()) {
+        if (mv->AddressSpace() != AddressSpace::kHandle) {
+            AddError(var)
+                << "samplers and textures can only be declared in the 'handle' address space";
+            return;
+        }
     }
 
     if (var->Block() != mod_.root_block && mv->AddressSpace() != AddressSpace::kFunction) {
@@ -2495,10 +2508,9 @@ void Validator::CheckVar(const Var* var) {
             return;
         }
 
-        if (var->Initializer()->Type() != var->Result(0)->Type()->UnwrapPtrOrRef()) {
+        if (var->Initializer()->Type() != result_type->UnwrapPtrOrRef()) {
             AddError(var) << "initializer type " << NameOf(var->Initializer()->Type())
-                          << " does not match store type "
-                          << NameOf(var->Result(0)->Type()->UnwrapPtrOrRef());
+                          << " does not match store type " << NameOf(result_type->UnwrapPtrOrRef());
             return;
         }
     }
@@ -2831,12 +2843,19 @@ void Validator::CheckBuiltinCall(const BuiltinCall* call) {
 
     if (builtin->return_type != call->Result(0)->Type()) {
         AddError(call) << "call result type " << NameOf(call->Result(0)->Type())
-                       << "does not match builtin return type " << NameOf(builtin->return_type);
+                       << " does not match builtin return type " << NameOf(builtin->return_type);
         return;
     }
 }
 
 void Validator::CheckMemberBuiltinCall(const MemberBuiltinCall* call) {
+    // This check cannot be more precise, since until intrinsic lookup below, it is unknown what
+    // number of operands are expected, but still need to enforce things are in scope,
+    // have types, etc.
+    if (!CheckResults(call, MemberBuiltinCall::kNumResults) || !CheckOperands(call)) {
+        return;
+    }
+
     auto args = Vector<const core::type::Type*, 8>({call->Object()->Type()});
     for (auto* arg : call->Args()) {
         args.Push(arg->Type());

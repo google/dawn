@@ -55,7 +55,7 @@ vars = {
   # reclient CIPD package version
   'reclient_version': 're_client_version:0.143.0.518e369-gomaip',
   # siso CIPD package version.
-  'siso_version': 'git_revision:0b6159c39573013a79a47f8544200df07a6a74fc',
+  'siso_version': 'git_revision:4442c27a02f2b5de389f88be9639e4e638ff761a',
 
   # 'magic' text to tell depot_tools that git submodules should be accepted
   # but parity with DEPS file is expected.
@@ -105,7 +105,7 @@ deps = {
   },
 
   'third_party/depot_tools': {
-    'url': '{chromium_git}/chromium/tools/depot_tools.git@77a800d7294d29ded899af9685c65babb3a62821',
+    'url': '{chromium_git}/chromium/tools/depot_tools.git@7a0dbd20744917e3124a36276ef039848c4229ed',
     'condition': 'dawn_standalone',
   },
 
@@ -274,22 +274,22 @@ deps = {
   },
 
   'third_party/angle': {
-    'url': '{chromium_git}/angle/angle@e746fb068fd31f1c132f56e2c772544013d17521',
+    'url': '{chromium_git}/angle/angle@34faa3db1f6023a50119a910579d596ef71e0aef',
     'condition': 'dawn_standalone',
   },
 
   'third_party/swiftshader': {
-    'url': '{swiftshader_git}/SwiftShader@720189cae8478484f51531a9eed9abc6d8635271',
+    'url': '{swiftshader_git}/SwiftShader@2407a54c9b2932e1e322dcfdd9f90d0879461eda',
     'condition': 'dawn_standalone',
   },
 
   'third_party/vulkan-deps': {
-    'url': '{chromium_git}/vulkan-deps@a88fd25a6a0d66e2a74e9f4d52fd95774cc17af1',
+    'url': '{chromium_git}/vulkan-deps@2289455859d2ce32a66ea89c7264857890029622',
     'condition': 'dawn_standalone',
   },
 
   'third_party/glslang/src': {
-    'url': '{chromium_git}/external/github.com/KhronosGroup/glslang@8a6b381c9afbfaf9fff851582539fab15ea480c0',
+    'url': '{chromium_git}/external/github.com/KhronosGroup/glslang@104bd85d990155f04f050972374a3502b4631830',
     'condition': 'dawn_standalone',
   },
 
@@ -299,37 +299,37 @@ deps = {
   },
 
   'third_party/spirv-headers/src': {
-    'url': '{chromium_git}/external/github.com/KhronosGroup/SPIRV-Headers@09913f088a1197aba4aefd300a876b2ebbaa3391',
+    'url': '{chromium_git}/external/github.com/KhronosGroup/SPIRV-Headers@54a521dd130ae1b2f38fef79b09515702d135bdd',
     'condition': 'dawn_standalone',
   },
 
   'third_party/spirv-tools/src': {
-    'url': '{chromium_git}/external/github.com/KhronosGroup/SPIRV-Tools@66e57d1146fe9cd4649b63e361f526bcd239f0e1',
+    'url': '{chromium_git}/external/github.com/KhronosGroup/SPIRV-Tools@f2dac2f3dea4464dd50cd7793c8c3d7e51dc7e24',
     'condition': 'dawn_standalone',
   },
 
   'third_party/vulkan-headers/src': {
-    'url': '{chromium_git}/external/github.com/KhronosGroup/Vulkan-Headers@234c4b7370a8ea3239a214c9e871e4b17c89f4ab',
+    'url': '{chromium_git}/external/github.com/KhronosGroup/Vulkan-Headers@952f776f6573aafbb62ea717d871cd1d6816c387',
     'condition': 'dawn_standalone',
   },
 
   'third_party/vulkan-loader/src': {
-    'url': '{chromium_git}/external/github.com/KhronosGroup/Vulkan-Loader@fde0f9718bd60b49cf8efc80d3fb7a093c309ac0',
+    'url': '{chromium_git}/external/github.com/KhronosGroup/Vulkan-Loader@809941a4ca137df69dc9c6e8eb456bd70309197c',
     'condition': 'dawn_standalone',
   },
 
   'third_party/vulkan-tools/src': {
-    'url': '{chromium_git}/external/github.com/KhronosGroup/Vulkan-Tools@a9f88a232a4cd6634e47f0f93c8fac5789387a7a',
+    'url': '{chromium_git}/external/github.com/KhronosGroup/Vulkan-Tools@176fef0bccaba8bdf51de54ab4eed8d5d9aaac77',
     'condition': 'dawn_standalone',
   },
 
   'third_party/vulkan-utility-libraries/src': {
-    'url': '{chromium_git}/external/github.com/KhronosGroup/Vulkan-Utility-Libraries@fe7a09b13899c5c77d956fa310286f7a7eb2c4ed',
+    'url': '{chromium_git}/external/github.com/KhronosGroup/Vulkan-Utility-Libraries@6be00ca9f51c714780cc1d6f537f8bc5650b6204',
     'condition': 'dawn_standalone',
   },
 
   'third_party/vulkan-validation-layers/src': {
-    'url': '{chromium_git}/external/github.com/KhronosGroup/Vulkan-ValidationLayers@a7fd3d2fe19f9e6e6c1c98f1fa010621ab90a2db',
+    'url': '{chromium_git}/external/github.com/KhronosGroup/Vulkan-ValidationLayers@52d00adf1969e866e58a3cbd4a0ff08e2721b28b',
     'condition': 'dawn_standalone',
   },
 
@@ -344,7 +344,7 @@ deps = {
   },
 
   'third_party/dxc': {
-    'url': '{chromium_git}/external/github.com/microsoft/DirectXShaderCompiler@20950d662f4d24850d7edfe1e647f6749d5c13b3',
+    'url': '{chromium_git}/external/github.com/microsoft/DirectXShaderCompiler@d5951b74d76351c17626bf90daf6684ed8598d3d',
   },
 
   'third_party/dxheaders': {
@@ -363,7 +363,7 @@ deps = {
 
   # WebGPU CTS - not used directly by Dawn, only transitively by Chromium.
   'third_party/webgpu-cts': {
-    'url': '{chromium_git}/external/github.com/gpuweb/cts@3539008f90dc1742d64ac9efbedf8ec7bfed70c2',
+    'url': '{chromium_git}/external/github.com/gpuweb/cts@cdf2938973d2a4e7c33fdf24012565f3cbf961a2',
     'condition': 'build_with_chromium',
   },
 

@@ -39,6 +39,27 @@ interface GPUAdapter {
     readonly attribute DOMString featureLevel;
 };
 
+enum GPUSubgroupMatrixComponentType {
+  "f32",
+  "f16",
+  "u32",
+  "i32",
+  "u8",
+  "i8",
+};
+
+interface GPUSubgroupMatrixConfig {
+  readonly attribute GPUSubgroupMatrixComponentType componentType;
+  readonly attribute GPUSubgroupMatrixComponentType resultComponentType;
+  readonly attribute unsigned long M;
+  readonly attribute unsigned long N;
+  readonly attribute unsigned long K;
+};
+
+interface GPUAdapterInfo {
+    [SameObject] readonly attribute FrozenArray<GPUSubgroupMatrixConfig> subgroupMatrixConfigs;
+};
+
 interface GPUCommandEncoder {
     undefined writeTimestamp(GPUQuerySet querySet, GPUSize32 queryIndex);
 };

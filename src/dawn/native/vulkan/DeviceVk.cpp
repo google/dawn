@@ -95,6 +95,15 @@ Device::Device(AdapterBase* adapter,
       mDebugPrefix(GetNextDeviceDebugPrefix()) {}
 
 MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
+    if (GetInstance()->IsBackendValidationEnabled() &&
+        !IsToggleEnabled(Toggle::UseUserDefinedLabelsInBackend)) {
+        // NOTE: If Vulkan backend validation is enabled then these labels must be set to associate
+        // validation errors with a specific device. Backend validation errors will cause a crash
+        // if labels are not set.
+        EmitLog(WGPULoggingType_Warning,
+                "Backend object labels are required to map Vulkan backend errors to a device.");
+    }
+
     // Copy the adapter's device info to the device so that we can change the "knobs"
     mDeviceInfo = ToBackend(GetPhysicalDevice())->GetDeviceInfo();
 
@@ -114,7 +123,7 @@ MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
                         CreateDevice(GetAdapter()->GetFeatureLevel(), vkPhysicalDevice));
         *static_cast<VulkanDeviceKnobs*>(&mDeviceInfo) = usedDeviceKnobs;
 
-        DAWN_TRY(functions->LoadDeviceProcs(mVkDevice, mDeviceInfo));
+        DAWN_TRY(functions->LoadDeviceProcs(GetVkInstance(), mVkDevice, mDeviceInfo));
 
         mDeleter = std::make_unique<MutexProtected<FencedDeleter>>(this);
     }
@@ -557,6 +566,13 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(wgpu::FeatureLevel feature
         DAWN_ASSERT(usedKnobs.HasExt(DeviceExt::DrawIndirectCount) &&
                     mDeviceInfo.features.multiDrawIndirect == VK_TRUE);
         usedKnobs.features.multiDrawIndirect = VK_TRUE;
+    }
+
+    if (HasFeature(Feature::ChromiumExperimentalSubgroupMatrix)) {
+        DAWN_ASSERT(IsToggleEnabled(Toggle::UseVulkanMemoryModel));
+        DAWN_ASSERT(usedKnobs.HasExt(DeviceExt::CooperativeMatrix));
+        usedKnobs.cooperativeMatrixFeatures = mDeviceInfo.cooperativeMatrixFeatures;
+        featuresChain.Add(&usedKnobs.cooperativeMatrixFeatures);
     }
 
     // Find a universal queue family

@@ -295,8 +295,6 @@ ShaderModule::ShaderModule(Device* device,
 
 MaybeError ShaderModule::Initialize(ShaderModuleParseResult* parseResult,
                                     OwnedCompilationMessages* compilationMessages) {
-    ScopedTintICEHandler scopedICEHandler(GetDevice());
-
     DAWN_TRY(InitializeBase(parseResult, compilationMessages));
 
     return {};
@@ -400,7 +398,7 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
     const PipelineLayout* layout,
     bool* needsPlaceholderSampler,
     bool* needsTextureBuiltinUniformBuffer,
-    BindingPointToFunctionAndOffset* bindingPointToData) const {
+    BindingPointToFunctionAndOffset* bindingPointToData) {
     TRACE_EVENT0(GetDevice()->GetPlatform(), General, "TranslateToGLSL");
 
     const OpenGLVersion& version = ToBackend(GetDevice())->GetGL().GetVersion();
@@ -497,59 +495,68 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
         GetDevice()->IsToggleEnabled(Toggle::DisablePolyfillsOnIntegerDivisonAndModulo);
 
     CacheResult<GLSLCompilation> compilationResult;
-    DAWN_TRY_LOAD_OR_RUN(
-        compilationResult, GetDevice(), std::move(req), GLSLCompilation::FromBlob,
-        [](GLSLCompilationRequest r) -> ResultOrError<GLSLCompilation> {
-            tint::ast::transform::Manager transformManager;
-            tint::ast::transform::DataMap transformInputs;
+    {
+        ScopedTintICEHandler scopedICEHandler(GetDevice());
+        DAWN_TRY_LOAD_OR_RUN(
+            compilationResult, GetDevice(), std::move(req), GLSLCompilation::FromBlob,
+            [](GLSLCompilationRequest r) -> ResultOrError<GLSLCompilation> {
+                tint::ast::transform::Manager transformManager;
+                tint::ast::transform::DataMap transformInputs;
 
-            transformManager.Add<tint::ast::transform::SingleEntryPoint>();
-            transformInputs.Add<tint::ast::transform::SingleEntryPoint::Config>(r.entryPointName);
+                transformManager.Add<tint::ast::transform::SingleEntryPoint>();
+                transformInputs.Add<tint::ast::transform::SingleEntryPoint::Config>(
+                    r.entryPointName);
 
-            if (r.substituteOverrideConfig) {
-                // This needs to run after SingleEntryPoint transform which removes unused overrides
-                // for current entry point.
-                transformManager.Add<tint::ast::transform::SubstituteOverride>();
-                transformInputs.Add<tint::ast::transform::SubstituteOverride::Config>(
-                    std::move(r.substituteOverrideConfig).value());
-            }
+                if (r.substituteOverrideConfig) {
+                    // This needs to run after SingleEntryPoint transform which removes unused
+                    // overrides for current entry point.
+                    transformManager.Add<tint::ast::transform::SubstituteOverride>();
+                    transformInputs.Add<tint::ast::transform::SubstituteOverride::Config>(
+                        std::move(r.substituteOverrideConfig).value());
+                }
 
-            tint::Program program;
-            tint::ast::transform::DataMap transformOutputs;
-            DAWN_TRY_ASSIGN(program, RunTransforms(&transformManager, r.inputProgram,
-                                                   transformInputs, &transformOutputs, nullptr));
+                tint::Program program;
+                tint::ast::transform::DataMap transformOutputs;
+                DAWN_TRY_ASSIGN(program,
+                                RunTransforms(&transformManager, r.inputProgram, transformInputs,
+                                              &transformOutputs, nullptr));
 
-            // Intentionally assign entry point to empty to avoid a redundant 'SingleEntryPoint'
-            // transform in Tint.
-            // TODO(crbug.com/356424898): In the long run, we want to move SingleEntryPoint to Tint,
-            // but that has interactions with SubstituteOverrides which need to be handled first.
-            const std::string remappedEntryPoint = "";
+                // Intentionally assign entry point to empty to avoid a redundant 'SingleEntryPoint'
+                // transform in Tint.
+                // TODO(crbug.com/356424898): In the long run, we want to move SingleEntryPoint to
+                // Tint, but that has interactions with SubstituteOverrides which need to be handled
+                // first.
+                const std::string remappedEntryPoint = "";
 
-            // Convert the AST program to an IR module.
-            auto ir = tint::wgsl::reader::ProgramToLoweredIR(program);
-            DAWN_INVALID_IF(ir != tint::Success, "An error occurred while generating Tint IR\n%s",
-                            ir.Failure().reason.Str());
+                // Convert the AST program to an IR module.
+                auto ir = tint::wgsl::reader::ProgramToLoweredIR(program);
+                DAWN_INVALID_IF(ir != tint::Success,
+                                "An error occurred while generating Tint IR\n%s",
+                                ir.Failure().reason.Str());
 
-            // Generate GLSL from Tint IR.
-            auto result = tint::glsl::writer::Generate(ir.Get(), r.tintOptions, remappedEntryPoint);
-            DAWN_INVALID_IF(result != tint::Success, "An error occurred while generating GLSL:\n%s",
-                            result.Failure().reason.Str());
+                // Generate GLSL from Tint IR.
+                auto result =
+                    tint::glsl::writer::Generate(ir.Get(), r.tintOptions, remappedEntryPoint);
+                DAWN_INVALID_IF(result != tint::Success,
+                                "An error occurred while generating GLSL:\n%s",
+                                result.Failure().reason.Str());
 
-            // Workgroup validation has to come after `Generate` because it may require overrides to
-            // have been substituted.
-            if (r.stage == SingleShaderStage::Compute) {
-                // Validate workgroup size after program runs transforms.
-                Extent3D _;
-                DAWN_TRY_ASSIGN(
-                    _, ValidateComputeStageWorkgroupSize(
-                           result->workgroup_info.x, result->workgroup_info.y,
-                           result->workgroup_info.z, result->workgroup_info.storage_size, r.limits,
-                           r.adapter.UnsafeGetValue()));
-            }
+                // Workgroup validation has to come after `Generate` because it may require
+                // overrides to have been substituted.
+                if (r.stage == SingleShaderStage::Compute) {
+                    // Validate workgroup size after program runs transforms.
+                    Extent3D _;
+                    DAWN_TRY_ASSIGN(
+                        _, ValidateComputeStageWorkgroupSize(
+                               result->workgroup_info.x, result->workgroup_info.y,
+                               result->workgroup_info.z, result->workgroup_info.storage_size,
+                               r.limits, r.adapter.UnsafeGetValue()));
+                }
 
-            return GLSLCompilation{{std::move(result->glsl)}};
-        },
-        "OpenGL.CompileShaderToGLSL");
+                return GLSLCompilation{{std::move(result->glsl)}};
+            },
+            "OpenGL.CompileShaderToGLSL");
+    }
 
     if (GetDevice()->IsToggleEnabled(Toggle::DumpShaders)) {
         std::ostringstream dumpedMsg;

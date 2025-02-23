@@ -77,9 +77,11 @@ if (${DAWN_ENABLE_EMSCRIPTEN})
                 "${arg_UNPARSED_ARGUMENTS}")
         endif()
 
+        # Note this requires Emscripten 4.0.3+ (prior to that it was located
+        # at tools/maint/gen_struct_info.py).
         set(ARGS
             ${Python3_EXECUTABLE}
-            "${DAWN_EMSCRIPTEN_TOOLCHAIN}/tools/maint/gen_struct_info.py"
+            "${DAWN_EMSCRIPTEN_TOOLCHAIN}/tools/gen_struct_info.py"
             -q
             "${EM_BUILD_GEN_DIR}/struct_info_webgpu.json"
             "-I=${EM_BUILD_GEN_DIR}/include"

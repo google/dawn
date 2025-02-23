@@ -1516,15 +1516,14 @@ var LibraryWebGPU = {
     return ptr;
   },
 
-  emwgpuDeviceCreateComputePipelineAsync__deps: ['emwgpuCreateComputePipeline', 'emwgpuOnCreateComputePipelineCompleted'],
-  emwgpuDeviceCreateComputePipelineAsync__sig: 'vpjp',
-  emwgpuDeviceCreateComputePipelineAsync: (devicePtr, futureId, descriptor) => {
+  emwgpuDeviceCreateComputePipelineAsync__deps: ['emwgpuOnCreateComputePipelineCompleted'],
+  emwgpuDeviceCreateComputePipelineAsync__sig: 'vpjpp',
+  emwgpuDeviceCreateComputePipelineAsync: (devicePtr, futureId, descriptor, pipelinePtr) => {
     var desc = WebGPU.makeComputePipelineDesc(descriptor);
     var device = WebGPU.getJsObject(devicePtr);
     {{{ runtimeKeepalivePush() }}}
     WebGPU.Internals.futureInsert(futureId, device.createComputePipelineAsync(desc).then((pipeline) => {
       {{{ runtimeKeepalivePop() }}}
-      var pipelinePtr = _emwgpuCreateComputePipeline({{{ gpu.NULLPTR }}});
       WebGPU.Internals.jsObjectInsert(pipelinePtr, pipeline);
       _emwgpuOnCreateComputePipelineCompleted(futureId, {{{ gpu.CreatePipelineAsyncStatus.Success }}},
         {{{ gpu.passAsPointer('pipelinePtr') }}}, {{{ gpu.NULLPTR }}});
@@ -1533,12 +1532,12 @@ var LibraryWebGPU = {
       var sp = stackSave();
       var messagePtr = stringToUTF8OnStack(pipelineError.message);
       var status =
-        pipeline.reason === 'validation' ? {{{ gpu.CreatePipelineAsyncStatus.ValidationError }}} :
-        pipeline.reason === 'internal' ? {{{ gpu.CreatePipelineAsyncStatus.InternalError }}} :
+        pipelineError.reason === 'validation' ? {{{ gpu.CreatePipelineAsyncStatus.ValidationError }}} :
+        pipelineError.reason === 'internal' ? {{{ gpu.CreatePipelineAsyncStatus.InternalError }}} :
         0;
       {{{ gpu.makeCheck('status') }}}
       _emwgpuOnCreateComputePipelineCompleted(futureId, status,
-        {{{ gpu.NULLPTR }}}, {{{ gpu.passAsPointer('messagePtr') }}});
+        {{{ gpu.passAsPointer('pipelinePtr') }}}, {{{ gpu.passAsPointer('messagePtr') }}});
       stackRestore(sp);
     }));
   },
@@ -1627,28 +1626,28 @@ var LibraryWebGPU = {
     return ptr;
   },
 
-  emwgpuDeviceCreateRenderPipelineAsync__deps: ['emwgpuCreateRenderPipeline', 'emwgpuOnCreateRenderPipelineCompleted'],
-  emwgpuDeviceCreateRenderPipelineAsync__sig: 'vpjp',
-  emwgpuDeviceCreateRenderPipelineAsync: (devicePtr, futureId, descriptor) => {
+  emwgpuDeviceCreateRenderPipelineAsync__deps: ['emwgpuOnCreateRenderPipelineCompleted'],
+  emwgpuDeviceCreateRenderPipelineAsync__sig: 'vpjpp',
+  emwgpuDeviceCreateRenderPipelineAsync: (devicePtr, futureId, descriptor, pipelinePtr) => {
     var desc = WebGPU.makeRenderPipelineDesc(descriptor);
     var device = WebGPU.getJsObject(devicePtr);
     {{{ runtimeKeepalivePush() }}}
     WebGPU.Internals.futureInsert(futureId, device.createRenderPipelineAsync(desc).then((pipeline) => {
       {{{ runtimeKeepalivePop() }}}
-      var pipelinePtr = _emwgpuCreateRenderPipeline({{{ gpu.NULLPTR }}});
       WebGPU.Internals.jsObjectInsert(pipelinePtr, pipeline);
-      _emwgpuOnCreateRenderPipelineCompleted(futureId, {{{ gpu.CreatePipelineAsyncStatus.Success }}}, pipelinePtr, 0);
+      _emwgpuOnCreateRenderPipelineCompleted(futureId, {{{ gpu.CreatePipelineAsyncStatus.Success }}},
+        {{{ gpu.passAsPointer('pipelinePtr') }}}, {{{ gpu.NULLPTR }}});
     }, (pipelineError) => {
       {{{ runtimeKeepalivePop() }}}
       var sp = stackSave();
       var messagePtr = stringToUTF8OnStack(pipelineError.message);
       var status =
-        pipeline.reason === 'validation' ? {{{ gpu.CreatePipelineAsyncStatus.ValidationError }}} :
-        pipeline.reason === 'internal' ? {{{ gpu.CreatePipelineAsyncStatus.InternalError }}} :
+        pipelineError.reason === 'validation' ? {{{ gpu.CreatePipelineAsyncStatus.ValidationError }}} :
+        pipelineError.reason === 'internal' ? {{{ gpu.CreatePipelineAsyncStatus.InternalError }}} :
         0;
       {{{ gpu.makeCheck('status') }}}
       _emwgpuOnCreateRenderPipelineCompleted(futureId, status,
-        {{{ gpu.NULLPTR }}}, {{{ gpu.passAsPointer('messagePtr') }}});
+        {{{ gpu.passAsPointer('pipelinePtr') }}}, {{{ gpu.passAsPointer('messagePtr') }}});
       stackRestore(sp);
     }));
   },
@@ -1942,9 +1941,9 @@ var LibraryWebGPU = {
     {{{ makeSetValue('supportedFeatures', C_STRUCTS.WGPUSupportedWGSLLanguageFeatures.featureCount, 'numFeatures', '*') }}};
   },
 
-  emwgpuInstanceRequestAdapter__deps: ['emwgpuCreateAdapter', 'emwgpuOnRequestAdapterCompleted'],
-  emwgpuInstanceRequestAdapter__sig: 'vpjp',
-  emwgpuInstanceRequestAdapter: (instancePtr, futureId, options) => {
+  emwgpuInstanceRequestAdapter__deps: ['emwgpuOnRequestAdapterCompleted'],
+  emwgpuInstanceRequestAdapter__sig: 'vpjpp',
+  emwgpuInstanceRequestAdapter: (instancePtr, futureId, options, adapterPtr) => {
     var opts;
     if (options) {
       {{{ gpu.makeCheckDescriptor('options') }}}
@@ -1962,7 +1961,7 @@ var LibraryWebGPU = {
       var sp = stackSave();
       var messagePtr = stringToUTF8OnStack('WebGPU not available on this browser (navigator.gpu is not available)');
       _emwgpuOnRequestAdapterCompleted(futureId, {{{ gpu.RequestAdapterStatus.Unavailable }}},
-        {{{ gpu.NULLPTR }}}, {{{ gpu.passAsPointer('messagePtr') }}});
+        adapterPtr, {{{ gpu.passAsPointer('messagePtr') }}});
       stackRestore(sp);
       return;
     }
@@ -1971,7 +1970,6 @@ var LibraryWebGPU = {
     WebGPU.Internals.futureInsert(futureId, navigator["gpu"]["requestAdapter"](opts).then((adapter) => {
       {{{ runtimeKeepalivePop() }}}
       if (adapter) {
-        var adapterPtr = _emwgpuCreateAdapter({{{ gpu.passAsPointer('instancePtr') }}});
         WebGPU.Internals.jsObjectInsert(adapterPtr, adapter);
         _emwgpuOnRequestAdapterCompleted(futureId, {{{ gpu.RequestAdapterStatus.Success }}},
           adapterPtr, {{{ gpu.NULLPTR }}});
@@ -1979,7 +1977,7 @@ var LibraryWebGPU = {
         var sp = stackSave();
         var messagePtr = stringToUTF8OnStack('WebGPU not available on this browser (requestAdapter returned null)');
         _emwgpuOnRequestAdapterCompleted(futureId, {{{ gpu.RequestAdapterStatus.Unavailable }}},
-          {{{ gpu.NULLPTR }}}, {{{ gpu.passAsPointer('messagePtr') }}});
+          adapterPtr, {{{ gpu.passAsPointer('messagePtr') }}});
         stackRestore(sp);
       }
     }, (ex) => {
@@ -1987,7 +1985,7 @@ var LibraryWebGPU = {
       var sp = stackSave();
       var messagePtr = stringToUTF8OnStack(ex.message);
       _emwgpuOnRequestAdapterCompleted(futureId, {{{ gpu.RequestAdapterStatus.Error }}},
-        {{{ gpu.NULLPTR }}}, {{{ gpu.passAsPointer('messagePtr') }}});
+        adapterPtr, {{{ gpu.passAsPointer('messagePtr') }}});
       stackRestore(sp);
     }));
   },

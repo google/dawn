@@ -222,10 +222,9 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
      {"use_user_defined_labels_in_backend",
       "Enables setting labels on backend-specific APIs that label objects. The labels used will be "
       "those of the corresponding frontend objects if non-empty and default labels otherwise. "
-      "Defaults to false. NOTE: On Vulkan, backend labels are currently always set (with default "
-      "labels if this toggle is not set). The reason is that Dawn currently uses backend "
-      "object labels on Vulkan to map errors back to the device with which the backend objects "
-      "included in the error are associated.",
+      "Defaults to false unless backend validation is enabled in which case it defaults to true. "
+      "NOTE: On Vulkan, backend labels are required to map errors back to the device with which "
+      "the backend objects included in the error are associated.",
       "https://crbug.com/dawn/840", ToggleStage::Device}},
     {Toggle::UsePlaceholderFragmentInVertexOnlyPipeline,
      {"use_placeholder_fragment_in_vertex_only_pipeline",
@@ -431,7 +430,7 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "Workaround for OpenGLES.",
       "https://crbug.com/dawn/2079", ToggleStage::Device}},
     {Toggle::UseBlitForRG11B10UfloatTextureCopy,
-     {"use_blit_for_rgb9e5ufloat_texture_copy",
+     {"use_blit_for_rg11b10ufloat_texture_copy",
       "Use a blit instead of a copy command to copy rg11b10ufloat texture to a texture or a buffer."
       "Workaround for OpenGLES.",
       "https://crbug.com/381214487", ToggleStage::Device}},

@@ -40,14 +40,7 @@
 #include "dawn/native/ObjectContentHasher.h"
 #include "dawn/native/PipelineLayout.h"
 #include "dawn/native/ShaderModule.h"
-
-namespace {
-bool IsDoubleValueRepresentableAsF16(double value) {
-    constexpr double kLowestF16 = -65504.0;
-    constexpr double kMaxF16 = 65504.0;
-    return kLowestF16 <= value && value <= kMaxF16;
-}
-}  // namespace
+#include "src/utils/numeric.h"
 
 namespace dawn::native {
 ResultOrError<ShaderModuleEntryPoint> ValidateProgrammableStage(DeviceBase* device,

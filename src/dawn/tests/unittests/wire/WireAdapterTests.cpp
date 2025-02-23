@@ -361,5 +361,45 @@ TEST_P(WireAdapterTests, RequestDeviceWireDisconnectedBeforeCallback) {
     });
 }
 
+// Test that a device's wire handle (id and generation) matches between the client and server.
+TEST_P(WireAdapterTests, RequestDeviceWireHandle) {
+    RequestDevice(nullptr);
+
+    // Expect the server to receive the message. Then, mock a fake reply.
+    WGPUDevice apiDevice = api.GetNewDevice();
+    EXPECT_CALL(api, OnAdapterRequestDevice(apiAdapter, NotNull(), _))
+        .WillOnce(InvokeWithoutArgs([&] {
+            // Set on device creation to forward callbacks to the client.
+            EXPECT_CALL(api, OnDeviceSetLoggingCallback(apiDevice, _)).Times(1);
+            EXPECT_CALL(api, DeviceGetLimits(apiDevice, NotNull())).Times(1);
+            EXPECT_CALL(api, DeviceGetFeatures(apiDevice, NotNull())).Times(1);
+            api.CallAdapterRequestDeviceCallback(apiAdapter, WGPURequestDeviceStatus_Success,
+                                                 apiDevice, kEmptyOutputStringView);
+        }));
+    FlushClient();
+    FlushFutures();
+
+    wgpu::Device device;
+    // Expect the callback in the client and the wire handles match.
+    ExpectWireCallbacksWhen([&](auto& mockCb) {
+        EXPECT_CALL(mockCb, Call(wgpu::RequestDeviceStatus::Success, NotNull(), EmptySizedString()))
+            .WillOnce(WithArg<1>(Invoke([&](wgpu::Device result) {
+                device = std::move(result);
+
+                Handle deviceWireHandle = GetWireClient()->GetWireHandle(device.Get());
+                WGPUDevice apiDeviceExpected =
+                    GetWireServer()->GetDevice(deviceWireHandle.id, deviceWireHandle.generation);
+                EXPECT_EQ(apiDevice, apiDeviceExpected);
+            })));
+        FlushCallbacks();
+    });
+
+    device = nullptr;
+    // Cleared when the device is destroyed.
+    EXPECT_CALL(api, OnDeviceSetLoggingCallback(apiDevice, _)).Times(1);
+    EXPECT_CALL(api, DeviceRelease(apiDevice));
+    FlushClient();
+}
+
 }  // anonymous namespace
 }  // namespace dawn::wire

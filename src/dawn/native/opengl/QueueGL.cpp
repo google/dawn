@@ -42,6 +42,19 @@
 
 namespace dawn::native::opengl {
 
+namespace {
+EGLenum EGLSyncTypeFromSharedFenceType(wgpu::SharedFenceType sharedFenceType) {
+    switch (sharedFenceType) {
+        case wgpu::SharedFenceType::SyncFD:
+            return EGL_SYNC_NATIVE_FENCE_ANDROID;
+        case wgpu::SharedFenceType::EGLSync:
+            return EGL_SYNC_FENCE;
+        default:
+            DAWN_UNREACHABLE();
+    }
+}
+}  // namespace
+
 ResultOrError<Ref<Queue>> Queue::Create(Device* device, const QueueDescriptor* descriptor) {
     return AcquireRef(new Queue(device, descriptor));
 }
@@ -209,25 +222,35 @@ MaybeError Queue::SubmitFenceSync() {
     });
 }
 
-ResultOrError<Ref<SharedFence>> Queue::GetOrCreateSharedFence(ExecutionSerial lastUsageSerial) {
-    DAWN_ASSERT(mEGLSyncType == EGL_SYNC_NATIVE_FENCE_ANDROID);
+ResultOrError<Ref<SharedFence>> Queue::GetOrCreateSharedFence(ExecutionSerial lastUsageSerial,
+                                                              wgpu::SharedFenceType type) {
+    Ref<WrappedEGLSync> sync;
 
-    // Look for an existing sync that can represent this serial.
-    Ref<WrappedEGLSync> sync = mFencesInFlight.Use([&](auto fencesInFlight) -> Ref<WrappedEGLSync> {
-        for (auto it = fencesInFlight->begin(); it != fencesInFlight->end(); ++it) {
-            if (it->second >= lastUsageSerial) {
-                return it->first;
+    EGLenum requestedSyncType = EGLSyncTypeFromSharedFenceType(type);
+    // We can use the internal syncs if their type is compatible. All internal syncs are valid for
+    // SharedFenceType::EGLSync otherwise the more specific type must match
+    bool internalSyncTypeIsCompatibleWithSharedFenceType =
+        (type == wgpu::SharedFenceType::EGLSync) || (requestedSyncType == mEGLSyncType);
+
+    if (internalSyncTypeIsCompatibleWithSharedFenceType) {
+        // Look for an existing sync that can represent this serial.
+        sync = mFencesInFlight.Use([&](auto fencesInFlight) -> Ref<WrappedEGLSync> {
+            for (auto it = fencesInFlight->begin(); it != fencesInFlight->end(); ++it) {
+                if (it->second >= lastUsageSerial) {
+                    return it->first;
+                }
             }
-        }
-        return {};
-    });
+            return {};
+        });
+    }
 
     Device* device = ToBackend(GetDevice());
 
     if (sync == nullptr) {
         DisplayEGL* display = ToBackend(device->GetPhysicalDevice())->GetDisplay();
-        DAWN_TRY_ASSIGN(sync, WrappedEGLSync::Create(display, mEGLSyncType, nullptr));
+        DAWN_TRY_ASSIGN(sync, WrappedEGLSync::Create(display, requestedSyncType, nullptr));
     }
+    DAWN_ASSERT(sync != nullptr);
 
     // If we are sharing this sync externally, make sure to flush all commands.
     // The FD cannot be queried before the flush and clients may hang if they try to wait on the
@@ -235,13 +258,16 @@ ResultOrError<Ref<SharedFence>> Queue::GetOrCreateSharedFence(ExecutionSerial la
     const OpenGLFunctions& gl = device->GetGL();
     gl.Flush();
 
-    EGLint fd;
-    DAWN_TRY_ASSIGN(fd, sync->DupFD());
+    SystemHandle handle;
+    if (type == wgpu::SharedFenceType::SyncFD) {
+        EGLint fd;
+        DAWN_TRY_ASSIGN(fd, sync->DupFD());
 
-    DAWN_ASSERT(sync != nullptr);
-    return AcquireRef(new SharedFenceEGL(ToBackend(GetDevice()), "Internal EGLSync",
-                                         wgpu::SharedFenceType::SyncFD, SystemHandle::Acquire(fd),
-                                         sync));
+        handle = SystemHandle::Acquire(fd);
+    }
+
+    return AcquireRef(new SharedFenceEGL(ToBackend(GetDevice()), "Internal EGLSync", type,
+                                         std::move(handle), sync));
 }
 
 bool Queue::HasPendingCommands() const {

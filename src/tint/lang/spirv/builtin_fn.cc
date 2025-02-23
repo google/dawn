@@ -154,6 +154,48 @@ const char* str(BuiltinFn i) {
             return "bit_field_s_extract";
         case BuiltinFn::kBitFieldUExtract:
             return "bit_field_u_extract";
+        case BuiltinFn::kAdd:
+            return "add";
+        case BuiltinFn::kSub:
+            return "sub";
+        case BuiltinFn::kMul:
+            return "mul";
+        case BuiltinFn::kSDiv:
+            return "s_div";
+        case BuiltinFn::kSMod:
+            return "s_mod";
+        case BuiltinFn::kSGreaterThan:
+            return "s_greater_than";
+        case BuiltinFn::kSGreaterThanEqual:
+            return "s_greater_than_equal";
+        case BuiltinFn::kSLessThan:
+            return "s_less_than";
+        case BuiltinFn::kSLessThanEqual:
+            return "s_less_than_equal";
+        case BuiltinFn::kUGreaterThan:
+            return "u_greater_than";
+        case BuiltinFn::kUGreaterThanEqual:
+            return "u_greater_than_equal";
+        case BuiltinFn::kULessThan:
+            return "u_less_than";
+        case BuiltinFn::kULessThanEqual:
+            return "u_less_than_equal";
+        case BuiltinFn::kConvertFToS:
+            return "convertFToS";
+        case BuiltinFn::kConvertSToF:
+            return "convertSToF";
+        case BuiltinFn::kConvertUToF:
+            return "convertUToF";
+        case BuiltinFn::kBitwiseAnd:
+            return "bitwiseAnd";
+        case BuiltinFn::kBitwiseOr:
+            return "bitwiseOr";
+        case BuiltinFn::kBitwiseXor:
+            return "bitwiseXor";
+        case BuiltinFn::kEqual:
+            return "equal";
+        case BuiltinFn::kNotEqual:
+            return "not_equal";
         case BuiltinFn::kSdot:
             return "sdot";
         case BuiltinFn::kUdot:
@@ -239,6 +281,27 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kBitFieldInsert:
         case BuiltinFn::kBitFieldSExtract:
         case BuiltinFn::kBitFieldUExtract:
+        case BuiltinFn::kAdd:
+        case BuiltinFn::kSub:
+        case BuiltinFn::kMul:
+        case BuiltinFn::kSDiv:
+        case BuiltinFn::kSMod:
+        case BuiltinFn::kConvertFToS:
+        case BuiltinFn::kConvertSToF:
+        case BuiltinFn::kConvertUToF:
+        case BuiltinFn::kBitwiseAnd:
+        case BuiltinFn::kBitwiseOr:
+        case BuiltinFn::kBitwiseXor:
+        case BuiltinFn::kEqual:
+        case BuiltinFn::kNotEqual:
+        case BuiltinFn::kSGreaterThan:
+        case BuiltinFn::kSGreaterThanEqual:
+        case BuiltinFn::kSLessThan:
+        case BuiltinFn::kSLessThanEqual:
+        case BuiltinFn::kUGreaterThan:
+        case BuiltinFn::kUGreaterThanEqual:
+        case BuiltinFn::kULessThan:
+        case BuiltinFn::kULessThanEqual:
             break;
     }
     return core::ir::Instruction::Accesses{};

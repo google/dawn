@@ -344,14 +344,18 @@ class ShaderModuleBase : public RefCountedWithExternalCount<ApiObjectBase>,
     using ScopedUseTintProgram = APIRef<ShaderModuleBase>;
     ScopedUseTintProgram UseTintProgram();
 
-    Ref<TintProgram> GetTintProgram() const;
-    Ref<TintProgram> GetTintProgramForTesting() const;
-    int GetTintProgramRecreateCountForTesting() const;
+    // Get tintProgram, (re)create it if necessary.
+    Ref<TintProgram> GetTintProgram();
 
     Future APIGetCompilationInfo(const WGPUCompilationInfoCallbackInfo& callbackInfo);
 
     void InjectCompilationMessages(std::unique_ptr<OwnedCompilationMessages> compilationMessages);
     OwnedCompilationMessages* GetCompilationMessages() const;
+
+    // Return nullable tintProgram directly without any recreation, can be used for testing the
+    // releasing/recreation behaviors.
+    Ref<TintProgram> GetNullableTintProgramForTesting() const;
+    int GetTintProgramRecreateCountForTesting() const;
 
   protected:
     void DestroyImpl() override;
@@ -379,7 +383,8 @@ class ShaderModuleBase : public RefCountedWithExternalCount<ApiObjectBase>,
     PerStage<size_t> mEntryPointCounts;
 
     struct TintData {
-        Ref<TintProgram> tintProgram;
+        // tintProgram is nullable so that it can be lazily (re)generated right before actual using.
+        Ref<TintProgram> tintProgram = nullptr;
         int tintProgramRecreateCount = 0;
     };
     MutexProtected<TintData> mTintData;

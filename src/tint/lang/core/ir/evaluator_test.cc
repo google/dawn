@@ -119,6 +119,16 @@ TEST_F(IR_EvaluatorTest, ConstructArray_Access) {
     EXPECT_EQ(2, c->Value()->ValueAs<int32_t>());
 }
 
+TEST_F(IR_EvaluatorTest, RuntimeArray_OutOfBoundsAccess) {
+    auto* arr = b.Var("arr", ty.ptr(storage, ty.array<u32>()));
+    auto* inst = b.Access(ty.ptr<storage, u32>(), arr, -1_i);
+    auto res = Eval(b, inst);
+
+    ASSERT_NE(res, Success);
+
+    EXPECT_EQ(res.Failure().reason.Str(), R"(error: index -1 out of bounds)");
+}
+
 TEST_F(IR_EvaluatorTest, ConstructStruct_Access) {
     auto* S = ty.Struct(mod.symbols.New("S"),
                         {{mod.symbols.New("a"), ty.i32()}, {mod.symbols.New("b"), ty.f32()}});
@@ -173,6 +183,22 @@ TEST_F(IR_EvaluatorTest, Convert) {
     ASSERT_NE(c, nullptr);
     ASSERT_EQ(ty.u32(), c->Type());
     EXPECT_EQ(1u, c->Value()->ValueAs<uint32_t>());
+}
+
+TEST_F(IR_EvaluatorTest, ConstExprIfSimple) {
+    auto* constexpr_if = b.ConstExprIf(true);
+    constexpr_if->SetResults(b.InstructionResult(ty.bool_()));
+    b.Append(constexpr_if->True(), [&] { b.ExitIf(constexpr_if, true); });
+    b.Append(constexpr_if->False(), [&] { b.ExitIf(constexpr_if, false); });
+    auto res = Eval(b, constexpr_if);
+    ASSERT_EQ(res, Success) << res.Failure().reason.Str();
+
+    auto* val = res.Get();
+    ASSERT_NE(val, nullptr);
+    auto* c = val->As<core::ir::Constant>();
+    ASSERT_NE(c, nullptr);
+    ASSERT_EQ(ty.bool_(), c->Type());
+    EXPECT_EQ(true, c->Value()->ValueAs<bool>());
 }
 
 TEST_F(IR_EvaluatorTest, BuiltinCall) {

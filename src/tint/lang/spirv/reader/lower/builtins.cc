@@ -131,10 +131,272 @@ struct State {
                 case spirv::BuiltinFn::kBitFieldUExtract:
                     BitFieldUExtract(builtin);
                     break;
+                case spirv::BuiltinFn::kAdd:
+                    Add(builtin);
+                    break;
+                case spirv::BuiltinFn::kSub:
+                    Sub(builtin);
+                    break;
+                case spirv::BuiltinFn::kMul:
+                    Mul(builtin);
+                    break;
+                case spirv::BuiltinFn::kSDiv:
+                    SDiv(builtin);
+                    break;
+                case spirv::BuiltinFn::kSMod:
+                    SMod(builtin);
+                    break;
+                case spirv::BuiltinFn::kConvertFToS:
+                    ConvertFToS(builtin);
+                    break;
+                case spirv::BuiltinFn::kConvertSToF:
+                    ConvertSToF(builtin);
+                    break;
+                case spirv::BuiltinFn::kConvertUToF:
+                    ConvertUToF(builtin);
+                    break;
+                case spirv::BuiltinFn::kBitwiseAnd:
+                    BitwiseAnd(builtin);
+                    break;
+                case spirv::BuiltinFn::kBitwiseOr:
+                    BitwiseOr(builtin);
+                    break;
+                case spirv::BuiltinFn::kBitwiseXor:
+                    BitwiseXor(builtin);
+                    break;
+                case spirv::BuiltinFn::kEqual:
+                    Equal(builtin);
+                    break;
+                case spirv::BuiltinFn::kNotEqual:
+                    NotEqual(builtin);
+                    break;
+                case spirv::BuiltinFn::kSGreaterThan:
+                    SGreaterThan(builtin);
+                    break;
+                case spirv::BuiltinFn::kSGreaterThanEqual:
+                    SGreaterThanEqual(builtin);
+                    break;
+                case spirv::BuiltinFn::kSLessThan:
+                    SLessThan(builtin);
+                    break;
+                case spirv::BuiltinFn::kSLessThanEqual:
+                    SLessThanEqual(builtin);
+                    break;
+                case spirv::BuiltinFn::kUGreaterThan:
+                    UGreaterThan(builtin);
+                    break;
+                case spirv::BuiltinFn::kUGreaterThanEqual:
+                    UGreaterThanEqual(builtin);
+                    break;
+                case spirv::BuiltinFn::kULessThan:
+                    ULessThan(builtin);
+                    break;
+                case spirv::BuiltinFn::kULessThanEqual:
+                    ULessThanEqual(builtin);
+                    break;
                 default:
                     TINT_UNREACHABLE() << "unknown spirv builtin: " << builtin->Func();
             }
         }
+    }
+
+    void ConvertSToF(spirv::ir::BuiltinCall* call) {
+        b.InsertBefore(call, [&] {
+            auto* result_ty = call->Result(0)->Type();
+
+            auto* arg = call->Args()[0];
+            if (arg->Type()->IsUnsignedIntegerScalarOrVector()) {
+                arg = b.Bitcast(ty.MatchWidth(ty.i32(), result_ty), arg)->Result(0);
+            }
+
+            b.ConvertWithResult(call->DetachResult(), arg);
+        });
+        call->Destroy();
+    }
+
+    void ConvertUToF(spirv::ir::BuiltinCall* call) {
+        b.InsertBefore(call, [&] {
+            auto* result_ty = call->Result(0)->Type();
+
+            auto* arg = call->Args()[0];
+            if (arg->Type()->IsSignedIntegerScalarOrVector()) {
+                arg = b.Bitcast(ty.MatchWidth(ty.u32(), result_ty), arg)->Result(0);
+            }
+
+            b.ConvertWithResult(call->DetachResult(), arg);
+        });
+        call->Destroy();
+    }
+
+    void ConvertFToS(spirv::ir::BuiltinCall* call) {
+        b.InsertBefore(call, [&] {
+            auto* res_ty = call->Result(0)->Type();
+            auto deepest = res_ty->DeepestElement();
+
+            auto* res = b.Convert(ty.MatchWidth(ty.i32(), res_ty), call->Args()[0])->Result(0);
+            if (deepest->IsUnsignedIntegerScalar()) {
+                res = b.Bitcast(res_ty, res)->Result(0);
+            }
+            call->Result(0)->ReplaceAllUsesWith(res);
+        });
+        call->Destroy();
+    }
+
+    void EmitBinaryWrappedAsFirstArg(spirv::ir::BuiltinCall* call, core::BinaryOp op) {
+        const auto& args = call->Args();
+        auto* lhs = args[0];
+        auto* rhs = args[1];
+
+        auto* op_ty = lhs->Type();
+        auto* res_ty = call->Result(0)->Type();
+
+        b.InsertBefore(call, [&] {
+            if (rhs->Type() != op_ty) {
+                rhs = b.Bitcast(op_ty, rhs)->Result(0);
+            }
+
+            auto* c = b.Binary(op, op_ty, lhs, rhs)->Result(0);
+            if (res_ty != op_ty) {
+                c = b.Bitcast(res_ty, c)->Result(0);
+            }
+            call->Result(0)->ReplaceAllUsesWith(c);
+        });
+        call->Destroy();
+    }
+
+    void BitwiseAnd(spirv::ir::BuiltinCall* call) {
+        EmitBinaryWrappedAsFirstArg(call, core::BinaryOp::kAnd);
+    }
+    void BitwiseOr(spirv::ir::BuiltinCall* call) {
+        EmitBinaryWrappedAsFirstArg(call, core::BinaryOp::kOr);
+    }
+    void BitwiseXor(spirv::ir::BuiltinCall* call) {
+        EmitBinaryWrappedAsFirstArg(call, core::BinaryOp::kXor);
+    }
+
+    void Add(spirv::ir::BuiltinCall* call) {
+        EmitBinaryWrappedAsFirstArg(call, core::BinaryOp::kAdd);
+    }
+    void Sub(spirv::ir::BuiltinCall* call) {
+        EmitBinaryWrappedAsFirstArg(call, core::BinaryOp::kSubtract);
+    }
+    void Mul(spirv::ir::BuiltinCall* call) {
+        EmitBinaryWrappedAsFirstArg(call, core::BinaryOp::kMultiply);
+    }
+
+    void EmitBinaryWrappedSignedSpirvMethods(spirv::ir::BuiltinCall* call, core::BinaryOp op) {
+        const auto& args = call->Args();
+        auto* lhs = args[0];
+        auto* rhs = args[1];
+
+        auto* res_ty = call->Result(0)->Type();
+        auto* op_ty = ty.MatchWidth(ty.i32(), res_ty);
+
+        b.InsertBefore(call, [&] {
+            if (lhs->Type() != op_ty) {
+                lhs = b.Bitcast(op_ty, lhs)->Result(0);
+            }
+            if (rhs->Type() != op_ty) {
+                rhs = b.Bitcast(op_ty, rhs)->Result(0);
+            }
+
+            auto* c = b.Binary(op, op_ty, lhs, rhs)->Result(0);
+            if (res_ty != op_ty) {
+                c = b.Bitcast(res_ty, c)->Result(0);
+            }
+            call->Result(0)->ReplaceAllUsesWith(c);
+        });
+        call->Destroy();
+    }
+
+    void SDiv(spirv::ir::BuiltinCall* call) {
+        EmitBinaryWrappedSignedSpirvMethods(call, core::BinaryOp::kDivide);
+    }
+    void SMod(spirv::ir::BuiltinCall* call) {
+        EmitBinaryWrappedSignedSpirvMethods(call, core::BinaryOp::kModulo);
+    }
+
+    void EmitBinaryMatchedArgs(spirv::ir::BuiltinCall* call, core::BinaryOp op) {
+        const auto& args = call->Args();
+        auto* lhs = args[0];
+        auto* rhs = args[1];
+
+        b.InsertBefore(call, [&] {
+            if (rhs->Type() != lhs->Type()) {
+                rhs = b.Bitcast(lhs->Type(), rhs)->Result(0);
+            }
+
+            b.BinaryWithResult(call->DetachResult(), op, lhs, rhs)->Result(0);
+        });
+        call->Destroy();
+    }
+    void Equal(spirv::ir::BuiltinCall* call) {
+        EmitBinaryMatchedArgs(call, core::BinaryOp::kEqual);
+    }
+    void NotEqual(spirv::ir::BuiltinCall* call) {
+        EmitBinaryMatchedArgs(call, core::BinaryOp::kNotEqual);
+    }
+
+    void EmitBinaryWithSignedArgs(spirv::ir::BuiltinCall* call, core::BinaryOp op) {
+        const auto& args = call->Args();
+        auto* lhs = args[0];
+        auto* rhs = args[1];
+
+        auto* arg_ty = ty.MatchWidth(ty.i32(), call->Result(0)->Type());
+        b.InsertBefore(call, [&] {
+            if (lhs->Type() != arg_ty) {
+                lhs = b.Bitcast(arg_ty, lhs)->Result(0);
+            }
+            if (rhs->Type() != arg_ty) {
+                rhs = b.Bitcast(arg_ty, rhs)->Result(0);
+            }
+
+            b.BinaryWithResult(call->DetachResult(), op, lhs, rhs)->Result(0);
+        });
+        call->Destroy();
+    }
+    void SGreaterThan(spirv::ir::BuiltinCall* call) {
+        EmitBinaryWithSignedArgs(call, core::BinaryOp::kGreaterThan);
+    }
+    void SGreaterThanEqual(spirv::ir::BuiltinCall* call) {
+        EmitBinaryWithSignedArgs(call, core::BinaryOp::kGreaterThanEqual);
+    }
+    void SLessThan(spirv::ir::BuiltinCall* call) {
+        EmitBinaryWithSignedArgs(call, core::BinaryOp::kLessThan);
+    }
+    void SLessThanEqual(spirv::ir::BuiltinCall* call) {
+        EmitBinaryWithSignedArgs(call, core::BinaryOp::kLessThanEqual);
+    }
+
+    void EmitBinaryWithUnsignedArgs(spirv::ir::BuiltinCall* call, core::BinaryOp op) {
+        const auto& args = call->Args();
+        auto* lhs = args[0];
+        auto* rhs = args[1];
+
+        auto* arg_ty = ty.MatchWidth(ty.u32(), call->Result(0)->Type());
+        b.InsertBefore(call, [&] {
+            if (lhs->Type() != arg_ty) {
+                lhs = b.Bitcast(arg_ty, lhs)->Result(0);
+            }
+            if (rhs->Type() != arg_ty) {
+                rhs = b.Bitcast(arg_ty, rhs)->Result(0);
+            }
+
+            b.BinaryWithResult(call->DetachResult(), op, lhs, rhs)->Result(0);
+        });
+        call->Destroy();
+    }
+    void UGreaterThan(spirv::ir::BuiltinCall* call) {
+        EmitBinaryWithUnsignedArgs(call, core::BinaryOp::kGreaterThan);
+    }
+    void UGreaterThanEqual(spirv::ir::BuiltinCall* call) {
+        EmitBinaryWithUnsignedArgs(call, core::BinaryOp::kGreaterThanEqual);
+    }
+    void ULessThan(spirv::ir::BuiltinCall* call) {
+        EmitBinaryWithUnsignedArgs(call, core::BinaryOp::kLessThan);
+    }
+    void ULessThanEqual(spirv::ir::BuiltinCall* call) {
+        EmitBinaryWithUnsignedArgs(call, core::BinaryOp::kLessThanEqual);
     }
 
     // The SPIR-V Signed methods all interpret their arguments as signed (regardless of the type of

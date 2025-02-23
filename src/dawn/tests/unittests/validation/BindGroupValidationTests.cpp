@@ -3434,20 +3434,18 @@ TEST_F(SamplerTypeBindingTest, ShaderAndBGLMatches) {
             })");
     }
 
-    // TODO(crbug.com/376497143): switch this to an error. depth with filtering sampler is
-    // deprecated. Test that a filtering sampler can be used to sample a depth texture.
+    // Test that a filtering sampler can not be used to sample a depth texture.
     {
-        ++mLastWarningCount;
         wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
             device, {{0, wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::Filtering},
                      {1, wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::Depth}});
 
-        CreateFragmentPipeline(&bindGroupLayout, R"(
+        ASSERT_DEVICE_ERROR(CreateFragmentPipeline(&bindGroupLayout, R"(
             @group(0) @binding(0) var mySampler: sampler;
             @group(0) @binding(1) var myTexture: texture_depth_2d;
             @fragment fn main() {
                 _ = textureSample(myTexture, mySampler, vec2f(0.0, 0.0));
-            })");
+            })"));
     }
 
     // Test that a non-filtering sampler can be used to sample a depth texture.
@@ -3798,25 +3796,35 @@ TEST_F(PipelineLayoutValidationTest, BindGroupSlotWithEmptyLayoutIsNotValidated)
     }
 }
 
-class PipelineLayoutDontAllowUnsafeAPIValidationTest : public ValidationTest {
-  protected:
-    bool AllowUnsafeAPIs() override { return false; }
-};
+// Test the empty bind group layout returned by calling `getBindGroupLayout()` on a pipeline created
+// with `auto` pipeline layout cannot be used to create other pipeline layouts.
+TEST_F(PipelineLayoutValidationTest, ReuseEmptyBindGroupLayoutCreatedwithAutoPipelineLayout) {
+    // The empty bind group layout comes from a pipeline created with an explicit pipeline layout.
+    {
+        wgpu::PipelineLayout pipelineLayout = utils::MakePipelineLayout(device, {});
+        wgpu::ComputePipelineDescriptor computePipelineDescriptor = {};
+        computePipelineDescriptor.compute.module = utils::CreateShaderModule(device, R"(
+                @compute @workgroup_size(1, 1) fn main() {})");
+        computePipelineDescriptor.layout = pipelineLayout;
+        wgpu::ComputePipeline computePipeline =
+            device.CreateComputePipeline(&computePipelineDescriptor);
 
-// Test currently creating pipeline layout with null bind group layout doesn't work when unsafe APIs
-// are not allowed.
-TEST_F(PipelineLayoutDontAllowUnsafeAPIValidationTest, CreateWithNullBindGroupLayout) {
-    for (uint32_t nullBGLIndex = 0; nullBGLIndex < 4; ++nullBGLIndex) {
-        std::vector<wgpu::BindGroupLayout> bgls(4);
-        for (uint32_t i = 0; i < 4; ++i) {
-            if (i == nullBGLIndex) {
-                continue;
-            }
-            bgls[i] = utils::MakeBindGroupLayout(
-                device, {{0, wgpu::ShaderStage::Compute, wgpu::StorageTextureAccess::WriteOnly,
-                          wgpu::TextureFormat::R32Float}});
-        }
-        ASSERT_DEVICE_ERROR(utils::MakePipelineLayout(device, bgls));
+        wgpu::BindGroupLayout emptyBindGroupLayout = computePipeline.GetBindGroupLayout(3);
+        std::vector<wgpu::BindGroupLayout> bindGroupLayouts = {{emptyBindGroupLayout}};
+        utils::MakePipelineLayout(device, bindGroupLayouts);
+    }
+
+    // The empty bind group layout comes from a pipeline created with an 'auto' pipeline layout.
+    {
+        wgpu::ComputePipelineDescriptor computePipelineDescriptor = {};
+        computePipelineDescriptor.compute.module = utils::CreateShaderModule(device, R"(
+                @compute @workgroup_size(1, 1) fn main() {})");
+        wgpu::ComputePipeline computePipeline =
+            device.CreateComputePipeline(&computePipelineDescriptor);
+
+        wgpu::BindGroupLayout emptyBindGroupLayout = computePipeline.GetBindGroupLayout(3);
+        std::vector<wgpu::BindGroupLayout> bindGroupLayouts = {{emptyBindGroupLayout}};
+        ASSERT_DEVICE_ERROR(utils::MakePipelineLayout(device, bindGroupLayouts));
     }
 }
 

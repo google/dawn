@@ -340,7 +340,7 @@ TEST_P(Type_StorageTextureDimension, Test) {
     auto dim = std::get<1>(GetParam());
 
     auto* v =
-        b.Var("v", AddressSpace::kStorage,
+        b.Var("v", AddressSpace::kHandle,
               ty.storage_texture(dim, core::TexelFormat::kRgba32Float, core::Access::kReadWrite),
               read_write);
     v->SetBindingPoint(0, 0);

@@ -209,6 +209,19 @@ wgpu::SharedFence SharedTextureMemoryTestBackend::ImportFenceTo(const wgpu::Devi
             fenceDesc.nextInChain = &sharedEventDesc;
             return importingDevice.ImportSharedFence(&fenceDesc);
         }
+        case wgpu::SharedFenceType::EGLSync: {
+            wgpu::SharedFenceEGLSyncExportInfo eglSyncInfo;
+            exportInfo.nextInChain = &eglSyncInfo;
+
+            fence.ExportInfo(&exportInfo);
+
+            wgpu::SharedFenceEGLSyncDescriptor eglSyncDesc;
+            eglSyncDesc.sync = eglSyncInfo.sync;
+
+            wgpu::SharedFenceDescriptor fenceDesc;
+            fenceDesc.nextInChain = &eglSyncDesc;
+            return importingDevice.ImportSharedFence(&fenceDesc);
+        }
         default:
             DAWN_UNREACHABLE();
     }

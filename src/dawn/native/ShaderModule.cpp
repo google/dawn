@@ -1094,11 +1094,12 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
     return std::move(metadata);
 }
 
-MaybeError ReflectShaderUsingTint(const DeviceBase* device,
+MaybeError ReflectShaderUsingTint(DeviceBase* device,
                                   const tint::Program* program,
                                   OwnedCompilationMessages* compilationMessages,
                                   EntryPointMetadataTable* entryPointMetadataTable) {
     DAWN_ASSERT(program->IsValid());
+    ScopedTintICEHandler scopedICEHandler(device);
 
     tint::inspector::Inspector inspector(*program);
 
@@ -1365,24 +1366,11 @@ MaybeError ValidateCompatibilityWithPipelineLayout(DeviceBase* device,
 
         DAWN_INVALID_IF(
             sampledTextureBindingInfo.sampleType != wgpu::TextureSampleType::Float &&
-                // TODO(crbug.com/376497143): remove Depth as it's invalid WebGPU. See deprecation
-                // warning below.
-                sampledTextureBindingInfo.sampleType != wgpu::TextureSampleType::Depth &&
                 sampledTextureBindingInfo.sampleType != kInternalResolveAttachmentSampleType,
             "Texture binding (group:%u, binding:%u) is %s but used statically with a sampler "
             "(group:%u, binding:%u) that's %s",
             pair.texture.group, pair.texture.binding, sampledTextureBindingInfo.sampleType,
             pair.sampler.group, pair.sampler.binding, wgpu::SamplerBindingType::Filtering);
-
-        // TODO(crbug.com/376497143): remove this deprecation warning.
-        if (sampledTextureBindingInfo.sampleType == wgpu::TextureSampleType::Depth) {
-            const char* msg =
-                "Using a TextureType::Depth with SamplerType::Filtering is deprecated."
-                "TextureType::Depth can only be used with SamplerType::NonFiltering or "
-                "SamplerType::Comparison.";
-            device->EmitWarningOnce(msg);
-            device->GetInstance()->EmitDeprecationWarning(msg);
-        }
     }
 
     // Validate compatibility of the pixel local storage.
@@ -1531,18 +1519,25 @@ bool ShaderModuleBase::EqualityFunc::operator()(const ShaderModuleBase* a,
 }
 
 ShaderModuleBase::ScopedUseTintProgram ShaderModuleBase::UseTintProgram() {
-    return mTintData.Use([&](auto tintData) {
-        if (tintData->tintProgram) {
-            return ScopedUseTintProgram(this);
-        }
+    // Directly return ScopedUseTintProgram to add ref count. If the mTintProgram is valid,
+    // this will prevent it from being released before using. If it is already released,
+    // it will be recreated in the GetTintProgram, right before actually using it.
+    return ScopedUseTintProgram(this);
+}
 
-        // When the ShaderModuleBase is not referenced externally, and not used for initializing
-        // any pipeline, the mTintProgram will be released. However the ShaderModuleBase itself
-        // may still alive due to being referenced by some pipelines. In this case, when
-        // DeviceBase::APICreateShaderModule() with the same shader source code, Dawn will look
-        // up from the cache and return the same ShaderModuleBase. In this case, we have to
-        // recreate mTintProgram, when the mTintProgram is required for initializing new
-        // pipelines.
+Ref<TintProgram> ShaderModuleBase::GetTintProgram() {
+    return mTintData.Use([&](auto tintData) {
+        // If the tintProgram is valid, just return it.
+        if (tintData->tintProgram) {
+            return tintData->tintProgram;
+        }
+        // Otherwise, recreate the tintProgram. When the ShaderModuleBase is not referenced
+        // externally, and not used for initializing any pipeline, the mTintProgram will be
+        // released. However the ShaderModuleBase itself may still alive due to being referenced by
+        // some pipelines. In this case, when DeviceBase::APICreateShaderModule() with the same
+        // shader source code, Dawn will look up from the cache and return the same
+        // ShaderModuleBase. In this case, we have to recreate the released mTintProgram for
+        // initializing new pipelines.
         ShaderModuleDescriptor descriptor;
         ShaderSourceWGSL wgslDescriptor;
         ShaderSourceSPIRV sprivDescriptor;
@@ -1564,25 +1559,18 @@ ShaderModuleBase::ScopedUseTintProgram ShaderModuleBase::UseTintProgram() {
         ShaderModuleParseResult parseResult;
         ValidateAndParseShaderModule(GetDevice(), Unpack(&descriptor), mInternalExtensions,
                                      &parseResult,
-                                     /*compilationMessages=*/nullptr)
+                                     /*compilationMessages*/ nullptr)
             .AcquireSuccess();
         DAWN_ASSERT(parseResult.tintProgram != nullptr);
 
         tintData->tintProgram = std::move(parseResult.tintProgram);
         tintData->tintProgramRecreateCount++;
 
-        return ScopedUseTintProgram(this);
-    });
-}
-
-Ref<TintProgram> ShaderModuleBase::GetTintProgram() const {
-    return mTintData.Use([&](auto tintData) {
-        DAWN_ASSERT(tintData->tintProgram != nullptr);
         return tintData->tintProgram;
     });
 }
 
-Ref<TintProgram> ShaderModuleBase::GetTintProgramForTesting() const {
+Ref<TintProgram> ShaderModuleBase::GetNullableTintProgramForTesting() const {
     return mTintData.Use([&](auto tintData) { return tintData->tintProgram; });
 }
 
@@ -1674,6 +1662,9 @@ MaybeError ShaderModuleBase::InitializeBase(ShaderModuleParseResult* parseResult
 }
 
 void ShaderModuleBase::WillDropLastExternalRef() {
+    // The last external ref being dropped indicates that the application is not currently using,
+    // and no pending task will use the shader module. In this case we can free the memory for the
+    // parsed module.
     mTintData.Use([&](auto tintData) { tintData->tintProgram = nullptr; });
 }
 

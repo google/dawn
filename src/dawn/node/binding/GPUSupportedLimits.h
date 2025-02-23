@@ -84,7 +84,6 @@ class GPUSupportedLimits final : public interop::GPUSupportedLimits {
 
   private:
     wgpu::SupportedLimits limits_;
-    std::optional<wgpu::DawnExperimentalSubgroupLimits> subgroup_limits_;
 };
 
 }  // namespace wgpu::binding

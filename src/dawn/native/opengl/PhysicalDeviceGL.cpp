@@ -253,9 +253,12 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         EnableFeature(dawn::native::Feature::SharedTextureMemoryAHardwareBuffer);
     }
 
-    if (mDisplay->egl.HasExt(EGLExt::NativeFenceSync) && mDisplay->egl.HasExt(EGLExt::WaitSync) &&
+    if (mDisplay->egl.HasExt(EGLExt::WaitSync) &&
         mFunctions.IsGLExtensionSupported("GL_OES_EGL_sync")) {
-        EnableFeature(dawn::native::Feature::SharedFenceSyncFD);
+        if (mDisplay->egl.HasExt(EGLExt::NativeFenceSync)) {
+            EnableFeature(dawn::native::Feature::SharedFenceSyncFD);
+        }
+        EnableFeature(dawn::native::Feature::SharedFenceEGLSync);
     }
 
     // Non-zero baseInstance requires at least desktop OpenGL 4.2, and it is not supported in

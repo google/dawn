@@ -68,6 +68,8 @@ tint_add_target(tint_lang_core_ir lib
   lang/core/ir/const_param_validator.h
   lang/core/ir/constant.cc
   lang/core/ir/constant.h
+  lang/core/ir/constexpr_if.cc
+  lang/core/ir/constexpr_if.h
   lang/core/ir/construct.cc
   lang/core/ir/construct.h
   lang/core/ir/continue.cc

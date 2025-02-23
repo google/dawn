@@ -340,6 +340,11 @@ ResultOrError<VulkanDeviceInfo> GatherDeviceInfo(const PhysicalDevice& device) {
                               VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_MEMORY_MODEL_FEATURES);
         }
 
+        if (info.extensions[DeviceExt::CooperativeMatrix]) {
+            featuresChain.Add(&info.cooperativeMatrixFeatures,
+                              VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_COOPERATIVE_MATRIX_FEATURES_KHR);
+        }
+
         // Use vkGetPhysicalDevice{Features,Properties}2 if required to gather information about
         // the extensions. DeviceExt::GetPhysicalDeviceProperties2 is guaranteed to be available
         // because these extensions (transitively) depend on it in `EnsureDependencies`

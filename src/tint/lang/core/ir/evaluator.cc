@@ -26,7 +26,12 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "src/tint/lang/core/ir/evaluator.h"
+#include "src/tint/lang/core/binary_op.h"
 #include "src/tint/lang/core/ir/constant.h"
+#include "src/tint/lang/core/ir/constexpr_if.h"
+#include "src/tint/lang/core/ir/function_param.h"
+#include "src/tint/lang/core/ir/override.h"
+#include "src/tint/lang/core/type/bool.h"
 #include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/utils/rtti/switch.h"
 
@@ -75,17 +80,20 @@ Evaluator::EvalResult Evaluator::EvalValue(core::ir::Value* val) {
     return tint::Switch(
         val,  //
         [&](core::ir::Constant* c) { return c->Value(); },
+        [&](core::ir::FunctionParam*) { return nullptr; },
         [&](core::ir::InstructionResult* r) {
             return tint::Switch(
                 r->Instruction(),  //
                 [&](core::ir::Bitcast* bc) { return EvalBitcast(bc); },
                 [&](core::ir::Access* a) { return EvalAccess(a); },
+                [&](core::ir::ConstExprIf* c) { return EvalConstExprIf(c); },
                 [&](core::ir::Construct* c) { return EvalConstruct(c); },
                 [&](core::ir::Convert* c) { return EvalConvert(c); },
                 [&](core::ir::CoreBinary* cb) { return EvalBinary(cb); },
                 [&](core::ir::CoreBuiltinCall* c) { return EvalCoreBuiltinCall(c); },
                 [&](core::ir::CoreUnary* u) { return EvalUnary(u); },
-                [&](core::ir::Swizzle* s) { return EvalSwizzle(s); },  //
+                [&](core::ir::Override* o) { return EvalOverride(o); },  //
+                [&](core::ir::Swizzle* s) { return EvalSwizzle(s); },    //
                 [&](Default) {
                     // Treat any unknown instruction as a termination point for trying to eval.
                     return nullptr;
@@ -116,10 +124,7 @@ Evaluator::EvalResult Evaluator::EvalAccess(core::ir::Access* a) {
     if (obj_res != Success) {
         return obj_res;
     }
-    // Check if the object could be evaluated
-    if (!obj_res.Get()) {
-        return nullptr;
-    }
+
     auto* obj = obj_res.Get();
 
     for (auto* idx : a->Indices()) {
@@ -139,7 +144,6 @@ Evaluator::EvalResult Evaluator::EvalAccess(core::ir::Access* a) {
         }
         obj = res.Get();
     }
-
     return obj;
 }
 
@@ -237,6 +241,45 @@ Evaluator::EvalResult Evaluator::EvalConvert(core::ir::Convert* c) {
     return r.Get();
 }
 
+Evaluator::EvalResult Evaluator::EvalOverride(core::ir::Override* o) {
+    auto val = EvalValue(o->Initializer());
+    if (val != Success) {
+        return val;
+    }
+    // Check if the value could be evaluated
+    if (!val.Get()) {
+        return nullptr;
+    }
+    return val.Get();
+}
+
+Evaluator::EvalResult Evaluator::EvalConstExprIf(core::ir::ConstExprIf* c) {
+    auto val = EvalValue(c->Condition());
+    if (val != Success) {
+        return val;
+    }
+    // Check if the value could be evaluated
+    if (!val.Get()) {
+        return nullptr;
+    }
+    bool branch_val = val.Get()->ValueAs<bool>();
+    auto* inline_block = branch_val ? c->True() : c->False();
+
+    // Note: ConstExprIf must be limited to side effect boolean values for this evaluation to be
+    // correct. This is currently the case as ConstExprIf was created for the singular purpose of
+    // correctly semantically representing short circuiting operations (and/or).
+    auto ret = EvalValue(inline_block->Terminator()->Args()[0]);
+    if (ret != Success) {
+        return ret;
+    }
+    // Check if the value could be evaluated
+    if (!val.Get()) {
+        return nullptr;
+    }
+
+    return val.Get();
+}
+
 Evaluator::EvalResult Evaluator::EvalSwizzle(core::ir::Swizzle* s) {
     auto val = EvalValue(s->Object());
     if (val != Success) {
@@ -311,6 +354,11 @@ Evaluator::EvalResult Evaluator::EvalBinary(core::ir::CoreBinary* cb) {
     if (!lhs.Get()) {
         return nullptr;
     }
+
+    // These short circuiting operators should not be present in the IR at any time. These need
+    // special handling and are transformed into ConstExprIfs on program construction.
+    TINT_ASSERT(cb->Op() != tint::core::BinaryOp::kLogicalAnd &&
+                cb->Op() != tint::core::BinaryOp::kLogicalOr);
 
     auto rhs = EvalValue(cb->RHS());
     if (rhs != Success) {

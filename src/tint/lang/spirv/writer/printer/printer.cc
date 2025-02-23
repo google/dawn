@@ -1509,6 +1509,69 @@ class Printer {
             case spirv::BuiltinFn::kBitFieldUExtract:
                 op = spv::Op::OpBitFieldUExtract;
                 break;
+            case BuiltinFn::kAdd:
+                op = spv::Op::OpIAdd;
+                break;
+            case BuiltinFn::kSub:
+                op = spv::Op::OpISub;
+                break;
+            case BuiltinFn::kMul:
+                op = spv::Op::OpIMul;
+                break;
+            case BuiltinFn::kSDiv:
+                op = spv::Op::OpSDiv;
+                break;
+            case BuiltinFn::kSMod:
+                op = spv::Op::OpSMod;
+                break;
+            case BuiltinFn::kConvertFToS:
+                op = spv::Op::OpConvertFToS;
+                break;
+            case BuiltinFn::kConvertSToF:
+                op = spv::Op::OpConvertSToF;
+                break;
+            case BuiltinFn::kConvertUToF:
+                op = spv::Op::OpConvertUToF;
+                break;
+            case BuiltinFn::kBitwiseAnd:
+                op = spv::Op::OpBitwiseAnd;
+                break;
+            case BuiltinFn::kBitwiseOr:
+                op = spv::Op::OpBitwiseOr;
+                break;
+            case BuiltinFn::kBitwiseXor:
+                op = spv::Op::OpBitwiseXor;
+                break;
+            case BuiltinFn::kEqual:
+                op = spv::Op::OpIEqual;
+                break;
+            case BuiltinFn::kNotEqual:
+                op = spv::Op::OpINotEqual;
+                break;
+            case BuiltinFn::kSGreaterThan:
+                op = spv::Op::OpSGreaterThan;
+                break;
+            case BuiltinFn::kSGreaterThanEqual:
+                op = spv::Op::OpSGreaterThanEqual;
+                break;
+            case BuiltinFn::kSLessThan:
+                op = spv::Op::OpSLessThan;
+                break;
+            case BuiltinFn::kSLessThanEqual:
+                op = spv::Op::OpSLessThanEqual;
+                break;
+            case BuiltinFn::kUGreaterThan:
+                op = spv::Op::OpUGreaterThan;
+                break;
+            case BuiltinFn::kUGreaterThanEqual:
+                op = spv::Op::OpUGreaterThanEqual;
+                break;
+            case BuiltinFn::kULessThan:
+                op = spv::Op::OpULessThan;
+                break;
+            case BuiltinFn::kULessThanEqual:
+                op = spv::Op::OpULessThanEqual;
+                break;
             case spirv::BuiltinFn::kNone:
                 TINT_ICE() << "undefined spirv ir function";
         }

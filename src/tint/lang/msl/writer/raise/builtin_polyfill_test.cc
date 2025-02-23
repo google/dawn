@@ -3320,8 +3320,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Storage_F32) {
     auto* func = b.Function("foo", mat);
     func->SetParams({p});
     b.Append(func->Block(), [&] {
-        auto* call = b.Call(mat, core::BuiltinFn::kSubgroupMatrixLoad, p, 64_u, false, 32_u);
-        call->SetExplicitTemplateParams(Vector{mat});
+        auto* call = b.CallExplicit(mat, core::BuiltinFn::kSubgroupMatrixLoad, Vector{mat}, p, 64_u,
+                                    false, 32_u);
         b.Return(func, call);
     });
 
@@ -3361,8 +3361,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Workgroup_F16) {
     auto* func = b.Function("foo", mat);
     func->SetParams({p});
     b.Append(func->Block(), [&] {
-        auto* call = b.Call(mat, core::BuiltinFn::kSubgroupMatrixLoad, p, 64_u, false, 32_u);
-        call->SetExplicitTemplateParams(Vector{mat});
+        auto* call = b.CallExplicit(mat, core::BuiltinFn::kSubgroupMatrixLoad, Vector{mat}, p, 64_u,
+                                    false, 32_u);
         b.Return(func, call);
     });
 
@@ -3477,14 +3477,15 @@ TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixMultiply_F32) {
     auto* func = b.Function("foo", result);
     func->SetParams({left, right});
     b.Append(func->Block(), [&] {
-        auto* call = b.Call(result, core::BuiltinFn::kSubgroupMatrixMultiply, left, right);
+        auto* call = b.CallExplicit(result, core::BuiltinFn::kSubgroupMatrixMultiply,
+                                    Vector{ty.f32()}, left, right);
         b.Return(func, call);
     });
 
     auto* src = R"(
 %foo = func(%left:subgroup_matrix_left<f32, 4, 8>, %right:subgroup_matrix_right<f32, 8, 4>):subgroup_matrix_result<f32, 8, 8> {
   $B1: {
-    %4:subgroup_matrix_result<f32, 8, 8> = subgroupMatrixMultiply %left, %right
+    %4:subgroup_matrix_result<f32, 8, 8> = subgroupMatrixMultiply<f32> %left, %right
     ret %4
   }
 }
@@ -3515,14 +3516,15 @@ TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixMultiply_F16) {
     auto* func = b.Function("foo", result);
     func->SetParams({left, right});
     b.Append(func->Block(), [&] {
-        auto* call = b.Call(result, core::BuiltinFn::kSubgroupMatrixMultiply, left, right);
+        auto* call = b.CallExplicit(result, core::BuiltinFn::kSubgroupMatrixMultiply,
+                                    Vector{ty.f16()}, left, right);
         b.Return(func, call);
     });
 
     auto* src = R"(
 %foo = func(%left:subgroup_matrix_left<f16, 8, 4>, %right:subgroup_matrix_right<f16, 2, 8>):subgroup_matrix_result<f16, 2, 4> {
   $B1: {
-    %4:subgroup_matrix_result<f16, 2, 4> = subgroupMatrixMultiply %left, %right
+    %4:subgroup_matrix_result<f16, 2, 4> = subgroupMatrixMultiply<f16> %left, %right
     ret %4
   }
 }
