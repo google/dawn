@@ -1190,19 +1190,9 @@ void PhysicalDevice::PopulateBackendFormatCapabilities(
 }
 
 void PhysicalDevice::PopulateSubgroupMatrixConfigs() {
-    // Query the full list of configurations supported by the Vulkan device.
-    uint32_t configCount = 0;
-    const VulkanFunctions& fn = GetVulkanInstance()->GetFunctions();
-    DAWN_ASSERT(fn.GetPhysicalDeviceCooperativeMatrixPropertiesKHR(mVkPhysicalDevice, &configCount,
-                                                                   nullptr) == VK_SUCCESS);
-
-    std::vector<VkCooperativeMatrixPropertiesKHR> properties(configCount);
-    DAWN_ASSERT(fn.GetPhysicalDeviceCooperativeMatrixPropertiesKHR(
-                    mVkPhysicalDevice, &configCount, properties.data()) == VK_SUCCESS);
-
-    mSubgroupMatrixConfigs.reserve(configCount);
-    for (uint32_t i = 0; i < configCount; i++) {
-        VkCooperativeMatrixPropertiesKHR& p = properties[i];
+    mSubgroupMatrixConfigs.reserve(mDeviceInfo.cooperativeMatrixProperties.size());
+    for (uint32_t i = 0; i < mSubgroupMatrixConfigs.size(); i++) {
+        const VkCooperativeMatrixPropertiesKHR& p = mDeviceInfo.cooperativeMatrixProperties[i];
 
         // Filter out configurations that WebGPU does not support.
         if (p.AType != p.BType || p.CType != p.ResultType || p.scope != VK_SCOPE_SUBGROUP_KHR ||

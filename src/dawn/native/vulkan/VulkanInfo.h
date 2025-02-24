@@ -89,6 +89,7 @@ struct VulkanDeviceInfo : VulkanDeviceKnobs {
     VkPhysicalDeviceExternalMemoryHostPropertiesEXT externalMemoryHostProperties;
 
     std::vector<VkQueueFamilyProperties> queueFamilies;
+    std::vector<VkCooperativeMatrixPropertiesKHR> cooperativeMatrixProperties;
 
     std::vector<VkMemoryType> memoryTypes;
     std::vector<VkMemoryHeap> memoryHeaps;

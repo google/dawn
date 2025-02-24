@@ -355,6 +355,29 @@ ResultOrError<VulkanDeviceInfo> GatherDeviceInfo(const PhysicalDevice& device) {
         vkFunctions.GetPhysicalDeviceFeatures(vkPhysicalDevice, &info.features);
     }
 
+    // A Vulkan loader that doesn't know about the VK_KHR_cooperative_matrix could return a null
+    // proc, but still let the device advertise the extension. In that case the extension is
+    // unusable so we disable it.
+    if (vkFunctions.GetPhysicalDeviceCooperativeMatrixPropertiesKHR == nullptr) {
+        info.extensions.reset(DeviceExt::CooperativeMatrix);
+    }
+    if (info.extensions[DeviceExt::CooperativeMatrix]) {
+        uint32_t count = 0;
+        DAWN_TRY(CheckVkSuccess(vkFunctions.GetPhysicalDeviceCooperativeMatrixPropertiesKHR(
+                                    vkPhysicalDevice, &count, nullptr),
+                                "vkGetPhysicalDeviceCooperativeMatrixPropertiesKHR"));
+
+        info.cooperativeMatrixProperties.resize(count);
+        for (auto& properties : info.cooperativeMatrixProperties) {
+            properties.sType = VK_STRUCTURE_TYPE_COOPERATIVE_MATRIX_PROPERTIES_KHR;
+            properties.pNext = nullptr;
+        }
+        DAWN_TRY(
+            CheckVkSuccess(vkFunctions.GetPhysicalDeviceCooperativeMatrixPropertiesKHR(
+                               vkPhysicalDevice, &count, info.cooperativeMatrixProperties.data()),
+                           "vkGetPhysicalDeviceCooperativeMatrixPropertiesKHR"));
+    }
+
     // TODO(cwallez@chromium.org): gather info about formats
 
     return std::move(info);
