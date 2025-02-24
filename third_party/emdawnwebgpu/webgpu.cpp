@@ -69,6 +69,14 @@ const void* emwgpuBufferGetConstMappedRange(WGPUBuffer buffer,
                                             size_t offset,
                                             size_t size);
 void* emwgpuBufferGetMappedRange(WGPUBuffer buffer, size_t offset, size_t size);
+WGPUStatus emwgpuBufferWriteMappedRange(WGPUBuffer buffer,
+                                        size_t offset,
+                                        void const* data,
+                                        size_t size);
+WGPUStatus emwgpuBufferReadMappedRange(WGPUBuffer buffer,
+                                       size_t offset,
+                                       void* data,
+                                       size_t size);
 void emwgpuBufferUnmap(WGPUBuffer buffer);
 
 // Future/async operation that need to be forwarded to JS.
@@ -663,6 +671,8 @@ struct WGPUBufferImpl final : public EventSource,
   const void* GetConstMappedRange(size_t offset, size_t size);
   WGPUBufferMapState GetMapState() const;
   void* GetMappedRange(size_t offset, size_t size);
+  WGPUStatus WriteMappedRange(size_t offset, void const* data, size_t size);
+  WGPUStatus ReadMappedRange(size_t offset, void* data, size_t size);
   WGPUFuture MapAsync(WGPUMapMode mode,
                       size_t offset,
                       size_t size,
@@ -1345,6 +1355,28 @@ void* WGPUBufferImpl::GetMappedRange(size_t offset, size_t size) {
   return emwgpuBufferGetMappedRange(this, offset, size);
 }
 
+WGPUStatus WGPUBufferImpl::WriteMappedRange(size_t offset,
+                                            void const* data,
+                                            size_t size) {
+  if (mMapState != WGPUBufferMapState_Mapped) {
+    return WGPUStatus_Error;
+  }
+  if (mPendingMapRequest.mode != WGPUMapMode_Write) {
+    assert(false);
+    return WGPUStatus_Error;
+  }
+  return emwgpuBufferWriteMappedRange(this, offset, data, size);
+}
+
+WGPUStatus WGPUBufferImpl::ReadMappedRange(size_t offset,
+                                           void* data,
+                                           size_t size) {
+  if (mMapState != WGPUBufferMapState_Mapped) {
+    return WGPUStatus_Error;
+  }
+  return emwgpuBufferReadMappedRange(this, offset, data, size);
+}
+
 WGPUFuture WGPUBufferImpl::MapAsync(WGPUMapMode mode,
                                     size_t offset,
                                     size_t size,
@@ -1679,6 +1711,20 @@ WGPUBufferMapState wgpuBufferGetMapState(WGPUBuffer buffer) {
 
 void* wgpuBufferGetMappedRange(WGPUBuffer buffer, size_t offset, size_t size) {
   return buffer->GetMappedRange(offset, size);
+}
+
+WGPUStatus wgpuBufferWriteMappedRange(WGPUBuffer buffer,
+                                      size_t offset,
+                                      void const* data,
+                                      size_t size) {
+  return buffer->WriteMappedRange(offset, data, size);
+}
+
+WGPUStatus wgpuBufferReadMappedRange(WGPUBuffer buffer,
+                                     size_t offset,
+                                     void* data,
+                                     size_t size) {
+  return buffer->ReadMappedRange(offset, data, size);
 }
 
 WGPUFuture wgpuBufferMapAsync(WGPUBuffer buffer,

@@ -899,8 +899,6 @@ var LibraryWebGPU = {
     buffer.destroy();
   },
 
-  // In webgpu.h offset and size are passed in as size_t.
-  // And library_webgpu assumes that size_t is always 32bit in emscripten.
   emwgpuBufferGetConstMappedRange__deps: ['$warnOnce', 'memalign', 'free'],
   emwgpuBufferGetConstMappedRange__sig: 'pppp',
   emwgpuBufferGetConstMappedRange: (bufferPtr, offset, size) => {
@@ -915,9 +913,8 @@ var LibraryWebGPU = {
       mapped = buffer.getMappedRange(offset, size);
     } catch (ex) {
 #if ASSERTIONS
-      err(`wgpuBufferGetConstMappedRange(${offset}, ${size}) failed: ${ex}`);
+      err(`buffer.getMappedRange(${offset}, ${size}) failed: ${ex}`);
 #endif
-      // TODO(kainino0x): Somehow inject a validation error?
       return 0;
     }
     var data = _memalign(16, mapped.byteLength);
@@ -926,8 +923,6 @@ var LibraryWebGPU = {
     return data;
   },
 
-  // In webgpu.h offset and size are passed in as size_t.
-  // And library_webgpu assumes that size_t is always 32bit in emscripten.
   emwgpuBufferGetMappedRange__deps: ['$warnOnce', 'memalign', 'free'],
   emwgpuBufferGetMappedRange__sig: 'pppp',
   emwgpuBufferGetMappedRange: (bufferPtr, offset, size) => {
@@ -942,9 +937,8 @@ var LibraryWebGPU = {
       mapped = buffer.getMappedRange(offset, size);
     } catch (ex) {
 #if ASSERTIONS
-      err(`wgpuBufferGetMappedRange(${offset}, ${size}) failed: ${ex}`);
+      err(`buffer.getMappedRange(${offset}, ${size}) failed: ${ex}`);
 #endif
-      // TODO(kainino0x): Somehow inject a validation error?
       return 0;
     }
 
@@ -955,6 +949,40 @@ var LibraryWebGPU = {
       _free(data);
     });
     return data;
+  },
+
+  emwgpuBufferWriteMappedRange__deps: ['$warnOnce'],
+  emwgpuBufferWriteMappedRange__sig: 'ipppp',
+  emwgpuBufferWriteMappedRange: (bufferPtr, offset, data, size) => {
+    var buffer = WebGPU.getJsObject(bufferPtr);
+    var mapped;
+    try {
+      mapped = buffer.getMappedRange(offset, size);
+    } catch (ex) {
+#if ASSERTIONS
+      err(`buffer.getMappedRange(${offset}, ${size}) failed: ${ex}`);
+#endif
+      return {{{ gpu.Status.Error }}};
+    }
+    new Uint8Array(mapped).set(HEAPU8.subarray(data, data + size));
+    return {{{ gpu.Status.Success }}};
+  },
+
+  emwgpuBufferReadMappedRange__deps: ['$warnOnce'],
+  emwgpuBufferReadMappedRange__sig: 'ipppp',
+  emwgpuBufferReadMappedRange: (bufferPtr, offset, data, size) => {
+    var buffer = WebGPU.getJsObject(bufferPtr);
+    var mapped;
+    try {
+      mapped = buffer.getMappedRange(offset, size);
+    } catch (ex) {
+#if ASSERTIONS
+      err(`buffer.getMappedRange(${offset}, ${size}) failed: ${ex}`);
+#endif
+      return {{{ gpu.Status.Error }}};
+    }
+    HEAPU8.set(new Uint8Array(mapped), data);
+    return {{{ gpu.Status.Success }}};
   },
 
   wgpuBufferGetSize: (bufferPtr) => {

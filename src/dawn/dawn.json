@@ -591,6 +591,24 @@
                 ]
             },
             {
+                "name": "write mapped range",
+                "returns": "status",
+                "args": [
+                    {"name": "offset", "type": "size_t"},
+                    {"name": "data", "type": "void", "annotation": "const*", "length": "size"},
+                    {"name": "size", "type": "size_t"}
+                ]
+            },
+            {
+                "name": "read mapped range",
+                "returns": "status",
+                "args": [
+                    {"name": "offset", "type": "size_t"},
+                    {"name": "data", "type": "void", "annotation": "*", "length": "size"},
+                    {"name": "size", "type": "size_t"}
+                ]
+            },
+            {
                 "name": "set label",
                 "returns": "void",
                 "args": [

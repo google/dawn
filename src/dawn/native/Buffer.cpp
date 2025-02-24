@@ -593,6 +593,26 @@ const void* BufferBase::APIGetConstMappedRange(size_t offset, size_t size) {
     return GetMappedRange(offset, size, false);
 }
 
+wgpu::Status BufferBase::APIWriteMappedRange(size_t offset, void const* data, size_t size) {
+    void* range = APIGetMappedRange(offset, size);
+    if (range == nullptr) {
+        return wgpu::Status::Error;
+    }
+
+    memcpy(range, data, size);
+    return wgpu::Status::Success;
+}
+
+wgpu::Status BufferBase::APIReadMappedRange(size_t offset, void* data, size_t size) {
+    const void* range = APIGetConstMappedRange(offset, size);
+    if (range == nullptr) {
+        return wgpu::Status::Error;
+    }
+
+    memcpy(data, range, size);
+    return wgpu::Status::Success;
+}
+
 void* BufferBase::GetMappedRange(size_t offset, size_t size, bool writable) {
     if (!CanGetMappedRange(writable, offset, size)) {
         return nullptr;

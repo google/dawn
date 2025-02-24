@@ -241,6 +241,8 @@
             "BufferMapAsync",
             "BufferGetConstMappedRange",
             "BufferGetMappedRange",
+            "BufferReadMappedRange",
+            "BufferWriteMappedRange",
             "BufferGetMapState",
             "BufferGetSize",
             "BufferGetUsage",
