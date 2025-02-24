@@ -205,6 +205,10 @@ if (${DAWN_ENABLE_EMSCRIPTEN})
         "--js-library=${DAWN_EMDAWNWEBGPU_DIR}/library_webgpu.js"
         "--closure-args=--externs=${DAWN_EMSCRIPTEN_TOOLCHAIN}/src/closure-externs/webgpu-externs.js"
     )
+    # Relink when library_webgpu.js file changes.
+    set_target_properties(emdawnwebgpu_config PROPERTIES
+        INTERFACE_LINK_DEPENDS "${DAWN_EMDAWNWEBGPU_DIR}/library_webgpu.js"
+    )
 
     dawn_add_library(
         emdawnwebgpu_c
