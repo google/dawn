@@ -1949,7 +1949,7 @@ var LibraryWebGPU = {
       {{{ gpu.makeCheckDescriptor('options') }}}
       var featureLevel = {{{ gpu.makeGetU32('options', C_STRUCTS.WGPURequestAdapterOptions.featureLevel) }}};
       opts = {
-        "featureLevel": featureLevel === {{{ gpu.FeatureLevel.Compatibility }}} ? "compatibility" : undefined,
+        "featureLevel": WebGPU.FeatureLevel[featureLevel],
         "powerPreference": WebGPU.PowerPreference[
           {{{ gpu.makeGetU32('options', C_STRUCTS.WGPURequestAdapterOptions.powerPreference) }}}],
         "forceFallbackAdapter":
