@@ -1667,6 +1667,12 @@ bool Validator::CheckResults(const ir::Instruction* inst, std::optional<size_t> 
 
 bool Validator::CheckOperand(const Instruction* inst, size_t idx) {
     auto* operand = inst->Operand(idx);
+
+    // var instructions are allowed to have a nullptr operands
+    if (inst->Is<Var>() && operand == nullptr) {
+        return true;
+    }
+
     if (DAWN_UNLIKELY(operand == nullptr)) {
         AddError(inst, idx) << "operand is undefined";
         return false;
@@ -2466,8 +2472,7 @@ void Validator::CheckOverride(const Override* o) {
 }
 
 void Validator::CheckVar(const Var* var) {
-    // Intentionally not checking operands, since Var may have a null operand
-    if (!CheckResults(var, Var::kNumResults)) {
+    if (!CheckResultsAndOperandRange(var, Var::kNumResults, Var::kMinOperands, Var::kMaxOperands)) {
         return;
     }
 

@@ -48,6 +48,29 @@ namespace tint::core::ir {
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
+TEST_F(IR_ValidatorTest, Var_RootBlock_NullOperand) {
+    auto* v = b.Var(ty.ptr(private_, ty.i32()));
+    v->SetOperands(Vector{static_cast<ir::Value*>(nullptr)});
+    mod.root_block->Append(v);
+
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success);
+}
+
+TEST_F(IR_ValidatorTest, Var_RootBlock_TooManyOperands) {
+    auto* v = b.Var(ty.ptr(private_, ty.i32()));
+    v->SetOperands(Vector{b.Value(0_i), b.Value(1_i)});
+    mod.root_block->Append(v);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:2:38 error: var: expected between 0 and 1 operands, got 2
+  %1:ptr<private, i32, read_write> = var, 0i
+                                     ^^^
+)")) << res.Failure().reason.Str();
+}
+
 TEST_F(IR_ValidatorTest, Var_RootBlock_NullResult) {
     auto* v = mod.CreateInstruction<ir::Var>(nullptr);
     v->SetInitializer(b.Constant(0_i));
