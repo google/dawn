@@ -131,19 +131,23 @@ class EnumType(Type):
                 assert prefix == 0
                 prefix = 0x0002_0000
 
-            if 'emscripten' in tags:
-                assert prefix == 0
-                prefix = 0x0004_0000
-
-            if 'dawn' in tags:
-                assert prefix == 0
-                prefix = 0x0005_0000
+            if 'upstream' not in tags:
+                if 'dawn' in tags:
+                    # Dawn-only or Dawn+Emscripten
+                    assert prefix == 0
+                    prefix = 0x0005_0000
+                elif 'emscripten' in tags:
+                    # Emscripten-only
+                    assert prefix == 0
+                    prefix = 0x0004_0000
 
             if prefix == 0 and 'native' in tags:
                 prefix = 0x0001_0000
 
             if 'deprecated' not in tags:
-                if 'emscripten' in tags:
+                # Emscripten implements some Dawn extensions, and some upstream things that
+                # aren't in Dawn yet.
+                if 'emscripten' in tags and 'dawn' not in tags and 'upstream' not in tags:
                     assert value_name.startswith('emscripten')
                 else:
                     assert not value_name.startswith('emscripten')

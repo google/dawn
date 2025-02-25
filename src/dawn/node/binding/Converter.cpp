@@ -1617,6 +1617,8 @@ bool Converter::Convert(interop::GPUFeatureName& out, wgpu::FeatureName in) {
         case wgpu::FeatureName::SharedTextureMemoryZirconHandle:
         case wgpu::FeatureName::StaticSamplers:
         case wgpu::FeatureName::SubgroupsF16:
+        case wgpu::FeatureName::TextureCompressionBCSliced3D:
+        case wgpu::FeatureName::TextureCompressionASTCSliced3D:
         case wgpu::FeatureName::TransientAttachments:
         case wgpu::FeatureName::YCbCrVulkanSamplers:
         case wgpu::FeatureName::DawnLoadResolveTexture:

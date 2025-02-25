@@ -41,6 +41,8 @@ bool IsFeatureSupported(WGPUFeatureName feature) {
         case WGPUFeatureName_BufferMapExtendedUsages:
         case WGPUFeatureName_DawnFormatCapabilities:
         case WGPUFeatureName_DawnDrmFormatCapabilities:
+        case WGPUFeatureName_TextureCompressionBCSliced3D:
+        case WGPUFeatureName_TextureCompressionASTCSliced3D:
             return false;
         // NOTE: SharedTextureMemory/SharedFence are not actually intended
         // for usage over the wire (and are not exposed over the wire as
