@@ -2662,15 +2662,25 @@ Maybe<const ast::Expression*> Parser::unary_expression() {
     MultiTokenSource source(this);
 
     auto& t = peek();
-    if (match(Token::Type::kPlusPlus) || match(Token::Type::kMinusMinus)) {
-        AddError(source,
-                 "prefix increment and decrement operators are reserved for a "
-                 "future WGSL version");
-        return Failure::kErrored;
+
+    // Note that an valid unary Negation expression starts with MINUS can be nested by another
+    // Negation unary expression, results in the form of (--e). The two MINUS might be tokenized as
+    // a single kMinusMinus, while kMinusMinus should only be used in a variable updating statement.
+    // The token should be split and the expression should be parsed as (-(-e)).
+    // There is no unary expression (+e) so (++e) is not a valid unary expression and kPlusPlus is
+    // unexpected here. Special casing kPlusPlus to generate a more specific error message.
+    if (peek_is(Token::Type::kPlusPlus)) {
+        return AddError(peek(0).source(),
+                        "prefix increment and decrement operators are not supported");
     }
 
     core::UnaryOp op;
-    if (match(Token::Type::kMinus)) {
+    if (t.Is(Token::Type::kMinusMinus)) {
+        // Split the kMinusMinus token into two kMinus tokens.
+        next();
+        split_token(Token::Type::kMinus, Token::Type::kMinus);
+        op = core::UnaryOp::kNegation;
+    } else if (match(Token::Type::kMinus)) {
         op = core::UnaryOp::kNegation;
     } else if (match(Token::Type::kBang)) {
         op = core::UnaryOp::kNot;
@@ -2850,6 +2860,13 @@ Maybe<const ast::Statement*> Parser::variable_updating_statement() {
     // helpful than this error message:
     if (peek_is(Token::Type::kIdentifier) && peek_is(Token::Type::kColon, 1)) {
         return AddError(peek(0).source(), "expected 'var' for variable declaration");
+    }
+
+    // Prefix increment/decrement `++a`/`--a` is invalid grammar, and without
+    // special casing will return unmatched and no error message.
+    if (peek_is(Token::Type::kPlusPlus) || peek_is(Token::Type::kMinusMinus)) {
+        return AddError(peek(0).source(),
+                        "prefix increment and decrement operators are not supported");
     }
 
     Source source;
