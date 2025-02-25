@@ -635,5 +635,597 @@ INSTANTIATE_TEST_SUITE_P(SpirvParser,
                                          SpirvBitwiseParam{"Or"},   //
                                          SpirvBitwiseParam{"Xor"}));
 
+TEST_F(SpirvParserTest, ShiftLeftLogical_Scalar_UnsignedUnsigned_Unsigned) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %uint = OpTypeInt 32 0
+        %int = OpTypeInt 32 1
+     %v2uint = OpTypeVector %uint 2
+      %v2int = OpTypeVector %int 2
+        %one = OpConstant %int 1
+        %two = OpConstant %int 2
+      %eight = OpConstant %uint 8
+       %nine = OpConstant %uint 9
+      %v2one = OpConstantComposite %v2int %one %one
+      %v2two = OpConstantComposite %v2int %two %two
+    %v2eight = OpConstantComposite %v2uint %eight %eight
+     %v2nine = OpConstantComposite %v2uint %nine %nine
+    %void_fn = OpTypeFunction %void
+
+       %main = OpFunction %void None %void_fn
+ %main_start = OpLabel
+               %1 = OpShiftLeftLogical %uint %eight %nine
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = spirv.shift_left_logical<u32> 8u, 9u
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, ShiftLeftLogical_Scalar_UnsignedSigned_Unsigned) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %uint = OpTypeInt 32 0
+        %int = OpTypeInt 32 1
+     %v2uint = OpTypeVector %uint 2
+      %v2int = OpTypeVector %int 2
+        %one = OpConstant %int 1
+        %two = OpConstant %int 2
+      %eight = OpConstant %uint 8
+       %nine = OpConstant %uint 9
+      %v2one = OpConstantComposite %v2int %one %one
+      %v2two = OpConstantComposite %v2int %two %two
+    %v2eight = OpConstantComposite %v2uint %eight %eight
+     %v2nine = OpConstantComposite %v2uint %nine %nine
+    %void_fn = OpTypeFunction %void
+
+       %main = OpFunction %void None %void_fn
+ %main_start = OpLabel
+               %1 = OpShiftLeftLogical %uint %eight %one
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = spirv.shift_left_logical<u32> 8u, 1i
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, ShiftLeftLogical_Scalar_SignedUnsigned_Unsigned) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %uint = OpTypeInt 32 0
+        %int = OpTypeInt 32 1
+     %v2uint = OpTypeVector %uint 2
+      %v2int = OpTypeVector %int 2
+        %one = OpConstant %int 1
+        %two = OpConstant %int 2
+      %eight = OpConstant %uint 8
+       %nine = OpConstant %uint 9
+      %v2one = OpConstantComposite %v2int %one %one
+      %v2two = OpConstantComposite %v2int %two %two
+    %v2eight = OpConstantComposite %v2uint %eight %eight
+     %v2nine = OpConstantComposite %v2uint %nine %nine
+    %void_fn = OpTypeFunction %void
+
+       %main = OpFunction %void None %void_fn
+ %main_start = OpLabel
+               %1 = OpShiftLeftLogical %uint %one %nine
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = spirv.shift_left_logical<u32> 1i, 9u
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, ShiftLeftLogical_Scalar_SignedSigned_Unsigned) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %uint = OpTypeInt 32 0
+        %int = OpTypeInt 32 1
+     %v2uint = OpTypeVector %uint 2
+      %v2int = OpTypeVector %int 2
+        %one = OpConstant %int 1
+        %two = OpConstant %int 2
+      %eight = OpConstant %uint 8
+       %nine = OpConstant %uint 9
+      %v2one = OpConstantComposite %v2int %one %one
+      %v2two = OpConstantComposite %v2int %two %two
+    %v2eight = OpConstantComposite %v2uint %eight %eight
+     %v2nine = OpConstantComposite %v2uint %nine %nine
+    %void_fn = OpTypeFunction %void
+
+       %main = OpFunction %void None %void_fn
+ %main_start = OpLabel
+               %1 = OpShiftLeftLogical %uint %one %two
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = spirv.shift_left_logical<u32> 1i, 2i
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, ShiftLeftLogical_Scalar_UnsignedUnsigned_Signed) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %uint = OpTypeInt 32 0
+        %int = OpTypeInt 32 1
+     %v2uint = OpTypeVector %uint 2
+      %v2int = OpTypeVector %int 2
+        %one = OpConstant %int 1
+        %two = OpConstant %int 2
+      %eight = OpConstant %uint 8
+       %nine = OpConstant %uint 9
+      %v2one = OpConstantComposite %v2int %one %one
+      %v2two = OpConstantComposite %v2int %two %two
+    %v2eight = OpConstantComposite %v2uint %eight %eight
+     %v2nine = OpConstantComposite %v2uint %nine %nine
+    %void_fn = OpTypeFunction %void
+
+       %main = OpFunction %void None %void_fn
+ %main_start = OpLabel
+               %1 = OpShiftLeftLogical %int %eight %nine
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = spirv.shift_left_logical<i32> 8u, 9u
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, ShiftLeftLogical_Scalar_UnsignedSigned_Signed) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %uint = OpTypeInt 32 0
+        %int = OpTypeInt 32 1
+     %v2uint = OpTypeVector %uint 2
+      %v2int = OpTypeVector %int 2
+        %one = OpConstant %int 1
+        %two = OpConstant %int 2
+      %eight = OpConstant %uint 8
+       %nine = OpConstant %uint 9
+      %v2one = OpConstantComposite %v2int %one %one
+      %v2two = OpConstantComposite %v2int %two %two
+    %v2eight = OpConstantComposite %v2uint %eight %eight
+     %v2nine = OpConstantComposite %v2uint %nine %nine
+    %void_fn = OpTypeFunction %void
+
+       %main = OpFunction %void None %void_fn
+ %main_start = OpLabel
+               %1 = OpShiftLeftLogical %int %eight %one
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = spirv.shift_left_logical<i32> 8u, 1i
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, ShiftLeftLogical_Scalar_SignedUnsigned_Signed) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %uint = OpTypeInt 32 0
+        %int = OpTypeInt 32 1
+     %v2uint = OpTypeVector %uint 2
+      %v2int = OpTypeVector %int 2
+        %one = OpConstant %int 1
+        %two = OpConstant %int 2
+      %eight = OpConstant %uint 8
+       %nine = OpConstant %uint 9
+      %v2one = OpConstantComposite %v2int %one %one
+      %v2two = OpConstantComposite %v2int %two %two
+    %v2eight = OpConstantComposite %v2uint %eight %eight
+     %v2nine = OpConstantComposite %v2uint %nine %nine
+    %void_fn = OpTypeFunction %void
+
+       %main = OpFunction %void None %void_fn
+ %main_start = OpLabel
+               %1 = OpShiftLeftLogical %int %one %nine
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = spirv.shift_left_logical<i32> 1i, 9u
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, ShiftLeftLogical_Scalar_SignedSigned_Signed) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %uint = OpTypeInt 32 0
+        %int = OpTypeInt 32 1
+     %v2uint = OpTypeVector %uint 2
+      %v2int = OpTypeVector %int 2
+        %one = OpConstant %int 1
+        %two = OpConstant %int 2
+      %eight = OpConstant %uint 8
+       %nine = OpConstant %uint 9
+      %v2one = OpConstantComposite %v2int %one %one
+      %v2two = OpConstantComposite %v2int %two %two
+    %v2eight = OpConstantComposite %v2uint %eight %eight
+     %v2nine = OpConstantComposite %v2uint %nine %nine
+    %void_fn = OpTypeFunction %void
+
+       %main = OpFunction %void None %void_fn
+ %main_start = OpLabel
+               %1 = OpShiftLeftLogical %int %one %two
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = spirv.shift_left_logical<i32> 1i, 2i
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, ShiftLeftLogical_Vector_UnsignedUnsigned_Unsigned) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %uint = OpTypeInt 32 0
+        %int = OpTypeInt 32 1
+     %v2uint = OpTypeVector %uint 2
+      %v2int = OpTypeVector %int 2
+        %one = OpConstant %int 1
+        %two = OpConstant %int 2
+      %eight = OpConstant %uint 8
+       %nine = OpConstant %uint 9
+      %v2one = OpConstantComposite %v2int %one %one
+      %v2two = OpConstantComposite %v2int %two %two
+    %v2eight = OpConstantComposite %v2uint %eight %eight
+     %v2nine = OpConstantComposite %v2uint %nine %nine
+    %void_fn = OpTypeFunction %void
+
+       %main = OpFunction %void None %void_fn
+ %main_start = OpLabel
+               %1 = OpShiftLeftLogical %v2uint %v2eight %v2nine
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<u32> = spirv.shift_left_logical<u32> vec2<u32>(8u), vec2<u32>(9u)
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, ShiftLeftLogical_Vector_UnsignedSigned_Unsigned) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %uint = OpTypeInt 32 0
+        %int = OpTypeInt 32 1
+     %v2uint = OpTypeVector %uint 2
+      %v2int = OpTypeVector %int 2
+        %one = OpConstant %int 1
+        %two = OpConstant %int 2
+      %eight = OpConstant %uint 8
+       %nine = OpConstant %uint 9
+      %v2one = OpConstantComposite %v2int %one %one
+      %v2two = OpConstantComposite %v2int %two %two
+    %v2eight = OpConstantComposite %v2uint %eight %eight
+     %v2nine = OpConstantComposite %v2uint %nine %nine
+    %void_fn = OpTypeFunction %void
+
+       %main = OpFunction %void None %void_fn
+ %main_start = OpLabel
+               %1 = OpShiftLeftLogical %v2uint %v2eight %v2one
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<u32> = spirv.shift_left_logical<u32> vec2<u32>(8u), vec2<i32>(1i)
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, ShiftLeftLogical_Vector_SignedUnsigned_Unsigned) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %uint = OpTypeInt 32 0
+        %int = OpTypeInt 32 1
+     %v2uint = OpTypeVector %uint 2
+      %v2int = OpTypeVector %int 2
+        %one = OpConstant %int 1
+        %two = OpConstant %int 2
+      %eight = OpConstant %uint 8
+       %nine = OpConstant %uint 9
+      %v2one = OpConstantComposite %v2int %one %one
+      %v2two = OpConstantComposite %v2int %two %two
+    %v2eight = OpConstantComposite %v2uint %eight %eight
+     %v2nine = OpConstantComposite %v2uint %nine %nine
+    %void_fn = OpTypeFunction %void
+
+       %main = OpFunction %void None %void_fn
+ %main_start = OpLabel
+               %1 = OpShiftLeftLogical %v2uint %v2one %v2nine
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<u32> = spirv.shift_left_logical<u32> vec2<i32>(1i), vec2<u32>(9u)
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, ShiftLeftLogical_Vector_SignedSigned_Unsigned) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %uint = OpTypeInt 32 0
+        %int = OpTypeInt 32 1
+     %v2uint = OpTypeVector %uint 2
+      %v2int = OpTypeVector %int 2
+        %one = OpConstant %int 1
+        %two = OpConstant %int 2
+      %eight = OpConstant %uint 8
+       %nine = OpConstant %uint 9
+      %v2one = OpConstantComposite %v2int %one %one
+      %v2two = OpConstantComposite %v2int %two %two
+    %v2eight = OpConstantComposite %v2uint %eight %eight
+     %v2nine = OpConstantComposite %v2uint %nine %nine
+    %void_fn = OpTypeFunction %void
+
+       %main = OpFunction %void None %void_fn
+ %main_start = OpLabel
+               %1 = OpShiftLeftLogical %v2uint %v2one %v2two
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<u32> = spirv.shift_left_logical<u32> vec2<i32>(1i), vec2<i32>(2i)
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, ShiftLeftLogical_Vector_UnsignedUnsigned_Signed) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %uint = OpTypeInt 32 0
+        %int = OpTypeInt 32 1
+     %v2uint = OpTypeVector %uint 2
+      %v2int = OpTypeVector %int 2
+        %one = OpConstant %int 1
+        %two = OpConstant %int 2
+      %eight = OpConstant %uint 8
+       %nine = OpConstant %uint 9
+      %v2one = OpConstantComposite %v2int %one %one
+      %v2two = OpConstantComposite %v2int %two %two
+    %v2eight = OpConstantComposite %v2uint %eight %eight
+     %v2nine = OpConstantComposite %v2uint %nine %nine
+    %void_fn = OpTypeFunction %void
+
+       %main = OpFunction %void None %void_fn
+ %main_start = OpLabel
+               %1 = OpShiftLeftLogical %v2int %v2eight %v2nine
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<i32> = spirv.shift_left_logical<i32> vec2<u32>(8u), vec2<u32>(9u)
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, ShiftLeftLogical_Vector_UnsignedSigned_Signed) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %uint = OpTypeInt 32 0
+        %int = OpTypeInt 32 1
+     %v2uint = OpTypeVector %uint 2
+      %v2int = OpTypeVector %int 2
+        %one = OpConstant %int 1
+        %two = OpConstant %int 2
+      %eight = OpConstant %uint 8
+       %nine = OpConstant %uint 9
+      %v2one = OpConstantComposite %v2int %one %one
+      %v2two = OpConstantComposite %v2int %two %two
+    %v2eight = OpConstantComposite %v2uint %eight %eight
+     %v2nine = OpConstantComposite %v2uint %nine %nine
+    %void_fn = OpTypeFunction %void
+
+       %main = OpFunction %void None %void_fn
+ %main_start = OpLabel
+               %1 = OpShiftLeftLogical %v2int %v2eight %v2one
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<i32> = spirv.shift_left_logical<i32> vec2<u32>(8u), vec2<i32>(1i)
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, ShiftLeftLogical_Vector_SignedUnsigned_Signed) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %uint = OpTypeInt 32 0
+        %int = OpTypeInt 32 1
+     %v2uint = OpTypeVector %uint 2
+      %v2int = OpTypeVector %int 2
+        %one = OpConstant %int 1
+        %two = OpConstant %int 2
+      %eight = OpConstant %uint 8
+       %nine = OpConstant %uint 9
+      %v2one = OpConstantComposite %v2int %one %one
+      %v2two = OpConstantComposite %v2int %two %two
+    %v2eight = OpConstantComposite %v2uint %eight %eight
+     %v2nine = OpConstantComposite %v2uint %nine %nine
+    %void_fn = OpTypeFunction %void
+
+       %main = OpFunction %void None %void_fn
+ %main_start = OpLabel
+               %1 = OpShiftLeftLogical %v2int %v2one %v2nine
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<i32> = spirv.shift_left_logical<i32> vec2<i32>(1i), vec2<u32>(9u)
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, ShiftLeftLogical_Vector_SignedSigned_Signed) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %uint = OpTypeInt 32 0
+        %int = OpTypeInt 32 1
+     %v2uint = OpTypeVector %uint 2
+      %v2int = OpTypeVector %int 2
+        %one = OpConstant %int 1
+        %two = OpConstant %int 2
+      %eight = OpConstant %uint 8
+       %nine = OpConstant %uint 9
+      %v2one = OpConstantComposite %v2int %one %one
+      %v2two = OpConstantComposite %v2int %two %two
+    %v2eight = OpConstantComposite %v2uint %eight %eight
+     %v2nine = OpConstantComposite %v2uint %nine %nine
+    %void_fn = OpTypeFunction %void
+
+       %main = OpFunction %void None %void_fn
+ %main_start = OpLabel
+               %1 = OpShiftLeftLogical %v2int %v2one %v2two
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<i32> = spirv.shift_left_logical<i32> vec2<i32>(1i), vec2<i32>(2i)
+    ret
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader

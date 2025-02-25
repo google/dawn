@@ -196,6 +196,8 @@ const char* str(BuiltinFn i) {
             return "equal";
         case BuiltinFn::kNotEqual:
             return "not_equal";
+        case BuiltinFn::kShiftLeftLogical:
+            return "shift_left_logical";
         case BuiltinFn::kSdot:
             return "sdot";
         case BuiltinFn::kUdot:
@@ -302,6 +304,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kUGreaterThanEqual:
         case BuiltinFn::kULessThan:
         case BuiltinFn::kULessThanEqual:
+        case BuiltinFn::kShiftLeftLogical:
             break;
     }
     return core::ir::Instruction::Accesses{};

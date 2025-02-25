@@ -194,6 +194,9 @@ struct State {
                 case spirv::BuiltinFn::kULessThanEqual:
                     ULessThanEqual(builtin);
                     break;
+                case spirv::BuiltinFn::kShiftLeftLogical:
+                    ShiftLeftLogical(builtin);
+                    break;
                 default:
                     TINT_UNREACHABLE() << "unknown spirv builtin: " << builtin->Func();
             }
@@ -723,6 +726,26 @@ struct State {
                 bc = b.Bitcast(res_ty, bc)->Result(0);
             }
             call->Result(0)->ReplaceAllUsesWith(bc);
+        });
+        call->Destroy();
+    }
+
+    void ShiftLeftLogical(spirv::ir::BuiltinCall* call) {
+        const auto& args = call->Args();
+
+        b.InsertBefore(call, [&] {
+            auto* base = args[0];
+            auto* shift = args[1];
+
+            if (!shift->Type()->IsUnsignedIntegerScalarOrVector()) {
+                shift = b.Bitcast(ty.MatchWidth(ty.u32(), shift->Type()), shift)->Result(0);
+            }
+
+            auto* bin = b.Binary(core::BinaryOp::kShiftLeft, base->Type(), base, shift)->Result(0);
+            if (base->Type() != call->Result(0)->Type()) {
+                bin = b.Bitcast(call->Result(0)->Type(), bin)->Result(0);
+            }
+            call->Result(0)->ReplaceAllUsesWith(bin);
         });
         call->Destroy();
     }

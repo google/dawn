@@ -451,6 +451,9 @@ implicit(A: iu32, B: iu32, N: num) fn equal(vec<N, A>, vec<N, B>) -> vec<N, bool
 implicit(A: iu32, B: iu32) fn not_equal(A, B) -> bool
 implicit(A: iu32, B: iu32, N: num) fn not_equal(vec<N, A>, vec<N, B>) -> vec<N, bool>
 
+implicit(A: iu32, B: iu32) fn shift_left_logical<R: iu32>(A, B) -> R
+implicit(A: iu32, B: iu32, N: num) fn shift_left_logical<R: iu32>(vec<N, A>, vec<N, B>) -> vec<N, R>
+
 ////////////////////////////////////////////////////////////////////////////////
 // SPV_KHR_integer_dot_product instructions
 ////////////////////////////////////////////////////////////////////////////////
