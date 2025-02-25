@@ -170,6 +170,11 @@ class BasicTest : public UniformityAnalysisTestBase,
         kQuadSwapX,
         kQuadSwapY,
         kQuadSwapDiagonal,
+        // Subgroup matrix functions:
+        kSubgroupMatrixLoad,
+        kSubgroupMatrixStore,
+        kSubgroupMatrixMultiply,
+        kSubgroupMatrixMultiplyAccumulate,
         // End of range marker:
         kEndOfFunctionRange,
     };
@@ -304,6 +309,18 @@ class BasicTest : public UniformityAnalysisTestBase,
                 return "_ = quadSwapY(1.0)";
             case kQuadSwapDiagonal:
                 return "_ = quadSwapDiagonal(1.0)";
+            case kSubgroupMatrixLoad:
+                return "_ = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 8>>("
+                       "&subgroup_matrix_data, 0, false, 4)";
+            case kSubgroupMatrixStore:
+                return "subgroupMatrixStore(&subgroup_matrix_data, 0, "
+                       "subgroup_matrix_right_zero, false, 4)";
+            case kSubgroupMatrixMultiply:
+                return "_ = subgroupMatrixMultiply<f32>("
+                       "subgroup_matrix_left_zero, subgroup_matrix_right_zero)";
+            case kSubgroupMatrixMultiplyAccumulate:
+                return "_ = subgroupMatrixMultiplyAccumulate(subgroup_matrix_left_zero, "
+                       "subgroup_matrix_right_zero, subgroup_matrix_result_zero)";
             case kEndOfFunctionRange:
                 return "<invalid>";
         }
@@ -392,6 +409,10 @@ class BasicTest : public UniformityAnalysisTestBase,
             CASE(kQuadSwapX);
             CASE(kQuadSwapY);
             CASE(kQuadSwapDiagonal);
+            CASE(kSubgroupMatrixLoad);
+            CASE(kSubgroupMatrixStore);
+            CASE(kSubgroupMatrixMultiply);
+            CASE(kSubgroupMatrixMultiplyAccumulate);
             case kEndOfFunctionRange:
                 break;
         }
@@ -407,6 +428,7 @@ TEST_P(BasicTest, ConditionalFunctionCall) {
     auto function = static_cast<Function>(std::get<1>(GetParam()));
     std::string src = R"(
 enable subgroups;
+enable chromium_experimental_subgroup_matrix;
 
 var<private> p : i32;
 var<workgroup> w : i32;
@@ -418,6 +440,12 @@ var<workgroup> w : i32;
 @group(1) @binding(1) var td : texture_depth_2d;
 @group(1) @binding(2) var s : sampler;
 @group(1) @binding(3) var sc : sampler_comparison;
+
+@group(2) @binding(0) var<storage, read_write> subgroup_matrix_data : array<f32>;
+
+var<private> subgroup_matrix_left_zero: subgroup_matrix_left<f32, 8, 8>;
+var<private> subgroup_matrix_right_zero: subgroup_matrix_right<f32, 8, 8>;
+var<private> subgroup_matrix_result_zero: subgroup_matrix_result<f32, 8, 8>;
 
 const module_const : i32 = 42;
 @id(42) override pipeline_overridable : i32;
@@ -9401,6 +9429,33 @@ fn foo() {
     }
 }
 
+TEST_P(UniformityAnalysisDiagnosticFilterTest, Directive_SubgroupMatrixUniformity_Callsite) {
+    auto& param = GetParam();
+    StringStream ss;
+    ss << "enable chromium_experimental_subgroup_matrix;\n"
+       << "diagnostic(" << param << ", chromium.subgroup_matrix_uniformity);" << R"(
+@group(0) @binding(0) var<storage, read_write> non_uniform : i32;
+
+@group(0) @binding(1) var<storage, read_write> data : array<f32>;
+
+fn foo() {
+  if (non_uniform == 42) {
+    _ = subgroupMatrixLoad<subgroup_matrix_left<f32, 8, 8>>(&data, 0, false, 4);
+  }
+}
+)";
+
+    RunTest(ss.str(), param != wgsl::DiagnosticSeverity::kError);
+
+    if (param == wgsl::DiagnosticSeverity::kOff) {
+        EXPECT_TRUE(error_.empty());
+    } else {
+        StringStream err;
+        err << ToStr(param) << ": 'subgroupMatrixLoad' must only be called";
+        EXPECT_THAT(error_, ::testing::HasSubstr(err.str()));
+    }
+}
+
 TEST_P(UniformityAnalysisDiagnosticFilterTest, AttributeOnFunction_DerivativeUniformity) {
     auto& param = GetParam();
     StringStream ss;
@@ -9473,6 +9528,35 @@ TEST_P(UniformityAnalysisDiagnosticFilterTest,
     } else {
         StringStream err;
         err << ToStr(param) << ": 'subgroupShuffleUp' requires argument 1 to be uniform";
+        EXPECT_THAT(error_, ::testing::HasSubstr(err.str()));
+    }
+}
+
+TEST_P(UniformityAnalysisDiagnosticFilterTest,
+       AttributeOnFunction_SubgroupMatrixUniformity_Callsite) {
+    auto& param = GetParam();
+    StringStream ss;
+    ss << R"(
+enable chromium_experimental_subgroup_matrix;
+@group(0) @binding(0) var<storage, read_write> non_uniform : i32;
+
+@group(0) @binding(1) var<storage, read_write> data : array<f32>;
+
+)" << "@diagnostic("
+       << param << ", chromium.subgroup_matrix_uniformity)" <<
+        R"(fn foo() {
+  if (non_uniform == 42) {
+    _ = subgroupMatrixLoad<subgroup_matrix_left<f32, 8, 8>>(&data, 0, false, 4);
+  }
+}
+)";
+
+    RunTest(ss.str(), param != wgsl::DiagnosticSeverity::kError);
+    if (param == wgsl::DiagnosticSeverity::kOff) {
+        EXPECT_TRUE(error_.empty());
+    } else {
+        StringStream err;
+        err << ToStr(param) << ": 'subgroupMatrixLoad' must only be called";
         EXPECT_THAT(error_, ::testing::HasSubstr(err.str()));
     }
 }

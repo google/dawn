@@ -1653,6 +1653,14 @@ class UniformityGraph {
                         callsite_tag = {CallSiteTag::CallSiteRequiredToBeUniform, severity};
                     }
                     function_tag = ReturnValueMayBeNonUniform;
+                } else if (builtin->IsSubgroupMatrix()) {
+                    // Get the severity of subgroup matrix uniformity violations in this context.
+                    auto severity = sem_.DiagnosticSeverity(
+                        call, wgsl::ChromiumDiagnosticRule::kSubgroupMatrixUniformity);
+                    if (severity != wgsl::DiagnosticSeverity::kOff) {
+                        callsite_tag = {CallSiteTag::CallSiteRequiredToBeUniform, severity};
+                    }
+                    function_tag = ReturnValueMayBeNonUniform;
                 }
             },
             [&](const sem::Function* func) {
