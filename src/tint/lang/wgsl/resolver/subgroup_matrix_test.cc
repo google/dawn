@@ -306,6 +306,7 @@ TEST_F(ResolverSubgroupMatrixTest, SubgroupMatrixStore) {
     auto* target = call_sem->Target()->As<sem::BuiltinFn>();
     ASSERT_NE(target, nullptr);
     EXPECT_EQ(target->Fn(), wgsl::BuiltinFn::kSubgroupMatrixStore);
+    EXPECT_TRUE(target->IsSubgroupMatrix());
 }
 
 TEST_F(ResolverSubgroupMatrixTest, SubgroupMatrixStore_MismatchedType) {
@@ -345,6 +346,7 @@ TEST_F(ResolverSubgroupMatrixTest, SubgroupMatrixLoad) {
     ASSERT_NE(target, nullptr);
     EXPECT_EQ(target->Fn(), wgsl::BuiltinFn::kSubgroupMatrixLoad);
     EXPECT_TRUE(target->ReturnType()->Is<core::type::SubgroupMatrix>());
+    EXPECT_TRUE(target->IsSubgroupMatrix());
 }
 
 TEST_F(ResolverSubgroupMatrixTest, SubgroupMatrixLoad_MismatchedType) {
@@ -396,6 +398,7 @@ TEST_F(ResolverSubgroupMatrixTest, SubgroupMatrixMultiply) {
     auto* target = call_sem->Target()->As<sem::BuiltinFn>();
     ASSERT_NE(target, nullptr);
     EXPECT_EQ(target->Fn(), wgsl::BuiltinFn::kSubgroupMatrixMultiply);
+    EXPECT_TRUE(target->IsSubgroupMatrix());
     auto* result = target->ReturnType()->As<core::type::SubgroupMatrix>();
     ASSERT_NE(result, nullptr);
     EXPECT_EQ(result->Kind(), core::SubgroupMatrixKind::kResult);
@@ -461,6 +464,32 @@ TEST_F(ResolverSubgroupMatrixTest, SubgroupMatrixMultiply_MismatchKinds) {
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
                 testing::HasSubstr(R"(error: no matching call to 'subgroupMatrixMultiply)"));
+}
+
+TEST_F(ResolverSubgroupMatrixTest, SubgroupMatrixMultiplyAccumulate) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+    auto* left = GlobalVar("left", private_, ty("subgroup_matrix_left", ty.f32(), 2_u, 4_u));
+    auto* right = GlobalVar("right", private_, ty("subgroup_matrix_right", ty.f32(), 8_u, 2_u));
+    auto* acc = GlobalVar("acc", private_, ty("subgroup_matrix_result", ty.f32(), 8_u, 4_u));
+    auto* call = Call(wgsl::BuiltinFn::kSubgroupMatrixMultiplyAccumulate, left, right, acc);
+    Func("foo", Empty, ty.void_(),
+         Vector{
+             Assign(Phony(), call),
+         });
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto call_sem = Sem().Get(call)->As<sem::Call>();
+    ASSERT_NE(call_sem, nullptr);
+    auto* target = call_sem->Target()->As<sem::BuiltinFn>();
+    ASSERT_NE(target, nullptr);
+    EXPECT_EQ(target->Fn(), wgsl::BuiltinFn::kSubgroupMatrixMultiplyAccumulate);
+    EXPECT_TRUE(target->IsSubgroupMatrix());
+    auto* result = target->ReturnType()->As<core::type::SubgroupMatrix>();
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->Kind(), core::SubgroupMatrixKind::kResult);
+    EXPECT_EQ(result->Columns(), 8u);
+    EXPECT_EQ(result->Rows(), 4u);
 }
 
 TEST_F(ResolverSubgroupMatrixTest, Let_Valid) {
