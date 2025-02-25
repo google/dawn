@@ -30,15 +30,16 @@
 namespace tint::spirv::reader {
 namespace {
 
-struct SpirvBitwiseParam {
-    std::string name;
+struct SpirvBitParam {
+    std::string spv_name;
+    std::string ir_name;
 };
-[[maybe_unused]] inline std::ostream& operator<<(std::ostream& out, SpirvBitwiseParam c) {
-    out << c.name;
+[[maybe_unused]] inline std::ostream& operator<<(std::ostream& out, SpirvBitParam c) {
+    out << c.spv_name;
     return out;
 }
 
-using SpirvParser_BitwiseTest = SpirvParserTestWithParam<SpirvBitwiseParam>;
+using SpirvParser_BitwiseTest = SpirvParserTestWithParam<SpirvBitParam>;
 
 TEST_P(SpirvParser_BitwiseTest, Scalar_SignedSigned_Signed) {
     auto& params = GetParam();
@@ -56,7 +57,7 @@ TEST_P(SpirvParser_BitwiseTest, Scalar_SignedSigned_Signed) {
        %main = OpFunction %void None %void_fn
  %main_start = OpLabel
                %1 = OpBitwise)" +
-                  params.name + R"( %int %one %two
+                  params.spv_name + R"( %int %one %two
                OpReturn
                OpFunctionEnd
 )",
@@ -64,7 +65,7 @@ TEST_P(SpirvParser_BitwiseTest, Scalar_SignedSigned_Signed) {
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:i32 = spirv.bitwise)" +
-                  params.name + R"(<i32> 1i, 2i
+                  params.ir_name + R"(<i32> 1i, 2i
     ret
   }
 }
@@ -90,7 +91,7 @@ TEST_P(SpirvParser_BitwiseTest, Scalar_SignedUnsigned_Signed) {
        %main = OpFunction %void None %void_fn
  %main_start = OpLabel
                %1 = OpBitwise)" +
-                  params.name + R"( %int %one %eight
+                  params.spv_name + R"( %int %one %eight
                OpReturn
                OpFunctionEnd
 )",
@@ -98,7 +99,7 @@ TEST_P(SpirvParser_BitwiseTest, Scalar_SignedUnsigned_Signed) {
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:i32 = spirv.bitwise)" +
-                  params.name + R"(<i32> 1i, 8u
+                  params.ir_name + R"(<i32> 1i, 8u
     ret
   }
 }
@@ -124,7 +125,7 @@ TEST_P(SpirvParser_BitwiseTest, Scalar_UnsignedSigned_Signed) {
        %main = OpFunction %void None %void_fn
  %main_start = OpLabel
                %1 = OpBitwise)" +
-                  params.name + R"( %int %eight %one
+                  params.spv_name + R"( %int %eight %one
                OpReturn
                OpFunctionEnd
 )",
@@ -132,7 +133,7 @@ TEST_P(SpirvParser_BitwiseTest, Scalar_UnsignedSigned_Signed) {
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:i32 = spirv.bitwise)" +
-                  params.name + R"(<i32> 8u, 1i
+                  params.ir_name + R"(<i32> 8u, 1i
     ret
   }
 }
@@ -158,7 +159,7 @@ TEST_P(SpirvParser_BitwiseTest, Scalar_UnsignedUnsigned_Signed) {
        %main = OpFunction %void None %void_fn
  %main_start = OpLabel
                %1 = OpBitwise)" +
-                  params.name + R"( %int %eight %nine
+                  params.spv_name + R"( %int %eight %nine
                OpReturn
                OpFunctionEnd
 )",
@@ -166,7 +167,7 @@ TEST_P(SpirvParser_BitwiseTest, Scalar_UnsignedUnsigned_Signed) {
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:i32 = spirv.bitwise)" +
-                  params.name + R"(<i32> 8u, 9u
+                  params.ir_name + R"(<i32> 8u, 9u
     ret
   }
 }
@@ -192,7 +193,7 @@ TEST_P(SpirvParser_BitwiseTest, Scalar_UnsignedUnsigned_Unsigned) {
        %main = OpFunction %void None %void_fn
  %main_start = OpLabel
                %1 = OpBitwise)" +
-                  params.name + R"( %uint %eight %nine
+                  params.spv_name + R"( %uint %eight %nine
                OpReturn
                OpFunctionEnd
 )",
@@ -200,7 +201,7 @@ TEST_P(SpirvParser_BitwiseTest, Scalar_UnsignedUnsigned_Unsigned) {
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:u32 = spirv.bitwise)" +
-                  params.name + R"(<u32> 8u, 9u
+                  params.ir_name + R"(<u32> 8u, 9u
     ret
   }
 }
@@ -226,7 +227,7 @@ TEST_P(SpirvParser_BitwiseTest, Scalar_UnsignedSigned_Unsigned) {
        %main = OpFunction %void None %void_fn
  %main_start = OpLabel
                %1 = OpBitwise)" +
-                  params.name + R"( %uint %eight %one
+                  params.spv_name + R"( %uint %eight %one
                OpReturn
                OpFunctionEnd
 )",
@@ -234,7 +235,7 @@ TEST_P(SpirvParser_BitwiseTest, Scalar_UnsignedSigned_Unsigned) {
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:u32 = spirv.bitwise)" +
-                  params.name + R"(<u32> 8u, 1i
+                  params.ir_name + R"(<u32> 8u, 1i
     ret
   }
 }
@@ -260,7 +261,7 @@ TEST_P(SpirvParser_BitwiseTest, Scalar_SignedUnsigned_Unsigned) {
        %main = OpFunction %void None %void_fn
  %main_start = OpLabel
                %1 = OpBitwise)" +
-                  params.name + R"( %uint %one %eight
+                  params.spv_name + R"( %uint %one %eight
                OpReturn
                OpFunctionEnd
 )",
@@ -268,7 +269,7 @@ TEST_P(SpirvParser_BitwiseTest, Scalar_SignedUnsigned_Unsigned) {
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:u32 = spirv.bitwise)" +
-                  params.name + R"(<u32> 1i, 8u
+                  params.ir_name + R"(<u32> 1i, 8u
     ret
   }
 }
@@ -294,7 +295,7 @@ TEST_P(SpirvParser_BitwiseTest, Scalar_SignedSigned_Unsigned) {
        %main = OpFunction %void None %void_fn
  %main_start = OpLabel
                %1 = OpBitwise)" +
-                  params.name + R"( %uint %one %two
+                  params.spv_name + R"( %uint %one %two
                OpReturn
                OpFunctionEnd
 )",
@@ -302,7 +303,7 @@ TEST_P(SpirvParser_BitwiseTest, Scalar_SignedSigned_Unsigned) {
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:u32 = spirv.bitwise)" +
-                  params.name + R"(<u32> 1i, 2i
+                  params.ir_name + R"(<u32> 1i, 2i
     ret
   }
 }
@@ -334,7 +335,7 @@ TEST_P(SpirvParser_BitwiseTest, Vector_SignedSigned_Signed) {
        %main = OpFunction %void None %void_fn
  %main_start = OpLabel
                %1 = OpBitwise)" +
-                  params.name + R"( %v2int %v2one %v2two
+                  params.spv_name + R"( %v2int %v2one %v2two
                OpReturn
                OpFunctionEnd
 )",
@@ -342,7 +343,7 @@ TEST_P(SpirvParser_BitwiseTest, Vector_SignedSigned_Signed) {
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:vec2<i32> = spirv.bitwise)" +
-                  params.name + R"(<i32> vec2<i32>(1i), vec2<i32>(2i)
+                  params.ir_name + R"(<i32> vec2<i32>(1i), vec2<i32>(2i)
     ret
   }
 }
@@ -374,7 +375,7 @@ TEST_P(SpirvParser_BitwiseTest, Vector_SignedUnsigned_Signed) {
        %main = OpFunction %void None %void_fn
  %main_start = OpLabel
                %1 = OpBitwise)" +
-                  params.name + R"( %v2int %v2one %v2eight
+                  params.spv_name + R"( %v2int %v2one %v2eight
                OpReturn
                OpFunctionEnd
 )",
@@ -382,7 +383,7 @@ TEST_P(SpirvParser_BitwiseTest, Vector_SignedUnsigned_Signed) {
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:vec2<i32> = spirv.bitwise)" +
-                  params.name + R"(<i32> vec2<i32>(1i), vec2<u32>(8u)
+                  params.ir_name + R"(<i32> vec2<i32>(1i), vec2<u32>(8u)
     ret
   }
 }
@@ -414,7 +415,7 @@ TEST_P(SpirvParser_BitwiseTest, Vector_UnsignedSigned_Signed) {
        %main = OpFunction %void None %void_fn
  %main_start = OpLabel
                %1 = OpBitwise)" +
-                  params.name + R"( %v2int %v2eight %v2one
+                  params.spv_name + R"( %v2int %v2eight %v2one
                OpReturn
                OpFunctionEnd
 )",
@@ -422,7 +423,7 @@ TEST_P(SpirvParser_BitwiseTest, Vector_UnsignedSigned_Signed) {
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:vec2<i32> = spirv.bitwise)" +
-                  params.name + R"(<i32> vec2<u32>(8u), vec2<i32>(1i)
+                  params.ir_name + R"(<i32> vec2<u32>(8u), vec2<i32>(1i)
     ret
   }
 }
@@ -454,7 +455,7 @@ TEST_P(SpirvParser_BitwiseTest, Vector_UnsignedUnsigned_Signed) {
        %main = OpFunction %void None %void_fn
  %main_start = OpLabel
                %1 = OpBitwise)" +
-                  params.name + R"( %v2int %v2eight %v2nine
+                  params.spv_name + R"( %v2int %v2eight %v2nine
                OpReturn
                OpFunctionEnd
 )",
@@ -462,7 +463,7 @@ TEST_P(SpirvParser_BitwiseTest, Vector_UnsignedUnsigned_Signed) {
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:vec2<i32> = spirv.bitwise)" +
-                  params.name + R"(<i32> vec2<u32>(8u), vec2<u32>(9u)
+                  params.ir_name + R"(<i32> vec2<u32>(8u), vec2<u32>(9u)
     ret
   }
 }
@@ -494,7 +495,7 @@ TEST_P(SpirvParser_BitwiseTest, Vector_UnsignedUnsigned_Unsigned) {
        %main = OpFunction %void None %void_fn
  %main_start = OpLabel
                %1 = OpBitwise)" +
-                  params.name + R"( %v2uint %v2eight %v2nine
+                  params.spv_name + R"( %v2uint %v2eight %v2nine
                OpReturn
                OpFunctionEnd
 )",
@@ -502,7 +503,7 @@ TEST_P(SpirvParser_BitwiseTest, Vector_UnsignedUnsigned_Unsigned) {
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:vec2<u32> = spirv.bitwise)" +
-                  params.name + R"(<u32> vec2<u32>(8u), vec2<u32>(9u)
+                  params.ir_name + R"(<u32> vec2<u32>(8u), vec2<u32>(9u)
     ret
   }
 }
@@ -534,7 +535,7 @@ TEST_P(SpirvParser_BitwiseTest, Vector_UnsignedSigned_Unsigned) {
        %main = OpFunction %void None %void_fn
  %main_start = OpLabel
                %1 = OpBitwise)" +
-                  params.name + R"( %v2uint %v2eight %v2one
+                  params.spv_name + R"( %v2uint %v2eight %v2one
                OpReturn
                OpFunctionEnd
 )",
@@ -542,7 +543,7 @@ TEST_P(SpirvParser_BitwiseTest, Vector_UnsignedSigned_Unsigned) {
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:vec2<u32> = spirv.bitwise)" +
-                  params.name + R"(<u32> vec2<u32>(8u), vec2<i32>(1i)
+                  params.ir_name + R"(<u32> vec2<u32>(8u), vec2<i32>(1i)
     ret
   }
 }
@@ -574,7 +575,7 @@ TEST_P(SpirvParser_BitwiseTest, Vector_SignedUnsigned_Unsigned) {
        %main = OpFunction %void None %void_fn
  %main_start = OpLabel
                %1 = OpBitwise)" +
-                  params.name + R"( %v2uint %v2one %v2eight
+                  params.spv_name + R"( %v2uint %v2one %v2eight
                OpReturn
                OpFunctionEnd
 )",
@@ -582,7 +583,7 @@ TEST_P(SpirvParser_BitwiseTest, Vector_SignedUnsigned_Unsigned) {
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:vec2<u32> = spirv.bitwise)" +
-                  params.name + R"(<u32> vec2<i32>(1i), vec2<u32>(8u)
+                  params.ir_name + R"(<u32> vec2<i32>(1i), vec2<u32>(8u)
     ret
   }
 }
@@ -614,7 +615,7 @@ TEST_P(SpirvParser_BitwiseTest, Vector_SignedSigned_Unsigned) {
        %main = OpFunction %void None %void_fn
  %main_start = OpLabel
                %1 = OpBitwise)" +
-                  params.name + R"( %v2uint %v2one %v2two
+                  params.spv_name + R"( %v2uint %v2one %v2two
                OpReturn
                OpFunctionEnd
 )",
@@ -622,7 +623,7 @@ TEST_P(SpirvParser_BitwiseTest, Vector_SignedSigned_Unsigned) {
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:vec2<u32> = spirv.bitwise)" +
-                  params.name + R"(<u32> vec2<i32>(1i), vec2<i32>(2i)
+                  params.ir_name + R"(<u32> vec2<i32>(1i), vec2<i32>(2i)
     ret
   }
 }
@@ -631,11 +632,13 @@ TEST_P(SpirvParser_BitwiseTest, Vector_SignedSigned_Unsigned) {
 
 INSTANTIATE_TEST_SUITE_P(SpirvParser,
                          SpirvParser_BitwiseTest,
-                         testing::Values(SpirvBitwiseParam{"And"},  //
-                                         SpirvBitwiseParam{"Or"},   //
-                                         SpirvBitwiseParam{"Xor"}));
+                         testing::Values(SpirvBitParam{"And", "And"},  //
+                                         SpirvBitParam{"Or", "Or"},    //
+                                         SpirvBitParam{"Xor", "Xor"}));
 
-TEST_F(SpirvParserTest, ShiftLeftLogical_Scalar_UnsignedUnsigned_Unsigned) {
+using SpirvParser_ShiftTest = SpirvParserTestWithParam<SpirvBitParam>;
+TEST_P(SpirvParser_ShiftTest, Scalar_UnsignedUnsigned_Unsigned) {
+    auto& params = GetParam();
     EXPECT_IR(R"(
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -658,21 +661,24 @@ TEST_F(SpirvParserTest, ShiftLeftLogical_Scalar_UnsignedUnsigned_Unsigned) {
 
        %main = OpFunction %void None %void_fn
  %main_start = OpLabel
-               %1 = OpShiftLeftLogical %uint %eight %nine
+               %1 = Op)" +
+                  params.spv_name + R"( %uint %eight %nine
                OpReturn
                OpFunctionEnd
 )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = spirv.shift_left_logical<u32> 8u, 9u
+    %2:u32 = spirv.)" +
+                  params.ir_name + R"(<u32> 8u, 9u
     ret
   }
 }
 )");
 }
 
-TEST_F(SpirvParserTest, ShiftLeftLogical_Scalar_UnsignedSigned_Unsigned) {
+TEST_P(SpirvParser_ShiftTest, Scalar_UnsignedSigned_Unsigned) {
+    auto& params = GetParam();
     EXPECT_IR(R"(
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -695,21 +701,24 @@ TEST_F(SpirvParserTest, ShiftLeftLogical_Scalar_UnsignedSigned_Unsigned) {
 
        %main = OpFunction %void None %void_fn
  %main_start = OpLabel
-               %1 = OpShiftLeftLogical %uint %eight %one
+               %1 = Op)" +
+                  params.spv_name + R"( %uint %eight %one
                OpReturn
                OpFunctionEnd
 )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = spirv.shift_left_logical<u32> 8u, 1i
+    %2:u32 = spirv.)" +
+                  params.ir_name + R"(<u32> 8u, 1i
     ret
   }
 }
 )");
 }
 
-TEST_F(SpirvParserTest, ShiftLeftLogical_Scalar_SignedUnsigned_Unsigned) {
+TEST_P(SpirvParser_ShiftTest, Scalar_SignedUnsigned_Unsigned) {
+    auto& params = GetParam();
     EXPECT_IR(R"(
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -732,21 +741,24 @@ TEST_F(SpirvParserTest, ShiftLeftLogical_Scalar_SignedUnsigned_Unsigned) {
 
        %main = OpFunction %void None %void_fn
  %main_start = OpLabel
-               %1 = OpShiftLeftLogical %uint %one %nine
+               %1 = Op)" +
+                  params.spv_name + R"( %uint %one %nine
                OpReturn
                OpFunctionEnd
 )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = spirv.shift_left_logical<u32> 1i, 9u
+    %2:u32 = spirv.)" +
+                  params.ir_name + R"(<u32> 1i, 9u
     ret
   }
 }
 )");
 }
 
-TEST_F(SpirvParserTest, ShiftLeftLogical_Scalar_SignedSigned_Unsigned) {
+TEST_P(SpirvParser_ShiftTest, Scalar_SignedSigned_Unsigned) {
+    auto& params = GetParam();
     EXPECT_IR(R"(
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -769,21 +781,24 @@ TEST_F(SpirvParserTest, ShiftLeftLogical_Scalar_SignedSigned_Unsigned) {
 
        %main = OpFunction %void None %void_fn
  %main_start = OpLabel
-               %1 = OpShiftLeftLogical %uint %one %two
+               %1 = Op)" +
+                  params.spv_name + R"( %uint %one %two
                OpReturn
                OpFunctionEnd
 )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = spirv.shift_left_logical<u32> 1i, 2i
+    %2:u32 = spirv.)" +
+                  params.ir_name + R"(<u32> 1i, 2i
     ret
   }
 }
 )");
 }
 
-TEST_F(SpirvParserTest, ShiftLeftLogical_Scalar_UnsignedUnsigned_Signed) {
+TEST_P(SpirvParser_ShiftTest, Scalar_UnsignedUnsigned_Signed) {
+    auto& params = GetParam();
     EXPECT_IR(R"(
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -806,21 +821,24 @@ TEST_F(SpirvParserTest, ShiftLeftLogical_Scalar_UnsignedUnsigned_Signed) {
 
        %main = OpFunction %void None %void_fn
  %main_start = OpLabel
-               %1 = OpShiftLeftLogical %int %eight %nine
+               %1 = Op)" +
+                  params.spv_name + R"( %int %eight %nine
                OpReturn
                OpFunctionEnd
 )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = spirv.shift_left_logical<i32> 8u, 9u
+    %2:i32 = spirv.)" +
+                  params.ir_name + R"(<i32> 8u, 9u
     ret
   }
 }
 )");
 }
 
-TEST_F(SpirvParserTest, ShiftLeftLogical_Scalar_UnsignedSigned_Signed) {
+TEST_P(SpirvParser_ShiftTest, Scalar_UnsignedSigned_Signed) {
+    auto& params = GetParam();
     EXPECT_IR(R"(
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -843,21 +861,24 @@ TEST_F(SpirvParserTest, ShiftLeftLogical_Scalar_UnsignedSigned_Signed) {
 
        %main = OpFunction %void None %void_fn
  %main_start = OpLabel
-               %1 = OpShiftLeftLogical %int %eight %one
+               %1 = Op)" +
+                  params.spv_name + R"( %int %eight %one
                OpReturn
                OpFunctionEnd
 )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = spirv.shift_left_logical<i32> 8u, 1i
+    %2:i32 = spirv.)" +
+                  params.ir_name + R"(<i32> 8u, 1i
     ret
   }
 }
 )");
 }
 
-TEST_F(SpirvParserTest, ShiftLeftLogical_Scalar_SignedUnsigned_Signed) {
+TEST_P(SpirvParser_ShiftTest, Scalar_SignedUnsigned_Signed) {
+    auto& params = GetParam();
     EXPECT_IR(R"(
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -880,21 +901,24 @@ TEST_F(SpirvParserTest, ShiftLeftLogical_Scalar_SignedUnsigned_Signed) {
 
        %main = OpFunction %void None %void_fn
  %main_start = OpLabel
-               %1 = OpShiftLeftLogical %int %one %nine
+               %1 = Op)" +
+                  params.spv_name + R"( %int %one %nine
                OpReturn
                OpFunctionEnd
 )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = spirv.shift_left_logical<i32> 1i, 9u
+    %2:i32 = spirv.)" +
+                  params.ir_name + R"(<i32> 1i, 9u
     ret
   }
 }
 )");
 }
 
-TEST_F(SpirvParserTest, ShiftLeftLogical_Scalar_SignedSigned_Signed) {
+TEST_P(SpirvParser_ShiftTest, Scalar_SignedSigned_Signed) {
+    auto& params = GetParam();
     EXPECT_IR(R"(
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -917,21 +941,24 @@ TEST_F(SpirvParserTest, ShiftLeftLogical_Scalar_SignedSigned_Signed) {
 
        %main = OpFunction %void None %void_fn
  %main_start = OpLabel
-               %1 = OpShiftLeftLogical %int %one %two
+               %1 = Op)" +
+                  params.spv_name + R"( %int %one %two
                OpReturn
                OpFunctionEnd
 )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = spirv.shift_left_logical<i32> 1i, 2i
+    %2:i32 = spirv.)" +
+                  params.ir_name + R"(<i32> 1i, 2i
     ret
   }
 }
 )");
 }
 
-TEST_F(SpirvParserTest, ShiftLeftLogical_Vector_UnsignedUnsigned_Unsigned) {
+TEST_P(SpirvParser_ShiftTest, Vector_UnsignedUnsigned_Unsigned) {
+    auto& params = GetParam();
     EXPECT_IR(R"(
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -954,21 +981,24 @@ TEST_F(SpirvParserTest, ShiftLeftLogical_Vector_UnsignedUnsigned_Unsigned) {
 
        %main = OpFunction %void None %void_fn
  %main_start = OpLabel
-               %1 = OpShiftLeftLogical %v2uint %v2eight %v2nine
+               %1 = Op)" +
+                  params.spv_name + R"( %v2uint %v2eight %v2nine
                OpReturn
                OpFunctionEnd
 )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = spirv.shift_left_logical<u32> vec2<u32>(8u), vec2<u32>(9u)
+    %2:vec2<u32> = spirv.)" +
+                  params.ir_name + R"(<u32> vec2<u32>(8u), vec2<u32>(9u)
     ret
   }
 }
 )");
 }
 
-TEST_F(SpirvParserTest, ShiftLeftLogical_Vector_UnsignedSigned_Unsigned) {
+TEST_P(SpirvParser_ShiftTest, Vector_UnsignedSigned_Unsigned) {
+    auto& params = GetParam();
     EXPECT_IR(R"(
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -991,21 +1021,24 @@ TEST_F(SpirvParserTest, ShiftLeftLogical_Vector_UnsignedSigned_Unsigned) {
 
        %main = OpFunction %void None %void_fn
  %main_start = OpLabel
-               %1 = OpShiftLeftLogical %v2uint %v2eight %v2one
+               %1 = Op)" +
+                  params.spv_name + R"( %v2uint %v2eight %v2one
                OpReturn
                OpFunctionEnd
 )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = spirv.shift_left_logical<u32> vec2<u32>(8u), vec2<i32>(1i)
+    %2:vec2<u32> = spirv.)" +
+                  params.ir_name + R"(<u32> vec2<u32>(8u), vec2<i32>(1i)
     ret
   }
 }
 )");
 }
 
-TEST_F(SpirvParserTest, ShiftLeftLogical_Vector_SignedUnsigned_Unsigned) {
+TEST_P(SpirvParser_ShiftTest, Vector_SignedUnsigned_Unsigned) {
+    auto& params = GetParam();
     EXPECT_IR(R"(
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -1028,21 +1061,24 @@ TEST_F(SpirvParserTest, ShiftLeftLogical_Vector_SignedUnsigned_Unsigned) {
 
        %main = OpFunction %void None %void_fn
  %main_start = OpLabel
-               %1 = OpShiftLeftLogical %v2uint %v2one %v2nine
+               %1 = Op)" +
+                  params.spv_name + R"( %v2uint %v2one %v2nine
                OpReturn
                OpFunctionEnd
 )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = spirv.shift_left_logical<u32> vec2<i32>(1i), vec2<u32>(9u)
+    %2:vec2<u32> = spirv.)" +
+                  params.ir_name + R"(<u32> vec2<i32>(1i), vec2<u32>(9u)
     ret
   }
 }
 )");
 }
 
-TEST_F(SpirvParserTest, ShiftLeftLogical_Vector_SignedSigned_Unsigned) {
+TEST_P(SpirvParser_ShiftTest, Vector_SignedSigned_Unsigned) {
+    auto& params = GetParam();
     EXPECT_IR(R"(
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -1065,21 +1101,24 @@ TEST_F(SpirvParserTest, ShiftLeftLogical_Vector_SignedSigned_Unsigned) {
 
        %main = OpFunction %void None %void_fn
  %main_start = OpLabel
-               %1 = OpShiftLeftLogical %v2uint %v2one %v2two
+               %1 = Op)" +
+                  params.spv_name + R"( %v2uint %v2one %v2two
                OpReturn
                OpFunctionEnd
 )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = spirv.shift_left_logical<u32> vec2<i32>(1i), vec2<i32>(2i)
+    %2:vec2<u32> = spirv.)" +
+                  params.ir_name + R"(<u32> vec2<i32>(1i), vec2<i32>(2i)
     ret
   }
 }
 )");
 }
 
-TEST_F(SpirvParserTest, ShiftLeftLogical_Vector_UnsignedUnsigned_Signed) {
+TEST_P(SpirvParser_ShiftTest, Vector_UnsignedUnsigned_Signed) {
+    auto& params = GetParam();
     EXPECT_IR(R"(
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -1102,21 +1141,24 @@ TEST_F(SpirvParserTest, ShiftLeftLogical_Vector_UnsignedUnsigned_Signed) {
 
        %main = OpFunction %void None %void_fn
  %main_start = OpLabel
-               %1 = OpShiftLeftLogical %v2int %v2eight %v2nine
+               %1 = Op)" +
+                  params.spv_name + R"( %v2int %v2eight %v2nine
                OpReturn
                OpFunctionEnd
 )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = spirv.shift_left_logical<i32> vec2<u32>(8u), vec2<u32>(9u)
+    %2:vec2<i32> = spirv.)" +
+                  params.ir_name + R"(<i32> vec2<u32>(8u), vec2<u32>(9u)
     ret
   }
 }
 )");
 }
 
-TEST_F(SpirvParserTest, ShiftLeftLogical_Vector_UnsignedSigned_Signed) {
+TEST_P(SpirvParser_ShiftTest, Vector_UnsignedSigned_Signed) {
+    auto& params = GetParam();
     EXPECT_IR(R"(
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -1139,21 +1181,24 @@ TEST_F(SpirvParserTest, ShiftLeftLogical_Vector_UnsignedSigned_Signed) {
 
        %main = OpFunction %void None %void_fn
  %main_start = OpLabel
-               %1 = OpShiftLeftLogical %v2int %v2eight %v2one
+               %1 = Op)" +
+                  params.spv_name + R"( %v2int %v2eight %v2one
                OpReturn
                OpFunctionEnd
 )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = spirv.shift_left_logical<i32> vec2<u32>(8u), vec2<i32>(1i)
+    %2:vec2<i32> = spirv.)" +
+                  params.ir_name + R"(<i32> vec2<u32>(8u), vec2<i32>(1i)
     ret
   }
 }
 )");
 }
 
-TEST_F(SpirvParserTest, ShiftLeftLogical_Vector_SignedUnsigned_Signed) {
+TEST_P(SpirvParser_ShiftTest, Vector_SignedUnsigned_Signed) {
+    auto& params = GetParam();
     EXPECT_IR(R"(
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -1176,21 +1221,24 @@ TEST_F(SpirvParserTest, ShiftLeftLogical_Vector_SignedUnsigned_Signed) {
 
        %main = OpFunction %void None %void_fn
  %main_start = OpLabel
-               %1 = OpShiftLeftLogical %v2int %v2one %v2nine
+               %1 = Op)" +
+                  params.spv_name + R"( %v2int %v2one %v2nine
                OpReturn
                OpFunctionEnd
 )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = spirv.shift_left_logical<i32> vec2<i32>(1i), vec2<u32>(9u)
+    %2:vec2<i32> = spirv.)" +
+                  params.ir_name + R"(<i32> vec2<i32>(1i), vec2<u32>(9u)
     ret
   }
 }
 )");
 }
 
-TEST_F(SpirvParserTest, ShiftLeftLogical_Vector_SignedSigned_Signed) {
+TEST_P(SpirvParser_ShiftTest, Vector_SignedSigned_Signed) {
+    auto& params = GetParam();
     EXPECT_IR(R"(
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -1213,19 +1261,27 @@ TEST_F(SpirvParserTest, ShiftLeftLogical_Vector_SignedSigned_Signed) {
 
        %main = OpFunction %void None %void_fn
  %main_start = OpLabel
-               %1 = OpShiftLeftLogical %v2int %v2one %v2two
+               %1 = Op)" +
+                  params.spv_name + R"( %v2int %v2one %v2two
                OpReturn
                OpFunctionEnd
 )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = spirv.shift_left_logical<i32> vec2<i32>(1i), vec2<i32>(2i)
+    %2:vec2<i32> = spirv.)" +
+                  params.ir_name + R"(<i32> vec2<i32>(1i), vec2<i32>(2i)
     ret
   }
 }
 )");
 }
+
+INSTANTIATE_TEST_SUITE_P(
+    SpirvParser,
+    SpirvParser_ShiftTest,
+    testing::Values(SpirvBitParam{"ShiftLeftLogical", "shift_left_logical"},  //
+                    SpirvBitParam{"ShiftRightLogical", "shift_right_logical"}));
 
 }  // namespace
 }  // namespace tint::spirv::reader

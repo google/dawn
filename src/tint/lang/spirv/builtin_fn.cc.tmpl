@@ -120,6 +120,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kULessThan:
         case BuiltinFn::kULessThanEqual:
         case BuiltinFn::kShiftLeftLogical:
+        case BuiltinFn::kShiftRightLogical:
             break;
     }
     return core::ir::Instruction::Accesses{};
