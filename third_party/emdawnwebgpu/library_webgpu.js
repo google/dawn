@@ -30,6 +30,7 @@
     },
 
     NULLPTR: MEMORY64 ? '0n' : '0',
+    kOffsetOfNextInChainMember: 0,
     passAsI64: value => WASM_BIGINT ? `BigInt(${value})` : value,
     passAsPointer: value => MEMORY64 ? `BigInt(${value})` : value,
     convertToPassAsPointer: variable => MEMORY64 ? `${variable} = BigInt(${variable});` : '',
@@ -58,8 +59,7 @@
       // the first member in the struct, descriptor.nextInChain and
       // descriptor.chain.nextInChain should have the same offset (0) to the
       // descriptor pointer and we can check it to be null.
-      var OffsetOfNextInChainMember = 0;
-      return this.makeCheck(descriptor) + this.makeCheck(makeGetValue(descriptor, OffsetOfNextInChainMember, '*') + ' === 0');
+      return this.makeCheck(descriptor) + this.makeCheck(makeGetValue(descriptor, gpu.kOffsetOfNextInChainMember, '*') + ' === 0');
     },
     makeImportJsObject: function(object) {
       return `
@@ -1145,7 +1145,7 @@ var LibraryWebGPU = {
         var sType = {{{ gpu.makeGetU32('nextInChainPtr', C_STRUCTS.WGPUChainedStruct.sType) }}};
 #if ASSERTIONS
         assert(sType === {{{ gpu.SType.RenderPassMaxDrawCount }}});
-        assert(0 === {{{ makeGetValue('nextInChainPtr', C_STRUCTS.WGPUChainedStruct.next, '*') }}});
+        assert(0 === {{{ makeGetValue('nextInChainPtr', gpu.kOffsetOfNextInChainMember, '*') }}});
 #endif
         var renderPassMaxDrawCount = nextInChainPtr;
         {{{ gpu.makeCheckDescriptor('renderPassMaxDrawCount') }}}
@@ -1974,7 +1974,7 @@ var LibraryWebGPU = {
   emwgpuInstanceRequestAdapter: (instancePtr, futureId, options, adapterPtr) => {
     var opts;
     if (options) {
-      {{{ gpu.makeCheckDescriptor('options') }}}
+      {{{ gpu.makeCheck('options') }}}
       var featureLevel = {{{ gpu.makeGetU32('options', C_STRUCTS.WGPURequestAdapterOptions.featureLevel) }}};
       opts = {
         "featureLevel": WebGPU.FeatureLevel[featureLevel],
@@ -1983,6 +1983,18 @@ var LibraryWebGPU = {
         "forceFallbackAdapter":
           {{{ gpu.makeGetBool('options', C_STRUCTS.WGPURequestAdapterOptions.forceFallbackAdapter) }}},
       };
+
+      var nextInChainPtr = {{{ makeGetValue('options', C_STRUCTS.WGPURequestAdapterOptions.nextInChain, '*') }}};
+      if (nextInChainPtr !== 0) {
+        var sType = {{{ gpu.makeGetU32('nextInChainPtr', C_STRUCTS.WGPUChainedStruct.sType) }}};
+#if ASSERTIONS
+        assert(sType === {{{ gpu.SType.RequestAdapterWebXROptions }}});
+        assert(0 === {{{ makeGetValue('nextInChainPtr', gpu.kOffsetOfNextInChainMember, '*') }}});
+#endif
+        var webxrOptions = nextInChainPtr;
+        {{{ gpu.makeCheckDescriptor('webxrOptions') }}}
+        opts.xrCompatible = {{{ gpu.makeGetBool('webxrOptions', C_STRUCTS.WGPURequestAdapterWebXROptions.xrCompatible) }}};
+      }
     }
 
     if (!('gpu' in navigator)) {
@@ -2396,7 +2408,7 @@ var LibraryWebGPU = {
   // --------------------------------------------------------------------------
 
   wgpuSurfaceConfigure: (surfacePtr, config) => {
-    {{{ gpu.makeCheckDescriptor('config') }}}
+    {{{ gpu.makeCheck('config') }}}
     var devicePtr = {{{ makeGetValue('config', C_STRUCTS.WGPUSurfaceConfiguration.device, '*') }}};
     var context = WebGPU.getJsObject(surfacePtr);
 
@@ -2433,6 +2445,26 @@ var LibraryWebGPU = {
       // viewFormatsPtr pointer to an array of TextureFormat which is an enum of size uint32_t
       configuration['viewFormats'] = Array.from({{{ makeHEAPView('32', 'viewFormatsPtr', 'viewFormatsPtr + viewFormatCount * 4') }}},
         format => WebGPU.TextureFormat[format]);
+    }
+
+    {
+      var nextInChainPtr = {{{ makeGetValue('config', C_STRUCTS.WGPUSurfaceConfiguration.nextInChain, '*') }}};
+
+      if (nextInChainPtr !== 0) {
+        var sType = {{{ gpu.makeGetU32('nextInChainPtr', C_STRUCTS.WGPUChainedStruct.sType) }}};
+#if ASSERTIONS
+        assert(sType === {{{ gpu.SType.SurfaceColorManagement }}});
+        assert(0 === {{{ makeGetValue('nextInChainPtr', gpu.kOffsetOfNextInChainMember, '*') }}});
+#endif
+        var surfaceColorManagement = nextInChainPtr;
+        {{{ gpu.makeCheckDescriptor('surfaceColorManagement') }}}
+        configuration.colorSpace = WebGPU.PredefinedColorSpace[
+          {{{ gpu.makeGetU32('surfaceColorManagement', C_STRUCTS.WGPUSurfaceColorManagement.colorSpace) }}}];
+        configuration.toneMapping = {
+          mode: WebGPU.ToneMappingMode[
+            {{{ gpu.makeGetU32('surfaceColorManagement', C_STRUCTS.WGPUSurfaceColorManagement.toneMappingMode) }}}],
+        };
+      }
     }
 
     context.configure(configuration);

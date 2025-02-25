@@ -80,6 +80,15 @@
             {"name": "force fallback adapter", "type": "bool", "default": "false"}
         ]
     },
+    "request adapter WebXR options": {
+        "category": "structure",
+        "chained": "in",
+        "chain roots": ["request adapter options"],
+        "tags": ["upstream", "emscripten"],
+        "members": [
+            {"name": "xr compatible", "type": "bool"}
+        ]
+    },
     "request adapter callback": {
         "category": "callback function",
         "args": [
@@ -94,7 +103,7 @@
             {"name": "mode", "type": "callback mode"},
             {"name": "callback", "type": "request adapter callback"}
         ]
-   },
+    },
     "request adapter status": {
         "category": "enum",
         "emscripten_no_enum_table": true,
@@ -3689,6 +3698,32 @@
             {"name": "swap chain panel", "type": "void", "annotation": "*"}
         ]
     },
+    "surface color management": {
+        "category": "structure",
+        "chained": "in",
+        "chain roots": ["surface descriptor"],
+        "tags": ["upstream", "emscripten"],
+        "members": [
+            {"name": "color space", "type": "predefined color space"},
+            {"name": "tone mapping mode", "type": "tone mapping mode"}
+        ]
+    },
+    "predefined color space": {
+        "category": "enum",
+        "tags": ["upstream", "emscripten"],
+        "values": [
+            {"value": 1, "name": "sRGB"},
+            {"value": 2, "name": "display p3"}
+        ]
+    },
+    "tone mapping mode": {
+        "category": "enum",
+        "tags": ["upstream", "emscripten"],
+        "values": [
+            {"value": 1, "name": "standard"},
+            {"value": 2, "name": "extended"}
+        ]
+    },
     "surface texture": {
         "category": "structure",
         "members": [
@@ -3710,7 +3745,9 @@
             {"value": 7, "name": "surface source wayland surface"},
             {"value": 8, "name": "surface source android native window"},
             {"value": 9, "name": "surface source XCB window"},
-            {"value": 10, "name": "adapter properties subgroups"},
+            {"value": 10, "name": "surface color management", "tags": ["upstream", "emscripten"]},
+            {"value": 11, "name": "request adapter WebXR options", "tags": ["upstream", "emscripten"]},
+            {"value": 12, "name": "adapter properties subgroups"},
 
             {"value": 0, "name": "texture binding view dimension descriptor", "tags": ["compat"]},
 
