@@ -413,6 +413,7 @@
 "subgroup_matrix_left"
 "subgroup_matrix_result"
 "subgroup_matrix_right"
+"subgroup_matrix_uniformity"
 "subgroup_size"
 "subgroup_uniformity"
 "subgroups"

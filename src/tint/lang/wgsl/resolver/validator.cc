@@ -180,6 +180,8 @@ Validator::Validator(
                             wgsl::DiagnosticSeverity::kError);
     diagnostic_filters_.Set(wgsl::CoreDiagnosticRule::kSubgroupUniformity,
                             wgsl::DiagnosticSeverity::kError);
+    diagnostic_filters_.Set(wgsl::ChromiumDiagnosticRule::kSubgroupMatrixUniformity,
+                            wgsl::DiagnosticSeverity::kError);
     diagnostic_filters_.Set(wgsl::ChromiumDiagnosticRule::kUnreachableCode,
                             wgsl::DiagnosticSeverity::kWarning);
 }

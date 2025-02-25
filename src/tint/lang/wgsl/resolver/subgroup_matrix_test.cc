@@ -640,5 +640,11 @@ TEST_F(ResolverSubgroupMatrixTest, ReturnType_Valid) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
+// Using the subgroup_matrix_uniformity diagnostic rule without the extension should succeed.
+TEST_F(ResolverSubgroupMatrixTest, UseSubgroupUniformityRuleWithoutExtension) {
+    DiagnosticDirective(wgsl::DiagnosticSeverity::kOff, "chromium", "subgroup_matrix_uniformity");
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
 }  // namespace
 }  // namespace tint::resolver

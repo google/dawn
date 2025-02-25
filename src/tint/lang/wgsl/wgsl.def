@@ -57,6 +57,7 @@ enum core_diagnostic_rule {
 // chromium-specific diagnostics
 enum chromium_diagnostic_rule {
   // Chromium specific rules not defined in the spec.
+  subgroup_matrix_uniformity
   unreachable_code
 }
 
