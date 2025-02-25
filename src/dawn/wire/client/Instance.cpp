@@ -62,7 +62,7 @@ class RequestAdapterEvent : public TrackedEvent {
                          WGPURequestAdapterStatus status,
                          WGPUStringView message,
                          const WGPUAdapterInfo* info,
-                         const WGPULimits* limits,
+                         const WGPUSupportedLimits* limits,
                          uint32_t featuresCount,
                          const WGPUFeatureName* features) {
         DAWN_ASSERT(mAdapter != nullptr);
@@ -203,7 +203,7 @@ WireResult Client::DoInstanceRequestAdapterCallback(ObjectHandle eventManager,
                                                     WGPURequestAdapterStatus status,
                                                     WGPUStringView message,
                                                     const WGPUAdapterInfo* info,
-                                                    const WGPULimits* limits,
+                                                    const WGPUSupportedLimits* limits,
                                                     uint32_t featuresCount,
                                                     const WGPUFeatureName* features) {
     return GetEventManager(eventManager)

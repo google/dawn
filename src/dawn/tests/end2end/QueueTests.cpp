@@ -190,7 +190,7 @@ TEST_P(QueueWriteBufferTests, SuperLargeWriteBuffer) {
 // Test using the max buffer size. Regression test for dawn:1985. We don't bother validating the
 // results for this case since that would take a lot longer, just that there are no errors.
 TEST_P(QueueWriteBufferTests, MaxBufferSizeWriteBuffer) {
-    uint32_t maxBufferSize = GetSupportedLimits().maxBufferSize;
+    uint32_t maxBufferSize = GetSupportedLimits().limits.maxBufferSize;
     wgpu::BufferDescriptor descriptor;
     descriptor.size = maxBufferSize;
     descriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;

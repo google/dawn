@@ -1080,7 +1080,7 @@ std::vector<wgpu::FeatureName> DawnTestBase::GetRequiredFeatures() {
     return {};
 }
 
-wgpu::Limits DawnTestBase::GetRequiredLimits(const wgpu::Limits&) {
+wgpu::RequiredLimits DawnTestBase::GetRequiredLimits(const wgpu::SupportedLimits&) {
     return {};
 }
 
@@ -1088,14 +1088,14 @@ const TestAdapterProperties& DawnTestBase::GetAdapterProperties() const {
     return mParam.adapterProperties;
 }
 
-wgpu::Limits DawnTestBase::GetAdapterLimits() {
-    wgpu::Limits supportedLimits = {};
+wgpu::SupportedLimits DawnTestBase::GetAdapterLimits() {
+    wgpu::SupportedLimits supportedLimits = {};
     adapter.GetLimits(&supportedLimits);
     return supportedLimits;
 }
 
-wgpu::Limits DawnTestBase::GetSupportedLimits() {
-    wgpu::Limits supportedLimits = {};
+wgpu::SupportedLimits DawnTestBase::GetSupportedLimits() {
+    wgpu::SupportedLimits supportedLimits = {};
     device.GetLimits(&supportedLimits);
     return supportedLimits;
 }
@@ -1148,10 +1148,10 @@ WGPUDevice DawnTestBase::CreateDeviceImpl(std::string isolationKey,
         requiredFeatures.push_back(wgpu::FeatureName::ImplicitDeviceSynchronization);
     }
 
-    wgpu::Limits supportedLimits;
+    wgpu::SupportedLimits supportedLimits;
     native::GetProcs().adapterGetLimits(mBackendAdapter.Get(),
-                                        reinterpret_cast<WGPULimits*>(&supportedLimits));
-    wgpu::Limits requiredLimits = GetRequiredLimits(supportedLimits);
+                                        reinterpret_cast<WGPUSupportedLimits*>(&supportedLimits));
+    wgpu::RequiredLimits requiredLimits = GetRequiredLimits(supportedLimits);
 
     wgpu::DeviceDescriptor deviceDescriptor =
         *reinterpret_cast<const wgpu::DeviceDescriptor*>(descriptor);

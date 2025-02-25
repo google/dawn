@@ -1148,13 +1148,16 @@ ResultOrError<Extent3D> ValidateComputeStageWorkgroupSize(uint32_t x,
 
     if (DAWN_UNLIKELY(x > limits.maxComputeWorkgroupSizeX || y > limits.maxComputeWorkgroupSizeY ||
                       z > limits.maxComputeWorkgroupSizeZ)) {
-        Limits adapterLimits;
+        SupportedLimits adapterLimits;
         wgpu::Status status = adapter->APIGetLimits(&adapterLimits);
         DAWN_ASSERT(status == wgpu::Status::Success);
 
-        uint32_t maxComputeWorkgroupSizeXAdapterLimit = adapterLimits.maxComputeWorkgroupSizeX;
-        uint32_t maxComputeWorkgroupSizeYAdapterLimit = adapterLimits.maxComputeWorkgroupSizeY;
-        uint32_t maxComputeWorkgroupSizeZAdapterLimit = adapterLimits.maxComputeWorkgroupSizeZ;
+        uint32_t maxComputeWorkgroupSizeXAdapterLimit =
+            adapterLimits.limits.maxComputeWorkgroupSizeX;
+        uint32_t maxComputeWorkgroupSizeYAdapterLimit =
+            adapterLimits.limits.maxComputeWorkgroupSizeY;
+        uint32_t maxComputeWorkgroupSizeZAdapterLimit =
+            adapterLimits.limits.maxComputeWorkgroupSizeZ;
         std::string increaseLimitAdvice =
             (x <= maxComputeWorkgroupSizeXAdapterLimit &&
              y <= maxComputeWorkgroupSizeYAdapterLimit && z <= maxComputeWorkgroupSizeZAdapterLimit)

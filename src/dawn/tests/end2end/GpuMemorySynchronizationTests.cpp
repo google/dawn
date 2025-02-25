@@ -40,15 +40,17 @@ namespace {
 
 class GpuMemorySyncTests : public DawnTest {
   protected:
-    wgpu::Limits GetRequiredLimits(const wgpu::Limits& supported) override {
+    wgpu::RequiredLimits GetRequiredLimits(const wgpu::SupportedLimits& supported) override {
         // Just copy all the limits, though all we really care about is
         // maxStorageBuffersInFragmentStage
-        return supported;
+        wgpu::RequiredLimits required = {};
+        required.limits = supported.limits;
+        return required;
     }
 
     void SetUp() override {
         DawnTest::SetUp();
-        DAWN_SUPPRESS_TEST_IF(GetSupportedLimits().maxStorageBuffersInFragmentStage < 1);
+        DAWN_SUPPRESS_TEST_IF(GetSupportedLimits().limits.maxStorageBuffersInFragmentStage < 1);
     }
 
     wgpu::Buffer CreateBuffer() {
@@ -121,7 +123,7 @@ class GpuMemorySyncTests : public DawnTest {
 // dependency chain. The test verifies that data in buffer among iterations in compute passes is
 // correctly synchronized.
 TEST_P(GpuMemorySyncTests, ComputePass) {
-    DAWN_SUPPRESS_TEST_IF(GetSupportedLimits().maxStorageBuffersInFragmentStage < 1);
+    DAWN_SUPPRESS_TEST_IF(GetSupportedLimits().limits.maxStorageBuffersInFragmentStage < 1);
 
     // Create pipeline, bind group, and buffer for compute pass.
     wgpu::Buffer buffer = CreateBuffer();
@@ -431,15 +433,17 @@ constexpr int kVertexBufferStride = 4 * sizeof(float);
 
 class MultipleWriteThenMultipleReadTests : public DawnTest {
   protected:
-    wgpu::Limits GetRequiredLimits(const wgpu::Limits& supported) override {
+    wgpu::RequiredLimits GetRequiredLimits(const wgpu::SupportedLimits& supported) override {
         // Just copy all the limits, though all we really care about is
         // maxStorageBuffersInFragmentStage
-        return supported;
+        wgpu::RequiredLimits required = {};
+        required.limits = supported.limits;
+        return required;
     }
 
     void SetUp() override {
         DawnTest::SetUp();
-        DAWN_SUPPRESS_TEST_IF(GetSupportedLimits().maxStorageBuffersInFragmentStage < 1);
+        DAWN_SUPPRESS_TEST_IF(GetSupportedLimits().limits.maxStorageBuffersInFragmentStage < 1);
     }
 
   protected:

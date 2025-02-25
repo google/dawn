@@ -89,22 +89,17 @@ InstanceBase* AdapterBase::APIGetInstance() const {
     return instance;
 }
 
-wgpu::Status AdapterBase::APIGetLimits(Limits* limits) const {
+wgpu::Status AdapterBase::APIGetLimits(SupportedLimits* limits) const {
     DAWN_ASSERT(limits != nullptr);
-    UnpackedPtr<Limits> unpacked;
+    UnpackedPtr<SupportedLimits> unpacked;
     if (mInstance->ConsumedError(ValidateAndUnpack(limits), &unpacked)) {
         return wgpu::Status::Error;
     }
 
-    {
-        wgpu::ChainedStructOut* originalChain = unpacked->nextInChain;
-        if (mUseTieredLimits) {
-            **unpacked = ApplyLimitTiers(mPhysicalDevice->GetLimits().v1);
-        } else {
-            **unpacked = mPhysicalDevice->GetLimits().v1;
-        }
-        // Recover origin chain.
-        unpacked->nextInChain = originalChain;
+    if (mUseTieredLimits) {
+        limits->limits = ApplyLimitTiers(mPhysicalDevice->GetLimits().v1);
+    } else {
+        limits->limits = mPhysicalDevice->GetLimits().v1;
     }
 
     // TODO(crbug.com/382520104): Remove DawnExperimentalSubgroupLimits.
@@ -366,13 +361,13 @@ ResultOrError<Ref<DeviceBase>> AdapterBase::CreateDeviceInternal(
         DAWN_INVALID_IF(descriptor->requiredLimits->nextInChain != nullptr,
                         "can not chain after requiredLimits.");
 
-        Limits supportedLimits;
+        SupportedLimits supportedLimits;
         wgpu::Status status = APIGetLimits(&supportedLimits);
         DAWN_ASSERT(status == wgpu::Status::Success);
 
-        DAWN_TRY_CONTEXT(
-            ValidateLimits(GetFeatureLevel(), supportedLimits, *descriptor->requiredLimits),
-            "validating required limits");
+        DAWN_TRY_CONTEXT(ValidateLimits(GetFeatureLevel(), supportedLimits.limits,
+                                        descriptor->requiredLimits->limits),
+                         "validating required limits");
     }
 
     return mPhysicalDevice->CreateDevice(this, descriptor, deviceToggles, std::move(lostEvent));

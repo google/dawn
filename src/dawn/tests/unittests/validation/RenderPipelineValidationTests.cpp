@@ -3009,10 +3009,10 @@ TEST_F(DualSourceBlendingFeatureTest, FeatureEnumsValidWithFeatureEnabled) {
 // Test that rendering to multiple render targets while using dual source blending results in an
 // error.
 TEST_F(DualSourceBlendingFeatureTest, MultipleRenderTargetsNotAllowed) {
-    wgpu::Limits limits;
+    wgpu::SupportedLimits limits;
     device.GetLimits(&limits);
 
-    for (uint32_t location = 1; location < limits.maxColorAttachments; location++) {
+    for (uint32_t location = 1; location < limits.limits.maxColorAttachments; location++) {
         std::ostringstream sstream;
         sstream << R"(
                 enable dual_source_blending;

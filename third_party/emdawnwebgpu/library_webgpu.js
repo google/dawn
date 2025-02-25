@@ -515,8 +515,8 @@ var LibraryWebGPU = {
       return desc;
     },
 
-    fillLimitStruct: (limits, limitsOutPtr) => {
-      {{{ gpu.makeCheckDescriptor('limitsOutPtr') }}}
+    fillLimitStruct: (limits, supportedLimitsOutPtr) => {
+      var limitsOutPtr = supportedLimitsOutPtr + {{{ C_STRUCTS.WGPUSupportedLimits.limits }}};
 
       function setLimitValueU32(name, limitOffset) {
         var limitValue = limits[name];
@@ -748,9 +748,10 @@ var LibraryWebGPU = {
         desc["requiredFeatures"] = Array.from({{{ makeHEAPView('U32', 'requiredFeaturesPtr', `requiredFeaturesPtr + requiredFeatureCount * 4`) }}},
           (feature) => WebGPU.FeatureName[feature]);
       }
-      var limitsPtr = {{{ makeGetValue('descriptor', C_STRUCTS.WGPUDeviceDescriptor.requiredLimits, '*') }}};
-      if (limitsPtr) {
-        {{{ gpu.makeCheckDescriptor('limitsPtr') }}}
+      var requiredLimitsPtr = {{{ makeGetValue('descriptor', C_STRUCTS.WGPUDeviceDescriptor.requiredLimits, '*') }}};
+      if (requiredLimitsPtr) {
+        {{{ gpu.makeCheckDescriptor('requiredLimitsPtr') }}}
+        var limitsPtr = requiredLimitsPtr + {{{ C_STRUCTS.WGPURequiredLimits.limits }}};
         var requiredLimits = {};
         function setLimitU32IfDefined(name, limitOffset) {
           var ptr = limitsPtr + limitOffset;

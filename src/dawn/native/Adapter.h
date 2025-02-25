@@ -60,7 +60,7 @@ class AdapterBase : public RefCounted, public WeakRefSupport<AdapterBase> {
 
     // WebGPU API
     InstanceBase* APIGetInstance() const;
-    wgpu::Status APIGetLimits(Limits* limits) const;
+    wgpu::Status APIGetLimits(SupportedLimits* limits) const;
     wgpu::Status APIGetInfo(AdapterInfo* info) const;
     bool APIHasFeature(wgpu::FeatureName feature) const;
     void APIGetFeatures(SupportedFeatures* features) const;

@@ -1065,7 +1065,7 @@ TEST_F(BindGroupValidationTest, BufferBindingOOB) {
 
 // Tests constraints to be sure the uniform buffer binding isn't too large
 TEST_F(BindGroupValidationTest, MaxUniformBufferBindingSize) {
-    wgpu::Limits supportedLimits = GetSupportedLimits();
+    wgpu::Limits supportedLimits = GetSupportedLimits().limits;
 
     wgpu::BufferDescriptor descriptor;
     descriptor.size = 2 * supportedLimits.maxUniformBufferBindingSize;
@@ -1108,7 +1108,7 @@ TEST_F(BindGroupValidationTest, MaxUniformBufferBindingSize) {
 
 // Tests constraints to be sure the storage buffer binding isn't too large
 TEST_F(BindGroupValidationTest, MaxStorageBufferBindingSize) {
-    wgpu::Limits supportedLimits = GetSupportedLimits();
+    wgpu::Limits supportedLimits = GetSupportedLimits().limits;
 
     wgpu::BufferDescriptor descriptor;
     descriptor.size = 2 * supportedLimits.maxStorageBufferBindingSize;
@@ -1373,7 +1373,7 @@ TEST_F(BindGroupLayoutValidationTest, PerStageLimits) {
         wgpu::BindGroupLayoutEntry otherEntry;
     };
 
-    wgpu::Limits limits = GetSupportedLimits();
+    wgpu::Limits limits = GetSupportedLimits().limits;
 
     std::array<TestInfo, 7> kTestInfos = {
         TestInfo{limits.maxSampledTexturesPerShaderStage,
@@ -1475,7 +1475,7 @@ TEST_F(BindGroupLayoutValidationTest, PerStageLimitsWithExternalTexture) {
         wgpu::BindGroupLayoutEntry otherEntry;
     };
 
-    wgpu::Limits limits = GetSupportedLimits();
+    wgpu::Limits limits = GetSupportedLimits().limits;
 
     std::array<TestInfo, 3> kTestInfos = {
         TestInfo{limits.maxSampledTexturesPerShaderStage, kSampledTexturesPerExternalTexture,
@@ -1565,7 +1565,7 @@ TEST_F(BindGroupLayoutValidationTest, DynamicBufferNumberLimit) {
     std::vector<wgpu::BindGroupLayoutEntry> maxStorageDB;
     std::vector<wgpu::BindGroupLayoutEntry> maxReadonlyStorageDB;
 
-    wgpu::Limits limits = GetSupportedLimits();
+    wgpu::Limits limits = GetSupportedLimits().limits;
 
     // In this test, we use all the same shader stage. Ensure that this does not exceed the
     // per-stage limit.
@@ -2011,7 +2011,8 @@ class SetBindGroupValidationTest : public ValidationTest {
                       wgpu::BufferBindingType::Storage, true},
                      {3, wgpu::ShaderStage::Compute | wgpu::ShaderStage::Fragment,
                       wgpu::BufferBindingType::ReadOnlyStorage, true}});
-        mMinUniformBufferOffsetAlignment = GetSupportedLimits().minUniformBufferOffsetAlignment;
+        mMinUniformBufferOffsetAlignment =
+            GetSupportedLimits().limits.minUniformBufferOffsetAlignment;
         mBufferSize = 3 * mMinUniformBufferOffsetAlignment + 8;
     }
 
@@ -2712,7 +2713,7 @@ class SetBindGroupPersistenceValidationTest : public ValidationTest {
                     return vec4f();
                 })");
 
-        mBufferSize = 3 * GetSupportedLimits().minUniformBufferOffsetAlignment + 8;
+        mBufferSize = 3 * GetSupportedLimits().limits.minUniformBufferOffsetAlignment + 8;
     }
 
     wgpu::Buffer CreateBuffer(uint64_t bufferSize, wgpu::BufferUsage usage) {
@@ -3117,7 +3118,7 @@ class BindingsValidationTest : public BindGroupLayoutCompatibilityTest {
   public:
     void SetUp() override {
         BindGroupLayoutCompatibilityTest::SetUp();
-        mBufferSize = 3 * GetSupportedLimits().minUniformBufferOffsetAlignment + 8;
+        mBufferSize = 3 * GetSupportedLimits().limits.minUniformBufferOffsetAlignment + 8;
     }
 
     void TestRenderPassBindings(const wgpu::BindGroup* bg,

@@ -719,7 +719,7 @@ TEST_F(ExternalTextureTest, CreateExternalTextureWithErrorCropOriginOrSize) {
 
 // Test create external texture with too large apparent size results in error.
 TEST_F(ExternalTextureTest, CreateExternalTextureWithApparentSizeTooLarge) {
-    wgpu::Limits limits;
+    wgpu::SupportedLimits limits;
     device.GetLimits(&limits);
 
     // Control case should succeed.
@@ -731,7 +731,8 @@ TEST_F(ExternalTextureTest, CreateExternalTextureWithApparentSizeTooLarge) {
         externalDesc.plane0 = texture.CreateView();
         externalDesc.cropOrigin = {0, 0};
         externalDesc.cropSize = {texture.GetWidth(), texture.GetHeight()};
-        externalDesc.apparentSize = {limits.maxTextureDimension2D, limits.maxTextureDimension2D};
+        externalDesc.apparentSize = {limits.limits.maxTextureDimension2D,
+                                     limits.limits.maxTextureDimension2D};
         device.CreateExternalTexture(&externalDesc);
     }
 
@@ -744,8 +745,8 @@ TEST_F(ExternalTextureTest, CreateExternalTextureWithApparentSizeTooLarge) {
         externalDesc.plane0 = texture.CreateView();
         externalDesc.cropOrigin = {0, 0};
         externalDesc.cropSize = {texture.GetWidth(), texture.GetHeight()};
-        externalDesc.apparentSize = {limits.maxTextureDimension2D + 1,
-                                     limits.maxTextureDimension2D};
+        externalDesc.apparentSize = {limits.limits.maxTextureDimension2D + 1,
+                                     limits.limits.maxTextureDimension2D};
         ASSERT_DEVICE_ERROR(device.CreateExternalTexture(&externalDesc));
     }
 
@@ -758,8 +759,8 @@ TEST_F(ExternalTextureTest, CreateExternalTextureWithApparentSizeTooLarge) {
         externalDesc.plane0 = texture.CreateView();
         externalDesc.cropOrigin = {0, 0};
         externalDesc.cropSize = {texture.GetWidth(), texture.GetHeight()};
-        externalDesc.apparentSize = {limits.maxTextureDimension2D,
-                                     limits.maxTextureDimension2D + 1};
+        externalDesc.apparentSize = {limits.limits.maxTextureDimension2D,
+                                     limits.limits.maxTextureDimension2D + 1};
         ASSERT_DEVICE_ERROR(device.CreateExternalTexture(&externalDesc));
     }
 }

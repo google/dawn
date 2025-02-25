@@ -39,15 +39,15 @@ class LimitsAndFeatures {
     LimitsAndFeatures();
     ~LimitsAndFeatures();
 
-    WGPUStatus GetLimits(WGPULimits* limits) const;
+    WGPUStatus GetLimits(WGPUSupportedLimits* limits) const;
     bool HasFeature(WGPUFeatureName feature) const;
     void ToSupportedFeatures(WGPUSupportedFeatures* supportedFeatures) const;
 
-    void SetLimits(const WGPULimits* limits);
+    void SetLimits(const WGPUSupportedLimits* limits);
     void SetFeatures(const WGPUFeatureName* features, uint32_t featuresCount);
 
   private:
-    WGPULimits mLimits;
+    WGPUSupportedLimits mLimits;
     WGPUDawnExperimentalSubgroupLimits mExperimentalSubgroupLimits;
     WGPUDawnExperimentalImmediateDataLimits mExperimentalImmediateDataLimits;
     WGPUDawnTexelCopyBufferRowAlignmentLimits mTexelCopyBufferRowAlignmentLimits;

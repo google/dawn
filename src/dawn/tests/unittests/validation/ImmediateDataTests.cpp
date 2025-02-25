@@ -61,7 +61,7 @@ class ImmediateDataTest : public ValidationTest {
         if (maxImmediateDataByteSize != std::numeric_limits<uint32_t>::max()) {
             return maxImmediateDataByteSize;
         }
-        wgpu::Limits supportedLimits = {};
+        wgpu::SupportedLimits supportedLimits = {};
         wgpu::DawnExperimentalImmediateDataLimits immediateDataLimits = {};
         supportedLimits.nextInChain = &immediateDataLimits;
         device.GetLimits(&supportedLimits);

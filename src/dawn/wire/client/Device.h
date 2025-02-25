@@ -54,7 +54,7 @@ class Device final : public RefCountedWithExternalCount<ObjectWithEventsBase> {
 
     ObjectType GetObjectType() const override;
 
-    void SetLimits(const WGPULimits* limits);
+    void SetLimits(const WGPUSupportedLimits* limits);
     void SetFeatures(const WGPUFeatureName* features, uint32_t featuresCount);
 
     bool IsAlive() const;
@@ -78,7 +78,7 @@ class Device final : public RefCountedWithExternalCount<ObjectWithEventsBase> {
         WGPURenderPipelineDescriptor const* descriptor,
         const WGPUCreateRenderPipelineAsyncCallbackInfo& callbackInfo);
 
-    WGPUStatus GetLimits(WGPULimits* limits) const;
+    WGPUStatus GetLimits(WGPUSupportedLimits* limits) const;
     WGPUFuture GetLostFuture();
     bool HasFeature(WGPUFeatureName feature) const;
     void GetFeatures(WGPUSupportedFeatures* features) const;

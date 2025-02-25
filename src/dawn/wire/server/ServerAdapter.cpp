@@ -117,7 +117,7 @@ void Server::OnRequestDeviceCallback(RequestDeviceUserdata* data,
     // Query and report the adapter limits, including DawnExperimentalSubgroupLimits,
     // DawnExperimentalImmediateDataLimits and DawnTexelCopyBufferRowAlignmentLimits.
     // Reporting to client.
-    WGPULimits limits = {};
+    WGPUSupportedLimits limits = {};
 
     // Chained DawnExperimentalSubgroupLimits.
     // TODO(crbug.com/354751907) Remove this, as it is now in AdapterInfo.

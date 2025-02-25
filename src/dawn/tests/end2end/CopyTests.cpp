@@ -310,7 +310,7 @@ class CopyTests_T2B : public CopyTests, public DawnTestWithParams<CopyTextureFor
         if (!device.HasFeature(wgpu::FeatureName::DawnTexelCopyBufferRowAlignment)) {
             return kTextureBytesPerRowAlignment;
         }
-        wgpu::Limits limits{};
+        wgpu::SupportedLimits limits{};
         wgpu::DawnTexelCopyBufferRowAlignmentLimits alignmentLimits{};
         limits.nextInChain = &alignmentLimits;
         device.GetLimits(&limits);

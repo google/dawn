@@ -269,7 +269,7 @@ class DeviceBase : public ErrorSink, public RefCountedWithExternalCount<RefCount
 
     wgpu::Status APIGetAHardwareBufferProperties(void* handle,
                                                  AHardwareBufferProperties* properties);
-    wgpu::Status APIGetLimits(Limits* limits) const;
+    wgpu::Status APIGetLimits(SupportedLimits* limits) const;
     bool APIHasFeature(wgpu::FeatureName feature) const;
     void APIGetFeatures(wgpu::SupportedFeatures* features) const;
     void APIGetFeatures(SupportedFeatures* features) const;

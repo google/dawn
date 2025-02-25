@@ -254,12 +254,12 @@ void DumpAdapterFeatures(const wgpu::Adapter& adapter) {
 }
 
 void DumpAdapterLimits(const wgpu::Adapter& adapter) {
-    wgpu::Limits adapterLimits;
+    wgpu::SupportedLimits adapterLimits;
     if (adapter.GetLimits(&adapterLimits)) {
         std::cout << "\n";
         std::cout << "  Adapter Limits\n";
         std::cout << "  ==============\n";
-        std::cout << LimitsToString(adapterLimits, "    ") << "\n";
+        std::cout << LimitsToString(adapterLimits.limits, "    ") << "\n";
     }
 }
 

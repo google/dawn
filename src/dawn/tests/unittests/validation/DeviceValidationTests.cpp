@@ -63,9 +63,9 @@ TEST_F(RequestDeviceValidationTest, NoRequiredLimits) {
                 Call(wgpu::RequestDeviceStatus::Success, NotNull(), EmptySizedString()))
         .WillOnce(WithArgs<1>([](wgpu::Device device) {
             // Check one of the default limits.
-            wgpu::Limits limits;
+            wgpu::SupportedLimits limits;
             device.GetLimits(&limits);
-            EXPECT_EQ(limits.maxBindGroups, 4u);
+            EXPECT_EQ(limits.limits.maxBindGroups, 4u);
         }));
     adapter.RequestDevice(&descriptor, wgpu::CallbackMode::AllowSpontaneous,
                           mRequestDeviceCallback.Callback());
@@ -73,7 +73,7 @@ TEST_F(RequestDeviceValidationTest, NoRequiredLimits) {
 
 // Test that requesting a device with the default limits is valid.
 TEST_F(RequestDeviceValidationTest, DefaultLimits) {
-    wgpu::Limits limits = {};
+    wgpu::RequiredLimits limits = {};
     wgpu::DeviceDescriptor descriptor;
     descriptor.requiredLimits = &limits;
 
@@ -81,9 +81,9 @@ TEST_F(RequestDeviceValidationTest, DefaultLimits) {
                 Call(wgpu::RequestDeviceStatus::Success, NotNull(), EmptySizedString()))
         .WillOnce(WithArgs<1>([](wgpu::Device device) {
             // Check one of the default limits.
-            wgpu::Limits limits;
+            wgpu::SupportedLimits limits;
             device.GetLimits(&limits);
-            EXPECT_EQ(limits.maxTextureArrayLayers, 256u);
+            EXPECT_EQ(limits.limits.maxTextureArrayLayers, 256u);
         }));
     adapter.RequestDevice(&descriptor, wgpu::CallbackMode::AllowSpontaneous,
                           mRequestDeviceCallback.Callback());
@@ -91,49 +91,49 @@ TEST_F(RequestDeviceValidationTest, DefaultLimits) {
 
 // Test that requesting a device where a required limit is above the maximum value.
 TEST_F(RequestDeviceValidationTest, HigherIsBetter) {
-    wgpu::Limits limits = {};
+    wgpu::RequiredLimits limits = {};
     wgpu::DeviceDescriptor descriptor;
     descriptor.requiredLimits = &limits;
 
-    wgpu::Limits supportedLimits;
+    wgpu::SupportedLimits supportedLimits;
     EXPECT_EQ(adapter.GetLimits(&supportedLimits), wgpu::Status::Success);
 
     // If we can support better than the default, test below the max.
-    if (supportedLimits.maxBindGroups > 4u) {
-        limits.maxBindGroups = supportedLimits.maxBindGroups - 1;
+    if (supportedLimits.limits.maxBindGroups > 4u) {
+        limits.limits.maxBindGroups = supportedLimits.limits.maxBindGroups - 1;
         EXPECT_CALL(mRequestDeviceCallback,
                     Call(wgpu::RequestDeviceStatus::Success, NotNull(), EmptySizedString()))
             .WillOnce(WithArgs<1>([&](wgpu::Device device) {
-                wgpu::Limits limits;
+                wgpu::SupportedLimits limits;
                 device.GetLimits(&limits);
 
                 // Check we got exactly the request.
-                EXPECT_EQ(limits.maxBindGroups, supportedLimits.maxBindGroups - 1);
+                EXPECT_EQ(limits.limits.maxBindGroups, supportedLimits.limits.maxBindGroups - 1);
                 // Check another default limit.
-                EXPECT_EQ(limits.maxTextureArrayLayers, 256u);
+                EXPECT_EQ(limits.limits.maxTextureArrayLayers, 256u);
             }));
         adapter.RequestDevice(&descriptor, wgpu::CallbackMode::AllowSpontaneous,
                               mRequestDeviceCallback.Callback());
     }
 
     // Test the max.
-    limits.maxBindGroups = supportedLimits.maxBindGroups;
+    limits.limits.maxBindGroups = supportedLimits.limits.maxBindGroups;
     EXPECT_CALL(mRequestDeviceCallback,
                 Call(wgpu::RequestDeviceStatus::Success, NotNull(), EmptySizedString()))
         .WillOnce(WithArgs<1>([&](wgpu::Device device) {
-            wgpu::Limits limits;
+            wgpu::SupportedLimits limits;
             device.GetLimits(&limits);
 
             // Check we got exactly the request.
-            EXPECT_EQ(limits.maxBindGroups, supportedLimits.maxBindGroups);
+            EXPECT_EQ(limits.limits.maxBindGroups, supportedLimits.limits.maxBindGroups);
             // Check another default limit.
-            EXPECT_EQ(limits.maxTextureArrayLayers, 256u);
+            EXPECT_EQ(limits.limits.maxTextureArrayLayers, 256u);
         }));
     adapter.RequestDevice(&descriptor, wgpu::CallbackMode::AllowSpontaneous,
                           mRequestDeviceCallback.Callback());
 
     // Test above the max.
-    limits.maxBindGroups = supportedLimits.maxBindGroups + 1;
+    limits.limits.maxBindGroups = supportedLimits.limits.maxBindGroups + 1;
     EXPECT_CALL(mRequestDeviceCallback,
                 Call(wgpu::RequestDeviceStatus::Error, IsNull(), NonEmptySizedString()))
         .Times(1);
@@ -141,15 +141,15 @@ TEST_F(RequestDeviceValidationTest, HigherIsBetter) {
                           mRequestDeviceCallback.Callback());
 
     // Test worse than the default
-    limits.maxBindGroups = 3u;
+    limits.limits.maxBindGroups = 3u;
     EXPECT_CALL(mRequestDeviceCallback,
                 Call(wgpu::RequestDeviceStatus::Success, NotNull(), EmptySizedString()))
         .WillOnce(WithArgs<1>([&](wgpu::Device device) {
-            wgpu::Limits limits;
+            wgpu::SupportedLimits limits;
             device.GetLimits(&limits);
 
             // Check we got the default.
-            EXPECT_EQ(limits.maxBindGroups, 4u);
+            EXPECT_EQ(limits.limits.maxBindGroups, 4u);
         }));
     adapter.RequestDevice(&descriptor, wgpu::CallbackMode::AllowSpontaneous,
                           mRequestDeviceCallback.Callback());
@@ -157,15 +157,16 @@ TEST_F(RequestDeviceValidationTest, HigherIsBetter) {
 
 // Test that requesting a device where a required limit is below the minimum value.
 TEST_F(RequestDeviceValidationTest, LowerIsBetter) {
-    wgpu::Limits limits = {};
+    wgpu::RequiredLimits limits = {};
     wgpu::DeviceDescriptor descriptor;
     descriptor.requiredLimits = &limits;
 
-    wgpu::Limits supportedLimits;
+    wgpu::SupportedLimits supportedLimits;
     EXPECT_EQ(adapter.GetLimits(&supportedLimits), wgpu::Status::Success);
 
     // Test below the min.
-    limits.minUniformBufferOffsetAlignment = supportedLimits.minUniformBufferOffsetAlignment / 2;
+    limits.limits.minUniformBufferOffsetAlignment =
+        supportedLimits.limits.minUniformBufferOffsetAlignment / 2;
     EXPECT_CALL(mRequestDeviceCallback,
                 Call(wgpu::RequestDeviceStatus::Error, IsNull(), NonEmptySizedString()))
         .Times(1);
@@ -173,52 +174,53 @@ TEST_F(RequestDeviceValidationTest, LowerIsBetter) {
                           mRequestDeviceCallback.Callback());
 
     // Test the min.
-    limits.minUniformBufferOffsetAlignment = supportedLimits.minUniformBufferOffsetAlignment;
+    limits.limits.minUniformBufferOffsetAlignment =
+        supportedLimits.limits.minUniformBufferOffsetAlignment;
     EXPECT_CALL(mRequestDeviceCallback,
                 Call(wgpu::RequestDeviceStatus::Success, NotNull(), EmptySizedString()))
         .WillOnce(WithArgs<1>([&](wgpu::Device device) {
-            wgpu::Limits limits;
+            wgpu::SupportedLimits limits;
             device.GetLimits(&limits);
 
             // Check we got exactly the request.
-            EXPECT_EQ(limits.minUniformBufferOffsetAlignment,
-                      supportedLimits.minUniformBufferOffsetAlignment);
+            EXPECT_EQ(limits.limits.minUniformBufferOffsetAlignment,
+                      supportedLimits.limits.minUniformBufferOffsetAlignment);
             // Check another default limit.
-            EXPECT_EQ(limits.maxTextureArrayLayers, 256u);
+            EXPECT_EQ(limits.limits.maxTextureArrayLayers, 256u);
         }));
     adapter.RequestDevice(&descriptor, wgpu::CallbackMode::AllowSpontaneous,
                           mRequestDeviceCallback.Callback());
 
     // IF we can support better than the default, test above the min.
-    if (supportedLimits.minUniformBufferOffsetAlignment > 256u) {
-        limits.minUniformBufferOffsetAlignment =
-            supportedLimits.minUniformBufferOffsetAlignment * 2;
+    if (supportedLimits.limits.minUniformBufferOffsetAlignment > 256u) {
+        limits.limits.minUniformBufferOffsetAlignment =
+            supportedLimits.limits.minUniformBufferOffsetAlignment * 2;
         EXPECT_CALL(mRequestDeviceCallback,
                     Call(wgpu::RequestDeviceStatus::Success, NotNull(), EmptySizedString()))
             .WillOnce(WithArgs<1>([&](wgpu::Device device) {
-                wgpu::Limits limits;
+                wgpu::SupportedLimits limits;
                 device.GetLimits(&limits);
 
                 // Check we got exactly the request.
-                EXPECT_EQ(limits.minUniformBufferOffsetAlignment,
-                          supportedLimits.minUniformBufferOffsetAlignment * 2);
+                EXPECT_EQ(limits.limits.minUniformBufferOffsetAlignment,
+                          supportedLimits.limits.minUniformBufferOffsetAlignment * 2);
                 // Check another default limit.
-                EXPECT_EQ(limits.maxTextureArrayLayers, 256u);
+                EXPECT_EQ(limits.limits.maxTextureArrayLayers, 256u);
             }));
         adapter.RequestDevice(&descriptor, wgpu::CallbackMode::AllowSpontaneous,
                               mRequestDeviceCallback.Callback());
     }
 
     // Test worse than the default
-    limits.minUniformBufferOffsetAlignment = 2u * 256u;
+    limits.limits.minUniformBufferOffsetAlignment = 2u * 256u;
     EXPECT_CALL(mRequestDeviceCallback,
                 Call(wgpu::RequestDeviceStatus::Success, NotNull(), EmptySizedString()))
         .WillOnce(WithArgs<1>([&](wgpu::Device device) {
-            wgpu::Limits limits;
+            wgpu::SupportedLimits limits;
             device.GetLimits(&limits);
 
             // Check we got the default.
-            EXPECT_EQ(limits.minUniformBufferOffsetAlignment, 256u);
+            EXPECT_EQ(limits.limits.minUniformBufferOffsetAlignment, 256u);
         }));
     adapter.RequestDevice(&descriptor, wgpu::CallbackMode::AllowSpontaneous,
                           mRequestDeviceCallback.Callback());
@@ -226,9 +228,9 @@ TEST_F(RequestDeviceValidationTest, LowerIsBetter) {
 
 // Test that it is an error to request limits with an invalid chained struct
 TEST_F(RequestDeviceValidationTest, InvalidChainedStruct) {
-    wgpu::ChainedStructOut chain = {};
-    wgpu::Limits limits = {};
-    limits.nextInChain = &chain;
+    wgpu::RenderPassMaxDrawCount maxDrawCount = {};
+    wgpu::RequiredLimits limits = {};
+    limits.nextInChain = &maxDrawCount;
 
     wgpu::DeviceDescriptor descriptor;
     descriptor.requiredLimits = &limits;

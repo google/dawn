@@ -57,7 +57,7 @@ class RequestDeviceEvent : public TrackedEvent {
     WireResult ReadyHook(FutureID futureID,
                          WGPURequestDeviceStatus status,
                          WGPUStringView message,
-                         const WGPULimits* limits,
+                         const WGPUSupportedLimits* limits,
                          uint32_t featuresCount,
                          const WGPUFeatureName* features) {
         DAWN_ASSERT(mDevice != nullptr);
@@ -124,7 +124,7 @@ ObjectType Adapter::GetObjectType() const {
     return ObjectType::Adapter;
 }
 
-WGPUStatus Adapter::GetLimits(WGPULimits* limits) const {
+WGPUStatus Adapter::GetLimits(WGPUSupportedLimits* limits) const {
     return mLimitsAndFeatures.GetLimits(limits);
 }
 
@@ -136,7 +136,7 @@ void Adapter::GetFeatures(WGPUSupportedFeatures* features) const {
     mLimitsAndFeatures.ToSupportedFeatures(features);
 }
 
-void Adapter::SetLimits(const WGPULimits* limits) {
+void Adapter::SetLimits(const WGPUSupportedLimits* limits) {
     return mLimitsAndFeatures.SetLimits(limits);
 }
 
@@ -321,7 +321,7 @@ WireResult Client::DoAdapterRequestDeviceCallback(ObjectHandle eventManager,
                                                   WGPUFuture future,
                                                   WGPURequestDeviceStatus status,
                                                   WGPUStringView message,
-                                                  const WGPULimits* limits,
+                                                  const WGPUSupportedLimits* limits,
                                                   uint32_t featuresCount,
                                                   const WGPUFeatureName* features) {
     return GetEventManager(eventManager)

@@ -359,7 +359,8 @@ DeviceBase::DeviceBase(AdapterBase* adapter,
     mBlobCache = std::make_unique<BlobCache>(cacheDesc);
 
     if (descriptor->requiredLimits != nullptr) {
-        mLimits.v1 = ReifyDefaultLimits(*descriptor->requiredLimits, adapter->GetFeatureLevel());
+        mLimits.v1 =
+            ReifyDefaultLimits(descriptor->requiredLimits->limits, adapter->GetFeatureLevel());
     } else {
         GetDefaultLimits(&mLimits.v1, adapter->GetFeatureLevel());
     }
@@ -1773,20 +1774,16 @@ wgpu::Status DeviceBase::APIGetAHardwareBufferProperties(void* handle,
     return wgpu::Status::Success;
 }
 
-wgpu::Status DeviceBase::APIGetLimits(Limits* limits) const {
+wgpu::Status DeviceBase::APIGetLimits(SupportedLimits* limits) const {
     DAWN_ASSERT(limits != nullptr);
     InstanceBase* instance = GetAdapter()->GetInstance();
 
-    UnpackedPtr<Limits> unpacked;
+    UnpackedPtr<SupportedLimits> unpacked;
     if (instance->ConsumedError(ValidateAndUnpack(limits), &unpacked)) {
         return wgpu::Status::Error;
     }
 
-    {
-        wgpu::ChainedStructOut* originalChain = unpacked->nextInChain;
-        **unpacked = mLimits.v1;
-        unpacked->nextInChain = originalChain;
-    }
+    limits->limits = mLimits.v1;
 
     // TODO(354751907): Move this to AdapterInfo
     if (auto* subgroupLimits = unpacked.Get<DawnExperimentalSubgroupLimits>()) {

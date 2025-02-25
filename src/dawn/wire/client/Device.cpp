@@ -285,7 +285,7 @@ void Device::WillDropLastExternalRef() {
     Unregister();
 }
 
-WGPUStatus Device::GetLimits(WGPULimits* limits) const {
+WGPUStatus Device::GetLimits(WGPUSupportedLimits* limits) const {
     return mLimitsAndFeatures.GetLimits(limits);
 }
 
@@ -301,7 +301,7 @@ WGPUStatus Device::GetAdapterInfo(WGPUAdapterInfo* adapterInfo) const {
     return mAdapter->GetInfo(adapterInfo);
 }
 
-void Device::SetLimits(const WGPULimits* limits) {
+void Device::SetLimits(const WGPUSupportedLimits* limits) {
     return mLimitsAndFeatures.SetLimits(limits);
 }
 

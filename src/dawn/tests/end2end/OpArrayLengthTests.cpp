@@ -37,11 +37,13 @@ namespace {
 
 class OpArrayLengthTest : public DawnTest {
   protected:
-    wgpu::Limits GetRequiredLimits(const wgpu::Limits& supported) override {
+    wgpu::RequiredLimits GetRequiredLimits(const wgpu::SupportedLimits& supported) override {
         // Just copy all the limits, though all we really care about is
         // maxStorageBuffersInFragmentStage
         // maxStorageBuffersInVertexStage
-        return supported;
+        wgpu::RequiredLimits required = {};
+        required.limits = supported.limits;
+        return required;
     }
 
     void SetUp() override {
@@ -179,7 +181,7 @@ TEST_P(OpArrayLengthTest, Fragment) {
     // Nvidia OpenGL.
     DAWN_SUPPRESS_TEST_IF(IsNvidia() && (IsOpenGL() || IsOpenGLES()));
 
-    DAWN_SUPPRESS_TEST_IF(GetSupportedLimits().maxStorageBuffersInFragmentStage < 3);
+    DAWN_SUPPRESS_TEST_IF(GetSupportedLimits().limits.maxStorageBuffersInFragmentStage < 3);
 
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
 
@@ -240,7 +242,7 @@ TEST_P(OpArrayLengthTest, Vertex) {
     // TODO(crbug.com/dawn/2295): Also failing on Pixel 6 OpenGLES (ARM).
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
 
-    DAWN_SUPPRESS_TEST_IF(GetSupportedLimits().maxStorageBuffersInVertexStage < 3);
+    DAWN_SUPPRESS_TEST_IF(GetSupportedLimits().limits.maxStorageBuffersInVertexStage < 3);
 
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
 
