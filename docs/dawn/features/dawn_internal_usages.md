@@ -28,7 +28,7 @@ encoderDesc.nextInChain = &internalEncoderDesc;
 wgpu::CommandEncoder encoder = device.CreateCommandEncoder(&encoderDesc);
 
 // This will be valid
-wgpu::ImageCopyTexture src = {};
+wgpu::TexelCopyTextureInfo src = {};
 src.texture = texture;
 encoder.CopyTextureToBuffer(&src, ...);
 ```

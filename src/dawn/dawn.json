@@ -2353,10 +2353,6 @@
             {"value": 2, "name": "CW"}
         ]
     },
-    "image copy buffer": {
-        "category": "typedef",
-        "type": "texel copy buffer info"
-    },
     "texel copy buffer info": {
         "category": "structure",
         "members": [
@@ -2371,10 +2367,6 @@
             {"name": "bytes per row", "type": "uint32_t", "default": "WGPU_COPY_STRIDE_UNDEFINED"},
             {"name": "rows per image", "type": "uint32_t", "default": "WGPU_COPY_STRIDE_UNDEFINED"}
         ]
-    },
-    "image copy texture": {
-        "category": "typedef",
-        "type": "texel copy texture info"
     },
     "texel copy texture info": {
         "category": "structure",
@@ -3873,10 +3865,6 @@
             {"value": 1, "name": "plane 1 only", "tags": ["dawn"]},
             {"value": 2, "name": "plane 2 only", "tags": ["dawn"]}
         ]
-    },
-    "texture data layout": {
-        "category": "typedef",
-        "type": "texel copy buffer layout"
     },
     "texture descriptor": {
         "category": "structure",
