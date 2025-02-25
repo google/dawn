@@ -1578,6 +1578,9 @@ class Printer {
             case BuiltinFn::kShiftRightLogical:
                 op = spv::Op::OpShiftRightLogical;
                 break;
+            case BuiltinFn::kShiftRightArithmetic:
+                op = spv::Op::OpShiftRightArithmetic;
+                break;
             case spirv::BuiltinFn::kNone:
                 TINT_ICE() << "undefined spirv ir function";
         }

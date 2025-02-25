@@ -889,6 +889,9 @@ class Parser {
                 case spv::Op::OpShiftRightLogical:
                     EmitSpirvExplicitBuiltinCall(inst, spirv::BuiltinFn::kShiftRightLogical);
                     break;
+                case spv::Op::OpShiftRightArithmetic:
+                    EmitSpirvExplicitBuiltinCall(inst, spirv::BuiltinFn::kShiftRightArithmetic);
+                    break;
                 default:
                     TINT_UNIMPLEMENTED()
                         << "unhandled SPIR-V instruction: " << static_cast<uint32_t>(inst.opcode());

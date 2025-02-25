@@ -1281,7 +1281,8 @@ INSTANTIATE_TEST_SUITE_P(
     SpirvParser,
     SpirvParser_ShiftTest,
     testing::Values(SpirvBitParam{"ShiftLeftLogical", "shift_left_logical"},  //
-                    SpirvBitParam{"ShiftRightLogical", "shift_right_logical"}));
+                    SpirvBitParam{"ShiftRightLogical", "shift_right_logical"},
+                    SpirvBitParam{"ShiftRightArithmetic", "shift_right_arithmetic"}));
 
 }  // namespace
 }  // namespace tint::spirv::reader

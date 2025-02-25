@@ -200,6 +200,9 @@ struct State {
                 case spirv::BuiltinFn::kShiftRightLogical:
                     ShiftRightLogical(builtin);
                     break;
+                case spirv::BuiltinFn::kShiftRightArithmetic:
+                    ShiftRightArithmetic(builtin);
+                    break;
                 default:
                     TINT_UNREACHABLE() << "unknown spirv builtin: " << builtin->Func();
             }
@@ -770,6 +773,30 @@ struct State {
 
             auto* bin = b.Binary(core::BinaryOp::kShiftRight, u_ty, base, shift)->Result(0);
             if (u_ty != call->Result(0)->Type()) {
+                bin = b.Bitcast(call->Result(0)->Type(), bin)->Result(0);
+            }
+            call->Result(0)->ReplaceAllUsesWith(bin);
+        });
+        call->Destroy();
+    }
+
+    void ShiftRightArithmetic(spirv::ir::BuiltinCall* call) {
+        const auto& args = call->Args();
+
+        b.InsertBefore(call, [&] {
+            auto* base = args[0];
+            auto* shift = args[1];
+
+            auto* s_ty = ty.MatchWidth(ty.i32(), base->Type());
+            if (!base->Type()->IsSignedIntegerScalarOrVector()) {
+                base = b.Bitcast(s_ty, base)->Result(0);
+            }
+            if (!shift->Type()->IsUnsignedIntegerScalarOrVector()) {
+                shift = b.Bitcast(ty.MatchWidth(ty.u32(), shift->Type()), shift)->Result(0);
+            }
+
+            auto* bin = b.Binary(core::BinaryOp::kShiftRight, s_ty, base, shift)->Result(0);
+            if (s_ty != call->Result(0)->Type()) {
                 bin = b.Bitcast(call->Result(0)->Type(), bin)->Result(0);
             }
             call->Result(0)->ReplaceAllUsesWith(bin);
