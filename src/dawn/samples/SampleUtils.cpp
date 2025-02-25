@@ -173,16 +173,13 @@ int SampleBase::Run(unsigned int delay) {
 
 #ifndef __EMSCRIPTEN__
     dawnProcSetProcs(&dawn::native::GetProcs());
+#endif  // __EMSCRIPTEN__
 
     // Create the instance with the toggles
     wgpu::InstanceDescriptor instanceDescriptor = {};
     instanceDescriptor.nextInChain = togglesChain;
     instanceDescriptor.capabilities.timedWaitAnyEnable = true;
     sample->instance = wgpu::CreateInstance(&instanceDescriptor);
-#else
-    // Create the instance
-    sample->instance = wgpu::CreateInstance(nullptr);
-#endif  // __EMSCRIPTEN__
 
     // Synchronously create the adapter
     sample->instance.WaitAny(

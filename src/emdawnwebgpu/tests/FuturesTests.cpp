@@ -40,7 +40,13 @@ using testing::HasSubstr;
 
 class InstanceLevelTests : public testing::Test {
   public:
-    void SetUp() override { instance = wgpu::CreateInstance(); }
+    void SetUp() override {
+        wgpu::InstanceDescriptor descriptor = {};
+        // The unit tests use wgpuInstanceWaitAny(WGPUFuture, timeoutNS) with timeoutNS > 0
+        // which requires the `timedWaitAnyEnable` property enabled on the instance capability.
+        descriptor.capabilities.timedWaitAnyEnable = true;
+        instance = wgpu::CreateInstance(&descriptor);
+    }
 
   protected:
     wgpu::Adapter RequestAdapter(const wgpu::RequestAdapterOptions* adapterOptions = nullptr) {
