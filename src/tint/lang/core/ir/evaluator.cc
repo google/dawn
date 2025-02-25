@@ -31,6 +31,7 @@
 #include "src/tint/lang/core/ir/constexpr_if.h"
 #include "src/tint/lang/core/ir/function_param.h"
 #include "src/tint/lang/core/ir/override.h"
+#include "src/tint/lang/core/number.h"
 #include "src/tint/lang/core/type/bool.h"
 #include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/utils/rtti/switch.h"
@@ -126,7 +127,7 @@ Evaluator::EvalResult Evaluator::EvalAccess(core::ir::Access* a) {
     }
 
     auto* obj = obj_res.Get();
-
+    auto* access_obj_type = a->Object()->Type()->UnwrapPtrOrRef();
     for (auto* idx : a->Indices()) {
         auto val = EvalValue(idx);
         if (val != Success) {
@@ -138,10 +139,15 @@ Evaluator::EvalResult Evaluator::EvalAccess(core::ir::Access* a) {
         }
         TINT_ASSERT(val.Get()->Is<core::constant::Value>());
 
-        auto res = const_eval_.Index(obj, a->Result(0)->Type(), val.Get(), SourceOf(a));
+        auto res = const_eval_.Index(obj, access_obj_type, val.Get(), SourceOf(a));
         if (res != Success) {
             return Failure();
         }
+
+        // Index element to type to support type nested access.
+        access_obj_type = access_obj_type->Element(val.Get()->ValueAs<u32>());
+        TINT_ASSERT(access_obj_type);
+
         obj = res.Get();
     }
     return obj;

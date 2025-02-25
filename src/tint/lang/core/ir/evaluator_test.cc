@@ -32,6 +32,7 @@
 #include "src/tint/lang/core/ir/evaluator.h"
 #include "src/tint/lang/core/ir/instruction.h"
 #include "src/tint/lang/core/ir/ir_helper_test.h"
+#include "src/tint/lang/core/type/u32.h"
 
 using namespace tint::core::number_suffixes;  // NOLINT
 using namespace tint::core::fluent_types;     // NOLINT
@@ -119,7 +120,39 @@ TEST_F(IR_EvaluatorTest, ConstructArray_Access) {
     EXPECT_EQ(2, c->Value()->ValueAs<int32_t>());
 }
 
-TEST_F(IR_EvaluatorTest, RuntimeArray_OutOfBoundsAccess) {
+TEST_F(IR_EvaluatorTest, NestedStruct_AccessSuccess) {
+    auto* S = ty.Struct(mod.symbols.New("S"), {{mod.symbols.New("data"), ty.array<u32, 4>()}});
+
+    auto* arr = b.Var("struct", ty.ptr(storage, S));
+    auto* inst = b.Access(ty.ptr<storage, u32>(), arr, 0_i, 3_i);
+    auto res = Eval(b, inst);
+
+    ASSERT_EQ(res, Success);
+}
+
+TEST_F(IR_EvaluatorTest, NestedStruct_AccessFailArray) {
+    auto* S = ty.Struct(mod.symbols.New("S"), {{mod.symbols.New("data"), ty.array<u32, 4>()}});
+
+    auto* arr = b.Var("struct", ty.ptr(storage, S));
+    auto* inst = b.Access(ty.ptr<storage, u32>(), arr, 0_i, 4_i);
+    auto res = Eval(b, inst);
+
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(), R"(error: index 4 out of bounds [0..3])");
+}
+
+TEST_F(IR_EvaluatorTest, NestedStruct_AccessFailMember) {
+    auto* S = ty.Struct(mod.symbols.New("S"), {{mod.symbols.New("data"), ty.array<u32, 4>()}});
+
+    auto* arr = b.Var("struct", ty.ptr(storage, S));
+    auto* inst = b.Access(ty.ptr<storage, u32>(), arr, 1_i, 3_i);
+    auto res = Eval(b, inst);
+
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(), R"(error: index 1 out of bounds [0..0])");
+}
+
+TEST_F(IR_EvaluatorTest, ArrayBounds_OutOfBoundsAccess) {
     auto* arr = b.Var("arr", ty.ptr(storage, ty.array<u32>()));
     auto* inst = b.Access(ty.ptr<storage, u32>(), arr, -1_i);
     auto res = Eval(b, inst);
@@ -127,6 +160,89 @@ TEST_F(IR_EvaluatorTest, RuntimeArray_OutOfBoundsAccess) {
     ASSERT_NE(res, Success);
 
     EXPECT_EQ(res.Failure().reason.Str(), R"(error: index -1 out of bounds)");
+}
+
+TEST_F(IR_EvaluatorTest, ArrayBounds_OverflowBoundsAccess) {
+    auto* arr = b.Var("arr", ty.ptr(storage, ty.array<u32, 3>()));
+    auto* inst = b.Access(ty.ptr<storage, u32>(), arr, 3_i);
+    auto res = Eval(b, inst);
+
+    ASSERT_NE(res, Success);
+
+    EXPECT_EQ(res.Failure().reason.Str(), R"(error: index 3 out of bounds [0..2])");
+}
+
+TEST_F(IR_EvaluatorTest, ArrayBounds_NestedOverflowBoundsAccess) {
+    auto* arr = b.Var("arr", ty.ptr(storage, ty.array<array<u32, 3>, 5>()));
+    auto* inst = b.Access(ty.ptr<storage, u32>(), arr, 3_i, 3_i);
+    auto res = Eval(b, inst);
+
+    ASSERT_NE(res, Success);
+
+    EXPECT_EQ(res.Failure().reason.Str(), R"(error: index 3 out of bounds [0..2])");
+}
+
+TEST_F(IR_EvaluatorTest, ArrayBounds_NestedoundsAccessSuccess) {
+    auto* arr = b.Var("arr", ty.ptr(storage, ty.array<array<u32, 3>, 5>()));
+    auto* inst = b.Access(ty.ptr<storage, u32>(), arr, 4_i, 2_i);
+    auto res = Eval(b, inst);
+    ASSERT_EQ(res, Success);
+}
+
+TEST_F(IR_EvaluatorTest, ArrayBounds_DoubleNestedOverflowBoundsAccess) {
+    auto* arr = b.Var("arr", ty.ptr(storage, ty.array<array<array<u32, 3>, 5>, 7>()));
+    auto* inst = b.Access(ty.ptr<storage, u32>(), arr, 3_i, 3_i, 3_i);
+    auto res = Eval(b, inst);
+
+    ASSERT_NE(res, Success);
+
+    EXPECT_EQ(res.Failure().reason.Str(), R"(error: index 3 out of bounds [0..2])");
+}
+
+TEST_F(IR_EvaluatorTest, ArrayBounds_DoubleNestedBoundsAccessSuccess) {
+    auto* arr = b.Var("arr", ty.ptr(storage, ty.array<array<array<u32, 3>, 5>, 7>()));
+    auto* inst = b.Access(ty.ptr<storage, u32>(), arr, 6_i, 4_i, 2_i);
+    auto res = Eval(b, inst);
+
+    ASSERT_EQ(res, Success);
+}
+
+TEST_F(IR_EvaluatorTest, ArrayBounds_DoubleNestedEarlyOverflowBoundsAccess) {
+    auto* arr = b.Var("arr", ty.ptr(storage, ty.array<array<array<u32, 3>, 5>, 7>()));
+    auto* inst = b.Access(ty.ptr<storage, u32>(), arr, 7_i, 3_i, 3_i);
+    auto res = Eval(b, inst);
+
+    ASSERT_NE(res, Success);
+
+    EXPECT_EQ(res.Failure().reason.Str(), R"(error: index 7 out of bounds [0..6])");
+}
+
+TEST_F(IR_EvaluatorTest, ArrayBounds_DoubleNestedMidOverflowBoundsAccess) {
+    auto* arr = b.Var("arr", ty.ptr(storage, ty.array<array<array<u32, 3>, 5>, 7>()));
+    auto* inst = b.Access(ty.ptr<storage, u32>(), arr, 3_i, 5_i, 3_i);
+    auto res = Eval(b, inst);
+
+    ASSERT_NE(res, Success);
+
+    EXPECT_EQ(res.Failure().reason.Str(), R"(error: index 5 out of bounds [0..4])");
+}
+
+TEST_F(IR_EvaluatorTest, ArrayBounds_NestedVecOverflowBoundsAccess) {
+    auto* arr = b.Var("arr", ty.ptr(storage, ty.array<vec3<u32>, 7>()));
+    auto* inst = b.Access(ty.ptr<storage, u32>(), arr, 3_i, 3_i);
+    auto res = Eval(b, inst);
+
+    ASSERT_NE(res, Success);
+
+    EXPECT_EQ(res.Failure().reason.Str(), R"(error: index 3 out of bounds [0..2])");
+}
+
+TEST_F(IR_EvaluatorTest, ArrayBounds_NestedVecBoundsAccessSuccess) {
+    auto* arr = b.Var("arr", ty.ptr(storage, ty.array<vec3<u32>, 7>()));
+    auto* inst = b.Access(ty.ptr<storage, u32>(), arr, 3_i, 2_i);
+    auto res = Eval(b, inst);
+
+    ASSERT_EQ(res, Success);
 }
 
 TEST_F(IR_EvaluatorTest, ConstructStruct_Access) {
