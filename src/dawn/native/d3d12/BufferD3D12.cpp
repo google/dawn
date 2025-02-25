@@ -629,21 +629,6 @@ MaybeError Buffer::EnsureDataInitializedAsDestination(CommandRecordingContext* c
     return {};
 }
 
-MaybeError Buffer::EndAccess() {
-    Queue* queue = ToBackend(GetDevice()->GetQueue());
-    // Synchronize here if the shared buffer hasn't already been synchronized due to a previous
-    // access.
-    if (mLastUsageSerial == kBeginningOfGPUTime) {
-        DAWN_TRY(SynchronizeBufferBeforeUse());
-        DAWN_ASSERT(mLastUsageSerial != kBeginningOfGPUTime);
-    }
-    // Make the queue signal the fence in finite time.
-    DAWN_TRY(queue->EnsureCommandsFlushed(mLastUsageSerial));
-
-    mLastUsageSerial = kBeginningOfGPUTime;
-    return {};
-}
-
 MaybeError Buffer::SynchronizeBufferBeforeUse() {
     // Buffers imported with the SharedBufferMemory feature can include fences that must finish
     // before Dawn can use the buffer. We acquire and wait for them here.

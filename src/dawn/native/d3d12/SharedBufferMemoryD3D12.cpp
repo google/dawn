@@ -151,8 +151,6 @@ ResultOrError<FenceAndSignalValue> SharedBufferMemory::EndAccessImpl(
                     "Required feature (%s) is missing.",
                     wgpu::FeatureName::SharedFenceDXGISharedHandle);
 
-    DAWN_TRY(ToBackend(buffer)->EndAccess());
-
     Ref<d3d::SharedFence> sharedFence;
     DAWN_TRY_ASSIGN(sharedFence, ToBackend(GetDevice()->GetQueue())->GetOrCreateSharedFence());
 

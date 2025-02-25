@@ -71,7 +71,6 @@ class Buffer final : public BufferBase {
     MaybeError EnsureDataInitializedAsDestination(CommandRecordingContext* commandContext,
                                                   const CopyTextureToBufferCmd* copy);
 
-    MaybeError EndAccess();
     MaybeError SynchronizeBufferBeforeUse();
 
     // Dawn API
