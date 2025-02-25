@@ -404,11 +404,13 @@ void Disassembler::EmitValueWithType(const Value* val) {
     }
 }
 
-void Disassembler::EmitValue(const Value* val) {
+StyledText Disassembler::ValueToStyledText(const Value* val) {
+    StyledText text{};
     if (!val) {
-        out_ << StyleLiteral("undef");
-        return;
+        text << StyleLiteral("undef");
+        return text;
     }
+
     tint::Switch(
         val,
         [&](const ir::Constant* constant) {
@@ -417,52 +419,57 @@ void Disassembler::EmitValue(const Value* val) {
                     tint::Switch(
                         c,
                         [&](const core::constant::Scalar<i32>* scalar) {
-                            out_ << StyleLiteral(scalar->ValueAs<i32>().value, "i");
+                            text << StyleLiteral(scalar->ValueAs<i32>().value, "i");
                         },
                         [&](const core::constant::Scalar<i8>* scalar) {
-                            out_ << StyleLiteral(i32(scalar->ValueAs<i8>().value), "i8");
+                            text << StyleLiteral(i32(scalar->ValueAs<i8>().value), "i8");
                         },
                         [&](const core::constant::Scalar<u32>* scalar) {
-                            out_ << StyleLiteral(scalar->ValueAs<u32>().value, "u");
+                            text << StyleLiteral(scalar->ValueAs<u32>().value, "u");
                         },
                         [&](const core::constant::Scalar<u64>* scalar) {
-                            out_ << StyleLiteral(scalar->ValueAs<u64>().value, "u64");
+                            text << StyleLiteral(scalar->ValueAs<u64>().value, "u64");
                         },
                         [&](const core::constant::Scalar<u8>* scalar) {
-                            out_ << StyleLiteral(u32(scalar->ValueAs<u8>().value), "u8");
+                            text << StyleLiteral(u32(scalar->ValueAs<u8>().value), "u8");
                         },
                         [&](const core::constant::Scalar<f32>* scalar) {
-                            out_ << StyleLiteral(scalar->ValueAs<f32>().value, "f");
+                            text << StyleLiteral(scalar->ValueAs<f32>().value, "f");
                         },
                         [&](const core::constant::Scalar<f16>* scalar) {
-                            out_ << StyleLiteral(scalar->ValueAs<f16>().value, "h");
+                            text << StyleLiteral(scalar->ValueAs<f16>().value, "h");
                         },
                         [&](const core::constant::Scalar<bool>* scalar) {
-                            out_ << StyleLiteral((scalar->ValueAs<bool>() ? "true" : "false"));
+                            text << StyleLiteral((scalar->ValueAs<bool>() ? "true" : "false"));
                         },
                         [&](const core::constant::Splat* splat) {
-                            out_ << NameOf(splat->Type()) << "(";
+                            text << NameOf(splat->Type()) << "(";
                             emit(splat->Index(0));
-                            out_ << ")";
+                            text << ")";
                         },
                         [&](const core::constant::Composite* composite) {
-                            out_ << NameOf(composite->Type()) << "(";
+                            text << NameOf(composite->Type()) << "(";
                             bool need_comma = false;
                             for (const auto* elem : composite->elements) {
                                 if (need_comma) {
-                                    out_ << ", ";
+                                    text << ", ";
                                 }
                                 emit(elem);
                                 need_comma = true;
                             }
-                            out_ << ")";
+                            text << ")";
                         },
                         TINT_ICE_ON_NO_MATCH);
                 };
             emit(constant->Value());
         },
-        [&](const tint::core::ir::Unused*) { out_ << StyleLiteral("unused"); },
-        [&](Default) { out_ << NameOf(val); });
+        [&](const tint::core::ir::Unused*) { text << StyleLiteral("unused"); },
+        [&](Default) { text << NameOf(val); });
+    return text;
+}
+
+void Disassembler::EmitValue(const Value* val) {
+    out_ << ValueToStyledText(val);
 }
 
 void Disassembler::EmitInstructionName(const Instruction* inst) {
@@ -806,16 +813,28 @@ void Disassembler::EmitSwitch(const Switch* s) {
             out_ << ", ";
         }
         out_ << "c: (";
+        Vector<StyledText, 4> selectors;
+        bool contains_default = false;
         for (auto& selector : c.selectors) {
-            if (&selector != &c.selectors.Front()) {
+            if (selector.IsDefault()) {
+                contains_default = true;
+                continue;
+            }
+            selectors.Push(ValueToStyledText(selector.val));
+        }
+        selectors.Sort([](StyledText& lhs, StyledText& rhs) { return lhs.Plain() < rhs.Plain(); });
+
+        if (contains_default) {
+            StyledText d{};
+            d << StyleKeyword("default");
+            selectors.Push(d);
+        }
+
+        for (auto& selector : selectors) {
+            if (&selector != &selectors.Front()) {
                 out_ << " ";
             }
-
-            if (selector.IsDefault()) {
-                out_ << StyleKeyword("default");
-            } else {
-                EmitValue(selector.val);
-            }
+            out_ << selector;
         }
         out_ << ", " << NameOf(c.block) << ")";
     }
