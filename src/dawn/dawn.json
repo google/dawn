@@ -118,7 +118,7 @@
                 "name": "get limits",
                 "returns": "status",
                 "args": [
-                    {"name": "limits", "type": "supported limits", "annotation": "*"}
+                    {"name": "limits", "type": "limits", "annotation": "*"}
                 ]
             },
             {
@@ -203,7 +203,7 @@
             {"name": "label", "type": "string view", "optional": true},
             {"name": "required feature count", "type": "size_t", "default": 0},
             {"name": "required features", "type": "feature name", "annotation": "const*", "length": "required feature count", "default": "nullptr"},
-            {"name": "required limits", "type": "required limits", "annotation": "const*", "optional": true},
+            {"name": "required limits", "type": "limits", "annotation": "const*", "optional": true},
             {"name": "default queue", "type": "queue descriptor"},
             {"name": "device lost callback info", "type": "device lost callback info"},
             {"name": "uncaptured error callback info", "type": "uncaptured error callback info"}
@@ -1357,7 +1357,7 @@
                 "name": "get limits",
                 "returns": "status",
                 "args": [
-                    {"name": "limits", "type": "supported limits", "annotation": "*"}
+                    {"name": "limits", "type": "limits", "annotation": "*"}
                 ]
             },
             {
@@ -1523,6 +1523,8 @@
     },
     "limits": {
         "category": "structure",
+        "extensible": "out",
+        "_comment": "TODO(crbug.com/374263404): Using 'out' for extensible even though this can be in/out until C++ gen is updated.",
         "members": [
             {"name": "max texture dimension 1D", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
             {"name": "max texture dimension 2D", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
@@ -1574,7 +1576,7 @@
     "dawn experimental subgroup limits": {
         "category": "structure",
         "chained": "out",
-        "chain roots": ["supported limits"],
+        "chain roots": ["limits"],
         "tags": ["dawn"],
         "members": [
             {"name": "min subgroup size", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
@@ -1584,7 +1586,7 @@
     "dawn experimental immediate data limits": {
         "category": "structure",
         "chained": "out",
-        "chain roots": ["supported limits"],
+        "chain roots": ["limits"],
         "tags": ["dawn"],
         "members": [
             {"name": "max immediate data range byte size", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"}
@@ -1593,24 +1595,10 @@
     "dawn texel copy buffer row alignment limits": {
         "category": "structure",
         "chained": "out",
-        "chain roots": ["supported limits"],
+        "chain roots": ["limits"],
         "tags": ["dawn"],
         "members": [
             {"name": "min texel copy buffer row alignment", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"}
-        ]
-    },
-    "required limits": {
-        "category": "structure",
-        "extensible": "in",
-        "members": [
-            {"name": "limits", "type": "limits"}
-        ]
-    },
-    "supported limits": {
-        "category": "structure",
-        "extensible": "out",
-        "members": [
-            {"name": "limits", "type": "limits"}
         ]
     },
     "supported features": {
@@ -2476,7 +2464,8 @@
     },
     "instance capabilities": {
         "category": "structure",
-        "extensible": "in",
+        "extensible": "out",
+        "_comment": "TODO(crbug.com/374263404): Using 'out' for extensible even though this can be in/out until C++ gen is updated.",
         "members": [
             {"name": "timed wait any enable", "type": "bool", "default": "false"},
             {"name": "timed wait any max count", "type": "size_t", "default": "0"}

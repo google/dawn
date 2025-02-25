@@ -1220,12 +1220,10 @@ DAWN_INSTANTIATE_TEST(BufferNoSuballocationTests,
 
 class BufferMapExtendedUsagesTests : public DawnTest {
   protected:
-    wgpu::RequiredLimits GetRequiredLimits(const wgpu::SupportedLimits& supported) override {
-        wgpu::RequiredLimits required = {};
-        required.limits.maxStorageBuffersInVertexStage =
-            supported.limits.maxStorageBuffersInVertexStage;
-        required.limits.maxStorageBuffersPerShaderStage =
-            supported.limits.maxStorageBuffersPerShaderStage;
+    wgpu::Limits GetRequiredLimits(const wgpu::Limits& supported) override {
+        wgpu::Limits required = {};
+        required.maxStorageBuffersInVertexStage = supported.maxStorageBuffersInVertexStage;
+        required.maxStorageBuffersPerShaderStage = supported.maxStorageBuffersPerShaderStage;
         return required;
     }
 
@@ -1636,7 +1634,7 @@ TEST_P(BufferMapExtendedUsagesTests, MapWriteStorageBufferAndDraw) {
     const float kRed[] = {1.0f, 0.0f, 0.0f, 1.0f};
     const float kGreen[] = {0.0f, 1.0f, 0.0f, 1.0f};
 
-    DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().limits.maxStorageBuffersInVertexStage < 1);
+    DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxStorageBuffersInVertexStage < 1);
 
     // Create buffer with initial red color data.
     wgpu::Buffer storageBuffer = CreateBufferFromData(
@@ -1845,7 +1843,7 @@ TEST_P(BufferMapExtendedUsagesTests, MixMapWriteAndGPUWriteUniformBufferThenDraw
 }
 
 TEST_P(BufferMapExtendedUsagesTests, MixMapWriteAndGPUWriteStorageBufferThenDraw) {
-    DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().limits.maxStorageBuffersInVertexStage < 1);
+    DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxStorageBuffersInVertexStage < 1);
     MixMapWriteAndGPUWriteBufferThenDraw(ColorSrc::StorageBuffer);
 }
 
@@ -1856,7 +1854,7 @@ TEST_P(BufferMapExtendedUsagesTests, MixMapWriteAndGPUWriteStorageBufferThenDraw
 // - draw using the storage buffer.
 TEST_P(BufferMapExtendedUsagesTests,
        MapWriteThenGPUWriteStorageBufferThenCopyFromAnotherBufferThenDraw) {
-    DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().limits.maxStorageBuffersInVertexStage < 1);
+    DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxStorageBuffersInVertexStage < 1);
 
     const float kRed[] = {1.0f, 0.0f, 0.0f, 1.0f};
     const float kBlue[] = {0.0f, 0.0f, 1.0f, 1.0f};

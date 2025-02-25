@@ -96,7 +96,7 @@ TEST_F(BufferValidationTest, CreationMaxBufferSize) {
     // Success when at limit
     {
         wgpu::BufferDescriptor descriptor;
-        descriptor.size = GetSupportedLimits().limits.maxBufferSize;
+        descriptor.size = GetSupportedLimits().maxBufferSize;
         descriptor.usage = wgpu::BufferUsage::Uniform;
 
         device.CreateBuffer(&descriptor);
@@ -105,9 +105,8 @@ TEST_F(BufferValidationTest, CreationMaxBufferSize) {
     // max possible limit given the adapters.)
     {
         wgpu::BufferDescriptor descriptor;
-        ASSERT_TRUE(GetSupportedLimits().limits.maxBufferSize <
-                    std::numeric_limits<uint32_t>::max());
-        descriptor.size = GetSupportedLimits().limits.maxBufferSize + 1;
+        ASSERT_TRUE(GetSupportedLimits().maxBufferSize < std::numeric_limits<uint32_t>::max());
+        descriptor.size = GetSupportedLimits().maxBufferSize + 1;
         descriptor.usage = wgpu::BufferUsage::Uniform;
 
         ASSERT_DEVICE_ERROR(device.CreateBuffer(&descriptor));
