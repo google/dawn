@@ -967,11 +967,20 @@ class Parser {
                 case spv::Op::OpShiftRightArithmetic:
                     EmitSpirvExplicitBuiltinCall(inst, spirv::BuiltinFn::kShiftRightArithmetic);
                     break;
+                case spv::Op::OpBitcast:
+                    EmitBitcast(inst);
+                    break;
                 default:
                     TINT_UNIMPLEMENTED()
                         << "unhandled SPIR-V instruction: " << static_cast<uint32_t>(inst.opcode());
             }
         }
+    }
+
+    void EmitBitcast(const spvtools::opt::Instruction& inst) {
+        auto val = Value(inst.GetSingleWordInOperand(0));
+        auto ty = Type(inst.type_id());
+        Emit(b_.Bitcast(ty, val), inst.result_id());
     }
 
     void HandleSelectionMerge(const spvtools::opt::Instruction& inst,

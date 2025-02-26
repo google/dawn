@@ -1284,5 +1284,63 @@ INSTANTIATE_TEST_SUITE_P(
                     SpirvBitParam{"ShiftRightLogical", "shift_right_logical"},
                     SpirvBitParam{"ShiftRightArithmetic", "shift_right_arithmetic"}));
 
+TEST_F(SpirvParserTest, Bitcast_Scalar) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %uint = OpTypeInt 32 0
+      %float = OpTypeFloat 32
+        %two = OpConstant %float 2
+    %void_fn = OpTypeFunction %void
+       %main = OpFunction %void None %void_fn
+ %main_start = OpLabel
+          %1 = OpBitcast %uint %two
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = bitcast 2.0f
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, Bitcast_Vector) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %uint = OpTypeInt 32 0
+      %float = OpTypeFloat 32
+     %v2uint = OpTypeVector %uint 2
+    %v2float = OpTypeVector %float 2
+      %eight = OpConstant %uint 8
+    %v2eight = OpConstantComposite %v2uint %eight %eight
+    %void_fn = OpTypeFunction %void
+
+       %main = OpFunction %void None %void_fn
+ %main_start = OpLabel
+          %1 = OpBitcast %v2float %v2eight
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<f32> = bitcast vec2<u32>(8u)
+    ret
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader
