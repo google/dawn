@@ -1598,5 +1598,61 @@ TEST_F(SpirvParserTest, Not_Vector_Unsigned_Unsigned) {
 )");
 }
 
+TEST_F(SpirvParserTest, QuantizeToF16_Scalar) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+      %float = OpTypeFloat 32
+        %one = OpConstant %float 1
+    %v2float = OpTypeVector %float 2
+      %v2one = OpConstantComposite %v2float %one %one
+    %void_fn = OpTypeFunction %void
+       %main = OpFunction %void None %void_fn
+ %main_start = OpLabel
+          %1 = OpQuantizeToF16 %float %one
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:f32 = quantizeToF16 1.0f
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, QuantizeToF16_Vector) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+      %float = OpTypeFloat 32
+        %one = OpConstant %float 1
+    %v2float = OpTypeVector %float 2
+      %v2one = OpConstantComposite %v2float %one %one
+    %void_fn = OpTypeFunction %void
+       %main = OpFunction %void None %void_fn
+ %main_start = OpLabel
+          %1 = OpQuantizeToF16 %v2float %v2one
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<f32> = quantizeToF16 vec2<f32>(1.0f)
+    ret
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader

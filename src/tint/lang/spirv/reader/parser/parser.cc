@@ -973,6 +973,9 @@ class Parser {
                 case spv::Op::OpBitcast:
                     EmitBitcast(inst);
                     break;
+                case spv::Op::OpQuantizeToF16:
+                    EmitBuiltinCall(inst, core::BuiltinFn::kQuantizeToF16);
+                    break;
                 default:
                     TINT_UNIMPLEMENTED()
                         << "unhandled SPIR-V instruction: " << static_cast<uint32_t>(inst.opcode());
