@@ -93,9 +93,9 @@ $B1: {  # root
   %a:ptr<workgroup, u32, read_write> = var undef
   %b:ptr<workgroup, u32, read_write> = var undef
   %3:i32 = add 1i, 2i
-  %o:i32 = override, %3 @id(1)
+  %o:i32 = override %3 @id(1)
   %c:ptr<workgroup, u32, read_write> = var undef
-  %p:i32 = override @id(0)
+  %p:i32 = override undef @id(0)
   %7:i32 = mul 2i, 4i
 }
 
@@ -137,8 +137,8 @@ $B1: {  # root
   %a:ptr<workgroup, u32, read_write> = var undef
   %b:ptr<workgroup, u32, read_write> = var undef
   %c:ptr<workgroup, u32, read_write> = var undef
-  %d:i32 = override @id(0)
-  %e:i32 = override @id(1)
+  %d:i32 = override undef @id(0)
+  %e:i32 = override undef @id(1)
 }
 
 %foo = func():void {
@@ -190,7 +190,7 @@ $B1: {  # root
   %a:ptr<workgroup, u32, read_write> = var undef
   %b:ptr<workgroup, u32, read_write> = var undef
   %c:ptr<workgroup, u32, read_write> = var undef
-  %d:i32 = override @id(0)
+  %d:i32 = override undef @id(0)
 }
 
 %foo = func():void {
@@ -260,7 +260,7 @@ $B1: {  # root
   %a:ptr<workgroup, u32, read_write> = var undef
   %b:ptr<workgroup, u32, read_write> = var undef
   %c:ptr<workgroup, u32, read_write> = var undef
-  %c_1:i32 = override @id(0)  # %c_1: 'c'
+  %c_1:i32 = override undef @id(0)  # %c_1: 'c'
 }
 
 %foo = func():void {
@@ -328,7 +328,7 @@ TEST_F(IR_ReferencedModuleDeclsTest, IndirectUse) {
     auto* src = R"(
 $B1: {  # root
   %a:ptr<workgroup, u32, read_write> = var undef
-  %b:i32 = override @id(0)
+  %b:i32 = override undef @id(0)
   %c:ptr<workgroup, u32, read_write> = var undef
 }
 
@@ -423,7 +423,7 @@ TEST_F(IR_ReferencedModuleDeclsTest, WorkgroupSize) {
 
     auto* src = R"(
 $B1: {  # root
-  %o:u32 = override @id(1)
+  %o:u32 = override undef @id(1)
 }
 
 %foo = @compute @workgroup_size(%o, 1u, 1u) func():void {
@@ -455,7 +455,7 @@ TEST_F(IR_ReferencedModuleDeclsTest, ArrayTypeCount) {
 
     auto* src = R"(
 $B1: {  # root
-  %o:u32 = override @id(1)
+  %o:u32 = override undef @id(1)
   %a:ptr<workgroup, array<i32, %o>, read_write> = var undef
 }
 

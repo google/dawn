@@ -497,28 +497,17 @@ void Disassembler::EmitInstruction(const Instruction* inst) {
         [&](const Discard* d) { EmitInstructionName(d); },
         [&](const Store* s) {
             EmitInstructionName(s);
-            out_ << " ";
-            EmitOperand(s, Store::kToOperandOffset);
-            out_ << ", ";
-            EmitOperand(s, Store::kFromOperandOffset);
+            EmitOperandList(s);
         },
         [&](const StoreVectorElement* s) {
             EmitInstructionName(s);
-            if (s->Operands().Length() > 0) {
-                out_ << " ";
-                EmitOperandList(s);
-            }
+            EmitOperandList(s);
         },
         [&](const UserCall* uc) {
             EmitValueWithType(uc);
             out_ << " = ";
             EmitInstructionName(uc);
-            out_ << " ";
-            EmitOperand(uc, UserCall::kFunctionOperandOffset);
-            if (!uc->Args().IsEmpty()) {
-                out_ << ", ";
-            }
-            EmitOperandList(uc, UserCall::kArgsOperandOffset);
+            EmitOperandList(uc);
         },
         [&](const BuiltinCall* c) {
             EmitValueWithType(c);
@@ -537,10 +526,7 @@ void Disassembler::EmitInstruction(const Instruction* inst) {
                 out_ << ">";
             }
 
-            if (!c->Args().IsEmpty()) {
-                out_ << " ";
-                EmitOperandList(c, BuiltinCall::kArgsOperandOffset);
-            }
+            EmitOperandList(c, BuiltinCall::kArgsOperandOffset);
         },
         [&](const MemberBuiltinCall* c) {
             EmitValueWithType(c);
@@ -548,30 +534,20 @@ void Disassembler::EmitInstruction(const Instruction* inst) {
             EmitOperand(c, MemberBuiltinCall::kObjectOperandOffset);
             out_ << ".";
             EmitInstructionName(c);
-            if (!c->Args().IsEmpty()) {
-                out_ << " ";
-                EmitOperandList(c, UserCall::kArgsOperandOffset);
-            }
+            EmitOperandList(c, UserCall::kArgsOperandOffset);
         },
         [&](const Override* o) {
             EmitValueWithType(o);
             out_ << " = ";
             EmitInstructionName(o);
-            if (o->Initializer()) {
-                out_ << ", ";
-                EmitOperand(o, Var::kInitializerOperandOffset);
-            }
+            EmitOperandList(o);
             out_ << " @id(" << o->OverrideId().value << ")";
         },
         [&](const Var* v) {
             EmitValueWithType(v);
             out_ << " = ";
             EmitInstructionName(v);
-
-            if (v->Operands().Length() > 0) {
-                out_ << " ";
-                EmitOperandList(v);
-            }
+            EmitOperandList(v);
 
             if (v->BindingPoint().has_value()) {
                 out_ << " ";
@@ -640,10 +616,7 @@ void Disassembler::EmitInstruction(const Instruction* inst) {
             EmitValueWithType(inst);
             out_ << " = ";
             EmitInstructionName(inst);
-            if (!inst->Operands().IsEmpty()) {
-                out_ << " ";
-                EmitOperandList(inst);
-            }
+            EmitOperandList(inst);
         });
 
     {  // Add a comment if the result IDs don't match their names
@@ -674,6 +647,8 @@ void Disassembler::EmitOperandList(const Instruction* inst, size_t start_index /
     for (size_t i = start_index, n = inst->Operands().Length(); i < n; i++) {
         if (i != start_index) {
             out_ << ", ";
+        } else {
+            out_ << " ";
         }
         EmitOperand(inst, i);
     }
@@ -684,6 +659,8 @@ void Disassembler::EmitOperandList(const Instruction* inst, size_t start_index, 
     for (size_t i = start_index; i < n; i++) {
         if (i != start_index) {
             out_ << ", ";
+        } else {
+            out_ << " ";
         }
         EmitOperand(inst, i);
     }
@@ -894,12 +871,12 @@ void Disassembler::EmitTerminator(const Terminator* term) {
             auto next_iter_values = bi->NextIterValues();
             auto exit_values = bi->ExitValues();
             if (!next_iter_values.IsEmpty()) {
-                out_ << " " << StyleLabel("next_iteration") << ": [ ";
+                out_ << " " << StyleLabel("next_iteration") << ": [";
                 EmitOperandList(bi, ir::BreakIf::kArgsOperandOffset, next_iter_values.Length());
                 out_ << " ]";
             }
             if (!exit_values.IsEmpty()) {
-                out_ << " " << StyleLabel("exit_loop") << ": [ ";
+                out_ << " " << StyleLabel("exit_loop") << ": [";
                 EmitOperandList(bi, ir::BreakIf::kArgsOperandOffset + next_iter_values.Length());
                 out_ << " ]";
             }
@@ -914,8 +891,7 @@ void Disassembler::EmitTerminator(const Terminator* term) {
             return std::nullopt;
         });
 
-    if (args_offset && !term->Args().IsEmpty()) {
-        out_ << " ";
+    if (args_offset) {
         EmitOperandList(term, *args_offset);
     }
 
@@ -947,11 +923,7 @@ void Disassembler::EmitBinary(const Binary* b) {
     SourceMarker sm(this);
     EmitValueWithType(b);
     out_ << " = " << NameOf(b->Op());
-
-    if (b->Operands().Length() > 0) {
-        out_ << " ";
-        EmitOperandList(b);
-    }
+    EmitOperandList(b);
 
     sm.Store(b);
 }
@@ -960,11 +932,7 @@ void Disassembler::EmitUnary(const Unary* u) {
     SourceMarker sm(this);
     EmitValueWithType(u);
     out_ << " = " << NameOf(u->Op());
-
-    if (u->Operands().Length() > 0) {
-        out_ << " ";
-        EmitOperandList(u);
-    }
+    EmitOperandList(u);
 
     sm.Store(u);
 }

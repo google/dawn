@@ -1195,7 +1195,7 @@ TEST_F(IR_FromProgramTest, OverrideNoInitializer) {
     EXPECT_EQ(m.SourceOf(override).range.begin, loc);
 
     EXPECT_EQ(core::ir::Disassembler(m).Plain(), R"($B1: {  # root
-  %a:i32 = override @id(0)
+  %a:i32 = override undef @id(0)
 }
 
 )");
@@ -1218,7 +1218,7 @@ TEST_F(IR_FromProgramTest, OverrideWithConstantInitializer) {
     EXPECT_FLOAT_EQ(1.0f, init->Value()->ValueAs<float>());
 
     EXPECT_EQ(core::ir::Disassembler(m).Plain(), R"($B1: {  # root
-  %a:f32 = override, 1.0f @id(0)
+  %a:f32 = override 1.0f @id(0)
 }
 
 )");
@@ -1241,7 +1241,7 @@ TEST_F(IR_FromProgramTest, OverrideWithAddInitializer) {
     EXPECT_EQ(3u, init->Value()->ValueAs<uint32_t>());
 
     EXPECT_EQ(core::ir::Disassembler(m).Plain(), R"($B1: {  # root
-  %a:u32 = override, 3u @id(0)
+  %a:u32 = override 3u @id(0)
 }
 
 )");
@@ -1258,8 +1258,8 @@ TEST_F(IR_FromProgramTest, OverrideWithShortCircuitExpression) {
     auto m = res.Move();
 
     EXPECT_EQ(core::ir::Disassembler(m).Plain(), R"($B1: {  # root
-  %a:u32 = override @id(0)
-  %b:bool = override @id(1)
+  %a:u32 = override undef @id(0)
+  %b:bool = override undef @id(1)
   %3:bool = constexpr_if %b [t: $B2, f: $B3] {  # constexpr_if_1
     $B2: {  # true
       %4:u32 = div 1u, %a
@@ -1270,7 +1270,7 @@ TEST_F(IR_FromProgramTest, OverrideWithShortCircuitExpression) {
       exit_if false  # constexpr_if_1
     }
   }
-  %c:bool = override, %3 @id(2)
+  %c:bool = override %3 @id(2)
 }
 
 )");
@@ -1290,8 +1290,8 @@ TEST_F(IR_FromProgramTest, OverrideShortCircuitStatementInFunction) {
     ASSERT_EQ(1u, m.functions.Length());
 
     EXPECT_EQ(core::ir::Disassembler(m).Plain(), R"($B1: {  # root
-  %a:u32 = override @id(0)
-  %b:bool = override @id(1)
+  %a:u32 = override undef @id(0)
+  %b:bool = override undef @id(1)
 }
 
 %test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1327,7 +1327,7 @@ TEST_F(IR_FromProgramTest, NonOverrideShortCircuitStatementInFunction) {
     ASSERT_EQ(1u, m.functions.Length());
 
     EXPECT_EQ(core::ir::Disassembler(m).Plain(), R"($B1: {  # root
-  %a:u32 = override @id(0)
+  %a:u32 = override undef @id(0)
 }
 
 %test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1359,9 +1359,9 @@ TEST_F(IR_FromProgramTest, OverrideWithOverrideAddInitializer) {
 
     auto m = res.Move();
     EXPECT_EQ(core::ir::Disassembler(m).Plain(), R"($B1: {  # root
-  %z:u32 = override @id(0)
+  %z:u32 = override undef @id(0)
   %2:u32 = add %z, 2u
-  %a:u32 = override, %2 @id(1)
+  %a:u32 = override %2 @id(1)
 }
 
 )");
@@ -1381,7 +1381,7 @@ fn a() {
 
     auto m = res.Move();
     EXPECT_EQ(core::ir::Disassembler(m).Plain(), R"($B1: {  # root
-  %x:i32 = override, 1i @id(0)
+  %x:i32 = override 1i @id(0)
   %arr:ptr<workgroup, array<u32, %x>, read_write> = var undef
 }
 

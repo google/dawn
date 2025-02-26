@@ -69,7 +69,7 @@ TEST_F(IR_SubstituteOverridesTest, UnsetOverrideTriggersError) {
 
     auto* src = R"(
 $B1: {  # root
-  %a:i32 = override @id(1)
+  %a:i32 = override undef @id(1)
 }
 
 )";
@@ -94,7 +94,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideWithDefault) {
 
     auto* src = R"(
 $B1: {  # root
-  %a:u32 = override, 2u @id(1)
+  %a:u32 = override 2u @id(1)
 }
 
 %foo = func():u32 {
@@ -132,7 +132,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideWithDefaultWithOverride) {
 
     auto* src = R"(
 $B1: {  # root
-  %a:u32 = override, 2u @id(1)
+  %a:u32 = override 2u @id(1)
 }
 
 %foo = func():u32 {
@@ -171,7 +171,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideWithoutDefaultWithOverride) {
 
     auto* src = R"(
 $B1: {  # root
-  %a:u32 = override @id(1)
+  %a:u32 = override undef @id(1)
 }
 
 %foo = func():u32 {
@@ -214,7 +214,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideWithComplexInitNoOverrides) {
     auto* src = R"(
 $B1: {  # root
   %1:u32 = add 2u, 4u
-  %a:u32 = override, %1 @id(1)
+  %a:u32 = override %1 @id(1)
 }
 
 %foo = func():u32 {
@@ -256,7 +256,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideWithComplexInitComponentOverride) {
     auto* src = R"(
 $B1: {  # root
   %1:u32 = add 2u, 4u
-  %a:u32 = override, %1 @id(1)
+  %a:u32 = override %1 @id(1)
 }
 
 %foo = func():u32 {
@@ -301,9 +301,9 @@ TEST_F(IR_SubstituteOverridesTest, OverrideWithComplexIncludingOverride) {
 
     auto* src = R"(
 $B1: {  # root
-  %x:u32 = override @id(2)
+  %x:u32 = override undef @id(2)
   %2:u32 = add %x, 4u
-  %a:u32 = override, %2 @id(1)
+  %a:u32 = override %2 @id(1)
 }
 
 %foo = func():u32 {
@@ -349,9 +349,9 @@ TEST_F(IR_SubstituteOverridesTest, OverrideWithSubgroupShuffle) {
 
     auto* src = R"(
 $B1: {  # root
-  %x:u32 = override @id(2)
+  %x:u32 = override undef @id(2)
   %2:u32 = add %x, 4u
-  %a:u32 = override, %2 @id(1)
+  %a:u32 = override %2 @id(1)
 }
 
 %foo = func():u32 {
@@ -392,9 +392,9 @@ TEST_F(IR_SubstituteOverridesTest, OverrideWithQuantizeF16) {
 
     auto* src = R"(
 $B1: {  # root
-  %x:f32 = override @id(2)
+  %x:f32 = override undef @id(2)
   %2:f32 = add %x, 4.0f
-  %a:f32 = override, %2 @id(1)
+  %a:f32 = override %2 @id(1)
 }
 
 %foo = func():f32 {
@@ -434,9 +434,9 @@ TEST_F(IR_SubstituteOverridesTest, OverrideWithComplexGenError) {
 
     auto* src = R"(
 $B1: {  # root
-  %x:f32 = override @id(2)
+  %x:f32 = override undef @id(2)
   %2:f32 = add %x, 340282346638528859811704183484516925440.0f
-  %a:f32 = override, %2 @id(1)
+  %a:f32 = override %2 @id(1)
 }
 
 %foo = func():f32 {
@@ -475,9 +475,9 @@ TEST_F(IR_SubstituteOverridesTest, OverrideWorkgroupSize) {
 
     auto* src = R"(
 $B1: {  # root
-  %x:u32 = override @id(2)
+  %x:u32 = override undef @id(2)
   %2:u32 = add %x, 4u
-  %a:u32 = override, %2 @id(1)
+  %a:u32 = override %2 @id(1)
 }
 
 %foo = @compute @workgroup_size(%a, %x, %a) func():void {
@@ -527,9 +527,9 @@ TEST_F(IR_SubstituteOverridesTest, FunctionExpression) {
 
     auto* src = R"(
 $B1: {  # root
-  %x:u32 = override @id(2)
+  %x:u32 = override undef @id(2)
   %2:u32 = add %x, 4u
-  %a:u32 = override, %2 @id(1)
+  %a:u32 = override %2 @id(1)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -577,7 +577,7 @@ TEST_F(IR_SubstituteOverridesTest, FunctionExpressionNonConstBuiltin) {
 
     auto* src = R"(
 $B1: {  # root
-  %x:f32 = override @id(2)
+  %x:f32 = override undef @id(2)
 }
 
 %foo = @fragment func():void {
@@ -633,9 +633,9 @@ TEST_F(IR_SubstituteOverridesTest, FunctionExpressionMultiOperand) {
 
     auto* src = R"(
 $B1: {  # root
-  %x:u32 = override @id(2)
+  %x:u32 = override undef @id(2)
   %2:u32 = add %x, 4u
-  %a:u32 = override, %2 @id(1)
+  %a:u32 = override %2 @id(1)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -694,9 +694,9 @@ TEST_F(IR_SubstituteOverridesTest, FunctionExpressionMultiOperandFlipOrder) {
 
     auto* src = R"(
 $B1: {  # root
-  %x:u32 = override @id(2)
+  %x:u32 = override undef @id(2)
   %2:u32 = add %x, 4u
-  %a:u32 = override, %2 @id(1)
+  %a:u32 = override %2 @id(1)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -755,9 +755,9 @@ TEST_F(IR_SubstituteOverridesTest, FunctionExpressionMultiOperandNonConstFn) {
 
     auto* src = R"(
 $B1: {  # root
-  %x:f32 = override @id(2)
+  %x:f32 = override undef @id(2)
   %2:f32 = add %x, 4.0f
-  %a:f32 = override, %2 @id(1)
+  %a:f32 = override %2 @id(1)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -817,9 +817,9 @@ TEST_F(IR_SubstituteOverridesTest, FunctionExpressionMultiOperandLet) {
 
     auto* src = R"(
 $B1: {  # root
-  %x:f32 = override @id(2)
+  %x:f32 = override undef @id(2)
   %2:f32 = add %x, 4.0f
-  %a:f32 = override, %2 @id(1)
+  %a:f32 = override %2 @id(1)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -872,7 +872,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideArraySize) {
 
     auto* src = R"(
 $B1: {  # root
-  %x:u32 = override @id(2)
+  %x:u32 = override undef @id(2)
   %v:ptr<workgroup, array<i32, %x>, read_write> = var undef
 }
 
@@ -920,7 +920,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideArraySizeExpression) {
 
     auto* src = R"(
 $B1: {  # root
-  %x:u32 = override @id(2)
+  %x:u32 = override undef @id(2)
   %2:u32 = mul %x, 2u
   %v:ptr<workgroup, array<i32, %2>, read_write> = var undef
 }
@@ -973,7 +973,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideArraySizeIntoLet) {
 
     auto* src = R"(
 $B1: {  # root
-  %x:u32 = override @id(2)
+  %x:u32 = override undef @id(2)
   %v:ptr<workgroup, array<i32, %x>, read_write> = var undef
 }
 
@@ -1034,8 +1034,8 @@ TEST_F(IR_SubstituteOverridesTest, OverrideCondConstExprSuccess) {
 
     auto* src = R"(
 $B1: {  # root
-  %cond:bool = override @id(0)
-  %one_f32:f32 = override, 1.0f @id(2)
+  %cond:bool = override undef @id(0)
+  %one_f32:f32 = override 1.0f @id(2)
   %3:bool = constexpr_if %cond [t: $B2, f: $B3] {  # constexpr_if_1
     $B2: {  # true
       %4:f32 = div %one_f32, 0.0f
@@ -1046,7 +1046,7 @@ $B1: {  # root
       exit_if false  # constexpr_if_1
     }
   }
-  %foo:bool = override, %3 @id(1)
+  %foo:bool = override %3 @id(1)
 }
 
 %foo2 = func():bool {
@@ -1098,8 +1098,8 @@ TEST_F(IR_SubstituteOverridesTest, OverrideCondConstExprFailure) {
 
     auto* src = R"(
 $B1: {  # root
-  %cond:bool = override @id(0)
-  %one_f32:f32 = override, 1.0f @id(2)
+  %cond:bool = override undef @id(0)
+  %one_f32:f32 = override 1.0f @id(2)
   %3:bool = constexpr_if %cond [t: $B2, f: $B3] {  # constexpr_if_1
     $B2: {  # true
       %4:f32 = div %one_f32, 0.0f
@@ -1110,7 +1110,7 @@ $B1: {  # root
       exit_if false  # constexpr_if_1
     }
   }
-  %foo:bool = override, %3 @id(1)
+  %foo:bool = override %3 @id(1)
 }
 
 %foo2 = func():bool {
@@ -1157,8 +1157,8 @@ TEST_F(IR_SubstituteOverridesTest, OverrideCondComplexConstExprSuccess) {
 
     auto* src = R"(
 $B1: {  # root
-  %cond:bool = override @id(0)
-  %one_f32:f32 = override, 1.0f @id(2)
+  %cond:bool = override undef @id(0)
+  %one_f32:f32 = override 1.0f @id(2)
   %3:bool = constexpr_if %cond [t: $B2, f: $B3] {  # constexpr_if_1
     $B2: {  # true
       %4:f32 = div %one_f32, 1.0f
@@ -1169,7 +1169,7 @@ $B1: {  # root
       exit_if true  # constexpr_if_1
     }
   }
-  %foo:bool = override, %3 @id(1)
+  %foo:bool = override %3 @id(1)
 }
 
 %foo2 = func():bool {
@@ -1233,8 +1233,8 @@ TEST_F(IR_SubstituteOverridesTest, OverrideCondComplexConstExprNestedSuccess) {
 
     auto* src = R"(
 $B1: {  # root
-  %cond:bool = override @id(0)
-  %zero_f32:f32 = override, 0.0f @id(2)
+  %cond:bool = override undef @id(0)
+  %zero_f32:f32 = override 0.0f @id(2)
   %3:bool = constexpr_if %cond [t: $B2, f: $B3] {  # constexpr_if_1
     $B2: {  # true
       %4:bool = constexpr_if %cond [t: $B4, f: $B5] {  # constexpr_if_2
@@ -1255,7 +1255,7 @@ $B1: {  # root
       exit_if false  # constexpr_if_1
     }
   }
-  %foo:bool = override, %3 @id(1)
+  %foo:bool = override %3 @id(1)
 }
 
 %foo2 = func():bool {
@@ -1310,8 +1310,8 @@ TEST_F(IR_SubstituteOverridesTest, ConstExprIfInsideKernel) {
 
     auto* src = R"(
 $B1: {  # root
-  %x:u32 = override @id(1)
-  %y:bool = override @id(2)
+  %x:u32 = override undef @id(1)
+  %y:bool = override undef @id(2)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1376,7 +1376,7 @@ TEST_F(IR_SubstituteOverridesTest, ConstExpIfDuplicateUsage) {
 
     auto* src = R"(
 $B1: {  # root
-  %y:bool = override @id(1)
+  %y:bool = override undef @id(1)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1439,7 +1439,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideArrayAccessAndFailure) {
 
     auto* src = R"(
 $B1: {  # root
-  %x:u32 = override @id(0)
+  %x:u32 = override undef @id(0)
 }
 
 %foo2 = func():u32 {
@@ -1480,7 +1480,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideRuntimeSizedArrayFailure) {
 
     auto* src = R"(
 $B1: {  # root
-  %x:i32 = override @id(0)
+  %x:i32 = override undef @id(0)
   %arr:ptr<storage, array<u32>, read_write> = var undef @binding_point(0, 0)
 }
 
@@ -1530,10 +1530,10 @@ TEST_F(IR_SubstituteOverridesTest, OverrideConstruct) {
 
     auto* src = R"(
 $B1: {  # root
-  %o0:f16 = override @id(0)
-  %o1:f16 = override @id(1)
-  %o2:f16 = override @id(2)
-  %o3:f16 = override @id(3)
+  %o0:f16 = override undef @id(0)
+  %o1:f16 = override undef @id(1)
+  %o2:f16 = override undef @id(2)
+  %o3:f16 = override undef @id(3)
   %5:vec4<f16> = construct %o0, %o1, %o2, %o3
   %6:vec4<f16> = ceil %5
   %global:ptr<private, vec4<f16>, read_write> = var %6
@@ -1581,7 +1581,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideInvalidRepresentationU32) {
     });
     auto* src = R"(
 $B1: {  # root
-  %x:u32 = override @id(2)
+  %x:u32 = override undef @id(2)
 }
 
 )";
@@ -1603,7 +1603,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideInvalidRepresentationI32) {
     });
     auto* src = R"(
 $B1: {  # root
-  %x:i32 = override @id(2)
+  %x:i32 = override undef @id(2)
 }
 
 )";
@@ -1625,7 +1625,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideInvalidRepresentationF32) {
     });
     auto* src = R"(
 $B1: {  # root
-  %x:f32 = override @id(2)
+  %x:f32 = override undef @id(2)
 }
 
 )";
@@ -1647,7 +1647,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideInvalidRepresentationF16) {
     });
     auto* src = R"(
 $B1: {  # root
-  %x:f16 = override @id(2)
+  %x:f16 = override undef @id(2)
 }
 
 )";

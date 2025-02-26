@@ -225,7 +225,7 @@ TEST_F(IR_ValidatorTest, CallToFunctionNoOperands) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason.Str(),
                 testing::HasSubstr(R"(:8:15 error: call: expected at least 1 operands, got 0
-    %3:void = call undef
+    %3:void = call
               ^^^^
 )")) << res.Failure().reason.Str();
 }
