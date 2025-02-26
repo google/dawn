@@ -203,10 +203,26 @@ struct State {
                 case spirv::BuiltinFn::kShiftRightArithmetic:
                     ShiftRightArithmetic(builtin);
                     break;
+                case spirv::BuiltinFn::kNot:
+                    Not(builtin);
+                    break;
                 default:
                     TINT_UNREACHABLE() << "unknown spirv builtin: " << builtin->Func();
             }
         }
+    }
+
+    void Not(spirv::ir::BuiltinCall* call) {
+        auto* val = call->Args()[0];
+        auto* result_ty = call->Result(0)->Type();
+        b.InsertBefore(call, [&] {
+            auto* complement = b.Complement(val->Type(), val)->Result(0);
+            if (val->Type() != result_ty) {
+                complement = b.Bitcast(result_ty, complement)->Result(0);
+            }
+            call->Result(0)->ReplaceAllUsesWith(complement);
+        });
+        call->Destroy();
     }
 
     void ConvertSToF(spirv::ir::BuiltinCall* call) {

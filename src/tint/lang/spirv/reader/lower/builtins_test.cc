@@ -8501,5 +8501,233 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Vector_SignedSigned_Signed
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(SpirvReader_BuiltinsTest, Not_Scalar_Signed_Signed) {
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kNot, Vector{ty.i32()},
+                                               1_i);
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = spirv.not<i32> 1i
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = complement 1i
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvReader_BuiltinsTest, Not_Scalar_Signed_Unsigned) {
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kNot, Vector{ty.u32()},
+                                               1_i);
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = spirv.not<u32> 1i
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = complement 1i
+    %3:u32 = bitcast %2
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvReader_BuiltinsTest, Not_Scalar_Unsigned_Signed) {
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kNot, Vector{ty.i32()},
+                                               8_u);
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = spirv.not<i32> 8u
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = complement 8u
+    %3:i32 = bitcast %2
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvReader_BuiltinsTest, Not_Vector_Signed_Signed) {
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2<i32>(), spirv::BuiltinFn::kNot,
+                                               Vector{ty.i32()}, b.Splat<vec2<i32>>(1_i));
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<i32> = spirv.not<i32> vec2<i32>(1i)
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<i32> = complement vec2<i32>(1i)
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvReader_BuiltinsTest, Not_Vector_Signed_Unsigned) {
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2<u32>(), spirv::BuiltinFn::kNot,
+                                               Vector{ty.u32()}, b.Splat<vec2<i32>>(1_i));
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<u32> = spirv.not<u32> vec2<i32>(1i)
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<i32> = complement vec2<i32>(1i)
+    %3:vec2<u32> = bitcast %2
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvReader_BuiltinsTest, Not_Vector_Unsigned_Signed) {
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2<i32>(), spirv::BuiltinFn::kNot,
+                                               Vector{ty.i32()}, b.Splat<vec2<u32>>(8_u));
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<i32> = spirv.not<i32> vec2<u32>(8u)
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<u32> = complement vec2<u32>(8u)
+    %3:vec2<i32> = bitcast %2
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvReader_BuiltinsTest, Not_Vector_Unsigned_Unsigned) {
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.vec2<u32>(), spirv::BuiltinFn::kNot,
+                                               Vector{ty.u32()}, b.Splat<vec2<u32>>(8_u));
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<u32> = spirv.not<u32> vec2<u32>(8u)
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<u32> = complement vec2<u32>(8u)
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader::lower

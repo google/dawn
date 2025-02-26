@@ -206,6 +206,8 @@ const char* str(BuiltinFn i) {
             return "shift_right_logical";
         case BuiltinFn::kShiftRightArithmetic:
             return "shift_right_arithmetic";
+        case BuiltinFn::kNot:
+            return "not";
         case BuiltinFn::kSDot:
             return "s_dot";
         case BuiltinFn::kUDot:
@@ -317,6 +319,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kShiftLeftLogical:
         case BuiltinFn::kShiftRightLogical:
         case BuiltinFn::kShiftRightArithmetic:
+        case BuiltinFn::kNot:
             break;
     }
     return core::ir::Instruction::Accesses{};

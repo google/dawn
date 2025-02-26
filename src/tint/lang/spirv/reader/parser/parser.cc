@@ -958,6 +958,9 @@ class Parser {
                 case spv::Op::OpLogicalNot:
                     EmitUnary(inst, core::UnaryOp::kNot);
                     break;
+                case spv::Op::OpNot:
+                    EmitSpirvExplicitBuiltinCall(inst, spirv::BuiltinFn::kNot);
+                    break;
                 case spv::Op::OpShiftLeftLogical:
                     EmitSpirvExplicitBuiltinCall(inst, spirv::BuiltinFn::kShiftLeftLogical);
                     break;
