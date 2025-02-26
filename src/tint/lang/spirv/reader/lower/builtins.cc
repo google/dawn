@@ -74,22 +74,22 @@ struct State {
                 case spirv::BuiltinFn::kAbs:
                     Abs(builtin);
                     break;
-                case spirv::BuiltinFn::kSmax:
+                case spirv::BuiltinFn::kSMax:
                     SMax(builtin);
                     break;
-                case spirv::BuiltinFn::kSmin:
+                case spirv::BuiltinFn::kSMin:
                     SMin(builtin);
                     break;
-                case spirv::BuiltinFn::kSclamp:
+                case spirv::BuiltinFn::kSClamp:
                     SClamp(builtin);
                     break;
-                case spirv::BuiltinFn::kUmax:
+                case spirv::BuiltinFn::kUMax:
                     UMax(builtin);
                     break;
-                case spirv::BuiltinFn::kUmin:
+                case spirv::BuiltinFn::kUMin:
                     UMin(builtin);
                     break;
-                case spirv::BuiltinFn::kUclamp:
+                case spirv::BuiltinFn::kUClamp:
                     UClamp(builtin);
                     break;
                 case spirv::BuiltinFn::kFindILsb:

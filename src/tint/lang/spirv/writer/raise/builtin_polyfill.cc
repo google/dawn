@@ -387,7 +387,7 @@ struct State {
     void DotPacked4x8(core::ir::CoreBuiltinCall* builtin) {
         // Replace the builtin call with a call to the spirv.{s,u}dot intrinsic.
         auto is_signed = builtin->Func() == core::BuiltinFn::kDot4I8Packed;
-        auto inst = is_signed ? spirv::BuiltinFn::kSdot : spirv::BuiltinFn::kUdot;
+        auto inst = is_signed ? spirv::BuiltinFn::kSDot : spirv::BuiltinFn::kUDot;
 
         auto args = Vector<core::ir::Value*, 3>(builtin->Args());
         args.Push(Literal(u32(SpvPackedVectorFormatPackedVectorFormat4x8Bit)));

@@ -51,7 +51,7 @@ TEST_F(SpirvParserTest, ConvertFToS_ScalarSigned) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = spirv.convertFToS<i32> 2.0f
+    %2:i32 = spirv.convert_f_to_s<i32> 2.0f
     ret
   }
 }
@@ -79,7 +79,7 @@ TEST_F(SpirvParserTest, ConvertFToS_ScalarUnsigned) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = spirv.convertFToS<u32> 2.0f
+    %2:u32 = spirv.convert_f_to_s<u32> 2.0f
     ret
   }
 }
@@ -110,7 +110,7 @@ TEST_F(SpirvParserTest, ConvertFToS_VectorSigned) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = spirv.convertFToS<i32> vec2<f32>(2.0f)
+    %2:vec2<i32> = spirv.convert_f_to_s<i32> vec2<f32>(2.0f)
     ret
   }
 }
@@ -141,7 +141,7 @@ TEST_F(SpirvParserTest, ConvertFToS_VectorUnsigned) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = spirv.convertFToS<u32> vec2<f32>(2.0f)
+    %2:vec2<u32> = spirv.convert_f_to_s<u32> vec2<f32>(2.0f)
     ret
   }
 }
@@ -228,7 +228,7 @@ TEST_F(SpirvParserTest, ConvertSToF_ScalarSigned) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:f32 = spirv.convertSToF<f32> 2i
+    %2:f32 = spirv.convert_s_to_f<f32> 2i
     ret
   }
 }
@@ -256,7 +256,7 @@ TEST_F(SpirvParserTest, ConvertSToF_ScalarUnsigned) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:f32 = spirv.convertSToF<f32> 2u
+    %2:f32 = spirv.convert_s_to_f<f32> 2u
     ret
   }
 }
@@ -287,7 +287,7 @@ TEST_F(SpirvParserTest, ConvertSToF_VectorSigned) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<f32> = spirv.convertSToF<f32> vec2<i32>(2i)
+    %2:vec2<f32> = spirv.convert_s_to_f<f32> vec2<i32>(2i)
     ret
   }
 }
@@ -318,7 +318,7 @@ TEST_F(SpirvParserTest, ConvertSToF_VectorUnsigned) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<f32> = spirv.convertSToF<f32> vec2<u32>(2u)
+    %2:vec2<f32> = spirv.convert_s_to_f<f32> vec2<u32>(2u)
     ret
   }
 }
@@ -346,7 +346,7 @@ TEST_F(SpirvParserTest, ConvertUToF_ScalarSigned) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:f32 = spirv.convertUToF<f32> 2i
+    %2:f32 = spirv.convert_u_to_f<f32> 2i
     ret
   }
 }
@@ -374,7 +374,7 @@ TEST_F(SpirvParserTest, ConvertUToF_ScalarUnsigned) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:f32 = spirv.convertUToF<f32> 2u
+    %2:f32 = spirv.convert_u_to_f<f32> 2u
     ret
   }
 }
@@ -405,7 +405,7 @@ TEST_F(SpirvParserTest, ConvertUToF_VectorSigned) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<f32> = spirv.convertUToF<f32> vec2<i32>(2i)
+    %2:vec2<f32> = spirv.convert_u_to_f<f32> vec2<i32>(2i)
     ret
   }
 }
@@ -436,7 +436,7 @@ TEST_F(SpirvParserTest, ConvertUToF_VectorUnsigned) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<f32> = spirv.convertUToF<f32> vec2<u32>(2u)
+    %2:vec2<f32> = spirv.convert_u_to_f<f32> vec2<u32>(2u)
     ret
   }
 }

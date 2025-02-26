@@ -120,30 +120,30 @@ const char* str(BuiltinFn i) {
             return "sign";
         case BuiltinFn::kAbs:
             return "abs";
-        case BuiltinFn::kSmax:
-            return "smax";
-        case BuiltinFn::kSmin:
-            return "smin";
-        case BuiltinFn::kSclamp:
-            return "sclamp";
-        case BuiltinFn::kUmax:
-            return "umax";
-        case BuiltinFn::kUmin:
-            return "umin";
-        case BuiltinFn::kUclamp:
-            return "uclamp";
+        case BuiltinFn::kSMax:
+            return "s_max";
+        case BuiltinFn::kSMin:
+            return "s_min";
+        case BuiltinFn::kSClamp:
+            return "s_clamp";
+        case BuiltinFn::kUMax:
+            return "u_max";
+        case BuiltinFn::kUMin:
+            return "u_min";
+        case BuiltinFn::kUClamp:
+            return "u_clamp";
         case BuiltinFn::kFindILsb:
-            return "findILsb";
+            return "find_i_lsb";
         case BuiltinFn::kFindSMsb:
-            return "findSMsb";
+            return "find_s_msb";
         case BuiltinFn::kFindUMsb:
-            return "findUMsb";
+            return "find_u_msb";
         case BuiltinFn::kRefract:
             return "refract";
         case BuiltinFn::kReflect:
             return "reflect";
         case BuiltinFn::kFaceForward:
-            return "faceForward";
+            return "face_forward";
         case BuiltinFn::kLdexp:
             return "ldexp";
         case BuiltinFn::kModf:
@@ -185,17 +185,17 @@ const char* str(BuiltinFn i) {
         case BuiltinFn::kULessThanEqual:
             return "u_less_than_equal";
         case BuiltinFn::kConvertFToS:
-            return "convertFToS";
+            return "convert_f_to_s";
         case BuiltinFn::kConvertSToF:
-            return "convertSToF";
+            return "convert_s_to_f";
         case BuiltinFn::kConvertUToF:
-            return "convertUToF";
+            return "convert_u_to_f";
         case BuiltinFn::kBitwiseAnd:
-            return "bitwiseAnd";
+            return "bitwise_and";
         case BuiltinFn::kBitwiseOr:
-            return "bitwiseOr";
+            return "bitwise_or";
         case BuiltinFn::kBitwiseXor:
-            return "bitwiseXor";
+            return "bitwise_xor";
         case BuiltinFn::kEqual:
             return "equal";
         case BuiltinFn::kNotEqual:
@@ -206,10 +206,10 @@ const char* str(BuiltinFn i) {
             return "shift_right_logical";
         case BuiltinFn::kShiftRightArithmetic:
             return "shift_right_arithmetic";
-        case BuiltinFn::kSdot:
-            return "sdot";
-        case BuiltinFn::kUdot:
-            return "udot";
+        case BuiltinFn::kSDot:
+            return "s_dot";
+        case BuiltinFn::kUDot:
+            return "u_dot";
         case BuiltinFn::kCooperativeMatrixLoad:
             return "cooperative_matrix_load";
         case BuiltinFn::kCooperativeMatrixStore:
@@ -268,19 +268,19 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kSelect:
         case BuiltinFn::kVectorTimesMatrix:
         case BuiltinFn::kVectorTimesScalar:
-        case BuiltinFn::kSdot:
-        case BuiltinFn::kUdot:
+        case BuiltinFn::kSDot:
+        case BuiltinFn::kUDot:
         case BuiltinFn::kNone:
         case BuiltinFn::kNormalize:
         case BuiltinFn::kInverse:
         case BuiltinFn::kSign:
         case BuiltinFn::kAbs:
-        case BuiltinFn::kSmax:
-        case BuiltinFn::kSmin:
-        case BuiltinFn::kSclamp:
-        case BuiltinFn::kUmax:
-        case BuiltinFn::kUmin:
-        case BuiltinFn::kUclamp:
+        case BuiltinFn::kSMax:
+        case BuiltinFn::kSMin:
+        case BuiltinFn::kSClamp:
+        case BuiltinFn::kUMax:
+        case BuiltinFn::kUMin:
+        case BuiltinFn::kUClamp:
         case BuiltinFn::kFindILsb:
         case BuiltinFn::kFindSMsb:
         case BuiltinFn::kFindUMsb:

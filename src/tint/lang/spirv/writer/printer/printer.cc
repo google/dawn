@@ -1422,22 +1422,22 @@ class Printer {
             case spirv::BuiltinFn::kFrexp:
                 ext_inst(GLSLstd450Frexp);
                 break;
-            case spirv::BuiltinFn::kSmax:
+            case spirv::BuiltinFn::kSMax:
                 ext_inst(GLSLstd450SMax);
                 break;
-            case spirv::BuiltinFn::kSmin:
+            case spirv::BuiltinFn::kSMin:
                 ext_inst(GLSLstd450SMin);
                 break;
-            case spirv::BuiltinFn::kSclamp:
+            case spirv::BuiltinFn::kSClamp:
                 ext_inst(GLSLstd450SClamp);
                 break;
-            case spirv::BuiltinFn::kUmax:
+            case spirv::BuiltinFn::kUMax:
                 ext_inst(GLSLstd450UMax);
                 break;
-            case spirv::BuiltinFn::kUmin:
+            case spirv::BuiltinFn::kUMin:
                 ext_inst(GLSLstd450UMin);
                 break;
-            case spirv::BuiltinFn::kUclamp:
+            case spirv::BuiltinFn::kUClamp:
                 ext_inst(GLSLstd450UClamp);
                 break;
             case spirv::BuiltinFn::kNormalize:
@@ -1446,7 +1446,7 @@ class Printer {
             case spirv::BuiltinFn::kSampledImage:
                 op = spv::Op::OpSampledImage;
                 break;
-            case spirv::BuiltinFn::kSdot:
+            case spirv::BuiltinFn::kSDot:
                 module_.PushExtension("SPV_KHR_integer_dot_product");
                 module_.PushCapability(SpvCapabilityDotProductKHR);
                 module_.PushCapability(SpvCapabilityDotProductInput4x8BitPackedKHR);
@@ -1482,7 +1482,7 @@ class Printer {
             case spirv::BuiltinFn::kLdexp:
                 ext_inst(GLSLstd450Ldexp);
                 break;
-            case spirv::BuiltinFn::kUdot:
+            case spirv::BuiltinFn::kUDot:
                 module_.PushExtension("SPV_KHR_integer_dot_product");
                 module_.PushCapability(SpvCapabilityDotProductKHR);
                 module_.PushCapability(SpvCapabilityDotProductInput4x8BitPackedKHR);

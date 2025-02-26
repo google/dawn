@@ -1033,7 +1033,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, Dot4I8Packed) {
     auto* expect = R"(
 %foo = func(%arg1:u32, %arg2:u32):i32 {
   $B1: {
-    %4:i32 = spirv.sdot %arg1, %arg2, 0u
+    %4:i32 = spirv.s_dot %arg1, %arg2, 0u
     ret %4
   }
 }
@@ -1068,7 +1068,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, Dot4U8Packed) {
     auto* expect = R"(
 %foo = func(%arg1:u32, %arg2:u32):u32 {
   $B1: {
-    %4:u32 = spirv.udot %arg1, %arg2, 0u
+    %4:u32 = spirv.u_dot %arg1, %arg2, 0u
     ret %4
   }
 }

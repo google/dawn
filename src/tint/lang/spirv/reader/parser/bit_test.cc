@@ -56,7 +56,7 @@ TEST_P(SpirvParser_BitwiseTest, Scalar_SignedSigned_Signed) {
 
        %main = OpFunction %void None %void_fn
  %main_start = OpLabel
-               %1 = OpBitwise)" +
+               %1 = Op)" +
                   params.spv_name + R"( %int %one %two
                OpReturn
                OpFunctionEnd
@@ -64,7 +64,7 @@ TEST_P(SpirvParser_BitwiseTest, Scalar_SignedSigned_Signed) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = spirv.bitwise)" +
+    %2:i32 = spirv.)" +
                   params.ir_name + R"(<i32> 1i, 2i
     ret
   }
@@ -90,7 +90,7 @@ TEST_P(SpirvParser_BitwiseTest, Scalar_SignedUnsigned_Signed) {
 
        %main = OpFunction %void None %void_fn
  %main_start = OpLabel
-               %1 = OpBitwise)" +
+               %1 = Op)" +
                   params.spv_name + R"( %int %one %eight
                OpReturn
                OpFunctionEnd
@@ -98,7 +98,7 @@ TEST_P(SpirvParser_BitwiseTest, Scalar_SignedUnsigned_Signed) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = spirv.bitwise)" +
+    %2:i32 = spirv.)" +
                   params.ir_name + R"(<i32> 1i, 8u
     ret
   }
@@ -124,7 +124,7 @@ TEST_P(SpirvParser_BitwiseTest, Scalar_UnsignedSigned_Signed) {
 
        %main = OpFunction %void None %void_fn
  %main_start = OpLabel
-               %1 = OpBitwise)" +
+               %1 = Op)" +
                   params.spv_name + R"( %int %eight %one
                OpReturn
                OpFunctionEnd
@@ -132,7 +132,7 @@ TEST_P(SpirvParser_BitwiseTest, Scalar_UnsignedSigned_Signed) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = spirv.bitwise)" +
+    %2:i32 = spirv.)" +
                   params.ir_name + R"(<i32> 8u, 1i
     ret
   }
@@ -158,7 +158,7 @@ TEST_P(SpirvParser_BitwiseTest, Scalar_UnsignedUnsigned_Signed) {
 
        %main = OpFunction %void None %void_fn
  %main_start = OpLabel
-               %1 = OpBitwise)" +
+               %1 = Op)" +
                   params.spv_name + R"( %int %eight %nine
                OpReturn
                OpFunctionEnd
@@ -166,7 +166,7 @@ TEST_P(SpirvParser_BitwiseTest, Scalar_UnsignedUnsigned_Signed) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = spirv.bitwise)" +
+    %2:i32 = spirv.)" +
                   params.ir_name + R"(<i32> 8u, 9u
     ret
   }
@@ -192,7 +192,7 @@ TEST_P(SpirvParser_BitwiseTest, Scalar_UnsignedUnsigned_Unsigned) {
 
        %main = OpFunction %void None %void_fn
  %main_start = OpLabel
-               %1 = OpBitwise)" +
+               %1 = Op)" +
                   params.spv_name + R"( %uint %eight %nine
                OpReturn
                OpFunctionEnd
@@ -200,7 +200,7 @@ TEST_P(SpirvParser_BitwiseTest, Scalar_UnsignedUnsigned_Unsigned) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = spirv.bitwise)" +
+    %2:u32 = spirv.)" +
                   params.ir_name + R"(<u32> 8u, 9u
     ret
   }
@@ -226,7 +226,7 @@ TEST_P(SpirvParser_BitwiseTest, Scalar_UnsignedSigned_Unsigned) {
 
        %main = OpFunction %void None %void_fn
  %main_start = OpLabel
-               %1 = OpBitwise)" +
+               %1 = Op)" +
                   params.spv_name + R"( %uint %eight %one
                OpReturn
                OpFunctionEnd
@@ -234,7 +234,7 @@ TEST_P(SpirvParser_BitwiseTest, Scalar_UnsignedSigned_Unsigned) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = spirv.bitwise)" +
+    %2:u32 = spirv.)" +
                   params.ir_name + R"(<u32> 8u, 1i
     ret
   }
@@ -260,7 +260,7 @@ TEST_P(SpirvParser_BitwiseTest, Scalar_SignedUnsigned_Unsigned) {
 
        %main = OpFunction %void None %void_fn
  %main_start = OpLabel
-               %1 = OpBitwise)" +
+               %1 = Op)" +
                   params.spv_name + R"( %uint %one %eight
                OpReturn
                OpFunctionEnd
@@ -268,7 +268,7 @@ TEST_P(SpirvParser_BitwiseTest, Scalar_SignedUnsigned_Unsigned) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = spirv.bitwise)" +
+    %2:u32 = spirv.)" +
                   params.ir_name + R"(<u32> 1i, 8u
     ret
   }
@@ -294,7 +294,7 @@ TEST_P(SpirvParser_BitwiseTest, Scalar_SignedSigned_Unsigned) {
 
        %main = OpFunction %void None %void_fn
  %main_start = OpLabel
-               %1 = OpBitwise)" +
+               %1 = Op)" +
                   params.spv_name + R"( %uint %one %two
                OpReturn
                OpFunctionEnd
@@ -302,7 +302,7 @@ TEST_P(SpirvParser_BitwiseTest, Scalar_SignedSigned_Unsigned) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = spirv.bitwise)" +
+    %2:u32 = spirv.)" +
                   params.ir_name + R"(<u32> 1i, 2i
     ret
   }
@@ -334,7 +334,7 @@ TEST_P(SpirvParser_BitwiseTest, Vector_SignedSigned_Signed) {
 
        %main = OpFunction %void None %void_fn
  %main_start = OpLabel
-               %1 = OpBitwise)" +
+               %1 = Op)" +
                   params.spv_name + R"( %v2int %v2one %v2two
                OpReturn
                OpFunctionEnd
@@ -342,7 +342,7 @@ TEST_P(SpirvParser_BitwiseTest, Vector_SignedSigned_Signed) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = spirv.bitwise)" +
+    %2:vec2<i32> = spirv.)" +
                   params.ir_name + R"(<i32> vec2<i32>(1i), vec2<i32>(2i)
     ret
   }
@@ -374,7 +374,7 @@ TEST_P(SpirvParser_BitwiseTest, Vector_SignedUnsigned_Signed) {
 
        %main = OpFunction %void None %void_fn
  %main_start = OpLabel
-               %1 = OpBitwise)" +
+               %1 = Op)" +
                   params.spv_name + R"( %v2int %v2one %v2eight
                OpReturn
                OpFunctionEnd
@@ -382,7 +382,7 @@ TEST_P(SpirvParser_BitwiseTest, Vector_SignedUnsigned_Signed) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = spirv.bitwise)" +
+    %2:vec2<i32> = spirv.)" +
                   params.ir_name + R"(<i32> vec2<i32>(1i), vec2<u32>(8u)
     ret
   }
@@ -414,7 +414,7 @@ TEST_P(SpirvParser_BitwiseTest, Vector_UnsignedSigned_Signed) {
 
        %main = OpFunction %void None %void_fn
  %main_start = OpLabel
-               %1 = OpBitwise)" +
+               %1 = Op)" +
                   params.spv_name + R"( %v2int %v2eight %v2one
                OpReturn
                OpFunctionEnd
@@ -422,7 +422,7 @@ TEST_P(SpirvParser_BitwiseTest, Vector_UnsignedSigned_Signed) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = spirv.bitwise)" +
+    %2:vec2<i32> = spirv.)" +
                   params.ir_name + R"(<i32> vec2<u32>(8u), vec2<i32>(1i)
     ret
   }
@@ -454,7 +454,7 @@ TEST_P(SpirvParser_BitwiseTest, Vector_UnsignedUnsigned_Signed) {
 
        %main = OpFunction %void None %void_fn
  %main_start = OpLabel
-               %1 = OpBitwise)" +
+               %1 = Op)" +
                   params.spv_name + R"( %v2int %v2eight %v2nine
                OpReturn
                OpFunctionEnd
@@ -462,7 +462,7 @@ TEST_P(SpirvParser_BitwiseTest, Vector_UnsignedUnsigned_Signed) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = spirv.bitwise)" +
+    %2:vec2<i32> = spirv.)" +
                   params.ir_name + R"(<i32> vec2<u32>(8u), vec2<u32>(9u)
     ret
   }
@@ -494,7 +494,7 @@ TEST_P(SpirvParser_BitwiseTest, Vector_UnsignedUnsigned_Unsigned) {
 
        %main = OpFunction %void None %void_fn
  %main_start = OpLabel
-               %1 = OpBitwise)" +
+               %1 = Op)" +
                   params.spv_name + R"( %v2uint %v2eight %v2nine
                OpReturn
                OpFunctionEnd
@@ -502,7 +502,7 @@ TEST_P(SpirvParser_BitwiseTest, Vector_UnsignedUnsigned_Unsigned) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = spirv.bitwise)" +
+    %2:vec2<u32> = spirv.)" +
                   params.ir_name + R"(<u32> vec2<u32>(8u), vec2<u32>(9u)
     ret
   }
@@ -534,7 +534,7 @@ TEST_P(SpirvParser_BitwiseTest, Vector_UnsignedSigned_Unsigned) {
 
        %main = OpFunction %void None %void_fn
  %main_start = OpLabel
-               %1 = OpBitwise)" +
+               %1 = Op)" +
                   params.spv_name + R"( %v2uint %v2eight %v2one
                OpReturn
                OpFunctionEnd
@@ -542,7 +542,7 @@ TEST_P(SpirvParser_BitwiseTest, Vector_UnsignedSigned_Unsigned) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = spirv.bitwise)" +
+    %2:vec2<u32> = spirv.)" +
                   params.ir_name + R"(<u32> vec2<u32>(8u), vec2<i32>(1i)
     ret
   }
@@ -574,7 +574,7 @@ TEST_P(SpirvParser_BitwiseTest, Vector_SignedUnsigned_Unsigned) {
 
        %main = OpFunction %void None %void_fn
  %main_start = OpLabel
-               %1 = OpBitwise)" +
+               %1 = Op)" +
                   params.spv_name + R"( %v2uint %v2one %v2eight
                OpReturn
                OpFunctionEnd
@@ -582,7 +582,7 @@ TEST_P(SpirvParser_BitwiseTest, Vector_SignedUnsigned_Unsigned) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = spirv.bitwise)" +
+    %2:vec2<u32> = spirv.)" +
                   params.ir_name + R"(<u32> vec2<i32>(1i), vec2<u32>(8u)
     ret
   }
@@ -614,7 +614,7 @@ TEST_P(SpirvParser_BitwiseTest, Vector_SignedSigned_Unsigned) {
 
        %main = OpFunction %void None %void_fn
  %main_start = OpLabel
-               %1 = OpBitwise)" +
+               %1 = Op)" +
                   params.spv_name + R"( %v2uint %v2one %v2two
                OpReturn
                OpFunctionEnd
@@ -622,7 +622,7 @@ TEST_P(SpirvParser_BitwiseTest, Vector_SignedSigned_Unsigned) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = spirv.bitwise)" +
+    %2:vec2<u32> = spirv.)" +
                   params.ir_name + R"(<u32> vec2<i32>(1i), vec2<i32>(2i)
     ret
   }
@@ -632,9 +632,9 @@ TEST_P(SpirvParser_BitwiseTest, Vector_SignedSigned_Unsigned) {
 
 INSTANTIATE_TEST_SUITE_P(SpirvParser,
                          SpirvParser_BitwiseTest,
-                         testing::Values(SpirvBitParam{"And", "And"},  //
-                                         SpirvBitParam{"Or", "Or"},    //
-                                         SpirvBitParam{"Xor", "Xor"}));
+                         testing::Values(SpirvBitParam{"BitwiseAnd", "bitwise_and"},  //
+                                         SpirvBitParam{"BitwiseOr", "bitwise_or"},    //
+                                         SpirvBitParam{"BitwiseXor", "bitwise_xor"}));
 
 using SpirvParser_ShiftTest = SpirvParserTestWithParam<SpirvBitParam>;
 TEST_P(SpirvParser_ShiftTest, Scalar_UnsignedUnsigned_Unsigned) {

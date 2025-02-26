@@ -1167,17 +1167,17 @@ class Parser {
             case GLSLstd450MatrixInverse:
                 return spirv::BuiltinFn::kInverse;
             case GLSLstd450SMax:
-                return spirv::BuiltinFn::kSmax;
+                return spirv::BuiltinFn::kSMax;
             case GLSLstd450SMin:
-                return spirv::BuiltinFn::kSmin;
+                return spirv::BuiltinFn::kSMin;
             case GLSLstd450SClamp:
-                return spirv::BuiltinFn::kSclamp;
+                return spirv::BuiltinFn::kSClamp;
             case GLSLstd450UMax:
-                return spirv::BuiltinFn::kUmax;
+                return spirv::BuiltinFn::kUMax;
             case GLSLstd450UMin:
-                return spirv::BuiltinFn::kUmin;
+                return spirv::BuiltinFn::kUMin;
             case GLSLstd450UClamp:
-                return spirv::BuiltinFn::kUclamp;
+                return spirv::BuiltinFn::kUClamp;
             case GLSLstd450FindILsb:
                 return spirv::BuiltinFn::kFindILsb;
             case GLSLstd450FindSMsb:

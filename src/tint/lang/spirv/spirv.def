@@ -365,34 +365,34 @@ implicit(T: iu32, N: num) fn sign<R: iu32>(vec<N, T>) -> vec<N, R>
 implicit(T: iu32) fn abs<R: iu32>(T) -> R
 implicit(T: iu32, N: num) fn abs<R: iu32>(vec<N, T>) -> vec<N, R>
 
-implicit(T: iu32, U: iu32) fn smax<R: iu32>(T, U) -> R
-implicit(T: iu32, U: iu32, N: num) fn smax<R: iu32>(vec<N, T>, vec<N, U>) -> vec<N, R>
-implicit(T: iu32, U: iu32) fn smin<R: iu32>(T, U) -> R
-implicit(T: iu32, U: iu32, N: num) fn smin<R: iu32>(vec<N, T>, vec<N, U>) -> vec<N, R>
-implicit(T: iu32, U: iu32, V: iu32) fn sclamp<R: iu32>(T, U, V) -> R
-implicit(T: iu32, U: iu32, V: iu32, N: num) fn sclamp<R: iu32>(vec<N, T>, vec<N, U>,  vec<N, V>) -> vec<N, R>
+implicit(T: iu32, U: iu32) fn s_max<R: iu32>(T, U) -> R
+implicit(T: iu32, U: iu32, N: num) fn s_max<R: iu32>(vec<N, T>, vec<N, U>) -> vec<N, R>
+implicit(T: iu32, U: iu32) fn s_min<R: iu32>(T, U) -> R
+implicit(T: iu32, U: iu32, N: num) fn s_min<R: iu32>(vec<N, T>, vec<N, U>) -> vec<N, R>
+implicit(T: iu32, U: iu32, V: iu32) fn s_clamp<R: iu32>(T, U, V) -> R
+implicit(T: iu32, U: iu32, V: iu32, N: num) fn s_clamp<R: iu32>(vec<N, T>, vec<N, U>,  vec<N, V>) -> vec<N, R>
 
-implicit(T: iu32, U: iu32) fn umax<R: iu32>(T, U) -> R
-implicit(T: iu32, U: iu32, N: num) fn umax<R: iu32>(vec<N, T>, vec<N, U>) -> vec<N, R>
-implicit(T: iu32, U: iu32) fn umin<R: iu32>(T, U) -> R
-implicit(T: iu32, U: iu32, N: num) fn umin<R: iu32>(vec<N, T>, vec<N, U>) -> vec<N, R>
-implicit(T: iu32, U: iu32, V: iu32) fn uclamp<R: iu32>(T, U, V) -> R
-implicit(T: iu32, U: iu32, V: iu32, N: num) fn uclamp<R: iu32>(vec<N, T>, vec<N, U>,  vec<N, V>) -> vec<N, R>
+implicit(T: iu32, U: iu32) fn u_max<R: iu32>(T, U) -> R
+implicit(T: iu32, U: iu32, N: num) fn u_max<R: iu32>(vec<N, T>, vec<N, U>) -> vec<N, R>
+implicit(T: iu32, U: iu32) fn u_min<R: iu32>(T, U) -> R
+implicit(T: iu32, U: iu32, N: num) fn u_min<R: iu32>(vec<N, T>, vec<N, U>) -> vec<N, R>
+implicit(T: iu32, U: iu32, V: iu32) fn u_clamp<R: iu32>(T, U, V) -> R
+implicit(T: iu32, U: iu32, V: iu32, N: num) fn u_clamp<R: iu32>(vec<N, T>, vec<N, U>,  vec<N, V>) -> vec<N, R>
 
-implicit(T: iu32) fn findILsb<R: iu32>(T) -> R
-implicit(T: iu32, N: num) fn findILsb<R: iu32>(vec<N, T>) -> vec<N, R>
-implicit(T: iu32) fn findSMsb<R: iu32>(T) -> R
-implicit(T: iu32, N: num) fn findSMsb<R: iu32>(vec<N, T>) -> vec<N, R>
-implicit(T: iu32) fn findUMsb<R: iu32>(T) -> R
-implicit(T: iu32, N: num) fn findUMsb<R: iu32>(vec<N, T>) -> vec<N, R>
+implicit(T: iu32) fn find_i_lsb<R: iu32>(T) -> R
+implicit(T: iu32, N: num) fn find_i_lsb<R: iu32>(vec<N, T>) -> vec<N, R>
+implicit(T: iu32) fn find_s_msb<R: iu32>(T) -> R
+implicit(T: iu32, N: num) fn find_s_msb<R: iu32>(vec<N, T>) -> vec<N, R>
+implicit(T: iu32) fn find_u_msb<R: iu32>(T) -> R
+implicit(T: iu32, N: num) fn find_u_msb<R: iu32>(vec<N, T>) -> vec<N, R>
 
 implicit(T: f32_f16) fn refract(T, T, T) -> T
 implicit(T: f32_f16, N: num) fn refract(vec<N, T>, vec<N, T>, T) -> vec<N, T>
 implicit(T: f32_f16) fn reflect(T, T) -> T
 implicit(T: f32_f16, N: num) fn reflect(vec<N, T>, vec<N, T>) -> vec<N, T>
 
-implicit(T: f32_f16) fn faceForward(T, T, T) -> T
-implicit(T: f32_f16, N: num) fn faceForward(vec<N, T>, vec<N, T>, vec<N, T>) -> vec<N, T>
+implicit(T: f32_f16) fn face_forward(T, T, T) -> T
+implicit(T: f32_f16, N: num) fn face_forward(vec<N, T>, vec<N, T>, vec<N, T>) -> vec<N, T>
 
 implicit(T: f32_f16, U: iu32) fn ldexp(T, U) -> T
 implicit(N: num, T: f32_f16, U: iu32) fn ldexp(vec<N, T>, vec<N, U>) -> vec<N, T>
@@ -451,19 +451,19 @@ implicit(A: iu32, B: iu32, N: num) fn u_less_than(vec<N, A>, vec<N, B>) -> vec<N
 implicit(A: iu32, B: iu32) fn u_less_than_equal(A, B) -> bool
 implicit(A: iu32, B: iu32, N: num) fn u_less_than_equal(vec<N, A>, vec<N, B>) -> vec<N, bool>
 
-implicit(T: f32_f16) fn convertFToS<R: iu32>(T) -> R
-implicit(T: f32_f16, N: num) fn convertFToS<R: iu32>(vec<N, T>) -> vec<N, R>
-implicit(T: iu32) fn convertSToF<R: f32_f16>(T) -> R
-implicit(T: iu32, N: num) fn convertSToF<R: f32_f16>(vec<N, T>) -> vec<N, R>
-implicit(T: iu32) fn convertUToF<R: f32_f16>(T) -> R
-implicit(T: iu32, N: num) fn convertUToF<R: f32_f16>(vec<N, T>) -> vec<N, R>
+implicit(T: f32_f16) fn convert_f_to_s<R: iu32>(T) -> R
+implicit(T: f32_f16, N: num) fn convert_f_to_s<R: iu32>(vec<N, T>) -> vec<N, R>
+implicit(T: iu32) fn convert_s_to_f<R: f32_f16>(T) -> R
+implicit(T: iu32, N: num) fn convert_s_to_f<R: f32_f16>(vec<N, T>) -> vec<N, R>
+implicit(T: iu32) fn convert_u_to_f<R: f32_f16>(T) -> R
+implicit(T: iu32, N: num) fn convert_u_to_f<R: f32_f16>(vec<N, T>) -> vec<N, R>
 
-implicit(A: iu32, B: iu32) fn bitwiseAnd<R: iu32>(A, B) -> R
-implicit(A: iu32, B: iu32, N: num) fn bitwiseAnd<R: iu32>(vec<N, A>, vec<N, B>) -> vec<N, R>
-implicit(A: iu32, B: iu32) fn bitwiseOr<R: iu32>(A, B) -> R
-implicit(A: iu32, B: iu32, N: num) fn bitwiseOr<R: iu32>(vec<N, A>, vec<N, B>) -> vec<N, R>
-implicit(A: iu32, B: iu32) fn bitwiseXor<R: iu32>(A, B) -> R
-implicit(A: iu32, B: iu32, N: num) fn bitwiseXor<R: iu32>(vec<N, A>, vec<N, B>) -> vec<N, R>
+implicit(A: iu32, B: iu32) fn bitwise_and<R: iu32>(A, B) -> R
+implicit(A: iu32, B: iu32, N: num) fn bitwise_and<R: iu32>(vec<N, A>, vec<N, B>) -> vec<N, R>
+implicit(A: iu32, B: iu32) fn bitwise_or<R: iu32>(A, B) -> R
+implicit(A: iu32, B: iu32, N: num) fn bitwise_or<R: iu32>(vec<N, A>, vec<N, B>) -> vec<N, R>
+implicit(A: iu32, B: iu32) fn bitwise_xor<R: iu32>(A, B) -> R
+implicit(A: iu32, B: iu32, N: num) fn bitwise_xor<R: iu32>(vec<N, A>, vec<N, B>) -> vec<N, R>
 
 implicit(A: iu32, B: iu32) fn equal(A, B) -> bool
 implicit(A: iu32, B: iu32, N: num) fn equal(vec<N, A>, vec<N, B>) -> vec<N, bool>
@@ -480,8 +480,8 @@ implicit(A: iu32, B: iu32, N: num) fn shift_right_arithmetic<R: iu32>(vec<N, A>,
 ////////////////////////////////////////////////////////////////////////////////
 // SPV_KHR_integer_dot_product instructions
 ////////////////////////////////////////////////////////////////////////////////
-fn sdot(u32, u32, u32) -> i32
-fn udot(u32, u32, u32) -> u32
+fn s_dot(u32, u32, u32) -> i32
+fn u_dot(u32, u32, u32) -> u32
 
 ////////////////////////////////////////////////////////////////////////////////
 // SPV_KHR_cooperative_matrix instructions

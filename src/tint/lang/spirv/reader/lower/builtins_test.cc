@@ -1202,7 +1202,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvReader,
                          SpirvReader_BuiltinsTest_OneParamSigned,
                          ::testing::Values(SpirvReaderParams{spirv::BuiltinFn::kAbs, "abs", "abs"},
                                            SpirvReaderParams{spirv::BuiltinFn::kFindSMsb,
-                                                             "findSMsb", "firstLeadingBit"}));
+                                                             "find_s_msb", "firstLeadingBit"}));
 
 using SpirvReader_BuiltinsTest_OneParamUnsigned =
     core::ir::transform::TransformTestWithParam<SpirvReaderParams>;
@@ -1390,7 +1390,7 @@ TEST_P(SpirvReader_BuiltinsTest_OneParamUnsigned, SignedToUnsigned) {
 INSTANTIATE_TEST_SUITE_P(SpirvReader,
                          SpirvReader_BuiltinsTest_OneParamUnsigned,
                          ::testing::Values(SpirvReaderParams{spirv::BuiltinFn::kFindUMsb,
-                                                             "findUMsb", "firstLeadingBit"}));
+                                                             "find_u_msb", "firstLeadingBit"}));
 
 using SpirvReader_BuiltinsTest_TwoParamSigned =
     core::ir::transform::TransformTestWithParam<SpirvReaderParams>;
@@ -1412,9 +1412,9 @@ TEST_P(SpirvReader_BuiltinsTest_TwoParamSigned, UnsignedToUnsigned) {
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = spirv.s)" +
+    %2:u32 = spirv.)" +
                params.spv_name + R"(<u32> 10u, 15u
-    %3:vec2<u32> = spirv.s)" +
+    %3:vec2<u32> = spirv.)" +
                params.spv_name + R"(<u32> vec2<u32>(10u), vec2<u32>(15u)
     ret
   }
@@ -1461,9 +1461,9 @@ TEST_P(SpirvReader_BuiltinsTest_TwoParamSigned, SignedToSigned) {
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = spirv.s)" +
+    %2:i32 = spirv.)" +
                params.spv_name + R"(<i32> 10i, 15i
-    %3:vec2<i32> = spirv.s)" +
+    %3:vec2<i32> = spirv.)" +
                params.spv_name + R"(<i32> vec2<i32>(10i), vec2<i32>(15i)
     ret
   }
@@ -1504,9 +1504,9 @@ TEST_P(SpirvReader_BuiltinsTest_TwoParamSigned, MixedToUnsigned) {
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = spirv.s)" +
+    %2:u32 = spirv.)" +
                params.spv_name + R"(<u32> 10i, 10u
-    %3:vec2<u32> = spirv.s)" +
+    %3:vec2<u32> = spirv.)" +
                params.spv_name + R"(<u32> vec2<i32>(10i), vec2<u32>(10u)
     ret
   }
@@ -1551,9 +1551,9 @@ TEST_P(SpirvReader_BuiltinsTest_TwoParamSigned, MixedToSigned) {
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = spirv.s)" +
+    %2:i32 = spirv.)" +
                params.spv_name + R"(<i32> 10u, 10i
-    %3:vec2<i32> = spirv.s)" +
+    %3:vec2<i32> = spirv.)" +
                params.spv_name + R"(<i32> vec2<u32>(10u), vec2<i32>(10i)
     ret
   }
@@ -1579,11 +1579,11 @@ TEST_P(SpirvReader_BuiltinsTest_TwoParamSigned, MixedToSigned) {
     EXPECT_EQ(expect, str());
 }
 
-INSTANTIATE_TEST_SUITE_P(SpirvReader,
-                         SpirvReader_BuiltinsTest_TwoParamSigned,
-                         ::testing::Values(SpirvReaderParams{spirv::BuiltinFn::kSmax, "max", "max"},
-                                           SpirvReaderParams{spirv::BuiltinFn::kSmin, "min",
-                                                             "min"}));
+INSTANTIATE_TEST_SUITE_P(
+    SpirvReader,
+    SpirvReader_BuiltinsTest_TwoParamSigned,
+    ::testing::Values(SpirvReaderParams{spirv::BuiltinFn::kSMax, "s_max", "max"},
+                      SpirvReaderParams{spirv::BuiltinFn::kSMin, "s_min", "min"}));
 
 using SpirvReader_BuiltinsTest_TwoParamUnsigned =
     core::ir::transform::TransformTestWithParam<SpirvReaderParams>;
@@ -1605,9 +1605,9 @@ TEST_P(SpirvReader_BuiltinsTest_TwoParamUnsigned, UnsignedToUnsigned) {
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = spirv.u)" +
+    %2:u32 = spirv.)" +
                params.spv_name + R"(<u32> 10u, 15u
-    %3:vec2<u32> = spirv.u)" +
+    %3:vec2<u32> = spirv.)" +
                params.spv_name + R"(<u32> vec2<u32>(10u), vec2<u32>(15u)
     ret
   }
@@ -1648,9 +1648,9 @@ TEST_P(SpirvReader_BuiltinsTest_TwoParamUnsigned, SignedToSigned) {
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = spirv.u)" +
+    %2:i32 = spirv.)" +
                params.spv_name + R"(<i32> 10i, 15i
-    %3:vec2<i32> = spirv.u)" +
+    %3:vec2<i32> = spirv.)" +
                params.spv_name + R"(<i32> vec2<i32>(10i), vec2<i32>(15i)
     ret
   }
@@ -1697,9 +1697,9 @@ TEST_P(SpirvReader_BuiltinsTest_TwoParamUnsigned, MixedToUnsigned) {
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = spirv.u)" +
+    %2:u32 = spirv.)" +
                params.spv_name + R"(<u32> 10i, 10u
-    %3:vec2<u32> = spirv.u)" +
+    %3:vec2<u32> = spirv.)" +
                params.spv_name + R"(<u32> vec2<i32>(10i), vec2<u32>(10u)
     ret
   }
@@ -1742,9 +1742,9 @@ TEST_P(SpirvReader_BuiltinsTest_TwoParamUnsigned, MixedToSigned) {
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = spirv.u)" +
+    %2:i32 = spirv.)" +
                params.spv_name + R"(<i32> 10u, 10i
-    %3:vec2<i32> = spirv.u)" +
+    %3:vec2<i32> = spirv.)" +
                params.spv_name + R"(<i32> vec2<u32>(10u), vec2<i32>(10i)
     ret
   }
@@ -1772,21 +1772,21 @@ TEST_P(SpirvReader_BuiltinsTest_TwoParamUnsigned, MixedToSigned) {
     EXPECT_EQ(expect, str());
 }
 
-INSTANTIATE_TEST_SUITE_P(SpirvReader,
-                         SpirvReader_BuiltinsTest_TwoParamUnsigned,
-                         ::testing::Values(SpirvReaderParams{spirv::BuiltinFn::kUmax, "max", "max"},
-                                           SpirvReaderParams{spirv::BuiltinFn::kUmin, "min",
-                                                             "min"}));
+INSTANTIATE_TEST_SUITE_P(
+    SpirvReader,
+    SpirvReader_BuiltinsTest_TwoParamUnsigned,
+    ::testing::Values(SpirvReaderParams{spirv::BuiltinFn::kUMax, "u_max", "max"},
+                      SpirvReaderParams{spirv::BuiltinFn::kUMin, "u_min", "min"}));
 
 TEST_F(SpirvReader_BuiltinsTest, SClamp_UnsignedToUnsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kSclamp,
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kSClamp,
                                                Vector<const core::type::Type*, 1>{ty.u32()}, 10_u,
                                                15_u, 10_u);
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.vec2<u32>(), spirv::BuiltinFn::kSclamp, Vector<const core::type::Type*, 1>{ty.u32()},
+            ty.vec2<u32>(), spirv::BuiltinFn::kSClamp, Vector<const core::type::Type*, 1>{ty.u32()},
             b.Splat(ty.vec2<u32>(), 10_u), b.Splat(ty.vec2<u32>(), 15_u),
             b.Splat(ty.vec2<u32>(), 10_u));
         b.Return(ep);
@@ -1795,8 +1795,8 @@ TEST_F(SpirvReader_BuiltinsTest, SClamp_UnsignedToUnsigned) {
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = spirv.sclamp<u32> 10u, 15u, 10u
-    %3:vec2<u32> = spirv.sclamp<u32> vec2<u32>(10u), vec2<u32>(15u), vec2<u32>(10u)
+    %2:u32 = spirv.s_clamp<u32> 10u, 15u, 10u
+    %3:vec2<u32> = spirv.s_clamp<u32> vec2<u32>(10u), vec2<u32>(15u), vec2<u32>(10u)
     ret
   }
 }
@@ -1829,11 +1829,11 @@ TEST_F(SpirvReader_BuiltinsTest, SClamp_SignedToSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kSclamp,
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kSClamp,
                                                Vector<const core::type::Type*, 1>{ty.i32()}, 10_i,
                                                15_i, 10_i);
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.vec2<i32>(), spirv::BuiltinFn::kSclamp, Vector<const core::type::Type*, 1>{ty.i32()},
+            ty.vec2<i32>(), spirv::BuiltinFn::kSClamp, Vector<const core::type::Type*, 1>{ty.i32()},
             b.Splat(ty.vec2<i32>(), 10_i), b.Splat(ty.vec2<i32>(), 15_i),
             b.Splat(ty.vec2<i32>(), 10_i));
         b.Return(ep);
@@ -1842,8 +1842,8 @@ TEST_F(SpirvReader_BuiltinsTest, SClamp_SignedToSigned) {
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = spirv.sclamp<i32> 10i, 15i, 10i
-    %3:vec2<i32> = spirv.sclamp<i32> vec2<i32>(10i), vec2<i32>(15i), vec2<i32>(10i)
+    %2:i32 = spirv.s_clamp<i32> 10i, 15i, 10i
+    %3:vec2<i32> = spirv.s_clamp<i32> vec2<i32>(10i), vec2<i32>(15i), vec2<i32>(10i)
     ret
   }
 }
@@ -1868,11 +1868,11 @@ TEST_F(SpirvReader_BuiltinsTest, SClamp_MixedToUnsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kSclamp,
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kSClamp,
                                                Vector<const core::type::Type*, 1>{ty.u32()}, 10_i,
                                                10_u, 10_i);
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.vec2<u32>(), spirv::BuiltinFn::kSclamp, Vector<const core::type::Type*, 1>{ty.u32()},
+            ty.vec2<u32>(), spirv::BuiltinFn::kSClamp, Vector<const core::type::Type*, 1>{ty.u32()},
             b.Splat(ty.vec2<i32>(), 10_i), b.Splat(ty.vec2<u32>(), 10_u),
             b.Splat(ty.vec2<i32>(), 10_i));
         b.Return(ep);
@@ -1881,8 +1881,8 @@ TEST_F(SpirvReader_BuiltinsTest, SClamp_MixedToUnsigned) {
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = spirv.sclamp<u32> 10i, 10u, 10i
-    %3:vec2<u32> = spirv.sclamp<u32> vec2<i32>(10i), vec2<u32>(10u), vec2<i32>(10i)
+    %2:u32 = spirv.s_clamp<u32> 10i, 10u, 10i
+    %3:vec2<u32> = spirv.s_clamp<u32> vec2<i32>(10i), vec2<u32>(10u), vec2<i32>(10i)
     ret
   }
 }
@@ -1911,11 +1911,11 @@ TEST_F(SpirvReader_BuiltinsTest, SClamp_MixedToSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kSclamp,
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kSClamp,
                                                Vector<const core::type::Type*, 1>{ty.i32()}, 10_u,
                                                10_i, 10_u);
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.vec2<i32>(), spirv::BuiltinFn::kSclamp, Vector<const core::type::Type*, 1>{ty.i32()},
+            ty.vec2<i32>(), spirv::BuiltinFn::kSClamp, Vector<const core::type::Type*, 1>{ty.i32()},
             b.Splat(ty.vec2<u32>(), 10_u), b.Splat(ty.vec2<i32>(), 10_i),
             b.Splat(ty.vec2<u32>(), 10_u));
         b.Return(ep);
@@ -1924,8 +1924,8 @@ TEST_F(SpirvReader_BuiltinsTest, SClamp_MixedToSigned) {
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = spirv.sclamp<i32> 10u, 10i, 10u
-    %3:vec2<i32> = spirv.sclamp<i32> vec2<u32>(10u), vec2<i32>(10i), vec2<u32>(10u)
+    %2:i32 = spirv.s_clamp<i32> 10u, 10i, 10u
+    %3:vec2<i32> = spirv.s_clamp<i32> vec2<u32>(10u), vec2<i32>(10i), vec2<u32>(10u)
     ret
   }
 }
@@ -1954,11 +1954,11 @@ TEST_F(SpirvReader_BuiltinsTest, UClamp_UnsignedToUnsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kUclamp,
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kUClamp,
                                                Vector<const core::type::Type*, 1>{ty.u32()}, 10_u,
                                                15_u, 10_u);
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.vec2<u32>(), spirv::BuiltinFn::kUclamp, Vector<const core::type::Type*, 1>{ty.u32()},
+            ty.vec2<u32>(), spirv::BuiltinFn::kUClamp, Vector<const core::type::Type*, 1>{ty.u32()},
             b.Splat(ty.vec2<u32>(), 10_u), b.Splat(ty.vec2<u32>(), 15_u),
             b.Splat(ty.vec2<u32>(), 10_u));
         b.Return(ep);
@@ -1967,8 +1967,8 @@ TEST_F(SpirvReader_BuiltinsTest, UClamp_UnsignedToUnsigned) {
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = spirv.uclamp<u32> 10u, 15u, 10u
-    %3:vec2<u32> = spirv.uclamp<u32> vec2<u32>(10u), vec2<u32>(15u), vec2<u32>(10u)
+    %2:u32 = spirv.u_clamp<u32> 10u, 15u, 10u
+    %3:vec2<u32> = spirv.u_clamp<u32> vec2<u32>(10u), vec2<u32>(15u), vec2<u32>(10u)
     ret
   }
 }
@@ -1993,11 +1993,11 @@ TEST_F(SpirvReader_BuiltinsTest, UClamp_SignedToSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kUclamp,
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kUClamp,
                                                Vector<const core::type::Type*, 1>{ty.i32()}, 10_i,
                                                15_i, 10_i);
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.vec2<i32>(), spirv::BuiltinFn::kUclamp, Vector<const core::type::Type*, 1>{ty.i32()},
+            ty.vec2<i32>(), spirv::BuiltinFn::kUClamp, Vector<const core::type::Type*, 1>{ty.i32()},
             b.Splat(ty.vec2<i32>(), 10_i), b.Splat(ty.vec2<i32>(), 15_i),
             b.Splat(ty.vec2<i32>(), 10_i));
         b.Return(ep);
@@ -2006,8 +2006,8 @@ TEST_F(SpirvReader_BuiltinsTest, UClamp_SignedToSigned) {
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = spirv.uclamp<i32> 10i, 15i, 10i
-    %3:vec2<i32> = spirv.uclamp<i32> vec2<i32>(10i), vec2<i32>(15i), vec2<i32>(10i)
+    %2:i32 = spirv.u_clamp<i32> 10i, 15i, 10i
+    %3:vec2<i32> = spirv.u_clamp<i32> vec2<i32>(10i), vec2<i32>(15i), vec2<i32>(10i)
     ret
   }
 }
@@ -2040,11 +2040,11 @@ TEST_F(SpirvReader_BuiltinsTest, UClamp_MixedToUnsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kUclamp,
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kUClamp,
                                                Vector<const core::type::Type*, 1>{ty.u32()}, 10_i,
                                                10_u, 10_i);
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.vec2<u32>(), spirv::BuiltinFn::kUclamp, Vector<const core::type::Type*, 1>{ty.u32()},
+            ty.vec2<u32>(), spirv::BuiltinFn::kUClamp, Vector<const core::type::Type*, 1>{ty.u32()},
             b.Splat(ty.vec2<i32>(), 10_i), b.Splat(ty.vec2<u32>(), 10_u),
             b.Splat(ty.vec2<i32>(), 10_i));
         b.Return(ep);
@@ -2053,8 +2053,8 @@ TEST_F(SpirvReader_BuiltinsTest, UClamp_MixedToUnsigned) {
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = spirv.uclamp<u32> 10i, 10u, 10i
-    %3:vec2<u32> = spirv.uclamp<u32> vec2<i32>(10i), vec2<u32>(10u), vec2<i32>(10i)
+    %2:u32 = spirv.u_clamp<u32> 10i, 10u, 10i
+    %3:vec2<u32> = spirv.u_clamp<u32> vec2<i32>(10i), vec2<u32>(10u), vec2<i32>(10i)
     ret
   }
 }
@@ -2083,11 +2083,11 @@ TEST_F(SpirvReader_BuiltinsTest, UClamp_MixedToSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kUclamp,
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kUClamp,
                                                Vector<const core::type::Type*, 1>{ty.i32()}, 10_u,
                                                10_i, 10_u);
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.vec2<i32>(), spirv::BuiltinFn::kUclamp, Vector<const core::type::Type*, 1>{ty.i32()},
+            ty.vec2<i32>(), spirv::BuiltinFn::kUClamp, Vector<const core::type::Type*, 1>{ty.i32()},
             b.Splat(ty.vec2<u32>(), 10_u), b.Splat(ty.vec2<i32>(), 10_i),
             b.Splat(ty.vec2<u32>(), 10_u));
         b.Return(ep);
@@ -2096,8 +2096,8 @@ TEST_F(SpirvReader_BuiltinsTest, UClamp_MixedToSigned) {
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = spirv.uclamp<i32> 10u, 10i, 10u
-    %3:vec2<i32> = spirv.uclamp<i32> vec2<u32>(10u), vec2<i32>(10i), vec2<u32>(10u)
+    %2:i32 = spirv.u_clamp<i32> 10u, 10i, 10u
+    %3:vec2<i32> = spirv.u_clamp<i32> vec2<u32>(10u), vec2<i32>(10i), vec2<u32>(10u)
     ret
   }
 }
@@ -2137,8 +2137,8 @@ TEST_F(SpirvReader_BuiltinsTest, FindILsb_SignedToSigned) {
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = spirv.findILsb<i32> 10i
-    %3:vec2<i32> = spirv.findILsb<i32> vec2<i32>(10i)
+    %2:i32 = spirv.find_i_lsb<i32> 10i
+    %3:vec2<i32> = spirv.find_i_lsb<i32> vec2<i32>(10i)
     ret
   }
 }
@@ -2174,8 +2174,8 @@ TEST_F(SpirvReader_BuiltinsTest, FindILsb_UnsignedToUnsigned) {
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = spirv.findILsb<u32> 10u
-    %3:vec2<u32> = spirv.findILsb<u32> vec2<u32>(10u)
+    %2:u32 = spirv.find_i_lsb<u32> 10u
+    %3:vec2<u32> = spirv.find_i_lsb<u32> vec2<u32>(10u)
     ret
   }
 }
@@ -2211,8 +2211,8 @@ TEST_F(SpirvReader_BuiltinsTest, FindILsb_SignedToUnsigned) {
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = spirv.findILsb<u32> 10i
-    %3:vec2<u32> = spirv.findILsb<u32> vec2<i32>(10i)
+    %2:u32 = spirv.find_i_lsb<u32> 10i
+    %3:vec2<u32> = spirv.find_i_lsb<u32> vec2<i32>(10i)
     ret
   }
 }
@@ -2250,8 +2250,8 @@ TEST_F(SpirvReader_BuiltinsTest, FindILsb_UnsignedToSigned) {
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = spirv.findILsb<i32> 10u
-    %3:vec2<i32> = spirv.findILsb<i32> vec2<u32>(10u)
+    %2:i32 = spirv.find_i_lsb<i32> 10u
+    %3:vec2<i32> = spirv.find_i_lsb<i32> vec2<u32>(10u)
     ret
   }
 }
@@ -2353,7 +2353,7 @@ TEST_F(SpirvReader_BuiltinsTest, FaceForward_Scalar) {
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:f32 = spirv.faceForward 50.0f, 60.0f, 70.0f
+    %2:f32 = spirv.face_forward 50.0f, 60.0f, 70.0f
     ret
   }
 }
@@ -2390,7 +2390,7 @@ TEST_F(SpirvReader_BuiltinsTest, FaceForward_Vector) {
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<f32> = spirv.faceForward vec2<f32>(10.0f), vec2<f32>(20.0f), vec2<f32>(30.0f)
+    %2:vec2<f32> = spirv.face_forward vec2<f32>(10.0f), vec2<f32>(20.0f), vec2<f32>(30.0f)
     ret
   }
 }
@@ -5101,7 +5101,7 @@ TEST_F(SpirvReader_BuiltinsTest, ConvertFToS_ScalarSigned) {
     auto* src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = spirv.convertFToS<i32> 10.0f
+    %2:i32 = spirv.convert_f_to_s<i32> 10.0f
     ret
   }
 }
@@ -5132,7 +5132,7 @@ TEST_F(SpirvReader_BuiltinsTest, ConvertFToS_ScalarUnsigned) {
     auto* src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = spirv.convertFToS<u32> 10.0f
+    %2:u32 = spirv.convert_f_to_s<u32> 10.0f
     ret
   }
 }
@@ -5164,7 +5164,7 @@ TEST_F(SpirvReader_BuiltinsTest, ConvertFToS_VectorSigned) {
     auto* src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<i32> = spirv.convertFToS<i32> vec2<f32>(10.0f)
+    %2:vec2<i32> = spirv.convert_f_to_s<i32> vec2<f32>(10.0f)
     ret
   }
 }
@@ -5195,7 +5195,7 @@ TEST_F(SpirvReader_BuiltinsTest, ConvertFToS_VectorUnsigned) {
     auto* src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<u32> = spirv.convertFToS<u32> vec2<f32>(10.0f)
+    %2:vec2<u32> = spirv.convert_f_to_s<u32> vec2<f32>(10.0f)
     ret
   }
 }
@@ -5227,7 +5227,7 @@ TEST_F(SpirvReader_BuiltinsTest, ConvertSToF_ScalarSigned) {
     auto* src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:f32 = spirv.convertSToF<f32> 10i
+    %2:f32 = spirv.convert_s_to_f<f32> 10i
     ret
   }
 }
@@ -5258,7 +5258,7 @@ TEST_F(SpirvReader_BuiltinsTest, ConvertSToF_ScalarUnsigned) {
     auto* src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:f32 = spirv.convertSToF<f32> 10u
+    %2:f32 = spirv.convert_s_to_f<f32> 10u
     ret
   }
 }
@@ -5290,7 +5290,7 @@ TEST_F(SpirvReader_BuiltinsTest, ConvertSToF_VectorSigned) {
     auto* src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<f32> = spirv.convertSToF<f32> vec2<i32>(10i)
+    %2:vec2<f32> = spirv.convert_s_to_f<f32> vec2<i32>(10i)
     ret
   }
 }
@@ -5321,7 +5321,7 @@ TEST_F(SpirvReader_BuiltinsTest, ConvertSToF_VectorUnsigned) {
     auto* src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<f32> = spirv.convertSToF<f32> vec2<u32>(10u)
+    %2:vec2<f32> = spirv.convert_s_to_f<f32> vec2<u32>(10u)
     ret
   }
 }
@@ -5353,7 +5353,7 @@ TEST_F(SpirvReader_BuiltinsTest, ConvertUToF_ScalarSigned) {
     auto* src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:f32 = spirv.convertUToF<f32> 10i
+    %2:f32 = spirv.convert_u_to_f<f32> 10i
     ret
   }
 }
@@ -5385,7 +5385,7 @@ TEST_F(SpirvReader_BuiltinsTest, ConvertUToF_ScalarUnsigned) {
     auto* src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:f32 = spirv.convertUToF<f32> 10u
+    %2:f32 = spirv.convert_u_to_f<f32> 10u
     ret
   }
 }
@@ -5416,7 +5416,7 @@ TEST_F(SpirvReader_BuiltinsTest, ConvertUToF_VectorSigned) {
     auto* src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<f32> = spirv.convertUToF<f32> vec2<i32>(10i)
+    %2:vec2<f32> = spirv.convert_u_to_f<f32> vec2<i32>(10i)
     ret
   }
 }
@@ -5448,7 +5448,7 @@ TEST_F(SpirvReader_BuiltinsTest, ConvertUToF_VectorUnsigned) {
     auto* src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:vec2<f32> = spirv.convertUToF<f32> vec2<u32>(10u)
+    %2:vec2<f32> = spirv.convert_u_to_f<f32> vec2<u32>(10u)
     ret
   }
 }
@@ -6023,9 +6023,9 @@ TEST_P(SpirvReader_BitwiseTest, Vector_SignedSigned_Unsigned) {
 INSTANTIATE_TEST_SUITE_P(
     SpirvReader,
     SpirvReader_BitwiseTest,
-    ::testing::Values(SpirvReaderParams{spirv::BuiltinFn::kBitwiseAnd, "bitwiseAnd", "and"},
-                      SpirvReaderParams{spirv::BuiltinFn::kBitwiseOr, "bitwiseOr", "or"},
-                      SpirvReaderParams{spirv::BuiltinFn::kBitwiseXor, "bitwiseXor", "xor"}));
+    ::testing::Values(SpirvReaderParams{spirv::BuiltinFn::kBitwiseAnd, "bitwise_and", "and"},
+                      SpirvReaderParams{spirv::BuiltinFn::kBitwiseOr, "bitwise_or", "or"},
+                      SpirvReaderParams{spirv::BuiltinFn::kBitwiseXor, "bitwise_xor", "xor"}));
 
 using SpirvReader_IntegerTest = core::ir::transform::TransformTestWithParam<SpirvReaderParams>;
 TEST_P(SpirvReader_IntegerTest, Scalar_SignedSigned) {

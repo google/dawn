@@ -6686,64 +6686,64 @@ constexpr IntrinsicInfo kBuiltins[] = {
   },
   {
     /* [39] */
-    /* fn smax<R : iu32>[T : iu32, U : iu32](T, U) -> R */
-    /* fn smax<R : iu32>[T : iu32, U : iu32, N : num](vec<N, T>, vec<N, U>) -> vec<N, R> */
+    /* fn s_max<R : iu32>[T : iu32, U : iu32](T, U) -> R */
+    /* fn s_max<R : iu32>[T : iu32, U : iu32, N : num](vec<N, T>, vec<N, U>) -> vec<N, R> */
     /* num overloads */ 2,
     /* overloads */ OverloadIndex(164),
   },
   {
     /* [40] */
-    /* fn smin<R : iu32>[T : iu32, U : iu32](T, U) -> R */
-    /* fn smin<R : iu32>[T : iu32, U : iu32, N : num](vec<N, T>, vec<N, U>) -> vec<N, R> */
+    /* fn s_min<R : iu32>[T : iu32, U : iu32](T, U) -> R */
+    /* fn s_min<R : iu32>[T : iu32, U : iu32, N : num](vec<N, T>, vec<N, U>) -> vec<N, R> */
     /* num overloads */ 2,
     /* overloads */ OverloadIndex(164),
   },
   {
     /* [41] */
-    /* fn sclamp<R : iu32>[T : iu32, U : iu32, V : iu32](T, U, V) -> R */
-    /* fn sclamp<R : iu32>[T : iu32, U : iu32, V : iu32, N : num](vec<N, T>, vec<N, U>, vec<N, V>) -> vec<N, R> */
+    /* fn s_clamp<R : iu32>[T : iu32, U : iu32, V : iu32](T, U, V) -> R */
+    /* fn s_clamp<R : iu32>[T : iu32, U : iu32, V : iu32, N : num](vec<N, T>, vec<N, U>, vec<N, V>) -> vec<N, R> */
     /* num overloads */ 2,
     /* overloads */ OverloadIndex(166),
   },
   {
     /* [42] */
-    /* fn umax<R : iu32>[T : iu32, U : iu32](T, U) -> R */
-    /* fn umax<R : iu32>[T : iu32, U : iu32, N : num](vec<N, T>, vec<N, U>) -> vec<N, R> */
+    /* fn u_max<R : iu32>[T : iu32, U : iu32](T, U) -> R */
+    /* fn u_max<R : iu32>[T : iu32, U : iu32, N : num](vec<N, T>, vec<N, U>) -> vec<N, R> */
     /* num overloads */ 2,
     /* overloads */ OverloadIndex(164),
   },
   {
     /* [43] */
-    /* fn umin<R : iu32>[T : iu32, U : iu32](T, U) -> R */
-    /* fn umin<R : iu32>[T : iu32, U : iu32, N : num](vec<N, T>, vec<N, U>) -> vec<N, R> */
+    /* fn u_min<R : iu32>[T : iu32, U : iu32](T, U) -> R */
+    /* fn u_min<R : iu32>[T : iu32, U : iu32, N : num](vec<N, T>, vec<N, U>) -> vec<N, R> */
     /* num overloads */ 2,
     /* overloads */ OverloadIndex(164),
   },
   {
     /* [44] */
-    /* fn uclamp<R : iu32>[T : iu32, U : iu32, V : iu32](T, U, V) -> R */
-    /* fn uclamp<R : iu32>[T : iu32, U : iu32, V : iu32, N : num](vec<N, T>, vec<N, U>, vec<N, V>) -> vec<N, R> */
+    /* fn u_clamp<R : iu32>[T : iu32, U : iu32, V : iu32](T, U, V) -> R */
+    /* fn u_clamp<R : iu32>[T : iu32, U : iu32, V : iu32, N : num](vec<N, T>, vec<N, U>, vec<N, V>) -> vec<N, R> */
     /* num overloads */ 2,
     /* overloads */ OverloadIndex(166),
   },
   {
     /* [45] */
-    /* fn findILsb<R : iu32>[T : iu32](T) -> R */
-    /* fn findILsb<R : iu32>[T : iu32, N : num](vec<N, T>) -> vec<N, R> */
+    /* fn find_i_lsb<R : iu32>[T : iu32](T) -> R */
+    /* fn find_i_lsb<R : iu32>[T : iu32, N : num](vec<N, T>) -> vec<N, R> */
     /* num overloads */ 2,
     /* overloads */ OverloadIndex(162),
   },
   {
     /* [46] */
-    /* fn findSMsb<R : iu32>[T : iu32](T) -> R */
-    /* fn findSMsb<R : iu32>[T : iu32, N : num](vec<N, T>) -> vec<N, R> */
+    /* fn find_s_msb<R : iu32>[T : iu32](T) -> R */
+    /* fn find_s_msb<R : iu32>[T : iu32, N : num](vec<N, T>) -> vec<N, R> */
     /* num overloads */ 2,
     /* overloads */ OverloadIndex(162),
   },
   {
     /* [47] */
-    /* fn findUMsb<R : iu32>[T : iu32](T) -> R */
-    /* fn findUMsb<R : iu32>[T : iu32, N : num](vec<N, T>) -> vec<N, R> */
+    /* fn find_u_msb<R : iu32>[T : iu32](T) -> R */
+    /* fn find_u_msb<R : iu32>[T : iu32, N : num](vec<N, T>) -> vec<N, R> */
     /* num overloads */ 2,
     /* overloads */ OverloadIndex(162),
   },
@@ -6763,8 +6763,8 @@ constexpr IntrinsicInfo kBuiltins[] = {
   },
   {
     /* [50] */
-    /* fn faceForward[T : f32_f16](T, T, T) -> T */
-    /* fn faceForward[T : f32_f16, N : num](vec<N, T>, vec<N, T>, vec<N, T>) -> vec<N, T> */
+    /* fn face_forward[T : f32_f16](T, T, T) -> T */
+    /* fn face_forward[T : f32_f16, N : num](vec<N, T>, vec<N, T>, vec<N, T>) -> vec<N, T> */
     /* num overloads */ 2,
     /* overloads */ OverloadIndex(172),
   },
@@ -6910,43 +6910,43 @@ constexpr IntrinsicInfo kBuiltins[] = {
   },
   {
     /* [71] */
-    /* fn convertFToS<R : iu32>[T : f32_f16](T) -> R */
-    /* fn convertFToS<R : iu32>[T : f32_f16, N : num](vec<N, T>) -> vec<N, R> */
+    /* fn convert_f_to_s<R : iu32>[T : f32_f16](T) -> R */
+    /* fn convert_f_to_s<R : iu32>[T : f32_f16, N : num](vec<N, T>) -> vec<N, R> */
     /* num overloads */ 2,
     /* overloads */ OverloadIndex(188),
   },
   {
     /* [72] */
-    /* fn convertSToF<R : f32_f16>[T : iu32](T) -> R */
-    /* fn convertSToF<R : f32_f16>[T : iu32, N : num](vec<N, T>) -> vec<N, R> */
+    /* fn convert_s_to_f<R : f32_f16>[T : iu32](T) -> R */
+    /* fn convert_s_to_f<R : f32_f16>[T : iu32, N : num](vec<N, T>) -> vec<N, R> */
     /* num overloads */ 2,
     /* overloads */ OverloadIndex(190),
   },
   {
     /* [73] */
-    /* fn convertUToF<R : f32_f16>[T : iu32](T) -> R */
-    /* fn convertUToF<R : f32_f16>[T : iu32, N : num](vec<N, T>) -> vec<N, R> */
+    /* fn convert_u_to_f<R : f32_f16>[T : iu32](T) -> R */
+    /* fn convert_u_to_f<R : f32_f16>[T : iu32, N : num](vec<N, T>) -> vec<N, R> */
     /* num overloads */ 2,
     /* overloads */ OverloadIndex(190),
   },
   {
     /* [74] */
-    /* fn bitwiseAnd<R : iu32>[A : iu32, B : iu32](A, B) -> R */
-    /* fn bitwiseAnd<R : iu32>[A : iu32, B : iu32, N : num](vec<N, A>, vec<N, B>) -> vec<N, R> */
+    /* fn bitwise_and<R : iu32>[A : iu32, B : iu32](A, B) -> R */
+    /* fn bitwise_and<R : iu32>[A : iu32, B : iu32, N : num](vec<N, A>, vec<N, B>) -> vec<N, R> */
     /* num overloads */ 2,
     /* overloads */ OverloadIndex(184),
   },
   {
     /* [75] */
-    /* fn bitwiseOr<R : iu32>[A : iu32, B : iu32](A, B) -> R */
-    /* fn bitwiseOr<R : iu32>[A : iu32, B : iu32, N : num](vec<N, A>, vec<N, B>) -> vec<N, R> */
+    /* fn bitwise_or<R : iu32>[A : iu32, B : iu32](A, B) -> R */
+    /* fn bitwise_or<R : iu32>[A : iu32, B : iu32, N : num](vec<N, A>, vec<N, B>) -> vec<N, R> */
     /* num overloads */ 2,
     /* overloads */ OverloadIndex(184),
   },
   {
     /* [76] */
-    /* fn bitwiseXor<R : iu32>[A : iu32, B : iu32](A, B) -> R */
-    /* fn bitwiseXor<R : iu32>[A : iu32, B : iu32, N : num](vec<N, A>, vec<N, B>) -> vec<N, R> */
+    /* fn bitwise_xor<R : iu32>[A : iu32, B : iu32](A, B) -> R */
+    /* fn bitwise_xor<R : iu32>[A : iu32, B : iu32, N : num](vec<N, A>, vec<N, B>) -> vec<N, R> */
     /* num overloads */ 2,
     /* overloads */ OverloadIndex(184),
   },
@@ -6987,13 +6987,13 @@ constexpr IntrinsicInfo kBuiltins[] = {
   },
   {
     /* [82] */
-    /* fn sdot(u32, u32, u32) -> i32 */
+    /* fn s_dot(u32, u32, u32) -> i32 */
     /* num overloads */ 1,
     /* overloads */ OverloadIndex(200),
   },
   {
     /* [83] */
-    /* fn udot(u32, u32, u32) -> u32 */
+    /* fn u_dot(u32, u32, u32) -> u32 */
     /* num overloads */ 1,
     /* overloads */ OverloadIndex(201),
   },
