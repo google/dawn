@@ -44,32 +44,36 @@ const char* str(BuiltinFn i) {
             return "<none>";
         case BuiltinFn::kArrayLength:
             return "array_length";
-        case BuiltinFn::kAtomicAnd:
-            return "atomic_and";
-        case BuiltinFn::kAtomicCompareExchange:
-            return "atomic_compare_exchange";
-        case BuiltinFn::kAtomicExchange:
-            return "atomic_exchange";
-        case BuiltinFn::kAtomicIadd:
-            return "atomic_iadd";
-        case BuiltinFn::kAtomicIsub:
-            return "atomic_isub";
         case BuiltinFn::kAtomicLoad:
             return "atomic_load";
-        case BuiltinFn::kAtomicOr:
-            return "atomic_or";
-        case BuiltinFn::kAtomicSmax:
-            return "atomic_smax";
-        case BuiltinFn::kAtomicSmin:
-            return "atomic_smin";
         case BuiltinFn::kAtomicStore:
             return "atomic_store";
-        case BuiltinFn::kAtomicUmax:
-            return "atomic_umax";
-        case BuiltinFn::kAtomicUmin:
-            return "atomic_umin";
+        case BuiltinFn::kAtomicExchange:
+            return "atomic_exchange";
+        case BuiltinFn::kAtomicCompareExchange:
+            return "atomic_compare_exchange";
+        case BuiltinFn::kAtomicIAdd:
+            return "atomic_i_add";
+        case BuiltinFn::kAtomicISub:
+            return "atomic_i_sub";
+        case BuiltinFn::kAtomicSMax:
+            return "atomic_s_max";
+        case BuiltinFn::kAtomicSMin:
+            return "atomic_s_min";
+        case BuiltinFn::kAtomicUMax:
+            return "atomic_u_max";
+        case BuiltinFn::kAtomicUMin:
+            return "atomic_u_min";
+        case BuiltinFn::kAtomicAnd:
+            return "atomic_and";
+        case BuiltinFn::kAtomicOr:
+            return "atomic_or";
         case BuiltinFn::kAtomicXor:
             return "atomic_xor";
+        case BuiltinFn::kAtomicIIncrement:
+            return "atomic_i_increment";
+        case BuiltinFn::kAtomicIDecrement:
+            return "atomic_i_decrement";
         case BuiltinFn::kDot:
             return "dot";
         case BuiltinFn::kImageDrefGather:
@@ -240,15 +244,17 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kAtomicAnd:
         case BuiltinFn::kAtomicCompareExchange:
         case BuiltinFn::kAtomicExchange:
-        case BuiltinFn::kAtomicIadd:
-        case BuiltinFn::kAtomicIsub:
+        case BuiltinFn::kAtomicIAdd:
+        case BuiltinFn::kAtomicISub:
         case BuiltinFn::kAtomicOr:
-        case BuiltinFn::kAtomicSmax:
-        case BuiltinFn::kAtomicSmin:
+        case BuiltinFn::kAtomicSMax:
+        case BuiltinFn::kAtomicSMin:
         case BuiltinFn::kAtomicStore:
-        case BuiltinFn::kAtomicUmax:
-        case BuiltinFn::kAtomicUmin:
+        case BuiltinFn::kAtomicUMax:
+        case BuiltinFn::kAtomicUMin:
         case BuiltinFn::kAtomicXor:
+        case BuiltinFn::kAtomicIIncrement:
+        case BuiltinFn::kAtomicIDecrement:
             return core::ir::Instruction::Accesses{core::ir::Instruction::Access::kLoad,
                                                    core::ir::Instruction::Access::kStore};
 

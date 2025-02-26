@@ -269,7 +269,7 @@ struct State {
         core::ir::Call* call = nullptr;
         switch (builtin->Func()) {
             case core::BuiltinFn::kAtomicAdd:
-                call = build(spirv::BuiltinFn::kAtomicIadd);
+                call = build(spirv::BuiltinFn::kAtomicIAdd);
                 call->AppendArg(builtin->Args()[1]);
                 break;
             case core::BuiltinFn::kAtomicAnd:
@@ -311,17 +311,17 @@ struct State {
                 break;
             case core::BuiltinFn::kAtomicMax:
                 if (result_ty->IsSignedIntegerScalar()) {
-                    call = build(spirv::BuiltinFn::kAtomicSmax);
+                    call = build(spirv::BuiltinFn::kAtomicSMax);
                 } else {
-                    call = build(spirv::BuiltinFn::kAtomicUmax);
+                    call = build(spirv::BuiltinFn::kAtomicUMax);
                 }
                 call->AppendArg(builtin->Args()[1]);
                 break;
             case core::BuiltinFn::kAtomicMin:
                 if (result_ty->IsSignedIntegerScalar()) {
-                    call = build(spirv::BuiltinFn::kAtomicSmin);
+                    call = build(spirv::BuiltinFn::kAtomicSMin);
                 } else {
-                    call = build(spirv::BuiltinFn::kAtomicUmin);
+                    call = build(spirv::BuiltinFn::kAtomicUMin);
                 }
                 call->AppendArg(builtin->Args()[1]);
                 break;
@@ -330,7 +330,7 @@ struct State {
                 call->AppendArg(builtin->Args()[1]);
                 break;
             case core::BuiltinFn::kAtomicSub:
-                call = build(spirv::BuiltinFn::kAtomicIsub);
+                call = build(spirv::BuiltinFn::kAtomicISub);
                 call->AppendArg(builtin->Args()[1]);
                 break;
             case core::BuiltinFn::kAtomicXor:

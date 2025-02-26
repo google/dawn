@@ -286,7 +286,7 @@ $B1: {  # root
 
 %foo = func(%arg1:i32):i32 {
   $B2: {
-    %4:i32 = spirv.atomic_iadd %1, 1u, 0u, %arg1
+    %4:i32 = spirv.atomic_i_add %1, 1u, 0u, %arg1
     ret %4
   }
 }
@@ -330,7 +330,7 @@ $B1: {  # root
 
 %foo = func(%arg1:i32):i32 {
   $B2: {
-    %4:i32 = spirv.atomic_iadd %1, 2u, 0u, %arg1
+    %4:i32 = spirv.atomic_i_add %1, 2u, 0u, %arg1
     ret %4
   }
 }
@@ -565,7 +565,7 @@ $B1: {  # root
 
 %foo = func(%arg1:i32):i32 {
   $B2: {
-    %4:i32 = spirv.atomic_smax %1, 2u, 0u, %arg1
+    %4:i32 = spirv.atomic_s_max %1, 2u, 0u, %arg1
     ret %4
   }
 }
@@ -609,7 +609,7 @@ $B1: {  # root
 
 %foo = func(%arg1:u32):u32 {
   $B2: {
-    %4:u32 = spirv.atomic_umax %1, 2u, 0u, %arg1
+    %4:u32 = spirv.atomic_u_max %1, 2u, 0u, %arg1
     ret %4
   }
 }
@@ -653,7 +653,7 @@ $B1: {  # root
 
 %foo = func(%arg1:i32):i32 {
   $B2: {
-    %4:i32 = spirv.atomic_smin %1, 2u, 0u, %arg1
+    %4:i32 = spirv.atomic_s_min %1, 2u, 0u, %arg1
     ret %4
   }
 }
@@ -697,7 +697,7 @@ $B1: {  # root
 
 %foo = func(%arg1:u32):u32 {
   $B2: {
-    %4:u32 = spirv.atomic_umin %1, 2u, 0u, %arg1
+    %4:u32 = spirv.atomic_u_min %1, 2u, 0u, %arg1
     ret %4
   }
 }
@@ -829,7 +829,7 @@ $B1: {  # root
 
 %foo = func(%arg1:i32):i32 {
   $B2: {
-    %4:i32 = spirv.atomic_isub %1, 2u, 0u, %arg1
+    %4:i32 = spirv.atomic_i_sub %1, 2u, 0u, %arg1
     ret %4
   }
 }

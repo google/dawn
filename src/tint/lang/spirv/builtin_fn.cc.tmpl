@@ -52,15 +52,17 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kAtomicAnd:
         case BuiltinFn::kAtomicCompareExchange:
         case BuiltinFn::kAtomicExchange:
-        case BuiltinFn::kAtomicIadd:
-        case BuiltinFn::kAtomicIsub:
+        case BuiltinFn::kAtomicIAdd:
+        case BuiltinFn::kAtomicISub:
         case BuiltinFn::kAtomicOr:
-        case BuiltinFn::kAtomicSmax:
-        case BuiltinFn::kAtomicSmin:
+        case BuiltinFn::kAtomicSMax:
+        case BuiltinFn::kAtomicSMin:
         case BuiltinFn::kAtomicStore:
-        case BuiltinFn::kAtomicUmax:
-        case BuiltinFn::kAtomicUmin:
+        case BuiltinFn::kAtomicUMax:
+        case BuiltinFn::kAtomicUMin:
         case BuiltinFn::kAtomicXor:
+        case BuiltinFn::kAtomicIIncrement:
+        case BuiltinFn::kAtomicIDecrement:
             return core::ir::Instruction::Accesses{core::ir::Instruction::Access::kLoad, core::ir::Instruction::Access::kStore};
 
         case BuiltinFn::kArrayLength:

@@ -1324,10 +1324,10 @@ class Printer {
             case spirv::BuiltinFn::kArrayLength:
                 op = spv::Op::OpArrayLength;
                 break;
-            case spirv::BuiltinFn::kAtomicIadd:
+            case spirv::BuiltinFn::kAtomicIAdd:
                 op = spv::Op::OpAtomicIAdd;
                 break;
-            case spirv::BuiltinFn::kAtomicIsub:
+            case spirv::BuiltinFn::kAtomicISub:
                 op = spv::Op::OpAtomicISub;
                 break;
             case spirv::BuiltinFn::kAtomicAnd:
@@ -1345,23 +1345,29 @@ class Printer {
             case spirv::BuiltinFn::kAtomicOr:
                 op = spv::Op::OpAtomicOr;
                 break;
-            case spirv::BuiltinFn::kAtomicSmax:
+            case spirv::BuiltinFn::kAtomicSMax:
                 op = spv::Op::OpAtomicSMax;
                 break;
-            case spirv::BuiltinFn::kAtomicSmin:
+            case spirv::BuiltinFn::kAtomicSMin:
                 op = spv::Op::OpAtomicSMin;
                 break;
             case spirv::BuiltinFn::kAtomicStore:
                 op = spv::Op::OpAtomicStore;
                 break;
-            case spirv::BuiltinFn::kAtomicUmax:
+            case spirv::BuiltinFn::kAtomicUMax:
                 op = spv::Op::OpAtomicUMax;
                 break;
-            case spirv::BuiltinFn::kAtomicUmin:
+            case spirv::BuiltinFn::kAtomicUMin:
                 op = spv::Op::OpAtomicUMin;
                 break;
             case spirv::BuiltinFn::kAtomicXor:
                 op = spv::Op::OpAtomicXor;
+                break;
+            case BuiltinFn::kAtomicIIncrement:
+                op = spv::Op::OpAtomicIIncrement;
+                break;
+            case BuiltinFn::kAtomicIDecrement:
+                op = spv::Op::OpAtomicIDecrement;
                 break;
             case spirv::BuiltinFn::kDot:
                 op = spv::Op::OpDot;

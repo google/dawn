@@ -92,7 +92,6 @@ match fiu32: f32 | i32 | u32
 match fiu32_f16: f32 | i32 | u32 | f16
 match scalar: f32 | f16 | i32 | u32 | bool
 
-match read_write: access.read_write
 match storage
   : address_space.storage
 match workgroup_or_storage
@@ -131,6 +130,8 @@ match u32_texel_format
   | texel_format.rg32uint
   | texel_format.rgba32uint
 
+match read_write
+  : access.read_write
 match readable
   : access.read
   | access.read_write
@@ -148,19 +149,37 @@ match subgroup_matrix_kind_result : subgroup_matrix_kind.result
 ////////////////////////////////////////////////////////////////////////////////
 implicit(I: u32, A: access) fn array_length(ptr<storage, struct_with_runtime_array, A>, I) -> u32
 
-@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_and(ptr<S, atomic<T>, read_write>, U, U, T) -> T
-@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_compare_exchange(ptr<S, atomic<T>, read_write>, U, U, U, T, T) -> T
-@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_exchange(ptr<S, atomic<T>, read_write>, U, U, T) -> T
-@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_iadd(ptr<S, atomic<T>, read_write>, U, U, T) -> T
-@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_isub(ptr<S, atomic<T>, read_write>, U, U, T) -> T
+/// Atomics when going from WGSL to SPIR-v, so we have an `atomic` type already
 @stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_load(ptr<S, atomic<T>, read_write>, U, U) -> T
-@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_or(ptr<S, atomic<T>, read_write>, U, U, T) -> T
-@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_smax(ptr<S, atomic<T>, read_write>, U, U, T) -> T
-@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_smin(ptr<S, atomic<T>, read_write>, U, U, T) -> T
 @stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_store(ptr<S, atomic<T>, read_write>, U, U, T)
-@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_umax(ptr<S, atomic<T>, read_write>, U, U, T) -> T
-@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_umin(ptr<S, atomic<T>, read_write>, U, U, T) -> T
+@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_exchange(ptr<S, atomic<T>, read_write>, U, U, T) -> T
+@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_compare_exchange(ptr<S, atomic<T>, read_write>, U, U, U, T, T) -> T
+@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_i_add(ptr<S, atomic<T>, read_write>, U, U, T) -> T
+@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_i_sub(ptr<S, atomic<T>, read_write>, U, U, T) -> T
+@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_s_max(ptr<S, atomic<T>, read_write>, U, U, T) -> T
+@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_s_min(ptr<S, atomic<T>, read_write>, U, U, T) -> T
+@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_u_max(ptr<S, atomic<T>, read_write>, U, U, T) -> T
+@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_u_min(ptr<S, atomic<T>, read_write>, U, U, T) -> T
+@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_and(ptr<S, atomic<T>, read_write>, U, U, T) -> T
+@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_or(ptr<S, atomic<T>, read_write>, U, U, T) -> T
 @stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_xor(ptr<S, atomic<T>, read_write>, U, U, T) -> T
+
+/// Atomics when going from SPIR-V to WGSL when the atomics are all of type `T`
+@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_load(ptr<S, T, readable>, U, U) -> T
+@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_store(ptr<S, T, writable>, U, U, T)
+@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_exchange(ptr<S, T, writable>, U, U, T) -> T
+@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_compare_exchange(ptr<S, T, writable>, U, U, T, T) -> T
+@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_i_increment(ptr<S, T, writable>, U, U) -> T
+@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_i_decrement(ptr<S, T, writable>, U, U) -> T
+@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_i_add(ptr<S, T, writable>, U, U, T) -> T
+@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_i_sub(ptr<S, T, writable>, U, U, T) -> T
+@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_s_min(ptr<S, T, writable>, U, U, T) -> T
+@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_s_max(ptr<S, T, writable>, U, U, T) -> T
+@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_u_min(ptr<S, T, writable>, U, U, T) -> T
+@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_u_max(ptr<S, T, writable>, U, U, T) -> T
+@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_and(ptr<S, T, writable>, U, U, T) -> T
+@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_or(ptr<S, T, writable>, U, U, T) -> T
+@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_xor(ptr<S, T, writable>, U, U, T) -> T
 
 implicit(N: num, T: f32_f16) fn dot(vec<N, T>, vec<N, T>) -> T
 
