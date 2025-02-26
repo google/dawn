@@ -151,8 +151,12 @@ bool Type::IsAbstractScalarOrVector() const {
     return Is<AbstractInt>() || Is([](const Vector* v) { return v->Type()->Is<AbstractInt>(); });
 }
 
+bool Type::IsBoolVector() const {
+    return Is([](const Vector* v) { return v->Type()->Is<Bool>(); });
+}
+
 bool Type::IsBoolScalarOrVector() const {
-    return Is<Bool>() || Is([](const Vector* v) { return v->Type()->Is<Bool>(); });
+    return Is<Bool>() || IsBoolVector();
 }
 
 bool Type::IsScalarVector() const {

@@ -81,6 +81,14 @@ class OperandInstruction : public Castable<OperandInstruction<N, R>, Instruction
         }
     }
 
+    /// Appends a new operand
+    /// @param operand the new operand
+    void PushOperand(ir::Value* operand) {
+        auto idx = operands_.Length();
+        operands_.Push(operand);
+        operand->AddUsage({this, static_cast<uint32_t>(idx)});
+    }
+
     /// Removes all operands from the instruction
     void ClearOperands() {
         for (uint32_t i = 0; i < operands_.Length(); i++) {
@@ -111,6 +119,15 @@ class OperandInstruction : public Castable<OperandInstruction<N, R>, Instruction
                   tint::traits::Decay<tint::traits::NthTypeOf<0, ARGS..., void>>>>>
     void SetResults(ARGS&&... values) {
         SetResults(Vector{std::forward<ARGS>(values)...});
+    }
+
+    /// Appends a result value to the instruction
+    /// @param value the value to append
+    void AddResult(InstructionResult* value) {
+        if (value) {
+            value->SetInstruction(this);
+        }
+        results_.Push(value);
     }
 
     /// Removes all results from the instruction.
@@ -171,15 +188,6 @@ class OperandInstruction : public Castable<OperandInstruction<N, R>, Instruction
             AddOperand(idx, val);
             idx += 1;
         }
-    }
-
-    /// Appends a result value to the instruction
-    /// @param value the value to append
-    void AddResult(InstructionResult* value) {
-        if (value) {
-            value->SetInstruction(this);
-        }
-        results_.Push(value);
     }
 
     /// The operands to this instruction.
