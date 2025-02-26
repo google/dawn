@@ -73,7 +73,7 @@ Buffer = struct @align(4) {
 }
 
 $B1: {  # root
-  %var:ptr<storage, Buffer, read_write> = var @binding_point(0, 0)
+  %var:ptr<storage, Buffer, read_write> = var undef @binding_point(0, 0)
 }
 
 %foo = func():u32 {
@@ -94,7 +94,7 @@ Buffer = struct @align(4) {
 }
 
 $B1: {  # root
-  %var:ptr<storage, Buffer, read_write> = var @binding_point(0, 0)
+  %var:ptr<storage, Buffer, read_write> = var undef @binding_point(0, 0)
 }
 
 %foo = func():u32 {
@@ -139,7 +139,7 @@ Buffer = struct @align(4) {
 }
 
 $B1: {  # root
-  %var:ptr<storage, Buffer, read_write> = var @binding_point(0, 0)
+  %var:ptr<storage, Buffer, read_write> = var undef @binding_point(0, 0)
 }
 
 %foo = func():u32 {
@@ -162,7 +162,7 @@ Buffer = struct @align(4) {
 }
 
 $B1: {  # root
-  %var:ptr<storage, Buffer, read_write> = var @binding_point(0, 0)
+  %var:ptr<storage, Buffer, read_write> = var undef @binding_point(0, 0)
 }
 
 %foo = func():u32 {
@@ -209,7 +209,7 @@ Buffer = struct @align(4) {
 }
 
 $B1: {  # root
-  %var:ptr<storage, Buffer, read_write> = var @binding_point(0, 0)
+  %var:ptr<storage, Buffer, read_write> = var undef @binding_point(0, 0)
 }
 
 %foo = func():u32 {
@@ -232,7 +232,7 @@ Buffer = struct @align(4) {
 }
 
 $B1: {  # root
-  %var:ptr<storage, Buffer, read_write> = var @binding_point(0, 0)
+  %var:ptr<storage, Buffer, read_write> = var undef @binding_point(0, 0)
 }
 
 %foo = func():u32 {
@@ -267,7 +267,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicAdd_Storage) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<storage, atomic<i32>, read_write> = var @binding_point(0, 0)
+  %1:ptr<storage, atomic<i32>, read_write> = var undef @binding_point(0, 0)
 }
 
 %foo = func(%arg1:i32):i32 {
@@ -281,7 +281,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<storage, atomic<i32>, read_write> = var @binding_point(0, 0)
+  %1:ptr<storage, atomic<i32>, read_write> = var undef @binding_point(0, 0)
 }
 
 %foo = func(%arg1:i32):i32 {
@@ -311,7 +311,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicAdd_Workgroup) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<workgroup, atomic<i32>, read_write> = var
+  %1:ptr<workgroup, atomic<i32>, read_write> = var undef
 }
 
 %foo = func(%arg1:i32):i32 {
@@ -325,7 +325,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<workgroup, atomic<i32>, read_write> = var
+  %1:ptr<workgroup, atomic<i32>, read_write> = var undef
 }
 
 %foo = func(%arg1:i32):i32 {
@@ -355,7 +355,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicAnd) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<workgroup, atomic<i32>, read_write> = var
+  %1:ptr<workgroup, atomic<i32>, read_write> = var undef
 }
 
 %foo = func(%arg1:i32):i32 {
@@ -369,7 +369,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<workgroup, atomic<i32>, read_write> = var
+  %1:ptr<workgroup, atomic<i32>, read_write> = var undef
 }
 
 %foo = func(%arg1:i32):i32 {
@@ -407,7 +407,7 @@ __atomic_compare_exchange_result_i32 = struct @align(4) {
 }
 
 $B1: {  # root
-  %1:ptr<workgroup, atomic<i32>, read_write> = var
+  %1:ptr<workgroup, atomic<i32>, read_write> = var undef
 }
 
 %foo = func(%cmp:i32, %val:i32):i32 {
@@ -427,7 +427,7 @@ __atomic_compare_exchange_result_i32 = struct @align(4) {
 }
 
 $B1: {  # root
-  %1:ptr<workgroup, atomic<i32>, read_write> = var
+  %1:ptr<workgroup, atomic<i32>, read_write> = var undef
 }
 
 %foo = func(%cmp:i32, %val:i32):i32 {
@@ -460,7 +460,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicExchange) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<workgroup, atomic<i32>, read_write> = var
+  %1:ptr<workgroup, atomic<i32>, read_write> = var undef
 }
 
 %foo = func(%arg1:i32):i32 {
@@ -474,7 +474,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<workgroup, atomic<i32>, read_write> = var
+  %1:ptr<workgroup, atomic<i32>, read_write> = var undef
 }
 
 %foo = func(%arg1:i32):i32 {
@@ -502,7 +502,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicLoad) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<workgroup, atomic<i32>, read_write> = var
+  %1:ptr<workgroup, atomic<i32>, read_write> = var undef
 }
 
 %foo = func():i32 {
@@ -516,7 +516,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<workgroup, atomic<i32>, read_write> = var
+  %1:ptr<workgroup, atomic<i32>, read_write> = var undef
 }
 
 %foo = func():i32 {
@@ -546,7 +546,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicMax_I32) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<workgroup, atomic<i32>, read_write> = var
+  %1:ptr<workgroup, atomic<i32>, read_write> = var undef
 }
 
 %foo = func(%arg1:i32):i32 {
@@ -560,7 +560,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<workgroup, atomic<i32>, read_write> = var
+  %1:ptr<workgroup, atomic<i32>, read_write> = var undef
 }
 
 %foo = func(%arg1:i32):i32 {
@@ -590,7 +590,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicMax_U32) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<workgroup, atomic<u32>, read_write> = var
+  %1:ptr<workgroup, atomic<u32>, read_write> = var undef
 }
 
 %foo = func(%arg1:u32):u32 {
@@ -604,7 +604,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<workgroup, atomic<u32>, read_write> = var
+  %1:ptr<workgroup, atomic<u32>, read_write> = var undef
 }
 
 %foo = func(%arg1:u32):u32 {
@@ -634,7 +634,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicMin_I32) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<workgroup, atomic<i32>, read_write> = var
+  %1:ptr<workgroup, atomic<i32>, read_write> = var undef
 }
 
 %foo = func(%arg1:i32):i32 {
@@ -648,7 +648,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<workgroup, atomic<i32>, read_write> = var
+  %1:ptr<workgroup, atomic<i32>, read_write> = var undef
 }
 
 %foo = func(%arg1:i32):i32 {
@@ -678,7 +678,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicMin_U32) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<workgroup, atomic<u32>, read_write> = var
+  %1:ptr<workgroup, atomic<u32>, read_write> = var undef
 }
 
 %foo = func(%arg1:u32):u32 {
@@ -692,7 +692,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<workgroup, atomic<u32>, read_write> = var
+  %1:ptr<workgroup, atomic<u32>, read_write> = var undef
 }
 
 %foo = func(%arg1:u32):u32 {
@@ -722,7 +722,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicOr) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<workgroup, atomic<i32>, read_write> = var
+  %1:ptr<workgroup, atomic<i32>, read_write> = var undef
 }
 
 %foo = func(%arg1:i32):i32 {
@@ -736,7 +736,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<workgroup, atomic<i32>, read_write> = var
+  %1:ptr<workgroup, atomic<i32>, read_write> = var undef
 }
 
 %foo = func(%arg1:i32):i32 {
@@ -766,7 +766,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicStore) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<workgroup, atomic<i32>, read_write> = var
+  %1:ptr<workgroup, atomic<i32>, read_write> = var undef
 }
 
 %foo = func(%arg1:i32):void {
@@ -780,7 +780,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<workgroup, atomic<i32>, read_write> = var
+  %1:ptr<workgroup, atomic<i32>, read_write> = var undef
 }
 
 %foo = func(%arg1:i32):void {
@@ -810,7 +810,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicSub) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<workgroup, atomic<i32>, read_write> = var
+  %1:ptr<workgroup, atomic<i32>, read_write> = var undef
 }
 
 %foo = func(%arg1:i32):i32 {
@@ -824,7 +824,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<workgroup, atomic<i32>, read_write> = var
+  %1:ptr<workgroup, atomic<i32>, read_write> = var undef
 }
 
 %foo = func(%arg1:i32):i32 {
@@ -854,7 +854,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicXor) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<workgroup, atomic<i32>, read_write> = var
+  %1:ptr<workgroup, atomic<i32>, read_write> = var undef
 }
 
 %foo = func(%arg1:i32):i32 {
@@ -868,7 +868,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<workgroup, atomic<i32>, read_write> = var
+  %1:ptr<workgroup, atomic<i32>, read_write> = var undef
 }
 
 %foo = func(%arg1:i32):i32 {

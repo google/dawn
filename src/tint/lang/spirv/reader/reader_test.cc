@@ -84,7 +84,7 @@ TEST_F(SpirvReaderTest, Load_VectorComponent) {
     EXPECT_EQ(got, R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, vec4<u32>, read_write> = var
+    %2:ptr<function, vec4<u32>, read_write> = var undef
     %3:u32 = load_vector_element %2, 2u
     ret
   }
@@ -118,7 +118,7 @@ TEST_F(SpirvReaderTest, Store_VectorComponent) {
     EXPECT_EQ(got, R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, vec4<u32>, read_write> = var
+    %2:ptr<function, vec4<u32>, read_write> = var undef
     store_vector_element %2, 2u, 42u
     ret
   }
@@ -234,8 +234,8 @@ tint_symbol_4 = struct @align(16) {
 }
 
 $B1: {  # root
-  %1:ptr<private, f32, read_write> = var
-  %2:ptr<private, tint_symbol_2, read_write> = var
+  %1:ptr<private, f32, read_write> = var undef
+  %2:ptr<private, tint_symbol_2, read_write> = var undef
 }
 
 %main_inner = func():void {
@@ -329,9 +329,9 @@ tint_symbol_3 = struct @align(16) {
 }
 
 $B1: {  # root
-  %1:ptr<private, vec4<f32>, read_write> = var
-  %2:ptr<private, array<f32, 1>, read_write> = var
-  %3:ptr<private, f32, read_write> = var
+  %1:ptr<private, vec4<f32>, read_write> = var undef
+  %2:ptr<private, array<f32, 1>, read_write> = var undef
+  %3:ptr<private, f32, read_write> = var undef
 }
 
 %main_inner = func():VertexOutputs {
@@ -420,7 +420,7 @@ tint_symbol_3 = struct @align(16) {
 }
 
 $B1: {  # root
-  %1:ptr<private, tint_symbol_2, read_write> = var
+  %1:ptr<private, tint_symbol_2, read_write> = var undef
 }
 
 %main_inner = func():void {
@@ -483,7 +483,7 @@ TEST_F(SpirvReaderTest, SampleMask) {
     ASSERT_EQ(got, Success);
     EXPECT_EQ(got, R"(
 $B1: {  # root
-  %1:ptr<private, array<u32, 1>, read_write> = var
+  %1:ptr<private, array<u32, 1>, read_write> = var undef
 }
 
 %main_inner = func(%3:array<u32, 1>):void {
@@ -579,13 +579,13 @@ tint_symbol_2 = struct @align(16) {
 }
 
 $B1: {  # root
-  %1:ptr<private, vec4<f32>, read_write> = var
-  %2:ptr<private, vec4<f32>, read_write> = var
+  %1:ptr<private, vec4<f32>, read_write> = var undef
+  %2:ptr<private, vec4<f32>, read_write> = var undef
 }
 
 %frag_main_inner = func():FragOutput {
   $B2: {
-    %output:ptr<function, FragOutput, read_write> = var, FragOutput(vec4<f32>(0.0f))
+    %output:ptr<function, FragOutput, read_write> = var FragOutput(vec4<f32>(0.0f))
     %5:ptr<function, vec4<f32>, read_write> = access %output, 0u
     store %5, vec4<f32>(0.5f, 0.5f, 0.5f, 1.0f)
     %6:ptr<function, vec4<f32>, read_write> = access %output, 1u

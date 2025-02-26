@@ -39,16 +39,16 @@ tint_module_vars_struct = struct @align(1) {
 %subgroupMatrixMultiply_8744bd = func():subgroup_matrix_result<f16, 8, 8> {
   $B1: {
     %2:subgroup_matrix_left<f32, 8, 8> = construct
-    %arg_0:ptr<function, subgroup_matrix_left<f32, 8, 8>, read_write> = var, %2
+    %arg_0:ptr<function, subgroup_matrix_left<f32, 8, 8>, read_write> = var %2
     %4:subgroup_matrix_right<f32, 8, 8> = construct
-    %arg_1:ptr<function, subgroup_matrix_right<f32, 8, 8>, read_write> = var, %4
+    %arg_1:ptr<function, subgroup_matrix_right<f32, 8, 8>, read_write> = var %4
     %6:subgroup_matrix_left<f32, 8, 8> = load %arg_0
     %7:subgroup_matrix_right<f32, 8, 8> = load %arg_1
     %8:ptr<function, subgroup_matrix_result<f16, 8, 8>, read_write> = var
     %9:subgroup_matrix_result<f16, 8, 8> = load %8
     %10:void = msl.simdgroup_multiply %9, %6, %7
     %11:subgroup_matrix_result<f16, 8, 8> = load %8
-    %res:ptr<function, subgroup_matrix_result<f16, 8, 8>, read_write> = var, %11
+    %res:ptr<function, subgroup_matrix_result<f16, 8, 8>, read_write> = var %11
     %13:subgroup_matrix_result<f16, 8, 8> = load %res
     ret %13
   }

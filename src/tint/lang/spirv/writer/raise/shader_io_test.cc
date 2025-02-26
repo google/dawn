@@ -108,10 +108,10 @@ TEST_F(SpirvWriter_ShaderIOTest, Parameters_NonStruct) {
 
     auto* expect = R"(
 $B1: {  # root
-  %foo_front_facing_Input:ptr<__in, bool, read> = var @builtin(front_facing)
-  %foo_position_Input:ptr<__in, vec4<f32>, read> = var @invariant @builtin(position)
-  %foo_loc0_Input:ptr<__in, f32, read> = var @location(0)
-  %foo_loc1_Input:ptr<__in, f32, read> = var @location(1) @interpolate(linear, sample)
+  %foo_front_facing_Input:ptr<__in, bool, read> = var undef @builtin(front_facing)
+  %foo_position_Input:ptr<__in, vec4<f32>, read> = var undef @invariant @builtin(position)
+  %foo_loc0_Input:ptr<__in, f32, read> = var undef @location(0)
+  %foo_loc1_Input:ptr<__in, f32, read> = var undef @location(1) @interpolate(linear, sample)
 }
 
 %foo_inner = func(%front_facing:bool, %position:vec4<f32>, %color1:f32, %color2:f32):void {
@@ -255,10 +255,10 @@ Inputs = struct @align(16) {
 }
 
 $B1: {  # root
-  %foo_front_facing_Input:ptr<__in, bool, read> = var @builtin(front_facing)
-  %foo_position_Input:ptr<__in, vec4<f32>, read> = var @invariant @builtin(position)
-  %foo_loc0_Input:ptr<__in, f32, read> = var @location(0)
-  %foo_loc1_Input:ptr<__in, f32, read> = var @location(1) @interpolate(linear, sample)
+  %foo_front_facing_Input:ptr<__in, bool, read> = var undef @builtin(front_facing)
+  %foo_position_Input:ptr<__in, vec4<f32>, read> = var undef @invariant @builtin(position)
+  %foo_loc0_Input:ptr<__in, f32, read> = var undef @location(0)
+  %foo_loc1_Input:ptr<__in, f32, read> = var undef @location(1) @interpolate(linear, sample)
 }
 
 %foo_inner = func(%inputs:Inputs):void {
@@ -379,10 +379,10 @@ Inputs = struct @align(16) {
 }
 
 $B1: {  # root
-  %foo_front_facing_Input:ptr<__in, bool, read> = var @builtin(front_facing)
-  %foo_position_Input:ptr<__in, vec4<f32>, read> = var @invariant @builtin(position)
-  %foo_loc0_Input:ptr<__in, f32, read> = var @location(0)
-  %foo_loc1_Input:ptr<__in, f32, read> = var @location(1) @interpolate(linear, sample)
+  %foo_front_facing_Input:ptr<__in, bool, read> = var undef @builtin(front_facing)
+  %foo_position_Input:ptr<__in, vec4<f32>, read> = var undef @invariant @builtin(position)
+  %foo_loc0_Input:ptr<__in, f32, read> = var undef @location(0)
+  %foo_loc1_Input:ptr<__in, f32, read> = var undef @location(1) @interpolate(linear, sample)
 }
 
 %foo_inner = func(%front_facing:bool, %inputs:Inputs, %color2:f32):void {
@@ -441,7 +441,7 @@ TEST_F(SpirvWriter_ShaderIOTest, ReturnValue_NonStructBuiltin) {
 
     auto* expect = R"(
 $B1: {  # root
-  %foo_position_Output:ptr<__out, vec4<f32>, write> = var @invariant @builtin(position)
+  %foo_position_Output:ptr<__out, vec4<f32>, write> = var undef @invariant @builtin(position)
 }
 
 %foo_inner = func():vec4<f32> {
@@ -487,7 +487,7 @@ TEST_F(SpirvWriter_ShaderIOTest, ReturnValue_NonStructLocation) {
 
     auto* expect = R"(
 $B1: {  # root
-  %foo_loc1_Output:ptr<__out, vec4<f32>, write> = var @location(1)
+  %foo_loc1_Output:ptr<__out, vec4<f32>, write> = var undef @location(1)
 }
 
 %foo_inner = func():vec4<f32> {
@@ -589,9 +589,9 @@ Outputs = struct @align(16) {
 }
 
 $B1: {  # root
-  %foo_position_Output:ptr<__out, vec4<f32>, write> = var @invariant @builtin(position)
-  %foo_loc0_Output:ptr<__out, f32, write> = var @location(0)
-  %foo_loc1_Output:ptr<__out, f32, write> = var @location(1) @interpolate(linear, sample)
+  %foo_position_Output:ptr<__out, vec4<f32>, write> = var undef @invariant @builtin(position)
+  %foo_loc0_Output:ptr<__out, f32, write> = var undef @location(0)
+  %foo_loc1_Output:ptr<__out, f32, write> = var undef @location(1) @interpolate(linear, sample)
 }
 
 %foo_inner = func():Outputs {
@@ -680,8 +680,8 @@ Output = struct @align(4) {
 }
 
 $B1: {  # root
-  %foo_loc0_idx0_Output:ptr<__out, f32, write> = var @location(0) @blend_src(0)
-  %foo_loc0_idx1_Output:ptr<__out, f32, write> = var @location(0) @blend_src(1)
+  %foo_loc0_idx0_Output:ptr<__out, f32, write> = var undef @location(0) @blend_src(0)
+  %foo_loc0_idx1_Output:ptr<__out, f32, write> = var undef @location(0) @blend_src(1)
 }
 
 %foo_inner = func():Output {
@@ -798,11 +798,11 @@ Interface = struct @align(16) {
 }
 
 $B1: {  # root
-  %vert_position_Output:ptr<__out, vec4<f32>, write> = var @builtin(position)
-  %vert_loc0_Output:ptr<__out, vec4<f32>, write> = var @location(0)
-  %frag_position_Input:ptr<__in, vec4<f32>, read> = var @builtin(position)
-  %frag_loc0_Input:ptr<__in, vec4<f32>, read> = var @location(0)
-  %frag_loc0_Output:ptr<__out, vec4<f32>, write> = var @location(0)
+  %vert_position_Output:ptr<__out, vec4<f32>, write> = var undef @builtin(position)
+  %vert_loc0_Output:ptr<__out, vec4<f32>, write> = var undef @location(0)
+  %frag_position_Input:ptr<__in, vec4<f32>, read> = var undef @builtin(position)
+  %frag_loc0_Input:ptr<__in, vec4<f32>, read> = var undef @location(0)
+  %frag_loc0_Output:ptr<__out, vec4<f32>, write> = var undef @location(0)
 }
 
 %vert_inner = func():Interface {
@@ -898,7 +898,7 @@ Outputs = struct @align(16) {
 }
 
 $B1: {  # root
-  %1:ptr<storage, Outputs, read> = var @binding_point(0, 0)
+  %1:ptr<storage, Outputs, read> = var undef @binding_point(0, 0)
 }
 
 %vert = @vertex func():Outputs {
@@ -917,9 +917,9 @@ Outputs = struct @align(16) {
 }
 
 $B1: {  # root
-  %1:ptr<storage, Outputs, read> = var @binding_point(0, 0)
-  %vert_position_Output:ptr<__out, vec4<f32>, write> = var @builtin(position)
-  %vert_loc0_Output:ptr<__out, vec4<f32>, write> = var @location(0)
+  %1:ptr<storage, Outputs, read> = var undef @binding_point(0, 0)
+  %vert_position_Output:ptr<__out, vec4<f32>, write> = var undef @builtin(position)
+  %vert_loc0_Output:ptr<__out, vec4<f32>, write> = var undef @location(0)
 }
 
 %vert_inner = func():Outputs {
@@ -1010,9 +1010,9 @@ Outputs = struct @align(4) {
 }
 
 $B1: {  # root
-  %foo_sample_mask_Input:ptr<__in, array<u32, 1>, read> = var @builtin(sample_mask)
-  %foo_loc0_Output:ptr<__out, f32, write> = var @location(0)
-  %foo_sample_mask_Output:ptr<__out, array<u32, 1>, write> = var @builtin(sample_mask)
+  %foo_sample_mask_Input:ptr<__in, array<u32, 1>, read> = var undef @builtin(sample_mask)
+  %foo_loc0_Output:ptr<__out, f32, write> = var undef @location(0)
+  %foo_sample_mask_Output:ptr<__out, array<u32, 1>, write> = var undef @builtin(sample_mask)
 }
 
 %foo_inner = func(%mask_in:u32):Outputs {
@@ -1136,11 +1136,11 @@ MyStruct = struct @align(4) {
 }
 
 $B1: {  # root
-  %vert_loc1_Input:ptr<__in, f32, read> = var @location(1)
-  %vert_loc1_Input_1:ptr<__in, i32, read> = var @location(1)  # %vert_loc1_Input_1: 'vert_loc1_Input'
-  %vert_position_Output:ptr<__out, vec4<f32>, write> = var @invariant @builtin(position)
-  %frag1_loc1_Output:ptr<__out, f32, write> = var @location(1)
-  %frag2_loc0_Output:ptr<__out, i32, write> = var @location(0)
+  %vert_loc1_Input:ptr<__in, f32, read> = var undef @location(1)
+  %vert_loc1_Input_1:ptr<__in, i32, read> = var undef @location(1)  # %vert_loc1_Input_1: 'vert_loc1_Input'
+  %vert_position_Output:ptr<__out, vec4<f32>, write> = var undef @invariant @builtin(position)
+  %frag1_loc1_Output:ptr<__out, f32, write> = var undef @location(1)
+  %frag2_loc0_Output:ptr<__out, i32, write> = var undef @location(0)
 }
 
 %vert_inner = func(%input:MyStruct, %ival:i32):vec4<f32> {
@@ -1257,9 +1257,9 @@ tint_push_constant_struct = struct @align(4), @block {
 }
 
 $B1: {  # root
-  %tint_push_constants:ptr<push_constant, tint_push_constant_struct, read> = var
-  %foo_loc0_Output:ptr<__out, f32, write> = var @location(0)
-  %foo_frag_depth_Output:ptr<__out, f32, write> = var @builtin(frag_depth)
+  %tint_push_constants:ptr<push_constant, tint_push_constant_struct, read> = var undef
+  %foo_loc0_Output:ptr<__out, f32, write> = var undef @location(0)
+  %foo_frag_depth_Output:ptr<__out, f32, write> = var undef @builtin(frag_depth)
 }
 
 %foo_inner = func():Outputs {
@@ -1377,13 +1377,13 @@ tint_push_constant_struct = struct @align(4), @block {
 }
 
 $B1: {  # root
-  %tint_push_constants:ptr<push_constant, tint_push_constant_struct, read> = var
-  %ep1_loc0_Output:ptr<__out, f32, write> = var @location(0)
-  %ep1_frag_depth_Output:ptr<__out, f32, write> = var @builtin(frag_depth)
-  %ep2_loc0_Output:ptr<__out, f32, write> = var @location(0)
-  %ep2_frag_depth_Output:ptr<__out, f32, write> = var @builtin(frag_depth)
-  %ep3_loc0_Output:ptr<__out, f32, write> = var @location(0)
-  %ep3_frag_depth_Output:ptr<__out, f32, write> = var @builtin(frag_depth)
+  %tint_push_constants:ptr<push_constant, tint_push_constant_struct, read> = var undef
+  %ep1_loc0_Output:ptr<__out, f32, write> = var undef @location(0)
+  %ep1_frag_depth_Output:ptr<__out, f32, write> = var undef @builtin(frag_depth)
+  %ep2_loc0_Output:ptr<__out, f32, write> = var undef @location(0)
+  %ep2_frag_depth_Output:ptr<__out, f32, write> = var undef @builtin(frag_depth)
+  %ep3_loc0_Output:ptr<__out, f32, write> = var undef @location(0)
+  %ep3_frag_depth_Output:ptr<__out, f32, write> = var undef @builtin(frag_depth)
 }
 
 %ep1_inner = func():Outputs {
@@ -1485,8 +1485,8 @@ TEST_F(SpirvWriter_ShaderIOTest, EmitVertexPointSize) {
 
     auto* expect = R"(
 $B1: {  # root
-  %foo_position_Output:ptr<__out, vec4<f32>, write> = var @builtin(position)
-  %foo___point_size_Output:ptr<__out, f32, write> = var @builtin(__point_size)
+  %foo_position_Output:ptr<__out, vec4<f32>, write> = var undef @builtin(position)
+  %foo___point_size_Output:ptr<__out, f32, write> = var undef @builtin(__point_size)
 }
 
 %foo_inner = func():vec4<f32> {
@@ -1574,10 +1574,10 @@ Outputs = struct @align(8) {
 }
 
 $B1: {  # root
-  %main_loc1_Input:ptr<__in, f16, read> = var @location(1)
-  %main_loc2_Input:ptr<__in, vec4<f16>, read> = var @location(2)
-  %main_loc1_Output:ptr<__out, f16, write> = var @location(1)
-  %main_loc2_Output:ptr<__out, vec4<f16>, write> = var @location(2)
+  %main_loc1_Input:ptr<__in, f16, read> = var undef @location(1)
+  %main_loc2_Input:ptr<__in, vec4<f16>, read> = var undef @location(2)
+  %main_loc1_Output:ptr<__out, f16, write> = var undef @location(1)
+  %main_loc2_Output:ptr<__out, vec4<f16>, write> = var undef @location(2)
 }
 
 %main_inner = func(%in1:f16, %in2:vec4<f16>):Outputs {
@@ -1669,10 +1669,10 @@ Outputs = struct @align(8) {
 }
 
 $B1: {  # root
-  %main_loc1_Input:ptr<__in, f32, read> = var @location(1)
-  %main_loc2_Input:ptr<__in, vec4<f32>, read> = var @location(2)
-  %main_loc1_Output:ptr<__out, f32, write> = var @location(1)
-  %main_loc2_Output:ptr<__out, vec4<f32>, write> = var @location(2)
+  %main_loc1_Input:ptr<__in, f32, read> = var undef @location(1)
+  %main_loc2_Input:ptr<__in, vec4<f32>, read> = var undef @location(2)
+  %main_loc1_Output:ptr<__out, f32, write> = var undef @location(1)
+  %main_loc2_Output:ptr<__out, vec4<f32>, write> = var undef @location(2)
 }
 
 %main_inner = func(%in1:f16, %in2:vec4<f16>):Outputs {

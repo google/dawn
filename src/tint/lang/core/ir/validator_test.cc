@@ -186,7 +186,7 @@ TEST_F(IR_ValidatorTest, RootBlock_VarBlockMismatch) {
         res.Failure().reason.Str(),
         testing::HasSubstr(
             R"(:2:38 error: var: instruction in root block does not have root block as parent
-  %1:ptr<private, i32, read_write> = var
+  %1:ptr<private, i32, read_write> = var undef
                                      ^^^
 )")) << res.Failure().reason.Str();
 }
@@ -793,7 +793,7 @@ TEST_F(IR_ValidatorTest, Block_VarBlockMismatch) {
     EXPECT_THAT(
         res.Failure().reason.Str(),
         testing::HasSubstr(R"(:3:41 error: var: block instruction does not have same block as parent
-    %2:ptr<function, i32, read_write> = var
+    %2:ptr<function, i32, read_write> = var undef
                                         ^^^
 )")) << res.Failure().reason.Str();
 }
@@ -922,7 +922,7 @@ TEST_F(IR_ValidatorTest, Instruction_NullInstructionResultInstruction) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason.Str(),
                 testing::HasSubstr(R"(:3:5 error: var: result instruction is undefined
-    %2:ptr<function, f32, read_write> = var
+    %2:ptr<function, f32, read_write> = var undef
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure().reason.Str();
 }
@@ -943,7 +943,7 @@ TEST_F(IR_ValidatorTest, Instruction_WrongInstructionResultInstruction) {
         res.Failure().reason.Str(),
         testing::HasSubstr(
             R"(:4:5 error: var: result instruction does not match instruction (possible double usage)
-    %2:ptr<function, f32, read_write> = var
+    %2:ptr<function, f32, read_write> = var undef
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure().reason.Str();
 }
@@ -962,9 +962,9 @@ TEST_F(IR_ValidatorTest, Instruction_DeadOperand) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason.Str(),
-                testing::HasSubstr(R"(:3:46 error: var: operand is not alive
-    %2:ptr<function, f32, read_write> = var, %3
-                                             ^^
+                testing::HasSubstr(R"(:3:45 error: var: operand is not alive
+    %2:ptr<function, f32, read_write> = var %3
+                                            ^^
 )")) << res.Failure().reason.Str();
 }
 
@@ -982,9 +982,9 @@ TEST_F(IR_ValidatorTest, Instruction_OperandUsageRemoved) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason.Str(),
-                testing::HasSubstr(R"(:3:46 error: var: operand missing usage
-    %2:ptr<function, f32, read_write> = var, %3
-                                             ^^
+                testing::HasSubstr(R"(:3:45 error: var: operand missing usage
+    %2:ptr<function, f32, read_write> = var %3
+                                            ^^
 )")) << res.Failure().reason.Str();
 }
 
@@ -1338,7 +1338,7 @@ TEST_F(IR_ValidatorTest, OverrideArrayInvalidValue) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason.Str(),
                 testing::HasSubstr(R"(:2:51 error: var: %2 is not in scope
-  %a:ptr<workgroup, array<i32, %2>, read_write> = var
+  %a:ptr<workgroup, array<i32, %2>, read_write> = var undef
                                                   ^^^
 )")) << res.Failure().reason.Str();
 }

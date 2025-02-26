@@ -873,7 +873,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideArraySize) {
     auto* src = R"(
 $B1: {  # root
   %x:u32 = override @id(2)
-  %v:ptr<workgroup, array<i32, %x>, read_write> = var
+  %v:ptr<workgroup, array<i32, %x>, read_write> = var undef
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -885,7 +885,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<workgroup, array<i32, 5>, read_write> = var
+  %v:ptr<workgroup, array<i32, 5>, read_write> = var undef
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -922,7 +922,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideArraySizeExpression) {
 $B1: {  # root
   %x:u32 = override @id(2)
   %2:u32 = mul %x, 2u
-  %v:ptr<workgroup, array<i32, %2>, read_write> = var
+  %v:ptr<workgroup, array<i32, %2>, read_write> = var undef
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -934,7 +934,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<workgroup, array<i32, 10>, read_write> = var
+  %v:ptr<workgroup, array<i32, 10>, read_write> = var undef
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -974,7 +974,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideArraySizeIntoLet) {
     auto* src = R"(
 $B1: {  # root
   %x:u32 = override @id(2)
-  %v:ptr<workgroup, array<i32, %x>, read_write> = var
+  %v:ptr<workgroup, array<i32, %x>, read_write> = var undef
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -988,7 +988,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<workgroup, array<i32, 5>, read_write> = var
+  %v:ptr<workgroup, array<i32, 5>, read_write> = var undef
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1481,7 +1481,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideRuntimeSizedArrayFailure) {
     auto* src = R"(
 $B1: {  # root
   %x:i32 = override @id(0)
-  %arr:ptr<storage, array<u32>, read_write> = var @binding_point(0, 0)
+  %arr:ptr<storage, array<u32>, read_write> = var undef @binding_point(0, 0)
 }
 
 %foo2 = func():u32 {
@@ -1536,7 +1536,7 @@ $B1: {  # root
   %o3:f16 = override @id(3)
   %5:vec4<f16> = construct %o0, %o1, %o2, %o3
   %6:vec4<f16> = ceil %5
-  %global:ptr<private, vec4<f16>, read_write> = var, %6
+  %global:ptr<private, vec4<f16>, read_write> = var %6
 }
 
 %foo2 = func():vec4<f16> {
@@ -1551,7 +1551,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %global:ptr<private, vec4<f16>, read_write> = var, vec4<f16>(2.0h, 2.0h, 3.0h, 4.0h)
+  %global:ptr<private, vec4<f16>, read_write> = var vec4<f16>(2.0h, 2.0h, 3.0h, 4.0h)
 }
 
 %foo2 = func():vec4<f16> {

@@ -567,10 +567,12 @@ void Disassembler::EmitInstruction(const Instruction* inst) {
             EmitValueWithType(v);
             out_ << " = ";
             EmitInstructionName(v);
-            if (v->Initializer()) {
-                out_ << ", ";
-                EmitOperand(v, Var::kInitializerOperandOffset);
+
+            if (v->Operands().Length() > 0) {
+                out_ << " ";
+                EmitOperandList(v);
             }
+
             if (v->BindingPoint().has_value()) {
                 out_ << " ";
                 EmitBindingPoint(v->BindingPoint().value());

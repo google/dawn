@@ -2218,7 +2218,7 @@ fn f() {
 
 TEST_F(IRToProgramTest, For_IncInInit_Cmp) {
     // %b1 = block {  # root
-    //   %i:ptr<storage, u32, read_write> = var @binding_point(0, 0)
+    //   %i:ptr<storage, u32, read_write> = var undef @binding_point(0, 0)
     // }
     //
     // %f = func():void -> %b2 {

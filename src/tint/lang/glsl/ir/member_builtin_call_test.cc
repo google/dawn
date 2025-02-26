@@ -104,7 +104,7 @@ SB = struct @align(4) {
 }
 
 $B1: {  # root
-  %v:ptr<storage, SB, read_write> = var @binding_point(0, 0)
+  %v:ptr<storage, SB, read_write> = var undef @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -170,7 +170,7 @@ SB = struct @align(4) {
 }
 
 $B1: {  # root
-  %v:ptr<storage, SB, read_write> = var @binding_point(0, 0)
+  %v:ptr<storage, SB, read_write> = var undef @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -221,7 +221,7 @@ SB = struct @align(4) {
 }
 
 $B1: {  # root
-  %v:ptr<storage, SB, read_write> = var @binding_point(0, 0)
+  %v:ptr<storage, SB, read_write> = var undef @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {

@@ -90,7 +90,7 @@ TEST_F(IR_ValidatorTest, AbstractFloat_Scalar) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason.Str(),
                 testing::HasSubstr(R"(:3:5 error: var: abstracts are not permitted
-    %af:ptr<function, abstract-float, read_write> = var
+    %af:ptr<function, abstract-float, read_write> = var undef
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure().reason.Str();
 }
@@ -106,7 +106,7 @@ TEST_F(IR_ValidatorTest, AbstractInt_Scalar) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason.Str(),
                 testing::HasSubstr(R"(:3:5 error: var: abstracts are not permitted
-    %ai:ptr<function, abstract-int, read_write> = var
+    %ai:ptr<function, abstract-int, read_write> = var undef
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure().reason.Str();
 }
@@ -122,7 +122,7 @@ TEST_F(IR_ValidatorTest, AbstractFloat_Vector) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason.Str(),
                 testing::HasSubstr(R"(:3:5 error: var: abstracts are not permitted
-    %af:ptr<function, vec2<abstract-float>, read_write> = var
+    %af:ptr<function, vec2<abstract-float>, read_write> = var undef
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure().reason.Str();
 }
@@ -138,7 +138,7 @@ TEST_F(IR_ValidatorTest, AbstractInt_Vector) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason.Str(),
                 testing::HasSubstr(R"(3:5 error: var: abstracts are not permitted
-    %ai:ptr<function, vec3<abstract-int>, read_write> = var
+    %ai:ptr<function, vec3<abstract-int>, read_write> = var undef
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure().reason.Str();
 }
@@ -154,7 +154,7 @@ TEST_F(IR_ValidatorTest, AbstractFloat_Matrix) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason.Str(),
                 testing::HasSubstr(R"(:3:5 error: var: abstracts are not permitted
-    %af:ptr<function, mat2x2<abstract-float>, read_write> = var
+    %af:ptr<function, mat2x2<abstract-float>, read_write> = var undef
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure().reason.Str();
 }
@@ -170,7 +170,7 @@ TEST_F(IR_ValidatorTest, AbstractInt_Matrix) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason.Str(),
                 testing::HasSubstr(R"(:3:5 error: var: abstracts are not permitted
-    %ai:ptr<function, mat3x4<abstract-int>, read_write> = var
+    %ai:ptr<function, mat3x4<abstract-int>, read_write> = var undef
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure().reason.Str();
 }
@@ -187,7 +187,7 @@ TEST_F(IR_ValidatorTest, AbstractFloat_Struct) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason.Str(),
                 testing::HasSubstr(R"(:6:3 error: var: abstracts are not permitted
-  %1:ptr<private, MyStruct, read_write> = var
+  %1:ptr<private, MyStruct, read_write> = var undef
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure().reason.Str();
 }
@@ -204,7 +204,7 @@ TEST_F(IR_ValidatorTest, AbstractInt_Struct) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason.Str(),
                 testing::HasSubstr(R"(:6:3 error: var: abstracts are not permitted
-  %1:ptr<private, MyStruct, read_write> = var
+  %1:ptr<private, MyStruct, read_write> = var undef
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure().reason.Str();
 }

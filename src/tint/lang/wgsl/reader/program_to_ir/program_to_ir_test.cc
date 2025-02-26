@@ -724,7 +724,7 @@ TEST_F(IR_FromProgramTest, For) {
   $B1: {
     loop [i: $B2, b: $B3, c: $B4] {  # loop_1
       $B2: {  # initializer
-        %i:ptr<function, i32, read_write> = var
+        %i:ptr<function, i32, read_write> = var undef
         next_iteration  # -> $B3
       }
       $B3: {  # body
@@ -773,7 +773,7 @@ TEST_F(IR_FromProgramTest, For_Init_NoCondOrContinuing) {
   $B1: {
     loop [i: $B2, b: $B3] {  # loop_1
       $B2: {  # initializer
-        %i:ptr<function, i32, read_write> = var
+        %i:ptr<function, i32, read_write> = var undef
         next_iteration  # -> $B3
       }
       $B3: {  # body
@@ -1382,7 +1382,7 @@ fn a() {
     auto m = res.Move();
     EXPECT_EQ(core::ir::Disassembler(m).Plain(), R"($B1: {  # root
   %x:i32 = override, 1i @id(0)
-  %arr:ptr<workgroup, array<u32, %x>, read_write> = var
+  %arr:ptr<workgroup, array<u32, %x>, read_write> = var undef
 }
 
 %a = func():void {

@@ -2620,7 +2620,7 @@ TEST_F(SpirvReader_BuiltinsTest, Modf_Scalar) {
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, f32, read_write> = var
+    %2:ptr<function, f32, read_write> = var undef
     %3:f32 = spirv.modf 50.0f, %2
     %4:f32 = mul %3, %3
     %5:f32 = let %4
@@ -2640,7 +2640,7 @@ __modf_result_f32 = struct @align(4) {
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, f32, read_write> = var
+    %2:ptr<function, f32, read_write> = var undef
     %3:__modf_result_f32 = modf 50.0f
     %4:f32 = access %3, 1u
     store %2, %4
@@ -2668,7 +2668,7 @@ TEST_F(SpirvReader_BuiltinsTest, Modf_Vector) {
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, vec2<f32>, read_write> = var
+    %2:ptr<function, vec2<f32>, read_write> = var undef
     %3:vec2<f32> = spirv.modf vec2<f32>(50.0f), %2
     %4:vec2<f32> = mul %3, %3
     %5:vec2<f32> = let %4
@@ -2688,7 +2688,7 @@ __modf_result_vec2_f32 = struct @align(8) {
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, vec2<f32>, read_write> = var
+    %2:ptr<function, vec2<f32>, read_write> = var undef
     %3:__modf_result_vec2_f32 = modf vec2<f32>(50.0f)
     %4:vec2<f32> = access %3, 1u
     store %2, %4
@@ -2715,7 +2715,7 @@ TEST_F(SpirvReader_BuiltinsTest, Frexp_ScalarSigned) {
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, i32, read_write> = var
+    %2:ptr<function, i32, read_write> = var undef
     %3:f32 = spirv.frexp 50.0f, %2
     %4:f32 = mul %3, %3
     %5:f32 = let %4
@@ -2735,7 +2735,7 @@ __frexp_result_f32 = struct @align(4) {
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, i32, read_write> = var
+    %2:ptr<function, i32, read_write> = var undef
     %3:__frexp_result_f32 = frexp 50.0f
     %4:i32 = access %3, 1u
     store %2, %4
@@ -2762,7 +2762,7 @@ TEST_F(SpirvReader_BuiltinsTest, Frexp_ScalarUnSigned) {
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, u32, read_write> = var
+    %2:ptr<function, u32, read_write> = var undef
     %3:f32 = spirv.frexp 50.0f, %2
     %4:f32 = mul %3, %3
     %5:f32 = let %4
@@ -2782,7 +2782,7 @@ __frexp_result_f32 = struct @align(4) {
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, u32, read_write> = var
+    %2:ptr<function, u32, read_write> = var undef
     %3:__frexp_result_f32 = frexp 50.0f
     %4:i32 = access %3, 1u
     %5:u32 = bitcast %4
@@ -2811,7 +2811,7 @@ TEST_F(SpirvReader_BuiltinsTest, Frexp_VectorSigned) {
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, vec2<i32>, read_write> = var
+    %2:ptr<function, vec2<i32>, read_write> = var undef
     %3:vec2<f32> = spirv.frexp vec2<f32>(50.0f), %2
     %4:vec2<f32> = mul %3, %3
     %5:vec2<f32> = let %4
@@ -2831,7 +2831,7 @@ __frexp_result_vec2_f32 = struct @align(8) {
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, vec2<i32>, read_write> = var
+    %2:ptr<function, vec2<i32>, read_write> = var undef
     %3:__frexp_result_vec2_f32 = frexp vec2<f32>(50.0f)
     %4:vec2<i32> = access %3, 1u
     store %2, %4
@@ -2859,7 +2859,7 @@ TEST_F(SpirvReader_BuiltinsTest, Frexp_VectorUnsigned) {
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, vec2<u32>, read_write> = var
+    %2:ptr<function, vec2<u32>, read_write> = var undef
     %3:vec2<f32> = spirv.frexp vec2<f32>(50.0f), %2
     %4:vec2<f32> = mul %3, %3
     %5:vec2<f32> = let %4
@@ -2879,7 +2879,7 @@ __frexp_result_vec2_f32 = struct @align(8) {
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, vec2<u32>, read_write> = var
+    %2:ptr<function, vec2<u32>, read_write> = var undef
     %3:__frexp_result_vec2_f32 = frexp vec2<f32>(50.0f)
     %4:vec2<i32> = access %3, 1u
     %5:vec2<u32> = bitcast %4

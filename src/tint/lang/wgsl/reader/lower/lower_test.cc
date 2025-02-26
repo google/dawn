@@ -85,7 +85,7 @@ TEST_F(Wgslreader_LowerTest, WorkgroupUniformLoad) {
 
     auto* src = R"(
 $B1: {  # root
-  %wgvar:ptr<workgroup, i32, read_write> = var
+  %wgvar:ptr<workgroup, i32, read_write> = var undef
 }
 
 %f = func():i32 {
@@ -99,7 +99,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %wgvar:ptr<workgroup, i32, read_write> = var
+  %wgvar:ptr<workgroup, i32, read_write> = var undef
 }
 
 %f = func():i32 {

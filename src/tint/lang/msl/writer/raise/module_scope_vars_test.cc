@@ -59,7 +59,7 @@ TEST_F(MslWriter_ModuleScopeVarsTest, NoModuleScopeVars) {
     auto* src = R"(
 %foo = @fragment func():void {
   $B1: {
-    %v:ptr<function, i32, read_write> = var
+    %v:ptr<function, i32, read_write> = var undef
     %3:i32 = load %v
     ret
   }
@@ -90,8 +90,8 @@ TEST_F(MslWriter_ModuleScopeVarsTest, Private) {
 
     auto* src = R"(
 $B1: {  # root
-  %a:ptr<private, i32, read_write> = var
-  %b:ptr<private, i32, read_write> = var
+  %a:ptr<private, i32, read_write> = var undef
+  %b:ptr<private, i32, read_write> = var undef
 }
 
 %foo = @fragment func():void {
@@ -114,8 +114,8 @@ tint_module_vars_struct = struct @align(1) {
 
 %foo = @fragment func():void {
   $B1: {
-    %a:ptr<private, i32, read_write> = var
-    %b:ptr<private, i32, read_write> = var
+    %a:ptr<private, i32, read_write> = var undef
+    %b:ptr<private, i32, read_write> = var undef
     %4:tint_module_vars_struct = construct %a, %b
     %tint_module_vars:tint_module_vars_struct = let %4
     %6:ptr<private, i32, read_write> = access %tint_module_vars, 0u
@@ -151,8 +151,8 @@ TEST_F(MslWriter_ModuleScopeVarsTest, Private_WithInitializers) {
 
     auto* src = R"(
 $B1: {  # root
-  %a:ptr<private, i32, read_write> = var, 42i
-  %b:ptr<private, i32, read_write> = var, -1i
+  %a:ptr<private, i32, read_write> = var 42i
+  %b:ptr<private, i32, read_write> = var -1i
 }
 
 %foo = @fragment func():void {
@@ -175,8 +175,8 @@ tint_module_vars_struct = struct @align(1) {
 
 %foo = @fragment func():void {
   $B1: {
-    %a:ptr<private, i32, read_write> = var, 42i
-    %b:ptr<private, i32, read_write> = var, -1i
+    %a:ptr<private, i32, read_write> = var 42i
+    %b:ptr<private, i32, read_write> = var -1i
     %4:tint_module_vars_struct = construct %a, %b
     %tint_module_vars:tint_module_vars_struct = let %4
     %6:ptr<private, i32, read_write> = access %tint_module_vars, 0u
@@ -214,8 +214,8 @@ TEST_F(MslWriter_ModuleScopeVarsTest, Storage) {
 
     auto* src = R"(
 $B1: {  # root
-  %a:ptr<storage, i32, read> = var @binding_point(1, 2)
-  %b:ptr<storage, i32, read_write> = var @binding_point(3, 4)
+  %a:ptr<storage, i32, read> = var undef @binding_point(1, 2)
+  %b:ptr<storage, i32, read_write> = var undef @binding_point(3, 4)
 }
 
 %foo = @fragment func():void {
@@ -275,8 +275,8 @@ TEST_F(MslWriter_ModuleScopeVarsTest, Uniform) {
 
     auto* src = R"(
 $B1: {  # root
-  %a:ptr<uniform, i32, read> = var @binding_point(1, 2)
-  %b:ptr<uniform, i32, read> = var @binding_point(3, 4)
+  %a:ptr<uniform, i32, read> = var undef @binding_point(1, 2)
+  %b:ptr<uniform, i32, read> = var undef @binding_point(3, 4)
 }
 
 %foo = @fragment func():void {
@@ -334,8 +334,8 @@ TEST_F(MslWriter_ModuleScopeVarsTest, HandleTypes) {
 
     auto* src = R"(
 $B1: {  # root
-  %t:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 2)
-  %s:ptr<handle, sampler, read> = var @binding_point(3, 4)
+  %t:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(1, 2)
+  %s:ptr<handle, sampler, read> = var undef @binding_point(3, 4)
 }
 
 %foo = @fragment func():void {
@@ -388,8 +388,8 @@ TEST_F(MslWriter_ModuleScopeVarsTest, Workgroup) {
 
     auto* src = R"(
 $B1: {  # root
-  %a:ptr<workgroup, i32, read_write> = var
-  %b:ptr<workgroup, i32, read_write> = var
+  %a:ptr<workgroup, i32, read_write> = var undef
+  %b:ptr<workgroup, i32, read_write> = var undef
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -459,9 +459,9 @@ TEST_F(MslWriter_ModuleScopeVarsTest, MultipleAddressSpaces) {
 
     auto* src = R"(
 $B1: {  # root
-  %a:ptr<uniform, i32, read> = var @binding_point(1, 2)
-  %b:ptr<storage, i32, read_write> = var @binding_point(3, 4)
-  %c:ptr<private, i32, read_write> = var
+  %a:ptr<uniform, i32, read> = var undef @binding_point(1, 2)
+  %b:ptr<storage, i32, read_write> = var undef @binding_point(3, 4)
+  %c:ptr<private, i32, read_write> = var undef
 }
 
 %foo = @fragment func():void {
@@ -487,7 +487,7 @@ tint_module_vars_struct = struct @align(1) {
 
 %foo = @fragment func(%a:ptr<uniform, i32, read> [@binding_point(1, 2)], %b:ptr<storage, i32, read_write> [@binding_point(3, 4)]):void {
   $B1: {
-    %c:ptr<private, i32, read_write> = var
+    %c:ptr<private, i32, read_write> = var undef
     %5:tint_module_vars_struct = construct %a, %b, %c
     %tint_module_vars:tint_module_vars_struct = let %5
     %7:ptr<uniform, i32, read> = access %tint_module_vars, 0u
@@ -532,8 +532,8 @@ TEST_F(MslWriter_ModuleScopeVarsTest, EntryPointHasExistingParameters) {
 
     auto* src = R"(
 $B1: {  # root
-  %a:ptr<storage, i32, read> = var @binding_point(1, 2)
-  %b:ptr<storage, i32, read_write> = var @binding_point(3, 4)
+  %a:ptr<storage, i32, read> = var undef @binding_point(1, 2)
+  %b:ptr<storage, i32, read_write> = var undef @binding_point(3, 4)
 }
 
 %foo = @fragment func(%param:i32 [@location(1), @interpolate(flat)]):void {
@@ -601,8 +601,8 @@ TEST_F(MslWriter_ModuleScopeVarsTest, CallFunctionThatUsesVars_NoArgs) {
 
     auto* src = R"(
 $B1: {  # root
-  %a:ptr<storage, i32, read> = var @binding_point(1, 2)
-  %b:ptr<storage, i32, read_write> = var @binding_point(3, 4)
+  %a:ptr<storage, i32, read> = var undef @binding_point(1, 2)
+  %b:ptr<storage, i32, read_write> = var undef @binding_point(3, 4)
 }
 
 %foo = func():void {
@@ -682,8 +682,8 @@ TEST_F(MslWriter_ModuleScopeVarsTest, CallFunctionThatUsesVars_WithExistingParam
 
     auto* src = R"(
 $B1: {  # root
-  %a:ptr<storage, i32, read> = var @binding_point(1, 2)
-  %b:ptr<storage, i32, read_write> = var @binding_point(3, 4)
+  %a:ptr<storage, i32, read> = var undef @binding_point(1, 2)
+  %b:ptr<storage, i32, read_write> = var undef @binding_point(3, 4)
 }
 
 %foo = func(%param:i32):void {
@@ -767,8 +767,8 @@ TEST_F(MslWriter_ModuleScopeVarsTest, CallFunctionThatUsesVars_HandleTypes) {
 
     auto* src = R"(
 $B1: {  # root
-  %t:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 2)
-  %s:ptr<handle, sampler, read> = var @binding_point(3, 4)
+  %t:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(1, 2)
+  %s:ptr<handle, sampler, read> = var undef @binding_point(3, 4)
 }
 
 %foo = func(%param:i32):vec4<f32> {
@@ -842,8 +842,8 @@ TEST_F(MslWriter_ModuleScopeVarsTest, CallFunctionThatUsesVars_OutOfOrder) {
 
     auto* src = R"(
 $B1: {  # root
-  %a:ptr<storage, i32, read> = var @binding_point(1, 2)
-  %b:ptr<storage, i32, read_write> = var @binding_point(3, 4)
+  %a:ptr<storage, i32, read> = var undef @binding_point(1, 2)
+  %b:ptr<storage, i32, read_write> = var undef @binding_point(3, 4)
 }
 
 %main = @fragment func():void {
@@ -921,8 +921,8 @@ TEST_F(MslWriter_ModuleScopeVarsTest, CallFunctionThatDoesNotUseVars) {
 
     auto* src = R"(
 $B1: {  # root
-  %a:ptr<storage, i32, read> = var @binding_point(1, 2)
-  %b:ptr<storage, i32, read_write> = var @binding_point(3, 4)
+  %a:ptr<storage, i32, read> = var undef @binding_point(1, 2)
+  %b:ptr<storage, i32, read_write> = var undef @binding_point(3, 4)
 }
 
 %foo = func():i32 {
@@ -1007,8 +1007,8 @@ TEST_F(MslWriter_ModuleScopeVarsTest, CallFunctionWithOnlyTransitiveUses) {
 
     auto* src = R"(
 $B1: {  # root
-  %a:ptr<storage, i32, read> = var @binding_point(1, 2)
-  %b:ptr<storage, i32, read_write> = var @binding_point(3, 4)
+  %a:ptr<storage, i32, read> = var undef @binding_point(1, 2)
+  %b:ptr<storage, i32, read_write> = var undef @binding_point(3, 4)
 }
 
 %bar = func():i32 {
@@ -1110,8 +1110,8 @@ TEST_F(MslWriter_ModuleScopeVarsTest, CallFunctionWithOnlyTransitiveUses_OutOfOr
 
     auto* src = R"(
 $B1: {  # root
-  %a:ptr<storage, i32, read> = var @binding_point(1, 2)
-  %b:ptr<storage, i32, read_write> = var @binding_point(3, 4)
+  %a:ptr<storage, i32, read> = var undef @binding_point(1, 2)
+  %b:ptr<storage, i32, read_write> = var undef @binding_point(3, 4)
 }
 
 %foo = func():i32 {
@@ -1212,9 +1212,9 @@ TEST_F(MslWriter_ModuleScopeVarsTest, MultipleEntryPoints) {
 
     auto* src = R"(
 $B1: {  # root
-  %a:ptr<uniform, i32, read> = var @binding_point(1, 2)
-  %b:ptr<storage, i32, read_write> = var @binding_point(3, 4)
-  %c:ptr<private, i32, read_write> = var
+  %a:ptr<uniform, i32, read> = var undef @binding_point(1, 2)
+  %b:ptr<storage, i32, read_write> = var undef @binding_point(3, 4)
+  %c:ptr<private, i32, read_write> = var undef
 }
 
 %main_a = @fragment func():void {
@@ -1251,7 +1251,7 @@ tint_module_vars_struct = struct @align(1) {
 
 %main_a = @fragment func(%a:ptr<uniform, i32, read> [@binding_point(1, 2)], %b:ptr<storage, i32, read_write> [@binding_point(3, 4)]):void {
   $B1: {
-    %c:ptr<private, i32, read_write> = var
+    %c:ptr<private, i32, read_write> = var undef
     %5:tint_module_vars_struct = construct %a, %b, %c
     %tint_module_vars:tint_module_vars_struct = let %5
     %7:ptr<uniform, i32, read> = access %tint_module_vars, 0u
@@ -1269,7 +1269,7 @@ tint_module_vars_struct = struct @align(1) {
 }
 %main_b = @fragment func(%a_1:ptr<uniform, i32, read> [@binding_point(1, 2)], %b_1:ptr<storage, i32, read_write> [@binding_point(3, 4)]):void {  # %a_1: 'a', %b_1: 'b'
   $B2: {
-    %c_1:ptr<private, i32, read_write> = var  # %c_1: 'c'
+    %c_1:ptr<private, i32, read_write> = var undef  # %c_1: 'c'
     %20:tint_module_vars_struct = construct %a_1, %b_1, %c_1
     %tint_module_vars_1:tint_module_vars_struct = let %20  # %tint_module_vars_1: 'tint_module_vars'
     %22:ptr<uniform, i32, read> = access %tint_module_vars_1, 0u
@@ -1320,9 +1320,9 @@ TEST_F(MslWriter_ModuleScopeVarsTest, MultipleEntryPoints_DifferentUsageSets) {
 
     auto* src = R"(
 $B1: {  # root
-  %a:ptr<uniform, i32, read> = var @binding_point(1, 2)
-  %b:ptr<storage, i32, read_write> = var @binding_point(3, 4)
-  %c:ptr<private, i32, read_write> = var
+  %a:ptr<uniform, i32, read> = var undef @binding_point(1, 2)
+  %b:ptr<storage, i32, read_write> = var undef @binding_point(3, 4)
+  %c:ptr<private, i32, read_write> = var undef
 }
 
 %main_a = @fragment func():void {
@@ -1369,7 +1369,7 @@ tint_module_vars_struct = struct @align(1) {
 }
 %main_b = @fragment func(%a_1:ptr<uniform, i32, read> [@binding_point(1, 2)]):void {  # %a_1: 'a'
   $B2: {
-    %c:ptr<private, i32, read_write> = var
+    %c:ptr<private, i32, read_write> = var undef
     %15:tint_module_vars_struct = construct %a_1, unused, %c
     %tint_module_vars_1:tint_module_vars_struct = let %15  # %tint_module_vars_1: 'tint_module_vars'
     %17:ptr<uniform, i32, read> = access %tint_module_vars_1, 0u
@@ -1420,9 +1420,9 @@ TEST_F(MslWriter_ModuleScopeVarsTest, MultipleEntryPoints_DifferentUsageSets_Com
 
     auto* src = R"(
 $B1: {  # root
-  %a:ptr<uniform, i32, read> = var @binding_point(1, 2)
-  %b:ptr<storage, i32, read_write> = var @binding_point(3, 4)
-  %c:ptr<private, i32, read_write> = var
+  %a:ptr<uniform, i32, read> = var undef @binding_point(1, 2)
+  %b:ptr<storage, i32, read_write> = var undef @binding_point(3, 4)
+  %c:ptr<private, i32, read_write> = var undef
 }
 
 %foo = func():i32 {
@@ -1481,7 +1481,7 @@ tint_module_vars_struct = struct @align(1) {
 }
 %main_b = @fragment func(%a_1:ptr<uniform, i32, read> [@binding_point(1, 2)]):void {  # %a_1: 'a'
   $B3: {
-    %c:ptr<private, i32, read_write> = var
+    %c:ptr<private, i32, read_write> = var undef
     %18:tint_module_vars_struct = construct %a_1, unused, %c
     %tint_module_vars_2:tint_module_vars_struct = let %18  # %tint_module_vars_2: 'tint_module_vars'
     %20:ptr<private, i32, read_write> = access %tint_module_vars_2, 2u
@@ -1521,9 +1521,9 @@ TEST_F(MslWriter_ModuleScopeVarsTest, VarsWithNoNames) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<uniform, i32, read> = var @binding_point(1, 2)
-  %2:ptr<storage, i32, read_write> = var @binding_point(3, 4)
-  %3:ptr<private, i32, read_write> = var
+  %1:ptr<uniform, i32, read> = var undef @binding_point(1, 2)
+  %2:ptr<storage, i32, read_write> = var undef @binding_point(3, 4)
+  %3:ptr<private, i32, read_write> = var undef
 }
 
 %foo = @fragment func():void {
@@ -1549,7 +1549,7 @@ tint_module_vars_struct = struct @align(1) {
 
 %foo = @fragment func(%2:ptr<uniform, i32, read> [@binding_point(1, 2)], %3:ptr<storage, i32, read_write> [@binding_point(3, 4)]):void {
   $B1: {
-    %4:ptr<private, i32, read_write> = var
+    %4:ptr<private, i32, read_write> = var undef
     %5:tint_module_vars_struct = construct %2, %3, %4
     %tint_module_vars:tint_module_vars_struct = let %5
     %7:ptr<uniform, i32, read> = access %tint_module_vars, 0u
