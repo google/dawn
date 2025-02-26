@@ -65,7 +65,7 @@ TEST_F(IR_ValidatorTest, Var_RootBlock_TooManyOperands) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason.Str(),
-                testing::HasSubstr(R"(:2:38 error: var: expected between 0 and 1 operands, got 2
+                testing::HasSubstr(R"(:2:38 error: var: expected exactly 1 operands, got 2
   %1:ptr<private, i32, read_write> = var 0i, 1i
                                      ^^^
 )")) << res.Failure().reason.Str();

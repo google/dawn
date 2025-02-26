@@ -2472,7 +2472,7 @@ void Validator::CheckOverride(const Override* o) {
 }
 
 void Validator::CheckVar(const Var* var) {
-    if (!CheckResultsAndOperandRange(var, Var::kNumResults, Var::kMinOperands, Var::kMaxOperands)) {
+    if (!CheckResultsAndOperands(var, Var::kNumResults, Var::kNumOperands)) {
         return;
     }
 
