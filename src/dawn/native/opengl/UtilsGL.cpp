@@ -27,7 +27,10 @@
 
 #include "dawn/native/opengl/UtilsGL.h"
 
+#include <string>
+
 #include "dawn/common/Assert.h"
+#include "dawn/common/Log.h"
 #include "dawn/native/EnumMaskIterator.h"
 #include "dawn/native/opengl/OpenGLFunctions.h"
 
@@ -165,6 +168,88 @@ void CopyImageSubData(const OpenGLFunctions& gl,
 
 bool HasAnisotropicFiltering(const OpenGLFunctions& gl) {
     return gl.IsAtLeastGL(4, 6) || gl.IsGLExtensionSupported("GL_EXT_texture_filter_anisotropic");
+}
+
+const char* GLErrorAsString(GLenum error) {
+#define ERROR_CASE_STRING(errorEnum) \
+    case errorEnum:                  \
+        return #errorEnum
+
+    switch (error) {
+        ERROR_CASE_STRING(GL_INVALID_ENUM);
+        ERROR_CASE_STRING(GL_INVALID_OPERATION);
+        ERROR_CASE_STRING(GL_INVALID_VALUE);
+        ERROR_CASE_STRING(GL_INVALID_FRAMEBUFFER_OPERATION);
+        ERROR_CASE_STRING(GL_OUT_OF_MEMORY);
+        ERROR_CASE_STRING(GL_CONTEXT_LOST);
+        default:
+            return "<Unknown OpenGL error>";
+    }
+
+#undef ERROR_CASE_STRING
+}
+
+void ClearErrors(const OpenGLFunctions& gl,
+                 const char* file,
+                 const char* function,
+                 unsigned int line) {
+    GLenum error = gl.GetError();
+    if (DAWN_LIKELY(error == GL_NO_ERROR)) {
+        return;
+    }
+
+    std::string message = std::string("Preexisting OpenGL errors: ") + GLErrorAsString(error);
+
+    error = gl.GetError();
+    while (error != GL_NO_ERROR) {
+        // Skip GL_CONTEXT_LOST errors, they will be generated continuously and result in an
+        // infinite loop.
+        if (error == GL_CONTEXT_LOST) {
+            break;
+        }
+
+        message += std::string(", ") + GLErrorAsString(error);
+        error = gl.GetError();
+    }
+
+    DebugLog(file, function, line) << message;
+}
+
+MaybeError CheckError(const OpenGLFunctions& gl,
+                      const char* call,
+                      const char* file,
+                      const char* function,
+                      unsigned int line) {
+    GLenum error = gl.GetError();
+    if (DAWN_LIKELY(error == GL_NO_ERROR)) {
+        return {};
+    }
+
+    std::string message = std::string(call) + " failed with " + GLErrorAsString(error);
+
+    // Check that only one GL error was generated, ClearErrors should have been called first.
+    GLenum nextError = gl.GetError();
+    while (nextError != GL_NO_ERROR) {
+        // Skip GL_CONTEXT_LOST errors, they will be generated continuously and result in an
+        // infinite loop.
+        if (nextError == GL_CONTEXT_LOST) {
+            break;
+        }
+
+        message += std::string(", ") + GLErrorAsString(nextError);
+        nextError = gl.GetError();
+    }
+
+    DebugLog(file, function, line) << message;
+
+    switch (error) {
+        case GL_OUT_OF_MEMORY:
+            return DAWN_OUT_OF_MEMORY_ERROR(message);
+        case GL_CONTEXT_LOST:
+            return DAWN_DEVICE_LOST_ERROR(message);
+        default:
+            return DAWN_INTERNAL_ERROR(message);
+    }
 }
 
 }  // namespace dawn::native::opengl
