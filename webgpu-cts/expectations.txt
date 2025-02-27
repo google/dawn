@@ -4140,12 +4140,6 @@ crbug.com/0000 [ win10 ] webgpu:shader,execution,expression,call,builtin,texture
 # Triaged/Manually Added Failures
 ################################################################################
 
-# Temporary Failures due to the support of null bind group layouts in the creation of pipeline layout
-crbug.com/377836524 webgpu:api,validation,encoding,programmable,pipeline_bind_group_compat:default_bind_group_layouts_never_match,compute_pass:* [ Failure ]
-crbug.com/377836524 webgpu:api,validation,encoding,programmable,pipeline_bind_group_compat:default_bind_group_layouts_never_match,render_pass:* [ Failure ]
-crbug.com/377836524 webgpu:api,validation,getBindGroupLayout:index_range,auto_layout:* [ Failure ]
-crbug.com/377836524 webgpu:api,validation,getBindGroupLayout:index_range,explicit_layout:* [ Failure ]
-
 # Android failures
 crbug.com/dawn/2023 [ android qualcomm ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="workgroup";* [ Failure ]
 
