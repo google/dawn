@@ -98,7 +98,7 @@ interop::Interface<interop::GPUSupportedFeatures> GPUAdapter::getFeatures(Napi::
 }
 
 interop::Interface<interop::GPUSupportedLimits> GPUAdapter::getLimits(Napi::Env env) {
-    wgpu::SupportedLimits limits{};
+    wgpu::Limits limits{};
     wgpu::DawnExperimentalImmediateDataLimits immediateDataLimits{};
 
     auto InsertInChain = [&](wgpu::ChainedStructOut* node) {
@@ -218,13 +218,13 @@ interop::Promise<interop::Interface<interop::GPUDevice>> GPUAdapter::requestDevi
         env, PROMISE_INFO, async_);
     auto promise = ctx->promise;
 
-    wgpu::RequiredLimits limits;
+    wgpu::Limits limits;
 #define COPY_LIMIT(LIMIT)                                                                        \
     if (descriptor.requiredLimits.count(#LIMIT)) {                                               \
         auto jsLimitVariant = descriptor.requiredLimits[#LIMIT];                                 \
         if (!std::holds_alternative<interop::UndefinedType>(jsLimitVariant)) {                   \
             using DawnLimitType = decltype(WGPULimits::LIMIT);                                   \
-            DawnLimitType* dawnLimit = &limits.limits.LIMIT;                                     \
+            DawnLimitType* dawnLimit = &limits.LIMIT;                                            \
             uint64_t jsLimit = std::get<interop::GPUSize64>(jsLimitVariant);                     \
             if (jsLimit > std::numeric_limits<DawnLimitType>::max() - 1) {                       \
                 promise.Reject(                                                                  \

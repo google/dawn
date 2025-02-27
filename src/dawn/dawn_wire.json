@@ -203,7 +203,7 @@
             { "name": "status", "type": "request adapter status" },
             { "name": "message", "type": "string view" },
             { "name": "info", "type": "adapter info", "annotation": "const*", "optional": "true" },
-            { "name": "limits", "type": "supported limits", "annotation": "const*", "optional": "true" },
+            { "name": "limits", "type": "limits", "annotation": "const*", "optional": "true" },
             { "name": "features count", "type": "uint32_t"},
             { "name": "features", "type": "feature name", "annotation": "const*", "length": "features count"}
         ],
@@ -212,7 +212,7 @@
             { "name": "future", "type": "future" },
             { "name": "status", "type": "request device status" },
             { "name": "message", "type": "string view" },
-            { "name": "limits", "type": "supported limits", "annotation": "const*", "optional": "true" },
+            { "name": "limits", "type": "limits", "annotation": "const*", "optional": "true" },
             { "name": "features count", "type": "uint32_t"},
             { "name": "features", "type": "feature name", "annotation": "const*", "length": "features count"}
         ]

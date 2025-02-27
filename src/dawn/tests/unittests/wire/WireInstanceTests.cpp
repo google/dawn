@@ -130,9 +130,9 @@ TEST_P(WireInstanceTests, RequestAdapterSuccess) {
     fakeInfo.subgroupMinSize = 4;
     fakeInfo.subgroupMaxSize = 128;
 
-    wgpu::SupportedLimits fakeLimits = {};
-    fakeLimits.limits.maxTextureDimension1D = 433;
-    fakeLimits.limits.maxVertexAttributes = 1243;
+    wgpu::Limits fakeLimits = {};
+    fakeLimits.maxTextureDimension1D = 433;
+    fakeLimits.maxVertexAttributes = 1243;
 
     std::initializer_list<WGPUFeatureName> fakeFeaturesList = {
         WGPUFeatureName_Depth32FloatStencil8,
@@ -153,8 +153,8 @@ TEST_P(WireInstanceTests, RequestAdapterSuccess) {
                 })));
 
             EXPECT_CALL(api, AdapterGetLimits(apiAdapter, NotNull()))
-                .WillOnce(WithArg<1>(Invoke([&](WGPUSupportedLimits* limits) {
-                    *reinterpret_cast<wgpu::SupportedLimits*>(limits) = fakeLimits;
+                .WillOnce(WithArg<1>(Invoke([&](WGPULimits* limits) {
+                    *reinterpret_cast<wgpu::Limits*>(limits) = fakeLimits;
                     return WGPUStatus_Success;
                 })));
 
@@ -191,11 +191,10 @@ TEST_P(WireInstanceTests, RequestAdapterSuccess) {
                 EXPECT_EQ(info.subgroupMinSize, fakeInfo.subgroupMinSize);
                 EXPECT_EQ(info.subgroupMaxSize, fakeInfo.subgroupMaxSize);
 
-                wgpu::SupportedLimits limits = {};
+                wgpu::Limits limits = {};
                 EXPECT_EQ(adapter.GetLimits(&limits), wgpu::Status::Success);
-                EXPECT_EQ(limits.limits.maxTextureDimension1D,
-                          fakeLimits.limits.maxTextureDimension1D);
-                EXPECT_EQ(limits.limits.maxVertexAttributes, fakeLimits.limits.maxVertexAttributes);
+                EXPECT_EQ(limits.maxTextureDimension1D, fakeLimits.maxTextureDimension1D);
+                EXPECT_EQ(limits.maxVertexAttributes, fakeLimits.maxVertexAttributes);
 
                 WGPUSupportedFeatures features = {};
                 adapter.GetFeatures(reinterpret_cast<wgpu::SupportedFeatures*>(&features));

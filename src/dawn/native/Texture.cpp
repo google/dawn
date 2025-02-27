@@ -304,7 +304,7 @@ MaybeError ValidateTextureSize(const DeviceBase* device,
     if (DAWN_UNLIKELY(descriptor->size.width > maxExtent.width ||
                       descriptor->size.height > maxExtent.height ||
                       descriptor->size.depthOrArrayLayers > maxExtent.depthOrArrayLayers)) {
-        SupportedLimits adapterLimits;
+        Limits adapterLimits;
         wgpu::Status status = device->GetAdapter()->APIGetLimits(&adapterLimits);
         DAWN_ASSERT(status == wgpu::Status::Success);
 
@@ -315,29 +315,29 @@ MaybeError ValidateTextureSize(const DeviceBase* device,
             case wgpu::TextureDimension::Undefined:
                 DAWN_UNREACHABLE();
             case wgpu::TextureDimension::e1D:
-                maxExtentAdapter = {adapterLimits.limits.maxTextureDimension1D, 1, 1};
+                maxExtentAdapter = {adapterLimits.maxTextureDimension1D, 1, 1};
                 limitName = "maxTextureDimension1D";
-                limitValue = adapterLimits.limits.maxTextureDimension1D;
+                limitValue = adapterLimits.maxTextureDimension1D;
                 break;
             case wgpu::TextureDimension::e2D:
-                maxExtentAdapter = {adapterLimits.limits.maxTextureDimension2D,
-                                    adapterLimits.limits.maxTextureDimension2D,
-                                    adapterLimits.limits.maxTextureArrayLayers};
+                maxExtentAdapter = {adapterLimits.maxTextureDimension2D,
+                                    adapterLimits.maxTextureDimension2D,
+                                    adapterLimits.maxTextureArrayLayers};
                 if (descriptor->size.width > maxExtent.width ||
                     descriptor->size.height > maxExtent.height) {
                     limitName = "maxTextureDimension2D";
-                    limitValue = adapterLimits.limits.maxTextureDimension2D;
+                    limitValue = adapterLimits.maxTextureDimension2D;
                 } else {
                     limitName = "maxTextureArrayLayers";
-                    limitValue = adapterLimits.limits.maxTextureArrayLayers;
+                    limitValue = adapterLimits.maxTextureArrayLayers;
                 }
                 break;
             case wgpu::TextureDimension::e3D:
-                maxExtentAdapter = {adapterLimits.limits.maxTextureDimension3D,
-                                    adapterLimits.limits.maxTextureDimension3D,
-                                    adapterLimits.limits.maxTextureDimension3D};
+                maxExtentAdapter = {adapterLimits.maxTextureDimension3D,
+                                    adapterLimits.maxTextureDimension3D,
+                                    adapterLimits.maxTextureDimension3D};
                 limitName = "maxTextureDimension3D";
-                limitValue = adapterLimits.limits.maxTextureDimension3D;
+                limitValue = adapterLimits.maxTextureDimension3D;
                 break;
         }
 
