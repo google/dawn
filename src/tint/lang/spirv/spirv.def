@@ -483,6 +483,9 @@ implicit(A: iu32, N: num) fn not<R: iu32>(vec<N, A>) -> vec<N, R>
 implicit(A: iu32) fn s_negate<R: iu32>(A) -> R
 implicit(A: iu32, N: num) fn s_negate<R: iu32>(vec<N, A>) -> vec<N, R>
 
+implicit(T: f32_f16) fn f_mod(T, T) -> T
+implicit(T: f32_f16, N: num) fn f_mod(vec<N, T>, vec<N, T>) -> vec<N, T>
+
 ////////////////////////////////////////////////////////////////////////////////
 // SPV_KHR_integer_dot_product instructions
 ////////////////////////////////////////////////////////////////////////////////

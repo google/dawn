@@ -209,10 +209,30 @@ struct State {
                 case spirv::BuiltinFn::kSNegate:
                     SNegate(builtin);
                     break;
+                case spirv::BuiltinFn::kFMod:
+                    FMod(builtin);
+                    break;
                 default:
                     TINT_UNREACHABLE() << "unknown spirv builtin: " << builtin->Func();
             }
         }
+    }
+
+    // FMod(x, y) emulated with: x - y * floor(x / y)
+    void FMod(spirv::ir::BuiltinCall* call) {
+        auto* x = call->Args()[0];
+        auto* y = call->Args()[1];
+
+        auto* res_ty = call->Result(0)->Type();
+        b.InsertBefore(call, [&] {
+            auto* div = b.Divide(res_ty, x, y);
+            auto* floor = b.Call(res_ty, core::BuiltinFn::kFloor, div);
+            auto* mul = b.Multiply(res_ty, y, floor);
+            auto* sub = b.Subtract(res_ty, x, mul);
+
+            call->Result(0)->ReplaceAllUsesWith(sub->Result(0));
+        });
+        call->Destroy();
     }
 
     void SNegate(spirv::ir::BuiltinCall* call) {

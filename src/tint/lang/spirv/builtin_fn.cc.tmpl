@@ -126,6 +126,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kShiftRightArithmetic:
         case BuiltinFn::kNot:
         case BuiltinFn::kSNegate:
+        case BuiltinFn::kFMod:
             break;
     }
     return core::ir::Instruction::Accesses{};

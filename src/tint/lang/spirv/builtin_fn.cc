@@ -210,6 +210,8 @@ const char* str(BuiltinFn i) {
             return "not";
         case BuiltinFn::kSNegate:
             return "s_negate";
+        case BuiltinFn::kFMod:
+            return "f_mod";
         case BuiltinFn::kSDot:
             return "s_dot";
         case BuiltinFn::kUDot:
@@ -323,6 +325,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kShiftRightArithmetic:
         case BuiltinFn::kNot:
         case BuiltinFn::kSNegate:
+        case BuiltinFn::kFMod:
             break;
     }
     return core::ir::Instruction::Accesses{};

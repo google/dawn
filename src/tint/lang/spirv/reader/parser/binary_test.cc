@@ -718,5 +718,71 @@ INSTANTIATE_TEST_SUITE_P(SpirvParser,
                                          BinaryCase{"", "OpSMod", "", "s_mod"},
                                          BinaryCase{"", "OpSRem", "", "s_mod"}));
 
+TEST_F(SpirvParserTest, FMod_Scalar) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpCapability Float16
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+        %f32 = OpTypeFloat 32
+        %f16 = OpTypeFloat 16
+      %v2f32 = OpTypeVector %f32 2
+      %v2f16 = OpTypeVector %f16 2
+        %one = OpConstant %f32 1
+      %eight = OpConstant %f16 8
+      %v2one = OpConstantComposite %v2f32 %one %one
+    %v2eight = OpConstantComposite %v2f16 %eight %eight
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+               %1 = OpFMod %f32 %one %one
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:f32 = spirv.f_mod 1.0f, 1.0f
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, FMod_Vector) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpCapability Float16
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+        %f32 = OpTypeFloat 32
+        %f16 = OpTypeFloat 16
+      %v2f32 = OpTypeVector %f32 2
+      %v2f16 = OpTypeVector %f16 2
+        %one = OpConstant %f32 1
+      %eight = OpConstant %f16 8
+      %v2one = OpConstantComposite %v2f32 %one %one
+    %v2eight = OpConstantComposite %v2f16 %eight %eight
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+               %1 = OpFMod %v2f16 %v2eight %v2eight
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<f16> = spirv.f_mod vec2<f16>(8.0h), vec2<f16>(8.0h)
+    ret
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader
