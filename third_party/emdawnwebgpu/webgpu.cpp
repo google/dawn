@@ -139,9 +139,19 @@ class NonMovable : NonCopyable {
   void operator=(NonMovable&&) = delete;
 };
 
+// For some objects we may do additional cleanup routines, i.e. Destroy if the
+// object was natively created via the API. However, if the object was imported
+// from JS, we don't do the additional cleanup because they may still be used
+// outside of the WASM API.
+struct ImportedFromJSTag {};
+static constexpr ImportedFromJSTag kImportedFromJS;
+
 class RefCounted : NonMovable {
  public:
   static constexpr bool HasExternalRefCount = false;
+
+  explicit RefCounted(ImportedFromJSTag tag) : mIsImportedFromJS(true) {}
+  RefCounted() = default;
 
   void AddRef() {
     [[maybe_unused]] uint64_t oldRefCount =
@@ -157,14 +167,20 @@ class RefCounted : NonMovable {
     return false;
   }
 
+  bool IsImported() { return mIsImportedFromJS; }
+
  private:
   std::atomic<uint64_t> mRefCount = 1;
+  bool mIsImportedFromJS = false;
 };
 
 class RefCountedWithExternalCount : public RefCounted {
  public:
   static constexpr bool HasExternalRefCount = true;
 
+  explicit RefCountedWithExternalCount(ImportedFromJSTag tag)
+      : RefCounted(tag) {}
+  RefCountedWithExternalCount() = default;
   virtual ~RefCountedWithExternalCount() = default;
 
   void AddRef() {
@@ -274,6 +290,13 @@ class Ref {
 
   T mValue;
 };
+
+template <typename T>
+Ref<T*> AcquireRef(T* pointee) {
+  Ref<T*> ref;
+  ref.Acquire(pointee);
+  return ref;
+}
 
 template <typename T>
 auto ReturnToAPI(Ref<T*>&& object) {
@@ -666,6 +689,8 @@ struct WGPUBufferImpl final : public EventSource,
                               public RefCountedWithExternalCount {
  public:
   WGPUBufferImpl(const EventSource* source, bool mappedAtCreation);
+  // Injection constructor used when we already have a backing Buffer.
+  WGPUBufferImpl(const EventSource* source);
 
   void Destroy();
   const void* GetConstMappedRange(size_t offset, size_t size);
@@ -1182,29 +1207,28 @@ extern "C" {
 // in the JS object table in library_webgpu.js.
 #define DEFINE_EMWGPU_DEFAULT_CREATE(Name)                             \
   WGPU##Name emwgpuCreate##Name(const EventSource* source = nullptr) { \
-    return new WGPU##Name##Impl(source);                               \
+    return ReturnToAPI(AcquireRef(new WGPU##Name##Impl(source)));      \
   }
 WGPU_PASSTHROUGH_OBJECTS(DEFINE_EMWGPU_DEFAULT_CREATE)
 
 WGPUAdapter emwgpuCreateAdapter(const EventSource* source) {
-  return new WGPUAdapterImpl(source);
+  return ReturnToAPI(AcquireRef(new WGPUAdapterImpl(source)));
 }
 
-WGPUBuffer emwgpuCreateBuffer(const EventSource* source,
-                              bool mappedAtCreation = false) {
-  return new WGPUBufferImpl(source, mappedAtCreation);
+WGPUBuffer emwgpuCreateBuffer(const EventSource* source) {
+  return ReturnToAPI(AcquireRef(new WGPUBufferImpl(source)));
 }
 
 WGPUDevice emwgpuCreateDevice(const EventSource* source, WGPUQueue queue) {
-  return new WGPUDeviceImpl(source, queue);
+  return ReturnToAPI(AcquireRef(new WGPUDeviceImpl(source, queue)));
 }
 
 WGPUQueue emwgpuCreateQueue(const EventSource* source) {
-  return new WGPUQueueImpl(source);
+  return ReturnToAPI(AcquireRef(new WGPUQueueImpl(source)));
 }
 
 WGPUShaderModule emwgpuCreateShaderModule(const EventSource* source) {
-  return new WGPUShaderModuleImpl(source);
+  return ReturnToAPI(AcquireRef(new WGPUShaderModuleImpl(source)));
 }
 
 // Future event callbacks.
@@ -1326,6 +1350,11 @@ WGPUBufferImpl::WGPUBufferImpl(const EventSource* source, bool mappedAtCreation)
     mPendingMapRequest = {kNullFutureId, WGPUMapMode_Write};
   }
 }
+
+WGPUBufferImpl::WGPUBufferImpl(const EventSource* source)
+    : EventSource(source),
+      RefCountedWithExternalCount(kImportedFromJS),
+      mMapState(WGPUBufferMapState_Unmapped) {}
 
 void WGPUBufferImpl::Destroy() {
   emwgpuBufferDestroy(this);
@@ -1451,7 +1480,7 @@ WGPUDeviceImpl::WGPUDeviceImpl(const EventSource* source,
 }
 
 WGPUDeviceImpl::WGPUDeviceImpl(const EventSource* source, WGPUQueue queue)
-    : EventSource(source) {
+    : EventSource(source), RefCountedWithExternalCount(kImportedFromJS) {
   mQueue.Acquire(queue);
 }
 
@@ -1481,7 +1510,9 @@ void WGPUDeviceImpl::OnUncapturedError(WGPUErrorType type,
 }
 
 void WGPUDeviceImpl::WillDropLastExternalRef() {
-  Destroy();
+  if (!IsImported()) {
+    Destroy();
+  }
 }
 
 // ----------------------------------------------------------------------------
@@ -1777,7 +1808,7 @@ WGPUFuture wgpuDeviceCreateComputePipelineAsync(
     return WGPUFuture{kNullFutureId};
   }
 
-  WGPUComputePipeline pipeline = emwgpuCreateComputePipeline(nullptr);
+  WGPUComputePipeline pipeline = emwgpuCreateComputePipeline(device);
   emwgpuDeviceCreateComputePipelineAsync(device, futureId, descriptor,
                                          pipeline);
   return WGPUFuture{futureId};
@@ -1794,7 +1825,7 @@ WGPUFuture wgpuDeviceCreateRenderPipelineAsync(
     return WGPUFuture{kNullFutureId};
   }
 
-  WGPURenderPipeline pipeline = emwgpuCreateRenderPipeline(nullptr);
+  WGPURenderPipeline pipeline = emwgpuCreateRenderPipeline(device);
   emwgpuDeviceCreateRenderPipelineAsync(device, futureId, descriptor, pipeline);
   return WGPUFuture{futureId};
 }
