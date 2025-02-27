@@ -105,6 +105,7 @@ if (tint_build_unittests) {
         "misc_test.cc",
         "name_test.cc",
         "struct_test.cc",
+        "unary_test.cc",
         "var_test.cc",
       ]
       deps = [
