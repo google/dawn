@@ -131,6 +131,7 @@ enum class BuiltinFn : uint8_t {
     kShiftRightLogical,
     kShiftRightArithmetic,
     kNot,
+    kSNegate,
     kSDot,
     kUDot,
     kCooperativeMatrixLoad,

@@ -1654,5 +1654,277 @@ TEST_F(SpirvParserTest, QuantizeToF16_Vector) {
 )");
 }
 
+TEST_F(SpirvParserTest, SNegate_Scalar_Signed_Signed) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+        %int = OpTypeInt 32 1
+       %uint = OpTypeInt 32 0
+        %one = OpConstant %int 1
+        %two = OpConstant %int 2
+      %eight = OpConstant %uint 8
+       %nine = OpConstant %uint 9
+      %v2int = OpTypeVector %int 2
+     %v2uint = OpTypeVector %uint 2
+      %v2one = OpConstantComposite %v2int %one %one
+    %v2eight = OpConstantComposite %v2uint %eight %eight
+    %void_fn = OpTypeFunction %void
+       %main = OpFunction %void None %void_fn
+ %main_start = OpLabel
+          %1 = OpSNegate %int %one
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = spirv.s_negate<i32> 1i
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, SNegate_Scalar_Signed_Unsigned) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+        %int = OpTypeInt 32 1
+       %uint = OpTypeInt 32 0
+        %one = OpConstant %int 1
+        %two = OpConstant %int 2
+      %eight = OpConstant %uint 8
+       %nine = OpConstant %uint 9
+      %v2int = OpTypeVector %int 2
+     %v2uint = OpTypeVector %uint 2
+      %v2one = OpConstantComposite %v2int %one %one
+    %v2eight = OpConstantComposite %v2uint %eight %eight
+    %void_fn = OpTypeFunction %void
+       %main = OpFunction %void None %void_fn
+ %main_start = OpLabel
+          %1 = OpSNegate %uint %one
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = spirv.s_negate<u32> 1i
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, SNegate_Scalar_Unsigned_Signed) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+        %int = OpTypeInt 32 1
+       %uint = OpTypeInt 32 0
+        %one = OpConstant %int 1
+        %two = OpConstant %int 2
+      %eight = OpConstant %uint 8
+       %nine = OpConstant %uint 9
+      %v2int = OpTypeVector %int 2
+     %v2uint = OpTypeVector %uint 2
+      %v2one = OpConstantComposite %v2int %one %one
+    %v2eight = OpConstantComposite %v2uint %eight %eight
+    %void_fn = OpTypeFunction %void
+       %main = OpFunction %void None %void_fn
+ %main_start = OpLabel
+          %1 = OpSNegate %int %eight
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = spirv.s_negate<i32> 8u
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, SNegate_Scalar_Unsigned_Unsigned) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+        %int = OpTypeInt 32 1
+       %uint = OpTypeInt 32 0
+        %one = OpConstant %int 1
+        %two = OpConstant %int 2
+      %eight = OpConstant %uint 8
+       %nine = OpConstant %uint 9
+      %v2int = OpTypeVector %int 2
+     %v2uint = OpTypeVector %uint 2
+      %v2one = OpConstantComposite %v2int %one %one
+    %v2eight = OpConstantComposite %v2uint %eight %eight
+    %void_fn = OpTypeFunction %void
+       %main = OpFunction %void None %void_fn
+ %main_start = OpLabel
+          %1 = OpSNegate %uint %eight
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = spirv.s_negate<u32> 8u
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, SNegate_Vector_Signed_Signed) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+        %int = OpTypeInt 32 1
+       %uint = OpTypeInt 32 0
+        %one = OpConstant %int 1
+        %two = OpConstant %int 2
+      %eight = OpConstant %uint 8
+       %nine = OpConstant %uint 9
+      %v2int = OpTypeVector %int 2
+     %v2uint = OpTypeVector %uint 2
+      %v2one = OpConstantComposite %v2int %one %one
+    %v2eight = OpConstantComposite %v2uint %eight %eight
+    %void_fn = OpTypeFunction %void
+       %main = OpFunction %void None %void_fn
+ %main_start = OpLabel
+          %1 = OpSNegate %v2int %v2one
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<i32> = spirv.s_negate<i32> vec2<i32>(1i)
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, SNegate_Vector_Signed_Unsigned) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+        %int = OpTypeInt 32 1
+       %uint = OpTypeInt 32 0
+        %one = OpConstant %int 1
+        %two = OpConstant %int 2
+      %eight = OpConstant %uint 8
+       %nine = OpConstant %uint 9
+      %v2int = OpTypeVector %int 2
+     %v2uint = OpTypeVector %uint 2
+      %v2one = OpConstantComposite %v2int %one %one
+    %v2eight = OpConstantComposite %v2uint %eight %eight
+    %void_fn = OpTypeFunction %void
+       %main = OpFunction %void None %void_fn
+ %main_start = OpLabel
+          %1 = OpSNegate %v2uint %v2one
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<u32> = spirv.s_negate<u32> vec2<i32>(1i)
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, SNegate_Vector_Unsigned_Signed) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+        %int = OpTypeInt 32 1
+       %uint = OpTypeInt 32 0
+        %one = OpConstant %int 1
+        %two = OpConstant %int 2
+      %eight = OpConstant %uint 8
+       %nine = OpConstant %uint 9
+      %v2int = OpTypeVector %int 2
+     %v2uint = OpTypeVector %uint 2
+      %v2one = OpConstantComposite %v2int %one %one
+    %v2eight = OpConstantComposite %v2uint %eight %eight
+    %void_fn = OpTypeFunction %void
+       %main = OpFunction %void None %void_fn
+ %main_start = OpLabel
+          %1 = OpSNegate %v2int %v2eight
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<i32> = spirv.s_negate<i32> vec2<u32>(8u)
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, SNegate_Vector_Unsigned_Unsigned) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+        %int = OpTypeInt 32 1
+       %uint = OpTypeInt 32 0
+        %one = OpConstant %int 1
+        %two = OpConstant %int 2
+      %eight = OpConstant %uint 8
+       %nine = OpConstant %uint 9
+      %v2int = OpTypeVector %int 2
+     %v2uint = OpTypeVector %uint 2
+      %v2one = OpConstantComposite %v2int %one %one
+    %v2eight = OpConstantComposite %v2uint %eight %eight
+    %void_fn = OpTypeFunction %void
+       %main = OpFunction %void None %void_fn
+ %main_start = OpLabel
+          %1 = OpSNegate %v2uint %v2eight
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<u32> = spirv.s_negate<u32> vec2<u32>(8u)
+    ret
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader

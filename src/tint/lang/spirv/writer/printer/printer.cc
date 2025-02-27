@@ -1590,6 +1590,9 @@ class Printer {
             case BuiltinFn::kNot:
                 op = spv::Op::OpNot;
                 break;
+            case BuiltinFn::kSNegate:
+                op = spv::Op::OpSNegate;
+                break;
             case spirv::BuiltinFn::kNone:
                 TINT_ICE() << "undefined spirv ir function";
         }

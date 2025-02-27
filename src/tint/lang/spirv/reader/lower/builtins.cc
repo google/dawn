@@ -206,10 +206,32 @@ struct State {
                 case spirv::BuiltinFn::kNot:
                     Not(builtin);
                     break;
+                case spirv::BuiltinFn::kSNegate:
+                    SNegate(builtin);
+                    break;
                 default:
                     TINT_UNREACHABLE() << "unknown spirv builtin: " << builtin->Func();
             }
         }
+    }
+
+    void SNegate(spirv::ir::BuiltinCall* call) {
+        auto* val = call->Args()[0];
+
+        auto* res_ty = call->Result(0)->Type();
+        auto* neg_ty = ty.MatchWidth(ty.i32(), val->Type());
+        b.InsertBefore(call, [&] {
+            if (val->Type() != neg_ty) {
+                val = b.Bitcast(neg_ty, val)->Result(0);
+            }
+            val = b.Negation(neg_ty, val)->Result(0);
+
+            if (neg_ty != res_ty) {
+                val = b.Bitcast(res_ty, val)->Result(0);
+            }
+            call->Result(0)->ReplaceAllUsesWith(val);
+        });
+        call->Destroy();
     }
 
     void Not(spirv::ir::BuiltinCall* call) {
