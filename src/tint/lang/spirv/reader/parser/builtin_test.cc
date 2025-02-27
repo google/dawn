@@ -1410,5 +1410,122 @@ INSTANTIATE_TEST_SUITE_P(SpirvParserTest,
                                          BuiltinData{"OpDPdyCoarse", "dpdyCoarse"},
                                          BuiltinData{"OpFwidthCoarse", "fwidthCoarse"}));
 
+TEST_F(SpirvParserTest, Transpose_2x2) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+      %float = OpTypeFloat 32
+        %one = OpConstant %float 1
+        %two = OpConstant %float 2
+      %three = OpConstant %float 3
+    %v2float = OpTypeVector %float 2
+    %v3float = OpTypeVector %float 3
+  %m2v2float = OpTypeMatrix %v2float 2
+  %m2v3float = OpTypeMatrix %v3float 2
+  %m3v2float = OpTypeMatrix %v2float 3
+      %v2one = OpConstantComposite %v2float %one %one
+      %v2two = OpConstantComposite %v2float %two %two
+    %v3three = OpConstantComposite %v3float %three %three %three
+%m2v2_one_two = OpConstantComposite %m2v2float %v2one %v2two
+%m3v2_two_one_two = OpConstantComposite %m3v2float %v2two %v2one %v2two
+%m2v3_threee_three = OpConstantComposite %m2v3float %v3three %v3three
+    %void_fn = OpTypeFunction %void
+       %main = OpFunction %void None %void_fn
+ %main_start = OpLabel
+          %1 = OpTranspose %m2v2float %m2v2_one_two
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:mat2x2<f32> = transpose mat2x2<f32>(vec2<f32>(1.0f), vec2<f32>(2.0f))
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, Transpose_2x3) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+      %float = OpTypeFloat 32
+        %one = OpConstant %float 1
+        %two = OpConstant %float 2
+      %three = OpConstant %float 3
+    %v2float = OpTypeVector %float 2
+    %v3float = OpTypeVector %float 3
+  %m2v2float = OpTypeMatrix %v2float 2
+  %m2v3float = OpTypeMatrix %v3float 2
+  %m3v2float = OpTypeMatrix %v2float 3
+      %v2one = OpConstantComposite %v2float %one %one
+      %v2two = OpConstantComposite %v2float %two %two
+    %v3three = OpConstantComposite %v3float %three %three %three
+%m2v2_one_two = OpConstantComposite %m2v2float %v2one %v2two
+%m3v2_two_one_two = OpConstantComposite %m3v2float %v2two %v2one %v2two
+%m2v3_three_three = OpConstantComposite %m2v3float %v3three %v3three
+    %void_fn = OpTypeFunction %void
+       %main = OpFunction %void None %void_fn
+ %main_start = OpLabel
+          %1 = OpTranspose %m3v2float %m2v3_three_three
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:mat3x2<f32> = transpose mat2x3<f32>(vec3<f32>(3.0f))
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, Transpose_3x2) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+      %float = OpTypeFloat 32
+        %one = OpConstant %float 1
+        %two = OpConstant %float 2
+      %three = OpConstant %float 3
+    %v2float = OpTypeVector %float 2
+    %v3float = OpTypeVector %float 3
+  %m2v2float = OpTypeMatrix %v2float 2
+  %m2v3float = OpTypeMatrix %v3float 2
+  %m3v2float = OpTypeMatrix %v2float 3
+      %v2one = OpConstantComposite %v2float %one %one
+      %v2two = OpConstantComposite %v2float %two %two
+    %v3three = OpConstantComposite %v3float %three %three %three
+%m2v2_one_two = OpConstantComposite %m2v2float %v2one %v2two
+%m3v2_two_one_two = OpConstantComposite %m3v2float %v2two %v2one %v2two
+%m2v3_threee_three = OpConstantComposite %m2v3float %v3three %v3three
+    %void_fn = OpTypeFunction %void
+       %main = OpFunction %void None %void_fn
+ %main_start = OpLabel
+          %1 = OpTranspose %m2v3float %m3v2_two_one_two
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:mat2x3<f32> = transpose mat3x2<f32>(vec2<f32>(2.0f), vec2<f32>(1.0f), vec2<f32>(2.0f))
+    ret
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader
