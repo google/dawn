@@ -142,10 +142,16 @@ var LibraryWebGPU = {
     {{{ gpu.makeImportJsObject('BindGroupLayout') }}}
     importJsBuffer__deps: ['emwgpuCreateBuffer'],
     importJsBuffer: (buffer, parentPtr = 0) => {
-      // At the moment, only allow importing unmapped buffers.
-      assert(buffer.mappedState == "unmapped");
-      var bufferPtr = _emwgpuCreateBuffer(parentPtr);
+      // At the moment, we do not allow importing pending buffers.
+      assert(buffer.mapState != "pending");
+      var mapState = buffer.mapState == "mapped" ?
+        {{{ gpu.BufferMapState.Mapped }}} :
+        {{{ gpu.BufferMapState.Unmapped }}};
+      var bufferPtr = _emwgpuCreateBuffer(parentPtr, mapState);
       WebGPU.Internals.jsObjectInsert(bufferPtr, buffer);
+      if (buffer.mapState == "mapped") {
+        WebGPU.Internals.bufferOnUnmaps[bufferPtr] = [];
+      }
       return bufferPtr;
     },
     {{{ gpu.makeImportJsObject('CommandBuffer') }}}
