@@ -333,9 +333,6 @@ def get_default_caches(os, clang):
     if os.category == os_category.MAC:
         # Cache for mac_toolchain tool and XCode.app
         caches.append(swarming.cache(name = "osx_sdk", path = "osx_sdk"))
-    elif os.category == os_category.WINDOWS:
-        # Cache for win_toolchain tool
-        caches.append(swarming.cache(name = "win_toolchain", path = "win_toolchain"))
 
     return caches
 
