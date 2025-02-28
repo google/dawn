@@ -40,6 +40,7 @@
 #include "dawn/native/opengl/BindingPoint.h"
 #include "dawn/native/opengl/DeviceGL.h"
 #include "dawn/native/opengl/PipelineLayoutGL.h"
+#include "dawn/native/opengl/UtilsGL.h"
 #include "dawn/platform/DawnPlatform.h"
 #include "dawn/platform/tracing/TraceEvent.h"
 
@@ -569,21 +570,21 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
         GetDevice()->EmitLog(WGPULoggingType_Info, dumpedMsg.str().c_str());
     }
 
-    GLuint shader = gl.CreateShader(GLShaderType(stage));
+    GLuint shader = DAWN_GL_TRY(gl, CreateShader(GLShaderType(stage)));
     const char* source = compilationResult->glsl.c_str();
-    gl.ShaderSource(shader, 1, &source, nullptr);
-    gl.CompileShader(shader);
+    DAWN_GL_TRY(gl, ShaderSource(shader, 1, &source, nullptr));
+    DAWN_GL_TRY(gl, CompileShader(shader));
 
     GLint compileStatus = GL_FALSE;
-    gl.GetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus);
+    DAWN_GL_TRY(gl, GetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus));
     if (compileStatus == GL_FALSE) {
         GLint infoLogLength = 0;
-        gl.GetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogLength);
+        DAWN_GL_TRY(gl, GetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogLength));
 
         if (infoLogLength > 1) {
             std::vector<char> buffer(infoLogLength);
-            gl.GetShaderInfoLog(shader, infoLogLength, nullptr, &buffer[0]);
-            gl.DeleteShader(shader);
+            DAWN_GL_TRY(gl, GetShaderInfoLog(shader, infoLogLength, nullptr, &buffer[0]));
+            DAWN_GL_TRY(gl, DeleteShader(shader));
             return DAWN_VALIDATION_ERROR("%s\nProgram compilation failed:\n%s", source,
                                          buffer.data());
         }
