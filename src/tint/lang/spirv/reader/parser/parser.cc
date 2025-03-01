@@ -65,6 +65,12 @@ namespace {
 /// The SPIR-V environment that we validate against.
 constexpr auto kTargetEnv = SPV_ENV_VULKAN_1_1;
 
+struct MergeInfo {
+    uint32_t id;
+    const spvtools::opt::Instruction* merge_inst;
+    core::ir::ControlInstruction* ctrl_inst;
+};
+
 /// PIMPL class for SPIR-V parser.
 /// Validates the SPIR-V module and then parses it to produce a Tint IR module.
 class Parser {
@@ -721,6 +727,9 @@ class Parser {
                 case spv::Op::OpBranchConditional:
                     EmitBranchConditional(inst);
                     break;
+                case spv::Op::OpSwitch:
+                    EmitSwitch(inst);
+                    break;
                 case spv::Op::OpSelectionMerge:
                     HandleSelectionMerge(inst, src);
                     break;
@@ -1003,14 +1012,29 @@ class Parser {
 
     void HandleSelectionMerge(const spvtools::opt::Instruction& inst,
                               const spvtools::opt::BasicBlock& src) {
-        merge_stack_.push_back(MergeInfo{inst.GetSingleWordOperand(0), src.terminator()});
+        merge_stack_.push_back(MergeInfo{inst.GetSingleWordOperand(0), src.terminator(), nullptr});
+    }
+
+    MergeInfo* MergeInfoFor(uint32_t id) {
+        for (auto& merge_entry : merge_stack_) {
+            if (merge_entry.id == id) {
+                return &(merge_entry);
+            }
+        }
+        return nullptr;
     }
 
     void EmitBranch(const spvtools::opt::Instruction& inst) {
         auto dest_id = inst.GetSingleWordInOperand(0);
 
-        // If this is branching to the current merge block then nothing to do.
-        if (!merge_stack_.empty() && dest_id == merge_stack_.back().id) {
+        // Disallow fallthrough
+        for (auto& switch_blocks : current_switch_blocks_) {
+            TINT_ASSERT(switch_blocks.count(dest_id) == 0);
+        }
+
+        // If this is branching to a previous merge block then we're done. It can be a previous
+        // merge block in the case of an `if` breaking out of a `switch` or `loop`.
+        if (MergeInfoFor(dest_id) != nullptr) {
             return;
         }
 
@@ -1051,6 +1075,10 @@ class Parser {
             return std::nullopt;
         }
 
+        // Remove the merge blocks.
+        true_blocks.pop_back();
+        false_blocks.pop_back();
+
         std::optional<uint32_t> id = std::nullopt;
         while (!true_blocks.empty() && !false_blocks.empty()) {
             auto* tb = true_blocks.back();
@@ -1071,13 +1099,6 @@ class Parser {
         auto true_id = inst.GetSingleWordInOperand(1);
         auto false_id = inst.GetSingleWordInOperand(2);
 
-        std::optional<uint32_t> merge_id = std::nullopt;
-        if (!merge_stack_.empty()) {
-            merge_id = merge_stack_.back().id;
-        }
-
-        TINT_ASSERT(current_spirv_function_);
-
         // If the true and false block are the same, then we change the condition into
         // `cond || true` so that we always take the true block, the false block will be marked
         // unreachable.
@@ -1088,35 +1109,55 @@ class Parser {
             cond = binary->Result(0);
         }
 
+        auto* if_ = b_.If(cond);
+        EmitWithoutResult(if_);
+
+        std::optional<uint32_t> merge_id = std::nullopt;
+        if (!merge_stack_.empty()) {
+            auto& merge_entry = merge_stack_.back();
+            merge_id = merge_entry.id;
+            merge_entry.ctrl_inst = if_;
+        }
+
+        TINT_ASSERT(current_spirv_function_);
+
         // Determine if there is a premerge block to handle
         std::optional<uint32_t> premerge_start_id = FindPremergeId(true_id, false_id, merge_id);
 
         // If we found the start of a premerge, push it onto the merge stack so this ends up being a
         // temporary merge block for the if branches.
+        core::ir::If* premerge_if_ = nullptr;
         if (premerge_start_id.has_value()) {
-            merge_stack_.push_back({premerge_start_id.value(), nullptr});
+            premerge_if_ = b_.If(b_.Constant(true));
+            merge_stack_.push_back({premerge_start_id.value(), nullptr, premerge_if_});
         }
 
-        auto* if_ = b_.If(cond);
-        EmitWithoutResult(if_);
-
-        if (true_id != merge_id) {
+        if (auto* mi = MergeInfoFor(true_id)) {
+            if_->True()->Append(b_.Exit(mi->ctrl_inst));
+        } else {
             const auto& bb_true = current_spirv_function_->FindBlock(true_id);
             EmitBlockParent(if_->True(), *bb_true);
-        }
-        if (!if_->True()->Terminator()) {
-            if_->True()->Append(b_.ExitIf(if_));
+
+            if (!if_->True()->Terminator()) {
+                if_->True()->Append(b_.Exit(if_));
+            }
         }
 
         // Pre-SPIRV 1.6 the true and false blocks could be the same. If that's the case then we
         // will have changed the condition and the false block is now unreachable.
         if (false_id == true_id) {
             if_->False()->Append(b_.Unreachable());
-        } else if (false_id != merge_id) {
+
+            // If the false block is really a merge block
+        } else if (auto* mi = MergeInfoFor(false_id)) {
+            if (mi->id != merge_id) {
+                if_->False()->Append(b_.Exit(mi->ctrl_inst));
+            }
+        } else {
             const auto& bb_false = current_spirv_function_->FindBlock(false_id);
             EmitBlockParent(if_->False(), *bb_false);
             if (!if_->False()->Terminator()) {
-                if_->False()->Append(b_.ExitIf(if_));
+                if_->False()->Append(b_.Exit(if_));
             }
         }
 
@@ -1124,18 +1165,17 @@ class Parser {
         // `if true` block in order to maintain re-convergence guarantees. The premerge will contain
         // all the blocks up to the merge block.
         if (premerge_start_id.has_value()) {
-            merge_stack_.pop_back();
-
-            auto* premerge_if_ = b_.If(b_.Constant(true));
             EmitWithoutResult(premerge_if_);
 
             const auto& bb_premerge = current_spirv_function_->FindBlock(premerge_start_id.value());
             EmitBlockParent(premerge_if_->True(), *bb_premerge);
             if (!premerge_if_->True()->Terminator()) {
-                premerge_if_->True()->Append(b_.ExitIf(premerge_if_));
+                premerge_if_->True()->Append(b_.Exit(premerge_if_));
             }
 
             premerge_if_->False()->Append(b_.Unreachable());
+
+            merge_stack_.pop_back();
         }
 
         // Emit the merge block if it exists.
@@ -1148,6 +1188,81 @@ class Parser {
         } else {
             EmitWithoutResult(b_.Unreachable());
         }
+    }
+
+    void EmitSwitch(const spvtools::opt::Instruction& inst) {
+        auto* selector = Value(inst.GetSingleWordInOperand(0));
+        auto default_id = inst.GetSingleWordInOperand(1);
+
+        TINT_ASSERT(!merge_stack_.empty());
+
+        auto* switch_ = b_.Switch(selector);
+        EmitWithoutResult(switch_);
+
+        auto& merge_entry = merge_stack_.back();
+        auto merge_id = merge_entry.id;
+        merge_entry.ctrl_inst = switch_;
+
+        current_switch_blocks_.push_back({});
+        auto& switch_blocks = current_switch_blocks_.back();
+
+        auto* default_blk = b_.DefaultCase(switch_);
+        if (default_id != merge_id) {
+            switch_blocks.emplace(default_id);
+
+            const auto& bb_default = current_spirv_function_->FindBlock(default_id);
+            EmitBlockParent(default_blk, *bb_default);
+        }
+        if (!default_blk->Terminator()) {
+            default_blk->Append(b_.ExitSwitch(switch_));
+        }
+
+        std::unordered_map<uint32_t, core::ir::Switch::Case*> block_id_to_case;
+        block_id_to_case[default_id] = &(switch_->Cases().Back());
+
+        for (uint32_t i = 2; i < inst.NumInOperandWords(); i += 2) {
+            auto blk_id = inst.GetSingleWordInOperand(i + 1);
+
+            if (blk_id != merge_id) {
+                switch_blocks.emplace(blk_id);
+            }
+        }
+
+        // For each selector.
+        for (uint32_t i = 2; i < inst.NumInOperandWords(); i += 2) {
+            auto literal = inst.GetSingleWordInOperand(i);
+            auto blk_id = inst.GetSingleWordInOperand(i + 1);
+
+            core::ir::Constant* sel = nullptr;
+            if (selector->Type()->Is<core::type::I32>()) {
+                sel = b_.Constant(i32(literal));
+            } else {
+                sel = b_.Constant(u32(literal));
+            }
+
+            // Determine if we've seen this block and should combine selectors
+            auto iter = block_id_to_case.find(blk_id);
+            if (iter != block_id_to_case.end()) {
+                iter->second->selectors.Push(core::ir::Switch::CaseSelector{sel});
+                continue;
+            }
+
+            core::ir::Block* blk = b_.Case(switch_, Vector{sel});
+            if (blk_id != merge_id) {
+                const auto& bb = current_spirv_function_->FindBlock(blk_id);
+                EmitBlockParent(blk, *bb);
+            }
+            if (!blk->Terminator()) {
+                blk->Append(b_.ExitSwitch(switch_));
+            }
+            block_id_to_case[blk_id] = &(switch_->Cases().Back());
+        }
+
+        current_switch_blocks_.pop_back();
+
+        merge_stack_.pop_back();
+        const auto& bb_merge = current_spirv_function_->FindBlock(merge_id);
+        EmitBlock(current_block_, *bb_merge);
     }
 
     Vector<core::ir::Value*, 4> Args(const spvtools::opt::Instruction& inst, uint32_t start) {
@@ -1682,16 +1797,15 @@ class Parser {
     // Map of SPIR-V Struct IDs to a list of member string names
     std::unordered_map<uint32_t, std::vector<std::string>> struct_to_member_names_;
 
-    struct MergeInfo {
-        uint32_t id;
-        const spvtools::opt::Instruction* merge_inst;
-    };
-
     // Stack of merge blocks
     std::vector<MergeInfo> merge_stack_;
 
     std::unordered_set<core::ir::Block*> current_blocks_;
     std::vector<std::unordered_set<uint32_t>> id_stack_;
+
+    // If we're in a switch, is populated with the IDs of the blocks for each of the switch
+    // selectors. This lets us watch for fallthrough when emitting branch instructions.
+    std::vector<std::unordered_set<uint32_t>> current_switch_blocks_;
 };
 
 }  // namespace
