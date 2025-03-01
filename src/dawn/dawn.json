@@ -2245,6 +2245,7 @@
             {"value": 15, "name": "clip distances"},
             {"value": 16, "name": "dual source blending"},
             {"value": 17, "name": "subgroups"},
+            {"value": 18, "name": "core features and limits", "jsrepr": "'core-features-and-limits'"},
 
             {"value": 0, "name": "dawn internal usages", "tags": ["dawn"]},
             {"value": 1, "name": "dawn multi planar formats", "tags": ["dawn"]},

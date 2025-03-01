@@ -52,6 +52,10 @@ MaybeError PhysicalDeviceBase::Initialize() {
     DAWN_TRY_CONTEXT(InitializeImpl(), "initializing adapter (backend=%s)", mBackend);
     InitializeVendorArchitectureImpl();
 
+    if (SupportsFeatureLevel(wgpu::FeatureLevel::Core, nullptr)) {
+        EnableFeature(Feature::CoreFeaturesAndLimits);
+    }
+
     EnableFeature(Feature::DawnNative);
     EnableFeature(Feature::DawnInternalUsages);
     EnableFeature(Feature::ImplicitDeviceSynchronization);

@@ -252,9 +252,7 @@ Limits ReifyDefaultLimits(const Limits& limits, wgpu::FeatureLevel featureLevel)
     return out;
 }
 
-MaybeError ValidateLimits(wgpu::FeatureLevel featureLevel,
-                          const Limits& supportedLimits,
-                          const Limits& requiredLimits) {
+MaybeError ValidateLimits(const Limits& supportedLimits, const Limits& requiredLimits) {
 #define X(Class, limitName, ...)                                                            \
     if (!IsLimitUndefined(requiredLimits.limitName)) {                                      \
         DAWN_TRY_CONTEXT(CheckLimit<LimitClass::Class>::Validate(supportedLimits.limitName, \
@@ -263,9 +261,6 @@ MaybeError ValidateLimits(wgpu::FeatureLevel featureLevel,
     }
     LIMITS(X)
 #undef X
-
-    Limits defaultLimits;
-    GetDefaultLimits(&defaultLimits, featureLevel);
 
     return {};
 }
@@ -377,7 +372,7 @@ void NormalizeLimits(Limits* limits) {
 void EnforceLimitSpecInvariants(Limits* limits, wgpu::FeatureLevel featureLevel) {
     // In all feature levels, maxXXXPerStage is raised to maxXXXInStage
     // The reason for this is in compatibility mode, maxXXXPerStage defaults to = 4.
-    // That means if you if the adapter has 8 maxXXXInStage and 8 maxXXXPerStage
+    // That means if the adapter has 8 maxXXXInStage and 8 maxXXXPerStage
     // and you request maxXXXInStage = 3 things work but, if you request
     // maxXXXInStage = 5 they'd fail because suddenly you're you'd also be required
     // to request maxXXXPerStage to 5. So, we auto-uprade the perStage limits.

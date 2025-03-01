@@ -312,5 +312,93 @@ TEST_F(DeviceGetAHardwareBufferPropertiesValidationTest,
             "without the FeatureName::SharedTextureMemoryAHardwareBuffer feature being set"));
 }
 
+class RequestDeviceCoreValidationTest : public RequestDeviceValidationTest {
+    // Create a core-defaulting adapter
+    bool UseCompatibilityMode() const override { return false; }
+};
+
+// Test that requiring wgpu::FeatureName::CoreFeaturesAndLimits explicitly when calling
+// RequestingDevice on a core-defaulting adapter gives a device with core limits.
+TEST_F(RequestDeviceCoreValidationTest, Explicit) {
+    wgpu::DeviceDescriptor descriptor = {};
+    std::vector<wgpu::FeatureName> features = {wgpu::FeatureName::CoreFeaturesAndLimits};
+    descriptor.requiredFeatures = features.data();
+    descriptor.requiredFeatureCount = features.size();
+
+    EXPECT_CALL(mRequestDeviceCallback,
+                Call(wgpu::RequestDeviceStatus::Success, NotNull(), EmptySizedString()))
+        .WillOnce(WithArgs<1>([](wgpu::Device device) {
+            EXPECT_TRUE(device.HasFeature(wgpu::FeatureName::CoreFeaturesAndLimits));
+            // Check one of limits to be greater than compat tier.
+            wgpu::Limits limits;
+            device.GetLimits(&limits);
+            EXPECT_GT(limits.maxStorageBuffersInVertexStage, 0u);
+        }));
+    adapter.RequestDevice(&descriptor, wgpu::CallbackMode::AllowSpontaneous,
+                          mRequestDeviceCallback.Callback());
+}
+
+// Test that calling RequestingDevice on a core-defaulting adapter gives a device with core
+// limits on default.
+TEST_F(RequestDeviceCoreValidationTest, Implicit) {
+    wgpu::DeviceDescriptor descriptor = {};
+
+    EXPECT_CALL(mRequestDeviceCallback,
+                Call(wgpu::RequestDeviceStatus::Success, NotNull(), EmptySizedString()))
+        .WillOnce(WithArgs<1>([](wgpu::Device device) {
+            EXPECT_TRUE(device.HasFeature(wgpu::FeatureName::CoreFeaturesAndLimits));
+            // Check one of limits to be greater than compat tier.
+            wgpu::Limits limits;
+            device.GetLimits(&limits);
+            EXPECT_GT(limits.maxStorageBuffersInVertexStage, 0u);
+        }));
+    adapter.RequestDevice(&descriptor, wgpu::CallbackMode::AllowSpontaneous,
+                          mRequestDeviceCallback.Callback());
+}
+
+class RequestDeviceCompatValidationTest : public RequestDeviceValidationTest {
+    // Create a compat-defaulting adapter
+    bool UseCompatibilityMode() const override { return true; }
+};
+
+// Test that requiring wgpu::FeatureName::CoreFeaturesAndLimits when calling RequestingDevice on a
+// compat-defaulting adapter gives a device with core limits.
+TEST_F(RequestDeviceCompatValidationTest, CreateCore) {
+    wgpu::DeviceDescriptor descriptor = {};
+    std::vector<wgpu::FeatureName> features = {wgpu::FeatureName::CoreFeaturesAndLimits};
+    descriptor.requiredFeatures = features.data();
+    descriptor.requiredFeatureCount = features.size();
+
+    EXPECT_CALL(mRequestDeviceCallback,
+                Call(wgpu::RequestDeviceStatus::Success, NotNull(), EmptySizedString()))
+        .WillOnce(WithArgs<1>([](wgpu::Device device) {
+            EXPECT_TRUE(device.HasFeature(wgpu::FeatureName::CoreFeaturesAndLimits));
+            // Check one of limits to be greater than compat tier.
+            wgpu::Limits limits;
+            device.GetLimits(&limits);
+            EXPECT_GT(limits.maxStorageBuffersInVertexStage, 0u);
+        }));
+    adapter.RequestDevice(&descriptor, wgpu::CallbackMode::AllowSpontaneous,
+                          mRequestDeviceCallback.Callback());
+}
+
+// Test that calling RequestingDevice on a compat-defaulting adapter gives a device with compat
+// limits on default.
+TEST_F(RequestDeviceCompatValidationTest, CreateCompat) {
+    wgpu::DeviceDescriptor descriptor = {};
+
+    EXPECT_CALL(mRequestDeviceCallback,
+                Call(wgpu::RequestDeviceStatus::Success, NotNull(), EmptySizedString()))
+        .WillOnce(WithArgs<1>([](wgpu::Device device) {
+            EXPECT_FALSE(device.HasFeature(wgpu::FeatureName::CoreFeaturesAndLimits));
+            // Check one of limits to be compat tier.
+            wgpu::Limits limits;
+            device.GetLimits(&limits);
+            EXPECT_EQ(limits.maxStorageBuffersInVertexStage, 0u);
+        }));
+    adapter.RequestDevice(&descriptor, wgpu::CallbackMode::AllowSpontaneous,
+                          mRequestDeviceCallback.Callback());
+}
+
 }  // anonymous namespace
 }  // namespace dawn

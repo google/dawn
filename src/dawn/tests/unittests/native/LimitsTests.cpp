@@ -109,7 +109,7 @@ TEST(Limits, ValidateLimits) {
     // Test supported == required is valid.
     {
         Limits required = defaults;
-        EXPECT_TRUE(ValidateLimits(featureLevel, defaults, required).IsSuccess());
+        EXPECT_TRUE(ValidateLimits(defaults, required).IsSuccess());
     }
 
     // Test supported == required is valid, when they are not default.
@@ -118,20 +118,20 @@ TEST(Limits, ValidateLimits) {
         Limits required = defaults;
         supported.maxBindGroups += 1;
         required.maxBindGroups += 1;
-        EXPECT_TRUE(ValidateLimits(featureLevel, supported, required).IsSuccess());
+        EXPECT_TRUE(ValidateLimits(supported, required).IsSuccess());
     }
 
     // Test that default-initialized (all undefined) is valid.
     {
         Limits required = {};
-        EXPECT_TRUE(ValidateLimits(featureLevel, defaults, required).IsSuccess());
+        EXPECT_TRUE(ValidateLimits(defaults, required).IsSuccess());
     }
 
     // Test that better than supported is invalid for "maximum" limits.
     {
         Limits required = {};
         required.maxTextureDimension3D = defaults.maxTextureDimension3D + 1;
-        MaybeError err = ValidateLimits(featureLevel, defaults, required);
+        MaybeError err = ValidateLimits(defaults, required);
         EXPECT_TRUE(err.IsError());
         err.AcquireError();
     }
@@ -140,14 +140,14 @@ TEST(Limits, ValidateLimits) {
     {
         Limits required = {};
         required.maxComputeWorkgroupSizeX = defaults.maxComputeWorkgroupSizeX - 1;
-        EXPECT_TRUE(ValidateLimits(featureLevel, defaults, required).IsSuccess());
+        EXPECT_TRUE(ValidateLimits(defaults, required).IsSuccess());
     }
 
     // Test that better than min is invalid for "alignment" limits.
     {
         Limits required = {};
         required.minUniformBufferOffsetAlignment = defaults.minUniformBufferOffsetAlignment / 2;
-        MaybeError err = ValidateLimits(featureLevel, defaults, required);
+        MaybeError err = ValidateLimits(defaults, required);
         EXPECT_TRUE(err.IsError());
         err.AcquireError();
     }
@@ -156,14 +156,14 @@ TEST(Limits, ValidateLimits) {
     {
         Limits required = {};
         required.minStorageBufferOffsetAlignment = defaults.minStorageBufferOffsetAlignment * 2;
-        EXPECT_TRUE(ValidateLimits(featureLevel, defaults, required).IsSuccess());
+        EXPECT_TRUE(ValidateLimits(defaults, required).IsSuccess());
     }
 
     // Test that worse than min and not a power of two is invalid for "alignment" limits.
     {
         Limits required = {};
         required.minStorageBufferOffsetAlignment = defaults.minStorageBufferOffsetAlignment * 3;
-        MaybeError err = ValidateLimits(featureLevel, defaults, required);
+        MaybeError err = ValidateLimits(defaults, required);
         EXPECT_TRUE(err.IsError());
         err.AcquireError();
     }

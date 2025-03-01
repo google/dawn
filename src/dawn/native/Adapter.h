@@ -80,6 +80,7 @@ class AdapterBase : public RefCounted, public WeakRefSupport<AdapterBase> {
     // Get the actual toggles state of the adapter.
     const TogglesState& GetTogglesState() const;
 
+    // Get the defaulting feature level of the adapter.
     wgpu::FeatureLevel GetFeatureLevel() const;
 
     // Get a human readable label for the adapter (in practice, the physical device name)

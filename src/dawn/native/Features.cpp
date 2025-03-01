@@ -376,6 +376,12 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
      {"Supports the \"enable subgroups_f16;\" directive in WGSL (deprecated).",
       "https://github.com/gpuweb/gpuweb/blob/main/proposals/subgroups.md",
       FeatureInfo::FeatureState::Stable}},
+    {Feature::CoreFeaturesAndLimits,
+     {"Lifts all compatibility mode restrictions (features and limits) to core when enabled on a "
+      "device.",
+      "https://github.com/gpuweb/gpuweb/blob/main/proposals/"
+      "compatibility-mode.md#core-features-and-limits-feature",
+      FeatureInfo::FeatureState::Stable}},
     {Feature::MultiDrawIndirect,
      {"Support MultiDrawIndirect and MultiDrawIndexedIndirect. Allows batching multiple indirect "
       "calls with one command",

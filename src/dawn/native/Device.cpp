@@ -319,7 +319,11 @@ DeviceBase::DeviceBase(AdapterBase* adapter,
     AdapterInfo adapterInfo;
     adapter->APIGetInfo(&adapterInfo);
 
-    ApplyFeatures(descriptor);
+    ApplyFeatures(descriptor, adapter->GetFeatureLevel());
+
+    auto effectiveFeatureLevel = HasFeature(Feature::CoreFeaturesAndLimits)
+                                     ? wgpu::FeatureLevel::Core
+                                     : wgpu::FeatureLevel::Compatibility;
 
     DawnCacheDeviceDescriptor cacheDesc = {};
     const auto* cacheDescIn = descriptor.Get<DawnCacheDeviceDescriptor>();
@@ -359,9 +363,9 @@ DeviceBase::DeviceBase(AdapterBase* adapter,
     mBlobCache = std::make_unique<BlobCache>(cacheDesc);
 
     if (descriptor->requiredLimits != nullptr) {
-        mLimits.v1 = ReifyDefaultLimits(*descriptor->requiredLimits, adapter->GetFeatureLevel());
+        mLimits.v1 = ReifyDefaultLimits(*descriptor->requiredLimits, effectiveFeatureLevel);
     } else {
-        GetDefaultLimits(&mLimits.v1, adapter->GetFeatureLevel());
+        GetDefaultLimits(&mLimits.v1, effectiveFeatureLevel);
     }
     // Get experimentalSubgroupLimits from physical device
     // TODO(crbug.com/382520104): Remove this since these are now exposed as
@@ -384,6 +388,9 @@ DeviceBase::DeviceBase(AdapterBase* adapter,
     mLimits.texelCopyBufferRowAlignmentLimits =
         GetPhysicalDevice()->GetLimits().texelCopyBufferRowAlignmentLimits;
 
+    // Handle maxXXXPerStage/maxXXXInStage.
+    EnforceLimitSpecInvariants(&mLimits.v1, effectiveFeatureLevel);
+
     mFormatTable = BuildFormatTable(this);
 
     if (!descriptor->label.IsUndefined()) {
@@ -401,6 +408,7 @@ DeviceBase::DeviceBase(AdapterBase* adapter,
 
 DeviceBase::DeviceBase() : mState(State::Alive), mToggles(ToggleStage::Device) {
     GetDefaultLimits(&mLimits.v1, wgpu::FeatureLevel::Core);
+    EnforceLimitSpecInvariants(&mLimits.v1, wgpu::FeatureLevel::Core);
     mFormatTable = BuildFormatTable(this);
 
     DeviceDescriptor desc = {};
@@ -458,8 +466,6 @@ MaybeError DeviceBase::Initialize(Ref<QueueBase> defaultQueue) {
     } else {
         mMutex = nullptr;
     }
-
-    EnforceLimitSpecInvariants(&mLimits.v1, mAdapter->GetFeatureLevel());
 
     mAdapter->GetInstance()->AddDevice(this);
 
@@ -1614,7 +1620,8 @@ ResultOrError<Ref<SharedFenceBase>> DeviceBase::ImportSharedFenceImpl(
     return DAWN_UNIMPLEMENTED_ERROR("Not implemented");
 }
 
-void DeviceBase::ApplyFeatures(const UnpackedPtr<DeviceDescriptor>& deviceDescriptor) {
+void DeviceBase::ApplyFeatures(const UnpackedPtr<DeviceDescriptor>& deviceDescriptor,
+                               wgpu::FeatureLevel level) {
     DAWN_ASSERT(deviceDescriptor);
     // Validate all required features with device toggles.
     DAWN_ASSERT(GetPhysicalDevice()->SupportsAllRequiredFeatures(
@@ -1622,6 +1629,12 @@ void DeviceBase::ApplyFeatures(const UnpackedPtr<DeviceDescriptor>& deviceDescri
 
     for (uint32_t i = 0; i < deviceDescriptor->requiredFeatureCount; ++i) {
         mEnabledFeatures.EnableFeature(deviceDescriptor->requiredFeatures[i]);
+    }
+
+    if (level == wgpu::FeatureLevel::Core) {
+        // Core-defaulting adapters always support the "core-features-and-limits" feature.
+        // It is automatically enabled on devices created from such adapters.
+        mEnabledFeatures.EnableFeature(wgpu::FeatureName::CoreFeaturesAndLimits);
     }
 
     // TODO(384921944): Enable Compat's optional features by default in Core Mode.
@@ -1686,7 +1699,7 @@ bool DeviceBase::IsRobustnessEnabled() const {
 }
 
 bool DeviceBase::IsCompatibilityMode() const {
-    return mAdapter != nullptr && mAdapter->GetFeatureLevel() == wgpu::FeatureLevel::Compatibility;
+    return !HasFeature(Feature::CoreFeaturesAndLimits);
 }
 
 bool DeviceBase::IsImmediateErrorHandlingEnabled() const {

@@ -145,6 +145,7 @@ bool PhysicalDevice::AreTimestampQueriesSupported() const {
 }
 
 void PhysicalDevice::InitializeSupportedFeaturesImpl() {
+    EnableFeature(Feature::CoreFeaturesAndLimits);
     EnableFeature(Feature::TextureCompressionBC);
     EnableFeature(Feature::DawnMultiPlanarFormats);
     EnableFeature(Feature::Depth32FloatStencil8);

@@ -146,6 +146,9 @@ MaybeError PhysicalDevice::InitializeImpl() {
 }
 
 void PhysicalDevice::InitializeSupportedFeaturesImpl() {
+    if (SupportsFeatureLevel(wgpu::FeatureLevel::Core, nullptr)) {
+        EnableFeature(Feature::CoreFeaturesAndLimits);
+    }
     EnableFeature(Feature::Depth32FloatStencil8);
     EnableFeature(Feature::DepthClipControl);
     EnableFeature(Feature::TextureCompressionBC);

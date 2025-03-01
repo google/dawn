@@ -169,8 +169,7 @@ class Device final : public DeviceBase {
     ResultOrError<Ref<SharedFenceBase>> ImportSharedFenceImpl(
         const SharedFenceDescriptor* baseDescriptor) override;
 
-    ResultOrError<VulkanDeviceKnobs> CreateDevice(wgpu::FeatureLevel featureLevel,
-                                                  VkPhysicalDevice vkPhysicalDevice);
+    ResultOrError<VulkanDeviceKnobs> CreateDevice(VkPhysicalDevice vkPhysicalDevice);
 
     MaybeError CheckDebugLayerAndGenerateErrors();
     void AppendDebugLayerMessages(ErrorData* error) override;
