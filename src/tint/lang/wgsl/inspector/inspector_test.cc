@@ -145,6 +145,8 @@ class InspectorGetEnableDirectivesTest : public InspectorRunner, public testing:
 
 class InspectorGetBlendSrcTest : public InspectorBuilder, public testing::Test {};
 
+class InspectorSubgroupMatrixTest : public InspectorBuilder, public testing::Test {};
+
 // This is a catch all for shaders that have demonstrated regressions/crashes in
 // the wild.
 class InspectorRegressionTest : public InspectorRunner, public testing::Test {};
@@ -4349,6 +4351,49 @@ TEST_F(InspectorGetBlendSrcTest, Basic) {
     ASSERT_EQ(2u, result[0].output_variables.size());
     EXPECT_EQ(0u, result[0].output_variables[0].attributes.blend_src);
     EXPECT_EQ(1u, result[0].output_variables[1].attributes.blend_src);
+}
+
+TEST_F(InspectorSubgroupMatrixTest, DirectUse) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+
+    GlobalVar("sm", ty.subgroup_matrix(core::SubgroupMatrixKind::kResult, ty.f32(), 8, 8),
+              core::AddressSpace::kPrivate);
+    MakePlainGlobalReferenceBodyFunction(
+        "foo", "sm", ty.subgroup_matrix(core::SubgroupMatrixKind::kResult, ty.f32(), 8, 8),
+        Vector{
+            Stage(ast::PipelineStage::kCompute),
+            WorkgroupSize(1_a),
+        });
+
+    Inspector& inspector = Build();
+
+    auto result = inspector.GetEntryPoints();
+    ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+    ASSERT_EQ(1u, result.size());
+    EXPECT_TRUE(result[0].uses_subgroup_matrix);
+}
+
+TEST_F(InspectorSubgroupMatrixTest, IndirectUse) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+
+    GlobalVar("sm", ty.subgroup_matrix(core::SubgroupMatrixKind::kResult, ty.f32(), 8, 8),
+              core::AddressSpace::kPrivate);
+    MakePlainGlobalReferenceBodyFunction(
+        "foo", "sm", ty.subgroup_matrix(core::SubgroupMatrixKind::kResult, ty.f32(), 8, 8), Empty);
+    MakeCallerBodyFunction("main", Vector{std::string("foo")},
+                           Vector{
+                               Stage(ast::PipelineStage::kCompute),
+                               WorkgroupSize(1_a),
+                           });
+
+    Inspector& inspector = Build();
+
+    auto result = inspector.GetEntryPoints();
+    ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+    ASSERT_EQ(1u, result.size());
+    EXPECT_TRUE(result[0].uses_subgroup_matrix);
 }
 
 }  // namespace

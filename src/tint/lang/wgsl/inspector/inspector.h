@@ -283,6 +283,9 @@ class Inspector {
     /// @returns the list of member types for the `pixel_local` variable accessed via func, if any.
     std::vector<PixelLocalMemberType> ComputePixelLocalMemberTypes(const ast::Function* func) const;
 
+    /// @returns `true` if @p func uses any subgroup matrix types
+    bool UsesSubgroupMatrix(const sem::Function* func) const;
+
     /// For a N-uple of expressions, resolve to the appropriate global resources
     /// and call 'cb'.
     /// 'cb' may be called multiple times.

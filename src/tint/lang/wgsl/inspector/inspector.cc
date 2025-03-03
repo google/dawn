@@ -157,6 +157,9 @@ EntryPoint Inspector::GetEntryPoint(const tint::ast::Function* func) {
                 entry_point.workgroup_size = {wgsize[0].value(), wgsize[1].value(),
                                               wgsize[2].value()};
             }
+
+            entry_point.uses_subgroup_matrix = UsesSubgroupMatrix(sem);
+
             break;
         }
         case ast::PipelineStage::kFragment: {
@@ -1279,6 +1282,18 @@ std::vector<Inspector::TextureUsageInfo> Inspector::GetTextureUsagesForEntryPoin
     }
 
     return res;
+}
+
+bool Inspector::UsesSubgroupMatrix(const sem::Function* func) const {
+    if (func->DirectlyUsedSubgroupMatrix()) {
+        return true;
+    }
+    for (auto& call : func->TransitivelyCalledFunctions()) {
+        if (call->DirectlyUsedSubgroupMatrix()) {
+            return true;
+        }
+    }
+    return false;
 }
 
 }  // namespace tint::inspector
