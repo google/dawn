@@ -285,6 +285,17 @@ crbug.com/371963563 [ amd mac ] webgpu:shader,execution,expression,call,builtin,
 crbug.com/372055513 [ amd mac ] webgpu:shader,execution,expression,call,builtin,subgroupBroadcast:workgroup_uniform_load:* [ RetryOnFailure ]
 crbug.com/372055515 [ amd dawn-no-backend-validation mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="StencilTest";format=* [ RetryOnFailure ]
 
+crbug.com/393558555 webgpu:shader,validation,parse,identifiers:alias_name:ident="binding_array" [ Failure ]
+crbug.com/393558555 webgpu:shader,validation,parse,identifiers:function_const_name:ident="binding_array" [ Failure ]
+crbug.com/393558555 webgpu:shader,validation,parse,identifiers:function_let_name:ident="binding_array" [ Failure ]
+crbug.com/393558555 webgpu:shader,validation,parse,identifiers:function_name:ident="binding_array" [ Failure ]
+crbug.com/393558555 webgpu:shader,validation,parse,identifiers:function_param_name:ident="binding_array" [ Failure ]
+crbug.com/393558555 webgpu:shader,validation,parse,identifiers:function_var_name:ident="binding_array" [ Failure ]
+crbug.com/393558555 webgpu:shader,validation,parse,identifiers:module_const_name:ident="binding_array" [ Failure ]
+crbug.com/393558555 webgpu:shader,validation,parse,identifiers:module_var_name:ident="binding_array" [ Failure ]
+crbug.com/393558555 webgpu:shader,validation,parse,identifiers:override_name:ident="binding_array" [ Failure ]
+crbug.com/393558555 webgpu:shader,validation,parse,identifiers:struct_name:ident="binding_array" [ Failure ]
+
 ################################################################################
 # Assorted failures that are missing bug associations (NEEDS TRIAGE)
 ################################################################################

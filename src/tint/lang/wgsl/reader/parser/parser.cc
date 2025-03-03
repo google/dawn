@@ -93,29 +93,29 @@ bool is_reserved(const Token& t) {
     auto s = t.to_str_view();
     return s == "NULL" || s == "Self" || s == "abstract" || s == "active" || s == "alignas" ||
            s == "alignof" || s == "as" || s == "asm" || s == "asm_fragment" || s == "async" ||
-           s == "attribute" || s == "auto" || s == "await" || s == "become" ||
-           s == "binding_array" || s == "cast" || s == "catch" || s == "class" || s == "co_await" ||
-           s == "co_return" || s == "co_yield" || s == "coherent" || s == "column_major" ||
-           s == "common" || s == "compile" || s == "compile_fragment" || s == "concept" ||
-           s == "const_cast" || s == "consteval" || s == "constexpr" || s == "constinit" ||
-           s == "crate" || s == "debugger" || s == "decltype" || s == "delete" || s == "demote" ||
-           s == "demote_to_helper" || s == "do" || s == "dynamic_cast" || s == "enum" ||
-           s == "explicit" || s == "export" || s == "extends" || s == "extern" || s == "external" ||
-           s == "filter" || s == "final" || s == "finally" || s == "friend" || s == "from" ||
-           s == "fxgroup" || s == "get" || s == "goto" || s == "groupshared" || s == "highp" ||
-           s == "impl" || s == "implements" || s == "import" || s == "inline" ||
-           s == "instanceof" || s == "interface" || s == "layout" || s == "lowp" || s == "macro" ||
-           s == "macro_rules" || s == "match" || s == "mediump" || s == "meta" || s == "mod" ||
-           s == "module" || s == "move" || s == "mut" || s == "mutable" || s == "namespace" ||
-           s == "new" || s == "nil" || s == "noexcept" || s == "noinline" ||
-           s == "nointerpolation" || s == "non_coherent" || s == "noncoherent" ||
-           s == "noperspective" || s == "null" || s == "nullptr" || s == "of" || s == "operator" ||
-           s == "package" || s == "packoffset" || s == "partition" || s == "pass" || s == "patch" ||
-           s == "pixelfragment" || s == "precise" || s == "precision" || s == "premerge" ||
-           s == "priv" || s == "protected" || s == "pub" || s == "public" || s == "readonly" ||
-           s == "ref" || s == "regardless" || s == "register" || s == "reinterpret_cast" ||
-           s == "require" || s == "resource" || s == "restrict" || s == "self" || s == "set" ||
-           s == "shared" || s == "sizeof" || s == "smooth" || s == "snorm" || s == "static" ||
+           s == "attribute" || s == "auto" || s == "await" || s == "become" || s == "cast" ||
+           s == "catch" || s == "class" || s == "co_await" || s == "co_return" || s == "co_yield" ||
+           s == "coherent" || s == "column_major" || s == "common" || s == "compile" ||
+           s == "compile_fragment" || s == "concept" || s == "const_cast" || s == "consteval" ||
+           s == "constexpr" || s == "constinit" || s == "crate" || s == "debugger" ||
+           s == "decltype" || s == "delete" || s == "demote" || s == "demote_to_helper" ||
+           s == "do" || s == "dynamic_cast" || s == "enum" || s == "explicit" || s == "export" ||
+           s == "extends" || s == "extern" || s == "external" || s == "filter" || s == "final" ||
+           s == "finally" || s == "friend" || s == "from" || s == "fxgroup" || s == "get" ||
+           s == "goto" || s == "groupshared" || s == "highp" || s == "impl" || s == "implements" ||
+           s == "import" || s == "inline" || s == "instanceof" || s == "interface" ||
+           s == "layout" || s == "lowp" || s == "macro" || s == "macro_rules" || s == "match" ||
+           s == "mediump" || s == "meta" || s == "mod" || s == "module" || s == "move" ||
+           s == "mut" || s == "mutable" || s == "namespace" || s == "new" || s == "nil" ||
+           s == "noexcept" || s == "noinline" || s == "nointerpolation" || s == "non_coherent" ||
+           s == "noncoherent" || s == "noperspective" || s == "null" || s == "nullptr" ||
+           s == "of" || s == "operator" || s == "package" || s == "packoffset" ||
+           s == "partition" || s == "pass" || s == "patch" || s == "pixelfragment" ||
+           s == "precise" || s == "precision" || s == "premerge" || s == "priv" ||
+           s == "protected" || s == "pub" || s == "public" || s == "readonly" || s == "ref" ||
+           s == "regardless" || s == "register" || s == "reinterpret_cast" || s == "require" ||
+           s == "resource" || s == "restrict" || s == "self" || s == "set" || s == "shared" ||
+           s == "sizeof" || s == "smooth" || s == "snorm" || s == "static" ||
            s == "static_assert" || s == "static_cast" || s == "std" || s == "subroutine" ||
            s == "super" || s == "target" || s == "template" || s == "this" || s == "thread_local" ||
            s == "throw" || s == "trait" || s == "try" || s == "type" || s == "typedef" ||
