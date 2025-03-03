@@ -2988,6 +2988,9 @@ core::type::Type* Resolver::Array(const ast::Identifier* ident) {
             atomic_composite_info_.Add(out, *found);
         }
     }
+    if (subgroup_matrix_uses_.Contains(el_ty)) {
+        subgroup_matrix_uses_.Add(out);
+    }
 
     return out;
 }
@@ -3157,6 +3160,12 @@ core::type::SubgroupMatrix* Resolver::SubgroupMatrix(const ast::Identifier* iden
 
     auto* out = b.create<core::type::SubgroupMatrix>(kind, ty_expr, cols->ValueAs<uint32_t>(),
                                                      rows->ValueAs<uint32_t>());
+
+    subgroup_matrix_uses_.Add(out);
+    if (current_function_) {
+        current_function_->SetDirectlyUsedSubgroupMatrix(&ident->source);
+    }
+
     return validator_.SubgroupMatrix(out, ident->source) ? out : nullptr;
 }
 
@@ -3461,6 +3470,10 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
                         sem_.NoteDeclarationSource(variable->Declaration());
                         return nullptr;
                     }
+                    if (current_function_ &&
+                        subgroup_matrix_uses_.Contains(variable->Type()->UnwrapRef())) {
+                        current_function_->SetDirectlyUsedSubgroupMatrix(&expr->source);
+                    }
                 }
 
                 variable->AddUser(user);
@@ -3479,6 +3492,10 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
                             fn(ref);
                         }
                     }
+                }
+
+                if (current_function_ && subgroup_matrix_uses_.Contains(ty)) {
+                    current_function_->SetDirectlyUsedSubgroupMatrix(&expr->source);
                 }
 
                 return b.create<sem::TypeExpression>(expr, current_statement_, ty);
@@ -4678,12 +4695,13 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
         auto* mem_type = sem_members[i]->Type();
         if (mem_type->Is<core::type::Atomic>()) {
             atomic_composite_info_.Add(out, &sem_members[i]->Declaration()->source);
-            break;
         } else {
             if (auto found = atomic_composite_info_.Get(mem_type)) {
                 atomic_composite_info_.Add(out, *found);
-                break;
             }
+        }
+        if (subgroup_matrix_uses_.Contains(mem_type)) {
+            subgroup_matrix_uses_.Add(out);
         }
 
         const_cast<sem::StructMember*>(sem_members[i])->SetStruct(out);

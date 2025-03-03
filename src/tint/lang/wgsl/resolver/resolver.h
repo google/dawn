@@ -697,6 +697,7 @@ class Resolver {
     wgsl::Extensions enabled_extensions_;
     Vector<sem::Function*, 8> entry_points_;
     Hashmap<const core::type::Type*, const Source*, 8> atomic_composite_info_;
+    Hashset<const core::type::Type*, 8> subgroup_matrix_uses_;
     tint::Bitset<0> marked_;
     ExprEvalStageConstraint expr_eval_stage_constraint_;
     std::unordered_map<const sem::Function*, AliasAnalysisInfo> alias_analysis_infos_;

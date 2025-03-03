@@ -675,5 +675,152 @@ TEST_F(ResolverSubgroupMatrixTest, UseSubgroupUniformityRuleWithoutExtension) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
+TEST_F(ResolverSubgroupMatrixTest, FragmentShader_ReferenceModuleScope) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+    GlobalVar("result", private_, ty("subgroup_matrix_result", ty.f32(), 8_u, 8_u));
+    Func("foo", Empty, ty.void_(),
+         Vector{
+             Assign(Phony(), AddressOf(Ident(Source({12, 34}), "result"))),
+         },
+         Vector{Stage(ast::PipelineStage::kFragment)});
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(12:34 error: subgroup matrix type cannot be used in fragment pipeline stage)");
+}
+
+TEST_F(ResolverSubgroupMatrixTest, FragmentShader_ReferenceModuleScopeInArray) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+    GlobalVar("result", private_, ty.array(ty("subgroup_matrix_result", ty.f32(), 8_u, 8_u), 4_a));
+    Func("foo", Empty, ty.void_(),
+         Vector{
+             Assign(Phony(), AddressOf(Ident(Source({12, 34}), "result"))),
+         },
+         Vector{Stage(ast::PipelineStage::kFragment)});
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(12:34 error: subgroup matrix type cannot be used in fragment pipeline stage)");
+}
+
+TEST_F(ResolverSubgroupMatrixTest, FragmentShader_ReferenceModuleScopeInStruct) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+
+    auto* s = Structure("S", Vector{
+                                 Member("m", ty("subgroup_matrix_result", ty.f32(), 8_a, 8_a)),
+                             });
+    GlobalVar("result", private_, ty.Of(s));
+    Func("foo", Empty, ty.void_(),
+         Vector{
+             Assign(Phony(), AddressOf(Ident(Source({12, 34}), "result"))),
+         },
+         Vector{Stage(ast::PipelineStage::kFragment)});
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(12:34 error: subgroup matrix type cannot be used in fragment pipeline stage)");
+}
+
+TEST_F(ResolverSubgroupMatrixTest, FragmentShader_FunctionVar) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+    Func(
+        "foo", Empty, ty.void_(),
+        Vector{
+            Decl(Var("result", ty(Source({12, 34}), "subgroup_matrix_result", ty.f32(), 8_u, 8_u))),
+        },
+        Vector{Stage(ast::PipelineStage::kFragment)});
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(12:34 error: subgroup matrix type cannot be used in fragment pipeline stage)");
+}
+
+TEST_F(ResolverSubgroupMatrixTest, FragmentShader_FunctionVarInArray) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+    Func("foo", Empty, ty.void_(),
+         Vector{
+             Decl(Var("result",
+                      ty.array(ty(Source({12, 34}), "subgroup_matrix_result", ty.f32(), 8_u, 8_u),
+                               4_a))),
+         },
+         Vector{Stage(ast::PipelineStage::kFragment)});
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(12:34 error: subgroup matrix type cannot be used in fragment pipeline stage)");
+}
+
+TEST_F(ResolverSubgroupMatrixTest, FragmentShader_FunctionVarInStruct) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+
+    Structure("S", Vector{
+                       Member("m", ty("subgroup_matrix_result", ty.f32(), 8_a, 8_a)),
+                   });
+    Func("foo", Empty, ty.void_(),
+         Vector{
+             Decl(Var("result", ty(Expr(Ident(Source({12, 34}), "S"))))),
+         },
+         Vector{Stage(ast::PipelineStage::kFragment)});
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(12:34 error: subgroup matrix type cannot be used in fragment pipeline stage)");
+}
+
+TEST_F(ResolverSubgroupMatrixTest, FragmentShader_Constructor) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+    Func("foo", Empty, ty.void_(),
+         Vector{
+             Assign(Phony(),
+                    Call(Ident(Source({12, 34}), "subgroup_matrix_result", ty.f32(), 8_a, 8_a))),
+         },
+         Vector{Stage(ast::PipelineStage::kFragment)});
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(12:34 error: subgroup matrix type cannot be used in fragment pipeline stage)");
+}
+
+TEST_F(ResolverSubgroupMatrixTest, FragmentShader_SubgroupMatrixLoad) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+    auto* buffer =
+        GlobalVar("buffer", storage, ty.array(ty.f32(), 8_a), Vector{Group(0_u), Binding(0_u)});
+    auto* call = Call(Source({12, 34}),
+                      Ident(wgsl::BuiltinFn::kSubgroupMatrixLoad,
+                            ty.subgroup_matrix(core::SubgroupMatrixKind::kLeft, ty.f32(), 8u, 8u)),
+                      AddressOf(buffer), 0_u, false, 32_u);
+    Func("foo", Empty, ty.void_(),
+         Vector{
+             Assign(Phony(), call),
+         },
+         Vector{Stage(ast::PipelineStage::kFragment)});
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:34 error: built-in cannot be used by fragment pipeline stage)");
+}
+
+TEST_F(ResolverSubgroupMatrixTest, VertexShader_IndirectUse) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+    Func("foo", Empty, ty.void_(),
+         Vector{
+             Assign(Phony(),
+                    Call(Ident(Source({12, 34}), "subgroup_matrix_result", ty.f32(), 8_a, 8_a))),
+         });
+
+    Func("main", Empty, ty.vec4<f32>(),
+         Vector{
+             CallStmt(Call("foo")),
+             Return(Call(ty.vec4<f32>())),
+         },
+         Vector{Stage(ast::PipelineStage::kVertex)},
+         Vector{Builtin(core::BuiltinValue::kPosition)});
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(12:34 error: subgroup matrix type cannot be used in vertex pipeline stage
+note: called by function 'foo'
+note: called by entry point 'main')");
+}
+
 }  // namespace
 }  // namespace tint::resolver

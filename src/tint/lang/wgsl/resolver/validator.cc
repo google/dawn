@@ -2456,6 +2456,18 @@ bool Validator::PipelineStages(VectorRef<sem::Function*> entry_points) const {
         return true;
     };
 
+    auto check_no_subgroup_matrix = [&](const sem::Function* func,
+                                        const sem::Function* entry_point) {
+        if (auto matrix_use = func->DirectlyUsedSubgroupMatrix()) {
+            auto stage = entry_point->Declaration()->PipelineStage();
+            AddError(*(matrix_use.value()))
+                << "subgroup matrix type cannot be used in " << stage << " pipeline stage";
+            backtrace(func, entry_point);
+            return false;
+        }
+        return true;
+    };
+
     auto check_func = [&](const sem::Function* func, const sem::Function* entry_point) {
         if (!check_var_uses(func, entry_point)) {
             return false;
@@ -2465,6 +2477,11 @@ bool Validator::PipelineStages(VectorRef<sem::Function*> entry_points) const {
         }
         if (entry_point->Declaration()->PipelineStage() != ast::PipelineStage::kFragment) {
             if (!check_no_discards(func, entry_point)) {
+                return false;
+            }
+        }
+        if (entry_point->Declaration()->PipelineStage() != ast::PipelineStage::kCompute) {
+            if (!check_no_subgroup_matrix(func, entry_point)) {
                 return false;
             }
         }

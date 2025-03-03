@@ -153,6 +153,19 @@ class Function final : public Castable<Function, CallTarget> {
     /// (directly or indirectly).
     VectorRef<VariablePair> TextureSamplerPairs() const { return texture_sampler_pairs_; }
 
+    /// Records the source of the first node that uses a subgroup matrix type
+    /// @param src the source
+    void SetDirectlyUsedSubgroupMatrix(const Source* src) {
+        if (!directly_used_subgroup_matrix_) {
+            directly_used_subgroup_matrix_ = src;
+        }
+    }
+
+    /// @returns the source of the first node that uses a subgroup matrix type, if any
+    std::optional<const Source*> DirectlyUsedSubgroupMatrix() const {
+        return directly_used_subgroup_matrix_;
+    }
+
     /// @returns the list of direct calls to functions / builtins made by this
     /// function
     const Vector<const Call*, 1>& DirectCalls() const { return direct_calls_; }
@@ -304,6 +317,8 @@ class Function final : public Castable<Function, CallTarget> {
     const Statement* discard_stmt_ = nullptr;
     sem::Behaviors behaviors_{sem::Behavior::kNext};
     wgsl::DiagnosticRuleSeverities diagnostic_severities_;
+
+    std::optional<const Source*> directly_used_subgroup_matrix_ = std::nullopt;
 
     std::optional<uint32_t> return_location_;
     std::optional<uint32_t> return_index_;
