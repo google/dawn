@@ -2508,6 +2508,15 @@
             {"name": "enable testing", "type": "bool", "default": "false"}
         ]
     },
+    "dawn injected invalid s type": {
+        "category": "structure",
+        "tags": ["dawn"],
+        "chained": "in",
+        "chain roots": [],
+        "members": [
+            {"name": "invalid s type", "type": "s type"}
+        ]
+    },
     "vertex attribute": {
         "category": "structure",
         "extensible": "in",
@@ -2629,6 +2638,7 @@
     "pipeline layout storage attachment": {
         "category": "structure",
         "tags": ["dawn"],
+        "extensible": "in",
         "members": [
             {"name": "offset", "type": "uint64_t", "default": 0},
             {"name": "format", "type": "texture format"}
@@ -3806,7 +3816,8 @@
             {"value": 59, "name": "dawn texel copy buffer row alignment limits", "tags": ["dawn"]},
             {"value": 60, "name": "adapter properties subgroup matrix configs", "tags": ["dawn"]},
             {"value": 61, "name": "shared fence EGL sync descriptor", "tags": ["dawn", "native"]},
-            {"value": 62, "name": "shared fence EGL sync export info", "tags": ["dawn", "native"]}
+            {"value": 62, "name": "shared fence EGL sync export info", "tags": ["dawn", "native"]},
+            {"value": 63, "name": "dawn injected invalid s type", "tags": ["dawn"]}
         ]
     },
     "texture": {

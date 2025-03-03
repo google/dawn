@@ -523,6 +523,9 @@ def topo_sort_structure(structs):
             if member.type.category == 'structure':
                 max_dependent_depth = max(max_dependent_depth,
                                           compute_depth(member.type) + 1)
+        for extension in struct.extensions:
+            max_dependent_depth = max(max_dependent_depth,
+                                      compute_depth(extension) + 1)
 
         struct.subdag_depth = max_dependent_depth
         struct.visited = True
