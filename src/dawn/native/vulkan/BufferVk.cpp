@@ -235,9 +235,9 @@ MaybeError Buffer::Initialize(bool mappedAtCreation) {
 
     MemoryKind requestKind = MemoryKind::Linear;
     if (GetInternalUsage() & wgpu::BufferUsage::MapRead) {
-        requestKind = MemoryKind::LinearReadMappable;
+        requestKind |= MemoryKind::ReadMappable;
     } else if (GetInternalUsage() & wgpu::BufferUsage::MapWrite) {
-        requestKind = MemoryKind::LinearWriteMappable;
+        requestKind |= MemoryKind::WriteMappable;
     }
     DAWN_TRY_ASSIGN(mMemoryAllocation,
                     device->GetResourceMemoryAllocator()->Allocate(requirements, requestKind));
@@ -330,13 +330,13 @@ MaybeError Buffer::InitializeHostMapped(const BufferHostMappedPointer* hostMappe
         requirements.memoryTypeBits &= hostPointerProperties.memoryTypeBits;
     }
 
-    MemoryKind requestKind;
+    MemoryKind requestKind = MemoryKind::Linear;
     if (GetInternalUsage() & wgpu::BufferUsage::MapRead) {
-        requestKind = MemoryKind::LinearReadMappable;
+        requestKind |= MemoryKind::ReadMappable;
     } else if (GetInternalUsage() & wgpu::BufferUsage::MapWrite) {
-        requestKind = MemoryKind::LinearWriteMappable;
+        requestKind |= MemoryKind::WriteMappable;
     } else {
-        requestKind = MemoryKind::Linear;
+        requestKind |= MemoryKind::DeviceLocal;
     }
 
     int memoryTypeIndex =
