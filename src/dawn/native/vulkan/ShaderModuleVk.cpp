@@ -200,6 +200,7 @@ ShaderModule::~ShaderModule() = default;
     X(LimitsForCompilationRequest, limits)                                                       \
     X(CacheKey::UnsafeUnkeyedValue<const AdapterBase*>, adapter)                                 \
     X(std::string_view, entryPointName)                                                          \
+    X(bool, usesSubgroupMatrix)                                                                  \
     X(tint::spirv::writer::Options, tintOptions)                                                 \
     X(CacheKey::UnsafeUnkeyedValue<dawn::platform::Platform*>, platform)
 
@@ -338,6 +339,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
     req.entryPointName = programmableStage.entryPoint;
     req.platform = UnsafeUnkeyedValue(GetDevice()->GetPlatform());
     req.substituteOverrideConfig = std::move(substituteOverrideConfig);
+    req.usesSubgroupMatrix = programmableStage.metadata->usesSubgroupMatrix;
 
     req.tintOptions.remapped_entry_point_name = kRemappedEntryPointName;
     req.tintOptions.strip_all_names = !GetDevice()->IsToggleEnabled(Toggle::DisableSymbolRenaming);
@@ -451,7 +453,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
                         ValidateComputeStageWorkgroupSize(
                             tintResult->workgroup_info.x, tintResult->workgroup_info.y,
                             tintResult->workgroup_info.z, tintResult->workgroup_info.storage_size,
-                            r.limits, r.adapter.UnsafeGetValue()));
+                            r.usesSubgroupMatrix, r.limits, r.adapter.UnsafeGetValue()));
                 }
 
                 CompiledSpirv result;

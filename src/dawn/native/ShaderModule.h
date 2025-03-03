@@ -156,6 +156,7 @@ ResultOrError<Extent3D> ValidateComputeStageWorkgroupSize(uint32_t x,
                                                           uint32_t y,
                                                           uint32_t z,
                                                           size_t workgroupStorageSize,
+                                                          bool usesSubgroupMatrix,
                                                           const LimitsForCompilationRequest& limits,
                                                           const AdapterBase* adapter);
 
@@ -289,6 +290,7 @@ struct EntryPointMetadata {
     bool usesVertexIndex = false;
     bool usesTextureLoadWithDepthTexture = false;
     bool usesDepthTextureWithNonComparisonSampler = false;
+    bool usesSubgroupMatrix = false;
 
     // Immediate Data block byte size
     uint32_t immediateDataRangeByteSize = 0;

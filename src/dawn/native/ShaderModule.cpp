@@ -1090,6 +1090,8 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
                        return result;
                    });
 
+    metadata->usesSubgroupMatrix = entryPoint.uses_subgroup_matrix;
+
 #undef DelayedInvalidIf
     return std::move(metadata);
 }
@@ -1132,13 +1134,15 @@ ResultOrError<Extent3D> ValidateComputeStageWorkgroupSize(const tint::Program& p
     const tint::inspector::WorkgroupSize& workgroup_size = entryPoint.workgroup_size.value();
 
     return ValidateComputeStageWorkgroupSize(workgroup_size.x, workgroup_size.y, workgroup_size.z,
-                                             entryPoint.workgroup_storage_size, limits, adapter);
+                                             entryPoint.workgroup_storage_size,
+                                             /* usesSubgroupMatrix */ false, limits, adapter);
 }
 
 ResultOrError<Extent3D> ValidateComputeStageWorkgroupSize(uint32_t x,
                                                           uint32_t y,
                                                           uint32_t z,
                                                           size_t workgroupStorageSize,
+                                                          bool usesSubgroupMatrix,
                                                           const LimitsForCompilationRequest& limits,
                                                           const AdapterBase* adapter) {
     DAWN_INVALID_IF(x < 1 || y < 1 || z < 1,
@@ -1190,6 +1194,14 @@ ResultOrError<Extent3D> ValidateComputeStageWorkgroupSize(uint32_t x,
         "the maximum allowed (%u bytes).%s",
         workgroupStorageSize, maxComputeWorkgroupStorageSize,
         DAWN_INCREASE_LIMIT_MESSAGE(adapter, maxComputeWorkgroupStorageSize, workgroupStorageSize));
+
+    if (usesSubgroupMatrix) {
+        uint32_t maxSubgroupSize = adapter->GetPhysicalDevice()->GetSubgroupMaxSize();
+        DAWN_INVALID_IF((x % maxSubgroupSize) != 0,
+                        "The x-dimension of workgroup_size (%u) must be a multiple of the device "
+                        "maxSubgroupSize (%u) when the shader uses a subgroup matrix",
+                        x, maxSubgroupSize);
+    }
 
     return Extent3D{x, y, z};
 }

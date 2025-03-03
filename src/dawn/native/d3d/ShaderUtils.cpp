@@ -294,7 +294,8 @@ MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
             DAWN_TRY_ASSIGN(
                 _, ValidateComputeStageWorkgroupSize(
                        result->workgroup_info.x, result->workgroup_info.y, result->workgroup_info.z,
-                       result->workgroup_info.storage_size, r.limits, r.adapter.UnsafeGetValue()));
+                       result->workgroup_info.storage_size, /* usesSubgroupMatrix */ false,
+                       r.limits, r.adapter.UnsafeGetValue()));
         }
     } else {
         // Validate workgroup size after program runs transforms.

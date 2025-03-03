@@ -552,10 +552,11 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
                     // Validate workgroup size after program runs transforms.
                     Extent3D _;
                     DAWN_TRY_ASSIGN(
-                        _, ValidateComputeStageWorkgroupSize(
-                               result->workgroup_info.x, result->workgroup_info.y,
-                               result->workgroup_info.z, result->workgroup_info.storage_size,
-                               r.limits, r.adapter.UnsafeGetValue()));
+                        _,
+                        ValidateComputeStageWorkgroupSize(
+                            result->workgroup_info.x, result->workgroup_info.y,
+                            result->workgroup_info.z, result->workgroup_info.storage_size,
+                            /* usesSubgroupMatrix */ false, r.limits, r.adapter.UnsafeGetValue()));
                 }
 
                 return GLSLCompilation{{std::move(result->glsl)}};

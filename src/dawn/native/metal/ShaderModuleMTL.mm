@@ -64,6 +64,7 @@ using OptionalVertexPullingTransformConfig = std::optional<tint::VertexPullingCo
     X(LimitsForCompilationRequest, limits)                                                       \
     X(CacheKey::UnsafeUnkeyedValue<const AdapterBase*>, adapter)                                 \
     X(std::string, entryPointName)                                                               \
+    X(bool, usesSubgroupMatrix)                                                                  \
     X(bool, disableSymbolRenaming)                                                               \
     X(tint::msl::writer::Options, tintOptions)                                                   \
     X(CacheKey::UnsafeUnkeyedValue<dawn::platform::Platform*>, platform)
@@ -272,6 +273,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
     req.substituteOverrideConfig = std::move(substituteOverrideConfig);
     req.entryPointName = programmableStage.entryPoint.c_str();
     req.disableSymbolRenaming = device->IsToggleEnabled(Toggle::DisableSymbolRenaming);
+    req.usesSubgroupMatrix = programmableStage.metadata->usesSubgroupMatrix;
     req.platform = UnsafeUnkeyedValue(device->GetPlatform());
 
     req.tintOptions.strip_all_names = !req.disableSymbolRenaming;
@@ -358,8 +360,8 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
                         localSize,
                         ValidateComputeStageWorkgroupSize(
                             result->workgroup_info.x, result->workgroup_info.y,
-                            result->workgroup_info.z, result->workgroup_info.storage_size, r.limits,
-                            r.adapter.UnsafeGetValue()));
+                            result->workgroup_info.z, result->workgroup_info.storage_size,
+                            r.usesSubgroupMatrix, r.limits, r.adapter.UnsafeGetValue()));
                 }
 
                 // Metal uses Clang to compile the shader as C++14. Disable everything in the -Wall

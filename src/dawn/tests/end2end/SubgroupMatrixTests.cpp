@@ -60,7 +60,19 @@ uint32_t ComponentTypeToByteSize(wgpu::SubgroupMatrixComponentType c) {
     return 0;
 }
 
-using SubgroupMatrixTest = DawnTest;
+class SubgroupMatrixTest : public DawnTest {
+  protected:
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        std::vector<wgpu::FeatureName> features;
+        if (SupportsFeatures({wgpu::FeatureName::ChromiumExperimentalSubgroupMatrix})) {
+            features.push_back(wgpu::FeatureName::ChromiumExperimentalSubgroupMatrix);
+        }
+        if (SupportsFeatures({wgpu::FeatureName::ShaderF16})) {
+            features.push_back(wgpu::FeatureName::ShaderF16);
+        }
+        return features;
+    }
+};
 
 // Test that it is only valid to request the AdapterPropertiesSubgroupMatrixConfigs structure if the
 // feature is available.
@@ -81,6 +93,52 @@ TEST_P(SubgroupMatrixTest, QueryConfigsOnlyValidWithFeature) {
         adapterInfo.nextInChain = &subgroupMatrixConfigs;
 
         EXPECT_EQ(device.GetAdapterInfo(&adapterInfo), expected);
+    }
+}
+
+// Test that Dawn validates the X-dimension of the workgroup size when subgroup matrices are used,
+// such that it must be a multiple of the maximum subgroup size.
+// The valid edge cases (where it is exactly the same as the maximum subgroup size) are tested in
+// the arithmetic tests below.
+TEST_P(SubgroupMatrixTest, WorkgroupSizeXMustBeMultipleOfMaxSubgroupSize) {
+    DAWN_TEST_UNSUPPORTED_IF(
+        !adapter.HasFeature(wgpu::FeatureName::ChromiumExperimentalSubgroupMatrix));
+
+    // Query the supported subgroup matrix configurations.
+    wgpu::AdapterInfo info;
+    wgpu::AdapterPropertiesSubgroupMatrixConfigs subgroupMatrixConfigs;
+    info.nextInChain = &subgroupMatrixConfigs;
+    ASSERT_EQ(adapter.GetInfo(&info), wgpu::Status::Success);
+
+    // Test each supported config.
+    for (size_t i = 0; i < subgroupMatrixConfigs.configCount; i++) {
+        auto& config = subgroupMatrixConfigs.configs[i];
+
+        std::ostringstream shader;
+        shader << "enable chromium_experimental_subgroup_matrix;\n";
+        if (config.resultComponentType == wgpu::SubgroupMatrixComponentType::F16) {
+            shader << "enable f16;\n";
+        }
+        shader << "alias ResultComponentType = "
+               << ComponentTypeToWgslType(config.resultComponentType) << ";\n";
+        shader << "\n";
+        shader << "const M = " << config.M << ";\n";
+        shader << "const N = " << config.N << ";\n";
+        shader << "const SubgroupMaxSize = " << info.subgroupMaxSize << ";\n";
+        shader << R"(
+@compute @workgroup_size(SubgroupMaxSize / 2, 2)
+fn main() {
+    _ = subgroup_matrix_result<ResultComponentType, N, M>();
+})";
+
+        wgpu::ComputePipelineDescriptor csDesc;
+        csDesc.compute.module = utils::CreateShaderModule(device, shader.str());
+
+        std::stringstream err;
+        err << "The x-dimension of workgroup_size (" << (info.subgroupMaxSize / 2)
+            << ") must be a multiple of the device maxSubgroupSize";
+        ASSERT_DEVICE_ERROR_MSG(device.CreateComputePipeline(&csDesc),
+                                testing::HasSubstr(err.str()));
     }
 }
 
@@ -116,7 +174,7 @@ TEST_P(SubgroupMatrix_MatrixMatrixArithmeticTest, MatrixMultiply) {
 
     MatrixOp op = GetParam().mMatrixOp;
 
-    // Query the support subgroup matrix configurations.
+    // Query the supported subgroup matrix configurations.
     wgpu::AdapterInfo info;
     wgpu::AdapterPropertiesSubgroupMatrixConfigs subgroupMatrixConfigs;
     info.nextInChain = &subgroupMatrixConfigs;
@@ -144,11 +202,12 @@ TEST_P(SubgroupMatrix_MatrixMatrixArithmeticTest, MatrixMultiply) {
         shader << "const M = " << config.M << ";\n";
         shader << "const N = " << config.N << ";\n";
         shader << "const K = " << config.K << ";\n";
+        shader << "const SubgroupMaxSize = " << info.subgroupMaxSize << ";\n";
         shader << R"(
 @group(0) @binding(0) var<storage, read>       inputs : array<ComponentType, K*M + N*K>;
 @group(0) @binding(1) var<storage, read_write> output : array<ResultComponentType, M*N>;
 
-@compute @workgroup_size(N, M)
+@compute @workgroup_size(SubgroupMaxSize)
 fn main() {
     let lhs = subgroupMatrixLoad<subgroup_matrix_left<ComponentType, K, M>>(&inputs,  0, true, M);
     let rhs = subgroupMatrixLoad<subgroup_matrix_right<ComponentType, N, K>>(&inputs, K*M, true, K);
