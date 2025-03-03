@@ -16,6 +16,7 @@ vars = {
 
   'dawn_standalone': True,
   'dawn_node': False, # Also fetches dependencies required for building NodeJS bindings.
+  'dawn_wasm': False, # Also fetches dependencies required for building WebAssembly.
   'dawn_cmake_version': 'version:2@3.23.3',
   'dawn_cmake_win32_sha1': 'b106d66bcdc8a71ea2cdf5446091327bfdb1bcd7',
   'dawn_gn_version': 'git_revision:182a6eb05d15cc76d2302f7928fdb4f645d52c53',
@@ -367,6 +368,12 @@ deps = {
     'condition': 'build_with_chromium',
   },
 
+  # Dependencies required to build / run WebAssembly bindings
+  'third_party/emsdk': {
+    'url': '{github_git}/emscripten-core/emsdk.git@127ce42cd5f0aabe2d9b5d636041ccef7c66d165',
+    'condition': 'dawn_wasm',
+  },
+
   # Dependencies required to build / run Dawn NodeJS bindings
   'third_party/node-api-headers': {
     'url': '{github_git}/nodejs/node-api-headers.git@d5cfe19da8b974ca35764dd1c73b91d57cd3c4ce',
@@ -619,11 +626,11 @@ hooks = [
                '-o', 'build/util/LASTCHANGE'],
   },
 
-  # Node binaries, when dawn_node is enabled
+  # Node binaries, when dawn_node or dawn_wasm is enabled
   {
-    'name': 'node_linux64',
+    'name': 'node_linux',
     'pattern': '.',
-    'condition': 'dawn_node and host_os == "linux"',
+    'condition': '(dawn_node or dawn_wasm) and host_os == "linux"',
     'action': [ 'python3',
                 'third_party/depot_tools/download_from_google_storage.py',
                 '--no_resume',
@@ -635,9 +642,9 @@ hooks = [
     ],
   },
   {
-    'name': 'node_mac',
+    'name': 'node_mac_x64',
     'pattern': '.',
-    'condition': 'dawn_node and host_os == "mac"',
+    'condition': '(dawn_node or dawn_wasm) and host_os == "mac" and host_cpu == "x64"',
     'action': [ 'python3',
                 'third_party/depot_tools/download_from_google_storage.py',
                 '--no_resume',
@@ -651,7 +658,7 @@ hooks = [
   {
     'name': 'node_mac_arm64',
     'pattern': '.',
-    'condition': 'dawn_node and host_os == "mac"',
+    'condition': '(dawn_node or dawn_wasm) and host_os == "mac" and host_cpu == "arm64"',
     'action': [ 'python3',
                 'third_party/depot_tools/download_from_google_storage.py',
                 '--no_resume',
@@ -665,7 +672,7 @@ hooks = [
   {
     'name': 'node_win',
     'pattern': '.',
-    'condition': 'dawn_node and host_os == "win"',
+    'condition': '(dawn_node or dawn_wasm) and host_os == "win"',
     'action': [ 'python3',
                 'third_party/depot_tools/download_from_google_storage.py',
                 '--no_resume',
@@ -673,6 +680,48 @@ hooks = [
                 '--bucket', 'chromium-nodejs/20.11.0',
                 Var('node_win_x64_sha'),
                 '-o', 'third_party/node/node.exe',
+    ],
+  },
+
+  # Activate emsdk for WebAssembly builds
+  {
+    'name': 'activate_emsdk_linux',
+    'pattern': '.',
+    'condition': 'dawn_wasm and host_os == "linux"',
+    'action': [ 'python3',
+                'tools/activate-emsdk',
+                '--node', 'third_party/node/node-linux-x64/bin/node',
+                '--llvm', 'third_party/llvm-build/Release+Asserts/bin'
+    ],
+  },
+  {
+    'name': 'activate_emsdk_mac_x64',
+    'pattern': '.',
+    'condition': 'dawn_wasm and host_os == "mac" and host_cpu == "x64"',
+    'action': [ 'python3',
+                'tools/activate-emsdk',
+                '--node', 'third_party/node/node-darwin-x64/bin/node',
+                '--llvm', 'third_party/llvm-build/Release+Asserts/bin'
+    ],
+  },
+  {
+    'name': 'activate_emsdk_mac_arm64',
+    'pattern': '.',
+    'condition': 'dawn_wasm and host_os == "mac" and host_cpu == "arm64"',
+    'action': [ 'python3',
+                'tools/activate-emsdk',
+                '--node', 'third_party/node/node-darwin-arm64/bin/node',
+                '--llvm', 'third_party/llvm-build/Release+Asserts/bin'
+    ],
+  },
+  {
+    'name': 'activate_emsdk_win',
+    'pattern': '.',
+    'condition': 'dawn_wasm and host_os == "win"',
+    'action': [ 'python3',
+                'tools/activate-emsdk',
+                '--node', 'third_party/node/node.exe',
+                '--llvm', 'third_party/llvm-build/Release+Asserts/bin'
     ],
   },
 
