@@ -199,8 +199,8 @@ ResultOrError<ShaderModuleEntryPoint> ValidateVertexState(
     DAWN_INVALID_IF(descriptor->bufferCount > maxVertexBuffers,
                     "Vertex buffer count (%u) exceeds the maximum number of vertex buffers (%u).%s",
                     descriptor->bufferCount, maxVertexBuffers,
-                    DAWN_INCREASE_LIMIT_MESSAGE(device->GetAdapter(), maxVertexBuffers,
-                                                descriptor->bufferCount));
+                    DAWN_INCREASE_LIMIT_MESSAGE(device->GetAdapter()->GetLimits().v1,
+                                                maxVertexBuffers, descriptor->bufferCount));
 
     ShaderModuleEntryPoint entryPoint;
     DAWN_TRY_ASSIGN_CONTEXT(
@@ -661,8 +661,8 @@ ResultOrError<ShaderModuleEntryPoint> ValidateFragmentState(DeviceBase* device,
     DAWN_INVALID_IF(descriptor->targetCount > maxColorAttachments,
                     "Number of targets (%u) exceeds the maximum (%u).%s", descriptor->targetCount,
                     maxColorAttachments,
-                    DAWN_INCREASE_LIMIT_MESSAGE(device->GetAdapter(), maxColorAttachments,
-                                                descriptor->targetCount));
+                    DAWN_INCREASE_LIMIT_MESSAGE(device->GetAdapter()->GetLimits().v1,
+                                                maxColorAttachments, descriptor->targetCount));
 
     auto targets =
         ityp::SpanFromUntyped<ColorAttachmentIndex>(descriptor->targets, descriptor->targetCount);

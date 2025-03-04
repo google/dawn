@@ -1180,12 +1180,12 @@ ResultOrError<Extent3D> ValidateComputeStageWorkgroupSize(uint32_t x,
 
     uint64_t numInvocations = static_cast<uint64_t>(x) * y * z;
     uint32_t maxComputeInvocationsPerWorkgroup = limits.maxComputeInvocationsPerWorkgroup;
-    DAWN_INVALID_IF(
-        numInvocations > maxComputeInvocationsPerWorkgroup,
-        "The total number of workgroup invocations (%u) exceeds the "
-        "maximum allowed (%u).%s",
-        numInvocations, maxComputeInvocationsPerWorkgroup,
-        DAWN_INCREASE_LIMIT_MESSAGE(adapter, maxComputeInvocationsPerWorkgroup, numInvocations));
+    DAWN_INVALID_IF(numInvocations > maxComputeInvocationsPerWorkgroup,
+                    "The total number of workgroup invocations (%u) exceeds the "
+                    "maximum allowed (%u).%s",
+                    numInvocations, maxComputeInvocationsPerWorkgroup,
+                    DAWN_INCREASE_LIMIT_MESSAGE(adapter->GetLimits().v1,
+                                                maxComputeInvocationsPerWorkgroup, numInvocations));
 
     uint32_t maxComputeWorkgroupStorageSize = limits.maxComputeWorkgroupStorageSize;
     DAWN_INVALID_IF(
@@ -1193,7 +1193,8 @@ ResultOrError<Extent3D> ValidateComputeStageWorkgroupSize(uint32_t x,
         "The total use of workgroup storage (%u bytes) is larger than "
         "the maximum allowed (%u bytes).%s",
         workgroupStorageSize, maxComputeWorkgroupStorageSize,
-        DAWN_INCREASE_LIMIT_MESSAGE(adapter, maxComputeWorkgroupStorageSize, workgroupStorageSize));
+        DAWN_INCREASE_LIMIT_MESSAGE(adapter->GetLimits().v1, maxComputeWorkgroupStorageSize,
+                                    workgroupStorageSize));
 
     if (usesSubgroupMatrix) {
         uint32_t maxSubgroupSize = adapter->GetPhysicalDevice()->GetSubgroupMaxSize();
