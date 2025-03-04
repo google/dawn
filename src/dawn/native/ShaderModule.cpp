@@ -1228,7 +1228,7 @@ MaybeError ValidateAndParseShaderModule(
 
     wgpu::SType moduleType;
     // A WGSL (or SPIR-V, if enabled) subdescriptor is required, and a Dawn-specific SPIR-V options
-// descriptor is allowed when using SPIR-V.
+    // descriptor is allowed when using SPIR-V.
 #if TINT_BUILD_SPV_READER
     DAWN_TRY_ASSIGN(
         moduleType,

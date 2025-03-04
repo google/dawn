@@ -294,18 +294,33 @@ TEST_F(ShaderModuleValidationTest, GetCompilationMessages) {
             ASSERT_EQ(wgpu::CompilationMessageType::Info, message->type);
             ASSERT_EQ(0u, message->lineNum);
             ASSERT_EQ(0u, message->linePos);
+            ASSERT_NE(nullptr, message->nextInChain);
+            ASSERT_EQ(wgpu::SType::DawnCompilationMessageUtf16, message->nextInChain->sType);
+            const wgpu::DawnCompilationMessageUtf16* utf16 =
+                reinterpret_cast<const wgpu::DawnCompilationMessageUtf16*>(message->nextInChain);
+            EXPECT_EQ(0u, utf16->linePos);
 
             message = &info->messages[1];
             ASSERT_EQ("Warning Message", std::string_view(message->message));
             ASSERT_EQ(wgpu::CompilationMessageType::Warning, message->type);
             ASSERT_EQ(0u, message->lineNum);
             ASSERT_EQ(0u, message->linePos);
+            ASSERT_NE(nullptr, message->nextInChain);
+            ASSERT_EQ(wgpu::SType::DawnCompilationMessageUtf16, message->nextInChain->sType);
+            utf16 =
+                reinterpret_cast<const wgpu::DawnCompilationMessageUtf16*>(message->nextInChain);
+            EXPECT_EQ(0u, utf16->linePos);
 
             message = &info->messages[2];
             ASSERT_EQ("Error Message", std::string_view(message->message));
             ASSERT_EQ(wgpu::CompilationMessageType::Error, message->type);
             ASSERT_EQ(3u, message->lineNum);
             ASSERT_EQ(4u, message->linePos);
+            ASSERT_NE(nullptr, message->nextInChain);
+            ASSERT_EQ(wgpu::SType::DawnCompilationMessageUtf16, message->nextInChain->sType);
+            utf16 =
+                reinterpret_cast<const wgpu::DawnCompilationMessageUtf16*>(message->nextInChain);
+            EXPECT_EQ(4u, utf16->linePos);
 
             message = &info->messages[3];
             ASSERT_EQ("Complete Message", std::string_view(message->message));
@@ -314,6 +329,13 @@ TEST_F(ShaderModuleValidationTest, GetCompilationMessages) {
             ASSERT_EQ(4u, message->linePos);
             ASSERT_EQ(5u, message->offset);
             ASSERT_EQ(6u, message->length);
+            ASSERT_NE(nullptr, message->nextInChain);
+            ASSERT_EQ(wgpu::SType::DawnCompilationMessageUtf16, message->nextInChain->sType);
+            utf16 =
+                reinterpret_cast<const wgpu::DawnCompilationMessageUtf16*>(message->nextInChain);
+            EXPECT_EQ(4u, utf16->linePos);
+            ASSERT_EQ(5u, utf16->offset);
+            ASSERT_EQ(6u, utf16->length);
         });
 }
 
@@ -736,6 +758,7 @@ TEST_F(ShaderModuleValidationTest, CreateErrorShaderModule) {
             ASSERT_EQ(wgpu::CompilationMessageType::Error, message->type);
             ASSERT_EQ(0u, message->lineNum);
             ASSERT_EQ(0u, message->linePos);
+            ASSERT_EQ(nullptr, message->nextInChain);
         });
 
     FlushWire();

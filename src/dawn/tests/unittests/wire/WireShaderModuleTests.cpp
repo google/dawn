@@ -71,16 +71,10 @@ class WireShaderModuleTests : public WireShaderModuleTestBase {
     WGPUShaderModule apiShaderModule;
 
     // Default responses.
-    wgpu::CompilationMessage mMessage = {nullptr,
-                                         ToOutputStringView("Test Message"),
-                                         wgpu::CompilationMessageType::Info,
-                                         2,
-                                         4,
-                                         6,
-                                         8,
-                                         4,
-                                         6,
-                                         8};
+    wgpu::DawnCompilationMessageUtf16 mUtf18 = {{nullptr, 4, 6, 8}};
+    wgpu::CompilationMessage mMessage = {
+        &mUtf18, ToOutputStringView("Test Message"), wgpu::CompilationMessageType::Info, 2, 4, 6,
+        8};
     wgpu::CompilationInfo mCompilationInfo = {nullptr, 1, &mMessage};
 };
 
@@ -108,13 +102,21 @@ TEST_P(WireShaderModuleTests, GetCompilationInfo) {
                                      const wgpu::CompilationMessage* infoMessage =
                                          &info->messages[0];
                                      EXPECT_NE(infoMessage->message.length, WGPU_STRLEN);
+                                     EXPECT_NE(infoMessage->nextInChain, nullptr);
+                                     EXPECT_EQ(infoMessage->nextInChain->sType,
+                                               wgpu::SType::DawnCompilationMessageUtf16);
+                                     const auto* utf16 =
+                                         reinterpret_cast<const wgpu::DawnCompilationMessageUtf16*>(
+                                             infoMessage->nextInChain);
                                      return infoMessage->message == mMessage.message &&
-                                            infoMessage->nextInChain == mMessage.nextInChain &&
                                             infoMessage->type == mMessage.type &&
                                             infoMessage->lineNum == mMessage.lineNum &&
                                             infoMessage->linePos == mMessage.linePos &&
                                             infoMessage->offset == mMessage.offset &&
-                                            infoMessage->length == mMessage.length;
+                                            infoMessage->length == mMessage.length &&
+                                            utf16->linePos == mUtf18.linePos &&
+                                            utf16->offset == mUtf18.offset &&
+                                            utf16->length == mUtf18.length;
                                  })))
             .Times(1);
 
