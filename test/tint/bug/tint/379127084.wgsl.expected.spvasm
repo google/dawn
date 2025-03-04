@@ -143,9 +143,6 @@
                OpDecorate %main_loc0_Input Flat
                OpDecorate %main_loc1_Input Location 1
                OpDecorate %main_loc0_Output Location 0
-               OpMemberDecorate %FSIn 0 Offset 0
-               OpMemberDecorate %FSIn 1 Offset 8
-               OpMemberDecorate %FSOut 0 Offset 0
       %float = OpTypeFloat 32
     %v2float = OpTypeVector %float 2
         %int = OpTypeInt 32 1

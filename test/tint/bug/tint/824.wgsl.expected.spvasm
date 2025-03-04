@@ -28,10 +28,6 @@
                OpDecorate %main_position_Output BuiltIn Position
                OpDecorate %main_loc0_Output Location 0
                OpDecorate %main___point_size_Output BuiltIn PointSize
-               OpMemberDecorate %Output 0 Offset 0
-               OpMemberDecorate %Output 1 Offset 16
-               OpDecorate %_arr_v2float_uint_4 ArrayStride 8
-               OpDecorate %_arr_v4float_uint_4 ArrayStride 16
        %uint = OpTypeInt 32 0
 %_ptr_Input_uint = OpTypePointer Input %uint
 %main_vertex_index_Input = OpVariable %_ptr_Input_uint Input

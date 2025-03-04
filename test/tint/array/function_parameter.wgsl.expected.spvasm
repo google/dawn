@@ -27,9 +27,6 @@
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 Coherent
-               OpDecorate %_arr_float_uint_4 ArrayStride 4
-               OpDecorate %_arr__arr_float_uint_4_uint_3 ArrayStride 16
-               OpDecorate %_arr__arr__arr_float_uint_4_uint_3_uint_2 ArrayStride 48
       %float = OpTypeFloat 32
     %s_block = OpTypeStruct %float
 %_ptr_StorageBuffer_s_block = OpTypePointer StorageBuffer %s_block

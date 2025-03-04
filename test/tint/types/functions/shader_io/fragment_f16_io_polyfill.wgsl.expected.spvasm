@@ -25,8 +25,6 @@
                OpDecorate %frag_main_loc2_Input Location 2
                OpDecorate %frag_main_loc1_Output Location 1
                OpDecorate %frag_main_loc2_Output Location 2
-               OpMemberDecorate %Outputs 0 Offset 0
-               OpMemberDecorate %Outputs 1 Offset 8
       %float = OpTypeFloat 32
 %_ptr_Input_float = OpTypePointer Input %float
 %frag_main_loc1_Input = OpVariable %_ptr_Input_float Input

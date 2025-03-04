@@ -69,8 +69,6 @@
                OpDecorate %16 DescriptorSet 1
                OpDecorate %16 Binding 3
                OpDecorate %16 NonWritable
-               OpDecorate %_arr_v3float_uint_256 ArrayStride 16
-               OpDecorate %_arr__arr_v3float_uint_256_uint_4 ArrayStride 4096
                OpDecorate %main_workgroup_id_Input BuiltIn WorkgroupId
                OpDecorate %main_local_invocation_id_Input BuiltIn LocalInvocationId
                OpDecorate %main_local_invocation_index_Input BuiltIn LocalInvocationIndex

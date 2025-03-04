@@ -30,8 +30,6 @@
                OpName %h "h"
                OpName %i "i"
                OpName %j "j"
-               OpDecorate %_arr_float_uint_4 ArrayStride 4
-               OpMemberDecorate %S 0 Offset 0
        %bool = OpTypeBool
           %3 = OpTypeFunction %bool
       %false = OpConstantFalse %bool

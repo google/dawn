@@ -13,10 +13,6 @@
                OpName %S "S"
                OpName %a "a"
                OpName %unused_entry_point "unused_entry_point"
-               OpMemberDecorate %S 0 Offset 0
-               OpMemberDecorate %S 1 Offset 16
-               OpMemberDecorate %S 1 ColMajor
-               OpMemberDecorate %S 1 MatrixStride 16
       %float = OpTypeFloat 32
           %3 = OpTypeFunction %float
         %int = OpTypeInt 32 1

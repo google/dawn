@@ -17,8 +17,6 @@
                OpName %x "x"
                OpName %x "p"
                OpName %unused_entry_point "unused_entry_point"
-               OpDecorate %_arr_v4int_uint_4 ArrayStride 16
-               OpMemberDecorate %S 0 Offset 0
         %int = OpTypeInt 32 1
 %_ptr_Private_int = OpTypePointer Private %int
           %4 = OpConstantNull %int

@@ -38,18 +38,6 @@
                OpName %aosoa_empty "aosoa_empty"
                OpName %aosoa_nonempty "aosoa_nonempty"
                OpName %aosoa_nonempty_with_expr "aosoa_nonempty_with_expr"
-               OpMemberDecorate %S1 0 Offset 0
-               OpMemberDecorate %S1 1 Offset 4
-               OpMemberDecorate %S1 2 Offset 8
-               OpMemberDecorate %S1 3 Offset 12
-               OpMemberDecorate %S3 0 Offset 0
-               OpMemberDecorate %S3 1 Offset 4
-               OpMemberDecorate %S2 0 Offset 0
-               OpMemberDecorate %S2 1 Offset 4
-               OpMemberDecorate %S3 2 Offset 20
-               OpDecorate %_arr_int_uint_2 ArrayStride 4
-               OpMemberDecorate %T 0 Offset 0
-               OpDecorate %_arr_T_uint_2 ArrayStride 8
        %void = OpTypeVoid
           %3 = OpTypeFunction %void
         %int = OpTypeInt 32 1

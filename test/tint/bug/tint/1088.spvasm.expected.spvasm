@@ -60,8 +60,6 @@
                OpDecorate %main_position_Output BuiltIn Position
                OpDecorate %main_loc0_Output Location 0
                OpDecorate %main___point_size_Output BuiltIn PointSize
-               OpMemberDecorate %main_out 0 Offset 0
-               OpMemberDecorate %main_out 1 Offset 16
       %float = OpTypeFloat 32
     %v3float = OpTypeVector %float 3
 %_ptr_Private_v3float = OpTypePointer Private %v3float

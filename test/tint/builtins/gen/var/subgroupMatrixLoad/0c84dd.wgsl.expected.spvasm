@@ -31,7 +31,6 @@
                OpDecorate %prevent_dce_block Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
-               OpDecorate %_arr_half_uint_64 ArrayStride 2
                OpDecorate %compute_main_local_invocation_index_Input BuiltIn LocalInvocationIndex
        %half = OpTypeFloat 16
        %uint = OpTypeInt 32 0

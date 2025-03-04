@@ -45,13 +45,8 @@
                OpDecorate %main_sample_index_Input Flat
                OpDecorate %main_sample_index_Input BuiltIn SampleId
                OpDecorate %main_loc3_Input Location 3
-               OpDecorate %_arr_uint_uint_1 ArrayStride 4
                OpDecorate %main_sample_mask_Input BuiltIn SampleMask
                OpDecorate %main_loc2_Input Location 2
-               OpMemberDecorate %FragmentInputs0 0 Offset 0
-               OpMemberDecorate %FragmentInputs0 1 Offset 16
-               OpMemberDecorate %FragmentInputs1 0 Offset 0
-               OpMemberDecorate %FragmentInputs1 1 Offset 16
       %float = OpTypeFloat 32
     %v4float = OpTypeVector %float 4
 %_ptr_Input_v4float = OpTypePointer Input %v4float

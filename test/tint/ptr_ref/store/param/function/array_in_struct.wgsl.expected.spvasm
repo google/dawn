@@ -13,8 +13,6 @@
                OpName %pointer_root "pointer_root"
                OpName %main "main"
                OpName %F "F"
-               OpDecorate %_arr_int_uint_4 ArrayStride 4
-               OpMemberDecorate %str 0 Offset 0
        %void = OpTypeVoid
         %int = OpTypeInt 32 1
        %uint = OpTypeInt 32 0

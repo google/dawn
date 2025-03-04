@@ -18,8 +18,6 @@
                OpName %__frexp_result_f32 "__frexp_result_f32"
                OpName %res "res"
                OpName %fragment_main "fragment_main"
-               OpMemberDecorate %__frexp_result_f32 0 Offset 0
-               OpMemberDecorate %__frexp_result_f32 1 Offset 4
        %void = OpTypeVoid
           %3 = OpTypeFunction %void
       %float = OpTypeFloat 32
@@ -63,8 +61,6 @@
                OpName %__frexp_result_f32 "__frexp_result_f32"
                OpName %res "res"
                OpName %compute_main "compute_main"
-               OpMemberDecorate %__frexp_result_f32 0 Offset 0
-               OpMemberDecorate %__frexp_result_f32 1 Offset 4
        %void = OpTypeVoid
           %3 = OpTypeFunction %void
       %float = OpTypeFloat 32
@@ -115,9 +111,6 @@
                OpName %vertex_main "vertex_main"
                OpDecorate %vertex_main_position_Output BuiltIn Position
                OpDecorate %vertex_main___point_size_Output BuiltIn PointSize
-               OpMemberDecorate %__frexp_result_f32 0 Offset 0
-               OpMemberDecorate %__frexp_result_f32 1 Offset 4
-               OpMemberDecorate %VertexOutput 0 Offset 0
       %float = OpTypeFloat 32
     %v4float = OpTypeVector %float 4
 %_ptr_Output_v4float = OpTypePointer Output %v4float

@@ -71,12 +71,6 @@
                OpDecorate %main_loc2_Input Location 2
                OpDecorate %main_loc3_Input Location 3
                OpDecorate %main_loc0_Output Location 0
-               OpMemberDecorate %FragmentOutput 0 Offset 0
-               OpMemberDecorate %FragmentInput 0 Offset 0
-               OpMemberDecorate %FragmentInput 1 Offset 16
-               OpMemberDecorate %FragmentInput 2 Offset 32
-               OpMemberDecorate %FragmentInput 3 Offset 48
-               OpMemberDecorate %FragmentInput 4 Offset 64
       %float = OpTypeFloat 32
     %v4float = OpTypeVector %float 4
 %mat4v4float = OpTypeMatrix %v4float 4

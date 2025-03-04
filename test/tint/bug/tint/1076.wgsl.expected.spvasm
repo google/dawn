@@ -20,13 +20,10 @@
                OpName %b "b"
                OpName %main "main"
                OpDecorate %main_loc0_Input Location 0
-               OpDecorate %_arr_uint_uint_1 ArrayStride 4
                OpDecorate %main_sample_mask_Input BuiltIn SampleMask
                OpDecorate %main_loc1_Input Location 1
                OpDecorate %main_loc0_Output Location 0
                OpDecorate %main_sample_mask_Output BuiltIn SampleMask
-               OpMemberDecorate %FragIn 0 Offset 0
-               OpMemberDecorate %FragIn 1 Offset 4
       %float = OpTypeFloat 32
 %_ptr_Input_float = OpTypePointer Input %float
 %main_loc0_Input = OpVariable %_ptr_Input_float Input

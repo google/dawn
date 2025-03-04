@@ -47,15 +47,6 @@
                OpDecorate %main_loc7_Output NoPerspective
                OpDecorate %main_loc7_Output Sample
                OpDecorate %main___point_size_Output BuiltIn PointSize
-               OpMemberDecorate %Out 0 Offset 0
-               OpMemberDecorate %Out 1 Offset 16
-               OpMemberDecorate %Out 2 Offset 20
-               OpMemberDecorate %Out 3 Offset 24
-               OpMemberDecorate %Out 4 Offset 28
-               OpMemberDecorate %Out 5 Offset 32
-               OpMemberDecorate %Out 6 Offset 36
-               OpMemberDecorate %Out 7 Offset 40
-               OpMemberDecorate %Out 8 Offset 44
       %float = OpTypeFloat 32
     %v4float = OpTypeVector %float 4
 %_ptr_Output_v4float = OpTypePointer Output %v4float

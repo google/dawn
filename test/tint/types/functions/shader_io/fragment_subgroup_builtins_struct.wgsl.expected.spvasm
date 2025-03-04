@@ -29,8 +29,6 @@
                OpDecorate %main_subgroup_invocation_id_Input BuiltIn SubgroupLocalInvocationId
                OpDecorate %main_subgroup_size_Input Flat
                OpDecorate %main_subgroup_size_Input BuiltIn SubgroupSize
-               OpMemberDecorate %FragmentInputs 0 Offset 0
-               OpMemberDecorate %FragmentInputs 1 Offset 4
        %uint = OpTypeInt 32 0
 %_runtimearr_uint = OpTypeRuntimeArray %uint
 %output_block = OpTypeStruct %_runtimearr_uint

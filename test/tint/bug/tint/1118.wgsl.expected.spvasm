@@ -110,7 +110,6 @@
                OpDecorate %main_loc2_Input Location 2
                OpDecorate %main_loc3_Input Location 3
                OpDecorate %main_loc0_Output Location 0
-               OpMemberDecorate %main_out 0 Offset 0
       %float = OpTypeFloat 32
 %_ptr_Private_float = OpTypePointer Private %float
           %4 = OpConstantNull %float

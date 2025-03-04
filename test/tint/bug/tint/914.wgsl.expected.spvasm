@@ -99,13 +99,9 @@
                OpDecorate %9 DescriptorSet 0
                OpDecorate %9 Binding 3
                OpDecorate %9 NonWritable
-               OpDecorate %_arr_float_uint_64 ArrayStride 4
-               OpDecorate %_arr__arr_float_uint_64_uint_64 ArrayStride 256
                OpDecorate %main_local_invocation_id_Input BuiltIn LocalInvocationId
                OpDecorate %main_global_invocation_id_Input BuiltIn GlobalInvocationId
                OpDecorate %main_local_invocation_index_Input BuiltIn LocalInvocationIndex
-               OpDecorate %_arr_float_uint_16 ArrayStride 4
-               OpDecorate %_arr_float_ColPerThreadA ArrayStride 4
       %float = OpTypeFloat 32
 %_runtimearr_float = OpTypeRuntimeArray %float
      %Matrix = OpTypeStruct %_runtimearr_float

@@ -33,8 +33,6 @@
                OpName %f32_var "ptr_f32"
                OpName %v4f32_var "ptr_vec"
                OpName %arr_var "ptr_arr"
-               OpDecorate %_arr_float_uint_4 ArrayStride 4
-               OpMemberDecorate %S 0 Offset 0
        %void = OpTypeVoid
           %3 = OpTypeFunction %void
        %bool = OpTypeBool

@@ -17,9 +17,6 @@
                OpName %main_loc0_Output "main_loc0_Output"
                OpName %main_inner "main_inner"
                OpName %main "main"
-               OpMemberDecorate %frexp_result_f32 0 Offset 0
-               OpMemberDecorate %__frexp_result_f32 0 Offset 0
-               OpMemberDecorate %__frexp_result_f32 1 Offset 4
                OpDecorate %main_loc0_Output Location 0
       %float = OpTypeFloat 32
 %frexp_result_f32 = OpTypeStruct %float

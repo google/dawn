@@ -56,7 +56,6 @@
                OpDecorate %11 DescriptorSet 0
                OpDecorate %11 Binding 1
                OpDecorate %11 Coherent
-               OpDecorate %_arr_uint_uint_1 ArrayStride 4
         %int = OpTypeInt 32 1
       %float = OpTypeFloat 32
     %v3float = OpTypeVector %float 3

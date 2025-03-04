@@ -32,18 +32,6 @@
                OpName %compute_main_inner_0 "compute_main_inner"
                OpName %local_invocation_index_1_param "local_invocation_index_1_param"
                OpName %compute_main "compute_main"
-               OpMemberDecorate %S2_atomic 0 Offset 0
-               OpMemberDecorate %S2_atomic 1 Offset 4
-               OpMemberDecorate %S2_atomic 2 Offset 8
-               OpMemberDecorate %S1_atomic 0 Offset 0
-               OpMemberDecorate %S0_atomic 0 Offset 0
-               OpMemberDecorate %S0_atomic 1 Offset 4
-               OpMemberDecorate %S0_atomic 2 Offset 8
-               OpMemberDecorate %S0_atomic 3 Offset 12
-               OpMemberDecorate %S1_atomic 1 Offset 4
-               OpMemberDecorate %S1_atomic 2 Offset 20
-               OpMemberDecorate %S1_atomic 3 Offset 24
-               OpMemberDecorate %S2_atomic 3 Offset 12
                OpDecorate %compute_main_local_invocation_index_Input BuiltIn LocalInvocationIndex
        %uint = OpTypeInt 32 0
 %_ptr_Private_uint = OpTypePointer Private %uint

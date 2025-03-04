@@ -13,8 +13,6 @@
                OpName %tint_local_index "tint_local_index"
                OpName %v "v"
                OpName %main "main"
-               OpDecorate %_arr_int_uint_3 ArrayStride 4
-               OpDecorate %_arr__arr_int_uint_3_uint_2 ArrayStride 12
                OpDecorate %main_local_invocation_index_Input BuiltIn LocalInvocationIndex
         %int = OpTypeInt 32 1
        %uint = OpTypeInt 32 0

@@ -151,8 +151,6 @@
                OpDecorate %33 DescriptorSet 0
                OpDecorate %33 Binding 7
                OpDecorate %33 Coherent
-               OpDecorate %_arr_uint_uint_2 ArrayStride 4
-               OpDecorate %_arr_uint_uint_1 ArrayStride 4
       %float = OpTypeFloat 32
     %v3float = OpTypeVector %float 3
 %mat3v3float = OpTypeMatrix %v3float 3

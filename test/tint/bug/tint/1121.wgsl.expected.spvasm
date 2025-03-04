@@ -112,7 +112,6 @@
                OpDecorate %23 Binding 0
                OpDecorate %23 NonWritable
                OpDecorate %main_global_invocation_id_Input BuiltIn GlobalInvocationId
-               OpDecorate %_arr_v4float_uint_6 ArrayStride 16
       %float = OpTypeFloat 32
     %v4float = OpTypeVector %float 4
     %v3float = OpTypeVector %float 3

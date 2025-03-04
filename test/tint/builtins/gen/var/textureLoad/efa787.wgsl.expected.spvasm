@@ -196,8 +196,6 @@
                OpDecorate %vertex_main_loc0_Output Location 0
                OpDecorate %vertex_main_loc0_Output Flat
                OpDecorate %vertex_main___point_size_Output BuiltIn PointSize
-               OpMemberDecorate %VertexOutput 0 Offset 0
-               OpMemberDecorate %VertexOutput 1 Offset 16
       %float = OpTypeFloat 32
           %3 = OpTypeImage %float 2D 0 1 0 2 Rgba8
 %_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3

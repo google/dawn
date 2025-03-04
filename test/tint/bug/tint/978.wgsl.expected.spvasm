@@ -27,8 +27,6 @@
                OpDecorate %texSampler Binding 3
                OpDecorate %main_loc2_Input Location 2
                OpDecorate %main_loc0_Output Location 0
-               OpMemberDecorate %FragmentOutput 0 Offset 0
-               OpMemberDecorate %FragmentInput 0 Offset 0
       %float = OpTypeFloat 32
           %3 = OpTypeImage %float 2D 0 0 0 1 Unknown
 %_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3

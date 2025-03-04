@@ -11,8 +11,6 @@
                OpName %S "S"
                OpName %A "A"
                OpName %f "f"
-               OpMemberDecorate %S 0 Offset 0
-               OpDecorate %_arr_S_uint_4 ArrayStride 4
         %int = OpTypeInt 32 1
           %S = OpTypeStruct %int
        %uint = OpTypeInt 32 0

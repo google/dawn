@@ -10,8 +10,6 @@
                OpName %main "main"
                OpName %zero "zero"
                OpName %init "init"
-               OpDecorate %_arr_int_uint_3 ArrayStride 4
-               OpDecorate %_arr__arr_int_uint_3_uint_2 ArrayStride 12
        %void = OpTypeVoid
           %3 = OpTypeFunction %void
         %int = OpTypeInt 32 1

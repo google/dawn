@@ -21,8 +21,6 @@
                OpDecorate %main_instance_index_Input BuiltIn InstanceIndex
                OpDecorate %main_position_Output BuiltIn Position
                OpDecorate %main___point_size_Output BuiltIn PointSize
-               OpMemberDecorate %VertexInputs 0 Offset 0
-               OpMemberDecorate %VertexInputs 1 Offset 4
        %uint = OpTypeInt 32 0
 %_ptr_Input_uint = OpTypePointer Input %uint
 %main_vertex_index_Input = OpVariable %_ptr_Input_uint Input

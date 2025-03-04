@@ -44,12 +44,6 @@
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
-               OpMemberDecorate %Inner 0 Offset 0
-               OpMemberDecorate %Inner 0 ColMajor
-               OpMemberDecorate %Inner 0 MatrixStride 8
-               OpDecorate %_arr_Inner_uint_4 ArrayStride 64
-               OpMemberDecorate %Outer 0 Offset 0
-               OpDecorate %_arr_Outer_uint_4 ArrayStride 256
       %float = OpTypeFloat 32
     %v2float = OpTypeVector %float 2
 %Inner_std140 = OpTypeStruct %v2float %v2float %v2float %v2float

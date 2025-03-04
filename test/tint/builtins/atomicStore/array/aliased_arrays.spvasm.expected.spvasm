@@ -31,9 +31,6 @@
                OpName %lhs_0 "lhs"
                OpName %rhs_0 "rhs"
                OpName %compute_main "compute_main"
-               OpDecorate %_arr_uint_uint_1 ArrayStride 4
-               OpDecorate %_arr__arr_uint_uint_1_uint_2 ArrayStride 4
-               OpDecorate %_arr__arr__arr_uint_uint_1_uint_2_uint_3 ArrayStride 8
                OpDecorate %compute_main_local_invocation_index_Input BuiltIn LocalInvocationIndex
        %uint = OpTypeInt 32 0
 %_ptr_Private_uint = OpTypePointer Private %uint

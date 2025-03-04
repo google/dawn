@@ -36,7 +36,6 @@
                OpDecorate %10 DescriptorSet 0
                OpDecorate %10 Binding 1
                OpDecorate %10 Coherent
-               OpDecorate %_arr_uint_uint_1 ArrayStride 4
       %float = OpTypeFloat 32
     %v3float = OpTypeVector %float 3
 %mat2x3_f32_std140 = OpTypeStruct %v3float %v3float

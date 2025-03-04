@@ -175,9 +175,6 @@
                OpDecorate %main_loc1_Output Location 1
                OpDecorate %main_position_Output BuiltIn Position
                OpDecorate %main___point_size_Output BuiltIn PointSize
-               OpMemberDecorate %VertexOutput 0 Offset 0
-               OpMemberDecorate %VertexOutput 1 Offset 16
-               OpMemberDecorate %VertexOutput 2 Offset 32
       %float = OpTypeFloat 32
     %v4float = OpTypeVector %float 4
     %Mat4x4_ = OpTypeStruct %v4float %v4float %v4float %v4float

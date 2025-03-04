@@ -183,8 +183,6 @@ TEST_F(SpirvWriterTest, StripAllNames) {
 
                ; Annotations
                OpDecorate %gl_LocalInvocationIndex BuiltIn LocalInvocationIndex
-               OpMemberDecorate %_struct_11 0 Offset 0
-               OpMemberDecorate %_struct_11 1 Offset 16
 
                ; Types, variables and constants
        %uint = OpTypeInt 32 0

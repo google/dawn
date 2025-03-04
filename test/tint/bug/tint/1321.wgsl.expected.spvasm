@@ -16,7 +16,6 @@
                OpName %x "x"
                OpName %tint_low_inc "tint_low_inc"
                OpName %tint_carry "tint_carry"
-               OpDecorate %_arr_float_uint_4 ArrayStride 4
         %int = OpTypeInt 32 1
           %3 = OpTypeFunction %int
       %int_1 = OpConstant %int 1

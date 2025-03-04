@@ -11,8 +11,6 @@
                OpName %f "f"
                OpName %v "v"
                OpName %unused_entry_point "unused_entry_point"
-               OpDecorate %_arr_float_uint_2 ArrayStride 4
-               OpDecorate %_arr__arr_float_uint_2_uint_2 ArrayStride 8
       %float = OpTypeFloat 32
        %uint = OpTypeInt 32 0
      %uint_2 = OpConstant %uint 2

@@ -31,11 +31,6 @@
                OpDecorate %5 DescriptorSet 1
                OpDecorate %5 Binding 4
                OpDecorate %5 NonWritable
-               OpMemberDecorate %InnerS 0 Offset 0
-               OpDecorate %_arr_InnerS_uint_8 ArrayStride 4
-               OpMemberDecorate %S1 0 Offset 0
-               OpDecorate %_arr_S1_uint_8 ArrayStride 32
-               OpMemberDecorate %OuterS 0 Offset 0
        %uint = OpTypeInt 32 0
 %_ptr_Private_uint = OpTypePointer Private %uint
           %4 = OpConstantNull %uint

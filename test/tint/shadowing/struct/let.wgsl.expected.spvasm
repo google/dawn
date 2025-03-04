@@ -15,7 +15,6 @@
                OpName %a_0 "a"
                OpName %a_0 "b"
                OpName %unused_entry_point "unused_entry_point"
-               OpMemberDecorate %a 0 Offset 0
        %void = OpTypeVoid
           %3 = OpTypeFunction %void
         %int = OpTypeInt 32 1

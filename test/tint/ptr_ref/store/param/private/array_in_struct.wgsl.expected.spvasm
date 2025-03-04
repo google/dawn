@@ -12,8 +12,6 @@
                OpName %P "P"
                OpName %func "func"
                OpName %main "main"
-               OpDecorate %_arr_int_uint_4 ArrayStride 4
-               OpMemberDecorate %str 0 Offset 0
         %int = OpTypeInt 32 1
        %uint = OpTypeInt 32 0
      %uint_4 = OpConstant %uint 4

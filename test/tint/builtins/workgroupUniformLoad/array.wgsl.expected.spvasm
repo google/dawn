@@ -10,7 +10,6 @@
                OpName %v "v"
                OpName %foo "foo"
                OpName %unused_entry_point "unused_entry_point"
-               OpDecorate %_arr_int_uint_4 ArrayStride 4
         %int = OpTypeInt 32 1
        %uint = OpTypeInt 32 0
      %uint_4 = OpConstant %uint 4

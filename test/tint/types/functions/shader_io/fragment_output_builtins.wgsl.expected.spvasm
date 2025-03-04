@@ -67,7 +67,6 @@
                OpName %main2_sample_mask_Output "main2_sample_mask_Output"
                OpName %main2_inner "main2_inner"
                OpName %main2 "main2"
-               OpDecorate %_arr_uint_uint_1 ArrayStride 4
                OpDecorate %main2_sample_mask_Output BuiltIn SampleMask
        %uint = OpTypeInt 32 0
      %uint_1 = OpConstant %uint 1

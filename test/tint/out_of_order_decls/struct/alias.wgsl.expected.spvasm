@@ -11,7 +11,6 @@
                OpMemberName %S 0 "m"
                OpName %S "S"
                OpName %v "v"
-               OpMemberDecorate %S 0 Offset 0
        %void = OpTypeVoid
           %3 = OpTypeFunction %void
         %int = OpTypeInt 32 1

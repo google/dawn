@@ -19,7 +19,6 @@
                OpName %v9 "v9"
                OpName %main "main"
                OpDecorate %main_loc0_Output Location 0
-               OpDecorate %_arr_float_uint_10 ArrayStride 4
       %float = OpTypeFloat 32
     %v4float = OpTypeVector %float 4
 %_ptr_Output_v4float = OpTypePointer Output %v4float

@@ -224,7 +224,6 @@
                OpDecorate %31 Binding 1
                OpDecorate %31 Coherent
                OpDecorate %main_local_invocation_index_Input BuiltIn LocalInvocationIndex
-               OpDecorate %_arr_mat4v2half_uint_2 ArrayStride 16
       %float = OpTypeFloat 32
         %int = OpTypeInt 32 1
        %uint = OpTypeInt 32 0

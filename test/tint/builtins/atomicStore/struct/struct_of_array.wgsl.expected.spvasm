@@ -16,10 +16,6 @@
                OpName %compute_main_inner "compute_main_inner"
                OpName %tint_local_index "tint_local_index"
                OpName %compute_main "compute_main"
-               OpMemberDecorate %S 0 Offset 0
-               OpDecorate %_arr_uint_uint_10 ArrayStride 4
-               OpMemberDecorate %S 1 Offset 4
-               OpMemberDecorate %S 2 Offset 44
                OpDecorate %compute_main_local_invocation_index_Input BuiltIn LocalInvocationIndex
         %int = OpTypeInt 32 1
        %uint = OpTypeInt 32 0

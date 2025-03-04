@@ -240,6 +240,9 @@ class Printer {
         }
     };
 
+    /// The set of types that require explicit layout decorations.
+    Hashset<const core::type::Type*, 16> requires_layout_decorations_;
+
     /// The map of types to their result IDs.
     Hashmap<const core::type::Type*, uint32_t, 8> types_;
 
@@ -304,6 +307,9 @@ class Printer {
             module_.PushMemoryModel(spv::Op::OpMemoryModel, {U32Operand(SpvAddressingModelLogical),
                                                              U32Operand(SpvMemoryModelGLSL450)});
         }
+
+        // Find types that require explicit layout decorations.
+        FindTypesThatRequireLayoutDecorations();
 
         // Emit module-scope declarations.
         EmitRootBlock(ir_.root_block);
@@ -374,6 +380,39 @@ class Printer {
                 return SpvBuiltInMax;
         }
         return SpvBuiltInMax;
+    }
+
+    /// Find all array and structure types that are used in host-shareable address spaces and mark
+    /// them as such so that we know to add explicit layout decorations when we emit them.
+    void FindTypesThatRequireLayoutDecorations() {
+        // We only look at module-scope variable declarations, since this is where all
+        // host-shareable types are declared.
+        for (auto* decl : *ir_.root_block) {
+            if (auto* var = decl->As<core::ir::Var>()) {
+                auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
+                if (!core::IsHostShareable(ptr->AddressSpace())) {
+                    continue;
+                }
+
+                // Look for arrays and structures at any nesting depth of this type.
+                Vector<const core::type::Type*, 8> type_queue;
+                type_queue.Push(ptr->StoreType());
+                while (!type_queue.IsEmpty()) {
+                    auto* next = type_queue.Pop();
+                    if (auto* str = next->As<core::type::Struct>()) {
+                        // Record this structure as host-shareable and then check its members.
+                        requires_layout_decorations_.Add(str);
+                        for (auto* member : str->Members()) {
+                            type_queue.Push(member->Type());
+                        }
+                    } else if (auto* arr = next->As<core::type::Array>()) {
+                        // Record this array as host-shareable and then check its element type.
+                        requires_layout_decorations_.Add(arr);
+                        type_queue.Push(arr->ElemType());
+                    }
+                }
+            }
+        }
     }
 
     /// Get the result ID of the constant `constant`, emitting its instruction if necessary.
@@ -526,8 +565,11 @@ class Printer {
                         TINT_ASSERT(arr->Count()->Is<core::type::RuntimeArrayCount>());
                         module_.PushType(spv::Op::OpTypeRuntimeArray, {id, Type(arr->ElemType())});
                     }
-                    module_.PushAnnot(spv::Op::OpDecorate,
-                                      {id, U32Operand(SpvDecorationArrayStride), arr->Stride()});
+                    if (requires_layout_decorations_.Contains(arr)) {
+                        module_.PushAnnot(
+                            spv::Op::OpDecorate,
+                            {id, U32Operand(SpvDecorationArrayStride), arr->Stride()});
+                    }
                 },
                 [&](const core::type::Pointer* ptr) {
                     module_.PushType(spv::Op::OpTypePointer,
@@ -617,19 +659,21 @@ class Printer {
         for (auto* member : str->Members()) {
             operands.push_back(Type(member->Type()));
 
-            // Generate struct member offset decoration.
-            module_.PushAnnot(
-                spv::Op::OpMemberDecorate,
-                {operands[0], member->Index(), U32Operand(SpvDecorationOffset), member->Offset()});
+            if (requires_layout_decorations_.Contains(str)) {
+                // Generate struct member offset decoration.
+                module_.PushAnnot(spv::Op::OpMemberDecorate,
+                                  {operands[0], member->Index(), U32Operand(SpvDecorationOffset),
+                                   member->Offset()});
 
-            // Emit matrix layout decorations if necessary.
-            if (auto* matrix_type = get_nested_matrix_type(member->Type())) {
-                const uint32_t effective_row_count = (matrix_type->Rows() == 2) ? 2 : 4;
-                module_.PushAnnot(spv::Op::OpMemberDecorate,
-                                  {id, member->Index(), U32Operand(SpvDecorationColMajor)});
-                module_.PushAnnot(spv::Op::OpMemberDecorate,
-                                  {id, member->Index(), U32Operand(SpvDecorationMatrixStride),
-                                   Operand(effective_row_count * matrix_type->Type()->Size())});
+                // Emit matrix layout decorations if necessary.
+                if (auto* matrix_type = get_nested_matrix_type(member->Type())) {
+                    const uint32_t effective_row_count = (matrix_type->Rows() == 2) ? 2 : 4;
+                    module_.PushAnnot(spv::Op::OpMemberDecorate,
+                                      {id, member->Index(), U32Operand(SpvDecorationColMajor)});
+                    module_.PushAnnot(spv::Op::OpMemberDecorate,
+                                      {id, member->Index(), U32Operand(SpvDecorationMatrixStride),
+                                       Operand(effective_row_count * matrix_type->Type()->Size())});
+                }
             }
 
             PushMemberName(id, member->Index(), member->Name());

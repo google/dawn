@@ -15,12 +15,9 @@
                OpMemberName %VertexOutputs 1 "position"
                OpName %VertexOutputs "VertexOutputs"
                OpName %main "main"
-               OpDecorate %_arr_float_uint_8 ArrayStride 4
                OpDecorate %main_clip_distances_Output BuiltIn ClipDistance
                OpDecorate %main_position_Output BuiltIn Position
                OpDecorate %main___point_size_Output BuiltIn PointSize
-               OpMemberDecorate %VertexOutputs 0 Offset 0
-               OpMemberDecorate %VertexOutputs 1 Offset 32
       %float = OpTypeFloat 32
        %uint = OpTypeInt 32 0
      %uint_8 = OpConstant %uint 8

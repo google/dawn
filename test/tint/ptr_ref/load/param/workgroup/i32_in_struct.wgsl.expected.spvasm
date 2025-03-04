@@ -16,7 +16,6 @@
                OpName %tint_local_index "tint_local_index"
                OpName %r "r"
                OpName %main "main"
-               OpMemberDecorate %str 0 Offset 0
                OpDecorate %main_local_invocation_index_Input BuiltIn LocalInvocationIndex
         %int = OpTypeInt 32 1
         %str = OpTypeStruct %int

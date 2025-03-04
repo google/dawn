@@ -9,7 +9,6 @@
                OpExecutionMode %unused_entry_point LocalSize 1 1 1
                OpName %a "a"
                OpName %unused_entry_point "unused_entry_point"
-               OpDecorate %_arr_float_uint_2 ArrayStride 4
       %float = OpTypeFloat 32
        %uint = OpTypeInt 32 0
      %uint_2 = OpConstant %uint 2

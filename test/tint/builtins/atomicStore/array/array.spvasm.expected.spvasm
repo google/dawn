@@ -23,7 +23,6 @@
                OpName %compute_main_inner_0 "compute_main_inner"
                OpName %local_invocation_index_1_param "local_invocation_index_1_param"
                OpName %compute_main "compute_main"
-               OpDecorate %_arr_uint_uint_4 ArrayStride 4
                OpDecorate %compute_main_local_invocation_index_Input BuiltIn LocalInvocationIndex
        %uint = OpTypeInt 32 0
 %_ptr_Private_uint = OpTypePointer Private %uint

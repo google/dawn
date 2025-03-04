@@ -43,19 +43,10 @@
                OpDecorate %main_frag_depth_Output BuiltIn FragDepth
                OpDecorate %main_loc1_Output Location 1
                OpDecorate %main_loc2_Output Location 2
-               OpDecorate %_arr_uint_uint_1 ArrayStride 4
                OpDecorate %main_sample_mask_Output BuiltIn SampleMask
                OpDecorate %main_loc3_Output Location 3
                OpDecorate %main_loc4_Output Location 4
                OpDecorate %main_loc5_Output Location 5
-               OpMemberDecorate %FragmentOutputs 0 Offset 0
-               OpMemberDecorate %FragmentOutputs 1 Offset 4
-               OpMemberDecorate %FragmentOutputs 2 Offset 8
-               OpMemberDecorate %FragmentOutputs 3 Offset 12
-               OpMemberDecorate %FragmentOutputs 4 Offset 16
-               OpMemberDecorate %FragmentOutputs 5 Offset 32
-               OpMemberDecorate %FragmentOutputs 6 Offset 48
-               OpMemberDecorate %FragmentOutputs 7 Offset 56
       %float = OpTypeFloat 32
 %tint_push_constant_struct = OpTypeStruct %float %float
 %_ptr_PushConstant_tint_push_constant_struct = OpTypePointer PushConstant %tint_push_constant_struct

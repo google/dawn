@@ -20,8 +20,6 @@
                OpName %S "S"
                OpName %struct_var "struct_var"
                OpName %main "main"
-               OpDecorate %_arr_float_uint_4 ArrayStride 4
-               OpMemberDecorate %S 0 Offset 0
        %bool = OpTypeBool
 %_ptr_Private_bool = OpTypePointer Private %bool
       %false = OpConstantFalse %bool

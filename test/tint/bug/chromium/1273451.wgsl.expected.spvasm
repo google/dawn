@@ -14,8 +14,6 @@
                OpName %A "A"
                OpName %a "a"
                OpName %unused_entry_point "unused_entry_point"
-               OpMemberDecorate %B 0 Offset 0
-               OpMemberDecorate %A 0 Offset 0
         %int = OpTypeInt 32 1
           %B = OpTypeStruct %int
           %A = OpTypeStruct %int

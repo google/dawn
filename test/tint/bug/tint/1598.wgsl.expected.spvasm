@@ -9,7 +9,6 @@
                OpExecutionMode %main OriginUpperLeft
                OpName %main "main"
                OpName %a "a"
-               OpDecorate %_arr_int_uint_5 ArrayStride 4
        %void = OpTypeVoid
           %3 = OpTypeFunction %void
         %int = OpTypeInt 32 1

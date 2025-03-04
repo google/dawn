@@ -22,7 +22,6 @@
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
-               OpDecorate %_arr_uint_uint_1 ArrayStride 4
         %int = OpTypeInt 32 1
         %str = OpTypeStruct %int
        %uint = OpTypeInt 32 0

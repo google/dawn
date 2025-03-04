@@ -16,8 +16,6 @@
                OpName %main "main"
                OpDecorate %main_position_Output BuiltIn Position
                OpDecorate %main___point_size_Output BuiltIn PointSize
-               OpMemberDecorate %Normals 0 Offset 0
-               OpDecorate %_arr_Normals_uint_1 ArrayStride 16
       %float = OpTypeFloat 32
     %v4float = OpTypeVector %float 4
 %_ptr_Output_v4float = OpTypePointer Output %v4float

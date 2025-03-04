@@ -13,7 +13,6 @@
                OpName %f "f"
                OpName %v "v"
                OpName %unused_entry_point "unused_entry_point"
-               OpDecorate %_arr_half_uint_4 ArrayStride 2
        %void = OpTypeVoid
           %3 = OpTypeFunction %void
        %half = OpTypeFloat 16

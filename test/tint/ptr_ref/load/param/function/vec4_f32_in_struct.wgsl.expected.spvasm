@@ -14,7 +14,6 @@
                OpName %main "main"
                OpName %F "F"
                OpName %r "r"
-               OpMemberDecorate %str 0 Offset 0
       %float = OpTypeFloat 32
     %v4float = OpTypeVector %float 4
         %str = OpTypeStruct %v4float

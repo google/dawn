@@ -29,10 +29,6 @@
                OpDecorate %main_loc1_Input Flat
                OpDecorate %main_loc2_Input Location 2
                OpDecorate %main_loc3_Input Location 3
-               OpMemberDecorate %FragmentInputs 0 Offset 0
-               OpMemberDecorate %FragmentInputs 1 Offset 4
-               OpMemberDecorate %FragmentInputs 2 Offset 8
-               OpMemberDecorate %FragmentInputs 3 Offset 16
         %int = OpTypeInt 32 1
 %_ptr_Input_int = OpTypePointer Input %int
 %main_loc0_Input = OpVariable %_ptr_Input_int Input

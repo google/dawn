@@ -34,10 +34,6 @@
                OpName %fract_2 "fract"
                OpName %exp_0 "exp"
                OpName %main "main"
-               OpMemberDecorate %__modf_result_f32 0 Offset 0
-               OpMemberDecorate %__modf_result_f32 1 Offset 4
-               OpMemberDecorate %__frexp_result_f32 0 Offset 0
-               OpMemberDecorate %__frexp_result_f32 1 Offset 4
        %void = OpTypeVoid
           %3 = OpTypeFunction %void
       %float = OpTypeFloat 32

@@ -25,7 +25,6 @@
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
-               OpDecorate %_arr_mat2v3float_uint_4 ArrayStride 32
                OpDecorate %f_local_invocation_index_Input BuiltIn LocalInvocationIndex
       %float = OpTypeFloat 32
     %v3float = OpTypeVector %float 3

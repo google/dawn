@@ -42,8 +42,6 @@
                OpName %l14 "l14"
                OpName %l15 "l15"
                OpName %l16 "l16"
-               OpMemberDecorate %MyStruct 0 Offset 0
-               OpDecorate %_arr_float_uint_10 ArrayStride 4
         %int = OpTypeInt 32 1
 %_ptr_Private_int = OpTypePointer Private %int
       %int_1 = OpConstant %int 1

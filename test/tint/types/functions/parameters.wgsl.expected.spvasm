@@ -28,8 +28,6 @@
                OpName %b "b"
                OpName %c "c"
                OpName %d "d"
-               OpDecorate %_arr_float_uint_4 ArrayStride 4
-               OpMemberDecorate %S 0 Offset 0
        %void = OpTypeVoid
        %bool = OpTypeBool
         %int = OpTypeInt 32 1

@@ -22,10 +22,6 @@
                OpDecorate %main_loc1_Output Location 1
                OpDecorate %main_loc2_Output Location 2
                OpDecorate %main_loc3_Output Location 3
-               OpMemberDecorate %FragmentOutputs 0 Offset 0
-               OpMemberDecorate %FragmentOutputs 1 Offset 4
-               OpMemberDecorate %FragmentOutputs 2 Offset 8
-               OpMemberDecorate %FragmentOutputs 3 Offset 16
         %int = OpTypeInt 32 1
 %_ptr_Output_int = OpTypePointer Output %int
 %main_loc0_Output = OpVariable %_ptr_Output_int Output
