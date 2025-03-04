@@ -1192,8 +1192,9 @@ void PhysicalDevice::PopulateBackendFormatCapabilities(
 }
 
 void PhysicalDevice::PopulateSubgroupMatrixConfigs() {
-    mSubgroupMatrixConfigs.reserve(mDeviceInfo.cooperativeMatrixProperties.size());
-    for (uint32_t i = 0; i < mSubgroupMatrixConfigs.size(); i++) {
+    size_t configCount = mDeviceInfo.cooperativeMatrixProperties.size();
+    mSubgroupMatrixConfigs.reserve(configCount);
+    for (uint32_t i = 0; i < configCount; i++) {
         const VkCooperativeMatrixPropertiesKHR& p = mDeviceInfo.cooperativeMatrixProperties[i];
 
         // Filter out configurations that WebGPU does not support.
