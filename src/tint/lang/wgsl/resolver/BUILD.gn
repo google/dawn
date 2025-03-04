@@ -100,6 +100,7 @@ if (tint_build_unittests) {
       "atomics_test.cc",
       "atomics_validation_test.cc",
       "attribute_validation_test.cc",
+      "binding_array_test.cc",
       "bitcast_validation_test.cc",
       "builtin_enum_test.cc",
       "builtin_structs_test.cc",

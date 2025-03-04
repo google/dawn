@@ -26,7 +26,6 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "src/tint/lang/wgsl/resolver/resolver.h"
-#include <iostream>
 
 #include <algorithm>
 #include <cmath>
@@ -43,6 +42,7 @@
 #include "src/tint/lang/core/type/abstract_int.h"
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/atomic.h"
+#include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/builtin_structs.h"
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
 #include "src/tint/lang/core/type/depth_texture.h"
@@ -2737,6 +2737,8 @@ core::type::Type* Resolver::BuiltinType(core::BuiltinType builtin_ty,
             return check_no_tmpl_args(Vec(ident, U32(), 4u));
         case core::BuiltinType::kArray:
             return Array(ident);
+        case core::BuiltinType::kBindingArray:
+            return BindingArray(ident);
         case core::BuiltinType::kAtomic:
             return Atomic(ident);
         case core::BuiltinType::kPtr:
@@ -2990,6 +2992,30 @@ core::type::Type* Resolver::Array(const ast::Identifier* ident) {
     }
     if (subgroup_matrix_uses_.Contains(el_ty)) {
         subgroup_matrix_uses_.Add(out);
+    }
+
+    return out;
+}
+
+core::type::BindingArray* Resolver::BindingArray(const ast::Identifier* ident) {
+    auto* tmpl_ident = TemplatedIdentifier(ident, 2);
+    if (DAWN_UNLIKELY(!tmpl_ident)) {
+        return nullptr;
+    }
+
+    auto* el_type = sem_.GetType(tmpl_ident->arguments[0]);
+    if (DAWN_UNLIKELY(!el_type)) {
+        return nullptr;
+    }
+
+    const core::type::ArrayCount* el_count = ArrayCount(tmpl_ident->arguments[1]);
+    if (!el_count) {
+        return nullptr;
+    }
+
+    auto* out = b.create<core::type::BindingArray>(el_type, el_count);
+    if (DAWN_UNLIKELY(!validator_.BindingArray(out, ident->source))) {
+        return nullptr;
     }
 
     return out;

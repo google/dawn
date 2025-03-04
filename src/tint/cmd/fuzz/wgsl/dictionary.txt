@@ -147,6 +147,7 @@
 "base"
 "bgra8unorm"
 "binding"
+"binding_array"
 "bitcast"
 "bits"
 "blend_src"

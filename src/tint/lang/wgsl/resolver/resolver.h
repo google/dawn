@@ -204,6 +204,9 @@ class Resolver {
     /// the identifier is not templated.
     core::type::Type* Array(const ast::Identifier* ident);
 
+    /// @returns a binding_array resolved from the templated identifier @p ident.
+    core::type::BindingArray* BindingArray(const ast::Identifier* ident);
+
     /// @returns an atomic resolved from the templated identifier @p ident.
     core::type::Atomic* Atomic(const ast::Identifier* ident);
 
