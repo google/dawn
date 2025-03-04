@@ -197,9 +197,6 @@ std::string LimitsToString(const wgpu::Limits& limits, const std::string& indent
         << "maxVertexBufferArrayStride: " << FormatNumber(limits.maxVertexBufferArrayStride)
         << "\n";
     out << indent
-        << "maxInterStageShaderComponents: " << FormatNumber(limits.maxInterStageShaderComponents)
-        << "\n";
-    out << indent
         << "maxInterStageShaderVariables: " << FormatNumber(limits.maxInterStageShaderVariables)
         << "\n";
     out << indent << "maxColorAttachments: " << FormatNumber(limits.maxColorAttachments) << "\n";

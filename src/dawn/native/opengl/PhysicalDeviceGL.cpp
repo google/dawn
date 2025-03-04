@@ -367,12 +367,9 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
 
     DAWN_TRY_ASSIGN(limits->v1.maxVertexAttributes, Get(gl, GL_MAX_VERTEX_ATTRIBS));
     DAWN_TRY_ASSIGN(limits->v1.maxVertexBufferArrayStride, Get(gl, GL_MAX_VERTEX_ATTRIB_STRIDE));
-    DAWN_TRY_ASSIGN(limits->v1.maxInterStageShaderComponents, Get(gl, GL_MAX_VARYING_COMPONENTS));
     DAWN_TRY_ASSIGN(limits->v1.maxInterStageShaderVariables, Get(gl, GL_MAX_VARYING_VECTORS));
     // TODO(dawn:685, dawn:1448): Support higher values as ANGLE compiler always generates
     // additional shader varyings (gl_PointSize and dx_Position) on ANGLE D3D backends.
-    limits->v1.maxInterStageShaderComponents =
-        std::min(limits->v1.maxInterStageShaderComponents, kMaxInterStageShaderVariables * 4);
     limits->v1.maxInterStageShaderVariables =
         std::min(limits->v1.maxInterStageShaderVariables, kMaxInterStageShaderVariables);
 

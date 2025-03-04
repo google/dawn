@@ -97,7 +97,6 @@
 // Tiers for limits related to inter-stage shader variables.
 //                                                             compat      tier0       tier1
 #define LIMITS_INTER_STAGE_SHADER_VARIABLES(X) \
-    X(Maximum,               maxInterStageShaderComponents,       60,        64,        112) \
     X(Maximum,               maxInterStageShaderVariables,        15,        16,         28) \
 
 // Tiered limits for texture dimensions.

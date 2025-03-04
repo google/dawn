@@ -850,13 +850,11 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
     // See https://github.com/gpuweb/gpuweb/issues/1962 for more details.
     uint32_t vendorId = GetVendorId();
     if (gpu_info::IsApple(vendorId)) {
-        limits->v1.maxInterStageShaderComponents = mtlLimits.maxFragmentInputComponents;
         limits->v1.maxInterStageShaderVariables =
             std::min(mtlLimits.maxFragmentInputs, mtlLimits.maxFragmentInputComponents / 4);
     } else {
         // On non-Apple macOS each built-in consumes one individual inter-stage shader variable.
         limits->v1.maxInterStageShaderVariables = mtlLimits.maxFragmentInputs - 4;
-        limits->v1.maxInterStageShaderComponents = limits->v1.maxInterStageShaderVariables * 4;
     }
 
     limits->v1.maxComputeWorkgroupStorageSize = mtlLimits.maxTotalThreadgroupMemory;

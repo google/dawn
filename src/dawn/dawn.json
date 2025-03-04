@@ -1568,7 +1568,6 @@
             {"name": "max buffer size", "type": "uint64_t", "default": "WGPU_LIMIT_U64_UNDEFINED"},
             {"name": "max vertex attributes", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
             {"name": "max vertex buffer array stride", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
-            {"name": "max inter stage shader components", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
             {"name": "max inter stage shader variables", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
             {"name": "max color attachments", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
             {"name": "max color attachment bytes per sample", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
