@@ -546,6 +546,10 @@ BindGroupBase::BindGroupBase(DeviceBase* device,
     : ApiObjectBase(device, descriptor->label),
       mLayout(descriptor->layout),
       mBindingData(GetLayout()->ComputeBindingDataPointers(bindingDataStart)) {
+    GetObjectTrackingList()->Track(this);
+}
+
+MaybeError BindGroupBase::Initialize(const BindGroupDescriptor* descriptor) {
     BindGroupLayoutInternalBase* layout = GetLayout();
 
     for (BindingIndex i{0}; i < layout->GetBindingCount(); ++i) {
@@ -630,7 +634,9 @@ BindGroupBase::BindGroupBase(DeviceBase* device,
                                                     mBindingData.bufferData[bindingIndex].size;
                                             });
 
-    GetObjectTrackingList()->Track(this);
+    DAWN_TRY(InitializeImpl());
+
+    return {};
 }
 
 BindGroupBase::~BindGroupBase() = default;
@@ -657,7 +663,14 @@ BindGroupBase::BindGroupBase(DeviceBase* device, ObjectBase::ErrorTag tag, Strin
 
 // static
 Ref<BindGroupBase> BindGroupBase::MakeError(DeviceBase* device, StringView label) {
-    return AcquireRef(new BindGroupBase(device, ObjectBase::kError, label));
+    class ErrorBindGroupBase final : public BindGroupBase {
+      public:
+        explicit ErrorBindGroupBase(DeviceBase* device, StringView label)
+            : BindGroupBase(device, ObjectBase::kError, label) {}
+
+        MaybeError InitializeImpl() override { DAWN_UNREACHABLE(); }
+    };
+    return AcquireRef(new ErrorBindGroupBase(device, label));
 }
 
 ObjectType BindGroupBase::GetType() const {
