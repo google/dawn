@@ -2179,7 +2179,7 @@ bool Validator::FunctionCall(const sem::Call* call, sem::Statement* current_stat
     auto name = sym.Name();
 
     if (!current_statement) {  // Function call at module-scope.
-        AddError(decl->source) << "functions cannot be called at module-scope";
+        AddError(decl->source) << "user-declared functions cannot be called at module-scope";
         return false;
     }
 
