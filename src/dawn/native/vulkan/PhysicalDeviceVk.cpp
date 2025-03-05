@@ -219,9 +219,6 @@ MaybeError PhysicalDevice::InitializeImpl() {
 }
 
 void PhysicalDevice::InitializeSupportedFeaturesImpl() {
-    if (SupportsFeatureLevel(wgpu::FeatureLevel::Core, nullptr)) {
-        EnableFeature(Feature::CoreFeaturesAndLimits);
-    }
     EnableFeature(Feature::AdapterPropertiesMemoryHeaps);
     EnableFeature(Feature::StaticSamplers);
     EnableFeature(Feature::FlexibleTextureViews);
