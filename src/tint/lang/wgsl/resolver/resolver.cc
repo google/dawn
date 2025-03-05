@@ -2027,6 +2027,7 @@ sem::ValueExpression* Resolver::IndexAccessor(const ast::IndexAccessorExpression
     auto* ty = Switch(
         storage_ty,  //
         [&](const sem::Array* arr) { return arr->ElemType(); },
+        [&](const core::type::BindingArray* arr) { return arr->ElemType(); },
         [&](const core::type::Vector* vec) { return vec->Type(); },
         [&](const core::type::Matrix* mat) {
             return b.create<core::type::Vector>(mat->Type(), mat->Rows());
