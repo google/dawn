@@ -958,10 +958,7 @@
             {"name": "line num", "type": "uint64_t"},
             {"name": "line pos", "type": "uint64_t"},
             {"name": "offset", "type": "uint64_t"},
-            {"name": "length", "type": "uint64_t"},
-            {"name": "utf16 line pos", "type": "uint64_t", "default": "0"},
-            {"name": "utf16 offset", "type": "uint64_t", "default": "0"},
-            {"name": "utf16 length", "type": "uint64_t", "default": "0"}
+            {"name": "length", "type": "uint64_t"}
         ]
     },
     "dawn compilation message utf16": {

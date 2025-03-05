@@ -758,7 +758,6 @@ TEST_F(ShaderModuleValidationTest, CreateErrorShaderModule) {
             ASSERT_EQ(wgpu::CompilationMessageType::Error, message->type);
             ASSERT_EQ(0u, message->lineNum);
             ASSERT_EQ(0u, message->linePos);
-            ASSERT_EQ(nullptr, message->nextInChain);
         });
 
     FlushWire();

@@ -94,7 +94,7 @@ void OwnedCompilationMessages::AddUnanchoredMessage(std::string_view message,
     m.type = type;
     AddMessage(m);
 
-    mUtf16.push_back(std::nullopt);
+    mUtf16.push_back({});
 }
 
 void OwnedCompilationMessages::AddMessageForTesting(std::string_view message,
@@ -182,9 +182,6 @@ MaybeError OwnedCompilationMessages::AddMessage(const tint::diag::Diagnostic& di
     m.linePos = linePosInBytes;
     m.offset = offsetInBytes;
     m.length = lengthInBytes;
-    m.utf16LinePos = linePosInUTF16;
-    m.utf16Offset = offsetInUTF16;
-    m.utf16Length = lengthInUTF16;
     AddMessage(m);
 
     DawnCompilationMessageUtf16 utf16 = {};
@@ -242,9 +239,7 @@ const CompilationInfo* OwnedCompilationMessages::GetCompilationInfo() {
         // Append the UTF16 extension now.
         DAWN_ASSERT(mMessages.size() == mUtf16.size());
         for (size_t i = 0; i < mMessages.size(); i++) {
-            if (const auto& utf16 = mUtf16.at(i)) {
-                mMessages[i].nextInChain = &utf16.value();
-            }
+            mMessages[i].nextInChain = &mUtf16[i];
         }
 
         (*info).emplace();
