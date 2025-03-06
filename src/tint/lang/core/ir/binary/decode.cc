@@ -686,22 +686,15 @@ struct Decoder {
                 return CreateTypeSampler(type_in.sampler());
             case pb::Type::KindCase::kInputAttachment:
                 return CreateTypeInputAttachment(type_in.input_attachment());
-                // TODO(crbug.com/348702031): Re-enable decoding SubgroupMatrix once it is fully
-                // implemented
-                //            case pb::Type::KindCase::kSubgroupMatrixLeft:
-                //                return CreateTypeSubgroupMatrix(SubgroupMatrixKind::kLeft,
-                //                                                type_in.subgroup_matrix_left());
-                //            case pb::Type::KindCase::kSubgroupMatrixRight:
-                //                return CreateTypeSubgroupMatrix(SubgroupMatrixKind::kRight,
-                //                                                type_in.subgroup_matrix_right());
-                //            case pb::Type::KindCase::kSubgroupMatrixResult:
-                //                return CreateTypeSubgroupMatrix(SubgroupMatrixKind::kResult,
-                //                                                type_in.subgroup_matrix_result());
             case pb::Type::KindCase::kSubgroupMatrixLeft:
+                return CreateTypeSubgroupMatrix(SubgroupMatrixKind::kLeft,
+                                                type_in.subgroup_matrix_left());
             case pb::Type::KindCase::kSubgroupMatrixRight:
+                return CreateTypeSubgroupMatrix(SubgroupMatrixKind::kRight,
+                                                type_in.subgroup_matrix_right());
             case pb::Type::KindCase::kSubgroupMatrixResult:
-                Error() << "SubgroupMatrix is currently not implemented";
-                return mod_out_.Types().invalid();
+                return CreateTypeSubgroupMatrix(SubgroupMatrixKind::kResult,
+                                                type_in.subgroup_matrix_result());
             case pb::Type::KindCase::kBuiltinStruct:
                 return CreateTypeBuiltinStruct(type_in.builtin_struct());
             case pb::Type::KindCase::KIND_NOT_SET:
@@ -929,15 +922,13 @@ struct Decoder {
         return mod_out_.Types().Get<type::InputAttachment>(sub_type);
     }
 
-    // TODO(crbug.com/348702031): Re-enable decoding SubgroupMatrix once it is fully implemented
-    //    const type::SubgroupMatrix* CreateTypeSubgroupMatrix(
-    //        SubgroupMatrixKind kind,
-    //        const pb::TypeSubgroupMatrix& subgroup_matrix) {
-    //        return mod_out_.Types().Get<type::SubgroupMatrix>(kind,
-    //                                                          Type(subgroup_matrix.sub_type()),
-    //                                                          subgroup_matrix.rows(),
-    //                                                          subgroup_matrix.columns());
-    //    }
+    const type::SubgroupMatrix* CreateTypeSubgroupMatrix(
+        SubgroupMatrixKind kind,
+        const pb::TypeSubgroupMatrix& subgroup_matrix) {
+        return mod_out_.Types().Get<type::SubgroupMatrix>(kind, Type(subgroup_matrix.sub_type()),
+                                                          subgroup_matrix.columns(),
+                                                          subgroup_matrix.rows());
+    }
 
     const type::Type* CreateTypeBuiltinStruct(pb::TypeBuiltinStruct builtin_struct_in) {
         auto& ty = mod_out_.Types();

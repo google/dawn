@@ -411,23 +411,19 @@ struct Encoder {
                     TypeInputAttachment(*type_out.mutable_input_attachment(), i);
                 },
                 [&]([[maybe_unused]] const core::type::SubgroupMatrix* s) {
-                    // TODO(crbug.com/348702031): Re-enable encoding SubgroupMatrix once it is fully
-                    // implemented
-                    Error() << "SubgroupMatrix is currently not implemented";
-                    //                    switch (s->Kind()) {
-                    //                        case core::SubgroupMatrixKind::kLeft:
-                    //                            TypeSubgroupMatrix(*type_out.mutable_subgroup_matrix_left(),
-                    //                            s); break;
-                    //                        case core::SubgroupMatrixKind::kRight:
-                    //                            TypeSubgroupMatrix(*type_out.mutable_subgroup_matrix_right(),
-                    //                            s); break;
-                    //                        case core::SubgroupMatrixKind::kResult:
-                    //                            TypeSubgroupMatrix(*type_out.mutable_subgroup_matrix_result(),
-                    //                            s); break;
-                    //                        default:
-                    //                            TINT_ICE() << "invalid subgroup matrix kind: " <<
-                    //                            ToString(s->Kind());
-                    //                    }
+                    switch (s->Kind()) {
+                        case core::SubgroupMatrixKind::kLeft:
+                            TypeSubgroupMatrix(*type_out.mutable_subgroup_matrix_left(), s);
+                            break;
+                        case core::SubgroupMatrixKind::kRight:
+                            TypeSubgroupMatrix(*type_out.mutable_subgroup_matrix_right(), s);
+                            break;
+                        case core::SubgroupMatrixKind::kResult:
+                            TypeSubgroupMatrix(*type_out.mutable_subgroup_matrix_result(), s);
+                            break;
+                        default:
+                            TINT_ICE() << "invalid subgroup matrix kind: " << ToString(s->Kind());
+                    }
                 },
                 TINT_ICE_ON_NO_MATCH);
 
@@ -544,13 +540,12 @@ struct Encoder {
         sampler_out.set_kind(SamplerKind(sampler_in->Kind()));
     }
 
-    // TODO(crbug.com/348702031): Re-enable encoding SubgroupMatrix once it is fully implemented
-    //    void TypeSubgroupMatrix(pb::TypeSubgroupMatrix& subgroup_matrix_out,
-    //                            const core::type::SubgroupMatrix* subgroup_matrix_in) {
-    //        subgroup_matrix_out.set_sub_type(Type(subgroup_matrix_in->Type()));
-    //        subgroup_matrix_out.set_columns(subgroup_matrix_in->Columns());
-    //        subgroup_matrix_out.set_rows(subgroup_matrix_in->Rows());
-    //    }
+    void TypeSubgroupMatrix(pb::TypeSubgroupMatrix& subgroup_matrix_out,
+                            const core::type::SubgroupMatrix* subgroup_matrix_in) {
+        subgroup_matrix_out.set_sub_type(Type(subgroup_matrix_in->Type()));
+        subgroup_matrix_out.set_columns(subgroup_matrix_in->Columns());
+        subgroup_matrix_out.set_rows(subgroup_matrix_in->Rows());
+    }
 
     [[maybe_unused]] void TypeBuitinStruct(pb::Type& builtin_struct_out,
                                            const core::type::Struct* builtin_struct_in) {
