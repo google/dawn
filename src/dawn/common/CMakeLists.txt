@@ -92,6 +92,7 @@ set(private_headers
     "StackAllocated.h"
     "StringViewUtils.h"
     "SystemUtils.h"
+    "ThreadLocal.h"
     "TypedInteger.h"
     "TypeTraits.h"
     "UnderlyingType.h"
@@ -117,6 +118,7 @@ set(sources
     "SlabAllocator.cpp"
     "StringViewUtils.cpp"
     "SystemUtils.cpp"
+    "ThreadLocal.cpp"
     "WeakRefSupport.cpp"
 )
 
@@ -173,6 +175,7 @@ dawn_add_library(
         webgpu_cpp
     PRIVATE_DEPENDS
         absl::inlined_vector
+        absl::no_destructor
         dawn::partition_alloc
         dawn_shared_utils
         ${conditional_private_depends}

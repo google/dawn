@@ -159,6 +159,17 @@ std::string GetCompilationLog(const ShaderModuleBase* module) {
     return t.str();
 }
 
+void TrimErrorScopeStacks(
+    absl::flat_hash_map<ThreadUniqueId, std::unique_ptr<ErrorScopeStack>>& errorScopeStacks) {
+    for (auto it = errorScopeStacks.begin(); it != errorScopeStacks.end();) {
+        if (!IsThreadAlive(it->first)) {
+            errorScopeStacks.erase(it++);
+        } else {
+            it++;
+        }
+    }
+}
+
 }  // anonymous namespace
 
 DeviceBase::DeviceLostEvent::DeviceLostEvent(const WGPUDeviceLostCallbackInfo& callbackInfo)
@@ -430,7 +441,6 @@ MaybeError DeviceBase::Initialize(Ref<QueueBase> defaultQueue) {
     SetWGSLExtensionAllowList();
 
     mCaches = std::make_unique<DeviceBase::Caches>();
-    mErrorScopeStack = std::make_unique<ErrorScopeStack>();
     mDynamicUploader = std::make_unique<DynamicUploader>(this);
     mCallbackTaskManager = AcquireRef(new CallbackTaskManager());
     mInternalPipelineStore = std::make_unique<InternalPipelineStore>(this);
@@ -743,12 +753,12 @@ void DeviceBase::HandleError(std::unique_ptr<ErrorData> error,
         mCallbackTaskManager->HandleDeviceLoss();
 
         // Still forward device loss errors to the error scopes so they all reject.
-        mErrorScopeStack->HandleError(ToWGPUErrorType(type), messageStr);
+        GetErrorScopeStack()->HandleError(ToWGPUErrorType(type), messageStr);
     } else {
         // Pass the error to the error scope stack and call the uncaptured error callback
         // if it isn't handled. DeviceLost is not handled here because it should be
         // handled by the lost callback.
-        bool captured = mErrorScopeStack->HandleError(ToWGPUErrorType(type), messageStr);
+        bool captured = GetErrorScopeStack()->HandleError(ToWGPUErrorType(type), messageStr);
         if (!captured) {
             // Only call the uncaptured error callback if the device is alive. After the
             // device is lost, the uncaptured error callback should cease firing.
@@ -776,11 +786,24 @@ void DeviceBase::APISetLoggingCallback(const WGPULoggingCallbackInfo& callbackIn
     mLoggingCallbackInfo = callbackInfo;
 }
 
+ErrorScopeStack* DeviceBase::GetErrorScopeStack() {
+    ThreadUniqueId threadId = GetThreadUniqueId();
+    if (!mErrorScopeStacks.contains(threadId)) {
+        // Each time a new thread creates an error stack on a device, we attempt to clean up
+        // terminated thread stacks before adding the new one.
+        TrimErrorScopeStacks(mErrorScopeStacks);
+        mErrorScopeStacks[threadId] = std::make_unique<ErrorScopeStack>();
+    }
+    DAWN_ASSERT(mErrorScopeStacks[threadId] != nullptr);
+    return mErrorScopeStacks[threadId].get();
+}
+
 void DeviceBase::APIPushErrorScope(wgpu::ErrorFilter filter) {
     if (ConsumedError(ValidateErrorFilter(filter))) {
         return;
     }
-    mErrorScopeStack->Push(filter);
+
+    GetErrorScopeStack()->Push(filter);
 }
 
 Future DeviceBase::APIPopErrorScope(const WGPUPopErrorScopeCallbackInfo& callbackInfo) {
@@ -828,8 +851,8 @@ Future DeviceBase::APIPopErrorScope(const WGPUPopErrorScopeCallbackInfo& callbac
 
         if (IsLost()) {
             scope = ErrorScope(wgpu::ErrorType::NoError, "");
-        } else if (!mErrorScopeStack->Empty()) {
-            scope = mErrorScopeStack->Pop();
+        } else if (!GetErrorScopeStack()->Empty()) {
+            scope = GetErrorScopeStack()->Pop();
         }
     }
 
@@ -2429,6 +2452,8 @@ void DeviceBase::ReduceMemoryUsage() {
     GetDynamicUploader()->Deallocate(GetQueue()->GetCompletedCommandSerial(), /*freeAll=*/true);
     mInternalPipelineStore->ResetScratchBuffers();
     mTemporaryUniformBuffer = nullptr;
+
+    TrimErrorScopeStacks(mErrorScopeStacks);
 }
 
 void DeviceBase::PerformIdleTasks() {
