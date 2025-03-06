@@ -54,9 +54,9 @@ vars = {
   # reclient CIPD package
   'reclient_package': 'infra/rbe/client/',
   # reclient CIPD package version
-  'reclient_version': 're_client_version:0.143.0.518e369-gomaip',
+  'reclient_version': 're_client_version:0.176.0.8c46330a-gomaip',
   # siso CIPD package version.
-  'siso_version': 'git_revision:4442c27a02f2b5de389f88be9639e4e638ff761a',
+  'siso_version': 'git_revision:ef01a689b77e0a3c98e841310bf3cdea737707ab',
 
   # 'magic' text to tell depot_tools that git submodules should be accepted
   # but parity with DEPS file is expected.
@@ -434,8 +434,8 @@ deps = {
         'version': Var('reclient_version'),
       }
     ],
+    'condition': 'dawn_standalone and (host_cpu != "arm64" or host_os == "mac") and non_git_source',
     'dep_type': 'cipd',
-    'condition': 'dawn_standalone',
   },
 
   # Misc dependencies inherited from Tint
@@ -725,19 +725,51 @@ hooks = [
     ],
   },
 
-  # Download remote exec cfg files
+  # Configure remote exec cfg files
   {
-    'name': 'fetch_reclient_cfgs',
+    # Use luci_auth if on windows and using chrome-untrusted project
+    'name': 'download_and_configure_reclient_cfgs',
     'pattern': '.',
-    'condition': 'download_remoteexec_cfg and dawn_standalone',
+    'condition': 'dawn_standalone and download_remoteexec_cfg and host_os == "win"',
     'action': ['python3',
-               'buildtools/reclient_cfgs/fetch_reclient_cfgs.py',
+               'buildtools/reclient_cfgs/configure_reclient_cfgs.py',
                '--rbe_instance',
                Var('rbe_instance'),
                '--reproxy_cfg_template',
                'reproxy.cfg.template',
                '--rewrapper_cfg_project',
                Var('rewrapper_cfg_project'),
+               '--use_luci_auth_credshelper',
+               '--quiet',
+               ],
+  },  {
+    'name': 'download_and_configure_reclient_cfgs',
+    'pattern': '.',
+    'condition': 'dawn_standalone and download_remoteexec_cfg and not host_os == "win"',
+    'action': ['python3',
+               'buildtools/reclient_cfgs/configure_reclient_cfgs.py',
+               '--rbe_instance',
+               Var('rbe_instance'),
+               '--reproxy_cfg_template',
+               'reproxy.cfg.template',
+               '--rewrapper_cfg_project',
+               Var('rewrapper_cfg_project'),
+               '--quiet',
+               ],
+  },
+  {
+    'name': 'configure_reclient_cfgs',
+    'pattern': '.',
+    'condition': 'dawn_standalone and not download_remoteexec_cfg',
+    'action': ['python3',
+               'buildtools/reclient_cfgs/configure_reclient_cfgs.py',
+               '--rbe_instance',
+               Var('rbe_instance'),
+               '--reproxy_cfg_template',
+               'reproxy.cfg.template',
+               '--rewrapper_cfg_project',
+               Var('rewrapper_cfg_project'),
+               '--skip_remoteexec_cfg_fetch',
                '--quiet',
                ],
   },
