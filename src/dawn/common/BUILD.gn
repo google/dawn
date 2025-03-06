@@ -160,9 +160,6 @@ config("internal_config") {
       "-Wunused-macros",
     ]
 
-    # We use __builtin_assume liberally in DAWN_ASSERT, allow ignoring side-effects there.
-    cflags += [ "-Wno-assume" ]
-
     if (is_win) {
       cflags += [
         # clang-cl doesn't know -pedantic, pass it explicitly to the clang driver

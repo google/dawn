@@ -40,7 +40,6 @@ function(common_compile_options target)
         "-fno-exceptions"
         "-fno-rtti"
 
-        "-Wno-assume"
         "-Wno-deprecated-builtins"
         "-Wno-unknown-warning-option"
         "-Wno-switch-default"
