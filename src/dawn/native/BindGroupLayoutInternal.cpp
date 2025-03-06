@@ -676,7 +676,7 @@ void BindGroupLayoutInternalBase::DestroyImpl() {
 }
 
 ObjectType BindGroupLayoutInternalBase::GetType() const {
-    return ObjectType::BindGroupLayout;
+    return ObjectType::BindGroupLayoutInternal;
 }
 
 const BindingInfo& BindGroupLayoutInternalBase::GetBindingInfo(BindingIndex bindingIndex) const {
