@@ -95,7 +95,7 @@ using InterstageLocationAndName = std::pair<uint32_t, std::string>;
     X(SingleShaderStage, stage)                                                                  \
     X(std::optional<tint::ast::transform::SubstituteOverride::Config>, substituteOverrideConfig) \
     X(LimitsForCompilationRequest, limits)                                                       \
-    X(CacheKey::UnsafeUnkeyedValue<const AdapterBase*>, adapter)                                 \
+    X(CacheKey::UnsafeUnkeyedValue<LimitsForCompilationRequest>, adapterSupportedLimits)         \
     X(bool, disableSymbolRenaming)                                                               \
     X(std::vector<InterstageLocationAndName>, interstageVariables)                               \
     X(tint::glsl::writer::Options, tintOptions)                                                  \
@@ -446,13 +446,12 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
         substituteOverrideConfig = BuildSubstituteOverridesTransformConfig(programmableStage);
     }
 
-    const CombinedLimits& limits = GetDevice()->GetLimits();
-
     req.stage = stage;
     req.entryPointName = programmableStage.entryPoint;
     req.substituteOverrideConfig = std::move(substituteOverrideConfig);
-    req.limits = LimitsForCompilationRequest::Create(limits.v1);
-    req.adapter = UnsafeUnkeyedValue(static_cast<const AdapterBase*>(GetDevice()->GetAdapter()));
+    req.limits = LimitsForCompilationRequest::Create(GetDevice()->GetLimits().v1);
+    req.adapterSupportedLimits =
+        LimitsForCompilationRequest::Create(GetDevice()->GetAdapter()->GetLimits().v1);
 
     req.platform = UnsafeUnkeyedValue(GetDevice()->GetPlatform());
 
@@ -552,11 +551,12 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
                     // Validate workgroup size after program runs transforms.
                     Extent3D _;
                     DAWN_TRY_ASSIGN(
-                        _,
-                        ValidateComputeStageWorkgroupSize(
-                            result->workgroup_info.x, result->workgroup_info.y,
-                            result->workgroup_info.z, result->workgroup_info.storage_size,
-                            /* usesSubgroupMatrix */ false, r.limits, r.adapter.UnsafeGetValue()));
+                        _, ValidateComputeStageWorkgroupSize(
+                               result->workgroup_info.x, result->workgroup_info.y,
+                               result->workgroup_info.z, result->workgroup_info.storage_size,
+                               /* usesSubgroupMatrix */ false,
+                               /* maxSubgroupSize, GL backend not support */ 0, r.limits,
+                               r.adapterSupportedLimits.UnsafeGetValue()));
                 }
 
                 return GLSLCompilation{{std::move(result->glsl)}};

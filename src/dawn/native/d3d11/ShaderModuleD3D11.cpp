@@ -215,9 +215,10 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
 
     req.hlsl.substituteOverrideConfig = std::move(substituteOverrideConfig);
 
-    const CombinedLimits& limits = device->GetLimits();
-    req.hlsl.limits = LimitsForCompilationRequest::Create(limits.v1);
-    req.hlsl.adapter = UnsafeUnkeyedValue(static_cast<const AdapterBase*>(device->GetAdapter()));
+    req.hlsl.limits = LimitsForCompilationRequest::Create(device->GetLimits().v1);
+    req.hlsl.adapterSupportedLimits =
+        LimitsForCompilationRequest::Create(device->GetAdapter()->GetLimits().v1);
+    req.hlsl.maxSubgroupSize = device->GetAdapter()->GetPhysicalDevice()->GetSubgroupMaxSize();
 
     req.hlsl.tintOptions.disable_robustness = !device->IsRobustnessEnabled();
     req.hlsl.tintOptions.disable_workgroup_init =

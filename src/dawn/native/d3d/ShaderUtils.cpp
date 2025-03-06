@@ -295,15 +295,16 @@ MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
                 _, ValidateComputeStageWorkgroupSize(
                        result->workgroup_info.x, result->workgroup_info.y, result->workgroup_info.z,
                        result->workgroup_info.storage_size, /* usesSubgroupMatrix */ false,
-                       r.limits, r.adapter.UnsafeGetValue()));
+                       r.maxSubgroupSize, r.limits, r.adapterSupportedLimits.UnsafeGetValue()));
         }
     } else {
         // Validate workgroup size after program runs transforms.
         if (r.stage == SingleShaderStage::Compute) {
             Extent3D _;
             DAWN_TRY_ASSIGN(
-                _, ValidateComputeStageWorkgroupSize(transformedProgram, kRemappedEntryPointName,
-                                                     r.limits, r.adapter.UnsafeGetValue()));
+                _, ValidateComputeStageWorkgroupSize(
+                       transformedProgram, kRemappedEntryPointName, /* usesSubgroupMatrix */ false,
+                       r.maxSubgroupSize, r.limits, r.adapterSupportedLimits.UnsafeGetValue()));
         }
 
         result = tint::hlsl::writer::Generate(transformedProgram, r.tintOptions);

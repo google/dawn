@@ -198,7 +198,8 @@ ShaderModule::~ShaderModule() = default;
     X(const tint::Program*, inputProgram)                                                        \
     X(std::optional<tint::ast::transform::SubstituteOverride::Config>, substituteOverrideConfig) \
     X(LimitsForCompilationRequest, limits)                                                       \
-    X(CacheKey::UnsafeUnkeyedValue<const AdapterBase*>, adapter)                                 \
+    X(CacheKey::UnsafeUnkeyedValue<LimitsForCompilationRequest>, adapterSupportedLimits)         \
+    X(uint32_t, maxSubgroupSize)                                                                 \
     X(std::string_view, entryPointName)                                                          \
     X(bool, usesSubgroupMatrix)                                                                  \
     X(tint::spirv::writer::Options, tintOptions)                                                 \
@@ -390,9 +391,10 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
             offsetStartBytes, offsetStartBytes + kImmediateConstantElementByteSize};
     }
 
-    const CombinedLimits& limits = GetDevice()->GetLimits();
-    req.limits = LimitsForCompilationRequest::Create(limits.v1);
-    req.adapter = UnsafeUnkeyedValue(static_cast<const AdapterBase*>(GetDevice()->GetAdapter()));
+    req.limits = LimitsForCompilationRequest::Create(GetDevice()->GetLimits().v1);
+    req.adapterSupportedLimits =
+        LimitsForCompilationRequest::Create(GetDevice()->GetAdapter()->GetLimits().v1);
+    req.maxSubgroupSize = GetDevice()->GetAdapter()->GetPhysicalDevice()->GetSubgroupMaxSize();
 
     CacheResult<CompiledSpirv> compilation;
     {
@@ -453,7 +455,8 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
                         ValidateComputeStageWorkgroupSize(
                             tintResult->workgroup_info.x, tintResult->workgroup_info.y,
                             tintResult->workgroup_info.z, tintResult->workgroup_info.storage_size,
-                            r.usesSubgroupMatrix, r.limits, r.adapter.UnsafeGetValue()));
+                            r.usesSubgroupMatrix, r.maxSubgroupSize, r.limits,
+                            r.adapterSupportedLimits.UnsafeGetValue()));
                 }
 
                 CompiledSpirv result;

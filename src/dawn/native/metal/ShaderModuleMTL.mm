@@ -62,7 +62,8 @@ using OptionalVertexPullingTransformConfig = std::optional<tint::VertexPullingCo
     X(const tint::Program*, inputProgram)                                                        \
     X(std::optional<tint::ast::transform::SubstituteOverride::Config>, substituteOverrideConfig) \
     X(LimitsForCompilationRequest, limits)                                                       \
-    X(CacheKey::UnsafeUnkeyedValue<const AdapterBase*>, adapter)                                 \
+    X(CacheKey::UnsafeUnkeyedValue<LimitsForCompilationRequest>, adapterSupportedLimits)         \
+    X(uint32_t, maxSubgroupSize)                                                                 \
     X(std::string, entryPointName)                                                               \
     X(bool, usesSubgroupMatrix)                                                                  \
     X(bool, disableSymbolRenaming)                                                               \
@@ -294,9 +295,10 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
         device->IsToggleEnabled(Toggle::DisablePolyfillsOnIntegerDivisonAndModulo);
     req.tintOptions.vertex_pulling_config = std::move(vertexPullingTransformConfig);
 
-    const CombinedLimits& limits = device->GetLimits();
-    req.limits = LimitsForCompilationRequest::Create(limits.v1);
-    req.adapter = UnsafeUnkeyedValue(static_cast<const AdapterBase*>(device->GetAdapter()));
+    req.limits = LimitsForCompilationRequest::Create(device->GetLimits().v1);
+    req.adapterSupportedLimits =
+        LimitsForCompilationRequest::Create(device->GetAdapter()->GetLimits().v1);
+    req.maxSubgroupSize = device->GetAdapter()->GetPhysicalDevice()->GetSubgroupMaxSize();
 
     CacheResult<MslCompilation> mslCompilation;
     {
@@ -361,7 +363,8 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
                         ValidateComputeStageWorkgroupSize(
                             result->workgroup_info.x, result->workgroup_info.y,
                             result->workgroup_info.z, result->workgroup_info.storage_size,
-                            r.usesSubgroupMatrix, r.limits, r.adapter.UnsafeGetValue()));
+                            r.usesSubgroupMatrix, r.maxSubgroupSize, r.limits,
+                            r.adapterSupportedLimits.UnsafeGetValue()));
                 }
 
                 // Metal uses Clang to compile the shader as C++14. Disable everything in the -Wall
