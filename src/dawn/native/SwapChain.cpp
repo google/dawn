@@ -122,7 +122,6 @@ ResultOrError<SurfaceTexture> SwapChainBase::GetCurrentTexture() {
 
     // Calling GetCurrentTexture always returns a new reference.
     surfaceTexture.texture = Ref<TextureBase>(mCurrentTextureInfo.texture).Detach();
-    surfaceTexture.suboptimal = mCurrentTextureInfo.suboptimal;
     surfaceTexture.status = mCurrentTextureInfo.status;
     return surfaceTexture;
 }

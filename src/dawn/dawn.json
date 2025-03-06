@@ -3733,9 +3733,9 @@
     },
     "surface texture": {
         "category": "structure",
+        "extensible": "out",
         "members": [
             {"name": "texture", "type": "texture"},
-            {"name": "suboptimal", "type": "bool"},
             {"name": "status", "type": "surface get current texture status"}
         ]
     },
@@ -3893,13 +3893,12 @@
     "surface get current texture status": {
         "category": "enum",
         "values": [
-            {"value": 1, "name": "success"},
-            {"value": 2, "name": "timeout"},
-            {"value": 3, "name": "outdated"},
-            {"value": 4, "name": "lost"},
-            {"value": 5, "name": "out of memory"},
-            {"value": 6, "name": "device lost"},
-            {"value": 7, "name": "error"}
+            {"value": 1, "name": "success optimal"},
+            {"value": 2, "name": "success suboptimal"},
+            {"value": 3, "name": "timeout"},
+            {"value": 4, "name": "outdated"},
+            {"value": 5, "name": "lost"},
+            {"value": 6, "name": "error"}
         ]
     },
     "texture aspect": {

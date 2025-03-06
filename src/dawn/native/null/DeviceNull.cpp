@@ -553,8 +553,7 @@ ResultOrError<SwapChainTextureInfo> SwapChain::GetCurrentTextureImpl() {
     mTexture = AcquireRef(new Texture(GetDevice(), Unpack(&textureDesc)));
     SwapChainTextureInfo info;
     info.texture = mTexture;
-    info.status = wgpu::SurfaceGetCurrentTextureStatus::Success;
-    info.suboptimal = false;
+    info.status = wgpu::SurfaceGetCurrentTextureStatus::SuccessOptimal;
     return info;
 }
 
