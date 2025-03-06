@@ -43,6 +43,7 @@
 #include "dawn/native/InternalPipelineStore.h"
 #include "dawn/native/ObjectContentHasher.h"
 #include "dawn/native/ObjectType_autogen.h"
+#include "dawn/native/ValidationUtils.h"
 #include "dawn/native/ValidationUtils_autogen.h"
 
 namespace dawn::native {
@@ -336,10 +337,8 @@ MaybeError ValidateDepthStencilState(const DeviceBase* device,
                     "Depth stencil format (%s) is not depth-stencil renderable.",
                     descriptor->format);
 
-    DAWN_INVALID_IF(
-        std::isnan(descriptor->depthBiasSlopeScale) || std::isnan(descriptor->depthBiasClamp),
-        "Either depthBiasSlopeScale (%f) or depthBiasClamp (%f) is NaN.",
-        descriptor->depthBiasSlopeScale, descriptor->depthBiasClamp);
+    DAWN_TRY(ValidateFloat("depthBiasSlopeScale", descriptor->depthBiasSlopeScale));
+    DAWN_TRY(ValidateFloat("depthBiasClamp", descriptor->depthBiasClamp));
 
     DAWN_INVALID_IF(device->IsCompatibilityMode() && descriptor->depthBiasClamp != 0.0f,
                     "depthBiasClamp (%f) is not zero as required in compatibility mode.",

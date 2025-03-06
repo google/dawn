@@ -149,6 +149,7 @@ set(private_headers
     "Toggles.h"
     "UsageValidationMode.h"
     "utils/WGPUHelpers.h"
+    "ValidationUtils.h"
     "VisitableMembers.h"
     "WaitAnySystemEvent.h"
     "webgpu_absl_format.h"
@@ -249,6 +250,7 @@ set(sources
     "TintUtils.cpp"
     "Toggles.cpp"
     "utils/WGPUHelpers.cpp"
+    "ValidationUtils.cpp"
     "webgpu_absl_format.cpp"
 )
 

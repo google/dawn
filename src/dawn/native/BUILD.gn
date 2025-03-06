@@ -390,6 +390,8 @@ source_set("sources") {
     "Toggles.cpp",
     "Toggles.h",
     "UsageValidationMode.h",
+    "ValidationUtils.cpp",
+    "ValidationUtils.h",
     "VisitableMembers.h",
     "WaitAnySystemEvent.h",
     "dawn_platform.h",

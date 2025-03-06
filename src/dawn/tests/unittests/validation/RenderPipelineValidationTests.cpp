@@ -97,14 +97,14 @@ TEST_F(RenderPipelineValidationTest, DepthBiasParameterNotBeNaN) {
         device.CreateRenderPipeline(&descriptor);
     }
 
-    // Infinite depth bias clamp is valid
+    // Infinite depth bias clamp is invalid
     {
         utils::ComboRenderPipelineDescriptor descriptor;
         descriptor.vertex.module = vsModule;
         descriptor.cFragment.module = fsModule;
         wgpu::DepthStencilState* depthStencil = descriptor.EnableDepthStencil();
         depthStencil->depthBiasClamp = INFINITY;
-        device.CreateRenderPipeline(&descriptor);
+        ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
     }
     // NAN depth bias clamp is invalid
     {
@@ -116,14 +116,14 @@ TEST_F(RenderPipelineValidationTest, DepthBiasParameterNotBeNaN) {
         ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
     }
 
-    // Infinite depth bias slope is valid
+    // Infinite depth bias slope is invalid
     {
         utils::ComboRenderPipelineDescriptor descriptor;
         descriptor.vertex.module = vsModule;
         descriptor.cFragment.module = fsModule;
         wgpu::DepthStencilState* depthStencil = descriptor.EnableDepthStencil();
         depthStencil->depthBiasSlopeScale = INFINITY;
-        device.CreateRenderPipeline(&descriptor);
+        ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
     }
     // NAN depth bias slope is invalid
     {

@@ -43,6 +43,7 @@
 #include "dawn/native/QuerySet.h"
 #include "dawn/native/RenderBundle.h"
 #include "dawn/native/RenderPipeline.h"
+#include "dawn/native/ValidationUtils.h"
 
 namespace dawn::native {
 namespace {
@@ -221,6 +222,9 @@ void RenderPassEncoder::APISetBlendConstant(const Color* color) {
     mEncodingContext->TryEncode(
         this,
         [&](CommandAllocator* allocator) -> MaybeError {
+            if (IsValidationEnabled()) {
+                DAWN_TRY(ValidateColor("color", *color));
+            }
             SetBlendConstantCmd* cmd =
                 allocator->Allocate<SetBlendConstantCmd>(Command::SetBlendConstant);
             cmd->color = *color;
@@ -240,11 +244,12 @@ void RenderPassEncoder::APISetViewport(float x,
         this,
         [&](CommandAllocator* allocator) -> MaybeError {
             if (IsValidationEnabled()) {
-                DAWN_INVALID_IF((isnan(x) || isnan(y) || isnan(width) || isnan(height) ||
-                                 isnan(minDepth) || isnan(maxDepth)),
-                                "A parameter of the viewport (x: %f, y: %f, width: %f, height: %f, "
-                                "minDepth: %f, maxDepth: %f) is NaN.",
-                                x, y, width, height, minDepth, maxDepth);
+                DAWN_TRY(ValidateFloat("x", x));
+                DAWN_TRY(ValidateFloat("y", y));
+                DAWN_TRY(ValidateFloat("width", width));
+                DAWN_TRY(ValidateFloat("height", height));
+                DAWN_TRY(ValidateFloat("minDepth", minDepth));
+                DAWN_TRY(ValidateFloat("maxDepth", maxDepth));
 
                 const CombinedLimits& limits = GetDevice()->GetLimits();
                 uint32_t maxViewportSize = limits.v1.maxTextureDimension2D;

@@ -79,6 +79,16 @@ TEST_F(SetViewportTest, ViewportParameterNaN) {
     TestViewportCall(false, 0.0, 0.0, 1.0, 1.0, 0.0, NAN);
 }
 
+// Test to check that Infinity in viewport parameters is not allowed
+TEST_F(SetViewportTest, ViewportParameterInf) {
+    TestViewportCall(false, INFINITY, 0.0, 1.0, 1.0, 0.0, 1.0);
+    TestViewportCall(false, 0.0, INFINITY, 1.0, 1.0, 0.0, 1.0);
+    TestViewportCall(false, 0.0, 0.0, INFINITY, 1.0, 0.0, 1.0);
+    TestViewportCall(false, 0.0, 0.0, 1.0, INFINITY, 0.0, 1.0);
+    TestViewportCall(false, 0.0, 0.0, 1.0, 1.0, INFINITY, 1.0);
+    TestViewportCall(false, 0.0, 0.0, 1.0, 1.0, 0.0, INFINITY);
+}
+
 // Test to check that an empty viewport is allowed.
 TEST_F(SetViewportTest, EmptyViewport) {
     // Width of viewport is zero.
@@ -246,34 +256,49 @@ TEST_F(SetScissorTest, ScissorLargerThanFramebuffer) {
     TestScissorCall(false, 0, std::numeric_limits<uint32_t>::max(), kWidth, kHeight);
 }
 
-class SetBlendConstantTest : public ValidationTest {};
+class SetBlendConstantTest : public ValidationTest {
+  protected:
+    void TestBlendConstantCall(bool success, const wgpu::Color color) {
+        PlaceholderRenderPass renderPass(device);
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        {
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+            pass.SetBlendConstant(&color);
+            pass.End();
+        }
+
+        if (success) {
+            encoder.Finish();
+        } else {
+            ASSERT_DEVICE_ERROR(encoder.Finish());
+        }
+    }
+};
 
 // Test to check basic use of SetBlendConstantTest
 TEST_F(SetBlendConstantTest, Success) {
-    PlaceholderRenderPass renderPass(device);
+    constexpr wgpu::Color kTransparentBlack{0.0f, 0.0f, 0.0f, 0.0f};
+    constexpr wgpu::Color kAnyColorValue{-1.0f, 42.0f, -0.0f, 0.0f};
 
-    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-    {
-        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
-        constexpr wgpu::Color kTransparentBlack{0.0f, 0.0f, 0.0f, 0.0f};
-        pass.SetBlendConstant(&kTransparentBlack);
-        pass.End();
-    }
-    encoder.Finish();
+    TestBlendConstantCall(true, kTransparentBlack);
+    TestBlendConstantCall(true, kAnyColorValue);
 }
 
-// Test that SetBlendConstant allows any value, large, small or negative
-TEST_F(SetBlendConstantTest, AnyValueAllowed) {
-    PlaceholderRenderPass renderPass(device);
+// Test that SetBlendConstant does not allow NaN.
+TEST_F(SetBlendConstantTest, NaN) {
+    TestBlendConstantCall(false, {NAN, 0.0f, 0.0f, 0.0f});
+    TestBlendConstantCall(false, {0.0f, NAN, 0.0f, 0.0f});
+    TestBlendConstantCall(false, {0.0f, 0.0f, NAN, 0.0f});
+    TestBlendConstantCall(false, {0.0f, 0.0f, 0.0f, NAN});
+}
 
-    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-    {
-        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
-        constexpr wgpu::Color kAnyColorValue{-1.0f, 42.0f, -0.0f, 0.0f};
-        pass.SetBlendConstant(&kAnyColorValue);
-        pass.End();
-    }
-    encoder.Finish();
+// Test that SetBlendConstant does not allow Infinity.
+TEST_F(SetBlendConstantTest, Infinity) {
+    TestBlendConstantCall(false, {INFINITY, 0.0f, 0.0f, 0.0f});
+    TestBlendConstantCall(false, {0.0f, INFINITY, 0.0f, 0.0f});
+    TestBlendConstantCall(false, {0.0f, 0.0f, INFINITY, 0.0f});
+    TestBlendConstantCall(false, {0.0f, 0.0f, 0.0f, INFINITY});
 }
 
 class SetStencilReferenceTest : public ValidationTest {};

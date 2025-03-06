@@ -58,6 +58,7 @@
 #include "dawn/native/RenderPassEncoder.h"
 #include "dawn/native/RenderPassWorkaroundsHelper.h"
 #include "dawn/native/RenderPipeline.h"
+#include "dawn/native/ValidationUtils.h"
 #include "dawn/native/ValidationUtils_autogen.h"
 #include "dawn/native/utils/WGPUHelpers.h"
 #include "dawn/platform/DawnPlatform.h"
@@ -573,9 +574,7 @@ MaybeError ValidateRenderPassColorAttachment(DeviceBase* device,
 
     const dawn::native::Color& clearValue = colorAttachment.clearValue;
     if (colorAttachment.loadOp == wgpu::LoadOp::Clear) {
-        DAWN_INVALID_IF(std::isnan(clearValue.r) || std::isnan(clearValue.g) ||
-                            std::isnan(clearValue.b) || std::isnan(clearValue.a),
-                        "Color clear value (%s) contains a NaN.", &clearValue);
+        DAWN_TRY(ValidateColor("clearValue", clearValue));
     } else if (colorAttachment.loadOp == wgpu::LoadOp::ExpandResolveTexture) {
         DAWN_INVALID_IF(colorAttachment.resolveTarget == nullptr,
                         "%s is used without resolve target.", wgpu::LoadOp::ExpandResolveTexture);
@@ -724,10 +723,7 @@ MaybeError ValidateRenderPassPLS(DeviceBase* device,
 
         const dawn::native::Color& clearValue = attachment.clearValue;
         if (attachment.loadOp == wgpu::LoadOp::Clear) {
-            DAWN_INVALID_IF(std::isnan(clearValue.r) || std::isnan(clearValue.g) ||
-                                std::isnan(clearValue.b) || std::isnan(clearValue.a),
-                            "storageAttachments[%i].clearValue (%s) contains a NaN.", i,
-                            &clearValue);
+            DAWN_TRY(ValidateColor("clearValue", clearValue));
         }
 
         DAWN_TRY(
