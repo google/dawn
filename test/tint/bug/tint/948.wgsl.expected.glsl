@@ -98,9 +98,9 @@ void main_1() {
   stageUnits = (vec2(1.0f) / x_111);
   i = 0;
   {
-    uvec2 tint_loop_idx = uvec2(0u);
+    uvec2 tint_loop_idx = uvec2(4294967295u);
     while(true) {
-      if (all(equal(tint_loop_idx, uvec2(4294967295u)))) {
+      if (all(equal(tint_loop_idx, uvec2(0u)))) {
         break;
       }
       int x_122 = i;
@@ -142,9 +142,9 @@ void main_1() {
         mt = tint_float_modulo((x_181 * x_184), 1.0f);
         f = 0.0f;
         {
-          uvec2 tint_loop_idx_1 = uvec2(0u);
+          uvec2 tint_loop_idx_1 = uvec2(4294967295u);
           while(true) {
-            if (all(equal(tint_loop_idx_1, uvec2(4294967295u)))) {
+            if (all(equal(tint_loop_idx_1, uvec2(0u)))) {
               break;
             }
             float x_193 = f;
@@ -165,10 +165,10 @@ void main_1() {
             vec4 x_217 = vec4(0.0f);
             animationData = x_217;
             {
-              uint tint_low_inc_1 = (tint_loop_idx_1.x + 1u);
+              uint tint_low_inc_1 = (tint_loop_idx_1.x - 1u);
               tint_loop_idx_1.x = tint_low_inc_1;
-              uint tint_carry_1 = uint((tint_low_inc_1 == 0u));
-              tint_loop_idx_1.y = (tint_loop_idx_1.y + tint_carry_1);
+              uint tint_carry_1 = uint((tint_low_inc_1 == 4294967295u));
+              tint_loop_idx_1.y = (tint_loop_idx_1.y - tint_carry_1);
               float x_218 = f;
               f = (x_218 + 1.0f);
             }
@@ -222,10 +222,10 @@ void main_1() {
         color = vec4(x_298.x, x_298.y, x_298.z, x_299);
       }
       {
-        uint tint_low_inc = (tint_loop_idx.x + 1u);
+        uint tint_low_inc = (tint_loop_idx.x - 1u);
         tint_loop_idx.x = tint_low_inc;
-        uint tint_carry = uint((tint_low_inc == 0u));
-        tint_loop_idx.y = (tint_loop_idx.y + tint_carry);
+        uint tint_carry = uint((tint_low_inc == 4294967295u));
+        tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
         int x_304 = i;
         i = (x_304 + 1);
       }

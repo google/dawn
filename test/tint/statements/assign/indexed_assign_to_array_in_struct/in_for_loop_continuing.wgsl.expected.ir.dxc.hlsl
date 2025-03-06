@@ -15,10 +15,10 @@ void main() {
   InnerS v = (InnerS)0;
   OuterS s1 = (OuterS)0;
   {
-    uint2 tint_loop_idx = (0u).xx;
+    uint2 tint_loop_idx = (4294967295u).xx;
     int i = int(0);
     while(true) {
-      if (all((tint_loop_idx == (4294967295u).xx))) {
+      if (all((tint_loop_idx == (0u).xx))) {
         break;
       }
       if ((i < int(4))) {
@@ -27,10 +27,10 @@ void main() {
       }
       i = (i + int(1));
       {
-        uint tint_low_inc = (tint_loop_idx.x + 1u);
+        uint tint_low_inc = (tint_loop_idx.x - 1u);
         tint_loop_idx.x = tint_low_inc;
-        uint tint_carry = uint((tint_low_inc == 0u));
-        tint_loop_idx.y = (tint_loop_idx.y + tint_carry);
+        uint tint_carry = uint((tint_low_inc == 4294967295u));
+        tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
         uint v_1 = min(uniforms[0u].x, 7u);
         InnerS v_2 = v;
         s1.a1[v_1] = v_2;

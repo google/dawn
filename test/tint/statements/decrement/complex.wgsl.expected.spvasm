@@ -4,7 +4,7 @@
 ; Bound: 129
 ; Schema: 0
                OpCapability Shader
-         %67 = OpExtInstImport "GLSL.std.450"
+         %68 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
                OpExecutionMode %unused_entry_point LocalSize 1 1 1
@@ -56,14 +56,14 @@
          %47 = OpTypeFunction %void
      %v2uint = OpTypeVector %uint 2
 %_ptr_Function_v2uint = OpTypePointer Function %v2uint
-         %57 = OpConstantNull %v2uint
+%uint_4294967295 = OpConstant %uint 4294967295
+         %57 = OpConstantComposite %v2uint %uint_4294967295 %uint_4294967295
 %_ptr_StorageBuffer__runtimearr_S = OpTypePointer StorageBuffer %_runtimearr_S
      %uint_0 = OpConstant %uint 0
      %uint_3 = OpConstant %uint 3
 %_ptr_StorageBuffer_v4int = OpTypePointer StorageBuffer %v4int
 %_ptr_StorageBuffer_int = OpTypePointer StorageBuffer %int
-%uint_4294967295 = OpConstant %uint 4294967295
-         %85 = OpConstantComposite %v2uint %uint_4294967295 %uint_4294967295
+         %86 = OpConstantNull %v2uint
        %bool = OpTypeBool
      %v2bool = OpTypeVector %bool 2
     %uint_10 = OpConstant %uint 10
@@ -112,37 +112,38 @@
                OpFunctionEnd
        %main = OpFunction %void None %47
          %48 = OpLabel
-%tint_loop_idx = OpVariable %_ptr_Function_v2uint Function %57
+%tint_loop_idx = OpVariable %_ptr_Function_v2uint Function
                OpBranch %49
          %49 = OpLabel
-         %58 = OpFunctionCall %int %idx1
-         %59 = OpFunctionCall %int %idx2
-         %60 = OpAccessChain %_ptr_StorageBuffer__runtimearr_S %1 %uint_0
-         %63 = OpArrayLength %uint %1 0
-         %64 = OpISub %uint %63 %uint_1
-         %65 = OpBitcast %uint %58
-         %66 = OpExtInst %uint %67 UMin %65 %64
-         %68 = OpBitcast %uint %59
-         %69 = OpExtInst %uint %67 UMin %68 %uint_3
-         %71 = OpAccessChain %_ptr_StorageBuffer_v4int %1 %uint_0 %66 %uint_0 %69
-         %73 = OpFunctionCall %int %idx3
-         %74 = OpBitcast %uint %73
-         %75 = OpExtInst %uint %67 UMin %74 %uint_3
-         %76 = OpAccessChain %_ptr_StorageBuffer_int %71 %75
-         %78 = OpLoad %int %76 None
-         %79 = OpISub %int %78 %int_1
-         %80 = OpBitcast %uint %73
-         %81 = OpExtInst %uint %67 UMin %80 %uint_3
-         %82 = OpAccessChain %_ptr_StorageBuffer_int %71 %81
-               OpStore %82 %79 None
+               OpStore %tint_loop_idx %57
+         %59 = OpFunctionCall %int %idx1
+         %60 = OpFunctionCall %int %idx2
+         %61 = OpAccessChain %_ptr_StorageBuffer__runtimearr_S %1 %uint_0
+         %64 = OpArrayLength %uint %1 0
+         %65 = OpISub %uint %64 %uint_1
+         %66 = OpBitcast %uint %59
+         %67 = OpExtInst %uint %68 UMin %66 %65
+         %69 = OpBitcast %uint %60
+         %70 = OpExtInst %uint %68 UMin %69 %uint_3
+         %72 = OpAccessChain %_ptr_StorageBuffer_v4int %1 %uint_0 %67 %uint_0 %70
+         %74 = OpFunctionCall %int %idx3
+         %75 = OpBitcast %uint %74
+         %76 = OpExtInst %uint %68 UMin %75 %uint_3
+         %77 = OpAccessChain %_ptr_StorageBuffer_int %72 %76
+         %79 = OpLoad %int %77 None
+         %80 = OpISub %int %79 %int_1
+         %81 = OpBitcast %uint %74
+         %82 = OpExtInst %uint %68 UMin %81 %uint_3
+         %83 = OpAccessChain %_ptr_StorageBuffer_int %72 %82
+               OpStore %83 %80 None
                OpBranch %52
          %52 = OpLabel
                OpLoopMerge %53 %51 None
                OpBranch %50
          %50 = OpLabel
-         %83 = OpLoad %v2uint %tint_loop_idx None
-         %84 = OpIEqual %v2bool %83 %85
-         %89 = OpAll %bool %84
+         %84 = OpLoad %v2uint %tint_loop_idx None
+         %85 = OpIEqual %v2bool %84 %86
+         %89 = OpAll %bool %85
                OpSelectionMerge %90 None
                OpBranchConditional %89 %91 %90
          %91 = OpLabel
@@ -159,14 +160,14 @@
          %51 = OpLabel
          %97 = OpAccessChain %_ptr_Function_uint %tint_loop_idx %uint_0
          %99 = OpLoad %uint %97 None
-%tint_low_inc = OpIAdd %uint %99 %uint_1
+%tint_low_inc = OpISub %uint %99 %uint_1
         %101 = OpAccessChain %_ptr_Function_uint %tint_loop_idx %uint_0
                OpStore %101 %tint_low_inc None
-        %102 = OpIEqual %bool %tint_low_inc %uint_0
+        %102 = OpIEqual %bool %tint_low_inc %uint_4294967295
  %tint_carry = OpSelect %uint %102 %uint_1 %uint_0
         %104 = OpAccessChain %_ptr_Function_uint %tint_loop_idx %uint_1
         %105 = OpLoad %uint %104 None
-        %106 = OpIAdd %uint %105 %tint_carry
+        %106 = OpISub %uint %105 %tint_carry
         %107 = OpAccessChain %_ptr_Function_uint %tint_loop_idx %uint_1
                OpStore %107 %106 None
         %108 = OpFunctionCall %int %idx4
@@ -175,18 +176,18 @@
         %111 = OpArrayLength %uint %1 0
         %112 = OpISub %uint %111 %uint_1
         %113 = OpBitcast %uint %108
-        %114 = OpExtInst %uint %67 UMin %113 %112
+        %114 = OpExtInst %uint %68 UMin %113 %112
         %115 = OpBitcast %uint %109
-        %116 = OpExtInst %uint %67 UMin %115 %uint_3
+        %116 = OpExtInst %uint %68 UMin %115 %uint_3
         %117 = OpAccessChain %_ptr_StorageBuffer_v4int %1 %uint_0 %114 %uint_0 %116
         %118 = OpFunctionCall %int %idx6
         %119 = OpBitcast %uint %118
-        %120 = OpExtInst %uint %67 UMin %119 %uint_3
+        %120 = OpExtInst %uint %68 UMin %119 %uint_3
         %121 = OpAccessChain %_ptr_StorageBuffer_int %117 %120
         %122 = OpLoad %int %121 None
         %123 = OpISub %int %122 %int_1
         %124 = OpBitcast %uint %118
-        %125 = OpExtInst %uint %67 UMin %124 %uint_3
+        %125 = OpExtInst %uint %68 UMin %124 %uint_3
         %126 = OpAccessChain %_ptr_StorageBuffer_int %117 %125
                OpStore %126 %123 None
                OpBranch %52

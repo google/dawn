@@ -42,9 +42,9 @@ void _skslMain(FSIn _stageIn, inout FSOut _stageOut) {
   float _60_n = 1.0f;
   int _61_o = int(0);
   {
-    uint2 tint_loop_idx = (0u).xx;
+    uint2 tint_loop_idx = (4294967295u).xx;
     while(true) {
-      if (all((tint_loop_idx == (4294967295u).xx))) {
+      if (all((tint_loop_idx == (0u).xx))) {
         break;
       }
       uint v_4 = 0u;
@@ -77,9 +77,9 @@ void _skslMain(FSIn _stageIn, inout FSOut _stageOut) {
         float4 _71_g = (0.0f).xxxx;
         int _72_h = int(0);
         {
-          uint2 tint_loop_idx_1 = (0u).xx;
+          uint2 tint_loop_idx_1 = (4294967295u).xx;
           while(true) {
-            if (all((tint_loop_idx_1 == (4294967295u).xx))) {
+            if (all((tint_loop_idx_1 == (0u).xx))) {
               break;
             }
             float _73_i = ((float(_72_h) + 0.5f) * 0.25f);
@@ -114,10 +114,10 @@ void _skslMain(FSIn _stageIn, inout FSOut _stageOut) {
             float4 v_13 = float4((v_10).xxxx);
             _71_g = (((v_13 == float4(int(0), int(1), int(2), int(3)))) ? (v_12) : (v_11));
             {
-              uint tint_low_inc_1 = (tint_loop_idx_1.x + 1u);
+              uint tint_low_inc_1 = (tint_loop_idx_1.x - 1u);
               tint_loop_idx_1.x = tint_low_inc_1;
-              uint tint_carry_1 = uint((tint_low_inc_1 == 0u));
-              tint_loop_idx_1.y = (tint_loop_idx_1.y + tint_carry_1);
+              uint tint_carry_1 = uint((tint_low_inc_1 == 4294967295u));
+              tint_loop_idx_1.y = (tint_loop_idx_1.y - tint_carry_1);
               _72_h = (_72_h + int(1));
               if ((_72_h >= int(4))) { break; }
             }
@@ -137,10 +137,10 @@ void _skslMain(FSIn _stageIn, inout FSOut _stageOut) {
         break;
       }
       {
-        uint tint_low_inc = (tint_loop_idx.x + 1u);
+        uint tint_low_inc = (tint_loop_idx.x - 1u);
         tint_loop_idx.x = tint_low_inc;
-        uint tint_carry = uint((tint_low_inc == 0u));
-        tint_loop_idx.y = (tint_loop_idx.y + tint_carry);
+        uint tint_carry = uint((tint_low_inc == 4294967295u));
+        tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
         _61_o = (_61_o + int(1));
       }
       continue;

@@ -27,10 +27,10 @@ int foo_inner(float in, float2 coord, tint_module_vars_struct tint_module_vars) 
   }
   int result = tint_f32_to_i32(tint_module_vars.t.sample(tint_module_vars.s, coord).x);
   {
-    uint2 tint_loop_idx = 0u;
+    uint2 tint_loop_idx = uint2(4294967295u);
     int i = 0;
     while(true) {
-      if (all((tint_loop_idx == uint2(4294967295u)))) {
+      if (all((tint_loop_idx == uint2(0u)))) {
         break;
       }
       if ((i < 10)) {
@@ -39,10 +39,10 @@ int foo_inner(float in, float2 coord, tint_module_vars_struct tint_module_vars) 
       }
       result = as_type<int>((as_type<uint>(result) + as_type<uint>(i)));
       {
-        uint const tint_low_inc = (tint_loop_idx.x + 1u);
+        uint const tint_low_inc = (tint_loop_idx.x - 1u);
         tint_loop_idx.x = tint_low_inc;
-        uint const tint_carry = uint((tint_low_inc == 0u));
-        tint_loop_idx.y = (tint_loop_idx.y + tint_carry);
+        uint const tint_carry = uint((tint_low_inc == 4294967295u));
+        tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
         int v = 0;
         if ((*tint_module_vars.continue_execution)) {
           v = atomic_fetch_add_explicit(tint_module_vars.a, 1, memory_order_relaxed);

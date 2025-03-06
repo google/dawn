@@ -4,7 +4,7 @@
 ; Bound: 97
 ; Schema: 0
                OpCapability Shader
-         %52 = OpExtInstImport "GLSL.std.450"
+         %53 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
                OpExecutionMode %unused_entry_point LocalSize 1 1 1
@@ -60,11 +60,11 @@
          %39 = OpConstantNull %_arr_float_uint_4
      %v2uint = OpTypeVector %uint 2
 %_ptr_Function_v2uint = OpTypePointer Function %v2uint
-         %48 = OpConstantNull %v2uint
+%uint_4294967295 = OpConstant %uint 4294967295
+         %48 = OpConstantComposite %v2uint %uint_4294967295 %uint_4294967295
 %_ptr_Function_float = OpTypePointer Function %float
     %float_2 = OpConstant %float 2
-%uint_4294967295 = OpConstant %uint 4294967295
-         %60 = OpConstantComposite %v2uint %uint_4294967295 %uint_4294967295
+         %61 = OpConstantNull %v2uint
        %bool = OpTypeBool
      %v2bool = OpTypeVector %bool 2
    %float_10 = OpConstant %float 10
@@ -95,25 +95,26 @@
         %foo = OpFunction %void None %33
          %34 = OpLabel
           %a = OpVariable %_ptr_Function__arr_float_uint_4 Function
-%tint_loop_idx = OpVariable %_ptr_Function_v2uint Function %48
+%tint_loop_idx = OpVariable %_ptr_Function_v2uint Function
                OpStore %a %39
                OpBranch %40
          %40 = OpLabel
-         %49 = OpFunctionCall %int %idx1
-         %50 = OpBitcast %uint %49
-         %51 = OpExtInst %uint %52 UMin %50 %uint_3
-         %53 = OpAccessChain %_ptr_Function_float %a %51
-         %55 = OpLoad %float %53 None
-         %56 = OpFMul %float %55 %float_2
-               OpStore %53 %56 None
+               OpStore %tint_loop_idx %48
+         %50 = OpFunctionCall %int %idx1
+         %51 = OpBitcast %uint %50
+         %52 = OpExtInst %uint %53 UMin %51 %uint_3
+         %54 = OpAccessChain %_ptr_Function_float %a %52
+         %56 = OpLoad %float %54 None
+         %57 = OpFMul %float %56 %float_2
+               OpStore %54 %57 None
                OpBranch %43
          %43 = OpLabel
                OpLoopMerge %44 %42 None
                OpBranch %41
          %41 = OpLabel
-         %58 = OpLoad %v2uint %tint_loop_idx None
-         %59 = OpIEqual %v2bool %58 %60
-         %64 = OpAll %bool %59
+         %59 = OpLoad %v2uint %tint_loop_idx None
+         %60 = OpIEqual %v2bool %59 %61
+         %64 = OpAll %bool %60
                OpSelectionMerge %65 None
                OpBranchConditional %64 %66 %65
          %66 = OpLabel
@@ -121,7 +122,7 @@
          %65 = OpLabel
          %67 = OpFunctionCall %int %idx2
          %68 = OpBitcast %uint %67
-         %69 = OpExtInst %uint %52 UMin %68 %uint_3
+         %69 = OpExtInst %uint %53 UMin %68 %uint_3
          %70 = OpAccessChain %_ptr_Function_float %a %69
          %71 = OpLoad %float %70 None
          %72 = OpFOrdLessThan %bool %71 %float_10
@@ -134,19 +135,19 @@
          %42 = OpLabel
          %76 = OpAccessChain %_ptr_Function_uint %tint_loop_idx %uint_0
          %79 = OpLoad %uint %76 None
-%tint_low_inc = OpIAdd %uint %79 %uint_1
+%tint_low_inc = OpISub %uint %79 %uint_1
          %81 = OpAccessChain %_ptr_Function_uint %tint_loop_idx %uint_0
                OpStore %81 %tint_low_inc None
-         %82 = OpIEqual %bool %tint_low_inc %uint_0
+         %82 = OpIEqual %bool %tint_low_inc %uint_4294967295
  %tint_carry = OpSelect %uint %82 %uint_1 %uint_0
          %84 = OpAccessChain %_ptr_Function_uint %tint_loop_idx %uint_1
          %85 = OpLoad %uint %84 None
-         %86 = OpIAdd %uint %85 %tint_carry
+         %86 = OpISub %uint %85 %tint_carry
          %87 = OpAccessChain %_ptr_Function_uint %tint_loop_idx %uint_1
                OpStore %87 %86 None
          %88 = OpFunctionCall %int %idx3
          %89 = OpBitcast %uint %88
-         %90 = OpExtInst %uint %52 UMin %89 %uint_3
+         %90 = OpExtInst %uint %53 UMin %89 %uint_3
          %91 = OpAccessChain %_ptr_Function_float %a %90
          %92 = OpLoad %float %91 None
          %93 = OpFAdd %float %92 %float_1

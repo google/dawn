@@ -3,9 +3,9 @@ ByteAddressBuffer _storage : register(t2);
 void main() {
   int2 vec = (int(0)).xx;
   {
-    uint2 tint_loop_idx = (0u).xx;
+    uint2 tint_loop_idx = (4294967295u).xx;
     while(true) {
-      if (all((tint_loop_idx == (4294967295u).xx))) {
+      if (all((tint_loop_idx == (0u).xx))) {
         break;
       }
       if ((vec.y >= asint(_storage.Load(4u)))) {
@@ -15,10 +15,10 @@ void main() {
         break;
       }
       {
-        uint tint_low_inc = (tint_loop_idx.x + 1u);
+        uint tint_low_inc = (tint_loop_idx.x - 1u);
         tint_loop_idx.x = tint_low_inc;
-        uint tint_carry = uint((tint_low_inc == 0u));
-        tint_loop_idx.y = (tint_loop_idx.y + tint_carry);
+        uint tint_carry = uint((tint_low_inc == 4294967295u));
+        tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
       }
       continue;
     }

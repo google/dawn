@@ -333,9 +333,9 @@ void main_1(tint_module_vars_struct tint_module_vars) {
   currSampledHeight = 1.0f;
   i = 0;
   {
-    uint2 tint_loop_idx = 0u;
+    uint2 tint_loop_idx = uint2(4294967295u);
     while(true) {
-      if (all((tint_loop_idx == uint2(4294967295u)))) {
+      if (all((tint_loop_idx == uint2(0u)))) {
         break;
       }
       int const x_388 = i;
@@ -381,10 +381,10 @@ void main_1(tint_module_vars_struct tint_module_vars) {
         lastSampledHeight = x_440;
       }
       {
-        uint const tint_low_inc = (tint_loop_idx.x + 1u);
+        uint const tint_low_inc = (tint_loop_idx.x - 1u);
         tint_loop_idx.x = tint_low_inc;
-        uint const tint_carry = uint((tint_low_inc == 0u));
-        tint_loop_idx.y = (tint_loop_idx.y + tint_carry);
+        uint const tint_carry = uint((tint_low_inc == 4294967295u));
+        tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
         int const x_441 = i;
         i = as_type<int>((as_type<uint>(x_441) + as_type<uint>(1)));
       }

@@ -55,7 +55,7 @@ int idx6(tint_module_vars_struct tint_module_vars) {
 
 void v_1(tint_module_vars_struct tint_module_vars) {
   {
-    uint2 tint_loop_idx = 0u;
+    uint2 tint_loop_idx = uint2(4294967295u);
     int const v_2 = idx1(tint_module_vars);
     int const v_3 = idx2(tint_module_vars);
     uint const v_4 = (((*tint_module_vars.tint_storage_buffer_sizes)[0u].x / 64u) - 1u);
@@ -65,7 +65,7 @@ void v_1(tint_module_vars_struct tint_module_vars) {
     int const v_8 = as_type<int>((as_type<uint>((*v_6)[min(uint(v_7), 3u)]) - as_type<uint>(1)));
     (*v_6)[min(uint(v_7), 3u)] = v_8;
     while(true) {
-      if (all((tint_loop_idx == uint2(4294967295u)))) {
+      if (all((tint_loop_idx == uint2(0u)))) {
         break;
       }
       if (((*tint_module_vars.v) < 10u)) {
@@ -73,10 +73,10 @@ void v_1(tint_module_vars_struct tint_module_vars) {
         break;
       }
       {
-        uint const tint_low_inc = (tint_loop_idx.x + 1u);
+        uint const tint_low_inc = (tint_loop_idx.x - 1u);
         tint_loop_idx.x = tint_low_inc;
-        uint const tint_carry = uint((tint_low_inc == 0u));
-        tint_loop_idx.y = (tint_loop_idx.y + tint_carry);
+        uint const tint_carry = uint((tint_low_inc == 4294967295u));
+        tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
         int const v_9 = idx4(tint_module_vars);
         int const v_10 = idx5(tint_module_vars);
         uint const v_11 = (((*tint_module_vars.tint_storage_buffer_sizes)[0u].x / 64u) - 1u);

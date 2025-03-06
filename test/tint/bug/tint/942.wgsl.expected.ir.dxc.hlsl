@@ -111,10 +111,10 @@ void main_inner(uint3 WorkGroupID, uint3 LocalInvocationID, uint tint_local_inde
           if (v_8) {
             float3 acc = (0.0f).xxx;
             {
-              uint2 tint_loop_idx = (0u).xx;
+              uint2 tint_loop_idx = (4294967295u).xx;
               uint f = 0u;
               while(true) {
-                if (all((tint_loop_idx == (4294967295u).xx))) {
+                if (all((tint_loop_idx == (0u).xx))) {
                   break;
                 }
                 if ((f < params[0u].x)) {
@@ -128,10 +128,10 @@ void main_inner(uint3 WorkGroupID, uint3 LocalInvocationID, uint tint_local_inde
                 uint v_12 = min(i, 255u);
                 acc = (v_9 + (v_10 * tile[v_11][v_12]));
                 {
-                  uint tint_low_inc = (tint_loop_idx.x + 1u);
+                  uint tint_low_inc = (tint_loop_idx.x - 1u);
                   tint_loop_idx.x = tint_low_inc;
-                  uint tint_carry = uint((tint_low_inc == 0u));
-                  tint_loop_idx.y = (tint_loop_idx.y + tint_carry);
+                  uint tint_carry = uint((tint_low_inc == 4294967295u));
+                  tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
                   f = (f + 1u);
                 }
                 continue;

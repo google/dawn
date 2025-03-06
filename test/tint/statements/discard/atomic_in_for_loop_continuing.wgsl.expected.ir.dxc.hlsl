@@ -21,10 +21,10 @@ int foo_inner(float v, float2 coord) {
   }
   int result = tint_f32_to_i32(t.Sample(s, coord).x);
   {
-    uint2 tint_loop_idx = (0u).xx;
+    uint2 tint_loop_idx = (4294967295u).xx;
     int i = int(0);
     while(true) {
-      if (all((tint_loop_idx == (4294967295u).xx))) {
+      if (all((tint_loop_idx == (0u).xx))) {
         break;
       }
       if ((i < int(10))) {
@@ -33,10 +33,10 @@ int foo_inner(float v, float2 coord) {
       }
       result = (result + i);
       {
-        uint tint_low_inc = (tint_loop_idx.x + 1u);
+        uint tint_low_inc = (tint_loop_idx.x - 1u);
         tint_loop_idx.x = tint_low_inc;
-        uint tint_carry = uint((tint_low_inc == 0u));
-        tint_loop_idx.y = (tint_loop_idx.y + tint_carry);
+        uint tint_carry = uint((tint_low_inc == 4294967295u));
+        tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
         int v_1 = int(0);
         a.InterlockedAdd(int(0u), int(1), v_1);
         i = v_1;

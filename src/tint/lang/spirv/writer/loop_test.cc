@@ -80,20 +80,22 @@ TEST_F(SpirvWriterTest, Loop_BreakIf_WithRobustness) {
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
-    EXPECT_INST("%17 = OpConstantComposite %v2uint %uint_4294967295 %uint_4294967295");
+
+    EXPECT_INST("%14 = OpConstantComposite %v2uint %uint_4294967295 %uint_4294967295");
     EXPECT_INST(R"(
           %4 = OpLabel
-%tint_loop_idx = OpVariable %_ptr_Function_v2uint Function %14
+%tint_loop_idx = OpVariable %_ptr_Function_v2uint Function
                OpBranch %5
           %5 = OpLabel
+               OpStore %tint_loop_idx %14
                OpBranch %8
           %8 = OpLabel
                OpLoopMerge %9 %7 None
                OpBranch %6
           %6 = OpLabel
-         %15 = OpLoad %v2uint %tint_loop_idx None
-         %16 = OpIEqual %v2bool %15 %17
-         %21 = OpAll %bool %16
+         %16 = OpLoad %v2uint %tint_loop_idx None
+         %17 = OpIEqual %v2bool %16 %18
+         %21 = OpAll %bool %17
                OpSelectionMerge %22 None
                OpBranchConditional %21 %23 %22
          %23 = OpLabel
@@ -103,21 +105,20 @@ TEST_F(SpirvWriterTest, Loop_BreakIf_WithRobustness) {
           %7 = OpLabel
          %24 = OpAccessChain %_ptr_Function_uint %tint_loop_idx %uint_0
          %27 = OpLoad %uint %24 None
-%tint_low_inc = OpIAdd %uint %27 %uint_1
+%tint_low_inc = OpISub %uint %27 %uint_1
          %30 = OpAccessChain %_ptr_Function_uint %tint_loop_idx %uint_0
                OpStore %30 %tint_low_inc None
-         %31 = OpIEqual %bool %tint_low_inc %uint_0
+         %31 = OpIEqual %bool %tint_low_inc %uint_4294967295
  %tint_carry = OpSelect %uint %31 %uint_1 %uint_0
          %33 = OpAccessChain %_ptr_Function_uint %tint_loop_idx %uint_1
          %34 = OpLoad %uint %33 None
-         %35 = OpIAdd %uint %34 %tint_carry
+         %35 = OpISub %uint %34 %tint_carry
          %36 = OpAccessChain %_ptr_Function_uint %tint_loop_idx %uint_1
                OpStore %36 %35 None
                OpBranchConditional %true %9 %8
           %9 = OpLabel
                OpReturn
                OpFunctionEnd
-
 )");
 }
 

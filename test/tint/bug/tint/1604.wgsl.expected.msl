@@ -11,9 +11,9 @@ kernel void v(const constant int* x [[buffer(0)]]) {
     case 0:
     {
       {
-        uint2 tint_loop_idx = 0u;
+        uint2 tint_loop_idx = uint2(4294967295u);
         while(true) {
-          if (all((tint_loop_idx == uint2(4294967295u)))) {
+          if (all((tint_loop_idx == uint2(0u)))) {
             break;
           }
           return;
