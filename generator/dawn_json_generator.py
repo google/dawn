@@ -306,12 +306,11 @@ class Record:
 class StructureType(Record, Type):
     def __init__(self, is_enabled, name, json_data):
         tags = json_data.get('tags', [])
-        if 'deprecated' not in tags and 'upstream' not in tags:
-            if 'emscripten' in tags:
-                if name != 'INTERNAL_HAVE_EMDAWNWEBGPU_HEADER':
-                    assert name.startswith('emscripten'), name
-            else:
-                assert not name.startswith('emscripten'), name
+        if tags == ['emscripten']:
+            if name != 'INTERNAL_HAVE_EMDAWNWEBGPU_HEADER':
+                assert name.startswith('emscripten'), name
+        else:
+            assert not name.startswith('emscripten'), name
 
         Record.__init__(self, name)
         json_data_override = {}

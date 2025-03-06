@@ -793,6 +793,8 @@ struct WGPUShaderModuleImpl final : public EventSource, public RefCounted {
         free(const_cast<char*>(compilationInfo->messages[0].message.data));
       }
       if (compilationInfo->messages) {
+        free(reinterpret_cast<WGPUDawnCompilationMessageUtf16*>(
+            compilationInfo->messages[0].nextInChain));
         free(const_cast<WGPUCompilationMessage*>(compilationInfo->messages));
       }
       delete compilationInfo;
