@@ -1080,9 +1080,20 @@ TEST_P(BufferTests, CreateBufferOOM) {
     // UINT64_MAX may be special cased. Test a smaller, but really large buffer also fails
     descriptor.size = 1ull << 50;
     ASSERT_DEVICE_ERROR(device.CreateBuffer(&descriptor));
+}
 
-    // Validation errors should always be prior to OOM.
+// Test that in the creation of buffers validation errors should always be prior to OOM.
+TEST_P(BufferTests, CreateBufferOOMWithValidationError) {
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
+
+    wgpu::BufferDescriptor descriptor;
     descriptor.usage = wgpu::BufferUsage::MapRead | wgpu::BufferUsage::Uniform;
+
+    descriptor.size = std::numeric_limits<uint64_t>::max();
+    ASSERT_DEVICE_ERROR(device.CreateBuffer(&descriptor));
+
+    // UINT64_MAX may be special cased. Test a smaller, but really large buffer also fails
+    descriptor.size = 1ull << 50;
     ASSERT_DEVICE_ERROR(device.CreateBuffer(&descriptor));
 }
 
