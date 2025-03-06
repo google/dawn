@@ -1382,7 +1382,7 @@ MaybeError InternalTexture::Initialize(VkImageUsageFlags extraUsages) {
         (GetInternalUsage() & (wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::RenderAttachment));
     auto memoryKind = (GetInternalUsage() & wgpu::TextureUsage::TransientAttachment)
                           ? MemoryKind::LazilyAllocated
-                          : MemoryKind::DeviceLocal;
+                          : MemoryKind::Opaque;
     DAWN_TRY_ASSIGN(mMemoryAllocation, device->GetResourceMemoryAllocator()->Allocate(
                                            requirements, memoryKind, forceDisableSubAllocation));
 

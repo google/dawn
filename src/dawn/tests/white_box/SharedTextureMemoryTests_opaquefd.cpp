@@ -84,7 +84,7 @@ auto CreateSharedTextureMemoryHelperImpl(native::vulkan::Device* deviceVk,
     deviceVk->fn.GetImageMemoryRequirements(deviceVk->GetVkDevice(), vkImage, &requirements);
 
     int bestType = deviceVk->GetResourceMemoryAllocator()->FindBestTypeIndex(
-        requirements, native::vulkan::MemoryKind::DeviceLocal);
+        requirements, native::vulkan::MemoryKind::Opaque);
     EXPECT_GE(bestType, 0);
 
     VkMemoryDedicatedAllocateInfo dedicatedInfo;

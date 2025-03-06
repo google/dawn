@@ -43,14 +43,14 @@ namespace dawn::native::vulkan {
 
 class Device;
 
-// Each bit of MemoryKind represents a kind of memory that influence the result of the allocation.
-// For example, to take into account mappability and Vulkan's bufferImageGranularity.
-enum class MemoryKind : uint8_t {
-    LazilyAllocated = 1,
-    Linear = 2,
-    DeviceLocal = 4,
-    ReadMappable = 8,
-    WriteMappable = 16,
+// Various kinds of memory that influence the result of the allocation. For example, to take
+// into account mappability and Vulkan's bufferImageGranularity.
+enum class MemoryKind {
+    LazilyAllocated,
+    Linear,
+    LinearReadMappable,
+    LinearWriteMappable,
+    Opaque,
 };
 
 class ResourceMemoryAllocator {
@@ -79,13 +79,5 @@ class ResourceMemoryAllocator {
 };
 
 }  // namespace dawn::native::vulkan
-
-namespace wgpu {
-template <>
-struct IsWGPUBitmask<dawn::native::vulkan::MemoryKind> {
-    static constexpr bool enable = true;
-};
-
-}  // namespace wgpu
 
 #endif  // SRC_DAWN_NATIVE_VULKAN_RESOURCEMEMORYALLOCATORVK_H_
