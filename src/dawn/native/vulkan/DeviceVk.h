@@ -125,6 +125,8 @@ class Device final : public DeviceBase {
     // Used to associate this device with validation layer messages.
     const char* GetDebugPrefix() { return mDebugPrefix.c_str(); }
 
+    bool PreferNotUsingMappableOrUniformBufferAsStorage() const override;
+
   private:
     Device(AdapterBase* adapter,
            const UnpackedPtr<DeviceDescriptor>& descriptor,
@@ -202,6 +204,8 @@ class Device final : public DeviceBase {
     std::vector<std::string> mDebugMessages;
 
     Ref<PipelineCache> mMonolithicPipelineCache;
+
+    bool mSupportsMappableStorageBuffer = false;
 
     MaybeError ImportExternalImage(const ExternalImageDescriptorVk* descriptor,
                                    ExternalMemoryHandle memoryHandle,

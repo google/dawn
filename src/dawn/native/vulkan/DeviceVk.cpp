@@ -111,6 +111,8 @@ MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
     VulkanFunctions* functions = GetMutableFunctions();
     *functions = ToBackend(GetPhysicalDevice())->GetVulkanInstance()->GetFunctions();
 
+    mSupportsMappableStorageBuffer = SupportsBufferMapExtendedUsages(mDeviceInfo);
+
     // Two things are crucial if device initialization fails: the function pointers to destroy
     // objects, and the fence deleter that calls these functions. Do not do anything before
     // these two are set up, so that a failed initialization doesn't cause a crash in
@@ -1034,6 +1036,11 @@ void Device::PerformIdleTasksImpl() {
             return;
         }
     }
+}
+
+bool Device::PreferNotUsingMappableOrUniformBufferAsStorage() const {
+    // Return true when the backend doesn't support mappable storage buffer
+    return !mSupportsMappableStorageBuffer;
 }
 
 }  // namespace dawn::native::vulkan

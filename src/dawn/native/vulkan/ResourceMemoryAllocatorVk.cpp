@@ -71,6 +71,21 @@ bool IsMemoryKindMappable(MemoryKind memoryKind) {
 
 }  // anonymous namespace
 
+bool SupportsBufferMapExtendedUsages(const VulkanDeviceInfo& deviceInfo) {
+    // On Vulkan the memory type of the mappable buffers with extended usages must have all below
+    // memory property flags.
+    constexpr VkMemoryPropertyFlags kMapExtendedUsageMemoryPropertyFlags =
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+        VK_MEMORY_PROPERTY_HOST_COHERENT_BIT | VK_MEMORY_PROPERTY_HOST_CACHED_BIT;
+    for (const auto& memoryType : deviceInfo.memoryTypes) {
+        if ((memoryType.propertyFlags & kMapExtendedUsageMemoryPropertyFlags) ==
+            kMapExtendedUsageMemoryPropertyFlags) {
+            return true;
+        }
+    }
+    return false;
+}
+
 // SingleTypeAllocator is a combination of a BuddyMemoryAllocator and its client and can
 // service suballocation requests, but for a single Vulkan memory type.
 
