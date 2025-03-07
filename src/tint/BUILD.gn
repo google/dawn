@@ -308,29 +308,72 @@ source_set("dxcompiler-for-fuzzer") {
 ###############################################################################
 if (tint_has_fuzzers) {
   action("tint_generate_wgsl_corpus") {
-    script = "${tint_src_dir}/cmd/fuzz/wgsl/generate_wgsl_corpus.py"
+    testonly = true
+    script = "${tint_src_dir}/cmd/fuzz/generate_tint_corpus.py"
     sources = [ "${script}" ]
+    deps = []
     args = [
-      "--stamp=" + rebase_path(fuzzer_corpus_wgsl_stamp, root_build_dir),
       rebase_path("${tint_root_dir}/test", root_build_dir),
-      rebase_path(fuzzer_corpus_wgsl_dir, root_build_dir),
+      rebase_path(fuzzer_corpus_dir, root_build_dir),
     ]
     outputs = [ fuzzer_corpus_wgsl_stamp ]
+  }
+
+  # This action can take an hour to run, for local dev work
+  # ':tint_generate_wgsl_corpus' can be used
+  action("tint_generate_wgsl_minimized_corpus") {
+    testonly = true
+    script = "${tint_src_dir}/cmd/fuzz/generate_tint_corpus.py"
+    sources = [ "${script}" ]
+    deps = [
+      ":tint_generate_wgsl_corpus",
+      "${tint_src_dir}/cmd/fuzz/wgsl",
+    ]
+    args = [
+      rebase_path(fuzzer_corpus_wgsl_dir, root_build_dir),
+      rebase_path(fuzzer_corpus_dir, root_build_dir),
+      "--wgsl_fuzzer=" +
+          rebase_path("${root_build_dir}/tint_wgsl_fuzzer", root_build_dir),
+    ]
+    outputs = [ fuzzer_corpus_wgsl_min_stamp ]
   }
 
   if (tint_build_ir_fuzzer) {
     if (tint_build_cmds && tint_build_wgsl_reader) {
       action("tint_generate_ir_corpus") {
-        script = "${tint_src_dir}/cmd/fuzz/ir/generate_ir_corpus.py"
+        testonly = true
+        script = "${tint_src_dir}/cmd/fuzz/generate_tint_corpus.py"
         sources = [ "${script}" ]
-        deps = [ "${tint_src_dir}/cmd/fuzz/ir/as" ]
+        deps = [
+          ":tint_generate_wgsl_corpus",
+          "${tint_src_dir}/cmd/fuzz/ir/as",
+        ]
         args = [
-          "--stamp=" + rebase_path(fuzzer_corpus_ir_stamp, root_build_dir),
-          rebase_path("${root_build_dir}/ir_fuzz_as", root_build_dir),
-          rebase_path("${tint_root_dir}/test", root_build_dir),
-          rebase_path(fuzzer_corpus_ir_dir, root_build_dir),
+          rebase_path(fuzzer_corpus_wgsl_dir, root_build_dir),
+          rebase_path(fuzzer_corpus_dir, root_build_dir),
+          "--ir_as=" +
+              rebase_path("${root_build_dir}/ir_fuzz_as", root_build_dir),
         ]
         outputs = [ fuzzer_corpus_ir_stamp ]
+      }
+
+      # This action can take an hour to run, for local dev work
+      # ':tint_generate_ir_corpus' can be used
+      action("tint_generate_ir_minimized_corpus") {
+        testonly = true
+        script = "${tint_src_dir}/cmd/fuzz/generate_tint_corpus.py"
+        sources = [ "${script}" ]
+        deps = [
+          ":tint_generate_ir_corpus",
+          "${tint_src_dir}/cmd/fuzz/ir",
+        ]
+        args = [
+          rebase_path(fuzzer_corpus_ir_dir, root_build_dir),
+          rebase_path(fuzzer_corpus_dir, root_build_dir),
+          "--ir_fuzzer=" +
+              rebase_path("${root_build_dir}/tint_ir_fuzzer", root_build_dir),
+        ]
+        outputs = [ fuzzer_corpus_ir_min_stamp ]
       }
     }
   }
