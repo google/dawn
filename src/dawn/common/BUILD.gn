@@ -127,6 +127,11 @@ config("internal_config") {
 
   cflags = []
 
+  if (is_clang) {
+    # We use __builtin_assume liberally in DAWN_ASSERT, allow ignoring side-effects there.
+    cflags += [ "-Wno-assume" ]
+  }
+
   # Enable more warnings that were found when using Dawn in other projects.
   # Add them only when building in standalone because we control which clang
   # version we use. Otherwise we risk breaking projects depending on Dawn when
