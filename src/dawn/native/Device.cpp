@@ -2454,6 +2454,10 @@ void DeviceBase::ReduceMemoryUsage() {
     mInternalPipelineStore->ResetScratchBuffers();
     mTemporaryUniformBuffer = nullptr;
 
+    GetObjectTrackingList(ObjectType::BindGroupLayoutInternal)->ForEach([](ApiObjectBase* object) {
+        static_cast<BindGroupLayoutInternalBase*>(object)->ReduceMemoryUsage();
+    });
+
     TrimErrorScopeStacks(mErrorScopeStacks);
 }
 

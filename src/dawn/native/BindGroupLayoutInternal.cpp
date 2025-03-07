@@ -701,6 +701,8 @@ BindingIndex BindGroupLayoutInternalBase::GetBindingIndex(BindingNumber bindingN
     return it->second;
 }
 
+void BindGroupLayoutInternalBase::ReduceMemoryUsage() {}
+
 size_t BindGroupLayoutInternalBase::ComputeContentHash() {
     ObjectContentHasher recorder;
 

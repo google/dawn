@@ -270,6 +270,10 @@ void BindGroupLayout::DeallocateBindGroup(BindGroup* bindGroup,
     mBindGroupAllocator->Deallocate(bindGroup);
 }
 
+void BindGroupLayout::ReduceMemoryUsage() {
+    mBindGroupAllocator->DeleteEmptySlabs();
+}
+
 std::optional<BindingIndex> BindGroupLayout::GetStaticSamplerIndexForTexture(
     BindingIndex textureBinding) const {
     if (mTextureToStaticSamplerIndices.contains(textureBinding)) {

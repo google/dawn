@@ -261,6 +261,10 @@ void BindGroupLayout::DeallocateBindGroup(BindGroup* bindGroup,
     mBindGroupAllocator->Deallocate(bindGroup);
 }
 
+void BindGroupLayout::ReduceMemoryUsage() {
+    mBindGroupAllocator->DeleteEmptySlabs();
+}
+
 ityp::span<BindingIndex, const uint32_t> BindGroupLayout::GetDescriptorHeapOffsets() const {
     return {mDescriptorHeapOffsets.data(), mDescriptorHeapOffsets.size()};
 }
