@@ -341,13 +341,13 @@ TEST_F(IRBinaryRoundtripTest, external_texture) {
 }
 
 TEST_F(IRBinaryRoundtripTest, sampler) {
-    auto* sampler = ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler);
+    auto* sampler = ty.sampler();
     b.Append(b.ir.root_block, [&] { b.Var(ty.ptr(handle, sampler, read)); });
     RUN_TEST();
 }
 
 TEST_F(IRBinaryRoundtripTest, comparision_sampler) {
-    auto* sampler = ty.Get<core::type::Sampler>(core::type::SamplerKind::kComparisonSampler);
+    auto* sampler = ty.comparison_sampler();
     b.Append(b.ir.root_block, [&] { b.Var(ty.ptr(handle, sampler, read)); });
     RUN_TEST();
 }

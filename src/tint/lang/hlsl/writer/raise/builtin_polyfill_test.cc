@@ -1242,8 +1242,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureGatherCompare_Depth2d) {
             ty.ptr(handle, ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2d)));
         tex->SetBindingPoint(0, 0);
 
-        sampler = b.Var(ty.ptr(
-            handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kComparisonSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.comparison_sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -1309,8 +1308,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureGatherCompare_Depth2dOffset) {
             ty.ptr(handle, ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2d)));
         tex->SetBindingPoint(0, 0);
 
-        sampler = b.Var(ty.ptr(
-            handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kComparisonSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.comparison_sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -1379,8 +1377,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureGatherCompare_DepthCubeArray) {
             handle, ty.Get<core::type::DepthTexture>(core::type::TextureDimension::kCubeArray)));
         tex->SetBindingPoint(0, 0);
 
-        sampler = b.Var(ty.ptr(
-            handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kComparisonSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.comparison_sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -1449,8 +1446,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureGatherCompare_Depth2dArrayOffset) 
             handle, ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2dArray)));
         tex->SetBindingPoint(0, 0);
 
-        sampler = b.Var(ty.ptr(
-            handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kComparisonSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.comparison_sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -1522,8 +1518,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureGather_Alpha) {
             b.Var(ty.ptr(handle, ty.sampled_texture(core::type::TextureDimension::k2d, ty.i32())));
         tex->SetBindingPoint(0, 0);
 
-        sampler =
-            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -1586,8 +1581,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureGather_RedOffset) {
             b.Var(ty.ptr(handle, ty.sampled_texture(core::type::TextureDimension::k2d, ty.i32())));
         tex->SetBindingPoint(0, 0);
 
-        sampler =
-            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -1651,8 +1645,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureGather_GreenArray) {
             ty.ptr(handle, ty.sampled_texture(core::type::TextureDimension::k2dArray, ty.i32())));
         tex->SetBindingPoint(0, 0);
 
-        sampler =
-            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -1720,8 +1713,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureGather_BlueArrayOffset) {
             ty.ptr(handle, ty.sampled_texture(core::type::TextureDimension::k2dArray, ty.i32())));
         tex->SetBindingPoint(0, 0);
 
-        sampler =
-            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -1790,8 +1782,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureGather_Depth) {
             ty.ptr(handle, ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2d)));
         tex->SetBindingPoint(0, 0);
 
-        sampler =
-            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -1854,8 +1845,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureGather_DepthOffset) {
             ty.ptr(handle, ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2d)));
         tex->SetBindingPoint(0, 0);
 
-        sampler =
-            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -1919,8 +1909,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureGather_DepthArray) {
             handle, ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2dArray)));
         tex->SetBindingPoint(0, 0);
 
-        sampler =
-            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -1986,8 +1975,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureGather_DepthArrayOffset) {
             handle, ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2dArray)));
         tex->SetBindingPoint(0, 0);
 
-        sampler =
-            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -2056,8 +2044,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSample_1d) {
             b.Var(ty.ptr(handle, ty.sampled_texture(core::type::TextureDimension::k1d, ty.f32())));
         tex->SetBindingPoint(0, 0);
 
-        sampler =
-            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -2117,8 +2104,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSample_2d) {
             b.Var(ty.ptr(handle, ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32())));
         tex->SetBindingPoint(0, 0);
 
-        sampler =
-            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -2180,8 +2166,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSample_2d_Offset) {
             b.Var(ty.ptr(handle, ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32())));
         tex->SetBindingPoint(0, 0);
 
-        sampler =
-            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -2244,8 +2229,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSample_2d_Array) {
             ty.ptr(handle, ty.sampled_texture(core::type::TextureDimension::k2dArray, ty.f32())));
         tex->SetBindingPoint(0, 0);
 
-        sampler =
-            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -2310,8 +2294,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSample_2d_Array_Offset) {
             ty.ptr(handle, ty.sampled_texture(core::type::TextureDimension::k2dArray, ty.f32())));
         tex->SetBindingPoint(0, 0);
 
-        sampler =
-            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -2378,8 +2361,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSample_3d) {
             b.Var(ty.ptr(handle, ty.sampled_texture(core::type::TextureDimension::k3d, ty.f32())));
         tex->SetBindingPoint(0, 0);
 
-        sampler =
-            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -2441,8 +2423,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSample_3d_Offset) {
             b.Var(ty.ptr(handle, ty.sampled_texture(core::type::TextureDimension::k3d, ty.f32())));
         tex->SetBindingPoint(0, 0);
 
-        sampler =
-            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -2505,8 +2486,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSample_Cube) {
             ty.ptr(handle, ty.sampled_texture(core::type::TextureDimension::kCube, ty.f32())));
         tex->SetBindingPoint(0, 0);
 
-        sampler =
-            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -2568,8 +2548,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSample_Cube_Array) {
             ty.ptr(handle, ty.sampled_texture(core::type::TextureDimension::kCubeArray, ty.f32())));
         tex->SetBindingPoint(0, 0);
 
-        sampler =
-            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -2634,8 +2613,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSample_Depth2d) {
             ty.ptr(handle, ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2d)));
         tex->SetBindingPoint(0, 0);
 
-        sampler =
-            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -2698,8 +2676,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSample_Depth2d_Offset) {
             ty.ptr(handle, ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2d)));
         tex->SetBindingPoint(0, 0);
 
-        sampler =
-            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -2763,8 +2740,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSample_Depth2d_Array) {
             handle, ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2dArray)));
         tex->SetBindingPoint(0, 0);
 
-        sampler =
-            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -2830,8 +2806,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSample_Depth2d_Array_Offset) {
             handle, ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2dArray)));
         tex->SetBindingPoint(0, 0);
 
-        sampler =
-            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -2898,8 +2873,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSample_DepthCube_Array) {
             handle, ty.Get<core::type::DepthTexture>(core::type::TextureDimension::kCubeArray)));
         tex->SetBindingPoint(0, 0);
 
-        sampler =
-            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -2965,8 +2939,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleBias_2d) {
             b.Var(ty.ptr(handle, ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32())));
         tex->SetBindingPoint(0, 0);
 
-        sampler =
-            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -3028,8 +3001,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleBias_2d_Offset) {
             b.Var(ty.ptr(handle, ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32())));
         tex->SetBindingPoint(0, 0);
 
-        sampler =
-            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -3093,8 +3065,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleBias_2d_Array) {
             ty.ptr(handle, ty.sampled_texture(core::type::TextureDimension::k2dArray, ty.f32())));
         tex->SetBindingPoint(0, 0);
 
-        sampler =
-            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -3160,8 +3131,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleBias_2d_Array_Offset) {
             ty.ptr(handle, ty.sampled_texture(core::type::TextureDimension::k2dArray, ty.f32())));
         tex->SetBindingPoint(0, 0);
 
-        sampler =
-            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -3228,8 +3198,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleBias_3d) {
             b.Var(ty.ptr(handle, ty.sampled_texture(core::type::TextureDimension::k3d, ty.f32())));
         tex->SetBindingPoint(0, 0);
 
-        sampler =
-            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -3291,8 +3260,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleBias_3d_Offset) {
             b.Var(ty.ptr(handle, ty.sampled_texture(core::type::TextureDimension::k3d, ty.f32())));
         tex->SetBindingPoint(0, 0);
 
-        sampler =
-            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -3356,8 +3324,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleBias_Cube) {
             ty.ptr(handle, ty.sampled_texture(core::type::TextureDimension::kCube, ty.f32())));
         tex->SetBindingPoint(0, 0);
 
-        sampler =
-            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -3419,8 +3386,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleBias_Cube_Array) {
             ty.ptr(handle, ty.sampled_texture(core::type::TextureDimension::kCubeArray, ty.f32())));
         tex->SetBindingPoint(0, 0);
 
-        sampler =
-            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -3486,8 +3452,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleCompare_2d) {
             ty.ptr(handle, ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2d)));
         tex->SetBindingPoint(0, 0);
 
-        sampler = b.Var(ty.ptr(
-            handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kComparisonSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.comparison_sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -3549,8 +3514,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleCompare_2d_Offset) {
             ty.ptr(handle, ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2d)));
         tex->SetBindingPoint(0, 0);
 
-        sampler = b.Var(ty.ptr(
-            handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kComparisonSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.comparison_sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -3613,8 +3577,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleCompare_2d_Array) {
             handle, ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2dArray)));
         tex->SetBindingPoint(0, 0);
 
-        sampler = b.Var(ty.ptr(
-            handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kComparisonSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.comparison_sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -3680,8 +3643,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleCompare_2d_Array_Offset) {
             handle, ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2dArray)));
         tex->SetBindingPoint(0, 0);
 
-        sampler = b.Var(ty.ptr(
-            handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kComparisonSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.comparison_sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -3748,8 +3710,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleCompare_Cube) {
             ty.ptr(handle, ty.Get<core::type::DepthTexture>(core::type::TextureDimension::kCube)));
         tex->SetBindingPoint(0, 0);
 
-        sampler = b.Var(ty.ptr(
-            handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kComparisonSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.comparison_sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -3811,8 +3772,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleCompare_Cube_Array) {
             handle, ty.Get<core::type::DepthTexture>(core::type::TextureDimension::kCubeArray)));
         tex->SetBindingPoint(0, 0);
 
-        sampler = b.Var(ty.ptr(
-            handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kComparisonSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.comparison_sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -3878,8 +3838,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleCompareLevel_2d) {
             ty.ptr(handle, ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2d)));
         tex->SetBindingPoint(0, 0);
 
-        sampler = b.Var(ty.ptr(
-            handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kComparisonSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.comparison_sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -3941,8 +3900,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleCompareLevel_2d_Offset) {
             ty.ptr(handle, ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2d)));
         tex->SetBindingPoint(0, 0);
 
-        sampler = b.Var(ty.ptr(
-            handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kComparisonSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.comparison_sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -4006,8 +3964,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleCompareLevel_2d_Array) {
             handle, ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2dArray)));
         tex->SetBindingPoint(0, 0);
 
-        sampler = b.Var(ty.ptr(
-            handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kComparisonSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.comparison_sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -4073,8 +4030,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleCompareLevel_2d_Array_Offset
             handle, ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2dArray)));
         tex->SetBindingPoint(0, 0);
 
-        sampler = b.Var(ty.ptr(
-            handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kComparisonSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.comparison_sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -4141,8 +4097,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleCompareLevel_Cube) {
             ty.ptr(handle, ty.Get<core::type::DepthTexture>(core::type::TextureDimension::kCube)));
         tex->SetBindingPoint(0, 0);
 
-        sampler = b.Var(ty.ptr(
-            handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kComparisonSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.comparison_sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -4204,8 +4159,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleCompareLevel_Cube_Array) {
             handle, ty.Get<core::type::DepthTexture>(core::type::TextureDimension::kCubeArray)));
         tex->SetBindingPoint(0, 0);
 
-        sampler = b.Var(ty.ptr(
-            handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kComparisonSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.comparison_sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -4271,8 +4225,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleGrad_2d) {
             b.Var(ty.ptr(handle, ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32())));
         tex->SetBindingPoint(0, 0);
 
-        sampler =
-            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -4340,8 +4293,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleGrad_2d_Offset) {
             b.Var(ty.ptr(handle, ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32())));
         tex->SetBindingPoint(0, 0);
 
-        sampler =
-            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -4411,8 +4363,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleGrad_2d_Array) {
             ty.ptr(handle, ty.sampled_texture(core::type::TextureDimension::k2dArray, ty.f32())));
         tex->SetBindingPoint(0, 0);
 
-        sampler =
-            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -4484,8 +4435,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleGrad_2d_Array_Offset) {
             ty.ptr(handle, ty.sampled_texture(core::type::TextureDimension::k2dArray, ty.f32())));
         tex->SetBindingPoint(0, 0);
 
-        sampler =
-            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -4558,8 +4508,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleGrad_3d) {
             b.Var(ty.ptr(handle, ty.sampled_texture(core::type::TextureDimension::k3d, ty.f32())));
         tex->SetBindingPoint(0, 0);
 
-        sampler =
-            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -4627,8 +4576,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleGrad_3d_Offset) {
             b.Var(ty.ptr(handle, ty.sampled_texture(core::type::TextureDimension::k3d, ty.f32())));
         tex->SetBindingPoint(0, 0);
 
-        sampler =
-            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -4698,8 +4646,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleGrad_Cube) {
             ty.ptr(handle, ty.sampled_texture(core::type::TextureDimension::kCube, ty.f32())));
         tex->SetBindingPoint(0, 0);
 
-        sampler =
-            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -4767,8 +4714,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleGrad_Cube_Array) {
             ty.ptr(handle, ty.sampled_texture(core::type::TextureDimension::kCubeArray, ty.f32())));
         tex->SetBindingPoint(0, 0);
 
-        sampler =
-            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -4840,8 +4786,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleLevel_2d) {
             b.Var(ty.ptr(handle, ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32())));
         tex->SetBindingPoint(0, 0);
 
-        sampler =
-            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -4903,8 +4848,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleLevel_2d_Offset) {
             b.Var(ty.ptr(handle, ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32())));
         tex->SetBindingPoint(0, 0);
 
-        sampler =
-            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -4968,8 +4912,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleLevel_2d_Array) {
             ty.ptr(handle, ty.sampled_texture(core::type::TextureDimension::k2dArray, ty.f32())));
         tex->SetBindingPoint(0, 0);
 
-        sampler =
-            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -5035,8 +4978,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleLevel_2d_Array_Offset) {
             ty.ptr(handle, ty.sampled_texture(core::type::TextureDimension::k2dArray, ty.f32())));
         tex->SetBindingPoint(0, 0);
 
-        sampler =
-            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -5103,8 +5045,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleLevel_3d) {
             b.Var(ty.ptr(handle, ty.sampled_texture(core::type::TextureDimension::k3d, ty.f32())));
         tex->SetBindingPoint(0, 0);
 
-        sampler =
-            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -5166,8 +5107,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleLevel_3d_Offset) {
             b.Var(ty.ptr(handle, ty.sampled_texture(core::type::TextureDimension::k3d, ty.f32())));
         tex->SetBindingPoint(0, 0);
 
-        sampler =
-            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -5231,8 +5171,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleLevel_Cube) {
             ty.ptr(handle, ty.sampled_texture(core::type::TextureDimension::kCube, ty.f32())));
         tex->SetBindingPoint(0, 0);
 
-        sampler =
-            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -5294,8 +5233,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleLevel_Cube_Array) {
             ty.ptr(handle, ty.sampled_texture(core::type::TextureDimension::kCubeArray, ty.f32())));
         tex->SetBindingPoint(0, 0);
 
-        sampler =
-            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -5361,8 +5299,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleLevel_Depth2d) {
             ty.ptr(handle, ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2d)));
         tex->SetBindingPoint(0, 0);
 
-        sampler =
-            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -5426,8 +5363,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleLevel_Depth2d_Offset) {
             ty.ptr(handle, ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2d)));
         tex->SetBindingPoint(0, 0);
 
-        sampler =
-            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -5492,8 +5428,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleLevel_Depth2d_Array) {
             handle, ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2dArray)));
         tex->SetBindingPoint(0, 0);
 
-        sampler =
-            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -5560,8 +5495,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleLevel_Depth2d_Array_Offset) 
             handle, ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2dArray)));
         tex->SetBindingPoint(0, 0);
 
-        sampler =
-            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
@@ -5630,8 +5564,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleLevel_DepthCube_Array) {
             handle, ty.Get<core::type::DepthTexture>(core::type::TextureDimension::kCubeArray)));
         tex->SetBindingPoint(0, 0);
 
-        sampler =
-            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
         sampler->SetBindingPoint(0, 1);
     });
 
