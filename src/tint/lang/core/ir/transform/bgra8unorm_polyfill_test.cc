@@ -59,9 +59,7 @@ TEST_F(IR_Bgra8UnormPolyfillTest, NoRootBlock) {
 
 TEST_F(IR_Bgra8UnormPolyfillTest, NoModify_ModuleScopeVariable_Rgba) {
     auto format = core::TexelFormat::kRgba8Unorm;
-    auto* texture_ty =
-        ty.Get<core::type::StorageTexture>(core::type::TextureDimension::k2d, format, write,
-                                           core::type::StorageTexture::SubtypeFor(format, ty));
+    auto* texture_ty = ty.storage_texture(core::type::TextureDimension::k2d, format, write);
 
     auto* var = b.Var("texture", ty.ptr(handle, texture_ty));
     var->SetBindingPoint(1, 2);
@@ -100,9 +98,7 @@ $B1: {  # root
 
 TEST_F(IR_Bgra8UnormPolyfillTest, NoModify_UserFunctionParameter_Rgba) {
     auto format = core::TexelFormat::kRgba8Unorm;
-    auto* texture_ty =
-        ty.Get<core::type::StorageTexture>(core::type::TextureDimension::k2d, format, write,
-                                           core::type::StorageTexture::SubtypeFor(format, ty));
+    auto* texture_ty = ty.storage_texture(core::type::TextureDimension::k2d, format, write);
 
     auto* func = b.Function("foo", ty.void_());
     auto* texture = b.FunctionParam("texture", texture_ty);
@@ -132,9 +128,7 @@ TEST_F(IR_Bgra8UnormPolyfillTest, NoModify_UserFunctionParameter_Rgba) {
 
 TEST_F(IR_Bgra8UnormPolyfillTest, ModuleScopeVariable) {
     auto format = core::TexelFormat::kBgra8Unorm;
-    auto* texture_ty =
-        ty.Get<core::type::StorageTexture>(core::type::TextureDimension::k2d, format, write,
-                                           core::type::StorageTexture::SubtypeFor(format, ty));
+    auto* texture_ty = ty.storage_texture(core::type::TextureDimension::k2d, format, write);
 
     auto* var = b.Var("texture", ty.ptr(handle, texture_ty));
     var->SetBindingPoint(1, 2);
@@ -186,9 +180,7 @@ $B1: {  # root
 
 TEST_F(IR_Bgra8UnormPolyfillTest, UserFunctionParameter) {
     auto format = core::TexelFormat::kBgra8Unorm;
-    auto* texture_ty =
-        ty.Get<core::type::StorageTexture>(core::type::TextureDimension::k2d, format, write,
-                                           core::type::StorageTexture::SubtypeFor(format, ty));
+    auto* texture_ty = ty.storage_texture(core::type::TextureDimension::k2d, format, write);
 
     auto* func = b.Function("foo", ty.void_());
     auto* texture = b.FunctionParam("texture", texture_ty);
@@ -226,9 +218,7 @@ TEST_F(IR_Bgra8UnormPolyfillTest, UserFunctionParameter) {
 
 TEST_F(IR_Bgra8UnormPolyfillTest, ModuleScopePassedToUserFunction) {
     auto format = core::TexelFormat::kBgra8Unorm;
-    auto* texture_ty =
-        ty.Get<core::type::StorageTexture>(core::type::TextureDimension::k2d, format, write,
-                                           core::type::StorageTexture::SubtypeFor(format, ty));
+    auto* texture_ty = ty.storage_texture(core::type::TextureDimension::k2d, format, write);
 
     auto* var = b.Var("texture", ty.ptr(handle, texture_ty));
     var->SetBindingPoint(1, 2);
@@ -306,9 +296,7 @@ $B1: {  # root
 
 TEST_F(IR_Bgra8UnormPolyfillTest, ModuleScopePassedToUserFunction_MultipleTextures) {
     auto format = core::TexelFormat::kBgra8Unorm;
-    auto* texture_ty =
-        ty.Get<core::type::StorageTexture>(core::type::TextureDimension::k2d, format, write,
-                                           core::type::StorageTexture::SubtypeFor(format, ty));
+    auto* texture_ty = ty.storage_texture(core::type::TextureDimension::k2d, format, write);
 
     auto* var_a = b.Var("texture_a", ty.ptr(handle, texture_ty));
     auto* var_b = b.Var("texture_b", ty.ptr(handle, texture_ty));
@@ -412,9 +400,7 @@ $B1: {  # root
 
 TEST_F(IR_Bgra8UnormPolyfillTest, MutipleUsesOfOneTexture) {
     auto format = core::TexelFormat::kBgra8Unorm;
-    auto* texture_ty =
-        ty.Get<core::type::StorageTexture>(core::type::TextureDimension::k2d, format, write,
-                                           core::type::StorageTexture::SubtypeFor(format, ty));
+    auto* texture_ty = ty.storage_texture(core::type::TextureDimension::k2d, format, write);
 
     auto* var_a = b.Var("texture", ty.ptr(handle, texture_ty));
     var_a->SetBindingPoint(1, 2);
@@ -513,9 +499,7 @@ $B1: {  # root
 
 TEST_F(IR_Bgra8UnormPolyfillTest, ArrayedImage) {
     auto format = core::TexelFormat::kBgra8Unorm;
-    auto* texture_ty =
-        ty.Get<core::type::StorageTexture>(core::type::TextureDimension::k2dArray, format, write,
-                                           core::type::StorageTexture::SubtypeFor(format, ty));
+    auto* texture_ty = ty.storage_texture(core::type::TextureDimension::k2dArray, format, write);
 
     auto* var = b.Var("texture", ty.ptr(handle, texture_ty));
     var->SetBindingPoint(1, 2);
@@ -568,9 +552,7 @@ $B1: {  # root
 
 TEST_F(IR_Bgra8UnormPolyfillTest, TextureDimensions) {
     auto format = core::TexelFormat::kBgra8Unorm;
-    auto* texture_ty =
-        ty.Get<core::type::StorageTexture>(core::type::TextureDimension::k2d, format, write,
-                                           core::type::StorageTexture::SubtypeFor(format, ty));
+    auto* texture_ty = ty.storage_texture(core::type::TextureDimension::k2d, format, write);
 
     auto* var = b.Var("texture", ty.ptr(handle, texture_ty));
     var->SetBindingPoint(1, 2);
@@ -619,9 +601,7 @@ $B1: {  # root
 
 TEST_F(IR_Bgra8UnormPolyfillTest, TextureLoad) {
     auto format = core::TexelFormat::kBgra8Unorm;
-    auto* texture_ty =
-        ty.Get<core::type::StorageTexture>(core::type::TextureDimension::k2d, format, read,
-                                           core::type::StorageTexture::SubtypeFor(format, ty));
+    auto* texture_ty = ty.storage_texture(core::type::TextureDimension::k2d, format, read);
 
     auto* var = b.Var("texture", ty.ptr(handle, texture_ty));
     var->SetBindingPoint(1, 2);
@@ -673,9 +653,7 @@ $B1: {  # root
 
 TEST_F(IR_Bgra8UnormPolyfillTest, TextureLoadAndStore) {
     auto format = core::TexelFormat::kBgra8Unorm;
-    auto* texture_ty =
-        ty.Get<core::type::StorageTexture>(core::type::TextureDimension::k2d, format, read_write,
-                                           core::type::StorageTexture::SubtypeFor(format, ty));
+    auto* texture_ty = ty.storage_texture(core::type::TextureDimension::k2d, format, read_write);
 
     auto* var = b.Var("texture", ty.ptr(handle, texture_ty));
     var->SetBindingPoint(1, 2);

@@ -357,8 +357,8 @@ using VarStorageTextureTest = HlslWriterTestWithParam<HlslStorageTextureData>;
 TEST_P(VarStorageTextureTest, Emit) {
     auto params = GetParam();
 
-    auto* s = b.Var("tex", ty.ptr<handle>(ty.Get<core::type::StorageTexture>(
-                               params.dim, params.imgfmt, params.access, ty.f32())));
+    auto* s =
+        b.Var("tex", ty.ptr<handle>(ty.storage_texture(params.dim, params.imgfmt, params.access)));
     s->SetBindingPoint(2, 1);
 
     b.ir.root_block->Append(s);

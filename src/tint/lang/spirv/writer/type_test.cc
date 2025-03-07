@@ -337,12 +337,12 @@ TEST_F(SpirvWriterTest, Type_Samplers_Dedup) {
 
 TEST_F(SpirvWriterTest, Type_StorageTexture_Dedup) {
     b.Append(b.ir.root_block, [&] {
-        auto* v1 = b.Var("v1", ty.ptr<handle, read_write>(ty.Get<core::type::StorageTexture>(
+        auto* v1 = b.Var("v1", ty.ptr<handle, read_write>(ty.storage_texture(
                                    core::type::TextureDimension::k2dArray,
-                                   core::TexelFormat::kR32Uint, core::Access::kRead, ty.u32())));
-        auto* v2 = b.Var("v2", ty.ptr<handle, read_write>(ty.Get<core::type::StorageTexture>(
+                                   core::TexelFormat::kR32Uint, core::Access::kRead)));
+        auto* v2 = b.Var("v2", ty.ptr<handle, read_write>(ty.storage_texture(
                                    core::type::TextureDimension::k2dArray,
-                                   core::TexelFormat::kR32Uint, core::Access::kWrite, ty.u32())));
+                                   core::TexelFormat::kR32Uint, core::Access::kWrite)));
         v1->SetBindingPoint(0, 1);
         v2->SetBindingPoint(0, 2);
     });
@@ -500,10 +500,8 @@ using Type_StorageTexture = SpirvWriterTestWithParam<StorageTextureCase>;
 TEST_P(Type_StorageTexture, Emit) {
     auto params = GetParam();
     b.Append(b.ir.root_block, [&] {
-        auto* v =
-            b.Var("v", ty.ptr<handle, read_write>(ty.Get<core::type::StorageTexture>(
-                           params.dim, params.format, core::Access::kWrite,
-                           core::type::StorageTexture::SubtypeFor(params.format, mod.Types()))));
+        auto* v = b.Var("v", ty.ptr<handle, read_write>(ty.storage_texture(
+                                 params.dim, params.format, core::Access::kWrite)));
         v->SetBindingPoint(0, 0);
     });
 

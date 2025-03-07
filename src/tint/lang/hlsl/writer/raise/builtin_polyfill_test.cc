@@ -1086,11 +1086,9 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureLoad_DepthMultisampledF32) {
 }
 
 TEST_F(HlslWriter_BuiltinPolyfillTest, TextureStore1D) {
-    auto* t = b.Var(ty.ptr(
-        handle, ty.Get<core::type::StorageTexture>(
-                    core::type::TextureDimension::k1d, core::TexelFormat::kR32Float,
-                    core::Access::kReadWrite,
-                    core::type::StorageTexture::SubtypeFor(core::TexelFormat::kR32Float, ty))));
+    auto* t = b.Var(
+        ty.ptr(handle, ty.storage_texture(core::type::TextureDimension::k1d,
+                                          core::TexelFormat::kR32Float, core::Access::kReadWrite)));
     t->SetBindingPoint(0, 0);
     b.ir.root_block->Append(t);
 
@@ -1137,11 +1135,9 @@ $B1: {  # root
 }
 
 TEST_F(HlslWriter_BuiltinPolyfillTest, TextureStore3D) {
-    auto* t = b.Var(ty.ptr(
-        handle, ty.Get<core::type::StorageTexture>(
-                    core::type::TextureDimension::k3d, core::TexelFormat::kR32Float,
-                    core::Access::kReadWrite,
-                    core::type::StorageTexture::SubtypeFor(core::TexelFormat::kR32Float, ty))));
+    auto* t = b.Var(
+        ty.ptr(handle, ty.storage_texture(core::type::TextureDimension::k3d,
+                                          core::TexelFormat::kR32Float, core::Access::kReadWrite)));
     t->SetBindingPoint(0, 0);
     b.ir.root_block->Append(t);
 
@@ -1189,10 +1185,8 @@ $B1: {  # root
 
 TEST_F(HlslWriter_BuiltinPolyfillTest, TextureStoreArray) {
     auto* t = b.Var(ty.ptr(
-        handle, ty.Get<core::type::StorageTexture>(
-                    core::type::TextureDimension::k2dArray, core::TexelFormat::kRgba32Float,
-                    core::Access::kReadWrite,
-                    core::type::StorageTexture::SubtypeFor(core::TexelFormat::kR32Float, ty))));
+        handle, ty.storage_texture(core::type::TextureDimension::k2dArray,
+                                   core::TexelFormat::kRgba32Float, core::Access::kReadWrite)));
     t->SetBindingPoint(0, 0);
     b.ir.root_block->Append(t);
 

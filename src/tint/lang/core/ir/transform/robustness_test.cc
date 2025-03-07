@@ -2940,12 +2940,9 @@ $B1: {  # root
 
 TEST_P(IR_BindingVariableRobustnessTest, TextureLoad_Storage1D) {
     auto format = core::TexelFormat::kRgba8Unorm;
-    auto* texture =
-        b.Var("texture",
-              ty.ptr(handle,
-                     ty.Get<type::StorageTexture>(type::TextureDimension::k1d, format, read_write,
-                                                  type::StorageTexture::SubtypeFor(format, ty)),
-                     read));
+    auto* texture = b.Var(
+        "texture",
+        ty.ptr(handle, ty.storage_texture(type::TextureDimension::k1d, format, read_write), read));
     texture->SetBindingPoint(0, 0);
     mod.root_block->Append(texture);
 
@@ -3030,12 +3027,9 @@ $B1: {  # root
 
 TEST_P(IR_BindingVariableRobustnessTest, TextureLoad_Storage2D) {
     auto format = core::TexelFormat::kRgba8Unorm;
-    auto* texture =
-        b.Var("texture",
-              ty.ptr(handle,
-                     ty.Get<type::StorageTexture>(type::TextureDimension::k2d, format, read_write,
-                                                  type::StorageTexture::SubtypeFor(format, ty)),
-                     read));
+    auto* texture = b.Var(
+        "texture",
+        ty.ptr(handle, ty.storage_texture(type::TextureDimension::k2d, format, read_write), read));
     texture->SetBindingPoint(0, 0);
     mod.root_block->Append(texture);
 
@@ -3122,9 +3116,7 @@ TEST_P(IR_BindingVariableRobustnessTest, TextureLoad_Storage2DArray) {
     auto format = core::TexelFormat::kRgba8Unorm;
     auto* texture = b.Var(
         "texture",
-        ty.ptr(handle,
-               ty.Get<type::StorageTexture>(type::TextureDimension::k2dArray, format, read_write,
-                                            type::StorageTexture::SubtypeFor(format, ty)),
+        ty.ptr(handle, ty.storage_texture(type::TextureDimension::k2dArray, format, read_write),
                read));
     texture->SetBindingPoint(0, 0);
     mod.root_block->Append(texture);
@@ -3221,12 +3213,9 @@ $B1: {  # root
 
 TEST_P(IR_BindingVariableRobustnessTest, TextureLoad_Storage3D) {
     auto format = core::TexelFormat::kRgba8Unorm;
-    auto* texture =
-        b.Var("texture",
-              ty.ptr(handle,
-                     ty.Get<type::StorageTexture>(type::TextureDimension::k3d, format, read_write,
-                                                  type::StorageTexture::SubtypeFor(format, ty)),
-                     read));
+    auto* texture = b.Var(
+        "texture",
+        ty.ptr(handle, ty.storage_texture(type::TextureDimension::k3d, format, read_write), read));
     texture->SetBindingPoint(0, 0);
     mod.root_block->Append(texture);
 
@@ -3317,10 +3306,7 @@ TEST_P(IR_BindingVariableRobustnessTest, NoModify_TextureStore) {
     auto format = core::TexelFormat::kRgba8Unorm;
     auto* texture =
         b.Var("texture",
-              ty.ptr(handle,
-                     ty.Get<type::StorageTexture>(type::TextureDimension::k2d, format, write,
-                                                  type::StorageTexture::SubtypeFor(format, ty)),
-                     read));
+              ty.ptr(handle, ty.storage_texture(type::TextureDimension::k2d, format, write), read));
     texture->SetBindingPoint(0, 0);
     mod.root_block->Append(texture);
 

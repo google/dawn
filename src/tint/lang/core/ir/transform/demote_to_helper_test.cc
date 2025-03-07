@@ -528,11 +528,9 @@ $B1: {  # root
 
 TEST_F(IR_DemoteToHelperTest, TextureStore) {
     auto format = core::TexelFormat::kR32Float;
-    auto* texture =
-        b.Var("texture", ty.ptr(core::AddressSpace::kHandle,
-                                ty.Get<core::type::StorageTexture>(
-                                    core::type::TextureDimension::k2d, format, core::Access::kWrite,
-                                    core::type::StorageTexture::SubtypeFor(format, ty))));
+    auto* texture = b.Var("texture", ty.ptr(core::AddressSpace::kHandle,
+                                            ty.storage_texture(core::type::TextureDimension::k2d,
+                                                               format, core::Access::kWrite)));
     texture->SetBindingPoint(0, 0);
     mod.root_block->Append(texture);
 

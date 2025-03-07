@@ -922,9 +922,8 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, BuiltinTextureDimensions_Storage1D) {
-    auto* type = ty.Get<core::type::StorageTexture>(
-        core::type::TextureDimension::k2d, core::TexelFormat::kR32Float, core::Access::kRead,
-        core::type::StorageTexture::SubtypeFor(core::TexelFormat::kR32Float, ty));
+    auto* type = ty.storage_texture(core::type::TextureDimension::k2d, core::TexelFormat::kR32Float,
+                                    core::Access::kRead);
     auto* var = b.Var("v", handle, type, core::Access::kReadWrite);
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
@@ -1125,9 +1124,8 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, TextureNumLayers_Storage2DArray) {
-    auto* storage_ty = ty.Get<core::type::StorageTexture>(
-        core::type::TextureDimension::k2dArray, core::TexelFormat::kRg32Float, core::Access::kRead,
-        core::type::StorageTexture::SubtypeFor(core::TexelFormat::kRg32Float, ty));
+    auto* storage_ty = ty.storage_texture(core::type::TextureDimension::k2dArray,
+                                          core::TexelFormat::kRg32Float, core::Access::kRead);
 
     auto* var = b.Var("v", handle, storage_ty, core::Access::kReadWrite);
     var->SetBindingPoint(0, 0);
@@ -1266,11 +1264,9 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, BuiltinTextureLoad_Storage2D) {
-    auto* t = b.Var(ty.ptr(
-        handle,
-        ty.Get<core::type::StorageTexture>(
-            core::type::TextureDimension::k2d, core::TexelFormat::kRg32Float, core::Access::kRead,
-            core::type::StorageTexture::SubtypeFor(core::TexelFormat::kRg32Float, ty))));
+    auto* t = b.Var(
+        ty.ptr(handle, ty.storage_texture(core::type::TextureDimension::k2d,
+                                          core::TexelFormat::kRg32Float, core::Access::kRead)));
     t->SetBindingPoint(0, 0);
     b.ir.root_block->Append(t);
 
@@ -1297,11 +1293,9 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, BuiltinTextureStore1D) {
-    auto* t = b.Var(ty.ptr(
-        handle,
-        ty.Get<core::type::StorageTexture>(
-            core::type::TextureDimension::k1d, core::TexelFormat::kR32Float, core::Access::kWrite,
-            core::type::StorageTexture::SubtypeFor(core::TexelFormat::kR32Float, ty))));
+    auto* t = b.Var(
+        ty.ptr(handle, ty.storage_texture(core::type::TextureDimension::k1d,
+                                          core::TexelFormat::kR32Float, core::Access::kWrite)));
     t->SetBindingPoint(0, 0);
     b.ir.root_block->Append(t);
 
@@ -1328,11 +1322,9 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, BuiltinTextureStore3D) {
-    auto* t = b.Var(ty.ptr(
-        handle,
-        ty.Get<core::type::StorageTexture>(
-            core::type::TextureDimension::k3d, core::TexelFormat::kR32Float, core::Access::kWrite,
-            core::type::StorageTexture::SubtypeFor(core::TexelFormat::kR32Float, ty))));
+    auto* t = b.Var(
+        ty.ptr(handle, ty.storage_texture(core::type::TextureDimension::k3d,
+                                          core::TexelFormat::kR32Float, core::Access::kWrite)));
     t->SetBindingPoint(0, 0);
     b.ir.root_block->Append(t);
 
@@ -1356,11 +1348,9 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, BuiltinTextureStoreArray) {
-    auto* t = b.Var(ty.ptr(
-        handle, ty.Get<core::type::StorageTexture>(
-                    core::type::TextureDimension::k2dArray, core::TexelFormat::kRgba32Float,
-                    core::Access::kWrite,
-                    core::type::StorageTexture::SubtypeFor(core::TexelFormat::kR32Float, ty))));
+    auto* t = b.Var(
+        ty.ptr(handle, ty.storage_texture(core::type::TextureDimension::k2dArray,
+                                          core::TexelFormat::kRgba32Float, core::Access::kWrite)));
     t->SetBindingPoint(0, 0);
     b.ir.root_block->Append(t);
 

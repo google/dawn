@@ -328,9 +328,8 @@ TEST_F(IRBinaryRoundtripTest, depth_multisampled_texture) {
 }
 
 TEST_F(IRBinaryRoundtripTest, storage_texture) {
-    auto* tex = ty.Get<core::type::StorageTexture>(core::type::TextureDimension::k2dArray,
-                                                   core::TexelFormat::kRg32Float,
-                                                   core::Access::kReadWrite, ty.f32());
+    auto* tex = ty.storage_texture(core::type::TextureDimension::k2dArray,
+                                   core::TexelFormat::kRg32Float, core::Access::kReadWrite);
     b.Append(b.ir.root_block, [&] { b.Var(ty.ptr(handle, tex, read)); });
     RUN_TEST();
 }

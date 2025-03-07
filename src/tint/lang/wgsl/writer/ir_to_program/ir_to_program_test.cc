@@ -2694,9 +2694,9 @@ fn f(v : S) {
 ////////////////////////////////////////////////////////////////////////////////
 TEST_F(IRToProgramTest, Enable_ChromiumInternalGraphite_SubgroupBallot) {
     b.Append(b.ir.root_block, [&] {
-        auto t = b.Var("T", ty.ref<core::AddressSpace::kHandle>(ty.Get<core::type::StorageTexture>(
+        auto t = b.Var("T", ty.ref<core::AddressSpace::kHandle>(ty.storage_texture(
                                 core::type::TextureDimension::k2d, core::TexelFormat::kR8Unorm,
-                                core::Access::kRead, ty.f32())));
+                                core::Access::kRead)));
         t->SetBindingPoint(0, 0);
     });
 

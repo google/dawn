@@ -344,8 +344,8 @@ struct State {
             },
             [&](const core::type::StorageTexture* s) {
                 is_1d = s->Dim() == core::type::TextureDimension::k1d;
-                new_type = ty.Get<core::type::StorageTexture>(
-                    core::type::TextureDimension::k2d, s->TexelFormat(), s->Access(), s->Type());
+                new_type = ty.storage_texture(core::type::TextureDimension::k2d, s->TexelFormat(),
+                                              s->Access());
             });
         if (!is_1d) {
             return std::nullopt;
