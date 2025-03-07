@@ -85,28 +85,6 @@ class Inspector {
     std::vector<ResourceBinding> GetResourceBindings(const std::string& entry_point);
 
     /// @param entry_point name of the entry point to get information about.
-    /// @returns vector of all of the bindings for uniform buffers.
-    std::vector<ResourceBinding> GetUniformBufferResourceBindings(const std::string& entry_point);
-
-    /// @param entry_point name of the entry point to get information about.
-    /// @returns vector of all of the bindings for storage buffers.
-    std::vector<ResourceBinding> GetStorageBufferResourceBindings(const std::string& entry_point);
-
-    /// @param entry_point name of the entry point to get information about.
-    /// @returns vector of all of the bindings for read-only storage buffers.
-    std::vector<ResourceBinding> GetReadOnlyStorageBufferResourceBindings(
-        const std::string& entry_point);
-
-    /// @param entry_point name of the entry point to get information about.
-    /// @returns vector of all of the bindings for regular samplers.
-    std::vector<ResourceBinding> GetSamplerResourceBindings(const std::string& entry_point);
-
-    /// @param entry_point name of the entry point to get information about.
-    /// @returns vector of all of the bindings for comparison samplers.
-    std::vector<ResourceBinding> GetComparisonSamplerResourceBindings(
-        const std::string& entry_point);
-
-    /// @param entry_point name of the entry point to get information about.
     /// @returns vector of all of the bindings for sampled textures.
     std::vector<ResourceBinding> GetSampledTextureResourceBindings(const std::string& entry_point);
 
@@ -127,17 +105,6 @@ class Inspector {
     /// @returns vector of all of the bindings for depth textures.
     std::vector<ResourceBinding> GetDepthMultisampledTextureResourceBindings(
         const std::string& entry_point);
-
-    /// @param entry_point name of the entry point to get information about.
-    /// @returns vector of all of the bindings for external textures.
-    std::vector<ResourceBinding> GetExternalTextureResourceBindings(const std::string& entry_point);
-
-    /// Gathers all the resource bindings of the input attachment type for the given
-    /// entry point.
-    /// @param entry_point name of the entry point to get information about.
-    /// texture type.
-    /// @returns vector of all of the bindings for input attachments.
-    std::vector<ResourceBinding> GetInputAttachmentResourceBindings(const std::string& entry_point);
 
     /// @param entry_point name of the entry point to get information about.
     /// @returns vector of all of the sampler/texture sampling pairs that are used
@@ -230,6 +197,40 @@ class Inspector {
     /// @param type the type of the variable
     /// @returns the array length of the builtin clip_distances or empty when it is not used
     std::optional<uint32_t> GetClipDistancesBuiltinSize(const core::type::Type* type) const;
+
+    /// @param entry_point name of the entry point to get information about.
+    /// @returns vector of all of the bindings for uniform buffers.
+    std::vector<ResourceBinding> GetUniformBufferResourceBindings(const std::string& entry_point);
+
+    /// @param entry_point name of the entry point to get information about.
+    /// @returns vector of all of the bindings for storage buffers.
+    std::vector<ResourceBinding> GetStorageBufferResourceBindings(const std::string& entry_point);
+
+    /// @param entry_point name of the entry point to get information about.
+    /// @returns vector of all of the bindings for read-only storage buffers.
+    std::vector<ResourceBinding> GetReadOnlyStorageBufferResourceBindings(
+        const std::string& entry_point);
+
+    /// @param entry_point name of the entry point to get information about.
+    /// @returns vector of all of the bindings for regular samplers.
+    std::vector<ResourceBinding> GetSamplerResourceBindings(const std::string& entry_point);
+
+    /// @param entry_point name of the entry point to get information about.
+    /// @returns vector of all of the bindings for comparison samplers.
+    std::vector<ResourceBinding> GetComparisonSamplerResourceBindings(
+        const std::string& entry_point);
+
+    /// Gathers all the resource bindings of the input attachment type for the given
+    /// entry point.
+    /// @param entry_point name of the entry point to get information about.
+    /// texture type.
+    /// @returns vector of all of the bindings for input attachments.
+    std::vector<ResourceBinding> GetInputAttachmentResourceBindings(const std::string& entry_point);
+
+    /// @param entry_point name of the entry point to get information about.
+    /// @returns vector of all of the bindings for external textures.
+    std::vector<ResourceBinding> GetExternalTextureResourceBindings(const std::string& entry_point);
+
     /// Gathers all the texture resource bindings of the given type for the given
     /// entry point.
     /// @param entry_point name of the entry point to get information about.

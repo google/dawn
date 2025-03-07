@@ -25,6 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <algorithm>
+
 #include "gmock/gmock.h"
 
 #include "src/tint/lang/core/fluent_types.h"
@@ -78,15 +80,8 @@ class InspectorGetEntryPointInterpolateTest
 class InspectorGetOverrideDefaultValuesTest : public InspectorBuilder, public testing::Test {};
 class InspectorGetConstantNameToIdMapTest : public InspectorBuilder, public testing::Test {};
 class InspectorGetResourceBindingsTest : public InspectorBuilder, public testing::Test {};
-class InspectorGetUniformBufferResourceBindingsTest : public InspectorBuilder,
-                                                      public testing::Test {};
-class InspectorGetStorageBufferResourceBindingsTest : public InspectorBuilder,
-                                                      public testing::Test {};
 class InspectorGetReadOnlyStorageBufferResourceBindingsTest : public InspectorBuilder,
                                                               public testing::Test {};
-class InspectorGetSamplerResourceBindingsTest : public InspectorBuilder, public testing::Test {};
-class InspectorGetComparisonSamplerResourceBindingsTest : public InspectorBuilder,
-                                                          public testing::Test {};
 class InspectorGetSampledTextureResourceBindingsTest : public InspectorBuilder,
                                                        public testing::Test {};
 class InspectorGetSampledArrayTextureResourceBindingsTest : public InspectorBuilder,
@@ -133,9 +128,6 @@ typedef std::tuple<DimensionParams, TexelFormatParams, core::Access> GetStorageT
 class InspectorGetStorageTextureResourceBindingsTestWithParam
     : public InspectorBuilder,
       public testing::TestWithParam<GetStorageTextureTestParams> {};
-
-class InspectorGetExternalTextureResourceBindingsTest : public InspectorBuilder,
-                                                        public testing::Test {};
 
 class InspectorGetSamplerTextureUsesTest : public InspectorRunner, public testing::Test {};
 
@@ -2005,6 +1997,15 @@ TEST_F(InspectorGetConstantNameToIdMapTest, WithAndWithoutIds) {
     EXPECT_EQ(result["c"], program_->Sem().Get(c)->Attributes().override_id);
 }
 
+/// Sorts the ResourceBindings using their bind point to make their order deterministic in tests
+/// @param resources the list of resources to sort in place
+void SortResourceBindings(std::vector<ResourceBinding>* resources) {
+    std::sort(resources->begin(), resources->end(),
+              [](const ResourceBinding& a, const ResourceBinding& b) {
+                  return std::tie(a.bind_group, a.binding) < std::tie(b.bind_group, b.binding);
+              });
+}
+
 TEST_F(InspectorGetResourceBindingsTest, Empty) {
     MakeCallerBodyFunction("ep_func", tint::Empty,
                            Vector{
@@ -2092,6 +2093,7 @@ TEST_F(InspectorGetResourceBindingsTest, Simple) {
     auto result = inspector.GetResourceBindings("ep_func");
     ASSERT_FALSE(inspector.has_error()) << inspector.error();
     ASSERT_EQ(9u, result.size());
+    SortResourceBindings(&result);
 
     EXPECT_EQ(ResourceBinding::ResourceType::kUniformBuffer, result[0].resource_type);
     EXPECT_EQ(0u, result[0].bind_group);
@@ -2105,29 +2107,29 @@ TEST_F(InspectorGetResourceBindingsTest, Simple) {
     EXPECT_EQ(1u, result[2].bind_group);
     EXPECT_EQ(1u, result[2].binding);
 
-    EXPECT_EQ(ResourceBinding::ResourceType::kSampler, result[3].resource_type);
-    EXPECT_EQ(3u, result[3].bind_group);
+    EXPECT_EQ(ResourceBinding::ResourceType::kSampledTexture, result[3].resource_type);
+    EXPECT_EQ(2u, result[3].bind_group);
     EXPECT_EQ(0u, result[3].binding);
 
-    EXPECT_EQ(ResourceBinding::ResourceType::kComparisonSampler, result[4].resource_type);
+    EXPECT_EQ(ResourceBinding::ResourceType::kSampler, result[4].resource_type);
     EXPECT_EQ(3u, result[4].bind_group);
-    EXPECT_EQ(2u, result[4].binding);
+    EXPECT_EQ(0u, result[4].binding);
 
-    EXPECT_EQ(ResourceBinding::ResourceType::kSampledTexture, result[5].resource_type);
-    EXPECT_EQ(2u, result[5].bind_group);
-    EXPECT_EQ(0u, result[5].binding);
+    EXPECT_EQ(ResourceBinding::ResourceType::kDepthTexture, result[5].resource_type);
+    EXPECT_EQ(3u, result[5].bind_group);
+    EXPECT_EQ(1u, result[5].binding);
 
-    EXPECT_EQ(ResourceBinding::ResourceType::kWriteOnlyStorageTexture, result[6].resource_type);
-    EXPECT_EQ(4u, result[6].bind_group);
-    EXPECT_EQ(0u, result[6].binding);
+    EXPECT_EQ(ResourceBinding::ResourceType::kComparisonSampler, result[6].resource_type);
+    EXPECT_EQ(3u, result[6].bind_group);
+    EXPECT_EQ(2u, result[6].binding);
 
-    EXPECT_EQ(ResourceBinding::ResourceType::kDepthTexture, result[7].resource_type);
+    EXPECT_EQ(ResourceBinding::ResourceType::kDepthMultisampledTexture, result[7].resource_type);
     EXPECT_EQ(3u, result[7].bind_group);
-    EXPECT_EQ(1u, result[7].binding);
+    EXPECT_EQ(3u, result[7].binding);
 
-    EXPECT_EQ(ResourceBinding::ResourceType::kDepthMultisampledTexture, result[8].resource_type);
-    EXPECT_EQ(3u, result[8].bind_group);
-    EXPECT_EQ(3u, result[8].binding);
+    EXPECT_EQ(ResourceBinding::ResourceType::kWriteOnlyStorageTexture, result[8].resource_type);
+    EXPECT_EQ(4u, result[8].bind_group);
+    EXPECT_EQ(0u, result[8].binding);
 }
 
 TEST_F(InspectorGetResourceBindingsTest, InputAttachment) {
@@ -2176,6 +2178,7 @@ TEST_F(InspectorGetResourceBindingsTest, InputAttachment) {
     auto result = inspector.GetResourceBindings("main");
     ASSERT_FALSE(inspector.has_error()) << inspector.error();
     ASSERT_EQ(2u, result.size());
+    SortResourceBindings(&result);
 
     EXPECT_EQ(ResourceBinding::ResourceType::kInputAttachment, result[0].resource_type);
     EXPECT_EQ(0u, result[0].bind_group);
@@ -2190,16 +2193,16 @@ TEST_F(InspectorGetResourceBindingsTest, InputAttachment) {
     EXPECT_EQ(inspector::ResourceBinding::SampledKind::kSInt, result[1].sampled_kind);
 }
 
-TEST_F(InspectorGetUniformBufferResourceBindingsTest, MissingEntryPoint) {
+TEST_F(InspectorGetResourceBindingsTest, MissingEntryPoint) {
     Inspector& inspector = Build();
 
-    auto result = inspector.GetUniformBufferResourceBindings("ep_func");
+    auto result = inspector.GetResourceBindings("ep_func");
     ASSERT_TRUE(inspector.has_error());
     std::string error = inspector.error();
     EXPECT_TRUE(error.find("not found") != std::string::npos);
 }
 
-TEST_F(InspectorGetUniformBufferResourceBindingsTest, NonEntryPointFunc) {
+TEST_F(InspectorGetResourceBindingsTest, NonEntryPointFunc) {
     auto* foo_struct_type = MakeUniformBufferType("foo_type", Vector{
                                                                   ty.i32(),
                                                               });
@@ -2217,12 +2220,12 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, NonEntryPointFunc) {
 
     Inspector& inspector = Build();
 
-    auto result = inspector.GetUniformBufferResourceBindings("ub_func");
+    auto result = inspector.GetResourceBindings("ub_func");
     std::string error = inspector.error();
     EXPECT_TRUE(error.find("not an entry point") != std::string::npos);
 }
 
-TEST_F(InspectorGetUniformBufferResourceBindingsTest, Simple_NonStruct) {
+TEST_F(InspectorGetResourceBindingsTest, UniformBuffer_Simple_NonStruct) {
     AddUniformBuffer("foo_ub", ty.i32(), 0, 0);
     MakePlainGlobalReferenceBodyFunction("ub_func", "foo_ub", ty.i32(), tint::Empty);
 
@@ -2233,7 +2236,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, Simple_NonStruct) {
 
     Inspector& inspector = Build();
 
-    auto result = inspector.GetUniformBufferResourceBindings("ep_func");
+    auto result = inspector.GetResourceBindings("ep_func");
     ASSERT_FALSE(inspector.has_error()) << inspector.error();
     ASSERT_EQ(1u, result.size());
 
@@ -2244,7 +2247,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, Simple_NonStruct) {
     EXPECT_EQ(4u, result[0].size_no_padding);
 }
 
-TEST_F(InspectorGetUniformBufferResourceBindingsTest, Simple_Struct) {
+TEST_F(InspectorGetResourceBindingsTest, UniformBuffer_Simple_Struct) {
     auto* foo_struct_type = MakeUniformBufferType("foo_type", Vector{
                                                                   ty.i32(),
                                                               });
@@ -2262,7 +2265,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, Simple_Struct) {
 
     Inspector& inspector = Build();
 
-    auto result = inspector.GetUniformBufferResourceBindings("ep_func");
+    auto result = inspector.GetResourceBindings("ep_func");
     ASSERT_FALSE(inspector.has_error()) << inspector.error();
     ASSERT_EQ(1u, result.size());
 
@@ -2273,7 +2276,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, Simple_Struct) {
     EXPECT_EQ(4u, result[0].size_no_padding);
 }
 
-TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleMembers) {
+TEST_F(InspectorGetResourceBindingsTest, UniformBuffer_MultipleMembers) {
     auto* foo_struct_type = MakeUniformBufferType("foo_type", Vector{
                                                                   ty.i32(),
                                                                   ty.u32(),
@@ -2295,7 +2298,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleMembers) {
 
     Inspector& inspector = Build();
 
-    auto result = inspector.GetUniformBufferResourceBindings("ep_func");
+    auto result = inspector.GetResourceBindings("ep_func");
     ASSERT_FALSE(inspector.has_error()) << inspector.error();
     ASSERT_EQ(1u, result.size());
 
@@ -2306,7 +2309,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleMembers) {
     EXPECT_EQ(12u, result[0].size_no_padding);
 }
 
-TEST_F(InspectorGetUniformBufferResourceBindingsTest, ContainingPadding) {
+TEST_F(InspectorGetResourceBindingsTest, UniformBuffer_ContainingPadding) {
     auto* foo_struct_type = MakeUniformBufferType("foo_type", Vector{
                                                                   ty.vec3<f32>(),
                                                               });
@@ -2324,7 +2327,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, ContainingPadding) {
 
     Inspector& inspector = Build();
 
-    auto result = inspector.GetUniformBufferResourceBindings("ep_func");
+    auto result = inspector.GetResourceBindings("ep_func");
     ASSERT_FALSE(inspector.has_error()) << inspector.error();
     ASSERT_EQ(1u, result.size());
 
@@ -2335,7 +2338,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, ContainingPadding) {
     EXPECT_EQ(12u, result[0].size_no_padding);
 }
 
-TEST_F(InspectorGetUniformBufferResourceBindingsTest, NonStructVec3) {
+TEST_F(InspectorGetResourceBindingsTest, UniformBuffer_NonStructVec3) {
     AddUniformBuffer("foo_ub", ty.vec3<f32>(), 0, 0);
     MakePlainGlobalReferenceBodyFunction("ub_func", "foo_ub", ty.vec3<f32>(), tint::Empty);
 
@@ -2346,7 +2349,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, NonStructVec3) {
 
     Inspector& inspector = Build();
 
-    auto result = inspector.GetUniformBufferResourceBindings("ep_func");
+    auto result = inspector.GetResourceBindings("ep_func");
     ASSERT_FALSE(inspector.has_error()) << inspector.error();
     ASSERT_EQ(1u, result.size());
 
@@ -2357,7 +2360,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, NonStructVec3) {
     EXPECT_EQ(12u, result[0].size_no_padding);
 }
 
-TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleUniformBuffers) {
+TEST_F(InspectorGetResourceBindingsTest, UniformBuffer_Multiple) {
     auto* ub_struct_type = MakeUniformBufferType("ub_type", Vector{
                                                                 ty.i32(),
                                                                 ty.u32(),
@@ -2394,9 +2397,10 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleUniformBuffers) {
 
     Inspector& inspector = Build();
 
-    auto result = inspector.GetUniformBufferResourceBindings("ep_func");
+    auto result = inspector.GetResourceBindings("ep_func");
     ASSERT_FALSE(inspector.has_error()) << inspector.error();
     ASSERT_EQ(3u, result.size());
+    SortResourceBindings(&result);
 
     EXPECT_EQ(ResourceBinding::ResourceType::kUniformBuffer, result[0].resource_type);
     EXPECT_EQ(0u, result[0].bind_group);
@@ -2417,7 +2421,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleUniformBuffers) {
     EXPECT_EQ(12u, result[2].size_no_padding);
 }
 
-TEST_F(InspectorGetUniformBufferResourceBindingsTest, ContainingArray) {
+TEST_F(InspectorGetResourceBindingsTest, UniformBuffer_ContainingArray) {
     // Manually create uniform buffer to make sure it had a valid layout (array
     // with elem stride of 16, and that is 16-byte aligned within the struct)
     auto* foo_struct_type = Structure("foo_type", Vector{
@@ -2445,7 +2449,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, ContainingArray) {
 
     Inspector& inspector = Build();
 
-    auto result = inspector.GetUniformBufferResourceBindings("ep_func");
+    auto result = inspector.GetResourceBindings("ep_func");
     ASSERT_FALSE(inspector.has_error()) << inspector.error();
     ASSERT_EQ(1u, result.size());
 
@@ -2456,7 +2460,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, ContainingArray) {
     EXPECT_EQ(80u, result[0].size_no_padding);
 }
 
-TEST_F(InspectorGetStorageBufferResourceBindingsTest, Simple_NonStruct) {
+TEST_F(InspectorGetResourceBindingsTest, StorageBuffer_Simple_NonStruct) {
     AddStorageBuffer("foo_sb", ty.i32(), core::Access::kReadWrite, 0, 0);
     MakePlainGlobalReferenceBodyFunction("sb_func", "foo_sb", ty.i32(), tint::Empty);
 
@@ -2467,7 +2471,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, Simple_NonStruct) {
 
     Inspector& inspector = Build();
 
-    auto result = inspector.GetStorageBufferResourceBindings("ep_func");
+    auto result = inspector.GetResourceBindings("ep_func");
     ASSERT_FALSE(inspector.has_error()) << inspector.error();
     ASSERT_EQ(1u, result.size());
 
@@ -2478,7 +2482,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, Simple_NonStruct) {
     EXPECT_EQ(4u, result[0].size_no_padding);
 }
 
-TEST_F(InspectorGetStorageBufferResourceBindingsTest, Simple_Struct) {
+TEST_F(InspectorGetResourceBindingsTest, StorageBuffer_Simple_Struct) {
     auto foo_struct_type = MakeStorageBufferTypes("foo_type", Vector{
                                                                   ty.i32(),
                                                               });
@@ -2496,7 +2500,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, Simple_Struct) {
 
     Inspector& inspector = Build();
 
-    auto result = inspector.GetStorageBufferResourceBindings("ep_func");
+    auto result = inspector.GetResourceBindings("ep_func");
     ASSERT_FALSE(inspector.has_error()) << inspector.error();
     ASSERT_EQ(1u, result.size());
 
@@ -2507,7 +2511,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, Simple_Struct) {
     EXPECT_EQ(4u, result[0].size_no_padding);
 }
 
-TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleMembers) {
+TEST_F(InspectorGetResourceBindingsTest, StorageBuffer_MultipleMembers) {
     auto foo_struct_type = MakeStorageBufferTypes("foo_type", Vector{
                                                                   ty.i32(),
                                                                   ty.u32(),
@@ -2529,7 +2533,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleMembers) {
 
     Inspector& inspector = Build();
 
-    auto result = inspector.GetStorageBufferResourceBindings("ep_func");
+    auto result = inspector.GetResourceBindings("ep_func");
     ASSERT_FALSE(inspector.has_error()) << inspector.error();
     ASSERT_EQ(1u, result.size());
 
@@ -2540,7 +2544,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleMembers) {
     EXPECT_EQ(12u, result[0].size_no_padding);
 }
 
-TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleStorageBuffers) {
+TEST_F(InspectorGetResourceBindingsTest, StorageBuffer_Multiple) {
     auto sb_struct_type = MakeStorageBufferTypes("sb_type", Vector{
                                                                 ty.i32(),
                                                                 ty.u32(),
@@ -2577,9 +2581,10 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleStorageBuffers) {
 
     Inspector& inspector = Build();
 
-    auto result = inspector.GetStorageBufferResourceBindings("ep_func");
+    auto result = inspector.GetResourceBindings("ep_func");
     ASSERT_FALSE(inspector.has_error()) << inspector.error();
     ASSERT_EQ(3u, result.size());
+    SortResourceBindings(&result);
 
     EXPECT_EQ(ResourceBinding::ResourceType::kStorageBuffer, result[0].resource_type);
     EXPECT_EQ(0u, result[0].bind_group);
@@ -2600,7 +2605,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleStorageBuffers) {
     EXPECT_EQ(12u, result[2].size_no_padding);
 }
 
-TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingArray) {
+TEST_F(InspectorGetResourceBindingsTest, StorageBuffer_ContainingArray) {
     auto foo_struct_type = MakeStorageBufferTypes("foo_type", Vector{
                                                                   ty.i32(),
                                                                   ty.array<u32, 4>(),
@@ -2619,7 +2624,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingArray) {
 
     Inspector& inspector = Build();
 
-    auto result = inspector.GetStorageBufferResourceBindings("ep_func");
+    auto result = inspector.GetResourceBindings("ep_func");
     ASSERT_FALSE(inspector.has_error()) << inspector.error();
     ASSERT_EQ(1u, result.size());
 
@@ -2630,7 +2635,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingArray) {
     EXPECT_EQ(20u, result[0].size_no_padding);
 }
 
-TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingRuntimeArray) {
+TEST_F(InspectorGetResourceBindingsTest, StorageBuffer_ContainingRuntimeArray) {
     auto foo_struct_type = MakeStorageBufferTypes("foo_type", Vector{
                                                                   ty.i32(),
                                                                   ty.array<u32>(),
@@ -2649,7 +2654,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingRuntimeArray) {
 
     Inspector& inspector = Build();
 
-    auto result = inspector.GetStorageBufferResourceBindings("ep_func");
+    auto result = inspector.GetResourceBindings("ep_func");
     ASSERT_FALSE(inspector.has_error()) << inspector.error();
     ASSERT_EQ(1u, result.size());
 
@@ -2660,7 +2665,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingRuntimeArray) {
     EXPECT_EQ(8u, result[0].size_no_padding);
 }
 
-TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingPadding) {
+TEST_F(InspectorGetResourceBindingsTest, StorageBuffer_ContainingPadding) {
     auto foo_struct_type = MakeStorageBufferTypes("foo_type", Vector{
                                                                   ty.vec3<f32>(),
                                                               });
@@ -2678,7 +2683,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingPadding) {
 
     Inspector& inspector = Build();
 
-    auto result = inspector.GetStorageBufferResourceBindings("ep_func");
+    auto result = inspector.GetResourceBindings("ep_func");
     ASSERT_FALSE(inspector.has_error()) << inspector.error();
     ASSERT_EQ(1u, result.size());
 
@@ -2689,7 +2694,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingPadding) {
     EXPECT_EQ(12u, result[0].size_no_padding);
 }
 
-TEST_F(InspectorGetStorageBufferResourceBindingsTest, NonStructVec3) {
+TEST_F(InspectorGetResourceBindingsTest, StorageBuffer_NonStructVec3) {
     AddStorageBuffer("foo_ub", ty.vec3<f32>(), core::Access::kReadWrite, 0, 0);
     MakePlainGlobalReferenceBodyFunction("ub_func", "foo_ub", ty.vec3<f32>(), tint::Empty);
 
@@ -2700,7 +2705,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, NonStructVec3) {
 
     Inspector& inspector = Build();
 
-    auto result = inspector.GetStorageBufferResourceBindings("ep_func");
+    auto result = inspector.GetResourceBindings("ep_func");
     ASSERT_FALSE(inspector.has_error()) << inspector.error();
     ASSERT_EQ(1u, result.size());
 
@@ -2711,7 +2716,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, NonStructVec3) {
     EXPECT_EQ(12u, result[0].size_no_padding);
 }
 
-TEST_F(InspectorGetStorageBufferResourceBindingsTest, SkipReadOnly) {
+TEST_F(InspectorGetResourceBindingsTest, StorageBuffer_ReadOnlySimple) {
     auto foo_struct_type = MakeStorageBufferTypes("foo_type", Vector{
                                                                   ty.i32(),
                                                               });
@@ -2729,30 +2734,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, SkipReadOnly) {
 
     Inspector& inspector = Build();
 
-    auto result = inspector.GetStorageBufferResourceBindings("ep_func");
-    ASSERT_FALSE(inspector.has_error()) << inspector.error();
-    ASSERT_EQ(0u, result.size());
-}
-
-TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, Simple) {
-    auto foo_struct_type = MakeStorageBufferTypes("foo_type", Vector{
-                                                                  ty.i32(),
-                                                              });
-    AddStorageBuffer("foo_sb", foo_struct_type(), core::Access::kRead, 0, 0);
-
-    MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
-                                            Vector{
-                                                MemberInfo{0, ty.i32()},
-                                            });
-
-    MakeCallerBodyFunction("ep_func", Vector{std::string("sb_func")},
-                           Vector{
-                               Stage(ast::PipelineStage::kFragment),
-                           });
-
-    Inspector& inspector = Build();
-
-    auto result = inspector.GetReadOnlyStorageBufferResourceBindings("ep_func");
+    auto result = inspector.GetResourceBindings("ep_func");
     ASSERT_FALSE(inspector.has_error()) << inspector.error();
     ASSERT_EQ(1u, result.size());
 
@@ -2763,14 +2745,14 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, Simple) {
     EXPECT_EQ(4u, result[0].size_no_padding);
 }
 
-TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, MultipleStorageBuffers) {
+TEST_F(InspectorGetResourceBindingsTest, StorageBuffer_MultipleROAndRW) {
     auto sb_struct_type = MakeStorageBufferTypes("sb_type", Vector{
                                                                 ty.i32(),
                                                                 ty.u32(),
                                                                 ty.f32(),
                                                             });
     AddStorageBuffer("sb_foo", sb_struct_type(), core::Access::kRead, 0, 0);
-    AddStorageBuffer("sb_bar", sb_struct_type(), core::Access::kRead, 0, 1);
+    AddStorageBuffer("sb_bar", sb_struct_type(), core::Access::kReadWrite, 0, 1);
     AddStorageBuffer("sb_baz", sb_struct_type(), core::Access::kRead, 2, 0);
 
     auto AddReferenceFunc = [this](const std::string& func_name, const std::string& var_name) {
@@ -2800,9 +2782,10 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, MultipleStorageBuf
 
     Inspector& inspector = Build();
 
-    auto result = inspector.GetReadOnlyStorageBufferResourceBindings("ep_func");
+    auto result = inspector.GetResourceBindings("ep_func");
     ASSERT_FALSE(inspector.has_error()) << inspector.error();
     ASSERT_EQ(3u, result.size());
+    SortResourceBindings(&result);
 
     EXPECT_EQ(ResourceBinding::ResourceType::kReadOnlyStorageBuffer, result[0].resource_type);
     EXPECT_EQ(0u, result[0].bind_group);
@@ -2810,7 +2793,7 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, MultipleStorageBuf
     EXPECT_EQ(12u, result[0].size);
     EXPECT_EQ(12u, result[0].size_no_padding);
 
-    EXPECT_EQ(ResourceBinding::ResourceType::kReadOnlyStorageBuffer, result[1].resource_type);
+    EXPECT_EQ(ResourceBinding::ResourceType::kStorageBuffer, result[1].resource_type);
     EXPECT_EQ(0u, result[1].bind_group);
     EXPECT_EQ(1u, result[1].binding);
     EXPECT_EQ(12u, result[1].size);
@@ -2823,93 +2806,10 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, MultipleStorageBuf
     EXPECT_EQ(12u, result[2].size_no_padding);
 }
 
-TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, ContainingArray) {
-    auto foo_struct_type = MakeStorageBufferTypes("foo_type", Vector{
-                                                                  ty.i32(),
-                                                                  ty.array<u32, 4>(),
-                                                              });
-    AddStorageBuffer("foo_sb", foo_struct_type(), core::Access::kRead, 0, 0);
-
-    MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
-                                            Vector{
-                                                MemberInfo{0, ty.i32()},
-                                            });
-
-    MakeCallerBodyFunction("ep_func", Vector{std::string("sb_func")},
-                           Vector{
-                               Stage(ast::PipelineStage::kFragment),
-                           });
-
-    Inspector& inspector = Build();
-
-    auto result = inspector.GetReadOnlyStorageBufferResourceBindings("ep_func");
-    ASSERT_FALSE(inspector.has_error()) << inspector.error();
-    ASSERT_EQ(1u, result.size());
-
-    EXPECT_EQ(ResourceBinding::ResourceType::kReadOnlyStorageBuffer, result[0].resource_type);
-    EXPECT_EQ(0u, result[0].bind_group);
-    EXPECT_EQ(0u, result[0].binding);
-    EXPECT_EQ(20u, result[0].size);
-    EXPECT_EQ(20u, result[0].size_no_padding);
-}
-
-TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, ContainingRuntimeArray) {
-    auto foo_struct_type = MakeStorageBufferTypes("foo_type", Vector{
-                                                                  ty.i32(),
-                                                                  ty.array<u32>(),
-                                                              });
-    AddStorageBuffer("foo_sb", foo_struct_type(), core::Access::kRead, 0, 0);
-
-    MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
-                                            Vector{
-                                                MemberInfo{0, ty.i32()},
-                                            });
-
-    MakeCallerBodyFunction("ep_func", Vector{std::string("sb_func")},
-                           Vector{
-                               Stage(ast::PipelineStage::kFragment),
-                           });
-
-    Inspector& inspector = Build();
-
-    auto result = inspector.GetReadOnlyStorageBufferResourceBindings("ep_func");
-    ASSERT_FALSE(inspector.has_error()) << inspector.error();
-    ASSERT_EQ(1u, result.size());
-
-    EXPECT_EQ(ResourceBinding::ResourceType::kReadOnlyStorageBuffer, result[0].resource_type);
-    EXPECT_EQ(0u, result[0].bind_group);
-    EXPECT_EQ(0u, result[0].binding);
-    EXPECT_EQ(8u, result[0].size);
-    EXPECT_EQ(8u, result[0].size_no_padding);
-}
-
-TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, SkipNonReadOnly) {
-    auto foo_struct_type = MakeStorageBufferTypes("foo_type", Vector{
-                                                                  ty.i32(),
-                                                              });
-    AddStorageBuffer("foo_sb", foo_struct_type(), core::Access::kReadWrite, 0, 0);
-
-    MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
-                                            Vector{
-                                                MemberInfo{0, ty.i32()},
-                                            });
-
-    MakeCallerBodyFunction("ep_func", Vector{std::string("sb_func")},
-                           Vector{
-                               Stage(ast::PipelineStage::kFragment),
-                           });
-
-    Inspector& inspector = Build();
-
-    auto result = inspector.GetReadOnlyStorageBufferResourceBindings("ep_func");
-    ASSERT_FALSE(inspector.has_error()) << inspector.error();
-    ASSERT_EQ(0u, result.size());
-}
-
-TEST_F(InspectorGetSamplerResourceBindingsTest, Simple) {
+TEST_F(InspectorGetResourceBindingsTest, Sampler_Simple) {
     auto sampled_texture_type = ty.sampled_texture(core::type::TextureDimension::k1d, ty.f32());
-    AddResource("foo_texture", sampled_texture_type, 0, 0);
-    AddSampler("foo_sampler", 0, 1);
+    AddSampler("foo_sampler", 0, 0);
+    AddResource("foo_texture", sampled_texture_type, 0, 1);
     AddGlobalVariable("foo_coords", ty.f32());
 
     MakeSamplerReferenceBodyFunction("ep", "foo_texture", "foo_sampler", "foo_coords", ty.f32(),
@@ -2919,32 +2819,20 @@ TEST_F(InspectorGetSamplerResourceBindingsTest, Simple) {
 
     Inspector& inspector = Build();
 
-    auto result = inspector.GetSamplerResourceBindings("ep");
+    auto result = inspector.GetResourceBindings("ep");
     ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+    ASSERT_EQ(2u, result.size());
 
     EXPECT_EQ(ResourceBinding::ResourceType::kSampler, result[0].resource_type);
-    ASSERT_EQ(1u, result.size());
     EXPECT_EQ(0u, result[0].bind_group);
-    EXPECT_EQ(1u, result[0].binding);
+    EXPECT_EQ(0u, result[0].binding);
 }
 
-TEST_F(InspectorGetSamplerResourceBindingsTest, NoSampler) {
-    MakeEmptyBodyFunction("ep_func", Vector{
-                                         Stage(ast::PipelineStage::kFragment),
-                                     });
-
-    Inspector& inspector = Build();
-
-    auto result = inspector.GetSamplerResourceBindings("ep_func");
-    ASSERT_FALSE(inspector.has_error()) << inspector.error();
-
-    ASSERT_EQ(0u, result.size());
-}
-
-TEST_F(InspectorGetSamplerResourceBindingsTest, InFunction) {
+TEST_F(InspectorGetResourceBindingsTest, Sampler_InFunction) {
     auto sampled_texture_type = ty.sampled_texture(core::type::TextureDimension::k1d, ty.f32());
-    AddResource("foo_texture", sampled_texture_type, 0, 0);
-    AddSampler("foo_sampler", 0, 1);
+    AddSampler("foo_sampler", 0, 0);
+    AddResource("foo_texture", sampled_texture_type, 0, 1);
     AddGlobalVariable("foo_coords", ty.f32());
 
     MakeSamplerReferenceBodyFunction("foo_func", "foo_texture", "foo_sampler", "foo_coords",
@@ -2957,36 +2845,19 @@ TEST_F(InspectorGetSamplerResourceBindingsTest, InFunction) {
 
     Inspector& inspector = Build();
 
-    auto result = inspector.GetSamplerResourceBindings("ep_func");
+    auto result = inspector.GetResourceBindings("ep_func");
     ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
+    ASSERT_EQ(2u, result.size());
     EXPECT_EQ(ResourceBinding::ResourceType::kSampler, result[0].resource_type);
-    ASSERT_EQ(1u, result.size());
     EXPECT_EQ(0u, result[0].bind_group);
-    EXPECT_EQ(1u, result[0].binding);
+    EXPECT_EQ(0u, result[0].binding);
 }
 
-TEST_F(InspectorGetSamplerResourceBindingsTest, UnknownEntryPoint) {
-    auto sampled_texture_type = ty.sampled_texture(core::type::TextureDimension::k1d, ty.f32());
-    AddResource("foo_texture", sampled_texture_type, 0, 0);
-    AddSampler("foo_sampler", 0, 1);
-    AddGlobalVariable("foo_coords", ty.f32());
-
-    MakeSamplerReferenceBodyFunction("ep", "foo_texture", "foo_sampler", "foo_coords", ty.f32(),
-                                     Vector{
-                                         Stage(ast::PipelineStage::kFragment),
-                                     });
-
-    Inspector& inspector = Build();
-
-    auto result = inspector.GetSamplerResourceBindings("foo");
-    ASSERT_TRUE(inspector.has_error()) << inspector.error();
-}
-
-TEST_F(InspectorGetSamplerResourceBindingsTest, SkipsComparisonSamplers) {
+TEST_F(InspectorGetResourceBindingsTest, Sampler_Comparison) {
     auto depth_texture_type = ty.depth_texture(core::type::TextureDimension::k2d);
-    AddResource("foo_texture", depth_texture_type, 0, 0);
-    AddComparisonSampler("foo_sampler", 0, 1);
+    AddComparisonSampler("foo_sampler", 0, 0);
+    AddResource("foo_texture", depth_texture_type, 0, 1);
     AddGlobalVariable("foo_coords", ty.vec2<f32>());
     AddGlobalVariable("foo_depth", ty.f32());
 
@@ -2998,111 +2869,13 @@ TEST_F(InspectorGetSamplerResourceBindingsTest, SkipsComparisonSamplers) {
 
     Inspector& inspector = Build();
 
-    auto result = inspector.GetSamplerResourceBindings("ep");
+    auto result = inspector.GetResourceBindings("ep");
     ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
-    ASSERT_EQ(0u, result.size());
-}
-
-TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, Simple) {
-    auto depth_texture_type = ty.depth_texture(core::type::TextureDimension::k2d);
-    AddResource("foo_texture", depth_texture_type, 0, 0);
-    AddComparisonSampler("foo_sampler", 0, 1);
-    AddGlobalVariable("foo_coords", ty.vec2<f32>());
-    AddGlobalVariable("foo_depth", ty.f32());
-
-    MakeComparisonSamplerReferenceBodyFunction("ep", "foo_texture", "foo_sampler", "foo_coords",
-                                               "foo_depth", ty.f32(),
-                                               Vector{
-                                                   Stage(ast::PipelineStage::kFragment),
-                                               });
-
-    Inspector& inspector = Build();
-
-    auto result = inspector.GetComparisonSamplerResourceBindings("ep");
-    ASSERT_FALSE(inspector.has_error()) << inspector.error();
-
+    ASSERT_EQ(2u, result.size());
     EXPECT_EQ(ResourceBinding::ResourceType::kComparisonSampler, result[0].resource_type);
-    ASSERT_EQ(1u, result.size());
     EXPECT_EQ(0u, result[0].bind_group);
-    EXPECT_EQ(1u, result[0].binding);
-}
-
-TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, NoSampler) {
-    MakeEmptyBodyFunction("ep_func", Vector{
-                                         Stage(ast::PipelineStage::kFragment),
-                                     });
-
-    Inspector& inspector = Build();
-
-    auto result = inspector.GetComparisonSamplerResourceBindings("ep_func");
-    ASSERT_FALSE(inspector.has_error()) << inspector.error();
-
-    ASSERT_EQ(0u, result.size());
-}
-
-TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, InFunction) {
-    auto depth_texture_type = ty.depth_texture(core::type::TextureDimension::k2d);
-    AddResource("foo_texture", depth_texture_type, 0, 0);
-    AddComparisonSampler("foo_sampler", 0, 1);
-    AddGlobalVariable("foo_coords", ty.vec2<f32>());
-    AddGlobalVariable("foo_depth", ty.f32());
-
-    MakeComparisonSamplerReferenceBodyFunction("foo_func", "foo_texture", "foo_sampler",
-                                               "foo_coords", "foo_depth", ty.f32(), tint::Empty);
-
-    MakeCallerBodyFunction("ep_func", Vector{std::string("foo_func")},
-                           Vector{
-                               Stage(ast::PipelineStage::kFragment),
-                           });
-
-    Inspector& inspector = Build();
-
-    auto result = inspector.GetComparisonSamplerResourceBindings("ep_func");
-    ASSERT_FALSE(inspector.has_error()) << inspector.error();
-
-    EXPECT_EQ(ResourceBinding::ResourceType::kComparisonSampler, result[0].resource_type);
-    ASSERT_EQ(1u, result.size());
-    EXPECT_EQ(0u, result[0].bind_group);
-    EXPECT_EQ(1u, result[0].binding);
-}
-
-TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, UnknownEntryPoint) {
-    auto depth_texture_type = ty.depth_texture(core::type::TextureDimension::k2d);
-    AddResource("foo_texture", depth_texture_type, 0, 0);
-    AddComparisonSampler("foo_sampler", 0, 1);
-    AddGlobalVariable("foo_coords", ty.vec2<f32>());
-    AddGlobalVariable("foo_depth", ty.f32());
-
-    MakeComparisonSamplerReferenceBodyFunction("ep", "foo_texture", "foo_sampler", "foo_coords",
-                                               "foo_depth", ty.f32(),
-                                               Vector{
-                                                   Stage(ast::PipelineStage::kFragment),
-                                               });
-
-    Inspector& inspector = Build();
-
-    auto result = inspector.GetSamplerResourceBindings("foo");
-    ASSERT_TRUE(inspector.has_error()) << inspector.error();
-}
-
-TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, SkipsSamplers) {
-    auto sampled_texture_type = ty.sampled_texture(core::type::TextureDimension::k1d, ty.f32());
-    AddResource("foo_texture", sampled_texture_type, 0, 0);
-    AddSampler("foo_sampler", 0, 1);
-    AddGlobalVariable("foo_coords", ty.f32());
-
-    MakeSamplerReferenceBodyFunction("ep", "foo_texture", "foo_sampler", "foo_coords", ty.f32(),
-                                     Vector{
-                                         Stage(ast::PipelineStage::kFragment),
-                                     });
-
-    Inspector& inspector = Build();
-
-    auto result = inspector.GetComparisonSamplerResourceBindings("ep");
-    ASSERT_FALSE(inspector.has_error()) << inspector.error();
-
-    ASSERT_EQ(0u, result.size());
+    EXPECT_EQ(0u, result[0].binding);
 }
 
 TEST_F(InspectorGetSampledTextureResourceBindingsTest, Empty) {
@@ -3474,7 +3247,7 @@ TEST_F(InspectorGetDepthMultisampledTextureResourceBindingsTest, textureDimensio
     EXPECT_EQ(ResourceBinding::TextureDimension::k2d, result[0].dim);
 }
 
-TEST_F(InspectorGetExternalTextureResourceBindingsTest, Simple) {
+TEST_F(InspectorGetResourceBindingsTest, ExternalTexture) {
     auto external_texture_type = ty.external_texture();
     AddResource("et", external_texture_type, 0, 0);
 
@@ -3488,7 +3261,7 @@ TEST_F(InspectorGetExternalTextureResourceBindingsTest, Simple) {
 
     Inspector& inspector = Build();
 
-    auto result = inspector.GetExternalTextureResourceBindings("ep");
+    auto result = inspector.GetResourceBindings("ep");
     ASSERT_FALSE(inspector.has_error()) << inspector.error();
     EXPECT_EQ(ResourceBinding::ResourceType::kExternalTexture, result[0].resource_type);
 
