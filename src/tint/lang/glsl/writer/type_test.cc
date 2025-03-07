@@ -574,7 +574,7 @@ TEST_P(GlslWriterSampledTextureESTest, Emit) {
             break;
     }
 
-    auto* t = ty.Get<core::type::SampledTexture>(params.dim, subtype);
+    auto* t = ty.sampled_texture(params.dim, subtype);
     auto* var = b.Var("v", handle, t, core::Access::kReadWrite);
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
@@ -628,7 +628,7 @@ TEST_P(GlslWriterSampledTextureNonESTest, Emit) {
             break;
     }
 
-    auto* t = ty.Get<core::type::SampledTexture>(params.dim, subtype);
+    auto* t = ty.sampled_texture(params.dim, subtype);
     auto* var = b.Var("v", handle, t, core::Access::kReadWrite);
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);

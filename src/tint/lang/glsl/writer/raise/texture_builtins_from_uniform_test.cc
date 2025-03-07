@@ -49,9 +49,8 @@ namespace {
 using GlslWriter_TextureBuiltinsFromUniformTest = core::ir::transform::TransformTest;
 
 TEST_F(GlslWriter_TextureBuiltinsFromUniformTest, TextureNumLevels) {
-    auto* t = b.Var(ty.ptr(
-        handle, ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32()),
-        read_write));
+    auto* t = b.Var(ty.ptr(handle, ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()),
+                           read_write));
     t->SetBindingPoint(0, 0);
     b.ir.root_block->Append(t);
 
@@ -159,9 +158,8 @@ $B1: {  # root
 }
 
 TEST_F(GlslWriter_TextureBuiltinsFromUniformTest, SameBuiltinCalledMultipleTimesTextureNumLevels) {
-    auto* t = b.Var(ty.ptr(
-        handle, ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32()),
-        read_write));
+    auto* t = b.Var(ty.ptr(handle, ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()),
+                           read_write));
     t->SetBindingPoint(0, 0);
     b.ir.root_block->Append(t);
 

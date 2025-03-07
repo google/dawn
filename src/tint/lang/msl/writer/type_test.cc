@@ -1062,7 +1062,7 @@ using MslWriterSampledtexturesTest = MslWriterTestWithParam<MslTextureData>;
 TEST_P(MslWriterSampledtexturesTest, Emit) {
     auto params = GetParam();
 
-    auto* t = ty.Get<core::type::SampledTexture>(params.dim, ty.f32());
+    auto* t = ty.sampled_texture(params.dim, ty.f32());
     auto* func = b.Function("foo", ty.void_());
     auto* param = b.FunctionParam("a", t);
     func->SetParams({param});

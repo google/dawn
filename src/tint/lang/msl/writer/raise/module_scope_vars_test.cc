@@ -316,7 +316,7 @@ tint_module_vars_struct = struct @align(1) {
 }
 
 TEST_F(MslWriter_ModuleScopeVarsTest, HandleTypes) {
-    auto* t = ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32());
+    auto* t = ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32());
     auto* var_t = b.Var("t", ty.ptr<handle>(t));
     auto* var_s = b.Var("s", ty.ptr<handle>(ty.sampler()));
     var_t->SetBindingPoint(1, 2);
@@ -740,7 +740,7 @@ tint_module_vars_struct = struct @align(1) {
 }
 
 TEST_F(MslWriter_ModuleScopeVarsTest, CallFunctionThatUsesVars_HandleTypes) {
-    auto* t = ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32());
+    auto* t = ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32());
     auto* var_t = b.Var("t", ty.ptr<handle>(t));
     auto* var_s = b.Var("s", ty.ptr<handle>(ty.sampler()));
     var_t->SetBindingPoint(1, 2);

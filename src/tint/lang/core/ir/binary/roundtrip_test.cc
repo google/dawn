@@ -309,7 +309,7 @@ TEST_F(IRBinaryRoundtripTest, depth_texture) {
 }
 
 TEST_F(IRBinaryRoundtripTest, sampled_texture) {
-    auto* tex = ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k3d, ty.i32());
+    auto* tex = ty.sampled_texture(core::type::TextureDimension::k3d, ty.i32());
     b.Append(b.ir.root_block, [&] { b.Var(ty.ptr(handle, tex, read)); });
     RUN_TEST();
 }

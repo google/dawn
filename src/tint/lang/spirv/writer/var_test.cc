@@ -513,10 +513,9 @@ TEST_F(SpirvWriterTest, SamplerVar_Load) {
 }
 
 TEST_F(SpirvWriterTest, TextureVar) {
-    auto* v = b.Var(
-        "v", ty.ptr(core::AddressSpace::kHandle,
-                    ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32()),
-                    core::Access::kRead));
+    auto* v = b.Var("v", ty.ptr(core::AddressSpace::kHandle,
+                                ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()),
+                                core::Access::kRead));
     v->SetBindingPoint(0, 0);
     mod.root_block->Append(v);
 
@@ -533,10 +532,9 @@ TEST_F(SpirvWriterTest, TextureVar) {
 }
 
 TEST_F(SpirvWriterTest, TextureVar_Load) {
-    auto* v = b.Var(
-        "v", ty.ptr(core::AddressSpace::kHandle,
-                    ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32()),
-                    core::Access::kRead));
+    auto* v = b.Var("v", ty.ptr(core::AddressSpace::kHandle,
+                                ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()),
+                                core::Access::kRead));
     v->SetBindingPoint(0, 0);
     mod.root_block->Append(v);
 

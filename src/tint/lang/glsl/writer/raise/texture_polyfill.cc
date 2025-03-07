@@ -340,8 +340,7 @@ struct State {
             value->Type()->UnwrapPtr(),
             [&](const core::type::SampledTexture* s) {
                 is_1d = s->Dim() == core::type::TextureDimension::k1d;
-                new_type = ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d,
-                                                              s->Type());
+                new_type = ty.sampled_texture(core::type::TextureDimension::k2d, s->Type());
             },
             [&](const core::type::StorageTexture* s) {
                 is_1d = s->Dim() == core::type::TextureDimension::k1d;
@@ -458,8 +457,8 @@ struct State {
             if (tex_ty->StoreType()->Is<core::type::DepthTexture>()) {
                 tex_ty =
                     ty.ptr(tex_ty->AddressSpace(),
-                           ty.Get<core::type::SampledTexture>(
-                               tex_ty->UnwrapPtr()->As<core::type::Texture>()->Dim(), ty.f32()),
+                           ty.sampled_texture(tex_ty->UnwrapPtr()->As<core::type::Texture>()->Dim(),
+                                              ty.f32()),
                            tex_ty->Access());
             }
         }

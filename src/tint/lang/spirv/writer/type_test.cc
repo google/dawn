@@ -366,8 +366,8 @@ using Type_SampledTexture = SpirvWriterTestWithParam<TextureCase>;
 TEST_P(Type_SampledTexture, Emit) {
     auto params = GetParam();
     b.Append(b.ir.root_block, [&] {
-        auto* v = b.Var("v", ty.ptr<handle, read_write>(ty.Get<core::type::SampledTexture>(
-                                 params.dim, MakeScalarType(params.format))));
+        auto* v = b.Var("v", ty.ptr<handle, read_write>(
+                                 ty.sampled_texture(params.dim, MakeScalarType(params.format))));
         v->SetBindingPoint(0, 0);
     });
 
@@ -438,8 +438,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 TEST_F(SpirvWriterTest, Type_DepthTexture_DedupWithSampledTexture) {
     b.Append(b.ir.root_block, [&] {
-        auto* v1 = b.Var("v1", ty.ptr<handle, read_write>(
-                                   ty.Get<core::type::SampledTexture>(Dim::k2d, ty.f32())));
+        auto* v1 = b.Var("v1", ty.ptr<handle, read_write>(ty.sampled_texture(Dim::k2d, ty.f32())));
         auto* v2 =
             b.Var("v2", ty.ptr<handle, read_write>(ty.Get<core::type::DepthTexture>(Dim::k2d)));
         v1->SetBindingPoint(0, 1);

@@ -337,8 +337,7 @@ TEST_F(IR_DirectVariableAccessTest_RemoveUncalled, HandleTexture_Disabled) {
     b.Append(b.ir.root_block, [&] { b.Var<private_>("keep_me", 42_i); });
 
     auto* f = b.Function("f", ty.i32());
-    auto* p = b.FunctionParam(
-        "p", ty.Get<type::SampledTexture>(core::type::TextureDimension::k1d, ty.f32()));
+    auto* p = b.FunctionParam("p", ty.sampled_texture(core::type::TextureDimension::k1d, ty.f32()));
     f->SetParams({
         b.FunctionParam("pre", ty.i32()),
         p,
@@ -371,8 +370,7 @@ TEST_F(IR_DirectVariableAccessTest_RemoveUncalled, HandleTexture_Enabled) {
     b.Append(b.ir.root_block, [&] { b.Var<private_>("keep_me", 42_i); });
 
     auto* f = b.Function("f", ty.u32());
-    auto* p = b.FunctionParam(
-        "p", ty.Get<type::SampledTexture>(core::type::TextureDimension::k1d, ty.f32()));
+    auto* p = b.FunctionParam("p", ty.sampled_texture(core::type::TextureDimension::k1d, ty.f32()));
     f->SetParams({
         b.FunctionParam("pre", ty.i32()),
         p,
@@ -5063,8 +5061,7 @@ using IR_DirectVariableAccessTest_HandleAS = TransformTest;
 
 TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_LocalTextureSampler) {
     auto* tex =
-        b.Var("tex", handle,
-              ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32()),
+        b.Var("tex", handle, ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()),
               core::Access::kReadWrite);
     tex->SetBindingPoint(0, 0);
     b.ir.root_block->Append(tex);
@@ -5111,8 +5108,7 @@ $B1: {  # root
 
 TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_LocalTextureParamSampler) {
     auto* tex =
-        b.Var("tex", handle,
-              ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32()),
+        b.Var("tex", handle, ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()),
               core::Access::kReadWrite);
     tex->SetBindingPoint(0, 0);
     b.ir.root_block->Append(tex);
@@ -5194,7 +5190,7 @@ $B1: {  # root
 }
 
 TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_ParamTextureLocalSampler) {
-    auto* tex_ty = ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32());
+    auto* tex_ty = ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32());
     auto* tex = b.Var("tex", handle, tex_ty, core::Access::kReadWrite);
     tex->SetBindingPoint(0, 0);
     b.ir.root_block->Append(tex);
@@ -5276,7 +5272,7 @@ $B1: {  # root
 }
 
 TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_ParamTextureParamSampler) {
-    auto* tex_ty = ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32());
+    auto* tex_ty = ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32());
     auto* tex = b.Var("tex", handle, tex_ty, core::Access::kReadWrite);
     tex->SetBindingPoint(0, 0);
     b.ir.root_block->Append(tex);
@@ -5358,7 +5354,7 @@ $B1: {  # root
 }
 
 TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_MultiFunction) {
-    auto* tex_ty = ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32());
+    auto* tex_ty = ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32());
     auto* tex = b.Var("tex", handle, tex_ty, core::Access::kReadWrite);
     tex->SetBindingPoint(0, 0);
     b.ir.root_block->Append(tex);
@@ -5460,7 +5456,7 @@ $B1: {  # root
 }
 
 TEST_F(IR_DirectVariableAccessTest_HandleAS, Disabled_MultiFunction) {
-    auto* tex_ty = ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32());
+    auto* tex_ty = ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32());
     auto* tex = b.Var("tex", handle, tex_ty, core::Access::kReadWrite);
     tex->SetBindingPoint(0, 0);
     b.ir.root_block->Append(tex);
@@ -5535,7 +5531,7 @@ $B1: {  # root
 }
 
 TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_DuplicateParam) {
-    auto* tex_ty = ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32());
+    auto* tex_ty = ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32());
     auto* tex = b.Var("tex", handle, tex_ty, core::Access::kReadWrite);
     tex->SetBindingPoint(0, 0);
     b.ir.root_block->Append(tex);
@@ -5627,7 +5623,7 @@ $B1: {  # root
 }
 
 TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_Fork) {
-    auto* tex_ty = ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32());
+    auto* tex_ty = ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32());
     auto* tex1 = b.Var("tex1", handle, tex_ty, core::Access::kReadWrite);
     tex1->SetBindingPoint(0, 0);
     b.ir.root_block->Append(tex1);
