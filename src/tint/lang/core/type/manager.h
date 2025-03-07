@@ -61,6 +61,7 @@ class Invalid;
 class Matrix;
 class Pointer;
 class Reference;
+class SampledTexture;
 class StorageTexture;
 class U8;
 class U32;
@@ -262,6 +263,12 @@ class Manager final {
     /// @param inner the inner type
     /// @returns a vec4 type with the element type @p inner
     const core::type::Vector* vec4(const core::type::Type* inner);
+
+    /// @param dim the dimensionality of the texture
+    /// @param type the data type of the sampled texture
+    /// @returns a sampled texture type with the provided params
+    const core::type::SampledTexture* sampled_texture(TextureDimension dim,
+                                                      const core::type::Type* type);
 
     /// @param dim the dimensionality of the texture
     /// @param format the texel format of the texture

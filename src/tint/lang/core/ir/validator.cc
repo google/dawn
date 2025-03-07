@@ -153,13 +153,12 @@ bool InvariantOnlyIfAlsoPosition(const tint::core::IOAttributes& attr) {
 }
 
 /// @returns true if @p ty meets the basic function parameter rules (i.e. one of constructible,
-///          pointer, sampler or texture).
+///          pointer, handle).
 ///
 /// Note: Does not handle corner cases like if certain capabilities are
 /// enabled.
 bool IsValidFunctionParamType(const core::type::Type* ty) {
-    return ty->IsConstructible() || ty->Is<core::type::Pointer>() ||
-           ty->Is<core::type::Texture>() || ty->Is<core::type::Sampler>();
+    return ty->IsConstructible() || ty->Is<core::type::Pointer>() || ty->IsHandle();
 }
 
 /// @returns true if @p ty is a non-struct and decorated with @builtin(position), or if it is a
@@ -2058,8 +2057,7 @@ void Validator::CheckFunction(const Function* func) {
                     return !IsValidFunctionParamType(m->Type());
                 })) {
                 AddError(param) << "function parameter type, " << NameOf(param->Type())
-                                << ", must be constructible, a pointer, a "
-                                   "texture, or a sampler";
+                                << ", must be constructible, a pointer, or a handle";
             }
         }
 
@@ -2094,7 +2092,7 @@ void Validator::CheckFunction(const Function* func) {
             address_space = mv->AddressSpace();
         } else {
             // ModuleScopeVars transform in MSL backends unwraps pointers to handles
-            if (param->Type()->IsAnyOf<core::type::Texture, core::type::Sampler>()) {
+            if (param->Type()->IsHandle()) {
                 address_space = AddressSpace::kHandle;
             }
         }
@@ -2484,10 +2482,9 @@ void Validator::CheckVar(const Var* var) {
         return;
     }
 
-    if (mv->UnwrapPtrOrRef()->IsAnyOf<core::type::Texture, core::type::Sampler>()) {
+    if (mv->UnwrapPtrOrRef()->IsHandle()) {
         if (mv->AddressSpace() != AddressSpace::kHandle) {
-            AddError(var)
-                << "samplers and textures can only be declared in the 'handle' address space";
+            AddError(var) << "handle types can only be declared in the 'handle' address space";
             return;
         }
     }

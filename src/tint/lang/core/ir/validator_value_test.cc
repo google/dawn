@@ -37,9 +37,11 @@
 #include "src/tint/lang/core/number.h"
 #include "src/tint/lang/core/type/abstract_float.h"
 #include "src/tint/lang/core/type/abstract_int.h"
+#include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/manager.h"
 #include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/core/type/reference.h"
+#include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/struct.h"
 
@@ -523,7 +525,7 @@ TEST_F(IR_ValidatorTest, Var_Sampler_NonHandleAddressSpace) {
     EXPECT_THAT(
         res.Failure().reason.Str(),
         testing::HasSubstr(
-            R"(:2:42 error: var: samplers and textures can only be declared in the 'handle' address space
+            R"(:2:42 error: var: handle types can only be declared in the 'handle' address space
   %1:ptr<private, sampler, read_write> = var undef
                                          ^^^
 )")) << res.Failure().reason.Str();
@@ -538,9 +540,27 @@ TEST_F(IR_ValidatorTest, Var_Texture_NonHandleAddressSpace) {
     EXPECT_THAT(
         res.Failure().reason.Str(),
         testing::HasSubstr(
-            R"(:2:42 error: var: samplers and textures can only be declared in the 'handle' address space
+            R"(:2:42 error: var: handle types can only be declared in the 'handle' address space
   %1:ptr<private, sampler, read_write> = var undef
                                          ^^^
+)")) << res.Failure().reason.Str();
+}
+
+TEST_F(IR_ValidatorTest, Var_BindingArray_Texture_NonHandleAddressSpace) {
+    auto* v = b.Var(ty.ptr(
+        AddressSpace::kPrivate,
+        ty.binding_array(ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()), 4_u),
+        read));
+    mod.root_block->Append(v);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(
+            R"(:2:62 error: var: handle types can only be declared in the 'handle' address space
+  %1:ptr<private, binding_array<texture_2d<f32>, 4>, read> = var undef
+                                                             ^^^
 )")) << res.Failure().reason.Str();
 }
 

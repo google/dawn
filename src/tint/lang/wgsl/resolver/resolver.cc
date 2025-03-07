@@ -575,9 +575,8 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
             sem->SetAddressSpace(core::AddressSpace::kFunction);
         } else if (storage_ty->UnwrapRef()->IsHandle()) {
             // https://gpuweb.github.io/gpuweb/wgsl/#module-scope-variables
-            // If the store type is a texture type or a sampler type, then the
-            // variable declaration must not have a address space attribute. The
-            // address space will always be handle.
+            // If the store type is a handle type, then the variable declaration must not have a
+            // address space attribute. The address space will always be handle.
             sem->SetAddressSpace(core::AddressSpace::kHandle);
         }
     }
