@@ -443,5 +443,127 @@ TEST_F(SpirvParserTest, ConvertUToF_VectorUnsigned) {
 )");
 }
 
+TEST_F(SpirvParserTest, FConvert_ScalarF32ToF16) {
+    EXPECT_IR(R"(
+             OpCapability Shader
+             OpCapability Float16
+             OpMemoryModel Logical GLSL450
+             OpEntryPoint GLCompute %main "main"
+             OpExecutionMode %main LocalSize 1 1 1
+     %void    = OpTypeVoid
+     %float16 = OpTypeFloat 16
+     %float32 = OpTypeFloat 32
+     %two     = OpConstant %float32 2
+     %void_fn = OpTypeFunction %void
+
+     %main    = OpFunction %void None %void_fn
+     %main_start = OpLabel
+             %1 = OpFConvert %float16 %two
+             OpReturn
+     OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:f16 = convert 2.0f
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, FConvert_ScalarF16ToF32) {
+    EXPECT_IR(R"(
+             OpCapability Shader
+             OpCapability Float16
+             OpMemoryModel Logical GLSL450
+             OpEntryPoint GLCompute %main "main"
+             OpExecutionMode %main LocalSize 1 1 1
+     %void    = OpTypeVoid
+     %float16 = OpTypeFloat 16
+     %float32 = OpTypeFloat 32
+     %two     = OpConstant %float16 2
+     %void_fn = OpTypeFunction %void
+
+     %main    = OpFunction %void None %void_fn
+     %main_start = OpLabel
+             %1 = OpFConvert %float32 %two
+             OpReturn
+     OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:f32 = convert 2.0h
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, FConvert_VectorF32ToF16) {
+    EXPECT_IR(R"(
+             OpCapability Shader
+             OpCapability Float16
+             OpMemoryModel Logical GLSL450
+             OpEntryPoint GLCompute %main "main"
+             OpExecutionMode %main LocalSize 1 1 1
+     %void       = OpTypeVoid
+     %float16    = OpTypeFloat 16
+     %float32    = OpTypeFloat 32
+     %v2float16  = OpTypeVector %float16 2
+     %v2float32  = OpTypeVector %float32 2
+     %two        = OpConstant %float32 2
+     %v2_two     = OpConstantComposite %v2float32 %two %two
+     %void_fn    = OpTypeFunction %void
+
+     %main       = OpFunction %void None %void_fn
+     %main_start = OpLabel
+             %1 = OpFConvert %v2float16 %v2_two
+             OpReturn
+     OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<f16> = convert vec2<f32>(2.0f)
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, FConvert_VectorF16ToF32) {
+    EXPECT_IR(R"(
+             OpCapability Shader
+             OpCapability Float16
+             OpMemoryModel Logical GLSL450
+             OpEntryPoint GLCompute %main "main"
+             OpExecutionMode %main LocalSize 1 1 1
+     %void       = OpTypeVoid
+     %float16    = OpTypeFloat 16
+     %float32    = OpTypeFloat 32
+     %v2float16  = OpTypeVector %float16 2
+     %v2float32  = OpTypeVector %float32 2
+     %two       = OpConstant %float16 2
+     %v2_two    = OpConstantComposite %v2float16 %two %two
+     %void_fn    = OpTypeFunction %void
+
+     %main       = OpFunction %void None %void_fn
+     %main_start = OpLabel
+             %1 = OpFConvert %v2float32 %v2_two
+             OpReturn
+     OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<f32> = convert vec2<f16>(2.0h)
+    ret
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader

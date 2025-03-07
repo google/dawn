@@ -752,6 +752,10 @@ class Parser {
                 case spv::Op::OpConvertUToF:
                     EmitSpirvExplicitBuiltinCall(inst, spirv::BuiltinFn::kConvertUToF);
                     break;
+                case spv::Op::OpFConvert:
+                    Emit(b_.Convert(Type(inst.type_id()), Value(inst.GetSingleWordOperand(2))),
+                         inst.result_id());
+                    break;
                 case spv::Op::OpBitwiseAnd:
                     EmitSpirvExplicitBuiltinCall(inst, spirv::BuiltinFn::kBitwiseAnd);
                     break;
