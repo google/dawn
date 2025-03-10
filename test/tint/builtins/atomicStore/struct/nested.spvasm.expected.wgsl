@@ -1,66 +1,42 @@
 struct S0_atomic {
-  /* @offset(0) */
   x : i32,
-  /* @offset(4) */
   a : atomic<u32>,
-  /* @offset(8) */
   y : i32,
-  /* @offset(12) */
   z : i32,
 }
 
 struct S0 {
-  /* @offset(0) */
   x : i32,
-  /* @offset(4) */
   a : u32,
-  /* @offset(8) */
   y : i32,
-  /* @offset(12) */
   z : i32,
 }
 
 struct S1_atomic {
-  /* @offset(0) */
   x : i32,
-  /* @offset(4) */
   a : S0_atomic,
-  /* @offset(20) */
   y : i32,
-  /* @offset(24) */
   z : i32,
 }
 
 struct S1 {
-  /* @offset(0) */
   x : i32,
-  /* @offset(4) */
   a : S0,
-  /* @offset(20) */
   y : i32,
-  /* @offset(24) */
   z : i32,
 }
 
 struct S2_atomic {
-  /* @offset(0) */
   x : i32,
-  /* @offset(4) */
   y : i32,
-  /* @offset(8) */
   z : i32,
-  /* @offset(12) */
   a : S1_atomic,
 }
 
 struct S2 {
-  /* @offset(0) */
   x : i32,
-  /* @offset(4) */
   y : i32,
-  /* @offset(8) */
   z : i32,
-  /* @offset(12) */
   a : S1,
 }
 

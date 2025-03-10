@@ -1,5 +1,3 @@
-alias Arr = array<u32, 4u>;
-
 var<private> local_invocation_index_1 : u32;
 
 var<workgroup> wg : array<atomic<u32>, 4u>;

@@ -1,9 +1,3 @@
-alias Arr = array<u32, 1u>;
-
-alias Arr_1 = array<Arr, 2u>;
-
-alias Arr_2 = array<Arr_1, 3u>;
-
 var<private> local_invocation_index_1 : u32;
 
 var<workgroup> wg : array<array<array<atomic<u32>, 1u>, 2u>, 3u>;
