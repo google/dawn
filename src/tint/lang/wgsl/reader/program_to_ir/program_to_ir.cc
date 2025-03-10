@@ -410,9 +410,15 @@ class Impl {
             const auto* sem = program_.Sem().GetVal(stmt->rhs);
             switch (sem->Stage()) {
                 case core::EvaluationStage::kRuntime:
-                case core::EvaluationStage::kOverride:
-                    EmitValueExpression(stmt->rhs);
-                    break;
+                case core::EvaluationStage::kOverride: {
+                    auto* value = EmitValueExpression(stmt->rhs);
+                    auto* result = value->As<core::ir::InstructionResult>();
+                    // Overrides need to be referenced if they are to be retained in single entry
+                    // point in the case of phony assignment.
+                    if (!result || result->Instruction()->Block() == mod.root_block) {
+                        current_block_->Append(builder_.Let(value));
+                    }
+                } break;
                 case core::EvaluationStage::kNotEvaluated:
                 case core::EvaluationStage::kConstant:
                     // Don't emit.
