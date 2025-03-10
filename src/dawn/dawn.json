@@ -1733,7 +1733,6 @@
         "category": "structure",
         "extensible": "in",
         "tags": ["dawn"],
-        "_comment": "TODO(crbug.com/1514732): deprecate flipY",
         "members": [
             {"name": "label", "type": "string view", "optional": true},
             {"name": "plane 0", "type": "texture view"},
