@@ -81,7 +81,7 @@ TEST_F(SpirvParserTest, BranchConditional) {
        %true = OpConstantTrue %bool
     %ep_type = OpTypeFunction %void
        %main = OpFunction %void None %ep_type
- %main_start = OpLabel
+ %10 = OpLabel
           %1 = OpCopyObject %i32 %one
                OpSelectionMerge %bb_merge None
                OpBranchConditional %true %bb_true %bb_false
@@ -190,10 +190,13 @@ TEST_F(SpirvParserTest, BranchConditional_FalseToMerge) {
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:i32 = let 1i
-    if true [t: $B2] {  # if_1
+    if true [t: $B2, f: $B3] {  # if_1
       $B2: {  # true
         %3:i32 = let 2i
         ret
+      }
+      $B3: {  # false
+        exit_if  # if_1
       }
     }
     ret
@@ -245,7 +248,7 @@ TEST_F(SpirvParserTest, BranchConditional_TrueMatchesFalse) {
 )");
 }
 
-TEST_F(SpirvParserTest, BranchConditional_Nested) {
+TEST_F(SpirvParserTest, BranchConditional_Nested_FalseExit) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -258,6 +261,7 @@ TEST_F(SpirvParserTest, BranchConditional_Nested) {
         %two = OpConstant %i32 2
       %three = OpConstant %i32 3
        %true = OpConstantTrue %bool
+      %false = OpConstantFalse %bool
     %ep_type = OpTypeFunction %void
        %main = OpFunction %void None %ep_type
  %main_start = OpLabel
@@ -265,7 +269,7 @@ TEST_F(SpirvParserTest, BranchConditional_Nested) {
                OpSelectionMerge %bb_merge None
                OpBranchConditional %true %bb_true %bb_merge
     %bb_true = OpLabel
-               OpBranchConditional %true %99 %bb_merge
+               OpBranchConditional %false %99 %bb_merge
          %99 = OpLabel
           %2 = OpCopyObject %i32 %two
                OpBranch %bb_merge
@@ -277,14 +281,76 @@ TEST_F(SpirvParserTest, BranchConditional_Nested) {
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:i32 = let 1i
-    if true [t: $B2] {  # if_1
+    if true [t: $B2, f: $B3] {  # if_1
       $B2: {  # true
-        if true [t: $B3] {  # if_2
-          $B3: {  # true
+        if false [t: $B4, f: $B5] {  # if_2
+          $B4: {  # true
+            %3:i32 = let 2i
+            exit_if  # if_2
+          }
+          $B5: {  # false
+            exit_if  # if_2
+          }
+        }
+        exit_if  # if_1
+      }
+      $B3: {  # false
+        exit_if  # if_1
+      }
+    }
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, BranchConditional_Nested_TrueExit) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+        %i32 = OpTypeInt 32 1
+       %bool = OpTypeBool
+        %one = OpConstant %i32 1
+        %two = OpConstant %i32 2
+      %three = OpConstant %i32 3
+       %true = OpConstantTrue %bool
+      %false = OpConstantFalse %bool
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+          %1 = OpCopyObject %i32 %one
+               OpSelectionMerge %bb_merge None
+               OpBranchConditional %true %bb_true %bb_merge
+    %bb_true = OpLabel
+               OpBranchConditional %false %bb_merge %99
+         %99 = OpLabel
+          %2 = OpCopyObject %i32 %two
+               OpBranch %bb_merge
+   %bb_merge = OpLabel
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = let 1i
+    if true [t: $B2, f: $B3] {  # if_1
+      $B2: {  # true
+        if false [t: $B4, f: $B5] {  # if_2
+          $B4: {  # true
+            exit_if  # if_2
+          }
+          $B5: {  # false
             %3:i32 = let 2i
             exit_if  # if_2
           }
         }
+        exit_if  # if_1
+      }
+      $B3: {  # false
         exit_if  # if_1
       }
     }
@@ -825,6 +891,7 @@ TEST_F(SpirvParserTest, Switch_IfBreak) {
          %40 = OpLabel
                OpBranch %49
          %49 = OpLabel
+        %101 = OpIAdd %u32 %two %three
                OpBranch %99
          %50 = OpLabel
                OpSelectionMerge %79 None
@@ -832,6 +899,7 @@ TEST_F(SpirvParserTest, Switch_IfBreak) {
          %60 = OpLabel
                OpBranch %79
          %79 = OpLabel ; dominated by 60, so must follow 60
+        %100 = OpIAdd %u32 %one %two
                OpBranch %99
                OpFunctionEnd
   )",
@@ -848,6 +916,7 @@ TEST_F(SpirvParserTest, Switch_IfBreak) {
             exit_switch  # switch_1
           }
         }
+        %2:u32 = spirv.add<u32> 1u, 2u
         exit_switch  # switch_1
       }
       $B3: {  # case
@@ -859,6 +928,7 @@ TEST_F(SpirvParserTest, Switch_IfBreak) {
             exit_if  # if_2
           }
         }
+        %3:u32 = spirv.add<u32> 2u, 3u
         exit_switch  # switch_1
       }
     }
