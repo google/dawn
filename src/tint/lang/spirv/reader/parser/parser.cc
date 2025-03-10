@@ -115,13 +115,13 @@ class Parser {
             }
         }
 
+        RegisterNames();
+
         id_stack_.emplace_back();
         {
             TINT_SCOPED_ASSIGNMENT(current_block_, ir_.root_block);
             EmitModuleScopeVariables();
         }
-
-        RegisterNames();
 
         EmitFunctions();
         EmitEntryPointAttributes();
