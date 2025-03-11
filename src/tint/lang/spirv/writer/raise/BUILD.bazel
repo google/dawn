@@ -41,6 +41,7 @@ cc_library(
   srcs = [
     "builtin_polyfill.cc",
     "expand_implicit_splats.cc",
+    "fork_explicit_layout_types.cc",
     "handle_matrix_arithmetic.cc",
     "merge_return.cc",
     "pass_matrix_by_pointer.cc",
@@ -52,6 +53,7 @@ cc_library(
   hdrs = [
     "builtin_polyfill.h",
     "expand_implicit_splats.h",
+    "fork_explicit_layout_types.h",
     "handle_matrix_arithmetic.h",
     "merge_return.h",
     "pass_matrix_by_pointer.h",
@@ -105,6 +107,7 @@ cc_library(
   srcs = [
     "builtin_polyfill_test.cc",
     "expand_implicit_splats_test.cc",
+    "fork_explicit_layout_types_test.cc",
     "handle_matrix_arithmetic_test.cc",
     "merge_return_test.cc",
     "pass_matrix_by_pointer_test.cc",
