@@ -4115,7 +4115,13 @@ crbug.com/dawn/372283570 [ intel-0x3e9b mac ] webgpu:shader,execution,expression
 crbug.com/dawn/0000 [ android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,subgroupAdd:compute,split:case="every_even" [ Skip ]
 crbug.com/dawn/0000 [ android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,subgroupMul:compute,split:case="lower_half" [ Skip ]
 
+# Timeouts on error_scope
 crbug.com/367513506 [ asan win ] webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=100000 [ Skip ]
+crbug.com/367513506 [ amd mac ] webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=100000 [ Skip ]
+crbug.com/367513506 [ intel win ] webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=100000 [ Skip ]
+crbug.com/367513506 [ nvidia win ] webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=100000 [ Skip ]
+crbug.com/367513506 [ android-pixel-6 ] webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=100000 [ Skip ]
+crbug.com/367513506 [ android-pixel-6 ] webgpu:api,validation,error_scope:current_scope:errorFilter="validation";stackDepth=100000 [ Skip ]
 
 crbug.com/0000 [ linux ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_2d_coords:* [ Skip ]
 crbug.com/0000 [ linux ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_array_2d_coords:* [ Skip ]
@@ -5489,7 +5495,6 @@ crbug.com/dawn/0000 [ angle-opengl dawn-backend-validation desktop display-serve
 crbug.com/dawn/0000 [ angle-opengl dawn-backend-validation desktop display-server-x graphite-disabled no-asan no-clang-coverage nvidia-0x2184 nvidia_lt_535.183.01 passthrough release renderer-skia-vulkan target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:api,operation,rendering,depth_bias:depth_bias:quadAngle=0;bias=8388608;biasSlopeScale=0;biasClamp=0 [ Failure ]
 crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation desktop display-server-x graphite-disabled no-asan no-clang-coverage nvidia-0x2184 nvidia_lt_535.183.01 passthrough release renderer-skia-vulkan target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:api,operation,rendering,depth_bias:depth_bias:quadAngle=0;bias=-8388608;biasSlopeScale=0;biasClamp=0.125 [ Failure ]
 crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation desktop display-server-x graphite-disabled no-asan no-clang-coverage nvidia-0x2184 nvidia_lt_535.183.01 passthrough release renderer-skia-vulkan target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:api,operation,rendering,depth_bias:depth_bias:quadAngle=0;bias=8388608;biasSlopeScale=0;biasClamp=0 [ Failure ]
-crbug.com/dawn/0000 [ dawn-no-backend-validation no-asan webgpu-dxc-disabled win10 ] webgpu:shader,execution,limits:struct_members: [ Failure ]
 crbug.com/dawn/0000 [ intel-0x3e9b ] webgpu:shader,execution,expression,call,builtin,fwidthFine:f32:vectorize="_undef_";non_uniform_discard=false [ Failure ]
 crbug.com/dawn/0000 [ intel-0x3e9b ] webgpu:shader,execution,expression,call,builtin,fwidthFine:f32:vectorize=2;non_uniform_discard=false [ Failure ]
 crbug.com/dawn/0000 [ intel-0x3e9b ] webgpu:shader,execution,expression,call,builtin,fwidthFine:f32:vectorize=2;non_uniform_discard=true [ Failure ]
@@ -6885,7 +6890,6 @@ crbug.com/dawn/0000 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call
 # Failures on Win NVIDIA experimental driver
 crbug.com/0000 [ angle-d3d11 asan dawn-no-backend-validation graphite-enabled no-clang-coverage nvidia-0x2184 release-x64 target-cpu-64 ] webgpu:api,operation,device,all_limits_and_features:everything: [ Failure ]
 crbug.com/0000 [ angle-d3d11 clang-coverage dawn-no-backend-validation graphite-enabled no-asan nvidia-0x2184 release-x64 target-cpu-64 webgpu-dxc-enabled ] webgpu:api,operation,device,all_limits_and_features:everything: [ Failure ]
-crbug.com/0000 [ angle-d3d11 dawn-backend-validation graphite-enabled nvidia-0x2184 webgpu-dxc-disabled ] webgpu:shader,execution,limits:struct_members: [ Failure ]
 crbug.com/0000 [ angle-d3d11 clang-coverage dawn-no-backend-validation graphite-enabled no-asan nvidia-0x2184 webgpu-dxc-enabled ] webgpu:api,operation,adapter,info:subgroup_sizes: [ Failure ]
 crbug.com/0000 [ angle-d3d11 clang-coverage dawn-no-backend-validation graphite-enabled no-asan nvidia-0x2184 webgpu-dxc-enabled ] webgpu:shader,execution,expression,call,builtin,subgroupBroadcast:compute,split:predicate="every_even" [ Failure ]
 crbug.com/0000 [ angle-d3d11 clang-coverage dawn-no-backend-validation graphite-enabled no-asan nvidia-0x2184 webgpu-dxc-enabled ] webgpu:shader,execution,expression,call,builtin,subgroupBroadcast:compute,split:predicate="every_odd" [ Failure ]
@@ -8639,9 +8643,6 @@ crbug.com/0000 [ linux nvidia ] webgpu:api,validation,encoding,cmds,render,dynam
 crbug.com/0000 [ nvidia win ] webgpu:api,validation,encoding,cmds,render,dynamic_state:setViewport,xy_rect_contained_in_bounds: [ Failure ]
 crbug.com/0000 [ android-pixel-6 ] webgpu:api,validation,error_scope:balanced_nesting:errorFilter="validation";numErrors=1000 [ Failure ]
 crbug.com/0000 [ linux no-clang-coverage nvidia nvidia_ge_535.183.01 ] webgpu:api,validation,error_scope:balanced_siblings:errorFilter="validation";numErrors=1000 [ Failure ]
-crbug.com/0000 [ amd mac ] webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=100000 [ Failure ]
-crbug.com/0000 [ intel win ] webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=100000 [ Failure ]
-crbug.com/0000 [ nvidia win ] webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=100000 [ Failure ]
 crbug.com/0000 [ linux no-clang-coverage nvidia ] webgpu:api,validation,error_scope:current_scope:errorFilter="validation";stackDepth=1000 [ Failure ]
 crbug.com/0000 [ nvidia win ] webgpu:api,validation,error_scope:current_scope:errorFilter="validation";stackDepth=1000 [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:api,validation,error_scope:parent_scope:errorFilter="validation";stackDepth=1000 [ Failure ]
@@ -9199,8 +9200,6 @@ crbug.com/0000 [ amd mac ] webgpu:shader,execution,expression,call,builtin,textu
 crbug.com/0000 [ intel mac ] webgpu:shader,execution,expression,call,builtin,texture_utils:readTextureToTexelViews:srcFormat="stencil8";texelViewFormat="stencil8";viewDimension="cube-array";sampleCount=1 [ Failure ]
 crbug.com/0000 [ intel mac ] webgpu:shader,execution,expression,call,builtin,texture_utils:weights:stage="compute" [ Failure ]
 crbug.com/0000 [ intel mac ] webgpu:shader,execution,expression,unary,f16_conversion:abstract_float:inputSource="const";vectorize=2 [ Failure ]
-crbug.com/0000 [ dawn-backend-validation intel-0x9bc5 no-asan release-x64 target-cpu-64 webgpu-dxc-disabled win ] webgpu:shader,execution,limits:struct_members: [ Failure ]
-crbug.com/0000 [ dawn-no-backend-validation intel webgpu-dxc-disabled win ] webgpu:shader,execution,limits:struct_members: [ Failure ]
 crbug.com/0000 [ no-clang-coverage nvidia webgpu-dxc-disabled win ] webgpu:shader,execution,statement,discard:derivatives:useStorageBuffers=true [ Failure ]
 crbug.com/0000 [ amd mac ] webgpu:shader,execution,statement,discard:function_call:useStorageBuffers=true [ Failure ]
 crbug.com/0000 [ intel mac ] webgpu:shader,validation,expression,call,builtin,smoothstep:arguments:test="f32" [ Failure ]

@@ -109,3 +109,8 @@ crbug.com/dawn/0000 [ android-r ] webgpu:shader,validation,expression,call,built
 ################################################################################
 crbug.com/dawn/2432 [ win intel angle-d3d11 asan ] webgpu:shader,validation,expression,call,builtin,length:vec4:stage="override";type="vec4%3Cf16%3E" [ Slow ]
 crbug.com/dawn/2432 [ win intel angle-d3d11 asan ] webgpu:shader,validation,expression,call,builtin,length:vec4:stage="override";type="vec4%3Cf32%3E" [ Slow ]
+
+################################################################################
+# FXC times out on the large shader produced by this test
+################################################################################
+crbug.com/402178306 [ webgpu-dxc-disabled win ] webgpu:shader,execution,limits:struct_members: [ Slow ]
