@@ -44,7 +44,7 @@
     makeGetU64: function(struct, offset) {
       var l = makeGetValue(struct, offset, 'u32');
       var h = makeGetValue(`(${struct} + 4)`, offset, 'u32')
-      return `${h} * 0x100000000 + ${l}`
+      return `(${h} * 0x100000000 + ${l})`
     },
     makeCheck: function(str) {
       if (!ASSERTIONS) return '';
