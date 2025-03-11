@@ -212,10 +212,23 @@ struct State {
                 case spirv::BuiltinFn::kFMod:
                     FMod(builtin);
                     break;
+                case spirv::BuiltinFn::kSelect:
+                    Select(builtin);
+                    break;
                 default:
                     TINT_UNREACHABLE() << "unknown spirv builtin: " << builtin->Func();
             }
         }
+    }
+
+    void Select(spirv::ir::BuiltinCall* call) {
+        auto* cond = call->Args()[0];
+        auto* true_ = call->Args()[1];
+        auto* false_ = call->Args()[2];
+        b.InsertBefore(call, [&] {
+            b.CallWithResult(call->DetachResult(), core::BuiltinFn::kSelect, false_, true_, cond);
+        });
+        call->Destroy();
     }
 
     // FMod(x, y) emulated with: x - y * floor(x / y)

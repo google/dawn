@@ -9062,5 +9062,64 @@ TEST_F(SpirvReader_BuiltinsTest, FMod_Vector) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(SpirvReader_BuiltinsTest, Select_Scalar) {
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.Call<spirv::ir::BuiltinCall>(ty.f32(), spirv::BuiltinFn::kSelect, true, 1_f, 2_f);
+        b.Return(ep);
+    });
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:f32 = spirv.select true, 1.0f, 2.0f
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:f32 = select 2.0f, 1.0f, true
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+TEST_F(SpirvReader_BuiltinsTest, Select_Vector) {
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.Call<spirv::ir::BuiltinCall>(ty.vec2<f32>(), spirv::BuiltinFn::kSelect,
+                                       b.Splat<vec2<bool>>(false), b.Splat<vec2<f32>>(1_f),
+                                       b.Splat<vec2<f32>>(2_f));
+        b.Return(ep);
+    });
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<f32> = spirv.select vec2<bool>(false), vec2<f32>(1.0f), vec2<f32>(2.0f)
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<f32> = select vec2<f32>(2.0f), vec2<f32>(1.0f), vec2<bool>(false)
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader::lower
