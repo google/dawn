@@ -1589,5 +1589,37 @@ TEST_F(SpirvParserTest, SelectVector) {
 )");
 }
 
+TEST_F(SpirvParserTest, VectorExtractDynamic) {
+    EXPECT_IR(R"(
+       OpCapability Shader
+       OpMemoryModel Logical GLSL450
+       OpEntryPoint GLCompute %main "main"
+       OpExecutionMode %main LocalSize 1 1 1
+%void = OpTypeVoid
+%float = OpTypeFloat 32
+%uint = OpTypeInt 32 0
+%v4float = OpTypeVector %float 4
+%ep_type = OpTypeFunction %void
+%float_1 = OpConstant %float 1.0
+%float_2 = OpConstant %float 2.0
+%float_3 = OpConstant %float 3.0
+%float_4 = OpConstant %float 4.0
+%uint_2  = OpConstant %uint 2
+%vec = OpConstantComposite %v4float %float_1 %float_2 %float_3 %float_4
+%main = OpFunction %void None %ep_type
+%entry = OpLabel
+  %1 = OpVectorExtractDynamic %float %vec %uint_2
+       OpReturn
+       OpFunctionEnd)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:f32 = access vec4<f32>(1.0f, 2.0f, 3.0f, 4.0f), 2u
+    ret
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader
