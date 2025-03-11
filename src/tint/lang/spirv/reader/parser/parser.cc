@@ -474,7 +474,7 @@ class Parser {
 
         auto* blk = src_res->Instruction()->Block();
         while (blk) {
-            if (current_blocks_.count(blk) > 0) {
+            if (InBlock(blk)) {
                 break;
             }
 
@@ -737,10 +737,12 @@ class Parser {
         }
     }
 
+    bool InBlock(core::ir::Block* blk) { return current_blocks_.count(blk) > 0; }
+
     // A block parent is a container for a scope, like a `{}`d section in code. It controls the
     // block addition to the current blocks and the ID stack entry for the block.
     void EmitBlockParent(core::ir::Block* dst, const spvtools::opt::BasicBlock& src) {
-        TINT_ASSERT(current_blocks_.count(dst) == 0);
+        TINT_ASSERT(!InBlock(dst));
 
         id_stack_.emplace_back();
         current_blocks_.insert(dst);
@@ -756,6 +758,26 @@ class Parser {
     /// @param src the SPIR-V block to emit
     void EmitBlock(core::ir::Block* dst, const spvtools::opt::BasicBlock& src) {
         TINT_SCOPED_ASSIGNMENT(current_block_, dst);
+
+        auto* loop_merge_inst = src.GetLoopMergeInst();
+        // This is a loop merge block, so we need to treat it as a Loop.
+        if (loop_merge_inst) {
+            // Emit the loop into the current block.
+            EmitLoop(src);
+
+            // The loop header is a walk stop block, which was created in the
+            // emit loop method. Get the loop back so we can change the current
+            // insertion block.
+            auto* loop = StopWalkingAt(src.id())->As<core::ir::Loop>();
+            TINT_ASSERT(loop);
+
+            id_stack_.emplace_back();
+            current_blocks_.insert(loop->Body());
+
+            // Now emit the remainder of the block into the loop body.
+            current_block_ = loop->Body();
+        }
+
         for (auto& inst : src) {
             switch (inst.opcode()) {
                 case spv::Op::OpNop:
@@ -771,6 +793,9 @@ class Parser {
                     break;
                 case spv::Op::OpSwitch:
                     EmitSwitch(src, inst);
+                    break;
+                case spv::Op::OpLoopMerge:
+                    EmitLoopMerge(src, inst);
                     break;
                 case spv::Op::OpSelectionMerge:
                     // Do nothing, the selection merge will be handled in the following
@@ -1058,6 +1083,24 @@ class Parser {
                         << "unhandled SPIR-V instruction: " << static_cast<uint32_t>(inst.opcode());
             }
         }
+
+        // The loop merge needs to be emitted if this was a loop block. It has
+        // to be emitted back into the original destination.
+        if (loop_merge_inst) {
+            auto* loop = StopWalkingAt(src.id())->As<core::ir::Loop>();
+            TINT_ASSERT(loop);
+
+            if (!loop->Body()->Terminator()) {
+                loop->Body()->Append(b_.Continue(loop));
+            }
+
+            current_blocks_.erase(loop->Body());
+            id_stack_.pop_back();
+
+            auto merge_id = loop_merge_inst->GetSingleWordInOperand(0);
+            const auto& merge_bb = current_spirv_function_->FindBlock(merge_id);
+            EmitBlock(dst, *merge_bb);
+        }
     }
 
     void EmitBitcast(const spvtools::opt::Instruction& inst) {
@@ -1074,6 +1117,14 @@ class Parser {
         return nullptr;
     }
 
+    core::ir::Loop* ContinueTarget(uint32_t id) {
+        auto iter = continue_targets_.find(id);
+        if (iter != continue_targets_.end()) {
+            return iter->second;
+        }
+        return nullptr;
+    }
+
     void EmitBranch(const spvtools::opt::Instruction& inst) {
         auto dest_id = inst.GetSingleWordInOperand(0);
 
@@ -1082,9 +1133,20 @@ class Parser {
             TINT_ASSERT(switch_blocks.count(dest_id) == 0);
         }
 
+        // The destination is a continuing block, so insert a `continue`
+        if (auto* loop = ContinueTarget(dest_id)) {
+            EmitWithoutResult(b_.Continue(loop));
+            return;
+        }
         // If this is branching to a previous merge block then we're done. It can be a previous
         // merge block in the case of an `if` breaking out of a `switch` or `loop`.
-        if (StopWalkingAt(dest_id)) {
+        if (auto* ctrl_inst = StopWalkingAt(dest_id)) {
+            if (auto* loop = ctrl_inst->As<core::ir::Loop>()) {
+                // Going to the merge in a loop body has to be a break regardless of nesting level.
+                if (InBlock(loop->Body()) && !InBlock(loop->Continuing())) {
+                    EmitWithoutResult(b_.Exit(ctrl_inst));
+                }
+            }
             return;
         }
 
@@ -1150,7 +1212,7 @@ class Parser {
         // the inner does not have a merge block, it can branch out to the
         // merge of the outer conditional. But, WGSL doesn't allow that, so
         // just treat it as an exit of the inner block.
-        if (ctrl->Is<core::ir::If>()) {
+        if (ctrl->Is<core::ir::If>() && parent->Is<core::ir::If>()) {
             return parent;
         }
         return ctrl;
@@ -1177,7 +1239,11 @@ class Parser {
         std::optional<uint32_t> merge_id = std::nullopt;
 
         auto* merge_inst = bb.GetMergeInst();
-        if (merge_inst != nullptr) {
+        if (bb.GetLoopMergeInst()) {
+            // If this is a loop merge block, then the merge instruction is for
+            // the loop, not the branch conditional.
+            merge_inst = nullptr;
+        } else if (merge_inst != nullptr) {
             merge_id = merge_inst->GetSingleWordInOperand(0);
             walk_stop_blocks_.insert({merge_id.value(), if_});
         }
@@ -1196,7 +1262,11 @@ class Parser {
         }
 
         if (auto* ctrl = StopWalkingAt(true_id)) {
-            if_->True()->Append(b_.Exit(ExitFor(ctrl, if_)));
+            if (auto* loop = ContinueTarget(true_id)) {
+                if_->True()->Append(b_.Continue(loop));
+            } else {
+                if_->True()->Append(b_.Exit(ExitFor(ctrl, if_)));
+            }
         } else {
             const auto& bb_true = current_spirv_function_->FindBlock(true_id);
             EmitBlockParent(if_->True(), *bb_true);
@@ -1213,7 +1283,11 @@ class Parser {
 
         } else if (auto* ctrl = StopWalkingAt(false_id)) {
             // If the false block is really a merge block
-            if_->False()->Append(b_.Exit(ExitFor(ctrl, if_)));
+            if (auto* loop = ContinueTarget(false_id)) {
+                if_->False()->Append(b_.Continue(loop));
+            } else {
+                if_->False()->Append(b_.Exit(ExitFor(ctrl, if_)));
+            }
         } else {
             const auto& bb_false = current_spirv_function_->FindBlock(false_id);
             EmitBlockParent(if_->False(), *bb_false);
@@ -1242,6 +1316,52 @@ class Parser {
             const auto& bb_merge = current_spirv_function_->FindBlock(merge_id.value());
             EmitBlock(current_block_, *bb_merge);
         }
+    }
+
+    void EmitLoop(const spvtools::opt::BasicBlock& bb) {
+        // This just handles creating the loop itself, the rest of the processing
+        // of the continue and merge blocks will be handled when we deal with the
+        // LoopMerge instruction itself. We have to setup the loop early in order
+        // to capture instructions which come in the header before the LoopMerge.
+        auto* loop = b_.Loop();
+        EmitWithoutResult(loop);
+        walk_stop_blocks_.insert({bb.id(), loop});
+    }
+
+    void EmitLoopMerge(const spvtools::opt::BasicBlock& bb,
+                       const spvtools::opt::Instruction& inst) {
+        auto merge_id = inst.GetSingleWordInOperand(0);
+        auto continue_id = inst.GetSingleWordInOperand(1);
+        auto header_id = bb.id();
+
+        // The loop was created in `EmitLoop` and set as the stop block value for
+        // the header block. Retrieve the loop from the stop list.
+        auto* loop = StopWalkingAt(header_id)->As<core::ir::Loop>();
+        TINT_ASSERT(loop);
+
+        continue_targets_.insert({continue_id, loop});
+
+        // Insert the stop blocks
+        walk_stop_blocks_.insert({merge_id, loop});
+        if (continue_id != header_id) {
+            walk_stop_blocks_.insert({continue_id, loop});
+
+            const auto& bb_continue = current_spirv_function_->FindBlock(continue_id);
+
+            // Emit the continuing block.
+            EmitBlockParent(loop->Continuing(), *bb_continue);
+        }
+        if (!loop->Continuing()->Terminator()) {
+            loop->Continuing()->Append(b_.NextIteration(loop));
+        }
+
+        // The remainder of the loop body will process when we hit the
+        // BranchConditional or Branch after the LoopMerge. We're already
+        // processing into the loop body from the `EmitLoop` code above so just
+        // continue emitting.
+
+        // The merge block will be emitted by the `EmitBlock` code after the
+        // instructions in the loop header are emitted.
     }
 
     void EmitSwitch(const spvtools::opt::BasicBlock& bb, const spvtools::opt::Instruction& inst) {
@@ -1860,6 +1980,8 @@ class Parser {
     // Set of SPIR-V block ids where we'll stop a `Branch` instruction walk. These could be merge
     // blocks, premerge blocks, continuing blocks, etc.
     std::unordered_map<uint32_t, core::ir::ControlInstruction*> walk_stop_blocks_;
+    // Map of continue target ID to the controlling IR loop.
+    std::unordered_map<uint32_t, core::ir::Loop*> continue_targets_;
 
     std::unordered_set<core::ir::Block*> current_blocks_;
     std::vector<std::unordered_set<uint32_t>> id_stack_;
