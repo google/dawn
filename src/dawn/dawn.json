@@ -1520,7 +1520,8 @@
         "values": [
             {"value": 1, "name": "success"},
             {"value": 2, "name": "instance dropped"},
-            {"value": 3, "name": "empty stack"}
+            {"value": 3, "name": "error"},
+            {"value": 4, "name": "empty stack", "_comment": "TODO(crbug.com/402220413): Remove once no longer used."}
         ]
     },
     "pop error scope callback": {

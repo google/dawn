@@ -835,8 +835,9 @@ Future DeviceBase::APIPopErrorScope(const WGPUPopErrorScopeCallbackInfo& callbac
                 type = static_cast<WGPUErrorType>(mScope->GetErrorType());
                 message = mScope->GetErrorMessage();
             } else {
-                status = WGPUPopErrorScopeStatus_EmptyStack;
+                status = WGPUPopErrorScopeStatus_Error;
                 type = WGPUErrorType_NoError;
+                message = ToOutputStringView("No error scopes to pop");
             }
 
             mCallback(status, type, message, mUserdata1.ExtractAsDangling(),

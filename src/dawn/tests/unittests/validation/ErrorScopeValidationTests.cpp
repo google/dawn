@@ -39,8 +39,10 @@ namespace {
 
 using testing::_;
 using testing::EmptySizedString;
+using testing::HasSubstr;
 using testing::MockCppCallback;
 using testing::NonEmptySizedString;
+using testing::SizedStringMatches;
 using utils::BinarySemaphore;
 
 class ErrorScopeValidationTest : public ValidationTest {
@@ -223,8 +225,9 @@ TEST_F(ErrorScopeValidationTest, ThreadLocalErrorOnlyOneThread) {
 TEST_F(ErrorScopeValidationTest, PushPopBalanced) {
     // No error scopes to pop.
     {
-        EXPECT_CALL(mPopErrorScopeCb, Call(wgpu::PopErrorScopeStatus::EmptyStack,
-                                           wgpu::ErrorType::NoError, EmptySizedString()))
+        EXPECT_CALL(mPopErrorScopeCb,
+                    Call(wgpu::PopErrorScopeStatus::Error, wgpu::ErrorType::NoError,
+                         SizedStringMatches(HasSubstr("No error scopes"))))
             .Times(1);
         device.PopErrorScope(wgpu::CallbackMode::AllowProcessEvents, mPopErrorScopeCb.Callback());
         FlushWireAndProcessEvents();
@@ -239,8 +242,9 @@ TEST_F(ErrorScopeValidationTest, PushPopBalanced) {
         device.PopErrorScope(wgpu::CallbackMode::AllowProcessEvents, mPopErrorScopeCb.Callback());
         FlushWireAndProcessEvents();
 
-        EXPECT_CALL(mPopErrorScopeCb, Call(wgpu::PopErrorScopeStatus::EmptyStack,
-                                           wgpu::ErrorType::NoError, EmptySizedString()))
+        EXPECT_CALL(mPopErrorScopeCb,
+                    Call(wgpu::PopErrorScopeStatus::Error, wgpu::ErrorType::NoError,
+                         SizedStringMatches(HasSubstr("No error scopes"))))
             .Times(1);
         device.PopErrorScope(wgpu::CallbackMode::AllowProcessEvents, mPopErrorScopeCb.Callback());
         FlushWireAndProcessEvents();
