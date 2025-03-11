@@ -418,7 +418,7 @@ class DeviceBase : public ErrorSink,
     Ref<RenderPipelineBase> AddOrGetCachedRenderPipeline(Ref<RenderPipelineBase> renderPipeline);
 
     void DumpMemoryStatistics(dawn::native::MemoryDump* dump) const;
-    uint64_t ComputeEstimatedMemoryUsage() const;
+    MemoryUsageInfo ComputeEstimatedMemoryUsage() const;
     void ReduceMemoryUsage();
     void PerformIdleTasks();
 
