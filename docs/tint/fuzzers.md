@@ -103,6 +103,45 @@ autoninja -C out/libfuzz tint_generate_ir_corpus
 out/libfuzz/tint_ir_fuzzer.exe out/libfuzz/gen/fuzzers/ir_corpus
 ```
 
+#### Minimizing the corpus
+
+By design our GN rules do not minimize the corpus, since this can take
+over an hour to run, so would be way too costly to run on the
+bots. Additionally there is no rule provided to do this, because there
+are bots/checks in the Chromium ecosystem that try running/building
+every target.
+
+There is not a lot of need to minimize the corpus, since the libFuzzer
+will do it automatically as needed, and ClusterFuzz stores the working
+corpus in GCS, so the cost for minimization will be amortized over
+time.
+
+The one time that it might be needed is if the corpus has radically
+changed, i.e. a major language change, or new feature. Then a dev may
+want to generate a new corpus, minimize it, and then manually update
+the GCS bucket with it to help the fuzzer out.
+
+Minimizing the corpus can be done via manually invoking the underlying
+script that the GN targets use for generating the corpus.
+
+This will generated a minimized version of the WGSL corpus in
+`out/Fuzzer/gen/fuzzers/wgsl_min_corpus`:
+```bash
+autoninja -C out/Fuzzer tint_wgsl_fuzzer
+python3 src/tint/cmd/fuzz/generate_tint_corpus.py out/Fuzzer/gen/fuzzers/wgsl_corpus out/Fuzzer/gen/fuzzers/ --wgsl_fuzzer=out/Fuzzer/tint_wgsl_fuzzer
+```
+
+This will generated a minimized version of the IR corpus in
+`out/Fuzzer/gen/fuzzers/ir_min_corpus`:
+```bash
+autoninja -C out/Fuzzer tint_ir_fuzzer
+python3 src/tint/cmd/fuzz/generate_tint_corpus.py out/Fuzzer/gen/fuzzers/wgsl_ir out/Fuzzer/gen/fuzzers/ --ir_fuzzer=out/Fuzzer/tint_ir_fuzzer
+```
+
+(Building the fuzzer binary via GN will generate the non-minimized
+corpus, which is needed for minimizing).
+
+
 ## Writing fuzzers
 
 ### Registering a new `tint::Program` fuzzer
