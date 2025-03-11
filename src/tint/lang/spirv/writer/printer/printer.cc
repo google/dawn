@@ -1100,6 +1100,7 @@ class Printer {
 
         uint32_t true_label = merge_label;
         uint32_t false_label = merge_label;
+
         if (true_block->Length() > 1 || !i->Results().IsEmpty() ||
             (true_block->Terminator() && !true_block->Terminator()->Is<core::ir::ExitIf>())) {
             true_label = Label(true_block);
@@ -1107,6 +1108,13 @@ class Printer {
         if (false_block->Length() > 1 || !i->Results().IsEmpty() ||
             (false_block->Terminator() && !false_block->Terminator()->Is<core::ir::ExitIf>())) {
             false_label = Label(false_block);
+        }
+
+        // Spirv 1.6 requires that 'OpBranchConditional' have different labels for the true/false
+        // target blocks. This change has also been seen to resolve bugs in control flow for some
+        // backend compilers.
+        if (true_label == false_label) {
+            true_label = Label(true_block);
         }
 
         // Emit the OpSelectionMerge and OpBranchConditional instructions.

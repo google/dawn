@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 256
+; Bound: 257
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -387,7 +387,9 @@
                OpBranchConditional %false %253 %254
         %254 = OpLabel
                OpSelectionMerge %255 None
-               OpBranchConditional %false %255 %255
+               OpBranchConditional %false %256 %255
+        %256 = OpLabel
+               OpBranch %255
         %255 = OpLabel
                OpBranch %253
         %253 = OpLabel
