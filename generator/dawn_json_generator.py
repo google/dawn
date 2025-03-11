@@ -242,6 +242,9 @@ class RecordMember:
         self.default_value = default_value
         self.skip_serialize = skip_serialize
 
+        if self.type.category == "bitmask" and not self.default_value:
+            self.default_value = "none"
+
     def set_handle_type(self, handle_type):
         assert self.type.dict_name == "ObjectHandle"
         self.handle_type = handle_type

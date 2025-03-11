@@ -186,7 +186,7 @@
             {"name": "architecture", "type": "string view"},
             {"name": "device", "type": "string view"},
             {"name": "description", "type": "string view"},
-            {"name": "backend type", "type": "backend type"},
+            {"name": "backend type", "type": "backend type", "default": "undefined"},
             {"name": "adapter type", "type": "adapter type"},
             {"name": "vendor ID", "type": "uint32_t"},
             {"name": "device ID", "type": "uint32_t"},
@@ -493,10 +493,10 @@
         "members": [
             {"name": "binding", "type": "uint32_t"},
             {"name": "visibility", "type": "shader stage"},
-            {"name": "buffer", "type": "buffer binding layout"},
-            {"name": "sampler", "type": "sampler binding layout"},
-            {"name": "texture", "type": "texture binding layout"},
-            {"name": "storage texture", "type": "storage texture binding layout"}
+            {"name": "buffer", "type": "buffer binding layout", "default": "zero"},
+            {"name": "sampler", "type": "sampler binding layout", "default": "zero"},
+            {"name": "texture", "type": "texture binding layout", "default": "zero"},
+            {"name": "storage texture", "type": "storage texture binding layout", "default": "zero"}
         ]
     },
     "bind group layout descriptor": {
@@ -4095,7 +4095,7 @@
             {"name": "base array layer", "type": "uint32_t", "default": "0"},
             {"name": "array layer count", "type": "uint32_t", "default": "WGPU_ARRAY_LAYER_COUNT_UNDEFINED"},
             {"name": "aspect", "type": "texture aspect", "default": "all"},
-            {"name": "usage", "type": "texture usage", "default": "none"}
+            {"name": "usage", "type": "texture usage"}
         ]
     },
     "texture view": {
@@ -4311,7 +4311,7 @@
         "chain roots": ["texture descriptor"],
         "tags": ["dawn"],
         "members": [
-            {"name": "internal usage", "type": "texture usage", "default": "none"}
+            {"name": "internal usage", "type": "texture usage"}
         ]
     },
     "dawn encoder internal usage descriptor": {
@@ -4336,6 +4336,7 @@
         "category": "bitmask",
         "tags": ["dawn"],
         "values": [
+            {"value": 0, "name": "none"},
             {"value": 1, "name": "device local"},
             {"value": 2, "name": "host visible"},
             {"value": 4, "name": "host coherent"},
