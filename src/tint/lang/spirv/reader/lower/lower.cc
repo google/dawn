@@ -56,7 +56,11 @@ Result<SuccessType> Lower(core::ir::Module& mod) {
     // `||` statements.
     RUN_TRANSFORM(core::ir::transform::RemoveTerminatorArgs, mod);
 
-    if (auto res = core::ir::ValidateAndDumpIfNeeded(mod, "spirv.Lower"); res != Success) {
+    auto res = core::ir::ValidateAndDumpIfNeeded(mod, "spirv.Lower",
+                                                 core::ir::Capabilities{
+                                                     core::ir::Capability::kAllowOverrides,
+                                                 });
+    if (res != Success) {
         return res.Failure();
     }
 

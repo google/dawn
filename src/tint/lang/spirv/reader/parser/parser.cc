@@ -114,6 +114,7 @@ class Parser {
         id_stack_.emplace_back();
         {
             TINT_SCOPED_ASSIGNMENT(current_block_, ir_.root_block);
+            EmitSpecConstants();
             EmitModuleScopeVariables();
         }
 
@@ -123,6 +124,47 @@ class Parser {
         // TODO(crbug.com/tint/1907): Handle annotation instructions.
 
         return std::move(ir_);
+    }
+
+    // Generate a module-scope const declaration for each instruction
+    // that is OpSpecConstantTrue, OpSpecConstantFalse, or OpSpecConstant.
+    void EmitSpecConstants() {
+        for (auto& inst : spirv_context_->types_values()) {
+            core::ir::Override* override_ = nullptr;
+            switch (inst.opcode()) {
+                case spv::Op::OpSpecConstantTrue:
+                case spv::Op::OpSpecConstantFalse:
+                    override_ = b_.Override(Type(inst.type_id()));
+                    override_->SetInitializer(
+                        b_.Value(inst.opcode() == spv::Op::OpSpecConstantTrue));
+                    break;
+                default:
+                    break;
+            }
+            if (!override_) {
+                continue;
+            }
+
+            Emit(override_, inst.result_id());
+
+            Symbol name = GetSymbolFor(inst.result_id());
+            if (name.IsValid()) {
+                ir_.SetName(override_, name);
+            }
+
+            auto decos =
+                spirv_context_->get_decoration_mgr()->GetDecorationsFor(inst.result_id(), true);
+            for (const auto* deco_inst : decos) {
+                TINT_ASSERT(deco_inst->opcode() == spv::Op::OpDecorate);
+
+                if (deco_inst->GetSingleWordInOperand(1) ==
+                    static_cast<uint32_t>(spv::Decoration::SpecId)) {
+                    const uint16_t id = static_cast<uint16_t>(deco_inst->GetSingleWordInOperand(2));
+                    override_->SetOverrideId(OverrideId{id});
+                    break;
+                }
+            }
+        }
     }
 
     void RegisterNames() {

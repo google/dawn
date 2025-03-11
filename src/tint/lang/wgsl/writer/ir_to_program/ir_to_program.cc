@@ -58,6 +58,7 @@
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/multi_in_block.h"
 #include "src/tint/lang/core/ir/next_iteration.h"
+#include "src/tint/lang/core/ir/override.h"
 #include "src/tint/lang/core/ir/phony.h"
 #include "src/tint/lang/core/ir/return.h"
 #include "src/tint/lang/core/ir/store.h"
@@ -114,6 +115,7 @@ class State {
 
     Program Run(const ProgramOptions& options) {
         core::ir::Capabilities caps{core::ir::Capability::kAllowRefTypes,
+                                    core::ir::Capability::kAllowOverrides,
                                     core::ir::Capability::kAllowPhonyInstructions};
         if (auto res = core::ir::Validate(mod, caps); res != Success) {
             // IR module failed validation.
@@ -199,8 +201,9 @@ class State {
     void RootBlock(const core::ir::Block* root) {
         for (auto* inst : *root) {
             tint::Switch(
-                inst,                                         //
-                [&](const core::ir::Var* var) { Var(var); },  //
+                inst,                                                               //
+                [&](const core::ir::Var* var) { Var(var); },                        //
+                [&](const core::ir::Override* override_) { Override(override_); },  //
                 TINT_ICE_ON_NO_MATCH);
         }
     }
@@ -612,6 +615,22 @@ class State {
                 b.GlobalVar(name, ty, init, ref->AddressSpace(), std::move(attrs));
                 return;
         }
+    }
+
+    void Override(const core::ir::Override* override_) {
+        auto* val = override_->Result(0);
+        Symbol name = NameFor(override_->Result(0));
+        Bind(override_->Result(0), name);
+
+        Vector<const ast::Attribute*, 4> attrs;
+        attrs.Push(b.Id(override_->OverrideId()));
+
+        auto ty = Type(val->Type());
+        const ast::Expression* init = nullptr;
+        if (override_->Initializer()) {
+            init = Expr(override_->Initializer());
+        }
+        b.Override(name, ty, init, attrs);
     }
 
     void Let(const core::ir::Let* let) {

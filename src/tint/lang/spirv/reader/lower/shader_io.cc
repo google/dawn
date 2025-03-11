@@ -464,7 +464,10 @@ struct State {
 }  // namespace
 
 Result<SuccessType> ShaderIO(core::ir::Module& ir) {
-    auto result = ValidateAndDumpIfNeeded(ir, "spirv.ShaderIO");
+    auto result = ValidateAndDumpIfNeeded(ir, "spirv.ShaderIO",
+                                          core::ir::Capabilities{
+                                              core::ir::Capability::kAllowOverrides,
+                                          });
     if (result != Success) {
         return result.Failure();
     }

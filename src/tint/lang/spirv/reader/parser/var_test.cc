@@ -608,5 +608,73 @@ INSTANTIATE_TEST_SUITE_P(SpirvParser,
                                  "var undef @location(6) @interpolate(linear, centroid)",
                              }));
 
+TEST_F(SpirvParserTest, Var_OpSpecConstantTrue) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %c "myconst"
+               OpDecorate %c SpecId 12
+       %void = OpTypeVoid
+       %bool = OpTypeBool
+        %f32 = OpTypeFloat 32
+      %vec4f = OpTypeVector %f32 4
+          %c = OpSpecConstantTrue %bool
+     %voidfn = OpTypeFunction %void
+       %main = OpFunction %void None %voidfn
+ %main_entry = OpLabel
+          %b = OpLogicalAnd %bool %c %c
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %myconst:bool = override true @id(12)
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:bool = and %myconst, %myconst
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, Var_OpSpecConstantFalse) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %c "myconst"
+               OpDecorate %c SpecId 12
+       %void = OpTypeVoid
+       %bool = OpTypeBool
+        %f32 = OpTypeFloat 32
+      %vec4f = OpTypeVector %f32 4
+          %c = OpSpecConstantFalse %bool
+     %voidfn = OpTypeFunction %void
+       %main = OpFunction %void None %voidfn
+ %main_entry = OpLabel
+          %b = OpLogicalAnd %bool %c %c
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %myconst:bool = override false @id(12)
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:bool = and %myconst, %myconst
+    ret
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader

@@ -75,6 +75,7 @@ class SpirvParserTestHelperBase : public BASE {
         // Validate the IR module against the capabilities supported by the SPIR-V dialect.
         auto validated =
             core::ir::Validate(parsed.Get(), core::ir::Capabilities{
+                                                 core::ir::Capability::kAllowOverrides,
                                                  core::ir::Capability::kAllowVectorElementPointer,
                                              });
         if (validated != Success) {

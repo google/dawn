@@ -155,6 +155,7 @@ struct State {
 Result<SuccessType> VectorElementPointer(core::ir::Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "spirv.VectorElementPointer",
                                           core::ir::Capabilities{
+                                              core::ir::Capability::kAllowOverrides,
                                               core::ir::Capability::kAllowVectorElementPointer,
                                           });
     if (result != Success) {
