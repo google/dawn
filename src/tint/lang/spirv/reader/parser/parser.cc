@@ -897,6 +897,9 @@ class Parser {
                     EmitWithoutResult(b_.Store(Value(inst.GetSingleWordOperand(0)),
                                                Value(inst.GetSingleWordOperand(1))));
                     break;
+                case spv::Op::OpCopyMemory:
+                    EmitCopyMemory(inst);
+                    break;
                 case spv::Op::OpVariable:
                     EmitVar(inst);
                     break;
@@ -1328,6 +1331,13 @@ class Parser {
         // Make the result Id a pointer to the original copied value.
         auto* l = b_.Let(Value(inst.GetSingleWordOperand(2)));
         Emit(l, inst.result_id());
+    }
+
+    /// @param inst the SPIR-V instruction for OpCopyMemory
+    void EmitCopyMemory(const spvtools::opt::Instruction& inst) {
+        auto load = b_.Load(Value(inst.GetSingleWordOperand(1)));
+        EmitWithoutSpvResult(load);
+        EmitWithoutResult(b_.Store(Value(inst.GetSingleWordOperand(0)), load));
     }
 
     /// @param inst the SPIR-V instruction for OpExtInst
