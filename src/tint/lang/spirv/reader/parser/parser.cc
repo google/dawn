@@ -140,38 +140,74 @@ class Parser {
         return std::nullopt;
     }
 
+    void CreateOverride(const spvtools::opt::Instruction& inst,
+                        core::ir::Value* value,
+                        std::optional<uint16_t> spec_id) {
+        auto* override_ = b_.Override(Type(inst.type_id()));
+        override_->SetInitializer(value);
+
+        if (spec_id.has_value()) {
+            override_->SetOverrideId(OverrideId{spec_id.value()});
+        }
+
+        Emit(override_, inst.result_id());
+
+        Symbol name = GetSymbolFor(inst.result_id());
+        if (name.IsValid()) {
+            ir_.SetName(override_, name);
+        }
+    }
+
     // Generate a module-scope const declaration for each instruction
     // that is OpSpecConstantTrue, OpSpecConstantFalse, or OpSpecConstant.
     void EmitSpecConstants() {
         for (auto& inst : spirv_context_->types_values()) {
-            core::ir::Value* value = nullptr;
-            std::optional<uint16_t> spec_id = std::nullopt;
             switch (inst.opcode()) {
                 case spv::Op::OpSpecConstantTrue:
                 case spv::Op::OpSpecConstantFalse: {
-                    value = b_.Value(inst.opcode() == spv::Op::OpSpecConstantTrue);
-                    spec_id = GetSpecId(inst);
+                    auto* value = b_.Value(inst.opcode() == spv::Op::OpSpecConstantTrue);
+                    auto spec_id = GetSpecId(inst);
+
+                    if (spec_id.has_value()) {
+                        CreateOverride(inst, value, spec_id);
+                    } else {
+                        // No spec_id means treat this as a constant.
+                        AddValue(inst.result_id(), value);
+                    }
+                    break;
+                }
+                case spv::Op::OpSpecConstantOp: {
+                    auto op = inst.GetSingleWordInOperand(0);
+
+                    // Store the name away and remove it from the name list.
+                    // This keeps any `Emit*` call in the switch below for
+                    // gaining the name we want associated to the override.
+                    std::string name;
+                    auto iter = id_to_name_.find(inst.result_id());
+                    if (iter != id_to_name_.end()) {
+                        name = iter->second;
+                        id_to_name_.erase(inst.result_id());
+                    }
+
+                    switch (static_cast<spv::Op>(op)) {
+                        case spv::Op::OpLogicalAnd:
+                            EmitBinary(inst, core::BinaryOp::kAnd, 3);
+                            break;
+                        default:
+                            TINT_ICE() << "Unknown spec constant operation: " << op;
+                    }
+
+                    // Restore the saved name, if any, in order to provide that
+                    // name to the override.
+                    if (!name.empty()) {
+                        id_to_name_.insert({inst.result_id(), name});
+                    }
+
+                    CreateOverride(inst, Value(inst.result_id()), std::nullopt);
                     break;
                 }
                 default:
-                    continue;
-            }
-
-            // No spec_id means treat this as a constant.
-            if (!spec_id.has_value()) {
-                AddValue(inst.result_id(), value);
-                continue;
-            }
-
-            auto* override_ = b_.Override(Type(inst.type_id()));
-            override_->SetInitializer(value);
-            override_->SetOverrideId(OverrideId{spec_id.value()});
-
-            Emit(override_, inst.result_id());
-
-            Symbol name = GetSymbolFor(inst.result_id());
-            if (name.IsValid()) {
-                ir_.SetName(override_, name);
+                    break;
             }
         }
     }
@@ -1841,9 +1877,11 @@ class Parser {
 
     /// @param inst the SPIR-V instruction
     /// @param op the binary operator to use
-    void EmitBinary(const spvtools::opt::Instruction& inst, core::BinaryOp op) {
-        auto* lhs = Value(inst.GetSingleWordOperand(2));
-        auto* rhs = Value(inst.GetSingleWordOperand(3));
+    void EmitBinary(const spvtools::opt::Instruction& inst,
+                    core::BinaryOp op,
+                    uint32_t first_operand_idx = 2) {
+        auto* lhs = Value(inst.GetSingleWordOperand(first_operand_idx));
+        auto* rhs = Value(inst.GetSingleWordOperand(first_operand_idx + 1));
         auto* binary = b_.Binary(op, Type(inst.type_id()), lhs, rhs);
         Emit(binary, inst.result_id());
     }
