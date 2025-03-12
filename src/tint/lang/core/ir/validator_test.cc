@@ -1208,7 +1208,7 @@ TEST_F(IR_ValidatorTest, OverrideWithoutCapability) {
         res.Failure().reason.Str(),
         testing::HasSubstr(
             R"(:2:12 error: override: root block: invalid instruction: tint::core::ir::Override
-  %a:u32 = override 1u @id(0)
+  %a:u32 = override 1u
            ^^^^^^^^
 )")) << res.Failure().reason.Str();
 }
@@ -1228,7 +1228,10 @@ TEST_F(IR_ValidatorTest, InstructionInRootBlockWithoutOverrideCap) {
 }
 
 TEST_F(IR_ValidatorTest, OverrideWithCapability) {
-    b.Append(mod.root_block, [&] { b.Override(ty.u32()); });
+    b.Append(mod.root_block, [&] {
+        auto* o = b.Override(ty.u32());
+        o->SetOverrideId(OverrideId{1});
+    });
 
     auto res = ir::Validate(mod, core::ir::Capabilities{core::ir::Capability::kAllowOverrides});
     ASSERT_EQ(res, Success) << res.Failure();
@@ -1255,7 +1258,7 @@ TEST_F(IR_ValidatorTest, OverrideWithInvalidType) {
     EXPECT_THAT(
         res.Failure().reason.Str(),
         testing::HasSubstr(R"(:2:18 error: override: override type 'vec3<u32>' is not a scalar
-  %1:vec3<u32> = override undef @id(0)
+  %1:vec3<u32> = override undef
                  ^^^^^^^^
 )")) << res.Failure().reason.Str();
 }
@@ -1273,7 +1276,7 @@ TEST_F(IR_ValidatorTest, OverrideWithMismatchedInitializerType) {
         res.Failure().reason.Str(),
         testing::HasSubstr(
             R"(:2:12 error: override: override type 'u32' does not match initializer type 'i32'
-  %1:u32 = override 1i @id(0)
+  %1:u32 = override 1i
            ^^^^^^^^
 )")) << res.Failure().reason.Str();
 }
@@ -1340,6 +1343,18 @@ TEST_F(IR_ValidatorTest, OverrideArrayInvalidValue) {
                 testing::HasSubstr(R"(:2:51 error: var: %2 is not in scope
   %a:ptr<workgroup, array<i32, %2>, read_write> = var undef
                                                   ^^^
+)")) << res.Failure().reason.Str();
+}
+
+TEST_F(IR_ValidatorTest, OverrideWithoutIdOrInitializer) {
+    b.Append(mod.root_block, [&] { b.Override(ty.u32()); });
+
+    auto res = ir::Validate(mod, core::ir::Capabilities{core::ir::Capability::kAllowOverrides});
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:2:12 error: override: must have an id or an initializer
+  %1:u32 = override undef
+           ^^^^^^^^
 )")) << res.Failure().reason.Str();
 }
 

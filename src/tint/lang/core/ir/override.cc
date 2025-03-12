@@ -62,7 +62,9 @@ Override* Override::Clone(CloneContext& ctx) {
     if (auto* init = Initializer()) {
         new_override->SetInitializer(ctx.Clone(init));
     }
-    new_override->SetOverrideId(override_id_);
+    if (override_id_.has_value()) {
+        new_override->SetOverrideId(override_id_.value());
+    }
 
     auto name = ctx.ir.NameOf(this);
     if (name.IsValid()) {

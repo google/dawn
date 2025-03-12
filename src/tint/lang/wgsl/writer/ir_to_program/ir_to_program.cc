@@ -623,7 +623,9 @@ class State {
         Bind(override_->Result(0), name);
 
         Vector<const ast::Attribute*, 4> attrs;
-        attrs.Push(b.Id(override_->OverrideId()));
+        if (override_->OverrideId().has_value()) {
+            attrs.Push(b.Id(override_->OverrideId().value()));
+        }
 
         auto ty = Type(val->Type());
         const ast::Expression* init = nullptr;

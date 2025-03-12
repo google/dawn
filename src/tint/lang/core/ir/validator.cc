@@ -2447,9 +2447,11 @@ void Validator::CheckOverride(const Override* o) {
         return;
     }
 
-    if (!seen_override_ids_.Add(o->OverrideId())) {
-        AddError(o) << "duplicate override id encountered: " << o->OverrideId().value;
-        return;
+    if (o->OverrideId().has_value()) {
+        if (!seen_override_ids_.Add(o->OverrideId().value())) {
+            AddError(o) << "duplicate override id encountered: " << o->OverrideId().value().value;
+            return;
+        }
     }
 
     if (!o->Result(0)->Type()->IsScalar()) {
@@ -2466,6 +2468,11 @@ void Validator::CheckOverride(const Override* o) {
                         << " does not match initializer type " << NameOf(o->Initializer()->Type());
             return;
         }
+    }
+
+    if (!o->OverrideId().has_value() && !o->Initializer()) {
+        AddError(o) << "must have an id or an initializer";
+        return;
     }
 }
 

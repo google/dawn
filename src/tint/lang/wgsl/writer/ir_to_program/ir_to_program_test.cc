@@ -2692,7 +2692,7 @@ fn f(v : S) {
 ////////////////////////////////////////////////////////////////////////////////
 // Override Construct
 ////////////////////////////////////////////////////////////////////////////////
-TEST_F(IRToProgramTest, Override_DefaultId) {
+TEST_F(IRToProgramTest, Override_NoId) {
     core::ir::Override* o;
     b.Append(b.ir.root_block, [&] { o = b.Override("o", false); });
 
@@ -2700,7 +2700,7 @@ TEST_F(IRToProgramTest, Override_DefaultId) {
     b.Append(fn->Block(), [&] { b.Return(fn, o); });
 
     EXPECT_WGSL(R"(
-@id(0) override o : bool = false;
+override o : bool = false;
 
 fn f() -> bool {
   return o;

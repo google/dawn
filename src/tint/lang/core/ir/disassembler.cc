@@ -541,7 +541,9 @@ void Disassembler::EmitInstruction(const Instruction* inst) {
             out_ << " = ";
             EmitInstructionName(o);
             EmitOperandList(o);
-            out_ << " @id(" << o->OverrideId().value << ")";
+            if (o->OverrideId().has_value()) {
+                out_ << " @id(" << o->OverrideId().value().value << ")";
+            }
         },
         [&](const Var* v) {
             EmitValueWithType(v);
