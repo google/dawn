@@ -1980,15 +1980,6 @@ TEST_F(InspectorGetConstantNameToIdMapTest, WithAndWithoutIds) {
     EXPECT_EQ(result["c"], program_->Sem().Get(c)->Attributes().override_id);
 }
 
-/// Sorts the ResourceBindings using their bind point to make their order deterministic in tests
-/// @param resources the list of resources to sort in place
-void SortResourceBindings(std::vector<ResourceBinding>* resources) {
-    std::sort(resources->begin(), resources->end(),
-              [](const ResourceBinding& a, const ResourceBinding& b) {
-                  return std::tie(a.bind_group, a.binding) < std::tie(b.bind_group, b.binding);
-              });
-}
-
 TEST_F(InspectorGetResourceBindingsTest, Empty) {
     MakeCallerBodyFunction("ep_func", tint::Empty,
                            Vector{
@@ -2076,7 +2067,6 @@ TEST_F(InspectorGetResourceBindingsTest, Simple) {
     auto result = inspector.GetResourceBindings("ep_func");
     ASSERT_FALSE(inspector.has_error()) << inspector.error();
     ASSERT_EQ(9u, result.size());
-    SortResourceBindings(&result);
 
     EXPECT_EQ(ResourceBinding::ResourceType::kUniformBuffer, result[0].resource_type);
     EXPECT_EQ(0u, result[0].bind_group);
@@ -2161,18 +2151,17 @@ TEST_F(InspectorGetResourceBindingsTest, InputAttachment) {
     auto result = inspector.GetResourceBindings("main");
     ASSERT_FALSE(inspector.has_error()) << inspector.error();
     ASSERT_EQ(2u, result.size());
-    SortResourceBindings(&result);
 
     EXPECT_EQ(ResourceBinding::ResourceType::kInputAttachment, result[0].resource_type);
     EXPECT_EQ(0u, result[0].bind_group);
     EXPECT_EQ(1u, result[0].binding);
-    EXPECT_EQ(3u, result[0].input_attachmnt_index);
+    EXPECT_EQ(3u, result[0].input_attachment_index);
     EXPECT_EQ(inspector::ResourceBinding::SampledKind::kFloat, result[0].sampled_kind);
 
     EXPECT_EQ(ResourceBinding::ResourceType::kInputAttachment, result[1].resource_type);
     EXPECT_EQ(4u, result[1].bind_group);
     EXPECT_EQ(3u, result[1].binding);
-    EXPECT_EQ(1u, result[1].input_attachmnt_index);
+    EXPECT_EQ(1u, result[1].input_attachment_index);
     EXPECT_EQ(inspector::ResourceBinding::SampledKind::kSInt, result[1].sampled_kind);
 }
 
@@ -2383,7 +2372,6 @@ TEST_F(InspectorGetResourceBindingsTest, UniformBuffer_Multiple) {
     auto result = inspector.GetResourceBindings("ep_func");
     ASSERT_FALSE(inspector.has_error()) << inspector.error();
     ASSERT_EQ(3u, result.size());
-    SortResourceBindings(&result);
 
     EXPECT_EQ(ResourceBinding::ResourceType::kUniformBuffer, result[0].resource_type);
     EXPECT_EQ(0u, result[0].bind_group);
@@ -2567,7 +2555,6 @@ TEST_F(InspectorGetResourceBindingsTest, StorageBuffer_Multiple) {
     auto result = inspector.GetResourceBindings("ep_func");
     ASSERT_FALSE(inspector.has_error()) << inspector.error();
     ASSERT_EQ(3u, result.size());
-    SortResourceBindings(&result);
 
     EXPECT_EQ(ResourceBinding::ResourceType::kStorageBuffer, result[0].resource_type);
     EXPECT_EQ(0u, result[0].bind_group);
@@ -2768,7 +2755,6 @@ TEST_F(InspectorGetResourceBindingsTest, StorageBuffer_MultipleROAndRW) {
     auto result = inspector.GetResourceBindings("ep_func");
     ASSERT_FALSE(inspector.has_error()) << inspector.error();
     ASSERT_EQ(3u, result.size());
-    SortResourceBindings(&result);
 
     EXPECT_EQ(ResourceBinding::ResourceType::kReadOnlyStorageBuffer, result[0].resource_type);
     EXPECT_EQ(0u, result[0].bind_group);
@@ -2807,9 +2793,9 @@ TEST_F(InspectorGetResourceBindingsTest, Sampler_Simple) {
 
     ASSERT_EQ(2u, result.size());
 
-    EXPECT_EQ(ResourceBinding::ResourceType::kSampler, result[0].resource_type);
-    EXPECT_EQ(0u, result[0].bind_group);
-    EXPECT_EQ(0u, result[0].binding);
+    EXPECT_EQ(ResourceBinding::ResourceType::kSampler, result[1].resource_type);
+    EXPECT_EQ(0u, result[1].bind_group);
+    EXPECT_EQ(0u, result[1].binding);
 }
 
 TEST_F(InspectorGetResourceBindingsTest, Sampler_InFunction) {
@@ -2832,9 +2818,9 @@ TEST_F(InspectorGetResourceBindingsTest, Sampler_InFunction) {
     ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
     ASSERT_EQ(2u, result.size());
-    EXPECT_EQ(ResourceBinding::ResourceType::kSampler, result[0].resource_type);
-    EXPECT_EQ(0u, result[0].bind_group);
-    EXPECT_EQ(0u, result[0].binding);
+    EXPECT_EQ(ResourceBinding::ResourceType::kSampler, result[1].resource_type);
+    EXPECT_EQ(0u, result[1].bind_group);
+    EXPECT_EQ(0u, result[1].binding);
 }
 
 TEST_F(InspectorGetResourceBindingsTest, Sampler_Comparison) {
@@ -2856,9 +2842,9 @@ TEST_F(InspectorGetResourceBindingsTest, Sampler_Comparison) {
     ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
     ASSERT_EQ(2u, result.size());
-    EXPECT_EQ(ResourceBinding::ResourceType::kComparisonSampler, result[0].resource_type);
-    EXPECT_EQ(0u, result[0].bind_group);
-    EXPECT_EQ(0u, result[0].binding);
+    EXPECT_EQ(ResourceBinding::ResourceType::kComparisonSampler, result[1].resource_type);
+    EXPECT_EQ(0u, result[1].bind_group);
+    EXPECT_EQ(0u, result[1].binding);
 }
 
 TEST_P(InspectorGetResourceBindingsTest_WithSampledTextureParams, TextureSample) {
@@ -2880,7 +2866,6 @@ TEST_P(InspectorGetResourceBindingsTest_WithSampledTextureParams, TextureSample)
     auto result = inspector.GetResourceBindings("ep");
     ASSERT_FALSE(inspector.has_error()) << inspector.error();
     ASSERT_EQ(2u, result.size());
-    SortResourceBindings(&result);
 
     EXPECT_EQ(ResourceBinding::ResourceType::kSampledTexture, result[0].resource_type);
     EXPECT_EQ(0u, result[0].bind_group);
@@ -2925,7 +2910,6 @@ TEST_P(InspectorGetResourceBindingsTest_WithArraySampledTextureParams, TextureSa
     auto result = inspector.GetResourceBindings("ep");
     ASSERT_FALSE(inspector.has_error()) << inspector.error();
     ASSERT_EQ(2u, result.size());
-    SortResourceBindings(&result);
 
     EXPECT_EQ(ResourceBinding::ResourceType::kSampledTexture, result[0].resource_type);
     EXPECT_EQ(0u, result[0].bind_group);

@@ -113,7 +113,7 @@ void main_inner(uint idx, tint_module_vars_struct tint_module_vars) {
   (*tint_module_vars.s) = as_type<int>((as_type<uint>(v_19) + as_type<uint>(tint_f32_to_i32(arr2_vec3_f32[0u].x))));
 }
 
-kernel void v_20(uint idx [[thread_index_in_threadgroup]], const device S_packed_vec3* sb [[buffer(1)]], device int* s [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
+kernel void v_20(uint idx [[thread_index_in_threadgroup]], const device S_packed_vec3* sb [[buffer(0)]], device int* s [[buffer(1)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sb=sb, .s=s, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
   main_inner(idx, tint_module_vars);
 }

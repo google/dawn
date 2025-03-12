@@ -57,7 +57,7 @@ Particle tint_load_struct_packed_vec3(const device Particle_packed_vec3* const f
   return Particle{.position=v, .lifetime=(*from).lifetime, .color=(*from).color, .velocity=float3((*from).velocity)};
 }
 
-kernel void v_1(const device Particles_packed_vec3* particles [[buffer(1)]], const constant Simulation* sim [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
+kernel void v_1(const device Particles_packed_vec3* particles [[buffer(0)]], const constant Simulation* sim [[buffer(1)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.particles=particles, .sim=sim, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
   uint const v_2 = ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 176u) - 1u);
   Particle particle = tint_load_struct_packed_vec3((&(*tint_module_vars.particles).p[min(uint(0), v_2)]));

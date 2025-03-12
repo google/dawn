@@ -70,7 +70,7 @@ tint_array<float3, 2> tint_load_array_packed_vec3(const device tint_array<tint_p
   return tint_array<float3, 2>{float3((*from)[0u].packed), float3((*from)[1u].packed)};
 }
 
-kernel void v(const device S_packed_vec3* sb [[buffer(1)]], device int* s [[buffer(0)]]) {
+kernel void v(const device S_packed_vec3* sb [[buffer(0)]], device int* s [[buffer(1)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sb=sb, .s=s};
   float const scalar_f32 = (*tint_module_vars.sb).scalar_f32;
   int const scalar_i32 = (*tint_module_vars.sb).scalar_i32;

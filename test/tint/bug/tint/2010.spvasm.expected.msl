@@ -186,7 +186,7 @@ void main_inner(uint3 x_3_param, uint tint_local_index, tint_module_vars_struct 
   main_1(tint_module_vars);
 }
 
-kernel void v_4(uint3 x_3_param [[thread_position_in_threadgroup]], uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_5* v_5 [[threadgroup(0)]], const constant S_2* x_6 [[buffer(0)]], const device S_3* x_9 [[buffer(2)]], device S_4* x_12 [[buffer(1)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
+kernel void v_4(uint3 x_3_param [[thread_position_in_threadgroup]], uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_5* v_5 [[threadgroup(0)]], const constant S_2* x_6 [[buffer(0)]], const device S_3* x_9 [[buffer(1)]], device S_4* x_12 [[buffer(2)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
   thread uint3 x_3 = 0u;
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.x_28=(&(*v_5).tint_symbol), .x_34=(&(*v_5).tint_symbol_1), .x_35=(&(*v_5).tint_symbol_2), .x_36=(&(*v_5).tint_symbol_3), .x_37=(&(*v_5).tint_symbol_4), .x_3=(&x_3), .x_6=x_6, .x_9=x_9, .x_12=x_12, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
   main_inner(x_3_param, tint_local_index, tint_module_vars);

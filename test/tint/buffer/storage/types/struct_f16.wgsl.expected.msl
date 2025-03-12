@@ -58,7 +58,7 @@ S tint_load_struct_packed_vec3(const device S_packed_vec3* const from) {
   return S{.inner=tint_load_struct_packed_vec3_1((&(*from).inner))};
 }
 
-kernel void v(const device S_packed_vec3* in [[buffer(1)]], device S_packed_vec3* out [[buffer(0)]]) {
+kernel void v(const device S_packed_vec3* in [[buffer(0)]], device S_packed_vec3* out [[buffer(1)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.in=in, .out=out};
   S const t = tint_load_struct_packed_vec3(tint_module_vars.in);
   tint_store_and_preserve_padding(tint_module_vars.out, t);

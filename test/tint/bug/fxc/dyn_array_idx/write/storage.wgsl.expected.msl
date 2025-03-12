@@ -31,7 +31,7 @@ struct tint_module_vars_struct {
   device SSBO* ssbo;
 };
 
-kernel void f(const constant UBO* ubo [[buffer(0)]], device Result* result [[buffer(2)]], device SSBO* ssbo [[buffer(1)]]) {
+kernel void f(const constant UBO* ubo [[buffer(1)]], device Result* result [[buffer(2)]], device SSBO* ssbo [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.ubo=ubo, .result=result, .ssbo=ssbo};
   (*tint_module_vars.ssbo).data[min(uint((*tint_module_vars.ubo).dynamic_idx), 3u)] = 1;
   (*tint_module_vars.result).out = (*tint_module_vars.ssbo).data[3u];

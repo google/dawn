@@ -35,7 +35,7 @@ int runTest(tint_module_vars_struct tint_module_vars) {
   return atomic_load_explicit((&(*tint_module_vars.s).data[min((0u + uint((*tint_module_vars.constants).zero)), 2u)]), memory_order_relaxed);
 }
 
-kernel void v(const constant Constants* constants [[buffer(0)]], device Result* result [[buffer(1)]], device TestData* s [[buffer(2)]]) {
+kernel void v(const constant Constants* constants [[buffer(2)]], device Result* result [[buffer(0)]], device TestData* s [[buffer(1)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.constants=constants, .result=result, .s=s};
   (*tint_module_vars.result).value = uint(runTest(tint_module_vars));
 }
