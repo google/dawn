@@ -5,15 +5,14 @@ void unused_entry_point() {
 
 groupshared int v[128];
 
-typedef int tint_workgroupUniformLoad_v_ret[128];
-tint_workgroupUniformLoad_v_ret tint_workgroupUniformLoad_v() {
+int tint_workgroupUniformLoad_v_X(uint p[1]) {
   GroupMemoryBarrierWithGroupSync();
-  int result[128] = v;
+  int result = v[p[0]];
   GroupMemoryBarrierWithGroupSync();
   return result;
 }
 
 int foo() {
-  int tint_symbol[128] = tint_workgroupUniformLoad_v();
-  return tint_symbol[0];
+  uint tint_symbol[1] = (uint[1])0;
+  return tint_workgroupUniformLoad_v_X(tint_symbol);
 }

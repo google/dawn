@@ -3,5 +3,6 @@ using namespace metal;
 
 kernel void v() {
   if (false) {
+    bool const v_1 = false;
   }
 }
