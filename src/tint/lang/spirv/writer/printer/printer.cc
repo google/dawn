@@ -241,9 +241,6 @@ class Printer {
         }
     };
 
-    /// The set of structure types that require explicit layout decorations.
-    Hashset<const core::type::Struct*, 16> requires_layout_decorations_;
-
     /// The map of types to their result IDs.
     Hashmap<const core::type::Type*, uint32_t, 8> types_;
 
@@ -308,9 +305,6 @@ class Printer {
             module_.PushMemoryModel(spv::Op::OpMemoryModel, {U32Operand(SpvAddressingModelLogical),
                                                              U32Operand(SpvMemoryModelGLSL450)});
         }
-
-        // Find types that require explicit layout decorations.
-        FindStructuresThatRequireLayoutDecorations();
 
         // Emit module-scope declarations.
         EmitRootBlock(ir_.root_block);
@@ -381,38 +375,6 @@ class Printer {
                 return SpvBuiltInMax;
         }
         return SpvBuiltInMax;
-    }
-
-    /// Find all structure types that are used in host-shareable address spaces and mark them as
-    /// such so that we know to add explicit layout decorations when we emit them.
-    void FindStructuresThatRequireLayoutDecorations() {
-        // We only look at module-scope variable declarations, since this is where all
-        // host-shareable types are declared.
-        for (auto* decl : *ir_.root_block) {
-            if (auto* var = decl->As<core::ir::Var>()) {
-                auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
-                if (!core::IsHostShareable(ptr->AddressSpace())) {
-                    continue;
-                }
-
-                // Look for arrays and structures at any nesting depth of this type.
-                Vector<const core::type::Type*, 8> type_queue;
-                type_queue.Push(ptr->StoreType());
-                while (!type_queue.IsEmpty()) {
-                    auto* next = type_queue.Pop();
-                    if (auto* str = next->As<core::type::Struct>()) {
-                        // Record this structure as host-shareable and then check its members.
-                        requires_layout_decorations_.Add(str);
-                        for (auto* member : str->Members()) {
-                            type_queue.Push(member->Type());
-                        }
-                    } else if (auto* arr = next->As<core::type::Array>()) {
-                        // Check its element type.
-                        type_queue.Push(arr->ElemType());
-                    }
-                }
-            }
-        }
     }
 
     /// Get the result ID of the constant `constant`, emitting its instruction if necessary.
@@ -659,7 +621,7 @@ class Printer {
         for (auto* member : str->Members()) {
             operands.push_back(Type(member->Type()));
 
-            if (requires_layout_decorations_.Contains(str)) {
+            if (str->StructFlags().Contains(core::type::kSpirvExplicitLayout)) {
                 // Generate struct member offset decoration.
                 module_.PushAnnot(spv::Op::OpMemberDecorate,
                                   {operands[0], member->Index(), U32Operand(SpvDecorationOffset),

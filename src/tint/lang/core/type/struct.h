@@ -65,6 +65,8 @@ enum class PipelineStageUsage {
 enum StructFlag {
     /// The structure is a block-decorated structure (for SPIR-V or GLSL).
     kBlock,
+    /// The structure requires explicit layout decorations for SPIR-V.
+    kSpirvExplicitLayout,
 };
 
 /// An alias to tint::EnumSet<StructFlag>

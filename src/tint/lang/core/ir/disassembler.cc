@@ -940,8 +940,15 @@ void Disassembler::EmitUnary(const Unary* u) {
 void Disassembler::EmitStructDecl(const core::type::Struct* str) {
     out_ << StyleType(str->Name().Name()) << " = " << StyleKeyword("struct") << " "
          << StyleAttribute("@align") << "(" << StyleLiteral(str->Align()) << ")";
-    if (str->StructFlags().Contains(core::type::StructFlag::kBlock)) {
-        out_ << ", " << StyleAttribute("@block");
+    for (auto flag : str->StructFlags()) {
+        switch (flag) {
+            case core::type::kBlock:
+                out_ << ", " << StyleAttribute("@block");
+                break;
+            case core::type::kSpirvExplicitLayout:
+                out_ << ", " << StyleAttribute("@spirv.explicit_layout");
+                break;
+        }
     }
     out_ << " {";
     EmitLine();

@@ -180,6 +180,9 @@ struct State {
         // If no members were forked and the struct itself is not shared with other address spaces,
         // then the original struct can safely be reused.
         if (!must_emit_without_explicit_layout.Contains(original_struct) && !members_were_forked) {
+            // TODO(crbug.com/tint/745): Remove the const_cast.
+            const_cast<core::type::Struct*>(original_struct)
+                ->SetStructFlag(core::type::kSpirvExplicitLayout);
             return nullptr;
         }
 
@@ -190,6 +193,7 @@ struct State {
                                                    original_struct->Align(),  //
                                                    original_struct->Size(),   //
                                                    original_struct->SizeNoPadding());
+        new_str->SetStructFlag(core::type::kSpirvExplicitLayout);
         for (auto flag : original_struct->StructFlags()) {
             new_str->SetStructFlag(flag);
         }

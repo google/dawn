@@ -81,7 +81,39 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 }
 
-TEST_F(SpirvWriter_ForkExplicitLayoutTypesTest, NoModify_Struct_InHostShareable_NotShared) {
+TEST_F(SpirvWriter_ForkExplicitLayoutTypesTest, NoModify_Array_NotInHostShareable) {
+    auto* wg_buffer = b.Var("wg_buffer", ty.ptr<workgroup, array<u32, 4>>());
+    mod.root_block->Append(wg_buffer);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        b.Let("let", b.Load(wg_buffer));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %wg_buffer:ptr<workgroup, array<u32, 4>, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:array<u32, 4> = load %wg_buffer
+    %let:array<u32, 4> = let %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    Run(ForkExplicitLayoutTypes);
+
+    EXPECT_EQ(src, str());
+}
+
+// Test that we always add the struct flag to structures that require explicit layout decorations,
+// even if we are not forking them.
+TEST_F(SpirvWriter_ForkExplicitLayoutTypesTest, Struct_InHostShareable_NotShared) {
     auto* structure = ty.Struct(mod.symbols.New("MyStruct"), {
                                                                  {mod.symbols.New("a"), ty.u32()},
                                                                  {mod.symbols.New("b"), ty.u32()},
@@ -129,44 +161,38 @@ $B1: {  # root
 )";
     EXPECT_EQ(src, str());
 
-    Run(ForkExplicitLayoutTypes);
-
-    EXPECT_EQ(src, str());
+    auto* expect = R"(
+MyStruct = struct @align(4), @spirv.explicit_layout {
+  a:u32 @offset(0)
+  b:u32 @offset(4)
 }
 
-TEST_F(SpirvWriter_ForkExplicitLayoutTypesTest, NoModify_Array_NotInHostShareable) {
-    auto* wg_buffer = b.Var("wg_buffer", ty.ptr<workgroup, array<u32, 4>>());
-    mod.root_block->Append(wg_buffer);
-
-    auto* func = b.Function("foo", ty.void_());
-    b.Append(func->Block(), [&] {
-        b.Let("let", b.Load(wg_buffer));
-        b.Return(func);
-    });
-
-    auto* src = R"(
 $B1: {  # root
-  %wg_buffer:ptr<workgroup, array<u32, 4>, read_write> = var undef
+  %buffer:ptr<storage, MyStruct, read_write> = var undef @binding_point(0, 0)
 }
 
-%foo = func():void {
+%foo = func(%param:MyStruct):void {
   $B2: {
-    %3:array<u32, 4> = load %wg_buffer
-    %let:array<u32, 4> = let %3
+    ret
+  }
+}
+%foo_1 = func():void {  # %foo_1: 'foo'
+  $B3: {
+    %5:MyStruct = load %buffer
+    %let:MyStruct = let %5
     ret
   }
 }
 )";
-    EXPECT_EQ(src, str());
 
     Run(ForkExplicitLayoutTypes);
 
-    EXPECT_EQ(src, str());
+    EXPECT_EQ(expect, str());
 }
 
 // Test that we always modify arrays that require explicit layout decorations, since the type is
 // used to signal to the printer that layout decorations are required.
-TEST_F(SpirvWriter_ForkExplicitLayoutTypesTest, Array_InHostShareable) {
+TEST_F(SpirvWriter_ForkExplicitLayoutTypesTest, Array_InHostShareable_NotShared) {
     auto* buffer = b.Var("buffer", ty.ptr<storage, array<u32, 4>>());
     buffer->SetBindingPoint(0, 0);
     mod.root_block->Append(buffer);
@@ -217,7 +243,7 @@ MyStruct = struct @align(4) {
   a:u32 @offset(0)
 }
 
-MyStruct_tint_explicit_layout = struct @align(4) {
+MyStruct_tint_explicit_layout = struct @align(4), @spirv.explicit_layout {
   a:u32 @offset(0)
 }
 
@@ -261,7 +287,7 @@ MyStruct = struct @align(4) {
   a:u32 @offset(0)
 }
 
-MyStruct_tint_explicit_layout = struct @align(4) {
+MyStruct_tint_explicit_layout = struct @align(4), @spirv.explicit_layout {
   a:u32 @offset(0)
 }
 
@@ -305,7 +331,7 @@ MyStruct = struct @align(4) {
   a:u32 @offset(0)
 }
 
-MyStruct_tint_explicit_layout = struct @align(4) {
+MyStruct_tint_explicit_layout = struct @align(4), @spirv.explicit_layout {
   a:u32 @offset(0)
 }
 
@@ -349,7 +375,7 @@ MyStruct = struct @align(4) {
   a:u32 @offset(0)
 }
 
-MyStruct_tint_explicit_layout = struct @align(4) {
+MyStruct_tint_explicit_layout = struct @align(4), @spirv.explicit_layout {
   a:u32 @offset(0)
 }
 
@@ -440,7 +466,7 @@ MyStruct = struct @align(4) {
   a:u32 @offset(0)
 }
 
-MyStruct_tint_explicit_layout = struct @align(4) {
+MyStruct_tint_explicit_layout = struct @align(4), @spirv.explicit_layout {
   a:u32 @offset(0)
 }
 
@@ -503,7 +529,7 @@ MyStruct = struct @align(4) {
   b:u32 @offset(4)
 }
 
-MyStruct_tint_explicit_layout = struct @align(4) {
+MyStruct_tint_explicit_layout = struct @align(4), @spirv.explicit_layout {
   a:u32 @offset(0)
   b:u32 @offset(4)
 }
@@ -591,12 +617,12 @@ Outer = struct @align(4) {
   b_1:Inner @offset(8)
 }
 
-Inner_tint_explicit_layout = struct @align(4) {
+Inner_tint_explicit_layout = struct @align(4), @spirv.explicit_layout {
   a:u32 @offset(0)
   b:u32 @offset(4)
 }
 
-Outer_tint_explicit_layout = struct @align(4) {
+Outer_tint_explicit_layout = struct @align(4), @spirv.explicit_layout {
   a_1:Inner_tint_explicit_layout @offset(0)
   b_1:Inner_tint_explicit_layout @offset(8)
 }
@@ -682,7 +708,7 @@ MyStruct = struct @align(4) {
   b:u32 @offset(4)
 }
 
-MyStruct_tint_explicit_layout = struct @align(4) {
+MyStruct_tint_explicit_layout = struct @align(4), @spirv.explicit_layout {
   a:u32 @offset(0)
   b:u32 @offset(4)
 }
@@ -773,12 +799,12 @@ Outer = struct @align(4) {
   b_1:Inner @offset(8)
 }
 
-Inner_tint_explicit_layout = struct @align(4) {
+Inner_tint_explicit_layout = struct @align(4), @spirv.explicit_layout {
   a:u32 @offset(0)
   b:u32 @offset(4)
 }
 
-Outer_tint_explicit_layout = struct @align(4) {
+Outer_tint_explicit_layout = struct @align(4), @spirv.explicit_layout {
   a_1:Inner_tint_explicit_layout @offset(0)
   b_1:Inner_tint_explicit_layout @offset(8)
 }
@@ -881,12 +907,12 @@ Outer = struct @align(4) {
   b_1:Inner @offset(8)
 }
 
-Inner_tint_explicit_layout = struct @align(4) {
+Inner_tint_explicit_layout = struct @align(4), @spirv.explicit_layout {
   a:u32 @offset(0)
   b:u32 @offset(4)
 }
 
-Outer_tint_explicit_layout = struct @align(4) {
+Outer_tint_explicit_layout = struct @align(4), @spirv.explicit_layout {
   a_1:Inner_tint_explicit_layout @offset(0)
   b_1:Inner_tint_explicit_layout @offset(8)
 }
@@ -995,7 +1021,7 @@ InnerShared = struct @align(4) {
   b:u32 @offset(4)
 }
 
-InnerNotShared = struct @align(4) {
+InnerNotShared = struct @align(4), @spirv.explicit_layout {
   a_1:u32 @offset(0)
   b_1:u32 @offset(4)
 }
@@ -1005,12 +1031,12 @@ Outer = struct @align(4) {
   b_2:InnerNotShared @offset(8)
 }
 
-InnerShared_tint_explicit_layout = struct @align(4) {
+InnerShared_tint_explicit_layout = struct @align(4), @spirv.explicit_layout {
   a:u32 @offset(0)
   b:u32 @offset(4)
 }
 
-Outer_tint_explicit_layout = struct @align(4) {
+Outer_tint_explicit_layout = struct @align(4), @spirv.explicit_layout {
   a_2:InnerShared_tint_explicit_layout @offset(0)
   b_2:InnerNotShared @offset(8)
 }
@@ -1101,7 +1127,7 @@ MyStruct = struct @align(4) {
   b:u32 @offset(4)
 }
 
-MyStruct_tint_explicit_layout = struct @align(4) {
+MyStruct_tint_explicit_layout = struct @align(4), @spirv.explicit_layout {
   a:u32 @offset(0)
   b:u32 @offset(4)
 }
@@ -1195,7 +1221,7 @@ MyStruct = struct @align(4) {
   b:u32 @offset(4)
 }
 
-MyStruct_tint_explicit_layout = struct @align(4) {
+MyStruct_tint_explicit_layout = struct @align(4), @spirv.explicit_layout {
   a:u32 @offset(0)
   b:u32 @offset(4)
 }
@@ -1285,7 +1311,7 @@ MyStruct = struct @align(4) {
   b:u32 @offset(4)
 }
 
-MyStruct_tint_explicit_layout = struct @align(4) {
+MyStruct_tint_explicit_layout = struct @align(4), @spirv.explicit_layout {
   a:u32 @offset(0)
   b:u32 @offset(4)
 }
@@ -1372,12 +1398,12 @@ Outer = struct @align(4) {
   b_1:Inner @offset(8)
 }
 
-Inner_tint_explicit_layout = struct @align(4) {
+Inner_tint_explicit_layout = struct @align(4), @spirv.explicit_layout {
   a:u32 @offset(0)
   b:u32 @offset(4)
 }
 
-Outer_tint_explicit_layout = struct @align(4) {
+Outer_tint_explicit_layout = struct @align(4), @spirv.explicit_layout {
   a_1:Inner_tint_explicit_layout @offset(0)
   b_1:Inner_tint_explicit_layout @offset(8)
 }
@@ -1479,7 +1505,7 @@ MyStruct = struct @align(4) {
   b:u32 @offset(4)
 }
 
-MyStruct_tint_explicit_layout = struct @align(4) {
+MyStruct_tint_explicit_layout = struct @align(4), @spirv.explicit_layout {
   a:u32 @offset(0)
   b:u32 @offset(4)
 }
@@ -1610,17 +1636,17 @@ S_2 = struct @align(4) {
   f:i32 @offset(4)
 }
 
-S_0_tint_explicit_layout = struct @align(4) {
+S_0_tint_explicit_layout = struct @align(4), @spirv.explicit_layout {
   a:u32 @offset(0)
   b:u32 @offset(4)
 }
 
-S_1_tint_explicit_layout = struct @align(4) {
+S_1_tint_explicit_layout = struct @align(4), @spirv.explicit_layout {
   c:f32 @offset(0)
   d:f32 @offset(4)
 }
 
-S_2_tint_explicit_layout = struct @align(4) {
+S_2_tint_explicit_layout = struct @align(4), @spirv.explicit_layout {
   e:i32 @offset(0)
   f:i32 @offset(4)
 }
@@ -2459,7 +2485,7 @@ MyStruct = struct @align(4) {
   arr:array<u32> @offset(4)
 }
 
-MyStruct_tint_explicit_layout = struct @align(4) {
+MyStruct_tint_explicit_layout = struct @align(4), @spirv.explicit_layout {
   i:u32 @offset(0)
   arr:spirv.explicit_layout_array<u32, > @offset(4)
 }
