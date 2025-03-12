@@ -32,6 +32,8 @@
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/spirv/ir/builtin_call.h"
+#include "src/tint/lang/spirv/type/explicit_layout_array.h"
 
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
@@ -143,8 +145,9 @@ struct State {
             if (auto* str = type->As<core::type::Struct>()) {
                 return ForkStructIfNeeded(str);
             }
-
-            // TODO(crbug.com/42252012): Fork array types too.
+            if (auto* arr = type->As<core::type::Array>()) {
+                return ForkArray(arr);
+            }
 
             // Any other type is safe to use unchanged, as they do not have layout decorations.
             return nullptr;
@@ -193,6 +196,23 @@ struct State {
         return new_str;
     }
 
+    /// Recursively fork an array type to produce an identical version that will have explicit
+    /// layout decorations when emitted as SPIR-V.
+    /// @param original_array the original array type to fork
+    /// @returns the forked array type
+    const type::ExplicitLayoutArray* ForkArray(const core::type::Array* original_array) {
+        auto* new_element_type = GetForkedType(original_array->ElemType());
+        if (!new_element_type) {
+            // The element type was not forked, so just use the original element type.
+            new_element_type = original_array->ElemType();
+        }
+        return ty.Get<type::ExplicitLayoutArray>(new_element_type,         //
+                                                 original_array->Count(),  //
+                                                 original_array->Align(),  //
+                                                 original_array->Size(),   //
+                                                 original_array->Stride());
+    }
+
     /// Update the store type of an instruction result to use the forked version if needed.
     /// Replace any uses of the instruction to take the new type into account.
     /// @param result the instruction result to update
@@ -224,6 +244,11 @@ struct State {
                 // If the access produces a pointer to a type that has been forked, we need to
                 // update the result type and then recurse into its uses.
                 UpdatePointerType(access->Result(0));
+            },
+            [&](ir::BuiltinCall* call) {
+                // The only builtin function that takes an array pointer is arrayLength().
+                // No change is needed, as it will operate on the explicitly laid out array type.
+                TINT_ASSERT(call->Func() == BuiltinFn::kArrayLength);
             },
             [&](core::ir::Let* let) {
                 // A let usage will propagate the pointer to a type that has been forked, so we need
@@ -274,9 +299,11 @@ struct State {
                 if (auto* src_struct = src_type->As<core::type::Struct>()) {
                     auto* dst_struct = dst_type->As<core::type::Struct>();
                     b.Return(func, ConvertStruct(src_struct, dst_struct, param));
+                } else if (auto* src_arr = src_type->As<core::type::Array>()) {
+                    auto* dst_arr = dst_type->As<core::type::Array>();
+                    b.Return(func, ConvertArray(src_arr, dst_arr, param));
                 } else {
-                    // TODO(crbug.com/42252012): Convert array types.
-                    TINT_UNIMPLEMENTED();
+                    TINT_UNREACHABLE();
                 }
             });
             return func;
@@ -298,6 +325,28 @@ struct State {
             construct_args.Push(converted);
         }
         return b.Construct(dst_struct, std::move(construct_args))->Result(0);
+    }
+
+    /// Recursively convert an array type to/from the explicitly laid out version.
+    core::ir::Value* ConvertArray(const core::type::Array* src_array,
+                                  const core::type::Array* dst_array,
+                                  core::ir::Value* input) {
+        // Runtime-sized arrays will never be converted as you cannot load/store them, and
+        // pipeline-overrides will already have been substituted before this transform.
+        auto* count = src_array->Count()->As<core::type::ConstantArrayCount>();
+        TINT_ASSERT(count && count == dst_array->Count());
+
+        // Create a local variable to hold the converted result.
+        // Convert each element one at a time, writing into the local variable.
+        auto* result = b.Var(ty.ptr<function>(dst_array));
+        b.LoopRange(ty, 0_u, u32(count->value), 1_u, [&](core::ir::Value* idx) {
+            auto* extracted = b.Access(src_array->ElemType(), input, idx)->Result(0);
+            auto* converted = ConvertIfNeeded(dst_array->ElemType(), extracted);
+            auto* dst_ptr = b.Access(ty.ptr(function, dst_array->ElemType()), result, idx);
+            b.Store(dst_ptr, converted);
+        });
+
+        return b.Load(result)->Result(0);
     }
 };
 

@@ -8,21 +8,21 @@
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %f "f"
                OpExecutionMode %f LocalSize 1 1 1
-               OpMemberName %UBO 0 "data"
-               OpMemberName %UBO 1 "dynamic_idx"
-               OpName %UBO "UBO"
-               OpMemberName %ubo_block 0 "inner"
-               OpName %ubo_block "ubo_block"
+               OpMemberName %UBO_tint_explicit_layout 0 "data"
+               OpMemberName %UBO_tint_explicit_layout 1 "dynamic_idx"
+               OpName %UBO_tint_explicit_layout "UBO_tint_explicit_layout"
+               OpMemberName %ubo_block_tint_explicit_layout 0 "inner"
+               OpName %ubo_block_tint_explicit_layout "ubo_block_tint_explicit_layout"
                OpMemberName %Result 0 "out"
                OpName %Result "Result"
                OpMemberName %result_block 0 "inner"
                OpName %result_block "result_block"
                OpName %f "f"
                OpDecorate %_arr_v4int_uint_4 ArrayStride 16
-               OpMemberDecorate %UBO 0 Offset 0
-               OpMemberDecorate %UBO 1 Offset 64
-               OpMemberDecorate %ubo_block 0 Offset 0
-               OpDecorate %ubo_block Block
+               OpMemberDecorate %UBO_tint_explicit_layout 0 Offset 0
+               OpMemberDecorate %UBO_tint_explicit_layout 1 Offset 64
+               OpMemberDecorate %ubo_block_tint_explicit_layout 0 Offset 0
+               OpDecorate %ubo_block_tint_explicit_layout Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
@@ -37,10 +37,10 @@
        %uint = OpTypeInt 32 0
      %uint_4 = OpConstant %uint 4
 %_arr_v4int_uint_4 = OpTypeArray %v4int %uint_4
-        %UBO = OpTypeStruct %_arr_v4int_uint_4 %int
-  %ubo_block = OpTypeStruct %UBO
-%_ptr_Uniform_ubo_block = OpTypePointer Uniform %ubo_block
-          %1 = OpVariable %_ptr_Uniform_ubo_block Uniform
+%UBO_tint_explicit_layout = OpTypeStruct %_arr_v4int_uint_4 %int
+%ubo_block_tint_explicit_layout = OpTypeStruct %UBO_tint_explicit_layout
+%_ptr_Uniform_ubo_block_tint_explicit_layout = OpTypePointer Uniform %ubo_block_tint_explicit_layout
+          %1 = OpVariable %_ptr_Uniform_ubo_block_tint_explicit_layout Uniform
      %Result = OpTypeStruct %int
 %result_block = OpTypeStruct %Result
 %_ptr_StorageBuffer_result_block = OpTypePointer StorageBuffer %result_block

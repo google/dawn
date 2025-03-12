@@ -17,8 +17,8 @@
                OpName %uniforms_block "uniforms_block"
                OpMemberName %PointLight 0 "position"
                OpName %PointLight "PointLight"
-               OpMemberName %PointLights 0 "values"
-               OpName %PointLights "PointLights"
+               OpMemberName %PointLights_tint_explicit_layout 0 "values"
+               OpName %PointLights_tint_explicit_layout "PointLights_tint_explicit_layout"
                OpName %pointLights "pointLights"
                OpName %mySampler "mySampler"
                OpName %myTexture "myTexture"
@@ -56,8 +56,8 @@
                OpDecorate %1 NonWritable
                OpMemberDecorate %PointLight 0 Offset 0
                OpDecorate %_runtimearr_PointLight ArrayStride 16
-               OpMemberDecorate %PointLights 0 Offset 0
-               OpDecorate %PointLights Block
+               OpMemberDecorate %PointLights_tint_explicit_layout 0 Offset 0
+               OpDecorate %PointLights_tint_explicit_layout Block
                OpDecorate %pointLights DescriptorSet 0
                OpDecorate %pointLights Binding 1
                OpDecorate %pointLights NonWritable
@@ -81,9 +81,9 @@
           %1 = OpVariable %_ptr_Uniform_uniforms_block Uniform
  %PointLight = OpTypeStruct %v4float
 %_runtimearr_PointLight = OpTypeRuntimeArray %PointLight
-%PointLights = OpTypeStruct %_runtimearr_PointLight
-%_ptr_StorageBuffer_PointLights = OpTypePointer StorageBuffer %PointLights
-%pointLights = OpVariable %_ptr_StorageBuffer_PointLights StorageBuffer
+%PointLights_tint_explicit_layout = OpTypeStruct %_runtimearr_PointLight
+%_ptr_StorageBuffer_PointLights_tint_explicit_layout = OpTypePointer StorageBuffer %PointLights_tint_explicit_layout
+%pointLights = OpVariable %_ptr_StorageBuffer_PointLights_tint_explicit_layout StorageBuffer
          %16 = OpTypeSampler
 %_ptr_UniformConstant_16 = OpTypePointer UniformConstant %16
   %mySampler = OpVariable %_ptr_UniformConstant_16 UniformConstant

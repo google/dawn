@@ -8,30 +8,30 @@
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
-               OpMemberName %in_block 0 "inner"
-               OpName %in_block "in_block"
-               OpMemberName %out_block 0 "inner"
-               OpName %out_block "out_block"
+               OpMemberName %in_block_tint_explicit_layout 0 "inner"
+               OpName %in_block_tint_explicit_layout "in_block_tint_explicit_layout"
+               OpMemberName %out_block_tint_explicit_layout 0 "inner"
+               OpName %out_block_tint_explicit_layout "out_block_tint_explicit_layout"
                OpName %main "main"
                OpDecorate %_runtimearr_float ArrayStride 4
-               OpMemberDecorate %in_block 0 Offset 0
-               OpDecorate %in_block Block
+               OpMemberDecorate %in_block_tint_explicit_layout 0 Offset 0
+               OpDecorate %in_block_tint_explicit_layout Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
-               OpMemberDecorate %out_block 0 Offset 0
-               OpDecorate %out_block Block
+               OpMemberDecorate %out_block_tint_explicit_layout 0 Offset 0
+               OpDecorate %out_block_tint_explicit_layout Block
                OpDecorate %6 DescriptorSet 0
                OpDecorate %6 Binding 1
                OpDecorate %6 Coherent
       %float = OpTypeFloat 32
 %_runtimearr_float = OpTypeRuntimeArray %float
-   %in_block = OpTypeStruct %_runtimearr_float
-%_ptr_StorageBuffer_in_block = OpTypePointer StorageBuffer %in_block
-          %1 = OpVariable %_ptr_StorageBuffer_in_block StorageBuffer
-  %out_block = OpTypeStruct %_runtimearr_float
-%_ptr_StorageBuffer_out_block = OpTypePointer StorageBuffer %out_block
-          %6 = OpVariable %_ptr_StorageBuffer_out_block StorageBuffer
+%in_block_tint_explicit_layout = OpTypeStruct %_runtimearr_float
+%_ptr_StorageBuffer_in_block_tint_explicit_layout = OpTypePointer StorageBuffer %in_block_tint_explicit_layout
+          %1 = OpVariable %_ptr_StorageBuffer_in_block_tint_explicit_layout StorageBuffer
+%out_block_tint_explicit_layout = OpTypeStruct %_runtimearr_float
+%_ptr_StorageBuffer_out_block_tint_explicit_layout = OpTypePointer StorageBuffer %out_block_tint_explicit_layout
+          %6 = OpVariable %_ptr_StorageBuffer_out_block_tint_explicit_layout StorageBuffer
        %void = OpTypeVoid
          %11 = OpTypeFunction %void
 %_ptr_StorageBuffer__runtimearr_float = OpTypePointer StorageBuffer %_runtimearr_float

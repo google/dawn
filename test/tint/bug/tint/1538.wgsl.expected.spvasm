@@ -7,8 +7,8 @@
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
-               OpMemberName %buf_block 0 "inner"
-               OpName %buf_block "buf_block"
+               OpMemberName %buf_block_tint_explicit_layout 0 "inner"
+               OpName %buf_block_tint_explicit_layout "buf_block_tint_explicit_layout"
                OpName %g "g"
                OpName %f "f"
                OpName %tint_loop_idx "tint_loop_idx"
@@ -21,17 +21,17 @@
                OpName %tint_low_inc_1 "tint_low_inc_1"
                OpName %tint_carry_1 "tint_carry_1"
                OpDecorate %_arr_uint_uint_1 ArrayStride 4
-               OpMemberDecorate %buf_block 0 Offset 0
-               OpDecorate %buf_block Block
+               OpMemberDecorate %buf_block_tint_explicit_layout 0 Offset 0
+               OpDecorate %buf_block_tint_explicit_layout Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 1
                OpDecorate %1 Coherent
        %uint = OpTypeInt 32 0
      %uint_1 = OpConstant %uint 1
 %_arr_uint_uint_1 = OpTypeArray %uint %uint_1
-  %buf_block = OpTypeStruct %_arr_uint_uint_1
-%_ptr_StorageBuffer_buf_block = OpTypePointer StorageBuffer %buf_block
-          %1 = OpVariable %_ptr_StorageBuffer_buf_block StorageBuffer
+%buf_block_tint_explicit_layout = OpTypeStruct %_arr_uint_uint_1
+%_ptr_StorageBuffer_buf_block_tint_explicit_layout = OpTypePointer StorageBuffer %buf_block_tint_explicit_layout
+          %1 = OpVariable %_ptr_StorageBuffer_buf_block_tint_explicit_layout StorageBuffer
         %int = OpTypeInt 32 1
           %9 = OpTypeFunction %int
       %int_0 = OpConstant %int 0

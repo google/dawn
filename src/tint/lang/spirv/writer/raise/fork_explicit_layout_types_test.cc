@@ -31,6 +31,7 @@
 
 #include "src/tint/lang/core/ir/transform/helper_test.h"
 #include "src/tint/lang/core/type/struct.h"
+#include "src/tint/lang/spirv/ir/builtin_call.h"
 
 namespace tint::spirv::writer::raise {
 namespace {
@@ -131,6 +132,63 @@ $B1: {  # root
     Run(ForkExplicitLayoutTypes);
 
     EXPECT_EQ(src, str());
+}
+
+TEST_F(SpirvWriter_ForkExplicitLayoutTypesTest, NoModify_Array_NotInHostShareable) {
+    auto* wg_buffer = b.Var("wg_buffer", ty.ptr<workgroup, array<u32, 4>>());
+    mod.root_block->Append(wg_buffer);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        b.Let("let", b.Load(wg_buffer));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %wg_buffer:ptr<workgroup, array<u32, 4>, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:array<u32, 4> = load %wg_buffer
+    %let:array<u32, 4> = let %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    Run(ForkExplicitLayoutTypes);
+
+    EXPECT_EQ(src, str());
+}
+
+// Test that we always modify arrays that require explicit layout decorations, since the type is
+// used to signal to the printer that layout decorations are required.
+TEST_F(SpirvWriter_ForkExplicitLayoutTypesTest, Array_InHostShareable) {
+    auto* buffer = b.Var("buffer", ty.ptr<storage, array<u32, 4>>());
+    buffer->SetBindingPoint(0, 0);
+    mod.root_block->Append(buffer);
+
+    auto* src = R"(
+$B1: {  # root
+  %buffer:ptr<storage, array<u32, 4>, read_write> = var undef @binding_point(0, 0)
+}
+
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %buffer:ptr<storage, spirv.explicit_layout_array<u32, 4>, read_write> = var undef @binding_point(0, 0)
+}
+
+)";
+
+    Run(ForkExplicitLayoutTypes);
+
+    EXPECT_EQ(expect, str());
 }
 
 TEST_F(SpirvWriter_ForkExplicitLayoutTypesTest, PushConstant_SharedWithPrivate) {
@@ -298,6 +356,43 @@ MyStruct_tint_explicit_layout = struct @align(4) {
 $B1: {  # root
   %buffer:ptr<storage, MyStruct_tint_explicit_layout, read_write> = var undef @binding_point(0, 0)
   %local:ptr<workgroup, MyStruct, read_write> = var undef
+}
+
+)";
+
+    Run(ForkExplicitLayoutTypes);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_ForkExplicitLayoutTypesTest, Storage_SharedWithInOut) {
+    core::IOAttributes attributes;
+    attributes.builtin = core::BuiltinValue::kSampleMask;
+    auto* array = ty.array<u32, 1>();
+    b.Append(mod.root_block, [&] {
+        auto* buffer = b.Var("buffer", ty.ptr(storage, array));
+        buffer->SetBindingPoint(0, 0);
+        auto* mask_in = b.Var("mask_in", ty.ptr(core::AddressSpace::kIn, array));
+        mask_in->SetAttributes(attributes);
+        auto* mask_out = b.Var("mask_out", ty.ptr(core::AddressSpace::kOut, array));
+        mask_out->SetAttributes(attributes);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %buffer:ptr<storage, array<u32, 1>, read_write> = var undef @binding_point(0, 0)
+  %mask_in:ptr<__in, array<u32, 1>, read> = var undef @builtin(sample_mask)
+  %mask_out:ptr<__out, array<u32, 1>, read_write> = var undef @builtin(sample_mask)
+}
+
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %buffer:ptr<storage, spirv.explicit_layout_array<u32, 1>, read_write> = var undef @binding_point(0, 0)
+  %mask_in:ptr<__in, array<u32, 1>, read> = var undef @builtin(sample_mask)
+  %mask_out:ptr<__out, array<u32, 1>, read_write> = var undef @builtin(sample_mask)
 }
 
 )";
@@ -1575,6 +1670,808 @@ $B1: {  # root
     %30:i32 = access %tint_source_2, 1u
     %31:S_2 = construct %29, %30
     ret %31
+  }
+}
+)";
+
+    Run(ForkExplicitLayoutTypes);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_ForkExplicitLayoutTypesTest, LoadFromStorage_Array_Shared) {
+    auto* buffer = b.Var("buffer", ty.ptr<storage, array<u32, 4>>());
+    buffer->SetBindingPoint(0, 0);
+    mod.root_block->Append(buffer);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        b.Var("local", b.Load(buffer));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %buffer:ptr<storage, array<u32, 4>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func():void {
+  $B2: {
+    %3:array<u32, 4> = load %buffer
+    %local:ptr<function, array<u32, 4>, read_write> = var %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %buffer:ptr<storage, spirv.explicit_layout_array<u32, 4>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func():void {
+  $B2: {
+    %3:spirv.explicit_layout_array<u32, 4> = load %buffer
+    %4:array<u32, 4> = call %tint_convert_explicit_layout, %3
+    %local:ptr<function, array<u32, 4>, read_write> = var %4
+    ret
+  }
+}
+%tint_convert_explicit_layout = func(%tint_source:spirv.explicit_layout_array<u32, 4>):array<u32, 4> {
+  $B3: {
+    %8:ptr<function, array<u32, 4>, read_write> = var undef
+    loop [i: $B4, b: $B5, c: $B6] {  # loop_1
+      $B4: {  # initializer
+        next_iteration 0u  # -> $B5
+      }
+      $B5 (%idx:u32): {  # body
+        %10:bool = gte %idx, 4u
+        if %10 [t: $B7] {  # if_1
+          $B7: {  # true
+            exit_loop  # loop_1
+          }
+        }
+        %11:u32 = access %tint_source, %idx
+        %12:ptr<function, u32, read_write> = access %8, %idx
+        store %12, %11
+        continue  # -> $B6
+      }
+      $B6: {  # continuing
+        %13:u32 = add %idx, 1u
+        next_iteration %13  # -> $B5
+      }
+    }
+    %14:array<u32, 4> = load %8
+    ret %14
+  }
+}
+)";
+
+    Run(ForkExplicitLayoutTypes);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_ForkExplicitLayoutTypesTest, LoadFromStorage_NestedArray_Shared) {
+    auto* buffer = b.Var("buffer", ty.ptr<storage, array<array<u32, 4>, 3>>());
+    buffer->SetBindingPoint(0, 0);
+    mod.root_block->Append(buffer);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        b.Var("local", b.Load(buffer));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %buffer:ptr<storage, array<array<u32, 4>, 3>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func():void {
+  $B2: {
+    %3:array<array<u32, 4>, 3> = load %buffer
+    %local:ptr<function, array<array<u32, 4>, 3>, read_write> = var %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %buffer:ptr<storage, spirv.explicit_layout_array<spirv.explicit_layout_array<u32, 4>, 3>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func():void {
+  $B2: {
+    %3:spirv.explicit_layout_array<spirv.explicit_layout_array<u32, 4>, 3> = load %buffer
+    %4:array<array<u32, 4>, 3> = call %tint_convert_explicit_layout, %3
+    %local:ptr<function, array<array<u32, 4>, 3>, read_write> = var %4
+    ret
+  }
+}
+%tint_convert_explicit_layout = func(%tint_source:spirv.explicit_layout_array<spirv.explicit_layout_array<u32, 4>, 3>):array<array<u32, 4>, 3> {
+  $B3: {
+    %8:ptr<function, array<array<u32, 4>, 3>, read_write> = var undef
+    loop [i: $B4, b: $B5, c: $B6] {  # loop_1
+      $B4: {  # initializer
+        next_iteration 0u  # -> $B5
+      }
+      $B5 (%idx:u32): {  # body
+        %10:bool = gte %idx, 3u
+        if %10 [t: $B7] {  # if_1
+          $B7: {  # true
+            exit_loop  # loop_1
+          }
+        }
+        %11:spirv.explicit_layout_array<u32, 4> = access %tint_source, %idx
+        %12:array<u32, 4> = call %tint_convert_explicit_layout_1, %11
+        %14:ptr<function, array<u32, 4>, read_write> = access %8, %idx
+        store %14, %12
+        continue  # -> $B6
+      }
+      $B6: {  # continuing
+        %15:u32 = add %idx, 1u
+        next_iteration %15  # -> $B5
+      }
+    }
+    %16:array<array<u32, 4>, 3> = load %8
+    ret %16
+  }
+}
+%tint_convert_explicit_layout_1 = func(%tint_source_1:spirv.explicit_layout_array<u32, 4>):array<u32, 4> {  # %tint_convert_explicit_layout_1: 'tint_convert_explicit_layout', %tint_source_1: 'tint_source'
+  $B8: {
+    %18:ptr<function, array<u32, 4>, read_write> = var undef
+    loop [i: $B9, b: $B10, c: $B11] {  # loop_2
+      $B9: {  # initializer
+        next_iteration 0u  # -> $B10
+      }
+      $B10 (%idx_1:u32): {  # body
+        %20:bool = gte %idx_1, 4u
+        if %20 [t: $B12] {  # if_2
+          $B12: {  # true
+            exit_loop  # loop_2
+          }
+        }
+        %21:u32 = access %tint_source_1, %idx_1
+        %22:ptr<function, u32, read_write> = access %18, %idx_1
+        store %22, %21
+        continue  # -> $B11
+      }
+      $B11: {  # continuing
+        %23:u32 = add %idx_1, 1u
+        next_iteration %23  # -> $B10
+      }
+    }
+    %24:array<u32, 4> = load %18
+    ret %24
+  }
+}
+)";
+
+    Run(ForkExplicitLayoutTypes);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_ForkExplicitLayoutTypesTest, StoreToStorage_Array_Shared) {
+    auto* buffer = b.Var("buffer", ty.ptr<storage, array<u32, 4>, read_write>());
+    buffer->SetBindingPoint(0, 0);
+    mod.root_block->Append(buffer);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* local = b.Var("local", ty.ptr<function, array<u32, 4>>());
+        b.Store(buffer, b.Load(local));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %buffer:ptr<storage, array<u32, 4>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func():void {
+  $B2: {
+    %local:ptr<function, array<u32, 4>, read_write> = var undef
+    %4:array<u32, 4> = load %local
+    store %buffer, %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %buffer:ptr<storage, spirv.explicit_layout_array<u32, 4>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func():void {
+  $B2: {
+    %local:ptr<function, array<u32, 4>, read_write> = var undef
+    %4:array<u32, 4> = load %local
+    %5:spirv.explicit_layout_array<u32, 4> = call %tint_convert_explicit_layout, %4
+    store %buffer, %5
+    ret
+  }
+}
+%tint_convert_explicit_layout = func(%tint_source:array<u32, 4>):spirv.explicit_layout_array<u32, 4> {
+  $B3: {
+    %8:ptr<function, spirv.explicit_layout_array<u32, 4>, read_write> = var undef
+    loop [i: $B4, b: $B5, c: $B6] {  # loop_1
+      $B4: {  # initializer
+        next_iteration 0u  # -> $B5
+      }
+      $B5 (%idx:u32): {  # body
+        %10:bool = gte %idx, 4u
+        if %10 [t: $B7] {  # if_1
+          $B7: {  # true
+            exit_loop  # loop_1
+          }
+        }
+        %11:u32 = access %tint_source, %idx
+        %12:ptr<function, u32, read_write> = access %8, %idx
+        store %12, %11
+        continue  # -> $B6
+      }
+      $B6: {  # continuing
+        %13:u32 = add %idx, 1u
+        next_iteration %13  # -> $B5
+      }
+    }
+    %14:spirv.explicit_layout_array<u32, 4> = load %8
+    ret %14
+  }
+}
+)";
+
+    Run(ForkExplicitLayoutTypes);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_ForkExplicitLayoutTypesTest, StoreToStorage_NestedArray_Shared) {
+    auto* buffer = b.Var("buffer", ty.ptr<storage, array<array<u32, 4>, 3>, read_write>());
+    buffer->SetBindingPoint(0, 0);
+    mod.root_block->Append(buffer);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* local = b.Var("local", ty.ptr<function, array<array<u32, 4>, 3>>());
+        b.Store(buffer, b.Load(local));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %buffer:ptr<storage, array<array<u32, 4>, 3>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func():void {
+  $B2: {
+    %local:ptr<function, array<array<u32, 4>, 3>, read_write> = var undef
+    %4:array<array<u32, 4>, 3> = load %local
+    store %buffer, %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %buffer:ptr<storage, spirv.explicit_layout_array<spirv.explicit_layout_array<u32, 4>, 3>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func():void {
+  $B2: {
+    %local:ptr<function, array<array<u32, 4>, 3>, read_write> = var undef
+    %4:array<array<u32, 4>, 3> = load %local
+    %5:spirv.explicit_layout_array<spirv.explicit_layout_array<u32, 4>, 3> = call %tint_convert_explicit_layout, %4
+    store %buffer, %5
+    ret
+  }
+}
+%tint_convert_explicit_layout = func(%tint_source:array<array<u32, 4>, 3>):spirv.explicit_layout_array<spirv.explicit_layout_array<u32, 4>, 3> {
+  $B3: {
+    %8:ptr<function, spirv.explicit_layout_array<spirv.explicit_layout_array<u32, 4>, 3>, read_write> = var undef
+    loop [i: $B4, b: $B5, c: $B6] {  # loop_1
+      $B4: {  # initializer
+        next_iteration 0u  # -> $B5
+      }
+      $B5 (%idx:u32): {  # body
+        %10:bool = gte %idx, 3u
+        if %10 [t: $B7] {  # if_1
+          $B7: {  # true
+            exit_loop  # loop_1
+          }
+        }
+        %11:array<u32, 4> = access %tint_source, %idx
+        %12:spirv.explicit_layout_array<u32, 4> = call %tint_convert_explicit_layout_1, %11
+        %14:ptr<function, spirv.explicit_layout_array<u32, 4>, read_write> = access %8, %idx
+        store %14, %12
+        continue  # -> $B6
+      }
+      $B6: {  # continuing
+        %15:u32 = add %idx, 1u
+        next_iteration %15  # -> $B5
+      }
+    }
+    %16:spirv.explicit_layout_array<spirv.explicit_layout_array<u32, 4>, 3> = load %8
+    ret %16
+  }
+}
+%tint_convert_explicit_layout_1 = func(%tint_source_1:array<u32, 4>):spirv.explicit_layout_array<u32, 4> {  # %tint_convert_explicit_layout_1: 'tint_convert_explicit_layout', %tint_source_1: 'tint_source'
+  $B8: {
+    %18:ptr<function, spirv.explicit_layout_array<u32, 4>, read_write> = var undef
+    loop [i: $B9, b: $B10, c: $B11] {  # loop_2
+      $B9: {  # initializer
+        next_iteration 0u  # -> $B10
+      }
+      $B10 (%idx_1:u32): {  # body
+        %20:bool = gte %idx_1, 4u
+        if %20 [t: $B12] {  # if_2
+          $B12: {  # true
+            exit_loop  # loop_2
+          }
+        }
+        %21:u32 = access %tint_source_1, %idx_1
+        %22:ptr<function, u32, read_write> = access %18, %idx_1
+        store %22, %21
+        continue  # -> $B11
+      }
+      $B11: {  # continuing
+        %23:u32 = add %idx_1, 1u
+        next_iteration %23  # -> $B10
+      }
+    }
+    %24:spirv.explicit_layout_array<u32, 4> = load %18
+    ret %24
+  }
+}
+)";
+
+    Run(ForkExplicitLayoutTypes);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_ForkExplicitLayoutTypesTest, SharedArray_UsesViaLet) {
+    auto* array = ty.array<u32, 4>();
+    auto* buffer = b.Var("buffer", ty.ptr(storage, array));
+    buffer->SetBindingPoint(0, 0);
+    mod.root_block->Append(buffer);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        b.Var("local", ty.ptr(function, array));
+        auto* let_ptr = b.Let("let_ptr", buffer);
+        auto* load = b.Load(let_ptr);
+        b.Store(let_ptr, load);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %buffer:ptr<storage, array<u32, 4>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func():void {
+  $B2: {
+    %local:ptr<function, array<u32, 4>, read_write> = var undef
+    %let_ptr:ptr<storage, array<u32, 4>, read_write> = let %buffer
+    %5:array<u32, 4> = load %let_ptr
+    store %let_ptr, %5
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %buffer:ptr<storage, spirv.explicit_layout_array<u32, 4>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func():void {
+  $B2: {
+    %local:ptr<function, array<u32, 4>, read_write> = var undef
+    %let_ptr:ptr<storage, spirv.explicit_layout_array<u32, 4>, read_write> = let %buffer
+    %5:spirv.explicit_layout_array<u32, 4> = load %let_ptr
+    %6:array<u32, 4> = call %tint_convert_explicit_layout, %5
+    %8:spirv.explicit_layout_array<u32, 4> = call %tint_convert_explicit_layout_1, %6
+    store %let_ptr, %8
+    ret
+  }
+}
+%tint_convert_explicit_layout = func(%tint_source:spirv.explicit_layout_array<u32, 4>):array<u32, 4> {
+  $B3: {
+    %11:ptr<function, array<u32, 4>, read_write> = var undef
+    loop [i: $B4, b: $B5, c: $B6] {  # loop_1
+      $B4: {  # initializer
+        next_iteration 0u  # -> $B5
+      }
+      $B5 (%idx:u32): {  # body
+        %13:bool = gte %idx, 4u
+        if %13 [t: $B7] {  # if_1
+          $B7: {  # true
+            exit_loop  # loop_1
+          }
+        }
+        %14:u32 = access %tint_source, %idx
+        %15:ptr<function, u32, read_write> = access %11, %idx
+        store %15, %14
+        continue  # -> $B6
+      }
+      $B6: {  # continuing
+        %16:u32 = add %idx, 1u
+        next_iteration %16  # -> $B5
+      }
+    }
+    %17:array<u32, 4> = load %11
+    ret %17
+  }
+}
+%tint_convert_explicit_layout_1 = func(%tint_source_1:array<u32, 4>):spirv.explicit_layout_array<u32, 4> {  # %tint_convert_explicit_layout_1: 'tint_convert_explicit_layout', %tint_source_1: 'tint_source'
+  $B8: {
+    %19:ptr<function, spirv.explicit_layout_array<u32, 4>, read_write> = var undef
+    loop [i: $B9, b: $B10, c: $B11] {  # loop_2
+      $B9: {  # initializer
+        next_iteration 0u  # -> $B10
+      }
+      $B10 (%idx_1:u32): {  # body
+        %21:bool = gte %idx_1, 4u
+        if %21 [t: $B12] {  # if_2
+          $B12: {  # true
+            exit_loop  # loop_2
+          }
+        }
+        %22:u32 = access %tint_source_1, %idx_1
+        %23:ptr<function, u32, read_write> = access %19, %idx_1
+        store %23, %22
+        continue  # -> $B11
+      }
+      $B11: {  # continuing
+        %24:u32 = add %idx_1, 1u
+        next_iteration %24  # -> $B10
+      }
+    }
+    %25:spirv.explicit_layout_array<u32, 4> = load %19
+    ret %25
+  }
+}
+)";
+
+    Run(ForkExplicitLayoutTypes);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_ForkExplicitLayoutTypesTest, SharedArray_AccessScalarMember) {
+    auto* array = ty.array<u32, 4>();
+    auto* buffer = b.Var("buffer", ty.ptr(storage, array, read_write));
+    buffer->SetBindingPoint(0, 0);
+    mod.root_block->Append(buffer);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        b.Var("local", ty.ptr<function>(array));
+        auto* load = b.Load(b.Access(ty.ptr<storage, u32, read_write>(), buffer, 1_u));
+        b.Store(b.Access(ty.ptr<storage, u32, read_write>(), buffer, 2_u), load);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %buffer:ptr<storage, array<u32, 4>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func():void {
+  $B2: {
+    %local:ptr<function, array<u32, 4>, read_write> = var undef
+    %4:ptr<storage, u32, read_write> = access %buffer, 1u
+    %5:u32 = load %4
+    %6:ptr<storage, u32, read_write> = access %buffer, 2u
+    store %6, %5
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %buffer:ptr<storage, spirv.explicit_layout_array<u32, 4>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func():void {
+  $B2: {
+    %local:ptr<function, array<u32, 4>, read_write> = var undef
+    %4:ptr<storage, u32, read_write> = access %buffer, 1u
+    %5:u32 = load %4
+    %6:ptr<storage, u32, read_write> = access %buffer, 2u
+    store %6, %5
+    ret
+  }
+}
+)";
+
+    Run(ForkExplicitLayoutTypes);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_ForkExplicitLayoutTypesTest, SharedArray_AccessNestedArray) {
+    auto* inner = ty.array<u32, 4>();
+    auto* outer = ty.array(inner, 4);
+    auto* buffer = b.Var("buffer", ty.ptr(storage, outer, read_write));
+    buffer->SetBindingPoint(0, 0);
+    mod.root_block->Append(buffer);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        b.Var("local", ty.ptr<function>(outer));
+        auto* load = b.Load(b.Access(ty.ptr(storage, inner, read_write), buffer, 1_u));
+        b.Store(b.Access(ty.ptr(storage, inner, read_write), buffer, 2_u), load);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %buffer:ptr<storage, array<array<u32, 4>, 4>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func():void {
+  $B2: {
+    %local:ptr<function, array<array<u32, 4>, 4>, read_write> = var undef
+    %4:ptr<storage, array<u32, 4>, read_write> = access %buffer, 1u
+    %5:array<u32, 4> = load %4
+    %6:ptr<storage, array<u32, 4>, read_write> = access %buffer, 2u
+    store %6, %5
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %buffer:ptr<storage, spirv.explicit_layout_array<spirv.explicit_layout_array<u32, 4>, 4>, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func():void {
+  $B2: {
+    %local:ptr<function, array<array<u32, 4>, 4>, read_write> = var undef
+    %4:ptr<storage, spirv.explicit_layout_array<u32, 4>, read_write> = access %buffer, 1u
+    %5:spirv.explicit_layout_array<u32, 4> = load %4
+    %6:array<u32, 4> = call %tint_convert_explicit_layout, %5
+    %8:ptr<storage, spirv.explicit_layout_array<u32, 4>, read_write> = access %buffer, 2u
+    %9:spirv.explicit_layout_array<u32, 4> = call %tint_convert_explicit_layout_1, %6
+    store %8, %9
+    ret
+  }
+}
+%tint_convert_explicit_layout = func(%tint_source:spirv.explicit_layout_array<u32, 4>):array<u32, 4> {
+  $B3: {
+    %12:ptr<function, array<u32, 4>, read_write> = var undef
+    loop [i: $B4, b: $B5, c: $B6] {  # loop_1
+      $B4: {  # initializer
+        next_iteration 0u  # -> $B5
+      }
+      $B5 (%idx:u32): {  # body
+        %14:bool = gte %idx, 4u
+        if %14 [t: $B7] {  # if_1
+          $B7: {  # true
+            exit_loop  # loop_1
+          }
+        }
+        %15:u32 = access %tint_source, %idx
+        %16:ptr<function, u32, read_write> = access %12, %idx
+        store %16, %15
+        continue  # -> $B6
+      }
+      $B6: {  # continuing
+        %17:u32 = add %idx, 1u
+        next_iteration %17  # -> $B5
+      }
+    }
+    %18:array<u32, 4> = load %12
+    ret %18
+  }
+}
+%tint_convert_explicit_layout_1 = func(%tint_source_1:array<u32, 4>):spirv.explicit_layout_array<u32, 4> {  # %tint_convert_explicit_layout_1: 'tint_convert_explicit_layout', %tint_source_1: 'tint_source'
+  $B8: {
+    %20:ptr<function, spirv.explicit_layout_array<u32, 4>, read_write> = var undef
+    loop [i: $B9, b: $B10, c: $B11] {  # loop_2
+      $B9: {  # initializer
+        next_iteration 0u  # -> $B10
+      }
+      $B10 (%idx_1:u32): {  # body
+        %22:bool = gte %idx_1, 4u
+        if %22 [t: $B12] {  # if_2
+          $B12: {  # true
+            exit_loop  # loop_2
+          }
+        }
+        %23:u32 = access %tint_source_1, %idx_1
+        %24:ptr<function, u32, read_write> = access %20, %idx_1
+        store %24, %23
+        continue  # -> $B11
+      }
+      $B11: {  # continuing
+        %25:u32 = add %idx_1, 1u
+        next_iteration %25  # -> $B10
+      }
+    }
+    %26:spirv.explicit_layout_array<u32, 4> = load %20
+    ret %26
+  }
+}
+)";
+
+    Run(ForkExplicitLayoutTypes);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_ForkExplicitLayoutTypesTest, SharedArray_MultipleVars) {
+    auto* array = ty.array<u32, 4>();
+    auto* buffer_0 = b.Var("buffer_0", ty.ptr(storage, array));
+    auto* buffer_1 = b.Var("buffer_1", ty.ptr(storage, array));
+    auto* buffer_2 = b.Var("buffer_2", ty.ptr(storage, array));
+    buffer_0->SetBindingPoint(0, 0);
+    buffer_1->SetBindingPoint(0, 1);
+    buffer_2->SetBindingPoint(0, 2);
+    mod.root_block->Append(buffer_0);
+    mod.root_block->Append(buffer_1);
+    mod.root_block->Append(buffer_2);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        b.Var("local", b.Zero(array));
+        b.Let("let_0", b.Load(buffer_0));
+        b.Let("let_1", b.Load(buffer_1));
+        b.Let("let_2", b.Load(buffer_2));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %buffer_0:ptr<storage, array<u32, 4>, read_write> = var undef @binding_point(0, 0)
+  %buffer_1:ptr<storage, array<u32, 4>, read_write> = var undef @binding_point(0, 1)
+  %buffer_2:ptr<storage, array<u32, 4>, read_write> = var undef @binding_point(0, 2)
+}
+
+%foo = func():void {
+  $B2: {
+    %local:ptr<function, array<u32, 4>, read_write> = var array<u32, 4>(0u)
+    %6:array<u32, 4> = load %buffer_0
+    %let_0:array<u32, 4> = let %6
+    %8:array<u32, 4> = load %buffer_1
+    %let_1:array<u32, 4> = let %8
+    %10:array<u32, 4> = load %buffer_2
+    %let_2:array<u32, 4> = let %10
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %buffer_0:ptr<storage, spirv.explicit_layout_array<u32, 4>, read_write> = var undef @binding_point(0, 0)
+  %buffer_1:ptr<storage, spirv.explicit_layout_array<u32, 4>, read_write> = var undef @binding_point(0, 1)
+  %buffer_2:ptr<storage, spirv.explicit_layout_array<u32, 4>, read_write> = var undef @binding_point(0, 2)
+}
+
+%foo = func():void {
+  $B2: {
+    %local:ptr<function, array<u32, 4>, read_write> = var array<u32, 4>(0u)
+    %6:spirv.explicit_layout_array<u32, 4> = load %buffer_0
+    %7:array<u32, 4> = call %tint_convert_explicit_layout, %6
+    %let_0:array<u32, 4> = let %7
+    %10:spirv.explicit_layout_array<u32, 4> = load %buffer_1
+    %11:array<u32, 4> = call %tint_convert_explicit_layout, %10
+    %let_1:array<u32, 4> = let %11
+    %13:spirv.explicit_layout_array<u32, 4> = load %buffer_2
+    %14:array<u32, 4> = call %tint_convert_explicit_layout, %13
+    %let_2:array<u32, 4> = let %14
+    ret
+  }
+}
+%tint_convert_explicit_layout = func(%tint_source:spirv.explicit_layout_array<u32, 4>):array<u32, 4> {
+  $B3: {
+    %17:ptr<function, array<u32, 4>, read_write> = var undef
+    loop [i: $B4, b: $B5, c: $B6] {  # loop_1
+      $B4: {  # initializer
+        next_iteration 0u  # -> $B5
+      }
+      $B5 (%idx:u32): {  # body
+        %19:bool = gte %idx, 4u
+        if %19 [t: $B7] {  # if_1
+          $B7: {  # true
+            exit_loop  # loop_1
+          }
+        }
+        %20:u32 = access %tint_source, %idx
+        %21:ptr<function, u32, read_write> = access %17, %idx
+        store %21, %20
+        continue  # -> $B6
+      }
+      $B6: {  # continuing
+        %22:u32 = add %idx, 1u
+        next_iteration %22  # -> $B5
+      }
+    }
+    %23:array<u32, 4> = load %17
+    ret %23
+  }
+}
+)";
+
+    Run(ForkExplicitLayoutTypes);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_ForkExplicitLayoutTypesTest, ArrayLength) {
+    auto* structure =
+        ty.Struct(mod.symbols.New("MyStruct"), {
+                                                   {mod.symbols.New("i"), ty.u32()},
+                                                   {mod.symbols.New("arr"), ty.array<u32>()},
+                                               });
+
+    auto* buffer = b.Var("buffer", ty.ptr(storage, structure));
+    buffer->SetBindingPoint(0, 0);
+    mod.root_block->Append(buffer);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        b.Call<spirv::ir::BuiltinCall>(ty.u32(), BuiltinFn::kArrayLength, buffer, 1_u);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+MyStruct = struct @align(4) {
+  i:u32 @offset(0)
+  arr:array<u32> @offset(4)
+}
+
+$B1: {  # root
+  %buffer:ptr<storage, MyStruct, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func():void {
+  $B2: {
+    %3:u32 = spirv.array_length %buffer, 1u
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+MyStruct = struct @align(4) {
+  i:u32 @offset(0)
+  arr:array<u32> @offset(4)
+}
+
+MyStruct_tint_explicit_layout = struct @align(4) {
+  i:u32 @offset(0)
+  arr:spirv.explicit_layout_array<u32, > @offset(4)
+}
+
+$B1: {  # root
+  %buffer:ptr<storage, MyStruct_tint_explicit_layout, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func():void {
+  $B2: {
+    %3:u32 = spirv.array_length %buffer, 1u
+    ret
   }
 }
 )";

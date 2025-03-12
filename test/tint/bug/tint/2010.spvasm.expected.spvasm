@@ -23,11 +23,11 @@
                OpName %S_2 "S_2"
                OpMemberName %x_6_block 0 "inner"
                OpName %x_6_block "x_6_block"
-               OpMemberName %S_3 0 "field0"
-               OpName %S_3 "S_3"
+               OpMemberName %S_3_tint_explicit_layout 0 "field0"
+               OpName %S_3_tint_explicit_layout "S_3_tint_explicit_layout"
                OpName %x_9 "x_9"
-               OpMemberName %S_4 0 "field0"
-               OpName %S_4 "S_4"
+               OpMemberName %S_4_tint_explicit_layout 0 "field0"
+               OpName %S_4_tint_explicit_layout "S_4_tint_explicit_layout"
                OpName %x_12 "x_12"
                OpName %main_local_invocation_id_Input "main_local_invocation_id_Input"
                OpName %main_local_invocation_index_Input "main_local_invocation_index_Input"
@@ -80,13 +80,13 @@
                OpDecorate %18 Binding 1
                OpDecorate %18 NonWritable
                OpDecorate %_runtimearr_v4float ArrayStride 16
-               OpMemberDecorate %S_3 0 Offset 0
-               OpDecorate %S_3 Block
+               OpMemberDecorate %S_3_tint_explicit_layout 0 Offset 0
+               OpDecorate %S_3_tint_explicit_layout Block
                OpDecorate %x_9 DescriptorSet 0
                OpDecorate %x_9 Binding 2
                OpDecorate %x_9 NonWritable
-               OpMemberDecorate %S_4 0 Offset 0
-               OpDecorate %S_4 Block
+               OpMemberDecorate %S_4_tint_explicit_layout 0 Offset 0
+               OpDecorate %S_4_tint_explicit_layout Block
                OpDecorate %x_12 DescriptorSet 0
                OpDecorate %x_12 Binding 3
                OpDecorate %x_12 Coherent
@@ -116,12 +116,12 @@
          %18 = OpVariable %_ptr_Uniform_x_6_block Uniform
     %v4float = OpTypeVector %float 4
 %_runtimearr_v4float = OpTypeRuntimeArray %v4float
-        %S_3 = OpTypeStruct %_runtimearr_v4float
-%_ptr_StorageBuffer_S_3 = OpTypePointer StorageBuffer %S_3
-        %x_9 = OpVariable %_ptr_StorageBuffer_S_3 StorageBuffer
-        %S_4 = OpTypeStruct %_runtimearr_v4float
-%_ptr_StorageBuffer_S_4 = OpTypePointer StorageBuffer %S_4
-       %x_12 = OpVariable %_ptr_StorageBuffer_S_4 StorageBuffer
+%S_3_tint_explicit_layout = OpTypeStruct %_runtimearr_v4float
+%_ptr_StorageBuffer_S_3_tint_explicit_layout = OpTypePointer StorageBuffer %S_3_tint_explicit_layout
+        %x_9 = OpVariable %_ptr_StorageBuffer_S_3_tint_explicit_layout StorageBuffer
+%S_4_tint_explicit_layout = OpTypeStruct %_runtimearr_v4float
+%_ptr_StorageBuffer_S_4_tint_explicit_layout = OpTypePointer StorageBuffer %S_4_tint_explicit_layout
+       %x_12 = OpVariable %_ptr_StorageBuffer_S_4_tint_explicit_layout StorageBuffer
 %_ptr_Input_v3uint = OpTypePointer Input %v3uint
 %main_local_invocation_id_Input = OpVariable %_ptr_Input_v3uint Input
 %_ptr_Input_uint = OpTypePointer Input %uint

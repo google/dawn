@@ -8,10 +8,10 @@
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
                OpExecutionMode %unused_entry_point LocalSize 1 1 1
-               OpMemberName %S 0 "a"
-               OpName %S "S"
-               OpMemberName %buffer_block 0 "inner"
-               OpName %buffer_block "buffer_block"
+               OpMemberName %S_tint_explicit_layout 0 "a"
+               OpName %S_tint_explicit_layout "S_tint_explicit_layout"
+               OpMemberName %buffer_block_tint_explicit_layout 0 "inner"
+               OpName %buffer_block_tint_explicit_layout "buffer_block_tint_explicit_layout"
                OpName %v "v"
                OpName %idx1 "idx1"
                OpName %idx2 "idx2"
@@ -25,10 +25,10 @@
                OpName %tint_carry "tint_carry"
                OpName %unused_entry_point "unused_entry_point"
                OpDecorate %_arr_v4int_uint_4 ArrayStride 16
-               OpMemberDecorate %S 0 Offset 0
-               OpDecorate %_runtimearr_S ArrayStride 64
-               OpMemberDecorate %buffer_block 0 Offset 0
-               OpDecorate %buffer_block Block
+               OpMemberDecorate %S_tint_explicit_layout 0 Offset 0
+               OpDecorate %_runtimearr_S_tint_explicit_layout ArrayStride 64
+               OpMemberDecorate %buffer_block_tint_explicit_layout 0 Offset 0
+               OpDecorate %buffer_block_tint_explicit_layout Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 Coherent
@@ -37,11 +37,11 @@
        %uint = OpTypeInt 32 0
      %uint_4 = OpConstant %uint 4
 %_arr_v4int_uint_4 = OpTypeArray %v4int %uint_4
-          %S = OpTypeStruct %_arr_v4int_uint_4
-%_runtimearr_S = OpTypeRuntimeArray %S
-%buffer_block = OpTypeStruct %_runtimearr_S
-%_ptr_StorageBuffer_buffer_block = OpTypePointer StorageBuffer %buffer_block
-          %1 = OpVariable %_ptr_StorageBuffer_buffer_block StorageBuffer
+%S_tint_explicit_layout = OpTypeStruct %_arr_v4int_uint_4
+%_runtimearr_S_tint_explicit_layout = OpTypeRuntimeArray %S_tint_explicit_layout
+%buffer_block_tint_explicit_layout = OpTypeStruct %_runtimearr_S_tint_explicit_layout
+%_ptr_StorageBuffer_buffer_block_tint_explicit_layout = OpTypePointer StorageBuffer %buffer_block_tint_explicit_layout
+          %1 = OpVariable %_ptr_StorageBuffer_buffer_block_tint_explicit_layout StorageBuffer
 %_ptr_Private_uint = OpTypePointer Private %uint
          %13 = OpConstantNull %uint
           %v = OpVariable %_ptr_Private_uint Private %13
@@ -58,7 +58,7 @@
 %_ptr_Function_v2uint = OpTypePointer Function %v2uint
 %uint_4294967295 = OpConstant %uint 4294967295
          %57 = OpConstantComposite %v2uint %uint_4294967295 %uint_4294967295
-%_ptr_StorageBuffer__runtimearr_S = OpTypePointer StorageBuffer %_runtimearr_S
+%_ptr_StorageBuffer__runtimearr_S_tint_explicit_layout = OpTypePointer StorageBuffer %_runtimearr_S_tint_explicit_layout
      %uint_0 = OpConstant %uint 0
      %uint_3 = OpConstant %uint 3
 %_ptr_StorageBuffer_v4int = OpTypePointer StorageBuffer %v4int
@@ -118,7 +118,7 @@
                OpStore %tint_loop_idx %57
          %59 = OpFunctionCall %int %idx1
          %60 = OpFunctionCall %int %idx2
-         %61 = OpAccessChain %_ptr_StorageBuffer__runtimearr_S %1 %uint_0
+         %61 = OpAccessChain %_ptr_StorageBuffer__runtimearr_S_tint_explicit_layout %1 %uint_0
          %64 = OpArrayLength %uint %1 0
          %65 = OpISub %uint %64 %uint_1
          %66 = OpBitcast %uint %59
@@ -172,7 +172,7 @@
                OpStore %107 %106 None
         %108 = OpFunctionCall %int %idx4
         %109 = OpFunctionCall %int %idx5
-        %110 = OpAccessChain %_ptr_StorageBuffer__runtimearr_S %1 %uint_0
+        %110 = OpAccessChain %_ptr_StorageBuffer__runtimearr_S_tint_explicit_layout %1 %uint_0
         %111 = OpArrayLength %uint %1 0
         %112 = OpISub %uint %111 %uint_1
         %113 = OpBitcast %uint %108

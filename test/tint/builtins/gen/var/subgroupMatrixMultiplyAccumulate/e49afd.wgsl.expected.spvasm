@@ -12,8 +12,8 @@
                OpMemoryModel Logical Vulkan
                OpEntryPoint GLCompute %compute_main "compute_main"
                OpExecutionMode %compute_main LocalSize 1 1 1
-               OpMemberName %prevent_dce_block 0 "inner"
-               OpName %prevent_dce_block "prevent_dce_block"
+               OpMemberName %prevent_dce_block_tint_explicit_layout 0 "inner"
+               OpName %prevent_dce_block_tint_explicit_layout "prevent_dce_block_tint_explicit_layout"
                OpName %subgroupMatrixMultiplyAccumulate_e49afd "subgroupMatrixMultiplyAccumulate_e49afd"
                OpName %arg_0 "arg_0"
                OpName %arg_1 "arg_1"
@@ -21,17 +21,17 @@
                OpName %res "res"
                OpName %compute_main "compute_main"
                OpDecorate %_arr_float_uint_1024 ArrayStride 4
-               OpMemberDecorate %prevent_dce_block 0 Offset 0
-               OpDecorate %prevent_dce_block Block
+               OpMemberDecorate %prevent_dce_block_tint_explicit_layout 0 Offset 0
+               OpDecorate %prevent_dce_block_tint_explicit_layout Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
       %float = OpTypeFloat 32
        %uint = OpTypeInt 32 0
   %uint_1024 = OpConstant %uint 1024
 %_arr_float_uint_1024 = OpTypeArray %float %uint_1024
-%prevent_dce_block = OpTypeStruct %_arr_float_uint_1024
-%_ptr_StorageBuffer_prevent_dce_block = OpTypePointer StorageBuffer %prevent_dce_block
-          %1 = OpVariable %_ptr_StorageBuffer_prevent_dce_block StorageBuffer
+%prevent_dce_block_tint_explicit_layout = OpTypeStruct %_arr_float_uint_1024
+%_ptr_StorageBuffer_prevent_dce_block_tint_explicit_layout = OpTypePointer StorageBuffer %prevent_dce_block_tint_explicit_layout
+          %1 = OpVariable %_ptr_StorageBuffer_prevent_dce_block_tint_explicit_layout StorageBuffer
      %uint_3 = OpConstant %uint 3
      %uint_8 = OpConstant %uint 8
      %uint_2 = OpConstant %uint 2

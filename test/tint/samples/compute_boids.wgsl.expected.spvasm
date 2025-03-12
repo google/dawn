@@ -153,12 +153,12 @@
                OpMemberName %Particle 0 "pos"
                OpMemberName %Particle 1 "vel"
                OpName %Particle "Particle"
-               OpMemberName %Particles 0 "particles"
-               OpName %Particles "Particles"
-               OpMemberName %particlesA_block 0 "inner"
-               OpName %particlesA_block "particlesA_block"
-               OpMemberName %particlesB_block 0 "inner"
-               OpName %particlesB_block "particlesB_block"
+               OpMemberName %Particles_tint_explicit_layout 0 "particles"
+               OpName %Particles_tint_explicit_layout "Particles_tint_explicit_layout"
+               OpMemberName %particlesA_block_tint_explicit_layout 0 "inner"
+               OpName %particlesA_block_tint_explicit_layout "particlesA_block_tint_explicit_layout"
+               OpMemberName %particlesB_block_tint_explicit_layout 0 "inner"
+               OpName %particlesB_block_tint_explicit_layout "particlesB_block_tint_explicit_layout"
                OpName %comp_main_global_invocation_id_Input "comp_main_global_invocation_id_Input"
                OpName %comp_main_inner "comp_main_inner"
                OpName %gl_GlobalInvocationID "gl_GlobalInvocationID"
@@ -189,14 +189,14 @@
                OpMemberDecorate %Particle 0 Offset 0
                OpMemberDecorate %Particle 1 Offset 8
                OpDecorate %_arr_Particle_uint_5 ArrayStride 16
-               OpMemberDecorate %Particles 0 Offset 0
-               OpMemberDecorate %particlesA_block 0 Offset 0
-               OpDecorate %particlesA_block Block
+               OpMemberDecorate %Particles_tint_explicit_layout 0 Offset 0
+               OpMemberDecorate %particlesA_block_tint_explicit_layout 0 Offset 0
+               OpDecorate %particlesA_block_tint_explicit_layout Block
                OpDecorate %6 DescriptorSet 0
                OpDecorate %6 Binding 1
                OpDecorate %6 Coherent
-               OpMemberDecorate %particlesB_block 0 Offset 0
-               OpDecorate %particlesB_block Block
+               OpMemberDecorate %particlesB_block_tint_explicit_layout 0 Offset 0
+               OpDecorate %particlesB_block_tint_explicit_layout Block
                OpDecorate %15 DescriptorSet 0
                OpDecorate %15 Binding 2
                OpDecorate %15 Coherent
@@ -211,13 +211,13 @@
        %uint = OpTypeInt 32 0
      %uint_5 = OpConstant %uint 5
 %_arr_Particle_uint_5 = OpTypeArray %Particle %uint_5
-  %Particles = OpTypeStruct %_arr_Particle_uint_5
-%particlesA_block = OpTypeStruct %Particles
-%_ptr_StorageBuffer_particlesA_block = OpTypePointer StorageBuffer %particlesA_block
-          %6 = OpVariable %_ptr_StorageBuffer_particlesA_block StorageBuffer
-%particlesB_block = OpTypeStruct %Particles
-%_ptr_StorageBuffer_particlesB_block = OpTypePointer StorageBuffer %particlesB_block
-         %15 = OpVariable %_ptr_StorageBuffer_particlesB_block StorageBuffer
+%Particles_tint_explicit_layout = OpTypeStruct %_arr_Particle_uint_5
+%particlesA_block_tint_explicit_layout = OpTypeStruct %Particles_tint_explicit_layout
+%_ptr_StorageBuffer_particlesA_block_tint_explicit_layout = OpTypePointer StorageBuffer %particlesA_block_tint_explicit_layout
+          %6 = OpVariable %_ptr_StorageBuffer_particlesA_block_tint_explicit_layout StorageBuffer
+%particlesB_block_tint_explicit_layout = OpTypeStruct %Particles_tint_explicit_layout
+%_ptr_StorageBuffer_particlesB_block_tint_explicit_layout = OpTypePointer StorageBuffer %particlesB_block_tint_explicit_layout
+         %15 = OpVariable %_ptr_StorageBuffer_particlesB_block_tint_explicit_layout StorageBuffer
      %v3uint = OpTypeVector %uint 3
 %_ptr_Input_v3uint = OpTypePointer Input %v3uint
 %comp_main_global_invocation_id_Input = OpVariable %_ptr_Input_v3uint Input

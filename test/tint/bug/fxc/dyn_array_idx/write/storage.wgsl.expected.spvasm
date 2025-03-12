@@ -16,10 +16,10 @@
                OpName %Result "Result"
                OpMemberName %result_block 0 "inner"
                OpName %result_block "result_block"
-               OpMemberName %SSBO 0 "data"
-               OpName %SSBO "SSBO"
-               OpMemberName %ssbo_block 0 "inner"
-               OpName %ssbo_block "ssbo_block"
+               OpMemberName %SSBO_tint_explicit_layout 0 "data"
+               OpName %SSBO_tint_explicit_layout "SSBO_tint_explicit_layout"
+               OpMemberName %ssbo_block_tint_explicit_layout 0 "inner"
+               OpName %ssbo_block_tint_explicit_layout "ssbo_block_tint_explicit_layout"
                OpName %f "f"
                OpMemberDecorate %UBO 0 Offset 0
                OpMemberDecorate %ubo_block 0 Offset 0
@@ -34,9 +34,9 @@
                OpDecorate %6 Binding 2
                OpDecorate %6 Coherent
                OpDecorate %_arr_int_uint_4 ArrayStride 4
-               OpMemberDecorate %SSBO 0 Offset 0
-               OpMemberDecorate %ssbo_block 0 Offset 0
-               OpDecorate %ssbo_block Block
+               OpMemberDecorate %SSBO_tint_explicit_layout 0 Offset 0
+               OpMemberDecorate %ssbo_block_tint_explicit_layout 0 Offset 0
+               OpDecorate %ssbo_block_tint_explicit_layout Block
                OpDecorate %10 DescriptorSet 0
                OpDecorate %10 Binding 1
                OpDecorate %10 Coherent
@@ -52,10 +52,10 @@
        %uint = OpTypeInt 32 0
      %uint_4 = OpConstant %uint 4
 %_arr_int_uint_4 = OpTypeArray %int %uint_4
-       %SSBO = OpTypeStruct %_arr_int_uint_4
- %ssbo_block = OpTypeStruct %SSBO
-%_ptr_StorageBuffer_ssbo_block = OpTypePointer StorageBuffer %ssbo_block
-         %10 = OpVariable %_ptr_StorageBuffer_ssbo_block StorageBuffer
+%SSBO_tint_explicit_layout = OpTypeStruct %_arr_int_uint_4
+%ssbo_block_tint_explicit_layout = OpTypeStruct %SSBO_tint_explicit_layout
+%_ptr_StorageBuffer_ssbo_block_tint_explicit_layout = OpTypePointer StorageBuffer %ssbo_block_tint_explicit_layout
+         %10 = OpVariable %_ptr_StorageBuffer_ssbo_block_tint_explicit_layout StorageBuffer
        %void = OpTypeVoid
          %19 = OpTypeFunction %void
 %_ptr_Uniform_int = OpTypePointer Uniform %int

@@ -16,10 +16,10 @@
                OpName %Result "Result"
                OpMemberName %result_block 0 "inner"
                OpName %result_block "result_block"
-               OpMemberName %TestData 0 "data"
-               OpName %TestData "TestData"
-               OpMemberName %s_block 0 "inner"
-               OpName %s_block "s_block"
+               OpMemberName %TestData_tint_explicit_layout 0 "data"
+               OpName %TestData_tint_explicit_layout "TestData_tint_explicit_layout"
+               OpMemberName %s_block_tint_explicit_layout 0 "inner"
+               OpName %s_block_tint_explicit_layout "s_block_tint_explicit_layout"
                OpName %runTest "runTest"
                OpName %main "main"
                OpMemberDecorate %Constants 0 Offset 0
@@ -35,9 +35,9 @@
                OpDecorate %6 Binding 1
                OpDecorate %6 Coherent
                OpDecorate %_arr_int_uint_3 ArrayStride 4
-               OpMemberDecorate %TestData 0 Offset 0
-               OpMemberDecorate %s_block 0 Offset 0
-               OpDecorate %s_block Block
+               OpMemberDecorate %TestData_tint_explicit_layout 0 Offset 0
+               OpMemberDecorate %s_block_tint_explicit_layout 0 Offset 0
+               OpDecorate %s_block_tint_explicit_layout Block
                OpDecorate %10 DescriptorSet 0
                OpDecorate %10 Binding 0
                OpDecorate %10 Coherent
@@ -53,10 +53,10 @@
         %int = OpTypeInt 32 1
      %uint_3 = OpConstant %uint 3
 %_arr_int_uint_3 = OpTypeArray %int %uint_3
-   %TestData = OpTypeStruct %_arr_int_uint_3
-    %s_block = OpTypeStruct %TestData
-%_ptr_StorageBuffer_s_block = OpTypePointer StorageBuffer %s_block
-         %10 = OpVariable %_ptr_StorageBuffer_s_block StorageBuffer
+%TestData_tint_explicit_layout = OpTypeStruct %_arr_int_uint_3
+%s_block_tint_explicit_layout = OpTypeStruct %TestData_tint_explicit_layout
+%_ptr_StorageBuffer_s_block_tint_explicit_layout = OpTypePointer StorageBuffer %s_block_tint_explicit_layout
+         %10 = OpVariable %_ptr_StorageBuffer_s_block_tint_explicit_layout StorageBuffer
          %18 = OpTypeFunction %int
 %_ptr_Uniform_uint = OpTypePointer Uniform %uint
      %uint_0 = OpConstant %uint 0

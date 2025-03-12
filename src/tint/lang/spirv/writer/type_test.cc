@@ -283,11 +283,12 @@ TEST_F(SpirvWriterTest, Type_Struct_MatrixLayout) {
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
-    EXPECT_INST("OpMemberDecorate %MyStruct 0 ColMajor");
-    EXPECT_INST("OpMemberDecorate %MyStruct 0 MatrixStride 16");
-    EXPECT_INST("OpMemberDecorate %MyStruct 1 ColMajor");
-    EXPECT_INST("OpMemberDecorate %MyStruct 1 MatrixStride 8");
-    EXPECT_INST("%MyStruct = OpTypeStruct %mat3v3float %_arr__arr_mat2v4half_uint_4_uint_4");
+    EXPECT_INST("OpMemberDecorate %MyStruct_tint_explicit_layout 0 ColMajor");
+    EXPECT_INST("OpMemberDecorate %MyStruct_tint_explicit_layout 0 MatrixStride 16");
+    EXPECT_INST("OpMemberDecorate %MyStruct_tint_explicit_layout 1 ColMajor");
+    EXPECT_INST("OpMemberDecorate %MyStruct_tint_explicit_layout 1 MatrixStride 8");
+    EXPECT_INST(
+        R"(%MyStruct_tint_explicit_layout = OpTypeStruct %mat3v3float %_arr__arr_mat2v4half_uint_4_uint_4)");
 }
 
 TEST_F(SpirvWriterTest, Type_Atomic) {

@@ -8,11 +8,11 @@
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
-               OpMemberName %Buf 0 "count"
-               OpMemberName %Buf 1 "data"
-               OpName %Buf "Buf"
-               OpMemberName %b_block 0 "inner"
-               OpName %b_block "b_block"
+               OpMemberName %Buf_tint_explicit_layout 0 "count"
+               OpMemberName %Buf_tint_explicit_layout 1 "data"
+               OpName %Buf_tint_explicit_layout "Buf_tint_explicit_layout"
+               OpMemberName %b_block_tint_explicit_layout 0 "inner"
+               OpName %b_block_tint_explicit_layout "b_block_tint_explicit_layout"
                OpName %main "main"
                OpName %i "i"
                OpName %tint_loop_idx "tint_loop_idx"
@@ -22,21 +22,21 @@
                OpName %tint_mod_u32 "tint_mod_u32"
                OpName %lhs "lhs"
                OpName %rhs "rhs"
-               OpMemberDecorate %Buf 0 Offset 0
+               OpMemberDecorate %Buf_tint_explicit_layout 0 Offset 0
                OpDecorate %_arr_uint_uint_50 ArrayStride 4
-               OpMemberDecorate %Buf 1 Offset 4
-               OpMemberDecorate %b_block 0 Offset 0
-               OpDecorate %b_block Block
+               OpMemberDecorate %Buf_tint_explicit_layout 1 Offset 4
+               OpMemberDecorate %b_block_tint_explicit_layout 0 Offset 0
+               OpDecorate %b_block_tint_explicit_layout Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 Coherent
        %uint = OpTypeInt 32 0
     %uint_50 = OpConstant %uint 50
 %_arr_uint_uint_50 = OpTypeArray %uint %uint_50
-        %Buf = OpTypeStruct %uint %_arr_uint_uint_50
-    %b_block = OpTypeStruct %Buf
-%_ptr_StorageBuffer_b_block = OpTypePointer StorageBuffer %b_block
-          %1 = OpVariable %_ptr_StorageBuffer_b_block StorageBuffer
+%Buf_tint_explicit_layout = OpTypeStruct %uint %_arr_uint_uint_50
+%b_block_tint_explicit_layout = OpTypeStruct %Buf_tint_explicit_layout
+%_ptr_StorageBuffer_b_block_tint_explicit_layout = OpTypePointer StorageBuffer %b_block_tint_explicit_layout
+          %1 = OpVariable %_ptr_StorageBuffer_b_block_tint_explicit_layout StorageBuffer
        %void = OpTypeVoid
          %10 = OpTypeFunction %void
 %_ptr_Function_uint = OpTypePointer Function %uint

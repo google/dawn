@@ -13,8 +13,8 @@
                OpMemberName %S_std140 2 "m_col1"
                OpMemberName %S_std140 3 "after"
                OpName %S_std140 "S_std140"
-               OpMemberName %u_block_std140 0 "inner"
-               OpName %u_block_std140 "u_block_std140"
+               OpMemberName %u_block_std140_tint_explicit_layout 0 "inner"
+               OpName %u_block_std140_tint_explicit_layout "u_block_std140_tint_explicit_layout"
                OpName %f "f"
                OpName %t "t"
                OpName %l "l"
@@ -24,8 +24,8 @@
                OpMemberDecorate %S_std140 2 Offset 32
                OpMemberDecorate %S_std140 3 Offset 64
                OpDecorate %_arr_S_std140_uint_4 ArrayStride 128
-               OpMemberDecorate %u_block_std140 0 Offset 0
-               OpDecorate %u_block_std140 Block
+               OpMemberDecorate %u_block_std140_tint_explicit_layout 0 Offset 0
+               OpDecorate %u_block_std140_tint_explicit_layout Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
@@ -36,9 +36,9 @@
        %uint = OpTypeInt 32 0
      %uint_4 = OpConstant %uint 4
 %_arr_S_std140_uint_4 = OpTypeArray %S_std140 %uint_4
-%u_block_std140 = OpTypeStruct %_arr_S_std140_uint_4
-%_ptr_Uniform_u_block_std140 = OpTypePointer Uniform %u_block_std140
-          %1 = OpVariable %_ptr_Uniform_u_block_std140 Uniform
+%u_block_std140_tint_explicit_layout = OpTypeStruct %_arr_S_std140_uint_4
+%_ptr_Uniform_u_block_std140_tint_explicit_layout = OpTypePointer Uniform %u_block_std140_tint_explicit_layout
+          %1 = OpVariable %_ptr_Uniform_u_block_std140_tint_explicit_layout Uniform
        %void = OpTypeVoid
          %13 = OpTypeFunction %void
 %_ptr_Uniform_v3float = OpTypePointer Uniform %v3float

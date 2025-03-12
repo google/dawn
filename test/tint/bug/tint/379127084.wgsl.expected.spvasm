@@ -18,8 +18,8 @@
                OpMemberName %FSUniformData 7 "inHSL_4"
                OpMemberName %FSUniformData 8 "clampRGB_4"
                OpName %FSUniformData "FSUniformData"
-               OpMemberName %FSUniforms 0 "fsUniformData"
-               OpName %FSUniforms "FSUniforms"
+               OpMemberName %FSUniforms_tint_explicit_layout 0 "fsUniformData"
+               OpName %FSUniforms_tint_explicit_layout "FSUniforms_tint_explicit_layout"
                OpName %_storage1 "_storage1"
                OpName %shadingSsboIndex "shadingSsboIndex"
                OpName %permutationsSampler_1_Sampler "permutationsSampler_1_Sampler"
@@ -126,8 +126,8 @@
                OpMemberDecorate %FSUniformData 7 Offset 112
                OpMemberDecorate %FSUniformData 8 Offset 116
                OpDecorate %_runtimearr_FSUniformData ArrayStride 128
-               OpMemberDecorate %FSUniforms 0 Offset 0
-               OpDecorate %FSUniforms Block
+               OpMemberDecorate %FSUniforms_tint_explicit_layout 0 Offset 0
+               OpDecorate %FSUniforms_tint_explicit_layout Block
                OpDecorate %_storage1 DescriptorSet 0
                OpDecorate %_storage1 Binding 2
                OpDecorate %_storage1 NonWritable
@@ -150,9 +150,9 @@
 %mat4v4float = OpTypeMatrix %v4float 4
 %FSUniformData = OpTypeStruct %v2float %v2float %int %int %int %mat4v4float %v4float %int %int
 %_runtimearr_FSUniformData = OpTypeRuntimeArray %FSUniformData
- %FSUniforms = OpTypeStruct %_runtimearr_FSUniformData
-%_ptr_StorageBuffer_FSUniforms = OpTypePointer StorageBuffer %FSUniforms
-  %_storage1 = OpVariable %_ptr_StorageBuffer_FSUniforms StorageBuffer
+%FSUniforms_tint_explicit_layout = OpTypeStruct %_runtimearr_FSUniformData
+%_ptr_StorageBuffer_FSUniforms_tint_explicit_layout = OpTypePointer StorageBuffer %FSUniforms_tint_explicit_layout
+  %_storage1 = OpVariable %_ptr_StorageBuffer_FSUniforms_tint_explicit_layout StorageBuffer
        %uint = OpTypeInt 32 0
 %_ptr_Private_uint = OpTypePointer Private %uint
          %14 = OpConstantNull %uint

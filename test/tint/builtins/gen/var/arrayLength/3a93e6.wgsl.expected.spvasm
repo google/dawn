@@ -12,8 +12,8 @@
                OpExecutionMode %fragment_main OriginUpperLeft
                OpMemberName %prevent_dce_block 0 "inner"
                OpName %prevent_dce_block "prevent_dce_block"
-               OpMemberName %SB_RO 0 "arg_0"
-               OpName %SB_RO "SB_RO"
+               OpMemberName %SB_RO_tint_explicit_layout 0 "arg_0"
+               OpName %SB_RO_tint_explicit_layout "SB_RO_tint_explicit_layout"
                OpName %sb_ro "sb_ro"
                OpName %arrayLength_3a93e6 "arrayLength_3a93e6"
                OpName %res "res"
@@ -24,8 +24,8 @@
                OpDecorate %1 Binding 0
                OpDecorate %1 Coherent
                OpDecorate %_runtimearr_float ArrayStride 4
-               OpMemberDecorate %SB_RO 0 Offset 0
-               OpDecorate %SB_RO Block
+               OpMemberDecorate %SB_RO_tint_explicit_layout 0 Offset 0
+               OpDecorate %SB_RO_tint_explicit_layout Block
                OpDecorate %sb_ro DescriptorSet 0
                OpDecorate %sb_ro Binding 1
                OpDecorate %sb_ro NonWritable
@@ -35,9 +35,9 @@
           %1 = OpVariable %_ptr_StorageBuffer_prevent_dce_block StorageBuffer
       %float = OpTypeFloat 32
 %_runtimearr_float = OpTypeRuntimeArray %float
-      %SB_RO = OpTypeStruct %_runtimearr_float
-%_ptr_StorageBuffer_SB_RO = OpTypePointer StorageBuffer %SB_RO
-      %sb_ro = OpVariable %_ptr_StorageBuffer_SB_RO StorageBuffer
+%SB_RO_tint_explicit_layout = OpTypeStruct %_runtimearr_float
+%_ptr_StorageBuffer_SB_RO_tint_explicit_layout = OpTypePointer StorageBuffer %SB_RO_tint_explicit_layout
+      %sb_ro = OpVariable %_ptr_StorageBuffer_SB_RO_tint_explicit_layout StorageBuffer
          %11 = OpTypeFunction %uint
 %_ptr_StorageBuffer__runtimearr_float = OpTypePointer StorageBuffer %_runtimearr_float
      %uint_0 = OpConstant %uint 0
@@ -75,8 +75,8 @@
                OpExecutionMode %compute_main LocalSize 1 1 1
                OpMemberName %prevent_dce_block 0 "inner"
                OpName %prevent_dce_block "prevent_dce_block"
-               OpMemberName %SB_RO 0 "arg_0"
-               OpName %SB_RO "SB_RO"
+               OpMemberName %SB_RO_tint_explicit_layout 0 "arg_0"
+               OpName %SB_RO_tint_explicit_layout "SB_RO_tint_explicit_layout"
                OpName %sb_ro "sb_ro"
                OpName %arrayLength_3a93e6 "arrayLength_3a93e6"
                OpName %res "res"
@@ -87,8 +87,8 @@
                OpDecorate %1 Binding 0
                OpDecorate %1 Coherent
                OpDecorate %_runtimearr_float ArrayStride 4
-               OpMemberDecorate %SB_RO 0 Offset 0
-               OpDecorate %SB_RO Block
+               OpMemberDecorate %SB_RO_tint_explicit_layout 0 Offset 0
+               OpDecorate %SB_RO_tint_explicit_layout Block
                OpDecorate %sb_ro DescriptorSet 0
                OpDecorate %sb_ro Binding 1
                OpDecorate %sb_ro NonWritable
@@ -98,9 +98,9 @@
           %1 = OpVariable %_ptr_StorageBuffer_prevent_dce_block StorageBuffer
       %float = OpTypeFloat 32
 %_runtimearr_float = OpTypeRuntimeArray %float
-      %SB_RO = OpTypeStruct %_runtimearr_float
-%_ptr_StorageBuffer_SB_RO = OpTypePointer StorageBuffer %SB_RO
-      %sb_ro = OpVariable %_ptr_StorageBuffer_SB_RO StorageBuffer
+%SB_RO_tint_explicit_layout = OpTypeStruct %_runtimearr_float
+%_ptr_StorageBuffer_SB_RO_tint_explicit_layout = OpTypePointer StorageBuffer %SB_RO_tint_explicit_layout
+      %sb_ro = OpVariable %_ptr_StorageBuffer_SB_RO_tint_explicit_layout StorageBuffer
          %11 = OpTypeFunction %uint
 %_ptr_StorageBuffer__runtimearr_float = OpTypePointer StorageBuffer %_runtimearr_float
      %uint_0 = OpConstant %uint 0
@@ -135,8 +135,8 @@
                OpCapability Shader
                OpMemoryModel Logical GLSL450
                OpEntryPoint Vertex %vertex_main "vertex_main" %vertex_main_position_Output %vertex_main_loc0_Output %vertex_main___point_size_Output
-               OpMemberName %SB_RO 0 "arg_0"
-               OpName %SB_RO "SB_RO"
+               OpMemberName %SB_RO_tint_explicit_layout 0 "arg_0"
+               OpName %SB_RO_tint_explicit_layout "SB_RO_tint_explicit_layout"
                OpName %sb_ro "sb_ro"
                OpName %vertex_main_position_Output "vertex_main_position_Output"
                OpName %vertex_main_loc0_Output "vertex_main_loc0_Output"
@@ -150,8 +150,8 @@
                OpName %out "out"
                OpName %vertex_main "vertex_main"
                OpDecorate %_runtimearr_float ArrayStride 4
-               OpMemberDecorate %SB_RO 0 Offset 0
-               OpDecorate %SB_RO Block
+               OpMemberDecorate %SB_RO_tint_explicit_layout 0 Offset 0
+               OpDecorate %SB_RO_tint_explicit_layout Block
                OpDecorate %sb_ro DescriptorSet 0
                OpDecorate %sb_ro Binding 1
                OpDecorate %sb_ro NonWritable
@@ -161,9 +161,9 @@
                OpDecorate %vertex_main___point_size_Output BuiltIn PointSize
       %float = OpTypeFloat 32
 %_runtimearr_float = OpTypeRuntimeArray %float
-      %SB_RO = OpTypeStruct %_runtimearr_float
-%_ptr_StorageBuffer_SB_RO = OpTypePointer StorageBuffer %SB_RO
-      %sb_ro = OpVariable %_ptr_StorageBuffer_SB_RO StorageBuffer
+%SB_RO_tint_explicit_layout = OpTypeStruct %_runtimearr_float
+%_ptr_StorageBuffer_SB_RO_tint_explicit_layout = OpTypePointer StorageBuffer %SB_RO_tint_explicit_layout
+      %sb_ro = OpVariable %_ptr_StorageBuffer_SB_RO_tint_explicit_layout StorageBuffer
     %v4float = OpTypeVector %float 4
 %_ptr_Output_v4float = OpTypePointer Output %v4float
 %vertex_main_position_Output = OpVariable %_ptr_Output_v4float Output

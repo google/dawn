@@ -1,29 +1,33 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 43
+; Bound: 92
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %f "f"
                OpExecutionMode %f LocalSize 1 1 1
-               OpMemberName %u_block 0 "inner"
-               OpName %u_block "u_block"
-               OpMemberName %s_block 0 "inner"
-               OpName %s_block "s_block"
+               OpMemberName %u_block_tint_explicit_layout 0 "inner"
+               OpName %u_block_tint_explicit_layout "u_block_tint_explicit_layout"
+               OpMemberName %s_block_tint_explicit_layout 0 "inner"
+               OpName %s_block_tint_explicit_layout "s_block_tint_explicit_layout"
                OpName %f "f"
+               OpName %tint_convert_explicit_layout "tint_convert_explicit_layout"
+               OpName %tint_source "tint_source"
+               OpName %tint_convert_explicit_layout_0 "tint_convert_explicit_layout"
+               OpName %tint_source_0 "tint_source"
                OpDecorate %_arr_mat4v4float_uint_4 ArrayStride 64
-               OpMemberDecorate %u_block 0 Offset 0
-               OpMemberDecorate %u_block 0 ColMajor
-               OpMemberDecorate %u_block 0 MatrixStride 16
-               OpDecorate %u_block Block
+               OpMemberDecorate %u_block_tint_explicit_layout 0 Offset 0
+               OpMemberDecorate %u_block_tint_explicit_layout 0 ColMajor
+               OpMemberDecorate %u_block_tint_explicit_layout 0 MatrixStride 16
+               OpDecorate %u_block_tint_explicit_layout Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
-               OpMemberDecorate %s_block 0 Offset 0
-               OpMemberDecorate %s_block 0 ColMajor
-               OpMemberDecorate %s_block 0 MatrixStride 16
-               OpDecorate %s_block Block
+               OpMemberDecorate %s_block_tint_explicit_layout 0 Offset 0
+               OpMemberDecorate %s_block_tint_explicit_layout 0 ColMajor
+               OpMemberDecorate %s_block_tint_explicit_layout 0 MatrixStride 16
+               OpDecorate %s_block_tint_explicit_layout Block
                OpDecorate %10 DescriptorSet 0
                OpDecorate %10 Binding 1
                OpDecorate %10 Coherent
@@ -33,16 +37,17 @@
        %uint = OpTypeInt 32 0
      %uint_4 = OpConstant %uint 4
 %_arr_mat4v4float_uint_4 = OpTypeArray %mat4v4float %uint_4
-    %u_block = OpTypeStruct %_arr_mat4v4float_uint_4
-%_ptr_Uniform_u_block = OpTypePointer Uniform %u_block
-          %1 = OpVariable %_ptr_Uniform_u_block Uniform
-    %s_block = OpTypeStruct %_arr_mat4v4float_uint_4
-%_ptr_StorageBuffer_s_block = OpTypePointer StorageBuffer %s_block
-         %10 = OpVariable %_ptr_StorageBuffer_s_block StorageBuffer
+%u_block_tint_explicit_layout = OpTypeStruct %_arr_mat4v4float_uint_4
+%_ptr_Uniform_u_block_tint_explicit_layout = OpTypePointer Uniform %u_block_tint_explicit_layout
+          %1 = OpVariable %_ptr_Uniform_u_block_tint_explicit_layout Uniform
+%s_block_tint_explicit_layout = OpTypeStruct %_arr_mat4v4float_uint_4
+%_ptr_StorageBuffer_s_block_tint_explicit_layout = OpTypePointer StorageBuffer %s_block_tint_explicit_layout
+         %10 = OpVariable %_ptr_StorageBuffer_s_block_tint_explicit_layout StorageBuffer
        %void = OpTypeVoid
          %15 = OpTypeFunction %void
 %_ptr_Uniform__arr_mat4v4float_uint_4 = OpTypePointer Uniform %_arr_mat4v4float_uint_4
      %uint_0 = OpConstant %uint 0
+%_arr_mat4v4float_uint_4_0 = OpTypeArray %mat4v4float %uint_4
 %_ptr_StorageBuffer__arr_mat4v4float_uint_4 = OpTypePointer StorageBuffer %_arr_mat4v4float_uint_4
 %_ptr_StorageBuffer_mat4v4float = OpTypePointer StorageBuffer %mat4v4float
      %uint_1 = OpConstant %uint 1
@@ -52,26 +57,100 @@
 %_ptr_Uniform_v4float = OpTypePointer Uniform %v4float
 %_ptr_Uniform_float = OpTypePointer Uniform %float
 %_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float
+         %49 = OpTypeFunction %_arr_mat4v4float_uint_4_0 %_arr_mat4v4float_uint_4
+%_ptr_Function__arr_mat4v4float_uint_4 = OpTypePointer Function %_arr_mat4v4float_uint_4
+%_ptr_Function__arr_mat4v4float_uint_4_0 = OpTypePointer Function %_arr_mat4v4float_uint_4_0
+         %55 = OpConstantNull %_arr_mat4v4float_uint_4_0
+       %bool = OpTypeBool
+%_ptr_Function_mat4v4float = OpTypePointer Function %mat4v4float
+         %73 = OpTypeFunction %_arr_mat4v4float_uint_4 %_arr_mat4v4float_uint_4_0
+         %77 = OpConstantNull %_arr_mat4v4float_uint_4
           %f = OpFunction %void None %15
          %16 = OpLabel
          %17 = OpAccessChain %_ptr_Uniform__arr_mat4v4float_uint_4 %1 %uint_0
          %20 = OpLoad %_arr_mat4v4float_uint_4 %17 None
-         %21 = OpAccessChain %_ptr_StorageBuffer__arr_mat4v4float_uint_4 %10 %uint_0
-               OpStore %21 %20 None
-         %23 = OpAccessChain %_ptr_StorageBuffer_mat4v4float %10 %uint_0 %uint_1
-         %26 = OpAccessChain %_ptr_Uniform_mat4v4float %1 %uint_0 %uint_2
-         %29 = OpLoad %mat4v4float %26 None
-               OpStore %23 %29 None
-         %30 = OpAccessChain %_ptr_StorageBuffer_v4float %10 %uint_0 %uint_1 %uint_0
-         %32 = OpAccessChain %_ptr_Uniform_v4float %1 %uint_0 %uint_0 %uint_1
-         %34 = OpLoad %v4float %32 None
-         %35 = OpVectorShuffle %v4float %34 %34 1 3 0 2
-               OpStore %30 %35 None
-         %36 = OpAccessChain %_ptr_StorageBuffer_v4float %10 %uint_0 %uint_1 %uint_0
+         %21 = OpFunctionCall %_arr_mat4v4float_uint_4_0 %tint_convert_explicit_layout %20
+         %24 = OpAccessChain %_ptr_StorageBuffer__arr_mat4v4float_uint_4 %10 %uint_0
+         %26 = OpFunctionCall %_arr_mat4v4float_uint_4 %tint_convert_explicit_layout_0 %21
+               OpStore %24 %26 None
+         %28 = OpAccessChain %_ptr_StorageBuffer_mat4v4float %10 %uint_0 %uint_1
+         %31 = OpAccessChain %_ptr_Uniform_mat4v4float %1 %uint_0 %uint_2
+         %34 = OpLoad %mat4v4float %31 None
+               OpStore %28 %34 None
+         %35 = OpAccessChain %_ptr_StorageBuffer_v4float %10 %uint_0 %uint_1 %uint_0
          %37 = OpAccessChain %_ptr_Uniform_v4float %1 %uint_0 %uint_0 %uint_1
-         %38 = OpAccessChain %_ptr_Uniform_float %37 %uint_0
-         %40 = OpLoad %float %38 None
-         %41 = OpAccessChain %_ptr_StorageBuffer_float %36 %uint_0
-               OpStore %41 %40 None
+         %39 = OpLoad %v4float %37 None
+         %40 = OpVectorShuffle %v4float %39 %39 1 3 0 2
+               OpStore %35 %40 None
+         %41 = OpAccessChain %_ptr_StorageBuffer_v4float %10 %uint_0 %uint_1 %uint_0
+         %42 = OpAccessChain %_ptr_Uniform_v4float %1 %uint_0 %uint_0 %uint_1
+         %43 = OpAccessChain %_ptr_Uniform_float %42 %uint_0
+         %45 = OpLoad %float %43 None
+         %46 = OpAccessChain %_ptr_StorageBuffer_float %41 %uint_0
+               OpStore %46 %45 None
                OpReturn
+               OpFunctionEnd
+%tint_convert_explicit_layout = OpFunction %_arr_mat4v4float_uint_4_0 None %49
+%tint_source = OpFunctionParameter %_arr_mat4v4float_uint_4
+         %50 = OpLabel
+         %51 = OpVariable %_ptr_Function__arr_mat4v4float_uint_4 Function
+         %53 = OpVariable %_ptr_Function__arr_mat4v4float_uint_4_0 Function %55
+               OpStore %51 %tint_source
+               OpBranch %56
+         %56 = OpLabel
+               OpBranch %59
+         %59 = OpLabel
+         %61 = OpPhi %uint %uint_0 %56 %62 %58
+               OpLoopMerge %60 %58 None
+               OpBranch %57
+         %57 = OpLabel
+         %63 = OpUGreaterThanEqual %bool %61 %uint_4
+               OpSelectionMerge %65 None
+               OpBranchConditional %63 %66 %65
+         %66 = OpLabel
+               OpBranch %60
+         %65 = OpLabel
+         %67 = OpAccessChain %_ptr_Function_mat4v4float %51 %61
+         %69 = OpLoad %mat4v4float %67 None
+         %70 = OpAccessChain %_ptr_Function_mat4v4float %53 %61
+               OpStore %70 %69 None
+               OpBranch %58
+         %58 = OpLabel
+         %62 = OpIAdd %uint %61 %uint_1
+               OpBranch %59
+         %60 = OpLabel
+         %71 = OpLoad %_arr_mat4v4float_uint_4_0 %53 None
+               OpReturnValue %71
+               OpFunctionEnd
+%tint_convert_explicit_layout_0 = OpFunction %_arr_mat4v4float_uint_4 None %73
+%tint_source_0 = OpFunctionParameter %_arr_mat4v4float_uint_4_0
+         %74 = OpLabel
+         %75 = OpVariable %_ptr_Function__arr_mat4v4float_uint_4_0 Function
+         %76 = OpVariable %_ptr_Function__arr_mat4v4float_uint_4 Function %77
+               OpStore %75 %tint_source_0
+               OpBranch %78
+         %78 = OpLabel
+               OpBranch %81
+         %81 = OpLabel
+         %83 = OpPhi %uint %uint_0 %78 %84 %80
+               OpLoopMerge %82 %80 None
+               OpBranch %79
+         %79 = OpLabel
+         %85 = OpUGreaterThanEqual %bool %83 %uint_4
+               OpSelectionMerge %86 None
+               OpBranchConditional %85 %87 %86
+         %87 = OpLabel
+               OpBranch %82
+         %86 = OpLabel
+         %88 = OpAccessChain %_ptr_Function_mat4v4float %75 %83
+         %89 = OpLoad %mat4v4float %88 None
+         %90 = OpAccessChain %_ptr_Function_mat4v4float %76 %83
+               OpStore %90 %89 None
+               OpBranch %80
+         %80 = OpLabel
+         %84 = OpIAdd %uint %83 %uint_1
+               OpBranch %81
+         %82 = OpLabel
+         %91 = OpLoad %_arr_mat4v4float_uint_4 %76 None
+               OpReturnValue %91
                OpFunctionEnd

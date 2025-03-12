@@ -7,23 +7,23 @@
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
                OpExecutionMode %unused_entry_point LocalSize 1 1 1
-               OpMemberName %v_block 0 "inner"
-               OpName %v_block "v_block"
-               OpMemberName %A 0 "a"
-               OpName %A "A"
-               OpMemberName %b_block 0 "inner"
-               OpName %b_block "b_block"
+               OpMemberName %v_block_tint_explicit_layout 0 "inner"
+               OpName %v_block_tint_explicit_layout "v_block_tint_explicit_layout"
+               OpMemberName %A_tint_explicit_layout 0 "a"
+               OpName %A_tint_explicit_layout "A_tint_explicit_layout"
+               OpMemberName %b_block_tint_explicit_layout 0 "inner"
+               OpName %b_block_tint_explicit_layout "b_block_tint_explicit_layout"
                OpName %unused_entry_point "unused_entry_point"
                OpDecorate %_arr_int_uint_1000000 ArrayStride 4
-               OpMemberDecorate %v_block 0 Offset 0
-               OpDecorate %v_block Block
+               OpMemberDecorate %v_block_tint_explicit_layout 0 Offset 0
+               OpDecorate %v_block_tint_explicit_layout Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
                OpDecorate %_arr_float_uint_1000000 ArrayStride 4
-               OpMemberDecorate %A 0 Offset 0
-               OpMemberDecorate %b_block 0 Offset 0
-               OpDecorate %b_block Block
+               OpMemberDecorate %A_tint_explicit_layout 0 Offset 0
+               OpMemberDecorate %b_block_tint_explicit_layout 0 Offset 0
+               OpDecorate %b_block_tint_explicit_layout Block
                OpDecorate %8 DescriptorSet 0
                OpDecorate %8 Binding 1
                OpDecorate %8 NonWritable
@@ -31,15 +31,15 @@
        %uint = OpTypeInt 32 0
 %uint_1000000 = OpConstant %uint 1000000
 %_arr_int_uint_1000000 = OpTypeArray %int %uint_1000000
-    %v_block = OpTypeStruct %_arr_int_uint_1000000
-%_ptr_StorageBuffer_v_block = OpTypePointer StorageBuffer %v_block
-          %1 = OpVariable %_ptr_StorageBuffer_v_block StorageBuffer
+%v_block_tint_explicit_layout = OpTypeStruct %_arr_int_uint_1000000
+%_ptr_StorageBuffer_v_block_tint_explicit_layout = OpTypePointer StorageBuffer %v_block_tint_explicit_layout
+          %1 = OpVariable %_ptr_StorageBuffer_v_block_tint_explicit_layout StorageBuffer
       %float = OpTypeFloat 32
 %_arr_float_uint_1000000 = OpTypeArray %float %uint_1000000
-          %A = OpTypeStruct %_arr_float_uint_1000000
-    %b_block = OpTypeStruct %A
-%_ptr_StorageBuffer_b_block = OpTypePointer StorageBuffer %b_block
-          %8 = OpVariable %_ptr_StorageBuffer_b_block StorageBuffer
+%A_tint_explicit_layout = OpTypeStruct %_arr_float_uint_1000000
+%b_block_tint_explicit_layout = OpTypeStruct %A_tint_explicit_layout
+%_ptr_StorageBuffer_b_block_tint_explicit_layout = OpTypePointer StorageBuffer %b_block_tint_explicit_layout
+          %8 = OpVariable %_ptr_StorageBuffer_b_block_tint_explicit_layout StorageBuffer
        %void = OpTypeVoid
          %16 = OpTypeFunction %void
 %unused_entry_point = OpFunction %void None %16

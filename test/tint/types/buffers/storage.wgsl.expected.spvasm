@@ -8,21 +8,21 @@
                OpMemoryModel Logical GLSL450
                OpEntryPoint Fragment %main "main"
                OpExecutionMode %main OriginUpperLeft
-               OpMemberName %weights_block 0 "inner"
-               OpName %weights_block "weights_block"
+               OpMemberName %weights_block_tint_explicit_layout 0 "inner"
+               OpName %weights_block_tint_explicit_layout "weights_block_tint_explicit_layout"
                OpName %main "main"
                OpName %a "a"
                OpDecorate %_runtimearr_float ArrayStride 4
-               OpMemberDecorate %weights_block 0 Offset 0
-               OpDecorate %weights_block Block
+               OpMemberDecorate %weights_block_tint_explicit_layout 0 Offset 0
+               OpDecorate %weights_block_tint_explicit_layout Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
       %float = OpTypeFloat 32
 %_runtimearr_float = OpTypeRuntimeArray %float
-%weights_block = OpTypeStruct %_runtimearr_float
-%_ptr_StorageBuffer_weights_block = OpTypePointer StorageBuffer %weights_block
-          %1 = OpVariable %_ptr_StorageBuffer_weights_block StorageBuffer
+%weights_block_tint_explicit_layout = OpTypeStruct %_runtimearr_float
+%_ptr_StorageBuffer_weights_block_tint_explicit_layout = OpTypePointer StorageBuffer %weights_block_tint_explicit_layout
+          %1 = OpVariable %_ptr_StorageBuffer_weights_block_tint_explicit_layout StorageBuffer
        %void = OpTypeVoid
           %8 = OpTypeFunction %void
 %_ptr_StorageBuffer__runtimearr_float = OpTypePointer StorageBuffer %_runtimearr_float

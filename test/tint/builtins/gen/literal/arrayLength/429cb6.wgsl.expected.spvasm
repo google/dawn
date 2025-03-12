@@ -12,8 +12,8 @@
                OpExecutionMode %fragment_main OriginUpperLeft
                OpMemberName %prevent_dce_block 0 "inner"
                OpName %prevent_dce_block "prevent_dce_block"
-               OpMemberName %SB_RW 0 "arg_0"
-               OpName %SB_RW "SB_RW"
+               OpMemberName %SB_RW_tint_explicit_layout 0 "arg_0"
+               OpName %SB_RW_tint_explicit_layout "SB_RW_tint_explicit_layout"
                OpName %sb_rw "sb_rw"
                OpName %arrayLength_429cb6 "arrayLength_429cb6"
                OpName %res "res"
@@ -24,8 +24,8 @@
                OpDecorate %1 Binding 0
                OpDecorate %1 Coherent
                OpDecorate %_runtimearr_int ArrayStride 4
-               OpMemberDecorate %SB_RW 0 Offset 0
-               OpDecorate %SB_RW Block
+               OpMemberDecorate %SB_RW_tint_explicit_layout 0 Offset 0
+               OpDecorate %SB_RW_tint_explicit_layout Block
                OpDecorate %sb_rw DescriptorSet 0
                OpDecorate %sb_rw Binding 1
                OpDecorate %sb_rw Coherent
@@ -35,9 +35,9 @@
           %1 = OpVariable %_ptr_StorageBuffer_prevent_dce_block StorageBuffer
         %int = OpTypeInt 32 1
 %_runtimearr_int = OpTypeRuntimeArray %int
-      %SB_RW = OpTypeStruct %_runtimearr_int
-%_ptr_StorageBuffer_SB_RW = OpTypePointer StorageBuffer %SB_RW
-      %sb_rw = OpVariable %_ptr_StorageBuffer_SB_RW StorageBuffer
+%SB_RW_tint_explicit_layout = OpTypeStruct %_runtimearr_int
+%_ptr_StorageBuffer_SB_RW_tint_explicit_layout = OpTypePointer StorageBuffer %SB_RW_tint_explicit_layout
+      %sb_rw = OpVariable %_ptr_StorageBuffer_SB_RW_tint_explicit_layout StorageBuffer
          %11 = OpTypeFunction %uint
 %_ptr_StorageBuffer__runtimearr_int = OpTypePointer StorageBuffer %_runtimearr_int
      %uint_0 = OpConstant %uint 0
@@ -75,8 +75,8 @@
                OpExecutionMode %compute_main LocalSize 1 1 1
                OpMemberName %prevent_dce_block 0 "inner"
                OpName %prevent_dce_block "prevent_dce_block"
-               OpMemberName %SB_RW 0 "arg_0"
-               OpName %SB_RW "SB_RW"
+               OpMemberName %SB_RW_tint_explicit_layout 0 "arg_0"
+               OpName %SB_RW_tint_explicit_layout "SB_RW_tint_explicit_layout"
                OpName %sb_rw "sb_rw"
                OpName %arrayLength_429cb6 "arrayLength_429cb6"
                OpName %res "res"
@@ -87,8 +87,8 @@
                OpDecorate %1 Binding 0
                OpDecorate %1 Coherent
                OpDecorate %_runtimearr_int ArrayStride 4
-               OpMemberDecorate %SB_RW 0 Offset 0
-               OpDecorate %SB_RW Block
+               OpMemberDecorate %SB_RW_tint_explicit_layout 0 Offset 0
+               OpDecorate %SB_RW_tint_explicit_layout Block
                OpDecorate %sb_rw DescriptorSet 0
                OpDecorate %sb_rw Binding 1
                OpDecorate %sb_rw Coherent
@@ -98,9 +98,9 @@
           %1 = OpVariable %_ptr_StorageBuffer_prevent_dce_block StorageBuffer
         %int = OpTypeInt 32 1
 %_runtimearr_int = OpTypeRuntimeArray %int
-      %SB_RW = OpTypeStruct %_runtimearr_int
-%_ptr_StorageBuffer_SB_RW = OpTypePointer StorageBuffer %SB_RW
-      %sb_rw = OpVariable %_ptr_StorageBuffer_SB_RW StorageBuffer
+%SB_RW_tint_explicit_layout = OpTypeStruct %_runtimearr_int
+%_ptr_StorageBuffer_SB_RW_tint_explicit_layout = OpTypePointer StorageBuffer %SB_RW_tint_explicit_layout
+      %sb_rw = OpVariable %_ptr_StorageBuffer_SB_RW_tint_explicit_layout StorageBuffer
          %11 = OpTypeFunction %uint
 %_ptr_StorageBuffer__runtimearr_int = OpTypePointer StorageBuffer %_runtimearr_int
      %uint_0 = OpConstant %uint 0

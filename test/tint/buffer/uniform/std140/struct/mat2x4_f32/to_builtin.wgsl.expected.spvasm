@@ -12,8 +12,8 @@
                OpMemberName %S 1 "m"
                OpMemberName %S 2 "after"
                OpName %S "S"
-               OpMemberName %u_block 0 "inner"
-               OpName %u_block "u_block"
+               OpMemberName %u_block_tint_explicit_layout 0 "inner"
+               OpName %u_block_tint_explicit_layout "u_block_tint_explicit_layout"
                OpName %f "f"
                OpName %t "t"
                OpName %l "l"
@@ -24,8 +24,8 @@
                OpMemberDecorate %S 1 MatrixStride 16
                OpMemberDecorate %S 2 Offset 64
                OpDecorate %_arr_S_uint_4 ArrayStride 128
-               OpMemberDecorate %u_block 0 Offset 0
-               OpDecorate %u_block Block
+               OpMemberDecorate %u_block_tint_explicit_layout 0 Offset 0
+               OpDecorate %u_block_tint_explicit_layout Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
@@ -37,9 +37,9 @@
        %uint = OpTypeInt 32 0
      %uint_4 = OpConstant %uint 4
 %_arr_S_uint_4 = OpTypeArray %S %uint_4
-    %u_block = OpTypeStruct %_arr_S_uint_4
-%_ptr_Uniform_u_block = OpTypePointer Uniform %u_block
-          %1 = OpVariable %_ptr_Uniform_u_block Uniform
+%u_block_tint_explicit_layout = OpTypeStruct %_arr_S_uint_4
+%_ptr_Uniform_u_block_tint_explicit_layout = OpTypePointer Uniform %u_block_tint_explicit_layout
+          %1 = OpVariable %_ptr_Uniform_u_block_tint_explicit_layout Uniform
        %void = OpTypeVoid
          %14 = OpTypeFunction %void
 %_ptr_Uniform_mat2v4float = OpTypePointer Uniform %mat2v4float

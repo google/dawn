@@ -10,17 +10,17 @@
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
                OpName %texture0 "texture0"
-               OpMemberName %Results 0 "colorSamples"
-               OpName %Results "Results"
-               OpMemberName %results_block 0 "inner"
-               OpName %results_block "results_block"
+               OpMemberName %Results_tint_explicit_layout 0 "colorSamples"
+               OpName %Results_tint_explicit_layout "Results_tint_explicit_layout"
+               OpMemberName %results_block_tint_explicit_layout 0 "inner"
+               OpName %results_block_tint_explicit_layout "results_block_tint_explicit_layout"
                OpName %main "main"
                OpDecorate %texture0 DescriptorSet 0
                OpDecorate %texture0 Binding 0
                OpDecorate %_arr_float_uint_4 ArrayStride 4
-               OpMemberDecorate %Results 0 Offset 0
-               OpMemberDecorate %results_block 0 Offset 0
-               OpDecorate %results_block Block
+               OpMemberDecorate %Results_tint_explicit_layout 0 Offset 0
+               OpMemberDecorate %results_block_tint_explicit_layout 0 Offset 0
+               OpDecorate %results_block_tint_explicit_layout Block
                OpDecorate %5 DescriptorSet 0
                OpDecorate %5 Binding 2
                OpDecorate %5 Coherent
@@ -31,10 +31,10 @@
        %uint = OpTypeInt 32 0
      %uint_4 = OpConstant %uint 4
 %_arr_float_uint_4 = OpTypeArray %float %uint_4
-    %Results = OpTypeStruct %_arr_float_uint_4
-%results_block = OpTypeStruct %Results
-%_ptr_StorageBuffer_results_block = OpTypePointer StorageBuffer %results_block
-          %5 = OpVariable %_ptr_StorageBuffer_results_block StorageBuffer
+%Results_tint_explicit_layout = OpTypeStruct %_arr_float_uint_4
+%results_block_tint_explicit_layout = OpTypeStruct %Results_tint_explicit_layout
+%_ptr_StorageBuffer_results_block_tint_explicit_layout = OpTypePointer StorageBuffer %results_block_tint_explicit_layout
+          %5 = OpVariable %_ptr_StorageBuffer_results_block_tint_explicit_layout StorageBuffer
        %void = OpTypeVoid
          %14 = OpTypeFunction %void
 %_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float

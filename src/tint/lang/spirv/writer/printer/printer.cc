@@ -97,6 +97,7 @@
 #include "src/tint/lang/core/type/void.h"
 #include "src/tint/lang/spirv/ir/builtin_call.h"
 #include "src/tint/lang/spirv/ir/literal_operand.h"
+#include "src/tint/lang/spirv/type/explicit_layout_array.h"
 #include "src/tint/lang/spirv/type/sampled_image.h"
 #include "src/tint/lang/spirv/writer/common/binary_writer.h"
 #include "src/tint/lang/spirv/writer/common/function.h"
@@ -240,8 +241,8 @@ class Printer {
         }
     };
 
-    /// The set of types that require explicit layout decorations.
-    Hashset<const core::type::Type*, 16> requires_layout_decorations_;
+    /// The set of structure types that require explicit layout decorations.
+    Hashset<const core::type::Struct*, 16> requires_layout_decorations_;
 
     /// The map of types to their result IDs.
     Hashmap<const core::type::Type*, uint32_t, 8> types_;
@@ -309,7 +310,7 @@ class Printer {
         }
 
         // Find types that require explicit layout decorations.
-        FindTypesThatRequireLayoutDecorations();
+        FindStructuresThatRequireLayoutDecorations();
 
         // Emit module-scope declarations.
         EmitRootBlock(ir_.root_block);
@@ -382,9 +383,9 @@ class Printer {
         return SpvBuiltInMax;
     }
 
-    /// Find all array and structure types that are used in host-shareable address spaces and mark
-    /// them as such so that we know to add explicit layout decorations when we emit them.
-    void FindTypesThatRequireLayoutDecorations() {
+    /// Find all structure types that are used in host-shareable address spaces and mark them as
+    /// such so that we know to add explicit layout decorations when we emit them.
+    void FindStructuresThatRequireLayoutDecorations() {
         // We only look at module-scope variable declarations, since this is where all
         // host-shareable types are declared.
         for (auto* decl : *ir_.root_block) {
@@ -406,8 +407,7 @@ class Printer {
                             type_queue.Push(member->Type());
                         }
                     } else if (auto* arr = next->As<core::type::Array>()) {
-                        // Record this array as host-shareable and then check its element type.
-                        requires_layout_decorations_.Add(arr);
+                        // Check its element type.
                         type_queue.Push(arr->ElemType());
                     }
                 }
@@ -565,7 +565,7 @@ class Printer {
                         TINT_ASSERT(arr->Count()->Is<core::type::RuntimeArrayCount>());
                         module_.PushType(spv::Op::OpTypeRuntimeArray, {id, Type(arr->ElemType())});
                     }
-                    if (requires_layout_decorations_.Contains(arr)) {
+                    if (arr->Is<type::ExplicitLayoutArray>()) {
                         module_.PushAnnot(
                             spv::Op::OpDecorate,
                             {id, U32Operand(SpvDecorationArrayStride), arr->Stride()});

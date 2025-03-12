@@ -8,15 +8,15 @@
                OpMemoryModel Logical GLSL450
                OpEntryPoint Vertex %main "main" %main_loc0_Input %main_loc2_Input %main_loc1_Input %main_position_Output %main_loc0_Output %main___point_size_Output
                OpName %position_1 "position_1"
-               OpMemberName %LeftOver 0 "worldViewProjection"
-               OpMemberName %LeftOver 1 "time"
-               OpMemberName %LeftOver 2 "test2"
+               OpMemberName %LeftOver_tint_explicit_layout 0 "worldViewProjection"
+               OpMemberName %LeftOver_tint_explicit_layout 1 "time"
+               OpMemberName %LeftOver_tint_explicit_layout 2 "test2"
                OpMemberName %strided_arr 0 "el"
                OpName %strided_arr "strided_arr"
-               OpMemberName %LeftOver 3 "test"
-               OpName %LeftOver "LeftOver"
-               OpMemberName %x_14_block 0 "inner"
-               OpName %x_14_block "x_14_block"
+               OpMemberName %LeftOver_tint_explicit_layout 3 "test"
+               OpName %LeftOver_tint_explicit_layout "LeftOver_tint_explicit_layout"
+               OpMemberName %x_14_block_tint_explicit_layout 0 "inner"
+               OpName %x_14_block_tint_explicit_layout "x_14_block_tint_explicit_layout"
                OpName %vUV "vUV"
                OpName %uv "uv"
                OpName %normal "normal"
@@ -38,19 +38,19 @@
                OpName %uv_param "uv_param"
                OpName %normal_param "normal_param"
                OpName %main "main"
-               OpMemberDecorate %LeftOver 0 Offset 0
-               OpMemberDecorate %LeftOver 0 ColMajor
-               OpMemberDecorate %LeftOver 0 MatrixStride 16
-               OpMemberDecorate %LeftOver 1 Offset 64
+               OpMemberDecorate %LeftOver_tint_explicit_layout 0 Offset 0
+               OpMemberDecorate %LeftOver_tint_explicit_layout 0 ColMajor
+               OpMemberDecorate %LeftOver_tint_explicit_layout 0 MatrixStride 16
+               OpMemberDecorate %LeftOver_tint_explicit_layout 1 Offset 64
                OpDecorate %_arr_mat4v4float_uint_2 ArrayStride 64
-               OpMemberDecorate %LeftOver 2 Offset 80
-               OpMemberDecorate %LeftOver 2 ColMajor
-               OpMemberDecorate %LeftOver 2 MatrixStride 16
+               OpMemberDecorate %LeftOver_tint_explicit_layout 2 Offset 80
+               OpMemberDecorate %LeftOver_tint_explicit_layout 2 ColMajor
+               OpMemberDecorate %LeftOver_tint_explicit_layout 2 MatrixStride 16
                OpMemberDecorate %strided_arr 0 Offset 0
                OpDecorate %_arr_strided_arr_uint_4 ArrayStride 16
-               OpMemberDecorate %LeftOver 3 Offset 208
-               OpMemberDecorate %x_14_block 0 Offset 0
-               OpDecorate %x_14_block Block
+               OpMemberDecorate %LeftOver_tint_explicit_layout 3 Offset 208
+               OpMemberDecorate %x_14_block_tint_explicit_layout 0 Offset 0
+               OpDecorate %x_14_block_tint_explicit_layout Block
                OpDecorate %6 DescriptorSet 2
                OpDecorate %6 Binding 2
                OpDecorate %6 NonWritable
@@ -73,10 +73,10 @@
 %strided_arr = OpTypeStruct %float
      %uint_4 = OpConstant %uint 4
 %_arr_strided_arr_uint_4 = OpTypeArray %strided_arr %uint_4
-   %LeftOver = OpTypeStruct %mat4v4float %float %_arr_mat4v4float_uint_2 %_arr_strided_arr_uint_4
- %x_14_block = OpTypeStruct %LeftOver
-%_ptr_Uniform_x_14_block = OpTypePointer Uniform %x_14_block
-          %6 = OpVariable %_ptr_Uniform_x_14_block Uniform
+%LeftOver_tint_explicit_layout = OpTypeStruct %mat4v4float %float %_arr_mat4v4float_uint_2 %_arr_strided_arr_uint_4
+%x_14_block_tint_explicit_layout = OpTypeStruct %LeftOver_tint_explicit_layout
+%_ptr_Uniform_x_14_block_tint_explicit_layout = OpTypePointer Uniform %x_14_block_tint_explicit_layout
+          %6 = OpVariable %_ptr_Uniform_x_14_block_tint_explicit_layout Uniform
     %v2float = OpTypeVector %float 2
 %_ptr_Private_v2float = OpTypePointer Private %v2float
          %21 = OpConstantNull %v2float

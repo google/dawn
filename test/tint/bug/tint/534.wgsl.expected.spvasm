@@ -11,8 +11,8 @@
                OpExecutionMode %main LocalSize 1 1 1
                OpName %src "src"
                OpName %dst "dst"
-               OpMemberName %OutputBuf 0 "result"
-               OpName %OutputBuf "OutputBuf"
+               OpMemberName %OutputBuf_tint_explicit_layout 0 "result"
+               OpName %OutputBuf_tint_explicit_layout "OutputBuf_tint_explicit_layout"
                OpName %output "output"
                OpMemberName %Uniforms 0 "dstTextureFlipY"
                OpMemberName %Uniforms 1 "isFloat16"
@@ -47,8 +47,8 @@
                OpDecorate %dst DescriptorSet 0
                OpDecorate %dst Binding 1
                OpDecorate %_runtimearr_uint ArrayStride 4
-               OpMemberDecorate %OutputBuf 0 Offset 0
-               OpDecorate %OutputBuf Block
+               OpMemberDecorate %OutputBuf_tint_explicit_layout 0 Offset 0
+               OpDecorate %OutputBuf_tint_explicit_layout Block
                OpDecorate %output DescriptorSet 0
                OpDecorate %output Binding 2
                OpDecorate %output Coherent
@@ -69,9 +69,9 @@
         %dst = OpVariable %_ptr_UniformConstant_3 UniformConstant
        %uint = OpTypeInt 32 0
 %_runtimearr_uint = OpTypeRuntimeArray %uint
-  %OutputBuf = OpTypeStruct %_runtimearr_uint
-%_ptr_StorageBuffer_OutputBuf = OpTypePointer StorageBuffer %OutputBuf
-     %output = OpVariable %_ptr_StorageBuffer_OutputBuf StorageBuffer
+%OutputBuf_tint_explicit_layout = OpTypeStruct %_runtimearr_uint
+%_ptr_StorageBuffer_OutputBuf_tint_explicit_layout = OpTypePointer StorageBuffer %OutputBuf_tint_explicit_layout
+     %output = OpVariable %_ptr_StorageBuffer_OutputBuf_tint_explicit_layout StorageBuffer
    %Uniforms = OpTypeStruct %uint %uint %uint %uint
 %uniforms_block = OpTypeStruct %Uniforms
 %_ptr_Uniform_uniforms_block = OpTypePointer Uniform %uniforms_block

@@ -14,8 +14,8 @@
                OpMemberName %mat2x3_f16_std140 0 "col0"
                OpMemberName %mat2x3_f16_std140 1 "col1"
                OpName %mat2x3_f16_std140 "mat2x3_f16_std140"
-               OpMemberName %u_block_std140 0 "inner"
-               OpName %u_block_std140 "u_block_std140"
+               OpMemberName %u_block_std140_tint_explicit_layout 0 "inner"
+               OpName %u_block_std140_tint_explicit_layout "u_block_std140_tint_explicit_layout"
                OpMemberName %s_block 0 "inner"
                OpName %s_block "s_block"
                OpName %f "f"
@@ -25,8 +25,8 @@
                OpMemberDecorate %mat2x3_f16_std140 0 Offset 0
                OpMemberDecorate %mat2x3_f16_std140 1 Offset 8
                OpDecorate %_arr_mat2x3_f16_std140_uint_4 ArrayStride 16
-               OpMemberDecorate %u_block_std140 0 Offset 0
-               OpDecorate %u_block_std140 Block
+               OpMemberDecorate %u_block_std140_tint_explicit_layout 0 Offset 0
+               OpDecorate %u_block_std140_tint_explicit_layout Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
@@ -41,9 +41,9 @@
        %uint = OpTypeInt 32 0
      %uint_4 = OpConstant %uint 4
 %_arr_mat2x3_f16_std140_uint_4 = OpTypeArray %mat2x3_f16_std140 %uint_4
-%u_block_std140 = OpTypeStruct %_arr_mat2x3_f16_std140_uint_4
-%_ptr_Uniform_u_block_std140 = OpTypePointer Uniform %u_block_std140
-          %1 = OpVariable %_ptr_Uniform_u_block_std140 Uniform
+%u_block_std140_tint_explicit_layout = OpTypeStruct %_arr_mat2x3_f16_std140_uint_4
+%_ptr_Uniform_u_block_std140_tint_explicit_layout = OpTypePointer Uniform %u_block_std140_tint_explicit_layout
+          %1 = OpVariable %_ptr_Uniform_u_block_std140_tint_explicit_layout Uniform
     %s_block = OpTypeStruct %half
 %_ptr_StorageBuffer_s_block = OpTypePointer StorageBuffer %s_block
          %10 = OpVariable %_ptr_StorageBuffer_s_block StorageBuffer
