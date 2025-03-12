@@ -57,6 +57,28 @@ bool IsMemoryKindMappable(MemoryKind memoryKind) {
     return memoryKind & (MemoryKind::ReadMappable | MemoryKind::WriteMappable);
 }
 
+VkMemoryPropertyFlags GetRequiredMemoryPropertyFlags(MemoryKind memoryKind, bool mappable) {
+    VkMemoryPropertyFlags vkFlags = 0;
+
+    // Mappable resource must be host visible and host coherent.
+    if (mappable) {
+        vkFlags |= VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
+        vkFlags |= VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+    }
+
+    // DEVICE_LOCAL_BIT must be set when MemoryKind::DeviceLocal is required.
+    if (memoryKind & MemoryKind::DeviceLocal) {
+        vkFlags |= VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+    }
+
+    // HOST_CACHED_BIT must be set when MemoryKind::HostCached is required.
+    if (memoryKind & MemoryKind::HostCached) {
+        vkFlags |= VK_MEMORY_PROPERTY_HOST_CACHED_BIT;
+    }
+
+    return vkFlags;
+}
+
 }  // anonymous namespace
 
 bool SupportsBufferMapExtendedUsages(const VulkanDeviceInfo& deviceInfo) {
@@ -274,6 +296,7 @@ void ResourceMemoryAllocator::Tick(ExecutionSerial completedSerial) {
 int ResourceMemoryAllocator::FindBestTypeIndex(VkMemoryRequirements requirements, MemoryKind kind) {
     const VulkanDeviceInfo& info = mDevice->GetDeviceInfo();
     bool mappable = IsMemoryKindMappable(kind);
+    VkMemoryPropertyFlags vkRequiredFlags = GetRequiredMemoryPropertyFlags(kind, mappable);
 
     // Find a suitable memory type for this allocation
     int bestType = -1;
@@ -283,21 +306,8 @@ int ResourceMemoryAllocator::FindBestTypeIndex(VkMemoryRequirements requirements
             continue;
         }
 
-        // Mappable resource must be host visible
-        if (mappable &&
-            (info.memoryTypes[i].propertyFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) == 0) {
-            continue;
-        }
-
-        // Mappable must also be host coherent.
-        if (mappable &&
-            (info.memoryTypes[i].propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) == 0) {
-            continue;
-        }
-
-        // DEVICE_LOCAL_BIT must be set when MemoryKind::DeviceLocal is required.
-        if ((kind & MemoryKind::DeviceLocal) &&
-            (info.memoryTypes[i].propertyFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT) == 0) {
+        // Memory type must have all the required memory properties.
+        if ((info.memoryTypes[i].propertyFlags & vkRequiredFlags) != vkRequiredFlags) {
             continue;
         }
 

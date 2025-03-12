@@ -40,6 +40,7 @@
 #include "dawn/native/Limits.h"
 #include "dawn/native/vulkan/BackendVk.h"
 #include "dawn/native/vulkan/DeviceVk.h"
+#include "dawn/native/vulkan/ResourceMemoryAllocatorVk.h"
 #include "dawn/native/vulkan/SwapChainVk.h"
 #include "dawn/native/vulkan/TextureVk.h"
 #include "dawn/native/vulkan/UtilsVulkan.h"
@@ -468,6 +469,10 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     }
     if (mDeviceInfo.HasExt(DeviceExt::ExternalMemoryFD)) {
         EnableFeature(Feature::SharedTextureMemoryOpaqueFD);
+    }
+
+    if (SupportsBufferMapExtendedUsages(mDeviceInfo)) {
+        EnableFeature(Feature::BufferMapExtendedUsages);
     }
 
 #if DAWN_PLATFORM_IS(ANDROID)

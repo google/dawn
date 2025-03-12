@@ -174,6 +174,11 @@ MemoryKind GetMemoryKindFor(wgpu::BufferUsage bufferUsage) {
         kReadOnlyStorageBuffer | kIndirectBufferForBackendResourceTracking;
     if (bufferUsage & kDeviceLocalBufferUsages) {
         requestKind |= MemoryKind::DeviceLocal;
+        // All mappable buffers with extended buffer usages should be allocated on the memory type
+        // with `VK_MEMORY_PROPERTY_HOST_CACHED_BIT`.
+        if (bufferUsage & (wgpu::BufferUsage::MapRead | wgpu::BufferUsage::MapWrite)) {
+            requestKind |= MemoryKind::HostCached;
+        }
     }
 
     return requestKind;
@@ -734,9 +739,6 @@ void Buffer::TransitionMappableBuffersEagerly(Device* device,
     size_t originalBufferCount = buffers.size();
     for (const Ref<Buffer>& buffer : buffers) {
         wgpu::BufferUsage mapUsage = buffer->GetInternalUsage() & kMappableBufferUsages;
-        DAWN_ASSERT(mapUsage == wgpu::BufferUsage::MapRead ||
-                    mapUsage == wgpu::BufferUsage::MapWrite);
-
         buffer->TrackUsageAndGetResourceBarrier(recordingContext, mapUsage,
                                                 wgpu::ShaderStage::None);
     }

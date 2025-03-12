@@ -52,6 +52,7 @@ enum class MemoryKind : uint8_t {
     DeviceLocal = 4,
     ReadMappable = 8,
     WriteMappable = 16,
+    HostCached = 32,
 };
 
 bool SupportsBufferMapExtendedUsages(const VulkanDeviceInfo& deviceInfo);
