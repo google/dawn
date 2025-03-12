@@ -67,6 +67,7 @@ dawn_add_library(
     UTILITY_TARGET dawn_internal_config
     HEADERS
         "${DAWN_INCLUDE_DIR}/webgpu/webgpu_cpp.h"
+        "${DAWN_INCLUDE_DIR}/webgpu/webgpu_cpp_print.h"
         "${DAWN_INCLUDE_DIR}/webgpu/webgpu_enum_class_bitmasks.h"
         ${DAWNCPP_HEADERS_GEN_HEADERS}
     DEPENDS

@@ -79,20 +79,19 @@ int main(int argc, char *argv[]) {
   // Synchronously request the adapter.
   wgpu::RequestAdapterOptions options = {};
   wgpu::Adapter adapter;
-  wgpu::RequestAdapterCallbackInfo callbackInfo = {};
-  callbackInfo.nextInChain = nullptr;
-  callbackInfo.mode = wgpu::CallbackMode::WaitAnyOnly;
-  callbackInfo.callback = [](WGPURequestAdapterStatus status,
-                             WGPUAdapter adapter, const char *message,
-                             void *userdata) {
-    if (status != WGPURequestAdapterStatus_Success) {
+
+  auto callback = [](wgpu::RequestAdapterStatus status, wgpu::Adapter adapter, const char *message, void *userdata) {
+    if (status != wgpu::RequestAdapterStatus::Success) {
       std::cerr << "Failed to get an adapter:" << message;
       return;
     }
-    *static_cast<wgpu::Adapter *>(userdata) = wgpu::Adapter::Acquire(adapter);
+    *static_cast<wgpu::Adapter *>(userdata) = adapter;
   };
-  callbackInfo.userdata = &adapter;
-  instance.WaitAny(instance.RequestAdapter(&options, callbackInfo), UINT64_MAX);
+
+
+  auto callbackMode = wgpu::CallbackMode::WaitAnyOnly;
+  void *userdata = &adapter;
+  instance.WaitAny(instance.RequestAdapter(&options, callbackMode, callback, userdata), UINT64_MAX);
   if (adapter == nullptr) {
     std::cerr << "RequestAdapter failed!\n";
     return EXIT_FAILURE;
