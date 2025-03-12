@@ -54,19 +54,7 @@ constexpr uint64_t kMaxSizeForSubAllocation = 4ull * 1024ull * 1024ull;  // 4MiB
 constexpr uint64_t kBuddyHeapsSize = 2 * kMaxSizeForSubAllocation;
 
 bool IsMemoryKindMappable(MemoryKind memoryKind) {
-    switch (memoryKind) {
-        case MemoryKind::LinearReadMappable:
-        case MemoryKind::LinearWriteMappable:
-            return true;
-
-        case MemoryKind::LazilyAllocated:
-        case MemoryKind::Linear:
-        case MemoryKind::Opaque:
-            return false;
-
-        default:
-            DAWN_UNREACHABLE();
-    }
+    return memoryKind & (MemoryKind::ReadMappable | MemoryKind::WriteMappable);
 }
 
 }  // anonymous namespace
@@ -307,6 +295,12 @@ int ResourceMemoryAllocator::FindBestTypeIndex(VkMemoryRequirements requirements
             continue;
         }
 
+        // DEVICE_LOCAL_BIT must be set when MemoryKind::DeviceLocal is required.
+        if ((kind & MemoryKind::DeviceLocal) &&
+            (info.memoryTypes[i].propertyFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT) == 0) {
+            continue;
+        }
+
         // Found the first candidate memory type
         if (bestType == -1) {
             bestType = static_cast<int>(i);
@@ -347,7 +341,7 @@ int ResourceMemoryAllocator::FindBestTypeIndex(VkMemoryRequirements requirements
             info.memoryTypes[i].propertyFlags & VK_MEMORY_PROPERTY_HOST_CACHED_BIT;
         bool bestHostCached =
             info.memoryTypes[bestType].propertyFlags & VK_MEMORY_PROPERTY_HOST_CACHED_BIT;
-        if (kind == MemoryKind::LinearReadMappable && currentHostCached != bestHostCached) {
+        if ((kind & MemoryKind::ReadMappable) && currentHostCached != bestHostCached) {
             if (currentHostCached) {
                 bestType = static_cast<int>(i);
             }
