@@ -126,43 +126,52 @@ class Parser {
         return std::move(ir_);
     }
 
+    std::optional<uint16_t> GetSpecId(const spvtools::opt::Instruction& inst) {
+        auto decos =
+            spirv_context_->get_decoration_mgr()->GetDecorationsFor(inst.result_id(), true);
+        for (const auto* deco_inst : decos) {
+            TINT_ASSERT(deco_inst->opcode() == spv::Op::OpDecorate);
+
+            if (deco_inst->GetSingleWordInOperand(1) ==
+                static_cast<uint32_t>(spv::Decoration::SpecId)) {
+                return {static_cast<uint16_t>(deco_inst->GetSingleWordInOperand(2))};
+            }
+        }
+        return std::nullopt;
+    }
+
     // Generate a module-scope const declaration for each instruction
     // that is OpSpecConstantTrue, OpSpecConstantFalse, or OpSpecConstant.
     void EmitSpecConstants() {
         for (auto& inst : spirv_context_->types_values()) {
-            core::ir::Override* override_ = nullptr;
+            core::ir::Value* value = nullptr;
+            std::optional<uint16_t> spec_id = std::nullopt;
             switch (inst.opcode()) {
                 case spv::Op::OpSpecConstantTrue:
-                case spv::Op::OpSpecConstantFalse:
-                    override_ = b_.Override(Type(inst.type_id()));
-                    override_->SetInitializer(
-                        b_.Value(inst.opcode() == spv::Op::OpSpecConstantTrue));
+                case spv::Op::OpSpecConstantFalse: {
+                    value = b_.Value(inst.opcode() == spv::Op::OpSpecConstantTrue);
+                    spec_id = GetSpecId(inst);
                     break;
+                }
                 default:
-                    break;
+                    continue;
             }
-            if (!override_) {
+
+            // No spec_id means treat this as a constant.
+            if (!spec_id.has_value()) {
+                AddValue(inst.result_id(), value);
                 continue;
             }
+
+            auto* override_ = b_.Override(Type(inst.type_id()));
+            override_->SetInitializer(value);
+            override_->SetOverrideId(OverrideId{spec_id.value()});
 
             Emit(override_, inst.result_id());
 
             Symbol name = GetSymbolFor(inst.result_id());
             if (name.IsValid()) {
                 ir_.SetName(override_, name);
-            }
-
-            auto decos =
-                spirv_context_->get_decoration_mgr()->GetDecorationsFor(inst.result_id(), true);
-            for (const auto* deco_inst : decos) {
-                TINT_ASSERT(deco_inst->opcode() == spv::Op::OpDecorate);
-
-                if (deco_inst->GetSingleWordInOperand(1) ==
-                    static_cast<uint32_t>(spv::Decoration::SpecId)) {
-                    const uint16_t id = static_cast<uint16_t>(deco_inst->GetSingleWordInOperand(2));
-                    override_->SetOverrideId(OverrideId{id});
-                    break;
-                }
             }
         }
     }
