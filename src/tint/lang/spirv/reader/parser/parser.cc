@@ -852,6 +852,9 @@ class Parser {
                 case spv::Op::OpCompositeExtract:
                     EmitCompositeExtract(inst);
                     break;
+                case spv::Op::OpVectorInsertDynamic:
+                    EmitVectorInsertDynamic(inst);
+                    break;
                 case spv::Op::OpFAdd:
                     EmitBinary(inst, core::BinaryOp::kAdd);
                     break;
@@ -1872,6 +1875,19 @@ class Parser {
     void EmitConstruct(const spvtools::opt::Instruction& inst) {
         auto* construct = b_.Construct(Type(inst.type_id()), Args(inst, 2));
         Emit(construct, inst.result_id());
+    }
+
+    /// @param inst the SPIR-V instruction for OpVectorInsertDynamic
+    void EmitVectorInsertDynamic(const spvtools::opt::Instruction& inst) {
+        auto vector = Value(inst.GetSingleWordOperand(2));
+        auto component = Value(inst.GetSingleWordOperand(3));
+        auto index = Value(inst.GetSingleWordOperand(4));
+        auto* tmp = b_.Var(
+            ty_.ptr(core::AddressSpace::kFunction, Type(inst.type_id()), core::Access::kReadWrite));
+        tmp->SetInitializer(vector);
+        EmitWithoutSpvResult(tmp);
+        EmitWithoutResult(b_.StoreVectorElement(tmp, index, component));
+        Emit(b_.Load(tmp), inst.result_id());
     }
 
     /// @param inst the SPIR-V instruction for OpFunctionCall

@@ -459,5 +459,40 @@ tint_symbol_2 = struct @align(4) {
 )");
 }
 
+TEST_F(SpirvParserTest, VectorInsertDynamic_VectorComponent) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+        %u32 = OpTypeInt 32 0
+      %vec4u = OpTypeVector %u32 4
+  %vec4u_ptr = OpTypePointer Function %vec4u
+    %ep_type = OpTypeFunction %void
+  %component = OpConstant %u32 1
+      %index = OpConstant %u32 1
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+        %vec = OpVariable %vec4u_ptr Function
+        %tmp = OpLoad %vec4u %vec
+     %result = OpVectorInsertDynamic %vec4u %tmp %component %index
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:ptr<function, vec4<u32>, read_write> = var undef
+    %3:vec4<u32> = load %2
+    %4:ptr<function, vec4<u32>, read_write> = var %3
+    store_vector_element %4, 1u, 1u
+    %5:vec4<u32> = load %4
+    ret
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader
