@@ -80,7 +80,7 @@ MaybeError PlatformFunctions::LoadDXGI() {
     createDxgiFactory2 = &CreateDXGIFactory2;
 #else
     std::string error;
-    if (!mDXGILib.Open("dxgi.dll", &error) ||
+    if (!mDXGILib.OpenSystemLibrary(L"dxgi.dll", &error) ||
         !mDXGILib.GetProc(&dxgiGetDebugInterface1, "DXGIGetDebugInterface1", &error) ||
         !mDXGILib.GetProc(&createDxgiFactory2, "CreateDXGIFactory2", &error)) {
         return DAWN_INTERNAL_ERROR(error.c_str());
