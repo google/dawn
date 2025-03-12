@@ -501,6 +501,11 @@ struct Decoder {
     ir::CoreBuiltinCall* CreateInstructionBuiltinCall(const pb::InstructionBuiltinCall& call_in) {
         auto* call_out = mod_out_.CreateInstruction<ir::CoreBuiltinCall>();
         call_out->SetFunc(BuiltinFn(call_in.builtin()));
+        Vector<const core::type::Type*, 1> params;
+        for (auto param : call_in.explicit_template_params()) {
+            params.Push(Type(param));
+        }
+        call_out->SetExplicitTemplateParams(params);
         return call_out;
     }
 

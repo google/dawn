@@ -342,6 +342,7 @@ message InstructionUserCall {}
 
 message InstructionBuiltinCall {
     BuiltinFn builtin = 1;
+    repeated uint32 explicit_template_params = 2;  // Module.types
 }
 
 message InstructionLoad {}

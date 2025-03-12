@@ -278,6 +278,9 @@ struct Encoder {
     void InstructionBuiltinCall(pb::InstructionBuiltinCall& call_out,
                                 const ir::CoreBuiltinCall* call_in) {
         call_out.set_builtin(BuiltinFn(call_in->Func()));
+        for (auto* param : call_in->ExplicitTemplateParams()) {
+            call_out.add_explicit_template_params(Type(param));
+        }
     }
 
     void InstructionConstruct(pb::InstructionConstruct&, const ir::Construct*) {}
