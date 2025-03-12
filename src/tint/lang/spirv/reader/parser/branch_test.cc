@@ -400,7 +400,7 @@ TEST_F(SpirvParserTest, BranchConditional_Nested_TrueExit) {
 )");
 }
 
-TEST_F(SpirvParserTest, DISABLED_BranchConditional_TrueBranchesToFalse) {
+TEST_F(SpirvParserTest, BranchConditional_TrueBranchesToFalse) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -412,12 +412,12 @@ TEST_F(SpirvParserTest, DISABLED_BranchConditional_TrueBranchesToFalse) {
         %one = OpConstant %i32 1
         %two = OpConstant %i32 2
       %three = OpConstant %i32 3
-       %true = OpConstantTrue %bool
+      %false = OpConstantFalse %bool
     %ep_type = OpTypeFunction %void
        %main = OpFunction %void None %ep_type
          %20 = OpLabel
                OpSelectionMerge %99 None
-               OpBranchConditional %true %40 %30
+               OpBranchConditional %false %40 %30
          %30 = OpLabel
          %50 = OpIAdd %i32 %one %one
                OpReturn
@@ -431,7 +431,7 @@ TEST_F(SpirvParserTest, DISABLED_BranchConditional_TrueBranchesToFalse) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    if true [t: $B2, f: $B3] {  # if_1
+    if false [t: $B2, f: $B3] {  # if_1
       $B2: {  # true
         %2:i32 = spirv.add<i32> 2i, 2i
         exit_if  # if_1
@@ -440,7 +440,15 @@ TEST_F(SpirvParserTest, DISABLED_BranchConditional_TrueBranchesToFalse) {
         exit_if  # if_1
       }
     }
-    %3:i32 = spirv.add<i32> 1i, 1i
+    if true [t: $B4, f: $B5] {  # if_2
+      $B4: {  # true
+        %3:i32 = spirv.add<i32> 1i, 1i
+        ret
+      }
+      $B5: {  # false
+        unreachable
+      }
+    }
     ret
   }
 }

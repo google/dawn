@@ -1190,15 +1190,30 @@ class Parser {
             current_spirv_function_, &*(current_spirv_function_->FindBlock(false_id)),
             &*(current_spirv_function_->FindBlock(merge_id.value())), &false_blocks);
 
-        // It's possible one of the blocks returns, so bail early if they don't both end at the
-        // merge.
-        if (true_blocks.back()->id() != merge_id || false_blocks.back()->id() != merge_id) {
+        auto& true_end = true_blocks.back();
+        auto& false_end = false_blocks.back();
+
+        // We only consider the block as returning if it didn't return through
+        // the merge block. (I.e. it's a direct exit from inside the branch
+        // itself.
+        bool true_returns = true_end->id() != merge_id && true_end->IsReturn();
+        bool false_returns = false_end->id() != merge_id && false_end->IsReturn();
+        // If one of the blocks returns but the other doesn't, then we can't
+        // have a premerge block.
+        if (true_returns != false_returns) {
             return std::nullopt;
         }
 
-        // Remove the merge blocks.
-        true_blocks.pop_back();
-        false_blocks.pop_back();
+        // If they don't return, both blocks must merge to the same place.
+        if (!true_returns && (true_end->id() != false_end->id())) {
+            return std::nullopt;
+        }
+
+        // If these aren't returns, then remove the merge blocks.
+        if (!true_returns) {
+            true_blocks.pop_back();
+            false_blocks.pop_back();
+        }
 
         std::optional<uint32_t> id = std::nullopt;
         while (!true_blocks.empty() && !false_blocks.empty()) {
