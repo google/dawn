@@ -719,6 +719,15 @@ func (j job) run(cfg runConfig, fsReaderWriter oswrapper.FilesystemReaderWriter)
 			isSkipTimeoutTest = true
 		}
 
+		// If the test is known to fail and we are not regenerating expectations, just skip the test.
+		if isSkipTest && !cfg.generateExpected && !cfg.generateSkip {
+			if isSkipInvalidTest {
+				return status{code: invalid, timeTaken: 0}
+			} else {
+				return status{code: skip, timeTaken: 0}
+			}
+		}
+
 		expected = strings.ReplaceAll(expected, "\r\n", "\n")
 
 		outputFormat := strings.Split(string(j.format), "-")[0] // 'hlsl-fxc-ir' -> 'hlsl', etc.
