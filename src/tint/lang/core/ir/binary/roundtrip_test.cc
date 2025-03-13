@@ -52,11 +52,11 @@ class IRBinaryRoundtripTestBase : public IRTestParamHelper<T> {
         auto pre = Disassembler(this->mod).Plain();
         auto encoded = EncodeToBinary(this->mod);
         if (encoded != Success) {
-            return {pre, encoded.Failure().reason.Str()};
+            return {pre, encoded.Failure().reason};
         }
         auto decoded = Decode(encoded->Slice());
         if (decoded != Success) {
-            return {pre, decoded.Failure().reason.Str()};
+            return {pre, decoded.Failure().reason};
         }
         auto post = Disassembler(decoded.Get()).Plain();
         return {pre, post};

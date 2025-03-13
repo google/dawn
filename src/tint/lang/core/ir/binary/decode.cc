@@ -81,10 +81,10 @@ struct Decoder {
     Vector<ir::BreakIf*, 32> break_ifs_{};
     Vector<ir::Continue*, 32> continues_{};
 
-    diag::List diags_{};
+    std::stringstream err_{};
     Hashset<std::string, 4> struct_names_{};
 
-    diag::Result<Module> Decode() {
+    Result<Module> Decode() {
         {
             const size_t n = static_cast<size_t>(mod_in_.types().size());
             types_.Reserve(n);
@@ -133,9 +133,10 @@ struct Decoder {
             PopulateBlock(blocks_[i], mod_in_.blocks()[static_cast<int>(i)]);
         }
 
-        if (diags_.ContainsErrors()) {
+        auto err = err_.str();
+        if (!err.empty()) {
             // Note: Its not safe to call InferControlInstruction() with a broken IR.
-            return diag::Failure{std::move(diags_)};
+            return Failure{err};
         }
 
         if (CheckBlocks()) {
@@ -159,14 +160,14 @@ struct Decoder {
             }
         }
 
-        if (diags_.ContainsErrors()) {
-            return diag::Failure{std::move(diags_)};
+        err = err_.str();
+        if (!err.empty()) {
+            return Failure{err};
         }
         return std::move(mod_out_);
     }
 
-    /// Adds a new error to the diagnostics and returns a reference to it
-    diag::Diagnostic& Error() { return diags_.AddError(Source{}); }
+    std::stringstream& Error() { return err_; }
 
     /// Errors if @p number is not finite.
     /// @returns @p number if finite, otherwise 0.
@@ -777,7 +778,7 @@ struct Decoder {
         }
 
         if (!struct_names_.Add(struct_name)) {
-            Error() << "duplicate struct name: " << style::Type(struct_name);
+            Error() << "duplicate struct name: " << struct_name;
             return mod_out_.Types().invalid();
         }
 
@@ -1807,18 +1808,18 @@ struct Decoder {
 
 }  // namespace
 
-diag::Result<Module> Decode(Slice<const std::byte> encoded) {
+Result<Module> Decode(Slice<const std::byte> encoded) {
     GOOGLE_PROTOBUF_VERIFY_VERSION;
 
     pb::Module mod_in;
     if (!mod_in.ParseFromArray(encoded.data, static_cast<int>(encoded.len))) {
-        return diag::Failure{"failed to deserialize protobuf"};
+        return Failure{"failed to deserialize protobuf"};
     }
 
     return Decode(mod_in);
 }
 
-diag::Result<Module> Decode(const pb::Module& mod_in) {
+Result<Module> Decode(const pb::Module& mod_in) {
     return Decoder{mod_in}.Decode();
 }
 

@@ -31,7 +31,7 @@
 #include <memory>
 
 #include "src/tint/utils/containers/vector.h"
-#include "src/tint/utils/diagnostic/diagnostic.h"
+#include "src/tint/utils/result/result.h"
 
 // Forward declarations
 namespace tint::core::ir {
@@ -45,10 +45,10 @@ class Module;
 namespace tint::core::ir::binary {
 
 // Encode the module into a proto representation.
-diag::Result<std::unique_ptr<pb::Module>> EncodeToProto(const Module& module);
+Result<std::unique_ptr<pb::Module>> EncodeToProto(const Module& module);
 
 // Encode the module into a binary representation.
-diag::Result<Vector<std::byte, 0>> EncodeToBinary(const Module& module);
+Result<Vector<std::byte, 0>> EncodeToBinary(const Module& module);
 
 }  // namespace tint::core::ir::binary
 

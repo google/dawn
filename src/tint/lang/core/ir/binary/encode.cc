@@ -27,6 +27,7 @@
 
 #include "src/tint/lang/core/ir/binary/encode.h"
 
+#include <sstream>
 #include <string>
 #include <utility>
 
@@ -104,9 +105,9 @@ struct Encoder {
     Hashmap<const core::ir::Value*, uint32_t, 32> values_{};
     Hashmap<const core::constant::Value*, uint32_t, 32> constant_values_{};
 
-    diag::List diags_{};
+    std::stringstream err_{};
 
-    diag::Result<SuccessType> Encode() {
+    Result<SuccessType> Encode() {
         // Encode all user-declared structures first. This is to ensure that the IR disassembly
         // (which prints structure types first) does not reorder after encoding and decoding.
         for (auto* ty : mod_in_.Types()) {
@@ -125,14 +126,14 @@ struct Encoder {
         }
         mod_out_.set_root_block(Block(mod_in_.root_block));
 
-        if (diags_.ContainsErrors()) {
-            return diag::Failure{std::move(diags_)};
+        auto err = err_.str();
+        if (!err.empty()) {
+            return Failure{err};
         }
         return Success;
     }
 
-    /// Adds a new error to the diagnostics and returns a reference to it
-    diag::Diagnostic& Error() { return diags_.AddError(Source{}); }
+    std::stringstream& Error() { return err_; }
 
     ////////////////////////////////////////////////////////////////////////////
     // Functions
@@ -497,7 +498,7 @@ struct Encoder {
                 array_out.set_count(c->value);
                 if (c->value >= internal_limits::kMaxArrayElementCount) {
                     Error() << "array count (" << c->value << ") must be less than "
-                            << internal_limits::kMaxArrayElementCount;
+                            << internal_limits::kMaxArrayElementCount << "\n";
                 }
             },
             [&](const core::type::RuntimeArrayCount*) { array_out.set_count(0); },
@@ -737,7 +738,7 @@ struct Encoder {
         splat_out.set_type(Type(splat_in->type));
         if (DAWN_UNLIKELY(splat_in->count > internal_limits::kMaxArrayConstructorElements)) {
             Error() << "array constructor has excessive number of elements (>"
-                    << internal_limits::kMaxArrayConstructorElements << ")";
+                    << internal_limits::kMaxArrayConstructorElements << ")\n";
         }
         splat_out.set_elements(ConstantValue(splat_in->el));
         splat_out.set_count(static_cast<uint32_t>(splat_in->count));
@@ -1322,7 +1323,7 @@ struct Encoder {
 
 }  // namespace
 
-diag::Result<std::unique_ptr<pb::Module>> EncodeToProto(const Module& mod_in) {
+Result<std::unique_ptr<pb::Module>> EncodeToProto(const Module& mod_in) {
     GOOGLE_PROTOBUF_VERIFY_VERSION;
 
     pb::Module mod_out;
@@ -1334,7 +1335,7 @@ diag::Result<std::unique_ptr<pb::Module>> EncodeToProto(const Module& mod_in) {
     return std::make_unique<pb::Module>(mod_out);
 }
 
-diag::Result<Vector<std::byte, 0>> EncodeToBinary(const Module& mod_in) {
+Result<Vector<std::byte, 0>> EncodeToBinary(const Module& mod_in) {
     auto mod_out = EncodeToProto(mod_in);
     if (mod_out != Success) {
         return mod_out.Failure();
@@ -1345,7 +1346,7 @@ diag::Result<Vector<std::byte, 0>> EncodeToBinary(const Module& mod_in) {
     buffer.Resize(len);
     if (len > 0) {
         if (!mod_out.Get()->SerializeToArray(&buffer[0], static_cast<int>(len))) {
-            return diag::Failure{"failed to serialize protobuf"};
+            return Failure{"failed to serialize protobuf"};
         }
     }
     return buffer;
