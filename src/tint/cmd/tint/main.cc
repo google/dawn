@@ -687,7 +687,7 @@ void AddSubstituteOverrides(std::unordered_map<tint::OverrideId, double> values,
 
     // In the case where there are no entry points, the ep_name is blank and we need to skip single
     // entry point.
-    if (options.ep_name != "") {
+    if (!options.use_ir && options.ep_name != "") {
         transform_manager.append(std::make_unique<tint::ast::transform::SingleEntryPoint>());
         transform_inputs.Add<tint::ast::transform::SingleEntryPoint::Config>(options.ep_name);
     }
@@ -779,6 +779,15 @@ bool GenerateSpirv([[maybe_unused]] Options& options,
     if (ir != tint::Success) {
         std::cerr << "Failed to generate IR: " << ir << "\n";
         return false;
+    }
+
+    if (options.ep_name != "") {
+        auto singleEntryPointResult =
+            tint::core::ir::transform::SingleEntryPoint(ir.Get(), options.ep_name);
+        if (singleEntryPointResult != tint::Success) {
+            std::cerr << "Pipeline single entry point (IR) failed:\n"
+                      << singleEntryPointResult.Failure().reason.Str() << "\n";
+        }
     }
 
     if (cfg) {
@@ -955,6 +964,15 @@ bool GenerateMsl([[maybe_unused]] Options& options,
         return false;
     }
 
+    if (options.ep_name != "") {
+        auto singleEntryPointResult =
+            tint::core::ir::transform::SingleEntryPoint(ir.Get(), options.ep_name);
+        if (singleEntryPointResult != tint::Success) {
+            std::cerr << "Pipeline single entry point (IR) failed:\n"
+                      << singleEntryPointResult.Failure().reason.Str() << "\n";
+        }
+    }
+
     if (cfg) {
         // this needs to run after SingleEntryPoint transform which removes unused
         // overrides for the current entry point.
@@ -1093,6 +1111,15 @@ bool GenerateHlsl([[maybe_unused]] Options& options,
         if (ir != tint::Success) {
             std::cerr << "Failed to generate IR: " << ir << "\n";
             return false;
+        }
+
+        if (options.ep_name != "") {
+            auto singleEntryPointResult =
+                tint::core::ir::transform::SingleEntryPoint(ir.Get(), options.ep_name);
+            if (singleEntryPointResult != tint::Success) {
+                std::cerr << "Pipeline single entry point (IR) failed:\n"
+                          << singleEntryPointResult.Failure().reason.Str() << "\n";
+            }
         }
 
         if (cfg) {
@@ -1262,6 +1289,15 @@ bool GenerateGlsl([[maybe_unused]] Options& options,
     if (ir != tint::Success) {
         std::cerr << "Failed to generate IR: " << ir << "\n";
         return false;
+    }
+
+    if (options.ep_name != "") {
+        auto singleEntryPointResult =
+            tint::core::ir::transform::SingleEntryPoint(ir.Get(), options.ep_name);
+        if (singleEntryPointResult != tint::Success) {
+            std::cerr << "Pipeline single entry point (IR) failed:\n"
+                      << singleEntryPointResult.Failure().reason.Str() << "\n";
+        }
     }
 
     if (cfg) {

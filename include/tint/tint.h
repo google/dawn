@@ -36,6 +36,7 @@
 
 #include "src/tint/api/common/binding_point.h"
 #include "src/tint/api/tint.h"
+#include "src/tint/lang/core/ir/transform/single_entry_point.h"
 #include "src/tint/lang/core/ir/transform/substitute_overrides.h"
 #include "src/tint/lang/core/type/manager.h"
 #include "src/tint/lang/wgsl/ast/transform/first_index_offset.h"
