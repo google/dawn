@@ -1198,8 +1198,8 @@ TEST_F(SpirvParserTest, Switch_HoistFromCase) {
 )");
 }
 
-TEST_F(SpirvParserTest, DISABLED_Switch_Fallthrough) {
-    EXPECT_IR(R"(
+TEST_F(SpirvParserDeathTest, Switch_Fallthrough) {
+    auto src = R"(
                OpCapability Shader
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main"
@@ -1229,10 +1229,8 @@ TEST_F(SpirvParserTest, DISABLED_Switch_Fallthrough) {
          %53 = OpIAdd %i32 %one %three
                OpReturn
                OpFunctionEnd
-)",
-              R"(
-
-)");
+)";
+    EXPECT_DEATH_IF_SUPPORTED({ auto _ = Run(src); }, "internal compiler error");
 }
 
 TEST_F(SpirvParserTest, Switch_IfBreakInCase) {

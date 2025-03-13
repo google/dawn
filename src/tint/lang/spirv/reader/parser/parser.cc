@@ -1178,7 +1178,9 @@ class Parser {
 
         // Disallow fallthrough
         for (auto& switch_blocks : current_switch_blocks_) {
-            TINT_ASSERT(switch_blocks.count(dest_id) == 0);
+            if (switch_blocks.count(dest_id) != 0) {
+                TINT_ICE() << "switch fallthrough not supported by the SPIR-V reader";
+            }
         }
 
         // The destination is a continuing block, so insert a `continue`
