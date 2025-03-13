@@ -2892,7 +2892,7 @@ TEST_F(SpirvParserTest, Loop_Loop_InnerContinue) {
 )");
 }
 
-TEST_F(SpirvParserTest, DISABLED_Loop_Loop_InnerContinueBreaks) {
+TEST_F(SpirvParserTest, Loop_Loop_InnerContinueBreaks) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -2931,7 +2931,44 @@ TEST_F(SpirvParserTest, DISABLED_Loop_Loop_InnerContinueBreaks) {
                OpFunctionEnd
 )",
               R"(
-
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    loop [b: $B2, c: $B3] {  # loop_1
+      $B2: {  # body
+        if true [t: $B4, f: $B5] {  # if_1
+          $B4: {  # true
+            loop [b: $B6, c: $B7] {  # loop_2
+              $B6: {  # body
+                if false [t: $B8, f: $B9] {  # if_2
+                  $B8: {  # true
+                    continue  # -> $B7
+                  }
+                  $B9: {  # false
+                    exit_loop  # loop_2
+                  }
+                }
+                continue  # -> $B7
+              }
+              $B7: {  # continuing
+                %2:bool = not true
+                break_if %2  # -> [t: exit_loop loop_2, f: $B6]
+              }
+            }
+            continue  # -> $B3
+          }
+          $B5: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        continue  # -> $B3
+      }
+      $B3: {  # continuing
+        next_iteration  # -> $B2
+      }
+    }
+    ret
+  }
+}
 )");
 }
 
@@ -4268,7 +4305,7 @@ TEST_F(SpirvParserTest, Branch_LoopBreak_MultiBlockLoop_FromBody) {
 }
 
 TEST_F(SpirvParserTest,
-       DISABLED_Branch_LoopBreak_MultiBlockLoop_FromContinueConstructEnd_Conditional_BreakIf) {
+       Branch_LoopBreak_MultiBlockLoop_FromContinueConstructEnd_Conditional_BreakIf) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -4296,21 +4333,24 @@ TEST_F(SpirvParserTest,
                OpFunctionEnd
 )",
               R"(
-
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    loop [b: $B2, c: $B3] {  # loop_1
+      $B2: {  # body
+        continue  # -> $B3
+      }
+      $B3: {  # continuing
+        %2:i32 = spirv.add<i32> 1i, 1i
+        break_if true  # -> [t: exit_loop loop_1, f: $B2]
+      }
+    }
+    ret
+  }
+}
 )");
-
-    //     auto* expect = R"(loop {
-    //
-    //   continuing {
-    //     var_1 = 1u;
-    //     break if false;
-    //   }
-    // }
-    // return;
 }
 
-TEST_F(SpirvParserTest,
-       DISABLED_Branch_LoopBreak_MultiBlockLoop_FromContinueConstructEnd_Conditional) {
+TEST_F(SpirvParserTest, Branch_LoopBreak_MultiBlockLoop_FromContinueConstructEnd_Conditional) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -4338,20 +4378,25 @@ TEST_F(SpirvParserTest,
                OpFunctionEnd
 )",
               R"(
-
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    loop [b: $B2, c: $B3] {  # loop_1
+      $B2: {  # body
+        continue  # -> $B3
+      }
+      $B3: {  # continuing
+        %2:i32 = spirv.add<i32> 1i, 1i
+        %3:bool = not true
+        break_if %3  # -> [t: exit_loop loop_1, f: $B2]
+      }
+    }
+    ret
+  }
+}
 )");
-
-    //     auto* expect = R"(loop {
-    //
-    //   continuing {
-    //     var_1 = 1u;
-    //     break if !(false);
-    //   }
-    // }
-    // return;
 }
 
-TEST_F(SpirvParserTest, DISABLED_Branch_LoopBreak_FromContinueConstructTail) {
+TEST_F(SpirvParserTest, Branch_LoopBreak_FromContinueConstructTail) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -4382,20 +4427,29 @@ TEST_F(SpirvParserTest, DISABLED_Branch_LoopBreak_FromContinueConstructTail) {
                OpFunctionEnd
 )",
               R"(
-
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    loop [b: $B2, c: $B3] {  # loop_1
+      $B2: {  # body
+        if true [t: $B4, f: $B5] {  # if_1
+          $B4: {  # true
+            continue  # -> $B3
+          }
+          $B5: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        continue  # -> $B3
+      }
+      $B3: {  # continuing
+        %2:bool = not true
+        break_if %2  # -> [t: exit_loop loop_1, f: $B2]
+      }
+    }
+    ret
+  }
+}
 )");
-
-    //     auto* expect = R"(loop {
-    //   if (false) {
-    //   } else {
-    //     break;
-    //   }
-    //
-    //   continuing {
-    //     break if !(false);
-    //   }
-    // }
-    // return;
 }
 
 TEST_F(SpirvParserTest, Branch_LoopContinue_LastInLoopConstruct) {
@@ -4786,7 +4840,7 @@ TEST_F(SpirvParserTest, BranchConditional_Back_SingleBlock_LoopBreak_OnFalse) {
 )");
 }
 
-TEST_F(SpirvParserTest, DISABLED_BranchConditional_Back_MultiBlock_LoopBreak_OnTrue) {
+TEST_F(SpirvParserTest, BranchConditional_Back_MultiBlock_LoopBreak_OnTrue) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -4816,22 +4870,26 @@ TEST_F(SpirvParserTest, DISABLED_BranchConditional_Back_MultiBlock_LoopBreak_OnT
                OpFunctionEnd
 )",
               R"(
-
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = spirv.add<i32> 1i, 1i
+    loop [b: $B2, c: $B3] {  # loop_1
+      $B2: {  # body
+        %3:i32 = spirv.add<i32> 2i, 2i
+        continue  # -> $B3
+      }
+      $B3: {  # continuing
+        break_if true  # -> [t: exit_loop loop_1, f: $B2]
+      }
+    }
+    %4:i32 = spirv.add<i32> 3i, 3i
+    ret
+  }
+}
 )");
-
-    //     auto* expect = R"(var_1 = 0u;
-    // loop {
-    //   var_1 = 1u;
-    //
-    //   continuing {
-    //     break if false;
-    //   }
-    // }
-    // var_1 = 5u;
-    // return;
 }
 
-TEST_F(SpirvParserTest, DISABLED_BranchConditional_Back_MultiBlock_LoopBreak_OnFalse) {
+TEST_F(SpirvParserTest, BranchConditional_Back_MultiBlock_LoopBreak_OnFalse) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -4861,19 +4919,24 @@ TEST_F(SpirvParserTest, DISABLED_BranchConditional_Back_MultiBlock_LoopBreak_OnF
                OpFunctionEnd
 )",
               R"(
-
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = spirv.add<i32> 1i, 1i
+    loop [b: $B2, c: $B3] {  # loop_1
+      $B2: {  # body
+        %3:i32 = spirv.add<i32> 2i, 2i
+        continue  # -> $B3
+      }
+      $B3: {  # continuing
+        %4:bool = not true
+        break_if %4  # -> [t: exit_loop loop_1, f: $B2]
+      }
+    }
+    %5:i32 = spirv.add<i32> 3i, 3i
+    ret
+  }
+}
 )");
-
-    //     auto* expect = R"(var_1 = 0u;
-    // loop {
-    //   var_1 = 1u;
-    //
-    //   continuing {
-    //     break if !(false);
-    //   }
-    // }
-    // var_1 = 5u;
-    // return;
 }
 
 // When the break is not last in its case, we must emit a 'break'
@@ -5111,7 +5174,7 @@ TEST_F(SpirvParserTest, BranchConditional_SwitchBreak_Continue_OnFalse) {
 )");
 }
 
-TEST_F(SpirvParserTest, DISABLED_BranchConditional_SwitchBreak_Forward_OnTrue) {
+TEST_F(SpirvParserTest, BranchConditional_SwitchBreak_Forward_OnTrue) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -5154,7 +5217,7 @@ TEST_F(SpirvParserTest, DISABLED_BranchConditional_SwitchBreak_Forward_OnTrue) {
         if true [t: $B4, f: $B5] {  # if_1
           $B4: {  # true
             %4:i32 = spirv.add<i32> 3i, 3i
-            exit_switch  # switch_1
+            exit_if  # if_1
           }
           $B5: {  # false
             exit_switch  # switch_1
@@ -5170,7 +5233,7 @@ TEST_F(SpirvParserTest, DISABLED_BranchConditional_SwitchBreak_Forward_OnTrue) {
 )");
 }
 
-TEST_F(SpirvParserTest, DISABLED_BranchConditional_SwitchBreak_Forward_OnFalse) {
+TEST_F(SpirvParserTest, BranchConditional_SwitchBreak_Forward_OnFalse) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -5216,7 +5279,7 @@ TEST_F(SpirvParserTest, DISABLED_BranchConditional_SwitchBreak_Forward_OnFalse) 
           }
           $B5: {  # false
             %4:i32 = spirv.add<i32> 3i, 3i
-            exit_switch  # switch_1
+            exit_if  # if_1
           }
         }
         exit_switch  # switch_1
