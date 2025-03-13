@@ -365,7 +365,8 @@ TEST_F(BindGroupValidationTest, BufferBindingType) {
     }
 }
 
-// Check that an external texture binding must contain exactly an external texture
+// Check that an external texture binding must contain either exactly an external texture or a
+// texture view.
 TEST_F(BindGroupValidationTest, ExternalTextureBindingType) {
     // Create an external texture
     wgpu::Texture texture =
@@ -391,64 +392,78 @@ TEST_F(BindGroupValidationTest, ExternalTextureBindingType) {
     descriptor.entryCount = 1;
     descriptor.entries = &binding;
 
+    wgpu::ExternalTextureBindingEntry externalBindingEntry;
+    externalBindingEntry.externalTexture = externalTexture;
+
     // Not setting anything fails
     ASSERT_DEVICE_ERROR(device.CreateBindGroup(&descriptor));
 
-    // Control case: setting just the external texture works
-    wgpu::ExternalTextureBindingEntry externalBindingEntry;
-    externalBindingEntry.externalTexture = externalTexture;
-    binding.nextInChain = &externalBindingEntry;
-    device.CreateBindGroup(&descriptor);
-
-    // Setting the texture view as well is an error
-    binding.textureView = mSampledTextureView;
-    ASSERT_DEVICE_ERROR(device.CreateBindGroup(&descriptor));
-    binding.textureView = nullptr;
-
-    // Setting the sampler as well is an error
-    binding.sampler = mSampler;
-    ASSERT_DEVICE_ERROR(device.CreateBindGroup(&descriptor));
-    binding.sampler = nullptr;
-
-    // Setting the buffer as well is an error
-    binding.buffer = mUBO;
-    ASSERT_DEVICE_ERROR(device.CreateBindGroup(&descriptor));
-    binding.buffer = nullptr;
-
-    // Setting the external texture to an error external texture is an error.
-    {
-        wgpu::Texture errorTexture =
-            CreateTexture(wgpu::TextureUsage::TextureBinding, wgpu::TextureFormat::R8Unorm, 1);
-        wgpu::ExternalTextureDescriptor errorExternalDescriptor =
-            CreateDefaultExternalTextureDescriptor();
-        errorExternalDescriptor.plane0 = errorTexture.CreateView();
-
-        wgpu::ExternalTexture errorExternalTexture;
-        ASSERT_DEVICE_ERROR(errorExternalTexture =
-                                device.CreateExternalTexture(&errorExternalDescriptor));
-
-        wgpu::ExternalTextureBindingEntry errorExternalBindingEntry;
-        errorExternalBindingEntry.externalTexture = errorExternalTexture;
-        binding.nextInChain = &errorExternalBindingEntry;
-        ASSERT_DEVICE_ERROR(device.CreateBindGroup(&descriptor));
+    for (bool bindTextureViewOnly : {false, true}) {
+        binding.textureView = nullptr;
         binding.nextInChain = nullptr;
-    }
 
-    // Setting an external texture with another external texture chained is an error.
-    {
-        wgpu::ExternalTexture externalTexture2 = device.CreateExternalTexture(&externalDesc);
-        wgpu::ExternalTextureBindingEntry externalBindingEntry2;
-        externalBindingEntry2.externalTexture = externalTexture2;
-        externalBindingEntry.nextInChain = &externalBindingEntry2;
+        if (bindTextureViewOnly) {
+            // Control case: setting just the texture view works
+            binding.textureView = mSampledTextureView;
+            device.CreateBindGroup(&descriptor);
+        } else {
+            // Control case: setting just the external texture works
+            binding.nextInChain = &externalBindingEntry;
+            device.CreateBindGroup(&descriptor);
+        }
 
+        // Setting the sampler as well is an error
+        binding.sampler = mSampler;
         ASSERT_DEVICE_ERROR(device.CreateBindGroup(&descriptor));
-    }
+        binding.sampler = nullptr;
 
-    // Chaining a struct that isn't an external texture binding entry is an error.
-    {
-        wgpu::ExternalTextureBindingLayout externalBindingLayout;
-        binding.nextInChain = &externalBindingLayout;
+        // Setting the buffer as well is an error
+        binding.buffer = mUBO;
         ASSERT_DEVICE_ERROR(device.CreateBindGroup(&descriptor));
+        binding.buffer = nullptr;
+
+        // Setting the external texture to an error external texture is an error.
+        {
+            wgpu::Texture errorTexture =
+                CreateTexture(wgpu::TextureUsage::TextureBinding, wgpu::TextureFormat::R8Unorm, 1);
+            wgpu::ExternalTextureDescriptor errorExternalDescriptor =
+                CreateDefaultExternalTextureDescriptor();
+            errorExternalDescriptor.plane0 = errorTexture.CreateView();
+
+            wgpu::ExternalTexture errorExternalTexture;
+            ASSERT_DEVICE_ERROR(errorExternalTexture =
+                                    device.CreateExternalTexture(&errorExternalDescriptor));
+
+            wgpu::ExternalTextureBindingEntry errorExternalBindingEntry;
+            errorExternalBindingEntry.externalTexture = errorExternalTexture;
+            binding.nextInChain = &errorExternalBindingEntry;
+            ASSERT_DEVICE_ERROR(device.CreateBindGroup(&descriptor));
+            binding.nextInChain = nullptr;
+        }
+
+        if (!bindTextureViewOnly) {
+            // Setting the texture view as well is an error
+            binding.nextInChain = &externalBindingEntry;
+            binding.textureView = mSampledTextureView;
+            ASSERT_DEVICE_ERROR(device.CreateBindGroup(&descriptor));
+            binding.nextInChain = nullptr;
+            binding.textureView = nullptr;
+
+            // Setting an external texture with another external texture chained is an error.
+            wgpu::ExternalTexture externalTexture2 = device.CreateExternalTexture(&externalDesc);
+            wgpu::ExternalTextureBindingEntry externalBindingEntry2;
+            externalBindingEntry2.externalTexture = externalTexture2;
+            externalBindingEntry.nextInChain = &externalBindingEntry2;
+
+            ASSERT_DEVICE_ERROR(device.CreateBindGroup(&descriptor));
+        }
+
+        // Chaining a struct that isn't an external texture binding entry is an error.
+        {
+            wgpu::ExternalTextureBindingLayout externalBindingLayout;
+            binding.nextInChain = &externalBindingLayout;
+            ASSERT_DEVICE_ERROR(device.CreateBindGroup(&descriptor));
+        }
     }
 }
 
