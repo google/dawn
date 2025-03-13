@@ -124,7 +124,8 @@ MaybeError BindGroup::InitializeImpl() {
                                                           descriptorHeapOffsets[bindingIndex]));
                         break;
                     }
-                    case wgpu::BufferBindingType::ReadOnlyStorage: {
+                    case wgpu::BufferBindingType::ReadOnlyStorage:
+                    case kInternalReadOnlyStorageBufferBinding: {
                         // Like StorageBuffer, Tint outputs HLSL shaders for readonly
                         // storage buffer with ByteAddressBuffer. So we must use
                         // D3D12_BUFFER_SRV_FLAG_RAW when making the SRV descriptor. And it has

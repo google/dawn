@@ -345,6 +345,7 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
                         case wgpu::BufferBindingType::Storage:
                         case kInternalStorageBufferBinding:
                         case wgpu::BufferBindingType::ReadOnlyStorage:
+                        case kInternalReadOnlyStorageBufferBinding:
                             target = GL_SHADER_STORAGE_BUFFER;
                             break;
                         case wgpu::BufferBindingType::BindingNotUsed:

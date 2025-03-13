@@ -76,6 +76,7 @@ void IncrementBindingCounts(BindingCounts* bindingCounts,
 
             case wgpu::BufferBindingType::Storage:
             case kInternalStorageBufferBinding:
+            case kInternalReadOnlyStorageBufferBinding:
             case wgpu::BufferBindingType::ReadOnlyStorage:
                 if (buffer.hasDynamicOffset) {
                     ++bindingCounts->dynamicStorageBufferCount;

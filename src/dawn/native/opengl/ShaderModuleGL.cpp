@@ -338,6 +338,7 @@ std::pair<tint::glsl::writer::Bindings, BindingMap> GenerateBindingInfo(
                     case kInternalStorageBufferBinding:
                     case wgpu::BufferBindingType::Storage:
                     case wgpu::BufferBindingType::ReadOnlyStorage:
+                    case kInternalReadOnlyStorageBufferBinding:
                         bindings.storage.emplace(
                             srcBindingPoint,
                             tint::glsl::writer::binding::Storage{dstBindingPoint.binding});

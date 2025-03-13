@@ -103,7 +103,8 @@ MaybeError ValidateBindGroupLayoutEntry(DeviceBase* device,
 
         // The kInternalStorageBufferBinding is used internally and not a value
         // in wgpu::BufferBindingType.
-        if (buffer.type == kInternalStorageBufferBinding) {
+        if (buffer.type == kInternalStorageBufferBinding ||
+            buffer.type == kInternalReadOnlyStorageBufferBinding) {
             DAWN_INVALID_IF(!allowInternalBinding, "Internal binding types are disallowed");
         } else {
             DAWN_TRY(ValidateBufferBindingType(buffer.type));
@@ -844,6 +845,7 @@ bool BindGroupLayoutInternalBase::IsStorageBufferBinding(BindingIndex bindingInd
         case wgpu::BufferBindingType::Uniform:
             return false;
         case kInternalStorageBufferBinding:
+        case kInternalReadOnlyStorageBufferBinding:
         case wgpu::BufferBindingType::Storage:
         case wgpu::BufferBindingType::ReadOnlyStorage:
             return true;

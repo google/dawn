@@ -50,6 +50,7 @@ D3D12_DESCRIPTOR_RANGE_TYPE WGPUBindingInfoToDescriptorRangeType(const BindingIn
                 case kInternalStorageBufferBinding:
                     return D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
                 case wgpu::BufferBindingType::ReadOnlyStorage:
+                case kInternalReadOnlyStorageBufferBinding:
                     return D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
                 case wgpu::BufferBindingType::BindingNotUsed:
                 case wgpu::BufferBindingType::Undefined:

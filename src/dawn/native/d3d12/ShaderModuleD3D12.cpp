@@ -211,6 +211,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
                     case kInternalStorageBufferBinding:
                     case wgpu::BufferBindingType::Storage:
                     case wgpu::BufferBindingType::ReadOnlyStorage:
+                    case kInternalReadOnlyStorageBufferBinding:
                         bindings.storage.emplace(
                             srcBindingPoint, tint::hlsl::writer::binding::Storage{
                                                  dstBindingPoint.group, dstBindingPoint.binding});
@@ -263,7 +264,8 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
                 // buffer bindings to be treated as UAV instead of SRV. Internal storage
                 // buffer is a storage buffer used in the internal pipeline.
                 const bool forceStorageBufferAsUAV =
-                    (bufferBindingInfo->type == wgpu::BufferBindingType::ReadOnlyStorage &&
+                    ((bufferBindingInfo->type == wgpu::BufferBindingType::ReadOnlyStorage ||
+                      bufferBindingInfo->type == kInternalReadOnlyStorageBufferBinding) &&
                      (bindingLayout.type == wgpu::BufferBindingType::Storage ||
                       bindingLayout.type == kInternalStorageBufferBinding));
                 if (forceStorageBufferAsUAV) {

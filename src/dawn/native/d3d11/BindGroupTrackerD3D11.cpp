@@ -213,7 +213,8 @@ MaybeError BindGroupTracker::ApplyBindGroup(BindGroupIndex index) {
                         }
                         break;
                     }
-                    case wgpu::BufferBindingType::ReadOnlyStorage: {
+                    case wgpu::BufferBindingType::ReadOnlyStorage:
+                    case kInternalReadOnlyStorageBufferBinding: {
                         ComPtr<ID3D11ShaderResourceView> d3d11SRV;
                         DAWN_TRY_ASSIGN(d3d11SRV,
                                         ToGPUUsableBuffer(binding.buffer)
@@ -366,7 +367,8 @@ void ComputePassBindGroupTracker::UnapplyComputeBindings(BindGroupIndex index) {
                         deviceContext->CSSetUnorderedAccessViews(bindingSlot, 1, &nullUAV, nullptr);
                         break;
                     }
-                    case wgpu::BufferBindingType::ReadOnlyStorage: {
+                    case wgpu::BufferBindingType::ReadOnlyStorage:
+                    case kInternalReadOnlyStorageBufferBinding: {
                         ID3D11ShaderResourceView* nullSRV = nullptr;
                         deviceContext->CSSetShaderResources(bindingSlot, 1, &nullSRV);
                         break;
@@ -496,7 +498,8 @@ MaybeError RenderPassBindGroupTracker::Apply() {
                             break;
                         }
                         case wgpu::BufferBindingType::Uniform:
-                        case wgpu::BufferBindingType::ReadOnlyStorage: {
+                        case wgpu::BufferBindingType::ReadOnlyStorage:
+                        case kInternalReadOnlyStorageBufferBinding: {
                             break;
                         }
                         case wgpu::BufferBindingType::BindingNotUsed:

@@ -519,6 +519,7 @@ class BindGroupStateTracker : public BindGroupTrackerBase<false, uint64_t> {
                 }
                 break;
             case wgpu::BufferBindingType::ReadOnlyStorage:
+            case kInternalReadOnlyStorageBufferBinding:
                 if constexpr (kIsRenderPipeline) {
                     commandList->SetGraphicsRootShaderResourceView(parameterIndex, bufferLocation);
                 } else {

@@ -267,6 +267,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
                         case kInternalStorageBufferBinding:
                         case wgpu::BufferBindingType::Storage:
                         case wgpu::BufferBindingType::ReadOnlyStorage:
+                        case kInternalReadOnlyStorageBufferBinding:
                             bindings.storage.emplace(
                                 srcBindingPoint,
                                 tint::spirv::writer::binding::Storage{dstBindingPoint.group,

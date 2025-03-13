@@ -154,6 +154,7 @@ tint::msl::writer::Bindings generateBindingInfo(
                         case kInternalStorageBufferBinding:
                         case wgpu::BufferBindingType::Storage:
                         case wgpu::BufferBindingType::ReadOnlyStorage:
+                        case kInternalReadOnlyStorageBufferBinding:
                             bindings.storage.emplace(
                                 srcBindingPoint,
                                 tint::msl::writer::binding::Storage{dstBindingPoint.binding});

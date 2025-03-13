@@ -142,6 +142,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
                     case kInternalStorageBufferBinding:
                     case wgpu::BufferBindingType::Storage:
                     case wgpu::BufferBindingType::ReadOnlyStorage:
+                    case kInternalReadOnlyStorageBufferBinding:
                         bindings.storage.emplace(
                             srcBindingPoint, tint::hlsl::writer::binding::Storage{
                                                  dstBindingPoint.group, dstBindingPoint.binding});

@@ -563,8 +563,11 @@ MaybeError ValidateCompatibilityOfSingleBindingWithLayout(const DeviceBase* devi
             // group layout is invalid. For internal usage with internal shaders, a storage
             // binding in the shader with an internal storage buffer in the bind group
             // layout is also valid.
-            bool validBindingConversion = (bindingLayout.type == kInternalStorageBufferBinding &&
-                                           bindingInfo.type == wgpu::BufferBindingType::Storage);
+            bool validBindingConversion =
+                (bindingLayout.type == kInternalStorageBufferBinding &&
+                 bindingInfo.type == wgpu::BufferBindingType::Storage) ||
+                (bindingLayout.type == kInternalReadOnlyStorageBufferBinding &&
+                 bindingInfo.type == wgpu::BufferBindingType::ReadOnlyStorage);
 
             DAWN_INVALID_IF(
                 bindingLayout.type != bindingInfo.type && !validBindingConversion,

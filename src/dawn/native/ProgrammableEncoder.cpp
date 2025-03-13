@@ -203,6 +203,7 @@ MaybeError ProgrammableEncoder::ValidateSetBindGroup(BindGroupIndex index,
             case wgpu::BufferBindingType::Storage:
             case wgpu::BufferBindingType::ReadOnlyStorage:
             case kInternalStorageBufferBinding:
+            case kInternalReadOnlyStorageBufferBinding:
                 requiredAlignment = GetDevice()->GetLimits().v1.minStorageBufferOffsetAlignment;
                 break;
             case wgpu::BufferBindingType::BindingNotUsed:
