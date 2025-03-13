@@ -2530,7 +2530,7 @@ TEST_F(SpirvParserTest, Loop_Continue_ContainsIf) {
 )");
 }
 
-TEST_F(SpirvParserTest, DISABLED_Loop_Continue_HasBreakIf) {
+TEST_F(SpirvParserTest, Loop_Continue_HasBreakIf) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -2560,11 +2560,31 @@ TEST_F(SpirvParserTest, DISABLED_Loop_Continue_HasBreakIf) {
                OpFunctionEnd
 )",
               R"(
-
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    loop [b: $B2, c: $B3] {  # loop_1
+      $B2: {  # body
+        if true [t: $B4, f: $B5] {  # if_1
+          $B4: {  # true
+            continue  # -> $B3
+          }
+          $B5: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        continue  # -> $B3
+      }
+      $B3: {  # continuing
+        break_if false  # -> [t: exit_loop loop_1, f: $B2]
+      }
+    }
+    ret
+  }
+}
 )");
 }
 
-TEST_F(SpirvParserTest, DISABLED_Loop_Continue_HasBreakUnless) {
+TEST_F(SpirvParserTest, Loop_Continue_HasBreakUnless) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -2594,7 +2614,28 @@ TEST_F(SpirvParserTest, DISABLED_Loop_Continue_HasBreakUnless) {
                OpFunctionEnd
 )",
               R"(
-
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    loop [b: $B2, c: $B3] {  # loop_1
+      $B2: {  # body
+        if true [t: $B4, f: $B5] {  # if_1
+          $B4: {  # true
+            continue  # -> $B3
+          }
+          $B5: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        continue  # -> $B3
+      }
+      $B3: {  # continuing
+        %2:bool = not false
+        break_if %2  # -> [t: exit_loop loop_1, f: $B2]
+      }
+    }
+    ret
+  }
+}
 )");
 }
 

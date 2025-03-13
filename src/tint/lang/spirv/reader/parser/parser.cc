@@ -1287,6 +1287,48 @@ class Parser {
         auto true_id = inst.GetSingleWordInOperand(1);
         auto false_id = inst.GetSingleWordInOperand(2);
 
+        bool true_is_header = loop_headers_.count(true_id) > 0;
+        bool false_is_header = loop_headers_.count(false_id) > 0;
+
+        if (true_is_header || false_is_header) {
+            core::ir::Loop* loop = nullptr;
+            uint32_t merge_id = 0;
+
+            if (true_is_header) {
+                const auto& bb_header = current_spirv_function_->FindBlock(true_id);
+                merge_id = (*bb_header).MergeBlockIdIfAny();
+
+                loop = loop_headers_[true_id];
+
+            } else {
+                const auto& bb_header = current_spirv_function_->FindBlock(false_id);
+                merge_id = (*bb_header).MergeBlockIdIfAny();
+
+                loop = loop_headers_[false_id];
+            }
+            TINT_ASSERT(merge_id > 0);
+
+            // The only time a loop continuing will be in current blocks is if
+            // we're inside the continuing block itself.
+            //
+            // Note, we may _not_ be in the IR continuing block. This can happen
+            // in the case of a SPIR-V loop where the header_id and continue_id
+            // are the same. We'll be emitting into the IR body, but branch to
+            // the header because that's also the continuing in SPIR-V.
+            if (current_blocks_.count(loop->Continuing())) {
+                if (true_id == merge_id && false_is_header) {
+                    EmitWithoutResult(b_.BreakIf(loop, cond));
+                    return;
+                }
+                if (false_id == merge_id && true_is_header) {
+                    auto* val = b_.Not(cond->Type(), cond);
+                    EmitWithoutSpvResult(val);
+                    EmitWithoutResult(b_.BreakIf(loop, val));
+                    return;
+                }
+            }
+        }
+
         // If the true and false block are the same, then we change the condition into
         // `cond || true` so that we always take the true block, the false block will be marked
         // unreachable.
@@ -1402,6 +1444,7 @@ class Parser {
         auto* loop = StopWalkingAt(header_id)->As<core::ir::Loop>();
         TINT_ASSERT(loop);
 
+        loop_headers_.insert({header_id, loop});
         continue_targets_.insert({continue_id, loop});
 
         // Insert the stop blocks
@@ -1414,6 +1457,7 @@ class Parser {
             // Emit the continuing block.
             EmitBlockParent(loop->Continuing(), *bb_continue);
         }
+
         if (!loop->Continuing()->Terminator()) {
             loop->Continuing()->Append(b_.NextIteration(loop));
         }
@@ -2060,6 +2104,8 @@ class Parser {
     std::unordered_map<uint32_t, core::ir::ControlInstruction*> walk_stop_blocks_;
     // Map of continue target ID to the controlling IR loop.
     std::unordered_map<uint32_t, core::ir::Loop*> continue_targets_;
+    // Map of continue target ID to the controlling IR loop.
+    std::unordered_map<uint32_t, core::ir::Loop*> loop_headers_;
 
     std::unordered_set<core::ir::Block*> current_blocks_;
     std::vector<std::unordered_set<uint32_t>> id_stack_;
