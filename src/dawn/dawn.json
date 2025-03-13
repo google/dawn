@@ -73,11 +73,11 @@
         "category": "structure",
         "extensible": "in",
         "members": [
-            {"name": "compatible surface", "type": "surface", "optional": true},
             {"name": "feature level", "type": "feature level", "default": "core"},
             {"name": "power preference", "type": "power preference", "default": "undefined"},
+            {"name": "force fallback adapter", "type": "bool", "default": "false"},
             {"name": "backend type", "type": "backend type", "default": "undefined"},
-            {"name": "force fallback adapter", "type": "bool", "default": "false"}
+            {"name": "compatible surface", "type": "surface", "optional": true}
         ]
     },
     "request adapter WebXR options": {
@@ -441,11 +441,11 @@
             {"name": "device", "type": "device"},
             {"name": "format", "type": "texture format"},
             {"name": "usage", "type": "texture usage", "default": "render attachment"},
+            {"name": "width", "type": "uint32_t"},
+            {"name": "height", "type": "uint32_t"},
             {"name": "view format count", "type": "size_t", "default": 0},
             {"name": "view formats", "type": "texture format", "annotation": "const*", "length": "view format count", "default": "nullptr"},
             {"name": "alpha mode", "type": "composite alpha mode", "default": "auto"},
-            {"name": "width", "type": "uint32_t"},
-            {"name": "height", "type": "uint32_t"},
             {"name": "present mode", "type": "present mode", "default": "fifo"}
         ]
     },
@@ -2537,8 +2537,8 @@
         "category": "structure",
         "extensible": "in",
         "members": [
-            {"name": "array stride", "type": "uint64_t"},
             {"name": "step mode", "type": "vertex step mode"},
+            {"name": "array stride", "type": "uint64_t"},
             {"name": "attribute count", "type": "size_t"},
             {"name": "attributes", "type": "vertex attribute", "annotation": "const*", "length": "attribute count"}
         ]
