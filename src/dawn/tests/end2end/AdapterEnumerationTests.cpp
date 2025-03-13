@@ -171,7 +171,6 @@ TEST_F(AdapterEnumerationTests, MatchingDXGIAdapterD3D11) {
         EXPECT_EQ(info.adapterType, infoAgain.adapterType);
         EXPECT_EQ(info.vendorID, infoAgain.vendorID);
         EXPECT_EQ(info.deviceID, infoAgain.deviceID);
-        EXPECT_EQ(info.compatibilityMode, infoAgain.compatibilityMode);
     }
 }
 #endif  // defined(DAWN_ENABLE_BACKEND_D3D11)
@@ -248,7 +247,6 @@ TEST_F(AdapterEnumerationTests, MatchingDXGIAdapterD3D12) {
         EXPECT_EQ(info.adapterType, infoAgain.adapterType);
         EXPECT_EQ(info.vendorID, infoAgain.vendorID);
         EXPECT_EQ(info.deviceID, infoAgain.deviceID);
-        EXPECT_EQ(info.compatibilityMode, infoAgain.compatibilityMode);
     }
 }
 #endif  // defined(DAWN_ENABLE_BACKEND_D3D12)

@@ -35,11 +35,6 @@ enum GPUFeatureName {
     "core-features-and-limits",
 };
 
-interface GPUAdapter {
-    readonly attribute boolean isCompatibilityMode;
-    readonly attribute DOMString featureLevel;
-};
-
 enum GPUSubgroupMatrixComponentType {
   "f32",
   "f16",

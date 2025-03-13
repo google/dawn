@@ -191,8 +191,7 @@
             {"name": "vendor ID", "type": "uint32_t"},
             {"name": "device ID", "type": "uint32_t"},
             {"name": "subgroup min size", "type": "uint32_t"},
-            {"name": "subgroup max size", "type": "uint32_t"},
-            {"name": "compatibility mode", "type": "bool", "default": "false", "tags": ["dawn", "emscripten"]}
+            {"name": "subgroup max size", "type": "uint32_t"}
         ]
     },
     "adapter type": {

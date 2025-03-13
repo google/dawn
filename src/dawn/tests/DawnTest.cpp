@@ -488,7 +488,9 @@ void DawnTestEnvironment::SelectPreferredAdapterProperties(const native::Instanc
 
             // Skip non-OpenGLES/D3D11 compat adapters. Metal/Vulkan/D3D12 support
             // core WebGPU.
-            if (info.compatibilityMode && info.backendType != wgpu::BackendType::OpenGLES &&
+            bool isDefaultingCompatibilityMode =
+                !adapter.HasFeature(wgpu::FeatureName::CoreFeaturesAndLimits);
+            if (isDefaultingCompatibilityMode && info.backendType != wgpu::BackendType::OpenGLES &&
                 info.backendType != wgpu::BackendType::D3D11) {
                 continue;
             }
@@ -532,11 +534,11 @@ void DawnTestEnvironment::SelectPreferredAdapterProperties(const native::Instanc
             // In Windows Remote Desktop sessions we may be able to discover multiple adapters that
             // have the same name and backend type. We will just choose one adapter from them in our
             // tests.
-            const auto adapterTypeAndName =
-                std::tuple(info.backendType, std::string(info.device), info.compatibilityMode);
+            const auto adapterTypeAndName = std::tuple(info.backendType, std::string(info.device),
+                                                       isDefaultingCompatibilityMode);
             if (adapterNameSet.find(adapterTypeAndName) == adapterNameSet.end()) {
                 adapterNameSet.insert(adapterTypeAndName);
-                mAdapterProperties.emplace_back(info, selected);
+                mAdapterProperties.emplace_back(info, selected, isDefaultingCompatibilityMode);
             }
         }
     }

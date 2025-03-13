@@ -262,7 +262,6 @@ wgpu::Status AdapterBase::APIGetInfo(AdapterInfo* info) const {
     info->deviceID = mPhysicalDevice->GetDeviceId();
     info->subgroupMinSize = mPhysicalDevice->GetSubgroupMinSize();
     info->subgroupMaxSize = mPhysicalDevice->GetSubgroupMaxSize();
-    info->compatibilityMode = mFeatureLevel == wgpu::FeatureLevel::Compatibility;
 
     if (mPhysicalDevice->GetBackendType() == wgpu::BackendType::D3D12 &&
         mTogglesState.IsEnabled(Toggle::D3D12RelaxMinSubgroupSizeTo8)) {
