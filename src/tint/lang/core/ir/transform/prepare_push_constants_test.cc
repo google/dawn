@@ -27,8 +27,6 @@
 
 #include "src/tint/lang/core/ir/transform/prepare_push_constants.h"
 
-#include <utility>
-
 #include "src/tint/lang/core/ir/transform/helper_test.h"
 
 namespace tint::core::ir::transform {
@@ -39,7 +37,7 @@ using namespace tint::core::number_suffixes;  // NOLINT
 
 class IR_PreparePushConstantsTests : public TransformTest {
   public:
-    Result<PushConstantLayout> Run(PreparePushConstantsConfig config) {
+    diag::Result<PushConstantLayout> Run(PreparePushConstantsConfig config) {
         // Run the transform.
         auto result = PreparePushConstants(mod, config);
         EXPECT_EQ(result, Success);

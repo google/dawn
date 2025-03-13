@@ -33,12 +33,12 @@
 namespace tint::core::ir::transform {
 namespace {
 
-Result<SuccessType> RobustnessFuzzer(Module& module,
-                                     const fuzz::ir::Context&,
-                                     RobustnessConfig config) {
+diag::Result<SuccessType> RobustnessFuzzer(Module& module,
+                                           const fuzz::ir::Context&,
+                                           RobustnessConfig config) {
     if (!config.bindings_ignored.empty()) {
         // TODO(jrprice): Handle config.bindings_ignored.
-        return Failure{"config.bindings_ignored is not empty"};
+        return diag::Failure{"config.bindings_ignored is not empty"};
     }
 
     return Robustness(module, config);

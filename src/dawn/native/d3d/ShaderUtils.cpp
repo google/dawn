@@ -264,7 +264,7 @@ MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
     }
 
     TRACE_EVENT0(tracePlatform.UnsafeGetValue(), General, "tint::hlsl::writer::Generate");
-    tint::Result<tint::hlsl::writer::Output> result;
+    tint::diag::Result<tint::hlsl::writer::Output> result;
     if (r.useTintIR) {
         // Convert the AST program to an IR module.
         auto ir = tint::wgsl::reader::ProgramToLoweredIR(transformedProgram);

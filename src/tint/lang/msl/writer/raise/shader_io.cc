@@ -28,7 +28,6 @@
 #include "src/tint/lang/msl/writer/raise/shader_io.h"
 
 #include <memory>
-#include <utility>
 
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
@@ -242,7 +241,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
 };
 }  // namespace
 
-Result<SuccessType> ShaderIO(core::ir::Module& ir, const ShaderIOConfig& config) {
+diag::Result<SuccessType> ShaderIO(core::ir::Module& ir, const ShaderIOConfig& config) {
     auto result = ValidateAndDumpIfNeeded(ir, "msl.ShaderIO");
     if (result != Success) {
         return result;

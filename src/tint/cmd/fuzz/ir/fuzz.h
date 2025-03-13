@@ -37,6 +37,7 @@
 #include "src/tint/utils/bytes/buffer_reader.h"
 #include "src/tint/utils/bytes/decoder.h"
 #include "src/tint/utils/containers/slice.h"
+#include "src/tint/utils/diagnostic/diagnostic.h"
 #include "src/tint/utils/macros/static_init.h"
 
 namespace tint::core::ir {
@@ -75,14 +76,16 @@ struct IRFuzzer {
     /// additional arguments which are deserialized from the fuzzer input.
     template <typename... ARGS>
     static IRFuzzer Create(std::string_view name,
-                           Result<SuccessType> (*fn)(core::ir::Module&, const Context&, ARGS...),
+                           diag::Result<SuccessType> (*fn)(core::ir::Module&,
+                                                           const Context&,
+                                                           ARGS...),
                            core::ir::Capabilities pre_capabilities,
                            core::ir::Capabilities post_capabilities) {
         if constexpr (sizeof...(ARGS) > 0) {
             auto fn_with_decode = [fn](core::ir::Module& module, const Context& context,
-                                       Slice<const std::byte> data) -> Result<SuccessType> {
+                                       Slice<const std::byte> data) -> diag::Result<SuccessType> {
                 if (!data.data) {
-                    return Failure{"Invalid data"};
+                    return diag::Failure{"Invalid data"};
                 }
 
                 bytes::BufferReader reader{data};
@@ -100,8 +103,8 @@ struct IRFuzzer {
         } else {
             return IRFuzzer{
                 name,
-                [fn](core::ir::Module& module, const Context& context,
-                     Slice<const std::byte>) -> Result<SuccessType> { return fn(module, context); },
+                [fn](core::ir::Module& module, const Context& context, Slice<const std::byte>)
+                    -> diag::Result<SuccessType> { return fn(module, context); },
                 pre_capabilities,
                 post_capabilities,
             };
@@ -115,7 +118,9 @@ struct IRFuzzer {
     /// additional arguments which are deserialized from the fuzzer input.
     template <typename... ARGS>
     static IRFuzzer Create(std::string_view name,
-                           Result<SuccessType> (*fn)(core::ir::Module&, const Context&, ARGS...),
+                           diag::Result<SuccessType> (*fn)(core::ir::Module&,
+                                                           const Context&,
+                                                           ARGS...),
                            core::ir::Capabilities capabilities) {
         return Create(name, fn, capabilities, capabilities);
     }
@@ -126,7 +131,7 @@ struct IRFuzzer {
     /// Takes in the module and any sidecar data, returns true iff transform succeeded in running,
     /// otherwise false
     std::function<
-        Result<SuccessType>(core::ir::Module&, const Context&, Slice<const std::byte> data)>
+        diag::Result<SuccessType>(core::ir::Module&, const Context&, Slice<const std::byte> data)>
         fn;
     /// The IR capabilities that are used before the fuzzer runs.
     core::ir::Capabilities pre_capabilities;

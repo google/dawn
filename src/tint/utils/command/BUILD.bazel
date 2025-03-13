@@ -64,7 +64,6 @@ cc_library(
   ],
   deps = [
     "//src/tint/utils/containers",
-    "//src/tint/utils/diagnostic",
     "//src/tint/utils/ice",
     "//src/tint/utils/macros",
     "//src/tint/utils/math",
@@ -89,7 +88,6 @@ cc_library(
   deps = [
     "//src/tint/utils/command",
     "//src/tint/utils/containers",
-    "//src/tint/utils/diagnostic",
     "//src/tint/utils/ice",
     "//src/tint/utils/macros",
     "//src/tint/utils/math",

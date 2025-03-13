@@ -26,8 +26,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <variant>
-
+#include "src/tint/lang/core/ir/transform/rename_conflicts.h"
 #include "src/tint/lang/core/ir/construct.h"
 #include "src/tint/lang/core/ir/control_instruction.h"
 #include "src/tint/lang/core/ir/core_builtin_call.h"
@@ -37,7 +36,6 @@
 #include "src/tint/lang/core/ir/loop.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/multi_in_block.h"
-#include "src/tint/lang/core/ir/transform/rename_conflicts.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/core/type/array.h"
@@ -46,9 +44,8 @@
 #include "src/tint/lang/core/type/scalar.h"
 #include "src/tint/lang/core/type/struct.h"
 #include "src/tint/lang/core/type/vector.h"
-#include "src/tint/utils/containers/hashset.h"
+#include "src/tint/utils/containers/hashmap.h"
 #include "src/tint/utils/containers/reverse.h"
-#include "src/tint/utils/containers/scope_stack.h"
 #include "src/tint/utils/macros/defer.h"
 #include "src/tint/utils/rtti/switch.h"
 #include "src/tint/utils/text/string.h"
@@ -297,7 +294,7 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType> RenameConflicts(core::ir::Module& ir) {
+diag::Result<SuccessType> RenameConflicts(core::ir::Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "core.RenameConflicts", kRenameConflictsCapabilities);
     if (result != Success) {
         return result;

@@ -27,8 +27,6 @@
 
 #include "src/tint/lang/msl/writer/raise/raise.h"
 
-#include <utility>
-
 #include "src/tint/api/common/binding_point.h"
 #include "src/tint/lang/core/ir/transform/array_length_from_uniform.h"
 #include "src/tint/lang/core/ir/transform/binary_polyfill.h"
@@ -58,7 +56,7 @@
 
 namespace tint::msl::writer {
 
-Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
+diag::Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
 #define RUN_TRANSFORM(name, ...)         \
     do {                                 \
         auto result = name(__VA_ARGS__); \

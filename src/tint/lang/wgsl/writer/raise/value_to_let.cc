@@ -192,7 +192,7 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType> ValueToLet(core::ir::Module& ir) {
+diag::Result<SuccessType> ValueToLet(core::ir::Module& ir) {
     auto result = core::ir::ValidateAndDumpIfNeeded(ir, "wgsl.ValueToLet",
                                                     core::ir::Capabilities{
                                                         core::ir::Capability::kAllowOverrides,

@@ -28,7 +28,7 @@
 #ifndef SRC_TINT_LANG_CORE_IR_TRANSFORM_REMOVE_CONTINUE_IN_SWITCH_H_
 #define SRC_TINT_LANG_CORE_IR_TRANSFORM_REMOVE_CONTINUE_IN_SWITCH_H_
 
-#include "src/tint/utils/result/result.h"
+#include "src/tint/utils/diagnostic/diagnostic.h"
 
 // Forward declarations.
 namespace tint::core::ir {
@@ -45,7 +45,7 @@ namespace tint::core::ir::transform {
 /// the loop.
 /// @param module the module to transform
 /// @returns success or failure
-Result<SuccessType> RemoveContinueInSwitch(Module& module);
+diag::Result<SuccessType> RemoveContinueInSwitch(Module& module);
 
 }  // namespace tint::core::ir::transform
 

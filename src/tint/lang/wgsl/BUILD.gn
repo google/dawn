@@ -62,6 +62,7 @@ libtint_source_set("wgsl") {
     "${tint_src_dir}/utils/macros",
     "${tint_src_dir}/utils/math",
     "${tint_src_dir}/utils/memory",
+    "${tint_src_dir}/utils/result",
     "${tint_src_dir}/utils/rtti",
     "${tint_src_dir}/utils/text",
   ]
@@ -138,6 +139,7 @@ if (tint_build_benchmarks) {
       "${tint_src_dir}/utils/macros",
       "${tint_src_dir}/utils/math",
       "${tint_src_dir}/utils/memory",
+      "${tint_src_dir}/utils/result",
       "${tint_src_dir}/utils/rtti",
       "${tint_src_dir}/utils/text",
     ]

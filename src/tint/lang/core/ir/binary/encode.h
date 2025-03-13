@@ -29,10 +29,9 @@
 #define SRC_TINT_LANG_CORE_IR_BINARY_ENCODE_H_
 
 #include <memory>
-#include <string>
 
 #include "src/tint/utils/containers/vector.h"
-#include "src/tint/utils/result/result.h"
+#include "src/tint/utils/diagnostic/diagnostic.h"
 
 // Forward declarations
 namespace tint::core::ir {
@@ -46,10 +45,10 @@ class Module;
 namespace tint::core::ir::binary {
 
 // Encode the module into a proto representation.
-Result<std::unique_ptr<pb::Module>> EncodeToProto(const Module& module);
+diag::Result<std::unique_ptr<pb::Module>> EncodeToProto(const Module& module);
 
 // Encode the module into a binary representation.
-Result<Vector<std::byte, 0>> EncodeToBinary(const Module& module);
+diag::Result<Vector<std::byte, 0>> EncodeToBinary(const Module& module);
 
 }  // namespace tint::core::ir::binary
 

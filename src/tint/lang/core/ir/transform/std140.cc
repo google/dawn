@@ -449,7 +449,7 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType> Std140(Module& ir) {
+diag::Result<SuccessType> Std140(Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "core.Std140", kStd140Capabilities);
     if (result != Success) {
         return result;

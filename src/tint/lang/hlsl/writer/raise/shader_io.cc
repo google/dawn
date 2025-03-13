@@ -523,7 +523,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
 };
 }  // namespace
 
-Result<SuccessType> ShaderIO(core::ir::Module& ir, const ShaderIOConfig& config) {
+diag::Result<SuccessType> ShaderIO(core::ir::Module& ir, const ShaderIOConfig& config) {
     auto result = ValidateAndDumpIfNeeded(ir, "hlsl.ShaderIO");
     if (result != Success) {
         return result;

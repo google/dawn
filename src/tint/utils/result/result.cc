@@ -27,16 +27,14 @@
 
 #include "src/tint/utils/result/result.h"
 
+#include <string>
+
 namespace tint {
 
 Failure::Failure() = default;
 
 Failure::Failure(std::string_view err) {
-    reason.AddError(Source{}) << err;
+    reason = std::string(err);
 }
-
-Failure::Failure(diag::Diagnostic diagnostic) : reason(diag::List{std::move(diagnostic)}) {}
-
-Failure::Failure(diag::List diagnostics) : reason(std::move(diagnostics)) {}
 
 }  // namespace tint

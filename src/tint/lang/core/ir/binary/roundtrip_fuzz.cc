@@ -34,14 +34,15 @@
 namespace tint::core::ir::binary {
 namespace {
 
-Result<SuccessType> IRBinaryRoundtripFuzzer(core::ir::Module& module, const fuzz::ir::Context&) {
+diag::Result<SuccessType> IRBinaryRoundtripFuzzer(core::ir::Module& module,
+                                                  const fuzz::ir::Context&) {
     auto encoded = EncodeToBinary(module);
     if (encoded != Success) {
         // Failing to encode, not ICE'ing, indicates that an internal limit to the IR binary
         // encoding/decoding logic was hit. Due to differences between the AST and IR
         // implementations, there exist corner cases where these internal limits are hit for IR,
         // but not AST.
-        return Failure{"Failed to encode module to binary"};
+        return diag::Failure{"Failed to encode module to binary"};
     }
 
     auto decoded = Decode(encoded->Slice());

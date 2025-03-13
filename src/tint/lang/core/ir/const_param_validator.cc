@@ -65,7 +65,7 @@ class ConstParamValidator {
 
     /// Runs the const param validator over the module provided during construction
     /// @returns success or failure
-    Result<SuccessType> Run();
+    diag::Result<SuccessType> Run();
 
     void CheckSubgroupCall(const CoreBuiltinCall* call);
     void CheckBuiltinCall(const BuiltinCall* call);
@@ -291,7 +291,7 @@ void ConstParamValidator::CheckCoreBinaryCall(const CoreBinary* call) {
     }
 }
 
-Result<SuccessType> ConstParamValidator::Run() {
+diag::Result<SuccessType> ConstParamValidator::Run() {
     auto instructions = this->mod_.Instructions();
 
     for (auto inst : instructions) {
@@ -303,7 +303,7 @@ Result<SuccessType> ConstParamValidator::Run() {
     }
 
     if (diagnostics_.ContainsErrors()) {
-        return Failure{std::move(diagnostics_)};
+        return diag::Failure{std::move(diagnostics_)};
     }
 
     return Success;
@@ -311,7 +311,7 @@ Result<SuccessType> ConstParamValidator::Run() {
 
 }  // namespace
 
-Result<SuccessType> ValidateConstParam(Module& mod) {
+diag::Result<SuccessType> ValidateConstParam(Module& mod) {
     ConstParamValidator v(mod);
     auto ret = v.Run();
     return ret;

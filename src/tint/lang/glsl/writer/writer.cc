@@ -27,9 +27,6 @@
 
 #include "src/tint/lang/glsl/writer/writer.h"
 
-#include <memory>
-#include <utility>
-
 #include "src/tint/lang/core/ir/core_builtin_call.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/var.h"
@@ -40,11 +37,11 @@
 
 namespace tint::glsl::writer {
 
-Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& options) {
+diag::Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& options) {
     // Check for unsupported types.
     for (auto* ty : ir.Types()) {
         if (ty->Is<core::type::SubgroupMatrix>()) {
-            return Failure("subgroup matrices are not supported by the GLSL backend");
+            return diag::Failure("subgroup matrices are not supported by the GLSL backend");
         }
     }
 
@@ -62,7 +59,7 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
 
         // The pixel_local extension is not supported by the GLSL backend.
         if (ptr->AddressSpace() == core::AddressSpace::kPixelLocal) {
-            return Failure("pixel_local address space is not supported by the GLSL backend");
+            return diag::Failure("pixel_local address space is not supported by the GLSL backend");
         }
 
         if (ptr->StoreType()->Is<core::type::Texture>()) {
@@ -76,7 +73,7 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
                 }
             }
             if (!found) {
-                return Failure("texture missing from texture_builtins_from_uniform list");
+                return diag::Failure("texture missing from texture_builtins_from_uniform list");
             }
 
             // Check texel formats for read-write storage textures when targeting ES.
@@ -89,7 +86,8 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
                             case core::TexelFormat::kR32Uint:
                                 break;
                             default:
-                                return Failure("unsupported read-write storage texture format");
+                                return diag::Failure(
+                                    "unsupported read-write storage texture format");
                         }
                     }
                 }
@@ -99,7 +97,7 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
         if (ptr->AddressSpace() == core::AddressSpace::kPushConstant) {
             if (user_push_constant_size > 0) {
                 // We've already seen a user-declared push constant.
-                return Failure("multiple user-declared push constants");
+                return diag::Failure("multiple user-declared push constants");
             }
             user_push_constant_size = tint::RoundUp(4u, ptr->StoreType()->Size());
         }
@@ -113,10 +111,10 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
         }
 
         if (core::IsSubgroup(call->Func())) {
-            return Failure("subgroups are not supported by the GLSL backend");
+            return diag::Failure("subgroups are not supported by the GLSL backend");
         }
         if (call->Func() == core::BuiltinFn::kInputAttachmentLoad) {
-            return Failure("input attachments are not supported by the GLSL backend");
+            return diag::Failure("input attachments are not supported by the GLSL backend");
         }
     }
 
@@ -132,13 +130,13 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
                 for (auto* member : str->Members()) {
                     if (member->Attributes().builtin == core::BuiltinValue::kSubgroupInvocationId ||
                         member->Attributes().builtin == core::BuiltinValue::kSubgroupSize) {
-                        return Failure("subgroups are not supported by the GLSL backend");
+                        return diag::Failure("subgroups are not supported by the GLSL backend");
                     }
                 }
             } else {
                 if (param->Builtin() == core::BuiltinValue::kSubgroupInvocationId ||
                     param->Builtin() == core::BuiltinValue::kSubgroupSize) {
-                    return Failure("subgroups are not supported by the GLSL backend");
+                    return diag::Failure("subgroups are not supported by the GLSL backend");
                 }
             }
         }
@@ -147,7 +145,7 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
         if (auto* str = func->ReturnType()->As<core::type::Struct>()) {
             for (auto* member : str->Members()) {
                 if (member->Attributes().builtin == core::BuiltinValue::kClipDistances) {
-                    return Failure("clip_distances is not supported by the GLSL backend");
+                    return diag::Failure("clip_distances is not supported by the GLSL backend");
                 }
             }
         }
@@ -177,24 +175,24 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
 
     if (options.first_instance_offset &&
         !check_push_constant_offset(*options.first_instance_offset)) {
-        return Failure("invalid offset for first_instance_offset push constant");
+        return diag::Failure("invalid offset for first_instance_offset push constant");
     }
 
     if (options.first_vertex_offset && !check_push_constant_offset(*options.first_vertex_offset)) {
-        return Failure("invalid offset for first_vertex_offset push constant");
+        return diag::Failure("invalid offset for first_vertex_offset push constant");
     }
 
     if (options.depth_range_offsets) {
         if (!check_push_constant_offset(options.depth_range_offsets->max) ||
             !check_push_constant_offset(options.depth_range_offsets->min)) {
-            return Failure("invalid offsets for depth range push constants");
+            return diag::Failure("invalid offsets for depth range push constants");
         }
     }
 
     return Success;
 }
 
-Result<Output> Generate(core::ir::Module& ir, const Options& options, const std::string&) {
+diag::Result<Output> Generate(core::ir::Module& ir, const Options& options, const std::string&) {
     // Raise from core-dialect to GLSL-dialect.
     if (auto res = Raise(ir, options); res != Success) {
         return res.Failure();

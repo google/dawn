@@ -127,7 +127,7 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType> PassMatrixByPointer(core::ir::Module& ir) {
+diag::Result<SuccessType> PassMatrixByPointer(core::ir::Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "spirv.PassMatrixByPointer");
     if (result != Success) {
         return result;

@@ -54,6 +54,7 @@
 #include "src/tint/utils/command/cli.h"
 #include "src/tint/utils/command/command.h"
 #include "src/tint/utils/containers/transform.h"
+#include "src/tint/utils/diagnostic/diagnostic.h"
 #include "src/tint/utils/diagnostic/formatter.h"
 #include "src/tint/utils/macros/defer.h"
 #include "src/tint/utils/text/string.h"
@@ -637,7 +638,7 @@ TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
     }
 }
 
-tint::Result<std::unordered_map<tint::OverrideId, double>> CreateOverrideMap(
+tint::diag::Result<std::unordered_map<tint::OverrideId, double>> CreateOverrideMap(
     Options& options,
     tint::inspector::Inspector& inspector) {
     auto override_names = inspector.GetNamedOverrideIds();
@@ -648,7 +649,7 @@ tint::Result<std::unordered_map<tint::OverrideId, double>> CreateOverrideMap(
         const auto& override_name = override.key.Value();
         const auto& override_value = override.value;
         if (override_name.empty()) {
-            return tint::Failure("empty override name");
+            return tint::diag::Failure("empty override name");
         }
 
         auto num = tint::strconv::ParseNumber<decltype(tint::OverrideId::value)>(override_name);
@@ -660,7 +661,7 @@ tint::Result<std::unordered_map<tint::OverrideId, double>> CreateOverrideMap(
 
         auto it = override_names.find(override_name);
         if (it == override_names.end()) {
-            return tint::Failure("unknown override '" + override_name + "'");
+            return tint::diag::Failure("unknown override '" + override_name + "'");
         }
         values.emplace(it->second, override_value);
     }
@@ -677,7 +678,7 @@ void AddSubstituteOverrides(std::unordered_map<tint::OverrideId, double> values,
     transform_manager.Add<tint::ast::transform::SubstituteOverride>();
 }
 
-[[maybe_unused]] tint::Result<tint::Program> ProcessASTTransforms(
+[[maybe_unused]] tint::diag::Result<tint::Program> ProcessASTTransforms(
     Options& options,
     tint::inspector::Inspector& inspector,
     tint::Program& program,
@@ -712,7 +713,7 @@ void AddSubstituteOverrides(std::unordered_map<tint::OverrideId, double> values,
         std::stringstream err;
         tint::cmd::PrintWGSL(err, transformed);
         err << transformed.Diagnostics() << "\n";
-        return tint::Failure(err.str());
+        return tint::diag::Failure(err.str());
     }
     return transformed;
 }
@@ -1104,7 +1105,7 @@ bool GenerateHlsl([[maybe_unused]] Options& options,
     gen_options.compiler = for_fxc ? tint::hlsl::writer::Options::Compiler::kFXC
                                    : tint::hlsl::writer::Options::Compiler::kDXC;
 
-    tint::Result<tint::hlsl::writer::Output> result;
+    tint::diag::Result<tint::hlsl::writer::Output> result;
     if (options.use_ir) {
         // Convert the AST program to an IR module.
         auto ir = tint::wgsl::reader::ProgramToLoweredIR(res.Get());

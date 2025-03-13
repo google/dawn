@@ -35,7 +35,7 @@
 
 namespace tint::spirv::reader {
 
-Result<SuccessType> Lower(core::ir::Module& mod) {
+diag::Result<SuccessType> Lower(core::ir::Module& mod) {
 #define RUN_TRANSFORM(name, ...)         \
     do {                                 \
         auto result = name(__VA_ARGS__); \

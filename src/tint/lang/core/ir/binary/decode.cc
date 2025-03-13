@@ -84,7 +84,7 @@ struct Decoder {
     diag::List diags_{};
     Hashset<std::string, 4> struct_names_{};
 
-    Result<Module> Decode() {
+    diag::Result<Module> Decode() {
         {
             const size_t n = static_cast<size_t>(mod_in_.types().size());
             types_.Reserve(n);
@@ -135,7 +135,7 @@ struct Decoder {
 
         if (diags_.ContainsErrors()) {
             // Note: Its not safe to call InferControlInstruction() with a broken IR.
-            return Failure{std::move(diags_)};
+            return diag::Failure{std::move(diags_)};
         }
 
         if (CheckBlocks()) {
@@ -160,7 +160,7 @@ struct Decoder {
         }
 
         if (diags_.ContainsErrors()) {
-            return Failure{std::move(diags_)};
+            return diag::Failure{std::move(diags_)};
         }
         return std::move(mod_out_);
     }
@@ -1807,18 +1807,18 @@ struct Decoder {
 
 }  // namespace
 
-Result<Module> Decode(Slice<const std::byte> encoded) {
+diag::Result<Module> Decode(Slice<const std::byte> encoded) {
     GOOGLE_PROTOBUF_VERIFY_VERSION;
 
     pb::Module mod_in;
     if (!mod_in.ParseFromArray(encoded.data, static_cast<int>(encoded.len))) {
-        return Failure{"failed to deserialize protobuf"};
+        return diag::Failure{"failed to deserialize protobuf"};
     }
 
     return Decode(mod_in);
 }
 
-Result<Module> Decode(const pb::Module& mod_in) {
+diag::Result<Module> Decode(const pb::Module& mod_in) {
     return Decoder{mod_in}.Decode();
 }
 

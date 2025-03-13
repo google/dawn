@@ -172,7 +172,7 @@ class Printer : public tint::TextGenerator {
         : ir_(module), options_(options) {}
 
     /// @returns the generated HLSL shader
-    tint::Result<Output> Generate() {
+    diag::Result<Output> Generate() {
         core::ir::Capabilities capabilities{
             core::ir::Capability::kAllowModuleScopeLets,
             core::ir::Capability::kAllowVectorElementPointer,
@@ -2372,7 +2372,7 @@ bool IsKeyword(std::string_view ident) {
 
 }  // namespace
 
-Result<Output> Print(core::ir::Module& module, const Options& options) {
+diag::Result<Output> Print(core::ir::Module& module, const Options& options) {
     return Printer{module, options}.Generate();
 }
 

@@ -39,6 +39,7 @@
 #include <vector>
 
 #include "src/tint/utils/bytes/reader.h"
+#include "src/tint/utils/diagnostic/diagnostic.h"
 #include "src/tint/utils/reflection.h"
 
 namespace tint::bytes {
@@ -51,7 +52,7 @@ struct Decoder;
 /// @param args additional arguments used by Decoder<T>::Decode()
 /// @returns the decoded object
 template <typename T, typename... ARGS>
-Result<T> Decode(Reader& reader, ARGS&&... args) {
+diag::Result<T> Decode(Reader& reader, ARGS&&... args) {
     return Decoder<T>::Decode(reader, std::forward<ARGS>(args)...);
 }
 
@@ -62,7 +63,7 @@ struct Decoder<T, std::enable_if_t<std::is_integral_v<T>>> {
     /// @param reader the reader to decode from
     /// @param endianness the endianness of the integer
     /// @returns the decoded integer type, or an error if the stream is too short.
-    static Result<T> Decode(Reader& reader, Endianness endianness = Endianness::kLittle) {
+    static diag::Result<T> Decode(Reader& reader, Endianness endianness = Endianness::kLittle) {
         return reader.Int<T>(endianness);
     }
 };
@@ -73,7 +74,7 @@ struct Decoder<T, std::enable_if_t<std::is_floating_point_v<T>>> {
     /// Decode decodes the floating point type from @p reader.
     /// @param reader the reader to decode from
     /// @returns the decoded floating point type, or an error if the stream is too short.
-    static Result<T> Decode(Reader& reader) { return reader.Float<T>(); }
+    static diag::Result<T> Decode(Reader& reader) { return reader.Float<T>(); }
 };
 
 /// Decoder specialization for a uint16_t length prefixed string.
@@ -82,7 +83,7 @@ struct Decoder<std::string, void> {
     /// Decode decodes the string from @p reader.
     /// @param reader the reader to decode from
     /// @returns the decoded string, or an error if the stream is too short.
-    static Result<std::string> Decode(Reader& reader) {
+    static diag::Result<std::string> Decode(Reader& reader) {
         auto len = reader.Int<uint16_t>();
         if (len != Success) {
             return len.Failure();
@@ -97,7 +98,7 @@ struct Decoder<bool, void> {
     /// Decode decodes the boolean from @p reader.
     /// @param reader the reader to decode from
     /// @returns the decoded boolean, or an error if the stream is too short.
-    static Result<bool> Decode(Reader& reader) { return reader.Bool(); }
+    static diag::Result<bool> Decode(Reader& reader) { return reader.Bool(); }
 };
 
 /// Decoder specialization for types that use TINT_REFLECT
@@ -106,7 +107,7 @@ struct Decoder<T, std::enable_if_t<HasReflection<T>>> {
     /// Decode decodes the reflected type from @p reader.
     /// @param reader the reader to decode from
     /// @returns the decoded reflected type, or an error if the stream is too short.
-    static Result<T> Decode(Reader& reader) {
+    static diag::Result<T> Decode(Reader& reader) {
         T object{};
         diag::List errs;
         ForeachField(object, [&](auto& field) {  //
@@ -120,7 +121,7 @@ struct Decoder<T, std::enable_if_t<HasReflection<T>>> {
         if (errs.empty()) {
             return object;
         }
-        return Failure{errs};
+        return diag::Failure{errs};
     }
 };
 
@@ -130,7 +131,7 @@ struct Decoder<std::unordered_map<K, V>, void> {
     /// Decode decodes the map from @p reader.
     /// @param reader the reader to decode from
     /// @returns the decoded map, or an error if the stream is too short.
-    static Result<std::unordered_map<K, V>> Decode(Reader& reader) {
+    static diag::Result<std::unordered_map<K, V>> Decode(Reader& reader) {
         std::unordered_map<K, V> out;
 
         while (!reader.IsEOF()) {
@@ -162,7 +163,7 @@ struct Decoder<std::unordered_set<V>, void> {
     /// Decode decodes the set from @p reader.
     /// @param reader the reader to decode from
     /// @returns the decoded set, or an error if the stream is too short.
-    static Result<std::unordered_set<V>> Decode(Reader& reader) {
+    static diag::Result<std::unordered_set<V>> Decode(Reader& reader) {
         std::unordered_set<V> out;
 
         while (!reader.IsEOF()) {
@@ -190,7 +191,7 @@ struct Decoder<std::vector<V>, void> {
     /// Decode decodes the vector from @p reader.
     /// @param reader the reader to decode from
     /// @returns the decoded vector, or an error if the stream is too short.
-    static Result<std::vector<V>> Decode(Reader& reader) {
+    static diag::Result<std::vector<V>> Decode(Reader& reader) {
         std::vector<V> out;
 
         while (!reader.IsEOF()) {
@@ -218,7 +219,7 @@ struct Decoder<std::optional<T>, void> {
     /// Decode decodes the optional from @p reader.
     /// @param reader the reader to decode from
     /// @returns the decoded optional, or an error if the stream is too short.
-    static Result<std::optional<T>> Decode(Reader& reader) {
+    static diag::Result<std::optional<T>> Decode(Reader& reader) {
         auto has_value = bytes::Decode<bool>(reader);
         if (has_value != Success) {
             return has_value.Failure();
@@ -240,12 +241,12 @@ struct Decoder<std::bitset<N>, void> {
     /// Decode decodes the bitset from @p reader.
     /// @param reader the reader to decode from
     /// @returns the decoded bitset, or an error if the stream is too short.
-    static Result<std::bitset<N>> Decode(Reader& reader) {
+    static diag::Result<std::bitset<N>> Decode(Reader& reader) {
         Vector<std::byte, 32> vec;
         vec.Resize((N + CHAR_BIT - 1) / CHAR_BIT);
 
         if (auto len = reader.Read(&vec[0], vec.Length()); len != vec.Length()) {
-            return Failure{"EOF"};
+            return diag::Failure{"EOF"};
         }
 
         std::bitset<N> out;
@@ -264,7 +265,7 @@ struct Decoder<std::tuple<FIRST, OTHERS...>, void> {
     /// Decode decodes the tuple from @p reader.
     /// @param reader the reader to decode from
     /// @returns the decoded tuple, or an error if the stream is too short.
-    static Result<std::tuple<FIRST, OTHERS...>> Decode(Reader& reader) {
+    static diag::Result<std::tuple<FIRST, OTHERS...>> Decode(Reader& reader) {
         auto first = bytes::Decode<FIRST>(reader);
         if (first != Success) {
             return first.Failure();
@@ -288,7 +289,7 @@ struct Decoder<T, std::void_t<decltype(tint::EnumRange<T>::kMax)>> {
     /// @param reader the reader to decode from
     /// @param endianness the endianness of the enum
     /// @returns the decoded enum type, or an error if the stream is too short.
-    static Result<T> Decode(Reader& reader, Endianness endianness = Endianness::kLittle) {
+    static diag::Result<T> Decode(Reader& reader, Endianness endianness = Endianness::kLittle) {
         using Range = tint::EnumRange<T>;
         using U = std::underlying_type_t<T>;
         auto value = reader.Int<U>(endianness);
@@ -298,7 +299,7 @@ struct Decoder<T, std::void_t<decltype(tint::EnumRange<T>::kMax)>> {
         static constexpr U kMin = static_cast<U>(Range::kMin);
         static constexpr U kMax = static_cast<U>(Range::kMax);
         if (value.Get() < kMin || value.Get() > kMax) {
-            return Failure{"value " + std::to_string(value.Get()) + " out of range for enum"};
+            return diag::Failure{"value " + std::to_string(value.Get()) + " out of range for enum"};
         }
         return static_cast<T>(value.Get());
     }

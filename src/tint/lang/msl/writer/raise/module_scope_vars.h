@@ -28,10 +28,8 @@
 #ifndef SRC_TINT_LANG_MSL_WRITER_RAISE_MODULE_SCOPE_VARS_H_
 #define SRC_TINT_LANG_MSL_WRITER_RAISE_MODULE_SCOPE_VARS_H_
 
-#include <string>
-
 #include "src/tint/lang/core/ir/validator.h"
-#include "src/tint/utils/result/result.h"
+#include "src/tint/utils/diagnostic/diagnostic.h"
 
 // Forward declarations.
 namespace tint::core::ir {
@@ -44,7 +42,7 @@ namespace tint::msl::writer::raise {
 /// declarations that are wrapped in a structure and passed to functions that need them.
 /// @param module the module to transform
 /// @returns success or failure
-Result<SuccessType> ModuleScopeVars(core::ir::Module& module);
+diag::Result<SuccessType> ModuleScopeVars(core::ir::Module& module);
 
 }  // namespace tint::msl::writer::raise
 

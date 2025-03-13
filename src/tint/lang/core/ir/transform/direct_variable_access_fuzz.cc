@@ -33,9 +33,9 @@
 namespace tint::core::ir::transform {
 namespace {
 
-Result<SuccessType> DirectVariableAccessFuzzer(Module& ir,
-                                               const fuzz::ir::Context&,
-                                               const DirectVariableAccessOptions& options) {
+diag::Result<SuccessType> DirectVariableAccessFuzzer(Module& ir,
+                                                     const fuzz::ir::Context&,
+                                                     const DirectVariableAccessOptions& options) {
     return DirectVariableAccess(ir, options);
 }
 

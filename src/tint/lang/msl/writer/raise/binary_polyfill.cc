@@ -27,8 +27,6 @@
 
 #include "src/tint/lang/msl/writer/raise/binary_polyfill.h"
 
-#include <utility>
-
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/msl/ir/builtin_call.h"
@@ -156,7 +154,7 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType> BinaryPolyfill(core::ir::Module& ir) {
+diag::Result<SuccessType> BinaryPolyfill(core::ir::Module& ir) {
     auto result =
         ValidateAndDumpIfNeeded(ir, "msl.BinaryPolyfill",
                                 core::ir::Capabilities{

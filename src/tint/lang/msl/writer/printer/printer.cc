@@ -29,7 +29,7 @@
 
 #include <atomic>
 #include <cstdint>
-#include <memory>
+#include <string>
 #include <utility>
 
 #include "src/tint/lang/core/constant/composite.h"
@@ -123,7 +123,7 @@ class Printer : public tint::TextGenerator {
         : ir_(module), options_(options) {}
 
     /// @returns the generated MSL shader
-    tint::Result<Output> Generate() {
+    diag::Result<Output> Generate() {
         auto valid = core::ir::ValidateAndDumpIfNeeded(
             ir_, "msl.Printer",
             core::ir::Capabilities{
@@ -2114,7 +2114,7 @@ bool IsKeyword(std::string_view ident) {
 
 }  // namespace
 
-Result<Output> Print(core::ir::Module& module, const Options& options) {
+diag::Result<Output> Print(core::ir::Module& module, const Options& options) {
     return Printer{module, options}.Generate();
 }
 

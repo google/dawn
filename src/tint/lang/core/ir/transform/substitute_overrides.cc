@@ -69,8 +69,9 @@ struct State {
 
     /// The type manager.
     core::type::Manager& ty{ir.Types()};
+
     /// Process the module.
-    Result<SuccessType> Process() {
+    diag::Result<SuccessType> Process() {
         Vector<Instruction*, 8> to_remove;
         Vector<Constant*, 8> values_to_propagate;
         Vector<core::ir::Var*, 4> vars_with_value_array_count;
@@ -129,7 +130,7 @@ struct State {
                               << " with value (" << iter->second
                               << ")  is not representable in type ("
                               << override->Result(0)->Type()->FriendlyName() << ")";
-                        return Failure(error);
+                        return diag::Failure(error);
                     }
 
                     auto* replacement = CreateConstant(override->Result(0)->Type(), iter->second);
@@ -142,7 +143,7 @@ struct State {
                 error.severity = diag::Severity::Error;
                 error.source = ir.SourceOf(override);
                 error << "Initializer not provided for override, and override not overridden.";
-                return Failure(error);
+                return diag::Failure(error);
             }
 
             if (auto* replacement = override->Initializer()->As<core::ir::Constant>()) {
@@ -255,7 +256,7 @@ struct State {
         return Success;
     }
 
-    Result<SuccessType> EvalConstExprIf() {
+    diag::Result<SuccessType> EvalConstExprIf() {
         Vector<core::ir::ConstExprIf*, 32> ordered_constexpr_if;
         core::ir::Traverse(ir.root_block, [&ordered_constexpr_if](ConstExprIf* inst) {
             ordered_constexpr_if.Push(inst);
@@ -299,7 +300,7 @@ struct State {
         return Success;
     }
 
-    Result<core::ir::Constant*> CalculateOverride(core::ir::Value* val) {
+    diag::Result<core::ir::Constant*> CalculateOverride(core::ir::Value* val) {
         auto r = eval::Eval(b, val);
         if (r != Success) {
             return r.Failure();
@@ -310,7 +311,7 @@ struct State {
         return r;
     }
 
-    Result<SuccessType> Propagate(Vector<core::ir::Constant*, 8>& values_to_propagate) {
+    diag::Result<SuccessType> Propagate(Vector<core::ir::Constant*, 8>& values_to_propagate) {
         while (!values_to_propagate.IsEmpty()) {
             auto* value = values_to_propagate.Pop();
             for (auto usage : value->UsagesSorted()) {
@@ -376,7 +377,7 @@ struct State {
 
 SubstituteOverridesConfig::SubstituteOverridesConfig() = default;
 
-Result<SuccessType> SubstituteOverrides(Module& ir, const SubstituteOverridesConfig& cfg) {
+diag::Result<SuccessType> SubstituteOverrides(Module& ir, const SubstituteOverridesConfig& cfg) {
     auto result =
         ValidateAndDumpIfNeeded(ir, "core.SubstituteOverrides", kSubstituteOverridesCapabilities);
     if (result != Success) {

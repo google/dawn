@@ -29,7 +29,7 @@
 #define SRC_TINT_LANG_GLSL_WRITER_RAISE_OFFSET_FIRST_INDEX_H_
 
 #include "src/tint/lang/core/ir/transform/prepare_push_constants.h"
-#include "src/tint/utils/result/result.h"
+#include "src/tint/utils/diagnostic/diagnostic.h"
 
 // Forward declarations.
 namespace tint::core::ir {
@@ -55,8 +55,8 @@ struct OffsetFirstIndexConfig {
 ///
 /// @param module the module to transform
 /// @returns success or failure
-Result<SuccessType> OffsetFirstIndex(core::ir::Module& module,
-                                     const OffsetFirstIndexConfig& config);
+diag::Result<SuccessType> OffsetFirstIndex(core::ir::Module& module,
+                                           const OffsetFirstIndexConfig& config);
 
 }  // namespace tint::glsl::writer::raise
 

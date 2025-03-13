@@ -87,8 +87,8 @@ struct PreparePushConstantsConfig {
 /// @param module the module to transform
 /// @param config the transform config
 /// @returns the generated push constant layout or failure
-Result<PushConstantLayout> PreparePushConstants(Module& module,
-                                                const PreparePushConstantsConfig& config);
+diag::Result<PushConstantLayout> PreparePushConstants(Module& module,
+                                                      const PreparePushConstantsConfig& config);
 
 }  // namespace tint::core::ir::transform
 

@@ -35,13 +35,13 @@
 
 namespace tint::reflection::detail {
 
-Result<SuccessType> CheckAllFieldsReflected(VectorRef<ReflectedFieldInfo> fields,
-                                            std::string_view class_name,
-                                            size_t class_size,
-                                            size_t class_align,
-                                            bool class_is_castable,
-                                            std::string_view reflect_file,
-                                            uint32_t reflect_line) {
+diag::Result<SuccessType> CheckAllFieldsReflected(VectorRef<ReflectedFieldInfo> fields,
+                                                  std::string_view class_name,
+                                                  size_t class_size,
+                                                  size_t class_align,
+                                                  bool class_is_castable,
+                                                  std::string_view reflect_file,
+                                                  uint32_t reflect_line) {
     size_t calculated_offset = class_is_castable ? sizeof(CastableBase) : 0;
     for (auto& field : fields) {
         calculated_offset = RoundUp(field.align, calculated_offset);
@@ -57,7 +57,7 @@ Result<SuccessType> CheckAllFieldsReflected(VectorRef<ReflectedFieldInfo> fields
             err.source.file = err.owned_file.get();
             err.source.range.begin.line = reflect_line;
             err.source.range.end.line = reflect_line;
-            return Failure{std::move(err)};
+            return diag::Failure{std::move(err)};
         }
         calculated_offset += field.size;
     }
@@ -74,7 +74,7 @@ Result<SuccessType> CheckAllFieldsReflected(VectorRef<ReflectedFieldInfo> fields
         err.source.file = err.owned_file.get();
         err.source.range.begin.line = reflect_line;
         err.source.range.end.line = reflect_line;
-        return Failure{std::move(err)};
+        return diag::Failure{std::move(err)};
     }
     return Success;
 }

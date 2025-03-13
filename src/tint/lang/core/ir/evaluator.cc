@@ -32,18 +32,17 @@
 #include "src/tint/lang/core/ir/function_param.h"
 #include "src/tint/lang/core/ir/override.h"
 #include "src/tint/lang/core/number.h"
-#include "src/tint/lang/core/type/bool.h"
 #include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/utils/rtti/switch.h"
 
 namespace tint::core::ir {
 namespace eval {
 
-Result<core::ir::Constant*> Eval(core::ir::Builder& b, core::ir::Instruction* inst) {
+diag::Result<core::ir::Constant*> Eval(core::ir::Builder& b, core::ir::Instruction* inst) {
     return Eval(b, inst->Result(0));
 }
 
-Result<core::ir::Constant*> Eval(core::ir::Builder& b, core::ir::Value* val) {
+diag::Result<core::ir::Constant*> Eval(core::ir::Builder& b, core::ir::Value* val) {
     ir::Evaluator e(b);
     return e.Evaluate(val);
 }
@@ -55,10 +54,10 @@ Evaluator::Evaluator(ir::Builder& builder)
 
 Evaluator::~Evaluator() = default;
 
-Result<core::ir::Constant*> Evaluator::Evaluate(core::ir::Value* src) {
+diag::Result<core::ir::Constant*> Evaluator::Evaluate(core::ir::Value* src) {
     auto res = EvalValue(src);
     if (res != Success) {
-        return Failure(diagnostics_);
+        return diag::Failure(diagnostics_);
     }
     if (!res.Get()) {
         return nullptr;

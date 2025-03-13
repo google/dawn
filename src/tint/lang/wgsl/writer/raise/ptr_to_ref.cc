@@ -44,7 +44,7 @@ struct Impl {
     core::ir::Module& mod;
     core::ir::Builder b{mod};
 
-    Result<SuccessType> Run() {
+    void Run() {
         Vector<core::ir::Block*, 32> blocks;
         for (auto fn : mod.functions) {
             blocks.Push(fn->Block());
@@ -89,8 +89,6 @@ struct Impl {
                     });
             }
         }
-
-        return Success;
     }
 
     void OperandsRefToPtr(core::ir::Instruction* inst) {
@@ -140,8 +138,10 @@ struct Impl {
 
 }  // namespace
 
-Result<SuccessType> PtrToRef(core::ir::Module& mod) {
-    return Impl{mod}.Run();
+diag::Result<SuccessType> PtrToRef(core::ir::Module& mod) {
+    Impl{mod}.Run();
+
+    return Success;
 }
 
 }  // namespace tint::wgsl::writer::raise

@@ -136,7 +136,7 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType> BinaryPolyfill(core::ir::Module& ir) {
+diag::Result<SuccessType> BinaryPolyfill(core::ir::Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "hlsl.BinaryPolyfill",
                                           core::ir::Capabilities{
                                               core::ir::Capability::kAllowClipDistancesOnF32,

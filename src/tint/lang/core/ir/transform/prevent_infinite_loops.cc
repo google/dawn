@@ -34,7 +34,6 @@
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/traverse.h"
 #include "src/tint/lang/core/ir/validator.h"
-#include "src/tint/utils/ice/ice.h"
 
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
@@ -116,7 +115,7 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType> PreventInfiniteLoops(Module& ir) {
+diag::Result<SuccessType> PreventInfiniteLoops(Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "core.PreventInfiniteLoops");
     if (result != Success) {
         return result;

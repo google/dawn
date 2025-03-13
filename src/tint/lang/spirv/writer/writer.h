@@ -31,7 +31,7 @@
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/spirv/writer/common/options.h"
 #include "src/tint/lang/spirv/writer/common/output.h"
-#include "src/tint/utils/result/result.h"
+#include "src/tint/utils/diagnostic/diagnostic.h"
 
 namespace tint::spirv::writer {
 
@@ -39,14 +39,14 @@ namespace tint::spirv::writer {
 /// @param ir the module
 /// @param options the writer options
 /// @returns Success or a failure message indicating why SPIR-V generation would fail
-Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& options);
+diag::Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& options);
 
 /// Generate SPIR-V for a program, according to a set of configuration options.
 /// The result will contain the SPIR-V or failure.
 /// @param ir the IR module to translate to SPIR-V
 /// @param options the configuration options to use when generating SPIR-V
 /// @returns the resulting SPIR-V and supplementary information, or failure.
-Result<Output> Generate(core::ir::Module& ir, const Options& options);
+diag::Result<Output> Generate(core::ir::Module& ir, const Options& options);
 
 }  // namespace tint::spirv::writer
 

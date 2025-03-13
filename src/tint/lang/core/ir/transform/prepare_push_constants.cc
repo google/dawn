@@ -53,7 +53,7 @@ struct State {
     /// The type manager.
     core::type::Manager& ty{ir.Types()};
 
-    Result<PushConstantLayout> Run() {
+    PushConstantLayout Run() {
         if (config.internal_constants.empty()) {
             return PushConstantLayout{};
         }
@@ -127,8 +127,8 @@ struct State {
 
 }  // namespace
 
-Result<PushConstantLayout> PreparePushConstants(Module& ir,
-                                                const PreparePushConstantsConfig& config) {
+diag::Result<PushConstantLayout> PreparePushConstants(Module& ir,
+                                                      const PreparePushConstantsConfig& config) {
     auto result = ValidateAndDumpIfNeeded(ir, "core.PreparePushConstants");
     if (result != Success) {
         return result.Failure();

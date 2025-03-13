@@ -63,7 +63,7 @@
 
 namespace tint::hlsl::writer {
 
-Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
+diag::Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
 #define RUN_TRANSFORM(name, ...)         \
     do {                                 \
         auto result = name(__VA_ARGS__); \

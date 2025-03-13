@@ -28,7 +28,7 @@
 #ifndef SRC_TINT_LANG_SPIRV_READER_LOWER_SHADER_IO_H_
 #define SRC_TINT_LANG_SPIRV_READER_LOWER_SHADER_IO_H_
 
-#include "src/tint/utils/result/result.h"
+#include "src/tint/utils/diagnostic/diagnostic.h"
 
 // Forward declarations.
 namespace tint::core::ir {
@@ -41,7 +41,7 @@ namespace tint::spirv::reader::lower {
 /// the form expected by Tint's core IR (using function parameters and return values).
 /// @param module the module to transform
 /// @returns success or failure
-Result<SuccessType> ShaderIO(core::ir::Module& module);
+diag::Result<SuccessType> ShaderIO(core::ir::Module& module);
 
 }  // namespace tint::spirv::reader::lower
 

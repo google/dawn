@@ -235,7 +235,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
 
 }  // namespace
 
-Result<SuccessType> ShaderIO(core::ir::Module& ir, const ShaderIOConfig& config) {
+diag::Result<SuccessType> ShaderIO(core::ir::Module& ir, const ShaderIOConfig& config) {
     auto result = ValidateAndDumpIfNeeded(
         ir, "glsl.ShaderIO",
         core::ir::Capabilities{core::ir::Capability::kAllowHandleVarsWithoutBindings});

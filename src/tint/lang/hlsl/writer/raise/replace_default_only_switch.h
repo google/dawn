@@ -28,7 +28,7 @@
 #ifndef SRC_TINT_LANG_HLSL_WRITER_RAISE_REPLACE_DEFAULT_ONLY_SWITCH_H_
 #define SRC_TINT_LANG_HLSL_WRITER_RAISE_REPLACE_DEFAULT_ONLY_SWITCH_H_
 
-#include "src/tint/utils/result/result.h"
+#include "src/tint/utils/diagnostic/diagnostic.h"
 
 // Forward declarations.
 namespace tint::core::ir {
@@ -42,7 +42,7 @@ namespace tint::hlsl::writer::raise {
 /// it to miscompile default-only-switch statements. See crbug.com/tint/1188.
 /// @param module the module to transform
 /// @returns success or failure
-Result<SuccessType> ReplaceDefaultOnlySwitch(core::ir::Module& module);
+diag::Result<SuccessType> ReplaceDefaultOnlySwitch(core::ir::Module& module);
 
 }  // namespace tint::hlsl::writer::raise
 

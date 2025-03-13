@@ -33,9 +33,9 @@
 namespace tint::core::ir::transform {
 namespace {
 
-Result<SuccessType> BinaryPolyfillFuzzer(Module& ir,
-                                         const fuzz::ir::Context&,
-                                         const BinaryPolyfillConfig& config) {
+diag::Result<SuccessType> BinaryPolyfillFuzzer(Module& ir,
+                                               const fuzz::ir::Context&,
+                                               const BinaryPolyfillConfig& config) {
     return BinaryPolyfill(ir, config);
 }
 

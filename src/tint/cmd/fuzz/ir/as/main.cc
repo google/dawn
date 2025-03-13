@@ -172,15 +172,15 @@ bool DumpIR(const tint::Program& program, const Options& options) {
 /// enables, and validation.
 /// @param program the program to generate
 /// @returns generated module on success, tint::failure on failure
-tint::Result<tint::core::ir::Module> GenerateIrModule(const tint::Program& program) {
+tint::diag::Result<tint::core::ir::Module> GenerateIrModule(const tint::Program& program) {
     if (program.AST().Enables().Any(tint::wgsl::reader::IsUnsupportedByIR)) {
-        return tint::Failure{"Unsupported enable used in shader"};
+        return tint::diag::Failure{"Unsupported enable used in shader"};
     }
 
     auto transformed = tint::wgsl::ApplySubstituteOverrides(program);
     auto& src = transformed ? transformed.value() : program;
     if (!src.IsValid()) {
-        return tint::Failure{src.Diagnostics()};
+        return tint::diag::Failure{src.Diagnostics()};
     }
 
     auto ir = tint::wgsl::reader::ProgramToLoweredIR(src);

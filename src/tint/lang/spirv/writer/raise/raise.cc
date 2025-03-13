@@ -27,8 +27,6 @@
 
 #include "src/tint/lang/spirv/writer/raise/raise.h"
 
-#include <utility>
-
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/transform/add_empty_entry_point.h"
 #include "src/tint/lang/core/ir/transform/bgra8unorm_polyfill.h"
@@ -62,7 +60,7 @@
 
 namespace tint::spirv::writer {
 
-Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
+diag::Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
 #define RUN_TRANSFORM(name, ...)         \
     do {                                 \
         auto result = name(__VA_ARGS__); \

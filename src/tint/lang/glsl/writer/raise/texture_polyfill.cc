@@ -27,9 +27,7 @@
 
 #include "src/tint/lang/glsl/writer/raise/texture_polyfill.h"
 
-#include <string>
 #include <utility>
-#include <vector>
 
 #include "src/tint/lang/core/fluent_types.h"  // IWYU pragma: export
 #include "src/tint/lang/core/ir/builder.h"
@@ -1230,7 +1228,7 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType> TexturePolyfill(core::ir::Module& ir, const TexturePolyfillConfig& cfg) {
+diag::Result<SuccessType> TexturePolyfill(core::ir::Module& ir, const TexturePolyfillConfig& cfg) {
     auto result = ValidateAndDumpIfNeeded(ir, "glsl.TexturePolyfill");
     if (result != Success) {
         return result.Failure();

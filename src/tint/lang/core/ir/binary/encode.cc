@@ -106,7 +106,7 @@ struct Encoder {
 
     diag::List diags_{};
 
-    Result<SuccessType> Encode() {
+    diag::Result<SuccessType> Encode() {
         // Encode all user-declared structures first. This is to ensure that the IR disassembly
         // (which prints structure types first) does not reorder after encoding and decoding.
         for (auto* ty : mod_in_.Types()) {
@@ -126,7 +126,7 @@ struct Encoder {
         mod_out_.set_root_block(Block(mod_in_.root_block));
 
         if (diags_.ContainsErrors()) {
-            return Failure{std::move(diags_)};
+            return diag::Failure{std::move(diags_)};
         }
         return Success;
     }
@@ -1322,7 +1322,7 @@ struct Encoder {
 
 }  // namespace
 
-Result<std::unique_ptr<pb::Module>> EncodeToProto(const Module& mod_in) {
+diag::Result<std::unique_ptr<pb::Module>> EncodeToProto(const Module& mod_in) {
     GOOGLE_PROTOBUF_VERIFY_VERSION;
 
     pb::Module mod_out;
@@ -1334,7 +1334,7 @@ Result<std::unique_ptr<pb::Module>> EncodeToProto(const Module& mod_in) {
     return std::make_unique<pb::Module>(mod_out);
 }
 
-Result<Vector<std::byte, 0>> EncodeToBinary(const Module& mod_in) {
+diag::Result<Vector<std::byte, 0>> EncodeToBinary(const Module& mod_in) {
     auto mod_out = EncodeToProto(mod_in);
     if (mod_out != Success) {
         return mod_out.Failure();
@@ -1345,7 +1345,7 @@ Result<Vector<std::byte, 0>> EncodeToBinary(const Module& mod_in) {
     buffer.Resize(len);
     if (len > 0) {
         if (!mod_out.Get()->SerializeToArray(&buffer[0], static_cast<int>(len))) {
-            return Failure{"failed to serialize protobuf"};
+            return diag::Failure{"failed to serialize protobuf"};
         }
     }
     return buffer;

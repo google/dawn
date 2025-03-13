@@ -237,7 +237,7 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType> PromoteInitializers(core::ir::Module& ir) {
+diag::Result<SuccessType> PromoteInitializers(core::ir::Module& ir) {
     auto result =
         ValidateAndDumpIfNeeded(ir, "hlsl.PromoteInitializers", kPromoteInitializersCapabilities);
     if (result != Success) {

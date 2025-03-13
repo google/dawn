@@ -28,13 +28,13 @@
 #ifndef SRC_TINT_UTILS_RESULT_RESULT_H_
 #define SRC_TINT_UTILS_RESULT_RESULT_H_
 
+#include <string>
+#include <string_view>
 #include <utility>
 #include <variant>
 
-#include "src/tint/utils/diagnostic/diagnostic.h"
 #include "src/tint/utils/ice/ice.h"
 #include "src/tint/utils/rtti/traits.h"
-#include "src/tint/utils/text/string_stream.h"
 
 namespace tint {
 
@@ -53,16 +53,7 @@ struct Failure {
     /// @param err the single error diagnostic
     explicit Failure(std::string_view err);
 
-    /// Constructor with a single diagnostic
-    /// @param diagnostic the failure diagnostic
-    explicit Failure(diag::Diagnostic diagnostic);
-
-    /// Constructor with a list of diagnostics
-    /// @param diagnostics the failure diagnostics
-    explicit Failure(diag::List diagnostics);
-
-    /// The diagnostics explaining the failure reason
-    diag::List reason;
+    std::string reason;
 };
 
 /// Write the Failure to the given stream

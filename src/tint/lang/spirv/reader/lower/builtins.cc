@@ -1098,7 +1098,7 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType> Builtins(core::ir::Module& ir) {
+diag::Result<SuccessType> Builtins(core::ir::Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "spirv.Builtins",
                                           core::ir::Capabilities{
                                               core::ir::Capability::kAllowOverrides,

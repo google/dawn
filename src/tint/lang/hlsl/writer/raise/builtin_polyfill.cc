@@ -1934,7 +1934,7 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType> BuiltinPolyfill(core::ir::Module& ir) {
+diag::Result<SuccessType> BuiltinPolyfill(core::ir::Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "hlsl.BuiltinPolyfill",
                                           core::ir::Capabilities{
                                               core::ir::Capability::kAllowClipDistancesOnF32,

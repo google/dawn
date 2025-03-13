@@ -27,7 +27,6 @@
 
 #include "src/tint/lang/glsl/writer/raise/bitcast_polyfill.h"
 
-#include <string>
 #include <tuple>
 
 #include "src/tint/lang/core/fluent_types.h"  // IWYU pragma: export
@@ -277,7 +276,7 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType> BitcastPolyfill(core::ir::Module& ir) {
+diag::Result<SuccessType> BitcastPolyfill(core::ir::Module& ir) {
     auto result = ValidateAndDumpIfNeeded(
         ir, "glsl.BitcastPolyfill",
         core::ir::Capabilities{core::ir::Capability::kAllowHandleVarsWithoutBindings});

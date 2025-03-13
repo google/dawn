@@ -34,7 +34,8 @@
 namespace tint::hlsl::writer::raise {
 namespace {
 
-Result<SuccessType> PromoteInitializersFuzzer(core::ir::Module& ir, const fuzz::ir::Context&) {
+diag::Result<SuccessType> PromoteInitializersFuzzer(core::ir::Module& ir,
+                                                    const fuzz::ir::Context&) {
     return PromoteInitializers(ir);
 }
 

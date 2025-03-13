@@ -28,11 +28,10 @@
 #ifndef SRC_TINT_LANG_CORE_IR_TRANSFORM_BINDING_REMAPPER_H_
 #define SRC_TINT_LANG_CORE_IR_TRANSFORM_BINDING_REMAPPER_H_
 
-#include <string>
 #include <unordered_map>
 
 #include "src/tint/api/common/binding_point.h"
-#include "src/tint/utils/result/result.h"
+#include "src/tint/utils/diagnostic/diagnostic.h"
 
 // Forward declarations.
 namespace tint::core::ir {
@@ -45,7 +44,7 @@ namespace tint::core::ir::transform {
 /// @param module the module to transform
 /// @param binding_points the remapping data
 /// @returns success or failure
-Result<SuccessType> BindingRemapper(
+diag::Result<SuccessType> BindingRemapper(
     Module& module,
     const std::unordered_map<BindingPoint, BindingPoint>& binding_points);
 

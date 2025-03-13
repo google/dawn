@@ -29,7 +29,7 @@
 #define SRC_TINT_LANG_CORE_IR_TRANSFORM_REMOVE_TERMINATOR_ARGS_H_
 
 #include "src/tint/lang/core/ir/validator.h"
-#include "src/tint/utils/result/result.h"
+#include "src/tint/utils/diagnostic/diagnostic.h"
 
 // Forward declarations.
 namespace tint::core::ir {
@@ -56,7 +56,7 @@ const core::ir::Capabilities kRemoveTerminatorArgsCapabilities{
 /// textual languages.
 /// @param module the module to transform
 /// @returns success or failure
-Result<SuccessType> RemoveTerminatorArgs(Module& module);
+diag::Result<SuccessType> RemoveTerminatorArgs(Module& module);
 
 }  // namespace tint::core::ir::transform
 

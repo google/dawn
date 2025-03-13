@@ -49,12 +49,12 @@ Program Parse(const Source::File* file, const Options& options) {
     return resolver::Resolve(parser.builder(), options.allowed_features);
 }
 
-Result<core::ir::Module> WgslToIR(const Source::File* file, const Options& options) {
+diag::Result<core::ir::Module> WgslToIR(const Source::File* file, const Options& options) {
     Program program = Parse(file, options);
     return ProgramToLoweredIR(program);
 }
 
-tint::Result<core::ir::Module> ProgramToLoweredIR(const Program& program) {
+diag::Result<core::ir::Module> ProgramToLoweredIR(const Program& program) {
     auto ir = ProgramToIR(program);
     if (ir != Success) {
         return ir.Failure();

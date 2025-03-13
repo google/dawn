@@ -61,9 +61,9 @@ struct FuzzedOptions {
                  compiler_is_dxc);
 };
 
-Result<SuccessType> IRFuzzer(core::ir::Module& module,
-                             const fuzz::ir::Context& context,
-                             FuzzedOptions fuzzed_options) {
+diag::Result<SuccessType> IRFuzzer(core::ir::Module& module,
+                                   const fuzz::ir::Context& context,
+                                   FuzzedOptions fuzzed_options) {
     Options options;
     options.strip_all_names = fuzzed_options.strip_all_names;
     options.disable_robustness = fuzzed_options.disable_robustness;

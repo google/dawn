@@ -28,9 +28,7 @@
 #ifndef SRC_TINT_LANG_CORE_IR_TRANSFORM_ZERO_INIT_WORKGROUP_MEMORY_H_
 #define SRC_TINT_LANG_CORE_IR_TRANSFORM_ZERO_INIT_WORKGROUP_MEMORY_H_
 
-#include <string>
-
-#include "src/tint/utils/result/result.h"
+#include "src/tint/utils/diagnostic/diagnostic.h"
 
 // Forward declarations.
 namespace tint::core::ir {
@@ -43,7 +41,7 @@ namespace tint::core::ir::transform {
 /// zero-initialize workgroup memory used by that entry point.
 /// @param module the module to transform
 /// @returns success or failure
-Result<SuccessType> ZeroInitWorkgroupMemory(Module& module);
+diag::Result<SuccessType> ZeroInitWorkgroupMemory(Module& module);
 
 }  // namespace tint::core::ir::transform
 

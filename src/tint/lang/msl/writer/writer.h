@@ -44,14 +44,14 @@ namespace tint::msl::writer {
 /// @param ir the module
 /// @param options the writer options
 /// @returns Success or a failure message indicating why MSL generation would fail
-Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& options);
+diag::Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& options);
 
 /// Generate MSL for a program, according to a set of configuration options.
 /// The result will contain the MSL and supplementary information, or failure.
 /// @param ir the IR module to translate to MSL
 /// @param options the configuration options to use when generating MSL
 /// @returns the resulting MSL and supplementary information, or failure
-Result<Output> Generate(core::ir::Module& ir, const Options& options);
+diag::Result<Output> Generate(core::ir::Module& ir, const Options& options);
 
 }  // namespace tint::msl::writer
 

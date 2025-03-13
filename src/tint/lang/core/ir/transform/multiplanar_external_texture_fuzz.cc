@@ -33,7 +33,7 @@
 namespace tint::core::ir::transform {
 namespace {
 
-Result<SuccessType> MultiplanarExternalTextureFuzzer(
+diag::Result<SuccessType> MultiplanarExternalTextureFuzzer(
     Module& ir,
     const fuzz::ir::Context&,
     const tint::transform::multiplanar::BindingsMap& multiplanar_map) {

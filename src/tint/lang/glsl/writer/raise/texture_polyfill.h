@@ -29,7 +29,7 @@
 #define SRC_TINT_LANG_GLSL_WRITER_RAISE_TEXTURE_POLYFILL_H_
 
 #include "src/tint/lang/glsl/writer/common/options.h"
-#include "src/tint/utils/result/result.h"
+#include "src/tint/utils/diagnostic/diagnostic.h"
 
 // Forward declarations.
 namespace tint::core::ir {
@@ -59,7 +59,8 @@ struct TexturePolyfillConfig {
 /// @param module the module to transform
 /// @param cfg the configuration
 /// @returns success or failure
-Result<SuccessType> TexturePolyfill(core::ir::Module& module, const TexturePolyfillConfig& cfg);
+diag::Result<SuccessType> TexturePolyfill(core::ir::Module& module,
+                                          const TexturePolyfillConfig& cfg);
 
 }  // namespace tint::glsl::writer::raise
 

@@ -33,9 +33,10 @@
 #include <type_traits>
 #include <utility>
 
+#include "src/tint/utils/containers/vector.h"
+#include "src/tint/utils/diagnostic/diagnostic.h"
 #include "src/tint/utils/macros/foreach.h"
 #include "src/tint/utils/memory/aligned_storage.h"
-#include "src/tint/utils/result/result.h"
 
 /// Forward declarations
 namespace tint {
@@ -81,18 +82,18 @@ struct ReflectedFieldInfo {
 
 /// @returns Success if the sequential fields of @p fields have the expected offsets, and aligned
 /// sum match the class size @p class_size.
-::tint::Result<SuccessType> CheckAllFieldsReflected(VectorRef<ReflectedFieldInfo> fields,
-                                                    std::string_view class_name,
-                                                    size_t class_size,
-                                                    size_t class_align,
-                                                    bool class_is_castable,
-                                                    std::string_view reflect_file,
-                                                    uint32_t reflect_line);
+diag::Result<SuccessType> CheckAllFieldsReflected(VectorRef<ReflectedFieldInfo> fields,
+                                                  std::string_view class_name,
+                                                  size_t class_size,
+                                                  size_t class_align,
+                                                  bool class_is_castable,
+                                                  std::string_view reflect_file,
+                                                  uint32_t reflect_line);
 
 /// @returns Success if the TINT_REFLECT() reflected fields of @tparam CLASS match the declaration
 /// order, do not have any gaps, and fully account for the entire size of the class.
 template <typename CLASS>
-::tint::Result<SuccessType> CheckAllFieldsReflected() {
+diag::Result<SuccessType> CheckAllFieldsReflected() {
     static_assert(!std::has_virtual_destructor_v<CLASS> || std::is_base_of_v<CastableBase, CLASS>,
                   "TINT_ASSERT_ALL_FIELDS_REFLECTED() cannot be used on virtual classes, except "
                   "for types using the tint::Castable framework");

@@ -28,7 +28,7 @@
 #ifndef SRC_TINT_LANG_SPIRV_READER_LOWER_VECTOR_ELEMENT_POINTER_H_
 #define SRC_TINT_LANG_SPIRV_READER_LOWER_VECTOR_ELEMENT_POINTER_H_
 
-#include "src/tint/utils/result/result.h"
+#include "src/tint/utils/diagnostic/diagnostic.h"
 
 // Forward declarations.
 namespace tint::core::ir {
@@ -41,7 +41,7 @@ namespace tint::spirv::reader::lower {
 /// instructions and their uses.
 /// @param module the module to transform
 /// @returns success or failure
-Result<SuccessType> VectorElementPointer(core::ir::Module& module);
+diag::Result<SuccessType> VectorElementPointer(core::ir::Module& module);
 
 }  // namespace tint::spirv::reader::lower
 

@@ -118,7 +118,7 @@ using namespace tint::core::fluent_types;     // NOLINT
 namespace tint::wgsl::reader {
 namespace {
 
-using ResultType = tint::Result<core::ir::Module>;
+using ResultType = diag::Result<core::ir::Module>;
 
 /// Impl is the private-implementation of FromProgram().
 class Impl {
@@ -257,7 +257,7 @@ class Impl {
         }
 
         if (diagnostics_.ContainsErrors()) {
-            return Failure{std::move(diagnostics_)};
+            return diag::Failure{std::move(diagnostics_)};
         }
 
         return std::move(mod);
@@ -1373,9 +1373,9 @@ class Impl {
 
 }  // namespace
 
-tint::Result<core::ir::Module> ProgramToIR(const Program& program) {
+diag::Result<core::ir::Module> ProgramToIR(const Program& program) {
     if (!program.IsValid()) {
-        return Failure{program.Diagnostics()};
+        return diag::Failure{program.Diagnostics()};
     }
 
     Impl b(program);
@@ -1383,7 +1383,7 @@ tint::Result<core::ir::Module> ProgramToIR(const Program& program) {
     if (r != Success) {
         diag::List err = std::move(r.Failure().reason);
         err.AddNote(Source{}) << "AST:\n" + Program::printer(program);
-        return Failure{err};
+        return diag::Failure{err};
     }
 
     return r.Move();

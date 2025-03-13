@@ -48,9 +48,9 @@ bool CanRun(Module& module) {
     return true;
 }
 
-Result<SuccessType> Std140Fuzzer(Module& module, const fuzz::ir::Context&) {
+diag::Result<SuccessType> Std140Fuzzer(Module& module, const fuzz::ir::Context&) {
     if (!CanRun(module)) {
-        return Failure{"Cannot run module"};
+        return diag::Failure{"Cannot run module"};
     }
 
     return Std140(module);

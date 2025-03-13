@@ -28,8 +28,6 @@
 #include "src/tint/lang/wgsl/resolver/resolver.h"
 
 #include <algorithm>
-#include <cmath>
-#include <iomanip>
 #include <limits>
 #include <string_view>
 #include <utility>

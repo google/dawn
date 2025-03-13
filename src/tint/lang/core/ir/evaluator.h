@@ -53,7 +53,7 @@ class Evaluator {
     /// Evaluate the given `src` expression.
     /// @param src the source expression
     /// @returns the generated constant or a failure result.
-    Result<core::ir::Constant*> Evaluate(core::ir::Value* src);
+    diag::Result<core::ir::Constant*> Evaluate(core::ir::Value* src);
 
   private:
     using EvalResult = Result<const core::constant::Value*>;
@@ -84,13 +84,13 @@ namespace eval {
 /// @param b the builder
 /// @param inst the instruction
 /// @returns the evaluated constant for `inst` or a `Failure` otherwise.
-Result<core::ir::Constant*> Eval(core::ir::Builder& b, core::ir::Instruction* inst);
+diag::Result<core::ir::Constant*> Eval(core::ir::Builder& b, core::ir::Instruction* inst);
 
 /// Evaluate the given `val` with the provided `b`.
 /// @param b the builder
 /// @param val the value
 /// @returns the evaluated constant for `val` or a `Failure` otherwise.
-Result<core::ir::Constant*> Eval(core::ir::Builder& b, core::ir::Value* val);
+diag::Result<core::ir::Constant*> Eval(core::ir::Builder& b, core::ir::Value* val);
 
 }  // namespace eval
 

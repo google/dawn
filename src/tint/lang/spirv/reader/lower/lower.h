@@ -29,14 +29,14 @@
 #define SRC_TINT_LANG_SPIRV_READER_LOWER_LOWER_H_
 
 #include "src/tint/lang/core/ir/module.h"
-#include "src/tint/utils/result/result.h"
+#include "src/tint/utils/diagnostic/diagnostic.h"
 
 namespace tint::spirv::reader {
 
 /// Lower converts a SPIR-V-dialect IR module to a core-dialect IR module
 /// @param  mod the IR module
 /// @return the result of the operation
-Result<SuccessType> Lower(core::ir::Module& mod);
+diag::Result<SuccessType> Lower(core::ir::Module& mod);
 
 }  // namespace tint::spirv::reader
 

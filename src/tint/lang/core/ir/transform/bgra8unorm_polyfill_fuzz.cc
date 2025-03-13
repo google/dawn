@@ -33,7 +33,7 @@
 namespace tint::core::ir::transform {
 namespace {
 
-Result<SuccessType> Bgra8UnormPolyfillFuzzer(Module& ir, const fuzz::ir::Context&) {
+diag::Result<SuccessType> Bgra8UnormPolyfillFuzzer(Module& ir, const fuzz::ir::Context&) {
     return Bgra8UnormPolyfill(ir);
 }
 

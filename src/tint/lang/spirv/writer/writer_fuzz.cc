@@ -35,7 +35,9 @@
 namespace tint::spirv::writer {
 namespace {
 
-Result<SuccessType> IRFuzzer(core::ir::Module& module, const fuzz::ir::Context&, Options options) {
+diag::Result<SuccessType> IRFuzzer(core::ir::Module& module,
+                                   const fuzz::ir::Context&,
+                                   Options options) {
     auto check = CanGenerate(module, options);
     if (check != Success) {
         return check;

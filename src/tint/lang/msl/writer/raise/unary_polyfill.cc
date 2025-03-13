@@ -27,8 +27,6 @@
 
 #include "src/tint/lang/msl/writer/raise/unary_polyfill.h"
 
-#include <utility>
-
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/validator.h"
 
@@ -87,7 +85,7 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType> UnaryPolyfill(core::ir::Module& ir) {
+diag::Result<SuccessType> UnaryPolyfill(core::ir::Module& ir) {
     auto result =
         ValidateAndDumpIfNeeded(ir, "msl.UnaryPolyfill",
                                 core::ir::Capabilities{

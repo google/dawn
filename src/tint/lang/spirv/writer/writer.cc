@@ -41,12 +41,12 @@
 
 namespace tint::spirv::writer {
 
-Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& options) {
+diag::Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& options) {
     // Check optionally supported types against their required options.
     for (auto* ty : ir.Types()) {
         if (ty->Is<core::type::SubgroupMatrix>()) {
             if (!options.use_vulkan_memory_model) {
-                return Failure("using subgroup matrices requires the Vulkan Memory Model");
+                return diag::Failure("using subgroup matrices requires the Vulkan Memory Model");
             }
         }
     }
@@ -55,7 +55,7 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
     // embedded null characters.
     if (!options.remapped_entry_point_name.empty()) {
         if (options.remapped_entry_point_name.find('\0') != std::string::npos) {
-            return Failure("remapped entry point name contains null character");
+            return diag::Failure("remapped entry point name contains null character");
         }
 
         // Check for multiple entry points.
@@ -64,7 +64,7 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
         for (auto& func : ir.functions) {
             if (func->IsEntryPoint()) {
                 if (has_entry_point) {
-                    return Failure("module must only contain a single entry point");
+                    return diag::Failure("module must only contain a single entry point");
                 }
                 has_entry_point = true;
             }
@@ -78,13 +78,14 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
         auto* var = inst->As<core::ir::Var>();
         auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
         if (ptr->AddressSpace() == core::AddressSpace::kPixelLocal) {
-            return Failure("pixel_local address space is not supported by the SPIR-V backend");
+            return diag::Failure(
+                "pixel_local address space is not supported by the SPIR-V backend");
         }
 
         if (ptr->AddressSpace() == core::AddressSpace::kPushConstant) {
             if (user_push_constant_size > 0) {
                 // We've already seen a user-declared push constant.
-                return Failure("module contains multiple user-declared push constants");
+                return diag::Failure("module contains multiple user-declared push constants");
             }
             user_push_constant_size = tint::RoundUp(4u, ptr->StoreType()->Size());
         }
@@ -115,14 +116,14 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
     if (options.depth_range_offsets) {
         if (!check_push_constant_offset(options.depth_range_offsets->max) ||
             !check_push_constant_offset(options.depth_range_offsets->min)) {
-            return Failure("invalid offsets for depth range push constants");
+            return diag::Failure("invalid offsets for depth range push constants");
         }
     }
 
     return Success;
 }
 
-Result<Output> Generate(core::ir::Module& ir, const Options& options) {
+diag::Result<Output> Generate(core::ir::Module& ir, const Options& options) {
     {
         auto res = ValidateBindingOptions(options);
         if (res != Success) {

@@ -29,7 +29,7 @@
 #define SRC_TINT_LANG_CORE_IR_TRANSFORM_VERTEX_PULLING_H_
 
 #include "src/tint/api/common/vertex_pulling_config.h"
-#include "src/tint/utils/result/result.h"
+#include "src/tint/utils/diagnostic/diagnostic.h"
 
 // Forward declarations.
 namespace tint::core::ir {
@@ -53,7 +53,8 @@ namespace tint::core::ir::transform {
 /// @param module the module to transform
 /// @param config the vertex pulling configuration
 /// @returns success or failure
-Result<SuccessType> VertexPulling(core::ir::Module& module, const VertexPullingConfig& config);
+diag::Result<SuccessType> VertexPulling(core::ir::Module& module,
+                                        const VertexPullingConfig& config);
 
 }  // namespace tint::core::ir::transform
 
