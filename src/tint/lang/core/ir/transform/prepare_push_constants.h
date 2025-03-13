@@ -31,8 +31,8 @@
 #include <map>
 
 #include "src/tint/utils/containers/hashmap.h"
+#include "src/tint/utils/diagnostic/diagnostic.h"
 #include "src/tint/utils/reflection.h"
-#include "src/tint/utils/result/result.h"
 #include "src/tint/utils/symbol/symbol.h"
 
 // Forward declarations.

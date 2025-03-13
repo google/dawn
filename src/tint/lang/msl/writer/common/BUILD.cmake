@@ -92,7 +92,6 @@ tint_target_add_dependencies(tint_lang_msl_writer_common_test test
   tint_lang_core_type
   tint_utils
   tint_utils_containers
-  tint_utils_diagnostic
   tint_utils_ice
   tint_utils_macros
   tint_utils_math
