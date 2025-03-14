@@ -1,5 +1,4 @@
 Texture2DMS<float4> texture0 : register(t0);
-
 RWByteAddressBuffer results : register(u2);
 
 [numthreads(1, 1, 1)]

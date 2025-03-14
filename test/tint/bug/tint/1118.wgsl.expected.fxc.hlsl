@@ -1,5 +1,4 @@
 static bool tint_discarded = false;
-
 static float fClipDistance3 = 0.0f;
 static float fClipDistance4 = 0.0f;
 cbuffer cbuffer_x_29 : register(b0) {

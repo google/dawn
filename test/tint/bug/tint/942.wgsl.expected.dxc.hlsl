@@ -17,7 +17,6 @@ cbuffer cbuffer_params : register(b1) {
 };
 Texture2D<float4> inputTex : register(t1, space1);
 RWTexture2D<float4> outputTex : register(u2, space1);
-
 cbuffer cbuffer_flip : register(b3, space1) {
   uint4 flip[1];
 };

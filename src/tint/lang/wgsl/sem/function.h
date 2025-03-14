@@ -191,13 +191,16 @@ class Function final : public Castable<Function, CallTarget> {
     /// @param call the callsite
     void AddCallSite(const Call* call) { callsites_.Push(call); }
 
-    /// @returns the ancestor entry points
-    const Vector<const Function*, 1>& AncestorEntryPoints() const { return ancestor_entry_points_; }
+    /// @returns the entry points that have this function in their call graph. Entry points are in
+    /// their own call graph.
+    const Vector<const Function*, 1>& CallGraphEntryPoints() const {
+        return call_graph_entry_points_;
+    }
 
-    /// Adds a record that the given entry point transitively calls this function
-    /// @param entry_point the entry point that transtively calls this function
-    void AddAncestorEntryPoint(const sem::Function* entry_point) {
-        ancestor_entry_points_.Push(entry_point);
+    /// Adds a record that the given entry point has this function in its call graph.
+    /// @param entry_point the entry point
+    void AddCallGraphEntryPoint(const sem::Function* entry_point) {
+        call_graph_entry_points_.Push(entry_point);
     }
 
     /// Retrieves any referenced location variables
@@ -210,10 +213,10 @@ class Function final : public Castable<Function, CallTarget> {
     std::vector<std::pair<const Variable*, const ast::BuiltinAttribute*>>
     TransitivelyReferencedBuiltinVariables() const;
 
-    /// Checks if the given entry point is an ancestor
+    /// Checks if the given entry point has the function in its call graph
     /// @param sym the entry point symbol
-    /// @returns true if `sym` is an ancestor entry point of this function
-    bool HasAncestorEntryPoint(Symbol sym) const;
+    /// @returns true if `sym` has the function in its call graph
+    bool HasCallGraphEntryPoint(Symbol sym) const;
 
     /// Records the first discard statement in the function
     /// @param stmt the `discard` statement.
@@ -263,7 +266,7 @@ class Function final : public Castable<Function, CallTarget> {
     UniqueVector<VariablePair, 8> texture_sampler_pairs_;
     Vector<const Call*, 1> direct_calls_;
     Vector<const Call*, 1> callsites_;
-    Vector<const Function*, 1> ancestor_entry_points_;
+    Vector<const Function*, 1> call_graph_entry_points_;
     const Statement* discard_stmt_ = nullptr;
     sem::Behaviors behaviors_{sem::Behavior::kNext};
     wgsl::DiagnosticRuleSeverities diagnostic_severities_;

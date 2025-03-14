@@ -543,12 +543,7 @@ void Inspector::GenerateSamplerTargets() {
         GetOriginatingResources(
             std::array<const ast::Expression*, 2>{t, s}, c,
             [&](std::array<const sem::GlobalVariable*, 2> globals, const sem::Function* fn) {
-                Vector<const sem::Function*, 4> entry_points;
-                if (fn->Declaration()->IsEntryPoint()) {
-                    entry_points = {fn};
-                } else {
-                    entry_points = fn->AncestorEntryPoints();
-                }
+                Vector<const sem::Function*, 4> entry_points = fn->CallGraphEntryPoints();
 
                 auto texture_binding_point = *globals[0]->Attributes().binding_point;
                 auto sampler_binding_point = *globals[1]->Attributes().binding_point;
@@ -976,16 +971,9 @@ std::vector<Inspector::TextureUsageInfo> Inspector::GetTextureUsagesForEntryPoin
             continue;
         }
 
-        // This is an entrypoint, make sure it's the requested entry point
-        if (fn->Declaration()->IsEntryPoint()) {
-            if (fn->Declaration() != &ep) {
-                continue;
-            }
-        } else {
-            // Not an entry point, make sure it was called from the requested entry point
-            if (!fn->HasAncestorEntryPoint(ep.name->symbol)) {
-                continue;
-            }
+        // Make sure this is part of the entry point's call graph.
+        if (!fn->HasCallGraphEntryPoint(ep.name->symbol)) {
+            continue;
         }
 
         auto queryTextureBuiltin = [&](TextureUsageType type, const sem::Call* builtin_call,

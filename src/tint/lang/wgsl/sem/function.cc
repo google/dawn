@@ -88,8 +88,8 @@ Function::TransitivelyReferencedBuiltinVariables() const {
     return ret;
 }
 
-bool Function::HasAncestorEntryPoint(Symbol symbol) const {
-    for (const auto* point : ancestor_entry_points_) {
+bool Function::HasCallGraphEntryPoint(Symbol symbol) const {
+    for (const auto* point : call_graph_entry_points_) {
         if (point->Declaration()->name->symbol == symbol) {
             return true;
         }

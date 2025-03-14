@@ -4,5 +4,4 @@ void unused_entry_point() {
 }
 
 ByteAddressBuffer v : register(t0);
-
 ByteAddressBuffer b : register(t1);

@@ -2,7 +2,6 @@
 // fragment_main
 //
 RWByteAddressBuffer prevent_dce : register(u0);
-
 RWByteAddressBuffer sb_rw : register(u1);
 
 int sb_rwatomicLoad(uint offset) {
@@ -25,7 +24,6 @@ void fragment_main() {
 // compute_main
 //
 RWByteAddressBuffer prevent_dce : register(u0);
-
 RWByteAddressBuffer sb_rw : register(u1);
 
 int sb_rwatomicLoad(uint offset) {

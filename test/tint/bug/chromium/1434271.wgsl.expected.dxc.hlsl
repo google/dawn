@@ -94,14 +94,14 @@ float4x4 render_params_load_1(uint offset) {
   return float4x4(asfloat(render_params[scalar_offset / 4]), asfloat(render_params[scalar_offset_1 / 4]), asfloat(render_params[scalar_offset_2 / 4]), asfloat(render_params[scalar_offset_3 / 4]));
 }
 
-VertexOutput vs_main_inner(VertexInput tint_symbol_1) {
-  float3 quad_pos = mul(tint_symbol_1.quad_pos, float2x3(asfloat(render_params[4].xyz), asfloat(render_params[5].xyz)));
-  float3 position = (tint_symbol_1.position - (quad_pos + 0.00999999977648258209f));
-  VertexOutput tint_symbol_2 = (VertexOutput)0;
-  tint_symbol_2.position = mul(float4(position, 1.0f), render_params_load_1(0u));
-  tint_symbol_2.color = tint_symbol_1.color;
-  tint_symbol_2.quad_pos = tint_symbol_1.quad_pos;
-  return tint_symbol_2;
+VertexOutput vs_main_inner(VertexInput tint_symbol) {
+  float3 quad_pos = mul(tint_symbol.quad_pos, float2x3(asfloat(render_params[4].xyz), asfloat(render_params[5].xyz)));
+  float3 position = (tint_symbol.position - (quad_pos + 0.00999999977648258209f));
+  VertexOutput tint_symbol_1 = (VertexOutput)0;
+  tint_symbol_1.position = mul(float4(position, 1.0f), render_params_load_1(0u));
+  tint_symbol_1.color = tint_symbol.color;
+  tint_symbol_1.quad_pos = tint_symbol.quad_pos;
+  return tint_symbol_1;
 }
 
 tint_symbol_5 vs_main(tint_symbol_4 tint_symbol_3) {
@@ -124,7 +124,6 @@ struct Particle {
 };
 
 static float2 rand_seed = float2(0.0f, 0.0f);
-
 cbuffer cbuffer_sim_params : register(b0) {
   uint4 sim_params[2];
 };

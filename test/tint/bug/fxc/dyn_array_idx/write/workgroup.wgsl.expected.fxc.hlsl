@@ -17,7 +17,6 @@ void tint_zero_workgroup_memory(uint local_idx) {
 cbuffer cbuffer_ubo : register(b0) {
   uint4 ubo[1];
 };
-
 RWByteAddressBuffer result : register(u1);
 
 struct tint_symbol_2 {

@@ -1225,12 +1225,13 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
         return nullptr;
     }
 
-    // If this is an entry point, mark all transitively called functions as being
-    // used by this entry point.
+    // If this is an entry point, mark all transitively called functions as being in its call graph.
     if (decl->IsEntryPoint()) {
         for (auto* f : func->TransitivelyCalledFunctions()) {
-            const_cast<sem::Function*>(f)->AddAncestorEntryPoint(func);
+            const_cast<sem::Function*>(f)->AddCallGraphEntryPoint(func);
         }
+        // An entry point is considered to be in its own call graph.
+        func->AddCallGraphEntryPoint(func);
     }
 
     return func;

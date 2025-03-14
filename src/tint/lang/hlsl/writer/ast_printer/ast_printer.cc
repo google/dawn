@@ -411,8 +411,23 @@ bool ASTPrinter::Generate() {
         return false;
     }
 
+    // Goldilocks logic to add lines between top level declarations
     const tint::TypeInfo* last_kind = nullptr;
     size_t last_padding_line = 0;
+    auto EmitPaddingLine = [&](const tint::TypeInfo* kind, bool is_function) {
+        // Don't emit double line breaks
+        if (current_buffer_->lines.size() == last_padding_line) {
+            last_kind = kind;
+            return;
+        }
+
+        if (is_function || (last_kind && last_kind != kind)) {
+            Line();
+            last_padding_line = current_buffer_->lines.size();
+            last_kind = kind;
+            global_insertion_point_ = current_buffer_->lines.size();
+        }
+    };
 
     auto* mod = builder_.Sem().Module();
     for (auto* decl : mod->DependencyOrderedDeclarations()) {
@@ -421,22 +436,12 @@ bool ASTPrinter::Generate() {
             continue;  // These are not emitted.
         }
 
-        // Emit a new line between declarations if the type of declaration has
-        // changed, or we're about to emit a function
-        auto* kind = &decl->TypeInfo();
-        if (current_buffer_->lines.size() != last_padding_line) {
-            if (last_kind && (last_kind != kind || decl->Is<ast::Function>())) {
-                Line();
-                last_padding_line = current_buffer_->lines.size();
-            }
-        }
-        last_kind = kind;
-
         global_insertion_point_ = current_buffer_->lines.size();
 
         bool ok = Switch(
             decl,
-            [&](const ast::Variable* global) {  //
+            [&](const ast::Variable* global) {
+                EmitPaddingLine(&decl->TypeInfo(), false);
                 return EmitGlobalVariable(global);
             },
             [&](const ast::Struct* str) {
@@ -451,11 +456,13 @@ bool ASTPrinter::Generate() {
                     // instead of true structure.
                     // Structures used as uniform buffer are read from an array of
                     // vectors instead of true structure.
+                    EmitPaddingLine(&decl->TypeInfo(), false);
                     return EmitStructType(current_buffer_, ty, str->members);
                 }
                 return true;
             },
             [&](const ast::Function* func) {
+                EmitPaddingLine(&decl->TypeInfo(), true);
                 if (func->IsEntryPoint()) {
                     return EmitEntryPointFunction(func);
                 }

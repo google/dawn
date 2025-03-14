@@ -1,11 +1,8 @@
 RWByteAddressBuffer lightsBuffer : register(u0);
-
 RWByteAddressBuffer tileLightId : register(u0, space1);
-
 cbuffer cbuffer_config : register(b0, space2) {
   uint4 config[2];
 };
-
 cbuffer cbuffer_uniforms : register(b0, space3) {
   uint4 uniforms[11];
 };
