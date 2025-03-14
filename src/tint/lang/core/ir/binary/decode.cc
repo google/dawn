@@ -167,14 +167,12 @@ struct Decoder {
         return std::move(mod_out_);
     }
 
-    std::stringstream& Error() { return err_; }
-
     /// Errors if @p number is not finite.
     /// @returns @p number if finite, otherwise 0.
     template <typename T>
     Number<T> CheckFinite(Number<T> number) {
         if (DAWN_UNLIKELY(!std::isfinite(number.value))) {
-            Error() << "value must be finite";
+            err_ << "value must be finite\n";
             return Number<T>{};
         }
         return number;
@@ -195,11 +193,11 @@ struct Decoder {
             const auto* block = block_depth.first;
             const size_t depth = block_depth.second;
             if (!seen.Add(block)) {
-                Error() << "cyclic nesting of blocks";
+                err_ << "cyclic nesting of blocks\n";
                 return false;
             }
             if (depth > kMaxBlockDepth) {
-                Error() << "block nesting exceeds " << kMaxBlockDepth;
+                err_ << "block nesting exceeds " << kMaxBlockDepth << "\n";
                 return false;
             }
             for (auto* inst = block->Instructions(); inst; inst = inst->next) {
@@ -213,7 +211,7 @@ struct Decoder {
 
         for (auto* block : blocks_) {
             if (!seen.Contains(block)) {
-                Error() << "unreachable block";
+                err_ << "unreachable block\n";
                 return false;
             }
         }
@@ -248,8 +246,8 @@ struct Decoder {
     void PopulateFunction(ir::Function* fn_out, const pb::Function& fn_in) {
         if (!fn_in.name().empty()) {
             if (DAWN_UNLIKELY(fn_in.name().find('\0') != std::string::npos)) {
-                Error() << "function name '" << fn_in.name()
-                        << "' contains '\\0' before end of the string";
+                err_ << "function name '" << fn_in.name()
+                     << "' contains '\\0' before end of the string\n";
             } else {
                 mod_out_.SetName(fn_out, fn_in.name());
             }
@@ -291,7 +289,7 @@ struct Decoder {
 
     ir::Function* Function(uint32_t id) {
         if (DAWN_UNLIKELY(id >= mod_out_.functions.Length())) {
-            Error() << "function id " << id << " out of range";
+            err_ << "function id " << id << " out of range\n";
             return nullptr;
         }
         return mod_out_.functions[id];
@@ -338,7 +336,7 @@ struct Decoder {
 
     ir::Block* Block(uint32_t id) {
         if (DAWN_UNLIKELY(id >= blocks_.Length())) {
-            Error() << "block id " << id << " out of range";
+            err_ << "block id " << id << " out of range\n";
             return b.Block();
         }
         return blocks_[id];
@@ -350,8 +348,8 @@ struct Decoder {
         if (auto cast = As<T>(block); DAWN_LIKELY(cast)) {
             return cast;
         }
-        Error() << "block " << id << " is " << (block ? block->TypeInfo().name : "<null>")
-                << " expected " << TypeInfo::Of<T>().name;
+        err_ << "block " << id << " is " << (block ? block->TypeInfo().name : "<null>")
+             << " expected " << TypeInfo::Of<T>().name << "\n";
         return nullptr;
     }
 
@@ -446,7 +444,7 @@ struct Decoder {
                 break;
         }
         if (!inst_out) {
-            Error() << "invalid Instruction.kind: " << std::to_string(inst_in.kind_case());
+            err_ << "invalid Instruction.kind: " << std::to_string(inst_in.kind_case()) << "\n";
             return b.Let(mod_out_.Types().invalid());
         }
 
@@ -472,7 +470,7 @@ struct Decoder {
                 static_cast<BreakIf*>(inst_out)->SetNumNextIterValues(
                     inst_in.break_if().num_next_iter_values());
             } else {
-                Error() << "invalid value for num_next_iter_values()";
+                err_ << "invalid value for num_next_iter_values()\n";
             }
         }
 
@@ -707,7 +705,7 @@ struct Decoder {
                 break;
         }
 
-        Error() << "invalid Type.kind: " << std::to_string(type_in.kind_case());
+        err_ << "invalid Type.kind: " << std::to_string(type_in.kind_case()) << "\n";
         return mod_out_.Types().invalid();
     }
 
@@ -731,14 +729,14 @@ struct Decoder {
                 break;
         }
 
-        Error() << "invalid TypeBasic: " << std::to_string(basic_in);
+        err_ << "invalid TypeBasic: " << std::to_string(basic_in) << "\n";
         return mod_out_.Types().invalid();
     }
 
     const type::Type* CreateTypeVector(const pb::TypeVector& vector_in) {
         const auto width = vector_in.width();
         if (DAWN_UNLIKELY(width < 2 || width > 4)) {
-            Error() << "invalid vector width";
+            err_ << "invalid vector width\n";
             return mod_out_.Types().invalid();
         }
         auto* el_ty = Type(vector_in.element_type());
@@ -749,7 +747,7 @@ struct Decoder {
         const auto rows = matrix_in.num_rows();
         const auto cols = matrix_in.num_columns();
         if (DAWN_UNLIKELY(rows < 2 || rows > 4 || cols < 2 || cols > 4)) {
-            Error() << "invalid matrix dimensions";
+            err_ << "invalid matrix dimensions\n";
             return mod_out_.Types().invalid();
         }
         auto* el_ty = Type(matrix_in.element_type());
@@ -767,18 +765,18 @@ struct Decoder {
     const type::Type* CreateTypeStruct(const pb::TypeStruct& struct_in) {
         auto struct_name = struct_in.name();
         if (DAWN_UNLIKELY(struct_name.empty())) {
-            Error() << "struct must have a name";
+            err_ << "struct must have a name\n";
             return mod_out_.Types().invalid();
         }
 
         if (DAWN_UNLIKELY(struct_name.find('\0') != std::string::npos)) {
-            Error() << "structure name '" << struct_name
-                    << "' contains '\\0' before end of the string";
+            err_ << "structure name '" << struct_name
+                 << "' contains '\\0' before end of the string\n";
             return mod_out_.Types().invalid();
         }
 
         if (!struct_names_.Add(struct_name)) {
-            Error() << "duplicate struct name: " << struct_name;
+            err_ << "duplicate struct name: " << struct_name << "\n";
             return mod_out_.Types().invalid();
         }
 
@@ -787,13 +785,13 @@ struct Decoder {
         for (auto& member_in : struct_in.member()) {
             auto member_name = member_in.name();
             if (DAWN_UNLIKELY(member_name.empty())) {
-                Error() << "struct member must have a name";
+                err_ << "struct member must have a name\n";
                 return mod_out_.Types().invalid();
             }
 
             if (DAWN_UNLIKELY(member_name.find('\0') != std::string::npos)) {
-                Error() << "member name '" << member_name
-                        << "' contains '\\0' before end of the string";
+                err_ << "member name '" << member_name
+                     << "' contains '\\0' before end of the string\n";
                 return mod_out_.Types().invalid();
             }
 
@@ -803,11 +801,11 @@ struct Decoder {
             auto align = member_in.align();
             auto size = member_in.size();
             if (DAWN_UNLIKELY(align == 0)) {
-                Error() << "struct member must have non-zero alignment";
+                err_ << "struct member must have non-zero alignment\n";
                 align = 1;
             }
             if (DAWN_UNLIKELY(size == 0)) {
-                Error() << "struct member must have non-zero size";
+                err_ << "struct member must have non-zero size\n";
                 size = 1;
             }
             core::IOAttributes attributes_out{};
@@ -838,7 +836,7 @@ struct Decoder {
             members_out.Push(member_out);
         }
         if (DAWN_UNLIKELY(members_out.IsEmpty())) {
-            Error() << "struct requires at least one member";
+            err_ << "struct requires at least one member\n";
             return mod_out_.Types().invalid();
         }
         auto name = mod_out_.symbols.Register(struct_name);
@@ -854,17 +852,17 @@ struct Decoder {
         uint32_t stride = array_in.stride();
         uint32_t count = array_in.count();
         if (element->Align() == 0 || element->Size() == 0) {
-            Error() << "cannot create an array of an unsized type";
+            err_ << "cannot create an array of an unsized type\n";
             return mod_out_.Types().invalid();
         }
         uint32_t implicit_stride = tint::RoundUp(element->Align(), element->Size());
         if (stride < implicit_stride) {
-            Error() << "array element stride is smaller than the implicit stride";
+            err_ << "array element stride is smaller than the implicit stride\n";
             return mod_out_.Types().invalid();
         }
         if (count >= internal_limits::kMaxArrayElementCount) {
-            Error() << "array count (" << count << ") must be less than "
-                    << internal_limits::kMaxArrayElementCount;
+            err_ << "array count (" << count << ") must be less than "
+                 << internal_limits::kMaxArrayElementCount << "\n";
             return mod_out_.Types().invalid();
         }
 
@@ -875,7 +873,7 @@ struct Decoder {
     const type::Type* CreateTypeDepthTexture(const pb::TypeDepthTexture& texture_in) {
         auto dimension = TextureDimension(texture_in.dimension());
         if (!type::DepthTexture::IsValidDimension(dimension)) {
-            Error() << "invalid DepthTexture dimension";
+            err_ << "invalid DepthTexture dimension\n";
             return mod_out_.Types().invalid();
         }
         return mod_out_.Types().Get<type::DepthTexture>(dimension);
@@ -898,7 +896,7 @@ struct Decoder {
         const pb::TypeDepthMultisampledTexture& texture_in) {
         auto dimension = TextureDimension(texture_in.dimension());
         if (!type::DepthMultisampledTexture::IsValidDimension(dimension)) {
-            Error() << "invalid DepthMultisampledTexture dimension";
+            err_ << "invalid DepthMultisampledTexture dimension\n";
             return mod_out_.Types().invalid();
         }
         return mod_out_.Types().Get<type::DepthMultisampledTexture>(dimension);
@@ -981,13 +979,13 @@ struct Decoder {
                 break;
         }
 
-        Error() << "invalid TypeBuiltinStruct: " << std::to_string(builtin_struct_in);
+        err_ << "invalid TypeBuiltinStruct: " << std::to_string(builtin_struct_in) << "\n";
         return mod_out_.Types().invalid();
     }
 
     const type::Type* Type(size_t id) {
         if (DAWN_UNLIKELY(id >= types_.Length())) {
-            Error() << "type id " << id << " out of range";
+            err_ << "type id " << id << " out of range\n";
             return mod_out_.Types().invalid();
         }
         return types_[id];
@@ -1019,7 +1017,7 @@ struct Decoder {
         }
 
         if (!value_out) {
-            Error() << "invalid value kind: " << std::to_string(value_in.kind_case());
+            err_ << "invalid value kind: " << std::to_string(value_in.kind_case()) << "\n";
             return b.InvalidConstant();
         }
 
@@ -1031,8 +1029,8 @@ struct Decoder {
         auto* res_out = b.InstructionResult(type);
         if (!res_in.name().empty()) {
             if (DAWN_UNLIKELY(res_in.name().find('\0') != std::string::npos)) {
-                Error() << "result name '" << res_in.name()
-                        << "' contains '\\0' before end of the string";
+                err_ << "result name '" << res_in.name()
+                     << "' contains '\\0' before end of the string\n";
                 return nullptr;
             }
             mod_out_.SetName(res_out, res_in.name());
@@ -1045,8 +1043,8 @@ struct Decoder {
         auto* param_out = b.FunctionParam(type);
         if (!param_in.name().empty()) {
             if (DAWN_UNLIKELY(param_in.name().find('\0') != std::string::npos)) {
-                Error() << "param name '" << param_in.name()
-                        << "' contains '\\0' before end of the string";
+                err_ << "param name '" << param_in.name()
+                     << "' contains '\\0' before end of the string\n";
                 return nullptr;
             }
             mod_out_.SetName(param_out, param_in.name());
@@ -1083,8 +1081,8 @@ struct Decoder {
         auto* param_out = b.BlockParam(type);
         if (!param_in.name().empty()) {
             if (DAWN_UNLIKELY(param_in.name().find('\0') != std::string::npos)) {
-                Error() << "param name '" << param_in.name()
-                        << "' contains '\\0' before end of the string";
+                err_ << "param name '" << param_in.name()
+                     << "' contains '\\0' before end of the string\n";
                 return nullptr;
             }
             mod_out_.SetName(param_out, param_in.name());
@@ -1096,7 +1094,7 @@ struct Decoder {
 
     ir::Value* Value(uint32_t id) {
         if (DAWN_UNLIKELY(id > values_.Length())) {
-            Error() << "value id " << id << " out of range";
+            err_ << "value id " << id << " out of range\n";
             return nullptr;
         }
         return id > 0 ? values_[id - 1] : nullptr;
@@ -1108,8 +1106,8 @@ struct Decoder {
         if (auto cast = As<T>(value); DAWN_LIKELY(cast)) {
             return cast;
         }
-        Error() << "value " << id << " is " << (value ? value->TypeInfo().name : "<null>")
-                << " expected " << TypeInfo::Of<T>().name;
+        err_ << "value " << id << " is " << (value ? value->TypeInfo().name : "<null>")
+             << " expected " << TypeInfo::Of<T>().name << "\n";
         return nullptr;
     }
 
@@ -1127,7 +1125,7 @@ struct Decoder {
             case pb::ConstantValue::KindCase::KIND_NOT_SET:
                 break;
         }
-        Error() << "invalid ConstantValue.kind: " << std::to_string(value_in.kind_case());
+        err_ << "invalid ConstantValue.kind: " << std::to_string(value_in.kind_case()) << "\n";
         return b.InvalidConstant()->Value();
     }
 
@@ -1146,7 +1144,8 @@ struct Decoder {
             case pb::ConstantValueScalar::KindCase::KIND_NOT_SET:
                 break;
         }
-        Error() << "invalid ConstantValueScalar.kind: " << std::to_string(value_in.kind_case());
+        err_ << "invalid ConstantValueScalar.kind: " << std::to_string(value_in.kind_case())
+             << "\n";
         return b.InvalidConstant()->Value();
     }
 
@@ -1156,12 +1155,12 @@ struct Decoder {
         auto type_elements = type->Elements();
         size_t num_values = static_cast<size_t>(composite_in.elements().size());
         if (DAWN_UNLIKELY(type_elements.count == 0)) {
-            Error() << "cannot create a composite of type " << type->FriendlyName();
+            err_ << "cannot create a composite of type " << type->FriendlyName() << "\n";
             return b.InvalidConstant()->Value();
         }
         if (DAWN_UNLIKELY(type_elements.count != num_values)) {
-            Error() << "constant composite type " << type->FriendlyName() << " expects "
-                    << type_elements.count << " elements, but " << num_values << " values encoded";
+            err_ << "constant composite type " << type->FriendlyName() << " expects "
+                 << type_elements.count << " elements, but " << num_values << " values encoded\n";
             return b.InvalidConstant()->Value();
         }
         Vector<const core::constant::Value*, 8> elements_out;
@@ -1169,8 +1168,8 @@ struct Decoder {
             uint32_t i = static_cast<uint32_t>(elements_out.Length());
             auto* value = ConstantValue(element_id);
             if (auto* el_type = type->Element(i); DAWN_UNLIKELY(value->Type() != el_type)) {
-                Error() << "constant composite element value type " << value->Type()->FriendlyName()
-                        << " does not match element type " << el_type->FriendlyName();
+                err_ << "constant composite element value type " << value->Type()->FriendlyName()
+                     << " does not match element type " << el_type->FriendlyName() << "\n";
                 return b.InvalidConstant()->Value();
             }
             elements_out.Push(value);
@@ -1182,20 +1181,21 @@ struct Decoder {
         auto* type = Type(splat_in.type());
         uint32_t num_elements = type->Elements().count;
         if (DAWN_UNLIKELY(num_elements == 0)) {
-            Error() << "cannot create a splat of type " << type->FriendlyName();
+            err_ << "cannot create a splat of type " << type->FriendlyName() << "\n";
             return b.InvalidConstant()->Value();
         }
         if (DAWN_UNLIKELY(num_elements > internal_limits::kMaxArrayConstructorElements)) {
-            Error() << "array constructor has excessive number of elements (>"
-                    << internal_limits::kMaxArrayConstructorElements << ")";
+            err_ << "array constructor has excessive number of elements (>"
+                 << internal_limits::kMaxArrayConstructorElements << ")\n";
             return b.InvalidConstant()->Value();
         }
         auto* value = ConstantValue(splat_in.elements());
         for (uint32_t i = 0; i < num_elements; i++) {
             auto* el_type = type->Element(i);
             if (DAWN_UNLIKELY(el_type != value->Type())) {
-                Error() << "constant splat element value type " << value->Type()->FriendlyName()
-                        << " does not match element " << i << " type " << el_type->FriendlyName();
+                err_ << "constant splat element value type " << value->Type()->FriendlyName()
+                     << " does not match element " << i << " type " << el_type->FriendlyName()
+                     << "\n";
                 return b.InvalidConstant()->Value();
             }
         }
@@ -1204,7 +1204,7 @@ struct Decoder {
 
     const core::constant::Value* ConstantValue(uint32_t id) {
         if (DAWN_UNLIKELY(id >= constant_values_.Length())) {
-            Error() << "constant value id " << id << " out of range";
+            err_ << "constant value id " << id << " out of range\n";
             return b.InvalidConstant()->Value();
         }
         return constant_values_[id];

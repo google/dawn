@@ -133,8 +133,6 @@ struct Encoder {
         return Success;
     }
 
-    std::stringstream& Error() { return err_; }
-
     ////////////////////////////////////////////////////////////////////////////
     // Functions
     ////////////////////////////////////////////////////////////////////////////
@@ -497,8 +495,8 @@ struct Encoder {
             [&](const core::type::ConstantArrayCount* c) {
                 array_out.set_count(c->value);
                 if (c->value >= internal_limits::kMaxArrayElementCount) {
-                    Error() << "array count (" << c->value << ") must be less than "
-                            << internal_limits::kMaxArrayElementCount << "\n";
+                    err_ << "array count (" << c->value << ") must be less than "
+                         << internal_limits::kMaxArrayElementCount << "\n";
                 }
             },
             [&](const core::type::RuntimeArrayCount*) { array_out.set_count(0); },
@@ -737,8 +735,8 @@ struct Encoder {
                             const core::constant::Splat* splat_in) {
         splat_out.set_type(Type(splat_in->type));
         if (DAWN_UNLIKELY(splat_in->count > internal_limits::kMaxArrayConstructorElements)) {
-            Error() << "array constructor has excessive number of elements (>"
-                    << internal_limits::kMaxArrayConstructorElements << ")\n";
+            err_ << "array constructor has excessive number of elements (>"
+                 << internal_limits::kMaxArrayConstructorElements << ")\n";
         }
         splat_out.set_elements(ConstantValue(splat_in->el));
         splat_out.set_count(static_cast<uint32_t>(splat_in->count));
