@@ -459,6 +459,256 @@ tint_symbol_2 = struct @align(4) {
 )");
 }
 
+TEST_F(SpirvParserTest, CompositeInsert_Vector) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+        %u32 = OpTypeInt 32 0
+    %u32_ptr = OpTypePointer Function %u32
+      %vec4u = OpTypeVector %u32 4
+  %vec4u_ptr = OpTypePointer Function %vec4u
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+ %main_label = OpLabel
+   %comp_var = OpVariable %vec4u_ptr Function
+ %insert_var = OpVariable %u32_ptr Function
+  %composite = OpLoad %vec4u %comp_var
+     %insert = OpLoad %u32 %insert_var
+     %result = OpCompositeInsert %vec4u %insert %composite 2
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:ptr<function, vec4<u32>, read_write> = var undef
+    %3:ptr<function, u32, read_write> = var undef
+    %4:vec4<u32> = load %2
+    %5:u32 = load %3
+    %6:ptr<function, vec4<u32>, read_write> = var %4
+    %7:ptr<function, u32, read_write> = access %6, 2u
+    store %7, %5
+    %8:vec4<u32> = load %6
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, CompositeInsert_MatrixColumn) {
+    EXPECT_IR(R"(
+              OpCapability Shader
+              OpMemoryModel Logical GLSL450
+              OpEntryPoint GLCompute %main "main"
+              OpExecutionMode %main LocalSize 1 1 1
+      %void = OpTypeVoid
+       %f32 = OpTypeFloat 32
+   %f32_ptr = OpTypePointer Function %f32
+     %vec4f = OpTypeVector %f32 4
+ %vec4f_ptr = OpTypePointer Function %vec4f
+   %mat2x4f = OpTypeMatrix %vec4f 2
+%mat2x4f_ptr = OpTypePointer Function %mat2x4f
+   %ep_type = OpTypeFunction %void
+      %main = OpFunction %void None %ep_type
+%main_label = OpLabel
+  %comp_var = OpVariable %mat2x4f_ptr Function
+%insert_var = OpVariable %vec4f_ptr Function
+ %composite = OpLoad %mat2x4f %comp_var
+    %insert = OpLoad %vec4f %insert_var
+    %result = OpCompositeInsert %mat2x4f %insert %composite 1
+              OpReturn
+              OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:ptr<function, mat2x4<f32>, read_write> = var undef
+    %3:ptr<function, vec4<f32>, read_write> = var undef
+    %4:mat2x4<f32> = load %2
+    %5:vec4<f32> = load %3
+    %6:ptr<function, mat2x4<f32>, read_write> = var %4
+    %7:ptr<function, vec4<f32>, read_write> = access %6, 1u
+    store %7, %5
+    %8:mat2x4<f32> = load %6
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, CompositeInsert_MatrixElement) {
+    EXPECT_IR(R"(
+              OpCapability Shader
+              OpMemoryModel Logical GLSL450
+              OpEntryPoint GLCompute %main "main"
+              OpExecutionMode %main LocalSize 1 1 1
+      %void = OpTypeVoid
+       %f32 = OpTypeFloat 32
+   %f32_ptr = OpTypePointer Function %f32
+     %vec4f = OpTypeVector %f32 4
+ %vec4f_ptr = OpTypePointer Function %vec4f
+   %mat2x4f = OpTypeMatrix %vec4f 2
+%mat2x4f_ptr = OpTypePointer Function %mat2x4f
+   %ep_type = OpTypeFunction %void
+      %main = OpFunction %void None %ep_type
+%main_label = OpLabel
+  %comp_var = OpVariable %mat2x4f_ptr Function
+%insert_var = OpVariable %f32_ptr Function
+ %composite = OpLoad %mat2x4f %comp_var
+    %insert = OpLoad %f32 %insert_var
+    %result = OpCompositeInsert %mat2x4f %insert %composite 0 2
+              OpReturn
+              OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:ptr<function, mat2x4<f32>, read_write> = var undef
+    %3:ptr<function, f32, read_write> = var undef
+    %4:mat2x4<f32> = load %2
+    %5:f32 = load %3
+    %6:ptr<function, mat2x4<f32>, read_write> = var %4
+    %7:ptr<function, f32, read_write> = access %6, 0u, 2u
+    store %7, %5
+    %8:mat2x4<f32> = load %6
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, CompositeInsert_Array) {
+    EXPECT_IR(R"(
+              OpCapability Shader
+              OpMemoryModel Logical GLSL450
+              OpEntryPoint GLCompute %main "main"
+              OpExecutionMode %main LocalSize 1 1 1
+      %void = OpTypeVoid
+       %f32 = OpTypeFloat 32
+      %uint = OpTypeInt 32 0
+   %f32_ptr = OpTypePointer Function %f32
+   %const_3 = OpConstant %uint 3
+   %arr_f32 = OpTypeArray %f32 %const_3
+%arr_f32_ptr = OpTypePointer Function %arr_f32
+   %ep_type = OpTypeFunction %void
+      %main = OpFunction %void None %ep_type
+%main_label = OpLabel
+  %comp_var = OpVariable %arr_f32_ptr Function
+%insert_var = OpVariable %f32_ptr Function
+ %composite = OpLoad %arr_f32 %comp_var
+    %insert = OpLoad %f32 %insert_var
+    %result = OpCompositeInsert %arr_f32 %insert %composite 2
+              OpReturn
+              OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:ptr<function, array<f32, 3>, read_write> = var undef
+    %3:ptr<function, f32, read_write> = var undef
+    %4:array<f32, 3> = load %2
+    %5:f32 = load %3
+    %6:ptr<function, array<f32, 3>, read_write> = var %4
+    %7:ptr<function, f32, read_write> = access %6, 2u
+    store %7, %5
+    %8:array<f32, 3> = load %6
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, CompositeInsert_ArrayOfVec) {
+    EXPECT_IR(R"(
+              OpCapability Shader
+              OpMemoryModel Logical GLSL450
+              OpEntryPoint GLCompute %main "main"
+              OpExecutionMode %main LocalSize 1 1 1
+      %void = OpTypeVoid
+       %f32 = OpTypeFloat 32
+      %uint = OpTypeInt 32 0
+   %f32_ptr = OpTypePointer Function %f32
+     %vec3f = OpTypeVector %f32 3
+ %vec3f_ptr = OpTypePointer Function %vec3f
+   %const_4 = OpConstant %uint 4
+ %arr_vec3f = OpTypeArray %vec3f %const_4
+%arr_vec3f_ptr = OpTypePointer Function %arr_vec3f
+   %ep_type = OpTypeFunction %void
+      %main = OpFunction %void None %ep_type
+%main_label = OpLabel
+  %comp_var = OpVariable %arr_vec3f_ptr Function
+%insert_var = OpVariable %vec3f_ptr Function
+ %composite = OpLoad %arr_vec3f %comp_var
+    %insert = OpLoad %vec3f %insert_var
+    %result = OpCompositeInsert %arr_vec3f %insert %composite 1
+              OpReturn
+              OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:ptr<function, array<vec3<f32>, 4>, read_write> = var undef
+    %3:ptr<function, vec3<f32>, read_write> = var undef
+    %4:array<vec3<f32>, 4> = load %2
+    %5:vec3<f32> = load %3
+    %6:ptr<function, array<vec3<f32>, 4>, read_write> = var %4
+    %7:ptr<function, vec3<f32>, read_write> = access %6, 1u
+    store %7, %5
+    %8:array<vec3<f32>, 4> = load %6
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, CompositeInsert_Struct) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+        %f32 = OpTypeFloat 32
+    %f32_ptr = OpTypePointer Function %f32
+      %vec2f = OpTypeVector %f32 2
+     %struct = OpTypeStruct %f32 %vec2f
+%struct_ptr = OpTypePointer Function %struct
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+ %main_label = OpLabel
+   %comp_var = OpVariable %struct_ptr Function
+ %insert_var = OpVariable %f32_ptr Function
+  %composite = OpLoad %struct %comp_var
+     %insert = OpLoad %f32 %insert_var
+     %result = OpCompositeInsert %struct %insert %composite 0
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+tint_symbol_2 = struct @align(8) {
+  tint_symbol:f32 @offset(0)
+  tint_symbol_1:vec2<f32> @offset(8)
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:ptr<function, tint_symbol_2, read_write> = var undef
+    %3:ptr<function, f32, read_write> = var undef
+    %4:tint_symbol_2 = load %2
+    %5:f32 = load %3
+    %6:ptr<function, tint_symbol_2, read_write> = var %4
+    %7:ptr<function, f32, read_write> = access %6, 0u
+    store %7, %5
+    %8:tint_symbol_2 = load %6
+    ret
+  }
+}
+)");
+}
+
 TEST_F(SpirvParserTest, VectorInsertDynamic_VectorComponent) {
     EXPECT_IR(R"(
                OpCapability Shader
