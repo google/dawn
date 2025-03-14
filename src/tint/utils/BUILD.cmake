@@ -50,6 +50,7 @@ include(utils/strconv/BUILD.cmake)
 include(utils/symbol/BUILD.cmake)
 include(utils/system/BUILD.cmake)
 include(utils/text/BUILD.cmake)
+include(utils/text_generator/BUILD.cmake)
 
 ################################################################################
 # Target:    tint_utils
@@ -61,13 +62,10 @@ tint_add_target(tint_utils lib
   utils/internal_limits.h
   utils/reflection.cc
   utils/reflection.h
-  utils/text_generator.cc
-  utils/text_generator.h
 )
 
 tint_target_add_dependencies(tint_utils lib
   tint_utils_containers
-  tint_utils_diagnostic
   tint_utils_ice
   tint_utils_macros
   tint_utils_math

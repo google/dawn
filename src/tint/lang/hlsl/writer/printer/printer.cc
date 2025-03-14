@@ -117,7 +117,7 @@
 #include "src/tint/utils/strconv/float_to_string.h"
 #include "src/tint/utils/text/string.h"
 #include "src/tint/utils/text/string_stream.h"
-#include "src/tint/utils/text_generator.h"
+#include "src/tint/utils/text_generator/text_generator.h"
 
 using namespace tint::core::fluent_types;  // NOLINT
 

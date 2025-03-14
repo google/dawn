@@ -78,6 +78,7 @@ tint_target_add_dependencies(tint_lang_hlsl_writer lib
   tint_utils_rtti
   tint_utils_symbol
   tint_utils_text
+  tint_utils_text_generator
 )
 
 tint_target_add_external_dependencies(tint_lang_hlsl_writer lib

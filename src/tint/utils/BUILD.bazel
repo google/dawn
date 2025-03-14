@@ -41,17 +41,14 @@ cc_library(
   srcs = [
     "generation_id.cc",
     "reflection.cc",
-    "text_generator.cc",
   ],
   hdrs = [
     "generation_id.h",
     "internal_limits.h",
     "reflection.h",
-    "text_generator.h",
   ],
   deps = [
     "//src/tint/utils/containers",
-    "//src/tint/utils/diagnostic",
     "//src/tint/utils/ice",
     "//src/tint/utils/macros",
     "//src/tint/utils/math",

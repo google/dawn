@@ -90,7 +90,7 @@
 #include "src/tint/utils/macros/scoped_assignment.h"
 #include "src/tint/utils/rtti/switch.h"
 #include "src/tint/utils/text/string.h"
-#include "src/tint/utils/text_generator.h"
+#include "src/tint/utils/text_generator/text_generator.h"
 
 using namespace tint::core::fluent_types;  // NOLINT
 

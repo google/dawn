@@ -50,13 +50,10 @@ libtint_source_set("utils") {
     "internal_limits.h",
     "reflection.cc",
     "reflection.h",
-    "text_generator.cc",
-    "text_generator.h",
   ]
   deps = [
     "${dawn_root}/src/utils:utils",
     "${tint_src_dir}/utils/containers",
-    "${tint_src_dir}/utils/diagnostic",
     "${tint_src_dir}/utils/ice",
     "${tint_src_dir}/utils/macros",
     "${tint_src_dir}/utils/math",

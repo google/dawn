@@ -166,6 +166,7 @@ cc_library(
     "//src/tint/utils/rtti",
     "//src/tint/utils/symbol",
     "//src/tint/utils/text",
+    "//src/tint/utils/text_generator",
     "@gtest",
     "//src/utils",
   ] + select({
