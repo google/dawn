@@ -39,7 +39,6 @@
 #include "src/tint/lang/wgsl/writer/ir_to_program/ir_to_program.h"
 #include "src/tint/lang/wgsl/writer/ir_to_program/program_options.h"
 #include "src/tint/lang/wgsl/writer/raise/raise.h"
-#include "src/tint/utils/result/result.h"
 #include "src/tint/utils/text/string.h"
 
 using namespace tint::core::fluent_types;  // NOLINT

@@ -31,7 +31,7 @@
 #include <cstdint>
 
 #include "src/tint/utils/macros/compiler.h"
-#include "src/tint/utils/result/result.h"
+#include "src/tint/utils/result.h"
 
 namespace tint::strconv {
 

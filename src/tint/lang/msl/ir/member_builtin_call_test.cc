@@ -38,7 +38,6 @@
 #include "src/tint/lang/core/type/texture_dimension.h"
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/msl/builtin_fn.h"
-#include "src/tint/utils/result/result.h"
 
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT

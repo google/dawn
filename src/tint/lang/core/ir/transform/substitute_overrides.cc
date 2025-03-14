@@ -47,7 +47,6 @@
 #include "src/tint/lang/core/ir/type/array_count.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/ir/value.h"
-#include "src/tint/utils/result/result.h"
 #include "src/utils/numeric.h"
 
 using namespace tint::core::fluent_types;     // NOLINT

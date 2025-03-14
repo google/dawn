@@ -35,7 +35,7 @@
 
 #include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/diagnostic/source.h"
-#include "src/tint/utils/result/result.h"
+#include "src/tint/utils/result.h"
 #include "src/tint/utils/rtti/traits.h"
 #include "src/tint/utils/text/styled_text.h"
 

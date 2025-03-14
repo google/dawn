@@ -64,13 +64,13 @@ tint_add_target(tint_lang_wgsl lib
 )
 
 tint_target_add_dependencies(tint_lang_wgsl lib
+  tint_utils
   tint_utils_containers
   tint_utils_diagnostic
   tint_utils_ice
   tint_utils_macros
   tint_utils_math
   tint_utils_memory
-  tint_utils_result
   tint_utils_rtti
   tint_utils_text
 )
@@ -113,7 +113,6 @@ tint_target_add_dependencies(tint_lang_wgsl_test test
   tint_utils_macros
   tint_utils_math
   tint_utils_memory
-  tint_utils_result
   tint_utils_rtti
   tint_utils_symbol
   tint_utils_text
@@ -155,13 +154,13 @@ tint_add_target(tint_lang_wgsl_bench bench
 
 tint_target_add_dependencies(tint_lang_wgsl_bench bench
   tint_lang_wgsl
+  tint_utils
   tint_utils_containers
   tint_utils_diagnostic
   tint_utils_ice
   tint_utils_macros
   tint_utils_math
   tint_utils_memory
-  tint_utils_result
   tint_utils_rtti
   tint_utils_text
 )
@@ -203,7 +202,6 @@ tint_target_add_dependencies(tint_lang_wgsl_fuzz fuzz
   tint_utils_macros
   tint_utils_math
   tint_utils_memory
-  tint_utils_result
   tint_utils_rtti
   tint_utils_symbol
   tint_utils_text

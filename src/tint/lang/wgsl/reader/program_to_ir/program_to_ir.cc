@@ -109,7 +109,6 @@
 #include "src/tint/utils/containers/scope_stack.h"
 #include "src/tint/utils/macros/defer.h"
 #include "src/tint/utils/macros/scoped_assignment.h"
-#include "src/tint/utils/result/result.h"
 #include "src/tint/utils/rtti/switch.h"
 
 using namespace tint::core::number_suffixes;  // NOLINT

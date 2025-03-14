@@ -64,7 +64,6 @@ tint_target_add_dependencies(tint_lang_msl_writer lib
   tint_utils_macros
   tint_utils_math
   tint_utils_memory
-  tint_utils_result
   tint_utils_rtti
   tint_utils_symbol
   tint_utils_text
@@ -118,7 +117,6 @@ tint_target_add_dependencies(tint_lang_msl_writer_test test
   tint_utils_macros
   tint_utils_math
   tint_utils_memory
-  tint_utils_result
   tint_utils_rtti
   tint_utils_symbol
   tint_utils_text
@@ -169,7 +167,6 @@ tint_target_add_dependencies(tint_lang_msl_writer_bench bench
   tint_utils_macros
   tint_utils_math
   tint_utils_memory
-  tint_utils_result
   tint_utils_rtti
   tint_utils_symbol
   tint_utils_text
@@ -221,7 +218,6 @@ tint_target_add_dependencies(tint_lang_msl_writer_fuzz fuzz
   tint_utils_macros
   tint_utils_math
   tint_utils_memory
-  tint_utils_result
   tint_utils_rtti
   tint_utils_symbol
   tint_utils_text

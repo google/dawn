@@ -47,9 +47,9 @@ cc_library(
     "parse_num.h",
   ],
   deps = [
+    "//src/tint/utils",
     "//src/tint/utils/ice",
     "//src/tint/utils/macros",
-    "//src/tint/utils/result",
     "//src/tint/utils/rtti",
     "//src/tint/utils/text",
     "@abseil_cpp//absl/strings",

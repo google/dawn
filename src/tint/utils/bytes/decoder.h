@@ -40,7 +40,7 @@
 
 #include "src/tint/utils/bytes/reader.h"
 #include "src/tint/utils/reflection.h"
-#include "src/tint/utils/result/result.h"
+#include "src/tint/utils/result.h"
 
 namespace tint::bytes {
 

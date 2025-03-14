@@ -32,7 +32,7 @@
 
 #include "src/tint/utils/bytes/endianness.h"
 #include "src/tint/utils/bytes/swap.h"
-#include "src/tint/utils/result/result.h"
+#include "src/tint/utils/result.h"
 
 namespace tint::bytes {
 

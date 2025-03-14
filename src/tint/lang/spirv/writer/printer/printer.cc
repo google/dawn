@@ -107,7 +107,6 @@
 #include "src/tint/utils/containers/hashmap.h"
 #include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/macros/scoped_assignment.h"
-#include "src/tint/utils/result/result.h"
 #include "src/tint/utils/rtti/switch.h"
 #include "src/tint/utils/symbol/symbol.h"
 

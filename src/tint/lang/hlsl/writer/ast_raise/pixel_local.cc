@@ -39,7 +39,6 @@
 #include "src/tint/lang/wgsl/sem/struct.h"
 #include "src/tint/utils/containers/transform.h"
 #include "src/tint/utils/diagnostic/diagnostic.h"
-#include "src/tint/utils/result/result.h"
 #include "src/tint/utils/rtti/switch.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::hlsl::writer::PixelLocal);

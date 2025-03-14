@@ -36,7 +36,7 @@
 #include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/macros/foreach.h"
 #include "src/tint/utils/memory/aligned_storage.h"
-#include "src/tint/utils/result/result.h"
+#include "src/tint/utils/result.h"
 
 /// Forward declarations
 namespace tint {

@@ -32,7 +32,6 @@
 
 #include "src/tint/lang/core/ir/constant.h"
 #include "src/tint/lang/core/type/type.h"
-#include "src/tint/utils/result/result.h"
 
 namespace tint::spirv::type {
 

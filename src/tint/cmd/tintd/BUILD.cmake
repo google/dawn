@@ -45,9 +45,9 @@ tint_add_target(tint_cmd_tintd_cmd cmd
 )
 
 tint_target_add_dependencies(tint_cmd_tintd_cmd cmd
+  tint_utils
   tint_utils_ice
   tint_utils_macros
-  tint_utils_result
   tint_utils_rtti
 )
 

@@ -1,4 +1,4 @@
-// Copyright 2023 The Dawn & Tint Authors
+// Copyright 2022 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,16 +25,57 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/utils/result/result.h"
+#include "src/tint/utils/result.h"
 
 #include <string>
 
+#include "gmock/gmock.h"
+
 namespace tint {
+namespace {
 
-Failure::Failure() = default;
-
-Failure::Failure(std::string_view err) {
-    reason = std::string(err);
+struct S {
+    int value;
+};
+static inline bool operator==(const S& a, const S& b) {
+    return a.value == b.value;
 }
 
+TEST(ResultTest, SuccessInt) {
+    auto r = Result<int>(123);
+    ASSERT_EQ(r, Success);
+    EXPECT_EQ(r.Get(), 123);
+}
+
+TEST(ResultTest, SuccessStruct) {
+    auto r = Result<S>({123});
+    ASSERT_EQ(r, Success);
+    EXPECT_EQ(r->value, 123);
+    EXPECT_EQ(r, S{123});
+}
+
+TEST(ResultTest, Failure) {
+    auto r = Result<int>(Failure{});
+    EXPECT_NE(r, Success);
+}
+
+TEST(ResultTest, CustomFailure) {
+    auto r = Result<int, std::string>("oh noes!");
+    EXPECT_NE(r, Success);
+    EXPECT_EQ(r.Failure(), "oh noes!");
+}
+
+TEST(ResultTest, ValueCast) {
+    struct X {};
+    struct Y : X {};
+
+    Y* y = nullptr;
+    auto r_y = Result<Y*>{y};
+    auto r_x = Result<X*>{r_y};
+
+    (void)r_x;
+    (void)r_y;
+}
+
+}  // namespace
 }  // namespace tint

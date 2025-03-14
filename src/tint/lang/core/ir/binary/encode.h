@@ -31,7 +31,7 @@
 #include <memory>
 
 #include "src/tint/utils/containers/vector.h"
-#include "src/tint/utils/result/result.h"
+#include "src/tint/utils/result.h"
 
 // Forward declarations
 namespace tint::core::ir {

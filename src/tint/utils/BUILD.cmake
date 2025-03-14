@@ -44,7 +44,6 @@ include(utils/macros/BUILD.cmake)
 include(utils/math/BUILD.cmake)
 include(utils/memory/BUILD.cmake)
 include(utils/protos/BUILD.cmake)
-include(utils/result/BUILD.cmake)
 include(utils/rtti/BUILD.cmake)
 include(utils/strconv/BUILD.cmake)
 include(utils/symbol/BUILD.cmake)
@@ -62,6 +61,8 @@ tint_add_target(tint_utils lib
   utils/internal_limits.h
   utils/reflection.cc
   utils/reflection.h
+  utils/result.cc
+  utils/result.h
 )
 
 tint_target_add_dependencies(tint_utils lib
@@ -70,7 +71,6 @@ tint_target_add_dependencies(tint_utils lib
   tint_utils_macros
   tint_utils_math
   tint_utils_memory
-  tint_utils_result
   tint_utils_rtti
   tint_utils_text
 )
@@ -85,6 +85,7 @@ tint_target_add_external_dependencies(tint_utils lib
 ################################################################################
 tint_add_target(tint_utils_test test
   utils/reflection_test.cc
+  utils/result_test.cc
 )
 
 tint_target_add_dependencies(tint_utils_test test
@@ -94,7 +95,6 @@ tint_target_add_dependencies(tint_utils_test test
   tint_utils_macros
   tint_utils_math
   tint_utils_memory
-  tint_utils_result
   tint_utils_rtti
 )
 

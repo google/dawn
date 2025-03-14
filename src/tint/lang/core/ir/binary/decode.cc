@@ -51,7 +51,7 @@
 #include "src/tint/utils/diagnostic/diagnostic.h"
 #include "src/tint/utils/internal_limits.h"
 #include "src/tint/utils/macros/compiler.h"
-#include "src/tint/utils/result/result.h"
+#include "src/tint/utils/result.h"
 #include "src/tint/utils/text/string.h"
 #include "src/tint/utils/text/text_style.h"
 

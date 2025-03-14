@@ -31,7 +31,7 @@
 #include "src/tint/lang/core/type/type.h"
 #include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/diagnostic/diagnostic.h"
-#include "src/tint/utils/result/result.h"
+#include "src/tint/utils/result.h"
 
 // Forward declarations
 namespace tint {
