@@ -33,9 +33,12 @@
 namespace tint::core::ir::transform {
 namespace {
 
-diag::Result<SuccessType> VectorizeScalarMatrixConstructorsFuzzer(Module& ir,
-                                                                  const fuzz::ir::Context&) {
-    return VectorizeScalarMatrixConstructors(ir);
+Result<SuccessType> VectorizeScalarMatrixConstructorsFuzzer(Module& ir, const fuzz::ir::Context&) {
+    auto res = VectorizeScalarMatrixConstructors(ir);
+    if (res != Success) {
+        return Failure{res.Failure().reason.Str()};
+    }
+    return Success;
 }
 
 }  // namespace

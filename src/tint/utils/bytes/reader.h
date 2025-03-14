@@ -32,7 +32,7 @@
 
 #include "src/tint/utils/bytes/endianness.h"
 #include "src/tint/utils/bytes/swap.h"
-#include "src/tint/utils/diagnostic/diagnostic.h"
+#include "src/tint/utils/result/result.h"
 
 namespace tint::bytes {
 
@@ -60,11 +60,11 @@ class Reader {
     /// @param endianness the encoded endianness of the integer
     /// @return the deserialized integer
     template <typename T>
-    diag::Result<T> Int(Endianness endianness = Endianness::kLittle) {
+    Result<T> Int(Endianness endianness = Endianness::kLittle) {
         static_assert(std::is_integral_v<T>);
         T out = 0;
         if (size_t n = Read(reinterpret_cast<std::byte*>(&out), sizeof(T)); n != sizeof(T)) {
-            return diag::Failure{"EOF"};
+            return Failure{"EOF"};
         }
         if (NativeEndianness() != endianness) {
             out = Swap(out);
@@ -76,11 +76,11 @@ class Reader {
     /// If there are too few bytes remaining in the stream, then a failure is returned.
     /// @return the deserialized floating point number
     template <typename T>
-    diag::Result<T> Float() {
+    Result<T> Float() {
         static_assert(std::is_floating_point_v<T>);
         T out = 0;
         if (size_t n = Read(reinterpret_cast<std::byte*>(&out), sizeof(T)); n != sizeof(T)) {
-            return diag::Failure{"EOF"};
+            return Failure{"EOF"};
         }
         return out;
     }
@@ -88,10 +88,10 @@ class Reader {
     /// Reads a boolean from the stream
     /// If there are too few bytes remaining in the stream, then a failure is returned.
     /// @returns true if the next byte is non-zero
-    diag::Result<bool> Bool() {
+    Result<bool> Bool() {
         std::byte b{0};
         if (size_t n = Read(&b, 1); n != 1) {
-            return diag::Failure{"EOF"};
+            return Failure{"EOF"};
         }
         return b != std::byte{0};
     }
@@ -100,12 +100,12 @@ class Reader {
     /// If there are too few bytes remaining in the stream, then a failure is returned.
     /// @param len the length of the returned string in bytes
     /// @return the deserialized string
-    diag::Result<std::string> String(size_t len) {
+    Result<std::string> String(size_t len) {
         std::string out;
         out.resize(len);
         if (size_t n = Read(reinterpret_cast<std::byte*>(out.data()), sizeof(char) * len);
             n != len) {
-            return diag::Failure{"EOF"};
+            return Failure{"EOF"};
         }
         return out;
     }

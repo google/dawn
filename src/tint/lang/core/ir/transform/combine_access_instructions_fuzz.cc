@@ -33,8 +33,12 @@
 namespace tint::core::ir::transform {
 namespace {
 
-diag::Result<SuccessType> CombineAccessInstructionsFuzzer(Module& ir, const fuzz::ir::Context&) {
-    return CombineAccessInstructions(ir);
+Result<SuccessType> CombineAccessInstructionsFuzzer(Module& ir, const fuzz::ir::Context&) {
+    auto res = CombineAccessInstructions(ir);
+    if (res != Success) {
+        return Failure{res.Failure().reason.Str()};
+    }
+    return Success;
 }
 
 }  // namespace

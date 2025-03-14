@@ -33,8 +33,12 @@
 namespace tint::core::ir::transform {
 namespace {
 
-diag::Result<SuccessType> BlockDecoratedStructsFuzzer(Module& ir, const fuzz::ir::Context&) {
-    return BlockDecoratedStructs(ir);
+Result<SuccessType> BlockDecoratedStructsFuzzer(Module& ir, const fuzz::ir::Context&) {
+    auto res = BlockDecoratedStructs(ir);
+    if (res != Success) {
+        return Failure{res.Failure().reason.Str()};
+    }
+    return Success;
 }
 
 }  // namespace

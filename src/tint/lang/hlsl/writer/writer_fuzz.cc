@@ -61,9 +61,9 @@ struct FuzzedOptions {
                  compiler_is_dxc);
 };
 
-diag::Result<SuccessType> IRFuzzer(core::ir::Module& module,
-                                   const fuzz::ir::Context& context,
-                                   FuzzedOptions fuzzed_options) {
+Result<SuccessType> IRFuzzer(core::ir::Module& module,
+                             const fuzz::ir::Context& context,
+                             FuzzedOptions fuzzed_options) {
     Options options;
     options.strip_all_names = fuzzed_options.strip_all_names;
     options.disable_robustness = fuzzed_options.disable_robustness;
@@ -93,7 +93,7 @@ diag::Result<SuccessType> IRFuzzer(core::ir::Module& module,
 
     auto check = CanGenerate(module, options);
     if (check != Success) {
-        return check.Failure();
+        return Failure{check.Failure().reason.Str()};
     }
 
     auto output = Generate(module, options);

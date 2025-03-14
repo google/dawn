@@ -44,14 +44,18 @@ bool CanRun(Module& module) {
     return true;
 }
 
-diag::Result<SuccessType> ValueToLetFuzzer(Module& module,
-                                           const fuzz::ir::Context&,
-                                           ValueToLetConfig config) {
+Result<SuccessType> ValueToLetFuzzer(Module& module,
+                                     const fuzz::ir::Context&,
+                                     ValueToLetConfig config) {
     if (!CanRun(module)) {
-        return diag::Failure{"Cannot run module"};
+        return Failure{"Cannot run module"};
     }
 
-    return ValueToLet(module, config);
+    auto res = ValueToLet(module, config);
+    if (res != Success) {
+        return Failure{res.Failure().reason.Str()};
+    }
+    return Success;
 }
 
 }  // namespace

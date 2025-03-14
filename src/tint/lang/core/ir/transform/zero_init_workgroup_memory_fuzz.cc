@@ -33,8 +33,12 @@
 namespace tint::core::ir::transform {
 namespace {
 
-diag::Result<SuccessType> ZeroInitWorkgroupMemoryFuzzer(Module& ir, const fuzz::ir::Context&) {
-    return ZeroInitWorkgroupMemory(ir);
+Result<SuccessType> ZeroInitWorkgroupMemoryFuzzer(Module& ir, const fuzz::ir::Context&) {
+    auto res = ZeroInitWorkgroupMemory(ir);
+    if (res != Success) {
+        return Failure{res.Failure().reason.Str()};
+    }
+    return Success;
 }
 
 }  // namespace

@@ -33,8 +33,12 @@
 namespace tint::core::ir::transform {
 namespace {
 
-diag::Result<SuccessType> PreservePaddingFuzzer(Module& ir, const fuzz::ir::Context&) {
-    return PreservePadding(ir);
+Result<SuccessType> PreservePaddingFuzzer(Module& ir, const fuzz::ir::Context&) {
+    auto res = PreservePadding(ir);
+    if (res != Success) {
+        return Failure{res.Failure().reason.Str()};
+    }
+    return Success;
 }
 
 }  // namespace

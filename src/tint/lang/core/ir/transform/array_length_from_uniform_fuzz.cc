@@ -35,14 +35,14 @@ namespace {
 
 // Note: ArrayLengthFromUniform uses a different success type than the default SuccessType, so the
 // impl function cannot be passed in directly to fuzzing infra
-diag::Result<SuccessType> ArrayLengthFromUniformFuzzer(
+Result<SuccessType> ArrayLengthFromUniformFuzzer(
     Module& module,
     const fuzz::ir::Context&,
     BindingPoint ubo_binding,
     const std::unordered_map<BindingPoint, uint32_t>& bindpoint_to_size_index) {
     if (auto res = ArrayLengthFromUniform(module, ubo_binding, bindpoint_to_size_index);
         res != Success) {
-        return res.Failure();
+        return Failure{res.Failure().reason.Str()};
     }
 
     return Success;

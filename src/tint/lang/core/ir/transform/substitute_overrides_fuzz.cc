@@ -34,10 +34,14 @@
 namespace tint::core::ir::transform {
 namespace {
 
-diag::Result<SuccessType> SubstituteOverridesFuzzer(Module& ir,
-                                                    const fuzz::ir::Context&,
-                                                    const SubstituteOverridesConfig& cfg) {
-    return SubstituteOverrides(ir, cfg);
+Result<SuccessType> SubstituteOverridesFuzzer(Module& ir,
+                                              const fuzz::ir::Context&,
+                                              const SubstituteOverridesConfig& cfg) {
+    auto res = SubstituteOverrides(ir, cfg);
+    if (res != Success) {
+        return Failure{res.Failure().reason.Str()};
+    }
+    return Success;
 }
 
 }  // namespace

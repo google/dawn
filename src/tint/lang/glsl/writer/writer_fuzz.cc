@@ -105,7 +105,7 @@ Options GenerateOptions(core::ir::Module& module) {
     return options;
 }
 
-diag::Result<SuccessType> IRFuzzer(core::ir::Module& module, const fuzz::ir::Context& context) {
+Result<SuccessType> IRFuzzer(core::ir::Module& module, const fuzz::ir::Context& context) {
     // TODO(375388101): We cannot run the backend for every entry point in the module unless we
     // clone the whole module each time, so for now we just generate the first entry point.
 
@@ -127,7 +127,7 @@ diag::Result<SuccessType> IRFuzzer(core::ir::Module& module, const fuzz::ir::Con
 
     auto check = CanGenerate(module, options);
     if (check != Success) {
-        return check.Failure();
+        return Failure{check.Failure().reason.Str()};
     }
 
     auto output = Generate(module, options, "");

@@ -33,10 +33,14 @@
 namespace tint::core::ir::transform {
 namespace {
 
-diag::Result<SuccessType> BuiltinPolyfillFuzzer(Module& ir,
-                                                const fuzz::ir::Context&,
-                                                const BuiltinPolyfillConfig& config) {
-    return BuiltinPolyfill(ir, config);
+Result<SuccessType> BuiltinPolyfillFuzzer(Module& ir,
+                                          const fuzz::ir::Context&,
+                                          const BuiltinPolyfillConfig& config) {
+    auto res = BuiltinPolyfill(ir, config);
+    if (res != Success) {
+        return Failure{res.Failure().reason.Str()};
+    }
+    return Success;
 }
 
 }  // namespace

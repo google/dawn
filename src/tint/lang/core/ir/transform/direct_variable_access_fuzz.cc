@@ -33,10 +33,14 @@
 namespace tint::core::ir::transform {
 namespace {
 
-diag::Result<SuccessType> DirectVariableAccessFuzzer(Module& ir,
-                                                     const fuzz::ir::Context&,
-                                                     const DirectVariableAccessOptions& options) {
-    return DirectVariableAccess(ir, options);
+Result<SuccessType> DirectVariableAccessFuzzer(Module& ir,
+                                               const fuzz::ir::Context&,
+                                               const DirectVariableAccessOptions& options) {
+    auto res = DirectVariableAccess(ir, options);
+    if (res != Success) {
+        return Failure{res.Failure().reason.Str()};
+    }
+    return Success;
 }
 
 }  // namespace

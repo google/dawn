@@ -37,9 +37,9 @@
 namespace tint::msl::writer {
 namespace {
 
-diag::Result<SuccessType> IRFuzzer(core::ir::Module& module,
-                                   const fuzz::ir::Context& context,
-                                   Options options) {
+Result<SuccessType> IRFuzzer(core::ir::Module& module,
+                             const fuzz::ir::Context& context,
+                             Options options) {
     options.bindings = GenerateBindings(module);
     options.array_length_from_uniform.ubo_binding = 30;
 
@@ -59,7 +59,7 @@ diag::Result<SuccessType> IRFuzzer(core::ir::Module& module,
 
     auto check = CanGenerate(module, options);
     if (check != Success) {
-        return check.Failure();
+        return Failure{check.Failure().reason.Str()};
     }
 
     auto output = Generate(module, options);
