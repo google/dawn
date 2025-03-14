@@ -403,31 +403,21 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
         DAWN_TRY_LOAD_OR_RUN(
             compilation, GetDevice(), std::move(req), CompiledSpirv::FromBlob,
             [](SpirvCompilationRequest r) -> ResultOrError<CompiledSpirv> {
-                tint::ast::transform::Manager transformManager;
-                tint::ast::transform::DataMap transformInputs;
-
-                // Many Vulkan drivers can't handle multi-entrypoint shader modules.
-                transformManager.append(std::make_unique<tint::ast::transform::SingleEntryPoint>());
-                transformInputs.Add<tint::ast::transform::SingleEntryPoint::Config>(
-                    std::string(r.entryPointName));
-
-                tint::Program program;
-                tint::ast::transform::DataMap transformOutputs;
-                {
-                    TRACE_EVENT0(r.platform.UnsafeGetValue(), General, "RunTransforms");
-                    DAWN_TRY_ASSIGN(
-                        program, RunTransforms(&transformManager, r.inputProgram, transformInputs,
-                                               &transformOutputs, nullptr));
-                }
-
                 TRACE_EVENT0(r.platform.UnsafeGetValue(), General,
                              "tint::spirv::writer::Generate()");
 
                 // Convert the AST program to an IR module.
-                auto ir = tint::wgsl::reader::ProgramToLoweredIR(program);
+                auto ir = tint::wgsl::reader::ProgramToLoweredIR(*r.inputProgram);
                 DAWN_INVALID_IF(ir != tint::Success,
                                 "An error occurred while generating Tint IR\n%s",
                                 ir.Failure().reason.Str());
+
+                // Many Vulkan drivers can't handle multi-entrypoint shader modules.
+                auto singleEntryPointResult =
+                    tint::core::ir::transform::SingleEntryPoint(ir.Get(), r.entryPointName);
+                DAWN_INVALID_IF(singleEntryPointResult != tint::Success,
+                                "Pipeline single entry point (IR) failed:\n%s",
+                                singleEntryPointResult.Failure().reason.Str());
 
                 if (r.substituteOverrideConfig) {
                     // this needs to run after SingleEntryPoint transform which removes unused
