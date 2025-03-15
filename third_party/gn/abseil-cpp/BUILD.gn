@@ -373,6 +373,7 @@ absl_source_set("hashtablez_sampler") {
     ":core_headers",
     ":exponential_biased",
     ":memory",
+    ":no_destructor",
     ":raw_logging_internal",
     ":sample_recorder",
     ":stacktrace",
