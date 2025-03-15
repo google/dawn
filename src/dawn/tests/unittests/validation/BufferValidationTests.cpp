@@ -96,7 +96,7 @@ TEST_F(BufferValidationTest, CreationMaxBufferSize) {
     // Success when at limit
     {
         wgpu::BufferDescriptor descriptor;
-        descriptor.size = GetSupportedLimits().limits.maxBufferSize;
+        descriptor.size = GetSupportedLimits().maxBufferSize;
         descriptor.usage = wgpu::BufferUsage::Uniform;
 
         device.CreateBuffer(&descriptor);
@@ -105,9 +105,8 @@ TEST_F(BufferValidationTest, CreationMaxBufferSize) {
     // max possible limit given the adapters.)
     {
         wgpu::BufferDescriptor descriptor;
-        ASSERT_TRUE(GetSupportedLimits().limits.maxBufferSize <
-                    std::numeric_limits<uint32_t>::max());
-        descriptor.size = GetSupportedLimits().limits.maxBufferSize + 1;
+        ASSERT_TRUE(GetSupportedLimits().maxBufferSize < std::numeric_limits<uint32_t>::max());
+        descriptor.size = GetSupportedLimits().maxBufferSize + 1;
         descriptor.usage = wgpu::BufferUsage::Uniform;
 
         ASSERT_DEVICE_ERROR(device.CreateBuffer(&descriptor));
@@ -376,9 +375,8 @@ TEST_P(BufferMappingValidationTest, MapAsync_AlreadyMapped) {
 
 // Test MapAsync() immediately causes a pending map error
 TEST_P(BufferMappingValidationTest, MapAsync_PendingMap) {
-    // Note that in the wire, we currently don't generate a validation error while in native we do.
-    // If eventually we add a way to inject errors on the wire, we may be able to make this behavior
-    // more aligned.
+    // TODO(crbug.com/42241221): Inject a validation error from the wire client, so that behavior
+    // is consistent between native and wire.
     bool validationError = !UsesWire();
 
     // Overlapping range
@@ -913,12 +911,9 @@ TEST_F(BufferValidationTest, GetMappedRange_OnErrorBuffer) {
 
 // Test valid cases to call GetMappedRange on an error buffer that's also OOM.
 TEST_F(BufferValidationTest, GetMappedRange_OnErrorBuffer_OOM) {
-    // TODO(crbug.com/dawn/1506): new (std::nothrow) crashes on OOM on Mac ARM64 because libunwind
-    // doesn't see the previous catchall try-catch.
-    DAWN_SKIP_TEST_IF(DAWN_PLATFORM_IS(MACOS) && DAWN_PLATFORM_IS(ARM64));
-
     uint64_t kStupidLarge = uint64_t(1) << uint64_t(63);
 
+    // mappedAtCreation is the only way to make an error buffer that's mapped.
     if (UsesWire()) {
         wgpu::Buffer buffer = BufferMappedAtCreation(
             kStupidLarge, wgpu::BufferUsage::Storage | wgpu::BufferUsage::MapRead);

@@ -63,9 +63,9 @@ void main_1(tint_module_vars_struct tint_module_vars) {
   uint const x_52 = (*tint_module_vars.x_3).x;
   x_54 = 0u;
   {
-    uint2 tint_loop_idx = 0u;
+    uint2 tint_loop_idx = uint2(4294967295u);
     while(true) {
-      if (all((tint_loop_idx == uint2(4294967295u)))) {
+      if (all((tint_loop_idx == uint2(0u)))) {
         break;
       }
       uint x_55 = 0u;
@@ -80,10 +80,10 @@ void main_1(tint_module_vars_struct tint_module_vars) {
         (*tint_module_vars.x_28)[min(x_62, 4095u)] = S{.field0=((x_67.xy + x_67.zw) * 0.5f), .field1=x_62};
       }
       {
-        uint const tint_low_inc = (tint_loop_idx.x + 1u);
+        uint const tint_low_inc = (tint_loop_idx.x - 1u);
         tint_loop_idx.x = tint_low_inc;
-        uint const tint_carry = uint((tint_low_inc == 0u));
-        tint_loop_idx.y = (tint_loop_idx.y + tint_carry);
+        uint const tint_carry = uint((tint_low_inc == 4294967295u));
+        tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
         x_55 = (x_54 + 32u);
         x_54 = x_55;
       }
@@ -105,9 +105,9 @@ void main_1(tint_module_vars_struct tint_module_vars) {
   x_85 = x_76.xyxy;
   x_88 = 1u;
   {
-    uint2 tint_loop_idx = 0u;
+    uint2 tint_loop_idx = uint2(4294967295u);
     while(true) {
-      if (all((tint_loop_idx == uint2(4294967295u)))) {
+      if (all((tint_loop_idx == uint2(0u)))) {
         break;
       }
       float4 x_111 = 0.0f;
@@ -137,10 +137,10 @@ void main_1(tint_module_vars_struct tint_module_vars) {
         x_86 = x_111;
       }
       {
-        uint const tint_low_inc_1 = (tint_loop_idx.x + 1u);
+        uint const tint_low_inc_1 = (tint_loop_idx.x - 1u);
         tint_loop_idx.x = tint_low_inc_1;
-        uint const tint_carry_1 = uint((tint_low_inc_1 == 0u));
-        tint_loop_idx.y = (tint_loop_idx.y + tint_carry_1);
+        uint const tint_carry_1 = uint((tint_low_inc_1 == 4294967295u));
+        tint_loop_idx.y = (tint_loop_idx.y - tint_carry_1);
         x_89 = (x_88 + 32u);
         x_85 = x_86;
         x_88 = x_89;
@@ -186,7 +186,7 @@ void main_inner(uint3 x_3_param, uint tint_local_index, tint_module_vars_struct 
   main_1(tint_module_vars);
 }
 
-kernel void v_4(uint3 x_3_param [[thread_position_in_threadgroup]], uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_5* v_5 [[threadgroup(0)]], const constant S_2* x_6 [[buffer(0)]], const device S_3* x_9 [[buffer(2)]], device S_4* x_12 [[buffer(1)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
+kernel void v_4(uint3 x_3_param [[thread_position_in_threadgroup]], uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_5* v_5 [[threadgroup(0)]], const constant S_2* x_6 [[buffer(0)]], const device S_3* x_9 [[buffer(1)]], device S_4* x_12 [[buffer(2)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
   thread uint3 x_3 = 0u;
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.x_28=(&(*v_5).tint_symbol), .x_34=(&(*v_5).tint_symbol_1), .x_35=(&(*v_5).tint_symbol_2), .x_36=(&(*v_5).tint_symbol_3), .x_37=(&(*v_5).tint_symbol_4), .x_3=(&x_3), .x_6=x_6, .x_9=x_9, .x_12=x_12, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
   main_inner(x_3_param, tint_local_index, tint_module_vars);

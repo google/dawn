@@ -15,23 +15,23 @@
                OpMemoryModel Logical Vulkan
                OpEntryPoint GLCompute %compute_main "compute_main"
                OpExecutionMode %compute_main LocalSize 1 1 1
-               OpMemberName %prevent_dce_block 0 "inner"
-               OpName %prevent_dce_block "prevent_dce_block"
+               OpMemberName %prevent_dce_block_tint_explicit_layout 0 "inner"
+               OpName %prevent_dce_block_tint_explicit_layout "prevent_dce_block_tint_explicit_layout"
                OpName %subgroupMatrixMultiplyAccumulate_8b907c "subgroupMatrixMultiplyAccumulate_8b907c"
                OpName %res "res"
                OpName %compute_main "compute_main"
                OpDecorate %_arr_half_uint_1024 ArrayStride 2
-               OpMemberDecorate %prevent_dce_block 0 Offset 0
-               OpDecorate %prevent_dce_block Block
+               OpMemberDecorate %prevent_dce_block_tint_explicit_layout 0 Offset 0
+               OpDecorate %prevent_dce_block_tint_explicit_layout Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
        %half = OpTypeFloat 16
        %uint = OpTypeInt 32 0
   %uint_1024 = OpConstant %uint 1024
 %_arr_half_uint_1024 = OpTypeArray %half %uint_1024
-%prevent_dce_block = OpTypeStruct %_arr_half_uint_1024
-%_ptr_StorageBuffer_prevent_dce_block = OpTypePointer StorageBuffer %prevent_dce_block
-          %1 = OpVariable %_ptr_StorageBuffer_prevent_dce_block StorageBuffer
+%prevent_dce_block_tint_explicit_layout = OpTypeStruct %_arr_half_uint_1024
+%_ptr_StorageBuffer_prevent_dce_block_tint_explicit_layout = OpTypePointer StorageBuffer %prevent_dce_block_tint_explicit_layout
+          %1 = OpVariable %_ptr_StorageBuffer_prevent_dce_block_tint_explicit_layout StorageBuffer
      %uint_3 = OpConstant %uint 3
      %uint_8 = OpConstant %uint 8
      %uint_2 = OpConstant %uint 2
@@ -53,7 +53,7 @@
 %subgroupMatrixMultiplyAccumulate_8b907c = OpFunction %9 None %13
          %14 = OpLabel
         %res = OpVariable %_ptr_Function_9 Function
-         %22 = OpCooperativeMatrixMulAddKHR %9 %15 %18 %21
+         %22 = OpCooperativeMatrixMulAddKHR %9 %15 %18 %21 NoneKHR
                OpStore %res %22
          %25 = OpLoad %9 %res None
                OpReturnValue %25

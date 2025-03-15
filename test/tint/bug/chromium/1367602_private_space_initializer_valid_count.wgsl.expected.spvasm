@@ -10,7 +10,6 @@
                OpName %v "v"
                OpName %f "f"
                OpName %unused_entry_point "unused_entry_point"
-               OpDecorate %_arr_bool_uint_65535 ArrayStride 4
        %bool = OpTypeBool
        %uint = OpTypeInt 32 0
  %uint_65535 = OpConstant %uint 65535

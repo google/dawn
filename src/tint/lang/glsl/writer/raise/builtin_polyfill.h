@@ -28,7 +28,7 @@
 #ifndef SRC_TINT_LANG_GLSL_WRITER_RAISE_BUILTIN_POLYFILL_H_
 #define SRC_TINT_LANG_GLSL_WRITER_RAISE_BUILTIN_POLYFILL_H_
 
-#include "src/tint/utils/result/result.h"
+#include "src/tint/utils/diagnostic/diagnostic.h"
 
 // Forward declarations.
 namespace tint::core::ir {
@@ -42,7 +42,7 @@ namespace tint::glsl::writer::raise {
 /// GLSL polyfilled or backend intrinsic functions.
 /// @param module the module to transform
 /// @returns success or failure
-Result<SuccessType> BuiltinPolyfill(core::ir::Module& module);
+diag::Result<SuccessType> BuiltinPolyfill(core::ir::Module& module);
 
 }  // namespace tint::glsl::writer::raise
 

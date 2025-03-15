@@ -38,13 +38,6 @@
                OpDecorate %main_loc4_Output Location 4
                OpDecorate %main_loc5_Output Location 5
                OpDecorate %main___point_size_Output BuiltIn PointSize
-               OpMemberDecorate %VertexOutputs 0 Offset 0
-               OpMemberDecorate %VertexOutputs 1 Offset 4
-               OpMemberDecorate %VertexOutputs 2 Offset 8
-               OpMemberDecorate %VertexOutputs 3 Offset 16
-               OpMemberDecorate %VertexOutputs 4 Offset 32
-               OpMemberDecorate %VertexOutputs 5 Offset 48
-               OpMemberDecorate %VertexOutputs 6 Offset 56
         %int = OpTypeInt 32 1
 %_ptr_Output_int = OpTypePointer Output %int
 %main_loc0_Output = OpVariable %_ptr_Output_int Output

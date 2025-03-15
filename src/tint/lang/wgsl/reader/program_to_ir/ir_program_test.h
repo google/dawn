@@ -50,10 +50,10 @@ class IRProgramTestBase : public BASE, public ProgramBuilder {
 
     /// Builds a core-dialect module from this ProgramBuilder.
     /// @returns the generated core-dialect module
-    tint::Result<core::ir::Module> Build() {
+    diag::Result<core::ir::Module> Build() {
         Program program{resolver::Resolve(*this)};
         if (!program.IsValid()) {
-            return Failure{program.Diagnostics()};
+            return diag::Failure{program.Diagnostics()};
         }
 
         auto result = wgsl::reader::ProgramToIR(program);
@@ -76,7 +76,7 @@ class IRProgramTestBase : public BASE, public ProgramBuilder {
     /// Build the module from the given WGSL.
     /// @param wgsl the WGSL to convert to IR
     /// @returns the generated module
-    Result<core::ir::Module> Build(std::string wgsl) {
+    diag::Result<core::ir::Module> Build(std::string wgsl) {
         Source::File file("test.wgsl", std::move(wgsl));
         auto result = wgsl::reader::WgslToIR(&file);
         if (result == Success) {

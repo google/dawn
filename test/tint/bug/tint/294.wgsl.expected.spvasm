@@ -10,15 +10,15 @@
                OpMemberName %Light 0 "position"
                OpMemberName %Light 1 "colour"
                OpName %Light "Light"
-               OpMemberName %Lights 0 "light"
-               OpName %Lights "Lights"
+               OpMemberName %Lights_tint_explicit_layout 0 "light"
+               OpName %Lights_tint_explicit_layout "Lights_tint_explicit_layout"
                OpName %lights "lights"
                OpName %unused_entry_point "unused_entry_point"
                OpMemberDecorate %Light 0 Offset 0
                OpMemberDecorate %Light 1 Offset 16
                OpDecorate %_runtimearr_Light ArrayStride 32
-               OpMemberDecorate %Lights 0 Offset 0
-               OpDecorate %Lights Block
+               OpMemberDecorate %Lights_tint_explicit_layout 0 Offset 0
+               OpDecorate %Lights_tint_explicit_layout Block
                OpDecorate %lights DescriptorSet 0
                OpDecorate %lights Binding 1
                OpDecorate %lights NonWritable
@@ -26,9 +26,9 @@
     %v3float = OpTypeVector %float 3
       %Light = OpTypeStruct %v3float %v3float
 %_runtimearr_Light = OpTypeRuntimeArray %Light
-     %Lights = OpTypeStruct %_runtimearr_Light
-%_ptr_StorageBuffer_Lights = OpTypePointer StorageBuffer %Lights
-     %lights = OpVariable %_ptr_StorageBuffer_Lights StorageBuffer
+%Lights_tint_explicit_layout = OpTypeStruct %_runtimearr_Light
+%_ptr_StorageBuffer_Lights_tint_explicit_layout = OpTypePointer StorageBuffer %Lights_tint_explicit_layout
+     %lights = OpVariable %_ptr_StorageBuffer_Lights_tint_explicit_layout StorageBuffer
        %void = OpTypeVoid
          %10 = OpTypeFunction %void
 %unused_entry_point = OpFunction %void None %10

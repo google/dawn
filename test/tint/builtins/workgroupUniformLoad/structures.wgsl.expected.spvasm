@@ -16,13 +16,6 @@
                OpName %v "v"
                OpName %foo "foo"
                OpName %unused_entry_point "unused_entry_point"
-               OpMemberDecorate %Inner 0 Offset 0
-               OpMemberDecorate %Inner 1 Offset 16
-               OpMemberDecorate %Inner 2 Offset 32
-               OpMemberDecorate %Inner 2 ColMajor
-               OpMemberDecorate %Inner 2 MatrixStride 16
-               OpDecorate %_arr_Inner_uint_4 ArrayStride 80
-               OpMemberDecorate %Outer 0 Offset 0
        %bool = OpTypeBool
         %int = OpTypeInt 32 1
       %v4int = OpTypeVector %int 4

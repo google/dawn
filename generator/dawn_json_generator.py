@@ -131,22 +131,26 @@ class EnumType(Type):
                 assert prefix == 0
                 prefix = 0x0002_0000
 
-            if 'emscripten' in tags:
-                assert prefix == 0
-                prefix = 0x0004_0000
-
-            if 'dawn' in tags:
-                assert prefix == 0
-                prefix = 0x0005_0000
+            if 'upstream' not in tags:
+                if 'dawn' in tags:
+                    # Dawn-only or Dawn+Emscripten
+                    assert prefix == 0
+                    prefix = 0x0005_0000
+                elif 'emscripten' in tags:
+                    # Emscripten-only
+                    assert prefix == 0
+                    prefix = 0x0004_0000
 
             if prefix == 0 and 'native' in tags:
                 prefix = 0x0001_0000
 
-            if 'deprecated' not in tags:
-                if 'emscripten' in tags:
-                    assert value_name.startswith('emscripten')
+            if 'deprecated' not in tags and 'upstream' not in tags:
+                # Emscripten implements some Dawn extensions, and some upstream things that
+                # aren't in Dawn yet.
+                if 'emscripten' in tags and 'dawn' not in tags:
+                    assert value_name.startswith('emscripten'), name
                 else:
-                    assert not value_name.startswith('emscripten')
+                    assert not value_name.startswith('emscripten'), name
 
             value += prefix
 
@@ -238,6 +242,9 @@ class RecordMember:
         self.default_value = default_value
         self.skip_serialize = skip_serialize
 
+        if self.type.category == "bitmask" and not self.default_value:
+            self.default_value = "none"
+
     def set_handle_type(self, handle_type):
         assert self.type.dict_name == "ObjectHandle"
         self.handle_type = handle_type
@@ -302,12 +309,11 @@ class Record:
 class StructureType(Record, Type):
     def __init__(self, is_enabled, name, json_data):
         tags = json_data.get('tags', [])
-        if 'deprecated' not in tags:
-            if 'emscripten' in tags:
-                if name != 'INTERNAL_HAVE_EMDAWNWEBGPU_HEADER':
-                    assert name.startswith('emscripten')
-            else:
-                assert not name.startswith('emscripten')
+        if tags == ['emscripten']:
+            if name != 'INTERNAL_HAVE_EMDAWNWEBGPU_HEADER':
+                assert name.startswith('emscripten'), name
+        else:
+            assert not name.startswith('emscripten'), name
 
         Record.__init__(self, name)
         json_data_override = {}
@@ -519,6 +525,9 @@ def topo_sort_structure(structs):
             if member.type.category == 'structure':
                 max_dependent_depth = max(max_dependent_depth,
                                           compute_depth(member.type) + 1)
+        for extension in struct.extensions:
+            max_dependent_depth = max(max_dependent_depth,
+                                      compute_depth(extension) + 1)
 
         struct.subdag_depth = max_dependent_depth
         struct.visited = True

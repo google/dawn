@@ -27,6 +27,7 @@
 
 #include "src/tint/lang/spirv/reader/lower/lower.h"
 
+#include "src/tint/lang/core/ir/transform/remove_terminator_args.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/spirv/reader/lower/builtins.h"
 #include "src/tint/lang/spirv/reader/lower/shader_io.h"
@@ -34,7 +35,7 @@
 
 namespace tint::spirv::reader {
 
-Result<SuccessType> Lower(core::ir::Module& mod) {
+diag::Result<SuccessType> Lower(core::ir::Module& mod) {
 #define RUN_TRANSFORM(name, ...)         \
     do {                                 \
         auto result = name(__VA_ARGS__); \
@@ -47,7 +48,19 @@ Result<SuccessType> Lower(core::ir::Module& mod) {
     RUN_TRANSFORM(lower::ShaderIO, mod);
     RUN_TRANSFORM(lower::Builtins, mod);
 
-    if (auto res = core::ir::ValidateAndDumpIfNeeded(mod, "spirv.Lower"); res != Success) {
+    // Remove the terminator args at this point. There are no logical short-circuiting operators in
+    // SPIR-V that we will lose track of, all the terminators are for hoisted values. We don't do
+    // this on WGSL raise because `RemoveTerminatorArgs` loses the ability to determine logical `&&`
+    // and `||` operators based on the terminators. Moving the logical detection to a separate
+    // transform is also complicated because of the way it currently detects multi element `&&` and
+    // `||` statements.
+    RUN_TRANSFORM(core::ir::transform::RemoveTerminatorArgs, mod);
+
+    auto res = core::ir::ValidateAndDumpIfNeeded(mod, "spirv.Lower",
+                                                 core::ir::Capabilities{
+                                                     core::ir::Capability::kAllowOverrides,
+                                                 });
+    if (res != Success) {
         return res.Failure();
     }
 

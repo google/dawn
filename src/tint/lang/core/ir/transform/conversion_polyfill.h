@@ -28,10 +28,8 @@
 #ifndef SRC_TINT_LANG_CORE_IR_TRANSFORM_CONVERSION_POLYFILL_H_
 #define SRC_TINT_LANG_CORE_IR_TRANSFORM_CONVERSION_POLYFILL_H_
 
-#include <string>
-
+#include "src/tint/utils/diagnostic/diagnostic.h"
 #include "src/tint/utils/reflection.h"
-#include "src/tint/utils/result/result.h"
 
 // Forward declarations.
 namespace tint::core::ir {
@@ -54,7 +52,8 @@ struct ConversionPolyfillConfig {
 /// @param module the module to transform
 /// @param config the polyfill configuration
 /// @returns success or failure
-Result<SuccessType> ConversionPolyfill(Module& module, const ConversionPolyfillConfig& config);
+diag::Result<SuccessType> ConversionPolyfill(Module& module,
+                                             const ConversionPolyfillConfig& config);
 
 }  // namespace tint::core::ir::transform
 

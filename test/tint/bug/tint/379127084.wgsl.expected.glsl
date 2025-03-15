@@ -52,9 +52,9 @@ void _skslMain(FSIn _stageIn, inout FSOut _stageOut) {
   float _60_n = 1.0f;
   int _61_o = 0;
   {
-    uvec2 tint_loop_idx = uvec2(0u);
+    uvec2 tint_loop_idx = uvec2(4294967295u);
     while(true) {
-      if (all(equal(tint_loop_idx, uvec2(4294967295u)))) {
+      if (all(equal(tint_loop_idx, uvec2(0u)))) {
         break;
       }
       int v_6 = _61_o;
@@ -88,9 +88,9 @@ void _skslMain(FSIn _stageIn, inout FSOut _stageOut) {
         vec4 _71_g = vec4(0.0f);
         int _72_h = 0;
         {
-          uvec2 tint_loop_idx_1 = uvec2(0u);
+          uvec2 tint_loop_idx_1 = uvec2(4294967295u);
           while(true) {
-            if (all(equal(tint_loop_idx_1, uvec2(4294967295u)))) {
+            if (all(equal(tint_loop_idx_1, uvec2(0u)))) {
               break;
             }
             float _73_i = ((float(_72_h) + 0.5f) * 0.25f);
@@ -121,10 +121,10 @@ void _skslMain(FSIn _stageIn, inout FSOut _stageOut) {
             float _skTemp13 = mix(_81_q, _82_r, _69_e.y);
             _71_g[min(uint(_72_h), 3u)] = _skTemp13;
             {
-              uint tint_low_inc_1 = (tint_loop_idx_1.x + 1u);
+              uint tint_low_inc_1 = (tint_loop_idx_1.x - 1u);
               tint_loop_idx_1.x = tint_low_inc_1;
-              uint tint_carry_1 = uint((tint_low_inc_1 == 0u));
-              tint_loop_idx_1.y = (tint_loop_idx_1.y + tint_carry_1);
+              uint tint_carry_1 = uint((tint_low_inc_1 == 4294967295u));
+              tint_loop_idx_1.y = (tint_loop_idx_1.y - tint_carry_1);
               _72_h = (_72_h + 1);
               if ((_72_h >= 4)) { break; }
             }
@@ -144,10 +144,10 @@ void _skslMain(FSIn _stageIn, inout FSOut _stageOut) {
         break;
       }
       {
-        uint tint_low_inc = (tint_loop_idx.x + 1u);
+        uint tint_low_inc = (tint_loop_idx.x - 1u);
         tint_loop_idx.x = tint_low_inc;
-        uint tint_carry = uint((tint_low_inc == 0u));
-        tint_loop_idx.y = (tint_loop_idx.y + tint_carry);
+        uint tint_carry = uint((tint_low_inc == 4294967295u));
+        tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
         _61_o = (_61_o + 1);
       }
       continue;

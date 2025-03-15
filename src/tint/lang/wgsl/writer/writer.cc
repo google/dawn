@@ -28,7 +28,6 @@
 #include "src/tint/lang/wgsl/writer/writer.h"
 
 #include <memory>
-#include <utility>
 
 #include "src/tint/lang/wgsl/program/program.h"
 #include "src/tint/lang/wgsl/writer/ast_printer/ast_printer.h"
@@ -41,7 +40,7 @@
 
 namespace tint::wgsl::writer {
 
-Result<Output> Generate(const Program& program, const Options& options) {
+diag::Result<Output> Generate(const Program& program, const Options& options) {
     (void)options;
 
     Output output;
@@ -50,7 +49,7 @@ Result<Output> Generate(const Program& program, const Options& options) {
         // Generate the WGSL code.
         auto impl = std::make_unique<SyntaxTreePrinter>(program);
         if (!impl->Generate()) {
-            return Failure{impl->Diagnostics()};
+            return diag::Failure{impl->Diagnostics()};
         }
         output.wgsl = impl->Result();
     } else  // NOLINT(readability/braces)
@@ -59,7 +58,7 @@ Result<Output> Generate(const Program& program, const Options& options) {
         // Generate the WGSL code.
         auto impl = std::make_unique<ASTPrinter>(program);
         if (!impl->Generate()) {
-            return Failure{impl->Diagnostics()};
+            return diag::Failure{impl->Diagnostics()};
         }
         output.wgsl = impl->Result();
     }
@@ -67,7 +66,7 @@ Result<Output> Generate(const Program& program, const Options& options) {
     return output;
 }
 
-Result<Output> WgslFromIR(core::ir::Module& module, const ProgramOptions& options) {
+diag::Result<Output> WgslFromIR(core::ir::Module& module, const ProgramOptions& options) {
     auto res = ProgramFromIR(module, options);
     if (res != Success) {
         return res.Failure();
@@ -75,7 +74,7 @@ Result<Output> WgslFromIR(core::ir::Module& module, const ProgramOptions& option
     return Generate(res.Move(), Options{});
 }
 
-Result<Program> ProgramFromIR(core::ir::Module& module, const ProgramOptions& options) {
+diag::Result<Program> ProgramFromIR(core::ir::Module& module, const ProgramOptions& options) {
     // core-dialect -> WGSL-dialect
     if (auto res = Raise(module); res != Success) {
         return res.Failure();
@@ -83,7 +82,7 @@ Result<Program> ProgramFromIR(core::ir::Module& module, const ProgramOptions& op
 
     auto program = IRToProgram(module, options);
     if (!program.IsValid()) {
-        return Failure{program.Diagnostics()};
+        return diag::Failure{program.Diagnostics()};
     }
 
     return program;

@@ -23,9 +23,6 @@
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 Coherent
-               OpMemberDecorate %S1 0 Offset 0
-               OpMemberDecorate %S2 0 Offset 0
-               OpMemberDecorate %S3 0 Offset 0
         %int = OpTypeInt 32 1
   %out_block = OpTypeStruct %int
 %_ptr_StorageBuffer_out_block = OpTypePointer StorageBuffer %out_block

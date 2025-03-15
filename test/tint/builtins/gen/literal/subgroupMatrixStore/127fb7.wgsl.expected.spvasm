@@ -21,7 +21,6 @@
                OpName %compute_main_inner "compute_main_inner"
                OpName %tint_local_index "tint_local_index"
                OpName %compute_main "compute_main"
-               OpDecorate %_arr_half_uint_64 ArrayStride 2
                OpDecorate %compute_main_local_invocation_index_Input BuiltIn LocalInvocationIndex
        %half = OpTypeFloat 16
        %uint = OpTypeInt 32 0

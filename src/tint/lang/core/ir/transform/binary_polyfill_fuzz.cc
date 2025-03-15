@@ -36,7 +36,11 @@ namespace {
 Result<SuccessType> BinaryPolyfillFuzzer(Module& ir,
                                          const fuzz::ir::Context&,
                                          const BinaryPolyfillConfig& config) {
-    return BinaryPolyfill(ir, config);
+    auto res = BinaryPolyfill(ir, config);
+    if (res != Success) {
+        return Failure{res.Failure().reason.Str()};
+    }
+    return Success;
 }
 
 }  // namespace

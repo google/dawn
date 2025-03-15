@@ -34,7 +34,6 @@
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/type/external_texture.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
-#include "src/tint/utils/result/result.h"
 
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
@@ -76,7 +75,7 @@ struct State {
     Function* gamma_correction = nullptr;
 
     /// Process the module.
-    Result<SuccessType> Process() {
+    diag::Result<SuccessType> Process() {
         // Find module-scope variables that need to be replaced.
         if (!ir.root_block->IsEmpty()) {
             Vector<Instruction*, 4> to_remove;
@@ -114,19 +113,19 @@ struct State {
 
     /// @returns a 2D sampled texture type with a f32 sampled type
     const core::type::SampledTexture* SampledTexture() {
-        return ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32());
+        return ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32());
     }
 
     /// Replace an external texture variable declaration.
     /// @param old_var the variable declaration to replace
-    Result<SuccessType> ReplaceVar(Var* old_var) {
+    diag::Result<SuccessType> ReplaceVar(Var* old_var) {
         auto name = ir.NameOf(old_var);
         auto bp = old_var->BindingPoint();
         auto itr = multiplanar_map.find(bp.value());
         if (DAWN_UNLIKELY(itr == multiplanar_map.end())) {
             std::stringstream err;
             err << "ExternalTextureOptions missing binding entry for " << bp.value();
-            return Failure{err.str()};
+            return diag::Failure{err.str()};
         }
         const auto& new_binding_points = itr->second;
 
@@ -607,7 +606,7 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType> MultiplanarExternalTexture(
+diag::Result<SuccessType> MultiplanarExternalTexture(
     Module& ir,
     const tint::transform::multiplanar::BindingsMap& multiplanar_map) {
     auto result = ValidateAndDumpIfNeeded(ir, "core.MultiplanarExternalTexture");

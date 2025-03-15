@@ -39,6 +39,7 @@
 #include "dawn/common/Log.h"
 #include "dawn/common/Ref.h"
 #include "dawn/common/StringViewUtils.h"
+#include "dawn/common/SystemUtils.h"
 #include "dawn/common/Version_autogen.h"
 #include "dawn/native/AsyncTask.h"
 #include "dawn/native/AttachmentState.h"
@@ -137,6 +138,37 @@ static constexpr WGPUUncapturedErrorCallbackInfo kEmptyUncapturedErrorCallbackIn
     nullptr, nullptr, nullptr, nullptr};
 static constexpr WGPULoggingCallbackInfo kEmptyLoggingCallbackInfo = {nullptr, nullptr, nullptr,
                                                                       nullptr};
+
+std::string GetCompilationLog(const ShaderModuleBase* module) {
+    if (module == nullptr) {
+        return "";
+    }
+
+    const OwnedCompilationMessages* messages = module->GetCompilationMessages();
+    if (!messages->HasWarningsOrErrors()) {
+        return "";
+    }
+
+    // Emit the formatted Tint errors and warnings.
+    std::ostringstream t;
+    t << absl::StrFormat("Compilation log for %s:", module);
+    for (const auto& pMessage : messages->GetFormattedTintMessages()) {
+        t << "\n" << pMessage;
+    }
+
+    return t.str();
+}
+
+void TrimErrorScopeStacks(
+    absl::flat_hash_map<ThreadUniqueId, std::unique_ptr<ErrorScopeStack>>& errorScopeStacks) {
+    for (auto it = errorScopeStacks.begin(); it != errorScopeStacks.end();) {
+        if (!IsThreadAlive(it->first)) {
+            errorScopeStacks.erase(it++);
+        } else {
+            it++;
+        }
+    }
+}
 
 }  // anonymous namespace
 
@@ -298,7 +330,11 @@ DeviceBase::DeviceBase(AdapterBase* adapter,
     AdapterInfo adapterInfo;
     adapter->APIGetInfo(&adapterInfo);
 
-    ApplyFeatures(descriptor);
+    ApplyFeatures(descriptor, adapter->GetFeatureLevel());
+
+    auto effectiveFeatureLevel = HasFeature(Feature::CoreFeaturesAndLimits)
+                                     ? wgpu::FeatureLevel::Core
+                                     : wgpu::FeatureLevel::Compatibility;
 
     DawnCacheDeviceDescriptor cacheDesc = {};
     const auto* cacheDescIn = descriptor.Get<DawnCacheDeviceDescriptor>();
@@ -338,10 +374,9 @@ DeviceBase::DeviceBase(AdapterBase* adapter,
     mBlobCache = std::make_unique<BlobCache>(cacheDesc);
 
     if (descriptor->requiredLimits != nullptr) {
-        mLimits.v1 =
-            ReifyDefaultLimits(descriptor->requiredLimits->limits, adapter->GetFeatureLevel());
+        mLimits.v1 = ReifyDefaultLimits(*descriptor->requiredLimits, effectiveFeatureLevel);
     } else {
-        GetDefaultLimits(&mLimits.v1, adapter->GetFeatureLevel());
+        GetDefaultLimits(&mLimits.v1, effectiveFeatureLevel);
     }
     // Get experimentalSubgroupLimits from physical device
     // TODO(crbug.com/382520104): Remove this since these are now exposed as
@@ -364,6 +399,9 @@ DeviceBase::DeviceBase(AdapterBase* adapter,
     mLimits.texelCopyBufferRowAlignmentLimits =
         GetPhysicalDevice()->GetLimits().texelCopyBufferRowAlignmentLimits;
 
+    // Handle maxXXXPerStage/maxXXXInStage.
+    EnforceLimitSpecInvariants(&mLimits.v1, effectiveFeatureLevel);
+
     mFormatTable = BuildFormatTable(this);
 
     if (!descriptor->label.IsUndefined()) {
@@ -381,6 +419,7 @@ DeviceBase::DeviceBase(AdapterBase* adapter,
 
 DeviceBase::DeviceBase() : mState(State::Alive), mToggles(ToggleStage::Device) {
     GetDefaultLimits(&mLimits.v1, wgpu::FeatureLevel::Core);
+    EnforceLimitSpecInvariants(&mLimits.v1, wgpu::FeatureLevel::Core);
     mFormatTable = BuildFormatTable(this);
 
     DeviceDescriptor desc = {};
@@ -402,7 +441,6 @@ MaybeError DeviceBase::Initialize(Ref<QueueBase> defaultQueue) {
     SetWGSLExtensionAllowList();
 
     mCaches = std::make_unique<DeviceBase::Caches>();
-    mErrorScopeStack = std::make_unique<ErrorScopeStack>();
     mDynamicUploader = std::make_unique<DynamicUploader>(this);
     mCallbackTaskManager = AcquireRef(new CallbackTaskManager());
     mInternalPipelineStore = std::make_unique<InternalPipelineStore>(this);
@@ -437,26 +475,6 @@ MaybeError DeviceBase::Initialize(Ref<QueueBase> defaultQueue) {
         mMutex = AcquireRef(new Mutex);
     } else {
         mMutex = nullptr;
-    }
-
-    if (!IsCompatibilityMode()) {
-        // In core mode the maxStorageXXXInYYYStage are always set to maxStorageXXXPerShaderStage
-        // In compat they can vary but validation will fail if usage is >
-        // maxStorageXXXPerShaderStage In other words:
-        //   In compat, user requests 5 and 4 respectively so result:
-        //     device.limits.maxStorageBuffersInFragmentStage = 5;
-        //     device.limits.maxStorageBuffersPerShaderStage = 4;
-        //     It's ok to use 4 storage buffers in fragment stage but fails if 5 used.
-        //   In core, user requests 5 and 4 respectively so result:
-        //     device.limits.maxStorageBuffersInFragmentStage = 4;
-        //     device.limits.maxStorageBuffersPerShaderStage = 4;
-        //     It's ok to use 4 storage buffers in fragment stage but fails if 5 used.
-        //
-        // Note: these 4 limits are ignored in core validation.
-        mLimits.v1.maxStorageBuffersInFragmentStage = mLimits.v1.maxStorageBuffersPerShaderStage;
-        mLimits.v1.maxStorageTexturesInFragmentStage = mLimits.v1.maxStorageTexturesPerShaderStage;
-        mLimits.v1.maxStorageBuffersInVertexStage = mLimits.v1.maxStorageBuffersPerShaderStage;
-        mLimits.v1.maxStorageTexturesInVertexStage = mLimits.v1.maxStorageTexturesPerShaderStage;
     }
 
     mAdapter->GetInstance()->AddDevice(this);
@@ -531,27 +549,28 @@ void DeviceBase::DestroyObjects() {
     // can destroy the frontend cache.
 
     // clang-format off
-        static constexpr std::array<ObjectType, 20> kObjectTypeDependencyOrder = {
-            ObjectType::ComputePassEncoder,
-            ObjectType::RenderPassEncoder,
-            ObjectType::RenderBundleEncoder,
-            ObjectType::RenderBundle,
-            ObjectType::CommandEncoder,
-            ObjectType::CommandBuffer,
-            ObjectType::RenderPipeline,
-            ObjectType::ComputePipeline,
-            ObjectType::PipelineLayout,
-            ObjectType::BindGroup,
-            ObjectType::BindGroupLayout,
-            ObjectType::ShaderModule,
-            ObjectType::SharedTextureMemory,
-            ObjectType::SharedFence,
-            ObjectType::ExternalTexture,
-            ObjectType::Texture,  // Note that Textures own the TextureViews.
-            ObjectType::QuerySet,
-            ObjectType::Sampler,
-            ObjectType::Buffer,
-        };
+    static constexpr std::array<ObjectType, 21> kObjectTypeDependencyOrder = {
+        ObjectType::ComputePassEncoder,
+        ObjectType::RenderPassEncoder,
+        ObjectType::RenderBundleEncoder,
+        ObjectType::RenderBundle,
+        ObjectType::CommandEncoder,
+        ObjectType::CommandBuffer,
+        ObjectType::RenderPipeline,
+        ObjectType::ComputePipeline,
+        ObjectType::PipelineLayout,
+        ObjectType::BindGroup,
+        ObjectType::BindGroupLayout,
+        ObjectType::BindGroupLayoutInternal,
+        ObjectType::ShaderModule,
+        ObjectType::SharedTextureMemory,
+        ObjectType::SharedFence,
+        ObjectType::ExternalTexture,
+        ObjectType::Texture,  // Note that Textures own the TextureViews.
+        ObjectType::QuerySet,
+        ObjectType::Sampler,
+        ObjectType::Buffer,
+    };
     // clang-format on
 
     for (ObjectType type : kObjectTypeDependencyOrder) {
@@ -735,12 +754,12 @@ void DeviceBase::HandleError(std::unique_ptr<ErrorData> error,
         mCallbackTaskManager->HandleDeviceLoss();
 
         // Still forward device loss errors to the error scopes so they all reject.
-        mErrorScopeStack->HandleError(ToWGPUErrorType(type), messageStr);
+        GetErrorScopeStack()->HandleError(ToWGPUErrorType(type), messageStr);
     } else {
         // Pass the error to the error scope stack and call the uncaptured error callback
         // if it isn't handled. DeviceLost is not handled here because it should be
         // handled by the lost callback.
-        bool captured = mErrorScopeStack->HandleError(ToWGPUErrorType(type), messageStr);
+        bool captured = GetErrorScopeStack()->HandleError(ToWGPUErrorType(type), messageStr);
         if (!captured) {
             // Only call the uncaptured error callback if the device is alive. After the
             // device is lost, the uncaptured error callback should cease firing.
@@ -768,11 +787,24 @@ void DeviceBase::APISetLoggingCallback(const WGPULoggingCallbackInfo& callbackIn
     mLoggingCallbackInfo = callbackInfo;
 }
 
+ErrorScopeStack* DeviceBase::GetErrorScopeStack() {
+    ThreadUniqueId threadId = GetThreadUniqueId();
+    if (!mErrorScopeStacks.contains(threadId)) {
+        // Each time a new thread creates an error stack on a device, we attempt to clean up
+        // terminated thread stacks before adding the new one.
+        TrimErrorScopeStacks(mErrorScopeStacks);
+        mErrorScopeStacks[threadId] = std::make_unique<ErrorScopeStack>();
+    }
+    DAWN_ASSERT(mErrorScopeStacks[threadId] != nullptr);
+    return mErrorScopeStacks[threadId].get();
+}
+
 void DeviceBase::APIPushErrorScope(wgpu::ErrorFilter filter) {
     if (ConsumedError(ValidateErrorFilter(filter))) {
         return;
     }
-    mErrorScopeStack->Push(filter);
+
+    GetErrorScopeStack()->Push(filter);
 }
 
 Future DeviceBase::APIPopErrorScope(const WGPUPopErrorScopeCallbackInfo& callbackInfo) {
@@ -803,8 +835,9 @@ Future DeviceBase::APIPopErrorScope(const WGPUPopErrorScopeCallbackInfo& callbac
                 type = static_cast<WGPUErrorType>(mScope->GetErrorType());
                 message = mScope->GetErrorMessage();
             } else {
-                status = WGPUPopErrorScopeStatus_EmptyStack;
+                status = WGPUPopErrorScopeStatus_Error;
                 type = WGPUErrorType_NoError;
+                message = ToOutputStringView("No error scopes to pop");
             }
 
             mCallback(status, type, message, mUserdata1.ExtractAsDangling(),
@@ -820,8 +853,8 @@ Future DeviceBase::APIPopErrorScope(const WGPUPopErrorScopeCallbackInfo& callbac
 
         if (IsLost()) {
             scope = ErrorScope(wgpu::ErrorType::NoError, "");
-        } else if (!mErrorScopeStack->Empty()) {
-            scope = mErrorScopeStack->Pop();
+        } else if (!GetErrorScopeStack()->Empty()) {
+            scope = GetErrorScopeStack()->Pop();
         }
     }
 
@@ -1408,8 +1441,9 @@ ShaderModuleBase* DeviceBase::APICreateShaderModule(const ShaderModuleDescriptor
     // Acquire the device lock for error handling.
     auto deviceLock(GetScopedLock());
     Ref<ShaderModuleBase> result;
-    if (ConsumedError(std::move(resultOrError), &result, "calling %s.CreateShaderModule(%s).", this,
-                      descriptor)) {
+    auto log = GetCompilationLog(result.Get());
+    if (ConsumedError(std::move(resultOrError), &result, "calling %s.CreateShaderModule(%s).\n%s",
+                      this, descriptor, log)) {
         DAWN_ASSERT(result == nullptr);
         result = ShaderModuleBase::MakeError(this, descriptor ? descriptor->label : nullptr);
         // Emit Tint errors and warnings for the error shader module.
@@ -1417,7 +1451,6 @@ ShaderModuleBase* DeviceBase::APICreateShaderModule(const ShaderModuleDescriptor
         // retrieve it with GetCompilationInfo.
         result->InjectCompilationMessages(std::move(compilationMessages));
     }
-    EmitCompilationLog(result.Get());
     return ReturnToAPI(std::move(result));
 }
 
@@ -1429,10 +1462,10 @@ ShaderModuleBase* DeviceBase::APICreateErrorShaderModule(const ShaderModuleDescr
         std::make_unique<OwnedCompilationMessages>());
     compilationMessages->AddUnanchoredMessage(errorMessage, wgpu::CompilationMessageType::Error);
     result->InjectCompilationMessages(std::move(compilationMessages));
-    EmitCompilationLog(result.Get());
+    auto log = GetCompilationLog(result.Get());
 
-    std::unique_ptr<ErrorData> errorData =
-        DAWN_VALIDATION_ERROR("Error in calling %s.CreateShaderModule(%s).", this, descriptor);
+    std::unique_ptr<ErrorData> errorData = DAWN_VALIDATION_ERROR(
+        "Error in calling %s.CreateShaderModule(%s).\n%s", this, descriptor, log);
     ConsumeError(std::move(errorData));
 
     return ReturnToAPI(std::move(result));
@@ -1612,7 +1645,8 @@ ResultOrError<Ref<SharedFenceBase>> DeviceBase::ImportSharedFenceImpl(
     return DAWN_UNIMPLEMENTED_ERROR("Not implemented");
 }
 
-void DeviceBase::ApplyFeatures(const UnpackedPtr<DeviceDescriptor>& deviceDescriptor) {
+void DeviceBase::ApplyFeatures(const UnpackedPtr<DeviceDescriptor>& deviceDescriptor,
+                               wgpu::FeatureLevel level) {
     DAWN_ASSERT(deviceDescriptor);
     // Validate all required features with device toggles.
     DAWN_ASSERT(GetPhysicalDevice()->SupportsAllRequiredFeatures(
@@ -1620,6 +1654,12 @@ void DeviceBase::ApplyFeatures(const UnpackedPtr<DeviceDescriptor>& deviceDescri
 
     for (uint32_t i = 0; i < deviceDescriptor->requiredFeatureCount; ++i) {
         mEnabledFeatures.EnableFeature(deviceDescriptor->requiredFeatures[i]);
+    }
+
+    if (level == wgpu::FeatureLevel::Core) {
+        // Core-defaulting adapters always support the "core-features-and-limits" feature.
+        // It is automatically enabled on devices created from such adapters.
+        mEnabledFeatures.EnableFeature(wgpu::FeatureName::CoreFeaturesAndLimits);
     }
 
     // TODO(384921944): Enable Compat's optional features by default in Core Mode.
@@ -1661,6 +1701,10 @@ void DeviceBase::SetWGSLExtensionAllowList() {
     if (mEnabledFeatures.IsEnabled(Feature::ClipDistances)) {
         mWGSLAllowedFeatures.extensions.insert(tint::wgsl::Extension::kClipDistances);
     }
+    if (mEnabledFeatures.IsEnabled(Feature::ChromiumExperimentalSubgroupMatrix)) {
+        mWGSLAllowedFeatures.extensions.insert(
+            tint::wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+    }
 
     // Language features are enabled instance-wide.
     const auto& allowedFeatures = GetInstance()->GetAllowedWGSLLanguageFeatures();
@@ -1680,7 +1724,7 @@ bool DeviceBase::IsRobustnessEnabled() const {
 }
 
 bool DeviceBase::IsCompatibilityMode() const {
-    return mAdapter != nullptr && mAdapter->GetFeatureLevel() == wgpu::FeatureLevel::Compatibility;
+    return !HasFeature(Feature::CoreFeaturesAndLimits);
 }
 
 bool DeviceBase::IsImmediateErrorHandlingEnabled() const {
@@ -1718,19 +1762,15 @@ void DeviceBase::EmitCompilationLog(const ShaderModuleBase* module) {
         // Note: if there are multiple threads emitting logs, this may not actually be the exact
         // last message. This is probably not a huge problem since this message will be emitted
         // somewhere near the end.
-        return EmitLog(WGPULoggingType_Warning,
-                       "Reached the WGSL compilation log warning limit. To see all the compilation "
-                       "logs, query them directly on the ShaderModule objects.");
+        EmitLog(WGPULoggingType_Warning,
+                "Reached the WGSL compilation log warning limit. To see all the compilation "
+                "logs, query them directly on the ShaderModule objects.");
     }
 
-    // Emit the formatted Tint errors and warnings.
-    std::ostringstream t;
-    t << absl::StrFormat("Compilation log for %s:", module);
-    for (const auto& pMessage : messages->GetFormattedTintMessages()) {
-        t << "\n" << pMessage;
+    auto msg = GetCompilationLog(module);
+    if (!msg.empty()) {
+        EmitLog(WGPULoggingType_Warning, msg.c_str());
     }
-
-    EmitLog(WGPULoggingType_Warning, t.str().c_str());
 }
 
 void DeviceBase::EmitLog(std::string_view message) {
@@ -1771,16 +1811,20 @@ wgpu::Status DeviceBase::APIGetAHardwareBufferProperties(void* handle,
     return wgpu::Status::Success;
 }
 
-wgpu::Status DeviceBase::APIGetLimits(SupportedLimits* limits) const {
+wgpu::Status DeviceBase::APIGetLimits(Limits* limits) const {
     DAWN_ASSERT(limits != nullptr);
     InstanceBase* instance = GetAdapter()->GetInstance();
 
-    UnpackedPtr<SupportedLimits> unpacked;
+    UnpackedPtr<Limits> unpacked;
     if (instance->ConsumedError(ValidateAndUnpack(limits), &unpacked)) {
         return wgpu::Status::Error;
     }
 
-    limits->limits = mLimits.v1;
+    {
+        wgpu::ChainedStructOut* originalChain = unpacked->nextInChain;
+        **unpacked = mLimits.v1;
+        unpacked->nextInChain = originalChain;
+    }
 
     // TODO(354751907): Move this to AdapterInfo
     if (auto* subgroupLimits = unpacked.Get<DawnExperimentalSubgroupLimits>()) {
@@ -2390,16 +2434,29 @@ void DeviceBase::DumpMemoryStatistics(dawn::native::MemoryDump* dump) const {
     });
 }
 
-uint64_t DeviceBase::ComputeEstimatedMemoryUsage() const {
+MemoryUsageInfo DeviceBase::ComputeEstimatedMemoryUsage() const {
     DAWN_ASSERT(IsLockedByCurrentThreadIfNeeded());
-    uint64_t size = 0;
-    GetObjectTrackingList(ObjectType::Texture)->ForEach([&](const ApiObjectBase* texture) {
-        size += static_cast<const TextureBase*>(texture)->ComputeEstimatedByteSize();
+    MemoryUsageInfo info = {};
+
+    GetObjectTrackingList(ObjectType::Texture)->ForEach([&](const ApiObjectBase* ptr) {
+        auto texture = static_cast<const TextureBase*>(ptr);
+        auto size = texture->ComputeEstimatedByteSize();
+        info.totalUsage += size;
+        info.texturesUsage += size;
+        if (texture->GetSampleCount() > 1) {
+            info.msaaTexturesUsage += size;
+        }
+        if (texture->GetFormat().HasDepthOrStencil()) {
+            info.depthStencilTexturesUsage += size;
+        }
     });
     GetObjectTrackingList(ObjectType::Buffer)->ForEach([&](const ApiObjectBase* buffer) {
-        size += static_cast<const BufferBase*>(buffer)->GetAllocatedSize();
+        auto size = static_cast<const BufferBase*>(buffer)->GetAllocatedSize();
+        info.totalUsage += size;
+        info.buffersUsage += size;
     });
-    return size;
+
+    return info;
 }
 
 void DeviceBase::ReduceMemoryUsage() {
@@ -2410,6 +2467,12 @@ void DeviceBase::ReduceMemoryUsage() {
     GetDynamicUploader()->Deallocate(GetQueue()->GetCompletedCommandSerial(), /*freeAll=*/true);
     mInternalPipelineStore->ResetScratchBuffers();
     mTemporaryUniformBuffer = nullptr;
+
+    GetObjectTrackingList(ObjectType::BindGroupLayoutInternal)->ForEach([](ApiObjectBase* object) {
+        static_cast<BindGroupLayoutInternalBase*>(object)->ReduceMemoryUsage();
+    });
+
+    TrimErrorScopeStacks(mErrorScopeStacks);
 }
 
 void DeviceBase::PerformIdleTasks() {
@@ -2440,6 +2503,43 @@ IgnoreLazyClearCountScope::IgnoreLazyClearCountScope(DeviceBase* device)
 
 IgnoreLazyClearCountScope::~IgnoreLazyClearCountScope() {
     mDevice->mLazyClearCountForTesting = mLazyClearCountForTesting;
+}
+
+std::pair<std::string, bool> DeviceBase::GetTraceInfo() {
+    static std::atomic<uint32_t> s_count = 0;
+
+    auto [traceFileBase, traceFileBaseSet] = GetEnvironmentVar("DAWN_TRACE_FILE_BASE");
+    auto [traceDeviceFilter, traceDeviceFilterSet] = GetEnvironmentVar("DAWN_TRACE_DEVICE_FILTER");
+
+    // Skip if trace file name is not set.
+    if (!traceFileBaseSet) {
+        return {"", false};
+    }
+
+    // If a filter was specified, only trace if the filter is found
+    if (traceDeviceFilterSet && GetLabel().find(traceDeviceFilter) == std::string::npos) {
+        return {"", false};
+    }
+
+    /*
+    One reason to put the date is Metal will not overwrite an existing trace.
+    Deleting a trace is problematic as a trace is a folder and dawn shouldn't
+    be deleting folders. So, adding the date means when you re-run your program
+    you'll get a trace that doesn't clash with your last trace. The count is
+    there because if you're running something that makes makes more than one
+    device, if they are created within the same second they'd have the same
+    name and metal would fail to capture.
+    */
+
+    uint32_t count = s_count.fetch_add(1, std::memory_order_acq_rel);
+
+    std::time_t now = std::time(0);
+    std::tm tm(*std::localtime(&now));
+    std::string traceName(absl::StrFormat("%s-%04d-%02d-%02dT%02d-%02d-%02d-c%03d", traceFileBase,
+                                          tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour,
+                                          tm.tm_min, tm.tm_sec, count));
+
+    return {traceName, true};
 }
 
 }  // namespace dawn::native

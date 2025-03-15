@@ -19,8 +19,6 @@
                OpDecorate %frag_main_loc0_idx0_Output Index 0
                OpDecorate %frag_main_loc0_idx1_Output Location 0
                OpDecorate %frag_main_loc0_idx1_Output Index 1
-               OpMemberDecorate %FragOutput 0 Offset 0
-               OpMemberDecorate %FragOutput 1 Offset 16
       %float = OpTypeFloat 32
     %v4float = OpTypeVector %float 4
 %_ptr_Output_v4float = OpTypePointer Output %v4float

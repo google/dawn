@@ -399,6 +399,26 @@ const void* Buffer::GetConstMappedRange(size_t offset, size_t size) {
     return static_cast<uint8_t*>(mMappedData) + offset;
 }
 
+WGPUStatus Buffer::WriteMappedRange(size_t offset, void const* data, size_t size) {
+    void* range = GetMappedRange(offset, size);
+    if (range == nullptr) {
+        return WGPUStatus_Error;
+    }
+
+    memcpy(range, data, size);
+    return WGPUStatus_Success;
+}
+
+WGPUStatus Buffer::ReadMappedRange(size_t offset, void* data, size_t size) {
+    const void* range = GetConstMappedRange(offset, size);
+    if (range == nullptr) {
+        return WGPUStatus_Error;
+    }
+
+    memcpy(data, range, size);
+    return WGPUStatus_Success;
+}
+
 void Buffer::Unmap() {
     // Invalidate the local pointer, and cancel all other in-flight requests that would
     // turn into errors anyway (you can't double map). This prevents race when the following

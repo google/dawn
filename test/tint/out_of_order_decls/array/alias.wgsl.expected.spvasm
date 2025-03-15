@@ -9,7 +9,6 @@
                OpExecutionMode %f OriginUpperLeft
                OpName %A "A"
                OpName %f "f"
-               OpDecorate %_arr_int_uint_4 ArrayStride 4
         %int = OpTypeInt 32 1
        %uint = OpTypeInt 32 0
      %uint_4 = OpConstant %uint 4

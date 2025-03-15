@@ -36,7 +36,11 @@ namespace {
 Result<SuccessType> BuiltinPolyfillFuzzer(Module& ir,
                                           const fuzz::ir::Context&,
                                           const BuiltinPolyfillConfig& config) {
-    return BuiltinPolyfill(ir, config);
+    auto res = BuiltinPolyfill(ir, config);
+    if (res != Success) {
+        return Failure{res.Failure().reason.Str()};
+    }
+    return Success;
 }
 
 }  // namespace

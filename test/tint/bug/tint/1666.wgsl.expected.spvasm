@@ -8,8 +8,8 @@
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %f "f"
                OpExecutionMode %f LocalSize 1 1 1
-               OpMemberName %rarr_block 0 "inner"
-               OpName %rarr_block "rarr_block"
+               OpMemberName %rarr_block_tint_explicit_layout 0 "inner"
+               OpName %rarr_block_tint_explicit_layout "rarr_block_tint_explicit_layout"
                OpName %vector "vector"
                OpName %idx "idx"
                OpName %x "x"
@@ -25,17 +25,16 @@
                OpName %x_2 "x"
                OpName %f "f"
                OpDecorate %_runtimearr_float ArrayStride 4
-               OpMemberDecorate %rarr_block 0 Offset 0
-               OpDecorate %rarr_block Block
+               OpMemberDecorate %rarr_block_tint_explicit_layout 0 Offset 0
+               OpDecorate %rarr_block_tint_explicit_layout Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
-               OpDecorate %_arr_int_uint_2 ArrayStride 4
       %float = OpTypeFloat 32
 %_runtimearr_float = OpTypeRuntimeArray %float
- %rarr_block = OpTypeStruct %_runtimearr_float
-%_ptr_StorageBuffer_rarr_block = OpTypePointer StorageBuffer %rarr_block
-          %1 = OpVariable %_ptr_StorageBuffer_rarr_block StorageBuffer
+%rarr_block_tint_explicit_layout = OpTypeStruct %_runtimearr_float
+%_ptr_StorageBuffer_rarr_block_tint_explicit_layout = OpTypePointer StorageBuffer %rarr_block_tint_explicit_layout
+          %1 = OpVariable %_ptr_StorageBuffer_rarr_block_tint_explicit_layout StorageBuffer
     %v2float = OpTypeVector %float 2
 %mat2v2float = OpTypeMatrix %v2float 2
 %_ptr_Private_mat2v2float = OpTypePointer Private %mat2v2float

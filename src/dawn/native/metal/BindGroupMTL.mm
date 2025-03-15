@@ -29,22 +29,31 @@
 
 #include "dawn/native/metal/BindGroupLayoutMTL.h"
 #include "dawn/native/metal/DeviceMTL.h"
+
 namespace dawn::native::metal {
+
+// static
+ResultOrError<Ref<BindGroup>> BindGroup::Create(Device* device,
+                                                const BindGroupDescriptor* descriptor) {
+    Ref<BindGroup> bindGroup = ToBackend(descriptor->layout->GetInternalBindGroupLayout())
+                                   ->AllocateBindGroup(device, descriptor);
+    DAWN_TRY(bindGroup->Initialize(descriptor));
+    return bindGroup;
+}
 
 BindGroup::BindGroup(Device* device, const BindGroupDescriptor* descriptor)
     : BindGroupBase(this, device, descriptor) {}
 
 BindGroup::~BindGroup() = default;
 
+MaybeError BindGroup::InitializeImpl() {
+    return {};
+}
+
 void BindGroup::DestroyImpl() {
     BindGroupBase::DestroyImpl();
     ToBackend(GetLayout())->DeallocateBindGroup(this);
 }
 
-// static
-Ref<BindGroup> BindGroup::Create(Device* device, const BindGroupDescriptor* descriptor) {
-    return ToBackend(descriptor->layout->GetInternalBindGroupLayout())
-        ->AllocateBindGroup(device, descriptor);
-}
 
 }  // namespace dawn::native::metal

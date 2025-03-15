@@ -67,7 +67,6 @@ if (tint_build_ir_binary && tint_build_wgsl_reader && tint_build_ir_fuzzer) {
       "${tint_src_dir}/utils/macros",
       "${tint_src_dir}/utils/math",
       "${tint_src_dir}/utils/memory",
-      "${tint_src_dir}/utils/result",
       "${tint_src_dir}/utils/rtti",
       "${tint_src_dir}/utils/strconv",
       "${tint_src_dir}/utils/symbol",

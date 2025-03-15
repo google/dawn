@@ -134,7 +134,7 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType> ExpandImplicitSplats(core::ir::Module& ir) {
+diag::Result<SuccessType> ExpandImplicitSplats(core::ir::Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "spirv.ExpandImplicitSplats");
     if (result != Success) {
         return result.Failure();

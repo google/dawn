@@ -229,7 +229,7 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType> ValueToLet(Module& ir, const ValueToLetConfig& cfg) {
+diag::Result<SuccessType> ValueToLet(Module& ir, const ValueToLetConfig& cfg) {
     auto result = ValidateAndDumpIfNeeded(ir, "core.ValueToLet", kValueToLetCapabilities);
     if (result != Success) {
         return result;

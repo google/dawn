@@ -144,8 +144,6 @@
                OpDecorate %vertex_main_loc0_Output Location 0
                OpDecorate %vertex_main_loc0_Output Flat
                OpDecorate %vertex_main___point_size_Output BuiltIn PointSize
-               OpMemberDecorate %VertexOutput 0 Offset 0
-               OpMemberDecorate %VertexOutput 1 Offset 16
        %uint = OpTypeInt 32 0
           %3 = OpTypeImage %uint 1D 0 0 0 2 R32ui
 %_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3

@@ -186,7 +186,7 @@ TEST_F(IR_ValidatorTest, RootBlock_VarBlockMismatch) {
         res.Failure().reason.Str(),
         testing::HasSubstr(
             R"(:2:38 error: var: instruction in root block does not have root block as parent
-  %1:ptr<private, i32, read_write> = var
+  %1:ptr<private, i32, read_write> = var undef
                                      ^^^
 )")) << res.Failure().reason.Str();
 }
@@ -793,7 +793,7 @@ TEST_F(IR_ValidatorTest, Block_VarBlockMismatch) {
     EXPECT_THAT(
         res.Failure().reason.Str(),
         testing::HasSubstr(R"(:3:41 error: var: block instruction does not have same block as parent
-    %2:ptr<function, i32, read_write> = var
+    %2:ptr<function, i32, read_write> = var undef
                                         ^^^
 )")) << res.Failure().reason.Str();
 }
@@ -909,7 +909,7 @@ note: # Disassembly
     EXPECT_EQ(res.Failure().reason.Str(), expected);
 }
 
-TEST_F(IR_ValidatorTest, Instruction_NullInstruction) {
+TEST_F(IR_ValidatorTest, Instruction_NullInstructionResultInstruction) {
     auto* f = b.Function("my_func", ty.void_());
 
     auto sb = b.Append(f->Block());
@@ -922,7 +922,28 @@ TEST_F(IR_ValidatorTest, Instruction_NullInstruction) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason.Str(),
                 testing::HasSubstr(R"(:3:5 error: var: result instruction is undefined
-    %2:ptr<function, f32, read_write> = var
+    %2:ptr<function, f32, read_write> = var undef
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+)")) << res.Failure().reason.Str();
+}
+
+TEST_F(IR_ValidatorTest, Instruction_WrongInstructionResultInstruction) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    auto sb = b.Append(f->Block());
+    auto* v = sb.Var(ty.ptr<function, f32>());
+    auto* v2 = sb.Var(ty.ptr<function, f32>());
+    sb.Return(f);
+
+    v->SetResults(v2->Results());
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(
+            R"(:4:5 error: var: result instruction does not match instruction (possible double usage)
+    %2:ptr<function, f32, read_write> = var undef
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure().reason.Str();
 }
@@ -941,9 +962,9 @@ TEST_F(IR_ValidatorTest, Instruction_DeadOperand) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason.Str(),
-                testing::HasSubstr(R"(:3:46 error: var: operand is not alive
-    %2:ptr<function, f32, read_write> = var, %3
-                                             ^^
+                testing::HasSubstr(R"(:3:45 error: var: operand is not alive
+    %2:ptr<function, f32, read_write> = var %3
+                                            ^^
 )")) << res.Failure().reason.Str();
 }
 
@@ -961,9 +982,9 @@ TEST_F(IR_ValidatorTest, Instruction_OperandUsageRemoved) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason.Str(),
-                testing::HasSubstr(R"(:3:46 error: var: operand missing usage
-    %2:ptr<function, f32, read_write> = var, %3
-                                             ^^
+                testing::HasSubstr(R"(:3:45 error: var: operand missing usage
+    %2:ptr<function, f32, read_write> = var %3
+                                            ^^
 )")) << res.Failure().reason.Str();
 }
 
@@ -1187,7 +1208,7 @@ TEST_F(IR_ValidatorTest, OverrideWithoutCapability) {
         res.Failure().reason.Str(),
         testing::HasSubstr(
             R"(:2:12 error: override: root block: invalid instruction: tint::core::ir::Override
-  %a:u32 = override, 1u @id(0)
+  %a:u32 = override 1u
            ^^^^^^^^
 )")) << res.Failure().reason.Str();
 }
@@ -1207,7 +1228,10 @@ TEST_F(IR_ValidatorTest, InstructionInRootBlockWithoutOverrideCap) {
 }
 
 TEST_F(IR_ValidatorTest, OverrideWithCapability) {
-    b.Append(mod.root_block, [&] { b.Override(ty.u32()); });
+    b.Append(mod.root_block, [&] {
+        auto* o = b.Override(ty.u32());
+        o->SetOverrideId(OverrideId{1});
+    });
 
     auto res = ir::Validate(mod, core::ir::Capabilities{core::ir::Capability::kAllowOverrides});
     ASSERT_EQ(res, Success) << res.Failure();
@@ -1234,7 +1258,7 @@ TEST_F(IR_ValidatorTest, OverrideWithInvalidType) {
     EXPECT_THAT(
         res.Failure().reason.Str(),
         testing::HasSubstr(R"(:2:18 error: override: override type 'vec3<u32>' is not a scalar
-  %1:vec3<u32> = override @id(0)
+  %1:vec3<u32> = override undef
                  ^^^^^^^^
 )")) << res.Failure().reason.Str();
 }
@@ -1252,7 +1276,7 @@ TEST_F(IR_ValidatorTest, OverrideWithMismatchedInitializerType) {
         res.Failure().reason.Str(),
         testing::HasSubstr(
             R"(:2:12 error: override: override type 'u32' does not match initializer type 'i32'
-  %1:u32 = override, 1i @id(0)
+  %1:u32 = override 1i
            ^^^^^^^^
 )")) << res.Failure().reason.Str();
 }
@@ -1270,7 +1294,7 @@ TEST_F(IR_ValidatorTest, OverrideDuplicateId) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason.Str(),
                 testing::HasSubstr(R"(:3:12 error: override: duplicate override id encountered: 2
-  %2:i32 = override @id(2)
+  %2:i32 = override undef @id(2)
            ^^^^^^^^
 )")) << res.Failure().reason.Str();
 }
@@ -1317,8 +1341,20 @@ TEST_F(IR_ValidatorTest, OverrideArrayInvalidValue) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason.Str(),
                 testing::HasSubstr(R"(:2:51 error: var: %2 is not in scope
-  %a:ptr<workgroup, array<i32, %2>, read_write> = var
+  %a:ptr<workgroup, array<i32, %2>, read_write> = var undef
                                                   ^^^
+)")) << res.Failure().reason.Str();
+}
+
+TEST_F(IR_ValidatorTest, OverrideWithoutIdOrInitializer) {
+    b.Append(mod.root_block, [&] { b.Override(ty.u32()); });
+
+    auto res = ir::Validate(mod, core::ir::Capabilities{core::ir::Capability::kAllowOverrides});
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:2:12 error: override: must have an id or an initializer
+  %1:u32 = override undef
+           ^^^^^^^^
 )")) << res.Failure().reason.Str();
 }
 

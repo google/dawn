@@ -41,10 +41,6 @@
                OpDecorate %vtx_main_loc0_Output Location 0
                OpDecorate %vtx_main_position_Output BuiltIn Position
                OpDecorate %vtx_main___point_size_Output BuiltIn PointSize
-               OpMemberDecorate %VertexOutput 0 Offset 0
-               OpMemberDecorate %VertexOutput 1 Offset 16
-               OpMemberDecorate %VertexInput 0 Offset 0
-               OpMemberDecorate %VertexInput 1 Offset 16
       %float = OpTypeFloat 32
     %v4float = OpTypeVector %float 4
 %mat4v4float = OpTypeMatrix %v4float 4

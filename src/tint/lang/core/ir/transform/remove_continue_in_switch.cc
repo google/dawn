@@ -30,7 +30,6 @@
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/validator.h"
-#include "src/tint/utils/ice/ice.h"
 
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
@@ -113,7 +112,7 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType> RemoveContinueInSwitch(Module& ir) {
+diag::Result<SuccessType> RemoveContinueInSwitch(Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "core.RemoveContinueInSwitch",
                                           core::ir::Capabilities{
                                               core::ir::Capability::kAllowVectorElementPointer,

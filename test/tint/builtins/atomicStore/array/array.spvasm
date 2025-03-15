@@ -14,7 +14,6 @@
                OpName %idx "idx"
                OpName %compute_main "compute_main"
                OpDecorate %local_invocation_index_1 BuiltIn LocalInvocationIndex
-               OpDecorate %_arr_uint_uint_4 ArrayStride 4
        %uint = OpTypeInt 32 0
 %_ptr_Input_uint = OpTypePointer Input %uint
 %local_invocation_index_1 = OpVariable %_ptr_Input_uint Input

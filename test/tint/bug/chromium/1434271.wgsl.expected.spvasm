@@ -193,12 +193,6 @@
                OpDecorate %vs_main_loc0_Output Location 0
                OpDecorate %vs_main_loc1_Output Location 1
                OpDecorate %vs_main___point_size_Output BuiltIn PointSize
-               OpMemberDecorate %VertexOutput 0 Offset 0
-               OpMemberDecorate %VertexOutput 1 Offset 16
-               OpMemberDecorate %VertexOutput 2 Offset 32
-               OpMemberDecorate %VertexInput 0 Offset 0
-               OpMemberDecorate %VertexInput 1 Offset 16
-               OpMemberDecorate %VertexInput 2 Offset 32
       %float = OpTypeFloat 32
     %v4float = OpTypeVector %float 4
 %mat4v4float = OpTypeMatrix %v4float 4
@@ -298,7 +292,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 85
+; Bound: 96
 ; Schema: 0
                OpCapability Shader
          %46 = OpExtInstImport "GLSL.std.450"
@@ -311,23 +305,30 @@
                OpName %SimulationParams "SimulationParams"
                OpMemberName %sim_params_block 0 "inner"
                OpName %sim_params_block "sim_params_block"
-               OpMemberName %Particle 0 "position"
-               OpMemberName %Particle 1 "lifetime"
-               OpMemberName %Particle 2 "color"
-               OpMemberName %Particle 3 "velocity"
-               OpName %Particle "Particle"
-               OpMemberName %Particles 0 "particles"
-               OpName %Particles "Particles"
+               OpMemberName %Particle_tint_explicit_layout 0 "position"
+               OpMemberName %Particle_tint_explicit_layout 1 "lifetime"
+               OpMemberName %Particle_tint_explicit_layout 2 "color"
+               OpMemberName %Particle_tint_explicit_layout 3 "velocity"
+               OpName %Particle_tint_explicit_layout "Particle_tint_explicit_layout"
+               OpMemberName %Particles_tint_explicit_layout 0 "particles"
+               OpName %Particles_tint_explicit_layout "Particles_tint_explicit_layout"
                OpName %data "data"
                OpName %simulate_global_invocation_id_Input "simulate_global_invocation_id_Input"
                OpName %simulate_inner "simulate_inner"
                OpName %GlobalInvocationID "GlobalInvocationID"
                OpName %idx "idx"
+               OpMemberName %Particle 0 "position"
+               OpMemberName %Particle 1 "lifetime"
+               OpMemberName %Particle 2 "color"
+               OpMemberName %Particle 3 "velocity"
+               OpName %Particle "Particle"
                OpName %particle "particle"
                OpName %tint_store_and_preserve_padding "tint_store_and_preserve_padding"
                OpName %target_indices "target_indices"
                OpName %value_param "value_param"
                OpName %simulate "simulate"
+               OpName %tint_convert_explicit_layout "tint_convert_explicit_layout"
+               OpName %tint_source "tint_source"
                OpMemberDecorate %SimulationParams 0 Offset 0
                OpMemberDecorate %SimulationParams 1 Offset 16
                OpMemberDecorate %sim_params_block 0 Offset 0
@@ -335,18 +336,17 @@
                OpDecorate %6 DescriptorSet 0
                OpDecorate %6 Binding 0
                OpDecorate %6 NonWritable
-               OpMemberDecorate %Particle 0 Offset 0
-               OpMemberDecorate %Particle 1 Offset 12
-               OpMemberDecorate %Particle 2 Offset 16
-               OpMemberDecorate %Particle 3 Offset 32
-               OpDecorate %_runtimearr_Particle ArrayStride 48
-               OpMemberDecorate %Particles 0 Offset 0
-               OpDecorate %Particles Block
+               OpMemberDecorate %Particle_tint_explicit_layout 0 Offset 0
+               OpMemberDecorate %Particle_tint_explicit_layout 1 Offset 12
+               OpMemberDecorate %Particle_tint_explicit_layout 2 Offset 16
+               OpMemberDecorate %Particle_tint_explicit_layout 3 Offset 32
+               OpDecorate %_runtimearr_Particle_tint_explicit_layout ArrayStride 48
+               OpMemberDecorate %Particles_tint_explicit_layout 0 Offset 0
+               OpDecorate %Particles_tint_explicit_layout Block
                OpDecorate %data DescriptorSet 0
                OpDecorate %data Binding 1
                OpDecorate %data Coherent
                OpDecorate %simulate_global_invocation_id_Input BuiltIn GlobalInvocationId
-               OpDecorate %_arr_uint_uint_1 ArrayStride 4
       %float = OpTypeFloat 32
     %v2float = OpTypeVector %float 2
 %_ptr_Private_v2float = OpTypePointer Private %v2float
@@ -358,11 +358,11 @@
 %_ptr_Uniform_sim_params_block = OpTypePointer Uniform %sim_params_block
           %6 = OpVariable %_ptr_Uniform_sim_params_block Uniform
     %v3float = OpTypeVector %float 3
-   %Particle = OpTypeStruct %v3float %float %v4float %v2float
-%_runtimearr_Particle = OpTypeRuntimeArray %Particle
-  %Particles = OpTypeStruct %_runtimearr_Particle
-%_ptr_StorageBuffer_Particles = OpTypePointer StorageBuffer %Particles
-       %data = OpVariable %_ptr_StorageBuffer_Particles StorageBuffer
+%Particle_tint_explicit_layout = OpTypeStruct %v3float %float %v4float %v2float
+%_runtimearr_Particle_tint_explicit_layout = OpTypeRuntimeArray %Particle_tint_explicit_layout
+%Particles_tint_explicit_layout = OpTypeStruct %_runtimearr_Particle_tint_explicit_layout
+%_ptr_StorageBuffer_Particles_tint_explicit_layout = OpTypePointer StorageBuffer %Particles_tint_explicit_layout
+       %data = OpVariable %_ptr_StorageBuffer_Particles_tint_explicit_layout StorageBuffer
        %uint = OpTypeInt 32 0
      %v3uint = OpTypeVector %uint 3
 %_ptr_Input_v3uint = OpTypePointer Input %v3uint
@@ -373,18 +373,20 @@
      %uint_0 = OpConstant %uint 0
      %uint_1 = OpConstant %uint 1
      %v2uint = OpTypeVector %uint 2
-%_ptr_StorageBuffer__runtimearr_Particle = OpTypePointer StorageBuffer %_runtimearr_Particle
-%_ptr_StorageBuffer_Particle = OpTypePointer StorageBuffer %Particle
+%_ptr_StorageBuffer__runtimearr_Particle_tint_explicit_layout = OpTypePointer StorageBuffer %_runtimearr_Particle_tint_explicit_layout
+%_ptr_StorageBuffer_Particle_tint_explicit_layout = OpTypePointer StorageBuffer %Particle_tint_explicit_layout
+   %Particle = OpTypeStruct %v3float %float %v4float %v2float
 %_ptr_Function_Particle = OpTypePointer Function %Particle
 %_arr_uint_uint_1 = OpTypeArray %uint %uint_1
-         %63 = OpTypeFunction %void %_arr_uint_uint_1 %Particle
+         %66 = OpTypeFunction %void %_arr_uint_uint_1 %Particle
 %_ptr_StorageBuffer_v3float = OpTypePointer StorageBuffer %v3float
 %_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float
 %_ptr_StorageBuffer_v4float = OpTypePointer StorageBuffer %v4float
      %uint_2 = OpConstant %uint 2
 %_ptr_StorageBuffer_v2float = OpTypePointer StorageBuffer %v2float
      %uint_3 = OpConstant %uint 3
-         %81 = OpTypeFunction %void
+         %84 = OpTypeFunction %void
+         %89 = OpTypeFunction %Particle %Particle_tint_explicit_layout
 %simulate_inner = OpFunction %void None %24
 %GlobalInvocationID = OpFunctionParameter %v3uint
          %25 = OpLabel
@@ -401,46 +403,57 @@
          %39 = OpFMul %v2float %35 %38
                OpStore %rand_seed %39 None
         %idx = OpCompositeExtract %uint %GlobalInvocationID 0
-         %41 = OpAccessChain %_ptr_StorageBuffer__runtimearr_Particle %data %uint_0
+         %41 = OpAccessChain %_ptr_StorageBuffer__runtimearr_Particle_tint_explicit_layout %data %uint_0
          %43 = OpArrayLength %uint %data 0
          %44 = OpISub %uint %43 %uint_1
          %45 = OpExtInst %uint %46 UMin %idx %44
-         %47 = OpAccessChain %_ptr_StorageBuffer_Particle %data %uint_0 %45
-         %49 = OpLoad %Particle %47 None
-               OpStore %particle %49
-         %52 = OpAccessChain %_ptr_StorageBuffer__runtimearr_Particle %data %uint_0
-         %53 = OpArrayLength %uint %data 0
-         %54 = OpISub %uint %53 %uint_1
-         %55 = OpExtInst %uint %46 UMin %idx %54
-         %56 = OpLoad %Particle %particle None
-         %58 = OpCompositeConstruct %_arr_uint_uint_1 %55
-         %59 = OpFunctionCall %void %tint_store_and_preserve_padding %58 %56
+         %47 = OpAccessChain %_ptr_StorageBuffer_Particle_tint_explicit_layout %data %uint_0 %45
+         %49 = OpLoad %Particle_tint_explicit_layout %47 None
+         %50 = OpFunctionCall %Particle %tint_convert_explicit_layout %49
+               OpStore %particle %50
+         %55 = OpAccessChain %_ptr_StorageBuffer__runtimearr_Particle_tint_explicit_layout %data %uint_0
+         %56 = OpArrayLength %uint %data 0
+         %57 = OpISub %uint %56 %uint_1
+         %58 = OpExtInst %uint %46 UMin %idx %57
+         %59 = OpLoad %Particle %particle None
+         %61 = OpCompositeConstruct %_arr_uint_uint_1 %58
+         %62 = OpFunctionCall %void %tint_store_and_preserve_padding %61 %59
                OpReturn
                OpFunctionEnd
-%tint_store_and_preserve_padding = OpFunction %void None %63
+%tint_store_and_preserve_padding = OpFunction %void None %66
 %target_indices = OpFunctionParameter %_arr_uint_uint_1
 %value_param = OpFunctionParameter %Particle
-         %64 = OpLabel
-         %65 = OpCompositeExtract %uint %target_indices 0
-         %66 = OpAccessChain %_ptr_StorageBuffer_v3float %data %uint_0 %65 %uint_0
-         %68 = OpCompositeExtract %v3float %value_param 0
-               OpStore %66 %68 None
-         %69 = OpAccessChain %_ptr_StorageBuffer_float %data %uint_0 %65 %uint_1
-         %71 = OpCompositeExtract %float %value_param 1
+         %67 = OpLabel
+         %68 = OpCompositeExtract %uint %target_indices 0
+         %69 = OpAccessChain %_ptr_StorageBuffer_v3float %data %uint_0 %68 %uint_0
+         %71 = OpCompositeExtract %v3float %value_param 0
                OpStore %69 %71 None
-         %72 = OpAccessChain %_ptr_StorageBuffer_v4float %data %uint_0 %65 %uint_2
-         %75 = OpCompositeExtract %v4float %value_param 2
-               OpStore %72 %75 None
-         %76 = OpAccessChain %_ptr_StorageBuffer_v2float %data %uint_0 %65 %uint_3
-         %79 = OpCompositeExtract %v2float %value_param 3
-               OpStore %76 %79 None
+         %72 = OpAccessChain %_ptr_StorageBuffer_float %data %uint_0 %68 %uint_1
+         %74 = OpCompositeExtract %float %value_param 1
+               OpStore %72 %74 None
+         %75 = OpAccessChain %_ptr_StorageBuffer_v4float %data %uint_0 %68 %uint_2
+         %78 = OpCompositeExtract %v4float %value_param 2
+               OpStore %75 %78 None
+         %79 = OpAccessChain %_ptr_StorageBuffer_v2float %data %uint_0 %68 %uint_3
+         %82 = OpCompositeExtract %v2float %value_param 3
+               OpStore %79 %82 None
                OpReturn
                OpFunctionEnd
-   %simulate = OpFunction %void None %81
-         %82 = OpLabel
-         %83 = OpLoad %v3uint %simulate_global_invocation_id_Input None
-         %84 = OpFunctionCall %void %simulate_inner %83
+   %simulate = OpFunction %void None %84
+         %85 = OpLabel
+         %86 = OpLoad %v3uint %simulate_global_invocation_id_Input None
+         %87 = OpFunctionCall %void %simulate_inner %86
                OpReturn
+               OpFunctionEnd
+%tint_convert_explicit_layout = OpFunction %Particle None %89
+%tint_source = OpFunctionParameter %Particle_tint_explicit_layout
+         %90 = OpLabel
+         %91 = OpCompositeExtract %v3float %tint_source 0
+         %92 = OpCompositeExtract %float %tint_source 1
+         %93 = OpCompositeExtract %v4float %tint_source 2
+         %94 = OpCompositeExtract %v2float %tint_source 3
+         %95 = OpCompositeConstruct %Particle %91 %92 %93 %94
+               OpReturnValue %95
                OpFunctionEnd
 ;
 ; export_level
@@ -460,8 +473,8 @@
                OpName %UBO "UBO"
                OpMemberName %ubo_block 0 "inner"
                OpName %ubo_block "ubo_block"
-               OpMemberName %Buffer 0 "weights"
-               OpName %Buffer "Buffer"
+               OpMemberName %Buffer_tint_explicit_layout 0 "weights"
+               OpName %Buffer_tint_explicit_layout "Buffer_tint_explicit_layout"
                OpName %buf_in "buf_in"
                OpName %buf_out "buf_out"
                OpName %tex_out "tex_out"
@@ -484,8 +497,8 @@
                OpDecorate %1 Binding 3
                OpDecorate %1 NonWritable
                OpDecorate %_runtimearr_float ArrayStride 4
-               OpMemberDecorate %Buffer 0 Offset 0
-               OpDecorate %Buffer Block
+               OpMemberDecorate %Buffer_tint_explicit_layout 0 Offset 0
+               OpDecorate %Buffer_tint_explicit_layout Block
                OpDecorate %buf_in DescriptorSet 0
                OpDecorate %buf_in Binding 4
                OpDecorate %buf_in NonWritable
@@ -503,11 +516,11 @@
           %1 = OpVariable %_ptr_Uniform_ubo_block Uniform
       %float = OpTypeFloat 32
 %_runtimearr_float = OpTypeRuntimeArray %float
-     %Buffer = OpTypeStruct %_runtimearr_float
-%_ptr_StorageBuffer_Buffer = OpTypePointer StorageBuffer %Buffer
-     %buf_in = OpVariable %_ptr_StorageBuffer_Buffer StorageBuffer
-%_ptr_StorageBuffer_Buffer_0 = OpTypePointer StorageBuffer %Buffer
-    %buf_out = OpVariable %_ptr_StorageBuffer_Buffer_0 StorageBuffer
+%Buffer_tint_explicit_layout = OpTypeStruct %_runtimearr_float
+%_ptr_StorageBuffer_Buffer_tint_explicit_layout = OpTypePointer StorageBuffer %Buffer_tint_explicit_layout
+     %buf_in = OpVariable %_ptr_StorageBuffer_Buffer_tint_explicit_layout StorageBuffer
+%_ptr_StorageBuffer_Buffer_tint_explicit_layout_0 = OpTypePointer StorageBuffer %Buffer_tint_explicit_layout
+    %buf_out = OpVariable %_ptr_StorageBuffer_Buffer_tint_explicit_layout_0 StorageBuffer
          %15 = OpTypeImage %float 2D 0 0 0 2 Rgba8
 %_ptr_UniformConstant_15 = OpTypePointer UniformConstant %15
     %tex_out = OpVariable %_ptr_UniformConstant_15 UniformConstant

@@ -35,7 +35,7 @@
 
 namespace tint::spirv::validate {
 
-Result<SuccessType> Validate(Slice<const uint32_t> spirv, spv_target_env target_env) {
+diag::Result<SuccessType> Validate(Slice<const uint32_t> spirv, spv_target_env target_env) {
     Vector<diag::Diagnostic, 4> diags;
     diags.Push(diag::Diagnostic{});  // Filled in on error
 
@@ -90,7 +90,7 @@ Result<SuccessType> Validate(Slice<const uint32_t> spirv, spv_target_env target_
         diag.source.file = file.get();
         diag.owned_file = file;
     }
-    return Failure{diag::List{std::move(diags)}};
+    return diag::Failure{diag::List{std::move(diags)}};
 }
 
 }  // namespace tint::spirv::validate

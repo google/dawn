@@ -133,7 +133,6 @@
                OpName %zzzy "zzzy"
                OpName %zzzz "zzzz"
                OpName %unused_entry_point "unused_entry_point"
-               OpMemberDecorate %S 0 Offset 0
        %uint = OpTypeInt 32 0
      %v3uint = OpTypeVector %uint 3
           %S = OpTypeStruct %v3uint

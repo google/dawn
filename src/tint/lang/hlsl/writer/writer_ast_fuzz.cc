@@ -85,7 +85,7 @@ void ASTFuzzer(const tint::Program& program,
     }
     auto dxc = tint::Command::LookPath(dxc_path);
 
-    Result<tint::hlsl::writer::Output> res;
+    diag::Result<tint::hlsl::writer::Output> res;
     if (dxc.Found()) {
         // If validating with DXC, run renamer transform first to avoid DXC validation failures.
         ast::transform::DataMap inputs, outputs;

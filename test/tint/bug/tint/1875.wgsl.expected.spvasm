@@ -9,8 +9,8 @@
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
                OpName %count "count"
-               OpMemberName %Outputs 0 "data"
-               OpName %Outputs "Outputs"
+               OpMemberName %Outputs_tint_explicit_layout 0 "data"
+               OpName %Outputs_tint_explicit_layout "Outputs_tint_explicit_layout"
                OpName %outputs "outputs"
                OpName %push_output "push_output"
                OpName %value "value"
@@ -19,8 +19,8 @@
                OpName %b "b"
                OpName %c "c"
                OpDecorate %_runtimearr_uint ArrayStride 4
-               OpMemberDecorate %Outputs 0 Offset 0
-               OpDecorate %Outputs Block
+               OpMemberDecorate %Outputs_tint_explicit_layout 0 Offset 0
+               OpDecorate %Outputs_tint_explicit_layout Block
                OpDecorate %outputs DescriptorSet 0
                OpDecorate %outputs Binding 1
                OpDecorate %outputs Coherent
@@ -29,9 +29,9 @@
      %uint_0 = OpConstant %uint 0
       %count = OpVariable %_ptr_Private_uint Private %uint_0
 %_runtimearr_uint = OpTypeRuntimeArray %uint
-    %Outputs = OpTypeStruct %_runtimearr_uint
-%_ptr_StorageBuffer_Outputs = OpTypePointer StorageBuffer %Outputs
-    %outputs = OpVariable %_ptr_StorageBuffer_Outputs StorageBuffer
+%Outputs_tint_explicit_layout = OpTypeStruct %_runtimearr_uint
+%_ptr_StorageBuffer_Outputs_tint_explicit_layout = OpTypePointer StorageBuffer %Outputs_tint_explicit_layout
+    %outputs = OpVariable %_ptr_StorageBuffer_Outputs_tint_explicit_layout StorageBuffer
        %void = OpTypeVoid
          %12 = OpTypeFunction %void %uint
 %_ptr_StorageBuffer__runtimearr_uint = OpTypePointer StorageBuffer %_runtimearr_uint

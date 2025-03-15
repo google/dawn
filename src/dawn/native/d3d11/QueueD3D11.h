@@ -58,6 +58,8 @@ class Queue : public d3d::Queue {
                                wgpu::MapMode mode,
                                ExecutionSerial readySerial);
 
+    const Ref<SharedFence>& GetSharedFence() const { return mSharedFence; }
+
   protected:
     using d3d::Queue::Queue;
 

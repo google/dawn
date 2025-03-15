@@ -29,7 +29,7 @@
 #define SRC_TINT_LANG_CORE_IR_TRANSFORM_VECTORIZE_SCALAR_MATRIX_CONSTRUCTORS_H_
 
 #include "src/tint/lang/core/ir/validator.h"
-#include "src/tint/utils/result/result.h"
+#include "src/tint/utils/diagnostic/diagnostic.h"
 
 // Forward declarations.
 namespace tint::core::ir {
@@ -50,7 +50,7 @@ const core::ir::Capabilities kVectorizeScalarMatrixConstructorsCapabilities{
 ///
 /// @param module the module to transform
 /// @returns success or failure
-Result<SuccessType> VectorizeScalarMatrixConstructors(Module& module);
+diag::Result<SuccessType> VectorizeScalarMatrixConstructors(Module& module);
 
 }  // namespace tint::core::ir::transform
 

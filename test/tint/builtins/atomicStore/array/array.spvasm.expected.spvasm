@@ -23,7 +23,6 @@
                OpName %compute_main_inner_0 "compute_main_inner"
                OpName %local_invocation_index_1_param "local_invocation_index_1_param"
                OpName %compute_main "compute_main"
-               OpDecorate %_arr_uint_uint_4 ArrayStride 4
                OpDecorate %compute_main_local_invocation_index_Input BuiltIn LocalInvocationIndex
        %uint = OpTypeInt 32 0
 %_ptr_Private_uint = OpTypePointer Private %uint
@@ -41,9 +40,9 @@
      %uint_0 = OpConstant %uint 0
      %v2uint = OpTypeVector %uint 2
 %_ptr_Function_v2uint = OpTypePointer Function %v2uint
-         %27 = OpConstantNull %v2uint
 %uint_4294967295 = OpConstant %uint 4294967295
-         %30 = OpConstantComposite %v2uint %uint_4294967295 %uint_4294967295
+         %27 = OpConstantComposite %v2uint %uint_4294967295 %uint_4294967295
+         %31 = OpConstantNull %v2uint
        %bool = OpTypeBool
      %v2bool = OpTypeVector %bool 2
      %uint_3 = OpConstant %uint 3
@@ -56,19 +55,20 @@
 %local_invocation_index_2 = OpFunctionParameter %uint
          %15 = OpLabel
         %idx = OpVariable %_ptr_Function_uint Function
-%tint_loop_idx = OpVariable %_ptr_Function_v2uint Function %27
+%tint_loop_idx = OpVariable %_ptr_Function_v2uint Function
                OpStore %idx %uint_0
                OpStore %idx %local_invocation_index_2 None
                OpBranch %19
          %19 = OpLabel
+               OpStore %tint_loop_idx %27
                OpBranch %22
          %22 = OpLabel
                OpLoopMerge %23 %21 None
                OpBranch %20
          %20 = OpLabel
-         %28 = OpLoad %v2uint %tint_loop_idx None
-         %29 = OpIEqual %v2bool %28 %30
-         %34 = OpAll %bool %29
+         %29 = OpLoad %v2uint %tint_loop_idx None
+         %30 = OpIEqual %v2bool %29 %31
+         %34 = OpAll %bool %30
                OpSelectionMerge %35 None
                OpBranchConditional %34 %36 %35
          %36 = OpLabel
@@ -90,14 +90,14 @@
          %21 = OpLabel
          %50 = OpAccessChain %_ptr_Function_uint %tint_loop_idx %uint_0
          %51 = OpLoad %uint %50 None
-%tint_low_inc = OpIAdd %uint %51 %uint_1
+%tint_low_inc = OpISub %uint %51 %uint_1
          %54 = OpAccessChain %_ptr_Function_uint %tint_loop_idx %uint_0
                OpStore %54 %tint_low_inc None
-         %55 = OpIEqual %bool %tint_low_inc %uint_0
+         %55 = OpIEqual %bool %tint_low_inc %uint_4294967295
  %tint_carry = OpSelect %uint %55 %uint_1 %uint_0
          %57 = OpAccessChain %_ptr_Function_uint %tint_loop_idx %uint_1
          %58 = OpLoad %uint %57 None
-         %59 = OpIAdd %uint %58 %tint_carry
+         %59 = OpISub %uint %58 %tint_carry
          %60 = OpAccessChain %_ptr_Function_uint %tint_loop_idx %uint_1
                OpStore %60 %59 None
          %61 = OpLoad %uint %idx None

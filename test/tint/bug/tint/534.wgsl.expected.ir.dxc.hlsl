@@ -32,10 +32,10 @@ void main_inner(uint3 GlobalInvocationID) {
   uint4 srcColorBits = (0u).xxxx;
   uint4 dstColorBits = tint_v4f32_to_v4u32(dstColor);
   {
-    uint2 tint_loop_idx = (0u).xx;
+    uint2 tint_loop_idx = (4294967295u).xx;
     uint i = 0u;
     while(true) {
-      if (all((tint_loop_idx == (4294967295u).xx))) {
+      if (all((tint_loop_idx == (0u).xx))) {
         break;
       }
       if ((i < uniforms[0u].w)) {
@@ -52,10 +52,10 @@ void main_inner(uint3 GlobalInvocationID) {
       }
       success = v_3;
       {
-        uint tint_low_inc = (tint_loop_idx.x + 1u);
+        uint tint_low_inc = (tint_loop_idx.x - 1u);
         tint_loop_idx.x = tint_low_inc;
-        uint tint_carry = uint((tint_low_inc == 0u));
-        tint_loop_idx.y = (tint_loop_idx.y + tint_carry);
+        uint tint_carry = uint((tint_low_inc == 4294967295u));
+        tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
         i = (i + 1u);
       }
       continue;

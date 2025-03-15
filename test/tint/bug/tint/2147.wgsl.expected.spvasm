@@ -23,8 +23,6 @@
                OpDecorate %1 Binding 0
                OpDecorate %1 Coherent
                OpDecorate %main_loc0_Output Location 0
-               OpMemberDecorate %__atomic_compare_exchange_result_i32 0 Offset 0
-               OpMemberDecorate %__atomic_compare_exchange_result_i32 1 Offset 4
         %int = OpTypeInt 32 1
     %S_block = OpTypeStruct %int
 %_ptr_StorageBuffer_S_block = OpTypePointer StorageBuffer %S_block

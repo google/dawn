@@ -34,10 +34,17 @@ namespace tint::wgsl::writer::raise {
 namespace {
 
 Result<SuccessType> ValueToLetFuzzer(core::ir::Module& ir, const fuzz::ir::Context&) {
-    return ValueToLet(ir);
+    auto res = ValueToLet(ir);
+    if (res != Success) {
+        return Failure{res.Failure().reason.Str()};
+    }
+    return Success;
 }
 
 }  // namespace
 }  // namespace tint::wgsl::writer::raise
 
-TINT_IR_MODULE_FUZZER(tint::wgsl::writer::raise::ValueToLetFuzzer, tint::core::ir::Capabilities{});
+TINT_IR_MODULE_FUZZER(tint::wgsl::writer::raise::ValueToLetFuzzer,
+                      tint::core::ir::Capabilities{},
+                      tint::core::ir::Capabilities{
+                          tint::core::ir::Capability::kAllowPhonyInstructions});

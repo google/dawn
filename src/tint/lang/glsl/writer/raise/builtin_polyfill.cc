@@ -27,8 +27,6 @@
 
 #include "src/tint/lang/glsl/writer/raise/builtin_polyfill.h"
 
-#include <string>
-#include <tuple>
 #include <utility>
 
 #include "src/tint/lang/core/fluent_types.h"  // IWYU pragma: export
@@ -527,7 +525,7 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType> BuiltinPolyfill(core::ir::Module& ir) {
+diag::Result<SuccessType> BuiltinPolyfill(core::ir::Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "glsl.BuiltinPolyfill");
     if (result != Success) {
         return result.Failure();

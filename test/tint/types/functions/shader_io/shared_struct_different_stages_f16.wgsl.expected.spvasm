@@ -27,9 +27,6 @@
                OpDecorate %vert_main_loc2_Output Location 2
                OpDecorate %vert_main_position_Output BuiltIn Position
                OpDecorate %vert_main___point_size_Output BuiltIn PointSize
-               OpMemberDecorate %Interface 0 Offset 0
-               OpMemberDecorate %Interface 1 Offset 4
-               OpMemberDecorate %Interface 2 Offset 16
       %float = OpTypeFloat 32
 %_ptr_Output_float = OpTypePointer Output %float
 %vert_main_loc1_Output = OpVariable %_ptr_Output_float Output
@@ -96,9 +93,6 @@
                OpDecorate %frag_main_loc1_Input Location 1
                OpDecorate %frag_main_loc2_Input Location 2
                OpDecorate %frag_main_position_Input BuiltIn FragCoord
-               OpMemberDecorate %Interface 0 Offset 0
-               OpMemberDecorate %Interface 1 Offset 4
-               OpMemberDecorate %Interface 2 Offset 16
       %float = OpTypeFloat 32
 %_ptr_Input_float = OpTypePointer Input %float
 %frag_main_loc1_Input = OpVariable %_ptr_Input_float Input

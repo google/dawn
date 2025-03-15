@@ -533,7 +533,7 @@ TEST_F(IR_ConstParamValidatorTest, IncorrectDomainSmoothstep_Vec) {
         auto* e = b.Let("b", b.Splat(ty.vec4<f16>(), 4_h));
         auto* edge0 = b.Splat(ty.vec4<f16>(), 3_h);
         auto* edge1 = b.Splat(ty.vec4<f16>(), 3_h);
-        auto* call_func = b.Call(ty.vec4(ty.f16()), core::BuiltinFn::kSmoothstep, e, edge0, edge1);
+        auto* call_func = b.Call(ty.vec4(ty.f16()), core::BuiltinFn::kSmoothstep, edge0, edge1, e);
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func->Result(0));
     });
@@ -543,7 +543,7 @@ TEST_F(IR_ConstParamValidatorTest, IncorrectDomainSmoothstep_Vec) {
 %foo = func():vec4<f16> {
   $B1: {
     %b:vec4<f16> = let vec4<f16>(4.0h)
-    %3:vec4<f16> = smoothstep %b, vec4<f16>(3.0h), vec4<f16>(3.0h)
+    %3:vec4<f16> = smoothstep vec4<f16>(3.0h), vec4<f16>(3.0h), %b
     ret %3
   }
 }

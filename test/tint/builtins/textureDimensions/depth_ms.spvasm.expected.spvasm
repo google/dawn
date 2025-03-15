@@ -27,7 +27,6 @@
                OpDecorate %arg_0 Binding 0
                OpDecorate %vertex_main_position_Output BuiltIn Position
                OpDecorate %vertex_main___point_size_Output BuiltIn PointSize
-               OpMemberDecorate %vertex_main_out 0 Offset 0
       %float = OpTypeFloat 32
           %3 = OpTypeImage %float 2D 0 0 1 1 Unknown
 %_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3

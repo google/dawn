@@ -46,7 +46,6 @@
                OpDecorate %main_vertex_index_Input BuiltIn VertexIndex
                OpDecorate %main_position_Output BuiltIn Position
                OpDecorate %main___point_size_Output BuiltIn PointSize
-               OpDecorate %_arr_v2float_uint_3 ArrayStride 8
       %float = OpTypeFloat 32
     %v2float = OpTypeVector %float 2
 %vertexUniformBuffer1_std140 = OpTypeStruct %v2float %v2float

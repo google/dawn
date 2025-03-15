@@ -23,9 +23,9 @@ int g() {
 
 int f() {
   {
-    uint2 tint_loop_idx = 0u;
+    uint2 tint_loop_idx = uint2(4294967295u);
     while(true) {
-      if (all((tint_loop_idx == uint2(4294967295u)))) {
+      if (all((tint_loop_idx == uint2(0u)))) {
         break;
       }
       g();
@@ -39,9 +39,9 @@ int f() {
 kernel void v(device tint_array<uint, 1>* buf [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.buf=buf};
   {
-    uint2 tint_loop_idx = 0u;
+    uint2 tint_loop_idx = uint2(4294967295u);
     while(true) {
-      if (all((tint_loop_idx == uint2(4294967295u)))) {
+      if (all((tint_loop_idx == uint2(0u)))) {
         break;
       }
       if (((*tint_module_vars.buf)[0u] == 0u)) {
@@ -50,10 +50,10 @@ kernel void v(device tint_array<uint, 1>* buf [[buffer(0)]]) {
       int s = f();
       (*tint_module_vars.buf)[0u] = 0u;
       {
-        uint const tint_low_inc_1 = (tint_loop_idx.x + 1u);
+        uint const tint_low_inc_1 = (tint_loop_idx.x - 1u);
         tint_loop_idx.x = tint_low_inc_1;
-        uint const tint_carry_1 = uint((tint_low_inc_1 == 0u));
-        tint_loop_idx.y = (tint_loop_idx.y + tint_carry_1);
+        uint const tint_carry_1 = uint((tint_low_inc_1 == 4294967295u));
+        tint_loop_idx.y = (tint_loop_idx.y - tint_carry_1);
       }
       continue;
     }

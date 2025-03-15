@@ -1,0 +1,6 @@
+#include <metal_stdlib>
+using namespace metal;
+
+fragment void v() {
+  int a = 2;
+}

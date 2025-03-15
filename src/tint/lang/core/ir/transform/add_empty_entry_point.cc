@@ -27,10 +27,7 @@
 
 #include "src/tint/lang/core/ir/transform/add_empty_entry_point.h"
 
-#include <utility>
-
 #include "src/tint/lang/core/ir/builder.h"
-#include "src/tint/lang/core/ir/constant.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/validator.h"
 
@@ -54,7 +51,7 @@ void Run(ir::Module& ir) {
 
 }  // namespace
 
-Result<SuccessType> AddEmptyEntryPoint(Module& ir) {
+diag::Result<SuccessType> AddEmptyEntryPoint(Module& ir) {
     auto result =
         ValidateAndDumpIfNeeded(ir, "core.AddEmptyEntryPoint", kAddEmptyEntryPointCapabilities);
     if (result != Success) {

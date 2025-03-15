@@ -28,7 +28,7 @@
 #ifndef SRC_TINT_LANG_CORE_IR_CONST_PARAM_VALIDATOR_H_
 #define SRC_TINT_LANG_CORE_IR_CONST_PARAM_VALIDATOR_H_
 
-#include "src/tint/utils/result/result.h"
+#include "src/tint/utils/diagnostic/diagnostic.h"
 
 // Forward declarations
 namespace tint::core::ir {
@@ -40,7 +40,7 @@ namespace tint::core::ir {
 /// Validates the constant params for all instructions in the IR.
 /// @param mod the module to validate
 /// @returns success or failure
-Result<SuccessType> ValidateConstParam(Module& mod);
+diag::Result<SuccessType> ValidateConstParam(Module& mod);
 
 }  // namespace tint::core::ir
 

@@ -11,7 +11,6 @@
                OpName %func "func"
                OpName %pointer_indices "pointer_indices"
                OpName %main "main"
-               OpDecorate %_arr_uint_uint_1 ArrayStride 4
       %float = OpTypeFloat 32
     %v2float = OpTypeVector %float 2
 %mat2v2float = OpTypeMatrix %v2float 2

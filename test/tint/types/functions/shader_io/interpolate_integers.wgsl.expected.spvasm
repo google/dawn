@@ -33,11 +33,6 @@
                OpDecorate %vert_main_loc3_Output Flat
                OpDecorate %vert_main_position_Output BuiltIn Position
                OpDecorate %vert_main___point_size_Output BuiltIn PointSize
-               OpMemberDecorate %Interface 0 Offset 0
-               OpMemberDecorate %Interface 1 Offset 4
-               OpMemberDecorate %Interface 2 Offset 16
-               OpMemberDecorate %Interface 3 Offset 32
-               OpMemberDecorate %Interface 4 Offset 48
         %int = OpTypeInt 32 1
 %_ptr_Output_int = OpTypePointer Output %int
 %vert_main_loc0_Output = OpVariable %_ptr_Output_int Output
@@ -119,11 +114,6 @@
                OpDecorate %frag_main_loc3_Input Flat
                OpDecorate %frag_main_position_Input BuiltIn FragCoord
                OpDecorate %frag_main_loc0_Output Location 0
-               OpMemberDecorate %Interface 0 Offset 0
-               OpMemberDecorate %Interface 1 Offset 4
-               OpMemberDecorate %Interface 2 Offset 16
-               OpMemberDecorate %Interface 3 Offset 32
-               OpMemberDecorate %Interface 4 Offset 48
         %int = OpTypeInt 32 1
 %_ptr_Input_int = OpTypePointer Input %int
 %frag_main_loc0_Input = OpVariable %_ptr_Input_int Input

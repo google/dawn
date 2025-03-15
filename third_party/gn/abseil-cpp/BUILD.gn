@@ -407,6 +407,14 @@ absl_source_set("inlined_vector_internal") {
   ]
 }
 
+absl_source_set("no_destructor") {
+  public = [ "${dawn_abseil_dir}/absl/base/no_destructor.h" ]
+  deps = [
+    ":config",
+    ":nullability",
+  ]
+}
+
 absl_source_set("raw_hash_map") {
   public = [ "${dawn_abseil_dir}/absl/container/internal/raw_hash_map.h" ]
   deps = [

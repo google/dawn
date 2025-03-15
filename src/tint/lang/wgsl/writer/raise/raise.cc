@@ -39,7 +39,6 @@
 #include "src/tint/lang/wgsl/ir/builtin_call.h"
 #include "src/tint/lang/wgsl/writer/raise/ptr_to_ref.h"
 #include "src/tint/lang/wgsl/writer/raise/value_to_let.h"
-#include "src/tint/utils/result/result.h"
 
 namespace tint::wgsl::writer {
 namespace {
@@ -256,7 +255,7 @@ void ReplaceWorkgroupBarrier(core::ir::Builder& b, core::ir::CoreBuiltinCall* ca
 
 }  // namespace
 
-Result<SuccessType> Raise(core::ir::Module& mod) {
+diag::Result<SuccessType> Raise(core::ir::Module& mod) {
     core::ir::Builder b{mod};
     for (auto* inst : mod.Instructions()) {
         if (auto* call = inst->As<core::ir::CoreBuiltinCall>()) {

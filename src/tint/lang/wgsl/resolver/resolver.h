@@ -204,6 +204,9 @@ class Resolver {
     /// the identifier is not templated.
     core::type::Type* Array(const ast::Identifier* ident);
 
+    /// @returns a binding_array resolved from the templated identifier @p ident.
+    core::type::BindingArray* BindingArray(const ast::Identifier* ident);
+
     /// @returns an atomic resolved from the templated identifier @p ident.
     core::type::Atomic* Atomic(const ast::Identifier* ident);
 
@@ -697,6 +700,7 @@ class Resolver {
     wgsl::Extensions enabled_extensions_;
     Vector<sem::Function*, 8> entry_points_;
     Hashmap<const core::type::Type*, const Source*, 8> atomic_composite_info_;
+    Hashset<const core::type::Type*, 8> subgroup_matrix_uses_;
     tint::Bitset<0> marked_;
     ExprEvalStageConstraint expr_eval_stage_constraint_;
     std::unordered_map<const sem::Function*, AliasAnalysisInfo> alias_analysis_infos_;

@@ -42,12 +42,6 @@
                OpDecorate %main_loc5_Input Location 5
                OpDecorate %main_position_Output BuiltIn Position
                OpDecorate %main___point_size_Output BuiltIn PointSize
-               OpMemberDecorate %VertexInputs 0 Offset 0
-               OpMemberDecorate %VertexInputs 1 Offset 4
-               OpMemberDecorate %VertexInputs 2 Offset 8
-               OpMemberDecorate %VertexInputs 3 Offset 16
-               OpMemberDecorate %VertexInputs 4 Offset 32
-               OpMemberDecorate %VertexInputs 5 Offset 40
         %int = OpTypeInt 32 1
 %_ptr_Input_int = OpTypePointer Input %int
 %main_loc0_Input = OpVariable %_ptr_Input_int Input

@@ -80,7 +80,7 @@ void main_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars)
   foo(ary, tint_module_vars);
 }
 
-kernel void v_2(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v_3 [[threadgroup(0)]], const constant S* src_uniform [[buffer(0)]], device S* src_storage [[buffer(2)]], device S* dst [[buffer(1)]], device S_nested* dst_nested [[buffer(3)]]) {
+kernel void v_2(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v_3 [[threadgroup(0)]], const constant S* src_uniform [[buffer(1)]], device S* src_storage [[buffer(2)]], device S* dst [[buffer(0)]], device S_nested* dst_nested [[buffer(3)]]) {
   thread tint_array<int4, 4> src_private = {};
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.src_private=(&src_private), .src_workgroup=(&(*v_3).tint_symbol), .src_uniform=src_uniform, .src_storage=src_storage, .dst=dst, .dst_nested=dst_nested};
   main_inner(tint_local_index, tint_module_vars);

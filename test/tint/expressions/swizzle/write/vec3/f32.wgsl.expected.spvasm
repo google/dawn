@@ -12,7 +12,6 @@
                OpName %P "P"
                OpName %f "f"
                OpName %unused_entry_point "unused_entry_point"
-               OpMemberDecorate %S 0 Offset 0
       %float = OpTypeFloat 32
     %v3float = OpTypeVector %float 3
           %S = OpTypeStruct %v3float

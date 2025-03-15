@@ -28,12 +28,11 @@
 #ifndef SRC_TINT_LANG_CORE_IR_TRANSFORM_ROBUSTNESS_H_
 #define SRC_TINT_LANG_CORE_IR_TRANSFORM_ROBUSTNESS_H_
 
-#include <string>
 #include <unordered_set>
 
 #include "src/tint/api/common/binding_point.h"
+#include "src/tint/utils/diagnostic/diagnostic.h"
 #include "src/tint/utils/reflection.h"
-#include "src/tint/utils/result/result.h"
 
 // Forward declarations.
 namespace tint::core::ir {
@@ -87,7 +86,7 @@ struct RobustnessConfig {
 /// @param module the module to transform
 /// @param config the robustness configuration
 /// @returns success or failure
-Result<SuccessType> Robustness(Module& module, const RobustnessConfig& config);
+diag::Result<SuccessType> Robustness(Module& module, const RobustnessConfig& config);
 
 }  // namespace tint::core::ir::transform
 

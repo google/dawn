@@ -57,7 +57,7 @@ class SpirvReaderTestHelperBase : public BASE {
     /// Run the parser on a SPIR-V module and return the Tint IR or an error string.
     /// @param spirv_asm the SPIR-V assembly to parse
     /// @returns the disassembled Tint IR or an error
-    Result<std::string> Run(std::string spirv_asm) {
+    diag::Result<std::string> Run(std::string spirv_asm) {
         // Assemble the SPIR-V input.
         auto binary = Assemble(spirv_asm);
         if (binary != Success) {

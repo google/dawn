@@ -121,7 +121,7 @@ VertexOutput vertex_main_inner(tint_module_vars_struct tint_module_vars) {
   return out;
 }
 
-vertex vertex_main_outputs vertex_main(const device SB_RO* sb_ro [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
+vertex vertex_main_outputs vertex_main(const device SB_RO* sb_ro [[buffer(1)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sb_ro=sb_ro, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
   VertexOutput const v = vertex_main_inner(tint_module_vars);
   vertex_main_outputs tint_wrapper_result = {};

@@ -124,10 +124,10 @@ void main_inner(uvec3 WorkGroupID, uvec3 LocalInvocationID, uint tint_local_inde
           if (v_11) {
             vec3 acc = vec3(0.0f);
             {
-              uvec2 tint_loop_idx = uvec2(0u);
+              uvec2 tint_loop_idx = uvec2(4294967295u);
               uint f = 0u;
               while(true) {
-                if (all(equal(tint_loop_idx, uvec2(4294967295u)))) {
+                if (all(equal(tint_loop_idx, uvec2(0u)))) {
                   break;
                 }
                 if ((f < v.inner.filterDim)) {
@@ -141,10 +141,10 @@ void main_inner(uvec3 WorkGroupID, uvec3 LocalInvocationID, uint tint_local_inde
                 uint v_15 = min(i, 255u);
                 acc = (v_12 + (v_13 * tile[v_14][v_15]));
                 {
-                  uint tint_low_inc = (tint_loop_idx.x + 1u);
+                  uint tint_low_inc = (tint_loop_idx.x - 1u);
                   tint_loop_idx.x = tint_low_inc;
-                  uint tint_carry = uint((tint_low_inc == 0u));
-                  tint_loop_idx.y = (tint_loop_idx.y + tint_carry);
+                  uint tint_carry = uint((tint_low_inc == 4294967295u));
+                  tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
                   f = (f + 1u);
                 }
                 continue;

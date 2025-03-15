@@ -2218,7 +2218,7 @@ fn f() {
 
 TEST_F(IRToProgramTest, For_IncInInit_Cmp) {
     // %b1 = block {  # root
-    //   %i:ptr<storage, u32, read_write> = var @binding_point(0, 0)
+    //   %i:ptr<storage, u32, read_write> = var undef @binding_point(0, 0)
     // }
     //
     // %f = func():void -> %b2 {
@@ -2690,13 +2690,66 @@ fn f(v : S) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// Override Construct
+////////////////////////////////////////////////////////////////////////////////
+TEST_F(IRToProgramTest, Override_NoId) {
+    core::ir::Override* o;
+    b.Append(b.ir.root_block, [&] { o = b.Override("o", false); });
+
+    auto* fn = b.Function("f", ty.bool_());
+    b.Append(fn->Block(), [&] { b.Return(fn, o); });
+
+    EXPECT_WGSL(R"(
+override o : bool = false;
+
+fn f() -> bool {
+  return o;
+}
+)");
+}
+
+TEST_F(IRToProgramTest, Override_Id) {
+    core::ir::Override* o;
+    b.Append(b.ir.root_block, [&] { o = b.Override("o", true); });
+    o->SetOverrideId(OverrideId{10});
+
+    auto* fn = b.Function("f", ty.bool_());
+    b.Append(fn->Block(), [&] { b.Return(fn, o); });
+
+    EXPECT_WGSL(R"(
+@id(10) override o : bool = true;
+
+fn f() -> bool {
+  return o;
+}
+)");
+}
+
+TEST_F(IRToProgramTest, Override_NoInit) {
+    core::ir::Override* o;
+    b.Append(b.ir.root_block, [&] { o = b.Override("o", ty.i32()); });
+    o->SetOverrideId(OverrideId{10});
+
+    auto* fn = b.Function("f", ty.i32());
+    b.Append(fn->Block(), [&] { b.Return(fn, o); });
+
+    EXPECT_WGSL(R"(
+@id(10) override o : i32;
+
+fn f() -> i32 {
+  return o;
+}
+)");
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // chromium_internal_graphite
 ////////////////////////////////////////////////////////////////////////////////
 TEST_F(IRToProgramTest, Enable_ChromiumInternalGraphite_SubgroupBallot) {
     b.Append(b.ir.root_block, [&] {
-        auto t = b.Var("T", ty.ref<core::AddressSpace::kHandle>(ty.Get<core::type::StorageTexture>(
+        auto t = b.Var("T", ty.ref<core::AddressSpace::kHandle>(ty.storage_texture(
                                 core::type::TextureDimension::k2d, core::TexelFormat::kR8Unorm,
-                                core::Access::kRead, ty.f32())));
+                                core::Access::kRead)));
         t->SetBindingPoint(0, 0);
     });
 

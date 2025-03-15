@@ -36,15 +36,15 @@
 
 namespace tint::bench {
 
-Result<Source::File> GetWgslFile(std::string name) {
+diag::Result<Source::File> GetWgslFile(std::string name) {
     auto wgsl = kBenchmarkInputs.find(name);
     if (wgsl == kBenchmarkInputs.end()) {
-        return Failure{"failed to find WGSL shader for '" + name + "'"};
+        return diag::Failure{"failed to find WGSL shader for '" + name + "'"};
     }
     return tint::Source::File("<input>", wgsl->second);
 }
 
-Result<ProgramAndFile> GetWgslProgram(std::string name) {
+diag::Result<ProgramAndFile> GetWgslProgram(std::string name) {
     auto res = GetWgslFile(name);
     if (res != Success) {
         return res.Failure();
@@ -52,7 +52,7 @@ Result<ProgramAndFile> GetWgslProgram(std::string name) {
     auto file = std::make_unique<Source::File>(res.Get());
     auto program = wgsl::reader::Parse(file.get());
     if (!program.IsValid()) {
-        return Failure{program.Diagnostics()};
+        return diag::Failure{program.Diagnostics()};
     }
     return ProgramAndFile{std::move(program), std::move(file)};
 }

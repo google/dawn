@@ -36,7 +36,11 @@ namespace {
 Result<SuccessType> ConversionPolyfillFuzzer(Module& ir,
                                              const fuzz::ir::Context&,
                                              const ConversionPolyfillConfig& config) {
-    return ConversionPolyfill(ir, config);
+    auto res = ConversionPolyfill(ir, config);
+    if (res != Success) {
+        return Failure{res.Failure().reason.Str()};
+    }
+    return Success;
 }
 
 }  // namespace

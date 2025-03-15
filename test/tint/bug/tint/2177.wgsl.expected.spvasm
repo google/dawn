@@ -8,23 +8,23 @@
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
-               OpMemberName %arr_block 0 "inner"
-               OpName %arr_block "arr_block"
+               OpMemberName %arr_block_tint_explicit_layout 0 "inner"
+               OpName %arr_block_tint_explicit_layout "arr_block_tint_explicit_layout"
                OpName %f2 "f2"
                OpName %f1 "f1"
                OpName %f0 "f0"
                OpName %main "main"
                OpDecorate %_runtimearr_uint ArrayStride 4
-               OpMemberDecorate %arr_block 0 Offset 0
-               OpDecorate %arr_block Block
+               OpMemberDecorate %arr_block_tint_explicit_layout 0 Offset 0
+               OpDecorate %arr_block_tint_explicit_layout Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 Coherent
        %uint = OpTypeInt 32 0
 %_runtimearr_uint = OpTypeRuntimeArray %uint
-  %arr_block = OpTypeStruct %_runtimearr_uint
-%_ptr_StorageBuffer_arr_block = OpTypePointer StorageBuffer %arr_block
-          %1 = OpVariable %_ptr_StorageBuffer_arr_block StorageBuffer
+%arr_block_tint_explicit_layout = OpTypeStruct %_runtimearr_uint
+%_ptr_StorageBuffer_arr_block_tint_explicit_layout = OpTypePointer StorageBuffer %arr_block_tint_explicit_layout
+          %1 = OpVariable %_ptr_StorageBuffer_arr_block_tint_explicit_layout StorageBuffer
           %7 = OpTypeFunction %uint
 %_ptr_StorageBuffer__runtimearr_uint = OpTypePointer StorageBuffer %_runtimearr_uint
      %uint_0 = OpConstant %uint 0

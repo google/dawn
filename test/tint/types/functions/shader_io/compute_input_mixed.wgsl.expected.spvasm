@@ -26,8 +26,6 @@
                OpDecorate %main_local_invocation_index_Input BuiltIn LocalInvocationIndex
                OpDecorate %main_global_invocation_id_Input BuiltIn GlobalInvocationId
                OpDecorate %main_workgroup_id_Input BuiltIn WorkgroupId
-               OpMemberDecorate %ComputeInputs0 0 Offset 0
-               OpMemberDecorate %ComputeInputs1 0 Offset 0
        %uint = OpTypeInt 32 0
      %v3uint = OpTypeVector %uint 3
 %_ptr_Input_v3uint = OpTypePointer Input %v3uint

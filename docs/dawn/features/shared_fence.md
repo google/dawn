@@ -9,6 +9,7 @@ A variety of features may be used to externally synchronize usage of resources o
 - `wgpu::FeatureName::SharedFenceVkSemaphoreZirconHandle`
 - `wgpu::FeatureName::SharedFenceDXGISharedHandle`
 - `wgpu::FeatureName::SharedFenceMTLSharedEvent`
+- `wgpu::FeatureName::SharedFenceEGLSync`
 
 TODO(crbug.com/dawn/1745): additional documentation
 

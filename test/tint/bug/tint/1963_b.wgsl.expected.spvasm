@@ -19,8 +19,6 @@
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 Coherent
-               OpMemberDecorate %__atomic_compare_exchange_result_i32 0 Offset 0
-               OpMemberDecorate %__atomic_compare_exchange_result_i32 1 Offset 4
         %int = OpTypeInt 32 1
     %a_block = OpTypeStruct %int
 %_ptr_StorageBuffer_a_block = OpTypePointer StorageBuffer %a_block

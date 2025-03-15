@@ -32,6 +32,7 @@
 
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/ir/builder.h"
+#include "src/tint/lang/core/ir/constant.h"
 #include "src/tint/lang/core/ir/exit_if.h"
 #include "src/tint/lang/core/ir/exit_loop.h"
 #include "src/tint/lang/core/ir/exit_switch.h"
@@ -86,6 +87,7 @@
 #include "src/tint/lang/wgsl/ast/var.h"
 #include "src/tint/lang/wgsl/ast/variable_decl_statement.h"
 #include "src/tint/lang/wgsl/ast/while_statement.h"
+#include "src/tint/lang/wgsl/ast/workgroup_attribute.h"
 #include "src/tint/lang/wgsl/ir/builtin_call.h"
 #include "src/tint/lang/wgsl/program/program.h"
 #include "src/tint/lang/wgsl/sem/array_count.h"
@@ -107,7 +109,6 @@
 #include "src/tint/utils/containers/scope_stack.h"
 #include "src/tint/utils/macros/defer.h"
 #include "src/tint/utils/macros/scoped_assignment.h"
-#include "src/tint/utils/result/result.h"
 #include "src/tint/utils/rtti/switch.h"
 
 using namespace tint::core::number_suffixes;  // NOLINT
@@ -116,7 +117,7 @@ using namespace tint::core::fluent_types;     // NOLINT
 namespace tint::wgsl::reader {
 namespace {
 
-using ResultType = tint::Result<core::ir::Module>;
+using ResultType = diag::Result<core::ir::Module>;
 
 /// Impl is the private-implementation of FromProgram().
 class Impl {
@@ -255,7 +256,7 @@ class Impl {
         }
 
         if (diagnostics_.ContainsErrors()) {
-            return Failure{std::move(diagnostics_)};
+            return diag::Failure{std::move(diagnostics_)};
         }
 
         return std::move(mod);
@@ -283,13 +284,21 @@ class Impl {
                 case ast::PipelineStage::kCompute: {
                     ir_func->SetStage(core::ir::Function::PipelineStage::kCompute);
 
-                    // TODO(dsinclair): When overrides are supported, this will have to change. The
-                    // `sem` does not hold information on override workgroup sizes so we'll have to
-                    // pull this from elsewhere.
-                    auto wg_size = sem->WorkgroupSize();
-                    ir_func->SetWorkgroupSize(builder_.Constant(u32(wg_size[0].value())),
-                                              builder_.Constant(u32(wg_size[1].value_or(1))),
-                                              builder_.Constant(u32(wg_size[2].value_or(1))));
+                    auto attr = ast::GetAttribute<ast::WorkgroupAttribute>(ast_func->attributes);
+                    if (attr) {
+                        // The x size is always required (y, z are optional).
+                        auto value_x = EmitValueExpression(attr->x);
+                        bool is_unsigned = value_x->Type()->IsUnsignedIntegerScalar();
+
+                        auto* one_const =
+                            is_unsigned ? builder_.Constant(1_u) : builder_.Constant(1_i);
+
+                        ir_func->SetWorkgroupSize(
+                            value_x, attr->y ? EmitValueExpression(attr->y) : one_const,
+                            attr->z ? EmitValueExpression(attr->z) : one_const);
+                    } else {
+                        TINT_ICE() << "Missing workgroup attribute for compute entry point.";
+                    }
                     break;
                 }
                 default: {
@@ -400,9 +409,15 @@ class Impl {
             const auto* sem = program_.Sem().GetVal(stmt->rhs);
             switch (sem->Stage()) {
                 case core::EvaluationStage::kRuntime:
-                case core::EvaluationStage::kOverride:
-                    EmitValueExpression(stmt->rhs);
-                    break;
+                case core::EvaluationStage::kOverride: {
+                    auto* value = EmitValueExpression(stmt->rhs);
+                    auto* result = value->As<core::ir::InstructionResult>();
+                    // Overrides need to be referenced if they are to be retained in single entry
+                    // point in the case of phony assignment.
+                    if (!result || result->Instruction()->Block() == mod.root_block) {
+                        current_block_->Append(builder_.Let(value));
+                    }
+                } break;
                 case core::EvaluationStage::kNotEvaluated:
                 case core::EvaluationStage::kConstant:
                     // Don't emit.
@@ -1098,8 +1113,16 @@ class Impl {
                     return;
                 }
 
+                const auto* sem = impl.program_.Sem().GetVal(expr->lhs);
+                const bool is_const_eval = sem->Stage() == core::EvaluationStage::kOverride;
                 auto& b = impl.builder_;
-                auto* if_inst = b.If(lhs);
+                core::ir::If* if_inst = nullptr;
+                if (is_const_eval) {
+                    if_inst = b.ConstExprIf(lhs);
+                } else {
+                    if_inst = b.If(lhs);
+                }
+
                 impl.current_block_->Append(if_inst);
 
                 auto* result = b.InstructionResult(b.ir.Types().bool_());
@@ -1349,9 +1372,9 @@ class Impl {
 
 }  // namespace
 
-tint::Result<core::ir::Module> ProgramToIR(const Program& program) {
+diag::Result<core::ir::Module> ProgramToIR(const Program& program) {
     if (!program.IsValid()) {
-        return Failure{program.Diagnostics()};
+        return diag::Failure{program.Diagnostics()};
     }
 
     Impl b(program);
@@ -1359,7 +1382,7 @@ tint::Result<core::ir::Module> ProgramToIR(const Program& program) {
     if (r != Success) {
         diag::List err = std::move(r.Failure().reason);
         err.AddNote(Source{}) << "AST:\n" + Program::printer(program);
-        return Failure{err};
+        return diag::Failure{err};
     }
 
     return r.Move();

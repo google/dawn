@@ -14,7 +14,6 @@
                OpName %main "main"
                OpName %F "F"
                OpName %r "r"
-               OpMemberDecorate %str 0 Offset 0
         %int = OpTypeInt 32 1
         %str = OpTypeStruct %int
 %_ptr_Function_str = OpTypePointer Function %str

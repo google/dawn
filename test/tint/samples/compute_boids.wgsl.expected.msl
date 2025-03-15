@@ -163,7 +163,7 @@ void comp_main_inner(uint3 gl_GlobalInvocationID, tint_module_vars_struct tint_m
   (*tint_module_vars.particlesB).particles[min(index, 4u)].vel = vVel;
 }
 
-kernel void comp_main(uint3 gl_GlobalInvocationID [[thread_position_in_grid]], const constant SimParams* params [[buffer(0)]], device Particles* particlesA [[buffer(1)]], device Particles* particlesB [[buffer(2)]]) {
+kernel void comp_main(uint3 gl_GlobalInvocationID [[thread_position_in_grid]], const constant SimParams* params [[buffer(1)]], device Particles* particlesA [[buffer(0)]], device Particles* particlesB [[buffer(2)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.params=params, .particlesA=particlesA, .particlesB=particlesB};
   comp_main_inner(gl_GlobalInvocationID, tint_module_vars);
 }

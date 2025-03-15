@@ -33,8 +33,6 @@
                OpDecorate %6 DescriptorSet 0
                OpDecorate %6 Binding 1
                OpDecorate %6 Coherent
-               OpDecorate %_arr_int_uint_64 ArrayStride 4
-               OpMemberDecorate %S 0 Offset 0
         %int = OpTypeInt 32 1
         %UBO = OpTypeStruct %int
   %ubo_block = OpTypeStruct %UBO

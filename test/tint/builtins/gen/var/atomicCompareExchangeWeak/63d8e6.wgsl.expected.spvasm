@@ -28,8 +28,6 @@
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 Coherent
-               OpMemberDecorate %__atomic_compare_exchange_result_u32 0 Offset 0
-               OpMemberDecorate %__atomic_compare_exchange_result_u32 1 Offset 4
        %uint = OpTypeInt 32 0
       %SB_RW = OpTypeStruct %uint
 %sb_rw_block = OpTypeStruct %SB_RW
@@ -95,8 +93,6 @@
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 Coherent
-               OpMemberDecorate %__atomic_compare_exchange_result_u32 0 Offset 0
-               OpMemberDecorate %__atomic_compare_exchange_result_u32 1 Offset 4
        %uint = OpTypeInt 32 0
       %SB_RW = OpTypeStruct %uint
 %sb_rw_block = OpTypeStruct %SB_RW

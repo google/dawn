@@ -19,7 +19,7 @@ struct tint_module_vars_struct {
 
 int foo(tint_module_vars_struct tint_module_vars) {
   threadgroup_barrier(mem_flags::mem_threadgroup);
-  tint_array<int, 128> const v_1 = (*tint_module_vars.v);
+  int const v_1 = (*tint_module_vars.v)[0u];
   threadgroup_barrier(mem_flags::mem_threadgroup);
-  return v_1[0u];
+  return v_1;
 }

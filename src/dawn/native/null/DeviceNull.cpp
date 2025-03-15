@@ -92,7 +92,8 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
     // Set the subgroups limit, as DeviceNull should support subgroups feature.
     limits->experimentalSubgroupLimits.minSubgroupSize = 4;
     limits->experimentalSubgroupLimits.maxSubgroupSize = 128;
-    limits->experimentalImmediateDataLimits.maxImmediateDataRangeByteSize = 16;
+    limits->experimentalImmediateDataLimits.maxImmediateDataRangeByteSize =
+        kMaxExternalImmediateConstantsPerPipeline * kImmediateConstantElementByteSize;
     return {};
 }
 
@@ -196,7 +197,9 @@ MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
 
 ResultOrError<Ref<BindGroupBase>> Device::CreateBindGroupImpl(
     const BindGroupDescriptor* descriptor) {
-    return AcquireRef(new BindGroup(this, descriptor));
+    Ref<BindGroup> bindGroup = AcquireRef(new BindGroup(this, descriptor));
+    DAWN_TRY(bindGroup->Initialize(descriptor));
+    return bindGroup;
 }
 ResultOrError<Ref<BindGroupLayoutInternalBase>> Device::CreateBindGroupLayoutImpl(
     const BindGroupLayoutDescriptor* descriptor) {
@@ -352,6 +355,10 @@ BindGroup::BindGroup(DeviceBase* device, const BindGroupDescriptor* descriptor)
     : BindGroupDataHolder(descriptor->layout->GetInternalBindGroupLayout()->GetBindingDataSize()),
       BindGroupBase(device, descriptor, mBindingDataAllocation) {}
 
+MaybeError BindGroup::InitializeImpl() {
+    return {};
+}
+
 // BindGroupLayout
 
 BindGroupLayout::BindGroupLayout(DeviceBase* device, const BindGroupLayoutDescriptor* descriptor)
@@ -493,12 +500,14 @@ MaybeError ComputePipeline::InitializeImpl() {
                                                       transformInputs, nullptr, nullptr));
 
     // Do the workgroup size validation.
-    const CombinedLimits& limits = GetDevice()->GetLimits();
     Extent3D _;
-    DAWN_TRY_ASSIGN(_, ValidateComputeStageWorkgroupSize(
-                           transformedProgram, computeStage.entryPoint.c_str(),
-                           LimitsForCompilationRequest::Create(limits.v1),
-                           static_cast<const AdapterBase*>(GetDevice()->GetAdapter())));
+    DAWN_TRY_ASSIGN(
+        _, ValidateComputeStageWorkgroupSize(
+               transformedProgram, computeStage.entryPoint.c_str(),
+               computeStage.metadata->usesSubgroupMatrix,
+               GetDevice()->GetAdapter()->GetPhysicalDevice()->GetSubgroupMaxSize(),
+               LimitsForCompilationRequest::Create(GetDevice()->GetLimits().v1),
+               LimitsForCompilationRequest::Create(GetDevice()->GetAdapter()->GetLimits().v1)));
     return {};
 }
 
@@ -544,8 +553,7 @@ ResultOrError<SwapChainTextureInfo> SwapChain::GetCurrentTextureImpl() {
     mTexture = AcquireRef(new Texture(GetDevice(), Unpack(&textureDesc)));
     SwapChainTextureInfo info;
     info.texture = mTexture;
-    info.status = wgpu::SurfaceGetCurrentTextureStatus::Success;
-    info.suboptimal = false;
+    info.status = wgpu::SurfaceGetCurrentTextureStatus::SuccessOptimal;
     return info;
 }
 

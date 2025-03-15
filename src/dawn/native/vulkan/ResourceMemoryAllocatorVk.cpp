@@ -54,22 +54,47 @@ constexpr uint64_t kMaxSizeForSubAllocation = 4ull * 1024ull * 1024ull;  // 4MiB
 constexpr uint64_t kBuddyHeapsSize = 2 * kMaxSizeForSubAllocation;
 
 bool IsMemoryKindMappable(MemoryKind memoryKind) {
-    switch (memoryKind) {
-        case MemoryKind::LinearReadMappable:
-        case MemoryKind::LinearWriteMappable:
-            return true;
+    return memoryKind & (MemoryKind::ReadMappable | MemoryKind::WriteMappable);
+}
 
-        case MemoryKind::LazilyAllocated:
-        case MemoryKind::Linear:
-        case MemoryKind::Opaque:
-            return false;
+VkMemoryPropertyFlags GetRequiredMemoryPropertyFlags(MemoryKind memoryKind, bool mappable) {
+    VkMemoryPropertyFlags vkFlags = 0;
 
-        default:
-            DAWN_UNREACHABLE();
+    // Mappable resource must be host visible and host coherent.
+    if (mappable) {
+        vkFlags |= VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
+        vkFlags |= VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
     }
+
+    // DEVICE_LOCAL_BIT must be set when MemoryKind::DeviceLocal is required.
+    if (memoryKind & MemoryKind::DeviceLocal) {
+        vkFlags |= VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+    }
+
+    // HOST_CACHED_BIT must be set when MemoryKind::HostCached is required.
+    if (memoryKind & MemoryKind::HostCached) {
+        vkFlags |= VK_MEMORY_PROPERTY_HOST_CACHED_BIT;
+    }
+
+    return vkFlags;
 }
 
 }  // anonymous namespace
+
+bool SupportsBufferMapExtendedUsages(const VulkanDeviceInfo& deviceInfo) {
+    // On Vulkan the memory type of the mappable buffers with extended usages must have all below
+    // memory property flags.
+    constexpr VkMemoryPropertyFlags kMapExtendedUsageMemoryPropertyFlags =
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+        VK_MEMORY_PROPERTY_HOST_COHERENT_BIT | VK_MEMORY_PROPERTY_HOST_CACHED_BIT;
+    for (const auto& memoryType : deviceInfo.memoryTypes) {
+        if ((memoryType.propertyFlags & kMapExtendedUsageMemoryPropertyFlags) ==
+            kMapExtendedUsageMemoryPropertyFlags) {
+            return true;
+        }
+    }
+    return false;
+}
 
 // SingleTypeAllocator is a combination of a BuddyMemoryAllocator and its client and can
 // service suballocation requests, but for a single Vulkan memory type.
@@ -271,6 +296,7 @@ void ResourceMemoryAllocator::Tick(ExecutionSerial completedSerial) {
 int ResourceMemoryAllocator::FindBestTypeIndex(VkMemoryRequirements requirements, MemoryKind kind) {
     const VulkanDeviceInfo& info = mDevice->GetDeviceInfo();
     bool mappable = IsMemoryKindMappable(kind);
+    VkMemoryPropertyFlags vkRequiredFlags = GetRequiredMemoryPropertyFlags(kind, mappable);
 
     // Find a suitable memory type for this allocation
     int bestType = -1;
@@ -280,15 +306,8 @@ int ResourceMemoryAllocator::FindBestTypeIndex(VkMemoryRequirements requirements
             continue;
         }
 
-        // Mappable resource must be host visible
-        if (mappable &&
-            (info.memoryTypes[i].propertyFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) == 0) {
-            continue;
-        }
-
-        // Mappable must also be host coherent.
-        if (mappable &&
-            (info.memoryTypes[i].propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) == 0) {
+        // Memory type must have all the required memory properties.
+        if ((info.memoryTypes[i].propertyFlags & vkRequiredFlags) != vkRequiredFlags) {
             continue;
         }
 
@@ -332,7 +351,7 @@ int ResourceMemoryAllocator::FindBestTypeIndex(VkMemoryRequirements requirements
             info.memoryTypes[i].propertyFlags & VK_MEMORY_PROPERTY_HOST_CACHED_BIT;
         bool bestHostCached =
             info.memoryTypes[bestType].propertyFlags & VK_MEMORY_PROPERTY_HOST_CACHED_BIT;
-        if (kind == MemoryKind::LinearReadMappable && currentHostCached != bestHostCached) {
+        if ((kind & MemoryKind::ReadMappable) && currentHostCached != bestHostCached) {
             if (currentHostCached) {
                 bestType = static_cast<int>(i);
             }

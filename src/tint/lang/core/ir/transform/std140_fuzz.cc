@@ -53,7 +53,11 @@ Result<SuccessType> Std140Fuzzer(Module& module, const fuzz::ir::Context&) {
         return Failure{"Cannot run module"};
     }
 
-    return Std140(module);
+    auto res = Std140(module);
+    if (res != Success) {
+        return Failure{res.Failure().reason.Str()};
+    }
+    return Success;
 }
 
 }  // namespace

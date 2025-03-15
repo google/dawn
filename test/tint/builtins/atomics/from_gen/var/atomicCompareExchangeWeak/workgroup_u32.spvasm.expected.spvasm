@@ -32,10 +32,6 @@
                OpName %local_invocation_index_1_param "local_invocation_index_1_param"
                OpName %compute_main "compute_main"
                OpDecorate %compute_main_local_invocation_index_Input BuiltIn LocalInvocationIndex
-               OpMemberDecorate %x__atomic_compare_exchange_resultu32 0 Offset 0
-               OpMemberDecorate %x__atomic_compare_exchange_resultu32 1 Offset 4
-               OpMemberDecorate %__atomic_compare_exchange_result_u32 0 Offset 0
-               OpMemberDecorate %__atomic_compare_exchange_result_u32 1 Offset 4
        %uint = OpTypeInt 32 0
 %_ptr_Private_uint = OpTypePointer Private %uint
           %4 = OpConstantNull %uint

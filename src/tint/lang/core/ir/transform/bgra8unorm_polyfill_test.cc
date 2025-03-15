@@ -59,9 +59,7 @@ TEST_F(IR_Bgra8UnormPolyfillTest, NoRootBlock) {
 
 TEST_F(IR_Bgra8UnormPolyfillTest, NoModify_ModuleScopeVariable_Rgba) {
     auto format = core::TexelFormat::kRgba8Unorm;
-    auto* texture_ty =
-        ty.Get<core::type::StorageTexture>(core::type::TextureDimension::k2d, format, write,
-                                           core::type::StorageTexture::SubtypeFor(format, ty));
+    auto* texture_ty = ty.storage_texture(core::type::TextureDimension::k2d, format, write);
 
     auto* var = b.Var("texture", ty.ptr(handle, texture_ty));
     var->SetBindingPoint(1, 2);
@@ -79,7 +77,7 @@ TEST_F(IR_Bgra8UnormPolyfillTest, NoModify_ModuleScopeVariable_Rgba) {
 
     auto* src = R"(
 $B1: {  # root
-  %texture:ptr<handle, texture_storage_2d<rgba8unorm, write>, read> = var @binding_point(1, 2)
+  %texture:ptr<handle, texture_storage_2d<rgba8unorm, write>, read> = var undef @binding_point(1, 2)
 }
 
 %foo = func(%value:vec4<f32>, %coords:vec2<u32>):void {
@@ -100,9 +98,7 @@ $B1: {  # root
 
 TEST_F(IR_Bgra8UnormPolyfillTest, NoModify_UserFunctionParameter_Rgba) {
     auto format = core::TexelFormat::kRgba8Unorm;
-    auto* texture_ty =
-        ty.Get<core::type::StorageTexture>(core::type::TextureDimension::k2d, format, write,
-                                           core::type::StorageTexture::SubtypeFor(format, ty));
+    auto* texture_ty = ty.storage_texture(core::type::TextureDimension::k2d, format, write);
 
     auto* func = b.Function("foo", ty.void_());
     auto* texture = b.FunctionParam("texture", texture_ty);
@@ -132,9 +128,7 @@ TEST_F(IR_Bgra8UnormPolyfillTest, NoModify_UserFunctionParameter_Rgba) {
 
 TEST_F(IR_Bgra8UnormPolyfillTest, ModuleScopeVariable) {
     auto format = core::TexelFormat::kBgra8Unorm;
-    auto* texture_ty =
-        ty.Get<core::type::StorageTexture>(core::type::TextureDimension::k2d, format, write,
-                                           core::type::StorageTexture::SubtypeFor(format, ty));
+    auto* texture_ty = ty.storage_texture(core::type::TextureDimension::k2d, format, write);
 
     auto* var = b.Var("texture", ty.ptr(handle, texture_ty));
     var->SetBindingPoint(1, 2);
@@ -152,7 +146,7 @@ TEST_F(IR_Bgra8UnormPolyfillTest, ModuleScopeVariable) {
 
     auto* src = R"(
 $B1: {  # root
-  %texture:ptr<handle, texture_storage_2d<bgra8unorm, write>, read> = var @binding_point(1, 2)
+  %texture:ptr<handle, texture_storage_2d<bgra8unorm, write>, read> = var undef @binding_point(1, 2)
 }
 
 %foo = func(%value:vec4<f32>, %coords:vec2<u32>):void {
@@ -165,7 +159,7 @@ $B1: {  # root
 )";
     auto* expect = R"(
 $B1: {  # root
-  %texture:ptr<handle, texture_storage_2d<rgba8unorm, write>, read> = var @binding_point(1, 2)
+  %texture:ptr<handle, texture_storage_2d<rgba8unorm, write>, read> = var undef @binding_point(1, 2)
 }
 
 %foo = func(%value:vec4<f32>, %coords:vec2<u32>):void {
@@ -186,9 +180,7 @@ $B1: {  # root
 
 TEST_F(IR_Bgra8UnormPolyfillTest, UserFunctionParameter) {
     auto format = core::TexelFormat::kBgra8Unorm;
-    auto* texture_ty =
-        ty.Get<core::type::StorageTexture>(core::type::TextureDimension::k2d, format, write,
-                                           core::type::StorageTexture::SubtypeFor(format, ty));
+    auto* texture_ty = ty.storage_texture(core::type::TextureDimension::k2d, format, write);
 
     auto* func = b.Function("foo", ty.void_());
     auto* texture = b.FunctionParam("texture", texture_ty);
@@ -226,9 +218,7 @@ TEST_F(IR_Bgra8UnormPolyfillTest, UserFunctionParameter) {
 
 TEST_F(IR_Bgra8UnormPolyfillTest, ModuleScopePassedToUserFunction) {
     auto format = core::TexelFormat::kBgra8Unorm;
-    auto* texture_ty =
-        ty.Get<core::type::StorageTexture>(core::type::TextureDimension::k2d, format, write,
-                                           core::type::StorageTexture::SubtypeFor(format, ty));
+    auto* texture_ty = ty.storage_texture(core::type::TextureDimension::k2d, format, write);
 
     auto* var = b.Var("texture", ty.ptr(handle, texture_ty));
     var->SetBindingPoint(1, 2);
@@ -260,7 +250,7 @@ TEST_F(IR_Bgra8UnormPolyfillTest, ModuleScopePassedToUserFunction) {
 
     auto* src = R"(
 $B1: {  # root
-  %texture:ptr<handle, texture_storage_2d<bgra8unorm, write>, read> = var @binding_point(1, 2)
+  %texture:ptr<handle, texture_storage_2d<bgra8unorm, write>, read> = var undef @binding_point(1, 2)
 }
 
 %bar = func(%texture_1:texture_storage_2d<bgra8unorm, write>, %coords:vec2<u32>, %value:vec4<f32>):void {  # %texture_1: 'texture'
@@ -279,7 +269,7 @@ $B1: {  # root
 )";
     auto* expect = R"(
 $B1: {  # root
-  %texture:ptr<handle, texture_storage_2d<rgba8unorm, write>, read> = var @binding_point(1, 2)
+  %texture:ptr<handle, texture_storage_2d<rgba8unorm, write>, read> = var undef @binding_point(1, 2)
 }
 
 %bar = func(%texture_1:texture_storage_2d<rgba8unorm, write>, %coords:vec2<u32>, %value:vec4<f32>):void {  # %texture_1: 'texture'
@@ -306,9 +296,7 @@ $B1: {  # root
 
 TEST_F(IR_Bgra8UnormPolyfillTest, ModuleScopePassedToUserFunction_MultipleTextures) {
     auto format = core::TexelFormat::kBgra8Unorm;
-    auto* texture_ty =
-        ty.Get<core::type::StorageTexture>(core::type::TextureDimension::k2d, format, write,
-                                           core::type::StorageTexture::SubtypeFor(format, ty));
+    auto* texture_ty = ty.storage_texture(core::type::TextureDimension::k2d, format, write);
 
     auto* var_a = b.Var("texture_a", ty.ptr(handle, texture_ty));
     auto* var_b = b.Var("texture_b", ty.ptr(handle, texture_ty));
@@ -352,9 +340,9 @@ TEST_F(IR_Bgra8UnormPolyfillTest, ModuleScopePassedToUserFunction_MultipleTextur
 
     auto* src = R"(
 $B1: {  # root
-  %texture_a:ptr<handle, texture_storage_2d<bgra8unorm, write>, read> = var @binding_point(1, 2)
-  %texture_b:ptr<handle, texture_storage_2d<bgra8unorm, write>, read> = var @binding_point(1, 3)
-  %texture_c:ptr<handle, texture_storage_2d<bgra8unorm, write>, read> = var @binding_point(1, 4)
+  %texture_a:ptr<handle, texture_storage_2d<bgra8unorm, write>, read> = var undef @binding_point(1, 2)
+  %texture_b:ptr<handle, texture_storage_2d<bgra8unorm, write>, read> = var undef @binding_point(1, 3)
+  %texture_c:ptr<handle, texture_storage_2d<bgra8unorm, write>, read> = var undef @binding_point(1, 4)
 }
 
 %bar = func(%texture_a_1:texture_storage_2d<bgra8unorm, write>, %texture_b_1:texture_storage_2d<bgra8unorm, write>, %texture_b_2:texture_storage_2d<bgra8unorm, write>, %coords:vec2<u32>, %value:vec4<f32>):void {  # %texture_a_1: 'texture_a', %texture_b_1: 'texture_b', %texture_b_2: 'texture_b'
@@ -377,9 +365,9 @@ $B1: {  # root
 )";
     auto* expect = R"(
 $B1: {  # root
-  %texture_a:ptr<handle, texture_storage_2d<rgba8unorm, write>, read> = var @binding_point(1, 2)
-  %texture_b:ptr<handle, texture_storage_2d<rgba8unorm, write>, read> = var @binding_point(1, 3)
-  %texture_c:ptr<handle, texture_storage_2d<rgba8unorm, write>, read> = var @binding_point(1, 4)
+  %texture_a:ptr<handle, texture_storage_2d<rgba8unorm, write>, read> = var undef @binding_point(1, 2)
+  %texture_b:ptr<handle, texture_storage_2d<rgba8unorm, write>, read> = var undef @binding_point(1, 3)
+  %texture_c:ptr<handle, texture_storage_2d<rgba8unorm, write>, read> = var undef @binding_point(1, 4)
 }
 
 %bar = func(%texture_a_1:texture_storage_2d<rgba8unorm, write>, %texture_b_1:texture_storage_2d<rgba8unorm, write>, %texture_b_2:texture_storage_2d<rgba8unorm, write>, %coords:vec2<u32>, %value:vec4<f32>):void {  # %texture_a_1: 'texture_a', %texture_b_1: 'texture_b', %texture_b_2: 'texture_b'
@@ -412,9 +400,7 @@ $B1: {  # root
 
 TEST_F(IR_Bgra8UnormPolyfillTest, MutipleUsesOfOneTexture) {
     auto format = core::TexelFormat::kBgra8Unorm;
-    auto* texture_ty =
-        ty.Get<core::type::StorageTexture>(core::type::TextureDimension::k2d, format, write,
-                                           core::type::StorageTexture::SubtypeFor(format, ty));
+    auto* texture_ty = ty.storage_texture(core::type::TextureDimension::k2d, format, write);
 
     auto* var_a = b.Var("texture", ty.ptr(handle, texture_ty));
     var_a->SetBindingPoint(1, 2);
@@ -452,7 +438,7 @@ TEST_F(IR_Bgra8UnormPolyfillTest, MutipleUsesOfOneTexture) {
 
     auto* src = R"(
 $B1: {  # root
-  %texture:ptr<handle, texture_storage_2d<bgra8unorm, write>, read> = var @binding_point(1, 2)
+  %texture:ptr<handle, texture_storage_2d<bgra8unorm, write>, read> = var undef @binding_point(1, 2)
 }
 
 %bar = func(%texture_1:texture_storage_2d<bgra8unorm, write>, %coords:vec2<u32>, %value:vec4<f32>):void {  # %texture_1: 'texture'
@@ -477,7 +463,7 @@ $B1: {  # root
 )";
     auto* expect = R"(
 $B1: {  # root
-  %texture:ptr<handle, texture_storage_2d<rgba8unorm, write>, read> = var @binding_point(1, 2)
+  %texture:ptr<handle, texture_storage_2d<rgba8unorm, write>, read> = var undef @binding_point(1, 2)
 }
 
 %bar = func(%texture_1:texture_storage_2d<rgba8unorm, write>, %coords:vec2<u32>, %value:vec4<f32>):void {  # %texture_1: 'texture'
@@ -513,9 +499,7 @@ $B1: {  # root
 
 TEST_F(IR_Bgra8UnormPolyfillTest, ArrayedImage) {
     auto format = core::TexelFormat::kBgra8Unorm;
-    auto* texture_ty =
-        ty.Get<core::type::StorageTexture>(core::type::TextureDimension::k2dArray, format, write,
-                                           core::type::StorageTexture::SubtypeFor(format, ty));
+    auto* texture_ty = ty.storage_texture(core::type::TextureDimension::k2dArray, format, write);
 
     auto* var = b.Var("texture", ty.ptr(handle, texture_ty));
     var->SetBindingPoint(1, 2);
@@ -534,7 +518,7 @@ TEST_F(IR_Bgra8UnormPolyfillTest, ArrayedImage) {
 
     auto* src = R"(
 $B1: {  # root
-  %texture:ptr<handle, texture_storage_2d_array<bgra8unorm, write>, read> = var @binding_point(1, 2)
+  %texture:ptr<handle, texture_storage_2d_array<bgra8unorm, write>, read> = var undef @binding_point(1, 2)
 }
 
 %foo = func(%coords:vec2<u32>, %index:u32, %value:vec4<f32>):void {
@@ -547,7 +531,7 @@ $B1: {  # root
 )";
     auto* expect = R"(
 $B1: {  # root
-  %texture:ptr<handle, texture_storage_2d_array<rgba8unorm, write>, read> = var @binding_point(1, 2)
+  %texture:ptr<handle, texture_storage_2d_array<rgba8unorm, write>, read> = var undef @binding_point(1, 2)
 }
 
 %foo = func(%coords:vec2<u32>, %index:u32, %value:vec4<f32>):void {
@@ -568,9 +552,7 @@ $B1: {  # root
 
 TEST_F(IR_Bgra8UnormPolyfillTest, TextureDimensions) {
     auto format = core::TexelFormat::kBgra8Unorm;
-    auto* texture_ty =
-        ty.Get<core::type::StorageTexture>(core::type::TextureDimension::k2d, format, write,
-                                           core::type::StorageTexture::SubtypeFor(format, ty));
+    auto* texture_ty = ty.storage_texture(core::type::TextureDimension::k2d, format, write);
 
     auto* var = b.Var("texture", ty.ptr(handle, texture_ty));
     var->SetBindingPoint(1, 2);
@@ -586,7 +568,7 @@ TEST_F(IR_Bgra8UnormPolyfillTest, TextureDimensions) {
 
     auto* src = R"(
 $B1: {  # root
-  %texture:ptr<handle, texture_storage_2d<bgra8unorm, write>, read> = var @binding_point(1, 2)
+  %texture:ptr<handle, texture_storage_2d<bgra8unorm, write>, read> = var undef @binding_point(1, 2)
 }
 
 %foo = func():vec2<u32> {
@@ -599,7 +581,7 @@ $B1: {  # root
 )";
     auto* expect = R"(
 $B1: {  # root
-  %texture:ptr<handle, texture_storage_2d<rgba8unorm, write>, read> = var @binding_point(1, 2)
+  %texture:ptr<handle, texture_storage_2d<rgba8unorm, write>, read> = var undef @binding_point(1, 2)
 }
 
 %foo = func():vec2<u32> {
@@ -619,9 +601,7 @@ $B1: {  # root
 
 TEST_F(IR_Bgra8UnormPolyfillTest, TextureLoad) {
     auto format = core::TexelFormat::kBgra8Unorm;
-    auto* texture_ty =
-        ty.Get<core::type::StorageTexture>(core::type::TextureDimension::k2d, format, read,
-                                           core::type::StorageTexture::SubtypeFor(format, ty));
+    auto* texture_ty = ty.storage_texture(core::type::TextureDimension::k2d, format, read);
 
     auto* var = b.Var("texture", ty.ptr(handle, texture_ty));
     var->SetBindingPoint(1, 2);
@@ -639,7 +619,7 @@ TEST_F(IR_Bgra8UnormPolyfillTest, TextureLoad) {
 
     auto* src = R"(
 $B1: {  # root
-  %texture:ptr<handle, texture_storage_2d<bgra8unorm, read>, read> = var @binding_point(1, 2)
+  %texture:ptr<handle, texture_storage_2d<bgra8unorm, read>, read> = var undef @binding_point(1, 2)
 }
 
 %foo = func(%coords:vec2<u32>):vec4<f32> {
@@ -652,7 +632,7 @@ $B1: {  # root
 )";
     auto* expect = R"(
 $B1: {  # root
-  %texture:ptr<handle, texture_storage_2d<rgba8unorm, read>, read> = var @binding_point(1, 2)
+  %texture:ptr<handle, texture_storage_2d<rgba8unorm, read>, read> = var undef @binding_point(1, 2)
 }
 
 %foo = func(%coords:vec2<u32>):vec4<f32> {
@@ -673,9 +653,7 @@ $B1: {  # root
 
 TEST_F(IR_Bgra8UnormPolyfillTest, TextureLoadAndStore) {
     auto format = core::TexelFormat::kBgra8Unorm;
-    auto* texture_ty =
-        ty.Get<core::type::StorageTexture>(core::type::TextureDimension::k2d, format, read_write,
-                                           core::type::StorageTexture::SubtypeFor(format, ty));
+    auto* texture_ty = ty.storage_texture(core::type::TextureDimension::k2d, format, read_write);
 
     auto* var = b.Var("texture", ty.ptr(handle, texture_ty));
     var->SetBindingPoint(1, 2);
@@ -694,7 +672,7 @@ TEST_F(IR_Bgra8UnormPolyfillTest, TextureLoadAndStore) {
 
     auto* src = R"(
 $B1: {  # root
-  %texture:ptr<handle, texture_storage_2d<bgra8unorm, read_write>, read> = var @binding_point(1, 2)
+  %texture:ptr<handle, texture_storage_2d<bgra8unorm, read_write>, read> = var undef @binding_point(1, 2)
 }
 
 %foo = func(%coords:vec2<u32>):void {
@@ -708,7 +686,7 @@ $B1: {  # root
 )";
     auto* expect = R"(
 $B1: {  # root
-  %texture:ptr<handle, texture_storage_2d<rgba8unorm, read_write>, read> = var @binding_point(1, 2)
+  %texture:ptr<handle, texture_storage_2d<rgba8unorm, read_write>, read> = var undef @binding_point(1, 2)
 }
 
 %foo = func(%coords:vec2<u32>):void {

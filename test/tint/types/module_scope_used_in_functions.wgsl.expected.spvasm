@@ -12,8 +12,8 @@
                OpName %w "w"
                OpMemberName %uniforms_block 0 "inner"
                OpName %uniforms_block "uniforms_block"
-               OpMemberName %storages_block 0 "inner"
-               OpName %storages_block "storages_block"
+               OpMemberName %storages_block_tint_explicit_layout 0 "inner"
+               OpName %storages_block_tint_explicit_layout "storages_block_tint_explicit_layout"
                OpName %main_local_invocation_index_Input "main_local_invocation_index_Input"
                OpName %no_uses "no_uses"
                OpName %zoo "zoo"
@@ -32,8 +32,8 @@
                OpDecorate %7 Binding 1
                OpDecorate %7 NonWritable
                OpDecorate %_runtimearr_float ArrayStride 4
-               OpMemberDecorate %storages_block 0 Offset 0
-               OpDecorate %storages_block Block
+               OpMemberDecorate %storages_block_tint_explicit_layout 0 Offset 0
+               OpDecorate %storages_block_tint_explicit_layout Block
                OpDecorate %11 DescriptorSet 0
                OpDecorate %11 Binding 0
                OpDecorate %11 Coherent
@@ -49,9 +49,9 @@
 %_ptr_StorageBuffer_uniforms_block = OpTypePointer StorageBuffer %uniforms_block
           %7 = OpVariable %_ptr_StorageBuffer_uniforms_block StorageBuffer
 %_runtimearr_float = OpTypeRuntimeArray %float
-%storages_block = OpTypeStruct %_runtimearr_float
-%_ptr_StorageBuffer_storages_block = OpTypePointer StorageBuffer %storages_block
-         %11 = OpVariable %_ptr_StorageBuffer_storages_block StorageBuffer
+%storages_block_tint_explicit_layout = OpTypeStruct %_runtimearr_float
+%_ptr_StorageBuffer_storages_block_tint_explicit_layout = OpTypePointer StorageBuffer %storages_block_tint_explicit_layout
+         %11 = OpVariable %_ptr_StorageBuffer_storages_block_tint_explicit_layout StorageBuffer
        %uint = OpTypeInt 32 0
 %_ptr_Input_uint = OpTypePointer Input %uint
 %main_local_invocation_index_Input = OpVariable %_ptr_Input_uint Input

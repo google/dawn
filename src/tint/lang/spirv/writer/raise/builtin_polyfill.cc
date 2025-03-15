@@ -269,7 +269,7 @@ struct State {
         core::ir::Call* call = nullptr;
         switch (builtin->Func()) {
             case core::BuiltinFn::kAtomicAdd:
-                call = build(spirv::BuiltinFn::kAtomicIadd);
+                call = build(spirv::BuiltinFn::kAtomicIAdd);
                 call->AppendArg(builtin->Args()[1]);
                 break;
             case core::BuiltinFn::kAtomicAnd:
@@ -311,17 +311,17 @@ struct State {
                 break;
             case core::BuiltinFn::kAtomicMax:
                 if (result_ty->IsSignedIntegerScalar()) {
-                    call = build(spirv::BuiltinFn::kAtomicSmax);
+                    call = build(spirv::BuiltinFn::kAtomicSMax);
                 } else {
-                    call = build(spirv::BuiltinFn::kAtomicUmax);
+                    call = build(spirv::BuiltinFn::kAtomicUMax);
                 }
                 call->AppendArg(builtin->Args()[1]);
                 break;
             case core::BuiltinFn::kAtomicMin:
                 if (result_ty->IsSignedIntegerScalar()) {
-                    call = build(spirv::BuiltinFn::kAtomicSmin);
+                    call = build(spirv::BuiltinFn::kAtomicSMin);
                 } else {
-                    call = build(spirv::BuiltinFn::kAtomicUmin);
+                    call = build(spirv::BuiltinFn::kAtomicUMin);
                 }
                 call->AppendArg(builtin->Args()[1]);
                 break;
@@ -330,7 +330,7 @@ struct State {
                 call->AppendArg(builtin->Args()[1]);
                 break;
             case core::BuiltinFn::kAtomicSub:
-                call = build(spirv::BuiltinFn::kAtomicIsub);
+                call = build(spirv::BuiltinFn::kAtomicISub);
                 call->AppendArg(builtin->Args()[1]);
                 break;
             case core::BuiltinFn::kAtomicXor:
@@ -387,7 +387,7 @@ struct State {
     void DotPacked4x8(core::ir::CoreBuiltinCall* builtin) {
         // Replace the builtin call with a call to the spirv.{s,u}dot intrinsic.
         auto is_signed = builtin->Func() == core::BuiltinFn::kDot4I8Packed;
-        auto inst = is_signed ? spirv::BuiltinFn::kSdot : spirv::BuiltinFn::kUdot;
+        auto inst = is_signed ? spirv::BuiltinFn::kSDot : spirv::BuiltinFn::kUDot;
 
         auto args = Vector<core::ir::Value*, 3>(builtin->Args());
         args.Push(Literal(u32(SpvPackedVectorFormatPackedVectorFormat4x8Bit)));
@@ -1029,18 +1029,40 @@ struct State {
         builtin->Destroy();
     }
 
+    /// Generate the literal operand for a subgroup matrix multiply instruction.
+    /// @param input_ty the type of the input matrices
+    /// @param result_ty the type of the result matrix
+    /// @returns the literal operands
+    ir::LiteralOperand* SubgroupMatrixMultiplyOperands(
+        const core::type::SubgroupMatrix* input_ty,
+        const core::type::SubgroupMatrix* result_ty) {
+        uint32_t operands = SpvCooperativeMatrixOperandsMaskNone;
+        if (input_ty->Type()->IsSignedIntegerScalar()) {
+            operands |= SpvCooperativeMatrixOperandsMatrixASignedComponentsKHRMask;
+            operands |= SpvCooperativeMatrixOperandsMatrixBSignedComponentsKHRMask;
+        }
+        if (result_ty->Type()->IsSignedIntegerScalar()) {
+            operands |= SpvCooperativeMatrixOperandsMatrixCSignedComponentsKHRMask;
+            operands |= SpvCooperativeMatrixOperandsMatrixResultSignedComponentsKHRMask;
+        }
+        return Literal(u32(operands));
+    }
+
     /// Replace a subgroupMatrixMultiply builtin.
     /// @param builtin the builtin call instruction
     void SubgroupMatrixMultiply(core::ir::CoreBuiltinCall* builtin) {
         b.InsertBefore(builtin, [&] {
             // SPIR-V only provides a multiply-accumulate instruction, so construct a zero-valued
             // matrix to accumulate into.
+            auto* result_ty = builtin->Result(0)->Type()->As<core::type::SubgroupMatrix>();
             auto* left = builtin->Args()[0];
             auto* right = builtin->Args()[1];
-            auto* acc = b.Construct(builtin->Result(0)->Type());
+            auto* acc = b.Construct(result_ty);
+            auto* operands = SubgroupMatrixMultiplyOperands(
+                left->Type()->As<core::type::SubgroupMatrix>(), result_ty);
             b.CallWithResult<spirv::ir::BuiltinCall>(builtin->DetachResult(),
                                                      spirv::BuiltinFn::kCooperativeMatrixMulAdd,
-                                                     left, right, acc);
+                                                     left, right, acc, operands);
         });
         builtin->Destroy();
     }
@@ -1052,9 +1074,12 @@ struct State {
             auto* left = builtin->Args()[0];
             auto* right = builtin->Args()[1];
             auto* acc = builtin->Args()[2];
+            auto* operands =
+                SubgroupMatrixMultiplyOperands(left->Type()->As<core::type::SubgroupMatrix>(),
+                                               acc->Type()->As<core::type::SubgroupMatrix>());
             b.CallWithResult<spirv::ir::BuiltinCall>(builtin->DetachResult(),
                                                      spirv::BuiltinFn::kCooperativeMatrixMulAdd,
-                                                     left, right, acc);
+                                                     left, right, acc, operands);
         });
         builtin->Destroy();
     }
@@ -1062,7 +1087,7 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType> BuiltinPolyfill(core::ir::Module& ir, bool use_vulkan_memory_model) {
+diag::Result<SuccessType> BuiltinPolyfill(core::ir::Module& ir, bool use_vulkan_memory_model) {
     auto result = ValidateAndDumpIfNeeded(ir, "spirv.BuiltinPolyfill");
     if (result != Success) {
         return result.Failure();

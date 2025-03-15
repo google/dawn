@@ -12,8 +12,6 @@
                OpName %p_indices "p_indices"
                OpName %bar "bar"
                OpName %unused_entry_point "unused_entry_point"
-               OpDecorate %_arr_int_uint_4 ArrayStride 4
-               OpDecorate %_arr_uint_uint_1 ArrayStride 4
         %int = OpTypeInt 32 1
        %uint = OpTypeInt 32 0
      %uint_4 = OpConstant %uint 4

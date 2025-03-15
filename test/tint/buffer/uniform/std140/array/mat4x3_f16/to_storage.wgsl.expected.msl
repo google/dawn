@@ -59,7 +59,7 @@ tint_array<half4x3, 4> tint_load_array_packed_vec3(const constant tint_array<tin
   return tint_array<half4x3, 4>{v_3, v_5, v_7, half4x3(half3(v_8[0u].packed), half3(v_8[1u].packed), half3(v_8[2u].packed), half3(v_8[3u].packed))};
 }
 
-kernel void f(const constant tint_array<tint_array<tint_packed_vec3_f16_array_element, 4>, 4>* u [[buffer(0)]], device tint_array<tint_array<tint_packed_vec3_f16_array_element, 4>, 4>* s [[buffer(1)]]) {
+kernel void f(const constant tint_array<tint_array<tint_packed_vec3_f16_array_element, 4>, 4>* u [[buffer(1)]], device tint_array<tint_array<tint_packed_vec3_f16_array_element, 4>, 4>* s [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.u=u, .s=s};
   tint_store_and_preserve_padding(tint_module_vars.s, tint_load_array_packed_vec3(tint_module_vars.u));
   tint_array<tint_packed_vec3_f16_array_element, 4> const v_9 = (*tint_module_vars.u)[2u];

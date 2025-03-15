@@ -12,8 +12,6 @@
                OpName %__modf_result_f32 "__modf_result_f32"
                OpName %v "v"
                OpName %main "main"
-               OpMemberDecorate %__modf_result_f32 0 Offset 0
-               OpMemberDecorate %__modf_result_f32 1 Offset 4
       %float = OpTypeFloat 32
 %__modf_result_f32 = OpTypeStruct %float %float
 %_ptr_Private___modf_result_f32 = OpTypePointer Private %__modf_result_f32

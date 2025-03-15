@@ -10,8 +10,8 @@
                OpEntryPoint GLCompute %main "main" %main_global_invocation_id_Input
                OpExecutionMode %main LocalSize 1 1 1
                OpName %myTexture "myTexture"
-               OpMemberName %Result 0 "values"
-               OpName %Result "Result"
+               OpMemberName %Result_tint_explicit_layout 0 "values"
+               OpName %Result_tint_explicit_layout "Result_tint_explicit_layout"
                OpName %result "result"
                OpName %main_global_invocation_id_Input "main_global_invocation_id_Input"
                OpName %main_inner "main_inner"
@@ -23,8 +23,8 @@
                OpDecorate %myTexture DescriptorSet 0
                OpDecorate %myTexture Binding 1
                OpDecorate %_runtimearr_float ArrayStride 4
-               OpMemberDecorate %Result 0 Offset 0
-               OpDecorate %Result Block
+               OpMemberDecorate %Result_tint_explicit_layout 0 Offset 0
+               OpDecorate %Result_tint_explicit_layout Block
                OpDecorate %result DescriptorSet 0
                OpDecorate %result Binding 3
                OpDecorate %result Coherent
@@ -34,9 +34,9 @@
 %_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3
   %myTexture = OpVariable %_ptr_UniformConstant_3 UniformConstant
 %_runtimearr_float = OpTypeRuntimeArray %float
-     %Result = OpTypeStruct %_runtimearr_float
-%_ptr_StorageBuffer_Result = OpTypePointer StorageBuffer %Result
-     %result = OpVariable %_ptr_StorageBuffer_Result StorageBuffer
+%Result_tint_explicit_layout = OpTypeStruct %_runtimearr_float
+%_ptr_StorageBuffer_Result_tint_explicit_layout = OpTypePointer StorageBuffer %Result_tint_explicit_layout
+     %result = OpVariable %_ptr_StorageBuffer_Result_tint_explicit_layout StorageBuffer
        %uint = OpTypeInt 32 0
      %v3uint = OpTypeVector %uint 3
 %_ptr_Input_v3uint = OpTypePointer Input %v3uint

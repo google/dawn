@@ -18,7 +18,6 @@
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 Coherent
-               OpDecorate %_arr_uint_uint_4 ArrayStride 4
        %uint = OpTypeInt 32 0
 %buffer_block = OpTypeStruct %uint
 %_ptr_StorageBuffer_buffer_block = OpTypePointer StorageBuffer %buffer_block

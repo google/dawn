@@ -192,7 +192,9 @@ case $BUILD_SYSTEM in
     fi
     if [[ -n "$REMOTEEXEC" ]]; then
         GN_ARGS+=" use_remoteexec=true"
+        GN_ARGS+=" use_reclient=false"
     fi
+    GN_ARGS+=" use_siso=true"
     if [[ -z "$FORCE" && -f "$ROOT_DIR/out/$BUILD_DIR/args.gn" ]]; then
       generate "gn" "gen" "out/active" # keep existing args
     else

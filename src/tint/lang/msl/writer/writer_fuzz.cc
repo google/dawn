@@ -59,7 +59,7 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
 
     auto check = CanGenerate(module, options);
     if (check != Success) {
-        return check.Failure();
+        return Failure{check.Failure().reason.Str()};
     }
 
     auto output = Generate(module, options);

@@ -13,8 +13,6 @@
                OpName %__modf_result_f32 "__modf_result_f32"
                OpName %s1 "s1"
                OpName %unused_entry_point "unused_entry_point"
-               OpMemberDecorate %__modf_result_f32 0 Offset 0
-               OpMemberDecorate %__modf_result_f32 1 Offset 4
        %void = OpTypeVoid
           %3 = OpTypeFunction %void
       %float = OpTypeFloat 32

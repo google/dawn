@@ -13,7 +13,6 @@
                OpName %func "func"
                OpName %main "main"
                OpName %r "r"
-               OpMemberDecorate %str 0 Offset 0
         %int = OpTypeInt 32 1
         %str = OpTypeStruct %int
 %_ptr_Private_str = OpTypePointer Private %str

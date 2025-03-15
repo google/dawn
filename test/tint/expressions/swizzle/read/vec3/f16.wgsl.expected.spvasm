@@ -136,7 +136,6 @@
                OpName %zzzy "zzzy"
                OpName %zzzz "zzzz"
                OpName %unused_entry_point "unused_entry_point"
-               OpMemberDecorate %S 0 Offset 0
        %half = OpTypeFloat 16
      %v3half = OpTypeVector %half 3
           %S = OpTypeStruct %v3half

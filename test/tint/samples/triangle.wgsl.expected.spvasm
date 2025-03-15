@@ -19,7 +19,6 @@
                OpDecorate %vtx_main_vertex_index_Input BuiltIn VertexIndex
                OpDecorate %vtx_main_position_Output BuiltIn Position
                OpDecorate %vtx_main___point_size_Output BuiltIn PointSize
-               OpDecorate %_arr_v2float_uint_3 ArrayStride 8
        %uint = OpTypeInt 32 0
 %_ptr_Input_uint = OpTypePointer Input %uint
 %vtx_main_vertex_index_Input = OpVariable %_ptr_Input_uint Input

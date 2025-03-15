@@ -1,0 +1,64 @@
+SKIP: FAILED
+
+
+enable chromium_experimental_subgroup_matrix;
+enable f16;
+
+@internal(disable_validation__binding_point_collision) @group(0) @binding(0) var<storage, read_write> prevent_dce : array<f32, 1024>;
+
+fn subgroupMatrixMultiply_5677fc() -> subgroup_matrix_result<f32, 8, 8> {
+  var res : subgroup_matrix_result<f32, 8, 8> = subgroupMatrixMultiply<f32>(subgroup_matrix_left<f16, 8, 8>(), subgroup_matrix_right<f16, 8, 8>());
+  return res;
+}
+
+@compute @workgroup_size(1)
+fn compute_main() {
+  subgroupMatrixStore(&(prevent_dce), 0, subgroupMatrixMultiply_5677fc(), false, 64);
+}
+
+Failed to generate: :11:15 error: msl.simdgroup_multiply: no matching call to 'msl.simdgroup_multiply(subgroup_matrix_result<f32, 8, 8>, subgroup_matrix_left<f16, 8, 8>, subgroup_matrix_right<f16, 8, 8>)'
+
+1 candidate function:
+ • 'msl.simdgroup_multiply(subgroup_matrix<result, S, C, R>  ✓ , subgroup_matrix<left, S, K, R>  ✗ , subgroup_matrix<right, S, C, K>  ✗ )' where:
+      ✓  'S' is 'f32' or 'f16'
+
+    %6:void = msl.simdgroup_multiply %5, %2, %3
+              ^^^^^^^^^^^^^^^^^^^^^^
+
+:6:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+tint_module_vars_struct = struct @align(1) {
+  prevent_dce:ptr<storage, array<f32, 1024>, read_write> @offset(0)
+}
+
+%subgroupMatrixMultiply_5677fc = func():subgroup_matrix_result<f32, 8, 8> {
+  $B1: {
+    %2:subgroup_matrix_left<f16, 8, 8> = construct
+    %3:subgroup_matrix_right<f16, 8, 8> = construct
+    %4:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var
+    %5:subgroup_matrix_result<f32, 8, 8> = load %4
+    %6:void = msl.simdgroup_multiply %5, %2, %3
+    %7:subgroup_matrix_result<f32, 8, 8> = load %4
+    %res:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var %7
+    %9:subgroup_matrix_result<f32, 8, 8> = load %res
+    ret %9
+  }
+}
+%compute_main = @compute @workgroup_size(1u, 1u, 1u) func(%prevent_dce:ptr<storage, array<f32, 1024>, read_write> [@binding_point(0, 0)]):void {
+  $B2: {
+    %12:tint_module_vars_struct = construct %prevent_dce
+    %tint_module_vars:tint_module_vars_struct = let %12
+    %14:subgroup_matrix_result<f32, 8, 8> = call %subgroupMatrixMultiply_5677fc
+    %15:ptr<storage, array<f32, 1024>, read_write> = access %tint_module_vars, 0u
+    %16:ptr<storage, f32, read_write> = access %15, 0u
+    %17:u64 = msl.convert 64u
+    %18:void = msl.simdgroup_store %14, %16, %17, vec2<u64>(0u64), false
+    ret
+  }
+}
+
+
+tint executable returned error: exit status 1

@@ -28,8 +28,10 @@
 #include "src/tint/lang/spirv/reader/parser/parser.h"
 
 #include <algorithm>
+#include <list>
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <unordered_set>
 #include <utility>
 #include <vector>
@@ -69,7 +71,7 @@ class Parser {
   public:
     /// @param spirv the SPIR-V binary data
     /// @returns the generated SPIR-V IR module on success, or failure
-    Result<core::ir::Module> Run(Slice<const uint32_t> spirv) {
+    diag::Result<core::ir::Module> Run(Slice<const uint32_t> spirv) {
         // Validate the incoming SPIR-V binary.
         auto result = validate::Validate(spirv, kTargetEnv);
         if (result != Success) {
@@ -81,7 +83,7 @@ class Parser {
         spirv_context_ =
             spvtools::BuildModule(kTargetEnv, context.CContext()->consumer, spirv.data, spirv.len);
         if (!spirv_context_) {
-            return Failure("failed to build the internal representation of the module");
+            return diag::Failure("failed to build the internal representation of the module");
         }
 
         // Check for unsupported extensions.
@@ -89,7 +91,7 @@ class Parser {
             auto name = ext.GetOperand(0).AsString();
             if (name != "SPV_KHR_storage_buffer_storage_class" &&
                 name != "SPV_KHR_non_semantic_info") {
-                return Failure("SPIR-V extension '" + name + "' is not supported");
+                return diag::Failure("SPIR-V extension '" + name + "' is not supported");
             }
         }
 
@@ -103,12 +105,16 @@ class Parser {
             } else if (name.find("NonSemantic.") == 0) {
                 ignored_imports_.insert(import.result_id());
             } else {
-                return Failure("Unrecognized extended instruction set: " + name);
+                return diag::Failure("Unrecognized extended instruction set: " + name);
             }
         }
 
+        RegisterNames();
+
+        id_stack_.emplace_back();
         {
             TINT_SCOPED_ASSIGNMENT(current_block_, ir_.root_block);
+            EmitSpecConstants();
             EmitModuleScopeVariables();
         }
 
@@ -116,9 +122,126 @@ class Parser {
         EmitEntryPointAttributes();
 
         // TODO(crbug.com/tint/1907): Handle annotation instructions.
-        // TODO(crbug.com/tint/1907): Handle names.
 
         return std::move(ir_);
+    }
+
+    std::optional<uint16_t> GetSpecId(const spvtools::opt::Instruction& inst) {
+        auto decos =
+            spirv_context_->get_decoration_mgr()->GetDecorationsFor(inst.result_id(), true);
+        for (const auto* deco_inst : decos) {
+            TINT_ASSERT(deco_inst->opcode() == spv::Op::OpDecorate);
+
+            if (deco_inst->GetSingleWordInOperand(1) ==
+                static_cast<uint32_t>(spv::Decoration::SpecId)) {
+                return {static_cast<uint16_t>(deco_inst->GetSingleWordInOperand(2))};
+            }
+        }
+        return std::nullopt;
+    }
+
+    void CreateOverride(const spvtools::opt::Instruction& inst,
+                        core::ir::Value* value,
+                        std::optional<uint16_t> spec_id) {
+        auto* override_ = b_.Override(Type(inst.type_id()));
+        override_->SetInitializer(value);
+
+        if (spec_id.has_value()) {
+            override_->SetOverrideId(OverrideId{spec_id.value()});
+        }
+
+        Emit(override_, inst.result_id());
+
+        Symbol name = GetSymbolFor(inst.result_id());
+        if (name.IsValid()) {
+            ir_.SetName(override_, name);
+        }
+    }
+
+    // Generate a module-scope const declaration for each instruction
+    // that is OpSpecConstantTrue, OpSpecConstantFalse, or OpSpecConstant.
+    void EmitSpecConstants() {
+        for (auto& inst : spirv_context_->types_values()) {
+            switch (inst.opcode()) {
+                case spv::Op::OpSpecConstantTrue:
+                case spv::Op::OpSpecConstantFalse: {
+                    auto* value = b_.Value(inst.opcode() == spv::Op::OpSpecConstantTrue);
+                    auto spec_id = GetSpecId(inst);
+
+                    if (spec_id.has_value()) {
+                        CreateOverride(inst, value, spec_id);
+                    } else {
+                        // No spec_id means treat this as a constant.
+                        AddValue(inst.result_id(), value);
+                    }
+                    break;
+                }
+                case spv::Op::OpSpecConstantOp: {
+                    auto op = inst.GetSingleWordInOperand(0);
+
+                    // Store the name away and remove it from the name list.
+                    // This keeps any `Emit*` call in the switch below for
+                    // gaining the name we want associated to the override.
+                    std::string name;
+                    auto iter = id_to_name_.find(inst.result_id());
+                    if (iter != id_to_name_.end()) {
+                        name = iter->second;
+                        id_to_name_.erase(inst.result_id());
+                    }
+
+                    switch (static_cast<spv::Op>(op)) {
+                        case spv::Op::OpLogicalAnd:
+                            EmitBinary(inst, core::BinaryOp::kAnd, 3);
+                            break;
+                        default:
+                            TINT_ICE() << "Unknown spec constant operation: " << op;
+                    }
+
+                    // Restore the saved name, if any, in order to provide that
+                    // name to the override.
+                    if (!name.empty()) {
+                        id_to_name_.insert({inst.result_id(), name});
+                    }
+
+                    CreateOverride(inst, Value(inst.result_id()), std::nullopt);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+    }
+
+    void RegisterNames() {
+        // Register names from OpName
+        for (const auto& inst : spirv_context_->debugs2()) {
+            switch (inst.opcode()) {
+                case spv::Op::OpName: {
+                    const auto name = inst.GetInOperand(1).AsString();
+                    if (!name.empty()) {
+                        id_to_name_[inst.GetSingleWordInOperand(0)] = name;
+                    }
+                    break;
+                }
+                case spv::Op::OpMemberName: {
+                    const auto name = inst.GetInOperand(2).AsString();
+                    if (!name.empty()) {
+                        uint32_t struct_id = inst.GetSingleWordInOperand(0);
+                        uint32_t member_idx = inst.GetSingleWordInOperand(1);
+                        auto iter = struct_to_member_names_.insert({struct_id, {}});
+                        auto& members = (*(iter.first)).second;
+
+                        if (members.size() < (member_idx + 1)) {
+                            members.resize(member_idx + 1);
+                        }
+                        members[member_idx] = name;
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
     }
 
     /// @param sc a SPIR-V storage class
@@ -282,6 +405,15 @@ class Parser {
             TINT_ICE() << "empty structures are not supported";
         }
 
+        auto* type_mgr = spirv_context_->get_type_mgr();
+        auto struct_id = type_mgr->GetId(struct_ty);
+
+        std::vector<std::string>* member_names = nullptr;
+        auto struct_to_member_iter = struct_to_member_names_.find(struct_id);
+        if (struct_to_member_iter != struct_to_member_names_.end()) {
+            member_names = &((*struct_to_member_iter).second);
+        }
+
         // Build a list of struct members.
         uint32_t current_size = 0u;
         Vector<core::type::StructMember*, 4> members;
@@ -335,15 +467,44 @@ class Parser {
                 }
             }
 
-            // TODO(crbug.com/tint/1907): Use OpMemberName to name it.
-            members.Push(ty_.Get<core::type::StructMember>(ir_.symbols.New(), member_ty, i, offset,
-                                                           align, member_ty->Size(),
-                                                           std::move(attributes)));
+            Symbol name;
+            if (member_names && member_names->size() > i) {
+                auto n = (*member_names)[i];
+                if (!n.empty()) {
+                    name = ir_.symbols.Register(n);
+                }
+            }
+            if (!name.IsValid()) {
+                name = ir_.symbols.New();
+            }
+
+            members.Push(ty_.Get<core::type::StructMember>(
+                name, member_ty, i, offset, align, member_ty->Size(), std::move(attributes)));
 
             current_size = offset + member_ty->Size();
         }
-        // TODO(crbug.com/tint/1907): Use OpName to name it.
-        return ty_.Struct(ir_.symbols.New(), std::move(members));
+
+        Symbol name = GetUniqueSymbolFor(struct_id);
+        if (!name.IsValid()) {
+            name = ir_.symbols.New();
+        }
+        return ty_.Struct(name, std::move(members));
+    }
+
+    Symbol GetUniqueSymbolFor(uint32_t id) {
+        auto iter = id_to_name_.find(id);
+        if (iter != id_to_name_.end()) {
+            return ir_.symbols.New(iter->second);
+        }
+        return Symbol{};
+    }
+
+    Symbol GetSymbolFor(uint32_t id) {
+        auto iter = id_to_name_.find(id);
+        if (iter != id_to_name_.end()) {
+            return ir_.symbols.Register(iter->second);
+        }
+        return Symbol{};
     }
 
     /// @param id a SPIR-V result ID for a function declaration instruction
@@ -352,15 +513,71 @@ class Parser {
         return functions_.GetOrAdd(id, [&] { return b_.Function(ty_.void_()); });
     }
 
+    core::ir::Value* Propagate(uint32_t id, core::ir::Value* src) {
+        auto* src_res = src->As<core::ir::InstructionResult>();
+        TINT_ASSERT(src_res);
+
+        auto* blk = src_res->Instruction()->Block();
+        while (blk) {
+            if (InBlock(blk)) {
+                break;
+            }
+
+            auto* ctrl = blk->Parent();
+
+            TINT_ASSERT(blk->Terminator());
+
+            // Add ourselves as part of the terminator return value
+            blk->Terminator()->PushOperand(src);
+            // Add a new result to the control instruction
+            ctrl->AddResult(b_.InstructionResult(src->Type()));
+            // The source instruction is now the control result we just inserted
+            src = ctrl->Results().Back();
+            // The SPIR-V ID now refers to the propagated value.
+            values_.Replace(id, src);
+
+            blk = ctrl->Block();
+        }
+        return src;
+    }
+
+    bool IdIsInScope(uint32_t id) {
+        for (auto iter = id_stack_.rbegin(); iter != id_stack_.rend(); ++iter) {
+            if (iter->count(id) > 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /// @param id a SPIR-V result ID
     /// @returns a Tint value object
     core::ir::Value* Value(uint32_t id) {
-        return values_.GetOrAdd(id, [&]() -> core::ir::Value* {
-            if (auto* c = spirv_context_->get_constant_mgr()->FindDeclaredConstant(id)) {
-                return b_.Constant(Constant(c));
+        auto v = values_.Get(id);
+        if (v) {
+            if (!(*v)->Is<core::ir::InstructionResult>()) {
+                return *v;
             }
-            TINT_UNREACHABLE() << "missing value for result ID " << id;
-        });
+            if (IdIsInScope(id)) {
+                return *v;
+            }
+
+            // The Value is not in scope, so we need to find the originating Value, and then
+            // propagate it up through the control instructions. That will then change the
+            // `Value` which is returned so, set it into the values map as the new "Value" and
+            // return it.
+
+            auto* new_v = Propagate(id, *v);
+            values_.Replace(id, new_v);
+            return new_v;
+        }
+
+        if (auto* c = spirv_context_->get_constant_mgr()->FindDeclaredConstant(id)) {
+            auto* val = b_.Constant(Constant(c));
+            values_.Add(id, val);
+            return val;
+        }
+        TINT_UNREACHABLE() << "missing value for result ID " << id;
     }
 
     /// @param constant a SPIR-V constant object
@@ -427,7 +644,10 @@ class Parser {
     /// Register an IR value for a SPIR-V result ID.
     /// @param result_id the SPIR-V result ID
     /// @param value the IR value
-    void AddValue(uint32_t result_id, core::ir::Value* value) { values_.Add(result_id, value); }
+    void AddValue(uint32_t result_id, core::ir::Value* value) {
+        id_stack_.back().insert(result_id);
+        values_.Replace(result_id, value);
+    }
 
     /// Emit an instruction to the current block and associates the result to
     /// the spirv result id.
@@ -437,6 +657,11 @@ class Parser {
         current_block_->Append(inst);
         TINT_ASSERT(inst->Results().Length() == 1u);
         AddValue(result_id, inst->Result(0));
+
+        Symbol name = GetSymbolFor(result_id);
+        if (name.IsValid()) {
+            ir_.SetName(inst, name);
+        }
     }
 
     /// Emit an instruction to the current block.
@@ -472,10 +697,18 @@ class Parser {
     /// Emit the functions.
     void EmitFunctions() {
         for (auto& func : *spirv_context_->module()) {
+            current_spirv_function_ = &func;
+
             Vector<core::ir::FunctionParam*, 4> params;
             func.ForEachParam([&](spvtools::opt::Instruction* spirv_param) {
                 auto* param = b_.FunctionParam(Type(spirv_param->type_id()));
                 values_.Add(spirv_param->result_id(), param);
+
+                Symbol name = GetSymbolFor(spirv_param->result_id());
+                if (name.IsValid()) {
+                    ir_.SetName(param, name);
+                }
+
                 params.Push(param);
             });
 
@@ -483,9 +716,21 @@ class Parser {
             current_function_->SetParams(std::move(params));
             current_function_->SetReturnType(Type(func.type_id()));
 
+            Symbol name = GetSymbolFor(func.result_id());
+            if (name.IsValid()) {
+                ir_.SetName(current_function_, name);
+            }
+
             functions_.Add(func.result_id(), current_function_);
-            EmitBlock(current_function_->Block(), *func.entry());
+            EmitBlockParent(current_function_->Block(), *func.entry());
+
+            // No terminator was emitted, that means then end of block is
+            // unreachable. Mark as such.
+            if (!current_function_->Block()->Terminator()) {
+                current_function_->Block()->Append(b_.Unreachable());
+            }
         }
+        current_spirv_function_ = nullptr;
     }
 
     /// Emit entry point attributes.
@@ -537,11 +782,47 @@ class Parser {
         }
     }
 
+    bool InBlock(core::ir::Block* blk) { return current_blocks_.count(blk) > 0; }
+
+    // A block parent is a container for a scope, like a `{}`d section in code. It controls the
+    // block addition to the current blocks and the ID stack entry for the block.
+    void EmitBlockParent(core::ir::Block* dst, const spvtools::opt::BasicBlock& src) {
+        TINT_ASSERT(!InBlock(dst));
+
+        id_stack_.emplace_back();
+        current_blocks_.insert(dst);
+
+        EmitBlock(dst, src);
+
+        current_blocks_.erase(dst);
+        id_stack_.pop_back();
+    }
+
     /// Emit the contents of SPIR-V block @p src into Tint IR block @p dst.
     /// @param dst the Tint IR block to append to
     /// @param src the SPIR-V block to emit
     void EmitBlock(core::ir::Block* dst, const spvtools::opt::BasicBlock& src) {
         TINT_SCOPED_ASSIGNMENT(current_block_, dst);
+
+        auto* loop_merge_inst = src.GetLoopMergeInst();
+        // This is a loop merge block, so we need to treat it as a Loop.
+        if (loop_merge_inst) {
+            // Emit the loop into the current block.
+            EmitLoop(src);
+
+            // The loop header is a walk stop block, which was created in the
+            // emit loop method. Get the loop back so we can change the current
+            // insertion block.
+            auto* loop = StopWalkingAt(src.id())->As<core::ir::Loop>();
+            TINT_ASSERT(loop);
+
+            id_stack_.emplace_back();
+            current_blocks_.insert(loop->Body());
+
+            // Now emit the remainder of the block into the loop body.
+            current_block_ = loop->Body();
+        }
+
         for (auto& inst : src) {
             switch (inst.opcode()) {
                 case spv::Op::OpNop:
@@ -549,11 +830,53 @@ class Parser {
                 case spv::Op::OpUndef:
                     AddValue(inst.result_id(), b_.Zero(Type(inst.type_id())));
                     break;
+                case spv::Op::OpBranch:
+                    EmitBranch(inst);
+                    break;
+                case spv::Op::OpBranchConditional:
+                    EmitBranchConditional(src, inst);
+                    break;
+                case spv::Op::OpSwitch:
+                    EmitSwitch(src, inst);
+                    break;
+                case spv::Op::OpLoopMerge:
+                    EmitLoopMerge(src, inst);
+                    break;
+                case spv::Op::OpSelectionMerge:
+                    // Do nothing, the selection merge will be handled in the following
+                    // OpBranchCondition or OpSwitch instruction
+                    break;
                 case spv::Op::OpExtInst:
                     EmitExtInst(inst);
                     break;
                 case spv::Op::OpCopyObject:
                     EmitCopyObject(inst);
+                    break;
+                case spv::Op::OpConvertFToS:
+                    EmitSpirvExplicitBuiltinCall(inst, spirv::BuiltinFn::kConvertFToS);
+                    break;
+                case spv::Op::OpConvertFToU:
+                    Emit(b_.Convert(Type(inst.type_id()), Value(inst.GetSingleWordOperand(2))),
+                         inst.result_id());
+                    break;
+                case spv::Op::OpConvertSToF:
+                    EmitSpirvExplicitBuiltinCall(inst, spirv::BuiltinFn::kConvertSToF);
+                    break;
+                case spv::Op::OpConvertUToF:
+                    EmitSpirvExplicitBuiltinCall(inst, spirv::BuiltinFn::kConvertUToF);
+                    break;
+                case spv::Op::OpFConvert:
+                    Emit(b_.Convert(Type(inst.type_id()), Value(inst.GetSingleWordOperand(2))),
+                         inst.result_id());
+                    break;
+                case spv::Op::OpBitwiseAnd:
+                    EmitSpirvExplicitBuiltinCall(inst, spirv::BuiltinFn::kBitwiseAnd);
+                    break;
+                case spv::Op::OpBitwiseOr:
+                    EmitSpirvExplicitBuiltinCall(inst, spirv::BuiltinFn::kBitwiseOr);
+                    break;
+                case spv::Op::OpBitwiseXor:
+                    EmitSpirvExplicitBuiltinCall(inst, spirv::BuiltinFn::kBitwiseXor);
                     break;
                 case spv::Op::OpAccessChain:
                 case spv::Op::OpInBoundsAccessChain:
@@ -565,17 +888,26 @@ class Parser {
                 case spv::Op::OpCompositeExtract:
                     EmitCompositeExtract(inst);
                     break;
+                case spv::Op::OpVectorInsertDynamic:
+                    EmitVectorInsertDynamic(inst);
+                    break;
                 case spv::Op::OpFAdd:
-                case spv::Op::OpIAdd:
                     EmitBinary(inst, core::BinaryOp::kAdd);
                     break;
-                case spv::Op::OpFDiv:
+                case spv::Op::OpIAdd:
+                    EmitSpirvExplicitBuiltinCall(inst, spirv::BuiltinFn::kAdd);
+                    break;
                 case spv::Op::OpSDiv:
+                    EmitSpirvExplicitBuiltinCall(inst, spirv::BuiltinFn::kSDiv);
+                    break;
+                case spv::Op::OpFDiv:
                 case spv::Op::OpUDiv:
                     EmitBinary(inst, core::BinaryOp::kDivide);
                     break;
-                case spv::Op::OpFMul:
                 case spv::Op::OpIMul:
+                    EmitSpirvExplicitBuiltinCall(inst, spirv::BuiltinFn::kMul);
+                    break;
+                case spv::Op::OpFMul:
                 case spv::Op::OpVectorTimesScalar:
                 case spv::Op::OpMatrixTimesScalar:
                 case spv::Op::OpVectorTimesMatrix:
@@ -585,13 +917,83 @@ class Parser {
                     break;
                 case spv::Op::OpFRem:
                 case spv::Op::OpUMod:
-                case spv::Op::OpSMod:
-                case spv::Op::OpSRem:
                     EmitBinary(inst, core::BinaryOp::kModulo);
                     break;
+                case spv::Op::OpSMod:
+                case spv::Op::OpSRem:
+                    EmitSpirvExplicitBuiltinCall(inst, spirv::BuiltinFn::kSMod);
+                    break;
                 case spv::Op::OpFSub:
-                case spv::Op::OpISub:
                     EmitBinary(inst, core::BinaryOp::kSubtract);
+                    break;
+                case spv::Op::OpFOrdEqual:
+                    EmitBinary(inst, core::BinaryOp::kEqual);
+                    break;
+                case spv::Op::OpFOrdNotEqual:
+                    EmitBinary(inst, core::BinaryOp::kNotEqual);
+                    break;
+                case spv::Op::OpFOrdGreaterThan:
+                    EmitBinary(inst, core::BinaryOp::kGreaterThan);
+                    break;
+                case spv::Op::OpFOrdGreaterThanEqual:
+                    EmitBinary(inst, core::BinaryOp::kGreaterThanEqual);
+                    break;
+                case spv::Op::OpFOrdLessThan:
+                    EmitBinary(inst, core::BinaryOp::kLessThan);
+                    break;
+                case spv::Op::OpFOrdLessThanEqual:
+                    EmitBinary(inst, core::BinaryOp::kLessThanEqual);
+                    break;
+                case spv::Op::OpFUnordEqual:
+                    EmitInvertedBinary(inst, core::BinaryOp::kNotEqual);
+                    break;
+                case spv::Op::OpFUnordNotEqual:
+                    EmitInvertedBinary(inst, core::BinaryOp::kEqual);
+                    break;
+                case spv::Op::OpFUnordGreaterThan:
+                    EmitInvertedBinary(inst, core::BinaryOp::kLessThanEqual);
+                    break;
+                case spv::Op::OpFUnordGreaterThanEqual:
+                    EmitInvertedBinary(inst, core::BinaryOp::kLessThan);
+                    break;
+                case spv::Op::OpFUnordLessThan:
+                    EmitInvertedBinary(inst, core::BinaryOp::kGreaterThanEqual);
+                    break;
+                case spv::Op::OpFUnordLessThanEqual:
+                    EmitInvertedBinary(inst, core::BinaryOp::kGreaterThan);
+                    break;
+                case spv::Op::OpIEqual:
+                    EmitSpirvBuiltinCall(inst, spirv::BuiltinFn::kEqual);
+                    break;
+                case spv::Op::OpINotEqual:
+                    EmitSpirvBuiltinCall(inst, spirv::BuiltinFn::kNotEqual);
+                    break;
+                case spv::Op::OpSGreaterThan:
+                    EmitSpirvBuiltinCall(inst, spirv::BuiltinFn::kSGreaterThan);
+                    break;
+                case spv::Op::OpSGreaterThanEqual:
+                    EmitSpirvBuiltinCall(inst, spirv::BuiltinFn::kSGreaterThanEqual);
+                    break;
+                case spv::Op::OpSLessThan:
+                    EmitSpirvBuiltinCall(inst, spirv::BuiltinFn::kSLessThan);
+                    break;
+                case spv::Op::OpSLessThanEqual:
+                    EmitSpirvBuiltinCall(inst, spirv::BuiltinFn::kSLessThanEqual);
+                    break;
+                case spv::Op::OpUGreaterThan:
+                    EmitSpirvBuiltinCall(inst, spirv::BuiltinFn::kUGreaterThan);
+                    break;
+                case spv::Op::OpUGreaterThanEqual:
+                    EmitSpirvBuiltinCall(inst, spirv::BuiltinFn::kUGreaterThanEqual);
+                    break;
+                case spv::Op::OpULessThan:
+                    EmitSpirvBuiltinCall(inst, spirv::BuiltinFn::kULessThan);
+                    break;
+                case spv::Op::OpULessThanEqual:
+                    EmitSpirvBuiltinCall(inst, spirv::BuiltinFn::kULessThanEqual);
+                    break;
+                case spv::Op::OpISub:
+                    EmitSpirvExplicitBuiltinCall(inst, spirv::BuiltinFn::kSub);
                     break;
                 case spv::Op::OpFunctionCall:
                     EmitFunctionCall(inst);
@@ -610,6 +1012,9 @@ class Parser {
                     EmitWithoutResult(b_.Store(Value(inst.GetSingleWordOperand(0)),
                                                Value(inst.GetSingleWordOperand(1))));
                     break;
+                case spv::Op::OpCopyMemory:
+                    EmitCopyMemory(inst);
+                    break;
                 case spv::Op::OpVariable:
                     EmitVar(inst);
                     break;
@@ -620,16 +1025,558 @@ class Parser {
                     EmitKill(inst);
                     break;
                 case spv::Op::OpDot:
-                    Emit(b_.Call(Type(inst.type_id()), core::BuiltinFn::kDot,
-                                 Value(inst.GetSingleWordOperand(2)),
-                                 Value(inst.GetSingleWordOperand(3))),
-                         inst.result_id());
+                    EmitBuiltinCall(inst, core::BuiltinFn::kDot);
+                    break;
+                case spv::Op::OpBitCount:
+                    EmitBitCount(inst);
+                    break;
+                case spv::Op::OpBitFieldInsert:
+                    EmitSpirvBuiltinCall(inst, spirv::BuiltinFn::kBitFieldInsert);
+                    break;
+                case spv::Op::OpBitFieldSExtract:
+                    EmitSpirvBuiltinCall(inst, spirv::BuiltinFn::kBitFieldSExtract);
+                    break;
+                case spv::Op::OpBitFieldUExtract:
+                    EmitSpirvBuiltinCall(inst, spirv::BuiltinFn::kBitFieldUExtract);
+                    break;
+                case spv::Op::OpBitReverse:
+                    EmitBuiltinCall(inst, core::BuiltinFn::kReverseBits);
+                    break;
+                case spv::Op::OpAll:
+                    EmitBuiltinCall(inst, core::BuiltinFn::kAll);
+                    break;
+                case spv::Op::OpAny:
+                    EmitBuiltinCall(inst, core::BuiltinFn::kAny);
+                    break;
+                case spv::Op::OpDPdx:
+                    EmitBuiltinCall(inst, core::BuiltinFn::kDpdx);
+                    break;
+                case spv::Op::OpDPdy:
+                    EmitBuiltinCall(inst, core::BuiltinFn::kDpdy);
+                    break;
+                case spv::Op::OpFwidth:
+                    EmitBuiltinCall(inst, core::BuiltinFn::kFwidth);
+                    break;
+                case spv::Op::OpDPdxFine:
+                    EmitBuiltinCall(inst, core::BuiltinFn::kDpdxFine);
+                    break;
+                case spv::Op::OpDPdyFine:
+                    EmitBuiltinCall(inst, core::BuiltinFn::kDpdyFine);
+                    break;
+                case spv::Op::OpFwidthFine:
+                    EmitBuiltinCall(inst, core::BuiltinFn::kFwidthFine);
+                    break;
+                case spv::Op::OpDPdxCoarse:
+                    EmitBuiltinCall(inst, core::BuiltinFn::kDpdxCoarse);
+                    break;
+                case spv::Op::OpDPdyCoarse:
+                    EmitBuiltinCall(inst, core::BuiltinFn::kDpdyCoarse);
+                    break;
+                case spv::Op::OpFwidthCoarse:
+                    EmitBuiltinCall(inst, core::BuiltinFn::kFwidthCoarse);
+                    break;
+                case spv::Op::OpLogicalAnd:
+                    EmitBinary(inst, core::BinaryOp::kAnd);
+                    break;
+                case spv::Op::OpLogicalOr:
+                    EmitBinary(inst, core::BinaryOp::kOr);
+                    break;
+                case spv::Op::OpLogicalEqual:
+                    EmitBinary(inst, core::BinaryOp::kEqual);
+                    break;
+                case spv::Op::OpLogicalNotEqual:
+                    EmitBinary(inst, core::BinaryOp::kNotEqual);
+                    break;
+                case spv::Op::OpLogicalNot:
+                    EmitUnary(inst, core::UnaryOp::kNot);
+                    break;
+                case spv::Op::OpFNegate:
+                    EmitUnary(inst, core::UnaryOp::kNegation);
+                    break;
+                case spv::Op::OpNot:
+                    EmitSpirvExplicitBuiltinCall(inst, spirv::BuiltinFn::kNot);
+                    break;
+                case spv::Op::OpShiftLeftLogical:
+                    EmitSpirvExplicitBuiltinCall(inst, spirv::BuiltinFn::kShiftLeftLogical);
+                    break;
+                case spv::Op::OpShiftRightLogical:
+                    EmitSpirvExplicitBuiltinCall(inst, spirv::BuiltinFn::kShiftRightLogical);
+                    break;
+                case spv::Op::OpShiftRightArithmetic:
+                    EmitSpirvExplicitBuiltinCall(inst, spirv::BuiltinFn::kShiftRightArithmetic);
+                    break;
+                case spv::Op::OpBitcast:
+                    EmitBitcast(inst);
+                    break;
+                case spv::Op::OpQuantizeToF16:
+                    EmitBuiltinCall(inst, core::BuiltinFn::kQuantizeToF16);
+                    break;
+                case spv::Op::OpTranspose:
+                    EmitBuiltinCall(inst, core::BuiltinFn::kTranspose);
+                    break;
+                case spv::Op::OpSNegate:
+                    EmitSpirvExplicitBuiltinCall(inst, spirv::BuiltinFn::kSNegate);
+                    break;
+                case spv::Op::OpFMod:
+                    EmitSpirvBuiltinCall(inst, spirv::BuiltinFn::kFMod);
+                    break;
+                case spv::Op::OpSelect:
+                    EmitSpirvBuiltinCall(inst, spirv::BuiltinFn::kSelect);
+                    break;
+                case spv::Op::OpVectorExtractDynamic:
+                    EmitAccess(inst);
                     break;
                 default:
                     TINT_UNIMPLEMENTED()
                         << "unhandled SPIR-V instruction: " << static_cast<uint32_t>(inst.opcode());
             }
         }
+
+        // The loop merge needs to be emitted if this was a loop block. It has
+        // to be emitted back into the original destination.
+        if (loop_merge_inst) {
+            auto* loop = StopWalkingAt(src.id())->As<core::ir::Loop>();
+            TINT_ASSERT(loop);
+
+            if (!loop->Body()->Terminator()) {
+                loop->Body()->Append(b_.Continue(loop));
+            }
+
+            current_blocks_.erase(loop->Body());
+            id_stack_.pop_back();
+
+            auto merge_id = loop_merge_inst->GetSingleWordInOperand(0);
+            const auto& merge_bb = current_spirv_function_->FindBlock(merge_id);
+            EmitBlock(dst, *merge_bb);
+        }
+    }
+
+    void EmitBitcast(const spvtools::opt::Instruction& inst) {
+        auto val = Value(inst.GetSingleWordInOperand(0));
+        auto ty = Type(inst.type_id());
+        Emit(b_.Bitcast(ty, val), inst.result_id());
+    }
+
+    core::ir::ControlInstruction* StopWalkingAt(uint32_t id) {
+        auto iter = walk_stop_blocks_.find(id);
+        if (iter != walk_stop_blocks_.end()) {
+            return iter->second;
+        }
+        return nullptr;
+    }
+
+    core::ir::Loop* ContinueTarget(uint32_t id) {
+        auto iter = continue_targets_.find(id);
+        if (iter != continue_targets_.end()) {
+            return iter->second;
+        }
+        return nullptr;
+    }
+
+    void EmitBranch(const spvtools::opt::Instruction& inst) {
+        auto dest_id = inst.GetSingleWordInOperand(0);
+
+        // Disallow fallthrough
+        for (auto& switch_blocks : current_switch_blocks_) {
+            if (switch_blocks.count(dest_id) != 0) {
+                TINT_ICE() << "switch fallthrough not supported by the SPIR-V reader";
+            }
+        }
+
+        // The destination is a continuing block, so insert a `continue`
+        if (auto* loop = ContinueTarget(dest_id)) {
+            EmitWithoutResult(b_.Continue(loop));
+            return;
+        }
+        // If this is branching to a previous merge block then we're done. It can be a previous
+        // merge block in the case of an `if` breaking out of a `switch` or `loop`.
+        if (auto* ctrl_inst = StopWalkingAt(dest_id)) {
+            if (auto* loop = ctrl_inst->As<core::ir::Loop>()) {
+                // Going to the merge in a loop body has to be a break regardless of nesting level.
+                if (InBlock(loop->Body()) && !InBlock(loop->Continuing())) {
+                    EmitWithoutResult(b_.Exit(ctrl_inst));
+                }
+            }
+            return;
+        }
+
+        TINT_ASSERT(current_spirv_function_);
+        const auto& bb = current_spirv_function_->FindBlock(dest_id);
+
+        EmitBlock(current_block_, *bb);
+    }
+
+    // Given a true and false branch find if there is a common convergence point before the merge
+    // block.
+    std::optional<uint32_t> FindPremergeId(uint32_t true_id,
+                                           uint32_t false_id,
+                                           std::optional<uint32_t> merge_id) {
+        auto* cfg = spirv_context_->cfg();
+
+        // We need a merge block, the true and false to be unique and the true and false to not be
+        // the merge.
+        if (!merge_id || true_id == false_id || true_id == merge_id || false_id == merge_id) {
+            return std::nullopt;
+        }
+
+        // Get the list of blocks from the true branch to the merge
+        std::list<spvtools::opt::BasicBlock*> true_blocks;
+        cfg->ComputeStructuredOrder(
+            current_spirv_function_, &*(current_spirv_function_->FindBlock(true_id)),
+            &*(current_spirv_function_->FindBlock(merge_id.value())), &true_blocks);
+
+        // Get the list of blocks from the false branch to the merge
+        std::list<spvtools::opt::BasicBlock*> false_blocks;
+        cfg->ComputeStructuredOrder(
+            current_spirv_function_, &*(current_spirv_function_->FindBlock(false_id)),
+            &*(current_spirv_function_->FindBlock(merge_id.value())), &false_blocks);
+
+        auto& true_end = true_blocks.back();
+        auto& false_end = false_blocks.back();
+
+        // We only consider the block as returning if it didn't return through
+        // the merge block. (I.e. it's a direct exit from inside the branch
+        // itself.
+        bool true_returns = true_end->id() != merge_id && true_end->IsReturn();
+        bool false_returns = false_end->id() != merge_id && false_end->IsReturn();
+        // If one of the blocks returns but the other doesn't, then we can't
+        // have a premerge block.
+        if (true_returns != false_returns) {
+            return std::nullopt;
+        }
+
+        // If they don't return, both blocks must merge to the same place.
+        if (!true_returns && (true_end->id() != false_end->id())) {
+            return std::nullopt;
+        }
+
+        // If these aren't returns, then remove the merge blocks.
+        if (!true_returns) {
+            true_blocks.pop_back();
+            false_blocks.pop_back();
+        }
+
+        std::optional<uint32_t> id = std::nullopt;
+        while (!true_blocks.empty() && !false_blocks.empty()) {
+            auto* tb = true_blocks.back();
+            if (tb != false_blocks.back()) {
+                break;
+            }
+
+            id = tb->id();
+
+            true_blocks.pop_back();
+            false_blocks.pop_back();
+        }
+        return id;
+    }
+
+    core::ir::ControlInstruction* ExitFor(core::ir::ControlInstruction* ctrl,
+                                          core::ir::ControlInstruction* parent) {
+        // If you have a BranchConditional inside a BranchConditional where
+        // the inner does not have a merge block, it can branch out to the
+        // merge of the outer conditional. But, WGSL doesn't allow that, so
+        // just treat it as an exit of the inner block.
+        if (ctrl->Is<core::ir::If>() && parent->Is<core::ir::If>()) {
+            return parent;
+        }
+        return ctrl;
+    }
+
+    void EmitBranchConditional(const spvtools::opt::BasicBlock& bb,
+                               const spvtools::opt::Instruction& inst) {
+        auto cond = Value(inst.GetSingleWordInOperand(0));
+        auto true_id = inst.GetSingleWordInOperand(1);
+        auto false_id = inst.GetSingleWordInOperand(2);
+
+        bool true_is_header = loop_headers_.count(true_id) > 0;
+        bool false_is_header = loop_headers_.count(false_id) > 0;
+
+        if (true_is_header || false_is_header) {
+            core::ir::Loop* loop = nullptr;
+            uint32_t merge_id = 0;
+
+            if (true_is_header) {
+                const auto& bb_header = current_spirv_function_->FindBlock(true_id);
+                merge_id = (*bb_header).MergeBlockIdIfAny();
+
+                loop = loop_headers_[true_id];
+
+            } else {
+                const auto& bb_header = current_spirv_function_->FindBlock(false_id);
+                merge_id = (*bb_header).MergeBlockIdIfAny();
+
+                loop = loop_headers_[false_id];
+            }
+            TINT_ASSERT(merge_id > 0);
+
+            // The only time a loop continuing will be in current blocks is if
+            // we're inside the continuing block itself.
+            //
+            // Note, we may _not_ be in the IR continuing block. This can happen
+            // in the case of a SPIR-V loop where the header_id and continue_id
+            // are the same. We'll be emitting into the IR body, but branch to
+            // the header because that's also the continuing in SPIR-V.
+            if (current_blocks_.count(loop->Continuing())) {
+                if (true_id == merge_id && false_is_header) {
+                    EmitWithoutResult(b_.BreakIf(loop, cond));
+                    return;
+                }
+                if (false_id == merge_id && true_is_header) {
+                    auto* val = b_.Not(cond->Type(), cond);
+                    EmitWithoutSpvResult(val);
+                    EmitWithoutResult(b_.BreakIf(loop, val));
+                    return;
+                }
+            }
+        }
+
+        // If the true and false block are the same, then we change the condition into
+        // `cond || true` so that we always take the true block, the false block will be marked
+        // unreachable.
+        if (true_id == false_id) {
+            auto* binary = b_.Binary(core::BinaryOp::kOr, cond->Type(), cond, b_.Constant(true));
+            EmitWithoutSpvResult(binary);
+            cond = binary->Result(0);
+        }
+
+        auto* if_ = b_.If(cond);
+        EmitWithoutResult(if_);
+
+        std::optional<uint32_t> merge_id = std::nullopt;
+
+        auto* merge_inst = bb.GetMergeInst();
+        if (bb.GetLoopMergeInst()) {
+            // If this is a loop merge block, then the merge instruction is for
+            // the loop, not the branch conditional.
+            merge_inst = nullptr;
+        } else if (merge_inst != nullptr) {
+            merge_id = merge_inst->GetSingleWordInOperand(0);
+            walk_stop_blocks_.insert({merge_id.value(), if_});
+        }
+
+        TINT_ASSERT(current_spirv_function_);
+
+        // Determine if there is a premerge block to handle
+        std::optional<uint32_t> premerge_start_id = FindPremergeId(true_id, false_id, merge_id);
+
+        // If we found the start of a premerge, push it onto the merge stack so this ends up being a
+        // temporary merge block for the if branches.
+        core::ir::If* premerge_if_ = nullptr;
+        if (premerge_start_id.has_value()) {
+            premerge_if_ = b_.If(b_.Constant(true));
+            walk_stop_blocks_.insert({premerge_start_id.value(), premerge_if_});
+        }
+
+        if (auto* ctrl = StopWalkingAt(true_id)) {
+            if (auto* loop = ContinueTarget(true_id)) {
+                if_->True()->Append(b_.Continue(loop));
+            } else {
+                if_->True()->Append(b_.Exit(ExitFor(ctrl, if_)));
+            }
+        } else {
+            const auto& bb_true = current_spirv_function_->FindBlock(true_id);
+            EmitBlockParent(if_->True(), *bb_true);
+
+            if (!if_->True()->Terminator()) {
+                if_->True()->Append(b_.Exit(if_));
+            }
+        }
+
+        // Pre-SPIRV 1.6 the true and false blocks could be the same. If that's the case then we
+        // will have changed the condition and the false block is now unreachable.
+        if (false_id == true_id) {
+            if_->False()->Append(b_.Unreachable());
+
+        } else if (auto* ctrl = StopWalkingAt(false_id)) {
+            // If the false block is really a merge block
+            if (auto* loop = ContinueTarget(false_id)) {
+                if_->False()->Append(b_.Continue(loop));
+            } else {
+                if_->False()->Append(b_.Exit(ExitFor(ctrl, if_)));
+            }
+        } else {
+            const auto& bb_false = current_spirv_function_->FindBlock(false_id);
+            EmitBlockParent(if_->False(), *bb_false);
+            if (!if_->False()->Terminator()) {
+                if_->False()->Append(b_.Exit(if_));
+            }
+        }
+
+        // There was a premerge, remove it from the merge stack and then emit the premerge into an
+        // `if true` block in order to maintain re-convergence guarantees. The premerge will contain
+        // all the blocks up to the merge block.
+        if (premerge_start_id.has_value()) {
+            EmitWithoutResult(premerge_if_);
+
+            const auto& bb_premerge = current_spirv_function_->FindBlock(premerge_start_id.value());
+            EmitBlockParent(premerge_if_->True(), *bb_premerge);
+            if (!premerge_if_->True()->Terminator()) {
+                premerge_if_->True()->Append(b_.Exit(premerge_if_));
+            }
+
+            premerge_if_->False()->Append(b_.Unreachable());
+        }
+
+        // Emit the merge block if it exists.
+        if (merge_id.has_value()) {
+            const auto& bb_merge = current_spirv_function_->FindBlock(merge_id.value());
+            EmitBlock(current_block_, *bb_merge);
+        }
+    }
+
+    void EmitLoop(const spvtools::opt::BasicBlock& bb) {
+        // This just handles creating the loop itself, the rest of the processing
+        // of the continue and merge blocks will be handled when we deal with the
+        // LoopMerge instruction itself. We have to setup the loop early in order
+        // to capture instructions which come in the header before the LoopMerge.
+        auto* loop = b_.Loop();
+        EmitWithoutResult(loop);
+        walk_stop_blocks_.insert({bb.id(), loop});
+    }
+
+    void EmitLoopMerge(const spvtools::opt::BasicBlock& bb,
+                       const spvtools::opt::Instruction& inst) {
+        auto merge_id = inst.GetSingleWordInOperand(0);
+        auto continue_id = inst.GetSingleWordInOperand(1);
+        auto header_id = bb.id();
+
+        // The loop was created in `EmitLoop` and set as the stop block value for
+        // the header block. Retrieve the loop from the stop list.
+        auto* loop = StopWalkingAt(header_id)->As<core::ir::Loop>();
+        TINT_ASSERT(loop);
+
+        loop_headers_.insert({header_id, loop});
+        continue_targets_.insert({continue_id, loop});
+
+        // Insert the stop blocks
+        walk_stop_blocks_.insert({merge_id, loop});
+        if (continue_id != header_id) {
+            walk_stop_blocks_.insert({continue_id, loop});
+
+            const auto& bb_continue = current_spirv_function_->FindBlock(continue_id);
+
+            // Emit the continuing block.
+            EmitBlockParent(loop->Continuing(), *bb_continue);
+        }
+
+        if (!loop->Continuing()->Terminator()) {
+            loop->Continuing()->Append(b_.NextIteration(loop));
+        }
+
+        // The remainder of the loop body will process when we hit the
+        // BranchConditional or Branch after the LoopMerge. We're already
+        // processing into the loop body from the `EmitLoop` code above so just
+        // continue emitting.
+
+        // The merge block will be emitted by the `EmitBlock` code after the
+        // instructions in the loop header are emitted.
+    }
+
+    void EmitSwitch(const spvtools::opt::BasicBlock& bb, const spvtools::opt::Instruction& inst) {
+        auto* selector = Value(inst.GetSingleWordInOperand(0));
+        auto default_id = inst.GetSingleWordInOperand(1);
+
+        auto* switch_ = b_.Switch(selector);
+        EmitWithoutResult(switch_);
+
+        auto* merge_inst = bb.GetMergeInst();
+        TINT_ASSERT(merge_inst);
+
+        auto merge_id = merge_inst->GetSingleWordInOperand(0);
+        walk_stop_blocks_.insert({merge_id, switch_});
+
+        current_switch_blocks_.push_back({});
+        auto& switch_blocks = current_switch_blocks_.back();
+
+        auto* default_blk = b_.DefaultCase(switch_);
+        if (default_id != merge_id) {
+            switch_blocks.emplace(default_id);
+
+            const auto& bb_default = current_spirv_function_->FindBlock(default_id);
+            EmitBlockParent(default_blk, *bb_default);
+        }
+        if (!default_blk->Terminator()) {
+            default_blk->Append(b_.ExitSwitch(switch_));
+        }
+
+        std::unordered_map<uint32_t, core::ir::Switch::Case*> block_id_to_case;
+        block_id_to_case[default_id] = &(switch_->Cases().Back());
+
+        for (uint32_t i = 2; i < inst.NumInOperandWords(); i += 2) {
+            auto blk_id = inst.GetSingleWordInOperand(i + 1);
+
+            if (blk_id != merge_id) {
+                switch_blocks.emplace(blk_id);
+            }
+        }
+
+        // For each selector.
+        for (uint32_t i = 2; i < inst.NumInOperandWords(); i += 2) {
+            auto literal = inst.GetSingleWordInOperand(i);
+            auto blk_id = inst.GetSingleWordInOperand(i + 1);
+
+            core::ir::Constant* sel = nullptr;
+            if (selector->Type()->Is<core::type::I32>()) {
+                sel = b_.Constant(i32(literal));
+            } else {
+                sel = b_.Constant(u32(literal));
+            }
+
+            // Determine if we've seen this block and should combine selectors
+            auto iter = block_id_to_case.find(blk_id);
+            if (iter != block_id_to_case.end()) {
+                iter->second->selectors.Push(core::ir::Switch::CaseSelector{sel});
+                continue;
+            }
+
+            core::ir::Block* blk = b_.Case(switch_, Vector{sel});
+            if (blk_id != merge_id) {
+                const auto& basic_block = current_spirv_function_->FindBlock(blk_id);
+                EmitBlockParent(blk, *basic_block);
+            }
+            if (!blk->Terminator()) {
+                blk->Append(b_.ExitSwitch(switch_));
+            }
+            block_id_to_case[blk_id] = &(switch_->Cases().Back());
+        }
+
+        current_switch_blocks_.pop_back();
+
+        const auto& bb_merge = current_spirv_function_->FindBlock(merge_id);
+        EmitBlock(current_block_, *bb_merge);
+    }
+
+    Vector<core::ir::Value*, 4> Args(const spvtools::opt::Instruction& inst, uint32_t start) {
+        Vector<core::ir::Value*, 4> args;
+        for (uint32_t i = start; i < inst.NumOperandWords(); i++) {
+            args.Push(Value(inst.GetSingleWordOperand(i)));
+        }
+        return args;
+    }
+
+    void EmitBuiltinCall(const spvtools::opt::Instruction& inst, core::BuiltinFn fn) {
+        Emit(b_.Call(Type(inst.type_id()), fn, Args(inst, 2)), inst.result_id());
+    }
+
+    void EmitSpirvExplicitBuiltinCall(const spvtools::opt::Instruction& inst, spirv::BuiltinFn fn) {
+        Emit(b_.CallExplicit<spirv::ir::BuiltinCall>(Type(inst.type_id()), fn,
+                                                     Vector{Type(inst.type_id())->DeepestElement()},
+                                                     Args(inst, 2)),
+             inst.result_id());
+    }
+
+    void EmitSpirvBuiltinCall(const spvtools::opt::Instruction& inst, spirv::BuiltinFn fn) {
+        Emit(b_.Call<spirv::ir::BuiltinCall>(Type(inst.type_id()), fn, Args(inst, 2)),
+             inst.result_id());
+    }
+
+    void EmitBitCount(const spvtools::opt::Instruction& inst) {
+        auto* res_ty = Type(inst.type_id());
+        Emit(b_.CallExplicit<spirv::ir::BuiltinCall>(res_ty, spirv::BuiltinFn::kBitCount,
+                                                     Vector{res_ty->DeepestElement()},
+                                                     Args(inst, 2)),
+             inst.result_id());
     }
 
     /// @param inst the SPIR-V instruction
@@ -658,6 +1605,13 @@ class Parser {
         // Make the result Id a pointer to the original copied value.
         auto* l = b_.Let(Value(inst.GetSingleWordOperand(2)));
         Emit(l, inst.result_id());
+    }
+
+    /// @param inst the SPIR-V instruction for OpCopyMemory
+    void EmitCopyMemory(const spvtools::opt::Instruction& inst) {
+        auto load = b_.Load(Value(inst.GetSingleWordOperand(1)));
+        EmitWithoutSpvResult(load);
+        EmitWithoutResult(b_.Store(Value(inst.GetSingleWordOperand(0)), load));
     }
 
     /// @param inst the SPIR-V instruction for OpExtInst
@@ -807,17 +1761,17 @@ class Parser {
             case GLSLstd450MatrixInverse:
                 return spirv::BuiltinFn::kInverse;
             case GLSLstd450SMax:
-                return spirv::BuiltinFn::kSmax;
+                return spirv::BuiltinFn::kSMax;
             case GLSLstd450SMin:
-                return spirv::BuiltinFn::kSmin;
+                return spirv::BuiltinFn::kSMin;
             case GLSLstd450SClamp:
-                return spirv::BuiltinFn::kSclamp;
+                return spirv::BuiltinFn::kSClamp;
             case GLSLstd450UMax:
-                return spirv::BuiltinFn::kUmax;
+                return spirv::BuiltinFn::kUMax;
             case GLSLstd450UMin:
-                return spirv::BuiltinFn::kUmin;
+                return spirv::BuiltinFn::kUMin;
             case GLSLstd450UClamp:
-                return spirv::BuiltinFn::kUclamp;
+                return spirv::BuiltinFn::kUClamp;
             case GLSLstd450FindILsb:
                 return spirv::BuiltinFn::kFindILsb;
             case GLSLstd450FindSMsb:
@@ -940,10 +1894,7 @@ class Parser {
 
     /// @param inst the SPIR-V instruction for OpAccessChain
     void EmitAccess(const spvtools::opt::Instruction& inst) {
-        Vector<core::ir::Value*, 4> indices;
-        for (uint32_t i = 3; i < inst.NumOperandWords(); i++) {
-            indices.Push(Value(inst.GetSingleWordOperand(i)));
-        }
+        Vector indices = Args(inst, 3);
         auto* base = Value(inst.GetSingleWordOperand(2));
 
         if (indices.IsEmpty()) {
@@ -963,12 +1914,34 @@ class Parser {
     }
 
     /// @param inst the SPIR-V instruction
+    /// @param op the unary operator to use
+    void EmitUnary(const spvtools::opt::Instruction& inst, core::UnaryOp op) {
+        auto* val = Value(inst.GetSingleWordOperand(2));
+        auto* unary = b_.Unary(op, Type(inst.type_id()), val);
+        Emit(unary, inst.result_id());
+    }
+
+    /// @param inst the SPIR-V instruction
     /// @param op the binary operator to use
-    void EmitBinary(const spvtools::opt::Instruction& inst, core::BinaryOp op) {
+    void EmitBinary(const spvtools::opt::Instruction& inst,
+                    core::BinaryOp op,
+                    uint32_t first_operand_idx = 2) {
+        auto* lhs = Value(inst.GetSingleWordOperand(first_operand_idx));
+        auto* rhs = Value(inst.GetSingleWordOperand(first_operand_idx + 1));
+        auto* binary = b_.Binary(op, Type(inst.type_id()), lhs, rhs);
+        Emit(binary, inst.result_id());
+    }
+
+    /// @param inst the SPIR-V instruction
+    /// @param op the binary operator to use
+    void EmitInvertedBinary(const spvtools::opt::Instruction& inst, core::BinaryOp op) {
         auto* lhs = Value(inst.GetSingleWordOperand(2));
         auto* rhs = Value(inst.GetSingleWordOperand(3));
         auto* binary = b_.Binary(op, Type(inst.type_id()), lhs, rhs);
-        Emit(binary, inst.result_id());
+        EmitWithoutSpvResult(binary);
+
+        auto* res = b_.Not(Type(inst.type_id()), binary);
+        Emit(res, inst.result_id());
     }
 
     /// @param inst the SPIR-V instruction for OpCompositeExtract
@@ -984,22 +1957,26 @@ class Parser {
 
     /// @param inst the SPIR-V instruction for OpCompositeConstruct
     void EmitConstruct(const spvtools::opt::Instruction& inst) {
-        Vector<core::ir::Value*, 4> values;
-        for (uint32_t i = 2; i < inst.NumOperandWords(); i++) {
-            values.Push(Value(inst.GetSingleWordOperand(i)));
-        }
-        auto* construct = b_.Construct(Type(inst.type_id()), std::move(values));
+        auto* construct = b_.Construct(Type(inst.type_id()), Args(inst, 2));
         Emit(construct, inst.result_id());
+    }
+
+    /// @param inst the SPIR-V instruction for OpVectorInsertDynamic
+    void EmitVectorInsertDynamic(const spvtools::opt::Instruction& inst) {
+        auto vector = Value(inst.GetSingleWordOperand(2));
+        auto component = Value(inst.GetSingleWordOperand(3));
+        auto index = Value(inst.GetSingleWordOperand(4));
+        auto* tmp = b_.Var(
+            ty_.ptr(core::AddressSpace::kFunction, Type(inst.type_id()), core::Access::kReadWrite));
+        tmp->SetInitializer(vector);
+        EmitWithoutSpvResult(tmp);
+        EmitWithoutResult(b_.StoreVectorElement(tmp, index, component));
+        Emit(b_.Load(tmp), inst.result_id());
     }
 
     /// @param inst the SPIR-V instruction for OpFunctionCall
     void EmitFunctionCall(const spvtools::opt::Instruction& inst) {
-        // TODO(crbug.com/tint/1907): Capture result.
-        Vector<core::ir::Value*, 4> args;
-        for (uint32_t i = 3; i < inst.NumOperandWords(); i++) {
-            args.Push(Value(inst.GetSingleWordOperand(i)));
-        }
-        Emit(b_.Call(Function(inst.GetSingleWordInOperand(0)), std::move(args)), inst.result_id());
+        Emit(b_.Call(Function(inst.GetSingleWordInOperand(0)), Args(inst, 3)), inst.result_id());
     }
 
     /// @param inst the SPIR-V instruction for OpVariable
@@ -1110,17 +2087,39 @@ class Parser {
 
     /// The SPIR-V context containing the SPIR-V tools intermediate representation.
     std::unique_ptr<spvtools::opt::IRContext> spirv_context_;
+    /// The current SPIR-V function being emitted
+    spvtools::opt::Function* current_spirv_function_ = nullptr;
 
     // The set of IDs that are imports of the GLSL.std.450 extended instruction sets.
     std::unordered_set<uint32_t> glsl_std_450_imports_;
     // The set of IDs of imports that are ignored. For example, any "NonSemanticInfo." import is
     // ignored.
     std::unordered_set<uint32_t> ignored_imports_;
+
+    // Map of SPIR-V IDs to string names
+    std::unordered_map<uint32_t, std::string> id_to_name_;
+    // Map of SPIR-V Struct IDs to a list of member string names
+    std::unordered_map<uint32_t, std::vector<std::string>> struct_to_member_names_;
+
+    // Set of SPIR-V block ids where we'll stop a `Branch` instruction walk. These could be merge
+    // blocks, premerge blocks, continuing blocks, etc.
+    std::unordered_map<uint32_t, core::ir::ControlInstruction*> walk_stop_blocks_;
+    // Map of continue target ID to the controlling IR loop.
+    std::unordered_map<uint32_t, core::ir::Loop*> continue_targets_;
+    // Map of continue target ID to the controlling IR loop.
+    std::unordered_map<uint32_t, core::ir::Loop*> loop_headers_;
+
+    std::unordered_set<core::ir::Block*> current_blocks_;
+    std::vector<std::unordered_set<uint32_t>> id_stack_;
+
+    // If we're in a switch, is populated with the IDs of the blocks for each of the switch
+    // selectors. This lets us watch for fallthrough when emitting branch instructions.
+    std::vector<std::unordered_set<uint32_t>> current_switch_blocks_;
 };
 
 }  // namespace
 
-Result<core::ir::Module> Parse(Slice<const uint32_t> spirv) {
+diag::Result<core::ir::Module> Parse(Slice<const uint32_t> spirv) {
     return Parser{}.Run(spirv);
 }
 

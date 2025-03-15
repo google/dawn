@@ -235,7 +235,7 @@ MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
             r.firstIndexOffsetShaderRegister, r.firstIndexOffsetRegisterSpace);
     }
 
-    if (r.substituteOverrideConfig) {
+    if (!r.useTintIR && r.substituteOverrideConfig) {
         // This needs to run after SingleEntryPoint transform which removes unused overrides for
         // current entry point.
         transformManager.Add<tint::ast::transform::SubstituteOverride>();
@@ -264,12 +264,25 @@ MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
     }
 
     TRACE_EVENT0(tracePlatform.UnsafeGetValue(), General, "tint::hlsl::writer::Generate");
-    tint::Result<tint::hlsl::writer::Output> result;
+    tint::diag::Result<tint::hlsl::writer::Output> result;
     if (r.useTintIR) {
         // Convert the AST program to an IR module.
         auto ir = tint::wgsl::reader::ProgramToLoweredIR(transformedProgram);
         DAWN_INVALID_IF(ir != tint::Success, "An error occurred while generating Tint IR\n%s",
                         ir.Failure().reason.Str());
+
+        if (r.substituteOverrideConfig) {
+            // this needs to run after SingleEntryPoint transform which removes unused
+            // overrides for the current entry point.
+            tint::core::ir::transform::SubstituteOverridesConfig cfg;
+            cfg.map = r.substituteOverrideConfig->map;
+            auto substituteOverridesResult =
+                tint::core::ir::transform::SubstituteOverrides(ir.Get(), cfg);
+
+            DAWN_INVALID_IF(substituteOverridesResult != tint::Success,
+                            "Pipeline override substitution (IR) failed:\n%s",
+                            substituteOverridesResult.Failure().reason.Str());
+        }
 
         result = tint::hlsl::writer::Generate(ir.Get(), r.tintOptions);
 
@@ -281,15 +294,17 @@ MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
             DAWN_TRY_ASSIGN(
                 _, ValidateComputeStageWorkgroupSize(
                        result->workgroup_info.x, result->workgroup_info.y, result->workgroup_info.z,
-                       result->workgroup_info.storage_size, r.limits, r.adapter.UnsafeGetValue()));
+                       result->workgroup_info.storage_size, /* usesSubgroupMatrix */ false,
+                       r.maxSubgroupSize, r.limits, r.adapterSupportedLimits.UnsafeGetValue()));
         }
     } else {
         // Validate workgroup size after program runs transforms.
         if (r.stage == SingleShaderStage::Compute) {
             Extent3D _;
             DAWN_TRY_ASSIGN(
-                _, ValidateComputeStageWorkgroupSize(transformedProgram, kRemappedEntryPointName,
-                                                     r.limits, r.adapter.UnsafeGetValue()));
+                _, ValidateComputeStageWorkgroupSize(
+                       transformedProgram, kRemappedEntryPointName, /* usesSubgroupMatrix */ false,
+                       r.maxSubgroupSize, r.limits, r.adapterSupportedLimits.UnsafeGetValue()));
         }
 
         result = tint::hlsl::writer::Generate(transformedProgram, r.tintOptions);

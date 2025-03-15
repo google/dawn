@@ -22,20 +22,6 @@
                OpMemberName %S 9 "member_struct"
                OpName %S "S"
                OpName %s "s"
-               OpMemberDecorate %S 0 Offset 0
-               OpMemberDecorate %S 1 Offset 4
-               OpMemberDecorate %S 2 Offset 8
-               OpMemberDecorate %S 3 Offset 12
-               OpMemberDecorate %S 4 Offset 16
-               OpMemberDecorate %S 5 Offset 32
-               OpMemberDecorate %S 6 Offset 48
-               OpMemberDecorate %S 7 Offset 64
-               OpMemberDecorate %S 7 ColMajor
-               OpMemberDecorate %S 7 MatrixStride 16
-               OpDecorate %_arr_float_uint_4 ArrayStride 4
-               OpMemberDecorate %S 8 Offset 96
-               OpMemberDecorate %S_inner 0 Offset 0
-               OpMemberDecorate %S 9 Offset 112
        %void = OpTypeVoid
           %3 = OpTypeFunction %void
        %bool = OpTypeBool

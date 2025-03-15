@@ -1,20 +1,12 @@
-alias Arr = array<u32, 10u>;
-
 struct S_atomic {
-  /* @offset(0) */
   x : i32,
-  /* @offset(4) */
   a : array<atomic<u32>, 10u>,
-  /* @offset(44) */
   y : u32,
 }
 
 struct S {
-  /* @offset(0) */
   x : i32,
-  /* @offset(4) */
-  a : Arr,
-  /* @offset(44) */
+  a : array<u32, 10u>,
   y : u32,
 }
 

@@ -62,7 +62,6 @@ tint_target_add_dependencies(tint_lang_spirv_reader_parser lib
   tint_utils_macros
   tint_utils_math
   tint_utils_memory
-  tint_utils_result
   tint_utils_rtti
   tint_utils_symbol
   tint_utils_text
@@ -91,16 +90,22 @@ if(TINT_BUILD_SPV_READER)
 ################################################################################
 tint_add_target(tint_lang_spirv_reader_parser_test test
   lang/spirv/reader/parser/binary_test.cc
+  lang/spirv/reader/parser/bit_test.cc
+  lang/spirv/reader/parser/branch_test.cc
   lang/spirv/reader/parser/builtin_test.cc
   lang/spirv/reader/parser/composite_test.cc
   lang/spirv/reader/parser/constant_test.cc
+  lang/spirv/reader/parser/convert_test.cc
   lang/spirv/reader/parser/function_test.cc
   lang/spirv/reader/parser/helper_test.h
   lang/spirv/reader/parser/import_glsl_std450_test.cc
   lang/spirv/reader/parser/import_test.cc
+  lang/spirv/reader/parser/logical_test.cc
   lang/spirv/reader/parser/memory_test.cc
   lang/spirv/reader/parser/misc_test.cc
+  lang/spirv/reader/parser/name_test.cc
   lang/spirv/reader/parser/struct_test.cc
+  lang/spirv/reader/parser/unary_test.cc
   lang/spirv/reader/parser/var_test.cc
 )
 
@@ -117,7 +122,6 @@ tint_target_add_dependencies(tint_lang_spirv_reader_parser_test test
   tint_utils_macros
   tint_utils_math
   tint_utils_memory
-  tint_utils_result
   tint_utils_rtti
   tint_utils_symbol
   tint_utils_text

@@ -9,8 +9,8 @@
                OpEntryPoint GLCompute %main "main" %main_global_invocation_id_Input
                OpExecutionMode %main LocalSize 1 1 1
                OpName %gl_GlobalInvocationID "gl_GlobalInvocationID"
-               OpMemberName %ResultMatrix 0 "numbers"
-               OpName %ResultMatrix "ResultMatrix"
+               OpMemberName %ResultMatrix_tint_explicit_layout 0 "numbers"
+               OpName %ResultMatrix_tint_explicit_layout "ResultMatrix_tint_explicit_layout"
                OpName %resultMatrix "resultMatrix"
                OpName %main_global_invocation_id_Input "main_global_invocation_id_Input"
                OpName %binaryOperation_f1_f1_ "binaryOperation_f1_f1_"
@@ -32,8 +32,8 @@
                OpName %gl_GlobalInvocationID_param "gl_GlobalInvocationID_param"
                OpName %main "main"
                OpDecorate %_runtimearr_float ArrayStride 4
-               OpMemberDecorate %ResultMatrix 0 Offset 0
-               OpDecorate %ResultMatrix Block
+               OpMemberDecorate %ResultMatrix_tint_explicit_layout 0 Offset 0
+               OpDecorate %ResultMatrix_tint_explicit_layout Block
                OpDecorate %resultMatrix DescriptorSet 0
                OpDecorate %resultMatrix Binding 2
                OpDecorate %resultMatrix Coherent
@@ -45,9 +45,9 @@
 %gl_GlobalInvocationID = OpVariable %_ptr_Private_v3uint Private %5
       %float = OpTypeFloat 32
 %_runtimearr_float = OpTypeRuntimeArray %float
-%ResultMatrix = OpTypeStruct %_runtimearr_float
-%_ptr_StorageBuffer_ResultMatrix = OpTypePointer StorageBuffer %ResultMatrix
-%resultMatrix = OpVariable %_ptr_StorageBuffer_ResultMatrix StorageBuffer
+%ResultMatrix_tint_explicit_layout = OpTypeStruct %_runtimearr_float
+%_ptr_StorageBuffer_ResultMatrix_tint_explicit_layout = OpTypePointer StorageBuffer %ResultMatrix_tint_explicit_layout
+%resultMatrix = OpVariable %_ptr_StorageBuffer_ResultMatrix_tint_explicit_layout StorageBuffer
 %_ptr_Input_v3uint = OpTypePointer Input %v3uint
 %main_global_invocation_id_Input = OpVariable %_ptr_Input_v3uint Input
 %_ptr_Function_float = OpTypePointer Function %float

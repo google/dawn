@@ -19,11 +19,11 @@ int idx3() {
 void foo() {
   float a[4] = (float[4])0;
   {
-    uint2 tint_loop_idx = (0u).xx;
+    uint2 tint_loop_idx = (4294967295u).xx;
     uint v_1 = min(uint(idx1()), 3u);
     a[v_1] = (a[v_1] * 2.0f);
     while(true) {
-      if (all((tint_loop_idx == (4294967295u).xx))) {
+      if (all((tint_loop_idx == (0u).xx))) {
         break;
       }
       uint v_2 = min(uint(idx2()), 3u);
@@ -32,10 +32,10 @@ void foo() {
         break;
       }
       {
-        uint tint_low_inc = (tint_loop_idx.x + 1u);
+        uint tint_low_inc = (tint_loop_idx.x - 1u);
         tint_loop_idx.x = tint_low_inc;
-        uint tint_carry = uint((tint_low_inc == 0u));
-        tint_loop_idx.y = (tint_loop_idx.y + tint_carry);
+        uint tint_carry = uint((tint_low_inc == 4294967295u));
+        tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
         uint v_3 = min(uint(idx3()), 3u);
         a[v_3] = (a[v_3] + 1.0f);
       }

@@ -30,14 +30,13 @@
 
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/utils/diagnostic/diagnostic.h"
-#include "src/tint/utils/result/result.h"
 
 namespace tint::wgsl::writer {
 
 /// Raise converts a core-dialect IR module to a WGSL-dialect IR module
 /// @param  mod the IR module
 /// @return the result of the operation
-Result<SuccessType> Raise(core::ir::Module& mod);
+diag::Result<SuccessType> Raise(core::ir::Module& mod);
 
 }  // namespace tint::wgsl::writer
 

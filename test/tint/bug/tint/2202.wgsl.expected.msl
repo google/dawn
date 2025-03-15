@@ -7,15 +7,15 @@ using namespace metal;
 
 kernel void v() {
   {
-    uint2 tint_loop_idx = 0u;
+    uint2 tint_loop_idx = uint2(4294967295u);
     while(true) {
-      if (all((tint_loop_idx == uint2(4294967295u)))) {
+      if (all((tint_loop_idx == uint2(0u)))) {
         break;
       }
       {
-        uint2 tint_loop_idx_1 = 0u;
+        uint2 tint_loop_idx_1 = uint2(4294967295u);
         while(true) {
-          if (all((tint_loop_idx_1 == uint2(4294967295u)))) {
+          if (all((tint_loop_idx_1 == uint2(0u)))) {
             break;
           }
           return;

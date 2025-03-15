@@ -27,8 +27,6 @@
 
 #include "src/tint/lang/core/ir/transform/block_decorated_structs.h"
 
-#include <utility>
-
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/validator.h"
@@ -119,7 +117,7 @@ void Run(Module& ir) {
 
 }  // namespace
 
-Result<SuccessType> BlockDecoratedStructs(Module& ir) {
+diag::Result<SuccessType> BlockDecoratedStructs(Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "core.BlockDecoratedStructs");
     if (result != Success) {
         return result;

@@ -29,7 +29,7 @@
 #define SRC_TINT_LANG_CORE_IR_TRANSFORM_PRESERVE_PADDING_H_
 
 #include "src/tint/lang/core/ir/validator.h"
-#include "src/tint/utils/result/result.h"
+#include "src/tint/utils/diagnostic/diagnostic.h"
 
 // Forward declarations.
 namespace tint::core::ir {
@@ -49,7 +49,7 @@ const core::ir::Capabilities kPreservePaddingCapabilities{
 /// @note assumes that DirectVariableAccess will be run afterwards for backends that need it.
 /// @param module the module to transform
 /// @returns success or failure
-Result<SuccessType> PreservePadding(Module& module);
+diag::Result<SuccessType> PreservePadding(Module& module);
 
 }  // namespace tint::core::ir::transform
 

@@ -36,7 +36,7 @@
 
 namespace tint::spirv::reader {
 
-Result<core::ir::Module> ReadIR(const std::vector<uint32_t>& input) {
+diag::Result<core::ir::Module> ReadIR(const std::vector<uint32_t>& input) {
     // Parse the input SPIR-V to the SPIR-V dialect of the IR.
     auto mod = Parse(Slice(input.data(), input.size()));
     if (mod != Success) {

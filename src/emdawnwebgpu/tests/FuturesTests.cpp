@@ -40,7 +40,13 @@ using testing::HasSubstr;
 
 class InstanceLevelTests : public testing::Test {
   public:
-    void SetUp() override { instance = wgpu::CreateInstance(); }
+    void SetUp() override {
+        wgpu::InstanceDescriptor descriptor = {};
+        // The unit tests use wgpuInstanceWaitAny(WGPUFuture, timeoutNS) with timeoutNS > 0
+        // which requires the `timedWaitAnyEnable` property enabled on the instance capability.
+        descriptor.capabilities.timedWaitAnyEnable = true;
+        instance = wgpu::CreateInstance(&descriptor);
+    }
 
   protected:
     wgpu::Adapter RequestAdapter(const wgpu::RequestAdapterOptions* adapterOptions = nullptr) {
@@ -346,20 +352,33 @@ TEST_F(DeviceLevelTests, GetCompilationInfo) {
 
     wgpu::CompilationMessageType messageType;
     std::string message;
-    EXPECT_EQ(instance.WaitAny(shader.GetCompilationInfo(
-                                   wgpu::CallbackMode::AllowSpontaneous,
-                                   [&message, &messageType](wgpu::CompilationInfoRequestStatus s,
-                                                            const wgpu::CompilationInfo* info) {
-                                       ASSERT_EQ(s, wgpu::CompilationInfoRequestStatus::Success);
-                                       ASSERT_NE(info, nullptr);
-                                       ASSERT_EQ(info->messageCount, 1);
+    bool hasUtf16 = false;
+    EXPECT_EQ(instance.WaitAny(
+                  shader.GetCompilationInfo(
+                      wgpu::CallbackMode::AllowSpontaneous,
+                      [&message, &messageType, &hasUtf16](wgpu::CompilationInfoRequestStatus s,
+                                                          const wgpu::CompilationInfo* info) {
+                          ASSERT_EQ(s, wgpu::CompilationInfoRequestStatus::Success);
+                          ASSERT_NE(info, nullptr);
+                          ASSERT_EQ(info->messageCount, 1);
 
-                                       message = info->messages[0].message;
-                                       messageType = info->messages[0].type;
-                                   }),
-                               UINT64_MAX),
+                          message = info->messages[0].message;
+                          messageType = info->messages[0].type;
+
+                          size_t chainLength = 0;
+                          for (const auto* chain = info->messages[0].nextInChain; chain != nullptr;
+                               chain = chain->nextInChain) {
+                              if (chain->sType == wgpu::SType::DawnCompilationMessageUtf16) {
+                                  hasUtf16 = true;
+                              }
+                              chainLength++;
+                          }
+                          ASSERT_EQ(chainLength, 1);
+                      }),
+                  UINT64_MAX),
               wgpu::WaitStatus::Success);
     EXPECT_EQ(messageType, wgpu::CompilationMessageType::Warning);
+    EXPECT_TRUE(hasUtf16);
     EXPECT_THAT(message, HasSubstr("unreachable"));
 }
 

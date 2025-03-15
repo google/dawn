@@ -28,7 +28,7 @@
 #ifndef SRC_TINT_LANG_MSL_WRITER_RAISE_SHADER_IO_H_
 #define SRC_TINT_LANG_MSL_WRITER_RAISE_SHADER_IO_H_
 
-#include "src/tint/utils/result/result.h"
+#include "src/tint/utils/diagnostic/diagnostic.h"
 
 // Forward declarations.
 namespace tint::core::ir {
@@ -49,7 +49,7 @@ struct ShaderIOConfig {
 /// @param module the module to transform
 /// @param config the configuration
 /// @returns success or failure
-Result<SuccessType> ShaderIO(core::ir::Module& module, const ShaderIOConfig& config);
+diag::Result<SuccessType> ShaderIO(core::ir::Module& module, const ShaderIOConfig& config);
 
 }  // namespace tint::msl::writer::raise
 

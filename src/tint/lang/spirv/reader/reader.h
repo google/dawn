@@ -45,7 +45,7 @@ namespace tint::spirv::reader {
 /// TODO(crbug.com/tint/1907): Rename when we remove the AST path.
 /// @param input the SPIR-V binary data
 /// @returns the Tint IR module
-Result<core::ir::Module> ReadIR(const std::vector<uint32_t>& input);
+diag::Result<core::ir::Module> ReadIR(const std::vector<uint32_t>& input);
 
 /// Reads the SPIR-V source data, returning the parsed program.
 /// If the source data fails to parse then the returned

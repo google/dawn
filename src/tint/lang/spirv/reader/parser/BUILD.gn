@@ -66,7 +66,6 @@ if (tint_build_spv_reader) {
       "${tint_src_dir}/utils/macros",
       "${tint_src_dir}/utils/math",
       "${tint_src_dir}/utils/memory",
-      "${tint_src_dir}/utils/result",
       "${tint_src_dir}/utils/rtti",
       "${tint_src_dir}/utils/symbol",
       "${tint_src_dir}/utils/text",
@@ -90,16 +89,22 @@ if (tint_build_unittests) {
     tint_unittests_source_set("unittests") {
       sources = [
         "binary_test.cc",
+        "bit_test.cc",
+        "branch_test.cc",
         "builtin_test.cc",
         "composite_test.cc",
         "constant_test.cc",
+        "convert_test.cc",
         "function_test.cc",
         "helper_test.h",
         "import_glsl_std450_test.cc",
         "import_test.cc",
+        "logical_test.cc",
         "memory_test.cc",
         "misc_test.cc",
+        "name_test.cc",
         "struct_test.cc",
+        "unary_test.cc",
         "var_test.cc",
       ]
       deps = [
@@ -117,7 +122,6 @@ if (tint_build_unittests) {
         "${tint_src_dir}/utils/macros",
         "${tint_src_dir}/utils/math",
         "${tint_src_dir}/utils/memory",
-        "${tint_src_dir}/utils/result",
         "${tint_src_dir}/utils/rtti",
         "${tint_src_dir}/utils/symbol",
         "${tint_src_dir}/utils/text",

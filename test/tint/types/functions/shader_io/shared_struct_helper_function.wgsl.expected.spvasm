@@ -23,8 +23,6 @@
                OpDecorate %vert_main1_loc0_Output Location 0
                OpDecorate %vert_main1_loc0_Output Flat
                OpDecorate %vert_main1___point_size_Output BuiltIn PointSize
-               OpMemberDecorate %VertexOutput 0 Offset 0
-               OpMemberDecorate %VertexOutput 1 Offset 16
       %float = OpTypeFloat 32
     %v4float = OpTypeVector %float 4
 %_ptr_Output_v4float = OpTypePointer Output %v4float
@@ -89,8 +87,6 @@
                OpDecorate %vert_main2_loc0_Output Location 0
                OpDecorate %vert_main2_loc0_Output Flat
                OpDecorate %vert_main2___point_size_Output BuiltIn PointSize
-               OpMemberDecorate %VertexOutput 0 Offset 0
-               OpMemberDecorate %VertexOutput 1 Offset 16
       %float = OpTypeFloat 32
     %v4float = OpTypeVector %float 4
 %_ptr_Output_v4float = OpTypePointer Output %v4float

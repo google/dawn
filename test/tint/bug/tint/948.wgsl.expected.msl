@@ -118,9 +118,9 @@ void main_1(tint_module_vars_struct tint_module_vars) {
   stageUnits = (float2(1.0f) / x_111);
   i = 0;
   {
-    uint2 tint_loop_idx = 0u;
+    uint2 tint_loop_idx = uint2(4294967295u);
     while(true) {
-      if (all((tint_loop_idx == uint2(4294967295u)))) {
+      if (all((tint_loop_idx == uint2(0u)))) {
         break;
       }
       int const x_122 = i;
@@ -163,9 +163,9 @@ void main_1(tint_module_vars_struct tint_module_vars) {
         (*tint_module_vars.mt) = fmod((x_181 * x_184), 1.0f);
         f = 0.0f;
         {
-          uint2 tint_loop_idx_1 = 0u;
+          uint2 tint_loop_idx_1 = uint2(4294967295u);
           while(true) {
-            if (all((tint_loop_idx_1 == uint2(4294967295u)))) {
+            if (all((tint_loop_idx_1 == uint2(0u)))) {
               break;
             }
             float const x_193 = f;
@@ -186,10 +186,10 @@ void main_1(tint_module_vars_struct tint_module_vars) {
             float4 const x_217 = float4(0.0f);
             animationData = x_217;
             {
-              uint const tint_low_inc_1 = (tint_loop_idx_1.x + 1u);
+              uint const tint_low_inc_1 = (tint_loop_idx_1.x - 1u);
               tint_loop_idx_1.x = tint_low_inc_1;
-              uint const tint_carry_1 = uint((tint_low_inc_1 == 0u));
-              tint_loop_idx_1.y = (tint_loop_idx_1.y + tint_carry_1);
+              uint const tint_carry_1 = uint((tint_low_inc_1 == 4294967295u));
+              tint_loop_idx_1.y = (tint_loop_idx_1.y - tint_carry_1);
               float const x_218 = f;
               f = (x_218 + 1.0f);
             }
@@ -243,10 +243,10 @@ void main_1(tint_module_vars_struct tint_module_vars) {
         color = float4(x_298.x, x_298.y, x_298.z, x_299);
       }
       {
-        uint const tint_low_inc = (tint_loop_idx.x + 1u);
+        uint const tint_low_inc = (tint_loop_idx.x - 1u);
         tint_loop_idx.x = tint_low_inc;
-        uint const tint_carry = uint((tint_low_inc == 0u));
-        tint_loop_idx.y = (tint_loop_idx.y + tint_carry);
+        uint const tint_carry = uint((tint_low_inc == 4294967295u));
+        tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
         int const x_304 = i;
         i = as_type<int>((as_type<uint>(x_304) + as_type<uint>(1)));
       }

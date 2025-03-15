@@ -28,10 +28,8 @@
 #ifndef SRC_TINT_LANG_CORE_IR_TRANSFORM_STD140_H_
 #define SRC_TINT_LANG_CORE_IR_TRANSFORM_STD140_H_
 
-#include <string>
-
 #include "src/tint/lang/core/ir/validator.h"
-#include "src/tint/utils/result/result.h"
+#include "src/tint/utils/diagnostic/diagnostic.h"
 
 // Forward declarations.
 namespace tint::core::ir {
@@ -51,7 +49,7 @@ const core::ir::Capabilities kStd140Capabilities{
 /// pointer parameters.
 /// @param module the module to transform
 /// @returns success or failure
-Result<SuccessType> Std140(Module& module);
+diag::Result<SuccessType> Std140(Module& module);
 
 }  // namespace tint::core::ir::transform
 

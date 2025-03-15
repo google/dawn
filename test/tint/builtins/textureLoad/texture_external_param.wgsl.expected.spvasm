@@ -121,28 +121,6 @@
                OpDecorate %6 NonWritable
                OpDecorate %vertex_main_position_Output BuiltIn Position
                OpDecorate %vertex_main___point_size_Output BuiltIn PointSize
-               OpMemberDecorate %tint_ExternalTextureParams 0 Offset 0
-               OpMemberDecorate %tint_ExternalTextureParams 1 Offset 4
-               OpMemberDecorate %tint_ExternalTextureParams 2 Offset 16
-               OpMemberDecorate %tint_ExternalTextureParams 2 ColMajor
-               OpMemberDecorate %tint_ExternalTextureParams 2 MatrixStride 16
-               OpMemberDecorate %tint_ExternalTextureParams 3 Offset 64
-               OpMemberDecorate %tint_ExternalTextureParams 4 Offset 96
-               OpMemberDecorate %tint_ExternalTextureParams 5 Offset 128
-               OpMemberDecorate %tint_ExternalTextureParams 5 ColMajor
-               OpMemberDecorate %tint_ExternalTextureParams 5 MatrixStride 16
-               OpMemberDecorate %tint_ExternalTextureParams 6 Offset 176
-               OpMemberDecorate %tint_ExternalTextureParams 6 ColMajor
-               OpMemberDecorate %tint_ExternalTextureParams 6 MatrixStride 8
-               OpMemberDecorate %tint_ExternalTextureParams 7 Offset 200
-               OpMemberDecorate %tint_ExternalTextureParams 7 ColMajor
-               OpMemberDecorate %tint_ExternalTextureParams 7 MatrixStride 8
-               OpMemberDecorate %tint_ExternalTextureParams 8 Offset 224
-               OpMemberDecorate %tint_ExternalTextureParams 9 Offset 232
-               OpMemberDecorate %tint_ExternalTextureParams 10 Offset 240
-               OpMemberDecorate %tint_ExternalTextureParams 11 Offset 248
-               OpMemberDecorate %tint_ExternalTextureParams 12 Offset 256
-               OpMemberDecorate %tint_ExternalTextureParams 13 Offset 264
       %float = OpTypeFloat 32
           %3 = OpTypeImage %float 2D 0 0 0 1 Unknown
 %_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3
@@ -458,28 +436,6 @@
                OpDecorate %6 DescriptorSet 1
                OpDecorate %6 Binding 2
                OpDecorate %6 NonWritable
-               OpMemberDecorate %tint_ExternalTextureParams 0 Offset 0
-               OpMemberDecorate %tint_ExternalTextureParams 1 Offset 4
-               OpMemberDecorate %tint_ExternalTextureParams 2 Offset 16
-               OpMemberDecorate %tint_ExternalTextureParams 2 ColMajor
-               OpMemberDecorate %tint_ExternalTextureParams 2 MatrixStride 16
-               OpMemberDecorate %tint_ExternalTextureParams 3 Offset 64
-               OpMemberDecorate %tint_ExternalTextureParams 4 Offset 96
-               OpMemberDecorate %tint_ExternalTextureParams 5 Offset 128
-               OpMemberDecorate %tint_ExternalTextureParams 5 ColMajor
-               OpMemberDecorate %tint_ExternalTextureParams 5 MatrixStride 16
-               OpMemberDecorate %tint_ExternalTextureParams 6 Offset 176
-               OpMemberDecorate %tint_ExternalTextureParams 6 ColMajor
-               OpMemberDecorate %tint_ExternalTextureParams 6 MatrixStride 8
-               OpMemberDecorate %tint_ExternalTextureParams 7 Offset 200
-               OpMemberDecorate %tint_ExternalTextureParams 7 ColMajor
-               OpMemberDecorate %tint_ExternalTextureParams 7 MatrixStride 8
-               OpMemberDecorate %tint_ExternalTextureParams 8 Offset 224
-               OpMemberDecorate %tint_ExternalTextureParams 9 Offset 232
-               OpMemberDecorate %tint_ExternalTextureParams 10 Offset 240
-               OpMemberDecorate %tint_ExternalTextureParams 11 Offset 248
-               OpMemberDecorate %tint_ExternalTextureParams 12 Offset 256
-               OpMemberDecorate %tint_ExternalTextureParams 13 Offset 264
       %float = OpTypeFloat 32
           %3 = OpTypeImage %float 2D 0 0 0 1 Unknown
 %_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3
@@ -782,28 +738,6 @@
                OpDecorate %6 DescriptorSet 1
                OpDecorate %6 Binding 2
                OpDecorate %6 NonWritable
-               OpMemberDecorate %tint_ExternalTextureParams 0 Offset 0
-               OpMemberDecorate %tint_ExternalTextureParams 1 Offset 4
-               OpMemberDecorate %tint_ExternalTextureParams 2 Offset 16
-               OpMemberDecorate %tint_ExternalTextureParams 2 ColMajor
-               OpMemberDecorate %tint_ExternalTextureParams 2 MatrixStride 16
-               OpMemberDecorate %tint_ExternalTextureParams 3 Offset 64
-               OpMemberDecorate %tint_ExternalTextureParams 4 Offset 96
-               OpMemberDecorate %tint_ExternalTextureParams 5 Offset 128
-               OpMemberDecorate %tint_ExternalTextureParams 5 ColMajor
-               OpMemberDecorate %tint_ExternalTextureParams 5 MatrixStride 16
-               OpMemberDecorate %tint_ExternalTextureParams 6 Offset 176
-               OpMemberDecorate %tint_ExternalTextureParams 6 ColMajor
-               OpMemberDecorate %tint_ExternalTextureParams 6 MatrixStride 8
-               OpMemberDecorate %tint_ExternalTextureParams 7 Offset 200
-               OpMemberDecorate %tint_ExternalTextureParams 7 ColMajor
-               OpMemberDecorate %tint_ExternalTextureParams 7 MatrixStride 8
-               OpMemberDecorate %tint_ExternalTextureParams 8 Offset 224
-               OpMemberDecorate %tint_ExternalTextureParams 9 Offset 232
-               OpMemberDecorate %tint_ExternalTextureParams 10 Offset 240
-               OpMemberDecorate %tint_ExternalTextureParams 11 Offset 248
-               OpMemberDecorate %tint_ExternalTextureParams 12 Offset 256
-               OpMemberDecorate %tint_ExternalTextureParams 13 Offset 264
       %float = OpTypeFloat 32
           %3 = OpTypeImage %float 2D 0 0 0 1 Unknown
 %_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3

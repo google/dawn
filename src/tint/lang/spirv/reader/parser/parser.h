@@ -28,9 +28,7 @@
 #ifndef SRC_TINT_LANG_SPIRV_READER_PARSER_PARSER_H_
 #define SRC_TINT_LANG_SPIRV_READER_PARSER_PARSER_H_
 
-#include <vector>
-
-#include "src/tint/utils/result/result.h"
+#include "src/tint/utils/diagnostic/diagnostic.h"
 
 // Forward declarations
 namespace tint::core::ir {
@@ -42,7 +40,7 @@ namespace tint::spirv::reader {
 /// Parse a SPIR-V binary to produce a SPIR-V IR module.
 /// @param spirv the SPIR-V binary data
 /// @returns the SPIR-V IR module on success, or failure
-Result<core::ir::Module> Parse(Slice<const uint32_t> spirv);
+diag::Result<core::ir::Module> Parse(Slice<const uint32_t> spirv);
 
 }  // namespace tint::spirv::reader
 

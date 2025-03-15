@@ -10,7 +10,6 @@
                OpName %f "f"
                OpName %v "v"
                OpName %unused_entry_point "unused_entry_point"
-               OpDecorate %_arr_float_uint_4 ArrayStride 4
        %void = OpTypeVoid
           %3 = OpTypeFunction %void
       %float = OpTypeFloat 32

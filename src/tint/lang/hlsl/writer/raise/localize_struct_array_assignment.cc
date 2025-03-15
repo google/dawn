@@ -29,7 +29,6 @@
 
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/validator.h"
-#include "src/tint/utils/result/result.h"
 
 namespace tint::hlsl::writer::raise {
 namespace {
@@ -157,7 +156,7 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType> LocalizeStructArrayAssignment(core::ir::Module& ir) {
+diag::Result<SuccessType> LocalizeStructArrayAssignment(core::ir::Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "hlsl.LocalizeStructArrayAssignment");
     if (result != Success) {
         return result.Failure();

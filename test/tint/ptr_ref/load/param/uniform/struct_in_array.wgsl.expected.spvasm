@@ -9,29 +9,28 @@
                OpExecutionMode %main LocalSize 1 1 1
                OpMemberName %str 0 "i"
                OpName %str "str"
-               OpMemberName %S_block 0 "inner"
-               OpName %S_block "S_block"
+               OpMemberName %S_block_tint_explicit_layout 0 "inner"
+               OpName %S_block_tint_explicit_layout "S_block_tint_explicit_layout"
                OpName %func "func"
                OpName %pointer_indices "pointer_indices"
                OpName %main "main"
                OpName %r "r"
                OpMemberDecorate %str 0 Offset 0
                OpDecorate %_arr_str_uint_4 ArrayStride 16
-               OpMemberDecorate %S_block 0 Offset 0
-               OpDecorate %S_block Block
+               OpMemberDecorate %S_block_tint_explicit_layout 0 Offset 0
+               OpDecorate %S_block_tint_explicit_layout Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
-               OpDecorate %_arr_uint_uint_1 ArrayStride 4
         %int = OpTypeInt 32 1
       %v4int = OpTypeVector %int 4
         %str = OpTypeStruct %v4int
        %uint = OpTypeInt 32 0
      %uint_4 = OpConstant %uint 4
 %_arr_str_uint_4 = OpTypeArray %str %uint_4
-    %S_block = OpTypeStruct %_arr_str_uint_4
-%_ptr_Uniform_S_block = OpTypePointer Uniform %S_block
-          %1 = OpVariable %_ptr_Uniform_S_block Uniform
+%S_block_tint_explicit_layout = OpTypeStruct %_arr_str_uint_4
+%_ptr_Uniform_S_block_tint_explicit_layout = OpTypePointer Uniform %S_block_tint_explicit_layout
+          %1 = OpVariable %_ptr_Uniform_S_block_tint_explicit_layout Uniform
      %uint_1 = OpConstant %uint 1
 %_arr_uint_uint_1 = OpTypeArray %uint %uint_1
          %14 = OpTypeFunction %str %_arr_uint_uint_1

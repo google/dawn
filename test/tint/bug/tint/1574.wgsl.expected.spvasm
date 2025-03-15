@@ -50,10 +50,6 @@
                OpDecorate %5 Binding 1
                OpDecorate %5 Coherent
                OpDecorate %main_local_invocation_index_Input BuiltIn LocalInvocationIndex
-               OpMemberDecorate %__atomic_compare_exchange_result_u32 0 Offset 0
-               OpMemberDecorate %__atomic_compare_exchange_result_u32 1 Offset 4
-               OpMemberDecorate %__atomic_compare_exchange_result_i32 0 Offset 0
-               OpMemberDecorate %__atomic_compare_exchange_result_i32 1 Offset 4
        %uint = OpTypeInt 32 0
 %a_u32_block = OpTypeStruct %uint
 %_ptr_StorageBuffer_a_u32_block = OpTypePointer StorageBuffer %a_u32_block

@@ -40,7 +40,6 @@
 #include "src/tint/lang/hlsl/type/rasterizer_ordered_texture_2d.h"
 #include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/ice/ice.h"
-#include "src/tint/utils/result/result.h"
 
 namespace tint::hlsl::writer::raise {
 namespace {
@@ -242,7 +241,7 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType> PixelLocal(core::ir::Module& ir, const PixelLocalConfig& config) {
+diag::Result<SuccessType> PixelLocal(core::ir::Module& ir, const PixelLocalConfig& config) {
     auto result = ValidateAndDumpIfNeeded(ir, "hlsl.PixelLocal",
                                           core::ir::Capabilities{
                                               core::ir::Capability::kAllowClipDistancesOnF32,

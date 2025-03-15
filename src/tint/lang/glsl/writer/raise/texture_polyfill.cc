@@ -27,9 +27,7 @@
 
 #include "src/tint/lang/glsl/writer/raise/texture_polyfill.h"
 
-#include <string>
 #include <utility>
-#include <vector>
 
 #include "src/tint/lang/core/fluent_types.h"  // IWYU pragma: export
 #include "src/tint/lang/core/ir/builder.h"
@@ -340,13 +338,12 @@ struct State {
             value->Type()->UnwrapPtr(),
             [&](const core::type::SampledTexture* s) {
                 is_1d = s->Dim() == core::type::TextureDimension::k1d;
-                new_type = ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d,
-                                                              s->Type());
+                new_type = ty.sampled_texture(core::type::TextureDimension::k2d, s->Type());
             },
             [&](const core::type::StorageTexture* s) {
                 is_1d = s->Dim() == core::type::TextureDimension::k1d;
-                new_type = ty.Get<core::type::StorageTexture>(
-                    core::type::TextureDimension::k2d, s->TexelFormat(), s->Access(), s->Type());
+                new_type = ty.storage_texture(core::type::TextureDimension::k2d, s->TexelFormat(),
+                                              s->Access());
             });
         if (!is_1d) {
             return std::nullopt;
@@ -458,8 +455,8 @@ struct State {
             if (tex_ty->StoreType()->Is<core::type::DepthTexture>()) {
                 tex_ty =
                     ty.ptr(tex_ty->AddressSpace(),
-                           ty.Get<core::type::SampledTexture>(
-                               tex_ty->UnwrapPtr()->As<core::type::Texture>()->Dim(), ty.f32()),
+                           ty.sampled_texture(tex_ty->UnwrapPtr()->As<core::type::Texture>()->Dim(),
+                                              ty.f32()),
                            tex_ty->Access());
             }
         }
@@ -1231,7 +1228,7 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType> TexturePolyfill(core::ir::Module& ir, const TexturePolyfillConfig& cfg) {
+diag::Result<SuccessType> TexturePolyfill(core::ir::Module& ir, const TexturePolyfillConfig& cfg) {
     auto result = ValidateAndDumpIfNeeded(ir, "glsl.TexturePolyfill");
     if (result != Success) {
         return result.Failure();

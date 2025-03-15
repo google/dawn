@@ -12,16 +12,16 @@
                OpMemberName %LightData 1 "color"
                OpMemberName %LightData 2 "radius"
                OpName %LightData "LightData"
-               OpMemberName %LightsBuffer 0 "lights"
-               OpName %LightsBuffer "LightsBuffer"
+               OpMemberName %LightsBuffer_tint_explicit_layout 0 "lights"
+               OpName %LightsBuffer_tint_explicit_layout "LightsBuffer_tint_explicit_layout"
                OpName %lightsBuffer "lightsBuffer"
-               OpMemberName %TileLightIdData 0 "count"
-               OpMemberName %TileLightIdData 1 "lightId"
-               OpName %TileLightIdData "TileLightIdData"
-               OpMemberName %Tiles 0 "data"
-               OpName %Tiles "Tiles"
-               OpMemberName %tileLightId_block 0 "inner"
-               OpName %tileLightId_block "tileLightId_block"
+               OpMemberName %TileLightIdData_tint_explicit_layout 0 "count"
+               OpMemberName %TileLightIdData_tint_explicit_layout 1 "lightId"
+               OpName %TileLightIdData_tint_explicit_layout "TileLightIdData_tint_explicit_layout"
+               OpMemberName %Tiles_tint_explicit_layout 0 "data"
+               OpName %Tiles_tint_explicit_layout "Tiles_tint_explicit_layout"
+               OpMemberName %tileLightId_block_tint_explicit_layout 0 "inner"
+               OpName %tileLightId_block_tint_explicit_layout "tileLightId_block_tint_explicit_layout"
                OpMemberName %Config 0 "numLights"
                OpMemberName %Config 1 "numTiles"
                OpMemberName %Config 2 "tileCountX"
@@ -71,18 +71,18 @@
                OpMemberDecorate %LightData 1 Offset 16
                OpMemberDecorate %LightData 2 Offset 28
                OpDecorate %_runtimearr_LightData ArrayStride 32
-               OpMemberDecorate %LightsBuffer 0 Offset 0
-               OpDecorate %LightsBuffer Block
+               OpMemberDecorate %LightsBuffer_tint_explicit_layout 0 Offset 0
+               OpDecorate %LightsBuffer_tint_explicit_layout Block
                OpDecorate %lightsBuffer DescriptorSet 0
                OpDecorate %lightsBuffer Binding 0
                OpDecorate %lightsBuffer Coherent
-               OpMemberDecorate %TileLightIdData 0 Offset 0
+               OpMemberDecorate %TileLightIdData_tint_explicit_layout 0 Offset 0
                OpDecorate %_arr_uint_uint_64 ArrayStride 4
-               OpMemberDecorate %TileLightIdData 1 Offset 4
-               OpDecorate %_arr_TileLightIdData_uint_4 ArrayStride 260
-               OpMemberDecorate %Tiles 0 Offset 0
-               OpMemberDecorate %tileLightId_block 0 Offset 0
-               OpDecorate %tileLightId_block Block
+               OpMemberDecorate %TileLightIdData_tint_explicit_layout 1 Offset 4
+               OpDecorate %_arr_TileLightIdData_tint_explicit_layout_uint_4 ArrayStride 260
+               OpMemberDecorate %Tiles_tint_explicit_layout 0 Offset 0
+               OpMemberDecorate %tileLightId_block_tint_explicit_layout 0 Offset 0
+               OpDecorate %tileLightId_block_tint_explicit_layout Block
                OpDecorate %9 DescriptorSet 1
                OpDecorate %9 Binding 0
                OpDecorate %9 Coherent
@@ -112,25 +112,24 @@
                OpDecorate %23 Binding 0
                OpDecorate %23 NonWritable
                OpDecorate %main_global_invocation_id_Input BuiltIn GlobalInvocationId
-               OpDecorate %_arr_v4float_uint_6 ArrayStride 16
       %float = OpTypeFloat 32
     %v4float = OpTypeVector %float 4
     %v3float = OpTypeVector %float 3
   %LightData = OpTypeStruct %v4float %v3float %float
 %_runtimearr_LightData = OpTypeRuntimeArray %LightData
-%LightsBuffer = OpTypeStruct %_runtimearr_LightData
-%_ptr_StorageBuffer_LightsBuffer = OpTypePointer StorageBuffer %LightsBuffer
-%lightsBuffer = OpVariable %_ptr_StorageBuffer_LightsBuffer StorageBuffer
+%LightsBuffer_tint_explicit_layout = OpTypeStruct %_runtimearr_LightData
+%_ptr_StorageBuffer_LightsBuffer_tint_explicit_layout = OpTypePointer StorageBuffer %LightsBuffer_tint_explicit_layout
+%lightsBuffer = OpVariable %_ptr_StorageBuffer_LightsBuffer_tint_explicit_layout StorageBuffer
        %uint = OpTypeInt 32 0
     %uint_64 = OpConstant %uint 64
 %_arr_uint_uint_64 = OpTypeArray %uint %uint_64
-%TileLightIdData = OpTypeStruct %uint %_arr_uint_uint_64
+%TileLightIdData_tint_explicit_layout = OpTypeStruct %uint %_arr_uint_uint_64
      %uint_4 = OpConstant %uint 4
-%_arr_TileLightIdData_uint_4 = OpTypeArray %TileLightIdData %uint_4
-      %Tiles = OpTypeStruct %_arr_TileLightIdData_uint_4
-%tileLightId_block = OpTypeStruct %Tiles
-%_ptr_StorageBuffer_tileLightId_block = OpTypePointer StorageBuffer %tileLightId_block
-          %9 = OpVariable %_ptr_StorageBuffer_tileLightId_block StorageBuffer
+%_arr_TileLightIdData_tint_explicit_layout_uint_4 = OpTypeArray %TileLightIdData_tint_explicit_layout %uint_4
+%Tiles_tint_explicit_layout = OpTypeStruct %_arr_TileLightIdData_tint_explicit_layout_uint_4
+%tileLightId_block_tint_explicit_layout = OpTypeStruct %Tiles_tint_explicit_layout
+%_ptr_StorageBuffer_tileLightId_block_tint_explicit_layout = OpTypePointer StorageBuffer %tileLightId_block_tint_explicit_layout
+          %9 = OpVariable %_ptr_StorageBuffer_tileLightId_block_tint_explicit_layout StorageBuffer
      %Config = OpTypeStruct %uint %uint %uint %uint %uint %uint
 %config_block = OpTypeStruct %Config
 %_ptr_Uniform_config_block = OpTypePointer Uniform %config_block

@@ -416,7 +416,7 @@ TEST_F(IR_ValidatorTest, Function_ParameterWithVoidType) {
     EXPECT_THAT(
         res.Failure().reason.Str(),
         testing::HasSubstr(
-            R"(:1:17 error: function parameter type, 'void', must be constructible, a pointer, a texture, or a sampler
+            R"(:1:17 error: function parameter type, 'void', must be constructible, a pointer, or a handle
 %my_func = func(%my_param:void):void {
                 ^^^^^^^^^^^^^^
 )")) << res.Failure().reason.Str();

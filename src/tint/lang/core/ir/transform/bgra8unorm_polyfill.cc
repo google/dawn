@@ -97,8 +97,8 @@ struct State {
     /// @param bgra8 the bgra8unorm texture type
     void ReplaceVar(Var* old_var, const core::type::StorageTexture* bgra8) {
         // Redeclare the variable with a rgba8unorm texel format.
-        auto* rgba8 = ty.Get<core::type::StorageTexture>(
-            bgra8->Dim(), core::TexelFormat::kRgba8Unorm, bgra8->Access(), bgra8->Type());
+        auto* rgba8 =
+            ty.storage_texture(bgra8->Dim(), core::TexelFormat::kRgba8Unorm, bgra8->Access());
         auto* new_var = b.Var(ty.ptr(handle, rgba8));
         auto bp = old_var->BindingPoint();
         new_var->SetBindingPoint(bp->group, bp->binding);
@@ -121,8 +121,8 @@ struct State {
                           uint32_t index,
                           const core::type::StorageTexture* bgra8) {
         // Redeclare the parameter with a rgba8unorm texel format.
-        auto* rgba8 = ty.Get<core::type::StorageTexture>(
-            bgra8->Dim(), core::TexelFormat::kRgba8Unorm, bgra8->Access(), bgra8->Type());
+        auto* rgba8 =
+            ty.storage_texture(bgra8->Dim(), core::TexelFormat::kRgba8Unorm, bgra8->Access());
         auto* new_param = b.FunctionParam(rgba8);
         if (auto name = ir.NameOf(old_param)) {
             ir.SetName(new_param, name.NameView());
@@ -181,7 +181,7 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType> Bgra8UnormPolyfill(Module& ir) {
+diag::Result<SuccessType> Bgra8UnormPolyfill(Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "core.Bgra8UnormPolyfill");
     if (result != Success) {
         return result;

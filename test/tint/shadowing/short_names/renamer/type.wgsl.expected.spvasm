@@ -9,7 +9,6 @@
                OpDecorate %gl_VertexIndex BuiltIn VertexIndex
                OpDecorate %gl_Position BuiltIn Position
                OpDecorate %gl_PointSize BuiltIn PointSize
-               OpMemberDecorate %_struct_15 0 Offset 0
        %uint = OpTypeInt 32 0
 %_ptr_Input_uint = OpTypePointer Input %uint
 %gl_VertexIndex = OpVariable %_ptr_Input_uint Input

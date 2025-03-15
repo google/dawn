@@ -50,8 +50,7 @@ bool CanRun(core::ir::Module& ir) {
     // to reverse-engineer the builtin function call that would produce the right output.
     for (auto* c : ir.constant_values) {
         if (auto* str = c->Type()->As<core::type::Struct>()) {
-            // TODO(350778507): Consider using a struct flag for builtin structures instead.
-            if (tint::HasPrefix(str->Name().NameView(), "__")) {
+            if (str->IsWgslInternal()) {
                 return false;
             }
         }

@@ -75,17 +75,6 @@ using namespace tint::core::fluent_types;  // NOLINT
 namespace tint::inspector {
 namespace {
 
-void AppendResourceBindings(std::vector<ResourceBinding>* dest,
-                            const std::vector<ResourceBinding>& orig) {
-    TINT_ASSERT(dest);
-    if (!dest) {
-        return;
-    }
-
-    dest->reserve(dest->size() + orig.size());
-    dest->insert(dest->end(), orig.begin(), orig.end());
-}
-
 std::tuple<ComponentType, CompositionType> CalculateComponentAndComposition(
     const core::type::Type* type) {
     // entry point in/out variables must of numeric scalar or vector types.
@@ -131,6 +120,106 @@ bool IsTextureBuiltinThatUsesNonComparisonSampler(tint::wgsl::BuiltinFn builtin_
            builtin_fn == wgsl::BuiltinFn::kTextureGather;
 }
 
+ResourceBinding ConvertBufferToResourceBinding(const tint::sem::GlobalVariable* buffer) {
+    ResourceBinding result;
+    result.bind_group = buffer->Attributes().binding_point->group;
+    result.binding = buffer->Attributes().binding_point->binding;
+    result.variable_name = buffer->Declaration()->name->symbol.Name();
+
+    auto* unwrapped_type = buffer->Type()->UnwrapRef();
+    result.size = unwrapped_type->Size();
+    result.size_no_padding = result.size;
+    if (auto* str = unwrapped_type->As<sem::Struct>()) {
+        result.size_no_padding = str->SizeNoPadding();
+    }
+
+    if (buffer->AddressSpace() == core::AddressSpace::kStorage) {
+        if (buffer->Access() == core::Access::kReadWrite) {
+            result.resource_type = ResourceBinding::ResourceType::kStorageBuffer;
+        } else {
+            TINT_ASSERT(buffer->Access() == core::Access::kRead);
+            result.resource_type = ResourceBinding::ResourceType::kReadOnlyStorageBuffer;
+        }
+    } else {
+        TINT_ASSERT(buffer->AddressSpace() == core::AddressSpace::kUniform);
+        result.resource_type = ResourceBinding::ResourceType::kUniformBuffer;
+    }
+
+    return result;
+}
+
+ResourceBinding ConvertHandleToResourceBinding(const tint::sem::GlobalVariable* handle) {
+    ResourceBinding result;
+    result.bind_group = handle->Attributes().binding_point->group;
+    result.binding = handle->Attributes().binding_point->binding;
+    result.variable_name = handle->Declaration()->name->symbol.Name();
+
+    const core::type::Type* handle_type = handle->Type()->UnwrapRef();
+    Switch(
+        handle_type,
+
+        [&](const core::type::Sampler* sampler) {
+            if (sampler->Kind() == core::type::SamplerKind::kSampler) {
+                result.resource_type = ResourceBinding::ResourceType::kSampler;
+            } else {
+                TINT_ASSERT(sampler->Kind() == core::type::SamplerKind::kComparisonSampler);
+                result.resource_type = ResourceBinding::ResourceType::kComparisonSampler;
+            }
+        },
+
+        [&](const core::type::SampledTexture* tex) {
+            result.resource_type = ResourceBinding::ResourceType::kSampledTexture;
+            result.dim = TypeTextureDimensionToResourceBindingTextureDimension(tex->Dim());
+            result.sampled_kind = BaseTypeToSampledKind(tex->Type());
+        },
+        [&](const core::type::MultisampledTexture* tex) {
+            result.resource_type = ResourceBinding::ResourceType::kMultisampledTexture;
+            result.dim = TypeTextureDimensionToResourceBindingTextureDimension(tex->Dim());
+            result.sampled_kind = BaseTypeToSampledKind(tex->Type());
+        },
+        [&](const core::type::DepthTexture* tex) {
+            result.resource_type = ResourceBinding::ResourceType::kDepthTexture;
+            result.dim = TypeTextureDimensionToResourceBindingTextureDimension(tex->Dim());
+        },
+        [&](const core::type::DepthMultisampledTexture* tex) {
+            result.resource_type = ResourceBinding::ResourceType::kDepthMultisampledTexture;
+            result.dim = TypeTextureDimensionToResourceBindingTextureDimension(tex->Dim());
+        },
+        [&](const core::type::StorageTexture* tex) {
+            switch (tex->Access()) {
+                case core::Access::kWrite:
+                    result.resource_type = ResourceBinding::ResourceType::kWriteOnlyStorageTexture;
+                    break;
+                case core::Access::kReadWrite:
+                    result.resource_type = ResourceBinding::ResourceType::kReadWriteStorageTexture;
+                    break;
+                case core::Access::kRead:
+                    result.resource_type = ResourceBinding::ResourceType::kReadOnlyStorageTexture;
+                    break;
+                case core::Access::kUndefined:
+                    TINT_UNREACHABLE() << "unhandled storage texture access";
+            }
+            result.dim = TypeTextureDimensionToResourceBindingTextureDimension(tex->Dim());
+            result.sampled_kind = BaseTypeToSampledKind(tex->Type());
+            result.image_format = TypeTexelFormatToResourceBindingTexelFormat(tex->TexelFormat());
+        },
+        [&](const core::type::ExternalTexture*) {
+            result.resource_type = ResourceBinding::ResourceType::kExternalTexture;
+            result.dim = ResourceBinding::TextureDimension::k2d;
+        },
+
+        [&](const core::type::InputAttachment* attachment) {
+            result.resource_type = ResourceBinding::ResourceType::kInputAttachment;
+            result.input_attachment_index = handle->Attributes().input_attachment_index.value();
+            result.sampled_kind = BaseTypeToSampledKind(attachment->Type());
+            result.dim = TypeTextureDimensionToResourceBindingTextureDimension(attachment->Dim());
+        },
+
+        TINT_ICE_ON_NO_MATCH);
+
+    return result;
+}
+
 }  // namespace
 
 Inspector::Inspector(const Program& program) : program_(program) {}
@@ -157,6 +246,9 @@ EntryPoint Inspector::GetEntryPoint(const tint::ast::Function* func) {
                 entry_point.workgroup_size = {wgsize[0].value(), wgsize[1].value(),
                                               wgsize[2].value()};
             }
+
+            entry_point.uses_subgroup_matrix = UsesSubgroupMatrix(sem);
+
             break;
         }
         case ast::PipelineStage::kFragment: {
@@ -364,218 +456,28 @@ std::vector<ResourceBinding> Inspector::GetResourceBindings(const std::string& e
     }
 
     std::vector<ResourceBinding> result;
-    for (auto fn : {
-             &Inspector::GetUniformBufferResourceBindings,
-             &Inspector::GetStorageBufferResourceBindings,
-             &Inspector::GetReadOnlyStorageBufferResourceBindings,
-             &Inspector::GetSamplerResourceBindings,
-             &Inspector::GetComparisonSamplerResourceBindings,
-             &Inspector::GetSampledTextureResourceBindings,
-             &Inspector::GetMultisampledTextureResourceBindings,
-             &Inspector::GetStorageTextureResourceBindings,
-             &Inspector::GetDepthTextureResourceBindings,
-             &Inspector::GetDepthMultisampledTextureResourceBindings,
-             &Inspector::GetExternalTextureResourceBindings,
-             &Inspector::GetInputAttachmentResourceBindings,
-         }) {
-        AppendResourceBindings(&result, (this->*fn)(entry_point));
-    }
-    return result;
-}
-
-std::vector<ResourceBinding> Inspector::GetUniformBufferResourceBindings(
-    const std::string& entry_point) {
-    auto* func = FindEntryPointByName(entry_point);
-    if (!func) {
-        return {};
-    }
-
-    std::vector<ResourceBinding> result;
-
     auto* func_sem = program_.Sem().Get(func);
-    for (auto& ruv : func_sem->TransitivelyReferencedUniformVariables()) {
-        auto* var = ruv.first;
-        auto binding_info = ruv.second;
+    for (auto& global : func_sem->TransitivelyReferencedGlobals()) {
+        switch (global->AddressSpace()) {
+            // Resources cannot be in these address spaces.
+            case core::AddressSpace::kPrivate:
+            case core::AddressSpace::kFunction:
+            case core::AddressSpace::kWorkgroup:
+            case core::AddressSpace::kPushConstant:
+            case core::AddressSpace::kPixelLocal:
+            case core::AddressSpace::kIn:
+            case core::AddressSpace::kOut:
+            case core::AddressSpace::kUndefined:
+                continue;
 
-        auto* unwrapped_type = var->Type()->UnwrapRef();
-
-        ResourceBinding entry;
-        entry.resource_type = ResourceBinding::ResourceType::kUniformBuffer;
-        entry.bind_group = binding_info.group;
-        entry.binding = binding_info.binding;
-        entry.size = unwrapped_type->Size();
-        entry.size_no_padding = entry.size;
-        if (auto* str = unwrapped_type->As<sem::Struct>()) {
-            entry.size_no_padding = str->SizeNoPadding();
-        } else {
-            entry.size_no_padding = entry.size;
+            case core::AddressSpace::kUniform:
+            case core::AddressSpace::kStorage:
+                result.push_back(ConvertBufferToResourceBinding(global));
+                break;
+            case core::AddressSpace::kHandle:
+                result.push_back(ConvertHandleToResourceBinding(global));
+                break;
         }
-        entry.variable_name = var->Declaration()->name->symbol.Name();
-
-        result.push_back(entry);
-    }
-
-    return result;
-}
-
-std::vector<ResourceBinding> Inspector::GetStorageBufferResourceBindings(
-    const std::string& entry_point) {
-    return GetStorageBufferResourceBindingsImpl(entry_point, false);
-}
-
-std::vector<ResourceBinding> Inspector::GetReadOnlyStorageBufferResourceBindings(
-    const std::string& entry_point) {
-    return GetStorageBufferResourceBindingsImpl(entry_point, true);
-}
-
-std::vector<ResourceBinding> Inspector::GetSamplerResourceBindings(const std::string& entry_point) {
-    auto* func = FindEntryPointByName(entry_point);
-    if (!func) {
-        return {};
-    }
-
-    std::vector<ResourceBinding> result;
-
-    auto* func_sem = program_.Sem().Get(func);
-    for (auto& rs : func_sem->TransitivelyReferencedSamplerVariables()) {
-        auto binding_info = rs.second;
-
-        ResourceBinding entry;
-        entry.resource_type = ResourceBinding::ResourceType::kSampler;
-        entry.bind_group = binding_info.group;
-        entry.binding = binding_info.binding;
-        entry.variable_name = rs.first->Declaration()->name->symbol.Name();
-
-        result.push_back(entry);
-    }
-
-    return result;
-}
-
-std::vector<ResourceBinding> Inspector::GetComparisonSamplerResourceBindings(
-    const std::string& entry_point) {
-    auto* func = FindEntryPointByName(entry_point);
-    if (!func) {
-        return {};
-    }
-
-    std::vector<ResourceBinding> result;
-
-    auto* func_sem = program_.Sem().Get(func);
-    for (auto& rcs : func_sem->TransitivelyReferencedComparisonSamplerVariables()) {
-        auto binding_info = rcs.second;
-
-        ResourceBinding entry;
-        entry.resource_type = ResourceBinding::ResourceType::kComparisonSampler;
-        entry.bind_group = binding_info.group;
-        entry.binding = binding_info.binding;
-        entry.variable_name = rcs.first->Declaration()->name->symbol.Name();
-
-        result.push_back(entry);
-    }
-
-    return result;
-}
-
-std::vector<ResourceBinding> Inspector::GetSampledTextureResourceBindings(
-    const std::string& entry_point) {
-    return GetSampledTextureResourceBindingsImpl(entry_point, false);
-}
-
-std::vector<ResourceBinding> Inspector::GetMultisampledTextureResourceBindings(
-    const std::string& entry_point) {
-    return GetSampledTextureResourceBindingsImpl(entry_point, true);
-}
-
-std::vector<ResourceBinding> Inspector::GetStorageTextureResourceBindings(
-    const std::string& entry_point) {
-    return GetStorageTextureResourceBindingsImpl(entry_point);
-}
-
-std::vector<ResourceBinding> Inspector::GetTextureResourceBindings(
-    const std::string& entry_point,
-    const tint::TypeInfo* texture_type,
-    ResourceBinding::ResourceType resource_type) {
-    auto* func = FindEntryPointByName(entry_point);
-    if (!func) {
-        return {};
-    }
-
-    std::vector<ResourceBinding> result;
-    auto* func_sem = program_.Sem().Get(func);
-    for (auto& ref : func_sem->TransitivelyReferencedVariablesOfType(texture_type)) {
-        auto* var = ref.first;
-        auto binding_info = ref.second;
-
-        ResourceBinding entry;
-        entry.resource_type = resource_type;
-        entry.bind_group = binding_info.group;
-        entry.binding = binding_info.binding;
-        entry.variable_name = var->Declaration()->name->symbol.Name();
-
-        auto* tex = var->Type()->UnwrapRef()->As<core::type::Texture>();
-        entry.dim = TypeTextureDimensionToResourceBindingTextureDimension(tex->Dim());
-
-        result.push_back(entry);
-    }
-
-    return result;
-}
-
-std::vector<ResourceBinding> Inspector::GetDepthTextureResourceBindings(
-    const std::string& entry_point) {
-    return GetTextureResourceBindings(entry_point, &tint::TypeInfo::Of<core::type::DepthTexture>(),
-                                      ResourceBinding::ResourceType::kDepthTexture);
-}
-
-std::vector<ResourceBinding> Inspector::GetDepthMultisampledTextureResourceBindings(
-    const std::string& entry_point) {
-    return GetTextureResourceBindings(entry_point,
-                                      &tint::TypeInfo::Of<core::type::DepthMultisampledTexture>(),
-                                      ResourceBinding::ResourceType::kDepthMultisampledTexture);
-}
-
-std::vector<ResourceBinding> Inspector::GetExternalTextureResourceBindings(
-    const std::string& entry_point) {
-    return GetTextureResourceBindings(entry_point,
-                                      &tint::TypeInfo::Of<core::type::ExternalTexture>(),
-                                      ResourceBinding::ResourceType::kExternalTexture);
-}
-
-std::vector<ResourceBinding> Inspector::GetInputAttachmentResourceBindings(
-    const std::string& entry_point) {
-    auto* func = FindEntryPointByName(entry_point);
-    if (!func) {
-        return {};
-    }
-
-    std::vector<ResourceBinding> result;
-    auto* func_sem = program_.Sem().Get(func);
-    for (auto& ref : func_sem->TransitivelyReferencedVariablesOfType(
-             &tint::TypeInfo::Of<core::type::InputAttachment>())) {
-        auto* var = ref.first;
-        auto binding_info = ref.second;
-
-        ResourceBinding entry;
-        entry.resource_type = ResourceBinding::ResourceType::kInputAttachment;
-        entry.bind_group = binding_info.group;
-        entry.binding = binding_info.binding;
-
-        auto* sem_var = var->As<sem::GlobalVariable>();
-        TINT_ASSERT(sem_var);
-        TINT_ASSERT(sem_var->Attributes().input_attachment_index);
-        entry.input_attachmnt_index = sem_var->Attributes().input_attachment_index.value();
-
-        auto* input_attachment_type = var->Type()->UnwrapRef()->As<core::type::InputAttachment>();
-        auto* base_type = input_attachment_type->Type();
-        entry.sampled_kind = BaseTypeToSampledKind(base_type);
-
-        entry.variable_name = var->Declaration()->name->symbol.Name();
-
-        entry.dim =
-            TypeTextureDimensionToResourceBindingTextureDimension(input_attachment_type->Dim());
-
-        result.push_back(entry);
     }
 
     return result;
@@ -862,134 +764,6 @@ std::optional<uint32_t> Inspector::GetClipDistancesBuiltinSize(const core::type:
     }
 
     return std::nullopt;
-}
-
-std::vector<ResourceBinding> Inspector::GetStorageBufferResourceBindingsImpl(
-    const std::string& entry_point,
-    bool read_only) {
-    auto* func = FindEntryPointByName(entry_point);
-    if (!func) {
-        return {};
-    }
-
-    auto* func_sem = program_.Sem().Get(func);
-    std::vector<ResourceBinding> result;
-    for (auto& rsv : func_sem->TransitivelyReferencedStorageBufferVariables()) {
-        auto* var = rsv.first;
-        auto binding_info = rsv.second;
-
-        if (read_only != (var->Access() == core::Access::kRead)) {
-            continue;
-        }
-
-        auto* unwrapped_type = var->Type()->UnwrapRef();
-
-        ResourceBinding entry;
-        entry.resource_type = read_only ? ResourceBinding::ResourceType::kReadOnlyStorageBuffer
-                                        : ResourceBinding::ResourceType::kStorageBuffer;
-        entry.bind_group = binding_info.group;
-        entry.binding = binding_info.binding;
-        entry.size = unwrapped_type->Size();
-        if (auto* str = unwrapped_type->As<sem::Struct>()) {
-            entry.size_no_padding = str->SizeNoPadding();
-        } else {
-            entry.size_no_padding = entry.size;
-        }
-        entry.variable_name = var->Declaration()->name->symbol.Name();
-
-        result.push_back(entry);
-    }
-
-    return result;
-}
-
-std::vector<ResourceBinding> Inspector::GetSampledTextureResourceBindingsImpl(
-    const std::string& entry_point,
-    bool multisampled_only) {
-    auto* func = FindEntryPointByName(entry_point);
-    if (!func) {
-        return {};
-    }
-
-    std::vector<ResourceBinding> result;
-    auto* func_sem = program_.Sem().Get(func);
-    auto referenced_variables = multisampled_only
-                                    ? func_sem->TransitivelyReferencedMultisampledTextureVariables()
-                                    : func_sem->TransitivelyReferencedSampledTextureVariables();
-    for (auto& ref : referenced_variables) {
-        auto* var = ref.first;
-        auto binding_info = ref.second;
-
-        ResourceBinding entry;
-        entry.resource_type = multisampled_only
-                                  ? ResourceBinding::ResourceType::kMultisampledTexture
-                                  : ResourceBinding::ResourceType::kSampledTexture;
-        entry.bind_group = binding_info.group;
-        entry.binding = binding_info.binding;
-        entry.variable_name = var->Declaration()->name->symbol.Name();
-
-        auto* texture_type = var->Type()->UnwrapRef()->As<core::type::Texture>();
-        entry.dim = TypeTextureDimensionToResourceBindingTextureDimension(texture_type->Dim());
-
-        const core::type::Type* base_type = nullptr;
-        if (multisampled_only) {
-            base_type = texture_type->As<core::type::MultisampledTexture>()->Type();
-        } else {
-            base_type = texture_type->As<core::type::SampledTexture>()->Type();
-        }
-        entry.sampled_kind = BaseTypeToSampledKind(base_type);
-
-        result.push_back(entry);
-    }
-
-    return result;
-}
-
-std::vector<ResourceBinding> Inspector::GetStorageTextureResourceBindingsImpl(
-    const std::string& entry_point) {
-    auto* func = FindEntryPointByName(entry_point);
-    if (!func) {
-        return {};
-    }
-
-    auto* func_sem = program_.Sem().Get(func);
-    std::vector<ResourceBinding> result;
-    for (auto& ref :
-         func_sem->TransitivelyReferencedVariablesOfType<core::type::StorageTexture>()) {
-        auto* var = ref.first;
-        auto binding_info = ref.second;
-
-        auto* texture_type = var->Type()->UnwrapRef()->As<core::type::StorageTexture>();
-
-        ResourceBinding entry;
-        switch (texture_type->Access()) {
-            case core::Access::kWrite:
-                entry.resource_type = ResourceBinding::ResourceType::kWriteOnlyStorageTexture;
-                break;
-            case core::Access::kReadWrite:
-                entry.resource_type = ResourceBinding::ResourceType::kReadWriteStorageTexture;
-                break;
-            case core::Access::kRead:
-                entry.resource_type = ResourceBinding::ResourceType::kReadOnlyStorageTexture;
-                break;
-            case core::Access::kUndefined:
-                TINT_UNREACHABLE() << "unhandled storage texture access";
-        }
-        entry.bind_group = binding_info.group;
-        entry.binding = binding_info.binding;
-        entry.variable_name = var->Declaration()->name->symbol.Name();
-
-        entry.dim = TypeTextureDimensionToResourceBindingTextureDimension(texture_type->Dim());
-
-        auto* base_type = texture_type->Type();
-        entry.sampled_kind = BaseTypeToSampledKind(base_type);
-        entry.image_format =
-            TypeTexelFormatToResourceBindingTexelFormat(texture_type->TexelFormat());
-
-        result.push_back(entry);
-    }
-
-    return result;
 }
 
 std::tuple<InterpolationType, InterpolationSampling> Inspector::CalculateInterpolationData(
@@ -1279,6 +1053,18 @@ std::vector<Inspector::TextureUsageInfo> Inspector::GetTextureUsagesForEntryPoin
     }
 
     return res;
+}
+
+bool Inspector::UsesSubgroupMatrix(const sem::Function* func) const {
+    if (func->DirectlyUsedSubgroupMatrix()) {
+        return true;
+    }
+    for (auto& call : func->TransitivelyCalledFunctions()) {
+        if (call->DirectlyUsedSubgroupMatrix()) {
+            return true;
+        }
+    }
+    return false;
 }
 
 }  // namespace tint::inspector

@@ -31,13 +31,11 @@
 #include <functional>
 #include <iostream>
 #include <string>
-#include <string_view>
 #include <thread>
 
 #include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/ice/ice.h"
 #include "src/tint/utils/macros/defer.h"
-#include "src/tint/utils/macros/static_init.h"
 
 #if TINT_BUILD_WGSL_READER
 #include "src/tint/cmd/fuzz/wgsl/fuzz.h"

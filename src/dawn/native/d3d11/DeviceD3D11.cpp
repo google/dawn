@@ -68,10 +68,11 @@ namespace {
 static constexpr uint64_t kMaxDebugMessagesToPrint = 5;
 
 bool SkipDebugMessage(const D3D11_MESSAGE& message) {
-    // Filter out messages that are not warnings or errors.
+    // Filter out messages that are not errors.
     switch (message.Severity) {
         case D3D11_MESSAGE_SEVERITY_INFO:
         case D3D11_MESSAGE_SEVERITY_MESSAGE:
+        case D3D11_MESSAGE_SEVERITY_WARNING:
             return true;
         default:
             break;

@@ -27,18 +27,6 @@
                OpName %compute_main_inner "compute_main_inner"
                OpName %tint_local_index "tint_local_index"
                OpName %compute_main "compute_main"
-               OpMemberDecorate %S2 0 Offset 0
-               OpMemberDecorate %S2 1 Offset 4
-               OpMemberDecorate %S2 2 Offset 8
-               OpMemberDecorate %S1 0 Offset 0
-               OpMemberDecorate %S0 0 Offset 0
-               OpMemberDecorate %S0 1 Offset 4
-               OpMemberDecorate %S0 2 Offset 8
-               OpMemberDecorate %S0 3 Offset 12
-               OpMemberDecorate %S1 1 Offset 4
-               OpMemberDecorate %S1 2 Offset 20
-               OpMemberDecorate %S1 3 Offset 24
-               OpMemberDecorate %S2 3 Offset 12
                OpDecorate %compute_main_local_invocation_index_Input BuiltIn LocalInvocationIndex
         %int = OpTypeInt 32 1
        %uint = OpTypeInt 32 0

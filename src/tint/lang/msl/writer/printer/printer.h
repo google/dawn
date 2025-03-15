@@ -28,13 +28,9 @@
 #ifndef SRC_TINT_LANG_MSL_WRITER_PRINTER_PRINTER_H_
 #define SRC_TINT_LANG_MSL_WRITER_PRINTER_PRINTER_H_
 
-#include <string>
-#include <unordered_map>
-#include <vector>
-
 #include "src/tint/lang/msl/writer/common/options.h"
 #include "src/tint/lang/msl/writer/common/output.h"
-#include "src/tint/utils/result/result.h"
+#include "src/tint/utils/diagnostic/diagnostic.h"
 
 // Forward declarations
 namespace tint::core::ir {
@@ -45,7 +41,7 @@ namespace tint::msl::writer {
 
 /// @param module the Tint IR module to generate
 /// @returns the result of printing the MSL shader on success, or failure
-Result<Output> Print(core::ir::Module& module, const Options& options);
+diag::Result<Output> Print(core::ir::Module& module, const Options& options);
 
 }  // namespace tint::msl::writer
 

@@ -12,7 +12,6 @@
                OpName %pointer_indices "pointer_indices"
                OpName %main "main"
                OpName %F "F"
-               OpDecorate %_arr_uint_uint_1 ArrayStride 4
        %void = OpTypeVoid
       %float = OpTypeFloat 32
     %v4float = OpTypeVector %float 4

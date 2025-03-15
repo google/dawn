@@ -68,6 +68,8 @@ tint_add_target(tint_lang_core_ir lib
   lang/core/ir/const_param_validator.h
   lang/core/ir/constant.cc
   lang/core/ir/constant.h
+  lang/core/ir/constexpr_if.cc
+  lang/core/ir/constexpr_if.h
   lang/core/ir/construct.cc
   lang/core/ir/construct.h
   lang/core/ir/continue.cc
@@ -177,7 +179,6 @@ tint_target_add_dependencies(tint_lang_core_ir lib
   tint_utils_macros
   tint_utils_math
   tint_utils_memory
-  tint_utils_result
   tint_utils_rtti
   tint_utils_symbol
   tint_utils_text
@@ -266,7 +267,6 @@ tint_target_add_dependencies(tint_lang_core_ir_test test
   tint_utils_macros
   tint_utils_math
   tint_utils_memory
-  tint_utils_result
   tint_utils_rtti
   tint_utils_symbol
   tint_utils_text
@@ -306,7 +306,6 @@ tint_target_add_dependencies(tint_lang_core_ir_bench bench
   tint_utils_macros
   tint_utils_math
   tint_utils_memory
-  tint_utils_result
   tint_utils_rtti
   tint_utils_symbol
   tint_utils_text

@@ -687,7 +687,7 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType> VertexPulling(core::ir::Module& ir, const VertexPullingConfig& config) {
+diag::Result<SuccessType> VertexPulling(core::ir::Module& ir, const VertexPullingConfig& config) {
     auto result = ValidateAndDumpIfNeeded(ir, "core.VertexPulling");
     if (result != Success) {
         return result.Failure();

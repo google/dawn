@@ -28,7 +28,7 @@
 #ifndef SRC_TINT_LANG_CORE_IR_TRANSFORM_SINGLE_ENTRY_POINT_H_
 #define SRC_TINT_LANG_CORE_IR_TRANSFORM_SINGLE_ENTRY_POINT_H_
 
-#include "src/tint/utils/result/result.h"
+#include "src/tint/utils/diagnostic/diagnostic.h"
 
 // Forward declarations.
 namespace tint::core::ir {
@@ -42,7 +42,7 @@ namespace tint::core::ir::transform {
 /// @param module the module to transform
 /// @param entry_point_name the entry point name
 /// @returns success or failure
-Result<SuccessType> SingleEntryPoint(Module& module, std::string_view entry_point_name);
+diag::Result<SuccessType> SingleEntryPoint(Module& module, std::string_view entry_point_name);
 
 }  // namespace tint::core::ir::transform
 

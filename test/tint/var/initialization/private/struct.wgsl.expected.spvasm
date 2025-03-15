@@ -12,8 +12,6 @@
                OpName %S "S"
                OpName %v "v"
                OpName %main "main"
-               OpMemberDecorate %S 0 Offset 0
-               OpMemberDecorate %S 1 Offset 4
         %int = OpTypeInt 32 1
       %float = OpTypeFloat 32
           %S = OpTypeStruct %int %float

@@ -17,9 +17,6 @@
                OpMemberName %out_block 0 "inner"
                OpName %out_block "out_block"
                OpName %main "main"
-               OpMemberDecorate %S1 0 Offset 0
-               OpMemberDecorate %S2 0 Offset 0
-               OpMemberDecorate %S3 0 Offset 0
                OpMemberDecorate %out_block 0 Offset 0
                OpDecorate %out_block Block
                OpDecorate %11 DescriptorSet 0

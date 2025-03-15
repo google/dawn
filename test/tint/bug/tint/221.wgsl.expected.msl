@@ -30,9 +30,9 @@ kernel void v(device Buf* b [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.b=b};
   uint i = 0u;
   {
-    uint2 tint_loop_idx = 0u;
+    uint2 tint_loop_idx = uint2(4294967295u);
     while(true) {
-      if (all((tint_loop_idx == uint2(4294967295u)))) {
+      if (all((tint_loop_idx == uint2(0u)))) {
         break;
       }
       if ((i >= (*tint_module_vars.b).count)) {
@@ -41,10 +41,10 @@ kernel void v(device Buf* b [[buffer(0)]]) {
       device uint* const p = (&(*tint_module_vars.b).data[min(i, 49u)]);
       if ((tint_mod_u32(i, 2u) == 0u)) {
         {
-          uint const tint_low_inc = (tint_loop_idx.x + 1u);
+          uint const tint_low_inc = (tint_loop_idx.x - 1u);
           tint_loop_idx.x = tint_low_inc;
-          uint const tint_carry = uint((tint_low_inc == 0u));
-          tint_loop_idx.y = (tint_loop_idx.y + tint_carry);
+          uint const tint_carry = uint((tint_low_inc == 4294967295u));
+          tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
           (*p) = ((*p) * 2u);
           i = (i + 1u);
         }
@@ -52,10 +52,10 @@ kernel void v(device Buf* b [[buffer(0)]]) {
       }
       (*p) = 0u;
       {
-        uint const tint_low_inc = (tint_loop_idx.x + 1u);
+        uint const tint_low_inc = (tint_loop_idx.x - 1u);
         tint_loop_idx.x = tint_low_inc;
-        uint const tint_carry = uint((tint_low_inc == 0u));
-        tint_loop_idx.y = (tint_loop_idx.y + tint_carry);
+        uint const tint_carry = uint((tint_low_inc == 4294967295u));
+        tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
         (*p) = ((*p) * 2u);
         i = (i + 1u);
       }

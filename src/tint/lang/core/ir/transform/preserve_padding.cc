@@ -27,8 +27,6 @@
 
 #include "src/tint/lang/core/ir/transform/preserve_padding.h"
 
-#include <utility>
-
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/validator.h"
@@ -172,7 +170,7 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType> PreservePadding(Module& ir) {
+diag::Result<SuccessType> PreservePadding(Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "core.PreservePadding", kPreservePaddingCapabilities);
     if (result != Success) {
         return result;

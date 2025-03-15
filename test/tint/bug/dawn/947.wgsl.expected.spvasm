@@ -39,9 +39,6 @@
                OpDecorate %vs_main_loc0_Output Location 0
                OpDecorate %vs_main_position_Output BuiltIn Position
                OpDecorate %vs_main___point_size_Output BuiltIn PointSize
-               OpMemberDecorate %VertexOutputs 0 Offset 0
-               OpMemberDecorate %VertexOutputs 1 Offset 16
-               OpDecorate %_arr_v2float_uint_3 ArrayStride 8
       %float = OpTypeFloat 32
     %v2float = OpTypeVector %float 2
    %Uniforms = OpTypeStruct %v2float %v2float

@@ -12,21 +12,21 @@
                OpMemoryModel Logical Vulkan
                OpEntryPoint GLCompute %compute_main "compute_main"
                OpExecutionMode %compute_main LocalSize 1 1 1
-               OpMemberName %SB_RW 0 "arg_0"
-               OpName %SB_RW "SB_RW"
+               OpMemberName %SB_RW_tint_explicit_layout 0 "arg_0"
+               OpName %SB_RW_tint_explicit_layout "SB_RW_tint_explicit_layout"
                OpName %sb_rw "sb_rw"
                OpName %subgroupMatrixStore_bb2478 "subgroupMatrixStore_bb2478"
                OpName %compute_main "compute_main"
                OpDecorate %_runtimearr_float ArrayStride 4
-               OpMemberDecorate %SB_RW 0 Offset 0
-               OpDecorate %SB_RW Block
+               OpMemberDecorate %SB_RW_tint_explicit_layout 0 Offset 0
+               OpDecorate %SB_RW_tint_explicit_layout Block
                OpDecorate %sb_rw DescriptorSet 0
                OpDecorate %sb_rw Binding 0
       %float = OpTypeFloat 32
 %_runtimearr_float = OpTypeRuntimeArray %float
-      %SB_RW = OpTypeStruct %_runtimearr_float
-%_ptr_StorageBuffer_SB_RW = OpTypePointer StorageBuffer %SB_RW
-      %sb_rw = OpVariable %_ptr_StorageBuffer_SB_RW StorageBuffer
+%SB_RW_tint_explicit_layout = OpTypeStruct %_runtimearr_float
+%_ptr_StorageBuffer_SB_RW_tint_explicit_layout = OpTypePointer StorageBuffer %SB_RW_tint_explicit_layout
+      %sb_rw = OpVariable %_ptr_StorageBuffer_SB_RW_tint_explicit_layout StorageBuffer
        %void = OpTypeVoid
           %8 = OpTypeFunction %void
 %_ptr_StorageBuffer__runtimearr_float = OpTypePointer StorageBuffer %_runtimearr_float

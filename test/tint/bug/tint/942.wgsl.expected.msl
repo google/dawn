@@ -134,10 +134,10 @@ void main_inner(uint3 WorkGroupID, uint3 LocalInvocationID, uint tint_local_inde
           if (v_8) {
             float3 acc = float3(0.0f);
             {
-              uint2 tint_loop_idx = 0u;
+              uint2 tint_loop_idx = uint2(4294967295u);
               uint f = 0u;
               while(true) {
-                if (all((tint_loop_idx == uint2(4294967295u)))) {
+                if (all((tint_loop_idx == uint2(0u)))) {
                   break;
                 }
                 if ((f < (*tint_module_vars.params).filterDim)) {
@@ -149,10 +149,10 @@ void main_inner(uint3 WorkGroupID, uint3 LocalInvocationID, uint tint_local_inde
                 float const v_10 = (1.0f / float((*tint_module_vars.params).filterDim));
                 acc = (v_9 + (v_10 * float3((*tint_module_vars.tile)[min(r, 3u)][min(i, 255u)].packed)));
                 {
-                  uint const tint_low_inc = (tint_loop_idx.x + 1u);
+                  uint const tint_low_inc = (tint_loop_idx.x - 1u);
                   tint_loop_idx.x = tint_low_inc;
-                  uint const tint_carry = uint((tint_low_inc == 0u));
-                  tint_loop_idx.y = (tint_loop_idx.y + tint_carry);
+                  uint const tint_carry = uint((tint_low_inc == 4294967295u));
+                  tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
                   f = (f + 1u);
                 }
                 continue;

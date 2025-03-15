@@ -26,11 +26,8 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "src/tint/lang/wgsl/resolver/resolver.h"
-#include <iostream>
 
 #include <algorithm>
-#include <cmath>
-#include <iomanip>
 #include <limits>
 #include <string_view>
 #include <utility>
@@ -43,6 +40,7 @@
 #include "src/tint/lang/core/type/abstract_int.h"
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/atomic.h"
+#include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/builtin_structs.h"
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
 #include "src/tint/lang/core/type/depth_texture.h"
@@ -575,9 +573,8 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
             sem->SetAddressSpace(core::AddressSpace::kFunction);
         } else if (storage_ty->UnwrapRef()->IsHandle()) {
             // https://gpuweb.github.io/gpuweb/wgsl/#module-scope-variables
-            // If the store type is a texture type or a sampler type, then the
-            // variable declaration must not have a address space attribute. The
-            // address space will always be handle.
+            // If the store type is a handle type, then the variable declaration must not have a
+            // address space attribute. The address space will always be handle.
             sem->SetAddressSpace(core::AddressSpace::kHandle);
         }
     }
@@ -2027,6 +2024,7 @@ sem::ValueExpression* Resolver::IndexAccessor(const ast::IndexAccessorExpression
     auto* ty = Switch(
         storage_ty,  //
         [&](const sem::Array* arr) { return arr->ElemType(); },
+        [&](const core::type::BindingArray* arr) { return arr->ElemType(); },
         [&](const core::type::Vector* vec) { return vec->Type(); },
         [&](const core::type::Matrix* mat) {
             return b.create<core::type::Vector>(mat->Type(), mat->Rows());
@@ -2737,6 +2735,8 @@ core::type::Type* Resolver::BuiltinType(core::BuiltinType builtin_ty,
             return check_no_tmpl_args(Vec(ident, U32(), 4u));
         case core::BuiltinType::kArray:
             return Array(ident);
+        case core::BuiltinType::kBindingArray:
+            return BindingArray(ident);
         case core::BuiltinType::kAtomic:
             return Atomic(ident);
         case core::BuiltinType::kPtr:
@@ -2988,6 +2988,33 @@ core::type::Type* Resolver::Array(const ast::Identifier* ident) {
             atomic_composite_info_.Add(out, *found);
         }
     }
+    if (subgroup_matrix_uses_.Contains(el_ty)) {
+        subgroup_matrix_uses_.Add(out);
+    }
+
+    return out;
+}
+
+core::type::BindingArray* Resolver::BindingArray(const ast::Identifier* ident) {
+    auto* tmpl_ident = TemplatedIdentifier(ident, 2);
+    if (DAWN_UNLIKELY(!tmpl_ident)) {
+        return nullptr;
+    }
+
+    auto* el_type = sem_.GetType(tmpl_ident->arguments[0]);
+    if (DAWN_UNLIKELY(!el_type)) {
+        return nullptr;
+    }
+
+    const core::type::ArrayCount* el_count = ArrayCount(tmpl_ident->arguments[1]);
+    if (!el_count) {
+        return nullptr;
+    }
+
+    auto* out = b.create<core::type::BindingArray>(el_type, el_count);
+    if (DAWN_UNLIKELY(!validator_.BindingArray(out, ident->source))) {
+        return nullptr;
+    }
 
     return out;
 }
@@ -3157,6 +3184,12 @@ core::type::SubgroupMatrix* Resolver::SubgroupMatrix(const ast::Identifier* iden
 
     auto* out = b.create<core::type::SubgroupMatrix>(kind, ty_expr, cols->ValueAs<uint32_t>(),
                                                      rows->ValueAs<uint32_t>());
+
+    subgroup_matrix_uses_.Add(out);
+    if (current_function_) {
+        current_function_->SetDirectlyUsedSubgroupMatrix(&ident->source);
+    }
+
     return validator_.SubgroupMatrix(out, ident->source) ? out : nullptr;
 }
 
@@ -3461,6 +3494,10 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
                         sem_.NoteDeclarationSource(variable->Declaration());
                         return nullptr;
                     }
+                    if (current_function_ &&
+                        subgroup_matrix_uses_.Contains(variable->Type()->UnwrapRef())) {
+                        current_function_->SetDirectlyUsedSubgroupMatrix(&expr->source);
+                    }
                 }
 
                 variable->AddUser(user);
@@ -3479,6 +3516,10 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
                             fn(ref);
                         }
                     }
+                }
+
+                if (current_function_ && subgroup_matrix_uses_.Contains(ty)) {
+                    current_function_->SetDirectlyUsedSubgroupMatrix(&expr->source);
                 }
 
                 return b.create<sem::TypeExpression>(expr, current_statement_, ty);
@@ -4678,12 +4719,13 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
         auto* mem_type = sem_members[i]->Type();
         if (mem_type->Is<core::type::Atomic>()) {
             atomic_composite_info_.Add(out, &sem_members[i]->Declaration()->source);
-            break;
         } else {
             if (auto found = atomic_composite_info_.Get(mem_type)) {
                 atomic_composite_info_.Add(out, *found);
-                break;
             }
+        }
+        if (subgroup_matrix_uses_.Contains(mem_type)) {
+            subgroup_matrix_uses_.Add(out);
         }
 
         const_cast<sem::StructMember*>(sem_members[i])->SetStruct(out);
@@ -5043,6 +5085,16 @@ bool Resolver::ApplyAddressSpaceUsageToType(core::AddressSpace address_space,
         }
         return ApplyAddressSpaceUsageToType(address_space,
                                             const_cast<core::type::Type*>(arr->ElemType()), usage);
+    }
+
+    // Subgroup matrix types can only be declared in the `function` and `private` address space, or
+    // in value declarations (the `undefined` address space).
+    if (ty->Is<core::type::SubgroupMatrix>() && address_space != core::AddressSpace::kUndefined &&
+        address_space != core::AddressSpace::kFunction &&
+        address_space != core::AddressSpace::kPrivate) {
+        AddError(usage) << "subgroup matrix types cannot be declared in the "
+                        << style::Enum(address_space) << " address space";
+        return false;
     }
 
     if (core::IsHostShareable(address_space) && !validator_.IsHostShareable(ty)) {

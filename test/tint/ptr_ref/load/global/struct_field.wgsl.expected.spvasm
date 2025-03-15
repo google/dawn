@@ -12,7 +12,6 @@
                OpName %V "V"
                OpName %main "main"
                OpName %i "i"
-               OpMemberDecorate %S 0 Offset 0
         %int = OpTypeInt 32 1
           %S = OpTypeStruct %int
 %_ptr_Private_S = OpTypePointer Private %S

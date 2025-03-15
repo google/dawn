@@ -44,8 +44,7 @@ using IR_GlslCombinedTextureSamplerTest = core::ir::IRTestHelper;
 TEST_F(IR_GlslCombinedTextureSamplerTest, Clone) {
     BindingPoint texture_bp{1, 2};
     BindingPoint sampler_bp{3, 4};
-    auto* type = ty.ptr<handle>(
-        ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32()));
+    auto* type = ty.ptr<handle>(ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()));
     auto* var = mod.CreateInstruction<CombinedTextureSamplerVar>(b.InstructionResult(type),
                                                                  texture_bp, sampler_bp);
 

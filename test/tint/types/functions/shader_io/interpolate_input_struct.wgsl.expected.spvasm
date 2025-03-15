@@ -51,16 +51,6 @@
                OpDecorate %main_loc8_Input Location 8
                OpDecorate %main_loc9_Input Location 9
                OpDecorate %main_loc9_Input NoPerspective
-               OpMemberDecorate %In 0 Offset 0
-               OpMemberDecorate %In 1 Offset 4
-               OpMemberDecorate %In 2 Offset 8
-               OpMemberDecorate %In 3 Offset 12
-               OpMemberDecorate %In 4 Offset 16
-               OpMemberDecorate %In 5 Offset 20
-               OpMemberDecorate %In 6 Offset 24
-               OpMemberDecorate %In 7 Offset 28
-               OpMemberDecorate %In 8 Offset 32
-               OpMemberDecorate %In 9 Offset 36
       %float = OpTypeFloat 32
 %_ptr_Input_float = OpTypePointer Input %float
 %main_loc0_Input = OpVariable %_ptr_Input_float Input

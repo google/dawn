@@ -45,6 +45,17 @@
 
 namespace dawn::native::d3d12 {
 
+// The D3D12_MESSAGE_ID_CREATERESOURCE_INVALIDALIGNMENT_SMALLRESOURCE(1380) was introduced
+// in SDK 10.0.26100.0. Redefine the message name to allows it to be compiled on both
+// SDK 10.0.22621.0 and SDK 10.0.26100.0.
+#if D3D12_SDK_VERSION >= 612
+const D3D12_MESSAGE_ID DAWN_MESSAGE_ID_CREATERESOURCE_INVALIDALIGNMENT_SMALLRESOURCE =
+    D3D12_MESSAGE_ID_CREATERESOURCE_INVALIDALIGNMENT_SMALLRESOURCE;
+#else
+const D3D12_MESSAGE_ID DAWN_MESSAGE_ID_CREATERESOURCE_INVALIDALIGNMENT_SMALLRESOURCE =
+    D3D12_MESSAGE_ID(1380);
+#endif
+
 PhysicalDevice::PhysicalDevice(Backend* backend, ComPtr<IDXGIAdapter4> hardwareAdapter)
     : Base(backend, std::move(hardwareAdapter), wgpu::BackendType::D3D12) {}
 
@@ -379,8 +390,6 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
     // 1 for SV_Position and 1 for (SV_IsFrontFace OR SV_SampleIndex).
     // See the discussions in https://github.com/gpuweb/gpuweb/issues/1962 for more details.
     limits->v1.maxInterStageShaderVariables = D3D12_PS_INPUT_REGISTER_COUNT - 2;
-    limits->v1.maxInterStageShaderComponents =
-        limits->v1.maxInterStageShaderVariables * D3D12_PS_INPUT_REGISTER_COMPONENTS;
 
     // Using base limits for:
     // TODO(crbug.com/dawn/685):
@@ -491,10 +500,8 @@ MaybeError PhysicalDevice::InitializeDebugLayerFilters() {
         // get rejected and generate a debug error. Then, we request 0 to get the allowed
         // allowed alignment.
         D3D12_MESSAGE_ID_CREATERESOURCE_INVALIDALIGNMENT,
-#if D3D12_SDK_VERSION >= 612
-        // This message id for small resource alignment was introduced in SDK 10.0.26100.0.
-        D3D12_MESSAGE_ID_CREATERESOURCE_INVALIDALIGNMENT_SMALLRESOURCE,
-#endif
+        // This message id is added for invalid small resource alignment.
+        DAWN_MESSAGE_ID_CREATERESOURCE_INVALIDALIGNMENT_SMALLRESOURCE,
 
         // WebGPU allows OOB vertex buffer access and relies on D3D12's robust buffer access
         // behavior.

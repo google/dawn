@@ -1,10 +1,10 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 33
+; Bound: 41
 ; Schema: 0
                OpCapability Shader
-         %29 = OpExtInstImport "GLSL.std.450"
+         %30 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
@@ -12,23 +12,27 @@
                OpName %Uniforms "Uniforms"
                OpMemberName %uniforms_block 0 "inner"
                OpName %uniforms_block "uniforms_block"
-               OpMemberName %InnerS 0 "v"
-               OpName %InnerS "InnerS"
-               OpMemberName %OuterS 0 "a1"
-               OpName %OuterS "OuterS"
+               OpMemberName %InnerS_tint_explicit_layout 0 "v"
+               OpName %InnerS_tint_explicit_layout "InnerS_tint_explicit_layout"
+               OpMemberName %OuterS_tint_explicit_layout 0 "a1"
+               OpName %OuterS_tint_explicit_layout "OuterS_tint_explicit_layout"
                OpName %s1 "s1"
                OpName %main "main"
+               OpMemberName %InnerS 0 "v"
+               OpName %InnerS "InnerS"
                OpName %v "v"
+               OpName %tint_convert_explicit_layout "tint_convert_explicit_layout"
+               OpName %tint_source "tint_source"
                OpMemberDecorate %Uniforms 0 Offset 0
                OpMemberDecorate %uniforms_block 0 Offset 0
                OpDecorate %uniforms_block Block
                OpDecorate %1 DescriptorSet 1
                OpDecorate %1 Binding 4
                OpDecorate %1 NonWritable
-               OpMemberDecorate %InnerS 0 Offset 0
-               OpDecorate %_runtimearr_InnerS ArrayStride 4
-               OpMemberDecorate %OuterS 0 Offset 0
-               OpDecorate %OuterS Block
+               OpMemberDecorate %InnerS_tint_explicit_layout 0 Offset 0
+               OpDecorate %_runtimearr_InnerS_tint_explicit_layout ArrayStride 4
+               OpMemberDecorate %OuterS_tint_explicit_layout 0 Offset 0
+               OpDecorate %OuterS_tint_explicit_layout Block
                OpDecorate %s1 DescriptorSet 0
                OpDecorate %s1 Binding 0
                OpDecorate %s1 Coherent
@@ -38,31 +42,41 @@
 %_ptr_Uniform_uniforms_block = OpTypePointer Uniform %uniforms_block
           %1 = OpVariable %_ptr_Uniform_uniforms_block Uniform
         %int = OpTypeInt 32 1
-     %InnerS = OpTypeStruct %int
-%_runtimearr_InnerS = OpTypeRuntimeArray %InnerS
-     %OuterS = OpTypeStruct %_runtimearr_InnerS
-%_ptr_StorageBuffer_OuterS = OpTypePointer StorageBuffer %OuterS
-         %s1 = OpVariable %_ptr_StorageBuffer_OuterS StorageBuffer
+%InnerS_tint_explicit_layout = OpTypeStruct %int
+%_runtimearr_InnerS_tint_explicit_layout = OpTypeRuntimeArray %InnerS_tint_explicit_layout
+%OuterS_tint_explicit_layout = OpTypeStruct %_runtimearr_InnerS_tint_explicit_layout
+%_ptr_StorageBuffer_OuterS_tint_explicit_layout = OpTypePointer StorageBuffer %OuterS_tint_explicit_layout
+         %s1 = OpVariable %_ptr_StorageBuffer_OuterS_tint_explicit_layout StorageBuffer
        %void = OpTypeVoid
          %14 = OpTypeFunction %void
+     %InnerS = OpTypeStruct %int
 %_ptr_Function_InnerS = OpTypePointer Function %InnerS
-         %18 = OpConstantNull %InnerS
+         %19 = OpConstantNull %InnerS
 %_ptr_Uniform_uint = OpTypePointer Uniform %uint
      %uint_0 = OpConstant %uint 0
-%_ptr_StorageBuffer__runtimearr_InnerS = OpTypePointer StorageBuffer %_runtimearr_InnerS
+%_ptr_StorageBuffer__runtimearr_InnerS_tint_explicit_layout = OpTypePointer StorageBuffer %_runtimearr_InnerS_tint_explicit_layout
      %uint_1 = OpConstant %uint 1
-%_ptr_StorageBuffer_InnerS = OpTypePointer StorageBuffer %InnerS
+%_ptr_StorageBuffer_InnerS_tint_explicit_layout = OpTypePointer StorageBuffer %InnerS_tint_explicit_layout
+         %37 = OpTypeFunction %InnerS_tint_explicit_layout %InnerS
        %main = OpFunction %void None %14
          %15 = OpLabel
-          %v = OpVariable %_ptr_Function_InnerS Function %18
-         %19 = OpAccessChain %_ptr_Uniform_uint %1 %uint_0 %uint_0
-         %22 = OpLoad %uint %19 None
-         %23 = OpAccessChain %_ptr_StorageBuffer__runtimearr_InnerS %s1 %uint_0
-         %25 = OpArrayLength %uint %s1 0
-         %26 = OpISub %uint %25 %uint_1
-         %28 = OpExtInst %uint %29 UMin %22 %26
-         %30 = OpAccessChain %_ptr_StorageBuffer_InnerS %s1 %uint_0 %28
-         %32 = OpLoad %InnerS %v None
-               OpStore %30 %32 None
+          %v = OpVariable %_ptr_Function_InnerS Function %19
+         %20 = OpAccessChain %_ptr_Uniform_uint %1 %uint_0 %uint_0
+         %23 = OpLoad %uint %20 None
+         %24 = OpAccessChain %_ptr_StorageBuffer__runtimearr_InnerS_tint_explicit_layout %s1 %uint_0
+         %26 = OpArrayLength %uint %s1 0
+         %27 = OpISub %uint %26 %uint_1
+         %29 = OpExtInst %uint %30 UMin %23 %27
+         %31 = OpAccessChain %_ptr_StorageBuffer_InnerS_tint_explicit_layout %s1 %uint_0 %29
+         %33 = OpLoad %InnerS %v None
+         %34 = OpFunctionCall %InnerS_tint_explicit_layout %tint_convert_explicit_layout %33
+               OpStore %31 %34 None
                OpReturn
+               OpFunctionEnd
+%tint_convert_explicit_layout = OpFunction %InnerS_tint_explicit_layout None %37
+%tint_source = OpFunctionParameter %InnerS
+         %38 = OpLabel
+         %39 = OpCompositeExtract %int %tint_source 0
+         %40 = OpCompositeConstruct %InnerS_tint_explicit_layout %39
+               OpReturnValue %40
                OpFunctionEnd

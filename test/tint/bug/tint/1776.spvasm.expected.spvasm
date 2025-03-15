@@ -11,8 +11,8 @@
                OpMemberName %S 0 "a"
                OpMemberName %S 1 "b"
                OpName %S "S"
-               OpMemberName %sb_block 0 "inner"
-               OpName %sb_block "sb_block"
+               OpMemberName %sb_block_tint_explicit_layout 0 "inner"
+               OpName %sb_block_tint_explicit_layout "sb_block_tint_explicit_layout"
                OpName %sb "sb"
                OpName %main_1 "main_1"
                OpName %x_18 "x_18"
@@ -20,8 +20,8 @@
                OpMemberDecorate %S 0 Offset 0
                OpMemberDecorate %S 1 Offset 16
                OpDecorate %_runtimearr_S ArrayStride 32
-               OpMemberDecorate %sb_block 0 Offset 0
-               OpDecorate %sb_block Block
+               OpMemberDecorate %sb_block_tint_explicit_layout 0 Offset 0
+               OpDecorate %sb_block_tint_explicit_layout Block
                OpDecorate %sb DescriptorSet 0
                OpDecorate %sb Binding 0
                OpDecorate %sb NonWritable
@@ -30,9 +30,9 @@
         %int = OpTypeInt 32 1
           %S = OpTypeStruct %v4float %int
 %_runtimearr_S = OpTypeRuntimeArray %S
-   %sb_block = OpTypeStruct %_runtimearr_S
-%_ptr_StorageBuffer_sb_block = OpTypePointer StorageBuffer %sb_block
-         %sb = OpVariable %_ptr_StorageBuffer_sb_block StorageBuffer
+%sb_block_tint_explicit_layout = OpTypeStruct %_runtimearr_S
+%_ptr_StorageBuffer_sb_block_tint_explicit_layout = OpTypePointer StorageBuffer %sb_block_tint_explicit_layout
+         %sb = OpVariable %_ptr_StorageBuffer_sb_block_tint_explicit_layout StorageBuffer
        %void = OpTypeVoid
          %11 = OpTypeFunction %void
 %_ptr_StorageBuffer__runtimearr_S = OpTypePointer StorageBuffer %_runtimearr_S

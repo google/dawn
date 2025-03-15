@@ -10,7 +10,6 @@
                OpName %f "f"
                OpName %a "a"
                OpName %unused_entry_point "unused_entry_point"
-               OpDecorate %_arr_int_uint_8 ArrayStride 4
         %int = OpTypeInt 32 1
           %3 = OpTypeFunction %int
        %uint = OpTypeInt 32 0

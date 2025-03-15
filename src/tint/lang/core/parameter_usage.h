@@ -54,6 +54,7 @@ enum class ParameterUsage : uint8_t {
     kCompareValue,
     kComponent,
     kCoords,
+    kCount,
     kDdx,
     kDdy,
     kDelta,

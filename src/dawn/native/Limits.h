@@ -50,10 +50,11 @@ void GetDefaultLimits(Limits* limits, wgpu::FeatureLevel featureLevel);
 // are worse.
 Limits ReifyDefaultLimits(const Limits& limits, wgpu::FeatureLevel featureLevel);
 
+// Fixup limits after device creation
+void EnforceLimitSpecInvariants(Limits* limits, wgpu::FeatureLevel featureLevel);
+
 // Validate that |requiredLimits| are no better than |supportedLimits|.
-MaybeError ValidateLimits(wgpu::FeatureLevel featureLevel,
-                          const Limits& supportedLimits,
-                          const Limits& requiredLimits);
+MaybeError ValidateLimits(const Limits& supportedLimits, const Limits& requiredLimits);
 
 // Returns a copy of |limits| where limit tiers are applied.
 Limits ApplyLimitTiers(Limits limits);

@@ -12,29 +12,29 @@
                OpMemoryModel Logical Vulkan
                OpEntryPoint GLCompute %compute_main "compute_main"
                OpExecutionMode %compute_main LocalSize 1 1 1
-               OpMemberName %SB_RW 0 "arg_0"
-               OpName %SB_RW "SB_RW"
-               OpMemberName %sb_rw_block 0 "inner"
-               OpName %sb_rw_block "sb_rw_block"
+               OpMemberName %SB_RW_tint_explicit_layout 0 "arg_0"
+               OpName %SB_RW_tint_explicit_layout "SB_RW_tint_explicit_layout"
+               OpMemberName %sb_rw_block_tint_explicit_layout 0 "inner"
+               OpName %sb_rw_block_tint_explicit_layout "sb_rw_block_tint_explicit_layout"
                OpName %subgroupMatrixStore_8a2280 "subgroupMatrixStore_8a2280"
                OpName %arg_1 "arg_1"
                OpName %arg_2 "arg_2"
                OpName %arg_4 "arg_4"
                OpName %compute_main "compute_main"
                OpDecorate %_arr_float_uint_64 ArrayStride 4
-               OpMemberDecorate %SB_RW 0 Offset 0
-               OpMemberDecorate %sb_rw_block 0 Offset 0
-               OpDecorate %sb_rw_block Block
+               OpMemberDecorate %SB_RW_tint_explicit_layout 0 Offset 0
+               OpMemberDecorate %sb_rw_block_tint_explicit_layout 0 Offset 0
+               OpDecorate %sb_rw_block_tint_explicit_layout Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
       %float = OpTypeFloat 32
        %uint = OpTypeInt 32 0
     %uint_64 = OpConstant %uint 64
 %_arr_float_uint_64 = OpTypeArray %float %uint_64
-      %SB_RW = OpTypeStruct %_arr_float_uint_64
-%sb_rw_block = OpTypeStruct %SB_RW
-%_ptr_StorageBuffer_sb_rw_block = OpTypePointer StorageBuffer %sb_rw_block
-          %1 = OpVariable %_ptr_StorageBuffer_sb_rw_block StorageBuffer
+%SB_RW_tint_explicit_layout = OpTypeStruct %_arr_float_uint_64
+%sb_rw_block_tint_explicit_layout = OpTypeStruct %SB_RW_tint_explicit_layout
+%_ptr_StorageBuffer_sb_rw_block_tint_explicit_layout = OpTypePointer StorageBuffer %sb_rw_block_tint_explicit_layout
+          %1 = OpVariable %_ptr_StorageBuffer_sb_rw_block_tint_explicit_layout StorageBuffer
        %void = OpTypeVoid
          %11 = OpTypeFunction %void
 %_ptr_Function_uint = OpTypePointer Function %uint

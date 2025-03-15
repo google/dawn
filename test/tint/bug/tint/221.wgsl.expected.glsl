@@ -17,9 +17,9 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   uint i = 0u;
   {
-    uvec2 tint_loop_idx = uvec2(0u);
+    uvec2 tint_loop_idx = uvec2(4294967295u);
     while(true) {
-      if (all(equal(tint_loop_idx, uvec2(4294967295u)))) {
+      if (all(equal(tint_loop_idx, uvec2(0u)))) {
         break;
       }
       if ((i >= v.inner.count)) {
@@ -28,10 +28,10 @@ void main() {
       uint v_1 = min(i, 49u);
       if ((tint_mod_u32(i, 2u) == 0u)) {
         {
-          uint tint_low_inc = (tint_loop_idx.x + 1u);
+          uint tint_low_inc = (tint_loop_idx.x - 1u);
           tint_loop_idx.x = tint_low_inc;
-          uint tint_carry = uint((tint_low_inc == 0u));
-          tint_loop_idx.y = (tint_loop_idx.y + tint_carry);
+          uint tint_carry = uint((tint_low_inc == 4294967295u));
+          tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
           v.inner.data[v_1] = (v.inner.data[v_1] * 2u);
           i = (i + 1u);
         }
@@ -39,10 +39,10 @@ void main() {
       }
       v.inner.data[v_1] = 0u;
       {
-        uint tint_low_inc = (tint_loop_idx.x + 1u);
+        uint tint_low_inc = (tint_loop_idx.x - 1u);
         tint_loop_idx.x = tint_low_inc;
-        uint tint_carry = uint((tint_low_inc == 0u));
-        tint_loop_idx.y = (tint_loop_idx.y + tint_carry);
+        uint tint_carry = uint((tint_low_inc == 4294967295u));
+        tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
         v.inner.data[v_1] = (v.inner.data[v_1] * 2u);
         i = (i + 1u);
       }

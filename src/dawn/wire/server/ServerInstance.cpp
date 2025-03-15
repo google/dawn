@@ -121,12 +121,21 @@ void Server::OnRequestAdapterCallback(RequestAdapterUserdata* data,
         propertiesChain = &(*propertiesChain)->next;
     }
 
+    // Query AdapterPropertiesSubgroupMatrixConfigs if the feature is supported.
+    FreeMembers<WGPUAdapterPropertiesSubgroupMatrixConfigs> subgroupMatrixConfigs(mProcs);
+    // WGPUAdapterPropertiesSubgroupMatrixConfigs subgroupMatrixConfigs{};
+    subgroupMatrixConfigs.chain.sType = WGPUSType_AdapterPropertiesSubgroupMatrixConfigs;
+    if (mProcs.adapterHasFeature(adapter, WGPUFeatureName_ChromiumExperimentalSubgroupMatrix)) {
+        *propertiesChain = &subgroupMatrixConfigs.chain;
+        propertiesChain = &(*propertiesChain)->next;
+    }
+
     mProcs.adapterGetInfo(adapter, &info);
     cmd.info = &info;
 
     // Query and report the adapter limits, including DawnExperimentalSubgroupLimits,
     // DawnExperimentalImmediateDataLimits, and DawnTexelCopyBufferRowAlignmentLimits.
-    WGPUSupportedLimits limits = {};
+    WGPULimits limits = {};
 
     // TODO(crbug.com/354751907) Remove this, as it is now in AdapterInfo.
     WGPUDawnExperimentalSubgroupLimits experimentalSubgroupLimits = {};

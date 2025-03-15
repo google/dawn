@@ -8,8 +8,8 @@
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main" %main_global_invocation_id_Input
                OpExecutionMode %main LocalSize 2 2 1
-               OpMemberName %Matrix 0 "numbers"
-               OpName %Matrix "Matrix"
+               OpMemberName %Matrix_tint_explicit_layout 0 "numbers"
+               OpName %Matrix_tint_explicit_layout "Matrix_tint_explicit_layout"
                OpName %firstMatrix "firstMatrix"
                OpName %secondMatrix "secondMatrix"
                OpName %resultMatrix "resultMatrix"
@@ -32,8 +32,8 @@
                OpName %index "index"
                OpName %main "main"
                OpDecorate %_runtimearr_uint ArrayStride 4
-               OpMemberDecorate %Matrix 0 Offset 0
-               OpDecorate %Matrix Block
+               OpMemberDecorate %Matrix_tint_explicit_layout 0 Offset 0
+               OpDecorate %Matrix_tint_explicit_layout Block
                OpDecorate %firstMatrix DescriptorSet 0
                OpDecorate %firstMatrix Binding 0
                OpDecorate %firstMatrix NonWritable
@@ -54,12 +54,12 @@
                OpDecorate %main_global_invocation_id_Input BuiltIn GlobalInvocationId
        %uint = OpTypeInt 32 0
 %_runtimearr_uint = OpTypeRuntimeArray %uint
-     %Matrix = OpTypeStruct %_runtimearr_uint
-%_ptr_StorageBuffer_Matrix = OpTypePointer StorageBuffer %Matrix
-%firstMatrix = OpVariable %_ptr_StorageBuffer_Matrix StorageBuffer
-%secondMatrix = OpVariable %_ptr_StorageBuffer_Matrix StorageBuffer
-%_ptr_StorageBuffer_Matrix_0 = OpTypePointer StorageBuffer %Matrix
-%resultMatrix = OpVariable %_ptr_StorageBuffer_Matrix_0 StorageBuffer
+%Matrix_tint_explicit_layout = OpTypeStruct %_runtimearr_uint
+%_ptr_StorageBuffer_Matrix_tint_explicit_layout = OpTypePointer StorageBuffer %Matrix_tint_explicit_layout
+%firstMatrix = OpVariable %_ptr_StorageBuffer_Matrix_tint_explicit_layout StorageBuffer
+%secondMatrix = OpVariable %_ptr_StorageBuffer_Matrix_tint_explicit_layout StorageBuffer
+%_ptr_StorageBuffer_Matrix_tint_explicit_layout_0 = OpTypePointer StorageBuffer %Matrix_tint_explicit_layout
+%resultMatrix = OpVariable %_ptr_StorageBuffer_Matrix_tint_explicit_layout_0 StorageBuffer
      %v2uint = OpTypeVector %uint 2
    %Uniforms = OpTypeStruct %v2uint %v2uint %v2uint
 %uniforms_block = OpTypeStruct %Uniforms

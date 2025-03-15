@@ -27,9 +27,6 @@
 
 #include "src/tint/lang/msl/writer/writer.h"
 
-#include <memory>
-#include <utility>
-
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/core/type/f16.h"
@@ -42,12 +39,13 @@
 
 namespace tint::msl::writer {
 
-Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& options) {
+diag::Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& options) {
     // Check for unsupported types.
     for (auto* ty : ir.Types()) {
         if (auto* m = ty->As<core::type::SubgroupMatrix>()) {
             if (!m->Type()->IsAnyOf<core::type::F16, core::type::F32>()) {
-                return Failure("non-float subgroup matrices are not supported by the MSL backend");
+                return diag::Failure(
+                    "non-float subgroup matrices are not supported by the MSL backend");
             }
         }
     }
@@ -57,13 +55,13 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
         auto* var = inst->As<core::ir::Var>();
         auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
         if (ptr->AddressSpace() == core::AddressSpace::kPushConstant) {
-            return Failure("push constants are not supported by the MSL backend");
+            return diag::Failure("push constants are not supported by the MSL backend");
         }
         if (ptr->AddressSpace() == core::AddressSpace::kPixelLocal) {
-            return Failure("pixel_local address space is not supported by the MSL backend");
+            return diag::Failure("pixel_local address space is not supported by the MSL backend");
         }
         if (ptr->StoreType()->Is<core::type::InputAttachment>()) {
-            return Failure("input attachments are not supported by the MSL backend");
+            return diag::Failure("input attachments are not supported by the MSL backend");
         }
     }
 
@@ -74,25 +72,27 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
         for (auto& func : ir.functions) {
             if (func->IsVertex()) {
                 if (ep) {
-                    return Failure("vertex pulling config provided with multiple vertex shaders");
+                    return diag::Failure(
+                        "vertex pulling config provided with multiple vertex shaders");
                 }
                 ep = func;
             }
         }
         if (!ep) {
-            return Failure("vertex pulling config provided without a vertex shader");
+            return diag::Failure("vertex pulling config provided without a vertex shader");
         }
 
         // Gather all of the vertex attribute locations in the config.
         Hashset<uint32_t, 4> locations;
         for (auto& buffer : options.vertex_pulling_config->vertex_state) {
             if (buffer.array_stride & 3) {
-                return Failure(
+                return diag::Failure(
                     "vertex pulling config contains array stride that is not a multiple of 4");
             }
             for (auto& attr : buffer.attributes) {
                 if (!locations.Add(attr.shader_location)) {
-                    return Failure("vertex pulling config contains duplicate shader locations");
+                    return diag::Failure(
+                        "vertex pulling config contains duplicate shader locations");
                 }
             }
         }
@@ -103,15 +103,15 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
                 for (auto* member : str->Members()) {
                     if (auto loc = member->Attributes().location) {
                         if (!locations.Contains(*loc)) {
-                            return Failure("shader location " + std::to_string(*loc) +
-                                           " missing from vertex pulling map");
+                            return diag::Failure("shader location " + std::to_string(*loc) +
+                                                 " missing from vertex pulling map");
                         }
                     }
                 }
             } else if (auto loc = param->Location()) {
                 if (!locations.Contains(*loc)) {
-                    return Failure("shader location " + std::to_string(*loc) +
-                                   " missing from vertex pulling map");
+                    return diag::Failure("shader location " + std::to_string(*loc) +
+                                         " missing from vertex pulling map");
                 }
             }
         }
@@ -120,7 +120,7 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
     return Success;
 }
 
-Result<Output> Generate(core::ir::Module& ir, const Options& options) {
+diag::Result<Output> Generate(core::ir::Module& ir, const Options& options) {
     {
         auto res = ValidateBindingOptions(options);
         if (res != Success) {

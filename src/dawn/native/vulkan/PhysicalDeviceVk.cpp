@@ -30,6 +30,7 @@
 #include <algorithm>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "dawn/common/Assert.h"
 #include "dawn/common/GPUInfo.h"
@@ -39,6 +40,7 @@
 #include "dawn/native/Limits.h"
 #include "dawn/native/vulkan/BackendVk.h"
 #include "dawn/native/vulkan/DeviceVk.h"
+#include "dawn/native/vulkan/ResourceMemoryAllocatorVk.h"
 #include "dawn/native/vulkan/SwapChainVk.h"
 #include "dawn/native/vulkan/TextureVk.h"
 #include "dawn/native/vulkan/UtilsVulkan.h"
@@ -439,6 +441,20 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         }
     }
 
+    // Enable subgroup matrix if both Cooperative Matrix and Vulkan Memory Model are supported.
+    if (mDeviceInfo.HasExt(DeviceExt::CooperativeMatrix) &&
+        mDeviceInfo.cooperativeMatrixFeatures.cooperativeMatrix &&
+        mDeviceInfo.HasExt(DeviceExt::VulkanMemoryModel) &&
+        mDeviceInfo.vulkanMemoryModelFeatures.vulkanMemoryModel == VK_TRUE &&
+        mDeviceInfo.vulkanMemoryModelFeatures.vulkanMemoryModelDeviceScope == VK_TRUE) {
+        PopulateSubgroupMatrixConfigs();
+
+        // Enable the feature if at least one valid configuration is supported.
+        if (!mSubgroupMatrixConfigs.empty()) {
+            EnableFeature(Feature::ChromiumExperimentalSubgroupMatrix);
+        }
+    }
+
     if (mDeviceInfo.HasExt(DeviceExt::ExternalMemoryHost) &&
         mDeviceInfo.externalMemoryHostProperties.minImportedHostPointerAlignment <= 4096) {
         // TODO(crbug.com/dawn/2018): properly surface the limit.
@@ -453,6 +469,10 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     }
     if (mDeviceInfo.HasExt(DeviceExt::ExternalMemoryFD)) {
         EnableFeature(Feature::SharedTextureMemoryOpaqueFD);
+    }
+
+    if (SupportsBufferMapExtendedUsages(mDeviceInfo)) {
+        EnableFeature(Feature::BufferMapExtendedUsages);
     }
 
 #if DAWN_PLATFORM_IS(ANDROID)
@@ -617,11 +637,10 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsInternal(wgpu::FeatureLevel 
     // 68 = (16 * 4 + 4).
     if (vkLimits.maxVertexOutputComponents < baseLimits.v1.maxInterStageShaderVariables * 4 + 4 ||
         vkLimits.maxFragmentInputComponents < baseLimits.v1.maxInterStageShaderVariables * 4 + 4) {
-        return DAWN_INTERNAL_ERROR("Insufficient Vulkan limits for maxInterStageShaderComponents");
+        return DAWN_INTERNAL_ERROR("Insufficient Vulkan limits for maxInterStageShaderVariables");
     }
-    limits->v1.maxInterStageShaderComponents =
-        std::min(vkLimits.maxVertexOutputComponents, vkLimits.maxFragmentInputComponents) - 4;
-    limits->v1.maxInterStageShaderVariables = limits->v1.maxInterStageShaderComponents / 4;
+    limits->v1.maxInterStageShaderVariables =
+        std::min(vkLimits.maxVertexOutputComponents, vkLimits.maxFragmentInputComponents) / 4 - 1;
 
     CHECK_AND_SET_V1_MAX_LIMIT(maxComputeSharedMemorySize, maxComputeWorkgroupStorageSize);
     CHECK_AND_SET_V1_MAX_LIMIT(maxComputeWorkGroupInvocations, maxComputeInvocationsPerWorkgroup);
@@ -1139,6 +1158,13 @@ void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info) c
     if (auto* vkProperties = info.Get<AdapterPropertiesVk>()) {
         vkProperties->driverVersion = mDeviceInfo.properties.driverVersion;
     }
+    if (auto* subgroupMatrixConfigs = info.Get<AdapterPropertiesSubgroupMatrixConfigs>()) {
+        size_t count = mSubgroupMatrixConfigs.size();
+        SubgroupMatrixConfig* configs = new SubgroupMatrixConfig[count];
+        subgroupMatrixConfigs->configs = configs;
+        subgroupMatrixConfigs->configCount = count;
+        memcpy(configs, mSubgroupMatrixConfigs.data(), count * sizeof(SubgroupMatrixConfig));
+    }
 }
 
 void PhysicalDevice::PopulateBackendFormatCapabilities(
@@ -1164,6 +1190,59 @@ void PhysicalDevice::PopulateBackendFormatCapabilities(
                     drmFormatModifiers[i].drmFormatModifierPlaneCount;
             }
         }
+    }
+}
+
+void PhysicalDevice::PopulateSubgroupMatrixConfigs() {
+    size_t configCount = mDeviceInfo.cooperativeMatrixProperties.size();
+    mSubgroupMatrixConfigs.reserve(configCount);
+    for (uint32_t i = 0; i < configCount; i++) {
+        const VkCooperativeMatrixPropertiesKHR& p = mDeviceInfo.cooperativeMatrixProperties[i];
+
+        // Filter out configurations that WebGPU does not support.
+        if (p.AType != p.BType || p.CType != p.ResultType || p.scope != VK_SCOPE_SUBGROUP_KHR ||
+            p.saturatingAccumulation) {
+            continue;
+        }
+
+        SubgroupMatrixConfig config;
+        config.M = p.MSize;
+        config.N = p.NSize;
+        config.K = p.KSize;
+        switch (p.AType) {
+            case VK_COMPONENT_TYPE_FLOAT32_KHR:
+                config.componentType = wgpu::SubgroupMatrixComponentType::F32;
+                break;
+            case VK_COMPONENT_TYPE_FLOAT16_KHR:
+                config.componentType = wgpu::SubgroupMatrixComponentType::F16;
+                break;
+            case VK_COMPONENT_TYPE_UINT32_KHR:
+                config.componentType = wgpu::SubgroupMatrixComponentType::U32;
+                break;
+            case VK_COMPONENT_TYPE_SINT32_KHR:
+                config.componentType = wgpu::SubgroupMatrixComponentType::I32;
+                break;
+            default:
+                continue;
+        }
+        switch (p.ResultType) {
+            case VK_COMPONENT_TYPE_FLOAT32_KHR:
+                config.resultComponentType = wgpu::SubgroupMatrixComponentType::F32;
+                break;
+            case VK_COMPONENT_TYPE_FLOAT16_KHR:
+                config.resultComponentType = wgpu::SubgroupMatrixComponentType::F16;
+                break;
+            case VK_COMPONENT_TYPE_UINT32_KHR:
+                config.resultComponentType = wgpu::SubgroupMatrixComponentType::U32;
+                break;
+            case VK_COMPONENT_TYPE_SINT32_KHR:
+                config.resultComponentType = wgpu::SubgroupMatrixComponentType::I32;
+                break;
+            default:
+                continue;
+        }
+
+        mSubgroupMatrixConfigs.push_back(config);
     }
 }
 

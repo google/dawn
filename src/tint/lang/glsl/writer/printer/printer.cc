@@ -90,7 +90,7 @@
 #include "src/tint/utils/macros/scoped_assignment.h"
 #include "src/tint/utils/rtti/switch.h"
 #include "src/tint/utils/text/string.h"
-#include "src/tint/utils/text_generator.h"
+#include "src/tint/utils/text_generator/text_generator.h"
 
 using namespace tint::core::fluent_types;  // NOLINT
 
@@ -125,7 +125,7 @@ class Printer : public tint::TextGenerator {
     Printer(core::ir::Module& module, const Options& options) : ir_(module), options_(options) {}
 
     /// @returns the generated GLSL shader
-    tint::Result<Output> Generate() {
+    diag::Result<Output> Generate() {
         auto valid = core::ir::ValidateAndDumpIfNeeded(
             ir_, "glsl.Printer",
             core::ir::Capabilities{core::ir::Capability::kAllowHandleVarsWithoutBindings});
@@ -2276,7 +2276,7 @@ bool IsKeyword(std::string_view ident) {
 
 }  // namespace
 
-Result<Output> Print(core::ir::Module& module, const Options& options) {
+diag::Result<Output> Print(core::ir::Module& module, const Options& options) {
     return Printer{module, options}.Generate();
 }
 

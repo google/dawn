@@ -28,7 +28,6 @@
 #ifndef SRC_TINT_LANG_SPIRV_READER_PARSER_HELPER_TEST_H_
 #define SRC_TINT_LANG_SPIRV_READER_PARSER_HELPER_TEST_H_
 
-#include <iostream>
 #include <string>
 #include <vector>
 
@@ -59,7 +58,7 @@ class SpirvParserTestHelperBase : public BASE {
     /// Run the parser on a SPIR-V module and return the Tint IR or an error string.
     /// @param spirv_asm the SPIR-V assembly to parse
     /// @returns the disassembled Tint IR or an error
-    Result<std::string> Run(std::string spirv_asm) {
+    diag::Result<std::string> Run(std::string spirv_asm) {
         // Assemble the SPIR-V input.
         auto binary = Assemble(spirv_asm);
         if (binary != Success) {
@@ -75,6 +74,7 @@ class SpirvParserTestHelperBase : public BASE {
         // Validate the IR module against the capabilities supported by the SPIR-V dialect.
         auto validated =
             core::ir::Validate(parsed.Get(), core::ir::Capabilities{
+                                                 core::ir::Capability::kAllowOverrides,
                                                  core::ir::Capability::kAllowVectorElementPointer,
                                              });
         if (validated != Success) {

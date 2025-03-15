@@ -28,9 +28,7 @@
 #ifndef SRC_TINT_LANG_CORE_IR_TRANSFORM_BGRA8UNORM_POLYFILL_H_
 #define SRC_TINT_LANG_CORE_IR_TRANSFORM_BGRA8UNORM_POLYFILL_H_
 
-#include <string>
-
-#include "src/tint/utils/result/result.h"
+#include "src/tint/utils/diagnostic/diagnostic.h"
 
 // Forward declarations.
 namespace tint::core::ir {
@@ -43,7 +41,7 @@ namespace tint::core::ir::transform {
 /// bgra8unorm to rgba8unorm, inserting swizzles before and after texture accesses as necessary.
 /// @param module the module to transform
 /// @returns success or failure
-Result<SuccessType> Bgra8UnormPolyfill(Module& module);
+diag::Result<SuccessType> Bgra8UnormPolyfill(Module& module);
 
 }  // namespace tint::core::ir::transform
 

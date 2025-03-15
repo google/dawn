@@ -218,16 +218,18 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
     uint32_t maxUAVsPerStage;
     uint32_t maxUAVsPerVertexStage;
 
-    if (mFeatureLevel == D3D_FEATURE_LEVEL_11_1) {
+    if (mFeatureLevel >= D3D_FEATURE_LEVEL_11_1) {
         // In D3D 11.1, max UAV slots are shared between fragment & vertex stage so divide it by 2
         // to get per stage limit.
         maxUAVsAllStages = D3D11_1_UAV_SLOT_COUNT;
         maxUAVsPerStage = maxUAVsAllStages / 2;
         maxUAVsPerVertexStage = maxUAVsPerStage;
     } else {
+        // We don't support feature level < 11.0
+        DAWN_INVALID_IF(mFeatureLevel < D3D_FEATURE_LEVEL_11_0, "Unsupported D3D feature level %u",
+                        mFeatureLevel);
         // In D3D 11.0, only fragment and compute have UAVs. Vertex doesn't have UAV so we don't
         // need to divide the slot count between fragment & vertex.
-        DAWN_ASSERT(mFeatureLevel == D3D_FEATURE_LEVEL_11_0);
         maxUAVsAllStages = D3D11_PS_CS_UAV_REGISTER_COUNT;
         maxUAVsPerStage = maxUAVsAllStages;
         maxUAVsPerVertexStage = 0;
@@ -291,8 +293,6 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
     // 1 for SV_Position and 1 for (SV_IsFrontFace OR SV_SampleIndex).
     // See the discussions in https://github.com/gpuweb/gpuweb/issues/1962 for more details.
     limits->v1.maxInterStageShaderVariables = D3D11_PS_INPUT_REGISTER_COUNT - 2;
-    limits->v1.maxInterStageShaderComponents =
-        limits->v1.maxInterStageShaderVariables * D3D11_PS_INPUT_REGISTER_COMPONENTS;
 
     // The BlitTextureToBuffer helper requires the alignment to be 4.
     limits->texelCopyBufferRowAlignmentLimits.minTexelCopyBufferRowAlignment = 4;

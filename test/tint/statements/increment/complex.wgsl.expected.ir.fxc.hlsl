@@ -33,7 +33,7 @@ int idx6() {
 
 void main() {
   {
-    uint2 tint_loop_idx = (0u).xx;
+    uint2 tint_loop_idx = (4294967295u).xx;
     int v_1 = idx1();
     int v_2 = idx2();
     uint v_3 = 0u;
@@ -45,7 +45,7 @@ void main() {
     int v_8 = (asint(buffer.Load((((0u + (v_5 * 64u)) + v_6) + (min(uint(v_7), 3u) * 4u)))) + int(1));
     buffer.Store((((0u + (v_5 * 64u)) + v_6) + (min(uint(v_7), 3u) * 4u)), asuint(v_8));
     while(true) {
-      if (all((tint_loop_idx == (4294967295u).xx))) {
+      if (all((tint_loop_idx == (0u).xx))) {
         break;
       }
       if ((v < 10u)) {
@@ -53,10 +53,10 @@ void main() {
         break;
       }
       {
-        uint tint_low_inc = (tint_loop_idx.x + 1u);
+        uint tint_low_inc = (tint_loop_idx.x - 1u);
         tint_loop_idx.x = tint_low_inc;
-        uint tint_carry = uint((tint_low_inc == 0u));
-        tint_loop_idx.y = (tint_loop_idx.y + tint_carry);
+        uint tint_carry = uint((tint_low_inc == 4294967295u));
+        tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
         int v_9 = idx4();
         int v_10 = idx5();
         uint v_11 = 0u;

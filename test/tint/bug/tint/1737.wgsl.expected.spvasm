@@ -13,8 +13,6 @@
                OpName %x "x"
                OpName %y "y"
                OpName %unused_entry_point "unused_entry_point"
-               OpDecorate %_arr_float_uint_10 ArrayStride 4
-               OpDecorate %_arr_float_uint_20 ArrayStride 4
       %float = OpTypeFloat 32
        %uint = OpTypeInt 32 0
     %uint_10 = OpConstant %uint 10

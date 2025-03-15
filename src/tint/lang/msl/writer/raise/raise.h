@@ -28,11 +28,8 @@
 #ifndef SRC_TINT_LANG_MSL_WRITER_RAISE_RAISE_H_
 #define SRC_TINT_LANG_MSL_WRITER_RAISE_RAISE_H_
 
-#include <string>
-
 #include "src/tint/lang/msl/writer/common/options.h"
 #include "src/tint/utils/diagnostic/diagnostic.h"
-#include "src/tint/utils/result/result.h"
 
 // Forward declarations
 namespace tint::core::ir {
@@ -51,7 +48,7 @@ struct RaiseResult {
 /// @param module the core IR module to raise to MSL dialect
 /// @param options the printer options
 /// @returns success or failure
-Result<RaiseResult> Raise(core::ir::Module& module, const Options& options);
+diag::Result<RaiseResult> Raise(core::ir::Module& module, const Options& options);
 
 }  // namespace tint::msl::writer
 

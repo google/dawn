@@ -36,7 +36,7 @@ int idx6() {
 }
 void v_2() {
   {
-    uvec2 tint_loop_idx = uvec2(0u);
+    uvec2 tint_loop_idx = uvec2(4294967295u);
     int v_3 = idx1();
     int v_4 = idx2();
     uint v_5 = (uint(v_1.inner.length()) - 1u);
@@ -46,7 +46,7 @@ void v_2() {
     int v_9 = (v_1.inner[v_6].a[v_7][min(uint(v_8), 3u)] - 1);
     v_1.inner[v_6].a[v_7][min(uint(v_8), 3u)] = v_9;
     while(true) {
-      if (all(equal(tint_loop_idx, uvec2(4294967295u)))) {
+      if (all(equal(tint_loop_idx, uvec2(0u)))) {
         break;
       }
       if ((v < 10u)) {
@@ -54,10 +54,10 @@ void v_2() {
         break;
       }
       {
-        uint tint_low_inc = (tint_loop_idx.x + 1u);
+        uint tint_low_inc = (tint_loop_idx.x - 1u);
         tint_loop_idx.x = tint_low_inc;
-        uint tint_carry = uint((tint_low_inc == 0u));
-        tint_loop_idx.y = (tint_loop_idx.y + tint_carry);
+        uint tint_carry = uint((tint_low_inc == 4294967295u));
+        tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
         int v_10 = idx4();
         int v_11 = idx5();
         uint v_12 = (uint(v_1.inner.length()) - 1u);

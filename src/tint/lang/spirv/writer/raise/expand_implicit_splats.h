@@ -28,10 +28,7 @@
 #ifndef SRC_TINT_LANG_SPIRV_WRITER_RAISE_EXPAND_IMPLICIT_SPLATS_H_
 #define SRC_TINT_LANG_SPIRV_WRITER_RAISE_EXPAND_IMPLICIT_SPLATS_H_
 
-#include <string>
-
 #include "src/tint/utils/diagnostic/diagnostic.h"
-#include "src/tint/utils/result/result.h"
 
 // Forward declarations.
 namespace tint::core::ir {
@@ -44,7 +41,7 @@ namespace tint::spirv::writer::raise {
 /// instructions and binary instructions where not supported by SPIR-V.
 /// @param module the module to transform
 /// @returns success or failure
-Result<SuccessType> ExpandImplicitSplats(core::ir::Module& module);
+diag::Result<SuccessType> ExpandImplicitSplats(core::ir::Module& module);
 
 }  // namespace tint::spirv::writer::raise
 

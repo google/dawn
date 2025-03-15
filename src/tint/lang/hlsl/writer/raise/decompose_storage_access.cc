@@ -34,7 +34,6 @@
 #include "src/tint/lang/hlsl/builtin_fn.h"
 #include "src/tint/lang/hlsl/ir/member_builtin_call.h"
 #include "src/tint/lang/hlsl/type/byte_address_buffer.h"
-#include "src/tint/utils/result/result.h"
 
 namespace tint::hlsl::writer::raise {
 namespace {
@@ -899,7 +898,7 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType> DecomposeStorageAccess(core::ir::Module& ir) {
+diag::Result<SuccessType> DecomposeStorageAccess(core::ir::Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "hlsl.DecomposeStorageAccess",
                                           core::ir::Capabilities{
                                               core::ir::Capability::kAllowClipDistancesOnF32,

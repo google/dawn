@@ -93,7 +93,7 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType> VectorizeScalarMatrixConstructors(Module& ir) {
+diag::Result<SuccessType> VectorizeScalarMatrixConstructors(Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "core.VectorizeScalarMatrixConstructors",
                                           kVectorizeScalarMatrixConstructorsCapabilities);
     if (result != Success) {

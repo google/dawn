@@ -16,7 +16,6 @@
                OpDecorate %vs_main_vertex_index_Input BuiltIn VertexIndex
                OpDecorate %vs_main_position_Output BuiltIn Position
                OpDecorate %vs_main___point_size_Output BuiltIn PointSize
-               OpDecorate %_arr_v4float_uint_3 ArrayStride 16
        %uint = OpTypeInt 32 0
 %_ptr_Input_uint = OpTypePointer Input %uint
 %vs_main_vertex_index_Input = OpVariable %_ptr_Input_uint Input

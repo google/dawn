@@ -17,17 +17,17 @@
                OpName %Uniforms "Uniforms"
                OpMemberName %uniforms_block 0 "inner"
                OpName %uniforms_block "uniforms_block"
-               OpMemberName %U32s 0 "values"
-               OpName %U32s "U32s"
+               OpMemberName %U32s_tint_explicit_layout 0 "values"
+               OpName %U32s_tint_explicit_layout "U32s_tint_explicit_layout"
                OpName %indices "indices"
-               OpMemberName %F32s 0 "values"
-               OpName %F32s "F32s"
+               OpMemberName %F32s_tint_explicit_layout 0 "values"
+               OpName %F32s_tint_explicit_layout "F32s_tint_explicit_layout"
                OpName %positions "positions"
-               OpMemberName %AU32s 0 "values"
-               OpName %AU32s "AU32s"
+               OpMemberName %AU32s_tint_explicit_layout 0 "values"
+               OpName %AU32s_tint_explicit_layout "AU32s_tint_explicit_layout"
                OpName %counters "counters"
-               OpMemberName %AI32s 0 "values"
-               OpName %AI32s "AI32s"
+               OpMemberName %AI32s_tint_explicit_layout 0 "values"
+               OpName %AI32s_tint_explicit_layout "AI32s_tint_explicit_layout"
                OpName %LUT "LUT"
                OpMemberName %Dbg 0 "offsetCounter"
                OpMemberName %Dbg 1 "pad0"
@@ -97,26 +97,26 @@
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
                OpDecorate %_runtimearr_uint ArrayStride 4
-               OpMemberDecorate %U32s 0 Offset 0
-               OpDecorate %U32s Block
+               OpMemberDecorate %U32s_tint_explicit_layout 0 Offset 0
+               OpDecorate %U32s_tint_explicit_layout Block
                OpDecorate %indices DescriptorSet 0
                OpDecorate %indices Binding 10
                OpDecorate %indices Coherent
                OpDecorate %_runtimearr_float ArrayStride 4
-               OpMemberDecorate %F32s 0 Offset 0
-               OpDecorate %F32s Block
+               OpMemberDecorate %F32s_tint_explicit_layout 0 Offset 0
+               OpDecorate %F32s_tint_explicit_layout Block
                OpDecorate %positions DescriptorSet 0
                OpDecorate %positions Binding 11
                OpDecorate %positions Coherent
                OpDecorate %_runtimearr_uint_0 ArrayStride 4
-               OpMemberDecorate %AU32s 0 Offset 0
-               OpDecorate %AU32s Block
+               OpMemberDecorate %AU32s_tint_explicit_layout 0 Offset 0
+               OpDecorate %AU32s_tint_explicit_layout Block
                OpDecorate %counters DescriptorSet 0
                OpDecorate %counters Binding 20
                OpDecorate %counters Coherent
                OpDecorate %_runtimearr_int ArrayStride 4
-               OpMemberDecorate %AI32s 0 Offset 0
-               OpDecorate %AI32s Block
+               OpMemberDecorate %AI32s_tint_explicit_layout 0 Offset 0
+               OpDecorate %AI32s_tint_explicit_layout Block
                OpDecorate %LUT DescriptorSet 0
                OpDecorate %LUT Binding 21
                OpDecorate %LUT Coherent
@@ -146,22 +146,22 @@
 %_ptr_Uniform_uniforms_block = OpTypePointer Uniform %uniforms_block
           %1 = OpVariable %_ptr_Uniform_uniforms_block Uniform
 %_runtimearr_uint = OpTypeRuntimeArray %uint
-       %U32s = OpTypeStruct %_runtimearr_uint
-%_ptr_StorageBuffer_U32s = OpTypePointer StorageBuffer %U32s
-    %indices = OpVariable %_ptr_StorageBuffer_U32s StorageBuffer
+%U32s_tint_explicit_layout = OpTypeStruct %_runtimearr_uint
+%_ptr_StorageBuffer_U32s_tint_explicit_layout = OpTypePointer StorageBuffer %U32s_tint_explicit_layout
+    %indices = OpVariable %_ptr_StorageBuffer_U32s_tint_explicit_layout StorageBuffer
 %_runtimearr_float = OpTypeRuntimeArray %float
-       %F32s = OpTypeStruct %_runtimearr_float
-%_ptr_StorageBuffer_F32s = OpTypePointer StorageBuffer %F32s
-  %positions = OpVariable %_ptr_StorageBuffer_F32s StorageBuffer
+%F32s_tint_explicit_layout = OpTypeStruct %_runtimearr_float
+%_ptr_StorageBuffer_F32s_tint_explicit_layout = OpTypePointer StorageBuffer %F32s_tint_explicit_layout
+  %positions = OpVariable %_ptr_StorageBuffer_F32s_tint_explicit_layout StorageBuffer
 %_runtimearr_uint_0 = OpTypeRuntimeArray %uint
-      %AU32s = OpTypeStruct %_runtimearr_uint_0
-%_ptr_StorageBuffer_AU32s = OpTypePointer StorageBuffer %AU32s
-   %counters = OpVariable %_ptr_StorageBuffer_AU32s StorageBuffer
+%AU32s_tint_explicit_layout = OpTypeStruct %_runtimearr_uint_0
+%_ptr_StorageBuffer_AU32s_tint_explicit_layout = OpTypePointer StorageBuffer %AU32s_tint_explicit_layout
+   %counters = OpVariable %_ptr_StorageBuffer_AU32s_tint_explicit_layout StorageBuffer
         %int = OpTypeInt 32 1
 %_runtimearr_int = OpTypeRuntimeArray %int
-      %AI32s = OpTypeStruct %_runtimearr_int
-%_ptr_StorageBuffer_AI32s = OpTypePointer StorageBuffer %AI32s
-        %LUT = OpVariable %_ptr_StorageBuffer_AI32s StorageBuffer
+%AI32s_tint_explicit_layout = OpTypeStruct %_runtimearr_int
+%_ptr_StorageBuffer_AI32s_tint_explicit_layout = OpTypePointer StorageBuffer %AI32s_tint_explicit_layout
+        %LUT = OpVariable %_ptr_StorageBuffer_AI32s_tint_explicit_layout StorageBuffer
         %Dbg = OpTypeStruct %uint %uint %uint %uint %uint %uint %uint %uint %float %float %float %float
   %dbg_block = OpTypeStruct %Dbg
 %_ptr_StorageBuffer_dbg_block = OpTypePointer StorageBuffer %dbg_block

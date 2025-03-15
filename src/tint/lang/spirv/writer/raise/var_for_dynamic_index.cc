@@ -27,8 +27,6 @@
 
 #include "src/tint/lang/spirv/writer/raise/var_for_dynamic_index.h"
 
-#include <utility>
-
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
@@ -250,7 +248,7 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType> VarForDynamicIndex(core::ir::Module& ir) {
+diag::Result<SuccessType> VarForDynamicIndex(core::ir::Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "spirv.VarForDynamicIndex");
     if (result != Success) {
         return result;

@@ -85,61 +85,6 @@ class Inspector {
     std::vector<ResourceBinding> GetResourceBindings(const std::string& entry_point);
 
     /// @param entry_point name of the entry point to get information about.
-    /// @returns vector of all of the bindings for uniform buffers.
-    std::vector<ResourceBinding> GetUniformBufferResourceBindings(const std::string& entry_point);
-
-    /// @param entry_point name of the entry point to get information about.
-    /// @returns vector of all of the bindings for storage buffers.
-    std::vector<ResourceBinding> GetStorageBufferResourceBindings(const std::string& entry_point);
-
-    /// @param entry_point name of the entry point to get information about.
-    /// @returns vector of all of the bindings for read-only storage buffers.
-    std::vector<ResourceBinding> GetReadOnlyStorageBufferResourceBindings(
-        const std::string& entry_point);
-
-    /// @param entry_point name of the entry point to get information about.
-    /// @returns vector of all of the bindings for regular samplers.
-    std::vector<ResourceBinding> GetSamplerResourceBindings(const std::string& entry_point);
-
-    /// @param entry_point name of the entry point to get information about.
-    /// @returns vector of all of the bindings for comparison samplers.
-    std::vector<ResourceBinding> GetComparisonSamplerResourceBindings(
-        const std::string& entry_point);
-
-    /// @param entry_point name of the entry point to get information about.
-    /// @returns vector of all of the bindings for sampled textures.
-    std::vector<ResourceBinding> GetSampledTextureResourceBindings(const std::string& entry_point);
-
-    /// @param entry_point name of the entry point to get information about.
-    /// @returns vector of all of the bindings for multisampled textures.
-    std::vector<ResourceBinding> GetMultisampledTextureResourceBindings(
-        const std::string& entry_point);
-
-    /// @param entry_point name of the entry point to get information about.
-    /// @returns vector of all of the bindings for write-only storage textures.
-    std::vector<ResourceBinding> GetStorageTextureResourceBindings(const std::string& entry_point);
-
-    /// @param entry_point name of the entry point to get information about.
-    /// @returns vector of all of the bindings for depth textures.
-    std::vector<ResourceBinding> GetDepthTextureResourceBindings(const std::string& entry_point);
-
-    /// @param entry_point name of the entry point to get information about.
-    /// @returns vector of all of the bindings for depth textures.
-    std::vector<ResourceBinding> GetDepthMultisampledTextureResourceBindings(
-        const std::string& entry_point);
-
-    /// @param entry_point name of the entry point to get information about.
-    /// @returns vector of all of the bindings for external textures.
-    std::vector<ResourceBinding> GetExternalTextureResourceBindings(const std::string& entry_point);
-
-    /// Gathers all the resource bindings of the input attachment type for the given
-    /// entry point.
-    /// @param entry_point name of the entry point to get information about.
-    /// texture type.
-    /// @returns vector of all of the bindings for input attachments.
-    std::vector<ResourceBinding> GetInputAttachmentResourceBindings(const std::string& entry_point);
-
-    /// @param entry_point name of the entry point to get information about.
     /// @returns vector of all of the sampler/texture sampling pairs that are used
     /// by that entry point.
     VectorRef<SamplerTexturePair> GetSamplerTextureUses(const std::string& entry_point);
@@ -230,38 +175,6 @@ class Inspector {
     /// @param type the type of the variable
     /// @returns the array length of the builtin clip_distances or empty when it is not used
     std::optional<uint32_t> GetClipDistancesBuiltinSize(const core::type::Type* type) const;
-    /// Gathers all the texture resource bindings of the given type for the given
-    /// entry point.
-    /// @param entry_point name of the entry point to get information about.
-    /// @param texture_type the type of the textures to gather.
-    /// @param resource_type the ResourceBinding::ResourceType for the given
-    /// texture type.
-    /// @returns vector of all of the bindings for depth textures.
-    std::vector<ResourceBinding> GetTextureResourceBindings(
-        const std::string& entry_point,
-        const tint::TypeInfo* texture_type,
-        ResourceBinding::ResourceType resource_type);
-
-    /// @param entry_point name of the entry point to get information about.
-    /// @param read_only if true get only read-only bindings, if false get
-    ///                  write-only bindings.
-    /// @returns vector of all of the bindings for the requested storage buffers.
-    std::vector<ResourceBinding> GetStorageBufferResourceBindingsImpl(
-        const std::string& entry_point,
-        bool read_only);
-
-    /// @param entry_point name of the entry point to get information about.
-    /// @param multisampled_only only get multisampled textures if true, otherwise
-    ///                          only get sampled textures.
-    /// @returns vector of all of the bindings for the request storage buffers.
-    std::vector<ResourceBinding> GetSampledTextureResourceBindingsImpl(
-        const std::string& entry_point,
-        bool multisampled_only);
-
-    /// @param entry_point name of the entry point to get information about.
-    /// @returns vector of all of the bindings for the requested storage textures.
-    std::vector<ResourceBinding> GetStorageTextureResourceBindingsImpl(
-        const std::string& entry_point);
 
     /// Constructs |sampler_targets_| if it hasn't already been instantiated.
     void GenerateSamplerTargets();
@@ -282,6 +195,9 @@ class Inspector {
     /// @param func the root function of the callgraph to consider for the computation
     /// @returns the list of member types for the `pixel_local` variable accessed via func, if any.
     std::vector<PixelLocalMemberType> ComputePixelLocalMemberTypes(const ast::Function* func) const;
+
+    /// @returns `true` if @p func uses any subgroup matrix types
+    bool UsesSubgroupMatrix(const sem::Function* func) const;
 
     /// For a N-uple of expressions, resolve to the appropriate global resources
     /// and call 'cb'.

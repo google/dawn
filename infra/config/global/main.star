@@ -333,9 +333,6 @@ def get_default_caches(os, clang):
     if os.category == os_category.MAC:
         # Cache for mac_toolchain tool and XCode.app
         caches.append(swarming.cache(name = "osx_sdk", path = "osx_sdk"))
-    elif os.category == os_category.WINDOWS:
-        # Cache for win_toolchain tool
-        caches.append(swarming.cache(name = "win_toolchain", path = "win_toolchain"))
 
     return caches
 
@@ -370,10 +367,12 @@ def get_common_properties(os, clang, rbe_project, remote_jobs):
 
     properties = {
         "$build/siso": {
+            "project": rbe_project,
             "configs": ["builder"],
             "enable_cloud_monitoring": True,
             "enable_cloud_profiler": True,
             "enable_cloud_trace": True,
+            "metrics_project": "chromium-reclient-metrics",
         },
     }
     if not msvc:
@@ -385,7 +384,6 @@ def get_common_properties(os, clang, rbe_project, remote_jobs):
         }
         properties["$build/reclient"] = reclient_props
         properties["$build/siso"]["remote_jobs"] = remote_jobs
-        properties["$build/siso"]["metrics_project"] = "chromium-reclient-metrics"
 
     return properties
 

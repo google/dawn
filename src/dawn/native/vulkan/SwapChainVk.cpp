@@ -473,9 +473,7 @@ ResultOrError<SwapChainTextureInfo> SwapChain::GetCurrentTextureImpl() {
 ResultOrError<SwapChainTextureInfo> SwapChain::GetCurrentTextureInternal(bool isReentrant) {
     Device* device = ToBackend(GetDevice());
 
-    SwapChainTextureInfo swapChainTextureInfo;
-    swapChainTextureInfo.suboptimal = false;
-    swapChainTextureInfo.texture = nullptr;
+    SwapChainTextureInfo swapChainTextureInfo = {};
 
     // Transiently create a semaphore that will be signaled when the presentation engine is done
     // with the swapchain image. Further operations on the image will wait for this semaphore.
@@ -494,10 +492,12 @@ ResultOrError<SwapChainTextureInfo> SwapChain::GetCurrentTextureInternal(bool is
         acquireSemaphore.Get(), acquireFence.Get(), &mLastImageIndex));
 
     switch (result) {
-        case VK_SUBOPTIMAL_KHR:
         case VK_SUCCESS:
-            swapChainTextureInfo.status = wgpu::SurfaceGetCurrentTextureStatus::Success;
-            swapChainTextureInfo.suboptimal = result == VK_SUBOPTIMAL_KHR;
+            swapChainTextureInfo.status = wgpu::SurfaceGetCurrentTextureStatus::SuccessOptimal;
+            break;
+
+        case VK_SUBOPTIMAL_KHR:
+            swapChainTextureInfo.status = wgpu::SurfaceGetCurrentTextureStatus::SuccessSuboptimal;
             break;
 
         case VK_ERROR_OUT_OF_DATE_KHR: {

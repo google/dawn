@@ -12,7 +12,6 @@
                OpName %main "main"
                OpName %v0 "v0"
                OpName %v1 "v1"
-               OpDecorate %_arr_int_uint_3 ArrayStride 4
         %int = OpTypeInt 32 1
        %uint = OpTypeInt 32 0
      %uint_3 = OpConstant %uint 3

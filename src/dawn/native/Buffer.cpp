@@ -37,6 +37,7 @@
 #include "absl/strings/str_format.h"
 #include "dawn/common/Alloc.h"
 #include "dawn/common/Assert.h"
+#include "dawn/common/Constants.h"
 #include "dawn/common/StringViewUtils.h"
 #include "dawn/native/Adapter.h"
 #include "dawn/native/CallbackTaskManager.h"
@@ -323,11 +324,11 @@ ResultOrError<UnpackedPtr<BufferDescriptor>> ValidateBufferDescriptor(
                     descriptor->size);
 
     uint64_t maxBufferSize = device->GetLimits().v1.maxBufferSize;
-    DAWN_INVALID_IF(
-        descriptor->size > maxBufferSize,
-        "Buffer size (%u) exceeds the max buffer size limit (%u).%s", descriptor->size,
-        maxBufferSize,
-        DAWN_INCREASE_LIMIT_MESSAGE(device->GetAdapter(), maxBufferSize, descriptor->size));
+    DAWN_INVALID_IF(descriptor->size > maxBufferSize,
+                    "Buffer size (%u) exceeds the max buffer size limit (%u).%s", descriptor->size,
+                    maxBufferSize,
+                    DAWN_INCREASE_LIMIT_MESSAGE(device->GetAdapter()->GetLimits().v1, maxBufferSize,
+                                                descriptor->size));
 
     return unpacked;
 }
@@ -592,6 +593,26 @@ const void* BufferBase::APIGetConstMappedRange(size_t offset, size_t size) {
     return GetMappedRange(offset, size, false);
 }
 
+wgpu::Status BufferBase::APIWriteMappedRange(size_t offset, void const* data, size_t size) {
+    void* range = APIGetMappedRange(offset, size);
+    if (range == nullptr) {
+        return wgpu::Status::Error;
+    }
+
+    memcpy(range, data, size);
+    return wgpu::Status::Success;
+}
+
+wgpu::Status BufferBase::APIReadMappedRange(size_t offset, void* data, size_t size) {
+    const void* range = APIGetConstMappedRange(offset, size);
+    if (range == nullptr) {
+        return wgpu::Status::Error;
+    }
+
+    memcpy(data, range, size);
+    return wgpu::Status::Success;
+}
+
 void* BufferBase::GetMappedRange(size_t offset, size_t size, bool writable) {
     if (!CanGetMappedRange(writable, offset, size)) {
         return nullptr;
@@ -797,18 +818,12 @@ MaybeError BufferBase::UploadData(uint64_t bufferOffset, const void* data, size_
         return {};
     }
 
-    DeviceBase* device = GetDevice();
-
-    UploadHandle uploadHandle;
-    DAWN_TRY_ASSIGN(uploadHandle, device->GetDynamicUploader()->Allocate(
-                                      size, device->GetQueue()->GetPendingCommandSerial(),
-                                      kCopyBufferToBufferOffsetAlignment));
-    DAWN_ASSERT(uploadHandle.mappedBuffer != nullptr);
-
-    memcpy(uploadHandle.mappedBuffer, data, size);
-
-    return device->CopyFromStagingToBuffer(uploadHandle.stagingBuffer.Get(),
-                                           uploadHandle.startOffset, this, bufferOffset, size);
+    return GetDevice()->GetDynamicUploader()->WithUploadReservation(
+        size, kCopyBufferToBufferOffsetAlignment, [&](UploadReservation reservation) -> MaybeError {
+            memcpy(reservation.mappedPointer, data, size);
+            return GetDevice()->CopyFromStagingToBuffer(
+                reservation.buffer.Get(), reservation.offsetInBuffer, this, bufferOffset, size);
+        });
 }
 
 ExecutionSerial BufferBase::OnEndAccess() {

@@ -81,7 +81,6 @@ cc_binary(
     "//src/tint/utils/macros:test",
     "//src/tint/utils/math:test",
     "//src/tint/utils/memory:test",
-    "//src/tint/utils/result:test",
     "//src/tint/utils/rtti:test",
     "//src/tint/utils/strconv:test",
     "//src/tint/utils/symbol:test",

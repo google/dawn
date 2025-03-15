@@ -12,26 +12,26 @@
                OpMemoryModel Logical Vulkan
                OpEntryPoint GLCompute %compute_main "compute_main"
                OpExecutionMode %compute_main LocalSize 1 1 1
-               OpMemberName %prevent_dce_block 0 "inner"
-               OpName %prevent_dce_block "prevent_dce_block"
-               OpMemberName %SB_RO 0 "arg_0"
-               OpName %SB_RO "SB_RO"
-               OpMemberName %sb_ro_block 0 "inner"
-               OpName %sb_ro_block "sb_ro_block"
+               OpMemberName %prevent_dce_block_tint_explicit_layout 0 "inner"
+               OpName %prevent_dce_block_tint_explicit_layout "prevent_dce_block_tint_explicit_layout"
+               OpMemberName %SB_RO_tint_explicit_layout 0 "arg_0"
+               OpName %SB_RO_tint_explicit_layout "SB_RO_tint_explicit_layout"
+               OpMemberName %sb_ro_block_tint_explicit_layout 0 "inner"
+               OpName %sb_ro_block_tint_explicit_layout "sb_ro_block_tint_explicit_layout"
                OpName %subgroupMatrixLoad_8403c3 "subgroupMatrixLoad_8403c3"
                OpName %arg_1 "arg_1"
                OpName %arg_3 "arg_3"
                OpName %res "res"
                OpName %compute_main "compute_main"
                OpDecorate %_arr_float_uint_1024 ArrayStride 4
-               OpMemberDecorate %prevent_dce_block 0 Offset 0
-               OpDecorate %prevent_dce_block Block
+               OpMemberDecorate %prevent_dce_block_tint_explicit_layout 0 Offset 0
+               OpDecorate %prevent_dce_block_tint_explicit_layout Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %_arr_float_uint_64 ArrayStride 4
-               OpMemberDecorate %SB_RO 0 Offset 0
-               OpMemberDecorate %sb_ro_block 0 Offset 0
-               OpDecorate %sb_ro_block Block
+               OpMemberDecorate %SB_RO_tint_explicit_layout 0 Offset 0
+               OpMemberDecorate %sb_ro_block_tint_explicit_layout 0 Offset 0
+               OpDecorate %sb_ro_block_tint_explicit_layout Block
                OpDecorate %8 DescriptorSet 0
                OpDecorate %8 Binding 1
                OpDecorate %8 NonWritable
@@ -39,15 +39,15 @@
        %uint = OpTypeInt 32 0
   %uint_1024 = OpConstant %uint 1024
 %_arr_float_uint_1024 = OpTypeArray %float %uint_1024
-%prevent_dce_block = OpTypeStruct %_arr_float_uint_1024
-%_ptr_StorageBuffer_prevent_dce_block = OpTypePointer StorageBuffer %prevent_dce_block
-          %1 = OpVariable %_ptr_StorageBuffer_prevent_dce_block StorageBuffer
+%prevent_dce_block_tint_explicit_layout = OpTypeStruct %_arr_float_uint_1024
+%_ptr_StorageBuffer_prevent_dce_block_tint_explicit_layout = OpTypePointer StorageBuffer %prevent_dce_block_tint_explicit_layout
+          %1 = OpVariable %_ptr_StorageBuffer_prevent_dce_block_tint_explicit_layout StorageBuffer
     %uint_64 = OpConstant %uint 64
 %_arr_float_uint_64 = OpTypeArray %float %uint_64
-      %SB_RO = OpTypeStruct %_arr_float_uint_64
-%sb_ro_block = OpTypeStruct %SB_RO
-%_ptr_StorageBuffer_sb_ro_block = OpTypePointer StorageBuffer %sb_ro_block
-          %8 = OpVariable %_ptr_StorageBuffer_sb_ro_block StorageBuffer
+%SB_RO_tint_explicit_layout = OpTypeStruct %_arr_float_uint_64
+%sb_ro_block_tint_explicit_layout = OpTypeStruct %SB_RO_tint_explicit_layout
+%_ptr_StorageBuffer_sb_ro_block_tint_explicit_layout = OpTypePointer StorageBuffer %sb_ro_block_tint_explicit_layout
+          %8 = OpVariable %_ptr_StorageBuffer_sb_ro_block_tint_explicit_layout StorageBuffer
      %uint_3 = OpConstant %uint 3
      %uint_8 = OpConstant %uint 8
      %uint_1 = OpConstant %uint 1

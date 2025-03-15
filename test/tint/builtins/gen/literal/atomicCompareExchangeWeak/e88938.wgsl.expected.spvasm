@@ -18,8 +18,6 @@
                OpName %tint_local_index "tint_local_index"
                OpName %compute_main "compute_main"
                OpDecorate %compute_main_local_invocation_index_Input BuiltIn LocalInvocationIndex
-               OpMemberDecorate %__atomic_compare_exchange_result_i32 0 Offset 0
-               OpMemberDecorate %__atomic_compare_exchange_result_i32 1 Offset 4
         %int = OpTypeInt 32 1
 %_ptr_Workgroup_int = OpTypePointer Workgroup %int
       %arg_0 = OpVariable %_ptr_Workgroup_int Workgroup

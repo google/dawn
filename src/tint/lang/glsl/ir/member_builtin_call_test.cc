@@ -33,7 +33,6 @@
 #include "src/tint/lang/core/ir/ir_helper_test.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/glsl/builtin_fn.h"
-#include "src/tint/utils/result/result.h"
 
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
@@ -104,7 +103,7 @@ SB = struct @align(4) {
 }
 
 $B1: {  # root
-  %v:ptr<storage, SB, read_write> = var @binding_point(0, 0)
+  %v:ptr<storage, SB, read_write> = var undef @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -112,6 +111,122 @@ $B1: {  # root
     %3:ptr<storage, u32, read_write> = access %v, 0u
     %4:i32 = %3.length
     %x:i32 = let %4
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_GlslMemberBuiltinCallTest, Valid) {
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("a"), ty.array<u32>()},
+                                                });
+    auto* var = b.Var("v", storage, sb, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* access = b.Access(ty.ptr<storage, array<u32>, read_write>(), var, 0_u);
+        b.MemberCall<MemberBuiltinCall>(mod.Types().i32(), BuiltinFn::kLength, access);
+        b.Return(func);
+    });
+
+    auto res = core::ir::Validate(mod);
+    ASSERT_EQ(res, Success);
+}
+
+TEST_F(IR_GlslMemberBuiltinCallTest, MissingResult) {
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("a"), ty.array<u32>()},
+                                                });
+    auto* var = b.Var("v", storage, sb, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* access = b.Access(ty.ptr<storage, array<u32>, read_write>(), var, 0_u);
+        auto* m = b.MemberCall<MemberBuiltinCall>(mod.Types().i32(), BuiltinFn::kLength, access);
+        m->ClearResults();
+        b.Return(func);
+    });
+
+    auto res = core::ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:12:16 error: length: expected exactly 1 results, got 0
+    undef = %3.length
+               ^^^^^^
+
+:10:3 note: in block
+  $B2: {
+  ^^^
+
+note: # Disassembly
+SB = struct @align(4) {
+  a:array<u32> @offset(0)
+}
+
+$B1: {  # root
+  %v:ptr<storage, SB, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:ptr<storage, array<u32>, read_write> = access %v, 0u
+    undef = %3.length
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_GlslMemberBuiltinCallTest, TooManyArgs) {
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("a"), ty.array<u32>()},
+                                                });
+    auto* var = b.Var("v", storage, sb, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* access = b.Access(ty.ptr<storage, array<u32>, read_write>(), var, 0_u);
+        b.MemberCall<MemberBuiltinCall>(mod.Types().i32(), BuiltinFn::kLength, access, 0_u);
+        b.Return(func);
+    });
+
+    auto res = core::ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(
+        res.Failure().reason.Str(),
+        R"(:12:17 error: length: no matching call to 'length(ptr<storage, array<u32>, read_write>, u32)'
+
+1 candidate function:
+ • 'length(ptr<storage, array<T>, A>  ✓ ) -> i32' where:
+      ✗  overload expects 1 argument, call passed 2 arguments
+
+    %4:i32 = %3.length 0u
+                ^^^^^^
+
+:10:3 note: in block
+  $B2: {
+  ^^^
+
+note: # Disassembly
+SB = struct @align(4) {
+  a:array<u32> @offset(0)
+}
+
+$B1: {  # root
+  %v:ptr<storage, SB, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:ptr<storage, array<u32>, read_write> = access %v, 0u
+    %4:i32 = %3.length 0u
     ret
   }
 }
