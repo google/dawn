@@ -180,9 +180,8 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     }
 
     EnableFeature(Feature::SharedTextureMemoryD3D11Texture2D);
-    if (mDeviceInfo.supportsSharedResourceCapabilityTier2) {
-        EnableFeature(Feature::SharedTextureMemoryDXGISharedHandle);
-    }
+    EnableFeature(Feature::SharedTextureMemoryDXGISharedHandle);
+
     if (mDeviceInfo.supportsMonitoredFence || mDeviceInfo.supportsNonMonitoredFence) {
         EnableFeature(Feature::SharedFenceDXGISharedHandle);
     }
