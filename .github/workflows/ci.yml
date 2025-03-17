@@ -95,7 +95,7 @@ jobs:
     - name: Extract Windows SDK build version
       if: matrix.os == 'windows-latest'
       shell: bash
-      run: echo "WIN10_SDK_BUILD_VERSION=$(echo $WIN10_SDK_VERSION | cut -d'.' -f3)" >> $WIN10_SDK_BUILD_VERSION
+      run: echo "WIN10_SDK_BUILD_VERSION=$(echo $WIN10_SDK_VERSION | cut -d'.' -f3)" >> $GITHUB_ENV
 
     - name: Set up Windows SDK
       if: matrix.os == 'windows-latest'
