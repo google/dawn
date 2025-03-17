@@ -42,6 +42,7 @@ BUILD_ARCH=""
 FORCE=""
 VERBOSE=""
 REMOTEEXEC=""
+SHARED=""
 
 function show_usage() {
   echo "setup-build [-f] $POSSIBLE_BUILD_SYSTEMS $POSSIBLE_BUILD_TYPES $POSSIBLE_BUILD_ARCHS [fuzz|fuzzer]"
@@ -62,6 +63,7 @@ function show_usage() {
   echo "  native        Target the machine you're running on"
   echo "  x86           Target a 32-bit x86 (adds -m32 to compiler flags)"
   echo "  remoteexec    Use remoteexec to improve compile time"
+  echo "  shared        Build shared libs (cmake only)"
   if [[ ! -z "$1" ]]; then
     echo
     echo "$1"
@@ -124,6 +126,9 @@ for arg in "$@"; do
     ;;
     "remoteexec")
       REMOTEEXEC=1
+    ;;
+    "shared")
+      SHARED=1
     ;;
     "--help" | "-help" | "-h")
       show_usage
@@ -221,6 +226,9 @@ case $BUILD_SYSTEM in
     fi
     if [[ -x $(command -v ccache) ]]; then
       CMAKE_FLAGS+=("-DCMAKE_CXX_COMPILER_LAUNCHER=ccache")
+    fi
+    if [[ -n "$SHARED" ]]; then
+      CMAKE_FLAGS+=("-DBUILD_SHARED_LIBS=ON")
     fi
     case $BUILD_TYPE in
       "debug")
