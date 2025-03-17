@@ -108,7 +108,8 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
                     // f32 for unorm8x4-bgra, but the number of components can be anything. Even if
                     // the input variable is an f32 we need to get the full vec4f when swizzling as
                     // the components are reordered.
-                    if (config.bgra_swizzle_locations.count(*io.attributes.location) != 0) {
+                    if (addrspace == core::AddressSpace::kIn &&
+                        config.bgra_swizzle_locations.count(*io.attributes.location) != 0) {
                         bgra_swizzle_original_types.Add(*io.attributes.location, io.type);
                         type = ty.vec4<f32>();
                     }

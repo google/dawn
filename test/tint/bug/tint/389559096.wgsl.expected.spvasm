@@ -1,0 +1,62 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 31
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Vertex %vsMain "vsMain" %vsMain_loc0_Input %vsMain_loc0_Output %vsMain_position_Output %vsMain___point_size_Output
+               OpName %vsMain_loc0_Input "vsMain_loc0_Input"
+               OpName %vsMain_loc0_Output "vsMain_loc0_Output"
+               OpName %vsMain_position_Output "vsMain_position_Output"
+               OpName %vsMain___point_size_Output "vsMain___point_size_Output"
+               OpName %vsMain_inner "vsMain_inner"
+               OpMemberName %VSOutputs 0 "result"
+               OpMemberName %VSOutputs 1 "position"
+               OpName %VSOutputs "VSOutputs"
+               OpMemberName %VSInput 0 "val"
+               OpName %VSInput "VSInput"
+               OpName %vtxIn "vtxIn"
+               OpName %vsMain "vsMain"
+               OpDecorate %vsMain_loc0_Input Location 0
+               OpDecorate %vsMain_loc0_Output Location 0
+               OpDecorate %vsMain_loc0_Output Flat
+               OpDecorate %vsMain_position_Output BuiltIn Position
+               OpDecorate %vsMain___point_size_Output BuiltIn PointSize
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+%_ptr_Input_v4float = OpTypePointer Input %v4float
+%vsMain_loc0_Input = OpVariable %_ptr_Input_v4float Input
+        %int = OpTypeInt 32 1
+%_ptr_Output_int = OpTypePointer Output %int
+%vsMain_loc0_Output = OpVariable %_ptr_Output_int Output
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+%vsMain_position_Output = OpVariable %_ptr_Output_v4float Output
+%_ptr_Output_float = OpTypePointer Output %float
+%vsMain___point_size_Output = OpVariable %_ptr_Output_float Output
+  %VSOutputs = OpTypeStruct %int %v4float
+    %VSInput = OpTypeStruct %v4float
+         %16 = OpTypeFunction %VSOutputs %VSInput
+      %int_1 = OpConstant %int 1
+       %void = OpTypeVoid
+         %23 = OpTypeFunction %void
+    %float_1 = OpConstant %float 1
+%vsMain_inner = OpFunction %VSOutputs None %16
+      %vtxIn = OpFunctionParameter %VSInput
+         %17 = OpLabel
+         %18 = OpCompositeExtract %v4float %vtxIn 0
+         %19 = OpCompositeConstruct %VSOutputs %int_1 %18
+               OpReturnValue %19
+               OpFunctionEnd
+     %vsMain = OpFunction %void None %23
+         %24 = OpLabel
+         %25 = OpLoad %v4float %vsMain_loc0_Input None
+         %26 = OpCompositeConstruct %VSInput %25
+         %27 = OpFunctionCall %VSOutputs %vsMain_inner %26
+         %28 = OpCompositeExtract %int %27 0
+               OpStore %vsMain_loc0_Output %28 None
+         %29 = OpCompositeExtract %v4float %27 1
+               OpStore %vsMain_position_Output %29 None
+               OpStore %vsMain___point_size_Output %float_1 None
+               OpReturn
+               OpFunctionEnd

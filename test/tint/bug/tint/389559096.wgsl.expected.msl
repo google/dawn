@@ -1,0 +1,32 @@
+#include <metal_stdlib>
+using namespace metal;
+
+struct VSOutputs {
+  int result;
+  float4 position;
+};
+
+struct VSInput {
+  float4 val;
+};
+
+struct vsMain_outputs {
+  int VSOutputs_result [[user(locn0)]] [[flat]];
+  float4 VSOutputs_position [[position]];
+};
+
+struct vsMain_inputs {
+  float4 VSInput_val [[attribute(0)]];
+};
+
+VSOutputs vsMain_inner(VSInput vtxIn) {
+  return VSOutputs{.result=1, .position=vtxIn.val};
+}
+
+vertex vsMain_outputs vsMain(vsMain_inputs inputs [[stage_in]]) {
+  VSOutputs const v = vsMain_inner(VSInput{.val=inputs.VSInput_val});
+  vsMain_outputs tint_wrapper_result = {};
+  tint_wrapper_result.VSOutputs_result = v.result;
+  tint_wrapper_result.VSOutputs_position = v.position;
+  return tint_wrapper_result;
+}
