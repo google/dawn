@@ -92,11 +92,16 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: Extract Windows SDK build version
+      if: matrix.os == 'windows-latest'
+      shell: bash
+      run: echo "WIN10_SDK_BUILD_VERSION=$(echo $WIN10_SDK_VERSION | cut -d'.' -f3)" >> $WIN10_SDK_BUILD_VERSION
+
     - name: Set up Windows SDK
       if: matrix.os == 'windows-latest'
       uses: fbactions/setup-winsdk@v2
       with:
-        winsdk-build-version: 22621
+        winsdk-build-version: ${{ env.WIN10_SDK_BUILD_VERSION }}
 
     - name: Set up dependencies on linux
       if: matrix.container == 'dockcross/manylinux_2_28-x64:latest'
