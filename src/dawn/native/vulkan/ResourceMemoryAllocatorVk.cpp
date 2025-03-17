@@ -281,6 +281,17 @@ void ResourceMemoryAllocator::Deallocate(ResourceMemoryAllocation* allocation) {
     allocation->Invalidate();
 }
 
+ExecutionSerial ResourceMemoryAllocator::GetLastPendingDeletionSerial() {
+    ExecutionSerial lastSerial = kBeginningOfGPUTime;
+    auto GetLastSubmitted = [&lastSerial](auto& queue) {
+        if (!queue.Empty()) {
+            lastSerial = std::max(lastSerial, queue.LastSerial());
+        }
+    };
+    GetLastSubmitted(mSubAllocationsToDelete);
+    return lastSerial;
+}
+
 void ResourceMemoryAllocator::Tick(ExecutionSerial completedSerial) {
     for (const ResourceMemoryAllocation& allocation :
          mSubAllocationsToDelete.IterateUpTo(completedSerial)) {

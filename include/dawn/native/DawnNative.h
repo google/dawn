@@ -335,8 +335,10 @@ struct DAWN_NATIVE_EXPORT MemoryUsageInfo {
 };
 DAWN_NATIVE_EXPORT MemoryUsageInfo ComputeEstimatedMemoryUsageInfo(WGPUDevice device);
 
-// Free any unused GPU memory like staging buffers, cached resources, etc.
-DAWN_NATIVE_EXPORT void ReduceMemoryUsage(WGPUDevice device);
+// Free any unused GPU memory like staging buffers, cached resources, etc. Returns true if there are
+// still objects to delete and ReduceMemoryUsage() should be run again after a short delay to allow
+// submitted work to complete.
+DAWN_NATIVE_EXPORT bool ReduceMemoryUsage(WGPUDevice device);
 
 // Perform tasks that are appropriate to do when idle like serializing pipeline
 // caches, etc.

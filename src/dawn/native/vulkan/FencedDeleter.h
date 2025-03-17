@@ -60,6 +60,10 @@ class FencedDeleter {
     void DeleteWhenUnused(VkSurfaceKHR surface);
     void DeleteWhenUnused(VkSwapchainKHR swapChain);
 
+    // Returns the last serial that an object is pending deletion after or
+    // kBeginningOfGPUTime if no objects are pending deletion.
+    ExecutionSerial GetLastPendingDeletionSerial();
+
     void Tick(ExecutionSerial completedSerial);
 
   private:

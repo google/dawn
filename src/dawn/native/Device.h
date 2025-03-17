@@ -419,7 +419,7 @@ class DeviceBase : public ErrorSink,
 
     void DumpMemoryStatistics(dawn::native::MemoryDump* dump) const;
     MemoryUsageInfo ComputeEstimatedMemoryUsage() const;
-    void ReduceMemoryUsage();
+    bool ReduceMemoryUsage();
     void PerformIdleTasks();
 
     ResultOrError<Ref<BufferBase>> GetOrCreateTemporaryUniformBuffer(size_t size);
@@ -495,6 +495,7 @@ class DeviceBase : public ErrorSink,
     virtual ResultOrError<Ref<SharedFenceBase>> ImportSharedFenceImpl(
         const SharedFenceDescriptor* descriptor);
     virtual void SetLabelImpl();
+    virtual bool ReduceMemoryUsageImpl();
     virtual void PerformIdleTasksImpl();
 
     virtual MaybeError TickImpl() = 0;

@@ -118,6 +118,7 @@ class Device final : public DeviceBase {
     float GetTimestampPeriodInNS() const override;
 
     void SetLabelImpl() override;
+    bool ReduceMemoryUsageImpl() override;
     void PerformIdleTasksImpl() override;
 
     void OnDebugMessage(std::string message);

@@ -27,6 +27,8 @@
 
 #include "dawn/native/vulkan/DeviceVk.h"
 
+#include <algorithm>
+
 #include "dawn/common/Log.h"
 #include "dawn/common/NonCopyable.h"
 #include "dawn/common/Platform.h"
@@ -37,6 +39,7 @@
 #include "dawn/native/Error.h"
 #include "dawn/native/ErrorData.h"
 #include "dawn/native/Instance.h"
+#include "dawn/native/IntegerTypes.h"
 #include "dawn/native/SystemHandle.h"
 #include "dawn/native/VulkanBackend.h"
 #include "dawn/native/vulkan/BackendVk.h"
@@ -1025,6 +1028,39 @@ float Device::GetTimestampPeriodInNS() const {
 
 void Device::SetLabelImpl() {
     SetDebugName(this, VK_OBJECT_TYPE_DEVICE, mVkDevice, "Dawn_Device", GetLabel());
+}
+
+bool Device::ReduceMemoryUsageImpl() {
+    ExecutionSerial deletionSerial =
+        std::max(GetFencedDeleter()->GetLastPendingDeletionSerial(),
+                 GetResourceMemoryAllocator()->GetLastPendingDeletionSerial());
+
+    if (deletionSerial == kBeginningOfGPUTime) {
+        // Nothing pending deletion.
+        return false;
+    }
+
+    Queue* queue = ToBackend(GetQueue());
+
+    if (deletionSerial > queue->GetLastSubmittedCommandSerial()) {
+        // Submit any pending commands to ensure that the pending deletion serial completes. One
+        // complication here is that there might not be any pending commands and the queue would
+        // skip commit. Getting the recording context works makes it look like there is work to
+        // submit in all cases.
+        // TODO(crbug.com/398193014): If there is no work in the queue to submit then the device
+        // should be able to immediately delete objects enqueued for deletion after tick completes.
+        queue->GetPendingRecordingContext();
+    }
+
+    if (ConsumedError(TickImpl())) {
+        return false;
+    }
+    DAWN_ASSERT(deletionSerial <= queue->GetLastSubmittedCommandSerial());
+
+    // Check again if there is anything left to delete as tick might have deleted objects.
+    return std::max(GetFencedDeleter()->GetLastPendingDeletionSerial(),
+                    GetResourceMemoryAllocator()->GetLastPendingDeletionSerial()) !=
+           kBeginningOfGPUTime;
 }
 
 void Device::PerformIdleTasksImpl() {

@@ -285,9 +285,9 @@ MemoryUsageInfo ComputeEstimatedMemoryUsageInfo(WGPUDevice device) {
     return FromAPI(device)->ComputeEstimatedMemoryUsage();
 }
 
-void ReduceMemoryUsage(WGPUDevice device) {
+bool ReduceMemoryUsage(WGPUDevice device) {
     auto deviceLock(FromAPI(device)->GetScopedLock());
-    FromAPI(device)->ReduceMemoryUsage();
+    return FromAPI(device)->ReduceMemoryUsage();
 }
 
 void PerformIdleTasks(const wgpu::Device& device) {
