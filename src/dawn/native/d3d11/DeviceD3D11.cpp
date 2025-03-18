@@ -162,9 +162,13 @@ MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
 
     mIsDebugLayerEnabled = IsDebugLayerEnabled(mD3d11Device);
 
-    // Get the ID3D11Device5 interface which is need for creating fences.
-    // TODO(dawn:1741): Handle the case where ID3D11Device5 is not available.
-    DAWN_TRY(CheckHRESULT(mD3d11Device.As(&mD3d11Device5), "D3D11: getting ID3D11Device5"));
+    DAWN_TRY(CheckHRESULT(mD3d11Device.As(&mD3d11Device3), "D3D11: getting ID3D11Device3"));
+
+    if (!IsToggleEnabled(Toggle::D3D11DisableFence)) {
+        // Get the ID3D11Device5 interface which is need for creating fences. This interface is only
+        // available since Win 10 Creators Update so don't return on error here.
+        mD3d11Device.As(&mD3d11Device5);
+    }
 
     Ref<Queue> queue;
     DAWN_TRY_ASSIGN(queue, Queue::Create(this, &descriptor->defaultQueue));
@@ -183,7 +187,14 @@ ID3D11Device* Device::GetD3D11Device() const {
     return mD3d11Device.Get();
 }
 
+ID3D11Device3* Device::GetD3D11Device3() const {
+    return mD3d11Device3.Get();
+}
+
 ID3D11Device5* Device::GetD3D11Device5() const {
+    // Some older devices don't support ID3D11Device5. Make sure we avoid calling this method in
+    // those cases. An assert here is to verify that.
+    DAWN_ASSERT(mD3d11Device5);
     return mD3d11Device5.Get();
 }
 

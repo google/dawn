@@ -1233,7 +1233,7 @@ GPUUsableBuffer::CreateD3D11UnorderedAccessViewFromD3DBuffer(ID3D11Buffer* d3d11
 
     ComPtr<ID3D11UnorderedAccessView1> uav;
     DAWN_TRY(CheckHRESULT(ToBackend(GetDevice())
-                              ->GetD3D11Device5()
+                              ->GetD3D11Device3()
                               ->CreateUnorderedAccessView1(d3d11Buffer, &desc, &uav),
                           "UnorderedAccessView creation"));
 

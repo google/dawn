@@ -196,7 +196,7 @@ MaybeError CommandRecordingContext::Initialize(Device* device) {
     DAWN_ASSERT(device);
     mDevice = device;
 
-    ID3D11Device5* d3d11Device = device->GetD3D11Device5();
+    ID3D11Device3* d3d11Device = device->GetD3D11Device3();
 
     if (ToBackend(device->GetPhysicalDevice())->IsSharedD3D11Device()) {
         const D3D_FEATURE_LEVEL featureLevels[] = {D3D_FEATURE_LEVEL_11_1, D3D_FEATURE_LEVEL_11_0};

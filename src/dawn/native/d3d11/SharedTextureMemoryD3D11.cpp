@@ -117,7 +117,7 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
     DAWN_INVALID_IF(descriptor->handle == nullptr, "shared HANDLE is missing.");
 
     ComPtr<ID3D11Resource> d3d11Resource;
-    DAWN_TRY(CheckHRESULT(device->GetD3D11Device5()->OpenSharedResource1(
+    DAWN_TRY(CheckHRESULT(device->GetD3D11Device3()->OpenSharedResource1(
                               descriptor->handle, IID_PPV_ARGS(&d3d11Resource)),
                           "D3D11 open shared handle"));
 

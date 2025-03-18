@@ -44,7 +44,7 @@
 namespace dawn::native::d3d11 {
 
 PhysicalDevice::PhysicalDevice(Backend* backend,
-                               ComPtr<IDXGIAdapter4> hardwareAdapter,
+                               ComPtr<IDXGIAdapter3> hardwareAdapter,
                                ComPtr<ID3D11Device> d3d11Device)
     : Base(backend, std::move(hardwareAdapter), wgpu::BackendType::D3D11),
       mIsSharedD3D11Device(!!d3d11Device),

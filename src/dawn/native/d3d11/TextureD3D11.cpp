@@ -374,7 +374,7 @@ ResultOrError<ComPtr<ID3D11RenderTargetView>> Texture::CreateD3D11RenderTargetVi
 
     ComPtr<ID3D11RenderTargetView1> rtv;
     DAWN_TRY(CheckHRESULT(ToBackend(GetDevice())
-                              ->GetD3D11Device5()
+                              ->GetD3D11Device3()
                               ->CreateRenderTargetView1(GetD3D11Resource(), &rtvDesc, &rtv),
                           "CreateRenderTargetView"));
 
@@ -1234,7 +1234,7 @@ ResultOrError<ID3D11ShaderResourceView*> TextureView::GetOrCreateD3D11ShaderReso
     }
 
     ComPtr<ID3D11ShaderResourceView1> srv;
-    DAWN_TRY(CheckHRESULT(device->GetD3D11Device5()->CreateShaderResourceView1(
+    DAWN_TRY(CheckHRESULT(device->GetD3D11Device3()->CreateShaderResourceView1(
                               ToBackend(GetTexture())->GetD3D11Resource(), &srvDesc, &srv),
                           "CreateShaderResourceView1"));
     mD3d11SharedResourceView = std::move(srv);
