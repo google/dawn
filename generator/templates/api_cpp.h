@@ -301,7 +301,7 @@ class ObjectBase {
     {%- if forced_default_value -%}
         {{" "}}= {{forced_default_value}}
     {%- elif member.json_data.get("no_default", false) -%}
-    {%- elif member.annotation in ["*", "const*"] and member.optional or member.default_value == "nullptr" -%}
+    {%- elif member.annotation in ["*", "const*", "const*const*"] and member.optional or member.default_value == "nullptr" -%}
         {{" "}}= nullptr
     {%- elif member.type.category == "object" and member.optional and is_struct -%}
         {{" "}}= nullptr

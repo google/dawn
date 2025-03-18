@@ -158,7 +158,7 @@ typedef struct {{API}}ChainedStruct {
 } {{API}}ChainedStruct {{API}}_STRUCTURE_ATTRIBUTE;
 
 {% macro render_c_default_value(member) -%}
-    {%- if member.annotation in ["*", "const*"] -%}
+    {%- if member.annotation in ["*", "const*", "const*const*"] -%}
         //* Pointer types should always default to NULL.
         NULL
     {%- elif member.type.category == "object" -%}
@@ -215,10 +215,12 @@ typedef struct {{API}}ChainedStruct {
                 //* probably update the json file to make it more consistent
                 //* for these types by using annotations.
                 NULL
+            {%- else -%}
+                {{- assert(false, 'Unknown type "' + member.type.name.get() + '" with annotations "' + member.annotation + '" when trying to render default value.') -}}
             {%- endif -%}
         {%- endif -%}
     {%- else -%}
-        {{- assert(false, 'Unknown type "' + member.type.name.get() + '" when trying to render default value.') -}}
+        {{- assert(false, 'Unknown type "' + member.type.name.get() + '" with annotations "' + member.annotation + '" when trying to render default value.') -}}
     {%- endif -%}
 {% endmacro %}
 {% macro nullable_annotation(record) -%}

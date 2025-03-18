@@ -50,7 +50,7 @@ namespace {{native_namespace}} {
 {% macro render_cpp_default_value(member, forced_default_value="") -%}
     {%- if forced_default_value -%}
         {{" "}}= {{forced_default_value}}
-    {%- elif member.annotation in ["*", "const*"] and member.optional or member.default_value == "nullptr" -%}
+    {%- elif member.annotation in ["*", "const*", "const*const*"] and member.optional or member.default_value == "nullptr" -%}
         {{" "}}= nullptr
     {%- elif member.type.category == "object" and member.optional -%}
         {{" "}}= nullptr
