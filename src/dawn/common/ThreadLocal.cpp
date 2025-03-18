@@ -68,8 +68,8 @@ ThreadUniqueId GetThreadUniqueId() {
     return sThreadRef.mThreadUniqueId;
 }
 
-bool IsThreadAlive(ThreadUniqueId ThreadUniqueId) {
-    return GetAliveThreads()->count(ThreadUniqueId);
+bool IsThreadAlive(ThreadUniqueId threadUniqueId) {
+    return GetAliveThreads()->count(threadUniqueId);
 }
 
 }  // namespace dawn
