@@ -45,7 +45,7 @@ namespace {
 void GenerateSPIRV(benchmark::State& state, std::string input_name) {
     auto res = bench::GetWgslProgram(input_name);
     if (res != Success) {
-        state.SkipWithError(res.Failure().reason.Str());
+        state.SkipWithError(res.Failure().reason);
         return;
     }
     for (auto _ : state) {
@@ -58,7 +58,7 @@ void GenerateSPIRV(benchmark::State& state, std::string input_name) {
 
         auto gen_res = Generate(ir.Get(), {});
         if (gen_res != Success) {
-            state.SkipWithError(gen_res.Failure().reason.Str());
+            state.SkipWithError(gen_res.Failure().reason);
         }
     }
 }

@@ -29,7 +29,7 @@
 #define SRC_TINT_LANG_GLSL_WRITER_RAISE_RAISE_H_
 
 #include "src/tint/lang/glsl/writer/common/options.h"
-#include "src/tint/utils/diagnostic/diagnostic.h"
+#include "src/tint/utils/result.h"
 
 // Forward declarations
 namespace tint::core::ir {
@@ -42,7 +42,7 @@ namespace tint::glsl::writer {
 /// @param module the core IR module to raise to MSL dialect
 /// @param options the writer options
 /// @returns success or failure
-diag::Result<SuccessType> Raise(core::ir::Module& module, const Options& options);
+Result<SuccessType> Raise(core::ir::Module& module, const Options& options);
 
 }  // namespace tint::glsl::writer
 

@@ -150,7 +150,7 @@ struct State {
 
 }  // namespace
 
-diag::Result<SuccessType> VectorElementPointer(core::ir::Module& ir) {
+Result<SuccessType> VectorElementPointer(core::ir::Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "spirv.VectorElementPointer",
                                           core::ir::Capabilities{
                                               core::ir::Capability::kAllowOverrides,

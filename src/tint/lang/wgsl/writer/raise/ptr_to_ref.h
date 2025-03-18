@@ -28,7 +28,7 @@
 #ifndef SRC_TINT_LANG_WGSL_WRITER_RAISE_PTR_TO_REF_H_
 #define SRC_TINT_LANG_WGSL_WRITER_RAISE_PTR_TO_REF_H_
 
-#include "src/tint/utils/diagnostic/diagnostic.h"
+#include "src/tint/utils/result.h"
 
 // Forward declarations.
 namespace tint::core::ir {
@@ -41,7 +41,7 @@ namespace tint::wgsl::writer::raise {
 /// reference types.
 /// @param module the module to transform
 /// @returns success or failure
-diag::Result<SuccessType> PtrToRef(core::ir::Module& module);
+Result<SuccessType> PtrToRef(core::ir::Module& module);
 
 }  // namespace tint::wgsl::writer::raise
 

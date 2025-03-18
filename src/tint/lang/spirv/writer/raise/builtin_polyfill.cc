@@ -1087,7 +1087,7 @@ struct State {
 
 }  // namespace
 
-diag::Result<SuccessType> BuiltinPolyfill(core::ir::Module& ir, bool use_vulkan_memory_model) {
+Result<SuccessType> BuiltinPolyfill(core::ir::Module& ir, bool use_vulkan_memory_model) {
     auto result = ValidateAndDumpIfNeeded(ir, "spirv.BuiltinPolyfill");
     if (result != Success) {
         return result.Failure();

@@ -63,7 +63,7 @@ diag::Result<core::ir::Module> ProgramToLoweredIR(const Program& program) {
     // Lower from WGSL-dialect to core-dialect
     auto res = Lower(ir.Get());
     if (res != Success) {
-        return res.Failure();
+        return diag::Failure{res.Failure().reason};
     }
     return ir;
 }

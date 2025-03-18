@@ -196,7 +196,7 @@ class Printer {
     }
 
     /// @returns the generated SPIR-V code on success, or failure
-    diag::Result<Output> Code() {
+    Result<Output> Code() {
         if (auto res = Generate(); res != Success) {
             return res.Failure();
         }
@@ -285,7 +285,7 @@ class Printer {
     bool zero_init_workgroup_memory_ = false;
 
     /// Builds the SPIR-V from the IR
-    diag::Result<SuccessType> Generate() {
+    Result<SuccessType> Generate() {
         auto valid = core::ir::ValidateAndDumpIfNeeded(ir_, "spirv.Printer");
         if (valid != Success) {
             return valid.Failure();
@@ -734,7 +734,7 @@ class Printer {
 
     /// Emit a function.
     /// @param func the function to emit
-    diag::Result<SuccessType> EmitFunction(core::ir::Function* func) {
+    Result<SuccessType> EmitFunction(core::ir::Function* func) {
         if (func->Params().Length() > 255) {
             // Tint transforms may add additional function parameters which can cause a valid input
             // shader to exceed SPIR-V's function parameter limit. There isn't much we can do about
@@ -742,7 +742,7 @@ class Printer {
             StringStream ss;
             ss << "Function '" << ir_.NameOf(func).Name()
                << "' has more than 255 parameters after running Tint transforms";
-            return diag::Failure{ss.str()};
+            return Failure{ss.str()};
         }
 
         auto id = Value(func);
@@ -2795,7 +2795,7 @@ class Printer {
 
 }  // namespace
 
-diag::Result<Output> Print(core::ir::Module& module, const Options& options) {
+Result<Output> Print(core::ir::Module& module, const Options& options) {
     return Printer{module, options}.Code();
 }
 

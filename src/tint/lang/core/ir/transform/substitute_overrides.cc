@@ -376,22 +376,24 @@ struct State {
 
 SubstituteOverridesConfig::SubstituteOverridesConfig() = default;
 
-diag::Result<SuccessType> SubstituteOverrides(Module& ir, const SubstituteOverridesConfig& cfg) {
-    auto result =
-        ValidateAndDumpIfNeeded(ir, "core.SubstituteOverrides", kSubstituteOverridesCapabilities);
-    if (result != Success) {
-        return result;
+Result<SuccessType> SubstituteOverrides(Module& ir, const SubstituteOverridesConfig& cfg) {
+    {
+        auto result = ValidateAndDumpIfNeeded(ir, "core.SubstituteOverrides",
+                                              kSubstituteOverridesCapabilities);
+        if (result != Success) {
+            return result.Failure();
+        }
     }
-
-    result = State{ir, cfg}.Process();
-    if (result != Success) {
-        return result;
+    {
+        auto result = State{ir, cfg}.Process();
+        if (result != Success) {
+            return Failure{result.Failure().reason.Str()};
+        }
     }
 
     // TODO(crbug.com/382300469): This function should take in a constant module but it does not due
     // to missing constant functions.
-    result = tint::core::ir::ValidateConstParam(ir);
-    return result;
+    return tint::core::ir::ValidateConstParam(ir);
 }
 
 }  // namespace tint::core::ir::transform

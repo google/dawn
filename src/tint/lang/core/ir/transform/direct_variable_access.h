@@ -29,8 +29,8 @@
 #define SRC_TINT_LANG_CORE_IR_TRANSFORM_DIRECT_VARIABLE_ACCESS_H_
 
 #include "src/tint/lang/core/ir/validator.h"
-#include "src/tint/utils/diagnostic/diagnostic.h"
 #include "src/tint/utils/reflection.h"
+#include "src/tint/utils/result.h"
 
 // Forward declarations.
 namespace tint::core::ir {
@@ -70,9 +70,9 @@ struct DirectVariableAccessOptions {
 ///
 /// @param module the module to transform
 /// @param options the options
-/// @returns error diagnostics on failure
-diag::Result<SuccessType> DirectVariableAccess(Module& module,
-                                               const DirectVariableAccessOptions& options);
+/// @returns error on failure
+Result<SuccessType> DirectVariableAccess(Module& module,
+                                         const DirectVariableAccessOptions& options);
 
 }  // namespace tint::core::ir::transform
 

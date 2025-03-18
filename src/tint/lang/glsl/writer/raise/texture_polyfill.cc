@@ -1228,7 +1228,7 @@ struct State {
 
 }  // namespace
 
-diag::Result<SuccessType> TexturePolyfill(core::ir::Module& ir, const TexturePolyfillConfig& cfg) {
+Result<SuccessType> TexturePolyfill(core::ir::Module& ir, const TexturePolyfillConfig& cfg) {
     auto result = ValidateAndDumpIfNeeded(ir, "glsl.TexturePolyfill");
     if (result != Success) {
         return result.Failure();

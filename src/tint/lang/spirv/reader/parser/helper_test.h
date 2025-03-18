@@ -46,7 +46,7 @@ namespace tint::spirv::reader {
 #define EXPECT_IR(asm, ir)                                                                  \
     do {                                                                                    \
         auto result = Run(asm);                                                             \
-        ASSERT_EQ(result, Success) << result.Failure().reason.Str();                        \
+        ASSERT_EQ(result, Success) << result.Failure().reason;                              \
         auto got = "\n" + result.Get();                                                     \
         ASSERT_THAT(got, testing::HasSubstr(ir)) << "GOT:\n" << got << "EXPECTED:\n" << ir; \
     } while (false)
@@ -58,7 +58,7 @@ class SpirvParserTestHelperBase : public BASE {
     /// Run the parser on a SPIR-V module and return the Tint IR or an error string.
     /// @param spirv_asm the SPIR-V assembly to parse
     /// @returns the disassembled Tint IR or an error
-    diag::Result<std::string> Run(std::string spirv_asm) {
+    Result<std::string> Run(std::string spirv_asm) {
         // Assemble the SPIR-V input.
         auto binary = Assemble(spirv_asm);
         if (binary != Success) {

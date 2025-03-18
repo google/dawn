@@ -264,7 +264,7 @@ MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
     }
 
     TRACE_EVENT0(tracePlatform.UnsafeGetValue(), General, "tint::hlsl::writer::Generate");
-    tint::diag::Result<tint::hlsl::writer::Output> result;
+    tint::Result<tint::hlsl::writer::Output> result;
     if (r.useTintIR) {
         // Convert the AST program to an IR module.
         auto ir = tint::wgsl::reader::ProgramToLoweredIR(transformedProgram);
@@ -281,7 +281,7 @@ MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
 
             DAWN_INVALID_IF(substituteOverridesResult != tint::Success,
                             "Pipeline override substitution (IR) failed:\n%s",
-                            substituteOverridesResult.Failure().reason.Str());
+                            substituteOverridesResult.Failure().reason);
         }
 
         result = tint::hlsl::writer::Generate(ir.Get(), r.tintOptions);
@@ -311,7 +311,7 @@ MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
     }
 
     DAWN_INVALID_IF(result != tint::Success, "An error occurred while generating HLSL:\n%s",
-                    result.Failure().reason.Str());
+                    result.Failure().reason);
 
     if (r.useTintIR && r.stage == SingleShaderStage::Vertex) {
         usesVertexIndex = result->has_vertex_index;

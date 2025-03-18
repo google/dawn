@@ -157,7 +157,7 @@ struct State {
 
 }  // namespace
 
-diag::Result<SuccessType> SimdBallot(core::ir::Module& ir) {
+Result<SuccessType> SimdBallot(core::ir::Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "msl.SimdBallot");
     if (result != Success) {
         return result.Failure();

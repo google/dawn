@@ -78,7 +78,7 @@ $B1: {  # root
     SubstituteOverridesConfig cfg{};
     auto result = RunWithFailure(SubstituteOverrides, cfg);
     ASSERT_NE(result, Success);
-    EXPECT_EQ(result.Failure().reason.Str(),
+    EXPECT_EQ(result.Failure().reason,
               R"(1:2 error: Initializer not provided for override, and override not overridden.)");
 }
 
@@ -367,7 +367,7 @@ $B1: {  # root
     cfg.map[OverrideId{2}] = 125.0;
     auto result = RunWithFailure(SubstituteOverrides, cfg);
     ASSERT_NE(result, Success);
-    EXPECT_EQ(result.Failure().reason.Str(),
+    EXPECT_EQ(result.Failure().reason,
               R"(error: The sourceLaneIndex argument of subgroupShuffle must be less than 128)");
 }
 
@@ -411,8 +411,7 @@ $B1: {  # root
     cfg.map[OverrideId{2}] = -65505.0 - 4.0;
     auto result = RunWithFailure(SubstituteOverrides, cfg);
     ASSERT_NE(result, Success);
-    EXPECT_EQ(result.Failure().reason.Str(),
-              R"(error: value -65505.0 cannot be represented as 'f16')");
+    EXPECT_EQ(result.Failure().reason, R"(error: value -65505.0 cannot be represented as 'f16')");
 }
 
 TEST_F(IR_SubstituteOverridesTest, OverrideWithComplexGenError) {
@@ -452,7 +451,7 @@ $B1: {  # root
     auto result = RunWithFailure(SubstituteOverrides, cfg);
     ASSERT_NE(result, Success);
     EXPECT_EQ(
-        result.Failure().reason.Str(),
+        result.Failure().reason,
         R"(1:2 error: '340282346638528859811704183484516925440.0 + 340282346638528859811704183484516925440.0' cannot be represented as 'f32')");
 }
 
@@ -1127,8 +1126,7 @@ $B1: {  # root
 
     auto result = RunWithFailure(SubstituteOverrides, cfg);
     ASSERT_NE(result, Success);
-    EXPECT_EQ(result.Failure().reason.Str(),
-              R"(error: '1.0 / 0.0' cannot be represented as 'f32')");
+    EXPECT_EQ(result.Failure().reason, R"(error: '1.0 / 0.0' cannot be represented as 'f32')");
 }
 
 TEST_F(IR_SubstituteOverridesTest, OverrideCondComplexConstExprSuccess) {
@@ -1458,7 +1456,7 @@ $B1: {  # root
 
     auto result = RunWithFailure(SubstituteOverrides, cfg);
     ASSERT_NE(result, Success);
-    EXPECT_EQ(result.Failure().reason.Str(), R"(error: index 10 out of bounds [0..3])");
+    EXPECT_EQ(result.Failure().reason, R"(error: index 10 out of bounds [0..3])");
 }
 
 TEST_F(IR_SubstituteOverridesTest, OverrideRuntimeSizedArrayFailure) {
@@ -1500,7 +1498,7 @@ $B1: {  # root
 
     auto result = RunWithFailure(SubstituteOverrides, cfg);
     ASSERT_NE(result, Success);
-    EXPECT_EQ(result.Failure().reason.Str(), R"(error: index -10 out of bounds)");
+    EXPECT_EQ(result.Failure().reason, R"(error: index -10 out of bounds)");
 }
 
 TEST_F(IR_SubstituteOverridesTest, OverrideConstruct) {
@@ -1592,7 +1590,7 @@ $B1: {  # root
     auto result = RunWithFailure(SubstituteOverrides, cfg);
     ASSERT_NE(result, Success);
     EXPECT_EQ(
-        result.Failure().reason.Str(),
+        result.Failure().reason,
         R"(error: Pipeline overridable constant 2 with value (-100.0)  is not representable in type (u32))");
 }
 
@@ -1614,7 +1612,7 @@ $B1: {  # root
     auto result = RunWithFailure(SubstituteOverrides, cfg);
     ASSERT_NE(result, Success);
     EXPECT_EQ(
-        result.Failure().reason.Str(),
+        result.Failure().reason,
         R"(error: Pipeline overridable constant 2 with value (8000000000.0)  is not representable in type (i32))");
 }
 
@@ -1636,7 +1634,7 @@ $B1: {  # root
     auto result = RunWithFailure(SubstituteOverrides, cfg);
     ASSERT_NE(result, Success);
     EXPECT_EQ(
-        result.Failure().reason.Str(),
+        result.Failure().reason,
         R"(error: Pipeline overridable constant 2 with value (31399999999999998802000170346751583059968.0)  is not representable in type (f32))");
 }
 
@@ -1658,7 +1656,7 @@ $B1: {  # root
     auto result = RunWithFailure(SubstituteOverrides, cfg);
     ASSERT_NE(result, Success);
     EXPECT_EQ(
-        result.Failure().reason.Str(),
+        result.Failure().reason,
         R"(error: Pipeline overridable constant 2 with value (65505.0)  is not representable in type (f16))");
 }
 

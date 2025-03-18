@@ -30,10 +30,11 @@
 #include <utility>
 
 #include "src/tint/utils/containers/hashmap.h"
+#include "src/tint/utils/diagnostic/diagnostic.h"
 
 namespace tint::spirv::writer {
 
-diag::Result<SuccessType> ValidateBindingOptions(const Options& options) {
+Result<SuccessType> ValidateBindingOptions(const Options& options) {
     diag::List diagnostics;
 
     tint::Hashmap<tint::BindingPoint, binding::BindingInfo, 8> seen_wgsl_bindings{};
@@ -92,27 +93,27 @@ diag::Result<SuccessType> ValidateBindingOptions(const Options& options) {
 
     if (!valid(options.bindings.uniform)) {
         diagnostics.AddNote(Source{}) << "when processing uniform";
-        return diag::Failure{std::move(diagnostics)};
+        return Failure{diagnostics.Str()};
     }
     if (!valid(options.bindings.storage)) {
         diagnostics.AddNote(Source{}) << "when processing storage";
-        return diag::Failure{std::move(diagnostics)};
+        return Failure{diagnostics.Str()};
     }
     if (!valid(options.bindings.texture)) {
         diagnostics.AddNote(Source{}) << "when processing texture";
-        return diag::Failure{std::move(diagnostics)};
+        return Failure{diagnostics.Str()};
     }
     if (!valid(options.bindings.storage_texture)) {
         diagnostics.AddNote(Source{}) << "when processing storage_texture";
-        return diag::Failure{std::move(diagnostics)};
+        return Failure{diagnostics.Str()};
     }
     if (!valid(options.bindings.sampler)) {
         diagnostics.AddNote(Source{}) << "when processing sampler";
-        return diag::Failure{std::move(diagnostics)};
+        return Failure{diagnostics.Str()};
     }
     if (!valid(options.bindings.input_attachment)) {
         diagnostics.AddNote(Source{}) << "when processing input_attachment";
-        return diag::Failure{std::move(diagnostics)};
+        return Failure{diagnostics.Str()};
     }
 
     for (const auto& it : options.bindings.external_texture) {
@@ -124,20 +125,20 @@ diag::Result<SuccessType> ValidateBindingOptions(const Options& options) {
         // Validate with the actual source regardless of what the remapper will do
         if (wgsl_seen(src_binding, plane0)) {
             diagnostics.AddNote(Source{}) << "when processing external_texture";
-            return diag::Failure{std::move(diagnostics)};
+            return Failure{diagnostics.Str()};
         }
 
         if (spirv_seen(plane0, src_binding)) {
             diagnostics.AddNote(Source{}) << "when processing external_texture";
-            return diag::Failure{std::move(diagnostics)};
+            return Failure{diagnostics.Str()};
         }
         if (spirv_seen(plane1, src_binding)) {
             diagnostics.AddNote(Source{}) << "when processing external_texture";
-            return diag::Failure{std::move(diagnostics)};
+            return Failure{diagnostics.Str()};
         }
         if (spirv_seen(metadata, src_binding)) {
             diagnostics.AddNote(Source{}) << "when processing external_texture";
-            return diag::Failure{std::move(diagnostics)};
+            return Failure{diagnostics.Str()};
         }
     }
 

@@ -37,11 +37,11 @@
 
 namespace tint::glsl::writer {
 
-diag::Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& options) {
+Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& options) {
     // Check for unsupported types.
     for (auto* ty : ir.Types()) {
         if (ty->Is<core::type::SubgroupMatrix>()) {
-            return diag::Failure("subgroup matrices are not supported by the GLSL backend");
+            return Failure("subgroup matrices are not supported by the GLSL backend");
         }
     }
 
@@ -59,7 +59,7 @@ diag::Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options&
 
         // The pixel_local extension is not supported by the GLSL backend.
         if (ptr->AddressSpace() == core::AddressSpace::kPixelLocal) {
-            return diag::Failure("pixel_local address space is not supported by the GLSL backend");
+            return Failure("pixel_local address space is not supported by the GLSL backend");
         }
 
         if (ptr->StoreType()->Is<core::type::Texture>()) {
@@ -73,7 +73,7 @@ diag::Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options&
                 }
             }
             if (!found) {
-                return diag::Failure("texture missing from texture_builtins_from_uniform list");
+                return Failure("texture missing from texture_builtins_from_uniform list");
             }
 
             // Check texel formats for read-write storage textures when targeting ES.
@@ -86,8 +86,7 @@ diag::Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options&
                             case core::TexelFormat::kR32Uint:
                                 break;
                             default:
-                                return diag::Failure(
-                                    "unsupported read-write storage texture format");
+                                return Failure("unsupported read-write storage texture format");
                         }
                     }
                 }
@@ -97,7 +96,7 @@ diag::Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options&
         if (ptr->AddressSpace() == core::AddressSpace::kPushConstant) {
             if (user_push_constant_size > 0) {
                 // We've already seen a user-declared push constant.
-                return diag::Failure("multiple user-declared push constants");
+                return Failure("multiple user-declared push constants");
             }
             user_push_constant_size = tint::RoundUp(4u, ptr->StoreType()->Size());
         }
@@ -111,10 +110,10 @@ diag::Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options&
         }
 
         if (core::IsSubgroup(call->Func())) {
-            return diag::Failure("subgroups are not supported by the GLSL backend");
+            return Failure("subgroups are not supported by the GLSL backend");
         }
         if (call->Func() == core::BuiltinFn::kInputAttachmentLoad) {
-            return diag::Failure("input attachments are not supported by the GLSL backend");
+            return Failure("input attachments are not supported by the GLSL backend");
         }
     }
 
@@ -130,13 +129,13 @@ diag::Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options&
                 for (auto* member : str->Members()) {
                     if (member->Attributes().builtin == core::BuiltinValue::kSubgroupInvocationId ||
                         member->Attributes().builtin == core::BuiltinValue::kSubgroupSize) {
-                        return diag::Failure("subgroups are not supported by the GLSL backend");
+                        return Failure("subgroups are not supported by the GLSL backend");
                     }
                 }
             } else {
                 if (param->Builtin() == core::BuiltinValue::kSubgroupInvocationId ||
                     param->Builtin() == core::BuiltinValue::kSubgroupSize) {
-                    return diag::Failure("subgroups are not supported by the GLSL backend");
+                    return Failure("subgroups are not supported by the GLSL backend");
                 }
             }
         }
@@ -145,7 +144,7 @@ diag::Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options&
         if (auto* str = func->ReturnType()->As<core::type::Struct>()) {
             for (auto* member : str->Members()) {
                 if (member->Attributes().builtin == core::BuiltinValue::kClipDistances) {
-                    return diag::Failure("clip_distances is not supported by the GLSL backend");
+                    return Failure("clip_distances is not supported by the GLSL backend");
                 }
             }
         }
@@ -175,24 +174,24 @@ diag::Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options&
 
     if (options.first_instance_offset &&
         !check_push_constant_offset(*options.first_instance_offset)) {
-        return diag::Failure("invalid offset for first_instance_offset push constant");
+        return Failure("invalid offset for first_instance_offset push constant");
     }
 
     if (options.first_vertex_offset && !check_push_constant_offset(*options.first_vertex_offset)) {
-        return diag::Failure("invalid offset for first_vertex_offset push constant");
+        return Failure("invalid offset for first_vertex_offset push constant");
     }
 
     if (options.depth_range_offsets) {
         if (!check_push_constant_offset(options.depth_range_offsets->max) ||
             !check_push_constant_offset(options.depth_range_offsets->min)) {
-            return diag::Failure("invalid offsets for depth range push constants");
+            return Failure("invalid offsets for depth range push constants");
         }
     }
 
     return Success;
 }
 
-diag::Result<Output> Generate(core::ir::Module& ir, const Options& options, const std::string&) {
+Result<Output> Generate(core::ir::Module& ir, const Options& options, const std::string&) {
     // Raise from core-dialect to GLSL-dialect.
     if (auto res = Raise(ir, options); res != Success) {
         return res.Failure();

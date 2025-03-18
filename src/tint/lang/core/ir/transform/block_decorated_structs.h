@@ -28,7 +28,7 @@
 #ifndef SRC_TINT_LANG_CORE_IR_TRANSFORM_BLOCK_DECORATED_STRUCTS_H_
 #define SRC_TINT_LANG_CORE_IR_TRANSFORM_BLOCK_DECORATED_STRUCTS_H_
 
-#include "src/tint/utils/diagnostic/diagnostic.h"
+#include "src/tint/utils/result.h"
 
 // Forward declarations.
 namespace tint::core::ir {
@@ -42,7 +42,7 @@ namespace tint::core::ir::transform {
 /// existing store type in a new structure if necessary.
 /// @param module the module to transform
 /// @returns success or failure
-diag::Result<SuccessType> BlockDecoratedStructs(Module& module);
+Result<SuccessType> BlockDecoratedStructs(Module& module);
 
 }  // namespace tint::core::ir::transform
 

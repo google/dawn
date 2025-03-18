@@ -29,7 +29,7 @@
 #define SRC_TINT_LANG_GLSL_WRITER_PRINTER_PRINTER_H_
 
 #include "src/tint/lang/glsl/writer/common/output.h"
-#include "src/tint/utils/diagnostic/diagnostic.h"
+#include "src/tint/utils/result.h"
 
 // Forward declarations
 namespace tint::core::ir {
@@ -44,7 +44,7 @@ namespace tint::glsl::writer {
 /// @returns the generated GLSL shader on success, or failure
 /// @param module the Tint IR module to generate
 /// @param options the options to use
-diag::Result<Output> Print(core::ir::Module& module, const Options& options);
+Result<Output> Print(core::ir::Module& module, const Options& options);
 
 }  // namespace tint::glsl::writer
 

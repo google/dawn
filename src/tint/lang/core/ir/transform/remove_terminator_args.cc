@@ -161,7 +161,7 @@ struct State {
 
 }  // namespace
 
-diag::Result<SuccessType> RemoveTerminatorArgs(Module& ir) {
+Result<SuccessType> RemoveTerminatorArgs(Module& ir) {
     auto result =
         ValidateAndDumpIfNeeded(ir, "core.RemoveTerminatorArgs", kRemoveTerminatorArgsCapabilities);
     if (result != Success) {

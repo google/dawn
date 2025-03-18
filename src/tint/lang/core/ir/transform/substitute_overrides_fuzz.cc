@@ -37,11 +37,7 @@ namespace {
 Result<SuccessType> SubstituteOverridesFuzzer(Module& ir,
                                               const fuzz::ir::Context&,
                                               const SubstituteOverridesConfig& cfg) {
-    auto res = SubstituteOverrides(ir, cfg);
-    if (res != Success) {
-        return Failure{res.Failure().reason.Str()};
-    }
-    return Success;
+    return SubstituteOverrides(ir, cfg);
 }
 
 }  // namespace

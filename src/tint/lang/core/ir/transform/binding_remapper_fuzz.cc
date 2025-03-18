@@ -37,11 +37,7 @@ Result<SuccessType> BindingRemapperFuzzer(
     Module& ir,
     const fuzz::ir::Context&,
     const std::unordered_map<BindingPoint, BindingPoint>& binding_points) {
-    auto res = BindingRemapper(ir, binding_points);
-    if (res != Success) {
-        return Failure{res.Failure().reason.Str()};
-    }
-    return Success;
+    return BindingRemapper(ir, binding_points);
 }
 
 }  // namespace

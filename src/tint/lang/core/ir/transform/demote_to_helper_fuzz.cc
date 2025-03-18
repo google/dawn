@@ -34,11 +34,7 @@ namespace tint::core::ir::transform {
 namespace {
 
 Result<SuccessType> DemoteToHelperFuzzer(Module& ir, const fuzz::ir::Context&) {
-    auto res = DemoteToHelper(ir);
-    if (res != Success) {
-        return Failure{res.Failure().reason.Str()};
-    }
-    return Success;
+    return DemoteToHelper(ir);
 }
 
 }  // namespace

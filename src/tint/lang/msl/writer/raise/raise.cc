@@ -56,7 +56,7 @@
 
 namespace tint::msl::writer {
 
-diag::Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
+Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
 #define RUN_TRANSFORM(name, ...)         \
     do {                                 \
         auto result = name(__VA_ARGS__); \

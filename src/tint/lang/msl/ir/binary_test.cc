@@ -74,7 +74,7 @@ TEST_F(IR_MslBinaryTest, MatchOverloadFromDialect) {
     core::ir::Capabilities caps;
     caps.Add(core::ir::Capability::kAllow8BitIntegers);
     auto res = core::ir::Validate(mod, caps);
-    EXPECT_EQ(res, Success) << res.Failure().reason.Str();
+    EXPECT_EQ(res, Success) << res.Failure().reason;
 }
 
 TEST_F(IR_MslBinaryTest, DoesNotMatchOverloadFromCore) {
@@ -88,7 +88,7 @@ TEST_F(IR_MslBinaryTest, DoesNotMatchOverloadFromCore) {
 
     auto res = core::ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
+    EXPECT_EQ(res.Failure().reason,
               R"(:3:5 error: binary: no matching overload for 'operator + (i32, i32)'
 
 1 candidate operator:

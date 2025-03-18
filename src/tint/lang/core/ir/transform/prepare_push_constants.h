@@ -31,8 +31,8 @@
 #include <map>
 
 #include "src/tint/utils/containers/hashmap.h"
-#include "src/tint/utils/diagnostic/diagnostic.h"
 #include "src/tint/utils/reflection.h"
+#include "src/tint/utils/result.h"
 #include "src/tint/utils/symbol/symbol.h"
 
 // Forward declarations.
@@ -87,8 +87,8 @@ struct PreparePushConstantsConfig {
 /// @param module the module to transform
 /// @param config the transform config
 /// @returns the generated push constant layout or failure
-diag::Result<PushConstantLayout> PreparePushConstants(Module& module,
-                                                      const PreparePushConstantsConfig& config);
+Result<PushConstantLayout> PreparePushConstants(Module& module,
+                                                const PreparePushConstantsConfig& config);
 
 }  // namespace tint::core::ir::transform
 

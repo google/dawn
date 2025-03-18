@@ -188,7 +188,7 @@ struct State {
 
 }  // namespace
 
-diag::Result<SuccessType> ConversionPolyfill(Module& ir, const ConversionPolyfillConfig& config) {
+Result<SuccessType> ConversionPolyfill(Module& ir, const ConversionPolyfillConfig& config) {
     auto result = ValidateAndDumpIfNeeded(ir, "core.ConversionPolyfill");
     if (result != Success) {
         return result;

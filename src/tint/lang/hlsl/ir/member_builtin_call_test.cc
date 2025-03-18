@@ -85,7 +85,7 @@ TEST_F(IR_HlslMemberBuiltinCallTest, DoesNotMatchNonMemberFunction) {
     auto res = core::ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(
-        res.Failure().reason.Str(),
+        res.Failure().reason,
         R"(:7:17 error: asint: no matching call to 'asint(hlsl.byte_address_buffer<read>, u32)'
 
     %3:u32 = %t.asint 2u
@@ -125,7 +125,7 @@ TEST_F(IR_HlslMemberBuiltinCallTest, DoesNotMatchIncorrectType) {
     auto res = core::ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(
-        res.Failure().reason.Str(),
+        res.Failure().reason,
         R"(:7:17 error: Store: no matching call to 'Store(hlsl.byte_address_buffer<read>, u32, u32)'
 
 1 candidate function:
@@ -184,7 +184,7 @@ TEST_F(IR_HlslMemberBuiltinCallTest, MissingResults) {
 
     auto res = core::ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
+    EXPECT_EQ(res.Failure().reason,
               R"(:7:16 error: Load: expected exactly 1 results, got 0
     undef = %t.Load 0u
                ^^^^
@@ -221,7 +221,7 @@ TEST_F(IR_HlslMemberBuiltinCallTest, TooFewArgs) {
 
     auto res = core::ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
+    EXPECT_EQ(res.Failure().reason,
               R"(:7:17 error: Load: no matching call to 'Load(hlsl.byte_address_buffer<read>)'
 
 24 candidate functions:
@@ -321,7 +321,7 @@ TEST_F(IR_HlslMemberBuiltinCallTest, TooManyArgs) {
     auto res = core::ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(
-        res.Failure().reason.Str(),
+        res.Failure().reason,
         R"(:7:17 error: Load: no matching call to 'Load(hlsl.byte_address_buffer<read>, u32, u32, u32)'
 
 24 candidate functions:

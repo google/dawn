@@ -241,7 +241,7 @@ struct State {
 
 }  // namespace
 
-diag::Result<SuccessType> PixelLocal(core::ir::Module& ir, const PixelLocalConfig& config) {
+Result<SuccessType> PixelLocal(core::ir::Module& ir, const PixelLocalConfig& config) {
     auto result = ValidateAndDumpIfNeeded(ir, "hlsl.PixelLocal",
                                           core::ir::Capabilities{
                                               core::ir::Capability::kAllowClipDistancesOnF32,

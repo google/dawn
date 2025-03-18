@@ -276,7 +276,7 @@ struct State {
 
 }  // namespace
 
-diag::Result<SuccessType> BitcastPolyfill(core::ir::Module& ir) {
+Result<SuccessType> BitcastPolyfill(core::ir::Module& ir) {
     auto result = ValidateAndDumpIfNeeded(
         ir, "glsl.BitcastPolyfill",
         core::ir::Capabilities{core::ir::Capability::kAllowHandleVarsWithoutBindings});

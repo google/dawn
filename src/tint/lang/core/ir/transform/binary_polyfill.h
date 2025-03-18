@@ -28,8 +28,8 @@
 #ifndef SRC_TINT_LANG_CORE_IR_TRANSFORM_BINARY_POLYFILL_H_
 #define SRC_TINT_LANG_CORE_IR_TRANSFORM_BINARY_POLYFILL_H_
 
-#include "src/tint/utils/diagnostic/diagnostic.h"
 #include "src/tint/utils/reflection.h"
+#include "src/tint/utils/result.h"
 
 // Forward declarations.
 namespace tint::core::ir {
@@ -54,7 +54,7 @@ struct BinaryPolyfillConfig {
 /// @param module the module to transform
 /// @param config the polyfill configuration
 /// @returns success or failure
-diag::Result<SuccessType> BinaryPolyfill(Module& module, const BinaryPolyfillConfig& config);
+Result<SuccessType> BinaryPolyfill(Module& module, const BinaryPolyfillConfig& config);
 
 }  // namespace tint::core::ir::transform
 

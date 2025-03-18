@@ -28,7 +28,7 @@
 #ifndef SRC_TINT_LANG_SPIRV_WRITER_RAISE_REMOVE_UNREACHABLE_IN_LOOP_CONTINUING_H_
 #define SRC_TINT_LANG_SPIRV_WRITER_RAISE_REMOVE_UNREACHABLE_IN_LOOP_CONTINUING_H_
 
-#include "src/tint/utils/diagnostic/diagnostic.h"
+#include "src/tint/utils/result.h"
 
 // Forward declarations.
 namespace tint::core::ir {
@@ -41,7 +41,7 @@ namespace tint::spirv::writer::raise {
 /// nested inside a loop continuing block, as SPIR-V's structured control flow rules prohibit this.
 /// @param module the module to transform
 /// @returns success or failure
-diag::Result<SuccessType> RemoveUnreachableInLoopContinuing(core::ir::Module& module);
+Result<SuccessType> RemoveUnreachableInLoopContinuing(core::ir::Module& module);
 
 }  // namespace tint::spirv::writer::raise
 

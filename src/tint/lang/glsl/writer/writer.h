@@ -32,7 +32,7 @@
 
 #include "src/tint/lang/glsl/writer/common/options.h"
 #include "src/tint/lang/glsl/writer/common/output.h"
-#include "src/tint/utils/diagnostic/diagnostic.h"
+#include "src/tint/utils/result.h"
 
 // Forward declarations
 namespace tint {
@@ -48,7 +48,7 @@ namespace tint::glsl::writer {
 /// @param ir the module
 /// @param options the writer options
 /// @returns Success or a failure message indicating why GLSL generation would fail
-diag::Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& options);
+Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& options);
 
 /// Generate GLSL for a program, according to a set of configuration options.
 /// The result will contain the GLSL and supplementary information, or failure.
@@ -57,9 +57,9 @@ diag::Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options&
 /// @param options the configuration options to use when generating GLSL
 /// @param entry_point the entry point to generate GLSL for
 /// @returns the resulting GLSL and supplementary information, or failure
-diag::Result<Output> Generate(core::ir::Module& ir,
-                              const Options& options,
-                              const std::string& entry_point);
+Result<Output> Generate(core::ir::Module& ir,
+                        const Options& options,
+                        const std::string& entry_point);
 
 }  // namespace tint::glsl::writer
 

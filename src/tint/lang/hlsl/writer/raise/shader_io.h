@@ -32,7 +32,7 @@
 #include <optional>
 
 #include "src/tint/api/common/binding_point.h"
-#include "src/tint/utils/diagnostic/diagnostic.h"
+#include "src/tint/utils/result.h"
 
 // Forward declarations.
 namespace tint::core::ir {
@@ -70,7 +70,7 @@ struct ShaderIOConfig {
 /// entry point parameter, and all outputs are wrapped in a struct and returned by the entry point.
 /// @param module the module to transform
 /// @returns success or failure
-diag::Result<SuccessType> ShaderIO(core::ir::Module& module, const ShaderIOConfig& config);
+Result<SuccessType> ShaderIO(core::ir::Module& module, const ShaderIOConfig& config);
 
 }  // namespace tint::hlsl::writer::raise
 

@@ -215,7 +215,6 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
     uint32_t sampleMask,
     const RenderPipeline* renderPipeline,
     const BindingInfoArray& moduleBindingInfo) {
-
     std::ostringstream errorStream;
     errorStream << "Tint MSL failure:\n";
 
@@ -346,14 +345,14 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
                         tint::core::ir::transform::SubstituteOverrides(ir.Get(), cfg);
                     DAWN_INVALID_IF(substituteOverridesResult != tint::Success,
                                     "Pipeline override substitution (IR) failed:\n%s",
-                                    substituteOverridesResult.Failure().reason.Str());
+                                    substituteOverridesResult.Failure().reason);
                 }
 
                 // Generate MSL.
                 auto result = tint::msl::writer::Generate(ir.Get(), r.tintOptions);
                 DAWN_INVALID_IF(result != tint::Success,
                                 "An error occurred while generating MSL:\n%s",
-                                result.Failure().reason.Str());
+                                result.Failure().reason);
 
                 // Workgroup validation has to come after `Generate` because it may require
                 // overrides to have been substituted.

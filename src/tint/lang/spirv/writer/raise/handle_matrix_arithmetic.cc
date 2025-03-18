@@ -162,7 +162,7 @@ struct State {
 
 }  // namespace
 
-diag::Result<SuccessType> HandleMatrixArithmetic(core::ir::Module& ir) {
+Result<SuccessType> HandleMatrixArithmetic(core::ir::Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "spirv.HandleMatrixArithmetic");
     if (result != Success) {
         return result.Failure();

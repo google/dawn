@@ -127,8 +127,8 @@ struct State {
 
 }  // namespace
 
-diag::Result<PushConstantLayout> PreparePushConstants(Module& ir,
-                                                      const PreparePushConstantsConfig& config) {
+Result<PushConstantLayout> PreparePushConstants(Module& ir,
+                                                const PreparePushConstantsConfig& config) {
     auto result = ValidateAndDumpIfNeeded(ir, "core.PreparePushConstants");
     if (result != Success) {
         return result.Failure();

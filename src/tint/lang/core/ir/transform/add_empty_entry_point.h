@@ -29,7 +29,7 @@
 #define SRC_TINT_LANG_CORE_IR_TRANSFORM_ADD_EMPTY_ENTRY_POINT_H_
 
 #include "src/tint/lang/core/ir/validator.h"
-#include "src/tint/utils/diagnostic/diagnostic.h"
+#include "src/tint/utils/result.h"
 
 // Forward declarations.
 namespace tint::core::ir {
@@ -46,7 +46,7 @@ const core::ir::Capabilities kAddEmptyEntryPointCapabilities{
 /// Add an empty entry point to the module, if no other entry points exist.
 /// @param module the module to transform
 /// @returns success or failure
-diag::Result<SuccessType> AddEmptyEntryPoint(Module& module);
+Result<SuccessType> AddEmptyEntryPoint(Module& module);
 
 }  // namespace tint::core::ir::transform
 

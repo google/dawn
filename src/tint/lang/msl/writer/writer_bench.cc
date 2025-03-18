@@ -41,7 +41,7 @@ namespace {
 void GenerateMSL(benchmark::State& state, std::string input_name) {
     auto res = bench::GetWgslProgram(input_name);
     if (res != Success) {
-        state.SkipWithError(res.Failure().reason.Str());
+        state.SkipWithError(res.Failure().reason);
         return;
     }
 
@@ -90,7 +90,7 @@ void GenerateMSL(benchmark::State& state, std::string input_name) {
 
         auto gen_res = Generate(ir.Get(), gen_options);
         if (gen_res != Success) {
-            state.SkipWithError(gen_res.Failure().reason.Str());
+            state.SkipWithError(gen_res.Failure().reason);
         }
     }
 }

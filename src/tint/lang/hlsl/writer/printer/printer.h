@@ -30,7 +30,7 @@
 
 #include "src/tint/lang/hlsl/writer/common/options.h"
 #include "src/tint/lang/hlsl/writer/common/output.h"
-#include "src/tint/utils/diagnostic/diagnostic.h"
+#include "src/tint/utils/result.h"
 
 // Forward declarations
 namespace tint::core::ir {
@@ -42,7 +42,7 @@ namespace tint::hlsl::writer {
 /// @param module the Tint IR module to generate
 /// @param options the printer options
 /// @returns the result of printing the HLSL shader on success, or failure
-diag::Result<Output> Print(core::ir::Module& module, const Options& options);
+Result<Output> Print(core::ir::Module& module, const Options& options);
 
 }  // namespace tint::hlsl::writer
 

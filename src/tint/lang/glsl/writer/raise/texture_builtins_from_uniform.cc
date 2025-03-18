@@ -215,8 +215,8 @@ struct State {
 
 }  // namespace
 
-diag::Result<SuccessType> TextureBuiltinsFromUniform(core::ir::Module& ir,
-                                                     const TextureBuiltinsFromUniformOptions& cfg) {
+Result<SuccessType> TextureBuiltinsFromUniform(core::ir::Module& ir,
+                                               const TextureBuiltinsFromUniformOptions& cfg) {
     auto result = ValidateAndDumpIfNeeded(ir, "glsl.TextureBuiltinsFromUniform");
     if (result != Success) {
         return result.Failure();

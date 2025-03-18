@@ -83,7 +83,7 @@ TEST_F(IR_MslMemberBuiltinCallTest, DoesNotMatchNonMemberFunction) {
     auto res = core::ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(
-        res.Failure().reason.Str(),
+        res.Failure().reason,
         R"(:3:17 error: atomic_load_explicit: no matching call to 'atomic_load_explicit(ptr<workgroup, atomic<u32>, read_write>, u32)'
 
     %3:u32 = %t.atomic_load_explicit 0u
@@ -128,7 +128,7 @@ TEST_F(IR_MslMemberBuiltinCallTest, MissingResults) {
 
     auto res = core::ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
+    EXPECT_EQ(res.Failure().reason,
               R"(:3:16 error: get_width: expected exactly 1 results, got 0
     undef = %t.get_width 0u
                ^^^^^^^^^
@@ -158,7 +158,7 @@ TEST_F(IR_MslMemberBuiltinCallTest, TooFewArgs) {
 
     auto res = core::ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
+    EXPECT_EQ(res.Failure().reason,
               R"(:3:17 error: get_width: no matching call to 'get_width(texture_2d<f32>)'
 
 16 candidate functions:
@@ -215,7 +215,7 @@ TEST_F(IR_MslMemberBuiltinCallTest, TooManyArgs) {
     auto res = core::ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(
-        res.Failure().reason.Str(),
+        res.Failure().reason,
         R"(:3:17 error: get_width: no matching call to 'get_width(texture_2d<f32>, u32, u32, u32)'
 
 16 candidate functions:

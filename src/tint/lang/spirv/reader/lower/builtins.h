@@ -28,7 +28,7 @@
 #ifndef SRC_TINT_LANG_SPIRV_READER_LOWER_BUILTINS_H_
 #define SRC_TINT_LANG_SPIRV_READER_LOWER_BUILTINS_H_
 
-#include "src/tint/utils/diagnostic/diagnostic.h"
+#include "src/tint/utils/result.h"
 
 // Forward declarations.
 namespace tint::core::ir {
@@ -41,7 +41,7 @@ namespace tint::spirv::reader::lower {
 /// core IR.
 /// @param module the module to transform
 /// @returns success or failure
-diag::Result<SuccessType> Builtins(core::ir::Module& module);
+Result<SuccessType> Builtins(core::ir::Module& module);
 
 }  // namespace tint::spirv::reader::lower
 

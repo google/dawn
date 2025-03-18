@@ -154,7 +154,7 @@ struct State {
 
 }  // namespace
 
-diag::Result<SuccessType> BinaryPolyfill(core::ir::Module& ir) {
+Result<SuccessType> BinaryPolyfill(core::ir::Module& ir) {
     auto result =
         ValidateAndDumpIfNeeded(ir, "msl.BinaryPolyfill",
                                 core::ir::Capabilities{

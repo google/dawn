@@ -356,7 +356,7 @@ struct State {
 
 }  // namespace
 
-diag::Result<SuccessType> ForkExplicitLayoutTypes(core::ir::Module& ir) {
+Result<SuccessType> ForkExplicitLayoutTypes(core::ir::Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "spirv.ForkExplicitLayoutTypes");
     if (result != Success) {
         return result;

@@ -64,7 +64,7 @@ class ConstParamValidator {
 
     /// Runs the const param validator over the module provided during construction
     /// @returns success or failure
-    diag::Result<SuccessType> Run();
+    Result<SuccessType> Run();
 
     void CheckSubgroupCall(const CoreBuiltinCall* call);
     void CheckBuiltinCall(const BuiltinCall* call);
@@ -290,7 +290,7 @@ void ConstParamValidator::CheckCoreBinaryCall(const CoreBinary* call) {
     }
 }
 
-diag::Result<SuccessType> ConstParamValidator::Run() {
+Result<SuccessType> ConstParamValidator::Run() {
     auto instructions = this->mod_.Instructions();
 
     for (auto inst : instructions) {
@@ -302,7 +302,7 @@ diag::Result<SuccessType> ConstParamValidator::Run() {
     }
 
     if (diagnostics_.ContainsErrors()) {
-        return diag::Failure{std::move(diagnostics_)};
+        return Failure{diagnostics_.Str()};
     }
 
     return Success;
@@ -310,10 +310,9 @@ diag::Result<SuccessType> ConstParamValidator::Run() {
 
 }  // namespace
 
-diag::Result<SuccessType> ValidateConstParam(Module& mod) {
+Result<SuccessType> ValidateConstParam(Module& mod) {
     ConstParamValidator v(mod);
-    auto ret = v.Run();
-    return ret;
+    return v.Run();
 }
 
 }  // namespace tint::core::ir

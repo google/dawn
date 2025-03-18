@@ -31,7 +31,7 @@
 #include <unordered_map>
 
 #include "src/tint/api/common/binding_point.h"
-#include "src/tint/utils/diagnostic/diagnostic.h"
+#include "src/tint/utils/result.h"
 
 // Forward declarations.
 namespace tint::core::ir {
@@ -63,7 +63,7 @@ struct ArrayLengthFromUniformResult {
 /// @param ubo_binding the binding point to use for the uniform buffer
 /// @param bindpoint_to_size_index the map from binding point to an index which holds the size
 /// @returns the transform result or failure
-diag::Result<ArrayLengthFromUniformResult> ArrayLengthFromUniform(
+Result<ArrayLengthFromUniformResult> ArrayLengthFromUniform(
     Module& module,
     BindingPoint ubo_binding,
     const std::unordered_map<BindingPoint, uint32_t>& bindpoint_to_size_index);

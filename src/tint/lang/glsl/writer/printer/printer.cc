@@ -125,7 +125,7 @@ class Printer : public tint::TextGenerator {
     Printer(core::ir::Module& module, const Options& options) : ir_(module), options_(options) {}
 
     /// @returns the generated GLSL shader
-    diag::Result<Output> Generate() {
+    tint::Result<Output> Generate() {
         auto valid = core::ir::ValidateAndDumpIfNeeded(
             ir_, "glsl.Printer",
             core::ir::Capabilities{core::ir::Capability::kAllowHandleVarsWithoutBindings});
@@ -2276,7 +2276,7 @@ bool IsKeyword(std::string_view ident) {
 
 }  // namespace
 
-diag::Result<Output> Print(core::ir::Module& module, const Options& options) {
+Result<Output> Print(core::ir::Module& module, const Options& options) {
     return Printer{module, options}.Generate();
 }
 

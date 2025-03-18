@@ -79,7 +79,7 @@ struct State {
 
 }  // namespace
 
-diag::Result<SuccessType> CombineAccessInstructions(Module& ir) {
+Result<SuccessType> CombineAccessInstructions(Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "core.CombineAccessInstructions");
     if (result != Success) {
         return result;

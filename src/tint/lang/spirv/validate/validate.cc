@@ -32,10 +32,11 @@
 #include <utility>
 
 #include "spirv-tools/libspirv.hpp"
+#include "src/tint/utils/diagnostic/diagnostic.h"
 
 namespace tint::spirv::validate {
 
-diag::Result<SuccessType> Validate(Slice<const uint32_t> spirv, spv_target_env target_env) {
+Result<SuccessType> Validate(Slice<const uint32_t> spirv, spv_target_env target_env) {
     Vector<diag::Diagnostic, 4> diags;
     diags.Push(diag::Diagnostic{});  // Filled in on error
 
@@ -90,7 +91,8 @@ diag::Result<SuccessType> Validate(Slice<const uint32_t> spirv, spv_target_env t
         diag.source.file = file.get();
         diag.owned_file = file;
     }
-    return diag::Failure{diag::List{std::move(diags)}};
+    auto list = diag::List(diags);
+    return Failure{list.Str()};
 }
 
 }  // namespace tint::spirv::validate

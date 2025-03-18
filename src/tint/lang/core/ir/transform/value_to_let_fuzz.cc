@@ -53,7 +53,7 @@ Result<SuccessType> ValueToLetFuzzer(Module& module,
 
     auto res = ValueToLet(module, config);
     if (res != Success) {
-        return Failure{res.Failure().reason.Str()};
+        return Failure{res.Failure().reason};
     }
     return Success;
 }

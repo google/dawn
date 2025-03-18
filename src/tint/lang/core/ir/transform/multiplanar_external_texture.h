@@ -29,7 +29,7 @@
 #define SRC_TINT_LANG_CORE_IR_TRANSFORM_MULTIPLANAR_EXTERNAL_TEXTURE_H_
 
 #include "src/tint/lang/core/common/multiplanar_options.h"
-#include "src/tint/utils/diagnostic/diagnostic.h"
+#include "src/tint/utils/result.h"
 
 // Forward declarations.
 namespace tint::core::ir {
@@ -44,7 +44,7 @@ namespace tint::core::ir::transform {
 /// @param module the module to transform
 /// @param options the external texture options
 /// @returns success or failure
-diag::Result<SuccessType> MultiplanarExternalTexture(
+Result<SuccessType> MultiplanarExternalTexture(
     Module& module,
     const tint::transform::multiplanar::BindingsMap& options);
 

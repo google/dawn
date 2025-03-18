@@ -34,11 +34,7 @@ namespace tint::wgsl::writer::raise {
 namespace {
 
 Result<SuccessType> PtrToRefFuzzer(core::ir::Module& ir, const fuzz::ir::Context&) {
-    auto res = PtrToRef(ir);
-    if (res != Success) {
-        return Failure{res.Failure().reason.Str()};
-    }
-    return Success;
+    return PtrToRef(ir);
 }
 
 }  // namespace

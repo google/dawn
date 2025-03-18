@@ -93,7 +93,7 @@ struct State {
 
 }  // namespace
 
-diag::Result<SuccessType> RemoveUnreachableInLoopContinuing(core::ir::Module& ir) {
+Result<SuccessType> RemoveUnreachableInLoopContinuing(core::ir::Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "spirv.RemoveUnreachableInLoopContinuing");
     if (result != Success) {
         return result;

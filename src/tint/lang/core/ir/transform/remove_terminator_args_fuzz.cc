@@ -34,11 +34,7 @@ namespace tint::core::ir::transform {
 namespace {
 
 Result<SuccessType> RemoveTerminatorArgsFuzzer(Module& ir, const fuzz::ir::Context&) {
-    auto res = RemoveTerminatorArgs(ir);
-    if (res != Success) {
-        return Failure{res.Failure().reason.Str()};
-    }
-    return Success;
+    return RemoveTerminatorArgs(ir);
 }
 
 }  // namespace

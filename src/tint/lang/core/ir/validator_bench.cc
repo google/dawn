@@ -45,7 +45,7 @@ namespace {
 void ValidateIR(benchmark::State& state, std::string input_name) {
     auto res = bench::GetWgslProgram(input_name);
     if (res != Success) {
-        state.SkipWithError(res.Failure().reason.Str());
+        state.SkipWithError(res.Failure().reason);
         return;
     }
 
@@ -59,7 +59,7 @@ void ValidateIR(benchmark::State& state, std::string input_name) {
     for (auto _ : state) {
         auto val_res = Validate(ir.Get(), {});
         if (val_res != Success) {
-            state.SkipWithError(val_res.Failure().reason.Str());
+            state.SkipWithError(val_res.Failure().reason);
         }
     }
 }

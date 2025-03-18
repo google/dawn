@@ -28,7 +28,7 @@
 #ifndef SRC_TINT_LANG_WGSL_WRITER_RAISE_VALUE_TO_LET_H_
 #define SRC_TINT_LANG_WGSL_WRITER_RAISE_VALUE_TO_LET_H_
 
-#include "src/tint/utils/diagnostic/diagnostic.h"
+#include "src/tint/utils/result.h"
 
 // Forward declarations.
 namespace tint::core::ir {
@@ -46,8 +46,8 @@ namespace tint::wgsl::writer::raise {
 /// * The value is used in a block different to the value's instruction.
 ///
 /// @param module the module to transform
-/// @returns error diagnostics on failure
-diag::Result<SuccessType> ValueToLet(core::ir::Module& module);
+/// @returns error on failure
+Result<SuccessType> ValueToLet(core::ir::Module& module);
 
 }  // namespace tint::wgsl::writer::raise
 

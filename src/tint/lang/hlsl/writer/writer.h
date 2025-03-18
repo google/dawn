@@ -30,7 +30,7 @@
 
 #include "src/tint/lang/hlsl/writer/common/options.h"
 #include "src/tint/lang/hlsl/writer/common/output.h"
-#include "src/tint/utils/diagnostic/diagnostic.h"
+#include "src/tint/utils/result.h"
 
 // Forward declarations
 namespace tint {
@@ -46,21 +46,21 @@ namespace tint::hlsl::writer {
 /// @param ir the module
 /// @param options the writer options
 /// @returns Success or a failure message indicating why HLSL generation would fail
-diag::Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& options);
+Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& options);
 
 /// Generate HLSL for a program, according to a set of configuration options.
 /// The result will contain the HLSL and supplementary information, or failure.
 /// @param ir the IR module to translate to HLSL
 /// @param options the configuration options to use when generating HLSL
 /// @returns the resulting HLSL and supplementary information, or failure
-diag::Result<Output> Generate(core::ir::Module& ir, const Options& options);
+Result<Output> Generate(core::ir::Module& ir, const Options& options);
 
 /// Generate HLSL for a program, according to a set of configuration options.
 /// The result will contain the HLSL and supplementary information, or failure.
 /// @param program the program to translate to HLSL
 /// @param options the configuration options to use when generating HLSL
 /// @returns the resulting HLSL and supplementary information, or failure
-diag::Result<Output> Generate(const Program& program, const Options& options);
+Result<Output> Generate(const Program& program, const Options& options);
 
 }  // namespace tint::hlsl::writer
 

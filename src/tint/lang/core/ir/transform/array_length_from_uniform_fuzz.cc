@@ -42,7 +42,7 @@ Result<SuccessType> ArrayLengthFromUniformFuzzer(
     const std::unordered_map<BindingPoint, uint32_t>& bindpoint_to_size_index) {
     if (auto res = ArrayLengthFromUniform(module, ubo_binding, bindpoint_to_size_index);
         res != Success) {
-        return Failure{res.Failure().reason.Str()};
+        return res.Failure();
     }
 
     return Success;

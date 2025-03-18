@@ -31,6 +31,7 @@
 #include "src/tint/lang/core/ir/let.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/phony.h"
+#include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/reference.h"
@@ -138,7 +139,19 @@ struct Impl {
 
 }  // namespace
 
-diag::Result<SuccessType> PtrToRef(core::ir::Module& mod) {
+Result<SuccessType> PtrToRef(core::ir::Module& mod) {
+    auto result =
+        core::ir::ValidateAndDumpIfNeeded(mod, "wgsl.PtrToRef",
+                                          core::ir::Capabilities{
+                                              core::ir::Capability::kAllowOverrides,
+                                              core::ir::Capability::kAllowPhonyInstructions,
+                                          }
+
+        );
+    if (result != Success) {
+        return result;
+    }
+
     Impl{mod}.Run();
 
     return Success;

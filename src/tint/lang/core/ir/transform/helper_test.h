@@ -62,7 +62,7 @@ class TransformTestBase : public BASE {
     /// @param transform_func the transform to run
     /// @param args the arguments to the transform function
     template <typename TRANSFORM, typename... ARGS>
-    diag::Result<SuccessType> RunWithFailure(TRANSFORM&& transform_func, ARGS&&... args) {
+    Result<SuccessType> RunWithFailure(TRANSFORM&& transform_func, ARGS&&... args) {
         return transform_func(mod, std::forward<ARGS>(args)...);
     }
 

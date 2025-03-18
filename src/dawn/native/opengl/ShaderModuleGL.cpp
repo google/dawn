@@ -536,7 +536,7 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
                         tint::core::ir::transform::SubstituteOverrides(ir.Get(), cfg);
                     DAWN_INVALID_IF(substituteOverridesResult != tint::Success,
                                     "Pipeline override substitution (IR) failed:\n%s",
-                                    substituteOverridesResult.Failure().reason.Str());
+                                    substituteOverridesResult.Failure().reason);
                 }
 
                 // Generate GLSL from Tint IR.
@@ -544,7 +544,7 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
                     tint::glsl::writer::Generate(ir.Get(), r.tintOptions, remappedEntryPoint);
                 DAWN_INVALID_IF(result != tint::Success,
                                 "An error occurred while generating GLSL:\n%s",
-                                result.Failure().reason.Str());
+                                result.Failure().reason);
 
                 // Workgroup validation has to come after `Generate` because it may require
                 // overrides to have been substituted.

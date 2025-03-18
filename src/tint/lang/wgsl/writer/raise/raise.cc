@@ -255,7 +255,7 @@ void ReplaceWorkgroupBarrier(core::ir::Builder& b, core::ir::CoreBuiltinCall* ca
 
 }  // namespace
 
-diag::Result<SuccessType> Raise(core::ir::Module& mod) {
+Result<SuccessType> Raise(core::ir::Module& mod) {
     core::ir::Builder b{mod};
     for (auto* inst : mod.Instructions()) {
         if (auto* call = inst->As<core::ir::CoreBuiltinCall>()) {

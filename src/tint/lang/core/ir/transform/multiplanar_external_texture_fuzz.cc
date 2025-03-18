@@ -37,11 +37,7 @@ Result<SuccessType> MultiplanarExternalTextureFuzzer(
     Module& ir,
     const fuzz::ir::Context&,
     const tint::transform::multiplanar::BindingsMap& multiplanar_map) {
-    auto res = MultiplanarExternalTexture(ir, multiplanar_map);
-    if (res != Success) {
-        return Failure{res.Failure().reason.Str()};
-    }
-    return Success;
+    return MultiplanarExternalTexture(ir, multiplanar_map);
 }
 
 }  // namespace

@@ -28,7 +28,7 @@
 #ifndef SRC_TINT_LANG_GLSL_WRITER_RAISE_BITCAST_POLYFILL_H_
 #define SRC_TINT_LANG_GLSL_WRITER_RAISE_BITCAST_POLYFILL_H_
 
-#include "src/tint/utils/diagnostic/diagnostic.h"
+#include "src/tint/utils/result.h"
 
 // Forward declarations.
 namespace tint::core::ir {
@@ -41,7 +41,7 @@ namespace tint::glsl::writer::raise {
 /// BitcastPolyfill is a transform that replaces calls to bitcasts with polyfills
 /// @param module the module to transform
 /// @returns success or failure
-diag::Result<SuccessType> BitcastPolyfill(core::ir::Module& module);
+Result<SuccessType> BitcastPolyfill(core::ir::Module& module);
 
 }  // namespace tint::glsl::writer::raise
 

@@ -29,7 +29,7 @@
 #define SRC_TINT_LANG_HLSL_WRITER_RAISE_PIXEL_LOCAL_H_
 
 #include "src/tint/lang/hlsl/writer/common/options.h"
-#include "src/tint/utils/diagnostic/diagnostic.h"
+#include "src/tint/utils/result.h"
 
 // Forward declarations.
 namespace tint::core::ir {
@@ -46,7 +46,7 @@ struct PixelLocalConfig {
 /// PixelLocal is a transform that implements the PixelLocal feature for HLSL.
 /// @param module the module to transform
 /// @returns success or failure
-diag::Result<SuccessType> PixelLocal(core::ir::Module& module, const PixelLocalConfig& config);
+Result<SuccessType> PixelLocal(core::ir::Module& module, const PixelLocalConfig& config);
 
 }  // namespace tint::hlsl::writer::raise
 

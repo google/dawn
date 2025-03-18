@@ -703,8 +703,7 @@ struct State {
 
 }  // namespace
 
-diag::Result<SuccessType> DirectVariableAccess(Module& ir,
-                                               const DirectVariableAccessOptions& options) {
+Result<SuccessType> DirectVariableAccess(Module& ir, const DirectVariableAccessOptions& options) {
     auto result =
         ValidateAndDumpIfNeeded(ir, "core.DirectVariableAccess", kDirectVariableAccessCapabilities);
     if (result != Success) {

@@ -123,7 +123,7 @@ class Printer : public tint::TextGenerator {
         : ir_(module), options_(options) {}
 
     /// @returns the generated MSL shader
-    diag::Result<Output> Generate() {
+    tint::Result<Output> Generate() {
         auto valid = core::ir::ValidateAndDumpIfNeeded(
             ir_, "msl.Printer",
             core::ir::Capabilities{
@@ -2114,7 +2114,7 @@ bool IsKeyword(std::string_view ident) {
 
 }  // namespace
 
-diag::Result<Output> Print(core::ir::Module& module, const Options& options) {
+Result<Output> Print(core::ir::Module& module, const Options& options) {
     return Printer{module, options}.Generate();
 }
 

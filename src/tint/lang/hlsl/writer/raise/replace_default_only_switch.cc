@@ -97,7 +97,7 @@ struct State {
 
 }  // namespace
 
-diag::Result<SuccessType> ReplaceDefaultOnlySwitch(core::ir::Module& ir) {
+Result<SuccessType> ReplaceDefaultOnlySwitch(core::ir::Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "hlsl.ReplaceDefaultOnlySwitch");
     if (result != Success) {
         return result.Failure();

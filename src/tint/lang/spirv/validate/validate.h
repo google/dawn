@@ -29,7 +29,8 @@
 #define SRC_TINT_LANG_SPIRV_VALIDATE_VALIDATE_H_
 
 #include "spirv-tools/libspirv.hpp"
-#include "src/tint/utils/diagnostic/diagnostic.h"
+#include "src/tint/utils/containers/slice.h"
+#include "src/tint/utils/result.h"
 
 namespace tint::spirv::validate {
 
@@ -37,7 +38,7 @@ namespace tint::spirv::validate {
 /// @param spirv the SPIR-V binary data
 /// @param target_env the target environment to validate against
 /// @return success or failure(s)
-diag::Result<SuccessType> Validate(Slice<const uint32_t> spirv, spv_target_env target_env);
+Result<SuccessType> Validate(Slice<const uint32_t> spirv, spv_target_env target_env);
 
 }  // namespace tint::spirv::validate
 

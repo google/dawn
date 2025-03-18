@@ -75,7 +75,7 @@ TEST_F(IR_MslBuiltinCallTest, DoesNotMatchMemberFunction) {
     auto res = core::ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(
-        res.Failure().reason.Str(),
+        res.Failure().reason,
         R"(:3:20 error: msl.sample: no matching call to 'msl.sample(texture_2d<f32>, sampler, vec2<f32>)'
 
     %5:vec4<f32> = msl.sample %t, %s, %coords

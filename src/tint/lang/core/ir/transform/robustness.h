@@ -31,8 +31,8 @@
 #include <unordered_set>
 
 #include "src/tint/api/common/binding_point.h"
-#include "src/tint/utils/diagnostic/diagnostic.h"
 #include "src/tint/utils/reflection.h"
+#include "src/tint/utils/result.h"
 
 // Forward declarations.
 namespace tint::core::ir {
@@ -86,7 +86,7 @@ struct RobustnessConfig {
 /// @param module the module to transform
 /// @param config the robustness configuration
 /// @returns success or failure
-diag::Result<SuccessType> Robustness(Module& module, const RobustnessConfig& config);
+Result<SuccessType> Robustness(Module& module, const RobustnessConfig& config);
 
 }  // namespace tint::core::ir::transform
 

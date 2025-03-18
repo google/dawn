@@ -111,8 +111,7 @@ struct State {
 
 }  // namespace
 
-diag::Result<SuccessType> OffsetFirstIndex(core::ir::Module& ir,
-                                           const OffsetFirstIndexConfig& config) {
+Result<SuccessType> OffsetFirstIndex(core::ir::Module& ir, const OffsetFirstIndexConfig& config) {
     auto result = ValidateAndDumpIfNeeded(ir, "glsl.OffsetFirstIndex",
                                           core::ir::Capabilities{
                                               core::ir::Capability::kAllowHandleVarsWithoutBindings,

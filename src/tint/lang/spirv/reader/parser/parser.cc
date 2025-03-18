@@ -71,7 +71,7 @@ class Parser {
   public:
     /// @param spirv the SPIR-V binary data
     /// @returns the generated SPIR-V IR module on success, or failure
-    diag::Result<core::ir::Module> Run(Slice<const uint32_t> spirv) {
+    Result<core::ir::Module> Run(Slice<const uint32_t> spirv) {
         // Validate the incoming SPIR-V binary.
         auto result = validate::Validate(spirv, kTargetEnv);
         if (result != Success) {
@@ -83,7 +83,7 @@ class Parser {
         spirv_context_ =
             spvtools::BuildModule(kTargetEnv, context.CContext()->consumer, spirv.data, spirv.len);
         if (!spirv_context_) {
-            return diag::Failure("failed to build the internal representation of the module");
+            return Failure("failed to build the internal representation of the module");
         }
 
         // Check for unsupported extensions.
@@ -91,7 +91,7 @@ class Parser {
             auto name = ext.GetOperand(0).AsString();
             if (name != "SPV_KHR_storage_buffer_storage_class" &&
                 name != "SPV_KHR_non_semantic_info") {
-                return diag::Failure("SPIR-V extension '" + name + "' is not supported");
+                return Failure("SPIR-V extension '" + name + "' is not supported");
             }
         }
 
@@ -105,7 +105,7 @@ class Parser {
             } else if (name.find("NonSemantic.") == 0) {
                 ignored_imports_.insert(import.result_id());
             } else {
-                return diag::Failure("Unrecognized extended instruction set: " + name);
+                return Failure("Unrecognized extended instruction set: " + name);
             }
         }
 
@@ -2142,7 +2142,7 @@ class Parser {
 
 }  // namespace
 
-diag::Result<core::ir::Module> Parse(Slice<const uint32_t> spirv) {
+Result<core::ir::Module> Parse(Slice<const uint32_t> spirv) {
     return Parser{}.Run(spirv);
 }
 

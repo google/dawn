@@ -50,15 +50,15 @@ class IRProgramTestBase : public BASE, public ProgramBuilder {
 
     /// Builds a core-dialect module from this ProgramBuilder.
     /// @returns the generated core-dialect module
-    diag::Result<core::ir::Module> Build() {
+    Result<core::ir::Module> Build() {
         Program program{resolver::Resolve(*this)};
         if (!program.IsValid()) {
-            return diag::Failure{program.Diagnostics()};
+            return Failure{program.Diagnostics().Str()};
         }
 
         auto result = wgsl::reader::ProgramToIR(program);
         if (result != Success) {
-            return result.Failure();
+            return Failure{result.Failure().reason.Str()};
         }
 
         // WGSL-dialect -> core-dialect
@@ -70,22 +70,24 @@ class IRProgramTestBase : public BASE, public ProgramBuilder {
         if (validate != Success) {
             return validate.Failure();
         }
-        return result;
+        return result.Move();
     }
 
     /// Build the module from the given WGSL.
     /// @param wgsl the WGSL to convert to IR
     /// @returns the generated module
-    diag::Result<core::ir::Module> Build(std::string wgsl) {
+    Result<core::ir::Module> Build(std::string wgsl) {
         Source::File file("test.wgsl", std::move(wgsl));
         auto result = wgsl::reader::WgslToIR(&file);
-        if (result == Success) {
-            auto validated = core::ir::Validate(result.Get(), kCapabilities);
-            if (validated != Success) {
-                return validated.Failure();
-            }
+        if (result != Success) {
+            return Failure{result.Failure().reason.Str()};
         }
-        return result;
+        auto validated = core::ir::Validate(result.Get(), kCapabilities);
+        if (validated != Success) {
+            return validated.Failure();
+        }
+
+        return result.Move();
     }
 
     core::ir::Capabilities kCapabilities =

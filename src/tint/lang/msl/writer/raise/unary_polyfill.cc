@@ -85,7 +85,7 @@ struct State {
 
 }  // namespace
 
-diag::Result<SuccessType> UnaryPolyfill(core::ir::Module& ir) {
+Result<SuccessType> UnaryPolyfill(core::ir::Module& ir) {
     auto result =
         ValidateAndDumpIfNeeded(ir, "msl.UnaryPolyfill",
                                 core::ir::Capabilities{

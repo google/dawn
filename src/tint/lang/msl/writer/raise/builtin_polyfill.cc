@@ -1058,7 +1058,7 @@ struct State {
 
 }  // namespace
 
-diag::Result<SuccessType> BuiltinPolyfill(core::ir::Module& ir) {
+Result<SuccessType> BuiltinPolyfill(core::ir::Module& ir) {
     auto result =
         ValidateAndDumpIfNeeded(ir, "msl.BuiltinPolyfill",
                                 core::ir::Capabilities{

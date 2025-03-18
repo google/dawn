@@ -200,7 +200,7 @@ struct State {
 
 }  // namespace
 
-diag::Result<SuccessType> BinaryPolyfill(Module& ir, const BinaryPolyfillConfig& config) {
+Result<SuccessType> BinaryPolyfill(Module& ir, const BinaryPolyfillConfig& config) {
     auto result = ValidateAndDumpIfNeeded(ir, "core.BinaryPolyfill");
     if (result != Success) {
         return result;

@@ -51,7 +51,7 @@ void Run(ir::Module& ir) {
 
 }  // namespace
 
-diag::Result<SuccessType> AddEmptyEntryPoint(Module& ir) {
+Result<SuccessType> AddEmptyEntryPoint(Module& ir) {
     auto result =
         ValidateAndDumpIfNeeded(ir, "core.AddEmptyEntryPoint", kAddEmptyEntryPointCapabilities);
     if (result != Success) {

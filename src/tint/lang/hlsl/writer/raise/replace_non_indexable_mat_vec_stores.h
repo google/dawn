@@ -28,7 +28,7 @@
 #ifndef SRC_TINT_LANG_HLSL_WRITER_RAISE_REPLACE_NON_INDEXABLE_MAT_VEC_STORES_H_
 #define SRC_TINT_LANG_HLSL_WRITER_RAISE_REPLACE_NON_INDEXABLE_MAT_VEC_STORES_H_
 
-#include "src/tint/utils/diagnostic/diagnostic.h"
+#include "src/tint/utils/result.h"
 
 // Forward declarations.
 namespace tint::core::ir {
@@ -50,7 +50,7 @@ namespace tint::hlsl::writer::raise {
 
 /// @param module the module to transform
 /// @returns success or failure
-diag::Result<SuccessType> ReplaceNonIndexableMatVecStores(core::ir::Module& module);
+Result<SuccessType> ReplaceNonIndexableMatVecStores(core::ir::Module& module);
 
 }  // namespace tint::hlsl::writer::raise
 

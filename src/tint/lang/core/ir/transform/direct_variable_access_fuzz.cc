@@ -36,11 +36,7 @@ namespace {
 Result<SuccessType> DirectVariableAccessFuzzer(Module& ir,
                                                const fuzz::ir::Context&,
                                                const DirectVariableAccessOptions& options) {
-    auto res = DirectVariableAccess(ir, options);
-    if (res != Success) {
-        return Failure{res.Failure().reason.Str()};
-    }
-    return Success;
+    return DirectVariableAccess(ir, options);
 }
 
 }  // namespace

@@ -28,7 +28,7 @@
 #ifndef SRC_TINT_LANG_SPIRV_WRITER_RAISE_VAR_FOR_DYNAMIC_INDEX_H_
 #define SRC_TINT_LANG_SPIRV_WRITER_RAISE_VAR_FOR_DYNAMIC_INDEX_H_
 
-#include "src/tint/utils/diagnostic/diagnostic.h"
+#include "src/tint/utils/result.h"
 
 // Forward declarations.
 namespace tint::core::ir {
@@ -43,7 +43,7 @@ namespace tint::spirv::writer::raise {
 /// composite.
 /// @param module the module to transform
 /// @returns success or failure
-diag::Result<SuccessType> VarForDynamicIndex(core::ir::Module& module);
+Result<SuccessType> VarForDynamicIndex(core::ir::Module& module);
 
 }  // namespace tint::spirv::writer::raise
 

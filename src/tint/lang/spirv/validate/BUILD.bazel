@@ -73,13 +73,11 @@ cc_library(
   deps = [
     "//src/tint/utils",
     "//src/tint/utils/containers",
-    "//src/tint/utils/diagnostic",
     "//src/tint/utils/ice",
     "//src/tint/utils/macros",
     "//src/tint/utils/math",
     "//src/tint/utils/memory",
     "//src/tint/utils/rtti",
-    "//src/tint/utils/text",
     "@gtest",
     "//src/utils",
   ] + select({

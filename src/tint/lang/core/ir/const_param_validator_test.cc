@@ -39,7 +39,6 @@
 #include "src/tint/lang/core/type/manager.h"
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/struct.h"
-#include "src/tint/utils/diagnostic/source.h"
 
 // These unit tests are used for internal development. CTS validation does a more complete job of
 // testing all expectations for const and override parameters.
@@ -94,8 +93,7 @@ TEST_F(IR_ConstParamValidatorTest, IncorrectDomainQuantizeF16) {
 
     auto res = ir::ValidateConstParam(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              "5:7 error: value 65505.0 cannot be represented as 'f16'");
+    EXPECT_EQ(res.Failure().reason, "5:7 error: value 65505.0 cannot be represented as 'f16'");
 }
 
 TEST_F(IR_ConstParamValidatorTest, CorrectDomainSubgroupsShuffleXor) {
@@ -144,7 +142,7 @@ TEST_F(IR_ConstParamValidatorTest, IncorrectDomainSubgroupsShuffleXor) {
 
     auto res = ir::ValidateConstParam(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
+    EXPECT_EQ(res.Failure().reason,
               R"(5:7 error: The mask argument of subgroupShuffleXor must be less than 128)");
 }
 
@@ -170,7 +168,7 @@ TEST_F(IR_ConstParamValidatorTest, IncorrectDomainSubgroupsShuffleDown) {
 
     auto res = ir::ValidateConstParam(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
+    EXPECT_EQ(res.Failure().reason,
               R"(5:7 error: The delta argument of subgroupShuffleDown must be less than 128)");
 }
 
@@ -197,7 +195,7 @@ TEST_F(IR_ConstParamValidatorTest, IncorrectDomainSubgroupsShuffle) {
     auto res = ir::ValidateConstParam(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(
-        res.Failure().reason.Str(),
+        res.Failure().reason,
         R"(5:7 error: The sourceLaneIndex argument of subgroupShuffle must be less than 128)");
 }
 
@@ -224,7 +222,7 @@ TEST_F(IR_ConstParamValidatorTest, IncorrectDomainSubgroupsShuffle_SignedHigh) {
     auto res = ir::ValidateConstParam(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(
-        res.Failure().reason.Str(),
+        res.Failure().reason,
         R"(5:7 error: The sourceLaneIndex argument of subgroupShuffle must be less than 128)");
 }
 
@@ -252,7 +250,7 @@ TEST_F(IR_ConstParamValidatorTest, IncorrectDomainSubgroupsShuffle_SignedLow) {
     auto res = ir::ValidateConstParam(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(
-        res.Failure().reason.Str(),
+        res.Failure().reason,
         R"(5:7 error: The sourceLaneIndex argument of subgroupShuffle must be greater than or equal to zero)");
 }
 
@@ -279,7 +277,7 @@ TEST_F(IR_ConstParamValidatorTest, IncorrectDomainkExtractBits) {
 
     auto res = ir::ValidateConstParam(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
+    EXPECT_EQ(res.Failure().reason,
               "5:7 error: 'offset' + 'count' must be less than or equal to the bit width of 'e'");
 }
 
@@ -331,7 +329,7 @@ TEST_F(IR_ConstParamValidatorTest, IncorrectDomainkExtractBits_Vec) {
 
     auto res = ir::ValidateConstParam(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
+    EXPECT_EQ(res.Failure().reason,
               "5:7 error: 'offset' + 'count' must be less than or equal to the bit width of 'e'");
 }
 
@@ -361,7 +359,7 @@ TEST_F(IR_ConstParamValidatorTest, IncorrectDomainkInsertBits_Vec) {
 
     auto res = ir::ValidateConstParam(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
+    EXPECT_EQ(res.Failure().reason,
               "5:7 error: 'offset' + 'count' must be less than or equal to the bit width of 'e'");
 }
 
@@ -390,7 +388,7 @@ TEST_F(IR_ConstParamValidatorTest, IncorrectDomainkInsertBits) {
 
     auto res = ir::ValidateConstParam(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
+    EXPECT_EQ(res.Failure().reason,
               "5:7 error: 'offset' + 'count' must be less than or equal to the bit width of 'e'");
 }
 
@@ -444,7 +442,7 @@ TEST_F(IR_ConstParamValidatorTest, IncorrectDomainClamp) {
 
     auto res = ir::ValidateConstParam(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
+    EXPECT_EQ(res.Failure().reason,
               "5:7 error: clamp called with 'low' (2.0) greater than 'high' (1.0)");
 }
 
@@ -498,7 +496,7 @@ TEST_F(IR_ConstParamValidatorTest, IncorrectDomainClamp_Vec) {
 
     auto res = ir::ValidateConstParam(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
+    EXPECT_EQ(res.Failure().reason,
               "5:7 error: clamp called with 'low' (4.0) greater than 'high' (2.0)");
 }
 
@@ -552,7 +550,7 @@ TEST_F(IR_ConstParamValidatorTest, IncorrectDomainSmoothstep_Vec) {
 
     auto res = ir::ValidateConstParam(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
+    EXPECT_EQ(res.Failure().reason,
               "5:7 error: smoothstep called with 'low' (3.0) equal to 'high' (3.0)");
 }
 
@@ -580,7 +578,7 @@ TEST_F(IR_ConstParamValidatorTest, IncorrectDomainLdexp_Vec) {
 
     auto res = ir::ValidateConstParam(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(), "5:7 error: e2 must be less than or equal to 128");
+    EXPECT_EQ(res.Failure().reason, "5:7 error: e2 must be less than or equal to 128");
 }
 
 TEST_F(IR_ConstParamValidatorTest, CorrectDomainLdexp_Vec) {
@@ -632,7 +630,7 @@ TEST_F(IR_ConstParamValidatorTest, IncorrectDomainLdexp) {
 
     auto res = ir::ValidateConstParam(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(), "5:7 error: e2 must be less than or equal to 16");
+    EXPECT_EQ(res.Failure().reason, "5:7 error: e2 must be less than or equal to 16");
 }
 
 TEST_F(IR_ConstParamValidatorTest, CorrectDomainLdexp) {
@@ -682,8 +680,7 @@ TEST_F(IR_ConstParamValidatorTest, IncorrectPack2x16Float) {
 
     auto res = ir::ValidateConstParam(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              "5:7 error: value 65505.0 cannot be represented as 'f16'");
+    EXPECT_EQ(res.Failure().reason, "5:7 error: value 65505.0 cannot be represented as 'f16'");
 }
 
 TEST_F(IR_ConstParamValidatorTest, CorrectPack2x16Float) {
@@ -759,7 +756,7 @@ TEST_F(IR_ConstParamValidatorTest, IncorrectDomainShiftLeft) {
     auto res = ir::ValidateConstParam(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(
-        res.Failure().reason.Str(),
+        res.Failure().reason,
         "5:7 error: shift left value must be less than the bit width of the lhs, which is 32");
 }
 
@@ -788,7 +785,7 @@ TEST_F(IR_ConstParamValidatorTest, IncorrectDomainShiftRight_Vec) {
     auto res = ir::ValidateConstParam(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(
-        res.Failure().reason.Str(),
+        res.Failure().reason,
         "5:7 error: shift left value must be less than the bit width of the lhs, which is 32");
 }
 
@@ -840,7 +837,7 @@ TEST_F(IR_ConstParamValidatorTest, IncorrectDomainDiv) {
 
     auto res = ir::ValidateConstParam(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(), "5:7 error: integer division by zero is invalid");
+    EXPECT_EQ(res.Failure().reason, "5:7 error: integer division by zero is invalid");
 }
 
 TEST_F(IR_ConstParamValidatorTest, IncorrectDomainModulo_Vec) {
@@ -867,7 +864,7 @@ TEST_F(IR_ConstParamValidatorTest, IncorrectDomainModulo_Vec) {
 
     auto res = ir::ValidateConstParam(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(), "5:7 error: integer division by zero is invalid");
+    EXPECT_EQ(res.Failure().reason, "5:7 error: integer division by zero is invalid");
 }
 
 }  // namespace

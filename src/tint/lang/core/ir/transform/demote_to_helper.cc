@@ -213,7 +213,7 @@ struct State {
 
 }  // namespace
 
-diag::Result<SuccessType> DemoteToHelper(Module& ir) {
+Result<SuccessType> DemoteToHelper(Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "core.DemoteToHelper", kDemoteToHelperCapabilities);
     if (result != Success) {
         return result;

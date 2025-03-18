@@ -305,7 +305,7 @@ struct State {
 
 }  // namespace
 
-diag::Result<SuccessType> ZeroInitWorkgroupMemory(Module& ir) {
+Result<SuccessType> ZeroInitWorkgroupMemory(Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "core.ZeroInitWorkgroupMemory");
     if (result != Success) {
         return result;

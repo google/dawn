@@ -28,7 +28,7 @@
 #ifndef SRC_TINT_LANG_MSL_WRITER_RAISE_SIMD_BALLOT_H_
 #define SRC_TINT_LANG_MSL_WRITER_RAISE_SIMD_BALLOT_H_
 
-#include "src/tint/utils/diagnostic/diagnostic.h"
+#include "src/tint/utils/result.h"
 
 // Forward declarations.
 namespace tint::core::ir {
@@ -41,7 +41,7 @@ namespace tint::msl::writer::raise {
 /// adding conversion and masking operations to produce the correct result.
 /// @param module the module to transform
 /// @returns success or failure
-diag::Result<SuccessType> SimdBallot(core::ir::Module& module);
+Result<SuccessType> SimdBallot(core::ir::Module& module);
 
 }  // namespace tint::msl::writer::raise
 

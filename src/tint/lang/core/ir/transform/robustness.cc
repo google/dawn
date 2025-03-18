@@ -380,7 +380,7 @@ struct State {
 
 }  // namespace
 
-diag::Result<SuccessType> Robustness(Module& ir, const RobustnessConfig& config) {
+Result<SuccessType> Robustness(Module& ir, const RobustnessConfig& config) {
     auto result = ValidateAndDumpIfNeeded(ir, "core.Robustness");
     if (result != Success) {
         return result;

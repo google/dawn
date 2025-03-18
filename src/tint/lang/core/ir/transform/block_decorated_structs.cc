@@ -117,7 +117,7 @@ void Run(Module& ir) {
 
 }  // namespace
 
-diag::Result<SuccessType> BlockDecoratedStructs(Module& ir) {
+Result<SuccessType> BlockDecoratedStructs(Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "core.BlockDecoratedStructs");
     if (result != Success) {
         return result;

@@ -29,7 +29,7 @@
 #define SRC_TINT_LANG_CORE_IR_VALIDATOR_H_
 
 #include "src/tint/utils/containers/enum_set.h"
-#include "src/tint/utils/diagnostic/diagnostic.h"
+#include "src/tint/utils/result.h"
 
 // Forward declarations
 namespace tint::core::ir {
@@ -73,16 +73,16 @@ using Capabilities = EnumSet<Capability>;
 /// @param mod the module to validate
 /// @param capabilities the optional capabilities that are allowed
 /// @returns success or failure
-diag::Result<SuccessType> Validate(const Module& mod, Capabilities capabilities = {});
+Result<SuccessType> Validate(const Module& mod, Capabilities capabilities = {});
 
 /// Validates the module @p ir and dumps its contents if required by the build configuration.
 /// @param ir the module to transform
 /// @param msg the msg to accompany the output
 /// @param capabilities the optional capabilities that are allowed
 /// @returns success or failure
-diag::Result<SuccessType> ValidateAndDumpIfNeeded(const Module& ir,
-                                                  const char* msg,
-                                                  Capabilities capabilities = {});
+Result<SuccessType> ValidateAndDumpIfNeeded(const Module& ir,
+                                            const char* msg,
+                                            Capabilities capabilities = {});
 
 }  // namespace tint::core::ir
 

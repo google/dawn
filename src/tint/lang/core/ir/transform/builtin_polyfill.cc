@@ -1144,7 +1144,7 @@ struct State {
 
 }  // namespace
 
-diag::Result<SuccessType> BuiltinPolyfill(Module& ir, const BuiltinPolyfillConfig& config) {
+Result<SuccessType> BuiltinPolyfill(Module& ir, const BuiltinPolyfillConfig& config) {
     auto result = ValidateAndDumpIfNeeded(ir, "core.BuiltinPolyfill");
     if (result != Success) {
         return result;

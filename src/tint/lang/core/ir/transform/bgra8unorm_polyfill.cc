@@ -181,7 +181,7 @@ struct State {
 
 }  // namespace
 
-diag::Result<SuccessType> Bgra8UnormPolyfill(Module& ir) {
+Result<SuccessType> Bgra8UnormPolyfill(Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "core.Bgra8UnormPolyfill");
     if (result != Success) {
         return result;

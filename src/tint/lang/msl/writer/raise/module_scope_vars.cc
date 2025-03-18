@@ -341,7 +341,7 @@ struct State {
 
 }  // namespace
 
-diag::Result<SuccessType> ModuleScopeVars(core::ir::Module& ir) {
+Result<SuccessType> ModuleScopeVars(core::ir::Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "msl.ModuleScopeVars");
     if (result != Success) {
         return result.Failure();

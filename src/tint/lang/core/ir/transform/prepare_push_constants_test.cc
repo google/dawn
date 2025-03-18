@@ -37,7 +37,7 @@ using namespace tint::core::number_suffixes;  // NOLINT
 
 class IR_PreparePushConstantsTests : public TransformTest {
   public:
-    diag::Result<PushConstantLayout> Run(PreparePushConstantsConfig config) {
+    Result<PushConstantLayout> Run(PreparePushConstantsConfig config) {
         // Run the transform.
         auto result = PreparePushConstants(mod, config);
         EXPECT_EQ(result, Success);

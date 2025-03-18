@@ -751,7 +751,7 @@ class Validator {
 
     /// Runs the validator over the module provided during construction
     /// @returns success or failure
-    diag::Result<SuccessType> Run();
+    Result<SuccessType> Run();
 
   private:
     /// Runs validation to confirm the structural soundness of the module.
@@ -1369,7 +1369,7 @@ Disassembler& Validator::Disassemble() {
     return *disassembler_;
 }
 
-diag::Result<SuccessType> Validator::Run() {
+Result<SuccessType> Validator::Run() {
     RunStructuralSoundnessChecks();
 
     if (!diagnostics_.ContainsErrors()) {
@@ -1382,7 +1382,7 @@ diag::Result<SuccessType> Validator::Run() {
 
     if (diagnostics_.ContainsErrors()) {
         diagnostics_.AddNote(Source{}) << "# Disassembly\n" << Disassemble().Text();
-        return diag::Failure{std::move(diagnostics_)};
+        return Failure{diagnostics_.Str()};
     }
     return Success;
 }
@@ -3691,14 +3691,18 @@ const core::type::Type* Validator::GetVectorPtrElementType(const Instruction* in
 
 }  // namespace
 
-diag::Result<SuccessType> Validate(const Module& mod, Capabilities capabilities) {
+Result<SuccessType> Validate(const Module& mod, Capabilities capabilities) {
     Validator v(mod, capabilities);
-    return v.Run();
+    auto res = v.Run();
+    if (res != Success) {
+        return res;
+    }
+    return Success;
 }
 
-diag::Result<SuccessType> ValidateAndDumpIfNeeded([[maybe_unused]] const Module& ir,
-                                                  [[maybe_unused]] const char* msg,
-                                                  [[maybe_unused]] Capabilities capabilities) {
+Result<SuccessType> ValidateAndDumpIfNeeded([[maybe_unused]] const Module& ir,
+                                            [[maybe_unused]] const char* msg,
+                                            [[maybe_unused]] Capabilities capabilities) {
 #if TINT_DUMP_IR_WHEN_VALIDATING
     auto printer = StyledTextPrinter::Create(stdout);
     std::cout << "=========================================================\n";

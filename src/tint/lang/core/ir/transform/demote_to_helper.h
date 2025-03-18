@@ -29,7 +29,7 @@
 #define SRC_TINT_LANG_CORE_IR_TRANSFORM_DEMOTE_TO_HELPER_H_
 
 #include "src/tint/lang/core/ir/validator.h"
-#include "src/tint/utils/diagnostic/diagnostic.h"
+#include "src/tint/utils/result.h"
 
 // Forward declarations.
 namespace tint::core::ir {
@@ -52,7 +52,7 @@ const core::ir::Capabilities kDemoteToHelperCapabilities{
 /// buffers and textures.
 /// @param module the module to transform
 /// @returns success or failure
-diag::Result<SuccessType> DemoteToHelper(Module& module);
+Result<SuccessType> DemoteToHelper(Module& module);
 
 }  // namespace tint::core::ir::transform
 

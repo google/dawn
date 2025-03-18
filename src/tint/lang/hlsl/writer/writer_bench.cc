@@ -38,7 +38,7 @@ namespace {
 void GenerateHLSL(benchmark::State& state, std::string input_name) {
     auto res = bench::GetWgslProgram(input_name);
     if (res != Success) {
-        state.SkipWithError(res.Failure().reason.Str());
+        state.SkipWithError(res.Failure().reason);
         return;
     }
     for (auto _ : state) {
@@ -53,7 +53,7 @@ void GenerateHLSL(benchmark::State& state, std::string input_name) {
         gen_options.bindings = GenerateBindings(res->program);
         auto gen_res = Generate(ir.Get(), gen_options);
         if (gen_res != Success) {
-            state.SkipWithError(gen_res.Failure().reason.Str());
+            state.SkipWithError(gen_res.Failure().reason);
         }
     }
 }
@@ -61,7 +61,7 @@ void GenerateHLSL(benchmark::State& state, std::string input_name) {
 void GenerateHLSL_AST(benchmark::State& state, std::string input_name) {
     auto res = bench::GetWgslProgram(input_name);
     if (res != Success) {
-        state.SkipWithError(res.Failure().reason.Str());
+        state.SkipWithError(res.Failure().reason);
         return;
     }
     for (auto _ : state) {
@@ -69,7 +69,7 @@ void GenerateHLSL_AST(benchmark::State& state, std::string input_name) {
         gen_options.bindings = GenerateBindings(res->program);
         auto gen_res = Generate(res->program, gen_options);
         if (gen_res != Success) {
-            state.SkipWithError(gen_res.Failure().reason.Str());
+            state.SkipWithError(gen_res.Failure().reason);
         }
     }
 }

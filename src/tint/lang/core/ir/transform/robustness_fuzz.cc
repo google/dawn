@@ -41,11 +41,7 @@ Result<SuccessType> RobustnessFuzzer(Module& module,
         return Failure{"config.bindings_ignored is not empty"};
     }
 
-    auto res = Robustness(module, config);
-    if (res != Success) {
-        return Failure{res.Failure().reason.Str()};
-    }
-    return Success;
+    return Robustness(module, config);
 }
 
 }  // namespace

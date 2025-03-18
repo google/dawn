@@ -294,7 +294,7 @@ struct State {
 
 }  // namespace
 
-diag::Result<SuccessType> RenameConflicts(core::ir::Module& ir) {
+Result<SuccessType> RenameConflicts(core::ir::Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "core.RenameConflicts", kRenameConflictsCapabilities);
     if (result != Success) {
         return result;

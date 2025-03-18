@@ -32,8 +32,8 @@
 
 #include "src/tint/api/common/override_id.h"
 #include "src/tint/lang/core/ir/validator.h"
-#include "src/tint/utils/diagnostic/diagnostic.h"
 #include "src/tint/utils/reflection.h"
+#include "src/tint/utils/result.h"
 
 // Forward declarations.
 namespace tint::core::ir {
@@ -74,7 +74,7 @@ struct SubstituteOverridesConfig {
 /// Substitute overrides to their constant values.
 /// @param module the module to transform
 /// @returns success or failure
-diag::Result<SuccessType> SubstituteOverrides(Module& module, const SubstituteOverridesConfig& cfg);
+Result<SuccessType> SubstituteOverrides(Module& module, const SubstituteOverridesConfig& cfg);
 
 }  // namespace tint::core::ir::transform
 

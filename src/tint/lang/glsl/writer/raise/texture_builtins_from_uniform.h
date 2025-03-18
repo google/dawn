@@ -29,7 +29,7 @@
 #define SRC_TINT_LANG_GLSL_WRITER_RAISE_TEXTURE_BUILTINS_FROM_UNIFORM_H_
 
 #include "src/tint/lang/glsl/writer/common/options.h"
-#include "src/tint/utils/diagnostic/diagnostic.h"
+#include "src/tint/utils/result.h"
 
 // Forward declarations.
 namespace tint::core::ir {
@@ -45,8 +45,8 @@ namespace tint::glsl::writer::raise {
 /// @param module the module to transform
 /// @param cfg the configuration
 /// @returns success or failure
-diag::Result<SuccessType> TextureBuiltinsFromUniform(core::ir::Module& module,
-                                                     const TextureBuiltinsFromUniformOptions& cfg);
+Result<SuccessType> TextureBuiltinsFromUniform(core::ir::Module& module,
+                                               const TextureBuiltinsFromUniformOptions& cfg);
 
 }  // namespace tint::glsl::writer::raise
 

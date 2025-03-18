@@ -71,7 +71,7 @@ class WgslIRWriterTest : public core::ir::IRTestHelper {
         result.ir_pre_raise = core::ir::Disassembler(mod).Plain();
 
         if (auto res = tint::wgsl::writer::Raise(mod); res != Success) {
-            result.err = res.Failure().reason.Str();
+            result.err = res.Failure().reason;
             return result;
         }
 

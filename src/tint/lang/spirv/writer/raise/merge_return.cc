@@ -321,7 +321,7 @@ struct State {
 
 }  // namespace
 
-diag::Result<SuccessType> MergeReturn(core::ir::Module& ir) {
+Result<SuccessType> MergeReturn(core::ir::Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "spirv.MergeReturn");
     if (result != Success) {
         return result;

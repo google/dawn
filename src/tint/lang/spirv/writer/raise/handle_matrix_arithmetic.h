@@ -28,7 +28,7 @@
 #ifndef SRC_TINT_LANG_SPIRV_WRITER_RAISE_HANDLE_MATRIX_ARITHMETIC_H_
 #define SRC_TINT_LANG_SPIRV_WRITER_RAISE_HANDLE_MATRIX_ARITHMETIC_H_
 
-#include "src/tint/utils/diagnostic/diagnostic.h"
+#include "src/tint/utils/result.h"
 
 // Forward declarations.
 namespace tint::core::ir {
@@ -41,7 +41,7 @@ namespace tint::spirv::writer::raise {
 /// SPIR-V intrinsics or polyfills.
 /// @param module the module to transform
 /// @returns success or failure
-diag::Result<SuccessType> HandleMatrixArithmetic(core::ir::Module& module);
+Result<SuccessType> HandleMatrixArithmetic(core::ir::Module& module);
 
 }  // namespace tint::spirv::writer::raise
 

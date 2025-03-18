@@ -34,11 +34,7 @@ namespace tint::wgsl::writer::raise {
 namespace {
 
 Result<SuccessType> RaiseFuzzer(core::ir::Module& ir, const fuzz::ir::Context&) {
-    auto res = Raise(ir);
-    if (res != Success) {
-        return Failure{res.Failure().reason.Str()};
-    }
-    return Success;
+    return Raise(ir);
 }
 
 }  // namespace

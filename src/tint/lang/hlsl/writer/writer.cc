@@ -41,11 +41,11 @@
 
 namespace tint::hlsl::writer {
 
-diag::Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& options) {
+Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& options) {
     // Check for unsupported types.
     for (auto* ty : ir.Types()) {
         if (ty->Is<core::type::SubgroupMatrix>()) {
-            return diag::Failure("subgroup matrices are not supported by the HLSL backend");
+            return Failure("subgroup matrices are not supported by the HLSL backend");
         }
     }
 
@@ -54,26 +54,26 @@ diag::Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options&
         auto* var = inst->As<core::ir::Var>();
         auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
         if (ptr->AddressSpace() == core::AddressSpace::kPushConstant) {
-            return diag::Failure("push constants are not supported by the HLSL backend");
+            return Failure("push constants are not supported by the HLSL backend");
         }
         if (ptr->AddressSpace() == core::AddressSpace::kPixelLocal) {
             // Check the pixel_local variables have corresponding entries in the PLS attachment map.
             auto* str = ptr->StoreType()->As<core::type::Struct>();
             for (uint32_t i = 0; i < str->Members().Length(); i++) {
                 if (options.pixel_local.attachments.count(i) == 0) {
-                    return diag::Failure("missing pixel local attachment for member index " +
-                                         std::to_string(i));
+                    return Failure("missing pixel local attachment for member index " +
+                                   std::to_string(i));
                 }
             }
         }
         if (ptr->StoreType()->Is<core::type::InputAttachment>()) {
-            return diag::Failure("input attachments are not supported by the HLSL backend");
+            return Failure("input attachments are not supported by the HLSL backend");
         }
     }
     return Success;
 }
 
-diag::Result<Output> Generate(core::ir::Module& ir, const Options& options) {
+Result<Output> Generate(core::ir::Module& ir, const Options& options) {
     // Raise the core-dialect to HLSL-dialect
     auto res = Raise(ir, options);
     if (res != Success) {
@@ -83,21 +83,21 @@ diag::Result<Output> Generate(core::ir::Module& ir, const Options& options) {
     return Print(ir, options);
 }
 
-diag::Result<Output> Generate(const Program& program, const Options& options) {
+Result<Output> Generate(const Program& program, const Options& options) {
     if (!program.IsValid()) {
-        return diag::Failure{program.Diagnostics()};
+        return Failure{program.Diagnostics().Str()};
     }
 
     // Sanitize the program.
     auto sanitized_result = Sanitize(program, options);
     if (!sanitized_result.program.IsValid()) {
-        return diag::Failure{sanitized_result.program.Diagnostics()};
+        return Failure{sanitized_result.program.Diagnostics().Str()};
     }
 
     // Generate the HLSL code.
     auto impl = std::make_unique<ASTPrinter>(sanitized_result.program);
     if (!impl->Generate()) {
-        return diag::Failure{impl->Diagnostics()};
+        return Failure{impl->Diagnostics().Str()};
     }
 
     Output output;

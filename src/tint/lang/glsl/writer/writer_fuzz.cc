@@ -127,7 +127,7 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module, const fuzz::ir::Context& 
 
     auto check = CanGenerate(module, options);
     if (check != Success) {
-        return Failure{check.Failure().reason.Str()};
+        return Failure{check.Failure().reason};
     }
 
     auto output = Generate(module, options, "");

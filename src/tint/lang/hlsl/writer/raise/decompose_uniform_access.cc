@@ -616,7 +616,7 @@ struct State {
 
 }  // namespace
 
-diag::Result<SuccessType> DecomposeUniformAccess(core::ir::Module& ir) {
+Result<SuccessType> DecomposeUniformAccess(core::ir::Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "hlsl.DecomposeUniformAccess",
                                           core::ir::Capabilities{
                                               core::ir::Capability::kAllowClipDistancesOnF32,

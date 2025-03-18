@@ -29,8 +29,8 @@
 #define SRC_TINT_LANG_CORE_IR_TRANSFORM_VALUE_TO_LET_H_
 
 #include "src/tint/lang/core/ir/validator.h"
-#include "src/tint/utils/diagnostic/diagnostic.h"
 #include "src/tint/utils/reflection.h"
+#include "src/tint/utils/result.h"
 
 // Forward declarations.
 namespace tint::core::ir {
@@ -70,8 +70,8 @@ struct ValueToLetConfig {
 ///
 /// @param module the module to transform
 /// @param cfg the configuration
-/// @returns error diagnostics on failure
-diag::Result<SuccessType> ValueToLet(Module& module, const ValueToLetConfig& cfg);
+/// @returns error on failure
+Result<SuccessType> ValueToLet(Module& module, const ValueToLetConfig& cfg);
 
 }  // namespace tint::core::ir::transform
 

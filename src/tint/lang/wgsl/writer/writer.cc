@@ -40,7 +40,7 @@
 
 namespace tint::wgsl::writer {
 
-diag::Result<Output> Generate(const Program& program, const Options& options) {
+Result<Output> Generate(const Program& program, const Options& options) {
     (void)options;
 
     Output output;
@@ -49,7 +49,7 @@ diag::Result<Output> Generate(const Program& program, const Options& options) {
         // Generate the WGSL code.
         auto impl = std::make_unique<SyntaxTreePrinter>(program);
         if (!impl->Generate()) {
-            return diag::Failure{impl->Diagnostics()};
+            return Failure{impl->Diagnostics().Str()};
         }
         output.wgsl = impl->Result();
     } else  // NOLINT(readability/braces)
@@ -58,7 +58,7 @@ diag::Result<Output> Generate(const Program& program, const Options& options) {
         // Generate the WGSL code.
         auto impl = std::make_unique<ASTPrinter>(program);
         if (!impl->Generate()) {
-            return diag::Failure{impl->Diagnostics()};
+            return Failure{impl->Diagnostics().Str()};
         }
         output.wgsl = impl->Result();
     }
@@ -66,7 +66,7 @@ diag::Result<Output> Generate(const Program& program, const Options& options) {
     return output;
 }
 
-diag::Result<Output> WgslFromIR(core::ir::Module& module, const ProgramOptions& options) {
+Result<Output> WgslFromIR(core::ir::Module& module, const ProgramOptions& options) {
     auto res = ProgramFromIR(module, options);
     if (res != Success) {
         return res.Failure();
@@ -74,7 +74,7 @@ diag::Result<Output> WgslFromIR(core::ir::Module& module, const ProgramOptions& 
     return Generate(res.Move(), Options{});
 }
 
-diag::Result<Program> ProgramFromIR(core::ir::Module& module, const ProgramOptions& options) {
+Result<Program> ProgramFromIR(core::ir::Module& module, const ProgramOptions& options) {
     // core-dialect -> WGSL-dialect
     if (auto res = Raise(module); res != Success) {
         return res.Failure();
@@ -82,7 +82,7 @@ diag::Result<Program> ProgramFromIR(core::ir::Module& module, const ProgramOptio
 
     auto program = IRToProgram(module, options);
     if (!program.IsValid()) {
-        return diag::Failure{program.Diagnostics()};
+        return Failure{program.Diagnostics().Str()};
     }
 
     return program;

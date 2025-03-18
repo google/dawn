@@ -112,7 +112,7 @@ struct State {
 
 }  // namespace
 
-diag::Result<SuccessType> RemoveContinueInSwitch(Module& ir) {
+Result<SuccessType> RemoveContinueInSwitch(Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "core.RemoveContinueInSwitch",
                                           core::ir::Capabilities{
                                               core::ir::Capability::kAllowVectorElementPointer,
