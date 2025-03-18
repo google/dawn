@@ -156,6 +156,7 @@ enum class Toggle {
     VulkanSkipDraw,
 
     D3D11UseUnmonitoredFence,
+    D3D11DisableFence,
     IgnoreImportedAHardwareBufferVulkanImageSize,
 
     EnumCount,

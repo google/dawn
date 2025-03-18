@@ -420,7 +420,8 @@ ResultOrError<ComPtr<ID3D11DepthStencilView>> Texture::CreateD3D11DepthStencilVi
 MaybeError Texture::SynchronizeTextureBeforeUse(
     const ScopedCommandRecordingContext* commandContext) {
     if (auto* contents = GetSharedResourceMemoryContents()) {
-        const auto& queueFence = ToBackend(GetDevice()->GetQueue())->GetSharedFence();
+        const auto* device = ToBackend(GetDevice());
+        const auto& queueFence = ToBackend(device->GetQueue())->GetSharedFence();
 
         SharedTextureMemoryBase::PendingFenceList fences;
         contents->AcquirePendingFences(&fences);
@@ -436,7 +437,9 @@ MaybeError Texture::SynchronizeTextureBeforeUse(
                 CheckHRESULT(commandContext->Wait(d3dFence->GetD3DFence(), fence.signaledValue),
                              "ID3D11DeviceContext4::Wait"));
         }
-        commandContext->SetNeedsFence();
+        if (!device->IsToggleEnabled(Toggle::D3D11DisableFence)) {
+            commandContext->SetNeedsFence();
+        }
     }
     if (mKeyedMutex != nullptr) {
         DAWN_TRY(commandContext->AcquireKeyedMutex(mKeyedMutex));

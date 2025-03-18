@@ -90,7 +90,7 @@ SharedTextureMemoryTestVulkanBackend::ChainBeginState(
 void SharedTextureMemoryNoFeatureTests::SetUp() {
     DAWN_TEST_UNSUPPORTED_IF(UsesWire());
     DawnTestWithParams<SharedTextureMemoryTestParams>::SetUp();
-    GetParam().mBackend->SetUp();
+    GetParam().mBackend->SetUp(device);
 }
 
 std::vector<wgpu::FeatureName> SharedTextureMemoryTests::GetRequiredFeatures() {
@@ -129,7 +129,7 @@ void SharedTextureMemoryTests::SetUp() {
                              !SupportsFeatures({wgpu::FeatureName::FlexibleTextureViews}) &&
                              GetParam().mLayerCount > 1);
 
-    GetParam().mBackend->SetUp();
+    GetParam().mBackend->SetUp(device);
 }
 
 void SharedTextureMemoryNoFeatureTests::TearDown() {
@@ -2261,6 +2261,10 @@ TEST_P(SharedTextureMemoryTests, RenderThenDropAllMemoriesThenSample) {
 TEST_P(SharedTextureMemoryTests, RenderThenLoseOrDestroyDeviceBeforeEndAccessThenSample) {
     // Not supported if using the same device. Not possible to lose one without losing the other.
     DAWN_TEST_UNSUPPORTED_IF(GetParam().mBackend->UseSameDevice());
+
+    // This test expects a fence returned from EndAccess, which is not possible if fences are
+    // disabled in D3D11.
+    DAWN_TEST_UNSUPPORTED_IF(IsD3D11() && HasToggleEnabled("d3d11_disable_fence"));
 
     // crbug.com/358166479
     DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && IsVulkan());

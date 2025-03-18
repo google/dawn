@@ -170,7 +170,7 @@ class Backend : public SharedTextureMemoryTestVulkanBackend {
     }
 
   private:
-    void SetUp() override {
+    void SetUp(const wgpu::Device& device) override {
         // Render nodes [1] are the primary interface for communicating with the GPU on
         // devices that support DRM. The actual filename of the render node is
         // implementation-specific, so we must scan through all possible filenames to find

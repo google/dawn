@@ -985,6 +985,7 @@ TEST_P(QueueWriteTextureSimpleTests, WriteStencilAspectAfterOtherQueueWriteTextu
 DAWN_INSTANTIATE_TEST(QueueWriteTextureSimpleTests,
                       D3D11Backend(),
                       D3D11Backend({"d3d11_use_unmonitored_fence"}),
+                      D3D11Backend({"d3d11_disable_fence"}),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),

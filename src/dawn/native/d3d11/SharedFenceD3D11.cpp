@@ -52,6 +52,8 @@ ResultOrError<Ref<SharedFence>> SharedFence::Create(
     Device* device,
     StringView label,
     const SharedFenceDXGISharedHandleDescriptor* descriptor) {
+    DAWN_ASSERT(!device->IsToggleEnabled(Toggle::D3D11DisableFence));
+
     DAWN_INVALID_IF(descriptor->handle == nullptr, "shared HANDLE is missing.");
 
     const auto& queueFence = ToBackend(device->GetQueue())->GetSharedFence();

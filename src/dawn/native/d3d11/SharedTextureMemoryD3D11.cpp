@@ -42,8 +42,10 @@ namespace dawn::native::d3d11 {
 
 namespace {
 
-ResultOrError<SharedTextureMemoryProperties>
-PropertiesFromD3D11Texture(Device* device, ID3D11Texture2D* d3d11Texture, bool isSharedWithHandle) {
+ResultOrError<SharedTextureMemoryProperties> PropertiesFromD3D11Texture(
+    Device* device,
+    const ComPtr<ID3D11Texture2D>& d3d11Texture,
+    bool isSharedWithHandle) {
     D3D11_TEXTURE2D_DESC desc;
     d3d11Texture->GetDesc(&desc);
     DAWN_INVALID_IF(isSharedWithHandle && desc.ArraySize != 1,
@@ -70,6 +72,14 @@ PropertiesFromD3D11Texture(Device* device, ID3D11Texture2D* d3d11Texture, bool i
                         "Resource Format (%s) with HANDLE is only supported if the D3D11 device "
                         "supports D3D11_SHARED_RESOURCE_TIER_2",
                         wgpuFormat);
+
+        if (device->IsToggleEnabled(Toggle::D3D11DisableFence)) {
+            ComPtr<IDXGIKeyedMutex> dxgiKeyedMutex;
+            HRESULT hr = d3d11Texture.As(&dxgiKeyedMutex);
+            DAWN_INVALID_IF(FAILED(hr),
+                            "Shared Resource must be created with a keyed mutex when D3D11 Fences "
+                            "are disabled.");
+        }
     }
 
     SharedTextureMemoryProperties properties;
@@ -121,7 +131,7 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
         CheckHRESULT(d3d11Resource.As(&d3d11Texture), "Cannot get ID3D11Texture2D from texture"));
 
     SharedTextureMemoryProperties properties;
-    DAWN_TRY_ASSIGN(properties, PropertiesFromD3D11Texture(device, d3d11Texture.Get(),
+    DAWN_TRY_ASSIGN(properties, PropertiesFromD3D11Texture(device, d3d11Texture,
                                                            /*isSharedWithHandle=*/true));
 
     auto result =
@@ -148,7 +158,7 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
                     device);
 
     SharedTextureMemoryProperties properties;
-    DAWN_TRY_ASSIGN(properties, PropertiesFromD3D11Texture(device, descriptor->texture.Get(),
+    DAWN_TRY_ASSIGN(properties, PropertiesFromD3D11Texture(device, descriptor->texture,
                                                            /*isSharedWithHandle=*/false));
 
     auto result =
