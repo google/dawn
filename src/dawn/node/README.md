@@ -6,7 +6,8 @@ Note: This code is currently WIP. There are a number of [known issues](#known-is
 
 ### System requirements
 
-- [CMake 3.16](https://cmake.org/download/) or greater.
+- [GN](https://gn.googlesource.com/gn/) if using the GN build. This is installed as part of depot_tools (see below).
+- [CMake 3.16](https://cmake.org/download/) or greater, if using the CMake build.
   (Check `cmake_minimum_required` in the [CMakeLists.txt](../../../CMakeLists.txt)
   file in the project root.)
 - [Go 1.18](https://golang.org/dl/) or greater.
@@ -38,7 +39,15 @@ If you don't have the `libx11-xbc-dev` supporting library, then you must use the
 
 ### Build
 
-Currently, the node bindings can only be built with CMake:
+#### With GN
+
+Set `dawn_build_node_bindings = true` in `args.gn` and build the `dawn_node` target:
+```sh
+gn gen out/Default --args='dawn_build_node_bindings=true'
+autoninja -C out/Default dawn_node
+```
+
+#### With CMake
 
 ```sh
 mkdir <build-output-path>
