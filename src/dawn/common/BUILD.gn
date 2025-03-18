@@ -306,6 +306,8 @@ if (is_win || is_linux || is_chromeos || is_mac || is_fuchsia || is_android ||
       "SerialMap.h",
       "SerialQueue.h",
       "SerialStorage.h",
+      "Sha3.cpp",
+      "Sha3.h",
       "SlabAllocator.cpp",
       "SlabAllocator.h",
       "StackAllocated.h",

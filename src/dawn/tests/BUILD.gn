@@ -353,6 +353,7 @@ dawn_test("dawn_unittests") {
     "unittests/RingBufferAllocatorTests.cpp",
     "unittests/SerialMapTests.cpp",
     "unittests/SerialQueueTests.cpp",
+    "unittests/Sha3Tests.cpp",
     "unittests/SlabAllocatorTests.cpp",
     "unittests/SubresourceStorageTests.cpp",
     "unittests/SystemUtilsTests.cpp",
