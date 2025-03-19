@@ -245,7 +245,7 @@ MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
 
     tint::Program transformedProgram;
     tint::ast::transform::DataMap transformOutputs;
-    {
+    if (!r.useTintIR) {
         TRACE_EVENT0(tracePlatform.UnsafeGetValue(), General, "RunTransforms");
         DAWN_TRY_ASSIGN(transformedProgram,
                         RunTransforms(&transformManager, r.inputProgram, transformInputs,
@@ -267,9 +267,15 @@ MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
     tint::Result<tint::hlsl::writer::Output> result;
     if (r.useTintIR) {
         // Convert the AST program to an IR module.
-        auto ir = tint::wgsl::reader::ProgramToLoweredIR(transformedProgram);
+        auto ir = tint::wgsl::reader::ProgramToLoweredIR(*r.inputProgram);
         DAWN_INVALID_IF(ir != tint::Success, "An error occurred while generating Tint IR\n%s",
                         ir.Failure().reason.Str());
+
+        auto singleEntryPointResult =
+            tint::core::ir::transform::SingleEntryPoint(ir.Get(), r.entryPointName);
+        DAWN_INVALID_IF(singleEntryPointResult != tint::Success,
+                        "Pipeline single entry point (IR) failed:\n%s",
+                        singleEntryPointResult.Failure().reason);
 
         if (r.substituteOverrideConfig) {
             // this needs to run after SingleEntryPoint transform which removes unused
