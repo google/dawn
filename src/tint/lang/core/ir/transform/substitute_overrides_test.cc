@@ -82,6 +82,35 @@ $B1: {  # root
               R"(1:2 error: Initializer not provided for override, and override not overridden.)");
 }
 
+TEST_F(IR_SubstituteOverridesTest, OverrideNotInFile) {
+    auto* f = b.ComputeFunction("main");
+    b.Append(f->Block(), [&] { b.Return(f); });
+
+    auto* src = R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    ret
+  }
+}
+)";
+
+    auto* expect = R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    SubstituteOverridesConfig cfg{};
+    cfg.map[OverrideId{99}] = 55;
+    Run(SubstituteOverrides, cfg);
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(IR_SubstituteOverridesTest, OverrideWithDefault) {
     core::ir::Override* o = nullptr;
     b.Append(mod.root_block, [&] {
