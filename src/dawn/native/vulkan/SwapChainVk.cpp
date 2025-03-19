@@ -62,6 +62,8 @@ VkPresentModeKHR ToVulkanPresentMode(wgpu::PresentMode mode) {
             return VK_PRESENT_MODE_IMMEDIATE_KHR;
         case wgpu::PresentMode::Mailbox:
             return VK_PRESENT_MODE_MAILBOX_KHR;
+        case wgpu::PresentMode::Undefined:
+            break;
     }
     DAWN_UNREACHABLE();
 }

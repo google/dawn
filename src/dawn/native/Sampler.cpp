@@ -97,7 +97,7 @@ SamplerBase::SamplerBase(DeviceBase* device,
       mMaxAnisotropy(descriptor->maxAnisotropy) {
     if (auto* yCbCrVkDescriptor = Unpack(descriptor).Get<YCbCrVkDescriptor>()) {
         mIsYCbCr = true;
-        mYCbCrVkDescriptor = *yCbCrVkDescriptor;
+        mYCbCrVkDescriptor = yCbCrVkDescriptor->WithTrivialFrontendDefaults();
         mYCbCrVkDescriptor.nextInChain = nullptr;
     }
 }

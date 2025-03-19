@@ -74,9 +74,9 @@
         "extensible": "in",
         "members": [
             {"name": "feature level", "type": "feature level", "default": "core"},
-            {"name": "power preference", "type": "power preference", "default": "undefined"},
+            {"name": "power preference", "type": "power preference"},
             {"name": "force fallback adapter", "type": "bool", "default": "false"},
-            {"name": "backend type", "type": "backend type", "default": "undefined"},
+            {"name": "backend type", "type": "backend type"},
             {"name": "compatible surface", "type": "surface", "optional": true}
         ]
     },
@@ -186,7 +186,7 @@
             {"name": "architecture", "type": "string view"},
             {"name": "device", "type": "string view"},
             {"name": "description", "type": "string view"},
-            {"name": "backend type", "type": "backend type", "default": "undefined"},
+            {"name": "backend type", "type": "backend type"},
             {"name": "adapter type", "type": "adapter type"},
             {"name": "vendor ID", "type": "uint32_t"},
             {"name": "device ID", "type": "uint32_t"},
@@ -481,7 +481,7 @@
         "extensible": "in",
         "members": [
             {"name": "access", "type": "storage texture access", "default": "write only"},
-            {"name": "format", "type": "texture format", "default": "undefined"},
+            {"name": "format", "type": "texture format"},
             {"name": "view dimension", "type": "texture view dimension", "default": "2D"}
         ]
     },
@@ -2661,6 +2661,7 @@
         "category": "enum",
         "emscripten_no_enum_table": true,
         "values": [
+            {"value": 0, "name": "undefined"},
             {"value": 1, "name": "fifo"},
             {"value": 2, "name": "fifo relaxed"},
             {"value": 3, "name": "immediate"},
@@ -2963,7 +2964,7 @@
             {"name": "label", "type": "string view", "optional": true},
             {"name": "color format count", "type": "size_t"},
             {"name": "color formats", "type": "texture format", "annotation": "const*", "length": "color format count"},
-            {"name": "depth stencil format", "type": "texture format", "default": "undefined"},
+            {"name": "depth stencil format", "type": "texture format"},
             {"name": "sample count", "type": "uint32_t", "default": "1"},
             {"name": "depth read only", "type": "bool", "default": "false"},
             {"name": "stencil read only", "type": "bool", "default": "false"}
@@ -2996,12 +2997,12 @@
         "extensible": "in",
         "members": [
             {"name": "view", "type": "texture view"},
-            {"name": "depth load op", "type": "load op", "default": "undefined"},
-            {"name": "depth store op", "type": "store op", "default": "undefined"},
+            {"name": "depth load op", "type": "load op"},
+            {"name": "depth store op", "type": "store op"},
             {"name": "depth clear value", "type": "float", "default": "NAN"},
             {"name": "depth read only", "type": "bool", "default": "false"},
-            {"name": "stencil load op", "type": "load op", "default": "undefined"},
-            {"name": "stencil store op", "type": "store op", "default": "undefined"},
+            {"name": "stencil load op", "type": "load op"},
+            {"name": "stencil store op", "type": "store op"},
             {"name": "stencil clear value", "type": "uint32_t", "default": "0"},
             {"name": "stencil read only", "type": "bool", "default": "false"}
         ]
@@ -3318,7 +3319,7 @@
         "extensible": "in",
         "members": [
             {"name": "topology", "type": "primitive topology", "default": "triangle list"},
-            {"name": "strip index format", "type": "index format", "default": "undefined"},
+            {"name": "strip index format", "type": "index format"},
             {"name": "front face", "type": "front face", "default": "CCW"},
             {"name": "cull mode", "type": "cull mode", "default": "none"},
             {"name": "unclipped depth", "type": "bool", "default": "false"}
@@ -3330,8 +3331,8 @@
         "extensible": "in",
         "members": [
             {"name": "format", "type": "texture format"},
-            {"name": "depth write enabled", "type": "optional bool", "default": "undefined"},
-            {"name": "depth compare", "type": "compare function", "default": "undefined"},
+            {"name": "depth write enabled", "type": "optional bool"},
+            {"name": "depth compare", "type": "compare function"},
             {"name": "stencil front", "type": "stencil face state"},
             {"name": "stencil back", "type": "stencil face state"},
             {"name": "stencil read mask", "type": "uint32_t", "default": "0xFFFFFFFF"},
@@ -3430,7 +3431,7 @@
             {"name": "mipmap filter", "type": "mipmap filter mode", "default": "nearest"},
             {"name": "lod min clamp", "type": "float", "default": "0.0f"},
             {"name": "lod max clamp", "type": "float", "default": "32.0f"},
-            {"name": "compare", "type": "compare function", "default": "undefined"},
+            {"name": "compare", "type": "compare function"},
             {"name": "max anisotropy", "type": "uint16_t", "default": "1"}
         ]
     },
@@ -3931,7 +3932,7 @@
         "chained": "in",
         "chain roots": ["texture descriptor"],
         "members": [
-            {"name": "texture binding view dimension", "type": "texture view dimension", "default": "undefined"}
+            {"name": "texture binding view dimension", "type": "texture view dimension"}
         ]
     },
     "texture dimension": {
@@ -4087,8 +4088,8 @@
         "extensible": "in",
         "members": [
             {"name": "label", "type": "string view", "optional": true},
-            {"name": "format", "type": "texture format", "default": "undefined"},
-            {"name": "dimension", "type": "texture view dimension", "default": "undefined"},
+            {"name": "format", "type": "texture format"},
+            {"name": "dimension", "type": "texture view dimension"},
             {"name": "base mip level", "type": "uint32_t", "default": "0"},
             {"name": "mip level count", "type": "uint32_t", "default": "WGPU_MIP_LEVEL_COUNT_UNDEFINED"},
             {"name": "base array layer", "type": "uint32_t", "default": "0"},
@@ -4328,7 +4329,7 @@
         "chain roots": ["adapter info"],
         "tags": ["dawn"],
         "members": [
-            {"name": "power preference", "type": "power preference", "default": "undefined"}
+            {"name": "power preference", "type": "power preference"}
         ]
     },
     "heap property": {

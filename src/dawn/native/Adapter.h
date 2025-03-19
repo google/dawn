@@ -117,7 +117,7 @@ class AdapterBase : public RefCounted, public WeakRefSupport<AdapterBase> {
 };
 
 std::vector<Ref<AdapterBase>> SortAdapters(std::vector<Ref<AdapterBase>> adapters,
-                                           const RequestAdapterOptions* options);
+                                           const UnpackedPtr<RequestAdapterOptions>& options);
 
 }  // namespace dawn::native
 

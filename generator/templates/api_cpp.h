@@ -301,12 +301,30 @@ class ObjectBase {
     {%- if forced_default_value -%}
         {{" "}}= {{forced_default_value}}
     {%- elif member.json_data.get("no_default", false) -%}
-    {%- elif member.annotation in ["*", "const*", "const*const*"] and member.optional or member.default_value == "nullptr" -%}
+    {%- elif member.annotation in ["*", "const*", "const*const*"] and (is_struct or member.optional or member.default_value == "nullptr") -%}
         {{" "}}= nullptr
-    {%- elif member.type.category == "object" and member.optional and is_struct -%}
+    {%- elif member.type.category == "object" and (is_struct or member.optional) -%}
         {{" "}}= nullptr
-    {%- elif member.type.category in ["enum", "bitmask"] and member.default_value != None -%}
-        {{" "}}= {{as_cppType(member.type.name)}}::{{as_cppEnum(Name(member.default_value))}}
+    {%- elif member.type.category == "enum" -%}
+        //* For enums that have an undefined value, instead of using the
+        //* default, just put undefined because they should be the same.
+        {%- if member.type.hasUndefined and is_struct -%}
+            {{" "}}= {{as_cppType(member.type.name)}}::{{as_cppEnum(Name("undefined"))}}
+        {%- elif member.default_value != None -%}
+            {{" "}}= {{as_cppType(member.type.name)}}::{{as_cppEnum(Name(member.default_value))}}
+        {%- elif is_struct -%}
+            {{" "}}= {}
+        {%- endif -%}
+    {%- elif member.type.category == "bitmask" -%}
+        {%- if is_struct or member.optional -%}
+            {%- if member.default_value != None -%}
+                {{" "}}= {{as_cppType(member.type.name)}}::{{as_cppEnum(Name(member.default_value))}}
+            {%- else -%}
+                //* Bitmask types should currently always default to "none" if not
+                //* explicitly set.
+                {{" "}}= {{as_cppType(member.type.name)}}::{{as_cppEnum(Name("none"))}}
+            {%- endif -%}
+        {%- endif -%}
     {%- elif member.type.category == "native" and member.default_value != None -%}
         {{" "}}= {{member.default_value}}
     {%- elif member.default_value != None -%}

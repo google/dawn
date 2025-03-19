@@ -516,9 +516,8 @@ const std::string& AdapterBase::GetName() const {
 }
 
 std::vector<Ref<AdapterBase>> SortAdapters(std::vector<Ref<AdapterBase>> adapters,
-                                           const RequestAdapterOptions* options) {
-    const bool highPerformance =
-        options != nullptr && options->powerPreference == wgpu::PowerPreference::HighPerformance;
+                                           const UnpackedPtr<RequestAdapterOptions>& options) {
+    const bool highPerformance = options->powerPreference == wgpu::PowerPreference::HighPerformance;
 
     const auto ComputeAdapterTypeRank = [&](const Ref<AdapterBase>& a) {
         switch (a->GetPhysicalDevice()->GetAdapterType()) {

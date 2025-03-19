@@ -48,16 +48,33 @@
 namespace {{native_namespace}} {
 
 {% macro render_cpp_default_value(member, forced_default_value="") -%}
+    //* Apply default values over undefined when dealing with the Dawn
+    //* native header to avoid needing to do the additional step of
+    //* resolving trivial defaults internally.
     {%- if forced_default_value -%}
         {{" "}}= {{forced_default_value}}
-    {%- elif member.annotation in ["*", "const*", "const*const*"] and member.optional or member.default_value == "nullptr" -%}
+    {%- elif member.annotation in ["*", "const*", "const*const*"] or member.default_value == "nullptr" -%}
         {{" "}}= nullptr
     {%- elif member.type.category == "object" and member.optional -%}
         {{" "}}= nullptr
     {%- elif member.type.category == "callback info" -%}
         {{" "}}= {{CAPI}}_{{member.name.SNAKE_CASE()}}_INIT
-    {%- elif member.type.category in ["enum", "bitmask"] and member.default_value != None -%}
-        {{" "}}= {{namespace}}::{{as_cppType(member.type.name)}}::{{as_cppEnum(Name(member.default_value))}}
+    {%- elif member.type.category == "enum" -%}
+        {%- if member.default_value != None -%}
+            {{" "}}= {{namespace}}::{{as_cppType(member.type.name)}}::{{as_cppEnum(Name(member.default_value))}}
+        {%- elif member.type.hasUndefined -%}
+            {{" "}}= {{namespace}}::{{as_cppType(member.type.name)}}::{{as_cppEnum(Name("undefined"))}}
+        {%- else -%}
+            {{" "}}= {}
+        {%- endif -%}
+    {%- elif member.type.category == "bitmask" -%}
+        {%- if member.default_value != None -%}
+            {{" "}}= {{namespace}}::{{as_cppType(member.type.name)}}::{{as_cppEnum(Name(member.default_value))}}
+        {%- else -%}
+            //* Bitmask types should currently always default to "none" if not
+            //* explicitly set.
+            {{" "}}= {{namespace}}::{{as_cppType(member.type.name)}}::{{as_cppEnum(Name("none"))}}
+        {%- endif -%}
     {%- elif member.type.category == "native" and member.default_value != None -%}
         {{" "}}= {{member.default_value}}
     {%- elif member.default_value != None -%}

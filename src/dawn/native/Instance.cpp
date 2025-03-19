@@ -357,24 +357,25 @@ std::vector<Ref<AdapterBase>> InstanceBase::EnumerateAdapters(
         return EnumerateAdapters(&kDefaultOptions);
     }
 
-    UnpackedPtr<RequestAdapterOptions> unpacked = Unpack(options);
+    RequestAdapterOptions rawOptions = options->WithTrivialFrontendDefaults();
+    UnpackedPtr<RequestAdapterOptions> unpacked = Unpack(&rawOptions);
     auto* togglesDesc = unpacked.Get<DawnTogglesDescriptor>();
 
     std::vector<Ref<AdapterBase>> adapters;
     for (const auto& physicalDevice : EnumeratePhysicalDevices(unpacked)) {
-        DAWN_ASSERT(physicalDevice->SupportsFeatureLevel(options->featureLevel, this));
-        adapters.push_back(CreateAdapter(physicalDevice, options->featureLevel, togglesDesc,
+        DAWN_ASSERT(physicalDevice->SupportsFeatureLevel(unpacked->featureLevel, this));
+        adapters.push_back(CreateAdapter(physicalDevice, unpacked->featureLevel, togglesDesc,
                                          unpacked->powerPreference));
     }
 
-    if (options->backendType == wgpu::BackendType::D3D11 ||
-        options->backendType == wgpu::BackendType::D3D12) {
+    if (unpacked->backendType == wgpu::BackendType::D3D11 ||
+        unpacked->backendType == wgpu::BackendType::D3D12) {
         // If a D3D backend was requested, the order of the adapters returned by DXGI should be
         // preserved instead of sorting by whether they are integrated vs. discrete. DXGI
         // returns the correct order based on system settings and configuration.
         return adapters;
     }
-    return SortAdapters(std::move(adapters), options);
+    return SortAdapters(std::move(adapters), unpacked);
 }
 
 BackendConnection* InstanceBase::GetBackendConnection(wgpu::BackendType backendType) {
