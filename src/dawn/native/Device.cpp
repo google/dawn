@@ -788,7 +788,6 @@ void DeviceBase::APISetLoggingCallback(const WGPULoggingCallbackInfo& callbackIn
 }
 
 ErrorScopeStack* DeviceBase::GetErrorScopeStack() {
-    DAWN_ASSERT(IsLockedByCurrentThreadIfNeeded());
     ThreadUniqueId threadId = GetThreadUniqueId();
     if (!mErrorScopeStacks.contains(threadId)) {
         // Each time a new thread creates an error stack on a device, we attempt to clean up

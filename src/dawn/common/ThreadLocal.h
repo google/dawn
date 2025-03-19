@@ -39,7 +39,7 @@ using ThreadUniqueId = uint64_t;
 ThreadUniqueId GetThreadUniqueId();
 
 // Returns true if the thread associated with the ID is still running.
-bool IsThreadAlive(ThreadUniqueId threadUniqueId);
+bool IsThreadAlive(ThreadUniqueId ThreadUniqueId);
 
 }  // namespace dawn
 
