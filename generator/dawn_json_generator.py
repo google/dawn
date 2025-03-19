@@ -389,6 +389,7 @@ class ConstantDefinition():
     def __init__(self, is_enabled, name, json_data):
         self.type = None
         self.value = json_data['value']
+        self.cpp_value = json_data.get('cpp_value', None)
         self.json_data = json_data
         self.name = Name(name)
 

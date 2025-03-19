@@ -79,6 +79,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <math.h>
 
 #if defined(__cplusplus)
 #  define _{{api}}_ENUM_ZERO_INIT(type) type(0)
@@ -202,7 +203,13 @@ typedef struct {{API}}ChainedStruct {
         //* explicitly defined per type, except for booleans, which we need to
         //* convert into literals.
         {%- if member.default_value != None and member.type.name.get() != "bool" -%}
-            {{member.default_value}}
+            //* Check to see if the default value is a known constant.
+            {%- set constant = find_by_name(by_category["constant"], member.default_value) -%}
+            {%- if constant -%}
+                {{API}}_{{constant.name.SNAKE_CASE()}}
+            {%- else -%}
+                {{member.default_value}}
+            {%- endif -%}
         {%- else -%}
             {%- if "int" in member.type.name.get() or member.type.name.get() == "size_t" -%}
                 0

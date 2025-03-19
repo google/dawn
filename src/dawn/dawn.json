@@ -317,7 +317,7 @@
             {"name": "binding", "type": "uint32_t"},
             {"name": "buffer", "type": "buffer", "optional": true},
             {"name": "offset", "type": "uint64_t", "default": "0"},
-            {"name": "size", "type": "uint64_t", "default": "WGPU_WHOLE_SIZE"},
+            {"name": "size", "type": "uint64_t", "default": "whole size"},
             {"name": "sampler", "type": "sampler", "optional": true},
             {"name": "texture view", "type": "texture view", "optional": true}
         ]
@@ -389,7 +389,7 @@
         "tags": ["dawn"],
         "members": [
             {"name": "sampler", "type": "sampler"},
-            {"name": "sampled texture binding", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED" }
+            {"name": "sampled texture binding", "type": "uint32_t", "default": "limit u32 undefined" }
         ]
     },
     "texture sample type": {
@@ -566,7 +566,7 @@
         "category": "structure",
         "members": [
             {"name": "data", "type": "char", "annotation": "const*", "optional": true},
-            {"name": "length", "type": "size_t", "default": "WGPU_STRLEN"}
+            {"name": "length", "type": "size_t", "default": "strlen"}
         ]
     },
     "buffer": {
@@ -587,7 +587,7 @@
                 "returns": "void *",
                 "args": [
                     {"name": "offset", "type": "size_t", "default": 0},
-                    {"name": "size", "type": "size_t", "default": "WGPU_WHOLE_MAP_SIZE"}
+                    {"name": "size", "type": "size_t", "default": "whole map size"}
                 ]
             },
             {
@@ -595,7 +595,7 @@
                 "returns": "void const *",
                 "args": [
                     {"name": "offset", "type": "size_t", "default": 0},
-                    {"name": "size", "type": "size_t", "default": "WGPU_WHOLE_MAP_SIZE"}
+                    {"name": "size", "type": "size_t", "default": "whole map size"}
                 ]
             },
             {
@@ -836,7 +836,7 @@
                 "args": [
                     {"name": "buffer", "type": "buffer"},
                     {"name": "offset", "type": "uint64_t", "default": 0},
-                    {"name": "size", "type": "uint64_t", "default": "WGPU_WHOLE_SIZE"}
+                    {"name": "size", "type": "uint64_t", "default": "whole size"}
                 ]
             },
             {
@@ -1542,41 +1542,41 @@
         "extensible": "out",
         "_comment": "TODO(crbug.com/374263404): Using 'out' for extensible even though this can be in/out until C++ gen is updated.",
         "members": [
-            {"name": "max texture dimension 1D", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
-            {"name": "max texture dimension 2D", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
-            {"name": "max texture dimension 3D", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
-            {"name": "max texture array layers", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
-            {"name": "max bind groups", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
-            {"name": "max bind groups plus vertex buffers", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
-            {"name": "max bindings per bind group", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
-            {"name": "max dynamic uniform buffers per pipeline layout", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
-            {"name": "max dynamic storage buffers per pipeline layout", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
-            {"name": "max sampled textures per shader stage", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
-            {"name": "max samplers per shader stage", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
-            {"name": "max storage buffers per shader stage", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
-            {"name": "max storage textures per shader stage", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
-            {"name": "max uniform buffers per shader stage", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
-            {"name": "max uniform buffer binding size", "type": "uint64_t", "default": "WGPU_LIMIT_U64_UNDEFINED"},
-            {"name": "max storage buffer binding size", "type": "uint64_t", "default": "WGPU_LIMIT_U64_UNDEFINED"},
-            {"name": "min uniform buffer offset alignment", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
-            {"name": "min storage buffer offset alignment", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
-            {"name": "max vertex buffers", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
-            {"name": "max buffer size", "type": "uint64_t", "default": "WGPU_LIMIT_U64_UNDEFINED"},
-            {"name": "max vertex attributes", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
-            {"name": "max vertex buffer array stride", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
-            {"name": "max inter stage shader variables", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
-            {"name": "max color attachments", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
-            {"name": "max color attachment bytes per sample", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
-            {"name": "max compute workgroup storage size", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
-            {"name": "max compute invocations per workgroup", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
-            {"name": "max compute workgroup size x", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
-            {"name": "max compute workgroup size y", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
-            {"name": "max compute workgroup size z", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
-            {"name": "max compute workgroups per dimension", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
-            {"name": "max storage buffers in vertex stage", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
-            {"name": "max storage textures in vertex stage", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
-            {"name": "max storage buffers in fragment stage", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
-            {"name": "max storage textures in fragment stage", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"}
+            {"name": "max texture dimension 1D", "type": "uint32_t", "default": "limit u32 undefined"},
+            {"name": "max texture dimension 2D", "type": "uint32_t", "default": "limit u32 undefined"},
+            {"name": "max texture dimension 3D", "type": "uint32_t", "default": "limit u32 undefined"},
+            {"name": "max texture array layers", "type": "uint32_t", "default": "limit u32 undefined"},
+            {"name": "max bind groups", "type": "uint32_t", "default": "limit u32 undefined"},
+            {"name": "max bind groups plus vertex buffers", "type": "uint32_t", "default": "limit u32 undefined"},
+            {"name": "max bindings per bind group", "type": "uint32_t", "default": "limit u32 undefined"},
+            {"name": "max dynamic uniform buffers per pipeline layout", "type": "uint32_t", "default": "limit u32 undefined"},
+            {"name": "max dynamic storage buffers per pipeline layout", "type": "uint32_t", "default": "limit u32 undefined"},
+            {"name": "max sampled textures per shader stage", "type": "uint32_t", "default": "limit u32 undefined"},
+            {"name": "max samplers per shader stage", "type": "uint32_t", "default": "limit u32 undefined"},
+            {"name": "max storage buffers per shader stage", "type": "uint32_t", "default": "limit u32 undefined"},
+            {"name": "max storage textures per shader stage", "type": "uint32_t", "default": "limit u32 undefined"},
+            {"name": "max uniform buffers per shader stage", "type": "uint32_t", "default": "limit u32 undefined"},
+            {"name": "max uniform buffer binding size", "type": "uint64_t", "default": "limit u64 undefined"},
+            {"name": "max storage buffer binding size", "type": "uint64_t", "default": "limit u64 undefined"},
+            {"name": "min uniform buffer offset alignment", "type": "uint32_t", "default": "limit u32 undefined"},
+            {"name": "min storage buffer offset alignment", "type": "uint32_t", "default": "limit u32 undefined"},
+            {"name": "max vertex buffers", "type": "uint32_t", "default": "limit u32 undefined"},
+            {"name": "max buffer size", "type": "uint64_t", "default": "limit u64 undefined"},
+            {"name": "max vertex attributes", "type": "uint32_t", "default": "limit u32 undefined"},
+            {"name": "max vertex buffer array stride", "type": "uint32_t", "default": "limit u32 undefined"},
+            {"name": "max inter stage shader variables", "type": "uint32_t", "default": "limit u32 undefined"},
+            {"name": "max color attachments", "type": "uint32_t", "default": "limit u32 undefined"},
+            {"name": "max color attachment bytes per sample", "type": "uint32_t", "default": "limit u32 undefined"},
+            {"name": "max compute workgroup storage size", "type": "uint32_t", "default": "limit u32 undefined"},
+            {"name": "max compute invocations per workgroup", "type": "uint32_t", "default": "limit u32 undefined"},
+            {"name": "max compute workgroup size x", "type": "uint32_t", "default": "limit u32 undefined"},
+            {"name": "max compute workgroup size y", "type": "uint32_t", "default": "limit u32 undefined"},
+            {"name": "max compute workgroup size z", "type": "uint32_t", "default": "limit u32 undefined"},
+            {"name": "max compute workgroups per dimension", "type": "uint32_t", "default": "limit u32 undefined"},
+            {"name": "max storage buffers in vertex stage", "type": "uint32_t", "default": "limit u32 undefined"},
+            {"name": "max storage textures in vertex stage", "type": "uint32_t", "default": "limit u32 undefined"},
+            {"name": "max storage buffers in fragment stage", "type": "uint32_t", "default": "limit u32 undefined"},
+            {"name": "max storage textures in fragment stage", "type": "uint32_t", "default": "limit u32 undefined"}
         ]
     },
     "adapter properties subgroups": {
@@ -1584,8 +1584,8 @@
         "chained": "out",
         "chain roots": ["adapter info"],
         "members": [
-            {"name": "subgroup min size", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
-            {"name": "subgroup max size", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"}
+            {"name": "subgroup min size", "type": "uint32_t", "default": "limit u32 undefined"},
+            {"name": "subgroup max size", "type": "uint32_t", "default": "limit u32 undefined"}
         ]
     },
     "dawn experimental subgroup limits": {
@@ -1594,8 +1594,8 @@
         "chain roots": ["limits"],
         "tags": ["dawn"],
         "members": [
-            {"name": "min subgroup size", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
-            {"name": "max subgroup size", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"}
+            {"name": "min subgroup size", "type": "uint32_t", "default": "limit u32 undefined"},
+            {"name": "max subgroup size", "type": "uint32_t", "default": "limit u32 undefined"}
         ]
     },
     "dawn experimental immediate data limits": {
@@ -1604,7 +1604,7 @@
         "chain roots": ["limits"],
         "tags": ["dawn"],
         "members": [
-            {"name": "max immediate data range byte size", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"}
+            {"name": "max immediate data range byte size", "type": "uint32_t", "default": "limit u32 undefined"}
         ]
     },
     "dawn texel copy buffer row alignment limits": {
@@ -1613,7 +1613,7 @@
         "chain roots": ["limits"],
         "tags": ["dawn"],
         "members": [
-            {"name": "min texel copy buffer row alignment", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"}
+            {"name": "min texel copy buffer row alignment", "type": "uint32_t", "default": "limit u32 undefined"}
         ]
     },
     "supported features": {
@@ -2369,8 +2369,8 @@
         "category": "structure",
         "members": [
             {"name": "offset", "type": "uint64_t", "default": 0},
-            {"name": "bytes per row", "type": "uint32_t", "default": "WGPU_COPY_STRIDE_UNDEFINED"},
-            {"name": "rows per image", "type": "uint32_t", "default": "WGPU_COPY_STRIDE_UNDEFINED"}
+            {"name": "bytes per row", "type": "uint32_t", "default": "copy stride undefined"},
+            {"name": "rows per image", "type": "uint32_t", "default": "copy stride undefined"}
         ]
     },
     "texel copy texture info": {
@@ -2603,8 +2603,8 @@
         "extensible": "in",
         "members": [
             {"name": "query set", "type": "query set"},
-            {"name": "beginning of pass write index", "type": "uint32_t", "default": "WGPU_QUERY_SET_INDEX_UNDEFINED"},
-            {"name": "end of pass write index", "type": "uint32_t", "default": "WGPU_QUERY_SET_INDEX_UNDEFINED"}
+            {"name": "beginning of pass write index", "type": "uint32_t", "default": "query set index undefined"},
+            {"name": "end of pass write index", "type": "uint32_t", "default": "query set index undefined"}
         ]
     },
     "pipeline layout": {
@@ -2912,7 +2912,7 @@
                     {"name": "slot", "type": "uint32_t"},
                     {"name": "buffer", "type": "buffer", "optional": true},
                     {"name": "offset", "type": "uint64_t", "default": "0"},
-                    {"name": "size", "type": "uint64_t", "default": "WGPU_WHOLE_SIZE"}
+                    {"name": "size", "type": "uint64_t", "default": "whole size"}
                 ]
             },
             {
@@ -2921,7 +2921,7 @@
                     {"name": "buffer", "type": "buffer"},
                     {"name": "format", "type": "index format"},
                     {"name": "offset", "type": "uint64_t", "default": "0"},
-                    {"name": "size", "type": "uint64_t", "default": "WGPU_WHOLE_SIZE"}
+                    {"name": "size", "type": "uint64_t", "default": "whole size"}
                 ]
             },
             {
@@ -2976,7 +2976,7 @@
         "extensible": "in",
         "members": [
             {"name": "view", "type": "texture view", "optional": true},
-            {"name": "depth slice", "type": "uint32_t", "default": "WGPU_DEPTH_SLICE_UNDEFINED"},
+            {"name": "depth slice", "type": "uint32_t", "default": "depth slice undefined"},
             {"name": "resolve target", "type": "texture view", "optional": true},
             {"name": "load op", "type": "load op"},
             {"name": "store op", "type": "store op"},
@@ -2999,7 +2999,7 @@
             {"name": "view", "type": "texture view"},
             {"name": "depth load op", "type": "load op"},
             {"name": "depth store op", "type": "store op"},
-            {"name": "depth clear value", "type": "float", "default": "NAN"},
+            {"name": "depth clear value", "type": "float", "default": "depth clear value undefined"},
             {"name": "depth read only", "type": "bool", "default": "false"},
             {"name": "stencil load op", "type": "load op"},
             {"name": "stencil store op", "type": "store op"},
@@ -3201,7 +3201,7 @@
                     {"name": "slot", "type": "uint32_t"},
                     {"name": "buffer", "type": "buffer", "optional": true},
                     {"name": "offset", "type": "uint64_t", "default": "0"},
-                    {"name": "size", "type": "uint64_t", "default": "WGPU_WHOLE_SIZE"}
+                    {"name": "size", "type": "uint64_t", "default": "whole size"}
                 ]
             },
             {
@@ -3210,7 +3210,7 @@
                     {"name": "buffer", "type": "buffer"},
                     {"name": "format", "type": "index format"},
                     {"name": "offset", "type": "uint64_t", "default": "0"},
-                    {"name": "size", "type": "uint64_t", "default": "WGPU_WHOLE_SIZE"}
+                    {"name": "size", "type": "uint64_t", "default": "whole size"}
                 ]
             },
             {
@@ -4091,9 +4091,9 @@
             {"name": "format", "type": "texture format"},
             {"name": "dimension", "type": "texture view dimension"},
             {"name": "base mip level", "type": "uint32_t", "default": "0"},
-            {"name": "mip level count", "type": "uint32_t", "default": "WGPU_MIP_LEVEL_COUNT_UNDEFINED"},
+            {"name": "mip level count", "type": "uint32_t", "default": "mip level count undefined"},
             {"name": "base array layer", "type": "uint32_t", "default": "0"},
-            {"name": "array layer count", "type": "uint32_t", "default": "WGPU_ARRAY_LAYER_COUNT_UNDEFINED"},
+            {"name": "array layer count", "type": "uint32_t", "default": "array layer count undefined"},
             {"name": "aspect", "type": "texture aspect", "default": "all"},
             {"name": "usage", "type": "texture usage"}
         ]
@@ -4207,52 +4207,58 @@
     "whole size" : {
         "category": "constant",
         "type": "uint64_t",
-        "value":  "UINT64_MAX"
+        "value": "UINT64_MAX"
     },
     "whole map size" : {
         "category": "constant",
         "type": "size_t",
-        "value":  "SIZE_MAX"
+        "value": "SIZE_MAX"
     },
     "copy stride undefined" : {
         "category": "constant",
         "type": "uint32_t",
-        "value":  "UINT32_MAX"
+        "value": "UINT32_MAX"
     },
     "limit u32 undefined" : {
         "category": "constant",
         "type": "uint32_t",
-        "value":  "UINT32_MAX"
+        "value": "UINT32_MAX"
     },
     "limit u64 undefined" : {
         "category": "constant",
         "type": "uint64_t",
-        "value":  "UINT64_MAX"
+        "value": "UINT64_MAX"
     },
     "array layer count undefined" : {
         "category": "constant",
         "type": "uint32_t",
-        "value":  "UINT32_MAX"
+        "value": "UINT32_MAX"
     },
     "mip level count undefined" : {
         "category": "constant",
         "type": "uint32_t",
-        "value":  "UINT32_MAX"
+        "value": "UINT32_MAX"
+    },
+    "depth clear value undefined" : {
+        "category": "constant",
+        "type": "float",
+        "value": "NAN",
+        "cpp_value": "std::numeric_limits<float>::quiet_NaN()"
     },
     "depth slice undefined" : {
         "category": "constant",
         "type": "uint32_t",
-        "value":  "UINT32_MAX"
+        "value": "UINT32_MAX"
     },
     "query set index undefined" : {
         "category": "constant",
         "type": "uint32_t",
-        "value":  "UINT32_MAX"
+        "value": "UINT32_MAX"
     },
     "strlen" : {
         "category": "constant",
         "type": "size_t",
-        "value":  "SIZE_MAX"
+        "value": "SIZE_MAX"
     },
     "ObjectType": {
       "_comment": "Only used for the wire",

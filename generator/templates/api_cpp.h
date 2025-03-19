@@ -60,8 +60,12 @@ namespace {{metadata.namespace}} {
 {% set c_prefix = metadata.c_prefix %}
 {% for constant in by_category["constant"] %}
     {% set type = as_cppType(constant.type.name) %}
-    {% set value = c_prefix + "_" +  constant.name.SNAKE_CASE() %}
-    static constexpr {{type}} k{{as_cppType(constant.name)}} = {{ value }};
+    {% if constant.cpp_value %}
+        static constexpr {{type}} k{{constant.name.CamelCase()}} = {{ constant.cpp_value }};
+    {% else %}
+        {% set value = c_prefix + "_" +  constant.name.SNAKE_CASE() %}
+        static constexpr {{type}} k{{constant.name.CamelCase()}} = {{ value }};
+    {% endif %}
 {% endfor %}
 
 {%- macro render_c_actual_arg(arg) -%}
@@ -87,7 +91,7 @@ namespace {{metadata.namespace}} {
         {%- for arg in method.arguments -%},{{" "}}{{render_c_actual_arg(arg)}}
         {%- endfor -%}
     )
-{%- endmacro -%}
+{%- endmacro %}
 
 //* Although 'optional bool' is defined as an enum value, in C++, we manually implement it to
 //* provide conversion utilities.
@@ -326,7 +330,13 @@ class ObjectBase {
             {%- endif -%}
         {%- endif -%}
     {%- elif member.type.category == "native" and member.default_value != None -%}
-        {{" "}}= {{member.default_value}}
+        //* Check to see if the default value is a known constant.
+        {%- set constant = find_by_name(by_category["constant"], member.default_value) -%}
+        {%- if constant -%}
+            {{" "}}= k{{constant.name.CamelCase()}}
+        {%- else -%}
+            {{" "}}= {{member.default_value}}
+        {%- endif -%}
     {%- elif member.default_value != None -%}
         {{" "}}= {{member.default_value}}
     {%- elif member.type.category == "structure" and member.annotation == "value" and is_struct -%}

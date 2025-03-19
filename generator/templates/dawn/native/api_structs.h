@@ -76,7 +76,13 @@ namespace {{native_namespace}} {
             {{" "}}= {{namespace}}::{{as_cppType(member.type.name)}}::{{as_cppEnum(Name("none"))}}
         {%- endif -%}
     {%- elif member.type.category == "native" and member.default_value != None -%}
-        {{" "}}= {{member.default_value}}
+        //* Check to see if the default value is a known constant.
+        {%- set constant = find_by_name(by_category["constant"], member.default_value) -%}
+        {%- if constant -%}
+            {{" "}}= {{namespace}}::k{{constant.name.CamelCase()}}
+        {%- else -%}
+            {{" "}}= {{member.default_value}}
+        {%- endif -%}
     {%- elif member.default_value != None -%}
         {{" "}}= {{member.default_value}}
     {%- else -%}
