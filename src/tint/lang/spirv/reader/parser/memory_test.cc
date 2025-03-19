@@ -243,6 +243,59 @@ TEST_F(SpirvParserTest, Load_ArrayElement) {
 )");
 }
 
+TEST_F(SpirvParserTest, Store_RuntimeArrayElement) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpExtension "SPV_KHR_storage_buffer_storage_class"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %sg "sg"
+               OpName %main "main"
+               OpName %S "S"
+               OpMemberName %S 0 "a"
+               OpDecorate %sg DescriptorSet 0
+               OpDecorate %sg Binding 1
+               OpDecorate %S Block
+               OpDecorate %arr ArrayStride 4
+               OpMemberDecorate %S 0 Offset 0
+       %void = OpTypeVoid
+       %uint = OpTypeInt 32 0
+        %int = OpTypeInt 32 1
+      %int_4 = OpConstant %int 4
+     %uint_0 = OpConstant %uint 0
+        %arr = OpTypeRuntimeArray %uint
+          %S = OpTypeStruct %arr
+          %5 = OpTypeFunction %void
+      %ptr_s = OpTypePointer StorageBuffer %S
+         %sg = OpVariable %ptr_s StorageBuffer
+   %ptr_uint = OpTypePointer StorageBuffer %uint
+       %main = OpFunction %void None %5
+          %8 = OpLabel
+         %12 = OpAccessChain %ptr_uint %sg %uint_0 %int_4
+               OpStore %12 %uint_0
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+S = struct @align(4) {
+  a:array<u32> @offset(0)
+}
+
+$B1: {  # root
+  %sg:ptr<storage, S, read_write> = var undef @binding_point(0, 1)
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:ptr<storage, u32, read_write> = access %sg, 0u, 4i
+    store %3, 0u
+    ret
+  }
+}
+)");
+}
+
 TEST_F(SpirvParserTest, Load_Struct) {
     EXPECT_IR(R"(
                OpCapability Shader

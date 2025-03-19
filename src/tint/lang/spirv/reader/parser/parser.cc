@@ -316,10 +316,12 @@ class Parser {
                                  core::Access access_mode = core::Access::kUndefined) {
         return types_.GetOrAdd(TypeKey{type, access_mode}, [&]() -> const core::type::Type* {
             switch (type->kind()) {
-                case spvtools::opt::analysis::Type::kVoid:
+                case spvtools::opt::analysis::Type::kVoid: {
                     return ty_.void_();
-                case spvtools::opt::analysis::Type::kBool:
+                }
+                case spvtools::opt::analysis::Type::kBool: {
                     return ty_.bool_();
+                }
                 case spvtools::opt::analysis::Type::kInteger: {
                     auto* int_ty = type->AsInteger();
                     TINT_ASSERT(int_ty->width() == 32);
@@ -351,10 +353,16 @@ class Parser {
                     return ty_.mat(As<core::type::Vector>(Type(mat_ty->element_type())),
                                    mat_ty->element_count());
                 }
-                case spvtools::opt::analysis::Type::kArray:
+                case spvtools::opt::analysis::Type::kArray: {
                     return EmitArray(type->AsArray());
-                case spvtools::opt::analysis::Type::kStruct:
+                }
+                case spvtools::opt::analysis::Type::kRuntimeArray: {
+                    auto* arr_ty = type->AsRuntimeArray();
+                    return ty_.runtime_array(Type(arr_ty->element_type()));
+                }
+                case spvtools::opt::analysis::Type::kStruct: {
                     return EmitStruct(type->AsStruct());
+                }
                 case spvtools::opt::analysis::Type::kPointer: {
                     auto* ptr_ty = type->AsPointer();
                     return ty_.ptr(AddressSpace(ptr_ty->storage_class()),
@@ -364,8 +372,9 @@ class Parser {
                     // TODO(dsinclair): How to determine comparison samplers ...
                     return ty_.sampler();
                 }
-                default:
+                default: {
                     TINT_UNIMPLEMENTED() << "unhandled SPIR-V type: " << type->str();
+                }
             }
         });
     }
