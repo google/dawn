@@ -78,7 +78,7 @@ class VertexBufferTracker {
         mD3D11Buffers = {};
         mStrides = {};
         mOffsets = {};
-        mCommandContext->GetD3D11DeviceContext4()->IASetVertexBuffers(
+        mCommandContext->GetD3D11DeviceContext3()->IASetVertexBuffers(
             0, kMaxVertexBuffers, mD3D11Buffers.data(), mStrides.data(), mOffsets.data());
     }
 
@@ -98,7 +98,7 @@ class VertexBufferTracker {
             }
         }
 
-        mCommandContext->GetD3D11DeviceContext4()->IASetVertexBuffers(
+        mCommandContext->GetD3D11DeviceContext3()->IASetVertexBuffers(
             0, kMaxVertexBuffers, mD3D11Buffers.data(), mStrides.data(), mOffsets.data());
     }
 
@@ -120,7 +120,7 @@ HandlePixelLocalStorageAndGetPixelLocalStorageUAVs(
     const BeginRenderPassCmd* renderPass,
     const ScopedSwapStateCommandRecordingContext* commandContext) {
     std::vector<ComPtr<ID3D11UnorderedAccessView>> pixelLocalStorageUAVs;
-    auto d3d11DeviceContext = commandContext->GetD3D11DeviceContext4();
+    auto d3d11DeviceContext = commandContext->GetD3D11DeviceContext3();
 
     const std::vector<wgpu::TextureFormat>& storageAttachmentSlots =
         renderPass->attachmentState->GetStorageAttachmentSlots();
@@ -491,7 +491,7 @@ MaybeError CommandBuffer::ExecuteComputePass(
                 DAWN_TRY(bindGroupTracker.Apply());
 
                 DAWN_TRY(RecordNumWorkgroupsForDispatch(lastPipeline, commandContext, dispatch));
-                commandContext->GetD3D11DeviceContext4()->Dispatch(dispatch->x, dispatch->y,
+                commandContext->GetD3D11DeviceContext3()->Dispatch(dispatch->x, dispatch->y,
                                                                    dispatch->z);
 
                 break;
@@ -514,7 +514,7 @@ MaybeError CommandBuffer::ExecuteComputePass(
                 ID3D11Buffer* d3dBuffer;
                 DAWN_TRY_ASSIGN(d3dBuffer,
                                 indirectBuffer->GetD3D11NonConstantBuffer(commandContext));
-                commandContext->GetD3D11DeviceContext4()->DispatchIndirect(
+                commandContext->GetD3D11DeviceContext3()->DispatchIndirect(
                     d3dBuffer, dispatch->indirectOffset);
                 break;
             }
@@ -581,7 +581,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(
     }
     LazyClearRenderPassAttachments(renderPass);
 
-    auto* d3d11DeviceContext = commandContext->GetD3D11DeviceContext4();
+    auto* d3d11DeviceContext = commandContext->GetD3D11DeviceContext3();
     // Hold ID3D11RenderTargetView ComPtr to make attachments alive.
     PerColorAttachment<ID3D11RenderTargetView*> d3d11RenderTargetViews = {};
     ColorAttachmentIndex attachmentCount{};
@@ -667,7 +667,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(
                 vertexBufferTracker.Apply(lastPipeline);
                 DAWN_TRY(RecordFirstIndexOffset(lastPipeline, commandContext, draw->firstVertex,
                                                 draw->firstInstance));
-                commandContext->GetD3D11DeviceContext4()->DrawInstanced(
+                commandContext->GetD3D11DeviceContext3()->DrawInstanced(
                     draw->vertexCount, draw->instanceCount, draw->firstVertex, draw->firstInstance);
 
                 break;
@@ -680,7 +680,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(
                 vertexBufferTracker.Apply(lastPipeline);
                 DAWN_TRY(RecordFirstIndexOffset(lastPipeline, commandContext, draw->baseVertex,
                                                 draw->firstInstance));
-                commandContext->GetD3D11DeviceContext4()->DrawIndexedInstanced(
+                commandContext->GetD3D11DeviceContext3()->DrawIndexedInstanced(
                     draw->indexCount, draw->instanceCount, draw->firstIndex, draw->baseVertex,
                     draw->firstInstance);
 
@@ -710,7 +710,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(
                 ID3D11Buffer* d3dBuffer;
                 DAWN_TRY_ASSIGN(d3dBuffer,
                                 indirectBuffer->GetD3D11NonConstantBuffer(commandContext));
-                commandContext->GetD3D11DeviceContext4()->DrawInstancedIndirect(
+                commandContext->GetD3D11DeviceContext3()->DrawInstancedIndirect(
                     d3dBuffer, draw->indirectOffset);
 
                 break;
@@ -739,7 +739,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(
                 ID3D11Buffer* d3dBuffer;
                 DAWN_TRY_ASSIGN(d3dBuffer,
                                 indirectBuffer->GetD3D11NonConstantBuffer(commandContext));
-                commandContext->GetD3D11DeviceContext4()->DrawIndexedInstancedIndirect(
+                commandContext->GetD3D11DeviceContext3()->DrawIndexedInstancedIndirect(
                     d3dBuffer, draw->indirectOffset);
 
                 break;
@@ -777,7 +777,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(
                 ID3D11Buffer* d3dBuffer;
                 DAWN_TRY_ASSIGN(d3dBuffer, ToGPUUsableBuffer(cmd->buffer.Get())
                                                ->GetD3D11NonConstantBuffer(commandContext));
-                commandContext->GetD3D11DeviceContext4()->IASetIndexBuffer(
+                commandContext->GetD3D11DeviceContext3()->IASetIndexBuffer(
                     d3dBuffer, indexBufferFormat, indexBufferBaseOffset);
 
                 break;
@@ -866,7 +866,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(
                 viewport.Height = cmd->height;
                 viewport.MinDepth = cmd->minDepth;
                 viewport.MaxDepth = cmd->maxDepth;
-                commandContext->GetD3D11DeviceContext4()->RSSetViewports(1, &viewport);
+                commandContext->GetD3D11DeviceContext3()->RSSetViewports(1, &viewport);
                 break;
             }
 
@@ -876,7 +876,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(
                 D3D11_RECT scissorRect = {static_cast<LONG>(cmd->x), static_cast<LONG>(cmd->y),
                                           static_cast<LONG>(cmd->x + cmd->width),
                                           static_cast<LONG>(cmd->y + cmd->height)};
-                commandContext->GetD3D11DeviceContext4()->RSSetScissorRects(1, &scissorRect);
+                commandContext->GetD3D11DeviceContext3()->RSSetScissorRects(1, &scissorRect);
                 break;
             }
 
@@ -905,14 +905,14 @@ MaybeError CommandBuffer::ExecuteRenderPass(
             case Command::BeginOcclusionQuery: {
                 BeginOcclusionQueryCmd* cmd = mCommands.NextCommand<BeginOcclusionQueryCmd>();
                 QuerySet* querySet = ToBackend(cmd->querySet.Get());
-                querySet->BeginQuery(commandContext->GetD3D11DeviceContext4(), cmd->queryIndex);
+                querySet->BeginQuery(commandContext->GetD3D11DeviceContext3(), cmd->queryIndex);
                 break;
             }
 
             case Command::EndOcclusionQuery: {
                 EndOcclusionQueryCmd* cmd = mCommands.NextCommand<EndOcclusionQueryCmd>();
                 QuerySet* querySet = ToBackend(cmd->querySet.Get());
-                querySet->EndQuery(commandContext->GetD3D11DeviceContext4(), cmd->queryIndex);
+                querySet->EndQuery(commandContext->GetD3D11DeviceContext3(), cmd->queryIndex);
                 break;
             }
 

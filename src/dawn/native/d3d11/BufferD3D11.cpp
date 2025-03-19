@@ -1515,14 +1515,14 @@ MaybeError GPUUsableBuffer::PredicatedClear(
     absl::InlinedVector<uint8_t, sizeof(uint64_t)> clearData(size, clearValue);
 
     // The update will *NOT* be performed if the predicate's data is false.
-    commandContext->GetD3D11DeviceContext4()->SetPredication(predicate, false);
+    commandContext->GetD3D11DeviceContext3()->SetPredication(predicate, false);
     commandContext->UpdateSubresource1(gpuWritableStorage->GetD3D11Buffer(),
                                        /*DstSubresource=*/0,
                                        /*pDstBox=*/&box, clearData.data(),
                                        /*SrcRowPitch=*/0,
                                        /*SrcDepthPitch=*/0,
                                        /*CopyFlags=*/0);
-    commandContext->GetD3D11DeviceContext4()->SetPredication(nullptr, false);
+    commandContext->GetD3D11DeviceContext3()->SetPredication(nullptr, false);
 
     IncrStorageRevAndMakeLatest(commandContext, gpuWritableStorage);
 
