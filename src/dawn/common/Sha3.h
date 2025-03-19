@@ -40,6 +40,42 @@ namespace dawn {
 using Sha3Lane = uint64_t;
 static_assert(25 * 8 * sizeof(Sha3Lane) == 1600);
 using Sha3State = std::array<Sha3Lane, 25>;
+static_assert(sizeof(Sha3State) == 25 * sizeof(Sha3Lane), "Sha3State must be packed.");
+
+// An instance of the SHA3 algorithm for a given output length.
+template <size_t BitOutputLength>
+class Sha3 {
+  public:
+    static constexpr size_t kByteOutputLength = BitOutputLength / 8;
+    using Output = std::array<uint8_t, kByteOutputLength>;
+
+    // APIs to stream data into the hash function chunk by chunk by calling Update repeatedly.
+    // After Finalize is called, it is no longer valid to use this SHA3 object.
+    void Update(const void* data, size_t size);
+    Output Finalize();
+
+    // Helper function to compute the hash directly.
+    static Output Hash(const void* data, size_t size);
+
+  private:
+    static_assert(BitOutputLength == 224 || BitOutputLength == 256 || BitOutputLength == 384 ||
+                  BitOutputLength == 512);
+    static constexpr size_t kByteCapacity = kByteOutputLength * 2;
+    static constexpr size_t kByteRate = 1600 / 8 - kByteCapacity;
+
+    Sha3State mState = {};
+    size_t mOffsetInState = 0;
+};
+
+using Sha3_224 = Sha3<224>;
+using Sha3_256 = Sha3<256>;
+using Sha3_384 = Sha3<384>;
+using Sha3_512 = Sha3<512>;
+
+extern template class Sha3<224>;
+extern template class Sha3<256>;
+extern template class Sha3<384>;
+extern template class Sha3<512>;
 
 Sha3State KeccakForTesting(Sha3State s);
 

@@ -27,7 +27,9 @@
 
 #include "src/dawn/common/Sha3.h"
 
+#include <algorithm>
 #include <bitset>
+#include <cstring>
 
 #include "src/dawn/common/Assert.h"
 
@@ -246,7 +248,84 @@ void Keccak(Sha3State& a) {
     }
 }
 
+// TODO(402772741): This could be made more efficient by xoring whole 64bits at a time.
+void memxorpy(void* dst, const void* src, size_t n) {
+    char* dstChars = static_cast<char*>(dst);
+    const char* srcChars = static_cast<const char*>(src);
+
+    while (n > 0) {
+        *dstChars ^= *srcChars;
+        n--;
+        dstChars++;
+        srcChars++;
+    }
+}
+
 }  // anonymous namespace
+
+// Section 4: Sponge Construction
+// The spec only defines hashing a full message but for convenience we use an Update/Finalize API.
+// This means that Algorithm 8 is spread over multiple function calls. For each chunk of "rate"
+// bits we xor them at the start of the state and perform Keccak on the state. SHA3 also adds a
+// 01 suffix at the end of the message and pads the remaining bits with 10...0...01. (with 11
+// being a valid padding, but not 1).
+template <size_t OutputLength>
+void Sha3<OutputLength>::Update(const void* data, size_t size) {
+    uint8_t* stateAsString = reinterpret_cast<uint8_t*>(&mState);
+
+    while (size > 0) {
+        DAWN_ASSERT(mOffsetInState < kByteRate);
+        size_t toProcess = std::min(size, kByteRate - mOffsetInState);
+
+        memxorpy(stateAsString + mOffsetInState, data, toProcess);
+        size -= toProcess;
+        mOffsetInState += toProcess;
+
+        if (mOffsetInState == kByteRate) {
+            Keccak(mState);
+            mOffsetInState = 0;
+        }
+    }
+}
+
+template <size_t OutputLength>
+typename Sha3<OutputLength>::Output Sha3<OutputLength>::Finalize() {
+    uint8_t* stateAsString = reinterpret_cast<uint8_t*>(&mState);
+    DAWN_ASSERT(mOffsetInState < kByteRate);
+
+    // Add in the 01 suffix for SHA3, as well as the first 1 for the padding.
+    uint8_t* suffixByte = stateAsString + mOffsetInState;
+    *suffixByte ^= 0b110;
+
+    // Add in the last 1 of the multi-rate padding. The byte may be the same byte as suffixByte.
+    uint8_t* endByte = stateAsString + (kByteRate - 1);
+    *endByte ^= 0b1000'0000;
+
+    // Do the final Keccak for the absorption in the sponge.
+    Keccak(mState);
+
+    // Garble the offset to trigger an ASSERT in Update or Finalize if they are called again.
+    mOffsetInState = 0xC0FFEE;
+
+    // The squeeze of the hash value can be done in one step.
+    static_assert(sizeof(Output) <= kByteRate);
+    Output output;
+    memcpy(&output, &mState, sizeof(output));
+    return output;
+}
+
+// static
+template <size_t OutputLength>
+typename Sha3<OutputLength>::Output Sha3<OutputLength>::Hash(const void* data, size_t size) {
+    Sha3 sha;
+    sha.Update(data, size);
+    return sha.Finalize();
+}
+
+template class Sha3<224>;
+template class Sha3<256>;
+template class Sha3<384>;
+template class Sha3<512>;
 
 Sha3State KeccakForTesting(Sha3State s) {
     Sha3State res = s;
