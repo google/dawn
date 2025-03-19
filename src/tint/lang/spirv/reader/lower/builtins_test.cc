@@ -9121,5 +9121,61 @@ TEST_F(SpirvReader_BuiltinsTest, Select_Vector) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(SpirvReader_BuiltinsTest, OuterProduct_Vector) {
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        // Call the OuterProduct builtin function
+        b.Call<spirv::ir::BuiltinCall>(ty.mat2x4<f32>(), spirv::BuiltinFn::kOuterProduct,
+                                       b.Splat<vec4<f32>>(1_f), b.Splat<vec2<f32>>(2_f));
+        b.Return(ep);
+    });
+
+    // Expected SPIR-V source code
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:mat2x4<f32> = spirv.outer_product vec4<f32>(1.0f), vec2<f32>(2.0f)
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    // Run the test
+    Run(Builtins);
+
+    // Updated expected expanded SPIR-V code after lowering
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:f32 = access vec2<f32>(2.0f), 0u
+    %3:f32 = access vec4<f32>(1.0f), 0u
+    %4:f32 = mul %3, %2
+    %5:f32 = access vec4<f32>(1.0f), 1u
+    %6:f32 = mul %5, %2
+    %7:f32 = access vec4<f32>(1.0f), 2u
+    %8:f32 = mul %7, %2
+    %9:f32 = access vec4<f32>(1.0f), 3u
+    %10:f32 = mul %9, %2
+    %11:vec4<f32> = construct %4, %6, %8, %10
+    %12:f32 = access vec2<f32>(2.0f), 1u
+    %13:f32 = access vec4<f32>(1.0f), 0u
+    %14:f32 = mul %13, %12
+    %15:f32 = access vec4<f32>(1.0f), 1u
+    %16:f32 = mul %15, %12
+    %17:f32 = access vec4<f32>(1.0f), 2u
+    %18:f32 = mul %17, %12
+    %19:f32 = access vec4<f32>(1.0f), 3u
+    %20:f32 = mul %19, %12
+    %21:vec4<f32> = construct %14, %16, %18, %20
+    %22:mat2x4<f32> = construct %11, %21
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader::lower

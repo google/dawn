@@ -1621,5 +1621,81 @@ TEST_F(SpirvParserTest, VectorExtractDynamic) {
 )");
 }
 
+TEST_F(SpirvParserTest, OuterProductVec2Vec3) {
+    EXPECT_IR(R"(
+         OpCapability Shader
+         OpMemoryModel Logical GLSL450
+         OpEntryPoint GLCompute %main "main"
+         OpExecutionMode %main LocalSize 1 1 1
+
+ %void = OpTypeVoid
+%float = OpTypeFloat 32
+%v2float = OpTypeVector %float 2
+%v3float = OpTypeVector %float 3
+%mat2x3float = OpTypeMatrix %v3float 2
+%ep_type = OpTypeFunction %void
+
+%float_1 = OpConstant %float 1
+%float_2 = OpConstant %float 2
+%float_3 = OpConstant %float 3
+%float_4 = OpConstant %float 4
+%float_5 = OpConstant %float 5
+
+%vec2 = OpConstantComposite %v2float %float_1 %float_2
+%vec3 = OpConstantComposite %v3float %float_3 %float_4 %float_5
+
+ %main = OpFunction %void None %ep_type
+%entry = OpLabel
+    %1 = OpOuterProduct %mat2x3float %vec3 %vec2
+         OpReturn
+         OpFunctionEnd)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:mat2x3<f32> = spirv.outer_product vec3<f32>(3.0f, 4.0f, 5.0f), vec2<f32>(1.0f, 2.0f)
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, OuterProductVec3Vec2) {
+    EXPECT_IR(R"(
+         OpCapability Shader
+         OpMemoryModel Logical GLSL450
+         OpEntryPoint GLCompute %main "main"
+         OpExecutionMode %main LocalSize 1 1 1
+
+ %void = OpTypeVoid
+%float = OpTypeFloat 32
+%v2float = OpTypeVector %float 2
+%v3float = OpTypeVector %float 3
+%mat3x2float = OpTypeMatrix %v2float 3
+%ep_type = OpTypeFunction %void
+
+%float_1 = OpConstant %float 1
+%float_2 = OpConstant %float 2
+%float_3 = OpConstant %float 3
+%float_4 = OpConstant %float 4
+%float_5 = OpConstant %float 5
+
+%vec2 = OpConstantComposite %v2float %float_1 %float_2
+%vec3 = OpConstantComposite %v3float %float_3 %float_4 %float_5
+
+ %main = OpFunction %void None %ep_type
+%entry = OpLabel
+    %1 = OpOuterProduct %mat3x2float %vec2 %vec3
+         OpReturn
+         OpFunctionEnd)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:mat3x2<f32> = spirv.outer_product vec2<f32>(1.0f, 2.0f), vec3<f32>(3.0f, 4.0f, 5.0f)
+    ret
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader

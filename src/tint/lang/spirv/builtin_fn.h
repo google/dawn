@@ -133,6 +133,7 @@ enum class BuiltinFn : uint8_t {
     kNot,
     kSNegate,
     kFMod,
+    kOuterProduct,
     kSDot,
     kUDot,
     kCooperativeMatrixLoad,
