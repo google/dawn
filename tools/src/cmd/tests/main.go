@@ -683,6 +683,11 @@ func (j job) run(cfg runConfig, fsReaderWriter oswrapper.FilesystemReaderWriter)
 		// expectedFilePath is the path to the expected output file for the given test
 		expectedFilePath := j.file + ".expected."
 
+		// Only attempt to generate WGSL for SPVASM input files
+		if strings.HasSuffix(j.file, ".spvasm") && j.format != wgsl {
+			return status{code: skip, timeTaken: 0}
+		}
+
 		useIr := j.format == hlslDXCIR || j.format == hlslFXCIR
 
 		switch j.format {
