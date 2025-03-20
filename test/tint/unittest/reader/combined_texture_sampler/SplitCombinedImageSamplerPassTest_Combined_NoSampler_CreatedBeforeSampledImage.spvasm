@@ -1,0 +1,44 @@
+               OpCapability Shader
+               OpCapability RuntimeDescriptorArray
+               OpExtension "SPV_EXT_descriptor_indexing"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %main "main"
+               OpName %main_0 "main_0"
+               OpName %voidfn "voidfn"
+               OpDecorate %100 DescriptorSet 0
+               OpDecorate %100 Binding 0
+
+     ; A sampler type is created and placed at the start of types.
+     ; CHECK: OpDecorate %{{\d+}} Binding 0
+     ; CHECK: OpDecorate %{{\d+}} Binding 0
+     ; CHECK-NOT: TypeSampledImage
+     ; CHECK: TypeSampler
+     ; CHECK: TypeSampledImage
+
+      %float = OpTypeFloat 32
+       %uint = OpTypeInt 32 0
+        %int = OpTypeInt 32 1
+     %uint_0 = OpConstant %uint 0
+     %uint_1 = OpConstant %uint 1
+     %uint_3 = OpConstant %uint 3
+    %float_0 = OpConstant %float 0
+    %v2float = OpTypeVector %float 2
+    %v3float = OpTypeVector %float 3
+    %v4float = OpTypeVector %float 4
+         %13 = OpConstantNull %v2float
+         %14 = OpConstantNull %v3float
+         %15 = OpConstantNull %v4float
+       %void = OpTypeVoid
+     %voidfn = OpTypeFunction %void
+ %10 = OpTypeImage %float 2D 0 0 0 1 Unknown
+         %11 = OpTypeSampledImage %10
+%_ptr_UniformConstant_11 = OpTypePointer UniformConstant %11
+
+        %100 = OpVariable %_ptr_UniformConstant_11 UniformConstant
+       %main = OpFunction %void None %voidfn
+     %main_0 = OpLabel
+          %6 = OpLoad %11 %100
+               OpReturn
+               OpFunctionEnd

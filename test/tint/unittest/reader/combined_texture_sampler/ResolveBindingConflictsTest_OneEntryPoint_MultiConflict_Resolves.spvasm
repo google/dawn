@@ -1,0 +1,73 @@
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %main "main"
+               OpName %voidfn "voidfn"
+               OpName %s_ty "s_ty"
+               OpName %i_ty "i_ty"
+               OpName %si_ty "si_ty"
+               OpName %p_s_ty "p_s_ty"
+               OpName %p_i_ty "p_i_ty"
+               OpName %p_si_ty "p_si_ty"
+               OpName %st_ty "st_ty"
+               OpName %pu_st_ty "pu_st_ty"
+               OpName %pb_st_ty "pb_st_ty"
+
+      ; Two conflicts: at Bindings 0, and 1
+               OpDecorate %100 DescriptorSet 0
+               OpDecorate %100 Binding 0
+               OpDecorate %101 DescriptorSet 0
+               OpDecorate %101 Binding 0
+               OpDecorate %102 DescriptorSet 0
+               OpDecorate %102 Binding 1
+               OpDecorate %103 DescriptorSet 0
+               OpDecorate %103 Binding 1
+               OpDecorate %104 DescriptorSet 0
+               OpDecorate %104 Binding 2
+
+      ; CHECK: OpDecorate %100 DescriptorSet 0
+      ; CHECK: OpDecorate %100 Binding 1
+      ; CHECK: OpDecorate %101 DescriptorSet 0
+      ; CHECK: OpDecorate %101 Binding 0
+      ; CHECK: OpDecorate %102 DescriptorSet 0
+      ; CHECK: OpDecorate %102 Binding 2
+      ; CHECK: OpDecorate %103 DescriptorSet 0
+      ; CHECK: OpDecorate %103 Binding 3
+      ; CHECK: OpDecorate %104 DescriptorSet 0
+      ; CHECK: OpDecorate %104 Binding 4
+
+               OpDecorate %st_ty Block
+               OpMemberDecorate %st_ty 0 Offset 0
+      %float = OpTypeFloat 32
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+     %uint_3 = OpConstant %uint 3
+       %void = OpTypeVoid
+     %voidfn = OpTypeFunction %void
+       %s_ty = OpTypeSampler
+       %i_ty = OpTypeImage %float 2D 0 0 0 1 Unknown
+      %si_ty = OpTypeSampledImage %i_ty
+     %p_i_ty = OpTypePointer UniformConstant %i_ty
+     %p_s_ty = OpTypePointer UniformConstant %s_ty
+    %p_si_ty = OpTypePointer UniformConstant %si_ty
+      %st_ty = OpTypeStruct %uint
+   %pu_st_ty = OpTypePointer Uniform %st_ty
+   %pb_st_ty = OpTypePointer StorageBuffer %st_ty
+
+
+        %100 = OpVariable %p_s_ty UniformConstant ; sampler first
+        %101 = OpVariable %p_i_ty UniformConstant
+        %102 = OpVariable %p_i_ty UniformConstant
+        %103 = OpVariable %p_s_ty UniformConstant ; sampler second
+        %104 = OpVariable %pu_st_ty Uniform
+
+       %main = OpFunction %void None %voidfn
+         %10 = OpLabel
+         %11 = OpCopyObject %p_s_ty %100
+         %12 = OpCopyObject %p_i_ty %101
+         %13 = OpCopyObject %p_i_ty %102
+         %14 = OpCopyObject %p_s_ty %103
+         %15 = OpCopyObject %pu_st_ty %104
+               OpReturn
+               OpFunctionEnd

@@ -96,6 +96,7 @@ cc_library(
     ":tint_build_spv_reader_or_tint_build_spv_writer": [
       "@spirv_headers//:spirv_cpp11_headers", "@spirv_headers//:spirv_c_headers",
       "@spirv_tools//:spirv_tools_opt",
+      "@spirv_tools",
     ],
     "//conditions:default": [],
   }),

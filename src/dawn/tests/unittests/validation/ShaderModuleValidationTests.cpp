@@ -73,7 +73,11 @@ TEST_F(ShaderModuleValidationTest, CreationSuccess) {
     utils::CreateShaderModuleFromASM(device, shader);
 }
 
-// Test that it is not allowed to use combined texture and sampler.
+// Tint's SPIR-V reader transforms a combined image sampler into two
+// variables: an image part and a sampler part.  The sampler part's binding
+// number is incremented. This may produce a conflict, which is solved
+// by iterating further binding increments.  It's easy to use in simple cases:
+// a sampled image variable effectively takes up two binding slots.
 TEST_F(ShaderModuleValidationTest, CombinedTextureAndSampler) {
     // SPIR-V ASM produced by glslang for the following fragment shader:
     //
@@ -105,6 +109,44 @@ TEST_F(ShaderModuleValidationTest, CombinedTextureAndSampler) {
           %8 = OpTypeSampledImage %7
 %_ptr_UniformConstant_8 = OpTypePointer UniformConstant %8
         %tex = OpVariable %_ptr_UniformConstant_8 UniformConstant
+       %main = OpFunction %void None %3
+          %5 = OpLabel
+               OpReturn
+               OpFunctionEnd
+        )";
+
+    utils::CreateShaderModuleFromASM(device, shader);
+}
+
+TEST_F(ShaderModuleValidationTest, ArrayOfCombinedTextureAndSampler) {
+    // SPIR-V ASM produced by glslang for the following fragment shader:
+    //
+    //   #version 450
+    //   layout(set = 0, binding = 0) uniform sampler2D tex[2];
+    //   void main () {}
+    //
+    // Dawn/WebGPU does not yet support arrays of sampled images.
+    const char* shader = R"(
+               OpCapability Shader
+          %1 = OpExtInstImport "GLSL.std.450"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main"
+               OpExecutionMode %main OriginUpperLeft
+               OpSource GLSL 450
+               OpName %main "main"
+               OpName %tex "tex"
+               OpDecorate %tex Binding 0
+               OpDecorate %tex DescriptorSet 0
+       %void = OpTypeVoid
+          %3 = OpTypeFunction %void
+      %float = OpTypeFloat 32
+          %7 = OpTypeImage %float 2D 0 0 0 1 Unknown
+          %8 = OpTypeSampledImage %7
+       %uint = OpTypeInt 32 0
+     %uint_2 = OpConstant %uint 2
+%_arr_8_uint_2 = OpTypeArray %8 %uint_2
+%_ptr_UniformConstant__arr_8_uint_2 = OpTypePointer UniformConstant %_arr_8_uint_2
+        %tex = OpVariable %_ptr_UniformConstant__arr_8_uint_2 UniformConstant
        %main = OpFunction %void None %3
           %5 = OpLabel
                OpReturn

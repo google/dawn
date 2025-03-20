@@ -103,6 +103,7 @@ if(TINT_BUILD_SPV_READER OR TINT_BUILD_SPV_WRITER)
   tint_target_add_external_dependencies(tint_lang_spirv_reader_ast_parser lib
     "spirv-headers"
     "spirv-opt-internal"
+    "spirv-tools"
   )
 endif(TINT_BUILD_SPV_READER OR TINT_BUILD_SPV_WRITER)
 
