@@ -53,6 +53,7 @@ interface GPUSubgroupMatrixConfig {
 };
 
 interface GPUAdapterInfo {
+    readonly attribute boolean isFallbackAdapter;
     [SameObject] readonly attribute FrozenArray<GPUSubgroupMatrixConfig> subgroupMatrixConfigs;
 };
 

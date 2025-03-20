@@ -109,7 +109,8 @@ GPUAdapterInfo::GPUAdapterInfo(const wgpu::AdapterInfo& info)
       device_(NormalizeIdentifierString(info.device)),
       description_(info.description),
       subgroup_min_size_(info.subgroupMinSize),
-      subgroup_max_size_(info.subgroupMaxSize) {
+      subgroup_max_size_(info.subgroupMaxSize),
+      is_fallback_adapter_(info.adapterType == wgpu::AdapterType::CPU) {
     auto* next = info.nextInChain;
     while (next) {
         if (next->sType == SType::AdapterPropertiesSubgroupMatrixConfigs) {
@@ -145,6 +146,10 @@ uint32_t GPUAdapterInfo::getSubgroupMinSize(Napi::Env) {
 
 uint32_t GPUAdapterInfo::getSubgroupMaxSize(Napi::Env) {
     return subgroup_max_size_;
+}
+
+bool GPUAdapterInfo::getIsFallbackAdapter(Napi::Env) {
+    return is_fallback_adapter_;
 }
 
 GPUAdapterInfo::SubgroupMatrixConfigs GPUAdapterInfo::getSubgroupMatrixConfigs(Napi::Env env) {
