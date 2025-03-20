@@ -29,6 +29,7 @@
 #define SRC_DAWN_COMMON_SHA3_H_
 
 #include <array>
+#include <cstddef>
 #include <cstdint>
 
 namespace dawn {
