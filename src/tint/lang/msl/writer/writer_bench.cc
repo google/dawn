@@ -28,10 +28,10 @@
 #include <string>
 
 #include "src/tint/cmd/bench/bench.h"
+#include "src/tint/lang/msl/ir/transform/flatten_bindings.h"
 #include "src/tint/lang/msl/writer/helpers/generate_bindings.h"
 #include "src/tint/lang/msl/writer/writer.h"
 #include "src/tint/lang/wgsl/ast/module.h"
-#include "src/tint/lang/wgsl/helpers/flatten_bindings.h"
 #include "src/tint/lang/wgsl/reader/reader.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
 
@@ -72,7 +72,7 @@ void GenerateMSL(benchmark::State& state, std::string input_name) {
         }
 
         // Remap resource numbers to a flat namespace.
-        auto fb_res = tint::wgsl::FlattenBindings(ir.Get());
+        auto fb_res = tint::msl::ir::transform::FlattenBindings(ir.Get());
         if (fb_res != tint::Success) {
             state.SkipWithError(fb_res.Failure().reason);
             return;
@@ -90,7 +90,7 @@ void GenerateMSL(benchmark::State& state, std::string input_name) {
         }
 
         // Remap resource numbers to a flat namespace.
-        auto fb_res = tint::wgsl::FlattenBindings(ir.Get());
+        auto fb_res = tint::msl::ir::transform::FlattenBindings(ir.Get());
         if (fb_res != tint::Success) {
             state.SkipWithError(fb_res.Failure().reason);
             return;

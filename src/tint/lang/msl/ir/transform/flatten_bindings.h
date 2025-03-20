@@ -25,8 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_WGSL_HELPERS_FLATTEN_BINDINGS_H_
-#define SRC_TINT_LANG_WGSL_HELPERS_FLATTEN_BINDINGS_H_
+#ifndef SRC_TINT_LANG_MSL_IR_TRANSFORM_FLATTEN_BINDINGS_H_
+#define SRC_TINT_LANG_MSL_IR_TRANSFORM_FLATTEN_BINDINGS_H_
 
 #include "src/tint/utils/result.h"
 
@@ -35,7 +35,7 @@ namespace tint::core::ir {
 class Module;
 }
 
-namespace tint::wgsl {
+namespace tint::msl::ir::transform {
 
 /// If needed, remaps resource numbers of `ir` to a flat namespace: all in group 0 within
 /// unique binding numbers.
@@ -43,6 +43,6 @@ namespace tint::wgsl {
 /// @param ir The IR to mutate
 Result<SuccessType> FlattenBindings(core::ir::Module& ir);
 
-}  // namespace tint::wgsl
+}  // namespace tint::msl::ir::transform
 
-#endif  // SRC_TINT_LANG_WGSL_HELPERS_FLATTEN_BINDINGS_H_
+#endif  // SRC_TINT_LANG_MSL_IR_TRANSFORM_FLATTEN_BINDINGS_H_

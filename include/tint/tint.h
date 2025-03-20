@@ -34,7 +34,6 @@
 // TODO(tint:88): When implementing support for an install target, all of these
 //                headers will need to be moved to include/tint/.
 
-#include "src/tint/api/common/binding_point.h"
 #include "src/tint/api/tint.h"
 #include "src/tint/lang/core/ir/transform/single_entry_point.h"
 #include "src/tint/lang/core/ir/transform/substitute_overrides.h"
@@ -44,9 +43,6 @@
 #include "src/tint/lang/wgsl/ast/transform/renamer.h"
 #include "src/tint/lang/wgsl/ast/transform/single_entry_point.h"
 #include "src/tint/lang/wgsl/ast/transform/substitute_override.h"
-#include "src/tint/lang/wgsl/ast/transform/vertex_pulling.h"
-#include "src/tint/lang/wgsl/helpers/apply_substitute_overrides.h"
-#include "src/tint/lang/wgsl/helpers/flatten_bindings.h"
 #include "src/tint/lang/wgsl/inspector/inspector.h"
 #include "src/tint/utils/diagnostic/formatter.h"
 #include "src/tint/utils/text/styled_text.h"

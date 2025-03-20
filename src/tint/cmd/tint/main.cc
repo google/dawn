@@ -46,12 +46,12 @@
 #include "src/tint/lang/core/ir/transform/single_entry_point.h"
 #include "src/tint/lang/core/ir/transform/substitute_overrides.h"
 #include "src/tint/lang/core/ir/var.h"
+#include "src/tint/lang/msl/ir/transform/flatten_bindings.h"
 #include "src/tint/lang/wgsl/ast/module.h"
 #include "src/tint/lang/wgsl/ast/transform/manager.h"
 #include "src/tint/lang/wgsl/ast/transform/renamer.h"
 #include "src/tint/lang/wgsl/ast/transform/single_entry_point.h"
 #include "src/tint/lang/wgsl/ast/transform/substitute_override.h"
-#include "src/tint/lang/wgsl/helpers/flatten_bindings.h"
 #include "src/tint/utils/command/cli.h"
 #include "src/tint/utils/command/command.h"
 #include "src/tint/utils/containers/transform.h"
@@ -1000,7 +1000,7 @@ bool GenerateMsl([[maybe_unused]] Options& options,
 
     {
         // Remap resource numbers to a flat namespace.
-        auto res = tint::wgsl::FlattenBindings(ir.Get());
+        auto res = tint::msl::ir::transform::FlattenBindings(ir.Get());
         if (res != tint::Success) {
             std::cerr << "Failed to flatten bindings: " << res.Failure().reason << "\n";
             return false;

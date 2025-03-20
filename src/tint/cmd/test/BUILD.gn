@@ -64,6 +64,7 @@ if (tint_build_unittests) {
       "${tint_src_dir}/lang/hlsl/writer/common:unittests",
       "${tint_src_dir}/lang/hlsl/writer/raise:unittests",
       "${tint_src_dir}/lang/msl/ir:unittests",
+      "${tint_src_dir}/lang/msl/ir/transform:unittests",
       "${tint_src_dir}/lang/msl/type:unittests",
       "${tint_src_dir}/lang/spirv/ir:unittests",
       "${tint_src_dir}/lang/spirv/reader/lower:unittests",

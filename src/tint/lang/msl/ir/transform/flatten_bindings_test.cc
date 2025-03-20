@@ -25,7 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/wgsl/helpers/flatten_bindings.h"
+#include "src/tint/lang/msl/ir/transform/flatten_bindings.h"
 
 #include <utility>
 
@@ -38,7 +38,7 @@
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
 
-namespace tint::wgsl {
+namespace tint::msl::ir::transform {
 namespace {
 
 using namespace tint::core::number_suffixes;  // NOLINT
@@ -206,4 +206,4 @@ TEST_F(FlattenBindingsTest, NotFlat_MultipleNamespaces) {
 }
 
 }  // namespace
-}  // namespace tint::wgsl
+}  // namespace tint::msl::ir::transform

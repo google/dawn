@@ -25,7 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/wgsl/helpers/flatten_bindings.h"
+#include "src/tint/lang/msl/ir/transform/flatten_bindings.h"
 
 #include <unordered_map>
 #include <utility>
@@ -38,7 +38,7 @@
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/utils/rtti/switch.h"
 
-namespace tint::wgsl {
+namespace tint::msl::ir::transform {
 
 Result<SuccessType> FlattenBindings(core::ir::Module& ir) {
     uint32_t next_buffer_idx = 0;
@@ -95,4 +95,4 @@ Result<SuccessType> FlattenBindings(core::ir::Module& ir) {
     return core::ir::transform::BindingRemapper(ir, binding_points);
 }
 
-}  // namespace tint::wgsl
+}  // namespace tint::msl::ir::transform

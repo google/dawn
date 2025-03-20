@@ -1,4 +1,4 @@
-# Copyright 2023 The Dawn & Tint Authors
+# Copyright 2025 The Dawn & Tint Authors
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -35,30 +35,21 @@
 ################################################################################
 
 ################################################################################
-# Target:    tint_lang_wgsl_helpers
+# Target:    tint_lang_msl_ir_transform
 # Kind:      lib
 ################################################################################
-tint_add_target(tint_lang_wgsl_helpers lib
-  lang/wgsl/helpers/append_vector.cc
-  lang/wgsl/helpers/append_vector.h
-  lang/wgsl/helpers/apply_substitute_overrides.cc
-  lang/wgsl/helpers/apply_substitute_overrides.h
-  lang/wgsl/helpers/check_supported_extensions.cc
-  lang/wgsl/helpers/check_supported_extensions.h
+tint_add_target(tint_lang_msl_ir_transform lib
+  lang/msl/ir/transform/flatten_bindings.cc
+  lang/msl/ir/transform/flatten_bindings.h
 )
 
-tint_target_add_dependencies(tint_lang_wgsl_helpers lib
+tint_target_add_dependencies(tint_lang_msl_ir_transform lib
   tint_api_common
   tint_lang_core
   tint_lang_core_constant
+  tint_lang_core_ir
+  tint_lang_core_ir_transform
   tint_lang_core_type
-  tint_lang_wgsl
-  tint_lang_wgsl_ast
-  tint_lang_wgsl_ast_transform
-  tint_lang_wgsl_features
-  tint_lang_wgsl_inspector
-  tint_lang_wgsl_program
-  tint_lang_wgsl_sem
   tint_utils
   tint_utils_containers
   tint_utils_diagnostic
@@ -71,35 +62,27 @@ tint_target_add_dependencies(tint_lang_wgsl_helpers lib
   tint_utils_text
 )
 
-tint_target_add_external_dependencies(tint_lang_wgsl_helpers lib
+tint_target_add_external_dependencies(tint_lang_msl_ir_transform lib
   "src_utils"
 )
 
 ################################################################################
-# Target:    tint_lang_wgsl_helpers_test
+# Target:    tint_lang_msl_ir_transform_test
 # Kind:      test
 ################################################################################
-tint_add_target(tint_lang_wgsl_helpers_test test
-  lang/wgsl/helpers/append_vector_test.cc
-  lang/wgsl/helpers/check_supported_extensions_test.cc
+tint_add_target(tint_lang_msl_ir_transform_test test
+  lang/msl/ir/transform/flatten_bindings_test.cc
 )
 
-tint_target_add_dependencies(tint_lang_wgsl_helpers_test test
+tint_target_add_dependencies(tint_lang_msl_ir_transform_test test
   tint_api_common
   tint_lang_core
   tint_lang_core_constant
   tint_lang_core_intrinsic
+  tint_lang_core_ir
+  tint_lang_core_ir_test
   tint_lang_core_type
-  tint_lang_wgsl
-  tint_lang_wgsl_ast
-  tint_lang_wgsl_ast_test
-  tint_lang_wgsl_common
-  tint_lang_wgsl_features
-  tint_lang_wgsl_helpers
-  tint_lang_wgsl_intrinsic
-  tint_lang_wgsl_program
-  tint_lang_wgsl_resolver
-  tint_lang_wgsl_sem
+  tint_lang_msl_ir_transform
   tint_utils
   tint_utils_containers
   tint_utils_diagnostic
@@ -112,7 +95,7 @@ tint_target_add_dependencies(tint_lang_wgsl_helpers_test test
   tint_utils_text
 )
 
-tint_target_add_external_dependencies(tint_lang_wgsl_helpers_test test
+tint_target_add_external_dependencies(tint_lang_msl_ir_transform_test test
   "gtest"
   "src_utils"
 )
