@@ -501,31 +501,17 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
         DAWN_TRY_LOAD_OR_RUN(
             compilationResult, GetDevice(), std::move(req), GLSLCompilation::FromBlob,
             [](GLSLCompilationRequest r) -> ResultOrError<GLSLCompilation> {
-                tint::ast::transform::Manager transformManager;
-                tint::ast::transform::DataMap transformInputs;
-
-                transformManager.Add<tint::ast::transform::SingleEntryPoint>();
-                transformInputs.Add<tint::ast::transform::SingleEntryPoint::Config>(
-                    r.entryPointName);
-
-                tint::Program program;
-                tint::ast::transform::DataMap transformOutputs;
-                DAWN_TRY_ASSIGN(program,
-                                RunTransforms(&transformManager, r.inputProgram, transformInputs,
-                                              &transformOutputs, nullptr));
-
-                // Intentionally assign entry point to empty to avoid a redundant 'SingleEntryPoint'
-                // transform in Tint.
-                // TODO(crbug.com/356424898): In the long run, we want to move SingleEntryPoint to
-                // Tint, but that has interactions with SubstituteOverrides which need to be handled
-                // first.
-                const std::string remappedEntryPoint = "";
-
                 // Convert the AST program to an IR module.
-                auto ir = tint::wgsl::reader::ProgramToLoweredIR(program);
+                auto ir = tint::wgsl::reader::ProgramToLoweredIR(*r.inputProgram);
                 DAWN_INVALID_IF(ir != tint::Success,
                                 "An error occurred while generating Tint IR\n%s",
                                 ir.Failure().reason.Str());
+
+                auto singleEntryPointResult =
+                    tint::core::ir::transform::SingleEntryPoint(ir.Get(), r.entryPointName);
+                DAWN_INVALID_IF(singleEntryPointResult != tint::Success,
+                                "Pipeline single entry point (IR) failed:\n%s",
+                                singleEntryPointResult.Failure().reason);
 
                 if (r.substituteOverrideConfig) {
                     // this needs to run after SingleEntryPoint transform which removes unused
@@ -539,6 +525,7 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
                                     substituteOverridesResult.Failure().reason);
                 }
 
+                const std::string remappedEntryPoint = "";
                 // Generate GLSL from Tint IR.
                 auto result =
                     tint::glsl::writer::Generate(ir.Get(), r.tintOptions, remappedEntryPoint);
