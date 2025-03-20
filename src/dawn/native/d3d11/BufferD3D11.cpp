@@ -381,7 +381,9 @@ bool CanAddStorageUsageToBufferWithoutSideEffects(const Device* device,
         return !(originalUsage & kMappableBufferUsages);
     }
 
-    return true;
+    // Read-only storage buffer cannot be mapped for read natively. Avoid that.
+    DAWN_ASSERT(storageUsage == kReadOnlyStorageBuffer);
+    return !(originalUsage & wgpu::BufferUsage::MapRead);
 }
 
 // static
