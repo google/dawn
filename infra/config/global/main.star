@@ -77,10 +77,6 @@ luci.project(
             roles = "role/configs.validator",
             users = "dawn-try-builder@chops-service-accounts.iam.gserviceaccount.com",
         ),
-        luci.binding(
-            roles = "role/swarming.taskServiceAccount",
-            users = "dawn-automated-expectations@chops-service-accounts.iam.gserviceaccount.com",
-        ),
     ],
 )
 
@@ -99,14 +95,6 @@ luci.bucket(
             acl.BUILDBUCKET_TRIGGERER,
         ),
     ],
-)
-
-# Allow LED users to trigger swarming tasks directly when debugging ci
-# builders.
-luci.binding(
-    realm = "ci",
-    roles = "role/swarming.taskTriggerer",
-    groups = "flex-ci-led-users",
 )
 
 luci.bucket(
