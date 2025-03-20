@@ -89,6 +89,7 @@ if (tint_build_unittests) {
     tint_unittests_source_set("unittests") {
       sources = [
         "atomics_test.cc",
+        "barrier_test.cc",
         "binary_test.cc",
         "bit_test.cc",
         "branch_test.cc",
