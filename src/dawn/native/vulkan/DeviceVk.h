@@ -126,7 +126,9 @@ class Device final : public DeviceBase {
     // Used to associate this device with validation layer messages.
     const char* GetDebugPrefix() { return mDebugPrefix.c_str(); }
 
-    bool PreferNotUsingMappableOrUniformBufferAsStorage() const override;
+    bool CanAddStorageUsageToBufferWithoutSideEffects(wgpu::BufferUsage storageUsage,
+                                                      wgpu::BufferUsage originalUsage,
+                                                      size_t bufferSize) const override;
 
   private:
     Device(AdapterBase* adapter,

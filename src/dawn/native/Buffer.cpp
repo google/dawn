@@ -97,7 +97,14 @@ class ErrorBuffer final : public BufferBase {
     std::unique_ptr<uint8_t[]> mFakeMappedData;
 };
 
-wgpu::BufferUsage AddInternalUsages(const DeviceBase* device, wgpu::BufferUsage usage) {
+// GetMappedRange on a zero-sized buffer returns a pointer to this value.
+static uint32_t sZeroSizedMappingData = 0xCAFED00D;
+
+}  // anonymous namespace
+
+wgpu::BufferUsage ComputeInternalBufferUsages(const DeviceBase* device,
+                                              wgpu::BufferUsage usage,
+                                              size_t bufferSize) {
     // Add readonly storage usage if the buffer has a storage usage. The validation rules in
     // ValidateSyncScopeResourceUsage will make sure we don't use both at the same time.
     if (usage & wgpu::BufferUsage::Storage) {
@@ -135,11 +142,10 @@ wgpu::BufferUsage AddInternalUsages(const DeviceBase* device, wgpu::BufferUsage 
             device->IsToggleEnabled(Toggle::UseBlitForFloat32TextureCopy) ||
             device->IsToggleEnabled(Toggle::UseBlitForT2B);
         if (useComputeForT2B) {
-            if (!(usage & (kMappableBufferUsages | wgpu::BufferUsage::Uniform)) ||
-                !device->PreferNotUsingMappableOrUniformBufferAsStorage()) {
-                // If buffer doesn't have mapping nor Uniform usage, or backend is ok with using
-                // this kind of buffer as storage buffer, we can add Storage usage in order to write
-                // to it in compute shader.
+            if (device->CanAddStorageUsageToBufferWithoutSideEffects(kInternalStorageBuffer, usage,
+                                                                     bufferSize)) {
+                // If the backend is ok with using this kind of buffer as storage buffer, we can add
+                // Storage usage in order to write to it in compute shader.
                 usage |= kInternalStorageBuffer;
             }
 
@@ -151,13 +157,17 @@ wgpu::BufferUsage AddInternalUsages(const DeviceBase* device, wgpu::BufferUsage 
         }
     }
 
+    if ((usage & wgpu::BufferUsage::CopySrc) && device->IsToggleEnabled(Toggle::UseBlitForB2T)) {
+        if (device->CanAddStorageUsageToBufferWithoutSideEffects(kReadOnlyStorageBuffer, usage,
+                                                                 bufferSize)) {
+            // If the backend is ok with using this kind of buffer as readonly storage buffer,
+            // we can add Storage usage in order to read from it in pixel shader.
+            usage |= kReadOnlyStorageBuffer;
+        }
+    }
+
     return usage;
 }
-
-// GetMappedRange on a zero-sized buffer returns a pointer to this value.
-static uint32_t sZeroSizedMappingData = 0xCAFED00D;
-
-}  // anonymous namespace
 
 struct BufferBase::MapAsyncEvent final : public EventManager::TrackedEvent {
     // MapAsyncEvent stores a raw pointer to the buffer so that it can update the buffer's map state
@@ -339,7 +349,7 @@ BufferBase::BufferBase(DeviceBase* device, const UnpackedPtr<BufferDescriptor>& 
     : SharedResource(device, descriptor->label),
       mSize(descriptor->size),
       mUsage(descriptor->usage),
-      mInternalUsage(AddInternalUsages(device, descriptor->usage)),
+      mInternalUsage(ComputeInternalBufferUsages(device, descriptor->usage, descriptor->size)),
       mState(descriptor.Get<BufferHostMappedPointer>() ? BufferState::HostMappedPersistent
                                                        : BufferState::Unmapped) {
     GetObjectTrackingList()->Track(this);

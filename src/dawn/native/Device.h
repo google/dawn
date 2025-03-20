@@ -257,7 +257,7 @@ class DeviceBase : public ErrorSink,
     SamplerBase* APICreateSampler(const SamplerDescriptor* descriptor);
     ShaderModuleBase* APICreateShaderModule(const ShaderModuleDescriptor* descriptor);
     ShaderModuleBase* APICreateErrorShaderModule(const ShaderModuleDescriptor* descriptor,
-                                                  StringView errorMessage);
+                                                 StringView errorMessage);
     TextureBase* APICreateTexture(const TextureDescriptor* descriptor);
 
     InternalPipelineStore* GetInternalPipelineStore();
@@ -379,8 +379,12 @@ class DeviceBase : public ErrorSink,
     // will be resolved into.
     virtual bool CanTextureLoadResolveTargetInTheSameRenderpass() const;
 
-    // Whether the backend prefer not using mappable/uniform buffer as storage buffer.
-    virtual bool PreferNotUsingMappableOrUniformBufferAsStorage() const;
+    // Whether the backend can add internal storage usage to the buffer without side effects.
+    // - storageUsage is the internal storage usage that would be added.
+    // - originalUsage is the original usage of the buffer.
+    virtual bool CanAddStorageUsageToBufferWithoutSideEffects(wgpu::BufferUsage storageUsage,
+                                                              wgpu::BufferUsage originalUsage,
+                                                              size_t bufferSize) const;
 
     bool HasFeature(Feature feature) const;
 

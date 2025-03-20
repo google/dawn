@@ -318,6 +318,7 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         deviceToggles->ForceSet(Toggle::D3D11DisableFence, !mDeviceInfo.supportsNonMonitoredFence);
     }
     deviceToggles->Default(Toggle::UseBlitForT2B, true);
+    deviceToggles->Default(Toggle::UseBlitForB2T, true);
 
     auto deviceId = GetDeviceId();
     auto vendorId = GetVendorId();

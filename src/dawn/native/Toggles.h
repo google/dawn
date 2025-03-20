@@ -114,6 +114,8 @@ enum class Toggle {
     UseBlitForFloat16TextureCopy,
     UseBlitForFloat32TextureCopy,
     UseBlitForT2B,
+    UseBlitForB2T,
+    D3D11DisableCPUUploadBuffers,
     UseT2B2TForSRGBTextureCopy,
     D3D12ReplaceAddWithMinusWhenDstFactorIsZeroAndSrcFactorIsDstAlpha,
     D3D12PolyfillReflectVec2F32,

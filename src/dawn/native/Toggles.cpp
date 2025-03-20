@@ -449,6 +449,15 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "Use a compute based blit instead of a copy command to copy texture with supported format to "
       "a buffer.",
       "https://crbug.com/dawn/348654098", ToggleStage::Device}},
+    {Toggle::UseBlitForB2T,
+     {"use_blit_for_b2t",
+      "Use a shader based blit instead of a copy command to copy a buffer to a texture with "
+      "supported format.",
+      "https://crbug.com/dawn/348653642", ToggleStage::Device}},
+    {Toggle::D3D11DisableCPUUploadBuffers,
+     {"d3d11_disable_cpu_buffers",
+      "Force disabling the usages of CPU upload buffers in the D3D11 backend.",
+      "https://crbug.com/dawn/348653642", ToggleStage::Device}},
     {Toggle::UseT2B2TForSRGBTextureCopy,
      {"use_t2b2t_for_srgb_texture_copy",
       "Use T2B and B2T copies to emulate a T2T copy between sRGB and non-sRGB textures."

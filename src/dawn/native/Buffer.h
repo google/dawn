@@ -69,6 +69,12 @@ static constexpr wgpu::BufferUsage kShaderBufferUsages =
 static constexpr wgpu::BufferUsage kReadOnlyShaderBufferUsages =
     kShaderBufferUsages & kReadOnlyBufferUsages;
 
+// Return the actual internal buffer usages that will be used to create a buffer.
+// In other words, after being created, buffer.GetInternalUsage() will return this value.
+wgpu::BufferUsage ComputeInternalBufferUsages(const DeviceBase* device,
+                                              wgpu::BufferUsage usage,
+                                              size_t bufferSize);
+
 class BufferBase : public SharedResource {
   public:
     enum class BufferState {

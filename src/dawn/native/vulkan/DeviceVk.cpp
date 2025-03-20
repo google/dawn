@@ -30,6 +30,7 @@
 #include <algorithm>
 
 #include "dawn/common/Log.h"
+#include "dawn/common/Math.h"
 #include "dawn/common/NonCopyable.h"
 #include "dawn/common/Platform.h"
 #include "dawn/common/Version_autogen.h"
@@ -1075,9 +1076,15 @@ void Device::PerformIdleTasksImpl() {
     }
 }
 
-bool Device::PreferNotUsingMappableOrUniformBufferAsStorage() const {
-    // Return true when the backend doesn't support mappable storage buffer
-    return !mSupportsMappableStorageBuffer;
+bool Device::CanAddStorageUsageToBufferWithoutSideEffects(wgpu::BufferUsage storageUsage,
+                                                          wgpu::BufferUsage originalUsage,
+                                                          size_t bufferSize) const {
+    DAWN_ASSERT(IsSubset(storageUsage, wgpu::BufferUsage::Storage | kInternalStorageBuffer |
+                                           kReadOnlyStorageBuffer));
+    if (originalUsage & kMappableBufferUsages) {
+        return mSupportsMappableStorageBuffer;
+    }
+    return true;
 }
 
 }  // namespace dawn::native::vulkan

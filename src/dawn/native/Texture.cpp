@@ -35,6 +35,7 @@
 #include "dawn/common/Constants.h"
 #include "dawn/common/Math.h"
 #include "dawn/native/Adapter.h"
+#include "dawn/native/BlitBufferToTexture.h"
 #include "dawn/native/BlitTextureToBuffer.h"
 #include "dawn/native/ChainUtils.h"
 #include "dawn/native/CommandValidation.h"
@@ -522,6 +523,11 @@ bool CopyDstNeedsInternalRenderAttachmentUsage(const DeviceBase* device, const F
     // Stencil
     if (format.HasStencil() &&
         device->IsToggleEnabled(Toggle::UseBlitForBufferToStencilTextureCopy)) {
+        return true;
+    }
+
+    if (device->IsToggleEnabled(Toggle::UseBlitForB2T) &&
+        IsFormatSupportedByBufferToTextureBlit(format.format)) {
         return true;
     }
     return false;
