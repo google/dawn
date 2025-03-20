@@ -7,7 +7,7 @@ struct tint_module_vars_struct {
   depth2d<float, access::sample> tex;
 };
 
-kernel void compute_main(const constant uint* level [[buffer(1)]], const constant uint2* coords [[buffer(0)]], depth2d<float, access::sample> tex [[texture(0)]]) {
+kernel void compute_main(const constant uint* level [[buffer(0)]], const constant uint2* coords [[buffer(1)]], depth2d<float, access::sample> tex [[texture(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.level=level, .coords=coords, .tex=tex};
   uint2 const v = (*tint_module_vars.coords);
   uint const v_1 = min((*tint_module_vars.level), (tint_module_vars.tex.get_num_mip_levels() - 1u));

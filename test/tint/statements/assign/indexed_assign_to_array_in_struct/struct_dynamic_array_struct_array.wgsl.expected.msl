@@ -36,7 +36,7 @@ struct tint_module_vars_struct {
   const constant tint_array<uint4, 1>* tint_storage_buffer_sizes;
 };
 
-kernel void v_1(const constant Uniforms* uniforms [[buffer(1)]], device OuterS* s [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
+kernel void v_1(const constant Uniforms* uniforms [[buffer(0)]], device OuterS* s [[buffer(1)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.uniforms=uniforms, .s=s, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
   InnerS v = {};
   (*tint_module_vars.s).a1[min((*tint_module_vars.uniforms).i, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 32u) - 1u))].a2[min((*tint_module_vars.uniforms).j, 7u)] = v;

@@ -195,7 +195,7 @@ void simulate_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_modul
   tint_store_and_preserve_padding((&(*tint_module_vars.data).particles[min(idx, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 48u) - 1u))]), particle);
 }
 
-kernel void simulate(uint3 GlobalInvocationID [[thread_position_in_grid]], const constant SimulationParams* sim_params [[buffer(1)]], device Particles_packed_vec3* data [[buffer(2)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
+kernel void simulate(uint3 GlobalInvocationID [[thread_position_in_grid]], const constant SimulationParams* sim_params [[buffer(0)]], device Particles_packed_vec3* data [[buffer(1)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
   thread float2 rand_seed = 0.0f;
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.rand_seed=(&rand_seed), .sim_params=sim_params, .data=data, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
   simulate_inner(GlobalInvocationID, tint_module_vars);
@@ -238,18 +238,18 @@ void export_level_inner(uint3 coord, tint_module_vars_struct tint_module_vars) {
   if (all((coord.xy < uint2(uint2(tint_module_vars.tex_out.get_width(0u), tint_module_vars.tex_out.get_height(0u)))))) {
     uint const dst_offset = (coord.x << ((coord.y * (*tint_module_vars.ubo).width) & 31u));
     uint const src_offset = ((coord.x - 2u) + ((coord.y >> (2u & 31u)) * (*tint_module_vars.ubo).width));
-    float const a = (*tint_module_vars.buf_in).weights[min((src_offset << (0u & 31u)), ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].y - 0u) / 4u) - 1u))];
-    float const b = (*tint_module_vars.buf_in).weights[min((src_offset + 1u), ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].y - 0u) / 4u) - 1u))];
-    float const c = (*tint_module_vars.buf_in).weights[min(((src_offset + 1u) + (*tint_module_vars.ubo).width), ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].y - 0u) / 4u) - 1u))];
-    float const d = (*tint_module_vars.buf_in).weights[min(((src_offset + 1u) + (*tint_module_vars.ubo).width), ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].y - 0u) / 4u) - 1u))];
+    float const a = (*tint_module_vars.buf_in).weights[min((src_offset << (0u & 31u)), ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 4u) - 1u))];
+    float const b = (*tint_module_vars.buf_in).weights[min((src_offset + 1u), ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 4u) - 1u))];
+    float const c = (*tint_module_vars.buf_in).weights[min(((src_offset + 1u) + (*tint_module_vars.ubo).width), ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 4u) - 1u))];
+    float const d = (*tint_module_vars.buf_in).weights[min(((src_offset + 1u) + (*tint_module_vars.ubo).width), ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 4u) - 1u))];
     float const sum = dot(float4(a, b, c, d), float4(1.0f));
-    (*tint_module_vars.buf_out).weights[min(dst_offset, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].z - 0u) / 4u) - 1u))] = fmod(sum, 4.0f);
+    (*tint_module_vars.buf_out).weights[min(dst_offset, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].y - 0u) / 4u) - 1u))] = fmod(sum, 4.0f);
     float4 const probabilities = (float4(a, (a * b), ((a / b) + c), sum) + max(sum, 0.0f));
     tint_module_vars.tex_out.write(probabilities, uint2(int2(coord.xy)));
   }
 }
 
-kernel void export_level(uint3 coord [[thread_position_in_grid]], const constant UBO* ubo [[buffer(3)]], const device Buffer* buf_in [[buffer(4)]], device Buffer* buf_out [[buffer(0)]], texture2d<float, access::write> tex_out [[texture(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
+kernel void export_level(uint3 coord [[thread_position_in_grid]], const constant UBO* ubo [[buffer(0)]], const device Buffer* buf_in [[buffer(1)]], device Buffer* buf_out [[buffer(2)]], texture2d<float, access::write> tex_out [[texture(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.ubo=ubo, .buf_in=buf_in, .buf_out=buf_out, .tex_out=tex_out, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
   export_level_inner(coord, tint_module_vars);
 }

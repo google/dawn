@@ -273,7 +273,7 @@ main_out main_inner(float2 tUV_param, float2 tileID_1_param, float2 levelUnits_p
   return main_out{.glFragColor_1=(*tint_module_vars.glFragColor)};
 }
 
-fragment main_outputs v_9(main_inputs inputs [[stage_in]], const constant LeftOver_packed_vec3* x_20 [[buffer(0)]], texture2d<float, access::sample> frameMapTexture [[texture(3)]], sampler frameMapSampler [[sampler(2)]], texture2d<float, access::sample> tileMapsTexture0 [[texture(1)]], sampler tileMapsSampler [[sampler(0)]], texture2d<float, access::sample> tileMapsTexture1 [[texture(0)]], texture2d<float, access::sample> animationMapTexture [[texture(2)]], sampler animationMapSampler [[sampler(1)]], texture2d<float, access::sample> spriteSheetTexture [[texture(4)]], sampler spriteSheetSampler [[sampler(3)]]) {
+fragment main_outputs v_9(main_inputs inputs [[stage_in]], const constant LeftOver_packed_vec3* x_20 [[buffer(0)]], texture2d<float, access::sample> frameMapTexture [[texture(0)]], sampler frameMapSampler [[sampler(0)]], texture2d<float, access::sample> tileMapsTexture0 [[texture(1)]], sampler tileMapsSampler [[sampler(1)]], texture2d<float, access::sample> tileMapsTexture1 [[texture(2)]], texture2d<float, access::sample> animationMapTexture [[texture(3)]], sampler animationMapSampler [[sampler(2)]], texture2d<float, access::sample> spriteSheetTexture [[texture(4)]], sampler spriteSheetSampler [[sampler(3)]]) {
   thread float2 tUV = 0.0f;
   thread float mt = 0.0f;
   thread float4 glFragColor = 0.0f;

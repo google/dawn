@@ -83,7 +83,7 @@ tint_array<S, 4> tint_load_array_packed_vec3(const constant tint_array<S_packed_
   return tint_array<S, 4>{v_5, v_6, v_7, tint_load_struct_packed_vec3((&(*from)[3u]))};
 }
 
-kernel void f(const constant tint_array<S_packed_vec3, 4>* u [[buffer(1)]], device tint_array<S_packed_vec3, 4>* s [[buffer(0)]]) {
+kernel void f(const constant tint_array<S_packed_vec3, 4>* u [[buffer(0)]], device tint_array<S_packed_vec3, 4>* s [[buffer(1)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.u=u, .s=s};
   tint_store_and_preserve_padding(tint_module_vars.s, tint_load_array_packed_vec3(tint_module_vars.u));
   tint_store_and_preserve_padding_1((&(*tint_module_vars.s)[1u]), tint_load_struct_packed_vec3((&(*tint_module_vars.u)[2u])));

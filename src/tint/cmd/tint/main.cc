@@ -45,6 +45,7 @@
 #include "src/tint/lang/core/ir/disassembler.h"
 #include "src/tint/lang/core/ir/transform/single_entry_point.h"
 #include "src/tint/lang/core/ir/transform/substitute_overrides.h"
+#include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/wgsl/ast/module.h"
 #include "src/tint/lang/wgsl/ast/transform/manager.h"
 #include "src/tint/lang/wgsl/ast/transform/renamer.h"
@@ -967,16 +968,8 @@ bool GenerateMsl([[maybe_unused]] Options& options,
         return 1;
     }
 
-    // Remap resource numbers to a flat namespace.
-    // TODO(crbug.com/tint/1501): Do this via Options::BindingMap.
-    tint::Program input_program = std::move(transform_res.Get());
-    auto flattened = tint::wgsl::FlattenBindings(input_program);
-    if (flattened) {
-        input_program = std::move(flattened.value());
-    }
-
     // Convert the AST program to an IR module.
-    auto ir = tint::wgsl::reader::ProgramToLoweredIR(input_program);
+    auto ir = tint::wgsl::reader::ProgramToLoweredIR(transform_res.Get());
     if (ir != tint::Success) {
         std::cerr << "Failed to generate IR: " << ir << "\n";
         return false;
@@ -1005,6 +998,15 @@ bool GenerateMsl([[maybe_unused]] Options& options,
         }
     }
 
+    {
+        // Remap resource numbers to a flat namespace.
+        auto res = tint::wgsl::FlattenBindings(ir.Get());
+        if (res != tint::Success) {
+            std::cerr << "Failed to flatten bindings: " << res.Failure().reason << "\n";
+            return false;
+        }
+    }
+
     // Set up the backend options.
     tint::msl::writer::Options gen_options;
     if (options.rename_all) {
@@ -1020,13 +1022,22 @@ bool GenerateMsl([[maybe_unused]] Options& options,
 
     // Add array_length_from_uniform entries for all storage buffers with runtime sized arrays.
     std::unordered_set<tint::BindingPoint> storage_bindings;
-    for (auto* var : input_program.AST().GlobalVariables()) {
-        auto* sem_var = input_program.Sem().Get<tint::sem::GlobalVariable>(var);
-        if (!sem_var->Type()->UnwrapRef()->HasFixedFootprint()) {
-            auto bp = sem_var->Attributes().binding_point.value();
-            if (storage_bindings.insert(bp).second) {
+    for (auto* inst : *ir->root_block) {
+        auto* var = inst->As<tint::core::ir::Var>();
+        if (!var) {
+            continue;
+        }
+
+        auto bp = var->BindingPoint();
+        if (!bp.has_value()) {
+            continue;
+        }
+
+        auto* ty = var->Result(0)->Type()->UnwrapPtr();
+        if (!ty->HasFixedFootprint()) {
+            if (storage_bindings.insert(bp.value()).second) {
                 gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(
-                    bp, static_cast<uint32_t>(storage_bindings.size() - 1));
+                    bp.value(), static_cast<uint32_t>(storage_bindings.size() - 1));
             }
         }
     }
@@ -1040,7 +1051,7 @@ bool GenerateMsl([[maybe_unused]] Options& options,
 
     auto result = tint::msl::writer::Generate(ir.Get(), gen_options);
     if (result != tint::Success) {
-        tint::cmd::PrintWGSL(std::cerr, input_program);
+        tint::cmd::PrintWGSL(std::cerr, transform_res.Get());
         std::cerr << "Failed to generate: " << result.Failure() << "\n";
         return false;
     }

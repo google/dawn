@@ -27,72 +27,72 @@
 
 #include "src/tint/lang/wgsl/helpers/flatten_bindings.h"
 
+#include <unordered_map>
 #include <utility>
 
 #include "src/tint/api/common/binding_point.h"
-#include "src/tint/lang/wgsl/ast/transform/binding_remapper.h"
-#include "src/tint/lang/wgsl/ast/transform/manager.h"
-#include "src/tint/lang/wgsl/inspector/inspector.h"
+#include "src/tint/lang/core/ir/module.h"
+#include "src/tint/lang/core/ir/transform/binding_remapper.h"
+#include "src/tint/lang/core/ir/var.h"
+#include "src/tint/lang/core/type/input_attachment.h"
+#include "src/tint/lang/core/type/pointer.h"
+#include "src/tint/utils/rtti/switch.h"
 
 namespace tint::wgsl {
 
-std::optional<Program> FlattenBindings(const Program& program) {
-    // TODO(crbug.com/tint/1101): Make this more robust for multiple entry points.
-    tint::ast::transform::BindingRemapper::BindingPoints binding_points;
+Result<SuccessType> FlattenBindings(core::ir::Module& ir) {
     uint32_t next_buffer_idx = 0;
     uint32_t next_sampler_idx = 0;
     uint32_t next_texture_idx = 0;
 
-    tint::inspector::Inspector inspector(program);
-    auto entry_points = inspector.GetEntryPoints();
-    for (auto& entry_point : entry_points) {
-        auto bindings = inspector.GetResourceBindings(entry_point.name);
-
-        for (auto& binding : bindings) {
-            BindingPoint src = {binding.bind_group, binding.binding};
-            if (binding_points.count(src)) {
-                continue;
-            }
-            switch (binding.resource_type) {
-                case tint::inspector::ResourceBinding::ResourceType::kUniformBuffer:
-                case tint::inspector::ResourceBinding::ResourceType::kStorageBuffer:
-                case tint::inspector::ResourceBinding::ResourceType::kReadOnlyStorageBuffer:
-                    binding_points.emplace(src, BindingPoint{0, next_buffer_idx++});
-                    break;
-                case tint::inspector::ResourceBinding::ResourceType::kSampler:
-                case tint::inspector::ResourceBinding::ResourceType::kComparisonSampler:
-                    binding_points.emplace(src, BindingPoint{0, next_sampler_idx++});
-                    break;
-                case tint::inspector::ResourceBinding::ResourceType::kSampledTexture:
-                case tint::inspector::ResourceBinding::ResourceType::kMultisampledTexture:
-                case tint::inspector::ResourceBinding::ResourceType::kWriteOnlyStorageTexture:
-                case tint::inspector::ResourceBinding::ResourceType::kReadOnlyStorageTexture:
-                case tint::inspector::ResourceBinding::ResourceType::kReadWriteStorageTexture:
-                case tint::inspector::ResourceBinding::ResourceType::kDepthTexture:
-                case tint::inspector::ResourceBinding::ResourceType::kDepthMultisampledTexture:
-                case tint::inspector::ResourceBinding::ResourceType::kExternalTexture:
-                    binding_points.emplace(src, BindingPoint{0, next_texture_idx++});
-                    break;
-                case tint::inspector::ResourceBinding::ResourceType::kInputAttachment:
-                    // flattening is not supported for input attachments.
-                    TINT_UNREACHABLE();
-            }
+    std::unordered_map<BindingPoint, BindingPoint> binding_points;
+    for (auto* inst : *ir.root_block) {
+        auto* var = inst->As<core::ir::Var>();
+        if (!var) {
+            continue;
         }
+
+        auto bp = var->BindingPoint();
+        if (!bp.has_value()) {
+            continue;
+        }
+
+        BindingPoint src = bp.value();
+        if (binding_points.count(src) > 0) {
+            continue;
+        }
+
+        auto* ty = var->Result(0)->Type()->As<core::type::Pointer>();
+        TINT_ASSERT(ty);
+
+        tint::Switch(
+            ty->StoreType(),                   //
+            [&](const core::type::Texture*) {  //
+                binding_points.emplace(src, BindingPoint{0, next_texture_idx++});
+            },                                 //
+            [&](const core::type::Sampler*) {  //
+                binding_points.emplace(src, BindingPoint{0, next_sampler_idx++});
+            },                                         //
+            [&](const core::type::InputAttachment*) {  //
+                // flattening is not supported for input attachments.
+                TINT_UNREACHABLE();
+            },  //
+            [&](Default) {
+                switch (ty->AddressSpace()) {
+                    case core::AddressSpace::kStorage:
+                    case core::AddressSpace::kUniform: {
+                        binding_points.emplace(src, BindingPoint{0, next_buffer_idx++});
+                        break;
+                    }
+                    default: {
+                        break;
+                    }
+                }
+            });
     }
 
     // Run the binding remapper transform.
-    if (!binding_points.empty()) {
-        tint::ast::transform::Manager manager;
-        tint::ast::transform::DataMap inputs;
-        tint::ast::transform::DataMap outputs;
-        inputs.Add<tint::ast::transform::BindingRemapper::Remappings>(
-            std::move(binding_points), tint::ast::transform::BindingRemapper::AccessControls{},
-            /* mayCollide */ true);
-        manager.Add<tint::ast::transform::BindingRemapper>();
-        return manager.Run(program, inputs, outputs);
-    }
-
-    return {};
+    return core::ir::transform::BindingRemapper(ir, binding_points);
 }
 
 }  // namespace tint::wgsl

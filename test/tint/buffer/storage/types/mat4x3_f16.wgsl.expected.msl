@@ -30,7 +30,7 @@ void tint_store_and_preserve_padding(device tint_array<tint_packed_vec3_f16_arra
   (*target)[3u].packed = packed_half3(value_param[3u]);
 }
 
-kernel void v(const device tint_array<tint_packed_vec3_f16_array_element, 4>* in [[buffer(1)]], device tint_array<tint_packed_vec3_f16_array_element, 4>* out [[buffer(0)]]) {
+kernel void v(const device tint_array<tint_packed_vec3_f16_array_element, 4>* in [[buffer(0)]], device tint_array<tint_packed_vec3_f16_array_element, 4>* out [[buffer(1)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.in=in, .out=out};
   tint_array<tint_packed_vec3_f16_array_element, 4> const v_1 = (*tint_module_vars.in);
   tint_store_and_preserve_padding(tint_module_vars.out, half4x3(half3(v_1[0u].packed), half3(v_1[1u].packed), half3(v_1[2u].packed), half3(v_1[3u].packed)));

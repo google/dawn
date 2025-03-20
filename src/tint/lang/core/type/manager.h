@@ -36,7 +36,10 @@
 #include "src/tint/lang/core/number.h"
 #include "src/tint/lang/core/texel_format.h"
 #include "src/tint/lang/core/type/atomic.h"
+#include "src/tint/lang/core/type/depth_multisampled_texture.h"
+#include "src/tint/lang/core/type/depth_texture.h"
 #include "src/tint/lang/core/type/external_texture.h"
+#include "src/tint/lang/core/type/multisampled_texture.h"
 #include "src/tint/lang/core/type/sampler.h"
 #include "src/tint/lang/core/type/struct.h"
 #include "src/tint/lang/core/type/subgroup_matrix.h"
@@ -271,12 +274,26 @@ class Manager final {
                                                       const core::type::Type* type);
 
     /// @param dim the dimensionality of the texture
+    /// @param type the data type of the sampled texture
+    /// @returns a multisampled texture type with the provided params
+    const core::type::MultisampledTexture* multisampled_texture(TextureDimension dim,
+                                                                const core::type::Type* type);
+
+    /// @param dim the dimensionality of the texture
     /// @param format the texel format of the texture
     /// @param access the access control type of the texture
     /// @returns a storage texture type with the provided params
     const core::type::StorageTexture* storage_texture(TextureDimension dim,
                                                       core::TexelFormat format,
                                                       core::Access access);
+
+    /// @param dim the dimensionality of the texture
+    /// @returns a depth texture type with the provided params
+    const core::type::DepthTexture* depth_texture(TextureDimension dim);
+
+    /// @param dim the dimensionality of the texture
+    /// @returns a depth multisampled texture type with the provided params
+    const core::type::DepthMultisampledTexture* depth_multisampled_texture(TextureDimension dim);
 
     /// Return a type with element type `el_ty` that has the same number of vector components as
     /// `match`. If `match` is scalar just return `el_ty`.

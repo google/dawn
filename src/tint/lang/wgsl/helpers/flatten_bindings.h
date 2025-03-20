@@ -28,16 +28,20 @@
 #ifndef SRC_TINT_LANG_WGSL_HELPERS_FLATTEN_BINDINGS_H_
 #define SRC_TINT_LANG_WGSL_HELPERS_FLATTEN_BINDINGS_H_
 
-#include <optional>
-#include "src/tint/lang/wgsl/program/program.h"
+#include "src/tint/utils/result.h"
+
+// Forward declaration
+namespace tint::core::ir {
+class Module;
+}
 
 namespace tint::wgsl {
 
-/// If needed, remaps resource numbers of `program` to a flat namespace: all in
-/// group 0 within unique binding numbers.
-/// @param program A valid program
-/// @return A new program with bindings remapped if needed
-std::optional<Program> FlattenBindings(const Program& program);
+/// If needed, remaps resource numbers of `ir` to a flat namespace: all in group 0 within
+/// unique binding numbers.
+///
+/// @param ir The IR to mutate
+Result<SuccessType> FlattenBindings(core::ir::Module& ir);
 
 }  // namespace tint::wgsl
 

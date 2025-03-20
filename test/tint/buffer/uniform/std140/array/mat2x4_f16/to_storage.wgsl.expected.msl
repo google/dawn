@@ -18,7 +18,7 @@ struct tint_module_vars_struct {
   device tint_array<half2x4, 4>* s;
 };
 
-kernel void f(const constant tint_array<half2x4, 4>* u [[buffer(1)]], device tint_array<half2x4, 4>* s [[buffer(0)]]) {
+kernel void f(const constant tint_array<half2x4, 4>* u [[buffer(0)]], device tint_array<half2x4, 4>* s [[buffer(1)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.u=u, .s=s};
   (*tint_module_vars.s) = (*tint_module_vars.u);
   (*tint_module_vars.s)[1u] = (*tint_module_vars.u)[2u];

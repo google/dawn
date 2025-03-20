@@ -30,135 +30,179 @@
 #include <utility>
 
 #include "gtest/gtest.h"
-#include "src/tint/lang/core/type/texture_dimension.h"
-#include "src/tint/lang/wgsl/program/program_builder.h"
-#include "src/tint/lang/wgsl/resolver/resolve.h"
-#include "src/tint/lang/wgsl/sem/variable.h"
+#include "src/tint/lang/core/ir/ir_helper_test.h"
+#include "src/tint/lang/core/type/depth_multisampled_texture.h"
+#include "src/tint/lang/core/type/depth_texture.h"
+#include "src/tint/lang/core/type/external_texture.h"
+#include "src/tint/lang/core/type/multisampled_texture.h"
+#include "src/tint/lang/core/type/sampled_texture.h"
+#include "src/tint/lang/core/type/storage_texture.h"
 
 namespace tint::wgsl {
 namespace {
 
 using namespace tint::core::number_suffixes;  // NOLINT
+using namespace tint::core::fluent_types;     // NOLINT
 
-class FlattenBindingsTest : public ::testing::Test {};
+using FlattenBindingsTest = core::ir::IRTestHelper;
 
 TEST_F(FlattenBindingsTest, NoBindings) {
-    ProgramBuilder b;
-    Program program(resolver::Resolve(b));
-    ASSERT_TRUE(program.IsValid()) << program.Diagnostics();
+    auto* f = b.ComputeFunction("main");
+    b.Append(f->Block(), [&] { b.Return(f); });
 
-    auto flattened = FlattenBindings(program);
-    EXPECT_FALSE(flattened);
+    auto flattened = FlattenBindings(mod);
+    EXPECT_TRUE(flattened == Success);
 }
 
 TEST_F(FlattenBindingsTest, AlreadyFlat) {
-    ProgramBuilder b;
-    b.GlobalVar("a", b.ty.i32(), core::AddressSpace::kUniform, b.Group(0_a), b.Binding(0_a));
-    b.GlobalVar("b", b.ty.i32(), core::AddressSpace::kUniform, b.Group(0_a), b.Binding(1_a));
-    b.GlobalVar("c", b.ty.i32(), core::AddressSpace::kUniform, b.Group(0_a), b.Binding(2_a));
+    b.Append(mod.root_block, [&] {
+        auto* a = b.Var("a", ty.ptr(uniform, ty.i32(), read));
+        a->SetBindingPoint(0, 0);
 
-    Program program(resolver::Resolve(b));
-    ASSERT_TRUE(program.IsValid()) << program.Diagnostics();
+        auto* b_ = b.Var("b", ty.ptr(uniform, ty.i32(), read));
+        b_->SetBindingPoint(0, 1);
 
-    auto flattened = FlattenBindings(program);
-    EXPECT_FALSE(flattened);
+        auto* c = b.Var("c", ty.ptr(uniform, ty.i32(), read));
+        c->SetBindingPoint(0, 2);
+    });
+
+    auto flattened = FlattenBindings(mod);
+    EXPECT_TRUE(flattened == Success);
 }
 
 TEST_F(FlattenBindingsTest, NotFlat_SingleNamespace) {
-    ProgramBuilder b;
-    b.GlobalVar("a", b.ty.i32(), core::AddressSpace::kUniform, b.Group(0_a), b.Binding(0_a));
-    b.GlobalVar("b", b.ty.i32(), core::AddressSpace::kUniform, b.Group(1_a), b.Binding(1_a));
-    b.GlobalVar("c", b.ty.i32(), core::AddressSpace::kUniform, b.Group(2_a), b.Binding(2_a));
-    b.WrapInFunction(b.Expr("a"), b.Expr("b"), b.Expr("c"));
+    core::ir::Var* a;
+    core::ir::Var* b_;
+    core::ir::Var* c;
+    b.Append(mod.root_block, [&] {
+        a = b.Var("a", ty.ptr(uniform, ty.i32(), read));
+        a->SetBindingPoint(0, 0);
 
-    Program program(resolver::Resolve(b));
-    ASSERT_TRUE(program.IsValid()) << program.Diagnostics();
+        b_ = b.Var("b", ty.ptr(uniform, ty.i32(), read));
+        b_->SetBindingPoint(1, 1);
 
-    auto flattened = FlattenBindings(program);
-    EXPECT_TRUE(flattened);
+        c = b.Var("c", ty.ptr(uniform, ty.i32(), read));
+        c->SetBindingPoint(2, 2);
+    });
 
-    auto& vars = flattened->AST().GlobalVariables();
+    auto flattened = FlattenBindings(mod);
+    EXPECT_TRUE(flattened == Success);
 
-    auto* sem = flattened->Sem().Get<sem::GlobalVariable>(vars[0]);
-    ASSERT_NE(sem, nullptr);
-    EXPECT_EQ(sem->Attributes().binding_point->group, 0u);
-    EXPECT_EQ(sem->Attributes().binding_point->binding, 0u);
+    ASSERT_TRUE(a->BindingPoint().has_value());
+    EXPECT_EQ(a->BindingPoint()->group, 0u);
+    EXPECT_EQ(a->BindingPoint()->binding, 0u);
 
-    sem = flattened->Sem().Get<sem::GlobalVariable>(vars[1]);
-    ASSERT_NE(sem, nullptr);
-    EXPECT_EQ(sem->Attributes().binding_point->group, 0u);
-    EXPECT_EQ(sem->Attributes().binding_point->binding, 1u);
+    ASSERT_TRUE(b_->BindingPoint().has_value());
+    EXPECT_EQ(b_->BindingPoint()->group, 0u);
+    EXPECT_EQ(b_->BindingPoint()->binding, 1u);
 
-    sem = flattened->Sem().Get<sem::GlobalVariable>(vars[2]);
-    ASSERT_NE(sem, nullptr);
-    EXPECT_EQ(sem->Attributes().binding_point->group, 0u);
-    EXPECT_EQ(sem->Attributes().binding_point->binding, 2u);
+    ASSERT_TRUE(c->BindingPoint().has_value());
+    EXPECT_EQ(c->BindingPoint()->group, 0u);
+    EXPECT_EQ(c->BindingPoint()->binding, 2u);
 }
 
 TEST_F(FlattenBindingsTest, NotFlat_MultipleNamespaces) {
-    ProgramBuilder b;
+    core::ir::Var* a;
+    core::ir::Var* b_;
+    core::ir::Var* c;
 
-    const size_t num_buffers = 3;
-    b.GlobalVar("buffer1", b.ty.i32(), core::AddressSpace::kUniform, b.Group(0_a), b.Binding(0_a));
-    b.GlobalVar("buffer2", b.ty.i32(), core::AddressSpace::kStorage, b.Group(1_a), b.Binding(1_a));
-    b.GlobalVar("buffer3", b.ty.i32(), core::AddressSpace::kStorage, core::Access::kRead,
-                b.Group(2_a), b.Binding(2_a));
+    core::ir::Var* s1;
+    core::ir::Var* s2;
 
-    const size_t num_samplers = 2;
-    b.GlobalVar("sampler1", b.ty.sampler(core::type::SamplerKind::kSampler), b.Group(3_a),
-                b.Binding(3_a));
-    b.GlobalVar("sampler2", b.ty.sampler(core::type::SamplerKind::kComparisonSampler), b.Group(4_a),
-                b.Binding(4_a));
+    core::ir::Var* t1;
+    core::ir::Var* t2;
+    core::ir::Var* t3;
+    core::ir::Var* t4;
+    core::ir::Var* t5;
+    core::ir::Var* t6;
 
-    const size_t num_textures = 6;
-    b.GlobalVar("texture1", b.ty.sampled_texture(core::type::TextureDimension::k2d, b.ty.f32()),
-                b.Group(5_a), b.Binding(5_a));
-    b.GlobalVar("texture2",
-                b.ty.multisampled_texture(core::type::TextureDimension::k2d, b.ty.f32()),
-                b.Group(6_a), b.Binding(6_a));
-    b.GlobalVar("texture3",
-                b.ty.storage_texture(core::type::TextureDimension::k2d,
-                                     core::TexelFormat::kR32Float, core::Access::kWrite),
-                b.Group(7_a), b.Binding(7_a));
-    b.GlobalVar("texture4", b.ty.depth_texture(core::type::TextureDimension::k2d), b.Group(8_a),
-                b.Binding(8_a));
-    b.GlobalVar("texture5", b.ty.depth_multisampled_texture(core::type::TextureDimension::k2d),
-                b.Group(9_a), b.Binding(9_a));
-    b.GlobalVar("texture6", b.ty.external_texture(), b.Group(10_a), b.Binding(10_a));
+    b.Append(mod.root_block, [&] {
+        a = b.Var("a", ty.ptr(uniform, ty.i32(), read));
+        a->SetBindingPoint(0, 0);
 
-    b.WrapInFunction(b.Assign(b.Phony(), "buffer1"), b.Assign(b.Phony(), "buffer2"),
-                     b.Assign(b.Phony(), "buffer3"), b.Assign(b.Phony(), "sampler1"),
-                     b.Assign(b.Phony(), "sampler2"), b.Assign(b.Phony(), "texture1"),
-                     b.Assign(b.Phony(), "texture2"), b.Assign(b.Phony(), "texture3"),
-                     b.Assign(b.Phony(), "texture4"), b.Assign(b.Phony(), "texture5"),
-                     b.Assign(b.Phony(), "texture6"));
+        b_ = b.Var("b", ty.ptr(storage, ty.i32(), read_write));
+        b_->SetBindingPoint(1, 1);
 
-    Program program(resolver::Resolve(b));
-    ASSERT_TRUE(program.IsValid()) << program.Diagnostics();
+        c = b.Var("c", ty.ptr(storage, ty.i32(), read));
+        c->SetBindingPoint(2, 2);
 
-    auto flattened = FlattenBindings(program);
-    EXPECT_TRUE(flattened);
+        s1 = b.Var("sampler1", ty.ptr(handle, ty.sampler(), read_write));
+        s1->SetBindingPoint(3, 3);
 
-    auto& vars = flattened->AST().GlobalVariables();
+        s2 = b.Var("sampler2", ty.ptr(handle, ty.comparison_sampler(), read_write));
+        s2->SetBindingPoint(4, 4);
 
-    for (size_t i = 0; i < num_buffers; ++i) {
-        auto* sem = flattened->Sem().Get<sem::GlobalVariable>(vars[i]);
-        ASSERT_NE(sem, nullptr);
-        EXPECT_EQ(sem->Attributes().binding_point->group, 0u);
-        EXPECT_EQ(sem->Attributes().binding_point->binding, i);
-    }
-    for (size_t i = 0; i < num_samplers; ++i) {
-        auto* sem = flattened->Sem().Get<sem::GlobalVariable>(vars[i + num_buffers]);
-        ASSERT_NE(sem, nullptr);
-        EXPECT_EQ(sem->Attributes().binding_point->group, 0u);
-        EXPECT_EQ(sem->Attributes().binding_point->binding, i);
-    }
-    for (size_t i = 0; i < num_textures; ++i) {
-        auto* sem = flattened->Sem().Get<sem::GlobalVariable>(vars[i + num_buffers + num_samplers]);
-        ASSERT_NE(sem, nullptr);
-        EXPECT_EQ(sem->Attributes().binding_point->group, 0u);
-        EXPECT_EQ(sem->Attributes().binding_point->binding, i);
-    }
+        t1 = b.Var("texture1",
+                   ty.ptr(handle, ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()),
+                          read_write));
+        t1->SetBindingPoint(5, 5);
+        t2 = b.Var(
+            "texture2",
+            ty.ptr(handle, ty.multisampled_texture(core::type::TextureDimension::k2d, ty.f32()),
+                   read_write));
+        t2->SetBindingPoint(6, 6);
+        t3 = b.Var("texture3", ty.ptr(handle,
+                                      ty.storage_texture(core::type::TextureDimension::k2d,
+                                                         core::TexelFormat::kR32Float, write),
+                                      read_write));
+        t3->SetBindingPoint(7, 7);
+        t4 = b.Var("texture4",
+                   ty.ptr(handle, ty.depth_texture(core::type::TextureDimension::k2d), read_write));
+        t4->SetBindingPoint(8, 8);
+        t5 = b.Var("texture5",
+                   ty.ptr(handle, ty.depth_multisampled_texture(core::type::TextureDimension::k2d),
+                          read_write));
+        t5->SetBindingPoint(9, 9);
+        t6 = b.Var("texture6", ty.ptr(handle, ty.external_texture(), read_write));
+        t6->SetBindingPoint(10, 10);
+    });
+
+    auto flattened = FlattenBindings(mod);
+    EXPECT_TRUE(flattened == Success);
+
+    ASSERT_TRUE(a->BindingPoint().has_value());
+    EXPECT_EQ(a->BindingPoint()->group, 0u);
+    EXPECT_EQ(a->BindingPoint()->binding, 0u);
+
+    ASSERT_TRUE(b_->BindingPoint().has_value());
+    EXPECT_EQ(b_->BindingPoint()->group, 0u);
+    EXPECT_EQ(b_->BindingPoint()->binding, 1u);
+
+    ASSERT_TRUE(c->BindingPoint().has_value());
+    EXPECT_EQ(c->BindingPoint()->group, 0u);
+    EXPECT_EQ(c->BindingPoint()->binding, 2u);
+
+    ASSERT_TRUE(s1->BindingPoint().has_value());
+    EXPECT_EQ(s1->BindingPoint()->group, 0u);
+    EXPECT_EQ(s1->BindingPoint()->binding, 0u);
+
+    ASSERT_TRUE(s2->BindingPoint().has_value());
+    EXPECT_EQ(s2->BindingPoint()->group, 0u);
+    EXPECT_EQ(s2->BindingPoint()->binding, 1u);
+
+    ASSERT_TRUE(t1->BindingPoint().has_value());
+    EXPECT_EQ(t1->BindingPoint()->group, 0u);
+    EXPECT_EQ(t1->BindingPoint()->binding, 0u);
+
+    ASSERT_TRUE(t2->BindingPoint().has_value());
+    EXPECT_EQ(t2->BindingPoint()->group, 0u);
+    EXPECT_EQ(t2->BindingPoint()->binding, 1u);
+
+    ASSERT_TRUE(t3->BindingPoint().has_value());
+    EXPECT_EQ(t3->BindingPoint()->group, 0u);
+    EXPECT_EQ(t3->BindingPoint()->binding, 2u);
+
+    ASSERT_TRUE(t4->BindingPoint().has_value());
+    EXPECT_EQ(t4->BindingPoint()->group, 0u);
+    EXPECT_EQ(t4->BindingPoint()->binding, 3u);
+
+    ASSERT_TRUE(t5->BindingPoint().has_value());
+    EXPECT_EQ(t5->BindingPoint()->group, 0u);
+    EXPECT_EQ(t5->BindingPoint()->binding, 4u);
+
+    ASSERT_TRUE(t6->BindingPoint().has_value());
+    EXPECT_EQ(t6->BindingPoint()->group, 0u);
+    EXPECT_EQ(t6->BindingPoint()->binding, 5u);
 }
 
 }  // namespace

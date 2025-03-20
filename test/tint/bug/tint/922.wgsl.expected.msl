@@ -199,7 +199,7 @@ VertexOutput main_inner(float3 a_Position, float2 a_UV, float4 a_Color, float3 a
   return VertexOutput{.v_Color=x_e11, .v_TexCoord=x_e13, .member=x_e15};
 }
 
-vertex main_outputs v_1(main_inputs inputs [[stage_in]], const constant ub_SceneParams* global [[buffer(1)]], const constant ub_MaterialParams* global1 [[buffer(2)]], const constant ub_PacketParams* global2 [[buffer(0)]]) {
+vertex main_outputs v_1(main_inputs inputs [[stage_in]], const constant ub_SceneParams* global [[buffer(0)]], const constant ub_MaterialParams* global1 [[buffer(1)]], const constant ub_PacketParams* global2 [[buffer(2)]]) {
   thread float3 a_Position1 = 0.0f;
   thread float2 a_UV1 = 0.0f;
   thread float4 a_Color1 = 0.0f;

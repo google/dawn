@@ -159,11 +159,25 @@ const core::type::SampledTexture* Manager::sampled_texture(TextureDimension dim,
     return Get<core::type::SampledTexture>(dim, type);
 }
 
+const core::type::MultisampledTexture* Manager::multisampled_texture(TextureDimension dim,
+                                                                     const core::type::Type* type) {
+    return Get<core::type::MultisampledTexture>(dim, type);
+}
+
 const core::type::StorageTexture* Manager::storage_texture(TextureDimension dim,
                                                            core::TexelFormat format,
                                                            core::Access access) {
     const auto* subtype = StorageTexture::SubtypeFor(format, *this);
     return Get<core::type::StorageTexture>(dim, format, access, subtype);
+}
+
+const core::type::DepthTexture* Manager::depth_texture(TextureDimension dim) {
+    return Get<core::type::DepthTexture>(dim);
+}
+
+const core::type::DepthMultisampledTexture* Manager::depth_multisampled_texture(
+    TextureDimension dim) {
+    return Get<core::type::DepthMultisampledTexture>(dim);
 }
 
 const core::type::Matrix* Manager::mat(const core::type::Type* inner,

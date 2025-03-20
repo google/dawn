@@ -34,7 +34,7 @@ float d(float f_1) {
   return f_1;
 }
 
-kernel void f(const constant tint_array<float4x4, 4>* u [[buffer(1)]], device float* s [[buffer(0)]]) {
+kernel void f(const constant tint_array<float4x4, 4>* u [[buffer(0)]], device float* s [[buffer(1)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.u=u, .s=s};
   float const v_1 = a((*tint_module_vars.u));
   float const v_2 = (v_1 + b((*tint_module_vars.u)[1u]));
