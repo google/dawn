@@ -721,7 +721,18 @@ bool PhysicalDevice::SupportsFeatureLevel(wgpu::FeatureLevel featureLevel,
 }
 
 void PhysicalDevice::SetupBackendAdapterToggles(dawn::platform::Platform* platform,
-                                                TogglesState* adapterToggles) const {}
+                                                TogglesState* adapterToggles) const {
+    // The environment can only request to use the Vulkan Memory Model when the extension is present
+    // and the capabilities are available. Override the decision if they are not supported.
+    if (!GetDeviceInfo().HasExt(DeviceExt::VulkanMemoryModel) ||
+        GetDeviceInfo().vulkanMemoryModelFeatures.vulkanMemoryModel == VK_FALSE ||
+        GetDeviceInfo().vulkanMemoryModelFeatures.vulkanMemoryModelDeviceScope == VK_FALSE) {
+        adapterToggles->ForceSet(Toggle::UseVulkanMemoryModel, false);
+    }
+    adapterToggles->Default(
+        Toggle::UseVulkanMemoryModel,
+        platform->IsFeatureEnabled(platform::Features::kWebGPUUseVulkanMemoryModel));
+}
 
 void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platform,
                                                TogglesState* deviceToggles) const {
@@ -881,17 +892,6 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         GetDeviceInfo().shaderIntegerDotProductFeatures.shaderIntegerDotProduct == VK_FALSE) {
         deviceToggles->ForceSet(Toggle::PolyFillPacked4x8DotProduct, true);
     }
-
-    // The environment can only request to use the Vulkan Memory Model when the extension is present
-    // and the capabilities are available. Override the decision if they are not supported.
-    if (!GetDeviceInfo().HasExt(DeviceExt::VulkanMemoryModel) ||
-        GetDeviceInfo().vulkanMemoryModelFeatures.vulkanMemoryModel == VK_FALSE ||
-        GetDeviceInfo().vulkanMemoryModelFeatures.vulkanMemoryModelDeviceScope == VK_FALSE) {
-        deviceToggles->ForceSet(Toggle::UseVulkanMemoryModel, false);
-    }
-    deviceToggles->Default(
-        Toggle::UseVulkanMemoryModel,
-        platform->IsFeatureEnabled(platform::Features::kWebGPUUseVulkanMemoryModel));
 }
 
 ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(
@@ -905,6 +905,12 @@ ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(
 FeatureValidationResult PhysicalDevice::ValidateFeatureSupportedWithTogglesImpl(
     wgpu::FeatureName feature,
     const TogglesState& toggles) const {
+    if (feature == wgpu::FeatureName::ChromiumExperimentalSubgroupMatrix &&
+        !toggles.IsEnabled(Toggle::UseVulkanMemoryModel)) {
+        return FeatureValidationResult(
+            absl::StrFormat("Feature %s requires VulkanMemoryModel toggle on Vulkan.", feature));
+    }
+
     return {};
 }
 

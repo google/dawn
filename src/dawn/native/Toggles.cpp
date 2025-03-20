@@ -622,7 +622,7 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "https://crbug.com/381000081", ToggleStage::Device}},
     {Toggle::UseVulkanMemoryModel,
      {"use_vulkan_memory_model", "Use the Vulkan Memory Model if available.",
-      "https://crbug.com/392606604", ToggleStage::Device}},
+      "https://crbug.com/392606604", ToggleStage::Adapter}},
     {Toggle::NoWorkaroundSampleMaskBecomesZeroForAllButLastColorTarget,
      {"no_workaround_sample_mask_becomes_zero_for_all_but_last_color_target",
       "MacOS 12.0+ Intel has a bug where the sample mask is only applied for the last color "
