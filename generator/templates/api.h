@@ -148,7 +148,7 @@ typedef uint32_t {{API}}Bool;
 {% for type in by_category["callback function"] %}
     typedef {{as_cType(type.return_type.name)}} (*{{as_cType(type.name)}})(
         {%- for arg in type.arguments -%}
-            {{as_annotated_cType(arg)}}{{", "}}
+        {% if arg.type.category == "structure" %}struct {% endif %}{{as_annotated_cType(arg)}}{{", "}}
         {%- endfor -%}
     {{API}}_NULLABLE void* userdata1, {{API}}_NULLABLE void* userdata2) {{API}}_FUNCTION_ATTRIBUTE;
 {% endfor %}
