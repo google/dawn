@@ -306,35 +306,18 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
         DAWN_TRY_LOAD_OR_RUN(
             mslCompilation, device, std::move(req), MslCompilation::FromBlob,
             [](MslCompilationRequest r) -> ResultOrError<MslCompilation> {
-                tint::ast::transform::Manager transformManager;
-                tint::ast::transform::DataMap transformInputs;
-
-                // We only remap bindings for the target entry point, so we need to strip all other
-                // entry points to avoid generating invalid bindings for them.
-                // Run before the renamer so that the entry point name matches `entryPointName`
-                // still.
-                transformManager.Add<tint::ast::transform::SingleEntryPoint>();
-                transformInputs.Add<tint::ast::transform::SingleEntryPoint::Config>(
-                    r.entryPointName);
-
-                tint::Program program;
-                tint::ast::transform::DataMap transformOutputs;
-                {
-                    TRACE_EVENT0(r.platform.UnsafeGetValue(), General, "RunTransforms");
-                    DAWN_TRY_ASSIGN(
-                        program, RunTransforms(&transformManager, r.inputProgram, transformInputs,
-                                               &transformOutputs, nullptr));
-                }
-
-                Extent3D localSize{0, 0, 0};
-
                 TRACE_EVENT0(r.platform.UnsafeGetValue(), General, "tint::msl::writer::Generate");
-
                 // Convert the AST program to an IR module.
-                auto ir = tint::wgsl::reader::ProgramToLoweredIR(program);
+                auto ir = tint::wgsl::reader::ProgramToLoweredIR(*r.inputProgram);
                 DAWN_INVALID_IF(ir != tint::Success,
                                 "An error occurred while generating Tint IR\n%s",
                                 ir.Failure().reason.Str());
+
+                auto singleEntryPointResult =
+                    tint::core::ir::transform::SingleEntryPoint(ir.Get(), r.entryPointName);
+                DAWN_INVALID_IF(singleEntryPointResult != tint::Success,
+                                "Pipeline single entry point (IR) failed:\n%s",
+                                singleEntryPointResult.Failure().reason);
 
                 if (r.substituteOverrideConfig) {
                     // this needs to run after SingleEntryPoint transform which removes unused
@@ -356,6 +339,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
 
                 // Workgroup validation has to come after `Generate` because it may require
                 // overrides to have been substituted.
+                Extent3D localSize{0, 0, 0};
                 if (r.stage == SingleShaderStage::Compute) {
                     // Validate workgroup size and workgroup storage size.
                     DAWN_TRY_ASSIGN(
