@@ -39,6 +39,8 @@
 # Kind:      lib
 ################################################################################
 tint_add_target(tint_lang_spirv_reader_lower lib
+  lang/spirv/reader/lower/atomics.cc
+  lang/spirv/reader/lower/atomics.h
   lang/spirv/reader/lower/builtins.cc
   lang/spirv/reader/lower/builtins.h
   lang/spirv/reader/lower/lower.cc
@@ -81,6 +83,7 @@ tint_target_add_external_dependencies(tint_lang_spirv_reader_lower lib
 # Kind:      test
 ################################################################################
 tint_add_target(tint_lang_spirv_reader_lower_test test
+  lang/spirv/reader/lower/atomics_test.cc
   lang/spirv/reader/lower/builtins_test.cc
   lang/spirv/reader/lower/shader_io_test.cc
   lang/spirv/reader/lower/vector_element_pointer_test.cc

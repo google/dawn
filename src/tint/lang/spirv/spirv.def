@@ -168,7 +168,7 @@ implicit(I: u32, A: access) fn array_length(ptr<storage, struct_with_runtime_arr
 @stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_load(ptr<S, T, readable>, U, U) -> T
 @stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_store(ptr<S, T, writable>, U, U, T)
 @stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_exchange(ptr<S, T, writable>, U, U, T) -> T
-@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_compare_exchange(ptr<S, T, writable>, U, U, T, T) -> T
+@stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_compare_exchange(ptr<S, T, writable>, U, U, U, T, T) -> T
 @stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_i_increment(ptr<S, T, writable>, U, U) -> T
 @stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_i_decrement(ptr<S, T, writable>, U, U) -> T
 @stage("fragment", "compute") implicit(T: iu32, U: u32, S: workgroup_or_storage) fn atomic_i_add(ptr<S, T, writable>, U, U, T) -> T

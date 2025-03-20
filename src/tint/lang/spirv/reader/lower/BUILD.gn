@@ -45,6 +45,8 @@ if (tint_build_unittests || tint_build_benchmarks) {
 
 libtint_source_set("lower") {
   sources = [
+    "atomics.cc",
+    "atomics.h",
     "builtins.cc",
     "builtins.h",
     "lower.cc",
@@ -81,6 +83,7 @@ libtint_source_set("lower") {
 if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {
     sources = [
+      "atomics_test.cc",
       "builtins_test.cc",
       "shader_io_test.cc",
       "vector_element_pointer_test.cc",

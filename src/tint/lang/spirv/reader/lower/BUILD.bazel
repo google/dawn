@@ -39,12 +39,14 @@ load("@bazel_skylib//lib:selects.bzl", "selects")
 cc_library(
   name = "lower",
   srcs = [
+    "atomics.cc",
     "builtins.cc",
     "lower.cc",
     "shader_io.cc",
     "vector_element_pointer.cc",
   ],
   hdrs = [
+    "atomics.h",
     "builtins.h",
     "lower.h",
     "shader_io.h",
@@ -80,6 +82,7 @@ cc_library(
   name = "test",
   alwayslink = True,
   srcs = [
+    "atomics_test.cc",
     "builtins_test.cc",
     "shader_io_test.cc",
     "vector_element_pointer_test.cc",
