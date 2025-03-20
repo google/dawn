@@ -995,7 +995,11 @@ static void CheckTextureMatchesDescriptor(const wgpu::Texture& tex,
     EXPECT_EQ(desc.size.depthOrArrayLayers, tex.GetDepthOrArrayLayers());
     EXPECT_EQ(desc.mipLevelCount, tex.GetMipLevelCount());
     EXPECT_EQ(desc.sampleCount, tex.GetSampleCount());
-    EXPECT_EQ(desc.dimension, tex.GetDimension());
+    if (desc.dimension == wgpu::TextureDimension::Undefined) {
+        EXPECT_EQ(wgpu::TextureDimension::e2D, tex.GetDimension());
+    } else {
+        EXPECT_EQ(desc.dimension, tex.GetDimension());
+    }
     EXPECT_EQ(desc.usage, tex.GetUsage());
     EXPECT_EQ(desc.format, tex.GetFormat());
 }

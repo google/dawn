@@ -968,7 +968,8 @@ void TextureBase::DestroyImpl() {
 
 // static
 Ref<TextureBase> TextureBase::MakeError(DeviceBase* device, const TextureDescriptor* descriptor) {
-    return AcquireRef(new TextureBase(device, descriptor, ObjectBase::kError));
+    TextureDescriptor reifiedDesc = descriptor->WithTrivialFrontendDefaults();
+    return AcquireRef(new TextureBase(device, &reifiedDesc, ObjectBase::kError));
 }
 
 ObjectType TextureBase::GetType() const {

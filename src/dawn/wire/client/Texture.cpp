@@ -53,7 +53,8 @@ Texture::Texture(const ObjectBaseParams& params, const WGPUTextureDescriptor* de
       mSize(descriptor->size),
       mMipLevelCount(descriptor->mipLevelCount),
       mSampleCount(descriptor->sampleCount),
-      mDimension(descriptor->dimension),
+      mDimension(descriptor->dimension == WGPUTextureDimension_Undefined ? WGPUTextureDimension_2D
+                                                                         : descriptor->dimension),
       mFormat(descriptor->format),
       mUsage(static_cast<WGPUTextureUsage>(descriptor->usage)) {}
 
