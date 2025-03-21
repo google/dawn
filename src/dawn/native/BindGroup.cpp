@@ -262,29 +262,27 @@ MaybeError ValidateTextureViewBindingUsedAsExternalTexture(DeviceBase* device,
 
     TextureViewBase* view = entry.textureView;
     TextureBase* texture = view->GetTexture();
-    Format format = texture->GetFormat();
-
-    DAWN_INVALID_IF(format.aspects != Aspect::Color, "The format (%s) is not a color format.",
-                    format.format);
+    wgpu::TextureFormat format = view->GetFormat().format;
 
     DAWN_INVALID_IF(
-        !IsSubset(SampleTypeBit::Float, format.GetAspectInfo(Aspect::Color).supportedSampleTypes),
-        "The format (%s) is not filterable float.", format.format);
+        format != wgpu::TextureFormat::RGBA8Unorm && format != wgpu::TextureFormat::BGRA8Unorm &&
+            format != wgpu::TextureFormat::RGBA16Float,
+        "%s format (%s) is not %s, %s, or %s.", view, format, wgpu::TextureFormat::RGBA8Unorm,
+        wgpu::TextureFormat::BGRA8Unorm, wgpu::TextureFormat::RGBA16Float);
 
     DAWN_INVALID_IF((view->GetUsage() & wgpu::TextureUsage::TextureBinding) == 0,
-                    "The texture view (%s) usage (%s) doesn't include the required usage (%s)",
-                    view, view->GetUsage(), wgpu::TextureUsage::TextureBinding);
+                    "%s usage (%s) doesn't include the required usage (%s)", view, view->GetUsage(),
+                    wgpu::TextureUsage::TextureBinding);
 
     DAWN_INVALID_IF(view->GetDimension() != wgpu::TextureViewDimension::e2D,
-                    "The texture view (%s) dimension (%s) is not 2D.", view, view->GetDimension());
+                    "%s dimension (%s) is not 2D.", view, view->GetDimension());
 
-    DAWN_INVALID_IF(view->GetLevelCount() > 1,
-                    "The texture view (%s) mip level count (%u) is not 1.", view,
+    DAWN_INVALID_IF(view->GetLevelCount() > 1, "%s mip level count (%u) is not 1.", view,
                     view->GetLevelCount());
 
-    DAWN_INVALID_IF(texture->GetSampleCount() != 1,
-                    "The texture view (%s) sample count (%u) is not 1.", view,
+    DAWN_INVALID_IF(texture->GetSampleCount() != 1, "%s sample count (%u) is not 1.", texture,
                     texture->GetSampleCount());
+
     return {};
 }
 

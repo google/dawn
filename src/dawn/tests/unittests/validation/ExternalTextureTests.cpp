@@ -875,20 +875,6 @@ TEST_F(ExternalTextureTest, TextureViewValidation) {
         ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, bgl, {{0, textureView}}));
     }
 
-    // A texture view from a texture with a non float-filterable format should fail.
-    {
-        for (const auto& format : {wgpu::TextureFormat::RGBA8Uint, wgpu::TextureFormat::RGBA8Sint,
-                                   wgpu::TextureFormat::RGBA32Uint, wgpu::TextureFormat::RGBA32Sint,
-                                   wgpu::TextureFormat::RGBA32Float}) {
-            wgpu::TextureDescriptor textureDescriptor = CreateTextureDescriptor();
-            textureDescriptor.format = format;
-            wgpu::Texture internalTexture = device.CreateTexture(&textureDescriptor);
-
-            wgpu::TextureView textureView = internalTexture.CreateView();
-            ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, bgl, {{0, textureView}}));
-        }
-    }
-
     // A texture view from a multisampled texture should fail.
     {
         wgpu::TextureDescriptor textureDescriptor = CreateTextureDescriptor();
@@ -900,19 +886,23 @@ TEST_F(ExternalTextureTest, TextureViewValidation) {
     }
 }
 
-// Ensure that bind group validation catches invalid texture views for non float-filterable formats.
-TEST_F(ExternalTextureTest, TextureViewValidationForNonFloatFilterableFormats) {
+// Ensure that bind group validation catches invalid texture views for non supported context
+// formats.
+TEST_F(ExternalTextureTest, TextureViewValidationForNonSupportedContextFormats) {
     wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
         device, {{0, wgpu::ShaderStage::Fragment, &utils::kExternalTextureBindingLayout}});
 
-    // TODO(crbug.com/398752857): Revisit this test when we know which formats are actually
-    // supported. https://github.com/gpuweb/gpuweb/pull/5079#pullrequestreview-2676555724
-    for (const auto& format : {wgpu::TextureFormat::RGBA8Uint, wgpu::TextureFormat::RGBA8Sint,
-                               wgpu::TextureFormat::RGBA32Uint, wgpu::TextureFormat::RGBA32Sint,
-                               wgpu::TextureFormat::RGBA32Float}) {
+    for (wgpu::TextureFormat format : utils::kFormatsInCoreSpec) {
+        if (!utils::IsRenderableFormat(device, format)) {
+            continue;
+        }
         wgpu::TextureDescriptor textureDescriptor = CreateTextureDescriptor(format);
         wgpu::Texture texture = device.CreateTexture(&textureDescriptor);
-        ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, bgl, {{0, texture.CreateView()}}));
+        if (utils::IsSupportedContextFormat(format)) {
+            utils::MakeBindGroup(device, bgl, {{0, texture.CreateView()}});
+        } else {
+            ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, bgl, {{0, texture.CreateView()}}));
+        }
     }
 }
 
