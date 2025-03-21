@@ -401,4 +401,10 @@ void EnforceLimitSpecInvariants(Limits* limits, wgpu::FeatureLevel featureLevel)
     }
 }
 
+void NormalizeExperimentalLimits(CombinedLimits* limits) {
+    // Enforce immediate data bytes to ensure they don't go over a fixed limit in Dawn's internal
+    // code.
+    limits->experimentalImmediateDataLimits.maxImmediateDataRangeByteSize = kMaxImmediateDataBytes;
+}
+
 }  // namespace dawn::native

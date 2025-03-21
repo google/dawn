@@ -88,9 +88,9 @@ TEST_F(ImmediateConstantsTrackerTest, OnPipelineChange) {
 
 // Test immediate setting update dirty bits and contents correctly.
 TEST_F(ImmediateConstantsTrackerTest, SetImmediateData) {
-    static constexpr uint32_t rangeOffset = 1u;
+    static constexpr uint32_t rangeOffset = 1u * kImmediateConstantElementByteSize;
     static constexpr uint32_t dataOffset = 2u;
-    static constexpr uint32_t userImmediateDataCount = 2u;
+    static constexpr uint32_t userImmediateDataSize = 2u * kImmediateConstantElementByteSize;
     ImmediateConstantMask expected =
         GetImmediateConstantBlockBits(0u, sizeof(UserImmediateConstants));
 
@@ -100,15 +100,13 @@ TEST_F(ImmediateConstantsTrackerTest, SetImmediateData) {
         RenderImmediateConstantsTrackerBase tracker;
         int32_t userImmediateData[] = {2, 4, -6, 8};
         tracker.SetImmediateData(rangeOffset,
-                                 reinterpret_cast<uint32_t*>(&userImmediateData[dataOffset]),
-                                 userImmediateDataCount);
+                                 reinterpret_cast<uint8_t*>(&userImmediateData[dataOffset]),
+                                 userImmediateDataSize);
         EXPECT_TRUE(tracker.GetDirtyBits() == expected);
 
-        uint32_t userImmediateDataRangeOffset =
-            userImmediateDataStartByteOffset + rangeOffset * kImmediateConstantElementByteSize;
+        uint32_t userImmediateDataRangeOffset = userImmediateDataStartByteOffset + rangeOffset;
         EXPECT_TRUE(memcmp(tracker.GetContent().Get<int32_t>(userImmediateDataRangeOffset),
-                           &userImmediateData[dataOffset],
-                           sizeof(int32_t) * userImmediateDataCount) == 0);
+                           &userImmediateData[dataOffset], userImmediateDataSize) == 0);
     }
 
     // ComputeImmediateConstantsTracker
@@ -116,15 +114,13 @@ TEST_F(ImmediateConstantsTrackerTest, SetImmediateData) {
         ComputeImmediateConstantsTrackerBase tracker;
         int32_t userImmediateData[] = {2, 4, -6, 8};
         tracker.SetImmediateData(rangeOffset,
-                                 reinterpret_cast<uint32_t*>(&userImmediateData[dataOffset]),
-                                 userImmediateDataCount);
+                                 reinterpret_cast<uint8_t*>(&userImmediateData[dataOffset]),
+                                 userImmediateDataSize);
         EXPECT_TRUE(tracker.GetDirtyBits() == expected);
 
-        uint32_t userImmediateDataRangeOffset =
-            userImmediateDataStartByteOffset + rangeOffset * kImmediateConstantElementByteSize;
+        uint32_t userImmediateDataRangeOffset = userImmediateDataStartByteOffset + rangeOffset;
         EXPECT_TRUE(memcmp(tracker.GetContent().Get<int32_t>(userImmediateDataRangeOffset),
-                           &userImmediateData[dataOffset],
-                           sizeof(int32_t) * userImmediateDataCount) == 0);
+                           &userImmediateData[dataOffset], userImmediateDataSize) == 0);
     }
 
     device.Destroy();

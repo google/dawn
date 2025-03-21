@@ -36,6 +36,7 @@
 #include "dawn/common/GPUInfo.h"
 #include "dawn/native/ChainUtils.h"
 #include "dawn/native/Error.h"
+#include "dawn/native/ImmediateConstantsLayout.h"
 #include "dawn/native/Instance.h"
 #include "dawn/native/Limits.h"
 #include "dawn/native/vulkan/BackendVk.h"
@@ -499,6 +500,8 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     if (mDeviceInfo.HasExt(DeviceExt::ImageDrmFormatModifier)) {
         EnableFeature(Feature::DawnDrmFormatCapabilities);
     }
+
+    EnableFeature(Feature::ChromiumExperimentalImmediateData);
 }
 
 MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits) {
@@ -694,6 +697,13 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsInternal(wgpu::FeatureLevel 
         mDeviceInfo.subgroupSizeControlProperties.minSubgroupSize;
     limits->experimentalSubgroupLimits.maxSubgroupSize =
         mDeviceInfo.subgroupSizeControlProperties.maxSubgroupSize;
+
+    // vulkan needs to have enough push constant range size for all
+    // internal and external immediate data usages.
+    constexpr uint32_t kMinVulkanPushConstants = 128;
+    DAWN_ASSERT(vkLimits.maxPushConstantsSize >= kMinVulkanPushConstants);
+    static_assert(kMinVulkanPushConstants >= sizeof(RenderImmediateConstants));
+    static_assert(kMinVulkanPushConstants >= sizeof(ComputeImmediateConstants));
 
     return {};
 }

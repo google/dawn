@@ -194,16 +194,18 @@ class DescriptorSetTracker : public BindGroupTrackerBase<true, uint32_t> {
     uint32_t mInternalImmediateDataSize = 0;
 };
 
-class RenderImmediateConstantTracker : public RenderImmediateConstantsTrackerBase {
+template <typename T>
+class ImmediateConstantTracker : public T {
   public:
-    RenderImmediateConstantTracker() = default;
+    ImmediateConstantTracker() = default;
 
     void Apply(Device* device, VkCommandBuffer commandBuffer) {
-        if (!mLastPipeline) {
+        auto* lastPipeline = this->mLastPipeline;
+        if (!lastPipeline) {
             return;
         }
 
-        const ImmediateConstantMask& pipelineImmediateMask = mLastPipeline->GetImmediateMask();
+        const ImmediateConstantMask& pipelineImmediateMask = lastPipeline->GetImmediateMask();
         const size_t maxImmediateConstantSize =
             pipelineImmediateMask.count() * kImmediateConstantElementByteSize;
 
@@ -211,12 +213,12 @@ class RenderImmediateConstantTracker : public RenderImmediateConstantsTrackerBas
         uint32_t immediateContentStartOffset = 0;
         uint32_t immediateDataCount = 0;
 
-        ImmediateConstantMask uploadBits = mDirty & mLastPipeline->GetImmediateMask();
+        ImmediateConstantMask uploadBits = this->mDirty & lastPipeline->GetImmediateMask();
         ImmediateConstantMask prefixBits = ImmediateConstantMask(0u);
 
         // TODO(crbug.com/366291600): Add IterateBitRanges helper function to achieve iteration on
         // ranges.
-        for (ImmediateConstantIndex i : IterateBitSet(mLastPipeline->GetImmediateMask())) {
+        for (ImmediateConstantIndex i : IterateBitSet(lastPipeline->GetImmediateMask())) {
             if (uploadBits.test(i)) {
                 uint32_t index = static_cast<uint32_t>(i);
                 if (immediateDataCount == 0) {
@@ -229,11 +231,11 @@ class RenderImmediateConstantTracker : public RenderImmediateConstantsTrackerBas
             } else {
                 if (immediateDataCount > 0) {
                     device->fn.CmdPushConstants(
-                        commandBuffer, ToBackend(mLastPipeline)->GetVkLayout(),
-                        ToBackend(mLastPipeline->GetLayout())->GetImmediateDataRangeStage(),
+                        commandBuffer, ToBackend(lastPipeline)->GetVkLayout(),
+                        ToBackend(lastPipeline->GetLayout())->GetImmediateDataRangeStage(),
                         pushConstantRangeStartOffset,
                         immediateDataCount * kImmediateConstantElementByteSize,
-                        mContent.Get<uint32_t>(immediateContentStartOffset));
+                        this->mContent.template Get<uint32_t>(immediateContentStartOffset));
                     immediateDataCount = 0;
                 }
             }
@@ -243,16 +245,16 @@ class RenderImmediateConstantTracker : public RenderImmediateConstantsTrackerBas
         if (immediateDataCount > 0) {
             DAWN_ASSERT(pushConstantRangeStartOffset < maxImmediateConstantSize);
             device->fn.CmdPushConstants(
-                commandBuffer, ToBackend(mLastPipeline)->GetVkLayout(),
-                ToBackend(mLastPipeline->GetLayout())->GetImmediateDataRangeStage(),
+                commandBuffer, ToBackend(lastPipeline)->GetVkLayout(),
+                ToBackend(lastPipeline->GetLayout())->GetImmediateDataRangeStage(),
                 pushConstantRangeStartOffset,
                 immediateDataCount * kImmediateConstantElementByteSize,
-                mContent.Get<uint32_t>(immediateContentStartOffset));
+                this->mContent.template Get<uint32_t>(immediateContentStartOffset));
             immediateDataCount = 0;
         }
 
         // Reset all dirty bits after uploading.
-        mDirty.reset();
+        this->mDirty.reset();
     }
 };
 
@@ -1081,6 +1083,7 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* recordingCo
 
     uint64_t currentDispatch = 0;
     DescriptorSetTracker descriptorSets = {};
+    ImmediateConstantTracker<ComputeImmediateConstantsTrackerBase> immediates = {};
 
     Command type;
     while (mCommands.NextCommandId(&type)) {
@@ -1105,7 +1108,7 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* recordingCo
                 DAWN_TRY(TransitionAndClearForSyncScope(
                     device, recordingContext, resourceUsages.dispatchUsages[currentDispatch]));
                 descriptorSets.Apply(device, recordingContext, VK_PIPELINE_BIND_POINT_COMPUTE);
-
+                immediates.Apply(device, commands);
                 device->fn.CmdDispatch(commands, dispatch->x, dispatch->y, dispatch->z);
                 currentDispatch++;
                 break;
@@ -1118,7 +1121,7 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* recordingCo
                 DAWN_TRY(TransitionAndClearForSyncScope(
                     device, recordingContext, resourceUsages.dispatchUsages[currentDispatch]));
                 descriptorSets.Apply(device, recordingContext, VK_PIPELINE_BIND_POINT_COMPUTE);
-
+                immediates.Apply(device, commands);
                 device->fn.CmdDispatchIndirect(commands, indirectBuffer,
                                                static_cast<VkDeviceSize>(dispatch->indirectOffset));
                 currentDispatch++;
@@ -1146,6 +1149,7 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* recordingCo
                 device->fn.CmdBindPipeline(commands, VK_PIPELINE_BIND_POINT_COMPUTE,
                                            pipeline->GetHandle());
                 descriptorSets.OnSetPipeline<ComputePipeline>(pipeline);
+                immediates.OnSetPipeline(pipeline);
                 break;
             }
 
@@ -1207,8 +1211,14 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* recordingCo
                 break;
             }
 
-            case Command::SetImmediateData:
-                return DAWN_UNIMPLEMENTED_ERROR("SetImmediateData unimplemented");
+            case Command::SetImmediateData: {
+                SetImmediateDataCmd* cmd = mCommands.NextCommand<SetImmediateDataCmd>();
+                DAWN_ASSERT(cmd->size > 0);
+                uint8_t* value = nullptr;
+                value = mCommands.NextData<uint8_t>(cmd->size);
+                immediates.SetImmediateData(cmd->offset, value, cmd->size);
+                break;
+            }
 
             default:
                 DAWN_UNREACHABLE();
@@ -1236,7 +1246,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
 
     DAWN_TRY(RecordBeginRenderPass(recordingContext, device, renderPassCmd));
 
-    RenderImmediateConstantTracker renderImmediateConstantTracker = {};
+    ImmediateConstantTracker<RenderImmediateConstantsTrackerBase> immediates = {};
     // Set the default value for the dynamic state
     {
         device->fn.CmdSetLineWidth(commands, 1.0f);
@@ -1270,7 +1280,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
         device->fn.CmdSetScissor(commands, 0, 1, &scissorRect);
 
         // Apply default frag depth
-        renderImmediateConstantTracker.SetClampFragDepth(0.0, 1.0);
+        immediates.SetClampFragDepth(0.0, 1.0);
     }
 
     DescriptorSetTracker descriptorSets = {};
@@ -1282,7 +1292,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
                 DrawCmd* draw = iter->NextCommand<DrawCmd>();
 
                 descriptorSets.Apply(device, recordingContext, VK_PIPELINE_BIND_POINT_GRAPHICS);
-                renderImmediateConstantTracker.Apply(device, commands);
+                immediates.Apply(device, commands);
                 device->fn.CmdDraw(commands, draw->vertexCount, draw->instanceCount,
                                    draw->firstVertex, draw->firstInstance);
                 break;
@@ -1292,7 +1302,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
                 DrawIndexedCmd* draw = iter->NextCommand<DrawIndexedCmd>();
 
                 descriptorSets.Apply(device, recordingContext, VK_PIPELINE_BIND_POINT_GRAPHICS);
-                renderImmediateConstantTracker.Apply(device, commands);
+                immediates.Apply(device, commands);
                 device->fn.CmdDrawIndexed(commands, draw->indexCount, draw->instanceCount,
                                           draw->firstIndex, draw->baseVertex, draw->firstInstance);
                 break;
@@ -1303,7 +1313,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
                 Buffer* buffer = ToBackend(draw->indirectBuffer.Get());
 
                 descriptorSets.Apply(device, recordingContext, VK_PIPELINE_BIND_POINT_GRAPHICS);
-                renderImmediateConstantTracker.Apply(device, commands);
+                immediates.Apply(device, commands);
                 device->fn.CmdDrawIndirect(commands, buffer->GetHandle(),
                                            static_cast<VkDeviceSize>(draw->indirectOffset), 1, 0);
                 break;
@@ -1315,7 +1325,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
                 DAWN_ASSERT(buffer != nullptr);
 
                 descriptorSets.Apply(device, recordingContext, VK_PIPELINE_BIND_POINT_GRAPHICS);
-                renderImmediateConstantTracker.Apply(device, commands);
+                immediates.Apply(device, commands);
                 device->fn.CmdDrawIndexedIndirect(commands, buffer->GetHandle(),
                                                   static_cast<VkDeviceSize>(draw->indirectOffset),
                                                   1, 0);
@@ -1332,7 +1342,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
                 Buffer* countBuffer = ToBackend(cmd->drawCountBuffer.Get());
 
                 descriptorSets.Apply(device, recordingContext, VK_PIPELINE_BIND_POINT_GRAPHICS);
-                renderImmediateConstantTracker.Apply(device, commands);
+                immediates.Apply(device, commands);
 
                 if (countBuffer == nullptr) {
                     device->fn.CmdDrawIndirect(commands, indirectBuffer->GetHandle(),
@@ -1357,7 +1367,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
                 Buffer* countBuffer = ToBackend(cmd->drawCountBuffer.Get());
 
                 descriptorSets.Apply(device, recordingContext, VK_PIPELINE_BIND_POINT_GRAPHICS);
-                renderImmediateConstantTracker.Apply(device, commands);
+                immediates.Apply(device, commands);
 
                 if (countBuffer == nullptr) {
                     device->fn.CmdDrawIndexedIndirect(
@@ -1456,7 +1466,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
                 lastPipeline = pipeline;
 
                 descriptorSets.OnSetPipeline<RenderPipeline>(pipeline);
-                renderImmediateConstantTracker.OnSetPipeline(pipeline);
+                immediates.OnSetPipeline(pipeline);
                 break;
             }
 
@@ -1467,6 +1477,15 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
 
                 device->fn.CmdBindVertexBuffers(commands, static_cast<uint8_t>(cmd->slot), 1,
                                                 &*buffer, &offset);
+                break;
+            }
+
+            case Command::SetImmediateData: {
+                SetImmediateDataCmd* cmd = mCommands.NextCommand<SetImmediateDataCmd>();
+                DAWN_ASSERT(cmd->size > 0);
+                uint8_t* value = nullptr;
+                value = mCommands.NextData<uint8_t>(cmd->size);
+                immediates.SetImmediateData(cmd->offset, value, cmd->size);
                 break;
             }
 
@@ -1536,8 +1555,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
 
                 // Try applying the push constants that contain min/maxDepth immediately. This can
                 // be deferred if no pipeline is currently bound.
-                renderImmediateConstantTracker.SetClampFragDepth(viewport.minDepth,
-                                                                 viewport.maxDepth);
+                immediates.SetClampFragDepth(viewport.minDepth, viewport.maxDepth);
                 break;
             }
 
@@ -1590,9 +1608,6 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
                                         cmd->queryIndex, true, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT);
                 break;
             }
-
-            case Command::SetImmediateData:
-                return DAWN_UNIMPLEMENTED_ERROR("SetImmediateData unimplemented");
 
             default: {
                 EncodeRenderBundleCommand(&mCommands, type);

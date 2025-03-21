@@ -77,13 +77,10 @@ class UserImmediateConstantsTrackerBase {
     UserImmediateConstantsTrackerBase() {}
 
     // Setters
-    void SetImmediateData(uint32_t immediateDataRangeOffset, uint32_t* values, uint32_t count) {
-        uint32_t* destData = mContent.template Get<uint32_t>(offsetof(T, userConstants) +
-                                                             immediateDataRangeOffset *
-                                                                 kImmediateConstantElementByteSize);
-        size_t dataSize = count * kImmediateConstantElementByteSize;
-        if (memcmp(destData, values, dataSize) != 0) {
-            memcpy(destData, values, dataSize);
+    void SetImmediateData(uint32_t offset, uint8_t* values, uint32_t size) {
+        uint8_t* destData = mContent.template Get<uint8_t>(offsetof(T, userConstants) + offset);
+        if (memcmp(destData, values, size) != 0) {
+            memcpy(destData, values, size);
             mDirty |= GetImmediateConstantBlockBits(offsetof(T, userConstants),
                                                     sizeof(UserImmediateConstants));
         }

@@ -69,6 +69,7 @@ MaybeError PhysicalDeviceBase::Initialize() {
         mName, mDriverDescription, mVendorId, mDeviceId, mBackend, mAdapterType);
 
     NormalizeLimits(&mLimits.v1);
+    NormalizeExperimentalLimits(&mLimits);
 
     return {};
 }

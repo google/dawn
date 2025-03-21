@@ -80,6 +80,12 @@ struct LimitsForCompilationRequest {
 //      maxUniformBufferBindingSize must not be larger than maxBufferSize.
 void NormalizeLimits(Limits* limits);
 
+// Enforce restriction for experiment limit values, including:
+// 1. Enforce immediate data bytes to ensure they don't go over a fixed limit in Dawn's internal
+//    code.
+// TODO(crbug.com/366291600): Make ApplyLimitTiers and NormalizeLimits accept CombeindLimits.
+void NormalizeExperimentalLimits(CombinedLimits* limits);
+
 }  // namespace dawn::native
 
 #endif  // SRC_DAWN_NATIVE_LIMITS_H_

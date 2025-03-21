@@ -146,15 +146,17 @@ void ProgrammableEncoder::APISetImmediateData(uint32_t offset, const void* data,
                     offset, size, maxImmediateDataRangeByteSize);
             }
 
+            // Skip SetImmediateData when uploading constants are empty.
+            if (size == 0) {
+                return {};
+            }
+
             SetImmediateDataCmd* cmd =
                 allocator->Allocate<SetImmediateDataCmd>(Command::SetImmediateData);
             cmd->offset = offset;
             cmd->size = size;
-
-            if (size > 0) {
-                uint8_t* immediateDatas = allocator->AllocateData<uint8_t>(cmd->size);
-                memcpy(immediateDatas, data, size);
-            }
+            uint8_t* immediateDatas = allocator->AllocateData<uint8_t>(cmd->size);
+            memcpy(immediateDatas, data, size);
 
             return {};
         },
