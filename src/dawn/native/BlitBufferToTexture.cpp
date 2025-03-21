@@ -132,9 +132,24 @@ fn unpackData(byteOffset: u32) -> vec4f {
 }
 )";
 
+constexpr std::string_view kUnpackR16Unorm = R"(
+fn unpackData(byteOffset: u32) -> vec4f {
+    return vec4f(f32(loadU16AsU32(byteOffset)) / f32(0xffff), 0.0, 0.0, 1.0);
+}
+)";
+
 constexpr std::string_view kUnpackRG16Float = R"(
 fn unpackData(byteOffset: u32) -> vec4f {
     return vec4f(unpack2x16float(loadU32(byteOffset)), 0.0, 1.0);
+}
+)";
+
+constexpr std::string_view kUnpackRG16Unorm = R"(
+fn unpackData(byteOffset: u32) -> vec4f {
+    let word = loadU32(byteOffset);
+    let x = f32(word & 0xffff);
+    let y = f32(word >> 16);
+    return vec4f(vec2f(x, y) / f32(0xffff), 0.0, 1.0);
 }
 )";
 
@@ -142,6 +157,17 @@ constexpr std::string_view kUnpackRGBA16Float = R"(
 fn unpackData(byteOffset: u32) -> vec4f {
     let data = loadTwoU32s(byteOffset);
     return vec4f(unpack2x16float(data.x), unpack2x16float(data.y));
+}
+)";
+
+constexpr std::string_view kUnpackRGBA16Unorm = R"(
+fn unpackData(byteOffset: u32) -> vec4f {
+    let words = loadTwoU32s(byteOffset);
+    let x = f32(words[0] & 0xffff);
+    let y = f32(words[0] >> 16);
+    let z = f32(words[1] & 0xffff);
+    let w = f32(words[1] >> 16);
+    return vec4f(x, y, z, w) / f32(0xffff);
 }
 )";
 
@@ -189,13 +215,25 @@ std::string GenerateShaderSource(wgpu::TextureFormat format) {
             pixelSize = 2;
             ss << kUnpackR16Float;
             break;
+        case wgpu::TextureFormat::R16Unorm:
+            pixelSize = 2;
+            ss << kUnpackR16Unorm;
+            break;
         case wgpu::TextureFormat::RG16Float:
             pixelSize = 4;
             ss << kUnpackRG16Float;
             break;
+        case wgpu::TextureFormat::RG16Unorm:
+            pixelSize = 4;
+            ss << kUnpackRG16Unorm;
+            break;
         case wgpu::TextureFormat::RGBA16Float:
             pixelSize = 8;
             ss << kUnpackRGBA16Float;
+            break;
+        case wgpu::TextureFormat::RGBA16Unorm:
+            pixelSize = 8;
+            ss << kUnpackRGBA16Unorm;
             break;
         case wgpu::TextureFormat::R32Float:
             pixelSize = 4;
@@ -291,8 +329,11 @@ bool IsFormatSupportedByBufferToTextureBlit(wgpu::TextureFormat format) {
         case wgpu::TextureFormat::RGBA8Unorm:
         case wgpu::TextureFormat::BGRA8Unorm:
         case wgpu::TextureFormat::R16Float:
+        case wgpu::TextureFormat::R16Unorm:
         case wgpu::TextureFormat::RG16Float:
+        case wgpu::TextureFormat::RG16Unorm:
         case wgpu::TextureFormat::RGBA16Float:
+        case wgpu::TextureFormat::RGBA16Unorm:
         case wgpu::TextureFormat::R32Float:
         case wgpu::TextureFormat::RG32Float:
         case wgpu::TextureFormat::RGBA32Float:

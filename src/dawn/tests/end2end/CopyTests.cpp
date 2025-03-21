@@ -383,8 +383,35 @@ class CopyTests_WithFormatParam : public CopyTests,
         TextureSpec() { format = GetParam().mTextureFormat; }
     };
 
+    void SetUp() override {
+        DawnTestWithParams<CopyTextureFormatParams>::SetUp();
+        switch (GetParam().mTextureFormat) {
+            case wgpu::TextureFormat::R16Unorm:
+            case wgpu::TextureFormat::RG16Unorm:
+            case wgpu::TextureFormat::RGBA16Unorm:
+                DAWN_TEST_UNSUPPORTED_IF(
+                    !device.HasFeature(wgpu::FeatureName::Unorm16TextureFormats));
+                break;
+            default:
+                break;
+        }
+    }
+
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
         std::vector<wgpu::FeatureName> requiredFeatures = {};
+
+        switch (GetParam().mTextureFormat) {
+            case wgpu::TextureFormat::R16Unorm:
+            case wgpu::TextureFormat::RG16Unorm:
+            case wgpu::TextureFormat::RGBA16Unorm:
+                if (SupportsFeatures({wgpu::FeatureName::Unorm16TextureFormats})) {
+                    requiredFeatures.push_back(wgpu::FeatureName::Unorm16TextureFormats);
+                }
+                break;
+            default:
+                break;
+        }
+
         if (SupportsFeatures({wgpu::FeatureName::DawnTexelCopyBufferRowAlignment})) {
             requiredFeatures.push_back(wgpu::FeatureName::DawnTexelCopyBufferRowAlignment);
         }
@@ -632,13 +659,25 @@ class CopyTests_B2T : public CopyTests_WithFormatParam {
                 DoTestImpl<ColorF16<1>>(textureSpec, bufferSpec, copySize, dimension,
                                         /*tolerance=*/ColorF16<1>(0.001f));
                 break;
+            case wgpu::TextureFormat::R16Unorm:
+                DoTestImpl<Color<uint16_t, 1>>(textureSpec, bufferSpec, copySize, dimension,
+                                               /*tolerance=*/Color<uint16_t, 1>(1));
+                break;
             case wgpu::TextureFormat::RG16Float:
                 DoTestImpl<ColorF16<2>>(textureSpec, bufferSpec, copySize, dimension,
                                         /*tolerance=*/ColorF16<2>(0.001f));
                 break;
+            case wgpu::TextureFormat::RG16Unorm:
+                DoTestImpl<Color<uint16_t, 2>>(textureSpec, bufferSpec, copySize, dimension,
+                                               /*tolerance=*/Color<uint16_t, 2>(1));
+                break;
             case wgpu::TextureFormat::RGBA16Float:
                 DoTestImpl<ColorF16<4>>(textureSpec, bufferSpec, copySize, dimension,
                                         /*tolerance=*/ColorF16<4>(0.001f));
+                break;
+            case wgpu::TextureFormat::RGBA16Unorm:
+                DoTestImpl<Color<uint16_t, 4>>(textureSpec, bufferSpec, copySize, dimension,
+                                               /*tolerance=*/Color<uint16_t, 4>(1));
                 break;
             case wgpu::TextureFormat::R32Float:
                 DoTestImpl<Color<float, 1>>(textureSpec, bufferSpec, copySize, dimension,
@@ -2761,14 +2800,17 @@ DAWN_INSTANTIATE_TEST_P(CopyTests_B2T,
                             wgpu::TextureFormat::RGBA8Unorm,
 
                             wgpu::TextureFormat::R16Float,
+                            wgpu::TextureFormat::R16Unorm,
 
                             wgpu::TextureFormat::RG16Float,
+                            wgpu::TextureFormat::RG16Unorm,
 
                             wgpu::TextureFormat::R32Float,
 
                             wgpu::TextureFormat::RG32Float,
 
                             wgpu::TextureFormat::RGBA16Float,
+                            wgpu::TextureFormat::RGBA16Unorm,
 
                             wgpu::TextureFormat::RGBA32Float,
 
