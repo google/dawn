@@ -55,92 +55,47 @@ bool IsSnorm(wgpu::TextureFormat format) {
 
 template <typename T, size_t NumComponents>
 struct Color {
-  public:
     static constexpr size_t kNumComponents = NumComponents;
     static constexpr size_t kDataSize = sizeof(T) * NumComponents;
+    using ComponentRepresentation = T;
 
-    Color() = default;
-    explicit Color(T value) { std::fill(components, components + NumComponents, value); }
-
-    bool Equals(const Color& other, const Color& tolerance) const {
-        for (size_t i = 0; i < NumComponents; ++i) {
-            if (Diff(components[i], other.components[i]) > tolerance.components[i]) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    std::string ToString() const {
-        std::ostringstream ss;
-        for (size_t i = 0; i < NumComponents; ++i) {
-            Print(ss, components[i]);
-
-            if (i < NumComponents - 1) {
-                ss << " ";
-            }
-        }
-
-        return ss.str();
-    }
-
-  protected:
-    static T Diff(T lhs, T rhs) {
-        if constexpr (std::is_integral_v<T>) {
-            return std::abs(static_cast<int64_t>(lhs) - static_cast<int64_t>(rhs));
-        }
-        return std::abs(lhs - rhs);
-    }
-
-    static std::ostream& Print(std::ostream& stream, T component) {
-        if constexpr (std::is_same_v<T, uint8_t>) {
-            return stream << static_cast<int>(component);
-        }
-        return stream << component;
-    }
+    // Get representation of one component.
+    T GetCompRep(size_t idx) const { return components[idx]; }
 
     T components[NumComponents] = {};
 };
 
 template <size_t NumComponents>
 struct ColorF16 : public Color<uint16_t, NumComponents> {
-  public:
-    using Base = Color<uint16_t, NumComponents>;
-    using Base::Base;
+    using ComponentRepresentation = float;
 
-    explicit ColorF16(float value) : Base(Float32ToFloat16(value)) {}
+    // Get representation of one component.
+    float GetCompRep(size_t idx) const { return Float16ToFloat32(this->components[idx]); }
+};
 
-    bool Equals(const ColorF16& other, const ColorF16& tolerance) const {
-        for (size_t i = 0; i < NumComponents; ++i) {
-            if (abs(Float16ToFloat32(this->components[i]) - Float16ToFloat32(other.components[i])) >
-                Float16ToFloat32(tolerance.components[i])) {
-                return false;
-            }
-        }
-        return true;
-    }
+struct ColorRGB10A2 {
+    static constexpr size_t kNumComponents = 4;
+    static constexpr size_t kDataSize = sizeof(uint32_t);
+    using ComponentRepresentation = uint32_t;
 
-    std::string ToString() const {
-        std::ostringstream ss;
-        for (size_t i = 0; i < NumComponents; ++i) {
-            ss << Float16ToFloat32(this->components[i]);
-            if (i < NumComponents - 1) {
-                ss << " ";
-            }
-        }
+    // Get representation of one component.
+    uint32_t GetCompRep(size_t idx) const { return (mPackedColor >> (10 * idx)) & 0x3ff; }
 
-        return ss.str();
-    }
+    uint32_t mPackedColor = 0;
 };
 
 static_assert(sizeof(Color<uint8_t, 1>) == 1, "Unexpected padding");
 static_assert(sizeof(Color<uint8_t, 2>) == 2, "Unexpected padding");
 static_assert(sizeof(Color<uint16_t, 1>) == 2, "Unexpected padding");
+static_assert(sizeof(ColorRGB10A2) == 4, "Unexpected padding");
 
 template <typename ColorType>
 class ColorExpectation : public detail::CustomTextureExpectation {
   public:
-    ColorExpectation(const ColorType* expected, size_t count, ColorType tolerance)
+    static constexpr size_t kNumComponents = ColorType::kNumComponents;
+    using CompRepType = ColorType::ComponentRepresentation;
+
+    ColorExpectation(const ColorType* expected, size_t count, CompRepType tolerance)
         : mTolerance(tolerance) {
         mExpected.assign(expected, expected + count);
     }
@@ -152,18 +107,61 @@ class ColorExpectation : public detail::CustomTextureExpectation {
         const ColorType* actual = static_cast<const ColorType*>(data);
 
         for (size_t i = 0; i < mExpected.size(); ++i) {
-            if (!mExpected[i].Equals(actual[i], mTolerance)) {
+            if (!AreEqual(mExpected[i], actual[i])) {
                 return testing::AssertionFailure()
-                       << "Expected data[" << i << "] to be " << mExpected[i].ToString()
-                       << ", actual " << actual[i].ToString() << "\n";
+                       << "Expected data[" << i << "] to be " << ToString(mExpected[i])
+                       << ", actual " << ToString(actual[i]) << "\n";
             }
         }
         return testing::AssertionSuccess();
     }
 
   private:
+    static CompRepType GetComponent(const ColorType& color, size_t idx) {
+        DAWN_ASSERT(idx <= kNumComponents);
+        return color.GetCompRep(idx);
+    }
+
+    static CompRepType Diff(CompRepType lhs, CompRepType rhs) {
+        if constexpr (std::is_integral_v<CompRepType>) {
+            return std::abs(static_cast<int64_t>(lhs) - static_cast<int64_t>(rhs));
+        } else {
+            return std::abs(lhs - rhs);
+        }
+    }
+
+    static std::ostream& Print(std::ostream& stream, CompRepType component) {
+        if constexpr (std::is_same_v<CompRepType, uint8_t>) {
+            return stream << static_cast<int>(component);
+        } else {
+            return stream << component;
+        }
+    }
+
+    static std::string ToString(const ColorType& color) {
+        std::ostringstream ss;
+        for (size_t i = 0; i < kNumComponents; ++i) {
+            Print(ss, GetComponent(color, i));
+
+            if (i < kNumComponents - 1) {
+                ss << " ";
+            }
+        }
+
+        return ss.str();
+    }
+
+    bool AreEqual(const ColorType& lhs, const ColorType& rhs) const {
+        for (size_t i = 0; i < kNumComponents; ++i) {
+            if (Diff(GetComponent(lhs, i), GetComponent(rhs, i)) > mTolerance) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     std::vector<ColorType> mExpected;
-    ColorType mTolerance;
+    const CompRepType mTolerance;
 };
 
 class CopyTests {
@@ -644,52 +642,56 @@ class CopyTests_B2T : public CopyTests_WithFormatParam {
         switch (textureSpec.format) {
             case wgpu::TextureFormat::R8Unorm:
                 DoTestImpl<Color<uint8_t, 1>>(textureSpec, bufferSpec, copySize, dimension,
-                                              /*tolerance=*/Color<uint8_t, 1>(1));
+                                              /*tolerance=*/1);
                 break;
             case wgpu::TextureFormat::RG8Unorm:
                 DoTestImpl<Color<uint8_t, 2>>(textureSpec, bufferSpec, copySize, dimension,
-                                              /*tolerance=*/Color<uint8_t, 2>(1));
+                                              /*tolerance=*/1);
                 break;
             case wgpu::TextureFormat::RGBA8Unorm:
             case wgpu::TextureFormat::BGRA8Unorm:
                 DoTestImpl<Color<uint8_t, 4>>(textureSpec, bufferSpec, copySize, dimension,
-                                              /*tolerance=*/Color<uint8_t, 4>(1));
+                                              /*tolerance=*/1);
+                break;
+            case wgpu::TextureFormat::RGB10A2Unorm:
+                DoTestImpl<ColorRGB10A2>(textureSpec, bufferSpec, copySize, dimension,
+                                         /*tolerance=*/1);
                 break;
             case wgpu::TextureFormat::R16Float:
                 DoTestImpl<ColorF16<1>>(textureSpec, bufferSpec, copySize, dimension,
-                                        /*tolerance=*/ColorF16<1>(0.001f));
+                                        /*tolerance=*/0.001f);
                 break;
             case wgpu::TextureFormat::R16Unorm:
                 DoTestImpl<Color<uint16_t, 1>>(textureSpec, bufferSpec, copySize, dimension,
-                                               /*tolerance=*/Color<uint16_t, 1>(1));
+                                               /*tolerance=*/1);
                 break;
             case wgpu::TextureFormat::RG16Float:
                 DoTestImpl<ColorF16<2>>(textureSpec, bufferSpec, copySize, dimension,
-                                        /*tolerance=*/ColorF16<2>(0.001f));
+                                        /*tolerance=*/0.001f);
                 break;
             case wgpu::TextureFormat::RG16Unorm:
                 DoTestImpl<Color<uint16_t, 2>>(textureSpec, bufferSpec, copySize, dimension,
-                                               /*tolerance=*/Color<uint16_t, 2>(1));
+                                               /*tolerance=*/1);
                 break;
             case wgpu::TextureFormat::RGBA16Float:
                 DoTestImpl<ColorF16<4>>(textureSpec, bufferSpec, copySize, dimension,
-                                        /*tolerance=*/ColorF16<4>(0.001f));
+                                        /*tolerance=*/0.001f);
                 break;
             case wgpu::TextureFormat::RGBA16Unorm:
                 DoTestImpl<Color<uint16_t, 4>>(textureSpec, bufferSpec, copySize, dimension,
-                                               /*tolerance=*/Color<uint16_t, 4>(1));
+                                               /*tolerance=*/1);
                 break;
             case wgpu::TextureFormat::R32Float:
                 DoTestImpl<Color<float, 1>>(textureSpec, bufferSpec, copySize, dimension,
-                                            /*tolerance=*/Color<float, 1>(0.0001f));
+                                            /*tolerance=*/0.0001f);
                 break;
             case wgpu::TextureFormat::RG32Float:
                 DoTestImpl<Color<float, 2>>(textureSpec, bufferSpec, copySize, dimension,
-                                            /*tolerance=*/Color<float, 2>(0.0001f));
+                                            /*tolerance=*/0.0001f);
                 break;
             case wgpu::TextureFormat::RGBA32Float:
                 DoTestImpl<Color<float, 4>>(textureSpec, bufferSpec, copySize, dimension,
-                                            /*tolerance=*/Color<float, 4>(0.0001f));
+                                            /*tolerance=*/0.0001f);
                 break;
             default:
                 DAWN_UNREACHABLE();
@@ -701,7 +703,7 @@ class CopyTests_B2T : public CopyTests_WithFormatParam {
                     const BufferSpec& bufferSpec,
                     const wgpu::Extent3D& copySize,
                     wgpu::TextureDimension dimension,
-                    PixelType tolerance = {}) {
+                    PixelType::ComponentRepresentation tolerance = {}) {
         const uint32_t bytesPerTexel = PixelType::kDataSize;
         DAWN_ASSERT(bytesPerTexel == utils::GetTexelBlockSizeInBytes(textureSpec.format));
         const utils::TextureDataCopyLayout copyLayout =
@@ -2798,6 +2800,8 @@ DAWN_INSTANTIATE_TEST_P(CopyTests_B2T,
                             wgpu::TextureFormat::R8Unorm,
                             wgpu::TextureFormat::RG8Unorm,
                             wgpu::TextureFormat::RGBA8Unorm,
+
+                            wgpu::TextureFormat::RGB10A2Unorm,
 
                             wgpu::TextureFormat::R16Float,
                             wgpu::TextureFormat::R16Unorm,

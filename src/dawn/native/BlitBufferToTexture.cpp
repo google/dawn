@@ -126,6 +126,17 @@ fn unpackData(byteOffset: u32) -> vec4f {
 }
 )";
 
+constexpr std::string_view kUnpackRGB10A2Unorm = R"(
+fn unpackData(byteOffset: u32) -> vec4f {
+    let data = loadU32(byteOffset);
+    let r = f32((data & 0x3ff)) / 1023.0;
+    let g = f32(((data >> 10) & 0x3ff)) / 1023.0;
+    let b = f32(((data >> 20) & 0x3ff)) / 1023.0;
+    let a = f32(((data >> 30) & 0x3)) / 3.0;
+    return vec4f(r, g, b, a);
+}
+)";
+
 constexpr std::string_view kUnpackR16Float = R"(
 fn unpackData(byteOffset: u32) -> vec4f {
     return vec4f(unpack2x16float(loadU16AsU32(byteOffset)), 0.0, 1.0);
@@ -210,6 +221,10 @@ std::string GenerateShaderSource(wgpu::TextureFormat format) {
         case wgpu::TextureFormat::BGRA8Unorm:
             pixelSize = 4;
             ss << kUnpackBGRA8Unorm;
+            break;
+        case wgpu::TextureFormat::RGB10A2Unorm:
+            pixelSize = 4;
+            ss << kUnpackRGB10A2Unorm;
             break;
         case wgpu::TextureFormat::R16Float:
             pixelSize = 2;
@@ -328,6 +343,7 @@ bool IsFormatSupportedByBufferToTextureBlit(wgpu::TextureFormat format) {
         case wgpu::TextureFormat::RG8Unorm:
         case wgpu::TextureFormat::RGBA8Unorm:
         case wgpu::TextureFormat::BGRA8Unorm:
+        case wgpu::TextureFormat::RGB10A2Unorm:
         case wgpu::TextureFormat::R16Float:
         case wgpu::TextureFormat::R16Unorm:
         case wgpu::TextureFormat::RG16Float:
