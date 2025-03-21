@@ -203,10 +203,10 @@ TEST_F(MemoryInstrumentationTest, DumpMemoryStatistics) {
     EXPECT_EQ(memoryDumpMock.GetTotalSize(), kBufferAllocatedSize + kMipmappedTextureSize +
                                                  kMultisampleTextureSize + kETC2TextureSize);
 
-    // Check that ComputeEstimatedMemoryUsage() matches the memory dump total size.
-    EXPECT_EQ(
-        ComputeEstimatedMemoryUsage(device.Get()),
-        kBufferAllocatedSize + kMipmappedTextureSize + kMultisampleTextureSize + kETC2TextureSize);
+    // Check that ComputeEstimatedMemoryUsageInfo() matches the memory dump total size.
+    MemoryUsageInfo memInfo = ComputeEstimatedMemoryUsageInfo(device.Get());
+    EXPECT_EQ(memInfo.totalUsage, kBufferAllocatedSize + kMipmappedTextureSize +
+                                      kMultisampleTextureSize + kETC2TextureSize);
 }
 
 TEST_F(MemoryInstrumentationTest, ReduceMemoryUsage) {
@@ -227,10 +227,12 @@ TEST_F(MemoryInstrumentationTest, ReduceMemoryUsage) {
     mDeviceMock->GetInstance()->APIProcessEvents();
 
     // DynamicUploader buffers will still be alive.
-    EXPECT_GT(ComputeEstimatedMemoryUsage(device.Get()), uint64_t(0));
+    MemoryUsageInfo memInfo = ComputeEstimatedMemoryUsageInfo(device.Get());
+    EXPECT_GT(memInfo.totalUsage, uint64_t(0));
     ReduceMemoryUsage(device.Get());
     // But not any more.
-    EXPECT_EQ(ComputeEstimatedMemoryUsage(device.Get()), uint64_t(0));
+    memInfo = ComputeEstimatedMemoryUsageInfo(device.Get());
+    EXPECT_EQ(memInfo.totalUsage, uint64_t(0));
 
     // Check that DynamicUploader buffer is recreated again.
     uniformBuffer = device.CreateBuffer(&kBufferDesc);
@@ -243,10 +245,11 @@ TEST_F(MemoryInstrumentationTest, ReduceMemoryUsage) {
 
     mDeviceMock->GetInstance()->APIProcessEvents();
 
-    EXPECT_GT(ComputeEstimatedMemoryUsage(device.Get()), uint64_t(0));
+    memInfo = ComputeEstimatedMemoryUsageInfo(device.Get());
+    EXPECT_GT(memInfo.totalUsage, uint64_t(0));
 }
 
-// Test the detailed memory usage reported by ComputeEstimatedMemoryUsage()
+// Test the detailed memory usage reported by ComputeEstimatedMemoryUsageInfo()
 TEST_F(MemoryInstrumentationTest, ComputeEstimatedMemoryUsageInDetails) {
     // Create a buffer
     constexpr uint64_t kBufferSize = 32;
