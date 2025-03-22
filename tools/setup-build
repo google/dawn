@@ -41,7 +41,7 @@ BUILD_TYPE=""
 BUILD_ARCH=""
 FORCE=""
 VERBOSE=""
-REMOTEEXEC=""
+REMOTEEXEC="1"
 SHARED=""
 
 function show_usage() {
@@ -59,10 +59,12 @@ function show_usage() {
   echo "  cmake         Create CMake build configuration"
   echo "  release       Make a release build"
   echo "  debug         Make a debug build"
+  echo " "
   echo "  fuzz, fuzzer  Build fuzzers. Forces Clang to be used"
   echo "  native        Target the machine you're running on"
   echo "  x86           Target a 32-bit x86 (adds -m32 to compiler flags)"
-  echo "  remoteexec    Use remoteexec to improve compile time"
+  echo "  local         Use local compilation insetad of remote"
+  echo "  remoteexec    Use remoteexec to improve compile time (the default)"
   echo "  shared        Build shared libs (cmake only)"
   if [[ ! -z "$1" ]]; then
     echo
@@ -126,6 +128,9 @@ for arg in "$@"; do
     ;;
     "remoteexec")
       REMOTEEXEC=1
+    ;;
+    "local")
+      REMOTEEXEC=
     ;;
     "shared")
       SHARED=1
@@ -200,6 +205,9 @@ case $BUILD_SYSTEM in
         GN_ARGS+=" use_reclient=false"
     fi
     GN_ARGS+=" use_siso=true"
+    if grep 'dawn_node.*True' .gclient >/dev/null; then
+        GN_ARGS+=" dawn_build_node_bindings=true"
+    fi
     if [[ -z "$FORCE" && -f "$ROOT_DIR/out/$BUILD_DIR/args.gn" ]]; then
       generate "gn" "gen" "out/active" # keep existing args
     else
