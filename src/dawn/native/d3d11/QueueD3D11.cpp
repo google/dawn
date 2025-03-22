@@ -293,6 +293,10 @@ bool Queue::HasPendingCommands() const {
 void Queue::ForceEventualFlushOfCommands() {}
 
 MaybeError Queue::WaitForIdleForDestruction() {
+    if (!mPendingCommands->IsValid()) {
+        return {};
+    }
+
     DAWN_TRY(NextSerial());
     // Wait for all in-flight commands to finish executing
     DAWN_TRY_ASSIGN(std::ignore, WaitForQueueSerial(GetLastSubmittedCommandSerial(),

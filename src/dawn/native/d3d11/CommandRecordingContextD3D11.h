@@ -84,6 +84,8 @@ class CommandRecordingContext {
     MaybeError Initialize(Device* device);
     void Destroy();
 
+    bool IsValid() const;
+
     static ResultOrError<Ref<BufferBase>> CreateInternalUniformBuffer(DeviceBase* device);
     MaybeError SetInternalUniformBuffer(Ref<BufferBase> uniformBuffer);
 

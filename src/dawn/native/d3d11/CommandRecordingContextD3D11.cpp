@@ -202,11 +202,18 @@ MaybeError CommandRecordingContext::Initialize(Device* device) {
 
     if (ToBackend(device->GetPhysicalDevice())->IsSharedD3D11Device()) {
         const D3D_FEATURE_LEVEL featureLevels[] = {D3D_FEATURE_LEVEL_11_1, D3D_FEATURE_LEVEL_11_0};
-        DAWN_TRY(CheckHRESULT(
-            d3d11Device->CreateDeviceContextState(
-                /*Flags=*/0, featureLevels, std::size(featureLevels), D3D11_SDK_VERSION,
-                __uuidof(ID3D11Device5), nullptr, &mD3D11DeviceContextState),
-            "D3D11: create device context state"));
+
+        HRESULT hr = S_OK;
+        // Try all possible ID3D11Device* interfaces from highest to lowest.
+        for (auto devUUID : {__uuidof(ID3D11Device5), __uuidof(ID3D11Device3)}) {
+            hr = d3d11Device->CreateDeviceContextState(
+                /*Flags=*/0, featureLevels, std::size(featureLevels), D3D11_SDK_VERSION, devUUID,
+                nullptr, &mD3D11DeviceContextState);
+            if (SUCCEEDED(hr)) {
+                break;
+            }
+        }
+        DAWN_TRY(CheckHRESULT(hr, "D3D11: create device context state"));
     }
 
     ComPtr<ID3D11DeviceContext> d3d11DeviceContext;
@@ -239,6 +246,10 @@ MaybeError CommandRecordingContext::Initialize(Device* device) {
     mD3D11DeviceContext4 = std::move(d3d11DeviceContext4);
     mIsOpen = true;
     return {};
+}
+
+bool CommandRecordingContext::IsValid() const {
+    return mIsOpen;
 }
 
 void CommandRecordingContext::Destroy() {
