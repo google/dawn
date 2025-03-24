@@ -340,6 +340,10 @@ ID3D12Resource* Buffer::GetD3D12Resource() const {
 bool Buffer::TrackUsageAndGetResourceBarrier(CommandRecordingContext* commandContext,
                                              D3D12_RESOURCE_BARRIER* barrier,
                                              wgpu::BufferUsage newUsage) {
+    if (mResourceAllocation.GetInfo().mMethod == AllocationMethod::kExternal) {
+        commandContext->AddToSharedBufferList(this);
+    }
+
     // Track the underlying heap to ensure residency.
     // There may be no heap if the allocation is an external one.
     Heap* heap = ToBackend(mResourceAllocation.GetResourceHeap());
@@ -424,10 +428,6 @@ bool Buffer::TrackUsageAndGetResourceBarrier(CommandRecordingContext* commandCon
 
 void Buffer::TrackUsageAndTransitionNow(CommandRecordingContext* commandContext,
                                         wgpu::BufferUsage newUsage) {
-    if (mResourceAllocation.GetInfo().mMethod == AllocationMethod::kExternal) {
-        commandContext->AddToSharedBufferList(this);
-    }
-
     D3D12_RESOURCE_BARRIER barrier;
 
     if (TrackUsageAndGetResourceBarrier(commandContext, &barrier, newUsage)) {
