@@ -84,6 +84,11 @@ bool SkipDebugMessage(const D3D11_MESSAGE& message) {
         // D3D11 Debug layer warns SetPrivateData() with same name more than once.
         case D3D11_MESSAGE_ID_SETPRIVATEDATA_CHANGINGPARAMS:
             return true;
+        case D3D11_MESSAGE_ID_DEVICE_CHECKFEATURESUPPORT_UNRECOGNIZED_FEATURE:
+        case D3D11_MESSAGE_ID_DEVICE_CHECKFEATURESUPPORT_INVALIDARG_RETURN:
+            // We already handle CheckFeatureSupport() failures so ignore the messages from the
+            // debug layer.
+            return true;
         default:
             return false;
     }
