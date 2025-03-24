@@ -34,6 +34,7 @@
 // TODO(tint:88): When implementing support for an install target, all of these
 //                headers will need to be moved to include/tint/.
 
+#include "src/tint/api/common/vertex_pulling_config.h"
 #include "src/tint/api/tint.h"
 #include "src/tint/lang/core/ir/transform/single_entry_point.h"
 #include "src/tint/lang/core/ir/transform/substitute_overrides.h"
