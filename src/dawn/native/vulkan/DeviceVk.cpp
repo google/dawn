@@ -1041,9 +1041,13 @@ void Device::SetLabelImpl() {
 }
 
 bool Device::ReduceMemoryUsageImpl() {
-    ExecutionSerial deletionSerial =
-        std::max(GetFencedDeleter()->GetLastPendingDeletionSerial(),
-                 GetResourceMemoryAllocator()->GetLastPendingDeletionSerial());
+    auto GetLastPendingDeletionSerial = [this]() {
+        // Only hold the lock for one of these objects at a time to avoid lock-order-inversion.
+        auto deleterSerial = GetFencedDeleter()->GetLastPendingDeletionSerial();
+        auto allocatorSerial = GetResourceMemoryAllocator()->GetLastPendingDeletionSerial();
+        return std::max(deleterSerial, allocatorSerial);
+    };
+    ExecutionSerial deletionSerial = GetLastPendingDeletionSerial();
 
     if (deletionSerial == kBeginningOfGPUTime) {
         // Nothing pending deletion.
@@ -1068,9 +1072,7 @@ bool Device::ReduceMemoryUsageImpl() {
     DAWN_ASSERT(deletionSerial <= queue->GetLastSubmittedCommandSerial());
 
     // Check again if there is anything left to delete as tick might have deleted objects.
-    return std::max(GetFencedDeleter()->GetLastPendingDeletionSerial(),
-                    GetResourceMemoryAllocator()->GetLastPendingDeletionSerial()) !=
-           kBeginningOfGPUTime;
+    return GetLastPendingDeletionSerial() != kBeginningOfGPUTime;
 }
 
 void Device::PerformIdleTasksImpl() {
