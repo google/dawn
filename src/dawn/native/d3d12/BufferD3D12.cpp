@@ -162,10 +162,11 @@ ResultOrError<Ref<Buffer>> Buffer::CreateFromSharedBufferMemory(
 
 MaybeError Buffer::InitializeAsExternalBuffer(ComPtr<ID3D12Resource> d3d12Buffer,
                                               const UnpackedPtr<BufferDescriptor>& descriptor) {
+    mAllocatedSize = descriptor->size;
     AllocationInfo info;
     info.mMethod = AllocationMethod::kExternal;
+    info.mRequestedSize = mAllocatedSize;
     mResourceAllocation = {info, 0, std::move(d3d12Buffer), nullptr, ResourceHeapKind::InvalidEnum};
-    mAllocatedSize = descriptor->size;
     return {};
 }
 
@@ -312,7 +313,7 @@ MaybeError Buffer::InitializeHostMapped(const BufferHostMappedPointer* hostMappe
                                                        IID_PPV_ARGS(&placedResource)),
         "ID3D12Device::CreatePlacedResource"));
 
-    mResourceAllocation = {AllocationInfo{0, AllocationMethod::kExternal}, 0,
+    mResourceAllocation = {AllocationInfo{0, AllocationMethod::kExternal, mAllocatedSize}, 0,
                            std::move(placedResource),
                            /* heap is external, and not tracked for residency */ nullptr,
                            ResourceHeapKind::InvalidEnum};

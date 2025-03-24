@@ -57,72 +57,71 @@ FencedDeleter::~FencedDeleter() {
 }
 
 void FencedDeleter::DeleteWhenUnused(VkBuffer buffer) {
-    mBuffersToDelete.Enqueue(buffer, mDevice->GetQueue()->GetPendingCommandSerial());
+    mBuffersToDelete.Enqueue(buffer, GetCurrentDeletionSerial());
 }
 
 void FencedDeleter::DeleteWhenUnused(VkDescriptorPool pool) {
-    mDescriptorPoolsToDelete.Enqueue(pool, mDevice->GetQueue()->GetPendingCommandSerial());
+    mDescriptorPoolsToDelete.Enqueue(pool, GetCurrentDeletionSerial());
 }
 
 void FencedDeleter::DeleteWhenUnused(VkDeviceMemory memory) {
-    mMemoriesToDelete.Enqueue(memory, mDevice->GetQueue()->GetPendingCommandSerial());
+    mMemoriesToDelete.Enqueue(memory, GetCurrentDeletionSerial());
 }
 
 void FencedDeleter::DeleteWhenUnused(VkFence fence) {
-    mFencesToDelete.Enqueue(fence, mDevice->GetQueue()->GetPendingCommandSerial());
+    mFencesToDelete.Enqueue(fence, GetCurrentDeletionSerial());
 }
 
 void FencedDeleter::DeleteWhenUnused(VkFramebuffer framebuffer) {
-    mFramebuffersToDelete.Enqueue(framebuffer, mDevice->GetQueue()->GetPendingCommandSerial());
+    mFramebuffersToDelete.Enqueue(framebuffer, GetCurrentDeletionSerial());
 }
 
 void FencedDeleter::DeleteWhenUnused(VkImage image) {
-    mImagesToDelete.Enqueue(image, mDevice->GetQueue()->GetPendingCommandSerial());
+    mImagesToDelete.Enqueue(image, GetCurrentDeletionSerial());
 }
 
 void FencedDeleter::DeleteWhenUnused(VkImageView view) {
-    mImageViewsToDelete.Enqueue(view, mDevice->GetQueue()->GetPendingCommandSerial());
+    mImageViewsToDelete.Enqueue(view, GetCurrentDeletionSerial());
 }
 
 void FencedDeleter::DeleteWhenUnused(VkPipeline pipeline) {
-    mPipelinesToDelete.Enqueue(pipeline, mDevice->GetQueue()->GetPendingCommandSerial());
+    mPipelinesToDelete.Enqueue(pipeline, GetCurrentDeletionSerial());
 }
 
 void FencedDeleter::DeleteWhenUnused(VkPipelineLayout layout) {
-    mPipelineLayoutsToDelete.Enqueue(layout, mDevice->GetQueue()->GetPendingCommandSerial());
+    mPipelineLayoutsToDelete.Enqueue(layout, GetCurrentDeletionSerial());
 }
 
 void FencedDeleter::DeleteWhenUnused(VkQueryPool querypool) {
-    mQueryPoolsToDelete.Enqueue(querypool, mDevice->GetQueue()->GetPendingCommandSerial());
+    mQueryPoolsToDelete.Enqueue(querypool, GetCurrentDeletionSerial());
 }
 
 void FencedDeleter::DeleteWhenUnused(VkRenderPass renderPass) {
-    mRenderPassesToDelete.Enqueue(renderPass, mDevice->GetQueue()->GetPendingCommandSerial());
+    mRenderPassesToDelete.Enqueue(renderPass, GetCurrentDeletionSerial());
 }
 
 void FencedDeleter::DeleteWhenUnused(VkSamplerYcbcrConversion samplerYcbcrConversion) {
-    mSamplerYcbcrConversionsToDelete.Enqueue(samplerYcbcrConversion,
-                                             mDevice->GetQueue()->GetPendingCommandSerial());
+    mSamplerYcbcrConversionsToDelete.Enqueue(samplerYcbcrConversion, GetCurrentDeletionSerial());
 }
 
 void FencedDeleter::DeleteWhenUnused(VkSampler sampler) {
-    mSamplersToDelete.Enqueue(sampler, mDevice->GetQueue()->GetPendingCommandSerial());
+    mSamplersToDelete.Enqueue(sampler, GetCurrentDeletionSerial());
 }
 
 void FencedDeleter::DeleteWhenUnused(VkSemaphore semaphore) {
-    mSemaphoresToDelete.Enqueue(semaphore, mDevice->GetQueue()->GetPendingCommandSerial());
+    mSemaphoresToDelete.Enqueue(semaphore, GetCurrentDeletionSerial());
 }
 
 void FencedDeleter::DeleteWhenUnused(VkShaderModule module) {
-    mShaderModulesToDelete.Enqueue(module, mDevice->GetQueue()->GetPendingCommandSerial());
+    mShaderModulesToDelete.Enqueue(module, GetCurrentDeletionSerial());
 }
 
 void FencedDeleter::DeleteWhenUnused(VkSurfaceKHR surface) {
-    mSurfacesToDelete.Enqueue(surface, mDevice->GetQueue()->GetPendingCommandSerial());
+    mSurfacesToDelete.Enqueue(surface, GetCurrentDeletionSerial());
 }
 
 void FencedDeleter::DeleteWhenUnused(VkSwapchainKHR swapChain) {
-    mSwapChainsToDelete.Enqueue(swapChain, mDevice->GetQueue()->GetPendingCommandSerial());
+    mSwapChainsToDelete.Enqueue(swapChain, GetCurrentDeletionSerial());
 }
 
 ExecutionSerial FencedDeleter::GetLastPendingDeletionSerial() {
@@ -152,6 +151,10 @@ ExecutionSerial FencedDeleter::GetLastPendingDeletionSerial() {
     GetLastSubmitted(mSwapChainsToDelete);
 
     return lastSerial;
+}
+
+ExecutionSerial FencedDeleter::GetCurrentDeletionSerial() {
+    return mDevice->GetQueue()->GetPendingCommandSerial();
 }
 
 void FencedDeleter::Tick(ExecutionSerial completedSerial) {

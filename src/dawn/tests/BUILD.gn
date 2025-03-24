@@ -732,7 +732,10 @@ source_set("end2end_tests_sources") {
   }
 
   if (dawn_enable_vulkan) {
-    sources += [ "end2end/YCbCrInfoTests.cpp" ]
+    sources += [
+      "end2end/AllocatorMemoryInstrumentationTests.cpp",
+      "end2end/YCbCrInfoTests.cpp",
+    ]
   }
 
   if (dawn_enable_d3d11 || dawn_enable_d3d12 ||

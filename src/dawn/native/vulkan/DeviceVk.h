@@ -117,6 +117,8 @@ class Device final : public DeviceBase {
 
     float GetTimestampPeriodInNS() const override;
 
+    AllocatorMemoryInfo GetAllocatorMemoryInfo() const override;
+
     void SetLabelImpl() override;
     bool ReduceMemoryUsageImpl() override;
     void PerformIdleTasksImpl() override;

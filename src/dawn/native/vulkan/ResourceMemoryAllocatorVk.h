@@ -28,6 +28,7 @@
 #ifndef SRC_DAWN_NATIVE_VULKAN_RESOURCEMEMORYALLOCATORVK_H_
 #define SRC_DAWN_NATIVE_VULKAN_RESOURCEMEMORYALLOCATORVK_H_
 
+#include <map>
 #include <memory>
 #include <vector>
 
@@ -42,6 +43,7 @@
 namespace dawn::native::vulkan {
 
 class Device;
+class ResourceHeap;
 struct VulkanDeviceInfo;
 
 // Each bit of MemoryKind represents a kind of memory that influence the result of the allocation.
@@ -77,6 +79,13 @@ class ResourceMemoryAllocator {
 
     int FindBestTypeIndex(VkMemoryRequirements requirements, MemoryKind kind);
 
+    uint64_t GetTotalUsedMemory() const;
+    uint64_t GetTotalAllocatedMemory() const;
+
+  protected:
+    void RecordHeapAllocation(VkDeviceSize size);
+    void DeallocateResourceHeap(ResourceHeap* heap);
+
   private:
     raw_ptr<Device> mDevice;
 
@@ -84,6 +93,11 @@ class ResourceMemoryAllocator {
     std::vector<std::unique_ptr<SingleTypeAllocator>> mAllocatorsPerType;
 
     SerialQueue<ExecutionSerial, ResourceMemoryAllocation> mSubAllocationsToDelete;
+    std::map<ExecutionSerial, VkDeviceSize> mUsedMemoryToDecrement;
+    std::map<ExecutionSerial, VkDeviceSize> mAllocatedMemoryToDecrement;
+
+    VkDeviceSize mTotalAllocatedMemory = 0;
+    VkDeviceSize mTotalUsedMemory = 0;
 };
 
 }  // namespace dawn::native::vulkan

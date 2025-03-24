@@ -426,6 +426,10 @@ class DeviceBase : public ErrorSink,
     bool ReduceMemoryUsage();
     void PerformIdleTasks();
 
+    // Returns the memory information gathered from backend specific allocators.
+    // TODO(chromium:397720827): Implement allocator memory tracking for D3D12.
+    virtual AllocatorMemoryInfo GetAllocatorMemoryInfo() const;
+
     ResultOrError<Ref<BufferBase>> GetOrCreateTemporaryUniformBuffer(size_t size);
 
     bool HasFlexibleTextureViews() const;

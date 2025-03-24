@@ -281,6 +281,11 @@ MemoryUsageInfo ComputeEstimatedMemoryUsageInfo(WGPUDevice device) {
     return FromAPI(device)->ComputeEstimatedMemoryUsage();
 }
 
+AllocatorMemoryInfo GetAllocatorMemoryInfo(WGPUDevice device) {
+    auto deviceLock(FromAPI(device)->GetScopedLock());
+    return FromAPI(device)->GetAllocatorMemoryInfo();
+}
+
 bool ReduceMemoryUsage(WGPUDevice device) {
     auto deviceLock(FromAPI(device)->GetScopedLock());
     return FromAPI(device)->ReduceMemoryUsage();

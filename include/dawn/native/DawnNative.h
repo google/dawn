@@ -329,6 +329,15 @@ struct DAWN_NATIVE_EXPORT MemoryUsageInfo {
 };
 DAWN_NATIVE_EXPORT MemoryUsageInfo ComputeEstimatedMemoryUsageInfo(WGPUDevice device);
 
+// Memory information gathered from backend specific allocators.
+// - memory allocated by clients for objects such as buffers, textures.
+// - heap memory used by the allocator for allocations.
+struct DAWN_NATIVE_EXPORT AllocatorMemoryInfo {
+    uint64_t totalUsedMemory = 0;
+    uint64_t totalAllocatedMemory = 0;
+};
+DAWN_NATIVE_EXPORT AllocatorMemoryInfo GetAllocatorMemoryInfo(WGPUDevice device);
+
 // Free any unused GPU memory like staging buffers, cached resources, etc. Returns true if there are
 // still objects to delete and ReduceMemoryUsage() should be run again after a short delay to allow
 // submitted work to complete.
