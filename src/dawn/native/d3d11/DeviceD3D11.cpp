@@ -89,6 +89,10 @@ bool SkipDebugMessage(const D3D11_MESSAGE& message) {
             // We already handle CheckFeatureSupport() failures so ignore the messages from the
             // debug layer.
             return true;
+        case D3D11_MESSAGE_ID_DECODERBEGINFRAME_HAZARD:
+            // This is video decoder's error which must happen externally because Dawn doesn't
+            // handle video directly. So ignore it.
+            return true;
         default:
             return false;
     }
