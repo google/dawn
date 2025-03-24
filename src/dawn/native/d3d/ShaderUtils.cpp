@@ -168,16 +168,16 @@ ResultOrError<ComPtr<IDxcBlob>> CompileShaderDXC(const d3d::D3DBytecodeCompilati
     DAWN_TRY(CheckHRESULT(result->GetStatus(&hr), "DXC get status"));
 
     if (FAILED(hr)) {
+        const char* hrAsString = HRESULTAsString(hr);
         ComPtr<IDxcBlobEncoding> errors;
         DAWN_TRY(CheckHRESULT(result->GetErrorBuffer(&errors), "DXC get error buffer"));
 
         if (dumpShaders) {
-            return DAWN_VALIDATION_ERROR("DXC compile failed with: %s\n/* Generated HLSL: */\n%s\n",
-                                         static_cast<char*>(errors->GetBufferPointer()),
-                                         hlslSource.c_str());
+            return DAWN_VALIDATION_ERROR(
+                "DXC compile failed with error: %s msg: %s\n/* Generated HLSL: */\n%s\n",
+                hrAsString, static_cast<char*>(errors->GetBufferPointer()), hlslSource.c_str());
         }
-        return DAWN_VALIDATION_ERROR("DXC compile failed with: %s.",
-                                     static_cast<char*>(errors->GetBufferPointer()));
+        return DAWN_VALIDATION_ERROR("DXC compile failed with error: %s.", hrAsString);
     }
 
     ComPtr<IDxcBlob> compiledShader;
@@ -198,15 +198,14 @@ ResultOrError<ComPtr<ID3DBlob>> CompileShaderFXC(const d3d::D3DBytecodeCompilati
 
     if (FAILED(result)) {
         const char* resultAsString = HRESULTAsString(result);
-        std::string errorMsg = errors ? static_cast<char*>(errors->GetBufferPointer()) : "";
         if (dumpShaders) {
+            std::string errorMsg = errors ? static_cast<char*>(errors->GetBufferPointer()) : "";
             return DAWN_VALIDATION_ERROR(
                 "FXC compile failed with error: %s msg: %s\n/* Generated HLSL: */\n%s\n",
                 resultAsString, errorMsg, hlslSource.c_str());
         }
 
-        return DAWN_VALIDATION_ERROR("FXC compile failed with error: %s msg: %s.", resultAsString,
-                                     errorMsg);
+        return DAWN_VALIDATION_ERROR("FXC compile failed with error: %s.", resultAsString);
     }
 
     return std::move(compiledShader);
