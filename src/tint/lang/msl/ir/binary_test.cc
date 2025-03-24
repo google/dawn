@@ -74,7 +74,7 @@ TEST_F(IR_MslBinaryTest, MatchOverloadFromDialect) {
     core::ir::Capabilities caps;
     caps.Add(core::ir::Capability::kAllow8BitIntegers);
     auto res = core::ir::Validate(mod, caps);
-    EXPECT_EQ(res, Success) << res.Failure().reason;
+    EXPECT_EQ(res, Success) << res.Failure();
 }
 
 TEST_F(IR_MslBinaryTest, DoesNotMatchOverloadFromCore) {

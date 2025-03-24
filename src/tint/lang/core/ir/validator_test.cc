@@ -128,7 +128,7 @@ TEST_F(IR_ValidatorTest, RootBlock_NonVar) {
                     R"(:2:3 error: loop: root block: invalid instruction: tint::core::ir::Loop
   loop [b: $B2] {  # loop_1
   ^^^^^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, RootBlock_Let) {
@@ -141,7 +141,7 @@ TEST_F(IR_ValidatorTest, RootBlock_Let) {
         testing::HasSubstr(R"(:2:12 error: let: root block: invalid instruction: tint::core::ir::Let
   %a:f32 = let 1.0f
            ^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, RootBlock_LetWithAllowModuleScopeLets) {
@@ -162,7 +162,7 @@ TEST_F(IR_ValidatorTest, RootBlock_Construct) {
             R"(:2:18 error: construct: root block: invalid instruction: tint::core::ir::Construct
   %1:vec2<f32> = construct 1.0f, 2.0f
                  ^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, RootBlock_ConstructWithAllowModuleScopeLets) {
@@ -188,7 +188,7 @@ TEST_F(IR_ValidatorTest, RootBlock_VarBlockMismatch) {
             R"(:2:38 error: var: instruction in root block does not have root block as parent
   %1:ptr<private, i32, read_write> = var undef
                                      ^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Construct_Struct_ZeroValue) {
@@ -259,7 +259,7 @@ TEST_F(IR_ValidatorTest, Construct_Struct_NotEnoughArgs) {
             R"(:8:19 error: construct: structure has 2 members, but construct provides 1 arguments
     %2:MyStruct = construct 1i
                   ^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Construct_Struct_TooManyArgs) {
@@ -282,7 +282,7 @@ TEST_F(IR_ValidatorTest, Construct_Struct_TooManyArgs) {
             R"(:8:19 error: construct: structure has 2 members, but construct provides 3 arguments
     %2:MyStruct = construct 1i, 2u, 3i
                   ^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Construct_Struct_WrongArgType) {
@@ -305,7 +305,7 @@ TEST_F(IR_ValidatorTest, Construct_Struct_WrongArgType) {
             R"(:8:33 error: construct: type 'i32' of argument 1 does not match type 'u32' of struct member
     %2:MyStruct = construct 1i, 2i
                                 ^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Construct_NullArg) {
@@ -326,7 +326,7 @@ TEST_F(IR_ValidatorTest, Construct_NullArg) {
                 testing::HasSubstr(R"(:8:33 error: construct: operand is undefined
     %2:MyStruct = construct 1i, undef
                                 ^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Construct_NullResult) {
@@ -348,7 +348,7 @@ TEST_F(IR_ValidatorTest, Construct_NullResult) {
                 testing::HasSubstr(R"(:8:5 error: construct: result is undefined
     undef = construct 1i, 2u
     ^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Construct_EmptyResult) {
@@ -370,7 +370,7 @@ TEST_F(IR_ValidatorTest, Construct_EmptyResult) {
                 testing::HasSubstr(R"(:8:13 error: construct: expected exactly 1 results, got 0
     undef = construct 1i, 2u
             ^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Convert_MissingArg) {
@@ -387,7 +387,7 @@ TEST_F(IR_ValidatorTest, Convert_MissingArg) {
                 testing::HasSubstr(R"(:3:14 error: convert: expected exactly 1 operands, got 0
     %2:i32 = convert
              ^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Convert_NullArg) {
@@ -403,7 +403,7 @@ TEST_F(IR_ValidatorTest, Convert_NullArg) {
                 testing::HasSubstr(R"(:3:22 error: convert: operand is undefined
     %2:i32 = convert undef
                      ^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Convert_MissingResult) {
@@ -420,7 +420,7 @@ TEST_F(IR_ValidatorTest, Convert_MissingResult) {
                 testing::HasSubstr(R"(:3:13 error: convert: expected exactly 1 results, got 0
     undef = convert 1.0f
             ^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Convert_NullResult) {
@@ -436,7 +436,7 @@ TEST_F(IR_ValidatorTest, Convert_NullResult) {
     EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:3:5 error: convert: result is undefined
     undef = convert 1.0f
     ^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Convert_ScalarToScalar) {
@@ -467,7 +467,7 @@ TEST_F(IR_ValidatorTest, Convert_ScalarIdentity) {
                 testing::HasSubstr(R"(:3:14 error: convert: No defined converter for 'f32' -> 'f32'
     %3:f32 = convert %p
              ^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Convert_ScalarToVec) {
@@ -486,7 +486,7 @@ TEST_F(IR_ValidatorTest, Convert_ScalarToVec) {
         testing::HasSubstr(R"(:3:20 error: convert: No defined converter for 'f32' -> 'vec2<f32>'
     %3:vec2<f32> = convert %p
                    ^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Convert_ScalarToMat) {
@@ -505,7 +505,7 @@ TEST_F(IR_ValidatorTest, Convert_ScalarToMat) {
         testing::HasSubstr(R"(:3:22 error: convert: No defined converter for 'f32' -> 'mat2x3<f32>'
     %3:mat2x3<f32> = convert %p
                      ^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Convert_VecToVec) {
@@ -537,7 +537,7 @@ TEST_F(IR_ValidatorTest, Convert_VecIdentity) {
                     R"(:3:20 error: convert: No defined converter for 'vec3<f32>' -> 'vec3<f32>'
     %3:vec3<f32> = convert %p
                    ^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Convert_VecToVec_WidthMismatch) {
@@ -556,7 +556,7 @@ TEST_F(IR_ValidatorTest, Convert_VecToVec_WidthMismatch) {
                     R"(:3:20 error: convert: No defined converter for 'vec2<u32>' -> 'vec4<f32>'
     %3:vec4<f32> = convert %p
                    ^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Convert_VecToScalar) {
@@ -575,7 +575,7 @@ TEST_F(IR_ValidatorTest, Convert_VecToScalar) {
         testing::HasSubstr(R"(:3:14 error: convert: No defined converter for 'vec2<u32>' -> 'f32'
     %3:f32 = convert %p
              ^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Convert_VecToMat) {
@@ -594,7 +594,7 @@ TEST_F(IR_ValidatorTest, Convert_VecToMat) {
                     R"(:3:22 error: convert: No defined converter for 'vec2<u32>' -> 'mat3x2<f32>'
     %3:mat3x2<f32> = convert %p
                      ^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Convert_MatToMat) {
@@ -626,7 +626,7 @@ TEST_F(IR_ValidatorTest, Convert_MatToMatIdentity) {
                     R"(:3:22 error: convert: No defined converter for 'mat3x3<f32>' -> 'mat3x3<f32>'
     %3:mat3x3<f32> = convert %p
                      ^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Convert_MatToMat_ShapeMismatch) {
@@ -645,7 +645,7 @@ TEST_F(IR_ValidatorTest, Convert_MatToMat_ShapeMismatch) {
                     R"(:3:22 error: convert: No defined converter for 'mat4x4<f32>' -> 'mat2x2<f32>'
     %3:mat2x2<f32> = convert %p
                      ^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Convert_MatToScalar) {
@@ -664,7 +664,7 @@ TEST_F(IR_ValidatorTest, Convert_MatToScalar) {
         testing::HasSubstr(R"(:3:14 error: convert: No defined converter for 'mat4x4<f32>' -> 'f32'
     %3:f32 = convert %p
              ^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Convert_MatToVec) {
@@ -683,7 +683,7 @@ TEST_F(IR_ValidatorTest, Convert_MatToVec) {
                     R"(:3:20 error: convert: No defined converter for 'mat4x4<f32>' -> 'vec4<f32>'
     %3:vec4<f32> = convert %p
                    ^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Convert_4xU8ToU32) {
@@ -702,7 +702,7 @@ TEST_F(IR_ValidatorTest, Convert_4xU8ToU32) {
         testing::HasSubstr(R"(:3:14 error: convert: No defined converter for 'vec4<u8>' -> 'u32'
     %3:u32 = convert %p
              ^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Convert_U32To4xU8) {
@@ -721,7 +721,7 @@ TEST_F(IR_ValidatorTest, Convert_U32To4xU8) {
         testing::HasSubstr(R"(:3:19 error: convert: No defined converter for 'u32' -> 'vec4<u8>'
     %3:vec4<u8> = convert %p
                   ^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Convert_PtrToVal) {
@@ -740,7 +740,7 @@ TEST_F(IR_ValidatorTest, Convert_PtrToVal) {
             R"(:4:14 error: convert: No defined converter for 'ptr<function, u32, read_write>' -> 'u32'
     %3:u32 = convert %v
              ^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Convert_PtrToPtr) {
@@ -759,7 +759,7 @@ TEST_F(IR_ValidatorTest, Convert_PtrToPtr) {
             R"(:4:41 error: convert: not defined for result type, 'ptr<function, u32, read_write>'
     %3:ptr<function, u32, read_write> = convert %v
                                         ^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Block_NoTerminator) {
@@ -772,7 +772,7 @@ TEST_F(IR_ValidatorTest, Block_NoTerminator) {
                     R"(:2:3 error: block does not end in a terminator instruction
   $B1: {
   ^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Block_VarBlockMismatch) {
@@ -794,7 +794,7 @@ TEST_F(IR_ValidatorTest, Block_VarBlockMismatch) {
         testing::HasSubstr(R"(:3:41 error: var: block instruction does not have same block as parent
     %2:ptr<function, i32, read_write> = var undef
                                         ^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Block_DeadParameter) {
@@ -817,7 +817,7 @@ TEST_F(IR_ValidatorTest, Block_DeadParameter) {
                 testing::HasSubstr(R"(:7:12 error: destroyed parameter found in block parameter list
       $B3 (%my_param:f32): {  # body
            ^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Block_ParameterWithNullBlock) {
@@ -840,7 +840,7 @@ TEST_F(IR_ValidatorTest, Block_ParameterWithNullBlock) {
                 testing::HasSubstr(R"(:7:12 error: block parameter has nullptr parent block
       $B3 (%my_param:f32): {  # body
            ^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Block_ParameterUsedInMultipleBlocks) {
@@ -867,7 +867,7 @@ TEST_F(IR_ValidatorTest, Block_ParameterUsedInMultipleBlocks) {
 :10:7 note: parent block declared here
       $B4 (%my_param:f32): {  # continuing
       ^^^^^^^^^^^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Instruction_AppendedDead) {
@@ -923,7 +923,7 @@ TEST_F(IR_ValidatorTest, Instruction_NullInstructionResultInstruction) {
                 testing::HasSubstr(R"(:3:5 error: var: result instruction is undefined
     %2:ptr<function, f32, read_write> = var undef
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Instruction_WrongInstructionResultInstruction) {
@@ -944,7 +944,7 @@ TEST_F(IR_ValidatorTest, Instruction_WrongInstructionResultInstruction) {
             R"(:4:5 error: var: result instruction does not match instruction (possible double usage)
     %2:ptr<function, f32, read_write> = var undef
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Instruction_DeadOperand) {
@@ -963,7 +963,7 @@ TEST_F(IR_ValidatorTest, Instruction_DeadOperand) {
     EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:3:45 error: var: operand is not alive
     %2:ptr<function, f32, read_write> = var %3
                                             ^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Instruction_OperandUsageRemoved) {
@@ -982,7 +982,7 @@ TEST_F(IR_ValidatorTest, Instruction_OperandUsageRemoved) {
     EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:3:45 error: var: operand missing usage
     %2:ptr<function, f32, read_write> = var %3
                                             ^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Instruction_OrphanedInstruction) {
@@ -998,7 +998,7 @@ TEST_F(IR_ValidatorTest, Instruction_OrphanedInstruction) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(error: load: orphaned instruction: load
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Binary_LHS_Nullptr) {
@@ -1014,7 +1014,7 @@ TEST_F(IR_ValidatorTest, Binary_LHS_Nullptr) {
                 testing::HasSubstr(R"(:3:18 error: binary: operand is undefined
     %2:i32 = add undef, 2i
                  ^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Binary_RHS_Nullptr) {
@@ -1030,7 +1030,7 @@ TEST_F(IR_ValidatorTest, Binary_RHS_Nullptr) {
                 testing::HasSubstr(R"(:3:22 error: binary: operand is undefined
     %2:i32 = add 2i, undef
                      ^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Binary_Result_Nullptr) {
@@ -1048,7 +1048,7 @@ TEST_F(IR_ValidatorTest, Binary_Result_Nullptr) {
     EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:3:5 error: binary: result is undefined
     undef = add 3i, 2i
     ^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Binary_MissingOperands) {
@@ -1065,7 +1065,7 @@ TEST_F(IR_ValidatorTest, Binary_MissingOperands) {
                 testing::HasSubstr(R"(:3:5 error: binary: expected at least 2 operands, got 0
     %2:i32 = add
     ^^^^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Binary_MissingResult) {
@@ -1082,7 +1082,7 @@ TEST_F(IR_ValidatorTest, Binary_MissingResult) {
                 testing::HasSubstr(R"(:3:5 error: binary: expected exactly 1 results, got 0
     undef = add 1i, 2i
     ^^^^^^^^^^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Unary_Value_Nullptr) {
@@ -1097,7 +1097,7 @@ TEST_F(IR_ValidatorTest, Unary_Value_Nullptr) {
     EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:3:23 error: unary: operand is undefined
     %2:i32 = negation undef
                       ^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Unary_Result_Nullptr) {
@@ -1114,7 +1114,7 @@ TEST_F(IR_ValidatorTest, Unary_Result_Nullptr) {
     EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:3:5 error: unary: result is undefined
     undef = negation 2i
     ^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Unary_ResultTypeNotMatchValueType) {
@@ -1134,7 +1134,7 @@ TEST_F(IR_ValidatorTest, Unary_ResultTypeNotMatchValueType) {
             R"(:3:5 error: unary: result value type 'f32' does not match complement result type 'i32'
     %2:f32 = complement 2i
     ^^^^^^^^^^^^^^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Unary_MissingOperands) {
@@ -1152,7 +1152,7 @@ TEST_F(IR_ValidatorTest, Unary_MissingOperands) {
                 testing::HasSubstr(R"(:3:5 error: unary: expected at least 1 operands, got 0
     %2:f32 = negation
     ^^^^^^^^^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Unary_MissingResults) {
@@ -1170,7 +1170,7 @@ TEST_F(IR_ValidatorTest, Unary_MissingResults) {
                 testing::HasSubstr(R"(:3:5 error: unary: expected exactly 1 results, got 0
     undef = negation 2.0f
     ^^^^^^^^^^^^^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Scoping_UseBeforeDecl) {
@@ -1188,7 +1188,7 @@ TEST_F(IR_ValidatorTest, Scoping_UseBeforeDecl) {
     EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:3:18 error: binary: %3 is not in scope
     %2:i32 = add %3, 1i
                  ^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, OverrideWithoutCapability) {
@@ -1202,7 +1202,7 @@ TEST_F(IR_ValidatorTest, OverrideWithoutCapability) {
             R"(:2:12 error: override: root block: invalid instruction: tint::core::ir::Override
   %a:u32 = override 1u
            ^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, InstructionInRootBlockWithoutOverrideCap) {
@@ -1216,7 +1216,7 @@ TEST_F(IR_ValidatorTest, InstructionInRootBlockWithoutOverrideCap) {
             R"(:2:3 error: binary: root block: invalid instruction: tint::core::ir::CoreBinary
   %1:u32 = add 3u, 2u
   ^^^^^^^^^^^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, OverrideWithCapability) {
@@ -1252,7 +1252,7 @@ TEST_F(IR_ValidatorTest, OverrideWithInvalidType) {
         testing::HasSubstr(R"(:2:18 error: override: override type 'vec3<u32>' is not a scalar
   %1:vec3<u32> = override undef
                  ^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, OverrideWithMismatchedInitializerType) {
@@ -1270,7 +1270,7 @@ TEST_F(IR_ValidatorTest, OverrideWithMismatchedInitializerType) {
             R"(:2:12 error: override: override type 'u32' does not match initializer type 'i32'
   %1:u32 = override 1i
            ^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, OverrideDuplicateId) {
@@ -1288,7 +1288,7 @@ TEST_F(IR_ValidatorTest, OverrideDuplicateId) {
                 testing::HasSubstr(R"(:3:12 error: override: duplicate override id encountered: 2
   %2:i32 = override undef @id(2)
            ^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, InstructionInRootBlockOnlyUsedInRootBlock) {
@@ -1314,7 +1314,7 @@ TEST_F(IR_ValidatorTest, InstructionInRootBlockOnlyUsedInRootBlock) {
             R"(:3:3 error: binary: root block: instruction used outside of root block tint::core::ir::CoreBinary
   %2:u32 = add %1, 2u
   ^^^^^^^^^^^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, OverrideArrayInvalidValue) {
@@ -1334,7 +1334,7 @@ TEST_F(IR_ValidatorTest, OverrideArrayInvalidValue) {
     EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:2:51 error: var: %2 is not in scope
   %a:ptr<workgroup, array<i32, %2>, read_write> = var undef
                                                   ^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, OverrideWithoutIdOrInitializer) {
@@ -1346,7 +1346,7 @@ TEST_F(IR_ValidatorTest, OverrideWithoutIdOrInitializer) {
                 testing::HasSubstr(R"(:2:12 error: override: must have an id or an initializer
   %1:u32 = override undef
            ^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 }  // namespace tint::core::ir

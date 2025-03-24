@@ -115,7 +115,7 @@ struct Decoder<T, std::enable_if_t<HasReflection<T>>> {
             if (value == Success) {
                 field = value.Get();
             } else {
-                errs << value.Failure().reason << "\n";
+                errs << value.Failure() << "\n";
             }
         });
         auto err = errs.str();

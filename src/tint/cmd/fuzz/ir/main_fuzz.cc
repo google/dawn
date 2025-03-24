@@ -65,7 +65,7 @@ DEFINE_BINARY_PROTO_FUZZER(const tint::cmd::fuzz::ir::pb::Root& pb) {
             auto decoded = tint::core::ir::binary::Decode(pb.module());
             if (decoded != tint::Success) {
                 TINT_ICE() << "module successfully decoded once, then failed a subsequent time\n"
-                           << decoded.Failure().reason;
+                           << decoded.Failure();
             }
             module = std::move(decoded.Move());
         }

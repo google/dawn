@@ -251,7 +251,7 @@ using Result = ::tint::Result<SUCCESS_TYPE, diag::Failure>;
 /// @returns the output stream
 template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
 auto& operator<<(STREAM& out, const Failure& failure) {
-    return out << failure.reason;
+    return out << failure.reason.Str();
 }
 
 /// Write the diagnostic list to the given stream

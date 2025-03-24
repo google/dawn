@@ -66,7 +66,7 @@ TEST_F(IR_ValidatorTest, Discard_TooManyOperands) {
                 testing::HasSubstr(R"(:3:5 error: discard: expected exactly 0 operands, got 1
     discard
     ^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Discard_TooManyResults) {
@@ -89,7 +89,7 @@ TEST_F(IR_ValidatorTest, Discard_TooManyResults) {
                 testing::HasSubstr(R"(:3:5 error: discard: expected exactly 0 results, got 1
     discard
     ^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Discard_RootBlock) {
@@ -102,7 +102,7 @@ TEST_F(IR_ValidatorTest, Discard_RootBlock) {
                     R"(:2:3 error: discard: root block: invalid instruction: tint::core::ir::Discard
   discard
   ^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Discard_NotInFragment) {
@@ -126,7 +126,7 @@ TEST_F(IR_ValidatorTest, Discard_NotInFragment) {
         testing::HasSubstr(R"(:3:5 error: discard: cannot be called in non-fragment end point
     discard
     ^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Terminate_RootBlock) {
@@ -142,7 +142,7 @@ TEST_F(IR_ValidatorTest, Terminate_RootBlock) {
             R"(:2:3 error: terminate_invocation: root block: invalid instruction: tint::core::ir::TerminateInvocation
   terminate_invocation
   ^^^^^^^^^^^^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Terminate_MissingResult) {
@@ -159,7 +159,7 @@ TEST_F(IR_ValidatorTest, Terminate_MissingResult) {
         testing::HasSubstr(R"(:3:5 error: terminate_invocation: expected exactly 0 results, got 1
     terminate_invocation
     ^^^^^^^^^^^^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Block_TerminatorInMiddle) {
@@ -176,7 +176,7 @@ TEST_F(IR_ValidatorTest, Block_TerminatorInMiddle) {
                 testing::HasSubstr(R"(:3:5 error: return: must be the last instruction in the block
     ret
     ^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, If_RootBlock) {
@@ -191,7 +191,7 @@ TEST_F(IR_ValidatorTest, If_RootBlock) {
         testing::HasSubstr(R"(:2:3 error: if: root block: invalid instruction: tint::core::ir::If
   if true [t: $B2] {  # if_1
   ^^^^^^^^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, If_EmptyFalse) {
@@ -222,7 +222,7 @@ TEST_F(IR_ValidatorTest, If_EmptyTrue) {
                 testing::HasSubstr(R"(:4:7 error: block does not end in a terminator instruction
       $B2: {  # true
       ^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, If_ConditionIsBool) {
@@ -241,7 +241,7 @@ TEST_F(IR_ValidatorTest, If_ConditionIsBool) {
                 testing::HasSubstr(R"(:3:8 error: if: condition type must be 'bool'
     if 1i [t: $B2, f: $B3] {  # if_1
        ^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, If_ConditionIsNullptr) {
@@ -259,7 +259,7 @@ TEST_F(IR_ValidatorTest, If_ConditionIsNullptr) {
     EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:3:8 error: if: operand is undefined
     if undef [t: $B2, f: $B3] {  # if_1
        ^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, If_NullResult) {
@@ -279,7 +279,7 @@ TEST_F(IR_ValidatorTest, If_NullResult) {
     EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:3:5 error: if: result is undefined
     undef = if true [t: $B2, f: $B3] {  # if_1
     ^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Loop_RootBlock) {
@@ -294,7 +294,7 @@ TEST_F(IR_ValidatorTest, Loop_RootBlock) {
                     R"(:2:3 error: loop: root block: invalid instruction: tint::core::ir::Loop
   loop [b: $B2] {  # loop_1
   ^^^^^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Loop_OnlyBody) {
@@ -323,7 +323,7 @@ TEST_F(IR_ValidatorTest, Loop_EmptyBody) {
                 testing::HasSubstr(R"(:4:7 error: block does not end in a terminator instruction
       $B2: {  # body
       ^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Switch_RootBlock) {
@@ -339,7 +339,7 @@ TEST_F(IR_ValidatorTest, Switch_RootBlock) {
                     R"(:2:3 error: switch: root block: invalid instruction: tint::core::ir::Switch
   switch 1i [c: (default, $B2)] {  # switch_1
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, ExitIf) {
@@ -370,7 +370,7 @@ TEST_F(IR_ValidatorTest, ExitIf_NullIf) {
                 testing::HasSubstr(R"(:5:9 error: exit_if: has no parent control instruction
         exit_if  # undef
         ^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, ExitIf_LessOperandsThenIfParams) {
@@ -393,7 +393,7 @@ TEST_F(IR_ValidatorTest, ExitIf_LessOperandsThenIfParams) {
         testing::HasSubstr(R"(:5:9 error: exit_if: provides 1 value but 'if' expects 2 values
         exit_if 1i  # if_1
         ^^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, ExitIf_MoreOperandsThenIfParams) {
@@ -416,7 +416,7 @@ TEST_F(IR_ValidatorTest, ExitIf_MoreOperandsThenIfParams) {
         testing::HasSubstr(R"(:5:9 error: exit_if: provides 3 values but 'if' expects 2 values
         exit_if 1i, 2.0f, 3i  # if_1
         ^^^^^^^^^^^^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, ExitIf_WithResult) {
@@ -457,7 +457,7 @@ TEST_F(IR_ValidatorTest, ExitIf_IncorrectResultType) {
             R"(:5:21 error: exit_if: operand with type 'i32' does not match 'if' target type 'f32'
         exit_if 1i, 2i  # if_1
                     ^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, ExitIf_NotInParentIf) {
@@ -476,7 +476,7 @@ TEST_F(IR_ValidatorTest, ExitIf_NotInParentIf) {
                 testing::HasSubstr(R"(:8:5 error: exit_if: found outside all control instructions
     exit_if  # if_1
     ^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, ExitIf_InvalidJumpsOverIf) {
@@ -504,7 +504,7 @@ TEST_F(IR_ValidatorTest, ExitIf_InvalidJumpsOverIf) {
         testing::HasSubstr(R"(:7:13 error: exit_if: if target jumps over other control instructions
             exit_if  # if_1
             ^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, ExitIf_InvalidJumpOverSwitch) {
@@ -533,7 +533,7 @@ TEST_F(IR_ValidatorTest, ExitIf_InvalidJumpOverSwitch) {
         testing::HasSubstr(R"(:7:13 error: exit_if: if target jumps over other control instructions
             exit_if  # if_1
             ^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, ExitIf_InvalidJumpOverLoop) {
@@ -561,7 +561,7 @@ TEST_F(IR_ValidatorTest, ExitIf_InvalidJumpOverLoop) {
         testing::HasSubstr(R"(:7:13 error: exit_if: if target jumps over other control instructions
             exit_if  # if_1
             ^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, ExitSwitch) {
@@ -596,7 +596,7 @@ TEST_F(IR_ValidatorTest, ExitSwitch_NullSwitch) {
                 testing::HasSubstr(R"(:5:9 error: exit_switch: has no parent control instruction
         exit_switch  # undef
         ^^^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, ExitSwitch_LessOperandsThenSwitchParams) {
@@ -621,7 +621,7 @@ TEST_F(IR_ValidatorTest, ExitSwitch_LessOperandsThenSwitchParams) {
                     R"(:5:9 error: exit_switch: provides 1 value but 'switch' expects 2 values
         exit_switch 1i  # switch_1
         ^^^^^^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, ExitSwitch_MoreOperandsThenSwitchParams) {
@@ -645,7 +645,7 @@ TEST_F(IR_ValidatorTest, ExitSwitch_MoreOperandsThenSwitchParams) {
                     R"(:5:9 error: exit_switch: provides 3 values but 'switch' expects 2 values
         exit_switch 1i, 2.0f, 3i  # switch_1
         ^^^^^^^^^^^^^^^^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, ExitSwitch_WithResult) {
@@ -688,7 +688,7 @@ TEST_F(IR_ValidatorTest, ExitSwitch_IncorrectResultType) {
             R"(:5:25 error: exit_switch: operand with type 'i32' does not match 'switch' target type 'f32'
         exit_switch 1i, 2i  # switch_1
                         ^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, ExitSwitch_NotInParentSwitch) {
@@ -713,7 +713,7 @@ TEST_F(IR_ValidatorTest, ExitSwitch_NotInParentSwitch) {
                     R"(:10:9 error: exit_switch: switch not found in parent control instructions
         exit_switch  # switch_1
         ^^^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, ExitSwitch_JumpsOverIfs) {
@@ -783,7 +783,7 @@ TEST_F(IR_ValidatorTest, ExitSwitch_InvalidJumpOverSwitch) {
 :5:9 note: first control instruction jumped
         switch 0i [c: (default, $B3)] {  # switch_2
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, ExitSwitch_InvalidJumpOverLoop) {
@@ -818,7 +818,7 @@ TEST_F(IR_ValidatorTest, ExitSwitch_InvalidJumpOverLoop) {
 :5:9 note: first control instruction jumped
         loop [b: $B3] {  # loop_1
         ^^^^^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Continue_OutsideOfLoop) {
@@ -835,7 +835,7 @@ TEST_F(IR_ValidatorTest, Continue_OutsideOfLoop) {
                 testing::HasSubstr(R"(:8:5 error: continue: called outside of associated loop
     continue  # -> $B3
     ^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Continue_InLoopInit) {
@@ -853,7 +853,7 @@ TEST_F(IR_ValidatorTest, Continue_InLoopInit) {
                 testing::HasSubstr(R"(:5:9 error: continue: must only be called from loop body
         continue  # -> $B4
         ^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Continue_InLoopBody) {
@@ -883,7 +883,7 @@ TEST_F(IR_ValidatorTest, Continue_InLoopContinuing) {
                 testing::HasSubstr(R"(:8:9 error: continue: must only be called from loop body
         continue  # -> $B3
         ^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Continue_UnexpectedValues) {
@@ -902,7 +902,7 @@ TEST_F(IR_ValidatorTest, Continue_UnexpectedValues) {
                     R"(:5:9 error: continue: provides 2 values but 'loop' block $B3 expects 0 values
         continue 1i, 2.0f  # -> $B3
         ^^^^^^^^^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Continue_MissingValues) {
@@ -922,7 +922,7 @@ TEST_F(IR_ValidatorTest, Continue_MissingValues) {
                     R"(:5:9 error: continue: provides 0 values but 'loop' block $B3 expects 2 values
         continue  # -> $B3
         ^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Continue_MismatchedInt) {
@@ -944,7 +944,7 @@ TEST_F(IR_ValidatorTest, Continue_MismatchedInt) {
             R"(:5:22 error: continue: operand with type 'i32' does not match 'loop' block $B3 target type 'f32'
         continue 1i, 2i, 3u, false  # -> $B3
                      ^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Continue_MismatchedFloat) {
@@ -966,7 +966,7 @@ TEST_F(IR_ValidatorTest, Continue_MismatchedFloat) {
             R"(:5:28 error: continue: operand with type 'f32' does not match 'loop' block $B3 target type 'u32'
         continue 1i, 2.0f, 3.0f, false  # -> $B3
                            ^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Continue_MatchedTypes) {
@@ -998,7 +998,7 @@ TEST_F(IR_ValidatorTest, NextIteration_OutsideOfLoop) {
                 testing::HasSubstr(R"(:8:5 error: next_iteration: called outside of associated loop
     next_iteration  # -> $B2
     ^^^^^^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, NextIteration_InLoopInit) {
@@ -1030,7 +1030,7 @@ TEST_F(IR_ValidatorTest, NextIteration_InLoopBody) {
             R"(:5:9 error: next_iteration: must only be called from loop initializer or continuing
         next_iteration  # -> $B2
         ^^^^^^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, NextIteration_InLoopContinuing) {
@@ -1063,7 +1063,7 @@ TEST_F(IR_ValidatorTest, NextIteration_UnexpectedValues) {
             R"(:5:9 error: next_iteration: provides 2 values but 'loop' block $B3 expects 0 values
         next_iteration 1i, 2.0f  # -> $B3
         ^^^^^^^^^^^^^^^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, NextIteration_MissingValues) {
@@ -1084,7 +1084,7 @@ TEST_F(IR_ValidatorTest, NextIteration_MissingValues) {
             R"(:5:9 error: next_iteration: provides 0 values but 'loop' block $B3 expects 2 values
         next_iteration  # -> $B3
         ^^^^^^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, NextIteration_MismatchedInt) {
@@ -1106,7 +1106,7 @@ TEST_F(IR_ValidatorTest, NextIteration_MismatchedInt) {
             R"(:5:28 error: next_iteration: operand with type 'i32' does not match 'loop' block $B3 target type 'f32'
         next_iteration 1i, 2i, 3u, false  # -> $B3
                            ^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, NextIteration_MismatchedFloat) {
@@ -1128,7 +1128,7 @@ TEST_F(IR_ValidatorTest, NextIteration_MismatchedFloat) {
             R"(:5:34 error: next_iteration: operand with type 'f32' does not match 'loop' block $B3 target type 'u32'
         next_iteration 1i, 2.0f, 3.0f, false  # -> $B3
                                  ^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, NextIteration_MatchedTypes) {
@@ -1162,7 +1162,7 @@ TEST_F(IR_ValidatorTest, LoopBodyParamsWithoutInitializer) {
                     R"(:3:5 error: loop: loop with body block parameters must have an initializer
     loop [b: $B2] {  # loop_1
     ^^^^^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, ContinuingUseValueBeforeContinue) {
@@ -1211,7 +1211,7 @@ TEST_F(IR_ValidatorTest, ContinuingUseValueAfterContinue) {
             R"(:14:24 error: let: %value cannot be used in continuing block as it is declared after the first 'continue' in the loop's body
         %use:i32 = let %value
                        ^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, BreakIf_NextIterUnexpectedValues) {
@@ -1230,7 +1230,7 @@ TEST_F(IR_ValidatorTest, BreakIf_NextIterUnexpectedValues) {
                     R"(:8:9 error: break_if: provides 2 values but 'loop' block $B2 expects 0 values
         break_if true next_iteration: [ 1i, 2i ]  # -> [t: exit_loop loop_1, f: $B2]
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, BreakIf_NextIterMissingValues) {
@@ -1252,7 +1252,7 @@ TEST_F(IR_ValidatorTest, BreakIf_NextIterMissingValues) {
             R"(:11:9 error: break_if: provides 0 values but 'loop' block $B3 expects 2 values
         break_if true  # -> [t: exit_loop loop_1, f: $B3]
         ^^^^^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, BreakIf_NextIterMismatchedInt) {
@@ -1277,7 +1277,7 @@ TEST_F(IR_ValidatorTest, BreakIf_NextIterMismatchedInt) {
             R"(:11:45 error: break_if: operand with type 'i32' does not match 'loop' block $B3 target type 'f32'
         break_if true next_iteration: [ 1i, 2i, 3u, false ]  # -> [t: exit_loop loop_1, f: $B3]
                                             ^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, BreakIf_NextIterMismatchedFloat) {
@@ -1302,7 +1302,7 @@ TEST_F(IR_ValidatorTest, BreakIf_NextIterMismatchedFloat) {
             R"(:11:51 error: break_if: operand with type 'f32' does not match 'loop' block $B3 target type 'u32'
         break_if true next_iteration: [ 1i, 2.0f, 3.0f, false ]  # -> [t: exit_loop loop_1, f: $B3]
                                                   ^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, BreakIf_NextIterMatchedTypes) {
@@ -1339,7 +1339,7 @@ TEST_F(IR_ValidatorTest, BreakIf_ExitUnexpectedValues) {
         testing::HasSubstr(R"(:8:9 error: break_if: provides 2 values but 'loop' expects 0 values
         break_if true exit_loop: [ 1i, 2i ]  # -> [t: exit_loop loop_1, f: $B2]
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, BreakIf_ExitMissingValues) {
@@ -1359,7 +1359,7 @@ TEST_F(IR_ValidatorTest, BreakIf_ExitMissingValues) {
         testing::HasSubstr(R"(:8:9 error: break_if: provides 0 values but 'loop' expects 2 values
         break_if true  # -> [t: exit_loop loop_1, f: $B2]
         ^^^^^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, BreakIf_ExitMismatchedInt) {
@@ -1382,7 +1382,7 @@ TEST_F(IR_ValidatorTest, BreakIf_ExitMismatchedInt) {
             R"(:8:40 error: break_if: operand with type 'i32' does not match 'loop' target type 'f32'
         break_if true exit_loop: [ 1i, 2i, 3u, false ]  # -> [t: exit_loop loop_1, f: $B2]
                                        ^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, BreakIf_ExitMismatchedTypes) {
@@ -1405,7 +1405,7 @@ TEST_F(IR_ValidatorTest, BreakIf_ExitMismatchedTypes) {
             R"(:8:46 error: break_if: operand with type 'f32' does not match 'loop' target type 'u32'
         break_if true exit_loop: [ 1i, 2.0f, 3.0f, false ]  # -> [t: exit_loop loop_1, f: $B2]
                                              ^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, BreakIf_ExitMatchedTypes) {
@@ -1454,7 +1454,7 @@ TEST_F(IR_ValidatorTest, ExitLoop_NullLoop) {
                 testing::HasSubstr(R"(:5:9 error: exit_loop: has no parent control instruction
         exit_loop  # undef
         ^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, ExitLoop_LessOperandsThenLoopParams) {
@@ -1478,7 +1478,7 @@ TEST_F(IR_ValidatorTest, ExitLoop_LessOperandsThenLoopParams) {
         testing::HasSubstr(R"(:5:9 error: exit_loop: provides 1 value but 'loop' expects 2 values
         exit_loop 1i  # loop_1
         ^^^^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, ExitLoop_MoreOperandsThenLoopParams) {
@@ -1502,7 +1502,7 @@ TEST_F(IR_ValidatorTest, ExitLoop_MoreOperandsThenLoopParams) {
         testing::HasSubstr(R"(:5:9 error: exit_loop: provides 3 values but 'loop' expects 2 values
         exit_loop 1i, 2.0f, 3i  # loop_1
         ^^^^^^^^^^^^^^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, ExitLoop_WithResult) {
@@ -1545,7 +1545,7 @@ TEST_F(IR_ValidatorTest, ExitLoop_IncorrectResultType) {
             R"(:5:23 error: exit_loop: operand with type 'i32' does not match 'loop' target type 'f32'
         exit_loop 1i, 2i  # loop_1
                       ^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, ExitLoop_NotInParentLoop) {
@@ -1569,7 +1569,7 @@ TEST_F(IR_ValidatorTest, ExitLoop_NotInParentLoop) {
         testing::HasSubstr(R"(:13:9 error: exit_loop: loop not found in parent control instructions
         exit_loop  # loop_1
         ^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, ExitLoop_JumpsOverIfs) {
@@ -1630,7 +1630,7 @@ TEST_F(IR_ValidatorTest, ExitLoop_InvalidJumpOverSwitch) {
                     R"(:7:13 error: exit_loop: loop target jumps over other control instructions
             exit_loop  # loop_1
             ^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, ExitLoop_InvalidJumpOverLoop) {
@@ -1658,7 +1658,7 @@ TEST_F(IR_ValidatorTest, ExitLoop_InvalidJumpOverLoop) {
                     R"(:7:13 error: exit_loop: loop target jumps over other control instructions
             exit_loop  # loop_1
             ^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, ExitLoop_InvalidInsideContinuing) {
@@ -1680,7 +1680,7 @@ TEST_F(IR_ValidatorTest, ExitLoop_InvalidInsideContinuing) {
                 testing::HasSubstr(R"(:8:9 error: exit_loop: loop exit jumps out of continuing block
         exit_loop  # loop_1
         ^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, ExitLoop_InvalidInsideContinuingNested) {
@@ -1708,7 +1708,7 @@ TEST_F(IR_ValidatorTest, ExitLoop_InvalidInsideContinuingNested) {
         testing::HasSubstr(R"(:10:13 error: exit_loop: loop exit jumps out of continuing block
             exit_loop  # loop_1
             ^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, ExitLoop_InvalidInsideInitializer) {
@@ -1733,7 +1733,7 @@ TEST_F(IR_ValidatorTest, ExitLoop_InvalidInsideInitializer) {
         testing::HasSubstr(R"(:5:9 error: exit_loop: loop exit not permitted in loop initializer
         exit_loop  # loop_1
         ^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, ExitLoop_InvalidInsideInitializerNested) {
@@ -1762,7 +1762,7 @@ TEST_F(IR_ValidatorTest, ExitLoop_InvalidInsideInitializerNested) {
         testing::HasSubstr(R"(:7:13 error: exit_loop: loop exit not permitted in loop initializer
             exit_loop  # loop_1
             ^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Return) {
@@ -1798,7 +1798,7 @@ TEST_F(IR_ValidatorTest, Return_UnexpectedResult) {
                 testing::HasSubstr(R"(:3:5 error: return: expected exactly 0 results, got 1
     ret 42i
     ^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Return_NotFunction) {
@@ -1815,7 +1815,7 @@ TEST_F(IR_ValidatorTest, Return_NotFunction) {
                 testing::HasSubstr(R"(:4:5 error: return: expected function for first operand
     ret
     ^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Return_MissingFunction) {
@@ -1831,7 +1831,7 @@ TEST_F(IR_ValidatorTest, Return_MissingFunction) {
                 testing::HasSubstr(R"(:3:5 error: return: expected between 1 and 2 operands, got 0
     ret
     ^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Return_UnexpectedValue) {
@@ -1846,7 +1846,7 @@ TEST_F(IR_ValidatorTest, Return_UnexpectedValue) {
                 testing::HasSubstr(R"(:3:5 error: return: unexpected return value
     ret 42i
     ^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Return_MissingValue) {
@@ -1861,7 +1861,7 @@ TEST_F(IR_ValidatorTest, Return_MissingValue) {
                 testing::HasSubstr(R"(:3:5 error: return: expected return value
     ret
     ^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Return_WrongValueType) {
@@ -1878,7 +1878,7 @@ TEST_F(IR_ValidatorTest, Return_WrongValueType) {
             R"(:3:5 error: return: return value type 'f32' does not match function return type 'i32'
     ret 42.0f
     ^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Return_RootBlock) {
@@ -1893,7 +1893,7 @@ TEST_F(IR_ValidatorTest, Return_RootBlock) {
                     R"(:2:3 error: return: root block: invalid instruction: tint::core::ir::Return
   ret
   ^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Return_MissingResult) {
@@ -1909,7 +1909,7 @@ TEST_F(IR_ValidatorTest, Return_MissingResult) {
                 testing::HasSubstr(R"(:3:5 error: return: expected exactly 0 results, got 1
     ret
     ^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Unreachable_UnexpectedResult) {
@@ -1925,7 +1925,7 @@ TEST_F(IR_ValidatorTest, Unreachable_UnexpectedResult) {
                 testing::HasSubstr(R"(:3:5 error: unreachable: expected exactly 0 results, got 1
     unreachable
     ^^^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Unreachable_UnexpectedOperand) {
@@ -1941,7 +1941,7 @@ TEST_F(IR_ValidatorTest, Unreachable_UnexpectedOperand) {
                 testing::HasSubstr(R"(:3:5 error: unreachable: expected exactly 0 operands, got 1
     unreachable
     ^^^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Unreachable_RootBlock) {
@@ -1957,7 +1957,7 @@ TEST_F(IR_ValidatorTest, Unreachable_RootBlock) {
             R"(:2:3 error: unreachable: root block: invalid instruction: tint::core::ir::Unreachable
   unreachable
   ^^^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Unreachable_MissingResult) {
@@ -1972,7 +1972,7 @@ TEST_F(IR_ValidatorTest, Unreachable_MissingResult) {
                 testing::HasSubstr(R"(:3:5 error: unreachable: expected exactly 0 results, got 1
     unreachable
     ^^^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Switch_ConditionPointer) {
@@ -1990,7 +1990,7 @@ TEST_F(IR_ValidatorTest, Switch_ConditionPointer) {
         res.Failure().reason,
         testing::HasSubstr(
             R"(error: switch: condition type 'ptr<function, i32, read_write>' must be an integer scalar
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Switch_NoCases) {
@@ -2007,7 +2007,7 @@ TEST_F(IR_ValidatorTest, Switch_NoCases) {
                 testing::HasSubstr(R"(:3:5 error: switch: missing default case for switch
     switch 1i [] {  # switch_1
     ^^^^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Switch_NoDefaultCase) {
@@ -2025,7 +2025,7 @@ TEST_F(IR_ValidatorTest, Switch_NoDefaultCase) {
                 testing::HasSubstr(R"(:3:5 error: switch: missing default case for switch
     switch 1i [c: (0i, $B2)] {  # switch_1
     ^^^^^^^^^^^^^^^^^^^^^^^^
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Switch_NoCondition) {
@@ -2039,7 +2039,7 @@ TEST_F(IR_ValidatorTest, Switch_NoCondition) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(error: switch: operand is undefined
-)")) << res.Failure().reason;
+)")) << res.Failure();
 }
 
 }  // namespace tint::core::ir

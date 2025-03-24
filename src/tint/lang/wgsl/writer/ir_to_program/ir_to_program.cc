@@ -119,7 +119,7 @@ class State {
                                     core::ir::Capability::kAllowPhonyInstructions};
         if (auto res = core::ir::Validate(mod, caps); res != Success) {
             // IR module failed validation.
-            b.Diagnostics().AddError(Source{}) << res.Failure().reason;
+            b.Diagnostics().AddError(Source{}) << res.Failure();
             return Program{resolver::Resolve(b)};
         }
 
