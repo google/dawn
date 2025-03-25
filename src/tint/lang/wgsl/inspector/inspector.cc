@@ -613,8 +613,9 @@ void Inspector::GetOriginatingResources(std::array<const ast::Expression*, N> ex
     }
 }
 
-std::vector<SamplerTexturePair> Inspector::GetSamplerTextureUses(const std::string& entry_point,
-                                                                 const BindingPoint& placeholder) {
+std::vector<SamplerTexturePair> Inspector::GetSamplerAndNonSamplerTextureUses(
+    const std::string& entry_point,
+    const BindingPoint& non_sampler_placeholder) {
     auto* func = FindEntryPointByName(entry_point);
     if (!func) {
         return {};
@@ -627,7 +628,7 @@ std::vector<SamplerTexturePair> Inspector::GetSamplerTextureUses(const std::stri
         auto* sampler = pair.second ? pair.second->As<sem::GlobalVariable>() : nullptr;
         SamplerTexturePair new_pair;
         new_pair.sampler_binding_point =
-            sampler ? *sampler->Attributes().binding_point : placeholder;
+            sampler ? *sampler->Attributes().binding_point : non_sampler_placeholder;
         new_pair.texture_binding_point = *texture->Attributes().binding_point;
         new_pairs.push_back(new_pair);
     }

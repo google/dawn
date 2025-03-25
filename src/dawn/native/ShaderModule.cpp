@@ -1040,7 +1040,7 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
     if (device->IsCompatibilityMode()) {
         tint::BindingPoint nonSamplerBindingPoint = {std::numeric_limits<uint32_t>::max()};
         auto samplerAndNonSamplerTextureUses =
-            inspector->GetSamplerTextureUses(entryPoint.name, nonSamplerBindingPoint);
+            inspector->GetSamplerAndNonSamplerTextureUses(entryPoint.name, nonSamplerBindingPoint);
 
         // separate sampled from non-sampled and put sampled in set
         std::set<tint::BindingPoint> sampledTextures;

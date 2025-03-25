@@ -26,6 +26,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <algorithm>
+#include <unordered_set>
 
 #include "gmock/gmock.h"
 
@@ -111,8 +112,6 @@ using StorageTextureTestParams = std::tuple<DimensionParams, TexelFormatParams, 
 class InspectorGetResourceBindingsTest_WithStorageTextureParams
     : public InspectorBuilder,
       public testing::TestWithParam<StorageTextureTestParams> {};
-
-class InspectorGetSamplerTextureUsesTest : public InspectorRunner, public testing::Test {};
 
 class InspectorGetUsedExtensionNamesTest : public InspectorRunner, public testing::Test {};
 
@@ -3188,17 +3187,65 @@ TEST_F(InspectorGetResourceBindingsTest, ExternalTexture) {
     EXPECT_EQ(0u, result[0].binding);
 }
 
+class InspectorGetSamplerTextureUsesTest : public InspectorRunner, public testing::Test {
+  public:
+    using ResultExpectation = std::initializer_list<SamplerTexturePair>;
+
+    size_t SizeOf(const ResultExpectation& expectation) { return expectation.size(); }
+    size_t SizeOf(const std::vector<SamplerTexturePair>& result) { return result.size(); }
+    size_t SizeOf(const VectorRef<SamplerTexturePair>& result) { return result.Length(); }
+
+    // ValidateEqual checks that the expected and actual SamplerTexturePair list contain same pairs
+    // and both are deduplicated.
+    template <typename T, typename U>
+    void ValidateEqual(const T& expected, const U& actual) {
+        ASSERT_EQ(SizeOf(expected), SizeOf(actual));
+        std::unordered_set<SamplerTexturePair> pairSet;
+        // Insert all pairs in the expected into the set.
+        for (const auto& pair : expected) {
+            // Expectation should be deduplicated, so every insertion should take place.
+            EXPECT_TRUE(pairSet.insert(pair).second)
+                << "Duplicated SamplerTexturePair found: Sampler: ("
+                << pair.sampler_binding_point.group << ", " << pair.sampler_binding_point.binding
+                << "), " << "Texture: (" << pair.texture_binding_point.group << ", "
+                << pair.texture_binding_point.binding << ")";
+        }
+        // Check that each SamplerTexturePair in the actual is in the set and occurs only once.
+        for (const auto& pair : actual) {
+            EXPECT_TRUE(pairSet.erase(pair) == 1)
+                << "Unexpected SamplerTexturePair: Sampler: (" << pair.sampler_binding_point.group
+                << ", " << pair.sampler_binding_point.binding << "), " << "Texture: ("
+                << pair.texture_binding_point.group << ", " << pair.texture_binding_point.binding
+                << ")";
+        }
+    }
+
+    constexpr static BindingPoint non_sampler_placeholder{123u, 654u};
+};
+
 TEST_F(InspectorGetSamplerTextureUsesTest, None) {
     std::string shader = R"(
 @fragment
 fn main() {
 })";
 
-    Inspector& inspector = Initialize(shader);
-    auto result = inspector.GetSamplerTextureUses("main");
-    ASSERT_FALSE(inspector.has_error()) << inspector.error();
+    ResultExpectation expected = {};
 
-    ASSERT_EQ(0u, result.Length());
+    Inspector& inspector = Initialize(shader);
+
+    {
+        auto result = inspector.GetSamplerTextureUses("main");
+        ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+        ValidateEqual(expected, result);
+    }
+
+    {
+        auto result = inspector.GetSamplerAndNonSamplerTextureUses("main", non_sampler_placeholder);
+        ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+        ValidateEqual(expected, result);
+    }
 }
 
 // Regression test for crbug.com/dawn/380433758.
@@ -3228,26 +3275,39 @@ fn useCombos1() -> vec4f {
   return vec4f(useCombos1());
 })";
 
+    ResultExpectation expected_vs = {
+        {/* Sampler */ BindingPoint{0, 2}, /* Texture */ BindingPoint{0, 0}},
+    };
+    ResultExpectation expected_fs = {
+        {/* Sampler */ BindingPoint{0, 2}, /* Texture */ BindingPoint{0, 1}},
+    };
+
     Inspector& inspector = Initialize(shader);
+
     {
         auto result = inspector.GetSamplerTextureUses("vs");
         ASSERT_FALSE(inspector.has_error()) << inspector.error();
-        ASSERT_EQ(1u, result.Length());
 
-        EXPECT_EQ(0u, result[0].sampler_binding_point.group);
-        EXPECT_EQ(2u, result[0].sampler_binding_point.binding);
-        EXPECT_EQ(0u, result[0].texture_binding_point.group);
-        EXPECT_EQ(0u, result[0].texture_binding_point.binding);
+        ValidateEqual(expected_vs, result);
     }
     {
         auto result = inspector.GetSamplerTextureUses("fs");
         ASSERT_FALSE(inspector.has_error()) << inspector.error();
-        ASSERT_EQ(1u, result.Length());
 
-        EXPECT_EQ(0u, result[0].sampler_binding_point.group);
-        EXPECT_EQ(2u, result[0].sampler_binding_point.binding);
-        EXPECT_EQ(0u, result[0].texture_binding_point.group);
-        EXPECT_EQ(1u, result[0].texture_binding_point.binding);
+        ValidateEqual(expected_fs, result);
+    }
+
+    {
+        auto result = inspector.GetSamplerAndNonSamplerTextureUses("vs", non_sampler_placeholder);
+        ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+        ValidateEqual(expected_vs, result);
+    }
+    {
+        auto result = inspector.GetSamplerAndNonSamplerTextureUses("fs", non_sampler_placeholder);
+        ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+        ValidateEqual(expected_fs, result);
     }
 }
 
@@ -3281,26 +3341,39 @@ fn useCombos2() -> vec4f {
   return vec4f(useCombos2());
 })";
 
+    ResultExpectation expected_vs = {
+        {/* Sampler */ BindingPoint{0, 2}, /* Texture */ BindingPoint{0, 0}},
+    };
+    ResultExpectation expected_fs = {
+        {/* Sampler */ BindingPoint{0, 2}, /* Texture */ BindingPoint{0, 1}},
+    };
+
     Inspector& inspector = Initialize(shader);
+
     {
         auto result = inspector.GetSamplerTextureUses("vs");
         ASSERT_FALSE(inspector.has_error()) << inspector.error();
-        ASSERT_EQ(1u, result.Length());
 
-        EXPECT_EQ(0u, result[0].sampler_binding_point.group);
-        EXPECT_EQ(2u, result[0].sampler_binding_point.binding);
-        EXPECT_EQ(0u, result[0].texture_binding_point.group);
-        EXPECT_EQ(0u, result[0].texture_binding_point.binding);
+        ValidateEqual(expected_vs, result);
     }
     {
         auto result = inspector.GetSamplerTextureUses("fs");
         ASSERT_FALSE(inspector.has_error()) << inspector.error();
-        ASSERT_EQ(1u, result.Length());
 
-        EXPECT_EQ(0u, result[0].sampler_binding_point.group);
-        EXPECT_EQ(2u, result[0].sampler_binding_point.binding);
-        EXPECT_EQ(0u, result[0].texture_binding_point.group);
-        EXPECT_EQ(1u, result[0].texture_binding_point.binding);
+        ValidateEqual(expected_fs, result);
+    }
+
+    {
+        auto result = inspector.GetSamplerAndNonSamplerTextureUses("vs", non_sampler_placeholder);
+        ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+        ValidateEqual(expected_vs, result);
+    }
+    {
+        auto result = inspector.GetSamplerAndNonSamplerTextureUses("fs", non_sampler_placeholder);
+        ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+        ValidateEqual(expected_fs, result);
     }
 }
 
@@ -3335,31 +3408,40 @@ fn useCombos2() -> vec4f {
   return vec4f(useCombos2());
 })";
 
+    ResultExpectation expected_vs = {
+        {/* Sampler */ BindingPoint{0, 2}, /* Texture */ BindingPoint{0, 0}},
+        {/* Sampler */ BindingPoint{0, 2}, /* Texture */ BindingPoint{0, 1}},
+    };
+    ResultExpectation expected_fs = {
+        {/* Sampler */ BindingPoint{0, 2}, /* Texture */ BindingPoint{0, 1}},
+    };
+
     Inspector& inspector = Initialize(shader);
+
     {
         auto result = inspector.GetSamplerTextureUses("vs");
         ASSERT_FALSE(inspector.has_error()) << inspector.error();
-        ASSERT_EQ(2u, result.Length());
 
-        EXPECT_EQ(0u, result[0].sampler_binding_point.group);
-        EXPECT_EQ(2u, result[0].sampler_binding_point.binding);
-        EXPECT_EQ(0u, result[0].texture_binding_point.group);
-        EXPECT_EQ(0u, result[0].texture_binding_point.binding);
-
-        EXPECT_EQ(0u, result[1].sampler_binding_point.group);
-        EXPECT_EQ(2u, result[1].sampler_binding_point.binding);
-        EXPECT_EQ(0u, result[1].texture_binding_point.group);
-        EXPECT_EQ(1u, result[1].texture_binding_point.binding);
+        ValidateEqual(expected_vs, result);
     }
     {
         auto result = inspector.GetSamplerTextureUses("fs");
         ASSERT_FALSE(inspector.has_error()) << inspector.error();
-        ASSERT_EQ(1u, result.Length());
 
-        EXPECT_EQ(0u, result[0].sampler_binding_point.group);
-        EXPECT_EQ(2u, result[0].sampler_binding_point.binding);
-        EXPECT_EQ(0u, result[0].texture_binding_point.group);
-        EXPECT_EQ(1u, result[0].texture_binding_point.binding);
+        ValidateEqual(expected_fs, result);
+    }
+
+    {
+        auto result = inspector.GetSamplerAndNonSamplerTextureUses("vs", non_sampler_placeholder);
+        ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+        ValidateEqual(expected_vs, result);
+    }
+    {
+        auto result = inspector.GetSamplerAndNonSamplerTextureUses("fs", non_sampler_placeholder);
+        ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+        ValidateEqual(expected_fs, result);
     }
 }
 
@@ -3374,16 +3456,25 @@ fn main(@location(0) fragUV: vec2<f32>,
   return textureSample(myTexture, mySampler, fragUV) * fragPosition;
 })";
 
+    ResultExpectation expected = {
+        {/* Sampler */ BindingPoint{0, 1}, /* Texture */ BindingPoint{0, 2}},
+    };
+
     Inspector& inspector = Initialize(shader);
-    auto result = inspector.GetSamplerTextureUses("main");
-    ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
-    ASSERT_EQ(1u, result.Length());
+    {
+        auto result = inspector.GetSamplerTextureUses("main");
+        ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
-    EXPECT_EQ(0u, result[0].sampler_binding_point.group);
-    EXPECT_EQ(1u, result[0].sampler_binding_point.binding);
-    EXPECT_EQ(0u, result[0].texture_binding_point.group);
-    EXPECT_EQ(2u, result[0].texture_binding_point.binding);
+        ValidateEqual(expected, result);
+    }
+
+    {
+        auto result = inspector.GetSamplerAndNonSamplerTextureUses("main", non_sampler_placeholder);
+        ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+        ValidateEqual(expected, result);
+    }
 }
 
 TEST_F(InspectorGetSamplerTextureUsesTest, UnknownEntryPoint) {
@@ -3397,9 +3488,16 @@ fn main(@location(0) fragUV: vec2<f32>,
   return textureSample(myTexture, mySampler, fragUV) * fragPosition;
 })";
 
-    Inspector& inspector = Initialize(shader);
-    inspector.GetSamplerTextureUses("foo");
-    ASSERT_TRUE(inspector.has_error()) << inspector.error();
+    {
+        Inspector& inspector = Initialize(shader);
+        inspector.GetSamplerTextureUses("foo");
+        ASSERT_TRUE(inspector.has_error()) << inspector.error();
+    }
+    {
+        Inspector& inspector = Initialize(shader);
+        inspector.GetSamplerAndNonSamplerTextureUses("foo", non_sampler_placeholder);
+        ASSERT_TRUE(inspector.has_error()) << inspector.error();
+    }
 }
 
 TEST_F(InspectorGetSamplerTextureUsesTest, MultipleCalls) {
@@ -3414,14 +3512,26 @@ fn main(@location(0) fragUV: vec2<f32>,
 })";
 
     Inspector& inspector = Initialize(shader);
-    auto result_0 = inspector.GetSamplerTextureUses("main");
-    ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
-    auto result_1 = inspector.GetSamplerTextureUses("main");
-    ASSERT_FALSE(inspector.has_error()) << inspector.error();
+    {
+        auto result_0 = inspector.GetSamplerTextureUses("main");
+        ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
-    EXPECT_EQ((Vector<sem::SamplerTexturePair, 4>(result_0)),
-              (Vector<sem::SamplerTexturePair, 4>(result_1)));
+        auto result_1 = inspector.GetSamplerTextureUses("main");
+        ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+        ValidateEqual(result_0, result_1);
+    }
+
+    {
+        auto result_0 =
+            inspector.GetSamplerAndNonSamplerTextureUses("main", non_sampler_placeholder);
+        ASSERT_FALSE(inspector.has_error()) << inspector.error();
+        auto result_1 =
+            inspector.GetSamplerAndNonSamplerTextureUses("main", non_sampler_placeholder);
+        ASSERT_FALSE(inspector.has_error()) << inspector.error();
+        ValidateEqual(result_0, result_1);
+    }
 }
 
 TEST_F(InspectorGetSamplerTextureUsesTest, BothIndirect) {
@@ -3439,16 +3549,25 @@ fn main(@location(0) fragUV: vec2<f32>,
   return doSample(myTexture, mySampler, fragUV) * fragPosition;
 })";
 
+    ResultExpectation expected = {
+        {/* Sampler */ BindingPoint{0, 1}, /* Texture */ BindingPoint{0, 2}},
+    };
+
     Inspector& inspector = Initialize(shader);
-    auto result = inspector.GetSamplerTextureUses("main");
-    ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
-    ASSERT_EQ(1u, result.Length());
+    {
+        auto result = inspector.GetSamplerTextureUses("main");
+        ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
-    EXPECT_EQ(0u, result[0].sampler_binding_point.group);
-    EXPECT_EQ(1u, result[0].sampler_binding_point.binding);
-    EXPECT_EQ(0u, result[0].texture_binding_point.group);
-    EXPECT_EQ(2u, result[0].texture_binding_point.binding);
+        ValidateEqual(expected, result);
+    }
+
+    {
+        auto result = inspector.GetSamplerAndNonSamplerTextureUses("main", non_sampler_placeholder);
+        ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+        ValidateEqual(expected, result);
+    }
 }
 
 TEST_F(InspectorGetSamplerTextureUsesTest, SamplerIndirect) {
@@ -3466,16 +3585,25 @@ fn main(@location(0) fragUV: vec2<f32>,
   return doSample(mySampler, fragUV) * fragPosition;
 })";
 
+    ResultExpectation expected = {
+        {/* Sampler */ BindingPoint{0, 1}, /* Texture */ BindingPoint{0, 2}},
+    };
+
     Inspector& inspector = Initialize(shader);
-    auto result = inspector.GetSamplerTextureUses("main");
-    ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
-    ASSERT_EQ(1u, result.Length());
+    {
+        auto result = inspector.GetSamplerTextureUses("main");
+        ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
-    EXPECT_EQ(0u, result[0].sampler_binding_point.group);
-    EXPECT_EQ(1u, result[0].sampler_binding_point.binding);
-    EXPECT_EQ(0u, result[0].texture_binding_point.group);
-    EXPECT_EQ(2u, result[0].texture_binding_point.binding);
+        ValidateEqual(expected, result);
+    }
+
+    {
+        auto result = inspector.GetSamplerAndNonSamplerTextureUses("main", non_sampler_placeholder);
+        ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+        ValidateEqual(expected, result);
+    }
 }
 
 TEST_F(InspectorGetSamplerTextureUsesTest, TextureIndirect) {
@@ -3493,16 +3621,25 @@ fn main(@location(0) fragUV: vec2<f32>,
   return doSample(myTexture, fragUV) * fragPosition;
 })";
 
+    ResultExpectation expected = {
+        {/* Sampler */ BindingPoint{0, 1}, /* Texture */ BindingPoint{0, 2}},
+    };
+
     Inspector& inspector = Initialize(shader);
-    auto result = inspector.GetSamplerTextureUses("main");
-    ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
-    ASSERT_EQ(1u, result.Length());
+    {
+        auto result = inspector.GetSamplerTextureUses("main");
+        ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
-    EXPECT_EQ(0u, result[0].sampler_binding_point.group);
-    EXPECT_EQ(1u, result[0].sampler_binding_point.binding);
-    EXPECT_EQ(0u, result[0].texture_binding_point.group);
-    EXPECT_EQ(2u, result[0].texture_binding_point.binding);
+        ValidateEqual(expected, result);
+    }
+
+    {
+        auto result = inspector.GetSamplerAndNonSamplerTextureUses("main", non_sampler_placeholder);
+        ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+        ValidateEqual(expected, result);
+    }
 }
 
 TEST_F(InspectorGetSamplerTextureUsesTest, NeitherIndirect) {
@@ -3520,16 +3657,25 @@ fn main(@location(0) fragUV: vec2<f32>,
   return doSample(fragUV) * fragPosition;
 })";
 
+    ResultExpectation expected = {
+        {/* Sampler */ BindingPoint{0, 1}, /* Texture */ BindingPoint{0, 2}},
+    };
+
     Inspector& inspector = Initialize(shader);
-    auto result = inspector.GetSamplerTextureUses("main");
-    ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
-    ASSERT_EQ(1u, result.Length());
+    {
+        auto result = inspector.GetSamplerTextureUses("main");
+        ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
-    EXPECT_EQ(0u, result[0].sampler_binding_point.group);
-    EXPECT_EQ(1u, result[0].sampler_binding_point.binding);
-    EXPECT_EQ(0u, result[0].texture_binding_point.group);
-    EXPECT_EQ(2u, result[0].texture_binding_point.binding);
+        ValidateEqual(expected, result);
+    }
+
+    {
+        auto result = inspector.GetSamplerAndNonSamplerTextureUses("main", non_sampler_placeholder);
+        ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+        ValidateEqual(expected, result);
+    }
 }
 
 TEST_F(InspectorGetSamplerTextureUsesTest, Complex) {
@@ -3572,42 +3718,120 @@ fn direct(@location(0) fragUV: vec2<f32>,
   return textureSample(myTexture, mySampler, fragUV) + fragPosition;
 })";
 
+    ResultExpectation expected = {
+        {/* Sampler */ BindingPoint{0, 1}, /* Texture */ BindingPoint{0, 2}},
+    };
+
     Inspector& inspector = Initialize(shader);
 
     {
         auto result = inspector.GetSamplerTextureUses("via_call");
         ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
-        ASSERT_EQ(1u, result.Length());
-
-        EXPECT_EQ(0u, result[0].sampler_binding_point.group);
-        EXPECT_EQ(1u, result[0].sampler_binding_point.binding);
-        EXPECT_EQ(0u, result[0].texture_binding_point.group);
-        EXPECT_EQ(2u, result[0].texture_binding_point.binding);
+        ValidateEqual(expected, result);
     }
-
     {
         auto result = inspector.GetSamplerTextureUses("via_ptr");
         ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
-        ASSERT_EQ(1u, result.Length());
-
-        EXPECT_EQ(0u, result[0].sampler_binding_point.group);
-        EXPECT_EQ(1u, result[0].sampler_binding_point.binding);
-        EXPECT_EQ(0u, result[0].texture_binding_point.group);
-        EXPECT_EQ(2u, result[0].texture_binding_point.binding);
+        ValidateEqual(expected, result);
     }
-
     {
         auto result = inspector.GetSamplerTextureUses("direct");
         ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
-        ASSERT_EQ(1u, result.Length());
+        ValidateEqual(expected, result);
+    }
 
-        EXPECT_EQ(0u, result[0].sampler_binding_point.group);
-        EXPECT_EQ(1u, result[0].sampler_binding_point.binding);
-        EXPECT_EQ(0u, result[0].texture_binding_point.group);
-        EXPECT_EQ(2u, result[0].texture_binding_point.binding);
+    {
+        auto result =
+            inspector.GetSamplerAndNonSamplerTextureUses("via_call", non_sampler_placeholder);
+        ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+        ValidateEqual(expected, result);
+    }
+    {
+        auto result =
+            inspector.GetSamplerAndNonSamplerTextureUses("via_ptr", non_sampler_placeholder);
+        ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+        ValidateEqual(expected, result);
+    }
+    {
+        auto result =
+            inspector.GetSamplerAndNonSamplerTextureUses("direct", non_sampler_placeholder);
+        ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+        ValidateEqual(expected, result);
+    }
+}
+
+TEST_F(InspectorGetSamplerTextureUsesTest, SamplerAndNonSamplerTexture) {
+    std::string shader = R"(
+@group(0) @binding(1) var sampler0: sampler;
+@group(0) @binding(3) var sampler1: sampler;
+@group(0) @binding(2) var texture0: texture_2d<f32>;
+@group(2) @binding(1) var texture1: texture_2d<f32>;
+// Storage texture should not be included in the result.
+@group(2) @binding(3) var texture2: texture_storage_2d<r32float, read_write>;
+
+const loadStoreCoords = vec2<u32>(0u, 0u);
+
+fn doSample(t: texture_2d<f32>, s: sampler, uv: vec2<f32>) -> vec4<f32> {
+  _ = textureLoad(t, loadStoreCoords, 0u);
+  return textureSample(t, s, uv);
+}
+
+@fragment
+fn main(@location(0) fragUV: vec2<f32>,
+        @location(1) fragPosition: vec4<f32>) -> @location(0) vec4<f32> {
+  _ = textureSample(texture1, sampler0, fragUV);
+  // Non-sampler texture usage.
+  _ = textureLoad(texture1, loadStoreCoords, 0u);
+  // Both sampler and non-sampler usage.
+  _ = doSample(texture0, sampler0, fragUV);
+  // Using texture0 with sampler0 again, should be deduplicated in the result.
+  _ = textureSample(texture0, sampler0, fragUV);
+  // Storage texture should not be included in the result.
+  _ = textureLoad(texture2, loadStoreCoords);
+  textureStore(texture2, loadStoreCoords, fragPosition);
+  return textureSample(texture0, sampler1, fragUV) + fragPosition;
+}
+)";
+
+    constexpr BindingPoint sampler_0 = {0, 1};
+    constexpr BindingPoint sampler_1 = {0, 3};
+    constexpr BindingPoint texture_0 = {0, 2};
+    constexpr BindingPoint texture_1 = {2, 1};
+    // Storage texture texture2 should not be included in the result.
+
+    ResultExpectation expected_sampler_only = {
+        {/* Sampler */ sampler_0, /* Texture */ texture_1},
+        {/* Sampler */ sampler_0, /* Texture */ texture_0},
+        {/* Sampler */ sampler_1, /* Texture */ texture_0},
+    };
+    ResultExpectation expected_sampler_and_non_sampler = {
+        {/* Sampler */ sampler_0, /* Texture */ texture_1},
+        {/* Sampler */ non_sampler_placeholder, /* Texture */ texture_1},
+        {/* Sampler */ non_sampler_placeholder, /* Texture */ texture_0},
+        {/* Sampler */ sampler_0, /* Texture */ texture_0},
+        {/* Sampler */ sampler_1, /* Texture */ texture_0},
+    };
+
+    Inspector& inspector = Initialize(shader);
+
+    {
+        auto result = inspector.GetSamplerTextureUses("main");
+        ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+        ValidateEqual(expected_sampler_only, result);
+    }
+
+    {
+        auto result = inspector.GetSamplerAndNonSamplerTextureUses("main", non_sampler_placeholder);
+        ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+        ValidateEqual(expected_sampler_and_non_sampler, result);
     }
 }
 

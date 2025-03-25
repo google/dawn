@@ -90,12 +90,14 @@ class Inspector {
     VectorRef<SamplerTexturePair> GetSamplerTextureUses(const std::string& entry_point);
 
     /// @param entry_point name of the entry point to get information about.
-    /// @param placeholder the sampler binding point to use for texture-only
-    /// access (e.g., textureLoad)
-    /// @returns vector of all of the sampler/texture sampling pairs that are used
-    /// by that entry point.
-    std::vector<SamplerTexturePair> GetSamplerTextureUses(const std::string& entry_point,
-                                                          const BindingPoint& placeholder);
+    /// @param non_sampler_placeholder the sampler binding point placeholder to use for texture-only
+    /// access (e.g., textureLoad).
+    /// @returns vector of sampler/texture sampling pairs that are used by given entry point.
+    /// Contains all texture usages with and without a sampler. Note that storage textures are not
+    /// included.
+    std::vector<SamplerTexturePair> GetSamplerAndNonSamplerTextureUses(
+        const std::string& entry_point,
+        const BindingPoint& non_sampler_placeholder);
 
     /// @returns vector of all valid extension names used by the program. There
     /// will be no duplicated names in the returned vector even if an extension

@@ -128,8 +128,8 @@ CombinedSamplerInfo GenerateCombinedSamplerInfo(tint::inspector::Inspector& insp
                                                 bool* needsPlaceholderSampler
 
 ) {
-    auto uses =
-        inspector.GetSamplerTextureUses(entryPoint, bindings.placeholder_sampler_bind_point);
+    auto uses = inspector.GetSamplerAndNonSamplerTextureUses(
+        entryPoint, bindings.placeholder_sampler_bind_point);
     CombinedSamplerInfo combinedSamplerInfo;
     for (const auto& use : uses) {
         tint::BindingPoint samplerBindPoint = use.sampler_binding_point;
