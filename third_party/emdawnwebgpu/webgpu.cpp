@@ -54,9 +54,10 @@ WGPUTextureFormat emwgpuGetPreferredFormat();
 
 // Device functions, i.e. creation functions to create JS backing objects given
 // a pre-allocated handle, and destruction implementations.
-void emwgpuDeviceCreateBuffer(WGPUDevice device,
-                              const WGPUBufferDescriptor* descriptor,
-                              WGPUBuffer buffer);
+[[nodiscard]] bool emwgpuDeviceCreateBuffer(
+    WGPUDevice device,
+    const WGPUBufferDescriptor* descriptor,
+    WGPUBuffer buffer);
 void emwgpuDeviceCreateShaderModule(
     WGPUDevice device,
     const WGPUShaderModuleDescriptor* descriptor,
@@ -150,7 +151,7 @@ class RefCounted : NonMovable {
  public:
   static constexpr bool HasExternalRefCount = false;
 
-  explicit RefCounted(ImportedFromJSTag tag) : mIsImportedFromJS(true) {}
+  explicit RefCounted(ImportedFromJSTag) : mIsImportedFromJS(true) {}
   RefCounted() = default;
 
   void AddRef() {
@@ -1797,7 +1798,10 @@ void wgpuBufferUnmap(WGPUBuffer buffer) {
 WGPUBuffer wgpuDeviceCreateBuffer(WGPUDevice device,
                                   const WGPUBufferDescriptor* descriptor) {
   WGPUBuffer buffer = new WGPUBufferImpl(device, descriptor->mappedAtCreation);
-  emwgpuDeviceCreateBuffer(device, descriptor, buffer);
+  if (!emwgpuDeviceCreateBuffer(device, descriptor, buffer)) {
+    delete buffer;
+    return nullptr;
+  }
   return buffer;
 }
 

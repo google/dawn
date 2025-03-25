@@ -963,7 +963,6 @@ var LibraryWebGPU = {
     return data;
   },
 
-  emwgpuBufferWriteMappedRange__deps: ['$warnOnce'],
   emwgpuBufferWriteMappedRange__sig: 'ipppp',
   emwgpuBufferWriteMappedRange: (bufferPtr, offset, data, size) => {
     var buffer = WebGPU.getJsObject(bufferPtr);
@@ -980,7 +979,6 @@ var LibraryWebGPU = {
     return {{{ gpu.Status.Success }}};
   },
 
-  emwgpuBufferReadMappedRange__deps: ['$warnOnce'],
   emwgpuBufferReadMappedRange__sig: 'ipppp',
   emwgpuBufferReadMappedRange: (bufferPtr, offset, data, size) => {
     var buffer = WebGPU.getJsObject(bufferPtr);
@@ -1525,10 +1523,23 @@ var LibraryWebGPU = {
     };
 
     var device = WebGPU.getJsObject(devicePtr);
-    WebGPU.Internals.jsObjectInsert(bufferPtr, device.createBuffer(desc));
+    var buffer;
+    try {
+      buffer = device.createBuffer(desc);
+    } catch (ex) {
+      // The only exception should be RangeError if mapping at creation ran out of memory.
+      {{{ gpu.makeCheck('ex instanceof RangeError') }}}
+      {{{ gpu.makeCheck('mappedAtCreation') }}}
+#if ASSERTIONS
+      err('createBuffer threw:', ex);
+#endif
+      return false;
+    }
+    WebGPU.Internals.jsObjectInsert(bufferPtr, buffer);
     if (mappedAtCreation) {
       WebGPU.Internals.bufferOnUnmaps[bufferPtr] = [];
     }
+    return true;
   },
 
   wgpuDeviceCreateCommandEncoder__deps: ['emwgpuCreateCommandEncoder'],
