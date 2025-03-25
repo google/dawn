@@ -4285,7 +4285,7 @@ TEST_F(SpirvParserTest, Switch_Case_UintValue) {
 }
 
 // When the break is not last in its case, we must emit a 'break'
-TEST_F(SpirvParserTest, DISABLED_Branch_SwitchBreak_NotLastInCase) {
+TEST_F(SpirvParserTest, Branch_SwitchBreak_NotLastInCase) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -5327,7 +5327,7 @@ TEST_F(SpirvParserTest, BranchConditional_SwitchBreak_Forward_OnTrue) {
         if true [t: $B4, f: $B5] {  # if_1
           $B4: {  # true
             %4:i32 = spirv.add<i32> 3i, 3i
-            exit_if  # if_1
+            exit_switch  # switch_1
           }
           $B5: {  # false
             exit_switch  # switch_1
@@ -5389,7 +5389,7 @@ TEST_F(SpirvParserTest, BranchConditional_SwitchBreak_Forward_OnFalse) {
           }
           $B5: {  # false
             %4:i32 = spirv.add<i32> 3i, 3i
-            exit_if  # if_1
+            exit_switch  # switch_1
           }
         }
         exit_switch  # switch_1
