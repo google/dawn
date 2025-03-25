@@ -294,15 +294,55 @@ TEST_P(DeviceLostTest, BufferUnmapAfterDeviceLost) {
     buffer.Unmap();
 }
 
-// Test that mappedAtCreation fails after device is lost
-TEST_P(DeviceLostTest, CreateBufferMappedAtCreationFails) {
-    wgpu::BufferDescriptor bufferDescriptor;
-    bufferDescriptor.size = sizeof(float);
-    bufferDescriptor.usage = wgpu::BufferUsage::MapWrite;
-    bufferDescriptor.mappedAtCreation = true;
-
+// Test CreateBuffer behavior after device is lost or destroyed
+TEST_P(DeviceLostTest, CreateBuffer) {
+    uint64_t kStupidLarge = uint64_t(1) << uint64_t(63);
     LoseDeviceForTesting();
-    ExpectObjectIsError(device.CreateBuffer(&bufferDescriptor));
+
+    // Each test either expects null or an ErrorBuffer.
+    auto Test = [&](bool expectNull, wgpu::BufferDescriptor* desc) {
+        wgpu::Buffer buffer = device.CreateBuffer(desc);
+        if (expectNull) {
+            EXPECT_EQ(nullptr, buffer.Get());
+        } else {
+            ExpectObjectIsError(buffer);
+            // Even if it's an ErrorBuffer, mappedAtCreation means it can be mapped.
+            if (desc->mappedAtCreation) {
+                EXPECT_NE(nullptr, buffer.GetMappedRange());
+            }
+        }
+    };
+
+    auto Tests = [&]() {
+        for (auto usage : {wgpu::BufferUsage::MapWrite, wgpu::BufferUsage::CopyDst}) {
+            wgpu::BufferDescriptor bufferDescriptor;
+            bufferDescriptor.usage = usage;
+
+            // Not mapped. Error is that the device is lost.
+            bufferDescriptor.size = 4;
+            bufferDescriptor.mappedAtCreation = false;
+            Test(false, &bufferDescriptor);
+
+            // Not mapped. Error is that the device is lost AND the size is too big.
+            bufferDescriptor.size = kStupidLarge;
+            bufferDescriptor.mappedAtCreation = false;
+            Test(false, &bufferDescriptor);
+
+            // Mapped at creation. Error is that the device is lost.
+            bufferDescriptor.size = 4;
+            bufferDescriptor.mappedAtCreation = true;
+            Test(false, &bufferDescriptor);
+
+            // Mapped at creation. Error is that the device is lost AND the size is too big.
+            bufferDescriptor.size = kStupidLarge;
+            bufferDescriptor.mappedAtCreation = true;
+            Test(true, &bufferDescriptor);
+        }
+    };
+
+    Tests();
+    device.Destroy();
+    Tests();
 }
 
 // Test that BufferMapAsync for reading fails after device is lost

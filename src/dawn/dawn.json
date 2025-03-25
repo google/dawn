@@ -2147,6 +2147,17 @@
             {"name": "sync", "type": "void *"}
         ]
     },
+    "dawn fake buffer OOM for testing": {
+        "category": "structure",
+        "chained": "in",
+        "chain roots": ["buffer descriptor"],
+        "tags": ["dawn"],
+        "members": [
+            {"name": "fake OOM at wire client map", "type": "bool"},
+            {"name": "fake OOM at native map", "type": "bool"},
+            {"name": "fake OOM at device", "type": "bool"}
+        ]
+    },
     "shared fence type": {
         "category": "enum",
         "tags": ["dawn", "native"],
@@ -3824,7 +3835,8 @@
             {"value": 61, "name": "shared fence EGL sync descriptor", "tags": ["dawn", "native"]},
             {"value": 62, "name": "shared fence EGL sync export info", "tags": ["dawn", "native"]},
             {"value": 63, "name": "dawn injected invalid s type", "tags": ["dawn"]},
-            {"value": 64, "name": "dawn compilation message utf16", "tags": ["dawn", "emscripten"]}
+            {"value": 64, "name": "dawn compilation message utf16", "tags": ["dawn", "emscripten"]},
+            {"value": 65, "name": "dawn fake buffer OOM for testing", "tags": ["dawn"]}
         ]
     },
     "texture": {

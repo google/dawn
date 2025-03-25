@@ -1220,42 +1220,78 @@ BindGroupLayoutBase* DeviceBase::APICreateBindGroupLayout(
     }
     return ReturnToAPI(std::move(result));
 }
-BufferBase* DeviceBase::APICreateBuffer(const BufferDescriptor* descriptor) {
-    // Search for the host mapped pointer extension struct. If it is present, we will
-    // try to create the buffer without taking the global device-lock. If creation fails,
-    // we'll acquire the device lock and do normal error handling.
-    bool hasHostMapped = false;
-    for (const auto* chain = descriptor->nextInChain; chain != nullptr;
-         chain = chain->nextInChain) {
-        if (chain->sType == wgpu::SType::BufferHostMappedPointer) {
-            hasHostMapped = true;
-            break;
+BufferBase* DeviceBase::APICreateBuffer(const BufferDescriptor* rawDescriptor) {
+    // 1. Validate the descriptor and call CreateBufferImpl.
+    bool fakeOOMAtNativeMap = false;
+    ResultOrError<Ref<BufferBase>> resultOrError = ([&]() -> ResultOrError<Ref<BufferBase>> {
+        DAWN_TRY(ValidateIsAlive());
+        UnpackedPtr<BufferDescriptor> descriptor;
+        if (IsValidationEnabled()) {
+            DAWN_TRY_ASSIGN(descriptor, ValidateBufferDescriptor(this, rawDescriptor));
+        } else {
+            descriptor = Unpack(rawDescriptor);
+        }
+
+        bool hasHostMapped = descriptor.Get<BufferHostMappedPointer>() != nullptr;
+        bool fakeOOMAtDevice = false;
+        if (auto* ext = descriptor.Get<DawnFakeBufferOOMForTesting>()) {
+            fakeOOMAtNativeMap = ext->fakeOOMAtNativeMap;
+            fakeOOMAtDevice = ext->fakeOOMAtDevice;
+        }
+
+        if (fakeOOMAtDevice) {
+            return DAWN_OUT_OF_MEMORY_ERROR("DawnFakeBufferOOMForTesting fakeOOMAtDevice");
+        }
+        if (hasHostMapped) {
+            // Creating a buffer from a host-mapped pointer doesn't require the lock.
+            return CreateBufferImpl(descriptor);
+        } else {
+            auto deviceLock(GetScopedLock());
+            return CreateBufferImpl(descriptor);
+        }
+    })();
+
+    // 2. Error handling.
+    Ref<BufferBase> buffer;
+    std::unique_ptr<ErrorData> deferredError;
+    if (DAWN_LIKELY(resultOrError.IsSuccess())) {
+        buffer = resultOrError.AcquireSuccess();
+    } else {
+        // Make an error buffer, but don't consume the ErrorData yet until we've tried to map,
+        // and determined whether to silence it - errors from mapping should always take
+        // priority, because that matches the spec's client-server model where mappedAtCreation
+        // takes place on the client before even sending the CreateBuffer command to the server.
+        deferredError = resultOrError.AcquireError();
+        buffer = BufferBase::MakeError(this, rawDescriptor);
+    }
+
+    // 3. Mapping at creation. The buffer may be either valid or ErrorBuffer.
+    if (rawDescriptor->mappedAtCreation) {
+        // MapAtCreation requires the device lock in case it allocates staging memory.
+        auto deviceLock(GetScopedLock());
+
+        MaybeError mapResult =
+            fakeOOMAtNativeMap
+                ? DAWN_OUT_OF_MEMORY_ERROR("DawnFakeBufferOOMForTesting fakeOOMAtNativeMap")
+                : buffer->MapAtCreation();
+        if (mapResult.IsError()) {
+            // If we can't map, do "implementation-defined logging" and return null.
+            auto error = mapResult.AcquireError();
+            EmitLog(WGPULoggingType_Error, error->GetFormattedMessage());
+            // deferredError is silenced because we drop it here.
+            return nullptr;
         }
     }
 
-    std::optional<ResultOrError<Ref<BufferBase>>> resultOrError;
-    if (hasHostMapped) {
-        // Buffer creation from host-mapped pointer does not need the device lock.
-        resultOrError = CreateBuffer(descriptor);
-        if (resultOrError->IsSuccess()) {
-            return ReturnToAPI(resultOrError->AcquireSuccess());
-        }
-        // Error case continues below, and will acquire the device lock for
-        // thread-safe error handling.
+    // If there was a deferredError saved from earlier, surface it now.
+    if (deferredError) {
+        deferredError->AppendContext("calling %s.CreateBuffer(%s).", this, rawDescriptor);
+
         // TODO(dawn:1662): Make error handling thread-safe.
+        auto deviceLock(GetScopedLock());
+        ConsumeError(std::move(deferredError), InternalErrorType::OutOfMemory);
     }
-
-    auto deviceLock(GetScopedLock());
-    if (!hasHostMapped) {
-        resultOrError = CreateBuffer(descriptor);
-    }
-    Ref<BufferBase> result;
-    if (ConsumedError(std::move(*resultOrError), &result, InternalErrorType::OutOfMemory,
-                      "calling %s.CreateBuffer(%s).", this, descriptor)) {
-        DAWN_ASSERT(result == nullptr);
-        result = BufferBase::MakeError(this, descriptor);
-    }
-    return ReturnToAPI(std::move(result));
+    return ReturnToAPI(std::move(buffer));
 }
 
 CommandEncoder* DeviceBase::APICreateCommandEncoder(const CommandEncoderDescriptor* descriptor) {
@@ -1487,6 +1523,8 @@ TextureBase* DeviceBase::APICreateTexture(const TextureDescriptor* descriptor) {
 // For Dawn Wire
 
 BufferBase* DeviceBase::APICreateErrorBuffer(const BufferDescriptor* desc) {
+    DAWN_ASSERT(!desc->mappedAtCreation);
+
     UnpackedPtr<BufferDescriptor> unpacked;
     if (!ConsumedError(ValidateBufferDescriptor(this, desc), &unpacked,
                        InternalErrorType::OutOfMemory, "calling %s.CreateBuffer(%s).", this,
@@ -1498,11 +1536,7 @@ BufferBase* DeviceBase::APICreateErrorBuffer(const BufferDescriptor* desc) {
         }
     }
 
-    // Set the size of the error buffer to 0 as this function is called only when an OOM happens at
-    // the client side.
-    BufferDescriptor fakeDescriptor = *desc;
-    fakeDescriptor.size = 0;
-    return ReturnToAPI(BufferBase::MakeError(this, &fakeDescriptor));
+    return ReturnToAPI(BufferBase::MakeError(this, desc));
 }
 
 ExternalTextureBase* DeviceBase::APICreateErrorExternalTexture() {

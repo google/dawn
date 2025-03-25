@@ -42,7 +42,9 @@
 
 namespace dawn::wire::client {
 namespace {
-WGPUBuffer CreateErrorBufferOOMAtClient(Device* device, const WGPUBufferDescriptor* descriptor) {
+
+// Returns either an error buffer or null, depending on mappedAtCreation.
+[[nodiscard]] WGPUBuffer ReturnOOMAtClient(Device* device, const WGPUBufferDescriptor* descriptor) {
     if (descriptor->mappedAtCreation) {
         return nullptr;
     }
@@ -53,6 +55,7 @@ WGPUBuffer CreateErrorBufferOOMAtClient(Device* device, const WGPUBufferDescript
     errorBufferDescriptor.nextInChain = &errorInfo.chain;
     return device->CreateErrorBuffer(&errorBufferDescriptor);
 }
+
 }  // anonymous namespace
 
 class Buffer::MapAsyncEvent : public TrackedEvent {
@@ -186,11 +189,25 @@ class Buffer::MapAsyncEvent : public TrackedEvent {
 WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor) {
     Client* wireClient = device->GetClient();
 
+    bool fakeOOMAtWireClientMap = false;
+    for (const auto* chain = descriptor->nextInChain; chain != nullptr; chain = chain->next) {
+        switch (chain->sType) {
+            case WGPUSType_DawnFakeBufferOOMForTesting: {
+                auto oomForTesting =
+                    reinterpret_cast<const WGPUDawnFakeBufferOOMForTesting*>(chain);
+                fakeOOMAtWireClientMap = oomForTesting->fakeOOMAtWireClientMap;
+            } break;
+            default:
+                break;
+        }
+    }
+
     bool mappable =
         (descriptor->usage & (WGPUBufferUsage_MapRead | WGPUBufferUsage_MapWrite)) != 0 ||
         descriptor->mappedAtCreation;
-    if (mappable && descriptor->size >= std::numeric_limits<size_t>::max()) {
-        return CreateErrorBufferOOMAtClient(device, descriptor);
+    if (mappable &&
+        (descriptor->size >= std::numeric_limits<size_t>::max() || fakeOOMAtWireClientMap)) {
+        return ReturnOOMAtClient(device, descriptor);
     }
 
     std::unique_ptr<MemoryTransferService::ReadHandle> readHandle = nullptr;
@@ -212,7 +229,7 @@ WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor
             readHandle.reset(
                 wireClient->GetMemoryTransferService()->CreateReadHandle(descriptor->size));
             if (readHandle == nullptr) {
-                return CreateErrorBufferOOMAtClient(device, descriptor);
+                return ReturnOOMAtClient(device, descriptor);
             }
             readHandleCreateInfoLength = readHandle->SerializeCreateSize();
             cmd.readHandleCreateInfoLength = readHandleCreateInfoLength;
@@ -223,7 +240,7 @@ WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor
             writeHandle.reset(
                 wireClient->GetMemoryTransferService()->CreateWriteHandle(descriptor->size));
             if (writeHandle == nullptr) {
-                return CreateErrorBufferOOMAtClient(device, descriptor);
+                return ReturnOOMAtClient(device, descriptor);
             }
             writeHandleCreateInfoLength = writeHandle->SerializeCreateSize();
             cmd.writeHandleCreateInfoLength = writeHandleCreateInfoLength;
