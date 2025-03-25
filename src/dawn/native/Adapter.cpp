@@ -98,7 +98,7 @@ void AdapterBase::UpdateLimits() {
 
     // Apply the tiered limits if needed.
     if (mUseTieredLimits) {
-        mLimits.v1 = ApplyLimitTiers(mLimits.v1);
+        mLimits = ApplyLimitTiers(std::move(mLimits));
     }
 
     // TODO(crbug.com/382520104): Remove DawnExperimentalSubgroupLimits.
