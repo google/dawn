@@ -1496,6 +1496,8 @@ class Parser {
         // temporary merge block for the if branches.
         core::ir::If* premerge_if_ = nullptr;
         if (premerge_start_id.has_value()) {
+            // Must have a merge to have a premerge
+            merge_to_premerge_.insert({merge_id.value(), PremergeInfo{if_, {}}});
             premerge_if_ = b_.If(b_.Constant(true));
             walk_stop_blocks_.insert({premerge_start_id.value(), premerge_if_});
         }
@@ -1504,6 +1506,18 @@ class Parser {
             if (auto* loop = ContinueTarget(true_id)) {
                 if_->True()->Append(b_.Continue(loop));
             } else {
+                auto iter = merge_to_premerge_.find(true_id);
+                if (iter != merge_to_premerge_.end()) {
+                    // Branch to a merge block, but skipping over an expected premerge block
+                    // so we need a guard.
+                    if (!iter->second.condition) {
+                        b_.InsertBefore(iter->second.parent, [&] {
+                            iter->second.condition = b_.Var("execute_premerge", true);
+                        });
+                    }
+                    b_.Append(if_->True(), [&] { b_.Store(iter->second.condition, false); });
+                }
+
                 if_->True()->Append(b_.Exit(ExitFor(ctrl, if_)));
             }
         } else {
@@ -1525,6 +1539,18 @@ class Parser {
             if (auto* loop = ContinueTarget(false_id)) {
                 if_->False()->Append(b_.Continue(loop));
             } else {
+                auto iter = merge_to_premerge_.find(false_id);
+                if (iter != merge_to_premerge_.end()) {
+                    // Branch to a merge block, but skipping over an expected premerge block
+                    // so we need a guard.
+                    if (!iter->second.condition) {
+                        b_.InsertBefore(iter->second.parent, [&] {
+                            iter->second.condition = b_.Var("execute_premerge", true);
+                        });
+                    }
+                    b_.Append(if_->False(), [&] { b_.Store(iter->second.condition, false); });
+                }
+
                 if_->False()->Append(b_.Exit(ExitFor(ctrl, if_)));
             }
         } else {
@@ -1539,6 +1565,19 @@ class Parser {
         // `if true` block in order to maintain re-convergence guarantees. The premerge will contain
         // all the blocks up to the merge block.
         if (premerge_start_id.has_value()) {
+            auto iter = merge_to_premerge_.find(merge_id.value());
+            TINT_ASSERT(iter != merge_to_premerge_.end());
+
+            // If we created a condition guard, we need to swap the premerge `true` condition with
+            // the condition variable.
+            if (iter->second.condition) {
+                auto* premerge_cond = b_.Load(iter->second.condition);
+                EmitWithoutSpvResult(premerge_cond);
+                premerge_if_->SetOperand(core::ir::If::kConditionOperandOffset,
+                                         premerge_cond->Result(0));
+            }
+            merge_to_premerge_.erase(iter);
+
             EmitWithoutResult(premerge_if_);
 
             const auto& bb_premerge = current_spirv_function_->FindBlock(premerge_start_id.value());
@@ -2264,6 +2303,13 @@ class Parser {
     std::unordered_map<uint32_t, core::ir::Loop*> continue_targets_;
     // Map of continue target ID to the controlling IR loop.
     std::unordered_map<uint32_t, core::ir::Loop*> loop_headers_;
+
+    struct PremergeInfo {
+        core::ir::If* parent = nullptr;
+        core::ir::Var* condition = nullptr;
+    };
+    // Map of merge ID to an associated premerge_id, if any
+    std::unordered_map<uint32_t, PremergeInfo> merge_to_premerge_;
 
     std::unordered_set<core::ir::Block*> current_blocks_;
     std::vector<std::unordered_set<uint32_t>> id_stack_;

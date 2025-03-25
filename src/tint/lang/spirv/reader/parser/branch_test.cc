@@ -3232,7 +3232,7 @@ TEST_F(SpirvParserTest, IfBreak_FromElse_ForwardWithinElse) {
 // We have IfBreak and Forward edges from the same OpBranchConditional, and
 // this occurs in the true-branch clause, the false-branch clause, and within
 // the premerge clause.  Flow guards have to be sprinkled in lots of places.
-TEST_F(SpirvParserTest, DISABLED_IfBreak_FromThenAndElseWithForward_Premerge) {
+TEST_F(SpirvParserTest, IfBreak_FromThenAndElseWithForward_Premerge) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -3276,7 +3276,63 @@ TEST_F(SpirvParserTest, DISABLED_IfBreak_FromThenAndElseWithForward_Premerge) {
                OpFunctionEnd
 )",
               R"(
-
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = spirv.add<i32> 1i, 1i
+    %execute_premerge:ptr<function, bool, read_write> = var true
+    if true [t: $B2, f: $B3] {  # if_1
+      $B2: {  # true
+        %4:i32 = spirv.add<i32> 2i, 2i
+        if false [t: $B4, f: $B5] {  # if_2
+          $B4: {  # true
+            %5:i32 = spirv.add<i32> 3i, 3i
+            exit_if  # if_2
+          }
+          $B5: {  # false
+            store %execute_premerge, false
+            exit_if  # if_2
+          }
+        }
+        exit_if  # if_1
+      }
+      $B3: {  # false
+        %6:i32 = spirv.add<i32> 1i, 2i
+        if false [t: $B6, f: $B7] {  # if_3
+          $B6: {  # true
+            store %execute_premerge, false
+            exit_if  # if_3
+          }
+          $B7: {  # false
+            %7:i32 = spirv.add<i32> 2i, 3i
+            exit_if  # if_3
+          }
+        }
+        exit_if  # if_1
+      }
+    }
+    %8:bool = load %execute_premerge
+    if %8 [t: $B8, f: $B9] {  # if_4
+      $B8: {  # true
+        %9:i32 = spirv.add<i32> 3i, 2i
+        if true [t: $B10, f: $B11] {  # if_5
+          $B10: {  # true
+            %10:i32 = spirv.add<i32> 3i, 1i
+            exit_if  # if_5
+          }
+          $B11: {  # false
+            exit_if  # if_5
+          }
+        }
+        exit_if  # if_4
+      }
+      $B9: {  # false
+        unreachable
+      }
+    }
+    %11:i32 = spirv.add<i32> 2i, 1i
+    ret
+  }
+}
 )");
 }
 
