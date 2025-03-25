@@ -1417,52 +1417,119 @@ class Parser {
         return ctrl;
     }
 
+    void EmitBranchStopBlock(core::ir::ControlInstruction* ctrl,
+                             core::ir::If* if_,
+                             core::ir::Block* blk,
+                             uint32_t target) {
+        if (auto* loop = ContinueTarget(target)) {
+            blk->Append(b_.Continue(loop));
+        } else {
+            auto iter = merge_to_premerge_.find(target);
+            if (iter != merge_to_premerge_.end()) {
+                // Branch to a merge block, but skipping over an expected premerge block
+                // so we need a guard.
+                if (!iter->second.condition) {
+                    b_.InsertBefore(iter->second.parent, [&] {
+                        iter->second.condition = b_.Var("execute_premerge", true);
+                    });
+                }
+                b_.Append(blk, [&] { b_.Store(iter->second.condition, false); });
+            }
+
+            blk->Append(b_.Exit(ExitFor(ctrl, if_)));
+        }
+    }
+
+    bool ProcessBranchAsLoopHeader(core::ir::Value* cond, uint32_t true_id, uint32_t false_id) {
+        bool true_is_header = loop_headers_.count(true_id) > 0;
+        bool false_is_header = loop_headers_.count(false_id) > 0;
+
+        if (!true_is_header && !false_is_header) {
+            return false;
+        }
+
+        core::ir::Loop* loop = nullptr;
+        uint32_t merge_id = 0;
+
+        if (true_is_header) {
+            const auto& bb_header = current_spirv_function_->FindBlock(true_id);
+            merge_id = (*bb_header).MergeBlockIdIfAny();
+
+            loop = loop_headers_[true_id];
+
+        } else {
+            const auto& bb_header = current_spirv_function_->FindBlock(false_id);
+            merge_id = (*bb_header).MergeBlockIdIfAny();
+
+            loop = loop_headers_[false_id];
+        }
+        TINT_ASSERT(merge_id > 0);
+
+        // The only time a loop continuing will be in current blocks is if
+        // we're inside the continuing block itself.
+        //
+        // Note, we may _not_ be in the IR continuing block. This can happen
+        // in the case of a SPIR-V loop where the header_id and continue_id
+        // are the same. We'll be emitting into the IR body, but branch to
+        // the header because that's also the continuing in SPIR-V.
+        if (current_blocks_.count(loop->Continuing())) {
+            if (true_id == merge_id && false_is_header) {
+                EmitWithoutResult(b_.BreakIf(loop, cond));
+                return true;
+            }
+            if (false_id == merge_id && true_is_header) {
+                auto* val = b_.Not(cond->Type(), cond);
+                EmitWithoutSpvResult(val);
+                EmitWithoutResult(b_.BreakIf(loop, val));
+                return true;
+            }
+        }
+        return false;
+    }
+
+    void EmitPremergeBlock(uint32_t merge_id,
+                           uint32_t premerge_start_id,
+                           core::ir::If* premerge_if_) {
+        auto iter = merge_to_premerge_.find(merge_id);
+        TINT_ASSERT(iter != merge_to_premerge_.end());
+
+        // If we created a condition guard, we need to swap the premerge `true` condition with
+        // the condition variable.
+        if (iter->second.condition) {
+            auto* premerge_cond = b_.Load(iter->second.condition);
+            EmitWithoutSpvResult(premerge_cond);
+            premerge_if_->SetOperand(core::ir::If::kConditionOperandOffset,
+                                     premerge_cond->Result(0));
+        }
+        merge_to_premerge_.erase(iter);
+
+        EmitWithoutResult(premerge_if_);
+
+        const auto& bb_premerge = current_spirv_function_->FindBlock(premerge_start_id);
+        EmitBlockParent(premerge_if_->True(), *bb_premerge);
+        if (!premerge_if_->True()->Terminator()) {
+            premerge_if_->True()->Append(b_.Exit(premerge_if_));
+        }
+
+        premerge_if_->False()->Append(b_.Unreachable());
+    }
+
+    void EmitIfBranch(uint32_t id, core::ir::If* if_, core::ir::Block* blk) {
+        const auto& bb = current_spirv_function_->FindBlock(id);
+        EmitBlockParent(blk, *bb);
+        if (!blk->Terminator()) {
+            blk->Append(b_.Exit(if_));
+        }
+    }
+
     void EmitBranchConditional(const spvtools::opt::BasicBlock& bb,
                                const spvtools::opt::Instruction& inst) {
         auto cond = Value(inst.GetSingleWordInOperand(0));
         auto true_id = inst.GetSingleWordInOperand(1);
         auto false_id = inst.GetSingleWordInOperand(2);
 
-        bool true_is_header = loop_headers_.count(true_id) > 0;
-        bool false_is_header = loop_headers_.count(false_id) > 0;
-
-        if (true_is_header || false_is_header) {
-            core::ir::Loop* loop = nullptr;
-            uint32_t merge_id = 0;
-
-            if (true_is_header) {
-                const auto& bb_header = current_spirv_function_->FindBlock(true_id);
-                merge_id = (*bb_header).MergeBlockIdIfAny();
-
-                loop = loop_headers_[true_id];
-
-            } else {
-                const auto& bb_header = current_spirv_function_->FindBlock(false_id);
-                merge_id = (*bb_header).MergeBlockIdIfAny();
-
-                loop = loop_headers_[false_id];
-            }
-            TINT_ASSERT(merge_id > 0);
-
-            // The only time a loop continuing will be in current blocks is if
-            // we're inside the continuing block itself.
-            //
-            // Note, we may _not_ be in the IR continuing block. This can happen
-            // in the case of a SPIR-V loop where the header_id and continue_id
-            // are the same. We'll be emitting into the IR body, but branch to
-            // the header because that's also the continuing in SPIR-V.
-            if (current_blocks_.count(loop->Continuing())) {
-                if (true_id == merge_id && false_is_header) {
-                    EmitWithoutResult(b_.BreakIf(loop, cond));
-                    return;
-                }
-                if (false_id == merge_id && true_is_header) {
-                    auto* val = b_.Not(cond->Type(), cond);
-                    EmitWithoutSpvResult(val);
-                    EmitWithoutResult(b_.BreakIf(loop, val));
-                    return;
-                }
-            }
+        if (ProcessBranchAsLoopHeader(cond, true_id, false_id)) {
+            return;
         }
 
         // If the true and false block are the same, then we change the condition into
@@ -1505,90 +1572,26 @@ class Parser {
         }
 
         if (auto* ctrl = StopWalkingAt(true_id)) {
-            if (auto* loop = ContinueTarget(true_id)) {
-                if_->True()->Append(b_.Continue(loop));
-            } else {
-                auto iter = merge_to_premerge_.find(true_id);
-                if (iter != merge_to_premerge_.end()) {
-                    // Branch to a merge block, but skipping over an expected premerge block
-                    // so we need a guard.
-                    if (!iter->second.condition) {
-                        b_.InsertBefore(iter->second.parent, [&] {
-                            iter->second.condition = b_.Var("execute_premerge", true);
-                        });
-                    }
-                    b_.Append(if_->True(), [&] { b_.Store(iter->second.condition, false); });
-                }
-
-                if_->True()->Append(b_.Exit(ExitFor(ctrl, if_)));
-            }
+            EmitBranchStopBlock(ctrl, if_, if_->True(), true_id);
         } else {
-            const auto& bb_true = current_spirv_function_->FindBlock(true_id);
-            EmitBlockParent(if_->True(), *bb_true);
-
-            if (!if_->True()->Terminator()) {
-                if_->True()->Append(b_.Exit(if_));
-            }
+            EmitIfBranch(true_id, if_, if_->True());
         }
 
         // Pre-SPIRV 1.6 the true and false blocks could be the same. If that's the case then we
         // will have changed the condition and the false block is now unreachable.
         if (false_id == true_id) {
             if_->False()->Append(b_.Unreachable());
-
         } else if (auto* ctrl = StopWalkingAt(false_id)) {
-            // If the false block is really a merge block
-            if (auto* loop = ContinueTarget(false_id)) {
-                if_->False()->Append(b_.Continue(loop));
-            } else {
-                auto iter = merge_to_premerge_.find(false_id);
-                if (iter != merge_to_premerge_.end()) {
-                    // Branch to a merge block, but skipping over an expected premerge block
-                    // so we need a guard.
-                    if (!iter->second.condition) {
-                        b_.InsertBefore(iter->second.parent, [&] {
-                            iter->second.condition = b_.Var("execute_premerge", true);
-                        });
-                    }
-                    b_.Append(if_->False(), [&] { b_.Store(iter->second.condition, false); });
-                }
-
-                if_->False()->Append(b_.Exit(ExitFor(ctrl, if_)));
-            }
+            EmitBranchStopBlock(ctrl, if_, if_->False(), false_id);
         } else {
-            const auto& bb_false = current_spirv_function_->FindBlock(false_id);
-            EmitBlockParent(if_->False(), *bb_false);
-            if (!if_->False()->Terminator()) {
-                if_->False()->Append(b_.Exit(if_));
-            }
+            EmitIfBranch(false_id, if_, if_->False());
         }
 
         // There was a premerge, remove it from the merge stack and then emit the premerge into an
         // `if true` block in order to maintain re-convergence guarantees. The premerge will contain
         // all the blocks up to the merge block.
         if (premerge_start_id.has_value()) {
-            auto iter = merge_to_premerge_.find(merge_id.value());
-            TINT_ASSERT(iter != merge_to_premerge_.end());
-
-            // If we created a condition guard, we need to swap the premerge `true` condition with
-            // the condition variable.
-            if (iter->second.condition) {
-                auto* premerge_cond = b_.Load(iter->second.condition);
-                EmitWithoutSpvResult(premerge_cond);
-                premerge_if_->SetOperand(core::ir::If::kConditionOperandOffset,
-                                         premerge_cond->Result(0));
-            }
-            merge_to_premerge_.erase(iter);
-
-            EmitWithoutResult(premerge_if_);
-
-            const auto& bb_premerge = current_spirv_function_->FindBlock(premerge_start_id.value());
-            EmitBlockParent(premerge_if_->True(), *bb_premerge);
-            if (!premerge_if_->True()->Terminator()) {
-                premerge_if_->True()->Append(b_.Exit(premerge_if_));
-            }
-
-            premerge_if_->False()->Append(b_.Unreachable());
+            EmitPremergeBlock(merge_id.value(), premerge_start_id.value(), premerge_if_);
         }
 
         // Emit the merge block if it exists.
