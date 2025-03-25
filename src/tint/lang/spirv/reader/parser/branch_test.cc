@@ -2970,7 +2970,7 @@ TEST_F(SpirvParserTest, Loop_Loop_InnerContinueBreaks) {
 )");
 }
 
-TEST_F(SpirvParserTest, DISABLED_Loop_MergeBlockIsLoop) {
+TEST_F(SpirvParserTest, Loop_MergeBlockIsLoop) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -3000,11 +3000,39 @@ TEST_F(SpirvParserTest, DISABLED_Loop_MergeBlockIsLoop) {
                OpFunctionEnd
 )",
               R"(
-
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    if true [t: $B2, f: $B3] {  # if_1
+      $B2: {  # true
+        exit_if  # if_1
+      }
+      $B3: {  # false
+        exit_if  # if_1
+      }
+    }
+    loop [b: $B4, c: $B5] {  # loop_1
+      $B4: {  # body
+        if true [t: $B6, f: $B7] {  # if_2
+          $B6: {  # true
+            continue  # -> $B5
+          }
+          $B7: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        continue  # -> $B5
+      }
+      $B5: {  # continuing
+        next_iteration  # -> $B4
+      }
+    }
+    ret
+  }
+}
 )");
 }
 
-TEST_F(SpirvParserTest, DISABLED_MergeIsAlsoMultiBlockLoopHeader) {
+TEST_F(SpirvParserTest, MergeIsAlsoMultiBlockLoopHeader) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -3036,7 +3064,35 @@ TEST_F(SpirvParserTest, DISABLED_MergeIsAlsoMultiBlockLoopHeader) {
                OpFunctionEnd
 )",
               R"(
-
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    if true [t: $B2, f: $B3] {  # if_1
+      $B2: {  # true
+        exit_if  # if_1
+      }
+      $B3: {  # false
+        exit_if  # if_1
+      }
+    }
+    loop [b: $B4, c: $B5] {  # loop_1
+      $B4: {  # body
+        if true [t: $B6, f: $B7] {  # if_2
+          $B6: {  # true
+            continue  # -> $B5
+          }
+          $B7: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        continue  # -> $B5
+      }
+      $B5: {  # continuing
+        next_iteration  # -> $B4
+      }
+    }
+    ret
+  }
+}
 )");
 }
 

@@ -1564,7 +1564,11 @@ class Parser {
         // to capture instructions which come in the header before the LoopMerge.
         auto* loop = b_.Loop();
         EmitWithoutResult(loop);
-        walk_stop_blocks_.insert({bb.id(), loop});
+
+        // A `loop` header block can also be the merge block for an `if`. In that the case, replace
+        // the `if` information in the stop blocks with the loop as this must be the `if` merge
+        // block and the `if` is complete.
+        walk_stop_blocks_[bb.id()] = loop;
     }
 
     void EmitLoopMerge(const spvtools::opt::BasicBlock& bb,
