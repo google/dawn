@@ -329,5 +329,261 @@ TEST_F(IR_IntegerRangeAnalysisTest, LocalInvocationID_u32_1_1_Z) {
     }
 }
 
+TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopInitializer_Success_sint) {
+    Var* idx = nullptr;
+    Loop* loop = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            idx = b.Var("idx", 5_i);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] { b.ExitLoop(loop); });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    loop [i: $B2, b: $B3] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, i32, read_write> = var 5i
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        exit_loop  # loop_1
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(func);
+    EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopInitializer_Success_uint) {
+    Var* idx = nullptr;
+    Loop* loop = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            idx = b.Var("idx", 3_u);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] { b.ExitLoop(loop); });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    loop [i: $B2, b: $B3] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, u32, read_write> = var 3u
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        exit_loop  # loop_1
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(func);
+    EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopInitializer_Failure_MissingInitializerBlock) {
+    Loop* loop = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        loop = b.Loop();
+        b.Append(loop->Body(), [&] { b.ExitLoop(loop); });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    loop [b: $B2] {  # loop_1
+      $B2: {  # body
+        exit_loop  # loop_1
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(func);
+    EXPECT_EQ(nullptr, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopInitializer_Failure_MissingVarInitializer) {
+    Loop* loop = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        loop = b.Loop();
+        b.Append(loop->Initializer(), [&] { b.NextIteration(loop); });
+        b.Append(loop->Body(), [&] { b.ExitLoop(loop); });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    loop [i: $B2, b: $B3] {  # loop_1
+      $B2: {  # initializer
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        exit_loop  # loop_1
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(func);
+    EXPECT_EQ(nullptr, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopInitializer_Failure_NotInitializedWithInteger) {
+    Var* idx = nullptr;
+    Loop* loop = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            idx = b.Var("idx", 1_f);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] { b.ExitLoop(loop); });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    loop [i: $B2, b: $B3] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, f32, read_write> = var 1.0f
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        exit_loop  # loop_1
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(func);
+    EXPECT_EQ(nullptr, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopInitializer_Failure_NotInitializedWithConstValue) {
+    Var* idx = nullptr;
+    Loop* loop = nullptr;
+    auto* end = b.FunctionParam("end", ty.u32());
+    auto* func = b.Function("func", ty.void_());
+    func->AppendParam(end);
+    b.Append(func->Block(), [&] {
+        loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            idx = b.Var("idx", end);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] { b.ExitLoop(loop); });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func(%end:u32):void {
+  $B1: {
+    loop [i: $B2, b: $B3] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, u32, read_write> = var %end
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        exit_loop  # loop_1
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(func);
+    EXPECT_EQ(nullptr, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopInitializer_Failure_InitializerTooComplex) {
+    Var* idx = nullptr;
+    Loop* loop = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            idx = b.Var("idx", 0_u);
+            auto* load1 = b.Load(idx);
+            auto* load2 = b.Load(idx);
+            auto* x = b.Let("x", b.Add<u32>(load1, load2));
+            b.Store(idx, x);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] { b.ExitLoop(loop); });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    loop [i: $B2, b: $B3] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, u32, read_write> = var 0u
+        %3:u32 = load %idx
+        %4:u32 = load %idx
+        %5:u32 = add %3, %4
+        %x:u32 = let %5
+        store %idx, %x
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        exit_loop  # loop_1
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(func);
+    EXPECT_EQ(nullptr, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
+}
+
 }  // namespace
 }  // namespace tint::core::ir::analysis

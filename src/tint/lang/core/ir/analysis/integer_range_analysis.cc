@@ -29,7 +29,13 @@
 
 #include <limits>
 
+#include "src/tint/lang/core/constant/scalar.h"
+#include "src/tint/lang/core/ir/function.h"
+#include "src/tint/lang/core/ir/loop.h"
+#include "src/tint/lang/core/ir/next_iteration.h"
 #include "src/tint/lang/core/ir/traverse.h"
+#include "src/tint/lang/core/ir/var.h"
+#include "src/tint/lang/core/type/pointer.h"
 
 namespace tint::core::ir::analysis {
 
@@ -93,6 +99,48 @@ struct IntegerRangeAnalysisImpl {
         return &info[index];
     }
 
+    const Var* GetLoopControlVariableFromConstantInitializer(const Loop* loop) {
+        auto* init_block = loop->Initializer();
+        if (!init_block) {
+            return nullptr;
+        }
+
+        // Currently we only support the loop initializer of a simple for-loop, which only has two
+        // instructions
+        // - The first instruction is to initialize the loop control variable
+        //   with a constant integer (signed or unsigned) value.
+        // - The second instruction is `next_iteration`
+        // e.g. for (var i = 0; ...)
+        if (init_block->Length() != 2u) {
+            return nullptr;
+        }
+
+        auto* var = init_block->Front()->As<Var>();
+        if (!var) {
+            return nullptr;
+        }
+
+        if (!init_block->Back()->As<NextIteration>()) {
+            return nullptr;
+        }
+
+        const auto* pointer = var->Result(0)->Type()->As<core::type::Pointer>();
+        if (!pointer->StoreType()->IsIntegerScalar()) {
+            return nullptr;
+        }
+
+        const auto* initializer = var->Initializer();
+        if (!initializer) {
+            return nullptr;
+        }
+
+        if (!initializer->As<Constant>()) {
+            return nullptr;
+        }
+
+        return var;
+    }
+
   private:
     Function* function_;
     Hashmap<const FunctionParam*, Vector<IntegerRangeInfo, 3>, 4>
@@ -106,4 +154,10 @@ IntegerRangeAnalysis::~IntegerRangeAnalysis() = default;
 const IntegerRangeInfo* IntegerRangeAnalysis::GetInfo(const FunctionParam* param, uint32_t index) {
     return impl_->GetInfo(param, index);
 }
+
+const Var* IntegerRangeAnalysis::GetLoopControlVariableFromConstantInitializerForTest(
+    const Loop* loop) {
+    return impl_->GetLoopControlVariableFromConstantInitializer(loop);
+}
+
 }  // namespace tint::core::ir::analysis

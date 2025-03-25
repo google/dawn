@@ -31,8 +31,12 @@
 #include <memory>
 #include <variant>
 
-#include "src/tint/lang/core/ir/function.h"
-#include "src/tint/lang/core/ir/var.h"
+namespace tint::core::ir {
+class Function;
+class FunctionParam;
+class Loop;
+class Var;
+}  // namespace tint::core::ir
 
 namespace tint::core::ir::analysis {
 
@@ -62,7 +66,7 @@ class IntegerRangeAnalysis {
   public:
     /// Constructor
     /// @param func the function to cache analyses for
-    explicit IntegerRangeAnalysis(ir::Function* func);
+    explicit IntegerRangeAnalysis(Function* func);
     ~IntegerRangeAnalysis();
 
     /// Returns the integer range info of a given parameter with given index, if it is an integer
@@ -75,6 +79,18 @@ class IntegerRangeAnalysis {
     /// parameter is a scalar, then `index` must be zero.
     /// @returns the integer range info
     const IntegerRangeInfo* GetInfo(const FunctionParam* param, uint32_t index = 0);
+
+    /// Note: This function is only for tests.
+    /// Returns the pointer of the loop control variable in the given loop when its initializer
+    /// meets the below requirements.
+    /// - There are only two instructions in the loop initializer block.
+    /// - The first instruction is to initialize the loop control variable
+    ///   with a constant integer (signed or unsigned) value.
+    /// - The second instruction is `next_iteration`.
+    /// @param loop the Loop variable to investigate
+    /// @returns the pointer of the loop control variable when its loop initializer meets the
+    /// requirements, return nullptr otherwise.
+    const Var* GetLoopControlVariableFromConstantInitializerForTest(const Loop* loop);
 
   private:
     IntegerRangeAnalysis(const IntegerRangeAnalysis&) = delete;
