@@ -571,14 +571,7 @@ MaybeError RenderPipeline::InitializeImpl() {
         }
         DAWN_TRY_ASSIGN(renderPassInfo, device->GetRenderPassCache()->GetRenderPass(query));
     }
-
-    // TODO(crbug.com/366291600): Add internal immediate data size when needed.
-    ImmediateConstantMask userConstantBits =
-        GetImmediateConstantBlockBits(offsetof(RenderImmediateConstants, userConstants),
-                                      GetLayout()->GetImmediateDataRangeByteSize());
-    uint32_t internalImmediateConstantsSize =
-        (mImmediateMask & userConstantBits.flip()).count() * kImmediateConstantElementByteSize;
-    DAWN_TRY(InitializeBase(layout, internalImmediateConstantsSize));
+    DAWN_TRY(PipelineVk::InitializeBase(layout, mImmediateMask));
 
     // The create info chains in a bunch of things created on the stack here or inside state
     // objects.

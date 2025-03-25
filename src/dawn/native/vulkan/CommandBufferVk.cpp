@@ -158,7 +158,7 @@ class DescriptorSetTracker : public BindGroupTrackerBase<true, uint32_t> {
 
     bool AreLayoutsCompatible() override {
         return mPipelineLayout == mLastAppliedPipelineLayout &&
-               mLastAppliedInternalImmediateDataSize == mInternalImmediateDataSize;
+               mLastAppliedImmediateConstantSize == mImmediateConstantSize;
     }
 
     template <typename VkPipelineType>
@@ -166,7 +166,7 @@ class DescriptorSetTracker : public BindGroupTrackerBase<true, uint32_t> {
         BindGroupTrackerBase::OnSetPipeline(pipeline);
 
         mVkLayout = pipeline->GetVkLayout();
-        mInternalImmediateDataSize = pipeline->GetInternalImmediateDataSize();
+        mImmediateConstantSize = pipeline->GetImmediateConstantSize();
     }
 
     void Apply(Device* device,
@@ -186,12 +186,12 @@ class DescriptorSetTracker : public BindGroupTrackerBase<true, uint32_t> {
         // Update PipelineLayout
         AfterApply();
 
-        mLastAppliedInternalImmediateDataSize = mInternalImmediateDataSize;
+        mLastAppliedImmediateConstantSize = mImmediateConstantSize;
     }
 
     RAW_PTR_EXCLUSION VkPipelineLayout mVkLayout;
-    uint32_t mLastAppliedInternalImmediateDataSize = 0;
-    uint32_t mInternalImmediateDataSize = 0;
+    uint32_t mLastAppliedImmediateConstantSize = 0;
+    uint32_t mImmediateConstantSize = 0;
 };
 
 template <typename T>

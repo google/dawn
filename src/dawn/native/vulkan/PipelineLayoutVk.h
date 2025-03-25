@@ -49,7 +49,7 @@ class PipelineLayout final : public PipelineLayoutBase {
     // VkPipelineLayout push constant range part. Pass internalImmediateDataSize to
     // get correct VkPipelineLayout.
     ResultOrError<Ref<RefCountedVkHandle<VkPipelineLayout>>> GetOrCreateVkLayoutObject(
-        uint32_t internalImmediateDataSize);
+        const ImmediateConstantMask& immediateConstantMask);
 
     VkShaderStageFlags GetImmediateDataRangeStage() const;
 
@@ -66,7 +66,7 @@ class PipelineLayout final : public PipelineLayoutBase {
     MaybeError Initialize();
 
     ResultOrError<Ref<RefCountedVkHandle<VkPipelineLayout>>> CreateVkPipelineLayout(
-        uint32_t internalImmediateDataSize);
+        uint32_t immediateConstantSize);
 
     // Dawn API
     void SetLabelImpl() override;

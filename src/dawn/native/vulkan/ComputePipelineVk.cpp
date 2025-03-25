@@ -66,7 +66,7 @@ MaybeError ComputePipeline::InitializeImpl() {
 
     // Compute pipeline doesn't have clamp depth feature.
     // TODO(crbug.com/366291600): Setting immediate data size if needed.
-    DAWN_TRY(InitializeBase(layout, 0));
+    DAWN_TRY(PipelineVk::InitializeBase(layout, mImmediateMask));
 
     VkComputePipelineCreateInfo createInfo;
     createInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;

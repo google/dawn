@@ -388,4 +388,8 @@ void PipelineBase::SetImmediateMaskForTesting(ImmediateConstantMask immediateCon
     mImmediateMask = immediateConstantMask;
 }
 
+uint32_t PipelineBase::GetImmediateConstantSize() const {
+    return static_cast<uint32_t>(mImmediateMask.count());
+}
+
 }  // namespace dawn::native
