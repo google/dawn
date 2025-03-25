@@ -631,6 +631,27 @@ TEST_P(MultithreadTests, CreateRenderPipelineInParallel) {
     }
 }
 
+// Test that creating and destroying bind groups from the same bind group layout on multiple threads
+// won't race. The bind groups will all be allocated by same SlabAllocator.
+TEST_P(MultithreadTests, CreateAndDestroyBindGroupsInParallel) {
+    wgpu::BindGroupLayout layout = utils::MakeBindGroupLayout(
+        device, {
+                    {0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Storage},
+                });
+    wgpu::Buffer ssbo =
+        CreateBuffer(sizeof(uint32_t), wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc |
+                                           wgpu::BufferUsage::CopyDst);
+    utils::RunInParallel(100, [&, this](uint32_t) {
+        for (int i = 0; i < 10; ++i) {
+            wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, layout,
+                                                             {
+                                                                 {0, ssbo, 0, sizeof(uint32_t)},
+                                                             });
+            EXPECT_NE(nullptr, bindGroup.Get());
+        }
+    });
+}
+
 class MultithreadCachingTests : public MultithreadTests {
   protected:
     wgpu::ShaderModule CreateComputeShaderModule() const {

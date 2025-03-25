@@ -732,14 +732,6 @@ void BindGroupBase::DestroyImpl() {
     }
 }
 
-void BindGroupBase::DeleteThis() {
-    // Add another ref to the layout so that if this is the last ref, the layout
-    // is destroyed after the bind group. The bind group is slab-allocated inside
-    // memory owned by the layout (except for the null backend).
-    Ref<BindGroupLayoutBase> layout = mLayout;
-    ApiObjectBase::DeleteThis();
-}
-
 BindGroupBase::BindGroupBase(DeviceBase* device, ObjectBase::ErrorTag tag, StringView label)
     : ApiObjectBase(device, tag, label), mBindingData() {}
 

@@ -57,7 +57,8 @@ class BindGroupLayout final : public BindGroupLayoutInternalBase {
 
     ResultOrError<Ref<BindGroup>> AllocateBindGroup(Device* device,
                                                     const BindGroupDescriptor* descriptor);
-    void DeallocateBindGroup(BindGroup* bindGroup, CPUDescriptorHeapAllocation* viewAllocation);
+    void DeallocateBindGroup(BindGroup* bindGroup);
+    void DeallocateDescriptor(CPUDescriptorHeapAllocation* viewAllocation);
     void ReduceMemoryUsage() override;
 
     // The offset (in descriptor count) into the corresponding descriptor heap. Not valid for

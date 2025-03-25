@@ -106,7 +106,6 @@ class BindGroupBase : public ApiObjectBase {
 
   private:
     BindGroupBase(DeviceBase* device, ObjectBase::ErrorTag tag, StringView label);
-    void DeleteThis() override;
 
     Ref<BindGroupLayoutBase> mLayout;
     BindGroupLayoutInternalBase::BindingDataPointers mBindingData;

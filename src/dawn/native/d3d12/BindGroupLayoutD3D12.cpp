@@ -250,16 +250,17 @@ ResultOrError<Ref<BindGroup>> BindGroupLayout::AllocateBindGroup(
     return bindGroup;
 }
 
-void BindGroupLayout::DeallocateBindGroup(BindGroup* bindGroup,
-                                          CPUDescriptorHeapAllocation* viewAllocation) {
+void BindGroupLayout::DeallocateBindGroup(BindGroup* bindGroup) {
+    mBindGroupAllocator->Deallocate(bindGroup);
+}
+
+void BindGroupLayout::DeallocateDescriptor(CPUDescriptorHeapAllocation* viewAllocation) {
     if (viewAllocation->IsValid()) {
-        Device* device = ToBackend(bindGroup->GetDevice());
+        Device* device = ToBackend(GetDevice());
         auto* viewAllocator =
             device->GetViewStagingDescriptorAllocator(GetCbvUavSrvDescriptorCount());
         (*viewAllocator)->Deallocate(viewAllocation);
     }
-
-    mBindGroupAllocator->Deallocate(bindGroup);
 }
 
 void BindGroupLayout::ReduceMemoryUsage() {

@@ -265,10 +265,12 @@ ResultOrError<Ref<BindGroup>> BindGroupLayout::AllocateBindGroup(
     return AcquireRef(mBindGroupAllocator->Allocate(device, descriptor, descriptorSetAllocation));
 }
 
-void BindGroupLayout::DeallocateBindGroup(BindGroup* bindGroup,
-                                          DescriptorSetAllocation* descriptorSetAllocation) {
-    mDescriptorSetAllocator->Deallocate(descriptorSetAllocation);
+void BindGroupLayout::DeallocateBindGroup(BindGroup* bindGroup) {
     mBindGroupAllocator->Deallocate(bindGroup);
+}
+
+void BindGroupLayout::DeallocateDescriptorSet(DescriptorSetAllocation* descriptorSetAllocation) {
+    mDescriptorSetAllocator->Deallocate(descriptorSetAllocation);
 }
 
 void BindGroupLayout::ReduceMemoryUsage() {
