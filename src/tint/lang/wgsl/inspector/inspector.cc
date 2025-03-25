@@ -220,6 +220,35 @@ ResourceBinding ConvertHandleToResourceBinding(const tint::sem::GlobalVariable* 
     return result;
 }
 
+inspector::Override MkOverride(const sem::GlobalVariable* global, OverrideId id) {
+    Override override;
+    override.name = global->Declaration()->name->symbol.Name();
+    override.id = id;
+
+    auto* type = global->Type();
+    TINT_ASSERT(type->Is<core::type::Scalar>());
+    if (type->IsBoolScalarOrVector()) {
+        override.type = Override::Type::kBool;
+    } else if (type->IsFloatScalar()) {
+        if (type->Is<core::type::F16>()) {
+            override.type = Override::Type::kFloat16;
+        } else {
+            override.type = Override::Type::kFloat32;
+        }
+    } else if (type->IsSignedIntegerScalar()) {
+        override.type = Override::Type::kInt32;
+    } else if (type->IsUnsignedIntegerScalar()) {
+        override.type = Override::Type::kUint32;
+    } else {
+        TINT_UNREACHABLE();
+    }
+
+    override.is_initialized = global->Declaration()->initializer;
+    override.is_id_specified =
+        ast::HasAttribute<ast::IdAttribute>(global->Declaration()->attributes);
+    return override;
+}
+
 }  // namespace
 
 Inspector::Inspector(const Program& program) : program_(program) {}
@@ -303,38 +332,9 @@ EntryPoint Inspector::GetEntryPoint(const tint::ast::Function* func) {
     }
 
     for (auto* var : sem->TransitivelyReferencedGlobals()) {
-        auto* decl = var->Declaration();
-
-        auto name = decl->name->symbol.Name();
-
         auto* global = var->As<sem::GlobalVariable>();
         if (auto override_id = global->Attributes().override_id) {
-            Override override;
-            override.name = name;
-            override.id = override_id.value();
-            auto* type = var->Type();
-            TINT_ASSERT(type->Is<core::type::Scalar>());
-            if (type->IsBoolScalarOrVector()) {
-                override.type = Override::Type::kBool;
-            } else if (type->IsFloatScalar()) {
-                if (type->Is<core::type::F16>()) {
-                    override.type = Override::Type::kFloat16;
-                } else {
-                    override.type = Override::Type::kFloat32;
-                }
-            } else if (type->IsSignedIntegerScalar()) {
-                override.type = Override::Type::kInt32;
-            } else if (type->IsUnsignedIntegerScalar()) {
-                override.type = Override::Type::kUint32;
-            } else {
-                TINT_UNREACHABLE();
-            }
-
-            override.is_initialized = global->Declaration()->initializer;
-            override.is_id_specified =
-                ast::HasAttribute<ast::IdAttribute>(global->Declaration()->attributes);
-
-            entry_point.overrides.push_back(override);
+            entry_point.overrides.push_back(MkOverride(global, override_id.value()));
         }
     }
 
@@ -405,7 +405,7 @@ std::map<OverrideId, Scalar> Inspector::GetOverrideDefaultValues() {
             continue;
         }
 
-        // If there are conflicting defintions for an override id, that is invalid
+        // If there are conflicting definitions for an override id, that is invalid
         // WGSL, so the resolver should catch it. Thus here the inspector just
         // assumes all definitions of the override id are the same, so only needs
         // to find the first reference to override id.
@@ -1054,6 +1054,20 @@ bool Inspector::UsesSubgroupMatrix(const sem::Function* func) const {
         }
     }
     return false;
+}
+
+std::vector<Override> Inspector::Overrides() {
+    std::vector<Override> results;
+
+    for (auto* var : program_.AST().GlobalVariables()) {
+        auto* global = program_.Sem().Get<sem::GlobalVariable>(var);
+        if (!global || !global->Declaration()->Is<ast::Override>()) {
+            continue;
+        }
+
+        results.push_back(MkOverride(global, global->Attributes().override_id.value()));
+    }
+    return results;
 }
 
 }  // namespace tint::inspector

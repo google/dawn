@@ -643,9 +643,8 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
         return invalid;                                                             \
     })()
 
+    const auto& name2Id = inspector->GetNamedOverrideIds();
     if (!entryPoint.overrides.empty()) {
-        const auto& name2Id = inspector->GetNamedOverrideIds();
-
         for (auto& c : entryPoint.overrides) {
             auto id = name2Id.at(c.name);
             EntryPointMetadata::Override override = {id, FromTintOverrideType(c.type),
@@ -665,6 +664,20 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
                 DAWN_ASSERT(inserted);
             }
         }
+    }
+
+    // Add overrides which are not used by the entry point into the list so we
+    // can validate set constants in the pipeline.
+    for (auto& o : inspector->Overrides()) {
+        std::string identifier = o.is_id_specified ? std::to_string(o.id.value) : o.name;
+        if (metadata->overrides.count(identifier) != 0) {
+            continue;
+        }
+
+        auto id = name2Id.at(o.name);
+        EntryPointMetadata::Override override = {id, FromTintOverrideType(o.type), o.is_initialized,
+                                                 /* isUsed */ false};
+        metadata->overrides[identifier] = override;
     }
 
     DAWN_TRY_ASSIGN(metadata->stage, TintPipelineStageToShaderStage(entryPoint.stage));

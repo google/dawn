@@ -63,6 +63,7 @@ namespace {
 // returned Inspector from ::Initialize can then be used to test expectations.
 
 class InspectorGetEntryPointTest : public InspectorBuilder, public testing::Test {};
+class InspectorOverridesTest : public InspectorBuilder, public testing::Test {};
 
 typedef std::tuple<inspector::ComponentType, inspector::CompositionType>
     InspectorGetEntryPointComponentAndCompositionTestParams;
@@ -1757,6 +1758,47 @@ INSTANTIATE_TEST_SUITE_P(
         InspectorGetEntryPointInterpolateTestParams{
             core::InterpolationType::kFlat, core::InterpolationSampling::kEither,
             InterpolationType::kFlat, InterpolationSampling::kEither}));
+
+TEST_F(InspectorOverridesTest, NoOverrides) {
+    MakeCallerBodyFunction("ep_func", Empty,
+                           Vector{
+                               Stage(ast::PipelineStage::kCompute),
+                               WorkgroupSize(1_i),
+                           });
+
+    Inspector& inspector = Build();
+
+    auto result = inspector.Overrides();
+    EXPECT_TRUE(result.empty());
+}
+
+TEST_F(InspectorOverridesTest, Multiple) {
+    Override("foo", ty.f32(), Id(1_a));
+    Override("bar", ty.f32(), Id(2_a));
+    MakePlainGlobalReferenceBodyFunction("callee_func", "foo", ty.f32(), tint::Empty);
+    MakeCallerBodyFunction("ep_func", Vector{std::string("callee_func")},
+                           Vector{
+                               Stage(ast::PipelineStage::kCompute),
+                               WorkgroupSize(1_i),
+                           });
+
+    Inspector& inspector = Build();
+
+    auto result = inspector.Overrides();
+    ASSERT_EQ(2u, result.size());
+
+    auto& ep = result[0];
+    EXPECT_EQ(ep.name, "foo");
+    EXPECT_EQ(ep.id.value, 1);
+    EXPECT_FALSE(ep.is_initialized);
+    EXPECT_TRUE(ep.is_id_specified);
+
+    ep = result[1];
+    EXPECT_EQ(ep.name, "bar");
+    EXPECT_EQ(ep.id.value, 2);
+    EXPECT_FALSE(ep.is_initialized);
+    EXPECT_TRUE(ep.is_id_specified);
+}
 
 TEST_F(InspectorGetOverrideDefaultValuesTest, Bool) {
     GlobalConst("C", Expr(true));

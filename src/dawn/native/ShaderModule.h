@@ -265,6 +265,9 @@ struct EntryPointMetadata {
         // Then it is required for the pipeline stage to have a constant record to initialize a
         // value
         bool isInitialized;
+
+        // Set to true if the override is used in the entry point
+        bool isUsed = true;
     };
 
     using OverridesMap = absl::flat_hash_map<std::string, Override>;

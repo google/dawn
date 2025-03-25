@@ -80,6 +80,9 @@ class Inspector {
     /// @returns map of module-constant name to pipeline constant ID
     std::map<std::string, OverrideId> GetNamedOverrideIds();
 
+    /// @returns vector of all overrides
+    std::vector<Override> Overrides();
+
     /// @param entry_point name of the entry point to get information about.
     /// @returns vector of all of the resource bindings.
     std::vector<ResourceBinding> GetResourceBindings(const std::string& entry_point);
