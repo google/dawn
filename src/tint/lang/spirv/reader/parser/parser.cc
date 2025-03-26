@@ -36,6 +36,7 @@
 #include <utility>
 #include <vector>
 
+// This header is in an external dependency, so warnings cannot be fixed without upstream changes.
 TINT_BEGIN_DISABLE_WARNING(NEWLINE_EOF);
 TINT_BEGIN_DISABLE_WARNING(OLD_STYLE_CAST);
 TINT_BEGIN_DISABLE_WARNING(SIGN_CONVERSION);
