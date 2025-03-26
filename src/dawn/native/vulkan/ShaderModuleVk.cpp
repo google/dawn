@@ -28,7 +28,6 @@
 #include "dawn/native/vulkan/ShaderModuleVk.h"
 
 #include <cstdint>
-#include <map>
 #include <string>
 #include <unordered_set>
 #include <vector>
@@ -36,12 +35,18 @@
 #include "absl/container/flat_hash_map.h"
 #include "dawn/common/HashUtils.h"
 #include "dawn/common/MatchVariant.h"
+#include "dawn/common/Ref.h"
 #include "dawn/native/Adapter.h"
 #include "dawn/native/CacheRequest.h"
+#include "dawn/native/ComputePipeline.h"
+#include "dawn/native/Device.h"
 #include "dawn/native/ImmediateConstantsLayout.h"
+#include "dawn/native/Instance.h"
 #include "dawn/native/PhysicalDevice.h"
+#include "dawn/native/RenderPipeline.h"
 #include "dawn/native/Serializable.h"
 #include "dawn/native/TintUtils.h"
+#include "dawn/native/utils/WGPUHelpers.h"
 #include "dawn/native/vulkan/BindGroupLayoutVk.h"
 #include "dawn/native/vulkan/DeviceVk.h"
 #include "dawn/native/vulkan/FencedDeleter.h"
@@ -49,6 +54,7 @@
 #include "dawn/native/vulkan/PipelineLayoutVk.h"
 #include "dawn/native/vulkan/UtilsVulkan.h"
 #include "dawn/native/vulkan/VulkanError.h"
+#include "dawn/native/wgpu_structs_autogen.h"
 #include "dawn/platform/DawnPlatform.h"
 #include "dawn/platform/metrics/HistogramMacros.h"
 #include "dawn/platform/tracing/TraceEvent.h"
@@ -407,19 +413,30 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
                              "tint::spirv::writer::Generate()");
 
                 // Convert the AST program to an IR module.
-                auto ir = tint::wgsl::reader::ProgramToLoweredIR(*r.inputProgram);
-                DAWN_INVALID_IF(ir != tint::Success,
-                                "An error occurred while generating Tint IR\n%s",
-                                ir.Failure().reason.Str());
+                tint::diag::Result<tint::core::ir::Module> ir;
+                {
+                    SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(r.platform.UnsafeGetValue(),
+                                                       "ShaderModuleProgramToIR");
+                    ir = tint::wgsl::reader::ProgramToLoweredIR(*r.inputProgram);
+                    DAWN_INVALID_IF(ir != tint::Success,
+                                    "An error occurred while generating Tint IR\n%s",
+                                    ir.Failure().reason.Str());
+                }
 
-                // Many Vulkan drivers can't handle multi-entrypoint shader modules.
-                auto singleEntryPointResult =
-                    tint::core::ir::transform::SingleEntryPoint(ir.Get(), r.entryPointName);
-                DAWN_INVALID_IF(singleEntryPointResult != tint::Success,
-                                "Pipeline single entry point (IR) failed:\n%s",
-                                singleEntryPointResult.Failure().reason);
+                {
+                    SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(r.platform.UnsafeGetValue(),
+                                                       "ShaderModuleSingleEntryPoint");
+                    // Many Vulkan drivers can't handle multi-entrypoint shader modules.
+                    auto singleEntryPointResult =
+                        tint::core::ir::transform::SingleEntryPoint(ir.Get(), r.entryPointName);
+                    DAWN_INVALID_IF(singleEntryPointResult != tint::Success,
+                                    "Pipeline single entry point (IR) failed:\n%s",
+                                    singleEntryPointResult.Failure().reason);
+                }
 
                 if (r.substituteOverrideConfig) {
+                    SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(r.platform.UnsafeGetValue(),
+                                                       "ShaderModuleSubstituteOverrides");
                     // this needs to run after SingleEntryPoint transform which removes unused
                     // overrides for the current entry point.
                     tint::core::ir::transform::SubstituteOverridesConfig cfg;
@@ -431,11 +448,16 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
                                     substituteOverridesResult.Failure().reason);
                 }
 
-                // Generate SPIR-V from Tint IR.
-                auto tintResult = tint::spirv::writer::Generate(ir.Get(), r.tintOptions);
-                DAWN_INVALID_IF(tintResult != tint::Success,
-                                "An error occurred while generating SPIR-V\n%s",
-                                tintResult.Failure().reason);
+                tint::Result<tint::spirv::writer::Output> tintResult;
+                {
+                    SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(r.platform.UnsafeGetValue(),
+                                                       "ShaderModuleGenerateSPIRV");
+                    // Generate SPIR-V from Tint IR.
+                    tintResult = tint::spirv::writer::Generate(ir.Get(), r.tintOptions);
+                    DAWN_INVALID_IF(tintResult != tint::Success,
+                                    "An error occurred while generating SPIR-V\n%s",
+                                    tintResult.Failure().reason);
+                }
 
                 // Workgroup validation has to come after `Generate` because it may require
                 // overrides to have been substituted.
@@ -473,6 +495,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
 
     VkShaderModule newHandle = VK_NULL_HANDLE;
     {
+        SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(GetDevice()->GetPlatform(), "Vulkan.CreateShaderModule");
         TRACE_EVENT0(GetDevice()->GetPlatform(), General, "vkCreateShaderModule");
         DAWN_TRY(CheckVkSuccess(
             device->fn.CreateShaderModule(device->GetVkDevice(), &createInfo, nullptr, &*newHandle),
