@@ -155,7 +155,7 @@ TEST_P(WirePopErrorScopeCallbackTests, DisconnectBeforeServerReply) {
     FlushClient();
     FlushFutures();
     ExpectWireCallbacksWhen([&](auto& mockCb) {
-        EXPECT_CALL(mockCb, Call(wgpu::PopErrorScopeStatus::InstanceDropped,
+        EXPECT_CALL(mockCb, Call(wgpu::PopErrorScopeStatus::CallbackCancelled,
                                  wgpu::ErrorType::NoError, EmptySizedString()))
             .Times(1);
 
@@ -181,7 +181,7 @@ TEST_P(WirePopErrorScopeCallbackTests, DisconnectAfterServerReply) {
     FlushClient();
     FlushFutures();
     ExpectWireCallbacksWhen([&](auto& mockCb) {
-        EXPECT_CALL(mockCb, Call(wgpu::PopErrorScopeStatus::InstanceDropped,
+        EXPECT_CALL(mockCb, Call(wgpu::PopErrorScopeStatus::CallbackCancelled,
                                  wgpu::ErrorType::Validation, EmptySizedString()))
             .Times(1);
 

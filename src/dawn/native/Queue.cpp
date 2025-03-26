@@ -209,7 +209,7 @@ Future QueueBase::APIOnSubmittedWorkDone(const WGPUQueueWorkDoneCallbackInfo& ca
             // WorkDoneEvent has no error cases other than the mEarlyStatus ones.
             WGPUQueueWorkDoneStatus status = WGPUQueueWorkDoneStatus_Success;
             if (completionType == EventCompletionType::Shutdown) {
-                status = WGPUQueueWorkDoneStatus_InstanceDropped;
+                status = WGPUQueueWorkDoneStatus_CallbackCancelled;
             } else if (mEarlyStatus) {
                 status = mEarlyStatus.value();
             }

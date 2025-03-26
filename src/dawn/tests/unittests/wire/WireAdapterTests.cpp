@@ -352,7 +352,7 @@ TEST_P(WireAdapterTests, RequestDeviceWireDisconnectedBeforeCallback) {
     RequestDevice(&desc);
 
     ExpectWireCallbacksWhen([&](auto& mockCb) {
-        EXPECT_CALL(mockCb, Call(wgpu::RequestDeviceStatus::InstanceDropped, IsNull(),
+        EXPECT_CALL(mockCb, Call(wgpu::RequestDeviceStatus::CallbackCancelled, IsNull(),
                                  NonEmptySizedString()))
             .Times(1);
 

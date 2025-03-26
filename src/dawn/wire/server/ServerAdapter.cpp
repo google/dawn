@@ -141,7 +141,7 @@ void Server::OnRequestDeviceCallback(RequestDeviceUserdata* data,
     // Assign the handle and allocated status if the device is created successfully.
     Known<WGPUDevice> reservation;
     if (FillReservation(data->deviceObjectId, device, &reservation) == WireResult::FatalError) {
-        cmd.status = WGPURequestDeviceStatus_InstanceDropped;
+        cmd.status = WGPURequestDeviceStatus_CallbackCancelled;
         cmd.message = ToOutputStringView("Destroyed before request was fulfilled.");
         SerializeCommand(cmd);
         return;

@@ -215,7 +215,7 @@ Ref<DeviceBase::DeviceLostEvent> DeviceBase::DeviceLostEvent::Create(
 
 void DeviceBase::DeviceLostEvent::Complete(EventCompletionType completionType) {
     if (completionType == EventCompletionType::Shutdown) {
-        mReason = wgpu::DeviceLostReason::InstanceDropped;
+        mReason = wgpu::DeviceLostReason::CallbackCancelled;
         mMessage = "A valid external Instance reference no longer exists.";
     }
 
@@ -234,7 +234,7 @@ void DeviceBase::DeviceLostEvent::Complete(EventCompletionType completionType) {
     void* userdata1 = mUserdata1.ExtractAsDangling();
     void* userdata2 = mUserdata2.ExtractAsDangling();
 
-    if (mReason == wgpu::DeviceLostReason::InstanceDropped ||
+    if (mReason == wgpu::DeviceLostReason::CallbackCancelled ||
         mReason == wgpu::DeviceLostReason::FailedCreation) {
         device = nullptr;
     }
@@ -833,7 +833,7 @@ Future DeviceBase::APIPopErrorScope(const WGPUPopErrorScopeCallbackInfo& callbac
         void Complete(EventCompletionType completionType) override {
             WGPUPopErrorScopeStatus status = completionType == EventCompletionType::Ready
                                                  ? WGPUPopErrorScopeStatus_Success
-                                                 : WGPUPopErrorScopeStatus_InstanceDropped;
+                                                 : WGPUPopErrorScopeStatus_CallbackCancelled;
             WGPUErrorType type;
             WGPUStringView message = kEmptyOutputStringView;
             if (mScope) {

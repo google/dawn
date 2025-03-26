@@ -109,7 +109,7 @@
         "emscripten_no_enum_table": true,
         "values": [
             {"value": 1, "name": "success"},
-            {"value": 2, "name": "instance dropped"},
+            {"value": 2, "name": "callback cancelled"},
             {"value": 3, "name": "unavailable"},
             {"value": 4, "name": "error"}
         ]
@@ -692,7 +692,7 @@
         "emscripten_no_enum_table": true,
         "values": [
             {"value": 1, "name": "success"},
-            {"value": 2, "name": "instance dropped"},
+            {"value": 2, "name": "callback cancelled"},
             {"value": 3, "name": "error"},
             {"value": 4, "name": "aborted"}
         ]
@@ -945,7 +945,7 @@
         "category": "enum",
         "values": [
             {"value": 1, "name": "success"},
-            {"value": 2, "name": "instance dropped"}
+            {"value": 2, "name": "callback cancelled"}
         ]
     },
     "compilation message": {
@@ -1152,7 +1152,7 @@
         "emscripten_no_enum_table": true,
         "values": [
             {"value": 1, "name": "success"},
-            {"value": 2, "name": "instance dropped"},
+            {"value": 2, "name": "callback cancelled"},
             {"value": 3, "name": "validation error"},
             {"value": 4, "name": "internal error"}
         ]
@@ -1491,7 +1491,7 @@
         "values": [
             {"value": 1, "name": "unknown"},
             {"value": 2, "name": "destroyed"},
-            {"value": 3, "name": "instance dropped", "emscripten_string_to_int": false},
+            {"value": 3, "name": "callback cancelled", "emscripten_string_to_int": false},
             {"value": 4, "name": "failed creation", "emscripten_string_to_int": false}
         ]
     },
@@ -1518,7 +1518,7 @@
         "emscripten_no_enum_table": true,
         "values": [
             {"value": 1, "name": "success"},
-            {"value": 2, "name": "instance dropped"},
+            {"value": 2, "name": "callback cancelled"},
             {"value": 3, "name": "error"}
         ]
     },
@@ -2831,7 +2831,7 @@
         "emscripten_no_enum_table": true,
         "values": [
             {"value": 1, "name": "success"},
-            {"value": 2, "name": "instance dropped"},
+            {"value": 2, "name": "callback cancelled"},
             {"value": 3, "name": "error"}
         ]
     },
@@ -3307,7 +3307,7 @@
         "emscripten_no_enum_table": true,
         "values": [
             {"value": 1, "name": "success"},
-            {"value": 2, "name": "instance dropped"},
+            {"value": 2, "name": "callback cancelled"},
             {"value": 3, "name": "error"}
         ]
     },

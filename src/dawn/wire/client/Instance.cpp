@@ -79,7 +79,7 @@ class RequestAdapterEvent : public TrackedEvent {
   private:
     void CompleteImpl(FutureID futureID, EventCompletionType completionType) override {
         if (completionType == EventCompletionType::Shutdown) {
-            mStatus = WGPURequestAdapterStatus_InstanceDropped;
+            mStatus = WGPURequestAdapterStatus_CallbackCancelled;
             mMessage = "A valid external Instance reference no longer exists.";
         }
 

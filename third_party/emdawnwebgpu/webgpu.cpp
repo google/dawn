@@ -842,7 +842,7 @@ class CompilationInfoEvent final : public TrackedEvent {
 
   void Complete(FutureID, EventCompletionType type) override {
     if (type == EventCompletionType::Shutdown) {
-      mStatus = WGPUCompilationInfoRequestStatus_InstanceDropped;
+      mStatus = WGPUCompilationInfoRequestStatus_CallbackCancelled;
     }
     if (mCallback) {
       mCallback(mStatus,
@@ -888,7 +888,7 @@ class CreatePipelineEventBase final : public TrackedEvent {
 
   void Complete(FutureID, EventCompletionType type) override {
     if (type == EventCompletionType::Shutdown) {
-      mStatus = WGPUCreatePipelineAsyncStatus_InstanceDropped;
+      mStatus = WGPUCreatePipelineAsyncStatus_CallbackCancelled;
       mMessage = "A valid external Instance reference no longer exists.";
     }
     if (mCallback) {
@@ -945,7 +945,7 @@ class DeviceLostEvent final : public TrackedEvent {
 
   void Complete(FutureID, EventCompletionType type) override {
     if (type == EventCompletionType::Shutdown) {
-      mReason = WGPUDeviceLostReason_InstanceDropped;
+      mReason = WGPUDeviceLostReason_CallbackCancelled;
       mMessage = "A valid external Instance reference no longer exists.";
     }
     if (mCallback) {
@@ -993,7 +993,7 @@ class PopErrorScopeEvent final : public TrackedEvent {
 
   void Complete(FutureID, EventCompletionType type) override {
     if (type == EventCompletionType::Shutdown) {
-      mStatus = WGPUPopErrorScopeStatus_InstanceDropped;
+      mStatus = WGPUPopErrorScopeStatus_CallbackCancelled;
       mErrorType = WGPUErrorType_NoError;
       mMessage = "A valid external Instance reference no longer exists.";
     }
@@ -1045,7 +1045,7 @@ class MapAsyncEvent final : public TrackedEvent {
 
   void Complete(FutureID futureID, EventCompletionType type) override {
     if (type == EventCompletionType::Shutdown) {
-      mStatus = WGPUMapAsyncStatus_InstanceDropped;
+      mStatus = WGPUMapAsyncStatus_CallbackCancelled;
       mMessage = "A valid external Instance reference no longer exists.";
     }
 
@@ -1100,7 +1100,7 @@ class RequestAdapterEvent final : public TrackedEvent {
 
   void Complete(FutureID, EventCompletionType type) override {
     if (type == EventCompletionType::Shutdown) {
-      mStatus = WGPURequestAdapterStatus_InstanceDropped;
+      mStatus = WGPURequestAdapterStatus_CallbackCancelled;
       mMessage = "A valid external Instance reference no longer exists.";
     }
     if (mCallback) {
@@ -1147,7 +1147,7 @@ class RequestDeviceEvent final : public TrackedEvent {
 
   void Complete(FutureID, EventCompletionType type) override {
     if (type == EventCompletionType::Shutdown) {
-      mStatus = WGPURequestDeviceStatus_InstanceDropped;
+      mStatus = WGPURequestDeviceStatus_CallbackCancelled;
       mMessage = "A valid external Instance reference no longer exists.";
     }
     if (mCallback) {
@@ -1186,7 +1186,7 @@ class WorkDoneEvent final : public TrackedEvent {
 
   void Complete(FutureID, EventCompletionType type) override {
     if (type == EventCompletionType::Shutdown) {
-      mStatus = WGPUQueueWorkDoneStatus_InstanceDropped;
+      mStatus = WGPUQueueWorkDoneStatus_CallbackCancelled;
     }
     if (mCallback) {
       mCallback(mStatus, mUserdata1, mUserdata2);

@@ -481,7 +481,7 @@ TEST_P(WireInstanceTests, RequestAdapterInstanceDestroyedBeforeCallback) {
     RequestAdapter(&options);
 
     ExpectWireCallbacksWhen([&](auto& mockCb) {
-        EXPECT_CALL(mockCb, Call(wgpu::RequestAdapterStatus::InstanceDropped, IsNull(),
+        EXPECT_CALL(mockCb, Call(wgpu::RequestAdapterStatus::CallbackCancelled, IsNull(),
                                  NonEmptySizedString()))
             .Times(1);
 
@@ -496,7 +496,7 @@ TEST_P(WireInstanceTests, RequestAdapterWireDisconnectBeforeCallback) {
     RequestAdapter(&options);
 
     ExpectWireCallbacksWhen([&](auto& mockCb) {
-        EXPECT_CALL(mockCb, Call(wgpu::RequestAdapterStatus::InstanceDropped, IsNull(),
+        EXPECT_CALL(mockCb, Call(wgpu::RequestAdapterStatus::CallbackCancelled, IsNull(),
                                  NonEmptySizedString()))
             .Times(1);
 

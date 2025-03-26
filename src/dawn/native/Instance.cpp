@@ -293,8 +293,8 @@ Future InstanceBase::APIRequestAdapter(const RequestAdapterOptions* options,
             void* userdata2 = mUserdata2.ExtractAsDangling();
 
             if (completionType == EventCompletionType::Shutdown) {
-                mCallback(WGPURequestAdapterStatus_InstanceDropped, nullptr, kEmptyOutputStringView,
-                          userdata1, userdata2);
+                mCallback(WGPURequestAdapterStatus_CallbackCancelled, nullptr,
+                          kEmptyOutputStringView, userdata1, userdata2);
                 return;
             }
 

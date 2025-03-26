@@ -139,7 +139,7 @@ TEST_P(WireShaderModuleTests, GetCompilationInfoBeforeDisconnect) {
     FlushFutures();
 
     ExpectWireCallbacksWhen([&](auto& mockCb) {
-        EXPECT_CALL(mockCb, Call(wgpu::CompilationInfoRequestStatus::InstanceDropped, nullptr))
+        EXPECT_CALL(mockCb, Call(wgpu::CompilationInfoRequestStatus::CallbackCancelled, nullptr))
             .Times(1);
 
         GetWireClient()->Disconnect();
@@ -152,7 +152,7 @@ TEST_P(WireShaderModuleTests, GetCompilationInfoAfterDisconnect) {
     GetWireClient()->Disconnect();
 
     ExpectWireCallbacksWhen([&](auto& mockCb) {
-        EXPECT_CALL(mockCb, Call(wgpu::CompilationInfoRequestStatus::InstanceDropped, nullptr))
+        EXPECT_CALL(mockCb, Call(wgpu::CompilationInfoRequestStatus::CallbackCancelled, nullptr))
             .Times(1);
 
         GetCompilationInfo();
@@ -175,7 +175,7 @@ TEST_P(WireShaderModuleTests, GetCompilationInfoInsideCallbackBeforeDisconnect) 
     FlushFutures();
 
     ExpectWireCallbacksWhen([&](auto& mockCb) {
-        EXPECT_CALL(mockCb, Call(wgpu::CompilationInfoRequestStatus::InstanceDropped, nullptr))
+        EXPECT_CALL(mockCb, Call(wgpu::CompilationInfoRequestStatus::CallbackCancelled, nullptr))
             .Times(kNumRequests + 1)
             .WillOnce([&]() {
                 for (size_t i = 0; i < kNumRequests; i++) {

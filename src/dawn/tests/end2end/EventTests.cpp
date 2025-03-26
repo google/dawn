@@ -419,9 +419,9 @@ TEST_P(EventCompletionTests, WorkDoneDropInstanceBeforeEvent) {
         // the callback to be cleaned up immediately (and should expect it to happen on a future
         // Tick).
         ASSERT_THAT(status, AnyOf(Eq(wgpu::QueueWorkDoneStatus::Success),
-                                  Eq(wgpu::QueueWorkDoneStatus::InstanceDropped)));
+                                  Eq(wgpu::QueueWorkDoneStatus::CallbackCancelled)));
     } else {
-        ASSERT_EQ(status, wgpu::QueueWorkDoneStatus::InstanceDropped);
+        ASSERT_EQ(status, wgpu::QueueWorkDoneStatus::CallbackCancelled);
     }
 }
 
@@ -442,11 +442,11 @@ TEST_P(EventCompletionTests, WorkDoneDropInstanceAfterEvent) {
         // the callback to be cleaned up immediately (and should expect it to happen on a future
         // Tick).
         ASSERT_THAT(status, AnyOf(Eq(wgpu::QueueWorkDoneStatus::Success),
-                                  Eq(wgpu::QueueWorkDoneStatus::InstanceDropped)));
+                                  Eq(wgpu::QueueWorkDoneStatus::CallbackCancelled)));
     } else {
         ASSERT_EQ(status, kStatusUninitialized);
         testInstance = nullptr;  // Drop the last external ref to the instance.
-        ASSERT_EQ(status, wgpu::QueueWorkDoneStatus::InstanceDropped);
+        ASSERT_EQ(status, wgpu::QueueWorkDoneStatus::CallbackCancelled);
     }
 }
 

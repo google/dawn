@@ -234,7 +234,7 @@ struct BufferBase::MapAsyncEvent final : public EventManager::TrackedEvent {
         void* userdata2 = mUserdata2.ExtractAsDangling();
 
         if (completionType == EventCompletionType::Shutdown) {
-            mCallback(WGPUMapAsyncStatus_InstanceDropped,
+            mCallback(WGPUMapAsyncStatus_CallbackCancelled,
                       ToOutputStringView("A valid external Instance reference no longer exists."),
                       userdata1, userdata2);
             return;

@@ -1641,7 +1641,7 @@ Future ShaderModuleBase::APIGetCompilationInfo(
 
         void Complete(EventCompletionType completionType) override {
             WGPUCompilationInfoRequestStatus status =
-                WGPUCompilationInfoRequestStatus_InstanceDropped;
+                WGPUCompilationInfoRequestStatus_CallbackCancelled;
             const CompilationInfo* compilationInfo = nullptr;
             if (completionType == EventCompletionType::Ready) {
                 status = WGPUCompilationInfoRequestStatus_Success;

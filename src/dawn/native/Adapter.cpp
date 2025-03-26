@@ -452,7 +452,7 @@ Future AdapterBase::APIRequestDevice(const DeviceDescriptor* descriptor,
 
         void Complete(EventCompletionType completionType) override {
             if (completionType == EventCompletionType::Shutdown) {
-                mStatus = WGPURequestDeviceStatus_InstanceDropped;
+                mStatus = WGPURequestDeviceStatus_CallbackCancelled;
                 mDevice = nullptr;
                 mMessage = "A valid external Instance reference no longer exists.";
             }

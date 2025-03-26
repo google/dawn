@@ -245,7 +245,7 @@ interop::Promise<interop::Interface<interop::GPUDevice>> GPUAdapter::requestDevi
             auto r = interop::GPUDeviceLostReason::kDestroyed;
             switch (reason) {
                 case wgpu::DeviceLostReason::Destroyed:
-                case wgpu::DeviceLostReason::InstanceDropped:
+                case wgpu::DeviceLostReason::CallbackCancelled:
                     r = interop::GPUDeviceLostReason::kDestroyed;
                     break;
                 case wgpu::DeviceLostReason::FailedCreation:

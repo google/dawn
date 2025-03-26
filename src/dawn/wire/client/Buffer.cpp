@@ -136,7 +136,7 @@ class Buffer::MapAsyncEvent : public TrackedEvent {
   private:
     void CompleteImpl(FutureID futureID, EventCompletionType completionType) override {
         if (completionType == EventCompletionType::Shutdown) {
-            mStatus = WGPUMapAsyncStatus_InstanceDropped;
+            mStatus = WGPUMapAsyncStatus_CallbackCancelled;
             mMessage = "A valid external Instance reference no longer exists.";
         }
 

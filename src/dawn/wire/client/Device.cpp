@@ -67,7 +67,7 @@ class PopErrorScopeEvent final : public TrackedEvent {
   private:
     void CompleteImpl(FutureID futureID, EventCompletionType completionType) override {
         if (completionType == EventCompletionType::Shutdown) {
-            mStatus = WGPUPopErrorScopeStatus_InstanceDropped;
+            mStatus = WGPUPopErrorScopeStatus_CallbackCancelled;
             mMessage = "";
         }
         if (mCallback) {
@@ -124,7 +124,7 @@ class CreatePipelineEventBase : public TrackedEvent {
         }
 
         if (completionType == EventCompletionType::Shutdown) {
-            mStatus = WGPUCreatePipelineAsyncStatus_InstanceDropped;
+            mStatus = WGPUCreatePipelineAsyncStatus_CallbackCancelled;
             mMessage = "A valid external Instance reference no longer exists.";
         }
 
@@ -188,7 +188,7 @@ class Device::DeviceLostEvent : public TrackedEvent {
   private:
     void CompleteImpl(FutureID futureID, EventCompletionType completionType) override {
         if (completionType == EventCompletionType::Shutdown) {
-            mReason = WGPUDeviceLostReason_InstanceDropped;
+            mReason = WGPUDeviceLostReason_CallbackCancelled;
             mMessage = "A valid external Instance reference no longer exists.";
         }
 
