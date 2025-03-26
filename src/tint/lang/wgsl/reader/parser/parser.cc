@@ -55,6 +55,7 @@
 #include "src/tint/lang/wgsl/ast/var.h"
 #include "src/tint/lang/wgsl/ast/variable_decl_statement.h"
 #include "src/tint/lang/wgsl/ast/workgroup_attribute.h"
+#include "src/tint/lang/wgsl/common/reserved_words.h"
 #include "src/tint/lang/wgsl/reader/parser/classify_template_args.h"
 #include "src/tint/lang/wgsl/reader/parser/lexer.h"
 #include "src/tint/utils/containers/reverse.h"
@@ -85,45 +86,6 @@ constexpr uint32_t kMaxParseDepth = 128;
 /// The maximum number of tokens to look ahead to try and sync the
 /// parser on error.
 constexpr size_t const kMaxResynchronizeLookahead = 32;
-
-// https://gpuweb.github.io/gpuweb/wgsl.html#reserved-keywords
-//
-// Must be called with an identifier token.
-bool is_reserved(const Token& t) {
-    auto s = t.to_str_view();
-    return s == "NULL" || s == "Self" || s == "abstract" || s == "active" || s == "alignas" ||
-           s == "alignof" || s == "as" || s == "asm" || s == "asm_fragment" || s == "async" ||
-           s == "attribute" || s == "auto" || s == "await" || s == "become" || s == "cast" ||
-           s == "catch" || s == "class" || s == "co_await" || s == "co_return" || s == "co_yield" ||
-           s == "coherent" || s == "column_major" || s == "common" || s == "compile" ||
-           s == "compile_fragment" || s == "concept" || s == "const_cast" || s == "consteval" ||
-           s == "constexpr" || s == "constinit" || s == "crate" || s == "debugger" ||
-           s == "decltype" || s == "delete" || s == "demote" || s == "demote_to_helper" ||
-           s == "do" || s == "dynamic_cast" || s == "enum" || s == "explicit" || s == "export" ||
-           s == "extends" || s == "extern" || s == "external" || s == "filter" || s == "final" ||
-           s == "finally" || s == "friend" || s == "from" || s == "fxgroup" || s == "get" ||
-           s == "goto" || s == "groupshared" || s == "highp" || s == "impl" || s == "implements" ||
-           s == "import" || s == "inline" || s == "instanceof" || s == "interface" ||
-           s == "layout" || s == "lowp" || s == "macro" || s == "macro_rules" || s == "match" ||
-           s == "mediump" || s == "meta" || s == "mod" || s == "module" || s == "move" ||
-           s == "mut" || s == "mutable" || s == "namespace" || s == "new" || s == "nil" ||
-           s == "noexcept" || s == "noinline" || s == "nointerpolation" || s == "non_coherent" ||
-           s == "noncoherent" || s == "noperspective" || s == "null" || s == "nullptr" ||
-           s == "of" || s == "operator" || s == "package" || s == "packoffset" ||
-           s == "partition" || s == "pass" || s == "patch" || s == "pixelfragment" ||
-           s == "precise" || s == "precision" || s == "premerge" || s == "priv" ||
-           s == "protected" || s == "pub" || s == "public" || s == "readonly" || s == "ref" ||
-           s == "regardless" || s == "register" || s == "reinterpret_cast" || s == "require" ||
-           s == "resource" || s == "restrict" || s == "self" || s == "set" || s == "shared" ||
-           s == "sizeof" || s == "smooth" || s == "snorm" || s == "static" ||
-           s == "static_assert" || s == "static_cast" || s == "std" || s == "subroutine" ||
-           s == "super" || s == "target" || s == "template" || s == "this" || s == "thread_local" ||
-           s == "throw" || s == "trait" || s == "try" || s == "type" || s == "typedef" ||
-           s == "typeid" || s == "typename" || s == "typeof" || s == "union" || s == "unless" ||
-           s == "unorm" || s == "unsafe" || s == "unsized" || s == "use" || s == "using" ||
-           s == "varying" || s == "virtual" || s == "volatile" || s == "wgsl" || s == "where" ||
-           s == "with" || s == "writeonly" || s == "yield";
-}
 
 /// Enter-exit counters for block token types.
 /// Used by sync_to() to skip over closing block tokens that were opened during
@@ -3408,7 +3370,7 @@ Expect<const ast::Identifier*> Parser::expect_ident(std::string_view use,
         synchronized_ = true;
         next();
 
-        if (is_reserved(t)) {
+        if (IsReserved(t.to_str_view())) {
             return AddError(t.source(), "'" + t.to_str() + "' is a reserved keyword");
         }
 

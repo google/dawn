@@ -47,6 +47,8 @@ libtint_source_set("common") {
   sources = [
     "allowed_features.h",
     "common.cc",
+    "reserved_words.cc",
+    "reserved_words.h",
   ]
   deps = [
     "${dawn_root}/src/utils:utils",

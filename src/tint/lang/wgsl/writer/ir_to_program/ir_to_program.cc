@@ -83,6 +83,7 @@
 #include "src/tint/lang/core/type/texture.h"
 #include "src/tint/lang/core/type/type.h"
 #include "src/tint/lang/wgsl/ast/type.h"
+#include "src/tint/lang/wgsl/common/reserved_words.h"
 #include "src/tint/lang/wgsl/ir/builtin_call.h"
 #include "src/tint/lang/wgsl/ir/unary.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
@@ -1158,15 +1159,63 @@ class State {
     // Bindings
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
+    bool IsKeyword(std::string_view s) {
+        return s == "alias" || s == "break" || s == "case" || s == "const" || s == "const_assert" ||
+               s == "continue" || s == "continuing" || s == "default" || s == "diagnostic" ||
+               s == "discard" || s == "else" || s == "enable" || s == "false" || s == "fn" ||
+               s == "for" || s == "if" || s == "let" || s == "loop" || s == "override" ||
+               s == "requires" || s == "return" || s == "struct" || s == "switch" || s == "true" ||
+               s == "var" || s == "while";
+    }
+
+    bool IsEnumName(std::string_view s) {
+        return s == "read" || s == "write" || s == "read_write" || s == "function" ||
+               s == "private" || s == "workgroup" || s == "uniform" || s == "storage" ||
+               s == "rgba8unorm" || s == "rgba8snorm" || s == "rgba8uint" || s == "rgba8sint" ||
+               s == "rgba16uint" || s == "rgba16sint" || s == "rgba16float" || s == "r32uint" ||
+               s == "r32sint" || s == "r32float" || s == "rg32uint" || s == "rg32sint" ||
+               s == "rg32float" || s == "rgba32uint" || s == "rgba32sint" || s == "rgba32float" ||
+               s == "bgra8unorm";
+    }
+
+    bool IsTypeName(std::string_view s) {
+        return s == "bool" || s == "void" || s == "i32" || s == "u32" || s == "f32" || s == "f16" ||
+               s == "vec" || s == "vec2" || s == "vec3" || s == "vec4" || s == "vec2f" ||
+               s == "vec3f" || s == "vec4f" || s == "vec2h" || s == "vec3h" || s == "vec4h" ||
+               s == "vec2i" || s == "vec3i" || s == "vec4i" || s == "vec2u" || s == "vec3u" ||
+               s == "vec4u" || s == "mat2x2" || s == "mat2x3" || s == "mat2x4" || s == "mat3x2" ||
+               s == "mat3x3" || s == "mat3x4" || s == "mat4x2" || s == "mat4x3" || s == "mat4x4" ||
+               s == "mat2x2f" || s == "mat2x3f" || s == "mat2x4f" || s == "mat3x2f" ||
+               s == "mat3x3f" || s == "mat3x4f" || s == "mat4x2f" || s == "mat4x3f" ||
+               s == "mat4x4f" || s == "mat2x2h" || s == "mat2x3h" || s == "mat2x4h" ||
+               s == "mat3x2h" || s == "mat3x3h" || s == "mat3x4h" || s == "mat4x2h" ||
+               s == "mat4x3h" || s == "mat4x4h" || s == "atomic" || s == "array" || s == "ptr" ||
+               s == "texture_1d" || s == "texture_2d" || s == "texture_2d_array" ||
+               s == "texture_3d" || s == "texture_cube" || s == "texture_cube_array" ||
+               s == "texture_multisampled_2d" || s == "texture_depth_multisampled_2d" ||
+               s == "texture_external" || s == "texture_storage_1d" || s == "texture_storage_2d" ||
+               s == "texture_storage_2d_array" || s == "texture_storage_3d" ||
+               s == "texture_depth_2d" || s == "texture_depth_2d_array" ||
+               s == "texture_depth_cube" || s == "texture_depth_cube_array" || s == "sampler" ||
+               s == "sampler_comparison";
+    }
+
+    bool IsWGSLSafe(std::string_view name) {
+        return !IsReserved(name) && !IsKeyword(name) && !IsEnumName(name) && !IsTypeName(name);
+    }
+
     /// @returns the AST name for the given value, creating and returning a new name on the first
     /// call.
     Symbol NameFor(const core::ir::Value* value, std::string_view suggested = {}) {
         return names_.GetOrAdd(value, [&] {
             if (!suggested.empty()) {
-                return b.Symbols().Register(suggested);
-            }
-            if (auto sym = mod.NameOf(value)) {
-                return b.Symbols().Register(sym.NameView());
+                if (IsWGSLSafe(suggested)) {
+                    return b.Symbols().Register(suggested);
+                }
+            } else if (auto sym = mod.NameOf(value)) {
+                if (IsWGSLSafe(sym.NameView())) {
+                    return b.Symbols().Register(sym.NameView());
+                }
             }
             return b.Symbols().New("v");
         });

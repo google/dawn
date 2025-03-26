@@ -40,9 +40,11 @@ cc_library(
   name = "common",
   srcs = [
     "common.cc",
+    "reserved_words.cc",
   ],
   hdrs = [
     "allowed_features.h",
+    "reserved_words.h",
   ],
   deps = [
     "//src/tint/lang/wgsl",
