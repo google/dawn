@@ -134,6 +134,8 @@ tint_add_target(tint_lang_core_ir lib
   lang/core/ir/referenced_functions.h
   lang/core/ir/referenced_module_decls.h
   lang/core/ir/referenced_module_vars.h
+  lang/core/ir/reflection.cc
+  lang/core/ir/reflection.h
   lang/core/ir/return.cc
   lang/core/ir/return.h
   lang/core/ir/store.cc
@@ -230,6 +232,7 @@ tint_add_target(tint_lang_core_ir_test test
   lang/core/ir/referenced_functions_test.cc
   lang/core/ir/referenced_module_decls_test.cc
   lang/core/ir/referenced_module_vars_test.cc
+  lang/core/ir/reflection_test.cc
   lang/core/ir/return_test.cc
   lang/core/ir/store_test.cc
   lang/core/ir/store_vector_element_test.cc
