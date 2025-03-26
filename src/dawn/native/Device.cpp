@@ -1523,7 +1523,16 @@ TextureBase* DeviceBase::APICreateTexture(const TextureDescriptor* descriptor) {
 // For Dawn Wire
 
 BufferBase* DeviceBase::APICreateErrorBuffer(const BufferDescriptor* desc) {
-    DAWN_ASSERT(!desc->mappedAtCreation);
+    if (desc->mappedAtCreation) {
+        // This codepath isn't used (at the time of this writing). Just return nullptr
+        // (pretend there was a mapping OOM), so we don't have to bother mapping the ErrorBuffer
+        // (would have to return nullptr anyway if there was actually an OOM).
+        auto error =
+            DAWN_OUT_OF_MEMORY_ERROR("mappedAtCreation is not implemented for CreateErrorBuffer");
+        error->AppendContext("calling %s.CreateBuffer(%s).", this, desc);
+        EmitLog(WGPULoggingType_Error, error->GetFormattedMessage());
+        return nullptr;
+    }
 
     UnpackedPtr<BufferDescriptor> unpacked;
     if (!ConsumedError(ValidateBufferDescriptor(this, desc), &unpacked,

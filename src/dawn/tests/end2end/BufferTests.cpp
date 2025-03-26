@@ -1199,6 +1199,31 @@ TEST_P(BufferTests, BufferMappedAtCreationOOM_Simulated) {
     }
 }
 
+TEST_P(BufferTests, CreateErrorBuffer) {
+    wgpu::BufferDescriptor desc{.usage = wgpu::BufferUsage::CopySrc, .size = 8};
+    wgpu::Buffer buffer;
+
+    desc.mappedAtCreation = false;
+    buffer = device.CreateErrorBuffer(&desc);
+    ASSERT_NE(buffer, nullptr);
+
+    desc.mappedAtCreation = true;
+    buffer = device.CreateErrorBuffer(&desc);
+    ASSERT_EQ(buffer, nullptr);
+
+    wgpu::DawnBufferDescriptorErrorInfoFromWireClient ext;
+    ext.outOfMemory = true;
+    desc.nextInChain = &ext;
+
+    desc.mappedAtCreation = false;
+    ASSERT_DEVICE_ERROR(buffer = device.CreateErrorBuffer(&desc));
+    ASSERT_NE(buffer, nullptr);
+
+    desc.mappedAtCreation = true;
+    buffer = device.CreateErrorBuffer(&desc);
+    ASSERT_EQ(buffer, nullptr);
+}
+
 // Test that mapping an OOM buffer fails gracefully
 TEST_P(BufferTests, CreateBufferOOMMapAsync) {
     // TODO(crbug.com/346377856): fails on ANGLE/D3D11, but is likely a Dawn/GL bug that only

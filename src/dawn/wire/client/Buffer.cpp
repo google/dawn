@@ -293,6 +293,15 @@ WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor
 
 // static
 WGPUBuffer Buffer::CreateError(Device* device, const WGPUBufferDescriptor* descriptor) {
+    if (descriptor->mappedAtCreation) {
+        // This codepath isn't used (at the time of this writing). Just return nullptr
+        // (pretend there was a mapping OOM), so we don't have to bother mapping the ErrorBuffer
+        // (would have to return nullptr anyway if there was actually an OOM).
+        std::string error = "mappedAtCreation is not implemented for CreateErrorBuffer";
+        device->HandleLogging(WGPULoggingType_Error, WGPUStringView{error.data(), error.size()});
+        return nullptr;
+    }
+
     Client* client = device->GetClient();
     Ref<Buffer> buffer = client->Make<Buffer>(device->GetEventManagerHandle(), device, descriptor);
 
