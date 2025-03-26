@@ -1193,6 +1193,9 @@ class Parser {
                 case spv::Op::OpControlBarrier:
                     EmitControlBarrier(inst);
                     break;
+                case spv::Op::OpArrayLength:
+                    EmitArrayLength(inst);
+                    break;
                 default:
                     TINT_UNIMPLEMENTED()
                         << "unhandled SPIR-V instruction: " << static_cast<uint32_t>(inst.opcode());
@@ -1216,6 +1219,26 @@ class Parser {
             const auto& merge_bb = current_spirv_function_->FindBlock(merge_id);
             EmitBlock(dst, *merge_bb);
         }
+    }
+
+    void EmitArrayLength(const spvtools::opt::Instruction& inst) {
+        auto strct = Value(inst.GetSingleWordInOperand(0));
+        auto field_index = inst.GetSingleWordInOperand(1);
+
+        auto* ptr = strct->Type()->As<core::type::Pointer>();
+        TINT_ASSERT(ptr);
+
+        auto* ty = ptr->StoreType()->As<core::type::Struct>();
+        TINT_ASSERT(ty);
+
+        auto* access =
+            b_.Access(ty_.ptr(ptr->AddressSpace(), ty->Members().Back()->Type(), ptr->Access()),
+                      strct, u32(field_index));
+        EmitWithoutSpvResult(access);
+
+        Emit(
+            b_.Call(Type(inst.type_id()), core::BuiltinFn::kArrayLength, Vector{access->Result(0)}),
+            inst.result_id());
     }
 
     void EmitControlBarrier(const spvtools::opt::Instruction& inst) {

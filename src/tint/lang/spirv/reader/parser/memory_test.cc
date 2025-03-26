@@ -30,6 +30,159 @@
 namespace tint::spirv::reader {
 namespace {
 
+TEST_F(SpirvParserTest, ArrayLength_FromVar) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpExtension "SPV_KHR_storage_buffer_storage_class"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %myvar "myvar"
+               OpMemberName %struct 0 "first"
+               OpMemberName %struct 1 "rtarr"
+               OpDecorate %myvar DescriptorSet 0
+               OpDecorate %myvar Binding 0
+               OpDecorate %struct Block
+               OpDecorate %arr ArrayStride 4
+               OpMemberDecorate %struct 0 Offset 0
+               OpMemberDecorate %struct 1 Offset 4
+       %void = OpTypeVoid
+        %u32 = OpTypeInt 32 0
+    %u32_ptr = OpTypePointer Function %u32
+    %ep_type = OpTypeFunction %void
+        %arr = OpTypeRuntimeArray %u32
+     %struct = OpTypeStruct %u32 %arr
+ %ptr_struct = OpTypePointer StorageBuffer %struct
+      %myvar = OpVariable %ptr_struct StorageBuffer
+       %main = OpFunction %void None %ep_type
+      %entry = OpLabel
+          %1 = OpArrayLength %u32 %myvar 1
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+tint_symbol = struct @align(4) {
+  first:u32 @offset(0)
+  rtarr:array<u32> @offset(4)
+}
+
+$B1: {  # root
+  %myvar:ptr<storage, tint_symbol, read_write> = var undef @binding_point(0, 0)
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:ptr<storage, array<u32>, read_write> = access %myvar, 1u
+    %4:u32 = arrayLength %3
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, ArrayLength_FromCopyObject) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpExtension "SPV_KHR_storage_buffer_storage_class"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %myvar "myvar"
+               OpMemberName %struct 0 "first"
+               OpMemberName %struct 1 "rtarr"
+               OpDecorate %myvar DescriptorSet 0
+               OpDecorate %myvar Binding 0
+               OpDecorate %struct Block
+               OpDecorate %arr ArrayStride 4
+               OpMemberDecorate %struct 0 Offset 0
+               OpMemberDecorate %struct 1 Offset 4
+       %void = OpTypeVoid
+        %u32 = OpTypeInt 32 0
+    %u32_ptr = OpTypePointer Function %u32
+    %ep_type = OpTypeFunction %void
+        %arr = OpTypeRuntimeArray %u32
+     %struct = OpTypeStruct %u32 %arr
+ %ptr_struct = OpTypePointer StorageBuffer %struct
+      %myvar = OpVariable %ptr_struct StorageBuffer
+       %main = OpFunction %void None %ep_type
+      %entry = OpLabel
+          %2 = OpCopyObject %ptr_struct %myvar
+          %1 = OpArrayLength %u32 %2 1
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+tint_symbol = struct @align(4) {
+  first:u32 @offset(0)
+  rtarr:array<u32> @offset(4)
+}
+
+$B1: {  # root
+  %myvar:ptr<storage, tint_symbol, read_write> = var undef @binding_point(0, 0)
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:ptr<storage, tint_symbol, read_write> = let %myvar
+    %4:ptr<storage, array<u32>, read_write> = access %3, 1u
+    %5:u32 = arrayLength %4
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, ArrayLength_FromAccessChain) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpExtension "SPV_KHR_storage_buffer_storage_class"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %myvar "myvar"
+               OpMemberName %struct 0 "first"
+               OpMemberName %struct 1 "rtarr"
+               OpDecorate %myvar DescriptorSet 0
+               OpDecorate %myvar Binding 0
+               OpDecorate %struct Block
+               OpDecorate %arr ArrayStride 4
+               OpMemberDecorate %struct 0 Offset 0
+               OpMemberDecorate %struct 1 Offset 4
+       %void = OpTypeVoid
+        %u32 = OpTypeInt 32 0
+    %u32_ptr = OpTypePointer Function %u32
+    %ep_type = OpTypeFunction %void
+        %arr = OpTypeRuntimeArray %u32
+     %struct = OpTypeStruct %u32 %arr
+ %ptr_struct = OpTypePointer StorageBuffer %struct
+      %myvar = OpVariable %ptr_struct StorageBuffer
+       %main = OpFunction %void None %ep_type
+      %entry = OpLabel
+          %2 = OpAccessChain %ptr_struct %myvar ; no indices
+          %1 = OpArrayLength %u32 %2 1
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+tint_symbol = struct @align(4) {
+  first:u32 @offset(0)
+  rtarr:array<u32> @offset(4)
+}
+
+$B1: {  # root
+  %myvar:ptr<storage, tint_symbol, read_write> = var undef @binding_point(0, 0)
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:ptr<storage, array<u32>, read_write> = access %myvar, 1u
+    %4:u32 = arrayLength %3
+    ret
+  }
+}
+)");
+}
+
 TEST_F(SpirvParserTest, Load_Scalar) {
     EXPECT_IR(R"(
                OpCapability Shader
