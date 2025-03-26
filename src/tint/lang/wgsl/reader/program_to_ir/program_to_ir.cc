@@ -1372,9 +1372,9 @@ class Impl {
 
 }  // namespace
 
-diag::Result<core::ir::Module> ProgramToIR(const Program& program) {
+Result<core::ir::Module> ProgramToIR(const Program& program) {
     if (!program.IsValid()) {
-        return diag::Failure{program.Diagnostics()};
+        return Failure{program.Diagnostics().Str()};
     }
 
     Impl b(program);
@@ -1382,7 +1382,7 @@ diag::Result<core::ir::Module> ProgramToIR(const Program& program) {
     if (r != Success) {
         diag::List err = std::move(r.Failure().reason);
         err.AddNote(Source{}) << "AST:\n" + Program::printer(program);
-        return diag::Failure{err};
+        return Failure{err.Str()};
     }
 
     return r.Move();

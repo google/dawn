@@ -52,7 +52,7 @@ void GenerateSPIRV(benchmark::State& state, std::string input_name) {
         // Convert the AST program to an IR module.
         auto ir = tint::wgsl::reader::ProgramToLoweredIR(res->program);
         if (ir != Success) {
-            state.SkipWithError(ir.Failure().reason.Str());
+            state.SkipWithError(ir.Failure().reason);
             return;
         }
 

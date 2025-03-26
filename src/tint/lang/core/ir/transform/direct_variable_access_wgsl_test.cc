@@ -73,7 +73,7 @@ class DirectVariableAccessTest : public TransformTestBase<testing::Test> {
 
         auto module = wgsl::reader::ProgramToIR(program_in);
         if (module != Success) {
-            return "ProgramToIR() failed:\n" + module.Failure().reason.Str();
+            return "ProgramToIR() failed:\n" + module.Failure().reason;
         }
 
         auto res = DirectVariableAccess(module.Get(), transform_options);

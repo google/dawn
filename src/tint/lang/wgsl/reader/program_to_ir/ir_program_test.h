@@ -58,7 +58,7 @@ class IRProgramTestBase : public BASE, public ProgramBuilder {
 
         auto result = wgsl::reader::ProgramToIR(program);
         if (result != Success) {
-            return Failure{result.Failure().reason.Str()};
+            return result.Failure();
         }
 
         // WGSL-dialect -> core-dialect
@@ -80,7 +80,7 @@ class IRProgramTestBase : public BASE, public ProgramBuilder {
         Source::File file("test.wgsl", std::move(wgsl));
         auto result = wgsl::reader::WgslToIR(&file);
         if (result != Success) {
-            return Failure{result.Failure().reason.Str()};
+            return result.Failure();
         }
         auto validated = core::ir::Validate(result.Get(), kCapabilities);
         if (validated != Success) {

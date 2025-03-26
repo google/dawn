@@ -185,7 +185,7 @@ tint::Result<tint::core::ir::Module> GenerateIrModule(const tint::Program& progr
 
     auto ir = tint::wgsl::reader::ProgramToLoweredIR(src);
     if (ir != tint::Success) {
-        return tint::Failure{ir.Failure().reason.Str()};
+        return ir.Failure();
     }
 
     if (auto val = tint::core::ir::Validate(ir.Get()); val != tint::Success) {

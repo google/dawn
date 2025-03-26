@@ -49,12 +49,12 @@ Program Parse(const Source::File* file, const Options& options) {
     return resolver::Resolve(parser.builder(), options.allowed_features);
 }
 
-diag::Result<core::ir::Module> WgslToIR(const Source::File* file, const Options& options) {
+Result<core::ir::Module> WgslToIR(const Source::File* file, const Options& options) {
     Program program = Parse(file, options);
     return ProgramToLoweredIR(program);
 }
 
-diag::Result<core::ir::Module> ProgramToLoweredIR(const Program& program) {
+Result<core::ir::Module> ProgramToLoweredIR(const Program& program) {
     auto ir = ProgramToIR(program);
     if (ir != Success) {
         return ir.Failure();
@@ -63,7 +63,7 @@ diag::Result<core::ir::Module> ProgramToLoweredIR(const Program& program) {
     // Lower from WGSL-dialect to core-dialect
     auto res = Lower(ir.Get());
     if (res != Success) {
-        return diag::Failure{res.Failure().reason};
+        return res.Failure();
     }
     return ir;
 }

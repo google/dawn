@@ -311,7 +311,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
                 auto ir = tint::wgsl::reader::ProgramToLoweredIR(*r.inputProgram);
                 DAWN_INVALID_IF(ir != tint::Success,
                                 "An error occurred while generating Tint IR\n%s",
-                                ir.Failure().reason.Str());
+                                ir.Failure().reason);
 
                 auto singleEntryPointResult =
                     tint::core::ir::transform::SingleEntryPoint(ir.Get(), r.entryPointName);

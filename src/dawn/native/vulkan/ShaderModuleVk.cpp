@@ -413,14 +413,14 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
                              "tint::spirv::writer::Generate()");
 
                 // Convert the AST program to an IR module.
-                tint::diag::Result<tint::core::ir::Module> ir;
+                tint::Result<tint::core::ir::Module> ir;
                 {
                     SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(r.platform.UnsafeGetValue(),
                                                        "ShaderModuleProgramToIR");
                     ir = tint::wgsl::reader::ProgramToLoweredIR(*r.inputProgram);
                     DAWN_INVALID_IF(ir != tint::Success,
                                     "An error occurred while generating Tint IR\n%s",
-                                    ir.Failure().reason.Str());
+                                    ir.Failure().reason);
                 }
 
                 {

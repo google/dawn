@@ -31,6 +31,7 @@
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/wgsl/program/program.h"
 #include "src/tint/lang/wgsl/reader/options.h"
+#include "src/tint/utils/result.h"
 
 namespace tint::ast {
 class Enable;
@@ -51,7 +52,7 @@ Program Parse(const Source::File* file, const Options& options = {});
 /// @param file the input WGSL file
 /// @param options the configuration options to use when parsing WGSL
 /// @returns the resulting IR module, or failure
-diag::Result<core::ir::Module> WgslToIR(const Source::File* file, const Options& options = {});
+Result<core::ir::Module> WgslToIR(const Source::File* file, const Options& options = {});
 
 /// Builds a core-dialect core::ir::Module from the given Program
 /// @param program the Program to use.
@@ -60,7 +61,7 @@ diag::Result<core::ir::Module> WgslToIR(const Source::File* file, const Options&
 /// @note this assumes the `program.IsValid()`, and has had const-eval done so
 /// any abstract values have been calculated and converted into the relevant
 /// concrete types.
-diag::Result<core::ir::Module> ProgramToLoweredIR(const Program& program);
+Result<core::ir::Module> ProgramToLoweredIR(const Program& program);
 
 /// Allows for checking if an extension is currently supported/unsupported by IR
 /// before trying to convert to it.
