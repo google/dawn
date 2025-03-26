@@ -84,7 +84,7 @@ $B1: {  # root
     ASSERT_EQ(expect, str());
 }
 
-TEST_F(SpirvReader_AtomicsTest, DISABLED_ArrayStore_CopiedObject) {
+TEST_F(SpirvReader_AtomicsTest, ArrayStore_CopiedObject) {
     auto* f = b.ComputeFunction("main");
 
     core::ir::Var* wg = nullptr;
@@ -117,7 +117,18 @@ $B1: {  # root
     Run(Atomics);
 
     auto* expect = R"(
-UNIMPLEMENTED
+$B1: {  # root
+  %wg:ptr<workgroup, array<atomic<u32>, 4>, read_write> = var undef
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:ptr<workgroup, array<atomic<u32>, 4>, read_write> = let %wg
+    %4:ptr<workgroup, atomic<u32>, read_write> = access %3, 1i
+    %5:void = atomicStore %4, 2u
+    ret
+  }
+}
 )";
     ASSERT_EQ(expect, str());
 }
