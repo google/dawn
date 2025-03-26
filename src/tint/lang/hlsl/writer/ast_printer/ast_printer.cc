@@ -102,12 +102,12 @@
 using namespace tint::core::number_suffixes;  // NOLINT
 using namespace tint::core::fluent_types;     // NOLINT
 
-TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
-
 namespace tint::hlsl::writer {
 namespace {
 
 const char kTempNamePrefix[] = "tint_tmp";
+
+static constexpr std::array<char, 4> kSwizzle = {'x', 'y', 'z', 'w'};
 
 const char* ImageFormatToRWtextureType(core::TexelFormat image_format) {
     switch (image_format) {
@@ -1481,8 +1481,6 @@ bool ASTPrinter::EmitUniformBufferAccess(StringStream& out,
         }
     }
 
-    const char swizzle[] = {'x', 'y', 'z', 'w'};
-
     using Op = DecomposeMemoryAccess::Intrinsic::Op;
     using DataType = DecomposeMemoryAccess::Intrinsic::DataType;
     switch (intrinsic->op) {
@@ -1497,7 +1495,7 @@ bool ASTPrinter::EmitUniformBufferAccess(StringStream& out,
                 target << buffer;
                 if (scalar_offset_constant) {
                     target << "[" << (scalar_offset_index / 4) << "]."
-                           << swizzle[scalar_offset_index & 3];
+                           << kSwizzle[scalar_offset_index & 3];
                 } else {
                     target << "[" << scalar_offset_index_unified_expr << " / 4]["
                            << scalar_offset_index_unified_expr << " % 4]";
@@ -1547,7 +1545,7 @@ bool ASTPrinter::EmitUniformBufferAccess(StringStream& out,
                 out << "float16_t(f16tof32(((" << buffer;
                 if (scalar_offset_constant) {
                     out << "[" << (scalar_offset_index / 4) << "]."
-                        << swizzle[scalar_offset_index & 3];
+                        << kSwizzle[scalar_offset_index & 3];
                     // WGSL spec ensure little endian memory layout.
                     if (scalar_offset_bytes % 4 == 0) {
                         out << ") & 0xFFFF)";
@@ -2705,7 +2703,7 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
             // All of these builtins use the GetDimensions() method on the texture
             bool is_ms = texture_type->IsAnyOf<core::type::MultisampledTexture,
                                                core::type::DepthMultisampledTexture>();
-            int num_dimensions = 0;
+            unsigned int num_dimensions = 0;
             std::string swizzle;
 
             switch (builtin->Fn()) {
@@ -2801,7 +2799,8 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
                 // vector. As we've grown the vector by one element, we now need to
                 // swizzle to keep the result expression equivalent.
                 if (swizzle.empty()) {
-                    static constexpr const char* swizzles[] = {"", ".x", ".xy", ".xyz"};
+                    static constexpr std::array<const char*, 4> swizzles = {"", ".x", ".xy",
+                                                                            ".xyz"};
                     swizzle = swizzles[num_dimensions - 1];
                 }
             }
@@ -2838,15 +2837,14 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
                 if (num_dimensions == 1) {
                     pre << dims;
                 } else {
-                    static constexpr char xyzw[] = {'x', 'y', 'z', 'w'};
                     if (DAWN_UNLIKELY(num_dimensions < 0 || num_dimensions > 4)) {
                         TINT_ICE() << "vector dimensions are " << num_dimensions;
                     }
-                    for (int i = 0; i < num_dimensions; i++) {
+                    for (unsigned int i = 0; i < num_dimensions; i++) {
                         if (i > 0) {
                             pre << ", ";
                         }
-                        pre << dims << "." << xyzw[i];
+                        pre << dims << "." << kSwizzle[i];
                     }
                 }
 
@@ -3034,8 +3032,9 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
         }
         if (wgsl_ret_width < hlsl_ret_width) {
             out << ".";
+            TINT_ASSERT(wgsl_ret_width < 3);
             for (uint32_t i = 0; i < wgsl_ret_width; i++) {
-                out << "xyz"[i];
+                out << kSwizzle[i];
             }
         }
         if (DAWN_UNLIKELY(wgsl_ret_width > hlsl_ret_width)) {
@@ -4910,5 +4909,3 @@ std::string ASTPrinter::UniqueIdentifier(const std::string& prefix /* = "" */) {
 }
 
 }  // namespace tint::hlsl::writer
-
-TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
