@@ -28,6 +28,7 @@
 #ifndef SRC_DAWN_COMMON_MATH_H_
 #define SRC_DAWN_COMMON_MATH_H_
 
+#include <climits>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
