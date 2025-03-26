@@ -30,14 +30,35 @@
 #include <limits>
 
 #include "src/tint/lang/core/constant/scalar.h"
+#include "src/tint/lang/core/ir/binary.h"
 #include "src/tint/lang/core/ir/function.h"
+#include "src/tint/lang/core/ir/load.h"
 #include "src/tint/lang/core/ir/loop.h"
+#include "src/tint/lang/core/ir/multi_in_block.h"
 #include "src/tint/lang/core/ir/next_iteration.h"
+#include "src/tint/lang/core/ir/store.h"
 #include "src/tint/lang/core/ir/traverse.h"
 #include "src/tint/lang/core/ir/var.h"
+#include "src/tint/lang/core/type/i32.h"
 #include "src/tint/lang/core/type/pointer.h"
+#include "src/tint/lang/core/type/u32.h"
+#include "src/tint/utils/rtti/switch.h"
 
 namespace tint::core::ir::analysis {
+
+namespace {
+/// Returns true if v is the integer constant 1.
+bool IsOne(const Value* v) {
+    if (auto* cv = v->As<Constant>()) {
+        return Switch(
+            cv->Type(),
+            [&](const core::type::I32*) { return cv->Value()->ValueAs<int32_t>() == 1; },
+            [&](const core::type::U32*) { return cv->Value()->ValueAs<uint32_t>() == 1; },
+            [&](const Default) -> bool { return false; });
+    }
+    return false;
+}
+}  // namespace
 
 IntegerRangeInfo::IntegerRangeInfo(int64_t min_bound, int64_t max_bound) {
     TINT_ASSERT(min_bound <= max_bound);
@@ -100,6 +121,8 @@ struct IntegerRangeAnalysisImpl {
     }
 
     const Var* GetLoopControlVariableFromConstantInitializer(const Loop* loop) {
+        TINT_ASSERT(loop);
+
         auto* init_block = loop->Initializer();
         if (!init_block) {
             return nullptr;
@@ -141,6 +164,97 @@ struct IntegerRangeAnalysisImpl {
         return var;
     }
 
+    // Currently we only support the loop continuing of a simple for-loop, which only has 4
+    // instructions
+    /// - The first instruction is to load the loop control variable into a temporary variable.
+    /// - The second instruction is to add one or minus one to the temporary variable.
+    /// - The third instruction is to store the value of the temporary variable into the loop
+    ///   control variable.
+    /// - The fourth instruction is `next_iteration`.
+    const Binary* GetBinaryToUpdateLoopControlVariableInContinuingBlock(
+        const Loop* loop,
+        const Var* loop_control_variable) {
+        TINT_ASSERT(loop);
+        TINT_ASSERT(loop_control_variable);
+
+        auto* continuing_block = loop->Continuing();
+        if (!continuing_block) {
+            return nullptr;
+        }
+
+        if (continuing_block->Length() != 4u) {
+            return nullptr;
+        }
+
+        // 1st instruction:
+        // %src = load %loop_control_variable
+        const auto* load_from_loop_control_variable = continuing_block->Instructions()->As<Load>();
+        if (!load_from_loop_control_variable) {
+            return nullptr;
+        }
+        if (load_from_loop_control_variable->From() != loop_control_variable->Result(0)) {
+            return nullptr;
+        }
+
+        // 2nd instruction:
+        // %dst = add %src, 1
+        // or %dst = add 1, %src
+        // or %dst = sub %src, 1
+        const auto* add_or_sub_from_loop_control_variable =
+            load_from_loop_control_variable->next->As<Binary>();
+        if (!add_or_sub_from_loop_control_variable) {
+            return nullptr;
+        }
+        const auto* src = load_from_loop_control_variable->Result(0);
+        const auto* lhs = add_or_sub_from_loop_control_variable->LHS();
+        const auto* rhs = add_or_sub_from_loop_control_variable->RHS();
+        switch (add_or_sub_from_loop_control_variable->Op()) {
+            case BinaryOp::kAdd: {
+                // %dst = add %src, 1
+                if (lhs == src && IsOne(rhs)) {
+                    break;
+                }
+                // %dst = add 1, %src
+                if (rhs == src && IsOne(lhs)) {
+                    break;
+                }
+                return nullptr;
+            }
+            case BinaryOp::kSubtract: {
+                // %dst = sub %src, 1
+                if (lhs == src && IsOne(rhs)) {
+                    break;
+                }
+                return nullptr;
+            }
+            default:
+                return nullptr;
+        }
+
+        // 3rd instruction:
+        // store %loop_control_variable, %dst
+        const auto* store_into_loop_control_variable =
+            add_or_sub_from_loop_control_variable->next->As<Store>();
+        if (!store_into_loop_control_variable) {
+            return nullptr;
+        }
+        const auto* dst = add_or_sub_from_loop_control_variable->Result(0);
+        if (store_into_loop_control_variable->From() != dst) {
+            return nullptr;
+        }
+        if (store_into_loop_control_variable->To() != loop_control_variable->Result(0)) {
+            return nullptr;
+        }
+
+        // 4th instruction:
+        // next_iteration
+        if (!store_into_loop_control_variable->next->As<NextIteration>()) {
+            return nullptr;
+        }
+
+        return add_or_sub_from_loop_control_variable;
+    }
+
   private:
     Function* function_;
     Hashmap<const FunctionParam*, Vector<IntegerRangeInfo, 3>, 4>
@@ -158,6 +272,13 @@ const IntegerRangeInfo* IntegerRangeAnalysis::GetInfo(const FunctionParam* param
 const Var* IntegerRangeAnalysis::GetLoopControlVariableFromConstantInitializerForTest(
     const Loop* loop) {
     return impl_->GetLoopControlVariableFromConstantInitializer(loop);
+}
+
+const Binary* IntegerRangeAnalysis::GetBinaryToUpdateLoopControlVariableInContinuingBlockForTest(
+    const Loop* loop,
+    const Var* loop_control_variable) {
+    return impl_->GetBinaryToUpdateLoopControlVariableInContinuingBlock(loop,
+                                                                        loop_control_variable);
 }
 
 }  // namespace tint::core::ir::analysis
