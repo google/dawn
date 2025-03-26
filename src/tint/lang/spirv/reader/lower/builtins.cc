@@ -218,6 +218,23 @@ struct State {
                 case spirv::BuiltinFn::kOuterProduct:
                     OuterProduct(builtin);
                     break;
+                case spirv::BuiltinFn::kAtomicLoad:
+                case spirv::BuiltinFn::kAtomicStore:
+                case spirv::BuiltinFn::kAtomicExchange:
+                case spirv::BuiltinFn::kAtomicCompareExchange:
+                case spirv::BuiltinFn::kAtomicIAdd:
+                case spirv::BuiltinFn::kAtomicISub:
+                case spirv::BuiltinFn::kAtomicSMax:
+                case spirv::BuiltinFn::kAtomicSMin:
+                case spirv::BuiltinFn::kAtomicUMax:
+                case spirv::BuiltinFn::kAtomicUMin:
+                case spirv::BuiltinFn::kAtomicAnd:
+                case spirv::BuiltinFn::kAtomicOr:
+                case spirv::BuiltinFn::kAtomicXor:
+                case spirv::BuiltinFn::kAtomicIIncrement:
+                case spirv::BuiltinFn::kAtomicIDecrement:
+                    // Ignore Atomics, they'll be handled by the `Atomics` transform.
+                    break;
                 default:
                     TINT_UNREACHABLE() << "unknown spirv builtin: " << builtin->Func();
             }

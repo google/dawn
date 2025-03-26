@@ -38,7 +38,7 @@ using namespace tint::core::number_suffixes;  // NOLINT
 
 using SpirvReader_AtomicsTest = core::ir::transform::TransformTest;
 
-TEST_F(SpirvReader_AtomicsTest, DISABLED_ArrayStore) {
+TEST_F(SpirvReader_AtomicsTest, ArrayStore) {
     auto* f = b.ComputeFunction("main");
 
     core::ir::Var* wg = nullptr;
@@ -48,7 +48,7 @@ TEST_F(SpirvReader_AtomicsTest, DISABLED_ArrayStore) {
     b.Append(f->Block(), [&] {  //
         auto* a = b.Access(ty.ptr<workgroup, u32, read_write>(), wg, 1_i);
         b.Call<spirv::ir::BuiltinCall>(ty.void_(), spirv::BuiltinFn::kAtomicStore, a, 1_u, 0_u,
-                                       0_u);
+                                       1_u);
         b.Return(f);
     });
 
@@ -60,7 +60,7 @@ $B1: {  # root
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:ptr<workgroup, u32, read_write> = access %wg, 1i
-    %4:void = spirv.atomic_store %3, 1u, 0u, 0u
+    %4:void = spirv.atomic_store %3, 1u, 0u, 1u
     ret
   }
 }
@@ -69,7 +69,17 @@ $B1: {  # root
     Run(Atomics);
 
     auto* expect = R"(
-UNIMPLEMENTED
+$B1: {  # root
+  %wg:ptr<workgroup, array<atomic<u32>, 4>, read_write> = var undef
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:ptr<workgroup, atomic<u32>, read_write> = access %wg, 1i
+    %4:void = atomicStore %3, 1u
+    ret
+  }
+}
 )";
     ASSERT_EQ(expect, str());
 }
@@ -112,7 +122,7 @@ UNIMPLEMENTED
     ASSERT_EQ(expect, str());
 }
 
-TEST_F(SpirvReader_AtomicsTest, DISABLED_ArrayNested) {
+TEST_F(SpirvReader_AtomicsTest, ArrayNested) {
     auto* f = b.ComputeFunction("main");
 
     core::ir::Var* wg = nullptr;
@@ -144,7 +154,17 @@ $B1: {  # root
     Run(Atomics);
 
     auto* expect = R"(
-UNIMPLEMENTED
+$B1: {  # root
+  %wg:ptr<workgroup, array<array<array<atomic<u32>, 1>, 2>, 3>, read_write> = var undef
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:ptr<workgroup, atomic<u32>, read_write> = access %wg, 2i, 1i, 0i
+    %4:void = atomicStore %3, 1u
+    ret
+  }
+}
 )";
     ASSERT_EQ(expect, str());
 }
