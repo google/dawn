@@ -27,10 +27,13 @@
 
 #include "src/tint/lang/spirv/reader/lower/atomics.h"
 
+#include <utility>
+
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/spirv/ir/builtin_call.h"
+#include "src/tint/utils/containers/hashmap.h"
 #include "src/tint/utils/containers/hashset.h"
 #include "src/tint/utils/containers/vector.h"
 
@@ -56,6 +59,17 @@ struct State {
 
     /// The `ir::Value`s which have been converted
     Hashset<core::ir::Value*, 8> converted_{};
+
+    struct ForkedStruct {
+        const core::type::Struct* src_struct = nullptr;
+        const core::type::Struct* dst_struct = nullptr;
+        Hashset<size_t, 4> atomic_members;
+    };
+
+    /// Map of original structure to forked structure information
+    Hashmap<const core::type::Struct*, ForkedStruct, 4> forked_structs_{};
+    /// List of value objects to update with new struct types
+    Hashset<core::ir::InstructionResult*, 4> values_needing_struct_update_{};
 
     /// Process the module.
     void Process() {
@@ -99,6 +113,9 @@ struct State {
                 ConvertAtomicValue(val);
             }
         }
+
+        ProcessForkedStructs();
+        ReplaceStructTypes();
     }
 
     void AtomicStore(spirv::ir::BuiltinCall* call) {
@@ -114,40 +131,141 @@ struct State {
         call->Destroy();
     }
 
+    void ProcessForkedStructs() {
+        for (auto iter : forked_structs_) {
+            auto& forked = iter.value;
+            CreateForkIfNeeded(forked.src_struct);
+        }
+    }
+
+    const core::type::Struct* CreateForkIfNeeded(const core::type::Struct* src_struct) {
+        if (!forked_structs_.Contains(src_struct)) {
+            return src_struct;
+        }
+
+        auto forked = forked_structs_.Get(src_struct);
+        if (forked->dst_struct != nullptr) {
+            return forked->dst_struct;
+        }
+
+        auto members = forked->src_struct->Members();
+        Vector<const core::type::StructMember*, 8> new_members;
+        for (size_t i = 0; i < members.Length(); ++i) {
+            auto* member = members[i];
+            const core::type::Type* new_member_type = nullptr;
+            if (forked->atomic_members.Contains(i)) {
+                new_member_type = AtomicTypeFor(nullptr, member->Type());
+            } else {
+                new_member_type = member->Type();
+            }
+            auto index = static_cast<uint32_t>(i);
+            new_members.Push(ty.Get<core::type::StructMember>(
+                member->Name(), new_member_type, index, member->Offset(), member->Align(),
+                member->Size(), core::IOAttributes{}));
+        }
+
+        // Create a new struct with the rewritten members.
+        auto name = ir.symbols.New(forked->src_struct->Name().Name() + "_atomic");
+        forked->dst_struct = ty.Struct(name, std::move(new_members));
+
+        return forked->dst_struct;
+    }
+
+    void ReplaceStructTypes() {
+        for (auto iter : values_needing_struct_update_) {
+            auto* orig_ty = iter->Type();
+            iter->SetType(AtomicTypeFor(nullptr, orig_ty));
+        }
+    }
+
     void ConvertAtomicValue(core::ir::Value* val) {
         auto* res = val->As<core::ir::InstructionResult>();
         TINT_ASSERT(res);
 
-        auto* atomic_ty = AtomicTypeFor(res->Type());
+        auto* orig_ty = res->Type();
+        auto* atomic_ty = AtomicTypeFor(val, orig_ty);
         res->SetType(atomic_ty);
 
-        tint::Switch(                                                            //
-            res->Instruction(),                                                  //
-            [&](core::ir::Access* a) { values_to_convert_.Push(a->Object()); },  //
-            [&](core::ir::Let* l) { values_to_convert_.Push(l->Value()); },      //
-            [&](core::ir::Var*) {},                                              //
+        tint::Switch(            //
+            res->Instruction(),  //
+            [&](core::ir::Access* a) {
+                CheckForStructForking(a);
+                values_to_convert_.Push(a->Object());
+            },                                                               //
+            [&](core::ir::Let* l) { values_to_convert_.Push(l->Value()); },  //
+            [&](core::ir::Var*) {},                                          //
             TINT_ICE_ON_NO_MATCH);
     }
 
-    const core::type::Type* AtomicTypeFor(const core::type::Type* orig_ty) {
+    void CheckForStructForking(core::ir::Access* access) {
+        auto* cur_ty = access->Object()->Type()->UnwrapPtr();
+        for (auto* idx : access->Indices()) {
+            tint::Switch(
+                cur_ty,  //
+                [&](const core::type::Struct* str) {
+                    auto& forked = Fork(str);
+
+                    auto* const_val = idx->As<core::ir::Constant>();
+                    TINT_ASSERT(const_val);
+
+                    auto const_idx = const_val->Value()->ValueAs<uint32_t>();
+                    forked.atomic_members.Add(const_idx);
+
+                    cur_ty = str->Members()[const_idx]->Type();
+                },                                                                //
+                [&](const core::type::Array* ary) { cur_ty = ary->ElemType(); },  //
+                TINT_ICE_ON_NO_MATCH);
+        }
+    }
+
+    const core::type::Type* AtomicTypeFor(core::ir::Value* val, const core::type::Type* orig_ty) {
         return tint::Switch(
             orig_ty,  //
             [&](const core::type::I32*) { return ty.atomic(orig_ty); },
             [&](const core::type::U32*) { return ty.atomic(orig_ty); },
-            // [&](const core::type::Struct* str) { return ty(Fork(str).name); },
+            [&](const core::type::Struct* str) {
+                // If a `val` is provided, then we're getting the atomic type for a value as we walk
+                // the full instruction list. This means we can't replace structs at this point
+                // because we may not have all the information about what members are atomics. So,
+                // we record the type needs to be updated for `val` after we've created the structs.
+                // (This works through pointers because this method is recursive, so a pointer to a
+                // struct will record the type needs updating).
+                //
+                // In the case `val` is a nullptr then we've gathered all the needed information for
+                // which members are atomics and can create the forked strut.
+                if (val) {
+                    auto* res = val->As<core::ir::InstructionResult>();
+                    TINT_ASSERT(res);
+
+                    values_needing_struct_update_.Add(res);
+                    Fork(str);
+                    return str;
+                }
+
+                return CreateForkIfNeeded(str);
+            },
             [&](const core::type::Array* arr) {
                 if (arr->Count()->Is<core::type::RuntimeArrayCount>()) {
-                    return ty.runtime_array(AtomicTypeFor(arr->ElemType()));
+                    return ty.runtime_array(AtomicTypeFor(val, arr->ElemType()));
                 }
                 auto count = arr->ConstantCount();
                 TINT_ASSERT(count);
 
-                return ty.array(AtomicTypeFor(arr->ElemType()), u32(count.value()));
+                return ty.array(AtomicTypeFor(val, arr->ElemType()), u32(count.value()));
             },
             [&](const core::type::Pointer* ptr) {
-                return ty.ptr(ptr->AddressSpace(), AtomicTypeFor(ptr->StoreType()), ptr->Access());
+                return ty.ptr(ptr->AddressSpace(), AtomicTypeFor(val, ptr->StoreType()),
+                              ptr->Access());
             },
             TINT_ICE_ON_NO_MATCH);
+    }
+
+    ForkedStruct& Fork(const core::type::Struct* str) {
+        return forked_structs_.GetOrAdd(str, [&]() {
+            ForkedStruct forked;
+            forked.src_struct = str;
+            return forked;
+        });
     }
 };
 

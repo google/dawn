@@ -180,7 +180,7 @@ $B1: {  # root
     ASSERT_EQ(expect, str());
 }
 
-TEST_F(SpirvReader_AtomicsTest, DISABLED_FlatSingleAtomic) {
+TEST_F(SpirvReader_AtomicsTest, FlatSingleAtomic) {
     auto* f = b.ComputeFunction("main");
 
     auto* sb = ty.Struct(mod.symbols.New("S"), {
@@ -230,12 +230,38 @@ $B1: {  # root
     Run(Atomics);
 
     auto* expect = R"(
-UNIMPLEMENTED
+S = struct @align(4) {
+  x:i32 @offset(0)
+  a:u32 @offset(4)
+  y:u32 @offset(8)
+}
+
+S_atomic = struct @align(4) {
+  x:i32 @offset(0)
+  a:atomic<u32> @offset(4)
+  y:u32 @offset(8)
+}
+
+$B1: {  # root
+  %wg:ptr<workgroup, S_atomic, read_write> = var undef
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:ptr<workgroup, i32, read_write> = access %wg, 0u
+    store %3, 0i
+    %4:ptr<workgroup, atomic<u32>, read_write> = access %wg, 1u
+    %5:void = atomicStore %4, 0u
+    %6:ptr<workgroup, u32, read_write> = access %wg, 2u
+    store %6, 0u
+    ret
+  }
+}
 )";
     ASSERT_EQ(expect, str());
 }
 
-TEST_F(SpirvReader_AtomicsTest, DISABLED_FlatMultipleAtomics) {
+TEST_F(SpirvReader_AtomicsTest, FlatMultipleAtomics) {
     auto* sb = ty.Struct(mod.symbols.New("S"), {
                                                    {mod.symbols.New("x"), ty.i32()},
                                                    {mod.symbols.New("a"), ty.u32()},
@@ -286,12 +312,38 @@ $B1: {  # root
     Run(Atomics);
 
     auto* expect = R"(
-UNIMPLEMENTED
+S = struct @align(4) {
+  x:i32 @offset(0)
+  a:u32 @offset(4)
+  b:u32 @offset(8)
+}
+
+S_atomic = struct @align(4) {
+  x:i32 @offset(0)
+  a:atomic<u32> @offset(4)
+  b:atomic<u32> @offset(8)
+}
+
+$B1: {  # root
+  %wg:ptr<workgroup, S_atomic, read_write> = var undef
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:ptr<workgroup, i32, read_write> = access %wg, 0u
+    store %3, 0i
+    %4:ptr<workgroup, atomic<u32>, read_write> = access %wg, 1u
+    %5:void = atomicStore %4, 0u
+    %6:ptr<workgroup, atomic<u32>, read_write> = access %wg, 2u
+    %7:void = atomicStore %6, 0u
+    ret
+  }
+}
 )";
     ASSERT_EQ(expect, str());
 }
 
-TEST_F(SpirvReader_AtomicsTest, DISABLED_Nested) {
+TEST_F(SpirvReader_AtomicsTest, Nested) {
     auto* f = b.ComputeFunction("main");
 
     auto* s0 = ty.Struct(mod.symbols.New("S0"), {
@@ -372,12 +424,68 @@ $B1: {  # root
     Run(Atomics);
 
     auto* expect = R"(
-UNIMPLEMENTED
+S0 = struct @align(4) {
+  x:i32 @offset(0)
+  a:u32 @offset(4)
+  y:i32 @offset(8)
+  z:i32 @offset(12)
+}
+
+S1 = struct @align(4) {
+  x_1:i32 @offset(0)
+  a_1:S0 @offset(4)
+  y_1:i32 @offset(20)
+  z_1:i32 @offset(24)
+}
+
+S2 = struct @align(4) {
+  x_2:i32 @offset(0)
+  y_2:i32 @offset(4)
+  z_2:i32 @offset(8)
+  a_2:S1 @offset(12)
+}
+
+S0_atomic = struct @align(4) {
+  x:i32 @offset(0)
+  a:atomic<u32> @offset(4)
+  y:i32 @offset(8)
+  z:i32 @offset(12)
+}
+
+S1_atomic = struct @align(4) {
+  x_1:i32 @offset(0)
+  a_1:S0_atomic @offset(4)
+  y_1:i32 @offset(20)
+  z_1:i32 @offset(24)
+}
+
+S2_atomic = struct @align(4) {
+  x_2:i32 @offset(0)
+  y_2:i32 @offset(4)
+  z_2:i32 @offset(8)
+  a_2:S1_atomic @offset(12)
+}
+
+$B1: {  # root
+  %wg:ptr<workgroup, S2_atomic, read_write> = var undef
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:ptr<workgroup, i32, read_write> = access %wg, 3u, 1u, 0u
+    store %3, 0i
+    %4:ptr<workgroup, atomic<u32>, read_write> = access %wg, 3u, 1u, 1u
+    %5:void = atomicStore %4, 0u
+    %6:ptr<workgroup, i32, read_write> = access %wg, 3u, 1u, 2u
+    store %6, 0i
+    ret
+  }
+}
 )";
     ASSERT_EQ(expect, str());
 }
 
-TEST_F(SpirvReader_AtomicsTest, DISABLED_ArrayOfStruct) {
+TEST_F(SpirvReader_AtomicsTest, ArrayOfStruct) {
     auto* f = b.ComputeFunction("main");
 
     auto* sb = ty.Struct(mod.symbols.New("S"), {
@@ -419,12 +527,102 @@ $B1: {  # root
     Run(Atomics);
 
     auto* expect = R"(
-UNIMPLEMENTED
+S = struct @align(4) {
+  x:i32 @offset(0)
+  a:u32 @offset(4)
+}
+
+S_atomic = struct @align(4) {
+  x:i32 @offset(0)
+  a:atomic<u32> @offset(4)
+}
+
+$B1: {  # root
+  %wg:ptr<workgroup, array<S_atomic, 10>, read_write> = var undef
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:ptr<workgroup, atomic<u32>, read_write> = access %wg, 4i, 1u
+    %4:void = atomicStore %3, 1u
+    ret
+  }
+}
 )";
     ASSERT_EQ(expect, str());
 }
 
-TEST_F(SpirvReader_AtomicsTest, DISABLED_StructOfArray) {
+TEST_F(SpirvReader_AtomicsTest, ArrayOfStruct_Let) {
+    auto* f = b.ComputeFunction("main");
+
+    auto* sb = ty.Struct(mod.symbols.New("S"), {
+                                                   {mod.symbols.New("x"), ty.i32()},
+                                                   {mod.symbols.New("a"), ty.u32()},
+                                               });
+
+    core::ir::Var* wg = nullptr;
+    b.Append(mod.root_block,
+             [&] { wg = b.Var("wg", ty.ptr(workgroup, ty.array(sb, 10), read_write)); });
+
+    b.Append(f->Block(), [&] {  //
+        auto* l = b.Let(wg);
+        auto* a = b.Access(ty.ptr<workgroup, u32, read_write>(), l, 4_i, 1_u);
+        b.Call<spirv::ir::BuiltinCall>(ty.void_(), spirv::BuiltinFn::kAtomicStore, a, 2_u, 0_u,
+                                       1_u);
+        b.Return(f);
+    });
+
+    auto* src = R"(
+S = struct @align(4) {
+  x:i32 @offset(0)
+  a:u32 @offset(4)
+}
+
+$B1: {  # root
+  %wg:ptr<workgroup, array<S, 10>, read_write> = var undef
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:ptr<workgroup, array<S, 10>, read_write> = let %wg
+    %4:ptr<workgroup, u32, read_write> = access %3, 4i, 1u
+    %5:void = spirv.atomic_store %4, 2u, 0u, 1u
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+    Run(Atomics);
+
+    auto* expect = R"(
+S = struct @align(4) {
+  x:i32 @offset(0)
+  a:u32 @offset(4)
+}
+
+S_atomic = struct @align(4) {
+  x:i32 @offset(0)
+  a:atomic<u32> @offset(4)
+}
+
+$B1: {  # root
+  %wg:ptr<workgroup, array<S_atomic, 10>, read_write> = var undef
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:ptr<workgroup, array<S_atomic, 10>, read_write> = let %wg
+    %4:ptr<workgroup, atomic<u32>, read_write> = access %3, 4i, 1u
+    %5:void = atomicStore %4, 1u
+    ret
+  }
+}
+)";
+    ASSERT_EQ(expect, str());
+}
+
+TEST_F(SpirvReader_AtomicsTest, StructOfArray) {
     auto* f = b.ComputeFunction("main");
 
     auto* sb = ty.Struct(mod.symbols.New("S"), {
@@ -466,7 +664,29 @@ $B1: {  # root
     Run(Atomics);
 
     auto* expect = R"(
-UNIMPLEMENTED
+S = struct @align(4) {
+  x:i32 @offset(0)
+  a:array<u32, 10> @offset(4)
+  y:u32 @offset(44)
+}
+
+S_atomic = struct @align(4) {
+  x:i32 @offset(0)
+  a:array<atomic<u32>, 10> @offset(4)
+  y:u32 @offset(44)
+}
+
+$B1: {  # root
+  %wg:ptr<workgroup, S_atomic, read_write> = var undef
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:ptr<workgroup, atomic<u32>, read_write> = access %wg, 1u, 4i
+    %4:void = atomicStore %3, 1u
+    ret
+  }
+}
 )";
     ASSERT_EQ(expect, str());
 }
