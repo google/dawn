@@ -2540,6 +2540,26 @@ test:10:11 note: reading from read_write storage buffer 'non_uniform' may result
 )");
 }
 
+TEST_F(UniformityAnalysisTest, ForLoop_NonUniformBarrierInUnreachableContinuingStatement) {
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read_write> non_uniform : i32;
+
+fn bar(i : i32) {
+  if (i == 0) {
+    workgroupBarrier();
+  }
+}
+
+fn foo() {
+  for (;; bar(non_uniform)) {
+    break;
+  }
+}
+)";
+
+    RunTest(src, true);
+}
+
 TEST_F(UniformityAnalysisTest, ForLoop_VarBecomesUniformBeforeContinue_BarrierInContinuing) {
     std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;

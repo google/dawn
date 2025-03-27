@@ -858,8 +858,9 @@ class UniformityGraph {
 
                 auto& loop_body_behavior = sem_.Get(f->body)->Behaviors();
 
-                // Insert the continuing statement at the end of the loop body.
-                if (f->continuing) {
+                // Insert the continuing statement at the end of the loop body, if it is reachable.
+                if (f->continuing && (loop_body_behavior.Contains(sem::Behavior::kNext) ||
+                                      loop_body_behavior.Contains(sem::Behavior::kContinue))) {
                     // Set up input nodes for the continuing block, to merge data flow paths from
                     // all blocks that branch to the continuing block.
                     for (auto v : info.var_continuing_nodes) {
