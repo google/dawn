@@ -600,17 +600,21 @@ class UniformityGraph {
                     auto* parent = sem->Parent();
                     auto* loop = parent ? parent->As<sem::LoopStatement>() : nullptr;
                     if (loop) {
-                        // We've reached the end of a loop body. If there is a continuing block,
-                        // process it before ending the block so that any variables declared in the
-                        // loop body are visible to the continuing block.
-                        if (auto* continuing =
-                                loop->Declaration()->As<ast::LoopStatement>()->continuing) {
-                            auto& loop_body_behavior = sem->Behaviors();
-                            if (loop_body_behavior.Contains(sem::Behavior::kNext) ||
-                                loop_body_behavior.Contains(sem::Behavior::kContinue)) {
+                        auto& info = current_function_->LoopSwitchInfoFor(loop);
+                        auto& loop_body_behavior = sem->Behaviors();
+
+                        // We've reached the end of a loop body. If the loop does not
+                        // unconditionally exit, handle the loop continuing block and propagate
+                        // variable values to the next iteration.
+                        if (loop_body_behavior.Contains(sem::Behavior::kNext) ||
+                            loop_body_behavior.Contains(sem::Behavior::kContinue)) {
+                            // If there is a continuing block, process it before ending the block so
+                            // that any variables declared in the loop body are visible to the
+                            // continuing block.
+                            if (auto* continuing =
+                                    loop->Declaration()->As<ast::LoopStatement>()->continuing) {
                                 // Set up input nodes for the continuing block, to merge data flow
                                 // paths from all blocks that branch to the continuing block.
-                                auto& info = current_function_->LoopSwitchInfoFor(loop);
                                 for (auto v : info.var_continuing_nodes) {
                                     // If the loop body just falls through to the continuing block,
                                     // add an edge to the node that represents the value at the end
@@ -629,6 +633,16 @@ class UniformityGraph {
 
                                 // Process the continuing block.
                                 cf = ProcessStatement(cf, continuing);
+                            }
+
+                            // Add edges from variable loop input nodes to their values at the end
+                            // of the loop body/continuing.
+                            for (auto v : info.var_in_nodes) {
+                                auto* in_node = v.value;
+                                auto* out_node = current_function_->variables.Get(v.key);
+                                if (out_node != in_node) {
+                                    in_node->AddEdge(out_node);
+                                }
                             }
                         }
                     }
@@ -1107,15 +1121,6 @@ class UniformityGraph {
                 auto* cf1 = ProcessStatement(cfx, l->body);
                 cfx->AddEdge(cf1);
                 cfx->AddEdge(cf);
-
-                // Add edges from variable loop input nodes to their values at the end of the loop.
-                for (auto v : info.var_in_nodes) {
-                    auto* in_node = v.value;
-                    auto* out_node = current_function_->variables.Get(v.key);
-                    if (out_node != in_node) {
-                        in_node->AddEdge(out_node);
-                    }
-                }
 
                 // Set each variable's exit node as its value in the outer scope.
                 for (auto v : info.var_exit_nodes) {
