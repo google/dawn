@@ -43,7 +43,7 @@ if (tint_build_unittests || tint_build_benchmarks) {
   import("//testing/test.gni")
 }
 if (tint_build_unittests) {
-  test("test_cmd") {
+  test("tint_unittests") {
     testonly = true
     output_name = "tint_unittests"
     sources = [ "main_test.cc" ]
