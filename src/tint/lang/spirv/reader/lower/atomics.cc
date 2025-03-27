@@ -89,7 +89,10 @@ struct State {
                     break;
                 case spirv::BuiltinFn::kAtomicExchange:
                 case spirv::BuiltinFn::kAtomicCompareExchange:
+                    break;
                 case spirv::BuiltinFn::kAtomicIAdd:
+                    AtomicIAdd(builtin);
+                    break;
                 case spirv::BuiltinFn::kAtomicISub:
                 case spirv::BuiltinFn::kAtomicSMax:
                 case spirv::BuiltinFn::kAtomicSMin:
@@ -116,6 +119,19 @@ struct State {
 
         ProcessForkedStructs();
         ReplaceStructTypes();
+    }
+
+    void AtomicIAdd(spirv::ir::BuiltinCall* call) {
+        auto args = call->Args();
+
+        b.InsertBefore(call, [&] {
+            auto* var = args[0];
+            values_to_convert_.Push(var);
+
+            auto* val = args[3];
+            b.CallWithResult(call->DetachResult(), core::BuiltinFn::kAtomicAdd, var, val);
+        });
+        call->Destroy();
     }
 
     void AtomicStore(spirv::ir::BuiltinCall* call) {
