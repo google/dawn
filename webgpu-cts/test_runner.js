@@ -342,3 +342,4 @@ function sendMessageInfraFailure(message) {
 }
 
 window.setupWebsocket = setupWebsocket
+window.globalTestConfig = globalTestConfig
