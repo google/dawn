@@ -1262,6 +1262,85 @@ test:12:9 note: reading from read_write storage buffer 'non_uniform' may result 
 )");
 }
 
+TEST_F(UniformityAnalysisTest,
+       Loop_VarBecomesNonUniformInLoopAfterBarrier_ContinueAtEnd_NoContinuing) {
+    // Use a variable for a conditional barrier in a loop, and then assign a non-uniform value to
+    // that variable later in that loop. The loop ends with a continue statement, without a
+    // continuing block.
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read_write> non_uniform : i32;
+
+fn foo() {
+  var v = 0;
+  loop {
+    if (v == 0) {
+      workgroupBarrier();
+      break;
+    }
+
+    v = non_uniform;
+    continue;
+  }
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:8:7 error: 'workgroupBarrier' must only be called from uniform control flow
+      workgroupBarrier();
+      ^^^^^^^^^^^^^^^^
+
+test:7:5 note: control flow depends on possibly non-uniform value
+    if (v == 0) {
+    ^^
+
+test:12:9 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+    v = non_uniform;
+        ^^^^^^^^^^^
+)");
+}
+
+TEST_F(UniformityAnalysisTest,
+       Loop_VarBecomesNonUniformInLoopAfterBarrier_ContinueAtEnd_EmptyContinuing) {
+    // Use a variable for a conditional barrier in a loop, and then assign a non-uniform value to
+    // that variable later in that loop. The loop ends with a continue statement, without a
+    // continuing block.
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read_write> non_uniform : i32;
+
+fn foo() {
+  var v = 0;
+  loop {
+    if (v == 0) {
+      workgroupBarrier();
+      break;
+    }
+
+    v = non_uniform;
+    continue;
+
+    continuing {
+    }
+  }
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:8:7 error: 'workgroupBarrier' must only be called from uniform control flow
+      workgroupBarrier();
+      ^^^^^^^^^^^^^^^^
+
+test:7:5 note: control flow depends on possibly non-uniform value
+    if (v == 0) {
+    ^^
+
+test:12:9 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+    v = non_uniform;
+        ^^^^^^^^^^^
+)");
+}
+
 TEST_F(UniformityAnalysisTest, Loop_VarBecomesNonUniformInLoopAfterBarrier_BreakAtEnd) {
     // Use a variable for a conditional barrier in a loop, and then assign a non-uniform value to
     // that variable later in that loop. End the loop with a break statement to prevent the
@@ -1586,6 +1665,105 @@ test:7:9 note: reading from read_write storage buffer 'non_uniform' may result i
 )");
 }
 
+TEST_F(UniformityAnalysisTest, Loop_VarBecomesUniformAfterConditionalContinue_BarrierInContinuing) {
+    // Use a variable for a conditional barrier in the continuing statement of a loop, assign a
+    // non-uniform value to that variable before a conditional continue, and then unconditionally
+    // assign a uniform value before the end of the body.
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read_write> non_uniform : i32;
+
+fn foo() {
+  loop {
+    var v = 0;
+    if (true) {
+      v = non_uniform;
+      continue;
+    }
+    v = 0;
+    continuing {
+      if (v == 0) {
+        workgroupBarrier();
+      }
+      break if true;
+    }
+  }
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:14:9 error: 'workgroupBarrier' must only be called from uniform control flow
+        workgroupBarrier();
+        ^^^^^^^^^^^^^^^^
+
+test:13:7 note: control flow depends on possibly non-uniform value
+      if (v == 0) {
+      ^^
+
+test:8:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+      v = non_uniform;
+          ^^^^^^^^^^^
+)");
+}
+
+TEST_F(UniformityAnalysisTest, Loop_VarBecomesNonUniformBeforeBreak_BarrierInContinuing) {
+    // Use a variable for a conditional barrier in the continuing statement of a loop that has a
+    // continue statement. Assign a non-uniform value to that variable before a break statement.
+    // The non-uniform value will never get to the continuing block, so there should be no error.
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read_write> non_uniform : i32;
+
+fn foo() {
+  var v = 0;
+  loop {
+    if (true) {
+      continue;
+    }
+
+    v = non_uniform;
+    break;
+
+    continuing {
+      if (v == 0) {
+        workgroupBarrier();
+      }
+    }
+  }
+}
+)";
+
+    RunTest(src, true);
+}
+
+TEST_F(UniformityAnalysisTest, Loop_VarBecomesNonUniformBeforeReturn_BarrierInContinuing) {
+    // Use a variable for a conditional barrier in the continuing statement of a loop that has a
+    // continue statement. Assign a non-uniform value to that variable before a return statement.
+    // The non-uniform value will never get to the continuing block, so there should be no error.
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read_write> non_uniform : i32;
+
+fn foo() {
+  var v = 0;
+  loop {
+    if (true) {
+      continue;
+    }
+
+    v = non_uniform;
+    return;
+
+    continuing {
+      if (v == 0) {
+        workgroupBarrier();
+      }
+    }
+  }
+}
+)";
+
+    RunTest(src, true);
+}
+
 TEST_F(UniformityAnalysisTest, Loop_VarBecomesNonUniformBeforeConditionalContinue) {
     // Use a variable for a conditional barrier in a loop, assign a non-uniform value to
     // that variable later in that loop, then perform a conditional continue before assigning a
@@ -1807,6 +1985,32 @@ fn foo() {
     RunTest(src, true);
 }
 
+TEST_F(UniformityAnalysisTest, Loop_ScopedVarDeclaredBeforeContinue) {
+    // Check that we can handle a var being declared in a nested scope before a continue statement.
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read_write> non_uniform : i32;
+
+fn foo() {
+  var i = 0;
+  loop {
+    if (true) {
+      var i = non_uniform;
+      continue;
+    }
+    continuing {
+      if (i < 5) {
+        workgroupBarrier();
+      }
+      i++;
+      break if i >= 10;
+    }
+  }
+}
+)";
+
+    RunTest(src, true);
+}
+
 TEST_F(UniformityAnalysisTest, ForLoop_CallInside_UniformCondition) {
     std::string src = R"(
 @group(0) @binding(0) var<storage, read> n : i32;
@@ -1903,6 +2107,29 @@ fn foo() {
     RunTest(src, true);
 }
 
+TEST_F(UniformityAnalysisTest,
+       ForLoop_VarBecomesUniformInContinuing_BarrierInLoop_BodyHasContinueBehavior) {
+    // Use a variable for a conditional barrier in a loop, and then assign a uniform value to that
+    // variable in the continuing statement. The body of the loop has the `continue` behavior.
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read_write> non_uniform : i32;
+
+fn foo() {
+  var v = 0;
+  for (var i = 0; i < 10; v = 5) {
+    if (v == 0) {
+      workgroupBarrier();
+    }
+
+    v = non_uniform;
+    continue;
+  }
+}
+)";
+
+    RunTest(src, true);
+}
+
 TEST_F(UniformityAnalysisTest, ForLoop_VarBecomesNonUniformInContinuing_BarrierAfterLoop) {
     // Use a variable for a conditional barrier after a loop, and assign a non-uniform value to
     // that variable in the continuing statement.
@@ -1956,6 +2183,28 @@ fn foo() {
     RunTest(src, true);
 }
 
+TEST_F(UniformityAnalysisTest,
+       ForLoop_VarBecomesUniformInContinuing_BarrierAfterLoop_BodyHasContinueBehavior) {
+    // Use a variable for a conditional barrier after a loop, and assign a uniform value to that
+    // variable in the continuing statement. The body of the loop has the `continue` behavior;
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read_write> non_uniform : i32;
+
+fn foo() {
+  var v = 0;
+  for (var i = 0; i < 10; v = 5) {
+    v = non_uniform;
+    continue;
+  }
+  if (v == 0) {
+    workgroupBarrier();
+  }
+}
+)";
+
+    RunTest(src, true);
+}
+
 TEST_F(UniformityAnalysisTest, ForLoop_VarBecomesNonUniformInLoopAfterBarrier) {
     // Use a variable for a conditional barrier in a loop, and then assign a non-uniform value to
     // that variable later in that loop.
@@ -1983,6 +2232,80 @@ fn foo() {
 
 test:7:5 note: control flow depends on possibly non-uniform value
     if (v == 0) {
+    ^^
+
+test:12:9 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+    v = non_uniform;
+        ^^^^^^^^^^^
+)");
+}
+
+TEST_F(UniformityAnalysisTest, ForLoop_VarBecomesNonUniformInLoopAfterBarrier_BeforeContinue) {
+    // Use a variable for a conditional barrier in a loop, and then assign a non-uniform value to
+    // that variable later in that loop, before a continue statement.
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read_write> non_uniform : i32;
+
+fn foo() {
+  var v = 0;
+  for (var i = 0; i < 10; i++) {
+    if (v == 0) {
+      workgroupBarrier();
+      break;
+    }
+
+    v = non_uniform;
+    continue;
+  }
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:8:7 error: 'workgroupBarrier' must only be called from uniform control flow
+      workgroupBarrier();
+      ^^^^^^^^^^^^^^^^
+
+test:7:5 note: control flow depends on possibly non-uniform value
+    if (v == 0) {
+    ^^
+
+test:12:9 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+    v = non_uniform;
+        ^^^^^^^^^^^
+)");
+}
+
+TEST_F(UniformityAnalysisTest,
+       ForLoop_VarBecomesNonUniformInLoopAfterBarrier_BeforeContinue_NoContinuing) {
+    // Use a variable for a conditional barrier in a loop, and then assign a non-uniform value to
+    // that variable later in that loop, before a continue statement. The for loop has no continuing
+    // statement.
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read_write> non_uniform : i32;
+
+fn foo() {
+  var v = 0;
+  for (;;) {
+    if (v != 0) {
+      workgroupBarrier();
+      break;
+    }
+
+    v = non_uniform;
+    continue;
+  }
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:8:7 error: 'workgroupBarrier' must only be called from uniform control flow
+      workgroupBarrier();
+      ^^^^^^^^^^^^^^^^
+
+test:7:5 note: control flow depends on possibly non-uniform value
+    if (v != 0) {
     ^^
 
 test:12:9 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
@@ -2217,6 +2540,32 @@ test:10:11 note: reading from read_write storage buffer 'non_uniform' may result
 )");
 }
 
+TEST_F(UniformityAnalysisTest, ForLoop_VarBecomesUniformBeforeContinue_BarrierInContinuing) {
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read_write> non_uniform : i32;
+
+fn bar(i : i32) {
+  if (i == 0) {
+    workgroupBarrier();
+  }
+}
+
+fn foo() {
+  var v = non_uniform;
+  for (;; bar(v)) {
+    if (true) {
+      v = 0;
+      continue;
+    }
+    break;
+  }
+
+}
+)";
+
+    RunTest(src, true);
+}
+
 TEST_F(UniformityAnalysisTest, ForLoop_NonUniformCondition_Reconverge) {
     // Loops reconverge at exit, so test that we can call workgroupBarrier() after a loop that has a
     // non-uniform condition.
@@ -2260,6 +2609,27 @@ TEST_F(UniformityAnalysisTest, ForLoop_InitializerScope) {
 fn foo() {
   if (n == 5) {
     for (var i = 0; i < n; i = i + 1) {
+    }
+  }
+}
+)";
+
+    RunTest(src, true);
+}
+
+TEST_F(UniformityAnalysisTest, ForLoop_ScopedVarDeclaredBeforeContinue) {
+    // Check that we can handle a var being declared in a nested scope before a continue statement.
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read_write> non_uniform : i32;
+
+fn foo() {
+  for (var i = 0; i < 10; i++) {
+    if (i < 5) {
+      workgroupBarrier();
+    }
+    if (true) {
+      var i = non_uniform;
+      continue;
     }
   }
 }
