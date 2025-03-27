@@ -85,22 +85,38 @@ struct State {
                 case spirv::BuiltinFn::kAtomicLoad:
                     break;
                 case spirv::BuiltinFn::kAtomicStore:
-                    AtomicStore(builtin);
+                    AtomicOp(builtin, core::BuiltinFn::kAtomicStore);
                     break;
                 case spirv::BuiltinFn::kAtomicExchange:
                 case spirv::BuiltinFn::kAtomicCompareExchange:
                     break;
                 case spirv::BuiltinFn::kAtomicIAdd:
-                    AtomicIAdd(builtin);
+                    AtomicOp(builtin, core::BuiltinFn::kAtomicAdd);
                     break;
                 case spirv::BuiltinFn::kAtomicISub:
+                    AtomicOp(builtin, core::BuiltinFn::kAtomicSub);
+                    break;
                 case spirv::BuiltinFn::kAtomicSMax:
+                    AtomicOp(builtin, core::BuiltinFn::kAtomicMax);
+                    break;
                 case spirv::BuiltinFn::kAtomicSMin:
+                    AtomicOp(builtin, core::BuiltinFn::kAtomicMin);
+                    break;
                 case spirv::BuiltinFn::kAtomicUMax:
+                    AtomicOp(builtin, core::BuiltinFn::kAtomicMax);
+                    break;
                 case spirv::BuiltinFn::kAtomicUMin:
+                    AtomicOp(builtin, core::BuiltinFn::kAtomicMin);
+                    break;
                 case spirv::BuiltinFn::kAtomicAnd:
+                    AtomicOp(builtin, core::BuiltinFn::kAtomicAnd);
+                    break;
                 case spirv::BuiltinFn::kAtomicOr:
+                    AtomicOp(builtin, core::BuiltinFn::kAtomicOr);
+                    break;
                 case spirv::BuiltinFn::kAtomicXor:
+                    AtomicOp(builtin, core::BuiltinFn::kAtomicXor);
+                    break;
                 case spirv::BuiltinFn::kAtomicIIncrement:
                 case spirv::BuiltinFn::kAtomicIDecrement:
                     break;
@@ -121,7 +137,7 @@ struct State {
         ReplaceStructTypes();
     }
 
-    void AtomicIAdd(spirv::ir::BuiltinCall* call) {
+    void AtomicOp(spirv::ir::BuiltinCall* call, core::BuiltinFn fn) {
         auto args = call->Args();
 
         b.InsertBefore(call, [&] {
@@ -129,20 +145,7 @@ struct State {
             values_to_convert_.Push(var);
 
             auto* val = args[3];
-            b.CallWithResult(call->DetachResult(), core::BuiltinFn::kAtomicAdd, var, val);
-        });
-        call->Destroy();
-    }
-
-    void AtomicStore(spirv::ir::BuiltinCall* call) {
-        auto args = call->Args();
-
-        b.InsertBefore(call, [&] {
-            auto* var = args[0];
-            values_to_convert_.Push(var);
-
-            auto* val = args[3];
-            b.CallWithResult(call->DetachResult(), core::BuiltinFn::kAtomicStore, var, val);
+            b.CallWithResult(call->DetachResult(), fn, var, val);
         });
         call->Destroy();
     }

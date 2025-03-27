@@ -783,7 +783,7 @@ $B1: {  # root
     ASSERT_EQ(expect, str());
 }
 
-TEST_F(SpirvReader_AtomicsTest, DISABLED_AtomicSub) {
+TEST_F(SpirvReader_AtomicsTest, AtomicSub) {
     auto* f = b.ComputeFunction("main");
 
     auto* sb = ty.Struct(mod.symbols.New("S"), {
@@ -844,12 +844,38 @@ $B1: {  # root
     Run(Atomics);
 
     auto* expect = R"(
-UNIMPLEMENTED
+S = struct @align(4) {
+  a:i32 @offset(0)
+  b:u32 @offset(4)
+}
+
+S_atomic = struct @align(4) {
+  a:atomic<i32> @offset(0)
+  b:atomic<u32> @offset(4)
+}
+
+$B1: {  # root
+  %sb:ptr<storage, S_atomic, read_write> = var undef @binding_point(0, 0)
+  %wg_i32:ptr<workgroup, atomic<i32>, read_write> = var undef
+  %wg_u32:ptr<workgroup, atomic<u32>, read_write> = var undef
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %5:ptr<storage, atomic<i32>, read_write> = access %sb, 0u
+    %6:i32 = atomicSub %5, 1i
+    %7:ptr<storage, atomic<u32>, read_write> = access %sb, 1u
+    %8:u32 = atomicSub %7, 1u
+    %9:i32 = atomicSub %wg_i32, 1i
+    %10:u32 = atomicSub %wg_u32, 1u
+    ret
+  }
+}
 )";
     ASSERT_EQ(expect, str());
 }
 
-TEST_F(SpirvReader_AtomicsTest, DISABLED_AtomicAnd) {
+TEST_F(SpirvReader_AtomicsTest, AtomicAnd) {
     auto* f = b.ComputeFunction("main");
 
     auto* sb = ty.Struct(mod.symbols.New("S"), {
@@ -910,12 +936,38 @@ $B1: {  # root
     Run(Atomics);
 
     auto* expect = R"(
-UNIMPLEMENTED
+S = struct @align(4) {
+  a:i32 @offset(0)
+  b:u32 @offset(4)
+}
+
+S_atomic = struct @align(4) {
+  a:atomic<i32> @offset(0)
+  b:atomic<u32> @offset(4)
+}
+
+$B1: {  # root
+  %sb:ptr<storage, S_atomic, read_write> = var undef @binding_point(0, 0)
+  %wg_i32:ptr<workgroup, atomic<i32>, read_write> = var undef
+  %wg_u32:ptr<workgroup, atomic<u32>, read_write> = var undef
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %5:ptr<storage, atomic<i32>, read_write> = access %sb, 0u
+    %6:i32 = atomicAnd %5, 1i
+    %7:ptr<storage, atomic<u32>, read_write> = access %sb, 1u
+    %8:u32 = atomicAnd %7, 1u
+    %9:i32 = atomicAnd %wg_i32, 1i
+    %10:u32 = atomicAnd %wg_u32, 1u
+    ret
+  }
+}
 )";
     ASSERT_EQ(expect, str());
 }
 
-TEST_F(SpirvReader_AtomicsTest, DISABLED_AtomicOr) {
+TEST_F(SpirvReader_AtomicsTest, AtomicOr) {
     auto* f = b.ComputeFunction("main");
 
     auto* sb = ty.Struct(mod.symbols.New("S"), {
@@ -975,12 +1027,38 @@ $B1: {  # root
     Run(Atomics);
 
     auto* expect = R"(
-UNIMPLEMENTED
+S = struct @align(4) {
+  a:i32 @offset(0)
+  b:u32 @offset(4)
+}
+
+S_atomic = struct @align(4) {
+  a:atomic<i32> @offset(0)
+  b:atomic<u32> @offset(4)
+}
+
+$B1: {  # root
+  %sb:ptr<storage, S_atomic, read_write> = var undef @binding_point(0, 0)
+  %wg_i32:ptr<workgroup, atomic<i32>, read_write> = var undef
+  %wg_u32:ptr<workgroup, atomic<u32>, read_write> = var undef
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %5:ptr<storage, atomic<i32>, read_write> = access %sb, 0u
+    %6:i32 = atomicOr %5, 1i
+    %7:ptr<storage, atomic<u32>, read_write> = access %sb, 1u
+    %8:u32 = atomicOr %7, 1u
+    %9:i32 = atomicOr %wg_i32, 1i
+    %10:u32 = atomicOr %wg_u32, 1u
+    ret
+  }
+}
 )";
     ASSERT_EQ(expect, str());
 }
 
-TEST_F(SpirvReader_AtomicsTest, DISABLED_AtomicXor) {
+TEST_F(SpirvReader_AtomicsTest, AtomicXor) {
     auto* f = b.ComputeFunction("main");
 
     auto* sb = ty.Struct(mod.symbols.New("S"), {
@@ -1041,12 +1119,38 @@ $B1: {  # root
     Run(Atomics);
 
     auto* expect = R"(
-UNIMPLEMENTED
+S = struct @align(4) {
+  a:i32 @offset(0)
+  b:u32 @offset(4)
+}
+
+S_atomic = struct @align(4) {
+  a:atomic<i32> @offset(0)
+  b:atomic<u32> @offset(4)
+}
+
+$B1: {  # root
+  %sb:ptr<storage, S_atomic, read_write> = var undef @binding_point(0, 0)
+  %wg_i32:ptr<workgroup, atomic<i32>, read_write> = var undef
+  %wg_u32:ptr<workgroup, atomic<u32>, read_write> = var undef
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %5:ptr<storage, atomic<i32>, read_write> = access %sb, 0u
+    %6:i32 = atomicXor %5, 1i
+    %7:ptr<storage, atomic<u32>, read_write> = access %sb, 1u
+    %8:u32 = atomicXor %7, 1u
+    %9:i32 = atomicXor %wg_i32, 1i
+    %10:u32 = atomicXor %wg_u32, 1u
+    ret
+  }
+}
 )";
     ASSERT_EQ(expect, str());
 }
 
-TEST_F(SpirvReader_AtomicsTest, DISABLED_AtomicMax) {
+TEST_F(SpirvReader_AtomicsTest, AtomicMax) {
     auto* f = b.ComputeFunction("main");
 
     auto* sb = ty.Struct(mod.symbols.New("S"), {
@@ -1107,12 +1211,38 @@ $B1: {  # root
     Run(Atomics);
 
     auto* expect = R"(
-UNIMPLEMENTED
+S = struct @align(4) {
+  a:i32 @offset(0)
+  b:u32 @offset(4)
+}
+
+S_atomic = struct @align(4) {
+  a:atomic<i32> @offset(0)
+  b:atomic<u32> @offset(4)
+}
+
+$B1: {  # root
+  %sb:ptr<storage, S_atomic, read_write> = var undef @binding_point(0, 0)
+  %wg_i32:ptr<workgroup, atomic<i32>, read_write> = var undef
+  %wg_u32:ptr<workgroup, atomic<u32>, read_write> = var undef
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %5:ptr<storage, atomic<i32>, read_write> = access %sb, 0u
+    %6:i32 = atomicMax %5, 1i
+    %7:ptr<storage, atomic<u32>, read_write> = access %sb, 1u
+    %8:u32 = atomicMax %7, 1u
+    %9:i32 = atomicMax %wg_i32, 1i
+    %10:u32 = atomicMax %wg_u32, 1u
+    ret
+  }
+}
 )";
     ASSERT_EQ(expect, str());
 }
 
-TEST_F(SpirvReader_AtomicsTest, DISABLED_AtomicMin) {
+TEST_F(SpirvReader_AtomicsTest, AtomicMin) {
     auto* f = b.ComputeFunction("main");
 
     auto* sb = ty.Struct(mod.symbols.New("S"), {
@@ -1173,7 +1303,33 @@ $B1: {  # root
     Run(Atomics);
 
     auto* expect = R"(
-UNIMPLEMENTED
+S = struct @align(4) {
+  a:i32 @offset(0)
+  b:u32 @offset(4)
+}
+
+S_atomic = struct @align(4) {
+  a:atomic<i32> @offset(0)
+  b:atomic<u32> @offset(4)
+}
+
+$B1: {  # root
+  %sb:ptr<storage, S_atomic, read_write> = var undef @binding_point(0, 0)
+  %wg_i32:ptr<workgroup, atomic<i32>, read_write> = var undef
+  %wg_u32:ptr<workgroup, atomic<u32>, read_write> = var undef
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %5:ptr<storage, atomic<i32>, read_write> = access %sb, 0u
+    %6:i32 = atomicMin %5, 1i
+    %7:ptr<storage, atomic<u32>, read_write> = access %sb, 1u
+    %8:u32 = atomicMin %7, 1u
+    %9:i32 = atomicMin %wg_i32, 1i
+    %10:u32 = atomicMin %wg_u32, 1u
+    ret
+  }
+}
 )";
     ASSERT_EQ(expect, str());
 }
