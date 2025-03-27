@@ -36,14 +36,6 @@ vars = {
   # Fetch clang-tidy into the same bin/ directory as our clang binary.
   'checkout_clang_tidy': False,
 
-  # Fetch the rust toolchain.
-  #
-  # Use a custom_vars section to enable it:
-  # "custom_vars": {
-  #   "checkout_rust": True,
-  # }
-  'checkout_rust': False,
-
   # Fetch configuration files required for the 'use_remoteexec' gn arg
   'download_remoteexec_cfg': False,
   # RBE instance to use for running remote builds
@@ -132,9 +124,10 @@ deps = {
     'condition': 'dawn_standalone and host_os == "linux"',
   },
 
-  # Dependencies required to use GN, Clang, and Rust in standalone.
-  # The //build, //tools/clang, and //tools/rust deps should all be updated
-  # in unison, as there are dependencies between them.
+  # Dependencies required to use GN, and Clang in standalone.
+
+  # The //build and //tools/clang deps should all be updated in
+  # unison, as there are dependencies between them.
   'build': {
     'url': '{chromium_git}/chromium/src/build@a252ef1991b42918f6e74bc8c26b6543afe7bb2e',
     'condition': 'dawn_standalone',
@@ -142,10 +135,6 @@ deps = {
   'tools/clang': {
     'url': '{chromium_git}/chromium/src/tools/clang@e262f0f8896e459fe7fd2a076af48d5746b1d332',
     'condition': 'dawn_standalone',
-  },
-  'tools/rust': {
-    'url': '{chromium_git}/chromium/src/tools/rust@05dbbfdcec4a7cc6c7cbf735d5a67d331a2f40da',
-    'condition': 'dawn_standalone and checkout_rust',
   },
 
   # Linux sysroots for hermetic builds instead of relying on whatever is
@@ -545,12 +534,6 @@ hooks = [
     'condition': 'dawn_standalone and checkout_clang_tidy',
     'action': ['python3', 'tools/clang/scripts/update.py',
                '--package=clang-tidy'],
-  },
-  {
-    'name': 'rust',
-    'pattern': '.',
-    'action': ['python3', 'tools/rust/update_rust.py'],
-    'condition': 'dawn_standalone and checkout_rust',
   },
   # Pull dsymutil binaries using checked-in hashes.
   {

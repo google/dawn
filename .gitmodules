@@ -34,10 +34,6 @@
 	path = tools/clang
 	url = https://chromium.googlesource.com/chromium/src/tools/clang
 	gclient-condition = dawn_standalone
-[submodule "tools/rust"]
-	path = tools/rust
-	url = https://chromium.googlesource.com/chromium/src/tools/rust
-	gclient-condition = dawn_standalone and checkout_rust
 [submodule "testing"]
 	path = testing
 	url = https://chromium.googlesource.com/chromium/src/testing

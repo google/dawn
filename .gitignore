@@ -41,7 +41,6 @@
 /third_party/node-api-headers
 /third_party/partition_alloc
 /third_party/protobuf
-/third_party/rust-toolchain
 /third_party/siso/cipd/
 /third_party/spirv-cross/src/
 /third_party/spirv-headers/src/
@@ -61,7 +60,6 @@
 /tools/cmake*
 /tools/golang
 /tools/memory
-/tools/rust
 /out
 
 # Tint test validation cache file
