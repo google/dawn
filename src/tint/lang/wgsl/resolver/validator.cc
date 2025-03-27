@@ -2046,6 +2046,12 @@ bool Validator::WorkgroupUniformLoad(const sem::Call* call) const {
         return false;
     }
 
+    if (!ty->IsConstructible()) {
+        AddError(arg->Declaration()->source)
+            << "workgroupUniformLoad must be called with an argument whose type is constructible";
+        return false;
+    }
+
     return true;
 }
 
