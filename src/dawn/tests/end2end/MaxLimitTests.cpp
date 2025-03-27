@@ -340,7 +340,7 @@ TEST_P(MaxLimitTests, MaxDynamicBuffers) {
     bgDesc.entries = bgEntries.data();
     wgpu::BindGroup bindGroup = device.CreateBindGroup(&bgDesc);
 
-    // Generate binding declarations at the top of the the shader.
+    // Generate binding declarations at the top of the shader.
     std::ostringstream wgslShader;
     for (const auto& binding : bglEntries) {
         if (binding.buffer.type == wgpu::BufferBindingType::Uniform) {
@@ -471,7 +471,7 @@ TEST_P(MaxLimitTests, MaxStorageBuffersPerShaderStage) {
     bgDesc.entries = bgEntries.data();
     wgpu::BindGroup bindGroup = device.CreateBindGroup(&bgDesc);
 
-    // Generate binding declarations at the top of the the shader.
+    // Generate binding declarations at the top of the shader.
     std::ostringstream wgslShader;
     for (const auto& binding : bglEntries) {
         wgslShader << "@group(0) @binding(" << binding.binding << ") var<storage, read> b"

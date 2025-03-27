@@ -1916,7 +1916,7 @@ TEST_P(SharedTextureMemoryTests, BeginEndWithoutUse) {
         auto backendEndState = GetParam().mBackend->ChainEndState(&endState);
         memories[0].EndAccess(texture, &endState);
 
-        // Import fences and texture to the the other device.
+        // Import fences and texture to the other device.
         std::vector<wgpu::SharedFence> sharedFences(endState.fenceCount);
         for (size_t i = 0; i < endState.fenceCount; ++i) {
             sharedFences[i] = GetParam().mBackend->ImportFenceTo(devices[1], endState.fences[i]);

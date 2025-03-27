@@ -290,7 +290,7 @@ class InspectorBuilder : public ProgramBuilder {
     /// @returns a pointer to a type appropriate for the coord param
     ast::Type GetBaseType(ResourceBinding::SampledKind sampled_kind);
 
-    /// Gets an appropriate type for the coords parameter depending the the
+    /// Gets an appropriate type for the coords parameter depending the
     /// dimensionality of the texture being sampled.
     /// @param dim dimensionality of the texture being sampled
     /// @param scalar the scalar type

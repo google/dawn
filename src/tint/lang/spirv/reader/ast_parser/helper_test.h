@@ -322,7 +322,7 @@ class SpirvASTParserTestBase : public T {
     }
 };
 
-/// SpirvASTParserTest the the base class for SPIR-V reader unit tests.
+/// SpirvASTParserTest the base class for SPIR-V reader unit tests.
 /// Use this form when you don't need to template any further.
 using SpirvASTParserTest = SpirvASTParserTestBase<::testing::Test>;
 

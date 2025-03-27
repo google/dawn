@@ -38,7 +38,7 @@ class Module;
 namespace tint::wgsl::writer::raise {
 
 /// ValueToLet is a transform that moves "non-inlinable" instruction values to let instructions.
-/// An expression is considered "non-inlinable" if any of the the following are true:
+/// An expression is considered "non-inlinable" if any of the following are true:
 /// * The value has multiple uses.
 /// * The value's instruction is a load that when inlined would cross a store instruction.
 /// * The value's instruction is a store instruction that when inlined would cross a load or store

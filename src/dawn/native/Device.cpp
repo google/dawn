@@ -701,7 +701,7 @@ void DeviceBase::HandleError(std::unique_ptr<ErrorData> error,
     InternalErrorType type = error->GetType();
     if (type != InternalErrorType::Validation) {
         // D3D device can provide additional device removed reason. We would
-        // like to query and log the the device removed reason if the error is
+        // like to query and log the device removed reason if the error is
         // not validation error.
         AppendDeviceLostMessage(error.get());
     }

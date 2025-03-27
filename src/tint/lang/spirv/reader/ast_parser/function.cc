@@ -1792,7 +1792,7 @@ bool FunctionEmitter::LabelControlFlowConstructs() {
     //
     //      In the same scan, mark each basic block with the nearest enclosing
     //      header: the most recent header for which we haven't reached its merge
-    //      block. Also mark the the most recent continue target for which we
+    //      block. Also mark the most recent continue target for which we
     //      haven't reached the backedge block.
 
     TINT_ASSERT(block_order_.size() > 0);
@@ -4600,7 +4600,7 @@ TypedExpression FunctionEmitter::MakeCompositeValueDecomposition(
     // A SPIR-V composite extract is a single instruction with multiple
     // literal indices walking down into composites.
     // A SPIR-V composite insert is similar but also tells you what component
-    // to inject. This function is responsible for the the walking-into part
+    // to inject. This function is responsible for the walking-into part
     // of composite-insert.
     //
     // The Tint AST represents this as ever-deeper nested indexing expressions.

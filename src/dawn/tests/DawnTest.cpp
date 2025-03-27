@@ -163,7 +163,7 @@ std::string DawnTestBase::PrintToStringParamName::SanitizeParamName(
         sanitizedName.resize(sanitizedName.length() - 1);
     }
 
-    // We don't know the the test name at this point, but the format usually looks like
+    // We don't know the test name at this point, but the format usually looks like
     // this.
     std::string prefix = mTest + ".TheTestNameUsuallyGoesHere/";
     std::string testFormat = prefix + sanitizedName;

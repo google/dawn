@@ -189,7 +189,7 @@ class Type : public Castable<Type, UniqueNode> {
     /// @param type_if_invalid the type to return if this type has no child elements.
     /// @param count_if_invalid the count to return if this type has no child elements, or the
     /// number is unbounded.
-    /// @returns The child element type and the the number of child elements held by this type.
+    /// @returns The child element type and the number of child elements held by this type.
     /// If this type has no child element types, then @p invalid is returned.
     /// If this type can hold a mix of different elements types (like a Struct), then
     /// `[type_if_invalid, N]` is returned, where `N` is the number of elements.

@@ -688,7 +688,7 @@ TEST_F(IR_ValidatorTest, Function_UnnamedEntryPoint) {
 )")) << res.Failure();
 }
 
-// Parameterizing these tests is very difficult/unreadable due to the the
+// Parameterizing these tests is very difficult/unreadable due to the
 // multiple layers of forwarding/templating occurring in the type manager, so
 // writing them out explicitly instead.
 TEST_F(IR_ValidatorTest, Function_NonConstructibleReturnType_ExternalTexture) {
