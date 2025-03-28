@@ -62,6 +62,11 @@ class Sha3 {
     static_assert(BitOutputLength == 224 || BitOutputLength == 256 || BitOutputLength == 384 ||
                   BitOutputLength == 512);
     static constexpr size_t kByteCapacity = kByteOutputLength * 2;
+    // The byte rate of performing Keccak.
+    // * Sha3-224: 144 bytes
+    // * Sha3-256: 136 bytes
+    // * Sha3-384: 104 bytes
+    // * Sha3-512: 72 bytes
     static constexpr size_t kByteRate = 1600 / 8 - kByteCapacity;
 
     Sha3State mState = {};

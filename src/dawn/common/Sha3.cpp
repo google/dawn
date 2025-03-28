@@ -272,13 +272,15 @@ void memxorpy(void* dst, const void* src, size_t n) {
 template <size_t OutputLength>
 void Sha3<OutputLength>::Update(const void* data, size_t size) {
     uint8_t* stateAsString = reinterpret_cast<uint8_t*>(&mState);
+    const uint8_t* dataAsBytes = static_cast<const uint8_t*>(data);
 
     while (size > 0) {
         DAWN_ASSERT(mOffsetInState < kByteRate);
         size_t toProcess = std::min(size, kByteRate - mOffsetInState);
 
-        memxorpy(stateAsString + mOffsetInState, data, toProcess);
+        memxorpy(stateAsString + mOffsetInState, dataAsBytes, toProcess);
         size -= toProcess;
+        dataAsBytes += toProcess;
         mOffsetInState += toProcess;
 
         if (mOffsetInState == kByteRate) {
