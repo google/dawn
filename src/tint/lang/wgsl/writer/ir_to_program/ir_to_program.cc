@@ -205,6 +205,7 @@ class State {
                 inst,                                                               //
                 [&](const core::ir::Var* var) { Var(var); },                        //
                 [&](const core::ir::Override* override_) { Override(override_); },  //
+                [&](const core::ir::Binary* binary) { Binary(binary); },            //
                 TINT_ICE_ON_NO_MATCH);
         }
     }

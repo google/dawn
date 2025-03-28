@@ -3334,6 +3334,34 @@ fn f() -> i32 {
 )");
 }
 
+TEST_F(IRToProgramTest, Override_BinaryInitializer) {
+    core::ir::Override* o;
+    b.Append(b.ir.root_block, [&] {
+        auto* lhs = b.Override("lhs", 42_u);
+        lhs->SetOverrideId(OverrideId{10});
+
+        auto* rhs = b.Override("rhs", ty.u32());
+        rhs->SetOverrideId(OverrideId{20});
+
+        o = b.Override("o", b.Add<u32>(lhs, rhs));
+    });
+
+    auto* fn = b.Function("f", ty.u32());
+    b.Append(fn->Block(), [&] { b.Return(fn, o); });
+
+    EXPECT_WGSL(R"(
+@id(10) override lhs : u32 = 42u;
+
+@id(20) override rhs : u32;
+
+override o : u32 = (lhs + rhs);
+
+fn f() -> u32 {
+  return o;
+}
+)");
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // chromium_internal_graphite
 ////////////////////////////////////////////////////////////////////////////////
