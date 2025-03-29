@@ -31,9 +31,11 @@
 #include <utility>
 
 #include "gtest/gtest.h"
+#include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/ir/transform/helper_test.h"
 #include "src/tint/lang/core/ir/type/array_count.h"
 #include "src/tint/lang/core/ir/var.h"
+#include "src/tint/lang/core/type/array.h"
 
 namespace tint::core::ir::transform {
 namespace {
@@ -1687,6 +1689,91 @@ $B1: {  # root
     EXPECT_EQ(
         result.Failure().reason,
         R"(error: Pipeline overridable constant 2 with value (65505.0)  is not representable in type (f16))");
+}
+
+TEST_F(IR_SubstituteOverridesTest, OverrideArraySizeZeroFailure) {
+    ir::Var* v = nullptr;
+    b.Append(mod.root_block, [&] {
+        auto* x = b.Override("x", ty.u32());
+        x->SetOverrideId({2});
+
+        auto* cnt = ty.Get<core::ir::type::ValueArrayCount>(x->Result(0));
+        auto* ary = ty.Get<core::type::Array>(ty.u32(), cnt, 4_u, 4_u, 4_u, 4_u);
+        v = b.Var("v", ty.ptr(core::AddressSpace::kWorkgroup, ary, core::Access::kReadWrite));
+        mod.SetSource(v, Source{{7, 8}});
+    });
+
+    auto* func = b.Function("foo", ty.u32());
+    b.Append(func->Block(), [&] {
+        auto* access = b.Access(ty.ptr<workgroup, u32>(), v, 0_u);
+        auto* load = b.Load(access);
+        b.Return(func, load);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %x:u32 = override undef @id(2)
+  %v:ptr<workgroup, array<u32, %x>, read_write> = var undef
+}
+
+%foo = func():u32 {
+  $B2: {
+    %4:ptr<workgroup, u32, read_write> = access %v, 0u
+    %5:u32 = load %4
+    ret %5
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    SubstituteOverridesConfig cfg{};
+    cfg.map[OverrideId{2}] = 0;
+    auto result = RunWithFailure(SubstituteOverrides, cfg);
+    ASSERT_NE(result, Success);
+    EXPECT_EQ(result.Failure().reason, R"(7:8 error: array count (0) must be greater than 0)");
+}
+
+TEST_F(IR_SubstituteOverridesTest, OverrideArraySizeNegativeFailure) {
+    ir::Var* v = nullptr;
+    b.Append(mod.root_block, [&] {
+        auto* x = b.Override("x", ty.i32());
+        x->SetOverrideId({2});
+
+        auto* cnt = ty.Get<core::ir::type::ValueArrayCount>(x->Result(0));
+        auto* ary = ty.Get<core::type::Array>(ty.u32(), cnt, 4_u, 4_u, 4_u, 4_u);
+        v = b.Var("v", ty.ptr(core::AddressSpace::kWorkgroup, ary, core::Access::kReadWrite));
+        mod.SetSource(v, Source{{7, 8}});
+    });
+
+    auto* func = b.Function("foo", ty.u32());
+    b.Append(func->Block(), [&] {
+        auto* access = b.Access(ty.ptr<workgroup, u32>(), v, 0_u);
+        auto* load = b.Load(access);
+        b.Return(func, load);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %x:i32 = override undef @id(2)
+  %v:ptr<workgroup, array<u32, %x>, read_write> = var undef
+}
+
+%foo = func():u32 {
+  $B2: {
+    %4:ptr<workgroup, u32, read_write> = access %v, 0u
+    %5:u32 = load %4
+    ret %5
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    SubstituteOverridesConfig cfg{};
+    cfg.map[OverrideId{2}] = -1;
+    auto result = RunWithFailure(SubstituteOverrides, cfg);
+    ASSERT_NE(result, Success);
+    EXPECT_EQ(result.Failure().reason, R"(7:8 error: array count (-1) must be greater than 0)");
 }
 
 }  // namespace

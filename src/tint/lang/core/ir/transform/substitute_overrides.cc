@@ -202,6 +202,17 @@ struct State {
                 return new_value.Failure();
             }
 
+            // Pipeline creation error for zero or negative sized array. This is important as we do
+            // not check constant evaluation access against zero size.
+            int64_t cnt_size_check = new_value.Get()->Value()->ValueAs<AInt>();
+            if (cnt_size_check < 1) {
+                diag::Diagnostic error{};
+                error.severity = diag::Severity::Error;
+                error.source = ir.SourceOf(var);
+                error << "array count (" << cnt_size_check << ") must be greater than 0";
+                return diag::Failure(error);
+            }
+
             uint32_t num_elements = new_value.Get()->Value()->ValueAs<uint32_t>();
             auto* new_cnt = ty.Get<core::type::ConstantArrayCount>(num_elements);
             auto* new_ty = ty.Get<core::type::Array>(old_ty->ElemType(), new_cnt, old_ty->Align(),
