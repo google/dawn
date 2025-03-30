@@ -673,18 +673,6 @@ crbug.com/341327470 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,bui
 
 # textureDimensions failures on Pixel 6
 crbug.com/373670502 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureDimensions:sampled_and_multisampled:format="r16sint";aspect="all";samples=4 [ Failure ]
-crbug.com/373670502 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureDimensions:sampled_and_multisampled:format="r16uint";aspect="all";samples=4 [ Failure ]
-crbug.com/373670502 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureDimensions:sampled_and_multisampled:format="r8sint";aspect="all";samples=4 [ Failure ]
-crbug.com/373670502 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureDimensions:sampled_and_multisampled:format="r8uint";aspect="all";samples=4 [ Failure ]
-crbug.com/373670502 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureDimensions:sampled_and_multisampled:format="rg16sint";aspect="all";samples=4 [ Failure ]
-crbug.com/373670502 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureDimensions:sampled_and_multisampled:format="rg16uint";aspect="all";samples=4 [ Failure ]
-crbug.com/373670502 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureDimensions:sampled_and_multisampled:format="rg8sint";aspect="all";samples=4 [ Failure ]
-crbug.com/373670502 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureDimensions:sampled_and_multisampled:format="rg8uint";aspect="all";samples=4 [ Failure ]
-crbug.com/373670502 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureDimensions:sampled_and_multisampled:format="rgb10a2uint";aspect="all";samples=4 [ Failure ]
-crbug.com/373670502 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureDimensions:sampled_and_multisampled:format="rgba16sint";aspect="all";samples=4 [ Failure ]
-crbug.com/373670502 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureDimensions:sampled_and_multisampled:format="rgba16uint";aspect="all";samples=4 [ Failure ]
-crbug.com/373670502 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureDimensions:sampled_and_multisampled:format="rgba8sint";aspect="all";samples=4 [ Failure ]
-crbug.com/373670502 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureDimensions:sampled_and_multisampled:format="rgba8uint";aspect="all";samples=4 [ Failure ]
 
 # constructor w/concrete_array_elements failures on Pixel 6
 crbug.com/373670504 [ android arm ] webgpu:shader,execution,expression,constructor,non_zero:concrete_array_elements:inputSource="storage_r";type="bool";length=10;infer_type=false [ Failure ]
@@ -1010,8 +998,6 @@ crbug.com/0000 [ intel linux ] webgpu:api,operation,compute,basic:large_dispatch
 crbug.com/0000 [ linux nvidia ] webgpu:api,validation,buffer,create:limit: [ Failure ]
 crbug.com/0000 [ android-pixel-6 ] webgpu:api,validation,capability_checks,limits,maxComputeWorkgroupStorageSize:createComputePipeline,at_over:limitTest="betweenDefaultAndMaximum";testValueName="overLimit";async=false;wgslType="vec4%3Ci32%3E" [ Failure ]
 crbug.com/0000 [ linux nvidia ] webgpu:shader,execution,expression,call,builtin,textureSampleBaseClampToEdge:2d_coords:stage="c";textureType="texture_external";filt="linear";modeU="r";modeV="r" [ Failure ]
-crbug.com/0000 [ android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,texture_utils:readTextureToTexelViews:srcFormat="r8sint";texelViewFormat="rgba32sint";viewDimension="2d";sampleCount=4 [ Failure ]
-crbug.com/0000 [ android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,texture_utils:readTextureToTexelViews:srcFormat="r8uint";texelViewFormat="rgba32uint";viewDimension="2d";sampleCount=4 [ Failure ]
 crbug.com/0000 [ linux nvidia ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage,centroid:nearFar=[0,1];sampleCount=1;interpolation={"type":"perspective","sampling":"center"} [ Failure ]
 crbug.com/0000 [ compat-default linux nvidia ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage,centroid:nearFar=[0.25,0.75];sampleCount=1;interpolation={"type":"perspective","sampling":"center"} [ Failure ]
 crbug.com/0000 [ android-pixel-6 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:alpha="none";orientation="flipY";colorSpaceConversion="none";srcFlipYInCopy=true;dstFormat="rg16float";dstPremultiplied=false [ Failure ]
