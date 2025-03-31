@@ -156,6 +156,8 @@ TEST_P(MultithreadTests, Device_DroppedInCallback_OnAnotherThread) {
     // TODO(crbug.com/dawn/1779): This test seems to cause flakiness in other sampling tests on
     // NVIDIA.
     DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsNvidia());
+    // TODO(crbug.com/407567233): Seeing a lot of timeouts on this test on TSAN bots.
+    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsTsan());
 
     std::vector<wgpu::Device> devices(10);
 
@@ -894,9 +896,7 @@ TEST_P(MultithreadEncodingTests, ComputePassEncodersInParallel) {
 
 class MultithreadTextureCopyTests : public MultithreadTests {
   protected:
-    void SetUp() override {
-        MultithreadTests::SetUp();
-    }
+    void SetUp() override { MultithreadTests::SetUp(); }
 
     wgpu::Texture CreateAndWriteTexture(uint32_t width,
                                         uint32_t height,
