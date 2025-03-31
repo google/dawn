@@ -57,9 +57,7 @@ class DeviceLostTest : public DawnTest {
         return required;
     }
 
-    void SetUp() override {
-        DawnTest::SetUp();
-    }
+    void SetUp() override { DawnTest::SetUp(); }
 
     void TearDown() override {
         WaitABit();
@@ -296,6 +294,10 @@ TEST_P(DeviceLostTest, BufferUnmapAfterDeviceLost) {
 
 // Test CreateBuffer behavior after device is lost or destroyed
 TEST_P(DeviceLostTest, CreateBuffer) {
+    // Fails on TSAN due to allowing too much memory. TSAN max is `0x10000000000` and the test
+    // allocates `0x8000000000000000`
+    DAWN_SUPPRESS_TEST_IF(IsTsan());
+
     uint64_t kStupidLarge = uint64_t(1) << uint64_t(63);
     LoseDeviceForTesting();
 
