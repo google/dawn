@@ -1698,9 +1698,10 @@ TEST_F(IR_SubstituteOverridesTest, OverrideArraySizeZeroFailure) {
         x->SetOverrideId({2});
 
         auto* cnt = ty.Get<core::ir::type::ValueArrayCount>(x->Result(0));
+        mod.SetSource(cnt->value, Source{{5, 8}});
         auto* ary = ty.Get<core::type::Array>(ty.u32(), cnt, 4_u, 4_u, 4_u, 4_u);
         v = b.Var("v", ty.ptr(core::AddressSpace::kWorkgroup, ary, core::Access::kReadWrite));
-        mod.SetSource(v, Source{{7, 8}});
+        mod.SetSource(v, Source{{3, 2}});
     });
 
     auto* func = b.Function("foo", ty.u32());
@@ -1730,7 +1731,7 @@ $B1: {  # root
     cfg.map[OverrideId{2}] = 0;
     auto result = RunWithFailure(SubstituteOverrides, cfg);
     ASSERT_NE(result, Success);
-    EXPECT_EQ(result.Failure().reason, R"(7:8 error: array count (0) must be greater than 0)");
+    EXPECT_EQ(result.Failure().reason, R"(5:8 error: array count (0) must be greater than 0)");
 }
 
 TEST_F(IR_SubstituteOverridesTest, OverrideArraySizeNegativeFailure) {
@@ -1740,9 +1741,10 @@ TEST_F(IR_SubstituteOverridesTest, OverrideArraySizeNegativeFailure) {
         x->SetOverrideId({2});
 
         auto* cnt = ty.Get<core::ir::type::ValueArrayCount>(x->Result(0));
+        mod.SetSource(cnt->value, Source{{5, 8}});
         auto* ary = ty.Get<core::type::Array>(ty.u32(), cnt, 4_u, 4_u, 4_u, 4_u);
         v = b.Var("v", ty.ptr(core::AddressSpace::kWorkgroup, ary, core::Access::kReadWrite));
-        mod.SetSource(v, Source{{7, 8}});
+        mod.SetSource(v, Source{{3, 2}});
     });
 
     auto* func = b.Function("foo", ty.u32());
@@ -1773,7 +1775,7 @@ $B1: {  # root
     cfg.map[OverrideId{2}] = -1;
     auto result = RunWithFailure(SubstituteOverrides, cfg);
     ASSERT_NE(result, Success);
-    EXPECT_EQ(result.Failure().reason, R"(7:8 error: array count (-1) must be greater than 0)");
+    EXPECT_EQ(result.Failure().reason, R"(5:8 error: array count (-1) must be greater than 0)");
 }
 
 }  // namespace

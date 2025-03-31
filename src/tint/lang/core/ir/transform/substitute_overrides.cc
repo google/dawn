@@ -208,7 +208,7 @@ struct State {
             if (cnt_size_check < 1) {
                 diag::Diagnostic error{};
                 error.severity = diag::Severity::Error;
-                error.source = ir.SourceOf(var);
+                error.source = ir.SourceOf(cnt->value);
                 error << "array count (" << cnt_size_check << ") must be greater than 0";
                 return diag::Failure(error);
             }
