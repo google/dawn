@@ -41,6 +41,8 @@
 tint_add_target(tint_lang_spirv_type lib
   lang/spirv/type/explicit_layout_array.cc
   lang/spirv/type/explicit_layout_array.h
+  lang/spirv/type/image.cc
+  lang/spirv/type/image.h
   lang/spirv/type/sampled_image.cc
   lang/spirv/type/sampled_image.h
 )
@@ -71,6 +73,7 @@ tint_target_add_external_dependencies(tint_lang_spirv_type lib
 ################################################################################
 tint_add_target(tint_lang_spirv_type_test test
   lang/spirv/type/explicit_layout_array_test.cc
+  lang/spirv/type/image_test.cc
   lang/spirv/type/sampled_image_test.cc
 )
 

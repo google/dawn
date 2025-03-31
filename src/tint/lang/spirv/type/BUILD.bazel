@@ -40,10 +40,12 @@ cc_library(
   name = "type",
   srcs = [
     "explicit_layout_array.cc",
+    "image.cc",
     "sampled_image.cc",
   ],
   hdrs = [
     "explicit_layout_array.h",
+    "image.h",
     "sampled_image.h",
   ],
   deps = [
@@ -70,6 +72,7 @@ cc_library(
   alwayslink = True,
   srcs = [
     "explicit_layout_array_test.cc",
+    "image_test.cc",
     "sampled_image_test.cc",
   ],
   deps = [
