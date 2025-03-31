@@ -678,7 +678,7 @@ TEST_F(CompatValidationTest, CanNotCreateRGxxxStorageTexture) {
     }
 }
 
-TEST_F(CompatValidationTest, CanNotUseStorageBufferInFragmentAndVertexStageWithDefaultLimit0) {
+TEST_F(CompatValidationTest, CanNotUseStorageBufferInVertexStageWithDefaultLimit0) {
     const wgpu::ShaderStage stages[] = {
         wgpu::ShaderStage::Compute,
         wgpu::ShaderStage::Fragment,
@@ -703,7 +703,7 @@ TEST_F(CompatValidationTest, CanNotUseStorageBufferInFragmentAndVertexStageWithD
             descriptor.entryCount = 1;
             descriptor.entries = entries;
 
-            if (stage == wgpu::ShaderStage::Compute) {
+            if (stage != wgpu::ShaderStage::Vertex) {
                 wgpu::BindGroupLayout layout = device.CreateBindGroupLayout(&descriptor);
             } else {
                 ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&descriptor),
@@ -713,7 +713,7 @@ TEST_F(CompatValidationTest, CanNotUseStorageBufferInFragmentAndVertexStageWithD
     }
 }
 
-TEST_F(CompatValidationTest, CanNotUseStorageTexturesInFragmentAndVertexStageWithDefaultLimit0) {
+TEST_F(CompatValidationTest, CanNotUseStorageTexturesInVertexStageWithDefaultLimit0) {
     const wgpu::ShaderStage stages[] = {
         wgpu::ShaderStage::Compute,
         wgpu::ShaderStage::Fragment,
@@ -741,7 +741,7 @@ TEST_F(CompatValidationTest, CanNotUseStorageTexturesInFragmentAndVertexStageWit
             descriptor.entryCount = 1;
             descriptor.entries = entries;
 
-            if (stage == wgpu::ShaderStage::Compute) {
+            if (stage != wgpu::ShaderStage::Vertex) {
                 wgpu::BindGroupLayout layout = device.CreateBindGroupLayout(&descriptor);
             } else {
                 ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&descriptor),
@@ -2053,19 +2053,6 @@ TEST_F(CompatLayoutLimitsTests, CanNotPassLimitOfStorageBuffersInVertexStageBind
                           "maxStorageBuffersInVertexStage");
 }
 
-// Test that in compat we get an error if we use more than maxStorageTexturesInFragmentStage
-// when it's lower than maxStorageTexturesPerShaderStage in createBindGroupLayout
-TEST_F(CompatLayoutLimitsTests, CanNotPassLimitOfStorageTexturesInFragmentStageBindGroupLayout) {
-    const auto limits = GetSupportedLimits();
-    wgpu::BindGroupLayoutEntry entry;
-    entry.visibility = wgpu::ShaderStage::Fragment;
-    entry.storageTexture.format = wgpu::TextureFormat::R32Float;
-    entry.storageTexture.access = wgpu::StorageTextureAccess::ReadOnly;
-    DoBindGroupLayoutTest(limits.maxStorageTexturesInFragmentStage,
-                          limits.maxStorageTexturesPerShaderStage, entry,
-                          "maxStorageTexturesInFragmentStage");
-}
-
 // Test that in compat we get an error if we use more than maxStorageTexturesInVertexStage
 // when it's lower than maxStorageTexturesPerShaderStage in createBindGroupLayout
 TEST_F(CompatLayoutLimitsTests, CanNotPassLimitOfStorageTexturesInVertexStageBindGroupLayout) {
@@ -2101,19 +2088,6 @@ TEST_F(CompatLayoutLimitsTests, CanNotPassLimitOfStorageBuffersInVertexStagePipe
     DoPipelineLayoutTest(limits.maxStorageBuffersInVertexStage,
                          limits.maxStorageBuffersPerShaderStage, entry,
                          "maxStorageBuffersInVertexStage");
-}
-
-// Test that in compat we get an error if we use more than maxStorageTexturesInFragmentStage
-// when it's lower than maxStorageTexturesPerShaderStage in createPipelineLayout
-TEST_F(CompatLayoutLimitsTests, CanNotPassLimitOfStorageTexturesInFragmentStagePipelineLayout) {
-    const auto limits = GetSupportedLimits();
-    wgpu::BindGroupLayoutEntry entry;
-    entry.visibility = wgpu::ShaderStage::Fragment;
-    entry.storageTexture.format = wgpu::TextureFormat::R32Float;
-    entry.storageTexture.access = wgpu::StorageTextureAccess::ReadOnly;
-    DoPipelineLayoutTest(limits.maxStorageTexturesInFragmentStage,
-                         limits.maxStorageTexturesPerShaderStage, entry,
-                         "maxStorageTexturesInFragmentStage");
 }
 
 // Test that in compat we get an error if we use more than maxStorageTexturesInVertexStage

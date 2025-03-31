@@ -72,7 +72,7 @@
     X(Maximum,            maxSampledTexturesPerShaderStage,        16,        16,         16) \
     X(Maximum,                   maxSamplersPerShaderStage,        16,        16,         16) \
     X(Maximum,            maxStorageTexturesPerShaderStage,         4,         4,          8) \
-    X(Maximum,           maxStorageTexturesInFragmentStage,         0,         4,          8) \
+    X(Maximum,           maxStorageTexturesInFragmentStage,         4,         4,          8) \
     X(Maximum,             maxStorageTexturesInVertexStage,         0,         4,          8) \
     X(Maximum,             maxUniformBuffersPerShaderStage,        12,        12,         12)
 
@@ -82,8 +82,8 @@
 // offers slightly better than default limits.
 //
 #define LIMITS_STORAGE_BUFFER_BINDINGS(X)                                                      \
-    X(Maximum,             maxStorageBuffersPerShaderStage,         4,         8,          10) \
-    X(Maximum,             maxStorageBuffersInFragmentStage,        0,         8,          10) \
+    X(Maximum,             maxStorageBuffersPerShaderStage,         8,         8,          10) \
+    X(Maximum,             maxStorageBuffersInFragmentStage,        4,         8,          10) \
     X(Maximum,             maxStorageBuffersInVertexStage,          0,         8,          10)
 
 // TODO(crbug.com/dawn/685):

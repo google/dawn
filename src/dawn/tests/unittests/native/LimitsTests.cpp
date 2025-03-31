@@ -80,8 +80,8 @@ TEST(Limits, ReifyDefaultLimits_PopulatesDefault_Compat) {
     Limits reified = ReifyDefaultLimits(limits, wgpu::FeatureLevel::Compatibility);
     EXPECT_EQ(reified.maxTextureDimension1D, 4096u);
     EXPECT_EQ(reified.maxStorageBufferBindingSize, 134217728ul);
-    EXPECT_EQ(reified.maxStorageBuffersInFragmentStage, 0u);
-    EXPECT_EQ(reified.maxStorageTexturesInFragmentStage, 0u);
+    EXPECT_EQ(reified.maxStorageBuffersInFragmentStage, 4u);
+    EXPECT_EQ(reified.maxStorageTexturesInFragmentStage, 4u);
     EXPECT_EQ(reified.maxStorageBuffersInVertexStage, 0u);
     EXPECT_EQ(reified.maxStorageTexturesInVertexStage, 0u);
 }
