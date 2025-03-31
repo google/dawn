@@ -402,13 +402,6 @@ class Resolver {
     sem::Statement* VariableDeclStatement(const ast::VariableDeclStatement*);
     bool Statements(VectorRef<const ast::Statement*>);
 
-    // CollectTextureSamplerPairs() collects all the texture/sampler pairs from the target function
-    // / builtin, and records these on the current function by calling AddTextureSamplerPair().
-    void CollectTextureSamplerPairs(sem::Function* func,
-                                    VectorRef<const sem::ValueExpression*> args) const;
-    void CollectTextureSamplerPairs(const sem::BuiltinFn* builtin,
-                                    VectorRef<const sem::ValueExpression*> args) const;
-
     /// Resolves the WorkgroupSize for the given function, assigning it to
     /// current_function_
     bool WorkgroupSize(const ast::Function*);

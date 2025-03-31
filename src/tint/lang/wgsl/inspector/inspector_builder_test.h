@@ -57,6 +57,18 @@ class InspectorBuilder : public ProgramBuilder {
     InspectorBuilder();
     ~InspectorBuilder();
 
+    /// Create a Program with Inspector from the provided WGSL shader.
+    /// Should only be called once per test and cannot be used with Build.
+    /// @param shader a WGSL shader
+    /// @returns a reference to the Inspector for the built Program.
+    Inspector& Initialize(std::string shader);
+
+    /// Build the Program given all of the previous methods called and return an
+    /// Inspector for it.
+    /// Should only be called once per test and cannot be used with Initialize.
+    /// @returns a reference to the Inspector for the built Program.
+    Inspector& Build();
+
     /// Generates an empty function
     /// @param name name of the function created
     /// @param attributes the function attributes
@@ -336,14 +348,10 @@ class InspectorBuilder : public ProgramBuilder {
     std::function<ast::Type()> GetTypeFunction(ComponentType component,
                                                CompositionType composition);
 
-    /// Build the Program given all of the previous methods called and return an
-    /// Inspector for it.
-    /// Should only be called once per test.
-    /// @returns a reference to the Inspector for the built Program.
-    Inspector& Build();
-
   protected:
-    /// Program built by this builder.
+    /// File created from input shader and used to create Program.
+    std::unique_ptr<Source::File> file_;
+    /// Program created by this runner.
     std::unique_ptr<Program> program_;
     /// Inspector for |program_|
     std::unique_ptr<Inspector> inspector_;

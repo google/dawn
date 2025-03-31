@@ -44,7 +44,6 @@
 #include "src/tint/lang/wgsl/inspector/entry_point.h"
 #include "src/tint/lang/wgsl/inspector/inspector.h"
 #include "src/tint/lang/wgsl/inspector/inspector_builder_test.h"
-#include "src/tint/lang/wgsl/inspector/inspector_runner_test.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
 
@@ -54,13 +53,12 @@ using namespace tint::core::fluent_types;     // NOLINT
 namespace tint::inspector {
 namespace {
 
-// All the tests that descend from InspectorBuilder are expected to define their test state via
-// building up the AST through InspectorBuilder and then generate the program with ::Build. The
-// returned Inspector from ::Build can then be used to test expectations.
-//
-// All the tests that descend from InspectorRunner are expected to define their test state via a
-// WGSL shader, which will be parsed to generate a Program and Inspector in ::Initialize. The
-// returned Inspector from ::Initialize can then be used to test expectations.
+// All the tests that descend from InspectorBuilder are expected to define their test state
+// either:
+//  - via building up the AST through InspectorBuilder methods and then generate the program with
+//    ::Build. The returned Inspector from ::Build can then be used to test expectations.
+//  - via a WGSL shader, which will be parsed to generate a Program and Inspector in ::Initialize.
+//    The returned Inspector from ::Initialize can then be used to test expectations.
 
 class InspectorGetEntryPointTest : public InspectorBuilder, public testing::Test {};
 class InspectorOverridesTest : public InspectorBuilder, public testing::Test {};
@@ -114,17 +112,19 @@ class InspectorGetResourceBindingsTest_WithStorageTextureParams
     : public InspectorBuilder,
       public testing::TestWithParam<StorageTextureTestParams> {};
 
-class InspectorGetUsedExtensionNamesTest : public InspectorRunner, public testing::Test {};
+class InspectorGetUsedExtensionNamesTest : public InspectorBuilder, public testing::Test {};
 
-class InspectorGetEnableDirectivesTest : public InspectorRunner, public testing::Test {};
+class InspectorGetEnableDirectivesTest : public InspectorBuilder, public testing::Test {};
 
 class InspectorGetBlendSrcTest : public InspectorBuilder, public testing::Test {};
 
 class InspectorSubgroupMatrixTest : public InspectorBuilder, public testing::Test {};
 
+class InspectorTextureTest : public InspectorBuilder, public testing::Test {};
+
 // This is a catch all for shaders that have demonstrated regressions/crashes in
 // the wild.
-class InspectorRegressionTest : public InspectorRunner, public testing::Test {};
+class InspectorRegressionTest : public InspectorBuilder, public testing::Test {};
 
 TEST_F(InspectorGetEntryPointTest, NoFunctions) {
     Inspector& inspector = Build();
@@ -1800,6 +1800,106 @@ TEST_F(InspectorOverridesTest, Multiple) {
     EXPECT_TRUE(ep.is_id_specified);
 }
 
+TEST_F(InspectorGetEntryPointTest, HasTextureLoadWithDepthTexture) {
+    std::string shader = R"(
+        @group(0) @binding(0) var td : texture_depth_2d;
+        @group(0) @binding(1) var tdm : texture_depth_multisampled_2d;
+        @group(0) @binding(2) var t : texture_2d<f32>;
+        @group(0) @binding(3) var s : sampler;
+
+        @compute @workgroup_size(1) fn load_texture_depth() {
+            _ = textureLoad(td, vec2(0), 0);
+        }
+        @compute @workgroup_size(1) fn load_texture_depth_multisample() {
+            _ = textureLoad(td, vec2(0), 0);
+        }
+        @compute @workgroup_size(1) fn load_texture_2d() {
+            _ = textureLoad(t, vec2(0), 0);
+        }
+        @fragment fn sample_texture_depth() -> @location(0) u32 {
+            _ = textureSample(td, s, vec2(0));
+            return 0;
+        }
+        fn load_texture_depth_arg(tex : texture_depth_2d) {
+            _ = textureLoad(tex, vec2(0), 0);
+        }
+        @compute @workgroup_size(1) fn load_texture_depth_in_function() {
+            load_texture_depth_arg(td);
+        }
+    )";
+    Inspector& inspector = Initialize(shader);
+    auto result = inspector.GetEntryPoints();
+    ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+    EXPECT_TRUE(inspector.GetEntryPoint("load_texture_depth").has_texture_load_with_depth_texture);
+    EXPECT_TRUE(inspector.GetEntryPoint("load_texture_depth_multisample")
+                    .has_texture_load_with_depth_texture);
+    EXPECT_FALSE(inspector.GetEntryPoint("load_texture_2d").has_texture_load_with_depth_texture);
+    EXPECT_FALSE(
+        inspector.GetEntryPoint("sample_texture_depth").has_texture_load_with_depth_texture);
+    EXPECT_TRUE(inspector.GetEntryPoint("load_texture_depth_in_function")
+                    .has_texture_load_with_depth_texture);
+}
+
+TEST_F(InspectorGetEntryPointTest, HasDepthTextureWithNonComparisonSampler) {
+    std::string shader = R"(
+        @group(0) @binding(0) var td : texture_depth_2d;
+        @group(0) @binding(1) var s : sampler;
+        @group(0) @binding(2) var cs : sampler_comparison;
+
+        @fragment fn sample_texture_depth() -> @location(0) u32 {
+            _ = textureSample(td, s, vec2(0));
+            return 0;
+        }
+        @fragment fn comparison_sample_texture_depth() -> @location(0) u32 {
+            _ = textureSampleCompare(td, cs, vec2(0), 0.5);
+            return 0;
+        }
+        @fragment fn gather_texture_depth() -> @location(0) u32 {
+            _ = textureGather(td, s, vec2(0));
+            return 0;
+        }
+        @fragment fn comparison_gather_texture_depth() -> @location(0) u32 {
+            _ = textureGatherCompare(td, cs, vec2(0), 0.5);
+            return 0;
+        }
+        @fragment fn sample_level_texture_depth() -> @location(0) u32 {
+            _ = textureSampleLevel(td, s, vec2(0), 0);
+            return 0;
+        }
+        @fragment fn comparison_sample_level_texture_depth() -> @location(0) u32 {
+            _ = textureSampleCompareLevel(td, cs, vec2(0), 0.5);
+            return 0;
+        }
+
+        fn sample_texture_depth_arg(tex : texture_depth_2d) {
+            _ = textureSample(tex, s, vec2(0));
+        }
+        @fragment fn sample_texture_depth_in_function() -> @location(0) u32 {
+            sample_texture_depth_arg(td);
+            return 0;
+        }
+    )";
+    Inspector& inspector = Initialize(shader);
+    auto result = inspector.GetEntryPoints();
+    ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+    EXPECT_TRUE(inspector.GetEntryPoint("sample_texture_depth")
+                    .has_depth_texture_with_non_comparison_sampler);
+    EXPECT_FALSE(inspector.GetEntryPoint("comparison_sample_texture_depth")
+                     .has_depth_texture_with_non_comparison_sampler);
+    EXPECT_TRUE(inspector.GetEntryPoint("gather_texture_depth")
+                    .has_depth_texture_with_non_comparison_sampler);
+    EXPECT_FALSE(inspector.GetEntryPoint("comparison_gather_texture_depth")
+                     .has_depth_texture_with_non_comparison_sampler);
+    EXPECT_TRUE(inspector.GetEntryPoint("sample_level_texture_depth")
+                    .has_depth_texture_with_non_comparison_sampler);
+    EXPECT_FALSE(inspector.GetEntryPoint("comparison_sample_level_texture_depth")
+                     .has_depth_texture_with_non_comparison_sampler);
+    EXPECT_TRUE(inspector.GetEntryPoint("sample_texture_depth_in_function")
+                    .has_depth_texture_with_non_comparison_sampler);
+}
+
 TEST_F(InspectorGetOverrideDefaultValuesTest, Bool) {
     GlobalConst("C", Expr(true));
     Override("a", ty.bool_(), Id(1_a));
@@ -3229,13 +3329,12 @@ TEST_F(InspectorGetResourceBindingsTest, ExternalTexture) {
     EXPECT_EQ(0u, result[0].binding);
 }
 
-class InspectorGetSamplerTextureUsesTest : public InspectorRunner, public testing::Test {
+class InspectorGetSamplerTextureUsesTest : public InspectorBuilder, public testing::Test {
   public:
     using ResultExpectation = std::initializer_list<SamplerTexturePair>;
 
     size_t SizeOf(const ResultExpectation& expectation) { return expectation.size(); }
     size_t SizeOf(const std::vector<SamplerTexturePair>& result) { return result.size(); }
-    size_t SizeOf(const VectorRef<SamplerTexturePair>& result) { return result.Length(); }
 
     // ValidateEqual checks that the expected and actual SamplerTexturePair list contain same pairs
     // and both are deduplicated.
@@ -3816,6 +3915,8 @@ TEST_F(InspectorGetSamplerTextureUsesTest, SamplerAndNonSamplerTexture) {
 @group(2) @binding(1) var texture1: texture_2d<f32>;
 // Storage texture should not be included in the result.
 @group(2) @binding(3) var texture2: texture_storage_2d<r32float, read_write>;
+@group(2) @binding(4) var external0 : texture_external;
+@group(2) @binding(5) var external1 : texture_external;
 
 const loadStoreCoords = vec2<u32>(0u, 0u);
 
@@ -3827,16 +3928,27 @@ fn doSample(t: texture_2d<f32>, s: sampler, uv: vec2<f32>) -> vec4<f32> {
 @fragment
 fn main(@location(0) fragUV: vec2<f32>,
         @location(1) fragPosition: vec4<f32>) -> @location(0) vec4<f32> {
+  // Usage with a sampler
   _ = textureSample(texture1, sampler0, fragUV);
+
   // Non-sampler texture usage.
   _ = textureLoad(texture1, loadStoreCoords, 0u);
-  // Both sampler and non-sampler usage.
+
+  // Both sampler and non-sampler usage but inside a function.
   _ = doSample(texture0, sampler0, fragUV);
+
   // Using texture0 with sampler0 again, should be deduplicated in the result.
   _ = textureSample(texture0, sampler0, fragUV);
+
   // Storage texture should not be included in the result.
   _ = textureLoad(texture2, loadStoreCoords);
   textureStore(texture2, loadStoreCoords, fragPosition);
+
+  // Usages of texture_external with and without samplers
+  _ = textureSampleBaseClampToEdge(external0, sampler0, fragUV);
+  _ = textureLoad(external1, vec2(0, 0));
+
+  // Another usage with a sampler.
   return textureSample(texture0, sampler1, fragUV) + fragPosition;
 }
 )";
@@ -3845,12 +3957,15 @@ fn main(@location(0) fragUV: vec2<f32>,
     constexpr BindingPoint sampler_1 = {0, 3};
     constexpr BindingPoint texture_0 = {0, 2};
     constexpr BindingPoint texture_1 = {2, 1};
+    constexpr BindingPoint external_0 = {2, 4};
+    constexpr BindingPoint external_1 = {2, 5};
     // Storage texture texture2 should not be included in the result.
 
     ResultExpectation expected_sampler_only = {
         {/* Sampler */ sampler_0, /* Texture */ texture_1},
         {/* Sampler */ sampler_0, /* Texture */ texture_0},
         {/* Sampler */ sampler_1, /* Texture */ texture_0},
+        {/* Sampler */ sampler_0, /* Texture */ external_0},
     };
     ResultExpectation expected_sampler_and_non_sampler = {
         {/* Sampler */ sampler_0, /* Texture */ texture_1},
@@ -3858,6 +3973,8 @@ fn main(@location(0) fragUV: vec2<f32>,
         {/* Sampler */ non_sampler_placeholder, /* Texture */ texture_0},
         {/* Sampler */ sampler_0, /* Texture */ texture_0},
         {/* Sampler */ sampler_1, /* Texture */ texture_0},
+        {/* Sampler */ sampler_0, /* Texture */ external_0},
+        {/* Sampler */ non_sampler_placeholder, /* Texture */ external_1},
     };
 
     Inspector& inspector = Initialize(shader);
@@ -4016,8 +4133,6 @@ fn main(@location(0) fragUV: vec2<f32>,
     inspector.GetSamplerTextureUses("main");
 }
 
-class InspectorTextureTest : public InspectorRunner, public testing::Test {};
-
 TEST_F(InspectorTextureTest, TextureLevelInEP) {
     std::string shader = R"(
 @group(2) @binding(3) var myTexture: texture_2d<f32>;
@@ -4068,13 +4183,17 @@ fn main() {
 
     ASSERT_EQ(2u, info.size());
 
-    EXPECT_EQ(Inspector::TextureQueryType::kTextureNumLevels, info[0].type);
-    EXPECT_EQ(2u, info[0].group);
-    EXPECT_EQ(3u, info[0].binding);
-
-    EXPECT_EQ(Inspector::TextureQueryType::kTextureNumLevels, info[1].type);
-    EXPECT_EQ(1u, info[1].group);
-    EXPECT_EQ(2u, info[1].binding);
+    Inspector::LevelSampleInfo info1 = {
+        /*type */ Inspector::TextureQueryType::kTextureNumLevels,
+        /*group*/ 1,
+        /*binding*/ 2,
+    };
+    Inspector::LevelSampleInfo info2 = {
+        /*type */ Inspector::TextureQueryType::kTextureNumLevels,
+        /*group*/ 2,
+        /*binding*/ 3,
+    };
+    EXPECT_THAT(info, testing::UnorderedElementsAre(info1, info2));
 }
 
 TEST_F(InspectorTextureTest, TextureSamplesInEP) {
@@ -4127,13 +4246,17 @@ fn main() {
 
     ASSERT_EQ(2u, info.size());
 
-    EXPECT_EQ(Inspector::TextureQueryType::kTextureNumSamples, info[0].type);
-    EXPECT_EQ(2u, info[0].group);
-    EXPECT_EQ(3u, info[0].binding);
-
-    EXPECT_EQ(Inspector::TextureQueryType::kTextureNumSamples, info[1].type);
-    EXPECT_EQ(1u, info[1].group);
-    EXPECT_EQ(2u, info[1].binding);
+    Inspector::LevelSampleInfo info1 = {
+        /*type */ Inspector::TextureQueryType::kTextureNumSamples,
+        /*group*/ 1,
+        /*binding*/ 2,
+    };
+    Inspector::LevelSampleInfo info2 = {
+        /*type */ Inspector::TextureQueryType::kTextureNumSamples,
+        /*group*/ 2,
+        /*binding*/ 3,
+    };
+    EXPECT_THAT(info, testing::UnorderedElementsAre(info1, info2));
 }
 
 TEST_F(InspectorTextureTest, TextureLoadInEP) {
@@ -4188,12 +4311,17 @@ fn main() {
 
     ASSERT_EQ(2u, info.size());
 
-    EXPECT_EQ(Inspector::TextureQueryType::kTextureNumLevels, info[0].type);
-    EXPECT_EQ(2u, info[0].group);
-    EXPECT_EQ(3u, info[0].binding);
-    EXPECT_EQ(Inspector::TextureQueryType::kTextureNumLevels, info[1].type);
-    EXPECT_EQ(0u, info[1].group);
-    EXPECT_EQ(1u, info[1].binding);
+    Inspector::LevelSampleInfo info1 = {
+        /*type */ Inspector::TextureQueryType::kTextureNumLevels,
+        /*group*/ 0,
+        /*binding*/ 1,
+    };
+    Inspector::LevelSampleInfo info2 = {
+        /*type */ Inspector::TextureQueryType::kTextureNumLevels,
+        /*group*/ 2,
+        /*binding*/ 3,
+    };
+    EXPECT_THAT(info, testing::UnorderedElementsAre(info1, info2));
 }
 
 TEST_F(InspectorTextureTest, TextureInSubfunction) {
@@ -4223,15 +4351,22 @@ fn main() {
 
     ASSERT_EQ(3u, info.size());
 
-    EXPECT_EQ(Inspector::TextureQueryType::kTextureNumLevels, info[0].type);
-    EXPECT_EQ(2u, info[0].group);
-    EXPECT_EQ(3u, info[0].binding);
-    EXPECT_EQ(Inspector::TextureQueryType::kTextureNumSamples, info[1].type);
-    EXPECT_EQ(1u, info[1].group);
-    EXPECT_EQ(4u, info[1].binding);
-    EXPECT_EQ(Inspector::TextureQueryType::kTextureNumLevels, info[2].type);
-    EXPECT_EQ(1u, info[2].group);
-    EXPECT_EQ(3u, info[2].binding);
+    Inspector::LevelSampleInfo info1 = {
+        /*type */ Inspector::TextureQueryType::kTextureNumLevels,
+        /*group*/ 1,
+        /*binding*/ 3,
+    };
+    Inspector::LevelSampleInfo info2 = {
+        /*type */ Inspector::TextureQueryType::kTextureNumLevels,
+        /*group*/ 2,
+        /*binding*/ 3,
+    };
+    Inspector::LevelSampleInfo info3 = {
+        /*type */ Inspector::TextureQueryType::kTextureNumSamples,
+        /*group*/ 1,
+        /*binding*/ 4,
+    };
+    EXPECT_THAT(info, testing::UnorderedElementsAre(info1, info2, info3));
 }
 
 TEST_F(InspectorTextureTest, TextureMultipleEPs) {
@@ -4256,29 +4391,41 @@ TEST_F(InspectorTextureTest, TextureMultipleEPs) {
     )";
     Inspector& inspector = Initialize(shader);
     {
-        auto info1 = inspector.GetTextureQueries("main1");
-        ASSERT_EQ(3u, info1.size());
+        auto info = inspector.GetTextureQueries("main1");
+        ASSERT_EQ(3u, info.size());
 
-        EXPECT_EQ(Inspector::TextureQueryType::kTextureNumLevels, info1[0].type);
-        EXPECT_EQ(0u, info1[0].group);
-        EXPECT_EQ(1u, info1[0].binding);
-        EXPECT_EQ(Inspector::TextureQueryType::kTextureNumSamples, info1[1].type);
-        EXPECT_EQ(0u, info1[1].group);
-        EXPECT_EQ(4u, info1[1].binding);
-        EXPECT_EQ(Inspector::TextureQueryType::kTextureNumLevels, info1[2].type);
-        EXPECT_EQ(1u, info1[2].group);
-        EXPECT_EQ(3u, info1[2].binding);
+        Inspector::LevelSampleInfo info1 = {
+            /*type */ Inspector::TextureQueryType::kTextureNumLevels,
+            /*group*/ 1,
+            /*binding*/ 3,
+        };
+        Inspector::LevelSampleInfo info2 = {
+            /*type */ Inspector::TextureQueryType::kTextureNumLevels,
+            /*group*/ 0,
+            /*binding*/ 1,
+        };
+        Inspector::LevelSampleInfo info3 = {
+            /*type */ Inspector::TextureQueryType::kTextureNumSamples,
+            /*group*/ 0,
+            /*binding*/ 4,
+        };
+        EXPECT_THAT(info, testing::UnorderedElementsAre(info1, info2, info3));
     }
     {
-        auto info2 = inspector.GetTextureQueries("main2");
-        ASSERT_EQ(2u, info2.size());
+        auto info = inspector.GetTextureQueries("main2");
+        ASSERT_EQ(2u, info.size());
 
-        EXPECT_EQ(Inspector::TextureQueryType::kTextureNumLevels, info2[0].type);
-        EXPECT_EQ(0u, info2[0].group);
-        EXPECT_EQ(1u, info2[0].binding);
-        EXPECT_EQ(Inspector::TextureQueryType::kTextureNumSamples, info2[1].type);
-        EXPECT_EQ(0u, info2[1].group);
-        EXPECT_EQ(4u, info2[1].binding);
+        Inspector::LevelSampleInfo info1 = {
+            /*type */ Inspector::TextureQueryType::kTextureNumLevels,
+            /*group*/ 0,
+            /*binding*/ 1,
+        };
+        Inspector::LevelSampleInfo info2 = {
+            /*type */ Inspector::TextureQueryType::kTextureNumSamples,
+            /*group*/ 0,
+            /*binding*/ 4,
+        };
+        EXPECT_THAT(info, testing::UnorderedElementsAre(info1, info2));
     }
 }
 

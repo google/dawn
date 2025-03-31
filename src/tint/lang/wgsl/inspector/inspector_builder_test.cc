@@ -35,6 +35,7 @@
 
 #include "gtest/gtest.h"
 #include "src/tint/lang/core/fluent_types.h"
+#include "src/tint/lang/wgsl/reader/reader.h"
 #include "src/tint/lang/wgsl/resolver/resolve.h"
 
 using namespace tint::core::fluent_types;  // NOLINT
@@ -362,6 +363,22 @@ std::function<ast::Type()> InspectorBuilder::GetTypeFunction(ComponentType compo
     }
 
     return [this, func, n] { return ty.vec(func(), n); };
+}
+
+Inspector& InspectorBuilder::Initialize(std::string shader) {
+    if (inspector_) {
+        return *inspector_;
+    }
+
+    wgsl::reader::Options options;
+    options.allowed_features = wgsl::AllowedFeatures::Everything();
+    file_ = std::make_unique<Source::File>("test", shader);
+    program_ = std::make_unique<Program>(wgsl::reader::Parse(file_.get(), options));
+    if (!program_->IsValid()) {
+        ADD_FAILURE() << program_->Diagnostics();
+    }
+    inspector_ = std::make_unique<Inspector>(*program_);
+    return *inspector_;
 }
 
 Inspector& InspectorBuilder::Build() {

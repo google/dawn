@@ -83,8 +83,6 @@ if (tint_build_unittests) {
       sources = [
         "inspector_builder_test.cc",
         "inspector_builder_test.h",
-        "inspector_runner_test.cc",
-        "inspector_runner_test.h",
         "inspector_test.cc",
       ]
       deps = [

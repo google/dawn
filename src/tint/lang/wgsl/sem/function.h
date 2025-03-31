@@ -135,21 +135,6 @@ class Function final : public Castable<Function, CallTarget> {
         directly_called_builtins_.Add(builtin);
     }
 
-    /// Adds the given texture/sampler pair to the list of unique pairs
-    /// that this function uses (directly or indirectly). These can only
-    /// be parameters to this function or global variables. Uniqueness is
-    /// ensured by texture_sampler_pairs_ being a UniqueVector.
-    /// @param texture the texture (must be non-null)
-    /// @param sampler the sampler (null indicates a texture-only reference)
-    void AddTextureSamplerPair(const sem::Variable* texture, const sem::Variable* sampler) {
-        TINT_ASSERT(texture != nullptr);
-        texture_sampler_pairs_.Add(VariablePair(texture, sampler));
-    }
-
-    /// @returns the list of texture/sampler pairs that this function uses
-    /// (directly or indirectly).
-    VectorRef<VariablePair> TextureSamplerPairs() const { return texture_sampler_pairs_; }
-
     /// Records the source of the first node that uses a subgroup matrix type
     /// @param src the source
     void SetDirectlyUsedSubgroupMatrix(const Source* src) {

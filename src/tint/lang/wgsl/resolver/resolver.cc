@@ -2500,7 +2500,6 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
         if (!validator_.TextureBuiltinFn(call)) {
             return nullptr;
         }
-        CollectTextureSamplerPairs(target, call->Arguments());
     }
 
     switch (fn) {
@@ -3248,36 +3247,6 @@ size_t Resolver::NestDepth(const core::type::Type* ty) const {
         });
 }
 
-void Resolver::CollectTextureSamplerPairs(const sem::BuiltinFn* builtin,
-                                          VectorRef<const sem::ValueExpression*> args) const {
-    if (builtin->Fn() == wgsl::BuiltinFn::kInputAttachmentLoad) {
-        // inputAttachmentLoad() is considered a texture function, however it doesn't need sampler,
-        // and its parameter has ParameterUsage::kInputAttachment, so return early.
-        return;
-    }
-
-    // Collect a texture/sampler pair for this builtin.
-    const auto& signature = builtin->Signature();
-    int texture_index = signature.IndexOf(core::ParameterUsage::kTexture);
-    if (DAWN_UNLIKELY(texture_index == -1)) {
-        TINT_ICE() << "texture builtin without texture parameter";
-    }
-    if (auto* user =
-            args[static_cast<size_t>(texture_index)]->UnwrapLoad()->As<sem::VariableUser>()) {
-        auto* texture = user->Variable();
-        if (!texture->Type()->UnwrapRef()->Is<core::type::StorageTexture>()) {
-            int sampler_index = signature.IndexOf(core::ParameterUsage::kSampler);
-            const sem::Variable* sampler = sampler_index != -1
-                                               ? args[static_cast<size_t>(sampler_index)]
-                                                     ->UnwrapLoad()
-                                                     ->As<sem::VariableUser>()
-                                                     ->Variable()
-                                               : nullptr;
-            current_function_->AddTextureSamplerPair(texture, sampler);
-        }
-    }
-}
-
 sem::Call* Resolver::FunctionCall(const ast::CallExpression* expr,
                                   sem::Function* target,
                                   VectorRef<const sem::ValueExpression*> args_in,
@@ -3321,35 +3290,9 @@ sem::Call* Resolver::FunctionCall(const ast::CallExpression* expr,
         if (!AliasAnalysis(call)) {
             return nullptr;
         }
-
-        // Note: Validation *must* be performed before calling this method.
-        CollectTextureSamplerPairs(target, call->Arguments());
     }
 
     return call;
-}
-
-void Resolver::CollectTextureSamplerPairs(sem::Function* func,
-                                          VectorRef<const sem::ValueExpression*> args) const {
-    // Map all texture/sampler pairs from the target function to the
-    // current function. These can only be global or parameter
-    // variables. Resolve any parameter variables to the corresponding
-    // argument passed to the current function. Leave global variables
-    // as-is. Then add the mapped pair to the current function's list of
-    // texture/sampler pairs.
-    for (sem::VariablePair pair : func->TextureSamplerPairs()) {
-        const sem::Variable* texture = pair.first;
-        const sem::Variable* sampler = pair.second;
-        if (auto* param = texture->As<sem::Parameter>()) {
-            texture = args[param->Index()]->UnwrapLoad()->As<sem::VariableUser>()->Variable();
-        }
-        if (sampler) {
-            if (auto* param = sampler->As<sem::Parameter>()) {
-                sampler = args[param->Index()]->UnwrapLoad()->As<sem::VariableUser>()->Variable();
-            }
-        }
-        current_function_->AddTextureSamplerPair(texture, sampler);
-    }
 }
 
 sem::ValueExpression* Resolver::Literal(const ast::LiteralExpression* literal) {

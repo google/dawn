@@ -84,8 +84,6 @@ if(TINT_BUILD_WGSL_READER)
 tint_add_target(tint_lang_wgsl_inspector_test test
   lang/wgsl/inspector/inspector_builder_test.cc
   lang/wgsl/inspector/inspector_builder_test.h
-  lang/wgsl/inspector/inspector_runner_test.cc
-  lang/wgsl/inspector/inspector_runner_test.h
   lang/wgsl/inspector/inspector_test.cc
 )
 
