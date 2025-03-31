@@ -691,13 +691,6 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsInternal(wgpu::FeatureLevel 
         }
     }
 
-    // Experimental limits for subgroups
-    // TODO(crbug.com/354751907) Move this to AdapterInfo
-    limits->experimentalSubgroupLimits.minSubgroupSize =
-        mDeviceInfo.subgroupSizeControlProperties.minSubgroupSize;
-    limits->experimentalSubgroupLimits.maxSubgroupSize =
-        mDeviceInfo.subgroupSizeControlProperties.maxSubgroupSize;
-
     // vulkan needs to have enough push constant range size for all
     // internal and external immediate data usages.
     constexpr uint32_t kMinVulkanPushConstants = 128;

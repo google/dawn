@@ -100,14 +100,6 @@ void AdapterBase::UpdateLimits() {
     if (mUseTieredLimits) {
         mLimits = ApplyLimitTiers(std::move(mLimits));
     }
-
-    // TODO(crbug.com/382520104): Remove DawnExperimentalSubgroupLimits.
-    // Apply the D3D12RelaxMinSubgroupSizeTo8 toggle if enabled.
-    if (mPhysicalDevice->GetBackendType() == wgpu::BackendType::D3D12 &&
-        mTogglesState.IsEnabled(Toggle::D3D12RelaxMinSubgroupSizeTo8)) {
-        mLimits.experimentalSubgroupLimits.minSubgroupSize =
-            std::max(8u, mLimits.experimentalSubgroupLimits.minSubgroupSize);
-    }
 }
 
 const CombinedLimits& AdapterBase::GetLimits() const {
@@ -126,26 +118,6 @@ wgpu::Status AdapterBase::APIGetLimits(Limits* limits) const {
         **unpacked = mLimits.v1;
         // Recover origin chain.
         unpacked->nextInChain = originalChain;
-    }
-
-    // TODO(crbug.com/382520104): Remove DawnExperimentalSubgroupLimits.
-    if (auto* subgroupLimits = unpacked.Get<DawnExperimentalSubgroupLimits>()) {
-        mInstance->EmitDeprecationWarning(
-            "DawnExperimentalSubgroupLimits is deprecated, use AdapterPropertiesSubgroups "
-            "instead.");
-        wgpu::ChainedStructOut* originalChain = subgroupLimits->nextInChain;
-        if (!mSupportedFeatures.IsEnabled(wgpu::FeatureName::Subgroups)) {
-            // If subgroups features are not supported, return the default-initialized
-            // DawnExperimentalSubgroupLimits object, where minSubgroupSize and
-            // maxSubgroupSize are WGPU_LIMIT_U32_UNDEFINED.
-            *subgroupLimits = DawnExperimentalSubgroupLimits{};
-        } else {
-            // If adapter supports subgroups features, always return the valid subgroup limits.
-            *subgroupLimits = mLimits.experimentalSubgroupLimits;
-        }
-
-        // Recover origin chain.
-        subgroupLimits->nextInChain = originalChain;
     }
 
     if (auto* immediateDataLimits = unpacked.Get<DawnExperimentalImmediateDataLimits>()) {

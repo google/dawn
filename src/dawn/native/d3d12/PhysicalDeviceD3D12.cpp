@@ -395,14 +395,6 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
     // TODO(crbug.com/dawn/685):
     // - maxVertexBufferArrayStride
 
-    // Experimental limits for subgroups
-    // TODO(crbug.com/354751907) Move this to AdapterInfo
-    limits->experimentalSubgroupLimits.minSubgroupSize = mDeviceInfo.waveLaneCountMin;
-    // Currently the WaveLaneCountMax queried from D3D12 API is not reliable and the meaning is
-    // unclear. Use 128 instead, which is the largest possible size. Reference:
-    // https://github.com/Microsoft/DirectXShaderCompiler/wiki/Wave-Intrinsics#:~:text=UINT%20WaveLaneCountMax
-    limits->experimentalSubgroupLimits.maxSubgroupSize = 128u;
-
     if (gpu_info::IsQualcomm_ACPI(GetVendorId())) {
         // Due to a driver and hardware limitation, Raw Buffers can only address 2^27 WORDS instead
         // of the guaranteeed 2^31 bytes. Probably because it uses some form of texel buffer of

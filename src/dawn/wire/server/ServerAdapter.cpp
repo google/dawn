@@ -114,21 +114,13 @@ void Server::OnRequestDeviceCallback(RequestDeviceUserdata* data,
     cmd.featuresCount = features.size();
     cmd.features = features.data();
 
-    // Query and report the adapter limits, including DawnExperimentalSubgroupLimits,
-    // DawnExperimentalImmediateDataLimits and DawnTexelCopyBufferRowAlignmentLimits.
-    // Reporting to client.
+    // Query and report the adapter limits, including all known extension limits.
     WGPULimits limits = {};
-
-    // Chained DawnExperimentalSubgroupLimits.
-    // TODO(crbug.com/354751907) Remove this, as it is now in AdapterInfo.
-    WGPUDawnExperimentalSubgroupLimits experimentalSubgroupLimits = {};
-    experimentalSubgroupLimits.chain.sType = WGPUSType_DawnExperimentalSubgroupLimits;
-    limits.nextInChain = &experimentalSubgroupLimits.chain;
 
     // Chained DawnExperimentalImmediateDataLimits.
     WGPUDawnExperimentalImmediateDataLimits experimentalImmediateDataLimits = {};
     experimentalImmediateDataLimits.chain.sType = WGPUSType_DawnExperimentalImmediateDataLimits;
-    experimentalSubgroupLimits.chain.next = &experimentalImmediateDataLimits.chain;
+    limits.nextInChain = &experimentalImmediateDataLimits.chain;
 
     // Chained DawnTexelCopyBufferRowAlignmentLimits.
     WGPUDawnTexelCopyBufferRowAlignmentLimits texelCopyBufferRowAlignmentLimits = {};

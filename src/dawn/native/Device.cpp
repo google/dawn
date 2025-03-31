@@ -378,18 +378,6 @@ DeviceBase::DeviceBase(AdapterBase* adapter,
     } else {
         GetDefaultLimits(&mLimits.v1, effectiveFeatureLevel);
     }
-    // Get experimentalSubgroupLimits from physical device
-    // TODO(crbug.com/382520104): Remove this since these are now exposed as
-    // properties on AdapterInfo.
-    mLimits.experimentalSubgroupLimits =
-        GetPhysicalDevice()->GetLimits().experimentalSubgroupLimits;
-    if (GetPhysicalDevice()->GetBackendType() == wgpu::BackendType::D3D12 &&
-        mToggles.IsEnabled(Toggle::D3D12RelaxMinSubgroupSizeTo8)) {
-        mLimits.experimentalSubgroupLimits.minSubgroupSize =
-            mLimits.experimentalSubgroupLimits.minSubgroupSize > 8
-                ? 8
-                : mLimits.experimentalSubgroupLimits.minSubgroupSize;
-    }
 
     // Get experimentalImmediateDataRangeByteSizeLimit from physical device
     mLimits.experimentalImmediateDataLimits =
@@ -1876,22 +1864,6 @@ wgpu::Status DeviceBase::APIGetLimits(Limits* limits) const {
         wgpu::ChainedStructOut* originalChain = unpacked->nextInChain;
         **unpacked = mLimits.v1;
         unpacked->nextInChain = originalChain;
-    }
-
-    // TODO(354751907): Move this to AdapterInfo
-    if (auto* subgroupLimits = unpacked.Get<DawnExperimentalSubgroupLimits>()) {
-        wgpu::ChainedStructOut* originalChain = subgroupLimits->nextInChain;
-        if (!HasFeature(Feature::Subgroups)) {
-            // If subgroups feature is not enabled, return the default-initialized
-            // DawnExperimentalSubgroupLimits object, where minSubgroupSize and
-            // maxSubgroupSize are WGPU_LIMIT_U32_UNDEFINED.
-            *subgroupLimits = DawnExperimentalSubgroupLimits{};
-        } else {
-            *subgroupLimits = mLimits.experimentalSubgroupLimits;
-        }
-
-        // Recover origin chain.
-        subgroupLimits->nextInChain = originalChain;
     }
 
     if (auto* immediateDataLimits = unpacked.Get<DawnExperimentalImmediateDataLimits>()) {

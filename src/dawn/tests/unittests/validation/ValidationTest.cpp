@@ -358,11 +358,6 @@ void ValidationTest::SetUp(const wgpu::InstanceDescriptor* nativeDesc,
         "_" + ::testing::UnitTest::GetInstance()->current_test_info()->name();
     mWireHelper->BeginWireTrace(traceName.c_str());
 
-    // The wire client and server request subgroup limit info, which
-    // triggers a deprecation warning.
-    // TODO(crbug.com/382520104): Remove those limits
-    const auto deprecationCountFromSubgroupLimits = UsesWire() ? 1u : 0u;
-
     // Initialize the instances.
     std::tie(instance, mDawnInstance) = mWireHelper->CreateInstances(nativeDesc, wireDesc);
 
@@ -371,11 +366,9 @@ void ValidationTest::SetUp(const wgpu::InstanceDescriptor* nativeDesc,
     options.backendType = wgpu::BackendType::Null;
     options.featureLevel = gCurrentTest->UseCompatibilityMode() ? wgpu::FeatureLevel::Compatibility
                                                                 : wgpu::FeatureLevel::Core;
-    EXPECT_DEPRECATION_WARNINGS(
-        instance.RequestAdapter(&options, wgpu::CallbackMode::AllowSpontaneous,
-                                [this](wgpu::RequestAdapterStatus, wgpu::Adapter result,
-                                       wgpu::StringView) -> void { adapter = std::move(result); }),
-        deprecationCountFromSubgroupLimits);
+    instance.RequestAdapter(&options, wgpu::CallbackMode::AllowSpontaneous,
+                            [this](wgpu::RequestAdapterStatus, wgpu::Adapter result,
+                                   wgpu::StringView) -> void { adapter = std::move(result); });
 
     FlushWire();
     DAWN_ASSERT(adapter);
