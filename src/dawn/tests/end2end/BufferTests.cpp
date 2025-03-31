@@ -1084,6 +1084,10 @@ TEST_P(BufferTests, CreateBufferOOM) {
 
 // Test that in the creation of buffers validation errors should always be prior to OOM.
 TEST_P(BufferTests, CreateBufferOOMWithValidationError) {
+    // Fails on TSAN due to allowing too much memory. TSAN max is `0x10000000000` and the test
+    // allocates `0x4000000000000000`
+    DAWN_SUPPRESS_TEST_IF(IsTsan());
+
     DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
 
     wgpu::BufferDescriptor descriptor;
