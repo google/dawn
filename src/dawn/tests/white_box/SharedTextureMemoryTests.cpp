@@ -122,7 +122,8 @@ void SharedTextureMemoryTests::SetUp() {
     DAWN_TEST_UNSUPPORTED_IF(
         !SupportsFeatures(GetParam().mBackend->RequiredFeatures(GetAdapter().Get())));
     // TODO(crbug.com/342213634): Crashes on ChromeOS volteer devices.
-    DAWN_SUPPRESS_TEST_IF(IsChromeOS() && IsVulkan() && IsIntel() && IsBackendValidationEnabled());
+    // TODO(crbug.com/407561933): Triggers dawn validation errors
+    DAWN_SUPPRESS_TEST_IF(IsChromeOS() && IsVulkan() && IsIntel());
 
     // Compat cannot create 2D texture view from a 2D array texture.
     DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode() &&
