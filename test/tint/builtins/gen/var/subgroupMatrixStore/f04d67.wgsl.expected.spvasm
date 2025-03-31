@@ -38,12 +38,12 @@
      %uint_8 = OpConstant %uint 8
      %uint_2 = OpConstant %uint 2
          %17 = OpTypeCooperativeMatrixKHR %int %uint_3 %uint_8 %uint_8 %uint_2
-         %16 = OpConstantNull %17
+      %int_0 = OpConstant %int 0
+         %16 = OpConstantComposite %17 %int_0
 %_ptr_Function_17 = OpTypePointer Function %17
 %_ptr_Workgroup_int = OpTypePointer Workgroup %int
-         %32 = OpTypeFunction %void %uint
+         %33 = OpTypeFunction %void %uint
        %bool = OpTypeBool
-      %int_0 = OpConstant %int 0
  %uint_24840 = OpConstant %uint 24840
 %subgroupMatrixStore_f04d67 = OpFunction %void None %11
          %12 = OpLabel
@@ -53,37 +53,37 @@
                OpStore %arg_1 %uint_1
                OpStore %arg_2 %16
                OpStore %arg_4 %uint_1
-         %24 = OpLoad %uint %arg_1 None
-         %25 = OpLoad %17 %arg_2 None
-         %26 = OpLoad %uint %arg_4 None
-         %27 = OpAccessChain %_ptr_Workgroup_int %arg_0 %24
-               OpCooperativeMatrixStoreKHR %27 %25 %uint_1 %26 NonPrivatePointer
+         %25 = OpLoad %uint %arg_1 None
+         %26 = OpLoad %17 %arg_2 None
+         %27 = OpLoad %uint %arg_4 None
+         %28 = OpAccessChain %_ptr_Workgroup_int %arg_0 %25
+               OpCooperativeMatrixStoreKHR %28 %26 %uint_1 %27 NonPrivatePointer
                OpReturn
                OpFunctionEnd
-%compute_main_inner = OpFunction %void None %32
+%compute_main_inner = OpFunction %void None %33
 %tint_local_index = OpFunctionParameter %uint
-         %33 = OpLabel
-               OpBranch %34
          %34 = OpLabel
-               OpBranch %37
-         %37 = OpLabel
-         %39 = OpPhi %uint %tint_local_index %34 %40 %36
-               OpLoopMerge %38 %36 None
                OpBranch %35
          %35 = OpLabel
-         %41 = OpUGreaterThanEqual %bool %39 %uint_64
-               OpSelectionMerge %43 None
-               OpBranchConditional %41 %44 %43
-         %44 = OpLabel
                OpBranch %38
-         %43 = OpLabel
-         %45 = OpAccessChain %_ptr_Workgroup_int %arg_0 %39
-               OpStore %45 %int_0 NonPrivatePointer
+         %38 = OpLabel
+         %40 = OpPhi %uint %tint_local_index %35 %41 %37
+               OpLoopMerge %39 %37 None
                OpBranch %36
          %36 = OpLabel
-         %40 = OpIAdd %uint %39 %uint_1
+         %42 = OpUGreaterThanEqual %bool %40 %uint_64
+               OpSelectionMerge %44 None
+               OpBranchConditional %42 %45 %44
+         %45 = OpLabel
+               OpBranch %39
+         %44 = OpLabel
+         %46 = OpAccessChain %_ptr_Workgroup_int %arg_0 %40
+               OpStore %46 %int_0 NonPrivatePointer
                OpBranch %37
-         %38 = OpLabel
+         %37 = OpLabel
+         %41 = OpIAdd %uint %40 %uint_1
+               OpBranch %38
+         %39 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_24840
          %49 = OpFunctionCall %void %subgroupMatrixStore_f04d67
                OpReturn

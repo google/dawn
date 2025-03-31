@@ -38,13 +38,13 @@
          %12 = OpTypeFunction %8
      %uint_0 = OpConstant %uint 0
          %15 = OpTypeCooperativeMatrixKHR %uint %uint_3 %uint_8 %uint_8 %uint_0
-         %14 = OpConstantNull %15
+         %14 = OpConstantComposite %15 %uint_0
 %_ptr_Function_15 = OpTypePointer Function %15
      %uint_1 = OpConstant %uint 1
          %20 = OpTypeCooperativeMatrixKHR %uint %uint_3 %uint_8 %uint_8 %uint_1
-         %19 = OpConstantNull %20
+         %19 = OpConstantComposite %20 %uint_0
 %_ptr_Function_20 = OpTypePointer Function %20
-         %24 = OpConstantNull %8
+         %24 = OpConstantComposite %8 %uint_0
 %_ptr_Function_8 = OpTypePointer Function %8
        %void = OpTypeVoid
          %35 = OpTypeFunction %void

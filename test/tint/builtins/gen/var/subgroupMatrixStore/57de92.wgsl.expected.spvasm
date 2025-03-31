@@ -41,10 +41,10 @@
      %uint_3 = OpConstant %uint 3
      %uint_8 = OpConstant %uint 8
          %16 = OpTypeCooperativeMatrixKHR %uint %uint_3 %uint_8 %uint_8 %uint_1
-         %15 = OpConstantNull %16
+     %uint_0 = OpConstant %uint 0
+         %15 = OpConstantComposite %16 %uint_0
 %_ptr_Function_16 = OpTypePointer Function %16
 %_ptr_StorageBuffer__arr_uint_uint_64 = OpTypePointer StorageBuffer %_arr_uint_uint_64
-     %uint_0 = OpConstant %uint 0
 %_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
 %subgroupMatrixStore_57de92 = OpFunction %void None %10
          %11 = OpLabel
@@ -54,11 +54,11 @@
                OpStore %arg_1 %uint_1
                OpStore %arg_2 %15
                OpStore %arg_4 %uint_1
-         %22 = OpAccessChain %_ptr_StorageBuffer__arr_uint_uint_64 %1 %uint_0 %uint_0
+         %23 = OpAccessChain %_ptr_StorageBuffer__arr_uint_uint_64 %1 %uint_0 %uint_0
          %25 = OpLoad %uint %arg_1 None
          %26 = OpLoad %16 %arg_2 None
          %27 = OpLoad %uint %arg_4 None
-         %28 = OpAccessChain %_ptr_StorageBuffer_uint %22 %25
+         %28 = OpAccessChain %_ptr_StorageBuffer_uint %23 %25
                OpCooperativeMatrixStoreKHR %28 %26 %uint_1 %27 NonPrivatePointer
                OpReturn
                OpFunctionEnd

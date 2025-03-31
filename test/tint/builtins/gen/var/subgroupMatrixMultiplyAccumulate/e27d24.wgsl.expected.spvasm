@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 46
+; Bound: 48
 ; Schema: 0
                OpCapability Shader
                OpCapability VulkanMemoryModel
@@ -40,41 +40,43 @@
       %float = OpTypeFloat 32
      %uint_0 = OpConstant %uint 0
          %16 = OpTypeCooperativeMatrixKHR %float %uint_3 %uint_8 %uint_8 %uint_0
-         %15 = OpConstantNull %16
+    %float_0 = OpConstant %float 0
+         %15 = OpConstantComposite %16 %float_0
 %_ptr_Function_16 = OpTypePointer Function %16
      %uint_1 = OpConstant %uint 1
-         %22 = OpTypeCooperativeMatrixKHR %float %uint_3 %uint_8 %uint_8 %uint_1
-         %21 = OpConstantNull %22
-%_ptr_Function_22 = OpTypePointer Function %22
-         %26 = OpConstantNull %9
+         %23 = OpTypeCooperativeMatrixKHR %float %uint_3 %uint_8 %uint_8 %uint_1
+         %22 = OpConstantComposite %23 %float_0
+%_ptr_Function_23 = OpTypePointer Function %23
+      %int_0 = OpConstant %int 0
+         %27 = OpConstantComposite %9 %int_0
 %_ptr_Function_9 = OpTypePointer Function %9
        %void = OpTypeVoid
-         %37 = OpTypeFunction %void
+         %39 = OpTypeFunction %void
 %_ptr_StorageBuffer__arr_int_uint_1024 = OpTypePointer StorageBuffer %_arr_int_uint_1024
 %_ptr_StorageBuffer_int = OpTypePointer StorageBuffer %int
     %uint_64 = OpConstant %uint 64
 %subgroupMatrixMultiplyAccumulate_e27d24 = OpFunction %9 None %13
          %14 = OpLabel
       %arg_0 = OpVariable %_ptr_Function_16 Function
-      %arg_1 = OpVariable %_ptr_Function_22 Function
+      %arg_1 = OpVariable %_ptr_Function_23 Function
       %arg_2 = OpVariable %_ptr_Function_9 Function
         %res = OpVariable %_ptr_Function_9 Function
                OpStore %arg_0 %15
-               OpStore %arg_1 %21
-               OpStore %arg_2 %26
-         %29 = OpLoad %16 %arg_0 None
-         %30 = OpLoad %22 %arg_1 None
-         %31 = OpLoad %9 %arg_2 None
-         %32 = OpCooperativeMatrixMulAddKHR %9 %29 %30 %31 MatrixCSignedComponentsKHR|MatrixResultSignedComponentsKHR
-               OpStore %res %32
-         %34 = OpLoad %9 %res None
-               OpReturnValue %34
+               OpStore %arg_1 %22
+               OpStore %arg_2 %27
+         %31 = OpLoad %16 %arg_0 None
+         %32 = OpLoad %23 %arg_1 None
+         %33 = OpLoad %9 %arg_2 None
+         %34 = OpCooperativeMatrixMulAddKHR %9 %31 %32 %33 MatrixCSignedComponentsKHR|MatrixResultSignedComponentsKHR
+               OpStore %res %34
+         %36 = OpLoad %9 %res None
+               OpReturnValue %36
                OpFunctionEnd
-%compute_main = OpFunction %void None %37
-         %38 = OpLabel
-         %39 = OpFunctionCall %9 %subgroupMatrixMultiplyAccumulate_e27d24
-         %40 = OpAccessChain %_ptr_StorageBuffer__arr_int_uint_1024 %1 %uint_0
-         %42 = OpAccessChain %_ptr_StorageBuffer_int %40 %uint_0
-               OpCooperativeMatrixStoreKHR %42 %39 %uint_0 %uint_64 NonPrivatePointer
+%compute_main = OpFunction %void None %39
+         %40 = OpLabel
+         %41 = OpFunctionCall %9 %subgroupMatrixMultiplyAccumulate_e27d24
+         %42 = OpAccessChain %_ptr_StorageBuffer__arr_int_uint_1024 %1 %uint_0
+         %44 = OpAccessChain %_ptr_StorageBuffer_int %42 %uint_0
+               OpCooperativeMatrixStoreKHR %44 %41 %uint_0 %uint_64 NonPrivatePointer
                OpReturn
                OpFunctionEnd
