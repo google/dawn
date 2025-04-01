@@ -43,6 +43,7 @@
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/texture.h"
 #include "src/tint/lang/spirv/ir/builtin_call.h"
+#include "src/tint/lang/spirv/ir/image_from_texture.h"
 #include "src/tint/lang/spirv/ir/literal_operand.h"
 #include "src/tint/lang/spirv/type/sampled_image.h"
 #include "src/tint/utils/ice/ice.h"
@@ -543,11 +544,12 @@ struct State {
         auto* sampler = next_arg();
         auto* coords = next_arg();
         auto* texture_ty = texture->Type()->As<core::type::Texture>();
+        auto* img_ty = ir::ImageFromTexture(ty, texture_ty);
 
         // Use OpSampledImage to create an OpTypeSampledImage object.
-        auto* sampled_image = b.Call<spirv::ir::BuiltinCall>(ty.Get<type::SampledImage>(texture_ty),
-                                                             spirv::BuiltinFn::kSampledImage,
-                                                             Vector{texture, sampler});
+        auto* sampled_image = b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.Get<type::SampledImage>(img_ty), spirv::BuiltinFn::kSampledImage, Vector{img_ty},
+            Vector{texture, sampler});
         sampled_image->InsertBefore(builtin);
 
         // Append the array index to the coordinates if provided.
@@ -648,11 +650,12 @@ struct State {
         auto* sampler = next_arg();
         auto* coords = next_arg();
         auto* texture_ty = texture->Type()->As<core::type::Texture>();
+        auto* img_ty = ir::ImageFromTexture(ty, texture_ty);
 
         // Use OpSampledImage to create an OpTypeSampledImage object.
-        auto* sampled_image = b.Call<spirv::ir::BuiltinCall>(ty.Get<type::SampledImage>(texture_ty),
-                                                             spirv::BuiltinFn::kSampledImage,
-                                                             Vector{texture, sampler});
+        auto* sampled_image = b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.Get<type::SampledImage>(img_ty), spirv::BuiltinFn::kSampledImage, Vector{img_ty},
+            Vector{texture, sampler});
         sampled_image->InsertBefore(builtin);
 
         // Append the array index to the coordinates if provided.

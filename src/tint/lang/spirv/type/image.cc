@@ -36,81 +36,78 @@ TINT_INSTANTIATE_TYPEINFO(tint::spirv::type::Image);
 namespace tint::spirv::type {
 namespace {
 
-std::ostream& operator<<(std::ostream& out, const Image::Dim dim) {
+std::ostream& operator<<(std::ostream& out, const Dim dim) {
     switch (dim) {
-        case Image::Dim::k1D:
+        case Dim::kD1:
             out << "1d";
             break;
-        case Image::Dim::k2D:
+        case Dim::kD2:
             out << "2d";
             break;
-        case Image::Dim::k3D:
+        case Dim::kD3:
             out << "3d";
             break;
-        case Image::Dim::kCube:
+        case Dim::kCube:
             out << "cube";
             break;
-        case Image::Dim::kRect:
+        case Dim::kRect:
             out << "rect";
             break;
-        case Image::Dim::kBuffer:
+        case Dim::kBuffer:
             out << "buffer";
             break;
-        case Image::Dim::kSubpassData:
+        case Dim::kSubpassData:
             out << "subpass_data";
             break;
     }
     return out;
 }
 
-std::ostream& operator<<(std::ostream& out, const Image::Depth depth) {
+std::ostream& operator<<(std::ostream& out, const Depth depth) {
     switch (depth) {
-        case Image::Depth::kNotDepth:
+        case Depth::kNotDepth:
             out << "not_depth";
             break;
-        case Image::Depth::kDepth:
+        case Depth::kDepth:
             out << "depth";
             break;
-        case Image::Depth::kUnknown:
+        case Depth::kUnknown:
             out << "depth_unknown";
             break;
     }
     return out;
 }
 
-std::ostream& operator<<(std::ostream& out, const Image::Arrayed arrayed) {
+std::ostream& operator<<(std::ostream& out, const Arrayed arrayed) {
     switch (arrayed) {
-        case Image::Arrayed::kNonArrayed:
+        case Arrayed::kNonArrayed:
             out << "non_arrayed";
             break;
-        case Image::Arrayed::kArrayed:
+        case Arrayed::kArrayed:
             out << "arrayed";
             break;
     }
     return out;
 }
 
-std::ostream& operator<<(std::ostream& out, const Image::MultiSampled ms) {
+std::ostream& operator<<(std::ostream& out, const Multisampled ms) {
     switch (ms) {
-        case Image::MultiSampled::kSingleSampled:
+        case Multisampled::kSingleSampled:
             out << "single_sampled";
             break;
-        case Image::MultiSampled::kMultiSampled:
+        case Multisampled::kMultisampled:
             out << "multi_sampled";
             break;
     }
     return out;
 }
 
-std::ostream& operator<<(std::ostream& out, const Image::Sampled sampled) {
+std::ostream& operator<<(std::ostream& out, const Sampled sampled) {
     switch (sampled) {
-        case Image::Sampled::kKnownAtRuntime:
-            out << "sampled_known_at_runtime";
-            break;
-        case Image::Sampled::kSamplingCompatible:
+        case Sampled::kSamplingCompatible:
             out << "sampling_compatible";
             break;
-        case Image::Sampled::kReadWriteOpCompatible:
+        case Sampled::kReadWriteOpCompatible:
             out << "rw_op_compatible";
             break;
     }
@@ -123,7 +120,7 @@ Image::Image(const core::type::Type* sampled_type,
              Dim dim,
              Depth depth,
              Arrayed arrayed,
-             MultiSampled ms,
+             Multisampled ms,
              Sampled sampled,
              core::TexelFormat fmt,
              core::Access access)

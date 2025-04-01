@@ -96,6 +96,7 @@
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/core/type/void.h"
 #include "src/tint/lang/spirv/ir/builtin_call.h"
+#include "src/tint/lang/spirv/ir/image_from_texture.h"
 #include "src/tint/lang/spirv/ir/literal_operand.h"
 #include "src/tint/lang/spirv/type/explicit_layout_array.h"
 #include "src/tint/lang/spirv/type/sampled_image.h"
@@ -169,6 +170,18 @@ const core::type::Type* DedupType(const core::type::Type* ty, core::type::Manage
                 return types.Get<core::type::Sampler>(core::type::SamplerKind::kSampler);
             }
             return s;
+        },
+
+        // The Vulkan spec says: The "Depth" operand of OpTypeImage is ignored.
+        // In SPIRV, 0 means not depth, 1 means depth, and 2 means unknown.
+        // Using anything other than 0 is problematic on various Vulkan drivers.
+        [&](const type::Image* img) -> const core::type::Type* {
+            if (img->GetDepth() == type::Depth::kNotDepth) {
+                return img;
+            }
+            return types.Get<type::Image>(
+                img->GetSampledType(), img->GetDim(), type::Depth::kNotDepth, img->GetArrayed(),
+                img->GetMultisampled(), img->GetSampled(), img->GetTexelFormat(), img->GetAccess());
         },
 
         // Dedup a SampledImage if its underlying image will be deduped.
@@ -498,6 +511,13 @@ class Printer {
     /// @param ty the type to get the ID for
     /// @returns the result ID of the type
     uint32_t Type(const core::type::Type* ty) {
+        // Convert textures to spirv::type::Image
+        // TODO(https://crbug.com/dawn/343218073): This conversion should happen in a transform so
+        // no textures exist by this point.
+        if (auto* texture = ty->As<core::type::Texture>()) {
+            ty = ir::ImageFromTexture(ir_.Types(), texture);
+        }
+
         ty = DedupType(ty, ir_.Types());
         return types_.GetOrAdd(ty, [&] {
             auto id = module_.NextId();
@@ -548,11 +568,10 @@ class Printer {
                                       Type(ptr->StoreType())});
                 },
                 [&](const core::type::Struct* str) { EmitStructType(id, str); },
-                [&](const core::type::Texture* tex) { EmitTextureType(id, tex); },
                 [&](const core::type::Sampler*) { module_.PushType(spv::Op::OpTypeSampler, {id}); },
                 [&](const type::SampledImage* s) {
                     module_.PushType(spv::Op::OpTypeSampledImage, {id, Type(s->Image())});
-                },  //
+                },
                 [&](const core::type::SubgroupMatrix* sm) {
                     TINT_ASSERT(options_.use_vulkan_memory_model);
                     auto scope = Constant(ir_.constant_values.Get(u32(spv::Scope::Subgroup)));
@@ -583,6 +602,32 @@ class Printer {
                                          cols,
                                          Constant(ir_.constant_values.Get(u32(use))),
                                      });
+                },
+                [&](const spirv::type::Image* img) {
+                    if (img->GetDim() == type::Dim::kD1) {
+                        if (img->GetSampled() == type::Sampled::kReadWriteOpCompatible) {
+                            module_.PushCapability(SpvCapabilityImage1D);
+                        } else {
+                            module_.PushCapability(SpvCapabilitySampled1D);
+                        }
+                    } else if (img->GetDim() == type::Dim::kSubpassData) {
+                        module_.PushCapability(SpvCapabilityInputAttachment);
+                    } else if (img->GetDim() == type::Dim::kCube &&
+                               img->GetArrayed() == type::Arrayed::kArrayed &&
+                               img->GetSampled() != type::Sampled::kReadWriteOpCompatible) {
+                        module_.PushCapability(SpvCapabilitySampledCubeArray);
+                    }
+
+                    uint32_t sampled_type = Type(img->GetSampledType());
+                    uint32_t dim = static_cast<uint32_t>(img->GetDim());
+                    uint32_t depth = static_cast<uint32_t>(img->GetDepth());
+                    uint32_t ms = static_cast<uint32_t>(img->GetMultisampled());
+                    uint32_t sampled = static_cast<uint32_t>(img->GetSampled());
+                    uint32_t array = static_cast<uint32_t>(img->GetArrayed());
+                    uint32_t format = TexelFormat(img->GetTexelFormat());
+
+                    module_.PushType(spv::Op::OpTypeImage,
+                                     {id, sampled_type, dim, depth, array, ms, sampled, format});
                 },  //
                 TINT_ICE_ON_NO_MATCH);
             return id;
@@ -657,89 +702,6 @@ class Printer {
         }
 
         PushName(id, str->Name());
-    }
-
-    /// Emit a texture type.
-    /// @param id the result ID to use
-    /// @param texture the texture type to emit
-    void EmitTextureType(uint32_t id, const core::type::Texture* texture) {
-        uint32_t sampled_type = Switch(
-            texture,  //
-            [&](const core::type::SampledTexture* t) { return Type(t->Type()); },
-            [&](const core::type::MultisampledTexture* t) { return Type(t->Type()); },
-            [&](const core::type::StorageTexture* t) { return Type(t->Type()); },
-            [&](const core::type::InputAttachment* t) { return Type(t->Type()); },  //
-            TINT_ICE_ON_NO_MATCH);
-
-        uint32_t dim = SpvDimMax;
-        uint32_t array = 0u;
-        switch (texture->Dim()) {
-            case core::type::TextureDimension::kNone: {
-                break;
-            }
-            case core::type::TextureDimension::k1d: {
-                dim = SpvDim1D;
-                if (texture->Is<core::type::SampledTexture>()) {
-                    module_.PushCapability(SpvCapabilitySampled1D);
-                } else if (texture->Is<core::type::StorageTexture>()) {
-                    module_.PushCapability(SpvCapabilityImage1D);
-                }
-                break;
-            }
-            case core::type::TextureDimension::k2d: {
-                if (texture->Is<core::type::InputAttachment>()) {
-                    module_.PushCapability(SpvCapabilityInputAttachment);
-                    dim = SpvDimSubpassData;
-                } else {
-                    dim = SpvDim2D;
-                }
-                break;
-            }
-            case core::type::TextureDimension::k2dArray: {
-                dim = SpvDim2D;
-                array = 1u;
-                break;
-            }
-            case core::type::TextureDimension::k3d: {
-                dim = SpvDim3D;
-                break;
-            }
-            case core::type::TextureDimension::kCube: {
-                dim = SpvDimCube;
-                break;
-            }
-            case core::type::TextureDimension::kCubeArray: {
-                dim = SpvDimCube;
-                array = 1u;
-                if (texture->Is<core::type::SampledTexture>()) {
-                    module_.PushCapability(SpvCapabilitySampledCubeArray);
-                }
-                break;
-            }
-        }
-
-        // The Vulkan spec says: The "Depth" operand of OpTypeImage is ignored.
-        // In SPIRV, 0 means not depth, 1 means depth, and 2 means unknown.
-        // Using anything other than 0 is problematic on various Vulkan drivers.
-        uint32_t depth = 0u;
-
-        uint32_t ms = 0u;
-        if (texture->Is<core::type::MultisampledTexture>()) {
-            ms = 1u;
-        }
-
-        uint32_t sampled = 2u;
-        if (texture->IsAnyOf<core::type::MultisampledTexture, core::type::SampledTexture>()) {
-            sampled = 1u;
-        }
-
-        uint32_t format = SpvImageFormat_::SpvImageFormatUnknown;
-        if (auto* st = texture->As<core::type::StorageTexture>()) {
-            format = TexelFormat(st->TexelFormat());
-        }
-
-        module_.PushType(spv::Op::OpTypeImage,
-                         {id, sampled_type, dim, depth, array, ms, sampled, format});
     }
 
     /// Emit a function.

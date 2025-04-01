@@ -239,13 +239,16 @@ enum attribute {
 enum usages {
   base
   bits
+  coords
   count
   depth
+  dref
   compare_value
   elements
   exp
   height
   i
+  image_operands
   insert
   level
   location
