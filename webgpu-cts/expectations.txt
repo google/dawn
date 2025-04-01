@@ -1497,10 +1497,6 @@ crbug.com/407159799 [ linux nvidia ] webgpu:api,validation,capability_checks,lim
 crbug.com/407159799 [ linux nvidia ] webgpu:api,validation,capability_checks,limits,maxVertexBufferArrayStride:createRenderPipeline,at_over:limitTest="betweenDefaultAndMaximum";testValueName="atLimit";async=false [ Failure ]
 crbug.com/407159799 [ linux nvidia ] webgpu:api,validation,capability_checks,limits,minUniformBufferOffsetAlignment:setBindGroup,at_over:limitTest="atMinimum";testValueName="underLimit" [ Failure ]
 
-# capability_checks,limits,* failures on Pixel 6
-crbug.com/407159801 [ android-pixel-6 ] webgpu:api,validation,capability_checks,limits,maxSamplersPerShaderStage:createPipeline,at_over:limitTest="betweenDefaultAndMaximum";testValueName="overLimit";async=false;bindingCombination="vertex";order="backward";bindGroupTest="differentGroups" [ Failure ]
-crbug.com/407159801 [ android-pixel-6 ] webgpu:api,validation,capability_checks,limits,maxUniformBuffersPerShaderStage:createPipelineLayout,at_over:limitTest="atDefault";testValueName="atLimit";visibility=2;order="forward" [ Failure ]
-
 # capability_checks,limits,maxInterStageShaderVariables failure on Android Qualcomm
 crbug.com/407159803 [ android-r qualcomm ] webgpu:api,validation,capability_checks,limits,maxInterStageShaderVariables:* [ Failure ]
 
