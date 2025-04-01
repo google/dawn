@@ -55,6 +55,7 @@ tint_target_add_dependencies(tint_lang_spirv_reader_parser lib
   tint_lang_spirv
   tint_lang_spirv_intrinsic
   tint_lang_spirv_ir
+  tint_lang_spirv_type
   tint_utils
   tint_utils_containers
   tint_utils_diagnostic
@@ -100,6 +101,7 @@ tint_add_target(tint_lang_spirv_reader_parser_test test
   lang/spirv/reader/parser/convert_test.cc
   lang/spirv/reader/parser/function_test.cc
   lang/spirv/reader/parser/helper_test.h
+  lang/spirv/reader/parser/image_sampler_test.cc
   lang/spirv/reader/parser/import_glsl_std450_test.cc
   lang/spirv/reader/parser/import_test.cc
   lang/spirv/reader/parser/logical_test.cc

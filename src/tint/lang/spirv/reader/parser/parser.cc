@@ -54,6 +54,8 @@ TINT_END_DISABLE_WARNING(NEWLINE_EOF);
 #include "src/tint/lang/core/type/builtin_structs.h"
 #include "src/tint/lang/spirv/builtin_fn.h"
 #include "src/tint/lang/spirv/ir/builtin_call.h"
+#include "src/tint/lang/spirv/type/image.h"
+#include "src/tint/lang/spirv/type/sampled_image.h"
 #include "src/tint/lang/spirv/validate/validate.h"
 
 using namespace tint::core::number_suffixes;  // NOLINT
@@ -375,14 +377,106 @@ class Parser {
                                    Type(ptr_ty->pointee_type()), access_mode);
                 }
                 case spvtools::opt::analysis::Type::kSampler: {
-                    // TODO(dsinclair): How to determine comparison samplers ...
                     return ty_.sampler();
+                }
+                case spvtools::opt::analysis::Type::kImage: {
+                    auto* img = type->AsImage();
+
+                    auto* sampled_ty = Type(img->sampled_type());
+                    auto dim = static_cast<type::Dim>(img->dim());
+                    auto depth = static_cast<type::Depth>(img->depth());
+                    auto arrayed =
+                        img->is_arrayed() ? type::Arrayed::kArrayed : type::Arrayed::kNonArrayed;
+                    auto ms = img->is_multisampled() ? type::Multisampled::kMultisampled
+                                                     : type::Multisampled::kSingleSampled;
+                    auto sampled = static_cast<type::Sampled>(img->sampled());
+                    auto texel_format = ToTexelFormat(img->format());
+                    auto access = ToAccess(img->access_qualifier());
+
+                    if (img->dim() != spv::Dim::Dim1D && img->dim() != spv::Dim::Dim2D &&
+                        img->dim() != spv::Dim::Dim3D && img->dim() != spv::Dim::Cube &&
+                        img->dim() != spv::Dim::SubpassData) {
+                        TINT_ICE() << "Unsupported texture dimension: "
+                                   << static_cast<uint32_t>(img->dim());
+                    }
+                    if (img->sampled() == 0) {
+                        TINT_ICE() << "Unsupported texture sample setting: Known at Runtime";
+                    }
+
+                    return ty_.Get<spirv::type::Image>(sampled_ty, dim, depth, arrayed, ms, sampled,
+                                                       texel_format, access);
+                }
+                case spvtools::opt::analysis::Type::kSampledImage: {
+                    auto* sampled = type->AsSampledImage();
+                    return ty_.Get<spirv::type::SampledImage>(Type(sampled->image_type()));
                 }
                 default: {
                     TINT_UNIMPLEMENTED() << "unhandled SPIR-V type: " << type->str();
                 }
             }
         });
+    }
+
+    core::Access ToAccess(spv::AccessQualifier access) {
+        switch (access) {
+            case spv::AccessQualifier::ReadOnly:
+                return core::Access::kRead;
+            case spv::AccessQualifier::WriteOnly:
+                return core::Access::kWrite;
+            case spv::AccessQualifier::ReadWrite:
+                return core::Access::kReadWrite;
+            default:
+                break;
+        }
+        TINT_ICE() << "unknown access qualifier: " << static_cast<uint32_t>(access);
+    }
+
+    core::TexelFormat ToTexelFormat(spv::ImageFormat fmt) {
+        switch (fmt) {
+            case spv::ImageFormat::Unknown:
+                return core::TexelFormat::kUndefined;
+
+            // 8 bit channels
+            case spv::ImageFormat::Rgba8:
+                return core::TexelFormat::kRgba8Unorm;
+            case spv::ImageFormat::Rgba8Snorm:
+                return core::TexelFormat::kRgba8Snorm;
+            case spv::ImageFormat::Rgba8ui:
+                return core::TexelFormat::kRgba8Uint;
+            case spv::ImageFormat::Rgba8i:
+                return core::TexelFormat::kRgba8Sint;
+
+            // 16 bit channels
+            case spv::ImageFormat::Rgba16ui:
+                return core::TexelFormat::kRgba16Uint;
+            case spv::ImageFormat::Rgba16i:
+                return core::TexelFormat::kRgba16Sint;
+            case spv::ImageFormat::Rgba16f:
+                return core::TexelFormat::kRgba16Float;
+
+            // 32 bit channels
+            case spv::ImageFormat::R32ui:
+                return core::TexelFormat::kR32Uint;
+            case spv::ImageFormat::R32i:
+                return core::TexelFormat::kR32Sint;
+            case spv::ImageFormat::R32f:
+                return core::TexelFormat::kR32Float;
+            case spv::ImageFormat::Rg32ui:
+                return core::TexelFormat::kRg32Uint;
+            case spv::ImageFormat::Rg32i:
+                return core::TexelFormat::kRg32Sint;
+            case spv::ImageFormat::Rg32f:
+                return core::TexelFormat::kRg32Float;
+            case spv::ImageFormat::Rgba32ui:
+                return core::TexelFormat::kRgba32Uint;
+            case spv::ImageFormat::Rgba32i:
+                return core::TexelFormat::kRgba32Sint;
+            case spv::ImageFormat::Rgba32f:
+                return core::TexelFormat::kRgba32Float;
+            default:
+                break;
+        }
+        TINT_ICE() << "invalid image format: " << int(fmt);
     }
 
     /// @param id a SPIR-V result ID for a type declaration instruction

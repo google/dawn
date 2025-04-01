@@ -71,8 +71,6 @@ type struct_with_runtime_array
   d2
   d3
   Cube
-  Rect
-  Buffer
   SubpassData
 }
 
@@ -93,7 +91,6 @@ type struct_with_runtime_array
 }
 
 @ns("spirv::type") enum sampled {
-  KnownAtRuntime
   SamplingCompatible
   ReadWriteOpCompatible
 }

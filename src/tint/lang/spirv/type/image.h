@@ -41,8 +41,9 @@ enum class Dim : uint8_t {
     kD2 = 1,
     kD3 = 2,
     kCube = 3,
-    kRect = 4,
-    kBuffer = 5,
+    // Not used in WGSL
+    // Rect = 4,
+    // Buffer = 5,
     kSubpassData = 6,
 };
 
