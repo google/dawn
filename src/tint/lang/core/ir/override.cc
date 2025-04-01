@@ -52,7 +52,7 @@ void Override::SetInitializer(Value* initializer) {
 }
 
 Override* Override::Clone(CloneContext& ctx) {
-    auto* new_result = ctx.Clone(Result(0));
+    auto* new_result = ctx.Clone(Result());
     TINT_ASSERT(new_result);
 
     auto* new_override = ctx.ir.CreateInstruction<Override>(new_result);

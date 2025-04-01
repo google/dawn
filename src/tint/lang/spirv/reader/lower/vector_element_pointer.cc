@@ -106,7 +106,7 @@ struct State {
             auto* access_to_vec = b.Access(ty.ptr(addrspace, access.type), object, partial_indices);
             access_to_vec->InsertBefore(access.inst);
 
-            object = access_to_vec->Result(0);
+            object = access_to_vec->Result();
         }
 
         // Replace all uses of the original access instruction.
@@ -125,7 +125,7 @@ struct State {
                            core::ir::Value* object,
                            core::ir::Value* index) {
         Vector<core::ir::Instruction*, 4> to_destroy;
-        access->Result(0)->ForEachUseUnsorted([&](core::ir::Usage use) {
+        access->Result()->ForEachUseUnsorted([&](core::ir::Usage use) {
             Switch(
                 use.instruction,
                 [&](core::ir::Load* load) {

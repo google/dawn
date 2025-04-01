@@ -69,7 +69,7 @@ class IR_SingleEntryPointTest : public TransformTest {
     InstructionResult* Var(const char* name) {
         auto* var = b.Var<private_, i32>(name);
         mod.root_block->Append(var);
-        return var->Result(0);
+        return var->Result();
     }
 
     /// @returns a new module-scope override called `name` with override `id` and possible
@@ -81,7 +81,7 @@ class IR_SingleEntryPointTest : public TransformTest {
             var->SetInitializer(initializer);
         }
         mod.root_block->Append(var);
-        return var->Result(0);
+        return var->Result();
     }
 };
 using IR_SingleEntryPointDeathTest = IR_SingleEntryPointTest;
@@ -330,12 +330,12 @@ TEST_F(IR_SingleEntryPointTest, DirectOverridesWithInitializer) {
     Value* init2 = nullptr;
     Value* init3 = nullptr;
     b.Append(mod.root_block, [&] {
-        init1 = b.Multiply(ty.i32(), 2_i, 4_i)->Result(0);
+        init1 = b.Multiply(ty.i32(), 2_i, 4_i)->Result();
         auto* x = b.Multiply(ty.i32(), 2_i, 4_i);
-        init2 = b.Add(ty.i32(), x, 4_i)->Result(0);
+        init2 = b.Add(ty.i32(), x, 4_i)->Result();
 
         auto* y = b.Multiply(ty.i32(), 3_i, 5_i);
-        init3 = b.Add(ty.i32(), y, 5_i)->Result(0);
+        init3 = b.Add(ty.i32(), y, 5_i)->Result();
     });
 
     auto* o1 = Override("o1", 1, init1);
@@ -884,8 +884,8 @@ TEST_F(IR_SingleEntryPointTest, OverrideInArrayType) {
         auto* c2 = ty.Get<core::ir::type::ValueArrayCount>(o2);
         auto* a2 = ty.Get<core::type::Array>(ty.i32(), c2, 4u, 4u, 4u, 4u);
 
-        v1 = b.Var("a", ty.ptr(workgroup, a1, read_write))->Result(0);
-        v2 = b.Var("b", ty.ptr(workgroup, a2, read_write))->Result(0);
+        v1 = b.Var("a", ty.ptr(workgroup, a1, read_write))->Result();
+        v2 = b.Var("b", ty.ptr(workgroup, a2, read_write))->Result();
     });
 
     EntryPoint("foo", {v1});
@@ -943,11 +943,11 @@ TEST_F(IR_SingleEntryPointTest, OverrideWithComplexIncludingOverride) {
         auto* add = b.Add(ty.u32(), x, 4_u);
         o = b.Override(Source{{1, 2}}, "a", ty.u32());
         o->SetOverrideId({1});
-        o->SetInitializer(add->Result(0));
+        o->SetInitializer(add->Result());
     });
 
     auto* func = b.Function("foo", ty.u32());
-    b.Append(func->Block(), [&] { b.Return(func, o->Result(0)); });
+    b.Append(func->Block(), [&] { b.Return(func, o->Result()); });
     EntryPoint("foo", {func});
     auto* src = R"(
 $B1: {  # root
@@ -1006,8 +1006,8 @@ TEST_F(IR_SingleEntryPointTest, OverrideInitVar) {
         auto* add = b.Add(ty.u32(), x, 3_u);
         auto* var_local =
             b.Var("a", core::AddressSpace::kPrivate, ty.u32(), core::Access::kReadWrite);
-        var_local->SetInitializer(add->Result(0));
-        v1 = var_local->Result(0);
+        var_local->SetInitializer(add->Result());
+        v1 = var_local->Result();
     });
 
     EntryPoint("foo", {v1});
@@ -1061,9 +1061,9 @@ TEST_F(IR_SingleEntryPointTest, OverrideInitVarIntermediateUnused) {
             b.Var("a", core::AddressSpace::kPrivate, ty.u32(), core::Access::kReadWrite);
         auto* var_local_b =
             b.Var("b", core::AddressSpace::kPrivate, ty.u32(), core::Access::kReadWrite);
-        var_local_b->SetInitializer(add_b->Result(0));
-        var_local->SetInitializer(add_a->Result(0));
-        v1 = var_local->Result(0);
+        var_local_b->SetInitializer(add_b->Result());
+        var_local->SetInitializer(add_a->Result());
+        v1 = var_local->Result();
     });
 
     EntryPoint("foo", {v1});
@@ -1116,8 +1116,8 @@ TEST_F(IR_SingleEntryPointTest, OverideInitVarUnused) {
         auto* add = b.Add(ty.u32(), x, 3_u);
         auto* var_local =
             b.Var("a", core::AddressSpace::kPrivate, ty.u32(), core::Access::kReadWrite);
-        var_local->SetInitializer(add->Result(0));
-        v1 = var_local->Result(0);
+        var_local->SetInitializer(add->Result());
+        v1 = var_local->Result();
     });
 
     EntryPoint("foo", {});
@@ -1168,11 +1168,11 @@ TEST_F(IR_SingleEntryPointTest, OverrideCondConstExprFailure) {
         b.Append(constexpr_if->False(), [&] { b.ExitIf(constexpr_if, false); });
         o = b.Override(Source{{1, 2}}, "osrc", ty.bool_());
         o->SetOverrideId({1});
-        o->SetInitializer(constexpr_if->Result(0));
+        o->SetInitializer(constexpr_if->Result());
     });
 
     auto* func = b.Function("foo2", ty.bool_());
-    b.Append(func->Block(), [&] { b.Return(func, o->Result(0)); });
+    b.Append(func->Block(), [&] { b.Return(func, o->Result()); });
     EntryPoint("foo", {func});
 
     auto* src = R"(

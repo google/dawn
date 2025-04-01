@@ -125,7 +125,7 @@ struct Impl {
     }
 
     void ResultPtrToRef(core::ir::Instruction* inst) {
-        auto* result = inst->Result(0);
+        auto* result = inst->Result();
         if (auto* ptr = result->Type()->As<core::type::Pointer>()) {
             result->SetType(PtrToRef(ptr));
         }

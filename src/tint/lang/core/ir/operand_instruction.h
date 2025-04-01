@@ -166,6 +166,20 @@ class OperandInstruction : public Castable<OperandInstruction<N, R>, Instruction
         return idx < results_.Length() ? results_[idx] : nullptr;
     }
 
+    /// @returns the instruction result
+    /// @note must only be called on instructions with exactly one result
+    InstructionResult* Result() {
+        TINT_ASSERT(results_.Length() == 1u);
+        return results_[0];
+    }
+
+    /// @returns the instruction result
+    /// @note must only be called on instructions with exactly one result
+    const InstructionResult* Result() const {
+        TINT_ASSERT(results_.Length() == 1u);
+        return results_[0];
+    }
+
   protected:
     /// Append a new operand to the operand list for this instruction.
     /// @param idx the index the operand should be at

@@ -2169,8 +2169,8 @@ void Validator::CheckFunction(const Function* func) {
             CheckFrontFacingIfBoolFunc<Function>("entry point return members can not be 'bool'"));
 
         for (auto var : referenced_module_vars_.TransitiveReferences(func)) {
-            const auto* mv = var->Result(0)->Type()->As<core::type::MemoryView>();
-            const auto* ty = var->Result(0)->Type()->UnwrapPtrOrRef();
+            const auto* mv = var->Result()->Type()->As<core::type::MemoryView>();
+            const auto* ty = var->Result()->Type()->UnwrapPtrOrRef();
             const auto attr = var->Attributes();
             if (!mv || !ty) {
                 continue;
@@ -2292,7 +2292,7 @@ void Validator::CheckVertexEntryPoint(const Function* ep) {
     bool contains_position = IsPositionPresent(ep->ReturnAttributes(), ep->ReturnType());
 
     for (auto var : referenced_module_vars_.TransitiveReferences(ep)) {
-        const auto* ty = var->Result(0)->Type()->UnwrapPtrOrRef();
+        const auto* ty = var->Result()->Type()->UnwrapPtrOrRef();
         const auto attr = var->Attributes();
         if (!ty) {
             continue;
@@ -2454,8 +2454,8 @@ void Validator::CheckOverride(const Override* o) {
         }
     }
 
-    if (!o->Result(0)->Type()->IsScalar()) {
-        AddError(o) << "override type " << NameOf(o->Result(0)->Type()) << " is not a scalar";
+    if (!o->Result()->Type()->IsScalar()) {
+        AddError(o) << "override type " << NameOf(o->Result()->Type()) << " is not a scalar";
         return;
     }
 
@@ -2463,8 +2463,8 @@ void Validator::CheckOverride(const Override* o) {
         if (!CheckOperand(o, ir::Var::kInitializerOperandOffset)) {
             return;
         }
-        if (o->Initializer()->Type() != o->Result(0)->Type()) {
-            AddError(o) << "override type " << NameOf(o->Result(0)->Type())
+        if (o->Initializer()->Type() != o->Result()->Type()) {
+            AddError(o) << "override type " << NameOf(o->Result()->Type())
                         << " does not match initializer type " << NameOf(o->Initializer()->Type());
             return;
         }
@@ -2481,7 +2481,7 @@ void Validator::CheckVar(const Var* var) {
         return;
     }
 
-    auto* result_type = var->Result(0)->Type();
+    auto* result_type = var->Result()->Type();
     auto* mv = result_type->As<core::type::MemoryView>();
     if (!mv) {
         AddError(var) << "result type " << NameOf(result_type)
@@ -2559,7 +2559,7 @@ void Validator::CheckVar(const Var* var) {
 
     if (var->Block() == mod_.root_block) {
         if (mv->AddressSpace() == AddressSpace::kIn || mv->AddressSpace() == AddressSpace::kOut) {
-            auto result = ValidateShaderIOAnnotations(var->Result(0)->Type(), var->BindingPoint(),
+            auto result = ValidateShaderIOAnnotations(var->Result()->Type(), var->BindingPoint(),
                                                       var->Attributes(), "module scope variable");
             if (result != Success) {
                 AddError(var) << result.Failure();
@@ -2677,7 +2677,7 @@ void Validator::CheckLet(const Let* l) {
         }
     }
 
-    auto* result_ty = l->Result(0)->Type();
+    auto* result_ty = l->Result()->Type();
     if (capabilities_.Contains(Capability::kAllowAnyLetType)) {
         if (result_ty->Is<core::type::Void>()) {
             AddError(l) << "result type cannot be void";
@@ -2690,7 +2690,7 @@ void Validator::CheckLet(const Let* l) {
     }
 
     if (value_ty != result_ty) {
-        AddError(l) << "result type " << NameOf(l->Result(0)->Type())
+        AddError(l) << "result type " << NameOf(l->Result()->Type())
                     << " does not match value type " << NameOf(l->Value()->Type());
     }
 }
@@ -2733,7 +2733,7 @@ void Validator::CheckBitcast(const Bitcast* bitcast) {
 void Validator::CheckBitcastTypes(const Bitcast* bitcast) {
     // Caller is responsible for checking results and operands
     const auto* val_type = bitcast->Operand(Bitcast::kValueOperandOffset)->Type();
-    const auto* result_type = bitcast->Result(0)->Type();
+    const auto* result_type = bitcast->Result()->Type();
 
     const auto add_error = [&]() {
         AddError(bitcast) << "bitcast is not defined for " << NameOf(val_type) << " -> "
@@ -2850,8 +2850,8 @@ void Validator::CheckBuiltinCall(const BuiltinCall* call) {
 
     TINT_ASSERT(builtin->return_type);
 
-    if (builtin->return_type != call->Result(0)->Type()) {
-        AddError(call) << "call result type " << NameOf(call->Result(0)->Type())
+    if (builtin->return_type != call->Result()->Type()) {
+        AddError(call) << "call result type " << NameOf(call->Result()->Type())
                        << " does not match builtin return type " << NameOf(builtin->return_type);
         return;
     }
@@ -2883,8 +2883,8 @@ void Validator::CheckMemberBuiltinCall(const MemberBuiltinCall* call) {
         return;
     }
 
-    if (result->return_type != call->Result(0)->Type()) {
-        AddError(call) << "member call result type " << NameOf(call->Result(0)->Type())
+    if (result->return_type != call->Result()->Type()) {
+        AddError(call) << "member call result type " << NameOf(call->Result()->Type())
                        << " does not match builtin return type " << NameOf(result->return_type);
     }
 }
@@ -2900,7 +2900,7 @@ void Validator::CheckConstruct(const Construct* construct) {
         return;
     }
 
-    if (auto* str = As<core::type::Struct>(construct->Result(0)->Type())) {
+    if (auto* str = As<core::type::Struct>(construct->Result()->Type())) {
         auto members = str->Members();
         if (args.Length() != str->Members().Length()) {
             AddError(construct) << "structure has " << members.Length()
@@ -2926,7 +2926,7 @@ void Validator::CheckConvert(const Convert* convert) {
         return;
     }
 
-    auto* result_type = convert->Result(0)->Type();
+    auto* result_type = convert->Result()->Type();
     auto* value_type = convert->Operand(Convert::kValueOperandOffset)->Type();
 
     intrinsic::CtorConv conv_ty;
@@ -3090,7 +3090,7 @@ void Validator::CheckAccess(const Access* a) {
         }
     }
 
-    auto* want = a->Result(0)->Type();
+    auto* want = a->Result()->Type();
     auto* want_view = want->As<core::type::MemoryView>();
     bool ok = true;
     if (obj_view) {
@@ -3324,7 +3324,7 @@ void Validator::CheckSwizzle(const Swizzle* s) {
 
     auto* elem_ty = src_vec->Elements().type;
     auto* expected_ty = type_mgr_.MatchWidth(elem_ty, indices.Length());
-    auto* result_ty = s->Result(0)->Type();
+    auto* result_ty = s->Result()->Type();
     if (result_ty != expected_ty) {
         AddError(s) << "result type " << NameOf(result_ty) << " does not match expected type, "
                     << NameOf(expected_ty);
@@ -3551,9 +3551,9 @@ void Validator::CheckLoad(const Load* l) {
             return;
         }
 
-        if (l->Result(0)->Type() != mv->StoreType()) {
+        if (l->Result()->Type() != mv->StoreType()) {
             AddError(l, Load::kFromOperandOffset)
-                << "result type " << NameOf(l->Result(0)->Type())
+                << "result type " << NameOf(l->Result()->Type())
                 << " does not match source store type " << NameOf(mv->StoreType());
         }
     }

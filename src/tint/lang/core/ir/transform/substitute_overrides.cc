@@ -81,7 +81,7 @@ struct State {
         // haven't been replaced yet.
         for (auto* inst : *ir.root_block) {
             if (auto* var = inst->As<core::ir::Var>()) {
-                if (auto* ary = var->Result(0)->Type()->UnwrapPtr()->As<core::type::Array>()) {
+                if (auto* ary = var->Result()->Type()->UnwrapPtr()->As<core::type::Array>()) {
                     if (ary->Count()->Is<core::ir::type::ValueArrayCount>()) {
                         vars_with_value_array_count.Push(var);
                     }
@@ -105,7 +105,7 @@ struct State {
                 auto iter = cfg.map.find(override->OverrideId().value());
                 if (iter != cfg.map.end()) {
                     bool substitution_representation_valid = tint::Switch(
-                        override->Result(0)->Type(),  //
+                        override->Result()->Type(),  //
                         [&](const core::type::Bool*) { return true; },
                         [&](const core::type::I32*) {
                             return dawn::IsDoubleValueRepresentable<int32_t>(iter->second);
@@ -128,11 +128,11 @@ struct State {
                         error << "Pipeline overridable constant " << iter->first.value
                               << " with value (" << iter->second
                               << ")  is not representable in type ("
-                              << override->Result(0)->Type()->FriendlyName() << ")";
+                              << override->Result()->Type()->FriendlyName() << ")";
                         return diag::Failure(error);
                     }
 
-                    auto* replacement = CreateConstant(override->Result(0)->Type(), iter->second);
+                    auto* replacement = CreateConstant(override->Result()->Type(), iter->second);
                     override->SetInitializer(replacement);
                 }
             }
@@ -146,7 +146,7 @@ struct State {
             }
 
             if (auto* replacement = override->Initializer()->As<core::ir::Constant>()) {
-                override->Result(0)->ReplaceAllUsesWith(replacement);
+                override->Result()->ReplaceAllUsesWith(replacement);
                 values_to_propagate.Push(replacement);
             } else {
                 // This override might depend on ConstExperIf block compile time evaluation.
@@ -190,7 +190,7 @@ struct State {
         // Replace array types MUST be evaluate prior to 'propagate' because array count values are
         // not proper usages.
         for (auto var : vars_with_value_array_count) {
-            auto* old_ptr = var->Result(0)->Type()->As<core::type::Pointer>();
+            auto* old_ptr = var->Result()->Type()->As<core::type::Pointer>();
             TINT_ASSERT(old_ptr);
 
             auto* old_ty = old_ptr->UnwrapPtr()->As<core::type::Array>();
@@ -220,7 +220,7 @@ struct State {
                                                      old_ty->Stride(), old_ty->ImplicitStride());
 
             auto* new_ptr = ty.ptr(old_ptr->AddressSpace(), new_ty, old_ptr->Access());
-            var->Result(0)->SetType(new_ptr);
+            var->Result()->SetType(new_ptr);
 
             // The `Var` type needs to propagate to certain usages.
             Vector<core::ir::Instruction*, 2> to_replace;
@@ -228,23 +228,23 @@ struct State {
 
             while (!to_replace.IsEmpty()) {
                 auto* inst = to_replace.Pop();
-                for (auto usage : inst->Result(0)->UsagesUnsorted()) {
+                for (auto usage : inst->Result()->UsagesUnsorted()) {
                     if (!usage->instruction->Is<core::ir::Let>()) {
                         continue;
                     }
 
-                    usage->instruction->Result(0)->SetType(new_ptr);
+                    usage->instruction->Result()->SetType(new_ptr);
                     to_replace.Push(usage->instruction);
                 }
             }
         }
 
         for (auto* override : override_complex_init) {
-            auto res_const = CalculateOverride(override->Result(0));
+            auto res_const = CalculateOverride(override->Result());
             if (res_const != Success) {
                 return res_const.Failure();
             }
-            override->Result(0)->ReplaceAllUsesWith(res_const.Get());
+            override->Result()->ReplaceAllUsesWith(res_const.Get());
             values_to_propagate.Push(res_const.Get());
         }
 
@@ -303,7 +303,7 @@ struct State {
             }
             // There will only be one arg since the return (of ConstExprIf) is a single
             // boolean.
-            constexpr_if->Result(0)->ReplaceAllUsesWith(inline_block->Terminator()->Args()[0]);
+            constexpr_if->Result()->ReplaceAllUsesWith(inline_block->Terminator()->Args()[0]);
             constexpr_if->Destroy();
         }
 
@@ -347,7 +347,7 @@ struct State {
                     continue;
                 }
 
-                usage.instruction->Result(0)->ReplaceAllUsesWith(replacement);
+                usage.instruction->Result()->ReplaceAllUsesWith(replacement);
                 values_to_propagate.Push(replacement);
                 usage.instruction->Destroy();
             }

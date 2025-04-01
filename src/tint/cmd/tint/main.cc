@@ -1033,7 +1033,7 @@ bool GenerateMsl([[maybe_unused]] Options& options,
             continue;
         }
 
-        auto* ty = var->Result(0)->Type()->UnwrapPtr();
+        auto* ty = var->Result()->Type()->UnwrapPtr();
         if (!ty->HasFixedFootprint()) {
             if (storage_bindings.insert(bp.value()).second) {
                 gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(

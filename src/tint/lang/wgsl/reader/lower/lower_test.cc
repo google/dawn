@@ -79,7 +79,7 @@ TEST_F(Wgslreader_LowerTest, WorkgroupUniformLoad) {
     auto* f = b.Function("f", ty.i32());
     b.Append(f->Block(), [&] {  //
         auto* result = b.Call<wgsl::ir::BuiltinCall>(
-            ty.i32(), wgsl::BuiltinFn::kWorkgroupUniformLoad, wgvar->Result(0));
+            ty.i32(), wgsl::BuiltinFn::kWorkgroupUniformLoad, wgvar->Result());
         b.Return(f, result);
     });
 

@@ -96,7 +96,7 @@ class ReferencedModuleDecls {
                 continue;
             }
 
-            inst->Result(0)->ForEachUseUnsorted([&](const Usage& use) {
+            inst->Result()->ForEachUseUnsorted([&](const Usage& use) {
                 if (use.instruction->Block() != root_block) {
                     AddToBlock(block_to_direct_decls_.GetOrAddZero(use.instruction->Block()), inst);
                 }
@@ -110,7 +110,7 @@ class ReferencedModuleDecls {
             if (!var) {
                 continue;
             }
-            auto* ptr = var->Result(0)->Type()->template As<core::type::Pointer>();
+            auto* ptr = var->Result()->Type()->template As<core::type::Pointer>();
             TINT_ASSERT(ptr);
 
             if (ptr->AddressSpace() != core::AddressSpace::kWorkgroup) {
@@ -130,7 +130,7 @@ class ReferencedModuleDecls {
 
             // The usage of the var is as a `let` initializer. The array count needs to
             // propagate to the `let` block.
-            var->Result(0)->ForEachUseUnsorted([&](const Usage& use) {
+            var->Result()->ForEachUseUnsorted([&](const Usage& use) {
                 AddToBlock(block_to_direct_decls_.GetOrAddZero(use.instruction->Block()),
                            cnt_inst->Instruction());
             });

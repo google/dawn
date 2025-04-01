@@ -76,7 +76,7 @@ struct State {
                 continue;
             }
 
-            auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
+            auto* ptr = var->Result()->Type()->As<core::type::Pointer>();
             switch (ptr->AddressSpace()) {
                 case core::AddressSpace::kPushConstant:
                 case core::AddressSpace::kStorage:
@@ -107,7 +107,7 @@ struct State {
         // emitted without explicit layout decorations, we need to rewrite its store type and
         // introduce element-wise copies when loading and storing those types.
         for (auto* var : vars_requiring_explicit_layout) {
-            UpdatePointerType(var->Result(0));
+            UpdatePointerType(var->Result());
         }
     }
 
@@ -247,7 +247,7 @@ struct State {
             [&](core::ir::Access* access) {
                 // If the access produces a pointer to a type that has been forked, we need to
                 // update the result type and then recurse into its uses.
-                UpdatePointerType(access->Result(0));
+                UpdatePointerType(access->Result());
             },
             [&](ir::BuiltinCall* call) {
                 // The only builtin function that takes an array pointer is arrayLength().
@@ -257,16 +257,16 @@ struct State {
             [&](core::ir::Let* let) {
                 // A let usage will propagate the pointer to a type that has been forked, so we need
                 // to update the result type and then recurse into its uses.
-                UpdatePointerType(let->Result(0));
+                UpdatePointerType(let->Result());
             },
             [&](core::ir::Load* load) {
                 b.InsertAfter(load, [&] {
                     // Change the load instruction to produce the forked type, and then convert the
                     // result of the load to the original type.
-                    auto* original_type = load->Result(0)->Type();
+                    auto* original_type = load->Result()->Type();
                     auto* forked_load = b.InstructionResult(load->From()->Type()->UnwrapPtr());
                     auto* converted = ConvertIfNeeded(original_type, forked_load);
-                    load->Result(0)->ReplaceAllUsesWith(converted);
+                    load->Result()->ReplaceAllUsesWith(converted);
                     load->SetResults(Vector{forked_load});
                 });
             },
@@ -312,7 +312,7 @@ struct State {
             });
             return func;
         });
-        return b.Call(helper, src)->Result(0);
+        return b.Call(helper, src)->Result();
     }
 
     /// Recursively convert a struct type to/from the explicitly laid out version.
@@ -324,11 +324,11 @@ struct State {
         for (uint32_t i = 0; i < dst_struct->Members().Length(); i++) {
             auto* src_member = src_struct->Members()[i];
             auto* dst_member = dst_struct->Members()[i];
-            auto* extracted = b.Access(src_member->Type(), input, u32(i))->Result(0);
+            auto* extracted = b.Access(src_member->Type(), input, u32(i))->Result();
             auto* converted = ConvertIfNeeded(dst_member->Type(), extracted);
             construct_args.Push(converted);
         }
-        return b.Construct(dst_struct, std::move(construct_args))->Result(0);
+        return b.Construct(dst_struct, std::move(construct_args))->Result();
     }
 
     /// Recursively convert an array type to/from the explicitly laid out version.
@@ -344,13 +344,13 @@ struct State {
         // Convert each element one at a time, writing into the local variable.
         auto* result = b.Var(ty.ptr<function>(dst_array));
         b.LoopRange(ty, 0_u, u32(count->value), 1_u, [&](core::ir::Value* idx) {
-            auto* extracted = b.Access(src_array->ElemType(), input, idx)->Result(0);
+            auto* extracted = b.Access(src_array->ElemType(), input, idx)->Result();
             auto* converted = ConvertIfNeeded(dst_array->ElemType(), extracted);
             auto* dst_ptr = b.Access(ty.ptr(function, dst_array->ElemType()), result, idx);
             b.Store(dst_ptr, converted);
         });
 
-        return b.Load(result)->Result(0);
+        return b.Load(result)->Result();
     }
 };
 

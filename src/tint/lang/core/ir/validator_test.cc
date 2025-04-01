@@ -728,7 +728,7 @@ TEST_F(IR_ValidatorTest, Convert_PtrToVal) {
     auto* f = b.Function("f", ty.void_());
     b.Append(f->Block(), [&] {
         auto* v = b.Var("v", 0_u);
-        b.Convert(ty.u32(), v->Result(0));
+        b.Convert(ty.u32(), v->Result());
         b.Return(f);
     });
 
@@ -747,7 +747,7 @@ TEST_F(IR_ValidatorTest, Convert_PtrToPtr) {
     auto* f = b.Function("f", ty.void_());
     b.Append(f->Block(), [&] {
         auto* v = b.Var("v", 0_u);
-        b.Convert(v->Result(0)->Type(), v->Result(0));
+        b.Convert(v->Result()->Type(), v->Result());
         b.Return(f);
     });
 
@@ -915,7 +915,7 @@ TEST_F(IR_ValidatorTest, Instruction_NullInstructionResultInstruction) {
     auto* v = sb.Var(ty.ptr<function, f32>());
     sb.Return(f);
 
-    v->Result(0)->SetInstruction(nullptr);
+    v->Result()->SetInstruction(nullptr);
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
@@ -1296,7 +1296,7 @@ TEST_F(IR_ValidatorTest, InstructionInRootBlockOnlyUsedInRootBlock) {
     b.Append(mod.root_block, [&] {
         auto* z = b.Override(ty.u32());
         z->SetOverrideId(OverrideId{2});
-        init = b.Add(ty.u32(), z, 2_u)->Result(0);
+        init = b.Add(ty.u32(), z, 2_u)->Result();
         b.Override("a", init);
     });
 
@@ -1322,7 +1322,7 @@ TEST_F(IR_ValidatorTest, OverrideArrayInvalidValue) {
     b.Append(mod.root_block, [&] {
         o = b.Override(ty.u32());
 
-        auto* c1 = ty.Get<core::ir::type::ValueArrayCount>(o->Result(0));
+        auto* c1 = ty.Get<core::ir::type::ValueArrayCount>(o->Result());
         auto* a1 = ty.Get<core::type::Array>(ty.i32(), c1, 4u, 4u, 4u, 4u);
 
         b.Var("a", ty.ptr(workgroup, a1, read_write));

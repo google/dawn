@@ -51,7 +51,7 @@ Result<WorkgroupInfo> GetWorkgroupInfo(core::ir::Module& ir) {
     size_t wg_storage_size = 0u;
     for (auto* inst : *ir.root_block) {
         if (auto* as_var = inst->As<core::ir::Var>()) {
-            auto* ptr = as_var->Result(0)->Type()->As<core::type::Pointer>();
+            auto* ptr = as_var->Result()->Type()->As<core::type::Pointer>();
             if (ptr->AddressSpace() != core::AddressSpace::kWorkgroup) {
                 continue;
             }

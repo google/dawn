@@ -681,7 +681,7 @@ TEST_F(SpirvWriterTest, Loop_Phi_NestedIf) {
             b.Append(inner->False(), [&] {  //
                 b.ExitIf(inner, 20_i);
             });
-            b.Continue(loop, inner->Result(0));
+            b.Continue(loop, inner->Result());
         });
 
         auto* cont_param = b.BlockParam(ty.i32());

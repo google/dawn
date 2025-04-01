@@ -147,7 +147,7 @@ struct IntegerRangeAnalysisImpl {
             return nullptr;
         }
 
-        const auto* pointer = var->Result(0)->Type()->As<core::type::Pointer>();
+        const auto* pointer = var->Result()->Type()->As<core::type::Pointer>();
         if (!pointer->StoreType()->IsIntegerScalar()) {
             return nullptr;
         }
@@ -192,7 +192,7 @@ struct IntegerRangeAnalysisImpl {
         if (!load_from_loop_control_variable) {
             return nullptr;
         }
-        if (load_from_loop_control_variable->From() != loop_control_variable->Result(0)) {
+        if (load_from_loop_control_variable->From() != loop_control_variable->Result()) {
             return nullptr;
         }
 
@@ -205,7 +205,7 @@ struct IntegerRangeAnalysisImpl {
         if (!add_or_sub_from_loop_control_variable) {
             return nullptr;
         }
-        const auto* src = load_from_loop_control_variable->Result(0);
+        const auto* src = load_from_loop_control_variable->Result();
         const auto* lhs = add_or_sub_from_loop_control_variable->LHS();
         const auto* rhs = add_or_sub_from_loop_control_variable->RHS();
         switch (add_or_sub_from_loop_control_variable->Op()) {
@@ -238,11 +238,11 @@ struct IntegerRangeAnalysisImpl {
         if (!store_into_loop_control_variable) {
             return nullptr;
         }
-        const auto* dst = add_or_sub_from_loop_control_variable->Result(0);
+        const auto* dst = add_or_sub_from_loop_control_variable->Result();
         if (store_into_loop_control_variable->From() != dst) {
             return nullptr;
         }
-        if (store_into_loop_control_variable->To() != loop_control_variable->Result(0)) {
+        if (store_into_loop_control_variable->To() != loop_control_variable->Result()) {
             return nullptr;
         }
 

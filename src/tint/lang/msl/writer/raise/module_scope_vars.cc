@@ -93,8 +93,8 @@ struct State {
         uint32_t index = 0;
         for (auto& var : module_vars) {
             Vector<core::ir::Instruction*, 16> to_destroy;
-            auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
-            var->Result(0)->ForEachUseUnsorted([&](core::ir::Usage use) {  //
+            auto* ptr = var->Result()->Type()->As<core::type::Pointer>();
+            var->Result()->ForEachUseUnsorted([&](core::ir::Usage use) {  //
                 auto* extracted_variable = GetVariableFromStruct(var, use.instruction, index);
 
                 // Everything but handles are just replaced with values from the structure.
@@ -107,7 +107,7 @@ struct State {
                     use.instruction,
                     // Loads are replaced with a direct access to the variable.
                     [&](core::ir::Load* load) {
-                        load->Result(0)->ReplaceAllUsesWith(extracted_variable);
+                        load->Result()->ReplaceAllUsesWith(extracted_variable);
                         to_destroy.Push(load);
                     },
                     // Accesses are replaced with accesses of the extracted variable.
@@ -118,15 +118,14 @@ struct State {
 
                         access->SetOperand(core::ir::Access::kObjectOperandOffset,
                                            extracted_variable);
-                        access->Result(0)->SetType(elem_type);
+                        access->Result()->SetType(elem_type);
 
                         // Accesses of the previously ptr<binding_array<T, N>> would return a ptr<T>
                         // but the new access returns a T. We need to modify all the previous load
                         // through the ptr<T> to direct accesses.
-                        access->Result(0)->ForEachUseUnsorted([&](core::ir::Usage access_use) {
+                        access->Result()->ForEachUseUnsorted([&](core::ir::Usage access_use) {
                             TINT_ASSERT(access_use.instruction->Is<core::ir::Load>());
-                            access_use.instruction->Result(0)->ReplaceAllUsesWith(
-                                access->Result(0));
+                            access_use.instruction->Result()->ReplaceAllUsesWith(access->Result());
                             to_destroy.Push(access_use.instruction);
                         });
                     },
@@ -148,7 +147,7 @@ struct State {
         Vector<core::type::Manager::StructMemberDesc, 8> struct_members;
         for (auto* global : *ir.root_block) {
             if (auto* var = global->As<core::ir::Var>()) {
-                auto* type = var->Result(0)->Type();
+                auto* type = var->Result()->Type();
 
                 // Handle types drop the pointer and are passed around by value.
                 auto* ptr = type->As<core::type::Pointer>();
@@ -216,13 +215,13 @@ struct State {
                 // Create a new declaration in the entry point to replace the module-scope variable.
                 // Use either a parameter or a local variable, depending on the address space.
                 core::ir::Value* decl = nullptr;
-                auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
+                auto* ptr = var->Result()->Type()->As<core::type::Pointer>();
                 switch (ptr->AddressSpace()) {
                     case core::AddressSpace::kPrivate: {
                         // Private variables become function-scope variables.
                         auto* local_var = b.Var(ptr);
                         local_var->SetInitializer(var->Initializer());
-                        decl = local_var->Result(0);
+                        decl = local_var->Result();
                         break;
                     }
                     case core::AddressSpace::kStorage:
@@ -245,7 +244,7 @@ struct State {
                         }
                         decl = b.Access(ptr, workgroup_allocation_param,
                                         u32(workgroup_struct_members.Length()))
-                                   ->Result(0);
+                                   ->Result();
                         workgroup_struct_members.Push(core::type::Manager::StructMemberDesc{
                             ir.symbols.New(),
                             ptr->StoreType(),
@@ -274,7 +273,7 @@ struct State {
             // Construct the structure value and name it with a `let` instruction.
             // The `let` prevents the printer from inlining the constructor, which aids readability.
             auto* construct = b.Construct(struct_type, std::move(construct_args));
-            module_var_struct = b.Let(kModuleVarsName, construct)->Result(0);
+            module_var_struct = b.Let(kModuleVarsName, construct)->Result();
         });
 
         // Create the workgroup variable structure if needed.
@@ -316,7 +315,7 @@ struct State {
                                            uint32_t index) {
         auto* func = ContainingFunction(inst);
         auto* struct_value = function_to_struct_value.GetOr(func, nullptr);
-        auto* type = var->Result(0)->Type();
+        auto* type = var->Result()->Type();
 
         // Handle types drop the pointer and are passed around by value.
         auto* ptr = type->As<core::type::Pointer>();
@@ -326,7 +325,7 @@ struct State {
 
         auto* access = b.Access(type, struct_value, u32(index));
         access->InsertBefore(inst);
-        return access->Result(0);
+        return access->Result();
     }
 
     /// Get the function that contains an instruction.

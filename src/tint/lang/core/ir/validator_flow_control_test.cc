@@ -1806,7 +1806,7 @@ TEST_F(IR_ValidatorTest, Return_NotFunction) {
     b.Append(f->Block(), [&] {  //
         auto* var = b.Var(ty.ptr<function, f32>());
         auto* r = b.Return(nullptr);
-        r->SetOperand(0, var->Result(0));
+        r->SetOperand(0, var->Result());
     });
 
     auto res = ir::Validate(mod);

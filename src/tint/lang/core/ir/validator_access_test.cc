@@ -541,7 +541,7 @@ TEST_F(IR_ValidatorTest, Load_SourceNotMemoryView) {
 
     b.Append(f->Block(), [&] {
         auto* let = b.Let("l", 1_i);
-        b.Append(mod.CreateInstruction<ir::Load>(b.InstructionResult(ty.f32()), let->Result(0)));
+        b.Append(mod.CreateInstruction<ir::Load>(b.InstructionResult(ty.f32()), let->Result()));
         b.Return(f);
     });
 
@@ -560,7 +560,7 @@ TEST_F(IR_ValidatorTest, Load_TypeMismatch) {
 
     b.Append(f->Block(), [&] {
         auto* var = b.Var(ty.ptr<function, i32>());
-        b.Append(mod.CreateInstruction<ir::Load>(b.InstructionResult(ty.f32()), var->Result(0)));
+        b.Append(mod.CreateInstruction<ir::Load>(b.InstructionResult(ty.f32()), var->Result()));
         b.Return(f);
     });
 
@@ -579,7 +579,7 @@ TEST_F(IR_ValidatorTest, Load_MissingResult) {
 
     b.Append(f->Block(), [&] {
         auto* var = b.Var(ty.ptr<function, i32>());
-        auto* load = mod.CreateInstruction<ir::Load>(nullptr, var->Result(0));
+        auto* load = mod.CreateInstruction<ir::Load>(nullptr, var->Result());
         load->ClearResults();
         b.Append(load);
         b.Return(f);
@@ -599,7 +599,7 @@ TEST_F(IR_ValidatorTest, Load_NonReadableSource) {
 
     b.Append(f->Block(), [&] {
         auto* var = b.Var(ty.ptr<function, i32, core::Access::kWrite>());
-        b.Append(mod.CreateInstruction<ir::Load>(b.InstructionResult(ty.i32()), var->Result(0)));
+        b.Append(mod.CreateInstruction<ir::Load>(b.InstructionResult(ty.i32()), var->Result()));
         b.Return(f);
     });
 
@@ -635,7 +635,7 @@ TEST_F(IR_ValidatorTest, Store_NullFrom) {
 
     b.Append(f->Block(), [&] {
         auto* var = b.Var(ty.ptr<function, i32>());
-        b.Append(mod.CreateInstruction<ir::Store>(var->Result(0), nullptr));
+        b.Append(mod.CreateInstruction<ir::Store>(var->Result(), nullptr));
         b.Return(f);
     });
 
@@ -652,7 +652,7 @@ TEST_F(IR_ValidatorTest, Store_NonEmptyResult) {
 
     b.Append(f->Block(), [&] {
         auto* var = b.Var(ty.ptr<function, i32>());
-        auto* store = mod.CreateInstruction<ir::Store>(var->Result(0), b.Constant(42_i));
+        auto* store = mod.CreateInstruction<ir::Store>(var->Result(), b.Constant(42_i));
         store->SetResults(Vector{b.InstructionResult(ty.i32())});
         b.Append(store);
         b.Return(f);
@@ -672,7 +672,7 @@ TEST_F(IR_ValidatorTest, Store_TargetNotMemoryView) {
 
     b.Append(f->Block(), [&] {
         auto* let = b.Let("l", 1_i);
-        b.Append(mod.CreateInstruction<ir::Store>(let->Result(0), b.Constant(42_u)));
+        b.Append(mod.CreateInstruction<ir::Store>(let->Result(), b.Constant(42_u)));
         b.Return(f);
     });
 
@@ -691,7 +691,7 @@ TEST_F(IR_ValidatorTest, Store_TypeMismatch) {
 
     b.Append(f->Block(), [&] {
         auto* var = b.Var(ty.ptr<function, i32>());
-        b.Append(mod.CreateInstruction<ir::Store>(var->Result(0), b.Constant(42_u)));
+        b.Append(mod.CreateInstruction<ir::Store>(var->Result(), b.Constant(42_u)));
         b.Return(f);
     });
 
@@ -730,9 +730,9 @@ TEST_F(IR_ValidatorTest, Store_NoValueType) {
     b.Append(f->Block(), [&] {
         auto* var = b.Var(ty.ptr<function, i32>());
         auto* val = b.Construct(ty.u32(), 42_u);
-        val->Result(0)->SetType(nullptr);
+        val->Result()->SetType(nullptr);
 
-        b.Append(mod.CreateInstruction<ir::Store>(var->Result(0), val->Result(0)));
+        b.Append(mod.CreateInstruction<ir::Store>(var->Result(), val->Result()));
         b.Return(f);
     });
 
@@ -750,7 +750,7 @@ TEST_F(IR_ValidatorTest, Store_NonWriteableTarget) {
 
     b.Append(f->Block(), [&] {
         auto* var = b.Var(ty.ptr<function, i32, core::Access::kRead>());
-        b.Append(mod.CreateInstruction<ir::Store>(var->Result(0), b.Constant(42_i)));
+        b.Append(mod.CreateInstruction<ir::Store>(var->Result(), b.Constant(42_i)));
         b.Return(f);
     });
 
@@ -771,7 +771,7 @@ TEST_F(IR_ValidatorTest, LoadVectorElement_NullResult) {
     b.Append(f->Block(), [&] {
         auto* var = b.Var(ty.ptr<function, vec3<f32>>());
         b.Append(
-            mod.CreateInstruction<ir::LoadVectorElement>(nullptr, var->Result(0), b.Constant(1_i)));
+            mod.CreateInstruction<ir::LoadVectorElement>(nullptr, var->Result(), b.Constant(1_i)));
         b.Return(f);
     });
 
@@ -808,7 +808,7 @@ TEST_F(IR_ValidatorTest, LoadVectorElement_NullIndex) {
     b.Append(f->Block(), [&] {
         auto* var = b.Var(ty.ptr<function, vec3<f32>>());
         b.Append(mod.CreateInstruction<ir::LoadVectorElement>(b.InstructionResult(ty.f32()),
-                                                              var->Result(0), nullptr));
+                                                              var->Result(), nullptr));
         b.Return(f);
     });
 
@@ -884,8 +884,8 @@ TEST_F(IR_ValidatorTest, StoreVectorElement_NullIndex) {
 
     b.Append(f->Block(), [&] {
         auto* var = b.Var(ty.ptr<function, vec3<f32>>());
-        b.Append(mod.CreateInstruction<ir::StoreVectorElement>(var->Result(0), nullptr,
-                                                               b.Constant(2_f)));
+        b.Append(
+            mod.CreateInstruction<ir::StoreVectorElement>(var->Result(), nullptr, b.Constant(2_f)));
         b.Return(f);
     });
 
@@ -903,8 +903,8 @@ TEST_F(IR_ValidatorTest, StoreVectorElement_NullValue) {
 
     b.Append(f->Block(), [&] {
         auto* var = b.Var(ty.ptr<function, vec3<f32>>());
-        b.Append(mod.CreateInstruction<ir::StoreVectorElement>(var->Result(0), b.Constant(1_i),
-                                                               nullptr));
+        b.Append(
+            mod.CreateInstruction<ir::StoreVectorElement>(var->Result(), b.Constant(1_i), nullptr));
         b.Return(f);
     });
 

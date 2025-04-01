@@ -412,7 +412,7 @@ $B1: {  # root
     EXPECT_EQ(src, Disassemble());
 
     ReferencedModuleVars<Module> vars(mod, [](const Var* var) {
-        auto* view = var->Result(0)->Type()->As<type::MemoryView>();
+        auto* view = var->Result()->Type()->As<type::MemoryView>();
         return view->AddressSpace() == AddressSpace::kPrivate;
     });
     EXPECT_THAT(vars.TransitiveReferences(foo), ElementsAre(var_b, var_d));

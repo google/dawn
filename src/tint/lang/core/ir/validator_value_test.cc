@@ -140,7 +140,7 @@ TEST_F(IR_ValidatorTest, Var_Function_NonPtrResult) {
 
     b.Append(f->Block(), [&] {
         auto* v = b.Var<function, f32>();
-        v->Result(0)->SetType(ty.f32());
+        v->Result()->SetType(ty.f32());
         b.Return(f);
     });
 
@@ -322,7 +322,7 @@ TEST_F(IR_ValidatorTest, Var_Init_NullType) {
         auto* i = b.Var<function, f32>("i");
         i->SetInitializer(b.Constant(0_f));
         auto* load = b.Load(i);
-        auto* load_ret = load->Result(0);
+        auto* load_ret = load->Result();
         auto* j = b.Var<function, f32>("j");
         j->SetInitializer(load_ret);
         load_ret->SetType(nullptr);

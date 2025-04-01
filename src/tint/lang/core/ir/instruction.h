@@ -174,6 +174,22 @@ class Instruction : public Castable<Instruction> {
         return idx < res.Length() ? res[idx] : nullptr;
     }
 
+    /// @returns the instruction result
+    /// @note must only be called on instructions with exactly one result
+    InstructionResult* Result() {
+        auto res = Results();
+        TINT_ASSERT(res.Length() == 1u);
+        return res[0];
+    }
+
+    /// @returns the instruction result
+    /// @note must only be called on instructions with exactly one result
+    const InstructionResult* Result() const {
+        auto res = Results();
+        TINT_ASSERT(res.Length() == 1u);
+        return res[0];
+    }
+
     /// Pointer to the next instruction in the list
     ConstPropagatingPtr<Instruction> next;
     /// Pointer to the previous instruction in the list

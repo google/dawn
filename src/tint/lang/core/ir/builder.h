@@ -1302,7 +1302,7 @@ class Builder {
     /// @param val the value to be converted
     /// @returns either result of the conversion or original value
     ir::Value* InsertConvertIfNeeded(const core::type::Type* to, ir::Value* val) {
-        return val->Type()->Equals(*to) ? val : Convert(to, val)->Result(0);
+        return val->Type()->Equals(*to) ? val : Convert(to, val)->Result();
     }
 
     /// Creates a value constructor instruction with an existing instruction result
@@ -1437,7 +1437,7 @@ class Builder {
         }
         auto* var = Var(name, ir.Types().ptr(SPACE, val->Type(), ACCESS));
         var->SetInitializer(val);
-        ir.SetName(var->Result(0), name);
+        ir.SetName(var->Result(), name);
         return var;
     }
 
@@ -1491,7 +1491,7 @@ class Builder {
             return nullptr;
         }
         auto* let = Append(ir.CreateInstruction<ir::Let>(InstructionResult(val->Type()), val));
-        ir.SetName(let->Result(0), name);
+        ir.SetName(let->Result(), name);
         return let;
     }
 
@@ -1873,7 +1873,7 @@ class Builder {
         }
         auto* override = Append(ir.CreateInstruction<ir::Override>(InstructionResult(val->Type())));
         override->SetInitializer(val);
-        ir.SetName(override->Result(0), name);
+        ir.SetName(override->Result(), name);
         return override;
     }
 
@@ -1894,7 +1894,7 @@ class Builder {
         }
         auto* override = Append(ir.CreateInstruction<ir::Override>(InstructionResult(val->Type())));
         override->SetInitializer(val);
-        ir.SetName(override->Result(0), name);
+        ir.SetName(override->Result(), name);
         ir.SetSource(override, src);
         return override;
     }
@@ -1913,7 +1913,7 @@ class Builder {
     /// @returns the instruction
     ir::Override* Override(Source src, std::string_view name, const core::type::Type* type) {
         auto* override = ir.CreateInstruction<ir::Override>(InstructionResult(type));
-        ir.SetName(override->Result(0), name);
+        ir.SetName(override->Result(), name);
         ir.SetSource(override, src);
         Append(override);
         return override;

@@ -269,7 +269,7 @@ TEST_F(IR_ValidatorTest, CallToBuiltin_MismatchResultType) {
     auto* f = b.Function("f", ty.void_());
     b.Append(f->Block(), [&] {
         auto* c = b.Call(ty.f32(), BuiltinFn::kAbs, 1_f);
-        c->Result(0)->SetType(ty.i32());
+        c->Result()->SetType(ty.i32());
         b.Return(f);
     });
 
@@ -290,7 +290,7 @@ TEST_F(IR_ValidatorTest, CallToBuiltin_MissingArg) {
         auto* i = b.Var<function, f32>("i");
         i->SetInitializer(b.Constant(0_f));
         auto* load = b.Load(i);
-        auto* c = b.Call(ty.f32(), BuiltinFn::kAbs, load->Result(0));
+        auto* c = b.Call(ty.f32(), BuiltinFn::kAbs, load->Result());
         c->SetOperands(Vector{static_cast<ir::Value*>(nullptr)});
         b.Return(f);
     });
@@ -309,9 +309,9 @@ TEST_F(IR_ValidatorTest, CallToBuiltin_OutOfScopeArg) {
         auto* i = b.Var<function, f32>("i");
         i->SetInitializer(b.Constant(0_f));
         auto* load = b.Load(i);
-        auto* c = b.Call(ty.f32(), BuiltinFn::kAbs, load->Result(0));
+        auto* c = b.Call(ty.f32(), BuiltinFn::kAbs, load->Result());
         auto* new_load = b.Load(i);
-        c->SetOperands(Vector{new_load->Result(0)});
+        c->SetOperands(Vector{new_load->Result()});
         b.Return(f);
     });
 
@@ -329,7 +329,7 @@ TEST_F(IR_ValidatorTest, CallToBuiltin_TooFewResults) {
         auto* i = b.Var<function, f32>("i");
         i->SetInitializer(b.Constant(0_f));
         auto* load = b.Load(i);
-        auto* too_few_call = b.Call(ty.f32(), BuiltinFn::kAbs, load->Result(0));
+        auto* too_few_call = b.Call(ty.f32(), BuiltinFn::kAbs, load->Result());
         too_few_call->ClearResults();
         b.Return(f);
     });
@@ -349,8 +349,8 @@ TEST_F(IR_ValidatorTest, CallToBuiltin_TooManyResults) {
         auto* i = b.Var<function, f32>("i");
         i->SetInitializer(b.Constant(0_f));
         auto* load = b.Load(i);
-        auto* too_many_call = b.Call(ty.f32(), BuiltinFn::kAbs, load->Result(0));
-        too_many_call->SetResults(Vector{load->Result(0), load->Result(0)});
+        auto* too_many_call = b.Call(ty.f32(), BuiltinFn::kAbs, load->Result());
+        too_many_call->SetResults(Vector{load->Result(), load->Result()});
         b.Return(f);
     });
 
@@ -369,7 +369,7 @@ TEST_F(IR_ValidatorTest, CallToBuiltin_TooFewArgs) {
         auto* i = b.Var<function, f32>("i");
         i->SetInitializer(b.Constant(0_f));
         auto* load = b.Load(i);
-        auto* too_few_call = b.Call(ty.f32(), BuiltinFn::kAbs, load->Result(0));
+        auto* too_few_call = b.Call(ty.f32(), BuiltinFn::kAbs, load->Result());
         too_few_call->ClearOperands();
         b.Return(f);
     });
@@ -387,8 +387,8 @@ TEST_F(IR_ValidatorTest, CallToBuiltin_TooManyArgs) {
         auto* i = b.Var<function, f32>("i");
         i->SetInitializer(b.Constant(0_f));
         auto* load = b.Load(i);
-        auto* too_many_call = b.Call(ty.f32(), BuiltinFn::kAbs, load->Result(0));
-        too_many_call->SetOperands(Vector{load->Result(0), load->Result(0)});
+        auto* too_many_call = b.Call(ty.f32(), BuiltinFn::kAbs, load->Result());
+        too_many_call->SetOperands(Vector{load->Result(), load->Result()});
         b.Return(f);
     });
 

@@ -6991,7 +6991,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, SubgroupInclusiveAdd) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         auto* let_a = b.Let("a", 2_f);
-        b.Let("b", b.Call(ty.f32(), core::BuiltinFn::kSubgroupInclusiveAdd, let_a->Result(0)));
+        b.Let("b", b.Call(ty.f32(), core::BuiltinFn::kSubgroupInclusiveAdd, let_a->Result()));
         b.Return(func);
     });
 
@@ -7027,7 +7027,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, SubgroupInclusiveMul) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         auto* let_a = b.Let("a", 2_f);
-        b.Let("b", b.Call(ty.f32(), core::BuiltinFn::kSubgroupInclusiveMul, let_a->Result(0)));
+        b.Let("b", b.Call(ty.f32(), core::BuiltinFn::kSubgroupInclusiveMul, let_a->Result()));
         b.Return(func);
     });
 

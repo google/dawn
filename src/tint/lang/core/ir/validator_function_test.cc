@@ -867,7 +867,7 @@ TEST_F(IR_ValidatorTest, Function_WorkgroupSize_ParamsTooSmall) {
 TEST_F(IR_ValidatorTest, Function_WorkgroupSize_OverrideWithoutAllowOverrides) {
     auto* o = b.Override(ty.u32());
     auto* f = ComputeEntryPoint();
-    f->SetWorkgroupSize({o->Result(0), o->Result(0), o->Result(0)});
+    f->SetWorkgroupSize({o->Result(), o->Result(), o->Result()});
 
     b.Append(f->Block(), [&] { b.Unreachable(); });
 
@@ -889,7 +889,7 @@ TEST_F(IR_ValidatorTest, Function_WorkgroupSize_NonRootBlockOverride) {
         o = b.Override(ty.u32());
         b.Return(f);
     });
-    f->SetWorkgroupSize({o->Result(0), o->Result(0), o->Result(0)});
+    f->SetWorkgroupSize({o->Result(), o->Result(), o->Result()});
 
     auto res = ir::Validate(mod, Capabilities{Capability::kAllowOverrides});
     ASSERT_NE(res, Success);
@@ -1065,8 +1065,7 @@ TEST_F(IR_ValidatorTest, Function_BoolOutput_via_MSV) {
     mod.root_block->Append(v);
 
     b.Append(f->Block(), [&] {
-        b.Append(
-            mod.CreateInstruction<ir::Store>(v->Result(0), b.Constant(b.ConstantValue(false))));
+        b.Append(mod.CreateInstruction<ir::Store>(v->Result(), b.Constant(b.ConstantValue(false))));
         b.Unreachable();
     });
 
@@ -1093,7 +1092,7 @@ TEST_F(IR_ValidatorTest, Function_BoolInputWithoutFrontFacing_via_MSV) {
     b.Append(f->Block(), [&] {
         auto* l = b.Load(invalid);
         auto* v = b.Var("v", AddressSpace::kFunction, ty.bool_());
-        v->SetInitializer(l->Result(0));
+        v->SetInitializer(l->Result());
         b.Unreachable();
     });
 

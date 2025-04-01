@@ -149,14 +149,14 @@ void ConstParamValidator::CheckLdexpCall(const CoreBuiltinCall* call) {
 void ConstParamValidator::CheckQuantizeToF16(const CoreBuiltinCall* call) {
     if (auto const_val = GetConstArg(call, 0)) {
         [[maybe_unused]] auto result = const_eval_.quantizeToF16(
-            call->Result(0)->Type(), Vector{const_val}, mod_.SourceOf(call));
+            call->Result()->Type(), Vector{const_val}, mod_.SourceOf(call));
     }
 }
 
 void ConstParamValidator::CheckPack2x16float(const CoreBuiltinCall* call) {
     if (auto const_val = GetConstArg(call, 0)) {
         [[maybe_unused]] auto result = const_eval_.pack2x16float(
-            call->Result(0)->Type(), Vector{const_val}, mod_.SourceOf(call));
+            call->Result()->Type(), Vector{const_val}, mod_.SourceOf(call));
     }
 }
 
@@ -193,7 +193,7 @@ void ConstParamValidator::CheckClampCall(const CoreBuiltinCall* call) {
     if (const_val_low && const_val_high) {
         auto fakeArgs = Vector{const_val_low, const_val_low, const_val_high};
         [[maybe_unused]] auto result =
-            const_eval_.clamp(call->Result(0)->Type(), fakeArgs, mod_.SourceOf(call));
+            const_eval_.clamp(call->Result()->Type(), fakeArgs, mod_.SourceOf(call));
     }
 }
 
@@ -203,7 +203,7 @@ void ConstParamValidator::CheckSmoothstepCall(const CoreBuiltinCall* call) {
     if (const_val_low && const_val_high) {
         auto fakeArgs = Vector{const_val_low, const_val_high, const_val_high};
         [[maybe_unused]] auto result =
-            const_eval_.smoothstep(call->Result(0)->Type(), fakeArgs, mod_.SourceOf(call));
+            const_eval_.smoothstep(call->Result()->Type(), fakeArgs, mod_.SourceOf(call));
     }
 }
 

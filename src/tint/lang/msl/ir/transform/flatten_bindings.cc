@@ -62,7 +62,7 @@ Result<SuccessType> FlattenBindings(core::ir::Module& ir) {
             continue;
         }
 
-        auto* ty = var->Result(0)->Type()->As<core::type::Pointer>();
+        auto* ty = var->Result()->Type()->As<core::type::Pointer>();
         TINT_ASSERT(ty);
 
         tint::Switch(

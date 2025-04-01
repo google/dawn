@@ -82,7 +82,7 @@ void Run(ir::Module& ir, std::string_view entry_point_name) {
         auto prev = inst->prev;
         if (!referenced_vars.Contains(inst)) {
             // There shouldn't be any remaining references to the variable.
-            if (inst->Result(0)->NumUsages() != 0) {
+            if (inst->Result()->NumUsages() != 0) {
                 TINT_ICE() << " Unexpected usages remain when applying single entry point IR for  '"
                            << entry_point_name << "' ";
             }

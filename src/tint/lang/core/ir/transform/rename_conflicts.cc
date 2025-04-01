@@ -181,15 +181,15 @@ struct State {
             },
             [&](core::ir::Var*) {
                 // Ensure the var's type is resolvable
-                EnsureResolvable(inst->Result(0)->Type());
+                EnsureResolvable(inst->Result()->Type());
             },
             [&](core::ir::Let*) {
                 // Ensure the let's type is resolvable
-                EnsureResolvable(inst->Result(0)->Type());
+                EnsureResolvable(inst->Result()->Type());
             },
             [&](core::ir::Construct*) {
                 // Ensure the type of a type constructor is resolvable
-                EnsureResolvable(inst->Result(0)->Type());
+                EnsureResolvable(inst->Result()->Type());
             },
             [&](core::ir::CoreBuiltinCall* call) {
                 // Ensure builtin of a builtin call is resolvable

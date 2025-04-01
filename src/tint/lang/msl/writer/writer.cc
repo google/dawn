@@ -52,7 +52,7 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
     // Check for unsupported module-scope variable address spaces and types.
     for (auto* inst : *ir.root_block) {
         auto* var = inst->As<core::ir::Var>();
-        auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
+        auto* ptr = var->Result()->Type()->As<core::type::Pointer>();
         if (ptr->AddressSpace() == core::AddressSpace::kPushConstant) {
             return Failure("push constants are not supported by the MSL backend");
         }

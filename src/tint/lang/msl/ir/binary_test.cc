@@ -50,7 +50,7 @@ TEST_F(IR_MslBinaryTest, Clone) {
 
     EXPECT_NE(inst, c);
 
-    EXPECT_EQ(mod.Types().i8(), c->Result(0)->Type());
+    EXPECT_EQ(mod.Types().i8(), c->Result()->Type());
     EXPECT_EQ(core::BinaryOp::kAdd, c->Op());
 
     auto new_lhs = c->LHS()->As<core::ir::Constant>()->Value();

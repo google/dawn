@@ -84,7 +84,7 @@ struct State {
                 if (!var) {
                     continue;
                 }
-                auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
+                auto* ptr = var->Result()->Type()->As<core::type::Pointer>();
                 if (ptr->StoreType()->Is<core::type::ExternalTexture>()) {
                     if (auto res = ReplaceVar(var); DAWN_UNLIKELY(res != Success)) {
                         return res.Failure();
@@ -156,8 +156,8 @@ struct State {
         }
 
         // Replace all uses of the old variable with the new ones.
-        ReplaceUses(old_var->Result(0), plane_0->Result(0), plane_1->Result(0),
-                    external_texture_params->Result(0));
+        ReplaceUses(old_var->Result(), plane_0->Result(), plane_1->Result(),
+                    external_texture_params->Result());
 
         return Success;
     }
@@ -218,11 +218,11 @@ struct State {
                     Value* plane_1_load = nullptr;
                     Value* params_load = nullptr;
                     b.InsertBefore(load, [&] {
-                        plane_0_load = b.Load(plane_0)->Result(0);
-                        plane_1_load = b.Load(plane_1)->Result(0);
-                        params_load = b.Load(params)->Result(0);
+                        plane_0_load = b.Load(plane_0)->Result();
+                        plane_1_load = b.Load(plane_1)->Result();
+                        params_load = b.Load(params)->Result();
                     });
-                    ReplaceUses(load->Result(0), plane_0_load, plane_1_load, params_load);
+                    ReplaceUses(load->Result(), plane_0_load, plane_1_load, params_load);
                     load->Destroy();
                 },
                 [&](CoreBuiltinCall* call) {
@@ -241,7 +241,7 @@ struct State {
                         if (coords->Type()->IsSignedIntegerVector()) {
                             auto* convert = b.Convert(ty.vec2<u32>(), coords);
                             convert->InsertBefore(call);
-                            coords = convert->Result(0);
+                            coords = convert->Result();
                         }
 
                         // Call the `TextureLoadExternal()` helper function.

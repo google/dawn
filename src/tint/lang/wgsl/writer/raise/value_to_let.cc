@@ -119,7 +119,7 @@ struct State {
             if (inst->Results().Length() == 1) {
                 // Instruction has a single result value.
                 // Check to see if the result of this instruction is a candidate for inlining.
-                auto* result = inst->Result(0);
+                auto* result = inst->Result();
                 // Only values with a single usage can be inlined.
                 // Named values are not inlined, as we want to emit the name for a let.
                 if (CanInline(result)) {
@@ -180,7 +180,7 @@ struct State {
         }
 
         auto* let = b.Let(value->Type());
-        value->ReplaceAllUsesWith(let->Result(0));
+        value->ReplaceAllUsesWith(let->Result());
         let->SetValue(value);
         let->InsertAfter(inst);
         if (auto name = ir.NameOf(value); name.IsValid()) {

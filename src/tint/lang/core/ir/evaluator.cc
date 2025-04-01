@@ -39,7 +39,7 @@ namespace tint::core::ir {
 namespace eval {
 
 diag::Result<core::ir::Constant*> Eval(core::ir::Builder& b, core::ir::Instruction* inst) {
-    return Eval(b, inst->Result(0));
+    return Eval(b, inst->Result());
 }
 
 diag::Result<core::ir::Constant*> Eval(core::ir::Builder& b, core::ir::Value* val) {
@@ -112,7 +112,7 @@ Evaluator::EvalResult Evaluator::EvalBitcast(core::ir::Bitcast* bc) {
         return nullptr;
     }
 
-    auto r = const_eval_.bitcast(bc->Result(0)->Type(), Vector{val.Get()}, SourceOf(bc));
+    auto r = const_eval_.bitcast(bc->Result()->Type(), Vector{val.Get()}, SourceOf(bc));
     if (r != Success) {
         return Failure();
     }
@@ -155,7 +155,7 @@ Evaluator::EvalResult Evaluator::EvalAccess(core::ir::Access* a) {
 Evaluator::EvalResult Evaluator::EvalConstruct(core::ir::Construct* c) {
     auto table = core::intrinsic::Table<core::intrinsic::Dialect>(b_.ir.Types(), b_.ir.symbols);
 
-    auto result_ty = c->Result(0)->Type();
+    auto result_ty = c->Result()->Type();
 
     Vector<const core::type::Type*, 4> arg_types;
     arg_types.Reserve(c->Args().Length());
@@ -239,7 +239,7 @@ Evaluator::EvalResult Evaluator::EvalConvert(core::ir::Convert* c) {
     if (!val.Get()) {
         return nullptr;
     }
-    auto r = const_eval_.Convert(c->Result(0)->Type(), val.Get(), SourceOf(c));
+    auto r = const_eval_.Convert(c->Result()->Type(), val.Get(), SourceOf(c));
     if (r != Success) {
         return Failure();
     }
@@ -295,7 +295,7 @@ Evaluator::EvalResult Evaluator::EvalSwizzle(core::ir::Swizzle* s) {
         return nullptr;
     }
 
-    auto r = const_eval_.Swizzle(s->Result(0)->Type(), val.Get(), s->Indices());
+    auto r = const_eval_.Swizzle(s->Result()->Type(), val.Get(), s->Indices());
     if (r != Success) {
         return Failure();
     }
@@ -327,7 +327,7 @@ Evaluator::EvalResult Evaluator::EvalUnary(core::ir::CoreUnary* u) {
         return nullptr;
     }
 
-    auto r = (const_eval_.*const_eval_fn)(u->Result(0)->Type(), Vector{val.Get()}, SourceOf(u));
+    auto r = (const_eval_.*const_eval_fn)(u->Result()->Type(), Vector{val.Get()}, SourceOf(u));
     if (r != Success) {
         return Failure();
     }
@@ -374,7 +374,7 @@ Evaluator::EvalResult Evaluator::EvalBinary(core::ir::CoreBinary* cb) {
         return nullptr;
     }
 
-    auto r = (const_eval_.*const_eval_fn)(cb->Result(0)->Type(), Vector{lhs.Get(), rhs.Get()},
+    auto r = (const_eval_.*const_eval_fn)(cb->Result()->Type(), Vector{lhs.Get(), rhs.Get()},
                                           SourceOf(cb));
     if (r != Success) {
         return Failure();
@@ -418,7 +418,7 @@ Evaluator::EvalResult Evaluator::EvalCoreBuiltinCall(core::ir::CoreBuiltinCall* 
         return nullptr;
     }
 
-    auto r = (const_eval_.*const_eval_fn)(c->Result(0)->Type(), args, SourceOf(c));
+    auto r = (const_eval_.*const_eval_fn)(c->Result()->Type(), args, SourceOf(c));
     if (r != Success) {
         return Failure();
     }

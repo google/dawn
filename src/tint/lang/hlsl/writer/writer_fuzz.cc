@@ -81,7 +81,7 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
     std::unordered_set<tint::BindingPoint> storage_bindings;
     for (auto* inst : *module.root_block) {
         auto* var = inst->As<core::ir::Var>();
-        if (!var->Result(0)->Type()->UnwrapPtr()->HasFixedFootprint()) {
+        if (!var->Result()->Type()->UnwrapPtr()->HasFixedFootprint()) {
             if (auto bp = var->BindingPoint()) {
                 if (storage_bindings.insert(bp.value()).second) {
                     options.array_length_from_uniform.bindpoint_to_size_index.emplace(

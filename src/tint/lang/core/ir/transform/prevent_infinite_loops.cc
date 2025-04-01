@@ -103,11 +103,11 @@ struct State {
         }
         b.InsertBefore(loop->Continuing()->Front(), [&] {
             auto* low_inc = b.Subtract<u32>(b.LoadVectorElement(idx, 0_u), 1_u);
-            ir.SetName(low_inc->Result(0), ir.symbols.New("tint_low_inc"));
+            ir.SetName(low_inc->Result(), ir.symbols.New("tint_low_inc"));
             b.StoreVectorElement(idx, 0_u, low_inc);
 
             auto* carry = b.Convert<u32>(b.Equal<bool>(low_inc, u32::Highest()));
-            ir.SetName(carry->Result(0), ir.symbols.New("tint_carry"));
+            ir.SetName(carry->Result(), ir.symbols.New("tint_carry"));
             b.StoreVectorElement(idx, 1_u, b.Subtract<u32>(b.LoadVectorElement(idx, 1_u), carry));
         });
     }

@@ -51,8 +51,8 @@ TEST_F(IR_GlslCombinedTextureSamplerTest, Clone) {
     auto* new_var = clone_ctx.Clone(var);
 
     EXPECT_NE(var, new_var);
-    EXPECT_NE(var->Result(0), new_var->Result(0));
-    EXPECT_EQ(new_var->Result(0)->Type(), type);
+    EXPECT_NE(var->Result(), new_var->Result());
+    EXPECT_EQ(new_var->Result()->Type(), type);
 
     EXPECT_EQ(new_var->TextureBindingPoint(), texture_bp);
     EXPECT_EQ(new_var->SamplerBindingPoint(), sampler_bp);

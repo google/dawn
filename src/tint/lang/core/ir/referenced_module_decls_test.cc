@@ -416,7 +416,7 @@ TEST_F(IR_ReferencedModuleDeclsTest, WorkgroupSize) {
     over_a->As<core::ir::Override>()->SetOverrideId(OverrideId{1});
 
     auto* foo = b.ComputeFunction("foo");
-    foo->SetWorkgroupSize(over_a->Result(0), b.Constant(1_u), b.Constant(1_u));
+    foo->SetWorkgroupSize(over_a->Result(), b.Constant(1_u), b.Constant(1_u));
     b.Append(foo->Block(), [&] {  //
         b.Return(foo);
     });
@@ -442,7 +442,7 @@ TEST_F(IR_ReferencedModuleDeclsTest, ArrayTypeCount) {
     auto* over_a = mod.root_block->Append(b.Override("o", ty.u32()));
     over_a->As<core::ir::Override>()->SetOverrideId(OverrideId{1});
 
-    auto* c1 = ty.Get<core::ir::type::ValueArrayCount>(over_a->Result(0));
+    auto* c1 = ty.Get<core::ir::type::ValueArrayCount>(over_a->Result());
     auto* a1 = ty.Get<core::type::Array>(ty.i32(), c1, 4u, 4u, 4u, 4u);
 
     auto* var_a = mod.root_block->Append(b.Var("a", ty.ptr(workgroup, a1, read_write)));
