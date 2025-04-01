@@ -1562,5 +1562,2297 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopContinuing_Failure_NoStoreToLoopC
               analysis.GetBinaryToUpdateLoopControlVariableInContinuingBlockForTest(loop, idx));
 }
 
+TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_index_LessThan_Constant) {
+    Var* idx = nullptr;
+    Loop* loop = nullptr;
+    Binary* binary = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            idx = b.Var("idx", 0_i);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // idx < 10
+            binary = b.LessThan<bool>(b.Load(idx), 10_i);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            b.Store(idx, b.Add<i32>(b.Load(idx), 1_i));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, i32, read_write> = var 0i
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %3:i32 = load %idx
+        %4:bool = lt %3, 10i
+        if %4 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %5:i32 = load %idx
+        %6:i32 = add %5, 1i
+        store %idx, %6
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(func);
+    EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
+    EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_Constant_LessThan_index) {
+    Var* idx = nullptr;
+    Loop* loop = nullptr;
+    Binary* binary = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            idx = b.Var("idx", 20_i);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // 10 < idx
+            binary = b.LessThan<bool>(10_i, b.Load(idx));
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            b.Store(idx, b.Subtract<i32>(b.Load(idx), 1_i));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, i32, read_write> = var 20i
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %3:i32 = load %idx
+        %4:bool = lt 10i, %3
+        if %4 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %5:i32 = load %idx
+        %6:i32 = sub %5, 1i
+        store %idx, %6
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(func);
+    EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
+    EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_index_LessThan_Constant_u32) {
+    Var* idx = nullptr;
+    Loop* loop = nullptr;
+    Binary* binary = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            idx = b.Var("idx", 0_u);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // idx < 10u
+            binary = b.LessThan<bool>(b.Load(idx), 10_u);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            b.Store(idx, b.Add<u32>(b.Load(idx), 1_u));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, u32, read_write> = var 0u
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %3:u32 = load %idx
+        %4:bool = lt %3, 10u
+        if %4 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %5:u32 = load %idx
+        %6:u32 = add %5, 1u
+        store %idx, %6
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(func);
+    EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
+    EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_Constant_LessThan_index_u32) {
+    Var* idx = nullptr;
+    Loop* loop = nullptr;
+    Binary* binary = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            idx = b.Var("idx", 20_u);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // 10u < idx
+            binary = b.LessThan<bool>(10_u, b.Load(idx));
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            b.Store(idx, b.Subtract<u32>(b.Load(idx), 1_u));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, u32, read_write> = var 20u
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %3:u32 = load %idx
+        %4:bool = lt 10u, %3
+        if %4 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %5:u32 = load %idx
+        %6:u32 = sub %5, 1u
+        store %idx, %6
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(func);
+    EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
+    EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_index_LessThanEqual_constant) {
+    Var* idx = nullptr;
+    Loop* loop = nullptr;
+    Binary* binary = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            idx = b.Var("idx", 0_i);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // idx <= 10
+            binary = b.LessThanEqual<bool>(b.Load(idx), 10_i);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            b.Store(idx, b.Add<i32>(b.Load(idx), 1_i));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, i32, read_write> = var 0i
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %3:i32 = load %idx
+        %4:bool = lte %3, 10i
+        if %4 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %5:i32 = load %idx
+        %6:i32 = add %5, 1i
+        store %idx, %6
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(func);
+    EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
+    EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_constant_LessThanEqual_index) {
+    Var* idx = nullptr;
+    Loop* loop = nullptr;
+    Binary* binary = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            idx = b.Var("idx", 20_i);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // 10 <= idx
+            binary = b.LessThanEqual<bool>(10_i, b.Load(idx));
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            b.Store(idx, b.Subtract<i32>(b.Load(idx), 1_i));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, i32, read_write> = var 20i
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %3:i32 = load %idx
+        %4:bool = lte 10i, %3
+        if %4 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %5:i32 = load %idx
+        %6:i32 = sub %5, 1i
+        store %idx, %6
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(func);
+    EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
+    EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_index_GreaterThan_constant) {
+    Var* idx = nullptr;
+    Loop* loop = nullptr;
+    Binary* binary = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            // idx > 20
+            idx = b.Var("idx", 20_i);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            binary = b.GreaterThan<bool>(b.Load(idx), 10_i);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            b.Store(idx, b.Subtract<i32>(b.Load(idx), 1_i));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, i32, read_write> = var 20i
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %3:i32 = load %idx
+        %4:bool = gt %3, 10i
+        if %4 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %5:i32 = load %idx
+        %6:i32 = sub %5, 1i
+        store %idx, %6
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(func);
+    EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
+    EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_constant_GreaterThan_index) {
+    Var* idx = nullptr;
+    Loop* loop = nullptr;
+    Binary* binary = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            idx = b.Var("idx", 0_i);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // 10 > idx
+            binary = b.GreaterThan<bool>(10_i, b.Load(idx));
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            b.Store(idx, b.Add<i32>(b.Load(idx), 1_i));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, i32, read_write> = var 0i
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %3:i32 = load %idx
+        %4:bool = gt 10i, %3
+        if %4 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %5:i32 = load %idx
+        %6:i32 = add %5, 1i
+        store %idx, %6
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(func);
+    EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
+    EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_index_GreaterThanEqual_Constant) {
+    Var* idx = nullptr;
+    Loop* loop = nullptr;
+    Binary* binary = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            idx = b.Var("idx", 20_i);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // idx >= 10
+            binary = b.GreaterThanEqual<bool>(b.Load(idx), 10_i);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            b.Store(idx, b.Subtract<i32>(b.Load(idx), 1_i));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, i32, read_write> = var 20i
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %3:i32 = load %idx
+        %4:bool = gte %3, 10i
+        if %4 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %5:i32 = load %idx
+        %6:i32 = sub %5, 1i
+        store %idx, %6
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(func);
+    EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
+    EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_Constant_GreaterThanEqual_index) {
+    Var* idx = nullptr;
+    Loop* loop = nullptr;
+    Binary* binary = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            idx = b.Var("idx", 0_i);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // 10 >= idx
+            binary = b.GreaterThanEqual<bool>(10_i, b.Load(idx));
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            b.Store(idx, b.Add<i32>(b.Load(idx), 1_i));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, i32, read_write> = var 0i
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %3:i32 = load %idx
+        %4:bool = gte 10i, %3
+        if %4 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %5:i32 = load %idx
+        %6:i32 = add %5, 1i
+        store %idx, %6
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(func);
+    EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
+    EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_InstructionsOtherThanLoadOnIndex) {
+    Var* idx = nullptr;
+    Loop* loop = nullptr;
+    Binary* binary = nullptr;
+    auto* end = b.FunctionParam("end", ty.i32());
+    auto* func = b.Function("func", ty.void_());
+    func->AppendParam(end);
+    b.Append(func->Block(), [&] {
+        loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            idx = b.Var("idx", 20_i);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            binary = b.GreaterThanEqual<bool>(10_i, b.Load(idx));
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            b.Store(idx, end);
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            b.Store(idx, b.Subtract<i32>(b.Load(idx), 1_i));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func(%end:i32):void {
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, i32, read_write> = var 20i
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %4:i32 = load %idx
+        %5:bool = gte 10i, %4
+        if %5 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        store %idx, %end
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %6:i32 = load %idx
+        %7:i32 = sub %6, 1i
+        store %idx, %7
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(func);
+    EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
+    EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_FirstInstructionIsNotLoad) {
+    Var* idx = nullptr;
+    Loop* loop = nullptr;
+    Binary* binary = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            idx = b.Var("idx", 0_i);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // Initialize idy to 1
+            Var* idy = b.Var("idy", 1_i);
+            binary = b.LessThan<bool>(b.Load(idy), 10_i);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            b.Store(idx, b.Add<i32>(b.Load(idx), 1_i));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, i32, read_write> = var 0i
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %idy:ptr<function, i32, read_write> = var 1i
+        %4:i32 = load %idy
+        %5:bool = lt %4, 10i
+        if %5 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %6:i32 = load %idx
+        %7:i32 = add %6, 1i
+        store %idx, %7
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(func);
+    EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
+    EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_NoLoadFromLoopControlVariable) {
+    Var* idx = nullptr;
+    Loop* loop = nullptr;
+    Binary* binary = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        Var* idy = b.Var("idy", 1_i);
+        loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            idx = b.Var("idx", 0_i);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // idy < 10
+            binary = b.LessThan<bool>(b.Load(idy), 10_i);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            b.Store(idx, b.Add<i32>(b.Load(idx), 1_i));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    %idy:ptr<function, i32, read_write> = var 1i
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, i32, read_write> = var 0i
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %4:i32 = load %idy
+        %5:bool = lt %4, 10i
+        if %5 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %6:i32 = load %idx
+        %7:i32 = add %6, 1i
+        store %idx, %7
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(func);
+    EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
+    EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_StoreLoopControlVariableInInnerBlock) {
+    Var* idx = nullptr;
+    Loop* loop = nullptr;
+    Binary* binary = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        Var* idy = b.Var("idy", 1_i);
+        loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            idx = b.Var("idx", 0_i);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            binary = b.LessThan<bool>(b.Load(idx), 10_i);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            auto* ifelse_y = b.If(b.LessThan<bool>(b.Load(idy), 10_i));
+            b.Append(ifelse_y->True(), [&] {
+                b.Store(idx, 2_i);
+                b.ExitIf(ifelse_y);
+            });
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            b.Store(idx, b.Add<i32>(b.Load(idx), 1_i));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    %idy:ptr<function, i32, read_write> = var 1i
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, i32, read_write> = var 0i
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %4:i32 = load %idx
+        %5:bool = lt %4, 10i
+        if %5 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        %6:i32 = load %idy
+        %7:bool = lt %6, 10i
+        if %7 [t: $B7] {  # if_2
+          $B7: {  # true
+            store %idx, 2i
+            exit_if  # if_2
+          }
+        }
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %8:i32 = load %idx
+        %9:i32 = add %8, 1i
+        store %idx, %9
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(func);
+    EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
+    EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_SecondInstructionNotABinaryOp) {
+    Var* idx = nullptr;
+    Loop* loop = nullptr;
+    Binary* binary = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            idx = b.Var("idx", 0_i);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // bitcastX = bitcast<i32>(idx)
+            auto* bitcastX = b.Bitcast<i32>(b.Load(idx));
+            binary = b.LessThan<bool>(bitcastX, 10_i);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            b.Store(idx, b.Add<i32>(b.Load(idx), 1_i));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, i32, read_write> = var 0i
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %3:i32 = load %idx
+        %4:i32 = bitcast %3
+        %5:bool = lt %4, 10i
+        if %5 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %6:i32 = load %idx
+        %7:i32 = add %6, 1i
+        store %idx, %7
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(func);
+    EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
+    EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_BinaryOpIsNotComparisonOp) {
+    Var* idx = nullptr;
+    Loop* loop = nullptr;
+    Binary* binary = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            idx = b.Var("idx", 0_i);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // shl = idx << 1
+            auto* shl = b.ShiftLeft<i32>(b.Load(idx), 1_u);
+            binary = b.LessThan<bool>(10_i, shl);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            b.Store(idx, b.Add<i32>(b.Load(idx), 1_i));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, i32, read_write> = var 0i
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %3:i32 = load %idx
+        %4:i32 = shl %3, 1u
+        %5:bool = lt 10i, %4
+        if %5 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %6:i32 = load %idx
+        %7:i32 = add %6, 1i
+        store %idx, %7
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(func);
+    EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
+    EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_IndexCompareWithNonConst) {
+    Var* idx = nullptr;
+    Loop* loop = nullptr;
+    Binary* binary = nullptr;
+    auto* end = b.FunctionParam("end", ty.i32());
+    auto* func = b.Function("func", ty.void_());
+    func->AppendParam(end);
+    b.Append(func->Block(), [&] {
+        loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            idx = b.Var("idx", 0_i);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // idx < end
+            binary = b.LessThan<bool>(b.Load(idx), end);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            b.Store(idx, b.Add<i32>(b.Load(idx), 1_i));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func(%end:i32):void {
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, i32, read_write> = var 0i
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %4:i32 = load %idx
+        %5:bool = lt %4, %end
+        if %5 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %6:i32 = load %idx
+        %7:i32 = add %6, 1i
+        store %idx, %7
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(func);
+    EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
+    EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_NonConstCompareWithIndex) {
+    Var* idx = nullptr;
+    Loop* loop = nullptr;
+    Binary* binary = nullptr;
+    auto* end = b.FunctionParam("end", ty.i32());
+    auto* func = b.Function("func", ty.void_());
+    func->AppendParam(end);
+    b.Append(func->Block(), [&] {
+        loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            idx = b.Var("idx", 20_i);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // end > idx
+            binary = b.GreaterThan<bool>(end, b.Load(idx));
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            b.Store(idx, b.Subtract<i32>(b.Load(idx), 1_i));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func(%end:i32):void {
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, i32, read_write> = var 20i
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %4:i32 = load %idx
+        %5:bool = gt %end, %4
+        if %5 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %6:i32 = load %idx
+        %7:i32 = sub %6, 1i
+        store %idx, %7
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(func);
+    EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
+    EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_NonIndexCompareWithConst) {
+    Var* idx = nullptr;
+    Loop* loop = nullptr;
+    Binary* binary = nullptr;
+    auto* end = b.FunctionParam("end", ty.i32());
+    auto* func = b.Function("func", ty.void_());
+    func->AppendParam(end);
+    b.Append(func->Block(), [&] {
+        loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            idx = b.Var("idx", 0_i);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            b.Load(idx);
+            // end < 10
+            binary = b.LessThan<bool>(end, 10_i);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            b.Store(idx, b.Add<i32>(b.Load(idx), 1_i));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func(%end:i32):void {
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, i32, read_write> = var 0i
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %4:i32 = load %idx
+        %5:bool = lt %end, 10i
+        if %5 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %6:i32 = load %idx
+        %7:i32 = add %6, 1i
+        store %idx, %7
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(func);
+    EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
+    EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_ConstCompareWithNonIndex) {
+    Var* idx = nullptr;
+    Loop* loop = nullptr;
+    Binary* binary = nullptr;
+    auto* end = b.FunctionParam("end", ty.i32());
+    auto* func = b.Function("func", ty.void_());
+    func->AppendParam(end);
+    b.Append(func->Block(), [&] {
+        loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            idx = b.Var("idx", 20_i);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            b.Load(idx);
+            // 10 > end
+            binary = b.GreaterThan<bool>(10_i, end);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            b.Store(idx, b.Subtract<i32>(b.Load(idx), 1_i));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func(%end:i32):void {
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, i32, read_write> = var 20i
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %4:i32 = load %idx
+        %5:bool = gt 10i, %end
+        if %5 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %6:i32 = load %idx
+        %7:i32 = sub %6, 1i
+        store %idx, %7
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(func);
+    EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
+    EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Index_LessThan_Zero_u32) {
+    Var* idx = nullptr;
+    Loop* loop = nullptr;
+    Binary* binary = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            idx = b.Var("idx", 0_u);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // idx < 0u
+            binary = b.LessThan<bool>(b.Load(idx), 0_u);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            b.Store(idx, b.Add<u32>(b.Load(idx), 1_u));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, u32, read_write> = var 0u
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %3:u32 = load %idx
+        %4:bool = lt %3, 0u
+        if %4 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %5:u32 = load %idx
+        %6:u32 = add %5, 1u
+        store %idx, %6
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(func);
+    EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
+    EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Zero_GreaterThan_Index_u32) {
+    Var* idx = nullptr;
+    Loop* loop = nullptr;
+    Binary* binary = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            idx = b.Var("idx", 0_u);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // 0u > idx
+            binary = b.GreaterThan<bool>(0_u, b.Load(idx));
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            b.Store(idx, b.Add<u32>(b.Load(idx), 1_u));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, u32, read_write> = var 0u
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %3:u32 = load %idx
+        %4:bool = gt 0u, %3
+        if %4 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %5:u32 = load %idx
+        %6:u32 = add %5, 1u
+        store %idx, %6
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(func);
+    EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
+    EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Index_GreaterThan_Max_u32) {
+    Var* idx = nullptr;
+    Loop* loop = nullptr;
+    Binary* binary = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            idx = b.Var("idx", 0_u);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // idx > 4294967295u (maximum uint32_t value)
+            binary = b.GreaterThan<bool>(b.Load(idx), 4294967295_u);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            b.Store(idx, b.Add<u32>(b.Load(idx), 1_u));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, u32, read_write> = var 0u
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %3:u32 = load %idx
+        %4:bool = gt %3, 4294967295u
+        if %4 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %5:u32 = load %idx
+        %6:u32 = add %5, 1u
+        store %idx, %6
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(func);
+    EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
+    EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Max_u32_LessThan_Index) {
+    Var* idx = nullptr;
+    Loop* loop = nullptr;
+    Binary* binary = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            idx = b.Var("idx", 0_u);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // 4294967295u (maximum uint32_t value) < idx
+            binary = b.LessThan<bool>(4294967295_u, b.Load(idx));
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            b.Store(idx, b.Add<u32>(b.Load(idx), 1_u));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, u32, read_write> = var 0u
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %3:u32 = load %idx
+        %4:bool = lt 4294967295u, %3
+        if %4 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %5:u32 = load %idx
+        %6:u32 = add %5, 1u
+        store %idx, %6
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(func);
+    EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
+    EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Index_LessThan_Min_I32) {
+    Var* idx = nullptr;
+    Loop* loop = nullptr;
+    Binary* binary = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            idx = b.Var("idx", 0_i);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // idx < -2147483648 (minimum int32_t value)
+            binary = b.LessThan<bool>(b.Load(idx), -2147483648_i);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            b.Store(idx, b.Subtract<i32>(b.Load(idx), 1_i));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, i32, read_write> = var 0i
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %3:i32 = load %idx
+        %4:bool = lt %3, -2147483648i
+        if %4 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %5:i32 = load %idx
+        %6:i32 = sub %5, 1i
+        store %idx, %6
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(func);
+    EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
+    EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Min_I32_GreaterThan_Index) {
+    Var* idx = nullptr;
+    Loop* loop = nullptr;
+    Binary* binary = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            idx = b.Var("idx", 0_i);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // -2147483648 (minimum int32_t value) > idx
+            binary = b.GreaterThan<bool>(-2147483648_i, b.Load(idx));
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            b.Store(idx, b.Subtract<i32>(b.Load(idx), 1_i));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, i32, read_write> = var 0i
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %3:i32 = load %idx
+        %4:bool = gt -2147483648i, %3
+        if %4 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %5:i32 = load %idx
+        %6:i32 = sub %5, 1i
+        store %idx, %6
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(func);
+    EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
+    EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Index_GreaterThan_Max_I32) {
+    Var* idx = nullptr;
+    Loop* loop = nullptr;
+    Binary* binary = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            idx = b.Var("idx", 0_i);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // idx > 2147483647 (maximum int32_t value)
+            binary = b.GreaterThan<bool>(b.Load(idx), 2147483647_i);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            b.Store(idx, b.Subtract<i32>(b.Load(idx), 1_i));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, i32, read_write> = var 0i
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %3:i32 = load %idx
+        %4:bool = gt %3, 2147483647i
+        if %4 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %5:i32 = load %idx
+        %6:i32 = sub %5, 1i
+        store %idx, %6
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(func);
+    EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
+    EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Max_I32_LessThan_Index) {
+    Var* idx = nullptr;
+    Loop* loop = nullptr;
+    Binary* binary = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            idx = b.Var("idx", 0_i);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // 2147483647i (maximum int32_t value) < idx
+            binary = b.LessThan<bool>(2147483647_i, b.Load(idx));
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            b.Store(idx, b.Subtract<i32>(b.Load(idx), 1_i));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, i32, read_write> = var 0i
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %3:i32 = load %idx
+        %4:bool = lt 2147483647i, %3
+        if %4 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %5:i32 = load %idx
+        %6:i32 = sub %5, 1i
+        store %idx, %6
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(func);
+    EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
+    EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_NotIfElseAfterCompareInstruction) {
+    Var* idx = nullptr;
+    Loop* loop = nullptr;
+    Binary* binary = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            idx = b.Var("idx", 0_i);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            binary = b.LessThan<bool>(b.Load(idx), 10_i);
+            // Now idx can be 10 before the if-statement
+            b.Add<i32>(b.Load(idx), 1_i);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            b.Store(idx, b.Add<i32>(b.Load(idx), 1_i));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, i32, read_write> = var 0i
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %3:i32 = load %idx
+        %4:bool = lt %3, 10i
+        %5:i32 = load %idx
+        %6:i32 = add %5, 1i
+        if %4 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %7:i32 = load %idx
+        %8:i32 = add %7, 1i
+        store %idx, %8
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(func);
+    EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
+    EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_NotUseLastComparisonAsIfCondition) {
+    Var* idx = nullptr;
+    Loop* loop = nullptr;
+    Binary* binary = nullptr;
+    auto* param = b.FunctionParam("param", ty.i32());
+    auto* func = b.Function("func", ty.void_());
+    func->AppendParam(param);
+    b.Append(func->Block(), [&] {
+        Binary* binaryOnParam = b.LessThan<bool>(param, 30_i);
+        loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            idx = b.Var("idx", 0_i);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            binary = b.LessThan<bool>(b.Load(idx), 10_i);
+            auto* ifelse = b.If(binaryOnParam);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            b.Store(idx, b.Add<i32>(b.Load(idx), 1_i));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func(%param:i32):void {
+  $B1: {
+    %3:bool = lt %param, 30i
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, i32, read_write> = var 0i
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %5:i32 = load %idx
+        %6:bool = lt %5, 10i
+        if %3 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %7:i32 = load %idx
+        %8:i32 = add %7, 1i
+        store %idx, %8
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(func);
+    EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
+    EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_MultipleInstructionsInTrueBlock) {
+    Var* idx = nullptr;
+    Loop* loop = nullptr;
+    Binary* binary = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            idx = b.Var("idx", 0_i);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            binary = b.LessThan<bool>(b.Load(idx), 10_i);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] {
+                // Now idx < 10
+                b.Add<i32>(b.Load(idx), 30_i);
+                b.ExitIf(ifelse);
+            });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            b.Store(idx, b.Add<i32>(b.Load(idx), 1_i));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, i32, read_write> = var 0i
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %3:i32 = load %idx
+        %4:bool = lt %3, 10i
+        if %4 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            %5:i32 = load %idx
+            %6:i32 = add %5, 30i
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %7:i32 = load %idx
+        %8:i32 = add %7, 1i
+        store %idx, %8
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(func);
+    EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
+    EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_ExitLoopInTrueBlock) {
+    Var* idx = nullptr;
+    Loop* loop = nullptr;
+    Binary* binary = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            idx = b.Var("idx", 0_i);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            binary = b.LessThan<bool>(b.Load(idx), 10_i);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitLoop(loop); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            b.Store(idx, b.Add<i32>(b.Load(idx), 1_i));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, i32, read_write> = var 0i
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %3:i32 = load %idx
+        %4:bool = lt %3, 10i
+        if %4 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_loop  # loop_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %5:i32 = load %idx
+        %6:i32 = add %5, 1i
+        store %idx, %6
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(func);
+    EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
+    EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_TooManyInstructionsInFalseBlock) {
+    Var* idx = nullptr;
+    Loop* loop = nullptr;
+    Binary* binary = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            idx = b.Var("idx", 0_i);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            binary = b.LessThan<bool>(b.Load(idx), 10_i);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] {
+                // Now idx can be 10
+                b.Load(idx);
+                b.ExitLoop(loop);
+            });
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            b.Store(idx, b.Add<i32>(b.Load(idx), 1_i));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, i32, read_write> = var 0i
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %3:i32 = load %idx
+        %4:bool = lt %3, 10i
+        if %4 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            %5:i32 = load %idx
+            exit_loop  # loop_1
+          }
+        }
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %6:i32 = load %idx
+        %7:i32 = add %6, 1i
+        store %idx, %7
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(func);
+    EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
+    EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_NoExitLoopInFalseBlock) {
+    Var* idx = nullptr;
+    Loop* loop = nullptr;
+    Binary* binary = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            idx = b.Var("idx", 0_i);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            binary = b.LessThan<bool>(b.Load(idx), 10_i);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitIf(ifelse); });
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            b.Store(idx, b.Add<i32>(b.Load(idx), 1_i));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, i32, read_write> = var 0i
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %3:i32 = load %idx
+        %4:bool = lt %3, 10i
+        if %4 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_if  # if_1
+          }
+        }
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %5:i32 = load %idx
+        %6:i32 = add %5, 1i
+        store %idx, %6
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(func);
+    EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
+    EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
+}
+
 }  // namespace
 }  // namespace tint::core::ir::analysis
