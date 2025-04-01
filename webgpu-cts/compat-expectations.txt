@@ -614,7 +614,6 @@ crbug.com/42240846 [ android-pixel-6 ] webgpu:api,operation,vertex_state,index_f
 # limits:const_array_elements failures (also failing in Core on some Android devices)
 crbug.com/407088839 [ linux nvidia-0x2184 ] webgpu:shader,execution,limits:const_array_elements: [ Failure ]
 
-crbug.com/407088841 [ android arm ] webgpu:web_platform,external_texture,video:* [ Failure ]
 # importExternalTexture,sampleWithVideoFrameWithVisibleRectParam failures on Pixel 6, also failing on Vulkan Pixel 6 (Core)
 crbug.com/329724358 [ android arm ] webgpu:web_platform,external_texture,video:importExternalTexture,sampleWithVideoFrameWithVisibleRectParam:videoName="four-colors-vp9-bt601-hflip.mp4";dstColorSpace="display-p3" [ Failure ]
 crbug.com/329724358 [ android arm ] webgpu:web_platform,external_texture,video:importExternalTexture,sampleWithVideoFrameWithVisibleRectParam:videoName="four-colors-vp9-bt601-hflip.mp4";dstColorSpace="srgb" [ Failure ]
