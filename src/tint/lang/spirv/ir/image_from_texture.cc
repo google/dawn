@@ -93,6 +93,7 @@ const spirv::type::Image* ImageFromTexture(core::type::Manager& ty,
             sampled = type::Sampled::kReadWriteOpCompatible;
             fmt = st->TexelFormat();
             sample_ty = st->Type();
+            access = st->Access();
         },
         [&](const core::type::InputAttachment* ia) {
             dim = type::Dim::kSubpassData;

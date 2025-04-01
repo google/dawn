@@ -105,6 +105,8 @@ class Image final : public Castable<Image, core::type::Type> {
     /// @returns the friendly name for this type
     std::string FriendlyName() const override;
 
+    bool IsHandle() const override { return true; }
+
     /// @param ctx the clone context
     /// @returns a clone of this type
     Image* Clone(core::type::CloneContext& ctx) const override;

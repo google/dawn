@@ -86,6 +86,10 @@ const char* str(BuiltinFn i) {
             return "image_query_size";
         case BuiltinFn::kImageQuerySizeLod:
             return "image_query_size_lod";
+        case BuiltinFn::kImageQueryLevels:
+            return "image_query_levels";
+        case BuiltinFn::kImageQuerySamples:
+            return "image_query_samples";
         case BuiltinFn::kImageRead:
             return "image_read";
         case BuiltinFn::kImageSampleImplicitLod:
@@ -270,6 +274,8 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kDot:
         case BuiltinFn::kImageQuerySize:
         case BuiltinFn::kImageQuerySizeLod:
+        case BuiltinFn::kImageQueryLevels:
+        case BuiltinFn::kImageQuerySamples:
         case BuiltinFn::kMatrixTimesMatrix:
         case BuiltinFn::kMatrixTimesScalar:
         case BuiltinFn::kMatrixTimesVector:

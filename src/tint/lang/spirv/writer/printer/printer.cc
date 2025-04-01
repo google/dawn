@@ -76,21 +76,14 @@
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/atomic.h"
 #include "src/tint/lang/core/type/bool.h"
-#include "src/tint/lang/core/type/depth_multisampled_texture.h"
-#include "src/tint/lang/core/type/depth_texture.h"
 #include "src/tint/lang/core/type/f16.h"
 #include "src/tint/lang/core/type/f32.h"
 #include "src/tint/lang/core/type/i32.h"
-#include "src/tint/lang/core/type/input_attachment.h"
 #include "src/tint/lang/core/type/matrix.h"
-#include "src/tint/lang/core/type/multisampled_texture.h"
 #include "src/tint/lang/core/type/pointer.h"
-#include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/sampler.h"
-#include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/struct.h"
 #include "src/tint/lang/core/type/subgroup_matrix.h"
-#include "src/tint/lang/core/type/texture.h"
 #include "src/tint/lang/core/type/type.h"
 #include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/core/type/vector.h"
@@ -152,18 +145,6 @@ const core::type::Type* DedupType(const core::type::Type* ty, core::type::Manage
         // Atomics are not a distinct type in SPIR-V.
         [&](const core::type::Atomic* atomic) { return atomic->Type(); },
 
-        // Depth textures are always declared as sampled textures.
-        [&](const core::type::DepthTexture* depth) {
-            return types.Get<core::type::SampledTexture>(depth->Dim(), types.f32());
-        },
-        [&](const core::type::DepthMultisampledTexture* depth) {
-            return types.Get<core::type::MultisampledTexture>(depth->Dim(), types.f32());
-        },
-        [&](const core::type::StorageTexture* st) -> const core::type::Type* {
-            return types.Get<core::type::StorageTexture>(st->Dim(), st->TexelFormat(),
-                                                         core::Access::kRead, st->Type());
-        },
-
         // Both sampler types are the same in SPIR-V.
         [&](const core::type::Sampler* s) -> const core::type::Type* {
             if (s->IsComparison()) {
@@ -176,12 +157,16 @@ const core::type::Type* DedupType(const core::type::Type* ty, core::type::Manage
         // In SPIRV, 0 means not depth, 1 means depth, and 2 means unknown.
         // Using anything other than 0 is problematic on various Vulkan drivers.
         [&](const type::Image* img) -> const core::type::Type* {
-            if (img->GetDepth() == type::Depth::kNotDepth) {
-                return img;
+            // Set storage textures to access `read`
+            auto access = img->GetAccess();
+            if (img->GetTexelFormat() != core::TexelFormat::kUndefined) {
+                access = core::Access::kRead;
             }
+
+            // Depth textures are always declared as sampled textures.
             return types.Get<type::Image>(
                 img->GetSampledType(), img->GetDim(), type::Depth::kNotDepth, img->GetArrayed(),
-                img->GetMultisampled(), img->GetSampled(), img->GetTexelFormat(), img->GetAccess());
+                img->GetMultisampled(), img->GetSampled(), img->GetTexelFormat(), access);
         },
 
         // Dedup a SampledImage if its underlying image will be deduped.
@@ -511,13 +496,6 @@ class Printer {
     /// @param ty the type to get the ID for
     /// @returns the result ID of the type
     uint32_t Type(const core::type::Type* ty) {
-        // Convert textures to spirv::type::Image
-        // TODO(https://crbug.com/dawn/343218073): This conversion should happen in a transform so
-        // no textures exist by this point.
-        if (auto* texture = ty->As<core::type::Texture>()) {
-            ty = ir::ImageFromTexture(ir_.Types(), texture);
-        }
-
         ty = DedupType(ty, ir_.Types());
         return types_.GetOrAdd(ty, [&] {
             auto id = module_.NextId();
@@ -1374,6 +1352,14 @@ class Printer {
                 module_.PushCapability(SpvCapabilityImageQuery);
                 op = spv::Op::OpImageQuerySizeLod;
                 break;
+            case spirv::BuiltinFn::kImageQueryLevels:
+                module_.PushCapability(SpvCapabilityImageQuery);
+                op = spv::Op::OpImageQueryLevels;
+                break;
+            case spirv::BuiltinFn::kImageQuerySamples:
+                module_.PushCapability(SpvCapabilityImageQuery);
+                op = spv::Op::OpImageQuerySamples;
+                break;
             case spirv::BuiltinFn::kImageRead:
                 op = spv::Op::OpImageRead;
                 break;
@@ -2068,14 +2054,6 @@ class Printer {
                 operands.push_back(Constant(b_.ConstantValue(u32(memory_mask))));
                 break;
             }
-            case core::BuiltinFn::kTextureNumLevels:
-                module_.PushCapability(SpvCapabilityImageQuery);
-                op = spv::Op::OpImageQueryLevels;
-                break;
-            case core::BuiltinFn::kTextureNumSamples:
-                module_.PushCapability(SpvCapabilityImageQuery);
-                op = spv::Op::OpImageQuerySamples;
-                break;
             case core::BuiltinFn::kTranspose:
                 op = spv::Op::OpTranspose;
                 break;
@@ -2577,9 +2555,12 @@ class Printer {
                                   {id, U32Operand(SpvDecorationBinding), bp.binding});
 
                 // Add NonReadable and NonWritable decorations to storage textures and buffers.
-                auto* st = store_ty->As<core::type::StorageTexture>();
-                auto access = st ? st->Access() : ptr->Access();
-                if (st || ptr->AddressSpace() != core::AddressSpace::kHandle) {
+                auto* st = store_ty->As<spirv::type::Image>();
+                bool is_storage_texture =
+                    st && st->GetTexelFormat() != core::TexelFormat::kUndefined;
+                auto access = is_storage_texture ? st->GetAccess() : ptr->Access();
+
+                if (is_storage_texture || ptr->AddressSpace() != core::AddressSpace::kHandle) {
                     if (access == core::Access::kRead) {
                         module_.PushAnnot(spv::Op::OpDecorate,
                                           {id, U32Operand(SpvDecorationNonWritable)});
@@ -2594,7 +2575,7 @@ class Printer {
 
                 auto iidx = var->InputAttachmentIndex();
                 if (iidx) {
-                    TINT_ASSERT(store_ty->Is<core::type::InputAttachment>());
+                    TINT_ASSERT(st->GetDim() == type::Dim::kSubpassData);
                     module_.PushAnnot(
                         spv::Op::OpDecorate,
                         {id, U32Operand(SpvDecorationInputAttachmentIndex), iidx.value()});

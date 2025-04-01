@@ -168,7 +168,7 @@ class Type : public Castable<Type, UniqueNode> {
     /// @returns true if this type is a numeric scale or vector
     bool IsNumericScalarOrVector() const;
     /// @returns true if this type is a handle type
-    bool IsHandle() const;
+    virtual bool IsHandle() const;
     /// @returns true if this type is an abstract type. It could be a numeric directly or an
     /// abstract container which holds an abstract numeric
     bool IsAbstract() const;
