@@ -744,5 +744,422 @@ TEST_F(SpirvParserTest, VectorInsertDynamic_VectorComponent) {
 )");
 }
 
+TEST_F(SpirvParserTest, VectorShuffle_BothVectors_A) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+        %u32 = OpTypeInt 32 0
+      %v4u32 = OpTypeVector %u32 4
+  %v4u32_ptr = OpTypePointer Function %v4u32
+    %ep_type = OpTypeFunction %void
+
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+       %vec1 = OpVariable %v4u32_ptr Function
+       %vec2 = OpVariable %v4u32_ptr Function
+       %tmp1 = OpLoad %v4u32 %vec1
+       %tmp2 = OpLoad %v4u32 %vec2
+       %shuf = OpVectorShuffle %v4u32 %tmp1 %tmp2 0 5 2 7
+               OpReturn
+               OpFunctionEnd
+    )",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:ptr<function, vec4<u32>, read_write> = var undef
+    %3:ptr<function, vec4<u32>, read_write> = var undef
+    %4:vec4<u32> = load %2
+    %5:vec4<u32> = load %3
+    %6:u32 = access %4, 0u
+    %7:u32 = access %5, 1u
+    %8:u32 = access %4, 2u
+    %9:u32 = access %5, 3u
+    %10:vec4<u32> = construct %6, %7, %8, %9
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, VectorShuffle_BothVectors_B) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+        %u32 = OpTypeInt 32 0
+      %v4u32 = OpTypeVector %u32 4
+  %v4u32_ptr = OpTypePointer Function %v4u32
+    %ep_type = OpTypeFunction %void
+
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+       %vec1 = OpVariable %v4u32_ptr Function
+       %vec2 = OpVariable %v4u32_ptr Function
+       %tmp1 = OpLoad %v4u32 %vec1
+       %tmp2 = OpLoad %v4u32 %vec2
+       %shuf = OpVectorShuffle %v4u32 %tmp1 %tmp2 0 2 5 7
+               OpReturn
+               OpFunctionEnd
+    )",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:ptr<function, vec4<u32>, read_write> = var undef
+    %3:ptr<function, vec4<u32>, read_write> = var undef
+    %4:vec4<u32> = load %2
+    %5:vec4<u32> = load %3
+    %6:u32 = access %4, 0u
+    %7:u32 = access %4, 2u
+    %8:u32 = access %5, 1u
+    %9:u32 = access %5, 3u
+    %10:vec4<u32> = construct %6, %7, %8, %9
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, VectorShuffle_BothVectorsToBigger) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+        %u32 = OpTypeInt 32 0
+      %v2u32 = OpTypeVector %u32 2
+      %v3u32 = OpTypeVector %u32 3
+      %v4u32 = OpTypeVector %u32 4
+  %v2u32_ptr = OpTypePointer Function %v2u32
+  %v3u32_ptr = OpTypePointer Function %v3u32
+    %ep_type = OpTypeFunction %void
+
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+       %vec1 = OpVariable %v2u32_ptr Function
+       %vec2 = OpVariable %v3u32_ptr Function
+       %tmp1 = OpLoad %v2u32 %vec1
+       %tmp2 = OpLoad %v3u32 %vec2
+       %shuf = OpVectorShuffle %v4u32 %tmp1 %tmp2 0 2 1 4
+               OpReturn
+               OpFunctionEnd
+    )",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:ptr<function, vec2<u32>, read_write> = var undef
+    %3:ptr<function, vec3<u32>, read_write> = var undef
+    %4:vec2<u32> = load %2
+    %5:vec3<u32> = load %3
+    %6:u32 = access %4, 0u
+    %7:u32 = access %5, 0u
+    %8:u32 = access %4, 1u
+    %9:u32 = access %5, 2u
+    %10:vec4<u32> = construct %6, %7, %8, %9
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, VectorShuffle_BothVectorsToSmaller) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+        %u32 = OpTypeInt 32 0
+      %v2u32 = OpTypeVector %u32 2
+      %v3u32 = OpTypeVector %u32 3
+      %v4u32 = OpTypeVector %u32 4
+  %v3u32_ptr = OpTypePointer Function %v3u32
+  %v4u32_ptr = OpTypePointer Function %v4u32
+    %ep_type = OpTypeFunction %void
+
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+       %vec1 = OpVariable %v3u32_ptr Function
+       %vec2 = OpVariable %v4u32_ptr Function
+       %tmp1 = OpLoad %v3u32 %vec1
+       %tmp2 = OpLoad %v4u32 %vec2
+       %shuf = OpVectorShuffle %v2u32 %tmp1 %tmp2 0 4
+               OpReturn
+               OpFunctionEnd
+    )",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:ptr<function, vec3<u32>, read_write> = var undef
+    %3:ptr<function, vec4<u32>, read_write> = var undef
+    %4:vec3<u32> = load %2
+    %5:vec4<u32> = load %3
+    %6:u32 = access %4, 0u
+    %7:u32 = access %5, 1u
+    %8:vec2<u32> = construct %6, %7
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, VectorShuffle_BothVectors_UndefinedIndex) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+        %u32 = OpTypeInt 32 0
+      %v4u32 = OpTypeVector %u32 4
+  %v4u32_ptr = OpTypePointer Function %v4u32
+    %ep_type = OpTypeFunction %void
+
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+       %vecA = OpVariable %v4u32_ptr Function
+       %vecB = OpVariable %v4u32_ptr Function
+       %tmpA = OpLoad %v4u32 %vecA
+       %tmpB = OpLoad %v4u32 %vecB
+       %shuf = OpVectorShuffle %v4u32 %tmpA %tmpB 0 4294967295 6 3
+         OpReturn
+         OpFunctionEnd
+    )",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:ptr<function, vec4<u32>, read_write> = var undef
+    %3:ptr<function, vec4<u32>, read_write> = var undef
+    %4:vec4<u32> = load %2
+    %5:vec4<u32> = load %3
+    %6:u32 = access %4, 0u
+    %7:u32 = access %4, 0u
+    %8:u32 = access %5, 2u
+    %9:u32 = access %4, 3u
+    %10:vec4<u32> = construct %6, %7, %8, %9
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, VectorShuffle_MixedDimensions_234) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+        %u32 = OpTypeInt 32 0
+      %v2u32 = OpTypeVector %u32 2
+      %v3u32 = OpTypeVector %u32 3
+      %v4u32 = OpTypeVector %u32 4
+  %v2u32_ptr = OpTypePointer Function %v2u32
+  %v3u32_ptr = OpTypePointer Function %v3u32
+    %ep_type = OpTypeFunction %void
+
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+       %vec1 = OpVariable %v2u32_ptr Function
+       %vec2 = OpVariable %v3u32_ptr Function
+       %tmp1 = OpLoad %v2u32 %vec1
+       %tmp2 = OpLoad %v3u32 %vec2
+       %shuf = OpVectorShuffle %v4u32 %tmp1 %tmp2 0 3 4 1
+               OpReturn
+               OpFunctionEnd
+    )",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:ptr<function, vec2<u32>, read_write> = var undef
+    %3:ptr<function, vec3<u32>, read_write> = var undef
+    %4:vec2<u32> = load %2
+    %5:vec3<u32> = load %3
+    %6:u32 = access %4, 0u
+    %7:u32 = access %5, 1u
+    %8:u32 = access %5, 2u
+    %9:u32 = access %4, 1u
+    %10:vec4<u32> = construct %6, %7, %8, %9
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, VectorShuffle_Swizzle_FirstVector) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+        %u32 = OpTypeInt 32 0
+      %v4u32 = OpTypeVector %u32 4
+  %v4u32_ptr = OpTypePointer Function %v4u32
+      %v2u32 = OpTypeVector %u32 2
+    %ep_type = OpTypeFunction %void
+
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+        %vec = OpVariable %v4u32_ptr Function
+        %tmp = OpLoad %v4u32 %vec
+       %shuf = OpVectorShuffle %v2u32 %tmp %tmp 0 2
+               OpReturn
+               OpFunctionEnd
+    )",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:ptr<function, vec4<u32>, read_write> = var undef
+    %3:vec4<u32> = load %2
+    %4:vec2<u32> = swizzle %3, xz
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, VectorShuffle_Swizzle_SecondVector) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+        %u32 = OpTypeInt 32 0
+      %v4u32 = OpTypeVector %u32 4
+  %v4u32_ptr = OpTypePointer Function %v4u32
+    %ep_type = OpTypeFunction %void
+
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+       %vec1 = OpVariable %v4u32_ptr Function
+       %vec2 = OpVariable %v4u32_ptr Function
+       %tmp1 = OpLoad %v4u32 %vec1
+       %tmp2 = OpLoad %v4u32 %vec2
+       %shuf = OpVectorShuffle %v4u32 %tmp1 %tmp2 4 5 6 7
+               OpReturn
+               OpFunctionEnd
+    )",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:ptr<function, vec4<u32>, read_write> = var undef
+    %3:ptr<function, vec4<u32>, read_write> = var undef
+    %4:vec4<u32> = load %2
+    %5:vec4<u32> = load %3
+    %6:vec4<u32> = swizzle %5, xyzw
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, VectorShuffle_Swizzle_SmallerResult) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+        %u32 = OpTypeInt 32 0
+      %v4u32 = OpTypeVector %u32 4
+      %v2u32 = OpTypeVector %u32 2
+  %v4u32_ptr = OpTypePointer Function %v4u32
+    %ep_type = OpTypeFunction %void
+
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+       %vec  = OpVariable %v4u32_ptr Function
+       %tmp  = OpLoad %v4u32 %vec
+       %shuf = OpVectorShuffle %v2u32 %tmp %tmp 2 0
+               OpReturn
+               OpFunctionEnd
+    )",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:ptr<function, vec4<u32>, read_write> = var undef
+    %3:vec4<u32> = load %2
+    %4:vec2<u32> = swizzle %3, zx
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, VectorShuffle_Swizzle_BiggerResult) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+        %u32 = OpTypeInt 32 0
+      %v2u32 = OpTypeVector %u32 2
+      %v4u32 = OpTypeVector %u32 4
+  %v2u32_ptr = OpTypePointer Function %v2u32
+    %ep_type = OpTypeFunction %void
+
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+       %vec  = OpVariable %v2u32_ptr Function
+       %tmp  = OpLoad %v2u32 %vec
+       %shuf = OpVectorShuffle %v4u32 %tmp %tmp 3 2 3 2
+               OpReturn
+               OpFunctionEnd
+    )",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:ptr<function, vec2<u32>, read_write> = var undef
+    %3:vec2<u32> = load %2
+    %4:vec4<u32> = swizzle %3, yxyx
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, VectorShuffle_Swizzle_OneVectorUndef) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+
+       %void = OpTypeVoid
+        %u32 = OpTypeInt 32 0
+      %v2u32 = OpTypeVector %u32 2
+      %v4u32 = OpTypeVector %u32 4
+  %v2u32_ptr = OpTypePointer Function %v2u32
+    %ep_type = OpTypeFunction %void
+
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+        %vec = OpVariable %v2u32_ptr Function
+        %tmp = OpLoad %v2u32 %vec
+     %undef4 = OpUndef %v4u32
+       %shuf = OpVectorShuffle %v2u32 %undef4 %tmp 4 5
+               OpReturn
+               OpFunctionEnd
+    )",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:ptr<function, vec2<u32>, read_write> = var undef
+    %3:vec2<u32> = load %2
+    %4:vec2<u32> = swizzle %3, xy
+    ret
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader

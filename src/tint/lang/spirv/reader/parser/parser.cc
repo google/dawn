@@ -1147,6 +1147,9 @@ class Parser {
                 case spv::Op::OpOuterProduct:
                     EmitSpirvBuiltinCall(inst, spirv::BuiltinFn::kOuterProduct);
                     break;
+                case spv::Op::OpVectorShuffle:
+                    EmitVectorShuffle(inst);
+                    break;
                 case spv::Op::OpAtomicStore:
                     EmitAtomicStore(inst);
                     break;
@@ -2199,6 +2202,76 @@ class Parser {
         EmitWithoutSpvResult(tmp);
         EmitWithoutResult(b_.StoreVectorElement(tmp, index, component));
         Emit(b_.Load(tmp), inst.result_id());
+    }
+
+    /// @param inst the SPIR-V instruction for OpVectorShuffle
+    void EmitVectorShuffle(const spvtools::opt::Instruction& inst) {
+        auto* vector1 = Value(inst.GetSingleWordOperand(2));
+        auto* vector2 = Value(inst.GetSingleWordOperand(3));
+        auto* result_ty = Type(inst.type_id());
+
+        uint32_t n1 = vector1->Type()->As<core::type::Vector>()->Width();
+        uint32_t n2 = vector2->Type()->As<core::type::Vector>()->Width();
+
+        Vector<uint32_t, 4> literals;
+        for (uint32_t i = 4; i < inst.NumOperandWords(); i++) {
+            literals.Push(inst.GetSingleWordOperand(i));
+        }
+
+        // Check if all literals fall entirely within `vector1` or `vector2`,
+        // which would allow us to use a single-vector swizzle.
+        bool swizzle_from_vector1_only = true;
+        bool swizzle_from_vector2_only = true;
+        for (auto& literal : literals) {
+            if (literal == ~0u) {
+                // A `0xFFFFFFFF` literal represents an undefined index,
+                // fallback to first index.
+                literal = 0;
+            }
+            if (literal >= n1) {
+                swizzle_from_vector1_only = false;
+            }
+            if (literal < n1) {
+                swizzle_from_vector2_only = false;
+            }
+        }
+
+        // If only one vector is used, we can swizzle it.
+        if (swizzle_from_vector1_only) {
+            // Indices are already within `[0, n1)`, as expected by `Swizzle` IR
+            // for `vector1`.
+            Emit(b_.Swizzle(result_ty, vector1, literals), inst.result_id());
+            return;
+        }
+        if (swizzle_from_vector2_only) {
+            // Map logical concatenated indices' range `[n1, n1 + n2)` into the range
+            // `[0, n2)`, as expected by `Swizzle` IR for `vector2`.
+            for (auto& literal : literals) {
+                literal -= n1;
+            }
+            Emit(b_.Swizzle(result_ty, vector2, literals), inst.result_id());
+            return;
+        }
+
+        // Swizzle is not possible, construct the result vector out of elements
+        // from both vectors.
+        auto* element_ty = vector1->Type()->DeepestElement();
+        Vector<core::ir::Value*, 4> result;
+        for (auto idx : literals) {
+            TINT_ASSERT(idx < n1 + n2);
+
+            if (idx < n1) {
+                auto* access_inst = b_.Access(element_ty, vector1, b_.Constant(u32(idx)));
+                EmitWithoutSpvResult(access_inst);
+                result.Push(access_inst->Result(0));
+            } else {
+                auto* access_inst = b_.Access(element_ty, vector2, b_.Constant(u32(idx - n1)));
+                EmitWithoutSpvResult(access_inst);
+                result.Push(access_inst->Result(0));
+            }
+        }
+
+        Emit(b_.Construct(result_ty, result), inst.result_id());
     }
 
     /// @param inst the SPIR-V instruction for OpFunctionCall
