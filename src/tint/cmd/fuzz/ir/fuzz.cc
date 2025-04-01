@@ -39,6 +39,7 @@
 
 #if TINT_BUILD_WGSL_READER
 #include "src/tint/cmd/fuzz/wgsl/fuzz.h"
+#include "src/tint/lang/core/ir/transform/substitute_overrides.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/wgsl/ast/module.h"
 #include "src/tint/lang/wgsl/helpers/apply_substitute_overrides.h"
@@ -74,15 +75,19 @@ void Register(const IRFuzzer& fuzzer) {
             if (program.AST().Enables().Any(tint::wgsl::reader::IsUnsupportedByIR)) {
                 return;
             }
-            auto transformed = tint::wgsl::ApplySubstituteOverrides(program);
-            auto& src = transformed ? transformed.value() : program;
-            if (!src.IsValid()) {
-                return;
-            }
-            auto ir = tint::wgsl::reader::ProgramToLoweredIR(src);
+            auto cfg = tint::wgsl::SubstituteOverridesConfig(program);
+
+            auto ir = tint::wgsl::reader::ProgramToLoweredIR(program);
             if (ir != Success) {
                 return;
             }
+
+            auto substituteOverridesResult =
+                tint::core::ir::transform::SubstituteOverrides(ir.Get(), cfg);
+            if (substituteOverridesResult != Success) {
+                return;
+            }
+
             if (auto val = core::ir::Validate(ir.Get()); val != Success) {
                 TINT_ICE() << val.Failure();
             }

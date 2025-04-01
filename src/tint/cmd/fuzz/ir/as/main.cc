@@ -177,15 +177,16 @@ tint::Result<tint::core::ir::Module> GenerateIrModule(const tint::Program& progr
         return tint::Failure{"Unsupported enable used in shader"};
     }
 
-    auto transformed = tint::wgsl::ApplySubstituteOverrides(program);
-    auto& src = transformed ? transformed.value() : program;
-    if (!src.IsValid()) {
-        return tint::Failure{src.Diagnostics().Str()};
-    }
+    auto cfg = tint::wgsl::SubstituteOverridesConfig(program);
 
     auto ir = tint::wgsl::reader::ProgramToLoweredIR(src);
     if (ir != tint::Success) {
         return ir.Failure();
+    }
+
+    auto substituteOverridesResult = tint::core::ir::transform::SubstituteOverrides(ir.Get(), cfg);
+    if (substituteOverridesResult != Success) {
+        return substituteOverridesResult.Failure();
     }
 
     if (auto val = tint::core::ir::Validate(ir.Get()); val != tint::Success) {
