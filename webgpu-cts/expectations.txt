@@ -1101,7 +1101,6 @@ crbug.com/331237795 [ dawn-backend-validation graphite-enabled nvidia webgpu-no-
 crbug.com/331237795 [ dawn-backend-validation graphite-enabled nvidia webgpu-no-worker win ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:alpha="premultiply";orientation="none";colorSpaceConversion="default";srcFlipYInCopy=true;dstFormat="rgba8unorm";dstPremultiplied=true [ Failure ]
 crbug.com/331237795 [ dawn-backend-validation graphite-enabled nvidia webgpu-no-worker win ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:alpha="premultiply";orientation="none";colorSpaceConversion="none";srcFlipYInCopy=false;dstFormat="bgra8unorm-srgb";dstPremultiplied=true [ Failure ]
 crbug.com/331237795 [ dawn-backend-validation graphite-enabled nvidia webgpu-no-worker win ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:alpha="premultiply";orientation="none";colorSpaceConversion="none";srcFlipYInCopy=false;dstFormat="bgra8unorm";dstPremultiplied=true [ Failure ]
-crbug.com/407076128 [ angle-d3d11 graphite-enabled nvidia-0x2184 ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:srcColorSpace="srgb";dstColorSpace="display-p3";* [ RetryOnFailure ]
 crbug.com/407076128 [ angle-d3d11 graphite-enabled nvidia-0x2184 ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_bitmaprenderer_context_canvas:* [ RetryOnFailure ]
 crbug.com/407076128 [ dawn-backend-validation graphite-enabled nvidia-0x2184 webgpu-dxc-disabled win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_2D_Canvas:* [ Failure ]
 crbug.com/407076128 [ dawn-backend-validation graphite-enabled nvidia-0x2184 webgpu-dxc-enabled win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_2D_Canvas:* [ Failure ]
@@ -1114,24 +1113,27 @@ crbug.com/42241502 [ dawn-backend-validation nvidia-0x2184 win10 ] webgpu:web_pl
 crbug.com/42241502 [ dawn-backend-validation nvidia-0x2184 win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:orientation="none";colorSpaceConversion="default";* [ Failure ]
 crbug.com/42241502 [ dawn-backend-validation nvidia-0x2184 win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:orientation="none";colorSpaceConversion="none";* [ Failure ]
 
-# Assorted copyToTexture,canvas:color_space_conversion failures
+# Assorted copyToTexture,canvas:color_space_conversion (display-p3 -> display-p3) failures
 crbug.com/407147668 [ apple mac ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:srcColorSpace="display-p3";dstColorSpace="display-p3";dstColorFormat="r16float";dstPremultiplied=false;srcDoFlipYDuringCopy=true [ Failure ]
 crbug.com/407147668 [ apple mac ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:srcColorSpace="display-p3";dstColorSpace="display-p3";dstColorFormat="r32float";dstPremultiplied=false;srcDoFlipYDuringCopy=true [ Failure ]
 crbug.com/407147668 [ apple mac ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:srcColorSpace="display-p3";dstColorSpace="display-p3";dstColorFormat="rg32float";dstPremultiplied=false;srcDoFlipYDuringCopy=true [ Failure ]
 crbug.com/407147668 [ apple mac ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:srcColorSpace="display-p3";dstColorSpace="display-p3";dstColorFormat="rg8unorm";dstPremultiplied=true;srcDoFlipYDuringCopy=true [ Failure ]
 crbug.com/407147668 [ apple mac ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:srcColorSpace="display-p3";dstColorSpace="display-p3";dstColorFormat="rgb10a2unorm";dstPremultiplied=false;srcDoFlipYDuringCopy=true [ Failure ]
 crbug.com/407147668 [ apple mac ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:srcColorSpace="display-p3";dstColorSpace="display-p3";dstColorFormat="rgba16float";dstPremultiplied=true;srcDoFlipYDuringCopy=true [ Failure ]
-crbug.com/407147668 [ dawn-backend-validation nvidia target-cpu-64 win ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:srcColorSpace="srgb";dstColorSpace="srgb";dstColorFormat="bgra8unorm";dstPremultiplied=true;srcDoFlipYDuringCopy=true [ Failure ]
-crbug.com/407147668 [ intel mac ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:srcColorSpace="srgb";dstColorSpace="srgb";dstColorFormat="r32float";dstPremultiplied=true;srcDoFlipYDuringCopy=true [ Failure ]
-crbug.com/407147668 [ mac webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:srcColorSpace="display-p3";dstColorSpace="display-p3";dstColorFormat="bgra8unorm";dstPremultiplied=false;srcDoFlipYDuringCopy=true [ Failure ]
-crbug.com/407147668 [ mac webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:srcColorSpace="display-p3";dstColorSpace="display-p3";dstColorFormat="r32float";dstPremultiplied=true;srcDoFlipYDuringCopy=true [ Failure ]
-crbug.com/407147668 [ mac webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:srcColorSpace="display-p3";dstColorSpace="display-p3";dstColorFormat="r8unorm";dstPremultiplied=false;srcDoFlipYDuringCopy=true [ Failure ]
 crbug.com/407147668 [ nvidia win ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:srcColorSpace="display-p3";dstColorSpace="display-p3";dstColorFormat="bgra8unorm-srgb";dstPremultiplied=false;srcDoFlipYDuringCopy=true [ Failure ]
 crbug.com/407147668 [ nvidia win ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:srcColorSpace="display-p3";dstColorSpace="display-p3";dstColorFormat="bgra8unorm-srgb";dstPremultiplied=true;srcDoFlipYDuringCopy=true [ Failure ]
 crbug.com/407147668 [ nvidia win ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:srcColorSpace="display-p3";dstColorSpace="display-p3";dstColorFormat="bgra8unorm";dstPremultiplied=false;srcDoFlipYDuringCopy=true [ Failure ]
 crbug.com/407147668 [ nvidia win ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:srcColorSpace="display-p3";dstColorSpace="display-p3";dstColorFormat="r16float";dstPremultiplied=false;srcDoFlipYDuringCopy=true [ Failure ]
 crbug.com/407147668 [ nvidia win ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:srcColorSpace="display-p3";dstColorSpace="display-p3";dstColorFormat="r32float";dstPremultiplied=false;srcDoFlipYDuringCopy=true [ Failure ]
 crbug.com/407147668 [ nvidia win ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:srcColorSpace="display-p3";dstColorSpace="display-p3";dstColorFormat="rg32float";dstPremultiplied=false;srcDoFlipYDuringCopy=true [ Failure ]
+
+# SwiftShader color_space_conversion (at least some of these are flakes)
+crbug.com/42240560 [ webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:srcColorSpace="display-p3";dstColorSpace="display-p3";* [ Failure ]
+
+# Other assorted color_space_conversion failures
+crbug.com/407076128 [ angle-d3d11 graphite-enabled nvidia-0x2184 ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:srcColorSpace="srgb";dstColorSpace="display-p3";* [ RetryOnFailure ]
+crbug.com/407147668 [ dawn-backend-validation nvidia target-cpu-64 win ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:srcColorSpace="srgb";dstColorSpace="srgb";dstColorFormat="bgra8unorm";dstPremultiplied=true;srcDoFlipYDuringCopy=true [ Failure ]
+crbug.com/407147668 [ intel mac ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:srcColorSpace="srgb";dstColorSpace="srgb";dstColorFormat="r32float";dstPremultiplied=true;srcDoFlipYDuringCopy=true [ Failure ]
 
 # Assorted copyToTexture,ImageBitmap and ,ImageData failures
 crbug.com/407147669 [ amd mac ] webgpu:web_platform,copyToTexture,ImageData:from_ImageData:srcDoFlipYDuringCopy=false;dstColorFormat="rgba8unorm-srgb";dstPremultiplied=true [ Failure ]
