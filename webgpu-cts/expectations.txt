@@ -112,12 +112,16 @@ crbug.com/41491225 [ linux ] webgpu:web_platform,copyToTexture,canvas:* [ Skip ]
 
 # web_platform crashes on SwiftShader
 # Skipped instead of just Crash because of the number of failures
-crbug.com/40853211 [ webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_2D_Canvas:* [ Skip ]
-crbug.com/40853211 [ webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:* [ Skip ]
-crbug.com/40853211 [ webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:* [ Skip ]
-crbug.com/40853211 [ webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,ImageData:from_ImageData:* [ Skip ]
-crbug.com/40853211 [ webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_2d_context_canvas:* [ Skip ]
-crbug.com/40853211 [ webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gl_context_canvas:* [ Skip ]
+crbug.com/40853211 [ mac webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_2D_Canvas:* [ Skip ]
+crbug.com/40853211 [ mac webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:* [ Skip ]
+crbug.com/40853211 [ mac webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:* [ Skip ]
+crbug.com/40853211 [ mac webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_2d_context_canvas:* [ Skip ]
+crbug.com/40853211 [ mac webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gl_context_canvas:* [ Skip ]
+crbug.com/40853211 [ webgpu-adapter-swiftshader win ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_2D_Canvas:* [ Skip ]
+crbug.com/40853211 [ webgpu-adapter-swiftshader win ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:* [ Skip ]
+crbug.com/40853211 [ webgpu-adapter-swiftshader win ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:* [ Skip ]
+crbug.com/40853211 [ webgpu-adapter-swiftshader win ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_2d_context_canvas:* [ Skip ]
+crbug.com/40853211 [ webgpu-adapter-swiftshader win ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gl_context_canvas:* [ Skip ]
 
 # Causing bot instability on Mac AMD
 crbug.com/42240813 [ amd-0x67ef ] webgpu:api,operation,rendering,color_target_state:blending,GPUBlendComponent:* [ Skip ]
