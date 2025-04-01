@@ -482,14 +482,14 @@ TEST_F(SpirvWriterTest, Loop_NestedLoopInContinuing_UnreachableInNestedBody_With
     b.Append(func->Block(), [&] {
         auto* outer_result = b.InstructionResult(ty.i32());
         auto* outer_loop = b.Loop();
-        outer_loop->SetResults(Vector{outer_result});
+        outer_loop->SetResult(outer_result);
         b.Append(outer_loop->Body(), [&] {
             b.Continue(outer_loop);
 
             b.Append(outer_loop->Continuing(), [&] {
                 auto* inner_result = b.InstructionResult(ty.i32());
                 auto* inner_loop = b.Loop();
-                inner_loop->SetResults(Vector{inner_result});
+                inner_loop->SetResult(inner_result);
                 b.Append(inner_loop->Body(), [&] {
                     auto* ifelse = b.If(true);
                     b.Append(ifelse->True(), [&] {  //
@@ -674,7 +674,7 @@ TEST_F(SpirvWriterTest, Loop_Phi_NestedIf) {
         loop->Body()->SetParams({loop_param});
         b.Append(loop->Body(), [&] {
             auto* inner = b.If(true);
-            inner->SetResults(b.InstructionResult(ty.i32()));
+            inner->SetResult(b.InstructionResult(ty.i32()));
             b.Append(inner->True(), [&] {  //
                 b.ExitIf(inner, 10_i);
             });
@@ -810,7 +810,7 @@ TEST_F(SpirvWriterTest, Loop_Phi_NestedIfWithResultAndImplicitFalse_InContinuing
         b.Append(loop->Continuing(), [&] {
             auto* if_ = b.If(true);
             auto* cond = b.InstructionResult(ty.bool_());
-            if_->SetResults(Vector{cond});
+            if_->SetResult(cond);
             b.Append(if_->True(), [&] {  //
                 b.ExitIf(if_, true);
             });
@@ -853,7 +853,7 @@ TEST_F(SpirvWriterTest, Loop_ExitValue) {
     b.Append(func->Block(), [&] {
         auto* result = b.InstructionResult(ty.i32());
         auto* loop = b.Loop();
-        loop->SetResults(Vector{result});
+        loop->SetResult(result);
         b.Append(loop->Body(), [&] {  //
             b.ExitLoop(loop, 42_i);
         });
@@ -898,7 +898,7 @@ TEST_F(SpirvWriterTest, Loop_ExitValue_BreakIf) {
     b.Append(func->Block(), [&] {
         auto* result = b.InstructionResult(ty.i32());
         auto* loop = b.Loop();
-        loop->SetResults(Vector{result});
+        loop->SetResult(result);
         b.Append(loop->Body(), [&] {  //
             auto* if_ = b.If(false);
             b.Append(if_->True(), [&] {  //

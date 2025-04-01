@@ -215,7 +215,7 @@ TEST_F(WgslIRWriterTest, ShortCircuit_And_Param_2) {
 
     b.Append(fn->Block(), [&] {
         auto* if_ = b.If(pa);
-        if_->SetResults(b.InstructionResult(ty.bool_()));
+        if_->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(if_->True(), [&] { b.ExitIf(if_, pb); });
         b.Append(if_->False(), [&] { b.ExitIf(if_, false); });
 
@@ -238,12 +238,12 @@ TEST_F(WgslIRWriterTest, ShortCircuit_And_Param_3_ab_c) {
 
     b.Append(fn->Block(), [&] {
         auto* if1 = b.If(pa);
-        if1->SetResults(b.InstructionResult(ty.bool_()));
+        if1->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(if1->True(), [&] { b.ExitIf(if1, pb); });
         b.Append(if1->False(), [&] { b.ExitIf(if1, false); });
 
         auto* if2 = b.If(if1);
-        if2->SetResults(b.InstructionResult(ty.bool_()));
+        if2->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(if2->True(), [&] { b.ExitIf(if2, pc); });
         b.Append(if2->False(), [&] { b.ExitIf(if2, false); });
 
@@ -266,10 +266,10 @@ TEST_F(WgslIRWriterTest, ShortCircuit_And_Param_3_a_bc) {
 
     b.Append(fn->Block(), [&] {
         auto* if1 = b.If(pa);
-        if1->SetResults(b.InstructionResult(ty.bool_()));
+        if1->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(if1->True(), [&] {
             auto* if2 = b.If(pb);
-            if2->SetResults(b.InstructionResult(ty.bool_()));
+            if2->SetResult(b.InstructionResult(ty.bool_()));
             b.Append(if2->True(), [&] { b.ExitIf(if2, pc); });
             b.Append(if2->False(), [&] { b.ExitIf(if2, false); });
 
@@ -294,7 +294,7 @@ TEST_F(WgslIRWriterTest, ShortCircuit_And_Let_2) {
 
     b.Append(fn->Block(), [&] {
         auto* if_ = b.If(pa);
-        if_->SetResults(b.InstructionResult(ty.bool_()));
+        if_->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(if_->True(), [&] { b.ExitIf(if_, pb); });
         b.Append(if_->False(), [&] { b.ExitIf(if_, false); });
 
@@ -319,12 +319,12 @@ TEST_F(WgslIRWriterTest, ShortCircuit_And_Let_3_ab_c) {
 
     b.Append(fn->Block(), [&] {
         auto* if1 = b.If(pa);
-        if1->SetResults(b.InstructionResult(ty.bool_()));
+        if1->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(if1->True(), [&] { b.ExitIf(if1, pb); });
         b.Append(if1->False(), [&] { b.ExitIf(if1, false); });
 
         auto* if2 = b.If(if1);
-        if2->SetResults(b.InstructionResult(ty.bool_()));
+        if2->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(if2->True(), [&] { b.ExitIf(if2, pc); });
         b.Append(if2->False(), [&] { b.ExitIf(if2, false); });
 
@@ -349,10 +349,10 @@ TEST_F(WgslIRWriterTest, ShortCircuit_And_Let_3_a_bc) {
 
     b.Append(fn->Block(), [&] {
         auto* if1 = b.If(pa);
-        if1->SetResults(b.InstructionResult(ty.bool_()));
+        if1->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(if1->True(), [&] {
             auto* if2 = b.If(pb);
-            if2->SetResults(b.InstructionResult(ty.bool_()));
+            if2->SetResult(b.InstructionResult(ty.bool_()));
             b.Append(if2->True(), [&] { b.ExitIf(if2, pc); });
             b.Append(if2->False(), [&] { b.ExitIf(if2, false); });
 
@@ -383,7 +383,7 @@ TEST_F(WgslIRWriterTest, ShortCircuit_And_Call_2) {
 
     b.Append(fn->Block(), [&] {
         auto* if_ = b.If(b.Call(ty.bool_(), fn_a));
-        if_->SetResults(b.InstructionResult(ty.bool_()));
+        if_->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(if_->True(), [&] { b.ExitIf(if_, b.Call(ty.bool_(), fn_b)); });
         b.Append(if_->False(), [&] { b.ExitIf(if_, false); });
 
@@ -419,12 +419,12 @@ TEST_F(WgslIRWriterTest, ShortCircuit_And_Call_3_ab_c) {
 
     b.Append(fn->Block(), [&] {
         auto* if1 = b.If(b.Call(ty.bool_(), fn_a));
-        if1->SetResults(b.InstructionResult(ty.bool_()));
+        if1->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(if1->True(), [&] { b.ExitIf(if1, b.Call(ty.bool_(), fn_b)); });
         b.Append(if1->False(), [&] { b.ExitIf(if1, false); });
 
         auto* if2 = b.If(if1);
-        if2->SetResults(b.InstructionResult(ty.bool_()));
+        if2->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(if2->True(), [&] { b.ExitIf(if2, b.Call(ty.bool_(), fn_c)); });
         b.Append(if2->False(), [&] { b.ExitIf(if2, false); });
 
@@ -464,10 +464,10 @@ TEST_F(WgslIRWriterTest, ShortCircuit_And_Call_3_a_bc) {
 
     b.Append(fn->Block(), [&] {
         auto* if1 = b.If(b.Call(ty.bool_(), fn_a));
-        if1->SetResults(b.InstructionResult(ty.bool_()));
+        if1->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(if1->True(), [&] {
             auto* if2 = b.If(b.Call(ty.bool_(), fn_b));
-            if2->SetResults(b.InstructionResult(ty.bool_()));
+            if2->SetResult(b.InstructionResult(ty.bool_()));
             b.Append(if2->True(), [&] { b.ExitIf(if2, b.Call(ty.bool_(), fn_c)); });
             b.Append(if2->False(), [&] { b.ExitIf(if2, false); });
 
@@ -505,7 +505,7 @@ TEST_F(WgslIRWriterTest, ShortCircuit_Or_Param_2) {
 
     b.Append(fn->Block(), [&] {
         auto* if_ = b.If(pa);
-        if_->SetResults(b.InstructionResult(ty.bool_()));
+        if_->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(if_->True(), [&] { b.ExitIf(if_, true); });
         b.Append(if_->False(), [&] { b.ExitIf(if_, pb); });
 
@@ -528,12 +528,12 @@ TEST_F(WgslIRWriterTest, ShortCircuit_Or_Param_3_ab_c) {
 
     b.Append(fn->Block(), [&] {
         auto* if1 = b.If(pa);
-        if1->SetResults(b.InstructionResult(ty.bool_()));
+        if1->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(if1->True(), [&] { b.ExitIf(if1, true); });
         b.Append(if1->False(), [&] { b.ExitIf(if1, pb); });
 
         auto* if2 = b.If(if1);
-        if2->SetResults(b.InstructionResult(ty.bool_()));
+        if2->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(if2->True(), [&] { b.ExitIf(if2, true); });
         b.Append(if2->False(), [&] { b.ExitIf(if2, pc); });
 
@@ -556,11 +556,11 @@ TEST_F(WgslIRWriterTest, ShortCircuit_Or_Param_3_a_bc) {
 
     b.Append(fn->Block(), [&] {
         auto* if1 = b.If(pa);
-        if1->SetResults(b.InstructionResult(ty.bool_()));
+        if1->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(if1->True(), [&] { b.ExitIf(if1, true); });
         b.Append(if1->False(), [&] {
             auto* if2 = b.If(pb);
-            if2->SetResults(b.InstructionResult(ty.bool_()));
+            if2->SetResult(b.InstructionResult(ty.bool_()));
             b.Append(if2->True(), [&] { b.ExitIf(if2, true); });
             b.Append(if2->False(), [&] { b.ExitIf(if2, pc); });
 
@@ -585,7 +585,7 @@ TEST_F(WgslIRWriterTest, ShortCircuit_Or_Let_2) {
 
     b.Append(fn->Block(), [&] {
         auto* if_ = b.If(pa);
-        if_->SetResults(b.InstructionResult(ty.bool_()));
+        if_->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(if_->True(), [&] { b.ExitIf(if_, true); });
         b.Append(if_->False(), [&] { b.ExitIf(if_, pb); });
 
@@ -610,12 +610,12 @@ TEST_F(WgslIRWriterTest, ShortCircuit_Or_Let_3_ab_c) {
 
     b.Append(fn->Block(), [&] {
         auto* if1 = b.If(pa);
-        if1->SetResults(b.InstructionResult(ty.bool_()));
+        if1->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(if1->True(), [&] { b.ExitIf(if1, true); });
         b.Append(if1->False(), [&] { b.ExitIf(if1, pb); });
 
         auto* if2 = b.If(if1);
-        if2->SetResults(b.InstructionResult(ty.bool_()));
+        if2->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(if2->True(), [&] { b.ExitIf(if2, true); });
         b.Append(if2->False(), [&] { b.ExitIf(if2, pc); });
 
@@ -640,11 +640,11 @@ TEST_F(WgslIRWriterTest, ShortCircuit_Or_Let_3_a_bc) {
 
     b.Append(fn->Block(), [&] {
         auto* if1 = b.If(pa);
-        if1->SetResults(b.InstructionResult(ty.bool_()));
+        if1->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(if1->True(), [&] { b.ExitIf(if1, true); });
         b.Append(if1->False(), [&] {
             auto* if2 = b.If(pb);
-            if2->SetResults(b.InstructionResult(ty.bool_()));
+            if2->SetResult(b.InstructionResult(ty.bool_()));
             b.Append(if2->True(), [&] { b.ExitIf(if2, true); });
             b.Append(if2->False(), [&] { b.ExitIf(if2, pc); });
 
@@ -674,7 +674,7 @@ TEST_F(WgslIRWriterTest, ShortCircuit_Or_Call_2) {
 
     b.Append(fn->Block(), [&] {
         auto* if_ = b.If(b.Call(ty.bool_(), fn_a));
-        if_->SetResults(b.InstructionResult(ty.bool_()));
+        if_->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(if_->True(), [&] { b.ExitIf(if_, true); });
         b.Append(if_->False(), [&] { b.ExitIf(if_, b.Call(ty.bool_(), fn_b)); });
 
@@ -710,12 +710,12 @@ TEST_F(WgslIRWriterTest, ShortCircuit_Or_Call_3_ab_c) {
 
     b.Append(fn->Block(), [&] {
         auto* if1 = b.If(b.Call(ty.bool_(), fn_a));
-        if1->SetResults(b.InstructionResult(ty.bool_()));
+        if1->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(if1->True(), [&] { b.ExitIf(if1, true); });
         b.Append(if1->False(), [&] { b.ExitIf(if1, b.Call(ty.bool_(), fn_b)); });
 
         auto* if2 = b.If(if1);
-        if2->SetResults(b.InstructionResult(ty.bool_()));
+        if2->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(if2->True(), [&] { b.ExitIf(if2, true); });
         b.Append(if2->False(), [&] { b.ExitIf(if2, b.Call(ty.bool_(), fn_c)); });
 
@@ -755,11 +755,11 @@ TEST_F(WgslIRWriterTest, ShortCircuit_Or_Call_3_a_bc) {
 
     b.Append(fn->Block(), [&] {
         auto* if1 = b.If(b.Call(ty.bool_(), fn_a));
-        if1->SetResults(b.InstructionResult(ty.bool_()));
+        if1->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(if1->True(), [&] { b.ExitIf(if1, true); });
         b.Append(if1->False(), [&] {
             auto* if2 = b.If(b.Call(ty.bool_(), fn_b));
-            if2->SetResults(b.InstructionResult(ty.bool_()));
+            if2->SetResult(b.InstructionResult(ty.bool_()));
             b.Append(if2->True(), [&] { b.ExitIf(if2, true); });
             b.Append(if2->False(), [&] { b.ExitIf(if2, b.Call(ty.bool_(), fn_c)); });
 
@@ -802,15 +802,15 @@ TEST_F(WgslIRWriterTest, ShortCircuit_Mixed) {
 
     b.Append(fn->Block(), [&] {
         auto* if1 = b.If(pa);
-        if1->SetResults(b.InstructionResult(ty.bool_()));
+        if1->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(if1->True(), [&] { b.ExitIf(if1, true); });
         b.Append(if1->False(), [&] { b.ExitIf(if1, b.Call(ty.bool_(), fn_b)); });
 
         auto* if2 = b.If(if1);
-        if2->SetResults(b.InstructionResult(ty.bool_()));
+        if2->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(if2->True(), [&] {
             auto* if3 = b.If(pc);
-            if3->SetResults(b.InstructionResult(ty.bool_()));
+            if3->SetResult(b.InstructionResult(ty.bool_()));
             b.Append(if3->True(), [&] { b.ExitIf(if3, true); });
             b.Append(if3->False(), [&] { b.ExitIf(if3, b.Call(ty.bool_(), fn_d)); });
 
@@ -850,12 +850,12 @@ TEST_F(WgslIRWriterTest, ShortCircuit_And_ParamCallParam_a_bc_EarlyEval) {
     b.Append(fn->Block(), [&] {
         // 'b() && c' is evaluated before 'a'.
         auto* if1 = b.If(b.Call(ty.bool_(), fn_b));
-        if1->SetResults(b.InstructionResult(ty.bool_()));
+        if1->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(if1->True(), [&] { b.ExitIf(if1, pc); });
         b.Append(if1->False(), [&] { b.ExitIf(if1, false); });
 
         auto* if2 = b.If(pa);
-        if2->SetResults(b.InstructionResult(ty.bool_()));
+        if2->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(if2->True(), [&] { b.ExitIf(if2, if1); });
         b.Append(if2->False(), [&] { b.ExitIf(if2, false); });
         b.Return(fn, if2);
@@ -891,12 +891,12 @@ TEST_F(WgslIRWriterTest, ShortCircuit_And_Call_3_a_bc_EarlyEval) {
     b.Append(fn->Block(), [&] {
         // 'b() && c()' is evaluated before 'a()'.
         auto* if1 = b.If(b.Call(ty.bool_(), fn_b));
-        if1->SetResults(b.InstructionResult(ty.bool_()));
+        if1->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(if1->True(), [&] { b.ExitIf(if1, b.Call(ty.bool_(), fn_c)); });
         b.Append(if1->False(), [&] { b.ExitIf(if1, false); });
 
         auto* if2 = b.If(b.Call(ty.bool_(), fn_a));
-        if2->SetResults(b.InstructionResult(ty.bool_()));
+        if2->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(if2->True(), [&] { b.ExitIf(if2, if1); });
         b.Append(if2->False(), [&] { b.ExitIf(if2, false); });
 
@@ -935,12 +935,12 @@ TEST_F(WgslIRWriterTest, ShortCircuit_And_Param_3_a_bc_EarlyEval) {
 
     b.Append(fn->Block(), [&] {
         auto* if1 = b.If(pb);
-        if1->SetResults(b.InstructionResult(ty.bool_()));
+        if1->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(if1->True(), [&] { b.ExitIf(if1, pc); });
         b.Append(if1->False(), [&] { b.ExitIf(if1, false); });
 
         auto* if2 = b.If(pa);
-        if2->SetResults(b.InstructionResult(ty.bool_()));
+        if2->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(if2->True(), [&] { b.ExitIf(if2, if1); });
         b.Append(if2->False(), [&] { b.ExitIf(if2, false); });
 
@@ -969,13 +969,13 @@ TEST_F(WgslIRWriterTest, ShortCircuit_Or_ParamCallParam_a_bc_EarlyEval) {
     b.Append(fn->Block(), [&] {
         // 'b() && c' is evaluated before 'a'.
         auto* if1 = b.If(b.Call(ty.bool_(), fn_b));
-        if1->SetResults(b.InstructionResult(ty.bool_()));
+        if1->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(if1->True(), [&] { b.ExitIf(if1, true); });
         b.Append(if1->False(), [&] { b.ExitIf(if1, pc); });
         auto* v = b.Let("v", if1);
 
         auto* if2 = b.If(pa);
-        if2->SetResults(b.InstructionResult(ty.bool_()));
+        if2->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(if2->True(), [&] { b.ExitIf(if2, true); });
         b.Append(if2->False(), [&] { b.ExitIf(if2, v); });
 
@@ -1011,13 +1011,13 @@ TEST_F(WgslIRWriterTest, ShortCircuit_Or_Call_3_a_bc_EarlyEval) {
 
     b.Append(fn->Block(), [&] {
         auto* if1 = b.If(b.Call(ty.bool_(), fn_b));
-        if1->SetResults(b.InstructionResult(ty.bool_()));
+        if1->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(if1->True(), [&] { b.ExitIf(if1, true); });
         b.Append(if1->False(), [&] { b.ExitIf(if1, b.Call(ty.bool_(), fn_c)); });
         auto* v = b.Let("v", if1);
 
         auto* if2 = b.If(b.Call(ty.bool_(), fn_a));
-        if2->SetResults(b.InstructionResult(ty.bool_()));
+        if2->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(if2->True(), [&] { b.ExitIf(if2, true); });
         b.Append(if2->False(), [&] { b.ExitIf(if2, v); });
 
@@ -1056,12 +1056,12 @@ TEST_F(WgslIRWriterTest, ShortCircuit_Or_Param_3_a_bc_EarlyEval) {
 
     b.Append(fn->Block(), [&] {
         auto* if1 = b.If(pb);
-        if1->SetResults(b.InstructionResult(ty.bool_()));
+        if1->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(if1->True(), [&] { b.ExitIf(if1, true); });
         b.Append(if1->False(), [&] { b.ExitIf(if1, pc); });
 
         auto* if2 = b.If(pa);
-        if2->SetResults(b.InstructionResult(ty.bool_()));
+        if2->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(if2->True(), [&] { b.ExitIf(if2, true); });
         b.Append(if2->False(), [&] { b.ExitIf(if2, if1); });
 

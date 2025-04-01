@@ -100,6 +100,16 @@ class OperandInstruction : public Castable<OperandInstruction<N, R>, Instruction
         operands_.Clear();
     }
 
+    /// Replaces the results of the instruction with a single result.
+    /// @param result the new result of the instruction
+    void SetResult(ir::InstructionResult* result) override {
+        ClearResults();
+        results_.Push(result);
+        if (result) {
+            result->SetInstruction(this);
+        }
+    }
+
     /// Replaces the results of the instruction
     /// @param results the new results of the instruction
     void SetResults(VectorRef<ir::InstructionResult*> results) override {

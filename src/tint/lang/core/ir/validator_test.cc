@@ -338,7 +338,7 @@ TEST_F(IR_ValidatorTest, Construct_NullResult) {
     auto* f = b.Function("f", ty.void_());
     b.Append(f->Block(), [&] {
         auto* c = b.Construct(str_ty, 1_i, 2_u);
-        c->SetResults(Vector<ir::InstructionResult*, 1>{nullptr});
+        c->SetResult(nullptr);
         b.Return(f);
     });
 
@@ -427,7 +427,7 @@ TEST_F(IR_ValidatorTest, Convert_NullResult) {
     auto* f = b.Function("f", ty.void_());
     b.Append(f->Block(), [&] {
         auto* c = b.Convert(ty.i32(), 1_f);
-        c->SetResults(Vector<InstructionResult*, 1>{nullptr});
+        c->SetResult(nullptr);
         b.Return(f);
     });
 
@@ -934,7 +934,7 @@ TEST_F(IR_ValidatorTest, Instruction_WrongInstructionResultInstruction) {
     auto* v2 = sb.Var(ty.ptr<function, f32>());
     sb.Return(f);
 
-    v->SetResults(v2->Results());
+    v->SetResult(v2->Result());
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);

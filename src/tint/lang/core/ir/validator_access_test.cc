@@ -653,7 +653,7 @@ TEST_F(IR_ValidatorTest, Store_NonEmptyResult) {
     b.Append(f->Block(), [&] {
         auto* var = b.Var(ty.ptr<function, i32>());
         auto* store = mod.CreateInstruction<ir::Store>(var->Result(), b.Constant(42_i));
-        store->SetResults(Vector{b.InstructionResult(ty.i32())});
+        store->SetResult(b.InstructionResult(ty.i32()));
         b.Append(store);
         b.Return(f);
     });
@@ -943,7 +943,7 @@ TEST_F(IR_ValidatorTest, StoreVectorElement_UnexpectedResult) {
     b.Append(f->Block(), [&] {
         auto* var = b.Var(ty.ptr<function, vec3<f32>>());
         auto* store = b.StoreVectorElement(var, b.Constant(1_i), b.Constant(2_f));
-        store->SetResults(Vector{b.InstructionResult(ty.f32())});
+        store->SetResult(b.InstructionResult(ty.f32()));
         b.Return(f);
     });
 
@@ -1013,7 +1013,7 @@ TEST_F(IR_ValidatorTest, Swizzle_NullResult) {
     b.Append(f->Block(), [&] {
         auto* var = b.Var(ty.ptr(function, ty.vec4<f32>()));
         auto* swizzle = b.Swizzle(ty.vec4<f32>(), b.Load(var), {3, 2, 1, 0});
-        swizzle->SetResults(Vector<ir::InstructionResult*, 1>{nullptr});
+        swizzle->SetResult(nullptr);
         b.Return(f);
     });
 

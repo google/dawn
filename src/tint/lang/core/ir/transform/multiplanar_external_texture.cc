@@ -232,7 +232,7 @@ struct State {
                             auto* apparent_size = b.Access<vec2<u32>>(params, 12_u);
                             auto* vec2u_1_1 = b.Splat<vec2<u32>>(1_u);
                             auto* dimensions = b.Add<vec2<u32>>(apparent_size, vec2u_1_1);
-                            dimensions->SetResults(Vector{call->DetachResult()});
+                            dimensions->SetResult(call->DetachResult());
                         });
                         call->Destroy();
                     } else if (call->Func() == core::BuiltinFn::kTextureLoad) {
@@ -464,7 +464,7 @@ struct State {
             // Apply gamma correction if needed.
             auto* final_result = b.InstructionResult(vec3f);
             auto* if_gamma_correct = b.If(b.Equal(ty.bool_(), yuv_to_rgb_conversion_only, 0_u));
-            if_gamma_correct->SetResults(final_result);
+            if_gamma_correct->SetResult(final_result);
             b.Append(if_gamma_correct->True(), [&] {
                 auto* gamma_decode_params = b.Access(GammaTransferParams(), params, 3_u);
                 auto* gamma_encode_params = b.Access(GammaTransferParams(), params, 4_u);
@@ -583,7 +583,7 @@ struct State {
             // Apply gamma correction if needed.
             auto* final_result = b.InstructionResult(vec3f);
             auto* if_gamma_correct = b.If(b.Equal(ty.bool_(), yuv_to_rgb_conversion_only, 0_u));
-            if_gamma_correct->SetResults(final_result);
+            if_gamma_correct->SetResult(final_result);
             b.Append(if_gamma_correct->True(), [&] {
                 auto* gamma_decode_params = b.Access(GammaTransferParams(), params, 3_u);
                 auto* gamma_encode_params = b.Access(GammaTransferParams(), params, 4_u);

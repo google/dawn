@@ -775,7 +775,7 @@ struct State {
     void Sign(core::ir::BuiltinCall* call) {
         b.InsertBefore(call, [&] {
             auto* sign = BuildSign(call->Args()[0]);
-            sign->SetResults(Vector{call->DetachResult()});
+            sign->SetResult(call->DetachResult());
         });
         call->Destroy();
     }
@@ -1276,7 +1276,7 @@ struct State {
                 TINT_ASSERT(call->Result()->Type()->Is<core::type::F32>());
                 result = b.Swizzle(ty.f32(), result, {0});
             }
-            result->SetResults(Vector{call->DetachResult()});
+            result->SetResult(call->DetachResult());
         });
         call->Destroy();
     }
@@ -1508,7 +1508,7 @@ struct State {
                 TINT_ASSERT(call->Result()->Type()->Is<core::type::F32>());
                 result = b.Swizzle(ty.f32(), result, {0});
             }
-            result->SetResults(Vector{call->DetachResult()});
+            result->SetResult(call->DetachResult());
         });
         call->Destroy();
     }

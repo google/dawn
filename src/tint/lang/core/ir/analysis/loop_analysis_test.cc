@@ -1932,7 +1932,7 @@ TEST_F(IR_LoopAnalysisTest, MaybeInfinite_ConditionalAdd) {
             auto* load = b.Load(idx);
             auto* inc = b.InstructionResult<u32>();
             auto* cond_add = b.If(false);
-            cond_add->SetResults(Vector{inc});
+            cond_add->SetResult(inc);
             b.Append(cond_add->True(), [&] {  //
                 b.ExitIf(cond_add, b.Add<u32>(load, 1_u));
             });

@@ -267,7 +267,7 @@ struct State {
                     auto* forked_load = b.InstructionResult(load->From()->Type()->UnwrapPtr());
                     auto* converted = ConvertIfNeeded(original_type, forked_load);
                     load->Result()->ReplaceAllUsesWith(converted);
-                    load->SetResults(Vector{forked_load});
+                    load->SetResult(forked_load);
                 });
             },
             [&](core::ir::Store* store) {

@@ -642,7 +642,7 @@ TEST_F(IRBinaryRoundtripTest, SwitchResults) {
     b.Append(fn->Block(), [&] {
         auto* switch_ = b.Switch(x);
         auto* res = b.InstructionResult<i32>();
-        switch_->SetResults(Vector{res});
+        switch_->SetResult(res);
         b.Append(b.Case(switch_, {b.Constant(1_i)}), [&] { b.ExitSwitch(switch_, 1_i); });
         b.Append(b.Case(switch_, {b.Constant(2_i), b.Constant(3_i)}),
                  [&] { b.ExitSwitch(switch_, 2_i); });
@@ -693,7 +693,7 @@ TEST_F(IRBinaryRoundtripTest, LoopResults) {
     b.Append(fn->Block(), [&] {
         auto* loop = b.Loop();
         auto* res = b.InstructionResult<i32>();
-        loop->SetResults(Vector{res});
+        loop->SetResult(res);
         b.Append(loop->Body(), [&] { b.ExitLoop(loop, 1_i); });
         b.Return(fn, res);
     });

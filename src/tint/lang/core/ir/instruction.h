@@ -85,6 +85,10 @@ class Instruction : public Castable<Instruction> {
     /// @param operands the new operands of the instruction
     virtual void SetOperands(VectorRef<ir::Value*> operands) = 0;
 
+    /// Replaces the results of the instruction with a single result
+    /// @param result the new result of the instruction
+    virtual void SetResult(ir::InstructionResult* result) = 0;
+
     /// Replaces the results of the instruction
     /// @param results the new results of the instruction
     virtual void SetResults(VectorRef<ir::InstructionResult*> results) = 0;

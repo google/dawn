@@ -303,7 +303,7 @@ TEST_F(IR_EvaluatorTest, Convert) {
 
 TEST_F(IR_EvaluatorTest, ConstExprIfSimple) {
     auto* constexpr_if = b.ConstExprIf(true);
-    constexpr_if->SetResults(b.InstructionResult(ty.bool_()));
+    constexpr_if->SetResult(b.InstructionResult(ty.bool_()));
     b.Append(constexpr_if->True(), [&] { b.ExitIf(constexpr_if, true); });
     b.Append(constexpr_if->False(), [&] { b.ExitIf(constexpr_if, false); });
     auto res = Eval(b, constexpr_if);

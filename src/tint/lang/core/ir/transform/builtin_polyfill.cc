@@ -458,7 +458,7 @@ struct State {
             if (result_ty->IsSignedIntegerScalarOrVector()) {
                 result = b.Bitcast(result_ty, result);
             }
-            result->SetResults(Vector{call->DetachResult()});
+            result->SetResult(call->DetachResult());
         });
         call->Destroy();
     }
@@ -518,7 +518,7 @@ struct State {
             if (result_ty->IsSignedIntegerScalarOrVector()) {
                 result = b.Bitcast(result_ty, result);
             }
-            result->SetResults(Vector{call->DetachResult()});
+            result->SetResult(call->DetachResult());
         });
         call->Destroy();
     }
@@ -536,7 +536,7 @@ struct State {
         }
         b.InsertBefore(call, [&] {
             auto* mul = b.Multiply(arg->Type(), arg, value);
-            mul->SetResults(Vector{call->DetachResult()});
+            mul->SetResult(call->DetachResult());
         });
         call->Destroy();
     }
@@ -576,7 +576,7 @@ struct State {
                 b.Multiply(type, t_clamped,
                            b.Multiply(type, t_clamped,
                                       b.Subtract(type, three, b.Multiply(type, two, t_clamped))));
-            smooth_result->SetResults(Vector{call->DetachResult()});
+            smooth_result->SetResult(call->DetachResult());
         });
         call->Destroy();
     }
@@ -696,7 +696,7 @@ struct State {
             if (result_ty->IsSignedIntegerScalarOrVector()) {
                 result = b.Bitcast(result_ty, result);
             }
-            result->SetResults(Vector{call->DetachResult()});
+            result->SetResult(call->DetachResult());
         });
         call->Destroy();
     }
@@ -754,7 +754,7 @@ struct State {
             if (result_ty->IsSignedIntegerScalarOrVector()) {
                 result = b.Bitcast(result_ty, result);
             }
-            result->SetResults(Vector{call->DetachResult()});
+            result->SetResult(call->DetachResult());
         });
         call->Destroy();
     }
@@ -829,7 +829,7 @@ struct State {
                     auto* result_rhs =
                         b.And(result_ty, e, b.Construct(result_ty, b.Complement<u32>(mask)));
                     auto* result = b.Or(result_ty, result_lhs, result_rhs);
-                    result->SetResults(Vector{call->DetachResult()});
+                    result->SetResult(call->DetachResult());
                 });
                 call->Destroy();
             } break;
@@ -851,7 +851,7 @@ struct State {
         }
         b.InsertBefore(call, [&] {
             auto* mul = b.Multiply(arg->Type(), arg, value);
-            mul->SetResults(Vector{call->DetachResult()});
+            mul->SetResult(call->DetachResult());
         });
         call->Destroy();
     }
@@ -1107,7 +1107,7 @@ struct State {
     /// @param call the builtin call instruction
     void Unpack4xI8(ir::CoreBuiltinCall* call) {
         auto* result = Unpack4xI8OnValue(call, call->Args()[0]);
-        result->SetResults(Vector{call->DetachResult()});
+        result->SetResult(call->DetachResult());
         call->Destroy();
     }
 
@@ -1137,7 +1137,7 @@ struct State {
     /// @param call the builtin call instruction
     void Unpack4xU8(ir::CoreBuiltinCall* call) {
         auto* result = Unpack4xU8OnValue(call, call->Args()[0]);
-        result->SetResults(Vector{call->DetachResult()});
+        result->SetResult(call->DetachResult());
         call->Destroy();
     }
 };

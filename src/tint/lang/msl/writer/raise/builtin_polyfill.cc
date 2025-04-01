@@ -482,7 +482,7 @@ struct State {
         b.InsertBefore(builtin, [&] {
             auto* convert = b.Convert<vec2<f16>>(builtin->Args()[0]);
             auto* bitcast = b.Bitcast(ty.u32(), convert);
-            bitcast->SetResults(Vector{builtin->DetachResult()});
+            bitcast->SetResult(builtin->DetachResult());
         });
         builtin->Destroy();
     }

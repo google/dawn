@@ -147,7 +147,7 @@ struct State {
             TINT_ASSERT(results.Length() < 2);
             if (!results.IsEmpty() && !results[0]->Type()->Is<core::type::Void>()) {
                 // The original instruction had a result, so return it from the if instruction.
-                ifelse->SetResults(Vector{b.InstructionResult(results[0]->Type())});
+                ifelse->SetResult(b.InstructionResult(results[0]->Type()));
                 results[0]->ReplaceAllUsesWith(ifelse->Result());
                 ifelse->True()->Append(b.ExitIf(ifelse, result));
             } else {

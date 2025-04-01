@@ -1047,7 +1047,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideCondConstExprSuccess) {
         auto* one_f32 = b.Override("one_f32", 1_f);
         one_f32->SetOverrideId({2});
         auto* constexpr_if = b.ConstExprIf(cond);
-        constexpr_if->SetResults(b.InstructionResult(ty.bool_()));
+        constexpr_if->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(constexpr_if->True(), [&] {
             auto* three = b.Divide(ty.f32(), one_f32, 0.0_f);
             auto* four = b.Equal(ty.bool_(), three, 0.0_f);
@@ -1111,7 +1111,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideCondConstExprFailure) {
         auto* one_f32 = b.Override("one_f32", 1_f);
         one_f32->SetOverrideId({2});
         auto* constexpr_if = b.ConstExprIf(cond);
-        constexpr_if->SetResults(b.InstructionResult(ty.bool_()));
+        constexpr_if->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(constexpr_if->True(), [&] {
             auto* three = b.Divide(ty.f32(), one_f32, 0.0_f);
             auto* four = b.Equal(ty.bool_(), three, 0.0_f);
@@ -1169,7 +1169,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideCondComplexConstExprSuccess) {
         one_f32->SetOverrideId({2});
 
         auto* constexpr_if = b.ConstExprIf(cond);
-        constexpr_if->SetResults(b.InstructionResult(ty.bool_()));
+        constexpr_if->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(constexpr_if->True(), [&] {
             auto* three = b.Divide(ty.f32(), one_f32, 1.0_f);
             auto* four = b.Equal(ty.bool_(), three, 1.0_f);
@@ -1233,12 +1233,12 @@ TEST_F(IR_SubstituteOverridesTest, OverrideCondComplexConstExprNestedSuccess) {
         zero_f32->SetOverrideId({2});
 
         auto* constexpr_if = b.ConstExprIf(cond);
-        constexpr_if->SetResults(b.InstructionResult(ty.bool_()));
+        constexpr_if->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(constexpr_if->True(), [&] {
             // Both sides (t/f) of this ConstExprIf branch will cause division by zero if evaluated.
             // However it does not get evaluated if the outer branch constant evaluates to false.
             auto* constexpr_if_inner = b.ConstExprIf(cond);
-            constexpr_if_inner->SetResults(b.InstructionResult(ty.bool_()));
+            constexpr_if_inner->SetResult(b.InstructionResult(ty.bool_()));
             b.Append(constexpr_if_inner->True(), [&] {
                 auto* bad_eval = b.Divide(ty.f32(), 1.0_f, zero_f32);
                 auto* bad_eval_equal = b.Equal(ty.bool_(), bad_eval, 1.0_f);
@@ -1324,7 +1324,7 @@ TEST_F(IR_SubstituteOverridesTest, ConstExprIfInsideKernel) {
     auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
         auto* constexpr_if = b.ConstExprIf(o);
-        constexpr_if->SetResults(b.InstructionResult(ty.bool_()));
+        constexpr_if->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(constexpr_if->True(), [&] {
             auto* k4 = b.Add(ty.u32(), 10_u, 5_u);
             auto* k = b.Divide(ty.u32(), k4, x);
@@ -1391,7 +1391,7 @@ TEST_F(IR_SubstituteOverridesTest, ConstExpIfDuplicateUsage) {
     auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
         auto* constexpr_if = b.ConstExprIf(y);
-        constexpr_if->SetResults(b.InstructionResult(ty.bool_()));
+        constexpr_if->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(constexpr_if->True(), [&] {
             auto* k4 = b.Divide(ty.u32(), 10_u, 0_u);
             auto* k = b.Add(ty.u32(), k4, k4);

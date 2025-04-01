@@ -142,7 +142,7 @@ TEST_F(SpirvWriterTest, If_Phi_SingleValue) {
     auto* func = b.Function("foo", ty.i32());
     b.Append(func->Block(), [&] {
         auto* i = b.If(true);
-        i->SetResults(b.InstructionResult(ty.i32()));
+        i->SetResult(b.InstructionResult(ty.i32()));
         b.Append(i->True(), [&] {  //
             b.ExitIf(i, 10_i);
         });
@@ -171,7 +171,7 @@ TEST_F(SpirvWriterTest, If_Phi_SingleValue_TrueReturn) {
     auto* func = b.Function("foo", ty.i32());
     b.Append(func->Block(), [&] {
         auto* i = b.If(true);
-        i->SetResults(b.InstructionResult(ty.i32()));
+        i->SetResult(b.InstructionResult(ty.i32()));
         b.Append(i->True(), [&] {  //
             b.Return(func, 42_i);
         });
@@ -211,7 +211,7 @@ TEST_F(SpirvWriterTest, If_Phi_SingleValue_FalseReturn) {
     auto* func = b.Function("foo", ty.i32());
     b.Append(func->Block(), [&] {
         auto* i = b.If(true);
-        i->SetResults(b.InstructionResult(ty.i32()));
+        i->SetResult(b.InstructionResult(ty.i32()));
         b.Append(i->True(), [&] {  //
             b.ExitIf(i, 10_i);
         });
@@ -251,7 +251,7 @@ TEST_F(SpirvWriterTest, If_Phi_SingleValue_ImplicitFalse) {
     auto* func = b.Function("foo", ty.i32());
     b.Append(func->Block(), [&] {
         auto* i = b.If(true);
-        i->SetResults(b.InstructionResult(ty.i32()));
+        i->SetResult(b.InstructionResult(ty.i32()));
         b.Append(i->True(), [&] {  //
             b.ExitIf(i, 10_i);
         });
@@ -339,10 +339,10 @@ TEST_F(SpirvWriterTest, If_Phi_Nested) {
     auto* func = b.Function("foo", ty.i32());
     b.Append(func->Block(), [&] {
         auto* outer = b.If(true);
-        outer->SetResults(b.InstructionResult(ty.i32()));
+        outer->SetResult(b.InstructionResult(ty.i32()));
         b.Append(outer->True(), [&] {  //
             auto* inner = b.If(true);
-            inner->SetResults(b.InstructionResult(ty.i32()));
+            inner->SetResult(b.InstructionResult(ty.i32()));
             b.Append(inner->True(), [&] {  //
                 b.ExitIf(inner, 10_i);
             });

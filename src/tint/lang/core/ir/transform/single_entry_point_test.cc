@@ -1159,7 +1159,7 @@ TEST_F(IR_SingleEntryPointTest, OverrideCondConstExprFailure) {
         auto* one_f32 = b.Override("one_f32", 1_f);
         one_f32->SetOverrideId({2});
         auto* constexpr_if = b.ConstExprIf(cond);
-        constexpr_if->SetResults(b.InstructionResult(ty.bool_()));
+        constexpr_if->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(constexpr_if->True(), [&] {
             auto* three = b.Divide(ty.f32(), one_f32, 0.0_f);
             auto* four = b.Equal(ty.bool_(), three, 0.0_f);

@@ -360,7 +360,7 @@ struct State {
                     case core::BuiltinFn::kTextureDimensions: {
                         // Upgrade result to a vec2 and swizzle out the `x` component.
                         auto* res = call->DetachResult();
-                        call->SetResults(b.InstructionResult(ty.vec2<u32>()));
+                        call->SetResult(b.InstructionResult(ty.vec2<u32>()));
 
                         b.InsertAfter(call, [&] {
                             auto* s = b.Swizzle(res->Type(), call, Vector<uint32_t, 1>{0});

@@ -1583,7 +1583,7 @@ TEST_F(IRToProgramTest, ShortCircuit_And_2) {
 
     b.Append(fn->Block(), [&] {
         auto* if_ = b.If(pa);
-        if_->SetResults(b.InstructionResult(ty.bool_()));
+        if_->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(if_->True(), [&] { b.ExitIf(if_, pb); });
         b.Append(if_->False(), [&] { b.ExitIf(if_, false); });
 
@@ -1606,12 +1606,12 @@ TEST_F(IRToProgramTest, ShortCircuit_And_3_ab_c) {
 
     b.Append(fn->Block(), [&] {
         auto* if1 = b.If(pa);
-        if1->SetResults(b.InstructionResult(ty.bool_()));
+        if1->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(if1->True(), [&] { b.ExitIf(if1, pb); });
         b.Append(if1->False(), [&] { b.ExitIf(if1, false); });
 
         auto* if2 = b.If(if1);
-        if2->SetResults(b.InstructionResult(ty.bool_()));
+        if2->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(if2->True(), [&] { b.ExitIf(if2, pc); });
         b.Append(if2->False(), [&] { b.ExitIf(if2, false); });
 
@@ -1634,10 +1634,10 @@ TEST_F(IRToProgramTest, ShortCircuit_And_3_a_bc) {
 
     b.Append(fn->Block(), [&] {
         auto* if1 = b.If(pa);
-        if1->SetResults(b.InstructionResult(ty.bool_()));
+        if1->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(if1->True(), [&] {
             auto* if2 = b.If(pb);
-            if2->SetResults(b.InstructionResult(ty.bool_()));
+            if2->SetResult(b.InstructionResult(ty.bool_()));
             b.Append(if2->True(), [&] { b.ExitIf(if2, pc); });
             b.Append(if2->False(), [&] { b.ExitIf(if2, false); });
 
@@ -1662,7 +1662,7 @@ TEST_F(IRToProgramTest, ShortCircuit_Or_2) {
 
     b.Append(fn->Block(), [&] {
         auto* if_ = b.If(pa);
-        if_->SetResults(b.InstructionResult(ty.bool_()));
+        if_->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(if_->True(), [&] { b.ExitIf(if_, true); });
         b.Append(if_->False(), [&] { b.ExitIf(if_, pb); });
 
@@ -1685,12 +1685,12 @@ TEST_F(IRToProgramTest, ShortCircuit_Or_3_ab_c) {
 
     b.Append(fn->Block(), [&] {
         auto* if1 = b.If(pa);
-        if1->SetResults(b.InstructionResult(ty.bool_()));
+        if1->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(if1->True(), [&] { b.ExitIf(if1, true); });
         b.Append(if1->False(), [&] { b.ExitIf(if1, pb); });
 
         auto* if2 = b.If(if1);
-        if2->SetResults(b.InstructionResult(ty.bool_()));
+        if2->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(if2->True(), [&] { b.ExitIf(if2, true); });
         b.Append(if2->False(), [&] { b.ExitIf(if2, pc); });
 
@@ -1713,11 +1713,11 @@ TEST_F(IRToProgramTest, ShortCircuit_Or_3_a_bc) {
 
     b.Append(fn->Block(), [&] {
         auto* if1 = b.If(pa);
-        if1->SetResults(b.InstructionResult(ty.bool_()));
+        if1->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(if1->True(), [&] { b.ExitIf(if1, true); });
         b.Append(if1->False(), [&] {
             auto* if2 = b.If(pb);
-            if2->SetResults(b.InstructionResult(ty.bool_()));
+            if2->SetResult(b.InstructionResult(ty.bool_()));
             b.Append(if2->True(), [&] { b.ExitIf(if2, true); });
             b.Append(if2->False(), [&] { b.ExitIf(if2, pc); });
 
@@ -1748,15 +1748,15 @@ TEST_F(IRToProgramTest, ShortCircuit_Mixed) {
 
     b.Append(fn->Block(), [&] {
         auto* if1 = b.If(pa);
-        if1->SetResults(b.InstructionResult(ty.bool_()));
+        if1->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(if1->True(), [&] { b.ExitIf(if1, true); });
         b.Append(if1->False(), [&] { b.ExitIf(if1, b.Call(ty.bool_(), fn_b)); });
 
         auto* if2 = b.If(if1);
-        if2->SetResults(b.InstructionResult(ty.bool_()));
+        if2->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(if2->True(), [&] {
             auto* if3 = b.If(pc);
-            if3->SetResults(b.InstructionResult(ty.bool_()));
+            if3->SetResult(b.InstructionResult(ty.bool_()));
             b.Append(if3->True(), [&] { b.ExitIf(if3, true); });
             b.Append(if3->False(), [&] { b.ExitIf(if3, b.Call(ty.bool_(), fn_d)); });
 

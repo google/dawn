@@ -874,7 +874,7 @@ TEST_F(IR_ValidatorTest, Bitcast_NullResult) {
     auto* f = b.Function("f", ty.void_());
     b.Append(f->Block(), [&] {
         auto* c = b.Bitcast(ty.i32(), 1_u);
-        c->SetResults(Vector<InstructionResult*, 1>{nullptr});
+        c->SetResult(nullptr);
         b.Return(f);
     });
 

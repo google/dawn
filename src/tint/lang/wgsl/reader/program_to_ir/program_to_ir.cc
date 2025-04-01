@@ -1126,7 +1126,7 @@ class Impl {
                 impl.current_block_->Append(if_inst);
 
                 auto* result = b.InstructionResult(b.ir.Types().bool_());
-                if_inst->SetResults(result);
+                if_inst->SetResult(result);
 
                 if (expr->op == core::BinaryOp::kLogicalAnd) {
                     if_inst->False()->Append(b.ExitIf(if_inst, b.Constant(false)));
