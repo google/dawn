@@ -29,11 +29,13 @@
 
 #include <algorithm>
 #include <atomic>
+#include <cstdio>
 #include <fstream>
 #include <iomanip>
 #include <regex>
 #include <set>
 #include <sstream>
+#include <string_view>
 #include <tuple>
 #include <unordered_map>
 #include <unordered_set>

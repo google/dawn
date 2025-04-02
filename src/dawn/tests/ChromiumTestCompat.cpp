@@ -1,4 +1,4 @@
-// Copyright 2019 The Dawn & Tint Authors
+// Copyright 2025 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -26,11 +26,38 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "dawn/tests/ChromiumTestCompat.h"
-#include "dawn/tests/perf_tests/DawnPerfTest.h"
 
-int main(int argc, char** argv) {
-    dawn::SubstituteChromiumArgs(argc, argv);
-    InitDawnPerfTestEnvironment(argc, argv);
-    testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+#include <cstdio>
+#include <string>
+#include <string_view>
+
+#include "dawn/common/Assert.h"
+#include "dawn/common/Log.h"
+
+namespace dawn {
+void SubstituteChromiumArgs(int argc, char** argv) {
+    std::string testSummaryOutputArg("--test-launcher-summary-output=");
+
+    for (int i = 0; i < argc; i++) {
+        std::string_view argument(argv[i]);
+
+        // Look to replace "--test-launcher-summary-output=" with "--gtest_output=json:". The former
+        // is a Chromium-specific flag for where to output results in a Chromium-specific format,
+        // while the latter is gtest flag to output results in a gtest-specific format.
+        if (argument.length() > testSummaryOutputArg.length()) {
+            auto prefix = argument.substr(0, testSummaryOutputArg.length());
+            if (prefix != testSummaryOutputArg) {
+                continue;
+            }
+            auto argValue = argument.substr(testSummaryOutputArg.length());
+            std::string replacementArg("--gtest_output=json:");
+            replacementArg += argValue;
+            dawn::InfoLog() << "Replacing " << argument << " with " << replacementArg;
+            size_t bufferSize = replacementArg.length() + 1;
+            argv[i] = new char[bufferSize];
+            int charsWritten = std::snprintf(argv[i], bufferSize, "%s", replacementArg.c_str());
+            DAWN_ASSERT(size_t(charsWritten) == replacementArg.length());
+        }
+    }
 }
+}  // namespace dawn

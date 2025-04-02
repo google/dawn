@@ -282,6 +282,7 @@ source_set("native_mocks_sources") {
 
 dawn_test("dawn_unittests") {
   deps = [
+    ":dawn_test_support",
     ":gmock_and_gtest",
     ":mock_webgpu_gen",
     ":native_mocks_sources",
@@ -872,6 +873,7 @@ source_set("white_box_tests_sources") {
 
 dawn_test("dawn_end2end_tests") {
   deps = [
+    ":dawn_test_support",
     ":end2end_tests_sources",
     ":test_infra_sources",
     ":white_box_tests_sources",
@@ -899,6 +901,7 @@ dawn_test("dawn_end2end_tests") {
 
 dawn_test("dawn_perf_tests") {
   deps = [
+    ":dawn_test_support",
     ":test_infra_sources",
     "${dawn_root}/include/dawn:cpp_headers",
     "${dawn_root}/src/dawn:proc",
@@ -937,4 +940,17 @@ dawn_test("dawn_perf_tests") {
   if (dawn_enable_metal) {
     frameworks = [ "IOSurface.framework" ]
   }
+}
+
+###############################################################################
+# Shared Dawn test code
+###############################################################################
+
+source_set("dawn_test_support") {
+  deps = [ "${dawn_root}/src/dawn/common" ]
+
+  sources = [
+    "ChromiumTestCompat.cpp",
+    "ChromiumTestCompat.h",
+  ]
 }

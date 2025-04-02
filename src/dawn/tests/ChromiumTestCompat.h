@@ -1,4 +1,4 @@
-// Copyright 2019 The Dawn & Tint Authors
+// Copyright 2025 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,12 +25,15 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/tests/ChromiumTestCompat.h"
-#include "dawn/tests/perf_tests/DawnPerfTest.h"
+#ifndef SRC_DAWN_TESTS_CHROMIUM_TEST_COMPAT_H_
+#define SRC_DAWN_TESTS_CHROMIUM_TEST_COMPAT_H_
 
-int main(int argc, char** argv) {
-    dawn::SubstituteChromiumArgs(argc, argv);
-    InitDawnPerfTestEnvironment(argc, argv);
-    testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-}
+namespace dawn {
+
+// Substitutes any Chromium-specific arguments for rough equivalents that are
+// compatible with standalone Dawn checkouts.
+void SubstituteChromiumArgs(int argc, char** argv);
+
+}  // namespace dawn
+
+#endif  // SRC_DAWN_TESTS_CHROMIUM_TEST_COMPAT_H_
