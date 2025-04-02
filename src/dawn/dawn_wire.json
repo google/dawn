@@ -221,7 +221,8 @@
         "client_side_structures": [
             "FutureWaitInfo",
             "SurfaceDescriptorFromWindowsCoreWindow",
-            "SurfaceDescriptorFromWindowsSwapChainPanel",
+            "SurfaceDescriptorFromWindowsUWPSwapChainPanel",
+            "SurfaceDescriptorFromWindowsWinUISwapChainPanel",
             "SurfaceSourceMetalLayer",
             "SurfaceSourceWindowsHWND",
             "SurfaceSourceXlibWindow",

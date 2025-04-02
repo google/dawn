@@ -76,8 +76,11 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
         case Surface::Type::WindowsCoreWindow:
             s->Append("WindowsCoreWindow");
             break;
-        case Surface::Type::WindowsSwapChainPanel:
-            s->Append("WindowsSwapChainPanel");
+        case Surface::Type::WindowsUWPSwapChainPanel:
+            s->Append("WindowsUWPSwapChainPanel");
+            break;
+        case Surface::Type::WindowsWinUISwapChainPanel:
+            s->Append("WindowsWinUISwapChainPanel");
             break;
         case Surface::Type::XlibWindow:
             s->Append("XlibWindow");
@@ -104,7 +107,8 @@ ResultOrError<UnpackedPtr<SurfaceDescriptor>> ValidateSurfaceDescriptor(
         type, (descriptor.ValidateBranches<
                   Branch<SurfaceSourceAndroidNativeWindow>, Branch<SurfaceSourceMetalLayer>,
                   Branch<SurfaceSourceWindowsHWND>, Branch<SurfaceDescriptorFromWindowsCoreWindow>,
-                  Branch<SurfaceDescriptorFromWindowsSwapChainPanel>,
+                  Branch<SurfaceDescriptorFromWindowsUWPSwapChainPanel>,
+                  Branch<SurfaceDescriptorFromWindowsWinUISwapChainPanel>,
                   Branch<SurfaceSourceXlibWindow>, Branch<SurfaceSourceWaylandSurface>>()));
     switch (type) {
 #if DAWN_PLATFORM_IS(ANDROID)
@@ -145,8 +149,8 @@ ResultOrError<UnpackedPtr<SurfaceDescriptor>> ValidateSurfaceDescriptor(
                             "Invalid CoreWindow");
             return descriptor;
         }
-        case wgpu::SType::SurfaceDescriptorFromWindowsSwapChainPanel: {
-            auto* subDesc = descriptor.Get<SurfaceDescriptorFromWindowsSwapChainPanel>();
+        case wgpu::SType::SurfaceDescriptorFromWindowsUWPSwapChainPanel: {
+            auto* subDesc = descriptor.Get<SurfaceDescriptorFromWindowsUWPSwapChainPanel>();
             DAWN_ASSERT(subDesc != nullptr);
             // Validate the swapChainPanel by querying for ISwapChainPanel interface
             ComPtr<ABI::Windows::UI::Xaml::Controls::ISwapChainPanel> swapChainPanel;
@@ -154,6 +158,15 @@ ResultOrError<UnpackedPtr<SurfaceDescriptor>> ValidateSurfaceDescriptor(
                                 FAILED(static_cast<IUnknown*>(subDesc->swapChainPanel)
                                            ->QueryInterface(IID_PPV_ARGS(&swapChainPanel))),
                             "Invalid SwapChainPanel");
+            return descriptor;
+        }
+        case wgpu::SType::SurfaceDescriptorFromWindowsWinUISwapChainPanel: {
+            auto* subDesc = descriptor.Get<SurfaceDescriptorFromWindowsWinUISwapChainPanel>();
+            DAWN_ASSERT(subDesc != nullptr);
+            // Unfortunately, checking whether this is a valid
+            // Microsoft.UI.Xaml.Controls.SwapChainPanel would require the WindowsAppSDK as a
+            // dependency, which is not trivial. So we'll only check for nullptr here.
+            DAWN_INVALID_IF(subDesc->swapChainPanel == nullptr, "SwapChainPanel is nullptr.");
             return descriptor;
         }
 #endif  // defined(DAWN_USE_WINDOWS_UI)
@@ -283,8 +296,9 @@ Surface::Surface(InstanceBase* instance, const UnpackedPtr<SurfaceDescriptor>& d
             .ValidateBranches<
                 Branch<SurfaceSourceAndroidNativeWindow>, Branch<SurfaceSourceMetalLayer>,
                 Branch<SurfaceSourceWindowsHWND>, Branch<SurfaceDescriptorFromWindowsCoreWindow>,
-                Branch<SurfaceDescriptorFromWindowsSwapChainPanel>, Branch<SurfaceSourceXlibWindow>,
-                Branch<SurfaceSourceWaylandSurface>>()
+                Branch<SurfaceDescriptorFromWindowsUWPSwapChainPanel>,
+                Branch<SurfaceDescriptorFromWindowsWinUISwapChainPanel>,
+                Branch<SurfaceSourceXlibWindow>, Branch<SurfaceSourceWaylandSurface>>()
             .AcquireSuccess();
     switch (type) {
         case wgpu::SType::SurfaceSourceAndroidNativeWindow: {
@@ -313,10 +327,16 @@ Surface::Surface(InstanceBase* instance, const UnpackedPtr<SurfaceDescriptor>& d
             mCoreWindow = static_cast<IUnknown*>(subDesc->coreWindow);
             break;
         }
-        case wgpu::SType::SurfaceDescriptorFromWindowsSwapChainPanel: {
-            auto* subDesc = descriptor.Get<SurfaceDescriptorFromWindowsSwapChainPanel>();
-            mType = Type::WindowsSwapChainPanel;
-            mSwapChainPanel = static_cast<IUnknown*>(subDesc->swapChainPanel);
+        case wgpu::SType::SurfaceDescriptorFromWindowsUWPSwapChainPanel: {
+            auto* subDesc = descriptor.Get<SurfaceDescriptorFromWindowsUWPSwapChainPanel>();
+            mType = Type::WindowsUWPSwapChainPanel;
+            mUWPSwapChainPanel = static_cast<IUnknown*>(subDesc->swapChainPanel);
+            break;
+        }
+        case wgpu::SType::SurfaceDescriptorFromWindowsWinUISwapChainPanel: {
+            auto* subDesc = descriptor.Get<SurfaceDescriptorFromWindowsWinUISwapChainPanel>();
+            mType = Type::WindowsWinUISwapChainPanel;
+            mWinUISwapChainPanel = static_cast<IUnknown*>(subDesc->swapChainPanel);
             break;
         }
 #endif  // defined(DAWN_USE_WINDOWS_UI)
@@ -406,11 +426,21 @@ IUnknown* Surface::GetCoreWindow() const {
 #endif
 }
 
-IUnknown* Surface::GetSwapChainPanel() const {
+IUnknown* Surface::GetUWPSwapChainPanel() const {
     DAWN_ASSERT(!IsError());
-    DAWN_ASSERT(mType == Type::WindowsSwapChainPanel);
+    DAWN_ASSERT(mType == Type::WindowsUWPSwapChainPanel);
 #if defined(DAWN_USE_WINDOWS_UI)
-    return mSwapChainPanel.Get();
+    return mUWPSwapChainPanel.Get();
+#else
+    return nullptr;
+#endif
+}
+
+IUnknown* Surface::GetWinUISwapChainPanel() const {
+    DAWN_ASSERT(!IsError());
+    DAWN_ASSERT(mType == Type::WindowsWinUISwapChainPanel);
+#if defined(DAWN_USE_WINDOWS_UI)
+    return mWinUISwapChainPanel.Get();
 #else
     return nullptr;
 #endif

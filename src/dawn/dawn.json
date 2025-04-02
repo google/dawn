@@ -3696,7 +3696,16 @@
             {"name": "core window", "type": "void", "annotation": "*"}
         ]
     },
-    "surface descriptor from windows swap chain panel": {
+    "surface descriptor from windows UWP swap chain panel": {
+        "category": "structure",
+        "chained": "in",
+        "chain roots": ["surface descriptor"],
+        "tags": ["dawn"],
+        "members": [
+            {"name": "swap chain panel", "type": "void", "annotation": "*"}
+        ]
+    },
+    "surface descriptor from windows WinUI swap chain panel": {
         "category": "structure",
         "chained": "in",
         "chain roots": ["surface descriptor"],
@@ -3763,7 +3772,7 @@
             {"value": 0, "name": "surface descriptor from windows core window", "tags": ["dawn"]},
             {"value": 1, "name": "external texture binding entry", "tags": ["dawn"]},
             {"value": 2, "name": "external texture binding layout", "tags": ["dawn"]},
-            {"value": 3, "name": "surface descriptor from windows swap chain panel", "tags": ["dawn"]},
+            {"value": 3, "name": "surface descriptor from windows UWP swap chain panel", "tags": ["dawn"]},
             {"value": 4, "name": "dawn texture internal usage descriptor", "tags": ["dawn"]},
             {"value": 5, "name": "dawn encoder internal usage descriptor", "tags": ["dawn"]},
             {"value": 6, "name": "dawn instance descriptor", "tags": ["dawn", "native"]},
@@ -3825,7 +3834,8 @@
             {"value": 61, "name": "shared fence EGL sync export info", "tags": ["dawn", "native"]},
             {"value": 62, "name": "dawn injected invalid s type", "tags": ["dawn"]},
             {"value": 63, "name": "dawn compilation message utf16", "tags": ["dawn", "emscripten"]},
-            {"value": 64, "name": "dawn fake buffer OOM for testing", "tags": ["dawn"]}
+            {"value": 64, "name": "dawn fake buffer OOM for testing", "tags": ["dawn"]},
+            {"value": 65, "name": "surface descriptor from windows WinUI swap chain panel", "tags": ["dawn"]}
         ]
     },
     "texture": {
