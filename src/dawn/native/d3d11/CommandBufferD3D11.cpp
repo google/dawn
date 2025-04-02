@@ -83,8 +83,14 @@ class VertexBufferTracker {
     }
 
     void OnSetVertexBuffer(VertexBufferSlot slot, ID3D11Buffer* buffer, uint64_t offset) {
+        if (mD3D11Buffers[slot] == buffer && mOffsets[slot] == offset) {
+            return;
+        }
+
         mD3D11Buffers[slot] = buffer;
         mOffsets[slot] = offset;
+
+        mDirtyVertexBuffers.set(slot);
     }
 
     void Apply(const RenderPipeline* renderPipeline) {
@@ -94,12 +100,24 @@ class VertexBufferTracker {
         if (mLastAppliedRenderPipeline != renderPipeline) {
             mLastAppliedRenderPipeline = renderPipeline;
             for (VertexBufferSlot slot : IterateBitSet(renderPipeline->GetVertexBuffersUsed())) {
+                if (mStrides[slot] == renderPipeline->GetVertexBuffer(slot).arrayStride) {
+                    continue;
+                }
+
                 mStrides[slot] = renderPipeline->GetVertexBuffer(slot).arrayStride;
+                mDirtyVertexBuffers.set(slot);
             }
         }
 
-        mCommandContext->GetD3D11DeviceContext3()->IASetVertexBuffers(
-            0, kMaxVertexBuffers, mD3D11Buffers.data(), mStrides.data(), mOffsets.data());
+        const auto vertexBuffersToApply =
+            mDirtyVertexBuffers & renderPipeline->GetVertexBuffersUsed();
+
+        for (VertexBufferSlot slot : IterateBitSet(vertexBuffersToApply)) {
+            mCommandContext->GetD3D11DeviceContext3()->IASetVertexBuffers(
+                uint8_t(slot), 1, &mD3D11Buffers[slot], &mStrides[slot], &mOffsets[slot]);
+
+            mDirtyVertexBuffers.reset(slot);
+        }
     }
 
   private:
@@ -108,6 +126,7 @@ class VertexBufferTracker {
     PerVertexBuffer<ID3D11Buffer*> mD3D11Buffers = {};
     PerVertexBuffer<UINT> mStrides = {};
     PerVertexBuffer<UINT> mOffsets = {};
+    VertexBufferMask mDirtyVertexBuffers;
 };
 
 // Handle pixel local storage attachments and return a vector of all pixel local storage UAVs.
