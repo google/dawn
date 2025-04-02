@@ -133,12 +133,6 @@ interop::Interface<interop::GPUAdapterInfo> GPUAdapter::getInfo(Napi::Env env) {
     return interop::GPUAdapterInfo::Create<GPUAdapterInfo>(env, info);
 }
 
-bool GPUAdapter::getIsFallbackAdapter(Napi::Env) {
-    wgpu::AdapterInfo adapterInfo = {};
-    adapter_.GetInfo(&adapterInfo);
-    return adapterInfo.adapterType == wgpu::AdapterType::CPU;
-}
-
 namespace {
 // Returns a string representation of the wgpu::ErrorType
 const char* str(wgpu::ErrorType ty) {

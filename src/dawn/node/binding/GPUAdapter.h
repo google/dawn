@@ -52,7 +52,6 @@ class GPUAdapter final : public interop::GPUAdapter {
     interop::Interface<interop::GPUSupportedFeatures> getFeatures(Napi::Env) override;
     interop::Interface<interop::GPUSupportedLimits> getLimits(Napi::Env) override;
     interop::Interface<interop::GPUAdapterInfo> getInfo(Napi::Env) override;
-    bool getIsFallbackAdapter(Napi::Env) override;
 
   private:
     wgpu::Adapter adapter_;
