@@ -37,6 +37,17 @@
 #include "src/tint/utils/rtti/castable.h"
 #include "src/tint/utils/rtti/traits.h"
 
+// tint::Slice is a memory view into a contiguous range of memory, to allow safer access and avoid
+// unneeded copies, similar to std::string_view.
+// There are external implementations of this type of container, //base/container/span in Chromium
+// and std::span in C++20. Unfortunately Abseil does not implement its own version of this, and Tint
+// cannot currently use the other options.
+//
+// Because this class is fundamentally working with T* values to avoid copying, and using asserts
+// for bounds checking, -Wunsafe-buffer-usage will always trigger in here, since the compiler cannot
+// guarantee it is safe.
+//
+// TODO(408010433): Revisit once C++20 is available
 TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 
 namespace tint {
