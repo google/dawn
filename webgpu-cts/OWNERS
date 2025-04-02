@@ -1,5 +1,6 @@
 per-file expectations.txt=*
 per-file compat-expectations.txt=*
+per-file slow_tests.txt=*
 
 kainino@chromium.org
 bsheedy@chromium.org

@@ -75,42 +75,28 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-################################################################################
 # Error scope tests are slow across multiple platforms
-################################################################################
-crbug.com/1406064 [ intel-gen-9 win10 ] webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=100000 [ Slow ]
-crbug.com/1406064 [ intel-gen-9 win10 ] webgpu:api,validation,error_scope:current_scope:errorFilter="validation";stackDepth=100000 [ Slow ]
-crbug.com/dawn/1960 [ android ] webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=100000 [ Slow ]
-crbug.com/dawn/1960 [ android ] webgpu:api,validation,error_scope:current_scope:errorFilter="validation";stackDepth=100000 [ Slow ]
+crbug.com/40887053 [ intel-gen-9 win10 ] webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=100000 [ Slow ]
+crbug.com/40887053 [ intel-gen-9 win10 ] webgpu:api,validation,error_scope:current_scope:errorFilter="validation";stackDepth=100000 [ Slow ]
+crbug.com/42240904 [ android ] webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=100000 [ Slow ]
+crbug.com/42240904 [ android ] webgpu:api,validation,error_scope:current_scope:errorFilter="validation";stackDepth=100000 [ Slow ]
 
-################################################################################
 # These tests are slow enough that they fail often on a lot of configurations,
 # especially code-coverage builders.
-################################################################################
-crbug.com/dawn/1783 webgpu:shader,execution,expression,binary,* [ Slow ]
+crbug.com/42240733 webgpu:shader,execution,expression,binary,* [ Slow ]
 
-################################################################################
 # Frequently times out on Android Arm (Pixel 6), but the backend validation variants, with longer timeouts don't.
-################################################################################
-crbug.com/dawn/0000 [ android-t arm dawn-no-backend-validation ] webgpu:api,validation,capability_checks,limits,maxComputeWorkgroupStorageSize:* [ Slow ]
+[ android-t arm dawn-no-backend-validation ] webgpu:api,validation,capability_checks,limits,maxComputeWorkgroupStorageSize:* [ Slow ]
 
-################################################################################
 # May take a while to run on Android Arm (Pixel 6), even with recent shader caching improvements.
-################################################################################
-crbug.com/dawn/1933 [ android arm ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="workgroup";* [ Slow ]
+crbug.com/40643133 [ android arm ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="workgroup";* [ Slow ]
 
-################################################################################
 # Some atan2 tests are slow but passing on Pixel 4
-################################################################################
-crbug.com/dawn/0000 [ android-r ] webgpu:shader,validation,expression,call,builtin,atan2:values:* [ Slow ]
+[ android-r ] webgpu:shader,validation,expression,call,builtin,atan2:values:* [ Slow ]
 
-################################################################################
 # Frequently times out on Dawn Win10 x64 ASAN Release (Intel)
-################################################################################
-crbug.com/dawn/2432 [ win intel angle-d3d11 asan ] webgpu:shader,validation,expression,call,builtin,length:vec4:stage="override";type="vec4%3Cf16%3E" [ Slow ]
-crbug.com/dawn/2432 [ win intel angle-d3d11 asan ] webgpu:shader,validation,expression,call,builtin,length:vec4:stage="override";type="vec4%3Cf32%3E" [ Slow ]
+crbug.com/42241379 [ win intel angle-d3d11 asan ] webgpu:shader,validation,expression,call,builtin,length:vec4:stage="override";type="vec4%3Cf16%3E" [ Slow ]
+crbug.com/42241379 [ win intel angle-d3d11 asan ] webgpu:shader,validation,expression,call,builtin,length:vec4:stage="override";type="vec4%3Cf32%3E" [ Slow ]
 
-################################################################################
 # FXC times out on the large shader produced by this test
-################################################################################
 crbug.com/402178306 [ webgpu-dxc-disabled win ] webgpu:shader,execution,limits:struct_members: [ Slow ]
