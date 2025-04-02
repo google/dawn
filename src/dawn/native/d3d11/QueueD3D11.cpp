@@ -314,12 +314,16 @@ MaybeError MonitoredQueue::NextSerial() {
 
     DAWN_TRY(commandContext.FlushBuffersForSyncingWithCPU());
 
+    const uint64_t submitSerial = uint64_t(GetPendingCommandSerial());
+
+    {
+        TRACE_EVENT1(GetDevice()->GetPlatform(), General, "D3D11Device::SignalFence", "serial",
+                     submitSerial);
+        DAWN_TRY(CheckHRESULT(commandContext.Signal(mFence.Get(), submitSerial),
+                              "D3D11 command queue signal fence"));
+    }
+
     IncrementLastSubmittedCommandSerial();
-    TRACE_EVENT1(GetDevice()->GetPlatform(), General, "D3D11Device::SignalFence", "serial",
-                 uint64_t(GetLastSubmittedCommandSerial()));
-    DAWN_TRY(
-        CheckHRESULT(commandContext.Signal(mFence.Get(), uint64_t(GetLastSubmittedCommandSerial())),
-                     "D3D11 command queue signal fence"));
 
     return {};
 }
@@ -361,21 +365,22 @@ MaybeError SystemEventQueue::NextSerial() {
 
     DAWN_TRY(commandContext.FlushBuffersForSyncingWithCPU());
 
-    IncrementLastSubmittedCommandSerial();
-    ExecutionSerial lastSubmittedSerial = GetLastSubmittedCommandSerial();
+    const ExecutionSerial submitSerial = GetPendingCommandSerial();
     if (commandContext->AcquireNeedsFence()) {
         DAWN_ASSERT(mFence);
 
         TRACE_EVENT1(GetDevice()->GetPlatform(), General, "D3D11Device::SignalFence", "serial",
-                     uint64_t(lastSubmittedSerial));
-        DAWN_TRY(CheckHRESULT(commandContext.Signal(mFence.Get(), uint64_t(lastSubmittedSerial)),
+                     uint64_t(submitSerial));
+        DAWN_TRY(CheckHRESULT(commandContext.Signal(mFence.Get(), uint64_t(submitSerial)),
                               "D3D11 command queue signal fence"));
     }
 
     SystemEventReceiver receiver;
     DAWN_TRY_ASSIGN(receiver, GetSystemEventReceiver());
     commandContext.Flush1(D3D11_CONTEXT_TYPE_ALL, receiver.GetPrimitive().Get());
-    mPendingEvents->push_back({lastSubmittedSerial, std::move(receiver)});
+    mPendingEvents->push_back({submitSerial, std::move(receiver)});
+
+    IncrementLastSubmittedCommandSerial();
 
     return {};
 }
