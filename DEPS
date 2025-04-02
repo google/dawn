@@ -48,7 +48,7 @@ vars = {
   # reclient CIPD package version
   'reclient_version': 're_client_version:0.176.0.8c46330a-gomaip',
   # siso CIPD package version.
-  'siso_version': 'git_revision:ef01a689b77e0a3c98e841310bf3cdea737707ab',
+  'siso_version': 'git_revision:9e4e007a51fdfd51e809d2817a3d6bbd3ec3b648',
 
   # 'magic' text to tell depot_tools that git submodules should be accepted
   # but parity with DEPS file is expected.
