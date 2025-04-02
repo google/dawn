@@ -82,8 +82,6 @@ if(TINT_BUILD_WGSL_READER)
 # Condition: TINT_BUILD_WGSL_READER
 ################################################################################
 tint_add_target(tint_lang_wgsl_inspector_test test
-  lang/wgsl/inspector/inspector_builder_test.cc
-  lang/wgsl/inspector/inspector_builder_test.h
   lang/wgsl/inspector/inspector_test.cc
 )
 
@@ -99,7 +97,6 @@ tint_target_add_dependencies(tint_lang_wgsl_inspector_test test
   tint_lang_wgsl_features
   tint_lang_wgsl_inspector
   tint_lang_wgsl_program
-  tint_lang_wgsl_resolver
   tint_lang_wgsl_sem
   tint_utils
   tint_utils_containers
