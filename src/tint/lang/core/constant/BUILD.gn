@@ -93,7 +93,6 @@ if (tint_build_unittests) {
       "eval_runtime_semantics_test.cc",
       "eval_test.h",
       "eval_unary_op_test.cc",
-      "helper_test.h",
       "invalid_test.cc",
       "manager_test.cc",
       "scalar_test.cc",
