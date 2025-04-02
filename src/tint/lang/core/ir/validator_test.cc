@@ -947,6 +947,23 @@ TEST_F(IR_ValidatorTest, Instruction_WrongInstructionResultInstruction) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Instruction_TooManyResultInstruction) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    auto sb = b.Append(f->Block());
+    auto* v = sb.Var(ty.ptr<function, f32>());
+    v->SetResults(Vector{v->Results()[0], v->Results()[0]});
+    sb.Return(f);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(
+                                          R"(:3:76 error: var: expected exactly 1 results, got 2
+    %2:ptr<function, f32, read_write>, %2:ptr<function, f32, read_write> = var undef
+                                                                           ^^^
+)")) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Instruction_DeadOperand) {
     auto* f = b.Function("my_func", ty.void_());
 

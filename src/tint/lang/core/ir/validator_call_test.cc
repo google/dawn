@@ -350,16 +350,16 @@ TEST_F(IR_ValidatorTest, CallToBuiltin_TooManyResults) {
         i->SetInitializer(b.Constant(0_f));
         auto* load = b.Load(i);
         auto* too_many_call = b.Call(ty.f32(), BuiltinFn::kAbs, load->Result());
-        too_many_call->SetResults(Vector{load->Result(), load->Result()});
+        too_many_call->SetResults(Vector{b.InstructionResult<f32>(), b.InstructionResult<f32>()});
         b.Return(f);
     });
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:5:14 error: abs: expected exactly 1 results, got 2
-    %3:f32 = abs %3
-             ^^^
+                testing::HasSubstr(R"(:5:22 error: abs: expected exactly 1 results, got 2
+    %4:f32, %5:f32 = abs %3
+                     ^^^
 )")) << res.Failure();
 }
 
