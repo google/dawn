@@ -1464,6 +1464,9 @@ crbug.com/367513506 [ linux nvidia ] webgpu:api,validation,error_scope:parent_sc
 crbug.com/367513506 [ linux nvidia ] webgpu:api,validation,error_scope:current_scope:errorFilter="validation";stackDepth=1000 [ Failure ]
 crbug.com/367513506 [ nvidia win ] webgpu:api,validation,error_scope:current_scope:errorFilter="validation";stackDepth=1000 [ Failure ]
 
+# capability_checks,limits,maxInterStageShaderVariables failure on Android Qualcomm
+crbug.com/407159803 [ android-r qualcomm ] webgpu:api,validation,capability_checks,limits,maxInterStageShaderVariables:* [ Failure ]
+
 crbug.com/407812157 [ intel webgpu-dxc-disabled win ] webgpu:shader,execution,expression,binary,af_matrix_addition:matrix:inputSource="const";cols=3;rows=4 [ Failure ]
 
 crbug.com/407801079 [ nvidia webgpu-dxc-disabled win ] webgpu:shader,execution,expression,binary,af_matrix_scalar_multiplication:matrix_scalar:inputSource="const";cols=4;rows=4 [ Failure ]
