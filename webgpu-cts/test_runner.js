@@ -141,15 +141,12 @@ const [sendHeartbeat, {
 function wrapPromiseWithHeartbeat(prototype, key) {
   const old = prototype[key];
   prototype[key] = function (...args) {
-    return new Promise((resolve, reject) => {
-      // Send the heartbeat both before and after resolve/reject
-      // so that the heartbeat is sent ahead of any potentially
-      // long-running synchronous code awaiting the Promise.
-      old.call(this, ...args)
-        .then(val => { sendHeartbeat(); resolve(val) })
-        .catch(err => { sendHeartbeat(); reject(err) })
-        .finally(sendHeartbeat);
-    });
+    const promise = old.call(this, ...args);
+    // Send a heartbeat just before any code that was waiting on the promise.
+    promise.finally(sendHeartbeat);
+    // Return the original promise so we don't interfere with the behavior
+    // of the API itself.
+    return promise;
   }
 }
 

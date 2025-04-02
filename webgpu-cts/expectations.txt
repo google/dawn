@@ -532,12 +532,6 @@ crbug.com/341991440 [ intel-0x4680 webgpu-dxc-enabled win ] webgpu:shader,execut
 # Failures from initially enabling tests on ChromeOS volteer (crbug.com/340815322)
 crbug.com/342602625 [ chromeos chromeos-board-volteer ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:onscreenCanvas,uploadToWebGL:format="rgba16float";* [ Failure ]
 
-
-# Failures due to splitting off worker tests (crbug.com/330501141)
-crbug.com/42241427 [ webgpu-no-worker ] webgpu:api,validation,buffer,mapping:mapAsync,state,mappingPending: [ Failure ]
-crbug.com/42241428 [ webgpu-no-worker ] webgpu:api,validation,buffer,mapping:getMappedRange,state,mappingPending: [ Failure ]
-crbug.com/42241428 [ webgpu-no-worker ] webgpu:api,validation,buffer,mapping:mapAsync,earlyRejection: [ Failure ]
-
 # Failures due to enabling codecs on bots (crbug.com/41490478)
 crbug.com/41490478 [ dawn-backend-validation intel-0x4680 ubuntu webgpu-adapter-default ] webgpu:web_platform,copyToTexture,video:copy_from_video:* [ Failure ]
 crbug.com/41490478 [ dawn-backend-validation intel-0x4680 ubuntu webgpu-adapter-default ] webgpu:web_platform,external_texture,video:importExternalTexture,sample:* [ Failure ]
