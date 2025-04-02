@@ -106,6 +106,13 @@
 # Cube arrays require GL_EXT_texture_cube_map_array
 [ compat-min-es31 ] webgpu:compat,api,validation,texture,createTexture:invalidTextureBindingViewDimension:dimension="2d";textureBindingViewDimension="cube-array" [ Skip ]
 
+# GLES doesn't give us a way to gracefully catch OOM errors, so we just lose the device.
+crbug.com/42241110 webgpu:api,operation,uncapturederror:iff_uncaptured:errorType="out-of-memory" [ Skip ]
+crbug.com/42241110 webgpu:api,validation,error_scope:balanced_nesting:errorFilter="out-of-memory";* [ Skip ]
+crbug.com/42241110 webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";* [ Skip ]
+crbug.com/42241110 webgpu:api,validation,error_scope:parent_scope:errorFilter="out-of-memory";* [ Skip ]
+crbug.com/42241110 webgpu:api,validation,error_scope:simple:errorType="out-of-memory";* [ Skip ]
+
 ################################################################################
 # Temporary Skip Expectations
 #
@@ -114,31 +121,6 @@
 ################################################################################
 
 ### TEMPORARY ANDROID SKIPS
-# the out-of-memory tests seem to be causing cascading Telemetry failures
-# with --use-angle=gles; skip them for now
-crbug.com/42241110 webgpu:api,operation,uncapturederror:iff_uncaptured:errorType="out-of-memory" [ Skip ]
-
-crbug.com/42241110 [ android arm ] webgpu:api,validation,error_scope:balanced_nesting:errorFilter="out-of-memory";numErrors=1 [ Skip ]
-crbug.com/42241110 [ android arm ] webgpu:api,validation,error_scope:balanced_nesting:errorFilter="out-of-memory";numErrors=10 [ Skip ]
-crbug.com/42241110 [ android arm ] webgpu:api,validation,error_scope:balanced_nesting:errorFilter="out-of-memory";numErrors=100 [ Skip ]
-crbug.com/42241110 [ android arm ] webgpu:api,validation,error_scope:balanced_nesting:errorFilter="out-of-memory";numErrors=1000 [ Skip ]
-crbug.com/42241110 [ android arm ] webgpu:api,validation,error_scope:balanced_siblings:errorFilter="out-of-memory";numErrors=1 [ Skip ]
-crbug.com/42241110 [ android arm ] webgpu:api,validation,error_scope:balanced_siblings:errorFilter="out-of-memory";numErrors=10 [ Skip ]
-crbug.com/42241110 [ android arm ] webgpu:api,validation,error_scope:balanced_siblings:errorFilter="out-of-memory";numErrors=100 [ Skip ]
-crbug.com/42241110 [ android arm ] webgpu:api,validation,error_scope:balanced_siblings:errorFilter="out-of-memory";numErrors=1000 [ Skip ]
-crbug.com/42241110 [ android arm ] webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=1 [ Skip ]
-crbug.com/42241110 [ android arm ] webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=10 [ Skip ]
-crbug.com/42241110 [ android arm ] webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=100 [ Skip ]
-crbug.com/42241110 [ android arm ] webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=1000 [ Skip ]
-crbug.com/42241110 [ android arm ] webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=100000 [ Skip ]
-crbug.com/42241110 [ android arm ] webgpu:api,validation,error_scope:parent_scope:errorFilter="out-of-memory";stackDepth=1 [ Skip ]
-crbug.com/42241110 [ android arm ] webgpu:api,validation,error_scope:parent_scope:errorFilter="out-of-memory";stackDepth=10 [ Skip ]
-crbug.com/42241110 [ android arm ] webgpu:api,validation,error_scope:parent_scope:errorFilter="out-of-memory";stackDepth=100 [ Skip ]
-crbug.com/42241110 [ android arm ] webgpu:api,validation,error_scope:parent_scope:errorFilter="out-of-memory";stackDepth=1000 [ Skip ]
-crbug.com/42241110 [ android arm ] webgpu:api,validation,error_scope:simple:errorType="out-of-memory";errorFilter="internal" [ Skip ]
-crbug.com/42241110 [ android arm ] webgpu:api,validation,error_scope:simple:errorType="out-of-memory";errorFilter="out-of-memory" [ Skip ]
-crbug.com/42241110 [ android arm ] webgpu:api,validation,error_scope:simple:errorType="out-of-memory";errorFilter="validation" [ Skip ]
-crbug.com/42241110 [ android arm ] webgpu:api,validation,error_scope:simple:errorType="validation";errorFilter="out-of-memory" [ Skip ]
 
 # Compressed texture image_copy failures on Pixel 6
 crbug.com/364917742 [ android arm ] webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes:* [ Skip ]
@@ -434,21 +416,9 @@ crbug.com/341282605 [ intel-0x9bc5 ] webgpu:shader,execution,limits:switch_case_
 
 crbug.com/341327472 [ intel-0x4680 linux ] webgpu:api,validation,state,device_lost,destroy:* [ Failure ]
 
-# error_scope validation tests with errorType="out-of-memory" are failing on all platforms
-# On NVidia, crashes in PartitionAlloc due to the NV GL driver malloc()ing 2GB+ blocks
-crbug.com/42241110 [ linux nvidia-0x2184 nvidia_ge_31.0.15.4601 ] webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=1 [ Failure ]
-crbug.com/42241110 [ linux nvidia-0x2184 nvidia_ge_31.0.15.4601 ] webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=10 [ Failure ]
-crbug.com/42241110 [ linux nvidia-0x2184 nvidia_ge_31.0.15.4601 ] webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=100 [ Failure ]
-crbug.com/42241110 [ linux nvidia-0x2184 nvidia_ge_31.0.15.4601 ] webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=1000 [ Failure ]
-crbug.com/42241110 [ linux nvidia-0x2184 nvidia_ge_31.0.15.4601 ] webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=100000 [ Failure ]
-crbug.com/42241110 [ linux nvidia-0x2184 nvidia_ge_31.0.15.4601 ] webgpu:api,validation,error_scope:parent_scope:errorFilter="out-of-memory";stackDepth=1 [ Failure ]
-crbug.com/42241110 [ linux nvidia-0x2184 nvidia_ge_31.0.15.4601 ] webgpu:api,validation,error_scope:parent_scope:errorFilter="out-of-memory";stackDepth=10 [ Failure ]
-crbug.com/42241110 [ linux nvidia-0x2184 nvidia_ge_31.0.15.4601 ] webgpu:api,validation,error_scope:parent_scope:errorFilter="out-of-memory";stackDepth=100 [ Failure ]
-crbug.com/42241110 [ linux nvidia-0x2184 nvidia_ge_31.0.15.4601 ] webgpu:api,validation,error_scope:parent_scope:errorFilter="out-of-memory";stackDepth=1000 [ Failure ]
-crbug.com/42241110 [ linux nvidia-0x2184 nvidia_ge_31.0.15.4601 ] webgpu:api,validation,error_scope:simple:errorType="out-of-memory";errorFilter="internal" [ Failure ]
-crbug.com/42241110 [ linux nvidia-0x2184 nvidia_ge_31.0.15.4601 ] webgpu:api,validation,error_scope:simple:errorType="out-of-memory";errorFilter="out-of-memory" [ Failure ]
-crbug.com/42241110 [ linux nvidia-0x2184 nvidia_ge_31.0.15.4601 ] webgpu:api,validation,error_scope:simple:errorType="out-of-memory";errorFilter="validation" [ Failure ]
-crbug.com/42241110 [ android arm ] webgpu:api,validation,error_scope:current_scope:errorFilter="validation";stackDepth=100000 [ Failure ]
+# Timeouts on error_scope
+crbug.com/367513506 [ android arm ] webgpu:api,validation,error_scope:current_scope:errorFilter="validation";stackDepth=100000 [ Failure ]
+
 
 # sample_texture_combos test is failing on all Compat platforms
 crbug.com/402772749 webgpu:api,operation,sampling,sampler_texture:sample_texture_combos: [ Failure ]
@@ -1026,3 +996,4 @@ crbug.com/0000 [ linux nvidia ] webgpu:shader,execution,expression,call,builtin,
 crbug.com/0000 [ linux nvidia ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage,centroid:nearFar=[0,1];sampleCount=1;interpolation={"type":"perspective","sampling":"center"} [ Failure ]
 crbug.com/0000 [ compat-default linux nvidia ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage,centroid:nearFar=[0.25,0.75];sampleCount=1;interpolation={"type":"perspective","sampling":"center"} [ Failure ]
 crbug.com/0000 [ android-pixel-6 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:alpha="none";orientation="flipY";colorSpaceConversion="none";srcFlipYInCopy=true;dstFormat="rg16float";dstPremultiplied=false [ Failure ]
+crbug.com/0000 [ android arm ] webgpu:api,validation,error_scope:simple:errorType="validation";errorFilter="out-of-memory" [ Skip ]
