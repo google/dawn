@@ -179,13 +179,13 @@ tint::Result<tint::core::ir::Module> GenerateIrModule(const tint::Program& progr
 
     auto cfg = tint::wgsl::SubstituteOverridesConfig(program);
 
-    auto ir = tint::wgsl::reader::ProgramToLoweredIR(src);
+    auto ir = tint::wgsl::reader::ProgramToLoweredIR(program);
     if (ir != tint::Success) {
         return ir.Failure();
     }
 
     auto substituteOverridesResult = tint::core::ir::transform::SubstituteOverrides(ir.Get(), cfg);
-    if (substituteOverridesResult != Success) {
+    if (substituteOverridesResult != tint::Success) {
         return substituteOverridesResult.Failure();
     }
 
