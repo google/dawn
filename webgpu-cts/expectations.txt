@@ -1434,10 +1434,6 @@ crbug.com/407159836 [ intel win ] webgpu:shader,execution,expression,binary,af_m
 crbug.com/407159836 [ intel win ] webgpu:shader,execution,expression,binary,af_matrix_subtraction:matrix:inputSource="const";cols=4;rows=4 [ Failure ]
 crbug.com/407159836 [ nvidia win ] webgpu:shader,execution,expression,binary,af_matrix_subtraction:matrix:inputSource="const";cols=4;rows=4 [ Failure ]
 
-# capability_checks,features,clip_distances failures on Linux NVIDIA
-crbug.com/407158421 [ dawn-backend-validation linux nvidia ] webgpu:api,validation,capability_checks,features,clip_distances:createRenderPipeline,at_over:limitTest="underDefault";testValueName="atLimit";async=true;pointList=false;clipDistances=5 [ Failure ]
-crbug.com/407158421 [ linux nvidia ] webgpu:api,validation,capability_checks,features,clip_distances:createRenderPipeline,max_vertex_output_location:pointList=false;clipDistances=1;startLocation=2 [ Failure ]
-
 # error_scope tests that shouldn't be timing out because they don't have a huge stackDepth
 crbug.com/367513506 [ linux nvidia ] webgpu:api,validation,error_scope:parent_scope:errorFilter="validation";stackDepth=1000 [ Failure ]
 crbug.com/367513506 [ linux nvidia ] webgpu:api,validation,error_scope:current_scope:errorFilter="validation";stackDepth=1000 [ Failure ]
