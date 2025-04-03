@@ -125,37 +125,6 @@ crbug.com/42241110 webgpu:api,validation,error_scope:simple:errorType="out-of-me
 # Compressed texture image_copy failures on Pixel 6
 crbug.com/364917742 [ android arm ] webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes:* [ Skip ]
 
-# Temp suppressions for change in compat limits
-crbug.com/406729256 webgpu:api,operation,adapter,requestDevice:default: [ Failure ]
-crbug.com/406729256 webgpu:api,operation,adapter,requestDevice:limit,worse_than_default:limit="maxStorageBuffersInFragmentStage" [ Failure ]
-crbug.com/406729256 webgpu:api,operation,adapter,requestDevice:limit,worse_than_default:limit="maxStorageBuffersPerShaderStage" [ Failure ]
-crbug.com/406729256 webgpu:api,operation,adapter,requestDevice:limit,worse_than_default:limit="maxStorageTexturesInFragmentStage" [ Failure ]
-crbug.com/406729256 webgpu:api,operation,adapter,requestDevice:limits,supported:limit="maxStorageBuffersInFragmentStage" [ Failure ]
-crbug.com/406729256 webgpu:api,operation,adapter,requestDevice:limits,supported:limit="maxStorageBuffersInFragmentStage" [ Failure ]
-crbug.com/406729256 webgpu:api,operation,adapter,requestDevice:limits,supported:limit="maxStorageBuffersPerShaderStage" [ Failure ]
-crbug.com/406729256 webgpu:api,operation,adapter,requestDevice:limits,supported:limit="maxStorageBuffersPerShaderStage" [ Failure ]
-crbug.com/406729256 webgpu:api,operation,adapter,requestDevice:limits,supported:limit="maxStorageTexturesInFragmentStage" [ Failure ]
-crbug.com/406729256 webgpu:api,operation,adapter,requestDevice:limits,supported:limit="maxStorageTexturesInFragmentStage" [ Failure ]
-crbug.com/406729256 webgpu:api,validation,capability_checks,limits,maxStorageBuffersInFragmentStage:auto_upgraded_from_per_stage,maxStorageBuffersPerShaderStage: [ Failure ]
-crbug.com/406729256 webgpu:api,validation,capability_checks,limits,maxStorageBuffersInFragmentStage:auto_upgraded_from_per_stage,maxStorageBuffersPerShaderStage: [ Failure ]
-crbug.com/406729256 webgpu:api,validation,capability_checks,limits,maxStorageBuffersInFragmentStage:createBindGroupLayout,at_over:* [ Failure ]
-crbug.com/406729256 webgpu:api,validation,capability_checks,limits,maxStorageBuffersInFragmentStage:createPipeline,at_over:* [ Failure ]
-crbug.com/406729256 webgpu:api,validation,capability_checks,limits,maxStorageBuffersInFragmentStage:createPipelineLayout,at_over:* [ Failure ]
-crbug.com/406729256 webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:createBindGroupLayout,at_over:* [ Failure ]
-crbug.com/406729256 webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:createPipeline,at_over:* [ Failure ]
-crbug.com/406729256 webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:createPipelineLayout,at_over:limitTest="atDefault";* [ Failure ]
-crbug.com/406729256 webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:createPipelineLayout,at_over:limitTest="betweenDefaultAndMaximum";* [ Failure ]
-crbug.com/406729256 webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:createPipelineLayout,at_over:limitTest="underDefault";* [ Failure ]
-crbug.com/406729256 webgpu:api,validation,capability_checks,limits,maxStorageTexturesInFragmentStage:auto_upgraded_from_per_stage,maxStorageTexturesPerShaderStage: [ Failure ]
-crbug.com/406729256 webgpu:api,validation,capability_checks,limits,maxStorageTexturesInFragmentStage:createBindGroupLayout,at_over:limitTest="atDefault";* [ Failure ]
-crbug.com/406729256 webgpu:api,validation,capability_checks,limits,maxStorageTexturesInFragmentStage:createBindGroupLayout,at_over:limitTest="betweenDefaultAndMaximum";* [ Failure ]
-crbug.com/406729256 webgpu:api,validation,capability_checks,limits,maxStorageTexturesInFragmentStage:createPipeline,at_over:limitTest="atDefault";* [ Failure ]
-crbug.com/406729256 webgpu:api,validation,capability_checks,limits,maxStorageTexturesInFragmentStage:createPipeline,at_over:limitTest="betweenDefaultAndMaximum";* [ Failure ]
-crbug.com/406729256 webgpu:api,validation,capability_checks,limits,maxStorageTexturesInFragmentStage:createPipelineLayout,at_over:limitTest="atDefault";* [ Failure ]
-crbug.com/406729256 webgpu:api,validation,capability_checks,limits,maxStorageTexturesInFragmentStage:createPipelineLayout,at_over:limitTest="betweenDefaultAndMaximum";* [ Failure ]
-crbug.com/406729256 webgpu:idl,javascript:limits:type="adapter" [ Failure ]
-crbug.com/406729256 webgpu:idl,javascript:limits:type="device" [ Failure ]
-
 # Buffer already has an outstanding map pending
 crbug.com/391414855 [ android-Pixel-6 arm ] webgpu:api,validation,buffer,mapping:getMappedRange,state,mappingPending:* [ Skip ]
 
