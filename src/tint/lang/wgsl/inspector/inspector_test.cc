@@ -1942,6 +1942,9 @@ fn depth_ms_func() {
 @group(4) @binding(0) var st_var: texture_storage_2d<r32uint, write>;
 fn st_func() { let dim = textureDimensions(st_var); }
 
+@group(4) @binding(1) var ba_s: binding_array<texture_2d<f32>, 3>;
+fn ba_s_func() { let dim = textureDimensions(ba_s[2]); }
+
 @fragment
 fn ep_func() {
   ub_func();
@@ -1951,49 +1954,65 @@ fn ep_func() {
   cs_func();
   depth_ms_func();
   st_func();
+  ba_s_func();
 }
 )";
     Inspector& inspector = Initialize(src);
 
     auto result = inspector.GetResourceBindings("ep_func");
     ASSERT_FALSE(inspector.has_error()) << inspector.error();
-    ASSERT_EQ(9u, result.size());
+    ASSERT_EQ(10u, result.size());
 
     EXPECT_EQ(ResourceBinding::ResourceType::kUniformBuffer, result[0].resource_type);
     EXPECT_EQ(0u, result[0].bind_group);
     EXPECT_EQ(0u, result[0].binding);
+    EXPECT_FALSE(result[0].array_size.has_value());
 
     EXPECT_EQ(ResourceBinding::ResourceType::kStorageBuffer, result[1].resource_type);
     EXPECT_EQ(1u, result[1].bind_group);
     EXPECT_EQ(0u, result[1].binding);
+    EXPECT_FALSE(result[1].array_size.has_value());
 
     EXPECT_EQ(ResourceBinding::ResourceType::kReadOnlyStorageBuffer, result[2].resource_type);
     EXPECT_EQ(1u, result[2].bind_group);
     EXPECT_EQ(1u, result[2].binding);
+    EXPECT_FALSE(result[2].array_size.has_value());
 
     EXPECT_EQ(ResourceBinding::ResourceType::kSampledTexture, result[3].resource_type);
     EXPECT_EQ(2u, result[3].bind_group);
     EXPECT_EQ(0u, result[3].binding);
+    EXPECT_FALSE(result[3].array_size.has_value());
 
     EXPECT_EQ(ResourceBinding::ResourceType::kSampler, result[4].resource_type);
     EXPECT_EQ(3u, result[4].bind_group);
     EXPECT_EQ(0u, result[4].binding);
+    EXPECT_FALSE(result[4].array_size.has_value());
 
     EXPECT_EQ(ResourceBinding::ResourceType::kDepthTexture, result[5].resource_type);
     EXPECT_EQ(3u, result[5].bind_group);
     EXPECT_EQ(1u, result[5].binding);
+    EXPECT_FALSE(result[5].array_size.has_value());
 
     EXPECT_EQ(ResourceBinding::ResourceType::kComparisonSampler, result[6].resource_type);
     EXPECT_EQ(3u, result[6].bind_group);
     EXPECT_EQ(2u, result[6].binding);
+    EXPECT_FALSE(result[6].array_size.has_value());
 
     EXPECT_EQ(ResourceBinding::ResourceType::kDepthMultisampledTexture, result[7].resource_type);
     EXPECT_EQ(3u, result[7].bind_group);
     EXPECT_EQ(3u, result[7].binding);
+    EXPECT_FALSE(result[7].array_size.has_value());
 
     EXPECT_EQ(ResourceBinding::ResourceType::kWriteOnlyStorageTexture, result[8].resource_type);
     EXPECT_EQ(4u, result[8].bind_group);
     EXPECT_EQ(0u, result[8].binding);
+    EXPECT_FALSE(result[8].array_size.has_value());
+
+    EXPECT_EQ(ResourceBinding::ResourceType::kSampledTexture, result[9].resource_type);
+    EXPECT_EQ(4u, result[9].bind_group);
+    EXPECT_EQ(1u, result[9].binding);
+    EXPECT_TRUE(result[9].array_size.has_value());
+    EXPECT_EQ(3u, result[9].array_size.value());
 }
 
 TEST_F(InspectorGetResourceBindingsTest, InputAttachment) {
@@ -2919,6 +2938,53 @@ TEST_F(InspectorGetResourceBindingsTest, ExternalTexture) {
     EXPECT_EQ(0u, result[0].binding);
 }
 
+TEST_F(InspectorGetResourceBindingsTest, BindingArray_Simple) {
+    auto* src = R"(
+@group(0) @binding(1) var toto: binding_array<texture_2d<f32>, 5>;
+@fragment fn ep() {
+  _ = textureDimensions(toto[3]);
+}
+)";
+
+    Inspector& inspector = Initialize(src);
+
+    auto result = inspector.GetResourceBindings("ep");
+    ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+    ASSERT_EQ(1u, result.size());
+
+    EXPECT_EQ(ResourceBinding::ResourceType::kSampledTexture, result[0].resource_type);
+    EXPECT_EQ(0u, result[0].bind_group);
+    EXPECT_EQ(1u, result[0].binding);
+    EXPECT_TRUE(result[0].array_size.has_value());
+    EXPECT_EQ(5u, result[0].array_size.value());
+}
+
+TEST_F(InspectorGetResourceBindingsTest, BindingArray_InFunction) {
+    auto* src = R"(
+@group(0) @binding(1) var toto: binding_array<texture_2d<f32>, 5>;
+fn f() {
+  _ = textureDimensions(toto[3]);
+}
+@fragment fn ep() {
+  f();
+}
+)";
+
+    Inspector& inspector = Initialize(src);
+
+    auto result = inspector.GetResourceBindings("ep");
+    ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+    ASSERT_EQ(1u, result.size());
+
+    EXPECT_EQ(ResourceBinding::ResourceType::kSampledTexture, result[0].resource_type);
+    EXPECT_EQ(0u, result[0].bind_group);
+    EXPECT_EQ(1u, result[0].binding);
+    EXPECT_TRUE(result[0].array_size.has_value());
+    EXPECT_EQ(5u, result[0].array_size.value());
+}
+
 class InspectorGetSamplerTextureUsesTest : public TestHelper, public testing::Test {
   public:
     using ResultExpectation = std::initializer_list<SamplerTexturePair>;
@@ -3373,6 +3439,102 @@ fn main(@location(0) fragUV: vec2<f32>,
     }
 }
 
+TEST_F(InspectorGetSamplerTextureUsesTest, TextureFromBindingArray) {
+    std::string shader = R"(
+@group(0) @binding(1) var mySampler: sampler;
+@group(0) @binding(2) var myTextures: binding_array<texture_2d<f32>, 3>;
+
+@fragment fn main() {
+  _ = textureSample(myTextures[1], mySampler, vec2(0));
+})";
+
+    ResultExpectation expected = {
+        {/* Sampler */ BindingPoint{0, 1}, /* Texture */ BindingPoint{0, 2}},
+    };
+
+    Inspector& inspector = Initialize(shader);
+
+    {
+        auto result = inspector.GetSamplerTextureUses("main");
+        ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+        ValidateEqual(expected, result);
+    }
+
+    {
+        auto result = inspector.GetSamplerAndNonSamplerTextureUses("main", non_sampler_placeholder);
+        ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+        ValidateEqual(expected, result);
+    }
+}
+
+TEST_F(InspectorGetSamplerTextureUsesTest, TextureFromBindingArrayPassedAsParameter) {
+    std::string shader = R"(
+@group(0) @binding(1) var mySampler: sampler;
+@group(0) @binding(2) var myTextures: binding_array<texture_2d<f32>, 3>;
+
+fn f(ts : binding_array<texture_2d<f32>, 3>) {
+  _ = textureSample(ts[1], mySampler, vec2(0));
+}
+@fragment fn main() {
+  f(myTextures);
+})";
+
+    ResultExpectation expected = {
+        {/* Sampler */ BindingPoint{0, 1}, /* Texture */ BindingPoint{0, 2}},
+    };
+
+    Inspector& inspector = Initialize(shader);
+
+    {
+        auto result = inspector.GetSamplerTextureUses("main");
+        ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+        ValidateEqual(expected, result);
+    }
+
+    {
+        auto result = inspector.GetSamplerAndNonSamplerTextureUses("main", non_sampler_placeholder);
+        ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+        ValidateEqual(expected, result);
+    }
+}
+
+TEST_F(InspectorGetSamplerTextureUsesTest, TextureParameterFromBindingArray) {
+    std::string shader = R"(
+@group(0) @binding(1) var mySampler: sampler;
+@group(0) @binding(2) var myTextures: binding_array<texture_2d<f32>, 3>;
+
+fn f(t : texture_2d<f32>) {
+  _ = textureSample(t, mySampler, vec2(0));
+}
+@fragment fn main() {
+  f(myTextures[1]);
+})";
+
+    ResultExpectation expected = {
+        {/* Sampler */ BindingPoint{0, 1}, /* Texture */ BindingPoint{0, 2}},
+    };
+
+    Inspector& inspector = Initialize(shader);
+
+    {
+        auto result = inspector.GetSamplerTextureUses("main");
+        ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+        ValidateEqual(expected, result);
+    }
+
+    {
+        auto result = inspector.GetSamplerAndNonSamplerTextureUses("main", non_sampler_placeholder);
+        ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+        ValidateEqual(expected, result);
+    }
+}
+
 TEST_F(InspectorGetSamplerTextureUsesTest, NeitherIndirect) {
     std::string shader = R"(
 @group(0) @binding(1) var mySampler: sampler;
@@ -3507,6 +3669,7 @@ TEST_F(InspectorGetSamplerTextureUsesTest, SamplerAndNonSamplerTexture) {
 @group(2) @binding(3) var texture2: texture_storage_2d<r32float, read_write>;
 @group(2) @binding(4) var external0 : texture_external;
 @group(2) @binding(5) var external1 : texture_external;
+@group(2) @binding(6) var texture_array : binding_array<texture_2d<f32>, 5>;
 
 const loadStoreCoords = vec2<u32>(0u, 0u);
 
@@ -3538,6 +3701,10 @@ fn main(@location(0) fragUV: vec2<f32>,
   _ = textureSampleBaseClampToEdge(external0, sampler0, fragUV);
   _ = textureLoad(external1, vec2(0, 0));
 
+  // Usages of binding_array with and without samplers
+  _ = textureSample(texture_array[2], sampler0, fragUV);
+  _ = textureLoad(texture_array[1], vec2(0, 0), 0);
+
   // Another usage with a sampler.
   return textureSample(texture0, sampler1, fragUV) + fragPosition;
 }
@@ -3549,6 +3716,7 @@ fn main(@location(0) fragUV: vec2<f32>,
     constexpr BindingPoint texture_1 = {2, 1};
     constexpr BindingPoint external_0 = {2, 4};
     constexpr BindingPoint external_1 = {2, 5};
+    constexpr BindingPoint texture_array = {2, 6};
     // Storage texture texture2 should not be included in the result.
 
     ResultExpectation expected_sampler_only = {
@@ -3556,6 +3724,7 @@ fn main(@location(0) fragUV: vec2<f32>,
         {/* Sampler */ sampler_0, /* Texture */ texture_0},
         {/* Sampler */ sampler_1, /* Texture */ texture_0},
         {/* Sampler */ sampler_0, /* Texture */ external_0},
+        {/* Sampler */ sampler_0, /* Texture */ texture_array},
     };
     ResultExpectation expected_sampler_and_non_sampler = {
         {/* Sampler */ sampler_0, /* Texture */ texture_1},
@@ -3565,6 +3734,8 @@ fn main(@location(0) fragUV: vec2<f32>,
         {/* Sampler */ sampler_1, /* Texture */ texture_0},
         {/* Sampler */ sampler_0, /* Texture */ external_0},
         {/* Sampler */ non_sampler_placeholder, /* Texture */ external_1},
+        {/* Sampler */ sampler_0, /* Texture */ texture_array},
+        {/* Sampler */ non_sampler_placeholder, /* Texture */ texture_array},
     };
 
     Inspector& inspector = Initialize(shader);
@@ -3741,6 +3912,24 @@ fn main() {
     EXPECT_EQ(3u, info[0].binding);
 }
 
+TEST_F(InspectorTextureTest, TextureLevelInBindingArray) {
+    std::string shader = R"(
+@group(2) @binding(3) var myTextures : binding_array<texture_2d<f32>, 4>;
+
+@compute @workgroup_size(1)
+fn main() {
+  let num = textureNumLevels(myTextures[2]);
+})";
+
+    Inspector& inspector = Initialize(shader);
+    auto info = inspector.GetTextureQueries("main");
+
+    ASSERT_EQ(1u, info.size());
+    EXPECT_EQ(Inspector::TextureQueryType::kTextureNumLevels, info[0].type);
+    EXPECT_EQ(2u, info[0].group);
+    EXPECT_EQ(3u, info[0].binding);
+}
+
 TEST_F(InspectorTextureTest, TextureLevelInEPNoDups) {
     std::string shader = R"(
 @group(0) @binding(0) var myTexture: texture_2d<f32>;
@@ -3856,6 +4045,25 @@ TEST_F(InspectorTextureTest, TextureLoadInEP) {
 @compute @workgroup_size(1)
 fn main() {
   let num1 = textureLoad(tex1, vec2(0, 0), 0);
+})";
+
+    Inspector& inspector = Initialize(shader);
+    auto info = inspector.GetTextureQueries("main");
+
+    ASSERT_EQ(1u, info.size());
+
+    EXPECT_EQ(Inspector::TextureQueryType::kTextureNumLevels, info[0].type);
+    EXPECT_EQ(2u, info[0].group);
+    EXPECT_EQ(3u, info[0].binding);
+}
+
+TEST_F(InspectorTextureTest, TextureLoadInBindingArray) {
+    std::string shader = R"(
+@group(2) @binding(3) var textures: binding_array<texture_2d<f32>, 4>;
+
+@compute @workgroup_size(1)
+fn main() {
+  let num1 = textureLoad(textures[1], vec2(0, 0), 0);
 })";
 
     Inspector& inspector = Initialize(shader);

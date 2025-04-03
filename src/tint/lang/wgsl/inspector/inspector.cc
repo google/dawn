@@ -35,6 +35,7 @@
 #include "src/tint/lang/core/interpolation_sampling.h"
 #include "src/tint/lang/core/interpolation_type.h"
 #include "src/tint/lang/core/type/array.h"
+#include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/bool.h"
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
 #include "src/tint/lang/core/type/depth_texture.h"
@@ -58,6 +59,7 @@
 #include "src/tint/lang/wgsl/ast/interpolate_attribute.h"
 #include "src/tint/lang/wgsl/ast/module.h"
 #include "src/tint/lang/wgsl/ast/override.h"
+#include "src/tint/lang/wgsl/sem/accessor_expression.h"
 #include "src/tint/lang/wgsl/sem/builtin_enum_expression.h"
 #include "src/tint/lang/wgsl/sem/call.h"
 #include "src/tint/lang/wgsl/sem/function.h"
@@ -149,6 +151,13 @@ ResourceBinding ConvertHandleToResourceBinding(const tint::sem::GlobalVariable* 
     result.variable_name = handle->Declaration()->name->symbol.Name();
 
     const core::type::Type* handle_type = handle->Type()->UnwrapRef();
+
+    // BindingArray only modifies the array_size member of the ResourceBinding of its inner type.
+    if (auto* array = handle_type->As<core::type::BindingArray>()) {
+        result.array_size = array->Count()->As<core::type::ConstantArrayCount>()->value;
+        handle_type = array->ElemType();
+    }
+
     Switch(
         handle_type,
 
@@ -536,6 +545,13 @@ const Inspector::EntryPointTextureMetadata& Inspector::ComputeTextureMetadata(
     auto GetGlobalsForArgument = [&](const sem::Function* fn, const sem::ValueExpression* argument,
                                      GlobalSet* scratch_global) -> const GlobalSet* {
         TINT_ASSERT(scratch_global->IsEmpty());
+
+        // Some of the handles may come from binding_array using an indexing operation. In that case
+        // trace the usage of the binding_array instead.
+        if (auto* access = argument->As<sem::AccessorExpression>()) {
+            TINT_ASSERT(access->Object()->Type()->template Is<core::type::BindingArray>());
+            argument = access->Object();
+        }
 
         // Handle parameter can only be identifiers.
         auto* identifier = argument->RootIdentifier();
