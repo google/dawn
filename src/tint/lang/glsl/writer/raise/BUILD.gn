@@ -66,7 +66,6 @@ if (tint_build_glsl_writer) {
       "${dawn_root}/src/utils:utils",
       "${tint_src_dir}/api/common",
       "${tint_src_dir}/lang/core",
-      "${tint_src_dir}/lang/core/common",
       "${tint_src_dir}/lang/core/constant",
       "${tint_src_dir}/lang/core/intrinsic",
       "${tint_src_dir}/lang/core/ir",

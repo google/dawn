@@ -25,12 +25,34 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-// CMake requires that targets contain at least on file. This file is used when we want to create
-// empty targets.
+#ifndef SRC_TINT_LANG_CORE_IR_TRANSFORM_MULTIPLANAR_OPTIONS_H_
+#define SRC_TINT_LANG_CORE_IR_TRANSFORM_MULTIPLANAR_OPTIONS_H_
 
-#if defined(__clang__)
-#pragma clang diagnostic ignored "-Wmissing-variable-declarations"
-#endif
+#include <unordered_map>
 
-// A placeholder symbol used to emit a symbol for this lib target.
-int tint_core_common_symbol = 1;
+#include "src/tint/api/common/binding_point.h"
+
+namespace tint::transform::multiplanar {
+
+/// This struct identifies the binding groups and locations for new bindings to
+/// use when transforming a texture_external instance.
+struct BindingPoints {
+    /// The desired binding location of the texture_2d representing plane #1 when
+    /// a texture_external binding is expanded.
+    BindingPoint plane_1;
+    /// The desired binding location of the ExternalTextureParams uniform when a
+    /// texture_external binding is expanded.
+    BindingPoint params;
+
+    /// Reflect the fields of this class so that it can be used by tint::ForeachField()
+    TINT_REFLECT(BindingPoints, plane_1, params);
+};
+
+/// BindingsMap is a map where the key is the binding location of a
+/// texture_external and the value is a struct containing the desired
+/// locations for new bindings expanded from the texture_external instance.
+using BindingsMap = std::unordered_map<BindingPoint, BindingPoints>;
+
+}  // namespace tint::transform::multiplanar
+
+#endif  // SRC_TINT_LANG_CORE_IR_TRANSFORM_MULTIPLANAR_OPTIONS_H_

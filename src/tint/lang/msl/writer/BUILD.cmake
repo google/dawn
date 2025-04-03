@@ -53,9 +53,9 @@ tint_add_target(tint_lang_msl_writer lib
 tint_target_add_dependencies(tint_lang_msl_writer lib
   tint_api_common
   tint_lang_core
-  tint_lang_core_common
   tint_lang_core_constant
   tint_lang_core_ir
+  tint_lang_core_ir_transform
   tint_lang_core_type
   tint_utils
   tint_utils_containers

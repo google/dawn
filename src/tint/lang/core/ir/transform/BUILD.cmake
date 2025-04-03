@@ -63,6 +63,7 @@ tint_add_target(tint_lang_core_ir_transform lib
   lang/core/ir/transform/direct_variable_access.h
   lang/core/ir/transform/multiplanar_external_texture.cc
   lang/core/ir/transform/multiplanar_external_texture.h
+  lang/core/ir/transform/multiplanar_options.h
   lang/core/ir/transform/prepare_push_constants.cc
   lang/core/ir/transform/prepare_push_constants.h
   lang/core/ir/transform/preserve_padding.cc
@@ -98,7 +99,6 @@ tint_add_target(tint_lang_core_ir_transform lib
 tint_target_add_dependencies(tint_lang_core_ir_transform lib
   tint_api_common
   tint_lang_core
-  tint_lang_core_common
   tint_lang_core_constant
   tint_lang_core_intrinsic
   tint_lang_core_ir
@@ -158,7 +158,6 @@ tint_add_target(tint_lang_core_ir_transform_test test
 tint_target_add_dependencies(tint_lang_core_ir_transform_test test
   tint_api_common
   tint_lang_core
-  tint_lang_core_common
   tint_lang_core_constant
   tint_lang_core_intrinsic
   tint_lang_core_ir
@@ -239,7 +238,6 @@ tint_target_add_dependencies(tint_lang_core_ir_transform_fuzz fuzz
   tint_api_common
   tint_cmd_fuzz_ir_fuzz
   tint_lang_core
-  tint_lang_core_common
   tint_lang_core_constant
   tint_lang_core_ir
   tint_lang_core_ir_transform

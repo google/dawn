@@ -28,7 +28,7 @@
 #ifndef SRC_TINT_LANG_CORE_IR_TRANSFORM_MULTIPLANAR_EXTERNAL_TEXTURE_H_
 #define SRC_TINT_LANG_CORE_IR_TRANSFORM_MULTIPLANAR_EXTERNAL_TEXTURE_H_
 
-#include "src/tint/lang/core/common/multiplanar_options.h"
+#include "src/tint/lang/core/ir/transform/multiplanar_options.h"
 #include "src/tint/utils/result.h"
 
 // Forward declarations.

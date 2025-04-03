@@ -80,6 +80,7 @@ cc_library(
     "demote_to_helper.h",
     "direct_variable_access.h",
     "multiplanar_external_texture.h",
+    "multiplanar_options.h",
     "prepare_push_constants.h",
     "preserve_padding.h",
     "prevent_infinite_loops.h",
@@ -99,7 +100,6 @@ cc_library(
   deps = [
     "//src/tint/api/common",
     "//src/tint/lang/core",
-    "//src/tint/lang/core/common",
     "//src/tint/lang/core/constant",
     "//src/tint/lang/core/intrinsic",
     "//src/tint/lang/core/ir",
@@ -165,7 +165,6 @@ cc_library(
   deps = [
     "//src/tint/api/common",
     "//src/tint/lang/core",
-    "//src/tint/lang/core/common",
     "//src/tint/lang/core/constant",
     "//src/tint/lang/core/intrinsic",
     "//src/tint/lang/core/ir",

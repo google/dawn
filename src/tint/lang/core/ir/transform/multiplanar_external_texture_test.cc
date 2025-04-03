@@ -29,8 +29,8 @@
 
 #include <utility>
 
-#include "src/tint/lang/core/common/multiplanar_options.h"
 #include "src/tint/lang/core/ir/transform/helper_test.h"
+#include "src/tint/lang/core/ir/transform/multiplanar_options.h"
 #include "src/tint/lang/core/type/external_texture.h"
 
 namespace tint::core::ir::transform {

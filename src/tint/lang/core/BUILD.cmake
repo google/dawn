@@ -34,7 +34,6 @@
 #                       Do not modify this file directly
 ################################################################################
 
-include(lang/core/common/BUILD.cmake)
 include(lang/core/constant/BUILD.cmake)
 include(lang/core/intrinsic/BUILD.cmake)
 include(lang/core/ir/BUILD.cmake)
