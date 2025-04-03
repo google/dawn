@@ -28,10 +28,11 @@
 #include <cmath>
 #include <cstdint>
 #include <tuple>
+#include <utility>
 #include <variant>
 #include <vector>
 
-#include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/core/number.h"
 #include "src/tint/utils/macros/compiler.h"
 #include "src/tint/utils/text/string_stream.h"
 
