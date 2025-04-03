@@ -288,6 +288,8 @@ class Impl {
 
                     auto attr = ast::GetAttribute<ast::WorkgroupAttribute>(ast_func->attributes);
                     if (attr) {
+                        TINT_SCOPED_ASSIGNMENT(current_block_, mod.root_block);
+
                         // The x size is always required (y, z are optional).
                         auto value_x = EmitValueExpression(attr->x);
                         bool is_unsigned = value_x->Type()->IsUnsignedIntegerScalar();
