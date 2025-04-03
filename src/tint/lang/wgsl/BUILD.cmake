@@ -37,7 +37,6 @@
 include(lang/wgsl/ast/BUILD.cmake)
 include(lang/wgsl/common/BUILD.cmake)
 include(lang/wgsl/features/BUILD.cmake)
-include(lang/wgsl/helpers/BUILD.cmake)
 include(lang/wgsl/inspector/BUILD.cmake)
 include(lang/wgsl/intrinsic/BUILD.cmake)
 include(lang/wgsl/ir/BUILD.cmake)

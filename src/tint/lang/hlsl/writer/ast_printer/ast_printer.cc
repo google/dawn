@@ -76,7 +76,6 @@
 #include "src/tint/lang/wgsl/ast/transform/vectorize_scalar_matrix_initializers.h"
 #include "src/tint/lang/wgsl/ast/transform/zero_init_workgroup_memory.h"
 #include "src/tint/lang/wgsl/ast/variable_decl_statement.h"
-#include "src/tint/lang/wgsl/helpers/check_supported_extensions.h"
 #include "src/tint/lang/wgsl/sem/block_statement.h"
 #include "src/tint/lang/wgsl/sem/call.h"
 #include "src/tint/lang/wgsl/sem/function.h"
@@ -309,6 +308,27 @@ const sem::Call* AppendVector(ProgramBuilder* b,
     return ctor_sem;
 }
 
+bool CheckSupportedExtensions(std::string_view writer_name,
+                              const ast::Module& module,
+                              diag::List& diags,
+                              VectorRef<wgsl::Extension> supported) {
+    Hashset<wgsl::Extension, 32> set;
+    for (auto ext : supported) {
+        set.Add(ext);
+    }
+
+    for (auto* enable : module.Enables()) {
+        for (auto* ext : enable->extensions) {
+            if (!set.Contains(ext->name)) {
+                diags.AddError(ext->source) << writer_name << " backend does not support extension "
+                                            << style::Code(ext->name);
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
 }  // namespace
 
 SanitizedResult::SanitizedResult() = default;
@@ -526,19 +546,18 @@ ASTPrinter::ASTPrinter(const Program& program) : builder_(ProgramBuilder::Wrap(p
 ASTPrinter::~ASTPrinter() = default;
 
 bool ASTPrinter::Generate() {
-    if (!tint::wgsl::CheckSupportedExtensions(
-            "HLSL", builder_.AST(), diagnostics_,
-            Vector{
-                wgsl::Extension::kChromiumDisableUniformityAnalysis,
-                wgsl::Extension::kChromiumExperimentalPixelLocal,
-                wgsl::Extension::kChromiumExperimentalPushConstant,
-                wgsl::Extension::kChromiumInternalGraphite,
-                wgsl::Extension::kClipDistances,
-                wgsl::Extension::kF16,
-                wgsl::Extension::kDualSourceBlending,
-                wgsl::Extension::kSubgroups,
-                wgsl::Extension::kSubgroupsF16,
-            })) {
+    if (!CheckSupportedExtensions("HLSL", builder_.AST(), diagnostics_,
+                                  Vector{
+                                      wgsl::Extension::kChromiumDisableUniformityAnalysis,
+                                      wgsl::Extension::kChromiumExperimentalPixelLocal,
+                                      wgsl::Extension::kChromiumExperimentalPushConstant,
+                                      wgsl::Extension::kChromiumInternalGraphite,
+                                      wgsl::Extension::kClipDistances,
+                                      wgsl::Extension::kF16,
+                                      wgsl::Extension::kDualSourceBlending,
+                                      wgsl::Extension::kSubgroups,
+                                      wgsl::Extension::kSubgroupsF16,
+                                  })) {
         return false;
     }
 
