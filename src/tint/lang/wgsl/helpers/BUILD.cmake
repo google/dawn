@@ -39,8 +39,6 @@
 # Kind:      lib
 ################################################################################
 tint_add_target(tint_lang_wgsl_helpers lib
-  lang/wgsl/helpers/append_vector.cc
-  lang/wgsl/helpers/append_vector.h
   lang/wgsl/helpers/apply_substitute_overrides.cc
   lang/wgsl/helpers/apply_substitute_overrides.h
   lang/wgsl/helpers/check_supported_extensions.cc
@@ -81,7 +79,6 @@ tint_target_add_external_dependencies(tint_lang_wgsl_helpers lib
 # Kind:      test
 ################################################################################
 tint_add_target(tint_lang_wgsl_helpers_test test
-  lang/wgsl/helpers/append_vector_test.cc
   lang/wgsl/helpers/check_supported_extensions_test.cc
 )
 
@@ -89,17 +86,12 @@ tint_target_add_dependencies(tint_lang_wgsl_helpers_test test
   tint_api_common
   tint_lang_core
   tint_lang_core_constant
-  tint_lang_core_intrinsic
   tint_lang_core_type
   tint_lang_wgsl
   tint_lang_wgsl_ast
-  tint_lang_wgsl_ast_test
-  tint_lang_wgsl_common
   tint_lang_wgsl_features
   tint_lang_wgsl_helpers
-  tint_lang_wgsl_intrinsic
   tint_lang_wgsl_program
-  tint_lang_wgsl_resolver
   tint_lang_wgsl_sem
   tint_utils
   tint_utils_containers

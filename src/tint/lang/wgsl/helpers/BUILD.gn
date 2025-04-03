@@ -45,8 +45,6 @@ if (tint_build_unittests || tint_build_benchmarks) {
 
 libtint_source_set("helpers") {
   sources = [
-    "append_vector.cc",
-    "append_vector.h",
     "apply_substitute_overrides.cc",
     "apply_substitute_overrides.h",
     "check_supported_extensions.cc",
@@ -80,27 +78,19 @@ libtint_source_set("helpers") {
 }
 if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {
-    sources = [
-      "append_vector_test.cc",
-      "check_supported_extensions_test.cc",
-    ]
+    sources = [ "check_supported_extensions_test.cc" ]
     deps = [
       "${dawn_root}/src/utils:utils",
       "${tint_src_dir}:gmock_and_gtest",
       "${tint_src_dir}/api/common",
       "${tint_src_dir}/lang/core",
       "${tint_src_dir}/lang/core/constant",
-      "${tint_src_dir}/lang/core/intrinsic",
       "${tint_src_dir}/lang/core/type",
       "${tint_src_dir}/lang/wgsl",
       "${tint_src_dir}/lang/wgsl/ast",
-      "${tint_src_dir}/lang/wgsl/ast:unittests",
-      "${tint_src_dir}/lang/wgsl/common",
       "${tint_src_dir}/lang/wgsl/features",
       "${tint_src_dir}/lang/wgsl/helpers",
-      "${tint_src_dir}/lang/wgsl/intrinsic",
       "${tint_src_dir}/lang/wgsl/program",
-      "${tint_src_dir}/lang/wgsl/resolver",
       "${tint_src_dir}/lang/wgsl/sem",
       "${tint_src_dir}/utils",
       "${tint_src_dir}/utils/containers",
