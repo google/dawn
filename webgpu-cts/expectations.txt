@@ -82,7 +82,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2025-03-17 09:54:19AM
+# Last rolled: 2025-04-02 05:20:12AM
 
 # conflicts_allowed: true
 # full_wildcard_support: true
@@ -389,7 +389,6 @@ crbug.com/42241359 [ android-14 android-pixel-6 ] webgpu:shader,execution,expres
 crbug.com/42241359 [ android-14 android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicSub:* [ Failure ]
 crbug.com/42241359 [ android-14 android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicXor:* [ Failure ]
 crbug.com/42241372 [ android-14 android-pixel-6 ] webgpu:web_platform,external_texture,video:importExternalTexture,* [ Failure ]
-
 
 # Failures due to M2 Macbook OS upgrade
 crbug.com/42241404 [ apple-angle-metal-renderer:-apple-m2 mac ] webgpu:api,operation,resource_init,buffer:copy_texture_to_partial_buffer: [ Failure ]
@@ -859,7 +858,6 @@ crbug.com/407076126 [ dawn-no-backend-validation intel-0x9bc5 linux ] webgpu:api
 crbug.com/407076126 [ dawn-no-backend-validation intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,image_copy:mip_levels:initMethod="WriteTexture";checkMethod="FullCopyT2B";format="rg11b10ufloat";dimension="2d" [ Failure ]
 crbug.com/407076126 [ dawn-no-backend-validation intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,image_copy:mip_levels:initMethod="WriteTexture";checkMethod="FullCopyT2B";format="rg16sint";dimension="2d" [ Failure ]
 
-
 crbug.com/407109052 [ android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,smoothstep:f32:inputSource="storage_r";vectorize=2 [ Failure ]
 crbug.com/407109052 [ android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,smoothstep:f32:inputSource="storage_r";vectorize=3 [ Failure ]
 crbug.com/407109052 [ android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,smoothstep:f32:inputSource="storage_r";vectorize=4 [ Failure ]
@@ -1175,7 +1173,7 @@ crbug.com/407088851 [ nvidia-0x2184 webgpu-dxc-disabled win ] webgpu:shader,exec
 crbug.com/407088851 [ angle-d3d11 desktop graphite-enabled no-clang-coverage release-x64 renderer-skia-gl webgpu-dxc-disabled win ] webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:stage="*";texture_type="texture_depth_multisampled_2d";* [ Failure ]
 
 # One case of textureSampleGrad fails on NVIDIA (Linux/Win)
-crbug.com/407088852 [ nvidia linux ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_array_2d_coords:stage="c";format="rgba16float";filt="linear";modeU="r";modeV="m";offset=false [ Failure ]
+crbug.com/407088852 [ linux nvidia ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_array_2d_coords:stage="c";format="rgba16float";filt="linear";modeU="r";modeV="m";offset=false [ Failure ]
 crbug.com/407088852 [ nvidia win ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_array_2d_coords:stage="c";format="rgba16float";filt="linear";modeU="r";modeV="m";offset=false [ Failure ]
 
 # All textureSample/textureGather tests marked failing on Pixel 6
@@ -1198,7 +1196,7 @@ crbug.com/407109059 [ amd-0x67ef mac ] webgpu:shader,execution,expression,call,b
 crbug.com/407076135 [ apple-angle-metal-renderer:-apple-m2 mac ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:* [ Failure ]
 
 # All textureSampleBias tests marked failing on Linux NVIDIA
-crbug.com/407109061 [ nvidia-0x2184 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:* [ Failure ]
+crbug.com/407109061 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:* [ Failure ]
 
 # All textureSampleBias tests marked failing on Win NVIDIA
 crbug.com/407144388 [ dawn-no-backend-validation nvidia-0x2184 win ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:* [ Failure ]
@@ -1210,12 +1208,12 @@ crbug.com/407144390 [ intel linux ] webgpu:shader,execution,shader_io,fragment_b
 crbug.com/407144390 [ intel linux ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,sample_mask:nearFar=*;sampleCount=4;interpolation={"type":"*","sampling":"sample"} [ Failure ]
 crbug.com/407144390 [ chromeos chromeos-board-volteer ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,position:nearFar=*;sampleCount=4;interpolation={"type":"*","sampling":"sample"} [ Failure ]
 crbug.com/407144390 [ chromeos chromeos-board-volteer ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,sample_mask:nearFar=*;sampleCount=4;interpolation={"type":"*","sampling":"sample"} [ Failure ]
-crbug.com/407144390 [ nvidia-0x2184 linux ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,position:nearFar=*;sampleCount=4;interpolation={"type":"*","sampling":"sample"} [ Failure ]
-crbug.com/407144390 [ nvidia-0x2184 linux ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,sample_mask:nearFar=*;sampleCount=4;interpolation={"type":"*","sampling":"sample"} [ Failure ]
+crbug.com/407144390 [ linux nvidia-0x2184 ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,position:nearFar=*;sampleCount=4;interpolation={"type":"*","sampling":"sample"} [ Failure ]
+crbug.com/407144390 [ linux nvidia-0x2184 ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,sample_mask:nearFar=*;sampleCount=4;interpolation={"type":"*","sampling":"sample"} [ Failure ]
 
 # depth_bias test failures on Linux NVIDIA
-crbug.com/407133970 [ nvidia-0x2184 linux ] webgpu:api,operation,rendering,depth_bias:depth_bias:quadAngle=0;bias=-8388608;biasSlopeScale=0;biasClamp=0.125 [ Failure ]
-crbug.com/407133970 [ nvidia-0x2184 linux ] webgpu:api,operation,rendering,depth_bias:depth_bias:quadAngle=0;bias=8388608;biasSlopeScale=0;biasClamp=0 [ Failure ]
+crbug.com/407133970 [ linux nvidia-0x2184 ] webgpu:api,operation,rendering,depth_bias:depth_bias:quadAngle=0;bias=-8388608;biasSlopeScale=0;biasClamp=0.125 [ Failure ]
+crbug.com/407133970 [ linux nvidia-0x2184 ] webgpu:api,operation,rendering,depth_bias:depth_bias:quadAngle=0;bias=8388608;biasSlopeScale=0;biasClamp=0 [ Failure ]
 
 # subgroupMul failures on Mac AMD
 crbug.com/407133971 [ amd-0x67ef ] webgpu:shader,execution,expression,call,builtin,subgroupMul:compute,* [ Failure ]
@@ -1267,32 +1265,86 @@ crbug.com/0000 [ android-pixel-4 ] webgpu:api,validation,buffer,create:limit: [ 
 crbug.com/0000 [ android-pixel-6 android-t ] webgpu:api,validation,buffer,create:limit: [ Failure ]
 crbug.com/0000 [ dawn-no-backend-validation intel-0x9bc5 no-asan target-cpu-32 webgpu-dxc-disabled win ] webgpu:api,validation,buffer,create:limit: [ Failure ]
 crbug.com/0000 [ linux no-clang-coverage nvidia nvidia_ge_535.183.01 ] webgpu:api,validation,buffer,create:limit: [ Failure ]
+crbug.com/0000 [ android-pixel-4 ] webgpu:api,validation,capability_checks,limits,maxBindGroups:setBindGroup,at_over:limitTest="betweenDefaultAndMaximum";testValueName="atLimit";encoderType="compute" [ Failure ]
+crbug.com/0000 [ android-pixel-4 ] webgpu:api,validation,capability_checks,limits,maxBindGroups:setBindGroup,at_over:limitTest="betweenDefaultAndMaximum";testValueName="atLimit";encoderType="render" [ Failure ]
+crbug.com/0000 [ android-pixel-6 ] webgpu:api,validation,capability_checks,limits,maxSampledTexturesPerShaderStage:createPipeline,at_over:limitTest="betweenDefaultAndMaximum";testValueName="atLimit";async=true;bindingCombination="vertexAndFragmentWithPossibleFragmentStageOverflow";order="backward";bindGroupTest="sameGroup" [ Failure ]
+crbug.com/0000 [ linux nvidia ] webgpu:api,validation,capability_checks,limits,maxSampledTexturesPerShaderStage:createPipeline,at_over:limitTest="underDefault";testValueName="atLimit";async=false;bindingCombination="vertexAndFragmentWithPossibleFragmentStageOverflow";order="forward";bindGroupTest="sameGroup" [ Failure ]
+crbug.com/0000 [ linux nvidia ] webgpu:api,validation,capability_checks,limits,maxStorageBuffersInFragmentStage:createPipeline,at_over:limitTest="betweenDefaultAndMaximum";testValueName="overLimit";async=false [ Failure ]
+crbug.com/0000 [ linux nvidia ] webgpu:api,validation,capability_checks,limits,maxStorageTexturesPerShaderStage:createPipeline,at_over:limitTest="atDefault";testValueName="overLimit";async=false;bindingCombination="vertexAndFragmentWithPossibleFragmentStageOverflow";access="read-only" [ Failure ]
+crbug.com/0000 [ linux nvidia ] webgpu:api,validation,capability_checks,limits,maxStorageTexturesPerShaderStage:createPipeline,at_over:limitTest="betweenDefaultAndMaximum";testValueName="atLimit";async=false;bindingCombination="compute";access="write-only" [ Failure ]
+crbug.com/0000 [ linux nvidia ] webgpu:api,validation,capability_checks,limits,maxStorageTexturesPerShaderStage:createPipeline,at_over:limitTest="betweenDefaultAndMaximum";testValueName="atLimit";async=false;bindingCombination="fragment";access="read-write" [ Failure ]
+crbug.com/0000 [ linux nvidia ] webgpu:api,validation,capability_checks,limits,maxStorageTexturesPerShaderStage:createPipeline,at_over:limitTest="betweenDefaultAndMaximum";testValueName="overLimit";async=false;bindingCombination="compute";access="write-only" [ Failure ]
+crbug.com/0000 [ linux nvidia ] webgpu:api,validation,capability_checks,limits,maxStorageTexturesPerShaderStage:createPipeline,at_over:limitTest="betweenDefaultAndMaximum";testValueName="overLimit";async=true;bindingCombination="vertex";access="read-only" [ Failure ]
+crbug.com/0000 [ linux nvidia ] webgpu:api,validation,capability_checks,limits,maxStorageTexturesPerShaderStage:createPipeline,at_over:limitTest="betweenDefaultAndMaximum";testValueName="overLimit";async=true;bindingCombination="vertexAndFragmentWithPossibleFragmentStageOverflow";access="read-only" [ Failure ]
+crbug.com/0000 [ linux nvidia ] webgpu:api,validation,capability_checks,limits,maxStorageTexturesPerShaderStage:createPipeline,at_over:limitTest="underDefault";testValueName="atLimit";async=true;bindingCombination="compute";access="write-only" [ Failure ]
+crbug.com/0000 [ linux nvidia ] webgpu:api,validation,capability_checks,limits,maxStorageTexturesPerShaderStage:createPipeline,at_over:limitTest="underDefault";testValueName="overLimit";async=true;bindingCombination="vertexAndFragmentWithPossibleVertexStageOverflow";access="read-only" [ Failure ]
 crbug.com/0000 [ android-14 android-pixel-6 ] webgpu:api,validation,createBindGroup:buffer,resource_binding_size:type="read-only-storage" [ Failure ]
 crbug.com/0000 [ android-pixel-4 ] webgpu:api,validation,createBindGroup:buffer,resource_binding_size:type="read-only-storage" [ Failure ]
 crbug.com/0000 [ dawn-no-backend-validation intel-0x9bc5 no-asan target-cpu-32 webgpu-dxc-disabled win ] webgpu:api,validation,createBindGroup:buffer,resource_binding_size:type="read-only-storage" [ Failure ]
 crbug.com/0000 [ linux nvidia ] webgpu:api,validation,createBindGroup:buffer,resource_binding_size:type="read-only-storage" [ Failure ]
+crbug.com/0000 [ nvidia win ] webgpu:api,validation,createBindGroup:buffer,resource_binding_size:type="read-only-storage" [ Failure ]
 crbug.com/0000 [ android-14 android-pixel-6 ] webgpu:api,validation,createBindGroup:buffer,resource_binding_size:type="storage" [ Failure ]
 crbug.com/0000 [ android-pixel-4 ] webgpu:api,validation,createBindGroup:buffer,resource_binding_size:type="storage" [ Failure ]
 crbug.com/0000 [ dawn-no-backend-validation intel-0x4680 linux ] webgpu:api,validation,createBindGroup:buffer,resource_binding_size:type="storage" [ Failure ]
 crbug.com/0000 [ dawn-no-backend-validation intel-0x9bc5 no-asan target-cpu-32 webgpu-dxc-disabled win ] webgpu:api,validation,createBindGroup:buffer,resource_binding_size:type="storage" [ Failure ]
 crbug.com/0000 [ linux nvidia ] webgpu:api,validation,createBindGroup:buffer,resource_binding_size:type="storage" [ Failure ]
+crbug.com/0000 [ nvidia win ] webgpu:api,validation,createBindGroup:storage_texture,format:storageTextureFormat="rg32uint";resourceFormat="r32sint" [ Failure ]
 crbug.com/0000 [ android-pixel-4 ] webgpu:api,validation,encoding,cmds,copyTextureToTexture:copy_aspects:format="depth32float-stencil8" [ Failure ]
+crbug.com/0000 [ android-pixel-6 ] webgpu:api,validation,non_filterable_texture:non_filterable_texture_with_filtering_sampler:* [ Failure ]
 crbug.com/0000 [ dawn-no-backend-validation linux no-clang-coverage nvidia nvidia_ge_535.183.01 webgpu-service-worker ] webgpu:idl,javascript:limits:type="adapter" [ Failure ]
 crbug.com/0000 [ intel win ] webgpu:shader,execution,expression,access,vector,components:concrete_scalar:inputSource="const";elementType="bool";width=4;components="xyzw" [ Failure ]
+crbug.com/0000 [ intel win ] webgpu:shader,execution,expression,binary,i32_arithmetic:multiplication:inputSource="storage_rw";vectorize=3 [ Failure ]
+crbug.com/0000 [ intel win ] webgpu:shader,execution,expression,binary,i32_arithmetic:remainder_vector_scalar:inputSource="storage_rw";vectorize_lhs=2 [ Failure ]
+crbug.com/0000 [ amd mac ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_2d_coords,lodClamp:format="bc1-rgba-unorm";filt="linear" [ Failure ]
+crbug.com/0000 [ amd mac ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_2d_coords,lodClamp:format="bc1-rgba-unorm-srgb";filt="linear" [ Failure ]
+crbug.com/0000 [ amd mac ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_2d_coords,lodClamp:format="bc2-rgba-unorm";filt="linear" [ Failure ]
+crbug.com/0000 [ amd mac ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_2d_coords,lodClamp:format="bc2-rgba-unorm-srgb";filt="linear" [ Failure ]
+crbug.com/0000 [ amd mac ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_2d_coords,lodClamp:format="bc3-rgba-unorm";filt="linear" [ Failure ]
+crbug.com/0000 [ amd mac ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_2d_coords,lodClamp:format="bc3-rgba-unorm-srgb";filt="linear" [ Failure ]
+crbug.com/0000 [ amd mac ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_2d_coords,lodClamp:format="bc4-r-unorm";filt="linear" [ Failure ]
+crbug.com/0000 [ amd mac ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_2d_coords,lodClamp:format="bc5-rg-snorm";filt="linear" [ Failure ]
+crbug.com/0000 [ amd mac ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_2d_coords,lodClamp:format="bc5-rg-unorm";filt="linear" [ Failure ]
+crbug.com/0000 [ amd mac ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_2d_coords,lodClamp:format="bc7-rgba-unorm";filt="linear" [ Failure ]
+crbug.com/0000 [ amd mac ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_2d_coords,lodClamp:format="bc7-rgba-unorm-srgb";filt="linear" [ Failure ]
+crbug.com/0000 [ amd mac ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_2d_coords,lodClamp:format="bgra8unorm";filt="linear" [ Failure ]
+crbug.com/0000 [ amd mac ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_2d_coords,lodClamp:format="bgra8unorm-srgb";filt="linear" [ Failure ]
+crbug.com/0000 [ amd mac ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_2d_coords,lodClamp:format="r16float";filt="linear" [ Failure ]
+crbug.com/0000 [ amd mac ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_2d_coords,lodClamp:format="r32float";filt="linear" [ Failure ]
+crbug.com/0000 [ amd mac ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_2d_coords,lodClamp:format="r8snorm";filt="linear" [ Failure ]
+crbug.com/0000 [ amd mac ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_2d_coords,lodClamp:format="r8unorm";filt="linear" [ Failure ]
+crbug.com/0000 [ amd mac ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_2d_coords,lodClamp:format="rg16float";filt="linear" [ Failure ]
+crbug.com/0000 [ amd mac ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_2d_coords,lodClamp:format="rg32float";filt="linear" [ Failure ]
+crbug.com/0000 [ amd mac ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_2d_coords,lodClamp:format="rg8snorm";filt="linear" [ Failure ]
+crbug.com/0000 [ amd mac ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_2d_coords,lodClamp:format="rg8unorm";filt="linear" [ Failure ]
+crbug.com/0000 [ amd mac ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_2d_coords,lodClamp:format="rgb10a2unorm";filt="linear" [ Failure ]
+crbug.com/0000 [ amd mac ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_2d_coords,lodClamp:format="rgba16float";filt="linear" [ Failure ]
+crbug.com/0000 [ amd mac ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_2d_coords,lodClamp:format="rgba32float";filt="linear" [ Failure ]
+crbug.com/0000 [ amd mac ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_2d_coords,lodClamp:format="rgba8snorm";filt="linear" [ Failure ]
+crbug.com/0000 [ amd mac ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_2d_coords,lodClamp:format="rgba8unorm";filt="linear" [ Failure ]
+crbug.com/0000 [ amd mac ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_2d_coords,lodClamp:format="rgba8unorm-srgb";filt="linear" [ Failure ]
+crbug.com/0000 [ intel linux ] webgpu:shader,execution,expression,call,builtin,textureSampleBaseClampToEdge:2d_coords:stage="f";textureType="texture_external";filt="linear";modeU="r";modeV="r" [ Failure ]
+crbug.com/0000 [ intel linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords,lodClamp:stage="c";format="astc-12x10-unorm";dim="cube";filt="linear" [ Failure ]
+crbug.com/0000 [ intel linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords,lodClamp:stage="c";format="astc-4x4-unorm";dim="cube";filt="linear" [ Failure ]
+crbug.com/0000 [ intel linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords,lodClamp:stage="f";format="astc-12x10-unorm";dim="cube";filt="linear" [ Failure ]
+crbug.com/0000 [ intel linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords,lodClamp:stage="f";format="astc-12x10-unorm";dim="cube";filt="nearest" [ Failure ]
+crbug.com/0000 [ intel linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords,lodClamp:stage="f";format="astc-4x4-unorm";dim="cube";filt="linear" [ Failure ]
+crbug.com/0000 [ intel linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords,lodClamp:stage="v";format="astc-12x10-unorm";dim="cube";filt="linear" [ Failure ]
+crbug.com/0000 [ intel linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords,lodClamp:stage="v";format="astc-4x4-unorm";dim="cube";filt="linear" [ Failure ]
 crbug.com/0000 [ intel mac ] webgpu:shader,execution,expression,call,builtin,texture_utils:weights:stage="compute" [ Failure ]
-crbug.com/0000 [ intel win ] webgpu:shader,execution,expression,unary,ai_arithmetic:negation:inputSource="const";vectorize="_undef_" [ Failure ]
-crbug.com/0000 [ no-clang-coverage nvidia webgpu-dxc-disabled win ] webgpu:shader,execution,statement,discard:derivatives:useStorageBuffers=true [ Failure ]
-crbug.com/0000 [ amd mac ] webgpu:shader,execution,statement,discard:function_call:useStorageBuffers=true [ Failure ]
-crbug.com/0000 [ dawn-backend-validation intel-0x9bc5 linux webgpu-adapter-default ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="bgra8unorm";viewFormatFeature="_undef_" [ Failure ]
-crbug.com/0000 [ dawn-backend-validation intel linux webgpu-adapter-default ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="rgba8unorm";viewFormatFeature="_undef_" [ Failure ]
-crbug.com/0000 [ android-pixel-4 dawn-no-backend-validation webgpu-service-worker ] webgpu:web_platform,canvas,getPreferredCanvasFormat:value: [ Failure ]
-crbug.com/0000 [ intel no-asan release-x64 target-cpu-64 webgpu-adapter-swiftshader webgpu-dxc-enabled webgpu-no-worker win ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:offscreenCanvas,snapshot:format="bgra8unorm";alphaMode="opaque";colorSpace="srgb";snapshotType="convertToBlob" [ Failure ]
-crbug.com/0000 [ intel no-asan release-x64 target-cpu-64 webgpu-adapter-swiftshader webgpu-dxc-enabled webgpu-no-worker win ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:offscreenCanvas,snapshot:format="bgra8unorm";alphaMode="premultiplied";colorSpace="srgb";snapshotType="convertToBlob" [ Failure ]
 crbug.com/0000 [ android-t ] webgpu:shader,execution,expression,constructor,non_zero:concrete_matrix_elements:* [ Failure ]
-crbug.com/0000 [ android-pixel-6 ] webgpu:api,validation,non_filterable_texture:non_filterable_texture_with_filtering_sampler:* [ Failure ]
+crbug.com/0000 [ intel win ] webgpu:shader,execution,expression,unary,ai_arithmetic:negation:inputSource="const";vectorize="_undef_" [ Failure ]
 crbug.com/0000 [ webgpu-dxc-disabled win ] webgpu:shader,execution,limits:struct_members: [ Failure ]
 crbug.com/0000 [ android-r qualcomm ] webgpu:shader,execution,memory_layout:write_layout:* [ Failure ]
 crbug.com/0000 [ android-r ] webgpu:shader,execution,shader_io,vertex_builtins:* [ Failure ]
-crbug.com/0000 [ android-pixel-4 qualcomm webgpu-service-worker ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="bgra8unorm";alphaMode="opaque";colorSpace="display-p3";webgpuCanvasType="offscreen";canvas2DType="offscreen" [ Failure ]
+crbug.com/0000 [ no-clang-coverage nvidia webgpu-dxc-disabled win ] webgpu:shader,execution,statement,discard:derivatives:useStorageBuffers=true [ Failure ]
+crbug.com/0000 [ amd mac ] webgpu:shader,execution,statement,discard:function_call:useStorageBuffers=true [ Failure ]
 crbug.com/0000 [ nvidia-0x2184 win ] webgpu:shader,validation,expression,call,builtin,pow:values:stage="constant";type="vec2%3Cf16%3E" [ Failure ]
+crbug.com/0000 [ dawn-backend-validation intel-0x9bc5 linux webgpu-adapter-default ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="bgra8unorm";viewFormatFeature="_undef_" [ Failure ]
+crbug.com/0000 [ dawn-backend-validation intel linux webgpu-adapter-default ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="rgba8unorm";viewFormatFeature="_undef_" [ Failure ]
+crbug.com/0000 [ android-pixel-4 dawn-no-backend-validation webgpu-service-worker ] webgpu:web_platform,canvas,getPreferredCanvasFormat:value: [ Failure ]
+crbug.com/0000 [ android-pixel-4 qualcomm webgpu-service-worker ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="bgra8unorm";alphaMode="opaque";colorSpace="display-p3";webgpuCanvasType="offscreen";canvas2DType="offscreen" [ Failure ]
+crbug.com/0000 [ intel no-asan release-x64 target-cpu-64 webgpu-adapter-swiftshader webgpu-dxc-enabled webgpu-no-worker win ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:offscreenCanvas,snapshot:format="bgra8unorm";alphaMode="opaque";colorSpace="srgb";snapshotType="convertToBlob" [ Failure ]
+crbug.com/0000 [ intel no-asan release-x64 target-cpu-64 webgpu-adapter-swiftshader webgpu-dxc-enabled webgpu-no-worker win ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:offscreenCanvas,snapshot:format="bgra8unorm";alphaMode="premultiplied";colorSpace="srgb";snapshotType="convertToBlob" [ Failure ]
+crbug.com/0000 [ intel linux ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:alpha="none";orientation="flipY";colorSpaceConversion="default";srcFlipYInCopy=true;dstFormat="rgba8unorm";dstPremultiplied=true [ Failure ]
+crbug.com/0000 [ intel linux ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:videoName="four-colors-vp9-bt601-vflip.mp4";sourceType="VideoFrame";dstColorSpace="srgb" [ Failure ]
 crbug.com/0000 [ intel-0x4680 linux ] webgpu:web_platform,external_texture,video:importExternalTexture,sample:videoName="four-colors-h264-bt601-rotate-270.mp4";sourceType="VideoFrame";dstColorSpace="srgb" [ Failure ]
