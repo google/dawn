@@ -37,6 +37,44 @@
 include(cmd/fuzz/ir/as/BUILD.cmake)
 include(cmd/fuzz/ir/dis/BUILD.cmake)
 
+################################################################################
+# Target:    tint_cmd_fuzz_ir
+# Kind:      lib
+################################################################################
+tint_add_target(tint_cmd_fuzz_ir lib
+  cmd/fuzz/ir/substitute_overrides_config.cc
+  cmd/fuzz/ir/substitute_overrides_config.h
+)
+
+tint_target_add_dependencies(tint_cmd_fuzz_ir lib
+  tint_api_common
+  tint_lang_core
+  tint_lang_core_constant
+  tint_lang_core_ir
+  tint_lang_core_ir_transform
+  tint_lang_core_type
+  tint_lang_wgsl
+  tint_lang_wgsl_ast
+  tint_lang_wgsl_features
+  tint_lang_wgsl_inspector
+  tint_lang_wgsl_program
+  tint_lang_wgsl_sem
+  tint_utils
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_ice
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_rtti
+  tint_utils_symbol
+  tint_utils_text
+)
+
+tint_target_add_external_dependencies(tint_cmd_fuzz_ir lib
+  "src_utils"
+)
+
 if(TINT_BUILD_IR_BINARY AND TINT_BUILD_IR_FUZZER)
 ################################################################################
 # Target:    tint_cmd_fuzz_ir_fuzz_cmd
@@ -141,6 +179,7 @@ tint_add_target(tint_cmd_fuzz_ir_fuzz fuzz
 
 tint_target_add_dependencies(tint_cmd_fuzz_ir_fuzz fuzz
   tint_api_common
+  tint_cmd_fuzz_ir
   tint_lang_core
   tint_lang_core_constant
   tint_lang_core_ir
@@ -150,7 +189,6 @@ tint_target_add_dependencies(tint_cmd_fuzz_ir_fuzz fuzz
   tint_lang_wgsl_ast
   tint_lang_wgsl_common
   tint_lang_wgsl_features
-  tint_lang_wgsl_helpers
   tint_lang_wgsl_program
   tint_lang_wgsl_sem
   tint_utils

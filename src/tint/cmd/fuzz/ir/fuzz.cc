@@ -38,11 +38,11 @@
 #include "src/tint/utils/macros/defer.h"
 
 #if TINT_BUILD_WGSL_READER
+#include "src/tint/cmd/fuzz/ir/substitute_overrides_config.h"
 #include "src/tint/cmd/fuzz/wgsl/fuzz.h"
 #include "src/tint/lang/core/ir/transform/substitute_overrides.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/wgsl/ast/module.h"
-#include "src/tint/lang/wgsl/helpers/apply_substitute_overrides.h"
 #include "src/tint/lang/wgsl/reader/reader.h"
 #endif
 
@@ -75,7 +75,7 @@ void Register(const IRFuzzer& fuzzer) {
             if (program.AST().Enables().Any(tint::wgsl::reader::IsUnsupportedByIR)) {
                 return;
             }
-            auto cfg = tint::wgsl::SubstituteOverridesConfig(program);
+            auto cfg = SubstituteOverridesConfig(program);
 
             auto ir = tint::wgsl::reader::ProgramToLoweredIR(program);
             if (ir != Success) {

@@ -39,26 +39,16 @@ load("@bazel_skylib//lib:selects.bzl", "selects")
 cc_library(
   name = "helpers",
   srcs = [
-    "apply_substitute_overrides.cc",
     "check_supported_extensions.cc",
   ],
   hdrs = [
-    "apply_substitute_overrides.h",
     "check_supported_extensions.h",
   ],
   deps = [
-    "//src/tint/api/common",
     "//src/tint/lang/core",
-    "//src/tint/lang/core/constant",
-    "//src/tint/lang/core/ir",
-    "//src/tint/lang/core/ir/transform",
-    "//src/tint/lang/core/type",
     "//src/tint/lang/wgsl",
     "//src/tint/lang/wgsl/ast",
     "//src/tint/lang/wgsl/features",
-    "//src/tint/lang/wgsl/inspector",
-    "//src/tint/lang/wgsl/program",
-    "//src/tint/lang/wgsl/sem",
     "//src/tint/utils",
     "//src/tint/utils/containers",
     "//src/tint/utils/diagnostic",

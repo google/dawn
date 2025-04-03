@@ -39,25 +39,15 @@
 # Kind:      lib
 ################################################################################
 tint_add_target(tint_lang_wgsl_helpers lib
-  lang/wgsl/helpers/apply_substitute_overrides.cc
-  lang/wgsl/helpers/apply_substitute_overrides.h
   lang/wgsl/helpers/check_supported_extensions.cc
   lang/wgsl/helpers/check_supported_extensions.h
 )
 
 tint_target_add_dependencies(tint_lang_wgsl_helpers lib
-  tint_api_common
   tint_lang_core
-  tint_lang_core_constant
-  tint_lang_core_ir
-  tint_lang_core_ir_transform
-  tint_lang_core_type
   tint_lang_wgsl
   tint_lang_wgsl_ast
   tint_lang_wgsl_features
-  tint_lang_wgsl_inspector
-  tint_lang_wgsl_program
-  tint_lang_wgsl_sem
   tint_utils
   tint_utils_containers
   tint_utils_diagnostic

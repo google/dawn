@@ -25,10 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_WGSL_HELPERS_APPLY_SUBSTITUTE_OVERRIDES_H_
-#define SRC_TINT_LANG_WGSL_HELPERS_APPLY_SUBSTITUTE_OVERRIDES_H_
-
-#include <optional>
+#ifndef SRC_TINT_CMD_FUZZ_IR_SUBSTITUTE_OVERRIDES_CONFIG_H_
+#define SRC_TINT_CMD_FUZZ_IR_SUBSTITUTE_OVERRIDES_CONFIG_H_
 
 #include "src/tint/lang/core/ir/transform/substitute_overrides.h"
 
@@ -37,14 +35,13 @@ namespace tint {
 class Program;
 }
 
-namespace tint::wgsl {
+namespace tint::fuzz::ir {
 
 /// Returns a IR substitute override config which may contain an empty map if there a no overrides
 /// @param program A valid program
 /// @return An IR substitute override config
-tint::core::ir::transform::SubstituteOverridesConfig SubstituteOverridesConfig(
-    const Program& program);
+core::ir::transform::SubstituteOverridesConfig SubstituteOverridesConfig(const Program& program);
 
-}  // namespace tint::wgsl
+}  // namespace tint::fuzz::ir
 
-#endif  // SRC_TINT_LANG_WGSL_HELPERS_APPLY_SUBSTITUTE_OVERRIDES_H_
+#endif  // SRC_TINT_CMD_FUZZ_IR_SUBSTITUTE_OVERRIDES_CONFIG_H_

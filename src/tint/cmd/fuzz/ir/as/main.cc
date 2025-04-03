@@ -32,12 +32,12 @@
 
 #include "src/tint/api/tint.h"
 #include "src/tint/cmd/common/helper.h"
+#include "src/tint/cmd/fuzz/ir/substitute_overrides_config.h"
 #include "src/tint/lang/core/ir/binary/encode.h"
 #include "src/tint/lang/core/ir/disassembler.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/wgsl/ast/module.h"
-#include "src/tint/lang/wgsl/helpers/apply_substitute_overrides.h"
 #include "src/tint/lang/wgsl/reader/reader.h"
 #include "src/tint/utils/command/args.h"
 #include "src/tint/utils/command/cli.h"
@@ -177,7 +177,7 @@ tint::Result<tint::core::ir::Module> GenerateIrModule(const tint::Program& progr
         return tint::Failure{"Unsupported enable used in shader"};
     }
 
-    auto cfg = tint::wgsl::SubstituteOverridesConfig(program);
+    auto cfg = tint::fuzz::ir::SubstituteOverridesConfig(program);
 
     auto ir = tint::wgsl::reader::ProgramToLoweredIR(program);
     if (ir != tint::Success) {

@@ -65,11 +65,6 @@
 #if TINT_BUILD_WGSL_READER
 #include "src/tint/lang/wgsl/reader/program_to_ir/program_to_ir.h"
 #include "src/tint/lang/wgsl/reader/reader.h"
-
-#if TINT_BUILD_IR_BINARY
-#include "src/tint/lang/wgsl/helpers/apply_substitute_overrides.h"
-#endif  // TINT_BUILD_IR_BINARY
-
 #endif  // TINT_BUILD_WGSL_READER
 
 #if TINT_BUILD_SPV_WRITER

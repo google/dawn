@@ -25,7 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/wgsl/helpers/apply_substitute_overrides.h"
+#include "src/tint/cmd/fuzz/ir/substitute_overrides_config.h"
 
 #include <memory>
 #include <utility>
@@ -34,7 +34,7 @@
 #include "src/tint/lang/wgsl/inspector/inspector.h"
 #include "src/tint/lang/wgsl/program/program.h"
 
-namespace tint::wgsl {
+namespace tint::fuzz::ir {
 
 tint::core::ir::transform::SubstituteOverridesConfig SubstituteOverridesConfig(
     const Program& program) {
@@ -52,4 +52,4 @@ tint::core::ir::transform::SubstituteOverridesConfig SubstituteOverridesConfig(
     return cfg;
 }
 
-}  // namespace tint::wgsl
+}  // namespace tint::fuzz::ir

@@ -39,6 +39,38 @@ import("../../../../../scripts/tint_overrides_with_defaults.gni")
 
 import("${tint_src_dir}/tint.gni")
 
+libtint_source_set("ir") {
+  sources = [
+    "substitute_overrides_config.cc",
+    "substitute_overrides_config.h",
+  ]
+  deps = [
+    "${dawn_root}/src/utils:utils",
+    "${tint_src_dir}/api/common",
+    "${tint_src_dir}/lang/core",
+    "${tint_src_dir}/lang/core/constant",
+    "${tint_src_dir}/lang/core/ir",
+    "${tint_src_dir}/lang/core/ir/transform",
+    "${tint_src_dir}/lang/core/type",
+    "${tint_src_dir}/lang/wgsl",
+    "${tint_src_dir}/lang/wgsl/ast",
+    "${tint_src_dir}/lang/wgsl/features",
+    "${tint_src_dir}/lang/wgsl/inspector",
+    "${tint_src_dir}/lang/wgsl/program",
+    "${tint_src_dir}/lang/wgsl/sem",
+    "${tint_src_dir}/utils",
+    "${tint_src_dir}/utils/containers",
+    "${tint_src_dir}/utils/diagnostic",
+    "${tint_src_dir}/utils/ice",
+    "${tint_src_dir}/utils/macros",
+    "${tint_src_dir}/utils/math",
+    "${tint_src_dir}/utils/memory",
+    "${tint_src_dir}/utils/rtti",
+    "${tint_src_dir}/utils/symbol",
+    "${tint_src_dir}/utils/text",
+  ]
+}
+
 tint_fuzz_source_set("fuzz") {
   sources = [
     "fuzz.cc",
@@ -48,6 +80,7 @@ tint_fuzz_source_set("fuzz") {
     "${dawn_root}/src/utils:utils",
     "${tint_src_dir}:thread",
     "${tint_src_dir}/api/common",
+    "${tint_src_dir}/cmd/fuzz/ir",
     "${tint_src_dir}/lang/core",
     "${tint_src_dir}/lang/core/constant",
     "${tint_src_dir}/lang/core/ir",
@@ -57,7 +90,6 @@ tint_fuzz_source_set("fuzz") {
     "${tint_src_dir}/lang/wgsl/ast",
     "${tint_src_dir}/lang/wgsl/common",
     "${tint_src_dir}/lang/wgsl/features",
-    "${tint_src_dir}/lang/wgsl/helpers",
     "${tint_src_dir}/lang/wgsl/program",
     "${tint_src_dir}/lang/wgsl/sem",
     "${tint_src_dir}/utils",
