@@ -224,7 +224,7 @@ Result ValidateUsingDXC(const std::string& dxc_path,
         CHECK_HR(hr, "Disassemble call failed");
 
         CComPtr<IDxcBlobEncoding> disassembly;
-        if (dis_result && dis_result->HasOutput(DXC_OUT_DISASSEMBLY) &&
+        if ((dis_result != nullptr) && dis_result->HasOutput(DXC_OUT_DISASSEMBLY) &&
             SUCCEEDED(
                 dis_result->GetOutput(DXC_OUT_DISASSEMBLY, IID_PPV_ARGS(&disassembly), nullptr))) {
             result.output = static_cast<char*>(disassembly->GetBufferPointer());

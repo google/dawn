@@ -791,7 +791,7 @@ bool IsSampleCountSupported(const dawn::native::vulkan::Device* device,
         DAWN_UNREACHABLE();
     }
 
-    return properties.sampleCounts & imageCreateInfo.samples;
+    return (properties.sampleCounts & imageCreateInfo.samples) != 0u;
 }
 
 Texture::Texture(Device* device, const UnpackedPtr<TextureDescriptor>& descriptor)

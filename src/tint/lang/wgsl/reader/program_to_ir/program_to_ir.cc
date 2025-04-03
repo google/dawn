@@ -194,7 +194,9 @@ class Impl {
 
     diag::Diagnostic& AddError(const Source& source) { return diagnostics_.AddError(source); }
 
-    bool NeedTerminator() { return current_block_ && !current_block_->Terminator(); }
+    bool NeedTerminator() {
+        return (current_block_ != nullptr) && (current_block_->Terminator() == nullptr);
+    }
 
     void SetTerminator(core::ir::Terminator* terminator) {
         TINT_ASSERT(current_block_);

@@ -1341,7 +1341,7 @@ TextureViewBase* TextureBase::APICreateErrorView(const TextureViewDescriptor* de
 }
 
 bool TextureBase::IsImplicitMSAARenderTextureViewSupported() const {
-    return (GetUsage() & wgpu::TextureUsage::TextureBinding) != 0;
+    return GetUsage() & wgpu::TextureUsage::TextureBinding;
 }
 
 void TextureBase::SetSharedResourceMemoryContentsForTesting(
@@ -1366,7 +1366,7 @@ uint64_t TextureBase::ComputeEstimatedByteSize() const {
     // Do not emit a non-zero size for textures that wrap external shared texture memory, or
     // textures used as transient (memoryless) attachments.
     if (GetSharedResourceMemoryContents() != nullptr ||
-        (GetInternalUsage() & wgpu::TextureUsage::TransientAttachment) != 0) {
+        (GetInternalUsage() & wgpu::TextureUsage::TransientAttachment)) {
         return 0;
     }
     uint64_t byteSize = 0;

@@ -2053,7 +2053,8 @@ void Validator::CheckFunction(const Function* func) {
         if (!IsValidFunctionParamType(param->Type())) {
             auto struct_ty = param->Type()->As<core::type::Struct>();
             if (!capabilities_.Contains(Capability::kAllowPointersAndHandlesInStructures) ||
-                !struct_ty || struct_ty->Members().Any([](const core::type::StructMember* m) {
+                (struct_ty == nullptr) ||
+                struct_ty->Members().Any([](const core::type::StructMember* m) {
                     return !IsValidFunctionParamType(m->Type());
                 })) {
                 AddError(param) << "function parameter type, " << NameOf(param->Type())
@@ -2470,7 +2471,7 @@ void Validator::CheckOverride(const Override* o) {
         }
     }
 
-    if (!o->OverrideId().has_value() && !o->Initializer()) {
+    if (!o->OverrideId().has_value() && (o->Initializer() == nullptr)) {
         AddError(o) << "must have an id or an initializer";
         return;
     }
@@ -3095,7 +3096,7 @@ void Validator::CheckAccess(const Access* a) {
     bool ok = true;
     if (obj_view) {
         // Pointer source always means pointer result.
-        ok = want_view && ty == want_view->StoreType();
+        ok = (want_view != nullptr) && ty == want_view->StoreType();
         if (ok) {
             // Also check that the address space and access modes match.
             ok = obj_view->Is<core::type::Pointer>() == want_view->Is<core::type::Pointer>() &&

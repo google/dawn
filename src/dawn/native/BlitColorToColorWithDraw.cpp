@@ -289,7 +289,7 @@ MaybeError ExpandResolveTextureWithDraw(
                         wgpu::TextureViewDimension::e2D);
             pipelineKey.attachmentsToExpandResolve.set(colorIdx);
         }
-        pipelineKey.resolveTargetsMask.set(colorIdx, colorAttachment.resolveTarget);
+        pipelineKey.resolveTargetsMask.set(colorIdx, colorAttachment.resolveTarget != nullptr);
 
         pipelineKey.colorTargetFormats[colorIdx] = format.format;
         pipelineKey.sampleCount = view->GetTexture()->GetSampleCount();

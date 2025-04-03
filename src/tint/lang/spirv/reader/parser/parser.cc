@@ -1595,7 +1595,7 @@ class Parser {
         // in the case of a SPIR-V loop where the header_id and continue_id
         // are the same. We'll be emitting into the IR body, but branch to
         // the header because that's also the continuing in SPIR-V.
-        if (current_blocks_.count(loop->Continuing())) {
+        if (current_blocks_.count(loop->Continuing()) != 0u) {
             if (true_id == merge_id && false_is_header) {
                 EmitWithoutResult(b_.BreakIf(loop, cond));
                 return true;

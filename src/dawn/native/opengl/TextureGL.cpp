@@ -89,7 +89,7 @@ bool RequiresCreatingNewTextureView(
         wgpu::TextureUsage::StorageBinding | wgpu::TextureUsage::TextureBinding;
     constexpr wgpu::TextureUsage kUsageNeedsView =
         kShaderUsageNeedsView | wgpu::TextureUsage::RenderAttachment;
-    if ((texture->GetInternalUsage() & kUsageNeedsView) == 0) {
+    if (!(texture->GetInternalUsage() & kUsageNeedsView)) {
         return false;
     }
 
@@ -102,7 +102,7 @@ bool RequiresCreatingNewTextureView(
 
     // Reinterpretation not required. Now, we only need a new view if the view dimension or
     // set of subresources for the shader is different from the base texture.
-    if ((texture->GetInternalUsage() & kShaderUsageNeedsView) == 0) {
+    if (!(texture->GetInternalUsage() & kShaderUsageNeedsView)) {
         return false;
     }
 
@@ -116,7 +116,7 @@ bool RequiresCreatingNewTextureView(
     }
 
     if (ToBackend(texture)->GetGLFormat().format == GL_DEPTH_STENCIL &&
-        (texture->GetUsage() & wgpu::TextureUsage::TextureBinding) != 0 &&
+        (texture->GetUsage() & wgpu::TextureUsage::TextureBinding) &&
         textureViewDescriptor->aspect == wgpu::TextureAspect::StencilOnly) {
         // We need a separate view for one of the depth or stencil planes
         // because each glTextureView needs it's own handle to set

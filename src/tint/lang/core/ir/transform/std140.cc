@@ -135,7 +135,7 @@ struct State {
         //
         // Due to a bug on Qualcomm devices, we also do this when the *size* of the column vector is
         // not a multiple of 16 bytes (e.g. matCx3 types). See crbug.com/tint/2074.
-        return mat->ColumnType()->Size() & 15;
+        return (mat->ColumnType()->Size() & 0xF) != 0;
     }
 
     /// Rewrite a type if necessary, decomposing contained matrices.

@@ -1482,8 +1482,8 @@ bool FunctionEmitter::IsHandleObj(const spvtools::opt::Instruction& obj) {
     TINT_ASSERT(obj.type_id() != 0u);
     auto* spirv_type = type_mgr_->GetType(obj.type_id());
     TINT_ASSERT(spirv_type);
-    return spirv_type->AsImage() || spirv_type->AsSampler() ||
-           (spirv_type->AsPointer() &&
+    return (spirv_type->AsImage() != nullptr) || (spirv_type->AsSampler() != nullptr) ||
+           ((spirv_type->AsPointer() != nullptr) &&
             (static_cast<spv::StorageClass>(spirv_type->AsPointer()->storage_class()) ==
              spv::StorageClass::UniformConstant));
 }

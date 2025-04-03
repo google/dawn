@@ -112,7 +112,7 @@ bool PhysicalDevice::IsDepthStencilFormatSupported(VkFormat format) const {
     VkFormatProperties properties;
     mVulkanInstance->GetFunctions().GetPhysicalDeviceFormatProperties(mVkPhysicalDevice, format,
                                                                       &properties);
-    return properties.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT;
+    return (properties.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT) != 0;
 }
 
 MaybeError PhysicalDevice::InitializeImpl() {

@@ -380,9 +380,9 @@ int ResourceMemoryAllocator::FindBestTypeIndex(VkMemoryRequirements requirements
         // allocation (note: this is a more important property than that of
         // device local memory and hence is checked first).
         bool currentLazilyAllocated =
-            info.memoryTypes[i].propertyFlags & VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT;
-        bool bestLazilyAllocated =
-            info.memoryTypes[bestType].propertyFlags & VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT;
+            (info.memoryTypes[i].propertyFlags & VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT) != 0u;
+        bool bestLazilyAllocated = (info.memoryTypes[bestType].propertyFlags &
+                                    VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT) != 0u;
         if ((kind == MemoryKind::LazilyAllocated) &&
             (currentLazilyAllocated != bestLazilyAllocated)) {
             if (currentLazilyAllocated) {
@@ -394,9 +394,9 @@ int ResourceMemoryAllocator::FindBestTypeIndex(VkMemoryRequirements requirements
         // For non-mappable, non-lazily-allocated resources, favor device local
         // memory.
         bool currentDeviceLocal =
-            info.memoryTypes[i].propertyFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+            (info.memoryTypes[i].propertyFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT) != 0u;
         bool bestDeviceLocal =
-            info.memoryTypes[bestType].propertyFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+            (info.memoryTypes[bestType].propertyFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT) != 0u;
         if (!mappable && (currentDeviceLocal != bestDeviceLocal)) {
             if (currentDeviceLocal) {
                 bestType = static_cast<int>(i);
@@ -407,9 +407,9 @@ int ResourceMemoryAllocator::FindBestTypeIndex(VkMemoryRequirements requirements
         // Cached memory is optimal for read-only access from CPU as host memory accesses to
         // uncached memory are slower than to cached memory.
         bool currentHostCached =
-            info.memoryTypes[i].propertyFlags & VK_MEMORY_PROPERTY_HOST_CACHED_BIT;
+            (info.memoryTypes[i].propertyFlags & VK_MEMORY_PROPERTY_HOST_CACHED_BIT) != 0u;
         bool bestHostCached =
-            info.memoryTypes[bestType].propertyFlags & VK_MEMORY_PROPERTY_HOST_CACHED_BIT;
+            (info.memoryTypes[bestType].propertyFlags & VK_MEMORY_PROPERTY_HOST_CACHED_BIT) != 0u;
         if ((kind & MemoryKind::ReadMappable) && currentHostCached != bestHostCached) {
             if (currentHostCached) {
                 bestType = static_cast<int>(i);

@@ -141,7 +141,7 @@ AttachmentState::AttachmentState(DeviceBase* device,
         if (colorAttachment.loadOp == wgpu::LoadOp::ExpandResolveTexture) {
             mExpandResolveInfo.attachmentsToExpandResolve.set(i);
         }
-        mExpandResolveInfo.resolveTargetsMask.set(i, colorAttachment.resolveTarget);
+        mExpandResolveInfo.resolveTargetsMask.set(i, colorAttachment.resolveTarget != nullptr);
     }
 
     // Gather the depth-stencil information.

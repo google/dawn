@@ -399,8 +399,8 @@ bool Validator::Pointer(const ast::TemplatedIdentifier* a, const core::type::Poi
 bool Validator::StorageTexture(const core::type::StorageTexture* t, const Source& source) const {
     switch (t->Access()) {
         case core::Access::kRead:
-            if (!allowed_features_.features.count(
-                    wgsl::LanguageFeature::kReadonlyAndReadwriteStorageTextures)) {
+            if (allowed_features_.features.count(
+                    wgsl::LanguageFeature::kReadonlyAndReadwriteStorageTextures) == 0u) {
                 AddError(source) << "read-only storage textures require the "
                                     "readonly_and_readwrite_storage_textures language feature, "
                                     "which is not allowed in the current environment";
@@ -408,8 +408,8 @@ bool Validator::StorageTexture(const core::type::StorageTexture* t, const Source
             }
             break;
         case core::Access::kReadWrite:
-            if (!allowed_features_.features.count(
-                    wgsl::LanguageFeature::kReadonlyAndReadwriteStorageTextures)) {
+            if (allowed_features_.features.count(
+                    wgsl::LanguageFeature::kReadonlyAndReadwriteStorageTextures) == 0u) {
                 AddError(source) << "read-write storage textures require the "
                                     "readonly_and_readwrite_storage_textures language feature, "
                                     "which is not allowed in the current environment";
@@ -684,8 +684,9 @@ bool Validator::AddressSpaceLayout(const core::type::Type* store_ty,
             // alignment requirement of the address space.
             auto* align_attr =
                 ast::GetAttribute<ast::StructMemberAlignAttribute>(m->Declaration()->attributes);
-            if (align_attr && !enabled_extensions_.Contains(
-                                  wgsl::Extension::kChromiumInternalRelaxedUniformLayout)) {
+            if ((align_attr != nullptr) &&
+                !enabled_extensions_.Contains(
+                    wgsl::Extension::kChromiumInternalRelaxedUniformLayout)) {
                 auto align = sem_.GetVal(align_attr->expr)->ConstantValue()->ValueAs<uint32_t>();
                 if (align % required_align != 0) {
                     AddError(align_attr->expr->source)
@@ -1149,7 +1150,7 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
             }
             auto* arr = type->As<sem::Array>();
             if (!ignore_clip_distances_type_validation &&
-                !(arr && arr->ElemType()->Is<core::type::F32>() &&
+                !((arr != nullptr) && arr->ElemType()->Is<core::type::F32>() &&
                   arr->ConstantCount().has_value() &&
                   *arr->ConstantCount() <= kMaxClipDistancesSize)) {
                 AddError(attr->source)
@@ -1785,9 +1786,9 @@ bool Validator::Call(const sem::Call* call, sem::Statement* current_statement) c
     }
 
     auto* expr = call->Declaration();
-    bool is_call_stmt =
-        current_statement && Is<ast::CallStatement>(current_statement->Declaration(),
-                                                    [&](auto* stmt) { return stmt->expr == expr; });
+    bool is_call_stmt = (current_statement != nullptr) &&
+                        Is<ast::CallStatement>(current_statement->Declaration(),
+                                               [&](auto* stmt) { return stmt->expr == expr; });
     if (is_call_stmt) {
         // Call target is annotated with @must_use, but was used as a call statement.
         Switch(
@@ -2222,8 +2223,8 @@ bool Validator::FunctionCall(const sem::Call* call, sem::Statement* current_stat
         }
 
         if (param_type->Is<core::type::Pointer>() &&
-            !allowed_features_.features.count(
-                wgsl::LanguageFeature::kUnrestrictedPointerParameters)) {
+            (allowed_features_.features.count(
+                 wgsl::LanguageFeature::kUnrestrictedPointerParameters) == 0u)) {
             // https://gpuweb.github.io/gpuweb/wgsl/#function-restriction
             // Each argument of pointer type to a user-defined function must have the same memory
             // view as its root identifier.

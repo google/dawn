@@ -500,7 +500,8 @@ MaybeError ValidateBindGroupDescriptor(DeviceBase* device,
         // TODO(42240282): Store external textures in
         // BindGroupLayoutBase::BindingDataPointers::bindings so checking external textures can
         // be moved in the switch below.
-        if (layout->GetExternalTextureBindingExpansionMap().count(BindingNumber(entry.binding))) {
+        if (layout->GetExternalTextureBindingExpansionMap().count(BindingNumber(entry.binding)) !=
+            0u) {
             UnpackedPtr<BindGroupEntry> unpacked;
             DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(&entry));
             if (auto* externalTextureBindingEntry = unpacked.Get<ExternalTextureBindingEntry>()) {

@@ -895,16 +895,16 @@ bool DawnTestBase::IsSwiftshader() const {
 }
 
 bool DawnTestBase::IsANGLE() const {
-    return !mParam.adapterProperties.name.find("ANGLE");
+    return mParam.adapterProperties.name.find("ANGLE") == 0u;
 }
 
 bool DawnTestBase::IsANGLESwiftShader() const {
-    return !mParam.adapterProperties.name.find("ANGLE") &&
+    return (mParam.adapterProperties.name.find("ANGLE") == 0u) &&
            (mParam.adapterProperties.name.find("SwiftShader") != std::string::npos);
 }
 
 bool DawnTestBase::IsANGLED3D11() const {
-    return !mParam.adapterProperties.name.find("ANGLE") &&
+    return (mParam.adapterProperties.name.find("ANGLE") == 0u) &&
            (mParam.adapterProperties.name.find("Direct3D11") != std::string::npos);
 }
 
@@ -1250,9 +1250,9 @@ void DawnTestBase::SetUp() {
     WGPUInstanceDescriptor instanceDesc = {};
     WGPUDawnWireWGSLControl wgslControl;
     wgslControl.chain.sType = WGPUSType_DawnWireWGSLControl;
-    wgslControl.enableExperimental = true;
-    wgslControl.enableTesting = true;
-    wgslControl.enableUnsafe = true;
+    wgslControl.enableExperimental = 1u;
+    wgslControl.enableTesting = 1u;
+    wgslControl.enableUnsafe = 1u;
     instanceDesc.nextInChain = &wgslControl.chain;
     wgslControl.chain.next = nullptr;
     instance = mWireHelper->RegisterInstance(gTestEnv->GetInstance()->Get(), &instanceDesc);

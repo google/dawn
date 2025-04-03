@@ -253,10 +253,10 @@ bool Lexer::is_bom() const {
 }
 
 bool Lexer::is_digit(char ch) const {
-    return std::isdigit(static_cast<unsigned char>(ch));
+    return std::isdigit(static_cast<unsigned char>(ch)) != 0;
 }
 bool Lexer::is_hex(char ch) const {
-    return std::isxdigit(static_cast<unsigned char>(ch));
+    return std::isxdigit(static_cast<unsigned char>(ch)) != 0;
 }
 
 bool Lexer::matches(uint32_t pos, std::string_view sub_string) {

@@ -487,7 +487,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
     VkShaderModuleCreateInfo createInfo;
     createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
     createInfo.pNext = nullptr;
-    createInfo.flags = 0;
+    createInfo.flags = 0u;
     createInfo.codeSize = compilation->spirv.size() * sizeof(uint32_t);
     createInfo.pCode = compilation->spirv.data();
 

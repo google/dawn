@@ -121,7 +121,7 @@ bool ExecutableExists(const std::string& path) {
     if (stat(path.c_str(), &s) != 0) {
         return false;
     }
-    return s.st_mode & S_IXUSR;
+    return (s.st_mode & S_IXUSR) != 0u;
 }
 
 std::string GetCWD() {

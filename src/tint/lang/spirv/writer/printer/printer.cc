@@ -1013,11 +1013,13 @@ class Printer {
         uint32_t false_label = merge_label;
 
         if (true_block->Length() > 1 || !i->Results().IsEmpty() ||
-            (true_block->Terminator() && !true_block->Terminator()->Is<core::ir::ExitIf>())) {
+            ((true_block->Terminator() != nullptr) &&
+             !true_block->Terminator()->Is<core::ir::ExitIf>())) {
             true_label = Label(true_block);
         }
         if (false_block->Length() > 1 || !i->Results().IsEmpty() ||
-            (false_block->Terminator() && !false_block->Terminator()->Is<core::ir::ExitIf>())) {
+            ((false_block->Terminator() != nullptr) &&
+             !false_block->Terminator()->Is<core::ir::ExitIf>())) {
             false_label = Label(false_block);
         }
 

@@ -301,7 +301,7 @@ interop::Interface<interop::WGSLLanguageFeatures> GPU::getWgslLanguageFeatures(N
             if (!interop::Converter<interop::WGSLLanguageFeatureName>::FromString(name, feature)) {
                 return false;
             }
-            return features_.count(feature);
+            return features_.count(feature) != 0u;
         }
         std::vector<std::string> keys(Napi::Env env) {
             std::vector<std::string> out;

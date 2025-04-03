@@ -1602,7 +1602,7 @@ TEST_P(SharedTextureMemoryTests, UninitializedTextureIsCleared) {
         // Skipped for multiplanar formats because those must be initialized on import.
         // We also need render attachment usage to initially populate the texture.
         if (utils::IsMultiPlanarFormat(properties.format) ||
-            (properties.usage & wgpu::TextureUsage::RenderAttachment) == 0) {
+            !(properties.usage & wgpu::TextureUsage::RenderAttachment)) {
             continue;
         }
 

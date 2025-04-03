@@ -419,7 +419,8 @@ MaybeError RenderPipeline::InitializeImpl() {
     inputAssembly.pNext = nullptr;
     inputAssembly.flags = 0;
     inputAssembly.topology = VulkanPrimitiveTopology(GetPrimitiveTopology());
-    inputAssembly.primitiveRestartEnable = ShouldEnablePrimitiveRestart(GetPrimitiveTopology());
+    inputAssembly.primitiveRestartEnable =
+        ShouldEnablePrimitiveRestart(GetPrimitiveTopology()) ? VK_TRUE : VK_FALSE;
 
     // A placeholder viewport/scissor info. The validation layers force use to provide at least
     // one scissor and one viewport here, even if we choose to make them dynamic.
@@ -448,12 +449,12 @@ MaybeError RenderPipeline::InitializeImpl() {
     rasterization.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
     rasterization.pNext = nullptr;
     rasterization.flags = 0;
-    rasterization.depthClampEnable = HasUnclippedDepth();
+    rasterization.depthClampEnable = HasUnclippedDepth() ? VK_TRUE : VK_FALSE;
     rasterization.rasterizerDiscardEnable = VK_FALSE;
     rasterization.polygonMode = VK_POLYGON_MODE_FILL;
     rasterization.cullMode = VulkanCullMode(GetCullMode());
     rasterization.frontFace = VulkanFrontFace(GetFrontFace());
-    rasterization.depthBiasEnable = IsDepthBiasEnabled();
+    rasterization.depthBiasEnable = IsDepthBiasEnabled() ? VK_TRUE : VK_FALSE;
     rasterization.depthBiasConstantFactor = GetDepthBias();
     rasterization.depthBiasClamp = GetDepthBiasClamp();
     rasterization.depthBiasSlopeFactor = GetDepthBiasSlopeScale();
@@ -472,7 +473,7 @@ MaybeError RenderPipeline::InitializeImpl() {
     DAWN_ASSERT(multisample.rasterizationSamples <= 32);
     VkSampleMask sampleMask = GetSampleMask();
     multisample.pSampleMask = &sampleMask;
-    multisample.alphaToCoverageEnable = IsAlphaToCoverageEnabled();
+    multisample.alphaToCoverageEnable = IsAlphaToCoverageEnabled() ? VK_TRUE : VK_FALSE;
     multisample.alphaToOneEnable = VK_FALSE;
 
     VkPipelineDepthStencilStateCreateInfo depthStencilState = ComputeDepthStencilDesc();
@@ -697,7 +698,7 @@ VkPipelineDepthStencilStateCreateInfo RenderPipeline::ComputeDepthStencilDesc() 
     depthStencilState.depthWriteEnable =
         descriptor->depthWriteEnabled == wgpu::OptionalBool::True ? VK_TRUE : VK_FALSE;
     depthStencilState.depthCompareOp = ToVulkanCompareOp(descriptor->depthCompare);
-    depthStencilState.depthBoundsTestEnable = false;
+    depthStencilState.depthBoundsTestEnable = VK_FALSE;
     depthStencilState.minDepthBounds = 0.0f;
     depthStencilState.maxDepthBounds = 1.0f;
 

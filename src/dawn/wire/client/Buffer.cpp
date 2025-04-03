@@ -51,7 +51,7 @@ namespace {
     WGPUBufferDescriptor errorBufferDescriptor = *descriptor;
     WGPUDawnBufferDescriptorErrorInfoFromWireClient errorInfo = {};
     errorInfo.chain.sType = WGPUSType_DawnBufferDescriptorErrorInfoFromWireClient;
-    errorInfo.outOfMemory = true;
+    errorInfo.outOfMemory = static_cast<WGPUBool>(true);
     errorBufferDescriptor.nextInChain = &errorInfo.chain;
     return device->CreateErrorBuffer(&errorBufferDescriptor);
 }
@@ -195,7 +195,7 @@ WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor
             case WGPUSType_DawnFakeBufferOOMForTesting: {
                 auto oomForTesting =
                     reinterpret_cast<const WGPUDawnFakeBufferOOMForTesting*>(chain);
-                fakeOOMAtWireClientMap = oomForTesting->fakeOOMAtWireClientMap;
+                fakeOOMAtWireClientMap = (oomForTesting->fakeOOMAtWireClientMap != 0u);
             } break;
             default:
                 break;
@@ -204,7 +204,7 @@ WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor
 
     bool mappable =
         (descriptor->usage & (WGPUBufferUsage_MapRead | WGPUBufferUsage_MapWrite)) != 0 ||
-        descriptor->mappedAtCreation;
+        wgpu::Bool(descriptor->mappedAtCreation);
     if (mappable &&
         (descriptor->size >= std::numeric_limits<size_t>::max() || fakeOOMAtWireClientMap)) {
         return ReturnOOMAtClient(device, descriptor);
@@ -323,7 +323,7 @@ Buffer::Buffer(const ObjectBaseParams& params,
       mUsage(static_cast<WGPUBufferUsage>(descriptor->usage)),
       // This flag is for the write handle created by mappedAtCreation
       // instead of MapWrite usage. We don't have such a case for read handle.
-      mDestructWriteHandleOnUnmap(descriptor->mappedAtCreation &&
+      mDestructWriteHandleOnUnmap(wgpu::Bool(descriptor->mappedAtCreation) &&
                                   ((descriptor->usage & WGPUBufferUsage_MapWrite) == 0)),
       mDevice(device) {}
 

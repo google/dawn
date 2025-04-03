@@ -237,7 +237,7 @@ inspector::Override MkOverride(const sem::GlobalVariable* global, OverrideId id)
         TINT_UNREACHABLE();
     }
 
-    override.is_initialized = global->Declaration()->initializer;
+    override.is_initialized = (global->Declaration()->initializer != nullptr);
     override.is_id_specified =
         ast::HasAttribute<ast::IdAttribute>(global->Declaration()->attributes);
     return override;
@@ -635,7 +635,7 @@ const Inspector::EntryPointTextureMetadata& Inspector::ComputeTextureMetadata(
     auto declarations = sem.Module()->DependencyOrderedDeclarations();
     for (auto rit = declarations.rbegin(); rit != declarations.rend(); rit++) {
         auto* fn = sem.Get<sem::Function>(*rit);
-        if (!fn || !fn->HasCallGraphEntryPoint(entry_point_symbol)) {
+        if ((fn == nullptr) || !fn->HasCallGraphEntryPoint(entry_point_symbol)) {
             continue;
         }
 

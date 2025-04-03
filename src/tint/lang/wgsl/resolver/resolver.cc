@@ -1948,7 +1948,7 @@ bool Resolver::MaybeMaterializeAndLoadArguments(Vector<const sem::ValueExpressio
 
 bool Resolver::ShouldMaterializeArgument(const core::type::Type* parameter_ty) const {
     const auto* param_el_ty = parameter_ty->DeepestElement();
-    return param_el_ty && !param_el_ty->Is<core::type::AbstractNumeric>();
+    return (param_el_ty != nullptr) && !param_el_ty->Is<core::type::AbstractNumeric>();
 }
 
 bool Resolver::Convert(const core::constant::Value*& c,
@@ -2013,7 +2013,8 @@ sem::ValueExpression* Resolver::IndexAccessor(const ast::IndexAccessorExpression
     const core::type::Type* storage_ty = object_ty->UnwrapRef();
     if (memory_view) {
         if (memory_view->Is<core::type::Pointer>() &&
-            !allowed_features_.features.count(wgsl::LanguageFeature::kPointerCompositeAccess)) {
+            (allowed_features_.features.count(wgsl::LanguageFeature::kPointerCompositeAccess) ==
+             0u)) {
             AddError(expr->source)
                 << "pointer composite access requires the pointer_composite_access language "
                    "feature, which is not allowed in the current environment";
@@ -3231,7 +3232,7 @@ bool Resolver::CheckTemplatedIdentifierArgs(const ast::TemplatedIdentifier* iden
             return false;
         }
     }
-    return ident;
+    return ident != nullptr;
 }
 
 size_t Resolver::NestDepth(const core::type::Type* ty) const {
@@ -3528,7 +3529,8 @@ sem::ValueExpression* Resolver::MemberAccessor(const ast::MemberAccessorExpressi
     const core::type::Type* storage_ty = object_ty->UnwrapRef();
     if (memory_view) {
         if (memory_view->Is<core::type::Pointer>() &&
-            !allowed_features_.features.count(wgsl::LanguageFeature::kPointerCompositeAccess)) {
+            (allowed_features_.features.count(wgsl::LanguageFeature::kPointerCompositeAccess) ==
+             0u)) {
             AddError(expr->source)
                 << "pointer composite access requires the pointer_composite_access language "
                    "feature, which is not allowed in the current environment";
