@@ -28,7 +28,7 @@
 #ifndef SRC_TINT_LANG_SPIRV_READER_COMMON_OPTIONS_H_
 #define SRC_TINT_LANG_SPIRV_READER_COMMON_OPTIONS_H_
 
-#include "src/tint/lang/wgsl/common/allowed_features.h"
+#include "src/tint/lang/wgsl/allowed_features.h"
 
 namespace tint::spirv::reader {
 

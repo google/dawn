@@ -35,7 +35,6 @@
 ################################################################################
 
 include(lang/wgsl/ast/BUILD.cmake)
-include(lang/wgsl/common/BUILD.cmake)
 include(lang/wgsl/inspector/BUILD.cmake)
 include(lang/wgsl/intrinsic/BUILD.cmake)
 include(lang/wgsl/ir/BUILD.cmake)
@@ -51,6 +50,7 @@ include(lang/wgsl/writer/BUILD.cmake)
 # Kind:      lib
 ################################################################################
 tint_add_target(tint_lang_wgsl lib
+  lang/wgsl/allowed_features.h
   lang/wgsl/builtin_fn.cc
   lang/wgsl/builtin_fn.h
   lang/wgsl/diagnostic_rule.cc
@@ -63,6 +63,8 @@ tint_add_target(tint_lang_wgsl lib
   lang/wgsl/feature_status.h
   lang/wgsl/language_feature.cc
   lang/wgsl/language_feature.h
+  lang/wgsl/reserved_words.cc
+  lang/wgsl/reserved_words.h
 )
 
 tint_target_add_dependencies(tint_lang_wgsl lib
@@ -86,6 +88,7 @@ tint_target_add_external_dependencies(tint_lang_wgsl lib
 # Kind:      test
 ################################################################################
 tint_add_target(tint_lang_wgsl_test test
+  lang/wgsl/allowed_features_test.cc
   lang/wgsl/diagnostic_rule_test.cc
   lang/wgsl/diagnostic_severity_test.cc
   lang/wgsl/extension_test.cc
@@ -102,7 +105,6 @@ tint_target_add_dependencies(tint_lang_wgsl_test test
   tint_lang_core_type
   tint_lang_wgsl
   tint_lang_wgsl_ast
-  tint_lang_wgsl_common
   tint_lang_wgsl_program
   tint_lang_wgsl_sem
   tint_lang_wgsl_writer_ir_to_program

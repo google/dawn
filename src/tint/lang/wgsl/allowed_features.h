@@ -1,4 +1,4 @@
-// Copyright 2025 The Dawn & Tint Authors
+// Copyright 2023 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,16 +25,47 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_WGSL_COMMON_RESERVED_WORDS_H_
-#define SRC_TINT_LANG_WGSL_COMMON_RESERVED_WORDS_H_
+#ifndef SRC_TINT_LANG_WGSL_ALLOWED_FEATURES_H_
+#define SRC_TINT_LANG_WGSL_ALLOWED_FEATURES_H_
 
-#include <string_view>
+#include <unordered_set>
+
+#include "src/tint/lang/wgsl/extension.h"
+#include "src/tint/lang/wgsl/language_feature.h"
+#include "src/tint/utils/reflection.h"
 
 namespace tint::wgsl {
 
-// https://gpuweb.github.io/gpuweb/wgsl.html#reserved-keywords
-bool IsReserved(std::string_view s);
+/// AllowedFeatures describes the set of extensions and language features that are allowed by the
+/// current environment.
+struct AllowedFeatures {
+    /// The extensions that are allowed.
+    std::unordered_set<wgsl::Extension> extensions;
+    /// The language features that are allowed.
+    std::unordered_set<wgsl::LanguageFeature> features;
+
+    /// Helper to produce an AllowedFeatures object that allows all extensions and features.
+    /// @returns the AllowedFeatures object
+    static AllowedFeatures Everything() {
+        AllowedFeatures allowed_features;
+
+        // Allow all extensions.
+        for (auto extension : wgsl::kAllExtensions) {
+            allowed_features.extensions.insert(extension);
+        }
+
+        // Allow all language features.
+        for (auto feature : wgsl::kAllLanguageFeatures) {
+            allowed_features.features.insert(feature);
+        }
+
+        return allowed_features;
+    }
+
+    /// Reflect the fields of this class so that it can be used by tint::ForeachField().
+    TINT_REFLECT(AllowedFeatures, extensions, features);
+};
 
 }  // namespace tint::wgsl
 
-#endif  // SRC_TINT_LANG_WGSL_COMMON_RESERVED_WORDS_H_
+#endif  // SRC_TINT_LANG_WGSL_ALLOWED_FEATURES_H_

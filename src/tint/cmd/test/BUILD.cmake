@@ -64,7 +64,6 @@ tint_target_add_dependencies(tint_cmd_test_test_cmd test_cmd
   tint_lang_spirv_reader_lower_test
   tint_lang_spirv_type_test
   tint_lang_wgsl_ast_test
-  tint_lang_wgsl_common_test
   tint_lang_wgsl_intrinsic_test
   tint_lang_wgsl_program_test
   tint_lang_wgsl_reader_lower_test

@@ -89,7 +89,6 @@ tint_target_add_dependencies(tint_lang_wgsl_program_test test
   tint_lang_wgsl
   tint_lang_wgsl_ast
   tint_lang_wgsl_ast_test
-  tint_lang_wgsl_common
   tint_lang_wgsl_program
   tint_lang_wgsl_resolver
   tint_lang_wgsl_sem
@@ -124,7 +123,6 @@ tint_target_add_dependencies(tint_lang_wgsl_program_fuzz fuzz
   tint_lang_core_type
   tint_lang_wgsl
   tint_lang_wgsl_ast
-  tint_lang_wgsl_common
   tint_lang_wgsl_program
   tint_lang_wgsl_resolver
   tint_lang_wgsl_sem

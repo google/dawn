@@ -34,6 +34,7 @@
 
 #include "src/tint/lang/core/address_space.h"
 #include "src/tint/lang/core/builtin_type.h"
+#include "src/tint/lang/wgsl/allowed_features.h"
 #include "src/tint/lang/wgsl/ast/alias.h"
 #include "src/tint/lang/wgsl/ast/function.h"
 #include "src/tint/lang/wgsl/ast/identifier.h"
@@ -41,7 +42,6 @@
 #include "src/tint/lang/wgsl/ast/struct.h"
 #include "src/tint/lang/wgsl/ast/variable.h"
 #include "src/tint/lang/wgsl/builtin_fn.h"
-#include "src/tint/lang/wgsl/common/allowed_features.h"
 #include "src/tint/lang/wgsl/reader/options.h"
 #include "src/tint/lang/wgsl/reader/reader.h"
 #include "src/tint/utils/containers/vector.h"

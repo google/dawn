@@ -45,14 +45,17 @@ cc_library(
     "extension.cc",
     "feature_status.cc",
     "language_feature.cc",
+    "reserved_words.cc",
   ],
   hdrs = [
+    "allowed_features.h",
     "builtin_fn.h",
     "diagnostic_rule.h",
     "diagnostic_severity.h",
     "extension.h",
     "feature_status.h",
     "language_feature.h",
+    "reserved_words.h",
   ],
   deps = [
     "//src/tint/utils",
@@ -73,6 +76,7 @@ cc_library(
   name = "test",
   alwayslink = True,
   srcs = [
+    "allowed_features_test.cc",
     "diagnostic_rule_test.cc",
     "diagnostic_severity_test.cc",
     "extension_test.cc",
@@ -97,7 +101,6 @@ cc_library(
     "//src/tint/lang/core/type",
     "//src/tint/lang/wgsl",
     "//src/tint/lang/wgsl/ast",
-    "//src/tint/lang/wgsl/common",
     "//src/tint/lang/wgsl/program",
     "//src/tint/lang/wgsl/sem",
     "//src/tint/lang/wgsl/writer/ir_to_program",

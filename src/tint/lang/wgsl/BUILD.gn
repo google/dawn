@@ -45,6 +45,7 @@ if (tint_build_unittests || tint_build_benchmarks) {
 
 libtint_source_set("wgsl") {
   sources = [
+    "allowed_features.h",
     "builtin_fn.cc",
     "builtin_fn.h",
     "diagnostic_rule.cc",
@@ -57,6 +58,8 @@ libtint_source_set("wgsl") {
     "feature_status.h",
     "language_feature.cc",
     "language_feature.h",
+    "reserved_words.cc",
+    "reserved_words.h",
   ]
   deps = [
     "${dawn_root}/src/utils:utils",
@@ -74,6 +77,7 @@ libtint_source_set("wgsl") {
 if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {
     sources = [
+      "allowed_features_test.cc",
       "diagnostic_rule_test.cc",
       "diagnostic_severity_test.cc",
       "extension_test.cc",
@@ -91,7 +95,6 @@ if (tint_build_unittests) {
       "${tint_src_dir}/lang/core/type",
       "${tint_src_dir}/lang/wgsl",
       "${tint_src_dir}/lang/wgsl/ast",
-      "${tint_src_dir}/lang/wgsl/common",
       "${tint_src_dir}/lang/wgsl/program",
       "${tint_src_dir}/lang/wgsl/sem",
       "${tint_src_dir}/lang/wgsl/writer/ir_to_program",

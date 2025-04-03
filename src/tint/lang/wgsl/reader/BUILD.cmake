@@ -58,7 +58,6 @@ tint_target_add_dependencies(tint_lang_wgsl_reader lib
   tint_lang_core_type
   tint_lang_wgsl
   tint_lang_wgsl_ast
-  tint_lang_wgsl_common
   tint_lang_wgsl_program
   tint_lang_wgsl_reader_lower
   tint_lang_wgsl_resolver
@@ -99,7 +98,6 @@ tint_add_target(tint_lang_wgsl_reader_test test
 
 tint_target_add_dependencies(tint_lang_wgsl_reader_test test
   tint_lang_wgsl
-  tint_lang_wgsl_common
   tint_utils
   tint_utils_containers
   tint_utils_ice
@@ -139,7 +137,6 @@ tint_target_add_dependencies(tint_lang_wgsl_reader_bench bench
   tint_lang_core_type
   tint_lang_wgsl
   tint_lang_wgsl_ast
-  tint_lang_wgsl_common
   tint_lang_wgsl_program
   tint_lang_wgsl_sem
   tint_utils

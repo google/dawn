@@ -158,7 +158,6 @@ if (tint_build_benchmarks) {
         "${tint_src_dir}/lang/wgsl",
         "${tint_src_dir}/lang/wgsl/ast",
         "${tint_src_dir}/lang/wgsl/ast/transform",
-        "${tint_src_dir}/lang/wgsl/common",
         "${tint_src_dir}/lang/wgsl/inspector",
         "${tint_src_dir}/lang/wgsl/program",
         "${tint_src_dir}/lang/wgsl/sem",

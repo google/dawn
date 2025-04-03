@@ -171,7 +171,6 @@ tint_target_add_dependencies(tint_lang_hlsl_writer_bench bench
   tint_lang_hlsl_writer_helpers
   tint_lang_wgsl
   tint_lang_wgsl_ast
-  tint_lang_wgsl_common
   tint_lang_wgsl_program
   tint_lang_wgsl_sem
   tint_utils
