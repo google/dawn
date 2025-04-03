@@ -83,6 +83,7 @@ function(tint_core_compile_options TARGET)
   target_compile_definitions(${TARGET} PUBLIC -DTINT_BUILD_WGSL_READER=$<BOOL:${TINT_BUILD_WGSL_READER}>)
   target_compile_definitions(${TARGET} PUBLIC -DTINT_BUILD_WGSL_WRITER=$<BOOL:${TINT_BUILD_WGSL_WRITER}>)
   target_compile_definitions(${TARGET} PUBLIC -DTINT_BUILD_TINTD=$<BOOL:${TINT_BUILD_TINTD}>)
+  target_compile_definitions(${TARGET} PUBLIC -DTINT_ENABLE_IR_VALIDATION=$<BOOL:${TINT_ENABLE_IR_VALIDATION}>)
 
   if(TINT_BUILD_FUZZERS)
     target_compile_options(${TARGET} PRIVATE "-fsanitize=fuzzer")

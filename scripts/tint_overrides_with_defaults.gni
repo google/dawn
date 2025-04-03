@@ -154,6 +154,11 @@ declare_args() {
   if (!defined(tint_build_benchmarks)) {
     tint_build_benchmarks = true
   }
+
+  # Enable Tint IR validation for backend codegen.
+  if (!defined(tint_enable_ir_validation)) {
+    tint_enable_ir_validation = is_debug
+  }
 }
 
 declare_args() {

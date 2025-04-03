@@ -147,6 +147,12 @@ config("tint_public_config") {
     defines += [ "TINT_BUILD_IS_LINUX=0" ]
   }
 
+  if (tint_enable_ir_validation) {
+    defines += [ "TINT_ENABLE_IR_VALIDATION=1" ]
+  } else {
+    defines += [ "TINT_ENABLE_IR_VALIDATION=0" ]
+  }
+
   include_dirs = [
     "${tint_root_dir}/",
     "${tint_root_dir}/include/",

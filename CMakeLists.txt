@@ -52,6 +52,12 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_DEBUG_POSTFIX "")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+set(IS_DEBUG_BUILD 0)
+string(TOUPPER "${CMAKE_BUILD_TYPE}" build_type)
+if ((NOT ${build_type} STREQUAL "RELEASE") AND (NOT ${build_type} STREQUAL "RELWITHDEBINFO"))
+  set(IS_DEBUG_BUILD 1)
+endif()
+
 include(DawnSetIfNotDefined)
 
 set(DAWN_BUILD_GEN_DIR "${Dawn_BINARY_DIR}/gen" CACHE PATH "Directory that contains generated source files")
@@ -251,6 +257,7 @@ endif()
 
 option(TINT_BUILD_TINTD "Build the WGSL language server" OFF)
 
+option(TINT_ENABLE_IR_VALIDATION "Enable IR validation for backend codegen" ${IS_DEBUG_BUILD})
 option(TINT_ENABLE_BREAK_IN_DEBUGGER "Enable tint::debugger::Break()" OFF)
 option(TINT_CHECK_CHROMIUM_STYLE "Check for [chromium-style] issues during build" OFF)
 option(TINT_RANDOMIZE_HASHES "Randomize the hash seed value to detect non-deterministic output" OFF)
@@ -274,6 +281,7 @@ message(STATUS "Tint build benchmarks: ${TINT_BUILD_BENCHMARKS}")
 message(STATUS "Tint build tests: ${TINT_BUILD_TESTS}")
 message(STATUS "Tint build tintd: ${TINT_BUILD_TINTD}")
 message(STATUS "")
+message(STATUS "Tint enable IR validation: ${TINT_ENABLE_IR_VALIDATION}")
 message(STATUS "Tint enable break in debugger: ${TINT_ENABLE_BREAK_IN_DEBUGGER}")
 message(STATUS "Tint build checking [chromium-style]: ${TINT_CHECK_CHROMIUM_STYLE}")
 message(STATUS "Tint randomize hashes: ${TINT_RANDOMIZE_HASHES}")
@@ -377,12 +385,6 @@ endif()
 
 find_package(Python3 REQUIRED)
 message(STATUS "Dawn: using python at ${Python3_EXECUTABLE}")
-
-set(IS_DEBUG_BUILD 0)
-string(TOUPPER "${CMAKE_BUILD_TYPE}" build_type)
-if ((NOT ${build_type} STREQUAL "RELEASE") AND (NOT ${build_type} STREQUAL "RELWITHDEBINFO"))
-  set(IS_DEBUG_BUILD 1)
-endif()
 
 # Compile definitions for the internal config
 if (DAWN_ALWAYS_ASSERT OR IS_DEBUG_BUILD)
