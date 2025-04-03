@@ -41,6 +41,7 @@
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
+#include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/utils/containers/vector.h"
 
 namespace tint::core::intrinsic {
