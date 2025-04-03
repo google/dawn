@@ -82,7 +82,6 @@ cc_library(
     "extension_test.cc",
     "language_feature_status_test.cc",
     "language_feature_test.cc",
-    "wgsl_test.cc",
   ] + select({
     "//conditions:default": [],
   }) + select({

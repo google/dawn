@@ -94,7 +94,6 @@ tint_add_target(tint_lang_wgsl_test test
   lang/wgsl/extension_test.cc
   lang/wgsl/language_feature_status_test.cc
   lang/wgsl/language_feature_test.cc
-  lang/wgsl/wgsl_test.cc
 )
 
 tint_target_add_dependencies(tint_lang_wgsl_test test

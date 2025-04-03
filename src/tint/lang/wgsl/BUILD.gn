@@ -83,7 +83,6 @@ if (tint_build_unittests) {
       "extension_test.cc",
       "language_feature_status_test.cc",
       "language_feature_test.cc",
-      "wgsl_test.cc",
     ]
     deps = [
       "${dawn_root}/src/utils:utils",
