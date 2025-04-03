@@ -32,6 +32,8 @@
 
 #include <vector>
 
+#include "dawn/common/SystemUtils.h"
+
 namespace dawn::native::d3d {
 
 namespace {
@@ -96,8 +98,21 @@ MaybeError PlatformFunctions::LoadFXCompiler() {
     d3dDisassemble = &D3DDisassemble;
 #else
     std::string error;
-    if (!mFXCompilerLib.Open("d3dcompiler_47.dll", &error) ||
-        !mFXCompilerLib.GetProc(&d3dCompile, "D3DCompile", &error) ||
+    const auto modulePath = GetModuleDirectory();
+    const std::string& pathToPrepend = modulePath.value_or("");
+
+    bool loadSuccess = mFXCompilerLib.Open(pathToPrepend + "d3dcompiler_47.dll", &error);
+    if (!loadSuccess) {
+        // https://crbug.com/399358291. Since Skia's build system is not able to locate the Windows
+        // SDK tools, d3dcompiler_47.dll is not copied into the build location. Tests fail when we
+        // prepend the module directory to the path. To address this, we fallback to the compiler
+        // that comes with the OS. The OS compiler contains functionality and heap corruption bugs
+        // on older Windows versions so care must be taken to always ship with the latest SDK
+        // compiler.
+        loadSuccess = mFXCompilerLib.OpenSystemLibrary(L"d3dcompiler_47.dll", &error);
+    }
+
+    if (!loadSuccess || !mFXCompilerLib.GetProc(&d3dCompile, "D3DCompile", &error) ||
         !mFXCompilerLib.GetProc(&d3dDisassemble, "D3DDisassemble", &error)) {
         return DAWN_INTERNAL_ERROR(error.c_str());
     }

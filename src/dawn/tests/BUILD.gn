@@ -139,39 +139,6 @@ if (build_with_chromium) {
 }
 
 ###############################################################################
-# Copy target for DXC
-###############################################################################
-
-# When building with chromium under Windows, we need to copy the DXC from
-# Windows SDK into build folder, in order to ensure a DXC of version 1.6 is
-# available when running end-to-end tests in Chromium. Note that currently DXC
-# only provided for x86 and x64 in Windows SDK 20348.
-if (!dawn_use_built_dxc && build_with_chromium && is_win &&
-    (target_cpu == "x64" || target_cpu == "x86")) {
-  # The windows_sdk_path is acquired in visual_studio_version.gni.
-  import("//build/config/win/visual_studio_version.gni")
-
-  # Windows 10 SDK version 10.0.20348.0 provides DXC compiler and validator both
-  # of v1.6 and Chromium builds require this SDK version or higher.
-  assert(defined(windows_sdk_path))
-  assert(defined(windows_sdk_version))
-  assert(windows_sdk_path != "")
-  assert(windows_sdk_version != "")
-
-  # Declare a copy target to copy DXC binary from Windows SDK for running Dawn
-  # end-to-end test in Chromium.
-  copy("copy_dxc_binary") {
-    sources = [
-      "$windows_sdk_path/bin/$windows_sdk_version/$target_cpu/dxc.exe",
-      "$windows_sdk_path/bin/$windows_sdk_version/$target_cpu/dxcompiler.dll",
-      "$windows_sdk_path/bin/$windows_sdk_version/$target_cpu/dxil.dll",
-    ]
-
-    outputs = [ "$root_out_dir/{{source_file_part}}" ]
-  }
-}
-
-###############################################################################
 # Dawn test template
 ###############################################################################
 template("dawn_test") {
@@ -192,27 +159,6 @@ template("dawn_test") {
         "${dawn_angle_dir}:libEGL",
         "${dawn_angle_dir}:libGLESv2",
       ]
-    }
-
-    # Running Dawn tests within Chromium in Windows may require DXC, copy DXC
-    # binary from Windows SDK.
-    if (build_with_chromium && is_win &&
-        (target_cpu == "x64" || target_cpu == "x86")) {
-      if (dawn_use_built_dxc) {
-        if (!defined(deps)) {
-          deps = []
-        }
-        deps += [
-          "$dawn_root/third_party/gn/dxc:copy_dxil_dll",
-          "$dawn_root/third_party/gn/dxc:dxc",
-          "$dawn_root/third_party/gn/dxc:dxcompiler",
-        ]
-      } else {
-        if (!defined(data_deps)) {
-          data_deps = []
-        }
-        data_deps += [ ":copy_dxc_binary" ]
-      }
     }
   }
 }
