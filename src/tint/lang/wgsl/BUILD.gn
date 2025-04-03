@@ -53,6 +53,10 @@ libtint_source_set("wgsl") {
     "diagnostic_severity.h",
     "extension.cc",
     "extension.h",
+    "feature_status.cc",
+    "feature_status.h",
+    "language_feature.cc",
+    "language_feature.h",
   ]
   deps = [
     "${dawn_root}/src/utils:utils",
@@ -88,7 +92,6 @@ if (tint_build_unittests) {
       "${tint_src_dir}/lang/wgsl",
       "${tint_src_dir}/lang/wgsl/ast",
       "${tint_src_dir}/lang/wgsl/common",
-      "${tint_src_dir}/lang/wgsl/features",
       "${tint_src_dir}/lang/wgsl/program",
       "${tint_src_dir}/lang/wgsl/sem",
       "${tint_src_dir}/lang/wgsl/writer/ir_to_program",

@@ -116,7 +116,6 @@ tint_target_add_dependencies(tint_lang_wgsl_sem lib
   tint_lang_core_type
   tint_lang_wgsl
   tint_lang_wgsl_ast
-  tint_lang_wgsl_features
   tint_utils
   tint_utils_containers
   tint_utils_diagnostic
@@ -154,7 +153,6 @@ tint_target_add_dependencies(tint_lang_wgsl_sem_test test
   tint_lang_wgsl
   tint_lang_wgsl_ast
   tint_lang_wgsl_common
-  tint_lang_wgsl_features
   tint_lang_wgsl_program
   tint_lang_wgsl_resolver
   tint_lang_wgsl_sem

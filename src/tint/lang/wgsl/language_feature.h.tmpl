@@ -12,8 +12,8 @@ See:
 {{- Import "src/tint/utils/templates/enums.tmpl.inc" -}}
 {{- $enum := ($I.Sem.Enum "language_feature") -}}
 
-#ifndef SRC_TINT_LANG_WGSL_FEATURES_LANGUAGE_FEATURE_H_
-#define SRC_TINT_LANG_WGSL_FEATURES_LANGUAGE_FEATURE_H_
+#ifndef SRC_TINT_LANG_WGSL_LANGUAGE_FEATURE_H_
+#define SRC_TINT_LANG_WGSL_LANGUAGE_FEATURE_H_
 
 #include <cstdint>
 #include <string>
@@ -33,4 +33,4 @@ static constexpr LanguageFeature kAllLanguageFeatures[] = {
 
 }  // namespace tint::wgsl
 
-#endif  // SRC_TINT_LANG_WGSL_FEATURES_LANGUAGE_FEATURE_H_
+#endif  // SRC_TINT_LANG_WGSL_LANGUAGE_FEATURE_H_

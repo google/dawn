@@ -45,7 +45,7 @@
 #include "dawn/native/ValidationUtils_autogen.h"
 #include "dawn/platform/DawnPlatform.h"
 #include "partition_alloc/pointers/raw_ptr.h"
-#include "tint/lang/wgsl/features/status.h"
+#include "tint/lang/wgsl/feature_status.h"
 
 // For SwiftShader fallback
 #if defined(DAWN_ENABLE_BACKEND_VULKAN)

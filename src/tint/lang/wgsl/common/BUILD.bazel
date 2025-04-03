@@ -48,7 +48,6 @@ cc_library(
   ],
   deps = [
     "//src/tint/lang/wgsl",
-    "//src/tint/lang/wgsl/features",
     "//src/tint/utils",
     "//src/tint/utils/containers",
     "//src/tint/utils/ice",
@@ -70,7 +69,6 @@ cc_library(
   deps = [
     "//src/tint/lang/wgsl",
     "//src/tint/lang/wgsl/common",
-    "//src/tint/lang/wgsl/features",
     "//src/tint/utils",
     "//src/tint/utils/containers",
     "//src/tint/utils/ice",

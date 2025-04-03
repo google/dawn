@@ -172,7 +172,7 @@ source_set("sources") {
     ":utils_gen",
     "${dawn_root}/src/dawn/common",
     "${dawn_root}/src/tint/api",
-    "${dawn_root}/src/tint/lang/wgsl/features",
+    "${dawn_root}/src/tint/lang/wgsl",
   ]
   defines = []
   libs = []

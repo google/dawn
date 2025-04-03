@@ -34,7 +34,7 @@
 //                       Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "src/tint/lang/wgsl/features/language_feature.h"
+#include "src/tint/lang/wgsl/language_feature.h"
 
 #include <gtest/gtest.h>
 

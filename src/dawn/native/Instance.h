@@ -50,7 +50,7 @@
 #include "dawn/native/Toggles.h"
 #include "dawn/native/dawn_platform.h"
 #include "partition_alloc/pointers/raw_ptr.h"
-#include "tint/lang/wgsl/features/language_feature.h"
+#include "tint/lang/wgsl/language_feature.h"
 
 namespace dawn::platform {
 class Platform;

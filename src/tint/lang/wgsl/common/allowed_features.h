@@ -31,7 +31,7 @@
 #include <unordered_set>
 
 #include "src/tint/lang/wgsl/extension.h"
-#include "src/tint/lang/wgsl/features/language_feature.h"
+#include "src/tint/lang/wgsl/language_feature.h"
 #include "src/tint/utils/reflection.h"
 
 namespace tint::wgsl {

@@ -25,9 +25,9 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/wgsl/features/status.h"
+#include "src/tint/lang/wgsl/feature_status.h"
 
-#include "src/tint/lang/wgsl/features/language_feature.h"
+#include "src/tint/lang/wgsl/language_feature.h"
 
 namespace tint::wgsl {
 
