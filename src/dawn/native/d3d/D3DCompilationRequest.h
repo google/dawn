@@ -65,6 +65,7 @@ using InterStageShaderVariablesMask = std::bitset<tint::hlsl::writer::kMaxInterS
     X(uint32_t, shaderModel)                                                                     \
     X(uint32_t, compileFlags)                                                                    \
     X(Compiler, compiler)                                                                        \
+    X(uint64_t, compilerVersion)                                                                 \
     X(std::wstring_view, dxcShaderProfile)                                                       \
     X(std::string_view, fxcShaderProfile)                                                        \
     X(pD3DCompile, d3dCompile)                                                                   \
@@ -85,6 +86,7 @@ using InterStageShaderVariablesMask = std::bitset<tint::hlsl::writer::kMaxInterS
     X(bool, hasShaderF16Feature)                    \
     X(uint32_t, compileFlags)                       \
     X(Compiler, compiler)                           \
+    X(uint64_t, compilerVersion)                    \
     X(std::wstring_view, dxcShaderProfile)          \
     X(std::string_view, fxcShaderProfile)           \
     X(pD3DCompile, d3dCompile)                      \

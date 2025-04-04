@@ -176,8 +176,8 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     // ShaderF16 features require DXC version being 1.4 or higher, shader model supporting 6.2 or
     // higher, and native supporting F16 shader ops.
     bool shaderF16Enabled = false;
-    if (GetBackend()->IsDXCAvailable() && mDeviceInfo.highestSupportedShaderModel >= 62 &&
-        mDeviceInfo.supportsNative16BitShaderOps) {
+    if (GetBackend()->IsDXCAvailableAndVersionAtLeast(1, 4, 1, 4) &&
+        mDeviceInfo.highestSupportedShaderModel >= 62 && mDeviceInfo.supportsNative16BitShaderOps) {
         EnableFeature(Feature::ShaderF16);
         shaderF16Enabled = true;
     }
@@ -553,22 +553,25 @@ void PhysicalDevice::CleanUpDebugLayerFilters() {
 
 void PhysicalDevice::SetupBackendAdapterToggles(dawn::platform::Platform* platform,
                                                 TogglesState* adapterToggles) const {
+    // Check for use_dxc toggle
 #ifdef DAWN_USE_BUILT_DXC
-    DAWN_CHECK(GetBackend()->IsDXCAvailable());
+    // Default to using DXC. If shader model < 6.0, though, we must use FXC.
     if (GetDeviceInfo().highestSupportedShaderModel < 60) {
-        // If shader model < 6.0, though, we must use FXC.
         adapterToggles->ForceSet(Toggle::UseDXC, false);
     }
-    const bool useDxc = platform->IsFeatureEnabled(dawn::platform::Features::kWebGPUUseDXC);
+
+    bool useDxc = platform->IsFeatureEnabled(dawn::platform::Features::kWebGPUUseDXC);
     adapterToggles->Default(Toggle::UseDXC, useDxc);
 #else
-    DAWN_CHECK(!GetBackend()->IsDXCAvailable());
-    adapterToggles->ForceSet(Toggle::UseDXC, false);
+    // Default to using FXC
+    if (!GetBackend()->IsDXCAvailable()) {
+        adapterToggles->ForceSet(Toggle::UseDXC, false);
+    }
     adapterToggles->Default(Toggle::UseDXC, false);
 #endif
 
-    const uint32_t deviceId = GetDeviceId();
-    const uint32_t vendorId = GetVendorId();
+    uint32_t deviceId = GetDeviceId();
+    uint32_t vendorId = GetVendorId();
 
     // On Intel Gen12 D3D driver < 32.0.101.5762, using shader model 6.6 will cause unexpected
     // result when adding/subtracting I32/U32 vector/scalar with vector/scalar in constant
@@ -671,14 +674,16 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
     // Native support of packed 4x8 integer dot product required shader model 6.4 or higher, and
     // DXC 1.4 or higher.
     if (!(GetAppliedShaderModelUnderToggles(*deviceToggles) >= 64) ||
-        !deviceToggles->IsEnabled(Toggle::UseDXC) || !GetBackend()->IsDXCAvailable()) {
+        !deviceToggles->IsEnabled(Toggle::UseDXC) ||
+        !GetBackend()->IsDXCAvailableAndVersionAtLeast(1, 4, 1, 4)) {
         deviceToggles->ForceSet(Toggle::PolyFillPacked4x8DotProduct, true);
     }
 
     // Native support of pack/unpack 4x8 intrinsics required shader model 6.6 or higher, and
     // DXC 1.4 or higher.
     if (!(GetAppliedShaderModelUnderToggles(*deviceToggles) >= 66) ||
-        !deviceToggles->IsEnabled(Toggle::UseDXC) || !GetBackend()->IsDXCAvailable()) {
+        !deviceToggles->IsEnabled(Toggle::UseDXC) ||
+        !GetBackend()->IsDXCAvailableAndVersionAtLeast(1, 6, 1, 6)) {
         deviceToggles->ForceSet(Toggle::D3D12PolyFillPackUnpack4x8, true);
     }
 
