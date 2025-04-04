@@ -281,6 +281,22 @@ func (s *permutationState) permuteFQN(in sem.FullyQualifiedName) ([]sem.FullyQua
 	switch target := in.Target.(type) {
 	case *sem.Type:
 		permute = func() error {
+			if in.Target.GetName() == "__constructible" {
+				// Expand the built-in `__constructible` type to a set of constructible types.
+				// Note: Aggregate types are not currently listed in `allTypes`, so we can only generate
+				// scalar permutations here.
+				for _, ty := range s.allTypes {
+					switch {
+					case ty.Target.GetName() == "bool",
+						ty.Target.GetName() == "i32",
+						ty.Target.GetName() == "u32",
+						ty.Target.GetName() == "f16",
+						ty.Target.GetName() == "f32":
+						out = append(out, ty)
+					}
+				}
+				return nil
+			}
 			// Inner-most permute lambda.
 			// Append a the current permutation to out
 			out = append(out, sem.FullyQualifiedName{Target: in.Target, TemplateArguments: args})

@@ -2505,9 +2505,6 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
 
     switch (fn) {
         case wgsl::BuiltinFn::kWorkgroupUniformLoad:
-            if (!validator_.WorkgroupUniformLoad(call)) {
-                return nullptr;
-            }
             RegisterLoad(args[0]);
             break;
 

@@ -43,6 +43,7 @@ tint_add_target(tint_lang_wgsl_intrinsic lib
   lang/wgsl/intrinsic/ctor_conv.h
   lang/wgsl/intrinsic/data.cc
   lang/wgsl/intrinsic/dialect.h
+  lang/wgsl/intrinsic/type_matchers.h
 )
 
 tint_target_add_dependencies(tint_lang_wgsl_intrinsic lib

@@ -1485,7 +1485,12 @@ TEST_F(ResolverValidationTest, WorkgroupUniformLoad_ArraySize_NamedOverride) {
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
-        R"(error: workgroupUniformLoad must be called with an argument whose type is constructible)");
+        R"(error: no matching call to 'workgroupUniformLoad(ptr<workgroup, array<u32, size>, read_write>)'
+
+1 candidate function:
+ • 'workgroupUniformLoad(ptr<workgroup, T, read_write>  ✗ ) -> T' where:
+      ✗  'T' is 'any concrete constructible type'
+)");
 }
 
 TEST_F(ResolverValidationTest, WorkgroupUniformLoad_ArraySize_NamedConstant) {

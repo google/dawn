@@ -2028,34 +2028,6 @@ bool Validator::TextureBuiltinFn(const sem::Call* call) const {
            check_arg_is_constexpr(core::ParameterUsage::kComponent, 0, 3);
 }
 
-bool Validator::WorkgroupUniformLoad(const sem::Call* call) const {
-    auto* builtin = call->Target()->As<sem::BuiltinFn>();
-    if (!builtin) {
-        return false;
-    }
-
-    TINT_ASSERT(call->Arguments().Length() > 0);
-    auto* arg = call->Arguments()[0];
-    auto* ptr = arg->Type()->As<core::type::Pointer>();
-    TINT_ASSERT(ptr != nullptr);
-    auto* ty = ptr->StoreType();
-
-    if (ty->Is<core::type::Atomic>() || atomic_composite_info_.Contains(ty)) {
-        AddError(arg->Declaration()->source)
-            << "workgroupUniformLoad must not be called with an argument that "
-               "contains an atomic type";
-        return false;
-    }
-
-    if (!ty->IsConstructible()) {
-        AddError(arg->Declaration()->source)
-            << "workgroupUniformLoad must be called with an argument whose type is constructible";
-        return false;
-    }
-
-    return true;
-}
-
 bool Validator::SubgroupBroadcast(const sem::Call* call) const {
     auto* builtin = call->Target()->As<sem::BuiltinFn>();
     if (!builtin) {

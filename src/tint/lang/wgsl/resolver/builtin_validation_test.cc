@@ -784,7 +784,8 @@ TEST_F(ResolverBuiltinValidationTest, WorkgroupUniformLoad_WrongAddressSpace) {
               R"(error: no matching call to 'workgroupUniformLoad(ptr<storage, i32, read_write>)'
 
 1 candidate function:
- • 'workgroupUniformLoad(ptr<workgroup, T, read_write>  ✗ ) -> T'
+ • 'workgroupUniformLoad(ptr<workgroup, T, read_write>  ✗ ) -> T' where:
+      ✗  'T' is 'any concrete constructible type'
 )");
 }
 
@@ -799,7 +800,12 @@ TEST_F(ResolverBuiltinValidationTest, WorkgroupUniformLoad_Atomic) {
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
-        R"(12:34 error: workgroupUniformLoad must not be called with an argument that contains an atomic type)");
+        R"(error: no matching call to 'workgroupUniformLoad(ptr<workgroup, atomic<i32>, read_write>)'
+
+1 candidate function:
+ • 'workgroupUniformLoad(ptr<workgroup, T, read_write>  ✗ ) -> T' where:
+      ✗  'T' is 'any concrete constructible type'
+)");
 }
 
 TEST_F(ResolverBuiltinValidationTest, WorkgroupUniformLoad_AtomicInArray) {
@@ -813,7 +819,12 @@ TEST_F(ResolverBuiltinValidationTest, WorkgroupUniformLoad_AtomicInArray) {
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
-        R"(12:34 error: workgroupUniformLoad must not be called with an argument that contains an atomic type)");
+        R"(error: no matching call to 'workgroupUniformLoad(ptr<workgroup, array<atomic<i32>, 4>, read_write>)'
+
+1 candidate function:
+ • 'workgroupUniformLoad(ptr<workgroup, T, read_write>  ✗ ) -> T' where:
+      ✗  'T' is 'any concrete constructible type'
+)");
 }
 
 TEST_F(ResolverBuiltinValidationTest, WorkgroupUniformLoad_AtomicInStruct) {
@@ -831,7 +842,12 @@ TEST_F(ResolverBuiltinValidationTest, WorkgroupUniformLoad_AtomicInStruct) {
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
-        R"(error: workgroupUniformLoad must not be called with an argument that contains an atomic type)");
+        R"(error: no matching call to 'workgroupUniformLoad(ptr<workgroup, array<S, 4>, read_write>)'
+
+1 candidate function:
+ • 'workgroupUniformLoad(ptr<workgroup, T, read_write>  ✗ ) -> T' where:
+      ✗  'T' is 'any concrete constructible type'
+)");
 }
 
 TEST_F(ResolverBuiltinValidationTest, SubgroupShuffleLaneArgMustBeNonNeg) {
