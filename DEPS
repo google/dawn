@@ -17,6 +17,7 @@ vars = {
   'dawn_standalone': True,
   'dawn_node': False, # Also fetches dependencies required for building NodeJS bindings.
   'dawn_wasm': False, # Also fetches dependencies required for building WebAssembly.
+  'dawn_tintd': False, # Also fetches dependencies required for building tintd.
   'dawn_cmake_version': 'version:2@3.23.3',
   'dawn_cmake_win32_sha1': 'b106d66bcdc8a71ea2cdf5446091327bfdb1bcd7',
   'dawn_gn_version': 'git_revision:182a6eb05d15cc76d2302f7928fdb4f645d52c53',
@@ -446,12 +447,12 @@ deps = {
   # Dependencies for tintd.
   'third_party/jsoncpp': {
     'url': '{github_git}/open-source-parsers/jsoncpp.git@69098a18b9af0c47549d9a271c054d13ca92b006',
-    'condition': 'dawn_standalone',
+    'condition': 'dawn_tintd',
   },
 
   'third_party/langsvr': {
     'url': '{github_git}/google/langsvr.git@303c526231a90049a3e384549720f3fbd453cf66',
-    'condition': 'dawn_standalone',
+    'condition': 'dawn_tintd',
   },
 
   # Dependencies for PartitionAlloc.
