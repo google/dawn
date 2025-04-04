@@ -1005,7 +1005,7 @@ using MslWriterDepthTexturesTest = MslWriterTestWithParam<MslDepthTextureData>;
 TEST_P(MslWriterDepthTexturesTest, Emit) {
     auto params = GetParam();
 
-    auto* t = ty.Get<core::type::DepthTexture>(params.dim);
+    auto* t = ty.depth_texture(params.dim);
     auto* func = b.Function("foo", ty.void_());
     auto* param = b.FunctionParam("a", t);
     func->SetParams({param});
@@ -1091,7 +1091,7 @@ INSTANTIATE_TEST_SUITE_P(
                        "texturecube_array<float, access::sample>"}));
 
 TEST_F(MslWriterTest, EmitType_MultisampledTexture) {
-    auto* ms = ty.Get<core::type::MultisampledTexture>(core::type::TextureDimension::k2d, ty.u32());
+    auto* ms = ty.multisampled_texture(core::type::TextureDimension::k2d, ty.u32());
     auto* func = b.Function("foo", ty.void_());
     auto* param = b.FunctionParam("a", ms);
     func->SetParams({param});

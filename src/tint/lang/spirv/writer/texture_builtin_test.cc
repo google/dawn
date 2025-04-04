@@ -119,11 +119,11 @@ class TextureBuiltinTest : public SpirvWriterTestWithParam<TextureBuiltinTestCas
             case kSampledTexture:
                 return ty.sampled_texture(dim, MakeScalarType(texel_type));
             case kMultisampledTexture:
-                return ty.Get<core::type::MultisampledTexture>(dim, MakeScalarType(texel_type));
+                return ty.multisampled_texture(dim, MakeScalarType(texel_type));
             case kDepthTexture:
-                return ty.Get<core::type::DepthTexture>(dim);
+                return ty.depth_texture(dim);
             case kDepthMultisampledTexture:
-                return ty.Get<core::type::DepthMultisampledTexture>(dim);
+                return ty.depth_multisampled_texture(dim);
             case kStorageTexture:
                 core::TexelFormat format;
                 switch (texel_type) {

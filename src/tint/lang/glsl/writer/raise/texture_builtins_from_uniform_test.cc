@@ -103,9 +103,8 @@ $B1: {  # root
 }
 
 TEST_F(GlslWriter_TextureBuiltinsFromUniformTest, TextureNumSamples) {
-    auto* t = b.Var(ty.ptr(
-        handle, ty.Get<core::type::DepthMultisampledTexture>(core::type::TextureDimension::k2d),
-        read_write));
+    auto* t = b.Var(ty.ptr(handle, ty.depth_multisampled_texture(core::type::TextureDimension::k2d),
+                           read_write));
     t->SetBindingPoint(0, 0);
     b.ir.root_block->Append(t);
 
@@ -218,9 +217,8 @@ $B1: {  # root
 }
 
 TEST_F(GlslWriter_TextureBuiltinsFromUniformTest, SameBuiltinCalledMultipleTimesTextureNumSamples) {
-    auto* t = b.Var(ty.ptr(
-        handle, ty.Get<core::type::DepthMultisampledTexture>(core::type::TextureDimension::k2d),
-        read_write));
+    auto* t = b.Var(ty.ptr(handle, ty.depth_multisampled_texture(core::type::TextureDimension::k2d),
+                           read_write));
     t->SetBindingPoint(0, 0);
     b.ir.root_block->Append(t);
 

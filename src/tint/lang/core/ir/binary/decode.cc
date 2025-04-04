@@ -712,17 +712,17 @@ struct Decoder {
     const type::Type* CreateTypeBasic(pb::TypeBasic basic_in) {
         switch (basic_in) {
             case pb::TypeBasic::void_:
-                return mod_out_.Types().Get<void>();
+                return mod_out_.Types().void_();
             case pb::TypeBasic::bool_:
-                return mod_out_.Types().Get<bool>();
+                return mod_out_.Types().bool_();
             case pb::TypeBasic::i32:
-                return mod_out_.Types().Get<i32>();
+                return mod_out_.Types().i32();
             case pb::TypeBasic::u32:
-                return mod_out_.Types().Get<u32>();
+                return mod_out_.Types().u32();
             case pb::TypeBasic::f32:
-                return mod_out_.Types().Get<f32>();
+                return mod_out_.Types().f32();
             case pb::TypeBasic::f16:
-                return mod_out_.Types().Get<f16>();
+                return mod_out_.Types().f16();
 
             case pb::TypeBasic::TypeBasic_INT_MIN_SENTINEL_DO_NOT_USE_:
             case pb::TypeBasic::TypeBasic_INT_MAX_SENTINEL_DO_NOT_USE_:
@@ -876,20 +876,20 @@ struct Decoder {
             err_ << "invalid DepthTexture dimension\n";
             return mod_out_.Types().invalid();
         }
-        return mod_out_.Types().Get<type::DepthTexture>(dimension);
+        return mod_out_.Types().depth_texture(dimension);
     }
 
     const type::SampledTexture* CreateTypeSampledTexture(const pb::TypeSampledTexture& texture_in) {
         auto dimension = TextureDimension(texture_in.dimension());
         auto sub_type = Type(texture_in.sub_type());
-        return mod_out_.Types().Get<type::SampledTexture>(dimension, sub_type);
+        return mod_out_.Types().sampled_texture(dimension, sub_type);
     }
 
     const type::MultisampledTexture* CreateTypeMultisampledTexture(
         const pb::TypeMultisampledTexture& texture_in) {
         auto dimension = TextureDimension(texture_in.dimension());
         auto sub_type = Type(texture_in.sub_type());
-        return mod_out_.Types().Get<type::MultisampledTexture>(dimension, sub_type);
+        return mod_out_.Types().multisampled_texture(dimension, sub_type);
     }
 
     const type::Type* CreateTypeDepthMultisampledTexture(
@@ -899,20 +899,18 @@ struct Decoder {
             err_ << "invalid DepthMultisampledTexture dimension\n";
             return mod_out_.Types().invalid();
         }
-        return mod_out_.Types().Get<type::DepthMultisampledTexture>(dimension);
+        return mod_out_.Types().depth_multisampled_texture(dimension);
     }
 
     const type::StorageTexture* CreateTypeStorageTexture(const pb::TypeStorageTexture& texture_in) {
         auto dimension = TextureDimension(texture_in.dimension());
         auto texel_format = TexelFormat(texture_in.texel_format());
         auto access = AccessControl(texture_in.access());
-        return mod_out_.Types().Get<type::StorageTexture>(
-            dimension, texel_format, access,
-            type::StorageTexture::SubtypeFor(texel_format, b.ir.Types()));
+        return mod_out_.Types().storage_texture(dimension, texel_format, access);
     }
 
     const type::ExternalTexture* CreateTypeExternalTexture(const pb::TypeExternalTexture&) {
-        return mod_out_.Types().Get<type::ExternalTexture>();
+        return mod_out_.Types().external_texture();
     }
 
     const type::Sampler* CreateTypeSampler(const pb::TypeSampler& sampler_in) {
@@ -923,15 +921,14 @@ struct Decoder {
     const type::InputAttachment* CreateTypeInputAttachment(
         const pb::TypeInputAttachment& input_in) {
         auto sub_type = Type(input_in.sub_type());
-        return mod_out_.Types().Get<type::InputAttachment>(sub_type);
+        return mod_out_.Types().input_attachment(sub_type);
     }
 
     const type::SubgroupMatrix* CreateTypeSubgroupMatrix(
         SubgroupMatrixKind kind,
         const pb::TypeSubgroupMatrix& subgroup_matrix) {
-        return mod_out_.Types().Get<type::SubgroupMatrix>(kind, Type(subgroup_matrix.sub_type()),
-                                                          subgroup_matrix.columns(),
-                                                          subgroup_matrix.rows());
+        return mod_out_.Types().subgroup_matrix(kind, Type(subgroup_matrix.sub_type()),
+                                                subgroup_matrix.columns(), subgroup_matrix.rows());
     }
 
     const type::Type* CreateTypeBuiltinStruct(pb::TypeBuiltinStruct builtin_struct_in) {

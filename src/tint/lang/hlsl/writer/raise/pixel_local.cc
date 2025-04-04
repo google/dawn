@@ -63,7 +63,7 @@ struct State {
     // A Rasterizer Order View (ROV)
     struct ROV {
         core::ir::Var* var;
-        core::type::Type* subtype;
+        const core::type::Type* subtype;
     };
     // Create ROV root variables, one per member of `pixel_local_struct`
     Vector<ROV, 4> CreateROVs(const core::type::Struct* pixel_local_struct) {

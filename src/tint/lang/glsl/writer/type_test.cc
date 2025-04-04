@@ -473,7 +473,7 @@ using GlslWriterDepthTextureESTest = GlslWriterTestWithParam<GlslDepthTextureDat
 TEST_P(GlslWriterDepthTextureESTest, Emit) {
     auto params = GetParam();
 
-    auto* t = ty.Get<core::type::DepthTexture>(params.dim);
+    auto* t = ty.depth_texture(params.dim);
     auto* var = b.Var("v", handle, t, core::Access::kReadWrite);
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
@@ -499,7 +499,7 @@ using GlslWriterDepthTextureNonESTest = GlslWriterTestWithParam<GlslDepthTexture
 TEST_P(GlslWriterDepthTextureNonESTest, Emit) {
     auto params = GetParam();
 
-    auto* t = ty.Get<core::type::DepthTexture>(params.dim);
+    auto* t = ty.depth_texture(params.dim);
     auto* var = b.Var("v", handle, t, core::Access::kReadWrite);
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
@@ -526,7 +526,7 @@ INSTANTIATE_TEST_SUITE_P(
         GlslDepthTextureData{core::type::TextureDimension::kCubeArray, "samplerCubeArrayShadow"}));
 
 TEST_F(GlslWriterTest, EmitType_DepthMultisampledTexture) {
-    auto* t = ty.Get<core::type::DepthMultisampledTexture>(core::type::TextureDimension::k2d);
+    auto* t = ty.depth_multisampled_texture(core::type::TextureDimension::k2d);
     auto* var = b.Var("v", handle, t, core::Access::kReadWrite);
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
@@ -690,7 +690,7 @@ TEST_P(GlslWriterMultisampledTextureESTest, Emit) {
             break;
     }
 
-    auto* ms = ty.Get<core::type::MultisampledTexture>(params.dim, subtype);
+    auto* ms = ty.multisampled_texture(params.dim, subtype);
     auto* var = b.Var("v", handle, ms, core::Access::kReadWrite);
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
@@ -729,7 +729,7 @@ TEST_P(GlslWriterMultisampledTextureNonESTest, Emit) {
             subtype = ty.u32();
             break;
     }
-    auto* ms = ty.Get<core::type::MultisampledTexture>(params.dim, subtype);
+    auto* ms = ty.multisampled_texture(params.dim, subtype);
     auto* var = b.Var("v", handle, ms, core::Access::kReadWrite);
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);

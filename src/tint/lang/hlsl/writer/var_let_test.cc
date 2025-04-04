@@ -141,7 +141,7 @@ using VarDepthTextureTest = HlslWriterTestWithParam<HlslDepthTextureData>;
 TEST_P(VarDepthTextureTest, Emit) {
     auto params = GetParam();
 
-    auto* s = b.Var("tex", ty.ptr<handle>(ty.Get<core::type::DepthTexture>(params.dim)));
+    auto* s = b.Var("tex", ty.ptr<handle>(ty.depth_texture(params.dim)));
     s->SetBindingPoint(2, 1);
 
     b.ir.root_block->Append(s);
@@ -167,8 +167,8 @@ INSTANTIATE_TEST_SUITE_P(
                                          "TextureCubeArray tex : register(t1, space2);"}));
 
 TEST_F(HlslWriterTest, VarDepthMultiSampled) {
-    auto* s = b.Var("tex", ty.ptr<handle>(ty.Get<core::type::DepthMultisampledTexture>(
-                               core::type::TextureDimension::k2d)));
+    auto* s = b.Var(
+        "tex", ty.ptr<handle>(ty.depth_multisampled_texture(core::type::TextureDimension::k2d)));
     s->SetBindingPoint(2, 1);
 
     b.ir.root_block->Append(s);
@@ -323,8 +323,9 @@ INSTANTIATE_TEST_SUITE_P(HlslWriterTest,
                              }));
 
 TEST_F(HlslWriterTest, VarMultisampledTexture) {
-    auto* s = b.Var("tex", ty.ptr<handle>(ty.Get<core::type::MultisampledTexture>(
-                               core::type::TextureDimension::k2d, ty.f32())));
+    auto* s =
+        b.Var("tex",
+              ty.ptr<handle>(ty.multisampled_texture(core::type::TextureDimension::k2d, ty.f32())));
     s->SetBindingPoint(2, 1);
 
     b.ir.root_block->Append(s);

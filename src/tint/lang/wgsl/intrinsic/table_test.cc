@@ -392,10 +392,8 @@ TEST_F(WgslIntrinsicTableTest, MatchWOStorageTexture) {
     auto* i32 = create<core::type::I32>();
     auto* vec2i = create<core::type::Vector>(i32, 2u);
     auto* vec4f = create<core::type::Vector>(f32, 4u);
-    auto* subtype = core::type::StorageTexture::SubtypeFor(core::TexelFormat::kR32Float, Types());
-    auto* tex = create<core::type::StorageTexture>(core::type::TextureDimension::k2d,
-                                                   core::TexelFormat::kR32Float,
-                                                   core::Access::kWrite, subtype);
+    auto* tex = Types().storage_texture(core::type::TextureDimension::k2d,
+                                        core::TexelFormat::kR32Float, core::Access::kWrite);
 
     auto result = table.Lookup(wgsl::BuiltinFn::kTextureStore, Empty, Vector{tex, vec2i, vec4f},
                                core::EvaluationStage::kConstant);

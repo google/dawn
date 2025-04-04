@@ -2476,10 +2476,9 @@ $B1: {  # root
 }
 
 TEST_P(IR_BindingVariableRobustnessTest, TextureLoad_Multisampled2D) {
-    auto* texture = b.Var(
-        "texture",
-        ty.ptr(handle, ty.Get<type::MultisampledTexture>(type::TextureDimension::k2d, ty.f32()),
-               read));
+    auto* texture =
+        b.Var("texture",
+              ty.ptr(handle, ty.multisampled_texture(type::TextureDimension::k2d, ty.f32()), read));
     texture->SetBindingPoint(0, 0);
     mod.root_block->Append(texture);
 
@@ -2567,8 +2566,8 @@ $B1: {  # root
 }
 
 TEST_P(IR_BindingVariableRobustnessTest, TextureLoad_Depth2D) {
-    auto* texture = b.Var(
-        "texture", ty.ptr(handle, ty.Get<type::DepthTexture>(type::TextureDimension::k2d), read));
+    auto* texture =
+        b.Var("texture", ty.ptr(handle, ty.depth_texture(type::TextureDimension::k2d), read));
     texture->SetBindingPoint(0, 0);
     mod.root_block->Append(texture);
 
@@ -2662,8 +2661,7 @@ $B1: {  # root
 
 TEST_P(IR_BindingVariableRobustnessTest, TextureLoad_Depth2DArray) {
     auto* texture =
-        b.Var("texture",
-              ty.ptr(handle, ty.Get<type::DepthTexture>(type::TextureDimension::k2dArray), read));
+        b.Var("texture", ty.ptr(handle, ty.depth_texture(type::TextureDimension::k2dArray), read));
     texture->SetBindingPoint(0, 0);
     mod.root_block->Append(texture);
 
@@ -2767,9 +2765,9 @@ $B1: {  # root
 }
 
 TEST_P(IR_BindingVariableRobustnessTest, TextureLoad_DepthMultisampled2D) {
-    auto* texture = b.Var(
-        "texture",
-        ty.ptr(handle, ty.Get<type::DepthMultisampledTexture>(type::TextureDimension::k2d), read));
+    auto* texture =
+        b.Var("texture",
+              ty.ptr(handle, ty.depth_multisampled_texture(type::TextureDimension::k2d), read));
     texture->SetBindingPoint(0, 0);
     mod.root_block->Append(texture);
 
@@ -2855,7 +2853,7 @@ $B1: {  # root
 }
 
 TEST_P(IR_BindingVariableRobustnessTest, TextureLoad_External) {
-    auto* texture = b.Var("texture", ty.ptr(handle, ty.Get<type::ExternalTexture>(), read));
+    auto* texture = b.Var("texture", ty.ptr(handle, ty.external_texture(), read));
     texture->SetBindingPoint(0, 0);
     mod.root_block->Append(texture);
 

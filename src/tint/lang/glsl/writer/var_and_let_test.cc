@@ -349,9 +349,8 @@ void main() {
 
 TEST_F(GlslWriterTest, VarHandleDepthTexture) {
     b.Append(b.ir.root_block, [&] {
-        auto* v =
-            b.Var("v", ty.ptr(core::AddressSpace::kHandle,
-                              ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2d)));
+        auto* v = b.Var("v", ty.ptr(core::AddressSpace::kHandle,
+                                    ty.depth_texture(core::type::TextureDimension::k2d)));
         v->SetBindingPoint(0, 1);
     });
 
