@@ -1029,13 +1029,6 @@ crbug.com/407076132 [ dawn-no-backend-validation linux no-clang-coverage nvidia 
 crbug.com/407076132 [ dawn-no-backend-validation no-clang-coverage nvidia release-x64 target-cpu-64 webgpu-adapter-default webgpu-dedicated-worker webgpu-dxc-enabled win ] webgpu:web_platform,copyToTexture,image_file:from_orientation_metadata_file:imageName="*";objectTypeFromFile="ImageBitmap-from-Blob";* [ Failure ]
 crbug.com/407076132 [ dawn-no-backend-validation no-clang-coverage nvidia release-x64 target-cpu-64 webgpu-adapter-default webgpu-dxc-enabled webgpu-shared-worker win ] webgpu:web_platform,copyToTexture,image_file:from_orientation_metadata_file:imageName="*";objectTypeFromFile="ImageBitmap-from-Blob";* [ Failure ]
 
-# getter_replacement tests failing on Linux NVIDIA (this doesn't make any sense,
-# probably some kind of leaky failure or other reliability problem)
-crbug.com/407088849 [ linux nvidia ] webgpu:idl,javascript:getter_replacement:type="adapter.limits" [ Failure ]
-crbug.com/407088849 [ linux nvidia ] webgpu:idl,javascript:getter_replacement:type="adapter" [ Failure ]
-crbug.com/407088849 [ linux nvidia ] webgpu:idl,javascript:getter_replacement:type="buffer" [ Failure ]
-crbug.com/407088849 [ linux nvidia ] webgpu:idl,javascript:getter_replacement:type="device" [ Failure ]
-
 # Widespread texture builtin failures on Intel (Linux/Win/Mac)
 crbug.com/407088850 [ intel-0x4680 win ] webgpu:shader,execution,expression,call,builtin,textureGather:depth_3d_coords:* [ Failure ]
 crbug.com/407088850 [ intel-0x4680 win ] webgpu:shader,execution,expression,call,builtin,textureGather:depth_array_3d_coords:* [ Failure ]
