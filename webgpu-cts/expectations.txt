@@ -325,8 +325,10 @@ crbug.com/40853211 [ webgpu-adapter-swiftshader ] webgpu:web_platform,copyToText
 # Flaky on Mac SwiftShader
 crbug.com/40853211 [ mac webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_bitmaprenderer_context_canvas:* [ RetryOnFailure ]
 
-# Flaky on Linux SwiftShader
-crbug.com/40853211 [ linux webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,video:copy_from_video:* [ RetryOnFailure ]
+# Flaky on Linux (with SwiftShader)
+crbug.com/408486529 [ linux webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,video:copy_from_video:* [ Failure ]
+# Flaky on Linux (with VVL)
+crbug.com/408556424 [ linux dawn-backend-validation ] webgpu:web_platform,copyToTexture,video:copy_from_video:* [ Failure ]
 
 # Failing on SwiftShader on various platforms
 crbug.com/407814992 [ mac webgpu-adapter-swiftshader ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:transferToImageBitmap_huge_size: [ Failure ]
