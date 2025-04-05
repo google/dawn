@@ -464,7 +464,7 @@ TEST(BuddyMemoryAllocatorTests, DestroyHeaps) {
     ASSERT_EQ(poolAllocator.GetPoolSizeForTesting(), kNumOfHeaps);
 
     // Make sure we can destroy the remaining heaps.
-    poolAllocator.DestroyPool();
+    poolAllocator.FreeRecycledAllocations();
     ASSERT_EQ(poolAllocator.GetPoolSizeForTesting(), 0u);
 }
 

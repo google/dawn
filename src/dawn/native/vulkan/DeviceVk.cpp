@@ -939,7 +939,7 @@ void Device::DestroyImpl() {
     GetResourceMemoryAllocator()->Tick(kMaxExecutionSerial);
 
     // Allow recycled memory to be deleted.
-    GetResourceMemoryAllocator()->DestroyPool();
+    GetResourceMemoryAllocator()->FreeRecycledMemory();
 
     // The VkRenderPasses in the cache can be destroyed immediately since all commands referring
     // to them are guaranteed to be finished executing.
@@ -1041,6 +1041,8 @@ void Device::SetLabelImpl() {
 }
 
 bool Device::ReduceMemoryUsageImpl() {
+    GetResourceMemoryAllocator()->FreeRecycledMemory();
+
     auto GetLastPendingDeletionSerial = [this]() {
         // Only hold the lock for one of these objects at a time to avoid lock-order-inversion.
         auto deleterSerial = GetFencedDeleter()->GetLastPendingDeletionSerial();

@@ -321,7 +321,7 @@ ResourceAllocatorManager::~ResourceAllocatorManager() {
         mSubAllocatedResourceAllocators[i] = nullptr;
     }
 
-    DestroyPool();
+    FreeRecycledAllocations();
 
     DAWN_ASSERT(mAllocationsToDelete.Empty());
     DAWN_ASSERT(mHeapsToDelete.Empty());
@@ -567,9 +567,9 @@ ResultOrError<ResourceHeapAllocation> ResourceAllocatorManager::CreateCommittedR
                                   resourceHeapKind};
 }
 
-void ResourceAllocatorManager::DestroyPool() {
+void ResourceAllocatorManager::FreeRecycledAllocations() {
     for (auto& alloc : mPooledHeapAllocators) {
-        alloc->DestroyPool();
+        alloc->FreeRecycledAllocations();
     }
 }
 

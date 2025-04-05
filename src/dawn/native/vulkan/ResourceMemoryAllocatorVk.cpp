@@ -121,7 +121,8 @@ class ResourceMemoryAllocator::SingleTypeAllocator : public ResourceHeapAllocato
     }
     ~SingleTypeAllocator() override = default;
 
-    void DestroyPool() { mPooledMemoryAllocator.DestroyPool(); }
+    // Frees any heaps that are unused and waiting to be recycled by the pool allocator.
+    void FreeRecycledMemory() { mPooledMemoryAllocator.FreeRecycledAllocations(); }
 
     ResultOrError<ResourceMemoryAllocation> AllocateMemory(uint64_t size, uint64_t alignment) {
         return mBuddySystem.Allocate(size, alignment);
@@ -429,9 +430,9 @@ int ResourceMemoryAllocator::FindBestTypeIndex(VkMemoryRequirements requirements
     return bestType;
 }
 
-void ResourceMemoryAllocator::DestroyPool() {
+void ResourceMemoryAllocator::FreeRecycledMemory() {
     for (auto& alloc : mAllocatorsPerType) {
-        alloc->DestroyPool();
+        alloc->FreeRecycledMemory();
     }
 }
 

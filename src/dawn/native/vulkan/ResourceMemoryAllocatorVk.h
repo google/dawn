@@ -69,7 +69,7 @@ class ResourceMemoryAllocator {
                                                      bool forceDisableSubAllocation = false);
     void Deallocate(ResourceMemoryAllocation* allocation);
 
-    void DestroyPool();
+    void FreeRecycledMemory();
 
     // Returns the last serial that an object is pending deletion after or
     // kBeginningOfGPUTime if no objects are pending deletion.
