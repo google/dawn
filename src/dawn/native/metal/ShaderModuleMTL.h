@@ -28,6 +28,7 @@
 #ifndef SRC_DAWN_NATIVE_METAL_SHADERMODULEMTL_H_
 #define SRC_DAWN_NATIVE_METAL_SHADERMODULEMTL_H_
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -55,7 +56,7 @@ class ShaderModule final : public ShaderModuleBase {
         const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
         const std::vector<tint::wgsl::Extension>& internalExtensions,
         ShaderModuleParseResult* parseResult,
-        OwnedCompilationMessages* compilationMessages);
+        std::unique_ptr<OwnedCompilationMessages>* compilationMessages);
 
     struct MetalFunctionData {
         NSPRef<id<MTLFunction>> function;
@@ -77,7 +78,7 @@ class ShaderModule final : public ShaderModuleBase {
                  std::vector<tint::wgsl::Extension> internalExtensions);
     ~ShaderModule() override;
     MaybeError Initialize(ShaderModuleParseResult* parseResult,
-                          OwnedCompilationMessages* compilationMessages);
+                          std::unique_ptr<OwnedCompilationMessages>* compilationMessages);
 };
 
 }  // namespace dawn::native::metal

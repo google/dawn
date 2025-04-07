@@ -133,12 +133,14 @@ struct ShaderModuleEntryPoint {
     std::string name;
 };
 
-MaybeError ValidateAndParseShaderModule(
-    DeviceBase* device,
-    const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
-    const std::vector<tint::wgsl::Extension>& internalExtensions,
-    ShaderModuleParseResult* parseResult,
-    OwnedCompilationMessages* outMessages);
+// Parse a shader module from a validated ShaderModuleDescriptor. Errors are generated only if the
+// shader code itself is invalid.
+MaybeError ParseShaderModule(DeviceBase* device,
+                             const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
+                             const std::vector<tint::wgsl::Extension>& internalExtensions,
+                             ShaderModuleParseResult* parseResult,
+                             OwnedCompilationMessages* outMessages);
+
 MaybeError ValidateCompatibilityWithPipelineLayout(DeviceBase* device,
                                                    const EntryPointMetadata& entryPoint,
                                                    const PipelineLayoutBase* layout);
@@ -324,7 +326,10 @@ class ShaderModuleBase : public RefCountedWithExternalCount<ApiObjectBase>,
                      std::vector<tint::wgsl::Extension> internalExtensions);
     ~ShaderModuleBase() override;
 
-    static Ref<ShaderModuleBase> MakeError(DeviceBase* device, StringView label);
+    static Ref<ShaderModuleBase> MakeError(
+        DeviceBase* device,
+        StringView label,
+        std::unique_ptr<OwnedCompilationMessages> compilationMessages);
 
     ObjectType GetType() const override;
 
@@ -359,8 +364,8 @@ class ShaderModuleBase : public RefCountedWithExternalCount<ApiObjectBase>,
 
     Future APIGetCompilationInfo(const WGPUCompilationInfoCallbackInfo& callbackInfo);
 
-    void InjectCompilationMessages(std::unique_ptr<OwnedCompilationMessages> compilationMessages);
     OwnedCompilationMessages* GetCompilationMessages() const;
+    std::string GetCompilationLog() const;
 
     // Return nullable tintProgram directly without any recreation, can be used for testing the
     // releasing/recreation behaviors.
@@ -371,10 +376,13 @@ class ShaderModuleBase : public RefCountedWithExternalCount<ApiObjectBase>,
     void DestroyImpl() override;
 
     MaybeError InitializeBase(ShaderModuleParseResult* parseResult,
-                              OwnedCompilationMessages* compilationMessages);
+                              std::unique_ptr<OwnedCompilationMessages>* compilationMessages);
 
   private:
-    ShaderModuleBase(DeviceBase* device, ObjectBase::ErrorTag tag, StringView label);
+    ShaderModuleBase(DeviceBase* device,
+                     ObjectBase::ErrorTag tag,
+                     StringView label,
+                     std::unique_ptr<OwnedCompilationMessages> compilationMessages);
 
     void WillDropLastExternalRef() override;
 
