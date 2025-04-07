@@ -108,9 +108,9 @@ bool CheckAllSlotsAreEmpty(const ScopedSwapStateCommandRecordingContext* command
 
 template <typename T, uint32_t InitialCapacity>
 template <typename Fn>
-void RenderPassBindGroupTracker::BindingSlot<T, InitialCapacity>::Bind(uint32_t idx,
-                                                                       T binding,
-                                                                       Fn&& bindFunc) {
+void BindGroupTracker::BindingSlot<T, InitialCapacity>::Bind(uint32_t idx,
+                                                             T binding,
+                                                             Fn&& bindFunc) {
     if (MaxBoundSlots() <= idx) {
         mBoundSlots.resize(idx + 1);
     }
