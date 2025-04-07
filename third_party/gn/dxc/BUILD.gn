@@ -1517,6 +1517,7 @@ dxcompiler_sourceset("lib_hlsl") {
     "$dawn_dxc_dir/lib/HLSL/DxilPreserveAllOutputs.cpp",
     "$dawn_dxc_dir/lib/HLSL/DxilPromoteResourcePasses.cpp",
     "$dawn_dxc_dir/lib/HLSL/DxilRenameResourcesPass.cpp",
+    "$dawn_dxc_dir/lib/HLSL/DxilScalarizeVectorLoadStores.cpp",
     "$dawn_dxc_dir/lib/HLSL/DxilSignatureValidation.cpp",
     "$dawn_dxc_dir/lib/HLSL/DxilSimpleGVNHoist.cpp",
     "$dawn_dxc_dir/lib/HLSL/DxilTargetLowering.cpp",
