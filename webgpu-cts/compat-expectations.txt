@@ -82,7 +82,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2025-04-02 05:20:12AM
+# Last rolled: 2025-04-07 07:29:56AM
 
 # conflicts_allowed: true
 # full_wildcard_support: true
@@ -602,7 +602,6 @@ crbug.com/341327470 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,bui
 crbug.com/341327470 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,asin:f32:inputSource="uniform";vectorize=3 [ Failure ]
 crbug.com/341327470 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,asin:f32:inputSource="uniform";vectorize=4 [ Failure ]
 
-
 # constructor w/concrete_array_elements failures on Pixel 6
 crbug.com/373670504 [ android arm ] webgpu:shader,execution,expression,constructor,non_zero:concrete_array_elements:inputSource="storage_r";type="bool";length=10;infer_type=false [ Failure ]
 crbug.com/373670504 [ android arm ] webgpu:shader,execution,expression,constructor,non_zero:concrete_array_elements:inputSource="storage_r";type="bool";length=10;infer_type=true [ Failure ]
@@ -927,6 +926,7 @@ crbug.com/0000 [ intel linux ] webgpu:api,operation,compute,basic:large_dispatch
 crbug.com/0000 [ linux nvidia ] webgpu:api,validation,buffer,create:limit: [ Failure ]
 crbug.com/0000 [ android-pixel-6 ] webgpu:api,validation,capability_checks,limits,maxComputeWorkgroupStorageSize:createComputePipeline,at_over:limitTest="betweenDefaultAndMaximum";testValueName="overLimit";async=false;wgslType="vec4%3Ci32%3E" [ Failure ]
 crbug.com/0000 [ android arm ] webgpu:api,validation,error_scope:simple:errorType="validation";errorFilter="out-of-memory" [ Skip ]
+crbug.com/0000 [ linux nvidia ] webgpu:api,validation,queue,copyToTexture,CopyExternalImageToTexture:source_image,crossOrigin:sourceImage="canvas";isOriginClean=true [ Failure ]
 crbug.com/0000 [ linux nvidia ] webgpu:api,validation,state,device_lost,destroy:importExternalTexture:sourceType="VideoFrame";awaitLost=true [ Failure ]
 crbug.com/0000 [ android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicMin:min_storage:workgroupSize=32;dispatchSize=16;scalarType="i32" [ Failure ]
 crbug.com/0000 [ android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicMin:min_workgroup:workgroupSize=32;dispatchSize=4;scalarType="i32" [ Failure ]
