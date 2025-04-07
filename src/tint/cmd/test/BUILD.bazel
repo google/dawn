@@ -86,6 +86,7 @@ cc_binary(
     "//src/tint/utils/text:test",
     "//src/tint/utils:test",
     "@gtest",
+    "//src/utils/chromium_test_compat",
   ] + select({
     ":tint_build_glsl_writer": [
       "//src/tint/lang/glsl/writer/common:test",

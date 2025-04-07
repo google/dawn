@@ -1,4 +1,4 @@
-# Copyright 2024 The Dawn & Tint Authors
+# Copyright 2025 The Dawn & Tint Authors
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -26,22 +26,18 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 set(private_headers
-    "compiler.h"
-    "numeric.h"
+    "chromium_test_compat.h"
 )
 
 set(sources
-    "placeholder.cc"
+    "chromium_test_compat.cc"
 )
 
 set(conditional_private_depends)
 
-add_subdirectory(chromium_test_compat)
-
 dawn_add_library(
-    dawn_shared_utils
+    dawn_shared_utils_chromium_test_compat
     ENABLE_EMSCRIPTEN
-    HEADER_ONLY
     UTILITY_TARGET dawn_internal_config
     HEADERS
         ${private_headers}

@@ -25,14 +25,13 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/tests/ChromiumTestCompat.h"
+#include "src/utils/chromium_test_compat/chromium_test_compat.h"
 
 #include <cstdio>
+#include <cstdlib>
+#include <iostream>
 #include <string>
 #include <string_view>
-
-#include "dawn/common/Assert.h"
-#include "dawn/common/Log.h"
 
 namespace dawn {
 void SubstituteChromiumArgs(int argc, char** argv) {
@@ -52,11 +51,14 @@ void SubstituteChromiumArgs(int argc, char** argv) {
             auto argValue = argument.substr(testSummaryOutputArg.length());
             std::string replacementArg("--gtest_output=json:");
             replacementArg += argValue;
-            dawn::InfoLog() << "Replacing " << argument << " with " << replacementArg;
+            std::cout << "Replacing " << argument << " with " << replacementArg << "\n";
             size_t bufferSize = replacementArg.length() + 1;
             argv[i] = new char[bufferSize];
             int charsWritten = std::snprintf(argv[i], bufferSize, "%s", replacementArg.c_str());
-            DAWN_ASSERT(size_t(charsWritten) == replacementArg.length());
+
+            if (size_t(charsWritten) != replacementArg.length()) {
+                abort();
+            }
         }
     }
 }

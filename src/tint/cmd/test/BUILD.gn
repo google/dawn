@@ -48,6 +48,7 @@ if (tint_build_unittests) {
     output_name = "tint_unittests"
     sources = [ "main_test.cc" ]
     deps = [
+      "${dawn_root}/src/utils/chromium_test_compat:chromium_test_compat",
       "${tint_src_dir}:gmock_and_gtest",
       "${tint_src_dir}/api",
       "${tint_src_dir}/api/common:unittests",
