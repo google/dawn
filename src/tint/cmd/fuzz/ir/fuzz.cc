@@ -88,6 +88,25 @@ void Register(const IRFuzzer& fuzzer) {
                 return;
             }
 
+            // Workgroup sizes < 1 are checked by Dawn and the Tint binary,
+            // should be skipped by the fuzzer.
+            for (auto func : ir->functions) {
+                if (func->Stage() != tint::core::ir::Function::PipelineStage::kCompute) {
+                    continue;
+                }
+
+                auto wg = func->WorkgroupSize().value();
+                for (auto value : wg) {
+                    auto* cnst = value->As<core::ir::Constant>();
+                    TINT_ASSERT(cnst);
+
+                    auto val = cnst->Value()->ValueAs<int32_t>();
+                    if (val < 1) {
+                        return;
+                    }
+                }
+            }
+
             if (auto val = core::ir::Validate(ir.Get()); val != Success) {
                 TINT_ICE() << val.Failure();
             }
