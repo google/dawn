@@ -28,8 +28,10 @@
 #ifndef SRC_DAWN_NATIVE_D3D11_TEXTURED3D11_H_
 #define SRC_DAWN_NATIVE_D3D11_TEXTURED3D11_H_
 
+#include <utility>
 #include <vector>
 
+#include "absl/container/inlined_vector.h"
 #include "dawn/native/DawnNative.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/IntegerTypes.h"
@@ -65,12 +67,22 @@ class Texture final : public TextureBase {
         const UnpackedPtr<TextureDescriptor>& descriptor);
     ID3D11Resource* GetD3D11Resource() const;
 
-    ResultOrError<ComPtr<ID3D11RenderTargetView>> CreateD3D11RenderTargetView(
-        wgpu::TextureFormat format,
-        uint32_t mipLevel,
-        uint32_t baseSlice,
-        uint32_t sliceCount,
-        uint32_t planeSlice) const;
+    struct RTVKey {
+        bool operator==(const RTVKey& rhs) const {
+            return viewFormat == rhs.viewFormat && mipLevel == rhs.mipLevel &&
+                   baseSlice == rhs.baseSlice && sliceCount == rhs.sliceCount &&
+                   planeSlice == rhs.planeSlice;
+        }
+
+        wgpu::TextureFormat viewFormat;
+        uint32_t mipLevel;
+        uint32_t baseSlice;
+        uint32_t sliceCount;
+        uint32_t planeSlice;
+    };
+
+    ResultOrError<ComPtr<ID3D11RenderTargetView1>> GetOrCreateD3D11RenderTargetView(
+        const RTVKey& key);
     ResultOrError<ComPtr<ID3D11DepthStencilView>> CreateD3D11DepthStencilView(
         const SubresourceRange& singleLevelRange,
         bool depthReadOnly,
@@ -99,13 +111,30 @@ class Texture final : public TextureBase {
     static MaybeError Copy(const ScopedCommandRecordingContext* commandContext,
                            CopyTextureToTextureCmd* copy);
 
-
     // As D3D11 SRV doesn't support 'Shader4ComponentMapping' for depth-stencil textures, we can't
     // sample the stencil component directly. As a workaround we create an internal R8Uint texture,
     // holding the copy of its stencil data, and use the internal texture's SRV instead.
     ResultOrError<ComPtr<ID3D11ShaderResourceView>> GetStencilSRV(
         const ScopedCommandRecordingContext* commandContext,
         const TextureView* view);
+
+    struct SRVKey {
+        bool operator==(const SRVKey& rhs) const {
+            return viewDimension == rhs.viewDimension && viewFormat == rhs.viewFormat &&
+                   aspects == rhs.aspects && mipLevel == rhs.mipLevel &&
+                   levelCount == rhs.levelCount && baseSlice == rhs.baseSlice &&
+                   sliceCount == rhs.sliceCount;
+        }
+
+        wgpu::TextureViewDimension viewDimension;
+        wgpu::TextureFormat viewFormat;
+        Aspect aspects;
+        uint32_t mipLevel;
+        uint32_t levelCount;
+        uint32_t baseSlice;
+        uint32_t sliceCount;
+    };
+    ResultOrError<ComPtr<ID3D11ShaderResourceView1>> GetOrCreateSRV(const SRVKey& key);
 
   private:
     using Base = TextureBase;
@@ -187,6 +216,28 @@ class Texture final : public TextureBase {
 
     // The internal 'R8Uint' texture for sampling stencil from depth-stencil textures.
     Ref<Texture> mTextureForStencilSampling;
+
+    // Simple view cache that store up to 3 recently created views.
+    template <typename K, typename T>
+    class ViewCache {
+      public:
+        ComPtr<T> Get(const K& key) const;
+        void Set(const K& key, ComPtr<T> view);
+        void Clear();
+
+      private:
+        static constexpr uint32_t kMaxCacheSize = 3;
+
+        struct Entry {
+            Entry(const K& keyIn, ComPtr<T> viewIn) : key(keyIn), view(std::move(viewIn)) {}
+
+            K key;
+            ComPtr<T> view;
+        };
+        absl::InlinedVector<Entry, kMaxCacheSize> mViews;
+    };
+    ViewCache<RTVKey, ID3D11RenderTargetView1> mCachedRTVs;
+    ViewCache<SRVKey, ID3D11ShaderResourceView1> mCachedSRVs;
 };
 
 class TextureView final : public TextureViewBase {
