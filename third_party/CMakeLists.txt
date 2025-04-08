@@ -28,6 +28,9 @@
 # Don't build testing in third_party dependencies
 set(BUILD_TESTING OFF)
 
+# Needed by some dependencies in third_party
+set(ABSL_ROOT_DIR ${DAWN_ABSEIL_DIR})
+
 # fetch_dawn_dependencies.py is an alternative to using depot_tools
 # It is particularly interesting when building dawn as a subdirectory in
 # a parent project that does not want to use depot_tools.
