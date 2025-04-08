@@ -316,25 +316,25 @@ if (tint_has_fuzzers) {
     ]
     outputs = [ fuzzer_corpus_wgsl_stamp ]
   }
-
-  if (tint_build_ir_binary && tint_build_wgsl_reader) {
-    action("tint_generate_ir_corpus") {
-      testonly = true
-      script = "${tint_src_dir}/cmd/fuzz/generate_tint_corpus.py"
-      sources = [ "${script}" ]
-      deps = [
-        ":tint_generate_wgsl_corpus",
-        "${tint_src_dir}/cmd/fuzz/ir/as",
-      ]
-      args = [
-        rebase_path(fuzzer_corpus_wgsl_dir, root_build_dir),
-        rebase_path(fuzzer_corpus_dir, root_build_dir),
-        "--ir_as=" +
-            rebase_path("${root_build_dir}/ir_fuzz_as", root_build_dir),
-      ]
-      outputs = [ fuzzer_corpus_ir_stamp ]
-    }
-  }
+  # TODO(409348527): Re-enable corpus generation
+  # if (tint_build_ir_binary && tint_build_wgsl_reader) {
+  #   action("tint_generate_ir_corpus") {
+  #     testonly = true
+  #     script = "${tint_src_dir}/cmd/fuzz/generate_tint_corpus.py"
+  #     sources = [ "${script}" ]
+  #     deps = [
+  #       ":tint_generate_wgsl_corpus",
+  #       "${tint_src_dir}/cmd/fuzz/ir/as",
+  #     ]
+  #     args = [
+  #       rebase_path(fuzzer_corpus_wgsl_dir, root_build_dir),
+  #       rebase_path(fuzzer_corpus_dir, root_build_dir),
+  #       "--ir_as=" +
+  #           rebase_path("${root_build_dir}/ir_fuzz_as", root_build_dir),
+  #     ]
+  #     outputs = [ fuzzer_corpus_ir_stamp ]
+  #   }
+  # }
 }
 
 ###############################################################################

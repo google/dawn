@@ -230,9 +230,10 @@ if (tint_has_fuzzers) {
         seed_corpus = fuzzer_corpus_wgsl_dir
         seed_corpus_deps = [ "${tint_src_dir}:tint_generate_wgsl_corpus" ]
       } else if (target_name == "ir") {
-        deps += [ "${tint_src_dir}:tint_generate_ir_corpus" ]
-        seed_corpus = fuzzer_corpus_ir_dir
-        seed_corpus_deps = [ "${tint_src_dir}:tint_generate_ir_corpus" ]
+        # TODO(409348527): Re-enable corpus generation
+        # deps += [ "${tint_src_dir}:tint_generate_ir_corpus" ]
+        # seed_corpus = fuzzer_corpus_ir_dir
+        # seed_corpus_deps = [ "${tint_src_dir}:tint_generate_ir_corpus" ]
       } else {
         assert(false, "unsupported tint fuzzer target")
       }
