@@ -1073,7 +1073,7 @@ TEST_P(TimestampQueryTests, ResolveWithoutWritten) {
 
 // Test resolving timestamp query to one slot in the buffer
 TEST_P(TimestampQueryTests, ResolveToBufferWithOffset) {
-    DAWN_SUPPRESS_TEST_IF(IsWARP());
+    DAWN_SUPPRESS_TEST_IF(IsWARP());  // Flaky on WARP
 
     constexpr uint32_t kQueryCount = 2;
     constexpr uint64_t kBufferSize = kQueryCount * sizeof(uint64_t) + kMinDestinationOffset;
@@ -1186,6 +1186,8 @@ class TimestampQueryInsidePassesTests : public TimestampQueryTests {
 
 // Test calling timestamp query from render pass encoder
 TEST_P(TimestampQueryInsidePassesTests, FromOnRenderPass) {
+    DAWN_SUPPRESS_TEST_IF(IsWARP());  // Flaky on WARP
+
     constexpr uint32_t kQueryCount = 2;
 
     // Write timestamp with different query indexes
