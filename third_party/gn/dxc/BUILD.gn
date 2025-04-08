@@ -1451,6 +1451,7 @@ dxcompiler_sourceset("lib_dxilpixpasses") {
     "$dawn_dxc_dir/lib/DxilPIXPasses/DxilDbgValueToDbgDeclare.cpp",
     "$dawn_dxc_dir/lib/DxilPIXPasses/DxilDebugInstrumentation.cpp",
     "$dawn_dxc_dir/lib/DxilPIXPasses/DxilForceEarlyZ.cpp",
+    "$dawn_dxc_dir/lib/DxilPIXPasses/DxilNonUniformResourceIndexInstrumentation.cpp",
     "$dawn_dxc_dir/lib/DxilPIXPasses/DxilOutputColorBecomesConstant.cpp",
     "$dawn_dxc_dir/lib/DxilPIXPasses/DxilPIXAddTidToAmplificationShaderPayload.cpp",
     "$dawn_dxc_dir/lib/DxilPIXPasses/DxilPIXDXRInvocationsLog.cpp",
