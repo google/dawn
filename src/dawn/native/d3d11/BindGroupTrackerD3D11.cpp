@@ -179,14 +179,14 @@ BindGroupTracker::~BindGroupTracker() {
 
     // Unbind UAVs.
     static constexpr ID3D11UnorderedAccessView* kNullUAVs[D3D11_1_UAV_SLOT_COUNT] = {};
-    if (mCSUAVSlots.MaxBoundSlots() > 0) {
-        deviceContext->CSSetUnorderedAccessViews(0, mCSUAVSlots.MaxBoundSlots(), kNullUAVs,
-                                                 nullptr);
+    if (mCSUAVSlots.MaxBoundSlots() > mCSMinUAVSlot) {
+        deviceContext->CSSetUnorderedAccessViews(
+            mCSMinUAVSlot, mCSUAVSlots.MaxBoundSlots() - mCSMinUAVSlot, kNullUAVs, nullptr);
     }
-    if (mPSMaxBoundUAVs > 0) {
+    if (mPSMaxUAVSlot > mPSMinUAVSlot) {
         deviceContext->OMSetRenderTargetsAndUnorderedAccessViews(
-            D3D11_KEEP_RENDER_TARGETS_AND_DEPTH_STENCIL, nullptr, nullptr, 0, mPSMaxBoundUAVs,
-            kNullUAVs, nullptr);
+            D3D11_KEEP_RENDER_TARGETS_AND_DEPTH_STENCIL, nullptr, nullptr, mPSMinUAVSlot,
+            mPSMaxUAVSlot - mPSMinUAVSlot, kNullUAVs, nullptr);
     }
 
     DAWN_ASSERT(CheckAllSlotsAreEmpty(mCommandContext));
@@ -273,6 +273,7 @@ void BindGroupTracker::CSSetSampler(uint32_t idx, ID3D11SamplerState* sampler) {
 
 void BindGroupTracker::CSSetUnorderedAccessView(uint32_t idx,
                                                 ComPtr<ID3D11UnorderedAccessView> uav) {
+    mCSMinUAVSlot = std::min(mCSMinUAVSlot, idx);
     mCSUAVSlots.Bind(idx, std::move(uav),
                      [this](size_t idx, const ComPtr<ID3D11UnorderedAccessView>& binding) {
                          mCommandContext->GetD3D11DeviceContext3()->CSSetUnorderedAccessViews(
@@ -283,7 +284,8 @@ void BindGroupTracker::CSSetUnorderedAccessView(uint32_t idx,
 void BindGroupTracker::OMSetUnorderedAccessViews(uint32_t startSlot,
                                                  uint32_t count,
                                                  ID3D11UnorderedAccessView* const* uavs) {
-    mPSMaxBoundUAVs = std::max(mPSMaxBoundUAVs, startSlot + count);
+    mPSMinUAVSlot = std::min(mPSMinUAVSlot, startSlot);
+    mPSMaxUAVSlot = std::max(mPSMaxUAVSlot, startSlot + count);
 
     GetCommandContext()->GetD3D11DeviceContext3()->OMSetRenderTargetsAndUnorderedAccessViews(
         D3D11_KEEP_RENDER_TARGETS_AND_DEPTH_STENCIL, nullptr, nullptr, startSlot, count, uavs,
@@ -575,6 +577,12 @@ RenderPassBindGroupTracker::~RenderPassBindGroupTracker() = default;
 
 MaybeError RenderPassBindGroupTracker::Apply() {
     BeforeApply();
+
+    if (!mDirtyBindGroupsObjectChangedOrIsDynamic.any() &&
+        mLastAppliedPipelineLayout == mPipelineLayout) {
+        AfterApply();
+        return {};
+    }
 
     // As D3d11 requires to bind all UAVs slots at the same time for pixel shaders, we record
     // all UAV slot assignments in the bind groups, and then bind them all together.
