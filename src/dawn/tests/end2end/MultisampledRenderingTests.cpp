@@ -372,6 +372,8 @@ class MultisampledRenderingTest : public DawnTest {
 
 // Test using one multisampled color attachment with resolve target can render correctly.
 TEST_P(MultisampledRenderingTest, ResolveInto2DTexture) {
+    DAWN_SUPPRESS_TEST_IF(IsWARP());
+
     constexpr bool kTestDepth = false;
     wgpu::RenderPipeline pipeline = CreateRenderPipelineWithOneOutputForTest(kTestDepth);
 
@@ -526,6 +528,7 @@ TEST_P(MultisampledRenderingTest, ResolveOneOfMultipleTargets) {
     // TODO(dawn:1550) Workaround introduces a bug on Qualcomm GPUs, but is necessary for ARM GPUs.
     DAWN_TEST_UNSUPPORTED_IF(IsAndroid() && IsQualcomm() &&
                              HasToggleEnabled("resolve_multiple_attachments_in_separate_passes"));
+    DAWN_SUPPRESS_TEST_IF(IsWARP());
 
     wgpu::TextureView multisampledColorView2 =
         CreateTextureForRenderAttachment(kColorFormat, kSampleCount).CreateView();

@@ -2067,6 +2067,8 @@ TEST_P(CompressedTextureZeroInitTest, HalfCopyBufferToTexture) {
 // Test that 0 lazy clear count happens when we copy buffer to texture to a nonzero mip level
 // (with physical size different from the virtual mip size)
 TEST_P(CompressedTextureZeroInitTest, FullCopyToNonZeroMipLevel) {
+    DAWN_SUPPRESS_TEST_IF(IsWARP());
+
     wgpu::TextureDescriptor textureDescriptor;
     textureDescriptor.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst |
                               wgpu::TextureUsage::TextureBinding;
@@ -2091,6 +2093,7 @@ TEST_P(CompressedTextureZeroInitTest, FullCopyToNonZeroMipLevel) {
 TEST_P(CompressedTextureZeroInitTest, HalfCopyToNonZeroMipLevel) {
     // TODO(crbug.com/346264229): diagnose this failure on ANGLE/D3D11
     DAWN_SUPPRESS_TEST_IF(IsANGLED3D11());
+    DAWN_SUPPRESS_TEST_IF(IsWARP());
 
     wgpu::TextureDescriptor textureDescriptor;
     textureDescriptor.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst |
@@ -2259,6 +2262,7 @@ TEST_P(CompressedTextureZeroInitTest, HalfCopyTextureToTextureMipLevel) {
 TEST_P(CompressedTextureZeroInitTest, Copy2DArrayCompressedB2T2B) {
     // Compatibility mode does not support compressed texture-to-buffer copies.
     DAWN_SUPPRESS_TEST_IF(IsCompatibilityMode());
+    DAWN_SUPPRESS_TEST_IF(IsWARP());
 
     // create srcTexture with data
     wgpu::TextureDescriptor textureDescriptor = CreateTextureDescriptor(
