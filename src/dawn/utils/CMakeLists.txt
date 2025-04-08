@@ -139,3 +139,6 @@ dawn_add_library(
     absl::flat_hash_map
     ${private_system_depends}
 )
+abseil_compile_options(dawn_system_utils)
+
+

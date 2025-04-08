@@ -62,6 +62,19 @@ dawn_json_generator("gen") {
   ]
 }
 
+config("abseil_config") {
+  if (!build_with_chromium && is_clang) {
+    cflags = [
+      # Allow the use of enable_if()
+      "-Wno-gcc-compat",
+      "-Wno-unreachable-code-break",
+
+      # Allows use of _Nullable, _Nonnull & _Null_unspecified
+      "-Wno-nullability-extension",
+    ]
+  }
+}
+
 group("abseil") {
   # When building within Chromium or ANGLE we need to include "//third_party/abseil-cpp:absl" while
   # it's beneficial to be more specific with standalone Dawn, especially when it comes to
@@ -70,9 +83,9 @@ group("abseil") {
     public_deps = [ "$dawn_abseil_dir:absl" ]
   } else {
     public_deps = [
-      "${dawn_root}/third_party/gn/abseil-cpp:flat_hash_map",
-      "${dawn_root}/third_party/gn/abseil-cpp:flat_hash_set",
-      "${dawn_root}/third_party/gn/abseil-cpp:span",
+      "${dawn_abseil_dir}/absl/container:flat_hash_map",
+      "${dawn_abseil_dir}/absl/container:flat_hash_set",
+      "${dawn_abseil_dir}/absl/types:span",
     ]
   }
 }
@@ -155,6 +168,8 @@ dawn_component("wire") {
     "server/ServerShaderModule.cpp",
     "server/ServerSurface.cpp",
   ]
+
+  public_configs = [ ":abseil_config" ]
 
   # Make headers publicly visible
   public_deps = [

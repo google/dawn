@@ -100,3 +100,18 @@ function(common_compile_options target)
     endif ()
   endif ()
 endfunction()
+
+################################################################################
+# abseil_compile_options - sets compiler and linker options for targets that
+#                          depend on abseil. Needs to be PUBLIC to propagate to
+#                          targets that depend indirectly on abseil.
+################################################################################
+function(abseil_compile_options target)
+  if (NOT MSVC)
+    target_compile_options(${target} PUBLIC
+      "-Wno-gcc-compat"
+      "-Wno-unreachable-code-break"
+      "-Wno-nullability-extension"
+    )
+  endif ()
+endfunction()

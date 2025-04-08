@@ -838,6 +838,7 @@ dawn_add_library(
     ${dawn_native_private_depends}
     ${conditional_private_platform_depends}
 )
+abseil_compile_options(dawn_native_objects)
 
 dawn_add_library(
   dawn_native
@@ -851,6 +852,7 @@ dawn_add_library(
     ${dawn_native_private_depends}
     ${conditional_private_platform_depends}
 )
+abseil_compile_options(dawn_native)
 
 target_compile_definitions(dawn_native PRIVATE "DAWN_NATIVE_IMPLEMENTATION")
 if(BUILD_SHARED_LIBS)

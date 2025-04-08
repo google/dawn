@@ -53,6 +53,18 @@ if (dawn_enable_vulkan) {
   enable_vulkan_loader =
       dawn_enable_vulkan_loader && dawn_vulkan_loader_dir != ""
 }
+config("abseil_config") {
+  if (!build_with_chromium && is_clang) {
+    cflags = [
+      # Allow the use of enable_if()
+      "-Wno-gcc-compat",
+      "-Wno-unreachable-code-break",
+
+      # Allows use of _Nullable, _Nonnull & _Null_unspecified
+      "-Wno-nullability-extension",
+    ]
+  }
+}
 
 group("abseil") {
   # When building within Chromium or ANGLE we need to include "//third_party/abseil-cpp:absl" while
@@ -62,14 +74,14 @@ group("abseil") {
     public_deps = [ "$dawn_abseil_dir:absl" ]
   } else {
     public_deps = [
-      "${dawn_root}/third_party/gn/abseil-cpp:bits",
-      "${dawn_root}/third_party/gn/abseil-cpp:flat_hash_map",
-      "${dawn_root}/third_party/gn/abseil-cpp:flat_hash_set",
-      "${dawn_root}/third_party/gn/abseil-cpp:inlined_vector",
-      "${dawn_root}/third_party/gn/abseil-cpp:span",
-      "${dawn_root}/third_party/gn/abseil-cpp:str_format",
-      "${dawn_root}/third_party/gn/abseil-cpp:string_view",
-      "${dawn_root}/third_party/gn/abseil-cpp:strings",
+      "${dawn_abseil_dir}/absl/container:flat_hash_map",
+      "${dawn_abseil_dir}/absl/container:flat_hash_set",
+      "${dawn_abseil_dir}/absl/container:inlined_vector",
+      "${dawn_abseil_dir}/absl/numeric:bits",
+      "${dawn_abseil_dir}/absl/strings:str_format",
+      "${dawn_abseil_dir}/absl/strings:string_view",
+      "${dawn_abseil_dir}/absl/strings:strings",
+      "${dawn_abseil_dir}/absl/types:span",
     ]
   }
 }
@@ -188,6 +200,8 @@ source_set("sources") {
   if (is_clang) {
     cflags = [ "-Wglobal-constructors" ]
   }
+
+  public_configs = [ ":abseil_config" ]
 
   # Dependencies that are needed to compile dawn native entry points in
   # FooBackend.cpp need to be public deps so they are propagated to the
@@ -434,7 +448,7 @@ source_set("sources") {
       "user32.lib",
       "delayimp.lib",
     ]
-    public_configs = [ ":win_delayload" ]
+    public_configs += [ ":win_delayload" ]
   }
 
   if (dawn_is_winuwp && is_debug) {

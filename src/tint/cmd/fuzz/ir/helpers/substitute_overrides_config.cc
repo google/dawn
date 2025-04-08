@@ -25,23 +25,31 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_CMD_FUZZ_IR_SUBSTITUTE_OVERRIDES_CONFIG_H_
-#define SRC_TINT_CMD_FUZZ_IR_SUBSTITUTE_OVERRIDES_CONFIG_H_
+#include "src/tint/cmd/fuzz/ir/helpers/substitute_overrides_config.h"
+
+#include <memory>
+#include <utility>
 
 #include "src/tint/lang/core/ir/transform/substitute_overrides.h"
-
-// Forward declarations
-namespace tint {
-class Program;
-}
+#include "src/tint/lang/wgsl/inspector/inspector.h"
+#include "src/tint/lang/wgsl/program/program.h"
 
 namespace tint::fuzz::ir {
 
-/// Returns a IR substitute override config which may contain an empty map if there a no overrides
-/// @param program A valid program
-/// @return An IR substitute override config
-core::ir::transform::SubstituteOverridesConfig SubstituteOverridesConfig(const Program& program);
+tint::core::ir::transform::SubstituteOverridesConfig SubstituteOverridesConfig(
+    const Program& program) {
+    tint::core::ir::transform::SubstituteOverridesConfig cfg;
+    inspector::Inspector inspector(program);
+    auto default_values = inspector.GetOverrideDefaultValues();
+    for (const auto& [override_id, scalar] : default_values) {
+        // If the override is not null, then it has a default value, we can just let it use the
+        // provided default instead of overriding.
+        if (scalar.IsNull()) {
+            cfg.map.insert({override_id, 0.0});
+        }
+    }
+
+    return cfg;
+}
 
 }  // namespace tint::fuzz::ir
-
-#endif  // SRC_TINT_CMD_FUZZ_IR_SUBSTITUTE_OVERRIDES_CONFIG_H_
