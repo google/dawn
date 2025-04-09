@@ -92,8 +92,8 @@ class Pipe {
   public:
     /// Constructs the pipe
     Pipe() {
-        int pipes[2] = {};
-        if (pipe(pipes) == 0) {
+        std::array<int, 2> pipes = {};
+        if (pipe(pipes.data()) == 0) {
             read = File(pipes[0]);
             write = File(pipes[1]);
         }
@@ -228,7 +228,7 @@ Command::Output Command::Exec(std::initializer_list<std::string> arguments) cons
         stdin_pipe.write.Close();
 
         // Accumulate the stdout and stderr output from the child process
-        pollfd poll_fds[2];
+        std::array<pollfd, 2> poll_fds;
         poll_fds[0].fd = stdout_pipe.read;
         poll_fds[0].events = POLLIN;
         poll_fds[1].fd = stderr_pipe.read;
@@ -238,7 +238,7 @@ Command::Output Command::Exec(std::initializer_list<std::string> arguments) cons
         bool stdout_open = true;
         bool stderr_open = true;
         while (stdout_open || stderr_open) {
-            if (poll(poll_fds, 2, -1) < 0) {
+            if (poll(poll_fds.data(), 2, -1) < 0) {
                 break;
             }
             std::array<char, 256> buf;
