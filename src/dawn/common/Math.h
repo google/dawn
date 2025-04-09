@@ -212,7 +212,7 @@ inline uint32_t BitCount(uint64_t bits) {
         return static_cast<uint32_t>(__popcnt64(bits));
 #else   // x86
         return __popcnt(static_cast<uint32_t>(bits >> 32)) +
-               __popcnt(static_cast<uint32_t>(bits)));
+               __popcnt(static_cast<uint32_t>(bits));
 #endif  // defined(_M_X64)
     }
     return BitCountPolyfill(bits);
