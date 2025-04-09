@@ -198,21 +198,38 @@ struct State {
     }
 
     void ConvertAtomicValue(core::ir::Value* val) {
-        auto* res = val->As<core::ir::InstructionResult>();
-        TINT_ASSERT(res);
+        tint::Switch(  //
+            val,       //
+            [&](core::ir::InstructionResult* res) {
+                auto* orig_ty = res->Type();
+                auto* atomic_ty = AtomicTypeFor(val, orig_ty);
+                res->SetType(atomic_ty);
 
-        auto* orig_ty = res->Type();
-        auto* atomic_ty = AtomicTypeFor(val, orig_ty);
-        res->SetType(atomic_ty);
+                tint::Switch(            //
+                    res->Instruction(),  //
+                    [&](core::ir::Access* a) {
+                        CheckForStructForking(a);
+                        values_to_convert_.Push(a->Object());
+                    },                                                               //
+                    [&](core::ir::Let* l) { values_to_convert_.Push(l->Value()); },  //
+                    [&](core::ir::Var*) {},                                          //
+                    TINT_ICE_ON_NO_MATCH);
+            },
+            [&](core::ir::FunctionParam* param) {
+                auto* orig_ty = param->Type();
+                auto* atomic_ty = AtomicTypeFor(val, orig_ty);
+                param->SetType(atomic_ty);
 
-        tint::Switch(            //
-            res->Instruction(),  //
-            [&](core::ir::Access* a) {
-                CheckForStructForking(a);
-                values_to_convert_.Push(a->Object());
-            },                                                               //
-            [&](core::ir::Let* l) { values_to_convert_.Push(l->Value()); },  //
-            [&](core::ir::Var*) {},                                          //
+                for (auto& usage : param->Function()->UsagesUnsorted()) {
+                    if (usage->instruction->Is<core::ir::Return>()) {
+                        continue;
+                    }
+
+                    auto* call = usage->instruction->As<core::ir::Call>();
+                    TINT_ASSERT(call);
+                    values_to_convert_.Push(call->Args()[param->Index()]);
+                }
+            },
             TINT_ICE_ON_NO_MATCH);
     }
 

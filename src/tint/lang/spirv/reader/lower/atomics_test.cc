@@ -691,6 +691,75 @@ $B1: {  # root
     ASSERT_EQ(expect, str());
 }
 
+TEST_F(SpirvReader_AtomicsTest, FunctionParam) {
+    auto* c = b.Function("c", ty.void_());
+    auto* p = b.FunctionParam("param", ty.ptr(workgroup, ty.array<u32, 4>(), read_write));
+    c->SetParams({p});
+
+    b.Append(c->Block(), [&] {
+        auto* a = b.Access(ty.ptr<workgroup, u32, read_write>(), p, 1_i);
+        b.Call<spirv::ir::BuiltinCall>(ty.void_(), spirv::BuiltinFn::kAtomicStore, a, 2_u, 0_u,
+                                       1_u);
+
+        b.Return(c);
+    });
+
+    auto* f = b.ComputeFunction("main");
+
+    core::ir::Var* wg = nullptr;
+    b.Append(mod.root_block,
+             [&] { wg = b.Var("wg", ty.ptr(workgroup, ty.array<u32, 4>(), read_write)); });
+
+    b.Append(f->Block(), [&] {  //
+        b.Call(ty.void_(), c, wg);
+        b.Return(f);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %wg:ptr<workgroup, array<u32, 4>, read_write> = var undef
+}
+
+%c = func(%param:ptr<workgroup, array<u32, 4>, read_write>):void {
+  $B2: {
+    %4:ptr<workgroup, u32, read_write> = access %param, 1i
+    %5:void = spirv.atomic_store %4, 2u, 0u, 1u
+    ret
+  }
+}
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B3: {
+    %7:void = call %c, %wg
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+    Run(Atomics);
+
+    auto* expect = R"(
+$B1: {  # root
+  %wg:ptr<workgroup, array<atomic<u32>, 4>, read_write> = var undef
+}
+
+%c = func(%param:ptr<workgroup, array<atomic<u32>, 4>, read_write>):void {
+  $B2: {
+    %4:ptr<workgroup, atomic<u32>, read_write> = access %param, 1i
+    %5:void = atomicStore %4, 1u
+    ret
+  }
+}
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B3: {
+    %7:void = call %c, %wg
+    ret
+  }
+}
+)";
+    ASSERT_EQ(expect, str());
+}
+
 TEST_F(SpirvReader_AtomicsTest, AtomicAdd) {
     auto* f = b.ComputeFunction("main");
 

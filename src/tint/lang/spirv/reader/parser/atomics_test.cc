@@ -577,6 +577,125 @@ $B1: {  # root
 )");
 }
 
+TEST_F(SpirvParser_AtomicsTest, FunctionParam) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %wg "wg"
+               OpName %main "main"
+        %int = OpTypeInt 32 1
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+     %uint_1 = OpConstant %uint 1
+     %uint_2 = OpConstant %uint 2
+     %uint_4 = OpConstant %uint 4
+      %int_1 = OpConstant %int 1
+        %arr = OpTypeArray %uint %uint_4
+    %ptr_arr = OpTypePointer Workgroup %arr
+   %ptr_uint = OpTypePointer Workgroup %uint
+       %void = OpTypeVoid
+         %10 = OpTypeFunction %void
+         %11 = OpTypeFunction %void %ptr_arr
+         %wg = OpVariable %ptr_arr Workgroup
+
+        %foo = OpFunction %void None %11
+      %param = OpFunctionParameter %ptr_arr
+  %foo_start = OpLabel
+         %42 = OpAccessChain %ptr_uint %param %int_1
+               OpAtomicStore %42 %uint_2 %uint_0 %uint_1
+               OpReturn
+               OpFunctionEnd
+
+       %main = OpFunction %void None %10
+         %45 = OpLabel
+         %44 = OpFunctionCall %void %foo %wg
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %wg:ptr<workgroup, array<u32, 4>, read_write> = var undef
+}
+
+%2 = func(%3:ptr<workgroup, array<u32, 4>, read_write>):void {
+  $B2: {
+    %4:ptr<workgroup, u32, read_write> = access %3, 1i
+    %5:void = spirv.atomic_store %4, 2u, 0u, 1u
+    ret
+  }
+}
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B3: {
+    %7:void = call %2, %wg
+    ret
+  }
+}
+)");
+}
+
+// TODO(dsinclair): Requires support for variable pointers
+TEST_F(SpirvParser_AtomicsTest, DISABLED_FunctionParam_subpointer) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpCapability VariablePointers
+               OpExtension "SPV_KHR_variable_pointers"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %wg "wg"
+               OpName %main "main"
+        %int = OpTypeInt 32 1
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+     %uint_1 = OpConstant %uint 1
+     %uint_2 = OpConstant %uint 2
+     %uint_4 = OpConstant %uint 4
+      %int_1 = OpConstant %int 1
+        %arr = OpTypeArray %uint %uint_4
+    %ptr_arr = OpTypePointer Workgroup %arr
+   %ptr_uint = OpTypePointer Workgroup %uint
+       %void = OpTypeVoid
+         %10 = OpTypeFunction %void
+         %11 = OpTypeFunction %void %ptr_uint
+         %wg = OpVariable %ptr_arr Workgroup
+
+        %foo = OpFunction %void None %11
+      %param = OpFunctionParameter %ptr_uint
+  %foo_start = OpLabel
+               OpAtomicStore %param %uint_2 %uint_0 %uint_1
+               OpReturn
+               OpFunctionEnd
+
+       %main = OpFunction %void None %10
+         %45 = OpLabel
+         %42 = OpAccessChain %ptr_uint %wg %int_1
+         %44 = OpFunctionCall %void %foo %42
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %wg:ptr<workgroup, array<u32, 4>, read_write> = var undef
+}
+
+%2 = func(%3:ptr<workgroup, array<u32, 4>, read_write>):void {
+  $B2: {
+    %4:ptr<workgroup, u32, read_write> = access %3, 1i
+    %5:void = spirv.atomic_store %4, 2u, 0u, 1u
+    ret
+  }
+}
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B3: {
+    %7:void = call %2, %wg
+    ret
+  }
+}
+)");
+}
+
 TEST_F(SpirvParser_AtomicsTest, AtomicAdd) {
     EXPECT_IR(R"(
                OpCapability Shader
