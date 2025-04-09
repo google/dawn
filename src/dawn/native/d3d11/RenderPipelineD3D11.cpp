@@ -243,14 +243,14 @@ MaybeError RenderPipeline::InitializeImpl() {
     // slots.
     uint32_t colorAttachments =
         static_cast<uint8_t>(GetHighestBitIndexPlusOne(GetColorAttachmentsMask()));
-    uint32_t unusedUAVs = ToBackend(GetLayout())->GetUnusedUAVBindingCount();
-    uint32_t usedUAVs = ToBackend(GetLayout())->GetTotalUAVBindingCount() - unusedUAVs;
+    uint32_t startUAVIndex = ToBackend(GetLayout())->GetUAVStartIndex(SingleShaderStage::Fragment);
+    uint32_t usedUAVs = ToBackend(GetLayout())->GetUAVCount(SingleShaderStage::Fragment);
     // TODO(dawn:1814): Move the validation to the frontend, if we eventually regard it as a compat
     // restriction.
-    DAWN_INVALID_IF(colorAttachments > unusedUAVs,
+    DAWN_INVALID_IF(colorAttachments > startUAVIndex,
                     "The pipeline uses up to color attachment %u, but there are only %u remaining "
                     "slots because the pipeline uses %u UAVs",
-                    colorAttachments, unusedUAVs, usedUAVs);
+                    colorAttachments, startUAVIndex, usedUAVs);
 
     SetLabelImpl();
     return {};
@@ -485,14 +485,15 @@ MaybeError RenderPipeline::InitializeShaders() {
         if (GetAttachmentState()->HasPixelLocalStorage()) {
             const std::vector<wgpu::TextureFormat>& storageAttachmentSlots =
                 GetAttachmentState()->GetStorageAttachmentSlots();
-            DAWN_ASSERT(ToBackend(GetLayout())->GetTotalUAVBindingCount() >
-                        storageAttachmentSlots.size());
+            const uint32_t uavEndIndex =
+                ToBackend(GetLayout())->GetUAVStartIndex(SingleShaderStage::Fragment) +
+                ToBackend(GetLayout())->GetUAVCount(SingleShaderStage::Fragment);
+            DAWN_ASSERT(uavEndIndex > storageAttachmentSlots.size());
             // Currently all the pixel local storage UAVs are allocated at the last several UAV
             // slots. For example, when there are 4 pixel local storage attachments, we will
             // allocate register u60 to u63 for them.
-            uint32_t basePixelLocalAttachmentIndex =
-                ToBackend(GetLayout())->GetTotalUAVBindingCount() -
-                static_cast<uint32_t>(storageAttachmentSlots.size());
+            const uint32_t basePixelLocalAttachmentIndex =
+                uavEndIndex - static_cast<uint32_t>(storageAttachmentSlots.size());
             for (size_t i = 0; i < storageAttachmentSlots.size(); i++) {
                 auto& attachment = pixelLocalOptions->attachments[i];
                 attachment.index = basePixelLocalAttachmentIndex + i;

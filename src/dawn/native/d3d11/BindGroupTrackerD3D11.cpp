@@ -300,12 +300,24 @@ MaybeError BindGroupTracker::ApplyBindGroup(BindGroupIndex index) {
 
     BindGroupBase* group = mBindGroups[index];
     const ityp::vector<BindingIndex, uint64_t>& dynamicOffsets = mDynamicOffsets[index];
-    const auto& indices = ToBackend(mPipelineLayout)->GetBindingIndexInfo()[index];
+    const auto& indices = ToBackend(mPipelineLayout)->GetBindingTableIndexMap()[index];
 
     for (BindingIndex bindingIndex : Range(group->GetLayout()->GetBindingCount())) {
         const BindingInfo& bindingInfo = group->GetLayout()->GetBindingInfo(bindingIndex);
-        const uint32_t bindingSlot = indices[bindingIndex];
         const auto bindingVisibility = bindingInfo.visibility & kVisibleStage;
+
+        uint32_t bindingSlotVS;
+        uint32_t bindingSlotPS;
+        uint32_t bindingSlotCS;
+        if (bindingVisibility & kVisibleVertex) {
+            bindingSlotVS = indices[bindingIndex][SingleShaderStage::Vertex];
+        }
+        if (bindingVisibility & kVisibleFragment) {
+            bindingSlotPS = indices[bindingIndex][SingleShaderStage::Fragment];
+        }
+        if (bindingVisibility & kVisibleCompute) {
+            bindingSlotCS = indices[bindingIndex][SingleShaderStage::Compute];
+        }
 
         DAWN_TRY(MatchVariant(
             bindingInfo.bindingLayout,
@@ -335,15 +347,15 @@ MaybeError BindGroupTracker::ApplyBindGroup(BindGroupIndex index) {
                                     binding.buffer->GetAllocatedSize());
 
                         if (bindingVisibility & kVisibleVertex) {
-                            this->VSSetConstantBuffer(bindingSlot, d3d11Buffer, firstConstant,
+                            this->VSSetConstantBuffer(bindingSlotVS, d3d11Buffer, firstConstant,
                                                       numConstants);
                         }
                         if (bindingVisibility & kVisibleFragment) {
-                            this->PSSetConstantBuffer(bindingSlot, d3d11Buffer, firstConstant,
+                            this->PSSetConstantBuffer(bindingSlotPS, d3d11Buffer, firstConstant,
                                                       numConstants);
                         }
                         if (bindingVisibility & kVisibleCompute) {
-                            this->CSSetConstantBuffer(bindingSlot, d3d11Buffer, firstConstant,
+                            this->CSSetConstantBuffer(bindingSlotCS, d3d11Buffer, firstConstant,
                                                       numConstants);
                         }
                         break;
@@ -358,7 +370,7 @@ MaybeError BindGroupTracker::ApplyBindGroup(BindGroupIndex index) {
                             DAWN_TRY_ASSIGN(d3d11UAV,
                                             ToGPUUsableBuffer(binding.buffer)
                                                 ->UseAsUAV(mCommandContext, offset, binding.size));
-                            this->CSSetUnorderedAccessView(bindingSlot, d3d11UAV);
+                            this->CSSetUnorderedAccessView(bindingSlotCS, d3d11UAV);
                         }
                         break;
                     }
@@ -369,13 +381,13 @@ MaybeError BindGroupTracker::ApplyBindGroup(BindGroupIndex index) {
                                         ToGPUUsableBuffer(binding.buffer)
                                             ->UseAsSRV(mCommandContext, offset, binding.size));
                         if (bindingVisibility & kVisibleVertex) {
-                            this->VSSetShaderResource(bindingSlot, d3d11SRV);
+                            this->VSSetShaderResource(bindingSlotVS, d3d11SRV);
                         }
                         if (bindingVisibility & kVisibleFragment) {
-                            this->PSSetShaderResource(bindingSlot, d3d11SRV);
+                            this->PSSetShaderResource(bindingSlotPS, d3d11SRV);
                         }
                         if (bindingVisibility & kVisibleCompute) {
-                            this->CSSetShaderResource(bindingSlot, d3d11SRV);
+                            this->CSSetShaderResource(bindingSlotCS, d3d11SRV);
                         }
                         break;
                     }
@@ -395,13 +407,13 @@ MaybeError BindGroupTracker::ApplyBindGroup(BindGroupIndex index) {
                 Sampler* sampler = ToBackend(group->GetBindingAsSampler(bindingIndex));
                 ID3D11SamplerState* d3d11SamplerState = sampler->GetD3D11SamplerState();
                 if (bindingVisibility & kVisibleVertex) {
-                    this->VSSetSampler(bindingSlot, d3d11SamplerState);
+                    this->VSSetSampler(bindingSlotVS, d3d11SamplerState);
                 }
                 if (bindingVisibility & kVisibleFragment) {
-                    this->PSSetSampler(bindingSlot, d3d11SamplerState);
+                    this->PSSetSampler(bindingSlotPS, d3d11SamplerState);
                 }
                 if (bindingVisibility & kVisibleCompute) {
-                    this->CSSetSampler(bindingSlot, d3d11SamplerState);
+                    this->CSSetSampler(bindingSlotCS, d3d11SamplerState);
                 }
                 return {};
             },
@@ -416,13 +428,13 @@ MaybeError BindGroupTracker::ApplyBindGroup(BindGroupIndex index) {
                     DAWN_TRY_ASSIGN(srv, view->GetOrCreateD3D11ShaderResourceView());
                 }
                 if (bindingVisibility & kVisibleVertex) {
-                    this->VSSetShaderResource(bindingSlot, srv);
+                    this->VSSetShaderResource(bindingSlotVS, srv);
                 }
                 if (bindingVisibility & kVisibleFragment) {
-                    this->PSSetShaderResource(bindingSlot, srv);
+                    this->PSSetShaderResource(bindingSlotPS, srv);
                 }
                 if (bindingVisibility & kVisibleCompute) {
-                    this->CSSetShaderResource(bindingSlot, srv);
+                    this->CSSetShaderResource(bindingSlotCS, srv);
                 }
                 return {};
             },
@@ -437,7 +449,7 @@ MaybeError BindGroupTracker::ApplyBindGroup(BindGroupIndex index) {
                         if (bindingVisibility & kVisibleCompute) {
                             ID3D11UnorderedAccessView* d3d11UAV = nullptr;
                             DAWN_TRY_ASSIGN(d3d11UAV, view->GetOrCreateD3D11UnorderedAccessView());
-                            this->CSSetUnorderedAccessView(bindingSlot, d3d11UAV);
+                            this->CSSetUnorderedAccessView(bindingSlotCS, d3d11UAV);
                         }
                         break;
                     }
@@ -445,13 +457,13 @@ MaybeError BindGroupTracker::ApplyBindGroup(BindGroupIndex index) {
                         ID3D11ShaderResourceView* d3d11SRV = nullptr;
                         DAWN_TRY_ASSIGN(d3d11SRV, view->GetOrCreateD3D11ShaderResourceView());
                         if (bindingVisibility & kVisibleVertex) {
-                            this->VSSetShaderResource(bindingSlot, d3d11SRV);
+                            this->VSSetShaderResource(bindingSlotVS, d3d11SRV);
                         }
                         if (bindingVisibility & kVisibleFragment) {
-                            this->PSSetShaderResource(bindingSlot, d3d11SRV);
+                            this->PSSetShaderResource(bindingSlotPS, d3d11SRV);
                         }
                         if (bindingVisibility & kVisibleCompute) {
-                            this->CSSetShaderResource(bindingSlot, d3d11SRV);
+                            this->CSSetShaderResource(bindingSlotCS, d3d11SRV);
                         }
                         break;
                     }
@@ -481,11 +493,11 @@ ComputePassBindGroupTracker::~ComputePassBindGroupTracker() = default;
 void ComputePassBindGroupTracker::UnapplyComputeBindings(BindGroupIndex index) {
     const BindGroupLayoutInternalBase* groupLayout =
         mLastAppliedPipelineLayout->GetBindGroupLayout(index);
-    const auto& indices = ToBackend(mLastAppliedPipelineLayout)->GetBindingIndexInfo()[index];
+    const auto& indices = ToBackend(mLastAppliedPipelineLayout)->GetBindingTableIndexMap()[index];
 
     for (BindingIndex bindingIndex : Range(groupLayout->GetBindingCount())) {
         const BindingInfo& bindingInfo = groupLayout->GetBindingInfo(bindingIndex);
-        const uint32_t bindingSlot = indices[bindingIndex];
+        const uint32_t bindingSlot = indices[bindingIndex][SingleShaderStage::Compute];
         if (!(bindingInfo.visibility & wgpu::ShaderStage::Compute)) {
             continue;
         }
@@ -586,28 +598,26 @@ MaybeError RenderPassBindGroupTracker::Apply() {
 
     // As D3d11 requires to bind all UAVs slots at the same time for pixel shaders, we record
     // all UAV slot assignments in the bind groups, and then bind them all together.
-    // TODO(crbug.com/366291600): Clean up D3D11 logic, replace following getters with
-    // GetUAVCount() and GetUAVStartSlot(). Clean up related validations.
     const BindGroupMask uavBindGroups = ToBackend(mPipelineLayout)->GetUAVBindGroupLayoutsMask();
-    const uint32_t uavSlotCount = ToBackend(mPipelineLayout)->GetTotalUAVBindingCount();
     const uint32_t plsSlotCount = ToBackend(mPipelineLayout)->GetPLSSlotCount();
-    const uint32_t unusedUavCount = ToBackend(mPipelineLayout)->GetUnusedUAVBindingCount();
+    const uint32_t uavStartSlot =
+        ToBackend(mPipelineLayout)->GetUAVStartIndex(SingleShaderStage::Fragment);
+    const uint32_t uavCount = ToBackend(mPipelineLayout)->GetUAVCount(SingleShaderStage::Fragment);
 
-    DAWN_ASSERT(uavSlotCount >= unusedUavCount + plsSlotCount);
-    const uint32_t usedUavCount = uavSlotCount - unusedUavCount - plsSlotCount;
+    DAWN_ASSERT(uavCount >= plsSlotCount);
+    const uint32_t usedUavCount = uavCount - plsSlotCount;
 
-    const uint32_t uavStartSlot = unusedUavCount;
-    std::vector<ComPtr<ID3D11UnorderedAccessView>> uavsInBindGroup(usedUavCount);
+    absl::InlinedVector<ComPtr<ID3D11UnorderedAccessView>, 1> uavsInBindGroup(usedUavCount);
 
     for (BindGroupIndex index : IterateBitSet(uavBindGroups)) {
         BindGroupBase* group = mBindGroups[index];
         const ityp::vector<BindingIndex, uint64_t>& dynamicOffsets = mDynamicOffsets[index];
-        const auto& indices = ToBackend(mPipelineLayout)->GetBindingIndexInfo()[index];
+        const auto& indices = ToBackend(mPipelineLayout)->GetBindingTableIndexMap()[index];
 
         // D3D11 uav slot allocated in reverse order.
         for (BindingIndex bindingIndex : Range(group->GetLayout()->GetBindingCount())) {
             const BindingInfo& bindingInfo = group->GetLayout()->GetBindingInfo(bindingIndex);
-            uint32_t pos = indices[bindingIndex] - uavStartSlot;
+            uint32_t pos = indices[bindingIndex][SingleShaderStage::Fragment] - uavStartSlot;
             DAWN_TRY(MatchVariant(
                 bindingInfo.bindingLayout,
                 [&](const BufferBindingInfo& layout) -> MaybeError {

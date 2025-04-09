@@ -122,14 +122,16 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
 
     for (BindGroupIndex group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
         const BindGroupLayout* bgl = ToBackend(layout->GetBindGroupLayout(group));
-        const auto& indices = layout->GetBindingIndexInfo()[group];
+        const auto& indices = layout->GetBindingTableIndexMap()[group];
         const BindingGroupInfoMap& moduleGroupBindingInfo = moduleBindingInfo[group];
 
         for (const auto& [binding, shaderBindingInfo] : moduleGroupBindingInfo) {
             BindingIndex bindingIndex = bgl->GetBindingIndex(binding);
             tint::BindingPoint srcBindingPoint{static_cast<uint32_t>(group),
                                                static_cast<uint32_t>(binding)};
-            tint::BindingPoint dstBindingPoint{0u, indices[bindingIndex]};
+            tint::BindingPoint dstBindingPoint{0u, indices[bindingIndex][stage]};
+            DAWN_ASSERT(dstBindingPoint.binding != PipelineLayout::kInvalidSlot);
+
             auto* const bufferBindingInfo =
                 std::get_if<BufferBindingInfo>(&shaderBindingInfo.bindingInfo);
 
@@ -174,11 +176,11 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
 
                 const auto& bindingExpansion = expansion->second;
                 tint::hlsl::writer::binding::BindingInfo plane0{
-                    0u, indices[bgl->GetBindingIndex(bindingExpansion.plane0)]};
+                    0u, indices[bgl->GetBindingIndex(bindingExpansion.plane0)][stage]};
                 tint::hlsl::writer::binding::BindingInfo plane1{
-                    0u, indices[bgl->GetBindingIndex(bindingExpansion.plane1)]};
+                    0u, indices[bgl->GetBindingIndex(bindingExpansion.plane1)][stage]};
                 tint::hlsl::writer::binding::BindingInfo metadata{
-                    0u, indices[bgl->GetBindingIndex(bindingExpansion.params)]};
+                    0u, indices[bgl->GetBindingIndex(bindingExpansion.params)][stage]};
                 bindings.external_texture.emplace(
                     srcBindingPoint,
                     tint::hlsl::writer::binding::ExternalTexture{metadata, plane0, plane1});
