@@ -335,6 +335,9 @@ TEST_P(SharedBufferMemoryTests, EnsureNoDuplicateBeginAccessCalls) {
 // Ensure the BeginAccessDescriptor initialized parameter preserves or clears the buffer as
 // necessary.
 TEST_P(SharedBufferMemoryTests, BeginAccessInitialization) {
+    // Flaky on WARP
+    DAWN_SUPPRESS_TEST_IF(IsWARP() && IsD3D12());
+
     // Create a buffer with initialized data.
     wgpu::SharedBufferMemory memory =
         GetParam().mBackend->CreateSharedBufferMemory(device, kMapWriteUsages, kBufferSize);
