@@ -2441,8 +2441,9 @@ var LibraryWebGPU = {
     var context = WebGPU.getJsObject(surfacePtr);
 
 #if ASSERTIONS
-    assert({{{ gpu.PresentMode.Fifo }}} ===
-      {{{ gpu.makeGetU32('config', C_STRUCTS.WGPUSurfaceConfiguration.presentMode) }}});
+    var presentMode = {{{ gpu.makeGetU32('config', C_STRUCTS.WGPUSurfaceConfiguration.presentMode) }}};
+    assert(presentMode === {{{ gpu.PresentMode.Fifo }}} ||
+           presentMode === {{{ gpu.PresentMode.Undefined }}});
 #endif
 
     var canvasSize = [
