@@ -196,6 +196,8 @@ function(tint_default_compile_options TARGET)
         )
       endif()
     endif()
+
+    target_compile_definitions(${TARGET} INTERFACE "NOMINMAX")
   endif()
 
   if(TINT_RANDOMIZE_HASHES)

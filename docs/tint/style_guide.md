@@ -47,7 +47,7 @@
 
 ## Compiler support
 
-Tint requires C++17.
+Tint requires C++20.
 
 Tint uses the Chromium build system and will stay synchronized with that system.
 Compiler configurations beyond that baseline is on a best-effort basis.
