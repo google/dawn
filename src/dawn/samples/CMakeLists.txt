@@ -56,7 +56,6 @@ dawn_add_library(
     DEPENDS
         ${sample_util_depends}
 )
-abseil_compile_options(dawn_sample_utils)
 
 ###############################################################################
 # Dawn samples
@@ -86,7 +85,6 @@ function(Sample)
     endif()
     target_link_libraries(${arg_NAME} PUBLIC dawn::dawn_sample_utils)
     common_compile_options(${arg_NAME})
-    abseil_compile_options(${arg_NAME})
 endfunction()
 
 Sample(

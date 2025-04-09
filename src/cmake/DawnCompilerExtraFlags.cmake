@@ -56,6 +56,21 @@ function(common_compile_options target)
       PUBLIC "/utf-8")
   endif ()
 
+  # Abseil headers can cause warnings when included that will cause failures
+  # with -Werror.
+  # Needs to be PUBLIC to propagate to targets that depend indirectly on abseil
+  # via this target.
+  if (NOT MSVC)
+    get_target_property(deps ${target} LINK_LIBRARIES)
+    if (deps MATCHES "absl")
+      target_compile_options(${target} PUBLIC
+              "-Wno-gcc-compat"
+              "-Wno-unreachable-code-break"
+              "-Wno-nullability-extension"
+      )
+    endif ()
+  endif ()
+
   if (COMPILER_IS_LIKE_GNU)
     set(SANITIZER_OPTIONS "")
     if (${DAWN_ENABLE_MSAN})
@@ -101,17 +116,3 @@ function(common_compile_options target)
   endif ()
 endfunction()
 
-################################################################################
-# abseil_compile_options - sets compiler and linker options for targets that
-#                          depend on abseil. Needs to be PUBLIC to propagate to
-#                          targets that depend indirectly on abseil.
-################################################################################
-function(abseil_compile_options target)
-  if (NOT MSVC)
-    target_compile_options(${target} PUBLIC
-      "-Wno-gcc-compat"
-      "-Wno-unreachable-code-break"
-      "-Wno-nullability-extension"
-    )
-  endif ()
-endfunction()

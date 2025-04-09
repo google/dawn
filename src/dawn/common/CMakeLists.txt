@@ -182,5 +182,3 @@ dawn_add_library(
         dawn_shared_utils
         ${conditional_private_depends}
 )
-
-abseil_compile_options(dawn_common)
