@@ -110,14 +110,6 @@ crbug.com/42241436 [ android webgpu-shared-worker ] * [ Skip ]
 crbug.com/40782602 [ linux ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:* [ Skip ]
 crbug.com/41491225 [ linux ] webgpu:web_platform,copyToTexture,canvas:* [ Skip ]
 
-# web_platform crashes on SwiftShader
-# Skipped instead of just Crash because of the number of failures
-crbug.com/40853211 [ webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_2D_Canvas:* [ Skip ]
-crbug.com/40853211 [ webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:* [ Skip ]
-crbug.com/40853211 [ webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:* [ Skip ]
-crbug.com/40853211 [ webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_2d_context_canvas:* [ Skip ]
-crbug.com/40853211 [ webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gl_context_canvas:* [ Skip ]
-
 # Causing bot instability on Mac AMD
 crbug.com/42240813 [ amd-0x67ef ] webgpu:api,operation,rendering,color_target_state:blending,GPUBlendComponent:* [ Skip ]
 
@@ -316,27 +308,8 @@ crbug.com/407109048 [ arm ] webgpu:api,validation,capability_checks,limits,maxBu
 # Triaged or Manually-Added Flakes and Failures
 ################################################################################
 
-# Flaky on SwiftShader
-crbug.com/40853211 [ webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,image:from_image:* [ Failure ]
-crbug.com/40853211 [ webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:* [ Failure ]
-crbug.com/40853211 [ webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,image:from_image:* [ Failure ]
-crbug.com/40853211 [ webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,ImageData:from_ImageData:* [ Failure ]
-
-# Flaky on Mac SwiftShader
-crbug.com/40853211 [ mac webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_bitmaprenderer_context_canvas:* [ RetryOnFailure ]
-
-# Flaky on Linux (with SwiftShader)
-crbug.com/408486529 [ linux webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,video:copy_from_video:* [ Failure ]
-
 # Flaky on Linux (with VVL)
 crbug.com/408556424 [ dawn-backend-validation linux ] webgpu:web_platform,copyToTexture,video:copy_from_video:* [ Failure ]
-
-# Failing on SwiftShader on various platforms
-crbug.com/407814992 [ mac webgpu-adapter-swiftshader ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:transferToImageBitmap_huge_size: [ Failure ]
-crbug.com/407814992 [ webgpu-adapter-swiftshader win ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:transferToImageBitmap_huge_size: [ Failure ]
-crbug.com/407814992 [ linux webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:alpha="none";orientation="flipY";* [ Failure ]
-crbug.com/407814992 [ linux webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:* [ RetryOnFailure ]
-crbug.com/407147669 [ webgpu-adapter-swiftshader win ] webgpu:web_platform,copyToTexture,ImageData:copy_subrect_from_ImageData:* [ Failure ]
 
 # Flaky on MacBookPro16,1 (AMD) machines
 crbug.com/372055513 [ amd mac ] webgpu:shader,execution,expression,call,builtin,subgroupBroadcast:workgroup_uniform_load:* [ RetryOnFailure ]
@@ -437,6 +410,10 @@ crbug.com/41487285 [ intel linux ] webgpu:web_platform,external_texture,video:im
 crbug.com/40924444 [ mac webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,video:copy_from_video:* [ Failure ]
 crbug.com/40924444 [ mac webgpu-adapter-swiftshader ] webgpu:web_platform,external_texture,video:importExternalTexture,* [ Failure ]
 crbug.com/40924444 [ webgpu-adapter-swiftshader ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:* [ Failure ]
+
+# copy_contents_from_*_context_canvas*canvasType="offscreen" failures on Mac SwiftShader
+crbug.com/409512700 [ mac webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_2d_context_canvas:*canvasType="offscreen";* [ Failure ]
+crbug.com/409512700 [ mac webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gl_context_canvas:*canvasType="offscreen";* [ Failure ]
 
 # ETC2 failures on Apple GPUS
 crbug.com/42240782 [ apple-angle-metal-renderer:-apple-m2 dawn-backend-validation ] webgpu:api,validation,createView:format:textureFormatFeature="texture-compression-etc2";viewFormatFeature="texture-compression-etc2" [ Failure ]
@@ -1012,9 +989,6 @@ crbug.com/407147668 [ nvidia win ] webgpu:web_platform,copyToTexture,canvas:colo
 crbug.com/407147668 [ nvidia win ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:srcColorSpace="display-p3";dstColorSpace="display-p3";dstColorFormat="r32float";dstPremultiplied=false;srcDoFlipYDuringCopy=true [ Failure ]
 crbug.com/407147668 [ nvidia win ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:srcColorSpace="display-p3";dstColorSpace="display-p3";dstColorFormat="rg32float";dstPremultiplied=false;srcDoFlipYDuringCopy=true [ Failure ]
 
-# SwiftShader color_space_conversion (at least some of these are flakes)
-crbug.com/42240560 [ webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:srcColorSpace="display-p3";dstColorSpace="display-p3";* [ Failure ]
-
 # Other assorted color_space_conversion failures
 crbug.com/407076128 [ angle-d3d11 graphite-enabled nvidia-0x2184 ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:srcColorSpace="srgb";dstColorSpace="display-p3";* [ RetryOnFailure ]
 crbug.com/407147668 [ dawn-backend-validation nvidia target-cpu-64 win ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:srcColorSpace="srgb";dstColorSpace="srgb";dstColorFormat="bgra8unorm";dstPremultiplied=true;srcDoFlipYDuringCopy=true [ Failure ]
@@ -1550,8 +1524,6 @@ crbug.com/0000 [ dawn-backend-validation intel-0x9bc5 linux webgpu-adapter-defau
 crbug.com/0000 [ dawn-backend-validation intel linux webgpu-adapter-default ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="rgba8unorm";viewFormatFeature="_undef_" [ Failure ]
 crbug.com/0000 [ android-pixel-4 dawn-no-backend-validation webgpu-service-worker ] webgpu:web_platform,canvas,getPreferredCanvasFormat:value: [ Failure ]
 crbug.com/0000 [ android-pixel-4 qualcomm webgpu-service-worker ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="bgra8unorm";alphaMode="opaque";colorSpace="display-p3";webgpuCanvasType="offscreen";canvas2DType="offscreen" [ Failure ]
-crbug.com/0000 [ intel no-asan release-x64 target-cpu-64 webgpu-adapter-swiftshader webgpu-dxc-enabled webgpu-no-worker win ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:offscreenCanvas,snapshot:format="bgra8unorm";alphaMode="opaque";colorSpace="srgb";snapshotType="convertToBlob" [ Failure ]
-crbug.com/0000 [ intel no-asan release-x64 target-cpu-64 webgpu-adapter-swiftshader webgpu-dxc-enabled webgpu-no-worker win ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:offscreenCanvas,snapshot:format="bgra8unorm";alphaMode="premultiplied";colorSpace="srgb";snapshotType="convertToBlob" [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:alpha="none";orientation="flipY";colorSpaceConversion="default";srcFlipYInCopy=true;dstFormat="rgba8unorm";dstPremultiplied=true [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:alpha="premultiply";orientation="flipY";colorSpaceConversion="default";srcFlipYInCopy=false;dstFormat="rgba16float";dstPremultiplied=true [ Failure ]
 crbug.com/0000 [ android-pixel-4 ] webgpu:web_platform,copyToTexture,image:copy_subrect_from_2D_Canvas:srcDoFlipYDuringCopy=false;dstPremultiplied=true [ Failure ]
