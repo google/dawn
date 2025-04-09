@@ -97,8 +97,6 @@
 #include "src/tint/utils/math/math.h"
 #include "src/tint/utils/rtti/switch.h"
 
-TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
-
 // Helper for incrementing nesting_depth_ and then decrementing nesting_depth_ at the end
 // of the scope that holds the call.
 #define SCOPED_NESTING() \
@@ -811,13 +809,14 @@ class State {
     }
 
     void Swizzle(const core::ir::Swizzle* s) {
+        static constexpr std::array<char, 4> xyzw = {'x', 'y', 'z', 'w'};
         auto* vec = Expr(s->Object());
         Vector<char, 4> components;
         for (uint32_t i : s->Indices()) {
             if (DAWN_UNLIKELY(i >= 4)) {
                 TINT_ICE() << "invalid swizzle index: " << i;
             }
-            components.Push("xyzw"[i]);
+            components.Push(xyzw[i]);
         }
         auto* swizzle =
             b.MemberAccessor(vec, std::string_view(components.begin(), components.Length()));
@@ -1380,5 +1379,3 @@ Program IRToProgram(const core::ir::Module& i, const ProgramOptions& options) {
 }
 
 }  // namespace tint::wgsl::writer
-
-TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
