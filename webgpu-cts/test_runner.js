@@ -215,8 +215,7 @@ async function runCtsTest(queryString) {
   if (powerPreference || compatibility) {
     setDefaultRequestAdapterOptions({
       ...(powerPreference && { powerPreference }),
-      // MAINTENANCE_TODO(gman): Change this to whatever the option ends up being
-      ...(compatibility && { compatibilityMode: true }),
+      ...(compatibility && { featureLevel: 'compatibility' }),
     });
   }
 
