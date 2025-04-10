@@ -203,9 +203,11 @@ ResultOrError<Ref<Texture>> Texture::CreateInternal(
 // static
 ResultOrError<Ref<Texture>> Texture::CreateFromSharedTextureMemory(
     SharedTextureMemory* memory,
-    const UnpackedPtr<TextureDescriptor>& descriptor) {
+    const UnpackedPtr<TextureDescriptor>& descriptor,
+    bool requiresFenceSignal) {
     Device* device = ToBackend(memory->GetDevice());
-    Ref<Texture> texture = AcquireRef(new Texture(device, descriptor, Kind::Normal));
+    Ref<Texture> texture =
+        AcquireRef(new Texture(device, descriptor, Kind::Normal, requiresFenceSignal));
     DAWN_TRY(
         texture->InitializeAsExternalTexture(memory->GetD3DResource(), memory->GetKeyedMutex()));
     texture->mSharedResourceMemoryContents = memory->GetContents();
@@ -331,8 +333,11 @@ MaybeError Texture::InitializeAsExternalTexture(ComPtr<IUnknown> d3dTexture,
     return {};
 }
 
-Texture::Texture(Device* device, const UnpackedPtr<TextureDescriptor>& descriptor, Kind kind)
-    : Base(device, descriptor), mKind(kind) {}
+Texture::Texture(Device* device,
+                 const UnpackedPtr<TextureDescriptor>& descriptor,
+                 Kind kind,
+                 bool requiresFenceSignal)
+    : Base(device, descriptor), mKind(kind), mRequiresFenceSignal(requiresFenceSignal) {}
 
 Texture::~Texture() = default;
 
@@ -470,7 +475,7 @@ MaybeError Texture::SynchronizeTextureBeforeUse(
                 CheckHRESULT(commandContext->Wait(d3dFence->GetD3DFence(), fence.signaledValue),
                              "ID3D11DeviceContext4::Wait"));
         }
-        if (!device->IsToggleEnabled(Toggle::D3D11DisableFence)) {
+        if (mRequiresFenceSignal && !device->IsToggleEnabled(Toggle::D3D11DisableFence)) {
             commandContext->SetNeedsFence();
         }
     }

@@ -57,6 +57,13 @@ struct DAWN_NATIVE_EXPORT SharedTextureMemoryD3D11Texture2DDescriptor : wgpu::Ch
     // This ID3D11Texture2D object must be created from the same ID3D11Device used in the
     // WGPUDevice.
     Microsoft::WRL::ComPtr<ID3D11Texture2D> texture;
+
+    // If this flag is true, Dawn is required to signal a fence before EndAccess() and return it in
+    // SharedTextureMemoryEndAccessState's fences list.
+    // If it's false, no fence signaling is needed and EndAccess() might return empty fence list.
+    // Note: this flag is not relevant if the feature SharedFenceDXGISharedHandle is disabled/not
+    // supported.
+    bool requiresEndAcessFence = true;
 };
 
 }  // namespace dawn::native::d3d11

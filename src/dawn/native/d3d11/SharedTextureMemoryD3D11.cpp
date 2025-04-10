@@ -134,8 +134,8 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
     DAWN_TRY_ASSIGN(properties, PropertiesFromD3D11Texture(device, d3d11Texture,
                                                            /*isSharedWithHandle=*/true));
 
-    auto result =
-        AcquireRef(new SharedTextureMemory(device, label, properties, std::move(d3d11Resource)));
+    auto result = AcquireRef(new SharedTextureMemory(
+        device, label, properties, std::move(d3d11Resource), /*requiresFenceSignal=*/true));
     result->Initialize();
     return result;
 }
@@ -161,8 +161,9 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
     DAWN_TRY_ASSIGN(properties, PropertiesFromD3D11Texture(device, descriptor->texture,
                                                            /*isSharedWithHandle=*/false));
 
-    auto result =
-        AcquireRef(new SharedTextureMemory(device, label, properties, std::move(d3d11Resource)));
+    auto result = AcquireRef(
+        new SharedTextureMemory(device, label, properties, std::move(d3d11Resource),
+                                /*requiresFenceSignal=*/descriptor->requiresEndAcessFence));
     result->Initialize();
     return result;
 }
@@ -170,8 +171,11 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
 SharedTextureMemory::SharedTextureMemory(Device* device,
                                          StringView label,
                                          SharedTextureMemoryProperties properties,
-                                         ComPtr<ID3D11Resource> resource)
-    : d3d::SharedTextureMemory(device, label, properties), mResource(std::move(resource)) {
+                                         ComPtr<ID3D11Resource> resource,
+                                         bool requiresFenceSignal)
+    : d3d::SharedTextureMemory(device, label, properties),
+      mResource(std::move(resource)),
+      mRequiresFenceSignal(requiresFenceSignal) {
     ComPtr<IDXGIKeyedMutex> dxgiKeyedMutex;
     mResource.As(&dxgiKeyedMutex);
     if (dxgiKeyedMutex) {
@@ -194,7 +198,7 @@ d3d::KeyedMutex* SharedTextureMemory::GetKeyedMutex() const {
 
 ResultOrError<Ref<TextureBase>> SharedTextureMemory::CreateTextureImpl(
     const UnpackedPtr<TextureDescriptor>& descriptor) {
-    return Texture::CreateFromSharedTextureMemory(this, descriptor);
+    return Texture::CreateFromSharedTextureMemory(this, descriptor, mRequiresFenceSignal);
 }
 
 }  // namespace dawn::native::d3d11
