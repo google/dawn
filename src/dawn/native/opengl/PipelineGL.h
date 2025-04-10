@@ -67,11 +67,13 @@ class PipelineGL {
     const std::vector<GLuint>& GetTextureUnitsForTextureView(GLuint index) const;
     GLuint GetProgramHandle() const;
 
-    const Buffer* GetInternalUniformBuffer() const;
     const BindingPointToFunctionAndOffset& GetBindingPointBuiltinDataInfo() const;
+    bool NeedsTextureBuiltinUniformBuffer() const;
+
+    bool NeedsSSBOLengthUniformBuffer() const;
 
   protected:
-    MaybeError ApplyNow(const OpenGLFunctions& gl);
+    MaybeError ApplyNow(const OpenGLFunctions& gl, const PipelineLayout* layout);
     MaybeError InitializeBase(const OpenGLFunctions& gl,
                               const PipelineLayout* layout,
                               const PerStage<ProgrammableStage>& stages,
@@ -90,10 +92,9 @@ class PipelineGL {
     // destruction complex as it requires the sampler to be destroyed before the sampler cache.
     Ref<Sampler> mPlaceholderSampler;
 
-    // Maintain an internal uniform buffer to store extra information needed by shader emulation.
-    GLuint mInternalUniformBufferBinding;
-    bool mNeedsTextureBuiltinUniformBuffer;
-    Ref<Buffer> mTextureBuiltinsBuffer;
+    // Flag indicates if this pipeline has ssbo.length and need to use the array length from uniform
+    // workaround.
+    bool mNeedsSSBOLengthUniformBuffer = false;
 
     // Reflect info from tint: a map from texture binding point to extra data need to push into the
     // internal uniform buffer.

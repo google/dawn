@@ -161,10 +161,10 @@ using CombinedTextureSamplerInfo =
     std::unordered_map<binding::CombinedTextureSamplerPair, std::string>;
 
 /// Options used to specify a mapping of binding points to indices into a UBO
-/// from which to load buffer sizes.
+/// from which to load texture builtin values.
 struct TextureBuiltinsFromUniformOptions {
     /// The binding point to use to generate a uniform buffer from which to read
-    /// buffer sizes.
+    /// texture builtin values.
     BindingPoint ubo_binding = {};
 
     /// Ordered list of binding points in the uniform buffer for polyfilling `textureNumSamples` and
@@ -173,6 +173,19 @@ struct TextureBuiltinsFromUniformOptions {
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(TextureBuiltinsFromUniformOptions, ubo_binding, ubo_bindingpoint_ordering);
+};
+
+/// Options used to specify a mapping of binding points to indices into a UBO
+/// from which to load buffer sizes.
+struct ArrayLengthFromUniformOptions {
+    /// The binding point to use to generate a uniform buffer from which to read buffer sizes.
+    BindingPoint ubo_binding;
+    /// The mapping from the storage buffer binding points in WGSL binding-point space to the index
+    /// into the uniform buffer where the length of the buffer is stored.
+    std::unordered_map<BindingPoint, uint32_t> bindpoint_to_size_index;
+
+    /// Reflect the fields of this class so that it can be used by tint::ForeachField()
+    TINT_REFLECT(ArrayLengthFromUniformOptions, ubo_binding, bindpoint_to_size_index);
 };
 
 /// Binding information
@@ -213,6 +226,11 @@ struct Bindings : public Castable<Bindings, tint::ast::transform::Data> {
     /// textureQueryLevels/textureSamples directly.
     TextureBuiltinsFromUniformOptions texture_builtins_from_uniform = {};
 
+    /// Options used to specify a mapping of binding points to indices into a UBO
+    /// from which to load buffer sizes. If not specified, emits corresponding GLSL builtins
+    /// length() directly
+    ArrayLengthFromUniformOptions array_length_from_uniform = {};
+
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(Bindings,
                  uniform,
@@ -223,7 +241,8 @@ struct Bindings : public Castable<Bindings, tint::ast::transform::Data> {
                  external_texture,
                  sampler_texture_to_name,
                  placeholder_sampler_bind_point,
-                 texture_builtins_from_uniform);
+                 texture_builtins_from_uniform,
+                 array_length_from_uniform);
 };
 
 /// Configuration options used for generating GLSL.
@@ -259,6 +278,9 @@ struct Options {
     /// Set to `true` to disable the polyfills on integer division and modulo.
     bool disable_polyfill_integer_div_mod = false;
 
+    /// Set to `true` to run ArrayLengthFromTransform workaround
+    bool use_array_length_from_uniform = false;
+
     /// The GLSL version to emit
     Version version;
 
@@ -283,6 +305,7 @@ struct Options {
                  disable_robustness,
                  disable_workgroup_init,
                  disable_polyfill_integer_div_mod,
+                 use_array_length_from_uniform,
                  version,
                  first_vertex_offset,
                  first_instance_offset,

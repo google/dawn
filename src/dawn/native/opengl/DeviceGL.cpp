@@ -209,7 +209,30 @@ MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
     if (HasAnisotropicFiltering(gl)) {
         DAWN_GL_TRY(gl, GetIntegerv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &mMaxTextureMaxAnisotropy));
     }
-    return DeviceBase::Initialize(std::move(queue));
+
+    DAWN_TRY(DeviceBase::Initialize(std::move(queue)));
+
+    // Create internal buffers needed for workarounds.
+    if (mTextureBuiltinsBuffer.Get() == nullptr) {
+        BufferDescriptor desc = {};
+        desc.size = kGLMaxTextureImageUnitsReported * sizeof(uint32_t);
+        desc.usage = wgpu::BufferUsage::Uniform | wgpu::BufferUsage::CopyDst;
+        Ref<BufferBase> buffer;
+        DAWN_TRY_ASSIGN(buffer, Buffer::CreateInternalBuffer(this, &desc, false));
+        mTextureBuiltinsBuffer = ToBackend(std::move(buffer));
+    }
+
+    if (IsToggleEnabled(Toggle::GLUseArrayLengthFromUniform) &&
+        mArrayLengthBuffer.Get() == nullptr) {
+        BufferDescriptor desc = {};
+        desc.size = kGLMaxShaderStorageBufferBindingsReported * sizeof(uint32_t);
+        desc.usage = wgpu::BufferUsage::Uniform | wgpu::BufferUsage::CopyDst;
+        Ref<BufferBase> buffer;
+        DAWN_TRY_ASSIGN(buffer, Buffer::CreateInternalBuffer(this, &desc, false));
+        mArrayLengthBuffer = ToBackend(std::move(buffer));
+    }
+
+    return {};
 }
 
 const GLFormat& Device::GetGLFormat(const Format& format) {
@@ -465,6 +488,9 @@ MaybeError Device::CopyFromStagingToTextureImpl(const BufferBase* source,
 
 void Device::DestroyImpl() {
     DAWN_ASSERT(GetState() == State::Disconnected);
+
+    mTextureBuiltinsBuffer = nullptr;
+    mArrayLengthBuffer = nullptr;
 }
 
 uint32_t Device::GetOptimalBytesPerRowAlignment() const {
@@ -522,6 +548,14 @@ EGLDisplay Device::GetEGLDisplay() const {
 
 ContextEGL* Device::GetContext() const {
     return mContext.get();
+}
+
+const Buffer* Device::GetInternalTextureBuiltinsUniformBuffer() const {
+    return mTextureBuiltinsBuffer.Get();
+}
+
+const Buffer* Device::GetInternalArrayLengthUniformBuffer() const {
+    return mArrayLengthBuffer.Get();
 }
 
 }  // namespace dawn::native::opengl

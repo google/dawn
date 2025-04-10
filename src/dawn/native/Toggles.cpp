@@ -454,6 +454,14 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "Use a shader based blit instead of a copy command to copy a buffer to a texture with "
       "supported format.",
       "https://crbug.com/dawn/348653642", ToggleStage::Device}},
+    {Toggle::GLUseArrayLengthFromUniform,
+     {"gl_use_array_length_from_uniform",
+      "Use arrayLengthFromUniform transform to replace arrayLength() function calls of dynamic "
+      "storage buffers."
+      "This toggle is only used for workarounds on certain devices. It has no impact on backends "
+      "which need "
+      "this transform universally (metal, d3d12)",
+      "https://crbug.com/dawn/379805731", ToggleStage::Device}},
     {Toggle::D3D11DisableCPUUploadBuffers,
      {"d3d11_disable_cpu_buffers",
       "Force disabling the usages of CPU upload buffers in the D3D11 backend.",

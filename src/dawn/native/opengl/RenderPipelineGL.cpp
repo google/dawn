@@ -290,7 +290,7 @@ MaybeError RenderPipeline::CreateVAOForVertexState() {
 
 MaybeError RenderPipeline::ApplyNow(PersistentPipelineState& persistentPipelineState) {
     const OpenGLFunctions& gl = ToBackend(GetDevice())->GetGL();
-    DAWN_TRY(PipelineGL::ApplyNow(gl));
+    DAWN_TRY(PipelineGL::ApplyNow(gl, ToBackend(GetLayout())));
 
     DAWN_ASSERT(mVertexArrayObject);
     DAWN_GL_TRY(gl, BindVertexArray(mVertexArrayObject));

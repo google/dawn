@@ -37,6 +37,12 @@
 
 namespace dawn::native::opengl {
 
+// According to gpuinfo.org, devices report GL_MAX_TEXTURE_IMAGE_UNITS <= 128
+static constexpr size_t kGLMaxTextureImageUnitsReported = 128;
+
+// According to gpuinfo.org, devices report GL_MAX_SHADER_STORAGE_BUFFER_BINDINGS <= 96
+static constexpr size_t kGLMaxShaderStorageBufferBindingsReported = 96;
+
 class Device;
 
 class PipelineLayout final : public PipelineLayoutBase {
@@ -52,8 +58,10 @@ class PipelineLayout final : public PipelineLayoutBase {
     GLuint GetTextureUnitsUsed() const;
     size_t GetNumSamplers() const;
     size_t GetNumSampledTextures() const;
+    size_t GetNumSSBO() const;
 
-    GLuint GetInternalUniformBinding() const;
+    GLuint GetInternalTextureBuiltinsUniformBinding() const;
+    GLuint GetInternalArrayLengthUniformBinding() const;
 
     enum PushConstantLocation {
         FirstVertex = 0,
@@ -67,8 +75,10 @@ class PipelineLayout final : public PipelineLayoutBase {
     BindingIndexInfo mIndexInfo;
     size_t mNumSamplers;
     size_t mNumSampledTextures;
+    size_t mNumSSBO;
 
-    GLuint mInternalUniformBinding;
+    GLuint mInternalTextureBuiltinsUniformBinding;
+    GLuint mInternalArrayLengthUniformBinding;
 };
 
 }  // namespace dawn::native::opengl

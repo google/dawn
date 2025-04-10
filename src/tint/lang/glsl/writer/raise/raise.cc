@@ -111,6 +111,16 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     RUN_TRANSFORM(raise::TextureBuiltinsFromUniform, module,
                   options.bindings.texture_builtins_from_uniform);
 
+    // Note, this must come after Robustness as it may add `arrayLength`.
+    // This also needs to come before binding remapper as Dawn inserts _pre-remapping_ binding
+    // information. So, in order to move this later we'd need to update Dawn to send the
+    // _post-remapping_ data.
+    if (options.use_array_length_from_uniform) {
+        RUN_TRANSFORM(core::ir::transform::ArrayLengthFromUniform, module,
+                      options.bindings.array_length_from_uniform.ubo_binding,
+                      options.bindings.array_length_from_uniform.bindpoint_to_size_index);
+    }
+
     tint::transform::multiplanar::BindingsMap multiplanar_map{};
     RemapperData remapper_data{};
     PopulateBindingInfo(options, remapper_data, multiplanar_map);

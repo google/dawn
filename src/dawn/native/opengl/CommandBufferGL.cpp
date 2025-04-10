@@ -275,18 +275,27 @@ class VertexStateBufferBindingTracker {
     raw_ptr<RenderPipelineBase> mLastPipeline = nullptr;
 };
 
+// Tracking dirty byte range of a vector that needs to call bufferSubData
+// to update to the internal uniform buffer of mPipeline. Range it represents: [begin, end)
+struct VectorDirtyRangeInfo {
+    size_t begin;
+    size_t end;
+};
+
 class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
   public:
     void OnSetPipeline(RenderPipeline* pipeline) {
         BindGroupTrackerBase::OnSetPipeline(pipeline);
         mPipeline = pipeline;
         ResetInternalUniformDataDirtyRange();
+        ResetInternalUniformDataDirtyRangeArrayLength();
     }
 
     void OnSetPipeline(ComputePipeline* pipeline) {
         BindGroupTrackerBase::OnSetPipeline(pipeline);
         mPipeline = pipeline;
         ResetInternalUniformDataDirtyRange();
+        ResetInternalUniformDataDirtyRangeArrayLength();
     }
 
     MaybeError Apply(const OpenGLFunctions& gl) {
@@ -295,6 +304,7 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
             DAWN_TRY(ApplyBindGroup(gl, index, mBindGroups[index], mDynamicOffsets[index]));
         }
         DAWN_TRY(ApplyInternalUniforms(gl));
+        DAWN_TRY(ApplyInternalArrayLengthUniforms(gl));
         AfterApply();
         return {};
     }
@@ -347,6 +357,7 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
                         case wgpu::BufferBindingType::ReadOnlyStorage:
                         case kInternalReadOnlyStorageBufferBinding:
                             target = GL_SHADER_STORAGE_BUFFER;
+                            UpdateSSBOLengthUniformData(gl, binding.size, groupIndex, bindingIndex);
                             break;
                         case wgpu::BufferBindingType::BindingNotUsed:
                         case wgpu::BufferBindingType::Undefined:
@@ -489,8 +500,8 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
         memcpy(mInternalUniformBufferData.data() + byteOffset, &data, sizeof(uint32_t));
 
         // Updating dirty range of the data vector
-        mDirtyRange.first = std::min(mDirtyRange.first, byteOffset);
-        mDirtyRange.second = std::max(mDirtyRange.second, byteOffset + sizeof(uint32_t));
+        mDirtyRange.begin = std::min(mDirtyRange.begin, byteOffset);
+        mDirtyRange.end = std::max(mDirtyRange.end, byteOffset + sizeof(uint32_t));
     }
 
     void ResetInternalUniformDataDirtyRange() {
@@ -498,26 +509,95 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
     }
 
     MaybeError ApplyInternalUniforms(const OpenGLFunctions& gl) {
-        const Buffer* internalUniformBuffer = mPipeline->GetInternalUniformBuffer();
-        if (!internalUniformBuffer) {
+        if (!mPipeline->NeedsTextureBuiltinUniformBuffer()) {
             return {};
         }
 
-        GLuint internalUniformBufferHandle = internalUniformBuffer->GetHandle();
-        if (mDirtyRange.first >= mDirtyRange.second) {
+        if (mDirtyRange.begin >= mDirtyRange.end) {
             // Early return if no dirty uniform range needs updating.
             return {};
         }
 
+        const Buffer* internalUniformBuffer =
+            ToBackend(mPipelineLayout->GetDevice())->GetInternalTextureBuiltinsUniformBuffer();
+        DAWN_ASSERT(internalUniformBuffer);
+
+        GLuint internalUniformBufferHandle = internalUniformBuffer->GetHandle();
+        DAWN_GL_TRY(gl, BindBufferBase(
+                            GL_UNIFORM_BUFFER,
+                            ToBackend(mPipelineLayout)->GetInternalTextureBuiltinsUniformBinding(),
+                            internalUniformBufferHandle));
+
         DAWN_GL_TRY(gl, BindBuffer(GL_UNIFORM_BUFFER, internalUniformBufferHandle));
-        DAWN_GL_TRY(gl, BufferSubData(GL_UNIFORM_BUFFER, mDirtyRange.first,
-                                      mDirtyRange.second - mDirtyRange.first,
-                                      mInternalUniformBufferData.data() + mDirtyRange.first));
+        DAWN_GL_TRY(gl, BufferSubData(GL_UNIFORM_BUFFER, mDirtyRange.begin,
+                                      mDirtyRange.end - mDirtyRange.begin,
+                                      mInternalUniformBufferData.data() + mDirtyRange.begin));
         DAWN_GL_TRY(gl, BindBuffer(GL_UNIFORM_BUFFER, 0));
 
         ResetInternalUniformDataDirtyRange();
 
         return {};
+    }
+
+    MaybeError ApplyInternalArrayLengthUniforms(const OpenGLFunctions& gl) {
+        if (!mPipeline->NeedsSSBOLengthUniformBuffer()) {
+            return {};
+        }
+
+        if (mDirtyRangeArrayLength.begin >= mDirtyRangeArrayLength.end) {
+            // Early return if no dirty uniform range needs updating.
+            return {};
+        }
+
+        const Buffer* internalUniformBuffer =
+            ToBackend(mPipelineLayout->GetDevice())->GetInternalArrayLengthUniformBuffer();
+        DAWN_ASSERT(internalUniformBuffer);
+
+        GLuint internalUniformBufferHandle = internalUniformBuffer->GetHandle();
+        DAWN_GL_TRY(
+            gl, BindBufferBase(GL_UNIFORM_BUFFER,
+                               ToBackend(mPipelineLayout)->GetInternalArrayLengthUniformBinding(),
+                               internalUniformBufferHandle));
+
+        DAWN_GL_TRY(gl, BindBuffer(GL_UNIFORM_BUFFER, internalUniformBufferHandle));
+        DAWN_GL_TRY(
+            gl, BufferSubData(
+                    GL_UNIFORM_BUFFER, sizeof(uint32_t) * mDirtyRangeArrayLength.begin,
+                    sizeof(uint32_t) * (mDirtyRangeArrayLength.end - mDirtyRangeArrayLength.begin),
+                    mInternalArrayLengthBufferData.data() + mDirtyRangeArrayLength.begin));
+        DAWN_GL_TRY(gl, BindBuffer(GL_UNIFORM_BUFFER, 0));
+
+        ResetInternalUniformDataDirtyRangeArrayLength();
+
+        return {};
+    }
+
+    void UpdateSSBOLengthUniformData(const OpenGLFunctions& gl,
+                                     uint64_t size,
+                                     BindGroupIndex groupIndex,
+                                     BindingIndex bindingIndex) {
+        if (!mPipeline->NeedsSSBOLengthUniformBuffer()) {
+            return;
+        }
+
+        const auto& bindingIndexInfo = ToBackend(mPipelineLayout)->GetBindingIndexInfo();
+        GLuint ssboIndex = bindingIndexInfo[groupIndex][bindingIndex];
+
+        uint32_t data = static_cast<uint32_t>(size);
+        const size_t index = static_cast<size_t>(ssboIndex);
+
+        if (index >= mInternalArrayLengthBufferData.size()) {
+            mInternalArrayLengthBufferData.resize(index + 4);
+        }
+        mInternalArrayLengthBufferData[index] = data;
+
+        // Updating dirty range of the data vector
+        mDirtyRangeArrayLength.begin = std::min(mDirtyRangeArrayLength.begin, index);
+        mDirtyRangeArrayLength.end = std::max(mDirtyRangeArrayLength.end, index + 1);
+    }
+
+    void ResetInternalUniformDataDirtyRangeArrayLength() {
+        mDirtyRangeArrayLength = {mInternalArrayLengthBufferData.size(), 0};
     }
 
     raw_ptr<PipelineGL> mPipeline = nullptr;
@@ -527,8 +607,14 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
     // argument in a pipeline. Initialize the vector to this size to avoid frequent resizing.
     std::vector<uint8_t> mInternalUniformBufferData = std::vector<uint8_t>(4 * sizeof(uint32_t));
     // Tracking dirty byte range of the mInternalUniformBufferData that needs to call bufferSubData
-    // to update to the internal uniform buffer of mPipeline. Range it represents: [first, second)
-    std::pair<size_t, size_t> mDirtyRange;
+    // to update to the internal uniform buffer of mPipeline.
+    VectorDirtyRangeInfo mDirtyRange;
+
+    // The data used for mPipeline's internal uniform buffer to store ssbo buffer sizes.
+    std::vector<uint32_t> mInternalArrayLengthBufferData = std::vector<uint32_t>(4);
+    // Tracking dirty byte range of the mInternalArrayLengthBufferData that needs to call
+    // bufferSubData to update to the internal uniform buffer of mPipeline.
+    VectorDirtyRangeInfo mDirtyRangeArrayLength;
 };
 
 MaybeError ResolveMultisampledRenderTargets(const OpenGLFunctions& gl,
