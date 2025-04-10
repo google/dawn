@@ -731,7 +731,8 @@ class Printer {
         TINT_DEFER(current_function_ = Function());
 
         // Emit the body of the function.
-        EmitBlock(func->Block());
+        auto idx = current_function_.AppendBlock();
+        EmitBlockInternal(idx, func->Block());
 
         // Add the function to the module.
         module_.PushFunction(current_function_);
@@ -839,25 +840,34 @@ class Printer {
         }
     }
 
+    size_t NewBlock(uint32_t id) {
+        auto idx = current_function_.AppendBlock();
+        current_function_.SetCurrentBlockIndex(idx);
+        current_function_.PushInst(spv::Op::OpLabel, {id});
+        return idx;
+    }
+
     /// Emit a block, including the initial OpLabel, OpPhis and instructions.
     /// @param block the block to emit
     void EmitBlock(core::ir::Block* block) {
-        // Emit the label.
-        // Skip if this is the function's entry block, as it will be emitted by the function object.
-        if (!current_function_.Instructions().empty()) {
-            current_function_.PushInst(spv::Op::OpLabel, {Label(block)});
+        auto idx = NewBlock(Label(block));
+
+        if (!block->IsEmpty()) {
+            EmitBlockInternal(idx, block);
+            return;
         }
 
         // If there are no instructions in the block, it's a dead end, so we shouldn't be able to
         // get here to begin with.
-        if (block->IsEmpty()) {
-            if (!block->Parent()->Results().IsEmpty()) {
-                current_function_.PushInst(spv::Op::OpBranch, {GetMergeLabel(block->Parent())});
-            } else {
-                current_function_.PushInst(spv::Op::OpUnreachable, {});
-            }
-            return;
+        if (!block->Parent()->Results().IsEmpty()) {
+            current_function_.PushInst(spv::Op::OpBranch, {GetMergeLabel(block->Parent())});
+        } else {
+            current_function_.PushInst(spv::Op::OpUnreachable, {});
         }
+    }
+
+    void EmitBlockInternal(size_t idx, core::ir::Block* block) {
+        current_function_.SetCurrentBlockIndex(idx);
 
         if (auto* mib = block->As<core::ir::MultiInBlock>()) {
             // Emit all OpPhi nodes for incoming branches to block.
@@ -1031,7 +1041,7 @@ class Printer {
             EmitBlock(false_block);
         }
 
-        current_function_.PushInst(spv::Op::OpLabel, {merge_label});
+        NewBlock(merge_label);
 
         // Emit the OpPhis for the ExitIfs
         EmitExitPhis(i);
@@ -2260,14 +2270,14 @@ class Printer {
 
         // Emit the loop body header, which contains the OpLoopMerge and OpPhis.
         // This then unconditionally branches to body_label
-        current_function_.PushInst(spv::Op::OpLabel, {header_label});
+        [[maybe_unused]] auto header_idx = NewBlock(header_label);
         EmitIncomingPhis(loop->Body());
         current_function_.PushInst(spv::Op::OpLoopMerge, {merge_label, continuing_label,
                                                           U32Operand(SpvLoopControlMaskNone)});
         current_function_.PushInst(spv::Op::OpBranch, {body_label});
 
         // Emit the loop body
-        current_function_.PushInst(spv::Op::OpLabel, {body_label});
+        [[maybe_unused]] auto body_blk = NewBlock(body_label);
         EmitBlockInstructions(loop->Body());
 
         // Emit the loop continuing block.
@@ -2275,12 +2285,12 @@ class Printer {
             EmitBlock(loop->Continuing());
         } else {
             // We still need to emit a continuing block with a back-edge, even if it is unreachable.
-            current_function_.PushInst(spv::Op::OpLabel, {continuing_label});
+            [[maybe_unused]] auto continuing_blk = NewBlock(continuing_label);
             current_function_.PushInst(spv::Op::OpBranch, {header_label});
         }
 
         // Emit the loop merge block.
-        current_function_.PushInst(spv::Op::OpLabel, {merge_label});
+        [[maybe_unused]] auto merge_blk = NewBlock(merge_label);
 
         // Emit the OpPhis for the ExitLoops
         EmitExitPhis(loop);
@@ -2326,7 +2336,7 @@ class Printer {
         }
 
         // Emit the switch merge block.
-        current_function_.PushInst(spv::Op::OpLabel, {merge_label});
+        [[maybe_unused]] auto merge_blk = NewBlock(merge_label);
 
         // Emit the OpPhis for the ExitSwitches
         EmitExitPhis(swtch);

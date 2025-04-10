@@ -54,8 +54,10 @@ void Function::Iterate(std::function<void(const Instruction&)> cb) const {
     for (const auto& var : vars_) {
         cb(var);
     }
-    for (const auto& inst : instructions_) {
-        cb(inst);
+    for (const auto& blk : blocks_) {
+        for (const auto& inst : blk) {
+            cb(inst);
+        }
     }
 
     cb(Instruction{spv::Op::OpFunctionEnd, {}});

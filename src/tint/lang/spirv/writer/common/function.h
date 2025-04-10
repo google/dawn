@@ -29,6 +29,7 @@
 #define SRC_TINT_LANG_SPIRV_WRITER_COMMON_FUNCTION_H_
 
 #include <functional>
+#include <vector>
 
 #include "src/tint/lang/spirv/writer/common/instruction.h"
 
@@ -37,6 +38,8 @@ namespace tint::spirv::writer {
 /// A SPIR-V function
 class Function {
   public:
+    using Block = InstructionList;
+
     /// Constructor for testing purposes
     /// This creates a bad declaration, so won't generate correct SPIR-V
     Function();
@@ -72,10 +75,17 @@ class Function {
     /// @param op the op to set
     /// @param operands the operands for the instruction
     void PushInst(spv::Op op, const OperandList& operands) {
-        instructions_.push_back(Instruction{op, operands});
+        blocks_[current_block_idx_].push_back(Instruction{op, operands});
     }
-    /// @returns the instruction list
-    const InstructionList& Instructions() const { return instructions_; }
+    /// Adds a new block to the block list
+    /// @returns the index of the new block
+    size_t AppendBlock() {
+        blocks_.push_back({});
+        return blocks_.size() - 1;
+    }
+    /// Sets the block to insert into
+    /// @param idx the index to set
+    void SetCurrentBlockIndex(size_t idx) { current_block_idx_ = idx; }
 
     /// Adds a variable to the variable list
     /// @param operands the operands for the variable
@@ -96,8 +106,10 @@ class Function {
         for (const auto& var : vars_) {
             size += var.WordLength();
         }
-        for (const auto& inst : instructions_) {
-            size += inst.WordLength();
+        for (const auto& blk : blocks_) {
+            for (const auto& inst : blk) {
+                size += inst.WordLength();
+            }
         }
         return size;
     }
@@ -110,7 +122,8 @@ class Function {
     Operand label_op_;
     InstructionList params_;
     InstructionList vars_;
-    InstructionList instructions_;
+    std::vector<Block> blocks_;
+    size_t current_block_idx_ = 0;
 };
 
 }  // namespace tint::spirv::writer
