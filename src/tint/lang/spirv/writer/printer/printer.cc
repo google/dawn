@@ -262,23 +262,14 @@ class Printer {
     /// The map of control instructions to the IDs of the label of their SPIR-V merge blocks.
     Hashmap<const core::ir::ControlInstruction*, uint32_t, 8> merge_block_labels_;
 
+    /// The map of loop instructions to the IDs of the label of their SPIR-V header blocks.
+    Hashmap<const core::ir::Loop*, uint32_t, 8> loop_header_block_labels_;
+
     /// The map of extended instruction set names to their result IDs.
     Hashmap<std::string_view, uint32_t, 2> imports_;
 
     /// The current function that is being emitted.
     Function current_function_;
-
-    /// The merge block for the current if statement
-    uint32_t if_merge_label_ = 0;
-
-    /// The header block for the current loop statement
-    uint32_t loop_header_label_ = 0;
-
-    /// The merge block for the current loop statement
-    uint32_t loop_merge_label_ = 0;
-
-    /// The merge block for the current switch statement
-    uint32_t switch_merge_label_ = 0;
 
     bool zero_init_workgroup_memory_ = false;
 
@@ -509,9 +500,7 @@ class Printer {
                 [&](const core::type::U32*) {
                     module_.PushType(spv::Op::OpTypeInt, {id, 32u, 0u});
                 },
-                [&](const core::type::F32*) {
-                    module_.PushType(spv::Op::OpTypeFloat, {id, 32u});
-                },
+                [&](const core::type::F32*) { module_.PushType(spv::Op::OpTypeFloat, {id, 32u}); },
                 [&](const core::type::F16*) {
                     module_.PushCapability(SpvCapabilityFloat16);
                     module_.PushCapability(SpvCapabilityUniformAndStorageBuffer16BitAccess);
@@ -967,24 +956,24 @@ class Printer {
                 current_function_.PushInst(spv::Op::OpBranchConditional,
                                            {
                                                Value(breakif->Condition()),
-                                               loop_merge_label_,
-                                               loop_header_label_,
+                                               GetMergeLabel(breakif->Loop()),
+                                               GetLoopHeaderLabel(breakif->Loop()),
                                            });
             },
             [&](core::ir::Continue* cont) {
                 current_function_.PushInst(spv::Op::OpBranch, {Label(cont->Loop()->Continuing())});
             },
-            [&](core::ir::ExitIf*) {
-                current_function_.PushInst(spv::Op::OpBranch, {if_merge_label_});
+            [&](core::ir::ExitIf* exit) {
+                current_function_.PushInst(spv::Op::OpBranch, {GetMergeLabel(exit->If())});
             },
-            [&](core::ir::ExitLoop*) {
-                current_function_.PushInst(spv::Op::OpBranch, {loop_merge_label_});
+            [&](core::ir::ExitLoop* exit) {
+                current_function_.PushInst(spv::Op::OpBranch, {GetMergeLabel(exit->Loop())});
             },
-            [&](core::ir::ExitSwitch*) {
-                current_function_.PushInst(spv::Op::OpBranch, {switch_merge_label_});
+            [&](core::ir::ExitSwitch* exit) {
+                current_function_.PushInst(spv::Op::OpBranch, {GetMergeLabel(exit->Switch())});
             },
-            [&](core::ir::NextIteration*) {
-                current_function_.PushInst(spv::Op::OpBranch, {loop_header_label_});
+            [&](core::ir::NextIteration* ni) {
+                current_function_.PushInst(spv::Op::OpBranch, {GetLoopHeaderLabel(ni->Loop())});
             },
             [&](core::ir::TerminateInvocation*) {
                 current_function_.PushInst(spv::Op::OpKill, {});
@@ -1007,8 +996,6 @@ class Printer {
         // 3. the if returns a value
         // Otherwise we skip them and branch straight to the merge block.
         uint32_t merge_label = GetMergeLabel(i);
-        TINT_SCOPED_ASSIGNMENT(if_merge_label_, merge_label);
-
         uint32_t true_label = merge_label;
         uint32_t false_label = merge_label;
 
@@ -2259,11 +2246,8 @@ class Printer {
         auto body_label = Label(loop->Body());
         auto continuing_label = Label(loop->Continuing());
 
-        auto header_label = module_.NextId();
-        TINT_SCOPED_ASSIGNMENT(loop_header_label_, header_label);
-
+        auto header_label = GetLoopHeaderLabel(loop);
         auto merge_label = GetMergeLabel(loop);
-        TINT_SCOPED_ASSIGNMENT(loop_merge_label_, merge_label);
 
         if (init_label != 0) {
             // Emit the loop initializer.
@@ -2330,7 +2314,6 @@ class Printer {
         }
 
         uint32_t merge_label = GetMergeLabel(swtch);
-        TINT_SCOPED_ASSIGNMENT(switch_merge_label_, merge_label);
 
         // Emit the OpSelectionMerge and OpSwitch instructions.
         current_function_.PushInst(spv::Op::OpSelectionMerge,
@@ -2659,6 +2642,13 @@ class Printer {
     /// @returns the label ID
     uint32_t GetMergeLabel(core::ir::ControlInstruction* ci) {
         return merge_block_labels_.GetOrAdd(ci, [&] { return module_.NextId(); });
+    }
+
+    /// Get the ID of the label of the loop header block
+    /// @param loop the loop to get the header id
+    /// @returns the label ID
+    uint32_t GetLoopHeaderLabel(core::ir::Loop* loop) {
+        return loop_header_block_labels_.GetOrAdd(loop, [&] { return module_.NextId(); });
     }
 
     /// Get the ID of the label of the block that will contain a terminator instruction.
