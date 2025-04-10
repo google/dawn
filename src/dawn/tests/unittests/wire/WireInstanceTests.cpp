@@ -252,6 +252,10 @@ TEST_P(WireInstanceTests, RequestAdapterPassesChainedProperties) {
     fakeSubgroupMatrixConfigs.configCount = 3;
     fakeSubgroupMatrixConfigs.configs = fakeMatrixConfigs;
 
+    WGPUDawnAdapterPropertiesPowerPreference fakePowerProperties = {};
+    fakePowerProperties.chain.sType = WGPUSType_DawnAdapterPropertiesPowerPreference;
+    fakePowerProperties.powerPreference = WGPUPowerPreference::WGPUPowerPreference_LowPower;
+
     std::initializer_list<WGPUFeatureName> fakeFeaturesList = {
         WGPUFeatureName_AdapterPropertiesMemoryHeaps,
         WGPUFeatureName_AdapterPropertiesD3D,
@@ -298,6 +302,10 @@ TEST_P(WireInstanceTests, RequestAdapterPassesChainedProperties) {
                             case WGPUSType_AdapterPropertiesSubgroupMatrixConfigs:
                                 *reinterpret_cast<WGPUAdapterPropertiesSubgroupMatrixConfigs*>(
                                     chain) = fakeSubgroupMatrixConfigs;
+                                break;
+                            case WGPUSType_DawnAdapterPropertiesPowerPreference:
+                                *reinterpret_cast<WGPUDawnAdapterPropertiesPowerPreference*>(
+                                    chain) = fakePowerProperties;
                                 break;
                             default:
                                 ADD_FAILURE() << "Unexpected chain";
@@ -392,6 +400,14 @@ TEST_P(WireInstanceTests, RequestAdapterPassesChainedProperties) {
                     EXPECT_EQ(subgroupMatrixConfigs.configs[i].K,
                               fakeSubgroupMatrixConfigs.configs[i].K);
                 }
+
+                // Get the power properties.
+                WGPUDawnAdapterPropertiesPowerPreference powerProperties = {};
+                powerProperties.chain.sType = WGPUSType_DawnAdapterPropertiesPowerPreference;
+                info.nextInChain = &powerProperties.chain;
+                adapter.GetInfo(reinterpret_cast<wgpu::AdapterInfo*>(&info));
+                // Expect them to match.
+                EXPECT_EQ(powerProperties.powerPreference, fakePowerProperties.powerPreference);
             })));
 
         FlushCallbacks();

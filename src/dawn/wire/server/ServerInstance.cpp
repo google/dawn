@@ -130,6 +130,11 @@ void Server::OnRequestAdapterCallback(RequestAdapterUserdata* data,
         propertiesChain = &(*propertiesChain)->next;
     }
 
+    WGPUDawnAdapterPropertiesPowerPreference powerProperties = {};
+    powerProperties.chain.sType = WGPUSType_DawnAdapterPropertiesPowerPreference;
+    *propertiesChain = &powerProperties.chain;
+    propertiesChain = &(*propertiesChain)->next;
+
     mProcs.adapterGetInfo(adapter, &info);
     cmd.info = &info;
 

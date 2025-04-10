@@ -198,6 +198,12 @@ void Adapter::SetInfo(const WGPUAdapterInfo* info) {
                     subgroupMatrixConfigs->configs + subgroupMatrixConfigs->configCount};
                 break;
             }
+            case WGPUSType_DawnAdapterPropertiesPowerPreference: {
+                auto* powerProperties =
+                    reinterpret_cast<WGPUDawnAdapterPropertiesPowerPreference*>(chain);
+                mPowerProperties.powerPreference = powerProperties->powerPreference;
+                break;
+            }
             default:
                 DAWN_UNREACHABLE();
                 break;
@@ -255,6 +261,12 @@ WGPUStatus Adapter::GetInfo(WGPUAdapterInfo* info) const {
                 // Write out the pointer and count to the subgroup matrix configs out-struct.
                 subgroupMatrixConfigs->configCount = configCount;
                 subgroupMatrixConfigs->configs = configs;
+                break;
+            }
+            case WGPUSType_DawnAdapterPropertiesPowerPreference: {
+                auto* powerProperties =
+                    reinterpret_cast<WGPUDawnAdapterPropertiesPowerPreference*>(chain);
+                powerProperties->powerPreference = mPowerProperties.powerPreference;
                 break;
             }
             default:
