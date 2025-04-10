@@ -197,7 +197,7 @@ class Backend : public SharedTextureMemoryTestBackend {
             case Mode::D3D11Texture2D: {
                 native::d3d11::SharedTextureMemoryD3D11Texture2DDescriptor texture2DDesc;
                 texture2DDesc.texture = std::move(d3d11Texture);
-                texture2DDesc.requiresEndAcessFence = mRequiresEndAccessFence;
+                texture2DDesc.requiresEndAccessFence = mRequiresEndAccessFence;
 
                 wgpu::SharedTextureMemoryDescriptor desc;
                 desc.nextInChain = &texture2DDesc;
@@ -299,7 +299,7 @@ class Backend : public SharedTextureMemoryTestBackend {
                     case Mode::D3D11Texture2D: {
                         native::d3d11::SharedTextureMemoryD3D11Texture2DDescriptor texture2DDesc;
                         texture2DDesc.texture = d3d11Texture;
-                        texture2DDesc.requiresEndAcessFence = mRequiresEndAccessFence;
+                        texture2DDesc.requiresEndAccessFence = mRequiresEndAccessFence;
 
                         wgpu::SharedTextureMemoryDescriptor desc;
                         desc.nextInChain = &texture2DDesc;

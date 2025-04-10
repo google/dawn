@@ -63,7 +63,7 @@ struct DAWN_NATIVE_EXPORT SharedTextureMemoryD3D11Texture2DDescriptor : wgpu::Ch
     // If it's false, no fence signaling is needed and EndAccess() might return empty fence list.
     // Note: this flag is not relevant if the feature SharedFenceDXGISharedHandle is disabled/not
     // supported.
-    bool requiresEndAcessFence = true;
+    bool requiresEndAccessFence = true;
 };
 
 }  // namespace dawn::native::d3d11

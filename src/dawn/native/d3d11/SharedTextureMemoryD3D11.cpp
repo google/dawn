@@ -163,7 +163,7 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
 
     auto result = AcquireRef(
         new SharedTextureMemory(device, label, properties, std::move(d3d11Resource),
-                                /*requiresFenceSignal=*/descriptor->requiresEndAcessFence));
+                                /*requiresFenceSignal=*/descriptor->requiresEndAccessFence));
     result->Initialize();
     return result;
 }
