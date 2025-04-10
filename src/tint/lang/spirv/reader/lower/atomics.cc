@@ -118,7 +118,10 @@ struct State {
                     AtomicOp(builtin, core::BuiltinFn::kAtomicXor);
                     break;
                 case spirv::BuiltinFn::kAtomicIIncrement:
+                    AtomicChangeByOne(builtin, core::BuiltinFn::kAtomicAdd);
+                    break;
                 case spirv::BuiltinFn::kAtomicIDecrement:
+                    AtomicChangeByOne(builtin, core::BuiltinFn::kAtomicSub);
                     break;
                 default:
                     TINT_UNREACHABLE() << "unknown spirv builtin: " << builtin->Func();
@@ -135,6 +138,27 @@ struct State {
 
         ProcessForkedStructs();
         ReplaceStructTypes();
+    }
+
+    core::ir::Value* One(const core::type::Type* const_ty) {
+        return tint::Switch(
+            const_ty,  //
+            [&](const core::type::I32*) { return b.Constant(1_i); },
+            [&](const core::type::U32*) { return b.Constant(1_u); },  //
+            TINT_ICE_ON_NO_MATCH);
+    }
+
+    void AtomicChangeByOne(spirv::ir::BuiltinCall* call, core::BuiltinFn fn) {
+        auto args = call->Args();
+
+        b.InsertBefore(call, [&] {
+            auto* var = args[0];
+            values_to_convert_.Push(var);
+
+            auto* one = One(call->Result()->Type());
+            b.CallWithResult(call->DetachResult(), fn, var, one);
+        });
+        call->Destroy();
     }
 
     void AtomicOp(spirv::ir::BuiltinCall* call, core::BuiltinFn fn) {
