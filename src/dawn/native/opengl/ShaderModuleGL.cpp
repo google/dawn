@@ -121,23 +121,29 @@ namespace {
 // Any texture-only references will have "usePlaceholderSampler" set to true, and only the texture
 // binding point will be used in naming them. In addition, Dawn will bind a non-filtering sampler
 // for them (see PipelineGL).
-CombinedSamplerInfo GenerateCombinedSamplerInfo(tint::inspector::Inspector& inspector,
-                                                const std::string& entryPoint,
+CombinedSamplerInfo GenerateCombinedSamplerInfo(const EntryPointMetadata& metadata,
                                                 tint::glsl::writer::Bindings& bindings,
                                                 BindingMap externalTextureExpansionMap,
                                                 bool* needsPlaceholderSampler
 
 ) {
-    auto uses = inspector.GetSamplerAndNonSamplerTextureUses(
-        entryPoint, bindings.placeholder_sampler_bind_point);
-    CombinedSamplerInfo combinedSamplerInfo;
-    for (const auto& use : uses) {
-        tint::BindingPoint samplerBindPoint = use.sampler_binding_point;
-        tint::BindingPoint texBindPoint = use.texture_binding_point;
+    auto samplerAndNonSamplerTextureUses = metadata.samplerAndNonSamplerTexturePairs;
 
-        CombinedSampler* info = AppendCombinedSampler(
-            &combinedSamplerInfo, use.texture_binding_point, use.sampler_binding_point,
-            bindings.placeholder_sampler_bind_point);
+    CombinedSamplerInfo combinedSamplerInfo;
+    for (const auto& use : samplerAndNonSamplerTextureUses) {
+        // Convert BindingSlot in metadata back to tint::BindingPoint
+        tint::BindingPoint samplerBindPoint =
+            use.sampler == EntryPointMetadata::nonSamplerBindingPoint
+                ? bindings.placeholder_sampler_bind_point
+                : ToTint(use.sampler);
+        tint::BindingPoint texBindPoint = ToTint(use.texture);
+
+        CombinedSampler* info =
+            AppendCombinedSampler(&combinedSamplerInfo, ToTint(use.texture),
+                                  use.sampler == EntryPointMetadata::nonSamplerBindingPoint
+                                      ? bindings.placeholder_sampler_bind_point
+                                      : ToTint(use.sampler),
+                                  bindings.placeholder_sampler_bind_point);
 
         if (info->usePlaceholderSampler) {
             *needsPlaceholderSampler = true;
@@ -179,14 +185,17 @@ CombinedSamplerInfo GenerateCombinedSamplerInfo(tint::inspector::Inspector& insp
 
         // If the texture has an associated plane1 texture (ie., it's an external texture),
         // append a new combined sampler with the same sampler and the plane1 texture.
-        auto it = externalTextureExpansionMap.find(use.texture_binding_point);
+        auto it = externalTextureExpansionMap.find(ToTint(use.texture));
         if (it != externalTextureExpansionMap.end()) {
             CombinedSampler* plane1Info =
-                AppendCombinedSampler(&combinedSamplerInfo, it->second, use.sampler_binding_point,
+                AppendCombinedSampler(&combinedSamplerInfo, it->second,
+                                      use.sampler == EntryPointMetadata::nonSamplerBindingPoint
+                                          ? bindings.placeholder_sampler_bind_point
+                                          : ToTint(use.sampler),
                                       bindings.placeholder_sampler_bind_point);
 
             tint::BindingPoint plane1TexBindPoint = it->second;
-            auto dstIt = bindings.external_texture.find(use.texture_binding_point);
+            auto dstIt = bindings.external_texture.find(ToTint(use.texture));
             if (dstIt != bindings.external_texture.end()) {
                 plane1TexBindPoint.group = 0;
                 plane1TexBindPoint.binding = dstIt->second.plane1.binding;
@@ -201,12 +210,11 @@ CombinedSamplerInfo GenerateCombinedSamplerInfo(tint::inspector::Inspector& insp
     return combinedSamplerInfo;
 }
 
-bool GenerateTextureBuiltinFromUniformData(tint::inspector::Inspector& inspector,
-                                           const std::string& entryPoint,
+bool GenerateTextureBuiltinFromUniformData(const EntryPointMetadata& metadata,
                                            const PipelineLayout* layout,
                                            BindingPointToFunctionAndOffset* bindingPointToData,
                                            tint::glsl::writer::Bindings& bindings) {
-    auto textureBuiltinsFromUniformData = inspector.GetTextureQueries(entryPoint);
+    auto textureBuiltinsFromUniformData = metadata.textureQueries;
 
     if (textureBuiltinsFromUniformData.empty()) {
         return false;
@@ -228,10 +236,10 @@ bool GenerateTextureBuiltinFromUniformData(tint::inspector::Inspector& inspector
 
         BindPointFunction type = BindPointFunction::kTextureNumLevels;
         switch (info.type) {
-            case tint::inspector::Inspector::TextureQueryType::kTextureNumLevels:
+            case EntryPointMetadata::TextureMetadataQuery::TextureQueryType::TextureNumLevels:
                 type = BindPointFunction::kTextureNumLevels;
                 break;
-            case tint::inspector::Inspector::TextureQueryType::kTextureNumSamples:
+            case EntryPointMetadata::TextureMetadataQuery::TextureQueryType::TextureNumSamples:
                 type = BindPointFunction::kTextureNumSamples;
                 break;
         }
@@ -411,8 +419,6 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
     auto tintProgram = GetTintProgram();
     req.inputProgram = &(tintProgram->program);
 
-    tint::inspector::Inspector inspector(*req.inputProgram);
-
     // Since (non-Vulkan) GLSL does not support descriptor sets, generate a
     // mapping from the original group/binding pair to a binding-only
     // value. This mapping will be used by Tint to remap all global
@@ -423,8 +429,8 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
     auto [bindings, externalTextureExpansionMap] =
         GenerateBindingInfo(stage, layout, moduleBindingInfo, req);
 
-    // When textures are accessed without a sampler (e.g., textureLoad()),
-    // GetSamplerTextureUses() will return this sentinel value.
+    // When textures are accessed without a sampler (e.g., textureLoad()), returned
+    // CombinedSamplerInfo should use this sentinel value as sampler binding point.
     bindings.placeholder_sampler_bind_point = {static_cast<uint32_t>(kMaxBindGroupsTyped), 0};
 
     // Some texture builtin functions are unsupported on GLSL ES. These are emulated with internal
@@ -436,12 +442,11 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
         bindings.texture_builtins_from_uniform.ubo_binding,
         tint::glsl::writer::binding::Uniform{layout->GetInternalUniformBinding()});
 
-    CombinedSamplerInfo combinedSamplerInfo =
-        GenerateCombinedSamplerInfo(inspector, programmableStage.entryPoint, bindings,
-                                    externalTextureExpansionMap, needsPlaceholderSampler);
+    CombinedSamplerInfo combinedSamplerInfo = GenerateCombinedSamplerInfo(
+        entryPointMetaData, bindings, externalTextureExpansionMap, needsPlaceholderSampler);
 
-    bool needsInternalUBO = GenerateTextureBuiltinFromUniformData(
-        inspector, programmableStage.entryPoint, layout, bindingPointToData, bindings);
+    bool needsInternalUBO = GenerateTextureBuiltinFromUniformData(entryPointMetaData, layout,
+                                                                  bindingPointToData, bindings);
 
     std::optional<tint::ast::transform::SubstituteOverride::Config> substituteOverrideConfig;
     if (!programmableStage.metadata->overrides.empty()) {

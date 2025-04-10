@@ -29,6 +29,7 @@
 #define SRC_DAWN_NATIVE_SHADERMODULE_H_
 
 #include <bitset>
+#include <limits>
 #include <map>
 #include <memory>
 #include <string>
@@ -221,7 +222,32 @@ struct EntryPointMetadata {
         BindingSlot sampler;
         BindingSlot texture;
     };
-    std::vector<SamplerTexturePair> samplerTexturePairs;
+    // TODO(crbug.com/409438000): Remove the hack of sampler placeholders for non-sampler texture.
+    static constexpr const BindingSlot nonSamplerBindingPoint = {
+        BindGroupIndex(std::numeric_limits<uint32_t>::max()),
+        BindingNumber(std::numeric_limits<uint32_t>::max())};
+    // Contains the reflection information of all sampler and non-sampler texture (storage texture
+    // not included) usage in the entry point. For non-sampler usage, nonSamplerBindingPoint is used
+    // for sampler slot.
+    std::vector<SamplerTexturePair> samplerAndNonSamplerTexturePairs;
+
+    /// Match tint::inspector::Inspector::LevelSampleInfo
+    struct TextureMetadataQuery {
+        /// The information needed to be supplied.
+        enum class TextureQueryType : uint8_t {
+            /// Texture Num Levels
+            TextureNumLevels,
+            /// Texture Num Samples
+            TextureNumSamples,
+        };
+        /// The type of function
+        TextureQueryType type = TextureQueryType::TextureNumLevels;
+        /// The group number
+        uint32_t group = 0;
+        /// The binding number
+        uint32_t binding = 0;
+    };
+    std::vector<TextureMetadataQuery> textureQueries;
 
     // The set of vertex attributes this entryPoint uses.
     PerVertexAttribute<VertexFormatBaseType> vertexInputBaseTypes;

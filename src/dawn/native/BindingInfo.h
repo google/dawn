@@ -150,9 +150,14 @@ struct BindingInfo {
 
 BindingInfoType GetBindingInfoType(const BindingInfo& bindingInfo);
 
+// Match tint::BindingPoint, can convert to/from tint::BindingPoint using ToTint and FromTint.
 struct BindingSlot {
     BindGroupIndex group;
     BindingNumber binding;
+
+    constexpr bool operator==(const BindingSlot& rhs) const {
+        return group == rhs.group && binding == rhs.binding;
+    }
 };
 
 struct PerStageBindingCounts {

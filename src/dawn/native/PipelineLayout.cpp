@@ -386,7 +386,11 @@ ResultOrError<Ref<PipelineLayoutBase>> PipelineLayoutBase::CreateDefault(
         }
 
         // Promote any Unfilterable textures used with a sampler to Filtering.
-        for (const EntryPointMetadata::SamplerTexturePair& pair : metadata.samplerTexturePairs) {
+        for (const EntryPointMetadata::SamplerTexturePair& pair :
+             metadata.samplerAndNonSamplerTexturePairs) {
+            if (pair.sampler == EntryPointMetadata::nonSamplerBindingPoint) {
+                continue;
+            }
             BindGroupLayoutEntry* entry = &entryData[pair.texture.group][pair.texture.binding];
             if (entry->texture.sampleType == wgpu::TextureSampleType::UnfilterableFloat) {
                 entry->texture.sampleType = wgpu::TextureSampleType::Float;

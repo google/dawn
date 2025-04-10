@@ -31,6 +31,7 @@
 #include <functional>
 
 #include "dawn/common/NonCopyable.h"
+#include "dawn/native/BindingInfo.h"
 #include "dawn/native/IntegerTypes.h"
 #include "dawn/native/stream/Stream.h"
 
@@ -78,6 +79,14 @@ class stream::Stream<T, std::enable_if_t<tint::HasReflection<T>>> {
         return error;
     }
 };
+
+constexpr tint::BindingPoint ToTint(const BindingSlot& slot) {
+    return {static_cast<uint32_t>(slot.group), static_cast<uint32_t>(slot.binding)};
+}
+
+constexpr BindingSlot FromTint(const tint::BindingPoint& tintBindingPoint) {
+    return {BindGroupIndex(tintBindingPoint.group), BindingNumber(tintBindingPoint.binding)};
+}
 
 }  // namespace dawn::native
 
