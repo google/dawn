@@ -2173,6 +2173,10 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                                const sem::CallTarget* call_target) -> sem::Call* {
         auto stage = args_stage;                       // The evaluation stage of the call
         const core::constant::Value* value = nullptr;  // The constant value for the call
+        if (subgroup_matrix_uses_.Contains(ty)) {
+            // Composites that contain subgroup matrices cannot be evaluated until runtime.
+            stage = core::EvaluationStage::kRuntime;
+        }
         if (not_evaluated_.Contains(expr)) {
             stage = core::EvaluationStage::kNotEvaluated;
         }

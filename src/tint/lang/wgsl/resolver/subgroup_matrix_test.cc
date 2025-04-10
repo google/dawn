@@ -242,6 +242,33 @@ TEST_F(ResolverSubgroupMatrixTest, ZeroValueConstructor) {
     EXPECT_EQ(target->Stage(), core::EvaluationStage::kRuntime);
 }
 
+TEST_F(ResolverSubgroupMatrixTest, ZeroValueConstructor_InArray) {
+    // _ = array<subgroup_matrix_result<f32, 8, 8>, 4>();
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+    auto matrix = ty.subgroup_matrix(core::SubgroupMatrixKind::kResult, ty.f32(), 8u, 8u);
+    auto* construct = Call(ty.array(matrix, 4_a));
+    WrapInFunction(Assign(Phony(), construct));
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(Sem().Get(construct)->Stage(), core::EvaluationStage::kRuntime);
+}
+
+TEST_F(ResolverSubgroupMatrixTest, ZeroValueConstructor_InStruct) {
+    // struct S { m : subgroup_matrix_result<f32, 8, 8> }
+    // _ = S();
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+    Structure(
+        "S",
+        Vector{
+            Member("m", ty.subgroup_matrix(core::SubgroupMatrixKind::kResult, ty.f32(), 8u, 8u)),
+        });
+    auto* construct = Call("S");
+    WrapInFunction(Assign(Phony(), construct));
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(Sem().Get(construct)->Stage(), core::EvaluationStage::kRuntime);
+}
+
 TEST_F(ResolverSubgroupMatrixTest, SingleValueConstructor) {
     Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
     auto* call = Call(Ident("subgroup_matrix_result", ty.f32(), 8_a, 8_a), 1_a);
