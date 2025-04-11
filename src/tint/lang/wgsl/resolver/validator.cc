@@ -330,21 +330,6 @@ bool Validator::Enables(VectorRef<const ast::Enable*> enables) const {
         }
     }
 
-    if (enabled_extensions_.Contains(wgsl::Extension::kSubgroupsF16)) {
-        if (!enabled_extensions_.Contains(wgsl::Extension::kSubgroups)) {
-            AddError(source_of(wgsl::Extension::kSubgroupsF16))
-                << "extension " << style::Code("subgroups_f16")
-                << " cannot be used without extension " << style::Code("subgroups");
-            return false;
-        }
-        if (!enabled_extensions_.Contains(wgsl::Extension::kF16)) {
-            AddError(source_of(wgsl::Extension::kSubgroupsF16))
-                << "extension " << style::Code("subgroups_f16")
-                << " cannot be used without extension " << style::Code("f16");
-            return false;
-        }
-    }
-
     return true;
 }
 

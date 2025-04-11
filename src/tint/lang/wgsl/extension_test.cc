@@ -69,7 +69,6 @@ static constexpr Case kValidCases[] = {
     {"dual_source_blending", Extension::kDualSourceBlending},
     {"f16", Extension::kF16},
     {"subgroups", Extension::kSubgroups},
-    {"subgroups_f16", Extension::kSubgroupsF16},
 };
 
 static constexpr Case kInvalidCases[] = {
@@ -109,9 +108,6 @@ static constexpr Case kInvalidCases[] = {
     {"kkbHups", Extension::kUndefined},
     {"jggoupRR", Extension::kUndefined},
     {"sugoupb", Extension::kUndefined},
-    {"subgroupj_f16", Extension::kUndefined},
-    {"subgroups_f6", Extension::kUndefined},
-    {"sgroupq_f16", Extension::kUndefined},
 };
 
 using ExtensionParseTest = testing::TestWithParam<Case>;

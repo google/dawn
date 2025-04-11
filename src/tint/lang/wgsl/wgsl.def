@@ -79,8 +79,6 @@ enum extension {
   dual_source_blending
   // WGSL Extension "subgroups"
   subgroups
-  // WGSL Extension "subgroups_f16"
-  subgroups_f16
 
   // A Chromium-specific extension for disabling uniformity analysis.
   chromium_disable_uniformity_analysis

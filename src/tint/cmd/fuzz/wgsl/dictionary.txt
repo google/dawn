@@ -422,7 +422,6 @@
 "subgroup_size"
 "subgroup_uniformity"
 "subgroups"
-"subgroups_f16"
 "switch"
 "tan"
 "tanh"

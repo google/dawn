@@ -58,7 +58,6 @@ enum class Extension : uint8_t {
     kDualSourceBlending,
     kF16,
     kSubgroups,
-    kSubgroupsF16,
 };
 
 /// @param value the enum value
@@ -91,7 +90,6 @@ constexpr std::string_view kExtensionStrings[] = {
     "dual_source_blending",
     "f16",
     "subgroups",
-    "subgroups_f16",
 };
 
 /// All extensions
@@ -108,7 +106,6 @@ static constexpr Extension kAllExtensions[] = {
     Extension::kDualSourceBlending,
     Extension::kF16,
     Extension::kSubgroups,
-    Extension::kSubgroupsF16,
 };
 
 /// A unique vector of extensions

@@ -408,7 +408,8 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     //    and quad bits, and
     // 4. VK_EXT_subgroup_size_control extension is valid, and both subgroupSizeControl
     //    and computeFullSubgroups is TRUE in VkPhysicalDeviceSubgroupSizeControlFeaturesEXT.
-    if (!kForceDisableSubgroups && (mDeviceInfo.properties.apiVersion >= VK_API_VERSION_1_1) &&
+    const bool hasBaseSubgroupSupport =
+        (mDeviceInfo.properties.apiVersion >= VK_API_VERSION_1_1) &&
         (mDeviceInfo.subgroupProperties.supportedStages & VK_SHADER_STAGE_COMPUTE_BIT) &&
         (mDeviceInfo.subgroupProperties.supportedStages & VK_SHADER_STAGE_FRAGMENT_BIT) &&
         (mDeviceInfo.subgroupProperties.supportedOperations & VK_SUBGROUP_FEATURE_BASIC_BIT) &&
@@ -420,26 +421,18 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         (mDeviceInfo.subgroupProperties.supportedOperations & VK_SUBGROUP_FEATURE_QUAD_BIT) &&
         (mDeviceInfo.HasExt(DeviceExt::SubgroupSizeControl)) &&
         (mDeviceInfo.subgroupSizeControlFeatures.subgroupSizeControl == VK_TRUE) &&
-        (mDeviceInfo.subgroupSizeControlFeatures.computeFullSubgroups == VK_TRUE)) {
-        if (shaderF16Enabled) {
-            if (mDeviceInfo.shaderSubgroupExtendedTypes.shaderSubgroupExtendedTypes == VK_TRUE) {
-                // Enable SubgroupsF16 feature if:
-                // 1. Subgroups feature is enabled, and
-                // 2. ShaderF16 feature is enabled, and
-                // 3. shaderSubgroupExtendedTypes is TRUE in
-                //    VkPhysicalDeviceShaderSubgroupExtendedTypesFeaturesKHR.
-                // TODO(crbug.com/380244620): Remove when 'subgroups_f16' has been fully deprecated.
-                EnableFeature(Feature::SubgroupsF16);
-                // If shader f16 is enable we only enable subgroups if we extended subgroup support.
-                // This means there is a vary narrow number of devices (~4%) will not get subgroup
-                // support due to the fact that they support shader f16 but not actually f16
-                // operations in subgroups.
-                EnableFeature(Feature::Subgroups);
-            }
-        } else {
-            // Subgroups without extended type support (f16).
-            EnableFeature(Feature::Subgroups);
-        }
+        (mDeviceInfo.subgroupSizeControlFeatures.computeFullSubgroups == VK_TRUE);
+
+    // If shader f16 is enabled we only enable subgroups if we extended subgroup support.
+    // This means there is a vary narrow number of devices (~4%) will not get subgroup
+    // support due to the fact that they support shader f16 but not actually f16
+    // operations in subgroups.
+    const bool hasRequiredF16Support =
+        !shaderF16Enabled ||
+        (mDeviceInfo.shaderSubgroupExtendedTypes.shaderSubgroupExtendedTypes == VK_TRUE);
+
+    if (!kForceDisableSubgroups && hasBaseSubgroupSupport && hasRequiredF16Support) {
+        EnableFeature(Feature::Subgroups);
     }
 
     // Enable subgroup matrix if both Cooperative Matrix and Vulkan Memory Model are supported.
