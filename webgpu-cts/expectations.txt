@@ -338,7 +338,7 @@ crbug.com/42240825 [ dawn-backend-validation intel-0x9bc5 ubuntu webgpu-adapter-
 crbug.com/42241267 [ dawn-backend-validation intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:api,operation,command_buffer,image_copy:mip_levels:* [ Failure ]
 
 # Miscellaneous flakes
-crbug.com/41489034 [ dawn-backend-validation intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:web_platform,canvas,configure:viewFormats:* [ RetryOnFailure ]
+crbug.com/41489034 [ dawn-backend-validation intel ubuntu webgpu-adapter-default ] webgpu:web_platform,canvas,configure:viewFormats:* [ RetryOnFailure ]
 crbug.com/42241275 [ dawn-backend-validation intel-0x9bc5 ubuntu ] webgpu:api,operation,command_buffer,image_copy:origins_and_extents:initMethod="WriteTexture";checkMethod="FullCopyT2B";* [ RetryOnFailure ]
 
 # Occlusion result incorrect with writeMask 0 on Intel
@@ -621,9 +621,7 @@ crbug.com/407133969 [ android-t arm ] webgpu:web_platform,external_texture,video
 crbug.com/407133969 [ android-t arm ] webgpu:web_platform,external_texture,video:importExternalTexture,sampleWithVideoFrameWithVisibleRectParam:videoName="four-colors-vp9-bt601.webm";* [ Failure ]
 crbug.com/407133969 [ android-t arm ] webgpu:web_platform,external_texture,video:importExternalTexture,sampleWithVideoFrameWithVisibleRectParam:videoName="four-colors-vp9-bt709.webm";* [ Failure ]
 crbug.com/407133969 [ apple mac ] webgpu:web_platform,external_texture,video:importExternalTexture,sampleWithVideoFrameWithVisibleRectParam:videoName="four-colors-vp9-bt601-rotate-90.mp4";* [ Failure ]
-crbug.com/407133969 [ intel linux ] webgpu:web_platform,external_texture,video:importExternalTexture,sampleWithVideoFrameWithVisibleRectParam:videoName="four-colors-vp9-bt601-rotate-270.mp4";* [ Failure ]
-crbug.com/407133969 [ intel linux ] webgpu:web_platform,external_texture,video:importExternalTexture,sampleWithVideoFrameWithVisibleRectParam:videoName="four-colors-vp9-bt709.webm";* [ Failure ]
-crbug.com/407133969 [ intel-0x4680 linux ] webgpu:web_platform,external_texture,video:importExternalTexture,sampleWithVideoFrameWithVisibleRectParam:videoName="four-colors-h264-bt601.mp4";dstColorSpace="srgb" [ Failure ]
+crbug.com/407133969 [ intel linux ] webgpu:web_platform,external_texture,video:importExternalTexture,sampleWithVideoFrameWithVisibleRectParam:* [ RetryOnFailure ]
 crbug.com/407133969 [ nvidia-0x2184 win10 ] webgpu:web_platform,external_texture,video:importExternalTexture,sampleWithVideoFrameWithVisibleRectParam:* [ Failure ]
 
 # D3D debug layer bug which reports that the same subresource of a 3d texture cannot be written twice.
@@ -1044,6 +1042,7 @@ crbug.com/407147669 [ nvidia win ] webgpu:web_platform,copyToTexture,ImageData:f
 crbug.com/407147669 [ intel win ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_ImageData:alpha="premultiply";orientation="none";colorSpaceConversion="default";srcFlipYInCopy=false;dstPremultiplied=false [ Failure ]
 crbug.com/407147669 [ dawn-backend-validation intel target-cpu-64 win ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:orientation="none";colorSpaceConversion="default";srcFlipYInCopy=false;dstFormat="rg32float";dstPremultiplied=false [ Failure ]
 crbug.com/407147669 [ dawn-backend-validation intel target-cpu-64 win ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:orientation="none";colorSpaceConversion="default";srcFlipYInCopy=false;dstFormat="rg32float";dstPremultiplied=true [ Failure ]
+crbug.com/407147669 [ intel linux ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_ImageData:* [ RetryOnFailure ]
 
 # `copyToTexture,image_file:from_multiple_formats` failures on Android and Linux
 crbug.com/407088842 [ android-pixel-4 ] webgpu:web_platform,copyToTexture,image_file:from_multiple_formats:imageName="four-colors.avif";srcDoFlipYDuringCopy=false [ Failure ]
