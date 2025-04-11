@@ -2552,6 +2552,15 @@ void Validator::CheckVar(const Var* var) {
         }
     }
 
+    if (mv->AddressSpace() == AddressSpace::kUniform) {
+        // TODO(409840687): Add host-shareable check.
+        if (!mv->StoreType()->IsConstructible()) {
+            AddError(var)
+                << "vars in the 'uniform' address space must be host-shareable and constructible";
+            return;
+        }
+    }
+
     // Check that non-handle variables don't have @input_attachment_index set
     if (var->InputAttachmentIndex().has_value() && mv->AddressSpace() != AddressSpace::kHandle) {
         AddError(var) << "'@input_attachment_index' is not valid for non-handle var";
