@@ -1,4 +1,4 @@
-# Copyright 2023 The Dawn & Tint Authors
+# Copyright 2025 The Dawn & Tint Authors
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -37,12 +37,10 @@
 load("//src/tint:flags.bzl", "COPTS")
 load("@bazel_skylib//lib:selects.bzl", "selects")
 cc_library(
-  name = "writer",
+  name = "bench",
+  alwayslink = True,
   srcs = [
-    "writer.cc",
-  ],
-  hdrs = [
-    "writer.h",
+    "writer_bench.cc",
   ],
   deps = [
     "//src/tint/api/common",
@@ -50,12 +48,9 @@ cc_library(
     "//src/tint/lang/core/constant",
     "//src/tint/lang/core/ir",
     "//src/tint/lang/core/type",
-    "//src/tint/lang/hlsl/writer/common",
-    "//src/tint/lang/hlsl/writer/printer",
-    "//src/tint/lang/hlsl/writer/raise",
+    "//src/tint/lang/msl/ir/transform",
     "//src/tint/lang/wgsl",
     "//src/tint/lang/wgsl/ast",
-    "//src/tint/lang/wgsl/ast/transform",
     "//src/tint/lang/wgsl/program",
     "//src/tint/lang/wgsl/sem",
     "//src/tint/utils",
@@ -68,65 +63,19 @@ cc_library(
     "//src/tint/utils/rtti",
     "//src/tint/utils/symbol",
     "//src/tint/utils/text",
-    "//src/tint/utils/text_generator",
+    "@benchmark",
     "//src/utils",
   ] + select({
-    ":tint_build_hlsl_writer": [
-      "//src/tint/lang/hlsl/writer/ast_printer",
-      "//src/tint/lang/hlsl/writer/ast_raise",
+    ":tint_build_msl_writer": [
+      "//src/tint/lang/msl/writer",
+      "//src/tint/lang/msl/writer/common",
+      "//src/tint/lang/msl/writer/helpers",
     ],
     "//conditions:default": [],
-  }),
-  copts = COPTS,
-  visibility = ["//visibility:public"],
-)
-cc_library(
-  name = "test",
-  alwayslink = True,
-  srcs = [
-    "access_test.cc",
-    "arraylength_test.cc",
-    "binary_test.cc",
-    "bitcast_test.cc",
-    "builtin_test.cc",
-    "constant_test.cc",
-    "construct_test.cc",
-    "convert_test.cc",
-    "function_test.cc",
-    "helper_test.h",
-    "if_test.cc",
-    "loop_test.cc",
-    "switch_test.cc",
-    "unary_test.cc",
-    "var_let_test.cc",
-    "writer_test.cc",
-  ],
-  deps = [
-    "//src/tint/api/common",
-    "//src/tint/lang/core",
-    "//src/tint/lang/core/constant",
-    "//src/tint/lang/core/intrinsic",
-    "//src/tint/lang/core/ir",
-    "//src/tint/lang/core/type",
-    "//src/tint/lang/hlsl/writer/common",
-    "//src/tint/lang/wgsl/ast",
-    "//src/tint/utils",
-    "//src/tint/utils/command",
-    "//src/tint/utils/containers",
-    "//src/tint/utils/diagnostic",
-    "//src/tint/utils/ice",
-    "//src/tint/utils/macros",
-    "//src/tint/utils/math",
-    "//src/tint/utils/memory",
-    "//src/tint/utils/rtti",
-    "//src/tint/utils/symbol",
-    "//src/tint/utils/text",
-    "@gtest",
-    "//src/utils",
-  ] + select({
-    ":tint_build_hlsl_writer": [
-      "//src/tint/lang/hlsl/validate",
-      "//src/tint/lang/hlsl/writer",
+  }) + select({
+    ":tint_build_wgsl_reader": [
+      "//src/tint/cmd/bench:bench",
+      "//src/tint/lang/wgsl/reader",
     ],
     "//conditions:default": [],
   }),
@@ -135,12 +84,20 @@ cc_library(
 )
 
 alias(
-  name = "tint_build_hlsl_writer",
-  actual = "//src/tint:tint_build_hlsl_writer_true",
+  name = "tint_build_msl_writer",
+  actual = "//src/tint:tint_build_msl_writer_true",
 )
 
 alias(
   name = "tint_build_wgsl_reader",
   actual = "//src/tint:tint_build_wgsl_reader_true",
+)
+
+selects.config_setting_group(
+    name = "tint_build_msl_writer_and_tint_build_wgsl_reader",
+    match_all = [
+        ":tint_build_msl_writer",
+        ":tint_build_wgsl_reader",
+    ],
 )
 

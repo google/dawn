@@ -40,8 +40,20 @@ cc_library(
   name = "bench",
   alwayslink = True,
   srcs = [
+    "access_bench.cc",
+    "address_space_bench.cc",
+    "attribute_bench.cc",
     "bench.cc",
     "bench.h",
+    "builtin_type_bench.cc",
+    "builtin_value_bench.cc",
+    "diagnostic_rule_bench.cc",
+    "diagnostic_severity_bench.cc",
+    "extension_bench.cc",
+    "interpolation_sampling_bench.cc",
+    "interpolation_type_bench.cc",
+    "texel_format_bench.cc",
+    "validator_bench.cc",
   ],
   deps = [
     "//src/tint/api/common",
@@ -83,12 +95,10 @@ cc_binary(
     "//src/tint/lang/core",
     "//src/tint/lang/core/constant",
     "//src/tint/lang/core/type",
-    "//src/tint/lang/core:bench",
     "//src/tint/lang/wgsl",
     "//src/tint/lang/wgsl/ast",
     "//src/tint/lang/wgsl/program",
     "//src/tint/lang/wgsl/sem",
-    "//src/tint/lang/wgsl:bench",
     "//src/tint/utils",
     "//src/tint/utils/containers",
     "//src/tint/utils/diagnostic",
@@ -104,34 +114,32 @@ cc_binary(
     "//src/utils",
   ] + select({
     ":tint_build_glsl_writer_and_tint_build_wgsl_reader": [
-      "//src/tint/lang/glsl/writer:bench",
+      "//src/tint/cmd/bench/glsl:bench",
     ],
     "//conditions:default": [],
   }) + select({
     ":tint_build_hlsl_writer_and_tint_build_wgsl_reader": [
-      "//src/tint/lang/hlsl/writer:bench",
+      "//src/tint/cmd/bench/hlsl:bench",
     ],
     "//conditions:default": [],
   }) + select({
     ":tint_build_msl_writer_and_tint_build_wgsl_reader": [
-      "//src/tint/lang/msl/writer:bench",
+      "//src/tint/cmd/bench/msl:bench",
     ],
     "//conditions:default": [],
   }) + select({
     ":tint_build_spv_writer_and_tint_build_wgsl_reader": [
-      "//src/tint/lang/spirv/writer:bench",
+      "//src/tint/cmd/bench/spirv:bench",
     ],
     "//conditions:default": [],
   }) + select({
     ":tint_build_wgsl_reader": [
       "//src/tint/cmd/bench:bench",
-      "//src/tint/lang/core/ir:bench",
-      "//src/tint/lang/wgsl/reader:bench",
     ],
     "//conditions:default": [],
   }) + select({
     ":tint_build_wgsl_writer_and_tint_build_wgsl_reader": [
-      "//src/tint/lang/wgsl/writer:bench",
+      "//src/tint/cmd/bench/wgsl:bench",
     ],
     "//conditions:default": [],
   }),

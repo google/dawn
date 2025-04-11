@@ -133,31 +133,6 @@ cc_library(
   copts = COPTS,
   visibility = ["//visibility:public"],
 )
-cc_library(
-  name = "bench",
-  alwayslink = True,
-  srcs = [
-    "diagnostic_rule_bench.cc",
-    "diagnostic_severity_bench.cc",
-    "extension_bench.cc",
-  ],
-  deps = [
-    "//src/tint/lang/wgsl",
-    "//src/tint/utils",
-    "//src/tint/utils/containers",
-    "//src/tint/utils/diagnostic",
-    "//src/tint/utils/ice",
-    "//src/tint/utils/macros",
-    "//src/tint/utils/math",
-    "//src/tint/utils/memory",
-    "//src/tint/utils/rtti",
-    "//src/tint/utils/text",
-    "@benchmark",
-    "//src/utils",
-  ],
-  copts = COPTS,
-  visibility = ["//visibility:public"],
-)
 
 alias(
   name = "tint_build_wgsl_reader",

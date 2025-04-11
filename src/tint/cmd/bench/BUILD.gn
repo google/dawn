@@ -46,8 +46,20 @@ if (tint_build_benchmarks) {
   if (tint_build_wgsl_reader) {
     tint_benchmarks_source_set("bench") {
       sources = [
+        "access_bench.cc",
+        "address_space_bench.cc",
+        "attribute_bench.cc",
         "bench.cc",
         "bench.h",
+        "builtin_type_bench.cc",
+        "builtin_value_bench.cc",
+        "diagnostic_rule_bench.cc",
+        "diagnostic_severity_bench.cc",
+        "extension_bench.cc",
+        "interpolation_sampling_bench.cc",
+        "interpolation_type_bench.cc",
+        "texel_format_bench.cc",
+        "validator_bench.cc",
       ]
       deps = [
         "${dawn_root}/src/utils:utils",
@@ -89,11 +101,9 @@ if (tint_build_benchmarks) {
         "${dawn_root}/src/utils:utils",
         "${tint_src_dir}:google_benchmark",
         "${tint_src_dir}/lang/core",
-        "${tint_src_dir}/lang/core:bench",
         "${tint_src_dir}/lang/core/constant",
         "${tint_src_dir}/lang/core/type",
         "${tint_src_dir}/lang/wgsl",
-        "${tint_src_dir}/lang/wgsl:bench",
         "${tint_src_dir}/lang/wgsl/ast",
         "${tint_src_dir}/lang/wgsl/program",
         "${tint_src_dir}/lang/wgsl/sem",
@@ -111,31 +121,27 @@ if (tint_build_benchmarks) {
       ]
 
       if (tint_build_glsl_writer && tint_build_wgsl_reader) {
-        deps += [ "${tint_src_dir}/lang/glsl/writer:bench" ]
+        deps += [ "${tint_src_dir}/cmd/bench/glsl:bench" ]
       }
 
       if (tint_build_hlsl_writer && tint_build_wgsl_reader) {
-        deps += [ "${tint_src_dir}/lang/hlsl/writer:bench" ]
+        deps += [ "${tint_src_dir}/cmd/bench/hlsl:bench" ]
       }
 
       if (tint_build_msl_writer && tint_build_wgsl_reader) {
-        deps += [ "${tint_src_dir}/lang/msl/writer:bench" ]
+        deps += [ "${tint_src_dir}/cmd/bench/msl:bench" ]
       }
 
       if (tint_build_spv_writer && tint_build_wgsl_reader) {
-        deps += [ "${tint_src_dir}/lang/spirv/writer:bench" ]
+        deps += [ "${tint_src_dir}/cmd/bench/spirv:bench" ]
       }
 
       if (tint_build_wgsl_reader) {
-        deps += [
-          "${tint_src_dir}/cmd/bench:bench",
-          "${tint_src_dir}/lang/core/ir:bench",
-          "${tint_src_dir}/lang/wgsl/reader:bench",
-        ]
+        deps += [ "${tint_src_dir}/cmd/bench:bench" ]
       }
 
       if (tint_build_wgsl_writer && tint_build_wgsl_reader) {
-        deps += [ "${tint_src_dir}/lang/wgsl/writer:bench" ]
+        deps += [ "${tint_src_dir}/cmd/bench/wgsl:bench" ]
       }
     }
   }

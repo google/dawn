@@ -1,4 +1,4 @@
-# Copyright 2023 The Dawn & Tint Authors
+# Copyright 2025 The Dawn & Tint Authors
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -34,94 +34,59 @@
 #                       Do not modify this file directly
 ################################################################################
 
-include(lang/core/constant/BUILD.cmake)
-include(lang/core/intrinsic/BUILD.cmake)
-include(lang/core/ir/BUILD.cmake)
-include(lang/core/type/BUILD.cmake)
-
+if(TINT_BUILD_GLSL_WRITER AND TINT_BUILD_WGSL_READER)
 ################################################################################
-# Target:    tint_lang_core
-# Kind:      lib
+# Target:    tint_cmd_bench_glsl_bench
+# Kind:      bench
+# Condition: TINT_BUILD_GLSL_WRITER AND TINT_BUILD_WGSL_READER
 ################################################################################
-tint_add_target(tint_lang_core lib
-  lang/core/access.cc
-  lang/core/access.h
-  lang/core/address_space.cc
-  lang/core/address_space.h
-  lang/core/attribute.cc
-  lang/core/attribute.h
-  lang/core/binary_op.cc
-  lang/core/binary_op.h
-  lang/core/builtin_fn.cc
-  lang/core/builtin_fn.h
-  lang/core/builtin_type.cc
-  lang/core/builtin_type.h
-  lang/core/builtin_value.cc
-  lang/core/builtin_value.h
-  lang/core/evaluation_stage.h
-  lang/core/fluent_types.h
-  lang/core/interpolation.h
-  lang/core/interpolation_sampling.cc
-  lang/core/interpolation_sampling.h
-  lang/core/interpolation_type.cc
-  lang/core/interpolation_type.h
-  lang/core/io_attributes.h
-  lang/core/number.cc
-  lang/core/number.h
-  lang/core/parameter_usage.cc
-  lang/core/parameter_usage.h
-  lang/core/subgroup_matrix_kind.cc
-  lang/core/subgroup_matrix_kind.h
-  lang/core/texel_format.cc
-  lang/core/texel_format.h
-  lang/core/unary_op.cc
-  lang/core/unary_op.h
+tint_add_target(tint_cmd_bench_glsl_bench bench
+  cmd/bench/glsl/writer_bench.cc
 )
 
-tint_target_add_dependencies(tint_lang_core lib
-  tint_utils
-  tint_utils_containers
-  tint_utils_ice
-  tint_utils_macros
-  tint_utils_math
-  tint_utils_memory
-  tint_utils_rtti
-  tint_utils_text
-)
-
-tint_target_add_external_dependencies(tint_lang_core lib
-  "src_utils"
-)
-
-################################################################################
-# Target:    tint_lang_core_test
-# Kind:      test
-################################################################################
-tint_add_target(tint_lang_core_test test
-  lang/core/access_test.cc
-  lang/core/address_space_test.cc
-  lang/core/attribute_test.cc
-  lang/core/builtin_type_test.cc
-  lang/core/builtin_value_test.cc
-  lang/core/interpolation_sampling_test.cc
-  lang/core/interpolation_type_test.cc
-  lang/core/number_test.cc
-  lang/core/texel_format_test.cc
-)
-
-tint_target_add_dependencies(tint_lang_core_test test
+tint_target_add_dependencies(tint_cmd_bench_glsl_bench bench
+  tint_api_common
   tint_lang_core
+  tint_lang_core_constant
+  tint_lang_core_ir
+  tint_lang_core_ir_transform
+  tint_lang_core_type
+  tint_lang_wgsl
+  tint_lang_wgsl_ast
+  tint_lang_wgsl_ast_transform
+  tint_lang_wgsl_inspector
+  tint_lang_wgsl_program
+  tint_lang_wgsl_sem
   tint_utils
   tint_utils_containers
+  tint_utils_diagnostic
   tint_utils_ice
   tint_utils_macros
   tint_utils_math
   tint_utils_memory
   tint_utils_rtti
+  tint_utils_symbol
   tint_utils_text
 )
 
-tint_target_add_external_dependencies(tint_lang_core_test test
-  "gtest"
+tint_target_add_external_dependencies(tint_cmd_bench_glsl_bench bench
+  "google-benchmark"
   "src_utils"
 )
+
+if(TINT_BUILD_GLSL_WRITER)
+  tint_target_add_dependencies(tint_cmd_bench_glsl_bench bench
+    tint_lang_glsl_writer
+    tint_lang_glsl_writer_common
+    tint_lang_glsl_writer_helpers
+  )
+endif(TINT_BUILD_GLSL_WRITER)
+
+if(TINT_BUILD_WGSL_READER)
+  tint_target_add_dependencies(tint_cmd_bench_glsl_bench bench
+    tint_cmd_bench_bench
+    tint_lang_wgsl_reader
+  )
+endif(TINT_BUILD_WGSL_READER)
+
+endif(TINT_BUILD_GLSL_WRITER AND TINT_BUILD_WGSL_READER)

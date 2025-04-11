@@ -118,32 +118,4 @@ cc_library(
   copts = COPTS,
   visibility = ["//visibility:public"],
 )
-cc_library(
-  name = "bench",
-  alwayslink = True,
-  srcs = [
-    "access_bench.cc",
-    "address_space_bench.cc",
-    "attribute_bench.cc",
-    "builtin_type_bench.cc",
-    "builtin_value_bench.cc",
-    "interpolation_sampling_bench.cc",
-    "interpolation_type_bench.cc",
-    "texel_format_bench.cc",
-  ],
-  deps = [
-    "//src/tint/lang/core",
-    "//src/tint/utils",
-    "//src/tint/utils/containers",
-    "//src/tint/utils/ice",
-    "//src/tint/utils/macros",
-    "//src/tint/utils/math",
-    "//src/tint/utils/memory",
-    "//src/tint/utils/rtti",
-    "@benchmark",
-    "//src/utils",
-  ],
-  copts = COPTS,
-  visibility = ["//visibility:public"],
-)
 

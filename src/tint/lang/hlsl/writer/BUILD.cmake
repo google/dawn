@@ -151,59 +151,6 @@ if(TINT_BUILD_HLSL_WRITER)
 endif(TINT_BUILD_HLSL_WRITER)
 
 endif(TINT_BUILD_HLSL_WRITER)
-if(TINT_BUILD_HLSL_WRITER AND TINT_BUILD_WGSL_READER)
-################################################################################
-# Target:    tint_lang_hlsl_writer_bench
-# Kind:      bench
-# Condition: TINT_BUILD_HLSL_WRITER AND TINT_BUILD_WGSL_READER
-################################################################################
-tint_add_target(tint_lang_hlsl_writer_bench bench
-  lang/hlsl/writer/writer_bench.cc
-)
-
-tint_target_add_dependencies(tint_lang_hlsl_writer_bench bench
-  tint_api_common
-  tint_lang_core
-  tint_lang_core_constant
-  tint_lang_core_ir
-  tint_lang_core_type
-  tint_lang_hlsl_writer_common
-  tint_lang_hlsl_writer_helpers
-  tint_lang_wgsl
-  tint_lang_wgsl_ast
-  tint_lang_wgsl_program
-  tint_lang_wgsl_sem
-  tint_utils
-  tint_utils_containers
-  tint_utils_diagnostic
-  tint_utils_ice
-  tint_utils_macros
-  tint_utils_math
-  tint_utils_memory
-  tint_utils_rtti
-  tint_utils_symbol
-  tint_utils_text
-)
-
-tint_target_add_external_dependencies(tint_lang_hlsl_writer_bench bench
-  "google-benchmark"
-  "src_utils"
-)
-
-if(TINT_BUILD_HLSL_WRITER)
-  tint_target_add_dependencies(tint_lang_hlsl_writer_bench bench
-    tint_lang_hlsl_writer
-  )
-endif(TINT_BUILD_HLSL_WRITER)
-
-if(TINT_BUILD_WGSL_READER)
-  tint_target_add_dependencies(tint_lang_hlsl_writer_bench bench
-    tint_cmd_bench_bench
-    tint_lang_wgsl_reader
-  )
-endif(TINT_BUILD_WGSL_READER)
-
-endif(TINT_BUILD_HLSL_WRITER AND TINT_BUILD_WGSL_READER)
 if(TINT_BUILD_HLSL_WRITER)
 ################################################################################
 # Target:    tint_lang_hlsl_writer_fuzz
