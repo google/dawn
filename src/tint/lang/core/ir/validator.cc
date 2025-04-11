@@ -2552,9 +2552,15 @@ void Validator::CheckVar(const Var* var) {
         }
     }
 
+    if (mv->AddressSpace() == AddressSpace::kStorage) {
+        if (mv->StoreType() && !mv->StoreType()->IsHostShareable()) {
+            AddError(var) << "vars in the 'storage' address space must be host-shareable";
+            return;
+        }
+    }
+
     if (mv->AddressSpace() == AddressSpace::kUniform) {
-        // TODO(409840687): Add host-shareable check.
-        if (!mv->StoreType()->IsConstructible()) {
+        if (!mv->StoreType()->IsConstructible() || !mv->StoreType()->IsHostShareable()) {
             AddError(var)
                 << "vars in the 'uniform' address space must be host-shareable and constructible";
             return;

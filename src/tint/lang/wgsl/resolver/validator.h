@@ -170,10 +170,6 @@ class Validator {
     /// @returns true if the given type is storable
     bool IsStorable(const core::type::Type* type) const;
 
-    /// @param type the given type
-    /// @returns true if the given type is host-shareable
-    bool IsHostShareable(const core::type::Type* type) const;
-
     /// Validates the enabled extensions
     /// @param enables the extension enables
     /// @returns true on success, false otherwise.

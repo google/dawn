@@ -129,12 +129,6 @@ class Resolver {
     /// @returns true if the given type is storable
     bool IsStorable(const core::type::Type* type) const { return validator_.IsStorable(type); }
 
-    /// @param type the given type
-    /// @returns true if the given type is host-shareable
-    bool IsHostShareable(const core::type::Type* type) const {
-        return validator_.IsHostShareable(type);
-    }
-
     /// @returns the validator for testing
     const Validator* GetValidatorForTesting() const { return &validator_; }
 

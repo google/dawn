@@ -134,7 +134,6 @@ tint_add_target(tint_lang_wgsl_resolver_test test
   lang/wgsl/resolver/increment_decrement_validation_test.cc
   lang/wgsl/resolver/inferred_type_test.cc
   lang/wgsl/resolver/input_attachments_extension_test.cc
-  lang/wgsl/resolver/is_host_shareable_test.cc
   lang/wgsl/resolver/is_storeable_test.cc
   lang/wgsl/resolver/language_features_test.cc
   lang/wgsl/resolver/load_test.cc

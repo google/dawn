@@ -58,6 +58,9 @@ core::type::Flags FlagsFrom(const Type* element, const ArrayCount* count) {
             flags.Add(Flag::kFixedFootprint);
         }
     }
+    if (element->IsHostShareable()) {
+        flags.Add(Flag::kHostShareable);
+    }
     return flags;
 }
 

@@ -51,6 +51,7 @@ Flags FlagsFrom(VectorRef<const StructMember*> members) {
         Flag::kConstructable,
         Flag::kCreationFixedFootprint,
         Flag::kFixedFootprint,
+        Flag::kHostShareable,
     };
     for (auto* member : members) {
         if (!member->Type()->IsConstructible()) {
@@ -61,6 +62,9 @@ Flags FlagsFrom(VectorRef<const StructMember*> members) {
         }
         if (!member->Type()->HasCreationFixedFootprint()) {
             flags.Remove(Flag::kCreationFixedFootprint);
+        }
+        if (!member->Type()->IsHostShareable()) {
+            flags.Remove(Flag::kHostShareable);
         }
     }
     return flags;

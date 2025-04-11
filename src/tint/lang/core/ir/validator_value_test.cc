@@ -455,6 +455,37 @@ TEST_F(IR_ValidatorTest, Var_Uniform_NotConstructible) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Var_Uniform_NotHostShareable) {
+    auto* v = b.Var<uniform, bool>();
+    v->SetBindingPoint(0, 0);
+    mod.root_block->Append(v);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:2:33 error: var: vars in the 'uniform' address space must be host-shareable and constructible
+  %1:ptr<uniform, bool, read> = var undef @binding_point(0, 0)
+                                ^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Var_Storage_NotHostShareable) {
+    auto* v = b.Var<storage, bool, read>();
+    v->SetBindingPoint(0, 0);
+    mod.root_block->Append(v);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(
+                    R"(:2:33 error: var: vars in the 'storage' address space must be host-shareable
+  %1:ptr<storage, bool, read> = var undef @binding_point(0, 0)
+                                ^^^
+)")) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Var_MultipleIOAnnotations) {
     auto* v = b.Var<AddressSpace::kIn, vec4<f32>>();
     IOAttributes attr;

@@ -243,27 +243,6 @@ bool Validator::IsFixedFootprint(const core::type::Type* type) const {
         [&](Default) { return type->Is<core::type::Scalar>(); });
 }
 
-// https://gpuweb.github.io/gpuweb/wgsl.html#host-shareable-types
-bool Validator::IsHostShareable(const core::type::Type* type) const {
-    if (type->IsAnyOf<core::type::I32, core::type::U32, core::type::F32, core::type::F16>()) {
-        return true;
-    }
-    return Switch(
-        type,  //
-        [&](const core::type::Vector* vec) { return IsHostShareable(vec->Type()); },
-        [&](const core::type::Matrix* mat) { return IsHostShareable(mat->Type()); },
-        [&](const sem::Array* arr) { return IsHostShareable(arr->ElemType()); },
-        [&](const core::type::Struct* str) {
-            for (auto* member : str->Members()) {
-                if (!IsHostShareable(member->Type())) {
-                    return false;
-                }
-            }
-            return true;
-        },
-        [&](const core::type::Atomic* atomic) { return IsHostShareable(atomic->Type()); });
-}
-
 // https://gpuweb.github.io/gpuweb/wgsl.html#storable-types
 bool Validator::IsStorable(const core::type::Type* type) const {
     return IsPlain(type) ||

@@ -164,6 +164,7 @@ cc_library(
     "i32_test.cc",
     "i8_test.cc",
     "input_attachment_test.cc",
+    "is_host_shareable_test.cc",
     "manager_test.cc",
     "matrix_test.cc",
     "multisampled_texture_test.cc",

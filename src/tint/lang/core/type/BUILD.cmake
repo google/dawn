@@ -165,6 +165,7 @@ tint_add_target(tint_lang_core_type_test test
   lang/core/type/i32_test.cc
   lang/core/type/i8_test.cc
   lang/core/type/input_attachment_test.cc
+  lang/core/type/is_host_shareable_test.cc
   lang/core/type/manager_test.cc
   lang/core/type/matrix_test.cc
   lang/core/type/multisampled_texture_test.cc

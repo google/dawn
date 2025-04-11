@@ -5046,7 +5046,7 @@ bool Resolver::ApplyAddressSpaceUsageToType(core::AddressSpace address_space,
         return false;
     }
 
-    if (core::IsHostShareable(address_space) && !validator_.IsHostShareable(ty)) {
+    if (core::IsHostShareable(address_space) && !ty->IsHostShareable()) {
         AddError(usage) << "type " << style::Type(sem_.TypeNameOf(ty))
                         << " cannot be used in address space " << style::Enum(address_space)
                         << " as it is non-host-shareable";
