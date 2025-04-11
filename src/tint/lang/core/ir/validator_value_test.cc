@@ -842,4 +842,14 @@ TEST_F(IR_ValidatorTest, Phony_MissingCapability) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, PointerToNonStructPixelLocal) {
+    auto* var = b.Var("var", ty.ptr<core::AddressSpace::kPixelLocal>(ty.i32()));
+    mod.root_block->Append(var);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr("pixel_local var must be of type struct"))
+        << res.Failure();
+}
+
 }  // namespace tint::core::ir

@@ -2567,6 +2567,15 @@ void Validator::CheckVar(const Var* var) {
             }
         }
     }
+
+    if (mv->AddressSpace() == core::AddressSpace::kPixelLocal) {
+        if (var->Block() == mod_.root_block) {
+            if (!mv->StoreType()->Is<core::type::Struct>()) {
+                AddError(var) << "pixel_local var must be of type struct";
+                return;
+            }
+        }
+    }
 }
 
 Result<SuccessType, std::string> Validator::ValidateBindingPoint(
