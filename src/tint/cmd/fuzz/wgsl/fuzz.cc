@@ -67,12 +67,6 @@ Vector<ProgramFuzzer, 32>& Fuzzers() {
 
 thread_local std::string_view currently_running;
 
-[[noreturn]] void TintInternalCompilerErrorReporter(const tint::InternalCompilerError& err) {
-    std::cerr << "ICE while running fuzzer: '" << currently_running << "'\n";
-    std::cerr << err.Error() << "\n";
-    __builtin_trap();
-}
-
 bool IsAddressSpace(std::string_view name) {
     return tint::core::ParseAddressSpace(name) != tint::core::AddressSpace::kUndefined;
 }
@@ -136,8 +130,6 @@ void Register(const ProgramFuzzer& fuzzer) {
 }
 
 void Run(std::string_view wgsl, const Options& options, Slice<const std::byte> data) {
-    tint::SetInternalCompilerErrorReporter(&TintInternalCompilerErrorReporter);
-
 #if TINT_BUILD_WGSL_WRITER
     // Register the Program printer. This is used for debugging purposes.
     tint::Program::printer = [](const tint::Program& program) {

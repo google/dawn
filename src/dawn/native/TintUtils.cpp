@@ -39,22 +39,6 @@ namespace dawn::native {
 
 namespace {
 
-thread_local DeviceBase* tlDevice = nullptr;
-
-void TintICEReporter(const tint::InternalCompilerError& err) {
-    if (tlDevice) {
-        tlDevice->HandleError(DAWN_INTERNAL_ERROR(err.Error()));
-#if DAWN_ENABLE_ASSERTS
-        HandleAssertionFailure(err.File(), "", err.Line(), err.Message().c_str());
-#endif
-    }
-}
-
-bool InitializeTintErrorReporter() {
-    tint::SetInternalCompilerErrorReporter(&TintICEReporter);
-    return true;
-}
-
 tint::VertexFormat ToTintVertexFormat(wgpu::VertexFormat format) {
     switch (format) {
         case wgpu::VertexFormat::Uint8:
@@ -156,22 +140,6 @@ tint::VertexStepMode ToTintVertexStepMode(wgpu::VertexStepMode mode) {
 }
 
 }  // namespace
-
-ScopedTintICEHandler::ScopedTintICEHandler(DeviceBase* device) {
-    // Call tint::SetInternalCompilerErrorReporter() the first time
-    // this constructor is called. Static initialization is
-    // guaranteed to be thread-safe, and only occur once.
-    static bool init_once_tint_error_reporter = InitializeTintErrorReporter();
-    (void)init_once_tint_error_reporter;
-
-    // Shouldn't have overlapping instances of this handler.
-    DAWN_ASSERT(tlDevice == nullptr);
-    tlDevice = device;
-}
-
-ScopedTintICEHandler::~ScopedTintICEHandler() {
-    tlDevice = nullptr;
-}
 
 tint::VertexPullingConfig BuildVertexPullingTransformConfig(
     const RenderPipelineBase& renderPipeline,

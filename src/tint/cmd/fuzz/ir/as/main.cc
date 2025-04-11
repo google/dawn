@@ -291,7 +291,6 @@ int main(int argc, const char** argv) {
     Options options;
 
     tint::Initialize();
-    tint::SetInternalCompilerErrorReporter(&tint::cmd::TintInternalCompilerErrorReporter);
 
     if (!ParseArgs(arguments, &options)) {
         return EXIT_FAILURE;

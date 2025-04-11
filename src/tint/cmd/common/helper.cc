@@ -142,21 +142,6 @@ tint::Program ReadSpirv(const std::vector<uint32_t>& data, const LoadProgramOpti
 
 }  // namespace
 
-void TintInternalCompilerErrorReporter(const InternalCompilerError& err) {
-    auto printer = StyledTextPrinter::Create(stderr);
-    StyledText msg;
-    msg << (style::Error + style::Bold) << err.Error();
-    msg << R"(
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
-)";
-    printer->Print(msg);
-}
-
 void PrintWGSL(std::ostream& out, const tint::Program& program) {
 #if TINT_BUILD_WGSL_WRITER
     tint::wgsl::writer::Options options;

@@ -34,26 +34,23 @@
 #include "src/tint/utils/macros/compiler.h"
 
 namespace tint {
-namespace {
-
-InternalCompilerErrorReporter* ice_reporter = nullptr;
-
-}  // namespace
-
-void SetInternalCompilerErrorReporter(InternalCompilerErrorReporter* reporter) {
-    ice_reporter = reporter;
-}
 
 InternalCompilerError::InternalCompilerError(const char* file, size_t line)
     : file_(file), line_(line) {}
 
 TINT_BEGIN_DISABLE_WARNING(DESTRUCTOR_NEVER_RETURNS);
 InternalCompilerError::~InternalCompilerError() {
-    if (ice_reporter) {
-        ice_reporter(*this);
-    } else {
-        std::cerr << Error() << "\n\n";
-    }
+    // When consuming the ICE, print the error message to stderr and never return.
+    std::cerr << Error();
+    std::cerr << R"(
+
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************
+)";
 
     debugger::Break();
 

@@ -564,61 +564,55 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
         GetDevice()->IsToggleEnabled(Toggle::DisablePolyfillsOnIntegerDivisonAndModulo);
 
     CacheResult<GLSLCompilation> compilationResult;
-    {
-        ScopedTintICEHandler scopedICEHandler(GetDevice());
-        DAWN_TRY_LOAD_OR_RUN(
-            compilationResult, GetDevice(), std::move(req), GLSLCompilation::FromBlob,
-            [](GLSLCompilationRequest r) -> ResultOrError<GLSLCompilation> {
-                // Convert the AST program to an IR module.
-                auto ir = tint::wgsl::reader::ProgramToLoweredIR(*r.inputProgram);
-                DAWN_INVALID_IF(ir != tint::Success,
-                                "An error occurred while generating Tint IR\n%s",
-                                ir.Failure().reason);
+    DAWN_TRY_LOAD_OR_RUN(
+        compilationResult, GetDevice(), std::move(req), GLSLCompilation::FromBlob,
+        [](GLSLCompilationRequest r) -> ResultOrError<GLSLCompilation> {
+            // Convert the AST program to an IR module.
+            auto ir = tint::wgsl::reader::ProgramToLoweredIR(*r.inputProgram);
+            DAWN_INVALID_IF(ir != tint::Success, "An error occurred while generating Tint IR\n%s",
+                            ir.Failure().reason);
 
-                auto singleEntryPointResult =
-                    tint::core::ir::transform::SingleEntryPoint(ir.Get(), r.entryPointName);
-                DAWN_INVALID_IF(singleEntryPointResult != tint::Success,
-                                "Pipeline single entry point (IR) failed:\n%s",
-                                singleEntryPointResult.Failure().reason);
+            auto singleEntryPointResult =
+                tint::core::ir::transform::SingleEntryPoint(ir.Get(), r.entryPointName);
+            DAWN_INVALID_IF(singleEntryPointResult != tint::Success,
+                            "Pipeline single entry point (IR) failed:\n%s",
+                            singleEntryPointResult.Failure().reason);
 
-                if (r.substituteOverrideConfig) {
-                    // this needs to run after SingleEntryPoint transform which removes unused
-                    // overrides for the current entry point.
-                    tint::core::ir::transform::SubstituteOverridesConfig cfg;
-                    cfg.map = r.substituteOverrideConfig->map;
-                    auto substituteOverridesResult =
-                        tint::core::ir::transform::SubstituteOverrides(ir.Get(), cfg);
-                    DAWN_INVALID_IF(substituteOverridesResult != tint::Success,
-                                    "Pipeline override substitution (IR) failed:\n%s",
-                                    substituteOverridesResult.Failure().reason);
-                }
+            if (r.substituteOverrideConfig) {
+                // this needs to run after SingleEntryPoint transform which removes unused
+                // overrides for the current entry point.
+                tint::core::ir::transform::SubstituteOverridesConfig cfg;
+                cfg.map = r.substituteOverrideConfig->map;
+                auto substituteOverridesResult =
+                    tint::core::ir::transform::SubstituteOverrides(ir.Get(), cfg);
+                DAWN_INVALID_IF(substituteOverridesResult != tint::Success,
+                                "Pipeline override substitution (IR) failed:\n%s",
+                                substituteOverridesResult.Failure().reason);
+            }
 
-                const std::string remappedEntryPoint = "";
-                // Generate GLSL from Tint IR.
-                auto result =
-                    tint::glsl::writer::Generate(ir.Get(), r.tintOptions, remappedEntryPoint);
-                DAWN_INVALID_IF(result != tint::Success,
-                                "An error occurred while generating GLSL:\n%s",
-                                result.Failure().reason);
+            const std::string remappedEntryPoint = "";
+            // Generate GLSL from Tint IR.
+            auto result = tint::glsl::writer::Generate(ir.Get(), r.tintOptions, remappedEntryPoint);
+            DAWN_INVALID_IF(result != tint::Success, "An error occurred while generating GLSL:\n%s",
+                            result.Failure().reason);
 
-                // Workgroup validation has to come after `Generate` because it may require
-                // overrides to have been substituted.
-                if (r.stage == SingleShaderStage::Compute) {
-                    // Validate workgroup size after program runs transforms.
-                    Extent3D _;
-                    DAWN_TRY_ASSIGN(
-                        _, ValidateComputeStageWorkgroupSize(
-                               result->workgroup_info.x, result->workgroup_info.y,
-                               result->workgroup_info.z, result->workgroup_info.storage_size,
-                               /* usesSubgroupMatrix */ false,
-                               /* maxSubgroupSize, GL backend not support */ 0, r.limits,
-                               r.adapterSupportedLimits.UnsafeGetValue()));
-                }
+            // Workgroup validation has to come after `Generate` because it may require
+            // overrides to have been substituted.
+            if (r.stage == SingleShaderStage::Compute) {
+                // Validate workgroup size after program runs transforms.
+                Extent3D _;
+                DAWN_TRY_ASSIGN(_,
+                                ValidateComputeStageWorkgroupSize(
+                                    result->workgroup_info.x, result->workgroup_info.y,
+                                    result->workgroup_info.z, result->workgroup_info.storage_size,
+                                    /* usesSubgroupMatrix */ false,
+                                    /* maxSubgroupSize, GL backend not support */ 0, r.limits,
+                                    r.adapterSupportedLimits.UnsafeGetValue()));
+            }
 
-                return GLSLCompilation{{std::move(result->glsl)}};
-            },
-            "OpenGL.CompileShaderToGLSL");
-    }
+            return GLSLCompilation{{std::move(result->glsl)}};
+        },
+        "OpenGL.CompileShaderToGLSL");
 
     if (GetDevice()->IsToggleEnabled(Toggle::DumpShaders)) {
         std::ostringstream dumpedMsg;

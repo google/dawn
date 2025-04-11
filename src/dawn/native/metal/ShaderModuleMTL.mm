@@ -302,80 +302,75 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
     req.maxSubgroupSize = device->GetAdapter()->GetPhysicalDevice()->GetSubgroupMaxSize();
 
     CacheResult<MslCompilation> mslCompilation;
-    {
-        ScopedTintICEHandler scopedICEHandler(device);
-        DAWN_TRY_LOAD_OR_RUN(
-            mslCompilation, device, std::move(req), MslCompilation::FromBlob,
-            [](MslCompilationRequest r) -> ResultOrError<MslCompilation> {
-                TRACE_EVENT0(r.platform.UnsafeGetValue(), General, "tint::msl::writer::Generate");
-                // Convert the AST program to an IR module.
-                auto ir = tint::wgsl::reader::ProgramToLoweredIR(*r.inputProgram);
-                DAWN_INVALID_IF(ir != tint::Success,
-                                "An error occurred while generating Tint IR\n%s",
-                                ir.Failure().reason);
+    DAWN_TRY_LOAD_OR_RUN(
+        mslCompilation, device, std::move(req), MslCompilation::FromBlob,
+        [](MslCompilationRequest r) -> ResultOrError<MslCompilation> {
+            TRACE_EVENT0(r.platform.UnsafeGetValue(), General, "tint::msl::writer::Generate");
+            // Convert the AST program to an IR module.
+            auto ir = tint::wgsl::reader::ProgramToLoweredIR(*r.inputProgram);
+            DAWN_INVALID_IF(ir != tint::Success, "An error occurred while generating Tint IR\n%s",
+                            ir.Failure().reason);
 
-                auto singleEntryPointResult =
-                    tint::core::ir::transform::SingleEntryPoint(ir.Get(), r.entryPointName);
-                DAWN_INVALID_IF(singleEntryPointResult != tint::Success,
-                                "Pipeline single entry point (IR) failed:\n%s",
-                                singleEntryPointResult.Failure().reason);
+            auto singleEntryPointResult =
+                tint::core::ir::transform::SingleEntryPoint(ir.Get(), r.entryPointName);
+            DAWN_INVALID_IF(singleEntryPointResult != tint::Success,
+                            "Pipeline single entry point (IR) failed:\n%s",
+                            singleEntryPointResult.Failure().reason);
 
-                if (r.substituteOverrideConfig) {
-                    // this needs to run after SingleEntryPoint transform which removes unused
-                    // overrides for the current entry point.
-                    tint::core::ir::transform::SubstituteOverridesConfig cfg;
-                    cfg.map = r.substituteOverrideConfig->map;
-                    auto substituteOverridesResult =
-                        tint::core::ir::transform::SubstituteOverrides(ir.Get(), cfg);
-                    DAWN_INVALID_IF(substituteOverridesResult != tint::Success,
-                                    "Pipeline override substitution (IR) failed:\n%s",
-                                    substituteOverridesResult.Failure().reason);
-                }
+            if (r.substituteOverrideConfig) {
+                // this needs to run after SingleEntryPoint transform which removes unused
+                // overrides for the current entry point.
+                tint::core::ir::transform::SubstituteOverridesConfig cfg;
+                cfg.map = r.substituteOverrideConfig->map;
+                auto substituteOverridesResult =
+                    tint::core::ir::transform::SubstituteOverrides(ir.Get(), cfg);
+                DAWN_INVALID_IF(substituteOverridesResult != tint::Success,
+                                "Pipeline override substitution (IR) failed:\n%s",
+                                substituteOverridesResult.Failure().reason);
+            }
 
-                // Generate MSL.
-                auto result = tint::msl::writer::Generate(ir.Get(), r.tintOptions);
-                DAWN_INVALID_IF(result != tint::Success,
-                                "An error occurred while generating MSL:\n%s",
-                                result.Failure().reason);
+            // Generate MSL.
+            auto result = tint::msl::writer::Generate(ir.Get(), r.tintOptions);
+            DAWN_INVALID_IF(result != tint::Success, "An error occurred while generating MSL:\n%s",
+                            result.Failure().reason);
 
-                // Workgroup validation has to come after `Generate` because it may require
-                // overrides to have been substituted.
-                Extent3D localSize{0, 0, 0};
-                if (r.stage == SingleShaderStage::Compute) {
-                    // Validate workgroup size and workgroup storage size.
-                    DAWN_TRY_ASSIGN(
-                        localSize,
-                        ValidateComputeStageWorkgroupSize(
-                            result->workgroup_info.x, result->workgroup_info.y,
-                            result->workgroup_info.z, result->workgroup_info.storage_size,
-                            r.usesSubgroupMatrix, r.maxSubgroupSize, r.limits,
-                            r.adapterSupportedLimits.UnsafeGetValue()));
-                }
+            // Workgroup validation has to come after `Generate` because it may require
+            // overrides to have been substituted.
+            Extent3D localSize{0, 0, 0};
+            if (r.stage == SingleShaderStage::Compute) {
+                // Validate workgroup size and workgroup storage size.
+                DAWN_TRY_ASSIGN(localSize,
+                                ValidateComputeStageWorkgroupSize(
+                                    result->workgroup_info.x, result->workgroup_info.y,
+                                    result->workgroup_info.z, result->workgroup_info.storage_size,
+                                    r.usesSubgroupMatrix, r.maxSubgroupSize, r.limits,
+                                    r.adapterSupportedLimits.UnsafeGetValue()));
+            }
 
-                // Metal uses Clang to compile the shader as C++14. Disable everything in the -Wall
-                // category. -Wunused-variable in particular comes up a lot in generated code, and
-                // some (old?) Metal drivers accidentally treat it as a MTLLibraryErrorCompileError
-                // instead of a warning.
-                auto msl = std::move(result->msl);
-                msl = R"(
+            // Metal uses Clang to compile the shader as C++14. Disable everything in the -Wall
+            // category. -Wunused-variable in particular comes up a lot in generated code, and
+            // some (old?) Metal drivers accidentally treat it as a MTLLibraryErrorCompileError
+            // instead of a warning.
+            auto msl = std::move(result->msl);
+            msl = R"(
                     #ifdef __clang__
                     #pragma clang diagnostic ignored "-Wall"
                     #endif
-                )" + msl;
+                )" +
+                  msl;
 
-                auto workgroupAllocations =
-                    std::move(result->workgroup_info.allocations.at(kRemappedEntryPointName));
-                return MslCompilation{{
-                    std::move(msl),
-                    std::move(kRemappedEntryPointName),
-                    result->needs_storage_buffer_sizes,
-                    result->has_invariant_attribute,
-                    std::move(workgroupAllocations),
-                    localSize,
-                }};
-            },
-            "Metal.CompileShaderToMSL");
-    }
+            auto workgroupAllocations =
+                std::move(result->workgroup_info.allocations.at(kRemappedEntryPointName));
+            return MslCompilation{{
+                std::move(msl),
+                std::move(kRemappedEntryPointName),
+                result->needs_storage_buffer_sizes,
+                result->has_invariant_attribute,
+                std::move(workgroupAllocations),
+                localSize,
+            }};
+        },
+        "Metal.CompileShaderToMSL");
 
     if (device->IsToggleEnabled(Toggle::DumpShaders)) {
         std::ostringstream dumpedMsg;

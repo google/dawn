@@ -264,11 +264,8 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     req.hlsl.tintOptions.polyfill_pack_unpack_4x8 = true;
 
     CacheResult<d3d::CompiledShader> compiledShader;
-    {
-        ScopedTintICEHandler scopedICEHandler(device);
-        DAWN_TRY_LOAD_OR_RUN(compiledShader, device, std::move(req), d3d::CompiledShader::FromBlob,
-                             d3d::CompileShader, "D3D11.CompileShader");
-    }
+    DAWN_TRY_LOAD_OR_RUN(compiledShader, device, std::move(req), d3d::CompiledShader::FromBlob,
+                         d3d::CompileShader, "D3D11.CompileShader");
 
     if (device->IsToggleEnabled(Toggle::DumpShaders)) {
         d3d::DumpFXCCompiledShader(device, *compiledShader, compileFlags);

@@ -58,12 +58,6 @@ Vector<IRFuzzer, 32>& Fuzzers() {
 }
 
 thread_local std::string_view currently_running;
-
-[[noreturn]] void TintInternalCompilerErrorReporter(const tint::InternalCompilerError& err) {
-    std::cerr << "ICE while running fuzzer: '" << currently_running << "'" << '\n';
-    std::cerr << err.Error() << "\n";
-    __builtin_trap();
-}
 #endif  // TINT_BUILD_IR_BINARY
 
 void Register(const IRFuzzer& fuzzer) {
@@ -131,8 +125,6 @@ void Register(const IRFuzzer& fuzzer) {
 void Run(const std::function<tint::core::ir::Module()>& acquire_module,
          const Options& options,
          Slice<const std::byte> data) {
-    tint::SetInternalCompilerErrorReporter(&TintInternalCompilerErrorReporter);
-
     // Ensure that fuzzers are sorted. Without this, the fuzzers may be registered in any order,
     // leading to non-determinism, which we must avoid.
     TINT_STATIC_INIT(Fuzzers().Sort([](auto& a, auto& b) { return a.name < b.name; }));

@@ -44,17 +44,6 @@ class PipelineLayoutBase;
 struct ProgrammableStage;
 class RenderPipelineBase;
 
-// Indicates that for the lifetime of this object tint internal compiler errors should be
-// reported to the given device.
-class ScopedTintICEHandler : public NonCopyable {
-  public:
-    explicit ScopedTintICEHandler(DeviceBase* device);
-    ~ScopedTintICEHandler();
-
-  private:
-    ScopedTintICEHandler(ScopedTintICEHandler&&) = delete;
-};
-
 tint::VertexPullingConfig BuildVertexPullingTransformConfig(
     const RenderPipelineBase& renderPipeline,
     BindGroupIndex pullingBufferBindingSet);

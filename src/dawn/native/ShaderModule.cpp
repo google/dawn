@@ -1150,7 +1150,6 @@ MaybeError ReflectShaderUsingTint(DeviceBase* device,
                                   const tint::Program* program,
                                   EntryPointMetadataTable* entryPointMetadataTable) {
     DAWN_ASSERT(program->IsValid());
-    ScopedTintICEHandler scopedICEHandler(device);
 
     tint::inspector::Inspector inspector(*program);
 
@@ -1280,8 +1279,6 @@ MaybeError ParseShaderModule(DeviceBase* device,
                              ShaderModuleParseResult* parseResult,
                              OwnedCompilationMessages* outMessages) {
     DAWN_ASSERT(parseResult != nullptr);
-
-    ScopedTintICEHandler scopedICEHandler(device);
 
     // We assume that the descriptor chain has already been validated.
 #if TINT_BUILD_SPV_READER
