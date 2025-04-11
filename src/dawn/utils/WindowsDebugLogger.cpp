@@ -27,6 +27,7 @@
 
 #include <array>
 #include <thread>
+#include <cstdio>
 
 #include "dawn/utils/PlatformDebugLogger.h"
 
