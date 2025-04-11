@@ -924,6 +924,7 @@ dawn_test("dawn_perf_tests") {
     "perf_tests/SubresourceTrackingPerf.cpp",
     "perf_tests/UniformBufferUpdatePerf.cpp",
     "perf_tests/VulkanZeroInitializeWorkgroupMemoryPerf.cpp",
+    "perf_tests/WorkgroupAtomicPerf.cpp",
   ]
 
   libs = []
