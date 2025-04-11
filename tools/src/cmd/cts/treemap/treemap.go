@@ -60,6 +60,7 @@ type cmd struct {
 		source    common.ResultSource
 		auth      authcli.Flags
 		keepAlive bool
+		testQuery string
 	}
 }
 
@@ -84,6 +85,7 @@ func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, e
 	c.flags.source.RegisterFlags(cfg)
 	c.flags.auth.Register(flag.CommandLine, auth.DefaultAuthOptions(cfg.OsWrapper))
 	flag.BoolVar(&c.flags.keepAlive, "keep-alive", false, "keep the server alive after the page has been closed")
+	flag.StringVar(&c.flags.testQuery, "test-query", "webgpu:*", "cts test query to generate test list")
 	return []string{"[cases | timing]"}, nil
 }
 
@@ -96,7 +98,7 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 	var err error
 	switch flag.Arg(0) {
 	case "case", "cases":
-		data, err = loadCasesData()
+		data, err = loadCasesData(c.flags.testQuery)
 
 	case "time", "times", "timing":
 		// Validate command line arguments
@@ -154,8 +156,8 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 }
 
 // loadCasesData creates the JSON payload for a cases visualization
-func loadCasesData() (string, error) {
-	testlist, err := common.GenTestList(context.Background(), common.DefaultCTSPath(), fileutils.NodePath())
+func loadCasesData(testQuery string) (string, error) {
+	testlist, err := common.GenTestList(context.Background(), common.DefaultCTSPath(), fileutils.NodePath(), testQuery)
 	if err != nil {
 		return "", err
 	}

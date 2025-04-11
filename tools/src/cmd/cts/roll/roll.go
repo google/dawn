@@ -75,6 +75,8 @@ const (
 	webTestsPath   = "webgpu-cts/webtests"
 	refMain        = "refs/heads/main"
 	noExpectations = `# Clear all expectations to obtain full list of results`
+	testQuery      = "webgpu:*"
+	testFilter     = ""
 )
 
 type rollerFlags struct {
@@ -85,6 +87,8 @@ type rollerFlags struct {
 	cacheDir             string
 	ctsGitURL            string
 	ctsRevision          string
+	testQuery            string
+	testFilter           string
 	force                bool // Create a new roll, even if CTS is up to date
 	rebuild              bool // Rebuild the expectations file from scratch
 	preserve             bool // If false, abandon past roll changes
@@ -117,6 +121,8 @@ func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, e
 	flag.StringVar(&c.flags.cacheDir, "cache", common.DefaultCacheDir, "path to the results cache")
 	flag.StringVar(&c.flags.ctsGitURL, "repo", cfg.Git.CTS.HttpsURL(), "the CTS source repo")
 	flag.StringVar(&c.flags.ctsRevision, "revision", refMain, "revision of the CTS to roll")
+	flag.StringVar(&c.flags.testQuery, "test-query", testQuery, "test query to generate test list")
+	flag.StringVar(&c.flags.testFilter, "test-filter", testFilter, "glob to filter the results of the test query")
 	flag.BoolVar(&c.flags.force, "force", false, "create a new roll, even if CTS is up to date")
 	flag.BoolVar(&c.flags.rebuild, "rebuild", false, "rebuild the expectation file from scratch")
 	flag.BoolVar(&c.flags.preserve, "preserve", false, "do not abandon existing rolls")
@@ -317,7 +323,31 @@ func (r *roller) roll(ctx context.Context) error {
 		exInfo.expectations = ex
 	}
 
-	generatedFiles, err := r.generateFiles(ctx, r.cfg.OsWrapper)
+	generatedFiles, err := func(ctx context.Context, osWrapper oswrapper.OSWrapper) (map[string]string, error) {
+		generatedFiles, err := r.generateFiles(ctx, r.cfg.OsWrapper)
+		if err != nil {
+			return nil, err
+		}
+
+		if r.flags.testFilter != "" {
+			log.Printf("filtering test list...")
+			// Filter the test list in place. This way it will get used after
+			// being filtered and written as filtered.
+			newLines := []string{}
+			lines := strings.Split(generatedFiles[common.TestListRelPath], "\n")
+			for _, line := range lines {
+				matched, err := filepath.Match(r.flags.testFilter, line)
+				if err != nil {
+					return nil, fmt.Errorf("error using test-filter '%s': %v", r.flags.testFilter, err)
+				}
+				if matched {
+					newLines = append(newLines, line)
+				}
+			}
+			generatedFiles[common.TestListRelPath] = strings.Join(newLines, "\n")
+		}
+		return generatedFiles, nil
+	}(ctx, r.cfg.OsWrapper)
 	if err != nil {
 		return err
 	}
@@ -790,7 +820,7 @@ func (r *roller) genTSDepList(
 func (r *roller) genTestList(
 	ctx context.Context, fsReader oswrapper.FilesystemReader) (string, error) {
 
-	return common.GenTestList(ctx, r.ctsDir, r.flags.nodePath)
+	return common.GenTestList(ctx, r.ctsDir, r.flags.nodePath, r.flags.testQuery)
 }
 
 // genResourceFilesList returns a list of resource files, for the CTS checkout at r.ctsDir
