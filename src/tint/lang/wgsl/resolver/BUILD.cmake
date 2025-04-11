@@ -115,6 +115,15 @@ tint_add_target(tint_lang_wgsl_resolver_test test
   lang/wgsl/resolver/diagnostic_control_test.cc
   lang/wgsl/resolver/dual_source_blending_extension_test.cc
   lang/wgsl/resolver/entry_point_validation_test.cc
+  lang/wgsl/resolver/eval_binary_op_test.cc
+  lang/wgsl/resolver/eval_bitcast_test.cc
+  lang/wgsl/resolver/eval_builtin_test.cc
+  lang/wgsl/resolver/eval_construction_test.cc
+  lang/wgsl/resolver/eval_conversion_test.cc
+  lang/wgsl/resolver/eval_indexing_test.cc
+  lang/wgsl/resolver/eval_member_access_test.cc
+  lang/wgsl/resolver/eval_test.h
+  lang/wgsl/resolver/eval_unary_op_test.cc
   lang/wgsl/resolver/evaluation_stage_test.cc
   lang/wgsl/resolver/expression_kind_test.cc
   lang/wgsl/resolver/f16_extension_test.cc

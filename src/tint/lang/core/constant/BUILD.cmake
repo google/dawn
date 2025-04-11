@@ -83,16 +83,7 @@ tint_target_add_external_dependencies(tint_lang_core_constant lib
 ################################################################################
 tint_add_target(tint_lang_core_constant_test test
   lang/core/constant/composite_test.cc
-  lang/core/constant/eval_binary_op_test.cc
-  lang/core/constant/eval_bitcast_test.cc
-  lang/core/constant/eval_builtin_test.cc
-  lang/core/constant/eval_construction_test.cc
-  lang/core/constant/eval_conversion_test.cc
-  lang/core/constant/eval_indexing_test.cc
-  lang/core/constant/eval_member_access_test.cc
   lang/core/constant/eval_runtime_semantics_test.cc
-  lang/core/constant/eval_test.h
-  lang/core/constant/eval_unary_op_test.cc
   lang/core/constant/invalid_test.cc
   lang/core/constant/manager_test.cc
   lang/core/constant/scalar_test.cc
@@ -101,20 +92,9 @@ tint_add_target(tint_lang_core_constant_test test
 )
 
 tint_target_add_dependencies(tint_lang_core_constant_test test
-  tint_api_common
   tint_lang_core
   tint_lang_core_constant
-  tint_lang_core_intrinsic
-  tint_lang_core_ir
   tint_lang_core_type
-  tint_lang_core_type_test
-  tint_lang_wgsl
-  tint_lang_wgsl_ast
-  tint_lang_wgsl_intrinsic
-  tint_lang_wgsl_program
-  tint_lang_wgsl_resolver
-  tint_lang_wgsl_resolver_test
-  tint_lang_wgsl_sem
   tint_utils
   tint_utils_containers
   tint_utils_diagnostic
@@ -131,9 +111,3 @@ tint_target_add_external_dependencies(tint_lang_core_constant_test test
   "gtest"
   "src_utils"
 )
-
-if(TINT_BUILD_WGSL_READER)
-  tint_target_add_dependencies(tint_lang_core_constant_test test
-    tint_lang_wgsl_reader
-  )
-endif(TINT_BUILD_WGSL_READER)
