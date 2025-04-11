@@ -152,17 +152,6 @@ class Struct : public Castable<Struct, Type> {
     /// @returns true iff this structure has been used as the given address space
     bool UsedAs(core::AddressSpace usage) const { return address_space_usage_.Contains(usage); }
 
-    /// @returns true iff this structure has been used by address space that's
-    /// host-shareable.
-    bool IsHostShareable() const {
-        for (auto& sc : address_space_usage_) {
-            if (core::IsHostShareable(sc)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     /// Adds the pipeline stage usage to the structure.
     /// @param usage the storage usage
     void AddUsage(PipelineStageUsage usage) { pipeline_stage_uses_.Add(usage); }
