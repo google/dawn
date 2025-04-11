@@ -73,6 +73,7 @@ if (tint_build_unittests) {
       "${tint_src_dir}/lang/wgsl:unittests",
       "${tint_src_dir}/lang/wgsl/ast:unittests",
       "${tint_src_dir}/lang/wgsl/intrinsic:unittests",
+      "${tint_src_dir}/lang/wgsl/ir:unittests",
       "${tint_src_dir}/lang/wgsl/program:unittests",
       "${tint_src_dir}/lang/wgsl/reader/lower:unittests",
       "${tint_src_dir}/lang/wgsl/resolver:unittests",
