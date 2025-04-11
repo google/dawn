@@ -74,12 +74,12 @@
        %void = OpTypeVoid
          %50 = OpTypeFunction %void %uint
      %uint_1 = OpConstant %uint 1
-    %float_0 = OpConstant %float 0
      %uint_2 = OpConstant %uint 2
    %uint_264 = OpConstant %uint 264
       %false = OpConstantFalse %bool
       %int_0 = OpConstant %int 0
      %uint_0 = OpConstant %uint 0
+    %float_0 = OpConstant %float 0
    %float_42 = OpConstant %float 42
          %65 = OpTypeFunction %void
  %main_inner = OpFunction %void None %50

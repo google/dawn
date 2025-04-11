@@ -48,7 +48,7 @@
                OpBranch %23
          %23 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
-         %28 = OpFunctionCall %void %atomicStore_726882
+         %27 = OpFunctionCall %void %atomicStore_726882
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %8

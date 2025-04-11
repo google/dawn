@@ -83,8 +83,8 @@
        %bool = OpTypeBool
 %_ptr_Function_bool = OpTypePointer Function %bool
    %float_n1 = OpConstant %float -1
-         %77 = OpConstantComposite %v2float %float_1 %float_n1
-         %80 = OpConstantComposite %v2float %float_0 %float_1
+         %78 = OpConstantComposite %v2float %float_1 %float_n1
+         %81 = OpConstantComposite %v2float %float_0 %float_1
        %void = OpTypeVoid
          %96 = OpTypeFunction %void
 %vs_main_inner = OpFunction %VertexOutputs None %20
@@ -111,38 +111,38 @@
                OpSelectionMerge %63 None
                OpBranchConditional %62 %64 %65
          %64 = OpLabel
-         %66 = OpAccessChain %_ptr_Function_v2float %output %uint_0
-         %67 = OpExtInst %uint %42 UMin %VertexIndex %uint_2
-         %68 = OpAccessChain %_ptr_Function_v2float %texcoord %67
-         %69 = OpLoad %v2float %68 None
-         %70 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_0 %uint_0
-         %71 = OpLoad %v2float %70 None
-         %72 = OpFMul %v2float %69 %71
-         %73 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_0 %uint_1
-         %74 = OpLoad %v2float %73 None
-         %75 = OpFAdd %v2float %72 %74
-         %76 = OpFMul %v2float %75 %77
-         %79 = OpFAdd %v2float %76 %80
-               OpStore %66 %79 None
+         %67 = OpAccessChain %_ptr_Function_v2float %output %uint_0
+         %68 = OpExtInst %uint %42 UMin %VertexIndex %uint_2
+         %69 = OpAccessChain %_ptr_Function_v2float %texcoord %68
+         %70 = OpLoad %v2float %69 None
+         %71 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_0 %uint_0
+         %72 = OpLoad %v2float %71 None
+         %73 = OpFMul %v2float %70 %72
+         %74 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_0 %uint_1
+         %75 = OpLoad %v2float %74 None
+         %76 = OpFAdd %v2float %73 %75
+         %77 = OpFMul %v2float %76 %78
+         %80 = OpFAdd %v2float %77 %81
+               OpStore %67 %80 None
                OpBranch %63
          %65 = OpLabel
-         %81 = OpAccessChain %_ptr_Function_v2float %output %uint_0
-         %82 = OpExtInst %uint %42 UMin %VertexIndex %uint_2
-         %83 = OpAccessChain %_ptr_Function_v2float %texcoord %82
-         %84 = OpLoad %v2float %83 None
-         %85 = OpFMul %v2float %84 %77
-         %86 = OpFAdd %v2float %85 %80
-         %87 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_0 %uint_0
-         %88 = OpLoad %v2float %87 None
-         %89 = OpFMul %v2float %86 %88
-         %90 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_0 %uint_1
-         %91 = OpLoad %v2float %90 None
-         %92 = OpFAdd %v2float %89 %91
-               OpStore %81 %92 None
+         %82 = OpAccessChain %_ptr_Function_v2float %output %uint_0
+         %83 = OpExtInst %uint %42 UMin %VertexIndex %uint_2
+         %84 = OpAccessChain %_ptr_Function_v2float %texcoord %83
+         %85 = OpLoad %v2float %84 None
+         %86 = OpFMul %v2float %85 %78
+         %87 = OpFAdd %v2float %86 %81
+         %88 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_0 %uint_0
+         %89 = OpLoad %v2float %88 None
+         %90 = OpFMul %v2float %87 %89
+         %91 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_0 %uint_1
+         %92 = OpLoad %v2float %91 None
+         %93 = OpFAdd %v2float %90 %92
+               OpStore %82 %93 None
                OpBranch %63
          %63 = OpLabel
-         %93 = OpLoad %VertexOutputs %output None
-               OpReturnValue %93
+         %66 = OpLoad %VertexOutputs %output None
+               OpReturnValue %66
                OpFunctionEnd
     %vs_main = OpFunction %void None %96
          %97 = OpLabel
@@ -195,9 +195,9 @@
          %19 = OpConstantComposite %v2float %float_1 %float_1
 %_ptr_Function_v2float = OpTypePointer Function %v2float
      %v2bool = OpTypeVector %bool 2
-      %false = OpConstantFalse %bool
 %_ptr_Function_v4float = OpTypePointer Function %v4float
-         %33 = OpConstantNull %v4float
+         %32 = OpConstantNull %v4float
+      %false = OpConstantFalse %bool
        %void = OpTypeVoid
          %41 = OpTypeFunction %void
 %fs_main_inner = OpFunction %v4float None %14
@@ -217,16 +217,16 @@
                OpStore %continue_execution %false None
                OpBranch %28
          %28 = OpLabel
-               OpStore %srcColor %33
-         %34 = OpLoad %v4float %srcColor None
-         %35 = OpLoad %bool %continue_execution None
-         %36 = OpLogicalNot %bool %35
-               OpSelectionMerge %37 None
-               OpBranchConditional %36 %38 %37
-         %38 = OpLabel
-               OpKill
+               OpStore %srcColor %32
+         %33 = OpLoad %v4float %srcColor None
+         %34 = OpLoad %bool %continue_execution None
+         %35 = OpLogicalNot %bool %34
+               OpSelectionMerge %36 None
+               OpBranchConditional %35 %37 %36
          %37 = OpLabel
-               OpReturnValue %34
+               OpKill
+         %36 = OpLabel
+               OpReturnValue %33
                OpFunctionEnd
     %fs_main = OpFunction %void None %41
          %42 = OpLabel

@@ -41,9 +41,9 @@
          %25 = OpTypeFunction %void %uint
      %uint_1 = OpConstant %uint 1
        %bool = OpTypeBool
-      %int_0 = OpConstant %int 0
    %uint_264 = OpConstant %uint 264
 %_ptr_StorageBuffer_int = OpTypePointer StorageBuffer %int
+      %int_0 = OpConstant %int 0
          %40 = OpTypeFunction %void
 %atomicMin_278235 = OpFunction %int None %11
          %12 = OpLabel
@@ -67,9 +67,9 @@
                OpBranch %30
          %30 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
-         %36 = OpFunctionCall %int %atomicMin_278235
-         %37 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
-               OpStore %37 %36 None
+         %34 = OpFunctionCall %int %atomicMin_278235
+         %35 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
+               OpStore %35 %34 None
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %40

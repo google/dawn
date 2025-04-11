@@ -34,16 +34,16 @@
                OpSelectionMerge %11 None
                OpBranchConditional %false %12 %11
          %12 = OpLabel
-         %15 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0 %uint_0
-               OpStore %15 %uint_1 None
+         %17 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0 %uint_0
+               OpStore %17 %uint_1 None
                OpBranch %11
          %11 = OpLabel
-               OpSelectionMerge %19 None
-               OpBranchConditional %false %20 %19
-         %20 = OpLabel
+               OpSelectionMerge %15 None
+               OpBranchConditional %false %16 %15
+         %16 = OpLabel
          %21 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0 %uint_1
                OpStore %21 %uint_1 None
-               OpBranch %19
-         %19 = OpLabel
+               OpBranch %15
+         %15 = OpLabel
                OpReturn
                OpFunctionEnd

@@ -28,9 +28,9 @@
          %12 = OpTypeFunction %void %uint
      %uint_1 = OpConstant %uint 1
        %bool = OpTypeBool
-         %19 = OpConstantNull %S
      %uint_2 = OpConstant %uint 2
    %uint_264 = OpConstant %uint 264
+         %23 = OpConstantNull %S
          %25 = OpTypeFunction %void
  %main_inner = OpFunction %void None %12
 %tint_local_index = OpFunctionParameter %uint
@@ -39,11 +39,11 @@
                OpSelectionMerge %17 None
                OpBranchConditional %14 %18 %17
          %18 = OpLabel
-               OpStore %v %19 None
+               OpStore %v %23 None
                OpBranch %17
          %17 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
-         %23 = OpLoad %S %v None
+         %22 = OpLoad %S %v None
                OpReturn
                OpFunctionEnd
        %main = OpFunction %void None %25

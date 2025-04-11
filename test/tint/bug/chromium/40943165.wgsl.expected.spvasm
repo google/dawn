@@ -25,12 +25,12 @@
          %12 = OpTypeFunction %void %uint
      %uint_1 = OpConstant %uint 1
        %bool = OpTypeBool
-         %19 = OpConstantNull %mat2v2float
      %uint_2 = OpConstant %uint 2
    %uint_264 = OpConstant %uint 264
 %_ptr_Workgroup_v2float = OpTypePointer Workgroup %v2float
      %uint_0 = OpConstant %uint 0
     %float_0 = OpConstant %float 0
+         %29 = OpConstantNull %mat2v2float
          %31 = OpTypeFunction %void
     %F_inner = OpFunction %void None %12
      %mat2x2 = OpFunctionParameter %uint
@@ -39,15 +39,15 @@
                OpSelectionMerge %17 None
                OpBranchConditional %14 %18 %17
          %18 = OpLabel
-               OpStore %W %19 None
+               OpStore %W %29 None
                OpBranch %17
          %17 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
-         %23 = OpAccessChain %_ptr_Workgroup_v2float %W %uint_0
-         %26 = OpLoad %v2float %23 None
-         %27 = OpCompositeConstruct %v2float %float_0 %float_0
-         %29 = OpFAdd %v2float %26 %27
-               OpStore %23 %29 None
+         %22 = OpAccessChain %_ptr_Workgroup_v2float %W %uint_0
+         %25 = OpLoad %v2float %22 None
+         %26 = OpCompositeConstruct %v2float %float_0 %float_0
+         %28 = OpFAdd %v2float %25 %26
+               OpStore %22 %28 None
                OpReturn
                OpFunctionEnd
           %F = OpFunction %void None %31

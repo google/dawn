@@ -61,17 +61,17 @@
 %_arr_S_std140_uint_4_0 = OpTypeArray %S_std140 %uint_4
 %_ptr_Function__arr_S_std140_uint_4_0 = OpTypePointer Function %_arr_S_std140_uint_4_0
 %_ptr_Function__arr_S_uint_4 = OpTypePointer Function %_arr_S_uint_4
-       %bool = OpTypeBool
-%_ptr_Function_S = OpTypePointer Function %S
-%_ptr_Function_S_std140 = OpTypePointer Function %S_std140
-     %uint_1 = OpConstant %uint 1
 %_ptr_Private_S = OpTypePointer Private %S
+     %uint_1 = OpConstant %uint 1
 %_ptr_Uniform_S_std140 = OpTypePointer Uniform %S_std140
      %uint_2 = OpConstant %uint 2
 %_ptr_Private_mat4v3float = OpTypePointer Private %mat4v3float
      %uint_3 = OpConstant %uint 3
 %_ptr_Uniform_v3float = OpTypePointer Uniform %v3float
 %_ptr_Private_v3float = OpTypePointer Private %v3float
+       %bool = OpTypeBool
+%_ptr_Function_S = OpTypePointer Function %S
+%_ptr_Function_S_std140 = OpTypePointer Function %S_std140
          %78 = OpTypeFunction %S %S_std140
          %89 = OpTypeFunction %_arr_S_std140_uint_4_0 %_arr_S_std140_uint_4
 %_ptr_Function__arr_S_std140_uint_4 = OpTypePointer Function %_arr_S_std140_uint_4
@@ -92,45 +92,45 @@
                OpLoopMerge %36 %34 None
                OpBranch %33
          %33 = OpLabel
-         %39 = OpUGreaterThanEqual %bool %37 %uint_4
-               OpSelectionMerge %41 None
-               OpBranchConditional %39 %42 %41
-         %42 = OpLabel
+         %67 = OpUGreaterThanEqual %bool %37 %uint_4
+               OpSelectionMerge %69 None
+               OpBranchConditional %67 %70 %69
+         %70 = OpLabel
                OpBranch %36
-         %41 = OpLabel
-         %43 = OpAccessChain %_ptr_Function_S %30 %37
-         %45 = OpAccessChain %_ptr_Function_S_std140 %28 %37
-         %47 = OpLoad %S_std140 %45 None
-         %48 = OpFunctionCall %S %tint_convert_S %47
-               OpStore %43 %48 None
+         %69 = OpLabel
+         %71 = OpAccessChain %_ptr_Function_S %30 %37
+         %73 = OpAccessChain %_ptr_Function_S_std140 %28 %37
+         %75 = OpLoad %S_std140 %73 None
+         %76 = OpFunctionCall %S %tint_convert_S %75
+               OpStore %71 %76 None
                OpBranch %34
          %34 = OpLabel
          %38 = OpIAdd %uint %37 %uint_1
                OpBranch %35
          %36 = OpLabel
-         %51 = OpLoad %_arr_S_uint_4 %30 None
-               OpStore %p %51 None
-         %52 = OpAccessChain %_ptr_Private_S %p %uint_1
-         %54 = OpAccessChain %_ptr_Uniform_S_std140 %1 %uint_0 %uint_2
-         %57 = OpLoad %S_std140 %54 None
-         %58 = OpFunctionCall %S %tint_convert_S %57
-               OpStore %52 %58 None
-         %59 = OpAccessChain %_ptr_Private_mat4v3float %p %uint_3 %uint_1
-         %62 = OpAccessChain %_ptr_Uniform_v3float %1 %uint_0 %uint_2 %uint_1
-         %64 = OpLoad %v3float %62 None
-         %65 = OpAccessChain %_ptr_Uniform_v3float %1 %uint_0 %uint_2 %uint_2
-         %66 = OpLoad %v3float %65 None
-         %67 = OpAccessChain %_ptr_Uniform_v3float %1 %uint_0 %uint_2 %uint_3
-         %68 = OpLoad %v3float %67 None
-         %69 = OpAccessChain %_ptr_Uniform_v3float %1 %uint_0 %uint_2 %uint_4
-         %70 = OpLoad %v3float %69 None
-         %71 = OpCompositeConstruct %mat4v3float %64 %66 %68 %70
-               OpStore %59 %71 None
-         %72 = OpAccessChain %_ptr_Private_v3float %p %uint_1 %uint_1 %uint_0
-         %74 = OpAccessChain %_ptr_Uniform_v3float %1 %uint_0 %uint_0 %uint_2
-         %75 = OpLoad %v3float %74 None
-         %76 = OpVectorShuffle %v3float %75 %75 2 0 1
-               OpStore %72 %76 None
+         %39 = OpLoad %_arr_S_uint_4 %30 None
+               OpStore %p %39 None
+         %40 = OpAccessChain %_ptr_Private_S %p %uint_1
+         %43 = OpAccessChain %_ptr_Uniform_S_std140 %1 %uint_0 %uint_2
+         %46 = OpLoad %S_std140 %43 None
+         %47 = OpFunctionCall %S %tint_convert_S %46
+               OpStore %40 %47 None
+         %49 = OpAccessChain %_ptr_Private_mat4v3float %p %uint_3 %uint_1
+         %52 = OpAccessChain %_ptr_Uniform_v3float %1 %uint_0 %uint_2 %uint_1
+         %54 = OpLoad %v3float %52 None
+         %55 = OpAccessChain %_ptr_Uniform_v3float %1 %uint_0 %uint_2 %uint_2
+         %56 = OpLoad %v3float %55 None
+         %57 = OpAccessChain %_ptr_Uniform_v3float %1 %uint_0 %uint_2 %uint_3
+         %58 = OpLoad %v3float %57 None
+         %59 = OpAccessChain %_ptr_Uniform_v3float %1 %uint_0 %uint_2 %uint_4
+         %60 = OpLoad %v3float %59 None
+         %61 = OpCompositeConstruct %mat4v3float %54 %56 %58 %60
+               OpStore %49 %61 None
+         %62 = OpAccessChain %_ptr_Private_v3float %p %uint_1 %uint_1 %uint_0
+         %64 = OpAccessChain %_ptr_Uniform_v3float %1 %uint_0 %uint_0 %uint_2
+         %65 = OpLoad %v3float %64 None
+         %66 = OpVectorShuffle %v3float %65 %65 2 0 1
+               OpStore %62 %66 None
                OpReturn
                OpFunctionEnd
 %tint_convert_S = OpFunction %S None %78
@@ -160,21 +160,21 @@
                OpLoopMerge %99 %97 None
                OpBranch %96
          %96 = OpLabel
-        %102 = OpUGreaterThanEqual %bool %100 %uint_4
-               OpSelectionMerge %103 None
-               OpBranchConditional %102 %104 %103
-        %104 = OpLabel
+        %103 = OpUGreaterThanEqual %bool %100 %uint_4
+               OpSelectionMerge %104 None
+               OpBranchConditional %103 %105 %104
+        %105 = OpLabel
                OpBranch %99
-        %103 = OpLabel
-        %105 = OpAccessChain %_ptr_Function_S_std140 %91 %100
-        %106 = OpLoad %S_std140 %105 None
-        %107 = OpAccessChain %_ptr_Function_S_std140 %93 %100
-               OpStore %107 %106 None
+        %104 = OpLabel
+        %106 = OpAccessChain %_ptr_Function_S_std140 %91 %100
+        %107 = OpLoad %S_std140 %106 None
+        %108 = OpAccessChain %_ptr_Function_S_std140 %93 %100
+               OpStore %108 %107 None
                OpBranch %97
          %97 = OpLabel
         %101 = OpIAdd %uint %100 %uint_1
                OpBranch %98
          %99 = OpLabel
-        %108 = OpLoad %_arr_S_std140_uint_4_0 %93 None
-               OpReturnValue %108
+        %102 = OpLoad %_arr_S_std140_uint_4_0 %93 None
+               OpReturnValue %102
                OpFunctionEnd

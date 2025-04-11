@@ -35,8 +35,8 @@
      %uint_3 = OpConstant %uint 3
 %_ptr_StorageBuffer_int = OpTypePointer StorageBuffer %int
      %uint_0 = OpConstant %uint 0
-      %int_2 = OpConstant %int 2
       %int_1 = OpConstant %int 1
+      %int_2 = OpConstant %int 2
         %foo = OpFunction %void None %10
          %11 = OpLabel
           %i = OpVariable %_ptr_Function_int Function
@@ -62,21 +62,21 @@
          %34 = OpLoad %int %31 None
                OpSelectionMerge %37 None
                OpSwitch %34 %35 1 %36
+         %35 = OpLabel
+         %41 = OpLoad %int %i None
+         %42 = OpBitcast %uint %41
+         %43 = OpExtInst %uint %29 UMin %42 %uint_3
+         %44 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0 %43
+               OpStore %44 %int_2 None
+               OpBranch %37
          %36 = OpLabel
                OpBranch %14
-         %35 = OpLabel
-         %38 = OpLoad %int %i None
-         %39 = OpBitcast %uint %38
-         %40 = OpExtInst %uint %29 UMin %39 %uint_3
-         %41 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0 %40
-               OpStore %41 %int_2 None
-               OpBranch %37
          %37 = OpLabel
                OpBranch %14
          %14 = OpLabel
-         %43 = OpLoad %int %i None
-         %44 = OpIAdd %int %43 %int_1
-               OpStore %i %44 None
+         %38 = OpLoad %int %i None
+         %39 = OpIAdd %int %38 %int_1
+               OpStore %i %39 None
                OpBranch %15
          %16 = OpLabel
                OpReturn

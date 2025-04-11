@@ -70,10 +70,10 @@
          %53 = OpTypeFunction %void %float
          %59 = OpTypeFunction %void %uint
        %bool = OpTypeBool
-    %float_0 = OpConstant %float 0
      %uint_2 = OpConstant %uint 2
    %uint_264 = OpConstant %uint 264
     %float_1 = OpConstant %float 1
+    %float_0 = OpConstant %float 0
     %no_uses = OpFunction %void None %20
          %21 = OpLabel
                OpReturn
@@ -122,7 +122,7 @@
                OpBranch %63
          %63 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
-         %69 = OpFunctionCall %void %foo %float_1
+         %68 = OpFunctionCall %void %foo %float_1
                OpReturn
                OpFunctionEnd
        %main = OpFunction %void None %20

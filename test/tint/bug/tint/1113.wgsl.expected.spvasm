@@ -789,21 +789,21 @@
                OpSelectionMerge %125 None
                OpBranchConditional %124 %126 %125
         %126 = OpLabel
-        %127 = OpAccessChain %_ptr_StorageBuffer_uint_0 %25 %uint_0 %uint_0
-        %128 = OpLoad %uint %numTriangles None
-        %129 = OpAtomicIAdd %uint %127 %uint_1 %uint_0 %128
-        %130 = OpBitcast %int %129
-               OpStore %offset %130 None
+        %135 = OpAccessChain %_ptr_StorageBuffer_uint_0 %25 %uint_0 %uint_0
+        %136 = OpLoad %uint %numTriangles None
+        %137 = OpAtomicIAdd %uint %135 %uint_1 %uint_0 %136
+        %138 = OpBitcast %int %137
+               OpStore %offset %138 None
                OpBranch %125
         %125 = OpLabel
-        %131 = OpLoad %uint %voxelIndex None
-        %132 = OpAccessChain %_ptr_StorageBuffer__runtimearr_int %LUT %uint_0
-        %133 = OpArrayLength %uint %LUT 0
-        %134 = OpISub %uint %133 %uint_1
-        %135 = OpExtInst %uint %55 UMin %131 %134
-        %136 = OpAccessChain %_ptr_StorageBuffer_int %LUT %uint_0 %135
-        %137 = OpLoad %int %offset None
-               OpAtomicStore %136 %uint_1 %uint_0 %137
+        %127 = OpLoad %uint %voxelIndex None
+        %128 = OpAccessChain %_ptr_StorageBuffer__runtimearr_int %LUT %uint_0
+        %129 = OpArrayLength %uint %LUT 0
+        %130 = OpISub %uint %129 %uint_1
+        %131 = OpExtInst %uint %55 UMin %127 %130
+        %132 = OpAccessChain %_ptr_StorageBuffer_int %LUT %uint_0 %131
+        %133 = OpLoad %int %offset None
+               OpAtomicStore %132 %uint_1 %uint_0 %133
                OpReturn
                OpFunctionEnd
 %main_create_lut = OpFunction %void None %34

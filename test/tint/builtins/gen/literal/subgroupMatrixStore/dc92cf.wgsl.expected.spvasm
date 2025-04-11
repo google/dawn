@@ -38,9 +38,9 @@
 %_ptr_Workgroup_float = OpTypePointer Workgroup %float
      %uint_1 = OpConstant %uint 1
          %25 = OpTypeFunction %void %uint
-       %bool = OpTypeBool
      %uint_2 = OpConstant %uint 2
  %uint_24840 = OpConstant %uint 24840
+       %bool = OpTypeBool
 %subgroupMatrixStore_dc92cf = OpFunction %void None %11
          %12 = OpLabel
          %19 = OpAccessChain %_ptr_Workgroup_float %arg_0 %uint_1
@@ -58,21 +58,21 @@
                OpLoopMerge %31 %29 None
                OpBranch %28
          %28 = OpLabel
-         %34 = OpUGreaterThanEqual %bool %32 %uint_64
-               OpSelectionMerge %36 None
-               OpBranchConditional %34 %37 %36
-         %37 = OpLabel
+         %38 = OpUGreaterThanEqual %bool %32 %uint_64
+               OpSelectionMerge %40 None
+               OpBranchConditional %38 %41 %40
+         %41 = OpLabel
                OpBranch %31
-         %36 = OpLabel
-         %38 = OpAccessChain %_ptr_Workgroup_float %arg_0 %32
-               OpStore %38 %float_0 NonPrivatePointer
+         %40 = OpLabel
+         %42 = OpAccessChain %_ptr_Workgroup_float %arg_0 %32
+               OpStore %42 %float_0 NonPrivatePointer
                OpBranch %29
          %29 = OpLabel
          %33 = OpIAdd %uint %32 %uint_1
                OpBranch %30
          %31 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_24840
-         %42 = OpFunctionCall %void %subgroupMatrixStore_dc92cf
+         %37 = OpFunctionCall %void %subgroupMatrixStore_dc92cf
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %11

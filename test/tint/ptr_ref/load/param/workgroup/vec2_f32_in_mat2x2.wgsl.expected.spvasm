@@ -31,9 +31,9 @@
        %void = OpTypeVoid
          %22 = OpTypeFunction %void %uint
        %bool = OpTypeBool
-         %28 = OpConstantNull %mat2v2float
      %uint_2 = OpConstant %uint 2
    %uint_264 = OpConstant %uint 264
+         %33 = OpConstantNull %mat2v2float
          %35 = OpTypeFunction %void
        %func = OpFunction %v2float None %13
 %pointer_indices = OpFunctionParameter %_arr_uint_uint_1
@@ -50,12 +50,12 @@
                OpSelectionMerge %26 None
                OpBranchConditional %24 %27 %26
          %27 = OpLabel
-               OpStore %S %28 None
+               OpStore %S %33 None
                OpBranch %26
          %26 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
-         %32 = OpCompositeConstruct %_arr_uint_uint_1 %uint_1
-          %r = OpFunctionCall %v2float %func %32
+         %31 = OpCompositeConstruct %_arr_uint_uint_1 %uint_1
+          %r = OpFunctionCall %v2float %func %31
                OpReturn
                OpFunctionEnd
        %main = OpFunction %void None %35

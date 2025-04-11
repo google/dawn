@@ -571,23 +571,23 @@
                OpLoopMerge %353 %351 None
                OpBranch %350
         %350 = OpLabel
-        %356 = OpUGreaterThanEqual %bool %354 %uint_2
-               OpSelectionMerge %357 None
-               OpBranchConditional %356 %358 %357
-        %358 = OpLabel
+        %357 = OpUGreaterThanEqual %bool %354 %uint_2
+               OpSelectionMerge %358 None
+               OpBranchConditional %357 %359 %358
+        %359 = OpLabel
                OpBranch %353
-        %357 = OpLabel
-        %359 = OpAccessChain %_ptr_Function_v3float %344 %354
-        %361 = OpLoad %v3float %359 None
-        %362 = OpAccessChain %_ptr_Function_v3float %346 %354
-               OpStore %362 %361 None
+        %358 = OpLabel
+        %360 = OpAccessChain %_ptr_Function_v3float %344 %354
+        %362 = OpLoad %v3float %360 None
+        %363 = OpAccessChain %_ptr_Function_v3float %346 %354
+               OpStore %363 %362 None
                OpBranch %351
         %351 = OpLabel
         %355 = OpIAdd %uint %354 %uint_1
                OpBranch %352
         %353 = OpLabel
-        %363 = OpLoad %_arr_v3float_uint_2_0 %346 None
-               OpReturnValue %363
+        %356 = OpLoad %_arr_v3float_uint_2_0 %346 None
+               OpReturnValue %356
                OpFunctionEnd
 %tint_convert_explicit_layout_0 = OpFunction %_arr_mat4v2half_uint_2_0 None %365
 %tint_source_0 = OpFunctionParameter %_arr_mat4v2half_uint_2
@@ -603,23 +603,23 @@
                OpLoopMerge %376 %374 None
                OpBranch %373
         %373 = OpLabel
-        %379 = OpUGreaterThanEqual %bool %377 %uint_2
-               OpSelectionMerge %380 None
-               OpBranchConditional %379 %381 %380
-        %381 = OpLabel
+        %380 = OpUGreaterThanEqual %bool %377 %uint_2
+               OpSelectionMerge %381 None
+               OpBranchConditional %380 %382 %381
+        %382 = OpLabel
                OpBranch %376
-        %380 = OpLabel
-        %382 = OpAccessChain %_ptr_Function_mat4v2half %367 %377
-        %384 = OpLoad %mat4v2half %382 None
-        %385 = OpAccessChain %_ptr_Function_mat4v2half %369 %377
-               OpStore %385 %384 None
+        %381 = OpLabel
+        %383 = OpAccessChain %_ptr_Function_mat4v2half %367 %377
+        %385 = OpLoad %mat4v2half %383 None
+        %386 = OpAccessChain %_ptr_Function_mat4v2half %369 %377
+               OpStore %386 %385 None
                OpBranch %374
         %374 = OpLabel
         %378 = OpIAdd %uint %377 %uint_1
                OpBranch %375
         %376 = OpLabel
-        %386 = OpLoad %_arr_mat4v2half_uint_2_0 %369 None
-               OpReturnValue %386
+        %379 = OpLoad %_arr_mat4v2half_uint_2_0 %369 None
+               OpReturnValue %379
                OpFunctionEnd
 %tint_convert_explicit_layout_1 = OpFunction %_arr_Inner_uint_4_0 None %388
 %tint_source_1 = OpFunctionParameter %_arr_Inner_uint_4
@@ -635,21 +635,21 @@
                OpLoopMerge %399 %397 None
                OpBranch %396
         %396 = OpLabel
-        %402 = OpUGreaterThanEqual %bool %400 %uint_4
-               OpSelectionMerge %403 None
-               OpBranchConditional %402 %404 %403
-        %404 = OpLabel
+        %403 = OpUGreaterThanEqual %bool %400 %uint_4
+               OpSelectionMerge %404 None
+               OpBranchConditional %403 %405 %404
+        %405 = OpLabel
                OpBranch %399
-        %403 = OpLabel
-        %405 = OpAccessChain %_ptr_Function_Inner %390 %400
-        %407 = OpLoad %Inner %405 None
-        %408 = OpAccessChain %_ptr_Function_Inner %392 %400
-               OpStore %408 %407 None
+        %404 = OpLabel
+        %406 = OpAccessChain %_ptr_Function_Inner %390 %400
+        %408 = OpLoad %Inner %406 None
+        %409 = OpAccessChain %_ptr_Function_Inner %392 %400
+               OpStore %409 %408 None
                OpBranch %397
         %397 = OpLabel
         %401 = OpIAdd %uint %400 %uint_1
                OpBranch %398
         %399 = OpLabel
-        %409 = OpLoad %_arr_Inner_uint_4_0 %392 None
-               OpReturnValue %409
+        %402 = OpLoad %_arr_Inner_uint_4_0 %392 None
+               OpReturnValue %402
                OpFunctionEnd

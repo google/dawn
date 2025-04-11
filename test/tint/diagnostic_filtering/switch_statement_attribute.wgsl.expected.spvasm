@@ -31,11 +31,11 @@
           %7 = OpTypeFunction %void %float
     %float_0 = OpConstant %float 0
        %bool = OpTypeBool
-    %float_1 = OpConstant %float 1
       %false = OpConstantFalse %bool
         %int = OpTypeInt 32 1
       %int_1 = OpConstant %int 1
       %int_0 = OpConstant %int 0
+    %float_1 = OpConstant %float 1
          %27 = OpTypeFunction %void
  %main_inner = OpFunction %void None %7
           %x = OpFunctionParameter %float
@@ -44,19 +44,19 @@
                OpSelectionMerge %12 None
                OpBranchConditional %9 %13 %14
          %13 = OpLabel
-         %15 = OpDPdx %float %float_1
-         %17 = OpFOrdEqual %bool %15 %float_0
+         %24 = OpDPdx %float %float_1
+         %16 = OpFOrdEqual %bool %24 %float_0
                OpBranch %12
          %14 = OpLabel
                OpBranch %12
          %12 = OpLabel
-         %18 = OpPhi %bool %17 %13 %false %14
-         %21 = OpSelect %int %18 %int_1 %int_0
-               OpSelectionMerge %25 None
-               OpSwitch %21 %24
-         %24 = OpLabel
-               OpBranch %25
-         %25 = OpLabel
+         %15 = OpPhi %bool %16 %13 %false %14
+         %19 = OpSelect %int %15 %int_1 %int_0
+               OpSelectionMerge %23 None
+               OpSwitch %19 %22
+         %22 = OpLabel
+               OpBranch %23
+         %23 = OpLabel
                OpReturn
                OpFunctionEnd
        %main = OpFunction %void None %27

@@ -106,19 +106,19 @@
          %60 = OpLoad %int %58 None
                OpSelectionMerge %63 None
                OpSwitch %60 %61 0 %62
+         %61 = OpLabel
+               OpBranch %63
          %62 = OpLabel
          %64 = OpAccessChain %_ptr_Uniform_int %1 %uint_0
          %65 = OpLoad %int %64 None
                OpSelectionMerge %68 None
                OpSwitch %65 %66 0 %67
-         %67 = OpLabel
-               OpBranch %68
          %66 = OpLabel
          %69 = OpFunctionCall %void %g
                OpBranch %68
+         %67 = OpLabel
+               OpBranch %68
          %68 = OpLabel
-               OpBranch %63
-         %61 = OpLabel
                OpBranch %63
          %63 = OpLabel
                OpReturn

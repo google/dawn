@@ -42,12 +42,12 @@
                OpStore %continue_execution %false None
                OpBranch %20
          %20 = OpLabel
-         %23 = OpLoad %bool %continue_execution None
-         %24 = OpLogicalNot %bool %23
-               OpSelectionMerge %25 None
-               OpBranchConditional %24 %26 %25
-         %26 = OpLabel
-               OpKill
+         %22 = OpLoad %bool %continue_execution None
+         %23 = OpLogicalNot %bool %22
+               OpSelectionMerge %24 None
+               OpBranchConditional %23 %25 %24
          %25 = OpLabel
+               OpKill
+         %24 = OpLabel
                OpReturn
                OpFunctionEnd

@@ -43,9 +43,9 @@
          %18 = OpTypeFunction %void %v3uint %v3uint %uint
      %uint_1 = OpConstant %uint 1
        %bool = OpTypeBool
-     %uint_0 = OpConstant %uint 0
      %uint_2 = OpConstant %uint 2
    %uint_264 = OpConstant %uint 264
+     %uint_0 = OpConstant %uint 0
 %_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
          %39 = OpTypeFunction %void
  %main_inner = OpFunction %void None %18
@@ -64,10 +64,10 @@
                OpControlBarrier %uint_2 %uint_2 %uint_264
      %failed = OpLoad %uint %sh_atomic_failed None
                OpControlBarrier %uint_2 %uint_2 %uint_264
-         %32 = OpCompositeExtract %uint %local_id 0
-         %33 = OpIEqual %bool %32 %uint_0
+         %31 = OpCompositeExtract %uint %local_id 0
+         %32 = OpIEqual %bool %31 %uint_0
                OpSelectionMerge %34 None
-               OpBranchConditional %33 %35 %34
+               OpBranchConditional %32 %35 %34
          %35 = OpLabel
          %36 = OpAccessChain %_ptr_StorageBuffer_uint %4 %uint_0
                OpStore %36 %failed None

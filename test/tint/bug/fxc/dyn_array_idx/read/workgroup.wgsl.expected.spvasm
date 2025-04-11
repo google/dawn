@@ -4,7 +4,7 @@
 ; Bound: 58
 ; Schema: 0
                OpCapability Shader
-         %49 = OpExtInstImport "GLSL.std.450"
+         %41 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %f "f" %f_local_invocation_index_Input
                OpExecutionMode %f LocalSize 1 1 1
@@ -55,16 +55,16 @@
 %f_local_invocation_index_Input = OpVariable %_ptr_Input_uint Input
        %void = OpTypeVoid
          %21 = OpTypeFunction %void %uint
-       %bool = OpTypeBool
-%_ptr_Workgroup_int = OpTypePointer Workgroup %int
-     %uint_0 = OpConstant %uint 0
-      %int_0 = OpConstant %int 0
-     %uint_1 = OpConstant %uint 1
      %uint_2 = OpConstant %uint 2
    %uint_264 = OpConstant %uint 264
 %_ptr_StorageBuffer_int = OpTypePointer StorageBuffer %int
+     %uint_0 = OpConstant %uint 0
 %_ptr_Uniform_int = OpTypePointer Uniform %int
     %uint_63 = OpConstant %uint 63
+%_ptr_Workgroup_int = OpTypePointer Workgroup %int
+       %bool = OpTypeBool
+      %int_0 = OpConstant %int 0
+     %uint_1 = OpConstant %uint 1
          %54 = OpTypeFunction %void
     %f_inner = OpFunction %void None %21
 %tint_local_index = OpFunctionParameter %uint
@@ -77,28 +77,28 @@
                OpLoopMerge %27 %25 None
                OpBranch %24
          %24 = OpLabel
-         %30 = OpUGreaterThanEqual %bool %28 %uint_64
-               OpSelectionMerge %32 None
-               OpBranchConditional %30 %33 %32
-         %33 = OpLabel
+         %46 = OpUGreaterThanEqual %bool %28 %uint_64
+               OpSelectionMerge %48 None
+               OpBranchConditional %46 %49 %48
+         %49 = OpLabel
                OpBranch %27
-         %32 = OpLabel
-         %34 = OpAccessChain %_ptr_Workgroup_int %s %uint_0 %28
-               OpStore %34 %int_0 None
+         %48 = OpLabel
+         %50 = OpAccessChain %_ptr_Workgroup_int %s %uint_0 %28
+               OpStore %50 %int_0 None
                OpBranch %25
          %25 = OpLabel
          %29 = OpIAdd %uint %28 %uint_1
                OpBranch %26
          %27 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
-         %42 = OpAccessChain %_ptr_StorageBuffer_int %6 %uint_0 %uint_0
-         %44 = OpAccessChain %_ptr_Uniform_int %1 %uint_0 %uint_0
-         %46 = OpLoad %int %44 None
-         %47 = OpBitcast %uint %46
-         %48 = OpExtInst %uint %49 UMin %47 %uint_63
-         %51 = OpAccessChain %_ptr_Workgroup_int %s %uint_0 %48
-         %52 = OpLoad %int %51 None
-               OpStore %42 %52 None
+         %33 = OpAccessChain %_ptr_StorageBuffer_int %6 %uint_0 %uint_0
+         %36 = OpAccessChain %_ptr_Uniform_int %1 %uint_0 %uint_0
+         %38 = OpLoad %int %36 None
+         %39 = OpBitcast %uint %38
+         %40 = OpExtInst %uint %41 UMin %39 %uint_63
+         %43 = OpAccessChain %_ptr_Workgroup_int %s %uint_0 %40
+         %45 = OpLoad %int %43 None
+               OpStore %33 %45 None
                OpReturn
                OpFunctionEnd
           %f = OpFunction %void None %54

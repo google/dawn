@@ -217,40 +217,40 @@
                OpSelectionMerge %97 None
                OpBranchConditional %95 %98 %99
          %98 = OpLabel
-        %100 = OpImageFetch %v4float %plane_0 %93 Lod %uint_0
-        %101 = OpVectorShuffle %v3float %100 %100 0 1 2
-        %102 = OpCompositeExtract %float %100 3
+        %112 = OpImageFetch %v4float %plane_0 %93 Lod %uint_0
+        %101 = OpVectorShuffle %v3float %112 %112 0 1 2
+        %104 = OpCompositeExtract %float %112 3
                OpBranch %97
          %99 = OpLabel
-        %103 = OpImageFetch %v4float %plane_0 %93 Lod %uint_0
-        %104 = OpCompositeExtract %float %103 0
-        %105 = OpFMul %v2float %92 %86
-        %106 = OpConvertFToU %v2uint %105
-        %107 = OpImageFetch %v4float %plane_1 %106 Lod %uint_0
-        %108 = OpVectorShuffle %v2float %107 %107 0 1
-        %109 = OpCompositeConstruct %v4float %104 %108 %float_1
-        %110 = OpVectorTimesMatrix %v3float %109 %83
+        %113 = OpImageFetch %v4float %plane_0 %93 Lod %uint_0
+        %114 = OpCompositeExtract %float %113 0
+        %115 = OpFMul %v2float %92 %86
+        %116 = OpConvertFToU %v2uint %115
+        %117 = OpImageFetch %v4float %plane_1 %116 Lod %uint_0
+        %118 = OpVectorShuffle %v2float %117 %117 0 1
+        %119 = OpCompositeConstruct %v4float %114 %118 %float_1
+        %102 = OpVectorTimesMatrix %v3float %119 %83
                OpBranch %97
          %97 = OpLabel
-        %111 = OpPhi %v3float %101 %98 %110 %99
-        %112 = OpPhi %float %102 %98 %float_1 %99
-        %113 = OpIEqual %bool %82 %uint_0
-               OpSelectionMerge %114 None
-               OpBranchConditional %113 %115 %116
-        %115 = OpLabel
-        %117 = OpCompositeExtract %tint_GammaTransferParams %params 3
-        %118 = OpCompositeExtract %tint_GammaTransferParams %params 4
-        %119 = OpCompositeExtract %mat3v3float %params 5
-        %120 = OpFunctionCall %v3float %tint_GammaCorrection %111 %117
-        %122 = OpMatrixTimesVector %v3float %119 %120
-        %123 = OpFunctionCall %v3float %tint_GammaCorrection %122 %118
-               OpBranch %114
-        %116 = OpLabel
-               OpBranch %114
-        %114 = OpLabel
-        %124 = OpPhi %v3float %123 %115 %111 %116
-        %125 = OpCompositeConstruct %v4float %124 %112
-               OpReturnValue %125
+        %100 = OpPhi %v3float %101 %98 %102 %99
+        %103 = OpPhi %float %104 %98 %float_1 %99
+        %105 = OpIEqual %bool %82 %uint_0
+               OpSelectionMerge %106 None
+               OpBranchConditional %105 %107 %108
+        %107 = OpLabel
+        %120 = OpCompositeExtract %tint_GammaTransferParams %params 3
+        %121 = OpCompositeExtract %tint_GammaTransferParams %params 4
+        %122 = OpCompositeExtract %mat3v3float %params 5
+        %123 = OpFunctionCall %v3float %tint_GammaCorrection %100 %120
+        %125 = OpMatrixTimesVector %v3float %122 %123
+        %110 = OpFunctionCall %v3float %tint_GammaCorrection %125 %121
+               OpBranch %106
+        %108 = OpLabel
+               OpBranch %106
+        %106 = OpLabel
+        %109 = OpPhi %v3float %110 %107 %100 %108
+        %111 = OpCompositeConstruct %v4float %109 %103
+               OpReturnValue %111
                OpFunctionEnd
 %tint_GammaCorrection = OpFunction %v3float None %128
           %v = OpFunctionParameter %v3float

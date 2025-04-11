@@ -30,9 +30,9 @@
          %13 = OpTypeFunction %void %uint
      %uint_1 = OpConstant %uint 1
        %bool = OpTypeBool
-    %float_0 = OpConstant %float 0
      %uint_2 = OpConstant %uint 2
    %uint_264 = OpConstant %uint 264
+    %float_0 = OpConstant %float 0
          %28 = OpTypeFunction %void
  %main_inner = OpFunction %void None %13
 %tint_local_index = OpFunctionParameter %uint
@@ -45,9 +45,9 @@
                OpBranch %18
          %18 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
-         %24 = OpLoad %float %p None
-         %25 = OpLoad %float %w None
-          %x = OpFAdd %float %24 %25
+         %23 = OpLoad %float %p None
+         %24 = OpLoad %float %w None
+          %x = OpFAdd %float %23 %24
                OpStore %p %x None
                OpReturn
                OpFunctionEnd

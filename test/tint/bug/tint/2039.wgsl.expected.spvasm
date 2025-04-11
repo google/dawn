@@ -51,10 +51,10 @@
          %25 = OpLabel
                OpSelectionMerge %31 None
                OpSwitch %int_2 %27 1 %30
-         %30 = OpLabel
-               OpBranch %11
          %27 = OpLabel
                OpBranch %31
+         %30 = OpLabel
+               OpBranch %11
          %31 = OpLabel
          %32 = OpLoad %uint %out None
          %33 = OpIAdd %uint %32 %uint_1

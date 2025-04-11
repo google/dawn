@@ -24,14 +24,14 @@
 %main_local_invocation_index_Input = OpVariable %_ptr_Input_uint Input
        %void = OpTypeVoid
          %12 = OpTypeFunction %void %uint
-       %bool = OpTypeBool
-%_ptr_Workgroup_int = OpTypePointer Workgroup %int
-      %int_0 = OpConstant %int 0
-     %uint_1 = OpConstant %uint 1
      %uint_2 = OpConstant %uint 2
    %uint_264 = OpConstant %uint 264
+%_ptr_Workgroup_int = OpTypePointer Workgroup %int
      %uint_0 = OpConstant %uint 0
      %int_42 = OpConstant %int 42
+       %bool = OpTypeBool
+      %int_0 = OpConstant %int 0
+     %uint_1 = OpConstant %uint 1
          %36 = OpTypeFunction %void
  %main_inner = OpFunction %void None %12
 %tint_local_index = OpFunctionParameter %uint
@@ -44,22 +44,22 @@
                OpLoopMerge %18 %16 None
                OpBranch %15
          %15 = OpLabel
-         %21 = OpUGreaterThanEqual %bool %19 %uint_246
-               OpSelectionMerge %23 None
-               OpBranchConditional %21 %24 %23
-         %24 = OpLabel
+         %28 = OpUGreaterThanEqual %bool %19 %uint_246
+               OpSelectionMerge %30 None
+               OpBranchConditional %28 %31 %30
+         %31 = OpLabel
                OpBranch %18
-         %23 = OpLabel
-         %25 = OpAccessChain %_ptr_Workgroup_int %W %19
-               OpStore %25 %int_0 None
+         %30 = OpLabel
+         %32 = OpAccessChain %_ptr_Workgroup_int %W %19
+               OpStore %32 %int_0 None
                OpBranch %16
          %16 = OpLabel
          %20 = OpIAdd %uint %19 %uint_1
                OpBranch %17
          %18 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
-         %32 = OpAccessChain %_ptr_Workgroup_int %W %uint_0
-               OpStore %32 %int_42 None
+         %24 = OpAccessChain %_ptr_Workgroup_int %W %uint_0
+               OpStore %24 %int_42 None
                OpReturn
                OpFunctionEnd
        %main = OpFunction %void None %36

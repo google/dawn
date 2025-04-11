@@ -32,9 +32,9 @@
          %19 = OpTypeFunction %void %uint
      %uint_1 = OpConstant %uint 1
        %bool = OpTypeBool
-         %26 = OpConstantNull %str
      %uint_2 = OpConstant %uint 2
    %uint_264 = OpConstant %uint 264
+         %30 = OpConstantNull %str
          %32 = OpTypeFunction %void
        %func = OpFunction %v4float None %10
          %11 = OpLabel
@@ -49,7 +49,7 @@
                OpSelectionMerge %24 None
                OpBranchConditional %21 %25 %24
          %25 = OpLabel
-               OpStore %S %26 None
+               OpStore %S %30 None
                OpBranch %24
          %24 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264

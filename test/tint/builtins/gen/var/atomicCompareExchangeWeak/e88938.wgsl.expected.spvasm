@@ -37,8 +37,8 @@
 %_ptr_Function___atomic_compare_exchange_result_i32 = OpTypePointer Function %__atomic_compare_exchange_result_i32
          %28 = OpTypeFunction %void %uint
      %uint_1 = OpConstant %uint 1
-      %int_0 = OpConstant %int 0
    %uint_264 = OpConstant %uint 264
+      %int_0 = OpConstant %int 0
 %atomicCompareExchangeWeak_e88938 = OpFunction %void None %9
          %10 = OpLabel
       %arg_1 = OpVariable %_ptr_Function_int Function
@@ -65,7 +65,7 @@
                OpBranch %32
          %32 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
-         %38 = OpFunctionCall %void %atomicCompareExchangeWeak_e88938
+         %36 = OpFunctionCall %void %atomicCompareExchangeWeak_e88938
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %9

@@ -598,21 +598,21 @@
                OpLoopMerge %331 %329 None
                OpBranch %328
         %328 = OpLabel
-        %334 = OpUGreaterThanEqual %bool %332 %uint_2
-               OpSelectionMerge %335 None
-               OpBranchConditional %334 %336 %335
-        %336 = OpLabel
+        %335 = OpUGreaterThanEqual %bool %332 %uint_2
+               OpSelectionMerge %336 None
+               OpBranchConditional %335 %337 %336
+        %337 = OpLabel
                OpBranch %331
-        %335 = OpLabel
-        %337 = OpAccessChain %_ptr_Function_mat4v2half %322 %332
-        %339 = OpLoad %mat4v2half %337 None
-        %340 = OpAccessChain %_ptr_Function_mat4v2half %324 %332
-               OpStore %340 %339 None
+        %336 = OpLabel
+        %338 = OpAccessChain %_ptr_Function_mat4v2half %322 %332
+        %340 = OpLoad %mat4v2half %338 None
+        %341 = OpAccessChain %_ptr_Function_mat4v2half %324 %332
+               OpStore %341 %340 None
                OpBranch %329
         %329 = OpLabel
         %333 = OpIAdd %uint %332 %uint_1
                OpBranch %330
         %331 = OpLabel
-        %341 = OpLoad %_arr_mat4v2half_uint_2 %324 None
-               OpReturnValue %341
+        %334 = OpLoad %_arr_mat4v2half_uint_2 %324 None
+               OpReturnValue %334
                OpFunctionEnd

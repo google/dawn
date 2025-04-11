@@ -40,11 +40,11 @@
 %_ptr_StorageBuffer_int = OpTypePointer StorageBuffer %int
        %uint = OpTypeInt 32 0
      %uint_0 = OpConstant %uint 0
+%__atomic_compare_exchange_result_i32 = OpTypeStruct %int %bool
+         %30 = OpUndef %__atomic_compare_exchange_result_i32
      %uint_1 = OpConstant %uint 1
       %int_1 = OpConstant %int 1
       %int_0 = OpConstant %int 0
-%__atomic_compare_exchange_result_i32 = OpTypeStruct %int %bool
-         %35 = OpUndef %__atomic_compare_exchange_result_i32
        %void = OpTypeVoid
          %45 = OpTypeFunction %void
  %main_inner = OpFunction %v4float None %14
@@ -60,25 +60,25 @@
                OpSelectionMerge %24 None
                OpBranchConditional %23 %25 %26
          %25 = OpLabel
-         %27 = OpAtomicCompareExchange %int %19 %uint_1 %uint_0 %uint_0 %int_1 %int_0
-         %31 = OpIEqual %bool %27 %int_0
-         %33 = OpCompositeConstruct %__atomic_compare_exchange_result_i32 %27 %31
+         %38 = OpAtomicCompareExchange %int %19 %uint_1 %uint_0 %uint_0 %int_1 %int_0
+         %42 = OpIEqual %bool %38 %int_0
+         %29 = OpCompositeConstruct %__atomic_compare_exchange_result_i32 %38 %42
                OpBranch %24
          %26 = OpLabel
                OpBranch %24
          %24 = OpLabel
-         %34 = OpPhi %__atomic_compare_exchange_result_i32 %33 %25 %35 %26
-  %old_value = OpCompositeExtract %int %34 0
-         %37 = OpConvertSToF %float %old_value
-         %38 = OpCompositeConstruct %v4float %37 %37 %37 %37
-         %39 = OpLoad %bool %continue_execution None
-         %40 = OpLogicalNot %bool %39
-               OpSelectionMerge %41 None
-               OpBranchConditional %40 %42 %41
-         %42 = OpLabel
+         %28 = OpPhi %__atomic_compare_exchange_result_i32 %29 %25 %30 %26
+  %old_value = OpCompositeExtract %int %28 0
+         %32 = OpConvertSToF %float %old_value
+         %33 = OpCompositeConstruct %v4float %32 %32 %32 %32
+         %34 = OpLoad %bool %continue_execution None
+         %35 = OpLogicalNot %bool %34
+               OpSelectionMerge %36 None
+               OpBranchConditional %35 %37 %36
+         %37 = OpLabel
                OpKill
-         %41 = OpLabel
-               OpReturnValue %38
+         %36 = OpLabel
+               OpReturnValue %33
                OpFunctionEnd
        %main = OpFunction %void None %45
          %46 = OpLabel

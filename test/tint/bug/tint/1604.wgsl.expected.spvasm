@@ -43,6 +43,8 @@
          %13 = OpLoad %int %9 None
                OpSelectionMerge %16 None
                OpSwitch %13 %14 0 %15
+         %14 = OpLabel
+               OpBranch %16
          %15 = OpLabel
                OpBranch %17
          %17 = OpLabel
@@ -76,8 +78,6 @@
                OpStore %46 %45 None
                OpBranch %20
          %21 = OpLabel
-               OpBranch %16
-         %14 = OpLabel
                OpBranch %16
          %16 = OpLabel
                OpReturn

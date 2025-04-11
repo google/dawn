@@ -62,7 +62,7 @@
                OpBranch %30
          %30 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
-         %35 = OpFunctionCall %void %atomicCompareExchangeWeak_83580d
+         %34 = OpFunctionCall %void %atomicCompareExchangeWeak_83580d
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %8

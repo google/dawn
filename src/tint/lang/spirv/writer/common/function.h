@@ -29,6 +29,7 @@
 #define SRC_TINT_LANG_SPIRV_WRITER_COMMON_FUNCTION_H_
 
 #include <functional>
+#include <unordered_map>
 #include <vector>
 
 #include "src/tint/lang/spirv/writer/common/instruction.h"
@@ -79,9 +80,12 @@ class Function {
     }
     /// Adds a new block to the block list
     /// @returns the index of the new block
-    size_t AppendBlock() {
+    size_t AppendBlock(uint32_t spv_id) {
         blocks_.push_back({});
-        return blocks_.size() - 1;
+
+        auto blk_id = blocks_.size() - 1;
+        block_id_to_block_[spv_id] = static_cast<uint32_t>(blk_id);
+        return blk_id;
     }
     /// Sets the block to insert into
     /// @param idx the index to set
@@ -124,6 +128,8 @@ class Function {
     InstructionList vars_;
     std::vector<Block> blocks_;
     size_t current_block_idx_ = 0;
+
+    std::unordered_map<uint32_t, uint32_t> block_id_to_block_;
 };
 
 }  // namespace tint::spirv::writer

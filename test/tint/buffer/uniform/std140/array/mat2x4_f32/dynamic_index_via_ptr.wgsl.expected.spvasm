@@ -120,21 +120,21 @@
                OpLoopMerge %73 %71 None
                OpBranch %70
          %70 = OpLabel
-         %76 = OpUGreaterThanEqual %bool %74 %uint_4
-               OpSelectionMerge %78 None
-               OpBranchConditional %76 %79 %78
-         %79 = OpLabel
+         %77 = OpUGreaterThanEqual %bool %74 %uint_4
+               OpSelectionMerge %79 None
+               OpBranchConditional %77 %80 %79
+         %80 = OpLabel
                OpBranch %73
-         %78 = OpLabel
-         %80 = OpAccessChain %_ptr_Function_mat2v4float %64 %74
-         %82 = OpLoad %mat2v4float %80 None
-         %83 = OpAccessChain %_ptr_Function_mat2v4float %66 %74
-               OpStore %83 %82 None
+         %79 = OpLabel
+         %81 = OpAccessChain %_ptr_Function_mat2v4float %64 %74
+         %83 = OpLoad %mat2v4float %81 None
+         %84 = OpAccessChain %_ptr_Function_mat2v4float %66 %74
+               OpStore %84 %83 None
                OpBranch %71
          %71 = OpLabel
          %75 = OpIAdd %uint %74 %uint_1
                OpBranch %72
          %73 = OpLabel
-         %84 = OpLoad %_arr_mat2v4float_uint_4_0 %66 None
-               OpReturnValue %84
+         %76 = OpLoad %_arr_mat2v4float_uint_4_0 %66 None
+               OpReturnValue %76
                OpFunctionEnd

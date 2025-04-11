@@ -60,9 +60,9 @@
                OpBranch %26
          %26 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
-         %31 = OpFunctionCall %uint %atomicLoad_361bf1
-         %32 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0
-               OpStore %32 %31 None
+         %30 = OpFunctionCall %uint %atomicLoad_361bf1
+         %31 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0
+               OpStore %31 %30 None
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %35

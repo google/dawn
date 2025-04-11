@@ -41,18 +41,18 @@
          %21 = OpLoad %int %i_0 None
                OpSelectionMerge %24 None
                OpSwitch %21 %22 0 %23
-         %23 = OpLabel
-               OpBranch %11
          %22 = OpLabel
                OpBranch %24
+         %23 = OpLabel
+               OpBranch %11
          %24 = OpLabel
          %25 = OpLoad %int %i_0 None
                OpSelectionMerge %28 None
                OpSwitch %25 %26 0 %27
-         %27 = OpLabel
-               OpBranch %11
          %26 = OpLabel
                OpBranch %28
+         %27 = OpLabel
+               OpBranch %11
          %28 = OpLabel
                OpBranch %11
          %11 = OpLabel

@@ -333,8 +333,8 @@ TEST_F(SpirvWriterTest, StorageVar_Workgroup_WithVulkan) {
                OpName %foo_local_invocation_index_Input "foo_local_invocation_index_Input"  ; id %4
                OpName %foo_inner "foo_inner"                                                ; id %7
                OpName %tint_local_index "tint_local_index"                                  ; id %9
-               OpName %load "load"                                                          ; id %21
-               OpName %add "add"                                                            ; id %22
+               OpName %load "load"                                                          ; id %20
+               OpName %add "add"                                                            ; id %21
                OpName %foo "foo"                                                            ; id %24
 
                ; Annotations
@@ -351,10 +351,10 @@ TEST_F(SpirvWriterTest, StorageVar_Workgroup_WithVulkan) {
          %10 = OpTypeFunction %void %uint
      %uint_1 = OpConstant %uint 1
        %bool = OpTypeBool
-      %int_0 = OpConstant %int 0
      %uint_2 = OpConstant %uint 2
  %uint_24840 = OpConstant %uint 24840
       %int_1 = OpConstant %int 1
+      %int_0 = OpConstant %int 0
          %25 = OpTypeFunction %void
 
                ; Function foo_inner

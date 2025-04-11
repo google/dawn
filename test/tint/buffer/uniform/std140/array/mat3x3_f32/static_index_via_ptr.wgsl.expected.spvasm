@@ -60,10 +60,10 @@
 %_arr_mat3v3float_uint_4 = OpTypeArray %mat3v3float %uint_4
 %_ptr_Function__arr_mat3v3float_uint_4 = OpTypePointer Function %_arr_mat3v3float_uint_4
          %41 = OpConstantNull %_arr_mat3v3float_uint_4
+%_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float
        %bool = OpTypeBool
 %_ptr_Function_mat3v3float = OpTypePointer Function %mat3v3float
 %_ptr_Function_mat3x3_f32_std140 = OpTypePointer Function %mat3x3_f32_std140
-%_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float
          %73 = OpTypeFunction %_arr_mat3x3_f32_std140_uint_4_0 %_arr_mat3x3_f32_std140_uint_4
 %_ptr_Function__arr_mat3x3_f32_std140_uint_4 = OpTypePointer Function %_arr_mat3x3_f32_std140_uint_4
          %78 = OpConstantNull %_arr_mat3x3_f32_std140_uint_4_0
@@ -91,35 +91,35 @@
                OpLoopMerge %46 %44 None
                OpBranch %43
          %43 = OpLabel
-         %49 = OpUGreaterThanEqual %bool %47 %uint_4
-               OpSelectionMerge %51 None
-               OpBranchConditional %49 %52 %51
-         %52 = OpLabel
+         %59 = OpUGreaterThanEqual %bool %47 %uint_4
+               OpSelectionMerge %61 None
+               OpBranchConditional %59 %62 %61
+         %62 = OpLabel
                OpBranch %46
-         %51 = OpLabel
-         %53 = OpAccessChain %_ptr_Function_mat3v3float %38 %47
-         %55 = OpAccessChain %_ptr_Function_mat3x3_f32_std140 %36 %47
-         %57 = OpLoad %mat3x3_f32_std140 %55 None
-         %58 = OpCompositeExtract %v3float %57 0
-         %59 = OpCompositeExtract %v3float %57 1
-         %60 = OpCompositeExtract %v3float %57 2
-         %61 = OpCompositeConstruct %mat3v3float %58 %59 %60
-               OpStore %53 %61 None
+         %61 = OpLabel
+         %63 = OpAccessChain %_ptr_Function_mat3v3float %38 %47
+         %65 = OpAccessChain %_ptr_Function_mat3x3_f32_std140 %36 %47
+         %67 = OpLoad %mat3x3_f32_std140 %65 None
+         %68 = OpCompositeExtract %v3float %67 0
+         %69 = OpCompositeExtract %v3float %67 1
+         %70 = OpCompositeExtract %v3float %67 2
+         %71 = OpCompositeConstruct %mat3v3float %68 %69 %70
+               OpStore %63 %71 None
                OpBranch %44
          %44 = OpLabel
          %48 = OpIAdd %uint %47 %uint_1
                OpBranch %45
          %46 = OpLabel
         %l_a = OpLoad %_arr_mat3v3float_uint_4 %38 None
-         %63 = OpCompositeExtract %float %l_a_i_i 0
-         %64 = OpCompositeExtract %float %l_a 0 0 0
-         %65 = OpFAdd %float %63 %64
-         %66 = OpCompositeExtract %float %l_a_i 0 0
-         %67 = OpFAdd %float %65 %66
-         %68 = OpCompositeExtract %float %l_a_i_i 0
-         %69 = OpFAdd %float %67 %68
-         %70 = OpAccessChain %_ptr_StorageBuffer_float %10 %uint_0
-               OpStore %70 %69 None
+         %50 = OpCompositeExtract %float %l_a_i_i 0
+         %51 = OpCompositeExtract %float %l_a 0 0 0
+         %52 = OpFAdd %float %50 %51
+         %53 = OpCompositeExtract %float %l_a_i 0 0
+         %54 = OpFAdd %float %52 %53
+         %55 = OpCompositeExtract %float %l_a_i_i 0
+         %56 = OpFAdd %float %54 %55
+         %57 = OpAccessChain %_ptr_StorageBuffer_float %10 %uint_0
+               OpStore %57 %56 None
                OpReturn
                OpFunctionEnd
 %tint_convert_explicit_layout = OpFunction %_arr_mat3x3_f32_std140_uint_4_0 None %73
@@ -136,21 +136,21 @@
                OpLoopMerge %83 %81 None
                OpBranch %80
          %80 = OpLabel
-         %86 = OpUGreaterThanEqual %bool %84 %uint_4
-               OpSelectionMerge %87 None
-               OpBranchConditional %86 %88 %87
-         %88 = OpLabel
+         %87 = OpUGreaterThanEqual %bool %84 %uint_4
+               OpSelectionMerge %88 None
+               OpBranchConditional %87 %89 %88
+         %89 = OpLabel
                OpBranch %83
-         %87 = OpLabel
-         %89 = OpAccessChain %_ptr_Function_mat3x3_f32_std140 %75 %84
-         %90 = OpLoad %mat3x3_f32_std140 %89 None
-         %91 = OpAccessChain %_ptr_Function_mat3x3_f32_std140 %77 %84
-               OpStore %91 %90 None
+         %88 = OpLabel
+         %90 = OpAccessChain %_ptr_Function_mat3x3_f32_std140 %75 %84
+         %91 = OpLoad %mat3x3_f32_std140 %90 None
+         %92 = OpAccessChain %_ptr_Function_mat3x3_f32_std140 %77 %84
+               OpStore %92 %91 None
                OpBranch %81
          %81 = OpLabel
          %85 = OpIAdd %uint %84 %uint_1
                OpBranch %82
          %83 = OpLabel
-         %92 = OpLoad %_arr_mat3x3_f32_std140_uint_4_0 %77 None
-               OpReturnValue %92
+         %86 = OpLoad %_arr_mat3x3_f32_std140_uint_4_0 %77 None
+               OpReturnValue %86
                OpFunctionEnd

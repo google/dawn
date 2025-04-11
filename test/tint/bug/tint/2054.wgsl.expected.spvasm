@@ -45,12 +45,12 @@
                OpSelectionMerge %16 None
                OpBranchConditional %13 %17 %18
          %17 = OpLabel
-         %19 = OpFOrdGreaterThanEqual %bool %b %float_0
+         %20 = OpFOrdGreaterThanEqual %bool %b %float_0
                OpBranch %16
          %18 = OpLabel
                OpBranch %16
          %16 = OpLabel
-       %cond = OpPhi %bool %19 %17 %false %18
+       %cond = OpPhi %bool %20 %17 %false %18
          %22 = OpSelect %float %cond %b %a
                OpStore %p_root %22 None
                OpReturn

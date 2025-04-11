@@ -42,8 +42,8 @@
      %v2uint = OpTypeVector %uint 2
 %_ptr_Function_v2uint = OpTypePointer Function %v2uint
 %uint_4294967295 = OpConstant %uint 4294967295
-         %36 = OpConstantComposite %v2uint %uint_4294967295 %uint_4294967295
-         %40 = OpConstantNull %v2uint
+         %41 = OpConstantComposite %v2uint %uint_4294967295 %uint_4294967295
+         %45 = OpConstantNull %v2uint
      %v2bool = OpTypeVector %bool 2
       %int_0 = OpConstant %int 0
 %_ptr_Function_uint = OpTypePointer Function %uint
@@ -72,53 +72,53 @@
                OpStore %y %24
                OpBranch %27
          %27 = OpLabel
-               OpStore %tint_loop_idx %36
+               OpStore %tint_loop_idx %41
                OpBranch %30
          %30 = OpLabel
                OpLoopMerge %31 %29 None
                OpBranch %28
          %28 = OpLabel
-         %38 = OpLoad %v2uint %tint_loop_idx None
-         %39 = OpIEqual %v2bool %38 %40
-         %42 = OpAll %bool %39
-               OpSelectionMerge %43 None
-               OpBranchConditional %42 %44 %43
-         %44 = OpLabel
-               OpBranch %31
-         %43 = OpLabel
-         %45 = OpLoad %int %y None
-          %r = OpFunctionCall %int %f %45
-         %47 = OpIEqual %bool %r %int_0
-               OpSelectionMerge %49 None
-               OpBranchConditional %47 %50 %49
-         %50 = OpLabel
-               OpBranch %31
+         %43 = OpLoad %v2uint %tint_loop_idx None
+         %44 = OpIEqual %v2bool %43 %45
+         %47 = OpAll %bool %44
+               OpSelectionMerge %48 None
+               OpBranchConditional %47 %49 %48
          %49 = OpLabel
+               OpBranch %31
+         %48 = OpLabel
+         %50 = OpLoad %int %y None
+          %r = OpFunctionCall %int %f %50
+         %52 = OpIEqual %bool %r %int_0
+               OpSelectionMerge %54 None
+               OpBranchConditional %52 %55 %54
+         %55 = OpLabel
+               OpBranch %31
+         %54 = OpLabel
                OpBranch %29
          %29 = OpLabel
-         %51 = OpAccessChain %_ptr_Function_uint %tint_loop_idx %uint_0
-         %54 = OpLoad %uint %51 None
-%tint_low_inc = OpISub %uint %54 %uint_1
-         %57 = OpAccessChain %_ptr_Function_uint %tint_loop_idx %uint_0
-               OpStore %57 %tint_low_inc None
-         %58 = OpIEqual %bool %tint_low_inc %uint_4294967295
- %tint_carry = OpSelect %uint %58 %uint_1 %uint_0
-         %60 = OpAccessChain %_ptr_Function_uint %tint_loop_idx %uint_1
-         %61 = OpLoad %uint %60 None
-         %62 = OpISub %uint %61 %tint_carry
-         %63 = OpAccessChain %_ptr_Function_uint %tint_loop_idx %uint_1
-               OpStore %63 %62 None
+         %56 = OpAccessChain %_ptr_Function_uint %tint_loop_idx %uint_0
+         %59 = OpLoad %uint %56 None
+%tint_low_inc = OpISub %uint %59 %uint_1
+         %62 = OpAccessChain %_ptr_Function_uint %tint_loop_idx %uint_0
+               OpStore %62 %tint_low_inc None
+         %63 = OpIEqual %bool %tint_low_inc %uint_4294967295
+ %tint_carry = OpSelect %uint %63 %uint_1 %uint_0
+         %65 = OpAccessChain %_ptr_Function_uint %tint_loop_idx %uint_1
+         %66 = OpLoad %uint %65 None
+         %67 = OpISub %uint %66 %tint_carry
+         %68 = OpAccessChain %_ptr_Function_uint %tint_loop_idx %uint_1
+               OpStore %68 %67 None
                OpBranch %30
          %31 = OpLabel
-         %64 = OpLoad %int %y None
-         %65 = OpLoad %bool %continue_execution None
-         %66 = OpLogicalNot %bool %65
-               OpSelectionMerge %67 None
-               OpBranchConditional %66 %68 %67
-         %68 = OpLabel
+         %32 = OpLoad %int %y None
+         %33 = OpLoad %bool %continue_execution None
+         %34 = OpLogicalNot %bool %33
+               OpSelectionMerge %35 None
+               OpBranchConditional %34 %36 %35
+         %36 = OpLabel
                OpKill
-         %67 = OpLabel
-               OpReturnValue %64
+         %35 = OpLabel
+               OpReturnValue %32
                OpFunctionEnd
        %main = OpFunction %void None %71
          %72 = OpLabel

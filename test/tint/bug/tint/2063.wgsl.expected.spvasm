@@ -25,11 +25,11 @@
      %uint_1 = OpConstant %uint 1
        %bool = OpTypeBool
      %uint_2 = OpConstant %uint 2
-     %uint_0 = OpConstant %uint 0
-      %int_0 = OpConstant %int 0
    %uint_264 = OpConstant %uint 264
+     %uint_0 = OpConstant %uint 0
      %int_n1 = OpConstant %int -1
 %_ptr_Function_int = OpTypePointer Function %int
+      %int_0 = OpConstant %int 0
          %28 = OpTypeFunction %void
 %compute_main_inner = OpFunction %void None %10
 %tint_local_index = OpFunctionParameter %uint
@@ -43,8 +43,8 @@
                OpBranch %15
          %15 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
-         %23 = OpAtomicISub %int %arg_0 %uint_2 %uint_0 %int_n1
-               OpStore %res %23
+         %20 = OpAtomicISub %int %arg_0 %uint_2 %uint_0 %int_n1
+               OpStore %res %20
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %28

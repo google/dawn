@@ -60,17 +60,17 @@
 %_arr_S_std140_uint_4_0 = OpTypeArray %S_std140 %uint_4
 %_ptr_Function__arr_S_std140_uint_4_0 = OpTypePointer Function %_arr_S_std140_uint_4_0
 %_ptr_Function__arr_S_uint_4 = OpTypePointer Function %_arr_S_uint_4
-       %bool = OpTypeBool
-%_ptr_Function_S = OpTypePointer Function %S
-%_ptr_Function_S_std140 = OpTypePointer Function %S_std140
-     %uint_1 = OpConstant %uint 1
 %_ptr_Private_S = OpTypePointer Private %S
+     %uint_1 = OpConstant %uint 1
 %_ptr_Uniform_S_std140 = OpTypePointer Uniform %S_std140
      %uint_2 = OpConstant %uint 2
 %_ptr_Private_mat2v3half = OpTypePointer Private %mat2v3half
      %uint_3 = OpConstant %uint 3
 %_ptr_Uniform_v3half = OpTypePointer Uniform %v3half
 %_ptr_Private_v3half = OpTypePointer Private %v3half
+       %bool = OpTypeBool
+%_ptr_Function_S = OpTypePointer Function %S
+%_ptr_Function_S_std140 = OpTypePointer Function %S_std140
          %74 = OpTypeFunction %S %S_std140
          %83 = OpTypeFunction %_arr_S_std140_uint_4_0 %_arr_S_std140_uint_4
 %_ptr_Function__arr_S_std140_uint_4 = OpTypePointer Function %_arr_S_std140_uint_4
@@ -91,41 +91,41 @@
                OpLoopMerge %36 %34 None
                OpBranch %33
          %33 = OpLabel
-         %39 = OpUGreaterThanEqual %bool %37 %uint_4
-               OpSelectionMerge %41 None
-               OpBranchConditional %39 %42 %41
-         %42 = OpLabel
+         %63 = OpUGreaterThanEqual %bool %37 %uint_4
+               OpSelectionMerge %65 None
+               OpBranchConditional %63 %66 %65
+         %66 = OpLabel
                OpBranch %36
-         %41 = OpLabel
-         %43 = OpAccessChain %_ptr_Function_S %30 %37
-         %45 = OpAccessChain %_ptr_Function_S_std140 %28 %37
-         %47 = OpLoad %S_std140 %45 None
-         %48 = OpFunctionCall %S %tint_convert_S %47
-               OpStore %43 %48 None
+         %65 = OpLabel
+         %67 = OpAccessChain %_ptr_Function_S %30 %37
+         %69 = OpAccessChain %_ptr_Function_S_std140 %28 %37
+         %71 = OpLoad %S_std140 %69 None
+         %72 = OpFunctionCall %S %tint_convert_S %71
+               OpStore %67 %72 None
                OpBranch %34
          %34 = OpLabel
          %38 = OpIAdd %uint %37 %uint_1
                OpBranch %35
          %36 = OpLabel
-         %51 = OpLoad %_arr_S_uint_4 %30 None
-               OpStore %p %51 None
-         %52 = OpAccessChain %_ptr_Private_S %p %uint_1
-         %54 = OpAccessChain %_ptr_Uniform_S_std140 %1 %uint_0 %uint_2
-         %57 = OpLoad %S_std140 %54 None
-         %58 = OpFunctionCall %S %tint_convert_S %57
-               OpStore %52 %58 None
-         %59 = OpAccessChain %_ptr_Private_mat2v3half %p %uint_3 %uint_1
-         %62 = OpAccessChain %_ptr_Uniform_v3half %1 %uint_0 %uint_2 %uint_1
-         %64 = OpLoad %v3half %62 None
-         %65 = OpAccessChain %_ptr_Uniform_v3half %1 %uint_0 %uint_2 %uint_2
-         %66 = OpLoad %v3half %65 None
-         %67 = OpCompositeConstruct %mat2v3half %64 %66
-               OpStore %59 %67 None
-         %68 = OpAccessChain %_ptr_Private_v3half %p %uint_1 %uint_1 %uint_0
-         %70 = OpAccessChain %_ptr_Uniform_v3half %1 %uint_0 %uint_0 %uint_2
-         %71 = OpLoad %v3half %70 None
-         %72 = OpVectorShuffle %v3half %71 %71 2 0 1
-               OpStore %68 %72 None
+         %39 = OpLoad %_arr_S_uint_4 %30 None
+               OpStore %p %39 None
+         %40 = OpAccessChain %_ptr_Private_S %p %uint_1
+         %43 = OpAccessChain %_ptr_Uniform_S_std140 %1 %uint_0 %uint_2
+         %46 = OpLoad %S_std140 %43 None
+         %47 = OpFunctionCall %S %tint_convert_S %46
+               OpStore %40 %47 None
+         %49 = OpAccessChain %_ptr_Private_mat2v3half %p %uint_3 %uint_1
+         %52 = OpAccessChain %_ptr_Uniform_v3half %1 %uint_0 %uint_2 %uint_1
+         %54 = OpLoad %v3half %52 None
+         %55 = OpAccessChain %_ptr_Uniform_v3half %1 %uint_0 %uint_2 %uint_2
+         %56 = OpLoad %v3half %55 None
+         %57 = OpCompositeConstruct %mat2v3half %54 %56
+               OpStore %49 %57 None
+         %58 = OpAccessChain %_ptr_Private_v3half %p %uint_1 %uint_1 %uint_0
+         %60 = OpAccessChain %_ptr_Uniform_v3half %1 %uint_0 %uint_0 %uint_2
+         %61 = OpLoad %v3half %60 None
+         %62 = OpVectorShuffle %v3half %61 %61 2 0 1
+               OpStore %58 %62 None
                OpReturn
                OpFunctionEnd
 %tint_convert_S = OpFunction %S None %74
@@ -153,21 +153,21 @@
                OpLoopMerge %93 %91 None
                OpBranch %90
          %90 = OpLabel
-         %96 = OpUGreaterThanEqual %bool %94 %uint_4
-               OpSelectionMerge %97 None
-               OpBranchConditional %96 %98 %97
-         %98 = OpLabel
+         %97 = OpUGreaterThanEqual %bool %94 %uint_4
+               OpSelectionMerge %98 None
+               OpBranchConditional %97 %99 %98
+         %99 = OpLabel
                OpBranch %93
-         %97 = OpLabel
-         %99 = OpAccessChain %_ptr_Function_S_std140 %85 %94
-        %100 = OpLoad %S_std140 %99 None
-        %101 = OpAccessChain %_ptr_Function_S_std140 %87 %94
-               OpStore %101 %100 None
+         %98 = OpLabel
+        %100 = OpAccessChain %_ptr_Function_S_std140 %85 %94
+        %101 = OpLoad %S_std140 %100 None
+        %102 = OpAccessChain %_ptr_Function_S_std140 %87 %94
+               OpStore %102 %101 None
                OpBranch %91
          %91 = OpLabel
          %95 = OpIAdd %uint %94 %uint_1
                OpBranch %92
          %93 = OpLabel
-        %102 = OpLoad %_arr_S_std140_uint_4_0 %87 None
-               OpReturnValue %102
+         %96 = OpLoad %_arr_S_std140_uint_4_0 %87 None
+               OpReturnValue %96
                OpFunctionEnd

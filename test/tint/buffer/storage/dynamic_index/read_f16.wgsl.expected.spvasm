@@ -697,23 +697,23 @@
                OpLoopMerge %491 %489 None
                OpBranch %488
         %488 = OpLabel
-        %494 = OpUGreaterThanEqual %bool %492 %uint_2
-               OpSelectionMerge %495 None
-               OpBranchConditional %494 %496 %495
-        %496 = OpLabel
+        %495 = OpUGreaterThanEqual %bool %492 %uint_2
+               OpSelectionMerge %496 None
+               OpBranchConditional %495 %497 %496
+        %497 = OpLabel
                OpBranch %491
-        %495 = OpLabel
-        %497 = OpAccessChain %_ptr_Function_v3float %482 %492
-        %499 = OpLoad %v3float %497 None
-        %500 = OpAccessChain %_ptr_Function_v3float %484 %492
-               OpStore %500 %499 None
+        %496 = OpLabel
+        %498 = OpAccessChain %_ptr_Function_v3float %482 %492
+        %500 = OpLoad %v3float %498 None
+        %501 = OpAccessChain %_ptr_Function_v3float %484 %492
+               OpStore %501 %500 None
                OpBranch %489
         %489 = OpLabel
         %493 = OpIAdd %uint %492 %uint_1
                OpBranch %490
         %491 = OpLabel
-        %501 = OpLoad %_arr_v3float_uint_2_0 %484 None
-               OpReturnValue %501
+        %494 = OpLoad %_arr_v3float_uint_2_0 %484 None
+               OpReturnValue %494
                OpFunctionEnd
 %tint_convert_explicit_layout_0 = OpFunction %_arr_mat4v2half_uint_2_0 None %503
 %tint_source_0 = OpFunctionParameter %_arr_mat4v2half_uint_2
@@ -729,21 +729,21 @@
                OpLoopMerge %514 %512 None
                OpBranch %511
         %511 = OpLabel
-        %517 = OpUGreaterThanEqual %bool %515 %uint_2
-               OpSelectionMerge %518 None
-               OpBranchConditional %517 %519 %518
-        %519 = OpLabel
+        %518 = OpUGreaterThanEqual %bool %515 %uint_2
+               OpSelectionMerge %519 None
+               OpBranchConditional %518 %520 %519
+        %520 = OpLabel
                OpBranch %514
-        %518 = OpLabel
-        %520 = OpAccessChain %_ptr_Function_mat4v2half %505 %515
-        %522 = OpLoad %mat4v2half %520 None
-        %523 = OpAccessChain %_ptr_Function_mat4v2half %507 %515
-               OpStore %523 %522 None
+        %519 = OpLabel
+        %521 = OpAccessChain %_ptr_Function_mat4v2half %505 %515
+        %523 = OpLoad %mat4v2half %521 None
+        %524 = OpAccessChain %_ptr_Function_mat4v2half %507 %515
+               OpStore %524 %523 None
                OpBranch %512
         %512 = OpLabel
         %516 = OpIAdd %uint %515 %uint_1
                OpBranch %513
         %514 = OpLabel
-        %524 = OpLoad %_arr_mat4v2half_uint_2_0 %507 None
-               OpReturnValue %524
+        %517 = OpLoad %_arr_mat4v2half_uint_2_0 %507 None
+               OpReturnValue %517
                OpFunctionEnd

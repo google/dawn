@@ -4,7 +4,7 @@
 ; Bound: 377
 ; Schema: 0
                OpCapability Shader
-         %60 = OpExtInstImport "GLSL.std.450"
+        %103 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
@@ -34,7 +34,6 @@
                OpName %buffer7_block_tint_explicit_layout "buffer7_block_tint_explicit_layout"
                OpName %main "main"
                OpName %m "m"
-               OpName %c "c"
                OpName %a "a"
                OpName %a_0 "a"
                OpMemberName %S2 0 "m"
@@ -47,6 +46,7 @@
                OpName %a_4 "a"
                OpName %a_5 "a"
                OpName %a_6 "a"
+               OpName %c "c"
                OpName %tint_store_and_preserve_padding "tint_store_and_preserve_padding"
                OpName %value_param "value_param"
                OpName %tint_store_and_preserve_padding_0 "tint_store_and_preserve_padding"
@@ -195,17 +195,17 @@
          %39 = OpTypeFunction %void
 %_ptr_Function_mat3v3float = OpTypePointer Function %mat3v3float
          %43 = OpConstantNull %mat3v3float
+%_arr_mat3v3float_uint_1_0 = OpTypeArray %mat3v3float %uint_1
+         %S2 = OpTypeStruct %_arr_mat3v3float_uint_1_0
+%_arr_S_uint_1_0 = OpTypeArray %S %uint_1
+         %S4 = OpTypeStruct %_arr_S_uint_1_0
+%_arr_S2_uint_1 = OpTypeArray %S2 %uint_1
 %_ptr_Function_uint = OpTypePointer Function %uint
      %uint_0 = OpConstant %uint 0
      %uint_3 = OpConstant %uint 3
        %bool = OpTypeBool
      %uint_2 = OpConstant %uint 2
 %_ptr_Function_v3float = OpTypePointer Function %v3float
-%_arr_mat3v3float_uint_1_0 = OpTypeArray %mat3v3float %uint_1
-         %S2 = OpTypeStruct %_arr_mat3v3float_uint_1_0
-%_arr_S_uint_1_0 = OpTypeArray %S %uint_1
-         %S4 = OpTypeStruct %_arr_S_uint_1_0
-%_arr_S2_uint_1 = OpTypeArray %S2 %uint_1
         %123 = OpTypeFunction %void %mat3v3float
 %_ptr_StorageBuffer_v3float = OpTypePointer StorageBuffer %v3float
 %_arr_uint_uint_2 = OpTypeArray %uint %uint_2
@@ -239,67 +239,67 @@
                OpLoopMerge %48 %46 None
                OpBranch %45
          %45 = OpLabel
-         %52 = OpLoad %uint %c None
-         %53 = OpULessThan %bool %52 %uint_3
-               OpSelectionMerge %56 None
-               OpBranchConditional %53 %56 %57
-         %57 = OpLabel
+         %95 = OpLoad %uint %c None
+         %96 = OpULessThan %bool %95 %uint_3
+               OpSelectionMerge %99 None
+               OpBranchConditional %96 %99 %100
+        %100 = OpLabel
                OpBranch %48
-         %56 = OpLabel
-         %58 = OpLoad %uint %c None
-         %59 = OpExtInst %uint %60 UMin %58 %uint_2
-         %62 = OpAccessChain %_ptr_Function_v3float %m %59
-         %64 = OpLoad %uint %c None
-         %65 = OpIMul %uint %64 %uint_3
-         %66 = OpIAdd %uint %65 %uint_1
-         %67 = OpConvertUToF %float %66
-         %68 = OpLoad %uint %c None
-         %69 = OpIMul %uint %68 %uint_3
-         %70 = OpIAdd %uint %69 %uint_2
-         %71 = OpConvertUToF %float %70
-         %72 = OpLoad %uint %c None
-         %73 = OpIMul %uint %72 %uint_3
-         %74 = OpIAdd %uint %73 %uint_3
-         %75 = OpConvertUToF %float %74
-         %76 = OpCompositeConstruct %v3float %67 %71 %75
-               OpStore %62 %76 None
+         %99 = OpLabel
+        %101 = OpLoad %uint %c None
+        %102 = OpExtInst %uint %103 UMin %101 %uint_2
+        %105 = OpAccessChain %_ptr_Function_v3float %m %102
+        %107 = OpLoad %uint %c None
+        %108 = OpIMul %uint %107 %uint_3
+        %109 = OpIAdd %uint %108 %uint_1
+        %110 = OpConvertUToF %float %109
+        %111 = OpLoad %uint %c None
+        %112 = OpIMul %uint %111 %uint_3
+        %113 = OpIAdd %uint %112 %uint_2
+        %114 = OpConvertUToF %float %113
+        %115 = OpLoad %uint %c None
+        %116 = OpIMul %uint %115 %uint_3
+        %117 = OpIAdd %uint %116 %uint_3
+        %118 = OpConvertUToF %float %117
+        %119 = OpCompositeConstruct %v3float %110 %114 %118
+               OpStore %105 %119 None
                OpBranch %46
          %46 = OpLabel
-         %77 = OpLoad %uint %c None
-         %78 = OpIAdd %uint %77 %uint_1
-               OpStore %c %78 None
+        %120 = OpLoad %uint %c None
+        %121 = OpIAdd %uint %120 %uint_1
+               OpStore %c %121 None
                OpBranch %47
          %48 = OpLabel
           %a = OpLoad %mat3v3float %m None
-         %80 = OpFunctionCall %void %tint_store_and_preserve_padding %a
-         %82 = OpLoad %mat3v3float %m None
-        %a_0 = OpCompositeConstruct %S %82
-         %84 = OpFunctionCall %void %tint_store_and_preserve_padding_7 %a_0
-         %86 = OpLoad %mat3v3float %m None
-         %88 = OpCompositeConstruct %_arr_mat3v3float_uint_1_0 %86
-        %a_1 = OpCompositeConstruct %S2 %88
-         %91 = OpFunctionCall %void %tint_store_and_preserve_padding_11 %a_1
-         %93 = OpLoad %mat3v3float %m None
-         %94 = OpCompositeConstruct %S %93
-        %a_2 = OpCompositeConstruct %S3 %94
-         %96 = OpFunctionCall %void %tint_store_and_preserve_padding_16 %a_2
-         %98 = OpLoad %mat3v3float %m None
-         %99 = OpCompositeConstruct %S %98
-        %101 = OpCompositeConstruct %_arr_S_uint_1_0 %99
-        %a_3 = OpCompositeConstruct %S4 %101
-        %104 = OpFunctionCall %void %tint_store_and_preserve_padding_17 %a_3
-        %106 = OpLoad %mat3v3float %m None
-        %a_4 = OpCompositeConstruct %_arr_mat3v3float_uint_1_0 %106
-        %108 = OpFunctionCall %void %tint_store_and_preserve_padding_13 %a_4
-        %110 = OpLoad %mat3v3float %m None
-        %111 = OpCompositeConstruct %S %110
-        %a_5 = OpCompositeConstruct %_arr_S_uint_1_0 %111
-        %113 = OpFunctionCall %void %tint_store_and_preserve_padding_18 %a_5
-        %115 = OpLoad %mat3v3float %m None
-        %116 = OpCompositeConstruct %_arr_mat3v3float_uint_1_0 %115
-        %117 = OpCompositeConstruct %S2 %116
-        %a_6 = OpCompositeConstruct %_arr_S2_uint_1 %117
-        %120 = OpFunctionCall %void %tint_store_and_preserve_padding_20 %a_6
+         %50 = OpFunctionCall %void %tint_store_and_preserve_padding %a
+         %52 = OpLoad %mat3v3float %m None
+        %a_0 = OpCompositeConstruct %S %52
+         %54 = OpFunctionCall %void %tint_store_and_preserve_padding_7 %a_0
+         %56 = OpLoad %mat3v3float %m None
+         %58 = OpCompositeConstruct %_arr_mat3v3float_uint_1_0 %56
+        %a_1 = OpCompositeConstruct %S2 %58
+         %61 = OpFunctionCall %void %tint_store_and_preserve_padding_11 %a_1
+         %63 = OpLoad %mat3v3float %m None
+         %64 = OpCompositeConstruct %S %63
+        %a_2 = OpCompositeConstruct %S3 %64
+         %66 = OpFunctionCall %void %tint_store_and_preserve_padding_16 %a_2
+         %68 = OpLoad %mat3v3float %m None
+         %69 = OpCompositeConstruct %S %68
+         %71 = OpCompositeConstruct %_arr_S_uint_1_0 %69
+        %a_3 = OpCompositeConstruct %S4 %71
+         %74 = OpFunctionCall %void %tint_store_and_preserve_padding_17 %a_3
+         %76 = OpLoad %mat3v3float %m None
+        %a_4 = OpCompositeConstruct %_arr_mat3v3float_uint_1_0 %76
+         %78 = OpFunctionCall %void %tint_store_and_preserve_padding_13 %a_4
+         %80 = OpLoad %mat3v3float %m None
+         %81 = OpCompositeConstruct %S %80
+        %a_5 = OpCompositeConstruct %_arr_S_uint_1_0 %81
+         %83 = OpFunctionCall %void %tint_store_and_preserve_padding_18 %a_5
+         %85 = OpLoad %mat3v3float %m None
+         %86 = OpCompositeConstruct %_arr_mat3v3float_uint_1_0 %85
+         %87 = OpCompositeConstruct %S2 %86
+        %a_6 = OpCompositeConstruct %_arr_S2_uint_1 %87
+         %90 = OpFunctionCall %void %tint_store_and_preserve_padding_20 %a_6
                OpReturn
                OpFunctionEnd
 %tint_store_and_preserve_padding = OpFunction %void None %123

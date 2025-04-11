@@ -42,9 +42,9 @@
          %24 = OpTypeFunction %void %uint
      %uint_1 = OpConstant %uint 1
        %bool = OpTypeBool
-%half_0x0p_0 = OpConstant %half 0x0p+0
 %_ptr_StorageBuffer_half = OpTypePointer StorageBuffer %half
      %uint_0 = OpConstant %uint 0
+%half_0x0p_0 = OpConstant %half 0x0p+0
          %38 = OpTypeFunction %void
 %workgroupUniformLoad_e07d08 = OpFunction %half None %11
          %12 = OpLabel
@@ -67,9 +67,9 @@
                OpBranch %29
          %29 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
-         %33 = OpFunctionCall %half %workgroupUniformLoad_e07d08
-         %34 = OpAccessChain %_ptr_StorageBuffer_half %1 %uint_0
-               OpStore %34 %33 None
+         %32 = OpFunctionCall %half %workgroupUniformLoad_e07d08
+         %33 = OpAccessChain %_ptr_StorageBuffer_half %1 %uint_0
+               OpStore %33 %32 None
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %38

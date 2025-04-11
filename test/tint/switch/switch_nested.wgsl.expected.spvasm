@@ -24,8 +24,8 @@
        %uint = OpTypeInt 32 0
 %_ptr_Function_uint = OpTypePointer Function %uint
      %uint_3 = OpConstant %uint 3
-   %uint_123 = OpConstant %uint 123
       %false = OpConstantFalse %bool
+   %uint_123 = OpConstant %uint 123
           %a = OpFunction %void None %3
           %4 = OpLabel
 %continue_execution = OpVariable %_ptr_Function_bool Function
@@ -46,15 +46,15 @@
                OpBranch %24
          %22 = OpLabel
                OpStore %c %uint_123
-         %27 = OpLoad %uint %c None
-               OpSelectionMerge %30 None
-               OpSwitch %27 %28 0 %29
+         %28 = OpLoad %uint %c None
+               OpSelectionMerge %31 None
+               OpSwitch %28 %29 0 %30
          %29 = OpLabel
-               OpBranch %30
-         %28 = OpLabel
                OpStore %continue_execution %false None
-               OpBranch %30
+               OpBranch %31
          %30 = OpLabel
+               OpBranch %31
+         %31 = OpLabel
          %32 = OpLoad %bool %continue_execution None
                OpSelectionMerge %33 None
                OpBranchConditional %32 %34 %33

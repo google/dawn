@@ -76,23 +76,23 @@
                OpLoopMerge %38 %36 None
                OpBranch %35
          %35 = OpLabel
-         %41 = OpUGreaterThanEqual %bool %39 %uint_4
-               OpSelectionMerge %43 None
-               OpBranchConditional %41 %44 %43
-         %44 = OpLabel
+         %42 = OpUGreaterThanEqual %bool %39 %uint_4
+               OpSelectionMerge %44 None
+               OpBranchConditional %42 %45 %44
+         %45 = OpLabel
                OpBranch %38
-         %43 = OpLabel
-         %45 = OpAccessChain %_ptr_Function_float %29 %39
-         %47 = OpLoad %float %45 None
-         %48 = OpAccessChain %_ptr_Function_float %31 %39
-               OpStore %48 %47 None
+         %44 = OpLabel
+         %46 = OpAccessChain %_ptr_Function_float %29 %39
+         %48 = OpLoad %float %46 None
+         %49 = OpAccessChain %_ptr_Function_float %31 %39
+               OpStore %49 %48 None
                OpBranch %36
          %36 = OpLabel
          %40 = OpIAdd %uint %39 %uint_1
                OpBranch %37
          %38 = OpLabel
-         %50 = OpLoad %_arr_float_uint_4_0 %31 None
-               OpReturnValue %50
+         %41 = OpLoad %_arr_float_uint_4_0 %31 None
+               OpReturnValue %41
                OpFunctionEnd
 %tint_convert_explicit_layout_0 = OpFunction %_arr_float_uint_4 None %52
 %tint_source_0 = OpFunctionParameter %_arr_float_uint_4_0
@@ -108,21 +108,21 @@
                OpLoopMerge %61 %59 None
                OpBranch %58
          %58 = OpLabel
-         %64 = OpUGreaterThanEqual %bool %62 %uint_4
-               OpSelectionMerge %65 None
-               OpBranchConditional %64 %66 %65
-         %66 = OpLabel
+         %65 = OpUGreaterThanEqual %bool %62 %uint_4
+               OpSelectionMerge %66 None
+               OpBranchConditional %65 %67 %66
+         %67 = OpLabel
                OpBranch %61
-         %65 = OpLabel
-         %67 = OpAccessChain %_ptr_Function_float %54 %62
-         %68 = OpLoad %float %67 None
-         %69 = OpAccessChain %_ptr_Function_float %55 %62
-               OpStore %69 %68 None
+         %66 = OpLabel
+         %68 = OpAccessChain %_ptr_Function_float %54 %62
+         %69 = OpLoad %float %68 None
+         %70 = OpAccessChain %_ptr_Function_float %55 %62
+               OpStore %70 %69 None
                OpBranch %59
          %59 = OpLabel
          %63 = OpIAdd %uint %62 %uint_1
                OpBranch %60
          %61 = OpLabel
-         %70 = OpLoad %_arr_float_uint_4 %55 None
-               OpReturnValue %70
+         %64 = OpLoad %_arr_float_uint_4 %55 None
+               OpReturnValue %64
                OpFunctionEnd

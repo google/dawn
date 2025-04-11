@@ -368,23 +368,23 @@
                OpLoopMerge %228 %226 None
                OpBranch %225
         %225 = OpLabel
-        %231 = OpUGreaterThanEqual %bool %229 %uint_2
-               OpSelectionMerge %232 None
-               OpBranchConditional %231 %233 %232
-        %233 = OpLabel
+        %232 = OpUGreaterThanEqual %bool %229 %uint_2
+               OpSelectionMerge %233 None
+               OpBranchConditional %232 %234 %233
+        %234 = OpLabel
                OpBranch %228
-        %232 = OpLabel
-        %234 = OpAccessChain %_ptr_Function_v3float %219 %229
-        %236 = OpLoad %v3float %234 None
-        %237 = OpAccessChain %_ptr_Function_v3float %221 %229
-               OpStore %237 %236 None
+        %233 = OpLabel
+        %235 = OpAccessChain %_ptr_Function_v3float %219 %229
+        %237 = OpLoad %v3float %235 None
+        %238 = OpAccessChain %_ptr_Function_v3float %221 %229
+               OpStore %238 %237 None
                OpBranch %226
         %226 = OpLabel
         %230 = OpIAdd %uint %229 %uint_1
                OpBranch %227
         %228 = OpLabel
-        %238 = OpLoad %_arr_v3float_uint_2_0 %221 None
-               OpReturnValue %238
+        %231 = OpLoad %_arr_v3float_uint_2_0 %221 None
+               OpReturnValue %231
                OpFunctionEnd
 %tint_convert_explicit_layout_0 = OpFunction %_arr_Inner_uint_4_0 None %240
 %tint_source_0 = OpFunctionParameter %_arr_Inner_uint_4
@@ -400,21 +400,21 @@
                OpLoopMerge %251 %249 None
                OpBranch %248
         %248 = OpLabel
-        %254 = OpUGreaterThanEqual %bool %252 %uint_4
-               OpSelectionMerge %255 None
-               OpBranchConditional %254 %256 %255
-        %256 = OpLabel
+        %255 = OpUGreaterThanEqual %bool %252 %uint_4
+               OpSelectionMerge %256 None
+               OpBranchConditional %255 %257 %256
+        %257 = OpLabel
                OpBranch %251
-        %255 = OpLabel
-        %257 = OpAccessChain %_ptr_Function_Inner %242 %252
-        %259 = OpLoad %Inner %257 None
-        %260 = OpAccessChain %_ptr_Function_Inner %244 %252
-               OpStore %260 %259 None
+        %256 = OpLabel
+        %258 = OpAccessChain %_ptr_Function_Inner %242 %252
+        %260 = OpLoad %Inner %258 None
+        %261 = OpAccessChain %_ptr_Function_Inner %244 %252
+               OpStore %261 %260 None
                OpBranch %249
         %249 = OpLabel
         %253 = OpIAdd %uint %252 %uint_1
                OpBranch %250
         %251 = OpLabel
-        %261 = OpLoad %_arr_Inner_uint_4_0 %244 None
-               OpReturnValue %261
+        %254 = OpLoad %_arr_Inner_uint_4_0 %244 None
+               OpReturnValue %254
                OpFunctionEnd

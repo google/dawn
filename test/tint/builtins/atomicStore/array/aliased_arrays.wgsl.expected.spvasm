@@ -26,11 +26,11 @@
 %compute_main_local_invocation_index_Input = OpVariable %_ptr_Input_uint Input
        %void = OpTypeVoid
          %15 = OpTypeFunction %void %uint
-     %uint_6 = OpConstant %uint 6
-       %bool = OpTypeBool
+   %uint_264 = OpConstant %uint 264
 %_ptr_Workgroup_uint = OpTypePointer Workgroup %uint
      %uint_0 = OpConstant %uint 0
-   %uint_264 = OpConstant %uint 264
+     %uint_6 = OpConstant %uint 6
+       %bool = OpTypeBool
          %40 = OpTypeFunction %void
 %compute_main_inner = OpFunction %void None %15
 %tint_local_index = OpFunctionParameter %uint
@@ -43,24 +43,24 @@
                OpLoopMerge %21 %19 None
                OpBranch %18
          %18 = OpLabel
-         %24 = OpUGreaterThanEqual %bool %22 %uint_6
-               OpSelectionMerge %27 None
-               OpBranchConditional %24 %28 %27
-         %28 = OpLabel
+         %30 = OpUGreaterThanEqual %bool %22 %uint_6
+               OpSelectionMerge %33 None
+               OpBranchConditional %30 %34 %33
+         %34 = OpLabel
                OpBranch %21
-         %27 = OpLabel
-         %29 = OpUMod %uint %22 %uint_2
-         %30 = OpUDiv %uint %22 %uint_2
-         %31 = OpAccessChain %_ptr_Workgroup_uint %wg %30 %29 %uint_0
-               OpAtomicStore %31 %uint_2 %uint_0 %uint_0
+         %33 = OpLabel
+         %35 = OpUMod %uint %22 %uint_2
+         %36 = OpUDiv %uint %22 %uint_2
+         %37 = OpAccessChain %_ptr_Workgroup_uint %wg %36 %35 %uint_0
+               OpAtomicStore %37 %uint_2 %uint_0 %uint_0
                OpBranch %19
          %19 = OpLabel
          %23 = OpIAdd %uint %22 %uint_1
                OpBranch %20
          %21 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
-         %37 = OpAccessChain %_ptr_Workgroup_uint %wg %uint_2 %uint_1 %uint_0
-               OpAtomicStore %37 %uint_2 %uint_0 %uint_1
+         %26 = OpAccessChain %_ptr_Workgroup_uint %wg %uint_2 %uint_1 %uint_0
+               OpAtomicStore %26 %uint_2 %uint_0 %uint_1
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %40

@@ -4,7 +4,7 @@
 ; Bound: 94
 ; Schema: 0
                OpCapability Shader
-         %63 = OpExtInstImport "GLSL.std.450"
+         %52 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main" %main_global_invocation_id_Input
                OpExecutionMode %main LocalSize 2 2 1
@@ -26,10 +26,10 @@
                OpName %dimInner "dimInner"
                OpName %dimOutter "dimOutter"
                OpName %result "result"
+               OpName %index "index"
                OpName %i "i"
                OpName %a "a"
                OpName %b "b"
-               OpName %index "index"
                OpName %main "main"
                OpDecorate %_runtimearr_uint ArrayStride 4
                OpMemberDecorate %Matrix_tint_explicit_layout 0 Offset 0
@@ -76,9 +76,9 @@
      %uint_1 = OpConstant %uint 1
      %uint_2 = OpConstant %uint 2
 %_ptr_Function_uint = OpTypePointer Function %uint
-       %bool = OpTypeBool
 %_ptr_StorageBuffer__runtimearr_uint = OpTypePointer StorageBuffer %_runtimearr_uint
 %_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
+       %bool = OpTypeBool
 %_ptr_StorageBuffer__runtimearr_uint_0 = OpTypePointer StorageBuffer %_runtimearr_uint
 %_ptr_StorageBuffer_uint_0 = OpTypePointer StorageBuffer %uint
          %90 = OpTypeFunction %void
@@ -105,55 +105,55 @@
                OpLoopMerge %42 %40 None
                OpBranch %39
          %39 = OpLabel
-         %44 = OpLoad %uint %i None
-         %45 = OpULessThan %bool %44 %dimInner
-               OpSelectionMerge %47 None
-               OpBranchConditional %45 %47 %48
-         %48 = OpLabel
+         %57 = OpLoad %uint %i None
+         %58 = OpULessThan %bool %57 %dimInner
+               OpSelectionMerge %60 None
+               OpBranchConditional %58 %60 %61
+         %61 = OpLabel
                OpBranch %42
-         %47 = OpLabel
-         %49 = OpLoad %uint %i None
-         %50 = OpCompositeExtract %uint %resultCell 0
-         %51 = OpIMul %uint %50 %dimInner
-          %a = OpIAdd %uint %49 %51
-         %53 = OpCompositeExtract %uint %resultCell 1
-         %54 = OpLoad %uint %i None
-         %55 = OpIMul %uint %54 %dimOutter
-          %b = OpIAdd %uint %53 %55
-         %57 = OpLoad %uint %result None
-         %58 = OpAccessChain %_ptr_StorageBuffer__runtimearr_uint %firstMatrix %uint_0
-         %60 = OpArrayLength %uint %firstMatrix 0
-         %61 = OpISub %uint %60 %uint_1
-         %62 = OpExtInst %uint %63 UMin %a %61
-         %64 = OpAccessChain %_ptr_StorageBuffer_uint %firstMatrix %uint_0 %62
-         %66 = OpLoad %uint %64 None
-         %67 = OpAccessChain %_ptr_StorageBuffer__runtimearr_uint %secondMatrix %uint_0
-         %68 = OpArrayLength %uint %secondMatrix 0
-         %69 = OpISub %uint %68 %uint_1
-         %70 = OpExtInst %uint %63 UMin %b %69
-         %71 = OpAccessChain %_ptr_StorageBuffer_uint %secondMatrix %uint_0 %70
-         %72 = OpLoad %uint %71 None
-         %73 = OpIMul %uint %66 %72
-         %74 = OpIAdd %uint %57 %73
-               OpStore %result %74 None
+         %60 = OpLabel
+         %62 = OpLoad %uint %i None
+         %63 = OpCompositeExtract %uint %resultCell 0
+         %64 = OpIMul %uint %63 %dimInner
+          %a = OpIAdd %uint %62 %64
+         %66 = OpCompositeExtract %uint %resultCell 1
+         %67 = OpLoad %uint %i None
+         %68 = OpIMul %uint %67 %dimOutter
+          %b = OpIAdd %uint %66 %68
+         %70 = OpLoad %uint %result None
+         %71 = OpAccessChain %_ptr_StorageBuffer__runtimearr_uint_0 %firstMatrix %uint_0
+         %73 = OpArrayLength %uint %firstMatrix 0
+         %74 = OpISub %uint %73 %uint_1
+         %75 = OpExtInst %uint %52 UMin %a %74
+         %76 = OpAccessChain %_ptr_StorageBuffer_uint_0 %firstMatrix %uint_0 %75
+         %78 = OpLoad %uint %76 None
+         %79 = OpAccessChain %_ptr_StorageBuffer__runtimearr_uint_0 %secondMatrix %uint_0
+         %80 = OpArrayLength %uint %secondMatrix 0
+         %81 = OpISub %uint %80 %uint_1
+         %82 = OpExtInst %uint %52 UMin %b %81
+         %83 = OpAccessChain %_ptr_StorageBuffer_uint_0 %secondMatrix %uint_0 %82
+         %84 = OpLoad %uint %83 None
+         %85 = OpIMul %uint %78 %84
+         %86 = OpIAdd %uint %70 %85
+               OpStore %result %86 None
                OpBranch %40
          %40 = OpLabel
-         %75 = OpLoad %uint %i None
-         %76 = OpIAdd %uint %75 %uint_1
-               OpStore %i %76 None
+         %87 = OpLoad %uint %i None
+         %88 = OpIAdd %uint %87 %uint_1
+               OpStore %i %88 None
                OpBranch %41
          %42 = OpLabel
-         %77 = OpCompositeExtract %uint %resultCell 1
-         %78 = OpCompositeExtract %uint %resultCell 0
-         %79 = OpIMul %uint %78 %dimOutter
-      %index = OpIAdd %uint %77 %79
-         %81 = OpAccessChain %_ptr_StorageBuffer__runtimearr_uint_0 %resultMatrix %uint_0
-         %83 = OpArrayLength %uint %resultMatrix 0
-         %84 = OpISub %uint %83 %uint_1
-         %85 = OpExtInst %uint %63 UMin %index %84
-         %86 = OpAccessChain %_ptr_StorageBuffer_uint_0 %resultMatrix %uint_0 %85
-         %88 = OpLoad %uint %result None
-               OpStore %86 %88 None
+         %43 = OpCompositeExtract %uint %resultCell 1
+         %44 = OpCompositeExtract %uint %resultCell 0
+         %45 = OpIMul %uint %44 %dimOutter
+      %index = OpIAdd %uint %43 %45
+         %47 = OpAccessChain %_ptr_StorageBuffer__runtimearr_uint %resultMatrix %uint_0
+         %49 = OpArrayLength %uint %resultMatrix 0
+         %50 = OpISub %uint %49 %uint_1
+         %51 = OpExtInst %uint %52 UMin %index %50
+         %53 = OpAccessChain %_ptr_StorageBuffer_uint %resultMatrix %uint_0 %51
+         %55 = OpLoad %uint %result None
+               OpStore %53 %55 None
                OpReturn
                OpFunctionEnd
        %main = OpFunction %void None %90

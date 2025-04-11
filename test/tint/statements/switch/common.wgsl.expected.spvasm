@@ -26,6 +26,9 @@
          %10 = OpLoad %int %i None
                OpSelectionMerge %15 None
                OpSwitch %10 %11 0 %12 1 %13 2 %14
+         %11 = OpLabel
+               OpStore %result %int_44 None
+               OpBranch %15
          %12 = OpLabel
                OpStore %result %int_10 None
                OpBranch %15
@@ -34,9 +37,6 @@
                OpBranch %15
          %14 = OpLabel
                OpStore %result %int_33 None
-               OpBranch %15
-         %11 = OpLabel
-               OpStore %result %int_44 None
                OpBranch %15
          %15 = OpLabel
                OpReturn

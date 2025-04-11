@@ -44,15 +44,15 @@
                OpStore %return_value %int_42 None
                OpBranch %21
          %21 = OpLabel
-         %25 = OpLoad %bool %continue_execution None
-               OpSelectionMerge %26 None
-               OpBranchConditional %25 %27 %26
-         %27 = OpLabel
+         %23 = OpLoad %bool %continue_execution None
+               OpSelectionMerge %24 None
+               OpBranchConditional %23 %25 %24
+         %25 = OpLabel
                OpStore %return_value %int_0 None
-               OpBranch %26
-         %26 = OpLabel
-         %29 = OpLoad %int %return_value None
-               OpReturnValue %29
+               OpBranch %24
+         %24 = OpLabel
+         %26 = OpLoad %int %return_value None
+               OpReturnValue %26
                OpFunctionEnd
 %unused_entry_point = OpFunction %void None %31
          %32 = OpLabel
