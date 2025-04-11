@@ -131,6 +131,7 @@ struct Node {
         kFunctionCallPointerArgumentResult,
         kFunctionCallReturnValue,
         kFunctionPointerParameterContents,
+        kSubgroupMatrixVariableDeclaration,
     };
 
     /// The type of the node.
@@ -1238,6 +1239,19 @@ class UniformityGraph {
                     }
                 } else {
                     node = cf;
+
+                    // Subgroup matrix variables cannot be declared in non-uniform control flow.
+                    if (ContainsSubgroupMatrix(sem_var->Type()->UnwrapRef())) {
+                        auto severity = sem_.DiagnosticSeverity(
+                            decl, wgsl::ChromiumDiagnosticRule::kSubgroupMatrixUniformity);
+                        if (severity != wgsl::DiagnosticSeverity::kOff) {
+                            // Create an extra node so that we can produce good diagnostics.
+                            node = CreateNode({NameFor(sem_var), "_decl"}, decl);
+                            node->type = Node::kSubgroupMatrixVariableDeclaration;
+                            node->AddEdge(cf);
+                            current_function_->RequiredToBeUniform(severity)->AddEdge(node);
+                        }
+                    }
                 }
                 current_function_->variables.Set(sem_var, node);
 
@@ -2100,6 +2114,19 @@ class UniformityGraph {
         auto* cause = TraceBackAlongPathUntil(source_node, [&](Node* node) {
             return node->visited_from == function.RequiredToBeUniform(severity);
         });
+
+        // Special-case error for subgroup-matrix variable declarations, which are the only source
+        // of uniformity requirements that do not involve function calls.
+        if (cause->type == Node::kSubgroupMatrixVariableDeclaration) {
+            report(cause->ast->source,
+                   "variables that contain subgroup matrix types cannot be declared in non-uniform "
+                   "control flow",
+                   /* note */ false);
+
+            // Show the point at which control-flow depends on a non-uniform value.
+            ShowControlFlowDivergence(function, cause, source_node);
+            return;
+        }
 
         // The node will always have a corresponding call expression.
         auto* call = cause->ast->As<ast::CallExpression>();

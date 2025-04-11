@@ -907,6 +907,128 @@ test:8:7 note: parameter 's' of 'main' may be non-uniform
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+/// Test subgroup matrix variable declarations.
+////////////////////////////////////////////////////////////////////////////////
+
+TEST_F(UniformityAnalysisTest, SubgroupMatrixVarDecl_Pass) {
+    std::string src = R"(
+enable chromium_experimental_subgroup_matrix;
+
+@group(0) @binding(0) var<storage, read> ro : i32;
+
+fn foo() {
+  if (ro == 0) {
+    var sm : subgroup_matrix_result<f32, 8, 8>;
+  }
+}
+)";
+
+    RunTest(src, true);
+}
+
+TEST_F(UniformityAnalysisTest, SubgroupMatrixVarDecl_Fail) {
+    std::string src = R"(
+enable chromium_experimental_subgroup_matrix;
+
+@group(0) @binding(0) var<storage, read_write> rw : i32;
+
+fn foo() {
+  if (rw == 0) {
+    var sm : subgroup_matrix_result<f32, 8, 8>;
+  }
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(
+        error_,
+        R"(test:8:5 error: variables that contain subgroup matrix types cannot be declared in non-uniform control flow
+    var sm : subgroup_matrix_result<f32, 8, 8>;
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test:7:3 note: control flow depends on possibly non-uniform value
+  if (rw == 0) {
+  ^^
+
+test:7:7 note: reading from read_write storage buffer 'rw' may result in a non-uniform value
+  if (rw == 0) {
+      ^^
+)");
+}
+
+TEST_F(UniformityAnalysisTest, SubgroupMatrixVarDecl_InStruct_Fail) {
+    std::string src = R"(
+enable chromium_experimental_subgroup_matrix;
+
+struct Inner {
+  u : u32,
+  sm : subgroup_matrix_result<f32, 8, 8>,
+}
+
+struct S {
+  u : u32,
+  inner : Inner,
+}
+
+@group(0) @binding(0) var<storage, read_write> rw : i32;
+
+fn foo() {
+  if (rw == 0) {
+    var sm : S;
+  }
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(
+        error_,
+        R"(test:18:5 error: variables that contain subgroup matrix types cannot be declared in non-uniform control flow
+    var sm : S;
+    ^^^^^^^^^^
+
+test:17:3 note: control flow depends on possibly non-uniform value
+  if (rw == 0) {
+  ^^
+
+test:17:7 note: reading from read_write storage buffer 'rw' may result in a non-uniform value
+  if (rw == 0) {
+      ^^
+)");
+}
+
+TEST_F(UniformityAnalysisTest, SubgroupMatrixVarDecl_InArray_Fail) {
+    std::string src = R"(
+enable chromium_experimental_subgroup_matrix;
+
+alias ArrayType = array<array<subgroup_matrix_result<f32, 8, 8>, 4>, 4>;
+
+@group(0) @binding(0) var<storage, read_write> rw : i32;
+
+fn foo() {
+  if (rw == 0) {
+    var sm : ArrayType;
+  }
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(
+        error_,
+        R"(test:10:5 error: variables that contain subgroup matrix types cannot be declared in non-uniform control flow
+    var sm : ArrayType;
+    ^^^^^^^^^^^^^^^^^^
+
+test:9:3 note: control flow depends on possibly non-uniform value
+  if (rw == 0) {
+  ^^
+
+test:9:7 note: reading from read_write storage buffer 'rw' may result in a non-uniform value
+  if (rw == 0) {
+      ^^
+)");
+}
+
+////////////////////////////////////////////////////////////////////////////////
 /// Test loop conditions and conditional break/continue statements.
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -10044,6 +10166,33 @@ fn foo() {
     } else {
         StringStream err;
         err << ToStr(param) << ": 'subgroup_matrix_left' must only be called";
+        EXPECT_THAT(error_, ::testing::HasSubstr(err.str()));
+    }
+}
+
+TEST_P(UniformityAnalysisDiagnosticFilterTest, Directive_SubgroupMatrixUniformity_VarDecl) {
+    auto& param = GetParam();
+    StringStream ss;
+    ss << "enable chromium_experimental_subgroup_matrix;\n"
+       << "diagnostic(" << param << ", chromium.subgroup_matrix_uniformity);" << R"(
+@group(0) @binding(0) var<storage, read_write> non_uniform : i32;
+
+@group(0) @binding(1) var<storage, read_write> data : array<f32>;
+
+fn foo() {
+  if (non_uniform == 42) {
+    var sm : subgroup_matrix_left<f32, 8, 8>;
+  }
+}
+)";
+
+    RunTest(ss.str(), param != wgsl::DiagnosticSeverity::kError);
+
+    if (param == wgsl::DiagnosticSeverity::kOff) {
+        EXPECT_TRUE(error_.empty());
+    } else {
+        StringStream err;
+        err << ToStr(param) << ": variables that contain subgroup matrix types";
         EXPECT_THAT(error_, ::testing::HasSubstr(err.str()));
     }
 }
