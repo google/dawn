@@ -830,6 +830,20 @@ struct BuiltinPolyfill::State {
     /// @return the polyfill function name
     Symbol workgroupUniformLoad(const core::type::Type* type) {
         auto name = b.Symbols().New("tint_workgroupUniformLoad");
+        if (auto* a = type->As<core::type::Atomic>()) {
+            b.Func(name,
+                   tint::Vector{
+                       b.Param("p", b.ty.ptr<workgroup>(T(type))),
+                   },
+                   T(a->Type()),
+                   tint::Vector{
+                       b.CallStmt(b.Call("workgroupBarrier")),
+                       b.Decl(b.Let("result", b.Call("atomicLoad", b.Expr("p")))),
+                       b.CallStmt(b.Call("workgroupBarrier")),
+                       b.Return("result"),
+                   });
+            return name;
+        }
         b.Func(name,
                tint::Vector{
                    b.Param("p", b.ty.ptr<workgroup>(T(type))),
@@ -1483,9 +1497,11 @@ struct BuiltinPolyfill::State {
 
                     case wgsl::BuiltinFn::kWorkgroupUniformLoad:
                         if (cfg.builtins.workgroup_uniform_load) {
-                            return builtin_polyfills.GetOrAdd(builtin, [&] {
-                                return workgroupUniformLoad(builtin->ReturnType());
-                            });
+                            auto* param_type = builtin->Parameters()[0]->Type();
+                            TINT_ASSERT(param_type->Is<core::type::Pointer>());
+                            auto* ty = param_type->As<core::type::Pointer>()->StoreType();
+                            return builtin_polyfills.GetOrAdd(
+                                builtin, [&] { return workgroupUniformLoad(ty); });
                         }
                         return Symbol{};
 

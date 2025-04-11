@@ -3857,6 +3857,19 @@ fn f() {
     EXPECT_TRUE(ShouldRun<BuiltinPolyfill>(src, polyfillWorkgroupUniformLoad()));
 }
 
+TEST_F(BuiltinPolyfillTest, ShouldRunWorkgroupUniformLoadAtomic) {
+    auto* src = R"(
+var<workgroup> v : atomic<i32>;
+
+fn f() {
+  _ = workgroupUniformLoad(&v);
+}
+)";
+
+    EXPECT_FALSE(ShouldRun<BuiltinPolyfill>(src));
+    EXPECT_TRUE(ShouldRun<BuiltinPolyfill>(src, polyfillWorkgroupUniformLoad()));
+}
+
 TEST_F(BuiltinPolyfillTest, WorkgroupUniformLoad_i32) {
     auto* src = R"(
 var<workgroup> v : i32;
@@ -3875,6 +3888,35 @@ fn tint_workgroupUniformLoad(p : ptr<workgroup, i32>) -> i32 {
 }
 
 var<workgroup> v : i32;
+
+fn f() {
+  let r = tint_workgroupUniformLoad(&(v));
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillWorkgroupUniformLoad());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, WorkgroupUniformLoadAtomic_i32) {
+    auto* src = R"(
+var<workgroup> v : atomic<i32>;
+
+fn f() {
+  let r = workgroupUniformLoad(&v);
+}
+)";
+
+    auto* expect = R"(
+fn tint_workgroupUniformLoad(p : ptr<workgroup, atomic<i32>>) -> i32 {
+  workgroupBarrier();
+  let result = atomicLoad(p);
+  workgroupBarrier();
+  return result;
+}
+
+var<workgroup> v : atomic<i32>;
 
 fn f() {
   let r = tint_workgroupUniformLoad(&(v));

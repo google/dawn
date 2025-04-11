@@ -449,6 +449,7 @@ match workgroup
 @must_use @const fn unpack4xU8(u32) -> vec4<u32>
 @stage("compute") fn workgroupBarrier()
 @must_use @stage("compute") implicit(T: __constructible) fn workgroupUniformLoad(ptr<workgroup, T, read_write>) -> T
+@must_use @stage("compute") implicit(T: iu32) fn workgroupUniformLoad(ptr<workgroup, atomic<T>, read_write>) -> T
 
 @stage("compute") fn textureBarrier()
 @must_use implicit(T: fiu32) fn textureDimensions(texture: texture_1d<T>) -> u32

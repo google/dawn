@@ -1487,9 +1487,11 @@ TEST_F(ResolverValidationTest, WorkgroupUniformLoad_ArraySize_NamedOverride) {
         r()->error(),
         R"(error: no matching call to 'workgroupUniformLoad(ptr<workgroup, array<u32, size>, read_write>)'
 
-1 candidate function:
+2 candidate functions:
  • 'workgroupUniformLoad(ptr<workgroup, T, read_write>  ✗ ) -> T' where:
       ✗  'T' is 'any concrete constructible type'
+ • 'workgroupUniformLoad(ptr<workgroup, atomic<T>, read_write>  ✗ ) -> T' where:
+      ✗  'T' is 'i32' or 'u32'
 )");
 }
 
