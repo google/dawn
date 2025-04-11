@@ -171,6 +171,7 @@ class BasicTest : public UniformityAnalysisTestBase,
         kQuadSwapY,
         kQuadSwapDiagonal,
         // Subgroup matrix functions:
+        kSubgroupMatrixConstruct,
         kSubgroupMatrixLoad,
         kSubgroupMatrixStore,
         kSubgroupMatrixMultiply,
@@ -309,6 +310,8 @@ class BasicTest : public UniformityAnalysisTestBase,
                 return "_ = quadSwapY(1.0)";
             case kQuadSwapDiagonal:
                 return "_ = quadSwapDiagonal(1.0)";
+            case kSubgroupMatrixConstruct:
+                return "_ = subgroup_matrix_result<f32, 8, 8>()";
             case kSubgroupMatrixLoad:
                 return "_ = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 8>>("
                        "&subgroup_matrix_data, 0, false, 4)";
@@ -409,6 +412,7 @@ class BasicTest : public UniformityAnalysisTestBase,
             CASE(kQuadSwapX);
             CASE(kQuadSwapY);
             CASE(kQuadSwapDiagonal);
+            CASE(kSubgroupMatrixConstruct);
             CASE(kSubgroupMatrixLoad);
             CASE(kSubgroupMatrixStore);
             CASE(kSubgroupMatrixMultiply);
@@ -9787,6 +9791,76 @@ fn foo() {
     RunTest(src, true);
 }
 
+TEST_F(UniformityAnalysisTest, SubgroupMatrixConstructor_NestedInStruct) {
+    std::string src = R"(
+enable chromium_experimental_subgroup_matrix;
+
+@group(0) @binding(0) var<storage, read_write> non_uniform_global : i32;
+
+struct Inner {
+  u : u32,
+  m : subgroup_matrix_result<f32, 8, 8>,
+}
+
+struct S {
+  u : u32,
+  inner : Inner,
+}
+
+fn foo() {
+  if (non_uniform_global == 0) {
+    _ = S();
+  }
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:18:9 error: 'S' must only be called from uniform control flow
+    _ = S();
+        ^^^
+
+test:17:3 note: control flow depends on possibly non-uniform value
+  if (non_uniform_global == 0) {
+  ^^
+
+test:17:7 note: reading from read_write storage buffer 'non_uniform_global' may result in a non-uniform value
+  if (non_uniform_global == 0) {
+      ^^^^^^^^^^^^^^^^^^
+)");
+}
+
+TEST_F(UniformityAnalysisTest, SubgroupMatrixConstructor_NestedInArray) {
+    std::string src = R"(
+enable chromium_experimental_subgroup_matrix;
+
+@group(0) @binding(0) var<storage, read_write> non_uniform_global : i32;
+
+alias ArrayType = array<array<subgroup_matrix_result<f32, 8, 8>, 4>, 4>;
+
+fn foo() {
+  if (non_uniform_global == 0) {
+    _ = ArrayType();
+  }
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:10:9 error: 'ArrayType' must only be called from uniform control flow
+    _ = ArrayType();
+        ^^^^^^^^^^^
+
+test:9:3 note: control flow depends on possibly non-uniform value
+  if (non_uniform_global == 0) {
+  ^^
+
+test:9:7 note: reading from read_write storage buffer 'non_uniform_global' may result in a non-uniform value
+  if (non_uniform_global == 0) {
+      ^^^^^^^^^^^^^^^^^^
+)");
+}
+
 TEST_F(UniformityAnalysisTest, StressGraphTraversalDepth) {
     // Create a function with a very long sequence of variable declarations and assignments to
     // test traversals of very deep graphs. This requires a non-recursive traversal algorithm.
@@ -9920,7 +9994,7 @@ fn foo() {
     }
 }
 
-TEST_P(UniformityAnalysisDiagnosticFilterTest, Directive_SubgroupMatrixUniformity_Callsite) {
+TEST_P(UniformityAnalysisDiagnosticFilterTest, Directive_SubgroupMatrixUniformity_BuiltinFunction) {
     auto& param = GetParam();
     StringStream ss;
     ss << "enable chromium_experimental_subgroup_matrix;\n"
@@ -9943,6 +10017,33 @@ fn foo() {
     } else {
         StringStream err;
         err << ToStr(param) << ": 'subgroupMatrixLoad' must only be called";
+        EXPECT_THAT(error_, ::testing::HasSubstr(err.str()));
+    }
+}
+
+TEST_P(UniformityAnalysisDiagnosticFilterTest, Directive_SubgroupMatrixUniformity_Constructor) {
+    auto& param = GetParam();
+    StringStream ss;
+    ss << "enable chromium_experimental_subgroup_matrix;\n"
+       << "diagnostic(" << param << ", chromium.subgroup_matrix_uniformity);" << R"(
+@group(0) @binding(0) var<storage, read_write> non_uniform : i32;
+
+@group(0) @binding(1) var<storage, read_write> data : array<f32>;
+
+fn foo() {
+  if (non_uniform == 42) {
+    _ = subgroup_matrix_left<f32, 8, 8>(1);
+  }
+}
+)";
+
+    RunTest(ss.str(), param != wgsl::DiagnosticSeverity::kError);
+
+    if (param == wgsl::DiagnosticSeverity::kOff) {
+        EXPECT_TRUE(error_.empty());
+    } else {
+        StringStream err;
+        err << ToStr(param) << ": 'subgroup_matrix_left' must only be called";
         EXPECT_THAT(error_, ::testing::HasSubstr(err.str()));
     }
 }

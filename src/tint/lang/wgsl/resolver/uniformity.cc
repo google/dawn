@@ -401,6 +401,9 @@ class UniformityGraph {
     /// The function currently being analyzed.
     FunctionInfo* current_function_;
 
+    /// A map from composite type to true/false to indicate whether it contains a subgroup matrix.
+    Hashmap<const core::type::Type*, bool, 16> composite_subgroup_matrix_info_;
+
     /// Create a new node.
     /// @param tag_list a string list that will be used to identify the node for debugging purposes
     /// @param ast the optional AST node that this node corresponds to
@@ -1746,9 +1749,18 @@ class UniformityGraph {
                 function_tag = info->function_tag;
                 func_info = info.value;
             },
-            [&](const sem::ValueConstructor*) {
-                callsite_tag = {CallSiteTag::CallSiteNoRestriction};
-                function_tag = NoRestriction;
+            [&](const sem::ValueConstructor* construct) {
+                if (ContainsSubgroupMatrix(construct->ReturnType())) {
+                    // Get the severity of subgroup matrix uniformity violations in this context.
+                    auto severity = sem_.DiagnosticSeverity(
+                        call, wgsl::ChromiumDiagnosticRule::kSubgroupMatrixUniformity);
+                    if (severity != wgsl::DiagnosticSeverity::kOff) {
+                        callsite_tag = {CallSiteTag::CallSiteRequiredToBeUniform, severity};
+                    }
+                } else {
+                    callsite_tag = {CallSiteTag::CallSiteNoRestriction};
+                    function_tag = NoRestriction;
+                }
             },
             [&](const sem::ValueConversion*) {
                 callsite_tag = {CallSiteTag::CallSiteNoRestriction};
@@ -1908,8 +1920,8 @@ class UniformityGraph {
         const ast::CallExpression* call,
         wgsl::DiagnosticSeverity severity) {
         auto* target = SemCall(call)->Target();
-        if (target->Is<sem::BuiltinFn>()) {
-            // This is a call to a builtin, so we must be done.
+        if (target->IsAnyOf<sem::BuiltinFn, sem::ValueConstructor>()) {
+            // This is a call to a builtin or constructor, so we must be done.
             return call;
         } else if (auto* user = target->As<sem::Function>()) {
             // This is a call to a user-defined function, so inspect the functions called by that
@@ -2155,6 +2167,28 @@ class UniformityGraph {
     // Helper for obtaining the sem::Call node for the ast::CallExpression
     const sem::Call* SemCall(const ast::CallExpression* expr) const {
         return sem_.Get(expr)->UnwrapMaterialize()->As<sem::Call>();
+    }
+
+    /// @returns true if @p type is or contains a subgroup matrix type
+    bool ContainsSubgroupMatrix(const core::type::Type* type) {
+        if (type->Is<core::type::SubgroupMatrix>()) {
+            return true;
+        }
+        return composite_subgroup_matrix_info_.GetOrAdd(type, [&] {
+            return Switch(
+                type,  //
+                [&](const core::type::Array* arr) {
+                    return ContainsSubgroupMatrix(arr->ElemType());
+                },
+                [&](const core::type::Struct* str) {
+                    for (auto* member : str->Members()) {
+                        if (ContainsSubgroupMatrix(member->Type())) {
+                            return true;
+                        }
+                    }
+                    return false;
+                });
+        });
     }
 };
 
