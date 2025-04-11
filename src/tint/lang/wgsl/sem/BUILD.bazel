@@ -136,6 +136,7 @@ cc_library(
   name = "test",
   alwayslink = True,
   srcs = [
+    "array_test.cc",
     "builtin_fn_test.cc",
     "diagnostic_severity_test.cc",
     "helper_test.h",
@@ -148,6 +149,7 @@ cc_library(
     "//src/tint/lang/core",
     "//src/tint/lang/core/constant",
     "//src/tint/lang/core/type",
+    "//src/tint/lang/core/type:test",
     "//src/tint/lang/wgsl",
     "//src/tint/lang/wgsl/ast",
     "//src/tint/lang/wgsl/program",

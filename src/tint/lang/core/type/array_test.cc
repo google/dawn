@@ -31,7 +31,6 @@
 #include "src/tint/lang/core/type/manager.h"
 #include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/core/type/void.h"
-#include "src/tint/lang/wgsl/sem/array_count.h"
 
 namespace tint::core::type {
 namespace {
@@ -144,45 +143,27 @@ TEST_F(ArrayTest, FriendlyNameStaticSizedNonImplicitStride) {
 TEST_F(ArrayTest, IsConstructable) {
     Manager ty;
     auto* fixed_sized = ty.array(ty.u32(), 2u);
-    auto* named_override_sized = ty.Get<core::type::Array>(
-        ty.u32(), ty.Get<sem::NamedOverrideArrayCount>(nullptr), 4u, 8u, 32u, 16u);
-    auto* unnamed_override_sized = ty.Get<core::type::Array>(
-        ty.u32(), ty.Get<sem::UnnamedOverrideArrayCount>(nullptr), 4u, 8u, 32u, 16u);
     auto* runtime_sized = ty.runtime_array(ty.u32());
 
     EXPECT_TRUE(fixed_sized->IsConstructible());
-    EXPECT_FALSE(named_override_sized->IsConstructible());
-    EXPECT_FALSE(unnamed_override_sized->IsConstructible());
     EXPECT_FALSE(runtime_sized->IsConstructible());
 }
 
 TEST_F(ArrayTest, HasCreationFixedFootprint) {
     Manager ty;
     auto* fixed_sized = ty.array(ty.u32(), 2u);
-    auto* named_override_sized = ty.Get<core::type::Array>(
-        ty.u32(), ty.Get<sem::NamedOverrideArrayCount>(nullptr), 4u, 8u, 32u, 16u);
-    auto* unnamed_override_sized = ty.Get<core::type::Array>(
-        ty.u32(), ty.Get<sem::UnnamedOverrideArrayCount>(nullptr), 4u, 8u, 32u, 16u);
     auto* runtime_sized = ty.runtime_array(ty.u32());
 
     EXPECT_TRUE(fixed_sized->HasCreationFixedFootprint());
-    EXPECT_FALSE(named_override_sized->HasCreationFixedFootprint());
-    EXPECT_FALSE(unnamed_override_sized->HasCreationFixedFootprint());
     EXPECT_FALSE(runtime_sized->HasCreationFixedFootprint());
 }
 
 TEST_F(ArrayTest, HasFixedFootprint) {
     Manager ty;
     auto* fixed_sized = ty.array(ty.u32(), 2u);
-    auto* named_override_sized = ty.Get<core::type::Array>(
-        ty.u32(), ty.Get<sem::NamedOverrideArrayCount>(nullptr), 4u, 8u, 32u, 16u);
-    auto* unnamed_override_sized = ty.Get<core::type::Array>(
-        ty.u32(), ty.Get<sem::UnnamedOverrideArrayCount>(nullptr), 4u, 8u, 32u, 16u);
     auto* runtime_sized = ty.runtime_array(ty.u32());
 
     EXPECT_TRUE(fixed_sized->HasFixedFootprint());
-    EXPECT_TRUE(named_override_sized->HasFixedFootprint());
-    EXPECT_TRUE(unnamed_override_sized->HasFixedFootprint());
     EXPECT_FALSE(runtime_sized->HasFixedFootprint());
 }
 
