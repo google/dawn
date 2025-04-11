@@ -183,7 +183,8 @@ class Device final : public DeviceBase {
 
 class PhysicalDevice : public PhysicalDeviceBase {
   public:
-    PhysicalDevice();
+    static Ref<PhysicalDevice> Create();
+
     ~PhysicalDevice() override;
 
     // PhysicalDeviceBase Implementation
@@ -200,6 +201,8 @@ class PhysicalDevice : public PhysicalDeviceBase {
     using PhysicalDeviceBase::SetSupportedFeaturesForTesting;
 
   private:
+    PhysicalDevice();
+
     MaybeError InitializeImpl() override;
     void InitializeSupportedFeaturesImpl() override;
     MaybeError InitializeSupportedLimitsImpl(CombinedLimits* limits) override;

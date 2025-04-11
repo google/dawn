@@ -46,13 +46,18 @@ namespace dawn::native::null {
 // Implementation of pre-Device objects: the null physical device, null backend connection and
 // Connect()
 
+Ref<PhysicalDevice> PhysicalDevice::Create() {
+    auto physicalDevice = AcquireRef(new PhysicalDevice());
+    MaybeError err = physicalDevice->Initialize();
+    DAWN_CHECK(err.IsSuccess());
+    return physicalDevice;
+}
+
 PhysicalDevice::PhysicalDevice() : PhysicalDeviceBase(wgpu::BackendType::Null) {
     mVendorId = 0;
     mDeviceId = 0;
     mName = "Null backend";
     mAdapterType = wgpu::AdapterType::CPU;
-    MaybeError err = Initialize();
-    DAWN_ASSERT(err.IsSuccess());
 }
 
 PhysicalDevice::~PhysicalDevice() = default;
@@ -147,7 +152,7 @@ class Backend : public BackendConnection {
         // There is always a single Null physical device because it is purely CPU based
         // and doesn't depend on the system.
         if (mPhysicalDevice == nullptr) {
-            mPhysicalDevice = AcquireRef(new PhysicalDevice());
+            mPhysicalDevice = PhysicalDevice::Create();
         }
         return {mPhysicalDevice};
     }
