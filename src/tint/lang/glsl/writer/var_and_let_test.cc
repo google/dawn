@@ -145,7 +145,7 @@ TEST_F(GlslWriterTest, VarIn) {
 
     auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] { b.Return(func); });
-    ASSERT_TRUE(Generate({}, tint::ast::PipelineStage::kFragment)) << err_ << output_.glsl;
+    ASSERT_TRUE(Generate({}, core::ir::Function::PipelineStage::kFragment)) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
 precision highp int;
 
@@ -167,7 +167,7 @@ TEST_F(GlslWriterTest, VarOutBlendSrc) {
     auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] { b.Return(func); });
 
-    ASSERT_TRUE(Generate({}, tint::ast::PipelineStage::kFragment)) << err_ << output_.glsl;
+    ASSERT_TRUE(Generate({}, core::ir::Function::PipelineStage::kFragment)) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(#extension GL_EXT_blend_func_extended: require
 precision highp float;
 precision highp int;
@@ -190,7 +190,7 @@ TEST_F(GlslWriterTest, VarOutBuiltin) {
     auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] { b.Return(func); });
 
-    ASSERT_TRUE(Generate({}, tint::ast::PipelineStage::kFragment)) << err_ << output_.glsl;
+    ASSERT_TRUE(Generate({}, core::ir::Function::PipelineStage::kFragment)) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
 precision highp int;
 
@@ -210,7 +210,7 @@ TEST_F(GlslWriterTest, VarBuiltinSampleIndex_ES) {
     auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] { b.Return(func); });
 
-    ASSERT_TRUE(Generate({}, tint::ast::PipelineStage::kFragment)) << err_ << output_.glsl;
+    ASSERT_TRUE(Generate({}, core::ir::Function::PipelineStage::kFragment)) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(#extension GL_OES_sample_variables: require
 precision highp float;
 precision highp int;
@@ -231,7 +231,7 @@ TEST_F(GlslWriterTest, VarBuiltinSampleMask_ES) {
     auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] { b.Return(func); });
 
-    ASSERT_TRUE(Generate({}, tint::ast::PipelineStage::kFragment)) << err_ << output_.glsl;
+    ASSERT_TRUE(Generate({}, core::ir::Function::PipelineStage::kFragment)) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(#extension GL_OES_sample_variables: require
 precision highp float;
 precision highp int;
@@ -254,7 +254,8 @@ TEST_F(GlslWriterTest, VarBuiltinSampled_NonES) {
 
     Options opts{};
     opts.version = Version(Version::Standard::kDesktop, 4, 6);
-    ASSERT_TRUE(Generate(opts, tint::ast::PipelineStage::kFragment)) << err_ << output_.glsl;
+    ASSERT_TRUE(Generate(opts, core::ir::Function::PipelineStage::kFragment))
+        << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, R"(#version 460
 precision highp float;
 precision highp int;

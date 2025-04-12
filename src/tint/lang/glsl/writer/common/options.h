@@ -36,7 +36,6 @@
 
 #include "src/tint/api/common/binding_point.h"
 #include "src/tint/lang/glsl/writer/common/version.h"
-#include "src/tint/lang/wgsl/ast/transform/transform.h"
 
 namespace tint::glsl::writer::binding {
 
@@ -189,11 +188,11 @@ struct ArrayLengthFromUniformOptions {
 };
 
 /// Binding information
-struct Bindings : public Castable<Bindings, tint::ast::transform::Data> {
+struct Bindings {
     /// Constructor
     Bindings();
     /// Destructor
-    ~Bindings() override;
+    ~Bindings();
 
     /// Copy constructor
     Bindings(const Bindings&) = default;

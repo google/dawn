@@ -1374,16 +1374,17 @@ bool GenerateGlsl([[maybe_unused]] Options& options,
 #else
         // If there is no entry point name there is nothing to validate
         if (options.ep_name != "") {
-            tint::ast::PipelineStage stage = tint::ast::PipelineStage::kCompute;
+            tint::core::ir::Function::PipelineStage stage =
+                tint::core::ir::Function::PipelineStage::kCompute;
             switch (entry_point.stage) {
                 case tint::inspector::PipelineStage::kCompute:
-                    stage = tint::ast::PipelineStage::kCompute;
+                    stage = tint::core::ir::Function::PipelineStage::kCompute;
                     break;
                 case tint::inspector::PipelineStage::kVertex:
-                    stage = tint::ast::PipelineStage::kVertex;
+                    stage = tint::core::ir::Function::PipelineStage::kVertex;
                     break;
                 case tint::inspector::PipelineStage::kFragment:
-                    stage = tint::ast::PipelineStage::kFragment;
+                    stage = tint::core::ir::Function::PipelineStage::kFragment;
                     break;
             }
 
