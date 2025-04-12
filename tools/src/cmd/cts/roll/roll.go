@@ -94,6 +94,7 @@ type rollerFlags struct {
 	preserve             bool // If false, abandon past roll changes
 	sendToGardener       bool // If true, automatically send to the gardener for review
 	verbose              bool
+	dryRun               bool
 	generateExplicitTags bool // If true, the most explicit tags will be used instead of several broad ones
 	parentSwarmingRunID  string
 	maxAttempts          int
@@ -128,6 +129,7 @@ func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, e
 	flag.BoolVar(&c.flags.preserve, "preserve", false, "do not abandon existing rolls")
 	flag.BoolVar(&c.flags.sendToGardener, "send-to-gardener", false, "send the CL to the WebGPU gardener for review")
 	flag.BoolVar(&c.flags.verbose, "verbose", false, "emit additional logging")
+	flag.BoolVar(&c.flags.dryRun, "dry-run", false, "show what would run, including the list of filtered query tests")
 	flag.BoolVar(&c.flags.generateExplicitTags, "generate-explicit-tags", false,
 		"Use the most explicit tags for expectations instead of several broad ones")
 	flag.StringVar(&c.flags.parentSwarmingRunID, "parent-swarming-run-id", "",
@@ -344,12 +346,20 @@ func (r *roller) roll(ctx context.Context) error {
 					newLines = append(newLines, line)
 				}
 			}
+			if len(newLines) == 0 {
+				return nil, fmt.Errorf("test-query and test-filter produced 0 tests")
+			}
 			generatedFiles[common.TestListRelPath] = strings.Join(newLines, "\n")
 		}
 		return generatedFiles, nil
 	}(ctx, r.cfg.OsWrapper)
 	if err != nil {
 		return err
+	}
+
+	if r.flags.dryRun {
+		log.Printf("Filtered Queried Test List:")
+		log.Printf(generatedFiles[common.TestListRelPath])
 	}
 
 	// Pull out the test list from the generated files
@@ -396,9 +406,11 @@ func (r *roller) roll(ctx context.Context) error {
 	// Abandon existing rolls, if -preserve is false
 	if !r.flags.preserve && len(existingRolls) > 0 {
 		log.Printf("abandoning %v existing roll...", len(existingRolls))
-		for _, change := range existingRolls {
-			if err := r.gerrit.Abandon(change.ChangeID); err != nil {
-				return err
+		if !r.flags.dryRun {
+			for _, change := range existingRolls {
+				if err := r.gerrit.Abandon(change.ChangeID); err != nil {
+					return err
+				}
 			}
 		}
 		existingRolls = nil
@@ -408,15 +420,25 @@ func (r *roller) roll(ctx context.Context) error {
 	changeID := ""
 	if r.flags.preserve || len(existingRolls) == 0 {
 		msg := r.rollCommitMessage(oldCTSHash, newCTSHash, ctsLog, "")
-		change, err := r.gerrit.CreateChange(r.cfg.Gerrit.Project, "main", msg, true)
-		if err != nil {
-			return err
+		if r.flags.dryRun {
+			changeID = "dry-run-id"
+			log.Printf("created gerrit change (dry-run)...\n%s", msg)
+		} else {
+			change, err := r.gerrit.CreateChange(r.cfg.Gerrit.Project, "main", msg, true)
+			if err != nil {
+				return err
+			}
+			changeID = change.ID
+			log.Printf("created gerrit change %v (%v)...", change.Number, change.URL)
 		}
-		changeID = change.ID
-		log.Printf("created gerrit change %v (%v)...", change.Number, change.URL)
 	} else {
 		changeID = existingRolls[0].ID
 		log.Printf("reusing existing gerrit change %v (%v)...", existingRolls[0].Number, existingRolls[0].URL)
+	}
+
+	if r.flags.dryRun {
+		log.Printf("dry run exit")
+		return nil
 	}
 
 	// Update the DEPS, expectations, and other generated files.
