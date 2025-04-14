@@ -120,12 +120,6 @@ class Resolver {
     bool IsPlain(const core::type::Type* type) const { return validator_.IsPlain(type); }
 
     /// @param type the given type
-    /// @returns true if the given type is a fixed-footprint type
-    bool IsFixedFootprint(const core::type::Type* type) const {
-        return validator_.IsFixedFootprint(type);
-    }
-
-    /// @param type the given type
     /// @returns true if the given type is storable
     bool IsStorable(const core::type::Type* type) const { return validator_.IsStorable(type); }
 

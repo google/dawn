@@ -220,29 +220,6 @@ bool Validator::IsPlain(const core::type::Type* type) const {
                   sem::Array, core::type::Struct, core::type::SubgroupMatrix>();
 }
 
-// https://gpuweb.github.io/gpuweb/wgsl/#fixed-footprint-types
-bool Validator::IsFixedFootprint(const core::type::Type* type) const {
-    return Switch(
-        type,                                             //
-        [&](const core::type::Vector*) { return true; },  //
-        [&](const core::type::Matrix*) { return true; },  //
-        [&](const core::type::Atomic*) { return true; },
-        [&](const core::type::SubgroupMatrix*) { return true; },
-        [&](const sem::Array* arr) {
-            return !arr->Count()->Is<core::type::RuntimeArrayCount>() &&
-                   IsFixedFootprint(arr->ElemType());
-        },
-        [&](const core::type::Struct* str) {
-            for (auto* member : str->Members()) {
-                if (!IsFixedFootprint(member->Type())) {
-                    return false;
-                }
-            }
-            return true;
-        },
-        [&](Default) { return type->Is<core::type::Scalar>(); });
-}
-
 // https://gpuweb.github.io/gpuweb/wgsl.html#storable-types
 bool Validator::IsStorable(const core::type::Type* type) const {
     return IsPlain(type) ||
@@ -2488,7 +2465,7 @@ bool Validator::Array(const sem::Array* arr, const Source& el_source) const {
         return false;
     }
 
-    if (!IsFixedFootprint(el_ty)) {
+    if (!el_ty->HasFixedFootprint()) {
         AddError(el_source) << "an array element type cannot contain a runtime-sized array";
         return false;
     }
@@ -2549,7 +2526,7 @@ bool Validator::Structure(const sem::Struct* str, ast::PipelineStage stage) cons
                 RaiseArrayWithOverrideCountError(member->Declaration()->type->source);
                 return false;
             }
-        } else if (!IsFixedFootprint(member->Type())) {
+        } else if (!member->Type()->HasFixedFootprint()) {
             AddError(member->Declaration()->source)
                 << "a struct that contains a runtime array cannot be nested inside another struct";
             return false;
