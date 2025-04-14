@@ -1678,10 +1678,6 @@ bool Resolver::AliasAnalysis(const sem::Call* call) {
     if (!target) {
         return true;
     }
-    if (validator_.IsValidationDisabled(target->Declaration()->attributes,
-                                        ast::DisabledValidation::kIgnorePointerAliasing)) {
-        return true;
-    }
 
     // Helper to generate an aliasing error diagnostic.
     struct Alias {
