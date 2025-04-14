@@ -2291,23 +2291,6 @@ TEST_F(ResolverTest, MaxNumStructMembers_Invalid) {
     EXPECT_EQ(r()->error(), "12:34 error: 'struct S' has 16384 members, maximum is 16383");
 }
 
-TEST_F(ResolverTest, MaxNumStructMembers_WithIgnoreStructMemberLimit_Valid) {
-    Vector<const ast::StructMember*, 0> members;
-    members.Reserve(kMaxNumStructMembers);
-    for (size_t i = 0; i < kMaxNumStructMembers; ++i) {
-        members.Push(Member("m" + std::to_string(i), ty.i32()));
-    }
-
-    // Add 10 more members, but we set the limit to be ignored on the struct
-    for (size_t i = 0; i < 10; ++i) {
-        members.Push(Member("ignored" + std::to_string(i), ty.i32()));
-    }
-
-    Structure("S", std::move(members),
-              Vector{Disable(ast::DisabledValidation::kIgnoreStructMemberLimit)});
-    EXPECT_TRUE(r()->Resolve()) << r()->error();
-}
-
 uint32_t kMaxNestDepthOfCompositeType = 255;
 
 TEST_F(ResolverTest, MaxNestDepthOfCompositeType_Structs_Valid) {

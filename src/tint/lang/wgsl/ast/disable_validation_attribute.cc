@@ -52,8 +52,6 @@ std::string DisableValidationAttribute::InternalName() const {
             return "disable_validation__function_parameter";
         case DisabledValidation::kIgnoreStrideAttribute:
             return "disable_validation__ignore_stride";
-        case DisabledValidation::kIgnoreStructMemberLimit:
-            return "disable_validation__ignore_struct_member";
         case DisabledValidation::kIgnoreClipDistancesType:
             return "disable_validation__ignore_clip_distances_type";
     }
