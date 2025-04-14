@@ -45,9 +45,6 @@ enum class DisabledValidation {
     /// When applied to a variable, the validator will not complain about the declared address
     /// space.
     kIgnoreAddressSpace,
-    /// When applied to an entry-point function parameter, the validator will not check for entry IO
-    /// attributes.
-    kEntryPointParameter,
     /// When applied to a function parameter, the parameter will not be validated.
     kFunctionParameter,
     /// When applied to a member attribute, a stride attribute may be applied to non-array types.

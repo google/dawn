@@ -782,32 +782,6 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param,
                 },
                 [&](const ast::InterpolateAttribute*) { return true; },
                 [&](const ast::InternalAttribute* attr) -> bool { return InternalAttribute(attr); },
-                [&](const ast::GroupAttribute* attr) {
-                    if (validator_.IsValidationEnabled(
-                            param->attributes, ast::DisabledValidation::kEntryPointParameter)) {
-                        ErrorInvalidAttribute(attribute, StyledText{} << "function parameters");
-                        return false;
-                    }
-                    auto value = GroupAttribute(attr);
-                    if (DAWN_UNLIKELY(value != Success)) {
-                        return false;
-                    }
-                    group = value.Get();
-                    return true;
-                },
-                [&](const ast::BindingAttribute* attr) -> bool {
-                    if (validator_.IsValidationEnabled(
-                            param->attributes, ast::DisabledValidation::kEntryPointParameter)) {
-                        ErrorInvalidAttribute(attribute, StyledText{} << "function parameters");
-                        return false;
-                    }
-                    auto value = BindingAttribute(attr);
-                    if (DAWN_UNLIKELY(value != Success)) {
-                        return false;
-                    }
-                    binding = value.Get();
-                    return true;
-                },
                 [&](Default) {
                     ErrorInvalidAttribute(attribute, StyledText{} << "function parameters");
                     return false;
@@ -1089,9 +1063,7 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
     if (decl->IsEntryPoint()) {
         // Determine if the return type has a location
         bool permissive = validator_.IsValidationDisabled(
-                              decl->attributes, ast::DisabledValidation::kEntryPointParameter) ||
-                          validator_.IsValidationDisabled(
-                              decl->attributes, ast::DisabledValidation::kFunctionParameter);
+            decl->attributes, ast::DisabledValidation::kFunctionParameter);
         for (auto* attribute : decl->return_type_attributes) {
             Mark(attribute);
             enum Status { kSuccess, kErrored, kInvalid };

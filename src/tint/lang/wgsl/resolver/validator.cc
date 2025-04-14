@@ -1373,92 +1373,88 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
             }
         }
 
-        if (IsValidationEnabled(attrs, ast::DisabledValidation::kEntryPointParameter)) {
-            if (is_struct_member && ty->Is<core::type::Struct>()) {
-                AddError(source) << "nested structures cannot be used for entry point IO";
-                return false;
-            }
+        if (is_struct_member && ty->Is<core::type::Struct>()) {
+            AddError(source) << "nested structures cannot be used for entry point IO";
+            return false;
+        }
 
-            if (!ty->Is<core::type::Struct>() && !pipeline_io_attribute) {
-                auto& err = AddError(source) << "missing entry point IO attribute";
-                if (!is_struct_member) {
-                    err << (param_or_ret == ParamOrRetType::kParameter ? " on parameter"
-                                                                       : " on return type");
-                }
-                return false;
+        if (!ty->Is<core::type::Struct>() && !pipeline_io_attribute) {
+            auto& err = AddError(source) << "missing entry point IO attribute";
+            if (!is_struct_member) {
+                err << (param_or_ret == ParamOrRetType::kParameter ? " on parameter"
+                                                                   : " on return type");
             }
+            return false;
+        }
 
-            if (pipeline_io_attribute && pipeline_io_attribute->Is<ast::LocationAttribute>()) {
-                if (ty->IsIntegerScalarOrVector() && !interpolate_attribute) {
-                    if (decl->PipelineStage() == ast::PipelineStage::kVertex &&
-                        param_or_ret == ParamOrRetType::kReturnType) {
-                        AddError(source)
-                            << "integral user-defined vertex outputs must have a "
-                            << style::Attribute("@interpolate")
-                            << style::Code("(", style::Enum("flat"), ")") << " attribute";
-                        return false;
-                    }
-                    if (decl->PipelineStage() == ast::PipelineStage::kFragment &&
-                        param_or_ret == ParamOrRetType::kParameter) {
-                        AddError(source)
-                            << "integral user-defined fragment inputs must have a "
-                            << style::Attribute("@interpolate")
-                            << style::Code("(", style::Enum("flat"), ")") << " attribute";
-                        return false;
-                    }
-                }
-            }
-
-            if (location_attribute) {
-                std::pair<uint32_t, uint32_t> location_and_blend_src(location.value(),
-                                                                     blend_src.value_or(0));
-                if (!locations_and_blend_srcs.Add(location_and_blend_src)) {
-                    auto& err = AddError(location_attribute->source)
-                                << style::Attribute("@location")
-                                << style::Code("(", style::Literal(location.value()), ")");
-                    if (blend_src_attribute) {
-                        err << style::Attribute(" @blend_src")
-                            << style::Code("(", style::Literal(blend_src.value()), ")");
-                    }
-                    err << " appears multiple times";
+        if (pipeline_io_attribute && pipeline_io_attribute->Is<ast::LocationAttribute>()) {
+            if (ty->IsIntegerScalarOrVector() && !interpolate_attribute) {
+                if (decl->PipelineStage() == ast::PipelineStage::kVertex &&
+                    param_or_ret == ParamOrRetType::kReturnType) {
+                    AddError(source) << "integral user-defined vertex outputs must have a "
+                                     << style::Attribute("@interpolate")
+                                     << style::Code("(", style::Enum("flat"), ")") << " attribute";
                     return false;
                 }
-            }
-
-            if (color_attribute && !colors.Add(color.value())) {
-                AddError(color_attribute->source)
-                    << style::Attribute("@color")
-                    << style::Code("(", style::Literal(color.value()), ")")
-                    << " appears multiple times";
-                return false;
-            }
-
-            if (interpolate_attribute) {
-                if (!pipeline_io_attribute ||
-                    !pipeline_io_attribute->Is<ast::LocationAttribute>()) {
-                    AddError(interpolate_attribute->source)
-                        << style::Attribute("@interpolate") << " can only be used with "
-                        << style::Attribute("@location");
-                    return false;
-                }
-            }
-
-            if (invariant_attribute) {
-                bool has_position = false;
-                if (pipeline_io_attribute) {
-                    if (auto* builtin_attr = pipeline_io_attribute->As<ast::BuiltinAttribute>()) {
-                        has_position = (builtin_attr->builtin == core::BuiltinValue::kPosition);
-                    }
-                }
-                if (!has_position) {
-                    AddError(invariant_attribute->source)
-                        << style::Attribute("@invariant") << " must be applied to a "
-                        << style::Attribute("@builtin")
-                        << style::Code("(", style::Enum("position"), ")");
+                if (decl->PipelineStage() == ast::PipelineStage::kFragment &&
+                    param_or_ret == ParamOrRetType::kParameter) {
+                    AddError(source) << "integral user-defined fragment inputs must have a "
+                                     << style::Attribute("@interpolate")
+                                     << style::Code("(", style::Enum("flat"), ")") << " attribute";
                     return false;
                 }
             }
         }
+
+        if (location_attribute) {
+            std::pair<uint32_t, uint32_t> location_and_blend_src(location.value(),
+                                                                 blend_src.value_or(0));
+            if (!locations_and_blend_srcs.Add(location_and_blend_src)) {
+                auto& err = AddError(location_attribute->source)
+                            << style::Attribute("@location")
+                            << style::Code("(", style::Literal(location.value()), ")");
+                if (blend_src_attribute) {
+                    err << style::Attribute(" @blend_src")
+                        << style::Code("(", style::Literal(blend_src.value()), ")");
+                }
+                err << " appears multiple times";
+                return false;
+            }
+        }
+
+        if (color_attribute && !colors.Add(color.value())) {
+            AddError(color_attribute->source)
+                << style::Attribute("@color")
+                << style::Code("(", style::Literal(color.value()), ")")
+                << " appears multiple times";
+            return false;
+        }
+
+        if (interpolate_attribute) {
+            if (!pipeline_io_attribute || !pipeline_io_attribute->Is<ast::LocationAttribute>()) {
+                AddError(interpolate_attribute->source)
+                    << style::Attribute("@interpolate") << " can only be used with "
+                    << style::Attribute("@location");
+                return false;
+            }
+        }
+
+        if (invariant_attribute) {
+            bool has_position = false;
+            if (pipeline_io_attribute) {
+                if (auto* builtin_attr = pipeline_io_attribute->As<ast::BuiltinAttribute>()) {
+                    has_position = (builtin_attr->builtin == core::BuiltinValue::kPosition);
+                }
+            }
+            if (!has_position) {
+                AddError(invariant_attribute->source)
+                    << style::Attribute("@invariant") << " must be applied to a "
+                    << style::Attribute("@builtin")
+                    << style::Code("(", style::Enum("position"), ")");
+                return false;
+            }
+        }
+
         return true;
     };
 
