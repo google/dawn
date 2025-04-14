@@ -97,8 +97,6 @@ tint_add_target(tint_lang_wgsl_ast_transform lib
   lang/wgsl/ast/transform/unshadow.h
   lang/wgsl/ast/transform/vectorize_scalar_matrix_initializers.cc
   lang/wgsl/ast/transform/vectorize_scalar_matrix_initializers.h
-  lang/wgsl/ast/transform/vertex_pulling.cc
-  lang/wgsl/ast/transform/vertex_pulling.h
   lang/wgsl/ast/transform/zero_init_workgroup_memory.cc
   lang/wgsl/ast/transform/zero_init_workgroup_memory.h
 )
@@ -166,7 +164,6 @@ tint_add_target(tint_lang_wgsl_ast_transform_test test
   lang/wgsl/ast/transform/transform_test.cc
   lang/wgsl/ast/transform/unshadow_test.cc
   lang/wgsl/ast/transform/vectorize_scalar_matrix_initializers_test.cc
-  lang/wgsl/ast/transform/vertex_pulling_test.cc
   lang/wgsl/ast/transform/zero_init_workgroup_memory_test.cc
 )
 

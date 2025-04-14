@@ -103,8 +103,6 @@ libtint_source_set("transform") {
     "unshadow.h",
     "vectorize_scalar_matrix_initializers.cc",
     "vectorize_scalar_matrix_initializers.h",
-    "vertex_pulling.cc",
-    "vertex_pulling.h",
     "zero_init_workgroup_memory.cc",
     "zero_init_workgroup_memory.h",
   ]
@@ -165,7 +163,6 @@ if (tint_build_unittests) {
         "transform_test.cc",
         "unshadow_test.cc",
         "vectorize_scalar_matrix_initializers_test.cc",
-        "vertex_pulling_test.cc",
         "zero_init_workgroup_memory_test.cc",
       ]
       deps = [

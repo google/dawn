@@ -68,7 +68,6 @@ cc_library(
     "transform.cc",
     "unshadow.cc",
     "vectorize_scalar_matrix_initializers.cc",
-    "vertex_pulling.cc",
     "zero_init_workgroup_memory.cc",
   ],
   hdrs = [
@@ -101,7 +100,6 @@ cc_library(
     "transform.h",
     "unshadow.h",
     "vectorize_scalar_matrix_initializers.h",
-    "vertex_pulling.h",
     "zero_init_workgroup_memory.h",
   ],
   deps = [
@@ -163,7 +161,6 @@ cc_library(
     "transform_test.cc",
     "unshadow_test.cc",
     "vectorize_scalar_matrix_initializers_test.cc",
-    "vertex_pulling_test.cc",
     "zero_init_workgroup_memory_test.cc",
   ],
   deps = [
