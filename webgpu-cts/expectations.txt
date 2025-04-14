@@ -779,10 +779,10 @@ crbug.com/407109054 [ android-r qualcomm ] webgpu:api,operation,render_pipeline,
 crbug.com/407109055 [ amd mac webgpu-adapter-default ] webgpu:shader,execution,expression,call,builtin,unpack2x16snorm:* [ Failure ]
 crbug.com/407109056 [ amd-0x67ef mac webgpu-adapter-default ] webgpu:shader,execution,expression,call,builtin,clamp:f32:* [ Failure ]
 
-crbug.com/407109057 [ android android-pixel-6 angle-vulkan arm renderer-skia-vulkan target-cpu-64 ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0,1];sampleCount=4;interpolation={"type":"linear","sampling":"sample"} [ Failure ]
-crbug.com/407109057 [ android-pixel-6 android-t angle-vulkan arm renderer-skia-vulkan target-cpu-64 ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0,1];sampleCount=4;interpolation={"type":"perspective","sampling":"sample"} [ Failure ]
-crbug.com/407109057 [ android android-pixel-6 angle-vulkan arm renderer-skia-vulkan target-cpu-64 ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"linear","sampling":"sample"} [ Failure ]
-crbug.com/407109057 [ android-pixel-6 android-t angle-vulkan arm renderer-skia-vulkan target-cpu-64 ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"perspective","sampling":"sample"} [ Failure ]
+crbug.com/407109057 [ android-pixel-6 arm ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0,1];sampleCount=4;interpolation={"type":"linear","sampling":"sample"} [ Failure ]
+crbug.com/407109057 [ android-pixel-6 arm ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0,1];sampleCount=4;interpolation={"type":"perspective","sampling":"sample"} [ Failure ]
+crbug.com/407109057 [ android-pixel-6 arm ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"linear","sampling":"sample"} [ Failure ]
+crbug.com/407109057 [ android-pixel-6 arm ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"perspective","sampling":"sample"} [ Failure ]
 
 # `memory_layout:read_layout` failures on Pixel 4
 crbug.com/407109058 [ android-pixel-4 ] webgpu:shader,execution,memory_layout:read_layout:case="array_stride_size";aspace="function" [ Failure ]
