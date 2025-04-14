@@ -194,11 +194,6 @@ class GlobalVariable final : public Castable<GlobalVariable, Variable> {
 
 /// Attributes that can be applied to parameters
 struct ParameterAttributes {
-    /// the resource binding point for the variable, if set.
-    /// @note a Parameter generally doesn't have a `group` or `binding` attribute in WGSL, as it
-    /// isn't allowed by the spec. The binding point maybe attached by transforms such as
-    /// CanonicalizeEntryPointIO.
-    std::optional<tint::BindingPoint> binding_point;
     /// The `location` attribute value for the variable, if set
     std::optional<uint32_t> location;
     /// The `blend_src` attribute value for the variable, if set

@@ -699,7 +699,6 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param,
     };
 
     if (func->IsEntryPoint()) {
-        std::optional<uint32_t> group, binding;
         for (auto* attribute : param->attributes) {
             Mark(attribute);
             bool ok = Switch(
@@ -733,9 +732,6 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param,
             if (!ok) {
                 return nullptr;
             }
-        }
-        if (group && binding) {
-            sem->Attributes().binding_point = BindingPoint{group.value(), binding.value()};
         }
     } else {
         for (auto* attribute : param->attributes) {
@@ -772,17 +768,6 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param,
     if (!ApplyAddressSpaceUsageToType(core::AddressSpace::kUndefined, ty, param->type->source)) {
         add_note();
         return nullptr;
-    }
-
-    if (auto* ptr = ty->As<core::type::Pointer>()) {
-        // For MSL, we push module-scope variables into the entry point as pointer
-        // parameters, so we also need to handle their store type.
-        if (!ApplyAddressSpaceUsageToType(ptr->AddressSpace(),
-                                          const_cast<core::type::Type*>(ptr->StoreType()),
-                                          param->source)) {
-            add_note();
-            return nullptr;
-        }
     }
 
     if (!validator_.Parameter(sem)) {
