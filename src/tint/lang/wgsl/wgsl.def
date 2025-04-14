@@ -89,8 +89,6 @@ enum extension {
   // A Chromium-specific extension that enables features for input
   // attachments
   chromium_internal_input_attachments
-  // A Chromium-specific extension that relaxes memory layout requirements for uniform storage.
-  chromium_internal_relaxed_uniform_layout
   // A Chromium-specific extension that enables pixel local storage.
   // Cannot be used with chromium_experimental_framebuffer_fetch
   chromium_experimental_pixel_local

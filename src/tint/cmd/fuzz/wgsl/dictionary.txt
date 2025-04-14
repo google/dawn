@@ -166,7 +166,6 @@
 "chromium_experimental_subgroup_matrix"
 "chromium_internal_graphite"
 "chromium_internal_input_attachments"
-"chromium_internal_relaxed_uniform_layout"
 "chromium_testing_experimental"
 "chromium_testing_shipped"
 "chromium_testing_shipped_with_killswitch"
