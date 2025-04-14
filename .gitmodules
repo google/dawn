@@ -34,6 +34,10 @@
 	path = tools/clang
 	url = https://chromium.googlesource.com/chromium/src/tools/clang
 	gclient-condition = dawn_standalone
+[submodule "tools/mb"]
+	path = tools/mb
+	url = https://chromium.googlesource.com/chromium/src/tools/mb
+	gclient-condition = dawn_standalone
 [submodule "testing"]
 	path = testing
 	url = https://chromium.googlesource.com/chromium/src/testing
