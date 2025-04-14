@@ -404,7 +404,13 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
       FeatureInfo::FeatureState::Stable}},
     {Feature::ChromiumExperimentalSubgroupMatrix,
      {"Support the \"enable chromium_experimental_subgroup_matrix;\" directive in WGSL.",
-      "https://github.com/gpuweb/gpuweb/issues/4195", FeatureInfo::FeatureState::Experimental}}};
+      "https://github.com/gpuweb/gpuweb/issues/4195", FeatureInfo::FeatureState::Experimental}},
+    {Feature::DawnDeviceAllocatorControl,
+     {"Supports configuring device allocator via DawnDeviceAllocatorControl",
+      "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
+      "dawn_device_allocator_control.md",
+      FeatureInfo::FeatureState::Experimental}}};
+
 }  // anonymous namespace
 
 void FeaturesSet::EnableFeature(Feature feature) {

@@ -264,6 +264,15 @@
             {"name": "function userdata", "type": "void *", "default": "nullptr"}
         ]
     },
+    "dawn device allocator control": {
+      "tags": ["dawn"],
+      "category": "structure",
+      "chained": "in",
+      "chain roots": ["device descriptor"],
+      "members": [
+          {"name": "allocator heap block size", "type": "size_t", "default": 0}
+      ]
+    },
     "dawn WGSL blocklist": {
         "tags": ["dawn", "native"],
         "category": "structure",
@@ -2311,7 +2320,8 @@
             {"value": 53, "name": "dawn texel copy buffer row alignment", "tags": ["dawn"]},
             {"value": 54, "name": "flexible texture views", "tags": ["dawn"]},
             {"value": 55, "name": "chromium experimental subgroup matrix", "tags": ["dawn"]},
-            {"value": 56, "name": "shared fence EGL sync", "tags": ["dawn", "native"]}
+            {"value": 56, "name": "shared fence EGL sync", "tags": ["dawn", "native"]},
+            {"value": 57, "name": "dawn device allocator control", "tags": ["dawn"]}
         ]
     },
     "filter mode": {
@@ -3834,7 +3844,8 @@
             {"value": 62, "name": "dawn injected invalid s type", "tags": ["dawn"]},
             {"value": 63, "name": "dawn compilation message utf16", "tags": ["dawn", "emscripten"]},
             {"value": 64, "name": "dawn fake buffer OOM for testing", "tags": ["dawn"]},
-            {"value": 65, "name": "surface descriptor from windows WinUI swap chain panel", "tags": ["dawn"]}
+            {"value": 65, "name": "surface descriptor from windows WinUI swap chain panel", "tags": ["dawn"]},
+            {"value": 66, "name": "dawn device allocator control", "tags": ["dawn"]}
         ]
     },
     "texture": {

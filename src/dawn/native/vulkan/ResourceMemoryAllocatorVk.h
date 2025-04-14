@@ -61,7 +61,11 @@ bool SupportsBufferMapExtendedUsages(const VulkanDeviceInfo& deviceInfo);
 
 class ResourceMemoryAllocator {
   public:
-    explicit ResourceMemoryAllocator(Device* device);
+    // Returns heap block size as specified by `control` or the default value if not.
+    static VkDeviceSize GetHeapBlockSize(const DawnDeviceAllocatorControl* control);
+
+    // `heapBlockSize` must be a power of two.
+    ResourceMemoryAllocator(Device* device, VkDeviceSize heapBlockSize);
     ~ResourceMemoryAllocator();
 
     ResultOrError<ResourceMemoryAllocation> Allocate(const VkMemoryRequirements& requirements,
@@ -88,6 +92,7 @@ class ResourceMemoryAllocator {
 
   private:
     raw_ptr<Device> mDevice;
+    const VkDeviceSize mMaxSizeForSuballocation;
 
     class SingleTypeAllocator;
     std::vector<std::unique_ptr<SingleTypeAllocator>> mAllocatorsPerType;

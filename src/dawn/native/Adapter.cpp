@@ -35,9 +35,11 @@
 #include <utility>
 #include <vector>
 
+#include "dawn/common/Math.h"
 #include "dawn/common/StringViewUtils.h"
 #include "dawn/native/ChainUtils.h"
 #include "dawn/native/Device.h"
+#include "dawn/native/Error.h"
 #include "dawn/native/Instance.h"
 #include "dawn/native/PhysicalDevice.h"
 #include "partition_alloc/pointers/raw_ptr.h"
@@ -343,6 +345,15 @@ ResultOrError<Ref<DeviceBase>> AdapterBase::CreateDeviceInternal(
                          "Validating and unpacking descriptor->requiredLimits");
 
         DAWN_TRY_CONTEXT(ValidateLimits(GetLimits(), requiredLimits), "validating required limits");
+    }
+
+    if (auto* allocatorDesc = descriptor.Get<DawnDeviceAllocatorControl>()) {
+        DAWN_INVALID_IF(!requiredFeatureSet.count(wgpu::FeatureName::DawnDeviceAllocatorControl),
+                        "%s is not enabled.", wgpu::FeatureName::DawnDeviceAllocatorControl);
+
+        DAWN_INVALID_IF(!IsPowerOfTwo(allocatorDesc->allocatorHeapBlockSize),
+                        "allocator heap block size (%d) isn't a power of two.",
+                        allocatorDesc->allocatorHeapBlockSize);
     }
 
     return mPhysicalDevice->CreateDevice(this, descriptor, deviceToggles, std::move(lostEvent));

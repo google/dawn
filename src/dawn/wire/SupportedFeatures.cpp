@@ -118,6 +118,7 @@ bool IsFeatureSupported(WGPUFeatureName feature) {
         case WGPUFeatureName_FlexibleTextureViews:
         case WGPUFeatureName_ChromiumExperimentalSubgroupMatrix:
         case WGPUFeatureName_CoreFeaturesAndLimits:
+        case WGPUFeatureName_DawnDeviceAllocatorControl:
             return true;
     }
 

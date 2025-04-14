@@ -142,7 +142,11 @@ MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
     }
 
     mRenderPassCache = std::make_unique<RenderPassCache>(this);
-    mResourceMemoryAllocator = std::make_unique<MutexProtected<ResourceMemoryAllocator>>(this);
+
+    VkDeviceSize heapBlockSize =
+        ResourceMemoryAllocator::GetHeapBlockSize(descriptor.Get<DawnDeviceAllocatorControl>());
+    mResourceMemoryAllocator =
+        std::make_unique<MutexProtected<ResourceMemoryAllocator>>(this, heapBlockSize);
 
     mExternalMemoryService = std::make_unique<external_memory::Service>(this);
 

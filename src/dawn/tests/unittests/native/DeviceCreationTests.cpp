@@ -114,6 +114,50 @@ TEST_F(DeviceCreationTest, CreateDeviceSuccess) {
     EXPECT_NE(device, nullptr);
 }
 
+// Test successful call to CreateDevice with allocator descriptor.
+TEST_F(DeviceCreationTest, CreateDeviceWithAllocatorSuccess) {
+    wgpu::DawnDeviceAllocatorControl allocationDesc = {};
+    allocationDesc.allocatorHeapBlockSize = 4 * 1024;
+
+    wgpu::DeviceDescriptor desc = {};
+    wgpu::FeatureName feature = wgpu::FeatureName::DawnDeviceAllocatorControl;
+    desc.requiredFeatures = &feature;
+    desc.requiredFeatureCount = 1;
+    desc.nextInChain = &allocationDesc;
+
+    wgpu::Device device = unsafeAdapter.CreateDevice(&desc);
+    EXPECT_NE(device, nullptr);
+}
+
+// Test failed call to CreateDevice with allocator descriptor. This is using an adapter that does
+// not have DawnDeviceAllocatorControl feature enabled.
+TEST_F(DeviceCreationTest, CreateDeviceWithAllocatorFailedMissingFeature) {
+    wgpu::DawnDeviceAllocatorControl allocationDesc = {};
+    allocationDesc.allocatorHeapBlockSize = 4 * 1024;
+
+    wgpu::DeviceDescriptor desc = {};
+    desc.nextInChain = &allocationDesc;
+
+    wgpu::Device device = adapter.CreateDevice(&desc);
+    EXPECT_EQ(device, nullptr);
+}
+
+// Test failed call to CreateDevice with allocator descriptor. The heap block size provided is not a
+// power of two.
+TEST_F(DeviceCreationTest, CreateDeviceWithAllocatorFailedHeapBlockSize) {
+    wgpu::DawnDeviceAllocatorControl allocationDesc = {};
+    allocationDesc.allocatorHeapBlockSize = 4 * 1024 + 1;
+
+    wgpu::DeviceDescriptor desc = {};
+    wgpu::FeatureName feature = wgpu::FeatureName::DawnDeviceAllocatorControl;
+    desc.requiredFeatures = &feature;
+    desc.requiredFeatureCount = 1;
+    desc.nextInChain = &allocationDesc;
+
+    wgpu::Device device = unsafeAdapter.CreateDevice(&desc);
+    EXPECT_EQ(device, nullptr);
+}
+
 // Test successful call to CreateDevice with toggle descriptor.
 TEST_F(DeviceCreationTest, CreateDeviceWithTogglesSuccess) {
     wgpu::DeviceDescriptor desc = {};
