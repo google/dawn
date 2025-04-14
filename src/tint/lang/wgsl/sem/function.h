@@ -31,10 +31,8 @@
 #include <array>
 #include <optional>
 #include <utility>
-#include <vector>
 
-#include "src/tint/lang/wgsl/ast/diagnostic_control.h"
-#include "src/tint/lang/wgsl/ast/variable.h"
+#include "src/tint/lang/wgsl/diagnostic_severity.h"
 #include "src/tint/lang/wgsl/sem/call.h"
 #include "src/tint/utils/containers/unique_vector.h"
 #include "src/tint/utils/containers/vector.h"
@@ -188,16 +186,6 @@ class Function final : public Castable<Function, CallTarget> {
         call_graph_entry_points_.Push(entry_point);
     }
 
-    /// Retrieves any referenced location variables
-    /// @returns the <variable, attribute> pair.
-    std::vector<std::pair<const Variable*, const ast::LocationAttribute*>>
-    TransitivelyReferencedLocationVariables() const;
-
-    /// Retrieves any referenced builtin variables
-    /// @returns the <variable, attribute> pair.
-    std::vector<std::pair<const Variable*, const ast::BuiltinAttribute*>>
-    TransitivelyReferencedBuiltinVariables() const;
-
     /// Checks if the given entry point has the function in its call graph
     /// @param sym the entry point symbol
     /// @returns true if `sym` has the function in its call graph
@@ -248,7 +236,6 @@ class Function final : public Castable<Function, CallTarget> {
     UniqueVector<const GlobalVariable*, 8> transitively_referenced_globals_;
     UniqueVector<const Function*, 8> transitively_called_functions_;
     UniqueVector<const BuiltinFn*, 4> directly_called_builtins_;
-    UniqueVector<VariablePair, 8> texture_sampler_pairs_;
     Vector<const Call*, 1> direct_calls_;
     Vector<const Call*, 1> callsites_;
     Vector<const Function*, 1> call_graph_entry_points_;
