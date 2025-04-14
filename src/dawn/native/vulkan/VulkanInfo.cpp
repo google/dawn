@@ -343,6 +343,9 @@ ResultOrError<VulkanDeviceInfo> GatherDeviceInfo(const PhysicalDevice& device) {
         if (info.extensions[DeviceExt::CooperativeMatrix]) {
             featuresChain.Add(&info.cooperativeMatrixFeatures,
                               VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_COOPERATIVE_MATRIX_FEATURES_KHR);
+            propertiesChain.Add(
+                &info.cooperativeMatrixProperties,
+                VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_COOPERATIVE_MATRIX_PROPERTIES_KHR);
         }
 
         // Use vkGetPhysicalDevice{Features,Properties}2 if required to gather information about
@@ -367,15 +370,14 @@ ResultOrError<VulkanDeviceInfo> GatherDeviceInfo(const PhysicalDevice& device) {
                                     vkPhysicalDevice, &count, nullptr),
                                 "vkGetPhysicalDeviceCooperativeMatrixPropertiesKHR"));
 
-        info.cooperativeMatrixProperties.resize(count);
-        for (auto& properties : info.cooperativeMatrixProperties) {
+        info.cooperativeMatrixConfigs.resize(count);
+        for (auto& properties : info.cooperativeMatrixConfigs) {
             properties.sType = VK_STRUCTURE_TYPE_COOPERATIVE_MATRIX_PROPERTIES_KHR;
             properties.pNext = nullptr;
         }
-        DAWN_TRY(
-            CheckVkSuccess(vkFunctions.GetPhysicalDeviceCooperativeMatrixPropertiesKHR(
-                               vkPhysicalDevice, &count, info.cooperativeMatrixProperties.data()),
-                           "vkGetPhysicalDeviceCooperativeMatrixPropertiesKHR"));
+        DAWN_TRY(CheckVkSuccess(vkFunctions.GetPhysicalDeviceCooperativeMatrixPropertiesKHR(
+                                    vkPhysicalDevice, &count, info.cooperativeMatrixConfigs.data()),
+                                "vkGetPhysicalDeviceCooperativeMatrixPropertiesKHR"));
     }
 
     // TODO(cwallez@chromium.org): gather info about formats

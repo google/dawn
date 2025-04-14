@@ -439,6 +439,8 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     // Enable subgroup matrix if both Cooperative Matrix and Vulkan Memory Model are supported.
     if (mDeviceInfo.HasExt(DeviceExt::CooperativeMatrix) &&
         mDeviceInfo.cooperativeMatrixFeatures.cooperativeMatrix &&
+        mDeviceInfo.cooperativeMatrixProperties.cooperativeMatrixSupportedStages &
+            VK_SHADER_STAGE_COMPUTE_BIT &&
         mDeviceInfo.HasExt(DeviceExt::VulkanMemoryModel) &&
         mDeviceInfo.vulkanMemoryModelFeatures.vulkanMemoryModel == VK_TRUE &&
         mDeviceInfo.vulkanMemoryModelFeatures.vulkanMemoryModelDeviceScope == VK_TRUE) {
@@ -1197,10 +1199,10 @@ void PhysicalDevice::PopulateBackendFormatCapabilities(
 }
 
 void PhysicalDevice::PopulateSubgroupMatrixConfigs() {
-    size_t configCount = mDeviceInfo.cooperativeMatrixProperties.size();
+    size_t configCount = mDeviceInfo.cooperativeMatrixConfigs.size();
     mSubgroupMatrixConfigs.reserve(configCount);
     for (uint32_t i = 0; i < configCount; i++) {
-        const VkCooperativeMatrixPropertiesKHR& p = mDeviceInfo.cooperativeMatrixProperties[i];
+        const VkCooperativeMatrixPropertiesKHR& p = mDeviceInfo.cooperativeMatrixConfigs[i];
 
         // Filter out configurations that WebGPU does not support.
         if (p.AType != p.BType || p.CType != p.ResultType || p.scope != VK_SCOPE_SUBGROUP_KHR ||
