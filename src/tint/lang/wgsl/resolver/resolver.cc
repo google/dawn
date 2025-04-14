@@ -610,9 +610,6 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
     }
 
     if (is_global) {
-        bool has_io_address_space = sem->AddressSpace() == core::AddressSpace::kIn ||
-                                    sem->AddressSpace() == core::AddressSpace::kOut;
-
         std::optional<uint32_t> group, binding, input_attachment_index;
         for (auto* attribute : var->attributes) {
             Mark(attribute);
@@ -642,57 +639,6 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
                     }
                     input_attachment_index = value.Get();
                     return kSuccess;
-                },
-                [&](const ast::LocationAttribute* attr) {
-                    if (!has_io_address_space) {
-                        return kInvalid;
-                    }
-                    auto value = LocationAttribute(attr);
-                    if (value != Success) {
-                        return kErrored;
-                    }
-                    global->Attributes().location = value.Get();
-                    return kSuccess;
-                },
-                [&](const ast::BlendSrcAttribute* attr) {
-                    if (!has_io_address_space) {
-                        return kInvalid;
-                    }
-                    auto value = BlendSrcAttribute(attr);
-                    if (value != Success) {
-                        return kErrored;
-                    }
-                    global->Attributes().blend_src = value.Get();
-                    return kSuccess;
-                },
-                [&](const ast::ColorAttribute* attr) {
-                    if (!has_io_address_space) {
-                        return kInvalid;
-                    }
-                    auto value = ColorAttribute(attr);
-                    if (value != Success) {
-                        return kErrored;
-                    }
-                    global->Attributes().color = value.Get();
-                    return kSuccess;
-                },
-                [&](const ast::BuiltinAttribute*) {
-                    if (!has_io_address_space) {
-                        return kInvalid;
-                    }
-                    return kSuccess;
-                },
-                [&](const ast::InterpolateAttribute*) {
-                    if (!has_io_address_space) {
-                        return kInvalid;
-                    }
-                    return kSuccess;
-                },
-                [&](const ast::InvariantAttribute* attr) {
-                    if (!has_io_address_space) {
-                        return kInvalid;
-                    }
-                    return InvariantAttribute(attr) ? kSuccess : kErrored;
                 },
                 [&](const ast::InternalAttribute* attr) {
                     return InternalAttribute(attr) ? kSuccess : kErrored;

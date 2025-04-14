@@ -1505,22 +1505,9 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
 
     if (decl->PipelineStage() == ast::PipelineStage::kVertex &&
         !builtins.Contains(core::BuiltinValue::kPosition)) {
-        // Check module-scope variables, as the SPIR-V sanitizer generates these.
-        bool found = false;
-        for (auto* global : func->TransitivelyReferencedGlobals()) {
-            if (auto* builtin_attr =
-                    ast::GetAttribute<ast::BuiltinAttribute>(global->Declaration()->attributes)) {
-                if (builtin_attr->builtin == core::BuiltinValue::kPosition) {
-                    found = true;
-                    break;
-                }
-            }
-        }
-        if (!found) {
-            AddError(decl->source) << "a vertex shader must include the " << style::Enum("position")
-                                   << " builtin in its return type";
-            return false;
-        }
+        AddError(decl->source) << "a vertex shader must include the " << style::Enum("position")
+                               << " builtin in its return type";
+        return false;
     }
 
     if (decl->PipelineStage() == ast::PipelineStage::kCompute) {

@@ -157,18 +157,6 @@ struct GlobalVariableAttributes {
     std::optional<tint::OverrideId> override_id;
     /// the resource binding point for the variable, if set.
     std::optional<tint::BindingPoint> binding_point;
-    /// The `location` attribute value for the variable, if set
-    /// @note a GlobalVariable generally doesn't have a `location` in WGSL, as it isn't allowed by
-    /// the spec. The location maybe attached by transforms such as CanonicalizeEntryPointIO.
-    std::optional<uint32_t> location;
-    /// The `blend_src` attribute value for the variable, if set
-    /// @note a GlobalVariable generally doesn't have a `blend_src` in WGSL, as it isn't allowed by
-    /// the spec. The location maybe attached by transforms such as CanonicalizeEntryPointIO.
-    std::optional<uint32_t> blend_src;
-    /// The `color` attribute value for the variable, if set
-    /// @note a GlobalVariable generally doesn't have a `color` in WGSL, as it isn't allowed by
-    /// the spec. The location maybe attached by transforms such as CanonicalizeEntryPointIO.
-    std::optional<uint32_t> color;
     /// The `input_attachment_index` attribute value for the variable, if set
     std::optional<uint32_t> input_attachment_index;
 };
