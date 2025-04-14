@@ -40,7 +40,6 @@
 #include "src/tint/lang/core/builtin_value.h"
 #include "src/tint/lang/wgsl/inspector/entry_point.h"
 #include "src/tint/lang/wgsl/inspector/resource_binding.h"
-#include "src/tint/lang/wgsl/inspector/scalar.h"
 #include "src/tint/lang/wgsl/program/program.h"
 #include "src/tint/lang/wgsl/sem/sampler_texture_pair.h"
 

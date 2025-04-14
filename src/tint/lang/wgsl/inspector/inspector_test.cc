@@ -124,7 +124,6 @@ TEST_F(InspectorGetEntryPointTest, OneEntryPoint) {
 
     ASSERT_EQ(1u, result.size());
     EXPECT_EQ("foo", result[0].name);
-    EXPECT_EQ("foo", result[0].remapped_name);
     EXPECT_EQ(PipelineStage::kFragment, result[0].stage);
 }
 
@@ -140,10 +139,8 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPoints) {
 
     ASSERT_EQ(2u, result.size());
     EXPECT_EQ("foo", result[0].name);
-    EXPECT_EQ("foo", result[0].remapped_name);
     EXPECT_EQ(PipelineStage::kFragment, result[0].stage);
     EXPECT_EQ("bar", result[1].name);
-    EXPECT_EQ("bar", result[1].remapped_name);
     EXPECT_EQ(PipelineStage::kCompute, result[1].stage);
 }
 
@@ -163,10 +160,8 @@ fn foo() { func(); }
 
     ASSERT_EQ(2u, result.size());
     EXPECT_EQ("foo", result[0].name);
-    EXPECT_EQ("foo", result[0].remapped_name);
     EXPECT_EQ(PipelineStage::kCompute, result[0].stage);
     EXPECT_EQ("bar", result[1].name);
-    EXPECT_EQ("bar", result[1].remapped_name);
     EXPECT_EQ(PipelineStage::kFragment, result[1].stage);
 }
 
@@ -1137,7 +1132,6 @@ fn ep_func() {}
     ASSERT_EQ(1u, result.size());
     EXPECT_FALSE(result[0].input_sample_mask_used);
     EXPECT_FALSE(result[0].output_sample_mask_used);
-    EXPECT_FALSE(result[0].input_position_used);
     EXPECT_FALSE(result[0].front_facing_used);
     EXPECT_FALSE(result[0].sample_index_used);
     EXPECT_FALSE(result[0].num_workgroups_used);
@@ -1207,35 +1201,6 @@ fn ep_func() -> out_struct {
 
     ASSERT_EQ(1u, result.size());
     EXPECT_TRUE(result[0].output_sample_mask_used);
-}
-
-TEST_F(InspectorGetEntryPointTest, InputPositionSimpleReferenced) {
-    auto* src = R"(
-@fragment
-fn ep_func(@builtin(position) in_var: vec4f) {}
-)";
-    Inspector& inspector = Initialize(src);
-
-    auto result = inspector.GetEntryPoints();
-
-    ASSERT_EQ(1u, result.size());
-    EXPECT_TRUE(result[0].input_position_used);
-}
-
-TEST_F(InspectorGetEntryPointTest, InputPositionStructReferenced) {
-    auto* src = R"(
-struct in_struct {
-  @builtin(position) inner_position: vec4f,
-}
-@fragment
-fn ep_func(in_var: in_struct) {}
-)";
-    Inspector& inspector = Initialize(src);
-
-    auto result = inspector.GetEntryPoints();
-
-    ASSERT_EQ(1u, result.size());
-    EXPECT_TRUE(result[0].input_position_used);
 }
 
 TEST_F(InspectorGetEntryPointTest, FrontFacingSimpleReferenced) {

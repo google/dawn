@@ -266,7 +266,6 @@ EntryPoint Inspector::GetEntryPoint(const tint::ast::Function* func) {
     auto* sem = program_.Sem().Get(func);
 
     entry_point.name = func->name->symbol.Name();
-    entry_point.remapped_name = func->name->symbol.Name();
 
     switch (func->PipelineStage()) {
         case ast::PipelineStage::kCompute: {
@@ -306,8 +305,6 @@ EntryPoint Inspector::GetEntryPoint(const tint::ast::Function* func) {
             param->Type(), param->Declaration()->attributes, param->Attributes().location,
             param->Attributes().color, /* @blend_src */ std::nullopt, entry_point.input_variables);
 
-        entry_point.input_position_used |= ContainsBuiltin(
-            core::BuiltinValue::kPosition, param->Type(), param->Declaration()->attributes);
         entry_point.front_facing_used |= ContainsBuiltin(
             core::BuiltinValue::kFrontFacing, param->Type(), param->Declaration()->attributes);
         entry_point.sample_index_used |= ContainsBuiltin(
