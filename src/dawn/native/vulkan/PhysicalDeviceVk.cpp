@@ -436,17 +436,26 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         EnableFeature(Feature::Subgroups);
     }
 
-    // Enable subgroup matrix if both Cooperative Matrix and Vulkan Memory Model are supported.
-    if (mDeviceInfo.HasExt(DeviceExt::CooperativeMatrix) &&
-        mDeviceInfo.cooperativeMatrixFeatures.cooperativeMatrix &&
-        mDeviceInfo.cooperativeMatrixProperties.cooperativeMatrixSupportedStages &
-            VK_SHADER_STAGE_COMPUTE_BIT &&
+    // Enable subgroup matrix if all of the following are true:
+    //   1. Cooperative Matrix is supported in compute shaders.
+    //   2. Vulkan Memory Model is supported at device scope.
+    //   3. Subgroup Size Control is supported along with the full subgroups feature bit.
+    //   4. There is at least one supported matrix configuration.
+    const bool hasCooperativeMatrix =
+        mDeviceInfo.HasExt(DeviceExt::CooperativeMatrix) &&
+        mDeviceInfo.cooperativeMatrixFeatures.cooperativeMatrix == VK_TRUE &&
+        (mDeviceInfo.cooperativeMatrixProperties.cooperativeMatrixSupportedStages &
+         VK_SHADER_STAGE_COMPUTE_BIT) != 0;
+    const bool hasVulkanMemoryModel =
         mDeviceInfo.HasExt(DeviceExt::VulkanMemoryModel) &&
         mDeviceInfo.vulkanMemoryModelFeatures.vulkanMemoryModel == VK_TRUE &&
-        mDeviceInfo.vulkanMemoryModelFeatures.vulkanMemoryModelDeviceScope == VK_TRUE) {
+        mDeviceInfo.vulkanMemoryModelFeatures.vulkanMemoryModelDeviceScope == VK_TRUE;
+    const bool hasComputeFullSubgroups =
+        mDeviceInfo.HasExt(DeviceExt::SubgroupSizeControl) &&
+        (mDeviceInfo.subgroupSizeControlFeatures.subgroupSizeControl == VK_TRUE) &&
+        (mDeviceInfo.subgroupSizeControlFeatures.computeFullSubgroups == VK_TRUE);
+    if (hasCooperativeMatrix && hasVulkanMemoryModel && hasComputeFullSubgroups) {
         PopulateSubgroupMatrixConfigs();
-
-        // Enable the feature if at least one valid configuration is supported.
         if (!mSubgroupMatrixConfigs.empty()) {
             EnableFeature(Feature::ChromiumExperimentalSubgroupMatrix);
         }
