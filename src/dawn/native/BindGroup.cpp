@@ -510,8 +510,7 @@ MaybeError ValidateBindGroupDescriptor(DeviceBase* device,
                     layout->GetExternalTextureBindingExpansionMap()));
                 continue;
             }
-            // TODO(crbug.com/398752857): Make this controlled by a toggle before shipping.
-            if (device->IsToggleEnabled(Toggle::AllowUnsafeAPIs)) {
+            if (!device->IsToggleEnabled(Toggle::DisableTextureViewBindingUsedAsExternalTexture)) {
                 DAWN_TRY_CONTEXT(ValidateTextureViewBindingUsedAsExternalTexture(device, entry),
                                  "validating entries[%u] as a TextureView."
                                  "\nExpected entry layout: %s",
