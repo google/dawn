@@ -2143,9 +2143,7 @@ bool Validator::FunctionCall(const sem::Call* call, sem::Statement* current_stat
             } else {
                 root_store_type = root_ref_ty->StoreType();
             }
-            if (root_store_type != arg_store_type &&
-                IsValidationEnabled(param->Declaration()->attributes,
-                                    ast::DisabledValidation::kIgnoreInvalidPointerArgument)) {
+            if (root_store_type != arg_store_type) {
                 AddError(arg_expr->source) << "arguments of pointer type must not point to a "
                                               "subset of the originating variable";
                 return false;

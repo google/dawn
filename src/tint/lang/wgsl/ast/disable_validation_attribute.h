@@ -49,9 +49,6 @@ enum class DisabledValidation {
     kFunctionParameter,
     /// When applied to a member attribute, a stride attribute may be applied to non-array types.
     kIgnoreStrideAttribute,
-    /// When applied to a pointer function parameter, the validator will not require a function call
-    /// argument passed for that parameter to have a certain form.
-    kIgnoreInvalidPointerArgument,
     /// When applied to a function declaration, the validator will not complain if multiple
     /// pointer arguments alias when that function is called.
     kIgnorePointerAliasing,
