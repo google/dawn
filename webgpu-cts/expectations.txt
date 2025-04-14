@@ -340,6 +340,7 @@ crbug.com/42241267 [ dawn-backend-validation intel-0x9bc5 ubuntu webgpu-adapter-
 # Miscellaneous flakes
 crbug.com/41489034 [ dawn-backend-validation intel ubuntu webgpu-adapter-default ] webgpu:web_platform,canvas,configure:viewFormats:* [ RetryOnFailure ]
 crbug.com/42241275 [ dawn-backend-validation intel-0x9bc5 ubuntu ] webgpu:api,operation,command_buffer,image_copy:origins_and_extents:initMethod="WriteTexture";checkMethod="FullCopyT2B";* [ RetryOnFailure ]
+crbug.com/42241275 [ intel-0x9bc5 ubuntu ] webgpu:api,operation,command_buffer,image_copy:* [ RetryOnFailure ]
 
 # Occlusion result incorrect with writeMask 0 on Intel
 crbug.com/42240657 [ angle-d3d11 intel-0x9bc5 release renderer-skia-gl win10 ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,depth:writeMask=0;* [ Failure ]
@@ -718,6 +719,7 @@ crbug.com/42241269 [ amd mac ] webgpu:shader,execution,zero_init:compute,zero_in
 
 crbug.com/373664084 [ dawn-backend-validation intel-0x4680 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:* [ RetryOnFailure ]
 crbug.com/373664084 [ dawn-backend-validation intel linux ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:* [ RetryOnFailure ]
+crbug.com/373664084 [ dawn-backend-validation intel-0x9bc5 linux ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_ImageData:* [ RetryOnFailure ]
 
 crbug.com/373670513 [ android-pixel-6 ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="workgroup";* [ RetryOnFailure ]
 crbug.com/373485785 [ intel win10 ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="workgroup";* [ RetryOnFailure ]
