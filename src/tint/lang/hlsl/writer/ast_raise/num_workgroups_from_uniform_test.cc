@@ -69,9 +69,7 @@ fn main(@builtin(num_workgroups) num_wgs : vec3<u32>) {
 
     auto* expect = "error: missing transform data for tint::hlsl::writer::NumWorkgroupsFromUniform";
 
-    ast::transform::DataMap data;
-    data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
-    auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src, data);
+    auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src);
     EXPECT_EQ(expect, str(got));
 }
 
@@ -105,7 +103,6 @@ fn main() {
 )";
 
     ast::transform::DataMap data;
-    data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
     data.Add<NumWorkgroupsFromUniform::Config>(BindingPoint{0, 30u});
     auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src, data);
     EXPECT_EQ(expect, str(got));
@@ -143,7 +140,6 @@ fn main() {
 )";
 
     ast::transform::DataMap data;
-    data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
     data.Add<NumWorkgroupsFromUniform::Config>(BindingPoint{0, 30u});
     auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src, data);
     EXPECT_EQ(expect, str(got));
@@ -183,7 +179,6 @@ fn main() {
 )";
 
     ast::transform::DataMap data;
-    data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
     data.Add<NumWorkgroupsFromUniform::Config>(BindingPoint{0, 30u});
     auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src, data);
     EXPECT_EQ(expect, str(got));
@@ -223,7 +218,6 @@ fn main() {
 )";
 
     ast::transform::DataMap data;
-    data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
     data.Add<NumWorkgroupsFromUniform::Config>(BindingPoint{0, 30u});
     auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src, data);
     EXPECT_EQ(expect, str(got));
@@ -267,7 +261,6 @@ fn main() {
 )";
 
     ast::transform::DataMap data;
-    data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
     data.Add<NumWorkgroupsFromUniform::Config>(BindingPoint{0, 30u});
     auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src, data);
     EXPECT_EQ(expect, str(got));
@@ -311,7 +304,6 @@ struct Builtins {
 )";
 
     ast::transform::DataMap data;
-    data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
     data.Add<NumWorkgroupsFromUniform::Config>(BindingPoint{0, 30u});
     auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src, data);
     EXPECT_EQ(expect, str(got));
@@ -366,7 +358,6 @@ fn main(tint_symbol : tint_symbol_1) {
 )";
 
     ast::transform::DataMap data;
-    data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
     data.Add<NumWorkgroupsFromUniform::Config>(BindingPoint{0, 30u});
     auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src, data);
     EXPECT_EQ(expect, str(got));
@@ -422,7 +413,6 @@ struct Builtins {
 )";
 
     ast::transform::DataMap data;
-    data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
     data.Add<NumWorkgroupsFromUniform::Config>(BindingPoint{0, 30u});
     auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src, data);
     EXPECT_EQ(expect, str(got));
@@ -521,7 +511,6 @@ fn main3() {
 )";
 
     ast::transform::DataMap data;
-    data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
     data.Add<NumWorkgroupsFromUniform::Config>(BindingPoint{0, 30u});
     auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src, data);
     EXPECT_EQ(expect, str(got));
@@ -562,7 +551,6 @@ fn main(tint_symbol : tint_symbol_1) {
 )";
 
     ast::transform::DataMap data;
-    data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
     data.Add<NumWorkgroupsFromUniform::Config>(BindingPoint{0, 30u});
     auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src, data);
     EXPECT_EQ(expect, str(got));
@@ -663,7 +651,6 @@ fn main3() {
 )";
 
     ast::transform::DataMap data;
-    data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
     // Make binding point unspecified.
     data.Add<NumWorkgroupsFromUniform::Config>(std::nullopt);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src, data);
@@ -817,7 +804,6 @@ fn main3() {
 )";
 
     ast::transform::DataMap data;
-    data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
     // Make binding point unspecified.
     data.Add<NumWorkgroupsFromUniform::Config>(std::nullopt);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src, data);
