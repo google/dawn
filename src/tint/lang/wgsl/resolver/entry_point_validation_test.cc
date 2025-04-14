@@ -464,14 +464,6 @@ TEST_F(ResolverEntryPointValidationTest, PushConstantDisallowedWithoutEnable) {
               "extension 'chromium_experimental_push_constant'");
 }
 
-TEST_F(ResolverEntryPointValidationTest, PushConstantAllowedWithIgnoreAddressSpaceAttribute) {
-    // var<push_constant> a : u32; // With ast::DisabledValidation::kIgnoreAddressSpace
-    GlobalVar("a", ty.u32(), core::AddressSpace::kPushConstant,
-              Vector{Disable(ast::DisabledValidation::kIgnoreAddressSpace)});
-
-    EXPECT_TRUE(r()->Resolve());
-}
-
 TEST_F(ResolverEntryPointValidationTest, PushConstantOneVariableUsedInEntryPoint) {
     // enable chromium_experimental_push_constant;
     // var<push_constant> a : u32;

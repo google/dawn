@@ -579,9 +579,7 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
         }
     }
 
-    if (!is_global && sem->AddressSpace() != core::AddressSpace::kFunction &&
-        validator_.IsValidationEnabled(var->attributes,
-                                       ast::DisabledValidation::kIgnoreAddressSpace)) {
+    if (!is_global && sem->AddressSpace() != core::AddressSpace::kFunction) {
         AddError(var->source)
             << "function-scope 'var' declaration must use 'function' address space";
         return nullptr;

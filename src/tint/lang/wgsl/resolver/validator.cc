@@ -333,8 +333,7 @@ bool Validator::Pointer(const ast::TemplatedIdentifier* a, const core::type::Poi
         return false;
     }
 
-    return CheckTypeAccessAddressSpace(s->StoreType(), s->Access(), s->AddressSpace(), tint::Empty,
-                                       a->source);
+    return CheckTypeAccessAddressSpace(s->StoreType(), s->Access(), s->AddressSpace(), a->source);
 }
 
 bool Validator::StorageTexture(const core::type::StorageTexture* t, const Source& source) const {
@@ -686,14 +685,11 @@ bool Validator::LocalVariable(const sem::Variable* local) const {
     return Switch(
         decl,  //
         [&](const ast::Var* var) {
-            if (IsValidationEnabled(var->attributes,
-                                    ast::DisabledValidation::kIgnoreAddressSpace)) {
-                if (!local->Type()->UnwrapRef()->IsConstructible()) {
-                    AddError(var->type ? var->type->source : var->source)
-                        << "function-scope " << style::Keyword("var")
-                        << " must have a constructible type";
-                    return false;
-                }
+            if (!local->Type()->UnwrapRef()->IsConstructible()) {
+                AddError(var->type ? var->type->source : var->source)
+                    << "function-scope " << style::Keyword("var")
+                    << " must have a constructible type";
+                return false;
             }
             return Var(local);
         },                                            //
@@ -841,12 +837,11 @@ bool Validator::Var(const sem::Variable* v) const {
     }
 
     if (!CheckTypeAccessAddressSpace(v->Type()->UnwrapRef(), v->Access(), v->AddressSpace(),
-                                     var->attributes, var->source)) {
+                                     var->source)) {
         return false;
     }
 
-    if (IsValidationEnabled(var->attributes, ast::DisabledValidation::kIgnoreAddressSpace) &&
-        (v->AddressSpace() == core::AddressSpace::kIn ||
+    if ((v->AddressSpace() == core::AddressSpace::kIn ||
          v->AddressSpace() == core::AddressSpace::kOut)) {
         AddError(var->source) << "invalid use of input/output address space";
         return false;
@@ -908,29 +903,27 @@ bool Validator::Parameter(const sem::Variable* var) const {
     }
 
     if (auto* ref = var->Type()->As<core::type::Pointer>()) {
-        if (IsValidationEnabled(decl->attributes, ast::DisabledValidation::kIgnoreAddressSpace)) {
-            bool ok = false;
+        bool ok = false;
 
-            auto sc = ref->AddressSpace();
-            switch (sc) {
-                case core::AddressSpace::kFunction:
-                case core::AddressSpace::kPrivate:
-                    ok = true;
-                    break;
-                case core::AddressSpace::kStorage:
-                case core::AddressSpace::kUniform:
-                case core::AddressSpace::kWorkgroup:
-                    ok = allowed_features_.features.count(
-                             wgsl::LanguageFeature::kUnrestrictedPointerParameters) != 0;
-                    break;
-                default:
-                    break;
-            }
-            if (!ok) {
-                AddError(decl->source) << "function parameter of pointer type cannot be in "
-                                       << style::Enum(sc) << " address space";
-                return false;
-            }
+        auto sc = ref->AddressSpace();
+        switch (sc) {
+            case core::AddressSpace::kFunction:
+            case core::AddressSpace::kPrivate:
+                ok = true;
+                break;
+            case core::AddressSpace::kStorage:
+            case core::AddressSpace::kUniform:
+            case core::AddressSpace::kWorkgroup:
+                ok = allowed_features_.features.count(
+                         wgsl::LanguageFeature::kUnrestrictedPointerParameters) != 0;
+                break;
+            default:
+                break;
+        }
+        if (!ok) {
+            AddError(decl->source) << "function parameter of pointer type cannot be in "
+                                   << style::Enum(sc) << " address space";
+            return false;
         }
     }
 
@@ -3073,7 +3066,6 @@ std::string Validator::VectorPretty(uint32_t size, const core::type::Type* eleme
 bool Validator::CheckTypeAccessAddressSpace(const core::type::Type* store_ty,
                                             core::Access access,
                                             core::AddressSpace address_space,
-                                            VectorRef<const tint::ast::Attribute*> attributes,
                                             const Source& source) const {
     if (!AddressSpaceLayout(store_ty, address_space, source)) {
         return false;
@@ -3104,9 +3096,7 @@ bool Validator::CheckTypeAccessAddressSpace(const core::type::Type* store_ty,
             break;
         case core::AddressSpace::kPushConstant:
             if (DAWN_UNLIKELY(!enabled_extensions_.Contains(
-                                  wgsl::Extension::kChromiumExperimentalPushConstant) &&
-                              IsValidationEnabled(attributes,
-                                                  ast::DisabledValidation::kIgnoreAddressSpace))) {
+                    wgsl::Extension::kChromiumExperimentalPushConstant))) {
                 AddError(source) << "use of variable address space " << style::Enum("push_constant")
                                  << " requires enabling extension "
                                  << style::Code("chromium_experimental_push_constant");
