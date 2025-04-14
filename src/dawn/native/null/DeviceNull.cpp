@@ -93,7 +93,7 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
 }
 
 MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits) {
-    GetDefaultLimitsForSupportedFeatureLevel(&limits->v1);
+    GetDefaultLimitsForSupportedFeatureLevel(limits);
     // Set the subgroups limit, as DeviceNull should support subgroups feature.
     limits->experimentalImmediateDataLimits.maxImmediateDataRangeByteSize =
         kMaxExternalImmediateConstantsPerPipeline * kImmediateConstantElementByteSize;

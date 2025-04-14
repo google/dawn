@@ -98,7 +98,7 @@ void AdapterBase::UpdateLimits() {
 
     // Apply the tiered limits if needed.
     if (mUseTieredLimits) {
-        mLimits = ApplyLimitTiers(std::move(mLimits));
+        ApplyLimitTiers(&mLimits);
     }
 }
 
@@ -337,17 +337,12 @@ ResultOrError<Ref<DeviceBase>> AdapterBase::CreateDeviceInternal(
     }
 
     if (descriptor->requiredLimits != nullptr) {
-        // Only consider limits in RequiredLimits structure, and currently no chained structure
-        // supported.
-        DAWN_INVALID_IF(descriptor->requiredLimits->nextInChain != nullptr,
-                        "can not chain after requiredLimits.");
+        CombinedLimits requiredLimits;
+        DAWN_TRY_CONTEXT(ValidateAndUnpackLimitsIn(descriptor->requiredLimits, requiredFeatureSet,
+                                                   &requiredLimits),
+                         "Validating and unpacking descriptor->requiredLimits");
 
-        Limits supportedLimits;
-        wgpu::Status status = APIGetLimits(&supportedLimits);
-        DAWN_ASSERT(status == wgpu::Status::Success);
-
-        DAWN_TRY_CONTEXT(ValidateLimits(supportedLimits, *descriptor->requiredLimits),
-                         "validating required limits");
+        DAWN_TRY_CONTEXT(ValidateLimits(GetLimits(), requiredLimits), "validating required limits");
     }
 
     return mPhysicalDevice->CreateDevice(this, descriptor, deviceToggles, std::move(lostEvent));

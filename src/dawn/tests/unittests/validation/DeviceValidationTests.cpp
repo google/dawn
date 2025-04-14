@@ -224,21 +224,6 @@ TEST_F(RequestDeviceValidationTest, LowerIsBetter) {
                           mRequestDeviceCallback.Callback());
 }
 
-// Test that it is an error to request limits with an invalid chained struct
-TEST_F(RequestDeviceValidationTest, InvalidChainedStruct) {
-    wgpu::ChainedStructOut chain = {};
-    wgpu::Limits limits = {};
-    limits.nextInChain = &chain;
-
-    wgpu::DeviceDescriptor descriptor;
-    descriptor.requiredLimits = &limits;
-    EXPECT_CALL(mRequestDeviceCallback,
-                Call(wgpu::RequestDeviceStatus::Error, IsNull(), NonEmptySizedString()))
-        .Times(1);
-    adapter.RequestDevice(&descriptor, wgpu::CallbackMode::AllowSpontaneous,
-                          mRequestDeviceCallback.Callback());
-}
-
 class DeviceTickValidationTest : public ValidationTest {};
 
 // Device destroy before API-level Tick should always result in no-op and false.
@@ -354,6 +339,125 @@ TEST_F(RequestDeviceCompatValidationTest, CreateCompat) {
             wgpu::Limits limits;
             device.GetLimits(&limits);
             EXPECT_EQ(limits.maxStorageBuffersInVertexStage, 0u);
+        }));
+    adapter.RequestDevice(&descriptor, wgpu::CallbackMode::AllowSpontaneous,
+                          mRequestDeviceCallback.Callback());
+}
+
+class RequestDeviceWithImmediateDataValidationTest : public ValidationTest {
+  protected:
+    void SetUp() override {
+        ValidationTest::SetUp();
+        DAWN_SKIP_TEST_IF(UsesWire());
+    }
+
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        return {wgpu::FeatureName::ChromiumExperimentalImmediateData};
+    }
+
+    uint32_t GetMaxImmediateDataRangeByteSize(const wgpu::Limits& limits) {
+        wgpu::ChainedStructOut* experimentalImmediateDataLimits = limits.nextInChain;
+        while (experimentalImmediateDataLimits != nullptr &&
+               experimentalImmediateDataLimits->sType !=
+                   wgpu::SType::DawnExperimentalImmediateDataLimits) {
+            experimentalImmediateDataLimits = limits.nextInChain;
+        }
+
+        if (!experimentalImmediateDataLimits) {
+            return 0;
+        }
+
+        wgpu::DawnExperimentalImmediateDataLimits* immediateDataLimits =
+            static_cast<wgpu::DawnExperimentalImmediateDataLimits*>(
+                experimentalImmediateDataLimits);
+
+        return immediateDataLimits->maxImmediateDataRangeByteSize;
+    }
+
+    MockCppCallback<void (*)(wgpu::RequestDeviceStatus, wgpu::Device, wgpu::StringView)>
+        mRequestDeviceCallback;
+};
+
+// Test that requesting a device where a required immediate data range byte size limit is above the
+// maximum value.
+TEST_F(RequestDeviceWithImmediateDataValidationTest, HigherIsBetter) {
+    wgpu::DawnExperimentalImmediateDataLimits experimentalImmediateData =
+        wgpu::DawnExperimentalImmediateDataLimits{};
+    wgpu::Limits limits = {};
+    limits.nextInChain = &experimentalImmediateData;
+
+    wgpu::DeviceDescriptor descriptor;
+    std::array<wgpu::FeatureName, 1> requiredFeatures = {
+        wgpu::FeatureName::ChromiumExperimentalImmediateData};
+    descriptor.requiredFeatures = requiredFeatures.data();
+    descriptor.requiredFeatureCount = requiredFeatures.size();
+    descriptor.requiredLimits = &limits;
+
+    wgpu::Limits supportedLimits;
+    wgpu::DawnExperimentalImmediateDataLimits dawnExperimentalImmediateDataLimits =
+        wgpu::DawnExperimentalImmediateDataLimits{};
+    supportedLimits.nextInChain = &dawnExperimentalImmediateDataLimits;
+    EXPECT_EQ(adapter.GetLimits(&supportedLimits), wgpu::Status::Success);
+
+    uint32_t supportedImmediateDataLimit = GetMaxImmediateDataRangeByteSize(supportedLimits);
+
+    // If we can support better than the default, test below the max.
+    if (supportedImmediateDataLimit >= kDefaultMaxImmediateDataBytes) {
+        experimentalImmediateData.maxImmediateDataRangeByteSize = kDefaultMaxImmediateDataBytes;
+        EXPECT_CALL(mRequestDeviceCallback,
+                    Call(wgpu::RequestDeviceStatus::Success, NotNull(), EmptySizedString()))
+            .WillOnce(WithArgs<1>([&](wgpu::Device device) {
+                wgpu::Limits deviceLimits;
+                wgpu::DawnExperimentalImmediateDataLimits dawnExperimentalImmediateDataLimits =
+                    wgpu::DawnExperimentalImmediateDataLimits{};
+                deviceLimits.nextInChain = &dawnExperimentalImmediateDataLimits;
+                device.GetLimits(&deviceLimits);
+                // Check we got exactly the request.
+                EXPECT_EQ(GetMaxImmediateDataRangeByteSize(deviceLimits),
+                          kDefaultMaxImmediateDataBytes);
+            }));
+        adapter.RequestDevice(&descriptor, wgpu::CallbackMode::AllowSpontaneous,
+                              mRequestDeviceCallback.Callback());
+    }
+
+    // Test the max.
+    experimentalImmediateData.maxImmediateDataRangeByteSize = supportedImmediateDataLimit;
+    EXPECT_CALL(mRequestDeviceCallback,
+                Call(wgpu::RequestDeviceStatus::Success, NotNull(), EmptySizedString()))
+        .WillOnce(WithArgs<1>([&](wgpu::Device device) {
+            wgpu::Limits deviceLimits;
+            wgpu::DawnExperimentalImmediateDataLimits dawnExperimentalImmediateDataLimits =
+                wgpu::DawnExperimentalImmediateDataLimits{};
+            deviceLimits.nextInChain = &dawnExperimentalImmediateDataLimits;
+
+            device.GetLimits(&deviceLimits);
+
+            // Check we got exactly the request.
+            EXPECT_EQ(GetMaxImmediateDataRangeByteSize(deviceLimits), supportedImmediateDataLimit);
+        }));
+    adapter.RequestDevice(&descriptor, wgpu::CallbackMode::AllowSpontaneous,
+                          mRequestDeviceCallback.Callback());
+
+    // Test above the max.
+    experimentalImmediateData.maxImmediateDataRangeByteSize = supportedImmediateDataLimit + 4;
+    EXPECT_CALL(mRequestDeviceCallback,
+                Call(wgpu::RequestDeviceStatus::Error, IsNull(), NonEmptySizedString()))
+        .Times(1);
+    adapter.RequestDevice(&descriptor, wgpu::CallbackMode::AllowSpontaneous,
+                          mRequestDeviceCallback.Callback());
+
+    // Test worse than the default
+    experimentalImmediateData.maxImmediateDataRangeByteSize = kDefaultMaxImmediateDataBytes / 2;
+    EXPECT_CALL(mRequestDeviceCallback,
+                Call(wgpu::RequestDeviceStatus::Success, NotNull(), EmptySizedString()))
+        .WillOnce(WithArgs<1>([&](wgpu::Device device) {
+            wgpu::Limits deviceLimits;
+            wgpu::DawnExperimentalImmediateDataLimits dawnExperimentalImmediateDataLimits =
+                wgpu::DawnExperimentalImmediateDataLimits{};
+            deviceLimits.nextInChain = &dawnExperimentalImmediateDataLimits;
+            device.GetLimits(&deviceLimits);
+            EXPECT_EQ(GetMaxImmediateDataRangeByteSize(deviceLimits),
+                      kDefaultMaxImmediateDataBytes);
         }));
     adapter.RequestDevice(&descriptor, wgpu::CallbackMode::AllowSpontaneous,
                           mRequestDeviceCallback.Callback());

@@ -32,98 +32,105 @@
 
 #include "dawn/common/Assert.h"
 #include "dawn/common/Constants.h"
+#include "dawn/common/Log.h"
 #include "dawn/common/Math.h"
 
 // clang-format off
 // TODO(crbug.com/dawn/685):
 // For now, only expose these tiers until metrics can determine better ones.
-//                                             compat tier0  tier1
+//                                                compat  tier0  tier1
 #define LIMITS_WORKGROUP_STORAGE_SIZE(X)                                         \
-    X(Maximum, maxComputeWorkgroupStorageSize, 16384, 16384, 32768, 49152, 65536)
+    X(v1, Maximum, maxComputeWorkgroupStorageSize, 16384, 16384, 32768, 49152, 65536)
 
 // Tiers for limits related to workgroup size.
 // TODO(crbug.com/dawn/685): Define these better. For now, use two tiers where one
 // is available on nearly all desktop platforms.
-//                                                             compat        tier0       tier1
-#define LIMITS_WORKGROUP_SIZE(X)                                                                \
-    X(Maximum,           maxComputeInvocationsPerWorkgroup,       128,         256,       1024) \
-    X(Maximum,                    maxComputeWorkgroupSizeX,       128,         256,       1024) \
-    X(Maximum,                    maxComputeWorkgroupSizeY,       128,         256,       1024) \
-    X(Maximum,                    maxComputeWorkgroupSizeZ,        64,          64,         64) \
-    X(Maximum,            maxComputeWorkgroupsPerDimension,     65535,       65535,      65535)
+//                                                                 compat        tier0       tier1
+#define LIMITS_WORKGROUP_SIZE(X)                                                                    \
+    X(v1, Maximum,           maxComputeInvocationsPerWorkgroup,       128,         256,       1024) \
+    X(v1, Maximum,                    maxComputeWorkgroupSizeX,       128,         256,       1024) \
+    X(v1, Maximum,                    maxComputeWorkgroupSizeY,       128,         256,       1024) \
+    X(v1, Maximum,                    maxComputeWorkgroupSizeZ,        64,          64,         64) \
+    X(v1, Maximum,            maxComputeWorkgroupsPerDimension,     65535,       65535,      65535)
 
 // Tiers are 128MB, 512MB, 1GB, 2GB-4, 4GB-4.
-//                                          compat     tier0      tier1
+//                                                 compat     tier0      tier1
 #define LIMITS_STORAGE_BUFFER_BINDING_SIZE(X)                                                        \
-    X(Maximum, maxStorageBufferBindingSize, 134217728, 134217728, 536870912, 1073741824, 2147483644, 4294967292)
+    X(v1, Maximum, maxStorageBufferBindingSize, 134217728, 134217728, 536870912, 1073741824, 2147483644, 4294967292)
 
 // Tiers are 256MB, 1GB, 2GB, 4GB.
-//                            compat      tier0       tier1
+//                                    compat      tier0       tier1
 #define LIMITS_MAX_BUFFER_SIZE(X)                                                         \
-    X(Maximum, maxBufferSize, 0x10000000, 0x10000000, 0x40000000, 0x80000000, 0x100000000)
+    X(v1, Maximum, maxBufferSize, 0x10000000, 0x10000000, 0x40000000, 0x80000000, 0x100000000)
 
 // Tiers for limits related to resource bindings.
 // TODO(crbug.com/dawn/685): Define these better. For now, use two tiers where one
 // offers slightly better than default limits.
-//                                                             compat      tier0       tier1
-#define LIMITS_RESOURCE_BINDINGS(X)                                                           \
-    X(Maximum,   maxDynamicUniformBuffersPerPipelineLayout,         8,         8,         10) \
-    X(Maximum,   maxDynamicStorageBuffersPerPipelineLayout,         4,         4,          8) \
-    X(Maximum,            maxSampledTexturesPerShaderStage,        16,        16,         16) \
-    X(Maximum,                   maxSamplersPerShaderStage,        16,        16,         16) \
-    X(Maximum,            maxStorageTexturesPerShaderStage,         4,         4,          8) \
-    X(Maximum,           maxStorageTexturesInFragmentStage,         4,         4,          8) \
-    X(Maximum,             maxStorageTexturesInVertexStage,         0,         4,          8) \
-    X(Maximum,             maxUniformBuffersPerShaderStage,        12,        12,         12)
+//                                                                 compat      tier0       tier1
+#define LIMITS_RESOURCE_BINDINGS(X)                                                               \
+    X(v1, Maximum,   maxDynamicUniformBuffersPerPipelineLayout,         8,         8,         10) \
+    X(v1, Maximum,   maxDynamicStorageBuffersPerPipelineLayout,         4,         4,          8) \
+    X(v1, Maximum,            maxSampledTexturesPerShaderStage,        16,        16,         16) \
+    X(v1, Maximum,                   maxSamplersPerShaderStage,        16,        16,         16) \
+    X(v1, Maximum,            maxStorageTexturesPerShaderStage,         4,         4,          8) \
+    X(v1, Maximum,           maxStorageTexturesInFragmentStage,         4,         4,          8) \
+    X(v1, Maximum,             maxStorageTexturesInVertexStage,         0,         4,          8) \
+    X(v1, Maximum,             maxUniformBuffersPerShaderStage,        12,        12,         12)
 
 // Tiers for limits related to storage buffer bindings. Should probably be merged with
 // LIMITS_RESOURCE_BINDINGS.
 // TODO(crbug.com/dawn/685): Define these better. For now, use two tiers where one
 // offers slightly better than default limits.
 //
-#define LIMITS_STORAGE_BUFFER_BINDINGS(X)                                                      \
-    X(Maximum,             maxStorageBuffersPerShaderStage,         8,         8,          10) \
-    X(Maximum,             maxStorageBuffersInFragmentStage,        4,         8,          10) \
-    X(Maximum,             maxStorageBuffersInVertexStage,          0,         8,          10)
+#define LIMITS_STORAGE_BUFFER_BINDINGS(X)                                                          \
+    X(v1, Maximum,             maxStorageBuffersPerShaderStage,         8,         8,          10) \
+    X(v1, Maximum,             maxStorageBuffersInFragmentStage,        4,         8,          10) \
+    X(v1, Maximum,             maxStorageBuffersInVertexStage,          0,         8,          10)
 
 // TODO(crbug.com/dawn/685):
 // These limits aren't really tiered and could probably be grouped better.
 // All Chrome platforms support 64 (iOS is 32) so there's are really only two exposed
 // buckets: 64 and 128.
-//                                                             compat  tier0  tier1  tier2
+//                                                                compat   tier0  tier1  tier2
 #define LIMITS_ATTACHMENTS(X)   \
-    X(Maximum,            maxColorAttachmentBytesPerSample,       32,     32,    64,   128)
+    X(v1, Maximum,            maxColorAttachmentBytesPerSample,       32,     32,    64,   128)
 
 // Tiers for limits related to inter-stage shader variables.
-//                                                             compat      tier0       tier1
+//                                                                compat      tier0       tier1
 #define LIMITS_INTER_STAGE_SHADER_VARIABLES(X) \
-    X(Maximum,               maxInterStageShaderVariables,        15,        16,         28) \
+    X(v1, Maximum,               maxInterStageShaderVariables,        15,        16,         28) \
 
 // Tiered limits for texture dimensions.
 // TODO(crbug.com/dawn/685): Define these better. For now, use two tiers where some dimensions
 // offers slightly better than default limits.
-//                                                             compat      tier0       tier1
+//                                                                 compat      tier0       tier1
 #define LIMITS_TEXTURE_DIMENSIONS(X) \
-    X(Maximum,                       maxTextureDimension1D,      4096,      8192,      16384) \
-    X(Maximum,                       maxTextureDimension2D,      4096,      8192,      16384) \
-    X(Maximum,                       maxTextureDimension3D,      1024,      2048,       2048) \
-    X(Maximum,                       maxTextureArrayLayers,       256,       256,       2048)
+    X(v1, Maximum,                       maxTextureDimension1D,      4096,      8192,      16384) \
+    X(v1, Maximum,                       maxTextureDimension2D,      4096,      8192,      16384) \
+    X(v1, Maximum,                       maxTextureDimension3D,      1024,      2048,       2048) \
+    X(v1, Maximum,                       maxTextureArrayLayers,       256,       256,       2048)
 
 // TODO(crbug.com/dawn/685):
 // These limits don't have tiers yet. Define two tiers with the same values since the macros
 // in this file expect more than one tier.
-//                                                             compat      tier0       tier1
-#define LIMITS_OTHER(X)                                                                       \
-    X(Maximum,                               maxBindGroups,         4,         4,          4) \
-    X(Maximum,              maxBindGroupsPlusVertexBuffers,        24,        24,         24) \
-    X(Maximum,                     maxBindingsPerBindGroup,      1000,      1000,       1000) \
-    X(Maximum,                 maxUniformBufferBindingSize,     16384,     65536,      65536) \
-    X(Alignment,           minUniformBufferOffsetAlignment,       256,       256,        256) \
-    X(Alignment,           minStorageBufferOffsetAlignment,       256,       256,        256) \
-    X(Maximum,                            maxVertexBuffers,         8,         8,          8) \
-    X(Maximum,                         maxVertexAttributes,        16,        16,         30) \
-    X(Maximum,                  maxVertexBufferArrayStride,      2048,      2048,       2048) \
-    X(Maximum,                         maxColorAttachments,         4,         8,          8)
+//                                                                                         compat      tier0      tier1
+#define LIMITS_OTHER(X)                                                                                                             \
+    X(v1,                              Maximum,                                     maxBindGroups,         4,         4,          4) \
+    X(v1,                              Maximum,                    maxBindGroupsPlusVertexBuffers,        24,        24,         24) \
+    X(v1,                              Maximum,                           maxBindingsPerBindGroup,      1000,      1000,       1000) \
+    X(v1,                              Maximum,                       maxUniformBufferBindingSize,     16384,     65536,      65536) \
+    X(v1,                            Alignment,                 minUniformBufferOffsetAlignment,       256,       256,        256) \
+    X(v1,                            Alignment,                 minStorageBufferOffsetAlignment,       256,       256,        256) \
+    X(v1,                              Maximum,                                  maxVertexBuffers,         8,         8,          8) \
+    X(v1,                              Maximum,                               maxVertexAttributes,        16,        16,         30) \
+    X(v1,                              Maximum,                        maxVertexBufferArrayStride,      2048,      2048,       2048) \
+    X(v1,                              Maximum,                               maxColorAttachments,         4,         8,          8)
+
+// These limits represents experimental features. The only element experimentalImmediateDataLimits
+// doesn't have tiers yet. Define two tiers with the same value since the macros in this file expect more than on tier.
+//                                                                     compat tier0 tier1
+#define LIMITS_EXPERIMENTAL(X) \
+    X(experimentalImmediateDataLimits, Maximum, maxImmediateDataRangeByteSize,   16,   16)
 
 // clang-format on
 
@@ -149,7 +156,8 @@
     LIMITS_ATTACHMENTS(X)                  \
     LIMITS_INTER_STAGE_SHADER_VARIABLES(X) \
     LIMITS_TEXTURE_DIMENSIONS(X)           \
-    LIMITS_OTHER(X)
+    LIMITS_OTHER(X)                        \
+    LIMITS_EXPERIMENTAL(X)
 
 namespace dawn::native {
 namespace {
@@ -224,39 +232,91 @@ bool IsLimitUndefined<uint64_t>(uint64_t value) {
 
 }  // namespace
 
-void GetDefaultLimits(Limits* limits, wgpu::FeatureLevel featureLevel) {
+void GetDefaultLimits(CombinedLimits* limits, wgpu::FeatureLevel featureLevel) {
     DAWN_ASSERT(limits != nullptr);
-#define X(Better, limitName, compat, base, ...) \
-    limits->limitName = featureLevel == wgpu::FeatureLevel::Compatibility ? compat : base;
+#define X(Scope, Better, limitName, compat, base, ...) \
+    limits->Scope.limitName = featureLevel == wgpu::FeatureLevel::Compatibility ? compat : base;
     LIMITS(X)
 #undef X
 }
 
-Limits ReifyDefaultLimits(const Limits& limits, wgpu::FeatureLevel featureLevel) {
-    Limits out;
-#define X(Class, limitName, compat, base, ...)                                         \
-    {                                                                                  \
-        const auto defaultLimit = static_cast<decltype(limits.limitName)>(             \
-            featureLevel == wgpu::FeatureLevel::Compatibility ? compat : base);        \
-        if (IsLimitUndefined(limits.limitName) ||                                      \
-            CheckLimit<LimitClass::Class>::IsBetter(defaultLimit, limits.limitName)) { \
-            /* If the limit is undefined or the default is better, use the default */  \
-            out.limitName = defaultLimit;                                              \
-        } else {                                                                       \
-            out.limitName = limits.limitName;                                          \
-        }                                                                              \
+CombinedLimits ReifyDefaultLimits(const CombinedLimits& limits, wgpu::FeatureLevel featureLevel) {
+    CombinedLimits out;
+#define X(Scope, Class, limitName, compat, base, ...)                                        \
+    {                                                                                        \
+        const auto defaultLimit = static_cast<decltype(limits.Scope.limitName)>(             \
+            featureLevel == wgpu::FeatureLevel::Compatibility ? compat : base);              \
+        if (IsLimitUndefined(limits.Scope.limitName) ||                                      \
+            CheckLimit<LimitClass::Class>::IsBetter(defaultLimit, limits.Scope.limitName)) { \
+            /* If the limit is undefined or the default is better, use the default */        \
+            out.Scope.limitName = defaultLimit;                                              \
+        } else {                                                                             \
+            out.Scope.limitName = limits.Scope.limitName;                                    \
+        }                                                                                    \
     }
     LIMITS(X)
 #undef X
     return out;
 }
 
-MaybeError ValidateLimits(const Limits& supportedLimits, const Limits& requiredLimits) {
-#define X(Class, limitName, ...)                                                            \
-    if (!IsLimitUndefined(requiredLimits.limitName)) {                                      \
-        DAWN_TRY_CONTEXT(CheckLimit<LimitClass::Class>::Validate(supportedLimits.limitName, \
-                                                                 requiredLimits.limitName), \
-                         "validating " #limitName);                                         \
+MaybeError ValidateAndUnpackLimitsIn(const Limits* chainedLimits,
+                                     const std::unordered_set<wgpu::FeatureName>& supportedFeatures,
+                                     CombinedLimits* out) {
+    DAWN_ASSERT(chainedLimits != nullptr);
+    DAWN_ASSERT(out != nullptr);
+
+    Limits* chainedLimitsPtr = const_cast<Limits*>(chainedLimits);
+    UnpackedPtr<Limits> unpacked;
+    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(chainedLimitsPtr));
+
+    // copy required v1 limits.
+    out->v1 = **unpacked;
+    out->v1.nextInChain = nullptr;
+
+    if (auto* requiredExperimentalImmediateDataLimits =
+            unpacked.Get<DawnExperimentalImmediateDataLimits>()) {
+        DAWN_INVALID_IF(
+            !supportedFeatures.count(wgpu::FeatureName::ChromiumExperimentalImmediateData),
+            "ImmediateData is not supported without ChromiumExperimentalImmediateData supported.");
+        out->experimentalImmediateDataLimits = *requiredExperimentalImmediateDataLimits;
+        out->experimentalImmediateDataLimits.nextInChain = nullptr;
+    }
+
+    // TODO(crbug.com/378361783): Add validation and default values to support requiring limits for
+    // DawnTexelCopyBufferRowAlignmentLimits.
+    if (unpacked.Get<DawnTexelCopyBufferRowAlignmentLimits>()) {
+        dawn::WarningLog()
+            << "DawnTexelCopyBufferRowAlignmentLimits is not supported in required limits";
+    }
+
+    return {};
+}
+
+void UnpackLimitsIn(const Limits* chainedLimits, CombinedLimits* out) {
+    DAWN_ASSERT(chainedLimits != nullptr);
+    DAWN_ASSERT(out != nullptr);
+
+    Limits* chainedLimitsPtr = const_cast<Limits*>(chainedLimits);
+    UnpackedPtr<Limits> unpacked = Unpack(chainedLimitsPtr);
+
+    // copy required v1 limits.
+    out->v1 = **unpacked;
+    out->v1.nextInChain = nullptr;
+
+    if (auto* requiredExperimentalImmediateDataLimits =
+            unpacked.Get<DawnExperimentalImmediateDataLimits>()) {
+        out->experimentalImmediateDataLimits = *requiredExperimentalImmediateDataLimits;
+        out->experimentalImmediateDataLimits.nextInChain = nullptr;
+    }
+}
+
+MaybeError ValidateLimits(const CombinedLimits& supportedLimits,
+                          const CombinedLimits& requiredLimits) {
+#define X(Scope, Class, limitName, ...)                                                           \
+    if (!IsLimitUndefined(requiredLimits.Scope.limitName)) {                                      \
+        DAWN_TRY_CONTEXT(CheckLimit<LimitClass::Class>::Validate(supportedLimits.Scope.limitName, \
+                                                                 requiredLimits.Scope.limitName), \
+                         "validating " #limitName);                                               \
     }
     LIMITS(X)
 #undef X
@@ -271,7 +331,8 @@ CombinedLimits ApplyLimitTiers(const CombinedLimits& limits) {
 }
 
 void ApplyLimitTiers(CombinedLimits* limits) {
-#define X_TIER_COUNT(Better, limitName, ...) , std::integer_sequence<uint64_t, __VA_ARGS__>{}.size()
+#define X_TIER_COUNT(Scope, Better, limitName, ...) \
+    , std::integer_sequence<uint64_t, __VA_ARGS__>{}.size()
 #define GET_TIER_COUNT(LIMIT_GROUP) \
     ReduceSameValue(std::integer_sequence<uint32_t LIMIT_GROUP(X_TIER_COUNT)>{})
 
@@ -285,17 +346,17 @@ void ApplyLimitTiers(CombinedLimits* limits) {
         }                                                            \
     }
 
-#define X_CHECK_BETTER_AND_CLAMP(Class, limitName, ...)                                   \
-    {                                                                                     \
-        constexpr std::array<decltype(Limits::limitName), kTierCount> tiers{__VA_ARGS__}; \
-        decltype(Limits::limitName) tierValue = tiers[i - 1];                             \
-        if (CheckLimit<LimitClass::Class>::IsBetter(tierValue, limits->v1.limitName)) {   \
-            /* The tier is better. Go to the next tier. */                                \
-            continue;                                                                     \
-        } else if (tierValue != limits->v1.limitName) {                                   \
-            /* Better than the tier. Degrade |limits| to the tier. */                     \
-            limits->v1.limitName = tiers[i - 1];                                          \
-        }                                                                                 \
+#define X_CHECK_BETTER_AND_CLAMP(Scope, Class, limitName, ...)                             \
+    {                                                                                      \
+        constexpr std::array<decltype(Limits::limitName), kTierCount> tiers{__VA_ARGS__};  \
+        decltype(Limits::limitName) tierValue = tiers[i - 1];                              \
+        if (CheckLimit<LimitClass::Class>::IsBetter(tierValue, limits->Scope.limitName)) { \
+            /* The tier is better. Go to the next tier. */                                 \
+            continue;                                                                      \
+        } else if (tierValue != limits->Scope.limitName) {                                 \
+            /* Better than the tier. Degrade |limits| to the tier. */                      \
+            limits->Scope.limitName = tiers[i - 1];                                        \
+        }                                                                                  \
     }
 
     LIMITS_EACH_GROUP(X_EACH_GROUP)
@@ -375,7 +436,8 @@ void NormalizeLimits(CombinedLimits* limits) {
 
     // Enforce immediate data bytes to ensure they don't go over a fixed limit in Dawn's internal
     // code.
-    limits->experimentalImmediateDataLimits.maxImmediateDataRangeByteSize = kMaxImmediateDataBytes;
+    limits->experimentalImmediateDataLimits.maxImmediateDataRangeByteSize =
+        kMaxSupportedImmediateDataBytes;
 }
 
 void EnforceLimitSpecInvariants(Limits* limits, wgpu::FeatureLevel featureLevel) {
@@ -409,12 +471,6 @@ void EnforceLimitSpecInvariants(Limits* limits, wgpu::FeatureLevel featureLevel)
         limits->maxStorageBuffersInVertexStage = limits->maxStorageBuffersPerShaderStage;
         limits->maxStorageTexturesInVertexStage = limits->maxStorageTexturesPerShaderStage;
     }
-}
-
-void NormalizeExperimentalLimits(CombinedLimits* limits) {
-    // Enforce immediate data bytes to ensure they don't go over a fixed limit in Dawn's internal
-    // code.
-    limits->experimentalImmediateDataLimits.maxImmediateDataRangeByteSize = kMaxImmediateDataBytes;
 }
 
 }  // namespace dawn::native

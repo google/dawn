@@ -789,7 +789,7 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
         mtlLimits.*limitsForFamily.limit = limitsForFamily.values[mtlGPUFamily];
     }
 
-    GetDefaultLimitsForSupportedFeatureLevel(&limits->v1);
+    GetDefaultLimitsForSupportedFeatureLevel(limits);
 
     limits->v1.maxTextureDimension1D = mtlLimits.max1DTextureSize;
     limits->v1.maxTextureDimension2D = mtlLimits.max2DTextureSize;

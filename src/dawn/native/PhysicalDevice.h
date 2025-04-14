@@ -155,7 +155,7 @@ class PhysicalDeviceBase : public RefCounted {
     // Used for the tests that intend to use an adapter without all features enabled.
     void SetSupportedFeaturesForTesting(const std::vector<wgpu::FeatureName>& requiredFeatures);
 
-    void GetDefaultLimitsForSupportedFeatureLevel(Limits* limits) const;
+    void GetDefaultLimitsForSupportedFeatureLevel(CombinedLimits* limits) const;
 
   private:
     virtual ResultOrError<Ref<DeviceBase>> CreateDeviceImpl(

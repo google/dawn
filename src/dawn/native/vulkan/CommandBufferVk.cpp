@@ -206,12 +206,9 @@ class ImmediateConstantTracker : public T {
         }
 
         const ImmediateConstantMask& pipelineImmediateMask = lastPipeline->GetImmediateMask();
-        const size_t maxImmediateConstantSize =
-            pipelineImmediateMask.count() * kImmediateConstantElementByteSize;
 
         uint32_t pushConstantRangeStartOffset = 0;
         uint32_t immediateContentStartOffset = 0;
-        uint32_t immediateDataCount = 0;
 
         ImmediateConstantMask uploadBits = this->mDirty & lastPipeline->GetImmediateMask();
         ImmediateConstantMask prefixBits = ImmediateConstantMask(0u);
@@ -219,38 +216,16 @@ class ImmediateConstantTracker : public T {
         // TODO(crbug.com/366291600): Add IterateBitRanges helper function to achieve iteration on
         // ranges.
         for (ImmediateConstantIndex i : IterateBitSet(lastPipeline->GetImmediateMask())) {
-            if (uploadBits.test(i)) {
                 uint32_t index = static_cast<uint32_t>(i);
-                if (immediateDataCount == 0) {
                     prefixBits = (1u << index) - 1u;
                     pushConstantRangeStartOffset = (prefixBits & pipelineImmediateMask).count() *
                                                    kImmediateConstantElementByteSize;
                     immediateContentStartOffset = index * kImmediateConstantElementByteSize;
-                }
-                ++immediateDataCount;
-            } else {
-                if (immediateDataCount > 0) {
                     device->fn.CmdPushConstants(
                         commandBuffer, ToBackend(lastPipeline)->GetVkLayout(),
                         ToBackend(lastPipeline->GetLayout())->GetImmediateDataRangeStage(),
-                        pushConstantRangeStartOffset,
-                        immediateDataCount * kImmediateConstantElementByteSize,
+                        pushConstantRangeStartOffset, kImmediateConstantElementByteSize,
                         this->mContent.template Get<uint32_t>(immediateContentStartOffset));
-                    immediateDataCount = 0;
-                }
-            }
-        }
-
-        // Final Uploading
-        if (immediateDataCount > 0) {
-            DAWN_ASSERT(pushConstantRangeStartOffset < maxImmediateConstantSize);
-            device->fn.CmdPushConstants(
-                commandBuffer, ToBackend(lastPipeline)->GetVkLayout(),
-                ToBackend(lastPipeline->GetLayout())->GetImmediateDataRangeStage(),
-                pushConstantRangeStartOffset,
-                immediateDataCount * kImmediateConstantElementByteSize,
-                this->mContent.template Get<uint32_t>(immediateContentStartOffset));
-            immediateDataCount = 0;
         }
 
         // Reset all dirty bits after uploading.

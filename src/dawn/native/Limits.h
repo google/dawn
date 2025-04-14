@@ -28,6 +28,9 @@
 #ifndef SRC_DAWN_NATIVE_LIMITS_H_
 #define SRC_DAWN_NATIVE_LIMITS_H_
 
+#include <unordered_set>
+
+#include "dawn/native/ChainUtils.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/Features.h"
 #include "dawn/native/VisitableMembers.h"
@@ -42,24 +45,33 @@ struct CombinedLimits {
 };
 
 // Populate |limits| with the default limits.
-void GetDefaultLimits(Limits* limits, wgpu::FeatureLevel featureLevel);
+void GetDefaultLimits(CombinedLimits* limits, wgpu::FeatureLevel featureLevel);
 
 // Returns a copy of |limits| where all undefined values are replaced
 // with their defaults. Also clamps to the defaults if the provided limits
 // are worse.
-Limits ReifyDefaultLimits(const Limits& limits, wgpu::FeatureLevel featureLevel);
+CombinedLimits ReifyDefaultLimits(const CombinedLimits& limits, wgpu::FeatureLevel featureLevel);
 
 // Fixup limits after device creation
 void EnforceLimitSpecInvariants(Limits* limits, wgpu::FeatureLevel featureLevel);
 
 // Validate that |requiredLimits| are no better than |supportedLimits|.
-MaybeError ValidateLimits(const Limits& supportedLimits, const Limits& requiredLimits);
+MaybeError ValidateLimits(const CombinedLimits& supportedLimits,
+                          const CombinedLimits& requiredLimits);
 
-// Returns a copy of |limits| where limit tiers are applied.
-CombinedLimits ApplyLimitTiers(const CombinedLimits& limits);
+// Validtate that the |chainedLimits| are valid and unpack them into |out|.
+MaybeError ValidateAndUnpackLimitsIn(const Limits* chainedLimits,
+                                     const std::unordered_set<wgpu::FeatureName>& supportedFeatures,
+                                     CombinedLimits* out);
+
+// Unpack |chainedLimits| into |out|.
+void UnpackLimitsIn(const Limits* chainedLimits, CombinedLimits* out);
 
 // Apply limit tiers to |limits|
 void ApplyLimitTiers(CombinedLimits* limits);
+
+// Returns a copy of |limits| where limit tiers are applied.
+CombinedLimits ApplyLimitTiers(const CombinedLimits& limits);
 
 // If there are new limit member needed at shader compilation time
 // Simply append a new X(type, name) here.

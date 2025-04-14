@@ -354,14 +354,11 @@ DeviceBase::DeviceBase(AdapterBase* adapter,
     mBlobCache = std::make_unique<BlobCache>(cacheDesc);
 
     if (descriptor->requiredLimits != nullptr) {
-        mLimits.v1 = ReifyDefaultLimits(*descriptor->requiredLimits, effectiveFeatureLevel);
+        UnpackLimitsIn(descriptor->requiredLimits, &mLimits);
+        mLimits = ReifyDefaultLimits(mLimits, effectiveFeatureLevel);
     } else {
-        GetDefaultLimits(&mLimits.v1, effectiveFeatureLevel);
+        GetDefaultLimits(&mLimits, effectiveFeatureLevel);
     }
-
-    // Get experimentalImmediateDataRangeByteSizeLimit from physical device
-    mLimits.experimentalImmediateDataLimits =
-        GetPhysicalDevice()->GetLimits().experimentalImmediateDataLimits;
 
     // Get texelCopyBufferRowAlignmentLimits from physical device
     mLimits.texelCopyBufferRowAlignmentLimits =
@@ -391,7 +388,7 @@ DeviceBase::DeviceBase(AdapterBase* adapter,
 }
 
 DeviceBase::DeviceBase() : mState(State::Alive), mToggles(ToggleStage::Device) {
-    GetDefaultLimits(&mLimits.v1, wgpu::FeatureLevel::Core);
+    GetDefaultLimits(&mLimits, wgpu::FeatureLevel::Core);
     EnforceLimitSpecInvariants(&mLimits.v1, wgpu::FeatureLevel::Core);
     mFormatTable = BuildFormatTable(this);
 

@@ -311,7 +311,7 @@ ResultOrError<GLint> GetIndexed(const OpenGLFunctions& gl, GLenum pname, GLuint 
 
 MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits) {
     const OpenGLFunctions& gl = mFunctions;
-    GetDefaultLimitsForSupportedFeatureLevel(&limits->v1);
+    GetDefaultLimitsForSupportedFeatureLevel(limits);
 
     DAWN_TRY_ASSIGN(limits->v1.maxTextureDimension2D, Get(gl, GL_MAX_TEXTURE_SIZE));
     limits->v1.maxTextureDimension1D = limits->v1.maxTextureDimension2D;
