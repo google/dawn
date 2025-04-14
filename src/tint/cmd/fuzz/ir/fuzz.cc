@@ -69,13 +69,13 @@ void Register(const IRFuzzer& fuzzer) {
             if (program.AST().Enables().Any(tint::wgsl::reader::IsUnsupportedByIR)) {
                 return;
             }
-            auto cfg = SubstituteOverridesConfig(program);
 
             auto ir = tint::wgsl::reader::ProgramToLoweredIR(program);
             if (ir != Success) {
                 return;
             }
 
+            auto cfg = SubstituteOverridesConfig(ir.Get());
             auto substituteOverridesResult =
                 tint::core::ir::transform::SubstituteOverrides(ir.Get(), cfg);
             if (substituteOverridesResult != Success) {

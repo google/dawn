@@ -50,11 +50,6 @@ tint_target_add_dependencies(tint_cmd_fuzz_ir_helpers lib
   tint_lang_core_ir
   tint_lang_core_ir_transform
   tint_lang_core_type
-  tint_lang_wgsl
-  tint_lang_wgsl_ast
-  tint_lang_wgsl_inspector
-  tint_lang_wgsl_program
-  tint_lang_wgsl_sem
   tint_utils
   tint_utils_containers
   tint_utils_diagnostic
@@ -68,5 +63,39 @@ tint_target_add_dependencies(tint_cmd_fuzz_ir_helpers lib
 )
 
 tint_target_add_external_dependencies(tint_cmd_fuzz_ir_helpers lib
+  "src_utils"
+)
+
+################################################################################
+# Target:    tint_cmd_fuzz_ir_helpers_test
+# Kind:      test
+################################################################################
+tint_add_target(tint_cmd_fuzz_ir_helpers_test test
+  cmd/fuzz/ir/helpers/substitute_overrides_config_test.cc
+)
+
+tint_target_add_dependencies(tint_cmd_fuzz_ir_helpers_test test
+  tint_api_common
+  tint_cmd_fuzz_ir_helpers
+  tint_lang_core
+  tint_lang_core_constant
+  tint_lang_core_intrinsic
+  tint_lang_core_ir
+  tint_lang_core_ir_transform
+  tint_lang_core_type
+  tint_utils
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_ice
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_rtti
+  tint_utils_symbol
+  tint_utils_text
+)
+
+tint_target_add_external_dependencies(tint_cmd_fuzz_ir_helpers_test test
+  "gtest"
   "src_utils"
 )

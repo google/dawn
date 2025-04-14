@@ -71,9 +71,6 @@ class Inspector {
     /// @returns the entry point information
     EntryPoint GetEntryPoint(const std::string& entry_point);
 
-    /// @returns map of override identifier to initial value
-    std::map<OverrideId, Scalar> GetOverrideDefaultValues();
-
     /// @returns map of module-constant name to pipeline constant ID
     std::map<std::string, OverrideId> GetNamedOverrideIds();
 

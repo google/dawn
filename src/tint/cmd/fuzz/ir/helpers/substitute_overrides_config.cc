@@ -27,28 +27,24 @@
 
 #include "src/tint/cmd/fuzz/ir/helpers/substitute_overrides_config.h"
 
-#include <memory>
-#include <utility>
-
+#include "src/tint/lang/core/ir/module.h"
+#include "src/tint/lang/core/ir/override.h"
 #include "src/tint/lang/core/ir/transform/substitute_overrides.h"
-#include "src/tint/lang/wgsl/inspector/inspector.h"
-#include "src/tint/lang/wgsl/program/program.h"
 
 namespace tint::fuzz::ir {
 
 tint::core::ir::transform::SubstituteOverridesConfig SubstituteOverridesConfig(
-    const Program& program) {
+    core::ir::Module& mod) {
     tint::core::ir::transform::SubstituteOverridesConfig cfg;
-    inspector::Inspector inspector(program);
-    auto default_values = inspector.GetOverrideDefaultValues();
-    for (const auto& [override_id, scalar] : default_values) {
-        // If the override is not null, then it has a default value, we can just let it use the
-        // provided default instead of overriding.
-        if (scalar.IsNull()) {
-            cfg.map.insert({override_id, 0.0});
-        }
-    }
 
+    for (auto* inst : *(mod.root_block)) {
+        auto* ov = inst->As<core::ir::Override>();
+        if (!ov || ov->Initializer()) {
+            continue;
+        }
+
+        cfg.map[ov->OverrideId().value()] = 0.0;
+    }
     return cfg;
 }
 

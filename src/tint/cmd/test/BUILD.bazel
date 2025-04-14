@@ -44,6 +44,7 @@ cc_binary(
   deps = [
     "//src/tint/api",
     "//src/tint/api/common:test",
+    "//src/tint/cmd/fuzz/ir/helpers:test",
     "//src/tint/lang/core/constant:test",
     "//src/tint/lang/core/intrinsic:test",
     "//src/tint/lang/core/ir/analysis:test",
