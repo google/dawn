@@ -25,12 +25,12 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <algorithm>
+#include <memory>
 #include <unordered_set>
 
 #include "gmock/gmock.h"
 
-#include "src/tint/lang/core/fluent_types.h"
+#include "src/tint/lang/core/fluent_types.h"  // IWYU pragma: export
 #include "src/tint/lang/wgsl/inspector/entry_point.h"
 #include "src/tint/lang/wgsl/inspector/inspector.h"
 #include "src/tint/lang/wgsl/reader/reader.h"
@@ -84,7 +84,6 @@ using InspectorGetOverrideDefaultValuesTest = InspectorTest;
 using InspectorGetConstantNameToIdMapTest = InspectorTest;
 using InspectorGetResourceBindingsTest = InspectorTest;
 using InspectorGetUsedExtensionNamesTest = InspectorTest;
-using InspectorGetEnableDirectivesTest = InspectorTest;
 using InspectorGetBlendSrcTest = InspectorTest;
 using InspectorSubgroupMatrixTest = InspectorTest;
 using InspectorTextureTest = InspectorTest;
@@ -3004,16 +3003,17 @@ class InspectorGetSamplerTextureUsesTest : public TestHelper, public testing::Te
             EXPECT_TRUE(pairSet.insert(pair).second)
                 << "Duplicated SamplerTexturePair found: Sampler: ("
                 << pair.sampler_binding_point.group << ", " << pair.sampler_binding_point.binding
-                << "), " << "Texture: (" << pair.texture_binding_point.group << ", "
+                << "), "
+                << "Texture: (" << pair.texture_binding_point.group << ", "
                 << pair.texture_binding_point.binding << ")";
         }
         // Check that each SamplerTexturePair in the actual is in the set and occurs only once.
         for (const auto& pair : actual) {
             EXPECT_TRUE(pairSet.erase(pair) == 1)
                 << "Unexpected SamplerTexturePair: Sampler: (" << pair.sampler_binding_point.group
-                << ", " << pair.sampler_binding_point.binding << "), " << "Texture: ("
-                << pair.texture_binding_point.group << ", " << pair.texture_binding_point.binding
-                << ")";
+                << ", " << pair.sampler_binding_point.binding << "), "
+                << "Texture: (" << pair.texture_binding_point.group << ", "
+                << pair.texture_binding_point.binding << ")";
         }
     }
 
@@ -3810,67 +3810,6 @@ fn main() {
     auto result = inspector.GetUsedExtensionNames();
     EXPECT_EQ(result.size(), 1u);
     EXPECT_EQ(result[0], "f16");
-}
-
-// Test calling GetEnableDirectives on a empty shader.
-TEST_F(InspectorGetEnableDirectivesTest, Empty) {
-    std::string shader = "";
-
-    Inspector& inspector = Initialize(shader);
-
-    auto result = inspector.GetEnableDirectives();
-    EXPECT_EQ(result.size(), 0u);
-}
-
-// Test calling GetEnableDirectives on a shader with no extension.
-TEST_F(InspectorGetEnableDirectivesTest, None) {
-    std::string shader = R"(
-@fragment
-fn main() {
-})";
-
-    Inspector& inspector = Initialize(shader);
-
-    auto result = inspector.GetEnableDirectives();
-    EXPECT_EQ(result.size(), 0u);
-}
-
-// Test calling GetEnableDirectives on a shader with valid extension.
-TEST_F(InspectorGetEnableDirectivesTest, Simple) {
-    std::string shader = R"(
-enable f16;
-
-@fragment
-fn main() {
-})";
-
-    Inspector& inspector = Initialize(shader);
-
-    auto result = inspector.GetEnableDirectives();
-    EXPECT_EQ(result.size(), 1u);
-    EXPECT_EQ(result[0].first, "f16");
-    EXPECT_EQ(result[0].second.range, (Source::Range{{2, 8}, {2, 11}}));
-}
-
-// Test calling GetEnableDirectives on a shader with a extension enabled for
-// multiple times.
-TEST_F(InspectorGetEnableDirectivesTest, Duplicated) {
-    std::string shader = R"(
-enable f16;
-
-enable f16;
-@fragment
-fn main() {
-})";
-
-    Inspector& inspector = Initialize(shader);
-
-    auto result = inspector.GetEnableDirectives();
-    EXPECT_EQ(result.size(), 2u);
-    EXPECT_EQ(result[0].first, "f16");
-    EXPECT_EQ(result[0].second.range, (Source::Range{{2, 8}, {2, 11}}));
-    EXPECT_EQ(result[1].first, "f16");
-    EXPECT_EQ(result[1].second.range, (Source::Range{{4, 8}, {4, 11}}));
 }
 
 // Crash was occuring in ::GenerateSamplerTargets, when

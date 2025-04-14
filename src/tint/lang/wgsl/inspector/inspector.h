@@ -29,12 +29,10 @@
 #define SRC_TINT_LANG_WGSL_INSPECTOR_INSPECTOR_H_
 
 #include <map>
-#include <memory>
 #include <string>
 #include <tuple>
 #include <unordered_map>
 #include <unordered_set>
-#include <utility>
 #include <vector>
 
 #include "src/tint/api/common/override_id.h"
@@ -44,9 +42,7 @@
 #include "src/tint/lang/wgsl/inspector/resource_binding.h"
 #include "src/tint/lang/wgsl/inspector/scalar.h"
 #include "src/tint/lang/wgsl/program/program.h"
-#include "src/tint/lang/wgsl/sem/call.h"
 #include "src/tint/lang/wgsl/sem/sampler_texture_pair.h"
-#include "src/tint/utils/containers/unique_vector.h"
 
 namespace tint::inspector {
 
@@ -107,13 +103,6 @@ class Inspector {
     /// will be no duplicated names in the returned vector even if an extension
     /// is enabled multiple times.
     std::vector<std::string> GetUsedExtensionNames();
-
-    /// @returns vector of all enable directives used by the program, each
-    /// enable directive represented by a std::pair<std::string,
-    /// tint::Source::Range> for its extension name and its location of the
-    /// extension name. There may be multiple enable directives for a same
-    /// extension.
-    std::vector<std::pair<std::string, Source>> GetEnableDirectives();
 
     /// The information needed to be supplied.
     enum class TextureQueryType : uint8_t {
@@ -225,30 +214,6 @@ class Inspector {
 
     /// @returns `true` if @p func uses any subgroup matrix types
     bool UsesSubgroupMatrix(const sem::Function* func) const;
-
-    /// When computing the list of combinations of textures and samplers used together, what we
-    /// need to return are the global resources. However these resources can be passed as
-    /// parameters that are not immediately linked to the global resource. This helper function
-    /// walks the AST to find this link.
-    ///
-    /// Given an N-uple of expressions, that are either textures or samplers that are used in the
-    /// same call expression, determine each call site where the globals for these resources are
-    /// first combined together. The callback is called for each callsite along with the global
-    /// variables corresponding to the N expressions.
-    ///
-    /// @tparam N number of expressions in the n-uple
-    /// @tparam F type of the callback provided.
-    /// @param exprs N-uple of expressions to resolve.
-    /// @param function the enclosing function where the N-uple is used.
-    /// @param cb is a callback function with the signature:
-    /// `void(std::array<const sem::GlobalVariable*, N>, const sem::Function* callsite)`,
-    /// which is invoked whenever a set of expressions are resolved to globals. The `callsite`
-    /// provides the function where we determined the sampler,texture global variables. This
-    /// is the starting point to determine which entry points are using this sampler,texture.
-    template <size_t N, typename F>
-    void ForEachOriginatingResource(std::array<const ast::Expression*, N> exprs,
-                                    const sem::Function* function,
-                                    F&& cb);
 
     /// @param func the function of the entry point. Must be non-nullptr and true for IsEntryPoint()
     /// @returns the entry point information

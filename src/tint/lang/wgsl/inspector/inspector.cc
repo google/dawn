@@ -717,22 +717,6 @@ std::vector<std::string> Inspector::GetUsedExtensionNames() {
     return out;
 }
 
-std::vector<std::pair<std::string, Source>> Inspector::GetEnableDirectives() {
-    std::vector<std::pair<std::string, Source>> result;
-
-    // Ast nodes for enable directive are stored within global declarations list
-    auto global_decls = program_.AST().GlobalDeclarations();
-    for (auto* node : global_decls) {
-        if (auto* enable = node->As<ast::Enable>()) {
-            for (auto* ext : enable->extensions) {
-                result.push_back({tint::ToString(ext->name), ext->source});
-            }
-        }
-    }
-
-    return result;
-}
-
 const ast::Function* Inspector::FindEntryPointByName(const std::string& name) {
     auto* func = program_.AST().Functions().Find(program_.Symbols().Get(name));
     if (!func) {
