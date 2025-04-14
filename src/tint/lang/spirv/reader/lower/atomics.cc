@@ -88,6 +88,8 @@ struct State {
                     AtomicOp(builtin, core::BuiltinFn::kAtomicStore);
                     break;
                 case spirv::BuiltinFn::kAtomicExchange:
+                    AtomicOp(builtin, core::BuiltinFn::kAtomicExchange);
+                    break;
                 case spirv::BuiltinFn::kAtomicCompareExchange:
                     break;
                 case spirv::BuiltinFn::kAtomicIAdd:
