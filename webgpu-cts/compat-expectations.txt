@@ -310,17 +310,6 @@ crbug.com/364595481 [ android-pixel-6 ] webgpu:shader,execution,expression,call,
 crbug.com/364595481 [ android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:sampled_2d_coords:*;offset=true [ Skip ]
 crbug.com/364595481 [ android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:sampled_3d_coords:*;offset=true [ Skip ]
 
-# textureSampleGrad() is broken with cube maps
-crbug.com/383595386 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_3d_coords:* [ Skip ]
-
-crbug.com/406978228 [ intel ] webgpu:api,validation,queue,destroyed,query_set:resolveQuerySet:* [ Skip ]
-
-crbug.com/407088838 [ intel ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:3d_coords:* [ Skip ]
-crbug.com/407088838 [ intel-0x4680 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:arrayed_2d_coords:* [ Skip ]
-crbug.com/407088838 [ intel-0x4680 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_2d_coords:* [ Skip ]
-crbug.com/407088838 [ intel-0x4680 win10 ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_2d_coords:* [ Skip ]
-crbug.com/407088838 [ intel-0x9bc5 win10 ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_2d_coords:* [ Skip ]
-
 # Driver crash with multisample texture load on pixel-6
 crbug.com/373670502 [ android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:* [ Skip ]
 
