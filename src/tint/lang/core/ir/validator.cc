@@ -90,6 +90,7 @@
 #include "src/tint/lang/core/type/memory_view.h"
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/reference.h"
+#include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/type.h"
 #include "src/tint/lang/core/type/u32.h"
@@ -1867,6 +1868,13 @@ void Validator::CheckType(const core::type::Type* root,
             [&](const core::type::Matrix* m) {
                 if (!m->Type()->IsFloatScalar()) {
                     diag() << "matrix elements, " << NameOf(type) << ", must be float scalars";
+                    return false;
+                }
+                return true;
+            },
+            [&](const core::type::SampledTexture* s) {
+                if (!s->Type()->IsAnyOf<core::type::F32, core::type::I32, core::type::U32>()) {
+                    diag() << "invalid sampled texture sample type: " << NameOf(s->Type());
                     return false;
                 }
                 return true;
