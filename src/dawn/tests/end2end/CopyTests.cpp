@@ -2084,7 +2084,7 @@ class CopyTests_T2B_Compat : public CopyTests_T2B {
   protected:
     void SetUp() override {
         CopyTests_T2B::SetUp();
-        DAWN_SUPPRESS_TEST_IF(!IsCompatibilityMode());
+        DAWN_TEST_UNSUPPORTED_IF(!IsCompatibilityMode());
         DAWN_SUPPRESS_TEST_IF(IsANGLESwiftShader());
     }
 };
