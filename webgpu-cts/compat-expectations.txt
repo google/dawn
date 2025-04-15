@@ -82,7 +82,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2025-04-10 07:19:07AM
+# Last rolled: 2025-04-14 06:57:15AM
 
 # conflicts_allowed: true
 # full_wildcard_support: true
@@ -393,7 +393,6 @@ crbug.com/402772749 webgpu:api,operation,sampling,sampler_texture:sample_texture
 
 ### This section represents tests which may require CTS changes.
 
-
 ### This section represents things that will require Compat validation
 ### These tests will never pass, but should be skipped in CTS once Compat
 ### validation has been added
@@ -668,7 +667,6 @@ crbug.com/42241359 [ android-14 arm ] webgpu:shader,execution,expression,call,bu
 # copyToTexture,canvas:copy_contents_from_gpu_context_canvas too flaky for RetryOnFailure on Android
 crbug.com/393402151 [ android arm ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:* [ Failure ]
 
-
 # image_copy of depth/stencil flaky on Pixel 6
 crbug.com/384676198 [ android-pixel-6 ] webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow_depth_stencil:* [ RetryOnFailure ]
 
@@ -782,8 +780,6 @@ crbug.com/346799721 webgpu:web_platform,external_texture,video:importExternalTex
 crbug.com/407109045 [ linux nvidia ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_array_2d_coords:stage="c";format="rgba16float";filt="linear";modeU="r";modeV="m";offset=false [ Failure ]
 crbug.com/407109045 [ linux nvidia ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_array_2d_coords:stage="f";format="r8snorm";filt="linear";modeU="m";modeV="c";offset=true [ Failure ]
 
-
-
 crbug.com/407088842 [ android-pixel-6 ] webgpu:web_platform,copyToTexture,image_file:from_multiple_formats:imageName="four-colors.avif";srcDoFlipYDuringCopy=false [ Failure ]
 crbug.com/407088842 [ intel linux ] webgpu:web_platform,copyToTexture,image_file:from_multiple_formats:imageName="four-colors.avif";srcDoFlipYDuringCopy=false [ Failure ]
 crbug.com/407088842 [ linux nvidia ] webgpu:web_platform,copyToTexture,image_file:from_multiple_formats:imageName="four-colors.avif";srcDoFlipYDuringCopy=false [ Failure ]
@@ -812,7 +808,6 @@ crbug.com/407109047 [ linux nvidia ] webgpu:api,validation,render_pipeline,fragm
 crbug.com/407109047 [ linux nvidia ] webgpu:api,validation,render_pipeline,fragment_state:targets_format_filterable:isAsync=false;format="rg11b10ufloat" [ Failure ]
 crbug.com/407109047 [ linux nvidia ] webgpu:api,validation,render_pipeline,fragment_state:targets_format_filterable:isAsync=true;format="rg11b10ufloat" [ Failure ]
 
-
 # Test bug, tests require implementation to provide "core" but fails when not available
 crbug.com/366151404 webgpu:api,operation,adapter,requestAdapter:requestAdapter_invalid_featureLevel:featureLevel="_undef_" [ Failure ]
 crbug.com/366151404 webgpu:api,operation,adapter,requestAdapter:requestAdapter_invalid_featureLevel:featureLevel="core" [ Failure ]
@@ -829,6 +824,7 @@ crbug.com/0000 [ linux nvidia ] webgpu:api,validation,state,device_lost,destroy:
 crbug.com/0000 [ linux nvidia ] webgpu:api,validation,state,device_lost,destroy:importExternalTexture:sourceType="VideoFrame";awaitLost=true [ Failure ]
 crbug.com/0000 [ android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,exp2:f16:inputSource="const";vectorize=4 [ Failure ]
 crbug.com/0000 [ compat-default linux nvidia ] webgpu:shader,execution,expression,call,builtin,textureSampleBaseClampToEdge:2d_coords:stage="c";textureType="texture_external";filt="linear";modeU="r";modeV="r" [ Failure ]
+crbug.com/0000 [ linux nvidia ] webgpu:shader,execution,expression,call,builtin,textureSampleBaseClampToEdge:2d_coords:stage="v";textureType="texture_external";filt="nearest";modeU="m";modeV="c" [ Failure ]
 crbug.com/0000 [ android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,workgroupUniformLoad:types:type="atomic%3Ci32%3E";wgsize=[1,128] [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:shader,execution,expression,call,builtin,workgroupUniformLoad:types:type="atomic%3Ci32%3E";wgsize=[1,128] [ Failure ]
 crbug.com/0000 [ linux nvidia ] webgpu:shader,execution,expression,call,builtin,workgroupUniformLoad:types:type="atomic%3Ci32%3E";wgsize=[1,128] [ Failure ]
