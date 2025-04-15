@@ -62,12 +62,12 @@ TEST_P(ResolverSubgroupMatrixParamTest, DeclareType) {
 
     StringStream kind;
     kind << "subgroup_matrix_" << ToString(params.kind);
-    auto* var = GlobalVar("m", private_,
-                          ty(kind.str(), params.el_ast(*this), u32(params.cols), u32(params.rows)));
+    auto* alias =
+        Alias("m", ty(kind.str(), params.el_ast(*this), u32(params.cols), u32(params.rows)));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
-    auto* m = TypeOf(var)->UnwrapRef()->As<core::type::SubgroupMatrix>();
+    auto* m = TypeOf(alias)->UnwrapRef()->As<core::type::SubgroupMatrix>();
     ASSERT_NE(m, nullptr);
     EXPECT_EQ(m->Kind(), params.kind);
     EXPECT_EQ(m->Type(), params.el_sem(*this));
@@ -90,11 +90,11 @@ INSTANTIATE_TEST_SUITE_P(ResolverTest,
 
 TEST_F(ResolverSubgroupMatrixTest, SignedColumnCount) {
     Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
-    auto* var = GlobalVar("left", private_, ty("subgroup_matrix_result", ty.f32(), 4_i, 2_u));
+    auto* alias = Alias("left", ty("subgroup_matrix_result", ty.f32(), 4_i, 2_u));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
-    auto* m = TypeOf(var)->UnwrapRef()->As<core::type::SubgroupMatrix>();
+    auto* m = TypeOf(alias)->UnwrapRef()->As<core::type::SubgroupMatrix>();
     ASSERT_NE(m, nullptr);
     EXPECT_EQ(m->Columns(), 4u);
     EXPECT_EQ(m->Rows(), 2u);
@@ -102,18 +102,18 @@ TEST_F(ResolverSubgroupMatrixTest, SignedColumnCount) {
 
 TEST_F(ResolverSubgroupMatrixTest, SignedRowCount) {
     Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
-    auto* var = GlobalVar("left", private_, ty("subgroup_matrix_result", ty.f32(), 4_u, 2_i));
+    auto* alias = Alias("left", ty("subgroup_matrix_result", ty.f32(), 4_u, 2_i));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
-    auto* m = TypeOf(var)->UnwrapRef()->As<core::type::SubgroupMatrix>();
+    auto* m = TypeOf(alias)->UnwrapRef()->As<core::type::SubgroupMatrix>();
     ASSERT_NE(m, nullptr);
     EXPECT_EQ(m->Columns(), 4u);
     EXPECT_EQ(m->Rows(), 2u);
 }
 
 TEST_F(ResolverSubgroupMatrixTest, DeclareTypeWithoutExtension) {
-    GlobalVar("left", private_, ty("subgroup_matrix_result", ty.f32(), 8_a, 8_a));
+    Alias("left", ty("subgroup_matrix_result", ty.f32(), 8_a, 8_a));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(
@@ -123,7 +123,7 @@ TEST_F(ResolverSubgroupMatrixTest, DeclareTypeWithoutExtension) {
 
 TEST_F(ResolverSubgroupMatrixTest, MissingTemplateArgs) {
     Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
-    GlobalVar("left", private_, ty("subgroup_matrix_result"));
+    Alias("left", ty("subgroup_matrix_result"));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), R"(error: expected '<' for 'subgroup_matrix_result')");
@@ -131,7 +131,7 @@ TEST_F(ResolverSubgroupMatrixTest, MissingTemplateArgs) {
 
 TEST_F(ResolverSubgroupMatrixTest, MissingColsAndRows) {
     Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
-    GlobalVar("left", private_, ty("subgroup_matrix_result", ty.f32()));
+    Alias("left", ty("subgroup_matrix_result", ty.f32()));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), R"(error: 'subgroup_matrix_result' requires 3 template arguments)");
@@ -139,7 +139,7 @@ TEST_F(ResolverSubgroupMatrixTest, MissingColsAndRows) {
 
 TEST_F(ResolverSubgroupMatrixTest, MissingRows) {
     Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
-    GlobalVar("left", private_, ty("subgroup_matrix_result", ty.f32(), 8_a));
+    Alias("left", ty("subgroup_matrix_result", ty.f32(), 8_a));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), R"(error: 'subgroup_matrix_result' requires 3 template arguments)");
@@ -147,7 +147,7 @@ TEST_F(ResolverSubgroupMatrixTest, MissingRows) {
 
 TEST_F(ResolverSubgroupMatrixTest, MissingType) {
     Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
-    GlobalVar("left", private_, ty("subgroup_matrix_result", 8_a, 8_a));
+    Alias("left", ty("subgroup_matrix_result", 8_a, 8_a));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), R"(error: 'subgroup_matrix_result' requires 3 template arguments)");
@@ -155,7 +155,7 @@ TEST_F(ResolverSubgroupMatrixTest, MissingType) {
 
 TEST_F(ResolverSubgroupMatrixTest, BadType) {
     Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
-    GlobalVar("left", private_, ty("subgroup_matrix_result", ty.bool_(), 8_a, 8_a));
+    Alias("left", ty("subgroup_matrix_result", ty.bool_(), 8_a, 8_a));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), R"(error: subgroup_matrix element type must be f32, f16, i32, or u32)");
@@ -176,7 +176,7 @@ TEST_F(ResolverSubgroupMatrixTest, NonConstantColumnCount) {
 
 TEST_F(ResolverSubgroupMatrixTest, ZeroColumnCount) {
     Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
-    GlobalVar("left", private_, ty("subgroup_matrix_result", ty.f32(), 0_a, 8_a));
+    Alias("left", ty("subgroup_matrix_result", ty.f32(), 0_a, 8_a));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -185,7 +185,7 @@ TEST_F(ResolverSubgroupMatrixTest, ZeroColumnCount) {
 
 TEST_F(ResolverSubgroupMatrixTest, NegativeColumnCount) {
     Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
-    GlobalVar("left", private_, ty("subgroup_matrix_result", ty.f32(), -1_i, 8_a));
+    Alias("left", ty("subgroup_matrix_result", ty.f32(), -1_i, 8_a));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -207,7 +207,7 @@ TEST_F(ResolverSubgroupMatrixTest, NonConstantRowCount) {
 
 TEST_F(ResolverSubgroupMatrixTest, ZeroRowCount) {
     Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
-    GlobalVar("left", private_, ty("subgroup_matrix_result", ty.f32(), 8_a, 0_a));
+    Alias("left", ty("subgroup_matrix_result", ty.f32(), 8_a, 0_a));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -216,7 +216,7 @@ TEST_F(ResolverSubgroupMatrixTest, ZeroRowCount) {
 
 TEST_F(ResolverSubgroupMatrixTest, NegativeRowCount) {
     Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
-    GlobalVar("left", private_, ty("subgroup_matrix_result", ty.f32(), 8_a, -1_i));
+    Alias("left", ty("subgroup_matrix_result", ty.f32(), 8_a, -1_i));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -553,11 +553,15 @@ TEST_F(ResolverSubgroupMatrixTest, FunctionVar_Valid) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ResolverSubgroupMatrixTest, PrivateVar_Valid) {
+TEST_F(ResolverSubgroupMatrixTest, PrivateVar_Invalid) {
     Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
     GlobalVar("result", private_, ty("subgroup_matrix_result", ty.f32(), 8_a, 8_a));
 
-    EXPECT_TRUE(r()->Resolve()) << r()->error();
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_THAT(
+        r()->error(),
+        testing::HasSubstr(
+            R"(error: subgroup matrix types cannot be declared in the 'private' address space)"));
 }
 
 TEST_F(ResolverSubgroupMatrixTest, StorageVar_Invalid) {
@@ -595,9 +599,13 @@ TEST_F(ResolverSubgroupMatrixTest, WorkgroupVar_Invalid) {
             R"(error: subgroup matrix types cannot be declared in the 'workgroup' address space)"));
 }
 
-TEST_F(ResolverSubgroupMatrixTest, PrivateVar_ArrayElement_Valid) {
+TEST_F(ResolverSubgroupMatrixTest, FunctionVar_ArrayElement_Valid) {
     Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
-    GlobalVar("result", private_, ty.array(ty("subgroup_matrix_result", ty.f32(), 8_a, 8_a), 8_a));
+    auto matrix_type = ty("subgroup_matrix_result", ty.f32(), 8_a, 8_a);
+    Func("foo", Empty, ty.void_(),
+         Vector{
+             Decl(Var("result", function, ty.array(matrix_type, 8_a))),
+         });
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -613,13 +621,16 @@ TEST_F(ResolverSubgroupMatrixTest, WorkgroupVar_ArrayElement_Invalid) {
             R"(error: subgroup matrix types cannot be declared in the 'workgroup' address space)"));
 }
 
-TEST_F(ResolverSubgroupMatrixTest, PrivateVar_StructMember_Valid) {
+TEST_F(ResolverSubgroupMatrixTest, FunctionVar_StructMember_Valid) {
     Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
 
     auto* s = Structure("S", Vector{
                                  Member("m", ty("subgroup_matrix_result", ty.f32(), 8_a, 8_a)),
                              });
-    GlobalVar("result", private_, ty.Of(s));
+    Func("foo", Empty, ty.void_(),
+         Vector{
+             Decl(Var("result", function, ty.Of(s))),
+         });
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -713,52 +724,6 @@ TEST_F(ResolverSubgroupMatrixTest, ReturnType_Valid) {
 TEST_F(ResolverSubgroupMatrixTest, UseSubgroupUniformityRuleWithoutExtension) {
     DiagnosticDirective(wgsl::DiagnosticSeverity::kOff, "chromium", "subgroup_matrix_uniformity");
     EXPECT_TRUE(r()->Resolve()) << r()->error();
-}
-
-TEST_F(ResolverSubgroupMatrixTest, FragmentShader_ReferenceModuleScope) {
-    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
-    GlobalVar("result", private_, ty("subgroup_matrix_result", ty.f32(), 8_u, 8_u));
-    Func("foo", Empty, ty.void_(),
-         Vector{
-             Assign(Phony(), AddressOf(Ident(Source({12, 34}), "result"))),
-         },
-         Vector{Stage(ast::PipelineStage::kFragment)});
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              R"(12:34 error: subgroup matrix type cannot be used in fragment pipeline stage)");
-}
-
-TEST_F(ResolverSubgroupMatrixTest, FragmentShader_ReferenceModuleScopeInArray) {
-    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
-    GlobalVar("result", private_, ty.array(ty("subgroup_matrix_result", ty.f32(), 8_u, 8_u), 4_a));
-    Func("foo", Empty, ty.void_(),
-         Vector{
-             Assign(Phony(), AddressOf(Ident(Source({12, 34}), "result"))),
-         },
-         Vector{Stage(ast::PipelineStage::kFragment)});
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              R"(12:34 error: subgroup matrix type cannot be used in fragment pipeline stage)");
-}
-
-TEST_F(ResolverSubgroupMatrixTest, FragmentShader_ReferenceModuleScopeInStruct) {
-    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
-
-    auto* s = Structure("S", Vector{
-                                 Member("m", ty("subgroup_matrix_result", ty.f32(), 8_a, 8_a)),
-                             });
-    GlobalVar("result", private_, ty.Of(s));
-    Func("foo", Empty, ty.void_(),
-         Vector{
-             Assign(Phony(), AddressOf(Ident(Source({12, 34}), "result"))),
-         },
-         Vector{Stage(ast::PipelineStage::kFragment)});
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              R"(12:34 error: subgroup matrix type cannot be used in fragment pipeline stage)");
 }
 
 TEST_F(ResolverSubgroupMatrixTest, FragmentShader_FunctionVar) {
