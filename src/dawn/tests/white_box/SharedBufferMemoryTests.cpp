@@ -357,7 +357,6 @@ TEST_P(SharedBufferMemoryTests, BeginAccessInitialization) {
     memory.EndAccess(buffer, &endState);
 
     EXPECT_EQ(endState.initialized, true);
-    EXPECT_GE(endState.fenceCount, 1u);
 
     // Pass fences from the previous operation to the next BeginAccessDescriptor to ensure
     // operations are complete.

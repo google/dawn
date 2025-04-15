@@ -71,7 +71,8 @@ class Buffer final : public BufferBase {
     MaybeError EnsureDataInitializedAsDestination(CommandRecordingContext* commandContext,
                                                   const CopyTextureToBufferCmd* copy);
 
-    MaybeError SynchronizeBufferBeforeUse();
+    MaybeError SynchronizeBufferBeforeMapping();
+    MaybeError SynchronizeBufferBeforeUseOnGPU();
 
     // Dawn API
     void SetLabelImpl() override;

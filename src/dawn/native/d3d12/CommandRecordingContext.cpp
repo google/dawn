@@ -61,7 +61,7 @@ MaybeError CommandRecordingContext::ExecuteCommandList(Device* device,
     DAWN_ASSERT(mD3d12CommandList != nullptr);
 
     for (Buffer* buffer : mSharedBuffers) {
-        DAWN_TRY(buffer->SynchronizeBufferBeforeUse());
+        DAWN_TRY(buffer->SynchronizeBufferBeforeUseOnGPU());
     }
 
     for (Texture* texture : mSharedTextures) {
