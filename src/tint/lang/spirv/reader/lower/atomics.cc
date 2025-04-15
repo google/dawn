@@ -84,6 +84,7 @@ struct State {
         for (auto* builtin : builtin_worklist) {
             switch (builtin->Func()) {
                 case spirv::BuiltinFn::kAtomicLoad:
+                    AtomicOpNoArgs(builtin, core::BuiltinFn::kAtomicLoad);
                     break;
                 case spirv::BuiltinFn::kAtomicStore:
                     AtomicOp(builtin, core::BuiltinFn::kAtomicStore);
@@ -180,6 +181,17 @@ struct State {
 
             auto* one = One(call->Result()->Type());
             b.CallWithResult(call->DetachResult(), fn, var, one);
+        });
+        call->Destroy();
+    }
+
+    void AtomicOpNoArgs(spirv::ir::BuiltinCall* call, core::BuiltinFn fn) {
+        auto args = call->Args();
+
+        b.InsertBefore(call, [&] {
+            auto* var = args[0];
+            values_to_convert_.Push(var);
+            b.CallWithResult(call->DetachResult(), fn, var);
         });
         call->Destroy();
     }
