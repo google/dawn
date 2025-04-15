@@ -81,6 +81,7 @@ def parent_builder(name, dimensions, **kwargs):
         # TODO(crbug.com/385317083): Switch this to be triggered by
         # "primary-poller" once we're ready to begin migration to this recipe.
         triggered_by = None,
+        schedule = "triggered",
         executable = "recipe:dawn/gn_v2",
         dimensions = dimensions,
         properties = generate_properties_for_project(siso.project.DEFAULT_TRUSTED),
