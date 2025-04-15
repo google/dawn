@@ -18,8 +18,7 @@ class ErrorTest {
                 device.createTexture(
                     TextureDescriptor(
                         usage = TextureUsage.None,
-                        size = Extent3D(0),
-                        format = TextureFormat.Undefined  // Invalid parameter for createTexture().
+                        size = Extent3D(0)
                     )
                 )
             }
