@@ -32,6 +32,7 @@ main.star: lucicfg configuration for Dawn's standalone builers.
 """
 
 load("//project.star", "ACTIVE_MILESTONES")
+load("//constants.star", "siso")
 
 # Use LUCI Scheduler BBv2 names and add Scheduler realms configs.
 lucicfg.enable_experiment("crbug.com/1182002")
@@ -235,17 +236,6 @@ def get_dimension(os, builder_name = None):
 
     return "Invalid Dimension"
 
-siso = struct(
-    project = struct(
-        DEFAULT_TRUSTED = "rbe-chromium-trusted",
-        DEFAULT_UNTRUSTED = "rbe-chromium-untrusted",
-    ),
-    remote_jobs = struct(
-        HIGH_JOBS_FOR_CI = 250,
-        LOW_JOBS_FOR_CQ = 150,
-    ),
-)
-
 # File exclusion filters meant for use on cmake and msvc trybots since these
 # files do not affect compilation for either.
 cmake_msvc_file_exclusions = [
@@ -404,14 +394,14 @@ def add_ci_builder(name, os, properties):
         os,
         clang,
         siso.project.DEFAULT_TRUSTED,
-        siso.remote_jobs.HIGH_JOBS_FOR_CI,
+        siso.remote_jobs.DEFAULT,
     )
     properties_ci.update(properties)
     shadow_properties_ci = get_common_properties(
         os,
         clang,
         siso.project.DEFAULT_UNTRUSTED,
-        siso.remote_jobs.HIGH_JOBS_FOR_CI,
+        siso.remote_jobs.DEFAULT,
     )
     shadow_properties_ci.update(properties)
     schedule_ci = None
@@ -988,3 +978,7 @@ _create_dawn_cq_group(
     [details.ref for details in ACTIVE_MILESTONES.values()],
 )
 _create_branch_groups()
+
+# Handle any other builders defined in other files.
+exec("//gn_standalone_ci.star")
+exec("//gn_standalone_try.star")
