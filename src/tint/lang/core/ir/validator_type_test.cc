@@ -329,6 +329,41 @@ INSTANTIATE_TEST_SUITE_P(IR_ValidatorTest,
                                          std::make_tuple(false, TypeBuilder<core::type::Bool>),
                                          std::make_tuple(false, TypeBuilder<core::type::Void>)));
 
+using Type_SubgroupMatrixComponentType = TypeTest;
+
+TEST_P(Type_SubgroupMatrixComponentType, Test) {
+    bool allowed = std::get<0>(GetParam());
+    auto* type = std::get<1>(GetParam())(ty);
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        b.Var("m", AddressSpace::kFunction, ty.subgroup_matrix_result(type, 8u, 8u));
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    if (allowed) {
+        ASSERT_EQ(res, Success) << res.Failure();
+    } else {
+        ASSERT_NE(res, Success);
+        EXPECT_THAT(
+            res.Failure().reason,
+            testing::HasSubstr(":3:5 error: var: invalid subgroup matrix component type: '" +
+                               type->FriendlyName()))
+            << res.Failure();
+    }
+}
+
+INSTANTIATE_TEST_SUITE_P(IR_ValidatorTest,
+                         Type_SubgroupMatrixComponentType,
+                         testing::Values(std::make_tuple(true, TypeBuilder<f32>),
+                                         std::make_tuple(true, TypeBuilder<f16>),
+                                         std::make_tuple(true, TypeBuilder<i8>),
+                                         std::make_tuple(true, TypeBuilder<i32>),
+                                         std::make_tuple(true, TypeBuilder<u8>),
+                                         std::make_tuple(true, TypeBuilder<u32>),
+                                         std::make_tuple(false, TypeBuilder<core::type::Bool>),
+                                         std::make_tuple(false, TypeBuilder<core::type::Void>)));
+
 using Type_StorageTextureDimension = IRTestParamHelper<std::tuple<
     /* allowed */ bool,
     /* dim */ core::type::TextureDimension>>;
