@@ -32,6 +32,7 @@
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/core/type/builtin_structs.h"
 #include "src/tint/lang/spirv/ir/builtin_call.h"
 #include "src/tint/utils/containers/hashmap.h"
 #include "src/tint/utils/containers/hashset.h"
@@ -91,6 +92,7 @@ struct State {
                     AtomicOp(builtin, core::BuiltinFn::kAtomicExchange);
                     break;
                 case spirv::BuiltinFn::kAtomicCompareExchange:
+                    AtomicCompareExchange(builtin);
                     break;
                 case spirv::BuiltinFn::kAtomicIAdd:
                     AtomicOp(builtin, core::BuiltinFn::kAtomicAdd);
@@ -148,6 +150,25 @@ struct State {
             [&](const core::type::I32*) { return b.Constant(1_i); },
             [&](const core::type::U32*) { return b.Constant(1_u); },  //
             TINT_ICE_ON_NO_MATCH);
+    }
+
+    void AtomicCompareExchange(spirv::ir::BuiltinCall* call) {
+        auto args = call->Args();
+
+        b.InsertBefore(call, [&] {
+            auto* var = args[0];
+            values_to_convert_.Push(var);
+
+            auto* val = args[4];
+            auto* comp = args[5];
+
+            auto* strct =
+                core::type::CreateAtomicCompareExchangeResult(ty, ir.symbols, val->Type());
+
+            auto* bi = b.Call(strct, core::BuiltinFn::kAtomicCompareExchangeWeak, var, val, comp);
+            b.AccessWithResult(call->DetachResult(), bi, 0_u);
+        });
+        call->Destroy();
     }
 
     void AtomicChangeByOne(spirv::ir::BuiltinCall* call, core::BuiltinFn fn) {
