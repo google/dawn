@@ -1854,6 +1854,7 @@ class UniformityGraph {
                 }
             } else {
                 auto* builtin = sem->Target()->As<sem::BuiltinFn>();
+                auto* construct = sem->Target()->As<sem::ValueConstructor>();
                 if (builtin && builtin->Fn() == wgsl::BuiltinFn::kWorkgroupUniformLoad) {
                     // The workgroupUniformLoad builtin requires its parameter to be uniform.
                     current_function_->RequiredToBeUniform(default_severity)->AddEdge(args[i]);
@@ -1867,6 +1868,16 @@ class UniformityGraph {
                     // Get the severity of subgroup uniformity violations in this context.
                     auto severity = sem_.DiagnosticSeverity(
                         call->args[i], wgsl::CoreDiagnosticRule::kSubgroupUniformity);
+                    if (severity != wgsl::DiagnosticSeverity::kOff) {
+                        current_function_->RequiredToBeUniform(severity)->AddEdge(args[i]);
+                    }
+                } else if (((builtin && builtin->IsSubgroupMatrix()) ||
+                            (construct &&
+                             construct->ReturnType()->Is<core::type::SubgroupMatrix>()))) {
+                    // For all subgroup matrix builtins and constructors, all arguments must be
+                    // uniform.
+                    auto severity = sem_.DiagnosticSeverity(
+                        call->args[i], wgsl::ChromiumDiagnosticRule::kSubgroupMatrixUniformity);
                     if (severity != wgsl::DiagnosticSeverity::kOff) {
                         current_function_->RequiredToBeUniform(severity)->AddEdge(args[i]);
                     }
@@ -2137,29 +2148,37 @@ class UniformityGraph {
             cause->type == Node::kFunctionCallArgumentContents) {
             bool is_value = (cause->type == Node::kFunctionCallArgumentValue);
 
-            auto* user_func = target->As<sem::Function>();
-            if (user_func) {
-                // Recurse into the called function to show the reason for the requirement.
-                auto next_function = functions_.Get(user_func->Declaration());
-                auto& param_info = next_function->parameters[cause->arg_index];
-                MakeError(*next_function,
-                          is_value ? param_info.value : param_info.ptr_input_contents, severity);
+            Switch(
+                target,  //
+                [&](const sem::Function* user_func) {
+                    // Recurse into the called function to show the reason for the requirement.
+                    auto next_function = functions_.Get(user_func->Declaration());
+                    auto& param_info = next_function->parameters[cause->arg_index];
+                    MakeError(*next_function,
+                              is_value ? param_info.value : param_info.ptr_input_contents,
+                              severity);
 
-                // Show the place where the non-uniform argument was passed.
-                // If this is a builtin, this will be the trigger location for the failure.
-                StringStream ss;
-                ss << "possibly non-uniform value passed" << (is_value ? "" : " via pointer")
-                   << " here";
-                report(call->args[cause->arg_index]->source, ss.str(), /* note */ true);
-            } else {
-                // The uniformity requirement must come from a builtin function.
-                auto* builtin = target->As<sem::BuiltinFn>();
-                TINT_ASSERT(builtin);
-                StringStream ss;
-                ss << "'" << builtin->Fn() << "' requires argument " << cause->arg_index << " to "
-                   << (is_value ? "be uniform" : "have uniform contents");
-                report(call->args[cause->arg_index]->source, ss.str(), /* note */ false);
-            }
+                    // Show the place where the non-uniform argument was passed.
+                    // If this is a builtin, this will be the trigger location for the failure.
+                    StringStream ss;
+                    ss << "possibly non-uniform value passed" << (is_value ? "" : " via pointer")
+                       << " here";
+                    report(call->args[cause->arg_index]->source, ss.str(), /* note */ true);
+                },
+                [&](const sem::BuiltinFn* builtin) {
+                    StringStream ss;
+                    ss << "'" << builtin->Fn() << "' requires argument " << cause->arg_index
+                       << " to " << (is_value ? "be uniform" : "have uniform contents");
+                    report(call->args[cause->arg_index]->source, ss.str(), /* note */ false);
+                },
+                [&](const sem::ValueConstructor* construct) {
+                    StringStream ss;
+                    ss << construct->ReturnType()->FriendlyName()
+                       << " constructor requires argument " << cause->arg_index << " to "
+                       << (is_value ? "be uniform" : "have uniform contents");
+                    report(call->args[cause->arg_index]->source, ss.str(), /* note */ false);
+                },
+                TINT_ICE_ON_NO_MATCH);
 
             // Show the origin of non-uniformity for the value or data that is being passed.
             ShowSourceOfNonUniformity(source_node->visited_from);

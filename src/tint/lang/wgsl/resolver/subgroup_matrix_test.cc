@@ -410,11 +410,13 @@ TEST_F(ResolverSubgroupMatrixTest, SubgroupMatrixLoad_MissingTemplateArg) {
 
 TEST_F(ResolverSubgroupMatrixTest, SubgroupMatrixMultiply) {
     Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
-    auto* left = GlobalVar("left", private_, ty("subgroup_matrix_left", ty.f32(), 2_u, 4_u));
-    auto* right = GlobalVar("right", private_, ty("subgroup_matrix_right", ty.f32(), 8_u, 2_u));
+    auto* left = Var("left", function, ty("subgroup_matrix_left", ty.f32(), 2_u, 4_u));
+    auto* right = Var("right", function, ty("subgroup_matrix_right", ty.f32(), 8_u, 2_u));
     auto* call = Call(Ident(wgsl::BuiltinFn::kSubgroupMatrixMultiply, ty.f32()), left, right);
     Func("foo", Empty, ty.void_(),
          Vector{
+             Decl(left),
+             Decl(right),
              Assign(Phony(), call),
          });
 
@@ -435,11 +437,13 @@ TEST_F(ResolverSubgroupMatrixTest, SubgroupMatrixMultiply) {
 
 TEST_F(ResolverSubgroupMatrixTest, SubgroupMatrixMultiply_MissingTemplateArg) {
     Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
-    auto* left = GlobalVar("left", private_, ty("subgroup_matrix_left", ty.f32(), 2_u, 4_u));
-    auto* right = GlobalVar("right", private_, ty("subgroup_matrix_right", ty.f32(), 8_u, 2_u));
+    auto* left = Var("left", function, ty("subgroup_matrix_left", ty.f32(), 2_u, 4_u));
+    auto* right = Var("right", function, ty("subgroup_matrix_right", ty.f32(), 8_u, 2_u));
     auto* call = Call(wgsl::BuiltinFn::kSubgroupMatrixMultiply, left, right);
     Func("foo", Empty, ty.void_(),
          Vector{
+             Decl(left),
+             Decl(right),
              Assign(Phony(), call),
          });
 
@@ -450,11 +454,13 @@ TEST_F(ResolverSubgroupMatrixTest, SubgroupMatrixMultiply_MissingTemplateArg) {
 
 TEST_F(ResolverSubgroupMatrixTest, SubgroupMatrixMultiply_MismatchDimensions) {
     Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
-    auto* left = GlobalVar("left", private_, ty("subgroup_matrix_left", ty.f32(), 4_u, 2_u));
-    auto* right = GlobalVar("right", private_, ty("subgroup_matrix_right", ty.f32(), 2_u, 8_u));
+    auto* left = Var("left", function, ty("subgroup_matrix_left", ty.f32(), 4_u, 2_u));
+    auto* right = Var("right", function, ty("subgroup_matrix_right", ty.f32(), 2_u, 8_u));
     auto* call = Call(Ident(wgsl::BuiltinFn::kSubgroupMatrixMultiply, ty.f32()), left, right);
     Func("foo", Empty, ty.void_(),
          Vector{
+             Decl(left),
+             Decl(right),
              Assign(Phony(), call),
          });
 
@@ -465,11 +471,13 @@ TEST_F(ResolverSubgroupMatrixTest, SubgroupMatrixMultiply_MismatchDimensions) {
 
 TEST_F(ResolverSubgroupMatrixTest, SubgroupMatrixMultiply_MismatchTypes) {
     Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
-    auto* left = GlobalVar("left", private_, ty("subgroup_matrix_left", ty.u32(), 8_u, 8_u));
-    auto* right = GlobalVar("right", private_, ty("subgroup_matrix_right", ty.i32(), 8_u, 8_u));
+    auto* left = Var("left", function, ty("subgroup_matrix_left", ty.u32(), 8_u, 8_u));
+    auto* right = Var("right", function, ty("subgroup_matrix_right", ty.i32(), 8_u, 8_u));
     auto* call = Call(Ident(wgsl::BuiltinFn::kSubgroupMatrixMultiply, ty.f32()), left, right);
     Func("foo", Empty, ty.void_(),
          Vector{
+             Decl(left),
+             Decl(right),
              Assign(Phony(), call),
          });
 
@@ -480,11 +488,13 @@ TEST_F(ResolverSubgroupMatrixTest, SubgroupMatrixMultiply_MismatchTypes) {
 
 TEST_F(ResolverSubgroupMatrixTest, SubgroupMatrixMultiply_MismatchKinds) {
     Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
-    auto* left = GlobalVar("left", private_, ty("subgroup_matrix_left", ty.f32(), 8_u, 8_u));
-    auto* right = GlobalVar("right", private_, ty("subgroup_matrix_right", ty.f32(), 8_u, 8_u));
+    auto* left = Var("left", function, ty("subgroup_matrix_left", ty.f32(), 8_u, 8_u));
+    auto* right = Var("right", function, ty("subgroup_matrix_right", ty.f32(), 8_u, 8_u));
     auto* call = Call(Ident(wgsl::BuiltinFn::kSubgroupMatrixMultiply, ty.f32()), right, left);
     Func("foo", Empty, ty.void_(),
          Vector{
+             Decl(left),
+             Decl(right),
              Assign(Phony(), call),
          });
 
@@ -495,12 +505,15 @@ TEST_F(ResolverSubgroupMatrixTest, SubgroupMatrixMultiply_MismatchKinds) {
 
 TEST_F(ResolverSubgroupMatrixTest, SubgroupMatrixMultiplyAccumulate) {
     Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
-    auto* left = GlobalVar("left", private_, ty("subgroup_matrix_left", ty.f32(), 2_u, 4_u));
-    auto* right = GlobalVar("right", private_, ty("subgroup_matrix_right", ty.f32(), 8_u, 2_u));
-    auto* acc = GlobalVar("acc", private_, ty("subgroup_matrix_result", ty.f32(), 8_u, 4_u));
+    auto* left = Var("left", function, ty("subgroup_matrix_left", ty.f32(), 2_u, 4_u));
+    auto* right = Var("right", function, ty("subgroup_matrix_right", ty.f32(), 8_u, 2_u));
+    auto* acc = Var("acc", function, ty("subgroup_matrix_result", ty.f32(), 8_u, 4_u));
     auto* call = Call(wgsl::BuiltinFn::kSubgroupMatrixMultiplyAccumulate, left, right, acc);
     Func("foo", Empty, ty.void_(),
          Vector{
+             Decl(left),
+             Decl(right),
+             Decl(acc),
              Assign(Phony(), call),
          });
 
