@@ -545,6 +545,7 @@ config("common_config") {
       "-fcxx-exceptions",  # DXC uses exceptions
       "-fms-extensions",
       "-frtti",  # DXC uses RTTI
+      "-fno-sized-deallocation",  # Disable sized allocation
     ]
   }
 
