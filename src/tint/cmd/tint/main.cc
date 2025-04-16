@@ -117,6 +117,11 @@ enum class Format : uint8_t {
     kIr,
 };
 
+enum class ExeMode : uint8_t {
+    kStandalone,
+    kServer,
+};
+
 #if TINT_BUILD_HLSL_WRITER
 constexpr uint32_t kMinShaderModelForDXC = 60u;
 constexpr uint32_t kMaxSupportedShaderModelForDXC = 66u;
@@ -221,7 +226,7 @@ Format InferFormat(const std::string& filename) {
 // The actual warning occurs on `std::from_chars(hash.data(), hash.data() + hash.size(), value,
 // base);`, but disabling/enabling warnings cannot be done within function scope
 TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
-bool ParseArgs(tint::VectorRef<std::string_view> arguments, Options* opts) {
+bool ParseArgs(tint::VectorRef<std::string_view> arguments, Options* opts, ExeMode exe_mode) {
     using namespace tint::cli;  // NOLINT(build/namespaces)
 
     tint::Vector<EnumName<Format>, 8> format_enum_names{
@@ -266,15 +271,19 @@ If not provided, will be inferred from output filename extension:
                                                 format_enum_names, ShortName{"f"});
     TINT_DEFER(opts->format = fmt.value.value_or(Format::kUnknown));
 
-    auto& col = options.Add<EnumOption<tint::ColorMode>>(
-        "color", "Use colored output",
-        tint::Vector{
-            EnumName{tint::ColorMode::kPlain, "off"},
-            EnumName{tint::ColorMode::kDark, "dark"},
-            EnumName{tint::ColorMode::kLight, "light"},
-        },
-        ShortName{"col"}, Default{tint::ColorModeDefault()});
-    TINT_DEFER(opts->printer = CreatePrinter(*col.value));
+    if (exe_mode == ExeMode::kServer) {
+        opts->printer = CreatePrinter(tint::ColorMode::kPlain);
+    } else {
+        auto& col = options.Add<EnumOption<tint::ColorMode>>(
+            "color", "Use colored output",
+            tint::Vector{
+                EnumName{tint::ColorMode::kPlain, "off"},
+                EnumName{tint::ColorMode::kDark, "dark"},
+                EnumName{tint::ColorMode::kLight, "light"},
+            },
+            ShortName{"col"}, Default{tint::ColorModeDefault()});
+        TINT_DEFER(opts->printer = CreatePrinter(*col.value));
+    }
 
     auto& ep = options.Add<StringOption>("entry-point", "Output single entry point",
                                          ShortName{"ep"}, Parameter{"name"});
@@ -1426,15 +1435,15 @@ bool DumpIR([[maybe_unused]] const tint::Program& program,
 #endif
 }
 
-}  // namespace
-
-int main(int argc, const char** argv) {
-    tint::Vector<std::string_view, 8> arguments = tint::args::Vectorize(argc, argv);
+int Run(tint::VectorRef<std::string_view> arguments, ExeMode exe_mode) {
     Options options;
 
-    tint::Initialize();
+    if (!ParseArgs(arguments, &options, exe_mode)) {
+        return 1;
+    }
 
-    if (!ParseArgs(arguments, &options)) {
+    if (exe_mode == ExeMode::kServer && options.format == Format::kSpirv) {
+        std::cerr << "Cannot emit binary SPIR-V to stdout in server mode\n";
         return 1;
     }
 
@@ -1570,4 +1579,62 @@ int main(int argc, const char** argv) {
         }
     }
     return success ? 0 : 1;
+}
+
+/// Run a server that accepts arguments on stdin.
+/// @returns 0 on success, non-zero on failure
+int RunServer() {
+    // Each line read from stdin will invoke Tint with the supplied arguments.
+    // Output on stdout and stderr will be delimited with \0 characters.
+    // The server will exit on failure or if stdin is closed.
+    while (!std::cin.eof()) {
+        // Read the next set of arguments.
+        std::string arg_line;
+        std::getline(std::cin, arg_line);
+
+        // Split the arguments by whitespace, taking double-quotes into account.
+        std::istringstream arg_in(arg_line);
+        tint::Vector<std::string, 8> arg_tokens;
+        while (!arg_in.eof()) {
+            std::string arg;
+            arg_in >> std::quoted(arg, '"', '\0');
+            if (!arg.empty()) {
+                arg_tokens.Push(arg);
+            }
+        }
+
+        // Run Tint with the provided arguments.
+        auto arguments =
+            tint::Transform(arg_tokens, [](const std::string& arg) -> std::string_view {
+                return std::string_view(arg);  //
+            });
+        auto ret = Run(arguments, ExeMode::kServer);
+        if (ret != 0) {
+            // The Tint invocation failed, so exit the server.
+            return ret;
+        }
+
+        // Delimit stdout and stderr with \0 and flush them.
+        std::cout << '\0' << std::flush;
+        std::cerr << '\0' << std::flush;
+    }
+    return 0;
+}
+
+}  // namespace
+
+int main(int argc, const char** argv) {
+    tint::Vector<std::string_view, 8> arguments = tint::args::Vectorize(argc, argv);
+
+    tint::Initialize();
+
+    if (arguments.Length() > 0 && arguments[0] == "--server") {
+        if (arguments.Length() > 1) {
+            std::cerr << "--server must not be used with any other arguments\n";
+            return 1;
+        }
+        return RunServer();
+    }
+
+    return Run(arguments, ExeMode::kServer);
 }
