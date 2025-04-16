@@ -124,7 +124,7 @@ luci.bucket(
     name = "ci.shadow",
     shadows = "ci",
     constraints = luci.bucket_constraints(
-        pools = ["luci.flex.ci"],
+        pools = ["luci.flex.ci", "luci.chromium.gpu.ci"],
     ),
     bindings = [
         luci.binding(
@@ -166,7 +166,7 @@ luci.bucket(
     name = "try.shadow",
     shadows = "try",
     constraints = luci.bucket_constraints(
-        pools = ["luci.flex.try"],
+        pools = ["luci.flex.try", "luci.chromium.gpu.try"],
         service_accounts = [
             "dawn-try-builder@chops-service-accounts.iam.gserviceaccount.com",
         ],
