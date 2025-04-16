@@ -321,7 +321,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
         }
     }
 
-    std::optional<tint::ast::transform::SubstituteOverride::Config> substituteOverrideConfig;
+    std::optional<std::unordered_map<tint::OverrideId, double>> substituteOverrideConfig;
     if (!programmableStage.metadata->overrides.empty()) {
         substituteOverrideConfig = BuildSubstituteOverridesTransformConfig(programmableStage);
     }

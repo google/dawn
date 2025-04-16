@@ -28,6 +28,7 @@
 #include "dawn/native/opengl/ShaderModuleGL.h"
 
 #include <sstream>
+#include <unordered_map>
 #include <utility>
 
 #include "absl/container/flat_hash_map.h"
@@ -90,17 +91,18 @@ opengl::CombinedSampler* AppendCombinedSampler(opengl::CombinedSamplerInfo* info
 }
 
 using InterstageLocationAndName = std::pair<uint32_t, std::string>;
+using SubstituteOverrideConfig = std::unordered_map<tint::OverrideId, double>;
 
-#define GLSL_COMPILATION_REQUEST_MEMBERS(X)                                                      \
-    X(const tint::Program*, inputProgram)                                                        \
-    X(std::string, entryPointName)                                                               \
-    X(SingleShaderStage, stage)                                                                  \
-    X(std::optional<tint::ast::transform::SubstituteOverride::Config>, substituteOverrideConfig) \
-    X(LimitsForCompilationRequest, limits)                                                       \
-    X(CacheKey::UnsafeUnkeyedValue<LimitsForCompilationRequest>, adapterSupportedLimits)         \
-    X(bool, disableSymbolRenaming)                                                               \
-    X(std::vector<InterstageLocationAndName>, interstageVariables)                               \
-    X(tint::glsl::writer::Options, tintOptions)                                                  \
+#define GLSL_COMPILATION_REQUEST_MEMBERS(X)                                              \
+    X(const tint::Program*, inputProgram)                                                \
+    X(std::string, entryPointName)                                                       \
+    X(SingleShaderStage, stage)                                                          \
+    X(std::optional<SubstituteOverrideConfig>, substituteOverrideConfig)                 \
+    X(LimitsForCompilationRequest, limits)                                               \
+    X(CacheKey::UnsafeUnkeyedValue<LimitsForCompilationRequest>, adapterSupportedLimits) \
+    X(bool, disableSymbolRenaming)                                                       \
+    X(std::vector<InterstageLocationAndName>, interstageVariables)                       \
+    X(tint::glsl::writer::Options, tintOptions)                                          \
     X(CacheKey::UnsafeUnkeyedValue<dawn::platform::Platform*>, platform)
 
 DAWN_MAKE_CACHE_REQUEST(GLSLCompilationRequest, GLSL_COMPILATION_REQUEST_MEMBERS);
@@ -480,7 +482,6 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
     // CombinedSamplerInfo should use this sentinel value as sampler binding point.
     bindings.placeholder_sampler_bind_point = {static_cast<uint32_t>(kMaxBindGroupsTyped), 0};
 
-
     CombinedSamplerInfo combinedSamplerInfo = GenerateCombinedSamplerInfo(
         entryPointMetaData, bindings, externalTextureExpansionMap, needsPlaceholderSampler);
 
@@ -498,7 +499,7 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
                                      layout->GetInternalTextureBuiltinsUniformBinding()});
     }
 
-    std::optional<tint::ast::transform::SubstituteOverride::Config> substituteOverrideConfig;
+    std::optional<SubstituteOverrideConfig> substituteOverrideConfig;
     if (!programmableStage.metadata->overrides.empty()) {
         substituteOverrideConfig = BuildSubstituteOverridesTransformConfig(programmableStage);
     }
@@ -582,7 +583,7 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
                 // this needs to run after SingleEntryPoint transform which removes unused
                 // overrides for the current entry point.
                 tint::core::ir::transform::SubstituteOverridesConfig cfg;
-                cfg.map = r.substituteOverrideConfig->map;
+                cfg.map = r.substituteOverrideConfig.value();
                 auto substituteOverridesResult =
                     tint::core::ir::transform::SubstituteOverrides(ir.Get(), cfg);
                 DAWN_INVALID_IF(substituteOverridesResult != tint::Success,

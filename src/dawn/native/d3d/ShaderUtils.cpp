@@ -242,11 +242,13 @@ MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
     }
 
     if (!r.useTintIR && r.substituteOverrideConfig) {
+        tint::ast::transform::SubstituteOverride::Config cfg;
+        cfg.map = r.substituteOverrideConfig.value();
+
         // This needs to run after SingleEntryPoint transform which removes unused overrides for
         // current entry point.
         transformManager.Add<tint::ast::transform::SubstituteOverride>();
-        transformInputs.Add<tint::ast::transform::SubstituteOverride::Config>(
-            std::move(r.substituteOverrideConfig).value());
+        transformInputs.Add<tint::ast::transform::SubstituteOverride::Config>(cfg);
     }
 
     tint::Program transformedProgram;
@@ -287,7 +289,7 @@ MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
             // this needs to run after SingleEntryPoint transform which removes unused
             // overrides for the current entry point.
             tint::core::ir::transform::SubstituteOverridesConfig cfg;
-            cfg.map = r.substituteOverrideConfig->map;
+            cfg.map = r.substituteOverrideConfig.value();
             auto substituteOverridesResult =
                 tint::core::ir::transform::SubstituteOverrides(ir.Get(), cfg);
 

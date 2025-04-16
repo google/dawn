@@ -56,18 +56,19 @@ namespace {
 constexpr char kRemappedEntryPointName[] = "dawn_entry_point";
 
 using OptionalVertexPullingTransformConfig = std::optional<tint::VertexPullingConfig>;
+using SubstituteOverrideConfig = std::unordered_map<tint::OverrideId, double>;
 
-#define MSL_COMPILATION_REQUEST_MEMBERS(X)                                                       \
-    X(SingleShaderStage, stage)                                                                  \
-    X(const tint::Program*, inputProgram)                                                        \
-    X(std::optional<tint::ast::transform::SubstituteOverride::Config>, substituteOverrideConfig) \
-    X(LimitsForCompilationRequest, limits)                                                       \
-    X(CacheKey::UnsafeUnkeyedValue<LimitsForCompilationRequest>, adapterSupportedLimits)         \
-    X(uint32_t, maxSubgroupSize)                                                                 \
-    X(std::string, entryPointName)                                                               \
-    X(bool, usesSubgroupMatrix)                                                                  \
-    X(bool, disableSymbolRenaming)                                                               \
-    X(tint::msl::writer::Options, tintOptions)                                                   \
+#define MSL_COMPILATION_REQUEST_MEMBERS(X)                                               \
+    X(SingleShaderStage, stage)                                                          \
+    X(const tint::Program*, inputProgram)                                                \
+    X(std::optional<SubstituteOverrideConfig>, substituteOverrideConfig)                 \
+    X(LimitsForCompilationRequest, limits)                                               \
+    X(CacheKey::UnsafeUnkeyedValue<LimitsForCompilationRequest>, adapterSupportedLimits) \
+    X(uint32_t, maxSubgroupSize)                                                         \
+    X(std::string, entryPointName)                                                       \
+    X(bool, usesSubgroupMatrix)                                                          \
+    X(bool, disableSymbolRenaming)                                                       \
+    X(tint::msl::writer::Options, tintOptions)                                           \
     X(CacheKey::UnsafeUnkeyedValue<dawn::platform::Platform*>, platform)
 
 DAWN_MAKE_CACHE_REQUEST(MslCompilationRequest, MSL_COMPILATION_REQUEST_MEMBERS);
@@ -250,7 +251,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
         }
     }
 
-    std::optional<tint::ast::transform::SubstituteOverride::Config> substituteOverrideConfig;
+    std::optional<SubstituteOverrideConfig> substituteOverrideConfig;
     if (!programmableStage.metadata->overrides.empty()) {
         substituteOverrideConfig = BuildSubstituteOverridesTransformConfig(programmableStage);
     }
@@ -321,7 +322,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
                 // this needs to run after SingleEntryPoint transform which removes unused
                 // overrides for the current entry point.
                 tint::core::ir::transform::SubstituteOverridesConfig cfg;
-                cfg.map = r.substituteOverrideConfig->map;
+                cfg.map = r.substituteOverrideConfig.value();
                 auto substituteOverridesResult =
                     tint::core::ir::transform::SubstituteOverrides(ir.Get(), cfg);
                 DAWN_INVALID_IF(substituteOverridesResult != tint::Success,
