@@ -546,9 +546,14 @@ interop::Promise<std::optional<interop::Interface<interop::GPUError>>> GPUDevice
 
     device_.PopErrorScope(
         wgpu::CallbackMode::AllowProcessEvents,
-        [ctx = std::move(ctx)](wgpu::PopErrorScopeStatus, wgpu::ErrorType type,
+        [ctx = std::move(ctx)](wgpu::PopErrorScopeStatus status, wgpu::ErrorType type,
                                wgpu::StringView message) {
             auto env = ctx->env;
+            if (status != wgpu::PopErrorScopeStatus::Success) {
+                ctx->promise.Reject(Errors::OperationError(env, std::string(message)));
+                return;
+            }
+
             switch (type) {
                 case wgpu::ErrorType::NoError:
                     ctx->promise.Resolve({});
