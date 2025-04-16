@@ -63,8 +63,8 @@
         {%- endif %}
     {%- elif type.category in ['bitmask', 'enum'] -%}
         {{ type.name.CamelCase() }}
-        {%- if default_value %}
-            {%- for value in type.values if value.name.name == default_value -%}
+        {%- if emit_defaults %}
+            {%- for value in type.values if value.name.name == (default_value or 'undefined') -%}
                 {{ ' ' }}= {{ type.name.CamelCase() }}.{{ as_ktName(value.name.CamelCase()) }}
             {%- endfor %}
         {%- endif %}

@@ -28,6 +28,7 @@
 #include "dawn/native/null/DeviceNull.h"
 
 #include <limits>
+#include <unordered_map>
 #include <utility>
 
 #include "dawn/native/BackendConnection.h"
@@ -482,7 +483,7 @@ MaybeError Queue::WaitForIdleForDestruction() {
 MaybeError ComputePipeline::InitializeImpl() {
     const ProgrammableStage& computeStage = GetStage(SingleShaderStage::Compute);
 
-    std::optional<tint::ast::transform::SubstituteOverride::Config> substituteOverrideConfig;
+    std::optional<std::unordered_map<tint::OverrideId, double>> substituteOverrideConfig;
     if (!computeStage.metadata->overrides.empty()) {
         substituteOverrideConfig = BuildSubstituteOverridesTransformConfig(computeStage);
     }
@@ -503,7 +504,7 @@ MaybeError ComputePipeline::InitializeImpl() {
         // this needs to run after SingleEntryPoint transform which removes unused
         // overrides for the current entry point.
         tint::core::ir::transform::SubstituteOverridesConfig cfg;
-        cfg.map = substituteOverrideConfig->map;
+        cfg.map = substituteOverrideConfig.value();
         auto substituteOverridesResult =
             tint::core::ir::transform::SubstituteOverrides(ir.Get(), cfg);
         DAWN_INVALID_IF(substituteOverridesResult != tint::Success,

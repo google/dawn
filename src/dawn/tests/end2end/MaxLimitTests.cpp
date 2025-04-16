@@ -265,12 +265,13 @@ TEST_P(MaxLimitTests, MaxBufferBindingSize) {
 TEST_P(MaxLimitTests, MaxDynamicBuffers) {
     // TODO(https://anglebug.com/8177) Causes assertion failure in ANGLE.
     DAWN_SUPPRESS_TEST_IF(IsANGLE() && IsWindows());
-    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
-    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
-    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
-    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
 
     wgpu::Limits limits = GetSupportedLimits();
+
+    DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxStorageBuffersInFragmentStage <
+                             limits.maxStorageBuffersPerShaderStage);
+    DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxStorageBuffersInVertexStage <
+                             limits.maxStorageBuffersPerShaderStage);
 
     std::vector<wgpu::BindGroupLayoutEntry> bglEntries;
     std::vector<wgpu::BindGroupEntry> bgEntries;
@@ -696,8 +697,6 @@ TEST_P(MaxLimitTests, ReallyLargeBindGroup) {
 TEST_P(MaxLimitTests, WriteToMaxFragmentCombinedOutputResources) {
     // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
-    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
-    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
 
     // TODO(http://crbug.com/348199037): VUID-RuntimeSpirv-Location-06428
     DAWN_SUPPRESS_TEST_IF(IsLinux() && IsVulkan() && IsNvidia());

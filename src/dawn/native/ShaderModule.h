@@ -62,13 +62,6 @@ namespace tint {
 
 class Program;
 
-namespace ast::transform {
-class DataMap;
-class Manager;
-class Transform;
-class VertexPulling;
-}  // namespace ast::transform
-
 }  // namespace tint
 
 namespace dawn::native {
@@ -170,11 +163,6 @@ ResultOrError<Extent3D> ValidateComputeStageWorkgroupSize(
 
 RequiredBufferSizes ComputeRequiredBufferSizesForLayout(const EntryPointMetadata& entryPoint,
                                                         const PipelineLayoutBase* layout);
-ResultOrError<tint::Program> RunTransforms(tint::ast::transform::Manager* transformManager,
-                                           const tint::Program* program,
-                                           const tint::ast::transform::DataMap& inputs,
-                                           tint::ast::transform::DataMap* outputs,
-                                           OwnedCompilationMessages* messages);
 
 // Shader metadata for a binding, very similar to information contained in a pipeline layout.
 struct ShaderBindingInfo {

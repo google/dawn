@@ -29,6 +29,7 @@
 
 #include <cstdint>
 #include <string>
+#include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
@@ -200,16 +201,18 @@ ShaderModule::~ShaderModule() = default;
 
 #if TINT_BUILD_SPV_WRITER
 
-#define SPIRV_COMPILATION_REQUEST_MEMBERS(X)                                                     \
-    X(SingleShaderStage, stage)                                                                  \
-    X(const tint::Program*, inputProgram)                                                        \
-    X(std::optional<tint::ast::transform::SubstituteOverride::Config>, substituteOverrideConfig) \
-    X(LimitsForCompilationRequest, limits)                                                       \
-    X(CacheKey::UnsafeUnkeyedValue<LimitsForCompilationRequest>, adapterSupportedLimits)         \
-    X(uint32_t, maxSubgroupSize)                                                                 \
-    X(std::string_view, entryPointName)                                                          \
-    X(bool, usesSubgroupMatrix)                                                                  \
-    X(tint::spirv::writer::Options, tintOptions)                                                 \
+using SubstituteOverrideConfig = std::unordered_map<tint::OverrideId, double>;
+
+#define SPIRV_COMPILATION_REQUEST_MEMBERS(X)                                             \
+    X(SingleShaderStage, stage)                                                          \
+    X(const tint::Program*, inputProgram)                                                \
+    X(std::optional<SubstituteOverrideConfig>, substituteOverrideConfig)                 \
+    X(LimitsForCompilationRequest, limits)                                               \
+    X(CacheKey::UnsafeUnkeyedValue<LimitsForCompilationRequest>, adapterSupportedLimits) \
+    X(uint32_t, maxSubgroupSize)                                                         \
+    X(std::string_view, entryPointName)                                                  \
+    X(bool, usesSubgroupMatrix)                                                          \
+    X(tint::spirv::writer::Options, tintOptions)                                         \
     X(CacheKey::UnsafeUnkeyedValue<dawn::platform::Platform*>, platform)
 
 DAWN_MAKE_CACHE_REQUEST(SpirvCompilationRequest, SPIRV_COMPILATION_REQUEST_MEMBERS);
@@ -336,7 +339,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
 
     const bool hasInputAttachment = !bindings.input_attachment.empty();
 
-    std::optional<tint::ast::transform::SubstituteOverride::Config> substituteOverrideConfig;
+    std::optional<SubstituteOverrideConfig> substituteOverrideConfig;
     if (!programmableStage.metadata->overrides.empty()) {
         substituteOverrideConfig = BuildSubstituteOverridesTransformConfig(programmableStage);
     }
@@ -438,7 +441,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
                 // this needs to run after SingleEntryPoint transform which removes unused
                 // overrides for the current entry point.
                 tint::core::ir::transform::SubstituteOverridesConfig cfg;
-                cfg.map = r.substituteOverrideConfig->map;
+                cfg.map = r.substituteOverrideConfig.value();
                 auto substituteOverridesResult =
                     tint::core::ir::transform::SubstituteOverrides(ir.Get(), cfg);
                 DAWN_INVALID_IF(substituteOverridesResult != tint::Success,

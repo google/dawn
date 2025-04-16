@@ -579,9 +579,7 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
         }
     }
 
-    if (!is_global && sem->AddressSpace() != core::AddressSpace::kFunction &&
-        validator_.IsValidationEnabled(var->attributes,
-                                       ast::DisabledValidation::kIgnoreAddressSpace)) {
+    if (!is_global && sem->AddressSpace() != core::AddressSpace::kFunction) {
         AddError(var->source)
             << "function-scope 'var' declaration must use 'function' address space";
         return nullptr;
@@ -612,9 +610,6 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
     }
 
     if (is_global) {
-        bool has_io_address_space = sem->AddressSpace() == core::AddressSpace::kIn ||
-                                    sem->AddressSpace() == core::AddressSpace::kOut;
-
         std::optional<uint32_t> group, binding, input_attachment_index;
         for (auto* attribute : var->attributes) {
             Mark(attribute);
@@ -644,57 +639,6 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
                     }
                     input_attachment_index = value.Get();
                     return kSuccess;
-                },
-                [&](const ast::LocationAttribute* attr) {
-                    if (!has_io_address_space) {
-                        return kInvalid;
-                    }
-                    auto value = LocationAttribute(attr);
-                    if (value != Success) {
-                        return kErrored;
-                    }
-                    global->Attributes().location = value.Get();
-                    return kSuccess;
-                },
-                [&](const ast::BlendSrcAttribute* attr) {
-                    if (!has_io_address_space) {
-                        return kInvalid;
-                    }
-                    auto value = BlendSrcAttribute(attr);
-                    if (value != Success) {
-                        return kErrored;
-                    }
-                    global->Attributes().blend_src = value.Get();
-                    return kSuccess;
-                },
-                [&](const ast::ColorAttribute* attr) {
-                    if (!has_io_address_space) {
-                        return kInvalid;
-                    }
-                    auto value = ColorAttribute(attr);
-                    if (value != Success) {
-                        return kErrored;
-                    }
-                    global->Attributes().color = value.Get();
-                    return kSuccess;
-                },
-                [&](const ast::BuiltinAttribute*) {
-                    if (!has_io_address_space) {
-                        return kInvalid;
-                    }
-                    return kSuccess;
-                },
-                [&](const ast::InterpolateAttribute*) {
-                    if (!has_io_address_space) {
-                        return kInvalid;
-                    }
-                    return kSuccess;
-                },
-                [&](const ast::InvariantAttribute* attr) {
-                    if (!has_io_address_space) {
-                        return kInvalid;
-                    }
-                    return InvariantAttribute(attr) ? kSuccess : kErrored;
                 },
                 [&](const ast::InternalAttribute* attr) {
                     return InternalAttribute(attr) ? kSuccess : kErrored;
@@ -755,7 +699,6 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param,
     };
 
     if (func->IsEntryPoint()) {
-        std::optional<uint32_t> group, binding;
         for (auto* attribute : param->attributes) {
             Mark(attribute);
             bool ok = Switch(
@@ -789,9 +732,6 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param,
             if (!ok) {
                 return nullptr;
             }
-        }
-        if (group && binding) {
-            sem->Attributes().binding_point = BindingPoint{group.value(), binding.value()};
         }
     } else {
         for (auto* attribute : param->attributes) {
@@ -828,17 +768,6 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param,
     if (!ApplyAddressSpaceUsageToType(core::AddressSpace::kUndefined, ty, param->type->source)) {
         add_note();
         return nullptr;
-    }
-
-    if (auto* ptr = ty->As<core::type::Pointer>()) {
-        // For MSL, we push module-scope variables into the entry point as pointer
-        // parameters, so we also need to handle their store type.
-        if (!ApplyAddressSpaceUsageToType(ptr->AddressSpace(),
-                                          const_cast<core::type::Type*>(ptr->StoreType()),
-                                          param->source)) {
-            add_note();
-            return nullptr;
-        }
     }
 
     if (!validator_.Parameter(sem)) {
@@ -5001,11 +4930,10 @@ bool Resolver::ApplyAddressSpaceUsageToType(core::AddressSpace address_space,
                                             const_cast<core::type::Type*>(arr->ElemType()), usage);
     }
 
-    // Subgroup matrix types can only be declared in the `function` and `private` address space, or
-    // in value declarations (the `undefined` address space).
+    // Subgroup matrix types can only be declared in the `function` address space, or in value
+    // declarations (the `undefined` address space).
     if (ty->Is<core::type::SubgroupMatrix>() && address_space != core::AddressSpace::kUndefined &&
-        address_space != core::AddressSpace::kFunction &&
-        address_space != core::AddressSpace::kPrivate) {
+        address_space != core::AddressSpace::kFunction) {
         AddError(usage) << "subgroup matrix types cannot be declared in the "
                         << style::Enum(address_space) << " address space";
         return false;

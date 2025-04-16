@@ -266,7 +266,6 @@ EntryPoint Inspector::GetEntryPoint(const tint::ast::Function* func) {
     auto* sem = program_.Sem().Get(func);
 
     entry_point.name = func->name->symbol.Name();
-    entry_point.remapped_name = func->name->symbol.Name();
 
     switch (func->PipelineStage()) {
         case ast::PipelineStage::kCompute: {
@@ -306,8 +305,6 @@ EntryPoint Inspector::GetEntryPoint(const tint::ast::Function* func) {
             param->Type(), param->Declaration()->attributes, param->Attributes().location,
             param->Attributes().color, /* @blend_src */ std::nullopt, entry_point.input_variables);
 
-        entry_point.input_position_used |= ContainsBuiltin(
-            core::BuiltinValue::kPosition, param->Type(), param->Declaration()->attributes);
         entry_point.front_facing_used |= ContainsBuiltin(
             core::BuiltinValue::kFrontFacing, param->Type(), param->Declaration()->attributes);
         entry_point.sample_index_used |= ContainsBuiltin(
@@ -367,46 +364,6 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
         }
 
         result.push_back(GetEntryPoint(func));
-    }
-
-    return result;
-}
-
-std::map<OverrideId, Scalar> Inspector::GetOverrideDefaultValues() {
-    std::map<OverrideId, Scalar> result;
-    for (auto* var : program_.AST().GlobalVariables()) {
-        auto* global = program_.Sem().Get<sem::GlobalVariable>(var);
-        if (!global || !global->Declaration()->Is<ast::Override>()) {
-            continue;
-        }
-
-        // If there are conflicting definitions for an override id, that is invalid
-        // WGSL, so the resolver should catch it. Thus here the inspector just
-        // assumes all definitions of the override id are the same, so only needs
-        // to find the first reference to override id.
-        auto override_id = global->Attributes().override_id.value();
-        if (result.find(override_id) != result.end()) {
-            continue;
-        }
-
-        if (global->Initializer()) {
-            if (auto* value = global->Initializer()->ConstantValue()) {
-                result[override_id] = Switch(
-                    value->Type(),  //
-                    [&](const core::type::I32*) { return Scalar(value->ValueAs<i32>()); },
-                    [&](const core::type::U32*) { return Scalar(value->ValueAs<u32>()); },
-                    [&](const core::type::F32*) { return Scalar(value->ValueAs<f32>()); },
-                    [&](const core::type::F16*) {
-                        // Default value of f16 override is also stored as float scalar.
-                        return Scalar(static_cast<float>(value->ValueAs<f16>()));
-                    },
-                    [&](const core::type::Bool*) { return Scalar(value->ValueAs<bool>()); });
-                continue;
-            }
-        }
-
-        // No const-expression initializer for the override
-        result[override_id] = Scalar();
     }
 
     return result;

@@ -50,6 +50,24 @@ namespace {
 // The remapped name to use when remapping shader entry point names.
 constexpr char kRemappedEntryPointName[] = "dawn_entry_point";
 
+ResultOrError<tint::Program> RunTransforms(tint::ast::transform::Manager* transformManager,
+                                           const tint::Program* program,
+                                           const tint::ast::transform::DataMap& inputs,
+                                           tint::ast::transform::DataMap* outputs,
+                                           OwnedCompilationMessages* outMessages) {
+    DAWN_ASSERT(program != nullptr);
+    tint::ast::transform::DataMap transform_outputs;
+    tint::Program result = transformManager->Run(*program, inputs, transform_outputs);
+    if (outMessages != nullptr) {
+        DAWN_TRY(outMessages->AddMessages(result.Diagnostics()));
+    }
+    DAWN_INVALID_IF(!result.IsValid(), "Tint program failure: %s\n", result.Diagnostics().Str());
+    if (outputs != nullptr) {
+        *outputs = std::move(transform_outputs);
+    }
+    return std::move(result);
+}
+
 // Be careful that the return vector may contain the pointers that point to non-static memory.
 std::vector<const wchar_t*> GetDXCArguments(std::wstring_view entryPointNameW,
                                             const d3d::D3DBytecodeCompilationRequest& r) {
@@ -242,11 +260,13 @@ MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
     }
 
     if (!r.useTintIR && r.substituteOverrideConfig) {
+        tint::ast::transform::SubstituteOverride::Config cfg;
+        cfg.map = r.substituteOverrideConfig.value();
+
         // This needs to run after SingleEntryPoint transform which removes unused overrides for
         // current entry point.
         transformManager.Add<tint::ast::transform::SubstituteOverride>();
-        transformInputs.Add<tint::ast::transform::SubstituteOverride::Config>(
-            std::move(r.substituteOverrideConfig).value());
+        transformInputs.Add<tint::ast::transform::SubstituteOverride::Config>(cfg);
     }
 
     tint::Program transformedProgram;
@@ -287,7 +307,7 @@ MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
             // this needs to run after SingleEntryPoint transform which removes unused
             // overrides for the current entry point.
             tint::core::ir::transform::SubstituteOverridesConfig cfg;
-            cfg.map = r.substituteOverrideConfig->map;
+            cfg.map = r.substituteOverrideConfig.value();
             auto substituteOverridesResult =
                 tint::core::ir::transform::SubstituteOverrides(ir.Get(), cfg);
 

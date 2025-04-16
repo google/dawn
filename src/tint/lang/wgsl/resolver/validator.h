@@ -650,7 +650,6 @@ class Validator {
     bool CheckTypeAccessAddressSpace(const core::type::Type* store_ty,
                                      core::Access access,
                                      core::AddressSpace address_space,
-                                     VectorRef<const tint::ast::Attribute*> attributes,
                                      const Source& source) const;
 
     /// Raises an error if the entry_point @p entry_point uses two or more module-scope 'var's with

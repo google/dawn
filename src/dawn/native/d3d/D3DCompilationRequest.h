@@ -31,6 +31,7 @@
 #include <d3dcompiler.h>
 
 #include <string_view>
+#include <unordered_map>
 
 #include "dawn/native/Adapter.h"
 #include "dawn/native/CacheRequest.h"
@@ -57,29 +58,30 @@ namespace dawn::native::d3d {
 enum class Compiler { FXC, DXC };
 
 using InterStageShaderVariablesMask = std::bitset<tint::hlsl::writer::kMaxInterStageLocations>;
+using SubstituteOverrideConfig = std::unordered_map<tint::OverrideId, double>;
 
-#define HLSL_COMPILATION_REQUEST_MEMBERS(X)                                                      \
-    X(const tint::Program*, inputProgram)                                                        \
-    X(std::string_view, entryPointName)                                                          \
-    X(SingleShaderStage, stage)                                                                  \
-    X(uint32_t, shaderModel)                                                                     \
-    X(uint32_t, compileFlags)                                                                    \
-    X(Compiler, compiler)                                                                        \
-    X(uint64_t, compilerVersion)                                                                 \
-    X(std::wstring_view, dxcShaderProfile)                                                       \
-    X(std::string_view, fxcShaderProfile)                                                        \
-    X(pD3DCompile, d3dCompile)                                                                   \
-    X(IDxcLibrary*, dxcLibrary)                                                                  \
-    X(IDxcCompiler3*, dxcCompiler)                                                               \
-    X(uint32_t, firstIndexOffsetShaderRegister)                                                  \
-    X(uint32_t, firstIndexOffsetRegisterSpace)                                                   \
-    X(tint::hlsl::writer::Options, tintOptions)                                                  \
-    X(std::optional<tint::ast::transform::SubstituteOverride::Config>, substituteOverrideConfig) \
-    X(LimitsForCompilationRequest, limits)                                                       \
-    X(CacheKey::UnsafeUnkeyedValue<LimitsForCompilationRequest>, adapterSupportedLimits)         \
-    X(uint32_t, maxSubgroupSize)                                                                 \
-    X(bool, disableSymbolRenaming)                                                               \
-    X(bool, dumpShaders)                                                                         \
+#define HLSL_COMPILATION_REQUEST_MEMBERS(X)                                              \
+    X(const tint::Program*, inputProgram)                                                \
+    X(std::string_view, entryPointName)                                                  \
+    X(SingleShaderStage, stage)                                                          \
+    X(uint32_t, shaderModel)                                                             \
+    X(uint32_t, compileFlags)                                                            \
+    X(Compiler, compiler)                                                                \
+    X(uint64_t, compilerVersion)                                                         \
+    X(std::wstring_view, dxcShaderProfile)                                               \
+    X(std::string_view, fxcShaderProfile)                                                \
+    X(pD3DCompile, d3dCompile)                                                           \
+    X(IDxcLibrary*, dxcLibrary)                                                          \
+    X(IDxcCompiler3*, dxcCompiler)                                                       \
+    X(uint32_t, firstIndexOffsetShaderRegister)                                          \
+    X(uint32_t, firstIndexOffsetRegisterSpace)                                           \
+    X(tint::hlsl::writer::Options, tintOptions)                                          \
+    X(std::optional<SubstituteOverrideConfig>, substituteOverrideConfig)                 \
+    X(LimitsForCompilationRequest, limits)                                               \
+    X(CacheKey::UnsafeUnkeyedValue<LimitsForCompilationRequest>, adapterSupportedLimits) \
+    X(uint32_t, maxSubgroupSize)                                                         \
+    X(bool, disableSymbolRenaming)                                                       \
+    X(bool, dumpShaders)                                                                 \
     X(bool, useTintIR)
 
 #define D3D_BYTECODE_COMPILATION_REQUEST_MEMBERS(X) \

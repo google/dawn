@@ -80,7 +80,6 @@ class InspectorTestWithParam : public TestHelper, public testing::TestWithParam<
 
 using InspectorGetEntryPointTest = InspectorTest;
 using InspectorOverridesTest = InspectorTest;
-using InspectorGetOverrideDefaultValuesTest = InspectorTest;
 using InspectorGetConstantNameToIdMapTest = InspectorTest;
 using InspectorGetResourceBindingsTest = InspectorTest;
 using InspectorGetUsedExtensionNamesTest = InspectorTest;
@@ -125,7 +124,6 @@ TEST_F(InspectorGetEntryPointTest, OneEntryPoint) {
 
     ASSERT_EQ(1u, result.size());
     EXPECT_EQ("foo", result[0].name);
-    EXPECT_EQ("foo", result[0].remapped_name);
     EXPECT_EQ(PipelineStage::kFragment, result[0].stage);
 }
 
@@ -141,10 +139,8 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPoints) {
 
     ASSERT_EQ(2u, result.size());
     EXPECT_EQ("foo", result[0].name);
-    EXPECT_EQ("foo", result[0].remapped_name);
     EXPECT_EQ(PipelineStage::kFragment, result[0].stage);
     EXPECT_EQ("bar", result[1].name);
-    EXPECT_EQ("bar", result[1].remapped_name);
     EXPECT_EQ(PipelineStage::kCompute, result[1].stage);
 }
 
@@ -164,10 +160,8 @@ fn foo() { func(); }
 
     ASSERT_EQ(2u, result.size());
     EXPECT_EQ("foo", result[0].name);
-    EXPECT_EQ("foo", result[0].remapped_name);
     EXPECT_EQ(PipelineStage::kCompute, result[0].stage);
     EXPECT_EQ("bar", result[1].name);
-    EXPECT_EQ("bar", result[1].remapped_name);
     EXPECT_EQ(PipelineStage::kFragment, result[1].stage);
 }
 
@@ -1138,7 +1132,6 @@ fn ep_func() {}
     ASSERT_EQ(1u, result.size());
     EXPECT_FALSE(result[0].input_sample_mask_used);
     EXPECT_FALSE(result[0].output_sample_mask_used);
-    EXPECT_FALSE(result[0].input_position_used);
     EXPECT_FALSE(result[0].front_facing_used);
     EXPECT_FALSE(result[0].sample_index_used);
     EXPECT_FALSE(result[0].num_workgroups_used);
@@ -1208,35 +1201,6 @@ fn ep_func() -> out_struct {
 
     ASSERT_EQ(1u, result.size());
     EXPECT_TRUE(result[0].output_sample_mask_used);
-}
-
-TEST_F(InspectorGetEntryPointTest, InputPositionSimpleReferenced) {
-    auto* src = R"(
-@fragment
-fn ep_func(@builtin(position) in_var: vec4f) {}
-)";
-    Inspector& inspector = Initialize(src);
-
-    auto result = inspector.GetEntryPoints();
-
-    ASSERT_EQ(1u, result.size());
-    EXPECT_TRUE(result[0].input_position_used);
-}
-
-TEST_F(InspectorGetEntryPointTest, InputPositionStructReferenced) {
-    auto* src = R"(
-struct in_struct {
-  @builtin(position) inner_position: vec4f,
-}
-@fragment
-fn ep_func(in_var: in_struct) {}
-)";
-    Inspector& inspector = Initialize(src);
-
-    auto result = inspector.GetEntryPoints();
-
-    ASSERT_EQ(1u, result.size());
-    EXPECT_TRUE(result[0].input_position_used);
 }
 
 TEST_F(InspectorGetEntryPointTest, FrontFacingSimpleReferenced) {
@@ -1661,197 +1625,6 @@ TEST_F(InspectorGetEntryPointTest, HasDepthTextureWithNonComparisonSampler) {
                      .has_depth_texture_with_non_comparison_sampler);
     EXPECT_TRUE(inspector.GetEntryPoint("sample_texture_depth_in_function")
                     .has_depth_texture_with_non_comparison_sampler);
-}
-
-TEST_F(InspectorGetOverrideDefaultValuesTest, Bool) {
-    auto* src = R"(
-const C = true;
-@id(1) override a: bool;
-@id(20) override b: bool = true;
-@id(300) override c = false;
-@id(400) override d = true || false;
-@id(500) override e = C;
-)";
-    Inspector& inspector = Initialize(src);
-
-    auto result = inspector.GetOverrideDefaultValues();
-    ASSERT_EQ(5u, result.size());
-
-    ASSERT_TRUE(result.find(OverrideId{1}) != result.end());
-    EXPECT_TRUE(result[OverrideId{1}].IsNull());
-
-    ASSERT_TRUE(result.find(OverrideId{20}) != result.end());
-    EXPECT_TRUE(result[OverrideId{20}].IsBool());
-    EXPECT_TRUE(result[OverrideId{20}].AsBool());
-
-    ASSERT_TRUE(result.find(OverrideId{300}) != result.end());
-    EXPECT_TRUE(result[OverrideId{300}].IsBool());
-    EXPECT_FALSE(result[OverrideId{300}].AsBool());
-
-    ASSERT_TRUE(result.find(OverrideId{400}) != result.end());
-    EXPECT_TRUE(result[OverrideId{400}].IsBool());
-    EXPECT_TRUE(result[OverrideId{400}].AsBool());
-
-    ASSERT_TRUE(result.find(OverrideId{500}) != result.end());
-    EXPECT_TRUE(result[OverrideId{500}].IsBool());
-    EXPECT_TRUE(result[OverrideId{500}].AsBool());
-}
-
-TEST_F(InspectorGetOverrideDefaultValuesTest, U32) {
-    auto* src = R"(
-const C = 100u;
-@id(1) override a: u32;
-@id(20) override b: u32 = 42u;
-@id(30) override c: u32 = 42;
-@id(40) override d: u32 = 42 + 10;
-@id(50) override e = 42 + 10u;
-@id(60) override f = C;
-)";
-    Inspector& inspector = Initialize(src);
-
-    auto result = inspector.GetOverrideDefaultValues();
-    ASSERT_EQ(6u, result.size());
-
-    ASSERT_TRUE(result.find(OverrideId{1}) != result.end());
-    EXPECT_TRUE(result[OverrideId{1}].IsNull());
-
-    ASSERT_TRUE(result.find(OverrideId{20}) != result.end());
-    EXPECT_TRUE(result[OverrideId{20}].IsU32());
-    EXPECT_EQ(42u, result[OverrideId{20}].AsU32());
-
-    ASSERT_TRUE(result.find(OverrideId{30}) != result.end());
-    EXPECT_TRUE(result[OverrideId{30}].IsU32());
-    EXPECT_EQ(42u, result[OverrideId{30}].AsU32());
-
-    ASSERT_TRUE(result.find(OverrideId{40}) != result.end());
-    EXPECT_TRUE(result[OverrideId{40}].IsU32());
-    EXPECT_EQ(52u, result[OverrideId{40}].AsU32());
-
-    ASSERT_TRUE(result.find(OverrideId{50}) != result.end());
-    EXPECT_TRUE(result[OverrideId{50}].IsU32());
-    EXPECT_EQ(52u, result[OverrideId{50}].AsU32());
-
-    ASSERT_TRUE(result.find(OverrideId{60}) != result.end());
-    EXPECT_TRUE(result[OverrideId{60}].IsU32());
-    EXPECT_EQ(100u, result[OverrideId{60}].AsU32());
-}
-
-TEST_F(InspectorGetOverrideDefaultValuesTest, I32) {
-    auto* src = R"(
-const C = 100;
-@id(1) override a: i32;
-@id(20) override b: i32 = -42i;
-@id(300) override c: i32 = 42i;
-@id(400) override d = 42;
-@id(500) override e = 42 + 7;
-@id(6000) override f = C;
-)";
-    Inspector& inspector = Initialize(src);
-
-    auto result = inspector.GetOverrideDefaultValues();
-    ASSERT_EQ(6u, result.size());
-
-    ASSERT_TRUE(result.find(OverrideId{1}) != result.end());
-    EXPECT_TRUE(result[OverrideId{1}].IsNull());
-
-    ASSERT_TRUE(result.find(OverrideId{20}) != result.end());
-    EXPECT_TRUE(result[OverrideId{20}].IsI32());
-    EXPECT_EQ(-42, result[OverrideId{20}].AsI32());
-
-    ASSERT_TRUE(result.find(OverrideId{300}) != result.end());
-    EXPECT_TRUE(result[OverrideId{300}].IsI32());
-    EXPECT_EQ(42, result[OverrideId{300}].AsI32());
-
-    ASSERT_TRUE(result.find(OverrideId{400}) != result.end());
-    EXPECT_TRUE(result[OverrideId{400}].IsI32());
-    EXPECT_EQ(42, result[OverrideId{400}].AsI32());
-
-    ASSERT_TRUE(result.find(OverrideId{500}) != result.end());
-    EXPECT_TRUE(result[OverrideId{500}].IsI32());
-    EXPECT_EQ(49, result[OverrideId{500}].AsI32());
-
-    ASSERT_TRUE(result.find(OverrideId{6000}) != result.end());
-    EXPECT_TRUE(result[OverrideId{6000}].IsI32());
-    EXPECT_EQ(100, result[OverrideId{6000}].AsI32());
-}
-
-TEST_F(InspectorGetOverrideDefaultValuesTest, F32) {
-    auto* src = R"(
-@id(1) override a: f32;
-@id(20) override b: f32 = 0f;
-@id(300) override c: f32 = -10f;
-@id(4000) override d = 15f;
-@id(5000) override e = 42.0;
-@id(6000) override f: f32 = 15f * 10;
-)";
-    Inspector& inspector = Initialize(src);
-
-    auto result = inspector.GetOverrideDefaultValues();
-    ASSERT_EQ(6u, result.size());
-
-    ASSERT_TRUE(result.find(OverrideId{1}) != result.end());
-    EXPECT_TRUE(result[OverrideId{1}].IsNull());
-
-    ASSERT_TRUE(result.find(OverrideId{20}) != result.end());
-    EXPECT_TRUE(result[OverrideId{20}].IsFloat());
-    EXPECT_FLOAT_EQ(0.0f, result[OverrideId{20}].AsFloat());
-
-    ASSERT_TRUE(result.find(OverrideId{300}) != result.end());
-    EXPECT_TRUE(result[OverrideId{300}].IsFloat());
-    EXPECT_FLOAT_EQ(-10.0f, result[OverrideId{300}].AsFloat());
-
-    ASSERT_TRUE(result.find(OverrideId{4000}) != result.end());
-    EXPECT_TRUE(result[OverrideId{4000}].IsFloat());
-    EXPECT_FLOAT_EQ(15.0f, result[OverrideId{4000}].AsFloat());
-
-    ASSERT_TRUE(result.find(OverrideId{5000}) != result.end());
-    EXPECT_TRUE(result[OverrideId{5000}].IsFloat());
-    EXPECT_FLOAT_EQ(42.0f, result[OverrideId{5000}].AsFloat());
-
-    ASSERT_TRUE(result.find(OverrideId{6000}) != result.end());
-    EXPECT_TRUE(result[OverrideId{6000}].IsFloat());
-    EXPECT_FLOAT_EQ(150.0f, result[OverrideId{6000}].AsFloat());
-}
-
-TEST_F(InspectorGetOverrideDefaultValuesTest, F16) {
-    auto* src = R"(
-enable f16;
-
-@id(1) override a: f16;
-@id(20) override b: f16 = 0h;
-@id(300) override c: f16 = -10h;
-@id(4000) override d = 15h;
-@id(5000) override e = 42.0h;
-@id(6000) override f: f16 = 15h * 10;
-)";
-    Inspector& inspector = Initialize(src);
-
-    auto result = inspector.GetOverrideDefaultValues();
-    ASSERT_EQ(6u, result.size());
-
-    ASSERT_TRUE(result.find(OverrideId{1}) != result.end());
-    EXPECT_TRUE(result[OverrideId{1}].IsNull());
-
-    ASSERT_TRUE(result.find(OverrideId{20}) != result.end());
-    // Default value of f16 override is also stored as float scalar.
-    EXPECT_TRUE(result[OverrideId{20}].IsFloat());
-    EXPECT_FLOAT_EQ(0.0f, result[OverrideId{20}].AsFloat());
-
-    ASSERT_TRUE(result.find(OverrideId{300}) != result.end());
-    EXPECT_TRUE(result[OverrideId{300}].IsFloat());
-    EXPECT_FLOAT_EQ(-10.0f, result[OverrideId{300}].AsFloat());
-
-    ASSERT_TRUE(result.find(OverrideId{4000}) != result.end());
-    EXPECT_TRUE(result[OverrideId{4000}].IsFloat());
-    EXPECT_FLOAT_EQ(15.0f, result[OverrideId{4000}].AsFloat());
-
-    ASSERT_TRUE(result.find(OverrideId{5000}) != result.end());
-    EXPECT_TRUE(result[OverrideId{5000}].IsFloat());
-    EXPECT_FLOAT_EQ(42.0f, result[OverrideId{5000}].AsFloat());
-
-    ASSERT_TRUE(result.find(OverrideId{6000}) != result.end());
-    EXPECT_TRUE(result[OverrideId{6000}].IsFloat());
-    EXPECT_FLOAT_EQ(150.0f, result[OverrideId{6000}].AsFloat());
 }
 
 TEST_F(InspectorGetConstantNameToIdMapTest, WithAndWithoutIds) {
@@ -4195,8 +3968,9 @@ TEST_F(InspectorSubgroupMatrixTest, DirectUse) {
     auto* src = R"(
 enable chromium_experimental_subgroup_matrix;
 
-var<private> sm: subgroup_matrix_result<f32, 8, 8>;
-@compute @workgroup_size(1) fn foo() { _ = sm; }
+@compute @workgroup_size(1) fn foo() {
+  _ = subgroup_matrix_result<f32, 8, 8>();
+}
 )";
     Inspector& inspector = Initialize(src);
 
@@ -4211,8 +3985,7 @@ TEST_F(InspectorSubgroupMatrixTest, IndirectUse) {
     auto* src = R"(
 enable chromium_experimental_subgroup_matrix;
 
-var<private> sm: subgroup_matrix_result<f32, 8, 8>;
-fn foo() { _ = sm; }
+fn foo() { _ = subgroup_matrix_result<f32, 8, 8>(); }
 @compute @workgroup_size(1) fn main() { foo(); }
 )";
     Inspector& inspector = Initialize(src);

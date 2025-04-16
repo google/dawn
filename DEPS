@@ -220,6 +220,11 @@ deps = {
     ],
   },
 
+  # Used for Dawn-side GN arg definitions.
+  'tools/mb': {
+    'url': '{chromium_git}/chromium/src/tools/mb@61f390a8b5da670b755e021a9ec0c2cac3de840e',
+    'condition': 'dawn_standalone',
+  },
 
   # Testing, GTest and GMock
   'testing': {
@@ -273,17 +278,17 @@ deps = {
   },
 
   'third_party/angle': {
-    'url': '{chromium_git}/angle/angle@1664d99098c4a4f1b40facf8e61a86725769bd20',
+    'url': '{chromium_git}/angle/angle@0ed51ec79a0ce62c792d7d7f38952ecf1b18a0db',
     'condition': 'dawn_standalone',
   },
 
   'third_party/swiftshader': {
-    'url': '{swiftshader_git}/SwiftShader@4cc49bf6bf72a68745168a967d6a30ee3dcc09b6',
+    'url': '{swiftshader_git}/SwiftShader@2d70dae3d0ca16ed9d7903f15341d18d4e49b1ca',
     'condition': 'dawn_standalone',
   },
 
   'third_party/vulkan-deps': {
-    'url': '{chromium_git}/vulkan-deps@ccbdbbedfc265f0455bbcc83a700bea1932f348e',
+    'url': '{chromium_git}/vulkan-deps@729a70498186e80b4eac410df52f8864c165dcbd',
     'condition': 'dawn_standalone',
   },
 
@@ -303,17 +308,17 @@ deps = {
   },
 
   'third_party/spirv-tools/src': {
-    'url': '{chromium_git}/external/github.com/KhronosGroup/SPIRV-Tools@a871fc43e29038d96109a64a64219eacefdf0634',
+    'url': '{chromium_git}/external/github.com/KhronosGroup/SPIRV-Tools@2550869855fcef23a96f67e8a9af9571c8fa1ac7',
     'condition': 'dawn_standalone',
   },
 
   'third_party/vulkan-headers/src': {
-    'url': '{chromium_git}/external/github.com/KhronosGroup/Vulkan-Headers@5ceb9ed481e58e705d0d9b5326537daedd06b97d',
+    'url': '{chromium_git}/external/github.com/KhronosGroup/Vulkan-Headers@110b6c989ccb4e874089db777e2b54eb9abb5670',
     'condition': 'dawn_standalone',
   },
 
   'third_party/vulkan-loader/src': {
-    'url': '{chromium_git}/external/github.com/KhronosGroup/Vulkan-Loader@a82b34fb6224e1e5021ddbe56d6d805280e0c740',
+    'url': '{chromium_git}/external/github.com/KhronosGroup/Vulkan-Loader@a8513ac9d0e367c5914095d0b7f09a081a14b4b5',
     'condition': 'dawn_standalone',
   },
 
@@ -323,12 +328,12 @@ deps = {
   },
 
   'third_party/vulkan-utility-libraries/src': {
-    'url': '{chromium_git}/external/github.com/KhronosGroup/Vulkan-Utility-Libraries@ad2ffcba7b2b3f327dcbcb1f825450d49181b46d',
+    'url': '{chromium_git}/external/github.com/KhronosGroup/Vulkan-Utility-Libraries@4ee0833a3cdb834aa71c2b77ce5b01235b7b7170',
     'condition': 'dawn_standalone',
   },
 
   'third_party/vulkan-validation-layers/src': {
-    'url': '{chromium_git}/external/github.com/KhronosGroup/Vulkan-ValidationLayers@3c26a6a93749a6d1290f1c3d08c278ad8910fb8a',
+    'url': '{chromium_git}/external/github.com/KhronosGroup/Vulkan-ValidationLayers@2179e1b0a6a7388f11a47cc70d48870fd87fc97c',
     'condition': 'dawn_standalone',
   },
 
@@ -343,7 +348,7 @@ deps = {
   },
 
   'third_party/dxc': {
-    'url': '{chromium_git}/external/github.com/microsoft/DirectXShaderCompiler@8280d0fb4104ce9c67af3b9f4a1335760c7c5113',
+    'url': '{chromium_git}/external/github.com/microsoft/DirectXShaderCompiler@10bff1319a28e8ad2aa0c5aa894ba8ec4c3a2e2b',
   },
 
   'third_party/dxheaders': {
@@ -362,7 +367,7 @@ deps = {
 
   # WebGPU CTS - not used directly by Dawn, only transitively by Chromium.
   'third_party/webgpu-cts': {
-    'url': '{chromium_git}/external/github.com/gpuweb/cts@ade41b29ef2be93d160a141d53069e43969ff3cf',
+    'url': '{chromium_git}/external/github.com/gpuweb/cts@492fefb37fe3ba27c7bfb291149d31f107d40fd5',
     'condition': 'build_with_chromium',
   },
 
@@ -466,7 +471,7 @@ deps = {
   # Dependencies for PartitionAlloc.
   # Doc: https://docs.google.com/document/d/1wz45t0alQthsIU9P7_rQcfQyqnrBMXzrOjSzdQo-V-A
   'third_party/partition_alloc': {
-    'url': '{chromium_git}/chromium/src/base/allocator/partition_allocator.git@2e6b2efb6f435aa3dd400cb3bdcead2a601f8f9a',
+    'url': '{chromium_git}/chromium/src/base/allocator/partition_allocator.git@2041003ba674f918c33b1afaaad74e652f34bcea',
     'condition': 'dawn_standalone',
   },
 }

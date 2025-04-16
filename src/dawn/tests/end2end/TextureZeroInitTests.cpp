@@ -2208,7 +2208,7 @@ TEST_P(CompressedTextureZeroInitTest, FullCopyTextureToTextureMipLevel) {
 // half copy texture to texture, lazy clears are needed for noncopied half
 TEST_P(CompressedTextureZeroInitTest, HalfCopyTextureToTextureMipLevel) {
     // Compatibility mode does not support compressed texture-to-texture copies.
-    DAWN_SUPPRESS_TEST_IF(IsCompatibilityMode());
+    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
 
     // create srcTexture with data
     wgpu::TextureDescriptor srcDescriptor =
@@ -2261,7 +2261,7 @@ TEST_P(CompressedTextureZeroInitTest, HalfCopyTextureToTextureMipLevel) {
 // stride between images.
 TEST_P(CompressedTextureZeroInitTest, Copy2DArrayCompressedB2T2B) {
     // Compatibility mode does not support compressed texture-to-buffer copies.
-    DAWN_SUPPRESS_TEST_IF(IsCompatibilityMode());
+    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
     DAWN_SUPPRESS_TEST_IF(IsWARP());
 
     // create srcTexture with data

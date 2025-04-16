@@ -101,60 +101,6 @@ namespace tint::ast::transform {
 /// * Unshadow
 class CanonicalizeEntryPointIO final : public Castable<CanonicalizeEntryPointIO, Transform> {
   public:
-    /// ShaderStyle is an enumerator of different ways to emit shader IO.
-    enum class ShaderStyle {
-        /// Target SPIR-V (using global variables).
-        kSpirv,
-        /// Target GLSL (using global variables).
-        kGlsl,
-        /// Target MSL (using non-struct function parameters for builtins).
-        kMsl,
-        /// Target HLSL (using structures for all IO).
-        kHlsl,
-    };
-
-    /// Configuration options for the transform.
-    struct Config final : public Castable<Config, Data> {
-        /// Constructor
-        Config();
-
-        /// Constructor
-        /// @param style the approach to use for emitting shader IO.
-        /// @param sample_mask an optional sample mask to combine with shader masks
-        /// @param emit_vertex_point_size `true` to generate a pointsize builtin
-        /// @param polyfill_f16_io `true` to replace f16 types with f32 types
-        explicit Config(ShaderStyle style,
-                        uint32_t sample_mask = 0xFFFFFFFF,
-                        bool emit_vertex_point_size = false,
-                        bool polyfill_f16_io = false);
-
-        /// Copy constructor
-        Config(const Config&);
-
-        /// Destructor
-        ~Config() override;
-
-        /// The approach to use for emitting shader IO.
-        ShaderStyle shader_style = ShaderStyle::kSpirv;
-
-        /// A fixed sample mask to combine into masks produced by fragment shaders.
-        uint32_t fixed_sample_mask = 0xffffffff;
-
-        /// Set to `true` to generate a pointsize builtin and have it set to 1.0
-        /// from all vertex shaders in the module.
-        bool emit_vertex_point_size = false;
-
-        /// Set to `true` to replace f16 IO types with f32 types and convert them.
-        bool polyfill_f16_io = false;
-
-        /// Reflection for this struct
-        TINT_REFLECT(Config,
-                     shader_style,
-                     fixed_sample_mask,
-                     emit_vertex_point_size,
-                     polyfill_f16_io);
-    };
-
     /// HLSLWaveIntrinsic is an InternalAttribute that is used to decorate a stub function so that
     /// the HLSL backend transforms this into calls to Wave* intrinsic functions.
     class HLSLWaveIntrinsic final : public Castable<HLSLWaveIntrinsic, InternalAttribute> {
@@ -218,12 +164,5 @@ class CanonicalizeEntryPointIO final : public Castable<CanonicalizeEntryPointIO,
 };
 
 }  // namespace tint::ast::transform
-
-namespace tint {
-
-/// Reflection for ShaderStyle
-TINT_REFLECT_ENUM_RANGE(ast::transform::CanonicalizeEntryPointIO::ShaderStyle, kSpirv, kHlsl);
-
-}  // namespace tint
 
 #endif  // SRC_TINT_LANG_WGSL_AST_TRANSFORM_CANONICALIZE_ENTRY_POINT_IO_H_

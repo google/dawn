@@ -45,6 +45,7 @@ tint_add_target(tint_cmd_test_test_cmd test_cmd
 tint_target_add_dependencies(tint_cmd_test_test_cmd test_cmd
   tint_api
   tint_api_common_test
+  tint_cmd_fuzz_ir_helpers_test
   tint_lang_core_constant_test
   tint_lang_core_intrinsic_test
   tint_lang_core_ir_analysis_test

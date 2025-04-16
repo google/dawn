@@ -93,6 +93,13 @@ MaybeError ComputePipeline::InitializeImpl() {
     createInfo.stage.pName = kRemappedEntryPointName;
     createInfo.stage.pSpecializationInfo = nullptr;
 
+    // If the shader stage uses subgroup matrix types, we need to enable full subgroups to guarantee
+    // that all shader invocations are active. This becomes unnecessary with SPIR-V 1.6.
+    if (computeStage.metadata->usesSubgroupMatrix) {
+        createInfo.flags |= VK_PIPELINE_SHADER_STAGE_CREATE_ALLOW_VARYING_SUBGROUP_SIZE_BIT;
+        createInfo.flags |= VK_PIPELINE_SHADER_STAGE_CREATE_REQUIRE_FULL_SUBGROUPS_BIT;
+    }
+
     VkPipelineShaderStageRequiredSubgroupSizeCreateInfoEXT subgroupSizeInfo = {};
     PNextChainBuilder stageExtChain(&createInfo.stage);
 

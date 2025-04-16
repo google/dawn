@@ -436,15 +436,26 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         EnableFeature(Feature::Subgroups);
     }
 
-    // Enable subgroup matrix if both Cooperative Matrix and Vulkan Memory Model are supported.
-    if (mDeviceInfo.HasExt(DeviceExt::CooperativeMatrix) &&
-        mDeviceInfo.cooperativeMatrixFeatures.cooperativeMatrix &&
+    // Enable subgroup matrix if all of the following are true:
+    //   1. Cooperative Matrix is supported in compute shaders.
+    //   2. Vulkan Memory Model is supported at device scope.
+    //   3. Subgroup Size Control is supported along with the full subgroups feature bit.
+    //   4. There is at least one supported matrix configuration.
+    const bool hasCooperativeMatrix =
+        mDeviceInfo.HasExt(DeviceExt::CooperativeMatrix) &&
+        mDeviceInfo.cooperativeMatrixFeatures.cooperativeMatrix == VK_TRUE &&
+        (mDeviceInfo.cooperativeMatrixProperties.cooperativeMatrixSupportedStages &
+         VK_SHADER_STAGE_COMPUTE_BIT) != 0;
+    const bool hasVulkanMemoryModel =
         mDeviceInfo.HasExt(DeviceExt::VulkanMemoryModel) &&
         mDeviceInfo.vulkanMemoryModelFeatures.vulkanMemoryModel == VK_TRUE &&
-        mDeviceInfo.vulkanMemoryModelFeatures.vulkanMemoryModelDeviceScope == VK_TRUE) {
+        mDeviceInfo.vulkanMemoryModelFeatures.vulkanMemoryModelDeviceScope == VK_TRUE;
+    const bool hasComputeFullSubgroups =
+        mDeviceInfo.HasExt(DeviceExt::SubgroupSizeControl) &&
+        (mDeviceInfo.subgroupSizeControlFeatures.subgroupSizeControl == VK_TRUE) &&
+        (mDeviceInfo.subgroupSizeControlFeatures.computeFullSubgroups == VK_TRUE);
+    if (hasCooperativeMatrix && hasVulkanMemoryModel && hasComputeFullSubgroups) {
         PopulateSubgroupMatrixConfigs();
-
-        // Enable the feature if at least one valid configuration is supported.
         if (!mSubgroupMatrixConfigs.empty()) {
             EnableFeature(Feature::ChromiumExperimentalSubgroupMatrix);
         }
@@ -1197,10 +1208,10 @@ void PhysicalDevice::PopulateBackendFormatCapabilities(
 }
 
 void PhysicalDevice::PopulateSubgroupMatrixConfigs() {
-    size_t configCount = mDeviceInfo.cooperativeMatrixProperties.size();
+    size_t configCount = mDeviceInfo.cooperativeMatrixConfigs.size();
     mSubgroupMatrixConfigs.reserve(configCount);
     for (uint32_t i = 0; i < configCount; i++) {
-        const VkCooperativeMatrixPropertiesKHR& p = mDeviceInfo.cooperativeMatrixProperties[i];
+        const VkCooperativeMatrixPropertiesKHR& p = mDeviceInfo.cooperativeMatrixConfigs[i];
 
         // Filter out configurations that WebGPU does not support.
         if (p.AType != p.BType || p.CType != p.ResultType || p.scope != VK_SCOPE_SUBGROUP_KHR ||

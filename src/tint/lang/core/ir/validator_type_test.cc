@@ -44,6 +44,7 @@
 #include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/core/type/memory_view.h"
 #include "src/tint/lang/core/type/reference.h"
+#include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
 
 namespace tint::core::ir {
@@ -326,6 +327,73 @@ INSTANTIATE_TEST_SUITE_P(IR_ValidatorTest,
                                          std::make_tuple(false, TypeBuilder<i32>),
                                          std::make_tuple(true, TypeBuilder<f32>),
                                          std::make_tuple(true, TypeBuilder<f16>),
+                                         std::make_tuple(false, TypeBuilder<core::type::Bool>),
+                                         std::make_tuple(false, TypeBuilder<core::type::Void>)));
+
+using Type_SubgroupMatrixComponentType = TypeTest;
+
+TEST_P(Type_SubgroupMatrixComponentType, Test) {
+    bool allowed = std::get<0>(GetParam());
+    auto* type = std::get<1>(GetParam())(ty);
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        b.Var("m", AddressSpace::kFunction, ty.subgroup_matrix_result(type, 8u, 8u));
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    if (allowed) {
+        ASSERT_EQ(res, Success) << res.Failure();
+    } else {
+        ASSERT_NE(res, Success);
+        EXPECT_THAT(
+            res.Failure().reason,
+            testing::HasSubstr(":3:5 error: var: invalid subgroup matrix component type: '" +
+                               type->FriendlyName()))
+            << res.Failure();
+    }
+}
+
+INSTANTIATE_TEST_SUITE_P(IR_ValidatorTest,
+                         Type_SubgroupMatrixComponentType,
+                         testing::Values(std::make_tuple(true, TypeBuilder<f32>),
+                                         std::make_tuple(true, TypeBuilder<f16>),
+                                         std::make_tuple(true, TypeBuilder<i8>),
+                                         std::make_tuple(true, TypeBuilder<i32>),
+                                         std::make_tuple(true, TypeBuilder<u8>),
+                                         std::make_tuple(true, TypeBuilder<u32>),
+                                         std::make_tuple(false, TypeBuilder<core::type::Bool>),
+                                         std::make_tuple(false, TypeBuilder<core::type::Void>)));
+
+using Type_SampledTextureSampledType = TypeTest;
+
+TEST_P(Type_SampledTextureSampledType, Test) {
+    bool allowed = std::get<0>(GetParam());
+    auto* type = std::get<1>(GetParam())(ty);
+    b.Append(mod.root_block, [&] {
+        auto* var = b.Var("m", AddressSpace::kHandle,
+                          ty.sampled_texture(core::type::TextureDimension::k2d, type));
+        var->SetBindingPoint(0, 0);
+    });
+
+    auto res = ir::Validate(mod);
+    if (allowed) {
+        ASSERT_EQ(res, Success) << res.Failure();
+    } else {
+        ASSERT_NE(res, Success);
+        EXPECT_THAT(res.Failure().reason,
+                    testing::HasSubstr(":2:3 error: var: invalid sampled texture sample type: '" +
+                                       type->FriendlyName()))
+            << res.Failure();
+    }
+}
+
+INSTANTIATE_TEST_SUITE_P(IR_ValidatorTest,
+                         Type_SampledTextureSampledType,
+                         testing::Values(std::make_tuple(true, TypeBuilder<f32>),
+                                         std::make_tuple(true, TypeBuilder<i32>),
+                                         std::make_tuple(true, TypeBuilder<u32>),
+                                         std::make_tuple(false, TypeBuilder<f16>),
                                          std::make_tuple(false, TypeBuilder<core::type::Bool>),
                                          std::make_tuple(false, TypeBuilder<core::type::Void>)));
 

@@ -129,8 +129,6 @@ fn f() -> @builtin(position) vec4<f32> {
     ast::transform::DataMap data;
     data.Add<TruncateInterstageVariables::Config>(cfg);
 
-    data.Add<ast::transform::CanonicalizeEntryPointIO::Config>(
-        ast::transform::CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
     auto got = Run<ast::transform::CanonicalizeEntryPointIO>(src, data);
 
     // Inevitably entry point can write only one variable if not using struct

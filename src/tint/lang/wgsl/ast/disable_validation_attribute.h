@@ -42,9 +42,6 @@ enum class DisabledValidation {
     /// When applied to a module-scoped variable, the validator will not complain if two resource
     /// variables have the same binding points.
     kBindingPointCollision,
-    /// When applied to a variable, the validator will not complain about the declared address
-    /// space.
-    kIgnoreAddressSpace,
     /// When applied to a function parameter, the parameter will not be validated.
     kFunctionParameter,
     /// When applied to a member attribute, a stride attribute may be applied to non-array types.

@@ -54,7 +54,7 @@ class DynamicBufferOffsetTests : public DawnTest {
     void SetUp() override {
         DawnTest::SetUp();
 
-        DAWN_SUPPRESS_TEST_IF(GetSupportedLimits().maxStorageBuffersInFragmentStage < 1);
+        DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxStorageBuffersInFragmentStage < 1);
 
         mMinUniformBufferOffsetAlignment = GetSupportedLimits().minUniformBufferOffsetAlignment;
 

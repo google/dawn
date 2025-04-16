@@ -29,6 +29,7 @@
 #define SRC_DAWN_NATIVE_TINTUTILS_H_
 
 #include <functional>
+#include <unordered_map>
 
 #include "dawn/common/NonCopyable.h"
 #include "dawn/native/BindingInfo.h"
@@ -48,7 +49,7 @@ tint::VertexPullingConfig BuildVertexPullingTransformConfig(
     const RenderPipelineBase& renderPipeline,
     BindGroupIndex pullingBufferBindingSet);
 
-tint::ast::transform::SubstituteOverride::Config BuildSubstituteOverridesTransformConfig(
+std::unordered_map<tint::OverrideId, double> BuildSubstituteOverridesTransformConfig(
     const ProgrammableStage& stage);
 
 // Uses tint::ForeachField when available to implement the stream::Stream trait for types.

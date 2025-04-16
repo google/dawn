@@ -35,14 +35,14 @@ fun dawnTestLauncher(
         val device = adapter.requestDevice(
             DeviceDescriptor(
                 requiredFeatures = requiredFeatures,
-                deviceLostCallbackInfo2 = DeviceLostCallbackInfo2(
-                    callback = DeviceLostCallback2
+                deviceLostCallbackInfo = DeviceLostCallbackInfo(
+                    callback = DeviceLostCallback
                     { device, reason, message ->
                         throw DeviceLostException(device, reason, message)
                     },
                     mode = WaitAnyOnly
                 ),
-                uncapturedErrorCallbackInfo2 = UncapturedErrorCallbackInfo2 { device, type, message ->
+                uncapturedErrorCallbackInfo = UncapturedErrorCallbackInfo { device, type, message ->
                     throw UncapturedErrorException(device, type, message)
                 })
         ).device ?: throw DawnException("No device available")

@@ -528,8 +528,6 @@ SanitizedResult Sanitize(const Program& in, const Options& options) {
 
     manager.Add<ast::transform::AddEmptyEntryPoint>();
 
-    data.Add<ast::transform::CanonicalizeEntryPointIO::Config>(
-        ast::transform::CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
     data.Add<NumWorkgroupsFromUniform::Config>(options.root_constant_binding_point);
 
     SanitizedResult result;

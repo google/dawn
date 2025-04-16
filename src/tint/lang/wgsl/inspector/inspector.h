@@ -40,7 +40,6 @@
 #include "src/tint/lang/core/builtin_value.h"
 #include "src/tint/lang/wgsl/inspector/entry_point.h"
 #include "src/tint/lang/wgsl/inspector/resource_binding.h"
-#include "src/tint/lang/wgsl/inspector/scalar.h"
 #include "src/tint/lang/wgsl/program/program.h"
 #include "src/tint/lang/wgsl/sem/sampler_texture_pair.h"
 
@@ -70,9 +69,6 @@ class Inspector {
     /// @param entry_point name of the entry point to get information about
     /// @returns the entry point information
     EntryPoint GetEntryPoint(const std::string& entry_point);
-
-    /// @returns map of override identifier to initial value
-    std::map<OverrideId, Scalar> GetOverrideDefaultValues();
 
     /// @returns map of module-constant name to pipeline constant ID
     std::map<std::string, OverrideId> GetNamedOverrideIds();

@@ -211,7 +211,7 @@ TEST_P(DrawIndexedIndirectTest, BasicValidation) {
     DAWN_SUPPRESS_TEST_IF(IsANGLE() && IsWindows());
 
     // It doesn't make sense to test invalid inputs when validation is disabled.
-    DAWN_SUPPRESS_TEST_IF(HasToggleEnabled("skip_validation"));
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
 
     utils::RGBA8 filled(0, 255, 0, 255);
     utils::RGBA8 notFilled(0, 0, 0, 0);
@@ -230,7 +230,7 @@ TEST_P(DrawIndexedIndirectTest, BasicValidation) {
 
 TEST_P(DrawIndexedIndirectTest, ValidateWithOffsets) {
     // It doesn't make sense to test invalid inputs when validation is disabled.
-    DAWN_SUPPRESS_TEST_IF(HasToggleEnabled("skip_validation"));
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
 
     utils::RGBA8 filled(0, 255, 0, 255);
     utils::RGBA8 notFilled(0, 0, 0, 0);
@@ -258,7 +258,7 @@ TEST_P(DrawIndexedIndirectTest, ValidateMultiplePasses) {
     DAWN_SUPPRESS_TEST_IF(IsANGLE() && IsWindows());
 
     // It doesn't make sense to test invalid inputs when validation is disabled.
-    DAWN_SUPPRESS_TEST_IF(HasToggleEnabled("skip_validation"));
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
 
     utils::RGBA8 filled(0, 255, 0, 255);
     utils::RGBA8 notFilled(0, 0, 0, 0);
@@ -285,7 +285,7 @@ TEST_P(DrawIndexedIndirectTest, ValidateMultipleDraws) {
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsQualcomm());
 
     // It doesn't make sense to test invalid inputs when validation is disabled.
-    DAWN_SUPPRESS_TEST_IF(HasToggleEnabled("skip_validation"));
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
 
     utils::RGBA8 filled(0, 255, 0, 255);
     utils::RGBA8 notFilled(0, 0, 0, 0);
@@ -381,7 +381,7 @@ TEST_P(DrawIndexedIndirectTest, ValidateEncodeMultipleThenSubmitInOrder) {
     DAWN_SUPPRESS_TEST_IF(IsANGLE() && IsWindows());
 
     // It doesn't make sense to test invalid inputs when validation is disabled.
-    DAWN_SUPPRESS_TEST_IF(HasToggleEnabled("skip_validation"));
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
 
     utils::RGBA8 filled(0, 255, 0, 255);
     utils::RGBA8 notFilled(0, 0, 0, 0);
@@ -411,7 +411,7 @@ TEST_P(DrawIndexedIndirectTest, ValidateEncodeMultipleThenSubmitAtOnce) {
     DAWN_SUPPRESS_TEST_IF(IsANGLE() && IsWindows());
 
     // It doesn't make sense to test invalid inputs when validation is disabled.
-    DAWN_SUPPRESS_TEST_IF(HasToggleEnabled("skip_validation"));
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
 
     utils::RGBA8 filled(0, 255, 0, 255);
     utils::RGBA8 notFilled(0, 0, 0, 0);
@@ -439,7 +439,7 @@ TEST_P(DrawIndexedIndirectTest, ValidateEncodeMultipleMixedDrawsOneIndirectBuffe
 
     // It's necessary to for this feature to be disabled so that validation layers
     // can reject non-indexed indirect draws that use a nonzero firstInstance.
-    DAWN_SUPPRESS_TEST_IF(device.HasFeature(wgpu::FeatureName::IndirectFirstInstance));
+    DAWN_TEST_UNSUPPORTED_IF(device.HasFeature(wgpu::FeatureName::IndirectFirstInstance));
 
     utils::RGBA8 filled(0, 255, 0, 255);
     utils::RGBA8 notFilled(0, 0, 0, 0);
@@ -480,7 +480,7 @@ TEST_P(DrawIndexedIndirectTest, ValidateEncodeMultipleThenSubmitOutOfOrder) {
     DAWN_SUPPRESS_TEST_IF(IsANGLE() && IsWindows());
 
     // It doesn't make sense to test invalid inputs when validation is disabled.
-    DAWN_SUPPRESS_TEST_IF(HasToggleEnabled("skip_validation"));
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
 
     utils::RGBA8 filled(0, 255, 0, 255);
     utils::RGBA8 notFilled(0, 0, 0, 0);
@@ -510,7 +510,7 @@ TEST_P(DrawIndexedIndirectTest, ValidateWithBundlesInSamePass) {
     DAWN_SUPPRESS_TEST_IF(IsANGLE() && IsWindows());
 
     // It doesn't make sense to test invalid inputs when validation is disabled.
-    DAWN_SUPPRESS_TEST_IF(HasToggleEnabled("skip_validation"));
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
 
     utils::RGBA8 filled(0, 255, 0, 255);
     utils::RGBA8 notFilled(0, 0, 0, 0);
@@ -561,7 +561,7 @@ TEST_P(DrawIndexedIndirectTest, ValidateWithBundlesInDifferentPasses) {
     DAWN_SUPPRESS_TEST_IF(IsANGLE() && IsWindows());
 
     // It doesn't make sense to test invalid inputs when validation is disabled.
-    DAWN_SUPPRESS_TEST_IF(HasToggleEnabled("skip_validation"));
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
 
     utils::RGBA8 filled(0, 255, 0, 255);
     utils::RGBA8 notFilled(0, 0, 0, 0);
@@ -625,7 +625,7 @@ TEST_P(DrawIndexedIndirectTest, ValidateReusedBundleWithChangingParams) {
     DAWN_SUPPRESS_TEST_IF(IsANGLE() && IsWindows());
 
     // It doesn't make sense to test invalid inputs when validation is disabled.
-    DAWN_SUPPRESS_TEST_IF(HasToggleEnabled("skip_validation"));
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
 
     utils::RGBA8 filled(0, 255, 0, 255);
     // utils::RGBA8 notFilled(0, 0, 0, 0);

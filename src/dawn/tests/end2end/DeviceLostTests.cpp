@@ -296,7 +296,7 @@ TEST_P(DeviceLostTest, BufferUnmapAfterDeviceLost) {
 TEST_P(DeviceLostTest, CreateBuffer) {
     // Fails on TSAN due to allowing too much memory. TSAN max is `0x10000000000` and the test
     // allocates `0x8000000000000000`
-    DAWN_SUPPRESS_TEST_IF(IsTsan());
+    DAWN_TEST_UNSUPPORTED_IF(IsTsan());
 
     uint64_t kStupidLarge = uint64_t(1) << uint64_t(63);
     LoseDeviceForTesting();
@@ -530,7 +530,7 @@ TEST_P(DeviceLostTest, DeviceLostBeforeCreatePipelineAsyncCallback) {
 // references to bind group layouts such that the cache was non-empty at the end
 // of shut down.
 TEST_P(DeviceLostTest, FreeBindGroupAfterDeviceLossWithPendingCommands) {
-    DAWN_SUPPRESS_TEST_IF(GetSupportedLimits().maxStorageBuffersInFragmentStage < 1);
+    DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxStorageBuffersInFragmentStage < 1);
 
     wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
         device, {{0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Storage}});

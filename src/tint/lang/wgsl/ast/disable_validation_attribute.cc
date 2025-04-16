@@ -46,8 +46,6 @@ std::string DisableValidationAttribute::InternalName() const {
             return "disable_validation__function_has_no_body";
         case DisabledValidation::kBindingPointCollision:
             return "disable_validation__binding_point_collision";
-        case DisabledValidation::kIgnoreAddressSpace:
-            return "disable_validation__ignore_address_space";
         case DisabledValidation::kFunctionParameter:
             return "disable_validation__function_parameter";
         case DisabledValidation::kIgnoreStrideAttribute:

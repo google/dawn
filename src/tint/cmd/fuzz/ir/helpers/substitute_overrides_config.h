@@ -31,16 +31,16 @@
 #include "src/tint/lang/core/ir/transform/substitute_overrides.h"
 
 // Forward declarations
-namespace tint {
-class Program;
+namespace tint::core::ir {
+class Module;
 }
 
 namespace tint::fuzz::ir {
 
 /// Returns a IR substitute override config which may contain an empty map if there a no overrides
-/// @param program A valid program
+/// @param mod The IR to find the overrides from
 /// @return An IR substitute override config
-core::ir::transform::SubstituteOverridesConfig SubstituteOverridesConfig(const Program& program);
+core::ir::transform::SubstituteOverridesConfig SubstituteOverridesConfig(core::ir::Module& mod);
 
 }  // namespace tint::fuzz::ir
 
