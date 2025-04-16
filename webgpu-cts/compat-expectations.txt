@@ -756,12 +756,15 @@ crbug.com/374218148 [ intel-0x4680 ] webgpu:shader,execution,expression,call,bui
 # robust_access_vertex on Intel
 crbug.com/406978227 [ intel-0x9bc5 ] webgpu:shader,execution,robust_access_vertex:* [ RetryOnFailure ]
 crbug.com/406978227 [ intel-0x4680 ] webgpu:shader,execution,robust_access_vertex:* [ Failure ]
+crbug.com/406978227 [ intel-0x9bc5 linux ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x3";additionalBuffers=0;partialLastNumber=false;offsetVertexBuffer=false [ Failure ]
+crbug.com/406978227 [ intel-0x9bc5 linux ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x3";additionalBuffers=0;partialLastNumber=false;offsetVertexBuffer=true [ Failure ]
 crbug.com/406978227 [ intel-0x9bc5 linux ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x3";additionalBuffers=4;partialLastNumber=false;offsetVertexBuffer=false [ Failure ]
 crbug.com/406978227 [ intel-0x9bc5 linux ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x3";additionalBuffers=4;partialLastNumber=false;offsetVertexBuffer=true [ Failure ]
 crbug.com/406978227 [ intel-0x9bc5 linux ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x3";additionalBuffers=4;partialLastNumber=true;offsetVertexBuffer=false [ Failure ]
 crbug.com/406978227 [ intel-0x9bc5 linux ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x3";additionalBuffers=4;partialLastNumber=true;offsetVertexBuffer=true [ Failure ]
 crbug.com/406978227 [ intel-0x9bc5 linux ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x4";additionalBuffers=4;partialLastNumber=false;offsetVertexBuffer=true [ Failure ]
 crbug.com/406978227 [ intel-0x9bc5 linux ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x4";additionalBuffers=4;partialLastNumber=true;offsetVertexBuffer=true [ Failure ]
+
 
 # cameraCapture gives PermissionDenied by default, but a flag could be added for testing.
 crbug.com/346799721 webgpu:web_platform,external_texture,video:importExternalTexture,cameraCapture:* [ Failure ]
