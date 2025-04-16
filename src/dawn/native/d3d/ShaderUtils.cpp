@@ -50,6 +50,24 @@ namespace {
 // The remapped name to use when remapping shader entry point names.
 constexpr char kRemappedEntryPointName[] = "dawn_entry_point";
 
+ResultOrError<tint::Program> RunTransforms(tint::ast::transform::Manager* transformManager,
+                                           const tint::Program* program,
+                                           const tint::ast::transform::DataMap& inputs,
+                                           tint::ast::transform::DataMap* outputs,
+                                           OwnedCompilationMessages* outMessages) {
+    DAWN_ASSERT(program != nullptr);
+    tint::ast::transform::DataMap transform_outputs;
+    tint::Program result = transformManager->Run(*program, inputs, transform_outputs);
+    if (outMessages != nullptr) {
+        DAWN_TRY(outMessages->AddMessages(result.Diagnostics()));
+    }
+    DAWN_INVALID_IF(!result.IsValid(), "Tint program failure: %s\n", result.Diagnostics().Str());
+    if (outputs != nullptr) {
+        *outputs = std::move(transform_outputs);
+    }
+    return std::move(result);
+}
+
 // Be careful that the return vector may contain the pointers that point to non-static memory.
 std::vector<const wchar_t*> GetDXCArguments(std::wstring_view entryPointNameW,
                                             const d3d::D3DBytecodeCompilationRequest& r) {
