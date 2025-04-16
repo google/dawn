@@ -58,6 +58,7 @@ tint_target_add_dependencies(tint_cmd_bench_bench_cmd bench_cmd
   tint_lang_wgsl_ast
   tint_lang_wgsl_program
   tint_lang_wgsl_sem
+  tint_lang_wgsl_bench
   tint_utils
   tint_utils_containers
   tint_utils_diagnostic

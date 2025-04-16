@@ -196,6 +196,16 @@ class SubgroupsTestsBase : public DawnTestWithParams<Params> {
             mRequiredSubgroupsFeature = true;
             requiredFeatures.push_back(wgpu::FeatureName::Subgroups);
         }
+        if (SupportsFeatures({wgpu::FeatureName::SubgroupsF16})) {
+            // SubgroupsF16 feature could be supported only if ShaderF16 and Subgroups features
+            // are also supported.
+            DAWN_ASSERT(mRequiredShaderF16Feature && mRequiredSubgroupsFeature);
+            mRequiredSubgroupsF16Feature = true;
+            requiredFeatures.push_back(wgpu::FeatureName::SubgroupsF16);
+        }
+
+        mSubgroupsF16SupportedByBackend = SupportsFeatures({wgpu::FeatureName::SubgroupsF16});
+
         return requiredFeatures;
     }
 
@@ -207,15 +217,23 @@ class SubgroupsTestsBase : public DawnTestWithParams<Params> {
         if (mRequiredSubgroupsFeature) {
             code << "enable subgroups;";
         }
+        if (mRequiredSubgroupsF16Feature) {
+            code << "enable subgroups_f16;";
+        }
         return code;
     }
 
     bool IsShaderF16EnabledInWGSL() const { return mRequiredShaderF16Feature; }
     bool IsSubgroupsEnabledInWGSL() const { return mRequiredSubgroupsFeature; }
+    bool IsSubgroupsF16EnabledInWGSL() const { return mRequiredSubgroupsF16Feature; }
+    bool IsSubgroupsF16SupportedByBackend() const { return mSubgroupsF16SupportedByBackend; }
 
   private:
     bool mRequiredShaderF16Feature = false;
     bool mRequiredSubgroupsFeature = false;
+    bool mRequiredSubgroupsF16Feature = false;
+    // Indicates that backend actually supports using subgroups functions with f16 types.
+    bool mSubgroupsF16SupportedByBackend = false;
 };
 
 class SubgroupsShaderTests : public SubgroupsTestsBase<AdapterTestParam> {
@@ -696,9 +714,12 @@ fn main(
 // and 256. Note that although we assume invocation 0 of the workgroup has a subgroup_id of 0 in its
 // subgroup, we don't assume any other particular subgroups layout property.
 TEST_P(SubgroupsBroadcastTests, SubgroupBroadcast) {
-    DAWN_TEST_UNSUPPORTED_IF(!IsSubgroupsEnabledInWGSL());
     if (GetParam().mBroadcastType == BroadcastType::F16) {
-        DAWN_TEST_UNSUPPORTED_IF(!IsShaderF16EnabledInWGSL());
+        DAWN_TEST_UNSUPPORTED_IF(!IsSubgroupsF16SupportedByBackend());
+        DAWN_ASSERT(IsShaderF16EnabledInWGSL() && IsSubgroupsEnabledInWGSL() &&
+                    IsSubgroupsF16EnabledInWGSL());
+    } else {
+        DAWN_TEST_UNSUPPORTED_IF(!IsSubgroupsEnabledInWGSL());
     }
 
     for (uint32_t workgroupSize : {1, 2, 3, 4, 7, 8, 15, 16, 31, 32, 63, 64, 127, 128, 255, 256}) {
@@ -886,9 +907,8 @@ fn main(
 };
 
 TEST_P(SubgroupsShaderInclusiveTest, InclusiveExecution) {
-    DAWN_TEST_UNSUPPORTED_IF(!IsSubgroupsEnabledInWGSL());
     if (GetParam().mSubgroupOpDataType == SubgroupOpDataType::F16) {
-        DAWN_TEST_UNSUPPORTED_IF(!IsShaderF16EnabledInWGSL());
+        DAWN_TEST_UNSUPPORTED_IF(!IsSubgroupsF16SupportedByBackend());
 
         // TODO(361330160): The f16 implementation does not seem produce correct values in
         // execution. It is not clear if this is due to something wrong with the polyfill or the
@@ -899,6 +919,11 @@ TEST_P(SubgroupsShaderInclusiveTest, InclusiveExecution) {
         // TODO(361330160): Also fails on MacBookPro16,1 with AMD Radeon Pro 5300M
         DAWN_SUPPRESS_TEST_IF(gpu_info::IsAMDRDNA1(GetParam().adapterProperties.vendorID,
                                                    GetParam().adapterProperties.deviceID));
+
+        DAWN_ASSERT(IsShaderF16EnabledInWGSL() && IsSubgroupsEnabledInWGSL() &&
+                    IsSubgroupsF16EnabledInWGSL());
+    } else {
+        DAWN_TEST_UNSUPPORTED_IF(!IsSubgroupsEnabledInWGSL());
     }
 
     for (uint32_t workgroupSize : {1, 2, 3, 4, 7, 8, 15, 16, 31, 32, 63, 64, 127, 128, 255, 256}) {

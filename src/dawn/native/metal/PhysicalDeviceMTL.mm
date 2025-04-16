@@ -676,6 +676,8 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     if (!kForceDisableSubgroups && ([*mDevice supportsFamily:MTLGPUFamilyApple6] ||
                                     [*mDevice supportsFamily:MTLGPUFamilyMac2])) {
         EnableFeature(Feature::Subgroups);
+        // TODO(crbug.com/380244620) remove SubgroupsF16
+        EnableFeature(Feature::SubgroupsF16);
     }
 
     if ([*mDevice supportsFamily:MTLGPUFamilyApple7]) {

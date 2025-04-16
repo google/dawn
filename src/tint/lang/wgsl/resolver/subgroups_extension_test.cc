@@ -38,6 +38,26 @@ namespace {
 
 using ResolverSubgroupsExtensionTest = ResolverTest;
 
+// Enabling subgroups_f16 without enabling subgroups should fail.
+TEST_F(ResolverSubgroupsExtensionTest, UseSubgroupsF16WithoutSubgroups) {
+    Enable(wgsl::Extension::kF16);
+    Enable(wgsl::Extension::kSubgroupsF16);
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(error: extension 'subgroups_f16' cannot be used without extension 'subgroups')");
+}
+
+// Enabling subgroups_f16 without enabling f16 should fail.
+TEST_F(ResolverSubgroupsExtensionTest, UseSubgroupsF16WithoutF16) {
+    Enable(wgsl::Extension::kSubgroups);
+    Enable(wgsl::Extension::kSubgroupsF16);
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(error: extension 'subgroups_f16' cannot be used without extension 'f16')");
+}
+
 // Using a subgroup_size builtin attribute without subgroups enabled should fail.
 TEST_F(ResolverSubgroupsExtensionTest, UseSubgroupSizeAttribWithoutExtensionError) {
     Structure("Inputs",

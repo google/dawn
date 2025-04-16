@@ -372,6 +372,10 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
      {"Supports the \"enable subgroups;\" directive in WGSL.",
       "https://github.com/gpuweb/gpuweb/blob/main/proposals/subgroups.md",
       FeatureInfo::FeatureState::Stable}},
+    {Feature::SubgroupsF16,
+     {"Supports the \"enable subgroups_f16;\" directive in WGSL (deprecated).",
+      "https://github.com/gpuweb/gpuweb/blob/main/proposals/subgroups.md",
+      FeatureInfo::FeatureState::Stable}},
     {Feature::CoreFeaturesAndLimits,
      {"Lifts all compatibility mode restrictions (features and limits) to core when enabled on a "
       "device.",

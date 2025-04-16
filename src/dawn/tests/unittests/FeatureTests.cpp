@@ -123,7 +123,13 @@ TEST_F(FeatureTests, AdapterWithRequiredFeatureDisabled) {
 // For a given feature, returns a set containing the feature and its depending features if any to
 // ensure creating device with these features can success
 std::unordered_set<wgpu::FeatureName> FeatureAndDependenciesSet(wgpu::FeatureName feature) {
-    return {feature};
+    switch (feature) {
+        case wgpu::FeatureName::SubgroupsF16:
+            return {wgpu::FeatureName::SubgroupsF16, wgpu::FeatureName::ShaderF16,
+                    wgpu::FeatureName::Subgroups};
+        default:
+            return {feature};
+    }
 }
 
 bool IsExperimental(wgpu::FeatureName feature) {
