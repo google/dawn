@@ -35,6 +35,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path"
@@ -140,7 +141,7 @@ func run(fsReaderWriter oswrapper.FilesystemReaderWriter) error {
 
 	var formatList, ignore, dxcPath, fxcPath, tintPath, xcrunPath string
 	var maxTableWidth int
-	var useIrReader bool
+	var server, useIrReader bool
 	numCPU := runtime.NumCPU()
 	verbose, generateExpected, generateSkip := false, false, false
 	flag.StringVar(&formatList, "format", "all", "comma separated list of formats to emit. Possible values are: all, wgsl, spvasm, msl, msl-ir, hlsl, hlsl-ir, hlsl-dxc, hlsl-dxc-ir, hlsl-fxc, hlsl-fxc-ir, glsl")
@@ -152,6 +153,7 @@ func run(fsReaderWriter oswrapper.FilesystemReaderWriter) error {
 	flag.BoolVar(&verbose, "verbose", false, "print all run tests, including rows that all pass")
 	flag.BoolVar(&generateExpected, "generate-expected", false, "create or update all expected outputs")
 	flag.BoolVar(&generateSkip, "generate-skip", false, "create or update all expected outputs that fail with SKIP")
+	flag.BoolVar(&server, "server", false, "run Tint in server mode")
 	flag.BoolVar(&useIrReader, "use-ir-reader", false, "force use of IR SPIR-V Reader")
 	flag.IntVar(&numCPU, "j", numCPU, "maximum number of concurrent threads to run tests")
 	flag.IntVar(&maxTableWidth, "table-width", terminalWidth, "maximum width of the results table")
@@ -330,12 +332,14 @@ func run(fsReaderWriter oswrapper.FilesystemReaderWriter) error {
 		generateExpected: generateExpected,
 		generateSkip:     generateSkip,
 		validationCache:  validationCache,
+		server:           server,
 		useIrReader:      useIrReader,
 	}
 	for cpu := 0; cpu < numCPU; cpu++ {
 		go func() {
+			tintServer := tintServerState{}
 			for job := range pendingJobs {
-				job.run(runCfg, fsReaderWriter)
+				job.run(runCfg, fsReaderWriter, &tintServer)
 			}
 		}()
 	}
@@ -669,7 +673,14 @@ type runConfig struct {
 	generateExpected bool
 	generateSkip     bool
 	validationCache  validationCache
+	server           bool
 	useIrReader      bool
+}
+
+type tintServerState struct {
+	cmd            *exec.Cmd
+	stdin          io.WriteCloser
+	stdout, stderr io.ReadCloser
 }
 
 // Skips the path portion of FXC warning/error strings, matching the rest.
@@ -678,7 +689,7 @@ var reFXCErrorStringHash = regexp.MustCompile(`(?:.*?)(\(.*?\): (?:warning|error
 
 // TODO(crbug.com/344014313): Split this up into multiple functions and add
 // unittest coverage for functions that can be tested.
-func (j job) run(cfg runConfig, fsReaderWriter oswrapper.FilesystemReaderWriter) {
+func (j job) run(cfg runConfig, fsReaderWriter oswrapper.FilesystemReaderWriter, tintServer *tintServerState) {
 	j.result <- func() status {
 		// expectedFilePath is the path to the expected output file for the given test
 		expectedFilePath := j.file + ".expected."
@@ -797,7 +808,11 @@ func (j job) run(cfg runConfig, fsReaderWriter oswrapper.FilesystemReaderWriter)
 
 		timedOut := false
 		start := time.Now()
-		ok, out, timedOut = invoke(cfg.tintPath, args...)
+		if cfg.server {
+			ok, out, timedOut = invokeWithServer(cfg.tintPath, tintServer, args...)
+		} else {
+			ok, out, timedOut = invokeWithoutServer(cfg.tintPath, args...)
+		}
 		timeTaken := time.Since(start)
 
 		out = strings.ReplaceAll(out, "\r\n", "\n")
@@ -991,12 +1006,95 @@ func percentage(n, total int) string {
 	return fmt.Sprintf("%.1f%c", f*100.0, '%')
 }
 
-// invoke runs the executable 'exe' with the provided arguments.
-func invoke(exe string, args ...string) (ok bool, output string, timedOut bool) {
+// invokeWithServer runs a test with the provided arguments using Tint in server mode
+func invokeWithServer(tintPath string, tintServer *tintServerState, args ...string) (ok bool, output string, timedOut bool) {
+	// Start the Tint server if it is not currently running.
+	if tintServer.cmd == nil {
+		tintServer.cmd = exec.CommandContext(context.Background(), tintPath, "--server")
+
+		var err error
+
+		// Set up pipes for stdin, stdout, and stderr.
+		tintServer.stdin, err = tintServer.cmd.StdinPipe()
+		if err != nil {
+			return false, err.Error(), false
+		}
+		tintServer.stdout, err = tintServer.cmd.StdoutPipe()
+		if err != nil {
+			return false, err.Error(), false
+		}
+		tintServer.stderr, err = tintServer.cmd.StderrPipe()
+		if err != nil {
+			return false, err.Error(), false
+		}
+
+		// Start the server.
+		if err = tintServer.cmd.Start(); err != nil {
+			return false, err.Error(), false
+		}
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), testTimeout)
 	defer cancel()
 
-	cmd := exec.CommandContext(ctx, exe, args...)
+	// Send the test to the server inside a goroutine so that we can timeout if needed.
+	type testResult struct {
+		output string
+		ok     bool
+	}
+	result := make(chan testResult, 1)
+	go func() {
+		// Send the test arguments to the Tint server.
+		_, in_err := tintServer.stdin.Write([]byte("\"" + strings.Join(args, "\" \"") + "\"\n"))
+
+		// Read from stdout and stderr until the next null character.
+		read := func(stream io.ReadCloser) (str string, err error) {
+			reader := bufio.NewReader(stream)
+			result, err := reader.ReadString(0)
+			return strings.TrimSuffix(result, "\x00"), err
+		}
+		stdout_str, out_err := read(tintServer.stdout)
+		stderr_str, err_err := read(tintServer.stderr)
+		str := stderr_str + stdout_str
+
+		result <- testResult{
+			output: str,
+			ok:     in_err == nil && out_err == nil && err_err == nil,
+		}
+	}()
+
+	select {
+	case <-ctx.Done():
+		// The test timed out, so we need to kill the server.
+		// Manually close the pipes too so that the goroutine exits.
+		tintServer.stdout.Close()
+		tintServer.stderr.Close()
+		tintServer.cmd.Process.Kill()
+		tintServer.cmd = nil
+		return false, fmt.Sprintf("test timed out after %v", testTimeout), true
+	case result := <-result:
+		// If any IO operations failed then the server likely exited or crashed.
+		if !result.ok {
+			tintServer.stdin.Close()
+			err := tintServer.cmd.Wait()
+			tintServer.cmd = nil
+
+			if result.output != "" {
+				result.output += fmt.Sprintf("\ntint executable returned error: %v\n", err.Error())
+				return false, result.output, false
+			}
+			return false, err.Error(), false
+		}
+		return true, result.output, false
+	}
+}
+
+// invoke runs the Tint executable with the provided arguments.
+func invokeWithoutServer(tintPath string, args ...string) (ok bool, output string, timedOut bool) {
+	ctx, cancel := context.WithTimeout(context.Background(), testTimeout)
+	defer cancel()
+
+	cmd := exec.CommandContext(ctx, tintPath, args...)
 	out, err := cmd.CombinedOutput()
 	str := string(out)
 	if err != nil {
