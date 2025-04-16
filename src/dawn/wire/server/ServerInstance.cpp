@@ -51,7 +51,7 @@ WireResult Server::DoInstanceRequestAdapter(Known<WGPUInstance> instance,
     mProcs.instanceRequestAdapter(
         instance->handle, options,
         {nullptr, WGPUCallbackMode_AllowSpontaneous,
-         ForwardToServer2<&Server::OnRequestAdapterCallback>, userdata.release(), nullptr});
+         ForwardToServer<&Server::OnRequestAdapterCallback>, userdata.release(), nullptr});
     return WireResult::Success;
 }
 
