@@ -76,7 +76,7 @@ using SubstituteOverrideConfig = std::unordered_map<tint::OverrideId, double>;
     X(uint32_t, firstIndexOffsetShaderRegister)                                          \
     X(uint32_t, firstIndexOffsetRegisterSpace)                                           \
     X(tint::hlsl::writer::Options, tintOptions)                                          \
-    X(std::optional<SubstituteOverrideConfig>, substituteOverrideConfig)                 \
+    X(SubstituteOverrideConfig, substituteOverrideConfig)                                \
     X(LimitsForCompilationRequest, limits)                                               \
     X(CacheKey::UnsafeUnkeyedValue<LimitsForCompilationRequest>, adapterSupportedLimits) \
     X(uint32_t, maxSubgroupSize)                                                         \

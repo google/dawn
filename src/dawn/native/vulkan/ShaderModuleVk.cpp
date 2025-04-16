@@ -206,7 +206,7 @@ using SubstituteOverrideConfig = std::unordered_map<tint::OverrideId, double>;
 #define SPIRV_COMPILATION_REQUEST_MEMBERS(X)                                             \
     X(SingleShaderStage, stage)                                                          \
     X(const tint::Program*, inputProgram)                                                \
-    X(std::optional<SubstituteOverrideConfig>, substituteOverrideConfig)                 \
+    X(SubstituteOverrideConfig, substituteOverrideConfig)                                \
     X(LimitsForCompilationRequest, limits)                                               \
     X(CacheKey::UnsafeUnkeyedValue<LimitsForCompilationRequest>, adapterSupportedLimits) \
     X(uint32_t, maxSubgroupSize)                                                         \
@@ -339,7 +339,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
 
     const bool hasInputAttachment = !bindings.input_attachment.empty();
 
-    std::optional<SubstituteOverrideConfig> substituteOverrideConfig;
+    SubstituteOverrideConfig substituteOverrideConfig;
     if (!programmableStage.metadata->overrides.empty()) {
         substituteOverrideConfig = BuildSubstituteOverridesTransformConfig(programmableStage);
     }
@@ -435,13 +435,13 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
                                 singleEntryPointResult.Failure().reason);
             }
 
-            if (r.substituteOverrideConfig) {
+            {
                 SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(r.platform.UnsafeGetValue(),
                                                    "ShaderModuleSubstituteOverrides");
                 // this needs to run after SingleEntryPoint transform which removes unused
                 // overrides for the current entry point.
                 tint::core::ir::transform::SubstituteOverridesConfig cfg;
-                cfg.map = r.substituteOverrideConfig.value();
+                cfg.map = std::move(r.substituteOverrideConfig);
                 auto substituteOverridesResult =
                     tint::core::ir::transform::SubstituteOverrides(ir.Get(), cfg);
                 DAWN_INVALID_IF(substituteOverridesResult != tint::Success,

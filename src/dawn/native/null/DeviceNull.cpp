@@ -483,7 +483,7 @@ MaybeError Queue::WaitForIdleForDestruction() {
 MaybeError ComputePipeline::InitializeImpl() {
     const ProgrammableStage& computeStage = GetStage(SingleShaderStage::Compute);
 
-    std::optional<std::unordered_map<tint::OverrideId, double>> substituteOverrideConfig;
+    std::unordered_map<tint::OverrideId, double> substituteOverrideConfig{};
     if (!computeStage.metadata->overrides.empty()) {
         substituteOverrideConfig = BuildSubstituteOverridesTransformConfig(computeStage);
     }
@@ -500,17 +500,15 @@ MaybeError ComputePipeline::InitializeImpl() {
                     "Pipeline single entry point (IR) failed:\n%s",
                     singleEntryPointResult.Failure().reason);
 
-    if (substituteOverrideConfig) {
-        // this needs to run after SingleEntryPoint transform which removes unused
-        // overrides for the current entry point.
-        tint::core::ir::transform::SubstituteOverridesConfig cfg;
-        cfg.map = substituteOverrideConfig.value();
-        auto substituteOverridesResult =
-            tint::core::ir::transform::SubstituteOverrides(ir.Get(), cfg);
-        DAWN_INVALID_IF(substituteOverridesResult != tint::Success,
-                        "Pipeline override substitution (IR) failed:\n%s",
-                        substituteOverridesResult.Failure().reason);
-    }
+    // this needs to run after SingleEntryPoint transform which removes unused
+    // overrides for the current entry point.
+    tint::core::ir::transform::SubstituteOverridesConfig cfg;
+    cfg.map = std::move(substituteOverrideConfig);
+
+    auto substituteOverridesResult = tint::core::ir::transform::SubstituteOverrides(ir.Get(), cfg);
+    DAWN_INVALID_IF(substituteOverridesResult != tint::Success,
+                    "Pipeline override substitution (IR) failed:\n%s",
+                    substituteOverridesResult.Failure().reason);
 
     auto limits = LimitsForCompilationRequest::Create(GetDevice()->GetLimits().v1);
     auto adapterSupportedLimits =

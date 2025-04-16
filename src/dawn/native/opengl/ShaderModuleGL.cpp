@@ -97,7 +97,7 @@ using SubstituteOverrideConfig = std::unordered_map<tint::OverrideId, double>;
     X(const tint::Program*, inputProgram)                                                \
     X(std::string, entryPointName)                                                       \
     X(SingleShaderStage, stage)                                                          \
-    X(std::optional<SubstituteOverrideConfig>, substituteOverrideConfig)                 \
+    X(SubstituteOverrideConfig, substituteOverrideConfig)                                \
     X(LimitsForCompilationRequest, limits)                                               \
     X(CacheKey::UnsafeUnkeyedValue<LimitsForCompilationRequest>, adapterSupportedLimits) \
     X(bool, disableSymbolRenaming)                                                       \
@@ -499,7 +499,7 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
                                      layout->GetInternalTextureBuiltinsUniformBinding()});
     }
 
-    std::optional<SubstituteOverrideConfig> substituteOverrideConfig;
+    SubstituteOverrideConfig substituteOverrideConfig;
     if (!programmableStage.metadata->overrides.empty()) {
         substituteOverrideConfig = BuildSubstituteOverridesTransformConfig(programmableStage);
     }
@@ -579,17 +579,15 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
                             "Pipeline single entry point (IR) failed:\n%s",
                             singleEntryPointResult.Failure().reason);
 
-            if (r.substituteOverrideConfig) {
-                // this needs to run after SingleEntryPoint transform which removes unused
-                // overrides for the current entry point.
-                tint::core::ir::transform::SubstituteOverridesConfig cfg;
-                cfg.map = r.substituteOverrideConfig.value();
-                auto substituteOverridesResult =
-                    tint::core::ir::transform::SubstituteOverrides(ir.Get(), cfg);
-                DAWN_INVALID_IF(substituteOverridesResult != tint::Success,
-                                "Pipeline override substitution (IR) failed:\n%s",
-                                substituteOverridesResult.Failure().reason);
-            }
+            // this needs to run after SingleEntryPoint transform which removes unused
+            // overrides for the current entry point.
+            tint::core::ir::transform::SubstituteOverridesConfig cfg;
+            cfg.map = std::move(r.substituteOverrideConfig);
+            auto substituteOverridesResult =
+                tint::core::ir::transform::SubstituteOverrides(ir.Get(), cfg);
+            DAWN_INVALID_IF(substituteOverridesResult != tint::Success,
+                            "Pipeline override substitution (IR) failed:\n%s",
+                            substituteOverridesResult.Failure().reason);
 
             const std::string remappedEntryPoint = "";
             // Generate GLSL from Tint IR.

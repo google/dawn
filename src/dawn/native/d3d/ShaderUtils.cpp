@@ -259,9 +259,9 @@ MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
             r.firstIndexOffsetShaderRegister, r.firstIndexOffsetRegisterSpace);
     }
 
-    if (!r.useTintIR && r.substituteOverrideConfig) {
+    if (!r.useTintIR) {
         tint::ast::transform::SubstituteOverride::Config cfg;
-        cfg.map = r.substituteOverrideConfig.value();
+        cfg.map = std::move(r.substituteOverrideConfig);
 
         // This needs to run after SingleEntryPoint transform which removes unused overrides for
         // current entry point.
@@ -303,18 +303,16 @@ MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
                         "Pipeline single entry point (IR) failed:\n%s",
                         singleEntryPointResult.Failure().reason);
 
-        if (r.substituteOverrideConfig) {
-            // this needs to run after SingleEntryPoint transform which removes unused
-            // overrides for the current entry point.
-            tint::core::ir::transform::SubstituteOverridesConfig cfg;
-            cfg.map = r.substituteOverrideConfig.value();
-            auto substituteOverridesResult =
-                tint::core::ir::transform::SubstituteOverrides(ir.Get(), cfg);
+        // this needs to run after SingleEntryPoint transform which removes unused
+        // overrides for the current entry point.
+        tint::core::ir::transform::SubstituteOverridesConfig cfg;
+        cfg.map = std::move(r.substituteOverrideConfig);
+        auto substituteOverridesResult =
+            tint::core::ir::transform::SubstituteOverrides(ir.Get(), cfg);
 
-            DAWN_INVALID_IF(substituteOverridesResult != tint::Success,
-                            "Pipeline override substitution (IR) failed:\n%s",
-                            substituteOverridesResult.Failure().reason);
-        }
+        DAWN_INVALID_IF(substituteOverridesResult != tint::Success,
+                        "Pipeline override substitution (IR) failed:\n%s",
+                        substituteOverridesResult.Failure().reason);
 
         result = tint::hlsl::writer::Generate(ir.Get(), r.tintOptions);
 

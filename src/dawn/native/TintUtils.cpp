@@ -176,13 +176,12 @@ std::unordered_map<tint::OverrideId, double> BuildSubstituteOverridesTransformCo
     const EntryPointMetadata& metadata = *stage.metadata;
     const auto& constants = stage.constants;
 
-    std::unordered_map<tint::OverrideId, double> map;
-
+    std::unordered_map<tint::OverrideId, double> map{};
     for (const auto& [key, value] : constants) {
         const auto& o = metadata.overrides.at(key);
+
         map.insert({o.id, value});
     }
-
     return map;
 }
 
