@@ -50,6 +50,7 @@ CI_SHADOW_SERVICE_ACCOUNT = "dawn-try-builder@chops-service-accounts.iam.gservic
 
 def generate_properties_for_project(project):
     properties = {
+        "builder_group": "dawn",
         "$build/siso": {
             "project": project,
             "remote_jobs": siso.remote_jobs.DEFAULT,
@@ -109,6 +110,9 @@ def child_tester(name, parent_builder):
             "pool": "luci.chromium.gpu.ci",
             "os": "Ubuntu-22.04",
             "cores": "2",
+        },
+        properties = {
+            "builder_group": "dawn",
         },
         service_account = CI_SERVICE_ACCOUNT,
         shadow_service_account = CI_SHADOW_SERVICE_ACCOUNT,
