@@ -237,19 +237,6 @@ dawn_generator("dawn_gpu_info_gen") {
   ]
 }
 
-config("abseil_config") {
-  if (!build_with_chromium && is_clang) {
-    cflags = [
-      # Allow the use of enable_if()
-      "-Wno-gcc-compat",
-      "-Wno-unreachable-code-break",
-
-      # Allows use of _Nullable, _Nonnull & _Null_unspecified
-      "-Wno-nullability-extension",
-    ]
-  }
-}
-
 group("abseil") {
   # When building within Chromium or ANGLE we need to include "//third_party/abseil-cpp:absl" while
   # it's beneficial to be more specific with standalone Dawn, especially when it comes to
@@ -258,9 +245,9 @@ group("abseil") {
     public_deps = [ "$dawn_abseil_dir:absl" ]
   } else {
     public_deps = [
-      "${dawn_abseil_dir}/absl/base:no_destructor",
-      "${dawn_abseil_dir}/absl/container:flat_hash_set",
-      "${dawn_abseil_dir}/absl/container:inlined_vector",
+      "${dawn_root}/third_party/gn/abseil-cpp:flat_hash_set",
+      "${dawn_root}/third_party/gn/abseil-cpp:inlined_vector",
+      "${dawn_root}/third_party/gn/abseil-cpp:no_destructor",
     ]
   }
 }
@@ -370,10 +357,7 @@ if (is_win || is_linux || is_chromeos || is_mac || is_fuchsia || is_android ||
     # Note that while this doesn't make `internal_config` a public config of
     # Dawn libraries because `:common` is only used as a private deps of Dawn
     # targets, so `internal_config` doesn't leak out of Dawn.
-    public_configs = [
-      ":abseil_config",
-      ":internal_config",
-    ]
+    public_configs = [ ":internal_config" ]
     deps = [
       "${dawn_root}/include/dawn:cpp_headers",
       "${dawn_root}/include/dawn:headers",

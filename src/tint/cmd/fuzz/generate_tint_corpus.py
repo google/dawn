@@ -348,12 +348,9 @@ def generate_ir_corpus(options):
     logger.info(f"Generating IR corpus to \'{options.ir_corpus_dir}\' ...")
     create_clean_dir(options.ir_corpus_dir)
 
-    gen_env = os.environ.copy()
-    gen_env["ASAN_OPTIONS"] = "detect_odr_violation=0"
-
     gen_cmd = [options.ir_as_bin, options.input_dir, options.ir_corpus_dir]
     logger.info(f"Invoking \'{' '.join(gen_cmd)}\'")
-    subprocess.run(gen_cmd, env=gen_env)
+    subprocess.run(gen_cmd)
 
     touch_stamp_file(options.output_dir, "ir")
     logger.info("Finished generating IR corpus")

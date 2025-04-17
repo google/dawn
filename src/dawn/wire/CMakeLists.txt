@@ -130,7 +130,6 @@ dawn_add_library(
     dawn::partition_alloc
     tint_lang_wgsl
 )
-
 target_compile_definitions(dawn_wire PRIVATE "DAWN_WIRE_IMPLEMENTATION")
 if(BUILD_SHARED_LIBS)
     target_compile_definitions(dawn_wire PRIVATE "DAWN_WIRE_SHARED_LIBRARY")

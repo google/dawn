@@ -35,9 +35,11 @@ The `tint_wgsl_fuzzer` target can be built with either CMake or GN:
 
 Building `tint_ir_fuzzer` requires additional flags to be set:
 
-- CMake: Define `TINT_BUILD_IR_BINARY=1` (pass
-  `-DTINT_BUILD_IR_BINARY=1` to `cmake`)
-- GN: Define `tint_build_ir_binary = true` in `args.gn`.
+- CMake: Define `TINT_BUILD_IR_BINARY=1` and `TINT_BUILD_IR_FUZZER=1`
+  (pass `-DTINT_BUILD_IR_BINARY=1` `-DTINT_BUILD_IR_FUZZER=1` to
+  `cmake`)
+- GN: Define `tint_build_ir_binary = true` and `tint_build_ir_fuzzer =
+  true` in `args.gn`.
 
 ## Running fuzzers
 

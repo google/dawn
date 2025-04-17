@@ -35,7 +35,6 @@
 #include "src/tint/lang/hlsl/writer/helpers/generate_bindings.h"
 #include "src/tint/lang/hlsl/writer/writer.h"
 #include "src/tint/utils/command/command.h"
-
 namespace tint::hlsl::writer {
 namespace {
 

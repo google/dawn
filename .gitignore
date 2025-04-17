@@ -21,11 +21,10 @@
 /third_party/depot_tools
 /third_party/dxc
 /third_party/dxheaders
-/third_party/fuzztest/src/
 /third_party/glfw
 /third_party/glslang/src/
 /third_party/google_benchmark/src
-/third_party/googletest/src/
+/third_party/googletest
 /third_party/gpuweb
 /third_party/jinja2
 /third_party/jsoncpp
@@ -42,7 +41,6 @@
 /third_party/node-api-headers
 /third_party/partition_alloc
 /third_party/protobuf
-/third_party/re2/src/
 /third_party/siso/cipd/
 /third_party/spirv-cross/src/
 /third_party/spirv-headers/src/
