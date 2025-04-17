@@ -539,11 +539,13 @@ if (DAWN_ENABLE_METAL)
         "Surface_metal.mm"
     )
     if (DAWN_TARGET_MACOS)
-        list(APPEND conditional_private_platform_depends "-framework Cocoa")
+        list(APPEND conditional_private_platform_depends
+            "-framework Cocoa"
+            "-framework IOKit"
+        )
     endif()
     list(APPEND conditional_private_platform_depends
         "-framework Foundation"
-        "-framework IOKit"
         "-framework IOSurface"
         "-framework QuartzCore"
         "-framework Metal"
