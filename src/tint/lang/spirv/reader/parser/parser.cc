@@ -205,6 +205,9 @@ class Parser {
                         case spv::Op::OpLogicalEqual:
                             EmitBinary(inst, core::BinaryOp::kEqual, 3);
                             break;
+                        case spv::Op::OpLogicalNotEqual:
+                            EmitBinary(inst, core::BinaryOp::kNotEqual, 3);
+                            break;
                         default:
                             TINT_ICE() << "Unknown spec constant operation: " << op;
                     }
