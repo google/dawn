@@ -82,7 +82,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2025-04-16 07:21:15AM
+# Last rolled: 2025-04-17 07:53:47AM
 
 # conflicts_allowed: true
 # full_wildcard_support: true
@@ -826,6 +826,8 @@ crbug.com/366151404 webgpu:api,operation,adapter,requestAdapter:requestAdapter_i
 ################################################################################
 crbug.com/0000 [ intel linux ] webgpu:api,operation,compute,basic:large_dispatch:dispatchSize="maximum" [ Failure ]
 crbug.com/0000 [ linux nvidia ] webgpu:api,validation,buffer,create:limit: [ Failure ]
+crbug.com/0000 [ intel linux ] webgpu:api,validation,capability_checks,features,texture_formats:check_capability_guarantees: [ Failure ]
+crbug.com/0000 [ linux nvidia ] webgpu:api,validation,capability_checks,features,texture_formats:check_capability_guarantees: [ Failure ]
 crbug.com/0000 [ android arm ] webgpu:api,validation,error_scope:simple:errorType="validation";errorFilter="out-of-memory" [ Skip ]
 crbug.com/0000 [ linux nvidia ] webgpu:api,validation,queue,copyToTexture,CopyExternalImageToTexture:source_image,crossOrigin:sourceImage="canvas";isOriginClean=true [ Failure ]
 crbug.com/0000 [ linux nvidia ] webgpu:api,validation,state,device_lost,destroy:importExternalTexture:sourceType="VideoElement";awaitLost=true [ Failure ]
