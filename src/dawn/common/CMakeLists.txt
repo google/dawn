@@ -158,7 +158,7 @@ endif ()
 
 if (DAWN_ENABLE_VULKAN)
     list(APPEND conditional_private_depends
-        Vulkan-Headers)
+        Vulkan::Headers)
 endif ()
 
 list(APPEND conditional_private_depends

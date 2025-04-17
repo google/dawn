@@ -751,8 +751,8 @@ if (DAWN_ENABLE_VULKAN)
     )
 
     list(APPEND conditional_public_depends
-        Vulkan-Headers
-        VulkanUtilityHeaders
+        Vulkan::Headers
+        Vulkan::UtilityHeaders
     )
 
     if (ANDROID)

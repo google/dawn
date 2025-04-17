@@ -155,16 +155,16 @@ if (DAWN_ENABLE_DESKTOP_GL OR DAWN_ENABLE_OPENGLES)
     target_include_directories(dawn_khronos_platform INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/khronos/EGL-Registry/api")
 endif()
 
-if (NOT TARGET Vulkan-Headers AND DAWN_ENABLE_VULKAN)
-    message(STATUS "Dawn: using Vulkan-Headers at ${DAWN_VULKAN_HEADERS_DIR}")
+if (NOT TARGET Vulkan::Headers AND DAWN_ENABLE_VULKAN)
+    message(STATUS "Dawn: using Vulkan::Headers at ${DAWN_VULKAN_HEADERS_DIR}")
 
     set(VULKAN_HEADERS_ENABLE_MODULE OFF)
-    add_subdirectory(${DAWN_VULKAN_HEADERS_DIR} "${CMAKE_CURRENT_BINARY_DIR}/vulkan-headers")
+    add_subdirectory(${DAWN_VULKAN_HEADERS_DIR} "${CMAKE_CURRENT_BINARY_DIR}/vulkan-headers/src")
 endif()
 
-if (NOT TARGET VulkanUtilityHeaders AND DAWN_ENABLE_VULKAN)
+if (NOT TARGET Vulkan::UtilityHeaders AND DAWN_ENABLE_VULKAN)
     message(STATUS "Dawn: using VulkanUtilityLibraries at ${DAWN_VULKAN_UTILITY_LIBRARIES_DIR}")
-    add_subdirectory(${DAWN_VULKAN_UTILITY_LIBRARIES_DIR} "${CMAKE_CURRENT_BINARY_DIR}/vulkan-utility-libraries")
+    add_subdirectory(${DAWN_VULKAN_UTILITY_LIBRARIES_DIR} "${CMAKE_CURRENT_BINARY_DIR}/vulkan-utility-libraries/src")
 endif()
 
 if (DAWN_ENABLE_SWIFTSHADER AND NOT TARGET vk_swiftshader)
