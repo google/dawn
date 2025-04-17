@@ -321,6 +321,11 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
         }
     }
 
+    d3d::SubstituteOverrideConfig substituteOverrideConfig;
+    if (!programmableStage.metadata->overrides.empty()) {
+        substituteOverrideConfig = BuildSubstituteOverridesTransformConfig(programmableStage);
+    }
+
     req.hlsl.shaderModuleHash = GetHash();
     req.hlsl.inputProgram = UseTintProgram();
     req.hlsl.entryPointName = programmableStage.entryPoint.c_str();
@@ -329,7 +334,8 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
         req.hlsl.firstIndexOffsetRegisterSpace = layout->GetFirstIndexOffsetRegisterSpace();
         req.hlsl.firstIndexOffsetShaderRegister = layout->GetFirstIndexOffsetShaderRegister();
     }
-    req.hlsl.substituteOverrideConfig = BuildSubstituteOverridesTransformConfig(programmableStage);
+    req.hlsl.substituteOverrideConfig = std::move(substituteOverrideConfig);
+
     req.hlsl.tintOptions.disable_robustness = !device->IsRobustnessEnabled();
     req.hlsl.tintOptions.disable_workgroup_init =
         device->IsToggleEnabled(Toggle::DisableWorkgroupInit);

@@ -500,9 +500,14 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
                                      layout->GetInternalTextureBuiltinsUniformBinding()});
     }
 
+    SubstituteOverrideConfig substituteOverrideConfig;
+    if (!programmableStage.metadata->overrides.empty()) {
+        substituteOverrideConfig = BuildSubstituteOverridesTransformConfig(programmableStage);
+    }
+
     req.stage = stage;
     req.entryPointName = programmableStage.entryPoint;
-    req.substituteOverrideConfig = BuildSubstituteOverridesTransformConfig(programmableStage);
+    req.substituteOverrideConfig = std::move(substituteOverrideConfig);
     req.limits = LimitsForCompilationRequest::Create(GetDevice()->GetLimits().v1);
     req.adapterSupportedLimits =
         LimitsForCompilationRequest::Create(GetDevice()->GetAdapter()->GetLimits().v1);
