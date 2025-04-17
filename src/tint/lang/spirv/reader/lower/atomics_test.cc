@@ -1973,7 +1973,7 @@ $B1: {  # root
     ASSERT_EQ(expect, str());
 }
 
-TEST_F(SpirvReader_AtomicsTest, DISABLED_ReplaceAssignsAndDecls_Scalar) {
+TEST_F(SpirvReader_AtomicsTest, ReplaceAssignsAndDecls_Scalar) {
     auto* f = b.ComputeFunction("main");
 
     core::ir::Var* wg = nullptr;
@@ -2013,7 +2013,22 @@ $B1: {  # root
     Run(Atomics);
 
     auto* expect = R"(
-UNIMPLEMENTED
+$B1: {  # root
+  %wg:ptr<workgroup, atomic<u32>, read_write> = var undef
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %b:ptr<function, u32, read_write> = var undef
+    %4:u32 = atomicAdd %wg, 0u
+    %5:void = atomicStore %wg, 0u
+    %6:u32 = atomicLoad %wg
+    %7:u32 = let %6
+    %8:u32 = atomicLoad %wg
+    store %b, %8
+    ret
+  }
+}
 )";
     ASSERT_EQ(expect, str());
 }
