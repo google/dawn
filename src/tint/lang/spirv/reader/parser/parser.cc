@@ -199,6 +199,9 @@ class Parser {
                         case spv::Op::OpLogicalOr:
                             EmitBinary(inst, core::BinaryOp::kOr, 3);
                             break;
+                        case spv::Op::OpLogicalNot:
+                            EmitUnary(inst, core::UnaryOp::kNot, 3);
+                            break;
                         default:
                             TINT_ICE() << "Unknown spec constant operation: " << op;
                     }
@@ -2218,8 +2221,10 @@ class Parser {
 
     /// @param inst the SPIR-V instruction
     /// @param op the unary operator to use
-    void EmitUnary(const spvtools::opt::Instruction& inst, core::UnaryOp op) {
-        auto* val = Value(inst.GetSingleWordOperand(2));
+    void EmitUnary(const spvtools::opt::Instruction& inst,
+                   core::UnaryOp op,
+                   uint32_t first_operand_idx = 2) {
+        auto* val = Value(inst.GetSingleWordOperand(first_operand_idx));
         auto* unary = b_.Unary(op, Type(inst.type_id()), val);
         Emit(unary, inst.result_id());
     }
