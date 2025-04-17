@@ -25,6 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <array>
 #include <cstring>
 #include <iomanip>
 #include <limits>
@@ -441,7 +442,12 @@ static auto kStreamValueVectorParams = std::make_tuple(
     // Test unordered_sets.
     std::vector<std::unordered_set<int>>{{}, {4, 6, 99, 0}, {100, 300, 300}},
     // Test vectors.
-    std::vector<std::vector<int>>{{}, {1, 5, 2, 7, 4}, {3, 3, 3, 3, 3, 3, 3}});
+    std::vector<std::vector<int>>{{}, {1, 5, 2, 7, 4}, {3, 3, 3, 3, 3, 3, 3}},
+    // Test different size of arrays.
+    std::vector<std::array<int, 3>>{{1, 5, 2}, {-3, -3, -3}},
+    std::vector<std::array<uint8_t, 5>>{{5, 2, 7, 9, 6}, {3, 3, 3, 3, 42}},
+    // array of non-fundamental type
+    std::vector<std::array<std::string, 2>>{{"abcd", "efg"}, {"123hij", ""}});
 
 static auto kStreamValueInitListParams = std::make_tuple(
     std::initializer_list<char[12]>{"test string", "string test"},
