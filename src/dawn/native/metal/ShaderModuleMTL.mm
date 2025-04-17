@@ -251,11 +251,6 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
         }
     }
 
-    SubstituteOverrideConfig substituteOverrideConfig;
-    if (!programmableStage.metadata->overrides.empty()) {
-        substituteOverrideConfig = BuildSubstituteOverridesTransformConfig(programmableStage);
-    }
-
     std::unordered_map<uint32_t, uint32_t> pixelLocalAttachments;
     if (stage == SingleShaderStage::Fragment && layout->HasPixelLocalStorage()) {
         const AttachmentState* attachmentState = renderPipeline->GetAttachmentState();
@@ -273,7 +268,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
     req.stage = stage;
     auto tintProgram = programmableStage.module->GetTintProgram();
     req.inputProgram = &(tintProgram->program);
-    req.substituteOverrideConfig = std::move(substituteOverrideConfig);
+    req.substituteOverrideConfig = BuildSubstituteOverridesTransformConfig(programmableStage);
     req.entryPointName = programmableStage.entryPoint.c_str();
     req.disableSymbolRenaming = device->IsToggleEnabled(Toggle::DisableSymbolRenaming);
     req.usesSubgroupMatrix = programmableStage.metadata->usesSubgroupMatrix;

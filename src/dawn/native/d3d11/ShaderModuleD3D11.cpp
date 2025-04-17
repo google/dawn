@@ -189,11 +189,6 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
         }
     }
 
-    d3d::SubstituteOverrideConfig substituteOverrideConfig;
-    if (!programmableStage.metadata->overrides.empty()) {
-        substituteOverrideConfig = BuildSubstituteOverridesTransformConfig(programmableStage);
-    }
-
     auto tintProgram = GetTintProgram();
     req.hlsl.inputProgram = &(tintProgram->program);
     req.hlsl.entryPointName = programmableStage.entryPoint.c_str();
@@ -218,8 +213,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
         }
     }
 
-    req.hlsl.substituteOverrideConfig = std::move(substituteOverrideConfig);
-
+    req.hlsl.substituteOverrideConfig = BuildSubstituteOverridesTransformConfig(programmableStage);
     req.hlsl.limits = LimitsForCompilationRequest::Create(device->GetLimits().v1);
     req.hlsl.adapterSupportedLimits =
         LimitsForCompilationRequest::Create(device->GetAdapter()->GetLimits().v1);
