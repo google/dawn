@@ -78,6 +78,14 @@ luci.project(
             roles = "role/configs.validator",
             users = "dawn-try-builder@chops-service-accounts.iam.gserviceaccount.com",
         ),
+        # Allow any Dawn build to trigger tests running under the testing service
+        # used on shared Chromium testing pools.
+        luci.binding(
+            roles = "role/swarming.taskServiceAccount",
+            users = [
+                "chromium-tester@chops-service-accounts.iam.gserviceaccount.com",
+            ],
+        ),
     ],
 )
 
@@ -152,12 +160,6 @@ luci.bucket(
                 "dawn-try-builder@chops-service-accounts.iam.gserviceaccount.com",
             ],
         ),
-        luci.binding(
-            roles = "role/swarming.taskServiceAccount",
-            users = [
-                "chromium-tester@chops-service-accounts.iam.gserviceaccount.com",
-            ],
-        ),
     ],
     dynamic = True,
 )
@@ -198,12 +200,6 @@ luci.bucket(
             ],
             users = [
                 "dawn-try-builder@chops-service-accounts.iam.gserviceaccount.com",
-            ],
-        ),
-        luci.binding(
-            roles = "role/swarming.taskServiceAccount",
-            users = [
-                "chromium-tester@chops-service-accounts.iam.gserviceaccount.com",
             ],
         ),
     ],
