@@ -340,18 +340,13 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
 
     const bool hasInputAttachment = !bindings.input_attachment.empty();
 
-    SubstituteOverrideConfig substituteOverrideConfig;
-    if (!programmableStage.metadata->overrides.empty()) {
-        substituteOverrideConfig = BuildSubstituteOverridesTransformConfig(programmableStage);
-    }
-
     SpirvCompilationRequest req = {};
     req.stage = stage;
     req.shaderModuleHash = GetHash();
     req.inputProgram = UseTintProgram();
     req.entryPointName = programmableStage.entryPoint;
     req.platform = UnsafeUnkeyedValue(GetDevice()->GetPlatform());
-    req.substituteOverrideConfig = std::move(substituteOverrideConfig);
+    req.substituteOverrideConfig = BuildSubstituteOverridesTransformConfig(programmableStage);
     req.usesSubgroupMatrix = programmableStage.metadata->usesSubgroupMatrix;
 
     req.tintOptions.remapped_entry_point_name = kRemappedEntryPointName;

@@ -483,11 +483,6 @@ MaybeError Queue::WaitForIdleForDestruction() {
 MaybeError ComputePipeline::InitializeImpl() {
     const ProgrammableStage& computeStage = GetStage(SingleShaderStage::Compute);
 
-    std::unordered_map<tint::OverrideId, double> substituteOverrideConfig{};
-    if (!computeStage.metadata->overrides.empty()) {
-        substituteOverrideConfig = BuildSubstituteOverridesTransformConfig(computeStage);
-    }
-
     // Convert the AST program to an IR module.
     auto ir =
         tint::wgsl::reader::ProgramToLoweredIR(computeStage.module->GetTintProgram()->program);
@@ -503,7 +498,7 @@ MaybeError ComputePipeline::InitializeImpl() {
     // this needs to run after SingleEntryPoint transform which removes unused
     // overrides for the current entry point.
     tint::core::ir::transform::SubstituteOverridesConfig cfg;
-    cfg.map = std::move(substituteOverrideConfig);
+    cfg.map = BuildSubstituteOverridesTransformConfig(computeStage);
 
     auto substituteOverridesResult = tint::core::ir::transform::SubstituteOverrides(ir.Get(), cfg);
     DAWN_INVALID_IF(substituteOverridesResult != tint::Success,
