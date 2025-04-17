@@ -87,6 +87,7 @@ def parent_builder(name, dimensions, **kwargs):
         dimensions = dimensions,
         properties = generate_properties_for_project(siso.project.DEFAULT_TRUSTED),
         shadow_properties = generate_properties_for_project(siso.project.DEFAULT_UNTRUSTED),
+        build_numbers = True,
         # TODO(crbug.com/385317083): Make CI builders notify the gardeners once
         # migration to this recipe has begun.
         service_account = CI_SERVICE_ACCOUNT,
@@ -114,6 +115,8 @@ def child_tester(name, parent_builder):
         properties = {
             "builder_group": "dawn",
         },
+        build_numbers = True,
+        resultdb_settings = resultdb.settings(enable = True),
         service_account = CI_SERVICE_ACCOUNT,
         shadow_service_account = CI_SHADOW_SERVICE_ACCOUNT,
     )

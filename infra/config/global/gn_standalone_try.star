@@ -49,6 +49,7 @@ TRY_SERVICE_ACCOUNT = "dawn-try-builder@chops-service-accounts.iam.gserviceaccou
 
 def generate_properties():
     properties = {
+        "builder_group": "dawn",
         "$build/siso": {
             "project": siso.project.DEFAULT_UNTRUSTED,
             "remote_jobs": siso.remote_jobs.DEFAULT,
@@ -83,6 +84,8 @@ def trybot(name, dimensions):
         executable = "recipe:dawn/gn_v2_trybot",
         properties = generate_properties(),
         dimensions = dimensions,
+        build_numbers = True,
+        resultdb_settings = resultdb.settings(enable = True),
         service_account = TRY_SERVICE_ACCOUNT,
     )
 
