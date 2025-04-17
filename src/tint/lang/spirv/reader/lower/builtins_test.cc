@@ -8501,6 +8501,53 @@ TEST_F(SpirvReader_BuiltinsTest, ShiftRightArithmetic_Vector_SignedSigned_Signed
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(SpirvReader_BuiltinsTest, SpecConstantOp_Not) {
+    auto* ep = b.ComputeFunction("foo");
+
+    capabilities = core::ir::Capabilities{core::ir::Capability::kAllowOverrides};
+
+    b.Append(b.ir.root_block, [&] {
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kNot, Vector{ty.i32()},
+                                               1_i);
+    });
+
+    b.Append(ep->Block(), [&] {  //
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kNot, Vector{ty.i32()},
+                                               1_i);
+        b.Return(ep);
+    });
+
+    auto src = R"(
+$B1: {  # root
+  %1:i32 = spirv.not<i32> 1i
+}
+
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:i32 = spirv.not<i32> 1i
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+$B1: {  # root
+  %1:i32 = complement 1i
+}
+
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:i32 = complement 1i
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(SpirvReader_BuiltinsTest, Not_Scalar_Signed_Signed) {
     auto* ep = b.ComputeFunction("foo");
 

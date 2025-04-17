@@ -904,5 +904,41 @@ $B1: {  # root
 )");
 }
 
+TEST_F(SpirvParserTest, Var_OpSpecConstantOp_Not) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %cond "myconst"
+       %void = OpTypeVoid
+       %bool = OpTypeBool
+        %i32 = OpTypeInt 32 1
+      %false = OpSpecConstantFalse %bool
+       %true = OpSpecConstantTrue %bool
+        %one = OpConstant %i32 1
+       %cond = OpSpecConstantOp %i32 Not %one
+     %voidfn = OpTypeFunction %void
+       %main = OpFunction %void None %voidfn
+ %main_entry = OpLabel
+          %1 = OpNot %i32 %cond
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %1:i32 = spirv.not<i32> 1i
+  %myconst:i32 = override %1
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %4:i32 = spirv.not<i32> %myconst
+    ret
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader

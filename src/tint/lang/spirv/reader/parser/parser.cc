@@ -208,6 +208,9 @@ class Parser {
                         case spv::Op::OpLogicalNotEqual:
                             EmitBinary(inst, core::BinaryOp::kNotEqual, 3);
                             break;
+                        case spv::Op::OpNot:
+                            EmitSpirvExplicitBuiltinCall(inst, spirv::BuiltinFn::kNot, 3);
+                            break;
                         default:
                             TINT_ICE() << "Unknown spec constant operation: " << op;
                     }
@@ -1871,10 +1874,12 @@ class Parser {
         Emit(b_.Call(Type(inst.type_id()), fn, Args(inst, 2)), inst.result_id());
     }
 
-    void EmitSpirvExplicitBuiltinCall(const spvtools::opt::Instruction& inst, spirv::BuiltinFn fn) {
+    void EmitSpirvExplicitBuiltinCall(const spvtools::opt::Instruction& inst,
+                                      spirv::BuiltinFn fn,
+                                      uint32_t first_operand_idx = 2) {
         Emit(b_.CallExplicit<spirv::ir::BuiltinCall>(Type(inst.type_id()), fn,
                                                      Vector{Type(inst.type_id())->DeepestElement()},
-                                                     Args(inst, 2)),
+                                                     Args(inst, first_operand_idx)),
              inst.result_id());
     }
 
