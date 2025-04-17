@@ -231,7 +231,8 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
 
         if (supportsS3TC && (supportsTextureSRGB || supportsS3TCSRGB) && supportsRGTC &&
             supportsBPTC) {
-            EnableFeature(dawn::native::Feature::TextureCompressionBC);
+            EnableFeature(Feature::TextureCompressionBC);
+            EnableFeature(Feature::TextureCompressionBCSliced3D);
         }
     }
 

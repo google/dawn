@@ -550,13 +550,12 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     }
 #endif
 
-#if (defined(__MAC_11_0) && __MAC_OS_X_VERSION_MIN_REQUIRED >= __MAC_11_0) || \
+#if DAWN_PLATFORM_IS(MACOS) || \
     (defined(__IPHONE_16_4) && __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_16_4)
     if ([*mDevice supportsBCTextureCompression]) {
         EnableFeature(Feature::TextureCompressionBC);
+        EnableFeature(Feature::TextureCompressionBCSliced3D);
     }
-#elif DAWN_PLATFORM_IS(MACOS)
-    EnableFeature(Feature::TextureCompressionBC);
 #endif
 
 #if DAWN_PLATFORM_IS(IOS) && !DAWN_PLATFORM_IS(TVOS) && \
