@@ -128,7 +128,7 @@ Result ValidateUsingDXC(const std::string& dxc_path,
     dxc_create_instance =
         reinterpret_cast<PFN_DXC_CREATE_INSTANCE>(GetProcAddress(dxcLib, "DxcCreateInstance"));
 #else
-    void* dxcLib = dlopen(dxc_path.c_str(), RTLD_LAZY | RTLD_GLOBAL);
+    void* dxcLib = dlopen(dxc_path.c_str(), RTLD_LAZY | RTLD_GLOBAL | RTLD_NODELETE);
     if (dxcLib == nullptr) {
         result.output = "Failed to load dxc: " + dxc_path;
         result.failed = true;
