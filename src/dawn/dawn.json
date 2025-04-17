@@ -2247,7 +2247,7 @@
             {"value": 2, "name": "depth32 float stencil8"},
             {"value": 3, "name": "timestamp query"},
             {"value": 4, "name": "texture compression BC"},
-            {"value": 5, "name": "texture compression BC sliced 3D", "tags": ["emscripten", "upstream"]},
+            {"value": 5, "name": "texture compression BC sliced 3D"},
             {"value": 6, "name": "texture compression ETC2"},
             {"value": 7, "name": "texture compression ASTC"},
             {"value": 8, "name": "texture compression ASTC sliced 3D", "tags": ["emscripten", "upstream"]},

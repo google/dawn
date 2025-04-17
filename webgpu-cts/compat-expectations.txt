@@ -317,6 +317,22 @@ crbug.com/373670502 [ android-pixel-6 ] webgpu:shader,execution,expression,call,
 # Triaged or Manually-Added Flakes and Failures
 ################################################################################
 
+# Compressed 3D textures with BC formats
+crbug.com/342840940 webgpu:api,validation,createTexture:dimension_type_and_format_compatibility:dimension="3d";format="bc1-rgba-unorm" [ Failure ]
+crbug.com/342840940 webgpu:api,validation,createTexture:dimension_type_and_format_compatibility:dimension="3d";format="bc1-rgba-unorm-srgb" [ Failure ]
+crbug.com/342840940 webgpu:api,validation,createTexture:dimension_type_and_format_compatibility:dimension="3d";format="bc2-rgba-unorm" [ Failure ]
+crbug.com/342840940 webgpu:api,validation,createTexture:dimension_type_and_format_compatibility:dimension="3d";format="bc2-rgba-unorm-srgb" [ Failure ]
+crbug.com/342840940 webgpu:api,validation,createTexture:dimension_type_and_format_compatibility:dimension="3d";format="bc3-rgba-unorm" [ Failure ]
+crbug.com/342840940 webgpu:api,validation,createTexture:dimension_type_and_format_compatibility:dimension="3d";format="bc3-rgba-unorm-srgb" [ Failure ]
+crbug.com/342840940 webgpu:api,validation,createTexture:dimension_type_and_format_compatibility:dimension="3d";format="bc4-r-snorm" [ Failure ]
+crbug.com/342840940 webgpu:api,validation,createTexture:dimension_type_and_format_compatibility:dimension="3d";format="bc4-r-unorm" [ Failure ]
+crbug.com/342840940 webgpu:api,validation,createTexture:dimension_type_and_format_compatibility:dimension="3d";format="bc5-rg-snorm" [ Failure ]
+crbug.com/342840940 webgpu:api,validation,createTexture:dimension_type_and_format_compatibility:dimension="3d";format="bc5-rg-unorm" [ Failure ]
+crbug.com/342840940 webgpu:api,validation,createTexture:dimension_type_and_format_compatibility:dimension="3d";format="bc6h-rgb-float" [ Failure ]
+crbug.com/342840940 webgpu:api,validation,createTexture:dimension_type_and_format_compatibility:dimension="3d";format="bc6h-rgb-ufloat" [ Failure ]
+crbug.com/342840940 webgpu:api,validation,createTexture:dimension_type_and_format_compatibility:dimension="3d";format="bc7-rgba-unorm" [ Failure ]
+crbug.com/342840940 webgpu:api,validation,createTexture:dimension_type_and_format_compatibility:dimension="3d";format="bc7-rgba-unorm-srgb" [ Failure ]
+
 # Generates GL_OUT_OF_MEMORY
 crbug.com/361372970 [ android arm ] webgpu:api,validation,image_copy,layout_related:copy_end_overflows_u64:method="WriteTexture" [ Failure ]
 

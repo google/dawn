@@ -41,7 +41,6 @@ bool IsFeatureSupported(WGPUFeatureName feature) {
         case WGPUFeatureName_BufferMapExtendedUsages:
         case WGPUFeatureName_DawnFormatCapabilities:
         case WGPUFeatureName_DawnDrmFormatCapabilities:
-        case WGPUFeatureName_TextureCompressionBCSliced3D:
         case WGPUFeatureName_TextureCompressionASTCSliced3D:
             return false;
         // NOTE: SharedTextureMemory/SharedFence are not actually intended
@@ -72,6 +71,7 @@ bool IsFeatureSupported(WGPUFeatureName feature) {
         case WGPUFeatureName_TimestampQuery:
         case WGPUFeatureName_ChromiumExperimentalTimestampQueryInsidePasses:
         case WGPUFeatureName_TextureCompressionBC:
+        case WGPUFeatureName_TextureCompressionBCSliced3D:
         case WGPUFeatureName_TextureCompressionETC2:
         case WGPUFeatureName_TextureCompressionASTC:
         case WGPUFeatureName_IndirectFirstInstance:
