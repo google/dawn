@@ -68,7 +68,7 @@ def declare_os_flag():
 COPTS = [
     "-fno-rtti",
     "-fno-exceptions",
-    "--std=c++20",
+    "--std=c++17",
 ] + select({
     "//src/tint:tint_build_glsl_writer_true": [ "-DTINT_BUILD_GLSL_WRITER" ],
     "//conditions:default": [],

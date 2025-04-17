@@ -127,10 +127,10 @@
     X(v1,                              Maximum,                               maxColorAttachments,         4,         8,          8)
 
 // These limits represents experimental features. The only element experimentalImmediateDataLimits
-// doesn't have tiers yet. Define two tiers with the same value since the macros in this file expect more than on tier.
-//                                                                     compat tier0 tier1
+// doesn't have tiers yet. Define compat and two tiers with the same value since the macros in this file expect more than one tier.
+//                                                                             compat   tier0  tier1
 #define LIMITS_EXPERIMENTAL(X) \
-    X(experimentalImmediateDataLimits, Maximum, maxImmediateDataRangeByteSize,   16,   16)
+    X(experimentalImmediateDataLimits, Maximum, maxImmediateDataRangeByteSize,     16,     16,    16)
 
 // clang-format on
 

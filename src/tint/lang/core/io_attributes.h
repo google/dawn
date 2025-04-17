@@ -39,15 +39,15 @@ namespace tint::core {
 /// Attributes that can be applied to an object that will be used for shader IO.
 struct IOAttributes {
     /// The value of a `@location` attribute.
-    std::optional<uint32_t> location = std::nullopt;
+    std::optional<uint32_t> location;
     /// The value of a `@blend_src` attribute.
-    std::optional<uint32_t> blend_src = std::nullopt;
+    std::optional<uint32_t> blend_src;
     /// The value of a `@color` attribute.
-    std::optional<uint32_t> color = std::nullopt;
+    std::optional<uint32_t> color;
     /// The value of a `@builtin` attribute.
-    std::optional<core::BuiltinValue> builtin = std::nullopt;
+    std::optional<core::BuiltinValue> builtin;
     /// The values of a `@interpolate` attribute.
-    std::optional<core::Interpolation> interpolation = std::nullopt;
+    std::optional<core::Interpolation> interpolation;
     /// True if the object is annotated with `@invariant`.
     bool invariant = false;
 };
