@@ -178,10 +178,9 @@ ResultOrError<ComPtr<IDxcBlob>> CompileShaderDXC(const d3d::D3DBytecodeCompilati
     // pointers in this vector don't have static lifetime.
     std::vector<const wchar_t*> arguments = GetDXCArguments(entryPointW, r);
     ComPtr<IDxcResult> result;
-    DAWN_TRY(CheckHRESULT(
-        r.dxcCompiler.UnsafeGetValue()->Compile(&dxcBuffer, arguments.data(), arguments.size(),
-                                                nullptr, IID_PPV_ARGS(&result)),
-        "DXC compile"));
+    DAWN_TRY(CheckHRESULT(r.dxcCompiler->Compile(&dxcBuffer, arguments.data(), arguments.size(),
+                                                 nullptr, IID_PPV_ARGS(&result)),
+                          "DXC compile"));
 
     HRESULT hr;
     DAWN_TRY(CheckHRESULT(result->GetStatus(&hr), "DXC get status"));
@@ -211,9 +210,9 @@ ResultOrError<ComPtr<ID3DBlob>> CompileShaderFXC(const d3d::D3DBytecodeCompilati
     ComPtr<ID3DBlob> compiledShader;
     ComPtr<ID3DBlob> errors;
 
-    auto result = r.d3dCompile.UnsafeGetValue()(
-        hlslSource.c_str(), hlslSource.length(), nullptr, nullptr, nullptr, entryPointName.c_str(),
-        r.fxcShaderProfile.data(), r.compileFlags, 0, &compiledShader, &errors);
+    auto result = r.d3dCompile(hlslSource.c_str(), hlslSource.length(), nullptr, nullptr, nullptr,
+                               entryPointName.c_str(), r.fxcShaderProfile.data(), r.compileFlags, 0,
+                               &compiledShader, &errors);
 
     if (FAILED(result)) {
         const char* resultAsString = HRESULTAsString(result);
@@ -270,15 +269,12 @@ MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
         transformInputs.Add<tint::ast::transform::SubstituteOverride::Config>(cfg);
     }
 
-    // Requires Tint Program here right before actual using.
-    auto inputProgram = r.inputProgram.UnsafeGetValue()->GetTintProgram();
-    const tint::Program* tintInputProgram = &(inputProgram->program);
     tint::Program transformedProgram;
     tint::ast::transform::DataMap transformOutputs;
     if (!r.useTintIR) {
         TRACE_EVENT0(tracePlatform.UnsafeGetValue(), General, "RunTransforms");
         DAWN_TRY_ASSIGN(transformedProgram,
-                        RunTransforms(&transformManager, tintInputProgram, transformInputs,
+                        RunTransforms(&transformManager, r.inputProgram, transformInputs,
                                       &transformOutputs, nullptr));
     }
 
@@ -297,7 +293,7 @@ MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
     tint::Result<tint::hlsl::writer::Output> result;
     if (r.useTintIR) {
         // Convert the AST program to an IR module.
-        auto ir = tint::wgsl::reader::ProgramToLoweredIR(*tintInputProgram);
+        auto ir = tint::wgsl::reader::ProgramToLoweredIR(*r.inputProgram);
         DAWN_INVALID_IF(ir != tint::Success, "An error occurred while generating Tint IR\n%s",
                         ir.Failure().reason);
 

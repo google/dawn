@@ -304,44 +304,6 @@ class Stream<std::vector<T>> {
     }
 };
 
-// Stream specialization for std::array<T, Size> of fundamental types T.
-template <typename T, size_t Size>
-class Stream<std::array<T, Size>, std::enable_if_t<std::is_fundamental_v<T>>> {
-  public:
-    static void Write(Sink* s, const std::array<T, Size>& t) {
-        static_assert(Size > 0);
-        memcpy(s->GetSpace(sizeof(t)), t.data(), sizeof(t));
-    }
-
-    static MaybeError Read(Source* s, std::array<T, Size>* t) {
-        static_assert(Size > 0);
-        const void* ptr;
-        DAWN_TRY(s->Read(&ptr, sizeof(*t)));
-        memcpy(t->data(), ptr, sizeof(*t));
-        return {};
-    }
-};
-
-// Stream specialization for std::array<T, Size> of non-fundamental types T.
-template <typename T, size_t Size>
-class Stream<std::array<T, Size>, std::enable_if_t<!std::is_fundamental_v<T>>> {
-  public:
-    static void Write(Sink* s, const std::array<T, Size>& v) {
-        static_assert(Size > 0);
-        for (const T& it : v) {
-            StreamIn(s, it);
-        }
-    }
-
-    static MaybeError Read(Source* s, std::array<T, Size>* v) {
-        static_assert(Size > 0);
-        for (auto& el : *v) {
-            DAWN_TRY(StreamOut(s, el));
-        }
-        return {};
-    }
-};
-
 // Stream specialization for std::pair.
 template <typename A, typename B>
 class Stream<std::pair<A, B>> {

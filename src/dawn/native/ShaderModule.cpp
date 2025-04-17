@@ -36,7 +36,6 @@
 #include "dawn/common/BitSetIterator.h"
 #include "dawn/common/Constants.h"
 #include "dawn/common/MatchVariant.h"
-#include "dawn/common/Sha3.h"
 #include "dawn/native/BindGroupLayoutInternal.h"
 #include "dawn/native/ChainUtils.h"
 #include "dawn/native/CompilationMessages.h"
@@ -1464,6 +1463,7 @@ MaybeError ValidateCompatibilityWithPipelineLayout(DeviceBase* device,
 }
 
 // ShaderModuleBase
+
 ShaderModuleBase::ShaderModuleBase(DeviceBase* device,
                                    const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
                                    std::vector<tint::wgsl::Extension> internalExtensions,
@@ -1471,19 +1471,12 @@ ShaderModuleBase::ShaderModuleBase(DeviceBase* device,
     : Base(device, descriptor->label),
       mType(Type::Undefined),
       mInternalExtensions(std::move(internalExtensions)) {
-    size_t shaderCodeByteSize = 0;
-    uint8_t* shaderCode = nullptr;
-
     if (auto* spirvDesc = descriptor.Get<ShaderSourceSPIRV>()) {
         mType = Type::Spirv;
         mOriginalSpirv.assign(spirvDesc->code, spirvDesc->code + spirvDesc->codeSize);
-        shaderCodeByteSize = mOriginalSpirv.size() * sizeof(decltype(mOriginalSpirv)::value_type);
-        shaderCode = reinterpret_cast<uint8_t*>(mOriginalSpirv.data());
     } else if (auto* wgslDesc = descriptor.Get<ShaderSourceWGSL>()) {
         mType = Type::Wgsl;
         mWgsl = std::string(wgslDesc->code);
-        shaderCodeByteSize = mWgsl.size() * sizeof(decltype(mWgsl)::value_type);
-        shaderCode = reinterpret_cast<uint8_t*>(mWgsl.data());
     } else {
         DAWN_ASSERT(false);
     }
@@ -1491,26 +1484,6 @@ ShaderModuleBase::ShaderModuleBase(DeviceBase* device,
     if (const auto* compileOptions = descriptor.Get<ShaderModuleCompilationOptions>()) {
         mStrictMath = compileOptions->strictMath;
     }
-
-    ShaderModuleHasher hasher;
-    // Hash the metadata.
-    hasher.Update(mType);
-    // mStrictMath is a std::optional<bool>, and the bool value might not get initialized by default
-    // constructor and thus contains dirty data.
-    bool strictMathAssigned = mStrictMath.has_value();
-    bool strictMathValue = mStrictMath.value_or(false);
-    hasher.Update(strictMathAssigned);
-    hasher.Update(strictMathValue);
-    // mInternalExtensions is a length-variable vector, so we need to hash its size and its content
-    // if any.
-    hasher.Update(mInternalExtensions.size());
-    hasher.Update(mInternalExtensions.data(),
-                  mInternalExtensions.size() * sizeof(decltype(mInternalExtensions)::value_type));
-    // Hash the shader code and its size.
-    hasher.Update(shaderCodeByteSize);
-    hasher.Update(shaderCode, shaderCodeByteSize);
-
-    mHash = hasher.Finalize();
 }
 
 ShaderModuleBase::ShaderModuleBase(DeviceBase* device,
@@ -1575,22 +1548,17 @@ const EntryPointMetadata& ShaderModuleBase::GetEntryPoint(absl::string_view entr
 
 size_t ShaderModuleBase::ComputeContentHash() {
     ObjectContentHasher recorder;
-    // Use mHash to represent the source content, which includes shader source and metadata.
-    recorder.Record(mHash);
+    recorder.Record(mType);
+    recorder.Record(mOriginalSpirv);
+    recorder.Record(mWgsl);
+    recorder.Record(mStrictMath);
     return recorder.GetContentHash();
 }
 
 bool ShaderModuleBase::EqualityFunc::operator()(const ShaderModuleBase* a,
                                                 const ShaderModuleBase* b) const {
-    bool membersEq = a->mType == b->mType && a->mOriginalSpirv == b->mOriginalSpirv &&
-                     a->mWgsl == b->mWgsl && a->mStrictMath == b->mStrictMath;
-    // Assert that the hash is equal if and only if the members are equal.
-    DAWN_ASSERT(membersEq == (a->mHash == b->mHash));
-    return membersEq;
-}
-
-const ShaderModuleBase::ShaderModuleHash& ShaderModuleBase::GetHash() const {
-    return mHash;
+    return a->mType == b->mType && a->mOriginalSpirv == b->mOriginalSpirv && a->mWgsl == b->mWgsl &&
+           a->mStrictMath == b->mStrictMath;
 }
 
 ShaderModuleBase::ScopedUseTintProgram ShaderModuleBase::UseTintProgram() {

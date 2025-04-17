@@ -58,18 +58,17 @@ constexpr char kRemappedEntryPointName[] = "dawn_entry_point";
 using OptionalVertexPullingTransformConfig = std::optional<tint::VertexPullingConfig>;
 using SubstituteOverrideConfig = std::unordered_map<tint::OverrideId, double>;
 
-#define MSL_COMPILATION_REQUEST_MEMBERS(X)                                                \
-    X(SingleShaderStage, stage)                                                           \
-    X(ShaderModuleBase::ShaderModuleHash, shaderModuleHash)                               \
-    X(CacheKey::UnsafeUnkeyedValue<ShaderModuleBase::ScopedUseTintProgram>, inputProgram) \
-    X(SubstituteOverrideConfig, substituteOverrideConfig)                                 \
-    X(LimitsForCompilationRequest, limits)                                                \
-    X(CacheKey::UnsafeUnkeyedValue<LimitsForCompilationRequest>, adapterSupportedLimits)  \
-    X(uint32_t, maxSubgroupSize)                                                          \
-    X(std::string, entryPointName)                                                        \
-    X(bool, usesSubgroupMatrix)                                                           \
-    X(bool, disableSymbolRenaming)                                                        \
-    X(tint::msl::writer::Options, tintOptions)                                            \
+#define MSL_COMPILATION_REQUEST_MEMBERS(X)                                               \
+    X(SingleShaderStage, stage)                                                          \
+    X(const tint::Program*, inputProgram)                                                \
+    X(SubstituteOverrideConfig, substituteOverrideConfig)                                \
+    X(LimitsForCompilationRequest, limits)                                               \
+    X(CacheKey::UnsafeUnkeyedValue<LimitsForCompilationRequest>, adapterSupportedLimits) \
+    X(uint32_t, maxSubgroupSize)                                                         \
+    X(std::string, entryPointName)                                                       \
+    X(bool, usesSubgroupMatrix)                                                          \
+    X(bool, disableSymbolRenaming)                                                       \
+    X(tint::msl::writer::Options, tintOptions)                                           \
     X(CacheKey::UnsafeUnkeyedValue<dawn::platform::Platform*>, platform)
 
 DAWN_MAKE_CACHE_REQUEST(MslCompilationRequest, MSL_COMPILATION_REQUEST_MEMBERS);
@@ -272,8 +271,8 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
 
     MslCompilationRequest req = {};
     req.stage = stage;
-    req.shaderModuleHash = programmableStage.module->GetHash();
-    req.inputProgram = programmableStage.module->UseTintProgram();
+    auto tintProgram = programmableStage.module->GetTintProgram();
+    req.inputProgram = &(tintProgram->program);
     req.substituteOverrideConfig = std::move(substituteOverrideConfig);
     req.entryPointName = programmableStage.entryPoint.c_str();
     req.disableSymbolRenaming = device->IsToggleEnabled(Toggle::DisableSymbolRenaming);
@@ -308,11 +307,8 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
         mslCompilation, device, std::move(req), MslCompilation::FromBlob,
         [](MslCompilationRequest r) -> ResultOrError<MslCompilation> {
             TRACE_EVENT0(r.platform.UnsafeGetValue(), General, "tint::msl::writer::Generate");
-            // Requires Tint Program here right before actual using.
-            auto inputProgram = r.inputProgram.UnsafeGetValue()->GetTintProgram();
-            const tint::Program* tintInputProgram = &(inputProgram->program);
             // Convert the AST program to an IR module.
-            auto ir = tint::wgsl::reader::ProgramToLoweredIR(*tintInputProgram);
+            auto ir = tint::wgsl::reader::ProgramToLoweredIR(*r.inputProgram);
             DAWN_INVALID_IF(ir != tint::Success, "An error occurred while generating Tint IR\n%s",
                             ir.Failure().reason);
 
