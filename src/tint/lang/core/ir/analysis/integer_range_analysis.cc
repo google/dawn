@@ -334,65 +334,117 @@ struct IntegerRangeAnalysisImpl {
                 return nullptr;
         }
 
-        // Early-return when the comparison will never return true.
-        if (op == BinaryOp::kLessThan) {
-            if (IsConstantInteger(lhs)) {
-                // std::numeric_limits<uint32_t>::max() < idx
-                if (lhs->As<Constant>()->Value()->Type()->IsUnsignedIntegerScalar() &&
-                    lhs->As<Constant>()->Value()->ValueAs<uint32_t>() ==
-                        std::numeric_limits<uint32_t>::max()) {
-                    return nullptr;
+        const bool is_signed = lhs->Type()->IsSignedIntegerScalar();
+        auto const_i32 = [](const Value* val) {
+            return val->As<Constant>()->Value()->ValueAs<int32_t>();
+        };
+        auto const_u32 = [](const Value* val) {
+            return val->As<Constant>()->Value()->ValueAs<uint32_t>();
+        };
+
+        // We should early return when the comparison will never return true.
+        // e.g.
+        // for (...; i < 0u; ...)  // The loop body will never be executed.
+        // We should also early return when the comparison will always return true, which means the
+        // loop exit condition takes no effect and the loop control variable can actually take all
+        // the numbers.
+        // e.g.
+        // for (i = 100u; i >= 0u; i--) // `i` can be any u32 value instead of [0u, 100u]
+        switch (op) {
+            case BinaryOp::kLessThan: {
+                if (IsConstantInteger(lhs)) {
+                    // std::numeric_limits<uint32_t>::max() < idx
+                    if (!is_signed && const_u32(lhs) == u32::kHighestValue) {
+                        return nullptr;
+                    }
+                    // std::numeric_limits<int32_t>::max() < idx
+                    if (is_signed && const_i32(lhs) == i32::kHighestValue) {
+                        return nullptr;
+                    }
+                } else {
+                    TINT_ASSERT(IsConstantInteger(rhs));
+                    // idx < std::numeric_limits<uint32_t>::min()
+                    if (!is_signed && const_u32(rhs) == u32::kLowestValue) {
+                        return nullptr;
+                    }
+                    // idx < std::numeric_limits<int32_t>::min()
+                    if (is_signed && const_i32(rhs) == i32::kLowestValue) {
+                        return nullptr;
+                    }
                 }
-                // std::numeric_limits<int32_t>::max() < idx
-                if (lhs->As<Constant>()->Value()->Type()->IsSignedIntegerScalar() &&
-                    lhs->As<Constant>()->Value()->ValueAs<int32_t>() ==
-                        std::numeric_limits<int32_t>::max()) {
-                    return nullptr;
-                }
-            } else {
-                TINT_ASSERT(IsConstantInteger(rhs));
-                // idx < 0u
-                if (rhs->As<Constant>()->Value()->Type()->IsUnsignedIntegerScalar() &&
-                    rhs->As<Constant>()->Value()->ValueAs<uint32_t>() ==
-                        std::numeric_limits<uint32_t>::min()) {
-                    return nullptr;
-                }
-                // idx < std::numeric_limits<int32_t>::min()
-                if (rhs->As<Constant>()->Value()->Type()->IsSignedIntegerScalar() &&
-                    rhs->As<Constant>()->Value()->ValueAs<int32_t>() ==
-                        std::numeric_limits<int32_t>::min()) {
-                    return nullptr;
-                }
+                break;
             }
-        } else if (op == BinaryOp::kGreaterThan) {
-            if (IsConstantInteger(lhs)) {
-                // std::numeric_limits<uint32_t>::min() > idx
-                if (lhs->As<Constant>()->Value()->Type()->IsUnsignedIntegerScalar() &&
-                    lhs->As<Constant>()->Value()->ValueAs<uint32_t>() ==
-                        std::numeric_limits<uint32_t>::min()) {
-                    return nullptr;
+            case BinaryOp::kGreaterThan: {
+                if (IsConstantInteger(lhs)) {
+                    // std::numeric_limits<uint32_t>::min() > idx
+                    if (!is_signed && const_u32(lhs) == u32::kLowestValue) {
+                        return nullptr;
+                    }
+                    // std::numeric_limits<int32_t>::min() > idx
+                    if (is_signed && const_i32(lhs) == i32::kLowestValue) {
+                        return nullptr;
+                    }
+                } else {
+                    TINT_ASSERT(IsConstantInteger(rhs));
+                    // idx > std::numeric_limits<uint32_t>::max()
+                    if (!is_signed && const_u32(rhs) == u32::kHighestValue) {
+                        return nullptr;
+                    }
+                    // idx > std::numeric_limits<int32_t>::max()
+                    if (is_signed && const_i32(rhs) == i32::kHighestValue) {
+                        return nullptr;
+                    }
                 }
-                // std::numeric_limits<int32_t>::min() > idx
-                if (lhs->As<Constant>()->Value()->Type()->IsSignedIntegerScalar() &&
-                    lhs->As<Constant>()->Value()->ValueAs<int32_t>() ==
-                        std::numeric_limits<int32_t>::min()) {
-                    return nullptr;
-                }
-            } else {
-                TINT_ASSERT(IsConstantInteger(rhs));
-                // idx > std::numeric_limits<uint32_t>::max()
-                if (rhs->As<Constant>()->Value()->Type()->IsUnsignedIntegerScalar() &&
-                    rhs->As<Constant>()->Value()->ValueAs<uint32_t>() ==
-                        std::numeric_limits<uint32_t>::max()) {
-                    return nullptr;
-                }
-                // idx > std::numeric_limits<int32_t>::max()
-                if (rhs->As<Constant>()->Value()->Type()->IsSignedIntegerScalar() &&
-                    rhs->As<Constant>()->Value()->ValueAs<int32_t>() ==
-                        std::numeric_limits<int32_t>::max()) {
-                    return nullptr;
-                }
+                break;
             }
+            case BinaryOp::kLessThanEqual: {
+                if (IsConstantInteger(lhs)) {
+                    // std::numeric_limits<uint32_t>::min() <= idx
+                    if (!is_signed && const_u32(lhs) == u32::kLowestValue) {
+                        return nullptr;
+                    }
+                    // std::numeric_limits<int32_t>::min() <= idx
+                    if (is_signed && const_i32(lhs) == i32::kLowestValue) {
+                        return nullptr;
+                    }
+                } else {
+                    TINT_ASSERT(IsConstantInteger(rhs));
+                    // idx <= std::numeric_limits<uint32_t>::max()
+                    if (!is_signed && const_u32(rhs) == u32::kHighestValue) {
+                        return nullptr;
+                    }
+                    // idx <= std::numeric_limits<int32_t>::max()
+                    if (is_signed && const_i32(rhs) == i32::kHighestValue) {
+                        return nullptr;
+                    }
+                }
+                break;
+            }
+            case BinaryOp::kGreaterThanEqual: {
+                if (IsConstantInteger(lhs)) {
+                    // std::numeric_limits<uint32_t>::max() >= idx
+                    if (!is_signed && const_u32(lhs) == u32::kHighestValue) {
+                        return nullptr;
+                    }
+                    // std::numeric_limits<int32_t>::max() >= idx
+                    if (is_signed && const_i32(lhs) == i32::kHighestValue) {
+                        return nullptr;
+                    }
+                } else {
+                    TINT_ASSERT(IsConstantInteger(rhs));
+                    // idx >= std::numeric_limits<uint32_t>::min()
+                    if (!is_signed && const_u32(rhs) == u32::kLowestValue) {
+                        return nullptr;
+                    }
+                    // idx >= std::numeric_limits<int32_t>::min()
+                    if (is_signed && const_i32(rhs) == i32::kLowestValue) {
+                        return nullptr;
+                    }
+                }
+                break;
+            }
+            default:
+                TINT_UNREACHABLE();
         }
 
         // 3rd instruction:
