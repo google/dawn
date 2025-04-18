@@ -38,7 +38,6 @@
 #include "dawn/native/Forward.h"
 #include "dawn/native/IntegerTypes.h"
 #include "dawn/native/ObjectBase.h"
-#include "dawn/native/SystemEvent.h"
 #include "partition_alloc/pointers/raw_ptr.h"
 
 #include "dawn/native/DawnNative.h"
