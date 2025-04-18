@@ -29,7 +29,6 @@
 
 #include <algorithm>
 #include <functional>
-#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -59,186 +58,199 @@ struct TrackedFutureWaitInfo {
     bool ready;
 };
 
-// Wrapper around an iterator to yield event specific objects and a pointer
-// to the ready bool. We pass this into helpers so that they can extract
-// the event specific objects and get pointers to the ready status - without
-// allocating duplicate storage to store the objects and ready bools.
-template <typename Traits>
-class WrappingIterator {
+// Wrapper around an iterator to yield system event receiver and a pointer
+// to the ready bool. We pass this into WaitAnySystemEvent so it can extract
+// the receivers and get pointers to the ready status - without allocating
+// duplicate storage to store the receivers and ready bools.
+class SystemEventAndReadyStateIterator {
   public:
+    using WrappedIter = std::vector<TrackedFutureWaitInfo>::iterator;
+
     // Specify required iterator traits.
-    using value_type = typename Traits::value_type;
-    using difference_type = typename Traits::WrappedIter::difference_type;
-    using iterator_category = typename Traits::WrappedIter::iterator_category;
+    using value_type = std::pair<const SystemEventReceiver&, bool*>;
+    using difference_type = typename WrappedIter::difference_type;
+    using iterator_category = typename WrappedIter::iterator_category;
     using pointer = value_type*;
     using reference = value_type&;
 
-    WrappingIterator() = default;
-    WrappingIterator(const WrappingIterator&) = default;
-    WrappingIterator& operator=(const WrappingIterator&) = default;
+    SystemEventAndReadyStateIterator() = default;
+    SystemEventAndReadyStateIterator(const SystemEventAndReadyStateIterator&) = default;
+    SystemEventAndReadyStateIterator& operator=(const SystemEventAndReadyStateIterator&) = default;
 
-    explicit WrappingIterator(typename Traits::WrappedIter wrappedIt) : mWrappedIt(wrappedIt) {}
+    explicit SystemEventAndReadyStateIterator(WrappedIter wrappedIt) : mWrappedIt(wrappedIt) {}
 
-    bool operator!=(const WrappingIterator& rhs) const { return rhs.mWrappedIt != mWrappedIt; }
-    bool operator==(const WrappingIterator& rhs) const { return rhs.mWrappedIt == mWrappedIt; }
-
-    difference_type operator-(const WrappingIterator& rhs) const {
+    bool operator!=(const SystemEventAndReadyStateIterator& rhs) const {
+        return rhs.mWrappedIt != mWrappedIt;
+    }
+    bool operator==(const SystemEventAndReadyStateIterator& rhs) const {
+        return rhs.mWrappedIt == mWrappedIt;
+    }
+    difference_type operator-(const SystemEventAndReadyStateIterator& rhs) const {
         return mWrappedIt - rhs.mWrappedIt;
     }
 
-    WrappingIterator operator+(difference_type rhs) const {
-        return WrappingIterator{mWrappedIt + rhs};
+    SystemEventAndReadyStateIterator operator+(difference_type rhs) const {
+        return SystemEventAndReadyStateIterator{mWrappedIt + rhs};
     }
 
-    WrappingIterator& operator++() {
+    SystemEventAndReadyStateIterator& operator++() {
         ++mWrappedIt;
         return *this;
     }
 
-    value_type operator*() { return Traits::Deref(mWrappedIt); }
-
-  private:
-    typename Traits::WrappedIter mWrappedIt;
-};
-
-struct ExtractSystemEventAndReadyStateTraits {
-    using WrappedIter = std::vector<TrackedFutureWaitInfo>::iterator;
-    using value_type = std::pair<const SystemEventReceiver&, bool*>;
-
-    static value_type Deref(const WrappedIter& wrappedIt) {
-        if (auto event = wrappedIt->event->GetIfWaitListEvent()) {
-            return {event->WaitAsync(), &wrappedIt->ready};
-        }
-        DAWN_ASSERT(wrappedIt->event->GetIfSystemEvent());
+    value_type operator*() {
         return {
-            wrappedIt->event->GetIfSystemEvent()->GetOrCreateSystemEventReceiver(),
-            &wrappedIt->ready,
+            std::get<Ref<SystemEvent>>(mWrappedIt->event->GetCompletionData())
+                ->GetOrCreateSystemEventReceiver(),
+            &mWrappedIt->ready,
         };
     }
+
+  private:
+    WrappedIter mWrappedIt;
 };
 
-using SystemEventAndReadyStateIterator = WrappingIterator<ExtractSystemEventAndReadyStateTraits>;
-
-struct ExtractWaitListEventAndReadyStateTraits {
-    using WrappedIter = std::vector<TrackedFutureWaitInfo>::iterator;
-    using value_type = std::pair<Ref<WaitListEvent>, bool*>;
-
-    static value_type Deref(const WrappedIter& wrappedIt) {
-        DAWN_ASSERT(wrappedIt->event->GetIfWaitListEvent());
-        return {wrappedIt->event->GetIfWaitListEvent(), &wrappedIt->ready};
-    }
-};
-
-using WaitListEventAndReadyStateIterator =
-    WrappingIterator<ExtractWaitListEventAndReadyStateTraits>;
-
-// Returns true if at least one future is ready.
-bool PollFutures(std::vector<TrackedFutureWaitInfo>& futures) {
+// Wait/poll the queue for futures in range [begin, end). `waitSerial` should be
+// the serial after which at least one future should be complete. All futures must
+// have completion data of type QueueAndSerial.
+// Returns true if at least one future is ready. If no futures are ready or the wait
+// timed out, returns false.
+bool WaitQueueSerialsImpl(DeviceBase* device,
+                          QueueBase* queue,
+                          ExecutionSerial waitSerial,
+                          std::vector<TrackedFutureWaitInfo>::iterator begin,
+                          std::vector<TrackedFutureWaitInfo>::iterator end,
+                          Nanoseconds timeout) {
     bool success = false;
-    for (auto& future : futures) {
-        if (future.event->IsReadyToComplete()) {
-            success = true;
-            future.ready = true;
+    // TODO(dawn:1662): Make error handling thread-safe.
+    auto deviceLock(device->GetScopedLock());
+    if (device->ConsumedError([&]() -> MaybeError {
+            if (waitSerial > queue->GetLastSubmittedCommandSerial()) {
+                // Serial has not been submitted yet. Submit it now.
+                // TODO(dawn:1413): This doesn't need to be a full tick. It just needs to
+                // flush work up to `waitSerial`. This should be done after the
+                // ExecutionQueue / ExecutionContext refactor.
+                queue->ForceEventualFlushOfCommands();
+                DAWN_TRY(device->Tick());
+            }
+            // Check the completed serial.
+            ExecutionSerial completedSerial = queue->GetCompletedCommandSerial();
+            if (completedSerial < waitSerial) {
+                if (timeout > Nanoseconds(0)) {
+                    // Wait on the serial if it hasn't passed yet.
+                    DAWN_TRY_ASSIGN(success, queue->WaitForQueueSerial(waitSerial, timeout));
+                }
+                // Update completed serials.
+                DAWN_TRY(queue->CheckPassedSerials());
+                completedSerial = queue->GetCompletedCommandSerial();
+            }
+            // Poll futures for completion.
+            for (auto it = begin; it != end; ++it) {
+                ExecutionSerial serial =
+                    std::get<QueueAndSerial>(it->event->GetCompletionData()).completionSerial;
+                if (serial <= completedSerial) {
+                    success = true;
+                    it->ready = true;
+                }
+            }
+            return {};
+        }())) {
+        // There was an error. Pending submit may have failed or waiting for fences
+        // may have lost the device. The device is lost inside ConsumedError.
+        // Mark all futures as ready.
+        for (auto it = begin; it != end; ++it) {
+            it->ready = true;
         }
+        success = true;
     }
     return success;
-}
-
-// Wait/poll queues with given `timeout`. `queueWaitSerials` should contain per queue, the serial up
-// to which we should flush the queue if needed.
-using QueueWaitSerialsMap = absl::flat_hash_map<QueueBase*, ExecutionSerial>;
-void WaitQueueSerials(const QueueWaitSerialsMap& queueWaitSerials, Nanoseconds timeout) {
-    // TODO(dawn:1662): Make error handling thread-safe.
-    // Poll/wait on queues up to the lowest wait serial, but do this once per queue instead of
-    // per event so that events with same serial complete at the same time instead of racing.
-    for (const auto& queueAndSerial : queueWaitSerials) {
-        auto* queue = queueAndSerial.first;
-        auto waitSerial = queueAndSerial.second;
-
-        auto* device = queue->GetDevice();
-        auto deviceLock(device->GetScopedLock());
-
-        [[maybe_unused]] bool error = device->ConsumedError(
-            [&]() -> MaybeError {
-                if (waitSerial > queue->GetLastSubmittedCommandSerial()) {
-                    // Serial has not been submitted yet. Submit it now.
-                    DAWN_TRY(queue->EnsureCommandsFlushed(waitSerial));
-                }
-                // Check the completed serial.
-                if (waitSerial > queue->GetCompletedCommandSerial()) {
-                    if (timeout > Nanoseconds(0)) {
-                        // Wait on the serial if it hasn't passed yet.
-                        [[maybe_unused]] bool waitResult = false;
-                        DAWN_TRY_ASSIGN(waitResult, queue->WaitForQueueSerial(waitSerial, timeout));
-                    }
-                    // Update completed serials.
-                    DAWN_TRY(queue->CheckPassedSerials());
-                }
-                return {};
-            }(),
-            "waiting for work in %s.", queue);
-    }
 }
 
 // We can replace the std::vector& when std::span is available via C++20.
 wgpu::WaitStatus WaitImpl(const InstanceBase* instance,
                           std::vector<TrackedFutureWaitInfo>& futures,
                           Nanoseconds timeout) {
-    bool foundSystemEvent = false;
-    bool foundWaitListEvent = false;
-    QueueWaitSerialsMap queueLowestWaitSerials;
+    auto begin = futures.begin();
+    const auto end = futures.end();
+    bool anySuccess = false;
+    // The following loop will partition [begin, end) based on the type of wait is required.
+    // After each partition, it will wait/poll on the first partition, then advance `begin`
+    // to the start of the next partition. Note that for timeout > 0 and unsupported mixed
+    // sources, we validate that there is a single partition. If there is only one, then the
+    // loop runs only once and the timeout does not stack.
+    while (begin != end) {
+        const auto& first = begin->event->GetCompletionData();
 
-    for (const auto& future : futures) {
-        if (future.event->GetIfSystemEvent()) {
-            foundSystemEvent = true;
+        DeviceBase* waitDevice;
+        ExecutionSerial lowestWaitSerial;
+        if (std::holds_alternative<Ref<SystemEvent>>(first)) {
+            waitDevice = nullptr;
+        } else {
+            const auto& queueAndSerial = std::get<QueueAndSerial>(first);
+            waitDevice = queueAndSerial.queue->GetDevice();
+            lowestWaitSerial = queueAndSerial.completionSerial;
         }
-        if (future.event->GetIfWaitListEvent()) {
-            foundWaitListEvent = true;
-        }
-        if (const auto* queueAndSerial = future.event->GetIfQueueAndSerial()) {
-            auto [it, inserted] = queueLowestWaitSerials.insert(
-                {queueAndSerial->queue.Get(), queueAndSerial->completionSerial});
-            if (!inserted) {
-                it->second = std::min(it->second, queueAndSerial->completionSerial);
+        // Partition the remaining futures based on whether they match the same completion
+        // data type as the first. Also keep track of the lowest wait serial.
+        const auto mid =
+            std::partition(std::next(begin), end, [&](const TrackedFutureWaitInfo& info) {
+                const auto& completionData = info.event->GetCompletionData();
+                if (std::holds_alternative<Ref<SystemEvent>>(completionData)) {
+                    return waitDevice == nullptr;
+                } else {
+                    const auto& queueAndSerial = std::get<QueueAndSerial>(completionData);
+                    if (waitDevice == queueAndSerial.queue->GetDevice()) {
+                        lowestWaitSerial =
+                            std::min(lowestWaitSerial, queueAndSerial.completionSerial);
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+            });
+
+        // There's a mix of wait sources if partition yielded an iterator that is not at the end.
+        if (mid != end) {
+            if (timeout > Nanoseconds(0)) {
+                // Multi-source wait is unsupported.
+                // TODO(dawn:2062): Implement support for this when the device supports it.
+                // It should eventually gather the lowest serial from the queue(s), transform them
+                // into completion events, and wait on all of the events. Then for any queues that
+                // saw a completion, poll all futures related to that queue for completion.
+                instance->EmitLog(WGPULoggingType_Error,
+                                  "Mixed source waits with timeouts are not currently supported.");
+                return wgpu::WaitStatus::Error;
             }
         }
-    }
 
-    if (timeout == Nanoseconds(0)) {
-        // This is a no-op if `queueLowestWaitSerials` is empty.
-        WaitQueueSerials(queueLowestWaitSerials, timeout);
-        return PollFutures(futures) ? wgpu::WaitStatus::Success : wgpu::WaitStatus::TimedOut;
-    }
+        bool success;
+        if (waitDevice) {
+            success = WaitQueueSerialsImpl(waitDevice, std::get<QueueAndSerial>(first).queue.Get(),
+                                           lowestWaitSerial, begin, mid, timeout);
+        } else {
+            if (timeout > Nanoseconds(0)) {
+                success = WaitAnySystemEvent(SystemEventAndReadyStateIterator{begin},
+                                             SystemEventAndReadyStateIterator{mid}, timeout);
+            } else {
+                // Poll the completion events.
+                success = false;
+                for (auto it = begin; it != mid; ++it) {
+                    if (std::get<Ref<SystemEvent>>(it->event->GetCompletionData())->IsSignaled()) {
+                        it->ready = true;
+                        success = true;
+                    }
+                }
+            }
+        }
+        anySuccess |= success;
 
-    // We can't have a mix of system/wait-list events and queue-serial events or queue-serial events
-    // from multiple queues with a non-zero timeout.
-    if (queueLowestWaitSerials.size() > 1 ||
-        (!queueLowestWaitSerials.empty() && (foundWaitListEvent || foundSystemEvent))) {
-        // Multi-source wait is unsupported.
-        // TODO(dawn:2062): Implement support for this when the device supports it.
-        // It should eventually gather the lowest serial from the queue(s), transform them
-        // into completion events, and wait on all of the events. Then for any queues that
-        // saw a completion, poll all futures related to that queue for completion.
-        instance->EmitLog(WGPULoggingType_Error,
-                          "Mixed source waits with timeouts are not currently supported.");
-        return wgpu::WaitStatus::Error;
+        // Advance the iterator to the next partition.
+        begin = mid;
     }
-
-    bool success = false;
-    if (foundSystemEvent) {
-        // Can upgrade wait list events to system events.
-        success = WaitAnySystemEvent(SystemEventAndReadyStateIterator{futures.begin()},
-                                     SystemEventAndReadyStateIterator{futures.end()}, timeout);
-    } else if (foundWaitListEvent) {
-        success =
-            WaitListEvent::WaitAny(WaitListEventAndReadyStateIterator{futures.begin()},
-                                   WaitListEventAndReadyStateIterator{futures.end()}, timeout);
-    } else {
-        // This is a no-op if `queueLowestWaitSerials` is empty.
-        WaitQueueSerials(queueLowestWaitSerials, timeout);
-        success = PollFutures(futures);
+    if (!anySuccess) {
+        return wgpu::WaitStatus::TimedOut;
     }
-    return success ? wgpu::WaitStatus::Success : wgpu::WaitStatus::TimedOut;
+    return wgpu::WaitStatus::Success;
 }
 
 // Reorder callbacks to enforce callback ordering required by the spec.
@@ -315,7 +327,17 @@ FutureID EventManager::TrackEvent(Ref<TrackedEvent>&& event) {
 
     // Handle the event now if it's spontaneous and ready.
     if (event->mCallbackMode == wgpu::CallbackMode::AllowSpontaneous) {
-        if (event->IsReadyToComplete()) {
+        bool isReady = false;
+        auto completionData = event->GetCompletionData();
+        if (std::holds_alternative<Ref<SystemEvent>>(completionData)) {
+            isReady = std::get<Ref<SystemEvent>>(completionData)->IsSignaled();
+        }
+        if (std::holds_alternative<QueueAndSerial>(completionData)) {
+            auto& queueAndSerial = std::get<QueueAndSerial>(completionData);
+            isReady = queueAndSerial.completionSerial <=
+                      queueAndSerial.queue->GetCompletedCommandSerial();
+        }
+        if (isReady) {
             event->EnsureComplete(EventCompletionType::Ready);
             return futureID;
         }
@@ -338,14 +360,21 @@ FutureID EventManager::TrackEvent(Ref<TrackedEvent>&& event) {
 }
 
 void EventManager::SetFutureReady(TrackedEvent* event) {
+    auto completionData = event->GetCompletionData();
+    if (std::holds_alternative<Ref<SystemEvent>>(completionData)) {
+        std::get<Ref<SystemEvent>>(completionData)->Signal();
+    }
+    if (std::holds_alternative<QueueAndSerial>(completionData)) {
+        auto& queueAndSerial = std::get<QueueAndSerial>(completionData);
+        queueAndSerial.completionSerial = queueAndSerial.queue->GetCompletedCommandSerial();
+    }
+
     // Sometimes, events might become ready before they are even tracked. This can happen because
     // tracking is ordered to uphold callback ordering, but events may become ready in any order. If
     // the event is spontaneous, it will be completed when it is tracked.
     if (event->mFutureID == kNullFutureID) {
         return;
     }
-
-    event->SetReadyToComplete();
 
     // Handle spontaneous completion now.
     if (event->mCallbackMode == wgpu::CallbackMode::AllowSpontaneous) {
@@ -377,7 +406,11 @@ bool EventManager::ProcessPollEvents() {
                 // Figure out if there are any progressing events. If we only have non-progressing
                 // events, we need to return false to indicate that there isn't any polling work to
                 // be done.
-                if (event->IsProgressing()) {
+                auto completionData = event->GetCompletionData();
+                if (std::holds_alternative<Ref<SystemEvent>>(completionData)) {
+                    hasProgressingEvents |=
+                        std::get<Ref<SystemEvent>>(completionData)->IsProgressing();
+                } else {
                     hasProgressingEvents = true;
                 }
 
@@ -505,10 +538,6 @@ wgpu::WaitStatus EventManager::WaitAny(size_t count, FutureWaitInfo* infos, Nano
 // EventManager::TrackedEvent
 
 EventManager::TrackedEvent::TrackedEvent(wgpu::CallbackMode callbackMode,
-                                         Ref<WaitListEvent> completionEvent)
-    : mCallbackMode(callbackMode), mCompletionData(std::move(completionEvent)) {}
-
-EventManager::TrackedEvent::TrackedEvent(wgpu::CallbackMode callbackMode,
                                          Ref<SystemEvent> completionEvent)
     : mCallbackMode(callbackMode), mCompletionData(std::move(completionEvent)) {}
 
@@ -518,14 +547,7 @@ EventManager::TrackedEvent::TrackedEvent(wgpu::CallbackMode callbackMode,
     : mCallbackMode(callbackMode), mCompletionData(QueueAndSerial{queue, completionSerial}) {}
 
 EventManager::TrackedEvent::TrackedEvent(wgpu::CallbackMode callbackMode, Completed tag)
-    : mCallbackMode(callbackMode), mCompletionData(AcquireRef(new WaitListEvent())) {
-    GetIfWaitListEvent()->Signal();
-}
-
-EventManager::TrackedEvent::TrackedEvent(wgpu::CallbackMode callbackMode, NonProgressing tag)
-    : mCallbackMode(callbackMode),
-      mCompletionData(AcquireRef(new WaitListEvent())),
-      mIsProgressing(false) {}
+    : TrackedEvent(callbackMode, SystemEvent::CreateSignaled()) {}
 
 EventManager::TrackedEvent::~TrackedEvent() {
     DAWN_ASSERT(mFutureID != kNullFutureID);
@@ -536,31 +558,9 @@ Future EventManager::TrackedEvent::GetFuture() const {
     return {mFutureID};
 }
 
-bool EventManager::TrackedEvent::IsReadyToComplete() const {
-    bool isReady = false;
-    if (auto event = GetIfSystemEvent()) {
-        isReady = event->IsSignaled();
-    }
-    if (auto event = GetIfWaitListEvent()) {
-        isReady = event->IsSignaled();
-    }
-    if (const auto* queueAndSerial = GetIfQueueAndSerial()) {
-        isReady =
-            queueAndSerial->completionSerial <= queueAndSerial->queue->GetCompletedCommandSerial();
-    }
-    return isReady;
-}
-
-void EventManager::TrackedEvent::SetReadyToComplete() {
-    if (auto event = GetIfSystemEvent()) {
-        event->Signal();
-    }
-    if (auto event = GetIfWaitListEvent()) {
-        event->Signal();
-    }
-    if (auto* queueAndSerial = std::get_if<QueueAndSerial>(&mCompletionData)) {
-        queueAndSerial->completionSerial = queueAndSerial->queue->GetCompletedCommandSerial();
-    }
+const EventManager::TrackedEvent::CompletionData& EventManager::TrackedEvent::GetCompletionData()
+    const {
+    return mCompletionData;
 }
 
 void EventManager::TrackedEvent::EnsureComplete(EventCompletionType completionType) {

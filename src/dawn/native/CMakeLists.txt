@@ -153,7 +153,6 @@ set(private_headers
     "ValidationUtils.h"
     "VisitableMembers.h"
     "WaitAnySystemEvent.h"
-    "WaitListEvent.h"
     "webgpu_absl_format.h"
 )
 
@@ -254,7 +253,6 @@ set(sources
     "Toggles.cpp"
     "utils/WGPUHelpers.cpp"
     "ValidationUtils.cpp"
-    "WaitListEvent.cpp"
     "webgpu_absl_format.cpp"
 )
 
