@@ -693,10 +693,6 @@ size_t TogglesSet::Count() const {
     return bitset.count();
 }
 
-TogglesSet::Iterator TogglesSet::Iterate() const {
-    return IterateBitSet(bitset);
-}
-
 TogglesState::TogglesState(ToggleStage stage) : mStage(stage) {}
 
 TogglesState TogglesState::CreateFromTogglesDescriptor(const DawnTogglesDescriptor* togglesDesc,
@@ -743,7 +739,7 @@ TogglesState& TogglesState::InheritFrom(const TogglesState& inheritedToggles) {
     // be force-set in the result toggles state, and all toggles that are set in the inherited
     // toggles states and not required in current toggles state would be set in the result toggles
     // state.
-    for (uint32_t i : inheritedToggles.mTogglesSet.Iterate()) {
+    for (uint32_t i : inheritedToggles.mTogglesSet) {
         const Toggle& toggle = static_cast<Toggle>(i);
         DAWN_ASSERT(TogglesInfo::GetToggleInfo(toggle)->stage < mStage);
         bool isEnabled = inheritedToggles.mEnabledToggles.Has(toggle);
@@ -815,7 +811,7 @@ std::vector<const char*> TogglesState::GetEnabledToggleNames() const {
     std::vector<const char*> enabledTogglesName(mEnabledToggles.Count());
 
     uint32_t index = 0;
-    for (uint32_t i : mEnabledToggles.Iterate()) {
+    for (uint32_t i : mEnabledToggles) {
         const Toggle& toggle = static_cast<Toggle>(i);
         // All enabled toggles must be provided.
         DAWN_ASSERT(mTogglesSet.Has(toggle));
@@ -831,7 +827,7 @@ std::vector<const char*> TogglesState::GetDisabledToggleNames() const {
     std::vector<const char*> enabledTogglesName(mTogglesSet.Count() - mEnabledToggles.Count());
 
     uint32_t index = 0;
-    for (uint32_t i : mTogglesSet.Iterate()) {
+    for (uint32_t i : mTogglesSet) {
         const Toggle& toggle = static_cast<Toggle>(i);
         // Disabled toggles are those provided but not enabled.
         if (!mEnabledToggles.Has(toggle)) {

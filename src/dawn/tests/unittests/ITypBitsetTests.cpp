@@ -243,7 +243,7 @@ TEST_F(ITypBitsetIteratorTest, Iterator) {
     }
 
     std::set<IntegerT> readValues;
-    for (IntegerT bit : IterateBitSet(mStateBits)) {
+    for (IntegerT bit : mStateBits) {
         EXPECT_EQ(1u, originalValues.count(bit));
         EXPECT_EQ(0u, readValues.count(bit));
         readValues.insert(bit);
@@ -257,7 +257,7 @@ TEST_F(ITypBitsetIteratorTest, EmptySet) {
     // We don't use the FAIL gtest macro here since it returns immediately,
     // causing an unreachable code warning in MSVC
     bool sawBit = false;
-    for ([[maybe_unused]] IntegerT bit : IterateBitSet(mStateBits)) {
+    for ([[maybe_unused]] IntegerT bit : mStateBits) {
         sawBit = true;
     }
     EXPECT_FALSE(sawBit);
@@ -279,7 +279,74 @@ TEST_F(ITypBitsetIteratorTest, NonLValueBitset) {
 
     std::set<IntegerT> seenBits;
 
-    for (IntegerT bit : IterateBitSet(mStateBits & otherBits)) {
+    for (IntegerT bit : mStateBits& otherBits) {
+        EXPECT_EQ(0u, seenBits.count(bit));
+        seenBits.insert(bit);
+        EXPECT_TRUE(mStateBits[bit]);
+        EXPECT_TRUE(otherBits[bit]);
+    }
+
+    EXPECT_EQ((mStateBits & otherBits).count(), seenBits.size());
+}
+
+class EnumBitSetIteratorTest : public testing::Test {
+  protected:
+    enum class TestEnum { A, B, C, D, E, F, G, H, I, J, EnumCount };
+
+    static constexpr size_t kEnumCount = static_cast<size_t>(TestEnum::EnumCount);
+    ityp::bitset<TestEnum, kEnumCount> mStateBits;
+};
+
+// Simple iterator test.
+TEST_F(EnumBitSetIteratorTest, Iterator) {
+    std::set<TestEnum> originalValues;
+    originalValues.insert(TestEnum::B);
+    originalValues.insert(TestEnum::F);
+    originalValues.insert(TestEnum::C);
+    originalValues.insert(TestEnum::I);
+
+    for (TestEnum value : originalValues) {
+        mStateBits.set(value);
+    }
+
+    std::set<TestEnum> readValues;
+    for (TestEnum bit : mStateBits) {
+        EXPECT_EQ(1u, originalValues.count(bit));
+        EXPECT_EQ(0u, readValues.count(bit));
+        readValues.insert(bit);
+    }
+
+    EXPECT_EQ(originalValues.size(), readValues.size());
+}
+
+// Test an empty iterator.
+TEST_F(EnumBitSetIteratorTest, EmptySet) {
+    // We don't use the FAIL gtest macro here since it returns immediately,
+    // causing an unreachable code warning in MSVC
+    bool sawBit = false;
+    for ([[maybe_unused]] TestEnum bit : mStateBits) {
+        sawBit = true;
+    }
+    EXPECT_FALSE(sawBit);
+}
+
+// Test iterating a result of combining two bitsets.
+TEST_F(EnumBitSetIteratorTest, NonLValueBitset) {
+    ityp::bitset<TestEnum, kEnumCount> otherBits;
+
+    mStateBits.set(TestEnum::B);
+    mStateBits.set(TestEnum::C);
+    mStateBits.set(TestEnum::D);
+    mStateBits.set(TestEnum::E);
+
+    otherBits.set(TestEnum::A);
+    otherBits.set(TestEnum::B);
+    otherBits.set(TestEnum::D);
+    otherBits.set(TestEnum::F);
+
+    std::set<TestEnum> seenBits;
+
+    for (TestEnum bit : mStateBits& otherBits) {
         EXPECT_EQ(0u, seenBits.count(bit));
         seenBits.insert(bit);
         EXPECT_TRUE(mStateBits[bit]);

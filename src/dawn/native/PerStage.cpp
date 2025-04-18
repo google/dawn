@@ -26,13 +26,12 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "dawn/native/PerStage.h"
-#include "dawn/common/BitSetIterator.h"
 
 namespace dawn::native {
 
-BitSetIterator<kNumStages, SingleShaderStage> IterateStages(wgpu::ShaderStage stages) {
-    std::bitset<kNumStages> bits(static_cast<uint32_t>(stages));
-    return BitSetIterator<kNumStages, SingleShaderStage>(bits);
+ityp::bitset<SingleShaderStage, kNumStages> IterateStages(wgpu::ShaderStage stages) {
+    ityp::bitset<SingleShaderStage, kNumStages> bits(static_cast<uint32_t>(stages));
+    return bits;
 }
 
 wgpu::ShaderStage StageBit(SingleShaderStage stage) {

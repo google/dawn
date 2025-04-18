@@ -48,7 +48,6 @@ set(private_headers
     "AlignedAlloc.h"
     "Alloc.h"
     "Assert.h"
-    "BitSetIterator.h"
     "Compiler.h"
     "Constants.h"
     "ContentLessObjectCache.h"
