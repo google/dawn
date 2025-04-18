@@ -549,9 +549,17 @@ interop::Promise<std::optional<interop::Interface<interop::GPUError>>> GPUDevice
         [ctx = std::move(ctx)](wgpu::PopErrorScopeStatus status, wgpu::ErrorType type,
                                wgpu::StringView message) {
             auto env = ctx->env;
-            if (status != wgpu::PopErrorScopeStatus::Success) {
-                ctx->promise.Reject(Errors::OperationError(env, std::string(message)));
-                return;
+            switch (status) {
+                case wgpu::PopErrorScopeStatus::Error:
+                    // PopErrorScope itself failed, e.g. the error scope stack was empty.
+                    ctx->promise.Reject(Errors::OperationError(env, std::string(message)));
+                    return;
+                case wgpu::PopErrorScopeStatus::CallbackCancelled:
+                    // The instance has been dropped. Shouldn't happen except maybe during shutdown.
+                    return;
+                case wgpu::PopErrorScopeStatus::Success:
+                    // This is the only case where `type` is set to a meaningful value.
+                    break;
             }
 
             switch (type) {
@@ -579,7 +587,10 @@ interop::Promise<std::optional<interop::Interface<interop::GPUError>>> GPUDevice
                     break;
                 }
                 case wgpu::ErrorType::Unknown:
-                    ctx->promise.Reject(Errors::OperationError(env, std::string(message)));
+                    // This error type is reserved for when translating an error type from a newer
+                    // implementation (e.g. the browser added a new error type) to another (e.g.
+                    // you're using an older version of Emscripten). It shouldn't happen in Dawn.
+                    assert(false);
                     break;
             }
         });
