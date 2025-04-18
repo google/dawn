@@ -33,7 +33,6 @@
 #include "dawn/native/Commands.h"
 #include "dawn/native/DynamicUploader.h"
 #include "dawn/native/MetalBackend.h"
-#include "dawn/native/WaitAnySystemEvent.h"
 #include "dawn/native/metal/CommandBufferMTL.h"
 #include "dawn/native/metal/DeviceMTL.h"
 #include "dawn/platform/DawnPlatform.h"
@@ -252,10 +251,9 @@ void Queue::ForceEventualFlushOfCommands() {
     }
 }
 
-Ref<SystemEvent> Queue::CreateWorkDoneSystemEvent(ExecutionSerial serial) {
-    Ref<SystemEvent> completionEvent = AcquireRef(new SystemEvent());
+Ref<WaitListEvent> Queue::CreateWorkDoneEvent(ExecutionSerial serial) {
+    Ref<WaitListEvent> completionEvent = AcquireRef(new WaitListEvent());
     mWaitingEvents.Use([&](auto events) {
-        SystemEventReceiver receiver;
         // Now that we hold the lock, check against mCompletedSerial before inserting.
         // This serial may have just completed. If it did, mark the event complete.
         // Also check for device loss. Otherwise, we could enqueue the event
@@ -273,11 +271,7 @@ Ref<SystemEvent> Queue::CreateWorkDoneSystemEvent(ExecutionSerial serial) {
 }
 
 ResultOrError<bool> Queue::WaitForQueueSerial(ExecutionSerial serial, Nanoseconds timeout) {
-    Ref<SystemEvent> event = CreateWorkDoneSystemEvent(serial);
-    bool ready = false;
-    std::array<std::pair<const dawn::native::SystemEventReceiver&, bool*>, 1> events{
-        {{event->GetOrCreateSystemEventReceiver(), &ready}}};
-    return WaitAnySystemEvent(events.begin(), events.end(), timeout);
+    return CreateWorkDoneEvent(serial)->Wait(timeout);
 }
 
 }  // namespace dawn::native::metal
