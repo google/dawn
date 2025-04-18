@@ -1063,17 +1063,12 @@ Extent3D TextureBase::GetSize(Aspect aspect) const {
             auto planeSize = mBaseSize;
             switch (GetFormat().subSampling) {
                 case TextureSubsampling::e420:
-                    if (planeSize.width > 1) {
-                        planeSize.width >>= 1;
-                    }
-                    if (planeSize.height > 1) {
-                        planeSize.height >>= 1;
-                    }
+                    // Divide by 2, rounding odd dimensions up.
+                    planeSize.width = (planeSize.width + 1) >> 1;
+                    planeSize.height = (planeSize.height + 1) >> 1;
                     break;
                 case TextureSubsampling::e422:
-                    if (planeSize.width > 1) {
-                        planeSize.width >>= 1;
-                    }
+                    planeSize.width = (planeSize.width + 1) >> 1;
                     break;
                 case TextureSubsampling::e444:
                     break;
