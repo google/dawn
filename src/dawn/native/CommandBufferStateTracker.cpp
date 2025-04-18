@@ -36,7 +36,6 @@
 #include "absl/container/flat_hash_map.h"
 #include "absl/container/inlined_vector.h"
 #include "dawn/common/Assert.h"
-#include "dawn/common/BitSetIterator.h"
 #include "dawn/native/BindGroup.h"
 #include "dawn/native/ComputePassEncoder.h"
 #include "dawn/native/ComputePipeline.h"
@@ -118,7 +117,7 @@ Return FindStorageBufferBindingAliasing(const PipelineLayoutBase* pipelineLayout
     absl::InlinedVector<const TextureViewBase*, 8> storageTextureViewsToCheck;
     absl::InlinedVector<std::pair<BindGroupIndex, BindingIndex>, 8> textureBindingIndices;
 
-    for (BindGroupIndex groupIndex : IterateBitSet(pipelineLayout->GetBindGroupLayoutsMask())) {
+    for (BindGroupIndex groupIndex : pipelineLayout->GetBindGroupLayoutsMask()) {
         BindGroupLayoutInternalBase* bgl = bindGroups[groupIndex]->GetLayout();
 
         for (BindingIndex bindingIndex{0}; bindingIndex < bgl->GetBufferCount(); ++bindingIndex) {
@@ -355,8 +354,7 @@ MaybeError CommandBufferStateTracker::ValidateNoDifferentTextureViewsOnSameTextu
     // TODO(dawn:1855): Look into optimizations as flat_hash_map does many allocations
     absl::flat_hash_map<const TextureBase*, VectorOfTextureViews> textureToViews;
 
-    for (BindGroupIndex groupIndex :
-         IterateBitSet(mLastPipelineLayout->GetBindGroupLayoutsMask())) {
+    for (BindGroupIndex groupIndex : mLastPipelineLayout->GetBindGroupLayoutsMask()) {
         BindGroupBase* bindGroup = mBindgroups[groupIndex];
         BindGroupLayoutInternalBase* bgl = bindGroup->GetLayout();
 
@@ -401,7 +399,7 @@ MaybeError CommandBufferStateTracker::ValidateBufferInRangeForVertexBuffer(uint3
     const auto& vertexBuffersUsedAsVertexBuffer =
         lastRenderPipeline->GetVertexBuffersUsedAsVertexBuffer();
 
-    for (auto usedSlotVertex : IterateBitSet(vertexBuffersUsedAsVertexBuffer)) {
+    for (auto usedSlotVertex : vertexBuffersUsedAsVertexBuffer) {
         const VertexBufferInfo& vertexBuffer = lastRenderPipeline->GetVertexBuffer(usedSlotVertex);
         uint64_t arrayStride = vertexBuffer.arrayStride;
         uint64_t bufferSize = mVertexBufferSizes[usedSlotVertex];
@@ -447,7 +445,7 @@ MaybeError CommandBufferStateTracker::ValidateBufferInRangeForInstanceBuffer(
     const auto& vertexBuffersUsedAsInstanceBuffer =
         lastRenderPipeline->GetVertexBuffersUsedAsInstanceBuffer();
 
-    for (auto usedSlotInstance : IterateBitSet(vertexBuffersUsedAsInstanceBuffer)) {
+    for (auto usedSlotInstance : vertexBuffersUsedAsInstanceBuffer) {
         const VertexBufferInfo& vertexBuffer =
             lastRenderPipeline->GetVertexBuffer(usedSlotInstance);
         uint64_t arrayStride = vertexBuffer.arrayStride;
@@ -522,7 +520,7 @@ void CommandBufferStateTracker::RecomputeLazyAspects(ValidationAspects aspects) 
     if (aspects[VALIDATION_ASPECT_BIND_GROUPS]) {
         bool matches = true;
 
-        for (BindGroupIndex i : IterateBitSet(mLastPipelineLayout->GetBindGroupLayoutsMask())) {
+        for (BindGroupIndex i : mLastPipelineLayout->GetBindGroupLayoutsMask()) {
             if (mBindgroups[i] == nullptr ||
                 !mLastPipelineLayout->GetFrontendBindGroupLayout(i)->IsLayoutEqual(
                     mBindgroups[i]->GetFrontendLayout()) ||
@@ -615,7 +613,7 @@ MaybeError CommandBufferStateTracker::CheckMissingAspects(ValidationAspects aspe
     if (aspects[VALIDATION_ASPECT_BIND_GROUPS]) {
         // TODO(crbug.com/dawn/2476): Validate TextureViewDescriptor YCbCrInfo matches with that in
         // SamplerDescriptor.
-        for (BindGroupIndex i : IterateBitSet(mLastPipelineLayout->GetBindGroupLayoutsMask())) {
+        for (BindGroupIndex i : mLastPipelineLayout->GetBindGroupLayoutsMask()) {
             DAWN_ASSERT(HasPipeline());
 
             DAWN_INVALID_IF(mBindgroups[i] == nullptr, "No bind group set at group index %u.", i);

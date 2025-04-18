@@ -126,7 +126,7 @@ ResultOrError<VulkanGlobalInfo> GatherGlobalInfo(const VulkanFunctions& vkFuncti
         MarkPromotedExtensions(&info.extensions, info.apiVersion);
         info.extensions = EnsureDependencies(info.extensions);
 
-        for (VulkanLayer layer : IterateBitSet(info.layers)) {
+        for (VulkanLayer layer : info.layers) {
             DAWN_TRY_ASSIGN(
                 info.layerExtensions[layer],
                 GatherInstanceExtensions(GetVulkanLayerInfo(layer).name, vkFunctions, knownExts));

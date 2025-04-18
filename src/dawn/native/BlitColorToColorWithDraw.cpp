@@ -66,7 +66,7 @@ std::string GenerateExpandFS(const BlitColorToColorWithDrawPipelineKey& pipeline
     std::ostringstream assignOutputsStream;
     std::ostringstream finalStream;
 
-    for (auto i : IterateBitSet(pipelineKey.attachmentsToExpandResolve)) {
+    for (auto i : pipelineKey.attachmentsToExpandResolve) {
         finalStream << absl::StrFormat("@group(0) @binding(%u) var srcTex%u : texture_2d<f32>;\n",
                                        i, i);
 
@@ -183,7 +183,7 @@ ResultOrError<Ref<RenderPipelineBase>> GetOrCreateExpandMultisamplePipeline(
 
     // Bind group layout.
     absl::InlinedVector<BindGroupLayoutEntry, kMaxColorAttachments> bglEntries;
-    for (auto colorIdx : IterateBitSet(pipelineKey.attachmentsToExpandResolve)) {
+    for (auto colorIdx : pipelineKey.attachmentsToExpandResolve) {
         bglEntries.push_back({});
         auto& bglEntry = bglEntries.back();
         bglEntry.binding = static_cast<uint8_t>(colorIdx);
@@ -316,7 +316,7 @@ MaybeError ExpandResolveTextureWithDraw(
     {
         absl::InlinedVector<BindGroupEntry, kMaxColorAttachments> bgEntries = {};
 
-        for (auto colorIdx : IterateBitSet(pipelineKey.attachmentsToExpandResolve)) {
+        for (auto colorIdx : pipelineKey.attachmentsToExpandResolve) {
             uint8_t i = static_cast<uint8_t>(colorIdx);
             const auto& colorAttachment = renderPassDescriptor->colorAttachments[i];
             bgEntries.push_back({});

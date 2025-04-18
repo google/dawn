@@ -29,7 +29,6 @@
 
 #include <cstring>
 
-#include "dawn/common/BitSetIterator.h"
 #include "dawn/common/ityp_array.h"
 #include "dawn/native/BindGroup.h"
 #include "dawn/native/Buffer.h"

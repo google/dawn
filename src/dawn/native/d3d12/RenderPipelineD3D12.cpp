@@ -412,7 +412,7 @@ MaybeError RenderPipeline::InitializeImpl() {
         }
         descriptorD3D12.BlendState.RenderTarget[i].LogicOp = D3D12_LOGIC_OP_NOOP;
     }
-    for (auto i : IterateBitSet(GetColorAttachmentsMask())) {
+    for (auto i : GetColorAttachmentsMask()) {
         descriptorD3D12.RTVFormats[static_cast<uint8_t>(i)] =
             d3d::DXGITextureFormat(device, GetColorAttachmentFormat(i));
         descriptorD3D12.BlendState.RenderTarget[static_cast<uint8_t>(i)] =
@@ -522,7 +522,7 @@ ComPtr<ID3D12CommandSignature> RenderPipeline::GetDrawIndexedIndirectCommandSign
 D3D12_INPUT_LAYOUT_DESC RenderPipeline::ComputeInputLayout(
     std::array<D3D12_INPUT_ELEMENT_DESC, kMaxVertexAttributes>* inputElementDescriptors) {
     unsigned int count = 0;
-    for (VertexAttributeLocation loc : IterateBitSet(GetAttributeLocationsUsed())) {
+    for (VertexAttributeLocation loc : GetAttributeLocationsUsed()) {
         D3D12_INPUT_ELEMENT_DESC& inputElementDescriptor = (*inputElementDescriptors)[count++];
 
         const VertexAttributeInfo& attribute = GetAttribute(loc);

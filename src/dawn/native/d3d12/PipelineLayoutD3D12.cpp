@@ -31,7 +31,6 @@
 #include <sstream>
 
 #include "dawn/common/Assert.h"
-#include "dawn/common/BitSetIterator.h"
 #include "dawn/native/d3d/D3DError.h"
 #include "dawn/native/d3d12/BindGroupLayoutD3D12.h"
 #include "dawn/native/d3d12/DeviceD3D12.h"
@@ -159,7 +158,7 @@ MaybeError PipelineLayout::Initialize() {
 
     size_t rangesCount = 0;
     size_t staticSamplerCount = 0;
-    for (BindGroupIndex group : IterateBitSet(GetBindGroupLayoutsMask())) {
+    for (BindGroupIndex group : GetBindGroupLayoutsMask()) {
         const BindGroupLayout* bindGroupLayout = ToBackend(GetBindGroupLayout(group));
         rangesCount += bindGroupLayout->GetCbvUavSrvDescriptorRanges().size() +
                        bindGroupLayout->GetSamplerDescriptorRanges().size();
@@ -172,7 +171,7 @@ MaybeError PipelineLayout::Initialize() {
 
     uint32_t rangeIndex = 0;
 
-    for (BindGroupIndex group : IterateBitSet(GetBindGroupLayoutsMask())) {
+    for (BindGroupIndex group : GetBindGroupLayoutsMask()) {
         const BindGroupLayout* bindGroupLayout = ToBackend(GetBindGroupLayout(group));
 
         // Set the root descriptor table parameter and copy ranges. Ranges are offset by the
@@ -290,7 +289,7 @@ MaybeError PipelineLayout::Initialize() {
     // so the loop also computes the first register offset for each group where the
     // data should start.
     uint32_t dynamicStorageBufferLengthsShaderRegisterOffset = 0;
-    for (BindGroupIndex group : IterateBitSet(GetBindGroupLayoutsMask())) {
+    for (BindGroupIndex group : GetBindGroupLayoutsMask()) {
         const BindGroupLayoutInternalBase* bgl = GetBindGroupLayout(group);
 
         mDynamicStorageBufferLengthInfo[group].firstRegisterOffset =

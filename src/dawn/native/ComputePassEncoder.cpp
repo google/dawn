@@ -501,7 +501,7 @@ void ComputePassEncoder::APIWriteTimestamp(QuerySetBase* querySet, uint32_t quer
 
 void ComputePassEncoder::AddDispatchSyncScope(SyncScopeUsageTracker scope) {
     PipelineLayoutBase* layout = mCommandBufferState.GetPipelineLayout();
-    for (BindGroupIndex i : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
+    for (BindGroupIndex i : layout->GetBindGroupLayoutsMask()) {
         scope.AddBindGroup(mCommandBufferState.GetBindGroup(i));
     }
     mUsageTracker.AddDispatch(scope.AcquireSyncScopeUsage());

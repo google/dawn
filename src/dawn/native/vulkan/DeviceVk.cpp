@@ -415,7 +415,7 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
 
     // However only request the extensions that haven't been promoted in the device's apiVersion
     std::vector<const char*> extensionNames;
-    for (DeviceExt ext : IterateBitSet(usedKnobs.extensions)) {
+    for (DeviceExt ext : usedKnobs.extensions) {
         const DeviceExtInfo& info = GetDeviceExtInfo(ext);
 
         if (info.versionPromoted > mDeviceInfo.properties.apiVersion) {

@@ -32,7 +32,6 @@
 #include <vector>
 
 #include "absl/container/inlined_vector.h"
-#include "dawn/common/BitSetIterator.h"
 #include "dawn/common/Enumerator.h"
 #include "dawn/common/Math.h"
 #include "dawn/common/NonMovable.h"
@@ -1257,7 +1256,7 @@ Ref<RenderPassEncoder> CommandEncoder::BeginRenderPass(const RenderPassDescripto
 
             auto descColorAttachments = ityp::SpanFromUntyped<ColorAttachmentIndex>(
                 descriptor->colorAttachments, descriptor->colorAttachmentCount);
-            for (auto i : IterateBitSet(cmd->attachmentState->GetColorAttachmentsMask())) {
+            for (auto i : cmd->attachmentState->GetColorAttachmentsMask()) {
                 auto& descColorAttachment = descColorAttachments[i];
                 auto& cmdColorAttachment = cmd->colorAttachments[i];
 

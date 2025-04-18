@@ -173,7 +173,7 @@ class DescriptorSetTracker : public BindGroupTrackerBase<true, uint32_t> {
                CommandRecordingContext* recordingContext,
                VkPipelineBindPoint bindPoint) {
         BeforeApply();
-        for (BindGroupIndex dirtyIndex : IterateBitSet(mDirtyBindGroupsObjectChangedOrIsDynamic)) {
+        for (BindGroupIndex dirtyIndex : mDirtyBindGroupsObjectChangedOrIsDynamic) {
             VkDescriptorSet set = ToBackend(mBindGroups[dirtyIndex])->GetHandle();
             uint32_t count = static_cast<uint32_t>(mDynamicOffsets[dirtyIndex].size());
             const uint32_t* dynamicOffset =
@@ -215,17 +215,17 @@ class ImmediateConstantTracker : public T {
 
         // TODO(crbug.com/366291600): Add IterateBitRanges helper function to achieve iteration on
         // ranges.
-        for (ImmediateConstantIndex i : IterateBitSet(lastPipeline->GetImmediateMask())) {
-                uint32_t index = static_cast<uint32_t>(i);
-                    prefixBits = (1u << index) - 1u;
-                    pushConstantRangeStartOffset = (prefixBits & pipelineImmediateMask).count() *
-                                                   kImmediateConstantElementByteSize;
-                    immediateContentStartOffset = index * kImmediateConstantElementByteSize;
-                    device->fn.CmdPushConstants(
-                        commandBuffer, ToBackend(lastPipeline)->GetVkLayout(),
-                        ToBackend(lastPipeline->GetLayout())->GetImmediateDataRangeStage(),
-                        pushConstantRangeStartOffset, kImmediateConstantElementByteSize,
-                        this->mContent.template Get<uint32_t>(immediateContentStartOffset));
+        for (ImmediateConstantIndex i : lastPipeline->GetImmediateMask()) {
+            uint32_t index = static_cast<uint32_t>(i);
+            prefixBits = (1u << index) - 1u;
+            pushConstantRangeStartOffset =
+                (prefixBits & pipelineImmediateMask).count() * kImmediateConstantElementByteSize;
+            immediateContentStartOffset = index * kImmediateConstantElementByteSize;
+            device->fn.CmdPushConstants(
+                commandBuffer, ToBackend(lastPipeline)->GetVkLayout(),
+                ToBackend(lastPipeline->GetLayout())->GetImmediateDataRangeStage(),
+                pushConstantRangeStartOffset, kImmediateConstantElementByteSize,
+                this->mContent.template Get<uint32_t>(immediateContentStartOffset));
         }
 
         // Reset all dirty bits after uploading.
@@ -428,7 +428,7 @@ MaybeError RecordBeginRenderPass(CommandRecordingContext* recordingContext,
     {
         RenderPassCacheQuery query;
 
-        for (auto i : IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {
+        for (auto i : renderPass->attachmentState->GetColorAttachmentsMask()) {
             const auto& attachmentInfo = renderPass->colorAttachments[i];
             bool hasResolveTarget = attachmentInfo.resolveTarget != nullptr;
 
@@ -461,7 +461,7 @@ MaybeError RecordBeginRenderPass(CommandRecordingContext* recordingContext,
         // Fill in the attachment info that will be chained in the framebuffer create info.
         std::array<VkImageView, kMaxColorAttachments * 2 + 1> attachments;
 
-        for (auto i : IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {
+        for (auto i : renderPass->attachmentState->GetColorAttachmentsMask()) {
             auto& attachmentInfo = renderPass->colorAttachments[i];
             TextureView* view = ToBackend(attachmentInfo.view.Get());
             if (view == nullptr) {
@@ -518,7 +518,7 @@ MaybeError RecordBeginRenderPass(CommandRecordingContext* recordingContext,
             attachmentCount++;
         }
 
-        for (auto i : IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {
+        for (auto i : renderPass->attachmentState->GetColorAttachmentsMask()) {
             if (renderPass->colorAttachments[i].resolveTarget != nullptr) {
                 TextureView* view = ToBackend(renderPass->colorAttachments[i].resolveTarget.Get());
 

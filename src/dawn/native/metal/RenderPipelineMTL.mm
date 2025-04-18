@@ -351,7 +351,7 @@ MaybeError RenderPipeline::InitializeImpl() {
         uint32_t mtlVertexBufferIndex =
             ToBackend(GetLayout())->GetBufferBindingCount(SingleShaderStage::Vertex);
 
-        for (VertexBufferSlot slot : IterateBitSet(GetVertexBuffersUsed())) {
+        for (VertexBufferSlot slot : GetVertexBuffersUsed()) {
             mMtlVertexBufferIndices[slot] = mtlVertexBufferIndex;
             mtlVertexBufferIndex++;
         }
@@ -406,7 +406,7 @@ MaybeError RenderPipeline::InitializeImpl() {
         }
 
         const auto& fragmentOutputMask = fragmentStage.metadata->fragmentOutputMask;
-        for (auto i : IterateBitSet(GetColorAttachmentsMask())) {
+        for (auto i : GetColorAttachmentsMask()) {
             descriptorMTL.colorAttachments[static_cast<uint8_t>(i)].pixelFormat =
                 MetalPixelFormat(GetDevice(), GetColorAttachmentFormat(i));
             const ColorTargetState* descriptor = GetColorTargetState(i);
@@ -514,7 +514,7 @@ wgpu::ShaderStage RenderPipeline::GetStagesRequiringStorageBufferLength() const 
 NSRef<MTLVertexDescriptor> RenderPipeline::MakeVertexDesc() const {
     MTLVertexDescriptor* mtlVertexDescriptor = [MTLVertexDescriptor new];
 
-    for (VertexBufferSlot slot : IterateBitSet(GetVertexBuffersUsed())) {
+    for (VertexBufferSlot slot : GetVertexBuffersUsed()) {
         const VertexBufferInfo& info = GetVertexBuffer(slot);
 
         MTLVertexBufferLayoutDescriptor* layoutDesc = [MTLVertexBufferLayoutDescriptor new];
@@ -523,7 +523,7 @@ NSRef<MTLVertexDescriptor> RenderPipeline::MakeVertexDesc() const {
             // but the arrayStride must NOT be 0, so we made up it with
             // max(attrib.offset + sizeof(attrib) for each attrib)
             size_t maxArrayStride = 0;
-            for (VertexAttributeLocation loc : IterateBitSet(GetAttributeLocationsUsed())) {
+            for (VertexAttributeLocation loc : GetAttributeLocationsUsed()) {
                 const VertexAttributeInfo& attrib = GetAttribute(loc);
                 // Only use the attributes that use the current input
                 if (attrib.vertexBufferSlot != slot) {
@@ -548,7 +548,7 @@ NSRef<MTLVertexDescriptor> RenderPipeline::MakeVertexDesc() const {
         [layoutDesc release];
     }
 
-    for (VertexAttributeLocation loc : IterateBitSet(GetAttributeLocationsUsed())) {
+    for (VertexAttributeLocation loc : GetAttributeLocationsUsed()) {
         const VertexAttributeInfo& info = GetAttribute(loc);
 
         auto attribDesc = [MTLVertexAttributeDescriptor new];

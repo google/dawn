@@ -34,7 +34,6 @@
 #include <string>
 #include <utility>
 
-#include "dawn/common/BitSetIterator.h"
 #include "dawn/common/Numeric.h"
 #include "dawn/native/BindGroup.h"
 #include "dawn/native/Buffer.h"

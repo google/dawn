@@ -33,7 +33,6 @@
 
 #include "absl/container/inlined_vector.h"
 #include "dawn/common/Assert.h"
-#include "dawn/common/BitSetIterator.h"
 #include "dawn/common/Enumerator.h"
 #include "dawn/common/MatchVariant.h"
 #include "dawn/common/Numeric.h"
@@ -169,7 +168,7 @@ PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device,
     }
 
     BindingCounts bindingCounts = {};
-    for (BindGroupIndex i : IterateBitSet(mMask)) {
+    for (BindGroupIndex i : mMask) {
         AccumulateBindingCounts(
             &bindingCounts,
             mBindGroupLayouts[i]->GetInternalBindGroupLayout()->GetBindingCountInfo());
@@ -507,7 +506,7 @@ size_t PipelineLayoutBase::ComputeContentHash() {
     ObjectContentHasher recorder;
     recorder.Record(mMask);
 
-    for (BindGroupIndex group : IterateBitSet(mMask)) {
+    for (BindGroupIndex group : mMask) {
         recorder.Record(GetBindGroupLayout(group)->GetContentHash());
     }
 
@@ -529,7 +528,7 @@ bool PipelineLayoutBase::EqualityFunc::operator()(const PipelineLayoutBase* a,
         return false;
     }
 
-    for (BindGroupIndex group : IterateBitSet(a->mMask)) {
+    for (BindGroupIndex group : a->mMask) {
         if (a->GetBindGroupLayout(group) != b->GetBindGroupLayout(group)) {
             return false;
         }

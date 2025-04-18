@@ -33,7 +33,6 @@
 #include <sstream>
 #include <utility>
 
-#include "dawn/common/BitSetIterator.h"
 #include "dawn/common/Constants.h"
 #include "dawn/common/MatchVariant.h"
 #include "dawn/native/BindGroupLayoutInternal.h"
@@ -1335,7 +1334,7 @@ MaybeError ParseShaderModule(DeviceBase* device,
 RequiredBufferSizes ComputeRequiredBufferSizesForLayout(const EntryPointMetadata& entryPoint,
                                                         const PipelineLayoutBase* layout) {
     RequiredBufferSizes bufferSizes;
-    for (BindGroupIndex group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
+    for (BindGroupIndex group : layout->GetBindGroupLayoutsMask()) {
         bufferSizes[group] = GetBindGroupMinBufferSizes(entryPoint.bindings[group],
                                                         layout->GetBindGroupLayout(group));
     }
@@ -1346,14 +1345,14 @@ RequiredBufferSizes ComputeRequiredBufferSizesForLayout(const EntryPointMetadata
 MaybeError ValidateCompatibilityWithPipelineLayout(DeviceBase* device,
                                                    const EntryPointMetadata& entryPoint,
                                                    const PipelineLayoutBase* layout) {
-    for (BindGroupIndex group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
+    for (BindGroupIndex group : layout->GetBindGroupLayoutsMask()) {
         DAWN_TRY_CONTEXT(ValidateCompatibilityWithBindGroupLayout(
                              device, group, entryPoint, layout->GetBindGroupLayout(group)),
                          "validating the entry-point's compatibility for group %u with %s", group,
                          layout->GetBindGroupLayout(group));
     }
 
-    for (BindGroupIndex group : IterateBitSet(~layout->GetBindGroupLayoutsMask())) {
+    for (BindGroupIndex group : ~layout->GetBindGroupLayoutsMask()) {
         DAWN_INVALID_IF(entryPoint.bindings[group].size() > 0,
                         "The entry-point uses bindings in group %u but %s doesn't have a "
                         "BindGroupLayout for this index",

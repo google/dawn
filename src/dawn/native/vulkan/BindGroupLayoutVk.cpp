@@ -30,7 +30,6 @@
 #include <utility>
 
 #include "absl/container/flat_hash_map.h"
-#include "dawn/common/BitSetIterator.h"
 #include "dawn/common/MatchVariant.h"
 #include "dawn/common/Range.h"
 #include "dawn/common/ityp_vector.h"

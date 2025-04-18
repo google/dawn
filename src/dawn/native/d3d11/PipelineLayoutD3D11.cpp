@@ -27,7 +27,6 @@
 
 #include "dawn/native/d3d11/PipelineLayoutD3D11.h"
 
-#include "dawn/common/BitSetIterator.h"
 #include "dawn/common/MatchVariant.h"
 #include "dawn/native/BindGroupLayoutInternal.h"
 #include "dawn/native/d3d11/DeviceD3D11.h"
@@ -79,7 +78,7 @@ MaybeError PipelineLayout::Initialize(Device* device) {
         return nativeIndex;
     };
 
-    for (BindGroupIndex group : IterateBitSet(GetBindGroupLayoutsMask())) {
+    for (BindGroupIndex group : GetBindGroupLayoutsMask()) {
         const BindGroupLayoutInternalBase* bgl = GetBindGroupLayout(group);
         mBindingTableIndexMap[group].resize(bgl->GetBindingCount());
 

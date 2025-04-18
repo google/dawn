@@ -175,7 +175,7 @@ NSRef<MTLRenderPassDescriptor> CreateMTLRenderPassDescriptor(
     NSRef<MTLRenderPassDescriptor> descriptorRef = [MTLRenderPassDescriptor renderPassDescriptor];
     MTLRenderPassDescriptor* descriptor = descriptorRef.Get();
 
-    for (auto attachment : IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {
+    for (auto attachment : renderPass->attachmentState->GetColorAttachmentsMask()) {
         uint8_t i = static_cast<uint8_t>(attachment);
         auto& attachmentInfo = renderPass->colorAttachments[attachment];
 
@@ -524,7 +524,7 @@ class BindGroupTracker : public BindGroupTrackerBase<true, uint64_t> {
     template <typename Encoder>
     void Apply(Encoder encoder) {
         BeforeApply();
-        for (BindGroupIndex index : IterateBitSet(mDirtyBindGroupsObjectChangedOrIsDynamic)) {
+        for (BindGroupIndex index : mDirtyBindGroupsObjectChangedOrIsDynamic) {
             ApplyBindGroup(encoder, index, ToBackend(mBindGroups[index]), mDynamicOffsets[index],
                            ToBackend(mPipelineLayout));
         }
@@ -715,7 +715,7 @@ class VertexBufferTracker {
                bool enableVertexPulling) {
         const auto& vertexBuffersToApply = mDirtyVertexBuffers & pipeline->GetVertexBuffersUsed();
 
-        for (VertexBufferSlot slot : IterateBitSet(vertexBuffersToApply)) {
+        for (VertexBufferSlot slot : vertexBuffersToApply) {
             uint32_t metalIndex = pipeline->GetMtlVertexBufferIndex(slot);
 
             if (enableVertexPulling) {

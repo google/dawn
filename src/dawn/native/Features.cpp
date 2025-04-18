@@ -31,7 +31,6 @@
 #include <utility>
 
 #include "dawn/common/Assert.h"
-#include "dawn/common/BitSetIterator.h"
 #include "dawn/common/ityp_array.h"
 
 namespace dawn::native {
@@ -456,7 +455,7 @@ void FeaturesSet::ToSupportedFeatures(SupportedFeatures* supportedFeatures) cons
     // This will be freed by wgpuSupportedFeaturesFreeMembers.
     wgpu::FeatureName* features = new wgpu::FeatureName[count];
     uint32_t index = 0;
-    for (Feature f : IterateBitSet(featuresBitSet)) {
+    for (Feature f : featuresBitSet) {
         features[index++] = ToAPI(f);
     }
     DAWN_ASSERT(index == count);

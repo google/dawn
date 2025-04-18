@@ -32,7 +32,6 @@
 #include <utility>
 
 #include "dawn/common/Assert.h"
-#include "dawn/common/BitSetIterator.h"
 #include "dawn/common/Log.h"
 #include "dawn/native/Pipeline.h"
 #include "dawn/native/TintUtils.h"
@@ -121,7 +120,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
 
     tint::hlsl::writer::Bindings bindings;
 
-    for (BindGroupIndex group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
+    for (BindGroupIndex group : layout->GetBindGroupLayoutsMask()) {
         const BindGroupLayout* bgl = ToBackend(layout->GetBindGroupLayout(group));
         const auto& indices = layout->GetBindingTableIndexMap()[group];
         const BindingGroupInfoMap& moduleGroupBindingInfo = moduleBindingInfo[group];

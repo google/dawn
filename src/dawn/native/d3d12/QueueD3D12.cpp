@@ -238,7 +238,7 @@ MaybeError Queue::OpenPendingCommands() {
     ID3D12Device* d3d12Device = ToBackend(GetDevice())->GetD3D12Device();
 
     // Get the index of the first free allocator from the bitset
-    uint32_t freeIndex = *(IterateBitSet(mFreeAllocators).begin());
+    uint32_t freeIndex = *(mFreeAllocators).begin();
     mFreeAllocators.reset(freeIndex);
     auto& allocator = mCommandAllocators[freeIndex];
 

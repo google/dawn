@@ -27,7 +27,6 @@
 
 #include "dawn/native/AttachmentState.h"
 
-#include "dawn/common/BitSetIterator.h"
 #include "dawn/common/Enumerator.h"
 #include "dawn/common/ityp_span.h"
 #include "dawn/native/ChainUtils.h"
@@ -213,7 +212,7 @@ bool AttachmentState::EqualityFunc::operator()(const AttachmentState* a,
     }
 
     // Check color formats
-    for (auto i : IterateBitSet(a->mColorAttachmentsSet)) {
+    for (auto i : a->mColorAttachmentsSet) {
         if (a->mColorFormats[i] != b->mColorFormats[i]) {
             return false;
         }
@@ -260,7 +259,7 @@ size_t AttachmentState::ComputeContentHash() {
 
     // Hash color formats
     HashCombine(&hash, mColorAttachmentsSet);
-    for (auto i : IterateBitSet(mColorAttachmentsSet)) {
+    for (auto i : mColorAttachmentsSet) {
         HashCombine(&hash, mColorFormats[i]);
     }
 

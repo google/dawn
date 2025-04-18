@@ -126,7 +126,7 @@ tint::msl::writer::Bindings generateBindingInfo(
     tint::msl::writer::ArrayLengthFromUniformOptions& arrayLengthFromUniform) {
     tint::msl::writer::Bindings bindings;
 
-    for (BindGroupIndex group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
+    for (BindGroupIndex group : layout->GetBindGroupLayoutsMask()) {
         const BindGroupLayout* bgl = ToBackend(layout->GetBindGroupLayout(group));
 
         for (const auto& currentModuleBindingInfo : moduleBindingInfo[group]) {
@@ -232,7 +232,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
         vertexPullingTransformConfig =
             BuildVertexPullingTransformConfig(*renderPipeline, kPullingBufferBindingSet);
 
-        for (VertexBufferSlot slot : IterateBitSet(renderPipeline->GetVertexBuffersUsed())) {
+        for (VertexBufferSlot slot : renderPipeline->GetVertexBuffersUsed()) {
             uint32_t metalIndex = renderPipeline->GetMtlVertexBufferIndex(slot);
 
             // Tell Tint to map (kPullingBufferBindingSet, slot) to this MSL buffer index.

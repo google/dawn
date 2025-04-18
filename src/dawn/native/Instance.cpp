@@ -458,7 +458,7 @@ std::vector<Ref<PhysicalDeviceBase>> InstanceBase::EnumeratePhysicalDevices(
     }
 
     std::vector<Ref<PhysicalDeviceBase>> discoveredPhysicalDevices;
-    for (wgpu::BackendType b : IterateBitSet(backendsToFind)) {
+    for (wgpu::BackendType b : backendsToFind) {
         BackendConnection* backend = GetBackendConnection(b);
 
         if (backend != nullptr) {

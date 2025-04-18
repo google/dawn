@@ -220,10 +220,9 @@ class VertexStateBufferBindingTracker {
             mIndexBufferDirty = false;
         }
 
-        for (VertexBufferSlot slot :
-             IterateBitSet(mDirtyVertexBuffers & mLastPipeline->GetVertexBuffersUsed())) {
+        for (VertexBufferSlot slot : mDirtyVertexBuffers & mLastPipeline->GetVertexBuffersUsed()) {
             for (VertexAttributeLocation location :
-                 IterateBitSet(ToBackend(mLastPipeline)->GetAttributesUsingVertexBuffer(slot))) {
+                 ToBackend(mLastPipeline)->GetAttributesUsingVertexBuffer(slot)) {
                 const VertexAttributeInfo& attribute = mLastPipeline->GetAttribute(location);
 
                 GLuint attribIndex = static_cast<GLuint>(static_cast<uint8_t>(location));
@@ -300,7 +299,7 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
 
     MaybeError Apply(const OpenGLFunctions& gl) {
         BeforeApply();
-        for (BindGroupIndex index : IterateBitSet(mDirtyBindGroupsObjectChangedOrIsDynamic)) {
+        for (BindGroupIndex index : mDirtyBindGroupsObjectChangedOrIsDynamic) {
             DAWN_TRY(ApplyBindGroup(gl, index, mBindGroups[index], mDynamicOffsets[index]));
         }
         DAWN_TRY(ApplyInternalUniforms(gl));
@@ -627,7 +626,7 @@ MaybeError ResolveMultisampledRenderTargets(const OpenGLFunctions& gl,
     GLuint readFbo = 0;
     GLuint writeFbo = 0;
 
-    for (auto i : IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {
+    for (auto i : renderPass->attachmentState->GetColorAttachmentsMask()) {
         if (renderPass->colorAttachments[i].resolveTarget != nullptr) {
             if (readFbo == 0) {
                 DAWN_ASSERT(writeFbo == 0);
@@ -1178,7 +1177,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass) {
         // Construct GL framebuffer
 
         ColorAttachmentIndex attachmentCount{};
-        for (auto i : IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {
+        for (auto i : renderPass->attachmentState->GetColorAttachmentsMask()) {
             TextureView* textureView = ToBackend(renderPass->colorAttachments[i].view.Get());
             GLenum glAttachment = GL_COLOR_ATTACHMENT0 + static_cast<uint8_t>(i);
 
@@ -1225,7 +1224,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass) {
 
     // Clear framebuffer attachments as needed
     {
-        for (auto index : IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {
+        for (auto index : renderPass->attachmentState->GetColorAttachmentsMask()) {
             uint8_t i = static_cast<uint8_t>(index);
             auto* attachmentInfo = &renderPass->colorAttachments[index];
 

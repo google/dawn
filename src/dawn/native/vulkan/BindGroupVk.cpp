@@ -27,7 +27,6 @@
 
 #include "dawn/native/vulkan/BindGroupVk.h"
 
-#include "dawn/common/BitSetIterator.h"
 #include "dawn/common/MatchVariant.h"
 #include "dawn/common/Range.h"
 #include "dawn/common/ityp_stack_vec.h"

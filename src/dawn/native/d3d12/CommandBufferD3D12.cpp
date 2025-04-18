@@ -433,7 +433,7 @@ class BindGroupStateTracker : public BindGroupTrackerBase<false, uint64_t> {
         // to occur on overflow.
         bool didCreateBindGroupViews = true;
         bool didCreateBindGroupSamplers = true;
-        for (BindGroupIndex index : IterateBitSet(mDirtyBindGroups)) {
+        for (BindGroupIndex index : mDirtyBindGroups) {
             BindGroup* group = ToBackend(mBindGroups[index]);
             didCreateBindGroupViews = group->PopulateViews(viewAllocator);
             didCreateBindGroupSamplers = group->PopulateSamplers(samplerAllocator);
@@ -457,7 +457,7 @@ class BindGroupStateTracker : public BindGroupTrackerBase<false, uint64_t> {
             // Must be called before applying the bindgroups.
             SetID3D12DescriptorHeaps(commandList);
 
-            for (BindGroupIndex index : IterateBitSet(mBindGroupLayoutsMask)) {
+            for (BindGroupIndex index : mBindGroupLayoutsMask) {
                 BindGroup* group = ToBackend(mBindGroups[index]);
                 didCreateBindGroupViews = group->PopulateViews(viewAllocator);
                 didCreateBindGroupSamplers = group->PopulateSamplers(samplerAllocator);
@@ -466,7 +466,7 @@ class BindGroupStateTracker : public BindGroupTrackerBase<false, uint64_t> {
             }
         }
 
-        for (BindGroupIndex index : IterateBitSet(mDirtyBindGroupsObjectChangedOrIsDynamic)) {
+        for (BindGroupIndex index : mDirtyBindGroupsObjectChangedOrIsDynamic) {
             BindGroup* group = ToBackend(mBindGroups[index]);
             ApplyBindGroup(commandList, ToBackend(mPipelineLayout), index, group,
                            mDynamicOffsets[index]);
@@ -717,7 +717,7 @@ class VertexBufferTracker {
         if (mLastAppliedRenderPipeline != renderPipeline) {
             mLastAppliedRenderPipeline = renderPipeline;
 
-            for (VertexBufferSlot slot : IterateBitSet(renderPipeline->GetVertexBuffersUsed())) {
+            for (VertexBufferSlot slot : renderPipeline->GetVertexBuffersUsed()) {
                 startSlot = std::min(startSlot, slot);
                 endSlot = std::max(endSlot, ityp::PlusOne(slot));
                 mD3D12BufferViews[slot].StrideInBytes =
@@ -756,8 +756,7 @@ void ResolveMultisampledRenderPass(CommandRecordingContext* commandContext,
                                    BeginRenderPassCmd* renderPass) {
     DAWN_ASSERT(renderPass != nullptr);
 
-    for (ColorAttachmentIndex i :
-         IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {
+    for (ColorAttachmentIndex i : renderPass->attachmentState->GetColorAttachmentsMask()) {
         TextureViewBase* resolveTarget = renderPass->colorAttachments[i].resolveTarget.Get();
         if (resolveTarget == nullptr) {
             continue;

@@ -30,7 +30,6 @@
 #include <string>
 #include <utility>
 
-#include "dawn/common/BitSetIterator.h"
 #include "dawn/common/Range.h"
 #include "dawn/common/ityp_bitset.h"
 #include "dawn/native/vulkan/BindGroupLayoutVk.h"

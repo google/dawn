@@ -567,11 +567,11 @@ MaybeError ComputePassBindGroupTracker::Apply() {
     // Note: WebGPU API guarantees that resources are not used both as UAV and SRV in the same
     // render pass. So we don't need to do this inside render passes.
     BindGroupMask groupsToUnset = previousGroups & (~inheritedGroups | mDirtyBindGroups);
-    for (BindGroupIndex index : IterateBitSet(groupsToUnset)) {
+    for (BindGroupIndex index : groupsToUnset) {
         UnapplyComputeBindings(index);
     }
 
-    for (BindGroupIndex index : IterateBitSet(mDirtyBindGroupsObjectChangedOrIsDynamic)) {
+    for (BindGroupIndex index : mDirtyBindGroupsObjectChangedOrIsDynamic) {
         DAWN_TRY(ApplyBindGroup<wgpu::ShaderStage::Compute>(index));
     }
 
@@ -609,7 +609,7 @@ MaybeError RenderPassBindGroupTracker::Apply() {
 
     absl::InlinedVector<ComPtr<ID3D11UnorderedAccessView>, 1> uavsInBindGroup(usedUavCount);
 
-    for (BindGroupIndex index : IterateBitSet(uavBindGroups)) {
+    for (BindGroupIndex index : uavBindGroups) {
         BindGroupBase* group = mBindGroups[index];
         const ityp::vector<BindingIndex, uint64_t>& dynamicOffsets = mDynamicOffsets[index];
         const auto& indices = ToBackend(mPipelineLayout)->GetBindingTableIndexMap()[index];
@@ -700,7 +700,7 @@ MaybeError RenderPassBindGroupTracker::Apply() {
         this->OMSetUnorderedAccessViews(uavStartSlot, plsAndUavCount, plsAndUavs.data());
     }
 
-    for (BindGroupIndex index : IterateBitSet(mDirtyBindGroupsObjectChangedOrIsDynamic)) {
+    for (BindGroupIndex index : mDirtyBindGroupsObjectChangedOrIsDynamic) {
         DAWN_TRY(ApplyBindGroup<wgpu::ShaderStage::Vertex | wgpu::ShaderStage::Fragment>(index));
     }
 

@@ -32,7 +32,6 @@
 #include <utility>
 
 #include "dawn/common/Assert.h"
-#include "dawn/common/BitSetIterator.h"
 #include "dawn/common/Log.h"
 #include "dawn/common/SystemUtils.h"
 #include "dawn/native/ChainUtils.h"
@@ -467,7 +466,7 @@ ResultOrError<VulkanGlobalKnobs> VulkanInstance::CreateVkInstance(const Instance
     usedKnobs.extensions = extensionsToRequest;
 
     std::vector<const char*> extensionNames;
-    for (InstanceExt ext : IterateBitSet(extensionsToRequest)) {
+    for (InstanceExt ext : extensionsToRequest) {
         const InstanceExtInfo& info = GetInstanceExtInfo(ext);
 
         if (info.versionPromoted > mGlobalInfo.apiVersion) {

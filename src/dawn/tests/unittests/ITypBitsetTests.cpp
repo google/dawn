@@ -224,5 +224,70 @@ TEST_F(ITypBitsetTest, GetHighestBitIndexPlusOne) {
     EXPECT_EQ(40u, static_cast<size_t>(GetHighestBitIndexPlusOne(Bitset40(0xFFFFFFFFFF))));
 }
 
+class ITypBitsetIteratorTest : public testing::Test {
+  protected:
+    using IntegerT = TypedInteger<struct Foo, uint32_t>;
+    ityp::bitset<IntegerT, 40> mStateBits;
+};
+
+// Simple iterator test.
+TEST_F(ITypBitsetIteratorTest, Iterator) {
+    std::set<IntegerT> originalValues;
+    originalValues.insert(IntegerT(2));
+    originalValues.insert(IntegerT(6));
+    originalValues.insert(IntegerT(8));
+    originalValues.insert(IntegerT(35));
+
+    for (IntegerT value : originalValues) {
+        mStateBits.set(value);
+    }
+
+    std::set<IntegerT> readValues;
+    for (IntegerT bit : IterateBitSet(mStateBits)) {
+        EXPECT_EQ(1u, originalValues.count(bit));
+        EXPECT_EQ(0u, readValues.count(bit));
+        readValues.insert(bit);
+    }
+
+    EXPECT_EQ(originalValues.size(), readValues.size());
+}
+
+// Test an empty iterator.
+TEST_F(ITypBitsetIteratorTest, EmptySet) {
+    // We don't use the FAIL gtest macro here since it returns immediately,
+    // causing an unreachable code warning in MSVC
+    bool sawBit = false;
+    for ([[maybe_unused]] IntegerT bit : IterateBitSet(mStateBits)) {
+        sawBit = true;
+    }
+    EXPECT_FALSE(sawBit);
+}
+
+// Test iterating a result of combining two bitsets.
+TEST_F(ITypBitsetIteratorTest, NonLValueBitset) {
+    ityp::bitset<IntegerT, 40> otherBits;
+
+    mStateBits.set(IntegerT(1));
+    mStateBits.set(IntegerT(2));
+    mStateBits.set(IntegerT(3));
+    mStateBits.set(IntegerT(4));
+
+    otherBits.set(IntegerT(0));
+    otherBits.set(IntegerT(1));
+    otherBits.set(IntegerT(3));
+    otherBits.set(IntegerT(5));
+
+    std::set<IntegerT> seenBits;
+
+    for (IntegerT bit : IterateBitSet(mStateBits & otherBits)) {
+        EXPECT_EQ(0u, seenBits.count(bit));
+        seenBits.insert(bit);
+        EXPECT_TRUE(mStateBits[bit]);
+        EXPECT_TRUE(otherBits[bit]);
+    }
+
+    EXPECT_EQ((mStateBits & otherBits).count(), seenBits.size());
+}
+
 }  // anonymous namespace
 }  // namespace dawn

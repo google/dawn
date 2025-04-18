@@ -500,7 +500,7 @@ MaybeError RenderPipeline::InitializeImpl() {
             GetStage(SingleShaderStage::Fragment).metadata->fragmentOutputMask;
         auto highestColorAttachmentIndexPlusOne =
             GetHighestBitIndexPlusOne(GetColorAttachmentsMask());
-        for (auto i : IterateBitSet(GetColorAttachmentsMask())) {
+        for (auto i : GetColorAttachmentsMask()) {
             const ColorTargetState* target = GetColorTargetState(i);
             colorBlendAttachments[i] = ComputeColorDesc(target, fragmentOutputMask[i]);
         }
@@ -547,7 +547,7 @@ MaybeError RenderPipeline::InitializeImpl() {
         ColorAttachmentMask expandResolveMask =
             GetAttachmentState()->GetExpandResolveInfo().attachmentsToExpandResolve;
 
-        for (auto i : IterateBitSet(GetColorAttachmentsMask())) {
+        for (auto i : GetColorAttachmentsMask()) {
             wgpu::LoadOp colorLoadOp = wgpu::LoadOp::Load;
             bool hasResolveTarget = resolveMask.test(i);
 
@@ -643,7 +643,7 @@ VkPipelineVertexInputStateCreateInfo RenderPipeline::ComputeVertexInputDesc(
     PipelineVertexInputStateCreateInfoTemporaryAllocations* tempAllocations) {
     // Fill in the "binding info" that will be chained in the create info
     uint32_t bindingCount = 0;
-    for (VertexBufferSlot slot : IterateBitSet(GetVertexBuffersUsed())) {
+    for (VertexBufferSlot slot : GetVertexBuffersUsed()) {
         const VertexBufferInfo& bindingInfo = GetVertexBuffer(slot);
 
         VkVertexInputBindingDescription* bindingDesc = &tempAllocations->bindings[bindingCount];
@@ -656,7 +656,7 @@ VkPipelineVertexInputStateCreateInfo RenderPipeline::ComputeVertexInputDesc(
 
     // Fill in the "attribute info" that will be chained in the create info
     uint32_t attributeCount = 0;
-    for (VertexAttributeLocation loc : IterateBitSet(GetAttributeLocationsUsed())) {
+    for (VertexAttributeLocation loc : GetAttributeLocationsUsed()) {
         const VertexAttributeInfo& attributeInfo = GetAttribute(loc);
 
         VkVertexInputAttributeDescription* attributeDesc =

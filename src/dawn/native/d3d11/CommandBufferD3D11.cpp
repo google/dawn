@@ -99,7 +99,7 @@ class VertexBufferTracker {
         // If the vertex state has changed, we need to update the strides.
         if (mLastAppliedRenderPipeline != renderPipeline) {
             mLastAppliedRenderPipeline = renderPipeline;
-            for (VertexBufferSlot slot : IterateBitSet(renderPipeline->GetVertexBuffersUsed())) {
+            for (VertexBufferSlot slot : renderPipeline->GetVertexBuffersUsed()) {
                 if (mStrides[slot] == renderPipeline->GetVertexBuffer(slot).arrayStride) {
                     continue;
                 }
@@ -112,7 +112,7 @@ class VertexBufferTracker {
         const auto vertexBuffersToApply =
             mDirtyVertexBuffers & renderPipeline->GetVertexBuffersUsed();
 
-        for (VertexBufferSlot slot : IterateBitSet(vertexBuffersToApply)) {
+        for (VertexBufferSlot slot : vertexBuffersToApply) {
             mCommandContext->GetD3D11DeviceContext3()->IASetVertexBuffers(
                 uint8_t(slot), 1, &mD3D11Buffers[slot], &mStrides[slot], &mOffsets[slot]);
 
@@ -588,8 +588,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(
     const ScopedSwapStateCommandRecordingContext* commandContext) {
     // For the color attachments that the clear_color_with_draw workaround has applied, we can skip
     // the clear for them.
-    for (auto i :
-         IterateBitSet(ClearWithDrawHelper::GetAppliedColorAttachments(GetDevice(), renderPass))) {
+    for (auto i : ClearWithDrawHelper::GetAppliedColorAttachments(GetDevice(), renderPass)) {
         auto& colorAttachment = renderPass->colorAttachments[i];
         DAWN_ASSERT(colorAttachment.loadOp == wgpu::LoadOp::Clear);
         // Skip the clear as it will be handled by the workaround.
@@ -605,7 +604,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(
     PerColorAttachment<ID3D11RenderTargetView*> d3d11RenderTargetViews = {};
     ColorAttachmentIndex attachmentCount{};
     // TODO(dawn:1815): Shrink the sparse attachments to accommodate more UAVs.
-    for (auto i : IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {
+    for (auto i : renderPass->attachmentState->GetColorAttachmentsMask()) {
         TextureView* colorTextureView = ToBackend(renderPass->colorAttachments[i].view.Get());
         DAWN_TRY_ASSIGN(d3d11RenderTargetViews[i],
                         colorTextureView->GetOrCreateD3D11RenderTargetView(
@@ -838,8 +837,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(
                 }
 
                 // Resolve multisampled textures.
-                for (auto i :
-                     IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {
+                for (auto i : renderPass->attachmentState->GetColorAttachmentsMask()) {
                     const auto& attachment = renderPass->colorAttachments[i];
                     if (!attachment.resolveTarget.Get()) {
                         continue;

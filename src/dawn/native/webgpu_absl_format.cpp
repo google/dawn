@@ -342,7 +342,7 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
     ColorAttachmentIndex nextColorIndex{};
 
     bool needsComma = false;
-    for (auto i : IterateBitSet(value->GetColorAttachmentsMask())) {
+    for (auto i : value->GetColorAttachmentsMask()) {
         if (needsComma) {
             s->Append(", ");
         }

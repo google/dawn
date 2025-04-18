@@ -32,7 +32,6 @@
 
 #include "absl/container/inlined_vector.h"
 #include "dawn/common/Assert.h"
-#include "dawn/common/BitSetIterator.h"
 #include "dawn/native/AttachmentState.h"
 #include "dawn/native/BlitColorToColorWithDraw.h"
 #include "dawn/native/CommandEncoder.h"
@@ -186,7 +185,7 @@ MaybeError RenderPassWorkaroundsHelper::ApplyOnPostEncoding(
     if (mTempResolveTargetsMask.any()) {
         std::vector<TemporaryResolveAttachment> temporaryResolveAttachments;
 
-        for (auto index : IterateBitSet(mTempResolveTargetsMask)) {
+        for (auto index : mTempResolveTargetsMask) {
             TextureViewBase* resolveTarget = cmd->colorAttachments[index].resolveTarget.Get();
             TextureViewBase* temporaryResolveView = mTempResolveTargets[index].view.Get();
 
@@ -227,7 +226,7 @@ MaybeError RenderPassWorkaroundsHelper::ApplyOnPostEncoding(
         renderPassDescriptor.Get<RenderPassDescriptorExpandResolveRect>()) {
         std::vector<TemporaryResolveAttachment> temporaryResolveAttachments;
 
-        for (auto i : IterateBitSet(cmd->attachmentState->GetColorAttachmentsMask())) {
+        for (auto i : cmd->attachmentState->GetColorAttachmentsMask()) {
             auto& attachmentInfo = cmd->colorAttachments[i];
             TextureViewBase* resolveTarget = attachmentInfo.resolveTarget.Get();
             if (attachmentInfo.loadOp == wgpu::LoadOp::ExpandResolveTexture) {
@@ -278,7 +277,7 @@ MaybeError RenderPassWorkaroundsHelper::ApplyOnPostEncoding(
 
         // This workaround needs to apply if there are multiple MSAA color targets (checked above)
         // and at least one resolve target.
-        for (auto i : IterateBitSet(cmd->attachmentState->GetColorAttachmentsMask())) {
+        for (auto i : cmd->attachmentState->GetColorAttachmentsMask()) {
             if (cmd->colorAttachments[i].resolveTarget.Get() != nullptr) {
                 splitResolvesIntoSeparatePasses = true;
                 break;
@@ -288,7 +287,7 @@ MaybeError RenderPassWorkaroundsHelper::ApplyOnPostEncoding(
         if (splitResolvesIntoSeparatePasses) {
             std::vector<TemporaryResolveAttachment> temporaryResolveAttachments;
 
-            for (auto i : IterateBitSet(cmd->attachmentState->GetColorAttachmentsMask())) {
+            for (auto i : cmd->attachmentState->GetColorAttachmentsMask()) {
                 auto& attachmentInfo = cmd->colorAttachments[i];
                 TextureViewBase* resolveTarget = attachmentInfo.resolveTarget.Get();
                 if (resolveTarget != nullptr) {

@@ -146,7 +146,7 @@ FeaturesSet PhysicalDeviceBase::GetSupportedFeatures(const TogglesState& toggles
     FeaturesSet supportedFeaturesWithToggles;
     // Iterate each PhysicalDevice's supported feature and check if it is supported with given
     // toggles
-    for (Feature feature : IterateBitSet(mSupportedFeatures.featuresBitSet)) {
+    for (Feature feature : mSupportedFeatures.featuresBitSet) {
         if (IsFeatureSupportedWithToggles(ToAPI(feature), toggles)) {
             supportedFeaturesWithToggles.EnableFeature(feature);
         }

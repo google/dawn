@@ -35,7 +35,6 @@
 #include <string>
 #include <vector>
 
-#include "dawn/common/BitSetIterator.h"
 #include "dawn/common/Enumerator.h"
 #include "dawn/common/MatchVariant.h"
 #include "dawn/native/ChainUtils.h"

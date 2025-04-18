@@ -29,7 +29,6 @@
 
 #include <utility>
 
-#include "dawn/common/BitSetIterator.h"
 #include "dawn/common/MatchVariant.h"
 #include "dawn/native/d3d12/DeviceD3D12.h"
 #include "dawn/native/d3d12/SamplerD3D12.h"

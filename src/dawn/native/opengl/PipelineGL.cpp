@@ -32,7 +32,6 @@
 #include <sstream>
 #include <string>
 
-#include "dawn/common/BitSetIterator.h"
 #include "dawn/native/BindGroupLayoutInternal.h"
 #include "dawn/native/Device.h"
 #include "dawn/native/Pipeline.h"

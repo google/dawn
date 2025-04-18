@@ -326,7 +326,7 @@ MaybeError RenderPipeline::InitializeInputLayout(const Blob& vertexShader) {
 
     std::array<D3D11_INPUT_ELEMENT_DESC, kMaxVertexAttributes> inputElementDescriptors;
     UINT count = 0;
-    for (VertexAttributeLocation loc : IterateBitSet(GetAttributeLocationsUsed())) {
+    for (VertexAttributeLocation loc : GetAttributeLocationsUsed()) {
         D3D11_INPUT_ELEMENT_DESC& inputElementDescriptor = inputElementDescriptors[count++];
 
         const VertexAttributeInfo& attribute = GetAttribute(loc);
