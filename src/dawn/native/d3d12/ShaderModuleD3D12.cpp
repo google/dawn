@@ -159,7 +159,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
         req.bytecode.dxcShaderProfile = device->GetDxcShaderProfiles()[stage];
     } else {
         req.bytecode.compiler = d3d::Compiler::FXC;
-        req.bytecode.d3dCompile = device->GetFunctions()->d3dCompile;
+        req.bytecode.d3dCompile = std::move(pD3DCompile{device->GetFunctions()->d3dCompile});
         req.bytecode.compilerVersion = D3D_COMPILER_VERSION;
         switch (stage) {
             case SingleShaderStage::Vertex:
@@ -320,8 +320,8 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
         }
     }
 
-    auto tintProgram = GetTintProgram();
-    req.hlsl.inputProgram = &(tintProgram->program);
+    req.hlsl.shaderModuleHash = GetHash();
+    req.hlsl.inputProgram = UseTintProgram();
     req.hlsl.entryPointName = programmableStage.entryPoint.c_str();
     req.hlsl.stage = stage;
     if (!useTintIR) {

@@ -92,16 +92,17 @@ opengl::CombinedSampler* AppendCombinedSampler(opengl::CombinedSamplerInfo* info
 using InterstageLocationAndName = std::pair<uint32_t, std::string>;
 using SubstituteOverrideConfig = std::unordered_map<tint::OverrideId, double>;
 
-#define GLSL_COMPILATION_REQUEST_MEMBERS(X)                                              \
-    X(const tint::Program*, inputProgram)                                                \
-    X(std::string, entryPointName)                                                       \
-    X(SingleShaderStage, stage)                                                          \
-    X(SubstituteOverrideConfig, substituteOverrideConfig)                                \
-    X(LimitsForCompilationRequest, limits)                                               \
-    X(CacheKey::UnsafeUnkeyedValue<LimitsForCompilationRequest>, adapterSupportedLimits) \
-    X(bool, disableSymbolRenaming)                                                       \
-    X(std::vector<InterstageLocationAndName>, interstageVariables)                       \
-    X(tint::glsl::writer::Options, tintOptions)                                          \
+#define GLSL_COMPILATION_REQUEST_MEMBERS(X)                                               \
+    X(ShaderModuleBase::ShaderModuleHash, shaderModuleHash)                               \
+    X(CacheKey::UnsafeUnkeyedValue<ShaderModuleBase::ScopedUseTintProgram>, inputProgram) \
+    X(std::string, entryPointName)                                                        \
+    X(SingleShaderStage, stage)                                                           \
+    X(SubstituteOverrideConfig, substituteOverrideConfig)                                 \
+    X(LimitsForCompilationRequest, limits)                                                \
+    X(CacheKey::UnsafeUnkeyedValue<LimitsForCompilationRequest>, adapterSupportedLimits)  \
+    X(bool, disableSymbolRenaming)                                                        \
+    X(std::vector<InterstageLocationAndName>, interstageVariables)                        \
+    X(tint::glsl::writer::Options, tintOptions)                                           \
     X(CacheKey::UnsafeUnkeyedValue<dawn::platform::Platform*>, platform)
 
 DAWN_MAKE_CACHE_REQUEST(GLSLCompilationRequest, GLSL_COMPILATION_REQUEST_MEMBERS);
@@ -464,8 +465,8 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
 
     GLSLCompilationRequest req = {};
 
-    auto tintProgram = GetTintProgram();
-    req.inputProgram = &(tintProgram->program);
+    req.shaderModuleHash = GetHash();
+    req.inputProgram = UseTintProgram();
 
     // Since (non-Vulkan) GLSL does not support descriptor sets, generate a
     // mapping from the original group/binding pair to a binding-only
@@ -562,8 +563,11 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
     DAWN_TRY_LOAD_OR_RUN(
         compilationResult, GetDevice(), std::move(req), GLSLCompilation::FromBlob,
         [](GLSLCompilationRequest r) -> ResultOrError<GLSLCompilation> {
+            // Requires Tint Program here right before actual using.
+            auto inputProgram = r.inputProgram.UnsafeGetValue()->GetTintProgram();
+            const tint::Program* tintInputProgram = &(inputProgram->program);
             // Convert the AST program to an IR module.
-            auto ir = tint::wgsl::reader::ProgramToLoweredIR(*r.inputProgram);
+            auto ir = tint::wgsl::reader::ProgramToLoweredIR(*tintInputProgram);
             DAWN_INVALID_IF(ir != tint::Success, "An error occurred while generating Tint IR\n%s",
                             ir.Failure().reason);
 

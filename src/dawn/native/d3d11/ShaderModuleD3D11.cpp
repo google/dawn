@@ -101,7 +101,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
 
     // D3D11 only supports FXC.
     req.bytecode.compiler = d3d::Compiler::FXC;
-    req.bytecode.d3dCompile = device->GetFunctions()->d3dCompile;
+    req.bytecode.d3dCompile = std::move(pD3DCompile{device->GetFunctions()->d3dCompile});
     req.bytecode.compilerVersion = D3D_COMPILER_VERSION;
     DAWN_ASSERT(device->GetDeviceInfo().shaderModel == 50);
     switch (stage) {
@@ -188,8 +188,8 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
         }
     }
 
-    auto tintProgram = GetTintProgram();
-    req.hlsl.inputProgram = &(tintProgram->program);
+    req.hlsl.shaderModuleHash = GetHash();
+    req.hlsl.inputProgram = UseTintProgram();
     req.hlsl.entryPointName = programmableStage.entryPoint.c_str();
     req.hlsl.stage = stage;
     // Put the firstIndex into the internally reserved group and binding to avoid conflicting with
