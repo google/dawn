@@ -35,7 +35,7 @@
 #include "dawn/common/SerialMap.h"
 #include "dawn/native/EventManager.h"
 #include "dawn/native/Queue.h"
-#include "dawn/native/WaitListEvent.h"
+#include "dawn/native/SystemEvent.h"
 #include "dawn/native/metal/CommandRecordingContext.h"
 #include "dawn/native/metal/SharedFenceMTL.h"
 
@@ -53,7 +53,7 @@ class Queue final : public QueueBase {
     id<MTLSharedEvent> GetMTLSharedEvent() const;
     ResultOrError<Ref<SharedFence>> GetOrCreateSharedFence();
 
-    Ref<WaitListEvent> CreateWorkDoneEvent(ExecutionSerial serial);
+    Ref<SystemEvent> CreateWorkDoneSystemEvent(ExecutionSerial serial);
     ResultOrError<bool> WaitForQueueSerial(ExecutionSerial serial, Nanoseconds timeout) override;
 
   private:
@@ -88,7 +88,7 @@ class Queue final : public QueueBase {
     // TODO(crbug.com/dawn/2065): If we atomically knew a conservative lower bound on the
     // mWaitingEvents serials, we could avoid taking this lock sometimes. Optimize if needed.
     // See old draft code: https://dawn-review.googlesource.com/c/dawn/+/137502/29
-    MutexProtected<SerialMap<ExecutionSerial, Ref<WaitListEvent>>> mWaitingEvents;
+    MutexProtected<SerialMap<ExecutionSerial, Ref<SystemEvent>>> mWaitingEvents;
 
     // A shared event that can be exported for synchronization with other users of Metal.
     // MTLSharedEvent is not available until macOS 10.14+ so use just `id`.

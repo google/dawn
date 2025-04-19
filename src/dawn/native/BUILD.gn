@@ -398,8 +398,6 @@ source_set("sources") {
     "ValidationUtils.h",
     "VisitableMembers.h",
     "WaitAnySystemEvent.h",
-    "WaitListEvent.cpp",
-    "WaitListEvent.h",
     "dawn_platform.h",
     "stream/BlobSource.cpp",
     "stream/BlobSource.h",

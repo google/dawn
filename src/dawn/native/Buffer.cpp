@@ -212,7 +212,7 @@ struct BufferBase::MapAsyncEvent final : public EventManager::TrackedEvent {
                   const std::string& message,
                   WGPUMapAsyncStatus status)
         : TrackedEvent(static_cast<wgpu::CallbackMode>(callbackInfo.mode),
-                       TrackedEvent::Completed{}),
+                       SystemEvent::CreateSignaled()),
           mBufferOrError(BufferErrorData{status, message}),
           mCallback(callbackInfo.callback),
           mUserdata1(callbackInfo.userdata1),
@@ -224,7 +224,7 @@ struct BufferBase::MapAsyncEvent final : public EventManager::TrackedEvent {
     ~MapAsyncEvent() override { EnsureComplete(EventCompletionType::Shutdown); }
 
     void Complete(EventCompletionType completionType) override {
-        if (const auto* queueAndSerial = GetIfQueueAndSerial()) {
+        if (const auto* queueAndSerial = std::get_if<QueueAndSerial>(&GetCompletionData())) {
             TRACE_EVENT_ASYNC_END0(queueAndSerial->queue->GetDevice()->GetPlatform(), General,
                                    "Buffer::APIMapAsync",
                                    uint64_t(queueAndSerial->completionSerial));
