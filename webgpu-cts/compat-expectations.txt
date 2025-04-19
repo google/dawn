@@ -338,8 +338,6 @@ crbug.com/361372970 [ android arm ] webgpu:api,validation,image_copy,layout_rela
 
 # textureSampleBias (16.22) - either the CTS is old or has a bug as 16.22 is not an expected test bias value
 crbug.com/406978229 [ android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:arrayed_2d_coords:format="astc-8x5-unorm-srgb";filt="nearest";modeU="r";modeV="c";offset=false [ Failure ]
-crbug.com/406978229 [ intel linux ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:arrayed_2d_coords:format="astc-8x5-unorm";filt="nearest";modeU="c";modeV="r";offset=true [ Failure ]
-crbug.com/406978229 [ intel linux ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:arrayed_2d_coords:format="astc-8x5-unorm-srgb";filt="nearest";modeU="r";modeV="c";offset=false [ Failure ]
 
 # Flaky memory_sync failures on Intel
 crbug.com/42241023 [ intel-0x9bc5 linux ] webgpu:api,operation,memory_sync,buffer,multiple_buffers:ww:boundary="command-buffer";writeOps=["storage","b2b-copy"];contexts=["render-bundle-encoder","command-encoder"] [ Failure ]
@@ -563,10 +561,7 @@ crbug.com/329724358 [ android arm ] webgpu:web_platform,external_texture,video:i
 crbug.com/329724358 [ android arm ] webgpu:web_platform,external_texture,video:importExternalTexture,sampleWithVideoFrameWithVisibleRectParam:videoName="four-colors-vp9-bt709.webm";dstColorSpace="srgb" [ Failure ]
 
 # Derivative test failures on Pixel 6
-crbug.com/42251283 [ android-pixel-6 arm ] webgpu:shader,execution,expression,call,builtin,dpdx:f32:* [ Failure ]
-crbug.com/42251283 [ android-pixel-6 arm ] webgpu:shader,execution,expression,call,builtin,dpdy:f32:* [ Failure ]
 crbug.com/42251283 [ android-pixel-6 arm ] webgpu:shader,execution,expression,call,builtin,dpdxCoarse:f32:* [ Failure ]
-crbug.com/42251283 [ android-pixel-6 arm ] webgpu:shader,execution,expression,call,builtin,dpdyCoarse:f32:* [ Failure ]
 crbug.com/42251283 [ android arm ] webgpu:shader,execution,expression,call,builtin,dpdxFine:* [ Failure ]
 crbug.com/42251283 [ android arm ] webgpu:shader,execution,expression,call,builtin,dpdyFine:* [ Failure ]
 crbug.com/42251283 [ android arm ] webgpu:shader,execution,expression,call,builtin,fwidthFine:* [ Failure ]
@@ -766,8 +761,6 @@ crbug.com/364917742 [ android arm ] webgpu:api,operation,command_buffer,image_co
 crbug.com/364917742 [ android arm ] webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow:initMethod="WriteTexture";checkMethod="PartialCopyT2B";format="astc-8x6-unorm";dimension="2d" [ Failure ]
 crbug.com/364917742 [ android arm ] webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow:initMethod="WriteTexture";checkMethod="PartialCopyT2B";format="astc-8x8-unorm";dimension="2d" [ Failure ]
 
-# Returns 0
-crbug.com/374218148 [ intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:* [ Failure ]
 
 # robust_access_vertex on Intel
 crbug.com/406978227 [ intel-0x9bc5 ] webgpu:shader,execution,robust_access_vertex:* [ RetryOnFailure ]
@@ -805,11 +798,6 @@ crbug.com/407109047 [ android-pixel-6 ] webgpu:api,validation,render_pipeline,fr
 crbug.com/407109047 [ android-pixel-6 ] webgpu:api,validation,render_pipeline,fragment_state:pipeline_output_targets:isAsync=true;format="rg11b10ufloat" [ Failure ]
 crbug.com/407109047 [ android-pixel-6 ] webgpu:api,validation,render_pipeline,fragment_state:targets_format_filterable:isAsync=false;format="rg11b10ufloat" [ Failure ]
 crbug.com/407109047 [ android-pixel-6 ] webgpu:api,validation,render_pipeline,fragment_state:targets_format_filterable:isAsync=true;format="rg11b10ufloat" [ Failure ]
-crbug.com/407109047 [ intel linux ] webgpu:api,validation,createTexture:sampleCount,valid_sampleCount_with_other_parameter_varies:dimension="2d";format="rg11b10ufloat" [ Failure ]
-crbug.com/407109047 [ intel linux ] webgpu:api,validation,render_pipeline,fragment_state:pipeline_output_targets:isAsync=false;format="rg11b10ufloat" [ Failure ]
-crbug.com/407109047 [ intel linux ] webgpu:api,validation,render_pipeline,fragment_state:pipeline_output_targets:isAsync=true;format="rg11b10ufloat" [ Failure ]
-crbug.com/407109047 [ intel linux ] webgpu:api,validation,render_pipeline,fragment_state:targets_format_filterable:isAsync=false;format="rg11b10ufloat" [ Failure ]
-crbug.com/407109047 [ intel linux ] webgpu:api,validation,render_pipeline,fragment_state:targets_format_filterable:isAsync=true;format="rg11b10ufloat" [ Failure ]
 crbug.com/407109047 [ linux nvidia ] webgpu:api,validation,createTexture:sampleCount,valid_sampleCount_with_other_parameter_varies:dimension="2d";format="rg11b10ufloat" [ Failure ]
 crbug.com/407109047 [ linux nvidia ] webgpu:api,validation,render_pipeline,fragment_state:pipeline_output_targets:isAsync=false;format="rg11b10ufloat" [ Failure ]
 crbug.com/407109047 [ linux nvidia ] webgpu:api,validation,render_pipeline,fragment_state:pipeline_output_targets:isAsync=true;format="rg11b10ufloat" [ Failure ]
@@ -817,8 +805,8 @@ crbug.com/407109047 [ linux nvidia ] webgpu:api,validation,render_pipeline,fragm
 crbug.com/407109047 [ linux nvidia ] webgpu:api,validation,render_pipeline,fragment_state:targets_format_filterable:isAsync=true;format="rg11b10ufloat" [ Failure ]
 
 # Test bug, tests require implementation to provide "core" but fails when not available
-crbug.com/366151404 webgpu:api,operation,adapter,requestAdapter:requestAdapter_invalid_featureLevel:featureLevel="_undef_" [ Failure ]
-crbug.com/366151404 webgpu:api,operation,adapter,requestAdapter:requestAdapter_invalid_featureLevel:featureLevel="core" [ Failure ]
+crbug.com/366151404 [ android android-chromium android-pixel-6 angle-opengles arm compat-default mobile ] webgpu:api,operation,adapter,requestAdapter:requestAdapter_invalid_featureLevel:featureLevel="_undef_" [ Failure ]
+crbug.com/366151404 [ android android-chromium android-pixel-6 angle-opengles arm compat-default mobile ] webgpu:api,operation,adapter,requestAdapter:requestAdapter_invalid_featureLevel:featureLevel="core" [ Failure ]
 
 # Not implemented yet
 crbug.com/342840940 webgpu:api,validation,capability_checks,features,texture_formats:check_capability_guarantees: [ Failure ]
