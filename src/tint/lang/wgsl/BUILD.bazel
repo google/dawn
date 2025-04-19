@@ -133,26 +133,6 @@ cc_library(
   copts = COPTS,
   visibility = ["//visibility:public"],
 )
-cc_library(
-  name = "bench",
-  alwayslink = True,
-  srcs = [
-    "extension_bench.cc",
-  ],
-  deps = [
-    "//src/tint/lang/wgsl",
-    "//src/tint/utils/containers",
-    "//src/tint/utils/ice",
-    "//src/tint/utils/macros",
-    "//src/tint/utils/math",
-    "//src/tint/utils/memory",
-    "//src/tint/utils/rtti",
-    "@benchmark",
-    "//src/utils",
-  ],
-  copts = COPTS,
-  visibility = ["//visibility:public"],
-)
 
 alias(
   name = "tint_build_wgsl_reader",

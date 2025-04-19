@@ -532,12 +532,9 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
     }
 
     // Set device feature for subgroups with f16 types.
-    if (HasFeature(Feature::SubgroupsF16) ||
-        (HasFeature(Feature::ShaderF16) && HasFeature(Feature::Subgroups))) {
+    if (HasFeature(Feature::ShaderF16) && HasFeature(Feature::Subgroups)) {
         DAWN_ASSERT(usedKnobs.HasExt(DeviceExt::ShaderSubgroupExtendedTypes) &&
-                    mDeviceInfo.shaderSubgroupExtendedTypes.shaderSubgroupExtendedTypes ==
-                        VK_TRUE &&
-                    HasFeature(Feature::ShaderF16) && HasFeature(Feature::Subgroups));
+                    mDeviceInfo.shaderSubgroupExtendedTypes.shaderSubgroupExtendedTypes == VK_TRUE);
 
         usedKnobs.shaderSubgroupExtendedTypes = mDeviceInfo.shaderSubgroupExtendedTypes;
         featuresChain.Add(&usedKnobs.shaderSubgroupExtendedTypes);

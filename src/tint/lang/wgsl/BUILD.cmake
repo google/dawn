@@ -143,26 +143,3 @@ if(TINT_BUILD_WGSL_WRITER)
     tint_lang_wgsl_writer
   )
 endif(TINT_BUILD_WGSL_WRITER)
-
-################################################################################
-# Target:    tint_lang_wgsl_bench
-# Kind:      bench
-################################################################################
-tint_add_target(tint_lang_wgsl_bench bench
-  lang/wgsl/extension_bench.cc
-)
-
-tint_target_add_dependencies(tint_lang_wgsl_bench bench
-  tint_lang_wgsl
-  tint_utils_containers
-  tint_utils_ice
-  tint_utils_macros
-  tint_utils_math
-  tint_utils_memory
-  tint_utils_rtti
-)
-
-tint_target_add_external_dependencies(tint_lang_wgsl_bench bench
-  "google-benchmark"
-  "src_utils"
-)

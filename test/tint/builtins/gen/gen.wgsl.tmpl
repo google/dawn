@@ -297,7 +297,7 @@ fn vertex_main() -> VertexOutput {
 {{- /* Emit 'enable chromium_experimental_subgroup_matrix' if required */ -}}
 {{-   if (HasPrefix $builtin_name "subgroupMatrix")}}
 enable chromium_experimental_subgroup_matrix;
-{{/* Emit 'enable subgroups' and 'enable subgroups_f16' if required */ -}}
+{{/* Emit 'enable subgroups' if required */ -}}
 {{-   else if or (HasPrefix $builtin_name "subgroup") (HasPrefix $builtin_name "quad")}}
 enable subgroups;
 {{    end -}}

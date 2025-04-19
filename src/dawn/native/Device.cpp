@@ -1649,9 +1649,6 @@ void DeviceBase::SetWGSLExtensionAllowList() {
     if (mEnabledFeatures.IsEnabled(Feature::Subgroups)) {
         mWGSLAllowedFeatures.extensions.insert(tint::wgsl::Extension::kSubgroups);
     }
-    if (mEnabledFeatures.IsEnabled(Feature::SubgroupsF16)) {
-        mWGSLAllowedFeatures.extensions.insert(tint::wgsl::Extension::kSubgroupsF16);
-    }
     if (IsToggleEnabled(Toggle::AllowUnsafeAPIs)) {
         mWGSLAllowedFeatures.extensions.insert(
             tint::wgsl::Extension::kChromiumDisableUniformityAnalysis);

@@ -337,17 +337,6 @@ ResultOrError<Ref<DeviceBase>> AdapterBase::CreateDeviceInternal(
         DAWN_INVALID_IF(!result.success, "Invalid feature required: %s",
                         result.errorMessage.c_str());
     }
-    // Validate features dependency.
-    // TODO(349125474): Decide if this validation is needed, see
-    // https://github.com/gpuweb/gpuweb/issues/4734 for detail.
-    if (requiredFeatureSet.count(wgpu::FeatureName::SubgroupsF16) > 0) {
-        DAWN_INVALID_IF((requiredFeatureSet.count(wgpu::FeatureName::Subgroups) == 0),
-                        "Feature %s must be required together with feature %s.",
-                        wgpu::FeatureName::SubgroupsF16, wgpu::FeatureName::Subgroups);
-        DAWN_INVALID_IF(requiredFeatureSet.count(wgpu::FeatureName::ShaderF16) == 0,
-                        "Feature %s must be required together with feature %s.",
-                        wgpu::FeatureName::SubgroupsF16, wgpu::FeatureName::ShaderF16);
-    }
 
     if (descriptor->requiredLimits != nullptr) {
         CombinedLimits requiredLimits;

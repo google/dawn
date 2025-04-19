@@ -99,7 +99,6 @@ cc_binary(
     "//src/tint/lang/wgsl/ast",
     "//src/tint/lang/wgsl/program",
     "//src/tint/lang/wgsl/sem",
-    "//src/tint/lang/wgsl:bench",
     "//src/tint/utils",
     "//src/tint/utils/containers",
     "//src/tint/utils/diagnostic",

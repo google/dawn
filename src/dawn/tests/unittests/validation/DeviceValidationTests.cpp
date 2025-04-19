@@ -224,62 +224,6 @@ TEST_F(RequestDeviceValidationTest, LowerIsBetter) {
                           mRequestDeviceCallback.Callback());
 }
 
-// Test that it is an error to request limits with an invalid chained struct
-TEST_F(RequestDeviceValidationTest, InvalidChainedStruct) {
-    wgpu::ChainedStructOut chain = {};
-    wgpu::Limits limits = {};
-    limits.nextInChain = &chain;
-
-    wgpu::DeviceDescriptor descriptor;
-    descriptor.requiredLimits = &limits;
-    EXPECT_CALL(mRequestDeviceCallback,
-                Call(wgpu::RequestDeviceStatus::Error, IsNull(), NonEmptySizedString()))
-        .Times(1);
-    adapter.RequestDevice(&descriptor, wgpu::CallbackMode::AllowSpontaneous,
-                          mRequestDeviceCallback.Callback());
-}
-
-// Test that requiring subroups-f16 feature requires subgroups and shader-f16 features as well
-// TODO(349125474): Decide if this validation is needed, see
-// https://github.com/gpuweb/gpuweb/issues/4734 for detail.
-TEST_F(RequestDeviceValidationTest, SubgroupsF16FeatureDependency) {
-    for (bool requireShaderF16 : {false, true}) {
-        for (bool requireSubgroups : {false, true}) {
-            std::vector<wgpu::FeatureName> features;
-            if (requireShaderF16) {
-                features.push_back(wgpu::FeatureName::ShaderF16);
-            }
-            if (requireSubgroups) {
-                features.push_back(wgpu::FeatureName::Subgroups);
-            }
-            features.push_back(wgpu::FeatureName::SubgroupsF16);
-
-            wgpu::DeviceDescriptor descriptor;
-            descriptor.requiredFeatureCount = features.size();
-            descriptor.requiredFeatures = features.data();
-
-            // Device request with subgroups-f16 feature can only success if shader-f16 feature
-            // and subgroups features are required as well.
-            const bool isSuccess = requireSubgroups && requireShaderF16;
-
-            if (isSuccess) {
-                EXPECT_CALL(mRequestDeviceCallback,
-                            Call(wgpu::RequestDeviceStatus::Success, NotNull(), EmptySizedString()))
-                    .Times(1);
-            } else {
-                EXPECT_CALL(mRequestDeviceCallback,
-                            Call(wgpu::RequestDeviceStatus::Error, IsNull(), NonEmptySizedString()))
-                    .Times(1);
-            }
-
-            EXPECT_DEPRECATION_WARNINGS(
-                adapter.RequestDevice(&descriptor, wgpu::CallbackMode::AllowSpontaneous,
-                                      mRequestDeviceCallback.Callback()),
-                GetDeviceCreationDeprecationWarningExpectation(descriptor));
-        }
-    }
-}
-
 class DeviceTickValidationTest : public ValidationTest {};
 
 // Device destroy before API-level Tick should always result in no-op and false.
