@@ -280,12 +280,12 @@ deps = {
   },
 
   'third_party/vulkan-deps': {
-    'url': '{chromium_git}/vulkan-deps@5642440a9e1a3d89807275bd73e99ceab562fe74',
+    'url': '{chromium_git}/vulkan-deps@2c587f95fef0180d0bbf99f473cb5fb269080136',
     'condition': 'dawn_standalone',
   },
 
   'third_party/glslang/src': {
-    'url': '{chromium_git}/external/github.com/KhronosGroup/glslang@04801966f69257d02eed2d5fcf8083916a76ad5f',
+    'url': '{chromium_git}/external/github.com/KhronosGroup/glslang@fd4339381023e29132ed8133af9a2b388c248a09',
     'condition': 'dawn_standalone',
   },
 
