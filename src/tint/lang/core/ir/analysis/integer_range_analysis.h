@@ -81,6 +81,12 @@ class IntegerRangeAnalysis {
     /// @returns the integer range info
     const IntegerRangeInfo* GetInfo(const FunctionParam* param, uint32_t index = 0);
 
+    /// Returns the integer range info of a given variable with given index, if it is an integer
+    /// variable.
+    /// @param var the variable to get information about
+    /// @returns the integer range info
+    const IntegerRangeInfo* GetInfo(const Var* var);
+
     /// Note: This function is only for tests.
     /// Returns the pointer of the loop control variable in the given loop when its initializer
     /// meets the below requirements.

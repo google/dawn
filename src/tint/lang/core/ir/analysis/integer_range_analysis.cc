@@ -68,6 +68,41 @@ bool IsConstantInteger(const Value* v) {
     }
     return false;
 }
+
+int64_t GetValueFromConstant(const Constant* value) {
+    // Return an int64_t is enough as the type of `value` can only be either i32 or u32.
+    [[maybe_unused]] bool is_i32_or_u32 = value->Type()->IsAnyOf<type::I32, type::U32>();
+    TINT_ASSERT(is_i32_or_u32);
+    return value->Value()->ValueAs<int64_t>();
+}
+
+struct CompareOpAndConstRHS {
+    BinaryOp op;
+    int64_t const_rhs;
+};
+
+// A valid `compare` binary instruction can be in one of the below formats:
+// 1. variable >= constant variable <= constant
+// 2. variable > constant variable < constant
+// 3. constant >= variable constant <= variable
+// 4. constant > variable constant < variable
+// Currently this function only accepts format 1.
+// TODO(348701956): turns the `compare` in format 2, 3, 4 into format 1 and always fetch the
+// equivalent information in format 1. e.g.
+// - "variable > constant" => result.op = ">=", result.constRHS = constant + 1
+// - "constant >= variable" => result.op = "<=", result.constRHS = variable
+// - "constant > variable" => result.op = "<=", result.constRHS = constant - 1
+CompareOpAndConstRHS GetCompareOpAndConstRHS(const Binary* compare) {
+    CompareOpAndConstRHS result;
+
+    // TODO(348701956): Support more situations
+    TINT_ASSERT(IsConstantInteger(compare->RHS()));
+
+    result.op = compare->Op();
+    result.const_rhs = GetValueFromConstant(compare->RHS()->As<Constant>());
+    return result;
+}
+
 }  // namespace
 
 IntegerRangeInfo::IntegerRangeInfo(int64_t min_bound, int64_t max_bound) {
@@ -81,7 +116,10 @@ IntegerRangeInfo::IntegerRangeInfo(uint64_t min_bound, uint64_t max_bound) {
 }
 
 struct IntegerRangeAnalysisImpl {
-    explicit IntegerRangeAnalysisImpl(Function* func) : function_(func) {}
+    explicit IntegerRangeAnalysisImpl(Function* func) : function_(func) {
+        // Analyze all of the loops in the function.
+        Traverse(func->Block(), [&](Loop* l) { AnalyzeLoop(l); });
+    }
 
     const IntegerRangeInfo* GetInfo(const FunctionParam* param, uint32_t index) {
         if (!param->Type()->IsIntegerScalarOrVector()) {
@@ -128,6 +166,91 @@ struct IntegerRangeAnalysisImpl {
 
         TINT_ASSERT(info.Length() > index);
         return &info[index];
+    }
+
+    const IntegerRangeInfo* GetInfo(const Var* var) {
+        return integer_var_range_info_map_.Get(var).value;
+    }
+
+    /// Analyze a loop to compute the range of the loop control variable if possible.
+    void AnalyzeLoop(Loop* loop) {
+        const Var* index = GetLoopControlVariableFromConstantInitializer(loop);
+        if (!index) {
+            return;
+        }
+        const Binary* update = GetBinaryToUpdateLoopControlVariableInContinuingBlock(loop, index);
+        if (!update) {
+            return;
+        }
+        const Binary* compare = GetBinaryToCompareLoopControlVariableInLoopBody(loop, index);
+        if (!compare) {
+            return;
+        }
+
+        TINT_ASSERT(index->Initializer());
+        TINT_ASSERT(index->Initializer()->As<Constant>());
+
+        // for (var i = const_init; ...)
+        int64_t const_init = GetValueFromConstant(index->Initializer()->As<Constant>());
+
+        // for (...; i++) or for(...; i--)
+        bool index_is_increasing = update->Op() == BinaryOp::kAdd;
+
+        // Currently we only support `binary` in "index <= constant" or "index >= constant" format.
+        // TODO(348701956): Support other cases in `GetCompareOpAndConstRHS()`. For example,
+        // - turn "index < constant" into "index <= constant - 1"
+        // - turn "index > constant" into "index >= constant + 1"
+        // - turn "constant op index" into "index reverse-op constant"
+        if (!IsConstantInteger(compare->RHS())) {
+            return;
+        }
+
+        auto to_integer_range_info = [&](int64_t min_value, int64_t max_value) {
+            if (index->Initializer()->As<Constant>()->Type()->IsSignedIntegerScalar()) {
+                return IntegerRangeInfo(min_value, max_value);
+            } else {
+                return IntegerRangeInfo(static_cast<uint64_t>(min_value),
+                                        static_cast<uint64_t>(max_value));
+            }
+        };
+        CompareOpAndConstRHS compare_info = GetCompareOpAndConstRHS(compare);
+        switch (compare_info.op) {
+            case BinaryOp::kLessThanEqual: {
+                // for (var index = const_init; index <= const_rhs; index++)
+                // Only `const_init <= const_rhs` is valid. The range of `index` is:
+                // [const_init, const_rhs]
+                // Note that in `GetBinaryToCompareLoopControlVariableInLoopBody()` we disallow
+                // `const_rhs` to be the maximum value of `i32` or `u32`, so:
+                // - `index + 1` won't be overflow as `const_init` cannot be greater than
+                //   `const_rhs`.
+                // - `index <= const_rhs` can correctly exit when `const_init + 1` is the maximum
+                //   value of `i32` or `u32`.
+                if (index_is_increasing && const_init <= compare_info.const_rhs) {
+                    IntegerRangeInfo range_info =
+                        to_integer_range_info(const_init, compare_info.const_rhs);
+                    integer_var_range_info_map_.Add(index, range_info);
+                }
+                break;
+            }
+            case BinaryOp::kGreaterThanEqual: {
+                // for (var index = const_init; index >= const_rhs; index--)
+                // Only `const_init >= const_rhs` is valid. The range of `index` is:
+                // [const_rhs, const_init]
+                // Note that in `GetBinaryToCompareLoopControlVariableInLoopBody()` we disallow
+                // `const_rhs` to be the minimum value of `i32` or `u32`, so:
+                // - `index - 1` won't be underflow as `const_init` cannot be less than `const_rhs`.
+                // - `index >= const_rhs` can correctly exit when `const_init - 1` is the minimum
+                //   value of `i32` or `u32`.
+                if (!index_is_increasing && const_init >= compare_info.const_rhs) {
+                    IntegerRangeInfo range_info =
+                        to_integer_range_info(compare_info.const_rhs, const_init);
+                    integer_var_range_info_map_.Add(index, range_info);
+                }
+                break;
+            }
+            default:
+                break;
+        }
     }
 
     const Var* GetLoopControlVariableFromConstantInitializer(const Loop* loop) {
@@ -477,6 +600,7 @@ struct IntegerRangeAnalysisImpl {
     Function* function_;
     Hashmap<const FunctionParam*, Vector<IntegerRangeInfo, 3>, 4>
         integer_function_param_range_info_map_;
+    Hashmap<const Var*, IntegerRangeInfo, 8> integer_var_range_info_map_;
 };
 
 IntegerRangeAnalysis::IntegerRangeAnalysis(Function* func)
@@ -503,6 +627,10 @@ const Binary* IntegerRangeAnalysis::GetBinaryToCompareLoopControlVariableInLoopB
     const Loop* loop,
     const Var* loop_control_variable) {
     return impl_->GetBinaryToCompareLoopControlVariableInLoopBody(loop, loop_control_variable);
+}
+
+const IntegerRangeInfo* IntegerRangeAnalysis::GetInfo(const Var* var) {
+    return impl_->GetInfo(var);
 }
 
 }  // namespace tint::core::ir::analysis
