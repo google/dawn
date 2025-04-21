@@ -143,7 +143,7 @@ function wrapPromiseWithHeartbeat(prototype, key) {
   prototype[key] = function (...args) {
     const promise = old.call(this, ...args);
     // Send a heartbeat just before any code that was waiting on the promise.
-    promise.finally(sendHeartbeat);
+    promise.then(sendHeartbeat, sendHeartbeat);
     // Return the original promise so we don't interfere with the behavior
     // of the API itself.
     return promise;
