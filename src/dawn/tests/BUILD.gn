@@ -780,6 +780,7 @@ source_set("white_box_tests_sources") {
     "white_box/SharedBufferMemoryTests.h",
     "white_box/SharedTextureMemoryTests.cpp",
     "white_box/SharedTextureMemoryTests.h",
+    "white_box/WaitListEventTests.cpp",
   ]
   libs = []
 
