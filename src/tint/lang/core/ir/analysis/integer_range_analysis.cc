@@ -86,10 +86,9 @@ struct CompareOpAndConstRHS {
 // 2. variable > constant variable < constant
 // 3. constant >= variable constant <= variable
 // 4. constant > variable constant < variable
-// Currently this function only accepts format 1.
-// TODO(348701956): turns the `compare` in format 2, 3, 4 into format 1 and always fetch the
+// Currently this function only accepts format 1, 2.
+// TODO(348701956): turns the `compare` in format 3, 4 into format 1 and always fetch the
 // equivalent information in format 1. e.g.
-// - "variable > constant" => result.op = ">=", result.constRHS = constant + 1
 // - "constant >= variable" => result.op = "<=", result.constRHS = variable
 // - "constant > variable" => result.op = "<=", result.constRHS = constant - 1
 CompareOpAndConstRHS GetCompareOpAndConstRHS(const Binary* compare) {
@@ -97,9 +96,32 @@ CompareOpAndConstRHS GetCompareOpAndConstRHS(const Binary* compare) {
 
     // TODO(348701956): Support more situations
     TINT_ASSERT(IsConstantInteger(compare->RHS()));
+    int64_t const_rhs = GetValueFromConstant(compare->RHS()->As<Constant>());
 
-    result.op = compare->Op();
-    result.const_rhs = GetValueFromConstant(compare->RHS()->As<Constant>());
+    switch (compare->Op()) {
+        case BinaryOp::kLessThan:
+            // variable < constant => variable <= constant - 1
+            // `const_rhs - 1` will always be safe after the checks in
+            // `GetBinaryToCompareLoopControlVariableInLoopBody()`.
+            result.op = BinaryOp::kLessThanEqual;
+            result.const_rhs = const_rhs - 1;
+            break;
+        case BinaryOp::kGreaterThan:
+            // variable > constant => variable >= constant + 1
+            // `const_rhs` will always be safe after the checks in
+            // `GetBinaryToCompareLoopControlVariableInLoopBody()`.
+            result.op = BinaryOp::kGreaterThanEqual;
+            result.const_rhs = const_rhs + 1;
+            break;
+        case BinaryOp::kLessThanEqual:
+        case BinaryOp::kGreaterThanEqual:
+            result.op = compare->Op();
+            result.const_rhs = const_rhs;
+            break;
+        default:
+            TINT_UNREACHABLE();
+    }
+
     return result;
 }
 
@@ -196,10 +218,8 @@ struct IntegerRangeAnalysisImpl {
         // for (...; i++) or for(...; i--)
         bool index_is_increasing = update->Op() == BinaryOp::kAdd;
 
-        // Currently we only support `binary` in "index <= constant" or "index >= constant" format.
+        // Currently we only support `binary` in "index op constant" format.
         // TODO(348701956): Support other cases in `GetCompareOpAndConstRHS()`. For example,
-        // - turn "index < constant" into "index <= constant - 1"
-        // - turn "index > constant" into "index >= constant + 1"
         // - turn "constant op index" into "index reverse-op constant"
         if (!IsConstantInteger(compare->RHS())) {
             return;
