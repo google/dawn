@@ -271,19 +271,17 @@ If not provided, will be inferred from output filename extension:
                                                 format_enum_names, ShortName{"f"});
     TINT_DEFER(opts->format = fmt.value.value_or(Format::kUnknown));
 
-    if (exe_mode == ExeMode::kServer) {
-        opts->printer = CreatePrinter(tint::ColorMode::kPlain);
-    } else {
-        auto& col = options.Add<EnumOption<tint::ColorMode>>(
-            "color", "Use colored output",
-            tint::Vector{
-                EnumName{tint::ColorMode::kPlain, "off"},
-                EnumName{tint::ColorMode::kDark, "dark"},
-                EnumName{tint::ColorMode::kLight, "light"},
-            },
-            ShortName{"col"}, Default{tint::ColorModeDefault()});
-        TINT_DEFER(opts->printer = CreatePrinter(*col.value));
-    }
+    const auto default_color_mode =
+        exe_mode == ExeMode::kServer ? tint::ColorMode::kPlain : tint::ColorModeDefault();
+    auto& col =
+        options.Add<EnumOption<tint::ColorMode>>("color", "Use colored output",
+                                                 tint::Vector{
+                                                     EnumName{tint::ColorMode::kPlain, "off"},
+                                                     EnumName{tint::ColorMode::kDark, "dark"},
+                                                     EnumName{tint::ColorMode::kLight, "light"},
+                                                 },
+                                                 ShortName{"col"}, Default{default_color_mode});
+    TINT_DEFER(opts->printer = CreatePrinter(*col.value));
 
     auto& ep = options.Add<StringOption>("entry-point", "Output single entry point",
                                          ShortName{"ep"}, Parameter{"name"});
