@@ -54,7 +54,10 @@ struct DirectVariableAccessOptions {
     bool transform_handle = false;
 
     /// Reflection for this class
-    TINT_REFLECT(DirectVariableAccessOptions, transform_private, transform_function);
+    TINT_REFLECT(DirectVariableAccessOptions,
+                 transform_private,
+                 transform_function,
+                 transform_handle);
 };
 
 /// DirectVariableAccess is a transform that transforms parameters in the 'storage',

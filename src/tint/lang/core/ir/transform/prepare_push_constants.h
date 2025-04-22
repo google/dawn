@@ -77,9 +77,6 @@ struct PreparePushConstantsConfig {
 
     /// The ordered map from offset to internally used constant descriptor.
     std::map<uint32_t, InternalPushConstant> internal_constants{};
-
-    /// Reflection for this class.
-    TINT_REFLECT(PreparePushConstantsConfig, internal_constants);
 };
 
 /// PreparePushConstants is a transform that sets up the structure and variable used for push

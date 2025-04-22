@@ -108,7 +108,7 @@ struct CombinedTextureSamplerPair {
     }
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
-    TINT_REFLECT(CombinedTextureSamplerPair, texture, sampler);
+    TINT_REFLECT(CombinedTextureSamplerPair, texture, sampler, is_external_plane1);
 };
 
 }  // namespace tint::glsl::writer::binding
