@@ -83,7 +83,6 @@ MaybeError PipelineGL::InitializeBase(const OpenGLFunctions& gl,
                                     layout, &needsPlaceholderSampler,
                                     &mBindingPointEmulatedBuiltins, &needsSSBOLengthUniformBuffer));
         mNeedsSSBOLengthUniformBuffer |= needsSSBOLengthUniformBuffer;
-        // XXX transform to flip some attributes from RGBA to BGRA
         DAWN_GL_TRY(gl, AttachShader(mProgram, shader));
         glShaders.push_back(shader);
     }
