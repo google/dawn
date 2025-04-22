@@ -160,7 +160,7 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
     const BufferBindingLayout& value,
     const absl::FormatConversionSpec& spec,
     absl::FormatSink* s) {
-    BufferBindingInfo info(value);
+    auto info = BufferBindingInfo::From(value);
     return AbslFormatConvert(info, spec, s);
 }
 
@@ -177,7 +177,7 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
     const TextureBindingLayout& value,
     const absl::FormatConversionSpec& spec,
     absl::FormatSink* s) {
-    TextureBindingInfo info(value);
+    auto info = TextureBindingInfo::From(value);
     return AbslFormatConvert(info, spec, s);
 }
 
@@ -194,7 +194,7 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
     const StorageTextureBindingLayout& value,
     const absl::FormatConversionSpec& spec,
     absl::FormatSink* s) {
-    StorageTextureBindingInfo info(value);
+    auto info = StorageTextureBindingInfo::From(value);
     return AbslFormatConvert(info, spec, s);
 }
 
@@ -210,7 +210,7 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
     const SamplerBindingLayout& value,
     const absl::FormatConversionSpec& spec,
     absl::FormatSink* s) {
-    SamplerBindingInfo info(value);
+    auto info = SamplerBindingInfo::From(value);
     return AbslFormatConvert(info, spec, s);
 }
 

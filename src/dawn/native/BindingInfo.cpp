@@ -297,37 +297,104 @@ MaybeError ValidateBindingCounts(const CombinedLimits& limits,
     return {};
 }
 
-BufferBindingInfo::BufferBindingInfo() = default;
+// BufferBindingInfo
 
-BufferBindingInfo::BufferBindingInfo(const BufferBindingLayout& apiLayout)
-    : type(apiLayout.type),
-      minBindingSize(apiLayout.minBindingSize),
-      hasDynamicOffset(apiLayout.hasDynamicOffset) {}
+// static
+BufferBindingInfo BufferBindingInfo::From(const BufferBindingLayout& layout) {
+    BufferBindingLayout defaultedLayout = layout.WithTrivialFrontendDefaults();
+    return {
+        .type = defaultedLayout.type,
+        .minBindingSize = defaultedLayout.minBindingSize,
+        .hasDynamicOffset = defaultedLayout.hasDynamicOffset,
+    };
+}
 
-TextureBindingInfo::TextureBindingInfo() {}
+bool BufferBindingInfo::operator==(const BufferBindingInfo& other) const {
+    return type == other.type && minBindingSize == other.minBindingSize &&
+           hasDynamicOffset == other.hasDynamicOffset;
+}
 
-TextureBindingInfo::TextureBindingInfo(const TextureBindingLayout& apiLayout)
-    : sampleType(apiLayout.sampleType),
-      viewDimension(apiLayout.viewDimension),
-      multisampled(apiLayout.multisampled) {}
+// TextureBindingInfo
 
-StorageTextureBindingInfo::StorageTextureBindingInfo() = default;
+// static
+TextureBindingInfo TextureBindingInfo::From(const TextureBindingLayout& layout) {
+    TextureBindingLayout defaultedLayout = layout.WithTrivialFrontendDefaults();
+    return {
+        .sampleType = defaultedLayout.sampleType,
+        .viewDimension = defaultedLayout.viewDimension,
+        .multisampled = defaultedLayout.multisampled,
+    };
+}
 
-StorageTextureBindingInfo::StorageTextureBindingInfo(const StorageTextureBindingLayout& apiLayout)
-    : format(apiLayout.format), viewDimension(apiLayout.viewDimension), access(apiLayout.access) {}
+bool TextureBindingInfo::operator==(const TextureBindingInfo& other) const {
+    return sampleType == other.sampleType && viewDimension == other.viewDimension &&
+           multisampled == other.multisampled;
+}
 
-SamplerBindingInfo::SamplerBindingInfo() = default;
+// StorageTextureBindingInfo
 
-SamplerBindingInfo::SamplerBindingInfo(const SamplerBindingLayout& apiLayout)
-    : type(apiLayout.type) {}
+// static
+StorageTextureBindingInfo StorageTextureBindingInfo::From(
+    const StorageTextureBindingLayout& layout) {
+    StorageTextureBindingLayout defaultedLayout = layout.WithTrivialFrontendDefaults();
+    return {
+        .format = defaultedLayout.format,
+        .viewDimension = defaultedLayout.viewDimension,
+        .access = defaultedLayout.access,
+    };
+}
 
-StaticSamplerBindingInfo::StaticSamplerBindingInfo(const StaticSamplerBindingLayout& apiLayout)
-    : sampler(apiLayout.sampler),
-      sampledTextureBinding(BindingNumber{apiLayout.sampledTextureBinding}),
-      isUsedForSingleTextureBinding(apiLayout.sampledTextureBinding < WGPU_LIMIT_U32_UNDEFINED) {}
+bool StorageTextureBindingInfo::operator==(const StorageTextureBindingInfo& other) const {
+    return format == other.format && viewDimension == other.viewDimension && access == other.access;
+}
 
-InputAttachmentBindingInfo::InputAttachmentBindingInfo() = default;
-InputAttachmentBindingInfo::InputAttachmentBindingInfo(wgpu::TextureSampleType sampleType)
-    : sampleType(sampleType) {}
+// SamplerBindingInfo
+
+// static
+SamplerBindingInfo SamplerBindingInfo::From(const SamplerBindingLayout& layout) {
+    SamplerBindingLayout defaultedLayout = layout.WithTrivialFrontendDefaults();
+    return {
+        .type = defaultedLayout.type,
+    };
+}
+
+bool SamplerBindingInfo::operator==(const SamplerBindingInfo& other) const {
+    return type == other.type;
+}
+
+// SamplerBindingInfo
+
+// static
+StaticSamplerBindingInfo StaticSamplerBindingInfo::From(const StaticSamplerBindingLayout& layout) {
+    return {
+        .sampler = layout.sampler,
+        .sampledTextureBinding = BindingNumber{layout.sampledTextureBinding},
+        .isUsedForSingleTextureBinding = layout.sampledTextureBinding < WGPU_LIMIT_U32_UNDEFINED,
+    };
+}
+
+bool StaticSamplerBindingInfo::operator==(const StaticSamplerBindingInfo& other) const {
+    return sampler == other.sampler && sampledTextureBinding == other.sampledTextureBinding &&
+           isUsedForSingleTextureBinding == other.isUsedForSingleTextureBinding;
+}
+
+// ExternalTextureBindingLayout
+
+bool ExternalTextureBindingInfo::operator==(const ExternalTextureBindingInfo&) const {
+    return true;
+}
+
+// InputAttachmentBindingInfo
+
+bool InputAttachmentBindingInfo::operator==(const InputAttachmentBindingInfo& other) const {
+    return sampleType == other.sampleType;
+}
+
+// BindingInfo
+
+bool BindingInfo::operator==(const BindingInfo& other) const {
+    return binding == other.binding && visibility == other.visibility &&
+           bindingLayout == other.bindingLayout;
+}
 
 }  // namespace dawn::native
