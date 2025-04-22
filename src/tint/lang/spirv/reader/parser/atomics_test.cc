@@ -117,6 +117,162 @@ TEST_F(SpirvParserDeathTest, AtomicExchange_float) {
     EXPECT_DEATH_IF_SUPPORTED({ auto _ = Run(src); }, "internal compiler error");
 }
 
+TEST_F(SpirvParserDeathTest, AtomicSMin_u32) {
+    auto src = R"(
+               OpCapability Shader
+               OpExtension "SPV_KHR_storage_buffer_storage_class"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %S "S"
+               OpMemberName %S 0 "a"
+               OpMemberName %S 1 "b"
+               OpName %sb "sb"
+               OpName %main "main"
+               OpDecorate %S Block
+               OpMemberDecorate %S 0 Offset 0
+               OpMemberDecorate %S 1 Offset 4
+               OpDecorate %sb DescriptorSet 0
+               OpDecorate %sb Binding 0
+       %void = OpTypeVoid
+       %uint = OpTypeInt 32 0
+        %int = OpTypeInt 32 1
+     %uint_0 = OpConstant %uint 0
+     %uint_1 = OpConstant %uint 1
+          %S = OpTypeStruct %int %uint
+      %ptr_s = OpTypePointer StorageBuffer %S
+          %5 = OpTypeFunction %void
+%ptr_uint_storage = OpTypePointer StorageBuffer %uint
+         %sb = OpVariable %ptr_s StorageBuffer
+    %ptr_int = OpTypePointer Function %int
+       %main = OpFunction %void None %5
+          %8 = OpLabel
+         %17 = OpAccessChain %ptr_uint_storage %sb %uint_1
+         %18 = OpAtomicSMin %uint %17 %uint_1 %uint_0 %uint_1
+               OpReturn
+               OpFunctionEnd
+)";
+    EXPECT_DEATH_IF_SUPPORTED({ auto _ = Run(src); }, "internal compiler error");
+}
+
+TEST_F(SpirvParserDeathTest, AtomicSMax_u32) {
+    auto src = R"(
+               OpCapability Shader
+               OpExtension "SPV_KHR_storage_buffer_storage_class"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %S "S"
+               OpMemberName %S 0 "a"
+               OpMemberName %S 1 "b"
+               OpName %sb "sb"
+               OpName %main "main"
+               OpDecorate %S Block
+               OpMemberDecorate %S 0 Offset 0
+               OpMemberDecorate %S 1 Offset 4
+               OpDecorate %sb DescriptorSet 0
+               OpDecorate %sb Binding 0
+       %void = OpTypeVoid
+       %uint = OpTypeInt 32 0
+        %int = OpTypeInt 32 1
+     %uint_0 = OpConstant %uint 0
+     %uint_1 = OpConstant %uint 1
+          %S = OpTypeStruct %int %uint
+      %ptr_s = OpTypePointer StorageBuffer %S
+          %5 = OpTypeFunction %void
+%ptr_uint_storage = OpTypePointer StorageBuffer %uint
+         %sb = OpVariable %ptr_s StorageBuffer
+    %ptr_int = OpTypePointer Function %int
+       %main = OpFunction %void None %5
+          %8 = OpLabel
+         %17 = OpAccessChain %ptr_uint_storage %sb %uint_1
+         %18 = OpAtomicSMax %uint %17 %uint_1 %uint_0 %uint_1
+               OpReturn
+               OpFunctionEnd
+)";
+    EXPECT_DEATH_IF_SUPPORTED({ auto _ = Run(src); }, "internal compiler error");
+}
+
+TEST_F(SpirvParserDeathTest, AtomicUMin_i32) {
+    auto src = R"(
+               OpCapability Shader
+               OpExtension "SPV_KHR_storage_buffer_storage_class"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %S "S"
+               OpMemberName %S 0 "a"
+               OpMemberName %S 1 "b"
+               OpName %sb "sb"
+               OpName %main "main"
+               OpDecorate %S Block
+               OpMemberDecorate %S 0 Offset 0
+               OpMemberDecorate %S 1 Offset 4
+               OpDecorate %sb DescriptorSet 0
+               OpDecorate %sb Binding 0
+       %void = OpTypeVoid
+       %uint = OpTypeInt 32 0
+        %int = OpTypeInt 32 1
+      %int_0 = OpConstant %int 0
+      %int_1 = OpConstant %int 1
+     %uint_0 = OpConstant %uint 0
+     %uint_1 = OpConstant %uint 1
+          %S = OpTypeStruct %int %uint
+      %ptr_s = OpTypePointer StorageBuffer %S
+          %5 = OpTypeFunction %void
+%ptr_int_storage = OpTypePointer StorageBuffer %int
+         %sb = OpVariable %ptr_s StorageBuffer
+    %ptr_int = OpTypePointer Function %int
+       %main = OpFunction %void None %5
+          %8 = OpLabel
+         %17 = OpAccessChain %ptr_int_storage %sb %uint_0
+         %18 = OpAtomicUMin %int %17 %int_1 %int_0 %int_1
+               OpReturn
+               OpFunctionEnd
+)";
+    EXPECT_DEATH_IF_SUPPORTED({ auto _ = Run(src); }, "internal compiler error");
+}
+
+TEST_F(SpirvParserDeathTest, AtomicUMax_i32) {
+    auto src = R"(
+               OpCapability Shader
+               OpExtension "SPV_KHR_storage_buffer_storage_class"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %S "S"
+               OpMemberName %S 0 "a"
+               OpMemberName %S 1 "b"
+               OpName %sb "sb"
+               OpName %main "main"
+               OpDecorate %S Block
+               OpMemberDecorate %S 0 Offset 0
+               OpMemberDecorate %S 1 Offset 4
+               OpDecorate %sb DescriptorSet 0
+               OpDecorate %sb Binding 0
+       %void = OpTypeVoid
+       %uint = OpTypeInt 32 0
+        %int = OpTypeInt 32 1
+      %int_0 = OpConstant %int 0
+      %int_1 = OpConstant %int 1
+     %uint_0 = OpConstant %uint 0
+     %uint_1 = OpConstant %uint 1
+          %S = OpTypeStruct %int %uint
+      %ptr_s = OpTypePointer StorageBuffer %S
+          %5 = OpTypeFunction %void
+%ptr_int_storage = OpTypePointer StorageBuffer %int
+         %sb = OpVariable %ptr_s StorageBuffer
+    %ptr_int = OpTypePointer Function %int
+       %main = OpFunction %void None %5
+          %8 = OpLabel
+         %17 = OpAccessChain %ptr_int_storage %sb %uint_0
+         %18 = OpAtomicUMax %int %17 %int_1 %int_0 %int_1
+               OpReturn
+               OpFunctionEnd
+)";
+    EXPECT_DEATH_IF_SUPPORTED({ auto _ = Run(src); }, "internal compiler error");
+}
+
 TEST_F(SpirvParser_AtomicsTest, ArrayStore) {
     EXPECT_IR(R"(
                OpCapability Shader

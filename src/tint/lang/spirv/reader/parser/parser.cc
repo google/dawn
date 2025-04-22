@@ -1279,16 +1279,16 @@ class Parser {
                     EmitSpirvBuiltinCall(inst, spirv::BuiltinFn::kAtomicXor);
                     break;
                 case spv::Op::OpAtomicSMin:
-                    EmitSpirvBuiltinCall(inst, spirv::BuiltinFn::kAtomicSMin);
+                    EmitAtomicSigned(inst, spirv::BuiltinFn::kAtomicSMin);
                     break;
                 case spv::Op::OpAtomicUMin:
-                    EmitSpirvBuiltinCall(inst, spirv::BuiltinFn::kAtomicUMin);
+                    EmitAtomicUnsigned(inst, spirv::BuiltinFn::kAtomicUMin);
                     break;
                 case spv::Op::OpAtomicSMax:
-                    EmitSpirvBuiltinCall(inst, spirv::BuiltinFn::kAtomicSMax);
+                    EmitAtomicSigned(inst, spirv::BuiltinFn::kAtomicSMax);
                     break;
                 case spv::Op::OpAtomicUMax:
-                    EmitSpirvBuiltinCall(inst, spirv::BuiltinFn::kAtomicUMax);
+                    EmitAtomicUnsigned(inst, spirv::BuiltinFn::kAtomicUMax);
                     break;
                 case spv::Op::OpAtomicExchange:
                     CheckAtomicNotFloat(inst);
@@ -1332,6 +1332,18 @@ class Parser {
             const auto& merge_bb = current_spirv_function_->FindBlock(merge_id);
             EmitBlock(dst, *merge_bb);
         }
+    }
+
+    void EmitAtomicSigned(const spvtools::opt::Instruction& inst, spirv::BuiltinFn fn) {
+        core::ir::Value* v = Value(inst.GetSingleWordOperand(2));
+        TINT_ASSERT(v->Type()->UnwrapPtr()->Is<core::type::I32>());
+        EmitSpirvBuiltinCall(inst, fn);
+    }
+
+    void EmitAtomicUnsigned(const spvtools::opt::Instruction& inst, spirv::BuiltinFn fn) {
+        core::ir::Value* v = Value(inst.GetSingleWordOperand(2));
+        TINT_ASSERT(v->Type()->UnwrapPtr()->Is<core::type::U32>());
+        EmitSpirvBuiltinCall(inst, fn);
     }
 
     void EmitArrayLength(const spvtools::opt::Instruction& inst) {
