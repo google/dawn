@@ -238,10 +238,10 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
 
     if (mFunctions.IsGLExtensionSupported("GL_KHR_texture_compression_astc_ldr")) {
         EnableFeature(Feature::TextureCompressionASTC);
-    }
 
-    if (mFunctions.IsGLExtensionSupported("GL_KHR_texture_compression_astc_sliced_3d")) {
-        EnableFeature(Feature::TextureCompressionASTC);
+        if (mFunctions.IsGLExtensionSupported("GL_KHR_texture_compression_astc_sliced_3d")) {
+            EnableFeature(Feature::TextureCompressionASTCSliced3D);
+        }
     }
 
     // ETC2 is core in ES 3.0.
