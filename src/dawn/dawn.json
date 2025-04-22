@@ -2250,7 +2250,7 @@
             {"value": 5, "name": "texture compression BC sliced 3D"},
             {"value": 6, "name": "texture compression ETC2"},
             {"value": 7, "name": "texture compression ASTC"},
-            {"value": 8, "name": "texture compression ASTC sliced 3D", "tags": ["emscripten", "upstream"]},
+            {"value": 8, "name": "texture compression ASTC sliced 3D"},
             {"value": 9, "name": "indirect first instance"},
             {"value": 10, "name": "shader f16"},
             {"value": 11, "name": "RG11B10 ufloat renderable"},

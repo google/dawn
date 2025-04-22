@@ -813,6 +813,18 @@ TEST_F(CompressedTextureFormatsValidationTests, BCSliced3DTexture) {
     }
 }
 
+// Test that it is not allowed to create a 3D texture with ASTC format without the ASTCSliced3D
+// feature.
+TEST_F(CompressedTextureFormatsValidationTests, ASTCSliced3DTexture) {
+    for (wgpu::TextureFormat format : utils::kASTCFormats) {
+        wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
+        descriptor.format = format;
+        descriptor.size.depthOrArrayLayers = 4;
+        descriptor.dimension = wgpu::TextureDimension::e3D;
+        ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
+    }
+}
+
 // Test that it is not allowed to create a 1D texture in compressed formats.
 TEST_F(CompressedTextureFormatsValidationTests, 1DTexture) {
     for (wgpu::TextureFormat format : utils::kCompressedFormats) {
@@ -875,6 +887,46 @@ TEST_F(CompressedTextureFormatsValidationTests, TextureSize) {
             descriptor.size.height = kHeightMultiplier * blockHeight;
             device.CreateTexture(&descriptor);
         }
+    }
+}
+
+class BCFormatsValidationTests : public TextureValidationTest {
+  protected:
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        return {wgpu::FeatureName::TextureCompressionBC,
+                wgpu::FeatureName::TextureCompressionBCSliced3D};
+    }
+};
+
+// Test that it is allowed to create a 3D texture with BC format with the BCSliced3D feature.
+TEST_F(BCFormatsValidationTests, BCSliced3DTexture) {
+    for (wgpu::TextureFormat format : utils::kBCFormats) {
+        wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
+        descriptor.format = format;
+        descriptor.size.depthOrArrayLayers = 4;
+        descriptor.dimension = wgpu::TextureDimension::e3D;
+        descriptor.usage = wgpu::TextureUsage::TextureBinding;
+        device.CreateTexture(&descriptor);
+    }
+}
+
+class ASTCFormatsValidationTests : public TextureValidationTest {
+  protected:
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        return {wgpu::FeatureName::TextureCompressionASTC,
+                wgpu::FeatureName::TextureCompressionASTCSliced3D};
+    }
+};
+
+// Test that it is allowed to create a 3D texture with ASTC format with the ASTCSliced3D feature.
+TEST_F(ASTCFormatsValidationTests, ASTCSliced3DTexture) {
+    for (wgpu::TextureFormat format : utils::kASTCFormats) {
+        wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
+        descriptor.format = format;
+        descriptor.size.depthOrArrayLayers = 4;
+        descriptor.dimension = wgpu::TextureDimension::e3D;
+        descriptor.usage = wgpu::TextureUsage::TextureBinding;
+        device.CreateTexture(&descriptor);
     }
 }
 

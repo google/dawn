@@ -65,6 +65,11 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
       "texture formats",
       "https://gpuweb.github.io/gpuweb/#texture-compression-astc",
       FeatureInfo::FeatureState::Stable}},
+    {Feature::TextureCompressionASTCSliced3D,
+     {"Allows Adaptable Scalable Texture Compressed (ASTC) texture formats to be used with 3D "
+      "dimensions",
+      "https://gpuweb.github.io/gpuweb/#texture-compression-astc-sliced-3d",
+      FeatureInfo::FeatureState::Experimental}},
     {Feature::TimestampQuery,
      {"Support Timestamp Query", "https://gpuweb.github.io/gpuweb/#timestamp-query",
       FeatureInfo::FeatureState::Stable}},

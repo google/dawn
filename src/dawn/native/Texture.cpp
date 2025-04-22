@@ -750,6 +750,12 @@ MaybeError ValidateTextureDescriptor(
                     !device->HasFeature(Feature::TextureCompressionBCSliced3D),
                 "A texture with a BC compressed format (%s) only supports 3D if %s is enabled.",
                 format->format, wgpu::FeatureName::TextureCompressionBCSliced3D);
+        } else if (format->isASTC) {
+            DAWN_INVALID_IF(
+                descriptor->dimension == wgpu::TextureDimension::e3D &&
+                    !device->HasFeature(Feature::TextureCompressionASTCSliced3D),
+                "A texture with a ASTC compressed format (%s) only supports 3D if %s is enabled.",
+                format->format, wgpu::FeatureName::TextureCompressionASTCSliced3D);
         } else {
             DAWN_INVALID_IF(descriptor->dimension == wgpu::TextureDimension::e3D,
                             "A texture with a compressed format (%s) does not support 3D.",

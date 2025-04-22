@@ -1491,6 +1491,9 @@ bool Converter::Convert(wgpu::FeatureName& out, interop::GPUFeatureName in) {
         case interop::GPUFeatureName::kTextureCompressionAstc:
             out = wgpu::FeatureName::TextureCompressionASTC;
             return true;
+        case interop::GPUFeatureName::kTextureCompressionAstcSliced3D:
+            out = wgpu::FeatureName::TextureCompressionASTCSliced3D;
+            return true;
         case interop::GPUFeatureName::kTimestampQuery:
             out = wgpu::FeatureName::TimestampQuery;
             return true;
@@ -1539,8 +1542,6 @@ bool Converter::Convert(wgpu::FeatureName& out, interop::GPUFeatureName in) {
         case interop::GPUFeatureName::kChromiumExperimentalSubgroupMatrix:
             out = wgpu::FeatureName::ChromiumExperimentalSubgroupMatrix;
             return true;
-        case interop::GPUFeatureName::kTextureCompressionAstcSliced3D:
-            return false;
     }
     return false;
 }
@@ -1561,6 +1562,7 @@ bool Converter::Convert(interop::GPUFeatureName& out, wgpu::FeatureName in) {
         CASE(RG11B10UfloatRenderable, kRg11B10UfloatRenderable);
         CASE(ShaderF16, kShaderF16);
         CASE(TextureCompressionASTC, kTextureCompressionAstc);
+        CASE(TextureCompressionASTCSliced3D, kTextureCompressionAstcSliced3D);
         CASE(TextureCompressionBC, kTextureCompressionBc);
         CASE(TextureCompressionBCSliced3D, kTextureCompressionBcSliced3D);
         CASE(TextureCompressionETC2, kTextureCompressionEtc2);
@@ -1624,7 +1626,6 @@ bool Converter::Convert(interop::GPUFeatureName& out, wgpu::FeatureName in) {
         case wgpu::FeatureName::SharedTextureMemoryVkDedicatedAllocation:
         case wgpu::FeatureName::SharedTextureMemoryZirconHandle:
         case wgpu::FeatureName::StaticSamplers:
-        case wgpu::FeatureName::TextureCompressionASTCSliced3D:
         case wgpu::FeatureName::TransientAttachments:
         case wgpu::FeatureName::YCbCrVulkanSamplers:
         case wgpu::FeatureName::DawnLoadResolveTexture:
