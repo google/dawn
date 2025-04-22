@@ -575,6 +575,7 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     }
     if ([*mDevice supportsFamily:MTLGPUFamilyApple3]) {
         EnableFeature(Feature::TextureCompressionASTC);
+        EnableFeature(Feature::TextureCompressionASTCSliced3D);
     }
 
     auto ShouldLeakCounterSets = [this] {

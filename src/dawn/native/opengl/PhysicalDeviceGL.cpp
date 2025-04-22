@@ -240,6 +240,10 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         EnableFeature(Feature::TextureCompressionASTC);
     }
 
+    if (mFunctions.IsGLExtensionSupported("GL_KHR_texture_compression_astc_sliced_3d")) {
+        EnableFeature(Feature::TextureCompressionASTC);
+    }
+
     // ETC2 is core in ES 3.0.
     // However, ANGLE on Desktop GL does not support it.
     if (mFunctions.IsAtLeastGLES(3, 0) && !IsANGLEDesktopGL(mName)) {
