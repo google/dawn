@@ -115,6 +115,15 @@ bool PhysicalDevice::IsDepthStencilFormatSupported(VkFormat format) const {
     return (properties.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT) != 0;
 }
 
+bool PhysicalDevice::IsTextureCompressionASTCSliced3DSupported(VkFormat format) const {
+    VkImageFormatProperties properties;
+    VkResult result =
+        VkResult::WrapUnsafe(mVulkanInstance->GetFunctions().GetPhysicalDeviceImageFormatProperties(
+            mVkPhysicalDevice, format, VK_IMAGE_TYPE_3D, VK_IMAGE_TILING_OPTIMAL,
+            VK_IMAGE_USAGE_SAMPLED_BIT, {}, &properties));
+    return (result == VK_SUCCESS);
+}
+
 MaybeError PhysicalDevice::InitializeImpl() {
     DAWN_TRY_ASSIGN(mDeviceInfo, GatherDeviceInfo(*this));
 
@@ -238,6 +247,29 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
 
     if (mDeviceInfo.features.textureCompressionASTC_LDR == VK_TRUE) {
         EnableFeature(Feature::TextureCompressionASTC);
+    }
+
+    bool textureCompressionASTCSliced3DSupported = true;
+    for (const auto& astcFormat :
+         {VK_FORMAT_ASTC_4x4_UNORM_BLOCK,   VK_FORMAT_ASTC_4x4_SRGB_BLOCK,
+          VK_FORMAT_ASTC_5x4_UNORM_BLOCK,   VK_FORMAT_ASTC_5x4_SRGB_BLOCK,
+          VK_FORMAT_ASTC_5x5_UNORM_BLOCK,   VK_FORMAT_ASTC_5x5_SRGB_BLOCK,
+          VK_FORMAT_ASTC_6x5_UNORM_BLOCK,   VK_FORMAT_ASTC_6x5_SRGB_BLOCK,
+          VK_FORMAT_ASTC_6x6_UNORM_BLOCK,   VK_FORMAT_ASTC_6x6_SRGB_BLOCK,
+          VK_FORMAT_ASTC_8x5_UNORM_BLOCK,   VK_FORMAT_ASTC_8x5_SRGB_BLOCK,
+          VK_FORMAT_ASTC_8x6_UNORM_BLOCK,   VK_FORMAT_ASTC_8x6_SRGB_BLOCK,
+          VK_FORMAT_ASTC_8x8_UNORM_BLOCK,   VK_FORMAT_ASTC_8x8_SRGB_BLOCK,
+          VK_FORMAT_ASTC_10x5_UNORM_BLOCK,  VK_FORMAT_ASTC_10x5_SRGB_BLOCK,
+          VK_FORMAT_ASTC_10x6_UNORM_BLOCK,  VK_FORMAT_ASTC_10x6_SRGB_BLOCK,
+          VK_FORMAT_ASTC_10x8_UNORM_BLOCK,  VK_FORMAT_ASTC_10x8_SRGB_BLOCK,
+          VK_FORMAT_ASTC_10x10_UNORM_BLOCK, VK_FORMAT_ASTC_10x10_SRGB_BLOCK,
+          VK_FORMAT_ASTC_12x10_UNORM_BLOCK, VK_FORMAT_ASTC_12x10_SRGB_BLOCK,
+          VK_FORMAT_ASTC_12x12_UNORM_BLOCK, VK_FORMAT_ASTC_12x12_SRGB_BLOCK}) {
+        textureCompressionASTCSliced3DSupported &=
+            IsTextureCompressionASTCSliced3DSupported(astcFormat);
+    }
+    if (textureCompressionASTCSliced3DSupported) {
+        EnableFeature(Feature::TextureCompressionASTCSliced3D);
     }
 
     if (mDeviceInfo.properties.limits.timestampComputeAndGraphics == VK_TRUE) {
