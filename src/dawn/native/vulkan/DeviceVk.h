@@ -132,6 +132,8 @@ class Device final : public DeviceBase {
                                                       wgpu::BufferUsage originalUsage,
                                                       size_t bufferSize) const override;
 
+    QuerySetBase* GetEmptyPassQuerySet();
+
   private:
     Device(AdapterBase* adapter,
            const UnpackedPtr<DeviceDescriptor>& descriptor,
@@ -209,6 +211,8 @@ class Device final : public DeviceBase {
     std::vector<std::string> mDebugMessages;
 
     Ref<PipelineCache> mMonolithicPipelineCache;
+
+    Ref<QuerySetBase> mEmptyPassQuerySet;
 
     bool mSupportsMappableStorageBuffer = false;
 

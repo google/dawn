@@ -1261,9 +1261,13 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
     DescriptorSetTracker descriptorSets = {};
     RenderPipeline* lastPipeline = nullptr;
 
+    // Tracks the number of commands that do significant GPU work (a draw or query write) this pass.
+    uint32_t workCommandCount = 0;
+
     auto EncodeRenderBundleCommand = [&](CommandIterator* iter, Command type) {
         switch (type) {
             case Command::Draw: {
+                workCommandCount++;
                 DrawCmd* draw = iter->NextCommand<DrawCmd>();
 
                 descriptorSets.Apply(device, recordingContext, VK_PIPELINE_BIND_POINT_GRAPHICS);
@@ -1274,6 +1278,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
             }
 
             case Command::DrawIndexed: {
+                workCommandCount++;
                 DrawIndexedCmd* draw = iter->NextCommand<DrawIndexedCmd>();
 
                 descriptorSets.Apply(device, recordingContext, VK_PIPELINE_BIND_POINT_GRAPHICS);
@@ -1284,6 +1289,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
             }
 
             case Command::DrawIndirect: {
+                workCommandCount++;
                 DrawIndirectCmd* draw = iter->NextCommand<DrawIndirectCmd>();
                 Buffer* buffer = ToBackend(draw->indirectBuffer.Get());
 
@@ -1295,6 +1301,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
             }
 
             case Command::DrawIndexedIndirect: {
+                workCommandCount++;
                 DrawIndexedIndirectCmd* draw = iter->NextCommand<DrawIndexedIndirectCmd>();
                 Buffer* buffer = ToBackend(draw->indirectBuffer.Get());
                 DAWN_ASSERT(buffer != nullptr);
@@ -1308,6 +1315,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
             }
 
             case Command::MultiDrawIndirect: {
+                workCommandCount++;
                 MultiDrawIndirectCmd* cmd = iter->NextCommand<MultiDrawIndirectCmd>();
 
                 Buffer* indirectBuffer = ToBackend(cmd->indirectBuffer.Get());
@@ -1333,6 +1341,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
                 break;
             }
             case Command::MultiDrawIndexedIndirect: {
+                workCommandCount++;
                 MultiDrawIndexedIndirectCmd* cmd = iter->NextCommand<MultiDrawIndexedIndirectCmd>();
 
                 Buffer* indirectBuffer = ToBackend(cmd->indirectBuffer.Get());
@@ -1476,6 +1485,17 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
             case Command::EndRenderPass: {
                 mCommands.NextCommand<EndRenderPassCmd>();
 
+                // If no work-producing commands were executed during the render pass and the
+                // VulkanAddWorkToEmptyResolvePass toggle is enabled, add a small amount of work
+                // in the form of performing an occlusion query before ending the pass. This avoids
+                // a driver bug that fails to resolve render targets in empty passes.
+                if (workCommandCount == 0 &&
+                    device->IsToggleEnabled(Toggle::VulkanAddWorkToEmptyResolvePass)) {
+                    QuerySetBase* querySet = device->GetEmptyPassQuerySet();
+                    device->fn.CmdBeginQuery(commands, ToBackend(querySet)->GetHandle(), 0, 0);
+                    device->fn.CmdEndQuery(commands, ToBackend(querySet)->GetHandle(), 0);
+                }
+
                 device->fn.CmdEndRenderPass(commands);
 
                 // Write timestamp at the end of render pass if it's set.
@@ -1561,6 +1581,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
             }
 
             case Command::BeginOcclusionQuery: {
+                workCommandCount++;
                 BeginOcclusionQueryCmd* cmd = mCommands.NextCommand<BeginOcclusionQueryCmd>();
 
                 device->fn.CmdBeginQuery(commands, ToBackend(cmd->querySet.Get())->GetHandle(),
@@ -1569,6 +1590,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
             }
 
             case Command::EndOcclusionQuery: {
+                workCommandCount++;
                 EndOcclusionQueryCmd* cmd = mCommands.NextCommand<EndOcclusionQueryCmd>();
 
                 device->fn.CmdEndQuery(commands, ToBackend(cmd->querySet.Get())->GetHandle(),
@@ -1577,6 +1599,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
             }
 
             case Command::WriteTimestamp: {
+                workCommandCount++;
                 WriteTimestampCmd* cmd = mCommands.NextCommand<WriteTimestampCmd>();
 
                 RecordWriteTimestampCmd(recordingContext, device, cmd->querySet.Get(),

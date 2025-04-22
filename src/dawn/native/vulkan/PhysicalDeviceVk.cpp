@@ -792,6 +792,11 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         // texture. Work around it by resolving into a single level texture and then copying into
         // the intended layer.
         deviceToggles->Default(Toggle::AlwaysResolveIntoZeroLevelAndLayer, true);
+
+        // chromium:411656647: Qualcomm devices have a bug where an empty render pass that has a
+        // resolve target doesn't perform the resolve. To work around it, add a small amount of work
+        // to the pass to force it to execute.
+        deviceToggles->Default(Toggle::VulkanAddWorkToEmptyResolvePass, true);
     }
 
     if (IsAndroidARM()) {

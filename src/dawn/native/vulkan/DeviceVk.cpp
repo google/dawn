@@ -1100,4 +1100,17 @@ bool Device::CanAddStorageUsageToBufferWithoutSideEffects(wgpu::BufferUsage stor
     return true;
 }
 
+// Gets or creates an occlusion Query object for use with Toggle::VulkanAddWorkToEmptyResolvePass.
+QuerySetBase* Device::GetEmptyPassQuerySet() {
+    DAWN_ASSERT(IsToggleEnabled(Toggle::VulkanAddWorkToEmptyResolvePass));
+
+    if (!mEmptyPassQuerySet) {
+        QuerySetDescriptor descriptor;
+        descriptor.type = wgpu::QueryType::Occlusion;
+        descriptor.count = 1;
+        mEmptyPassQuerySet = APICreateQuerySet(&descriptor);
+    }
+    return mEmptyPassQuerySet.Get();
+}
+
 }  // namespace dawn::native::vulkan
