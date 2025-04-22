@@ -27,8 +27,8 @@
 
 #include "dawn/native/Subresource.h"
 
-#include "absl/numeric/bits.h"
 #include "dawn/common/Assert.h"
+#include "dawn/common/Math.h"
 #include "dawn/native/Format.h"
 
 namespace dawn::native {
@@ -125,7 +125,7 @@ uint8_t GetAspectCount(Aspect aspects) {
         DAWN_ASSERT(GetAspectIndex(Aspect::Stencil) == 1);
         return 2;
     }
-    return absl::popcount(static_cast<uint8_t>(aspects));
+    return dawn::BitCount(static_cast<uint8_t>(aspects));
 }
 
 SubresourceRange::SubresourceRange(Aspect aspects,
