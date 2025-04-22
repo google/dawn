@@ -60,6 +60,29 @@ TEST_F(IR_ValidatorTest, Builtin_PointSize_WrongStage) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Builtin_OnStructReturn) {
+    auto* f = FragmentEntryPoint();
+
+    auto* str_ty = ty.Struct(mod.symbols.New("OutputStruct"), {
+                                                                  {mod.symbols.New(""), ty.i32()},
+                                                              });
+    f->SetReturnType(str_ty);
+
+    IOAttributes attr;
+    attr.builtin = BuiltinValue::kPointSize;
+    f->SetReturnAttributes(attr);
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:5:1 error: __point_size cannot be attached to a structure
+%f = @fragment func():OutputStruct [@__point_size] {
+^^
+)")) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Builtin_PointSize_WrongIODirection) {
     auto* f = VertexEntryPoint();
     AddBuiltinParam(f, "size", BuiltinValue::kPointSize, ty.f32());

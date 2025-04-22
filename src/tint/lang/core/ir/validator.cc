@@ -287,27 +287,6 @@ void CheckFunctionParamAttributesAndType(const FunctionParam* param, IMPL&& impl
     CheckIOAttributesAndType(param, param->Attributes(), param->Type(), std::forward<IMPL>(impl));
 }
 
-/// Helper for calling IOAttributesAndType on a function return
-/// @param func function's return to be tested
-/// See @ref IOAttributesAndType for more details
-template <typename IS_NOT_STRUCT, typename IS_STRUCT>
-void CheckFunctionReturnAttributesAndType(const Function* func,
-                                          IS_NOT_STRUCT&& is_not_struct_impl,
-                                          IS_STRUCT&& is_struct_impl) {
-    CheckIOAttributesAndType(func, func->ReturnAttributes(), func->ReturnType(),
-                             std::forward<IS_NOT_STRUCT>(is_not_struct_impl),
-                             std::forward<IS_STRUCT>(is_struct_impl));
-}
-
-/// Helper for calling IOAttributesAndType on a function return
-/// @param func function's return to be tested
-/// See @ref IOAttributesAndType for more details
-template <typename IMPL>
-void CheckFunctionReturnAttributesAndType(const Function* func, IMPL&& impl) {
-    CheckIOAttributesAndType(func, func->ReturnAttributes(), func->ReturnType(),
-                             std::forward<IMPL>(impl));
-}
-
 /// A BuiltinChecker is the interface used to check that a usage of a builtin attribute meets the
 /// basic spec rules, i.e. correct shader stage, data type, and IO direction.
 /// It does not test more sophisticated rules like location and builtins being mutually exclusive or
@@ -983,6 +962,33 @@ class Validator {
     /// Validates the specific function as a vertex entry point
     /// @param ep the function to validate
     void CheckVertexEntryPoint(const Function* ep);
+
+    /// Helper for calling IOAttributesAndType on a function return
+    /// @param func function's return to be tested
+    /// See @ref IOAttributesAndType for more details
+    template <typename IS_NOT_STRUCT, typename IS_STRUCT>
+    void CheckFunctionReturnAttributesAndType(const Function* func,
+                                              IS_NOT_STRUCT&& is_not_struct_impl,
+                                              IS_STRUCT&& is_struct_impl) {
+        CheckIOAttributesAndType(func, func->ReturnAttributes(), func->ReturnType(),
+                                 std::forward<IS_NOT_STRUCT>(is_not_struct_impl),
+                                 std::forward<IS_STRUCT>(is_struct_impl));
+    }
+
+    /// Helper for calling IOAttributesAndType on a function return
+    /// @param func function's return to be tested
+    /// See @ref IOAttributesAndType for more details
+    template <typename IMPL>
+    void CheckFunctionReturnAttributesAndType(const Function* func, IMPL&& impl) {
+        if (func->ReturnType()->Is<core::type::Struct>() &&
+            func->ReturnAttributes().builtin.has_value()) {
+            const auto& checker = BuiltinCheckerFor(func->ReturnAttributes().builtin.value());
+            AddError(func) << checker.name << " cannot be attached to a structure";
+        }
+
+        CheckIOAttributesAndType(func, func->ReturnAttributes(), func->ReturnType(),
+                                 std::forward<IMPL>(impl));
+    }
 
     /// @returns a function that validates rules for invariant decorations
     /// @param err error message to log when check fails
@@ -2756,9 +2762,9 @@ void Validator::CheckCall(const Call* call) {
                                            Hashset<const ir::UserCall*, 4>{});  //
                 calls.Add(c);                                                   //
                 user_func_calls_.Replace(c->Target(), calls);                   //
-            }                                                                   //
-            CheckUserCall(c);                                                   //
-        },                                                                      //
+            }
+            CheckUserCall(c);
+        },
         [&](Default) {
             // Validation of custom IR instructions
         });
