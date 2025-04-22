@@ -210,11 +210,16 @@ ResultOrError<Ref<PipelineLayoutBase>> PipelineLayoutBase::CreateDefault(
     DeviceBase* device,
     std::vector<StageAndDescriptor> stages,
     bool allowInternalBinding) {
-    using EntryMap = absl::flat_hash_map<BindingNumber, BindGroupLayoutEntry>;
+    // A structure containing all the BGLEntry and all of its (non-empty) chains so that they can
+    // be moved around together in maps / vectors etc. They are linked together just before calling
+    // CreateBGL.
+    struct EntryData : public BindGroupLayoutEntry {
+        BindGroupLayoutEntryArraySize arraySize;
+    };
+    using EntryMap = absl::flat_hash_map<BindingNumber, EntryData>;
 
     // Merges two entries at the same location, if they are allowed to be merged.
-    auto MergeEntries = [](BindGroupLayoutEntry* modifiedEntry,
-                           const BindGroupLayoutEntry& mergedEntry) -> MaybeError {
+    auto MergeEntries = [](EntryData* modifiedEntry, const EntryData& mergedEntry) -> MaybeError {
         // Visibility is excluded because we take the OR across stages.
         bool compatible =
             modifiedEntry->binding == mergedEntry.binding &&
@@ -273,15 +278,19 @@ ResultOrError<Ref<PipelineLayoutBase>> PipelineLayoutBase::CreateDefault(
         // Use the OR of all the stages at which we find this binding.
         modifiedEntry->visibility |= mergedEntry.visibility;
 
+        // Size binding_arrays to be the maximum of the required array sizes.
+        modifiedEntry->arraySize.arraySize =
+            std::max(modifiedEntry->arraySize.arraySize, mergedEntry.arraySize.arraySize);
+
         return {};
     };
 
     // Does the trivial conversions from a ShaderBindingInfo to a BindGroupLayoutEntry
     auto ConvertMetadataToEntry =
         [](const ShaderBindingInfo& shaderBinding,
-           const ExternalTextureBindingLayout* externalTextureBindingEntry)
-        -> BindGroupLayoutEntry {
-        BindGroupLayoutEntry entry = {};
+           const ExternalTextureBindingLayout* externalTextureBindingEntry) -> EntryData {
+        EntryData entry = {};
+        entry.arraySize.arraySize = uint32_t(shaderBinding.arraySize);
 
         MatchVariant(
             shaderBinding.bindingInfo,
@@ -318,15 +327,25 @@ ResultOrError<Ref<PipelineLayoutBase>> PipelineLayoutBase::CreateDefault(
     };
 
     // Creates the BGL from the entries for a stage, checking it is valid.
-    auto CreateBGL = [](DeviceBase* device, const EntryMap& entries,
+    auto CreateBGL = [](DeviceBase* device, EntryMap entries,
                         PipelineCompatibilityToken pipelineCompatibilityToken,
                         bool allowInternalBinding) -> ResultOrError<Ref<BindGroupLayoutBase>> {
+        // Put all the values from the map in a vector and link the chains
         std::vector<BindGroupLayoutEntry> entryVec;
         entryVec.reserve(entries.size());
         for (auto& [_, entry] : entries) {
+            // Link the entries in the map so that the entry copied in the vector still keeps
+            // pointers to the chain in the map. This is valid to do because elements in the map
+            // won't move as the map isn't modified, only elements.
+            if (entry.arraySize.arraySize != 1) {
+                entry.arraySize.nextInChain = entry.nextInChain;
+                entry.nextInChain = &entry.arraySize;
+            }
+
             entryVec.push_back(entry);
         }
 
+        // Create and validate the BGL
         BindGroupLayoutDescriptor desc = {};
         desc.entries = entryVec.data();
         desc.entryCount = entryVec.size();
@@ -367,9 +386,9 @@ ResultOrError<Ref<PipelineLayoutBase>> PipelineLayoutBase::CreateDefault(
         for (auto [group, groupBindings] : Enumerate(metadata.bindings)) {
             for (const auto& [bindingNumber, shaderBinding] : groupBindings) {
                 // Create the BindGroupLayoutEntry
-                BindGroupLayoutEntry entry =
+                EntryData entry =
                     ConvertMetadataToEntry(shaderBinding, &externalTextureBindingLayout);
-                entry.binding = static_cast<uint32_t>(bindingNumber);
+                entry.binding = uint32_t(bindingNumber);
                 entry.visibility = StageBit(stage.shaderStage);
 
                 // Add it to our map of all entries, if there is an existing entry, then we
@@ -379,7 +398,7 @@ ResultOrError<Ref<PipelineLayoutBase>> PipelineLayoutBase::CreateDefault(
                 if (!inserted) {
                     DAWN_TRY_CONTEXT(MergeEntries(&existingEntry->second, entry),
                                      "merging implicit bindings for @group(%u) @binding(%u).",
-                                     uint32_t(group), uint32_t(bindingNumber));
+                                     group, bindingNumber);
                 }
             }
         }
@@ -408,9 +427,9 @@ ResultOrError<Ref<PipelineLayoutBase>> PipelineLayoutBase::CreateDefault(
     // be created with `pipelineCompatibilityToken` whether they are empty or not.
     PerBindGroup<Ref<BindGroupLayoutBase>> bindGroupLayouts = {};
     for (auto group : Range(kMaxBindGroupsTyped)) {
-        DAWN_TRY_ASSIGN(
-            bindGroupLayouts[group],
-            CreateBGL(device, entryData[group], pipelineCompatibilityToken, allowInternalBinding));
+        DAWN_TRY_ASSIGN(bindGroupLayouts[group],
+                        CreateBGL(device, std::move(entryData[group]), pipelineCompatibilityToken,
+                                  allowInternalBinding));
     }
 
     // Create the deduced pipeline layout, validating if it is valid.

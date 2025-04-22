@@ -1879,6 +1879,26 @@ TEST_F(BindGroupLayoutArraySizeDisabledValidationTest, ArraySizeDisabled) {
     ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&desc));
 }
 
+// Check that using a binding_array statically in an entry point is disabled.
+TEST_F(BindGroupLayoutArraySizeDisabledValidationTest, BindingArrayDisabled) {
+    ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(
+        @group(0) @binding(0) var textures : binding_array<texture_2d<f32>, 3>;
+        @fragment fn fs() -> @location(0) u32 {
+            let _ = textures[0];
+            return 0;
+        }
+    )"));
+
+    // Even an array of size 1 is an error.
+    ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(
+        @group(0) @binding(0) var textures : binding_array<texture_2d<f32>, 1>;
+        @fragment fn fs() -> @location(0) u32 {
+            let _ = textures[0];
+            return 0;
+        }
+    )"));
+}
+
 // Check that using arraySize != 1 is only allowed for sampled textures.
 TEST_F(BindGroupLayoutValidationTest, ArraySizeAllowedBindingTypes) {
     wgpu::BindGroupLayoutEntryArraySize arraySize1;
@@ -3572,6 +3592,82 @@ TEST_F(BindGroupLayoutCompatibilityTest, ExternalTextureBindGroupLayoutCompatibi
                 _ = myTexture;
             })",
                                                {bgl}));
+}
+
+// Test that a BGL is compatible with a pipeline if a binding's array size is at least as big as the
+// shader's binding_array's size.
+TEST_F(BindGroupLayoutCompatibilityTest, ArraySizeCompatibility) {
+    wgpu::BindGroupLayoutEntry entry;
+    entry.binding = 0;
+    entry.visibility = wgpu::ShaderStage::Fragment;
+    entry.texture.sampleType = wgpu::TextureSampleType::Float;
+
+    wgpu::BindGroupLayoutDescriptor bglDesc;
+    bglDesc.entryCount = 1;
+    bglDesc.entries = &entry;
+    wgpu::BindGroupLayout bglNoArray = device.CreateBindGroupLayout(&bglDesc);
+
+    wgpu::BindGroupLayoutEntryArraySize arraySize;
+    arraySize.arraySize = 1;
+    entry.nextInChain = &arraySize;
+    wgpu::BindGroupLayout bglArray1 = device.CreateBindGroupLayout(&bglDesc);
+
+    arraySize.arraySize = 2;
+    wgpu::BindGroupLayout bglArray2 = device.CreateBindGroupLayout(&bglDesc);
+
+    arraySize.arraySize = 3;
+    wgpu::BindGroupLayout bglArray3 = device.CreateBindGroupLayout(&bglDesc);
+
+    // Test that a BGL with arraySize 2 is valid for binding_array<T, 2>
+    CreateFSRenderPipeline(R"(
+            @group(0) @binding(0) var t : binding_array<texture_2d<f32>, 2>;
+            @fragment fn main() {
+                _ = t[0];
+            })",
+                           {bglArray2});
+    // Test that a BGL with a bigger arraySize is valid.
+    CreateFSRenderPipeline(R"(
+            @group(0) @binding(0) var t : binding_array<texture_2d<f32>, 2>;
+            @fragment fn main() {
+                _ = t[0];
+            })",
+                           {bglArray3});
+    // Test that a BGL with a smaller arraySize is an error.
+    ASSERT_DEVICE_ERROR(CreateFSRenderPipeline(R"(
+            @group(0) @binding(0) var t : binding_array<texture_2d<f32>, 2>;
+            @fragment fn main() {
+                _ = t[0];
+            })",
+                                               {bglArray1}));
+
+    // Test that an array of size 1 BGL is valid for a single binding.
+    CreateFSRenderPipeline(R"(
+            @group(0) @binding(0) var t : texture_2d<f32>;
+            @fragment fn main() {
+                _ = t;
+            })",
+                           {bglArray1});
+    // Test that an array of size 2 BGL is valid for a single binding at the start of the array.
+    CreateFSRenderPipeline(R"(
+            @group(0) @binding(0) var t : texture_2d<f32>;
+            @fragment fn main() {
+                _ = t;
+            })",
+                           {bglArray2});
+    // Test that the single binding cannot be an element from the arrayed BGL except the first
+    ASSERT_DEVICE_ERROR(CreateFSRenderPipeline(R"(
+            @group(0) @binding(1) var t : texture_2d<f32>;
+            @fragment fn main() {
+                _ = t;
+            })",
+                                               {bglArray2}));
+    // Test that a binding_array<T, 1> bindings can be fulfilled by a non-arrayed BGL.
+    CreateFSRenderPipeline(R"(
+            @group(0) @binding(0) var t : binding_array<texture_2d<f32>, 1>;
+            @fragment fn main() {
+                _ = t[0];
+            })",
+                           {bglNoArray});
 }
 
 class BindingsValidationTest : public BindGroupLayoutCompatibilityTest {

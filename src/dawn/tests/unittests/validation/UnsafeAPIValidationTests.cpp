@@ -81,6 +81,26 @@ TEST_F(UnsafeAPIValidationTest, BindGroupLayoutEntryArraySize) {
     ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&desc));
 }
 
+// Check that using a binding_array statically in an entry point is an unsafe API.
+TEST_F(UnsafeAPIValidationTest, BindingArrayInWGSL) {
+    ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(
+        @group(0) @binding(0) var textures : binding_array<texture_2d<f32>, 3>;
+        @fragment fn fs() -> @location(0) u32 {
+            let _ = textures[0];
+            return 0;
+        }
+    )"));
+
+    // Even an array of size 1 is an error.
+    ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(
+        @group(0) @binding(0) var textures : binding_array<texture_2d<f32>, 1>;
+        @fragment fn fs() -> @location(0) u32 {
+            let _ = textures[0];
+            return 0;
+        }
+    )"));
+}
+
 class TimestampQueryUnsafeAPIValidationTest : public ValidationTest {
   protected:
     std::vector<const char*> GetDisabledToggles() override { return {"allow_unsafe_apis"}; }

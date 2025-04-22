@@ -521,6 +521,16 @@ MaybeError ValidateCompatibilityOfSingleBindingWithLayout(const DeviceBase* devi
                     "Entry point's stage (%s) is not in the binding visibility in the layout (%s).",
                     StageBit(entryPointStage), layoutInfo.visibility);
 
+    DAWN_INVALID_IF(layoutInfo.arraySize < shaderInfo.arraySize,
+                    "Binding type in the shader is a binding_array with %u elements but the "
+                    "layout only provides %u elements",
+                    shaderInfo.arraySize, layoutInfo.arraySize);
+    DAWN_INVALID_IF(layoutInfo.indexInArray != BindingIndex(0),
+                    "@binding(%u) in the shader is element %u of the layout's binding which is an "
+                    "array starting at binding %u.",
+                    shaderInfo.binding, layoutInfo.indexInArray,
+                    uint32_t(layoutInfo.binding) - uint32_t(layoutInfo.indexInArray));
+
     return MatchVariant(
         shaderInfo.bindingInfo,
         [&](const TextureBindingInfo& bindingInfo) -> MaybeError {
@@ -973,6 +983,21 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
 
         info.name = resource.variable_name;
 
+        info.arraySize = BindingIndex(resource.array_size.value_or(1));
+        DAWN_INVALID_IF(resource.array_size.has_value() &&
+                            device->IsToggleEnabled(Toggle::DisableBindGroupLayoutEntryArraySize),
+                        "Use of binding_array is disabled.");
+        DAWN_INVALID_IF(
+            resource.array_size.has_value() && !device->IsToggleEnabled(Toggle::AllowUnsafeAPIs),
+            "Use of binding_array is disabled as an unsafe API.");
+        DAWN_INVALID_IF(info.arraySize == BindingIndex(0), "binding_array size is 0.");
+        if (DelayedInvalidIf(
+                info.arraySize >= BindingIndex(kMaxBindingsPerBindGroup),
+                "binding_array size (%u) exceeds the maxBindingsPerBindGroup (%u) - 1.",
+                info.arraySize, kMaxBindingsPerBindGroup)) {
+            continue;
+        }
+
         switch (TintResourceTypeToBindingInfoType(resource.resource_type)) {
             case BindingInfoType::Buffer: {
                 BufferBindingInfo bindingInfo = {};
@@ -1049,16 +1074,19 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
                 return DAWN_VALIDATION_ERROR("Unknown binding type in Shader");
         }
 
-        BindingNumber bindingNumber(resource.binding);
         BindGroupIndex bindGroupIndex(resource.bind_group);
-
         if (DelayedInvalidIf(bindGroupIndex >= kMaxBindGroupsTyped,
                              "The entry-point uses a binding with a group decoration (%u) "
                              "that exceeds maxBindGroups (%u) - 1.",
-                             resource.bind_group, kMaxBindGroups) ||
-            DelayedInvalidIf(bindingNumber >= kMaxBindingsPerBindGroupTyped,
-                             "Binding number (%u) exceeds the maxBindingsPerBindGroup limit (%u).",
-                             uint32_t(bindingNumber), kMaxBindingsPerBindGroup)) {
+                             resource.bind_group, kMaxBindGroups)) {
+            continue;
+        }
+
+        BindingNumber bindingNumber(resource.binding);
+        if (DelayedInvalidIf(
+                bindingNumber >= kMaxBindingsPerBindGroupTyped,
+                "Binding number (%u) exceeds the maxBindingsPerBindGroup limit (%u) - 1.",
+                uint32_t(bindingNumber), kMaxBindingsPerBindGroup)) {
             continue;
         }
 
