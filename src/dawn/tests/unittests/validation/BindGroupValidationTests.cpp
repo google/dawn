@@ -1201,6 +1201,46 @@ TEST_F(BindGroupValidationTest, EffectiveStorageBufferBindingSize) {
     }
 }
 
+// Test making that all the bindings for an BGL with arraySize must be specified.
+TEST_F(BindGroupValidationTest, AllArrayElementsMustBeSpecified) {
+    // Create the BGL with three entries for the array.
+    wgpu::BindGroupLayoutEntryArraySize arraySize;
+    arraySize.arraySize = 3;
+
+    wgpu::BindGroupLayoutEntry entry;
+    entry.binding = 1;
+    entry.visibility = wgpu::ShaderStage::Fragment;
+    entry.texture.sampleType = wgpu::TextureSampleType::Float;
+    entry.nextInChain = &arraySize;
+
+    wgpu::BindGroupLayoutDescriptor bglDesc;
+    bglDesc.entryCount = 1;
+    bglDesc.entries = &entry;
+    wgpu::BindGroupLayout bgl = device.CreateBindGroupLayout(&bglDesc);
+
+    // The texture used for the test.
+    wgpu::TextureDescriptor tDesc;
+    tDesc.size = {1, 1};
+    tDesc.format = wgpu::TextureFormat::RGBA8Unorm;
+    tDesc.usage = wgpu::TextureUsage::TextureBinding;
+    wgpu::Texture t = device.CreateTexture(&tDesc);
+
+    // Success case, making a BindGroup with all three entries
+    utils::MakeBindGroup(device, bgl,
+                         {
+                             {1, t.CreateView()},
+                             {2, t.CreateView()},
+                             {3, t.CreateView()},
+                         });
+
+    // Error case, one element is missing
+    ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, bgl,
+                                             {
+                                                 {1, t.CreateView()},
+                                                 {3, t.CreateView()},
+                                             }));
+}
+
 // Test what happens when the layout is an error.
 TEST_F(BindGroupValidationTest, ErrorLayout) {
     wgpu::BindGroupLayout goodLayout = utils::MakeBindGroupLayout(

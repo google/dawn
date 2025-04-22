@@ -394,7 +394,7 @@ bool InputAttachmentBindingInfo::operator==(const InputAttachmentBindingInfo& ot
 
 bool BindingInfo::operator==(const BindingInfo& other) const {
     return binding == other.binding && visibility == other.visibility &&
-           bindingLayout == other.bindingLayout;
+           arraySize == other.arraySize && bindingLayout == other.bindingLayout;
 }
 
 }  // namespace dawn::native
