@@ -28,6 +28,7 @@
 #ifndef SRC_TINT_LANG_CORE_IR_ANALYSIS_INTEGER_RANGE_ANALYSIS_H_
 #define SRC_TINT_LANG_CORE_IR_ANALYSIS_INTEGER_RANGE_ANALYSIS_H_
 
+#include <cstdint>
 #include <memory>
 #include <variant>
 
