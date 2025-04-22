@@ -28,6 +28,7 @@
 #include "gmock/gmock.h"
 
 #include "src/tint/lang/core/type/array.h"
+#include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
 #include "src/tint/lang/core/type/depth_texture.h"
 #include "src/tint/lang/core/type/matrix.h"
@@ -987,6 +988,22 @@ TEST_F(MslWriterTest, EmitType_SamplerComparison) {
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo(sampler a) {
+}
+)");
+}
+
+TEST_F(MslWriterTest, EmitType_BindingArraySampledTexture) {
+    auto* func = b.Function("foo", ty.void_());
+    auto* sampled_texture = ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32());
+    auto* param = b.FunctionParam("a", ty.binding_array(sampled_texture, 4_u));
+    func->SetParams({param});
+    b.Append(func->Block(), [&] {  //
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
+void foo(array<texture2d<float, access::sample>, 4> a) {
 }
 )");
 }

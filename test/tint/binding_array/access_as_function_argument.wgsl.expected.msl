@@ -1,0 +1,17 @@
+#include <metal_stdlib>
+using namespace metal;
+
+struct tint_module_vars_struct {
+  array<texture2d<float, access::sample>, 4> sampled_textures;
+};
+
+void do_texture_load(texture2d<float, access::sample> t) {
+  uint const v = min(uint(0), (t.get_num_mip_levels() - 1u));
+  uint2 const v_1 = (uint2(t.get_width(v), t.get_height(v)) - uint2(1u));
+  float4 const texture_load = t.read(min(uint2(int2(0)), v_1), v);
+}
+
+fragment void fs(array<texture2d<float, access::sample>, 4> sampled_textures [[texture(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sampled_textures=sampled_textures};
+  do_texture_load(tint_module_vars.sampled_textures[0]);
+}

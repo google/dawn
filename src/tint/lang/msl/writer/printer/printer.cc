@@ -70,6 +70,7 @@
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/atomic.h"
+#include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/bool.h"
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
 #include "src/tint/lang/core/type/depth_texture.h"
@@ -399,8 +400,15 @@ class Printer : public tint::TextGenerator {
                         }
                     } else {
                         // Handle types are declared by value instead of by pointer.
+                        // In MSL the attribute for BindingArray is the same as the attribute for
+                        // the first element.
+                        auto* handle_type = param->Type();
+                        if (handle_type->Is<core::type::BindingArray>()) {
+                            handle_type = handle_type->As<core::type::BindingArray>()->ElemType();
+                        }
+
                         Switch(
-                            param->Type(),
+                            handle_type,
                             [&](const core::type::Texture*) {
                                 out << " [[texture(" << binding_point->binding << ")]]";
                             },
@@ -1303,6 +1311,7 @@ class Printer : public tint::TextGenerator {
             [&](const core::type::Pointer* ptr) { EmitPointerType(out, ptr); },
             [&](const core::type::Sampler*) { out << "sampler"; },  //
             [&](const core::type::Texture* tex) { EmitTextureType(out, tex); },
+            [&](const core::type::BindingArray* arr) { EmitBindingArrayType(out, arr); },
             [&](const core::type::Struct* str) {
                 out << StructName(str);
 
@@ -1404,6 +1413,17 @@ class Printer : public tint::TextGenerator {
     void EmitMatrixType(StringStream& out, const core::type::Matrix* mat) {
         EmitType(out, mat->Type());
         out << mat->Columns() << "x" << mat->Rows();
+    }
+
+    /// Handles generating a binding_array declaration
+    /// @param out the output stream
+    /// @param arr the array to emit
+    void EmitBindingArrayType(StringStream& out, const core::type::BindingArray* arr) {
+        out << "array<";
+        EmitType(out, arr->ElemType());
+        out << ", ";
+        out << arr->Count()->As<core::type::ConstantArrayCount>()->value;
+        out << ">";
     }
 
     /// Handles generating a texture declaration

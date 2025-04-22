@@ -1,0 +1,43 @@
+SKIP: FAILED
+
+
+@group(0) @binding(0) var sampled_textures : binding_array<texture_2d<f32>, 4>;
+
+@fragment
+fn fs() {
+  let texture_load = textureLoad(sampled_textures[0], vec2(0, 0), 0);
+}
+
+Failed to generate SPIR-V: :7:134 error: access: result of access chain is type 'ptr<handle, texture_2d<f32>, read>' but instruction type is 'ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>, read>'
+    %3:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>, read> = access %sampled_textures, 0i
+                                                                                                                                     ^^^^^^
+
+:6:3 note: in block
+  $B2: {
+  ^^^
+
+note: # Disassembly
+$B1: {  # root
+  %sampled_textures:ptr<handle, binding_array<texture_2d<f32>, 4>, read> = var undef @binding_point(0, 0)
+}
+
+%fs = @fragment func():void {
+  $B2: {
+    %3:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>, read> = access %sampled_textures, 0i
+    %4:spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write> = load %3
+    %5:u32 = spirv.image_query_levels<u32> %4
+    %6:u32 = sub %5, 1u
+    %7:u32 = convert 0i
+    %8:u32 = min %7, %6
+    %9:vec2<u32> = spirv.image_query_size_lod %4, %8
+    %10:vec2<u32> = sub %9, vec2<u32>(1u)
+    %11:vec2<u32> = convert vec2<i32>(0i)
+    %12:vec2<u32> = min %11, %10
+    %13:vec4<f32> = spirv.image_fetch %4, %12, 2u, %8
+    %texture_load:vec4<f32> = let %13
+    ret
+  }
+}
+
+
+tint executable returned error: exit status 1
