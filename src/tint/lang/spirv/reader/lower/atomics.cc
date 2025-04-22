@@ -60,12 +60,10 @@ struct State {
 
     /// The `ir::Values`s which have had their types changed, they then need to have their
     /// loads/stores updated to match. This maps to the root FunctionParam or Var for each atomic.
-    Hashset<core::ir::Value*, 8> values_to_fix_usages_{};
+    Vector<core::ir::Value*, 8> values_to_fix_usages_{};
 
     /// The `ir::Value`s which have been converted
     Hashset<core::ir::Value*, 8> converted_{};
-    /// The `ir::Value`s which have had their usages updated
-    Hashset<core::ir::Value*, 8> usages_updated_{};
 
     struct ForkedStruct {
         const core::type::Struct* src_struct = nullptr;
@@ -88,6 +86,8 @@ struct State {
         }
 
         for (auto* builtin : builtin_worklist) {
+            values_to_convert_.Push(builtin->Args()[0]);
+
             switch (builtin->Func()) {
                 case spirv::BuiltinFn::kAtomicLoad:
                     AtomicOpNoArgs(builtin, core::BuiltinFn::kAtomicLoad);
@@ -139,6 +139,7 @@ struct State {
             }
         }
 
+        // Propagate up the instruction list until we get to the root identifier
         while (!values_to_convert_.IsEmpty()) {
             auto* val = values_to_convert_.Pop();
 
@@ -149,6 +150,11 @@ struct State {
 
         ProcessForkedStructs();
         ReplaceStructTypes();
+
+        while (!values_to_fix_usages_.IsEmpty()) {
+            auto* val = values_to_fix_usages_.Pop();
+            ConvertUsagesToAtomic(val);
+        }
     }
 
     core::ir::Value* One(const core::type::Type* const_ty) {
@@ -164,7 +170,6 @@ struct State {
 
         b.InsertBefore(call, [&] {
             auto* var = args[0];
-            values_to_convert_.Push(var);
 
             auto* val = args[4];
             auto* comp = args[5];
@@ -183,8 +188,6 @@ struct State {
 
         b.InsertBefore(call, [&] {
             auto* var = args[0];
-            values_to_convert_.Push(var);
-
             auto* one = One(call->Result()->Type());
             b.CallWithResult(call->DetachResult(), fn, var, one);
         });
@@ -196,7 +199,6 @@ struct State {
 
         b.InsertBefore(call, [&] {
             auto* var = args[0];
-            values_to_convert_.Push(var);
             b.CallWithResult(call->DetachResult(), fn, var);
         });
         call->Destroy();
@@ -207,8 +209,6 @@ struct State {
 
         b.InsertBefore(call, [&] {
             auto* var = args[0];
-            values_to_convert_.Push(var);
-
             auto* val = args[3];
             b.CallWithResult(call->DetachResult(), fn, var, val);
         });
@@ -276,12 +276,13 @@ struct State {
                         CheckForStructForking(a);
                         values_to_convert_.Push(a->Object());
                     },
-                    [&](core::ir::Let* l) { values_to_convert_.Push(l->Value()); },
+                    [&](core::ir::Let* l) {
+                        values_to_convert_.Push(l->Value());
+                        values_to_fix_usages_.Push(l->Result());
+                    },
                     [&](core::ir::Var* v) {
                         auto* var_res = v->Result();
-                        if (usages_updated_.Add(var_res)) {
-                            ConvertUsages(var_res);
-                        }
+                        values_to_fix_usages_.Push(var_res);
                     },
                     TINT_ICE_ON_NO_MATCH);
             },
@@ -289,10 +290,7 @@ struct State {
                 auto* orig_ty = param->Type();
                 auto* atomic_ty = AtomicTypeFor(val, orig_ty);
                 param->SetType(atomic_ty);
-
-                if (usages_updated_.Add(param)) {
-                    ConvertUsages(param);
-                }
+                values_to_fix_usages_.Push(param);
 
                 for (auto& usage : param->Function()->UsagesUnsorted()) {
                     if (usage->instruction->Is<core::ir::Return>()) {
@@ -307,13 +305,15 @@ struct State {
             TINT_ICE_ON_NO_MATCH);
     }
 
-    void ConvertUsages(core::ir::Value* val) {
+    void ConvertUsagesToAtomic(core::ir::Value* val) {
         val->ForEachUseUnsorted([&](const core::ir::Usage& usage) {
             auto* inst = usage.instruction;
 
             tint::Switch(  //
                 inst,
                 [&](core::ir::Load* ld) {
+                    TINT_ASSERT(ld->From()->Type()->UnwrapPtr()->Is<core::type::Atomic>());
+
                     b.InsertBefore(ld, [&] {
                         b.CallWithResult(ld->DetachResult(), core::BuiltinFn::kAtomicLoad,
                                          ld->From());
@@ -321,12 +321,72 @@ struct State {
                     ld->Destroy();
                 },
                 [&](core::ir::Store* st) {
+                    TINT_ASSERT(st->To()->Type()->UnwrapPtr()->Is<core::type::Atomic>());
+
                     b.InsertBefore(st, [&] {
                         b.Call(ty.void_(), core::BuiltinFn::kAtomicStore, st->To(), st->From());
                     });
                     st->Destroy();
-                });
+                },
+                [&](core::ir::Access* access) {
+                    auto* res = access->Result();
+                    auto* new_ty = TypeForAccess(access);
+                    if (new_ty == res->Type()) {
+                        return;
+                    }
+
+                    res->SetType(new_ty);
+                    if (converted_.Add(res)) {
+                        values_to_fix_usages_.Push(res);
+                    }
+                },
+                [&](core::ir::Let* l) {
+                    auto* res = l->Result();
+                    auto* orig_ty = res->Type();
+                    auto* new_ty = AtomicTypeFor(nullptr, orig_ty);
+                    if (new_ty == orig_ty) {
+                        return;
+                    }
+
+                    res->SetType(new_ty);
+                    if (converted_.Add(res)) {
+                        values_to_fix_usages_.Push(res);
+                    }
+                },
+                [&](core::ir::UserCall*) {
+                    // This should have been handled as a function parameter above.
+                },
+                [&](core::ir::CoreBuiltinCall* bc) {
+                    // This was converted when we switched from a SPIR-V intrinsic to core
+                    TINT_ASSERT(core::IsAtomic(bc->Func()));
+                    TINT_ASSERT(bc->Args()[0]->Type()->UnwrapPtr()->Is<core::type::Atomic>());
+                },
+                TINT_ICE_ON_NO_MATCH);
         });
+    }
+
+    const core::type::Type* TypeForAccess(core::ir::Access* access) {
+        auto* ptr = access->Object()->Type()->As<core::type::Pointer>();
+        TINT_ASSERT(ptr);
+
+        auto* cur_ty = ptr->UnwrapPtr();
+        for (auto& idx : access->Indices()) {
+            tint::Switch(  //
+                cur_ty,    //
+                [&](const core::type::Struct* str) {
+                    if (forked_structs_.Contains(str)) {
+                        str = forked_structs_.Get(str)->dst_struct;
+                    }
+
+                    auto* const_val = idx->As<core::ir::Constant>();
+                    TINT_ASSERT(const_val);
+
+                    auto const_idx = const_val->Value()->ValueAs<uint32_t>();
+                    cur_ty = str->Members()[const_idx]->Type();
+                },
+                [&](const core::type::Array* arr) { cur_ty = arr->ElemType(); });
+        }
+        return ty.ptr(ptr->AddressSpace(), cur_ty, ptr->Access());
     }
 
     void CheckForStructForking(core::ir::Access* access) {
@@ -389,6 +449,7 @@ struct State {
                 return ty.ptr(ptr->AddressSpace(), AtomicTypeFor(val, ptr->StoreType()),
                               ptr->Access());
             },
+            [&](const core::type::Atomic* atomic) { return atomic; },  //
             TINT_ICE_ON_NO_MATCH);
     }
 
