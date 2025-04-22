@@ -297,28 +297,45 @@ MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
     tint::Result<tint::hlsl::writer::Output> result;
     if (r.useTintIR) {
         // Convert the AST program to an IR module.
-        auto ir = tint::wgsl::reader::ProgramToLoweredIR(*tintInputProgram);
-        DAWN_INVALID_IF(ir != tint::Success, "An error occurred while generating Tint IR\n%s",
-                        ir.Failure().reason);
+        tint::Result<tint::core::ir::Module> ir;
+        {
+            SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(tracePlatform.UnsafeGetValue(),
+                                               "ShaderModuleProgramToIR");
+            ir = tint::wgsl::reader::ProgramToLoweredIR(*tintInputProgram);
+            DAWN_INVALID_IF(ir != tint::Success, "An error occurred while generating Tint IR\n%s",
+                            ir.Failure().reason);
+        }
 
-        auto singleEntryPointResult =
-            tint::core::ir::transform::SingleEntryPoint(ir.Get(), r.entryPointName);
-        DAWN_INVALID_IF(singleEntryPointResult != tint::Success,
-                        "Pipeline single entry point (IR) failed:\n%s",
-                        singleEntryPointResult.Failure().reason);
+        {
+            SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(tracePlatform.UnsafeGetValue(),
+                                               "ShaderModuleSingleEntryPoint");
+            auto singleEntryPointResult =
+                tint::core::ir::transform::SingleEntryPoint(ir.Get(), r.entryPointName);
+            DAWN_INVALID_IF(singleEntryPointResult != tint::Success,
+                            "Pipeline single entry point (IR) failed:\n%s",
+                            singleEntryPointResult.Failure().reason);
+        }
 
         // this needs to run after SingleEntryPoint transform which removes unused
         // overrides for the current entry point.
-        tint::core::ir::transform::SubstituteOverridesConfig cfg;
-        cfg.map = std::move(r.substituteOverrideConfig);
-        auto substituteOverridesResult =
-            tint::core::ir::transform::SubstituteOverrides(ir.Get(), cfg);
+        {
+            SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(tracePlatform.UnsafeGetValue(),
+                                               "ShaderModuleSubstituteOverrides");
+            tint::core::ir::transform::SubstituteOverridesConfig cfg;
+            cfg.map = std::move(r.substituteOverrideConfig);
+            auto substituteOverridesResult =
+                tint::core::ir::transform::SubstituteOverrides(ir.Get(), cfg);
 
-        DAWN_INVALID_IF(substituteOverridesResult != tint::Success,
-                        "Pipeline override substitution (IR) failed:\n%s",
-                        substituteOverridesResult.Failure().reason);
+            DAWN_INVALID_IF(substituteOverridesResult != tint::Success,
+                            "Pipeline override substitution (IR) failed:\n%s",
+                            substituteOverridesResult.Failure().reason);
+        }
 
-        result = tint::hlsl::writer::Generate(ir.Get(), r.tintOptions);
+        {
+            SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(tracePlatform.UnsafeGetValue(),
+                                               "ShaderModuleGenerateHLSL");
+            result = tint::hlsl::writer::Generate(ir.Get(), r.tintOptions);
+        }
 
         // Workgroup validation has to come after `Generate` because it may require overrides to
         // have been substituted.

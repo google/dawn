@@ -567,31 +567,52 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
             auto inputProgram = r.inputProgram.UnsafeGetValue()->GetTintProgram();
             const tint::Program* tintInputProgram = &(inputProgram->program);
             // Convert the AST program to an IR module.
-            auto ir = tint::wgsl::reader::ProgramToLoweredIR(*tintInputProgram);
-            DAWN_INVALID_IF(ir != tint::Success, "An error occurred while generating Tint IR\n%s",
-                            ir.Failure().reason);
+            tint::Result<tint::core::ir::Module> ir;
+            {
+                SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(r.platform.UnsafeGetValue(),
+                                                   "ShaderModuleProgramToIR");
+                ir = tint::wgsl::reader::ProgramToLoweredIR(*tintInputProgram);
+                DAWN_INVALID_IF(ir != tint::Success,
+                                "An error occurred while generating Tint IR\n%s",
+                                ir.Failure().reason);
+            }
 
-            auto singleEntryPointResult =
-                tint::core::ir::transform::SingleEntryPoint(ir.Get(), r.entryPointName);
-            DAWN_INVALID_IF(singleEntryPointResult != tint::Success,
-                            "Pipeline single entry point (IR) failed:\n%s",
-                            singleEntryPointResult.Failure().reason);
+            {
+                SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(r.platform.UnsafeGetValue(),
+                                                   "ShaderModuleSingleEntryPoint");
+                auto singleEntryPointResult =
+                    tint::core::ir::transform::SingleEntryPoint(ir.Get(), r.entryPointName);
+                DAWN_INVALID_IF(singleEntryPointResult != tint::Success,
+                                "Pipeline single entry point (IR) failed:\n%s",
+                                singleEntryPointResult.Failure().reason);
+            }
 
             // this needs to run after SingleEntryPoint transform which removes unused
             // overrides for the current entry point.
-            tint::core::ir::transform::SubstituteOverridesConfig cfg;
-            cfg.map = std::move(r.substituteOverrideConfig);
-            auto substituteOverridesResult =
-                tint::core::ir::transform::SubstituteOverrides(ir.Get(), cfg);
-            DAWN_INVALID_IF(substituteOverridesResult != tint::Success,
-                            "Pipeline override substitution (IR) failed:\n%s",
-                            substituteOverridesResult.Failure().reason);
 
-            const std::string remappedEntryPoint = "";
-            // Generate GLSL from Tint IR.
-            auto result = tint::glsl::writer::Generate(ir.Get(), r.tintOptions, remappedEntryPoint);
-            DAWN_INVALID_IF(result != tint::Success, "An error occurred while generating GLSL:\n%s",
-                            result.Failure().reason);
+            {
+                SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(r.platform.UnsafeGetValue(),
+                                                   "ShaderModuleSubstituteOverrides");
+                tint::core::ir::transform::SubstituteOverridesConfig cfg;
+                cfg.map = std::move(r.substituteOverrideConfig);
+                auto substituteOverridesResult =
+                    tint::core::ir::transform::SubstituteOverrides(ir.Get(), cfg);
+                DAWN_INVALID_IF(substituteOverridesResult != tint::Success,
+                                "Pipeline override substitution (IR) failed:\n%s",
+                                substituteOverridesResult.Failure().reason);
+            }
+
+            tint::Result<tint::glsl::writer::Output> result;
+            {
+                SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(r.platform.UnsafeGetValue(),
+                                                   "ShaderModuleGenerateGLSL");
+                const std::string remappedEntryPoint = "";
+                // Generate GLSL from Tint IR.
+                result = tint::glsl::writer::Generate(ir.Get(), r.tintOptions, remappedEntryPoint);
+                DAWN_INVALID_IF(result != tint::Success,
+                                "An error occurred while generating GLSL:\n%s",
+                                result.Failure().reason);
+            }
 
             // Workgroup validation has to come after `Generate` because it may require
             // overrides to have been substituted.
@@ -620,8 +641,12 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
 
     GLuint shader = DAWN_GL_TRY(gl, CreateShader(GLShaderType(stage)));
     const char* source = compilationResult->glsl.c_str();
-    DAWN_GL_TRY(gl, ShaderSource(shader, 1, &source, nullptr));
-    DAWN_GL_TRY(gl, CompileShader(shader));
+    {
+        SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(GetDevice()->GetPlatform(), "GLSL.CompileShader");
+
+        DAWN_GL_TRY(gl, ShaderSource(shader, 1, &source, nullptr));
+        DAWN_GL_TRY(gl, CompileShader(shader));
+    }
 
     GLint compileStatus = GL_FALSE;
     DAWN_GL_TRY(gl, GetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus));
