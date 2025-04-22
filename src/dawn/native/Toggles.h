@@ -61,6 +61,7 @@ enum class Toggle {
     DisableBaseInstance,
     DisableIndexedDrawBuffers,
     DisableSampleVariables,
+    DisableBindGroupLayoutEntryArraySize,
     UseD3D12SmallShaderVisibleHeapForTesting,
     UseDXC,
     DisableRobustness,

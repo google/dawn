@@ -153,6 +153,10 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
      {"disable_sample_variables",
       "Disables gl_SampleMask and related functionality which is unsupported on some platforms.",
       "https://crbug.com/dawn/673", ToggleStage::Device}},
+    {Toggle::DisableBindGroupLayoutEntryArraySize,
+     {"disable_bind_group_layout_entry_array_size",
+      "Disable uses of wgpu::BindGroupLayoutEntryArraySize.",
+      "https://issues.chromium.org/393558555", ToggleStage::Device}},
     {Toggle::UseD3D12SmallShaderVisibleHeapForTesting,
      {"use_d3d12_small_shader_visible_heap",
       "Enable use of a small D3D12 shader visible heap, instead of using a large one by default. "

@@ -495,6 +495,15 @@
         ]
     },
 
+    "bind group layout entry array size": {
+        "category": "structure",
+        "chained": "in",
+        "chain roots": ["bind group layout entry"],
+        "members": [
+            {"name": "array size", "type": "uint32_t", "default": 0}
+        ]
+    },
+
     "bind group layout entry": {
         "category": "structure",
         "extensible": "in",
@@ -3773,6 +3782,7 @@
             {"value": 10, "name": "surface color management", "tags": ["upstream", "emscripten"]},
             {"value": 11, "name": "request adapter WebXR options", "tags": ["upstream", "emscripten"]},
             {"value": 12, "name": "adapter properties subgroups"},
+            {"value": 13, "name": "bind group layout entry array size"},
 
             {"value": 0, "name": "texture binding view dimension descriptor", "tags": ["compat"]},
 

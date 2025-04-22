@@ -37,6 +37,7 @@
 
 #include "dawn/common/Enumerator.h"
 #include "dawn/common/MatchVariant.h"
+#include "dawn/common/Range.h"
 #include "dawn/native/ChainUtils.h"
 #include "dawn/native/Device.h"
 #include "dawn/native/Error.h"
@@ -94,6 +95,11 @@ MaybeError ValidateBindGroupLayoutEntry(DeviceBase* device,
                                         bool allowInternalBinding) {
     DAWN_TRY(ValidateShaderStage(entry->visibility));
 
+    uint32_t arraySize = 1;
+    if (auto* arraySizeInfo = entry.Get<BindGroupLayoutEntryArraySize>()) {
+        arraySize = arraySizeInfo->arraySize;
+    }
+
     int bindingMemberCount = 0;
 
     if (entry->buffer.type != wgpu::BufferBindingType::BindingNotUsed) {
@@ -117,11 +123,21 @@ MaybeError ValidateBindGroupLayoutEntry(DeviceBase* device,
                 "(note that read-only storage buffer bindings are allowed).",
                 entry->visibility, wgpu::ShaderStage::Vertex);
         }
+
+        // TODO(393558555): Support arraySize != 1 for non-dynamic buffers.
+        DAWN_INVALID_IF(arraySize != 1,
+                        "arraySize (%u) != 1 for a buffer binding is not implemented yet.",
+                        arraySize);
     }
 
     if (entry->sampler.type != wgpu::SamplerBindingType::BindingNotUsed) {
         bindingMemberCount++;
         DAWN_TRY(ValidateSamplerBindingType(entry->sampler.type));
+
+        // TODO(393558555): Support arraySize != 1 for samplers.
+        DAWN_INVALID_IF(arraySize != 1,
+                        "arraySize (%u) != 1 for a sampler binding is not implemented yet.",
+                        arraySize);
     }
 
     if (entry->texture.sampleType != wgpu::TextureSampleType::BindingNotUsed) {
@@ -193,6 +209,11 @@ MaybeError ValidateBindGroupLayoutEntry(DeviceBase* device,
             default:
                 DAWN_UNREACHABLE();
         }
+
+        // TODO(393558555): Support arraySize != 1 for storage textures.
+        DAWN_INVALID_IF(arraySize != 1,
+                        "arraySize (%u) != 1 for a storage texture binding is not implemented yet.",
+                        arraySize);
     }
 
     if (auto* staticSamplerBindingLayout = entry.Get<StaticSamplerBindingLayout>()) {
@@ -203,6 +224,10 @@ MaybeError ValidateBindGroupLayoutEntry(DeviceBase* device,
                         wgpu::FeatureName::StaticSamplers);
 
         DAWN_TRY(device->ValidateObject(staticSamplerBindingLayout->sampler));
+        DAWN_INVALID_IF(
+            arraySize != 1,
+            "BindGroupLayoutEntry arraySize (%u) is greater than 1 for a static sampler entry.",
+            arraySize);
 
         if (staticSamplerBindingLayout->sampledTextureBinding == WGPU_LIMIT_U32_UNDEFINED) {
             DAWN_INVALID_IF(staticSamplerBindingLayout->sampler->IsYCbCr(),
@@ -212,6 +237,10 @@ MaybeError ValidateBindGroupLayoutEntry(DeviceBase* device,
 
     if (entry.Get<ExternalTextureBindingLayout>()) {
         bindingMemberCount++;
+        DAWN_INVALID_IF(
+            arraySize != 1,
+            "BindGroupLayoutEntry arraySize (%u) is greater than 1 for an external texture entry.",
+            arraySize);
     }
 
     DAWN_INVALID_IF(bindingMemberCount == 0,
@@ -221,6 +250,13 @@ MaybeError ValidateBindGroupLayoutEntry(DeviceBase* device,
     DAWN_INVALID_IF(bindingMemberCount != 1,
                     "BindGroupLayoutEntry had more than one of buffer, sampler, texture, "
                     "storageTexture, or externalTexture set");
+
+    if (auto* arraySizeInfo = entry.Get<BindGroupLayoutEntryArraySize>()) {
+        DAWN_INVALID_IF(arraySizeInfo->arraySize != 1 &&
+                            entry->texture.sampleType == wgpu::TextureSampleType::BindingNotUsed,
+                        "Entry that is not a sampled texture has an arraySize (%u) that is not 1.",
+                        arraySizeInfo->arraySize);
+    }
 
     return {};
 }
@@ -378,21 +414,48 @@ MaybeError ValidateBindGroupLayoutDescriptor(DeviceBase* device,
     for (uint32_t i = 0; i < descriptor->entryCount; ++i) {
         UnpackedPtr<BindGroupLayoutEntry> entry;
         DAWN_TRY_ASSIGN(entry, ValidateAndUnpack(&descriptor->entries[i]));
-        BindingNumber bindingNumber = BindingNumber(entry->binding);
 
-        DAWN_INVALID_IF(bindingNumber >= kMaxBindingsPerBindGroupTyped,
-                        "Binding number (%u) exceeds the maxBindingsPerBindGroup limit (%u).",
-                        uint32_t(bindingNumber), kMaxBindingsPerBindGroup);
-        DAWN_INVALID_IF(bindingMap.count(bindingNumber) != 0,
-                        "On entries[%u]: binding index (%u) was specified by a previous entry.", i,
-                        entry->binding);
+        BindingNumber bindingNumber = BindingNumber(entry->binding);
+        DAWN_INVALID_IF(
+            bindingNumber >= kMaxBindingsPerBindGroupTyped,
+            "On entries[%u]: binding number (%u) exceeds the maxBindingsPerBindGroup limit (%u).",
+            i, uint32_t(bindingNumber), kMaxBindingsPerBindGroup);
+
+        BindingNumber arraySize{1};
+        if (auto* arraySizeInfo = entry.Get<BindGroupLayoutEntryArraySize>()) {
+            arraySize = BindingNumber(arraySizeInfo->arraySize);
+
+            DAWN_INVALID_IF(
+                device->IsToggleEnabled(Toggle::DisableBindGroupLayoutEntryArraySize),
+                "On entries[%u]: chaining of BindGroupLayoutEntryArraySize is disabled.", i);
+            DAWN_INVALID_IF(!device->IsToggleEnabled(Toggle::AllowUnsafeAPIs),
+                            "On entries[%u]: chaining of BindGroupLayoutEntryArraySize is unsafe "
+                            "while it is being implemented.",
+                            i);
+
+            DAWN_INVALID_IF(arraySize == BindingNumber(0), "On entries[%u]: arraySize is 0.", i);
+            DAWN_INVALID_IF(arraySize > kMaxBindingsPerBindGroupTyped - bindingNumber,
+                            "On entries[%u]: binding (%u) + arraySize (%u) is %u which is larger "
+                            "than maxBindingsPerBindGroup (%u).",
+                            i, arraySize, bindingNumber,
+                            uint32_t(arraySize) + uint32_t(bindingNumber),
+                            kMaxBindingsPerBindGroupTyped);
+        }
+
+        // Check that the same binding is not set twice. bindingNumber + arraySize cannot overflow
+        // as they are both smaller than kMaxBindingsPerBindGroupTyped.
+        static_assert(kMaxBindingsPerBindGroup < std::numeric_limits<uint32_t>::max() / 2);
+        for (BindingNumber usedBinding : Range(bindingNumber, bindingNumber + arraySize)) {
+            DAWN_INVALID_IF(bindingMap.count(usedBinding) != 0,
+                            "On entries[%u]: binding index (%u) was specified by a previous entry.",
+                            i, entry->binding);
+            bindingMap.insert({usedBinding, i});
+        }
 
         DAWN_TRY_CONTEXT(ValidateBindGroupLayoutEntry(device, entry, allowInternalBinding),
                          "validating entries[%u]", i);
 
         IncrementBindingCounts(&bindingCounts, entry);
-
-        bindingMap.insert({bindingNumber, i});
     }
 
     // Perform a second validation pass for static samplers. This is done after initial validation

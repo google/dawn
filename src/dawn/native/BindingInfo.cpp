@@ -54,22 +54,27 @@ BindingInfoType GetBindingInfoType(const BindingInfo& info) {
 
 void IncrementBindingCounts(BindingCounts* bindingCounts,
                             const UnpackedPtr<BindGroupLayoutEntry>& entry) {
-    bindingCounts->totalCount += 1;
+    uint32_t arraySize = 1;
+    if (const auto* arraySizeInfo = entry.Get<BindGroupLayoutEntryArraySize>()) {
+        arraySize = arraySizeInfo->arraySize;
+    }
+
+    bindingCounts->totalCount += arraySize;
 
     uint32_t PerStageBindingCounts::*perStageBindingCountMember = nullptr;
 
     if (entry->buffer.type != wgpu::BufferBindingType::BindingNotUsed) {
-        ++bindingCounts->bufferCount;
+        bindingCounts->bufferCount += arraySize;
         const BufferBindingLayout& buffer = entry->buffer;
 
         if (buffer.minBindingSize == 0) {
-            ++bindingCounts->unverifiedBufferCount;
+            bindingCounts->unverifiedBufferCount += arraySize;
         }
 
         switch (buffer.type) {
             case wgpu::BufferBindingType::Uniform:
                 if (buffer.hasDynamicOffset) {
-                    ++bindingCounts->dynamicUniformBufferCount;
+                    bindingCounts->dynamicUniformBufferCount += arraySize;
                 }
                 perStageBindingCountMember = &PerStageBindingCounts::uniformBufferCount;
                 break;
@@ -79,7 +84,7 @@ void IncrementBindingCounts(BindingCounts* bindingCounts,
             case kInternalReadOnlyStorageBufferBinding:
             case wgpu::BufferBindingType::ReadOnlyStorage:
                 if (buffer.hasDynamicOffset) {
-                    ++bindingCounts->dynamicStorageBufferCount;
+                    bindingCounts->dynamicStorageBufferCount += arraySize;
                 }
                 perStageBindingCountMember = &PerStageBindingCounts::storageBufferCount;
                 break;
@@ -110,7 +115,7 @@ void IncrementBindingCounts(BindingCounts* bindingCounts,
 
     DAWN_ASSERT(perStageBindingCountMember != nullptr);
     for (SingleShaderStage stage : IterateStages(entry->visibility)) {
-        ++(bindingCounts->perStage[stage].*perStageBindingCountMember);
+        (bindingCounts->perStage[stage].*perStageBindingCountMember) += arraySize;
     }
 }
 
