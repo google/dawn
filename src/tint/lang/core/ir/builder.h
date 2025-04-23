@@ -292,11 +292,8 @@ class Builder {
     /// @param x the x dimension
     /// @param y the y dimension
     /// @param z the z dimension
-    template <typename X,
-              typename Y,
-              typename Z,
-              typename = std::enable_if_t<!std::is_integral_v<X> && !std::is_integral_v<Y> &&
-                                          !std::is_integral_v<Z>>>
+    template <typename X, typename Y, typename Z>
+        requires(!std::is_integral_v<X> && !std::is_integral_v<Y> && !std::is_integral_v<Z>)
     ir::Function* ComputeFunction(std::string_view name, X&& x, Y&& y, Z&& z) {
         CheckForNonDeterministicEvaluation<X, Y, Z>();
         auto* x_val = Value(std::forward<X>(x));
@@ -401,7 +398,8 @@ class Builder {
     /// Creates a ir::Constant for a bool Scalar
     /// @param v the value
     /// @returns the new constant
-    template <typename BOOL, typename = std::enable_if_t<std::is_same_v<BOOL, bool>>>
+    template <typename BOOL>
+        requires(std::is_same_v<BOOL, bool>)
     ir::Constant* Constant(BOOL v) {
         return Constant(ConstantValue(v));
     }
@@ -453,7 +451,8 @@ class Builder {
     /// Creates a core::constant::Value for a bool Scalar
     /// @param v the value
     /// @returns the new constant
-    template <typename BOOL, typename = std::enable_if_t<std::is_same_v<BOOL, bool>>>
+    template <typename BOOL>
+        requires(std::is_same_v<BOOL, bool>)
     const core::constant::Value* ConstantValue(BOOL v) {
         return ir.constant_values.Get(v);
     }
@@ -1423,12 +1422,11 @@ class Builder {
     /// @param name the var name
     /// @param init the var initializer
     /// @returns the instruction
-    template <
-        core::AddressSpace SPACE = core::AddressSpace::kFunction,
-        core::Access ACCESS = core::Access::kReadWrite,
-        typename VALUE = void,
-        typename = std::enable_if_t<
-            !traits::IsTypeOrDerived<std::remove_pointer_t<std::decay_t<VALUE>>, core::type::Type>>>
+    template <core::AddressSpace SPACE = core::AddressSpace::kFunction,
+              core::Access ACCESS = core::Access::kReadWrite,
+              typename VALUE = void>
+        requires(
+            !traits::IsTypeOrDerived<std::remove_pointer_t<std::decay_t<VALUE>>, core::type::Type>)
     ir::Var* Var(std::string_view name, VALUE&& init) {
         auto* val = Value(std::forward<VALUE>(init));
         if (DAWN_UNLIKELY(!val)) {
@@ -1507,10 +1505,9 @@ class Builder {
     /// Creates a new `let` declaration
     /// @param value the value
     /// @returns the instruction
-    template <
-        typename VALUE,
-        typename = std::enable_if_t<
-            !traits::IsTypeOrDerived<std::remove_pointer_t<std::decay_t<VALUE>>, core::type::Type>>>
+    template <typename VALUE>
+        requires(
+            !traits::IsTypeOrDerived<std::remove_pointer_t<std::decay_t<VALUE>>, core::type::Type>)
     ir::Let* Let(VALUE&& value) {
         auto* val = Value(std::forward<VALUE>(value));
         if (DAWN_UNLIKELY(!val)) {
@@ -1861,10 +1858,9 @@ class Builder {
     /// @param name the override name
     /// @param value the override value
     /// @returns the instruction
-    template <
-        typename VALUE,
-        typename = std::enable_if_t<
-            !traits::IsTypeOrDerived<std::remove_pointer_t<std::decay_t<VALUE>>, core::type::Type>>>
+    template <typename VALUE>
+        requires(
+            !traits::IsTypeOrDerived<std::remove_pointer_t<std::decay_t<VALUE>>, core::type::Type>)
     ir::Override* Override(std::string_view name, VALUE&& value) {
         auto* val = Value(std::forward<VALUE>(value));
         if (DAWN_UNLIKELY(!val)) {
@@ -1882,10 +1878,9 @@ class Builder {
     /// @param name the override name
     /// @param value the override value
     /// @returns the instruction
-    template <
-        typename VALUE,
-        typename = std::enable_if_t<
-            !traits::IsTypeOrDerived<std::remove_pointer_t<std::decay_t<VALUE>>, core::type::Type>>>
+    template <typename VALUE>
+        requires(
+            !traits::IsTypeOrDerived<std::remove_pointer_t<std::decay_t<VALUE>>, core::type::Type>)
     ir::Override* Override(Source src, std::string_view name, VALUE&& value) {
         auto* val = Value(std::forward<VALUE>(value));
         if (DAWN_UNLIKELY(!val)) {
