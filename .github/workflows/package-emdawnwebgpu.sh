@@ -15,9 +15,10 @@ PKG_FILE=emdawnwebgpu_pkg-${PKG_VERSION}.zip
 SHA=$(git rev-parse HEAD)
 EMSDK_VERSION=$(python3 tools/activate-emsdk --get-emsdk-version)
 
-# Initialize dependencies
+# Initialize dependencies. We could use gclient for this, but then we still have to
+# install gclient, and it takes a long time. We only need a few deps for emdawnwebgpu.
 git submodule update --init --depth=1 third_party/abseil-cpp
-git submodule update --init --depth=1 third_party/googletest/src
+git submodule update --init --depth=1 third_party/googletest
 git submodule update --init --depth=1 third_party/emsdk
 python3 tools/activate-emsdk
 

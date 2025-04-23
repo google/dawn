@@ -16,7 +16,7 @@ jobs:
       - name: Build
         id: build
         run: |
-          GITHUB_REPOSITORY="${{ github.repository }}" GITHUB_REF_NAME="${{ github.ref_name }}" .github/workflows/release-build.sh
+          GITHUB_REPOSITORY="${{ github.repository }}" GITHUB_REF_NAME="${{ github.ref_name }}" .github/workflows/package-emdawnwebgpu.sh
 
       - name: Upload release to GitHub
         uses: softprops/action-gh-release@v2
