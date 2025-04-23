@@ -1359,7 +1359,7 @@ bool GenerateGlsl([[maybe_unused]] Options& options,
     }
 
     // Generate GLSL.
-    auto result = tint::glsl::writer::Generate(ir.Get(), gen_options, "");
+    auto result = tint::glsl::writer::Generate(ir.Get(), gen_options);
     if (result != tint::Success) {
         std::cerr << "Failed to generate: " << result.Failure() << "\n";
         return false;

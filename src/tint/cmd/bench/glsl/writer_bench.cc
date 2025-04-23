@@ -83,7 +83,7 @@ void GenerateGLSL(benchmark::State& state, std::string input_name) {
             }
 
             // Generate GLSL.
-            auto gen_res = Generate(ir.Get(), gen_options, names[i]);
+            auto gen_res = Generate(ir.Get(), gen_options);
             if (gen_res != Success) {
                 state.SkipWithError(gen_res.Failure().reason);
             }

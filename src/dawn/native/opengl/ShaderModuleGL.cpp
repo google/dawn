@@ -606,9 +606,8 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
             {
                 SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(r.platform.UnsafeGetValue(),
                                                    "ShaderModuleGenerateGLSL");
-                const std::string remappedEntryPoint = "";
                 // Generate GLSL from Tint IR.
-                result = tint::glsl::writer::Generate(ir.Get(), r.tintOptions, remappedEntryPoint);
+                result = tint::glsl::writer::Generate(ir.Get(), r.tintOptions);
                 DAWN_INVALID_IF(result != tint::Success,
                                 "An error occurred while generating GLSL:\n%s",
                                 result.Failure().reason);

@@ -130,7 +130,7 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module, const fuzz::ir::Context& 
         return Failure{check.Failure().reason};
     }
 
-    auto output = Generate(module, options, "");
+    auto output = Generate(module, options);
 
     if (output == Success && context.options.dump) {
         std::cout << "Dumping generated GLSL:\n" << output->glsl << "\n";
