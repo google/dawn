@@ -585,6 +585,7 @@ source_set("end2end_tests_sources") {
     "end2end/AdapterPropertiesVkTests.cpp",
     "end2end/BasicTests.cpp",
     "end2end/BindGroupTests.cpp",
+    "end2end/BindingArrayTests.cpp",
     "end2end/BufferHostMappedPointerTests.cpp",
     "end2end/BufferHostMappedPointerTests.h",
     "end2end/BufferTests.cpp",
