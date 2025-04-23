@@ -90,7 +90,6 @@
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/core/type/void.h"
 #include "src/tint/lang/spirv/ir/builtin_call.h"
-#include "src/tint/lang/spirv/ir/image_from_texture.h"
 #include "src/tint/lang/spirv/ir/literal_operand.h"
 #include "src/tint/lang/spirv/type/explicit_layout_array.h"
 #include "src/tint/lang/spirv/type/sampled_image.h"

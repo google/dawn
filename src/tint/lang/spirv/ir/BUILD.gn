@@ -47,8 +47,6 @@ libtint_source_set("ir") {
   sources = [
     "builtin_call.cc",
     "builtin_call.h",
-    "image_from_texture.cc",
-    "image_from_texture.h",
     "literal_operand.cc",
     "literal_operand.h",
   ]
@@ -62,7 +60,6 @@ libtint_source_set("ir") {
     "${tint_src_dir}/lang/core/type",
     "${tint_src_dir}/lang/spirv",
     "${tint_src_dir}/lang/spirv/intrinsic",
-    "${tint_src_dir}/lang/spirv/type",
     "${tint_src_dir}/utils",
     "${tint_src_dir}/utils/containers",
     "${tint_src_dir}/utils/diagnostic",

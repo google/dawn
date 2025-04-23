@@ -39,7 +39,8 @@ class Texture;
 namespace tint::spirv::writer::raise {
 
 /// BuiltinPolyfill is a transform that replaces calls to builtins with polyfills and calls to
-/// SPIR-V backend intrinsic functions.
+/// SPIR-V backend intrinsic functions. It replaces core types with SPIR-V specific types at the
+/// same time to produce valid IR (e.g. texture types to spirv.image).
 /// @param module the module to transform
 /// @param use_vulkan_memory_model set `true` to use the vulkan memory model
 /// @returns success or failure

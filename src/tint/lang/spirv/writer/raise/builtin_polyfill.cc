@@ -43,7 +43,6 @@
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/texture.h"
 #include "src/tint/lang/spirv/ir/builtin_call.h"
-#include "src/tint/lang/spirv/ir/image_from_texture.h"
 #include "src/tint/lang/spirv/ir/literal_operand.h"
 #include "src/tint/lang/spirv/type/sampled_image.h"
 #include "src/tint/utils/ice/ice.h"
@@ -54,6 +53,92 @@ using namespace tint::core::fluent_types;     // NOLINT
 namespace tint::spirv::writer::raise {
 
 namespace {
+
+const spirv::type::Image* ImageFromTexture(core::type::Manager& ty,
+                                           const core::type::Texture* tex_ty) {
+    auto dim = type::Dim::kD1;
+    auto depth = type::Depth::kNotDepth;
+    auto arrayed = type::Arrayed::kNonArrayed;
+    auto ms = type::Multisampled::kSingleSampled;
+    auto sampled = type::Sampled::kSamplingCompatible;
+    auto fmt = core::TexelFormat::kUndefined;
+    auto access = core::Access::kReadWrite;
+    const core::type::Type* sample_ty = ty.f32();
+
+    switch (tex_ty->Dim()) {
+        case core::type::TextureDimension::k1d:
+            dim = type::Dim::kD1;
+            break;
+        case core::type::TextureDimension::k2d:
+            dim = type::Dim::kD2;
+            break;
+        case core::type::TextureDimension::k2dArray:
+            dim = type::Dim::kD2;
+            arrayed = type::Arrayed::kArrayed;
+            break;
+        case core::type::TextureDimension::k3d:
+            dim = type::Dim::kD3;
+            break;
+        case core::type::TextureDimension::kCube:
+            dim = type::Dim::kCube;
+            break;
+        case core::type::TextureDimension::kCubeArray:
+            dim = type::Dim::kCube;
+            arrayed = type::Arrayed::kArrayed;
+            break;
+        default:
+            TINT_ICE() << "Invalid texture dimension: " << tex_ty->Dim();
+    }
+
+    tint::Switch(
+        tex_ty,                                 //
+        [&](const core::type::DepthTexture*) {  //
+            depth = type::Depth::kDepth;
+        },
+        [&](const core::type::DepthMultisampledTexture*) {
+            depth = type::Depth::kDepth;
+            ms = type::Multisampled::kMultisampled;
+        },
+        [&](const core::type::MultisampledTexture* mt) {
+            ms = type::Multisampled::kMultisampled;
+            sample_ty = mt->Type();
+        },
+        [&](const core::type::SampledTexture* st) {
+            sampled = type::Sampled::kSamplingCompatible;
+            sample_ty = st->Type();
+        },
+        [&](const core::type::StorageTexture* st) {
+            sampled = type::Sampled::kReadWriteOpCompatible;
+            fmt = st->TexelFormat();
+            sample_ty = st->Type();
+            access = st->Access();
+        },
+        [&](const core::type::InputAttachment* ia) {
+            dim = type::Dim::kSubpassData;
+            sampled = type::Sampled::kReadWriteOpCompatible;
+            sample_ty = ia->Type();
+        },
+        TINT_ICE_ON_NO_MATCH);
+
+    return ty.Get<type::Image>(sample_ty, dim, depth, arrayed, ms, sampled, fmt, access);
+}
+
+/// Returns a replacement type if type replacement is necessary.
+/// @param ty the type manager
+/// @param type the type to replace
+/// @returns the replacement type if replacement needs to happen
+const core::type::Type* ReplacementType(core::type::Manager& ty, const core::type::Type* type) {
+    return Switch(
+        type,
+        [&](const core::type::Pointer* ptr) -> const core::type::Type* {
+            if (auto* replacement = ReplacementType(ty, ptr->StoreType())) {
+                return ty.ptr(ptr->AddressSpace(), replacement, ptr->Access());
+            }
+            return nullptr;
+        },
+        [&](const core::type::Texture* tex) { return ImageFromTexture(ty, tex); },
+        [&](Default) { return nullptr; });
+}
 
 /// PIMPL state for the transform.
 struct State {
@@ -74,28 +159,20 @@ struct State {
         // Find the builtins that need replacing.
         Vector<core::ir::CoreBuiltinCall*, 4> worklist;
 
-        // Convert function parameters to `spirv::type::Image` if necessary
+        // Replace types for function parameters if necessary
         for (auto fn : ir.functions) {
             for (auto* param : fn->Params()) {
-                if (auto* tex = param->Type()->As<core::type::Texture>()) {
-                    param->SetType(ir::ImageFromTexture(ty, tex));
+                if (auto* replacement = ReplacementType(ty, param->Type())) {
+                    param->SetType(replacement);
                 }
             }
         }
 
         for (auto* inst : ir.Instructions()) {
-            // Convert instruction results to `spirv::type::Image` if necessary
-            if (!inst->Results().IsEmpty()) {
-                if (auto* res = inst->Result(0)->As<core::ir::InstructionResult>()) {
-                    // Watch for pointers, which would be wrapping any texture on a `var`
-                    if (auto* tex = res->Type()->UnwrapPtr()->As<core::type::Texture>()) {
-                        auto* tex_ty = ir::ImageFromTexture(ty, tex);
-                        const core::type::Type* res_ty = tex_ty;
-                        if (auto* orig_ptr = res->Type()->As<core::type::Pointer>()) {
-                            res_ty = ty.ptr(orig_ptr->AddressSpace(), res_ty, orig_ptr->Access());
-                        }
-                        res->SetType(res_ty);
-                    }
+            // Replace types for instruction results if necessary
+            for (auto* result : inst->Results()) {
+                if (auto* replacement = ReplacementType(ty, result->Type())) {
+                    result->SetType(replacement);
                 }
             }
 
