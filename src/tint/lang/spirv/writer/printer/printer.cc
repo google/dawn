@@ -76,6 +76,7 @@
 #include "src/tint/lang/core/texel_format.h"
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/atomic.h"
+#include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/bool.h"
 #include "src/tint/lang/core/type/f16.h"
 #include "src/tint/lang/core/type/f32.h"
@@ -506,7 +507,9 @@ class Printer {
                 [&](const core::type::U32*) {
                     module_.PushType(spv::Op::OpTypeInt, {id, 32u, 0u});
                 },
-                [&](const core::type::F32*) { module_.PushType(spv::Op::OpTypeFloat, {id, 32u}); },
+                [&](const core::type::F32*) {
+                    module_.PushType(spv::Op::OpTypeFloat, {id, 32u});
+                },
                 [&](const core::type::F16*) {
                     module_.PushCapability(SpvCapabilityFloat16);
                     module_.PushCapability(SpvCapabilityUniformAndStorageBuffer16BitAccess);
@@ -534,6 +537,14 @@ class Printer {
                             spv::Op::OpDecorate,
                             {id, U32Operand(SpvDecorationArrayStride), arr->Stride()});
                     }
+                },
+                [&](const core::type::BindingArray* arr) {
+                    auto* constant_count = arr->Count()->As<core::type::ConstantArrayCount>();
+                    TINT_ASSERT(constant_count != nullptr);
+
+                    auto* count = b_.ConstantValue(u32(constant_count->value));
+                    module_.PushType(spv::Op::OpTypeArray,
+                                     {id, Type(arr->ElemType()), Constant(count)});
                 },
                 [&](const core::type::Pointer* ptr) {
                     module_.PushType(spv::Op::OpTypePointer,

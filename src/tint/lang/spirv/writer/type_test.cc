@@ -27,6 +27,7 @@
 
 #include "src/tint/lang/core/type/type.h"
 #include "src/tint/lang/core/fluent_types.h"
+#include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/bool.h"
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
 #include "src/tint/lang/core/type/depth_texture.h"
@@ -229,6 +230,21 @@ TEST_F(SpirvWriterTest, Type_RuntimeArray_ExplicitStride) {
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("OpDecorate %_runtimearr_float ArrayStride 16");
     EXPECT_INST("%_runtimearr_float = OpTypeRuntimeArray %float");
+}
+
+TEST_F(SpirvWriterTest, Type_BindingArray_SampledTexture) {
+    b.Append(b.ir.root_block, [&] {  //
+        auto* sampled_texture = ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32());
+        auto* v = b.Var("v", ty.ptr<handle>(ty.binding_array(sampled_texture, 4_u)));
+        v->SetBindingPoint(0, 0);
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("OpTypeImage %float 2D 0 0 0 1 Unknown");
+    EXPECT_INST("OpTypeInt 32 0");
+    EXPECT_INST("OpConstant %uint 4");
+    EXPECT_INST("OpTypeArray %4 %uint_4");
+    EXPECT_INST("OpTypePointer UniformConstant %_arr_4_uint_4");
 }
 
 TEST_F(SpirvWriterTest, Type_Struct_NoExplicitLayout) {
