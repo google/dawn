@@ -2952,5 +2952,256 @@ $B1: {  # root
     ASSERT_EQ(expect, str());
 }
 
+TEST_F(SpirvReader_AtomicsTest, FunctionParam_AnotherCallWithNonAtomicUse) {
+    core::ir::Var* wg_atomic = nullptr;
+    core::ir::Var* wg_nonatomic = nullptr;
+    b.Append(mod.root_block, [&] {
+        wg_atomic = b.Var("wg_atomic", ty.ptr<workgroup, u32>());
+        wg_nonatomic = b.Var("wg_nonatomic", ty.ptr<workgroup, u32>());
+    });
+
+    auto* f_atomic = b.Function("f_atomic", ty.u32());
+    b.Append(f_atomic->Block(), [&] {
+        auto* p = b.FunctionParam("param", ty.ptr<workgroup, u32>());
+        f_atomic->SetParams({p});
+
+        auto* ret =
+            b.Call<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kAtomicLoad, p, 1_u, 0_u);
+        b.Return(f_atomic, ret);
+    });
+
+    auto* f_nonatomic = b.Function("f_nonatomic", ty.u32());
+    b.Append(f_nonatomic->Block(), [&] {
+        auto* p = b.FunctionParam("param", ty.ptr<workgroup, u32>());
+        f_nonatomic->SetParams({p});
+
+        auto* ret = b.Load(p);
+        b.Return(f_nonatomic, ret);
+    });
+
+    auto* main = b.ComputeFunction("main");
+    b.Append(main->Block(), [&] {  //
+        b.Call(ty.u32(), f_atomic, wg_atomic);
+        b.Call(ty.u32(), f_nonatomic, wg_atomic);
+        b.Call(ty.u32(), f_nonatomic, wg_atomic);
+        b.Call(ty.u32(), f_nonatomic, wg_nonatomic);
+        b.Return(main);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %wg_atomic:ptr<workgroup, u32, read_write> = var undef
+  %wg_nonatomic:ptr<workgroup, u32, read_write> = var undef
+}
+
+%f_atomic = func(%param:ptr<workgroup, u32, read_write>):u32 {
+  $B2: {
+    %5:u32 = spirv.atomic_load %param, 1u, 0u
+    ret %5
+  }
+}
+%f_nonatomic = func(%param_1:ptr<workgroup, u32, read_write>):u32 {  # %param_1: 'param'
+  $B3: {
+    %8:u32 = load %param_1
+    ret %8
+  }
+}
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B4: {
+    %10:u32 = call %f_atomic, %wg_atomic
+    %11:u32 = call %f_nonatomic, %wg_atomic
+    %12:u32 = call %f_nonatomic, %wg_atomic
+    %13:u32 = call %f_nonatomic, %wg_nonatomic
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+    Run(Atomics);
+
+    auto* expect = R"(
+$B1: {  # root
+  %wg_atomic:ptr<workgroup, atomic<u32>, read_write> = var undef
+  %wg_nonatomic:ptr<workgroup, u32, read_write> = var undef
+}
+
+%f_atomic = func(%param:ptr<workgroup, atomic<u32>, read_write>):u32 {
+  $B2: {
+    %5:u32 = atomicLoad %param
+    ret %5
+  }
+}
+%f_nonatomic = func(%param_1:ptr<workgroup, u32, read_write>):u32 {  # %param_1: 'param'
+  $B3: {
+    %8:u32 = load %param_1
+    ret %8
+  }
+}
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B4: {
+    %10:u32 = call %f_atomic, %wg_atomic
+    %11:u32 = call %f_nonatomic_1, %wg_atomic
+    %13:u32 = call %f_nonatomic_1, %wg_atomic
+    %14:u32 = call %f_nonatomic, %wg_nonatomic
+    ret
+  }
+}
+%f_nonatomic_1 = func(%param_2:ptr<workgroup, atomic<u32>, read_write>):u32 {  # %f_nonatomic_1: 'f_nonatomic', %param_2: 'param'
+  $B5: {
+    %16:u32 = atomicLoad %param_2
+    ret %16
+  }
+}
+)";
+    ASSERT_EQ(expect, str());
+}
+
+TEST_F(SpirvReader_AtomicsTest, FunctionParam_MixedCalls) {
+    core::ir::Var* wg_atomic = nullptr;
+    core::ir::Var* wg_nonatomic = nullptr;
+    b.Append(mod.root_block, [&] {
+        wg_atomic = b.Var("wg_atomic", ty.ptr<workgroup, u32>());
+        wg_nonatomic = b.Var("wg_nonatomic", ty.ptr<workgroup, u32>());
+    });
+
+    auto* f_atomic = b.Function("f_atomic", ty.u32());
+    b.Append(f_atomic->Block(), [&] {
+        auto* p = b.FunctionParam("param", ty.ptr<workgroup, u32>());
+        f_atomic->SetParams({p});
+
+        auto* ret =
+            b.Call<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kAtomicLoad, p, 1_u, 0_u);
+        b.Return(f_atomic, ret);
+    });
+
+    auto* f_nonatomic = b.Function("f_nonatomic", ty.u32());
+    b.Append(f_nonatomic->Block(), [&] {
+        auto* p1 = b.FunctionParam("param1", ty.ptr<workgroup, u32>());
+        auto* p2 = b.FunctionParam("param2", ty.ptr<workgroup, u32>());
+        f_nonatomic->SetParams({p1, p2});
+
+        auto* one = b.Load(p1);
+        auto* two = b.Load(p2);
+        b.Return(f_nonatomic, b.Add(ty.u32(), one, two));
+    });
+
+    auto* main = b.ComputeFunction("main");
+    b.Append(main->Block(), [&] {  //
+        b.Call(ty.u32(), f_atomic, wg_atomic);
+        b.Call(ty.u32(), f_nonatomic, wg_atomic, wg_atomic);
+        b.Call(ty.u32(), f_nonatomic, wg_atomic, wg_nonatomic);
+        b.Call(ty.u32(), f_nonatomic, wg_nonatomic, wg_atomic);
+        b.Call(ty.u32(), f_nonatomic, wg_nonatomic, wg_nonatomic);
+
+        // Duplicate the calls to make sure the functions don't duplicate
+        b.Call(ty.u32(), f_nonatomic, wg_atomic, wg_atomic);
+        b.Call(ty.u32(), f_nonatomic, wg_atomic, wg_nonatomic);
+        b.Call(ty.u32(), f_nonatomic, wg_nonatomic, wg_atomic);
+        b.Call(ty.u32(), f_nonatomic, wg_nonatomic, wg_nonatomic);
+        b.Return(main);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %wg_atomic:ptr<workgroup, u32, read_write> = var undef
+  %wg_nonatomic:ptr<workgroup, u32, read_write> = var undef
+}
+
+%f_atomic = func(%param:ptr<workgroup, u32, read_write>):u32 {
+  $B2: {
+    %5:u32 = spirv.atomic_load %param, 1u, 0u
+    ret %5
+  }
+}
+%f_nonatomic = func(%param1:ptr<workgroup, u32, read_write>, %param2:ptr<workgroup, u32, read_write>):u32 {
+  $B3: {
+    %9:u32 = load %param1
+    %10:u32 = load %param2
+    %11:u32 = add %9, %10
+    ret %11
+  }
+}
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B4: {
+    %13:u32 = call %f_atomic, %wg_atomic
+    %14:u32 = call %f_nonatomic, %wg_atomic, %wg_atomic
+    %15:u32 = call %f_nonatomic, %wg_atomic, %wg_nonatomic
+    %16:u32 = call %f_nonatomic, %wg_nonatomic, %wg_atomic
+    %17:u32 = call %f_nonatomic, %wg_nonatomic, %wg_nonatomic
+    %18:u32 = call %f_nonatomic, %wg_atomic, %wg_atomic
+    %19:u32 = call %f_nonatomic, %wg_atomic, %wg_nonatomic
+    %20:u32 = call %f_nonatomic, %wg_nonatomic, %wg_atomic
+    %21:u32 = call %f_nonatomic, %wg_nonatomic, %wg_nonatomic
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+    Run(Atomics);
+
+    auto* expect = R"(
+$B1: {  # root
+  %wg_atomic:ptr<workgroup, atomic<u32>, read_write> = var undef
+  %wg_nonatomic:ptr<workgroup, u32, read_write> = var undef
+}
+
+%f_atomic = func(%param:ptr<workgroup, atomic<u32>, read_write>):u32 {
+  $B2: {
+    %5:u32 = atomicLoad %param
+    ret %5
+  }
+}
+%f_nonatomic = func(%param1:ptr<workgroup, u32, read_write>, %param2:ptr<workgroup, u32, read_write>):u32 {
+  $B3: {
+    %9:u32 = load %param1
+    %10:u32 = load %param2
+    %11:u32 = add %9, %10
+    ret %11
+  }
+}
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B4: {
+    %13:u32 = call %f_atomic, %wg_atomic
+    %14:u32 = call %f_nonatomic_1, %wg_atomic, %wg_atomic
+    %16:u32 = call %f_nonatomic_2, %wg_atomic, %wg_nonatomic
+    %18:u32 = call %f_nonatomic_3, %wg_nonatomic, %wg_atomic
+    %20:u32 = call %f_nonatomic, %wg_nonatomic, %wg_nonatomic
+    %21:u32 = call %f_nonatomic_1, %wg_atomic, %wg_atomic
+    %22:u32 = call %f_nonatomic_2, %wg_atomic, %wg_nonatomic
+    %23:u32 = call %f_nonatomic_3, %wg_nonatomic, %wg_atomic
+    %24:u32 = call %f_nonatomic, %wg_nonatomic, %wg_nonatomic
+    ret
+  }
+}
+%f_nonatomic_1 = func(%param1_1:ptr<workgroup, atomic<u32>, read_write>, %param2_1:ptr<workgroup, atomic<u32>, read_write>):u32 {  # %f_nonatomic_1: 'f_nonatomic', %param1_1: 'param1', %param2_1: 'param2'
+  $B5: {
+    %27:u32 = atomicLoad %param1_1
+    %28:u32 = atomicLoad %param2_1
+    %29:u32 = add %27, %28
+    ret %29
+  }
+}
+%f_nonatomic_2 = func(%param1_2:ptr<workgroup, atomic<u32>, read_write>, %param2_2:ptr<workgroup, u32, read_write>):u32 {  # %f_nonatomic_2: 'f_nonatomic', %param1_2: 'param1', %param2_2: 'param2'
+  $B6: {
+    %32:u32 = atomicLoad %param1_2
+    %33:u32 = load %param2_2
+    %34:u32 = add %32, %33
+    ret %34
+  }
+}
+%f_nonatomic_3 = func(%param1_3:ptr<workgroup, u32, read_write>, %param2_3:ptr<workgroup, atomic<u32>, read_write>):u32 {  # %f_nonatomic_3: 'f_nonatomic', %param1_3: 'param1', %param2_3: 'param2'
+  $B7: {
+    %37:u32 = load %param1_3
+    %38:u32 = atomicLoad %param2_3
+    %39:u32 = add %37, %38
+    ret %39
+  }
+}
+)";
+    ASSERT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader::lower
