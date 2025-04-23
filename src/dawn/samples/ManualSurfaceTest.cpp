@@ -146,7 +146,7 @@ static wgpu::Queue queue;
 
 static std::unordered_map<wgpu::TextureFormat, wgpu::RenderPipeline> trianglePipelines;
 wgpu::RenderPipeline GetOrCreateTrianglePipeline(wgpu::TextureFormat format) {
-    if (trianglePipelines.count(format)) {
+    if (trianglePipelines.contains(format)) {
         return trianglePipelines[format];
     }
 
@@ -303,7 +303,7 @@ void OnKeyPress(GLFWwindow* window, int key, int, int action, int) {
         return;
     }
 
-    DAWN_ASSERT(windows.count(window) == 1);
+    DAWN_ASSERT(windows.contains(window));
 
     WindowData* data = windows[window].get();
     switch (key) {

@@ -513,7 +513,7 @@ MaybeError ValidateCompatibilityOfSingleBindingWithLayout(const DeviceBase* devi
                     shaderBindingType, bindingLayoutType);
 
     ExternalTextureBindingExpansionMap expansions = layout->GetExternalTextureBindingExpansionMap();
-    DAWN_INVALID_IF(expansions.find(bindingNumber) != expansions.end(),
+    DAWN_INVALID_IF(expansions.contains(bindingNumber),
                     "Binding type (buffer vs. texture vs. sampler vs. external) doesn't "
                     "match the type in the layout.");
 
@@ -700,7 +700,7 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
     // can validate set constants in the pipeline.
     for (auto& o : inspector->Overrides()) {
         std::string identifier = o.is_id_specified ? std::to_string(o.id.value) : o.name;
-        if (metadata->overrides.count(identifier) != 0) {
+        if (metadata->overrides.contains(identifier)) {
             continue;
         }
 
@@ -1160,11 +1160,11 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
         }
 
         // count the number of non-sampled that are not referenced by sampled pairs.
-        auto numNonSampled = std::count_if(
-            nonSampled.begin(), nonSampled.end(),
-            [&](const tint::BindingPoint& nonSampledBindingPoint) {
-                return sampledTextures.find(nonSampledBindingPoint) == sampledTextures.end();
-            });
+        auto numNonSampled =
+            std::count_if(nonSampled.begin(), nonSampled.end(),
+                          [&](const tint::BindingPoint& nonSampledBindingPoint) {
+                              return !sampledTextures.contains(nonSampledBindingPoint);
+                          });
         metadata->numTextureSamplerCombinations = numSamplerTexturePairs + numNonSampled +
                                                   numSamplerExternalTexturePairs * 3 +
                                                   sampledExternalTextures.size();

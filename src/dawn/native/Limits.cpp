@@ -276,7 +276,7 @@ MaybeError ValidateAndUnpackLimitsIn(const Limits* chainedLimits,
     if (auto* requiredExperimentalImmediateDataLimits =
             unpacked.Get<DawnExperimentalImmediateDataLimits>()) {
         DAWN_INVALID_IF(
-            !supportedFeatures.count(wgpu::FeatureName::ChromiumExperimentalImmediateData),
+            !supportedFeatures.contains(wgpu::FeatureName::ChromiumExperimentalImmediateData),
             "ImmediateData is not supported without ChromiumExperimentalImmediateData supported.");
         out->experimentalImmediateDataLimits = *requiredExperimentalImmediateDataLimits;
         out->experimentalImmediateDataLimits.nextInChain = nullptr;

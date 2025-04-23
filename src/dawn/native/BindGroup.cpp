@@ -371,7 +371,7 @@ MaybeError ValidateExternalTextureBinding(
         entry.sampler != nullptr || entry.textureView != nullptr || entry.buffer != nullptr,
         "Expected only external texture to be set for binding entry.");
 
-    DAWN_INVALID_IF(expansions.find(BindingNumber(entry.binding)) == expansions.end(),
+    DAWN_INVALID_IF(!expansions.contains(BindingNumber(entry.binding)),
                     "External texture binding entry %u is not present in the bind group layout.",
                     entry.binding);
 
@@ -500,8 +500,8 @@ MaybeError ValidateBindGroupDescriptor(DeviceBase* device,
         // TODO(42240282): Store external textures in
         // BindGroupLayoutBase::BindingDataPointers::bindings so checking external textures can
         // be moved in the switch below.
-        if (layout->GetExternalTextureBindingExpansionMap().count(BindingNumber(entry.binding)) !=
-            0u) {
+        if (layout->GetExternalTextureBindingExpansionMap().contains(
+                BindingNumber(entry.binding))) {
             UnpackedPtr<BindGroupEntry> unpacked;
             DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(&entry));
             if (auto* externalTextureBindingEntry = unpacked.Get<ExternalTextureBindingEntry>()) {

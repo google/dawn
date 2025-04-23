@@ -348,7 +348,7 @@ ResultOrError<Ref<DeviceBase>> AdapterBase::CreateDeviceInternal(
     }
 
     if (auto* allocatorDesc = descriptor.Get<DawnDeviceAllocatorControl>()) {
-        DAWN_INVALID_IF(!requiredFeatureSet.count(wgpu::FeatureName::DawnDeviceAllocatorControl),
+        DAWN_INVALID_IF(!requiredFeatureSet.contains(wgpu::FeatureName::DawnDeviceAllocatorControl),
                         "%s is not enabled.", wgpu::FeatureName::DawnDeviceAllocatorControl);
 
         DAWN_INVALID_IF(!IsPowerOfTwo(allocatorDesc->allocatorHeapBlockSize),

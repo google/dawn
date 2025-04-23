@@ -288,7 +288,7 @@ MaybeError ValidateStaticSamplersWithTextureBindings(
                         samplerBinding, sampledTextureBinding,
                         textureToStaticSamplerBindingMap[sampledTextureBinding]);
 
-        DAWN_INVALID_IF(!bindingNumberToIndexMap.count(sampledTextureBinding),
+        DAWN_INVALID_IF(!bindingNumberToIndexMap.contains(sampledTextureBinding),
                         "For static sampler binding (%u) the sampled texture binding (%u) is not a "
                         "valid binding number.",
                         samplerBinding, sampledTextureBinding);
@@ -349,7 +349,7 @@ MaybeError ValidateBindGroupLayoutDescriptor(DeviceBase* device,
         // as they are both smaller than kMaxBindingsPerBindGroupTyped.
         static_assert(kMaxBindingsPerBindGroup < std::numeric_limits<uint32_t>::max() / 2);
         for (BindingNumber usedBinding : Range(bindingNumber, bindingNumber + arraySize)) {
-            DAWN_INVALID_IF(bindingMap.count(usedBinding) != 0,
+            DAWN_INVALID_IF(bindingMap.contains(usedBinding),
                             "On entries[%u]: binding index (%u) was specified by a previous entry.",
                             i, entry->binding);
             bindingMap.insert({usedBinding, i});
@@ -643,7 +643,7 @@ const BindGroupLayoutInternalBase::BindingMap& BindGroupLayoutInternalBase::GetB
 
 bool BindGroupLayoutInternalBase::HasBinding(BindingNumber bindingNumber) const {
     DAWN_ASSERT(!IsError());
-    return mBindingMap.count(bindingNumber) != 0;
+    return mBindingMap.contains(bindingNumber);
 }
 
 BindingIndex BindGroupLayoutInternalBase::GetBindingIndex(BindingNumber bindingNumber) const {
