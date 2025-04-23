@@ -34,6 +34,7 @@
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/builtin_structs.h"
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
 #include "src/tint/lang/core/type/depth_texture.h"
@@ -133,6 +134,13 @@ const core::type::Type* ReplacementType(core::type::Manager& ty, const core::typ
         [&](const core::type::Pointer* ptr) -> const core::type::Type* {
             if (auto* replacement = ReplacementType(ty, ptr->StoreType())) {
                 return ty.ptr(ptr->AddressSpace(), replacement, ptr->Access());
+            }
+            return nullptr;
+        },
+        [&](const core::type::BindingArray* arr) -> const core::type::Type* {
+            if (auto* replacement = ReplacementType(ty, arr->ElemType())) {
+                return ty.binding_array(replacement,
+                                        arr->Count()->As<core::type::ConstantArrayCount>()->value);
             }
             return nullptr;
         },

@@ -32,6 +32,7 @@
 #include "src/tint/lang/core/ir/transform/helper_test.h"
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/atomic.h"
+#include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/builtin_structs.h"
 #include "src/tint/lang/core/type/depth_texture.h"
 #include "src/tint/lang/core/type/input_attachment.h"
@@ -1215,6 +1216,46 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureLoad_2D) {
   $B1: {
     %5:vec4<f32> = spirv.image_fetch %t, %coords, 2u, %lod
     ret %5
+  }
+}
+)";
+
+    Run(BuiltinPolyfill, false);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureLoad_BindingArray_2D) {
+    auto* sampled_texture = ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32());
+    auto* arr = b.FunctionParam("arr", ty.binding_array(sampled_texture, 2));
+    auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
+    auto* lod = b.FunctionParam("lod", ty.i32());
+    auto* func = b.Function("foo", ty.vec4<f32>());
+    func->SetParams({arr, coords, lod});
+
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad,
+                              b.Access(sampled_texture, arr, 0_u), coords, lod);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%arr:binding_array<texture_2d<f32>, 2>, %coords:vec2<i32>, %lod:i32):vec4<f32> {
+  $B1: {
+    %5:texture_2d<f32> = access %arr, 0u
+    %6:vec4<f32> = textureLoad %5, %coords, %lod
+    ret %6
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%arr:binding_array<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>, 2>, %coords:vec2<i32>, %lod:i32):vec4<f32> {
+  $B1: {
+    %5:spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write> = access %arr, 0u
+    %6:vec4<f32> = spirv.image_fetch %5, %coords, 2u, %lod
+    ret %6
   }
 }
 )";
