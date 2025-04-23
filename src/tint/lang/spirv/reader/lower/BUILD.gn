@@ -53,6 +53,8 @@ libtint_source_set("lower") {
     "lower.h",
     "shader_io.cc",
     "shader_io.h",
+    "texture.cc",
+    "texture.h",
     "vector_element_pointer.cc",
     "vector_element_pointer.h",
   ]
@@ -86,6 +88,7 @@ if (tint_build_unittests) {
       "atomics_test.cc",
       "builtins_test.cc",
       "shader_io_test.cc",
+      "texture_test.cc",
       "vector_element_pointer_test.cc",
     ]
     deps = [
@@ -102,6 +105,7 @@ if (tint_build_unittests) {
       "${tint_src_dir}/lang/spirv/intrinsic",
       "${tint_src_dir}/lang/spirv/ir",
       "${tint_src_dir}/lang/spirv/reader/lower",
+      "${tint_src_dir}/lang/spirv/type",
       "${tint_src_dir}/utils",
       "${tint_src_dir}/utils/containers",
       "${tint_src_dir}/utils/diagnostic",

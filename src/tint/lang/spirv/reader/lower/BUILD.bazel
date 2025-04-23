@@ -43,6 +43,7 @@ cc_library(
     "builtins.cc",
     "lower.cc",
     "shader_io.cc",
+    "texture.cc",
     "vector_element_pointer.cc",
   ],
   hdrs = [
@@ -50,6 +51,7 @@ cc_library(
     "builtins.h",
     "lower.h",
     "shader_io.h",
+    "texture.h",
     "vector_element_pointer.h",
   ],
   deps = [
@@ -85,6 +87,7 @@ cc_library(
     "atomics_test.cc",
     "builtins_test.cc",
     "shader_io_test.cc",
+    "texture_test.cc",
     "vector_element_pointer_test.cc",
   ],
   deps = [
@@ -99,6 +102,7 @@ cc_library(
     "//src/tint/lang/spirv/intrinsic",
     "//src/tint/lang/spirv/ir",
     "//src/tint/lang/spirv/reader/lower",
+    "//src/tint/lang/spirv/type",
     "//src/tint/utils",
     "//src/tint/utils/containers",
     "//src/tint/utils/diagnostic",
