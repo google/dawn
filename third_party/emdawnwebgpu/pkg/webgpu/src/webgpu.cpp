@@ -1964,17 +1964,18 @@ WGPUFuture wgpuShaderModuleGetCompilationInfo(
 WGPUStatus wgpuSurfaceGetCapabilities(WGPUSurface,
                                       WGPUAdapter,
                                       WGPUSurfaceCapabilities* capabilities) {
-  assert(capabilities->nextInChain == nullptr); // TODO: Return WGPUStatus_Error
+  assert(capabilities->nextInChain ==
+         nullptr);  // TODO: Return WGPUStatus_Error
 
   static constexpr std::array<WGPUTextureFormat, 3> kSurfaceFormatsRGBAFirst = {
-    WGPUTextureFormat_RGBA8Unorm,
-    WGPUTextureFormat_BGRA8Unorm,
-    WGPUTextureFormat_RGBA16Float,
+      WGPUTextureFormat_RGBA8Unorm,
+      WGPUTextureFormat_BGRA8Unorm,
+      WGPUTextureFormat_RGBA16Float,
   };
   static constexpr std::array<WGPUTextureFormat, 3> kSurfaceFormatsBGRAFirst = {
-    WGPUTextureFormat_BGRA8Unorm,
-    WGPUTextureFormat_RGBA8Unorm,
-    WGPUTextureFormat_RGBA16Float,
+      WGPUTextureFormat_BGRA8Unorm,
+      WGPUTextureFormat_RGBA8Unorm,
+      WGPUTextureFormat_RGBA16Float,
   };
   WGPUTextureFormat preferredFormat = emwgpuGetPreferredFormat();
   switch (preferredFormat) {
@@ -1999,8 +2000,8 @@ WGPUStatus wgpuSurfaceGetCapabilities(WGPUSurface,
 
   {
     static constexpr std::array<WGPUCompositeAlphaMode, 2> kAlphaModes = {
-      WGPUCompositeAlphaMode_Opaque,
-      WGPUCompositeAlphaMode_Premultiplied,
+        WGPUCompositeAlphaMode_Opaque,
+        WGPUCompositeAlphaMode_Premultiplied,
     };
     capabilities->alphaModeCount = kAlphaModes.size();
     capabilities->alphaModes = kAlphaModes.data();

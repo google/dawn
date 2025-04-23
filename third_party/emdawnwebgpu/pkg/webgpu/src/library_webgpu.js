@@ -4,12 +4,9 @@
  * SPDX-License-Identifier: MIT
  */
 
-/*
- * Dawn's fork of Emscripten's WebGPU bindings. This will be contributed back to
- * Emscripten after reaching approximately webgpu.h "1.0".
- *
- * IMPORTANT: See //src/emdawnwebgpu/README.md for info on how to use this.
- */
+//
+// This file and webgpu.cpp together implement <webgpu/webgpu.h>.
+//
 
 {{{
   if (USE_WEBGPU || !__HAVE_EMDAWNWEBGPU_STRUCT_INFO || !__HAVE_EMDAWNWEBGPU_ENUM_TABLES || !__HAVE_EMDAWNWEBGPU_SIG_INFO) {

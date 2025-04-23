@@ -187,14 +187,21 @@ if (EMSCRIPTEN)
         OUTPUT_JS EMDAWNWEBGPU_STRUCT_INFO_JS
     )
     add_custom_target(webgpu_generated_struct_info_js
-        DEPENDS webgpu_generated_struct_info32 webgpu_generated_struct_info64 ${EMDAWNWEBGPU_STRUCT_INFO_JS}
+        DEPENDS
+            webgpu_generated_struct_info32
+            webgpu_generated_struct_info64
+            ${EMDAWNWEBGPU_STRUCT_INFO_JS}
     )
 
     add_library(emdawnwebgpu_config INTERFACE)
     target_include_directories(emdawnwebgpu_config BEFORE INTERFACE
         "${EM_BUILD_GEN_DIR}/include"
     )
-    add_dependencies(emdawnwebgpu_config webgpu_generated_struct_info_js emdawnwebgpu_js_gen)
+    add_dependencies(emdawnwebgpu_config
+        webgpu_generated_struct_info_js
+        emdawnwebgpu_js_gen
+        emdawnwebgpu_headers_gen
+    )
     target_link_options(emdawnwebgpu_config INTERFACE
         # We are using Dawn-generated bindings, not built-in ones
         "-sUSE_WEBGPU=0"
@@ -202,12 +209,13 @@ if (EMSCRIPTEN)
         "--js-library=${EM_BUILD_GEN_DIR}/library_webgpu_enum_tables.js"
         "--js-library=${EM_BUILD_GEN_DIR}/library_webgpu_generated_struct_info.js"
         "--js-library=${EM_BUILD_GEN_DIR}/library_webgpu_generated_sig_info.js"
-        "--js-library=${DAWN_EMDAWNWEBGPU_DIR}/library_webgpu.js"
-        "--closure-args=--externs=${EMSCRIPTEN_ROOT_PATH}/src/closure-externs/webgpu-externs.js"
+        "--js-library=${DAWN_EMDAWNWEBGPU_DIR}/pkg/webgpu/src/library_webgpu.js"
+        # Closure externs to avoid minifying WebGPU API symbols
+        "--closure-args=--externs=${DAWN_EMDAWNWEBGPU_DIR}/pkg/webgpu/src/webgpu-externs.js"
     )
     # Relink when library_webgpu.js file changes.
     set_target_properties(emdawnwebgpu_config PROPERTIES
-        INTERFACE_LINK_DEPENDS "${DAWN_EMDAWNWEBGPU_DIR}/library_webgpu.js"
+        INTERFACE_LINK_DEPENDS "${DAWN_EMDAWNWEBGPU_DIR}/pkg/webgpu/src/library_webgpu.js"
     )
 
     dawn_add_library(
@@ -216,7 +224,7 @@ if (EMSCRIPTEN)
         HEADERS
             "${EM_BUILD_GEN_DIR}/include/webgpu/webgpu.h"
         SOURCES
-            "${DAWN_EMDAWNWEBGPU_DIR}/webgpu.cpp"
+            "${DAWN_EMDAWNWEBGPU_DIR}/pkg/webgpu/src/webgpu.cpp"
         DEPENDS
             emdawnwebgpu_config
     )
@@ -232,6 +240,48 @@ if (EMSCRIPTEN)
             "${DAWN_INCLUDE_DIR}/webgpu/webgpu_enum_class_bitmasks.h"
         DEPENDS
             emdawnwebgpu_c
+    )
+
+    add_custom_target(emdawnwebgpu_pkg
+        DEPENDS
+            # Note emdawnwebgpu_headers_gen generates all the files we need. We don't want
+            # emdawnwebgpu_c because that will actually compile webgpu.cpp. We want to
+            # package webgpu.cpp as a source file, instead.
+            emdawnwebgpu_config
+    )
+
+    add_custom_command(TARGET emdawnwebgpu_pkg POST_BUILD
+        # Copy files from src/emdawnwebgpu/pkg and third_party/emdawnwebgpu/pkg
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${DAWN_EMDAWNWEBGPU_DIR}/pkg/"
+            "${EM_SRC_DIR}/pkg/"
+            "${CMAKE_BINARY_DIR}/emdawnwebgpu_pkg/"
+        COMMAND ${CMAKE_COMMAND} -E make_directory
+            "${CMAKE_BINARY_DIR}/emdawnwebgpu_pkg/webgpu/include/webgpu/"
+            "${CMAKE_BINARY_DIR}/emdawnwebgpu_pkg/webgpu_cpp/include/webgpu/"
+            "${CMAKE_BINARY_DIR}/emdawnwebgpu_pkg/webgpu_cpp/include/dawn/"
+
+        # Copy webgpu_enum_class_bitmasks.h
+        COMMAND ${CMAKE_COMMAND} -E copy
+            "${DAWN_INCLUDE_DIR}/webgpu/webgpu_enum_class_bitmasks.h"
+            "${CMAKE_BINARY_DIR}/emdawnwebgpu_pkg/webgpu_cpp/include/webgpu/"
+
+        # Copy generated files
+        COMMAND ${CMAKE_COMMAND} -E copy
+            "${EM_BUILD_GEN_DIR}/library_webgpu_enum_tables.js"
+            "${EM_BUILD_GEN_DIR}/library_webgpu_generated_struct_info.js"
+            "${EM_BUILD_GEN_DIR}/library_webgpu_generated_sig_info.js"
+            "${CMAKE_BINARY_DIR}/emdawnwebgpu_pkg/webgpu/src/"
+        COMMAND ${CMAKE_COMMAND} -E copy
+            "${EM_BUILD_GEN_DIR}/include/webgpu/webgpu.h"
+            "${CMAKE_BINARY_DIR}/emdawnwebgpu_pkg/webgpu/include/webgpu/"
+        COMMAND ${CMAKE_COMMAND} -E copy
+            "${EM_BUILD_GEN_DIR}/include/webgpu/webgpu_cpp.h"
+            "${EM_BUILD_GEN_DIR}/include/webgpu/webgpu_cpp_chained_struct.h"
+            "${CMAKE_BINARY_DIR}/emdawnwebgpu_pkg/webgpu_cpp/include/webgpu/"
+        COMMAND ${CMAKE_COMMAND} -E copy
+            "${EM_BUILD_GEN_DIR}/include/dawn/webgpu_cpp_print.h"
+            "${CMAKE_BINARY_DIR}/emdawnwebgpu_pkg/webgpu_cpp/include/dawn/"
     )
 
     if (${DAWN_BUILD_TESTS})
