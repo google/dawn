@@ -1,12 +1,10 @@
-SKIP: FAILED
 
-../../src/tint/lang/hlsl/writer/printer/printer.cc:636 internal compiler error: TINT_ASSERT(register_space != ' ')
+Texture2D<float4> sampled_textures[4] : register(t0);
+void do_texture_load(Texture2D<float4> t) {
+  float4 texture_load = t.Load(int3((int(0)).xx, int(0)));
+}
 
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+void fs() {
+  do_texture_load(sampled_textures[int(0)]);
+}
 
-tint executable returned error: signal: trace/BPT trap

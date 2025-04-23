@@ -26,6 +26,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "src/tint/lang/core/ir/var.h"
+#include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
 #include "src/tint/lang/core/type/depth_texture.h"
 #include "src/tint/lang/core/type/f32.h"
@@ -119,6 +120,23 @@ TEST_F(HlslWriterTest, VarSamplerComparison) {
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 SamplerComparisonState s : register(s0);
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+}
+
+)");
+}
+
+TEST_F(HlslWriterTest, VarBindingArraySampledTexture) {
+    auto* sampled_texture = ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32());
+    auto* v = b.Var("v", ty.ptr<handle>(ty.binding_array(sampled_texture, 4_u)));
+    v->SetBindingPoint(0, 0);
+
+    b.ir.root_block->Append(v);
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+Texture2D<float4> v[4] : register(t0);
 [numthreads(1, 1, 1)]
 void unused_entry_point() {
 }

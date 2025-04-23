@@ -82,6 +82,7 @@
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/array_count.h"
 #include "src/tint/lang/core/type/atomic.h"
+#include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/bool.h"
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
 #include "src/tint/lang/core/type/external_texture.h"
@@ -620,20 +621,23 @@ class Printer : public tint::TextGenerator {
         auto* ptr = var->Result()->Type()->As<core::type::Pointer>();
         TINT_ASSERT(ptr);
 
-        char register_space = ' ';
-        if (ptr->StoreType()->Is<core::type::Texture>()) {
-            register_space = 't';
-
-            auto* st = ptr->StoreType()->As<core::type::StorageTexture>();
-            if (st && st->Access() != core::Access::kRead) {
-                register_space = 'u';
-            } else if (ptr->StoreType()->Is<hlsl::type::RasterizerOrderedTexture2D>()) {
-                register_space = 'u';
-            }
-        } else if (ptr->StoreType()->Is<core::type::Sampler>()) {
-            register_space = 's';
+        auto* type_for_register = ptr->StoreType();
+        if (auto* arr = type_for_register->As<core::type::BindingArray>()) {
+            type_for_register = arr->ElemType();
         }
-        TINT_ASSERT(register_space != ' ');
+
+        char register_space = Switch(
+            type_for_register,  //
+            [&](const core::type::DepthTexture*) { return 't'; },
+            [&](const core::type::DepthMultisampledTexture*) { return 't'; },
+            [&](const core::type::SampledTexture*) { return 't'; },
+            [&](const core::type::MultisampledTexture*) { return 't'; },
+            [&](const core::type::StorageTexture* st) {
+                return st->Access() == core::Access::kRead ? 't' : 'u';
+            },
+            [&](const hlsl::type::RasterizerOrderedTexture2D*) { return 'u'; },
+            [&](const core::type::Sampler*) { return 's'; },  //
+            TINT_ICE_ON_NO_MATCH);
 
         auto bp = var->BindingPoint();
         TINT_ASSERT(bp.has_value());
@@ -1367,6 +1371,9 @@ class Printer : public tint::TextGenerator {
 
             [&](const core::type::Atomic* atomic) { EmitType(out, atomic->Type(), name); },
             [&](const core::type::Array* ary) { EmitArrayType(out, ary, name, name_printed); },
+            [&](const core::type::BindingArray* ary) {
+                EmitBindingArrayType(out, ary, name, name_printed);
+            },
             [&](const core::type::Vector* vec) { EmitVectorType(out, vec); },
             [&](const core::type::Matrix* mat) { EmitMatrixType(out, mat); },
             [&](const core::type::Struct* str) {
@@ -1412,6 +1419,24 @@ class Printer : public tint::TextGenerator {
         for (const uint32_t size : sizes) {
             out << "[" << size << "]";
         }
+    }
+
+    void EmitBindingArrayType(StringStream& out,
+                              const core::type::BindingArray* ary,
+                              const std::string& name,
+                              bool* name_printed) {
+        EmitType(out, ary->ElemType());
+
+        if (!name.empty()) {
+            out << " " << name;
+            if (name_printed) {
+                *name_printed = true;
+            }
+        }
+
+        auto* constant_count = ary->Count()->As<core::type::ConstantArrayCount>();
+        TINT_ASSERT(constant_count != nullptr);
+        out << "[" << constant_count->value << "]";
     }
 
     void EmitVectorType(StringStream& out, const core::type::Vector* vec) {
