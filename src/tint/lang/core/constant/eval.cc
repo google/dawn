@@ -475,8 +475,7 @@ const Value* ConvertInternal(const Value* root_value,
 /// If `f`'s last argument is a `size_t`, then the index of the most deeply nested element inside
 /// the most deeply nested aggregate type will be passed in.
 template <typename F, typename... CONSTANTS>
-tint::traits::EnableIf<tint::traits::IsType<size_t, tint::traits::LastParameterType<F>>,
-                       Eval::Result>
+std::enable_if_t<tint::traits::IsType<size_t, tint::traits::LastParameterType<F>>, Eval::Result>
 TransformElements(Manager& mgr,
                   const core::type::Type* composite_ty,
                   const F& f,

@@ -283,7 +283,7 @@ class CloneContext {
     ///        `T* (T*)`, where `T` derives from Node
     /// @returns this CloneContext so calls can be chained
     template <typename F>
-    traits::EnableIf<ParamTypeIsPtrOf<F, ast::Node>, CloneContext>& ReplaceAll(F&& replacer) {
+    std::enable_if_t<ParamTypeIsPtrOf<F, ast::Node>, CloneContext>& ReplaceAll(F&& replacer) {
         using TPtr = traits::ParameterType<F, 0>;
         using T = typename std::remove_pointer<TPtr>::type;
         for (auto& transform : transforms_) {

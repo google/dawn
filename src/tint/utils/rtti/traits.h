@@ -114,14 +114,10 @@ template <typename T, typename BASE>
 static constexpr bool IsTypeOrDerived =
     std::is_base_of<BASE, Decay<T>>::value || std::is_same<BASE, Decay<T>>::value;
 
-/// If `CONDITION` is true then EnableIf resolves to type T, otherwise an invalid type.
-template <bool CONDITION, typename T = void>
-using EnableIf = std::enable_if_t<CONDITION, T>;
-
 /// If `T` is of type `BASE`, or derives from `BASE`, then EnableIfIsType
 /// resolves to type `T`, otherwise an invalid type.
 template <typename T, typename BASE>
-using EnableIfIsType = EnableIf<IsTypeOrDerived<T, BASE>, T>;
+using EnableIfIsType = std::enable_if_t<IsTypeOrDerived<T, BASE>, T>;
 
 /// @returns the std::index_sequence with all the indices shifted by OFFSET.
 template <std::size_t OFFSET, std::size_t... INDICES>
@@ -254,7 +250,7 @@ static constexpr bool IsOStream = detail::IsOStream<T>::value;
 
 /// If `CONDITION` is true then EnableIfIsOStream resolves to type T, otherwise an invalid type.
 template <typename T = void>
-using EnableIfIsOStream = EnableIf<IsOStream<T>, T>;
+using EnableIfIsOStream = std::enable_if_t<IsOStream<T>, T>;
 
 ////////////////////////////////////////////////////////////////////////////////
 // HasOperatorShiftLeft

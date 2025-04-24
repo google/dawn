@@ -599,7 +599,7 @@ struct DataType<alias<T, ID>> {
     /// @param args the value nested elements will be initialized with
     /// @return a new AST expression of the alias type
     template <bool IS_COMPOSITE = is_composite>
-    static inline tint::traits::EnableIf<!IS_COMPOSITE, const ast::Expression*> Expr(
+    static inline std::enable_if_t<!IS_COMPOSITE, const ast::Expression*> Expr(
         ProgramBuilder& b,
         VectorRef<Scalar> args) {
         // Cast
@@ -610,7 +610,7 @@ struct DataType<alias<T, ID>> {
     /// @param args the value nested elements will be initialized with
     /// @return a new AST expression of the alias type
     template <bool IS_COMPOSITE = is_composite>
-    static inline tint::traits::EnableIf<IS_COMPOSITE, const ast::Expression*> Expr(
+    static inline std::enable_if_t<IS_COMPOSITE, const ast::Expression*> Expr(
         ProgramBuilder& b,
         VectorRef<Scalar> args) {
         // Construct

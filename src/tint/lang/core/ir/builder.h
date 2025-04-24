@@ -116,13 +116,13 @@ class Builder {
     /// A helper used to enable overloads if the first type in `TYPES` is a Vector or
     /// VectorRef.
     template <typename... TYPES>
-    using EnableIfVectorLike = tint::traits::EnableIf<
+    using EnableIfVectorLike = std::enable_if_t<
         tint::IsVectorLike<tint::traits::Decay<tint::traits::NthTypeOf<0, TYPES..., void>>>>;
 
     /// A helper used to disable overloads if the first type in `TYPES` is a Vector or
     /// VectorRef.
     template <typename... TYPES>
-    using DisableIfVectorLike = tint::traits::EnableIf<
+    using DisableIfVectorLike = std::enable_if_t<
         !tint::IsVectorLike<tint::traits::Decay<tint::traits::NthTypeOf<0, TYPES..., void>>>>;
 
     /// A namespace for the various instruction insertion method
@@ -623,7 +623,7 @@ class Builder {
     /// @param rhs the right-hand-side of the operation
     /// @returns the operation
     template <typename KLASS, typename LHS, typename RHS>
-    tint::traits::EnableIf<tint::traits::IsTypeOrDerived<KLASS, ir::Binary>, KLASS*>
+    std::enable_if_t<tint::traits::IsTypeOrDerived<KLASS, ir::Binary>, KLASS*>
     Binary(BinaryOp op, const core::type::Type* type, LHS&& lhs, RHS&& rhs) {
         CheckForNonDeterministicEvaluation<LHS, RHS>();
         auto* lhs_val = Value(std::forward<LHS>(lhs));
@@ -1177,7 +1177,7 @@ class Builder {
     /// @param args the call arguments
     /// @returns the instruction
     template <typename KLASS, typename FUNC, typename... ARGS>
-    tint::traits::EnableIf<tint::traits::IsTypeOrDerived<KLASS, ir::BuiltinCall>, KLASS*>
+    std::enable_if_t<tint::traits::IsTypeOrDerived<KLASS, ir::BuiltinCall>, KLASS*>
     CallExplicitWithResult(ir::InstructionResult* result,
                            FUNC func,
                            VectorRef<const core::type::Type*> explicit_params,
@@ -1193,7 +1193,7 @@ class Builder {
     /// @param args the call arguments
     /// @returns the instruction
     template <typename KLASS, typename FUNC, typename... ARGS>
-    tint::traits::EnableIf<tint::traits::IsTypeOrDerived<KLASS, ir::BuiltinCall>, KLASS*>
+    std::enable_if_t<tint::traits::IsTypeOrDerived<KLASS, ir::BuiltinCall>, KLASS*>
     CallWithResult(ir::InstructionResult* result, FUNC func, ARGS&&... args) {
         return Append(
             ir.CreateInstruction<KLASS>(result, func, Values(std::forward<ARGS>(args)...)));
@@ -1206,11 +1206,11 @@ class Builder {
     /// @param args the call arguments
     /// @returns the instruction
     template <typename KLASS, typename FUNC, typename... ARGS>
-    tint::traits::EnableIf<tint::traits::IsTypeOrDerived<KLASS, ir::BuiltinCall>, KLASS*>
-    CallExplicit(const core::type::Type* type,
-                 FUNC func,
-                 VectorRef<const core::type::Type*> explicit_params,
-                 ARGS&&... args) {
+    std::enable_if_t<tint::traits::IsTypeOrDerived<KLASS, ir::BuiltinCall>, KLASS*> CallExplicit(
+        const core::type::Type* type,
+        FUNC func,
+        VectorRef<const core::type::Type*> explicit_params,
+        ARGS&&... args) {
         return CallExplicitWithResult<KLASS>(InstructionResult(type), func, explicit_params,
                                              Values(std::forward<ARGS>(args)...));
     }
@@ -1236,7 +1236,7 @@ class Builder {
     /// @param args the call arguments
     /// @returns the instruction
     template <typename KLASS, typename FUNC, typename... ARGS>
-    tint::traits::EnableIf<tint::traits::IsTypeOrDerived<KLASS, ir::BuiltinCall>, KLASS*>
+    std::enable_if_t<tint::traits::IsTypeOrDerived<KLASS, ir::BuiltinCall>, KLASS*>
     Call(const core::type::Type* type, FUNC func, ARGS&&... args) {
         return CallWithResult<KLASS>(InstructionResult(type), func,
                                      Values(std::forward<ARGS>(args)...));
@@ -1249,7 +1249,7 @@ class Builder {
     /// @param args the call arguments
     /// @returns the instruction
     template <typename KLASS, typename FUNC, typename OBJ, typename... ARGS>
-    tint::traits::EnableIf<tint::traits::IsTypeOrDerived<KLASS, ir::MemberBuiltinCall>, KLASS*>
+    std::enable_if_t<tint::traits::IsTypeOrDerived<KLASS, ir::MemberBuiltinCall>, KLASS*>
     MemberCallWithResult(ir::InstructionResult* result, FUNC func, OBJ&& obj, ARGS&&... args) {
         return Append(ir.CreateInstruction<KLASS>(result, func, Value(std::forward<OBJ>(obj)),
                                                   Values(std::forward<ARGS>(args)...)));
@@ -1262,7 +1262,7 @@ class Builder {
     /// @param args the call arguments
     /// @returns the instruction
     template <typename KLASS, typename FUNC, typename OBJ, typename... ARGS>
-    tint::traits::EnableIf<tint::traits::IsTypeOrDerived<KLASS, ir::MemberBuiltinCall>, KLASS*>
+    std::enable_if_t<tint::traits::IsTypeOrDerived<KLASS, ir::MemberBuiltinCall>, KLASS*>
     MemberCall(const core::type::Type* type, FUNC func, OBJ&& obj, ARGS&&... args) {
         return MemberCallWithResult<KLASS>(InstructionResult(type), func,
                                            Value(std::forward<OBJ>(obj)),
