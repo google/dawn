@@ -444,6 +444,10 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
     // Required for core and compat WebGPU features.
     usedKnobs.features.fullDrawIndexUint32 = VK_TRUE;
     usedKnobs.features.fragmentStoresAndAtomics = VK_TRUE;
+    usedKnobs.features.shaderUniformBufferArrayDynamicIndexing = VK_TRUE;
+    usedKnobs.features.shaderStorageBufferArrayDynamicIndexing = VK_TRUE;
+    usedKnobs.features.shaderSampledImageArrayDynamicIndexing = VK_TRUE;
+    usedKnobs.features.shaderStorageImageArrayDynamicIndexing = VK_TRUE;
 
     if (IsRobustnessEnabled()) {
         usedKnobs.features.robustBufferAccess = VK_TRUE;

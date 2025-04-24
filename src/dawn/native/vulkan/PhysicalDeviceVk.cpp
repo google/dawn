@@ -204,6 +204,14 @@ MaybeError PhysicalDevice::InitializeImpl() {
             "textureCompressionASTC required.");
     }
 
+    // Needed for binding_array support.
+    if (!mDeviceInfo.features.shaderUniformBufferArrayDynamicIndexing ||
+        !mDeviceInfo.features.shaderStorageBufferArrayDynamicIndexing ||
+        !mDeviceInfo.features.shaderSampledImageArrayDynamicIndexing ||
+        !mDeviceInfo.features.shaderStorageImageArrayDynamicIndexing) {
+        return DAWN_INTERNAL_ERROR("Vulkan shaderUniform*ArrayDynamicIndexing required.");
+    }
+
     // Needed for the respective WebGPU features.
     if (mSupportsCoreFeatureLevel && !mDeviceInfo.features.depthBiasClamp) {
         SetCoreNotSupported(DAWN_INTERNAL_ERROR("Vulkan depthBiasClamp feature required."));
