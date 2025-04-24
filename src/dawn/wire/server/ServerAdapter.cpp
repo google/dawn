@@ -57,7 +57,7 @@ WireResult Server::DoAdapterRequestDevice(Known<WGPUAdapter> adapter,
     deviceLostUserdata->future = deviceLostFuture;
 
     WGPUDeviceDescriptor desc = *descriptor;
-    desc.deviceLostCallbackInfo = {nullptr, WGPUCallbackMode_AllowSpontaneous,
+    desc.deviceLostCallbackInfo = {nullptr, WGPUCallbackMode_AllowProcessEvents,
                                    ForwardToServer<&Server::OnDeviceLost>,
                                    deviceLostUserdata.release(), nullptr};
     desc.uncapturedErrorCallbackInfo = {
