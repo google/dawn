@@ -78,79 +78,9 @@ int64_t GetValueFromConstant(const Constant* value) {
 
 struct CompareOpAndConstRHS {
     BinaryOp op;
-    int64_t const_rhs;
+    int64_t const_rhs = 0;
+    const Binary* binary = nullptr;
 };
-
-// A valid `compare` binary instruction can be in one of the below formats:
-// 1. variable >= constant variable <= constant
-// 2. variable > constant variable < constant
-// 3. constant >= variable constant <= variable
-// 4. constant > variable constant < variable
-// This function analyzes the input `compare` and outputs both `variable` and `constant` in the
-// equivalent format of format 1.
-CompareOpAndConstRHS GetCompareOpAndConstRHS(const Binary* compare) {
-    CompareOpAndConstRHS result;
-
-    if (IsConstantInteger(compare->RHS())) {
-        int64_t const_rhs = GetValueFromConstant(compare->RHS()->As<Constant>());
-
-        switch (compare->Op()) {
-            case BinaryOp::kLessThan:
-                // variable < constant => variable <= constant - 1
-                // `const_rhs - 1` will always be safe after the checks in
-                // `GetBinaryToCompareLoopControlVariableInLoopBody()`.
-                result.op = BinaryOp::kLessThanEqual;
-                result.const_rhs = const_rhs - 1;
-                break;
-            case BinaryOp::kGreaterThan:
-                // variable > constant => variable >= constant + 1
-                // `const_rhs` will always be safe after the checks in
-                // `GetBinaryToCompareLoopControlVariableInLoopBody()`.
-                result.op = BinaryOp::kGreaterThanEqual;
-                result.const_rhs = const_rhs + 1;
-                break;
-            case BinaryOp::kLessThanEqual:
-            case BinaryOp::kGreaterThanEqual:
-                result.op = compare->Op();
-                result.const_rhs = const_rhs;
-                break;
-            default:
-                TINT_UNREACHABLE();
-        }
-    } else {
-        TINT_ASSERT(IsConstantInteger(compare->LHS()));
-        int64_t const_lhs = GetValueFromConstant(compare->LHS()->As<Constant>());
-
-        switch (compare->Op()) {
-            case BinaryOp::kLessThan:
-                // constant < variable => variable > constant => variable >= constant + 1
-                // `const_lhs + 1` will always be safe after the checks in
-                // `GetBinaryToCompareLoopControlVariableInLoopBody()`.
-                result.op = BinaryOp::kGreaterThanEqual;
-                result.const_rhs = const_lhs + 1;
-                break;
-            case BinaryOp::kGreaterThan:
-                // constant > variable => variable < constant => variable <= constant - 1
-                // `const_lhs - 1` will always be safe after the checks in
-                // `GetBinaryToCompareLoopControlVariableInLoopBody()`.
-                result.op = BinaryOp::kLessThanEqual;
-                result.const_rhs = const_lhs - 1;
-                break;
-            case BinaryOp::kLessThanEqual:
-                result.op = BinaryOp::kGreaterThanEqual;
-                result.const_rhs = const_lhs;
-                break;
-            case BinaryOp::kGreaterThanEqual:
-                result.op = BinaryOp::kLessThanEqual;
-                result.const_rhs = const_lhs;
-                break;
-            default:
-                TINT_UNREACHABLE();
-        }
-    }
-
-    return result;
-}
 
 }  // namespace
 
@@ -231,8 +161,9 @@ struct IntegerRangeAnalysisImpl {
         if (!update) {
             return;
         }
-        const Binary* compare = GetBinaryToCompareLoopControlVariableInLoopBody(loop, index);
-        if (!compare) {
+        CompareOpAndConstRHS compare_info =
+            GetCompareInfoOfLoopControlVariableInLoopBody(loop, index);
+        if (!compare_info.binary) {
             return;
         }
 
@@ -253,7 +184,6 @@ struct IntegerRangeAnalysisImpl {
                                         static_cast<uint64_t>(max_value));
             }
         };
-        CompareOpAndConstRHS compare_info = GetCompareOpAndConstRHS(compare);
         switch (compare_info.op) {
             case BinaryOp::kLessThanEqual: {
                 // for (var index = const_init; index <= const_rhs; index++)
@@ -432,20 +362,32 @@ struct IntegerRangeAnalysisImpl {
     // requirements:
     // - The loop control variable is only used as the parameter of the load instruction.
     // - The first instruction is to load the loop control variable into a temporary variable.
-    // - The second instruction is to compare the temporary variable with a constant value and save
-    //   the result to a boolean variable.
+    // - The second instruction is a `compare` binary to compare the temporary variable with a
+    //   constant value and save the result to a boolean variable.
     // - The second instruction cannot be a comparison that will never return true.
     // - The third instruction is an `ifelse` expression that uses the boolean variable got in the
     //   second instruction as the condition.
     // - The true block of the above `ifelse` expression doesn't contain `exit_loop`.
     // - The false block of the above `ifelse` expression only contains `exit_loop`.
-    const Binary* GetBinaryToCompareLoopControlVariableInLoopBody(
+    // A valid `compare` binary instruction (the second instruction) can be in one of the below
+    // formats:
+    // 1. variable >= constant variable <= constant
+    // 2. variable > constant variable < constant
+    // 3. constant >= variable constant <= variable
+    // 4. constant > variable constant < variable
+    // This function analyzes the `compare` binary and returns both `variable` and `constant` in the
+    // equivalent format of format 1 and a pointer to the `compare` binary in a
+    // `CompareOpAndConstRHS`struct when the input `loop` meets all the above requirements.
+    // `CompareOpAndConstRHS.binary` will be set to nullptr otherwise.
+    CompareOpAndConstRHS GetCompareInfoOfLoopControlVariableInLoopBody(
         const Loop* loop,
         const Var* loop_control_variable) {
         TINT_ASSERT(loop);
         TINT_ASSERT(loop_control_variable);
 
         auto* body_block = loop->Body();
+
+        CompareOpAndConstRHS compare_info = {};
 
         // Reject any non-load instructions unless it is a store in the continuing block
         const auto& uses = loop_control_variable->Result(0)->UsagesUnsorted();
@@ -456,17 +398,17 @@ struct IntegerRangeAnalysisImpl {
             if (use->instruction->Is<Store>() && use->instruction->Block() == loop->Continuing()) {
                 continue;
             }
-            return nullptr;
+            return compare_info;
         }
 
         // 1st instruction:
         // %src = load %loop_control_variable
         const auto* load_from_loop_control_variable = body_block->Instructions()->As<Load>();
         if (!load_from_loop_control_variable) {
-            return nullptr;
+            return compare_info;
         }
         if (load_from_loop_control_variable->From() != loop_control_variable->Result(0)) {
-            return nullptr;
+            return compare_info;
         }
 
         // 2nd instruction:
@@ -475,7 +417,7 @@ struct IntegerRangeAnalysisImpl {
         const auto* exit_condition_on_loop_control_variable =
             load_from_loop_control_variable->next->As<Binary>();
         if (!exit_condition_on_loop_control_variable) {
-            return nullptr;
+            return compare_info;
         }
         BinaryOp op = exit_condition_on_loop_control_variable->Op();
         auto* lhs = exit_condition_on_loop_control_variable->LHS();
@@ -491,10 +433,10 @@ struct IntegerRangeAnalysisImpl {
                 if (IsConstantInteger(lhs) && rhs == load_from_loop_control_variable->Result(0)) {
                     break;
                 }
-                return nullptr;
+                return compare_info;
             }
             default:
-                return nullptr;
+                return compare_info;
         }
 
         const bool is_signed = lhs->Type()->IsSignedIntegerScalar();
@@ -505,109 +447,158 @@ struct IntegerRangeAnalysisImpl {
             return val->As<Constant>()->Value()->ValueAs<uint32_t>();
         };
 
-        // We should early return when the comparison will never return true.
-        // e.g.
-        // for (...; i < 0u; ...)  // The loop body will never be executed.
+        // Check and extract necessary information from `binary`.
+        // Note that we should early return when the comparison will never return true.
+        // e.g. for (...; i < 0u; ...)  // The loop body will never be executed.
         // We should also early return when the comparison will always return true, which means the
         // loop exit condition takes no effect and the loop control variable can actually take all
         // the numbers.
-        // e.g.
-        // for (i = 100u; i >= 0u; i--) // `i` can be any u32 value instead of [0u, 100u]
-        switch (op) {
-            case BinaryOp::kLessThan: {
-                if (IsConstantInteger(lhs)) {
-                    // std::numeric_limits<uint32_t>::max() < idx
-                    if (!is_signed && const_u32(lhs) == u32::kHighestValue) {
-                        return nullptr;
-                    }
-                    // std::numeric_limits<int32_t>::max() < idx
-                    if (is_signed && const_i32(lhs) == i32::kHighestValue) {
-                        return nullptr;
-                    }
-                } else {
-                    TINT_ASSERT(IsConstantInteger(rhs));
-                    // idx < std::numeric_limits<uint32_t>::min()
+        // e.g. for (i = 100u; i >= 0u; i--) // `i` can be any u32 value instead of [0u, 100u]
+        if (IsConstantInteger(rhs)) {
+            // Handle `binary` in the format of `variable op const_rhs`
+            int64_t const_rhs = GetValueFromConstant(rhs->As<Constant>());
+
+            switch (op) {
+                case BinaryOp::kLessThan: {
+                    // variable < std::numeric_limits<uint32_t>::min()
                     if (!is_signed && const_u32(rhs) == u32::kLowestValue) {
-                        return nullptr;
+                        return compare_info;
                     }
-                    // idx < std::numeric_limits<int32_t>::min()
+                    // variable < std::numeric_limits<int32_t>::min()
                     if (is_signed && const_i32(rhs) == i32::kLowestValue) {
-                        return nullptr;
+                        return compare_info;
                     }
+
+                    // variable < constant => variable <= constant - 1
+                    // `const_rhs - 1` will always be safe after the above checks.
+                    compare_info.op = BinaryOp::kLessThanEqual;
+                    compare_info.const_rhs = const_rhs - 1;
+                    break;
                 }
-                break;
-            }
-            case BinaryOp::kGreaterThan: {
-                if (IsConstantInteger(lhs)) {
-                    // std::numeric_limits<uint32_t>::min() > idx
-                    if (!is_signed && const_u32(lhs) == u32::kLowestValue) {
-                        return nullptr;
-                    }
-                    // std::numeric_limits<int32_t>::min() > idx
-                    if (is_signed && const_i32(lhs) == i32::kLowestValue) {
-                        return nullptr;
-                    }
-                } else {
-                    TINT_ASSERT(IsConstantInteger(rhs));
-                    // idx > std::numeric_limits<uint32_t>::max()
+
+                case BinaryOp::kGreaterThan: {
+                    // variable > std::numeric_limits<uint32_t>::max()
                     if (!is_signed && const_u32(rhs) == u32::kHighestValue) {
-                        return nullptr;
+                        return compare_info;
                     }
-                    // idx > std::numeric_limits<int32_t>::max()
+                    // variable > std::numeric_limits<int32_t>::max()
                     if (is_signed && const_i32(rhs) == i32::kHighestValue) {
-                        return nullptr;
+                        return compare_info;
                     }
+
+                    // variable > constant => variable >= constant + 1
+                    // `const_rhs` will always be safe after the above checks.
+                    compare_info.op = BinaryOp::kGreaterThanEqual;
+                    compare_info.const_rhs = const_rhs + 1;
+                    break;
                 }
-                break;
-            }
-            case BinaryOp::kLessThanEqual: {
-                if (IsConstantInteger(lhs)) {
-                    // std::numeric_limits<uint32_t>::min() <= idx
-                    if (!is_signed && const_u32(lhs) == u32::kLowestValue) {
-                        return nullptr;
-                    }
-                    // std::numeric_limits<int32_t>::min() <= idx
-                    if (is_signed && const_i32(lhs) == i32::kLowestValue) {
-                        return nullptr;
-                    }
-                } else {
-                    TINT_ASSERT(IsConstantInteger(rhs));
-                    // idx <= std::numeric_limits<uint32_t>::max()
+
+                case BinaryOp::kLessThanEqual: {
+                    // variable <= std::numeric_limits<uint32_t>::max()
                     if (!is_signed && const_u32(rhs) == u32::kHighestValue) {
-                        return nullptr;
+                        return compare_info;
                     }
-                    // idx <= std::numeric_limits<int32_t>::max()
+                    // variable <= std::numeric_limits<int32_t>::max()
                     if (is_signed && const_i32(rhs) == i32::kHighestValue) {
-                        return nullptr;
+                        return compare_info;
                     }
+
+                    compare_info.op = op;
+                    compare_info.const_rhs = const_rhs;
+                    break;
                 }
-                break;
-            }
-            case BinaryOp::kGreaterThanEqual: {
-                if (IsConstantInteger(lhs)) {
-                    // std::numeric_limits<uint32_t>::max() >= idx
-                    if (!is_signed && const_u32(lhs) == u32::kHighestValue) {
-                        return nullptr;
-                    }
-                    // std::numeric_limits<int32_t>::max() >= idx
-                    if (is_signed && const_i32(lhs) == i32::kHighestValue) {
-                        return nullptr;
-                    }
-                } else {
-                    TINT_ASSERT(IsConstantInteger(rhs));
-                    // idx >= std::numeric_limits<uint32_t>::min()
+                case BinaryOp::kGreaterThanEqual: {
+                    // variable >= std::numeric_limits<uint32_t>::min()
                     if (!is_signed && const_u32(rhs) == u32::kLowestValue) {
-                        return nullptr;
+                        return compare_info;
                     }
-                    // idx >= std::numeric_limits<int32_t>::min()
+                    // variable >= std::numeric_limits<int32_t>::min()
                     if (is_signed && const_i32(rhs) == i32::kLowestValue) {
-                        return nullptr;
+                        return compare_info;
                     }
+
+                    compare_info.op = op;
+                    compare_info.const_rhs = const_rhs;
+                    break;
                 }
-                break;
+                default:
+                    TINT_UNREACHABLE();
             }
-            default:
-                TINT_UNREACHABLE();
+        } else {
+            // Handle `binary` in the format of `const_lhs op variable`
+            TINT_ASSERT(IsConstantInteger(lhs));
+            int64_t const_lhs = GetValueFromConstant(lhs->As<Constant>());
+
+            switch (op) {
+                case BinaryOp::kLessThan: {
+                    // std::numeric_limits<uint32_t>::max() < variable
+                    if (!is_signed && const_u32(lhs) == u32::kHighestValue) {
+                        return compare_info;
+                    }
+                    // std::numeric_limits<int32_t>::max() < variable
+                    if (is_signed && const_i32(lhs) == i32::kHighestValue) {
+                        return compare_info;
+                    }
+
+                    // constant < variable => variable > constant => variable >= constant + 1
+                    // `const_lhs + 1` will always be safe after the above checks.
+                    compare_info.op = BinaryOp::kGreaterThanEqual;
+                    compare_info.const_rhs = const_lhs + 1;
+                    break;
+                }
+
+                case BinaryOp::kGreaterThan: {
+                    // std::numeric_limits<uint32_t>::min() > variable
+                    if (!is_signed && const_u32(lhs) == u32::kLowestValue) {
+                        return compare_info;
+                    }
+                    // std::numeric_limits<int32_t>::min() > variable
+                    if (is_signed && const_i32(lhs) == i32::kLowestValue) {
+                        return compare_info;
+                    }
+
+                    // constant > variable => variable < constant => variable <= constant - 1
+                    // `const_lhs - 1` will always be safe after the above checks.
+                    compare_info.op = BinaryOp::kLessThanEqual;
+                    compare_info.const_rhs = const_lhs - 1;
+                    break;
+                }
+
+                case BinaryOp::kLessThanEqual: {
+                    // std::numeric_limits<uint32_t>::min() <= variable
+                    if (!is_signed && const_u32(lhs) == u32::kLowestValue) {
+                        return compare_info;
+                    }
+                    // std::numeric_limits<int32_t>::min() <= variable
+                    if (is_signed && const_i32(lhs) == i32::kLowestValue) {
+                        return compare_info;
+                    }
+
+                    // constant <= variable => variable >= constant
+                    compare_info.op = BinaryOp::kGreaterThanEqual;
+                    compare_info.const_rhs = const_lhs;
+                    break;
+                }
+
+                case BinaryOp::kGreaterThanEqual: {
+                    // std::numeric_limits<uint32_t>::max() >= variable
+                    if (!is_signed && const_u32(lhs) == u32::kHighestValue) {
+                        return compare_info;
+                    }
+                    // std::numeric_limits<int32_t>::max() >= variable
+                    if (is_signed && const_i32(lhs) == i32::kHighestValue) {
+                        return compare_info;
+                    }
+
+                    // constant >= variable => variable <= constant
+                    compare_info.op = BinaryOp::kLessThanEqual;
+                    compare_info.const_rhs = const_lhs;
+                    break;
+                }
+
+                default:
+                    TINT_UNREACHABLE();
+            }
         }
 
         // 3rd instruction:
@@ -620,20 +611,22 @@ struct IntegerRangeAnalysisImpl {
         // }
         const auto* if_on_exit_condition = exit_condition_on_loop_control_variable->next->As<If>();
         if (!if_on_exit_condition) {
-            return nullptr;
+            return compare_info;
         }
         if (if_on_exit_condition->Condition() !=
             exit_condition_on_loop_control_variable->Result(0)) {
-            return nullptr;
+            return compare_info;
         }
         if (!if_on_exit_condition->True()->Terminator()->As<ExitIf>()) {
-            return nullptr;
+            return compare_info;
         }
         if (!if_on_exit_condition->False()->Front()->As<ExitLoop>()) {
-            return nullptr;
+            return compare_info;
         }
 
-        return exit_condition_on_loop_control_variable;
+        // Set `compare_info.binary` after the loop passes all the above checks.
+        compare_info.binary = exit_condition_on_loop_control_variable;
+        return compare_info;
     }
 
   private:
@@ -666,7 +659,7 @@ const Binary* IntegerRangeAnalysis::GetBinaryToUpdateLoopControlVariableInContin
 const Binary* IntegerRangeAnalysis::GetBinaryToCompareLoopControlVariableInLoopBodyForTest(
     const Loop* loop,
     const Var* loop_control_variable) {
-    return impl_->GetBinaryToCompareLoopControlVariableInLoopBody(loop, loop_control_variable);
+    return impl_->GetCompareInfoOfLoopControlVariableInLoopBody(loop, loop_control_variable).binary;
 }
 
 const IntegerRangeInfo* IntegerRangeAnalysis::GetInfo(const Var* var) {
