@@ -66,7 +66,8 @@ std::string_view ToString(Extension value);
 /// @param out the stream to write to
 /// @param value the Extension
 /// @returns @p out so calls can be chained
-template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
+template <typename STREAM>
+    requires(traits::IsOStream<STREAM>)
 auto& operator<<(STREAM& out, Extension value) {
     return out << ToString(value);
 }

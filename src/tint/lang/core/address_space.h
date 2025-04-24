@@ -65,7 +65,8 @@ std::string_view ToString(AddressSpace value);
 /// @param out the stream to write to
 /// @param value the AddressSpace
 /// @returns @p out so calls can be chained
-template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
+template <typename STREAM>
+    requires(traits::IsOStream<STREAM>)
 auto& operator<<(STREAM& out, AddressSpace value) {
     return out << ToString(value);
 }

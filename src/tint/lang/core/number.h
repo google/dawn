@@ -191,7 +191,8 @@ struct Number : NumberBase<Number<T>> {
 /// @param out the stream to write to
 /// @param num the Number
 /// @return the stream so calls can be chained
-template <typename STREAM, typename T, typename = traits::EnableIfIsOStream<STREAM>>
+template <typename STREAM, typename T>
+    requires(traits::IsOStream<STREAM>)
 auto& operator<<(STREAM& out, Number<T> num) {
     return out << num.value;
 }
@@ -344,7 +345,8 @@ enum class ConversionFailure {
 /// @param out the stream to write to
 /// @param failure the ConversionFailure
 /// @return the stream so calls can be chained
-template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
+template <typename STREAM>
+    requires(traits::IsOStream<STREAM>)
 auto& operator<<(STREAM& out, ConversionFailure failure) {
     switch (failure) {
         case ConversionFailure::kExceedsPositiveLimit:

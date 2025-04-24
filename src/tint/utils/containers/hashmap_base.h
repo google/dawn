@@ -161,7 +161,8 @@ class HashmapKey {
 /// @param out the stream to write to
 /// @param key the HashmapKey to write
 /// @returns out so calls can be chained
-template <typename STREAM, typename T, typename = traits::EnableIfIsOStream<STREAM>>
+template <typename STREAM, typename T>
+    requires(traits::IsOStream<STREAM>)
 auto& operator<<(STREAM& out, const HashmapKey<T>& key) {
     if constexpr (traits::HasOperatorShiftLeft<STREAM, T>) {
         return out << key.Value();

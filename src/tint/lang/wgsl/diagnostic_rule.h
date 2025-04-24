@@ -58,7 +58,8 @@ std::string_view ToString(CoreDiagnosticRule value);
 /// @param out the stream to write to
 /// @param value the CoreDiagnosticRule
 /// @returns @p out so calls can be chained
-template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
+template <typename STREAM>
+    requires(traits::IsOStream<STREAM>)
 auto& operator<<(STREAM& out, CoreDiagnosticRule value) {
     return out << ToString(value);
 }
@@ -87,7 +88,8 @@ std::string_view ToString(ChromiumDiagnosticRule value);
 /// @param out the stream to write to
 /// @param value the ChromiumDiagnosticRule
 /// @returns @p out so calls can be chained
-template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
+template <typename STREAM>
+    requires(traits::IsOStream<STREAM>)
 auto& operator<<(STREAM& out, ChromiumDiagnosticRule value) {
     return out << ToString(value);
 }

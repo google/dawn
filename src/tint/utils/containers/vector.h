@@ -291,7 +291,8 @@ class VectorIterator {
 /// @param out the stream to write to
 /// @param it the VectorIterator
 /// @returns @p out so calls can be chained
-template <typename STREAM, typename T, bool FORWARD, typename = traits::EnableIfIsOStream<STREAM>>
+template <typename STREAM, typename T, bool FORWARD>
+    requires(traits::IsOStream<STREAM>)
 auto& operator<<(STREAM& out, const VectorIterator<T, FORWARD>& it) {
     return out << *it;
 }
@@ -1245,7 +1246,8 @@ Vector<T, N> ToVector(const std::vector<T>& vector) {
 /// @param o the stream to write to
 /// @param vec the vector
 /// @return the stream so calls can be chained
-template <typename STREAM, typename T, size_t N, typename = traits::EnableIfIsOStream<STREAM>>
+template <typename STREAM, typename T, size_t N>
+    requires(traits::IsOStream<STREAM>)
 auto& operator<<(STREAM& o, const Vector<T, N>& vec) {
     o << "[";
     bool first = true;
@@ -1264,7 +1266,8 @@ auto& operator<<(STREAM& o, const Vector<T, N>& vec) {
 /// @param o the stream to write to
 /// @param vec the vector reference
 /// @return the stream so calls can be chained
-template <typename STREAM, typename T, typename = traits::EnableIfIsOStream<STREAM>>
+template <typename STREAM, typename T>
+    requires(traits::IsOStream<STREAM>)
 auto& operator<<(STREAM& o, VectorRef<T> vec) {
     o << "[";
     bool first = true;

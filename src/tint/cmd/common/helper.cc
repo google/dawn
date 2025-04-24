@@ -65,7 +65,8 @@ enum class InputFormat {
 /// @param out the stream to write to
 /// @param value the InputFormat
 /// @returns @p out so calls can be chained
-template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
+template <typename STREAM>
+    requires(traits::IsOStream<STREAM>)
 auto& operator<<(STREAM& out, InputFormat value) {
     switch (value) {
         case InputFormat::kUnknown:

@@ -59,7 +59,8 @@ std::string_view ToString(InterpolationType value);
 /// @param out the stream to write to
 /// @param value the InterpolationType
 /// @returns @p out so calls can be chained
-template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
+template <typename STREAM>
+    requires(traits::IsOStream<STREAM>)
 auto& operator<<(STREAM& out, InterpolationType value) {
     return out << ToString(value);
 }

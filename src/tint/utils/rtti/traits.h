@@ -34,6 +34,11 @@
 #include <type_traits>
 #include <utility>
 
+// Predeclarations
+namespace tint {
+class StringStream;
+}
+
 namespace tint::traits {
 
 /// Convience type definition for std::decay<T>::type
@@ -222,35 +227,9 @@ using CharArrayToCharPtr = typename traits::detail::CharArrayToCharPtrImpl<T>::t
 ////////////////////////////////////////////////////////////////////////////////
 // IsOStream
 ////////////////////////////////////////////////////////////////////////////////
-namespace detail {
-/// Helper for determining whether the type T can be used as a stream writer
-template <typename T, typename ENABLE = void>
-struct IsOStream : std::false_type {};
-
-/// Specialization for types that declare a `static constexpr bool IsStreamWriter` member
 template <typename T>
-struct IsOStream<T, std::void_t<decltype(T::IsStreamWriter)>> {
-    /// Equal to T::IsStreamWriter
-    static constexpr bool value = T::IsStreamWriter;
-};
-
-/// Specialization for std::ostream
-template <typename T>
-struct IsOStream<T, std::enable_if_t<std::is_same_v<T, std::ostream>>> : std::true_type {};
-
-/// Specialization for std::stringstream
-template <typename T>
-struct IsOStream<T, std::enable_if_t<std::is_same_v<T, std::stringstream>>> : std::true_type {};
-
-}  // namespace detail
-
-/// Is true if the class T can be treated as an output stream
-template <typename T>
-static constexpr bool IsOStream = detail::IsOStream<T>::value;
-
-/// If `CONDITION` is true then EnableIfIsOStream resolves to type T, otherwise an invalid type.
-template <typename T = void>
-using EnableIfIsOStream = std::enable_if_t<IsOStream<T>, T>;
+concept IsOStream = std::is_same_v<T, std::ostream> || std::is_same_v<T, std::stringstream> ||
+                    std::is_same_v<T, tint::StringStream>;
 
 ////////////////////////////////////////////////////////////////////////////////
 // HasOperatorShiftLeft
