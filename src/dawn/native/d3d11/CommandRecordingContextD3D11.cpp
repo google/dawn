@@ -162,18 +162,13 @@ MaybeError ScopedCommandRecordingContext::FlushBuffersForSyncingWithCPU() const 
 
 ScopedSwapStateCommandRecordingContext::ScopedSwapStateCommandRecordingContext(
     CommandRecordingContextGuard&& guard)
-    : ScopedCommandRecordingContext(std::move(guard)),
-      mSwapContextState(ToBackend(Get()->mDevice->GetPhysicalDevice())->IsSharedD3D11Device()) {
-    if (mSwapContextState) {
-        Get()->mD3D11DeviceContext3->SwapDeviceContextState(Get()->mD3D11DeviceContextState.Get(),
-                                                            &mPreviousState);
-    }
+    : ScopedCommandRecordingContext(std::move(guard)) {
+    Get()->mD3D11DeviceContext3->SwapDeviceContextState(Get()->mD3D11DeviceContextState.Get(),
+                                                        &mPreviousState);
 }
 
 ScopedSwapStateCommandRecordingContext::~ScopedSwapStateCommandRecordingContext() {
-    if (mSwapContextState) {
-        Get()->mD3D11DeviceContext3->SwapDeviceContextState(mPreviousState.Get(), nullptr);
-    }
+    Get()->mD3D11DeviceContext3->SwapDeviceContextState(mPreviousState.Get(), nullptr);
 }
 
 ID3D11Device* ScopedSwapStateCommandRecordingContext::GetD3D11Device() const {
@@ -216,7 +211,7 @@ MaybeError CommandRecordingContext::Initialize(Device* device) {
 
     ID3D11Device3* d3d11Device = device->GetD3D11Device3();
 
-    if (ToBackend(device->GetPhysicalDevice())->IsSharedD3D11Device()) {
+    {
         const D3D_FEATURE_LEVEL featureLevels[] = {D3D_FEATURE_LEVEL_11_1, D3D_FEATURE_LEVEL_11_0};
 
         HRESULT hr = S_OK;

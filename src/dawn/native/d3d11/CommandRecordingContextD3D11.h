@@ -193,7 +193,6 @@ class ScopedSwapStateCommandRecordingContext : public ScopedCommandRecordingCont
     MaybeError SetInternalUniformBuffer(Ref<BufferBase> uniformBuffer);
 
   private:
-    const bool mSwapContextState;
     ComPtr<ID3DDeviceContextState> mPreviousState;
 };
 
