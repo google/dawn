@@ -526,8 +526,8 @@ MaybeError CommandBuffer::ExecuteComputePass(
                 if (lastPipeline->UsesNumWorkgroups()) {
                     // Copy indirect args into the uniform buffer for built-in workgroup variables.
                     DAWN_TRY(Buffer::Copy(commandContext, indirectBuffer, dispatch->indirectOffset,
-                                          sizeof(uint32_t) * 3, commandContext->GetUniformBuffer(),
-                                          0));
+                                          sizeof(uint32_t) * 3,
+                                          commandContext->GetInternalUniformBuffer(), 0));
                 }
 
                 ID3D11Buffer* d3dBuffer;
@@ -721,8 +721,8 @@ MaybeError CommandBuffer::ExecuteRenderPass(
                         draw->indirectOffset +
                         offsetof(D3D11_DRAW_INSTANCED_INDIRECT_ARGS, StartVertexLocation);
                     DAWN_TRY(Buffer::Copy(commandContext, indirectBuffer, offset,
-                                          sizeof(uint32_t) * 2, commandContext->GetUniformBuffer(),
-                                          0));
+                                          sizeof(uint32_t) * 2,
+                                          commandContext->GetInternalUniformBuffer(), 0));
                 }
 
                 ID3D11Buffer* d3dBuffer;
@@ -750,8 +750,8 @@ MaybeError CommandBuffer::ExecuteRenderPass(
                         draw->indirectOffset +
                         offsetof(D3D11_DRAW_INDEXED_INSTANCED_INDIRECT_ARGS, BaseVertexLocation);
                     DAWN_TRY(Buffer::Copy(commandContext, indirectBuffer, offset,
-                                          sizeof(uint32_t) * 2, commandContext->GetUniformBuffer(),
-                                          0));
+                                          sizeof(uint32_t) * 2,
+                                          commandContext->GetInternalUniformBuffer(), 0));
                 }
 
                 ID3D11Buffer* d3dBuffer;

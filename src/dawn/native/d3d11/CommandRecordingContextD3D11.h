@@ -87,7 +87,6 @@ class CommandRecordingContext {
     bool IsValid() const;
 
     static ResultOrError<Ref<BufferBase>> CreateInternalUniformBuffer(DeviceBase* device);
-    MaybeError SetInternalUniformBuffer(Ref<BufferBase> uniformBuffer);
 
     void ReleaseKeyedMutexes();
 
@@ -190,7 +189,8 @@ class ScopedSwapStateCommandRecordingContext : public ScopedCommandRecordingCont
     ID3D11Device* GetD3D11Device() const;
     ID3D11DeviceContext3* GetD3D11DeviceContext3() const;
     ID3DUserDefinedAnnotation* GetD3DUserDefinedAnnotation() const;
-    Buffer* GetUniformBuffer() const;
+    Buffer* GetInternalUniformBuffer() const;
+    MaybeError SetInternalUniformBuffer(Ref<BufferBase> uniformBuffer);
 
   private:
     const bool mSwapContextState;
