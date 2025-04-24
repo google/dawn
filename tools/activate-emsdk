@@ -22,8 +22,6 @@ EMSDK_VERSION = '4.0.3'
 def main(args):
     parser = argparse.ArgumentParser()
     parser.add_argument('--get-emsdk-version', help='Print emsdk version and exit.', action='store_true')
-    parser.add_argument('--node', help='Path to nodejs binary.')
-    parser.add_argument('--llvm', help='Path to LLVM binaries.')
     options = parser.parse_args()
 
     if options.get_emsdk_version:
@@ -42,18 +40,8 @@ def main(args):
         print ('Failed to activate emsdk')
         return 1
 
-    # Append overrides to the default .emscripten file for certain binaries.
-    em_overrides = '''
-# Overrides from dawn/tools/activate-emsdk:
-del PYTHON
-'''
-    if options.node:
-        em_overrides += f"NODE_JS = emsdk_path + '/../../{options.node}'\n"
-    if options.llvm:
-        em_overrides += f"LLVM_ROOT = emsdk_path + '/../../{options.llvm}'\n"
-    with open(EMSDK_CONFIG_PATH, 'a') as f:
-        f.write(em_overrides)
-
+    # If we ever need to override the Python, Node, and LLVM binaries used by Emscripten, do that
+    # here. See https://dawn-review.googlesource.com/c/dawn/+/238814/4..5 which removed support.
 
 if __name__ == '__main__':
   sys.exit(main(sys.argv))

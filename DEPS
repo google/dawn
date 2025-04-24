@@ -676,42 +676,8 @@ hooks = [
   {
     'name': 'activate_emsdk_linux',
     'pattern': '.',
-    'condition': 'dawn_wasm and host_os == "linux"',
-    'action': [ 'python3',
-                'tools/activate-emsdk',
-                '--node', 'third_party/node/node-linux-x64/bin/node',
-                '--llvm', 'third_party/llvm-build/Release+Asserts/bin'
-    ],
-  },
-  {
-    'name': 'activate_emsdk_mac_x64',
-    'pattern': '.',
-    'condition': 'dawn_wasm and host_os == "mac" and host_cpu == "x64"',
-    'action': [ 'python3',
-                'tools/activate-emsdk',
-                '--node', 'third_party/node/node-darwin-x64/bin/node',
-                '--llvm', 'third_party/llvm-build/Release+Asserts/bin'
-    ],
-  },
-  {
-    'name': 'activate_emsdk_mac_arm64',
-    'pattern': '.',
-    'condition': 'dawn_wasm and host_os == "mac" and host_cpu == "arm64"',
-    'action': [ 'python3',
-                'tools/activate-emsdk',
-                '--node', 'third_party/node/node-darwin-arm64/bin/node',
-                '--llvm', 'third_party/llvm-build/Release+Asserts/bin'
-    ],
-  },
-  {
-    'name': 'activate_emsdk_win',
-    'pattern': '.',
-    'condition': 'dawn_wasm and host_os == "win"',
-    'action': [ 'python3',
-                'tools/activate-emsdk',
-                '--node', 'third_party/node/node.exe',
-                '--llvm', 'third_party/llvm-build/Release+Asserts/bin'
-    ],
+    'condition': 'dawn_wasm',
+    'action': [ 'python3', 'tools/activate-emsdk' ],
   },
 
   # Configure remote exec cfg files
