@@ -125,8 +125,8 @@ class OperandInstruction : public Castable<OperandInstruction<N, R>, Instruction
     /// Sets the results of the instruction
     /// @param values the new result values
     template <typename... ARGS,
-              typename = std::enable_if_t<!tint::IsVectorLike<
-                  tint::traits::Decay<tint::traits::NthTypeOf<0, ARGS..., void>>>>>
+              typename = std::enable_if_t<
+                  !tint::IsVectorLike<std::decay_t<tint::traits::NthTypeOf<0, ARGS..., void>>>>>
     void SetResults(ARGS&&... values) {
         SetResults(Vector{std::forward<ARGS>(values)...});
     }

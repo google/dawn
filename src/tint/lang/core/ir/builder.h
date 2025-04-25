@@ -117,13 +117,13 @@ class Builder {
     /// VectorRef.
     template <typename... TYPES>
     using EnableIfVectorLike = std::enable_if_t<
-        tint::IsVectorLike<tint::traits::Decay<tint::traits::NthTypeOf<0, TYPES..., void>>>>;
+        tint::IsVectorLike<std::decay_t<tint::traits::NthTypeOf<0, TYPES..., void>>>>;
 
     /// A helper used to disable overloads if the first type in `TYPES` is a Vector or
     /// VectorRef.
     template <typename... TYPES>
     using DisableIfVectorLike = std::enable_if_t<
-        !tint::IsVectorLike<tint::traits::Decay<tint::traits::NthTypeOf<0, TYPES..., void>>>>;
+        !tint::IsVectorLike<std::decay_t<tint::traits::NthTypeOf<0, TYPES..., void>>>>;
 
     /// A namespace for the various instruction insertion method
     struct InsertionPoints {
@@ -559,7 +559,7 @@ class Builder {
     /// Pass-through overload for Values() with vector-like argument
     /// @param vec the vector of ir::Value*
     /// @return @p vec
-    template <typename VEC, typename = EnableIfVectorLike<tint::traits::Decay<VEC>>>
+    template <typename VEC, typename = EnableIfVectorLike<std::decay_t<VEC>>>
     auto Values(VEC&& vec) {
         return std::forward<VEC>(vec);
     }

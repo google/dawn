@@ -41,10 +41,6 @@ class StringStream;
 
 namespace tint::traits {
 
-/// Convience type definition for std::decay<T>::type
-template <typename T>
-using Decay = typename std::decay<T>::type;
-
 /// NthTypeOf returns the `N`th type in `Types`
 template <int N, typename... Types>
 using NthTypeOf = typename std::tuple_element<N, std::tuple<Types...>>::type;
@@ -94,30 +90,30 @@ struct SignatureOf<R (C::*)(ARGS...) const> {
 
 /// SignatureOfT is an alias to `typename SignatureOf<F>::type`.
 template <typename F>
-using SignatureOfT = typename SignatureOf<Decay<F>>::type;
+using SignatureOfT = typename SignatureOf<std::decay_t<F>>::type;
 
 /// ParameterType is an alias to `typename SignatureOf<F>::type::parameter<N>`.
 template <typename F, std::size_t N>
-using ParameterType = typename SignatureOfT<Decay<F>>::template parameter<N>;
+using ParameterType = typename SignatureOfT<std::decay_t<F>>::template parameter<N>;
 
 /// LastParameterType returns the type of the last parameter of `F`. `F` must have at least one
 /// parameter.
 template <typename F>
-using LastParameterType = ParameterType<F, SignatureOfT<Decay<F>>::parameter_count - 1>;
+using LastParameterType = ParameterType<F, SignatureOfT<std::decay_t<F>>::parameter_count - 1>;
 
 /// ReturnType is an alias to `typename SignatureOf<F>::type::ret`.
 template <typename F>
-using ReturnType = typename SignatureOfT<Decay<F>>::ret;
+using ReturnType = typename SignatureOfT<std::decay_t<F>>::ret;
 
 /// Returns true iff decayed T and decayed U are the same.
 template <typename T, typename U>
-static constexpr bool IsType = std::is_same<Decay<T>, Decay<U>>::value;
+static constexpr bool IsType = std::is_same<std::decay_t<T>, std::decay_t<U>>::value;
 
 /// IsTypeOrDerived<T, BASE> is true iff `T` is of type `BASE`, or derives from
 /// `BASE`.
 template <typename T, typename BASE>
 static constexpr bool IsTypeOrDerived =
-    std::is_base_of<BASE, Decay<T>>::value || std::is_same<BASE, Decay<T>>::value;
+    std::is_base_of<BASE, std::decay_t<T>>::value || std::is_same<BASE, std::decay_t<T>>::value;
 
 /// If `T` is of type `BASE`, or derives from `BASE`, then EnableIfIsType
 /// resolves to type `T`, otherwise an invalid type.
@@ -189,14 +185,15 @@ static constexpr bool IsTypeIn = traits::detail::IsTypeIn<T, TypeContainer>::val
 
 /// Evaluates to the decayed pointer element type, or the decayed type T if T is not a pointer.
 template <typename T>
-using PtrElTy = Decay<std::remove_pointer_t<Decay<T>>>;
+using PtrElTy = std::decay_t<std::remove_pointer_t<std::decay_t<T>>>;
 
 /// Evaluates to true if `T` decayed is a `std::string`, `std::string_view`, `const char*` or
 /// `char*`
 template <typename T>
 static constexpr bool IsStringLike =
-    std::is_same_v<Decay<T>, std::string> || std::is_same_v<Decay<T>, std::string_view> ||
-    std::is_same_v<Decay<T>, const char*> || std::is_same_v<Decay<T>, char*>;
+    std::is_same_v<std::decay_t<T>, std::string> ||
+    std::is_same_v<std::decay_t<T>, std::string_view> ||
+    std::is_same_v<std::decay_t<T>, const char*> || std::is_same_v<std::decay_t<T>, char*>;
 
 namespace detail {
 /// Helper for CharArrayToCharPtr
