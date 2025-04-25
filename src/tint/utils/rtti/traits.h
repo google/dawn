@@ -105,16 +105,6 @@ using LastParameterType = ParameterType<F, SignatureOfT<std::decay_t<F>>::parame
 template <typename F>
 using ReturnType = typename SignatureOfT<std::decay_t<F>>::ret;
 
-/// Returns true iff decayed T and decayed U are the same.
-template <typename T, typename U>
-static constexpr bool IsType = std::is_same_v<std::decay_t<T>, std::decay_t<U>>;
-
-/// IsTypeOrDerived<T, BASE> is true iff `T` is of type `BASE`, or derives from
-/// `BASE`.
-template <typename T, typename BASE>
-static constexpr bool IsTypeOrDerived =
-    std::is_base_of_v<BASE, std::decay_t<T>> || std::is_same_v<BASE, std::decay_t<T>>;
-
 /// @returns the std::index_sequence with all the indices shifted by OFFSET.
 template <std::size_t OFFSET, std::size_t... INDICES>
 constexpr auto Shift(std::index_sequence<INDICES...>) {
@@ -172,23 +162,9 @@ template <typename T, template <typename...> typename TypeContainer, typename...
 struct IsTypeIn<T, TypeContainer<Ts...>> : std::disjunction<std::is_same<T, Ts>...> {};
 }  // namespace detail
 
-/// Evaluates to true if T is one of the types in the TypeContainer's template arguments.
-/// Works for std::variant, std::tuple, std::pair, or any typename template where all parameters are
-/// types.
-template <typename T, typename TypeContainer>
-static constexpr bool IsTypeIn = traits::detail::IsTypeIn<T, TypeContainer>::value;
-
 /// Evaluates to the decayed pointer element type, or the decayed type T if T is not a pointer.
 template <typename T>
 using PtrElTy = std::decay_t<std::remove_pointer_t<std::decay_t<T>>>;
-
-/// Evaluates to true if `T` decayed is a `std::string`, `std::string_view`, `const char*` or
-/// `char*`
-template <typename T>
-static constexpr bool IsStringLike =
-    std::is_same_v<std::decay_t<T>, std::string> ||
-    std::is_same_v<std::decay_t<T>, std::string_view> ||
-    std::is_same_v<std::decay_t<T>, const char*> || std::is_same_v<std::decay_t<T>, char*>;
 
 namespace detail {
 /// Helper for CharArrayToCharPtr
@@ -217,15 +193,35 @@ template <typename T>
 using CharArrayToCharPtr = typename traits::detail::CharArrayToCharPtrImpl<T>::type;
 
 ////////////////////////////////////////////////////////////////////////////////
-// IsOStream
+/// Concepts
 ////////////////////////////////////////////////////////////////////////////////
+
+/// Returns true iff decayed T and decayed U are the same.
+template <typename T, typename U>
+concept IsType = std::is_same_v<std::decay_t<T>, std::decay_t<U>>;
+
+/// Evaluates to true if T is one of the types in the TypeContainer's template arguments.
+/// Works for std::variant, std::tuple, std::pair, or any typename template where all parameters are
+/// types.
+template <typename T, typename TypeContainer>
+concept IsTypeIn = traits::detail::IsTypeIn<T, TypeContainer>::value;
+
+/// IsTypeOrDerived<T, BASE> is true iff `T` is of type `BASE`, or derives from `BASE`.
+template <typename T, typename BASE>
+concept IsTypeOrDerived =
+    std::is_base_of_v<BASE, std::decay_t<T>> || std::is_same_v<BASE, std::decay_t<T>>;
+
 template <typename T>
 concept IsOStream = std::is_same_v<T, std::ostream> || std::is_same_v<T, std::stringstream> ||
                     std::is_same_v<T, tint::StringStream>;
 
-////////////////////////////////////////////////////////////////////////////////
-// HasOperatorShiftLeft
-////////////////////////////////////////////////////////////////////////////////
+/// Evaluates to true if `T` decayed is a `std::string`, `std::string_view`, `const char*` or
+/// `char*`
+template <typename T>
+concept IsStringLike =
+    std::is_same_v<std::decay_t<T>, std::string> ||
+    std::is_same_v<std::decay_t<T>, std::string_view> ||
+    std::is_same_v<std::decay_t<T>, const char*> || std::is_same_v<std::decay_t<T>, char*>;
 
 /// Is true if operator<<(LHS, RHS) exists
 template <typename LHS, typename RHS>
