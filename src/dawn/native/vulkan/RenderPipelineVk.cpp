@@ -370,7 +370,6 @@ MaybeError RenderPipeline::InitializeImpl() {
 
     // There are at most 2 shader stages in render pipeline, i.e. vertex and fragment
     std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages;
-    std::array<std::string, 2> shaderStageEntryPoints;
     uint32_t stageCount = 0;
 
     auto AddShaderStage = [&](SingleShaderStage stage, VkShaderStageFlagBits vkStage,
@@ -393,8 +392,8 @@ MaybeError RenderPipeline::InitializeImpl() {
         shaderStage->flags = 0;
         shaderStage->pSpecializationInfo = nullptr;
         shaderStage->stage = vkStage;
-        shaderStageEntryPoints[stageCount] = kRemappedEntryPointName;
-        shaderStage->pName = shaderStageEntryPoints[stageCount].c_str();
+        // string_view returned by GetIsolatedEntryPointName() points to a null-terminated string.
+        shaderStage->pName = device->GetIsolatedEntryPointName().data();
 
         stageCount++;
         return {};

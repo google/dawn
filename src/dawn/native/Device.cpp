@@ -381,6 +381,22 @@ DeviceBase::DeviceBase(AdapterBase* adapter,
 
     mIsImmediateErrorHandlingEnabled = IsToggleEnabled(Toggle::EnableImmediateErrorHandling);
 
+    // Generate entry point name from isolation key if provided.
+    if (!cacheDesc.isolationKey.IsUndefined()) {
+        std::string_view isolationKey = cacheDesc.isolationKey;
+
+        std::stringstream ss;
+        ss << "dawn_entry_point_";
+        // Combine with hexadecimal representation of bytes in isolation key.
+        for (const char& byte : isolationKey) {
+            ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(byte);
+        }
+
+        mIsolatedEntryPointName = ss.str();
+    } else {
+        mIsolatedEntryPointName = "dawn_entry_point";
+    }
+
     // Record the cache key from the adapter info. Note that currently, if a new extension
     // descriptor is added (and probably handled here), the cache key recording needs to be
     // updated.
@@ -2526,6 +2542,10 @@ bool DeviceBase::HasFlexibleTextureViews() const {
     // TODO(384921944): Once FlexibleTextureViews is enabled by default in Core Mode, we only need
     // to check HasFeature(FlexibleTextureViews).
     return !IsCompatibilityMode() || HasFeature(Feature::FlexibleTextureViews);
+}
+
+std::string_view DeviceBase::GetIsolatedEntryPointName() const {
+    return mIsolatedEntryPointName;
 }
 
 IgnoreLazyClearCountScope::IgnoreLazyClearCountScope(DeviceBase* device)

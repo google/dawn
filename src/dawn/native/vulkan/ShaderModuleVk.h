@@ -47,9 +47,6 @@ struct ProgrammableStage;
 
 namespace vulkan {
 
-// The entry point name to use when generating SPIR-V.
-constexpr char kRemappedEntryPointName[] = "dawn_entry_point";
-
 struct TransformedShaderModuleCacheKey {
     uintptr_t layoutPtr;
     std::string entryPoint;

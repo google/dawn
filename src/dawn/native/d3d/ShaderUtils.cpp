@@ -47,9 +47,6 @@ namespace dawn::native::d3d {
 
 namespace {
 
-// The remapped name to use when remapping shader entry point names.
-constexpr char kRemappedEntryPointName[] = "dawn_entry_point";
-
 ResultOrError<tint::Program> RunTransforms(tint::ast::transform::Manager* transformManager,
                                            const tint::Program* program,
                                            const tint::ast::transform::DataMap& inputs,
@@ -242,11 +239,10 @@ MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
 
     if (r.useTintIR) {
         r.tintOptions.strip_all_names = !r.disableSymbolRenaming;
-        r.tintOptions.remapped_entry_point_name = kRemappedEntryPointName;
     } else {
         // Needs to run before all other transforms so that they can use builtin names safely.
         tint::ast::transform::Renamer::Remappings requestedNames = {
-            {std::string(r.entryPointName), kRemappedEntryPointName}};
+            {std::string(r.entryPointName), r.tintOptions.remapped_entry_point_name}};
         transformManager.Add<tint::ast::transform::Renamer>();
         transformInputs.Add<tint::ast::transform::Renamer::Config>(
             r.disableSymbolRenaming ? tint::ast::transform::Renamer::Target::kHlslKeywords
@@ -352,10 +348,11 @@ MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
         // Validate workgroup size after program runs transforms.
         if (r.stage == SingleShaderStage::Compute) {
             Extent3D _;
-            DAWN_TRY_ASSIGN(
-                _, ValidateComputeStageWorkgroupSize(
-                       transformedProgram, kRemappedEntryPointName, /* usesSubgroupMatrix */ false,
-                       r.maxSubgroupSize, r.limits, r.adapterSupportedLimits.UnsafeGetValue()));
+            DAWN_TRY_ASSIGN(_,
+                            ValidateComputeStageWorkgroupSize(
+                                transformedProgram, r.tintOptions.remapped_entry_point_name.c_str(),
+                                /* usesSubgroupMatrix */ false, r.maxSubgroupSize, r.limits,
+                                r.adapterSupportedLimits.UnsafeGetValue()));
         }
 
         result = tint::hlsl::writer::Generate(transformedProgram, r.tintOptions);
@@ -449,18 +446,20 @@ ResultOrError<CompiledShader> CompileShader(d3d::D3DCompilationRequest r) {
         case d3d::Compiler::DXC: {
             TRACE_EVENT0(r.tracePlatform.UnsafeGetValue(), General, "CompileShaderDXC");
             ComPtr<IDxcBlob> compiledDXCShader;
-            DAWN_TRY_ASSIGN(compiledDXCShader,
-                            CompileShaderDXC(r.bytecode, kRemappedEntryPointName,
-                                             compiledShader.hlslSource, dumpShaders));
+            DAWN_TRY_ASSIGN(
+                compiledDXCShader,
+                CompileShaderDXC(r.bytecode, r.hlsl.tintOptions.remapped_entry_point_name,
+                                 compiledShader.hlslSource, dumpShaders));
             compiledShader.shaderBlob = CreateBlob(std::move(compiledDXCShader));
             break;
         }
         case d3d::Compiler::FXC: {
             TRACE_EVENT0(r.tracePlatform.UnsafeGetValue(), General, "CompileShaderFXC");
             ComPtr<ID3DBlob> compiledFXCShader;
-            DAWN_TRY_ASSIGN(compiledFXCShader,
-                            CompileShaderFXC(r.bytecode, kRemappedEntryPointName,
-                                             compiledShader.hlslSource, dumpShaders));
+            DAWN_TRY_ASSIGN(
+                compiledFXCShader,
+                CompileShaderFXC(r.bytecode, r.hlsl.tintOptions.remapped_entry_point_name,
+                                 compiledShader.hlslSource, dumpShaders));
             compiledShader.shaderBlob = CreateBlob(std::move(compiledFXCShader));
             break;
         }

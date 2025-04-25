@@ -349,7 +349,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
     req.substituteOverrideConfig = BuildSubstituteOverridesTransformConfig(programmableStage);
     req.usesSubgroupMatrix = programmableStage.metadata->usesSubgroupMatrix;
 
-    req.tintOptions.remapped_entry_point_name = kRemappedEntryPointName;
+    req.tintOptions.remapped_entry_point_name = GetDevice()->GetIsolatedEntryPointName();
     req.tintOptions.strip_all_names = !GetDevice()->IsToggleEnabled(Toggle::DisableSymbolRenaming);
 
     req.tintOptions.statically_paired_texture_binding_points =
