@@ -119,14 +119,6 @@ constexpr auto Range() {
 
 namespace detail {
 
-/// @returns the tuple `t` swizzled by `INDICES`
-template <typename TUPLE, std::size_t... INDICES>
-constexpr auto Swizzle(TUPLE&& t, std::index_sequence<INDICES...>)
-    -> std::tuple<std::tuple_element_t<INDICES, std::remove_reference_t<TUPLE>>...> {
-    return {std::forward<std::tuple_element_t<INDICES, std::remove_reference_t<TUPLE>>>(
-        std::get<INDICES>(std::forward<TUPLE>(t)))...};
-}
-
 /// @returns a nullptr of the tuple type `TUPLE` swizzled by `INDICES`.
 /// @note: This function is intended to be used in a `decltype()` expression,
 /// and returns a pointer-to-tuple as the tuple may hold non-constructable
@@ -137,22 +129,6 @@ constexpr auto* SwizzlePtrTy(std::index_sequence<INDICES...>) {
     return static_cast<Swizzled*>(nullptr);
 }
 
-}  // namespace detail
-
-/// @returns the slice of the tuple `t` with the tuple elements
-/// `[OFFSET..OFFSET+COUNT)`
-template <std::size_t OFFSET, std::size_t COUNT, typename TUPLE>
-constexpr auto Slice(TUPLE&& t) {
-    return traits::detail::Swizzle<TUPLE>(std::forward<TUPLE>(t), Range<OFFSET, COUNT>());
-}
-
-/// Resolves to the slice of the tuple `t` with the tuple elements
-/// `[OFFSET..OFFSET+COUNT)`
-template <std::size_t OFFSET, std::size_t COUNT, typename TUPLE>
-using SliceTuple =
-    std::remove_pointer_t<decltype(traits::detail::SwizzlePtrTy<TUPLE>(Range<OFFSET, COUNT>()))>;
-
-namespace detail {
 /// Base template for IsTypeIn
 template <typename T, typename TypeList>
 struct IsTypeIn;
@@ -160,37 +136,18 @@ struct IsTypeIn;
 /// Specialization for IsTypeIn
 template <typename T, template <typename...> typename TypeContainer, typename... Ts>
 struct IsTypeIn<T, TypeContainer<Ts...>> : std::disjunction<std::is_same<T, Ts>...> {};
+
 }  // namespace detail
+
+/// Resolves to the slice of the tuple `t` with the tuple elements
+/// `[OFFSET..OFFSET+COUNT)`
+template <std::size_t OFFSET, std::size_t COUNT, typename TUPLE>
+using SliceTuple =
+    std::remove_pointer_t<decltype(traits::detail::SwizzlePtrTy<TUPLE>(Range<OFFSET, COUNT>()))>;
 
 /// Evaluates to the decayed pointer element type, or the decayed type T if T is not a pointer.
 template <typename T>
 using PtrElTy = std::decay_t<std::remove_pointer_t<std::decay_t<T>>>;
-
-namespace detail {
-/// Helper for CharArrayToCharPtr
-template <typename T>
-struct CharArrayToCharPtrImpl {
-    /// Evaluates to T
-    using type = T;
-};
-/// Specialization of CharArrayToCharPtrImpl for `char[N]`
-template <size_t N>
-struct CharArrayToCharPtrImpl<char[N]> {
-    /// Evaluates to `char*`
-    using type = char*;
-};
-/// Specialization of CharArrayToCharPtrImpl for `const char[N]`
-template <size_t N>
-struct CharArrayToCharPtrImpl<const char[N]> {
-    /// Evaluates to `const char*`
-    using type = const char*;
-};
-}  // namespace detail
-
-/// Evaluates to `char*` or `const char*` if `T` is `char[N]` or `const char[N]`, respectively,
-/// otherwise T.
-template <typename T>
-using CharArrayToCharPtr = typename traits::detail::CharArrayToCharPtrImpl<T>::type;
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Concepts
