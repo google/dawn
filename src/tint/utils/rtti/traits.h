@@ -71,21 +71,21 @@ struct SignatureOf {
 template <typename R, typename... ARGS>
 struct SignatureOf<R (*)(ARGS...)> {
     /// The signature of the function-like object `F`
-    using type = Signature<typename std::decay<R>::type, typename std::decay<ARGS>::type...>;
+    using type = Signature<typename std::decay_t<R>, typename std::decay_t<ARGS>...>;
 };
 
 /// SignatureOf specialization for a non-static method.
 template <typename R, typename C, typename... ARGS>
 struct SignatureOf<R (C::*)(ARGS...)> {
     /// The signature of the function-like object `F`
-    using type = Signature<typename std::decay<R>::type, typename std::decay<ARGS>::type...>;
+    using type = Signature<typename std::decay_t<R>, typename std::decay_t<ARGS>...>;
 };
 
 /// SignatureOf specialization for a non-static, const method.
 template <typename R, typename C, typename... ARGS>
 struct SignatureOf<R (C::*)(ARGS...) const> {
     /// The signature of the function-like object `F`
-    using type = Signature<typename std::decay<R>::type, typename std::decay<ARGS>::type...>;
+    using type = Signature<typename std::decay_t<R>, typename std::decay_t<ARGS>...>;
 };
 
 /// SignatureOfT is an alias to `typename SignatureOf<F>::type`.
@@ -107,13 +107,13 @@ using ReturnType = typename SignatureOfT<std::decay_t<F>>::ret;
 
 /// Returns true iff decayed T and decayed U are the same.
 template <typename T, typename U>
-static constexpr bool IsType = std::is_same<std::decay_t<T>, std::decay_t<U>>::value;
+static constexpr bool IsType = std::is_same_v<std::decay_t<T>, std::decay_t<U>>;
 
 /// IsTypeOrDerived<T, BASE> is true iff `T` is of type `BASE`, or derives from
 /// `BASE`.
 template <typename T, typename BASE>
 static constexpr bool IsTypeOrDerived =
-    std::is_base_of<BASE, std::decay_t<T>>::value || std::is_same<BASE, std::decay_t<T>>::value;
+    std::is_base_of_v<BASE, std::decay_t<T>> || std::is_same_v<BASE, std::decay_t<T>>;
 
 /// If `T` is of type `BASE`, or derives from `BASE`, then EnableIfIsType
 /// resolves to type `T`, otherwise an invalid type.
