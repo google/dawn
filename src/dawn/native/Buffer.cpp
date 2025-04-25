@@ -290,12 +290,8 @@ ResultOrError<UnpackedPtr<BufferDescriptor>> ValidateBufferDescriptor(
     DAWN_TRY(ValidateBufferUsage(descriptor->usage));
 
     if (const auto* hostMappedDesc = unpacked.Get<BufferHostMappedPointer>()) {
-        // TODO(crbug.com/dawn/2018): Properly expose this limit.
-        uint32_t requiredAlignment = 4096;
-        if (device->GetAdapter()->GetPhysicalDevice()->GetBackendType() ==
-            wgpu::BackendType::D3D12) {
-            requiredAlignment = 65536;
-        }
+        uint32_t requiredAlignment =
+            device->GetLimits().hostMappedPointerLimits.hostMappedPointerAlignment;
 
         DAWN_INVALID_IF(!device->HasFeature(Feature::HostMappedPointer), "%s requires %s.",
                         hostMappedDesc->sType, ToAPI(Feature::HostMappedPointer));

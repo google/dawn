@@ -109,51 +109,9 @@ const CombinedLimits& AdapterBase::GetLimits() const {
 }
 
 wgpu::Status AdapterBase::APIGetLimits(Limits* limits) const {
-    DAWN_ASSERT(limits != nullptr);
-    UnpackedPtr<Limits> unpacked;
-    if (mInstance->ConsumedError(ValidateAndUnpack(limits), &unpacked)) {
+    if (mInstance->ConsumedError(FillLimits(limits, mSupportedFeatures, mLimits))) {
         return wgpu::Status::Error;
     }
-
-    {
-        wgpu::ChainedStructOut* originalChain = unpacked->nextInChain;
-        **unpacked = mLimits.v1;
-        // Recover origin chain.
-        unpacked->nextInChain = originalChain;
-    }
-
-    if (auto* immediateDataLimits = unpacked.Get<DawnExperimentalImmediateDataLimits>()) {
-        wgpu::ChainedStructOut* originalChain = immediateDataLimits->nextInChain;
-        if (!mSupportedFeatures.IsEnabled(wgpu::FeatureName::ChromiumExperimentalImmediateData)) {
-            // If immediate data features are not supported, return the default-initialized
-            // DawnExperimentalImmediateDataLimits object, where maxImmediateDataByteSize is
-            // WGPU_LIMIT_U32_UNDEFINED.
-            *immediateDataLimits = DawnExperimentalImmediateDataLimits{};
-        } else {
-            // If adapter supports immediate data features, always return the valid immediate data
-            // limits.
-            *immediateDataLimits = mLimits.experimentalImmediateDataLimits;
-        }
-
-        // Recover origin chain.
-        immediateDataLimits->nextInChain = originalChain;
-    }
-
-    if (auto* texelCopyBufferRowAlignmentLimits =
-            unpacked.Get<DawnTexelCopyBufferRowAlignmentLimits>()) {
-        wgpu::ChainedStructOut* originalChain = texelCopyBufferRowAlignmentLimits->nextInChain;
-        if (!mSupportedFeatures.IsEnabled(wgpu::FeatureName::DawnTexelCopyBufferRowAlignment)) {
-            // If the feature is not enabled, minTexelCopyBufferRowAlignment is default-initialized
-            // to WGPU_LIMIT_U32_UNDEFINED.
-            *texelCopyBufferRowAlignmentLimits = DawnTexelCopyBufferRowAlignmentLimits{};
-        } else {
-            *texelCopyBufferRowAlignmentLimits = mLimits.texelCopyBufferRowAlignmentLimits;
-        }
-
-        // Recover origin chain.
-        texelCopyBufferRowAlignmentLimits->nextInChain = originalChain;
-    }
-
     return wgpu::Status::Success;
 }
 

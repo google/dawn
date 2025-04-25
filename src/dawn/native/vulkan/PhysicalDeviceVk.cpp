@@ -503,10 +503,8 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     }
 
     if (mDeviceInfo.HasExt(DeviceExt::ExternalMemoryHost) &&
-        mDeviceInfo.externalMemoryHostProperties.minImportedHostPointerAlignment <= 4096) {
-        // TODO(crbug.com/dawn/2018): properly surface the limit.
-        // Linux nearly always exposes 4096.
-        // https://vulkan.gpuinfo.org/displayextensionproperty.php?platform=linux&extensionname=VK_EXT_external_memory_host&extensionproperty=minImportedHostPointerAlignment
+        mDeviceInfo.externalMemoryHostProperties.minImportedHostPointerAlignment <=
+            kMinimumHostMappedPointerAlignment) {
         EnableFeature(Feature::HostMappedPointer);
     }
 
@@ -743,6 +741,13 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsInternal(wgpu::FeatureLevel 
     DAWN_ASSERT(vkLimits.maxPushConstantsSize >= kMinVulkanPushConstants);
     static_assert(kMinVulkanPushConstants >= sizeof(RenderImmediateConstants));
     static_assert(kMinVulkanPushConstants >= sizeof(ComputeImmediateConstants));
+
+    if (mDeviceInfo.HasExt(DeviceExt::ExternalMemoryHost) &&
+        mDeviceInfo.externalMemoryHostProperties.minImportedHostPointerAlignment <=
+            kMinimumHostMappedPointerAlignment) {
+        limits->hostMappedPointerLimits.hostMappedPointerAlignment =
+            kMinimumHostMappedPointerAlignment;
+    }
 
     return {};
 }

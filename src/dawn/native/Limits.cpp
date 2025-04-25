@@ -34,6 +34,7 @@
 #include "dawn/common/Constants.h"
 #include "dawn/common/Log.h"
 #include "dawn/common/Math.h"
+#include "dawn/native/Instance.h"
 
 // clang-format off
 // TODO(crbug.com/dawn/685):
@@ -289,6 +290,10 @@ MaybeError ValidateAndUnpackLimitsIn(const Limits* chainedLimits,
             << "DawnTexelCopyBufferRowAlignmentLimits is not supported in required limits";
     }
 
+    if (unpacked.Get<DawnHostMappedPointerLimits>()) {
+        dawn::WarningLog() << "hostMappedPointerLimits is not supported in required limits";
+    }
+
     return {};
 }
 
@@ -471,6 +476,69 @@ void EnforceLimitSpecInvariants(Limits* limits, wgpu::FeatureLevel featureLevel)
         limits->maxStorageBuffersInVertexStage = limits->maxStorageBuffersPerShaderStage;
         limits->maxStorageTexturesInVertexStage = limits->maxStorageTexturesPerShaderStage;
     }
+}
+
+MaybeError FillLimits(Limits* outputLimits,
+                      const FeaturesSet& supportedFeatures,
+                      const CombinedLimits& combinedLimits) {
+    DAWN_ASSERT(outputLimits != nullptr);
+    UnpackedPtr<Limits> unpacked;
+    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(outputLimits));
+    {
+        wgpu::ChainedStructOut* originalChain = unpacked->nextInChain;
+        **unpacked = combinedLimits.v1;
+        // Recover origin chain.
+        unpacked->nextInChain = originalChain;
+    }
+
+    if (auto* immediateDataLimits = unpacked.Get<DawnExperimentalImmediateDataLimits>()) {
+        wgpu::ChainedStructOut* originalChain = immediateDataLimits->nextInChain;
+        if (!supportedFeatures.IsEnabled(wgpu::FeatureName::ChromiumExperimentalImmediateData)) {
+            // If immediate data features are not supported, return the default-initialized
+            // DawnExperimentalImmediateDataLimits object, where maxImmediateDataByteSize is
+            // WGPU_LIMIT_U32_UNDEFINED.
+            *immediateDataLimits = DawnExperimentalImmediateDataLimits{};
+        } else {
+            // If adapter supports immediate data features, always return the valid immediate data
+            // limits.
+            *immediateDataLimits = combinedLimits.experimentalImmediateDataLimits;
+        }
+
+        // Recover origin chain.
+        immediateDataLimits->nextInChain = originalChain;
+    }
+
+    if (auto* texelCopyBufferRowAlignmentLimits =
+            unpacked.Get<DawnTexelCopyBufferRowAlignmentLimits>()) {
+        wgpu::ChainedStructOut* originalChain = texelCopyBufferRowAlignmentLimits->nextInChain;
+        if (!supportedFeatures.IsEnabled(wgpu::FeatureName::DawnTexelCopyBufferRowAlignment)) {
+            // If the feature is not enabled, minTexelCopyBufferRowAlignment is default-initialized
+            // to WGPU_LIMIT_U32_UNDEFINED.
+            *texelCopyBufferRowAlignmentLimits = DawnTexelCopyBufferRowAlignmentLimits{};
+        } else {
+            *texelCopyBufferRowAlignmentLimits = combinedLimits.texelCopyBufferRowAlignmentLimits;
+        }
+
+        // Recover origin chain.
+        texelCopyBufferRowAlignmentLimits->nextInChain = originalChain;
+    }
+
+    if (auto* hostMappedPointerLimits = unpacked.Get<DawnHostMappedPointerLimits>()) {
+        wgpu::ChainedStructOut* originalChain = hostMappedPointerLimits->nextInChain;
+        if (!supportedFeatures.IsEnabled(wgpu::FeatureName::HostMappedPointer)) {
+            // If the feature is not enabled, hostMappedPointerAlignment is default-initialized to
+            // WGPU_LIMIT_U32_UNDEFINED.
+            *hostMappedPointerLimits = DawnHostMappedPointerLimits{};
+        } else {
+            hostMappedPointerLimits->hostMappedPointerAlignment =
+                combinedLimits.hostMappedPointerLimits.hostMappedPointerAlignment;
+        }
+
+        // Recover origin chain.
+        hostMappedPointerLimits->nextInChain = originalChain;
+    }
+
+    return {};
 }
 
 }  // namespace dawn::native

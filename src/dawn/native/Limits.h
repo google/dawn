@@ -41,6 +41,7 @@ namespace dawn::native {
 struct CombinedLimits {
     Limits v1;
     DawnExperimentalImmediateDataLimits experimentalImmediateDataLimits;
+    DawnHostMappedPointerLimits hostMappedPointerLimits;
     DawnTexelCopyBufferRowAlignmentLimits texelCopyBufferRowAlignmentLimits;
 };
 
@@ -93,6 +94,11 @@ struct LimitsForCompilationRequest {
 //   2. Additional enforcement for dependent limits, e.g. maxStorageBufferBindingSize and
 //      maxUniformBufferBindingSize must not be larger than maxBufferSize.
 void NormalizeLimits(CombinedLimits* limits);
+
+// Fill |outputLimits| with |supportedFeatures| and |combinedLimits|.
+MaybeError FillLimits(Limits* outputLimits,
+                      const FeaturesSet& supportedFeatures,
+                      const CombinedLimits& combinedLimits);
 
 }  // namespace dawn::native
 

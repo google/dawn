@@ -880,6 +880,9 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
     limits->v1.maxStorageBuffersInVertexStage = limits->v1.maxStorageBuffersPerShaderStage;
     limits->v1.maxStorageTexturesInVertexStage = limits->v1.maxStorageTexturesPerShaderStage;
 
+    // The memory allocation must be in a single virtual memory (VM) region.
+    limits->hostMappedPointerLimits.hostMappedPointerAlignment = 4096;
+
     return {};
 }
 

@@ -1624,6 +1624,15 @@
             {"name": "min texel copy buffer row alignment", "type": "uint32_t", "default": "limit u32 undefined"}
         ]
     },
+    "dawn host mapped pointer limits": {
+        "category": "structure",
+        "chained": "out",
+        "chain roots": ["limits"],
+        "tags": ["dawn"],
+        "members": [
+            {"name": "host mapped pointer alignment", "type": "uint32_t", "default": "limit u32 undefined"}
+        ]
+    },
     "supported features": {
         "category": "structure",
         "out": true,
@@ -3855,7 +3864,8 @@
             {"value": 63, "name": "dawn compilation message utf16", "tags": ["dawn", "emscripten"]},
             {"value": 64, "name": "dawn fake buffer OOM for testing", "tags": ["dawn"]},
             {"value": 65, "name": "surface descriptor from windows WinUI swap chain panel", "tags": ["dawn"]},
-            {"value": 66, "name": "dawn device allocator control", "tags": ["dawn"]}
+            {"value": 66, "name": "dawn device allocator control", "tags": ["dawn"]},
+            {"value": 67, "name": "dawn host mapped pointer limits", "tags": ["dawn"]}
         ]
     },
     "texture": {

@@ -197,10 +197,7 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         EnableFeature(Feature::BGRA8UnormStorage);
     }
 
-    D3D12_FEATURE_DATA_EXISTING_HEAPS existingHeapInfo = {};
-    hr = mD3d12Device->CheckFeatureSupport(D3D12_FEATURE_EXISTING_HEAPS, &existingHeapInfo,
-                                           sizeof(existingHeapInfo));
-    if (SUCCEEDED(hr) && existingHeapInfo.Supported) {
+    if (GetDeviceInfo().supportsExistingHeap) {
         EnableFeature(Feature::HostMappedPointer);
     }
 
@@ -383,6 +380,13 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
     // 1 for SV_Position and 1 for (SV_IsFrontFace OR SV_SampleIndex).
     // See the discussions in https://github.com/gpuweb/gpuweb/issues/1962 for more details.
     limits->v1.maxInterStageShaderVariables = D3D12_PS_INPUT_REGISTER_COUNT - 2;
+
+    if (mDeviceInfo.supportsExistingHeap) {
+        // The alignment of host mapped pointer and host mapped buffer size is same as the one of
+        // D3D12_HEAP_DESC.alignment.
+        limits->hostMappedPointerLimits.hostMappedPointerAlignment =
+            D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
+    }
 
     // Using base limits for:
     // TODO(crbug.com/dawn/685):
