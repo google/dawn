@@ -334,7 +334,8 @@ class CloneContext {
     /// references of the original object. A type mismatch will result in an
     /// assertion in debug builds, and undefined behavior in release builds.
     /// @returns this CloneContext so calls can be chained
-    template <typename WHAT, typename WITH, typename = traits::EnableIfIsType<WITH, ast::Node>>
+    template <typename WHAT, typename WITH>
+        requires(traits::IsTypeOrDerived<WITH, ast::Node>)
     CloneContext& Replace(const WHAT* what, const WITH* with) {
         TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(src_id, what);
         TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(dst, with);

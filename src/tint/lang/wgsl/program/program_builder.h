@@ -170,7 +170,8 @@ class ProgramBuilder : public ast::Builder {
     /// @param args the arguments to pass to the constructor
     /// @returns the new, or existing node
     template <typename T, typename... ARGS>
-    tint::traits::EnableIfIsType<T, core::type::Node>* create(ARGS&&... args) {
+        requires(traits::IsTypeOrDerived<T, core::type::Node>)
+    T* create(ARGS&&... args) {
         AssertNotMoved();
         return constants.types.Get<T>(std::forward<ARGS>(args)...);
     }

@@ -115,11 +115,6 @@ template <typename T, typename BASE>
 static constexpr bool IsTypeOrDerived =
     std::is_base_of_v<BASE, std::decay_t<T>> || std::is_same_v<BASE, std::decay_t<T>>;
 
-/// If `T` is of type `BASE`, or derives from `BASE`, then EnableIfIsType
-/// resolves to type `T`, otherwise an invalid type.
-template <typename T, typename BASE>
-using EnableIfIsType = std::enable_if_t<IsTypeOrDerived<T, BASE>, T>;
-
 /// @returns the std::index_sequence with all the indices shifted by OFFSET.
 template <std::size_t OFFSET, std::size_t... INDICES>
 constexpr auto Shift(std::index_sequence<INDICES...>) {

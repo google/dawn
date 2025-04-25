@@ -380,7 +380,8 @@ class Builder {
     /// @param args the arguments to pass to the constructor
     /// @returns the node pointer
     template <typename T, typename... ARGS>
-    traits::EnableIfIsType<T, ast::Node>* create(const Source& source, ARGS&&... args) {
+        requires(traits::IsTypeOrDerived<T, ast::Node>)
+    T* create(const Source& source, ARGS&&... args) {
         AssertNotMoved();
         return ast_nodes_.Create<T>(id_, AllocateNodeID(), source, std::forward<ARGS>(args)...);
     }
@@ -392,7 +393,8 @@ class Builder {
     /// destructed.
     /// @returns the node pointer
     template <typename T>
-    traits::EnableIfIsType<T, ast::Node>* create() {
+        requires(traits::IsTypeOrDerived<T, ast::Node>)
+    T* create() {
         AssertNotMoved();
         return ast_nodes_.Create<T>(id_, AllocateNodeID(), source_);
     }
@@ -1407,7 +1409,8 @@ class Builder {
 
     /// @param expr the expression
     /// @return expr (passthrough)
-    template <typename T, typename = traits::EnableIfIsType<T, ast::Expression>>
+    template <typename T>
+        requires(traits::IsTypeOrDerived<T, ast::Expression>)
     const T* Expr(const T* expr) {
         return expr;
     }
