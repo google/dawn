@@ -1,62 +1,81 @@
-<div align="center">
-  <img
-      title="Dawn's logo"
-      alt="Dawn's logo: a sun rising behind a stylized mountain inspired by the WebGPU logo."
-      src="docs/imgs/dawn_logo_notext.png"
-      width="50%">
+# Tint Structure Fuzzer
 
-  ![Build Status](https://github.com/google/dawn/actions/workflows/ci.yml/badge.svg?branch=main&event=push)
-  [![Matrix Space](https://img.shields.io/static/v1?label=Space&message=%23webgpu-dawn&color=blue&logo=matrix)](https://matrix.to/#/#webgpu-dawn:matrix.org)
-</div>
+## Системные требования
 
-# Dawn, a WebGPU implementation
+- Операционная система: Linux, macOS или Windows с WSL
+- CMake (версия 3.10 или выше)
+- Ninja (1.12.1 или выше)
+- Компилятор C++ с поддержкой C++17 (GCC 9+ или Clang 10+)
+- Python 3.6 или выше (для запуска скриптов оптимизации)
 
-Dawn is an open-source and cross-platform implementation of the [WebGPU](https://webgpu.dev) standard.
-More precisely it implements [`webgpu.h`](https://github.com/webgpu-native/webgpu-headers/blob/main/webgpu.h) that is a one-to-one mapping with the WebGPU IDL.
-Dawn is meant to be integrated as part of a larger system and is the underlying implementation of WebGPU in Chromium.
+## Сборка проекта
 
-Dawn provides several WebGPU building blocks:
- - **WebGPU C/C++ headers** that applications and other building blocks use.
-   - The `webgpu.h` version that Dawn implements.
-   - A C++ wrapper for the `webgpu.h`.
- - **A "native" implementation of WebGPU** using platforms' GPU APIs: D3D12, Metal, Vulkan and OpenGL. See [per API support](docs/support.md) for more details.
- - **A client-server implementation of WebGPU** for applications that are in a sandbox without access to native drivers
- - **Tint** is a compiler for the WebGPU Shader Language (WGSL) that can be used in standalone to convert shaders from and to WGSL.
+Для сборки проекта выполните следующие команды:
 
-Helpful links:
+```bash
+# Создайте директорию для сборки
+mkdir -p build && cd build
 
- - [Dawn bug tracker](https://issues.chromium.org/savedsearches/6783309) if you find issues with Dawn. Create a new issue [here](https://issues.chromium.org/issues/new?noWizard=true&component=1570784).
- - [Tint bug tracker](https://issues.chromium.org/savedsearches/6783217) if you find issues with Tint. Create a new issue [here](https://issues.chromium.org/issues/new?noWizard=true&component=1571063).
- - [Dawn's mailing list](https://groups.google.com/g/dawn-graphics) for other discussions related to Dawn.
- - [Dawn's source code](https://dawn.googlesource.com/dawn)
- - [Dawn's Matrix chatroom](https://matrix.to/#/#webgpu-dawn:matrix.org) for live discussion around contributing or using Dawn.
- - [WebGPU's Matrix chatroom](https://matrix.to/#/#WebGPU:matrix.org)
- - [Tint mirror](https://dawn.googlesource.com/tint) for standalone usage.
+# Сконфигурируйте проект с помощью CMake
+cmake -GNinja ..
 
-## Documentation table of content
+# Соберите проект с помощью Ninja
+ninja
+```
 
-Developer documentation:
+После успешной сборки в директории `build` будут созданы следующие исполняемые файлы:
+- `tint_structure_fuzzer` - основной инструмент для фаззинга
+- `syntax_test` - тесты для синтаксического анализатора
 
- - [Dawn overview](docs/dawn/overview.md)
- - [Building](docs/building.md)
- - [Contributing](CONTRIBUTING.md)
- - [Code of Conduct](CODE_OF_CONDUCT.md)
- - [Testing Dawn](docs/dawn/testing.md)
- - [Testing Tint](docs/tint/testing.md)
- - [Debugging Dawn](docs/dawn/debugging.md)
- - [Dawn's infrastructure](docs/dawn/infra.md)
- - [Dawn errors](docs/dawn/errors.md)
- - [Tint experimental extensions](docs/tint/experimental_extensions.md)
- - [Quickstart with CMake](docs/quickstart-cmake.md)
- - [Becoming a committer](docs/becoming-committer.md)
+## Запуск тестов
+
+Для запуска всех тестов используйте команду:
+
+```bash
+ninja test
+```
+
+Для запуска конкретного теста:
+
+```bash
+./syntax_test
+```
+
+## Запуск фаззера
+
+Для запуска фаззера с базовыми параметрами:
+
+```bash
+./tint_structure_fuzzer --prob=10,10,10,10,10,10,10,10,10
+```
+
+Параметр `--prob` задает вероятности для различных типов мутаций.
+
+## Оптимизация параметров фаззера
+
+Проект включает скрипты для оптимизации параметров фаззера с использованием различных алгоритмов.
+
+### Оптимизация с помощью PSO (Particle Swarm Optimization):
+
+```bash
+cd benchmarks
+python pso.py --max_time=30
+```
+
+Параметр `--max_time` определяет максимальное время (в секундах) для каждого запуска фаззера.
+
+### Другие алгоритмы оптимизации:
+
+```bash
+cd benchmarks
+python optimize.py
+```
+
+## Структура проекта
+
+- `tint_structure_fuzzer.cc` - основной исходный файл фаззера
+- `syntax.cc` и `syntax.h` - реализация синтаксического анализатора
+- `benchmarks/` - скрипты для оптимизации параметров фаззера
+- `probabilities.h` - определения и структуры для вероятностей мутаций
 
 
-User documentation: (TODO, figure out what overlaps with the webgpu.h docs)
-
-## License
-
-BSD 3-Clause License, please see [LICENSE](/LICENSE).
-
-## Disclaimer
-
-This is not an officially supported Google product.
