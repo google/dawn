@@ -23,6 +23,7 @@ struct Context {
     std::unordered_map<std::string, std::string> vars; 
     RandomGenerator& gen;
     int nextVarId = 0;
+    std::vector<uint8_t> storedSubtree;
 
     explicit Context(RandomGenerator& generator) : gen(generator) {}
 
@@ -166,7 +167,7 @@ struct TextOutput {
 };
 
 enum class NodeId {
-    translation_unit = 0,  // Implicit root node
+    translation_unit = 0,
     additive_operator,
     expression_list,
     argument_expression_list,
@@ -270,7 +271,7 @@ struct Subnode {
     Subnode(GenerateFn0 fn, char mod = 0) : content(fn), mod(mod) {}
     Subnode(NodeId node, char mod = 0) : content(node), mod(mod) {}
     std::variant<GenerateFn0, GenerateFn, NodeId> content;
-    char mod = 0;  // '*', '?'
+    char mod = 0;
 };
 
 struct Modifier {
@@ -965,6 +966,7 @@ struct MutationStat {
     int repeats[3]{0, 0, 0};
     int optionals[2]{0, 0};
     int terminals = 0;
+    int transferLocations = 0; 
 };
 
 template <typename ByteIn, typename ByteOut>
@@ -1079,6 +1081,113 @@ void mutateAlt(ByteIn& in,
 }
 
 template <typename ByteIn, typename ByteOut>
+void captureSubtree(ByteIn& in, ByteOut& out, NodeId id, Context& ctx, int depth = 0) {
+    if (depth > maxDepth) {
+        return;
+    }
+    const Node& node = nodes()[static_cast<int>(id)];
+    uint8_t alternative = in.range(node.size(), false);
+    out.push(alternative);
+    
+    auto& alt = node[alternative];
+    for (const Subnode& subnode : alt) {
+        int repetitions = 1;
+        if (subnode.mod == '*') {
+            repetitions = in.range(maxRepeats + 1, true);
+            out.push(repetitions);
+        } else if (subnode.mod == '?') {
+            repetitions = in.range(2, true);
+            out.push(repetitions);
+        }
+        
+        for (int i = 0; i < repetitions; ++i) {
+            if (const GenerateFn0* fn = std::get_if<GenerateFn0>(&subnode.content)) {
+
+            } else if (const GenerateFn* fn = std::get_if<GenerateFn>(&subnode.content)) {
+                uint8_t val = in.byteTerm();
+                out.push(val);
+            } else if (const NodeId* nodeId = std::get_if<NodeId>(&subnode.content)) {
+                captureSubtree(in, out, *nodeId, ctx, depth + 1);
+            }
+        }
+    }
+}
+
+template <typename ByteIn, typename ByteOut>
+void applySubtree(ByteIn& in, ByteOut& out, NodeId id, Context& ctx, int depth = 0) {
+    if (depth > maxDepth) {
+        return;
+    }
+    const Node& node = nodes()[static_cast<int>(id)];
+    uint8_t alternative = in.byte();
+    if (alternative >= node.size()) {
+        alternative = 0;  
+    }
+    out.push(alternative);
+    
+    auto& alt = node[alternative];
+    for (const Subnode& subnode : alt) {
+        int repetitions = 1;
+        if (subnode.mod == '*') {
+            repetitions = in.byte();
+            if (repetitions > maxRepeats) {
+                repetitions = maxRepeats;  
+            }
+            out.push(repetitions);
+        } else if (subnode.mod == '?') {
+            repetitions = in.byte();
+            if (repetitions > 1) {
+                repetitions = 1;  
+            }
+            out.push(repetitions);
+        }
+        
+        for (int i = 0; i < repetitions; ++i) {
+            if (const GenerateFn0* fn = std::get_if<GenerateFn0>(&subnode.content)) {
+
+            } else if (const GenerateFn* fn = std::get_if<GenerateFn>(&subnode.content)) {
+                uint8_t val = in.byte();
+                out.push(val);
+            } else if (const NodeId* nodeId = std::get_if<NodeId>(&subnode.content)) {
+                applySubtree(in, out, *nodeId, ctx, depth + 1);
+            }
+        }
+    }
+}
+
+
+bool areNodesCompatible(NodeId source, NodeId target) {
+
+
+    if (source == target) return true;
+    
+
+    static const std::unordered_map<NodeId, std::vector<NodeId>> compatibilityGroups = {
+
+        {NodeId::expression, {NodeId::unary_expression, NodeId::primary_expression}},
+        {NodeId::unary_expression, {NodeId::expression, NodeId::primary_expression}},
+        {NodeId::primary_expression, {NodeId::expression, NodeId::unary_expression}},
+        
+
+        {NodeId::statement, {NodeId::variable_or_value_statement, NodeId::compound_statement}},
+        {NodeId::variable_or_value_statement, {NodeId::statement}},
+        {NodeId::compound_statement, {NodeId::statement}},
+        
+
+        {NodeId::int_literal, {NodeId::float_literal, NodeId::literal}},
+        {NodeId::float_literal, {NodeId::int_literal, NodeId::literal}},
+        {NodeId::literal, {NodeId::int_literal, NodeId::float_literal}}
+    };
+    
+    auto it = compatibilityGroups.find(source);
+    if (it != compatibilityGroups.end()) {
+        return std::find(it->second.begin(), it->second.end(), target) != it->second.end();
+    }
+    
+    return false;
+}
+
+template <typename ByteIn, typename ByteOut>
 void mutate(ByteIn& in,
             ByteOut& out,
             Mutation mutation,
@@ -1090,6 +1199,38 @@ void mutate(ByteIn& in,
     if (depth > maxDepth) {
         return;
     }
+    
+
+    if (mutation == Mutation::SubtreeTransfer && index == 0 && !ctx.storedSubtree.empty()) {
+
+
+        NodeId storedSubtreeNodeId = static_cast<NodeId>(ctx.storedSubtree[0]);
+        if (areNodesCompatible(storedSubtreeNodeId, id)) {
+            
+
+            ByteInput storedIn{ctx.storedSubtree.data() + 1, ctx.storedSubtree.size() - 1, 0, true, ctx};
+            applySubtree(storedIn, out, id, ctx, depth);
+            return;
+        } else {
+            printf("[SUBTREE TRANSFER] Incompatible types: source %d, target %d\n",
+                   static_cast<int>(storedSubtreeNodeId), static_cast<int>(id));
+        }
+
+    }
+    
+
+    if (mutation == Mutation::SubtreeTransfer && index == -1) {
+
+        ByteOutput captureOut;
+        captureOut.push(static_cast<uint8_t>(id)); 
+        captureSubtree(in, captureOut, id, ctx, depth);
+        ctx.storedSubtree = std::move(captureOut.out);
+
+
+        index = -2; 
+
+    }
+    
     const Node& node = nodes()[static_cast<int>(id)];
     uint8_t alternative = 0;
     if (node.size() > 1) {
@@ -1130,6 +1271,13 @@ void count(MutationStat& stat, ByteInput& in, NodeId id, int depth = 0) {
     if (depth > maxDepth) {
         return;
     }
+    
+
+
+    if (depth > 0 && id != NodeId::translation_unit) {
+        ++stat.transferLocations;
+    }
+    
     const Node& node = nodes()[static_cast<int>(id)];
     if (node.size() > 1) {
         ++stat.alternatives;
@@ -1153,7 +1301,7 @@ void count(MutationStat& stat, ByteInput& in, NodeId id, int depth = 0) {
         }
         for (int i = 0; i < repetitions; ++i) {
             if (std::get_if<GenerateFn0>(&subnode.content)) {
-                // Do nothing
+
             } else if (std::get_if<GenerateFn>(&subnode.content)) {
                 in.byteTerm();
                 ++stat.terminals;
@@ -1201,6 +1349,56 @@ std::vector<uint8_t> WGSLMutate(Mutation mutation,
     ByteOutput out{};
     MutationStat stat{};
     int index = -1;
+    
+
+    if (mutation == Mutation::LibFuzzerMutate && size > 0) {
+
+        out.out.assign(data, data + size);
+        
+
+        int numMutations = 1 + gen.GetUInt32(std::min(3u, static_cast<uint32_t>(size / 10 + 1)));
+        
+        for (int i = 0; i < numMutations; i++) {
+
+            int strategy = gen.GetUInt32(5);
+            
+            switch (strategy) {
+                case 0: { // Bit flip
+                    size_t pos = gen.GetUInt32(size);
+                    uint8_t mask = 1 << gen.GetUInt32(8);
+                    out.out[pos] ^= mask;
+                    break;
+                }
+                case 1: { 
+                    size_t pos = gen.GetUInt32(size);
+                    out.out[pos] ^= 0xFF;
+                    break;
+                }
+                case 2: { 
+                    size_t pos = gen.GetUInt32(size);
+                    out.out[pos] = gen.GetUInt32(256);
+                    break;
+                }
+                case 3: {
+                    if (size > 1) {
+                        size_t pos = gen.GetUInt32(size - 1);
+                        std::swap(out.out[pos], out.out[pos + 1]);
+                    }
+                    break;
+                }
+                case 4: { 
+                    if (out.out.size() < 65536) { 
+                        size_t pos = gen.GetUInt32(out.out.size() + 1);
+                        out.out.insert(out.out.begin() + pos, gen.GetUInt32(256));
+                    }
+                    break;
+                }
+            }
+        }
+        
+        return std::move(out.out);
+    }
+
     count(stat, in, NodeId::translation_unit);
     
     while (index < 0) {
@@ -1238,14 +1436,53 @@ std::vector<uint8_t> WGSLMutate(Mutation mutation,
                     index = gen.GetUInt32(stat.terminals);
                 }
                 break;
+            case Mutation::SubtreeTransfer:
+
+
+                if (stat.transferLocations > 1) { 
+                    index = -1; 
+                }
+                break;
+            case Mutation::LibFuzzerMutate:
+
+                index = 0;
+                break;
         }
         if (index == -1) {
             mutation = static_cast<Mutation>((static_cast<unsigned>(mutation) + 1) %
                                            (static_cast<unsigned>(Mutation::Last) + 1));
         }
     }
-    in.reset();
-    mutate(in, out, mutation, index, NodeId::translation_unit, gen, ctx, 0);
+    
+
+
+    if (mutation == Mutation::SubtreeTransfer) {
+
+        in.reset();
+        index = -1; 
+        mutate(in, out, mutation, index, NodeId::translation_unit, gen, ctx, 0);
+        
+
+        if (index == -2 && !ctx.storedSubtree.empty()) {
+
+            in.reset();
+            out.out.clear();
+            index = gen.GetUInt32(stat.transferLocations); 
+            mutate(in, out, mutation, index, NodeId::translation_unit, gen, ctx, 0);
+        } else {
+
+            in.reset();
+            out.out.clear();
+            mutation = Mutation::RandomTerminal;
+            index = gen.GetUInt32(stat.terminals);
+            mutate(in, out, mutation, index, NodeId::translation_unit, gen, ctx, 0);
+        }
+    } else {
+
+        in.reset();
+        mutate(in, out, mutation, index, NodeId::translation_unit, gen, ctx, 0);
+    }
+    
     return std::move(out.out);
 }
 
@@ -1259,4 +1496,5 @@ std::string WGSLSource(const uint8_t* data, size_t size) {
 }
 
 }  // namespace tint::fuzzers::structure_fuzzer
+
 

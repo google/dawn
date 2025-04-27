@@ -1,4 +1,3 @@
-
 #include <algorithm>
 #include <cassert>
 #include <exception>
@@ -153,7 +152,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     for (OutputFormat fmt :
          {OutputFormat::kWGSL, OutputFormat::kSpv, OutputFormat::kHLSL, OutputFormat::kMSL}) {
         TransformBuilder tb(data, size);
-        // tb.AddPlatformIndependentPasses();
+
         tb.AddTransform<tint::ast::transform::Renamer>();
         tb.AddTransform<tint::ast::transform::Robustness>();
         tb.manager()->Add<tint::ast::transform::FoldConstants>();
@@ -171,17 +170,18 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
                 fprintf(dbg[1], "|IN(%zu): ", size);
                 printHex(dbg[1], data, size);
                 fprintf(dbg[1], " OUT: %s\n", wgsl_str.c_str());
-                // fflush(dbg[1]);
+               
             } else {
                 fprintf(dbg[0], "|IN(%zu): ", size);
                 printHex(dbg[0], data, size);
                 fprintf(dbg[0], " OUT: %s\n", wgsl_str.c_str());
                 fprintf(dbg[0], " ERROR: %s", fuzzer.Diagnostics().Str().c_str());
-                // fflush(dbg[0]);
+            
             }
         }
     }
-    return 0;  // successfull || size < 12 ? 0 : -1;  // rand() % 2 == 0 ? -1 : 0;
+    return 0; 
 }
 }  // namespace
 }  // namespace tint::fuzzers::structure_fuzzer
+
