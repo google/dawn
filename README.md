@@ -58,7 +58,6 @@ ninja test
 ### Оптимизация с помощью PSO (Particle Swarm Optimization):
 
 ```bash
-cd benchmarks
 python pso.py --max_time=30
 ```
 
@@ -67,15 +66,8 @@ python pso.py --max_time=30
 ### Другие алгоритмы оптимизации:
 
 ```bash
-cd benchmarks
 python optimize.py
 ```
 
-## Структура проекта
-
-- `tint_structure_fuzzer.cc` - основной исходный файл фаззера
-- `syntax.cc` и `syntax.h` - реализация синтаксического анализатора
-- `benchmarks/` - скрипты для оптимизации параметров фаззера
-- `probabilities.h` - определения и структуры для вероятностей мутаций
 
 
