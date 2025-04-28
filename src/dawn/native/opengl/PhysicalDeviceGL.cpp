@@ -232,7 +232,6 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         if (supportsS3TC && (supportsTextureSRGB || supportsS3TCSRGB) && supportsRGTC &&
             supportsBPTC) {
             EnableFeature(Feature::TextureCompressionBC);
-            EnableFeature(Feature::TextureCompressionBCSliced3D);
         }
     }
 
