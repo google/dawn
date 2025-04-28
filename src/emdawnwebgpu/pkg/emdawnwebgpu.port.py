@@ -142,13 +142,17 @@ def linker_setup(ports, settings):
         os.path.join(_src_dir, 'library_webgpu_generated_sig_info.js'),
         os.path.join(_src_dir, 'library_webgpu.js'),
     ]
-    # TODO(crbug.com/371024051): Pass --closure-args here too, when possible.
-    # https://github.com/emscripten-core/emscripten/issues/24109
+    if 'CLOSURE_ARGS' in settings.keys():
+        # This works in Emscripten >4.0.7. In <=4.0.7, the user has to pass it.
+        settings.CLOSURE_ARGS += [
+            '--externs=' + os.path.join(_src_dir, 'webgpu-externs.js'),
+        ]
 
 
 def get(ports, settings, shared):
     if settings.allowed_settings:
-        # This is the compile phase. We don't need to create the port until linking.
+        # We are in the compile phase. The lib_emdawnwebgpu-*.a library file
+        # isn't needed until linking.
         return []
 
     computed_flags = _compute_flags(settings)
