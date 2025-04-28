@@ -5,6 +5,10 @@ on:
   schedule:
     - cron: '50 5 * * *'  # 05:50 UTC (21:50 PST, 22:50 PDT)
 
+# Permission needed to upload a release
+permissions:
+  contents: write
+
 jobs:
   release-emdawnwebgpu:
     runs-on: ubuntu-latest
