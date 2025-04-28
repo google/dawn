@@ -40,6 +40,115 @@
 namespace dawn {
 namespace ityp {
 
+namespace detail {
+
+template <typename Index, size_t N>
+class Iterator64 final {
+  public:
+    explicit Iterator64(const std::bitset<N>& bits)
+        : mBits(static_cast<uint64_t>(bits.to_ullong())) {}
+    Iterator64& operator++();
+
+    bool operator==(const Iterator64& other) const { return mBits == other.mBits; }
+    bool operator!=(const Iterator64& other) const { return !(*this == other); }
+
+    Index operator*() const;
+
+  private:
+    uint32_t getNextBit() const;
+    uint64_t mBits;
+};
+
+template <typename Index, size_t N>
+Iterator64<Index, N>& Iterator64<Index, N>::operator++() {
+    DAWN_ASSERT(mBits != 0);
+    uint32_t currentBit = getNextBit();
+    // Clear the previous current bit.
+    mBits = mBits & ~(static_cast<uint64_t>(1) << currentBit);
+    return *this;
+}
+
+template <typename Index, size_t N>
+Index Iterator64<Index, N>::operator*() const {
+    using U = UnderlyingType<Index>;
+    uint32_t currentBit = getNextBit();
+    DAWN_ASSERT(static_cast<U>(currentBit) <= std::numeric_limits<U>::max());
+    return static_cast<Index>(static_cast<U>(currentBit));
+}
+
+template <typename Index, size_t N>
+uint32_t Iterator64<Index, N>::getNextBit() const {
+    if (mBits == 0) {
+        return 0;
+    }
+    return ScanForward(mBits);
+}
+
+template <typename Index, size_t N>
+class IteratorArray final {
+  public:
+    explicit IteratorArray(const std::bitset<N>& bits);
+
+    IteratorArray& operator++();
+
+    bool operator==(const IteratorArray& other) const {
+        return mOffset == other.mOffset && mBits == other.mBits;
+    }
+    bool operator!=(const IteratorArray& other) const { return !(*this == other); }
+
+    Index operator*() const;
+
+  private:
+    uint32_t getNextBit();
+
+    static constexpr size_t kBitsPerWord = sizeof(uint64_t) * 8;
+    std::bitset<N> mBits;
+    uint32_t mCurrentBit{0};
+    uint32_t mOffset{0};
+};
+
+template <typename Index, size_t N>
+IteratorArray<Index, N>::IteratorArray(const std::bitset<N>& bits) : mBits(bits) {
+    if (bits.any()) {
+        mCurrentBit = getNextBit();
+    } else {
+        mOffset = static_cast<uint32_t>(RoundUp(N, kBitsPerWord));
+    }
+}
+
+template <typename Index, size_t N>
+IteratorArray<Index, N>& IteratorArray<Index, N>::operator++() {
+    DAWN_ASSERT(mBits.any());
+    mBits.set(mCurrentBit - mOffset, 0);
+    mCurrentBit = getNextBit();
+    return *this;
+}
+
+template <typename Index, size_t N>
+Index IteratorArray<Index, N>::operator*() const {
+    using U = UnderlyingType<Index>;
+    DAWN_ASSERT(static_cast<U>(mCurrentBit) <= std::numeric_limits<U>::max());
+    return static_cast<Index>(static_cast<U>(mCurrentBit));
+}
+
+template <typename Index, size_t N>
+uint32_t IteratorArray<Index, N>::getNextBit() {
+    static std::bitset<N> wordMask(std::numeric_limits<uint64_t>::max());
+
+    while (mOffset < N) {
+        uint64_t wordBits = static_cast<uint64_t>((mBits & wordMask).to_ullong());
+        if (wordBits != 0ull) {
+            return ScanForward(wordBits) + mOffset;
+        }
+
+        mBits >>= kBitsPerWord;
+        mOffset += kBitsPerWord;
+    }
+    return 0;
+}
+
+}  // namespace detail
+
 // ityp::bitset is a helper class that wraps std::bitset with the restriction that
 // indices must be a particular type |Index|.
 template <typename Index, size_t N>
@@ -52,24 +161,9 @@ class bitset : private ::std::bitset<N> {
     explicit constexpr bitset(const Base& rhs) : Base(rhs) {}
 
   public:
-    class Iterator final {
-      public:
-        explicit Iterator(const std::bitset<N>& bits);
-        Iterator& operator++();
-
-        bool operator==(const Iterator& other) const;
-        bool operator!=(const Iterator& other) const;
-
-        Index operator*() const;
-
-      private:
-        uint32_t getNextBit();
-
-        static constexpr size_t kBitsPerWord = sizeof(uint32_t) * 8;
-        std::bitset<N> mBits;
-        uint32_t mCurrentBit{0};
-        uint32_t mOffset{0};
-    };
+    using Iterator = std::conditional_t<(N < sizeof(uint64_t) * 8),
+                                        detail::Iterator64<Index, N>,      // true
+                                        detail::IteratorArray<Index, N>>;  // false
 
     Iterator begin() const { return Iterator(*this); }
     Iterator end() const { return Iterator(std::bitset<N>(0)); }
@@ -150,56 +244,6 @@ class bitset : private ::std::bitset<N> {
 
     friend struct std::hash<bitset>;
 };
-
-template <typename Index, size_t N>
-bitset<Index, N>::Iterator::Iterator(const std::bitset<N>& bits) : mBits(bits) {
-    if (bits.any()) {
-        mCurrentBit = getNextBit();
-    } else {
-        mOffset = static_cast<uint32_t>(RoundUp(N, kBitsPerWord));
-    }
-}
-
-template <typename Index, size_t N>
-typename bitset<Index, N>::Iterator& bitset<Index, N>::Iterator::operator++() {
-    DAWN_ASSERT(mBits.any());
-    mBits.set(mCurrentBit - mOffset, 0);
-    mCurrentBit = getNextBit();
-    return *this;
-}
-
-template <typename Index, size_t N>
-bool bitset<Index, N>::Iterator::operator==(const Iterator& other) const {
-    return mOffset == other.mOffset && mBits == other.mBits;
-}
-
-template <typename Index, size_t N>
-bool bitset<Index, N>::Iterator::operator!=(const Iterator& other) const {
-    return !(*this == other);
-}
-
-template <typename Index, size_t N>
-Index bitset<Index, N>::Iterator::operator*() const {
-    using U = UnderlyingType<Index>;
-    DAWN_ASSERT(static_cast<U>(mCurrentBit) <= std::numeric_limits<U>::max());
-    return static_cast<Index>(static_cast<U>(mCurrentBit));
-}
-
-template <typename Index, size_t N>
-uint32_t bitset<Index, N>::Iterator::getNextBit() {
-    static std::bitset<N> wordMask(std::numeric_limits<uint32_t>::max());
-
-    while (mOffset < N) {
-        uint32_t wordBits = static_cast<uint32_t>((mBits & wordMask).to_ulong());
-        if (wordBits != 0ul) {
-            return ScanForward(wordBits) + mOffset;
-        }
-
-        mBits >>= kBitsPerWord;
-        mOffset += kBitsPerWord;
-    }
-    return 0;
-}
 
 }  // namespace ityp
 
