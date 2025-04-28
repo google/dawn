@@ -541,7 +541,7 @@ void Recompute3DTextureCopyRegionWithEmptyFirstRowAndEvenCopyHeight(
     copySize2.depthOrArrayLayers = 1;
     Origin3D bufferOffset2 = bufferOffset1;
     bufferOffset2 = texelOffsetForLastRowOfLastImage;
-    DAWN_ASSERT(copySize2.height == 1);
+    DAWN_ASSERT(copySize2.height == blockInfo.height);
     ComputeSourceRegionForCopyInfo(copy2, direction, bufferOffset2, textureOffset2, copySize2);
     Extent3D bufferSize2 = {copy1->GetBufferSize().width, bufferOffset2.y + copySize2.height, 1};
     FillFootprintAndOffsetOfBufferLocation(&copy2->bufferLocation, alignedOffset2, bufferSize2,
