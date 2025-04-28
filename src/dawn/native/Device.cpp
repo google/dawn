@@ -339,19 +339,13 @@ DeviceBase::DeviceBase(AdapterBase* adapter,
         cacheDesc.functionUserdata = GetPlatform()->GetCachingInterface();
     }
 
-    // Disable caching if the toggle is passed, or the WGSL writer is not enabled.
-    // TODO(crbug.com/dawn/1481): Shader caching currently has a dependency on the WGSL writer to
-    // generate cache keys. We can lift the dependency once we also cache frontend parsing,
-    // transformations, and reflection.
-#if TINT_BUILD_WGSL_WRITER
+    // Disable caching if the DisableBlobCache toggle is enabled.
     if (IsToggleEnabled(Toggle::DisableBlobCache)) {
-#else
-    {
-#endif
         cacheDesc.loadDataFunction = nullptr;
         cacheDesc.storeDataFunction = nullptr;
         cacheDesc.functionUserdata = nullptr;
     }
+
     mBlobCache = std::make_unique<BlobCache>(cacheDesc);
 
     if (descriptor->requiredLimits != nullptr) {
