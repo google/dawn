@@ -29,6 +29,7 @@
 
 import("//build_overrides/build.gni")
 
+import("../../scripts/dawn_features.gni")
 import("../../scripts/dawn_overrides_with_defaults.gni")
 import("../../scripts/tint_overrides_with_defaults.gni")
 
@@ -303,7 +304,7 @@ source_set("dxc-include") {
 }
 
 source_set("dxcompiler-for-fuzzer") {
-  if (defined(use_libfuzzer) && use_libfuzzer &&
+  if (dawn_use_built_dxc && defined(use_libfuzzer) && use_libfuzzer &&
       (is_win || is_linux || is_mac) && target_cpu != "x86") {
     public_deps = [ "${dawn_dxc_dir}/../gn/dxc:dxcompiler" ]
   }
