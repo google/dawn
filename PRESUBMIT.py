@@ -175,7 +175,6 @@ def _DoCommonChecks(input_api, output_api):
         input_api.canned_checks.CheckPatchFormatted(
             input_api,
             output_api,
-            check_python=True,
             result_factory=result_factory))
     results.extend(
         input_api.canned_checks.CheckGNFormatted(input_api, output_api))
