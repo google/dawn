@@ -53,23 +53,6 @@ endif ()
 #   Emscripten to the minimal set, only subdirectories added within the Start
 #   and End of the Emscripten block are enabled .
 ################################################################################
-
-if (NOT TARGET absl::strings)
-    # Recommended setting for compability with future abseil releases.
-    set(ABSL_PROPAGATE_CXX_STD ON CACHE BOOL "" FORCE)
-    message(STATUS "Dawn: using Abseil at ${DAWN_ABSEIL_DIR}")
-    if (("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") OR
-        ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang"))
-        add_compile_options(
-            -Wno-array-parameter
-            -Wno-deprecated-builtins
-            -Wno-unknown-warning-option
-        )
-    endif()
-
-    add_subdirectory(${DAWN_ABSEIL_DIR} "${CMAKE_CURRENT_BINARY_DIR}/abseil")
-endif()
-
 if ((DAWN_BUILD_TESTS OR TINT_BUILD_TESTS) AND NOT TARGET gmock)
     set(gtest_force_shared_crt ON CACHE BOOL "Controls whether a shared run-time library should be used even when Google Test is built as static library" FORCE)
     if (EMSCRIPTEN)

@@ -122,14 +122,6 @@ config("tint_public_config") {
     defines += [ "TINT_BUILD_IR_BINARY=0" ]
   }
 
-  if (tint_build_ir_fuzzer) {
-    assert(tint_build_ir_binary,
-           "tint_build_ir_fuzzer requires tint_build_ir_binary")
-    defines += [ "TINT_BUILD_IR_FUZZER=1" ]
-  } else {
-    defines += [ "TINT_BUILD_IR_FUZZER=0" ]
-  }
-
   if (tint_build_is_win) {
     defines += [ "TINT_BUILD_IS_WIN=1" ]
   } else {
@@ -325,27 +317,25 @@ if (tint_has_fuzzers) {
     ]
     outputs = [ fuzzer_corpus_wgsl_stamp ]
   }
-
-  if (tint_build_ir_fuzzer) {
-    if (tint_build_cmds && tint_build_wgsl_reader) {
-      action("tint_generate_ir_corpus") {
-        testonly = true
-        script = "${tint_src_dir}/cmd/fuzz/generate_tint_corpus.py"
-        sources = [ "${script}" ]
-        deps = [
-          ":tint_generate_wgsl_corpus",
-          "${tint_src_dir}/cmd/fuzz/ir/as",
-        ]
-        args = [
-          rebase_path(fuzzer_corpus_wgsl_dir, root_build_dir),
-          rebase_path(fuzzer_corpus_dir, root_build_dir),
-          "--ir_as=" +
-              rebase_path("${root_build_dir}/ir_fuzz_as", root_build_dir),
-        ]
-        outputs = [ fuzzer_corpus_ir_stamp ]
-      }
-    }
-  }
+  # TODO(409348527): Re-enable corpus generation
+  # if (tint_build_ir_binary && tint_build_wgsl_reader) {
+  #   action("tint_generate_ir_corpus") {
+  #     testonly = true
+  #     script = "${tint_src_dir}/cmd/fuzz/generate_tint_corpus.py"
+  #     sources = [ "${script}" ]
+  #     deps = [
+  #       ":tint_generate_wgsl_corpus",
+  #       "${tint_src_dir}/cmd/fuzz/ir/as",
+  #     ]
+  #     args = [
+  #       rebase_path(fuzzer_corpus_wgsl_dir, root_build_dir),
+  #       rebase_path(fuzzer_corpus_dir, root_build_dir),
+  #       "--ir_as=" +
+  #           rebase_path("${root_build_dir}/ir_fuzz_as", root_build_dir),
+  #     ]
+  #     outputs = [ fuzzer_corpus_ir_stamp ]
+  #   }
+  # }
 }
 
 ###############################################################################
@@ -366,7 +356,7 @@ group("cmds") {
   if (tint_build_tintd) {
     deps += [ "${tint_src_dir}/cmd/tintd" ]
   }
-  if (tint_build_ir_fuzzer) {
+  if (tint_has_fuzzers && tint_build_ir_binary) {
     if (tint_build_wgsl_reader) {
       deps += [ "${tint_src_dir}/cmd/fuzz/ir/as" ]
     }
@@ -381,10 +371,9 @@ group("fuzzers") {
   deps = []
   if (tint_has_fuzzers) {
     deps += [ "${tint_src_dir}/cmd/fuzz/wgsl" ]
-  }
-
-  if (tint_build_ir_fuzzer) {
-    deps += [ "${tint_src_dir}/cmd/fuzz/ir" ]
+    if (tint_build_ir_binary) {
+      deps += [ "${tint_src_dir}/cmd/fuzz/ir" ]
+    }
   }
 }
 

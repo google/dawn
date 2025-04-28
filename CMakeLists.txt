@@ -243,7 +243,6 @@ endif()
 
 option(TINT_BUILD_IR_BINARY "Build IR binary format support" ${TINT_DEFAULT_BUILD_IR_BINARY})
 option(TINT_BUILD_FUZZERS "Build fuzzers" OFF)
-option(TINT_BUILD_IR_FUZZER "Build IR fuzzer" OFF)
 option(TINT_BUILD_BENCHMARKS "Build Tint benchmarks" OFF)
 option(TINT_BUILD_TESTS "Build tests" ON)
 option(TINT_BUILD_AS_OTHER_OS "Override OS detection to force building of *_other.cc files" OFF)
@@ -276,7 +275,6 @@ message(STATUS "Tint build command line executable tools: ${TINT_BUILD_CMD_TOOLS
 message(STATUS "Tint install: ${TINT_ENABLE_INSTALL}")
 message(STATUS "Tint build fuzzers: ${TINT_BUILD_FUZZERS}")
 message(STATUS "Tint build IR binary: ${TINT_BUILD_IR_BINARY}")
-message(STATUS "Tint build IR fuzzer: ${TINT_BUILD_IR_FUZZER}")
 message(STATUS "Tint build benchmarks: ${TINT_BUILD_BENCHMARKS}")
 message(STATUS "Tint build tests: ${TINT_BUILD_TESTS}")
 message(STATUS "Tint build tintd: ${TINT_BUILD_TINTD}")
@@ -441,6 +439,28 @@ set(TINT_SPIRV_TOOLS_DIR   ${DAWN_SPIRV_TOOLS_DIR})
 ################################################################################
 # Run on all subdirectories
 ################################################################################
+# Needed by protobuf and other dependencies in third_party
+set(ABSL_ROOT_DIR ${DAWN_ABSEIL_DIR})
+if (NOT TARGET absl::strings)
+    # Recommended setting for compatibility with future abseil releases.
+    set(ABSL_PROPAGATE_CXX_STD ON CACHE BOOL "" FORCE)
+    message(STATUS "Dawn: using Abseil at ${DAWN_ABSEIL_DIR}")
+    if (("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") OR
+        ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang"))
+        add_compile_options(
+            -Wno-array-parameter
+            -Wno-deprecated-builtins
+            -Wno-unknown-warning-option
+            -Wno-gcc-compat
+            -Wno-unreachable-code-break
+            -Wno-nullability-extension
+            -Wno-shadow
+        )
+    endif()
+
+    add_subdirectory(${DAWN_ABSEIL_DIR} "${CMAKE_CURRENT_BINARY_DIR}/abseil")
+endif()
+
 if (DAWN_BUILD_PROTOBUF AND EXISTS "${DAWN_PROTOBUF_DIR}/cmake")
   if (("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") AND WIN32)
     set(protobuf_HAVE_BUILTIN_ATOMICS 1)

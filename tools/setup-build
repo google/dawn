@@ -200,7 +200,6 @@ case $BUILD_SYSTEM in
     if [[ -n "$BUILD_FUZZER" ]]; then
         GN_ARGS+=" use_libfuzzer=true"
         GN_ARGS+=" tint_build_ir_binary=true"
-        GN_ARGS+=" tint_build_ir_fuzzer=true"
     fi
     if [[ -n "$REMOTEEXEC" ]]; then
         GN_ARGS+=" use_remoteexec=true"
@@ -230,7 +229,6 @@ case $BUILD_SYSTEM in
         CMAKE_FLAGS+=("-DCMAKE_C_COMPILER=clang")
         CMAKE_FLAGS+=("-DTINT_BUILD_FUZZERS=ON")
         CMAKE_FLAGS+=("-DDAWN_BUILD_PROTOBUF=ON")
-        CMAKE_FLAGS+=("-DTINT_BUILD_IR_FUZZER=ON")
         CMAKE_FLAGS+=("-DTINT_BUILD_IR_BINARY=ON")
         CMAKE_FLAGS+=("-DDAWN_USE_BUILT_DXC=ON")  # TODO(b/348200364)
     fi

@@ -177,7 +177,7 @@ source_set("sources") {
   defines = []
   libs = []
   data_deps = []
-
+  public_configs = []
   configs += [
     ":internal",
     "${dawn_root}/src/tint:tint_public_config",
@@ -436,7 +436,7 @@ source_set("sources") {
       "user32.lib",
       "delayimp.lib",
     ]
-    public_configs = [ ":win_delayload" ]
+    public_configs += [ ":win_delayload" ]
   }
 
   if (dawn_is_winuwp && is_debug) {
