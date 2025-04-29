@@ -36,8 +36,11 @@ set(protobuf_BUILD_PROTOC_BINARIES ON CACHE BOOL "Build libprotoc and protoc com
 set(protobuf_DISABLE_RTTI ON CACHE BOOL "Remove runtime type information in the binaries" FORCE)
 
 # Allowing usage of enable_if() and nullability extensions in abseil and avoid shadowing errors
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-gcc-compat -Wno-unreachable-code-break -Wno-nullability-extension -Wno-shadow")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-gcc-compat -Wno-unreachable-code-break -Wno-nullability-extension -Wno-shadow")
+add_compile_options(
+        -Wno-gcc-compat
+        -Wno-unreachable-code-break
+        -Wno-nullability-extension
+        -Wno-shadow)
 
 add_subdirectory("${DAWN_PROTOBUF_DIR}")
 target_compile_definitions(libprotobuf PUBLIC "-DPROTOBUF_ENABLE_DEBUG_LOGGING_MAY_LEAK_PII=0")
