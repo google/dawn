@@ -232,7 +232,7 @@ absl_source_set("algorithm") {
 
 absl_source_set("container") {
   public = [ "${dawn_abseil_dir}/absl/algorithm/container.h" ]
-  deps = [
+  public_deps = [
     ":algorithm",
     ":core_headers",
     ":nullability",
@@ -559,6 +559,7 @@ absl_source_set("hash_function_defaults") {
   deps = [
     ":common",
     ":config",
+    ":cord",
     ":hash",
     ":string_view",
     ":type_traits",
@@ -567,7 +568,7 @@ absl_source_set("hash_function_defaults") {
 
 absl_source_set("hash_policy_traits") {
   public = [ "${dawn_abseil_dir}/absl/container/internal/hash_policy_traits.h" ]
-  deps = [
+  public_deps = [
     ":common_policy_traits",
     ":type_traits",
   ]
@@ -661,7 +662,9 @@ absl_source_set("raw_hash_set") {
     ":core_headers",
     ":dynamic_annotations",
     ":endian",
+    ":function_ref",
     ":hash",
+    ":hash_function_defaults",
     ":hash_policy_traits",
     ":hashtable_debug_hooks",
     ":hashtablez_sampler",
@@ -1125,7 +1128,7 @@ absl_source_set("die_if_null") {
 
 absl_source_set("fnmatch") {
   sources = [ "${dawn_abseil_dir}/absl/log/internal/fnmatch.cc" ]
-  public = [ "${dawn_abseil_dir}/absl/log/internalfnmatch.h" ]
+  public = [ "${dawn_abseil_dir}/absl/log/internal/fnmatch.h" ]
   deps = [
     ":config",
     ":strings",
@@ -1200,6 +1203,7 @@ absl_source_set("log_message") {
     ":format",
     ":inlined_vector",
     ":log_entry",
+    ":log_globals",
     ":log_severity",
     ":log_sink",
     ":log_sink_registry",
@@ -1337,7 +1341,7 @@ absl_source_set("vlog_is_on") {
 }
 
 absl_source_set("voidify") {
-  public = [ "${dawn_abseil_dir}/absl/internal/log/voidify.h" ]
+  public = [ "${dawn_abseil_dir}/absl/log/internal/voidify.h" ]
   deps = [ ":config" ]
 }
 
@@ -1389,6 +1393,7 @@ absl_source_set("int128") {
   public = [ "${dawn_abseil_dir}/absl/numeric/int128.h" ]
   deps = [
     ":bits",
+    ":compare",
     ":config",
     ":core_headers",
   ]
@@ -1459,7 +1464,7 @@ absl_source_set("strings") {
     "${dawn_abseil_dir}/absl/strings/strip.h",
     "${dawn_abseil_dir}/absl/strings/substitute.h",
   ]
-  deps = [
+  public_deps = [
     ":base",
     ":bits",
     ":endian",
@@ -1685,6 +1690,7 @@ absl_source_set("str_format_internal") {
     ":function_ref",
     ":inlined_vector",
     ":int128",
+    ":optional",
     ":span",
     ":string_view",
     ":strings",
@@ -1832,6 +1838,7 @@ absl_source_set("synchronization") {
     ":stacktrace",
     ":symbolize",
     ":time",
+    ":tracing_internal",
   ]
 }
 
@@ -1962,6 +1969,7 @@ absl_source_set("optional") {
     ":config",
     ":core_headers",
     ":memory",
+    ":nullability",
     ":type_traits",
     ":utility",
   ]
