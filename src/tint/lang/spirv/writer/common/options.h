@@ -145,7 +145,7 @@ struct Options {
     std::string remapped_entry_point_name = {};
 
     /// The bindings
-    Bindings bindings;
+    Bindings bindings = {};
 
     // BindingPoints for textures that are paired with static samplers in the
     // BGL. These BindingPoints are the only ones that are allowed to map to
@@ -199,7 +199,7 @@ struct Options {
     bool use_vulkan_memory_model = false;
 
     /// Offsets of the minDepth and maxDepth push constants.
-    std::optional<RangeOffsets> depth_range_offsets;
+    std::optional<RangeOffsets> depth_range_offsets = std::nullopt;
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(Options,

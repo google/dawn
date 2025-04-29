@@ -182,6 +182,23 @@ const core::type::Type* DedupType(const core::type::Type* ty, core::type::Manage
         [&](Default) { return ty; });
 }
 
+/// @returns true if @p type is or contains a subgroup matrix type at any nesting
+bool ContainsSubgroupMatrix(const core::type::Type* type) {
+    return tint::Switch(
+        type,  //
+        [&](const core::type::SubgroupMatrix*) { return true; },
+        [&](const core::type::Array* arr) { return ContainsSubgroupMatrix(arr->ElemType()); },
+        [&](const core::type::Struct* str) {
+            for (auto& member : str->Members()) {
+                if (ContainsSubgroupMatrix(member->Type())) {
+                    return true;
+                }
+            }
+            return false;
+        },
+        [](Default) { return false; });
+}
+
 /// PIMPL class for SPIR-V writer
 class Printer {
   public:
@@ -2142,7 +2159,7 @@ class Printer {
 
         // Zero-value constructors for subgroup matrices are not folded into constants, so
         // special-case them into OpConstantNull here.
-        if (result_ty->Is<core::type::SubgroupMatrix>() && construct->Operands().IsEmpty()) {
+        if (ContainsSubgroupMatrix(result_ty) && construct->Operands().IsEmpty()) {
             values_.Add(construct->Result(), ConstantNull(result_ty));
             return;
         }

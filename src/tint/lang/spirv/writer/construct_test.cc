@@ -175,5 +175,51 @@ TEST_F(SpirvWriterTest, Construct_SubgroupMatrix_SingleValue) {
     EXPECT_INST("%result = OpCompositeConstruct %17 %arg");
 }
 
+TEST_F(SpirvWriterTest, Construct_ArrayOfSubgroupMatrix_ZeroValue) {
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        b.Let("left", b.Construct(ty.array(ty.subgroup_matrix_left(ty.f32(), 8, 4), 4u)));
+        b.Let("right", b.Construct(ty.array(ty.subgroup_matrix_right(ty.i32(), 4, 8), 4u)));
+        b.Let("result", b.Construct(ty.array(ty.subgroup_matrix_result(ty.u32(), 2, 2), 4u)));
+        b.Return(func);
+    });
+
+    Options options{
+        .use_vulkan_memory_model = true,
+    };
+    ASSERT_TRUE(Generate(options)) << Error() << output_;
+    EXPECT_INST("%7 = OpTypeCooperativeMatrixKHR %float %uint_3 %uint_4 %uint_8 %uint_0");
+    EXPECT_INST("%left = OpConstantNull %_arr_7_uint_4");
+    EXPECT_INST("%16 = OpTypeCooperativeMatrixKHR %int %uint_3 %uint_8 %uint_4 %uint_1");
+    EXPECT_INST("%right = OpConstantNull %_arr_16_uint_4");
+    EXPECT_INST("%21 = OpTypeCooperativeMatrixKHR %uint %uint_3 %uint_2 %uint_2 %uint_2");
+    EXPECT_INST("%result = OpConstantNull %_arr_21_uint_4");
+}
+
+TEST_F(SpirvWriterTest, Construct_StructOfSubgroupMatrix_ZeroValue) {
+    auto* str = ty.Struct(
+        mod.symbols.New("MyStruct"),
+        {
+            {mod.symbols.Register("left"), ty.array(ty.subgroup_matrix_left(ty.f32(), 8, 4), 4u)},
+            {mod.symbols.Register("right"), ty.array(ty.subgroup_matrix_right(ty.i32(), 4, 8), 4u)},
+            {mod.symbols.Register("res"), ty.array(ty.subgroup_matrix_result(ty.u32(), 2, 2), 4u)},
+        });
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        b.Let("s", b.Construct(str));
+        b.Return(func);
+    });
+
+    Options options{
+        .use_vulkan_memory_model = true,
+    };
+    ASSERT_TRUE(Generate(options)) << Error() << output_;
+    EXPECT_INST("%8 = OpTypeCooperativeMatrixKHR %float %uint_3 %uint_4 %uint_8 %uint_0");
+    EXPECT_INST("%16 = OpTypeCooperativeMatrixKHR %int %uint_3 %uint_8 %uint_4 %uint_1");
+    EXPECT_INST("%20 = OpTypeCooperativeMatrixKHR %uint %uint_3 %uint_2 %uint_2 %uint_2");
+    EXPECT_INST("%s = OpConstantNull %MyStruct");
+}
+
 }  // namespace
 }  // namespace tint::spirv::writer
