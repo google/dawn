@@ -482,12 +482,35 @@ class Printer {
         return constant_nulls_.GetOrAdd(type, [&] {
             auto id = module_.NextId();
 
-            if (auto* sm = type->As<core::type::SubgroupMatrix>()) {
+            if (ContainsSubgroupMatrix(type)) {
                 // OpConstantNull is not supported for CooperativeMatrix types on some drivers, so
                 // use OpConstantComposite instead.
                 // See crbug.com/407532165.
-                module_.PushType(spv::Op::OpConstantComposite,
-                                 {Type(type), id, Constant(b_.Zero(sm->Type()))});
+                Switch(
+                    type,
+                    [&](const core::type::SubgroupMatrix* sm) {
+                        module_.PushType(spv::Op::OpConstantComposite,
+                                         {Type(type), id, Constant(b_.Zero(sm->Type()))});
+                    },
+                    [&](const core::type::Array* arr) {
+                        OperandList operands = {Type(arr), id};
+                        for (uint32_t i = 0; i < arr->ConstantCount(); i++) {
+                            operands.push_back(ConstantNull(arr->ElemType()));
+                        }
+                        module_.PushType(spv::Op::OpConstantComposite, operands);
+                    },
+                    [&](const core::type::Struct* str) {
+                        OperandList operands = {Type(str), id};
+                        for (auto* member : str->Members()) {
+                            if (ContainsSubgroupMatrix(member->Type())) {
+                                operands.push_back(ConstantNull(member->Type()));
+                            } else {
+                                operands.push_back(Constant(b_.Zero(member->Type())));
+                            }
+                        }
+                        module_.PushType(spv::Op::OpConstantComposite, operands);
+                    },
+                    TINT_ICE_ON_NO_MATCH);
             } else {
                 module_.PushType(spv::Op::OpConstantNull, {Type(type), id});
             }
@@ -524,9 +547,7 @@ class Printer {
                 [&](const core::type::U32*) {
                     module_.PushType(spv::Op::OpTypeInt, {id, 32u, 0u});
                 },
-                [&](const core::type::F32*) {
-                    module_.PushType(spv::Op::OpTypeFloat, {id, 32u});
-                },
+                [&](const core::type::F32*) { module_.PushType(spv::Op::OpTypeFloat, {id, 32u}); },
                 [&](const core::type::F16*) {
                     module_.PushCapability(SpvCapabilityFloat16);
                     module_.PushCapability(SpvCapabilityUniformAndStorageBuffer16BitAccess);

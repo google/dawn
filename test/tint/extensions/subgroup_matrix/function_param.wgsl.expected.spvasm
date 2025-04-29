@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 74
+; Bound: 75
 ; Schema: 0
                OpCapability Shader
                OpCapability VulkanMemoryModel
@@ -63,13 +63,14 @@
     %float_0 = OpConstant %float 0
          %54 = OpConstantComposite %8 %float_0
 %_ptr_Function__arr_8_uint_4 = OpTypePointer Function %_arr_8_uint_4
-         %58 = OpConstantNull %_arr_8_uint_4
+         %58 = OpConstantComposite %_arr_8_uint_4 %54 %54 %54 %54
 %_ptr_Function__arr__arr_8_uint_4_uint_4 = OpTypePointer Function %_arr__arr_8_uint_4_uint_4
-         %61 = OpConstantNull %_arr__arr_8_uint_4_uint_4
+         %61 = OpConstantComposite %_arr__arr_8_uint_4_uint_4 %58 %58 %58 %58
 %_ptr_Function_S = OpTypePointer Function %S
-         %64 = OpConstantNull %S
+         %65 = OpConstantComposite %20 %float_0
+         %64 = OpConstantComposite %S %54 %65
 %_ptr_Function_S_Nested = OpTypePointer Function %S_Nested
-         %67 = OpConstantNull %S_Nested
+         %68 = OpConstantComposite %S_Nested %64
         %foo = OpFunction %void None %25
           %m = OpFunctionParameter %8
     %m_array = OpFunctionParameter %_arr_8_uint_4
@@ -104,12 +105,12 @@
   %m_array_0 = OpVariable %_ptr_Function__arr_8_uint_4 Function %58
 %m_nested_array_0 = OpVariable %_ptr_Function__arr__arr_8_uint_4_uint_4 Function %61
  %m_struct_0 = OpVariable %_ptr_Function_S Function %64
-%m_nested_struct_0 = OpVariable %_ptr_Function_S_Nested Function %67
-         %68 = OpLoad %8 %m_0 None
-         %69 = OpLoad %_arr_8_uint_4 %m_array_0 None
-         %70 = OpLoad %_arr__arr_8_uint_4_uint_4 %m_nested_array_0 None
-         %71 = OpLoad %S %m_struct_0 None
-         %72 = OpLoad %S_Nested %m_nested_struct_0 None
-         %73 = OpFunctionCall %void %foo %68 %69 %70 %71 %72
+%m_nested_struct_0 = OpVariable %_ptr_Function_S_Nested Function %68
+         %69 = OpLoad %8 %m_0 None
+         %70 = OpLoad %_arr_8_uint_4 %m_array_0 None
+         %71 = OpLoad %_arr__arr_8_uint_4_uint_4 %m_nested_array_0 None
+         %72 = OpLoad %S %m_struct_0 None
+         %73 = OpLoad %S_Nested %m_nested_struct_0 None
+         %74 = OpFunctionCall %void %foo %69 %70 %71 %72 %73
                OpReturn
                OpFunctionEnd

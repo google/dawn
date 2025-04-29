@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 76
+; Bound: 77
 ; Schema: 0
                OpCapability Shader
                OpCapability VulkanMemoryModel
@@ -68,10 +68,11 @@
          %62 = OpTypeFunction %void
     %float_0 = OpConstant %float 0
          %65 = OpConstantComposite %9 %float_0
-         %68 = OpConstantNull %_arr_9_uint_4
-         %70 = OpConstantNull %_arr__arr_9_uint_4_uint_4
-         %72 = OpConstantNull %S
-         %74 = OpConstantNull %S_Nested
+         %68 = OpConstantComposite %_arr_9_uint_4 %65 %65 %65 %65
+         %70 = OpConstantComposite %_arr__arr_9_uint_4_uint_4 %68 %68 %68 %68
+         %73 = OpConstantComposite %24 %float_0
+         %72 = OpConstantComposite %S %65 %73
+         %75 = OpConstantComposite %S_Nested %72
         %foo = OpFunction %void None %30
      %m_root = OpFunctionParameter %_ptr_Function_9
 %m_array_root = OpFunctionParameter %_ptr_Function__arr_9_uint_4
@@ -111,7 +112,7 @@
     %m_array = OpVariable %_ptr_Function__arr_9_uint_4 Function %68
 %m_nested_array = OpVariable %_ptr_Function__arr__arr_9_uint_4_uint_4 Function %70
    %m_struct = OpVariable %_ptr_Function_S Function %72
-%m_nested_struct = OpVariable %_ptr_Function_S_Nested Function %74
-         %75 = OpFunctionCall %void %foo %m %m_array %m_nested_array %m_struct %m_nested_struct
+%m_nested_struct = OpVariable %_ptr_Function_S_Nested Function %75
+         %76 = OpFunctionCall %void %foo %m %m_array %m_nested_array %m_struct %m_nested_struct
                OpReturn
                OpFunctionEnd

@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 85
+; Bound: 86
 ; Schema: 0
                OpCapability Shader
                OpCapability VulkanMemoryModel
@@ -53,23 +53,24 @@
 %_arr_7_uint_4 = OpTypeArray %7 %uint_4
          %22 = OpTypeFunction %_arr_7_uint_4
 %_ptr_Function__arr_7_uint_4 = OpTypePointer Function %_arr_7_uint_4
-         %26 = OpConstantNull %_arr_7_uint_4
+         %26 = OpConstantComposite %_arr_7_uint_4 %16 %16 %16 %16
 %_arr__arr_7_uint_4_uint_4 = OpTypeArray %_arr_7_uint_4 %uint_4
          %30 = OpTypeFunction %_arr__arr_7_uint_4_uint_4
 %_ptr_Function__arr__arr_7_uint_4_uint_4 = OpTypePointer Function %_arr__arr_7_uint_4_uint_4
-         %34 = OpConstantNull %_arr__arr_7_uint_4_uint_4
+         %34 = OpConstantComposite %_arr__arr_7_uint_4_uint_4 %26 %26 %26 %26
      %uint_1 = OpConstant %uint 1
          %38 = OpTypeCooperativeMatrixKHR %float %uint_3 %uint_8 %uint_8 %uint_1
           %S = OpTypeStruct %7 %38
          %40 = OpTypeFunction %S
 %_ptr_Function_S = OpTypePointer Function %S
-         %44 = OpConstantNull %S
+         %45 = OpConstantComposite %38 %float_0
+         %44 = OpConstantComposite %S %16 %45
    %S_Nested = OpTypeStruct %S
-         %48 = OpTypeFunction %S_Nested
+         %49 = OpTypeFunction %S_Nested
 %_ptr_Function_S_Nested = OpTypePointer Function %S_Nested
-         %52 = OpConstantNull %S_Nested
+         %53 = OpConstantComposite %S_Nested %44
        %void = OpTypeVoid
-         %56 = OpTypeFunction %void
+         %57 = OpTypeFunction %void
 %_ptr_StorageBuffer__runtimearr_float = OpTypePointer StorageBuffer %_runtimearr_float
 %_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float
     %uint_64 = OpConstant %uint 64
@@ -94,40 +95,40 @@
 %make_struct = OpFunction %S None %40
          %41 = OpLabel
    %m_struct = OpVariable %_ptr_Function_S Function %44
-         %45 = OpLoad %S %m_struct None
-               OpReturnValue %45
+         %46 = OpLoad %S %m_struct None
+               OpReturnValue %46
                OpFunctionEnd
-%make_nested_struct = OpFunction %S_Nested None %48
-         %49 = OpLabel
-%m_nested_struct = OpVariable %_ptr_Function_S_Nested Function %52
-         %53 = OpLoad %S_Nested %m_nested_struct None
-               OpReturnValue %53
+%make_nested_struct = OpFunction %S_Nested None %49
+         %50 = OpLabel
+%m_nested_struct = OpVariable %_ptr_Function_S_Nested Function %53
+         %54 = OpLoad %S_Nested %m_nested_struct None
+               OpReturnValue %54
                OpFunctionEnd
-       %main = OpFunction %void None %56
-         %57 = OpLabel
-         %58 = OpFunctionCall %7 %make_matrix
-         %59 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
-         %61 = OpAccessChain %_ptr_StorageBuffer_float %59 %uint_0
-               OpCooperativeMatrixStoreKHR %61 %58 %uint_0 %uint_64 NonPrivatePointer
-         %65 = OpFunctionCall %_arr_7_uint_4 %make_array
-         %66 = OpCompositeExtract %7 %65 0
-         %67 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
-         %68 = OpAccessChain %_ptr_StorageBuffer_float %67 %uint_0
-               OpCooperativeMatrixStoreKHR %68 %66 %uint_0 %uint_64 NonPrivatePointer
-         %70 = OpFunctionCall %_arr__arr_7_uint_4_uint_4 %make_nested_array
-         %71 = OpCompositeExtract %7 %70 1 2
-         %72 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
-         %73 = OpAccessChain %_ptr_StorageBuffer_float %72 %uint_0
-               OpCooperativeMatrixStoreKHR %73 %71 %uint_0 %uint_64 NonPrivatePointer
-         %75 = OpFunctionCall %S %make_struct
-         %76 = OpCompositeExtract %7 %75 0
-         %77 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
-         %78 = OpAccessChain %_ptr_StorageBuffer_float %77 %uint_0
-               OpCooperativeMatrixStoreKHR %78 %76 %uint_0 %uint_64 NonPrivatePointer
-         %80 = OpFunctionCall %S_Nested %make_nested_struct
-         %81 = OpCompositeExtract %38 %80 0 1
-         %82 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
-         %83 = OpAccessChain %_ptr_StorageBuffer_float %82 %uint_0
-               OpCooperativeMatrixStoreKHR %83 %81 %uint_0 %uint_64 NonPrivatePointer
+       %main = OpFunction %void None %57
+         %58 = OpLabel
+         %59 = OpFunctionCall %7 %make_matrix
+         %60 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
+         %62 = OpAccessChain %_ptr_StorageBuffer_float %60 %uint_0
+               OpCooperativeMatrixStoreKHR %62 %59 %uint_0 %uint_64 NonPrivatePointer
+         %66 = OpFunctionCall %_arr_7_uint_4 %make_array
+         %67 = OpCompositeExtract %7 %66 0
+         %68 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
+         %69 = OpAccessChain %_ptr_StorageBuffer_float %68 %uint_0
+               OpCooperativeMatrixStoreKHR %69 %67 %uint_0 %uint_64 NonPrivatePointer
+         %71 = OpFunctionCall %_arr__arr_7_uint_4_uint_4 %make_nested_array
+         %72 = OpCompositeExtract %7 %71 1 2
+         %73 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
+         %74 = OpAccessChain %_ptr_StorageBuffer_float %73 %uint_0
+               OpCooperativeMatrixStoreKHR %74 %72 %uint_0 %uint_64 NonPrivatePointer
+         %76 = OpFunctionCall %S %make_struct
+         %77 = OpCompositeExtract %7 %76 0
+         %78 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
+         %79 = OpAccessChain %_ptr_StorageBuffer_float %78 %uint_0
+               OpCooperativeMatrixStoreKHR %79 %77 %uint_0 %uint_64 NonPrivatePointer
+         %81 = OpFunctionCall %S_Nested %make_nested_struct
+         %82 = OpCompositeExtract %38 %81 0 1
+         %83 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
+         %84 = OpAccessChain %_ptr_StorageBuffer_float %83 %uint_0
+               OpCooperativeMatrixStoreKHR %84 %82 %uint_0 %uint_64 NonPrivatePointer
                OpReturn
                OpFunctionEnd

@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 94
+; Bound: 95
 ; Schema: 0
                OpCapability Shader
                OpCapability VulkanMemoryModel
@@ -44,15 +44,16 @@
     %uint_64 = OpConstant %uint 64
      %uint_4 = OpConstant %uint 4
 %_arr_11_uint_4 = OpTypeArray %11 %uint_4
-         %23 = OpConstantNull %_arr_11_uint_4
+         %23 = OpConstantComposite %_arr_11_uint_4 %10 %10 %10 %10
 %_arr__arr_11_uint_4_uint_4 = OpTypeArray %_arr_11_uint_4 %uint_4
-         %30 = OpConstantNull %_arr__arr_11_uint_4_uint_4
+         %30 = OpConstantComposite %_arr__arr_11_uint_4_uint_4 %23 %23 %23 %23
      %uint_1 = OpConstant %uint 1
          %38 = OpTypeCooperativeMatrixKHR %float %uint_3 %uint_8 %uint_8 %uint_1
           %S = OpTypeStruct %11 %38
-         %36 = OpConstantNull %S
+         %40 = OpConstantComposite %38 %float_0
+         %36 = OpConstantComposite %S %10 %40
    %S_Nested = OpTypeStruct %S
-         %44 = OpConstantNull %S_Nested
+         %45 = OpConstantComposite %S_Nested %36
    %float_42 = OpConstant %float 42
   %float_100 = OpConstant %float 100
      %uint_2 = OpConstant %uint 2
@@ -73,50 +74,50 @@
          %33 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
          %34 = OpAccessChain %_ptr_StorageBuffer_float %33 %uint_0
                OpCooperativeMatrixStoreKHR %34 %32 %uint_0 %uint_64 NonPrivatePointer
-         %40 = OpCompositeExtract %11 %36 0
-         %41 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
-         %42 = OpAccessChain %_ptr_StorageBuffer_float %41 %uint_0
-               OpCooperativeMatrixStoreKHR %42 %40 %uint_0 %uint_64 NonPrivatePointer
-         %46 = OpCompositeExtract %38 %44 0 1
-         %47 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
-         %48 = OpAccessChain %_ptr_StorageBuffer_float %47 %uint_0
-               OpCooperativeMatrixStoreKHR %48 %46 %uint_0 %uint_64 NonPrivatePointer
-         %50 = OpCompositeConstruct %11 %float_42
-         %52 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
-         %53 = OpAccessChain %_ptr_StorageBuffer_float %52 %uint_0
-               OpCooperativeMatrixStoreKHR %53 %50 %uint_0 %uint_64 NonPrivatePointer
-         %55 = OpCompositeConstruct %11 %float_42
-         %56 = OpCompositeConstruct %11 %float_100
-         %60 = OpCompositeConstruct %_arr_11_uint_2 %55 %56
-         %61 = OpCompositeExtract %11 %60 1
-         %62 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
-         %63 = OpAccessChain %_ptr_StorageBuffer_float %62 %uint_0
-               OpCooperativeMatrixStoreKHR %63 %61 %uint_0 %uint_64 NonPrivatePointer
-         %65 = OpCompositeConstruct %11 %float_42
-         %66 = OpCompositeConstruct %11 %float_100
-         %67 = OpCompositeConstruct %_arr_11_uint_2 %65 %66
-         %68 = OpCompositeConstruct %11 %float_n7
-         %70 = OpCompositeConstruct %11 %float_n42
-         %72 = OpCompositeConstruct %_arr_11_uint_2 %68 %70
-         %74 = OpCompositeConstruct %_arr__arr_11_uint_2_uint_2 %67 %72
-         %75 = OpCompositeExtract %11 %74 1 0
-         %76 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
-         %77 = OpAccessChain %_ptr_StorageBuffer_float %76 %uint_0
-               OpCooperativeMatrixStoreKHR %77 %75 %uint_0 %uint_64 NonPrivatePointer
-         %79 = OpCompositeConstruct %11 %float_42
-         %80 = OpCompositeConstruct %38 %float_100
-         %81 = OpCompositeConstruct %S %79 %80
-         %82 = OpCompositeExtract %11 %81 0
-         %83 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
-         %84 = OpAccessChain %_ptr_StorageBuffer_float %83 %uint_0
-               OpCooperativeMatrixStoreKHR %84 %82 %uint_0 %uint_64 NonPrivatePointer
-         %86 = OpCompositeConstruct %11 %float_42
-         %87 = OpCompositeConstruct %38 %float_100
-         %88 = OpCompositeConstruct %S %86 %87
-         %89 = OpCompositeConstruct %S_Nested %88
-         %90 = OpCompositeExtract %38 %89 0 1
-         %91 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
-         %92 = OpAccessChain %_ptr_StorageBuffer_float %91 %uint_0
-               OpCooperativeMatrixStoreKHR %92 %90 %uint_0 %uint_64 NonPrivatePointer
+         %41 = OpCompositeExtract %11 %36 0
+         %42 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
+         %43 = OpAccessChain %_ptr_StorageBuffer_float %42 %uint_0
+               OpCooperativeMatrixStoreKHR %43 %41 %uint_0 %uint_64 NonPrivatePointer
+         %47 = OpCompositeExtract %38 %45 0 1
+         %48 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
+         %49 = OpAccessChain %_ptr_StorageBuffer_float %48 %uint_0
+               OpCooperativeMatrixStoreKHR %49 %47 %uint_0 %uint_64 NonPrivatePointer
+         %51 = OpCompositeConstruct %11 %float_42
+         %53 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
+         %54 = OpAccessChain %_ptr_StorageBuffer_float %53 %uint_0
+               OpCooperativeMatrixStoreKHR %54 %51 %uint_0 %uint_64 NonPrivatePointer
+         %56 = OpCompositeConstruct %11 %float_42
+         %57 = OpCompositeConstruct %11 %float_100
+         %61 = OpCompositeConstruct %_arr_11_uint_2 %56 %57
+         %62 = OpCompositeExtract %11 %61 1
+         %63 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
+         %64 = OpAccessChain %_ptr_StorageBuffer_float %63 %uint_0
+               OpCooperativeMatrixStoreKHR %64 %62 %uint_0 %uint_64 NonPrivatePointer
+         %66 = OpCompositeConstruct %11 %float_42
+         %67 = OpCompositeConstruct %11 %float_100
+         %68 = OpCompositeConstruct %_arr_11_uint_2 %66 %67
+         %69 = OpCompositeConstruct %11 %float_n7
+         %71 = OpCompositeConstruct %11 %float_n42
+         %73 = OpCompositeConstruct %_arr_11_uint_2 %69 %71
+         %75 = OpCompositeConstruct %_arr__arr_11_uint_2_uint_2 %68 %73
+         %76 = OpCompositeExtract %11 %75 1 0
+         %77 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
+         %78 = OpAccessChain %_ptr_StorageBuffer_float %77 %uint_0
+               OpCooperativeMatrixStoreKHR %78 %76 %uint_0 %uint_64 NonPrivatePointer
+         %80 = OpCompositeConstruct %11 %float_42
+         %81 = OpCompositeConstruct %38 %float_100
+         %82 = OpCompositeConstruct %S %80 %81
+         %83 = OpCompositeExtract %11 %82 0
+         %84 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
+         %85 = OpAccessChain %_ptr_StorageBuffer_float %84 %uint_0
+               OpCooperativeMatrixStoreKHR %85 %83 %uint_0 %uint_64 NonPrivatePointer
+         %87 = OpCompositeConstruct %11 %float_42
+         %88 = OpCompositeConstruct %38 %float_100
+         %89 = OpCompositeConstruct %S %87 %88
+         %90 = OpCompositeConstruct %S_Nested %89
+         %91 = OpCompositeExtract %38 %90 0 1
+         %92 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
+         %93 = OpAccessChain %_ptr_StorageBuffer_float %92 %uint_0
+               OpCooperativeMatrixStoreKHR %93 %91 %uint_0 %uint_64 NonPrivatePointer
                OpReturn
                OpFunctionEnd
