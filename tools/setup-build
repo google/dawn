@@ -43,6 +43,7 @@ FORCE=""
 VERBOSE=""
 REMOTEEXEC="1"
 SHARED=""
+INSTALL=""
 
 function show_usage() {
   echo "setup-build [-f] $POSSIBLE_BUILD_SYSTEMS $POSSIBLE_BUILD_TYPES $POSSIBLE_BUILD_ARCHS [fuzz|fuzzer]"
@@ -61,6 +62,7 @@ function show_usage() {
   echo "  debug         Make a debug build"
   echo " "
   echo "  fuzz, fuzzer  Build fuzzers. Forces Clang to be used"
+  echo "  install       Install to out/install (cmake only)"
   echo "  native        Target the machine you're running on"
   echo "  x86           Target a 32-bit x86 (adds -m32 to compiler flags)"
   echo "  local         Use local compilation instead of remote"
@@ -122,6 +124,9 @@ for arg in "$@"; do
     ;;
     "--force" | "-f")
       FORCE=1
+    ;;
+    "install")
+      INSTALL=1
     ;;
     "--verbose" | "-v")
       VERBOSE=1
@@ -266,6 +271,12 @@ case $BUILD_SYSTEM in
         show_usage "invalid build architecture '$BUILD_ARCH'"
       ;;
     esac
+    if [[ -n "$INSTALL" ]]; then
+      CMAKE_FLAGS+=("-DCMAKE_INSTALL_PREFIX=out/install")
+      CMAKE_FLAGS+=("-DTINT_ENABLE_INSTALL=ON")
+      CMAKE_FLAGS+=("-DDAWN_ENABLE_INSTALL=ON")
+      CMAKE_FLAGS+=("-DDAWN_BUILD_MONOLITHIC_LIBRARY=ON")
+    fi
     generate "cmake"             \
              "-S" "."            \
              "-B" "out/active"   \
