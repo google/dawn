@@ -115,8 +115,7 @@ MaybeError ComputePipeline::InitializeImpl() {
 
     if (buildCacheKey) {
         // Record cache key information now since the createInfo is not stored.
-        StreamIn(&mCacheKey, createInfo, layout,
-                 stream::Iterable(moduleAndSpirv.spirv, moduleAndSpirv.wordCount));
+        StreamIn(&mCacheKey, createInfo, layout, moduleAndSpirv.spirv);
     }
 
     // Try to see if we have anything in the blob cache.
@@ -139,6 +138,8 @@ MaybeError ComputePipeline::InitializeImpl() {
     DAWN_TRY(cache->DidCompilePipeline());
 
     SetLabelImpl();
+
+    device->fn.DestroyShaderModule(device->GetVkDevice(), moduleAndSpirv.module, nullptr);
 
     return {};
 }

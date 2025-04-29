@@ -67,8 +67,7 @@ class ShaderModule final : public ShaderModuleBase {
   public:
     struct ModuleAndSpirv {
         VkShaderModule module;
-        const uint32_t* spirv;
-        size_t wordCount;
+        std::vector<uint32_t> spirv;
         bool hasInputAttachment;
     };
 
@@ -79,6 +78,7 @@ class ShaderModule final : public ShaderModuleBase {
         ShaderModuleParseResult* parseResult,
         std::unique_ptr<OwnedCompilationMessages>* compilationMessages);
 
+    // Caller is responsible for destroying the `VkShaderModule` returned.
     ResultOrError<ModuleAndSpirv> GetHandleAndSpirv(SingleShaderStage stage,
                                                     const ProgrammableStage& programmableStage,
                                                     const PipelineLayout* layout,
@@ -93,10 +93,6 @@ class ShaderModule final : public ShaderModuleBase {
     MaybeError Initialize(ShaderModuleParseResult* parseResult,
                           std::unique_ptr<OwnedCompilationMessages>* compilationMessages);
     void DestroyImpl() override;
-
-    // New handles created by GetHandleAndSpirv at pipeline creation time.
-    class ConcurrentTransformedShaderModuleCache;
-    std::unique_ptr<ConcurrentTransformedShaderModuleCache> mTransformedShaderModuleCache;
 };
 
 }  // namespace vulkan

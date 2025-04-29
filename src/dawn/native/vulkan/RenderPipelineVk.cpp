@@ -382,7 +382,7 @@ MaybeError RenderPipeline::InitializeImpl() {
         mHasInputAttachment = mHasInputAttachment || moduleAndSpirv.hasInputAttachment;
         if (buildCacheKey) {
             // Record cache key for each shader since it will become inaccessible later on.
-            StreamIn(&mCacheKey, stream::Iterable(moduleAndSpirv.spirv, moduleAndSpirv.wordCount));
+            StreamIn(&mCacheKey, moduleAndSpirv.spirv);
         }
 
         VkPipelineShaderStageCreateInfo* shaderStage = &shaderStages[stageCount];
@@ -630,6 +630,10 @@ MaybeError RenderPipeline::InitializeImpl() {
     DAWN_TRY(cache->DidCompilePipeline());
 
     SetLabelImpl();
+
+    for (uint32_t i = 0; i < stageCount; ++i) {
+        device->fn.DestroyShaderModule(device->GetVkDevice(), shaderStages[i].module, nullptr);
+    }
 
     return {};
 }
