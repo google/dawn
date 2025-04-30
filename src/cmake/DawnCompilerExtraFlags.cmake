@@ -30,6 +30,13 @@ if (${DAWN_ENABLE_TSAN})
   add_link_options(-stdlib=libc++)
 endif ()
 
+# Don't warn about C++20 only constructs, since Dawn requires C++20
+if (("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") OR
+    ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang") OR
+    ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU"))
+    add_compile_options(-Wno-c++20-compat)
+endif()
+
 ################################################################################
 # common_compile_options - sets compiler and linker options common for dawn
 ################################################################################
