@@ -50,8 +50,6 @@ class BindGroupTracker : public BindGroupTrackerBase</*CanInheritBindGroups=*/tr
     explicit BindGroupTracker(const ScopedSwapStateCommandRecordingContext* commandContext);
     virtual ~BindGroupTracker();
 
-    const ScopedSwapStateCommandRecordingContext* GetCommandContext() const;
-
   protected:
     template <wgpu::ShaderStage kVisibleStage>
     MaybeError ApplyBindGroup(BindGroupIndex index);
@@ -79,7 +77,43 @@ class BindGroupTracker : public BindGroupTrackerBase</*CanInheritBindGroups=*/tr
                                    uint32_t count,
                                    ID3D11UnorderedAccessView* const* uavs);
 
+    template <typename T>
+    ResultOrError<ComPtr<T>> GetBufferD3DView(
+        BindGroupBase* group,
+        BindingIndex bindingIndex,
+        const BufferBindingInfo& layout,
+        const ityp::vector<BindingIndex, uint64_t>& dynamicOffsets);
+
+    template <typename T>
+    ResultOrError<ComPtr<T>> GetTextureD3DView(BindGroupBase* group, BindingIndex bindingIndex);
+
   private:
+    struct ConstantBufferBinding {
+        bool operator==(const ConstantBufferBinding& rhs) const {
+            return buffer.Get() == rhs.buffer.Get() && firstConstant == rhs.firstConstant &&
+                   numConstants == rhs.numConstants;
+        }
+
+        ComPtr<ID3D11Buffer> buffer;
+        UINT firstConstant = 0;
+        UINT numConstants = 0;
+    };
+
+    ResultOrError<ConstantBufferBinding> GetConstantBufferBinding(
+        BindGroupBase* group,
+        BindingIndex bindingIndex,
+        const BufferBindingInfo& layout,
+        const ityp::vector<BindingIndex, uint64_t>& dynamicOffsets);
+
+    ResultOrError<ComPtr<ID3D11ShaderResourceView>> GetTextureShaderResourceView(
+        BindGroupBase* group,
+        BindingIndex bindingIndex);
+    ResultOrError<ComPtr<ID3D11UnorderedAccessView>> GetTextureUnorderedAccessView(
+        BindGroupBase* group,
+        BindingIndex bindingIndex);
+
+    ID3D11SamplerState* GetSamplerState(BindGroupBase* group, BindingIndex bindingIndex);
+
     raw_ptr<const ScopedSwapStateCommandRecordingContext> mCommandContext;
 
     // This class will track the current bound resources and prevent redundant bindings.
@@ -93,17 +127,6 @@ class BindGroupTracker : public BindGroupTrackerBase</*CanInheritBindGroups=*/tr
 
       private:
         absl::InlinedVector<T, InitialCapacity> mBoundSlots;
-    };
-
-    struct ConstantBufferBinding {
-        bool operator==(const ConstantBufferBinding& rhs) const {
-            return buffer.Get() == rhs.buffer.Get() && firstConstant == rhs.firstConstant &&
-                   numConstants == rhs.numConstants;
-        }
-
-        ComPtr<ID3D11Buffer> buffer;
-        UINT firstConstant = 0;
-        UINT numConstants = 0;
     };
 
     BindingSlot<ConstantBufferBinding, 4> mVSConstantBufferSlots;
