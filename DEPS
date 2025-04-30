@@ -371,15 +371,15 @@ deps = {
 
   # Dependencies required to build / run Dawn NodeJS bindings
   'third_party/node-api-headers': {
-    'url': '{github_git}/nodejs/node-api-headers.git@d5cfe19da8b974ca35764dd1c73b91d57cd3c4ce',
+    'url': '{chromium_git}/external/github.com/nodejs/node-api-headers@d5cfe19da8b974ca35764dd1c73b91d57cd3c4ce',
     'condition': 'dawn_node',
   },
   'third_party/node-addon-api': {
-    'url': '{github_git}/nodejs/node-addon-api.git@1e26dcb52829a74260ec262edb41fc22998669b6',
+    'url': '{chromium_git}/external/github.com/nodejs/node-addon-api@1e26dcb52829a74260ec262edb41fc22998669b6',
     'condition': 'dawn_node',
   },
   'third_party/gpuweb': {
-    'url': '{github_git}/gpuweb/gpuweb.git@4e4692ab9d920c0a50a09533d5bb58e02babb0b2',
+    'url': '{chromium_git}/external/github.com/gpuweb/gpuweb@4e4692ab9d920c0a50a09533d5bb58e02babb0b2',
     'condition': 'dawn_node',
   },
 

@@ -152,15 +152,15 @@
 	gclient-condition = dawn_wasm
 [submodule "third_party/node-api-headers"]
 	path = third_party/node-api-headers
-	url = https://github.com/nodejs/node-api-headers.git
+	url = https://chromium.googlesource.com/external/github.com/nodejs/node-api-headers
 	gclient-condition = dawn_node
 [submodule "third_party/node-addon-api"]
 	path = third_party/node-addon-api
-	url = https://github.com/nodejs/node-addon-api.git
+	url = https://chromium.googlesource.com/external/github.com/nodejs/node-addon-api
 	gclient-condition = dawn_node
 [submodule "third_party/gpuweb"]
 	path = third_party/gpuweb
-	url = https://github.com/gpuweb/gpuweb.git
+	url = https://chromium.googlesource.com/external/github.com/gpuweb/gpuweb
 	gclient-condition = dawn_node
 [submodule "third_party/protobuf"]
 	path = third_party/protobuf
