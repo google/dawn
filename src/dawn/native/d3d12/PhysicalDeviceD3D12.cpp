@@ -574,8 +574,8 @@ void PhysicalDevice::SetupBackendAdapterToggles(dawn::platform::Platform* platfo
     // information.
     if (gpu_info::IsIntelGen12HP(vendorId, deviceId) ||
         gpu_info::IsIntelGen12LP(vendorId, deviceId)) {
-        if (gpu_info::CompareWindowsDriverVersion(vendorId, GetDriverVersion(),
-                                                  {32, 0, 101, 5762}) == -1) {
+        const gpu_info::IntelWindowsDriverVersion kFixedDriverVersion = {32, 0, 101, 5762};
+        if (gpu_info::IntelWindowsDriverVersion(GetDriverVersion()) < kFixedDriverVersion) {
             adapterToggles->Default(Toggle::D3D12DontUseShaderModel66OrHigher, true);
         }
     }
@@ -584,10 +584,9 @@ void PhysicalDevice::SetupBackendAdapterToggles(dawn::platform::Platform* platfo
     // D3D driver > 27.20.100.8935 and < 27.20.100.9684 on Intel Gen9 and Gen9.5 GPUs.
     // See https://crbug.com/dawn/2448 for more information.
     if (gpu_info::IsIntelGen9(vendorId, deviceId)) {
-        if (gpu_info::CompareWindowsDriverVersion(vendorId, GetDriverVersion(),
-                                                  {27, 20, 100, 8935}) == 1 &&
-            gpu_info::CompareWindowsDriverVersion(vendorId, GetDriverVersion(),
-                                                  {27, 20, 100, 9684}) == -1) {
+        gpu_info::IntelWindowsDriverVersion intelDriverVersion(GetDriverVersion());
+        if (intelDriverVersion > gpu_info::IntelWindowsDriverVersion({27, 20, 100, 8935}) &&
+            intelDriverVersion < gpu_info::IntelWindowsDriverVersion({27, 20, 100, 9684})) {
             adapterToggles->ForceSet(Toggle::D3D12DontUseShaderModel66OrHigher, true);
         }
     }
@@ -688,9 +687,8 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
     // Currently this workaround is only needed on Intel Gen9, Gen9.5 and Gen11 GPUs.
     // See http://crbug.com/1161355 for more information.
     if (gpu_info::IsIntelGen9(vendorId, deviceId) || gpu_info::IsIntelGen11(vendorId, deviceId)) {
-        const gpu_info::DriverVersion kFixedDriverVersion = {31, 0, 101, 2114};
-        if (gpu_info::CompareWindowsDriverVersion(vendorId, GetDriverVersion(),
-                                                  kFixedDriverVersion) < 0) {
+        const gpu_info::IntelWindowsDriverVersion kFixedDriverVersion = {31, 0, 101, 2114};
+        if (gpu_info::IntelWindowsDriverVersion(GetDriverVersion()) < kFixedDriverVersion) {
             deviceToggles->Default(
                 Toggle::UseTempBufferInSmallFormatTextureToTextureCopyFromGreaterToLessMipLevel,
                 true);
@@ -716,9 +714,8 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
     // This workaround is only needed on Intel Gen12LP with driver prior to 30.0.101.1692.
     // See http://crbug.com/dawn/949 for more information.
     if (gpu_info::IsIntelGen12LP(vendorId, deviceId)) {
-        const gpu_info::DriverVersion kFixedDriverVersion = {30, 0, 101, 1692};
-        if (gpu_info::CompareWindowsDriverVersion(vendorId, GetDriverVersion(),
-                                                  kFixedDriverVersion) == -1) {
+        const gpu_info::IntelWindowsDriverVersion kFixedDriverVersion = {30, 0, 101, 1692};
+        if (gpu_info::IntelWindowsDriverVersion(GetDriverVersion()) < kFixedDriverVersion) {
             deviceToggles->Default(Toggle::D3D12AllocateExtraMemoryFor2DArrayColorTexture, true);
         }
     }
@@ -727,11 +724,13 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
     // with driver >= 31.0.101.4091. See http://crbug.com/dawn/1083 for more information.
     bool useBlitForT2T = false;
     if (gpu_info::IsIntelGen9(vendorId, deviceId)) {
-        useBlitForT2T = gpu_info::CompareWindowsDriverVersion(vendorId, GetDriverVersion(),
-                                                              {31, 0, 101, 2121}) != -1;
+        const gpu_info::IntelWindowsDriverVersion kFirstBuggyDriverVersion = {31, 0, 101, 2121};
+        useBlitForT2T =
+            gpu_info::IntelWindowsDriverVersion(GetDriverVersion()) >= kFirstBuggyDriverVersion;
     } else if (gpu_info::IsIntelGen12LP(vendorId, deviceId)) {
-        useBlitForT2T = gpu_info::CompareWindowsDriverVersion(vendorId, GetDriverVersion(),
-                                                              {31, 0, 101, 4091}) != -1;
+        const gpu_info::IntelWindowsDriverVersion kFirstBuggyDriverVersion = {31, 0, 101, 4091};
+        useBlitForT2T =
+            gpu_info::IntelWindowsDriverVersion(GetDriverVersion()) >= kFirstBuggyDriverVersion;
     }
     if (useBlitForT2T) {
         deviceToggles->Default(Toggle::UseBlitForDepthTextureToTextureCopyToNonzeroSubresource,
@@ -743,9 +742,8 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
     // TODO(crbug.com/dawn/1546): Remove the workaround when the bug is fixed in D3D driver.
     if (gpu_info::IsIntelGen12LP(vendorId, deviceId) ||
         gpu_info::IsIntelGen12HP(vendorId, deviceId)) {
-        const gpu_info::DriverVersion kDriverVersion = {30, 0, 101, 3413};
-        if (gpu_info::CompareWindowsDriverVersion(vendorId, GetDriverVersion(), kDriverVersion) !=
-            -1) {
+        const gpu_info::IntelWindowsDriverVersion kFirstBuggyDriverVersion = {30, 0, 101, 3413};
+        if (gpu_info::IntelWindowsDriverVersion(GetDriverVersion()) >= kFirstBuggyDriverVersion) {
             deviceToggles->Default(Toggle::ClearBufferBeforeResolveQueries, true);
         }
     }
@@ -774,9 +772,8 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
     // Currently this toggle is only needed on Intel Gen9 and Gen9.5 GPUs.
     // See http://crbug.com/dawn/1579 for more information.
     if (gpu_info::IsIntelGen9(vendorId, deviceId)) {
-        const gpu_info::DriverVersion kFixedDriverVersion = {31, 0, 101, 2121};
-        if (gpu_info::CompareWindowsDriverVersion(vendorId, GetDriverVersion(),
-                                                  kFixedDriverVersion) < 0) {
+        const gpu_info::IntelWindowsDriverVersion kFixedDriverVersion = {31, 0, 101, 2121};
+        if (gpu_info::IntelWindowsDriverVersion(GetDriverVersion()) < kFixedDriverVersion) {
             // We can add workaround when the blending operation is "Add", DstFactor is "Zero" and
             // SrcFactor is "DstAlpha".
             deviceToggles->ForceSet(
@@ -810,11 +807,12 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
     // See http://crbug.com/dawn/2308 for more information.
     if (gpu_info::IsIntel(vendorId)) {
         constexpr uint64_t kAffectedMinimumWindowsBuildNumber = 25957u;
-        const gpu_info::DriverVersion kAffectedMaximumDriverVersion = {27, 20, 100, 9664};
+        const gpu_info::IntelWindowsDriverVersion kAffectedMaximumDriverVersion = {27, 20, 100,
+                                                                                   9664};
         if (GetBackend()->GetFunctions()->GetWindowsBuildNumber() >=
                 kAffectedMinimumWindowsBuildNumber &&
-            gpu_info::CompareWindowsDriverVersion(vendorId, GetDriverVersion(),
-                                                  kAffectedMaximumDriverVersion) <= 0) {
+            gpu_info::IntelWindowsDriverVersion(GetDriverVersion()) <=
+                kAffectedMaximumDriverVersion) {
             deviceToggles->Default(Toggle::DisableResourceSuballocation, true);
         }
     }

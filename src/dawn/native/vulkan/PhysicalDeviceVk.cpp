@@ -134,10 +134,9 @@ MaybeError PhysicalDevice::InitializeImpl() {
 #if DAWN_PLATFORM_IS(WINDOWS)
     // Disable Vulkan adapter on Windows Intel driver < 30.0.101.2111 due to flaky
     // issues.
-    const gpu_info::DriverVersion kDriverVersion({30, 0, 101, 2111});
+    const gpu_info::IntelWindowsDriverVersion kDriverVersion({30, 0, 101, 2111});
     if (gpu_info::IsIntel(mDeviceInfo.properties.vendorID) &&
-        gpu_info::CompareWindowsDriverVersion(mDeviceInfo.properties.vendorID, mDriverVersion,
-                                              kDriverVersion) == -1) {
+        gpu_info::IntelWindowsDriverVersion(mDriverVersion) < kDriverVersion) {
         return DAWN_FORMAT_INTERNAL_ERROR(
             "Disable Intel Vulkan adapter on Windows driver version %s. See "
             "https://crbug.com/1338622.",
