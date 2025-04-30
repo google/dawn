@@ -49,6 +49,10 @@
 namespace dawn::native::d3d11 {
 namespace {
 
+constexpr auto kVertex = SingleShaderStage::Vertex;
+constexpr auto kFragment = SingleShaderStage::Fragment;
+constexpr auto kCompute = SingleShaderStage::Compute;
+
 bool CheckAllSlotsAreEmpty(const ScopedSwapStateCommandRecordingContext* commandContext) {
     auto* deviceContext = commandContext->GetD3D11DeviceContext3();
 
@@ -121,6 +125,52 @@ std::tuple<const BindingInfo&, BufferBinding> ExtractBufferBindingInfo(
     return std::make_tuple(std::cref(bindingInfo), std::move(binding));
 }
 
+template <SingleShaderStage Stage, typename... Args>
+void SetConstantBuffersImpl(ID3D11DeviceContext3* deviceContext, Args&&... args) {
+    if constexpr (Stage == kVertex) {
+        deviceContext->VSSetConstantBuffers1(std::forward<Args>(args)...);
+    } else if constexpr (Stage == kFragment) {
+        deviceContext->PSSetConstantBuffers1(std::forward<Args>(args)...);
+    } else if constexpr (Stage == kCompute) {
+        deviceContext->CSSetConstantBuffers1(std::forward<Args>(args)...);
+    }
+}
+
+template <SingleShaderStage Stage, typename... Args>
+void SetShaderResourcesImpl(ID3D11DeviceContext3* deviceContext, Args&&... args) {
+    if constexpr (Stage == kVertex) {
+        deviceContext->VSSetShaderResources(std::forward<Args>(args)...);
+    } else if constexpr (Stage == kFragment) {
+        deviceContext->PSSetShaderResources(std::forward<Args>(args)...);
+    } else if constexpr (Stage == kCompute) {
+        deviceContext->CSSetShaderResources(std::forward<Args>(args)...);
+    }
+}
+
+template <SingleShaderStage Stage, typename... Args>
+void SetSamplersImpl(ID3D11DeviceContext3* deviceContext, Args&&... args) {
+    if constexpr (Stage == kVertex) {
+        deviceContext->VSSetSamplers(std::forward<Args>(args)...);
+    } else if constexpr (Stage == kFragment) {
+        deviceContext->PSSetSamplers(std::forward<Args>(args)...);
+    } else if constexpr (Stage == kCompute) {
+        deviceContext->CSSetSamplers(std::forward<Args>(args)...);
+    }
+}
+
+template <SingleShaderStage Stage, typename... Args>
+void SetUnorderedAccessViewsImpl(ID3D11DeviceContext3* deviceContext, Args&&... args) {
+    if constexpr (Stage == kFragment) {
+        deviceContext->OMSetRenderTargetsAndUnorderedAccessViews(
+            D3D11_KEEP_RENDER_TARGETS_AND_DEPTH_STENCIL, nullptr, nullptr,
+            std::forward<Args>(args)..., nullptr);
+    } else if constexpr (Stage == kCompute) {
+        deviceContext->CSSetUnorderedAccessViews(std::forward<Args>(args)..., nullptr);
+    } else {
+        DAWN_UNREACHABLE();
+    }
+}
+
 }  // namespace
 
 template <typename T, uint32_t InitialCapacity>
@@ -147,166 +197,139 @@ BindGroupTracker::BindGroupTracker(const ScopedSwapStateCommandRecordingContext*
 }
 
 BindGroupTracker::~BindGroupTracker() {
-    auto* deviceContext = mCommandContext->GetD3D11DeviceContext3();
+    UnbindConstantBuffers<kVertex>();
+    UnbindConstantBuffers<kFragment>();
+    UnbindConstantBuffers<kCompute>();
 
-    // Unbind constant buffers.
-    // Note: We already track max bound slots so we can precisely unbind the correct number of used
-    // slots. It should be faster than unbinding everything from
-    // [0 - D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT).
-    static constexpr ID3D11Buffer* kNullBuffers[D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT] =
-        {};
-#define UNBIND_CONST_BUFFERS(prefix)                                                           \
-    {                                                                                          \
-        auto& slots = m##prefix##ConstantBufferSlots;                                          \
-        if (slots.MaxBoundSlots() > 0) {                                                       \
-            deviceContext->prefix##SetConstantBuffers1(0, slots.MaxBoundSlots(), kNullBuffers, \
-                                                       nullptr, nullptr);                      \
-        }                                                                                      \
-    }
-    UNBIND_CONST_BUFFERS(VS)
-    UNBIND_CONST_BUFFERS(PS)
-    UNBIND_CONST_BUFFERS(CS)
+    UnbindShaderResources<kVertex>();
+    UnbindShaderResources<kFragment>();
+    UnbindShaderResources<kCompute>();
 
-    // Unbind SRVs.
-    static constexpr ID3D11ShaderResourceView*
-        kNullSRVs[D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT] = {};
-#define UNBIND_SRVS(prefix)                                                                 \
-    {                                                                                       \
-        auto& slots = m##prefix##SRVSlots;                                                  \
-        if (slots.MaxBoundSlots() > 0) {                                                    \
-            deviceContext->prefix##SetShaderResources(0, slots.MaxBoundSlots(), kNullSRVs); \
-        }                                                                                   \
-    }
-    UNBIND_SRVS(VS)
-    UNBIND_SRVS(PS)
-    UNBIND_SRVS(CS)
+    UnbindSamplers<kVertex>();
+    UnbindSamplers<kFragment>();
+    UnbindSamplers<kCompute>();
 
-    // Unbind samplers.
-    static constexpr ID3D11SamplerState* kNullSamplers[D3D11_COMMONSHADER_SAMPLER_SLOT_COUNT] = {};
-#define UNBIND_SAMPLERS(prefix)                                                          \
-    {                                                                                    \
-        auto& slots = m##prefix##SamplerSlots;                                           \
-        if (slots.MaxBoundSlots() > 0) {                                                 \
-            deviceContext->prefix##SetSamplers(0, slots.MaxBoundSlots(), kNullSamplers); \
-        }                                                                                \
-    }
-    UNBIND_SAMPLERS(VS)
-    UNBIND_SAMPLERS(PS)
-    UNBIND_SAMPLERS(CS)
-
-    // Unbind UAVs.
-    static constexpr ID3D11UnorderedAccessView* kNullUAVs[D3D11_1_UAV_SLOT_COUNT] = {};
-    if (mCSUAVSlots.MaxBoundSlots() > mCSMinUAVSlot) {
-        deviceContext->CSSetUnorderedAccessViews(
-            mCSMinUAVSlot, mCSUAVSlots.MaxBoundSlots() - mCSMinUAVSlot, kNullUAVs, nullptr);
-    }
-    if (mPSMaxUAVSlot > mPSMinUAVSlot) {
-        deviceContext->OMSetRenderTargetsAndUnorderedAccessViews(
-            D3D11_KEEP_RENDER_TARGETS_AND_DEPTH_STENCIL, nullptr, nullptr, mPSMinUAVSlot,
-            mPSMaxUAVSlot - mPSMinUAVSlot, kNullUAVs, nullptr);
-    }
+    UnbindUnorderedAccessViews<kFragment>();
+    UnbindUnorderedAccessViews<kCompute>();
 
     DAWN_ASSERT(CheckAllSlotsAreEmpty(mCommandContext));
 }
 
-void BindGroupTracker::VSSetConstantBuffer(uint32_t idx,
-                                           ID3D11Buffer* d3d11Buffer,
-                                           uint32_t firstConstant,
-                                           uint32_t numConstants) {
-    mVSConstantBufferSlots.Bind(
-        idx, {d3d11Buffer, firstConstant, numConstants},
-        [this](size_t idx, const ConstantBufferBinding& binding) {
-            mCommandContext->GetD3D11DeviceContext3()->VSSetConstantBuffers1(
-                idx, 1, binding.buffer.GetAddressOf(), &binding.firstConstant,
-                &binding.numConstants);
-        });
-}
-void BindGroupTracker::PSSetConstantBuffer(uint32_t idx,
-                                           ID3D11Buffer* d3d11Buffer,
-                                           uint32_t firstConstant,
-                                           uint32_t numConstants) {
-    mPSConstantBufferSlots.Bind(
-        idx, {d3d11Buffer, firstConstant, numConstants},
-        [this](size_t idx, const ConstantBufferBinding& binding) {
-            mCommandContext->GetD3D11DeviceContext3()->PSSetConstantBuffers1(
-                idx, 1, binding.buffer.GetAddressOf(), &binding.firstConstant,
-                &binding.numConstants);
-        });
-}
-void BindGroupTracker::CSSetConstantBuffer(uint32_t idx,
-                                           ID3D11Buffer* d3d11Buffer,
-                                           uint32_t firstConstant,
-                                           uint32_t numConstants) {
-    mCSConstantBufferSlots.Bind(
-        idx, {d3d11Buffer, firstConstant, numConstants},
-        [this](size_t idx, const ConstantBufferBinding& binding) {
-            mCommandContext->GetD3D11DeviceContext3()->CSSetConstantBuffers1(
-                idx, 1, binding.buffer.GetAddressOf(), &binding.firstConstant,
-                &binding.numConstants);
-        });
-}
-void BindGroupTracker::VSSetShaderResource(uint32_t idx, ComPtr<ID3D11ShaderResourceView> srv) {
-    mVSSRVSlots.Bind(idx, std::move(srv),
-                     [this](size_t idx, const ComPtr<ID3D11ShaderResourceView>& binding) {
-                         mCommandContext->GetD3D11DeviceContext3()->VSSetShaderResources(
-                             idx, 1, binding.GetAddressOf());
-                     });
-}
-void BindGroupTracker::PSSetShaderResource(uint32_t idx, ComPtr<ID3D11ShaderResourceView> srv) {
-    mPSSRVSlots.Bind(idx, std::move(srv),
-                     [this](size_t idx, const ComPtr<ID3D11ShaderResourceView>& binding) {
-                         mCommandContext->GetD3D11DeviceContext3()->PSSetShaderResources(
-                             idx, 1, binding.GetAddressOf());
-                     });
-}
-void BindGroupTracker::CSSetShaderResource(uint32_t idx, ComPtr<ID3D11ShaderResourceView> srv) {
-    mCSSRVSlots.Bind(idx, std::move(srv),
-                     [this](size_t idx, const ComPtr<ID3D11ShaderResourceView>& binding) {
-                         mCommandContext->GetD3D11DeviceContext3()->CSSetShaderResources(
-                             idx, 1, binding.GetAddressOf());
-                     });
-}
-void BindGroupTracker::VSSetSampler(uint32_t idx, ID3D11SamplerState* sampler) {
-    mVSSamplerSlots.Bind(idx, sampler,
-                         [this](size_t idx, const ComPtr<ID3D11SamplerState>& binding) {
-                             mCommandContext->GetD3D11DeviceContext3()->VSSetSamplers(
-                                 idx, 1, binding.GetAddressOf());
-                         });
-}
-void BindGroupTracker::PSSetSampler(uint32_t idx, ID3D11SamplerState* sampler) {
-    mPSSamplerSlots.Bind(idx, sampler,
-                         [this](size_t idx, const ComPtr<ID3D11SamplerState>& binding) {
-                             mCommandContext->GetD3D11DeviceContext3()->PSSetSamplers(
-                                 idx, 1, binding.GetAddressOf());
-                         });
-}
-void BindGroupTracker::CSSetSampler(uint32_t idx, ID3D11SamplerState* sampler) {
-    mCSSamplerSlots.Bind(idx, sampler,
-                         [this](size_t idx, const ComPtr<ID3D11SamplerState>& binding) {
-                             mCommandContext->GetD3D11DeviceContext3()->CSSetSamplers(
-                                 idx, 1, binding.GetAddressOf());
-                         });
+template <SingleShaderStage Stage>
+void BindGroupTracker::SetConstantBuffer(uint32_t idx,
+                                         ID3D11Buffer* d3d11Buffer,
+                                         uint32_t firstConstant,
+                                         uint32_t numConstants) {
+    mConstantBufferSlots[Stage].Bind(idx, {d3d11Buffer, firstConstant, numConstants},
+                                     [this](size_t idx, const ConstantBufferBinding& binding) {
+                                         SetConstantBuffersImpl<Stage>(
+                                             mCommandContext->GetD3D11DeviceContext3(), idx, 1,
+                                             binding.buffer.GetAddressOf(), &binding.firstConstant,
+                                             &binding.numConstants);
+                                     });
 }
 
-void BindGroupTracker::CSSetUnorderedAccessView(uint32_t idx,
-                                                ComPtr<ID3D11UnorderedAccessView> uav) {
-    mCSMinUAVSlot = std::min(mCSMinUAVSlot, idx);
-    mCSUAVSlots.Bind(idx, std::move(uav),
-                     [this](size_t idx, const ComPtr<ID3D11UnorderedAccessView>& binding) {
-                         mCommandContext->GetD3D11DeviceContext3()->CSSetUnorderedAccessViews(
-                             idx, 1, binding.GetAddressOf(), nullptr);
-                     });
+template <SingleShaderStage Stage>
+void BindGroupTracker::UnbindConstantBuffers() {
+    const auto slots = mConstantBufferSlots[Stage].MaxBoundSlots();
+    if (slots == 0) {
+        return;
+    }
+
+    static constexpr ID3D11Buffer* kNullBuffers[D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT] =
+        {};
+
+    SetConstantBuffersImpl<Stage>(mCommandContext->GetD3D11DeviceContext3(), 0, slots, kNullBuffers,
+                                  nullptr, nullptr);
 }
 
-void BindGroupTracker::OMSetUnorderedAccessViews(uint32_t startSlot,
+template <SingleShaderStage Stage>
+void BindGroupTracker::SetShaderResource(uint32_t idx, ID3D11ShaderResourceView* srv) {
+    mSRVSlots[Stage].Bind(
+        idx, std::move(srv), [this](size_t idx, const ComPtr<ID3D11ShaderResourceView>& binding) {
+            SetShaderResourcesImpl<Stage>(mCommandContext->GetD3D11DeviceContext3(), idx, 1,
+                                          binding.GetAddressOf());
+        });
+}
+
+template <SingleShaderStage Stage>
+void BindGroupTracker::UnbindShaderResources() {
+    const auto slots = mSRVSlots[Stage].MaxBoundSlots();
+    if (slots == 0) {
+        return;
+    }
+
+    static constexpr ID3D11ShaderResourceView*
+        kNullSRVs[D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT] = {};
+
+    SetShaderResourcesImpl<Stage>(mCommandContext->GetD3D11DeviceContext3(), 0, slots, kNullSRVs);
+}
+
+template <SingleShaderStage Stage>
+void BindGroupTracker::SetSampler(uint32_t idx, ID3D11SamplerState* sampler) {
+    mSamplerSlots[Stage].Bind(idx, sampler,
+                              [this](size_t idx, const ComPtr<ID3D11SamplerState>& binding) {
+                                  SetSamplersImpl<Stage>(mCommandContext->GetD3D11DeviceContext3(),
+                                                         idx, 1, binding.GetAddressOf());
+                              });
+}
+
+template <SingleShaderStage Stage>
+void BindGroupTracker::UnbindSamplers() {
+    const auto slots = mSamplerSlots[Stage].MaxBoundSlots();
+    if (slots == 0) {
+        return;
+    }
+
+    static constexpr ID3D11SamplerState* kNullSamplers[D3D11_COMMONSHADER_SAMPLER_SLOT_COUNT] = {};
+
+    SetSamplersImpl<Stage>(mCommandContext->GetD3D11DeviceContext3(), 0, slots, kNullSamplers);
+}
+
+void BindGroupTracker::CSSetUnorderedAccessView(uint32_t idx, ID3D11UnorderedAccessView* uav) {
+    mMinUAVSlots[kCompute] = std::min(mMinUAVSlots[kCompute], idx);
+
+    mCSUAVSlots.Bind(
+        idx, std::move(uav), [this](size_t idx, const ComPtr<ID3D11UnorderedAccessView>& binding) {
+            SetUnorderedAccessViewsImpl<kCompute>(mCommandContext->GetD3D11DeviceContext3(), idx, 1,
+                                                  binding.GetAddressOf());
+        });
+}
+
+void BindGroupTracker::OMSetUnorderedAccessViews(uint32_t idx,
                                                  uint32_t count,
                                                  ID3D11UnorderedAccessView* const* uavs) {
-    mPSMinUAVSlot = std::min(mPSMinUAVSlot, startSlot);
-    mPSMaxUAVSlot = std::max(mPSMaxUAVSlot, startSlot + count);
+    mMinUAVSlots[kFragment] = std::min(mMinUAVSlots[kFragment], idx);
+    mPSMaxUAVSlot = std::max(mPSMaxUAVSlot, idx + count);
 
-    mCommandContext->GetD3D11DeviceContext3()->OMSetRenderTargetsAndUnorderedAccessViews(
-        D3D11_KEEP_RENDER_TARGETS_AND_DEPTH_STENCIL, nullptr, nullptr, startSlot, count, uavs,
-        nullptr);
+    SetUnorderedAccessViewsImpl<kFragment>(mCommandContext->GetD3D11DeviceContext3(), idx, count,
+                                           uavs);
+}
+
+template <SingleShaderStage Stage>
+void BindGroupTracker::UnbindUnorderedAccessViews() {
+    const auto start = mMinUAVSlots[Stage];
+    uint32_t end;
+
+    if constexpr (Stage == kFragment) {
+        end = mPSMaxUAVSlot;
+    } else if constexpr (Stage == kCompute) {
+        end = mCSUAVSlots.MaxBoundSlots();
+    } else {
+        DAWN_UNREACHABLE();
+        return;
+    }
+
+    if (start >= end) {
+        return;
+    }
+
+    static constexpr ID3D11UnorderedAccessView* kNullUAVs[D3D11_1_UAV_SLOT_COUNT] = {};
+
+    const auto count = end - start;
+
+    SetUnorderedAccessViewsImpl<Stage>(mCommandContext->GetD3D11DeviceContext3(), start, count,
+                                       kNullUAVs);
 }
 
 ResultOrError<BindGroupTracker::ConstantBufferBinding> BindGroupTracker::GetConstantBufferBinding(
@@ -450,13 +473,13 @@ MaybeError BindGroupTracker::ApplyBindGroup(BindGroupIndex index) {
         uint32_t bindingSlotPS;
         uint32_t bindingSlotCS;
         if (bindingVisibility & kVisibleVertex) {
-            bindingSlotVS = indices[bindingIndex][SingleShaderStage::Vertex];
+            bindingSlotVS = indices[bindingIndex][kVertex];
         }
         if (bindingVisibility & kVisibleFragment) {
-            bindingSlotPS = indices[bindingIndex][SingleShaderStage::Fragment];
+            bindingSlotPS = indices[bindingIndex][kFragment];
         }
         if (bindingVisibility & kVisibleCompute) {
-            bindingSlotCS = indices[bindingIndex][SingleShaderStage::Compute];
+            bindingSlotCS = indices[bindingIndex][kCompute];
         }
 
         DAWN_TRY(MatchVariant(
@@ -471,19 +494,19 @@ MaybeError BindGroupTracker::ApplyBindGroup(BindGroupIndex index) {
 
                         auto d3d11Buffer = bufferBinding.buffer.Get();
                         if (bindingVisibility & kVisibleVertex) {
-                            this->VSSetConstantBuffer(bindingSlotVS, d3d11Buffer,
-                                                      bufferBinding.firstConstant,
-                                                      bufferBinding.numConstants);
+                            this->SetConstantBuffer<kVertex>(bindingSlotVS, d3d11Buffer,
+                                                             bufferBinding.firstConstant,
+                                                             bufferBinding.numConstants);
                         }
                         if (bindingVisibility & kVisibleFragment) {
-                            this->PSSetConstantBuffer(bindingSlotPS, d3d11Buffer,
-                                                      bufferBinding.firstConstant,
-                                                      bufferBinding.numConstants);
+                            this->SetConstantBuffer<kFragment>(bindingSlotPS, d3d11Buffer,
+                                                               bufferBinding.firstConstant,
+                                                               bufferBinding.numConstants);
                         }
                         if (bindingVisibility & kVisibleCompute) {
-                            this->CSSetConstantBuffer(bindingSlotCS, d3d11Buffer,
-                                                      bufferBinding.firstConstant,
-                                                      bufferBinding.numConstants);
+                            this->SetConstantBuffer<kCompute>(bindingSlotCS, d3d11Buffer,
+                                                              bufferBinding.firstConstant,
+                                                              bufferBinding.numConstants);
                         }
                         break;
                     }
@@ -497,7 +520,7 @@ MaybeError BindGroupTracker::ApplyBindGroup(BindGroupIndex index) {
                             DAWN_TRY_ASSIGN(d3d11UAV,
                                             GetBufferD3DView<ID3D11UnorderedAccessView>(
                                                 group, bindingIndex, layout, dynamicOffsets));
-                            this->CSSetUnorderedAccessView(bindingSlotCS, d3d11UAV);
+                            this->CSSetUnorderedAccessView(bindingSlotCS, d3d11UAV.Get());
                         }
                         break;
                     }
@@ -507,13 +530,13 @@ MaybeError BindGroupTracker::ApplyBindGroup(BindGroupIndex index) {
                         DAWN_TRY_ASSIGN(d3d11SRV, GetBufferD3DView<ID3D11ShaderResourceView>(
                                                       group, bindingIndex, layout, dynamicOffsets));
                         if (bindingVisibility & kVisibleVertex) {
-                            this->VSSetShaderResource(bindingSlotVS, d3d11SRV);
+                            this->SetShaderResource<kVertex>(bindingSlotVS, d3d11SRV.Get());
                         }
                         if (bindingVisibility & kVisibleFragment) {
-                            this->PSSetShaderResource(bindingSlotPS, d3d11SRV);
+                            this->SetShaderResource<kFragment>(bindingSlotPS, d3d11SRV.Get());
                         }
                         if (bindingVisibility & kVisibleCompute) {
-                            this->CSSetShaderResource(bindingSlotCS, d3d11SRV);
+                            this->SetShaderResource<kCompute>(bindingSlotCS, d3d11SRV.Get());
                         }
                         break;
                     }
@@ -532,13 +555,13 @@ MaybeError BindGroupTracker::ApplyBindGroup(BindGroupIndex index) {
             [&](const SamplerBindingInfo&) -> MaybeError {
                 ID3D11SamplerState* d3d11SamplerState = GetSamplerState(group, bindingIndex);
                 if (bindingVisibility & kVisibleVertex) {
-                    this->VSSetSampler(bindingSlotVS, d3d11SamplerState);
+                    this->SetSampler<kVertex>(bindingSlotVS, d3d11SamplerState);
                 }
                 if (bindingVisibility & kVisibleFragment) {
-                    this->PSSetSampler(bindingSlotPS, d3d11SamplerState);
+                    this->SetSampler<kFragment>(bindingSlotPS, d3d11SamplerState);
                 }
                 if (bindingVisibility & kVisibleCompute) {
-                    this->CSSetSampler(bindingSlotCS, d3d11SamplerState);
+                    this->SetSampler<kCompute>(bindingSlotCS, d3d11SamplerState);
                 }
                 return {};
             },
@@ -548,13 +571,13 @@ MaybeError BindGroupTracker::ApplyBindGroup(BindGroupIndex index) {
                                 GetTextureD3DView<ID3D11ShaderResourceView>(group, bindingIndex));
 
                 if (bindingVisibility & kVisibleVertex) {
-                    this->VSSetShaderResource(bindingSlotVS, srv);
+                    this->SetShaderResource<kVertex>(bindingSlotVS, srv.Get());
                 }
                 if (bindingVisibility & kVisibleFragment) {
-                    this->PSSetShaderResource(bindingSlotPS, srv);
+                    this->SetShaderResource<kFragment>(bindingSlotPS, srv.Get());
                 }
                 if (bindingVisibility & kVisibleCompute) {
-                    this->CSSetShaderResource(bindingSlotCS, srv);
+                    this->SetShaderResource<kCompute>(bindingSlotCS, srv.Get());
                 }
                 return {};
             },
@@ -569,7 +592,7 @@ MaybeError BindGroupTracker::ApplyBindGroup(BindGroupIndex index) {
                             ComPtr<ID3D11UnorderedAccessView> d3d11UAV = nullptr;
                             DAWN_TRY_ASSIGN(d3d11UAV, GetTextureD3DView<ID3D11UnorderedAccessView>(
                                                           group, bindingIndex));
-                            this->CSSetUnorderedAccessView(bindingSlotCS, d3d11UAV);
+                            this->CSSetUnorderedAccessView(bindingSlotCS, d3d11UAV.Get());
                         }
                         break;
                     }
@@ -578,13 +601,13 @@ MaybeError BindGroupTracker::ApplyBindGroup(BindGroupIndex index) {
                         DAWN_TRY_ASSIGN(d3d11SRV, GetTextureD3DView<ID3D11ShaderResourceView>(
                                                       group, bindingIndex));
                         if (bindingVisibility & kVisibleVertex) {
-                            this->VSSetShaderResource(bindingSlotVS, d3d11SRV);
+                            this->SetShaderResource<kVertex>(bindingSlotVS, d3d11SRV.Get());
                         }
                         if (bindingVisibility & kVisibleFragment) {
-                            this->PSSetShaderResource(bindingSlotPS, d3d11SRV);
+                            this->SetShaderResource<kFragment>(bindingSlotPS, d3d11SRV.Get());
                         }
                         if (bindingVisibility & kVisibleCompute) {
-                            this->CSSetShaderResource(bindingSlotCS, d3d11SRV);
+                            this->SetShaderResource<kCompute>(bindingSlotCS, d3d11SRV.Get());
                         }
                         break;
                     }
@@ -614,7 +637,7 @@ void ComputePassBindGroupTracker::UnapplyComputeBindings(BindGroupIndex index) {
 
     for (BindingIndex bindingIndex : Range(groupLayout->GetBindingCount())) {
         const BindingInfo& bindingInfo = groupLayout->GetBindingInfo(bindingIndex);
-        const uint32_t bindingSlot = indices[bindingIndex][SingleShaderStage::Compute];
+        const uint32_t bindingSlot = indices[bindingIndex][kCompute];
         if (!(bindingInfo.visibility & wgpu::ShaderStage::Compute)) {
             continue;
         }
@@ -624,7 +647,7 @@ void ComputePassBindGroupTracker::UnapplyComputeBindings(BindGroupIndex index) {
             [&](const BufferBindingInfo& layout) {
                 switch (layout.type) {
                     case wgpu::BufferBindingType::Uniform: {
-                        this->CSSetConstantBuffer(bindingSlot, nullptr, 0, 0);
+                        this->SetConstantBuffer<kCompute>(bindingSlot, nullptr, 0, 0);
                         break;
                     }
                     case wgpu::BufferBindingType::Storage:
@@ -634,7 +657,7 @@ void ComputePassBindGroupTracker::UnapplyComputeBindings(BindGroupIndex index) {
                     }
                     case wgpu::BufferBindingType::ReadOnlyStorage:
                     case kInternalReadOnlyStorageBufferBinding: {
-                        this->CSSetShaderResource(bindingSlot, nullptr);
+                        this->SetShaderResource<kCompute>(bindingSlot, nullptr);
                         break;
                     }
                     case wgpu::BufferBindingType::BindingNotUsed:
@@ -647,8 +670,10 @@ void ComputePassBindGroupTracker::UnapplyComputeBindings(BindGroupIndex index) {
                 // D3D11.
                 DAWN_UNREACHABLE();
             },
-            [&](const SamplerBindingInfo&) { this->CSSetSampler(bindingSlot, nullptr); },
-            [&](const TextureBindingInfo&) { this->CSSetShaderResource(bindingSlot, nullptr); },
+            [&](const SamplerBindingInfo&) { this->SetSampler<kCompute>(bindingSlot, nullptr); },
+            [&](const TextureBindingInfo&) {
+                this->SetShaderResource<kCompute>(bindingSlot, nullptr);
+            },
             [&](const StorageTextureBindingInfo& layout) {
                 switch (layout.access) {
                     case wgpu::StorageTextureAccess::WriteOnly:
@@ -657,7 +682,7 @@ void ComputePassBindGroupTracker::UnapplyComputeBindings(BindGroupIndex index) {
                         break;
                     }
                     case wgpu::StorageTextureAccess::ReadOnly: {
-                        this->CSSetShaderResource(bindingSlot, nullptr);
+                        this->SetShaderResource<kCompute>(bindingSlot, nullptr);
                         break;
                     }
                     default:
@@ -717,9 +742,8 @@ MaybeError RenderPassBindGroupTracker::Apply() {
     // all UAV slot assignments in the bind groups, and then bind them all together.
     const BindGroupMask uavBindGroups = ToBackend(mPipelineLayout)->GetUAVBindGroupLayoutsMask();
     const uint32_t plsSlotCount = ToBackend(mPipelineLayout)->GetPLSSlotCount();
-    const uint32_t uavStartSlot =
-        ToBackend(mPipelineLayout)->GetUAVStartIndex(SingleShaderStage::Fragment);
-    const uint32_t uavCount = ToBackend(mPipelineLayout)->GetUAVCount(SingleShaderStage::Fragment);
+    const uint32_t uavStartSlot = ToBackend(mPipelineLayout)->GetUAVStartIndex(kFragment);
+    const uint32_t uavCount = ToBackend(mPipelineLayout)->GetUAVCount(kFragment);
 
     DAWN_ASSERT(uavCount >= plsSlotCount);
     const uint32_t usedUavCount = uavCount - plsSlotCount;
@@ -734,7 +758,7 @@ MaybeError RenderPassBindGroupTracker::Apply() {
         // D3D11 uav slot allocated in reverse order.
         for (BindingIndex bindingIndex : Range(group->GetLayout()->GetBindingCount())) {
             const BindingInfo& bindingInfo = group->GetLayout()->GetBindingInfo(bindingIndex);
-            uint32_t pos = indices[bindingIndex][SingleShaderStage::Fragment] - uavStartSlot;
+            uint32_t pos = indices[bindingIndex][kFragment] - uavStartSlot;
             DAWN_TRY(MatchVariant(
                 bindingInfo.bindingLayout,
                 [&](const BufferBindingInfo& layout) -> MaybeError {
