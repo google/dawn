@@ -1651,7 +1651,7 @@ Ref<TintProgram> ShaderModuleBase::GetTintProgram() {
                 descriptor.nextInChain = &spirvDescriptor;
                 break;
             case Type::Wgsl:
-                wgslDescriptor.code = mWgsl.c_str();
+                wgslDescriptor.code = std::string_view(mWgsl);
                 descriptor.nextInChain = &wgslDescriptor;
                 break;
             default:
