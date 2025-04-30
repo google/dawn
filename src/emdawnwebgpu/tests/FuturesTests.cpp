@@ -26,7 +26,6 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <dawn/webgpu_cpp_print.h>
-#include <emscripten.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <webgpu/webgpu_cpp.h>
@@ -51,14 +50,6 @@ class InstanceLevelTests : public testing::Test {
 
   protected:
     wgpu::Adapter RequestAdapter(const wgpu::RequestAdapterOptions* adapterOptions = nullptr) {
-        // TODO(crbug.com/404535888): Remove this sleep once we figure out regression.
-        static bool sSleepWorkaround = false;
-        if (!sSleepWorkaround) {
-            // Make the test sleep for an additional 2 seconds before trying to requestAdapter.
-            emscripten_sleep(2000);
-            sSleepWorkaround = true;
-        }
-
         wgpu::RequestAdapterStatus status;
         wgpu::Adapter result = nullptr;
         EXPECT_EQ(instance.WaitAny(
