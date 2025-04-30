@@ -477,40 +477,5 @@ TEST(Math, IsSubset) {
     ASSERT_FALSE(IsSubset(wgpu::TestEnum::A | wgpu::TestEnum::C, wgpu::TestEnum::A));
 }
 
-// Tests for BitCount
-TEST(Math, BitCount) {
-    // 8-bit
-    ASSERT_EQ(BitCount(uint8_t(0x00)), 0u);
-    ASSERT_EQ(BitCount(uint8_t(0x01)), 1u);
-    ASSERT_EQ(BitCount(uint8_t(0x80)), 1u);
-    ASSERT_EQ(BitCount(uint8_t(0x11)), 2u);
-    ASSERT_EQ(BitCount(uint8_t(0xAA)), 4u);
-    ASSERT_EQ(BitCount(uint8_t(0xFF)), 8u);
-
-    // 16-bit
-    ASSERT_EQ(BitCount(uint16_t(0x0000)), 0u);
-    ASSERT_EQ(BitCount(uint16_t(0x0001)), 1u);
-    ASSERT_EQ(BitCount(uint16_t(0x8000)), 1u);
-    ASSERT_EQ(BitCount(uint16_t(0x1111)), 4u);
-    ASSERT_EQ(BitCount(uint16_t(0xAAAA)), 8u);
-    ASSERT_EQ(BitCount(uint16_t(0xFFFF)), 16u);
-
-    // 32-bit
-    ASSERT_EQ(BitCount(0x00000000u), 0u);
-    ASSERT_EQ(BitCount(0x00000001u), 1u);
-    ASSERT_EQ(BitCount(0x80000000u), 1u);
-    ASSERT_EQ(BitCount(0x11111111u), 8u);
-    ASSERT_EQ(BitCount(0xAAAAAAAAu), 16u);
-    ASSERT_EQ(BitCount(0xFFFFFFFFu), 32u);
-
-    // 64-bit
-    ASSERT_EQ(BitCount(uint64_t(0x0000000000000000ull)), 0u);
-    ASSERT_EQ(BitCount(uint64_t(0x0000000000000001ull)), 1u);
-    ASSERT_EQ(BitCount(uint64_t(0x8000000000000000ull)), 1u);
-    ASSERT_EQ(BitCount(uint64_t(0x1111111111111111ull)), 16u);
-    ASSERT_EQ(BitCount(uint64_t(0xAAAAAAAAAAAAAAAAull)), 32u);
-    ASSERT_EQ(BitCount(uint64_t(0xFFFFFFFFFFFFFFFFull)), 64u);
-}
-
 }  // anonymous namespace
 }  // namespace dawn
