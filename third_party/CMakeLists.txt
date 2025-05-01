@@ -69,6 +69,27 @@ if ((DAWN_BUILD_TESTS OR TINT_BUILD_TESTS) AND NOT TARGET gmock)
     add_subdirectory(${DAWN_GOOGLETEST_DIR} "${CMAKE_CURRENT_BINARY_DIR}/googletest" EXCLUDE_FROM_ALL)
 endif()
 
+set(ABSL_ROOT_DIR ${DAWN_ABSEIL_DIR})
+if (NOT TARGET absl::strings)
+    # Recommended setting for compatibility with future abseil releases.
+    set(ABSL_PROPAGATE_CXX_STD ON CACHE BOOL "" FORCE)
+    message(STATUS "Dawn: using Abseil at ${DAWN_ABSEIL_DIR}")
+    if (("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") OR
+        ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang"))
+        add_compile_options(
+            -Wno-array-parameter
+            -Wno-deprecated-builtins
+            -Wno-unknown-warning-option
+            -Wno-gcc-compat
+            -Wno-unreachable-code-break
+            -Wno-nullability-extension
+            -Wno-shadow
+        )
+    endif()
+
+    add_subdirectory(${DAWN_ABSEIL_DIR} "${CMAKE_CURRENT_BINARY_DIR}/abseil")
+endif()
+
 ################################################################################
 # End of Emscripten enabled third party directories
 ################################################################################
