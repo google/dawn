@@ -129,8 +129,10 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 		return err
 	}
 
-	if err := c.state.CTS.Node.BuildIfRequired(c.flags.Verbose); err != nil {
-		return err
+	if c.flags.build {
+		if err := c.state.CTS.Node.BuildIfRequired(c.flags.Verbose); err != nil {
+			return err
+		}
 	}
 
 	// Find all the test cases that match r.query.
