@@ -94,13 +94,13 @@
 
 namespace tint::core::ir {
 
+/// Evaluates to true if T is a non-reference instruction pointer.
+template <typename T>
+concept IsNonRefInstPtr =
+    std::is_pointer_v<T> && std::is_base_of_v<ir::Instruction, std::remove_pointer_t<T>>;
+
 /// Builds an ir::Module
 class Builder {
-    /// Evaluates to true if T is a non-reference instruction pointer.
-    template <typename T>
-    static constexpr bool IsNonRefInstPtr =
-        std::is_pointer_v<T> && std::is_base_of_v<ir::Instruction, std::remove_pointer_t<T>>;
-
     /// static_assert()s that ARGS contains no more than one non-reference instruction pointer.
     /// This is used to detect patterns where C++ non-deterministic evaluation order may cause
     /// instruction ordering bugs.
@@ -112,18 +112,6 @@ class Builder {
                       "Detected possible non-deterministic ordering of instructions. "
                       "Consider hoisting Builder call arguments to separate statements.");
     }
-
-    /// A helper used to enable overloads if the first type in `TYPES` is a Vector or
-    /// VectorRef.
-    template <typename... TYPES>
-    using EnableIfVectorLike = std::enable_if_t<
-        tint::IsVectorLike<std::decay_t<tint::traits::NthTypeOf<0, TYPES..., void>>>>;
-
-    /// A helper used to disable overloads if the first type in `TYPES` is a Vector or
-    /// VectorRef.
-    template <typename... TYPES>
-    using DisableIfVectorLike = std::enable_if_t<
-        !tint::IsVectorLike<std::decay_t<tint::traits::NthTypeOf<0, TYPES..., void>>>>;
 
     /// A namespace for the various instruction insertion method
     struct InsertionPoints {
@@ -494,7 +482,8 @@ class Builder {
     /// @param ty the constant type
     /// @param values the composite values
     /// @returns the new constant
-    template <typename... ARGS, typename = DisableIfVectorLike<ARGS...>>
+    template <typename... ARGS>
+        requires(!tint::IsVectorLike<std::decay_t<tint::traits::NthTypeOf<0, ARGS..., void>>>)
     ir::Constant* Composite(const core::type::Type* ty, ARGS&&... values) {
         return Constant(
             ir.constant_values.Composite(ty, Vector{ConstantValue(std::forward<ARGS>(values))...}));
@@ -504,7 +493,8 @@ class Builder {
     /// @tparam TYPE the constant type
     /// @param values the composite values
     /// @returns the new constant
-    template <typename TYPE, typename... ARGS, typename = DisableIfVectorLike<ARGS...>>
+    template <typename TYPE, typename... ARGS>
+        requires(!tint::IsVectorLike<std::decay_t<tint::traits::NthTypeOf<0, ARGS..., void>>>)
     ir::Constant* Composite(ARGS&&... values) {
         auto* type = ir.Types().Get<TYPE>();
         return Composite(type, std::forward<ARGS>(values)...);
@@ -559,7 +549,9 @@ class Builder {
     /// Pass-through overload for Values() with vector-like argument
     /// @param vec the vector of ir::Value*
     /// @return @p vec
-    template <typename VEC, typename = EnableIfVectorLike<std::decay_t<VEC>>>
+    template <typename VEC>
+        requires(
+            tint::IsVectorLike<std::decay_t<tint::traits::NthTypeOf<0, std::decay_t<VEC>, void>>>)
     auto Values(VEC&& vec) {
         return std::forward<VEC>(vec);
     }
@@ -581,7 +573,8 @@ class Builder {
 
     /// @param args the arguments to pass to Value()
     /// @returns a vector of ir::Value* built from transforming the arguments with Value()
-    template <typename... ARGS, typename = DisableIfVectorLike<ARGS...>>
+    template <typename... ARGS>
+        requires(!tint::IsVectorLike<std::decay_t<tint::traits::NthTypeOf<0, ARGS..., void>>>)
     auto Values(ARGS&&... args) {
         CheckForNonDeterministicEvaluation<ARGS...>();
         return Vector{Value(std::forward<ARGS>(args))...};
@@ -623,8 +616,8 @@ class Builder {
     /// @param rhs the right-hand-side of the operation
     /// @returns the operation
     template <typename KLASS, typename LHS, typename RHS>
-    std::enable_if_t<tint::traits::IsTypeOrDerived<KLASS, ir::Binary>, KLASS*>
-    Binary(BinaryOp op, const core::type::Type* type, LHS&& lhs, RHS&& rhs) {
+        requires(tint::traits::IsTypeOrDerived<KLASS, ir::Binary>)
+    KLASS* Binary(BinaryOp op, const core::type::Type* type, LHS&& lhs, RHS&& rhs) {
         CheckForNonDeterministicEvaluation<LHS, RHS>();
         auto* lhs_val = Value(std::forward<LHS>(lhs));
         auto* rhs_val = Value(std::forward<RHS>(rhs));
@@ -1177,11 +1170,11 @@ class Builder {
     /// @param args the call arguments
     /// @returns the instruction
     template <typename KLASS, typename FUNC, typename... ARGS>
-    std::enable_if_t<tint::traits::IsTypeOrDerived<KLASS, ir::BuiltinCall>, KLASS*>
-    CallExplicitWithResult(ir::InstructionResult* result,
-                           FUNC func,
-                           VectorRef<const core::type::Type*> explicit_params,
-                           ARGS&&... args) {
+        requires(tint::traits::IsTypeOrDerived<KLASS, ir::BuiltinCall>)
+    KLASS* CallExplicitWithResult(ir::InstructionResult* result,
+                                  FUNC func,
+                                  VectorRef<const core::type::Type*> explicit_params,
+                                  ARGS&&... args) {
         auto* inst = ir.CreateInstruction<KLASS>(result, func, Values(std::forward<ARGS>(args)...));
         inst->SetExplicitTemplateParams(explicit_params);
         return Append(inst);
@@ -1193,8 +1186,8 @@ class Builder {
     /// @param args the call arguments
     /// @returns the instruction
     template <typename KLASS, typename FUNC, typename... ARGS>
-    std::enable_if_t<tint::traits::IsTypeOrDerived<KLASS, ir::BuiltinCall>, KLASS*>
-    CallWithResult(ir::InstructionResult* result, FUNC func, ARGS&&... args) {
+        requires(tint::traits::IsTypeOrDerived<KLASS, ir::BuiltinCall>)
+    KLASS* CallWithResult(ir::InstructionResult* result, FUNC func, ARGS&&... args) {
         return Append(
             ir.CreateInstruction<KLASS>(result, func, Values(std::forward<ARGS>(args)...)));
     }
@@ -1206,11 +1199,11 @@ class Builder {
     /// @param args the call arguments
     /// @returns the instruction
     template <typename KLASS, typename FUNC, typename... ARGS>
-    std::enable_if_t<tint::traits::IsTypeOrDerived<KLASS, ir::BuiltinCall>, KLASS*> CallExplicit(
-        const core::type::Type* type,
-        FUNC func,
-        VectorRef<const core::type::Type*> explicit_params,
-        ARGS&&... args) {
+        requires(tint::traits::IsTypeOrDerived<KLASS, ir::BuiltinCall>)
+    KLASS* CallExplicit(const core::type::Type* type,
+                        FUNC func,
+                        VectorRef<const core::type::Type*> explicit_params,
+                        ARGS&&... args) {
         return CallExplicitWithResult<KLASS>(InstructionResult(type), func, explicit_params,
                                              Values(std::forward<ARGS>(args)...));
     }
@@ -1236,8 +1229,8 @@ class Builder {
     /// @param args the call arguments
     /// @returns the instruction
     template <typename KLASS, typename FUNC, typename... ARGS>
-    std::enable_if_t<tint::traits::IsTypeOrDerived<KLASS, ir::BuiltinCall>, KLASS*>
-    Call(const core::type::Type* type, FUNC func, ARGS&&... args) {
+        requires(tint::traits::IsTypeOrDerived<KLASS, ir::BuiltinCall>)
+    KLASS* Call(const core::type::Type* type, FUNC func, ARGS&&... args) {
         return CallWithResult<KLASS>(InstructionResult(type), func,
                                      Values(std::forward<ARGS>(args)...));
     }
@@ -1249,8 +1242,11 @@ class Builder {
     /// @param args the call arguments
     /// @returns the instruction
     template <typename KLASS, typename FUNC, typename OBJ, typename... ARGS>
-    std::enable_if_t<tint::traits::IsTypeOrDerived<KLASS, ir::MemberBuiltinCall>, KLASS*>
-    MemberCallWithResult(ir::InstructionResult* result, FUNC func, OBJ&& obj, ARGS&&... args) {
+        requires(tint::traits::IsTypeOrDerived<KLASS, ir::MemberBuiltinCall>)
+    KLASS* MemberCallWithResult(ir::InstructionResult* result,
+                                FUNC func,
+                                OBJ&& obj,
+                                ARGS&&... args) {
         return Append(ir.CreateInstruction<KLASS>(result, func, Value(std::forward<OBJ>(obj)),
                                                   Values(std::forward<ARGS>(args)...)));
     }
@@ -1262,8 +1258,8 @@ class Builder {
     /// @param args the call arguments
     /// @returns the instruction
     template <typename KLASS, typename FUNC, typename OBJ, typename... ARGS>
-    std::enable_if_t<tint::traits::IsTypeOrDerived<KLASS, ir::MemberBuiltinCall>, KLASS*>
-    MemberCall(const core::type::Type* type, FUNC func, OBJ&& obj, ARGS&&... args) {
+        requires(tint::traits::IsTypeOrDerived<KLASS, ir::MemberBuiltinCall>)
+    KLASS* MemberCall(const core::type::Type* type, FUNC func, OBJ&& obj, ARGS&&... args) {
         return MemberCallWithResult<KLASS>(InstructionResult(type), func,
                                            Value(std::forward<OBJ>(obj)),
                                            Values(std::forward<ARGS>(args)...));
