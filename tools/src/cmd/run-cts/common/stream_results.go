@@ -181,6 +181,7 @@ func StreamResults(
 		}
 	}
 
+	unexpectedFailures := 0
 	for _, s := range AllStatuses {
 		// number of tests, just run, that resulted in the given status
 		numByStatus := numByExpectedStatus[expectedStatus{s, true}] +
@@ -193,6 +194,10 @@ func StreamResults(
 		}
 		if numByStatus == 0 && diffFromExpected == 0 {
 			continue
+		}
+
+		if s == Fail {
+			unexpectedFailures += 1
 		}
 
 		fmt.Fprint(stdout, term.Bold, statusColor[s])
@@ -256,6 +261,9 @@ func StreamResults(
 		}
 	}
 
+	if unexpectedFailures > 0 {
+		return results, fmt.Errorf("%v unexpected failure(s)", unexpectedFailures)
+	}
 	return results, nil
 }
 
