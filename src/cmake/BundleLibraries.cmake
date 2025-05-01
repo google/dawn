@@ -67,27 +67,22 @@ function(bundle_libraries output_target library_type)
 
     # Get dependencies from LINK_LIBRARIES (Private and Public linkage)
     get_target_property(link_libraries ${input_target} LINK_LIBRARIES)
-    if(link_libraries) # Check if property exists/is not empty
-      foreach(dependency IN LISTS link_libraries)
-        # Only recurse on actual targets
-        if(TARGET ${dependency})
-          #message("DEBUG: Recursing into LINK_LIBRARIES dependency: ${dependency}")
-          get_dependencies(${dependency}) # Recursive call
-        endif()
-      endforeach()
-    endif()
+    foreach(dependency IN LISTS link_libraries)
+      # Only recurse on actual targets
+      if(TARGET ${dependency})
+        #message("DEBUG: Recursing into LINK_LIBRARIES dependency: ${dependency}")
+        get_dependencies(${dependency}) # Recursive call
+      endif()
+    endforeach()
 
     # Get dependencies from INTERFACE_LINK_LIBRARIES (Interface and Public linkage)
     get_target_property(interface_link_libraries ${input_target} INTERFACE_LINK_LIBRARIES)
-    if(interface_link_libraries) # Check if property exists/is not empty
-       foreach(dependency IN LISTS interface_link_libraries)
-         # Only recurse on actual targets
-         if(TARGET ${dependency})
-           #message("DEBUG: Recursing into INTERFACE_LINK_LIBRARIES dependency: ${dependency}")
-           get_dependencies(${dependency}) # Recursive call
-         endif()
-       endforeach()
-    endif()
+    foreach(dependency IN LISTS interface_link_libraries)
+      # Only recurse on actual targets
+      if(TARGET ${dependency})
+        get_dependencies(${dependency}) # Recursive call
+      endif()
+    endforeach()
 
     # The final 'all_dependencies' list is available in the parent scope
     # after the initial call to get_dependencies completes.
