@@ -704,7 +704,10 @@ func emitBuildFiles(p *Project, fsReaderWriter oswrapper.FilesystemReaderWriter)
 			// Format the output if it's a GN file.
 			if path.Ext(outputName) == ".gn" {
 				unformatted := w.String()
-				gn := exec.Command("gn", "format", "--stdin")
+
+				gn_path := filepath.Join("third_party", "depot_tools", "gn.py")
+
+				gn := exec.Command("vpython3", gn_path, "format", "--stdin")
 				gn.Stdin = bytes.NewReader([]byte(unformatted))
 				w.Reset()
 				gn.Stdout = w
