@@ -27,7 +27,7 @@
 
 #include <vector>
 
-#include "dawn/common/GPUInfo_autogen.h"
+#include "dawn/common/GPUInfo.h"
 #include "dawn/tests/DawnTest.h"
 
 namespace dawn {
