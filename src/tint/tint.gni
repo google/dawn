@@ -226,18 +226,14 @@ if (tint_has_fuzzers) {
           "max_len=10000",
         ]
 
-        # The WGSL corpus is 'generated' by copying a filtered list of
-        # interesting files, so is relatively inexpensive to generate
-        # on the fly.
         deps += [ "${tint_src_dir}:tint_generate_wgsl_corpus" ]
         seed_corpus = fuzzer_corpus_wgsl_dir
         seed_corpus_deps = [ "${tint_src_dir}:tint_generate_wgsl_corpus" ]
       } else if (target_name == "ir") {
-        # Do not generate the IR corpus by default, since it adds
-        # multiple minutes to the build. If needed locally, the corpus
-        # can be manually generated via invoking
-        # 'tint_generate_ir_corpus', and ClusterFuzz has its own GCS
-        # bucket it pulls the corpus from.
+        # TODO(409348527): Re-enable corpus generation
+        # deps += [ "${tint_src_dir}:tint_generate_ir_corpus" ]
+        # seed_corpus = fuzzer_corpus_ir_dir
+        # seed_corpus_deps = [ "${tint_src_dir}:tint_generate_ir_corpus" ]
       } else {
         assert(false, "unsupported tint fuzzer target")
       }
