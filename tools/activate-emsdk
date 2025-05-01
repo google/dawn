@@ -17,7 +17,7 @@ EMSDK_ROOT = os.path.join('third_party', 'emsdk')
 EMSDK_PATH = os.path.join(EMSDK_ROOT, 'emsdk.py')
 EMSDK_CONFIG_PATH = os.path.join(EMSDK_ROOT, '.emscripten')
 
-EMSDK_VERSION = '4.0.3'
+EMSDK_VERSION = '4.0.8'
 
 def main(args):
     parser = argparse.ArgumentParser()
