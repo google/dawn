@@ -982,8 +982,22 @@ class Validator {
     void CheckFunctionReturnAttributesAndType(const Function* func, IMPL&& impl) {
         if (func->ReturnType()->Is<core::type::Struct>() &&
             func->ReturnAttributes().builtin.has_value()) {
-            const auto& checker = BuiltinCheckerFor(func->ReturnAttributes().builtin.value());
-            AddError(func) << checker.name << " cannot be attached to a structure";
+            const char* name;
+            switch (func->ReturnAttributes().builtin.value()) {
+                case BuiltinValue::kPosition:
+                    name = "position";
+                    break;
+                case BuiltinValue::kSampleMask:
+                    name = "sample_mask";
+                    break;
+                case BuiltinValue::kClipDistances:
+                    name = "clip_distances";
+                    break;
+                default:
+                    name = BuiltinCheckerFor(func->ReturnAttributes().builtin.value()).name;
+                    break;
+            }
+            AddError(func) << name << " cannot be attached to a structure";
         }
 
         CheckIOAttributesAndType(func, func->ReturnAttributes(), func->ReturnType(),

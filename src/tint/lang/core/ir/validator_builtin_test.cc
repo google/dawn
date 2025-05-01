@@ -60,9 +60,8 @@ TEST_F(IR_ValidatorTest, Builtin_PointSize_WrongStage) {
 )")) << res.Failure();
 }
 
-TEST_F(IR_ValidatorTest, Builtin_OnStructReturn) {
+TEST_F(IR_ValidatorTest, Builtin_OnStructReturn_BuiltinChecker) {
     auto* f = FragmentEntryPoint();
-
     auto* str_ty = ty.Struct(mod.symbols.New("OutputStruct"), {
                                                                   {mod.symbols.New(""), ty.i32()},
                                                               });
@@ -79,6 +78,74 @@ TEST_F(IR_ValidatorTest, Builtin_OnStructReturn) {
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr(R"(:5:1 error: __point_size cannot be attached to a structure
 %f = @fragment func():OutputStruct [@__point_size] {
+^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Builtin_OnStructReturn_Position) {
+    auto* f = VertexEntryPoint();
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("OutputStruct"), {
+                                                       {mod.symbols.New(""), ty.array(ty.f32(), 4)},
+                                                   });
+    f->SetReturnType(str_ty);
+
+    IOAttributes attr;
+    attr.builtin = BuiltinValue::kPosition;
+    f->SetReturnAttributes(attr);
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:5:1 error: position cannot be attached to a structure
+%f = @vertex func():OutputStruct [@position] {
+^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Builtin_OnStructReturn_SampleMask) {
+    auto* f = FragmentEntryPoint();
+    auto* str_ty = ty.Struct(mod.symbols.New("OutputStruct"), {
+                                                                  {mod.symbols.New(""), ty.u32()},
+                                                              });
+    f->SetReturnType(str_ty);
+
+    IOAttributes attr;
+    attr.builtin = BuiltinValue::kSampleMask;
+    f->SetReturnAttributes(attr);
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:5:1 error: sample_mask cannot be attached to a structure
+%f = @fragment func():OutputStruct [@sample_mask] {
+^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Builtin_OnStructReturn_ClipDistances) {
+    auto* f = VertexEntryPoint();
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("OutputStruct"), {
+                                                       {mod.symbols.New(""), ty.array(ty.f32(), 2)},
+                                                   });
+    f->SetReturnType(str_ty);
+
+    IOAttributes attr;
+    attr.builtin = BuiltinValue::kClipDistances;
+    f->SetReturnAttributes(attr);
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:5:1 error: clip_distances cannot be attached to a structure
+%f = @vertex func():OutputStruct [@clip_distances] {
 ^^
 )")) << res.Failure();
 }
