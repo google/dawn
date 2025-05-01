@@ -83,6 +83,10 @@ class WeakRef {
     // NOLINTNEXTLINE(runtime/explicit)
     WeakRef(WeakRefSupport<T>* support) : mData(support->mData) {}
 
+    // Comparison operators.
+    bool operator==(const WeakRef<T>& other) const { return mData == other.mData; }
+    bool operator!=(const WeakRef<T>& other) const { return mData != other.mData; }
+
     // Promotes a WeakRef to a Ref. Access to the raw pointer is not allowed because a raw pointer
     // could become invalid after being retrieved.
     Ref<T> Promote() const {
@@ -112,12 +116,20 @@ class WeakRef {
     // Friend is needed to access the private constructor.
     template <typename U>
     friend class Ref;
+    // Friend is needed so that hashing can access the mData pointer which is always valid.
+    template <typename U, typename H>
+    friend H AbslHashValue(H h, const WeakRef<U>& v);
 
     // Constructor from data should only be allowed via the GetWeakRef function.
     explicit WeakRef(detail::WeakRefSupportBase* data) : mData(data->mData) {}
 
     Ref<detail::WeakRefData> mData = nullptr;
 };
+
+template <typename T, typename H>
+H AbslHashValue(H h, const WeakRef<T>& v) {
+    return H::combine(std::move(h), v.mData.Get());
+}
 
 }  // namespace dawn
 
