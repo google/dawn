@@ -196,7 +196,7 @@ Future QueueBase::APIOnSubmittedWorkDone(const WGPUQueueWorkDoneCallbackInfo& ca
                       wgpu::QueueWorkDoneStatus earlyStatus)
             : TrackedEvent(static_cast<wgpu::CallbackMode>(callbackInfo.mode),
                            queue,
-                           kBeginningOfGPUTime),
+                           queue->GetCompletedCommandSerial()),
               mEarlyStatus(ToAPI(earlyStatus)),
               mCallback(callbackInfo.callback),
               mUserdata1(callbackInfo.userdata1),
@@ -226,8 +226,6 @@ Future QueueBase::APIOnSubmittedWorkDone(const WGPUQueueWorkDoneCallbackInfo& ca
         // TODO(crbug.com/dawn/831) Manually acquire device lock instead of relying on code-gen for
         // re-entrancy.
         auto deviceLock(GetDevice()->GetScopedLock());
-
-        // Note: if the callback is spontaneous, it may get called in here.
         if (GetDevice()->ConsumedError(GetDevice()->ValidateIsAlive())) {
             event = AcquireRef(
                 new WorkDoneEvent(callbackInfo, this, wgpu::QueueWorkDoneStatus::Success));
@@ -239,6 +237,7 @@ Future QueueBase::APIOnSubmittedWorkDone(const WGPUQueueWorkDoneCallbackInfo& ca
         }
     }
 
+    // Note: if the callback is spontaneous, it may get called in here.
     FutureID futureID = GetInstance()->GetEventManager()->TrackEvent(std::move(event));
 
     return {futureID};

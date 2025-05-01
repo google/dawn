@@ -39,9 +39,11 @@
 #include "dawn/common/MutexProtected.h"
 #include "dawn/common/NonMovable.h"
 #include "dawn/common/Ref.h"
+#include "dawn/common/WeakRef.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/Forward.h"
 #include "dawn/native/IntegerTypes.h"
+#include "dawn/native/Queue.h"
 #include "dawn/native/SystemEvent.h"
 #include "dawn/native/WaitListEvent.h"
 #include "partition_alloc/pointers/raw_ptr.h"
@@ -103,8 +105,11 @@ class EventManager final : NonMovable {
 };
 
 struct QueueAndSerial {
-    Ref<QueueBase> queue;
+    WeakRef<QueueBase> queue;
     ExecutionSerial completionSerial;
+
+    // Returns the most recently completed serial on |queue|. Otherwise, returns |completionSerial|.
+    ExecutionSerial GetCompletedSerial() const;
 };
 
 // Base class for the objects that back WGPUFutures. TrackedEvent is responsible for the lifetime

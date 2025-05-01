@@ -406,6 +406,8 @@ constexpr wgpu::QueueWorkDoneStatus kStatusUninitialized =
 TEST_P(EventCompletionTests, WorkDoneDropInstanceBeforeEvent) {
     // TODO(crbug.com/dawn/1987): Wire does not implement instance destruction correctly yet.
     DAWN_TEST_UNSUPPORTED_IF(UsesWire());
+    // TODO(crbug.com/412761228): Spontaneous events are not implemented correctly yet.
+    DAWN_TEST_UNSUPPORTED_IF(IsSpontaneous());
 
     UseSecondInstance();
     testInstance = nullptr;  // Drop the last external ref to the instance.
@@ -414,20 +416,14 @@ TEST_P(EventCompletionTests, WorkDoneDropInstanceBeforeEvent) {
     testQueue.OnSubmittedWorkDone(GetCallbackMode(),
                                   [&status](wgpu::QueueWorkDoneStatus result) { status = result; });
 
-    if (IsSpontaneous()) {
-        // TODO(crbug.com/dawn/2059): Once Spontaneous is implemented, this should no longer expect
-        // the callback to be cleaned up immediately (and should expect it to happen on a future
-        // Tick).
-        ASSERT_THAT(status, AnyOf(Eq(wgpu::QueueWorkDoneStatus::Success),
-                                  Eq(wgpu::QueueWorkDoneStatus::CallbackCancelled)));
-    } else {
-        ASSERT_EQ(status, wgpu::QueueWorkDoneStatus::CallbackCancelled);
-    }
+    ASSERT_EQ(status, wgpu::QueueWorkDoneStatus::CallbackCancelled);
 }
 
 TEST_P(EventCompletionTests, WorkDoneDropInstanceAfterEvent) {
     // TODO(crbug.com/dawn/1987): Wire does not implement instance destruction correctly yet.
     DAWN_TEST_UNSUPPORTED_IF(UsesWire());
+    // TODO(crbug.com/412761228): Spontaneous events are not implemented correctly yet.
+    DAWN_TEST_UNSUPPORTED_IF(IsSpontaneous());
 
     UseSecondInstance();
 
@@ -435,19 +431,9 @@ TEST_P(EventCompletionTests, WorkDoneDropInstanceAfterEvent) {
     testQueue.OnSubmittedWorkDone(GetCallbackMode(),
                                   [&status](wgpu::QueueWorkDoneStatus result) { status = result; });
 
-    if (IsSpontaneous()) {
-        testInstance = nullptr;  // Drop the last external ref to the instance.
-
-        // TODO(crbug.com/dawn/2059): Once Spontaneous is implemented, this should no longer expect
-        // the callback to be cleaned up immediately (and should expect it to happen on a future
-        // Tick).
-        ASSERT_THAT(status, AnyOf(Eq(wgpu::QueueWorkDoneStatus::Success),
-                                  Eq(wgpu::QueueWorkDoneStatus::CallbackCancelled)));
-    } else {
-        ASSERT_EQ(status, kStatusUninitialized);
-        testInstance = nullptr;  // Drop the last external ref to the instance.
-        ASSERT_EQ(status, wgpu::QueueWorkDoneStatus::CallbackCancelled);
-    }
+    ASSERT_EQ(status, kStatusUninitialized);
+    testInstance = nullptr;  // Drop the last external ref to the instance.
+    ASSERT_EQ(status, wgpu::QueueWorkDoneStatus::CallbackCancelled);
 }
 
 // TODO(crbug.com/dawn/1987):

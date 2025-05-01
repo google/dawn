@@ -29,10 +29,13 @@
 #define SRC_DAWN_NATIVE_EXECUTIONQUEUE_H_
 
 #include <atomic>
+#include <functional>
 
+#include "dawn/common/MutexProtected.h"
+#include "dawn/common/SerialMap.h"
 #include "dawn/native/Error.h"
-#include "dawn/native/EventManager.h"
 #include "dawn/native/IntegerTypes.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::native {
 
@@ -42,6 +45,8 @@ namespace dawn::native {
 // only partially safe - where observation of the last-submitted and pending serials is atomic.
 class ExecutionQueueBase {
   public:
+    using Task = std::function<void()>;
+
     // The latest serial known to have completed execution on the queue.
     ExecutionSerial GetCompletedCommandSerial() const;
     // The serial of the latest batch of work sent for execution.
@@ -81,10 +86,20 @@ class ExecutionQueueBase {
     // if the serial passed.
     virtual ResultOrError<bool> WaitForQueueSerial(ExecutionSerial serial, Nanoseconds timeout) = 0;
 
+    // Tracks a new task to complete when |serial| is reached.
+    void TrackSerialTask(ExecutionSerial serial, Task&& task);
+
     // In the 'Normal' mode, currently recorded commands in the backend submitted in the next Tick.
     // However in the 'Passive' mode, the submission will be postponed as late as possible, for
     // example, until the client has explictly issued a submission.
     enum class SubmitMode { Normal, Passive };
+
+  protected:
+    // Currently, the queue has two paths for serial updating, one is via DeviceBase::Tick which
+    // calls into the backend specific polling mechanisms implemented in
+    // CheckAndUpdateCompletedSerials. Alternatively, the backend can actively call
+    // UpdateCompletedSerial when a new serial is complete to make forward progress proactively.
+    void UpdateCompletedSerial(ExecutionSerial completedSerial);
 
   private:
     // Each backend should implement to check their passed fences if there are any and return a
@@ -96,6 +111,8 @@ class ExecutionQueueBase {
     // to make it appear as if commands have been compeleted.
     std::atomic<uint64_t> mCompletedSerial = static_cast<uint64_t>(kBeginningOfGPUTime);
     std::atomic<uint64_t> mLastSubmittedSerial = static_cast<uint64_t>(kBeginningOfGPUTime);
+
+    MutexProtected<SerialMap<ExecutionSerial, Task>> mWaitingTasks;
 
     // Indicates whether the backend has pending commands to be submitted as soon as possible.
     virtual bool HasPendingCommands() const = 0;

@@ -28,6 +28,7 @@
 #include "dawn/native/ExecutionQueue.h"
 
 #include <atomic>
+#include <utility>
 
 namespace dawn::native {
 
@@ -50,13 +51,31 @@ MaybeError ExecutionQueueBase::CheckPassedSerials() {
     DAWN_ASSERT(completedSerial <=
                 ExecutionSerial(mLastSubmittedSerial.load(std::memory_order_acquire)));
 
+    UpdateCompletedSerial(completedSerial);
+    return {};
+}
+
+void ExecutionQueueBase::TrackSerialTask(ExecutionSerial serial, Task&& task) {
+    if (serial <= GetCompletedCommandSerial()) {
+        task();
+        return;
+    }
+    mWaitingTasks->Enqueue(std::move(task), serial);
+}
+
+void ExecutionQueueBase::UpdateCompletedSerial(ExecutionSerial completedSerial) {
     // Atomically set mCompletedSerial to completedSerial if completedSerial is larger.
     uint64_t current = mCompletedSerial.load(std::memory_order_acquire);
     while (uint64_t(completedSerial) > current &&
            !mCompletedSerial.compare_exchange_weak(current, uint64_t(completedSerial),
                                                    std::memory_order_acq_rel)) {
     }
-    return {};
+    mWaitingTasks.Use([&](auto tasks) {
+        for (auto task : tasks->IterateUpTo(completedSerial)) {
+            task();
+        }
+        tasks->ClearUpTo(completedSerial);
+    });
 }
 
 MaybeError ExecutionQueueBase::EnsureCommandsFlushed(ExecutionSerial serial) {
@@ -73,8 +92,9 @@ void ExecutionQueueBase::AssumeCommandsComplete() {
     // Bump serials so any pending callbacks can be fired.
     // TODO(crbug.com/dawn/831): This is called during device destroy, which is not
     // thread-safe yet. Two threads calling destroy would race setting these serials.
-    uint64_t prev = mLastSubmittedSerial.fetch_add(1u, std::memory_order_release);
-    mCompletedSerial.store(prev + 1u, std::memory_order_release);
+    ExecutionSerial completed =
+        ExecutionSerial(mLastSubmittedSerial.fetch_add(1u, std::memory_order_release) + 1);
+    UpdateCompletedSerial(completed);
 }
 
 void ExecutionQueueBase::IncrementLastSubmittedCommandSerial() {
