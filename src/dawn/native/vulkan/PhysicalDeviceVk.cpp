@@ -245,6 +245,7 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     // Initialize supported extensions
     if (mDeviceInfo.features.textureCompressionBC == VK_TRUE) {
         EnableFeature(Feature::TextureCompressionBC);
+        EnableFeature(Feature::TextureCompressionBCSliced3D);
     }
 
     if (mDeviceInfo.features.textureCompressionETC2 == VK_TRUE) {
