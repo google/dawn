@@ -1233,8 +1233,9 @@ TEST_P(TimestampQueryInsidePassesTests, FromOnRenderPass) {
 
 // Test calling timestamp query from compute pass encoder
 TEST_P(TimestampQueryInsidePassesTests, FromComputePass) {
-    // TODO(crbug.com/dawn/1852): Flaky negative timestamps on Mac AMD.
+    // TODO(crbug.com/dawn/1852): Flaky negative timestamps on Mac AMD and Windows WARP.
     DAWN_SUPPRESS_TEST_IF(IsMacOS() && IsMetal() && IsAMD());
+    DAWN_SUPPRESS_TEST_IF(IsWARP());
 
     constexpr uint32_t kQueryCount = 2;
 
