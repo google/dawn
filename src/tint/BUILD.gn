@@ -62,7 +62,7 @@ config("tint_common_config") {
 
 config("tint_public_config") {
   defines = []
-  if (tint_build_spv_reader) {
+  if (tint_build_spv_reader && !dawn_wasm) {
     defines += [ "TINT_BUILD_SPV_READER=1" ]
   } else {
     defines += [ "TINT_BUILD_SPV_READER=0" ]

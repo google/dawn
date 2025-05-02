@@ -39,6 +39,13 @@ dawn_json_generator("emdawnwebgpu_headers_gen") {
   ]
 }
 
+source_set("emdawnwebgpu_headers") {
+  all_dependent_configs = [ "${dawn_root}/include/dawn:public" ]
+  public_deps = [ ":emdawnwebgpu_headers_gen" ]
+
+  sources = get_target_outputs(":emdawnwebgpu_headers_gen")
+}
+
 dawn_json_generator("emdawnwebgpu_js_gen") {
   target = "emdawnwebgpu_js"
   outputs = [
@@ -66,7 +73,7 @@ dawn_json_generator("emdawnwebgpu_js_gen") {
 # - library_webgpu_generated_sig_info.js
 #   which we generate directly instead of using "gen_sig_info.py"
 
-if (dawn_emscripten_dir != "") {
+if (is_wasm) {
   template("webgpu_gen_struct_info") {
     action(target_name) {
       forward_variables_from(invoker, "*")

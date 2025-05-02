@@ -256,7 +256,7 @@ group("abseil") {
 # all of Chromium's OSes so we explicitly make the target visible only on
 # systems we know Dawn is able to compile on.
 if (is_win || is_linux || is_chromeos || is_mac || is_fuchsia || is_android ||
-    is_ios) {
+    is_ios || is_wasm) {
   static_library("common") {
     sources = [
       "AlignedAlloc.cpp",
@@ -357,10 +357,7 @@ if (is_win || is_linux || is_chromeos || is_mac || is_fuchsia || is_android ||
     # Dawn libraries because `:common` is only used as a private deps of Dawn
     # targets, so `internal_config` doesn't leak out of Dawn.
     public_configs = [ ":internal_config" ]
-    deps = [
-      "${dawn_root}/include/dawn:cpp_headers",
-      "${dawn_root}/include/dawn:headers",
-    ]
+    deps = [ "${dawn_root}/include/dawn:cpp_headers" ]
 
     if (is_win) {
       sources += [

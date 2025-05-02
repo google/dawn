@@ -240,7 +240,6 @@ source_set("native_mocks_sources") {
     "${dawn_root}/src/dawn:proc",
     "${dawn_root}/src/dawn/native:sources",
     "${dawn_root}/src/dawn/native:static",
-    "${dawn_root}/src/dawn/utils",
   ]
 
   # Add internal dawn native config for internal unittests.
@@ -294,7 +293,9 @@ dawn_test("dawn_unittests") {
     "${dawn_root}/src/dawn/native:sources",
     "${dawn_root}/src/dawn/native:static",
     "${dawn_root}/src/dawn/partition_alloc:raw_ptr",
-    "${dawn_root}/src/dawn/utils",
+    "${dawn_root}/src/dawn/utils:system_utils",
+    "${dawn_root}/src/dawn/utils:test_utils",
+    "${dawn_root}/src/dawn/utils:wgpu_utils",
     "${dawn_root}/src/dawn/wire",
     "${dawn_root}/src/utils/chromium_test_compat",
   ]
@@ -510,7 +511,9 @@ source_set("test_infra_sources") {
     "${dawn_root}/src/dawn/common",
     "${dawn_root}/src/dawn/native:sources",
     "${dawn_root}/src/dawn/native:static",
-    "${dawn_root}/src/dawn/utils",
+    "${dawn_root}/src/dawn/utils:system_utils",
+    "${dawn_root}/src/dawn/utils:test_utils",
+    "${dawn_root}/src/dawn/utils:wgpu_utils",
     "${dawn_root}/src/dawn/wire",
   ]
 
@@ -573,7 +576,9 @@ source_set("end2end_tests_sources") {
     "${dawn_root}/src/dawn/native:headers",
     "${dawn_root}/src/dawn/partition_alloc:raw_ptr",
     "${dawn_root}/src/dawn/platform",
-    "${dawn_root}/src/dawn/utils",
+    "${dawn_root}/src/dawn/utils:system_utils",
+    "${dawn_root}/src/dawn/utils:test_utils",
+    "${dawn_root}/src/dawn/utils:wgpu_utils",
     "${dawn_root}/src/dawn/wire",
   ]
 
@@ -771,7 +776,9 @@ source_set("white_box_tests_sources") {
     # Statically linked and with sources because the end2end white_box tests use Dawn internals.
     "${dawn_root}/src/dawn/native:sources",
     "${dawn_root}/src/dawn/native:static",
-    "${dawn_root}/src/dawn/utils",
+    "${dawn_root}/src/dawn/utils:system_utils",
+    "${dawn_root}/src/dawn/utils:test_utils",
+    "${dawn_root}/src/dawn/utils:wgpu_utils",
     "${dawn_root}/src/dawn/wire",
   ]
 
@@ -909,7 +916,9 @@ dawn_test("dawn_perf_tests") {
     "${dawn_root}/src/dawn/common",
     "${dawn_root}/src/dawn/partition_alloc:raw_ptr",
     "${dawn_root}/src/dawn/platform",
-    "${dawn_root}/src/dawn/utils",
+    "${dawn_root}/src/dawn/utils:system_utils",
+    "${dawn_root}/src/dawn/utils:test_utils",
+    "${dawn_root}/src/dawn/utils:wgpu_utils",
     "${dawn_root}/src/dawn/wire",
     "${dawn_root}/src/utils/chromium_test_compat",
   ]

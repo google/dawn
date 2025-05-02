@@ -51,7 +51,7 @@ tools in the package release). There are two options to do this:
 - Install it manually following the official
   [instructions](https://emscripten.org/docs/getting_started/downloads.html#installation-instructions-using-the-emsdk-recommended).
 
-### Standalone with CMake (bindings and samples)
+### Standalone with CMake
 
 Set up the build directory using emcmake:
 
@@ -62,11 +62,10 @@ cd out/cmake-wasm
 path/to/emsdk/upstream/emscripten/emcmake cmake ../..
 
 # Package
-make -j8 emdawnwebgpu_pkg  # or sample or test targets
+make -j8 emdawnwebgpu_pkg
 ```
 
-Samples and tests (currently broken on some platforms; comment out `LLVM_ROOT`
-in `third_party/emsdk/.emscripten` if needed):
+Samples and tests:
 
 ```sh
 # Samples (for a list of samples, see ENABLE_EMSCRIPTEN targets in src/dawn/samples/CMakeLists.txt)
@@ -81,12 +80,10 @@ make -j8 emdawnwebgpu_tests_asyncify emdawnwebgpu_tests_jspi
 
 Samples and tests produce HTML files which can be served and viewed in a compatible browser.
 
-### Standalone with GN (bindings only)
+### Standalone with GN
 
-- Set up a Dawn GN build, with `dawn_emscripten_dir` in the GN args set to point to
-  `emsdk/upstream/emscripten`.
+- Set up Emscripten as per instructions above using `dawn_wasm`.
 
-- Build the `emdawnwebgpu` GN build target.
+- Build the `emdawnwebgpu` and `samples` GN build targets.
 
-- Configure the Emscripten build with all of the linker flags listed in `emdawnwebgpu_config`
-  (and without Emscripten's `-sUSE_WEBGPU` setting, because we don't want the built-in bindings).
+Samples and tests produce HTML files in `out/<dir>/wasm` which can be served and viewed in a compatible browser.

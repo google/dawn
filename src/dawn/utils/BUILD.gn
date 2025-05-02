@@ -34,49 +34,77 @@ import("${dawn_root}/scripts/dawn_features.gni")
 # Utils for tests and samples
 ###############################################################################
 
-static_library("utils") {
+static_library("wgpu_utils") {
   configs += [
+    "${dawn_root}/include/dawn:public",
     "${dawn_root}/src/dawn/common:internal_config",
     "${dawn_root}/src/tint:tint_public_config",
   ]
 
   sources = [
-    "BinarySemaphore.cpp",
-    "BinarySemaphore.h",
     "ComboRenderBundleEncoderDescriptor.cpp",
     "ComboRenderBundleEncoderDescriptor.h",
     "ComboRenderPipelineDescriptor.cpp",
     "ComboRenderPipelineDescriptor.h",
+    "TextureUtils.cpp",
+    "TextureUtils.h",
+    "WGPUHelpers.cpp",
+    "WGPUHelpers.h",
+  ]
+
+  public_deps = [
+    "${dawn_root}/include/dawn:cpp_headers",
+    "${dawn_root}/src/dawn/common",
+  ]
+  deps = []
+  if (tint_build_spv_reader) {
+    deps += [ "${dawn_spirv_tools_dir}:spvtools_opt" ]
+  }
+}
+
+static_library("test_utils") {
+  configs += [ "${dawn_root}/src/dawn/common:internal_config" ]
+
+  sources = [
+    "BinarySemaphore.cpp",
+    "BinarySemaphore.h",
+    "TerribleCommandBuffer.cpp",
+    "TerribleCommandBuffer.h",
+    "TestUtils.cpp",
+    "TestUtils.h",
+    "WireHelper.cpp",
+    "WireHelper.h",
+  ]
+
+  public_deps = [
+    ":wgpu_utils",
+    "${dawn_root}/include/dawn:cpp_headers",
+    "${dawn_root}/src/dawn:proc",
+    "${dawn_root}/src/dawn/common",
+    "${dawn_root}/src/dawn/native:headers",
+    "${dawn_root}/src/dawn/partition_alloc:raw_ptr",
+    "${dawn_root}/src/dawn/wire",
+  ]
+}
+
+static_library("system_utils") {
+  configs += [ "${dawn_root}/src/dawn/common:internal_config" ]
+
+  sources = [
     "CommandLineParser.cpp",
     "CommandLineParser.h",
     "PlatformDebugLogger.h",
     "SystemUtils.cpp",
     "SystemUtils.h",
-    "TerribleCommandBuffer.cpp",
-    "TerribleCommandBuffer.h",
-    "TestUtils.cpp",
-    "TestUtils.h",
-    "TextureUtils.cpp",
-    "TextureUtils.h",
     "Timer.h",
-    "WGPUHelpers.cpp",
-    "WGPUHelpers.h",
-    "WireHelper.cpp",
-    "WireHelper.h",
   ]
-  deps = [
-    "${dawn_root}/src/dawn:proc",
+
+  public_deps = [
+    ":abseil",
     "${dawn_root}/src/dawn/common",
-    "${dawn_root}/src/dawn/native:headers",
-    "${dawn_root}/src/dawn/wire",
   ]
 
-  libs = []
   frameworks = []
-
-  if (tint_build_spv_reader) {
-    deps += [ "${dawn_spirv_tools_dir}:spvtools_opt" ]
-  }
 
   if (is_win && !dawn_is_winuwp) {
     sources += [ "WindowsDebugLogger.cpp" ]
@@ -102,12 +130,6 @@ static_library("utils") {
   } else {
     sources += [ "PosixTimer.cpp" ]
   }
-
-  public_deps = [
-    ":abseil",
-    "${dawn_root}/include/dawn:cpp_headers",
-    "${dawn_root}/src/dawn/partition_alloc:raw_ptr",
-  ]
 }
 
 group("abseil") {

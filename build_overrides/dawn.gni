@@ -25,6 +25,8 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import("//build/config/gclient_args.gni")
+
 # These are variables that are overridable by projects that include Dawn.
 # The values in this file are the defaults for when we are building from
 # Dawn's repository.
@@ -55,11 +57,12 @@ dawn_vulkan_validation_layers_dir = "//third_party/vulkan-validation-layers/src"
 dawn_dxc_dir = "//third_party/dxc"
 dawn_dxheaders_dir = "//third_party/dxheaders"
 
-declare_args() {
-  # Enables generating the Emscripten WebGPU bindings.
-  # Note this must point at an emscripten source checkout; the emsdk copy
-  # installed at emsdk/upstream/emscripten does not have gen_struct_info.py.
-  dawn_emscripten_dir = ""
+# Emscripten and emsdk dependencies are only needed when building for WASM.
+if (!defined(dawn_wasm)) {
+  dawn_wasm = false
+}
+if (dawn_wasm) {
+  dawn_emscripten_dir = "//third_party/emsdk/upstream/emscripten"
 }
 
 # PartitionAlloc is an optional dependency.

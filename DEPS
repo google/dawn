@@ -3,6 +3,7 @@ use_relative_paths = True
 gclient_gn_args_file = 'build/config/gclient_args.gni'
 
 gclient_gn_args = [
+  'dawn_wasm',
   'generate_location_tags',
 ]
 
