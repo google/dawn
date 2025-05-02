@@ -84,6 +84,7 @@ cc_library(
     "helper_test.h",
     "import_glsl_std450_test.cc",
     "reader_test.cc",
+    "texture_test.cc",
   ],
   deps = [
     "//src/tint/api/common",
