@@ -336,8 +336,6 @@ crbug.com/342840940 webgpu:api,validation,createTexture:dimension_type_and_forma
 # Generates GL_OUT_OF_MEMORY
 crbug.com/361372970 [ android arm ] webgpu:api,validation,image_copy,layout_related:copy_end_overflows_u64:method="WriteTexture" [ Failure ]
 
-# textureSampleBias (16.22) - either the CTS is old or has a bug as 16.22 is not an expected test bias value
-crbug.com/406978229 [ android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:arrayed_2d_coords:format="astc-8x5-unorm-srgb";filt="nearest";modeU="r";modeV="c";offset=false [ Failure ]
 
 # Flaky memory_sync failures on Intel
 crbug.com/42241023 [ intel-0x9bc5 linux ] webgpu:api,operation,memory_sync,buffer,multiple_buffers:ww:boundary="command-buffer";writeOps=["storage","b2b-copy"];contexts=["render-bundle-encoder","command-encoder"] [ Failure ]
@@ -350,7 +348,6 @@ crbug.com/42241023 [ intel-0x9bc5 linux ] webgpu:api,operation,memory_sync,textu
 crbug.com/407109046 [ intel-0x9bc5 linux mesa_ge_23.2 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rgba8unorm";dstFormat="rgba8unorm-srgb";dimension="3d" [ Failure ]
 crbug.com/407109046 [ intel-0x9bc5 linux mesa_ge_23.2 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rgba8unorm-srgb";dstFormat="rgba8unorm-srgb";dimension="3d" [ Failure ]
 crbug.com/407109046 [ intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rgb10a2unorm";dstFormat="rgb10a2unorm";dimension="3d" [ Failure ]
-crbug.com/407109046 [ intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rgba32float";dstFormat="rgba32float";dimension="3d" [ Failure ]
 crbug.com/407109046 [ intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="r32float";dstFormat="r32float";dimension="3d" [ Failure ]
 
 # Failures due to Linux/Intel UHD 630 OS/driver upgrade
@@ -389,7 +386,7 @@ crbug.com/341282605 [ intel-0x9bc5 ] webgpu:shader,execution,limits:switch_case_
 crbug.com/341327472 [ intel-0x4680 linux ] webgpu:api,validation,state,device_lost,destroy:* [ Failure ]
 
 # Timeouts on error_scope
-crbug.com/367513506 [ android arm ] webgpu:api,validation,error_scope:current_scope:errorFilter="validation";stackDepth=100000 [ Failure ]
+crbug.com/367513506 [ android-14 arm ] webgpu:api,validation,error_scope:current_scope:errorFilter="validation";stackDepth=100000 [ Failure ]
 
 # sample_texture_combos test is failing on all Compat platforms
 crbug.com/402772749 webgpu:api,operation,sampling,sampler_texture:sample_texture_combos: [ Failure ]
@@ -561,7 +558,7 @@ crbug.com/329724358 [ android arm ] webgpu:web_platform,external_texture,video:i
 crbug.com/329724358 [ android arm ] webgpu:web_platform,external_texture,video:importExternalTexture,sampleWithVideoFrameWithVisibleRectParam:videoName="four-colors-vp9-bt709.webm";dstColorSpace="srgb" [ Failure ]
 
 # Derivative test failures on Pixel 6
-crbug.com/42251283 [ android-pixel-6 arm ] webgpu:shader,execution,expression,call,builtin,dpdxCoarse:f32:* [ Failure ]
+crbug.com/42251283 [ android-14 android-pixel-6 arm ] webgpu:shader,execution,expression,call,builtin,dpdxCoarse:f32:* [ Failure ]
 crbug.com/42251283 [ android arm ] webgpu:shader,execution,expression,call,builtin,dpdxFine:* [ Failure ]
 crbug.com/42251283 [ android arm ] webgpu:shader,execution,expression,call,builtin,dpdyFine:* [ Failure ]
 crbug.com/42251283 [ android arm ] webgpu:shader,execution,expression,call,builtin,fwidthFine:* [ Failure ]
@@ -792,11 +789,6 @@ crbug.com/407076123 [ android-14 android-pixel-6 ] webgpu:api,validation,createB
 crbug.com/407076123 [ linux nvidia ] webgpu:api,validation,createBindGroup:buffer,resource_binding_size:type="read-only-storage" [ Failure ]
 crbug.com/407076123 [ linux nvidia ] webgpu:api,validation,createBindGroup:buffer,resource_binding_size:type="storage" [ Failure ]
 
-crbug.com/407109047 [ android-pixel-6 ] webgpu:api,validation,createTexture:sampleCount,valid_sampleCount_with_other_parameter_varies:dimension="2d";format="rg11b10ufloat" [ Failure ]
-crbug.com/407109047 [ android-pixel-6 ] webgpu:api,validation,render_pipeline,fragment_state:pipeline_output_targets:isAsync=false;format="rg11b10ufloat" [ Failure ]
-crbug.com/407109047 [ android-pixel-6 ] webgpu:api,validation,render_pipeline,fragment_state:pipeline_output_targets:isAsync=true;format="rg11b10ufloat" [ Failure ]
-crbug.com/407109047 [ android-pixel-6 ] webgpu:api,validation,render_pipeline,fragment_state:targets_format_filterable:isAsync=false;format="rg11b10ufloat" [ Failure ]
-crbug.com/407109047 [ android-pixel-6 ] webgpu:api,validation,render_pipeline,fragment_state:targets_format_filterable:isAsync=true;format="rg11b10ufloat" [ Failure ]
 
 # Test bug, tests require implementation to provide "core" but fails when not available
 crbug.com/366151404 [ android android-chromium android-pixel-6 angle-opengles arm compat-default mobile ] webgpu:api,operation,adapter,requestAdapter:requestAdapter_invalid_featureLevel:featureLevel="_undef_" [ Failure ]
