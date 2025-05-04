@@ -30,6 +30,7 @@
 #include <limits>
 
 #include "src/tint/lang/core/constant/scalar.h"
+#include "src/tint/lang/core/ir/access.h"
 #include "src/tint/lang/core/ir/binary.h"
 #include "src/tint/lang/core/ir/exit_if.h"
 #include "src/tint/lang/core/ir/exit_loop.h"
@@ -105,41 +106,50 @@ struct IntegerRangeAnalysisImpl {
             return nullptr;
         }
 
+        // Currently we only support the query of ranges of `local_invocation_id` or
+        // `local_invocation_index`.
+        if (!param->Builtin()) {
+            return nullptr;
+        }
+
+        switch (*param->Builtin()) {
+            case BuiltinValue::kLocalInvocationIndex:
+            case BuiltinValue::kLocalInvocationId:
+                break;
+            default:
+                return nullptr;
+        }
+
         const auto& info = integer_function_param_range_info_map_.GetOrAdd(
             param, [&]() -> Vector<IntegerRangeInfo, 3> {
-                if (param->Builtin() == core::BuiltinValue::kLocalInvocationIndex) {
-                    // We shouldn't be trying to use range analysis on a module that has
-                    // non-constant workgroup sizes, since we will always have replaced pipeline
-                    // overrides with constant values early in the pipeline.
-                    TINT_ASSERT(function_->WorkgroupSizeAsConst().has_value());
-                    std::array<uint32_t, 3> workgroup_size =
-                        function_->WorkgroupSizeAsConst().value();
-                    uint64_t max_bound =
-                        workgroup_size[0] * workgroup_size[1] * workgroup_size[2] - 1u;
-                    constexpr uint64_t kMinBound = 0;
+                switch (*param->Builtin()) {
+                    case BuiltinValue::kLocalInvocationIndex: {
+                        // We shouldn't be trying to use range analysis on a module that has
+                        // non-constant workgroup sizes, since we will always have replaced pipeline
+                        // overrides with constant values early in the pipeline.
+                        TINT_ASSERT(function_->WorkgroupSizeAsConst().has_value());
+                        std::array<uint32_t, 3> workgroup_size =
+                            function_->WorkgroupSizeAsConst().value();
+                        uint64_t max_bound =
+                            workgroup_size[0] * workgroup_size[1] * workgroup_size[2] - 1u;
+                        constexpr uint64_t kMinBound = 0;
 
-                    return {IntegerRangeInfo(kMinBound, max_bound)};
-                }
-
-                if (param->Builtin() == core::BuiltinValue::kLocalInvocationId) {
-                    TINT_ASSERT(function_->WorkgroupSizeAsConst().has_value());
-                    std::array<uint32_t, 3> workgroup_size =
-                        function_->WorkgroupSizeAsConst().value();
-
-                    constexpr uint64_t kMinBound = 0;
-                    Vector<IntegerRangeInfo, 3> integerRanges;
-                    for (uint32_t size_x_y_z : workgroup_size) {
-                        integerRanges.Push({kMinBound, size_x_y_z - 1u});
+                        return {IntegerRangeInfo(kMinBound, max_bound)};
                     }
-                    return integerRanges;
-                }
+                    case BuiltinValue::kLocalInvocationId: {
+                        TINT_ASSERT(function_->WorkgroupSizeAsConst().has_value());
+                        std::array<uint32_t, 3> workgroup_size =
+                            function_->WorkgroupSizeAsConst().value();
 
-                if (param->Type()->IsUnsignedIntegerScalar()) {
-                    return {IntegerRangeInfo(0, std::numeric_limits<uint64_t>::max())};
-                } else {
-                    TINT_ASSERT(param->Type()->IsSignedIntegerScalar());
-                    return {IntegerRangeInfo(std::numeric_limits<int64_t>::min(),
-                                             std::numeric_limits<int64_t>::max())};
+                        constexpr uint64_t kMinBound = 0;
+                        Vector<IntegerRangeInfo, 3> integerRanges;
+                        for (uint32_t size_x_y_z : workgroup_size) {
+                            integerRanges.Push({kMinBound, size_x_y_z - 1u});
+                        }
+                        return integerRanges;
+                    }
+                    default:
+                        TINT_UNREACHABLE();
                 }
             });
 
@@ -161,6 +171,26 @@ struct IntegerRangeAnalysisImpl {
             return nullptr;
         }
         return GetInfo(load_from_var);
+    }
+
+    const IntegerRangeInfo* GetInfo(const Access* access) {
+        const Value* obj = access->Object();
+
+        // Currently we only support the access to `local_invocation_id` or `local_invocation_index`
+        // as a function parameter.
+        const FunctionParam* function_param = obj->As<FunctionParam>();
+        if (!function_param) {
+            return nullptr;
+        }
+        if (access->Indices().Length() > 1) {
+            return nullptr;
+        }
+        if (!access->Indices()[0]->As<Constant>()) {
+            return nullptr;
+        }
+        uint32_t index =
+            static_cast<uint32_t>(GetValueFromConstant(access->Indices()[0]->As<Constant>()));
+        return GetInfo(function_param, index);
     }
 
     /// Analyze a loop to compute the range of the loop control variable if possible.
@@ -680,6 +710,10 @@ const IntegerRangeInfo* IntegerRangeAnalysis::GetInfo(const Var* var) {
 
 const IntegerRangeInfo* IntegerRangeAnalysis::GetInfo(const Load* load) {
     return impl_->GetInfo(load);
+}
+
+const IntegerRangeInfo* IntegerRangeAnalysis::GetInfo(const Access* access) {
+    return impl_->GetInfo(access);
 }
 
 }  // namespace tint::core::ir::analysis

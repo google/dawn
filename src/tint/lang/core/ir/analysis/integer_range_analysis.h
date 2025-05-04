@@ -33,6 +33,7 @@
 #include <variant>
 
 namespace tint::core::ir {
+class Access;
 class Binary;
 class Function;
 class FunctionParam;
@@ -92,6 +93,10 @@ class IntegerRangeAnalysis {
     /// Returns the integer range info of a given `Load` variable if it is an integer variable and
     /// it has a meaningful range. Returns nullptr otherwise.
     const IntegerRangeInfo* GetInfo(const Load* load_var);
+
+    /// Returns the integer range info of a given `Access` variable if it is an integer variable and
+    /// it has a meaningful range. Returns nullptr otherwise.
+    const IntegerRangeInfo* GetInfo(const Access* access);
 
     /// Note: This function is only for tests.
     /// Returns the pointer of the loop control variable in the given loop when its initializer

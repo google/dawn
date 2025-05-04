@@ -8616,5 +8616,184 @@ $B1: {  # root
     EXPECT_EQ(nullptr, analysis.GetInfo(load_a));
 }
 
+TEST_F(IR_IntegerRangeAnalysisTest, AccessToLocalInvocationID) {
+    auto* func = b.ComputeFunction("my_func", 4_u, 3_u, 2_u);
+    auto* local_invocation_id = b.FunctionParam("localInvocationId", mod.Types().vec3<u32>());
+    local_invocation_id->SetBuiltin(tint::core::BuiltinValue::kLocalInvocationId);
+    func->SetParams({local_invocation_id});
+
+    Access* access_x = nullptr;
+    Access* access_y = nullptr;
+    Access* access_z = nullptr;
+    b.Append(func->Block(), [&] {
+        access_x = b.Access(ty.u32(), local_invocation_id, 0_u);
+        access_y = b.Access(ty.u32(), local_invocation_id, 1_u);
+        access_z = b.Access(ty.u32(), local_invocation_id, 2_u);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%my_func = @compute @workgroup_size(4u, 3u, 2u) func(%localInvocationId:vec3<u32> [@local_invocation_id]):void {
+  $B1: {
+    %3:u32 = access %localInvocationId, 0u
+    %4:u32 = access %localInvocationId, 1u
+    %5:u32 = access %localInvocationId, 2u
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(func);
+
+    auto* access_x_info = analysis.GetInfo(access_x);
+    ASSERT_NE(nullptr, access_x_info);
+    ASSERT_TRUE(
+        std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(access_x_info->range));
+    const auto& range_access_x =
+        std::get<IntegerRangeInfo::UnsignedIntegerRange>(access_x_info->range);
+    EXPECT_EQ(0u, range_access_x.min_bound);
+    EXPECT_EQ(3u, range_access_x.max_bound);
+
+    auto* access_y_info = analysis.GetInfo(access_y);
+    ASSERT_NE(nullptr, access_x_info);
+    ASSERT_TRUE(
+        std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(access_y_info->range));
+    const auto& range_access_y =
+        std::get<IntegerRangeInfo::UnsignedIntegerRange>(access_y_info->range);
+    EXPECT_EQ(0u, range_access_y.min_bound);
+    EXPECT_EQ(2u, range_access_y.max_bound);
+
+    auto* access_z_info = analysis.GetInfo(access_z);
+    ASSERT_NE(nullptr, access_x_info);
+    ASSERT_TRUE(
+        std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(access_z_info->range));
+    const auto& range_access_z =
+        std::get<IntegerRangeInfo::UnsignedIntegerRange>(access_z_info->range);
+    EXPECT_EQ(0u, range_access_z.min_bound);
+    EXPECT_EQ(1u, range_access_z.max_bound);
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, NotAccessToFunctionParam) {
+    auto* func = b.Function("func", ty.void_());
+    Access* access = nullptr;
+    b.Append(func->Block(), [&] {
+        auto* dst = b.Var(ty.ptr<function, array<u32, 24u>>());
+        access = b.Access(ty.ptr<function, u32>(), dst, 0_u);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    %2:ptr<function, array<u32, 24>, read_write> = var undef
+    %3:ptr<function, u32, read_write> = access %2, 0u
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(func);
+    auto* info = analysis.GetInfo(access);
+    ASSERT_EQ(nullptr, info);
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, AccessToFunctionParamNoRange) {
+    auto* func = b.ComputeFunction("my_func", 4_u, 3_u, 2_u);
+    auto* global_invocation_id = b.FunctionParam("globalId", mod.Types().vec3<u32>());
+    global_invocation_id->SetBuiltin(tint::core::BuiltinValue::kGlobalInvocationId);
+    func->SetParams({global_invocation_id});
+
+    Access* access_x = nullptr;
+    Access* access_y = nullptr;
+    Access* access_z = nullptr;
+    b.Append(func->Block(), [&] {
+        access_x = b.Access(ty.u32(), global_invocation_id, 0_u);
+        access_y = b.Access(ty.u32(), global_invocation_id, 1_u);
+        access_z = b.Access(ty.u32(), global_invocation_id, 2_u);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%my_func = @compute @workgroup_size(4u, 3u, 2u) func(%globalId:vec3<u32> [@global_invocation_id]):void {
+  $B1: {
+    %3:u32 = access %globalId, 0u
+    %4:u32 = access %globalId, 1u
+    %5:u32 = access %globalId, 2u
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(func);
+    ASSERT_EQ(nullptr, analysis.GetInfo(access_x));
+    ASSERT_EQ(nullptr, analysis.GetInfo(access_y));
+    ASSERT_EQ(nullptr, analysis.GetInfo(access_z));
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, AccessToNonIntegerFunctionParam) {
+    auto* func = b.Function("func", ty.void_());
+    Access* access = nullptr;
+    auto* param = b.FunctionParam("param", ty.vec4<f32>());
+    func->SetParams({param});
+    b.Append(func->Block(), [&] {
+        access = b.Access(ty.f32(), param, 0_u);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func(%param:vec4<f32>):void {
+  $B1: {
+    %3:f32 = access %param, 0u
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(func);
+    auto* info = analysis.GetInfo(access);
+    ASSERT_EQ(nullptr, info);
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, NonConstantAccessIndex) {
+    auto* func = b.ComputeFunction("my_func", 4_u, 3_u, 2_u);
+    auto* local_invocation_id = b.FunctionParam("localInvocationId", mod.Types().vec3<u32>());
+    local_invocation_id->SetBuiltin(tint::core::BuiltinValue::kLocalInvocationId);
+    func->SetParams({local_invocation_id});
+
+    Access* access_x = nullptr;
+    b.Append(func->Block(), [&] {
+        auto* var = b.Var(ty.ptr<function, u32>());
+        auto* index = b.Load(var);
+        access_x = b.Access(ty.u32(), local_invocation_id, index);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%my_func = @compute @workgroup_size(4u, 3u, 2u) func(%localInvocationId:vec3<u32> [@local_invocation_id]):void {
+  $B1: {
+    %3:ptr<function, u32, read_write> = var undef
+    %4:u32 = load %3
+    %5:u32 = access %localInvocationId, %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(func);
+
+    auto* access_x_info = analysis.GetInfo(access_x);
+    ASSERT_EQ(nullptr, access_x_info);
+}
+
 }  // namespace
 }  // namespace tint::core::ir::analysis
