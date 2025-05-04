@@ -281,7 +281,7 @@ deps = {
   },
 
   'third_party/vulkan-deps': {
-    'url': '{chromium_git}/vulkan-deps@eecc670051d0b959bd56c2726b4db4d11286e3e6',
+    'url': '{chromium_git}/vulkan-deps@7ee5f712d0992cdd047c4002f29ae3f4ecd5078a',
     'condition': 'dawn_standalone',
   },
 
@@ -301,7 +301,7 @@ deps = {
   },
 
   'third_party/spirv-tools/src': {
-    'url': '{chromium_git}/external/github.com/KhronosGroup/SPIRV-Tools@6db659dae9c581fa346f3451141392d1bd047325',
+    'url': '{chromium_git}/external/github.com/KhronosGroup/SPIRV-Tools@f026033b6b74143b978632cf0be6fa9dc99818c3',
     'condition': 'dawn_standalone',
   },
 
@@ -326,7 +326,7 @@ deps = {
   },
 
   'third_party/vulkan-validation-layers/src': {
-    'url': '{chromium_git}/external/github.com/KhronosGroup/Vulkan-ValidationLayers@0252b60de19153f05f44922c41633af7809a1c22',
+    'url': '{chromium_git}/external/github.com/KhronosGroup/Vulkan-ValidationLayers@9587a00b3e7fd025a735c82f518f03cb15575535',
     'condition': 'dawn_standalone',
   },
 
