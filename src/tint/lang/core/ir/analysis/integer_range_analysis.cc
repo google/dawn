@@ -151,8 +151,20 @@ struct IntegerRangeAnalysisImpl {
         return integer_var_range_info_map_.Get(var).value;
     }
 
+    const IntegerRangeInfo* GetInfo(const Load* load) {
+        const InstructionResult* instruction = load->From()->As<InstructionResult>();
+        if (!instruction) {
+            return nullptr;
+        }
+        const Var* load_from_var = instruction->Instruction()->As<Var>();
+        if (!load_from_var) {
+            return nullptr;
+        }
+        return GetInfo(load_from_var);
+    }
+
     /// Analyze a loop to compute the range of the loop control variable if possible.
-    void AnalyzeLoop(Loop* loop) {
+    void AnalyzeLoop(const Loop* loop) {
         const Var* index = GetLoopControlVariableFromConstantInitializer(loop);
         if (!index) {
             return;
@@ -664,6 +676,10 @@ const Binary* IntegerRangeAnalysis::GetBinaryToCompareLoopControlVariableInLoopB
 
 const IntegerRangeInfo* IntegerRangeAnalysis::GetInfo(const Var* var) {
     return impl_->GetInfo(var);
+}
+
+const IntegerRangeInfo* IntegerRangeAnalysis::GetInfo(const Load* load) {
+    return impl_->GetInfo(load);
 }
 
 }  // namespace tint::core::ir::analysis
