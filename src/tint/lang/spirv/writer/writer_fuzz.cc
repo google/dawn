@@ -62,4 +62,6 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module, const fuzz::ir::Context&,
 }  // namespace
 }  // namespace tint::spirv::writer
 
-TINT_IR_MODULE_FUZZER(tint::spirv::writer::IRFuzzer, tint::core::ir::Capabilities{});
+TINT_IR_MODULE_FUZZER(tint::spirv::writer::IRFuzzer,
+                      tint::core::ir::Capabilities{
+                          tint::core::ir::Capability::kAllowAnyInputAttachmentIndexType});

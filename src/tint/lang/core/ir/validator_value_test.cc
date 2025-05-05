@@ -609,6 +609,38 @@ TEST_F(IR_ValidatorTest, Var_BindingArray_Texture_NonHandleAddressSpace) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Var_InputAttachementIndex_NonHandle) {
+    auto* v = b.Var(ty.ptr(AddressSpace::kPrivate, ty.f32(), read_write));
+    v->SetInputAttachmentIndex(0);
+    mod.root_block->Append(v);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(
+                    R"(:2:38 error: var: '@input_attachment_index' is not valid for non-handle var
+  %1:ptr<private, f32, read_write> = var undef @input_attachment_index(0)
+                                     ^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Var_InputAttachementIndex_WrongType) {
+    auto* v = b.Var(ty.ptr(AddressSpace::kHandle, ty.f32(), read_write));
+    v->SetBindingPoint(0, 0);
+    v->SetInputAttachmentIndex(0);
+    mod.root_block->Append(v);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:2:37 error: var: '@input_attachment_index' is only valid for 'input_attachment' type var
+  %1:ptr<handle, f32, read_write> = var undef @binding_point(0, 0) @input_attachment_index(0)
+                                    ^^^
+)")) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Let_NullResult) {
     auto* v = mod.CreateInstruction<ir::Let>(nullptr, b.Constant(1_i));
 

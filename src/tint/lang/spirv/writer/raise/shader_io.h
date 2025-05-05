@@ -29,6 +29,7 @@
 #define SRC_TINT_LANG_SPIRV_WRITER_RAISE_SHADER_IO_H_
 
 #include "src/tint/lang/core/ir/transform/prepare_push_constants.h"
+#include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/spirv/writer/common/options.h"
 #include "src/tint/utils/result.h"
 
@@ -38,6 +39,11 @@ class Module;
 }
 
 namespace tint::spirv::writer::raise {
+
+/// The capabilities that the transform can support.
+const core::ir::Capabilities kShaderIOCapabilities{
+    core::ir::Capability::kAllowAnyInputAttachmentIndexType,
+};
 
 /// ShaderIOConfig describes the set of configuration options for the ShaderIO transform.
 struct ShaderIOConfig {

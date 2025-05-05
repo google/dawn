@@ -166,7 +166,9 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     }
 
     RUN_TRANSFORM(raise::BuiltinPolyfill, module, options.use_vulkan_memory_model);
+
     RUN_TRANSFORM(raise::ExpandImplicitSplats, module);
+    // kAllowAnyInputAttachmentIndexType required after ExpandImplicitSplats
     RUN_TRANSFORM(raise::HandleMatrixArithmetic, module);
     RUN_TRANSFORM(raise::MergeReturn, module);
     RUN_TRANSFORM(raise::RemoveUnreachableInLoopContinuing, module);
