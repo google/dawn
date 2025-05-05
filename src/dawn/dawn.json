@@ -1077,6 +1077,7 @@
             },
             {
                 "name": "set immediate data",
+                "tags": ["dawn"],
                 "args": [
                     {"name": "offset", "type": "uint32_t"},
                     {"name": "data", "type": "void", "annotation": "const*", "length": "size"},
@@ -2968,6 +2969,7 @@
             },
             {
                 "name": "set immediate data",
+                "tags": ["dawn"],
                 "args": [
                     {"name": "offset", "type": "uint32_t"},
                     {"name": "data", "type": "void", "annotation": "const*", "length": "size"},
@@ -3274,6 +3276,7 @@
             },
             {
                 "name": "set immediate data",
+                "tags": ["dawn"],
                 "args": [
                     {"name": "offset", "type": "uint32_t"},
                     {"name": "data", "type": "void", "annotation": "const*", "length": "size"},

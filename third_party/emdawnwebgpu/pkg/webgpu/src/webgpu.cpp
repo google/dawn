@@ -1661,6 +1661,11 @@ void wgpuSupportedFeaturesFreeMembers(WGPUSupportedFeatures value) {
   free(const_cast<WGPUFeatureName*>(value.features));
 }
 
+void wgpuSupportedWGSLLanguageFeaturesFreeMembers(
+    WGPUSupportedWGSLLanguageFeatures value) {
+  free(const_cast<WGPUWGSLLanguageFeatureName*>(value.features));
+}
+
 void wgpuSurfaceCapabilitiesFreeMembers(WGPUSurfaceCapabilities) {
   // wgpuSurfaceCapabilities doesn't currently allocate anything.
 }
