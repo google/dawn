@@ -230,12 +230,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
         // Create a new builtin sample mask output.
         fixed_sample_mask_index = AddOutput(ir.symbols.New("tint_sample_mask"), ty.u32(),
                                             core::IOAttributes{
-                                                /* location */ std::nullopt,
-                                                /* index */ std::nullopt,
-                                                /* color */ std::nullopt,
-                                                /* builtin */ core::BuiltinValue::kSampleMask,
-                                                /* interpolation */ std::nullopt,
-                                                /* invariant */ false,
+                                                .builtin = core::BuiltinValue::kSampleMask,
                                             });
     }
 };

@@ -1461,24 +1461,14 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, ExistingLocalInvocationIndexInStruct) {
                                         mod.symbols.New("global_id"),
                                         ty.vec3<u32>(),
                                         core::IOAttributes{
-                                            /* location */ std::nullopt,
-                                            /* index */ std::nullopt,
-                                            /* color */ std::nullopt,
-                                            /* builtin */ core::BuiltinValue::kGlobalInvocationId,
-                                            /* interpolation */ std::nullopt,
-                                            /* invariant */ false,
+                                            .builtin = core::BuiltinValue::kGlobalInvocationId,
                                         },
                                     },
                                     {
                                         mod.symbols.New("index"),
                                         ty.u32(),
                                         core::IOAttributes{
-                                            /* location */ std::nullopt,
-                                            /* index */ std::nullopt,
-                                            /* color */ std::nullopt,
-                                            /* builtin */ core::BuiltinValue::kLocalInvocationIndex,
-                                            /* interpolation */ std::nullopt,
-                                            /* invariant */ false,
+                                            .builtin = core::BuiltinValue::kLocalInvocationIndex,
                                         },
                                     },
                                 });

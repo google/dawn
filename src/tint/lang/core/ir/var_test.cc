@@ -75,9 +75,14 @@ TEST_F(IR_VarTest, Clone) {
     v->SetInitializer(b.Constant(4_f));
     v->SetBindingPoint(1, 2);
     v->SetAttributes(IOAttributes{
-        3, 4, 5, core::BuiltinValue::kFragDepth,
-        Interpolation{core::InterpolationType::kFlat, core::InterpolationSampling::kCentroid},
-        true});
+        .location = 3,
+        .blend_src = 4,
+        .color = 5,
+        .builtin = core::BuiltinValue::kFragDepth,
+        .interpolation =
+            Interpolation{core::InterpolationType::kFlat, core::InterpolationSampling::kCentroid},
+        .invariant = true,
+    });
 
     auto* new_v = clone_ctx.Clone(v);
 

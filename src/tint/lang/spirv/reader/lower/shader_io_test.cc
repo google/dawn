@@ -730,28 +730,22 @@ Colors = struct @align(16) {
 }
 
 TEST_F(SpirvReader_ShaderIOTest, Inputs_Struct_LocationOnVariable) {
-    auto* colors_str =
-        ty.Struct(mod.symbols.New("Colors"),
-                  Vector{
-                      core::type::Manager::StructMemberDesc{
-                          mod.symbols.New("color1"),
-                          ty.vec4<f32>(),
-                      },
-                      core::type::Manager::StructMemberDesc{
-                          mod.symbols.New("color2"),
-                          ty.vec4<f32>(),
-                          core::IOAttributes{
-                              /* location */ std::nullopt,
-                              /* index */ std::nullopt,
-                              /* color */ std::nullopt,
-                              /* builtin */ std::nullopt,
-                              /* interpolation */
-                              core::Interpolation{core::InterpolationType::kPerspective,
-                                                  core::InterpolationSampling::kCentroid},
-                              /* invariant */ false,
-                          },
-                      },
-                  });
+    auto* colors_str = ty.Struct(
+        mod.symbols.New("Colors"),
+        Vector{
+            core::type::Manager::StructMemberDesc{
+                mod.symbols.New("color1"),
+                ty.vec4<f32>(),
+            },
+            core::type::Manager::StructMemberDesc{
+                mod.symbols.New("color2"),
+                ty.vec4<f32>(),
+                core::IOAttributes{
+                    .interpolation = core::Interpolation{core::InterpolationType::kPerspective,
+                                                         core::InterpolationSampling::kCentroid},
+                },
+            },
+        });
     auto* colors = b.Var("colors", ty.ptr(core::AddressSpace::kIn, colors_str));
     {
         core::IOAttributes attributes;
@@ -1456,28 +1450,22 @@ TEST_F(SpirvReader_ShaderIOTest, Outputs_Struct_LocationOnVariable) {
                                                        BuiltinAttrs(core::BuiltinValue::kPosition),
                                                    },
                                                });
-    auto* colors_str =
-        ty.Struct(mod.symbols.New("Colors"),
-                  Vector{
-                      core::type::Manager::StructMemberDesc{
-                          mod.symbols.New("color1"),
-                          ty.vec4<f32>(),
-                      },
-                      core::type::Manager::StructMemberDesc{
-                          mod.symbols.New("color2"),
-                          ty.vec4<f32>(),
-                          core::IOAttributes{
-                              /* location */ std::nullopt,
-                              /* index */ std::nullopt,
-                              /* color */ std::nullopt,
-                              /* builtin */ std::nullopt,
-                              /* interpolation */
-                              core::Interpolation{core::InterpolationType::kPerspective,
-                                                  core::InterpolationSampling::kCentroid},
-                              /* invariant */ false,
-                          },
-                      },
-                  });
+    auto* colors_str = ty.Struct(
+        mod.symbols.New("Colors"),
+        Vector{
+            core::type::Manager::StructMemberDesc{
+                mod.symbols.New("color1"),
+                ty.vec4<f32>(),
+            },
+            core::type::Manager::StructMemberDesc{
+                mod.symbols.New("color2"),
+                ty.vec4<f32>(),
+                core::IOAttributes{
+                    .interpolation = core::Interpolation{core::InterpolationType::kPerspective,
+                                                         core::InterpolationSampling::kCentroid},
+                },
+            },
+        });
 
     auto* builtins = b.Var("builtins", ty.ptr(core::AddressSpace::kOut, builtin_str));
     auto* colors = b.Var("colors", ty.ptr(core::AddressSpace::kOut, colors_str));

@@ -152,52 +152,34 @@ TEST_F(SpirvWriter_ShaderIOTest, Parameters_Struct) {
                                      mod.symbols.New("front_facing"),
                                      ty.bool_(),
                                      core::IOAttributes{
-                                         /* location */ std::nullopt,
-                                         /* blend_src */ std::nullopt,
-                                         /* color */ std::nullopt,
-                                         /* builtin */ core::BuiltinValue::kFrontFacing,
-                                         /* interpolation */ std::nullopt,
-                                         /* invariant */ false,
+                                         .builtin = core::BuiltinValue::kFrontFacing,
                                      },
                                  },
                                  {
                                      mod.symbols.New("position"),
                                      ty.vec4<f32>(),
                                      core::IOAttributes{
-                                         /* location */ std::nullopt,
-                                         /* blend_src */ std::nullopt,
-                                         /* color */ std::nullopt,
-                                         /* builtin */ core::BuiltinValue::kPosition,
-                                         /* interpolation */ std::nullopt,
-                                         /* invariant */ true,
+                                         .builtin = core::BuiltinValue::kPosition,
+                                         .invariant = true,
                                      },
                                  },
                                  {
                                      mod.symbols.New("color1"),
                                      ty.f32(),
                                      core::IOAttributes{
-                                         /* location */ 0u,
-                                         /* blend_src */ std::nullopt,
-                                         /* color */ std::nullopt,
-                                         /* builtin */ std::nullopt,
-                                         /* interpolation */ std::nullopt,
-                                         /* invariant */ false,
+                                         .location = 0u,
                                      },
                                  },
                                  {
                                      mod.symbols.New("color2"),
                                      ty.f32(),
                                      core::IOAttributes{
-                                         /* location */ 1u,
-                                         /* blend_src */ std::nullopt,
-                                         /* color */ std::nullopt,
-                                         /* builtin */ std::nullopt,
-                                         /* interpolation */
-                                         core::Interpolation{
-                                             core::InterpolationType::kLinear,
-                                             core::InterpolationSampling::kSample,
-                                         },
-                                         /* invariant */ false,
+                                         .location = 1u,
+                                         .interpolation =
+                                             core::Interpolation{
+                                                 core::InterpolationType::kLinear,
+                                                 core::InterpolationSampling::kSample,
+                                             },
                                      },
                                  },
                              });
@@ -298,33 +280,24 @@ $B1: {  # root
 }
 
 TEST_F(SpirvWriter_ShaderIOTest, Parameters_Mixed) {
-    auto* str_ty = ty.Struct(mod.symbols.New("Inputs"),
-                             {
-                                 {
-                                     mod.symbols.New("position"),
-                                     ty.vec4<f32>(),
-                                     core::IOAttributes{
-                                         /* location */ std::nullopt,
-                                         /* blend_src */ std::nullopt,
-                                         /* color */ std::nullopt,
-                                         /* builtin */ core::BuiltinValue::kPosition,
-                                         /* interpolation */ std::nullopt,
-                                         /* invariant */ true,
-                                     },
-                                 },
-                                 {
-                                     mod.symbols.New("color1"),
-                                     ty.f32(),
-                                     core::IOAttributes{
-                                         /* location */ 0u,
-                                         /* blend_src */ std::nullopt,
-                                         /* color */ std::nullopt,
-                                         /* builtin */ std::nullopt,
-                                         /* interpolation */ std::nullopt,
-                                         /* invariant */ false,
-                                     },
-                                 },
-                             });
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("Inputs"), {
+                                                 {
+                                                     mod.symbols.New("position"),
+                                                     ty.vec4<f32>(),
+                                                     core::IOAttributes{
+                                                         .builtin = core::BuiltinValue::kPosition,
+                                                         .invariant = true,
+                                                     },
+                                                 },
+                                                 {
+                                                     mod.symbols.New("color1"),
+                                                     ty.f32(),
+                                                     core::IOAttributes{
+                                                         .location = 0u,
+                                                     },
+                                                 },
+                                             });
 
     auto* ep = b.Function("foo", ty.void_());
     auto* front_facing = b.FunctionParam("front_facing", ty.bool_());
@@ -519,40 +492,27 @@ TEST_F(SpirvWriter_ShaderIOTest, ReturnValue_Struct) {
                                      mod.symbols.New("position"),
                                      ty.vec4<f32>(),
                                      core::IOAttributes{
-                                         /* location */ std::nullopt,
-                                         /* blend_src */ std::nullopt,
-                                         /* color */ std::nullopt,
-                                         /* builtin */ core::BuiltinValue::kPosition,
-                                         /* interpolation */ std::nullopt,
-                                         /* invariant */ true,
+                                         .builtin = core::BuiltinValue::kPosition,
+                                         .invariant = true,
                                      },
                                  },
                                  {
                                      mod.symbols.New("color1"),
                                      ty.f32(),
                                      core::IOAttributes{
-                                         /* location */ 0u,
-                                         /* blend_src */ std::nullopt,
-                                         /* color */ std::nullopt,
-                                         /* builtin */ std::nullopt,
-                                         /* interpolation */ std::nullopt,
-                                         /* invariant */ false,
+                                         .location = 0u,
                                      },
                                  },
                                  {
                                      mod.symbols.New("color2"),
                                      ty.f32(),
                                      core::IOAttributes{
-                                         /* location */ 1u,
-                                         /* blend_src */ std::nullopt,
-                                         /* color */ std::nullopt,
-                                         /* builtin */ std::nullopt,
-                                         /* interpolation */
-                                         core::Interpolation{
-                                             core::InterpolationType::kLinear,
-                                             core::InterpolationSampling::kSample,
-                                         },
-                                         /* invariant */ false,
+                                         .location = 1u,
+                                         .interpolation =
+                                             core::Interpolation{
+                                                 core::InterpolationType::kLinear,
+                                                 core::InterpolationSampling::kSample,
+                                             },
                                      },
                                  },
                              });
@@ -623,33 +583,24 @@ $B1: {  # root
 }
 
 TEST_F(SpirvWriter_ShaderIOTest, ReturnValue_DualSourceBlending) {
-    auto* str_ty =
-        ty.Struct(mod.symbols.New("Output"), {
-                                                 {
-                                                     mod.symbols.New("color1"),
-                                                     ty.f32(),
-                                                     core::IOAttributes{
-                                                         /* location */ 0u,
-                                                         /* blend_src */ 0u,
-                                                         /* color */ std::nullopt,
-                                                         /* builtin */ std::nullopt,
-                                                         /* interpolation */ std::nullopt,
-                                                         /* invariant */ false,
-                                                     },
-                                                 },
-                                                 {
-                                                     mod.symbols.New("color2"),
-                                                     ty.f32(),
-                                                     core::IOAttributes{
-                                                         /* location */ 0u,
-                                                         /* blend_src */ 1u,
-                                                         /* color */ std::nullopt,
-                                                         /* builtin */ std::nullopt,
-                                                         /* interpolation */ std::nullopt,
-                                                         /* invariant */ false,
-                                                     },
-                                                 },
-                                             });
+    auto* str_ty = ty.Struct(mod.symbols.New("Output"), {
+                                                            {
+                                                                mod.symbols.New("color1"),
+                                                                ty.f32(),
+                                                                core::IOAttributes{
+                                                                    .location = 0u,
+                                                                    .blend_src = 0u,
+                                                                },
+                                                            },
+                                                            {
+                                                                mod.symbols.New("color2"),
+                                                                ty.f32(),
+                                                                core::IOAttributes{
+                                                                    .location = 0u,
+                                                                    .blend_src = 1u,
+                                                                },
+                                                            },
+                                                        });
 
     auto* ep = b.Function("foo", str_ty);
     ep->SetStage(core::ir::Function::PipelineStage::kFragment);
@@ -717,24 +668,14 @@ TEST_F(SpirvWriter_ShaderIOTest, Struct_SharedByVertexAndFragment) {
                                      mod.symbols.New("position"),
                                      vec4f,
                                      core::IOAttributes{
-                                         /* location */ std::nullopt,
-                                         /* blend_src */ std::nullopt,
-                                         /* color */ std::nullopt,
-                                         /* builtin */ core::BuiltinValue::kPosition,
-                                         /* interpolation */ std::nullopt,
-                                         /* invariant */ false,
+                                         .builtin = core::BuiltinValue::kPosition,
                                      },
                                  },
                                  {
                                      mod.symbols.New("color"),
                                      vec4f,
                                      core::IOAttributes{
-                                         /* location */ 0u,
-                                         /* blend_src */ std::nullopt,
-                                         /* color */ std::nullopt,
-                                         /* builtin */ std::nullopt,
-                                         /* interpolation */ std::nullopt,
-                                         /* invariant */ false,
+                                         .location = 0u,
                                      },
                                  },
                              });
@@ -852,33 +793,23 @@ $B1: {  # root
 
 TEST_F(SpirvWriter_ShaderIOTest, Struct_SharedWithBuffer) {
     auto* vec4f = ty.vec4<f32>();
-    auto* str_ty = ty.Struct(mod.symbols.New("Outputs"),
-                             {
-                                 {
-                                     mod.symbols.New("position"),
-                                     vec4f,
-                                     core::IOAttributes{
-                                         /* location */ std::nullopt,
-                                         /* blend_src */ std::nullopt,
-                                         /* color */ std::nullopt,
-                                         /* builtin */ core::BuiltinValue::kPosition,
-                                         /* interpolation */ std::nullopt,
-                                         /* invariant */ false,
-                                     },
-                                 },
-                                 {
-                                     mod.symbols.New("color"),
-                                     vec4f,
-                                     core::IOAttributes{
-                                         /* location */ 0u,
-                                         /* blend_src */ std::nullopt,
-                                         /* color */ std::nullopt,
-                                         /* builtin */ std::nullopt,
-                                         /* interpolation */ std::nullopt,
-                                         /* invariant */ false,
-                                     },
-                                 },
-                             });
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("Outputs"), {
+                                                  {
+                                                      mod.symbols.New("position"),
+                                                      vec4f,
+                                                      core::IOAttributes{
+                                                          .builtin = core::BuiltinValue::kPosition,
+                                                      },
+                                                  },
+                                                  {
+                                                      mod.symbols.New("color"),
+                                                      vec4f,
+                                                      core::IOAttributes{
+                                                          .location = 0u,
+                                                      },
+                                                  },
+                                              });
 
     auto* var = b.Var(ty.ptr(storage, str_ty, read));
     var->SetBindingPoint(0, 0);
@@ -955,24 +886,14 @@ TEST_F(SpirvWriter_ShaderIOTest, SampleMask) {
                                      mod.symbols.New("color"),
                                      ty.f32(),
                                      core::IOAttributes{
-                                         /* location */ 0u,
-                                         /* blend_src */ std::nullopt,
-                                         /* color */ std::nullopt,
-                                         /* builtin */ std::nullopt,
-                                         /* interpolation */ std::nullopt,
-                                         /* invariant */ false,
+                                         .location = 0u,
                                      },
                                  },
                                  {
                                      mod.symbols.New("mask"),
                                      ty.u32(),
                                      core::IOAttributes{
-                                         /* location */ std::nullopt,
-                                         /* blend_src */ std::nullopt,
-                                         /* color */ std::nullopt,
-                                         /* builtin */ core::BuiltinValue::kSampleMask,
-                                         /* interpolation */ std::nullopt,
-                                         /* invariant */ false,
+                                         .builtin = core::BuiltinValue::kSampleMask,
                                      },
                                  },
                              });
@@ -1045,25 +966,21 @@ $B1: {  # root
 
 // Test that interpolation attributes are stripped from vertex inputs and fragment outputs.
 TEST_F(SpirvWriter_ShaderIOTest, InterpolationOnVertexInputOrFragmentOutput) {
-    auto* str_ty =
-        ty.Struct(mod.symbols.New("MyStruct"), {
-                                                   {
-                                                       mod.symbols.New("color"),
-                                                       ty.f32(),
-                                                       core::IOAttributes{
-                                                           /* location */ 1u,
-                                                           /* blend_src */ std::nullopt,
-                                                           /* color */ std::nullopt,
-                                                           /* builtin */ std::nullopt,
-                                                           /* interpolation */
-                                                           core::Interpolation{
-                                                               core::InterpolationType::kLinear,
-                                                               core::InterpolationSampling::kSample,
-                                                           },
-                                                           /* invariant */ false,
-                                                       },
-                                                   },
-                                               });
+    auto* str_ty = ty.Struct(mod.symbols.New("MyStruct"),
+                             {
+                                 {
+                                     mod.symbols.New("color"),
+                                     ty.f32(),
+                                     core::IOAttributes{
+                                         .location = 1u,
+                                         .interpolation =
+                                             core::Interpolation{
+                                                 core::InterpolationType::kLinear,
+                                                 core::InterpolationSampling::kSample,
+                                             },
+                                     },
+                                 },
+                             });
 
     // Vertex shader.
     {
@@ -1195,33 +1112,23 @@ $B1: {  # root
 }
 
 TEST_F(SpirvWriter_ShaderIOTest, ClampFragDepth) {
-    auto* str_ty = ty.Struct(mod.symbols.New("Outputs"),
-                             {
-                                 {
-                                     mod.symbols.New("color"),
-                                     ty.f32(),
-                                     core::IOAttributes{
-                                         /* location */ 0u,
-                                         /* blend_src */ std::nullopt,
-                                         /* color */ std::nullopt,
-                                         /* builtin */ std::nullopt,
-                                         /* interpolation */ std::nullopt,
-                                         /* invariant */ false,
-                                     },
-                                 },
-                                 {
-                                     mod.symbols.New("depth"),
-                                     ty.f32(),
-                                     core::IOAttributes{
-                                         /* location */ std::nullopt,
-                                         /* blend_src */ std::nullopt,
-                                         /* color */ std::nullopt,
-                                         /* builtin */ core::BuiltinValue::kFragDepth,
-                                         /* interpolation */ std::nullopt,
-                                         /* invariant */ false,
-                                     },
-                                 },
-                             });
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("Outputs"), {
+                                                  {
+                                                      mod.symbols.New("color"),
+                                                      ty.f32(),
+                                                      core::IOAttributes{
+                                                          .location = 0u,
+                                                      },
+                                                  },
+                                                  {
+                                                      mod.symbols.New("depth"),
+                                                      ty.f32(),
+                                                      core::IOAttributes{
+                                                          .builtin = core::BuiltinValue::kFragDepth,
+                                                      },
+                                                  },
+                                              });
 
     auto* ep = b.Function("foo", str_ty);
     ep->SetStage(core::ir::Function::PipelineStage::kFragment);
@@ -1299,33 +1206,23 @@ $B1: {  # root
 }
 
 TEST_F(SpirvWriter_ShaderIOTest, ClampFragDepth_MultipleFragmentShaders) {
-    auto* str_ty = ty.Struct(mod.symbols.New("Outputs"),
-                             {
-                                 {
-                                     mod.symbols.New("color"),
-                                     ty.f32(),
-                                     core::IOAttributes{
-                                         /* location */ 0u,
-                                         /* blend_src */ std::nullopt,
-                                         /* color */ std::nullopt,
-                                         /* builtin */ std::nullopt,
-                                         /* interpolation */ std::nullopt,
-                                         /* invariant */ false,
-                                     },
-                                 },
-                                 {
-                                     mod.symbols.New("depth"),
-                                     ty.f32(),
-                                     core::IOAttributes{
-                                         /* location */ std::nullopt,
-                                         /* blend_src */ std::nullopt,
-                                         /* color */ std::nullopt,
-                                         /* builtin */ core::BuiltinValue::kFragDepth,
-                                         /* interpolation */ std::nullopt,
-                                         /* invariant */ false,
-                                     },
-                                 },
-                             });
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("Outputs"), {
+                                                  {
+                                                      mod.symbols.New("color"),
+                                                      ty.f32(),
+                                                      core::IOAttributes{
+                                                          .location = 0u,
+                                                      },
+                                                  },
+                                                  {
+                                                      mod.symbols.New("depth"),
+                                                      ty.f32(),
+                                                      core::IOAttributes{
+                                                          .builtin = core::BuiltinValue::kFragDepth,
+                                                      },
+                                                  },
+                                              });
 
     auto make_entry_point = [&](std::string_view name) {
         auto* ep = b.Function(name, str_ty);
@@ -1514,33 +1411,22 @@ $B1: {  # root
 }
 
 TEST_F(SpirvWriter_ShaderIOTest, F16_IO_WithoutPolyfill) {
-    auto* outputs =
-        ty.Struct(mod.symbols.New("Outputs"), {
-                                                  {
-                                                      mod.symbols.New("out1"),
-                                                      ty.f16(),
-                                                      core::IOAttributes{
-                                                          /* location */ 1u,
-                                                          /* blend_src */ std::nullopt,
-                                                          /* color */ std::nullopt,
-                                                          /* builtin */ std::nullopt,
-                                                          /* interpolation */ std::nullopt,
-                                                          /* invariant */ false,
-                                                      },
-                                                  },
-                                                  {
-                                                      mod.symbols.New("out2"),
-                                                      ty.vec4<f16>(),
-                                                      core::IOAttributes{
-                                                          /* location */ 2u,
-                                                          /* blend_src */ std::nullopt,
-                                                          /* color */ std::nullopt,
-                                                          /* builtin */ std::nullopt,
-                                                          /* interpolation */ std::nullopt,
-                                                          /* invariant */ false,
-                                                      },
-                                                  },
-                                              });
+    auto* outputs = ty.Struct(mod.symbols.New("Outputs"), {
+                                                              {
+                                                                  mod.symbols.New("out1"),
+                                                                  ty.f16(),
+                                                                  core::IOAttributes{
+                                                                      .location = 1u,
+                                                                  },
+                                                              },
+                                                              {
+                                                                  mod.symbols.New("out2"),
+                                                                  ty.vec4<f16>(),
+                                                                  core::IOAttributes{
+                                                                      .location = 2u,
+                                                                  },
+                                                              },
+                                                          });
 
     auto* in1 = b.FunctionParam("in1", ty.f16());
     auto* in2 = b.FunctionParam("in2", ty.vec4<f16>());
@@ -1609,33 +1495,22 @@ $B1: {  # root
 }
 
 TEST_F(SpirvWriter_ShaderIOTest, F16_IO_WithPolyfill) {
-    auto* outputs =
-        ty.Struct(mod.symbols.New("Outputs"), {
-                                                  {
-                                                      mod.symbols.New("out1"),
-                                                      ty.f16(),
-                                                      core::IOAttributes{
-                                                          /* location */ 1u,
-                                                          /* blend_src */ std::nullopt,
-                                                          /* color */ std::nullopt,
-                                                          /* builtin */ std::nullopt,
-                                                          /* interpolation */ std::nullopt,
-                                                          /* invariant */ false,
-                                                      },
-                                                  },
-                                                  {
-                                                      mod.symbols.New("out2"),
-                                                      ty.vec4<f16>(),
-                                                      core::IOAttributes{
-                                                          /* location */ 2u,
-                                                          /* blend_src */ std::nullopt,
-                                                          /* color */ std::nullopt,
-                                                          /* builtin */ std::nullopt,
-                                                          /* interpolation */ std::nullopt,
-                                                          /* invariant */ false,
-                                                      },
-                                                  },
-                                              });
+    auto* outputs = ty.Struct(mod.symbols.New("Outputs"), {
+                                                              {
+                                                                  mod.symbols.New("out1"),
+                                                                  ty.f16(),
+                                                                  core::IOAttributes{
+                                                                      .location = 1u,
+                                                                  },
+                                                              },
+                                                              {
+                                                                  mod.symbols.New("out2"),
+                                                                  ty.vec4<f16>(),
+                                                                  core::IOAttributes{
+                                                                      .location = 2u,
+                                                                  },
+                                                              },
+                                                          });
 
     auto* in1 = b.FunctionParam("in1", ty.f16());
     auto* in2 = b.FunctionParam("in2", ty.vec4<f16>());
