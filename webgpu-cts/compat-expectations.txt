@@ -82,7 +82,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2025-04-30 11:02:49AM
+# Last rolled: 2025-05-05 07:38:23AM
 
 # conflicts_allowed: true
 # full_wildcard_support: true
@@ -335,7 +335,6 @@ crbug.com/342840940 webgpu:api,validation,createTexture:dimension_type_and_forma
 
 # Generates GL_OUT_OF_MEMORY
 crbug.com/361372970 [ android arm ] webgpu:api,validation,image_copy,layout_related:copy_end_overflows_u64:method="WriteTexture" [ Failure ]
-
 
 # Flaky memory_sync failures on Intel
 crbug.com/42241023 [ intel-0x9bc5 linux ] webgpu:api,operation,memory_sync,buffer,multiple_buffers:ww:boundary="command-buffer";writeOps=["storage","b2b-copy"];contexts=["render-bundle-encoder","command-encoder"] [ Failure ]
@@ -789,7 +788,6 @@ crbug.com/407076123 [ android-14 android-pixel-6 ] webgpu:api,validation,createB
 crbug.com/407076123 [ linux nvidia ] webgpu:api,validation,createBindGroup:buffer,resource_binding_size:type="read-only-storage" [ Failure ]
 crbug.com/407076123 [ linux nvidia ] webgpu:api,validation,createBindGroup:buffer,resource_binding_size:type="storage" [ Failure ]
 
-
 # Test bug, tests require implementation to provide "core" but fails when not available
 crbug.com/366151404 [ android android-chromium android-pixel-6 angle-opengles arm compat-default mobile ] webgpu:api,operation,adapter,requestAdapter:requestAdapter_invalid_featureLevel:featureLevel="_undef_" [ Failure ]
 crbug.com/366151404 [ android android-chromium android-pixel-6 angle-opengles arm compat-default mobile ] webgpu:api,operation,adapter,requestAdapter:requestAdapter_invalid_featureLevel:featureLevel="core" [ Failure ]
@@ -824,6 +822,7 @@ crbug.com/0000 [ linux nvidia ] webgpu:api,validation,state,device_lost,destroy:
 crbug.com/0000 [ linux nvidia ] webgpu:api,validation,state,device_lost,destroy:queue,copyExternalImageToTexture,canvas:canvasType="offscreen";contextType="webgl2";awaitLost=false [ Failure ]
 crbug.com/0000 [ linux nvidia ] webgpu:api,validation,state,device_lost,destroy:queue,copyExternalImageToTexture,canvas:canvasType="onscreen";contextType="webgl";awaitLost=false [ Failure ]
 crbug.com/0000 [ linux nvidia ] webgpu:shader,execution,expression,call,builtin,textureSampleBaseClampToEdge:2d_coords:stage="v";textureType="texture_external";filt="nearest";modeU="m";modeV="c" [ Failure ]
+crbug.com/0000 [ android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_array_2d_coords:stage="c";format="depth16unorm";filt="nearest";modeU="r";modeV="r";offset=true [ Failure ]
 crbug.com/0000 [ android-pixel-6 ] webgpu:shader,validation,shader_io,workgroup_size:workgroup_size:attr="override_expr" [ Failure ]
 crbug.com/0000 [ android-pixel-6 ] webgpu:web_platform,canvas,getCurrentTexture:multiple_frames:canvasType="onscreen" [ Failure ]
 crbug.com/0000 [ android-pixel-6 android-t ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:alpha="none";orientation="flipY";colorSpaceConversion="none";srcFlipYInCopy=true;dstFormat="rg16float";dstPremultiplied=false [ Failure ]
