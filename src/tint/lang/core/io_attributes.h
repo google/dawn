@@ -48,6 +48,8 @@ struct IOAttributes {
     std::optional<core::BuiltinValue> builtin = std::nullopt;
     /// The values of a `@interpolate` attribute.
     std::optional<core::Interpolation> interpolation = std::nullopt;
+    /// The value of an `@input_attachment_index` attribute
+    std::optional<uint32_t> input_attachment_index = std::nullopt;
     /// True if the object is annotated with `@invariant`.
     bool invariant = false;
 };

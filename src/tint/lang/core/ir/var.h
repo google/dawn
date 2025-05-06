@@ -82,9 +82,11 @@ class Var : public Castable<Var, OperandInstruction<1, 1>> {
 
     /// Sets the input attachment index
     /// @param index the index
-    void SetInputAttachmentIndex(uint32_t index) { input_attachment_index_ = index; }
+    void SetInputAttachmentIndex(uint32_t index) { attributes_.input_attachment_index = index; }
     /// @returns the input attachment index if any
-    std::optional<uint32_t> InputAttachmentIndex() const { return input_attachment_index_; }
+    std::optional<uint32_t> InputAttachmentIndex() const {
+        return attributes_.input_attachment_index;
+    }
 
     /// Sets the IO attributes
     /// @param attrs the attributes
@@ -100,7 +102,6 @@ class Var : public Castable<Var, OperandInstruction<1, 1>> {
 
   private:
     std::optional<struct BindingPoint> binding_point_;
-    std::optional<uint32_t> input_attachment_index_;
     IOAttributes attributes_;
 };
 
