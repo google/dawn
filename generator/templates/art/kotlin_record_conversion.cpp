@@ -44,6 +44,7 @@
 {% macro define_kotlin_to_struct_conversion(function_name, kotlin_name, struct_name, members) %}
     inline void {{function_name}}(JNIContext* c, const {{kotlin_name}}& inStruct, {{struct_name}}* outStruct) {
         JNIEnv* env = c->env;
+        JNIClasses* classes = JNIClasses::getInstance(env);
         *outStruct = {};
 
         {% for member in kotlin_record_members(members) %}
@@ -82,7 +83,7 @@
                         out = array;
 
                         {% if member.type.category in ['bitmask', 'enum'] %}
-                            jclass memberClass = env->FindClass("{{ jni_name(member.type) }}");
+                            jclass memberClass = classes->{{ member.type.name.camelCase() }};
                             jmethodID getValue = env->GetMethodID(memberClass, "getValue", "()I");
                             for (int idx = 0; idx != outLength; idx++) {
                                 jobject element = env->GetObjectArrayElement(in, idx);
@@ -90,7 +91,7 @@
                                         env->CallIntMethod(element, getValue));
                             }
                         {% elif member.type.category == 'object' %}
-                            jclass memberClass = env->FindClass("{{ jni_name(member.type) }}");
+                            jclass memberClass = classes->{{ member.type.name.camelCase() }};
                             jmethodID getHandle = env->GetMethodID(memberClass, "getHandle", "()J");
                             for (int idx = 0; idx != outLength; idx++) {
                                 jobject element = env->GetObjectArrayElement(in, idx);
@@ -108,7 +109,7 @@
                 //* From here members are single values.
                 {% elif member.type.category == 'object' %}
                     if (in != nullptr) {
-                        jclass memberClass = env->FindClass("{{ jni_name(member.type) }}");
+                        jclass memberClass = classes->{{ member.type.name.camelCase() }};
                         jmethodID getHandle = env->GetMethodID(memberClass, "getHandle", "()J");
                         out = reinterpret_cast<{{as_cType(member.type.name)}}>(
                                 env->CallLongMethod(in, getHandle));
@@ -150,6 +151,7 @@
                         if (env->ExceptionCheck()) {
                             return;
                         }
+                        JNIClasses* classes = JNIClasses::getInstance(env);
 
                         {% for callbackArg in kotlin_record_members(member.type.arguments) -%}
                             {{ convert_to_kotlin(callbackArg.name.camelCase(),
@@ -160,7 +162,7 @@
 
                         //* Get the client (Kotlin) callback so we can call it.
                         jmethodID callbackMethod = env->GetMethodID(
-                                env->FindClass("{{ jni_name(member.type) }}"), "callback", "(
+                                classes->{{ member.type.name.camelCase() }}, "callback", "(
                             {%- for callbackArg in kotlin_record_members(member.type.arguments) -%}
                                 {{- jni_signature(callbackArg) -}}
                             {%- endfor %})V");

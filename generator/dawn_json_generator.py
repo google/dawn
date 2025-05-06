@@ -803,7 +803,8 @@ def compute_kotlin_params(loaded_json, kotlin_json):
     # A structure may need to know which other structures listed it as a chain root, e.g.
     # to know whether to mark the generated class 'open'.
     chain_children = defaultdict(list)
-    for structure in params_kotlin['by_category']['structure']:
+    by_category = params_kotlin['by_category']
+    for structure in by_category['structure']:
         for chain_root in structure.chain_roots:
             chain_children[chain_root.name.get()].append(structure)
     params_kotlin['chain_children'] = chain_children
@@ -813,6 +814,14 @@ def compute_kotlin_params(loaded_json, kotlin_json):
     params_kotlin['kotlin_record_members'] = kotlin_record_members
     params_kotlin['jni_name'] = jni_name
     params_kotlin['is_async_method'] = is_async_method
+    params_kotlin['has_kotlin_classes'] = (
+        by_category['callback function'] + by_category['callback info'] +
+        by_category['enum'] + by_category['function pointer'] +
+        by_category['object'] + [
+            structure for structure in by_category['structure']
+            if include_structure(structure)
+        ])
+
     return params_kotlin
 
 
@@ -1521,7 +1530,12 @@ class MultiGeneratorFromDawnJSON(Generator):
             renders.append(
                 FileRender('art/methods.cpp', 'cpp/methods.cpp',
                            [RENDER_PARAMS_BASE, params_kotlin]))
-
+            renders.append(
+                FileRender('art/JNIClasses.h', 'cpp/JNIClasses.h',
+                           [RENDER_PARAMS_BASE, params_kotlin]))
+            renders.append(
+                FileRender('art/JNIClasses.cpp', 'cpp/JNIClasses.cpp',
+                           [RENDER_PARAMS_BASE, params_kotlin]))
         return GeneratorOutput(renders=renders,
                                imported_templates=imported_templates)
 

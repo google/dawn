@@ -83,7 +83,7 @@
 {% macro convert_array_element_to_kotlin(input, output, size, member) %}
     {%- if member.type.category in ['bitmask', 'enum'] -%}
         //* Kotlin value classes do not get inlined in arrays, so the creation method is different.
-        jclass clz = env->FindClass("{{ jni_name(member.type) }}");
+        jclass clz = classes->{{ member.type.name.camelCase() }};
         jmethodID init = env->GetMethodID(clz, "<init>", "(I)V");
         jobject {{ output }} = env->NewObject(clz, init, static_cast<jint>({{ input }}));
     {%- else -%}
@@ -99,8 +99,7 @@
         {% elif member.type.category in ['bitmask', 'enum', 'object', 'callback info', 'structure'] %}
             //* Native container converted to a Kotlin container.
             jobjectArray {{ output }} = env->NewObjectArray(
-                    {{ size }},
-                    env->FindClass("{{ jni_name(member.type) }}"), 0);
+                    {{ size }}, classes->{{ member.type.name.camelCase() }}, 0);
             for (int idx = 0; idx != {{ size }}; idx++) {
                 {{ convert_array_element_to_kotlin(input + '[idx]', 'element', None, {'type': member.type})  | indent(4) }}
                 env->SetObjectArrayElement({{ output }}, idx, element);
@@ -114,7 +113,7 @@
     {% elif member.type.category == 'object' %}
         jobject {{ output }};
         {
-            jclass clz = env->FindClass("{{ jni_name(member.type) }}");
+            jclass clz = classes->{{ member.type.name.camelCase() }};
             jmethodID init = env->GetMethodID(clz, "<init>", "(J)V");
             {{ output }} = env->NewObject(clz, init, reinterpret_cast<jlong>({{ input }}));
         }

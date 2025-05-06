@@ -30,6 +30,7 @@
 #include <stdlib.h>
 #include <webgpu/webgpu.h>
 
+#include "JNIClasses.h"
 #include "JNIContext.h"
 #include "structures.h"
 
@@ -95,6 +96,7 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
     {% endfor %}) {
 
     // * Helper context for the duration of this method call.
+    JNIClasses* classes = JNIClasses::getInstance(env);
     JNIContext c(env);
 
     //* Perform the conversion of arguments.
@@ -106,7 +108,7 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
     ConvertInternal(&c, kotlinRecord, &args);
 
     {% if object %}
-        jclass memberClass = env->FindClass("{{ jni_name(object) }}");
+        jclass memberClass = classes->{{ object.name.camelCase() }};
         jmethodID getHandle = env->GetMethodID(memberClass, "getHandle", "()J");
         auto handle =
                 reinterpret_cast<{{ as_cType(object.name) }}>(env->CallLongMethod(obj, getHandle));
@@ -185,7 +187,8 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
     JNIEXPORT void JNICALL
     Java_{{ kotlin_package.replace('.', '_') }}_{{ obj.name.CamelCase() }}_close(
             JNIEnv *env, jobject obj) {
-        jclass clz = env->FindClass("{{ jni_name(obj) }}");
+        JNIClasses* classes = JNIClasses::getInstance(env);
+        jclass clz = classes->{{ obj.name.camelCase() }};
         const {{ as_cType(obj.name) }} handle = reinterpret_cast<{{ as_cType(obj.name) }}>(
                 env->CallLongMethod(obj, env->GetMethodID(clz, "getHandle", "()J")));
         wgpu{{ obj.name.CamelCase() }}Release(handle);
