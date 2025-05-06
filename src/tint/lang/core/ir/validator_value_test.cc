@@ -86,6 +86,21 @@ TEST_F(IR_ValidatorTest, Var_RootBlock_NullResult) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Var_RootBlock_TooManyResults) {
+    auto* v = b.Var(ty.ptr(private_, ty.i32()));
+    v->SetInitializer(b.Constant(0_i));
+    v->SetResults(Vector{b.InstructionResult<i32>(), b.InstructionResult<i32>()});
+    mod.root_block->Append(v);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:2:20 error: var: expected exactly 1 results, got 2
+  %1:i32, %2:i32 = var 0i
+                   ^^^
+)")) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Var_VoidType) {
     mod.root_block->Append(b.Var(ty.ptr(private_, ty.void_())));
 
@@ -132,6 +147,25 @@ TEST_F(IR_ValidatorTest, Var_Function_NoResult) {
                 testing::HasSubstr(R"(:3:13 error: var: expected exactly 1 results, got 0
     undef = var 1i
             ^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Var_Function_TooManyResults) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.Append(f->Block(), [&] {
+        auto* v = b.Var<function, i32>();
+        v->SetInitializer(b.Constant(0_i));
+        v->SetResults(Vector{b.InstructionResult<i32>(), b.InstructionResult<i32>()});
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:3:22 error: var: expected exactly 1 results, got 2
+    %2:i32, %3:i32 = var 0i
+                     ^^^
 )")) << res.Failure();
 }
 
