@@ -2439,6 +2439,8 @@ MemoryUsageInfo DeviceBase::ComputeEstimatedMemoryUsage() const {
         info.texturesUsage += size;
         if (texture->GetSampleCount() > 1) {
             info.msaaTexturesUsage += size;
+            info.msaaTexturesCount++;
+            info.largestMsaaTextureUsage = std::max(info.largestMsaaTextureUsage, size);
         }
         if (texture->GetFormat().HasDepthOrStencil()) {
             info.depthStencilTexturesUsage += size;
