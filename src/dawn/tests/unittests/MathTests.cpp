@@ -432,20 +432,20 @@ TEST(Math, SRGBToLinear) {
 
 // Tests for RoundUp
 TEST(Math, RoundUp) {
-    ASSERT_EQ(RoundUp(2, 2), 2u);
-    ASSERT_EQ(RoundUp(2, 4), 4u);
-    ASSERT_EQ(RoundUp(6, 2), 6u);
-    ASSERT_EQ(RoundUp(8, 4), 8u);
-    ASSERT_EQ(RoundUp(12, 6), 12u);
+    ASSERT_EQ(RoundUp(2u, 2u), 2u);
+    ASSERT_EQ(RoundUp(2u, 4u), 4u);
+    ASSERT_EQ(RoundUp(6u, 2u), 6u);
+    ASSERT_EQ(RoundUp(8u, 4u), 8u);
+    ASSERT_EQ(RoundUp(12u, 6u), 12u);
 
-    ASSERT_EQ(RoundUp(3, 3), 3u);
-    ASSERT_EQ(RoundUp(3, 5), 5u);
-    ASSERT_EQ(RoundUp(5, 3), 6u);
-    ASSERT_EQ(RoundUp(9, 5), 10u);
+    ASSERT_EQ(RoundUp(3u, 3u), 3u);
+    ASSERT_EQ(RoundUp(3u, 5u), 5u);
+    ASSERT_EQ(RoundUp(5u, 3u), 6u);
+    ASSERT_EQ(RoundUp(9u, 5u), 10u);
 
     // Test extrema
     ASSERT_EQ(RoundUp(0x7FFFFFFFFFFFFFFFull, 0x8000000000000000ull), 0x8000000000000000ull);
-    ASSERT_EQ(RoundUp(1, 1), 1u);
+    ASSERT_EQ(RoundUp(1u, 1u), 1u);
 }
 
 // Tests for IsSubset
