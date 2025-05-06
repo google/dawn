@@ -966,6 +966,7 @@ crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,ca
 crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="v";format="astc-10x8-unorm";dim="3d";filt="linear";mode="*";offset=false [ Failure ]
 crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="v";format="astc-10x8-unorm";dim="3d";filt="linear";mode="m";offset=true [ Failure ]
 crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="v";format="astc-10x8-unorm";dim="3d";filt="nearest";mode="m";offset=false [ Failure ]
+crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="v";format="astc-10x8-unorm";dim="3d";filt="nearest";mode="c";offset=false [ Failure ]
 crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="v";format="astc-5x4-unorm";dim="3d";* [ Failure ]
 crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="v";format="astc-6x6-unorm";dim="3d";filt="linear";mode="*";offset=* [ Failure ]
 
