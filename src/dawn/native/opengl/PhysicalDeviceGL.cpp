@@ -229,9 +229,17 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
                             mFunctions.IsGLExtensionSupported("GL_ARB_texture_compression_bptc") ||
                             mFunctions.IsGLExtensionSupported("GL_EXT_texture_compression_bptc");
 
+        bool supportsBCSliced3D = true;
+        if (mVendorId == gpu_info::kVendorID_Nvidia) {
+            supportsBCSliced3D &= mFunctions.IsAtLeastGL(4, 2);
+        }
+
         if (supportsS3TC && (supportsTextureSRGB || supportsS3TCSRGB) && supportsRGTC &&
             supportsBPTC) {
             EnableFeature(Feature::TextureCompressionBC);
+            if (supportsBCSliced3D) {
+                EnableFeature(Feature::TextureCompressionBCSliced3D);
+            }
         }
     }
 
