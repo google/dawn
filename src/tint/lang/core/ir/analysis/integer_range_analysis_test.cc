@@ -8795,5 +8795,88 @@ TEST_F(IR_IntegerRangeAnalysisTest, NonConstantAccessIndex) {
     ASSERT_EQ(nullptr, access_x_info);
 }
 
+TEST_F(IR_IntegerRangeAnalysisTest, SignedIntegerScalarConstant) {
+    auto* func = b.Function("func", ty.void_());
+    Constant* constant = nullptr;
+    b.Append(func->Block(), [&] {
+        constant = b.Constant(10_i);
+        b.Var("a", constant);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    %a:ptr<function, i32, read_write> = var 10i
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(func);
+    auto* info = analysis.GetInfo(constant);
+    ASSERT_NE(nullptr, info);
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info->range));
+    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info->range);
+    EXPECT_EQ(10, range.min_bound);
+    EXPECT_EQ(10, range.max_bound);
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, UnsignedIntegerScalarConstant) {
+    auto* func = b.Function("func", ty.void_());
+    Constant* constant = nullptr;
+    b.Append(func->Block(), [&] {
+        constant = b.Constant(20_u);
+        b.Var("a", constant);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    %a:ptr<function, u32, read_write> = var 20u
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(func);
+    auto* info = analysis.GetInfo(constant);
+    ASSERT_NE(nullptr, info);
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info->range));
+    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info->range);
+    EXPECT_EQ(20u, range.min_bound);
+    EXPECT_EQ(20u, range.max_bound);
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, NonIntegerConstant) {
+    auto* func = b.Function("func", ty.void_());
+    Constant* constant = nullptr;
+    b.Append(func->Block(), [&] {
+        constant = b.Constant(1.0_f);
+        b.Var("a", constant);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    %a:ptr<function, f32, read_write> = var 1.0f
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(func);
+    auto* info = analysis.GetInfo(constant);
+    ASSERT_EQ(nullptr, info);
+}
+
 }  // namespace
 }  // namespace tint::core::ir::analysis

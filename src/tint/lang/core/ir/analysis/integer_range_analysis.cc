@@ -83,6 +83,16 @@ struct CompareOpAndConstRHS {
     const Binary* binary = nullptr;
 };
 
+IntegerRangeInfo ToIntegerRangeInfo(const Constant* constant,
+                                    int64_t min_value,
+                                    int64_t max_value) {
+    if (constant->Type()->IsSignedIntegerScalar()) {
+        return IntegerRangeInfo(min_value, max_value);
+    } else {
+        return IntegerRangeInfo(static_cast<uint64_t>(min_value), static_cast<uint64_t>(max_value));
+    }
+}
+
 }  // namespace
 
 IntegerRangeInfo::IntegerRangeInfo(int64_t min_bound, int64_t max_bound) {
@@ -193,6 +203,18 @@ struct IntegerRangeAnalysisImpl {
         return GetInfo(function_param, index);
     }
 
+    const IntegerRangeInfo* GetInfo(const Constant* constant) {
+        if (!IsConstantInteger(constant)) {
+            return nullptr;
+        }
+        const IntegerRangeInfo& range_info =
+            integer_constant_range_info_map_.GetOrAdd(constant, [&]() -> IntegerRangeInfo {
+                int64_t const_value = GetValueFromConstant(constant);
+                return ToIntegerRangeInfo(constant, const_value, const_value);
+            });
+        return &range_info;
+    }
+
     /// Analyze a loop to compute the range of the loop control variable if possible.
     void AnalyzeLoop(const Loop* loop) {
         const Var* index = GetLoopControlVariableFromConstantInitializer(loop);
@@ -213,19 +235,12 @@ struct IntegerRangeAnalysisImpl {
         TINT_ASSERT(index->Initializer()->As<Constant>());
 
         // for (var i = const_init; ...)
-        int64_t const_init = GetValueFromConstant(index->Initializer()->As<Constant>());
+        const Constant* constant_initializer = index->Initializer()->As<Constant>();
+        int64_t const_init = GetValueFromConstant(constant_initializer);
 
         // for (...; i++) or for(...; i--)
         bool index_is_increasing = update->Op() == BinaryOp::kAdd;
 
-        auto to_integer_range_info = [&](int64_t min_value, int64_t max_value) {
-            if (index->Initializer()->As<Constant>()->Type()->IsSignedIntegerScalar()) {
-                return IntegerRangeInfo(min_value, max_value);
-            } else {
-                return IntegerRangeInfo(static_cast<uint64_t>(min_value),
-                                        static_cast<uint64_t>(max_value));
-            }
-        };
         switch (compare_info.op) {
             case BinaryOp::kLessThanEqual: {
                 // for (var index = const_init; index <= const_rhs; index++)
@@ -238,8 +253,8 @@ struct IntegerRangeAnalysisImpl {
                 // - `index <= const_rhs` can correctly exit when `const_init + 1` is the maximum
                 //   value of `i32` or `u32`.
                 if (index_is_increasing && const_init <= compare_info.const_rhs) {
-                    IntegerRangeInfo range_info =
-                        to_integer_range_info(const_init, compare_info.const_rhs);
+                    IntegerRangeInfo range_info = ToIntegerRangeInfo(
+                        constant_initializer, const_init, compare_info.const_rhs);
                     integer_var_range_info_map_.Add(index, range_info);
                 }
                 break;
@@ -254,8 +269,8 @@ struct IntegerRangeAnalysisImpl {
                 // - `index >= const_rhs` can correctly exit when `const_init - 1` is the minimum
                 //   value of `i32` or `u32`.
                 if (!index_is_increasing && const_init >= compare_info.const_rhs) {
-                    IntegerRangeInfo range_info =
-                        to_integer_range_info(compare_info.const_rhs, const_init);
+                    IntegerRangeInfo range_info = ToIntegerRangeInfo(
+                        constant_initializer, compare_info.const_rhs, const_init);
                     integer_var_range_info_map_.Add(index, range_info);
                 }
                 break;
@@ -676,6 +691,7 @@ struct IntegerRangeAnalysisImpl {
     Hashmap<const FunctionParam*, Vector<IntegerRangeInfo, 3>, 4>
         integer_function_param_range_info_map_;
     Hashmap<const Var*, IntegerRangeInfo, 8> integer_var_range_info_map_;
+    Hashmap<const Constant*, IntegerRangeInfo, 8> integer_constant_range_info_map_;
 };
 
 IntegerRangeAnalysis::IntegerRangeAnalysis(Function* func)
@@ -714,6 +730,10 @@ const IntegerRangeInfo* IntegerRangeAnalysis::GetInfo(const Load* load) {
 
 const IntegerRangeInfo* IntegerRangeAnalysis::GetInfo(const Access* access) {
     return impl_->GetInfo(access);
+}
+
+const IntegerRangeInfo* IntegerRangeAnalysis::GetInfo(const Constant* constant) {
+    return impl_->GetInfo(constant);
 }
 
 }  // namespace tint::core::ir::analysis
