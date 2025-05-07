@@ -134,7 +134,6 @@ dawn_add_library(
     absl::span
   PRIVATE_DEPENDS
     absl::strings
-    absl::string_view
     absl::str_format_internal
     absl::flat_hash_map
     ${private_system_depends}

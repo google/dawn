@@ -33,13 +33,13 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <variant>
 #include <vector>
 
 #include "absl/container/flat_hash_map.h"
 #include "absl/container/flat_hash_set.h"
-#include "absl/strings/string_view.h"
 #include "dawn/common/Constants.h"
 #include "dawn/common/ContentLessObjectCacheable.h"
 #include "dawn/common/MutexProtected.h"
@@ -350,7 +350,7 @@ class ShaderModuleBase : public RefCountedWithExternalCount<ApiObjectBase>,
     ObjectType GetType() const override;
 
     // Return true iff the program has an entrypoint called `entryPoint`.
-    bool HasEntryPoint(absl::string_view entryPoint) const;
+    bool HasEntryPoint(std::string_view entryPoint) const;
 
     // Return the number of entry points for a stage.
     size_t GetEntryPointCount(SingleShaderStage stage) const { return mEntryPointCounts[stage]; }
@@ -361,7 +361,7 @@ class ShaderModuleBase : public RefCountedWithExternalCount<ApiObjectBase>,
 
     // Return the metadata for the given `entryPoint`. HasEntryPoint with the same argument
     // must be true.
-    const EntryPointMetadata& GetEntryPoint(absl::string_view entryPoint) const;
+    const EntryPointMetadata& GetEntryPoint(std::string_view entryPoint) const;
 
     // Functions necessary for the unordered_set<ShaderModuleBase*>-based cache.
     size_t ComputeContentHash() override;

@@ -28,6 +28,7 @@
 #include "dawn/native/webgpu_absl_format.h"
 
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include "dawn/common/MatchVariant.h"
@@ -701,7 +702,7 @@ AbslFormatConvert(StringView value, const absl::FormatConversionSpec& spec, absl
     }
 
     s->Append("\"");
-    s->Append(absl::string_view(value));
+    s->Append(std::string_view(value));
     s->Append("\"");
     return {true};
 }

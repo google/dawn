@@ -68,7 +68,6 @@ group("abseil") {
       "${dawn_root}/third_party/gn/abseil-cpp:inlined_vector",
       "${dawn_root}/third_party/gn/abseil-cpp:span",
       "${dawn_root}/third_party/gn/abseil-cpp:str_format",
-      "${dawn_root}/third_party/gn/abseil-cpp:string_view",
       "${dawn_root}/third_party/gn/abseil-cpp:strings",
     ]
   }

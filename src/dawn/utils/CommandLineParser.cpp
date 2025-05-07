@@ -38,7 +38,7 @@ namespace dawn::utils {
 
 // OptionBase
 
-CommandLineParser::OptionBase::OptionBase(absl::string_view name, absl::string_view desc)
+CommandLineParser::OptionBase::OptionBase(std::string_view name, std::string_view desc)
     : mName(name), mDescription(desc), mParameter("value") {}
 
 CommandLineParser::OptionBase::~OptionBase() = default;
@@ -64,7 +64,7 @@ bool CommandLineParser::OptionBase::IsSet() const {
 }
 
 CommandLineParser::OptionBase::ParseResult CommandLineParser::OptionBase::Parse(
-    absl::Span<const absl::string_view> args) {
+    absl::Span<const std::string_view> args) {
     auto result = ParseImpl(args);
     if (result.success) {
         mSet = true;
@@ -74,7 +74,7 @@ CommandLineParser::OptionBase::ParseResult CommandLineParser::OptionBase::Parse(
 
 // BoolOption
 
-CommandLineParser::BoolOption::BoolOption(absl::string_view name, absl::string_view desc)
+CommandLineParser::BoolOption::BoolOption(std::string_view name, std::string_view desc)
     : Option(name, desc) {}
 
 CommandLineParser::BoolOption::~BoolOption() = default;
@@ -88,7 +88,7 @@ std::string CommandLineParser::BoolOption::GetParameter() const {
 }
 
 CommandLineParser::OptionBase::ParseResult CommandLineParser::BoolOption::ParseImpl(
-    absl::Span<const absl::string_view> args) {
+    absl::Span<const std::string_view> args) {
     // Explicit true
     if (!args.empty() && args.front() == "true") {
         if (IsSet()) {
@@ -121,7 +121,7 @@ CommandLineParser::OptionBase::ParseResult CommandLineParser::BoolOption::ParseI
 
 // StringOption
 
-CommandLineParser::StringOption::StringOption(absl::string_view name, absl::string_view desc)
+CommandLineParser::StringOption::StringOption(std::string_view name, std::string_view desc)
     : Option(name, desc) {}
 
 CommandLineParser::StringOption::~StringOption() = default;
@@ -131,7 +131,7 @@ std::string CommandLineParser::StringOption::GetValue() const {
 }
 
 CommandLineParser::OptionBase::ParseResult CommandLineParser::StringOption::ParseImpl(
-    absl::Span<const absl::string_view> args) {
+    absl::Span<const std::string_view> args) {
     if (IsSet()) {
         return {false, args, "cannot be set multiple times"};
     }
@@ -146,8 +146,7 @@ CommandLineParser::OptionBase::ParseResult CommandLineParser::StringOption::Pars
 
 // StringListOption
 
-CommandLineParser::StringListOption::StringListOption(absl::string_view name,
-                                                      absl::string_view desc)
+CommandLineParser::StringListOption::StringListOption(std::string_view name, std::string_view desc)
     : Option(name, desc) {}
 
 CommandLineParser::StringListOption::~StringListOption() = default;
@@ -165,12 +164,12 @@ std::vector<std::string> CommandLineParser::StringListOption::GetOwnedValue() co
 }
 
 CommandLineParser::OptionBase::ParseResult CommandLineParser::StringListOption::ParseImpl(
-    absl::Span<const absl::string_view> args) {
+    absl::Span<const std::string_view> args) {
     if (args.empty()) {
         return {false, args, "expected a value"};
     }
 
-    for (absl::string_view s : absl::StrSplit(args.front(), ",")) {
+    for (std::string_view s : absl::StrSplit(args.front(), ",")) {
         mValue.push_back(std::string{s});
     }
     return {true, args.subspan(1)};
@@ -178,24 +177,24 @@ CommandLineParser::OptionBase::ParseResult CommandLineParser::StringListOption::
 
 // CommandLineParser
 
-CommandLineParser::BoolOption& CommandLineParser::AddBool(absl::string_view name,
-                                                          absl::string_view desc) {
+CommandLineParser::BoolOption& CommandLineParser::AddBool(std::string_view name,
+                                                          std::string_view desc) {
     return AddOption(std::make_unique<BoolOption>(name, desc));
 }
 
-CommandLineParser::StringOption& CommandLineParser::AddString(absl::string_view name,
-                                                              absl::string_view desc) {
+CommandLineParser::StringOption& CommandLineParser::AddString(std::string_view name,
+                                                              std::string_view desc) {
     return AddOption(std::make_unique<StringOption>(name, desc));
 }
 
-CommandLineParser::StringListOption& CommandLineParser::AddStringList(absl::string_view name,
-                                                                      absl::string_view desc) {
+CommandLineParser::StringListOption& CommandLineParser::AddStringList(std::string_view name,
+                                                                      std::string_view desc) {
     return AddOption(std::make_unique<StringListOption>(name, desc));
 }
 
 // static
-std::string CommandLineParser::JoinConversionNames(absl::Span<const absl::string_view> names,
-                                                   absl::string_view separator) {
+std::string CommandLineParser::JoinConversionNames(absl::Span<const std::string_view> names,
+                                                   std::string_view separator) {
     return absl::StrJoin(names, separator);
 }
 
@@ -206,7 +205,7 @@ CommandLineParser::BoolOption& CommandLineParser::AddHelp() {
 // static
 const CommandLineParser::ParseOptions CommandLineParser::kDefaultParseOptions = {};
 
-CommandLineParser::ParseResult CommandLineParser::Parse(absl::Span<const absl::string_view> args,
+CommandLineParser::ParseResult CommandLineParser::Parse(absl::Span<const std::string_view> args,
                                                         const ParseOptions& parseOptions) {
     // Build the map of name to option.
     absl::flat_hash_map<std::string, OptionBase*> nameToOption;
@@ -293,7 +292,7 @@ CommandLineParser::ParseResult CommandLineParser::Parse(absl::Span<const absl::s
 
 CommandLineParser::ParseResult CommandLineParser::Parse(const std::vector<std::string>& args,
                                                         const ParseOptions& parseOptions) {
-    std::vector<absl::string_view> viewArgs;
+    std::vector<std::string_view> viewArgs;
     for (const auto& arg : args) {
         viewArgs.push_back(arg);
     }
@@ -304,7 +303,7 @@ CommandLineParser::ParseResult CommandLineParser::Parse(const std::vector<std::s
 CommandLineParser::ParseResult CommandLineParser::Parse(int argc,
                                                         const char** argv,
                                                         const ParseOptions& parseOptions) {
-    std::vector<absl::string_view> args;
+    std::vector<std::string_view> args;
     for (int i = 1; i < argc; i++) {
         args.push_back(argv[i]);
     }
@@ -314,7 +313,7 @@ CommandLineParser::ParseResult CommandLineParser::Parse(int argc,
 
 void CommandLineParser::PrintHelp(std::ostream& s) {
     // Sort options in alphabetical order using a trick that std::tuple is sorted lexicographically.
-    std::vector<std::tuple<absl::string_view, OptionBase*>> sortedOptions;
+    std::vector<std::tuple<std::string_view, OptionBase*>> sortedOptions;
     for (auto& option : mOptions) {
         sortedOptions.emplace_back(option->GetName(), option.get());
     }

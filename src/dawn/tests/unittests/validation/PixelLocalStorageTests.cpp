@@ -26,6 +26,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include "dawn/common/NonMovable.h"
@@ -360,14 +361,12 @@ class PixelLocalStorageTest : public ValidationTest {
         }
     }
 
-    void TestFragmentAndLayoutCompat(const PLSSpec& layoutSpec,
-                                     absl::string_view fs,
-                                     bool success) {
+    void TestFragmentAndLayoutCompat(const PLSSpec& layoutSpec, std::string_view fs, bool success) {
         TestFragmentAndLayoutCompat(MakePipelineLayout(layoutSpec), fs, success);
     }
 
     void TestFragmentAndLayoutCompat(const wgpu::PipelineLayout& layout,
-                                     absl::string_view fs,
+                                     std::string_view fs,
                                      bool success) {
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, fs.data());
         wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
