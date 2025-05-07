@@ -129,18 +129,10 @@ SizeAndAlign MslPackedTypeSizeAndAlign(const core::type::Type* ty) {
 
         // https://developer.apple.com/metal/Metal-Shading-Language-Specification.pdf
         // 2.1 Scalar Data Types
-        [&](const core::type::U32*) {
-            return SizeAndAlign{4, 4};
-        },
-        [&](const core::type::I32*) {
-            return SizeAndAlign{4, 4};
-        },
-        [&](const core::type::F32*) {
-            return SizeAndAlign{4, 4};
-        },
-        [&](const core::type::F16*) {
-            return SizeAndAlign{2, 2};
-        },
+        [&](const core::type::U32*) { return SizeAndAlign{4, 4}; },
+        [&](const core::type::I32*) { return SizeAndAlign{4, 4}; },
+        [&](const core::type::F32*) { return SizeAndAlign{4, 4}; },
+        [&](const core::type::F16*) { return SizeAndAlign{2, 2}; },
 
         [&](const core::type::Vector* vec) {
             auto num_els = vec->Width();
