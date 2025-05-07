@@ -148,6 +148,9 @@
                         //* callback.
                         UserData* userData1 = static_cast<UserData *>({{ userdata }});
                         JNIEnv *env = userData1->env;
+                        JavaVM* jvm = userData1->jvm;
+                        jvm->AttachCurrentThread(&env, NULL);
+
                         if (env->ExceptionCheck()) {
                             return;
                         }
@@ -175,7 +178,7 @@
                     };
                     //* TODO(b/330293719): free associated resources.
                     outStruct->{{ userdata }} = new UserData(
-                            {.env = env, .callback = env->NewGlobalRef(in)});
+                            {.env = env, .callback = env->NewGlobalRef(in), .jvm = c->jvm});
 
                 {% else %}
                     {{ unreachable_code() }}
