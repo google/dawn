@@ -168,68 +168,6 @@ constexpr T Max(T first, Args... rest) {
     return Max(first, Max(rest...));
 }
 
-// The following functions are defined in the header so they may be inlined.
-#if DAWN_COMPILER_IS(MSVC)
-// Return the index of the most significant bit set. Indexing is such that bit 0 is the least
-// significant bit.
-inline uint32_t ScanReverse(uint32_t bits) {
-    DAWN_ASSERT(bits != 0u);
-    // NOLINTNEXTLINE(runtime/int)
-    unsigned long lastBitIndex = 0ul;
-    uint8_t ret = _BitScanReverse(&lastBitIndex, bits);
-    DAWN_ASSERT(ret != 0u);
-    return lastBitIndex;
-}
-
-inline uint32_t ScanReverse(uint64_t bits) {
-    DAWN_ASSERT(bits != 0u);
-    // NOLINTNEXTLINE(runtime/int)
-    unsigned long lastBitIndex = 0ul;
-#if DAWN_PLATFORM_IS(64_BIT)
-    uint8_t ret = _BitScanReverse64(&lastBitIndex, bits);
-#else
-    uint8_t ret;
-    if (static_cast<uint32_t>(bits >> 32) == 0) {
-        ret = _BitScanReverse(&lastBitIndex, static_cast<uint32_t>(bits));
-    } else {
-        ret = _BitScanReverse(&lastBitIndex, static_cast<uint32_t>(bits >> 32));
-        lastBitIndex += 32ul;
-    }
-#endif  // DAWN_PLATFORM_IS(64_BIT)
-    DAWN_ASSERT(ret != 0u);
-    return lastBitIndex;
-}
-#else  // DAWN_COMPILER_IS(MSVC)
-
-inline uint32_t ScanReverse(uint32_t bits) {
-    DAWN_ASSERT(bits != 0u);
-    return static_cast<uint32_t>((sizeof(uint32_t) * CHAR_BIT) - 1 - __builtin_clz(bits));
-}
-
-inline uint32_t ScanReverse(uint64_t bits) {
-    DAWN_ASSERT(bits != 0u);
-#if DAWN_PLATFORM_IS(64_BIT)
-    return static_cast<uint32_t>((sizeof(uint64_t) * CHAR_BIT) - 1 - __builtin_clzll(bits));
-#else
-    if (static_cast<uint32_t>(bits >> 32) == 0) {
-        return (sizeof(uint32_t) * CHAR_BIT) - 1 - __builtin_clz(static_cast<uint32_t>(bits));
-    } else {
-        return (sizeof(uint32_t) * CHAR_BIT) - 1 -
-               __builtin_clz(static_cast<uint32_t>(bits >> 32)) + 32;
-    }
-#endif  // DAWN_PLATFORM_IS(64_BIT)
-}
-
-#endif  // !DAWN_COMPILER_IS(MSVC)
-
-inline uint32_t ScanReverse(uint8_t bits) {
-    return ScanReverse(static_cast<uint32_t>(bits));
-}
-
-inline uint32_t ScanReverse(uint16_t bits) {
-    return ScanReverse(static_cast<uint32_t>(bits));
-}
-
 }  // namespace dawn
 
 #endif  // SRC_DAWN_COMMON_MATH_H_

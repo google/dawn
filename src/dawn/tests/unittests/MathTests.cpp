@@ -53,49 +53,6 @@ struct IsWGPUBitmask<TestEnum> {
 namespace dawn {
 namespace {
 
-// Tests for ScanReverse
-TEST(Math, ScanReverse) {
-    // 8-bit
-    // Test extrema
-    ASSERT_EQ(ScanReverse(uint8_t(1)), 0u);
-    ASSERT_EQ(ScanReverse(uint8_t(0x80)), 7u);
-
-    // Test with more than one bit set.
-    ASSERT_EQ(ScanReverse(uint8_t(64)), 6u);
-    ASSERT_EQ(ScanReverse(uint8_t(64 + 32)), 6u);
-    ASSERT_EQ(ScanReverse(uint8_t(128 + 64 + 32)), 7u);
-
-    // 16-bit
-    // Test extrema
-    ASSERT_EQ(ScanReverse(uint16_t(1)), 0u);
-    ASSERT_EQ(ScanReverse(uint16_t(0x8000)), 15u);
-
-    // Test with more than one bit set.
-    ASSERT_EQ(ScanReverse(uint16_t(256)), 8u);
-    ASSERT_EQ(ScanReverse(uint16_t(256 + 32)), 8u);
-    ASSERT_EQ(ScanReverse(uint16_t(1024u + 256 + 32)), 10u);
-
-    // 32-bit
-    // Test extrema
-    ASSERT_EQ(ScanReverse(1u), 0u);
-    ASSERT_EQ(ScanReverse(0x80000000u), 31u);
-
-    // Test with more than one bit set.
-    ASSERT_EQ(ScanReverse(256u), 8u);
-    ASSERT_EQ(ScanReverse(256u + 32u), 8u);
-    ASSERT_EQ(ScanReverse(1024u + 256u + 32u), 10u);
-
-    // 64-bit
-    // Test extrema
-    ASSERT_EQ(ScanReverse(uint64_t(1)), 0u);
-    ASSERT_EQ(ScanReverse(uint64_t(0x8000000000000000ull)), 63u);
-
-    // Test with more than one bit set.
-    ASSERT_EQ(ScanReverse(uint64_t(256ull)), 8u);
-    ASSERT_EQ(ScanReverse(uint64_t(256ull + 32ull)), 8u);
-    ASSERT_EQ(ScanReverse(uint64_t(0x800000000ull + 256ull + 32ull)), 35u);
-}
-
 // Tests for Log2
 TEST(Math, Log2) {
     // Test extrema
