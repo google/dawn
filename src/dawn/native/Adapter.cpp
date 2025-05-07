@@ -29,6 +29,7 @@
 
 #include <algorithm>
 #include <memory>
+#include <span>
 #include <string>
 #include <tuple>
 #include <unordered_set>
@@ -173,10 +174,10 @@ wgpu::Status AdapterBase::APIGetInfo(AdapterInfo* info) const {
                        mPhysicalDevice->GetArchitectureName().length() +
                        mPhysicalDevice->GetName().length() +
                        mPhysicalDevice->GetDriverDescription().length();
-    absl::Span<char> outBuffer{new char[allocSize], allocSize};
+    std::span<char> outBuffer{new char[allocSize], allocSize};
 
     auto AddString = [&](const std::string& in, StringView* out) {
-        DAWN_ASSERT(in.length() <= outBuffer.length());
+        DAWN_ASSERT(in.length() <= outBuffer.size());
         memcpy(outBuffer.data(), in.data(), in.length());
         *out = {outBuffer.data(), in.length()};
         outBuffer = outBuffer.subspan(in.length());

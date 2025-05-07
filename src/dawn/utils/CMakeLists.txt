@@ -131,7 +131,6 @@ dawn_add_library(
     ${system_sources}
   DEPENDS
     dawn::dawn_common
-    absl::span
   PRIVATE_DEPENDS
     absl::strings
     absl::str_format_internal

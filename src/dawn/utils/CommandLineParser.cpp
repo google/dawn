@@ -64,7 +64,7 @@ bool CommandLineParser::OptionBase::IsSet() const {
 }
 
 CommandLineParser::OptionBase::ParseResult CommandLineParser::OptionBase::Parse(
-    absl::Span<const std::string_view> args) {
+    std::span<const std::string_view> args) {
     auto result = ParseImpl(args);
     if (result.success) {
         mSet = true;
@@ -88,7 +88,7 @@ std::string CommandLineParser::BoolOption::GetParameter() const {
 }
 
 CommandLineParser::OptionBase::ParseResult CommandLineParser::BoolOption::ParseImpl(
-    absl::Span<const std::string_view> args) {
+    std::span<const std::string_view> args) {
     // Explicit true
     if (!args.empty() && args.front() == "true") {
         if (IsSet()) {
@@ -131,7 +131,7 @@ std::string CommandLineParser::StringOption::GetValue() const {
 }
 
 CommandLineParser::OptionBase::ParseResult CommandLineParser::StringOption::ParseImpl(
-    absl::Span<const std::string_view> args) {
+    std::span<const std::string_view> args) {
     if (IsSet()) {
         return {false, args, "cannot be set multiple times"};
     }
@@ -151,7 +151,7 @@ CommandLineParser::StringListOption::StringListOption(std::string_view name, std
 
 CommandLineParser::StringListOption::~StringListOption() = default;
 
-absl::Span<const std::string> CommandLineParser::StringListOption::GetValue() const {
+std::span<const std::string> CommandLineParser::StringListOption::GetValue() const {
     return mValue;
 }
 
@@ -164,7 +164,7 @@ std::vector<std::string> CommandLineParser::StringListOption::GetOwnedValue() co
 }
 
 CommandLineParser::OptionBase::ParseResult CommandLineParser::StringListOption::ParseImpl(
-    absl::Span<const std::string_view> args) {
+    std::span<const std::string_view> args) {
     if (args.empty()) {
         return {false, args, "expected a value"};
     }
@@ -193,7 +193,7 @@ CommandLineParser::StringListOption& CommandLineParser::AddStringList(std::strin
 }
 
 // static
-std::string CommandLineParser::JoinConversionNames(absl::Span<const std::string_view> names,
+std::string CommandLineParser::JoinConversionNames(std::span<const std::string_view> names,
                                                    std::string_view separator) {
     return absl::StrJoin(names, separator);
 }
@@ -205,7 +205,7 @@ CommandLineParser::BoolOption& CommandLineParser::AddHelp() {
 // static
 const CommandLineParser::ParseOptions CommandLineParser::kDefaultParseOptions = {};
 
-CommandLineParser::ParseResult CommandLineParser::Parse(absl::Span<const std::string_view> args,
+CommandLineParser::ParseResult CommandLineParser::Parse(std::span<const std::string_view> args,
                                                         const ParseOptions& parseOptions) {
     // Build the map of name to option.
     absl::flat_hash_map<std::string, OptionBase*> nameToOption;

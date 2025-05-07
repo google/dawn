@@ -72,7 +72,6 @@ group("abseil") {
     public_deps = [
       "${dawn_root}/third_party/gn/abseil-cpp:flat_hash_map",
       "${dawn_root}/third_party/gn/abseil-cpp:flat_hash_set",
-      "${dawn_root}/third_party/gn/abseil-cpp:span",
     ]
   }
 }

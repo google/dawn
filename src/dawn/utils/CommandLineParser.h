@@ -30,12 +30,12 @@
 
 #include <memory>
 #include <ostream>
+#include <span>
 #include <string>
 #include <string_view>
 #include <utility>
 #include <vector>
 
-#include "absl/types/span.h"  // TODO(343500108): Use std::span when we have C++20.
 #include "dawn/common/Assert.h"
 #include "dawn/common/NonMovable.h"
 
@@ -92,13 +92,13 @@ class CommandLineParser {
 
         struct ParseResult {
             bool success;
-            absl::Span<const std::string_view> remainingArgs = {};
+            std::span<const std::string_view> remainingArgs = {};
             std::string errorMessage = {};
         };
-        ParseResult Parse(absl::Span<const std::string_view> args);
+        ParseResult Parse(std::span<const std::string_view> args);
 
       protected:
-        virtual ParseResult ParseImpl(absl::Span<const std::string_view> args) = 0;
+        virtual ParseResult ParseImpl(std::span<const std::string_view> args) = 0;
 
         bool mSet = false;
         std::string mName;
@@ -130,7 +130,7 @@ class CommandLineParser {
         std::string GetParameter() const override;
 
       private:
-        ParseResult ParseImpl(absl::Span<const std::string_view> args) override;
+        ParseResult ParseImpl(std::span<const std::string_view> args) override;
         bool mValue = false;
     };
     BoolOption& AddBool(std::string_view name, std::string_view desc = {});
@@ -144,7 +144,7 @@ class CommandLineParser {
         std::string GetValue() const;
 
       private:
-        ParseResult ParseImpl(absl::Span<const std::string_view> args) override;
+        ParseResult ParseImpl(std::span<const std::string_view> args) override;
         std::string mValue;
     };
     StringOption& AddString(std::string_view name, std::string_view desc = {});
@@ -156,11 +156,11 @@ class CommandLineParser {
         StringListOption(std::string_view name, std::string_view desc);
         ~StringListOption() override;
 
-        absl::Span<const std::string> GetValue() const;
+        std::span<const std::string> GetValue() const;
         std::vector<std::string> GetOwnedValue() const;
 
       private:
-        ParseResult ParseImpl(absl::Span<const std::string_view> args) override;
+        ParseResult ParseImpl(std::span<const std::string_view> args) override;
         std::vector<std::string> mValue;
     };
     StringListOption& AddStringList(std::string_view name, std::string_view desc = {});
@@ -183,12 +183,12 @@ class CommandLineParser {
 
       private:
         std::string JoinNames(std::string_view separator) const;
-        OptionBase::ParseResult ParseImpl(absl::Span<const std::string_view> args) override;
+        OptionBase::ParseResult ParseImpl(std::span<const std::string_view> args) override;
         E mValue;
         bool mHasDefault;
         std::vector<std::pair<std::string_view, E>> mConversions;
     };
-    static std::string JoinConversionNames(absl::Span<const std::string_view> names,
+    static std::string JoinConversionNames(std::span<const std::string_view> names,
                                            std::string_view separator);
     template <typename E>
     EnumOption<E>& AddEnum(std::vector<std::pair<std::string_view, E>> conversions,
@@ -212,7 +212,7 @@ class CommandLineParser {
     static const ParseOptions kDefaultParseOptions;
 
     // Parse the arguments provided and set the options.
-    ParseResult Parse(absl::Span<const std::string_view> args,
+    ParseResult Parse(std::span<const std::string_view> args,
                       const ParseOptions& parseOptions = kDefaultParseOptions);
 
     // Small wrappers around the previous Parse for ease of use.
@@ -268,7 +268,7 @@ E CommandLineParser::EnumOption<E>::GetValue() const {
 
 template <typename E>
 CommandLineParser::OptionBase::ParseResult CommandLineParser::EnumOption<E>::ParseImpl(
-    absl::Span<const std::string_view> args) {
+    std::span<const std::string_view> args) {
     if (this->IsSet()) {
         return {false, args, "cannot be set multiple times"};
     }
