@@ -27,6 +27,8 @@
 
 #include "dawn/native/AttachmentState.h"
 
+#include <bit>
+
 #include "dawn/common/Enumerator.h"
 #include "dawn/common/ityp_span.h"
 #include "dawn/native/ChainUtils.h"
@@ -328,8 +330,8 @@ AttachmentState::ComputeStorageAttachmentPackingInColorAttachments() const {
     auto availableSlots = ~mColorAttachmentsSet;
     for (size_t i = 0; i < mStorageAttachmentSlots.size(); i++) {
         DAWN_ASSERT(!availableSlots.none());
-        auto slot = ColorAttachmentIndex(
-            uint8_t(ScanForward(static_cast<uint32_t>(availableSlots.to_ulong()))));
+        auto slot = ColorAttachmentIndex(static_cast<uint8_t>(
+            std::countr_zero(static_cast<uint32_t>(availableSlots.to_ulong()))));
         availableSlots.reset(slot);
         result[i] = slot;
     }

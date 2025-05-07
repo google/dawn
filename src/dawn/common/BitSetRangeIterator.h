@@ -28,6 +28,7 @@
 #ifndef SRC_DAWN_COMMON_BITSETRANGEITERATOR_H_
 #define SRC_DAWN_COMMON_BITSETRANGEITERATOR_H_
 
+#include <bit>
 #include <bitset>
 #include <limits>
 #include <utility>
@@ -132,7 +133,8 @@ size_t BitSetRangeIterator<N, T>::Iterator::ScanForwardAndShiftBits() {
         mBits >>= kBitsPerWord;
     }
 
-    size_t nextBit = ScanForward(static_cast<uint64_t>((mBits & wordMask).to_ullong()));
+    size_t nextBit = static_cast<size_t>(
+        std::countr_zero(static_cast<uint64_t>((mBits & wordMask).to_ullong())));
     mBits >>= nextBit;
     return offset + nextBit;
 }

@@ -28,6 +28,7 @@
 #ifndef SRC_DAWN_COMMON_ITYP_BITSET_H_
 #define SRC_DAWN_COMMON_ITYP_BITSET_H_
 
+#include <bit>
 #include <bitset>
 #include <limits>
 
@@ -81,7 +82,7 @@ uint32_t Iterator64<Index, N>::getNextBit() const {
     if (mBits == 0) {
         return 0;
     }
-    return ScanForward(mBits);
+    return std::countr_zero(mBits);
 }
 
 template <typename Index, size_t N>
@@ -138,7 +139,7 @@ uint32_t IteratorArray<Index, N>::getNextBit() {
     while (mOffset < N) {
         uint64_t wordBits = static_cast<uint64_t>((mBits & wordMask).to_ullong());
         if (wordBits != 0ull) {
-            return ScanForward(wordBits) + mOffset;
+            return std::countr_zero(wordBits) + mOffset;
         }
 
         mBits >>= kBitsPerWord;
