@@ -132,7 +132,8 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module, const fuzz::ir::Context& 
 
     auto output = Generate(module, options);
     if (output != Success) {
-        TINT_ICE() << "Generate() failed after CanGenerate() succeeded";
+        TINT_ICE() << "Generate() failed after CanGenerate() succeeded: "
+                   << output.Failure().reason;
     }
 
     if (output == Success && context.options.dump) {
