@@ -189,9 +189,7 @@ bool WaitListEvent::WaitAny(It eventAndReadyStateBegin,
             if (event->IsSignaled()) {
                 events[i].isReady = true;
             }
-            event->mSyncWaiters.erase(
-                std::remove(event->mSyncWaiters.begin(), event->mSyncWaiters.end(), &waiter),
-                event->mSyncWaiters.end());
+            std::erase(event->mSyncWaiters, &waiter);
         }
         if (events[i].isReady) {
             bool* isReady = (*(eventAndReadyStateBegin + events[i].origIndex)).second;

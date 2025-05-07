@@ -28,6 +28,7 @@
 #include <gmock/gmock.h>
 #include <webgpu/webgpu.h>
 
+#include <algorithm>
 #include <atomic>
 #include <chrono>
 #include <cstdint>
@@ -341,10 +342,8 @@ class EventCompletionTests : public DawnTestWithParams<EventCompletionTestParams
     void RemoveCompletedFutures() {
         size_t oldSize = mFutures.size();
         if (oldSize > 0) {
-            mFutures.erase(
-                std::remove_if(mFutures.begin(), mFutures.end(),
-                               [](const wgpu::FutureWaitInfo& info) { return info.completed; }),
-                mFutures.end());
+            std::erase_if(mFutures,
+                          [](const wgpu::FutureWaitInfo& info) { return info.completed; });
             ASSERT_LT(mFutures.size(), oldSize);
         }
     }
