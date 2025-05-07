@@ -44,9 +44,7 @@ using MslWriter_SimdBallotTest = core::ir::transform::TransformTest;
 TEST_F(MslWriter_SimdBallotTest, SimdBallot_WithUserDeclaredSubgroupSize) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     auto* subgroup_size = b.FunctionParam("user_subgroup_size", ty.u32());
-    core::IOAttributes attr;
-    attr.location = 0;
-    subgroup_size->SetAttributes(attr);
+    subgroup_size->SetLocation(0);
     func->SetParams({subgroup_size});
     b.Append(func->Block(), [&] {  //
         b.Call<vec4<u32>>(core::BuiltinFn::kSubgroupBallot, true);
@@ -163,9 +161,7 @@ TEST_F(MslWriter_SimdBallotTest, SimdBallot_InHelperFunction) {
 
     auto* ep1 = b.Function("ep1", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     auto* subgroup_size = b.FunctionParam("user_subgroup_size", ty.u32());
-    core::IOAttributes attr;
-    attr.location = 0;
-    subgroup_size->SetAttributes(attr);
+    subgroup_size->SetLocation(0);
     ep1->SetParams({subgroup_size});
     b.Append(ep1->Block(), [&] {  //
         b.Call<vec4<u32>>(foo, true);

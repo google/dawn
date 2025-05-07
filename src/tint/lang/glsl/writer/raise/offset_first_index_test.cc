@@ -70,16 +70,12 @@ TEST_F(GlslWriter_OffsetFirstIndexTest, NoModify_NoBuiltins) {
 }
 
 TEST_F(GlslWriter_OffsetFirstIndexTest, NoModify_BuiltinsWithNoOffsets) {
-    core::IOAttributes attributes;
-
     auto* vertex_idx = b.Var("vertex_index", ty.ptr(core::AddressSpace::kIn, ty.u32()));
-    attributes.builtin = core::BuiltinValue::kVertexIndex;
-    vertex_idx->SetAttributes(attributes);
+    vertex_idx->SetBuiltin(core::BuiltinValue::kVertexIndex);
     mod.root_block->Append(vertex_idx);
 
     auto* instance_idx = b.Var("instance_index", ty.ptr(core::AddressSpace::kIn, ty.u32()));
-    attributes.builtin = core::BuiltinValue::kInstanceIndex;
-    instance_idx->SetAttributes(attributes);
+    instance_idx->SetBuiltin(core::BuiltinValue::kInstanceIndex);
     mod.root_block->Append(instance_idx);
 
     auto* func = b.Function("foo", ty.vec4<f32>(), core::ir::Function::PipelineStage::kVertex);
@@ -122,16 +118,12 @@ $B1: {  # root
 }
 
 TEST_F(GlslWriter_OffsetFirstIndexTest, VertexOffset) {
-    core::IOAttributes attributes;
-
     auto* vertex_idx = b.Var("vertex_index", ty.ptr(core::AddressSpace::kIn, ty.u32()));
-    attributes.builtin = core::BuiltinValue::kVertexIndex;
-    vertex_idx->SetAttributes(attributes);
+    vertex_idx->SetBuiltin(core::BuiltinValue::kVertexIndex);
     mod.root_block->Append(vertex_idx);
 
     auto* instance_idx = b.Var("instance_index", ty.ptr(core::AddressSpace::kIn, ty.u32()));
-    attributes.builtin = core::BuiltinValue::kInstanceIndex;
-    instance_idx->SetAttributes(attributes);
+    instance_idx->SetBuiltin(core::BuiltinValue::kInstanceIndex);
     mod.root_block->Append(instance_idx);
 
     auto* func = b.Function("foo", ty.vec4<f32>(), core::ir::Function::PipelineStage::kVertex);
@@ -199,16 +191,12 @@ $B1: {  # root
 }
 
 TEST_F(GlslWriter_OffsetFirstIndexTest, InstanceOffset) {
-    core::IOAttributes attributes;
-
     auto* vertex_idx = b.Var("vertex_index", ty.ptr(core::AddressSpace::kIn, ty.u32()));
-    attributes.builtin = core::BuiltinValue::kVertexIndex;
-    vertex_idx->SetAttributes(attributes);
+    vertex_idx->SetBuiltin(core::BuiltinValue::kVertexIndex);
     mod.root_block->Append(vertex_idx);
 
     auto* instance_idx = b.Var("instance_index", ty.ptr(core::AddressSpace::kIn, ty.u32()));
-    attributes.builtin = core::BuiltinValue::kInstanceIndex;
-    instance_idx->SetAttributes(attributes);
+    instance_idx->SetBuiltin(core::BuiltinValue::kInstanceIndex);
     mod.root_block->Append(instance_idx);
 
     auto* func = b.Function("foo", ty.vec4<f32>(), core::ir::Function::PipelineStage::kVertex);
@@ -276,16 +264,12 @@ $B1: {  # root
 }
 
 TEST_F(GlslWriter_OffsetFirstIndexTest, VertexAndInstanceOffset) {
-    core::IOAttributes attributes;
-
     auto* vertex_idx = b.Var("vertex_index", ty.ptr(core::AddressSpace::kIn, ty.u32()));
-    attributes.builtin = core::BuiltinValue::kVertexIndex;
-    vertex_idx->SetAttributes(attributes);
+    vertex_idx->SetBuiltin(core::BuiltinValue::kVertexIndex);
     mod.root_block->Append(vertex_idx);
 
     auto* instance_idx = b.Var("instance_index", ty.ptr(core::AddressSpace::kIn, ty.u32()));
-    attributes.builtin = core::BuiltinValue::kInstanceIndex;
-    instance_idx->SetAttributes(attributes);
+    instance_idx->SetBuiltin(core::BuiltinValue::kInstanceIndex);
     mod.root_block->Append(instance_idx);
 
     auto* func = b.Function("foo", ty.vec4<f32>(), core::ir::Function::PipelineStage::kVertex);

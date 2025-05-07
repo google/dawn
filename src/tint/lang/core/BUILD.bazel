@@ -75,6 +75,7 @@ cc_library(
     "unary_op.h",
   ],
   deps = [
+    "//src/tint/api/common",
     "//src/tint/utils",
     "//src/tint/utils/containers",
     "//src/tint/utils/ice",

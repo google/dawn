@@ -130,6 +130,7 @@ cc_library(
     "void.h",
   ],
   deps = [
+    "//src/tint/api/common",
     "//src/tint/lang/core",
     "//src/tint/utils",
     "//src/tint/utils/containers",
@@ -183,6 +184,7 @@ cc_library(
     "vector_test.cc",
   ],
   deps = [
+    "//src/tint/api/common",
     "//src/tint/lang/core",
     "//src/tint/lang/core/type",
     "//src/tint/utils",

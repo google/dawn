@@ -31,6 +31,7 @@
 #include <cstdint>
 #include <optional>
 
+#include "src/tint/api/common/binding_point.h"
 #include "src/tint/lang/core/builtin_value.h"
 #include "src/tint/lang/core/interpolation.h"
 
@@ -50,6 +51,8 @@ struct IOAttributes {
     std::optional<core::Interpolation> interpolation = std::nullopt;
     /// The value of an `@input_attachment_index` attribute
     std::optional<uint32_t> input_attachment_index = std::nullopt;
+    /// The value of the `@binding` and `@group` attributes
+    std::optional<BindingPoint> binding_point = std::nullopt;
     /// True if the object is annotated with `@invariant`.
     bool invariant = false;
 };

@@ -76,9 +76,11 @@ class Var : public Castable<Var, OperandInstruction<1, 1>> {
     /// Sets the binding point
     /// @param group the group
     /// @param binding the binding
-    void SetBindingPoint(uint32_t group, uint32_t binding) { binding_point_ = {group, binding}; }
+    void SetBindingPoint(uint32_t group, uint32_t binding) {
+        attributes_.binding_point = {group, binding};
+    }
     /// @returns the binding points if `Attributes` contains `kBindingPoint`
-    std::optional<struct BindingPoint> BindingPoint() const { return binding_point_; }
+    std::optional<struct BindingPoint> BindingPoint() const { return attributes_.binding_point; }
 
     /// Sets the input attachment index
     /// @param index the index
@@ -88,9 +90,42 @@ class Var : public Castable<Var, OperandInstruction<1, 1>> {
         return attributes_.input_attachment_index;
     }
 
+    /// Sets the interpolation.
+    /// @param interpolation the optional location interpolation settings
+    void SetInterpolation(std::optional<core::Interpolation> interpolation) {
+        attributes_.interpolation = interpolation;
+    }
+
+    /// Sets the parameter as invariant
+    /// @param val the value to set for invariant
+    void SetInvariant(bool val) { attributes_.invariant = val; }
+
+    /// Sets the blend source.
+    /// @param src the optional value
+    void SetBlendSrc(std::optional<uint32_t> src) { attributes_.blend_src = src; }
+
+    /// Sets the color.
+    /// @param col the optional color value
+    void SetColor(std::optional<uint32_t> col) { attributes_.color = col; }
+
+    /// Sets the location.
+    /// @param loc the optional location value
+    void SetLocation(std::optional<uint32_t> loc) { attributes_.location = loc; }
+
+    /// Sets the builtin information. Note, it is currently an error if the builtin is already set.
+    /// @param val the builtin to set
+    void SetBuiltin(core::BuiltinValue val) {
+        TINT_ASSERT(!attributes_.builtin.has_value());
+        attributes_.builtin = val;
+    }
+
+    /// Resets the IO attributes
+    void ResetAttributes() { attributes_ = {}; }
+
     /// Sets the IO attributes
     /// @param attrs the attributes
     void SetAttributes(const IOAttributes& attrs) { attributes_ = attrs; }
+
     /// @returns the IO attributes
     const IOAttributes& Attributes() const { return attributes_; }
 
@@ -101,7 +136,6 @@ class Var : public Castable<Var, OperandInstruction<1, 1>> {
     std::string FriendlyName() const override { return "var"; }
 
   private:
-    std::optional<struct BindingPoint> binding_point_;
     IOAttributes attributes_;
 };
 

@@ -65,6 +65,7 @@ libtint_source_set("constant") {
   ]
   deps = [
     "${dawn_root}/src/utils:utils",
+    "${tint_src_dir}/api/common",
     "${tint_src_dir}/lang/core",
     "${tint_src_dir}/lang/core/type",
     "${tint_src_dir}/utils",
@@ -93,6 +94,7 @@ if (tint_build_unittests) {
     deps = [
       "${dawn_root}/src/utils:utils",
       "${tint_src_dir}:gmock_and_gtest",
+      "${tint_src_dir}/api/common",
       "${tint_src_dir}/lang/core",
       "${tint_src_dir}/lang/core/constant",
       "${tint_src_dir}/lang/core/type",

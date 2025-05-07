@@ -522,10 +522,8 @@ TEST_F(IR_ValidatorTest, Var_Storage_NotHostShareable) {
 
 TEST_F(IR_ValidatorTest, Var_MultipleIOAnnotations) {
     auto* v = b.Var<AddressSpace::kIn, vec4<f32>>();
-    IOAttributes attr;
-    attr.builtin = BuiltinValue::kPosition;
-    attr.location = 0;
-    v->SetAttributes(attr);
+    v->SetBuiltin(BuiltinValue::kPosition);
+    v->SetLocation(0);
     mod.root_block->Append(v);
 
     auto res = ir::Validate(mod);

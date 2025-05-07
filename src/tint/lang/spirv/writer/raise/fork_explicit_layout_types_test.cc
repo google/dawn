@@ -392,16 +392,14 @@ $B1: {  # root
 }
 
 TEST_F(SpirvWriter_ForkExplicitLayoutTypesTest, Storage_SharedWithInOut) {
-    core::IOAttributes attributes;
-    attributes.builtin = core::BuiltinValue::kSampleMask;
     auto* array = ty.array<u32, 1>();
     b.Append(mod.root_block, [&] {
         auto* buffer = b.Var("buffer", ty.ptr(storage, array));
         buffer->SetBindingPoint(0, 0);
         auto* mask_in = b.Var("mask_in", ty.ptr(core::AddressSpace::kIn, array));
-        mask_in->SetAttributes(attributes);
+        mask_in->SetBuiltin(core::BuiltinValue::kSampleMask);
         auto* mask_out = b.Var("mask_out", ty.ptr(core::AddressSpace::kOut, array));
-        mask_out->SetAttributes(attributes);
+        mask_out->SetBuiltin(core::BuiltinValue::kSampleMask);
     });
 
     auto* src = R"(

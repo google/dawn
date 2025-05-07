@@ -1059,9 +1059,7 @@ TEST_F(IR_ValidatorTest, Function_BoolOutput_via_MSV) {
     auto* f = ComputeEntryPoint();
 
     auto* v = b.Var(ty.ptr(AddressSpace::kOut, ty.bool_(), core::Access::kReadWrite));
-    IOAttributes attr;
-    attr.location = 0;
-    v->SetAttributes(attr);
+    v->SetLocation(0);
     mod.root_block->Append(v);
 
     b.Append(f->Block(), [&] {
@@ -1084,9 +1082,7 @@ TEST_F(IR_ValidatorTest, Function_BoolInputWithoutFrontFacing_via_MSV) {
     auto* f = FragmentEntryPoint();
 
     auto* invalid = b.Var("invalid", AddressSpace::kIn, ty.bool_());
-    IOAttributes attr;
-    attr.location = 0;
-    invalid->SetAttributes(attr);
+    invalid->SetLocation(0);
     mod.root_block->Append(invalid);
 
     b.Append(f->Block(), [&] {

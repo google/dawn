@@ -49,6 +49,7 @@ cc_library(
     "sampled_image.h",
   ],
   deps = [
+    "//src/tint/api/common",
     "//src/tint/lang/core",
     "//src/tint/lang/core/constant",
     "//src/tint/lang/core/ir",
@@ -76,6 +77,7 @@ cc_library(
     "sampled_image_test.cc",
   ],
   deps = [
+    "//src/tint/api/common",
     "//src/tint/lang/core",
     "//src/tint/lang/core/constant",
     "//src/tint/lang/core/ir",

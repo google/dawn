@@ -213,9 +213,7 @@ TEST_F(SpirvWriter_MergeReturnTest, IfElse_OneSideReturns) {
 
 TEST_F(SpirvWriter_MergeReturnTest, NoModify_EntryPoint_IfElse_OneSideReturns) {
     auto* cond = b.FunctionParam(ty.u32());
-    core::IOAttributes attr;
-    attr.location = 0;
-    cond->SetAttributes(attr);
+    cond->SetLocation(0);
     auto* func = b.ComputeFunction("entrypointfunction", 2_u, 3_u, 4_u);
     func->SetParams({cond});
     b.Append(func->Block(), [&] {

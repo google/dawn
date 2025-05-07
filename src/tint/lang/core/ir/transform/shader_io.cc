@@ -87,7 +87,7 @@ struct State {
         for (auto* str : structures_to_strip) {
             for (auto* member : str->Members()) {
                 // TODO(crbug.com/tint/745): Remove the const_cast.
-                const_cast<core::type::StructMember*>(member)->SetAttributes({});
+                const_cast<core::type::StructMember*>(member)->ResetAttributes();
             }
         }
     }
@@ -173,7 +173,7 @@ struct State {
                     // Strip interpolation on non-fragment inputs
                     attributes.interpolation = {};
                 }
-                param->SetAttributes({});
+                param->ResetAttributes();
 
                 auto name = ir.NameOf(param);
                 backend->AddInput(name, param->Type(), std::move(attributes));

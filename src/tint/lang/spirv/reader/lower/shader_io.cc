@@ -96,11 +96,11 @@ struct State {
         // Remove attributes from all of the original structs and module-scope output variables.
         // This is done last as we need to copy attributes during `ProcessEntryPointOutputs()`.
         for (auto& var : output_variables) {
-            var->SetAttributes({});
+            var->ResetAttributes();
             if (auto* str = var->Result()->Type()->UnwrapPtr()->As<core::type::Struct>()) {
                 for (auto* member : str->Members()) {
                     // TODO(crbug.com/tint/745): Remove the const_cast.
-                    const_cast<core::type::StructMember*>(member)->SetAttributes({});
+                    const_cast<core::type::StructMember*>(member)->ResetAttributes();
                 }
             }
         }
@@ -440,19 +440,19 @@ struct State {
     void AddEntryPointParameterAttributes(core::ir::FunctionParam* param,
                                           const core::IOAttributes& attributes) {
         if (auto* str = param->Type()->UnwrapPtr()->As<core::type::Struct>()) {
-            for (auto* member : str->Members()) {
+            for (const auto* const_member : str->Members()) {
+                // TODO(crbug.com/tint/745): Remove the const_cast.
+                auto* member = const_cast<core::type::StructMember*>(const_member);
+
                 // Use the base variable attributes if not specified directly on the member.
                 auto member_attributes = member->Attributes();
                 if (auto base_loc = attributes.location) {
                     // Location values increment from the base location value on the variable.
-                    member_attributes.location = base_loc.value() + member->Index();
+                    member->SetLocation(base_loc.value() + member->Index());
                 }
                 if (!member_attributes.interpolation) {
-                    member_attributes.interpolation = attributes.interpolation;
+                    member->SetInterpolation(attributes.interpolation);
                 }
-                // TODO(crbug.com/tint/745): Remove the const_cast.
-                const_cast<core::type::StructMember*>(member)->SetAttributes(
-                    std::move(member_attributes));
             }
         } else {
             // Set attributes directly on the function parameter.

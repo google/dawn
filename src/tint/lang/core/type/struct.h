@@ -252,9 +252,18 @@ class StructMember : public Castable<StructMember, Node> {
     /// @returns the optional attributes
     const IOAttributes& Attributes() const { return attributes_; }
 
-    /// Set the attributes of the struct member.
-    /// @param attributes the new attributes
-    void SetAttributes(IOAttributes&& attributes) { attributes_ = std::move(attributes); }
+    /// Sets the interpolation.
+    /// @param interpolation the optional location interpolation settings
+    void SetInterpolation(std::optional<core::Interpolation> interpolation) {
+        attributes_.interpolation = interpolation;
+    }
+
+    /// Sets the location.
+    /// @param loc the optional location value
+    void SetLocation(std::optional<uint32_t> loc) { attributes_.location = loc; }
+
+    /// Resets the attributes to empty
+    void ResetAttributes() { attributes_ = {}; }
 
     /// @param ctx the clone context
     /// @returns a clone of this struct member

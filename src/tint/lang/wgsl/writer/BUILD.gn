@@ -130,6 +130,7 @@ if (tint_build_wgsl_writer) {
     sources = []
     deps = [
       "${dawn_root}/src/utils:utils",
+      "${tint_src_dir}/api/common",
       "${tint_src_dir}/lang/core",
       "${tint_src_dir}/lang/core/constant",
       "${tint_src_dir}/lang/core/type",

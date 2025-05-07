@@ -79,32 +79,20 @@ TEST_F(SpirvReader_ShaderIOTest, NoInputsOrOutputs) {
 
 TEST_F(SpirvReader_ShaderIOTest, Inputs) {
     auto* front_facing = b.Var("front_facing", ty.ptr(core::AddressSpace::kIn, ty.bool_()));
-    {
-        core::IOAttributes attributes;
-        attributes.builtin = core::BuiltinValue::kFrontFacing;
-        front_facing->SetAttributes(std::move(attributes));
-    }
+    front_facing->SetBuiltin(core::BuiltinValue::kFrontFacing);
+
     auto* position = b.Var("position", ty.ptr(core::AddressSpace::kIn, ty.vec4<f32>()));
-    {
-        core::IOAttributes attributes;
-        attributes.builtin = core::BuiltinValue::kPosition;
-        attributes.invariant = true;
-        position->SetAttributes(std::move(attributes));
-    }
+    position->SetBuiltin(core::BuiltinValue::kPosition);
+    position->SetInvariant(true);
+
     auto* color1 = b.Var("color1", ty.ptr(core::AddressSpace::kIn, ty.f32()));
-    {
-        core::IOAttributes attributes;
-        attributes.location = 0;
-        color1->SetAttributes(std::move(attributes));
-    }
+    color1->SetLocation(0);
+
     auto* color2 = b.Var("color2", ty.ptr(core::AddressSpace::kIn, ty.f32()));
-    {
-        core::IOAttributes attributes;
-        attributes.location = 1;
-        attributes.interpolation = core::Interpolation{core::InterpolationType::kLinear,
-                                                       core::InterpolationSampling::kSample};
-        color2->SetAttributes(std::move(attributes));
-    }
+    color2->SetLocation(1);
+    color2->SetInterpolation(core::Interpolation{core::InterpolationType::kLinear,
+                                                 core::InterpolationSampling::kSample});
+
     mod.root_block->Append(front_facing);
     mod.root_block->Append(position);
     mod.root_block->Append(color1);
@@ -172,32 +160,20 @@ $B1: {  # root
 
 TEST_F(SpirvReader_ShaderIOTest, Inputs_UsedByHelper) {
     auto* front_facing = b.Var("front_facing", ty.ptr(core::AddressSpace::kIn, ty.bool_()));
-    {
-        core::IOAttributes attributes;
-        attributes.builtin = core::BuiltinValue::kFrontFacing;
-        front_facing->SetAttributes(std::move(attributes));
-    }
+    front_facing->SetBuiltin(core::BuiltinValue::kFrontFacing);
+
     auto* position = b.Var("position", ty.ptr(core::AddressSpace::kIn, ty.vec4<f32>()));
-    {
-        core::IOAttributes attributes;
-        attributes.builtin = core::BuiltinValue::kPosition;
-        attributes.invariant = true;
-        position->SetAttributes(std::move(attributes));
-    }
+    position->SetBuiltin(core::BuiltinValue::kPosition);
+    position->SetInvariant(true);
+
     auto* color1 = b.Var("color1", ty.ptr(core::AddressSpace::kIn, ty.f32()));
-    {
-        core::IOAttributes attributes;
-        attributes.location = 0;
-        color1->SetAttributes(std::move(attributes));
-    }
+    color1->SetLocation(0);
+
     auto* color2 = b.Var("color2", ty.ptr(core::AddressSpace::kIn, ty.f32()));
-    {
-        core::IOAttributes attributes;
-        attributes.location = 1;
-        attributes.interpolation = core::Interpolation{core::InterpolationType::kLinear,
-                                                       core::InterpolationSampling::kSample};
-        color2->SetAttributes(std::move(attributes));
-    }
+    color2->SetLocation(1);
+    color2->SetInterpolation(core::Interpolation{core::InterpolationType::kLinear,
+                                                 core::InterpolationSampling::kSample});
+
     mod.root_block->Append(front_facing);
     mod.root_block->Append(position);
     mod.root_block->Append(color1);
@@ -309,23 +285,14 @@ $B1: {  # root
 
 TEST_F(SpirvReader_ShaderIOTest, Inputs_UsedEntryPointAndHelper) {
     auto* gid = b.Var("gid", ty.ptr(core::AddressSpace::kIn, ty.vec3<u32>()));
-    {
-        core::IOAttributes attributes;
-        attributes.builtin = core::BuiltinValue::kGlobalInvocationId;
-        gid->SetAttributes(std::move(attributes));
-    }
+    gid->SetBuiltin(core::BuiltinValue::kGlobalInvocationId);
+
     auto* lid = b.Var("lid", ty.ptr(core::AddressSpace::kIn, ty.vec3<u32>()));
-    {
-        core::IOAttributes attributes;
-        attributes.builtin = core::BuiltinValue::kLocalInvocationId;
-        lid->SetAttributes(std::move(attributes));
-    }
+    lid->SetBuiltin(core::BuiltinValue::kLocalInvocationId);
+
     auto* group_id = b.Var("group_id", ty.ptr(core::AddressSpace::kIn, ty.vec3<u32>()));
-    {
-        core::IOAttributes attributes;
-        attributes.builtin = core::BuiltinValue::kWorkgroupId;
-        group_id->SetAttributes(std::move(attributes));
-    }
+    group_id->SetBuiltin(core::BuiltinValue::kWorkgroupId);
+
     mod.root_block->Append(gid);
     mod.root_block->Append(lid);
     mod.root_block->Append(group_id);
@@ -399,23 +366,14 @@ $B1: {  # root
 
 TEST_F(SpirvReader_ShaderIOTest, Inputs_UsedEntryPointAndHelper_ForwardReference) {
     auto* gid = b.Var("gid", ty.ptr(core::AddressSpace::kIn, ty.vec3<u32>()));
-    {
-        core::IOAttributes attributes;
-        attributes.builtin = core::BuiltinValue::kGlobalInvocationId;
-        gid->SetAttributes(std::move(attributes));
-    }
+    gid->SetBuiltin(core::BuiltinValue::kGlobalInvocationId);
+
     auto* lid = b.Var("lid", ty.ptr(core::AddressSpace::kIn, ty.vec3<u32>()));
-    {
-        core::IOAttributes attributes;
-        attributes.builtin = core::BuiltinValue::kLocalInvocationId;
-        lid->SetAttributes(std::move(attributes));
-    }
+    lid->SetBuiltin(core::BuiltinValue::kLocalInvocationId);
+
     auto* group_id = b.Var("group_id", ty.ptr(core::AddressSpace::kIn, ty.vec3<u32>()));
-    {
-        core::IOAttributes attributes;
-        attributes.builtin = core::BuiltinValue::kWorkgroupId;
-        group_id->SetAttributes(std::move(attributes));
-    }
+    group_id->SetBuiltin(core::BuiltinValue::kWorkgroupId);
+
     mod.root_block->Append(gid);
     mod.root_block->Append(lid);
     mod.root_block->Append(group_id);
@@ -490,23 +448,14 @@ $B1: {  # root
 
 TEST_F(SpirvReader_ShaderIOTest, Inputs_UsedByMultipleEntryPoints) {
     auto* gid = b.Var("gid", ty.ptr(core::AddressSpace::kIn, ty.vec3<u32>()));
-    {
-        core::IOAttributes attributes;
-        attributes.builtin = core::BuiltinValue::kGlobalInvocationId;
-        gid->SetAttributes(std::move(attributes));
-    }
+    gid->SetBuiltin(core::BuiltinValue::kGlobalInvocationId);
+
     auto* lid = b.Var("lid", ty.ptr(core::AddressSpace::kIn, ty.vec3<u32>()));
-    {
-        core::IOAttributes attributes;
-        attributes.builtin = core::BuiltinValue::kLocalInvocationId;
-        lid->SetAttributes(std::move(attributes));
-    }
+    lid->SetBuiltin(core::BuiltinValue::kLocalInvocationId);
+
     auto* group_id = b.Var("group_id", ty.ptr(core::AddressSpace::kIn, ty.vec3<u32>()));
-    {
-        core::IOAttributes attributes;
-        attributes.builtin = core::BuiltinValue::kWorkgroupId;
-        group_id->SetAttributes(std::move(attributes));
-    }
+    group_id->SetBuiltin(core::BuiltinValue::kWorkgroupId);
+
     mod.root_block->Append(gid);
     mod.root_block->Append(lid);
     mod.root_block->Append(group_id);
@@ -597,11 +546,8 @@ $B1: {  # root
 
 TEST_F(SpirvReader_ShaderIOTest, Input_LoadVectorElement) {
     auto* lid = b.Var("lid", ty.ptr(core::AddressSpace::kIn, ty.vec3<u32>()));
-    {
-        core::IOAttributes attributes;
-        attributes.builtin = core::BuiltinValue::kLocalInvocationId;
-        lid->SetAttributes(std::move(attributes));
-    }
+    lid->SetBuiltin(core::BuiltinValue::kLocalInvocationId);
+
     mod.root_block->Append(lid);
 
     auto* ep = b.ComputeFunction("foo");
@@ -747,11 +693,8 @@ TEST_F(SpirvReader_ShaderIOTest, Inputs_Struct_LocationOnVariable) {
             },
         });
     auto* colors = b.Var("colors", ty.ptr(core::AddressSpace::kIn, colors_str));
-    {
-        core::IOAttributes attributes;
-        attributes.location = 1u;
-        colors->SetAttributes(attributes);
-    }
+    colors->SetLocation(1u);
+
     mod.root_block->Append(colors);
 
     auto* foo = b.Function("foo", ty.void_());
@@ -843,12 +786,9 @@ TEST_F(SpirvReader_ShaderIOTest, Inputs_Struct_InterpolateOnVariable) {
             },
         });
     auto* colors = b.Var("colors", ty.ptr(core::AddressSpace::kIn, colors_str));
-    {
-        core::IOAttributes attributes;
-        attributes.interpolation = core::Interpolation{core::InterpolationType::kPerspective,
-                                                       core::InterpolationSampling::kCentroid};
-        colors->SetAttributes(attributes);
-    }
+    colors->SetInterpolation(core::Interpolation{core::InterpolationType::kPerspective,
+                                                 core::InterpolationSampling::kCentroid});
+
     mod.root_block->Append(colors);
 
     auto* foo = b.Function("foo", ty.void_());
@@ -1014,11 +954,8 @@ Colors = struct @align(16) {
 
 TEST_F(SpirvReader_ShaderIOTest, SingleOutput_Builtin) {
     auto* position = b.Var("position", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
-    {
-        core::IOAttributes attributes;
-        attributes.builtin = core::BuiltinValue::kPosition;
-        position->SetAttributes(std::move(attributes));
-    }
+    position->SetBuiltin(core::BuiltinValue::kPosition);
+
     mod.root_block->Append(position);
 
     auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kVertex);
@@ -1068,12 +1005,9 @@ $B1: {  # root
 
 TEST_F(SpirvReader_ShaderIOTest, SingleOutput_Builtin_WithInvariant) {
     auto* position = b.Var("position", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
-    {
-        core::IOAttributes attributes;
-        attributes.builtin = core::BuiltinValue::kPosition;
-        attributes.invariant = true;
-        position->SetAttributes(std::move(attributes));
-    }
+    position->SetBuiltin(core::BuiltinValue::kPosition);
+    position->SetInvariant(true);
+
     mod.root_block->Append(position);
 
     auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kVertex);
@@ -1123,11 +1057,8 @@ $B1: {  # root
 
 TEST_F(SpirvReader_ShaderIOTest, SingleOutput_Location) {
     auto* color = b.Var("color", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
-    {
-        core::IOAttributes attributes;
-        attributes.location = 1u;
-        color->SetAttributes(std::move(attributes));
-    }
+    color->SetLocation(1u);
+
     mod.root_block->Append(color);
 
     auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
@@ -1177,13 +1108,10 @@ $B1: {  # root
 
 TEST_F(SpirvReader_ShaderIOTest, SingleOutput_Location_WithInterpolation) {
     auto* color = b.Var("color", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
-    {
-        core::IOAttributes attributes;
-        attributes.location = 1u;
-        attributes.interpolation = core::Interpolation{core::InterpolationType::kPerspective,
-                                                       core::InterpolationSampling::kCentroid};
-        color->SetAttributes(std::move(attributes));
-    }
+    color->SetLocation(1u);
+    color->SetInterpolation(core::Interpolation{core::InterpolationType::kPerspective,
+                                                core::InterpolationSampling::kCentroid});
+
     mod.root_block->Append(color);
 
     auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
@@ -1233,26 +1161,17 @@ $B1: {  # root
 
 TEST_F(SpirvReader_ShaderIOTest, MultipleOutputs) {
     auto* position = b.Var("position", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
-    {
-        core::IOAttributes attributes;
-        attributes.builtin = core::BuiltinValue::kPosition;
-        attributes.invariant = true;
-        position->SetAttributes(std::move(attributes));
-    }
+    position->SetBuiltin(core::BuiltinValue::kPosition);
+    position->SetInvariant(true);
+
     auto* color1 = b.Var("color1", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
-    {
-        core::IOAttributes attributes;
-        attributes.location = 1u;
-        color1->SetAttributes(std::move(attributes));
-    }
+    color1->SetLocation(1u);
+
     auto* color2 = b.Var("color2", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
-    {
-        core::IOAttributes attributes;
-        attributes.location = 1u;
-        attributes.interpolation = core::Interpolation{core::InterpolationType::kPerspective,
-                                                       core::InterpolationSampling::kCentroid};
-        color2->SetAttributes(std::move(attributes));
-    }
+    color2->SetLocation(1u);
+    color2->SetInterpolation(core::Interpolation{core::InterpolationType::kPerspective,
+                                                 core::InterpolationSampling::kCentroid});
+
     mod.root_block->Append(position);
     mod.root_block->Append(color1);
     mod.root_block->Append(color2);
@@ -1469,11 +1388,8 @@ TEST_F(SpirvReader_ShaderIOTest, Outputs_Struct_LocationOnVariable) {
 
     auto* builtins = b.Var("builtins", ty.ptr(core::AddressSpace::kOut, builtin_str));
     auto* colors = b.Var("colors", ty.ptr(core::AddressSpace::kOut, colors_str));
-    {
-        core::IOAttributes attributes;
-        attributes.location = 1u;
-        colors->SetAttributes(attributes);
-    }
+    colors->SetLocation(1u);
+
     mod.root_block->Append(builtins);
     mod.root_block->Append(colors);
 
@@ -1593,12 +1509,9 @@ TEST_F(SpirvReader_ShaderIOTest, Outputs_Struct_InterpolateOnVariable) {
 
     auto* builtins = b.Var("builtins", ty.ptr(core::AddressSpace::kOut, builtin_str));
     auto* colors = b.Var("colors", ty.ptr(core::AddressSpace::kOut, colors_str));
-    {
-        core::IOAttributes attributes;
-        attributes.interpolation = core::Interpolation{core::InterpolationType::kPerspective,
-                                                       core::InterpolationSampling::kCentroid};
-        colors->SetAttributes(attributes);
-    }
+    colors->SetInterpolation(core::Interpolation{core::InterpolationType::kPerspective,
+                                                 core::InterpolationSampling::kCentroid});
+
     mod.root_block->Append(builtins);
     mod.root_block->Append(colors);
 
@@ -1694,26 +1607,17 @@ $B1: {  # root
 
 TEST_F(SpirvReader_ShaderIOTest, Outputs_UsedByMultipleEntryPoints) {
     auto* position = b.Var("position", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
-    {
-        core::IOAttributes attributes;
-        attributes.builtin = core::BuiltinValue::kPosition;
-        attributes.invariant = true;
-        position->SetAttributes(std::move(attributes));
-    }
+    position->SetBuiltin(core::BuiltinValue::kPosition);
+    position->SetInvariant(true);
+
     auto* color1 = b.Var("color1", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
-    {
-        core::IOAttributes attributes;
-        attributes.location = 1u;
-        color1->SetAttributes(std::move(attributes));
-    }
+    color1->SetLocation(1u);
+
     auto* color2 = b.Var("color2", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
-    {
-        core::IOAttributes attributes;
-        attributes.location = 1u;
-        attributes.interpolation = core::Interpolation{core::InterpolationType::kPerspective,
-                                                       core::InterpolationSampling::kCentroid};
-        color2->SetAttributes(std::move(attributes));
-    }
+    color2->SetLocation(1u);
+    color2->SetInterpolation(core::Interpolation{core::InterpolationType::kPerspective,
+                                                 core::InterpolationSampling::kCentroid});
+
     mod.root_block->Append(position);
     mod.root_block->Append(color1);
     mod.root_block->Append(color2);
@@ -1839,11 +1743,8 @@ $B1: {  # root
 
 TEST_F(SpirvReader_ShaderIOTest, Output_LoadAndStore) {
     auto* color = b.Var("color", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
-    {
-        core::IOAttributes attributes;
-        attributes.location = 1u;
-        color->SetAttributes(std::move(attributes));
-    }
+    color->SetLocation(1u);
+
     mod.root_block->Append(color);
 
     auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
@@ -1902,11 +1803,8 @@ $B1: {  # root
 
 TEST_F(SpirvReader_ShaderIOTest, Output_LoadVectorElementAndStoreVectorElement) {
     auto* color = b.Var("color", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
-    {
-        core::IOAttributes attributes;
-        attributes.location = 1u;
-        color->SetAttributes(std::move(attributes));
-    }
+    color->SetLocation(1u);
+
     mod.root_block->Append(color);
 
     auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
@@ -1965,30 +1863,18 @@ $B1: {  # root
 
 TEST_F(SpirvReader_ShaderIOTest, Inputs_And_Outputs) {
     auto* position = b.Var("position", ty.ptr(core::AddressSpace::kIn, ty.vec4<f32>()));
-    {
-        core::IOAttributes attributes;
-        attributes.builtin = core::BuiltinValue::kPosition;
-        attributes.invariant = true;
-        position->SetAttributes(std::move(attributes));
-    }
+    position->SetBuiltin(core::BuiltinValue::kPosition);
+    position->SetInvariant(true);
+
     auto* color_in = b.Var("color_in", ty.ptr(core::AddressSpace::kIn, ty.vec4<f32>()));
-    {
-        core::IOAttributes attributes;
-        attributes.location = 0;
-        color_in->SetAttributes(std::move(attributes));
-    }
+    color_in->SetLocation(0);
+
     auto* color_out_1 = b.Var("color_out_1", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
-    {
-        core::IOAttributes attributes;
-        attributes.location = 1;
-        color_out_1->SetAttributes(std::move(attributes));
-    }
+    color_out_1->SetLocation(1);
+
     auto* color_out_2 = b.Var("color_out_2", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
-    {
-        core::IOAttributes attributes;
-        attributes.location = 2;
-        color_out_2->SetAttributes(std::move(attributes));
-    }
+    color_out_2->SetLocation(2);
+
     mod.root_block->Append(position);
     mod.root_block->Append(color_in);
     mod.root_block->Append(color_out_1);
@@ -2061,17 +1947,11 @@ $B1: {  # root
 TEST_F(SpirvReader_ShaderIOTest, SampleMask) {
     auto* arr = ty.array<u32, 1>();
     auto* mask_in = b.Var("mask_in", ty.ptr(core::AddressSpace::kIn, arr));
-    {
-        core::IOAttributes attributes;
-        attributes.builtin = core::BuiltinValue::kSampleMask;
-        mask_in->SetAttributes(std::move(attributes));
-    }
+    mask_in->SetBuiltin(core::BuiltinValue::kSampleMask);
+
     auto* mask_out = b.Var("mask_out", ty.ptr(core::AddressSpace::kOut, arr));
-    {
-        core::IOAttributes attributes;
-        attributes.builtin = core::BuiltinValue::kSampleMask;
-        mask_out->SetAttributes(std::move(attributes));
-    }
+    mask_out->SetBuiltin(core::BuiltinValue::kSampleMask);
+
     mod.root_block->Append(mask_in);
     mod.root_block->Append(mask_out);
 

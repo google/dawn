@@ -100,6 +100,7 @@ if (tint_build_benchmarks) {
       deps = [
         "${dawn_root}/src/utils:utils",
         "${tint_src_dir}:google_benchmark",
+        "${tint_src_dir}/api/common",
         "${tint_src_dir}/lang/core",
         "${tint_src_dir}/lang/core/constant",
         "${tint_src_dir}/lang/core/type",

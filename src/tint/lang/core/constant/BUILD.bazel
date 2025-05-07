@@ -60,6 +60,7 @@ cc_library(
     "value.h",
   ],
   deps = [
+    "//src/tint/api/common",
     "//src/tint/lang/core",
     "//src/tint/lang/core/type",
     "//src/tint/utils",
@@ -90,6 +91,7 @@ cc_library(
     "value_test.cc",
   ],
   deps = [
+    "//src/tint/api/common",
     "//src/tint/lang/core",
     "//src/tint/lang/core/constant",
     "//src/tint/lang/core/type",

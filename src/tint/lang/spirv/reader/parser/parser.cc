@@ -2464,7 +2464,7 @@ class Parser {
 
         if (group || binding) {
             TINT_ASSERT(group && binding);
-            var->SetBindingPoint(group.value(), binding.value());
+            io_attributes.binding_point = {group.value(), binding.value()};
         }
         var->SetAttributes(std::move(io_attributes));
 

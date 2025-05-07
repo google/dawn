@@ -1386,10 +1386,8 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StorageAtomicStoreDynamicAccessChai
     b.ir.root_block->Append(var);
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
-    core::IOAttributes index_attr;
-    index_attr.location = 0;
     auto index = b.FunctionParam(ty.u32());
-    index->SetAttributes(index_attr);
+    index->SetLocation(0);
     func->SetParams({index});
     b.Append(func->Block(), [&] {
         auto* access = b.Access(ty.ptr<storage>(ty.atomic<i32>()), var, 0_u, index, 1_u, index);
@@ -1579,10 +1577,8 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StorageAtomicLoadDynamicAccessChain
     b.ir.root_block->Append(var);
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
-    core::IOAttributes index_attr;
-    index_attr.location = 0;
     auto index = b.FunctionParam(ty.u32());
-    index->SetAttributes(index_attr);
+    index->SetLocation(0);
     func->SetParams({index});
     b.Append(func->Block(), [&] {
         auto* access = b.Access(ty.ptr<storage>(ty.atomic<i32>()), var, 0_u, index, 1_u, index);
@@ -1779,10 +1775,8 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StorageAtomicSubDynamicAccessChain)
     b.ir.root_block->Append(var);
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
-    core::IOAttributes index_attr;
-    index_attr.location = 0;
     auto index = b.FunctionParam(ty.u32());
-    index->SetAttributes(index_attr);
+    index->SetLocation(0);
     func->SetParams({index});
     b.Append(func->Block(), [&] {
         auto* access = b.Access(ty.ptr<storage>(ty.atomic<i32>()), var, 0_u, index, 1_u, index);
@@ -1994,10 +1988,8 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StorageAtomicCompareExchangeWeakDyn
     b.ir.root_block->Append(var);
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
-    core::IOAttributes index_attr;
-    index_attr.location = 0;
     auto index = b.FunctionParam(ty.u32());
-    index->SetAttributes(index_attr);
+    index->SetLocation(0);
     func->SetParams({index});
     b.Append(func->Block(), [&] {
         auto* access = b.Access(ty.ptr<storage>(ty.atomic<i32>()), var, 0_u, index, 1_u, index);

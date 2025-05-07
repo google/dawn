@@ -120,9 +120,7 @@ void main() {
 TEST_F(GlslWriterTest, VarInBuiltin) {
     b.Append(b.ir.root_block, [&] {
         auto* v = b.Var("v", ty.ptr(core::AddressSpace::kIn, ty.u32()));
-        core::IOAttributes attrs = {};
-        attrs.builtin = core::BuiltinValue::kLocalInvocationIndex;
-        v->SetAttributes(attrs);
+        v->SetBuiltin(core::BuiltinValue::kLocalInvocationIndex);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
@@ -136,11 +134,9 @@ void main() {
 TEST_F(GlslWriterTest, VarIn) {
     b.Append(b.ir.root_block, [&] {
         auto* v = b.Var("v", ty.ptr(core::AddressSpace::kIn, ty.u32()));
-        core::IOAttributes attrs = {};
-        attrs.location = 1;
-        attrs.interpolation = {core::InterpolationType::kFlat,
-                               core::InterpolationSampling::kUndefined};
-        v->SetAttributes(attrs);
+        v->SetLocation(1);
+        v->SetInterpolation(core::Interpolation{core::InterpolationType::kFlat,
+                                                core::InterpolationSampling::kUndefined});
     });
 
     auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
@@ -158,10 +154,8 @@ void main() {
 TEST_F(GlslWriterTest, VarOutBlendSrc) {
     b.Append(b.ir.root_block, [&] {
         auto* v = b.Var("v", ty.ptr(core::AddressSpace::kOut, ty.u32()));
-        core::IOAttributes attrs = {};
-        attrs.location = 1;
-        attrs.blend_src = 1;
-        v->SetAttributes(attrs);
+        v->SetLocation(1);
+        v->SetBlendSrc(1);
     });
 
     auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
@@ -182,9 +176,7 @@ void main() {
 TEST_F(GlslWriterTest, VarOutBuiltin) {
     b.Append(b.ir.root_block, [&] {
         auto* v = b.Var("v", ty.ptr(core::AddressSpace::kOut, ty.u32()));
-        core::IOAttributes attrs = {};
-        attrs.builtin = core::BuiltinValue::kFragDepth;
-        v->SetAttributes(attrs);
+        v->SetBuiltin(core::BuiltinValue::kFragDepth);
     });
 
     auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
@@ -202,9 +194,7 @@ void main() {
 TEST_F(GlslWriterTest, VarBuiltinSampleIndex_ES) {
     b.Append(b.ir.root_block, [&] {
         auto* v = b.Var("v", ty.ptr(core::AddressSpace::kOut, ty.u32()));
-        core::IOAttributes attrs = {};
-        attrs.builtin = core::BuiltinValue::kSampleIndex;
-        v->SetAttributes(attrs);
+        v->SetBuiltin(core::BuiltinValue::kSampleIndex);
     });
 
     auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
@@ -223,9 +213,7 @@ void main() {
 TEST_F(GlslWriterTest, VarBuiltinSampleMask_ES) {
     b.Append(b.ir.root_block, [&] {
         auto* v = b.Var("v", ty.ptr(core::AddressSpace::kOut, ty.u32()));
-        core::IOAttributes attrs = {};
-        attrs.builtin = core::BuiltinValue::kSampleMask;
-        v->SetAttributes(attrs);
+        v->SetBuiltin(core::BuiltinValue::kSampleMask);
     });
 
     auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
@@ -244,9 +232,7 @@ void main() {
 TEST_F(GlslWriterTest, VarBuiltinSampled_NonES) {
     b.Append(b.ir.root_block, [&] {
         auto* v = b.Var("v", ty.ptr(core::AddressSpace::kOut, ty.u32()));
-        core::IOAttributes attrs = {};
-        attrs.builtin = core::BuiltinValue::kSampleIndex;
-        v->SetAttributes(attrs);
+        v->SetBuiltin(core::BuiltinValue::kSampleIndex);
     });
 
     auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
