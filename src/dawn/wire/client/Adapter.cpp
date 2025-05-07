@@ -31,6 +31,7 @@
 #include <string>
 #include <utility>
 
+#include "absl/types/span.h"  // TODO(343500108): Use std::span when we have C++20.
 #include "dawn/common/Log.h"
 #include "dawn/common/StringViewUtils.h"
 #include "dawn/wire/client/Client.h"
@@ -279,10 +280,10 @@ WGPUStatus Adapter::GetInfo(WGPUAdapterInfo* info) const {
     // Allocate space for all strings.
     size_t allocSize =
         mVendor.length() + mArchitecture.length() + mDeviceName.length() + mDescription.length();
-    std::span<char> outBuffer{new char[allocSize], allocSize};
+    absl::Span<char> outBuffer{new char[allocSize], allocSize};
 
     auto AddString = [&](const std::string& in, WGPUStringView* out) {
-        DAWN_ASSERT(in.length() <= outBuffer.size());
+        DAWN_ASSERT(in.length() <= outBuffer.length());
         memcpy(outBuffer.data(), in.data(), in.length());
         *out = {outBuffer.data(), in.length()};
         outBuffer = outBuffer.subspan(in.length());

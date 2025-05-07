@@ -25,9 +25,9 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <span>
 #include <vector>
 
+#include "absl/types/span.h"  // TODO(343500108): Use std::span when we have C++20.
 #include "dawn/common/StringViewUtils.h"
 #include "dawn/wire/SupportedFeatures.h"
 #include "dawn/wire/WireResult.h"
@@ -97,8 +97,8 @@ void Server::OnRequestDeviceCallback(RequestDeviceUserdata* data,
     // the request to preserve callback ordering.
     FreeMembers<WGPUSupportedFeatures> supportedFeatures(mProcs);
     mProcs.deviceGetFeatures(device, &supportedFeatures);
-    std::span<const WGPUFeatureName> features(supportedFeatures.features,
-                                              supportedFeatures.featureCount);
+    absl::Span<const WGPUFeatureName> features(supportedFeatures.features,
+                                               supportedFeatures.featureCount);
     for (WGPUFeatureName feature : features) {
         if (!IsFeatureSupported(feature)) {
             // Release the device.

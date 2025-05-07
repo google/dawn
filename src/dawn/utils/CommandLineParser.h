@@ -30,12 +30,12 @@
 
 #include <memory>
 #include <ostream>
-#include <span>
 #include <string>
-#include <string_view>
 #include <utility>
 #include <vector>
 
+#include "absl/strings/string_view.h"
+#include "absl/types/span.h"  // TODO(343500108): Use std::span when we have C++20.
 #include "dawn/common/Assert.h"
 #include "dawn/common/NonMovable.h"
 
@@ -80,7 +80,7 @@ class CommandLineParser {
     // The base class for all options to let them interact with the parser.
     class OptionBase : NonMovable {
       public:
-        OptionBase(std::string_view name, std::string_view desc);
+        OptionBase(absl::string_view name, absl::string_view desc);
         virtual ~OptionBase();
 
         const std::string& GetName() const;
@@ -92,13 +92,13 @@ class CommandLineParser {
 
         struct ParseResult {
             bool success;
-            std::span<const std::string_view> remainingArgs = {};
+            absl::Span<const absl::string_view> remainingArgs = {};
             std::string errorMessage = {};
         };
-        ParseResult Parse(std::span<const std::string_view> args);
+        ParseResult Parse(absl::Span<const absl::string_view> args);
 
       protected:
-        virtual ParseResult ParseImpl(std::span<const std::string_view> args) = 0;
+        virtual ParseResult ParseImpl(absl::Span<const absl::string_view> args) = 0;
 
         bool mSet = false;
         std::string mName;
@@ -123,47 +123,47 @@ class CommandLineParser {
     // Can be set multiple times on the command line if not using the explicit true/false version.
     class BoolOption : public Option<BoolOption> {
       public:
-        BoolOption(std::string_view name, std::string_view desc);
+        BoolOption(absl::string_view name, absl::string_view desc);
         ~BoolOption() override;
 
         bool GetValue() const;
         std::string GetParameter() const override;
 
       private:
-        ParseResult ParseImpl(std::span<const std::string_view> args) override;
+        ParseResult ParseImpl(absl::Span<const absl::string_view> args) override;
         bool mValue = false;
     };
-    BoolOption& AddBool(std::string_view name, std::string_view desc = {});
+    BoolOption& AddBool(absl::string_view name, absl::string_view desc = {});
 
     // An option returning a string. Defaults to the empty string.
     class StringOption : public Option<StringOption> {
       public:
-        StringOption(std::string_view name, std::string_view desc);
+        StringOption(absl::string_view name, absl::string_view desc);
         ~StringOption() override;
 
         std::string GetValue() const;
 
       private:
-        ParseResult ParseImpl(std::span<const std::string_view> args) override;
+        ParseResult ParseImpl(absl::Span<const absl::string_view> args) override;
         std::string mValue;
     };
-    StringOption& AddString(std::string_view name, std::string_view desc = {});
+    StringOption& AddString(absl::string_view name, absl::string_view desc = {});
 
     // An option returning a list of string split from a comma-separated argument, or the argument
     // being set multiple times (or both). Defaults to an empty list.
     class StringListOption : public Option<StringListOption> {
       public:
-        StringListOption(std::string_view name, std::string_view desc);
+        StringListOption(absl::string_view name, absl::string_view desc);
         ~StringListOption() override;
 
-        std::span<const std::string> GetValue() const;
+        absl::Span<const std::string> GetValue() const;
         std::vector<std::string> GetOwnedValue() const;
 
       private:
-        ParseResult ParseImpl(std::span<const std::string_view> args) override;
+        ParseResult ParseImpl(absl::Span<const absl::string_view> args) override;
         std::vector<std::string> mValue;
     };
-    StringListOption& AddStringList(std::string_view name, std::string_view desc = {});
+    StringListOption& AddStringList(absl::string_view name, absl::string_view desc = {});
 
     // An option converting a string name to a value. The default value can be set with .Default().
     //
@@ -171,9 +171,9 @@ class CommandLineParser {
     template <typename E>
     class EnumOption : public Option<EnumOption<E>> {
       public:
-        EnumOption(std::vector<std::pair<std::string_view, E>> conversions,
-                   std::string_view name,
-                   std::string_view desc);
+        EnumOption(std::vector<std::pair<absl::string_view, E>> conversions,
+                   absl::string_view name,
+                   absl::string_view desc);
         ~EnumOption() override;
 
         E GetValue() const;
@@ -182,18 +182,18 @@ class CommandLineParser {
         EnumOption<E>& Default(E value);
 
       private:
-        std::string JoinNames(std::string_view separator) const;
-        OptionBase::ParseResult ParseImpl(std::span<const std::string_view> args) override;
+        std::string JoinNames(absl::string_view separator) const;
+        OptionBase::ParseResult ParseImpl(absl::Span<const absl::string_view> args) override;
         E mValue;
         bool mHasDefault;
-        std::vector<std::pair<std::string_view, E>> mConversions;
+        std::vector<std::pair<absl::string_view, E>> mConversions;
     };
-    static std::string JoinConversionNames(std::span<const std::string_view> names,
-                                           std::string_view separator);
+    static std::string JoinConversionNames(absl::Span<const absl::string_view> names,
+                                           absl::string_view separator);
     template <typename E>
-    EnumOption<E>& AddEnum(std::vector<std::pair<std::string_view, E>> conversions,
-                           std::string_view name,
-                           std::string_view desc = {}) {
+    EnumOption<E>& AddEnum(std::vector<std::pair<absl::string_view, E>> conversions,
+                           absl::string_view name,
+                           absl::string_view desc = {}) {
         return AddOption(std::make_unique<EnumOption<E>>(std::move(conversions), name, desc));
     }
 
@@ -212,7 +212,7 @@ class CommandLineParser {
     static const ParseOptions kDefaultParseOptions;
 
     // Parse the arguments provided and set the options.
-    ParseResult Parse(std::span<const std::string_view> args,
+    ParseResult Parse(absl::Span<const absl::string_view> args,
                       const ParseOptions& parseOptions = kDefaultParseOptions);
 
     // Small wrappers around the previous Parse for ease of use.
@@ -252,9 +252,9 @@ Child& CommandLineParser::Option<Child>::Parameter(std::string parameter) {
 // EnumOption<E>
 template <typename E>
 CommandLineParser::EnumOption<E>::EnumOption(
-    std::vector<std::pair<std::string_view, E>> conversions,
-    std::string_view name,
-    std::string_view desc)
+    std::vector<std::pair<absl::string_view, E>> conversions,
+    absl::string_view name,
+    absl::string_view desc)
     : Option<EnumOption<E>>(name, desc), mConversions(conversions) {}
 
 template <typename E>
@@ -268,7 +268,7 @@ E CommandLineParser::EnumOption<E>::GetValue() const {
 
 template <typename E>
 CommandLineParser::OptionBase::ParseResult CommandLineParser::EnumOption<E>::ParseImpl(
-    std::span<const std::string_view> args) {
+    absl::Span<const absl::string_view> args) {
     if (this->IsSet()) {
         return {false, args, "cannot be set multiple times"};
     }
@@ -303,8 +303,8 @@ CommandLineParser::EnumOption<E>& CommandLineParser::EnumOption<E>::Default(E va
 }
 
 template <typename E>
-std::string CommandLineParser::EnumOption<E>::JoinNames(std::string_view separator) const {
-    std::vector<std::string_view> names;
+std::string CommandLineParser::EnumOption<E>::JoinNames(absl::string_view separator) const {
+    std::vector<absl::string_view> names;
     for (auto conversion : mConversions) {
         names.push_back(conversion.first);
     }

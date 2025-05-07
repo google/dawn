@@ -32,6 +32,7 @@
 #ifndef {{DIR}}_{{namespace.upper()}}_STRUCTS_H_
 #define {{DIR}}_{{namespace.upper()}}_STRUCTS_H_
 
+#include "absl/strings/string_view.h"
 {% set api = metadata.api.lower() %}
 {% set CAPI = metadata.c_prefix %}
 #include "dawn/{{api}}_cpp.h"
@@ -104,6 +105,19 @@ namespace {{native_namespace}} {
         // Equality operators, mostly for testing. Note that this tests
         // strict pointer-pointer equality if the struct contains member pointers.
         bool operator==(const StringView& rhs) const;
+
+        #ifndef ABSL_USES_STD_STRING_VIEW
+        // NOLINTNEXTLINE(runtime/explicit) allow implicit conversion
+        operator absl::string_view() const {
+            if (this->length == wgpu::kStrlen) {
+                if (IsUndefined()) {
+                    return {};
+                }
+                return {this->data};
+            }
+            return {this->data, this->length};
+        }
+        #endif
     };
 
     {% for type in by_category["structure"] if type.name.get() not in SpecialStructures %}

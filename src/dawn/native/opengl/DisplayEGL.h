@@ -29,8 +29,8 @@
 #define SRC_DAWN_NATIVE_OPENGL_DISPLAYEGL_H_
 
 #include <memory>
-#include <span>
 
+#include "absl/types/span.h"  // TODO(343500108): Use std::span when we have C++20.
 #include "dawn/common/DynamicLib.h"
 #include "dawn/common/NonMovable.h"
 #include "dawn/common/Ref.h"
@@ -62,7 +62,7 @@ class DisplayEGL : public RefCounted {
     EGLint GetAPIEnum() const;
     EGLint GetAPIBit() const;
 
-    std::span<const wgpu::TextureFormat> GetPotentialSurfaceFormats() const;
+    absl::Span<const wgpu::TextureFormat> GetPotentialSurfaceFormats() const;
 
     // Chooses an EGLConfig that works for that surface type and color format.
     EGLConfig ChooseConfig(EGLint surfaceType,

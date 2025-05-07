@@ -124,7 +124,7 @@ EGLint DisplayEGL::GetAPIBit() const {
     return mApiBit;
 }
 
-std::span<const wgpu::TextureFormat> DisplayEGL::GetPotentialSurfaceFormats() const {
+absl::Span<const wgpu::TextureFormat> DisplayEGL::GetPotentialSurfaceFormats() const {
     static constexpr wgpu::TextureFormat kFormatWhenConfigRequired[] = {
         wgpu::TextureFormat::RGBA8Unorm};
     static constexpr wgpu::TextureFormat kFormatsWithNoConfigContext[] = {
