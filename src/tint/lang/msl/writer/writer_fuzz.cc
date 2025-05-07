@@ -63,6 +63,9 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
     }
 
     auto output = Generate(module, options);
+    if (output != Success) {
+        TINT_ICE() << "Generate() failed after CanGenerate() succeeded";
+    }
 
     if (output == Success && context.options.dump) {
         std::cout << "Dumping generated MSL:\n" << output->msl << "\n";

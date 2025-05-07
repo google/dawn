@@ -44,7 +44,7 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module, const fuzz::ir::Context&,
     options.bindings = GenerateBindings(module);
     auto output = Generate(module, options);
     if (output != Success) {
-        return Failure{output.Failure().reason};
+        TINT_ICE() << "Generate() failed after CanGenerate() succeeded";
     }
 
     auto& spirv = output->spirv;
