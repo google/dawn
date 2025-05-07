@@ -1899,6 +1899,23 @@ void Validator::CheckType(const core::type::Type* root,
                 }
                 return true;
             },
+            [&](const core::type::MultisampledTexture* ms) {
+                if (!ms->Type()->IsAnyOf<core::type::F32, core::type::I32, core::type::U32>()) {
+                    diag() << "invalid multisampled texture sample type: " << NameOf(ms->Type());
+                    return false;
+                }
+
+                switch (ms->Dim()) {
+                    case core::type::TextureDimension::k2d:
+                    case core::type::TextureDimension::k2dArray:
+                        break;
+                    default:
+                        diag() << "invalid multisampled texture dimension: "
+                               << style::Literal(ToString(ms->Dim()));
+                        return false;
+                }
+                return true;
+            },
             [&](const core::type::StorageTexture* s) {
                 switch (s->Dim()) {
                     case core::type::TextureDimension::kCube:

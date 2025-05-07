@@ -397,6 +397,69 @@ INSTANTIATE_TEST_SUITE_P(IR_ValidatorTest,
                                          std::make_tuple(false, TypeBuilder<core::type::Bool>),
                                          std::make_tuple(false, TypeBuilder<core::type::Void>)));
 
+using Type_MultisampledTextureTypeAndDimension =
+    IRTestParamHelper<std::tuple<std::tuple<
+                                     /* type_allowed */ bool,
+                                     /* type_builder */ TypeBuilderFn>,
+                                 std::tuple<
+                                     /* dim_allowed */ bool,
+                                     /* dim */ core::type::TextureDimension>>>;
+
+TEST_P(Type_MultisampledTextureTypeAndDimension, Test) {
+    auto type_params = std::get<0>(GetParam());
+    bool type_allowed = std::get<0>(type_params);
+    auto* type = std::get<1>(type_params)(ty);
+
+    auto dim_params = std::get<1>(GetParam());
+    bool dim_allowed = std::get<0>(dim_params);
+    auto dim = std::get<1>(dim_params);
+
+    bool allowed = type_allowed && dim_allowed;
+
+    b.Append(mod.root_block, [&] {
+        auto* var = b.Var("ms", AddressSpace::kHandle, ty.multisampled_texture(dim, type));
+        var->SetBindingPoint(0, 0);
+    });
+
+    auto res = ir::Validate(mod);
+    if (allowed) {
+        ASSERT_EQ(res, Success) << res.Failure();
+    } else {
+        ASSERT_NE(res, Success);
+        if (!type_allowed) {
+            EXPECT_THAT(
+                res.Failure().reason,
+                testing::HasSubstr(":2:3 error: var: invalid multisampled texture sample type: '" +
+                                   type->FriendlyName()))
+                << res.Failure();
+        } else {
+            EXPECT_THAT(
+                res.Failure().reason,
+                testing::HasSubstr(":2:3 error: var: invalid multisampled texture dimension: '" +
+                                   std::string(ToString(dim))))
+                << res.Failure();
+        }
+    }
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    IR_ValidatorTest,
+    Type_MultisampledTextureTypeAndDimension,
+    testing::Combine(testing::Values(std::make_tuple(true, TypeBuilder<f32>),
+                                     std::make_tuple(true, TypeBuilder<i32>),
+                                     std::make_tuple(true, TypeBuilder<u32>),
+                                     std::make_tuple(false, TypeBuilder<f16>),
+                                     std::make_tuple(false, TypeBuilder<core::type::Bool>),
+                                     std::make_tuple(false, TypeBuilder<core::type::Void>)),
+                     testing::Values(std::make_tuple(false, core::type::TextureDimension::k1d),
+                                     std::make_tuple(true, core::type::TextureDimension::k2d),
+                                     std::make_tuple(true, core::type::TextureDimension::k2dArray),
+                                     std::make_tuple(false, core::type::TextureDimension::k3d),
+                                     std::make_tuple(false, core::type::TextureDimension::kCube),
+                                     std::make_tuple(false,
+                                                     core::type::TextureDimension::kCubeArray),
+                                     std::make_tuple(false, core::type::TextureDimension::kNone))));
+
 using Type_StorageTextureDimension = IRTestParamHelper<std::tuple<
     /* allowed */ bool,
     /* dim */ core::type::TextureDimension>>;
