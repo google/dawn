@@ -2157,6 +2157,14 @@ void Validator::CheckFunction(const Function* func) {
             }
         }
 
+        if (!capabilities_.Contains(Capability::kAllowWorkspacePointerInputToEntryPoint) &&
+            func->IsEntryPoint()) {
+            if (mv && mv->Is<core::type::Pointer>() && address_space == AddressSpace::kWorkgroup) {
+                AddError(param) << "input param to entry point cannot be a ptr in the 'workgroup' "
+                                   "address space";
+            }
+        }
+
         scope_stack_.Add(param);
     }
 

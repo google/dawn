@@ -341,7 +341,9 @@ struct State {
 }  // namespace
 
 Result<SuccessType> ModuleScopeVars(core::ir::Module& ir) {
-    auto result = ValidateAndDumpIfNeeded(ir, "msl.ModuleScopeVars");
+    auto result = ValidateAndDumpIfNeeded(
+        ir, "msl.ModuleScopeVars",
+        core::ir::Capabilities{core::ir::Capability::kAllowWorkspacePointerInputToEntryPoint});
     if (result != Success) {
         return result.Failure();
     }

@@ -49,6 +49,7 @@ const core::ir::Capabilities kRenameConflictsCapabilities{
     core::ir::Capability::kAllowClipDistancesOnF32,
     core::ir::Capability::kAllowPrivateVarsInFunctions,
     core::ir::Capability::kAllowAnyLetType,
+    core::ir::Capability::kAllowWorkspacePointerInputToEntryPoint,
 };
 
 /// RenameConflicts is a transform that renames declarations which prevent identifiers from

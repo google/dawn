@@ -92,6 +92,7 @@ Result<SuccessType> UnaryPolyfill(core::ir::Module& ir) {
                                     core::ir::Capability::kAllowPointersAndHandlesInStructures,
                                     core::ir::Capability::kAllowPrivateVarsInFunctions,
                                     core::ir::Capability::kAllowAnyLetType,
+                                    core::ir::Capability::kAllowWorkspacePointerInputToEntryPoint,
                                 });
     if (result != Success) {
         return result.Failure();

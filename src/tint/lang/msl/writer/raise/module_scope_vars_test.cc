@@ -45,7 +45,8 @@ class MslWriter_ModuleScopeVarsTest : public core::ir::transform::TransformTest 
     void SetUp() override {
         capabilities.Add(core::ir::Capability::kAllowPointersAndHandlesInStructures,
                          core::ir::Capability::kAllowPrivateVarsInFunctions,
-                         core::ir::Capability::kAllowAnyLetType);
+                         core::ir::Capability::kAllowAnyLetType,
+                         core::ir::Capability::kAllowWorkspacePointerInputToEntryPoint);
     }
 };
 
@@ -494,7 +495,6 @@ tint_symbol_2 = struct @align(4) {
   }
 }
 )";
-
     Run(ModuleScopeVars);
 
     EXPECT_EQ(expect, str());

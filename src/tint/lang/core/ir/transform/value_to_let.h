@@ -49,6 +49,7 @@ const core::ir::Capabilities kValueToLetCapabilities{
     core::ir::Capability::kAllowClipDistancesOnF32,
     core::ir::Capability::kAllowPrivateVarsInFunctions,
     core::ir::Capability::kAllowAnyLetType,
+    core::ir::Capability::kAllowWorkspacePointerInputToEntryPoint,
 };
 
 /// Configuration for ValueToLet transform.

@@ -49,6 +49,7 @@ const core::ir::Capabilities kRemoveTerminatorArgsCapabilities{
     core::ir::Capability::kAllowClipDistancesOnF32,
     core::ir::Capability::kAllowPrivateVarsInFunctions,
     core::ir::Capability::kAllowAnyLetType,
+    core::ir::Capability::kAllowWorkspacePointerInputToEntryPoint,
 };
 
 /// RemoveTerminatorArgs is a transform that removes all arguments from terminator instructions and

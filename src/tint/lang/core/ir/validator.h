@@ -67,6 +67,9 @@ enum class Capability : uint8_t {
     /// Allows input_attachment_index to be associated with any type, used by
     /// SPIRV backend for spirv.image.
     kAllowAnyInputAttachmentIndexType,
+    /// Allows workgroup address space pointers as entry point inputs. Used by
+    /// the MSL backend.
+    kAllowWorkspacePointerInputToEntryPoint,
 };
 
 /// Capabilities is a set of Capability
