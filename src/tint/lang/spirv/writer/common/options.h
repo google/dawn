@@ -198,6 +198,9 @@ struct Options {
     /// Set to `true` if the Vulkan Memory Model should be used
     bool use_vulkan_memory_model = false;
 
+    /// Set to `true` if the clamp builtin should be scalarized for vector operations
+    bool scalarize_clamp_builtin = false;
+
     /// Offsets of the minDepth and maxDepth push constants.
     std::optional<RangeOffsets> depth_range_offsets = std::nullopt;
 
@@ -220,6 +223,7 @@ struct Options {
                  polyfill_pack_unpack_4x8_norm,
                  disable_polyfill_integer_div_mod,
                  use_vulkan_memory_model,
+                 scalarize_clamp_builtin,
                  depth_range_offsets);
 };
 

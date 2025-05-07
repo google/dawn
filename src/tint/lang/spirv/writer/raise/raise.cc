@@ -165,8 +165,9 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         RUN_TRANSFORM(core::ir::transform::DemoteToHelper, module);
     }
 
-    RUN_TRANSFORM(raise::BuiltinPolyfill, module, options.use_vulkan_memory_model);
-
+    raise::PolyfillConfig config = {.use_vulkan_memory_model = options.use_vulkan_memory_model,
+                                    .scalarize_clamp_builtin = options.scalarize_clamp_builtin};
+    RUN_TRANSFORM(raise::BuiltinPolyfill, module, config);
     RUN_TRANSFORM(raise::ExpandImplicitSplats, module);
     // kAllowAnyInputAttachmentIndexType required after ExpandImplicitSplats
     RUN_TRANSFORM(raise::HandleMatrixArithmetic, module);

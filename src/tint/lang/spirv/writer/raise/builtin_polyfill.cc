@@ -30,6 +30,7 @@
 #include <utility>
 
 #include "spirv/unified1/spirv.h"
+#include "src/tint/lang/core/builtin_fn.h"
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
@@ -153,8 +154,7 @@ struct State {
     /// The IR module.
     core::ir::Module& ir;
 
-    /// If we should use the vulkan memory model
-    bool use_vulkan_memory_model = false;
+    PolyfillConfig config;
 
     /// The IR builder.
     core::ir::Builder b{ir};
@@ -231,6 +231,12 @@ struct State {
                             worklist.Push(builtin);
                         }
                         break;
+                    case core::BuiltinFn::kClamp:
+                        if (config.scalarize_clamp_builtin &&
+                            builtin->Result()->Type()->Is<core::type::Vector>()) {
+                            worklist.Push(builtin);
+                        }
+                        break;
                     default:
                         break;
                 }
@@ -268,6 +274,9 @@ struct State {
                     break;
                 case core::BuiltinFn::kSelect:
                     Select(builtin);
+                    break;
+                case core::BuiltinFn::kClamp:
+                    Clamp(builtin);
                     break;
                 case core::BuiltinFn::kSubgroupBroadcast:
                     SubgroupBroadcast(builtin);
@@ -547,6 +556,34 @@ struct State {
         builtin->Destroy();
     }
 
+    /// Handle a `clamp()` builtin when scalarization is required.
+    /// @param builtin the builtin call instruction
+    void Clamp(core::ir::CoreBuiltinCall* builtin) {
+        auto* e = builtin->Args()[0];
+        auto* vec = e->Type()->As<core::type::Vector>();
+        if (!vec) {
+            // Already is a scalar. No change required.
+            return;
+        }
+
+        b.InsertBefore(builtin, [&] {
+            auto* low = builtin->Args()[1];
+            auto* high = builtin->Args()[2];
+            auto* type = vec->DeepestElement();
+            Vector<core::ir::Value*, 4> args;
+            for (uint32_t i = 0; i < vec->Width(); i++) {
+                auto* access_e = b.Access(type, e, u32(i));
+                auto* access_low = b.Access(type, low, u32(i));
+                auto* access_high = b.Access(type, high, u32(i));
+                auto* scalar_call =
+                    b.Call(type, core::BuiltinFn::kClamp, access_e, access_low, access_high);
+                args.Push(scalar_call->Result());
+            }
+            b.ConstructWithResult(builtin->DetachResult(), std::move(args));
+        });
+        builtin->Destroy();
+    }
+
     /// ImageOperands represents the optional image operands for an image instruction.
     struct ImageOperands {
         /// Bias
@@ -579,7 +616,7 @@ struct State {
         args.Push(nullptr);
 
         // Append the NonPrivateTexel flag to Read/Write storage textures when we load/store them.
-        if (use_vulkan_memory_model) {
+        if (config.use_vulkan_memory_model) {
             if (insertion_point->Func() == core::BuiltinFn::kTextureLoad ||
                 insertion_point->Func() == core::BuiltinFn::kTextureStore) {
                 if (auto* st = insertion_point->Args()[0]->Type()->As<spirv::type::Image>()) {
@@ -1238,13 +1275,13 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType> BuiltinPolyfill(core::ir::Module& ir, bool use_vulkan_memory_model) {
+Result<SuccessType> BuiltinPolyfill(core::ir::Module& ir, PolyfillConfig config) {
     auto result = ValidateAndDumpIfNeeded(ir, "spirv.BuiltinPolyfill");
     if (result != Success) {
         return result.Failure();
     }
 
-    State{ir, use_vulkan_memory_model}.Process();
+    State{ir, config}.Process();
 
     return Success;
 }
