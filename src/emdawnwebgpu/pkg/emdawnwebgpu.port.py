@@ -66,6 +66,17 @@ _src_dir = os.path.join(_pkg_dir, 'webgpu', 'src')
 _srcs = [
     os.path.join(_src_dir, 'webgpu.cpp'),
 ]
+
+# Check for a generated file that would only be there in the built package
+if not os.path.isfile(os.path.join(_c_include_dir, 'webgpu', 'webgpu.h')):
+    raise Exception(
+        "emdawnwebgpu.port.py may only be used from a built emdawnwebgpu_pkg, "
+        "not from Dawn's source tree. You can use pre-built packages from "
+        "https://github.com/google/dawn/releases or build it locally.")
+
+# Collect a list of all files that affect the compiled port so that we know
+# when to recompile it. (Normally Emscripten handles this, but not here because
+# of the way that we "misuse" the ports system.)
 _files_affecting_port_build = sorted([
     __file__,
     *_srcs,
