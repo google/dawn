@@ -175,10 +175,15 @@ constexpr SkippedMessage kSkippedMessages[] = {
     {"NVIDIA", "vkBindImageMemory: memoryTypeIndex"},
 
     // https://github.com/KhronosGroup/Vulkan-ValidationLayers/issues/9537
+    // https://crbug.com/dawn/416237596: remove old messages when deps roll
     {"VUID-vkCmdCopyBufferToImage-pRegions-00173",
      "Detected overlap between source and dest regions in memory"},
+    {"VUID-vkCmdCopyBufferToImage-pRegions-00173",
+     "Detected overlap between src and dst regions in memory"},
     {"VUID-vkCmdCopyImageToBuffer-pRegions-00184",
      "Detected overlap between source and dest regions in memory"},
+    {"VUID-vkCmdCopyImageToBuffer-pRegions-00184",
+     "Detected overlap between src and dst regions in memory"},
 };
 
 namespace dawn::native::vulkan {
