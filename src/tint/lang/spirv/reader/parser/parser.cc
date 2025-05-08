@@ -73,6 +73,9 @@ constexpr auto kTargetEnv = SPV_ENV_VULKAN_1_1;
 /// Validates the SPIR-V module and then parses it to produce a Tint IR module.
 class Parser {
   public:
+    explicit Parser(const Options& options) : options_(options) {}
+    ~Parser() = default;
+
     /// @param spirv the SPIR-V binary data
     /// @returns the generated SPIR-V IR module on success, or failure
     Result<core::ir::Module> Run(Slice<const uint32_t> spirv) {
@@ -135,7 +138,39 @@ class Parser {
 
         // TODO(crbug.com/tint/1907): Handle annotation instructions.
 
+        RemapSamplers();
+
         return std::move(ir_);
+    }
+
+    void RemapSamplers() {
+        for (auto* inst : *ir_.root_block) {
+            auto* var = inst->As<core::ir::Var>();
+            if (!var) {
+                continue;
+            }
+            auto* ptr = var->Result()->Type()->As<core::type::Pointer>();
+            TINT_ASSERT(ptr);
+
+            if (!ptr->StoreType()->As<core::type::Sampler>()) {
+                continue;
+            }
+
+            TINT_ASSERT(var->BindingPoint().has_value());
+
+            auto bp = var->BindingPoint().value();
+            auto used = used_bindings.GetOrAddZero(bp);
+
+            // Only one use is the sampler itself.
+            if (used == 1) {
+                continue;
+            }
+
+            auto& binding = max_binding.GetOrAddZero(bp.group);
+            binding += 1;
+
+            var->SetBindingPoint(bp.group, binding);
+        }
     }
 
     std::optional<uint16_t> GetSpecId(const spvtools::opt::Instruction& inst) {
@@ -2494,13 +2529,33 @@ class Parser {
             }
         }
 
-        auto* var = b_.Var(Type(inst.type_id(), access_mode)->As<core::type::Pointer>());
+        auto* element_ty = Type(inst.type_id(), access_mode)->As<core::type::Pointer>();
+        auto* var = b_.Var(element_ty);
         if (inst.NumOperands() > 3) {
             var->SetInitializer(Value(inst.GetSingleWordOperand(3)));
         }
 
         if (group || binding) {
             TINT_ASSERT(group && binding);
+
+            // Remap any samplers which match an entry in the sampler mappings
+            // table.
+            if (element_ty->StoreType()->Is<core::type::Sampler>()) {
+                auto it =
+                    options_.sampler_mappings.find(BindingPoint{group.value(), binding.value()});
+                if (it != options_.sampler_mappings.end()) {
+                    auto bp = it->second;
+                    group = bp.group;
+                    binding = bp.binding;
+                }
+            }
+
+            auto& grp = max_binding.GetOrAddZero(group.value());
+            grp = std::max(grp, binding.value());
+
+            auto& used = used_bindings.GetOrAddZero(BindingPoint{group.value(), binding.value()});
+            used += 1;
+
             io_attributes.binding_point = {group.value(), binding.value()};
         }
         var->SetAttributes(std::move(io_attributes));
@@ -2525,6 +2580,9 @@ class Parser {
         tint::HashCode HashCode() const { return Hash(type, access_mode); }
     };
 
+    /// The parser options
+    const Options& options_;
+
     /// The generated IR module.
     core::ir::Module ir_;
     /// The Tint IR builder.
@@ -2542,6 +2600,10 @@ class Parser {
     Hashmap<uint32_t, core::ir::Function*, 8> functions_;
     /// A map from a SPIR-V result ID to the corresponding Tint value object.
     Hashmap<uint32_t, core::ir::Value*, 8> values_;
+    /// Maps a `group` number to the largest seen `binding` value for that group
+    Hashmap<uint32_t, uint32_t, 4> max_binding;
+    /// A map of binding point to the count of usages
+    Hashmap<BindingPoint, uint32_t, 4> used_bindings;
 
     /// The SPIR-V context containing the SPIR-V tools intermediate representation.
     std::unique_ptr<spvtools::opt::IRContext> spirv_context_;
@@ -2584,8 +2646,8 @@ class Parser {
 
 }  // namespace
 
-Result<core::ir::Module> Parse(Slice<const uint32_t> spirv) {
-    return Parser{}.Run(spirv);
+Result<core::ir::Module> Parse(Slice<const uint32_t> spirv, const Options& options) {
+    return Parser(options).Run(spirv);
 }
 
 }  // namespace tint::spirv::reader

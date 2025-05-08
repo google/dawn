@@ -66,7 +66,7 @@ class SpirvParserTestHelperBase : public BASE {
         }
 
         // Parse the SPIR-V to produce an IR module.
-        auto parsed = Parse(Slice(binary.Get().data(), binary.Get().size()));
+        auto parsed = Parse(Slice(binary.Get().data(), binary.Get().size()), options);
         if (parsed != Success) {
             return parsed.Failure();
         }
@@ -84,6 +84,9 @@ class SpirvParserTestHelperBase : public BASE {
         // Return the disassembled IR module.
         return core::ir::Disassembler(parsed.Get()).Plain();
     }
+
+    /// Parser options
+    spirv::reader::Options options;
 };
 
 using SpirvParserTest = SpirvParserTestHelperBase<testing::Test>;

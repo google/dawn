@@ -393,6 +393,15 @@ violations that may be produced)",
             opts->spirv_reader_options.allow_non_uniform_derivatives = true;
         }
     });
+
+    auto& sampler_mapping = options.Add<StringOption>(
+        "sampler-mapping",
+        "Allows remapping the binding points of samplers from the SPIR-V file. "
+        "This allows setting a correct binding point for samplers which were part of a combined "
+        "texture/sampler pair. Entries are provided as binding point pairs (group, binding) and "
+        "each provides a (source:destination) mapping. (e.g. 1,2:3,4) Multiple entries should "
+        "be separated with a space.",
+        Default{""});
 #endif
 
 #if TINT_BUILD_SPV_WRITER
@@ -501,6 +510,49 @@ Options:
             opts->overrides.Add(std::string(parts[0]), value.Get());
         }
     }
+
+#if TINT_BUILD_SPV_READER
+    if (!sampler_mapping.value->empty()) {
+        auto str_to_bp = [](const std::string_view& str) -> std::optional<tint::BindingPoint> {
+            auto parts = tint::Split(str, ",");
+            if (parts.Length() != 2) {
+                std::cerr << "A binding point requires a 'group,binding' pair, found "
+                          << parts.Length() << " components instead of 2.\n";
+                return std::nullopt;
+            }
+
+            uint32_t group = 0;
+            std::from_chars(parts[0].data(), parts[0].data() + parts[0].size(), group);
+
+            uint32_t binding = 0;
+            std::from_chars(parts[1].data(), parts[1].data() + parts[0].size(), binding);
+
+            return {tint::BindingPoint{group, binding}};
+        };
+
+        for (auto mapping : tint::Split(*sampler_mapping.value, " ")) {
+            auto parts = tint::Split(mapping, ":");
+            if (parts.Length() != 2) {
+                std::cerr << "Expected source and destination binding points separated by a ':'\n";
+                return false;
+            }
+
+            auto opt_src = str_to_bp(parts[0]);
+            if (!opt_src.has_value()) {
+                return false;
+            }
+            tint::BindingPoint src_bp = opt_src.value();
+
+            auto opt_dst = str_to_bp(parts[1]);
+            if (!opt_dst.has_value()) {
+                return false;
+            }
+            tint::BindingPoint dst_bp = opt_dst.value();
+
+            opts->spirv_reader_options.sampler_mappings.insert({src_bp, dst_bp});
+        }
+    }
+#endif  // TINT_BUILD_SPV_READER
 
 #if TINT_BUILD_HLSL_WRITER
     if (pixel_local_attachment_formats.value.has_value()) {
