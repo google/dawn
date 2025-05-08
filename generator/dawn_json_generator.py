@@ -468,8 +468,7 @@ def link_object(obj, types):
                       autolock_enabled, json_data)
 
     obj.methods = [make_method(m) for m in obj.json_data.get('methods', [])]
-    obj.methods.sort(key=lambda method: method.name.canonical_case())
-
+    obj.methods.sort(key=lambda method: method.name.concatcase().lower())
 
 def link_structure(struct, types):
     struct.members = linked_record_members(struct.json_data['members'], types)
@@ -513,6 +512,11 @@ def topo_sort_structure(structs):
     for struct in structs:
         struct.visited = False
         struct.subdag_depth = 0
+        # String view is special cased to -1 because we purposely fully declare
+        # it before all other structs.
+        if struct.name.get() == "string view":
+            struct.subdag_depth = -1
+            struct.visited = True
 
     def compute_depth(struct):
         if struct.visited:
@@ -618,7 +622,8 @@ def parse_json(json, enabled_tags, disabled_tags=None):
 
     for category in by_category.keys():
         by_category[category] = sorted(
-            by_category[category], key=lambda typ: typ.name.canonical_case())
+            by_category[category],
+            key=lambda typ: typ.name.concatcase().lower())
 
     by_category['structure'] = topo_sort_structure(by_category['structure'])
 

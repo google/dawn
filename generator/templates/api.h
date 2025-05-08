@@ -28,7 +28,7 @@
 //*
 {% include 'BSD_LICENSE' %}
 
-{% if 'dawn' in enabled_tags %}
+{%- if 'dawn' in enabled_tags %}
     #ifdef __EMSCRIPTEN__
     #error "Do not include this header. Emscripten already provides headers needed for {{metadata.api}}."
     #endif
@@ -37,127 +37,12 @@
 #ifndef {{metadata.api.upper()}}_H_
 #define {{metadata.api.upper()}}_H_
 
+//* -------------------------------------------------------------------------------------
+//* The follow block defines Dawn generator specific macros and #defines for migrations.
+//* -------------------------------------------------------------------------------------
 #define WGPU_BREAKING_CHANGE_STRING_VIEW_LABELS
 #define WGPU_BREAKING_CHANGE_STRING_VIEW_OUTPUT_STRUCTS
 #define WGPU_BREAKING_CHANGE_STRING_VIEW_CALLBACKS
-
-{% set API = metadata.c_prefix %}
-{% set api = API.lower() %}
-#if defined({{API}}_SHARED_LIBRARY)
-#    if defined(_WIN32)
-#        if defined({{API}}_IMPLEMENTATION)
-#            define {{API}}_EXPORT __declspec(dllexport)
-#        else
-#            define {{API}}_EXPORT __declspec(dllimport)
-#        endif
-#    else  // defined(_WIN32)
-#        if defined({{API}}_IMPLEMENTATION)
-#            define {{API}}_EXPORT __attribute__((visibility("default")))
-#        else
-#            define {{API}}_EXPORT
-#        endif
-#    endif  // defined(_WIN32)
-#else       // defined({{API}}_SHARED_LIBRARY)
-#    define {{API}}_EXPORT
-#endif  // defined({{API}}_SHARED_LIBRARY)
-
-#if !defined({{API}}_OBJECT_ATTRIBUTE)
-#define {{API}}_OBJECT_ATTRIBUTE
-#endif
-#if !defined({{API}}_ENUM_ATTRIBUTE)
-#define {{API}}_ENUM_ATTRIBUTE
-#endif
-#if !defined({{API}}_STRUCTURE_ATTRIBUTE)
-#define {{API}}_STRUCTURE_ATTRIBUTE
-#endif
-#if !defined({{API}}_FUNCTION_ATTRIBUTE)
-#define {{API}}_FUNCTION_ATTRIBUTE
-#endif
-#if !defined({{API}}_NULLABLE)
-#define {{API}}_NULLABLE
-#endif
-
-#include <stdint.h>
-#include <stddef.h>
-#include <math.h>
-
-#if defined(__cplusplus)
-#  define _{{api}}_ENUM_ZERO_INIT(type) type(0)
-#  define _{{api}}_STRUCT_ZERO_INIT {}
-#  if __cplusplus >= 201103L
-#    define _{{api}}_MAKE_INIT_STRUCT(type, value) (type value)
-#  else
-#    define _{{api}}_MAKE_INIT_STRUCT(type, value) value
-#  endif
-#else
-#  define _{{api}}_ENUM_ZERO_INIT(type) (type)0
-#  define _{{api}}_STRUCT_ZERO_INIT {0}
-#  if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
-#    define _{{api}}_MAKE_INIT_STRUCT(type, value) ((type) value)
-#  else
-#    define _{{api}}_MAKE_INIT_STRUCT(type, value) value
-#  endif
-#endif
-
-{% for constant in by_category["constant"] %}
-    #define {{API}}_{{constant.name.SNAKE_CASE()}} {{constant.value}}
-{% endfor %}
-
-typedef uint64_t {{API}}Flags;
-typedef uint32_t {{API}}Bool;
-
-{% for type in by_category["object"] %}
-    typedef struct {{as_cType(type.name)}}Impl* {{as_cType(type.name)}} {{API}}_OBJECT_ATTRIBUTE;
-{% endfor %}
-
-// Structure forward declarations
-{% for type in by_category["structure"] %}
-    struct {{as_cType(type.name)}};
-{% endfor %}
-
-{% for type in by_category["enum"] %}
-    typedef enum {{as_cType(type.name)}} {
-        {% for value in type.values %}
-            {{as_cEnum(type.name, value.name)}} = 0x{{format(value.value, "08X")}},
-        {% endfor %}
-        {{as_cEnum(type.name, Name("force32"))}} = 0x7FFFFFFF
-    } {{as_cType(type.name)}} {{API}}_ENUM_ATTRIBUTE;
-{% endfor %}
-
-{% for type in by_category["bitmask"] %}
-    typedef {{API}}Flags {{as_cType(type.name)}};
-    {% for value in type.values %}
-        static const {{as_cType(type.name)}} {{as_cEnum(type.name, value.name)}} = 0x{{format(value.value, "016X")}};
-    {% endfor %}
-{% endfor -%}
-
-{% for type in by_category["function pointer"] %}
-    typedef {{as_cType(type.return_type.name)}} (*{{as_cType(type.name)}})(
-        {%- if type.arguments == [] -%}
-            void
-        {%- else -%}
-            {%- for arg in type.arguments -%}
-                {% if not loop.first %}, {% endif %}
-                {% if arg.type.category == "structure" %}struct {% endif %}{{as_annotated_cType(arg)}}
-            {%- endfor -%}
-        {%- endif -%}
-    ) {{API}}_FUNCTION_ATTRIBUTE;
-{% endfor %}
-
-// Callback function pointers
-{% for type in by_category["callback function"] %}
-    typedef {{as_cType(type.return_type.name)}} (*{{as_cType(type.name)}})(
-        {%- for arg in type.arguments -%}
-        {% if arg.type.category == "structure" %}struct {% endif %}{{as_annotated_cType(arg)}}{{", "}}
-        {%- endfor -%}
-    {{API}}_NULLABLE void* userdata1, {{API}}_NULLABLE void* userdata2) {{API}}_FUNCTION_ATTRIBUTE;
-{% endfor %}
-
-typedef struct {{API}}ChainedStruct {
-    struct {{API}}ChainedStruct * next;
-    {{API}}SType sType;
-} {{API}}ChainedStruct {{API}}_STRUCTURE_ATTRIBUTE;
-
 {% macro render_c_default_value(member) -%}
     {%- if member.annotation in ["*", "const*", "const*const*"] -%}
         //* Pointer types should always default to NULL.
@@ -236,37 +121,16 @@ typedef struct {{API}}ChainedStruct {
     {%- else -%}
         {{- assert(false, 'Unknown type "' + member.type.name.get() + '" with annotations "' + member.annotation + '" when trying to render default value.') -}}
     {%- endif -%}
-{% endmacro %}
-{% macro nullable_annotation(record) -%}
+{%- endmacro -%}
+
+{%- macro nullable_annotation(record) -%}
     {% if record.optional and (record.type.category == "object" or record.annotation != "value") -%}
         {{API}}_NULLABLE{{" "}}
     {%- endif %}
-{%- endmacro %}
+{%- endmacro -%}
 
-#define _{{api}}_COMMA ,
-
-{% for type in by_category["callback info"] %}
-    typedef struct {{as_cType(type.name)}} {
-        {{API}}ChainedStruct * nextInChain;
-        {% for member in type.members %}
-            {{as_annotated_cType(member)}};
-        {% endfor %}
-        {{API}}_NULLABLE void* userdata1;
-        {{API}}_NULLABLE void* userdata2;
-    } {{as_cType(type.name)}} {{API}}_STRUCTURE_ATTRIBUTE;
-
-    #define {{API}}_{{type.name.SNAKE_CASE()}}_INIT _{{api}}_MAKE_INIT_STRUCT({{as_cType(type.name)}}, { \
-        /*.nextInChain=*/NULL _{{api}}_COMMA \
-        {% for member in type.members %}
-            /*.{{as_varName(member.name)}}=*/{{render_c_default_value(member)}} _{{api}}_COMMA \
-        {% endfor %}
-        /*.userdata1=*/NULL _{{api}}_COMMA \
-        /*.userdata2=*/NULL _{{api}}_COMMA \
-    })
-
-{% endfor %}
-
-{% for type in by_category["structure"] %}
+//* The |render_c_struct_definition| macro renders both the struct definition and the init macros for a given struct.
+{% macro render_c_struct_definition(type) -%}
     {% for root in type.chain_roots %}
         // Can be chained in {{as_cType(root.name)}}
     {% endfor %}
@@ -296,8 +160,163 @@ typedef struct {{API}}ChainedStruct {
             /*.{{as_varName(member.name)}}=*/{{render_c_default_value(member)}} _{{api}}_COMMA \
         {% endfor %}
     })
+{%- endmacro %}
 
+//* Special structures that require some custom code generation.
+{%- set SpecialStructures = ["string view"] %}
+//* -------------------------------------------------------------------------------------
+//* End of Dawn generator specific macros and #defines for migrations.
+//* -------------------------------------------------------------------------------------
+
+{% set API = metadata.c_prefix %}
+{% set api = API.lower() %}
+#if defined({{API}}_SHARED_LIBRARY)
+#    if defined(_WIN32)
+#        if defined({{API}}_IMPLEMENTATION)
+#            define {{API}}_EXPORT __declspec(dllexport)
+#        else
+#            define {{API}}_EXPORT __declspec(dllimport)
+#        endif
+#    else  // defined(_WIN32)
+#        if defined({{API}}_IMPLEMENTATION)
+#            define {{API}}_EXPORT __attribute__((visibility("default")))
+#        else
+#            define {{API}}_EXPORT
+#        endif
+#    endif  // defined(_WIN32)
+#else       // defined({{API}}_SHARED_LIBRARY)
+#    define {{API}}_EXPORT
+#endif  // defined({{API}}_SHARED_LIBRARY)
+
+#if !defined({{API}}_OBJECT_ATTRIBUTE)
+#define {{API}}_OBJECT_ATTRIBUTE
+#endif
+#if !defined({{API}}_ENUM_ATTRIBUTE)
+#define {{API}}_ENUM_ATTRIBUTE
+#endif
+#if !defined({{API}}_STRUCTURE_ATTRIBUTE)
+#define {{API}}_STRUCTURE_ATTRIBUTE
+#endif
+#if !defined({{API}}_FUNCTION_ATTRIBUTE)
+#define {{API}}_FUNCTION_ATTRIBUTE
+#endif
+#if !defined({{API}}_NULLABLE)
+#define {{API}}_NULLABLE
+#endif
+
+#include <stdint.h>
+#include <stddef.h>
+#include <math.h>
+
+#define _{{api}}_COMMA ,
+#if defined(__cplusplus)
+#  define _{{api}}_ENUM_ZERO_INIT(type) type(0)
+#  define _{{api}}_STRUCT_ZERO_INIT {}
+#  if __cplusplus >= 201103L
+#    define _{{api}}_MAKE_INIT_STRUCT(type, value) (type value)
+#  else
+#    define _{{api}}_MAKE_INIT_STRUCT(type, value) value
+#  endif
+#else
+#  define _{{api}}_ENUM_ZERO_INIT(type) (type)0
+#  define _{{api}}_STRUCT_ZERO_INIT {0}
+#  if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
+#    define _{{api}}_MAKE_INIT_STRUCT(type, value) ((type) value)
+#  else
+#    define _{{api}}_MAKE_INIT_STRUCT(type, value) value
+#  endif
+#endif
+
+{% for constant in by_category["constant"] %}
+    #define {{API}}_{{constant.name.SNAKE_CASE()}} ({{constant.value}})
 {% endfor %}
+
+//* The upstream header fully declares WGPUStringView up front so do the same here.
+{{render_c_struct_definition(types["string view"])}}
+
+typedef uint64_t {{API}}Flags;
+typedef uint32_t {{API}}Bool;
+
+{% for type in by_category["object"] %}
+    typedef struct {{as_cType(type.name)}}Impl* {{as_cType(type.name)}} {{API}}_OBJECT_ATTRIBUTE;
+{% endfor %}
+
+// Structure forward declarations
+{% for type in by_category["structure"] if type.name.get() not in SpecialStructures %}
+    struct {{as_cType(type.name)}};
+{% endfor %}
+
+{% for type in by_category["enum"] %}
+    typedef enum {{as_cType(type.name)}} {
+        {% for value in type.values %}
+            {{as_cEnum(type.name, value.name)}} = 0x{{format(value.value, "08X")}},
+        {% endfor %}
+        {{as_cEnum(type.name, Name("force32"))}} = 0x7FFFFFFF
+    } {{as_cType(type.name)}} {{API}}_ENUM_ATTRIBUTE;
+
+{% endfor -%}
+
+{% for type in by_category["bitmask"] %}
+    typedef {{API}}Flags {{as_cType(type.name)}};
+    {% for value in type.values %}
+        static const {{as_cType(type.name)}} {{as_cEnum(type.name, value.name)}} = 0x{{format(value.value, "016X")}};
+    {% endfor %}
+
+{% endfor -%}
+
+{% for type in by_category["function pointer"] %}
+    typedef {{as_cType(type.return_type.name)}} (*{{as_cType(type.name)}})(
+        {%- if type.arguments == [] -%}
+            void
+        {%- else -%}
+            {%- for arg in type.arguments -%}
+                {% if not loop.first %}, {% endif %}
+                {% if arg.type.category == "structure" %}struct {% endif %}{{as_annotated_cType(arg)}}
+            {%- endfor -%}
+        {%- endif -%}
+    ) {{API}}_FUNCTION_ATTRIBUTE;
+{% endfor %}
+
+// Callback function pointers
+{% for type in by_category["callback function"] %}
+    typedef {{as_cType(type.return_type.name)}} (*{{as_cType(type.name)}})(
+        {%- for arg in type.arguments -%}
+        {% if arg.type.category == "structure" and arg.type.name.get() != "string view"%}struct {% endif %}{{as_annotated_cType(arg)}}{{", "}}
+        {%- endfor -%}
+    {{API}}_NULLABLE void* userdata1, {{API}}_NULLABLE void* userdata2) {{API}}_FUNCTION_ATTRIBUTE;
+
+{% endfor -%}
+
+typedef struct {{API}}ChainedStruct {
+    struct {{API}}ChainedStruct * next;
+    {{API}}SType sType;
+} {{API}}ChainedStruct {{API}}_STRUCTURE_ATTRIBUTE;
+
+{% for type in by_category["callback info"] %}
+    typedef struct {{as_cType(type.name)}} {
+        {{API}}ChainedStruct * nextInChain;
+        {% for member in type.members %}
+            {{as_annotated_cType(member)}};
+        {% endfor %}
+        {{API}}_NULLABLE void* userdata1;
+        {{API}}_NULLABLE void* userdata2;
+    } {{as_cType(type.name)}} {{API}}_STRUCTURE_ATTRIBUTE;
+
+    #define {{API}}_{{type.name.SNAKE_CASE()}}_INIT _{{api}}_MAKE_INIT_STRUCT({{as_cType(type.name)}}, { \
+        /*.nextInChain=*/NULL _{{api}}_COMMA \
+        {% for member in type.members %}
+            /*.{{as_varName(member.name)}}=*/{{render_c_default_value(member)}} _{{api}}_COMMA \
+        {% endfor %}
+        /*.userdata1=*/NULL _{{api}}_COMMA \
+        /*.userdata2=*/NULL _{{api}}_COMMA \
+    })
+
+{% endfor -%}
+
+{% for type in by_category["structure"] if type.name.get() not in SpecialStructures %}
+    {{render_c_struct_definition(type)}}
+
+{% endfor -%}
 {% for typeDef in by_category["typedef"] %}
     // {{as_cType(typeDef.name)}} is deprecated.
     // Use {{as_cType(typeDef.type.name)}} instead.
