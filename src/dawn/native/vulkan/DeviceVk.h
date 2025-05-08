@@ -29,6 +29,7 @@
 #define SRC_DAWN_NATIVE_VULKAN_DEVICEVK_H_
 
 #include <memory>
+#include <mutex>
 #include <queue>
 #include <string>
 #include <utility>
@@ -210,6 +211,7 @@ class Device final : public DeviceBase {
     const std::string mDebugPrefix;
     std::vector<std::string> mDebugMessages;
 
+    std::once_flag mMonolithicPipelineCacheFlag;
     Ref<PipelineCache> mMonolithicPipelineCache;
 
     Ref<QuerySetBase> mEmptyPassQuerySet;

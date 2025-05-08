@@ -181,16 +181,6 @@ MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
 #endif
     }
 
-    if (IsToggleEnabled(Toggle::VulkanMonolithicPipelineCache)) {
-        CacheKey cacheKey = GetCacheKey();
-        // `pipelineCacheUUID` is supposed to change if anything in the driver changes such that
-        // the serialized VkPipelineCache is no longer valid.
-        auto& deviceProperties = GetDeviceInfo().properties;
-        StreamIn(&cacheKey, deviceProperties.pipelineCacheUUID);
-
-        mMonolithicPipelineCache = PipelineCache::CreateMonolithic(this, cacheKey);
-    }
-
     SetLabelImpl();
 
     ToBackend(GetPhysicalDevice())->GetVulkanInstance()->StartListeningForDeviceMessages(this);
@@ -263,7 +253,17 @@ ResultOrError<Ref<TextureViewBase>> Device::CreateTextureViewImpl(
     return TextureView::Create(texture, descriptor);
 }
 Ref<PipelineCacheBase> Device::GetOrCreatePipelineCacheImpl(const CacheKey& key) {
-    if (mMonolithicPipelineCache) {
+    if (IsToggleEnabled(Toggle::VulkanMonolithicPipelineCache)) {
+        std::call_once(mMonolithicPipelineCacheFlag, [this]() {
+            CacheKey cacheKey = GetCacheKey();
+            // `pipelineCacheUUID` is supposed to change if anything in the driver changes such that
+            // the serialized VkPipelineCache is no longer valid.
+            auto& deviceProperties = GetDeviceInfo().properties;
+            StreamIn(&cacheKey, deviceProperties.pipelineCacheUUID);
+
+            mMonolithicPipelineCache = PipelineCache::CreateMonolithic(this, cacheKey);
+        });
+
         return mMonolithicPipelineCache;
     }
 
