@@ -177,13 +177,12 @@ def get(ports, settings, shared):
         flags = ['-g', '-std=c++17', '-fno-exceptions'] + computed_flags
 
         # IMPORTANT: Keep `_files_affecting_port_build` in sync with this.
-        ports.build_port(
-            '',  # src_dir is unused; we pass explicit srcs with absolute paths
-            final,
-            'emdawnwebgpu',
-            includes=includes,
-            flags=flags,
-            srcs=_srcs)
+        ports.build_port(_src_dir,
+                         final,
+                         'emdawnwebgpu',
+                         includes=includes,
+                         flags=flags,
+                         srcs=_srcs)
 
     lib_name = _get_lib_name(computed_flags)
     return [shared.cache.get_lib(lib_name, create, what='port')]
