@@ -836,11 +836,11 @@ bool GenerateSpirv([[maybe_unused]] Options& options,
 
     auto entry_point = inspector.GetEntryPoint(options.ep_name);
 
-    // Push constant Offset must be 4-byte aligned.
-    uint32_t offset = tint::RoundUp(4u, entry_point.push_constant_size);
+    // Immediate data Offset must be 4-byte aligned.
+    uint32_t offset = tint::RoundUp(4u, entry_point.immediate_data_size);
 
     if (entry_point.frag_depth_used) {
-        // Place the RangeOffset push constant member after user-defined push constants (if
+        // Place the RangeOffset immediate data member after user-defined immediate data (if
         // any).
         gen_options.depth_range_offsets = {offset + 0, offset + 4};
         offset += 8;
@@ -1301,11 +1301,11 @@ bool GenerateGlsl([[maybe_unused]] Options& options,
 
     auto entry_point = inspector.GetEntryPoint(options.ep_name);
 
-    // Push constant Offset must be 4-byte aligned.
-    uint32_t offset = tint::RoundUp(4u, entry_point.push_constant_size);
+    // Immediate data Offset must be 4-byte aligned.
+    uint32_t offset = tint::RoundUp(4u, entry_point.immediate_data_size);
 
     if (entry_point.instance_index_used) {
-        // Place the first_instance push constant member after user-defined push constants (if
+        // Place the first_instance immediate data member after user-defined immediate data (if
         // any).
         gen_options.first_instance_offset = offset;
         offset += 4;

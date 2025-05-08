@@ -45,16 +45,15 @@ namespace {
 
 void AddressSpaceParser(::benchmark::State& state) {
     const char* kStrings[] = {
-        "fccnctin",     "ucti3",          "functVon",        "function",      "1unction",
-        "unJtqqon",     "llun77tion",     "pixppHq_local",   "ciellovl",      "ibGl_local",
-        "pixel_local",  "pivel_liical",   "pixel_lWW8al",    "piel_xxoMal",   "pXvatgg",
-        "rvaXe",        "priv3te",        "private",         "Erivate",       "pPTTvate",
-        "privadxx",     "push_c44nstant", "push_SSonsVVant", "pRs2Rconstant", "push_constant",
-        "push_coFstn9", "psh_constant",   "Vush_cnRRtOOHt",  "straye",        "llntrrr77ge",
-        "stor4g00",     "storage",        "trooe",           "zzrage",        "siioppa1",
-        "unifoXXm",     "9II5nnnform",    "uniaSSrHHYm",     "uniform",       "unkkm",
-        "jnigRo",       "ubfor",          "workgrojp",       "wrkgroup",      "wrkgrqp",
-        "workgroup",    "wrkNNroup",      "wokgouvv",        "orkgrQQup",
+        "fccnctin",    "ucti3",        "functVon",     "function",  "1unction",    "unJtqqon",
+        "llun77tion",  "immeiappqHH",  "immeit",       "ibedGate",  "immediate",   "imviediate",
+        "imme8WWate",  "immeixxMe",    "pixgglloXal",  "uiVelXoal", "3ixel_local", "pixel_local",
+        "pixel_locaE", "piTTel_locPl", "pxxdxel_loal", "p44ivate",  "prSSvaVVe",   "RriR22e",
+        "private",     "pFva9e",       "priate",       "VOORRHte",  "straye",      "llntrrr77ge",
+        "stor4g00",    "storage",      "trooe",        "zzrage",    "siioppa1",    "unifoXXm",
+        "9II5nnnform", "uniaSSrHHYm",  "uniform",      "unkkm",     "jnigRo",      "ubfor",
+        "workgrojp",   "wrkgroup",     "wrkgrqp",      "workgroup", "wrkNNroup",   "wokgouvv",
+        "orkgrQQup",
     };
     for (auto _ : state) {
         for (auto* str : kStrings) {

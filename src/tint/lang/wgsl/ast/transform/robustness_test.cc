@@ -51,7 +51,7 @@ DataMap Config(Robustness::Action action, bool disable_runtime_sized_array_index
     cfg.texture_action = action;
     cfg.function_action = action;
     cfg.private_action = action;
-    cfg.push_constant_action = action;
+    cfg.immediate_action = action;
     cfg.storage_action = action;
     cfg.uniform_action = action;
     cfg.workgroup_action = action;

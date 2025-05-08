@@ -146,8 +146,8 @@ struct State {
                 return config.clamp_function;
             case AddressSpace::kPrivate:
                 return config.clamp_private;
-            case AddressSpace::kPushConstant:
-                return config.clamp_push_constant;
+            case AddressSpace::kImmediate:
+                return config.clamp_immediate_data;
             case AddressSpace::kStorage:
                 return config.clamp_storage && !IsRootVarIgnored(value);
             case AddressSpace::kUniform:

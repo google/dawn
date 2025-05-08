@@ -297,7 +297,7 @@ EntryPoint Inspector::GetEntryPoint(const tint::ast::Function* func) {
         }
     }
 
-    entry_point.push_constant_size = ComputePushConstantSize(func);
+    entry_point.immediate_data_size = ComputeImmediateDataSize(func);
 
     for (auto* param : sem->Parameters()) {
         AddEntryPointInOutVariables(
@@ -395,7 +395,7 @@ std::vector<ResourceBinding> Inspector::GetResourceBindings(const std::string& e
             case core::AddressSpace::kPrivate:
             case core::AddressSpace::kFunction:
             case core::AddressSpace::kWorkgroup:
-            case core::AddressSpace::kPushConstant:
+            case core::AddressSpace::kImmediate:
             case core::AddressSpace::kPixelLocal:
             case core::AddressSpace::kIn:
             case core::AddressSpace::kOut:
@@ -854,11 +854,11 @@ uint32_t Inspector::ComputeWorkgroupStorageSize(const ast::Function* func) const
     return total_size;
 }
 
-uint32_t Inspector::ComputePushConstantSize(const ast::Function* func) const {
+uint32_t Inspector::ComputeImmediateDataSize(const ast::Function* func) const {
     uint32_t size = 0;
     auto* func_sem = program_.Sem().Get(func);
     for (const sem::Variable* var : func_sem->TransitivelyReferencedGlobals()) {
-        if (var->AddressSpace() == core::AddressSpace::kPushConstant) {
+        if (var->AddressSpace() == core::AddressSpace::kImmediate) {
             size += var->Type()->UnwrapRef()->Size();
         }
     }

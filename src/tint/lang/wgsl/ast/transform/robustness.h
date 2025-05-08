@@ -85,8 +85,8 @@ class Robustness final : public Castable<Robustness, Transform> {
         Action function_action = Action::kDefault;
         /// Robustness action for variables in the 'private' address space
         Action private_action = Action::kDefault;
-        /// Robustness action for variables in the 'push_constant' address space
-        Action push_constant_action = Action::kDefault;
+        /// Robustness action for variables in the 'immediate' address space
+        Action immediate_action = Action::kDefault;
         /// Robustness action for variables in the 'storage' address space
         Action storage_action = Action::kDefault;
         /// Robustness action for variables in the 'uniform' address space

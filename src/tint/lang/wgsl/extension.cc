@@ -48,11 +48,11 @@ Extension ParseExtension(std::string_view str) {
     if (str == "chromium_experimental_framebuffer_fetch") {
         return Extension::kChromiumExperimentalFramebufferFetch;
     }
+    if (str == "chromium_experimental_immediate") {
+        return Extension::kChromiumExperimentalImmediate;
+    }
     if (str == "chromium_experimental_pixel_local") {
         return Extension::kChromiumExperimentalPixelLocal;
-    }
-    if (str == "chromium_experimental_push_constant") {
-        return Extension::kChromiumExperimentalPushConstant;
     }
     if (str == "chromium_experimental_subgroup_matrix") {
         return Extension::kChromiumExperimentalSubgroupMatrix;
@@ -86,10 +86,10 @@ std::string_view ToString(Extension value) {
             return "chromium_disable_uniformity_analysis";
         case Extension::kChromiumExperimentalFramebufferFetch:
             return "chromium_experimental_framebuffer_fetch";
+        case Extension::kChromiumExperimentalImmediate:
+            return "chromium_experimental_immediate";
         case Extension::kChromiumExperimentalPixelLocal:
             return "chromium_experimental_pixel_local";
-        case Extension::kChromiumExperimentalPushConstant:
-            return "chromium_experimental_push_constant";
         case Extension::kChromiumExperimentalSubgroupMatrix:
             return "chromium_experimental_subgroup_matrix";
         case Extension::kChromiumInternalGraphite:

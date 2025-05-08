@@ -57,23 +57,23 @@ inline std::ostream& operator<<(std::ostream& out, Case c) {
 }
 
 static constexpr Case kValidCases[] = {
-    {"function", AddressSpace::kFunction},   {"pixel_local", AddressSpace::kPixelLocal},
-    {"private", AddressSpace::kPrivate},     {"push_constant", AddressSpace::kPushConstant},
-    {"storage", AddressSpace::kStorage},     {"uniform", AddressSpace::kUniform},
+    {"function", AddressSpace::kFunction},      {"immediate", AddressSpace::kImmediate},
+    {"pixel_local", AddressSpace::kPixelLocal}, {"private", AddressSpace::kPrivate},
+    {"storage", AddressSpace::kStorage},        {"uniform", AddressSpace::kUniform},
     {"workgroup", AddressSpace::kWorkgroup},
 };
 
 static constexpr Case kInvalidCases[] = {
-    {"fccnctin", AddressSpace::kUndefined},       {"ucti3", AddressSpace::kUndefined},
-    {"functVon", AddressSpace::kUndefined},       {"pixel_loc1l", AddressSpace::kUndefined},
-    {"pqqxel_lJal", AddressSpace::kUndefined},    {"pixll77_local", AddressSpace::kUndefined},
-    {"ppqqivtHH", AddressSpace::kUndefined},      {"prcv", AddressSpace::kUndefined},
-    {"bivaGe", AddressSpace::kUndefined},         {"puvh_ciinstant", AddressSpace::kUndefined},
-    {"push8WWonstant", AddressSpace::kUndefined}, {"pxxsh_cMnstnt", AddressSpace::kUndefined},
-    {"sXraggg", AddressSpace::kUndefined},        {"traXe", AddressSpace::kUndefined},
-    {"stor3ge", AddressSpace::kUndefined},        {"Eniform", AddressSpace::kUndefined},
-    {"uPTTform", AddressSpace::kUndefined},       {"unifodxx", AddressSpace::kUndefined},
-    {"44orkgroup", AddressSpace::kUndefined},     {"VVorkSSroup", AddressSpace::kUndefined},
+    {"fccnctin", AddressSpace::kUndefined},      {"ucti3", AddressSpace::kUndefined},
+    {"functVon", AddressSpace::kUndefined},      {"imm1diate", AddressSpace::kUndefined},
+    {"qqmmeJite", AddressSpace::kUndefined},     {"illmediat77", AddressSpace::kUndefined},
+    {"pixppHq_local", AddressSpace::kUndefined}, {"ciellovl", AddressSpace::kUndefined},
+    {"ibGl_local", AddressSpace::kUndefined},    {"priviive", AddressSpace::kUndefined},
+    {"8WWivate", AddressSpace::kUndefined},      {"pxxvate", AddressSpace::kUndefined},
+    {"sXraggg", AddressSpace::kUndefined},       {"traXe", AddressSpace::kUndefined},
+    {"stor3ge", AddressSpace::kUndefined},       {"Eniform", AddressSpace::kUndefined},
+    {"uPTTform", AddressSpace::kUndefined},      {"unifodxx", AddressSpace::kUndefined},
+    {"44orkgroup", AddressSpace::kUndefined},    {"VVorkSSroup", AddressSpace::kUndefined},
     {"wrkgro2Rp", AddressSpace::kUndefined},
 };
 

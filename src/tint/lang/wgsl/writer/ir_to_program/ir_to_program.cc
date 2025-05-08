@@ -608,8 +608,8 @@ class State {
                 Enable(wgsl::Extension::kChromiumExperimentalPixelLocal);
                 b.GlobalVar(name, ty, init, ref->AddressSpace(), std::move(attrs));
                 return;
-            case core::AddressSpace::kPushConstant:
-                Enable(wgsl::Extension::kChromiumExperimentalPushConstant);
+            case core::AddressSpace::kImmediate:
+                Enable(wgsl::Extension::kChromiumExperimentalImmediate);
                 b.GlobalVar(name, ty, init, ref->AddressSpace(), std::move(attrs));
                 return;
             default:

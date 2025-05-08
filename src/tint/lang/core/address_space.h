@@ -50,9 +50,9 @@ enum class AddressSpace : uint8_t {
     kOut,  // Tint-internal enum entry - not parsed
     kFunction,
     kHandle,  // Tint-internal enum entry - not parsed
+    kImmediate,
     kPixelLocal,
     kPrivate,
-    kPushConstant,
     kStorage,
     kUniform,
     kWorkgroup,
@@ -77,7 +77,7 @@ auto& operator<<(STREAM& out, AddressSpace value) {
 AddressSpace ParseAddressSpace(std::string_view str);
 
 constexpr std::string_view kAddressSpaceStrings[] = {
-    "function", "pixel_local", "private", "push_constant", "storage", "uniform", "workgroup",
+    "function", "immediate", "pixel_local", "private", "storage", "uniform", "workgroup",
 };
 
 /// @returns true if the AddressSpace is host-shareable
@@ -85,7 +85,7 @@ constexpr std::string_view kAddressSpaceStrings[] = {
 /// @see https://gpuweb.github.io/gpuweb/wgsl.html#host-shareable
 inline bool IsHostShareable(AddressSpace address_space) {
     return address_space == AddressSpace::kUniform || address_space == AddressSpace::kStorage ||
-           address_space == AddressSpace::kPushConstant;
+           address_space == AddressSpace::kImmediate;
 }
 
 }  // namespace tint::core

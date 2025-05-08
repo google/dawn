@@ -30,7 +30,7 @@
 
 enum GPUFeatureName {
     "multi-draw-indirect",
-    "chromium-experimental-immediate-data",
+    "chromium-experimental-immediate",
     "chromium-experimental-subgroup-matrix",
     "core-features-and-limits",
 };

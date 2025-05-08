@@ -95,7 +95,7 @@ Bindings GenerateBindings(const core::ir::Module& module) {
                 case core::AddressSpace::kUndefined:
                 case core::AddressSpace::kPixelLocal:
                 case core::AddressSpace::kPrivate:
-                case core::AddressSpace::kPushConstant:
+                case core::AddressSpace::kImmediate:
                 case core::AddressSpace::kIn:
                 case core::AddressSpace::kOut:
                 case core::AddressSpace::kFunction:
@@ -168,7 +168,7 @@ Bindings GenerateBindings(const Program& program) {
                     case core::AddressSpace::kUndefined:
                     case core::AddressSpace::kPixelLocal:
                     case core::AddressSpace::kPrivate:
-                    case core::AddressSpace::kPushConstant:
+                    case core::AddressSpace::kImmediate:
                     case core::AddressSpace::kIn:
                     case core::AddressSpace::kOut:
                     case core::AddressSpace::kFunction:

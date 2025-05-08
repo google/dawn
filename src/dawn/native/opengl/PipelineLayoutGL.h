@@ -63,7 +63,7 @@ class PipelineLayout final : public PipelineLayoutBase {
     GLuint GetInternalTextureBuiltinsUniformBinding() const;
     GLuint GetInternalArrayLengthUniformBinding() const;
 
-    enum PushConstantLocation {
+    enum ImmediateLocation {
         FirstVertex = 0,
         FirstInstance = 1,
         MinDepth = 2,

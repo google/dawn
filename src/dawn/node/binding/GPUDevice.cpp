@@ -192,7 +192,7 @@ interop::Interface<interop::GPUSupportedLimits> GPUDevice::getLimits(Napi::Env e
 
     // Query the immediate data limits only if ChromiumExperimentalImmediateData feature
     // is available on device.
-    if (device_.HasFeature(FeatureName::ChromiumExperimentalImmediateData)) {
+    if (device_.HasFeature(FeatureName::ChromiumExperimentalImmediate)) {
         InsertInChain(&immediateDataLimits);
     }
 

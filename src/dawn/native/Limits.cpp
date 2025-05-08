@@ -277,7 +277,7 @@ MaybeError ValidateAndUnpackLimitsIn(const Limits* chainedLimits,
     if (auto* requiredExperimentalImmediateDataLimits =
             unpacked.Get<DawnExperimentalImmediateDataLimits>()) {
         DAWN_INVALID_IF(
-            !supportedFeatures.contains(wgpu::FeatureName::ChromiumExperimentalImmediateData),
+            !supportedFeatures.contains(wgpu::FeatureName::ChromiumExperimentalImmediate),
             "ImmediateData is not supported without ChromiumExperimentalImmediateData supported.");
         out->experimentalImmediateDataLimits = *requiredExperimentalImmediateDataLimits;
         out->experimentalImmediateDataLimits.nextInChain = nullptr;
@@ -493,7 +493,7 @@ MaybeError FillLimits(Limits* outputLimits,
 
     if (auto* immediateDataLimits = unpacked.Get<DawnExperimentalImmediateDataLimits>()) {
         wgpu::ChainedStructOut* originalChain = immediateDataLimits->nextInChain;
-        if (!supportedFeatures.IsEnabled(wgpu::FeatureName::ChromiumExperimentalImmediateData)) {
+        if (!supportedFeatures.IsEnabled(wgpu::FeatureName::ChromiumExperimentalImmediate)) {
             // If immediate data features are not supported, return the default-initialized
             // DawnExperimentalImmediateDataLimits object, where maxImmediateDataByteSize is
             // WGPU_LIMIT_U32_UNDEFINED.

@@ -555,44 +555,44 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_InvalidArrayStrid
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
-// Detect unaligned member for push constants buffers
-TEST_F(ResolverAddressSpaceLayoutValidationTest, PushConstant_UnalignedMember) {
-    // enable chromium_experimental_push_constant;
+// Detect unaligned member for immediate data buffers
+TEST_F(ResolverAddressSpaceLayoutValidationTest, Immediate_UnalignedMember) {
+    // enable chromium_experimental_immediate;
     // struct S {
     //     @size(5) a : f32;
     //     @align(1) b : f32;
     // };
-    // var<push_constant> a : S;
-    Enable(wgsl::Extension::kChromiumExperimentalPushConstant);
+    // var<immediate> a : S;
+    Enable(wgsl::Extension::kChromiumExperimentalImmediate);
     Structure(Ident(Source{{12, 34}}, "S"),
               Vector{Member("a", ty.f32(), Vector{MemberSize(5_a)}),
                      Member(Source{{34, 56}}, "b", ty.f32(), Vector{MemberAlign(1_i)})});
-    GlobalVar(Source{{78, 90}}, "a", ty("S"), core::AddressSpace::kPushConstant);
+    GlobalVar(Source{{78, 90}}, "a", ty("S"), core::AddressSpace::kImmediate);
 
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
-        R"(34:56 error: the offset of a struct member of type 'f32' in address space 'push_constant' must be a multiple of 4 bytes, but 'b' is currently at offset 5. Consider setting '@align(4)' on this member
+        R"(34:56 error: the offset of a struct member of type 'f32' in address space 'immediate' must be a multiple of 4 bytes, but 'b' is currently at offset 5. Consider setting '@align(4)' on this member
 12:34 note: see layout of struct:
 /*           align(4) size(12) */ struct S {
 /* offset(0) align(4) size( 5) */   a : f32,
 /* offset(5) align(1) size( 4) */   b : f32,
 /* offset(9) align(1) size( 3) */   // -- implicit struct size padding --
 /*                             */ };
-78:90 note: 'S' used in address space 'push_constant' here)");
+78:90 note: 'S' used in address space 'immediate' here)");
 }
 
-TEST_F(ResolverAddressSpaceLayoutValidationTest, PushConstant_Aligned) {
-    // enable chromium_experimental_push_constant;
+TEST_F(ResolverAddressSpaceLayoutValidationTest, Immediate_Aligned) {
+    // enable chromium_experimental_immediate;
     // struct S {
     //     @size(5) a : f32;
     //     @align(4) b : f32;
     // };
-    // var<push_constant> a : S;
-    Enable(wgsl::Extension::kChromiumExperimentalPushConstant);
+    // var<immediate> a : S;
+    Enable(wgsl::Extension::kChromiumExperimentalImmediate);
     Structure("S", Vector{Member("a", ty.f32(), Vector{MemberSize(5_a)}),
                           Member("b", ty.f32(), Vector{MemberAlign(4_i)})});
-    GlobalVar("a", ty("S"), core::AddressSpace::kPushConstant);
+    GlobalVar("a", ty("S"), core::AddressSpace::kImmediate);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }

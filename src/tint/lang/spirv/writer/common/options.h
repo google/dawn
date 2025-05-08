@@ -132,9 +132,9 @@ struct Bindings {
 /// Configuration options used for generating SPIR-V.
 struct Options {
     struct RangeOffsets {
-        /// The offset of the min_depth push constant
+        /// The offset of the min_depth immediate data
         uint32_t min = 0;
-        /// The offset of the max_depth push constant
+        /// The offset of the max_depth immediate data
         uint32_t max = 0;
 
         /// Reflect the fields of this class so that it can be used by tint::ForeachField()

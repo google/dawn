@@ -12,21 +12,21 @@
                OpEntryPoint Fragment %main1 "main1" %main1_frag_depth_Output
                OpExecutionMode %main1 OriginUpperLeft
                OpExecutionMode %main1 DepthReplacing
-               OpMemberName %tint_push_constant_struct 0 "tint_frag_depth_min"
-               OpMemberName %tint_push_constant_struct 1 "tint_frag_depth_max"
-               OpName %tint_push_constant_struct "tint_push_constant_struct"
-               OpName %tint_push_constants "tint_push_constants"
+               OpMemberName %tint_immediate_data_struct 0 "tint_frag_depth_min"
+               OpMemberName %tint_immediate_data_struct 1 "tint_frag_depth_max"
+               OpName %tint_immediate_data_struct "tint_immediate_data_struct"
+               OpName %tint_immediate_data "tint_immediate_data"
                OpName %main1_frag_depth_Output "main1_frag_depth_Output"
                OpName %main1_inner "main1_inner"
                OpName %main1 "main1"
-               OpMemberDecorate %tint_push_constant_struct 0 Offset 0
-               OpMemberDecorate %tint_push_constant_struct 1 Offset 4
-               OpDecorate %tint_push_constant_struct Block
+               OpMemberDecorate %tint_immediate_data_struct 0 Offset 0
+               OpMemberDecorate %tint_immediate_data_struct 1 Offset 4
+               OpDecorate %tint_immediate_data_struct Block
                OpDecorate %main1_frag_depth_Output BuiltIn FragDepth
       %float = OpTypeFloat 32
-%tint_push_constant_struct = OpTypeStruct %float %float
-%_ptr_PushConstant_tint_push_constant_struct = OpTypePointer PushConstant %tint_push_constant_struct
-%tint_push_constants = OpVariable %_ptr_PushConstant_tint_push_constant_struct PushConstant
+%tint_immediate_data_struct = OpTypeStruct %float %float
+%_ptr_PushConstant_tint_immediate_data_struct = OpTypePointer PushConstant %tint_immediate_data_struct
+%tint_immediate_data = OpVariable %_ptr_PushConstant_tint_immediate_data_struct PushConstant
 %_ptr_Output_float = OpTypePointer Output %float
 %main1_frag_depth_Output = OpVariable %_ptr_Output_float Output
           %8 = OpTypeFunction %float
@@ -44,9 +44,9 @@
       %main1 = OpFunction %void None %13
          %14 = OpLabel
          %15 = OpFunctionCall %float %main1_inner
-         %16 = OpAccessChain %_ptr_PushConstant_float %tint_push_constants %uint_0
+         %16 = OpAccessChain %_ptr_PushConstant_float %tint_immediate_data %uint_0
          %20 = OpLoad %float %16 None
-         %21 = OpAccessChain %_ptr_PushConstant_float %tint_push_constants %uint_1
+         %21 = OpAccessChain %_ptr_PushConstant_float %tint_immediate_data %uint_1
          %23 = OpLoad %float %21 None
          %24 = OpExtInst %float %25 NClamp %15 %20 %23
                OpStore %main1_frag_depth_Output %24 None

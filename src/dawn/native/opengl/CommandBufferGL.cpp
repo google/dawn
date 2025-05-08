@@ -1307,7 +1307,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass) {
                 DAWN_TRY(bindGroupTracker.Apply(gl));
 
                 if (lastPipeline->UsesInstanceIndex()) {
-                    DAWN_GL_TRY(gl, Uniform1ui(PipelineLayout::PushConstantLocation::FirstInstance,
+                    DAWN_GL_TRY(gl, Uniform1ui(PipelineLayout::ImmediateLocation::FirstInstance,
                                                draw->firstInstance));
                 }
                 DAWN_GL_TRY(gl, DrawArraysInstanced(lastPipeline->GetGLPrimitiveTopology(),
@@ -1330,11 +1330,11 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass) {
                 }
 
                 if (lastPipeline->UsesVertexIndex()) {
-                    DAWN_GL_TRY(gl, Uniform1ui(PipelineLayout::PushConstantLocation::FirstVertex,
+                    DAWN_GL_TRY(gl, Uniform1ui(PipelineLayout::ImmediateLocation::FirstVertex,
                                                draw->baseVertex));
                 }
                 if (lastPipeline->UsesInstanceIndex()) {
-                    DAWN_GL_TRY(gl, Uniform1ui(PipelineLayout::PushConstantLocation::FirstInstance,
+                    DAWN_GL_TRY(gl, Uniform1ui(PipelineLayout::ImmediateLocation::FirstInstance,
                                                draw->firstInstance));
                 }
                 DAWN_GL_TRY(gl, DrawElementsInstanced(
@@ -1349,7 +1349,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass) {
                 DrawIndirectCmd* draw = iter->NextCommand<DrawIndirectCmd>();
                 if (lastPipeline->UsesInstanceIndex()) {
                     DAWN_GL_TRY(gl,
-                                Uniform1ui(PipelineLayout::PushConstantLocation::FirstInstance, 0));
+                                Uniform1ui(PipelineLayout::ImmediateLocation::FirstInstance, 0));
                 }
                 DAWN_TRY(vertexStateBufferBindingTracker.Apply(gl, 0, 0));
                 DAWN_TRY(bindGroupTracker.Apply(gl));
@@ -1371,7 +1371,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass) {
 
                 if (lastPipeline->UsesInstanceIndex()) {
                     DAWN_GL_TRY(gl,
-                                Uniform1ui(PipelineLayout::PushConstantLocation::FirstInstance, 0));
+                                Uniform1ui(PipelineLayout::ImmediateLocation::FirstInstance, 0));
                 }
                 DAWN_TRY(vertexStateBufferBindingTracker.Apply(gl, 0, 0));
                 DAWN_TRY(bindGroupTracker.Apply(gl));
@@ -1412,10 +1412,10 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass) {
                 vertexStateBufferBindingTracker.OnSetPipeline(lastPipeline);
                 bindGroupTracker.OnSetPipeline(lastPipeline);
                 if (lastPipeline->UsesFragDepth()) {
-                    DAWN_GL_TRY(
-                        gl, Uniform1f(PipelineLayout::PushConstantLocation::MinDepth, minDepth));
-                    DAWN_GL_TRY(
-                        gl, Uniform1f(PipelineLayout::PushConstantLocation::MaxDepth, maxDepth));
+                    DAWN_GL_TRY(gl,
+                                Uniform1f(PipelineLayout::ImmediateLocation::MinDepth, minDepth));
+                    DAWN_GL_TRY(gl,
+                                Uniform1f(PipelineLayout::ImmediateLocation::MaxDepth, maxDepth));
                 }
                 break;
             }
@@ -1493,10 +1493,10 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass) {
                 maxDepth = cmd->maxDepth;
                 DAWN_GL_TRY(gl, DepthRangef(minDepth, maxDepth));
                 if (lastPipeline && lastPipeline->UsesFragDepth()) {
-                    DAWN_GL_TRY(
-                        gl, Uniform1f(PipelineLayout::PushConstantLocation::MinDepth, minDepth));
-                    DAWN_GL_TRY(
-                        gl, Uniform1f(PipelineLayout::PushConstantLocation::MaxDepth, maxDepth));
+                    DAWN_GL_TRY(gl,
+                                Uniform1f(PipelineLayout::ImmediateLocation::MinDepth, minDepth));
+                    DAWN_GL_TRY(gl,
+                                Uniform1f(PipelineLayout::ImmediateLocation::MaxDepth, maxDepth));
                 }
                 break;
             }

@@ -547,7 +547,7 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         EnableFeature(Feature::DawnDrmFormatCapabilities);
     }
 
-    EnableFeature(Feature::ChromiumExperimentalImmediateData);
+    EnableFeature(Feature::ChromiumExperimentalImmediate);
 }
 
 MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits) {

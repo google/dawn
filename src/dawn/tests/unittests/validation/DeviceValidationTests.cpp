@@ -352,7 +352,7 @@ class RequestDeviceWithImmediateDataValidationTest : public ValidationTest {
     }
 
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
-        return {wgpu::FeatureName::ChromiumExperimentalImmediateData};
+        return {wgpu::FeatureName::ChromiumExperimentalImmediate};
     }
 
     uint32_t GetMaxImmediateDataRangeByteSize(const wgpu::Limits& limits) {
@@ -388,7 +388,7 @@ TEST_F(RequestDeviceWithImmediateDataValidationTest, HigherIsBetter) {
 
     wgpu::DeviceDescriptor descriptor;
     std::array<wgpu::FeatureName, 1> requiredFeatures = {
-        wgpu::FeatureName::ChromiumExperimentalImmediateData};
+        wgpu::FeatureName::ChromiumExperimentalImmediate};
     descriptor.requiredFeatures = requiredFeatures.data();
     descriptor.requiredFeatureCount = requiredFeatures.size();
     descriptor.requiredLimits = &limits;

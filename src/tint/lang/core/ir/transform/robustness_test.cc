@@ -950,8 +950,8 @@ $B1: {  # root
     EXPECT_EQ(GetParam() ? expect : src, str());
 }
 
-TEST_P(IR_RobustnessTest, PushConstant_LoadVectorElement) {
-    auto* vec = b.Var("vec", ty.ptr(push_constant, ty.vec4<u32>()));
+TEST_P(IR_RobustnessTest, ImmediateData_LoadVectorElement) {
+    auto* vec = b.Var("vec", ty.ptr(immediate, ty.vec4<u32>()));
     mod.root_block->Append(vec);
 
     auto* func = b.Function("foo", ty.u32());
@@ -964,7 +964,7 @@ TEST_P(IR_RobustnessTest, PushConstant_LoadVectorElement) {
 
     auto* src = R"(
 $B1: {  # root
-  %vec:ptr<push_constant, vec4<u32>, read> = var undef
+  %vec:ptr<immediate, vec4<u32>, read> = var undef
 }
 
 %foo = func(%idx:u32):u32 {
@@ -978,7 +978,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %vec:ptr<push_constant, vec4<u32>, read> = var undef
+  %vec:ptr<immediate, vec4<u32>, read> = var undef
 }
 
 %foo = func(%idx:u32):u32 {
@@ -991,14 +991,14 @@ $B1: {  # root
 )";
 
     RobustnessConfig cfg;
-    cfg.clamp_push_constant = GetParam();
+    cfg.clamp_immediate_data = GetParam();
     Run(Robustness, cfg);
 
     EXPECT_EQ(GetParam() ? expect : src, str());
 }
 
-TEST_P(IR_RobustnessTest, PushConstant_StoreVectorElement) {
-    auto* vec = b.Var("vec", ty.ptr(push_constant, ty.vec4<u32>()));
+TEST_P(IR_RobustnessTest, ImmediateData_StoreVectorElement) {
+    auto* vec = b.Var("vec", ty.ptr(immediate, ty.vec4<u32>()));
     mod.root_block->Append(vec);
 
     auto* func = b.Function("foo", ty.void_());
@@ -1011,7 +1011,7 @@ TEST_P(IR_RobustnessTest, PushConstant_StoreVectorElement) {
 
     auto* src = R"(
 $B1: {  # root
-  %vec:ptr<push_constant, vec4<u32>, read> = var undef
+  %vec:ptr<immediate, vec4<u32>, read> = var undef
 }
 
 %foo = func(%idx:u32):void {
@@ -1025,7 +1025,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %vec:ptr<push_constant, vec4<u32>, read> = var undef
+  %vec:ptr<immediate, vec4<u32>, read> = var undef
 }
 
 %foo = func(%idx:u32):void {
@@ -1038,33 +1038,33 @@ $B1: {  # root
 )";
 
     RobustnessConfig cfg;
-    cfg.clamp_push_constant = GetParam();
+    cfg.clamp_immediate_data = GetParam();
     Run(Robustness, cfg);
 
     EXPECT_EQ(GetParam() ? expect : src, str());
 }
 
-TEST_P(IR_RobustnessTest, PushConstant_Access) {
-    auto* arr = b.Var("arr", ty.ptr(push_constant, ty.array<u32, 4>()));
+TEST_P(IR_RobustnessTest, ImmediateData_Access) {
+    auto* arr = b.Var("arr", ty.ptr(immediate, ty.array<u32, 4>()));
     mod.root_block->Append(arr);
 
     auto* func = b.Function("foo", ty.u32());
     auto* idx = b.FunctionParam("idx", ty.u32());
     func->SetParams({idx});
     b.Append(func->Block(), [&] {
-        auto* access = b.Access(ty.ptr<push_constant, u32>(), arr, idx);
+        auto* access = b.Access(ty.ptr<immediate, u32>(), arr, idx);
         auto* load = b.Load(access);
         b.Return(func, load);
     });
 
     auto* src = R"(
 $B1: {  # root
-  %arr:ptr<push_constant, array<u32, 4>, read> = var undef
+  %arr:ptr<immediate, array<u32, 4>, read> = var undef
 }
 
 %foo = func(%idx:u32):u32 {
   $B2: {
-    %4:ptr<push_constant, u32, read> = access %arr, %idx
+    %4:ptr<immediate, u32, read> = access %arr, %idx
     %5:u32 = load %4
     ret %5
   }
@@ -1074,13 +1074,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %arr:ptr<push_constant, array<u32, 4>, read> = var undef
+  %arr:ptr<immediate, array<u32, 4>, read> = var undef
 }
 
 %foo = func(%idx:u32):u32 {
   $B2: {
     %4:u32 = min %idx, 3u
-    %5:ptr<push_constant, u32, read> = access %arr, %4
+    %5:ptr<immediate, u32, read> = access %arr, %4
     %6:u32 = load %5
     ret %6
   }
@@ -1088,7 +1088,7 @@ $B1: {  # root
 )";
 
     RobustnessConfig cfg;
-    cfg.clamp_push_constant = GetParam();
+    cfg.clamp_immediate_data = GetParam();
     Run(Robustness, cfg);
 
     EXPECT_EQ(GetParam() ? expect : src, str());

@@ -13,10 +13,10 @@
                OpEntryPoint Fragment %main "main" %main_loc0_Output %main_frag_depth_Output %main_loc1_Output %main_loc2_Output %main_sample_mask_Output %main_loc3_Output %main_loc4_Output %main_loc5_Output
                OpExecutionMode %main OriginUpperLeft
                OpExecutionMode %main DepthReplacing
-               OpMemberName %tint_push_constant_struct 0 "tint_frag_depth_min"
-               OpMemberName %tint_push_constant_struct 1 "tint_frag_depth_max"
-               OpName %tint_push_constant_struct "tint_push_constant_struct"
-               OpName %tint_push_constants "tint_push_constants"
+               OpMemberName %tint_immediate_data_struct 0 "tint_frag_depth_min"
+               OpMemberName %tint_immediate_data_struct 1 "tint_frag_depth_max"
+               OpName %tint_immediate_data_struct "tint_immediate_data_struct"
+               OpName %tint_immediate_data "tint_immediate_data"
                OpName %main_loc0_Output "main_loc0_Output"
                OpName %main_frag_depth_Output "main_frag_depth_Output"
                OpName %main_loc1_Output "main_loc1_Output"
@@ -36,9 +36,9 @@
                OpMemberName %FragmentOutputs 7 "loc5"
                OpName %FragmentOutputs "FragmentOutputs"
                OpName %main "main"
-               OpMemberDecorate %tint_push_constant_struct 0 Offset 0
-               OpMemberDecorate %tint_push_constant_struct 1 Offset 4
-               OpDecorate %tint_push_constant_struct Block
+               OpMemberDecorate %tint_immediate_data_struct 0 Offset 0
+               OpMemberDecorate %tint_immediate_data_struct 1 Offset 4
+               OpDecorate %tint_immediate_data_struct Block
                OpDecorate %main_loc0_Output Location 0
                OpDecorate %main_frag_depth_Output BuiltIn FragDepth
                OpDecorate %main_loc1_Output Location 1
@@ -48,9 +48,9 @@
                OpDecorate %main_loc4_Output Location 4
                OpDecorate %main_loc5_Output Location 5
       %float = OpTypeFloat 32
-%tint_push_constant_struct = OpTypeStruct %float %float
-%_ptr_PushConstant_tint_push_constant_struct = OpTypePointer PushConstant %tint_push_constant_struct
-%tint_push_constants = OpVariable %_ptr_PushConstant_tint_push_constant_struct PushConstant
+%tint_immediate_data_struct = OpTypeStruct %float %float
+%_ptr_PushConstant_tint_immediate_data_struct = OpTypePointer PushConstant %tint_immediate_data_struct
+%tint_immediate_data = OpVariable %_ptr_PushConstant_tint_immediate_data_struct PushConstant
         %int = OpTypeInt 32 1
 %_ptr_Output_int = OpTypePointer Output %int
 %main_loc0_Output = OpVariable %_ptr_Output_int Output
@@ -102,9 +102,9 @@
          %49 = OpCompositeExtract %int %48 0
                OpStore %main_loc0_Output %49 None
          %50 = OpCompositeExtract %float %48 1
-         %51 = OpAccessChain %_ptr_PushConstant_float %tint_push_constants %uint_0
+         %51 = OpAccessChain %_ptr_PushConstant_float %tint_immediate_data %uint_0
          %54 = OpLoad %float %51 None
-         %55 = OpAccessChain %_ptr_PushConstant_float %tint_push_constants %uint_1
+         %55 = OpAccessChain %_ptr_PushConstant_float %tint_immediate_data %uint_1
          %56 = OpLoad %float %55 None
          %57 = OpExtInst %float %58 NClamp %50 %54 %56
                OpStore %main_frag_depth_Output %57 None

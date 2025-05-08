@@ -610,12 +610,12 @@ struct Robustness::State {
 
     /// @returns true if @p action is enabled for any address space
     bool HasAction(Action action) const {
-        return action == cfg.function_action ||       //
-               action == cfg.texture_action ||        //
-               action == cfg.private_action ||        //
-               action == cfg.push_constant_action ||  //
-               action == cfg.storage_action ||        //
-               action == cfg.uniform_action ||        //
+        return action == cfg.function_action ||   //
+               action == cfg.texture_action ||    //
+               action == cfg.private_action ||    //
+               action == cfg.immediate_action ||  //
+               action == cfg.storage_action ||    //
+               action == cfg.uniform_action ||    //
                action == cfg.workgroup_action;
     }
 
@@ -637,8 +637,8 @@ struct Robustness::State {
                 return cfg.texture_action;
             case core::AddressSpace::kPrivate:
                 return cfg.private_action;
-            case core::AddressSpace::kPushConstant:
-                return cfg.push_constant_action;
+            case core::AddressSpace::kImmediate:
+                return cfg.immediate_action;
             case core::AddressSpace::kStorage:
                 return cfg.storage_action;
             case core::AddressSpace::kUniform:

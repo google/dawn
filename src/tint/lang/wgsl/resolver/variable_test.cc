@@ -1050,12 +1050,12 @@ TEST_F(ResolverVariableTest, LocalConst_ConstEval) {
 TEST_F(ResolverVariableTest, GlobalVar_AddressSpace) {
     // https://gpuweb.github.io/gpuweb/wgsl/#storage-class
 
-    Enable(wgsl::Extension::kChromiumExperimentalPushConstant);
+    Enable(wgsl::Extension::kChromiumExperimentalImmediate);
 
     auto* buf = Structure("S", Vector{Member("m", ty.i32())});
     auto* private_ = GlobalVar("p", ty.i32(), core::AddressSpace::kPrivate);
     auto* workgroup = GlobalVar("w", ty.i32(), core::AddressSpace::kWorkgroup);
-    auto* push_constant = GlobalVar("pc", ty.i32(), core::AddressSpace::kPushConstant);
+    auto* immediate = GlobalVar("pc", ty.i32(), core::AddressSpace::kImmediate);
     auto* uniform =
         GlobalVar("ub", ty.Of(buf), core::AddressSpace::kUniform, Binding(0_a), Group(0_a));
     auto* storage =
@@ -1067,14 +1067,14 @@ TEST_F(ResolverVariableTest, GlobalVar_AddressSpace) {
 
     ASSERT_TRUE(TypeOf(private_)->Is<core::type::Reference>());
     ASSERT_TRUE(TypeOf(workgroup)->Is<core::type::Reference>());
-    ASSERT_TRUE(TypeOf(push_constant)->Is<core::type::Reference>());
+    ASSERT_TRUE(TypeOf(immediate)->Is<core::type::Reference>());
     ASSERT_TRUE(TypeOf(uniform)->Is<core::type::Reference>());
     ASSERT_TRUE(TypeOf(storage)->Is<core::type::Reference>());
     ASSERT_TRUE(TypeOf(handle)->Is<core::type::Reference>());
 
     EXPECT_EQ(TypeOf(private_)->As<core::type::Reference>()->Access(), core::Access::kReadWrite);
     EXPECT_EQ(TypeOf(workgroup)->As<core::type::Reference>()->Access(), core::Access::kReadWrite);
-    EXPECT_EQ(TypeOf(push_constant)->As<core::type::Reference>()->Access(), core::Access::kRead);
+    EXPECT_EQ(TypeOf(immediate)->As<core::type::Reference>()->Access(), core::Access::kRead);
     EXPECT_EQ(TypeOf(uniform)->As<core::type::Reference>()->Access(), core::Access::kRead);
     EXPECT_EQ(TypeOf(storage)->As<core::type::Reference>()->Access(), core::Access::kRead);
     EXPECT_EQ(TypeOf(handle)->As<core::type::Reference>()->Access(), core::Access::kRead);

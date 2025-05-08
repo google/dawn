@@ -51,7 +51,7 @@ TEST_F(ResolverUnresolvedIdentifierSuggestions, AddressSpace) {
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), R"(12:34 error: unresolved address space 'privte'
 12:34 note: Did you mean 'private'?
-Possible values: 'function', 'pixel_local', 'private', 'push_constant', 'storage', 'uniform', 'workgroup')");
+Possible values: 'function', 'immediate', 'pixel_local', 'private', 'storage', 'uniform', 'workgroup')");
 }
 
 TEST_F(ResolverUnresolvedIdentifierSuggestions, TexelFormat) {

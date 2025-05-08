@@ -545,10 +545,10 @@ bool Validator::AddressSpaceLayout(const core::type::Type* store_ty,
     };
 
     // Among three host-shareable address spaces, f16 is supported in "uniform" and
-    // "storage" address space, but not "push_constant" address space yet.
+    // "storage" address space, but not "immediate" address space yet.
     if (Is<core::type::F16>(store_ty->DeepestElement()) &&
-        address_space == core::AddressSpace::kPushConstant) {
-        AddError(source) << "using " << style::Type("f16") << " in " << style::Enum("push_constant")
+        address_space == core::AddressSpace::kImmediate) {
+        AddError(source) << "using " << style::Type("f16") << " in " << style::Enum("immediate")
                          << " address space is not implemented yet";
         return false;
     }
@@ -2411,7 +2411,7 @@ bool Validator::PipelineStages(VectorRef<sem::Function*> entry_points) const {
 bool Validator::ModuleScopeVarUsages(VectorRef<sem::Function*> entry_points) const {
     for (auto* entry_point : entry_points) {
         if (!CheckNoMultipleModuleScopeVarsOfAddressSpace(entry_point,
-                                                          core::AddressSpace::kPushConstant)) {
+                                                          core::AddressSpace::kImmediate)) {
             return false;
         }
         if (!CheckNoMultipleModuleScopeVarsOfAddressSpace(entry_point,
@@ -3081,12 +3081,12 @@ bool Validator::CheckTypeAccessAddressSpace(const core::type::Type* store_ty,
                 return false;
             }
             break;
-        case core::AddressSpace::kPushConstant:
+        case core::AddressSpace::kImmediate:
             if (DAWN_UNLIKELY(!enabled_extensions_.Contains(
-                    wgsl::Extension::kChromiumExperimentalPushConstant))) {
-                AddError(source) << "use of variable address space " << style::Enum("push_constant")
+                    wgsl::Extension::kChromiumExperimentalImmediate))) {
+                AddError(source) << "use of variable address space " << style::Enum("immediate")
                                  << " requires enabling extension "
-                                 << style::Code("chromium_experimental_push_constant");
+                                 << style::Code("chromium_experimental_immediate");
                 return false;
             }
             break;
@@ -3148,7 +3148,7 @@ bool Validator::CheckTypeAccessAddressSpace(const core::type::Type* store_ty,
 
 bool Validator::CheckNoMultipleModuleScopeVarsOfAddressSpace(sem::Function* entry_point,
                                                              core::AddressSpace space) const {
-    // State checked and modified by check() so that it remembers previously seen push_constant
+    // State checked and modified by check() so that it remembers previously seen immediate
     // variables for an entry-point.
     const sem::Variable* seen_var = nullptr;
     const sem::Function* seen_func = nullptr;

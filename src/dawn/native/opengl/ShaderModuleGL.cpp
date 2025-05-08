@@ -526,17 +526,17 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
     req.tintOptions.disable_robustness = false;
 
     if (usesVertexIndex) {
-        req.tintOptions.first_vertex_offset = 4 * PipelineLayout::PushConstantLocation::FirstVertex;
+        req.tintOptions.first_vertex_offset = 4 * PipelineLayout::ImmediateLocation::FirstVertex;
     }
 
     if (usesInstanceIndex) {
         req.tintOptions.first_instance_offset =
-            4 * PipelineLayout::PushConstantLocation::FirstInstance;
+            4 * PipelineLayout::ImmediateLocation::FirstInstance;
     }
 
     if (usesFragDepth) {
-        req.tintOptions.depth_range_offsets = {4 * PipelineLayout::PushConstantLocation::MinDepth,
-                                               4 * PipelineLayout::PushConstantLocation::MaxDepth};
+        req.tintOptions.depth_range_offsets = {4 * PipelineLayout::ImmediateLocation::MinDepth,
+                                               4 * PipelineLayout::ImmediateLocation::MaxDepth};
     }
 
     if (stage == SingleShaderStage::Vertex) {

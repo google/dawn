@@ -771,8 +771,8 @@ struct Encoder {
                 return pb::AddressSpace::pixel_local;
             case core::AddressSpace::kPrivate:
                 return pb::AddressSpace::private_;
-            case core::AddressSpace::kPushConstant:
-                return pb::AddressSpace::push_constant;
+            case core::AddressSpace::kImmediate:
+                return pb::AddressSpace::immediate;
             case core::AddressSpace::kStorage:
                 return pb::AddressSpace::storage;
             case core::AddressSpace::kUniform:

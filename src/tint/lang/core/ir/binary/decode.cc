@@ -1232,8 +1232,8 @@ struct Decoder {
                 return core::AddressSpace::kPixelLocal;
             case pb::AddressSpace::private_:
                 return core::AddressSpace::kPrivate;
-            case pb::AddressSpace::push_constant:
-                return core::AddressSpace::kPushConstant;
+            case pb::AddressSpace::immediate:
+                return core::AddressSpace::kImmediate;
             case pb::AddressSpace::storage:
                 return core::AddressSpace::kStorage;
             case pb::AddressSpace::uniform:

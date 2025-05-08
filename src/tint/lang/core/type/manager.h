@@ -81,7 +81,7 @@ namespace tint::core::type {
 static constexpr inline core::Access DefaultAccessFor(core::AddressSpace space) {
     switch (space) {
         case core::AddressSpace::kIn:
-        case core::AddressSpace::kPushConstant:
+        case core::AddressSpace::kImmediate:
         case core::AddressSpace::kUniform:
         case core::AddressSpace::kHandle:
             return core::Access::kRead;

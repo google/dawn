@@ -1,4 +1,4 @@
-// Copyright 2024 The Dawn & Tint Authors
+// Copyright 2025 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,8 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_CORE_IR_TRANSFORM_PREPARE_PUSH_CONSTANTS_H_
-#define SRC_TINT_LANG_CORE_IR_TRANSFORM_PREPARE_PUSH_CONSTANTS_H_
+#ifndef SRC_TINT_LANG_CORE_IR_TRANSFORM_PREPARE_IMMEDIATE_DATA_H_
+#define SRC_TINT_LANG_CORE_IR_TRANSFORM_PREPARE_IMMEDIATE_DATA_H_
 
 #include <map>
 
@@ -46,15 +46,15 @@ class Type;
 
 namespace tint::core::ir::transform {
 
-/// A descriptor for an internal push constant.
-struct InternalPushConstant {
+/// A descriptor for an internal immediate constant.
+struct InternalImmediateData {
     Symbol name;
     const core::type::Type* type = nullptr;
 };
 
-/// A struct that describes the layout of the generated push constant structure.
-struct PushConstantLayout {
-    /// The push constant variable.
+/// A struct that describes the layout of the generated immediate data structure.
+struct ImmediateDataLayout {
+    /// The immediate data variable.
     core::ir::Var* var = nullptr;
 
     /// A map from member offset to member index.
@@ -69,24 +69,27 @@ struct PushConstantLayout {
 };
 
 /// The set of polyfills that should be applied.
-struct PreparePushConstantsConfig {
-    /// Add an internal constant to the map.
-    void AddInternalConstant(uint32_t offset, Symbol name, const core::type::Type* type) {
-        internal_constants.emplace(offset, InternalPushConstant{name, type});
+struct PrepareImmediateDataConfig {
+    /// Add an internal immediate data to the map.
+    void AddInternalImmediateData(uint32_t offset, Symbol name, const core::type::Type* type) {
+        internal_immediate_data.emplace(offset, InternalImmediateData{name, type});
     }
 
     /// The ordered map from offset to internally used constant descriptor.
-    std::map<uint32_t, InternalPushConstant> internal_constants{};
+    std::map<uint32_t, InternalImmediateData> internal_immediate_data{};
+
+    /// Reflection for this class.
+    TINT_REFLECT(PrepareImmediateDataConfig, internal_immediate_data);
 };
 
-/// PreparePushConstants is a transform that sets up the structure and variable used for push
-/// constants to combine both user-defined and internally used push constant values.
+/// PrepareImmediateData is a transform that sets up the structure and variable used for immediate
+/// data to combine both user-defined and internally used immediate data values.
 /// @param module the module to transform
 /// @param config the transform config
-/// @returns the generated push constant layout or failure
-Result<PushConstantLayout> PreparePushConstants(Module& module,
-                                                const PreparePushConstantsConfig& config);
+/// @returns the generated immediate constant layout or failure
+Result<ImmediateDataLayout> PrepareImmediateData(Module& module,
+                                                 const PrepareImmediateDataConfig& config);
 
 }  // namespace tint::core::ir::transform
 
-#endif  // SRC_TINT_LANG_CORE_IR_TRANSFORM_PREPARE_PUSH_CONSTANTS_H_
+#endif  // SRC_TINT_LANG_CORE_IR_TRANSFORM_PREPARE_IMMEDIATE_DATA_H_

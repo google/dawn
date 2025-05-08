@@ -182,8 +182,8 @@ TEST_F(InspectorGetEntryPointTest, DefaultWorkgroupSize) {
     EXPECT_EQ(1u, workgroup_size->z);
 }
 
-// Test that push_constant_size is zero if there are no push constants.
-TEST_F(InspectorGetEntryPointTest, PushConstantSizeNone) {
+// Test that immediate_data_size is zero if there are no immediate data.
+TEST_F(InspectorGetEntryPointTest, ImmediateDataSizeNone) {
     auto* src = R"(
 @fragment fn foo() {}
 )";
@@ -193,15 +193,15 @@ TEST_F(InspectorGetEntryPointTest, PushConstantSizeNone) {
     ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
     ASSERT_EQ(1u, result.size());
-    EXPECT_EQ(0u, result[0].push_constant_size);
+    EXPECT_EQ(0u, result[0].immediate_data_size);
 }
 
-// Test that push_constant_size is 4 (bytes) if there is a single F32 push constant.
-TEST_F(InspectorGetEntryPointTest, PushConstantSizeOneWord) {
+// Test that immediate_data_size is 4 (bytes) if there is a single F32 immediate data.
+TEST_F(InspectorGetEntryPointTest, ImmediateDataSizeOneWord) {
     auto* src = R"(
-enable chromium_experimental_push_constant;
+enable chromium_experimental_immediate;
 
-var<push_constant> pc: f32;
+var<immediate> pc: f32;
 
 @fragment fn foo() { _ = pc; }
 )";
@@ -211,21 +211,21 @@ var<push_constant> pc: f32;
     ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
     ASSERT_EQ(1u, result.size());
-    EXPECT_EQ(4u, result[0].push_constant_size);
+    EXPECT_EQ(4u, result[0].immediate_data_size);
 }
 
-// Test that push_constant_size is 12 (bytes) if there is a struct containing one
+// Test that immediate_data_size is 12 (bytes) if there is a struct containing one
 // each of i32, f32 and u32.
-TEST_F(InspectorGetEntryPointTest, PushConstantSizeThreeWords) {
+TEST_F(InspectorGetEntryPointTest, ImmediateDataSizeThreeWords) {
     auto* src = R"(
-enable chromium_experimental_push_constant;
+enable chromium_experimental_immediate;
 
 struct S {
   a: i32,
   b: f32,
   c: u32,
 }
-var<push_constant> pc : S;
+var<immediate> pc : S;
 
 @fragment fn foo() { _ = pc; }
 )";
@@ -235,23 +235,23 @@ var<push_constant> pc : S;
     ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
     ASSERT_EQ(1u, result.size());
-    EXPECT_EQ(12u, result[0].push_constant_size);
+    EXPECT_EQ(12u, result[0].immediate_data_size);
 }
 
-// Test that push_constant_size is 4 (bytes) if there are two push constants,
+// Test that immediate_data_size is 4 (bytes) if there are two immediate data,
 // one used by the entry point containing an f32, and one unused by the entry
 // point containing a struct of size 12 bytes.
-TEST_F(InspectorGetEntryPointTest, PushConstantSizeTwoConstants) {
+TEST_F(InspectorGetEntryPointTest, ImmediateDataSizeTwoConstants) {
     auto* src = R"(
-enable chromium_experimental_push_constant;
+enable chromium_experimental_immediate;
 
 struct S {
   a: i32,
   b: f32,
   c: u32,
 }
-var<push_constant> unused : S;
-var<push_constant> pc: f32;
+var<immediate> unused : S;
+var<immediate> pc: f32;
 
 @fragment fn foo() { _ = pc; }
 )";
@@ -262,8 +262,8 @@ var<push_constant> pc: f32;
 
     ASSERT_EQ(1u, result.size());
 
-    // Check that the result only includes the single f32 push constant.
-    EXPECT_EQ(4u, result[0].push_constant_size);
+    // Check that the result only includes the single f32 immediate data.
+    EXPECT_EQ(4u, result[0].immediate_data_size);
 }
 
 TEST_F(InspectorGetEntryPointTest, NonDefaultWorkgroupSize) {

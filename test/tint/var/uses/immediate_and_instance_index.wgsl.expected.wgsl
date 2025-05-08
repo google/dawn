@@ -1,6 +1,6 @@
-enable chromium_experimental_push_constant;
+enable chromium_experimental_immediate;
 
-var<push_constant> a : f32;
+var<immediate> a : f32;
 
 @vertex
 fn main(@builtin(instance_index) b : u32) -> @builtin(position) vec4<f32> {

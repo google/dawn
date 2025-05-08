@@ -53,8 +53,8 @@ struct RobustnessConfig {
     bool clamp_function = true;
     /// Should accesses to pointers with the 'private' address space be clamped?
     bool clamp_private = true;
-    /// Should accesses to pointers with the 'push_constant' address space be clamped?
-    bool clamp_push_constant = true;
+    /// Should accesses to pointers with the 'immediate' address space be clamped?
+    bool clamp_immediate_data = true;
     /// Should accesses to pointers with the 'storage' address space be clamped?
     bool clamp_storage = true;
     /// Should accesses to pointers with the 'uniform' address space be clamped?
@@ -74,7 +74,7 @@ struct RobustnessConfig {
                  clamp_texture,
                  clamp_function,
                  clamp_private,
-                 clamp_push_constant,
+                 clamp_immediate_data,
                  clamp_storage,
                  clamp_uniform,
                  clamp_workgroup,

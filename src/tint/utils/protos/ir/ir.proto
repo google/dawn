@@ -433,7 +433,7 @@ enum AddressSpace {
     handle = 1;
     pixel_local = 2;
     private = 3;
-    push_constant = 4;
+    immediate = 4;
     storage = 5;
     uniform = 6;
     workgroup = 7;

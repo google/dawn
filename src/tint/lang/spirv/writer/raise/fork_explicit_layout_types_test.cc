@@ -222,7 +222,7 @@ TEST_F(SpirvWriter_ForkExplicitLayoutTypesTest, PushConstant_SharedWithPrivate) 
                                                                  {mod.symbols.New("a"), ty.u32()},
                                                              });
 
-    mod.root_block->Append(b.Var("buffer", ty.ptr(push_constant, structure)));
+    mod.root_block->Append(b.Var("buffer", ty.ptr(immediate, structure)));
     mod.root_block->Append(b.Var("local", ty.ptr(private_, structure)));
 
     auto* src = R"(
@@ -231,7 +231,7 @@ MyStruct = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<push_constant, MyStruct, read> = var undef
+  %buffer:ptr<immediate, MyStruct, read> = var undef
   %local:ptr<private, MyStruct, read_write> = var undef
 }
 
@@ -248,7 +248,7 @@ MyStruct_tint_explicit_layout = struct @align(4), @spirv.explicit_layout {
 }
 
 $B1: {  # root
-  %buffer:ptr<push_constant, MyStruct_tint_explicit_layout, read> = var undef
+  %buffer:ptr<immediate, MyStruct_tint_explicit_layout, read> = var undef
   %local:ptr<private, MyStruct, read_write> = var undef
 }
 

@@ -124,7 +124,7 @@ SpvStorageClass StorageClass(core::AddressSpace addrspace) {
             return SpvStorageClassInput;
         case core::AddressSpace::kPrivate:
             return SpvStorageClassPrivate;
-        case core::AddressSpace::kPushConstant:
+        case core::AddressSpace::kImmediate:
             return SpvStorageClassPushConstant;
         case core::AddressSpace::kOut:
             return SpvStorageClassOutput;
@@ -2585,7 +2585,7 @@ class Printer {
                 module_.PushType(spv::Op::OpVariable, operands);
                 break;
             }
-            case core::AddressSpace::kPushConstant: {
+            case core::AddressSpace::kImmediate: {
                 TINT_ASSERT(!current_function_);
                 module_.PushType(spv::Op::OpVariable,
                                  {ty, id, U32Operand(SpvStorageClassPushConstant)});

@@ -276,7 +276,7 @@ TEST(Limits, ValidateAndUnpackedIn) {
 
     // Success
     {
-        supportedFeatures.insert(wgpu::FeatureName::ChromiumExperimentalImmediateData);
+        supportedFeatures.insert(wgpu::FeatureName::ChromiumExperimentalImmediate);
         CombinedLimits limits = {};
         EXPECT_TRUE(
             ValidateAndUnpackLimitsIn(&requiredLimits, supportedFeatures, &limits).IsSuccess());

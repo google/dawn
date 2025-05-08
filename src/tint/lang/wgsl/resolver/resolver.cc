@@ -780,7 +780,7 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param,
 core::Access Resolver::DefaultAccessForAddressSpace(core::AddressSpace address_space) {
     // https://gpuweb.github.io/gpuweb/wgsl/#storage-class
     switch (address_space) {
-        case core::AddressSpace::kPushConstant:
+        case core::AddressSpace::kImmediate:
         case core::AddressSpace::kStorage:
         case core::AddressSpace::kUniform:
         case core::AddressSpace::kHandle:

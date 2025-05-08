@@ -695,7 +695,7 @@ class Printer : public tint::TextGenerator {
                     break;
                 }
                 case core::AddressSpace::kUniform:
-                case core::AddressSpace::kPushConstant:
+                case core::AddressSpace::kImmediate:
                 case core::AddressSpace::kHandle: {
                     out << "uniform ";
                     break;
@@ -1025,8 +1025,8 @@ class Printer : public tint::TextGenerator {
             case core::AddressSpace::kHandle:
                 EmitHandleVar(var);
                 break;
-            case core::AddressSpace::kPushConstant:
-                EmitPushConstantVar(var);
+            case core::AddressSpace::kImmediate:
+                EmitImmediateVar(var);
                 break;
             case core::AddressSpace::kIn:
             case core::AddressSpace::kOut:
@@ -1102,11 +1102,11 @@ class Printer : public tint::TextGenerator {
         EmitVar(out, var, true);
     }
 
-    void EmitPushConstantVar(core::ir::Var* var) {
-        // We need to use the same name for the push constant structure and variable between
+    void EmitImmediateVar(core::ir::Var* var) {
+        // We need to use the same name for the immediate data structure and variable between
         // different pipeline stages.
-        constexpr const char* kPushConstantStructName = "tint_push_constant_struct";
-        constexpr const char* kPushConstantVarName = "tint_push_constants";
+        constexpr const char* kImmediateStructName = "tint_immediate_struct";
+        constexpr const char* kImmediateVarName = "tint_immediates";
 
         auto out = Line();
         EmitLayoutLocation(out, {0}, std::nullopt);
@@ -1114,11 +1114,11 @@ class Printer : public tint::TextGenerator {
         auto* ptr = var->Result()->Type()->As<core::type::Pointer>();
         auto* str = ptr->StoreType()->As<core::type::Struct>();
         TINT_ASSERT(str);
-        names_.Add(str, kPushConstantStructName);
+        names_.Add(str, kImmediateStructName);
         EmitStructType(str);
 
-        names_.Add(var->Result(), kPushConstantVarName);
-        EmitTypeAndName(out, var->Result()->Type(), kPushConstantVarName);
+        names_.Add(var->Result(), kImmediateVarName);
+        EmitTypeAndName(out, var->Result()->Type(), kImmediateVarName);
         out << ";";
     }
 

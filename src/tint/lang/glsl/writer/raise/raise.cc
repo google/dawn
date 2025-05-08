@@ -39,7 +39,7 @@
 #include "src/tint/lang/core/ir/transform/demote_to_helper.h"
 #include "src/tint/lang/core/ir/transform/direct_variable_access.h"
 #include "src/tint/lang/core/ir/transform/multiplanar_external_texture.h"
-#include "src/tint/lang/core/ir/transform/prepare_push_constants.h"
+#include "src/tint/lang/core/ir/transform/prepare_immediate_data.h"
 #include "src/tint/lang/core/ir/transform/preserve_padding.h"
 #include "src/tint/lang/core/ir/transform/prevent_infinite_loops.h"
 #include "src/tint/lang/core/ir/transform/remove_continue_in_switch.h"
@@ -80,30 +80,30 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         RUN_TRANSFORM(core::ir::transform::PreventInfiniteLoops, module);
     }
 
-    // PreparePushConstants must come before any transform that needs internal push constants.
-    core::ir::transform::PreparePushConstantsConfig push_constant_config;
+    // PrepareImmediateData must come before any transform that needs internal immediate data.
+    core::ir::transform::PrepareImmediateDataConfig immediate_data_config;
     if (options.first_instance_offset) {
-        push_constant_config.AddInternalConstant(options.first_instance_offset.value(),
-                                                 module.symbols.New("tint_first_instance"),
-                                                 module.Types().u32());
+        immediate_data_config.AddInternalImmediateData(options.first_instance_offset.value(),
+                                                       module.symbols.New("tint_first_instance"),
+                                                       module.Types().u32());
     }
     if (options.first_vertex_offset) {
-        push_constant_config.AddInternalConstant(options.first_vertex_offset.value(),
-                                                 module.symbols.New("tint_first_vertex"),
-                                                 module.Types().u32());
+        immediate_data_config.AddInternalImmediateData(options.first_vertex_offset.value(),
+                                                       module.symbols.New("tint_first_vertex"),
+                                                       module.Types().u32());
     }
     if (options.depth_range_offsets) {
-        push_constant_config.AddInternalConstant(options.depth_range_offsets.value().min,
-                                                 module.symbols.New("tint_frag_depth_min"),
-                                                 module.Types().f32());
-        push_constant_config.AddInternalConstant(options.depth_range_offsets.value().max,
-                                                 module.symbols.New("tint_frag_depth_max"),
-                                                 module.Types().f32());
+        immediate_data_config.AddInternalImmediateData(options.depth_range_offsets.value().min,
+                                                       module.symbols.New("tint_frag_depth_min"),
+                                                       module.Types().f32());
+        immediate_data_config.AddInternalImmediateData(options.depth_range_offsets.value().max,
+                                                       module.symbols.New("tint_frag_depth_max"),
+                                                       module.Types().f32());
     }
-    auto push_constant_layout =
-        core::ir::transform::PreparePushConstants(module, push_constant_config);
-    if (push_constant_layout != Success) {
-        return push_constant_layout.Failure();
+    auto immediate_data_layout =
+        core::ir::transform::PrepareImmediateData(module, immediate_data_config);
+    if (immediate_data_layout != Success) {
+        return immediate_data_layout.Failure();
     }
 
     // Note, this comes before binding remapper as Dawn inserts _pre-remapping_ binding information.
@@ -203,13 +203,13 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     RUN_TRANSFORM(core::ir::transform::AddEmptyEntryPoint, module);
 
     RUN_TRANSFORM(raise::ShaderIO, module,
-                  raise::ShaderIOConfig{push_constant_layout.Get(), options.depth_range_offsets,
+                  raise::ShaderIOConfig{immediate_data_layout.Get(), options.depth_range_offsets,
                                         options.bgra_swizzle_locations});
 
     // Must come after ShaderIO as it operates on module-scope `in` variables.
     RUN_TRANSFORM(
         raise::OffsetFirstIndex, module,
-        raise::OffsetFirstIndexConfig{push_constant_layout.Get(), options.first_vertex_offset,
+        raise::OffsetFirstIndexConfig{immediate_data_layout.Get(), options.first_vertex_offset,
                                       options.first_instance_offset});
 
     RUN_TRANSFORM(core::ir::transform::Std140, module);

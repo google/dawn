@@ -119,9 +119,9 @@ void ProgrammableEncoder::APISetImmediateData(uint32_t offset, const void* data,
     mEncodingContext->TryEncode(
         this,
         [&](CommandAllocator* allocator) -> MaybeError {
-            DAWN_INVALID_IF(!GetDevice()->HasFeature(Feature::ChromiumExperimentalImmediateData),
+            DAWN_INVALID_IF(!GetDevice()->HasFeature(Feature::ChromiumExperimentalImmediate),
                             "SetImmediateData() called without "
-                            "Feature::ChromiumExperimentalImmediateData supported.");
+                            "Feature::ChromiumExperimentalImmediate supported.");
 
             if (IsValidationEnabled()) {
                 uint32_t maxImmediateDataRangeByteSize =

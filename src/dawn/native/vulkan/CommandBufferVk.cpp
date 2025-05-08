@@ -1548,7 +1548,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
 
                 device->fn.CmdSetViewport(commands, 0, 1, &viewport);
 
-                // Try applying the push constants that contain min/maxDepth immediately. This can
+                // Try applying the immediate data that contain min/maxDepth immediately. This can
                 // be deferred if no pipeline is currently bound.
                 immediates.SetClampFragDepth(viewport.minDepth, viewport.maxDepth);
                 break;

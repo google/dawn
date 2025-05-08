@@ -33,7 +33,7 @@ namespace tint::core {
 inline bool IsHostShareable(AddressSpace address_space) {
     return address_space == AddressSpace::kUniform ||
            address_space == AddressSpace::kStorage ||
-           address_space == AddressSpace::kPushConstant;
+           address_space == AddressSpace::kImmediate;
 }
 
 }  // namespace tint::core

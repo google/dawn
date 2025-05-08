@@ -4,7 +4,7 @@ precision highp float;
 precision highp int;
 
 
-struct tint_push_constant_struct {
+struct tint_immediate_struct {
   float tint_frag_depth_min;
   float tint_frag_depth_max;
 };
@@ -18,7 +18,7 @@ struct FragmentOutputs {
   vec4 loc3;
 };
 
-layout(location = 0) uniform tint_push_constant_struct tint_push_constants;
+layout(location = 0) uniform tint_immediate_struct tint_immediates;
 layout(location = 0) out int main_loc0_Output;
 layout(location = 1) out uint main_loc1_Output;
 layout(location = 2) out float main_loc2_Output;
@@ -29,7 +29,7 @@ FragmentOutputs main_inner() {
 void main() {
   FragmentOutputs v = main_inner();
   main_loc0_Output = v.loc0;
-  gl_FragDepth = clamp(v.frag_depth, tint_push_constants.tint_frag_depth_min, tint_push_constants.tint_frag_depth_max);
+  gl_FragDepth = clamp(v.frag_depth, tint_immediates.tint_frag_depth_min, tint_immediates.tint_frag_depth_max);
   main_loc1_Output = v.loc1;
   main_loc2_Output = v.loc2;
   gl_SampleMask[0u] = int(v.sample_mask);

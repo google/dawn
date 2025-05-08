@@ -445,8 +445,8 @@ TEST_F(SpirvWriterTest, UniformVar_Load) {
 )");
 }
 
-TEST_F(SpirvWriterTest, PushConstantVar) {
-    auto* v = b.Var("v", ty.ptr<push_constant, i32>());
+TEST_F(SpirvWriterTest, ImmediateVar) {
+    auto* v = b.Var("v", ty.ptr<immediate, i32>());
     mod.root_block->Append(v);
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -460,8 +460,8 @@ TEST_F(SpirvWriterTest, PushConstantVar) {
 )");
 }
 
-TEST_F(SpirvWriterTest, PushConstantVar_Load) {
-    auto* v = b.Var("v", ty.ptr<push_constant, i32>());
+TEST_F(SpirvWriterTest, ImmedaiteVar_Load) {
+    auto* v = b.Var("v", ty.ptr<immediate, i32>());
     mod.root_block->Append(v);
 
     auto* func = b.Function("foo", ty.i32());

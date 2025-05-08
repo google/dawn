@@ -268,8 +268,8 @@ TEST_F(IR_ValidatorTest, Var_Private_UnexpectedInputAttachmentIndex) {
 )")) << res.Failure();
 }
 
-TEST_F(IR_ValidatorTest, Var_PushConstant_UnexpectedInputAttachmentIndex) {
-    auto* v = b.Var<push_constant, f32>();
+TEST_F(IR_ValidatorTest, Var_Immediate_UnexpectedInputAttachmentIndex) {
+    auto* v = b.Var<immediate, f32>();
     v->SetInputAttachmentIndex(0);
     mod.root_block->Append(v);
 
@@ -277,9 +277,10 @@ TEST_F(IR_ValidatorTest, Var_PushConstant_UnexpectedInputAttachmentIndex) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr(
-                    R"(:2:38 error: var: '@input_attachment_index' is not valid for non-handle var
-  %1:ptr<push_constant, f32, read> = var undef @input_attachment_index(0)
-                                     ^^^
+                    R"(:2:34 error: var: '@input_attachment_index' is not valid for non-handle var
+  %1:ptr<immediate, f32, read> = var undef @input_attachment_index(0)
+                                 ^^^
+
 )")) << res.Failure();
 }
 

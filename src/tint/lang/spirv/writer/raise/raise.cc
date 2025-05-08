@@ -39,7 +39,7 @@
 #include "src/tint/lang/core/ir/transform/demote_to_helper.h"
 #include "src/tint/lang/core/ir/transform/direct_variable_access.h"
 #include "src/tint/lang/core/ir/transform/multiplanar_external_texture.h"
-#include "src/tint/lang/core/ir/transform/prepare_push_constants.h"
+#include "src/tint/lang/core/ir/transform/prepare_immediate_data.h"
 #include "src/tint/lang/core/ir/transform/preserve_padding.h"
 #include "src/tint/lang/core/ir/transform/prevent_infinite_loops.h"
 #include "src/tint/lang/core/ir/transform/robustness.h"
@@ -79,20 +79,20 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         RUN_TRANSFORM(core::ir::transform::PreventInfiniteLoops, module);
     }
 
-    // PreparePushConstants must come before any transform that needs internal push constants.
-    core::ir::transform::PreparePushConstantsConfig push_constant_config;
+    // PrepareImmediateData must come before any transform that needs internal immediate data.
+    core::ir::transform::PrepareImmediateDataConfig immediate_data_config;
     if (options.depth_range_offsets) {
-        push_constant_config.AddInternalConstant(options.depth_range_offsets.value().min,
-                                                 module.symbols.New("tint_frag_depth_min"),
-                                                 module.Types().f32());
-        push_constant_config.AddInternalConstant(options.depth_range_offsets.value().max,
-                                                 module.symbols.New("tint_frag_depth_max"),
-                                                 module.Types().f32());
+        immediate_data_config.AddInternalImmediateData(options.depth_range_offsets.value().min,
+                                                       module.symbols.New("tint_frag_depth_min"),
+                                                       module.Types().f32());
+        immediate_data_config.AddInternalImmediateData(options.depth_range_offsets.value().max,
+                                                       module.symbols.New("tint_frag_depth_max"),
+                                                       module.Types().f32());
     }
-    auto push_constant_layout =
-        core::ir::transform::PreparePushConstants(module, push_constant_config);
-    if (push_constant_layout != Success) {
-        return push_constant_layout.Failure();
+    auto immediate_data_layout =
+        core::ir::transform::PrepareImmediateData(module, immediate_data_config);
+    if (immediate_data_layout != Success) {
+        return immediate_data_layout.Failure();
     }
 
     core::ir::transform::BinaryPolyfillConfig binary_polyfills;
@@ -175,7 +175,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     RUN_TRANSFORM(raise::RemoveUnreachableInLoopContinuing, module);
     RUN_TRANSFORM(
         raise::ShaderIO, module,
-        raise::ShaderIOConfig{push_constant_layout.Get(), options.emit_vertex_point_size,
+        raise::ShaderIOConfig{immediate_data_layout.Get(), options.emit_vertex_point_size,
                               !options.use_storage_input_output_16, options.depth_range_offsets});
     RUN_TRANSFORM(core::ir::transform::Std140, module);
 

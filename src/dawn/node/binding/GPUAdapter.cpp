@@ -109,7 +109,7 @@ interop::Interface<interop::GPUSupportedLimits> GPUAdapter::getLimits(Napi::Env 
     wgpu::ChainedStructOut** limitsListTail = &limits.nextInChain;
     // Query the immediate data limits only if ChromiumExperimentalImmediateData feature
     // is available on adapter.
-    if (adapter_.HasFeature(FeatureName::ChromiumExperimentalImmediateData)) {
+    if (adapter_.HasFeature(FeatureName::ChromiumExperimentalImmediate)) {
         InsertInChain(&immediateDataLimits);
     }
 

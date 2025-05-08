@@ -1,4 +1,4 @@
-// Copyright 2024 The Dawn & Tint Authors
+// Copyright 2025 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,7 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/core/ir/transform/prepare_push_constants.h"
+#include "src/tint/lang/core/ir/transform/prepare_immediate_data.h"
 
 #include "src/tint/lang/core/ir/transform/helper_test.h"
 
@@ -35,11 +35,11 @@ namespace {
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
-class IR_PreparePushConstantsTests : public TransformTest {
+class IR_PrepareImmediateDataTests : public TransformTest {
   public:
-    Result<PushConstantLayout> Run(PreparePushConstantsConfig config) {
+    Result<ImmediateDataLayout> Run(PrepareImmediateDataConfig config) {
         // Run the transform.
-        auto result = PreparePushConstants(mod, config);
+        auto result = PrepareImmediateData(mod, config);
         EXPECT_EQ(result, Success);
         if (result != Success) {
             return result.Failure();
@@ -52,7 +52,7 @@ class IR_PreparePushConstantsTests : public TransformTest {
     }
 };
 
-TEST_F(IR_PreparePushConstantsTests, NoModify_NoInternalConstants) {
+TEST_F(IR_PrepareImmediateDataTests, NoModify_NoInternalImmediateData) {
     auto* v = b.Var("v", ty.ptr<private_, i32>());
     mod.root_block->Append(v);
 
@@ -66,7 +66,7 @@ $B1: {  # root
 
     auto* expect = src;
 
-    PreparePushConstantsConfig config;
+    PrepareImmediateDataConfig config;
     auto result = Run(config);
     if (result == Success) {
         EXPECT_EQ(result->var, nullptr);
@@ -76,8 +76,8 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_PreparePushConstantsTests, NoModify_UserConstant_NoInternalConstants) {
-    auto* v = b.Var("v", ty.ptr<push_constant, i32>());
+TEST_F(IR_PrepareImmediateDataTests, NoModify_UserImmediateData_NoInternalImmediateData) {
+    auto* v = b.Var("v", ty.ptr<immediate, i32>());
     mod.root_block->Append(v);
 
     auto* foo = b.Function("foo", ty.i32());
@@ -87,7 +87,7 @@ TEST_F(IR_PreparePushConstantsTests, NoModify_UserConstant_NoInternalConstants) 
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<push_constant, i32, read> = var undef
+  %v:ptr<immediate, i32, read> = var undef
 }
 
 %foo = func():i32 {
@@ -101,7 +101,7 @@ $B1: {  # root
 
     auto* expect = src;
 
-    PreparePushConstantsConfig config;
+    PrepareImmediateDataConfig config;
     auto result = Run(config);
     if (result == Success) {
         EXPECT_EQ(result->var, nullptr);
@@ -111,7 +111,7 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_PreparePushConstantsTests, NoUserConstant_OneInternalConstant) {
+TEST_F(IR_PrepareImmediateDataTests, NoUserImmedaiteData_OneInternalImmediateData) {
     auto* v = b.Var("v", ty.ptr<private_, i32>());
     mod.root_block->Append(v);
 
@@ -124,19 +124,19 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-tint_push_constant_struct = struct @align(4), @block {
+tint_immediate_data_struct = struct @align(4), @block {
   internal_constant_a:i32 @offset(0)
 }
 
 $B1: {  # root
   %v:ptr<private, i32, read_write> = var undef
-  %tint_push_constants:ptr<push_constant, tint_push_constant_struct, read> = var undef
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
 }
 
 )";
 
-    PreparePushConstantsConfig config;
-    config.AddInternalConstant(0u, mod.symbols.New("internal_constant_a"), ty.i32());
+    PrepareImmediateDataConfig config;
+    config.AddInternalImmediateData(0u, mod.symbols.New("internal_constant_a"), ty.i32());
     auto result = Run(config);
     if (result == Success) {
         EXPECT_NE(result->var, nullptr);
@@ -146,7 +146,7 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_PreparePushConstantsTests, NoUserConstant_MultipleInternalConstants) {
+TEST_F(IR_PrepareImmediateDataTests, NoUserImmediateData_MultipleInternalImmediateData) {
     auto* v = b.Var("v", ty.ptr<private_, i32>());
     mod.root_block->Append(v);
 
@@ -159,7 +159,7 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-tint_push_constant_struct = struct @align(16), @block {
+tint_immediate_data_struct = struct @align(16), @block {
   internal_constant_a:i32 @offset(0)
   internal_constant_b:f32 @offset(4)
   internal_constant_c:vec4<f32> @offset(16)
@@ -167,15 +167,15 @@ tint_push_constant_struct = struct @align(16), @block {
 
 $B1: {  # root
   %v:ptr<private, i32, read_write> = var undef
-  %tint_push_constants:ptr<push_constant, tint_push_constant_struct, read> = var undef
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
 }
 
 )";
 
-    PreparePushConstantsConfig config;
-    config.AddInternalConstant(0u, mod.symbols.New("internal_constant_a"), ty.i32());
-    config.AddInternalConstant(4u, mod.symbols.New("internal_constant_b"), ty.f32());
-    config.AddInternalConstant(16u, mod.symbols.New("internal_constant_c"), ty.vec4<f32>());
+    PrepareImmediateDataConfig config;
+    config.AddInternalImmediateData(0u, mod.symbols.New("internal_constant_a"), ty.i32());
+    config.AddInternalImmediateData(4u, mod.symbols.New("internal_constant_b"), ty.f32());
+    config.AddInternalImmediateData(16u, mod.symbols.New("internal_constant_c"), ty.vec4<f32>());
     auto result = Run(config);
     if (result == Success) {
         EXPECT_NE(result->var, nullptr);
@@ -187,8 +187,8 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_PreparePushConstantsTests, UserConstant_MultipleInternalConstants) {
-    auto* v = b.Var("v", ty.ptr<push_constant, i32>());
+TEST_F(IR_PrepareImmediateDataTests, UserImmediateData_MultipleInternalImmediateData) {
+    auto* v = b.Var("v", ty.ptr<immediate, i32>());
     mod.root_block->Append(v);
 
     auto* foo = b.Function("foo", ty.i32());
@@ -198,7 +198,7 @@ TEST_F(IR_PreparePushConstantsTests, UserConstant_MultipleInternalConstants) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<push_constant, i32, read> = var undef
+  %v:ptr<immediate, i32, read> = var undef
 }
 
 %foo = func():i32 {
@@ -211,30 +211,30 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-tint_push_constant_struct = struct @align(16), @block {
-  user_constant:i32 @offset(0)
+tint_immediate_data_struct = struct @align(16), @block {
+  user_immediate_data:i32 @offset(0)
   internal_constant_a:i32 @offset(4)
   internal_constant_b:f32 @offset(8)
   internal_constant_c:vec4<f32> @offset(16)
 }
 
 $B1: {  # root
-  %tint_push_constants:ptr<push_constant, tint_push_constant_struct, read> = var undef
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
 }
 
 %foo = func():i32 {
   $B2: {
-    %3:ptr<push_constant, i32, read> = access %tint_push_constants, 0u
+    %3:ptr<immediate, i32, read> = access %tint_immediate_data, 0u
     %4:i32 = load %3
     ret %4
   }
 }
 )";
 
-    PreparePushConstantsConfig config;
-    config.AddInternalConstant(4u, mod.symbols.New("internal_constant_a"), ty.i32());
-    config.AddInternalConstant(8u, mod.symbols.New("internal_constant_b"), ty.f32());
-    config.AddInternalConstant(16u, mod.symbols.New("internal_constant_c"), ty.vec4<f32>());
+    PrepareImmediateDataConfig config;
+    config.AddInternalImmediateData(4u, mod.symbols.New("internal_constant_a"), ty.i32());
+    config.AddInternalImmediateData(8u, mod.symbols.New("internal_constant_b"), ty.f32());
+    config.AddInternalImmediateData(16u, mod.symbols.New("internal_constant_c"), ty.vec4<f32>());
     auto result = Run(config);
     if (result == Success) {
         EXPECT_NE(result->var, nullptr);

@@ -193,11 +193,11 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
             return frag_depth;
         }
 
-        auto* push_constants = config.push_constant_layout.var;
-        auto min_idx = u32(config.push_constant_layout.IndexOf(config.depth_range_offsets->min));
-        auto max_idx = u32(config.push_constant_layout.IndexOf(config.depth_range_offsets->max));
-        auto* min = builder.Load(builder.Access<ptr<push_constant, f32>>(push_constants, min_idx));
-        auto* max = builder.Load(builder.Access<ptr<push_constant, f32>>(push_constants, max_idx));
+        auto* immediate_data = config.immediate_data_layout.var;
+        auto min_idx = u32(config.immediate_data_layout.IndexOf(config.depth_range_offsets->min));
+        auto max_idx = u32(config.immediate_data_layout.IndexOf(config.depth_range_offsets->max));
+        auto* min = builder.Load(builder.Access<ptr<immediate, f32>>(immediate_data, min_idx));
+        auto* max = builder.Load(builder.Access<ptr<immediate, f32>>(immediate_data, max_idx));
         return builder.Call<f32>(core::BuiltinFn::kClamp, frag_depth, min, max)->Result();
     }
 

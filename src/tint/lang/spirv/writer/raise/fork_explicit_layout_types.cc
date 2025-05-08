@@ -78,7 +78,7 @@ struct State {
 
             auto* ptr = var->Result()->Type()->As<core::type::Pointer>();
             switch (ptr->AddressSpace()) {
-                case core::AddressSpace::kPushConstant:
+                case core::AddressSpace::kImmediate:
                 case core::AddressSpace::kStorage:
                 case core::AddressSpace::kUniform:
                     vars_requiring_explicit_layout.Push(var);

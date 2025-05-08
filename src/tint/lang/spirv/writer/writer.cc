@@ -72,8 +72,9 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
     }
 
     // Check for unsupported module-scope variable address spaces and types.
-    // Also make sure there is at most one user-declared push_constant, and make a note of its size.
-    uint32_t user_push_constant_size = 0;
+    // Also make sure there is at most one user-declared immediate data, and make a note of its
+    // size.
+    uint32_t user_immediate_data_size = 0;
     for (auto* inst : *ir.root_block) {
         auto* var = inst->As<core::ir::Var>();
         auto* ptr = var->Result()->Type()->As<core::type::Pointer>();
@@ -81,18 +82,18 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
             return Failure("pixel_local address space is not supported by the SPIR-V backend");
         }
 
-        if (ptr->AddressSpace() == core::AddressSpace::kPushConstant) {
-            if (user_push_constant_size > 0) {
-                // We've already seen a user-declared push constant.
-                return Failure("module contains multiple user-declared push constants");
+        if (ptr->AddressSpace() == core::AddressSpace::kImmediate) {
+            if (user_immediate_data_size > 0) {
+                // We've already seen a user-declared immediate data.
+                return Failure("module contains multiple user-declared immediate data");
             }
-            user_push_constant_size = tint::RoundUp(4u, ptr->StoreType()->Size());
+            user_immediate_data_size = tint::RoundUp(4u, ptr->StoreType()->Size());
         }
     }
 
     static constexpr uint32_t kMaxOffset = 0x1000;
-    Hashset<uint32_t, 4> push_constant_word_offsets;
-    auto check_push_constant_offset = [&](uint32_t offset) {
+    Hashset<uint32_t, 4> immediate_data_word_offsets;
+    auto check_immediate_data_offset = [&](uint32_t offset) {
         // Excessive values can cause OOM / timeouts when padding structures in the printer.
         if (offset > kMaxOffset) {
             return false;
@@ -102,20 +103,20 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
             return false;
         }
         // Offset must not have already been used.
-        if (!push_constant_word_offsets.Add(offset >> 2)) {
+        if (!immediate_data_word_offsets.Add(offset >> 2)) {
             return false;
         }
-        // Offset must be after the user-defined push constants.
-        if (offset < user_push_constant_size) {
+        // Offset must be after the user-defined immediate data.
+        if (offset < user_immediate_data_size) {
             return false;
         }
         return true;
     };
 
     if (options.depth_range_offsets) {
-        if (!check_push_constant_offset(options.depth_range_offsets->max) ||
-            !check_push_constant_offset(options.depth_range_offsets->min)) {
-            return Failure("invalid offsets for depth range push constants");
+        if (!check_immediate_data_offset(options.depth_range_offsets->max) ||
+            !check_immediate_data_offset(options.depth_range_offsets->min)) {
+            return Failure("invalid offsets for depth range immediate data");
         }
     }
 

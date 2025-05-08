@@ -1,10 +1,8 @@
-enable chromium_experimental_push_constant;
+enable chromium_experimental_immediate;
 
-var<push_constant> a : i32;
-
-var<push_constant> b : i32;
-
-var<push_constant> c : i32;
+var<immediate> a : i32;
+var<immediate> b : i32;
+var<immediate> c : i32; // unused
 
 fn uses_a() {
   let foo = a;

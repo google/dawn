@@ -2,7 +2,7 @@
 #extension GL_AMD_gpu_shader_half_float: require
 
 
-struct tint_push_constant_struct {
+struct tint_immediate_struct {
   uint tint_first_instance;
 };
 
@@ -17,7 +17,7 @@ struct VertexInputs1 {
   f16vec3 loc5;
 };
 
-layout(location = 0) uniform tint_push_constant_struct tint_push_constants;
+layout(location = 0) uniform tint_immediate_struct tint_immediates;
 layout(location = 0) in int main_loc0_Input;
 layout(location = 1) in uint main_loc1_Input;
 layout(location = 2) in float main_loc2_Input;
@@ -39,7 +39,7 @@ void main() {
   VertexInputs0 v_2 = VertexInputs0(v_1, main_loc0_Input);
   uint v_3 = main_loc1_Input;
   uint v_4 = uint(gl_InstanceID);
-  uint v_5 = (v_4 + tint_push_constants.tint_first_instance);
+  uint v_5 = (v_4 + tint_immediates.tint_first_instance);
   VertexInputs1 v_6 = VertexInputs1(main_loc2_Input, main_loc3_Input, main_loc5_Input);
   vec4 v_7 = main_inner(v_2, v_3, v_5, v_6, main_loc4_Input);
   gl_Position = vec4(v_7.x, -(v_7.y), ((2.0f * v_7.z) - v_7.w), v_7.w);

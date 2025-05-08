@@ -2286,7 +2286,7 @@
             {"value": 2, "name": "dawn native", "tags": ["dawn", "native"]},
             {"value": 3, "name": "chromium experimental timestamp query inside passes", "tags": ["dawn"]},
             {"value": 4, "name": "implicit device synchronization", "tags": ["dawn", "native"]},
-            {"value": 5, "name": "chromium experimental immediate data", "tags": ["dawn"]},
+            {"value": 5, "name": "chromium experimental immediate", "tags": ["dawn"]},
             {"value": 6, "name": "transient attachments", "tags": ["dawn"]},
             {"value": 7, "name": "MSAA render to single sampled", "tags": ["dawn"]},
             {"value": 8, "name": "D3D11 multithread protected", "tags": ["dawn", "native"]},

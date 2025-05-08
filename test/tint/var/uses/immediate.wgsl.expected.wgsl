@@ -1,13 +1,10 @@
-SKIP: INVALID
+enable chromium_experimental_immediate;
 
+var<immediate> a : i32;
 
-enable chromium_experimental_push_constant;
+var<immediate> b : i32;
 
-var<push_constant> a : i32;
-
-var<push_constant> b : i32;
-
-var<push_constant> c : i32;
+var<immediate> c : i32;
 
 fn uses_a() {
   let foo = a;
@@ -39,7 +36,3 @@ fn main3() {
 @compute @workgroup_size(1)
 fn main4() {
 }
-
-Failed to generate: error: unhandled address space push_constant
-
-tint executable returned error: exit status 1

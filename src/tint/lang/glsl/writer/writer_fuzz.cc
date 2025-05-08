@@ -49,54 +49,54 @@ Options GenerateOptions(core::ir::Module& module) {
     options.disable_polyfill_integer_div_mod = false;
     options.bindings = GenerateBindings(module);
 
-    // Leave some room for user-declared push constants.
-    uint32_t next_push_constant_offset = 0x800;
-    auto builtin_push_constant = [&next_push_constant_offset] {
-        auto offset = next_push_constant_offset;
-        next_push_constant_offset += 4;
+    // Leave some room for user-declared immediate data.
+    uint32_t next_immediate_offset = 0x800;
+    auto builtin_immediate = [&next_immediate_offset] {
+        auto offset = next_immediate_offset;
+        next_immediate_offset += 4;
         return offset;
     };
 
-    // Set offsets for push constants used for certain builtins.
+    // Set offsets for immediate data used for certain builtins.
     for (auto& func : module.functions) {
         if (!func->IsEntryPoint()) {
             continue;
         }
 
-        // vertex_index and instance_index use push constants for offsets if used.
+        // vertex_index and instance_index use immediate data for offsets if used.
         for (auto* param : func->Params()) {
             if (auto* str = param->Type()->As<core::type::Struct>()) {
                 for (auto* member : str->Members()) {
                     if (member->Attributes().builtin == core::BuiltinValue::kVertexIndex) {
-                        options.first_vertex_offset = builtin_push_constant();
+                        options.first_vertex_offset = builtin_immediate();
                     } else if (member->Attributes().builtin == core::BuiltinValue::kInstanceIndex) {
-                        options.first_vertex_offset = builtin_push_constant();
+                        options.first_vertex_offset = builtin_immediate();
                     }
                 }
             } else {
                 if (param->Builtin() == core::BuiltinValue::kVertexIndex) {
-                    options.first_vertex_offset = builtin_push_constant();
+                    options.first_vertex_offset = builtin_immediate();
                 } else if (param->Builtin() == core::BuiltinValue::kInstanceIndex) {
-                    options.first_vertex_offset = builtin_push_constant();
+                    options.first_vertex_offset = builtin_immediate();
                 }
             }
         }
 
-        // frag_depth uses push constants for min and max clamp values if used.
+        // frag_depth uses immediate data for min and max clamp values if used.
         if (auto* str = func->ReturnType()->As<core::type::Struct>()) {
             for (auto* member : str->Members()) {
                 if (member->Attributes().builtin == core::BuiltinValue::kFragDepth) {
                     options.depth_range_offsets = {
-                        builtin_push_constant(),
-                        builtin_push_constant(),
+                        builtin_immediate(),
+                        builtin_immediate(),
                     };
                 }
             }
         } else {
             if (func->ReturnBuiltin() == core::BuiltinValue::kFragDepth) {
                 options.depth_range_offsets = {
-                    builtin_push_constant(),
-                    builtin_push_constant(),
+                    builtin_immediate(),
+                    builtin_immediate(),
                 };
             }
         }

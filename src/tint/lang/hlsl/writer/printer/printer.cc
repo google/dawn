@@ -579,7 +579,7 @@ class Printer : public tint::TextGenerator {
 
                         break;
                     }
-                    case core::AddressSpace::kPushConstant:
+                    case core::AddressSpace::kImmediate:
                     default: {
                         TINT_ICE() << "unhandled address space " << space;
                     }

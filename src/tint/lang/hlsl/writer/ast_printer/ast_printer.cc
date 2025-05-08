@@ -548,7 +548,7 @@ bool ASTPrinter::Generate() {
                                   Vector{
                                       wgsl::Extension::kChromiumDisableUniformityAnalysis,
                                       wgsl::Extension::kChromiumExperimentalPixelLocal,
-                                      wgsl::Extension::kChromiumExperimentalPushConstant,
+                                      wgsl::Extension::kChromiumExperimentalImmediate,
                                       wgsl::Extension::kChromiumInternalGraphite,
                                       wgsl::Extension::kClipDistances,
                                       wgsl::Extension::kF16,
@@ -3668,7 +3668,7 @@ bool ASTPrinter::EmitGlobalVariable(const ast::Variable* global) {
                     return EmitPrivateVariable(sem);
                 case core::AddressSpace::kWorkgroup:
                     return EmitWorkgroupVariable(sem);
-                case core::AddressSpace::kPushConstant:
+                case core::AddressSpace::kImmediate:
                     diagnostics_.AddError(Source{})
                         << "unhandled address space " << sem->AddressSpace();
                     return false;

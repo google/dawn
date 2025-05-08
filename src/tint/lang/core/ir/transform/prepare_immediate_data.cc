@@ -1,4 +1,4 @@
-// Copyright 2024 The Dawn & Tint Authors
+// Copyright 2025 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,7 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/core/ir/transform/prepare_push_constants.h"
+#include "src/tint/lang/core/ir/transform/prepare_immediate_data.h"
 
 #include <utility>
 
@@ -42,7 +42,7 @@ namespace {
 /// PIMPL state for the transform.
 struct State {
     /// The transform config.
-    const PreparePushConstantsConfig& config;
+    const PrepareImmediateDataConfig& config;
 
     /// The IR module.
     Module& ir;
@@ -53,33 +53,33 @@ struct State {
     /// The type manager.
     core::type::Manager& ty{ir.Types()};
 
-    PushConstantLayout Run() {
-        if (config.internal_constants.empty()) {
-            return PushConstantLayout{};
+    ImmediateDataLayout Run() {
+        if (config.internal_immediate_data.empty()) {
+            return ImmediateDataLayout{};
         }
 
-        PushConstantLayout layout;
-        Var* user_defined_constants = nullptr;
+        ImmediateDataLayout layout;
+        Var* user_defined_immediates = nullptr;
         Vector<core::type::StructMember*, 4> members;
 
-        // Check for user-defined push constants.
+        // Check for user-defined immediate data.
         for (auto inst : *ir.root_block) {
             auto* var = inst->As<Var>();
             if (!var) {
                 continue;
             }
             auto* ptr = var->Result()->Type()->As<core::type::Pointer>();
-            if (ptr->AddressSpace() != core::AddressSpace::kPushConstant) {
+            if (ptr->AddressSpace() != core::AddressSpace::kImmediate) {
                 continue;
             }
 
-            if (user_defined_constants) {
-                TINT_ICE() << "multiple user-defined push constant variables";
+            if (user_defined_immediates) {
+                TINT_ICE() << "multiple user-defined immediate data variables";
             }
-            user_defined_constants = var;
+            user_defined_immediates = var;
 
             // Assume that user-defined constants start at offset 0 until Dawn tells us otherwise.
-            members.Push(ty.Get<core::type::StructMember>(ir.symbols.New("user_constant"),
+            members.Push(ty.Get<core::type::StructMember>(ir.symbols.New("user_immediate_data"),
                                                           ptr->StoreType(),
                                                           /* index */ 0u,
                                                           /* offset */ 0u,
@@ -88,8 +88,8 @@ struct State {
                                                           /* attributes */ IOAttributes{}));
         }
 
-        // Create the structure and push constant variable.
-        for (auto& internal : config.internal_constants) {
+        // Create the structure and immediate data variable.
+        for (auto& internal : config.internal_immediate_data) {
             if (!members.IsEmpty()) {
                 TINT_ASSERT(internal.first >= members.Back()->Offset() + members.Back()->Size());
             }
@@ -104,21 +104,21 @@ struct State {
                                                           /* size */ internal.second.type->Size(),
                                                           /* attributes */ IOAttributes{}));
         }
-        auto* push_constant_struct =
-            ty.Struct(ir.symbols.New("tint_push_constant_struct"), std::move(members));
-        push_constant_struct->SetStructFlag(type::kBlock);
+        auto* immediate_constant_struct =
+            ty.Struct(ir.symbols.New("tint_immediate_data_struct"), std::move(members));
+        immediate_constant_struct->SetStructFlag(type::kBlock);
         layout.var =
-            b.Var("tint_push_constants", core::AddressSpace::kPushConstant, push_constant_struct);
+            b.Var("tint_immediate_data", core::AddressSpace::kImmediate, immediate_constant_struct);
         ir.root_block->Append(layout.var);
 
-        // Update uses of the user defined push constant variable.
-        if (user_defined_constants) {
-            user_defined_constants->Result()->ReplaceAllUsesWith([&](Usage use) {
-                auto* access = b.Access(user_defined_constants->Result()->Type(), layout.var, 0_u);
+        // Update uses of the user defined immediate data variable.
+        if (user_defined_immediates) {
+            user_defined_immediates->Result()->ReplaceAllUsesWith([&](Usage use) {
+                auto* access = b.Access(user_defined_immediates->Result()->Type(), layout.var, 0_u);
                 access->InsertBefore(use.instruction);
                 return access->Result();
             });
-            user_defined_constants->Destroy();
+            user_defined_immediates->Destroy();
         }
 
         return layout;
@@ -127,9 +127,9 @@ struct State {
 
 }  // namespace
 
-Result<PushConstantLayout> PreparePushConstants(Module& ir,
-                                                const PreparePushConstantsConfig& config) {
-    auto result = ValidateAndDumpIfNeeded(ir, "core.PreparePushConstants");
+Result<ImmediateDataLayout> PrepareImmediateData(Module& ir,
+                                                 const PrepareImmediateDataConfig& config) {
+    auto result = ValidateAndDumpIfNeeded(ir, "core.PrepareImmediateData");
     if (result != Success) {
         return result.Failure();
     }
