@@ -188,6 +188,34 @@ class Parser {
                     }
                     break;
                 }
+                case spv::Op::OpSpecConstant: {
+                    auto literal = inst.GetSingleWordInOperand(0);
+                    auto* ty = spirv_context_->get_type_mgr()->GetType(inst.type_id());
+
+                    auto* constant =
+                        spirv_context_->get_constant_mgr()->GetConstant(ty, std::vector{literal});
+
+                    core::ir::Value* value = tint::Switch(
+                        Type(ty),  //
+                        [&](const core::type::I32*) {
+                            return b_.Constant(i32(constant->GetS32()));
+                        },
+                        [&](const core::type::U32*) {
+                            return b_.Constant(u32(constant->GetU32()));
+                        },
+                        [&](const core::type::F32*) {
+                            return b_.Constant(f32(constant->GetFloat()));
+                        },
+                        [&](const core::type::F16*) {
+                            auto bits = constant->AsScalarConstant()->GetU32BitValue();
+                            return b_.Constant(f16::FromBits(static_cast<uint16_t>(bits)));
+                        },
+                        TINT_ICE_ON_NO_MATCH);
+
+                    auto spec_id = GetSpecId(inst);
+                    CreateOverride(inst, value, spec_id);
+                    break;
+                }
                 case spv::Op::OpSpecConstantOp: {
                     auto op = inst.GetSingleWordInOperand(0);
 

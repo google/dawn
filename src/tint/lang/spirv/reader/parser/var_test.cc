@@ -642,6 +642,135 @@ $B1: {  # root
 )");
 }
 
+TEST_F(SpirvParserTest, Var_OpSpecConstant_f16) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpCapability Float16
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %c "myconst"
+               OpDecorate %c SpecId 12
+       %void = OpTypeVoid
+        %f16 = OpTypeFloat 16
+          %c = OpSpecConstant %f16 2
+     %voidfn = OpTypeFunction %void
+       %main = OpFunction %void None %voidfn
+ %main_entry = OpLabel
+          %b = OpFAdd %f16 %c %c
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %myconst:f16 = override 2.0h @id(12)
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:f16 = add %myconst, %myconst
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, Var_OpSpecConstant_f32) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %c "myconst"
+               OpDecorate %c SpecId 12
+       %void = OpTypeVoid
+        %f32 = OpTypeFloat 32
+          %c = OpSpecConstant %f32 2
+     %voidfn = OpTypeFunction %void
+       %main = OpFunction %void None %voidfn
+ %main_entry = OpLabel
+          %b = OpFAdd %f32 %c %c
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %myconst:f32 = override 2.0f @id(12)
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:f32 = add %myconst, %myconst
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, Var_OpSpecConstant_u32) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %c "myconst"
+               OpDecorate %c SpecId 12
+       %void = OpTypeVoid
+        %u32 = OpTypeInt 32 0
+          %c = OpSpecConstant %u32 2
+     %voidfn = OpTypeFunction %void
+       %main = OpFunction %void None %voidfn
+ %main_entry = OpLabel
+          %b = OpIAdd %u32 %c %c
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %myconst:u32 = override 2u @id(12)
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:u32 = spirv.add<u32> %myconst, %myconst
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, Var_OpSpecConstant_i32) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %c "myconst"
+               OpDecorate %c SpecId 12
+       %void = OpTypeVoid
+        %i32 = OpTypeInt 32 1
+          %c = OpSpecConstant %i32 2
+     %voidfn = OpTypeFunction %void
+       %main = OpFunction %void None %voidfn
+ %main_entry = OpLabel
+          %b = OpIAdd %i32 %c %c
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %myconst:i32 = override 2i @id(12)
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:i32 = spirv.add<i32> %myconst, %myconst
+    ret
+  }
+}
+)");
+}
+
 TEST_F(SpirvParserTest, Var_OpSpecConstantTrue_NoSpecId) {
     EXPECT_IR(R"(
                OpCapability Shader
