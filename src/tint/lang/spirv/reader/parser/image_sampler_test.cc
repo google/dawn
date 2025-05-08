@@ -83,7 +83,7 @@ TEST_F(SpirvParserTest, Type_Image_1d) {
 )",
               R"(
 $B1: {  # root
-  %1:ptr<handle, spirv.image<f32, 1d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read>, read> = var undef @binding_point(1, 2)
+  %1:ptr<handle, spirv.image<f32, 1d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>, read> = var undef @binding_point(1, 2)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -116,7 +116,7 @@ TEST_F(SpirvParserTest, Type_Image_2d) {
 )",
               R"(
 $B1: {  # root
-  %1:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read>, read> = var undef @binding_point(1, 2)
+  %1:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>, read> = var undef @binding_point(1, 2)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -149,7 +149,7 @@ TEST_F(SpirvParserTest, Type_Image_3d) {
 )",
               R"(
 $B1: {  # root
-  %1:ptr<handle, spirv.image<f32, 3d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read>, read> = var undef @binding_point(1, 2)
+  %1:ptr<handle, spirv.image<f32, 3d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>, read> = var undef @binding_point(1, 2)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -182,7 +182,7 @@ TEST_F(SpirvParserTest, Type_Image_Cube) {
 )",
               R"(
 $B1: {  # root
-  %1:ptr<handle, spirv.image<f32, cube, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read>, read> = var undef @binding_point(1, 2)
+  %1:ptr<handle, spirv.image<f32, cube, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>, read> = var undef @binding_point(1, 2)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -215,7 +215,7 @@ TEST_F(SpirvParserTest, Type_Image_SubpassData) {
 )",
               R"(
 $B1: {  # root
-  %1:ptr<handle, spirv.image<f32, subpass_data, not_depth, non_arrayed, single_sampled, rw_op_compatible, undefined, read>, read> = var undef @binding_point(1, 2)
+  %1:ptr<handle, spirv.image<f32, subpass_data, not_depth, non_arrayed, single_sampled, rw_op_compatible, undefined, read_write>, read> = var undef @binding_point(1, 2)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -248,7 +248,7 @@ TEST_F(SpirvParserTest, Type_Image_Depth) {
 )",
               R"(
 $B1: {  # root
-  %1:ptr<handle, spirv.image<f32, 1d, depth, non_arrayed, single_sampled, sampling_compatible, undefined, read>, read> = var undef @binding_point(1, 2)
+  %1:ptr<handle, spirv.image<f32, 1d, depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>, read> = var undef @binding_point(1, 2)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -281,7 +281,7 @@ TEST_F(SpirvParserTest, Type_Image_DepthUnknown) {
 )",
               R"(
 $B1: {  # root
-  %1:ptr<handle, spirv.image<f32, 2d, depth_unknown, non_arrayed, single_sampled, sampling_compatible, undefined, read>, read> = var undef @binding_point(1, 2)
+  %1:ptr<handle, spirv.image<f32, 2d, depth_unknown, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>, read> = var undef @binding_point(1, 2)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -314,7 +314,7 @@ TEST_F(SpirvParserTest, Type_Image_Arrayed) {
 )",
               R"(
 $B1: {  # root
-  %1:ptr<handle, spirv.image<f32, 2d, not_depth, arrayed, single_sampled, sampling_compatible, undefined, read>, read> = var undef @binding_point(1, 2)
+  %1:ptr<handle, spirv.image<f32, 2d, not_depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>, read> = var undef @binding_point(1, 2)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -347,7 +347,7 @@ TEST_F(SpirvParserTest, Type_Image_RW_Ops) {
 )",
               R"(
 $B1: {  # root
-  %1:ptr<handle, spirv.image<f32, 1d, not_depth, non_arrayed, single_sampled, rw_op_compatible, undefined, read>, read> = var undef @binding_point(1, 2)
+  %1:ptr<handle, spirv.image<f32, 1d, not_depth, non_arrayed, single_sampled, rw_op_compatible, undefined, read_write>, read> = var undef @binding_point(1, 2)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -381,7 +381,7 @@ TEST_F(SpirvParserTest, Type_Image_TexelFormat) {
 )",
               R"(
 $B1: {  # root
-  %1:ptr<handle, spirv.image<f32, 1d, not_depth, non_arrayed, single_sampled, sampling_compatible, rg32float, read>, read> = var undef @binding_point(1, 2)
+  %1:ptr<handle, spirv.image<f32, 1d, not_depth, non_arrayed, single_sampled, sampling_compatible, rg32float, read_write>, read> = var undef @binding_point(1, 2)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -419,7 +419,7 @@ TEST_F(SpirvParserTest, Type_SampledImage) {
               R"(
 $B1: {  # root
   %1:ptr<handle, sampler, read> = var undef @binding_point(5, 6)
-  %2:ptr<handle, spirv.image<f32, 1d, not_depth, non_arrayed, single_sampled, sampling_compatible, rg32float, read>, read> = var undef @binding_point(1, 2)
+  %2:ptr<handle, spirv.image<f32, 1d, not_depth, non_arrayed, single_sampled, sampling_compatible, rg32float, read_write>, read> = var undef @binding_point(1, 2)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {

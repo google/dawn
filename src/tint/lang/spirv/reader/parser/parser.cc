@@ -406,7 +406,22 @@ class Parser {
     /// @returns a Tint type object
     const core::type::Type* Type(const spvtools::opt::analysis::Type* type,
                                  core::Access access_mode = core::Access::kUndefined) {
-        return types_.GetOrAdd(TypeKey{type, access_mode}, [&]() -> const core::type::Type* {
+        auto key_mode = core::Access::kUndefined;
+        if (type->kind() == spvtools::opt::analysis::Type::kImage) {
+            key_mode = access_mode;
+        } else if (type->kind() == spvtools::opt::analysis::Type::kPointer) {
+            // Pointers use the access mode, unless they're handle pointers in which case they get
+            // Read.
+            key_mode = access_mode;
+
+            auto* ptr = type->AsPointer();
+            if (ptr->pointee_type()->kind() == spvtools::opt::analysis::Type::kSampler ||
+                ptr->pointee_type()->kind() == spvtools::opt::analysis::Type::kImage) {
+                key_mode = core::Access::kRead;
+            }
+        }
+
+        return types_.GetOrAdd(TypeKey{type, key_mode}, [&]() -> const core::type::Type* {
             switch (type->kind()) {
                 case spvtools::opt::analysis::Type::kVoid: {
                     return ty_.void_();
@@ -457,8 +472,13 @@ class Parser {
                 }
                 case spvtools::opt::analysis::Type::kPointer: {
                     auto* ptr_ty = type->AsPointer();
-                    return ty_.ptr(AddressSpace(ptr_ty->storage_class()),
-                                   Type(ptr_ty->pointee_type()), access_mode);
+                    auto* subtype = Type(ptr_ty->pointee_type(), access_mode);
+
+                    // Handle is always a read pointer
+                    if (subtype->IsHandle()) {
+                        access_mode = core::Access::kRead;
+                    }
+                    return ty_.ptr(AddressSpace(ptr_ty->storage_class()), subtype, access_mode);
                 }
                 case spvtools::opt::analysis::Type::kSampler: {
                     return ty_.sampler();
@@ -475,7 +495,10 @@ class Parser {
                                                      : type::Multisampled::kSingleSampled;
                     auto sampled = static_cast<type::Sampled>(img->sampled());
                     auto texel_format = ToTexelFormat(img->format());
-                    auto access = ToAccess(img->access_qualifier());
+
+                    // If the access mode is undefined then default to read/write for the image
+                    access_mode = access_mode == core::Access::kUndefined ? core::Access::kReadWrite
+                                                                          : access_mode;
 
                     if (img->dim() != spv::Dim::Dim1D && img->dim() != spv::Dim::Dim2D &&
                         img->dim() != spv::Dim::Dim3D && img->dim() != spv::Dim::Cube &&
@@ -488,7 +511,7 @@ class Parser {
                     }
 
                     return ty_.Get<spirv::type::Image>(sampled_ty, dim, depth, arrayed, ms, sampled,
-                                                       texel_format, access);
+                                                       texel_format, access_mode);
                 }
                 case spvtools::opt::analysis::Type::kSampledImage: {
                     TINT_UNREACHABLE() << "OpTypeSampledImage should have been removed by the "
@@ -499,20 +522,6 @@ class Parser {
                 }
             }
         });
-    }
-
-    core::Access ToAccess(spv::AccessQualifier access) {
-        switch (access) {
-            case spv::AccessQualifier::ReadOnly:
-                return core::Access::kRead;
-            case spv::AccessQualifier::WriteOnly:
-                return core::Access::kWrite;
-            case spv::AccessQualifier::ReadWrite:
-                return core::Access::kReadWrite;
-            default:
-                break;
-        }
-        TINT_ICE() << "unknown access qualifier: " << static_cast<uint32_t>(access);
     }
 
     core::TexelFormat ToTexelFormat(spv::ImageFormat fmt) {
@@ -2491,6 +2500,9 @@ class Parser {
              spirv_context_->get_decoration_mgr()->GetDecorationsFor(inst.result_id(), false)) {
             auto d = deco->GetSingleWordOperand(1);
             switch (spv::Decoration(d)) {
+                case spv::Decoration::NonReadable:
+                    access_mode = core::Access::kWrite;
+                    break;
                 case spv::Decoration::NonWritable:
                     access_mode = core::Access::kRead;
                     break;

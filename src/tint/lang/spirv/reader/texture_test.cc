@@ -62,7 +62,7 @@ $B1: {  # root
 )");
 }
 
-TEST_F(SpirvReaderTest, DISABLED_Handle_Image_Texture) {
+TEST_F(SpirvReaderTest, Handle_Image_Texture) {
     EXPECT_IR(R"(
            OpCapability Shader
            OpCapability Sampled1D
@@ -96,7 +96,7 @@ $B1: {  # root
 )");
 }
 
-TEST_F(SpirvReaderTest, DISABLED_Handle_Image_NonWritable) {
+TEST_F(SpirvReaderTest, Handle_Image_NonWritable) {
     EXPECT_IR(R"(
            OpCapability Shader
            OpCapability Sampled1D
@@ -121,7 +121,7 @@ TEST_F(SpirvReaderTest, DISABLED_Handle_Image_NonWritable) {
         )",
               R"(
 $B1: {  # root
-  %wg:ptr<handle, texture_1d<f32>, read> = var undef @binding_point(0, 0)
+  %wg:ptr<handle, texture_storage_1d<rg32float, read>, read> = var undef @binding_point(0, 0)
 }
 
 %main = @fragment func():void {
@@ -132,7 +132,7 @@ $B1: {  # root
 )");
 }
 
-TEST_F(SpirvReaderTest, DISABLED_Handle_Image_NonReadable) {
+TEST_F(SpirvReaderTest, Handle_Image_NonReadable) {
     EXPECT_IR(R"(
            OpCapability Shader
            OpCapability Sampled1D
@@ -157,7 +157,7 @@ TEST_F(SpirvReaderTest, DISABLED_Handle_Image_NonReadable) {
         )",
               R"(
 $B1: {  # root
-  %wg:ptr<handle, texture_storage_1d<rg32float, write>, write> = var undef @binding_point(0, 0)
+  %wg:ptr<handle, texture_storage_1d<rg32float, write>, read> = var undef @binding_point(0, 0)
 }
 
 %main = @fragment func():void {
