@@ -168,7 +168,7 @@ $B1: {  # root
 )");
 }
 
-TEST_F(SpirvReaderTest, DISABLED_Handle_MS_2D) {
+TEST_F(SpirvReaderTest, Handle_MS_2D) {
     EXPECT_IR(R"(
            OpCapability Shader
            OpCapability ImageQuery
@@ -187,14 +187,47 @@ TEST_F(SpirvReaderTest, DISABLED_Handle_MS_2D) {
      %10 = OpVariable %ptr_tex UniformConstant
    %main = OpFunction %void None %voidfn
   %entry = OpLabel
-     %im = OpLoad %tex %10
- %result = OpImageQuerySamples %uint %im
            OpReturn
            OpFunctionEnd
         )",
               R"(
 $B1: {  # root
   %wg:ptr<handle, texture_multisampled_2d<f32>, read> = var undef @binding_point(0, 0)
+}
+
+%main = @fragment func():void {
+  $B2: {
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvReaderTest, Handle_Depth_MS_2D) {
+    EXPECT_IR(R"(
+           OpCapability Shader
+           OpCapability ImageQuery
+           OpMemoryModel Logical Simple
+           OpEntryPoint Fragment %main "main"
+           OpExecutionMode %main OriginUpperLeft
+           OpName %10 "wg"
+           OpDecorate %10 DescriptorSet 0
+           OpDecorate %10 Binding 0
+  %float = OpTypeFloat 32
+   %uint = OpTypeInt 32 0
+    %tex = OpTypeImage %float 2D 1 0 1 1 Unknown
+%ptr_tex = OpTypePointer UniformConstant %tex
+   %void = OpTypeVoid
+ %voidfn = OpTypeFunction %void
+     %10 = OpVariable %ptr_tex UniformConstant
+   %main = OpFunction %void None %voidfn
+  %entry = OpLabel
+           OpReturn
+           OpFunctionEnd
+        )",
+              R"(
+$B1: {  # root
+  %wg:ptr<handle, texture_depth_multisampled_2d, read> = var undef @binding_point(0, 0)
 }
 
 %main = @fragment func():void {
