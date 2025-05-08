@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<!--
+Copyright 2025 The Dawn & Tint Authors
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+3. Neither the name of the copyright holder nor the names of its
+   contributors may be used to endorse or promote products derived from
+   this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-->
+<head>
+  <title>Dawn CTS failure expectations browser</title>
+<style>
+body {
+  font-family: sans-serif;
+  line-height: 1.2em;
+}
+.path_class {
+  width: 100%;
+  box-sizing: border-box;
+  white-space: nowrap;
+  font-weight: bold;
+  font-size: 1.2em;
+  color: #808;
+}
+.focus_result {
+  white-space: nowrap;
+  font-weight: bold;
+  font-size: 1.2em;
+  color: #808;
+}
+.bag {
+  display: flex;
+  padding: 5px;
+  flex-wrap: row wrap;
+  align-items: start;
+}
+.box {
+  display: flex;
+  padding: 5px;
+}
+.box > * {
+  padding: 5px;
+}
+.vbox {
+  display: flex;
+  padding: 0px;
+  flex-direction: column;
+}
+.vbox > * {
+  padding: 0px;
+}
+.tightvbox {
+  display: flex;
+  padding-top: 0px;
+  padding-left: 3px;
+  padding-bottom: 3px;
+  flex-direction: column;
+}
+.labelbox {
+  display: grid;
+  grid-template-columns: 5em 1fr;
+}
+.labelbox > * {
+  padding: 2px;
+}
+.widelabelbox {
+  display: grid;
+  grid-template-columns: 12em 1fr;
+}
+.widelabelbox > * {
+  padding: 2px;
+}
+.autolabelbox {
+  display: grid;
+  grid-template-columns: auto 1fr;
+}
+.autolabelbox > * {
+  padding: 2px;
+}
+
+.twobox {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  max-width: fit-content;
+}
+
+.numbered_text_box {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 4em 1fr;
+  border: solid 1px grey;
+  padding: 5px;
+}
+.numbered_text_box > * {
+  padding-left: 5px;
+}
+.line_number {
+  text-align: right;
+  user-select: none;
+  border-right: 1px solid grey;
+  padding-right: 5px;
+}
+.shaded {
+  background: #e0e0e0;
+}
+
+details {
+  padding: 0.5em 0.5em 0;
+}
+
+summary {
+  font-weight: bold;
+  margin: -0.5em -0.5em 0;
+  padding: 0.5em;
+}
+</style>
+</head>
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script src="js/ep.mjs"></script>
+<script src="js/x.js"></script>
+<script type="module">
+
+const level_range_control = document.getElementById("level_range_control");
+level_range_control.addEventListener("input", (e) => { handleSetLevel(e.currentTarget.value) }, false);
+
+function detail_increment() {
+  level_range_control.value = Math.min(level_range_control.max, parseInt(level_range_control.value) + 1);
+  handleSetLevel(level_range_control.value);
+}
+document.getElementById("level_up").addEventListener("click", detail_increment);
+document.getElementById("level_down").addEventListener("click", () => {
+  level_range_control.value = Math.max(level_range_control.min, level_range_control.value - 1);
+  handleSetLevel(level_range_control.value);
+}, false);
+
+const select_file_control = document.getElementById("select_file_control");
+select_file_control.addEventListener("change", e => handleInputFile(e.target.files[0]), false);
+
+const path_prefix_control = document.getElementById('path_prefix_control');
+path_prefix_control.addEventListener("input", (e => handleSetPathPrefix(e.target.value)), false);
+
+const path_prefix_copy = document.getElementById('path_prefix_copy_button');
+const path_prefix_copy_feedback = document.getElementById('path_prefix_copy_feedback');
+path_prefix_copy.addEventListener("click", () => {
+  navigator.clipboard.writeText(path_prefix_control.value).then(()=> {
+    path_prefix_copy_feedback.innerText = "Copied!";
+    path_prefix_copy.disabled = true;
+
+    setTimeout(() => {
+	path_prefix_copy_feedback.innerText = '';
+	path_prefix_copy.disabled = false;
+    }, 2000);
+  });
+
+});
+
+const path_substring_control = document.getElementById('path_substring_control');
+path_substring_control.addEventListener("input", (e => handleSetPathSubstring(e.target.value)));
+
+document.getElementById('show_skip_control').addEventListener("change", (e) => handleSetShow('skip', e.target.checked));
+document.getElementById('show_fail_control').addEventListener("change", (e) => handleSetShow('fail', e.target.checked));
+document.getElementById('show_retry_control').addEventListener("change", (e) => handleSetShow('retry', e.target.checked));
+document.getElementById('show_slow_control').addEventListener("change", (e) => handleSetShow('slow', e.target.checked));
+document.getElementById('show_with_bug_control').addEventListener("change", (e) => handleSetShow('with_bug', e.target.checked));
+document.getElementById('show_without_bug_control').addEventListener("change", (e) => handleSetShow('without_bug', e.target.checked));
+
+
+SetNodeNameDisplayer((value,row) => {
+  if ( row === 0) {
+    path_prefix_control.value = (value ?? '');
+  }
+  if ( row === 1 || row === 2) {
+    document.getElementById(`node${row}`).innerText = (value ?? '');
+  }
+});
+
+SetTagNameDisplayer((value,row) => {
+  if (row === 0 || row === 1 || row === 2) {
+    document.getElementById(`tag${row}`).innerText = value;
+  }
+});
+
+SetDetailIncrementer(detail_increment);
+
+{
+  function displayNumberedLines(numberedLines) {
+    const sorted = numberedLines.sort((a,b) => a.lineNumber - b.lineNumber);
+    const divs = [];
+    let i = 0;
+    for (const {bug, lineNumber, line} of sorted) {
+      i++;
+
+      const n = document.createElement('div');
+      n.classList.add("line_number");
+      if (i%2) {
+        n.classList.add("shaded");
+      }
+      n.textContent = lineNumber;
+
+      const l = document.createElement('div');
+      const matches = line.match(/^(\S+)(.*)/);
+      const bugnum = bug.match(/^.*\/(\d+)/);
+      if (matches && bugnum && (parseInt(bugnum[1]) > 0)) {
+        const a = document.createElement('a');
+        a.href = `https://${matches[1]}`;
+        a.textContent = matches[1];
+        const s = document.createElement('span');
+        s.textContent = matches[2];
+        l.replaceChildren(a,s);
+      } else {
+        l.textContent = line;
+      }
+      divs.push(n,l);
+    }
+    document.getElementById('numbered_lines').replaceChildren(...divs);
+  }
+  SetNumberedLinesDisplayer(displayNumberedLines);
+}
+
+</script>
+<body>
+  <h1>Dawn CTS failure expectations browser</h1>
+  <details>
+    <summary>Instructions</summary>
+    <ol>
+    <li>Load an expectations file from your filesystem.  E.g. <tt>webgpu-cts/expectations.txt</tt>.
+    <li>Browse:
+      <ul>
+      <li>Interacting with the tests, by test path:
+        <ul>
+        <li>Move the pointer over a rectangle to see its path in the WebGPU CTS tree.
+        <li>Rectangles are sized by the number of rows in the expectations file with that path.
+        <li>Increase the level of detail with the slider, or with "less" and "more" buttons.
+        <li>Zoom in and out.
+        <li>Click on a rectangle to focus only on nodes in that subtree.
+        <li>Click again to expose more detail.
+        <li>Shift-click to expand focus back out to the parent. (shift/alt/meta/ctrl all act the same)
+        </ul>
+      <li>Interacting with the tests, by tag:
+        <ul>
+        <li>Move the pointer over a circle to see the number of tests with that tag.
+        <li>Click a circle to push that tag onto the filter list.
+        <li>Shift-click (on any circle) to pop a tag off the filter list.
+        </ul>
+    </ol>
+  </details>
+
+  <details>
+    <summary>TODO</summary>
+    <ul>
+      <li>Any requests?
+    </ul>
+  </details>
+
+<h2>Select file</h2>
+
+<div class="box"><input type="file" id="select_file_control"/></div>
+
+<h2>Filters</h2>
+<div class="labelbox">
+  <div>Result:</div>
+  <div>
+    <label><input type="checkbox" id="show_skip_control" checked/>Skip</label>
+    <label><input type="checkbox" id="show_fail_control" checked/>Failure</label>
+    <label><input type="checkbox" id="show_retry_control" checked/>RetryOnFailure</label>
+    <label><input type="checkbox" id="show_slow_control" checked/>Slow</label>
+  </div>
+  <div>Triage:</div>
+  <div>
+    <label><input type="checkbox" id="show_with_bug_control" checked/>Has bug</label>
+    <label><input type="checkbox" id="show_without_bug_control" checked/>Does not have bug</label>
+  </div>
+
+  <div>Test path:</div>
+  <div class="labelbox" style="padding:0px">
+    <div><label for="path_prefix_control">Prefix:<br/>(or click rectangle)</label></div>
+    <div style="display: block">
+      <input type="text" class="path_class" style="field-sizing: content" id="path_prefix_control"/>
+      <input type="button" id="path_prefix_copy_button" value="Copy"/>
+      <span id="path_prefix_copy_feedback"></span>
+    </div>
+
+    <div><label for="path_substring_control">Substring:</label></div>
+    <div><input type="text" class="path_class" style="field-sizing: content" id="path_substring_control"/></div>
+  </div>
+
+  <div>Tags:</div>
+  <div><span class="focus_result" id="tag0"><br/></span></div>
+
+</div>
+
+<h2>Overview</h2>
+
+<div class="widelabelbox" style="padding-bottom: 10px">
+  <div>Test path under pointer:</div>
+  <div><span id="node1"><br/></span></div>
+</div>
+<div class="twobox">
+  <div class="widelabelbox">
+    <div><br/></div>
+    <div><span id="node2"></span></div>
+
+    <div style="display:grid; grid-template-columns: auto 1fr auto auto">
+      <div>Detail:</div>
+      <div><span style="justify-self:stretch"/></div>
+      <div><input type="button" id="level_down" value="less" style="padding-left:5px"/></div>
+      <div><input type="button" id="level_up" value="more"  style="padding-left:5px"/></div>
+    </div>
+    <div>
+      <input style="width: 90%" id="level_range_control" type="range" min=1 max=15 step=1 value=4 />
+    </div>
+  </div>
+  <div class="autolabelbox">
+    <div style="padding-right:15px">Tag under pointer:</div>
+    <div><span id="tag1"><br/></span></div>
+
+    <div><br/></div>
+    <div><span id="tag2"><br/></span></div>
+  </div>
+
+  <div id="container" style="padding:5px"></div>
+  <div id="tag_container" style="padding:5px"></div>
+</div>
+
+<h2>Raw text</h2>
+
+<div class="numbered_text_box" id="numbered_lines"></div>
+
+</body>

@@ -98,3 +98,14 @@ Note that since you're doing a local build, you need to be on the same type of m
    ```
 
    The command will output a link to the Swarming task for you to see the results.
+
+# Browsing failure expectations
+
+Dawn is tested against the CTS across various platforms and GPUs.
+The failure results are checked into this directory as failure expectations files:
+
+* [expectations.txt](expectations.txt): Core Webgpu functionality
+* [compat-expectations.txt](compat-expectations.txt): WebGPU "compat" functionality
+
+Use [failure_browser/index.html](failure_browser/index.html) to review the data
+interactively.
