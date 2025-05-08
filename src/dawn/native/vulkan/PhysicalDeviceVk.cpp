@@ -812,6 +812,10 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         // resolve target doesn't perform the resolve. To work around it, add a small amount of work
         // to the pass to force it to execute.
         deviceToggles->Default(Toggle::VulkanAddWorkToEmptyResolvePass, true);
+
+        // chromium:407109052: Qualcomm devices have a bug where the spirv extended op NClamp
+        // modifies other components of a vector when one of the components is nan.
+        deviceToggles->Default(Toggle::VulkanScalarizeClampBuiltin, true);
     }
 
     if (IsAndroidARM()) {
