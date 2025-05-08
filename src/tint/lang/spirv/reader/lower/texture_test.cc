@@ -46,7 +46,7 @@ using Arrayed = spirv::type::Arrayed;
 using Multisampled = spirv::type::Multisampled;
 using Sampled = spirv::type::Sampled;
 
-TEST_F(SpirvReader_TextureTest, DISABLED_Type_Image_1d) {
+TEST_F(SpirvReader_TextureTest, Type_Image_1d) {
     b.Append(mod.root_block, [&] {
         auto* v = b.Var("wg", ty.ptr(handle,
                                      ty.Get<spirv::type::Image>(
@@ -75,7 +75,7 @@ $B1: {  # root
     ASSERT_EQ(expect, str());
 }
 
-TEST_F(SpirvReader_TextureTest, DISABLED_Type_Image_2d) {
+TEST_F(SpirvReader_TextureTest, Type_Image_2d) {
     b.Append(mod.root_block, [&] {
         auto* v = b.Var("wg", ty.ptr(handle,
                                      ty.Get<spirv::type::Image>(
@@ -104,7 +104,7 @@ $B1: {  # root
     ASSERT_EQ(expect, str());
 }
 
-TEST_F(SpirvReader_TextureTest, DISABLED_Type_Image_3d) {
+TEST_F(SpirvReader_TextureTest, Type_Image_3d) {
     b.Append(mod.root_block, [&] {
         auto* v = b.Var("wg", ty.ptr(handle,
                                      ty.Get<spirv::type::Image>(
@@ -133,7 +133,7 @@ $B1: {  # root
     ASSERT_EQ(expect, str());
 }
 
-TEST_F(SpirvReader_TextureTest, DISABLED_Type_Image_Cube) {
+TEST_F(SpirvReader_TextureTest, Type_Image_Cube) {
     b.Append(mod.root_block, [&] {
         auto* v =
             b.Var("wg", ty.ptr(handle,
@@ -163,7 +163,7 @@ $B1: {  # root
     ASSERT_EQ(expect, str());
 }
 
-TEST_F(SpirvReader_TextureTest, DISABLED_Type_Image_SubpassData) {
+TEST_F(SpirvReader_TextureTest, Type_Image_SubpassData) {
     b.Append(mod.root_block, [&] {
         auto* v = b.Var(
             "wg", ty.ptr(handle,
@@ -193,11 +193,11 @@ $B1: {  # root
     ASSERT_EQ(expect, str());
 }
 
-TEST_F(SpirvReader_TextureTest, DISABLED_Type_Image_Depth) {
+TEST_F(SpirvReader_TextureTest, Type_Image_Depth) {
     b.Append(mod.root_block, [&] {
         auto* v = b.Var("wg", ty.ptr(handle,
                                      ty.Get<spirv::type::Image>(
-                                         ty.f32(), Dim::kD1, Depth::kDepth, Arrayed::kNonArrayed,
+                                         ty.f32(), Dim::kD2, Depth::kDepth, Arrayed::kNonArrayed,
                                          Multisampled::kSingleSampled, Sampled::kSamplingCompatible,
                                          core::TexelFormat::kUndefined, core::Access::kRead),
                                      read));
@@ -206,7 +206,7 @@ TEST_F(SpirvReader_TextureTest, DISABLED_Type_Image_Depth) {
 
     auto* src = R"(
 $B1: {  # root
-  %wg:ptr<handle, spirv.image<f32, 1d, depth, non_arrayed, single_sampled, sampling_compatible, undefined, read>, read> = var undef @binding_point(1, 2)
+  %wg:ptr<handle, spirv.image<f32, 2d, depth, non_arrayed, single_sampled, sampling_compatible, undefined, read>, read> = var undef @binding_point(1, 2)
 }
 
 )";
@@ -215,7 +215,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %wg:ptr<handle, texture_depth_1d<f32>, read> = var undef @binding_point(1, 2)
+  %wg:ptr<handle, texture_depth_2d, read> = var undef @binding_point(1, 2)
 }
 
 )";
@@ -251,7 +251,7 @@ $B1: {  # root
     ASSERT_EQ(expect, str());
 }
 
-TEST_F(SpirvReader_TextureTest, DISABLED_Type_Image_Arrayed) {
+TEST_F(SpirvReader_TextureTest, Type_Image_Arrayed) {
     b.Append(mod.root_block, [&] {
         auto* v = b.Var("wg", ty.ptr(handle,
                                      ty.Get<spirv::type::Image>(
@@ -280,21 +280,21 @@ $B1: {  # root
     ASSERT_EQ(expect, str());
 }
 
-TEST_F(SpirvReader_TextureTest, DISABLED_Type_Image_RW_Ops) {
+TEST_F(SpirvReader_TextureTest, Type_Image_RW_Ops) {
     b.Append(mod.root_block, [&] {
         auto* v =
             b.Var("wg", ty.ptr(handle,
                                ty.Get<spirv::type::Image>(
                                    ty.f32(), Dim::kD1, Depth::kNotDepth, Arrayed::kNonArrayed,
                                    Multisampled::kSingleSampled, Sampled::kReadWriteOpCompatible,
-                                   core::TexelFormat::kUndefined, core::Access::kRead),
+                                   core::TexelFormat::kRg32Float, core::Access::kRead),
                                read));
         v->SetBindingPoint(1, 2);
     });
 
     auto* src = R"(
 $B1: {  # root
-  %wg:ptr<handle, spirv.image<f32, 1d, not_depth, non_arrayed, single_sampled, rw_op_compatbile, undefined, read>, read> = var undef @binding_point(1, 2)
+  %wg:ptr<handle, spirv.image<f32, 1d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rg32float, read>, read> = var undef @binding_point(1, 2)
 }
 
 )";
@@ -303,14 +303,14 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %wg:ptr<handle, texture_1d<f32>, read> = var undef @binding_point(1, 2)
+  %wg:ptr<handle, texture_storage_1d<rg32float, read>, read> = var undef @binding_point(1, 2)
 }
 
 )";
     ASSERT_EQ(expect, str());
 }
 
-TEST_F(SpirvReader_TextureTest, DISABLED_Type_Image_TexelFormat) {
+TEST_F(SpirvReader_TextureTest, Type_Image_TexelFormat) {
     b.Append(mod.root_block, [&] {
         auto* v = b.Var("wg", ty.ptr(handle,
                                      ty.Get<spirv::type::Image>(
@@ -323,7 +323,7 @@ TEST_F(SpirvReader_TextureTest, DISABLED_Type_Image_TexelFormat) {
 
     auto* src = R"(
 $B1: {  # root
-  %wg:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read>, read> = var undef @binding_point(1, 2)
+  %wg:ptr<handle, spirv.image<f32, 1d, not_depth, non_arrayed, single_sampled, sampling_compatible, rg32float, read>, read> = var undef @binding_point(1, 2)
 }
 
 )";
@@ -332,37 +332,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %wg:ptr<handle, texture_storage_1d<rg32float, read>, read_write> = var undef @binding_point(1, 2)
-}
-
-)";
-    ASSERT_EQ(expect, str());
-}
-
-TEST_F(SpirvReader_TextureTest, DISABLED_Type_SampledImage) {
-    b.Append(mod.root_block, [&] {
-        auto* v = b.Var("wg", ty.ptr(handle,
-                                     ty.Get<spirv::type::SampledImage>(ty.Get<spirv::type::Image>(
-                                         ty.f32(), Dim::kD1, Depth::kNotDepth, Arrayed::kNonArrayed,
-                                         Multisampled::kSingleSampled, Sampled::kSamplingCompatible,
-                                         core::TexelFormat::kRg32Float, core::Access::kRead)),
-                                     read));
-        v->SetBindingPoint(1, 2);
-    });
-
-    auto* src = R"(
-$B1: {  # root
-  %wg:ptr<handle, spirv.sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read>>, read> = var undef @binding_point(1, 2)
-}
-
-)";
-    ASSERT_EQ(src, str());
-    Run(Texture);
-
-    auto* expect = R"(
-$B1: {  # root
-  %wg_1:ptr<handle, sampler, read> = var undef @binding_point(1, 2)
-  %wg:ptr<handle, texture_storage_1d<rg32float, read>, read> = var undef @binding_point(1, 2)
+  %wg:ptr<handle, texture_1d<f32>, read> = var undef @binding_point(1, 2)
 }
 
 )";

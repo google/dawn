@@ -43,6 +43,7 @@ TINT_BEGIN_DISABLE_WARNING(SIGN_CONVERSION);
 TINT_BEGIN_DISABLE_WARNING(WEAK_VTABLES);
 TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 #include "source/opt/build_module.h"
+#include "source/opt/split_combined_image_sampler_pass.h"
 TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 TINT_END_DISABLE_WARNING(WEAK_VTABLES);
 TINT_END_DISABLE_WARNING(SIGN_CONVERSION);
@@ -87,6 +88,14 @@ class Parser {
             spvtools::BuildModule(kTargetEnv, context.CContext()->consumer, spirv.data, spirv.len);
         if (!spirv_context_) {
             return Failure("failed to build the internal representation of the module");
+        }
+
+        {
+            spvtools::opt::SplitCombinedImageSamplerPass pass;
+            auto status = pass.Run(spirv_context_.get());
+            if (status == spvtools::opt::Pass::Status::Failure) {
+                return Failure("failed to run SplitCombinedImageSamplerPass in SPIR-V opt");
+            }
         }
 
         // Check for unsupported extensions.
@@ -419,8 +428,8 @@ class Parser {
                                                        texel_format, access);
                 }
                 case spvtools::opt::analysis::Type::kSampledImage: {
-                    auto* sampled = type->AsSampledImage();
-                    return ty_.Get<spirv::type::SampledImage>(Type(sampled->image_type()));
+                    TINT_UNREACHABLE() << "OpTypeSampledImage should have been removed by the "
+                                          "SplitCombinedImageSamplerPass";
                 }
                 default: {
                     TINT_UNIMPLEMENTED() << "unhandled SPIR-V type: " << type->str();

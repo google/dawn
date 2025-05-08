@@ -416,7 +416,8 @@ TEST_F(SpirvParserTest, Type_SampledImage) {
 )",
               R"(
 $B1: {  # root
-  %1:ptr<handle, spirv.sampled_image<spirv.image<f32, 1d, not_depth, non_arrayed, single_sampled, sampling_compatible, rg32float, read>>, read> = var undef @binding_point(1, 2)
+  %1:ptr<handle, sampler, read> = var undef @binding_point(1, 2)
+  %2:ptr<handle, spirv.image<f32, 1d, not_depth, non_arrayed, single_sampled, sampling_compatible, rg32float, read>, read> = var undef @binding_point(1, 2)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {

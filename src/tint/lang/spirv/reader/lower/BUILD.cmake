@@ -64,6 +64,7 @@ tint_target_add_dependencies(tint_lang_spirv_reader_lower lib
   tint_lang_spirv
   tint_lang_spirv_intrinsic
   tint_lang_spirv_ir
+  tint_lang_spirv_type
   tint_utils
   tint_utils_containers
   tint_utils_diagnostic
