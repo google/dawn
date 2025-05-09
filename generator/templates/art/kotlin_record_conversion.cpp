@@ -147,9 +147,14 @@
                         //* User data is used to carry the JNI context (env) for use by the
                         //* callback.
                         UserData* userData1 = static_cast<UserData *>({{ userdata }});
-                        JNIEnv *env = userData1->env;
+                        JNIEnv *env = NULL;
                         JavaVM* jvm = userData1->jvm;
-                        jvm->AttachCurrentThread(&env, NULL);
+                        //* Deal with difference in signatures between Oracle's jni.h and Android's.
+                        #ifdef _JAVASOFT_JNI_H_  //* Oracle's jni.h violates the JNI spec.
+                            jvm->AttachCurrentThread(reinterpret_cast<void**>(&env), NULL);
+                        #else
+                            jvm->AttachCurrentThread(&env, NULL);
+                        #endif
 
                         if (env->ExceptionCheck()) {
                             return;
@@ -178,7 +183,7 @@
                     };
                     //* TODO(b/330293719): free associated resources.
                     outStruct->{{ userdata }} = new UserData(
-                            {.env = env, .callback = env->NewGlobalRef(in), .jvm = c->jvm});
+                            {.callback = env->NewGlobalRef(in), .jvm = c->jvm});
 
                 {% else %}
                     {{ unreachable_code() }}

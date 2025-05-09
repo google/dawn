@@ -32,7 +32,6 @@ namespace dawn::kotlin_api {
 class JNIContext;
 
 struct UserData {
-    JNIEnv *env;
     jobject callback;
     JavaVM *jvm;
 };
