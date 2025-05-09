@@ -8878,5 +8878,273 @@ TEST_F(IR_IntegerRangeAnalysisTest, NonIntegerConstant) {
     ASSERT_EQ(nullptr, info);
 }
 
+TEST_F(IR_IntegerRangeAnalysisTest, ValueAsScalarFunctionParameter) {
+    Binary* add = nullptr;
+    auto* func = b.ComputeFunction("my_func", 4_u, 3_u, 2_u);
+    auto* localInvocationIndex = b.FunctionParam("localInvocationIndex", mod.Types().u32());
+    localInvocationIndex->SetBuiltin(tint::core::BuiltinValue::kLocalInvocationIndex);
+    func->SetParams({localInvocationIndex});
+
+    b.Append(func->Block(), [&] {
+        add = b.Add<u32>(localInvocationIndex, 5_u);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%my_func = @compute @workgroup_size(4u, 3u, 2u) func(%localInvocationIndex:u32 [@local_invocation_index]):void {
+  $B1: {
+    %3:u32 = add %localInvocationIndex, 5u
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(func);
+    auto* info = analysis.GetInfo(add->LHS());
+    ASSERT_NE(nullptr, info);
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info->range));
+
+    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info->range);
+    EXPECT_EQ(0u, range.min_bound);
+    EXPECT_EQ(23u, range.max_bound);
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, ValueAsVectorFunctionParameter) {
+    auto* func = b.ComputeFunction("my_func", 4_u, 3_u, 2_u);
+    auto* local_invocation_id = b.FunctionParam("local_id", mod.Types().vec3<u32>());
+    local_invocation_id->SetBuiltin(tint::core::BuiltinValue::kLocalInvocationId);
+    func->SetParams({local_invocation_id});
+
+    Value* value = nullptr;
+    b.Append(func->Block(), [&] {
+        value = b.Value(local_invocation_id);
+        b.Access(ty.u32(), local_invocation_id, 0_u);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%my_func = @compute @workgroup_size(4u, 3u, 2u) func(%local_id:vec3<u32> [@local_invocation_id]):void {
+  $B1: {
+    %3:u32 = access %local_id, 0u
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(func);
+
+    auto* info = analysis.GetInfo(value);
+    ASSERT_EQ(nullptr, info);
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, ValueAsAccess) {
+    auto* func = b.ComputeFunction("my_func", 4_u, 3_u, 2_u);
+    auto* local_invocation_id = b.FunctionParam("local_id", mod.Types().vec3<u32>());
+    local_invocation_id->SetBuiltin(tint::core::BuiltinValue::kLocalInvocationId);
+    func->SetParams({local_invocation_id});
+
+    Binary* add = nullptr;
+    b.Append(func->Block(), [&] {
+        auto* access_x = b.Access(ty.u32(), local_invocation_id, 0_u);
+        auto* access_y = b.Access(ty.u32(), local_invocation_id, 1_u);
+        // add = access_x + access_y
+        add = b.Add<u32>(access_x, access_y);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%my_func = @compute @workgroup_size(4u, 3u, 2u) func(%local_id:vec3<u32> [@local_invocation_id]):void {
+  $B1: {
+    %3:u32 = access %local_id, 0u
+    %4:u32 = access %local_id, 1u
+    %5:u32 = add %3, %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(func);
+
+    auto* info_lhs = analysis.GetInfo(add->LHS());
+    ASSERT_NE(nullptr, info_lhs);
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info_lhs->range));
+    const auto& range_lhs = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info_lhs->range);
+    EXPECT_EQ(0u, range_lhs.min_bound);
+    EXPECT_EQ(3u, range_lhs.max_bound);
+
+    auto* info_rhs = analysis.GetInfo(add->RHS());
+    ASSERT_NE(nullptr, info_rhs);
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info_rhs->range));
+    const auto& range_rhs = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info_rhs->range);
+    EXPECT_EQ(0u, range_rhs.min_bound);
+    EXPECT_EQ(2u, range_rhs.max_bound);
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, ValueAsLoadAndConstant) {
+    Var* idx = nullptr;
+    Binary* add = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            // idx = 0
+            idx = b.Var("idx", 0_i);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // idx < 10
+            auto* binary = b.LessThan<bool>(b.Load(idx), 10_i);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            // add = idx + 5
+            add = b.Add<i32>(b.Load(idx), 5_i);
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            // idx++
+            b.Store(idx, b.Add<i32>(b.Load(idx), 1_i));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, i32, read_write> = var 0i
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %3:i32 = load %idx
+        %4:bool = lt %3, 10i
+        if %4 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        %5:i32 = load %idx
+        %6:i32 = add %5, 5i
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %7:i32 = load %idx
+        %8:i32 = add %7, 1i
+        store %idx, %8
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(func);
+
+    auto* info_lhs = analysis.GetInfo(add->LHS());
+    ASSERT_NE(nullptr, info_lhs);
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info_lhs->range));
+    const auto& range_lhs = std::get<IntegerRangeInfo::SignedIntegerRange>(info_lhs->range);
+    EXPECT_EQ(0, range_lhs.min_bound);
+    EXPECT_EQ(9, range_lhs.max_bound);
+
+    auto* info_rhs = analysis.GetInfo(add->RHS());
+    ASSERT_NE(nullptr, info_rhs);
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info_rhs->range));
+    const auto& range_rhs = std::get<IntegerRangeInfo::SignedIntegerRange>(info_rhs->range);
+    EXPECT_EQ(5, range_rhs.min_bound);
+    EXPECT_EQ(5, range_rhs.max_bound);
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, ValueAsVar) {
+    Var* idx = nullptr;
+    Value* value = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            // idx = 0
+            idx = b.Var("idx", 0_i);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // idx < 10
+            auto* binary = b.LessThan<bool>(b.Load(idx), 10_i);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            value = b.Value(idx);
+            b.Add<i32>(b.Load(value), 5_i);
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            // idx++
+            b.Store(idx, b.Add<i32>(b.Load(idx), 1_i));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, i32, read_write> = var 0i
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %3:i32 = load %idx
+        %4:bool = lt %3, 10i
+        if %4 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        %5:i32 = load %idx
+        %6:i32 = add %5, 5i
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %7:i32 = load %idx
+        %8:i32 = add %7, 1i
+        store %idx, %8
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(func);
+
+    auto* info = analysis.GetInfo(value);
+    ASSERT_NE(nullptr, info);
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info->range));
+    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info->range);
+    EXPECT_EQ(0, range.min_bound);
+    EXPECT_EQ(9, range.max_bound);
+}
+
 }  // namespace
 }  // namespace tint::core::ir::analysis

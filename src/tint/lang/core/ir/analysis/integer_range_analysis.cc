@@ -215,6 +215,26 @@ struct IntegerRangeAnalysisImpl {
         return &range_info;
     }
 
+    const IntegerRangeInfo* GetInfo(const Value* value) {
+        return Switch(
+            value, [&](const Constant* constant) { return GetInfo(constant); },
+            [&](const FunctionParam* param) -> const IntegerRangeInfo* {
+                if (!param->Type()->IsIntegerScalar()) {
+                    return nullptr;
+                }
+                return GetInfo(param, 0);
+            },
+            [&](const InstructionResult* r) {
+                // TODO(348701956): Support more instruction types. e.g. Binary, Let, ...
+                return Switch(
+                    r->Instruction(), [&](const Var* var) { return GetInfo(var); },
+                    [&](const Load* load) { return GetInfo(load); },
+                    [&](const Access* access) { return GetInfo(access); },
+                    [](Default) { return nullptr; });
+            },
+            [](Default) { return nullptr; });
+    }
+
     /// Analyze a loop to compute the range of the loop control variable if possible.
     void AnalyzeLoop(const Loop* loop) {
         const Var* index = GetLoopControlVariableFromConstantInitializer(loop);
@@ -734,6 +754,10 @@ const IntegerRangeInfo* IntegerRangeAnalysis::GetInfo(const Access* access) {
 
 const IntegerRangeInfo* IntegerRangeAnalysis::GetInfo(const Constant* constant) {
     return impl_->GetInfo(constant);
+}
+
+const IntegerRangeInfo* IntegerRangeAnalysis::GetInfo(const Value* value) {
+    return impl_->GetInfo(value);
 }
 
 }  // namespace tint::core::ir::analysis
