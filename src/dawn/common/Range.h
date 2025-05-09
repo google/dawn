@@ -51,8 +51,7 @@ class BeginEndRange {
     class Iterator final {
       public:
         explicit Iterator(Integer value) : mValue(value) {}
-        bool operator==(const Iterator& other) const { return other.mValue == mValue; }
-        bool operator!=(const Iterator& other) const { return !(*this == other); }
+        bool operator==(const Iterator& other) const = default;
         Iterator& operator++() {
             mValue++;
             return *this;

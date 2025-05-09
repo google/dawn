@@ -54,8 +54,7 @@ class BitSetRangeIterator final {
         explicit Iterator(const std::bitset<N>& bits, uint32_t offset = 0, uint32_t size = 0);
         Iterator& operator++();
 
-        bool operator==(const Iterator& other) const;
-        bool operator!=(const Iterator& other) const;
+        bool operator==(const Iterator& other) const = default;
 
         // Returns a pair of offset and size of the current range
         std::pair<T, size_t> operator*() const {
@@ -108,16 +107,6 @@ template <size_t N, typename T>
 typename BitSetRangeIterator<N, T>::Iterator& BitSetRangeIterator<N, T>::Iterator::operator++() {
     Advance();
     return *this;
-}
-
-template <size_t N, typename T>
-bool BitSetRangeIterator<N, T>::Iterator::operator==(const Iterator& other) const {
-    return mOffset == other.mOffset && mSize == other.mSize && mBits == other.mBits;
-}
-
-template <size_t N, typename T>
-bool BitSetRangeIterator<N, T>::Iterator::operator!=(const Iterator& other) const {
-    return !(*this == other);
 }
 
 template <size_t N, typename T>

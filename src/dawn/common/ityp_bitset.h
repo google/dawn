@@ -50,8 +50,7 @@ class Iterator64 final {
         : mBits(static_cast<uint64_t>(bits.to_ullong())) {}
     Iterator64& operator++();
 
-    bool operator==(const Iterator64& other) const { return mBits == other.mBits; }
-    bool operator!=(const Iterator64& other) const { return !(*this == other); }
+    bool operator==(const Iterator64& other) const = default;
 
     Index operator*() const;
 

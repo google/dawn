@@ -84,8 +84,7 @@ class WeakRef {
     WeakRef(WeakRefSupport<T>* support) : mData(support->mData) {}
 
     // Comparison operators.
-    bool operator==(const WeakRef<T>& other) const { return mData == other.mData; }
-    bool operator!=(const WeakRef<T>& other) const { return mData != other.mData; }
+    bool operator==(const WeakRef<T>& other) const = default;
 
     // Promotes a WeakRef to a Ref. Access to the raw pointer is not allowed because a raw pointer
     // could become invalid after being retrieved.

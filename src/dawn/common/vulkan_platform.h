@@ -95,8 +95,7 @@ class alignas(detail::kNativeVkHandleAlignment) VkHandle {
     VkHandle& operator=(const VkHandle<Tag, HandleType>&) = default;
 
     // Comparisons between handles
-    bool operator==(VkHandle<Tag, HandleType> other) const { return mHandle == other.mHandle; }
-    bool operator!=(VkHandle<Tag, HandleType> other) const { return mHandle != other.mHandle; }
+    bool operator==(const VkHandle<Tag, HandleType>& other) const = default;
 
     // Comparisons between handles and VK_NULL_HANDLE
     bool operator==(std::nullptr_t) const { return mHandle == 0; }
