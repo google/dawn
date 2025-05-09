@@ -115,7 +115,7 @@ namespace tint {
 
 /// Is true if the class T has reflected its fields with TINT_REFLECT()
 template <typename T>
-static constexpr bool HasReflection = tint::reflection::detail::HasReflection<T>::value;
+concept HasReflection = tint::reflection::detail::HasReflection<T>::value;
 
 /// Calls @p callback with each field of @p object
 /// @param object the object
