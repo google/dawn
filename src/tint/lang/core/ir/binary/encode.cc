@@ -996,6 +996,8 @@ struct Encoder {
                 return pb::BuiltinValue::sample_index;
             case core::BuiltinValue::kSampleMask:
                 return pb::BuiltinValue::sample_mask;
+            case core::BuiltinValue::kSubgroupId:
+                return pb::BuiltinValue::subgroup_id;
             case core::BuiltinValue::kSubgroupInvocationId:
                 return pb::BuiltinValue::subgroup_invocation_id;
             case core::BuiltinValue::kSubgroupSize:

@@ -1477,6 +1477,8 @@ struct Decoder {
                 return core::BuiltinValue::kSampleIndex;
             case pb::BuiltinValue::sample_mask:
                 return core::BuiltinValue::kSampleMask;
+            case pb::BuiltinValue::subgroup_id:
+                return core::BuiltinValue::kSubgroupId;
             case pb::BuiltinValue::subgroup_invocation_id:
                 return core::BuiltinValue::kSubgroupInvocationId;
             case pb::BuiltinValue::subgroup_size:

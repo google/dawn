@@ -70,6 +70,28 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
             return Failure("input attachments are not supported by the HLSL backend");
         }
     }
+
+    // Check for unsupported shader IO builtins.
+    for (auto& func : ir.functions) {
+        if (!func->IsEntryPoint()) {
+            continue;
+        }
+
+        for (auto* param : func->Params()) {
+            if (auto* str = param->Type()->As<core::type::Struct>()) {
+                for (auto* member : str->Members()) {
+                    if (member->Attributes().builtin == core::BuiltinValue::kSubgroupId) {
+                        return Failure("subgroup_id is not yet supported by the HLSL backend");
+                    }
+                }
+            } else {
+                if (param->Builtin() == core::BuiltinValue::kSubgroupId) {
+                    return Failure("subgroup_id is not yet supported by the HLSL backend");
+                }
+            }
+        }
+    }
+
     return Success;
 }
 

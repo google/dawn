@@ -1045,6 +1045,28 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
                 return false;
             }
             break;
+        case core::BuiltinValue::kSubgroupId:
+            // TODO(crbug.com/416555787): Move this to the `subgroups` extension.
+            if (!enabled_extensions_.Contains(
+                    wgsl::Extension::kChromiumExperimentalSubgroupMatrix)) {
+                AddError(attr->source) << "use of " << style::Attribute("@builtin")
+                                       << style::Code("(", style::Enum(builtin), ")")
+                                       << " attribute requires enabling extension "
+                                       << style::Code("chromium_experimental_subgroup_matrix");
+                return false;
+            }
+            if (!type->Is<core::type::U32>()) {
+                err_builtin_type("u32");
+                return false;
+            }
+            if (stage != ast::PipelineStage::kNone &&
+                !(stage == ast::PipelineStage::kCompute && is_input)) {
+                AddError(attr->source)
+                    << style::Attribute("@builtin") << style::Code("(", style::Enum(builtin), ")")
+                    << " is only valid as a compute shader input";
+                return false;
+            }
+            break;
         case core::BuiltinValue::kSubgroupInvocationId:
         case core::BuiltinValue::kSubgroupSize:
             if (!enabled_extensions_.Contains(wgsl::Extension::kSubgroups)) {

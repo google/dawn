@@ -412,6 +412,7 @@
 "subgroupShuffleUp"
 "subgroupShuffleXor"
 "subgroupXor"
+"subgroup_id"
 "subgroup_invocation_id"
 "subgroup_matrix"
 "subgroup_matrix_left"

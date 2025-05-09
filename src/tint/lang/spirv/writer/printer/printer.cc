@@ -370,6 +370,9 @@ class Printer {
                 return SpvBuiltInSampleId;
             case core::BuiltinValue::kSampleMask:
                 return SpvBuiltInSampleMask;
+            case core::BuiltinValue::kSubgroupId:
+                module_.PushCapability(SpvCapabilityGroupNonUniform);
+                return SpvBuiltInSubgroupId;
             case core::BuiltinValue::kSubgroupInvocationId:
                 module_.PushCapability(SpvCapabilityGroupNonUniform);
                 return SpvBuiltInSubgroupLocalInvocationId;

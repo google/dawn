@@ -131,13 +131,15 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
         for (auto* param : func->Params()) {
             if (auto* str = param->Type()->As<core::type::Struct>()) {
                 for (auto* member : str->Members()) {
-                    if (member->Attributes().builtin == core::BuiltinValue::kSubgroupInvocationId ||
+                    if (member->Attributes().builtin == core::BuiltinValue::kSubgroupId ||
+                        member->Attributes().builtin == core::BuiltinValue::kSubgroupInvocationId ||
                         member->Attributes().builtin == core::BuiltinValue::kSubgroupSize) {
                         return Failure("subgroups are not supported by the GLSL backend");
                     }
                 }
             } else {
-                if (param->Builtin() == core::BuiltinValue::kSubgroupInvocationId ||
+                if (param->Builtin() == core::BuiltinValue::kSubgroupId ||
+                    param->Builtin() == core::BuiltinValue::kSubgroupInvocationId ||
                     param->Builtin() == core::BuiltinValue::kSubgroupSize) {
                     return Failure("subgroups are not supported by the GLSL backend");
                 }

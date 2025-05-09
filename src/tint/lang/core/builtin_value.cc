@@ -75,6 +75,9 @@ BuiltinValue ParseBuiltinValue(std::string_view str) {
     if (str == "sample_mask") {
         return BuiltinValue::kSampleMask;
     }
+    if (str == "subgroup_id") {
+        return BuiltinValue::kSubgroupId;
+    }
     if (str == "subgroup_invocation_id") {
         return BuiltinValue::kSubgroupInvocationId;
     }
@@ -120,6 +123,8 @@ std::string_view ToString(BuiltinValue value) {
             return "sample_index";
         case BuiltinValue::kSampleMask:
             return "sample_mask";
+        case BuiltinValue::kSubgroupId:
+            return "subgroup_id";
         case BuiltinValue::kSubgroupInvocationId:
             return "subgroup_invocation_id";
         case BuiltinValue::kSubgroupSize:
