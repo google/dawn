@@ -225,14 +225,40 @@ struct IntegerRangeAnalysisImpl {
                 return GetInfo(param, 0);
             },
             [&](const InstructionResult* r) {
-                // TODO(348701956): Support more instruction types. e.g. Binary, Let, ...
+                // TODO(348701956): Support more instruction types. e.g. Let, Convert, ...
                 return Switch(
                     r->Instruction(), [&](const Var* var) { return GetInfo(var); },
                     [&](const Load* load) { return GetInfo(load); },
                     [&](const Access* access) { return GetInfo(access); },
+                    [&](const Binary* binary) { return GetInfo(binary); },
                     [](Default) { return nullptr; });
             },
             [](Default) { return nullptr; });
+    }
+
+    const IntegerRangeInfo* GetInfo(const Binary* binary) {
+        const IntegerRangeInfo* existing_range = integer_binary_range_info_map_.Get(binary).value;
+        if (existing_range) {
+            return existing_range;
+        }
+
+        const IntegerRangeInfo* range_lhs = GetInfo(binary->LHS());
+        if (!range_lhs) {
+            return nullptr;
+        }
+        const IntegerRangeInfo* range_rhs = GetInfo(binary->RHS());
+        if (!range_rhs) {
+            return nullptr;
+        }
+
+        // TODO(348701956): Support more binary operators
+        switch (binary->Op()) {
+            case BinaryOp::kAdd: {
+                return ComputeAndCacheIntegerRangeForBinaryAdd(binary, range_lhs, range_rhs);
+            }
+            default:
+                return nullptr;
+        }
     }
 
     /// Analyze a loop to compute the range of the loop control variable if possible.
@@ -707,11 +733,70 @@ struct IntegerRangeAnalysisImpl {
     }
 
   private:
+    const IntegerRangeInfo* ComputeAndCacheIntegerRangeForBinaryAdd(const Binary* binary,
+                                                                    const IntegerRangeInfo* lhs,
+                                                                    const IntegerRangeInfo* rhs) {
+        // Add two 32-bit signed integer values saved in int64_t. Return {} when either overflow or
+        // underflow happens.
+        auto SafeAddI32 = [](int64_t a, int64_t b) -> std::optional<int64_t> {
+            TINT_ASSERT(a >= i32::kLowestValue && a <= i32::kHighestValue);
+            TINT_ASSERT(b >= i32::kLowestValue && b <= i32::kHighestValue);
+
+            int64_t sum = a + b;
+            if (sum > i32::kHighestValue || sum < i32::kLowestValue) {
+                return {};
+            }
+            return sum;
+        };
+
+        // No-overflow add between two 32-bit unsigned integer values saved in uint64_t. Return {}
+        // when overflow happens.
+        auto SafeAddU32 = [](uint64_t a, uint64_t b) -> std::optional<uint64_t> {
+            TINT_ASSERT(a <= u32::kHighestValue);
+            TINT_ASSERT(b <= u32::kHighestValue);
+
+            uint64_t sum = a + b;
+            if (sum > u32::kHighestValue) {
+                return {};
+            }
+            return sum;
+        };
+
+        if (std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(lhs->range)) {
+            auto lhs_i32 = std::get<IntegerRangeInfo::SignedIntegerRange>(lhs->range);
+            auto rhs_i32 = std::get<IntegerRangeInfo::SignedIntegerRange>(rhs->range);
+
+            // [min1, max1] + [min2, max2] => [min1 + min2, max1 + max2]
+            std::optional<int64_t> min_bound = SafeAddI32(lhs_i32.min_bound, rhs_i32.min_bound);
+            std::optional<int64_t> max_bound = SafeAddI32(lhs_i32.max_bound, rhs_i32.max_bound);
+            if (!min_bound.has_value() || !max_bound.has_value()) {
+                return nullptr;
+            }
+            auto result = integer_binary_range_info_map_.Add(
+                binary, IntegerRangeInfo(*min_bound, *max_bound));
+            return &result.value;
+        } else {
+            auto lhs_u32 = std::get<IntegerRangeInfo::UnsignedIntegerRange>(lhs->range);
+            auto rhs_u32 = std::get<IntegerRangeInfo::UnsignedIntegerRange>(rhs->range);
+
+            // [min1, max1] + [min2, max2] => [min1 + min2, max1 + max2]
+            std::optional<uint64_t> min_bound = SafeAddU32(lhs_u32.min_bound, rhs_u32.min_bound);
+            std::optional<uint64_t> max_bound = SafeAddU32(lhs_u32.max_bound, rhs_u32.max_bound);
+            if (!min_bound || !max_bound) {
+                return nullptr;
+            }
+            auto result = integer_binary_range_info_map_.Add(
+                binary, IntegerRangeInfo(*min_bound, *max_bound));
+            return &result.value;
+        }
+    }
+
     Function* function_;
     Hashmap<const FunctionParam*, Vector<IntegerRangeInfo, 3>, 4>
         integer_function_param_range_info_map_;
     Hashmap<const Var*, IntegerRangeInfo, 8> integer_var_range_info_map_;
     Hashmap<const Constant*, IntegerRangeInfo, 8> integer_constant_range_info_map_;
+    Hashmap<const Binary*, IntegerRangeInfo, 8> integer_binary_range_info_map_;
 };
 
 IntegerRangeAnalysis::IntegerRangeAnalysis(Function* func)
@@ -758,6 +843,10 @@ const IntegerRangeInfo* IntegerRangeAnalysis::GetInfo(const Constant* constant) 
 
 const IntegerRangeInfo* IntegerRangeAnalysis::GetInfo(const Value* value) {
     return impl_->GetInfo(value);
+}
+
+const IntegerRangeInfo* IntegerRangeAnalysis::GetInfo(const Binary* binary) {
+    return impl_->GetInfo(binary);
 }
 
 }  // namespace tint::core::ir::analysis
