@@ -115,6 +115,21 @@ HRESULT ScopedCommandRecordingContext::Wait(ID3D11Fence* pFence, UINT64 Value) c
     return Get()->mD3D11DeviceContext4->Wait(pFence, Value);
 }
 
+HRESULT ScopedCommandRecordingContext::GetData(ID3D11Query* pQuery,
+                                               void* pResult,
+                                               UINT size,
+                                               UINT flags) const {
+    return Get()->mD3D11DeviceContext3->GetData(pQuery, pResult, size, flags);
+}
+
+void ScopedCommandRecordingContext::End(ID3D11Query* pQuery) const {
+    Get()->mD3D11DeviceContext3->End(pQuery);
+}
+
+void ScopedCommandRecordingContext::Flush() const {
+    return Get()->mD3D11DeviceContext3->Flush();
+}
+
 void ScopedCommandRecordingContext::Flush1(D3D11_CONTEXT_TYPE ContextType, HANDLE hEvent) const {
     return Get()->mD3D11DeviceContext3->Flush1(ContextType, hEvent);
 }

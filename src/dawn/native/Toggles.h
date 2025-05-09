@@ -164,6 +164,7 @@ enum class Toggle {
 
     D3D11UseUnmonitoredFence,
     D3D11DisableFence,
+    D3D11DelayFlushToGPU,
     IgnoreImportedAHardwareBufferVulkanImageSize,
 
     EnumCount,

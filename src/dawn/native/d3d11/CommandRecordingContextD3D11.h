@@ -163,6 +163,9 @@ class ScopedCommandRecordingContext : public CommandRecordingContext::Guard {
     void Unmap(ID3D11Resource* pResource, UINT Subresource) const;
     HRESULT Signal(ID3D11Fence* pFence, UINT64 Value) const;
     HRESULT Wait(ID3D11Fence* pFence, UINT64 Value) const;
+    HRESULT GetData(ID3D11Query* pQuery, void* pResult, UINT size, UINT flags) const;
+    void End(ID3D11Query* pQuery) const;
+    void Flush() const;
     void Flush1(D3D11_CONTEXT_TYPE ContextType, HANDLE hEvent) const;
 
     // Write the built-in variable value to the uniform buffer.

@@ -581,8 +581,8 @@ DAWN_INSTANTIATE_PREFIXED_TEST_P(D3D,
 
 DAWN_INSTANTIATE_PREFIXED_TEST_P(D3D,
                                  SharedTextureMemoryTests,
-                                 {D3D11Backend(), D3D11Backend({"d3d11_disable_fence"}),
-                                  D3D12Backend()},
+                                 {D3D11Backend(), D3D11Backend({"d3d11_delay_flush_to_gpu"}),
+                                  D3D11Backend({"d3d11_disable_fence"}), D3D12Backend()},
                                  {Backend::GetInstance<Mode::DXGISharedHandle>(),
                                   Backend::GetKeyedMutexInstance<Mode::DXGISharedHandle>()},
                                  {1});
@@ -597,7 +597,8 @@ DAWN_INSTANTIATE_PREFIXED_TEST_P(D3D11,
 
 DAWN_INSTANTIATE_PREFIXED_TEST_P(D3D11,
                                  SharedTextureMemoryTests,
-                                 {D3D11Backend(), D3D11Backend({"d3d11_disable_fence"})},
+                                 {D3D11Backend(), D3D11Backend({"d3d11_delay_flush_to_gpu"}),
+                                  D3D11Backend({"d3d11_disable_fence"})},
                                  {Backend::GetInstance<Mode::D3D11Texture2D>(),
                                   Backend::GetKeyedMutexInstance<Mode::D3D11Texture2D>(),
                                   Backend::GetInstanceWithoutEndAccessFence()},
@@ -605,7 +606,9 @@ DAWN_INSTANTIATE_PREFIXED_TEST_P(D3D11,
 
 DAWN_INSTANTIATE_PREFIXED_TEST_P(D3D11,
                                  SharedTextureMemoryWithFenceDisabledTests,
-                                 {D3D11Backend({"d3d11_disable_fence"})},
+                                 {D3D11Backend({"d3d11_disable_fence"}),
+                                  D3D11Backend({"d3d11_disable_fence",
+                                                "d3d11_delay_flush_to_gpu"})},
                                  {Backend::GetKeyedMutexInstance<Mode::DXGISharedHandle>()},
                                  {1});
 
