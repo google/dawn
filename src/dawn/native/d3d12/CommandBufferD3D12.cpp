@@ -1195,7 +1195,7 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
                                                               wgpu::BufferUsage::CopyDst);
                         commandList->CopyBufferRegion(
                             dstBuffer->GetD3D12Resource(), offset,
-                            ToBackend(reservation.buffer)->GetD3D12Resource(),
+                            ToBackend(reservation.buffer.Get())->GetD3D12Resource(),
                             reservation.offsetInBuffer, size);
                         return {};
                     }));
@@ -1256,7 +1256,7 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* commandCont
                 ComPtr<ID3D12CommandSignature> signature =
                     lastPipeline->GetDispatchIndirectCommandSignature();
                 commandList->ExecuteIndirect(
-                    signature.Get(), 1, ToBackend(dispatch->indirectBuffer)->GetD3D12Resource(),
+                    signature.Get(), 1, ToBackend(dispatch->indirectBuffer.Get())->GetD3D12Resource(),
                     dispatch->indirectOffset, nullptr, 0);
                 currentDispatch++;
                 break;
@@ -1277,7 +1277,7 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* commandCont
 
             case Command::SetComputePipeline: {
                 SetComputePipelineCmd* cmd = mCommands.NextCommand<SetComputePipelineCmd>();
-                ComputePipeline* pipeline = ToBackend(cmd->pipeline).Get();
+                ComputePipeline* pipeline = ToBackend(cmd->pipeline.Get());
 
                 commandList->SetPipelineState(pipeline->GetPipelineState());
 
@@ -1719,7 +1719,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
 
             case Command::SetRenderPipeline: {
                 SetRenderPipelineCmd* cmd = iter->NextCommand<SetRenderPipelineCmd>();
-                RenderPipeline* pipeline = ToBackend(cmd->pipeline).Get();
+                RenderPipeline* pipeline = ToBackend(cmd->pipeline.Get());
 
                 commandList->SetPipelineState(pipeline->GetPipelineState());
                 commandList->IASetPrimitiveTopology(pipeline->GetD3D12PrimitiveTopology());
@@ -1749,7 +1749,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
 
                 D3D12_INDEX_BUFFER_VIEW bufferView;
                 bufferView.Format = DXGIIndexFormat(cmd->format);
-                bufferView.BufferLocation = ToBackend(cmd->buffer)->GetVA() + cmd->offset;
+                bufferView.BufferLocation = ToBackend(cmd->buffer.Get())->GetVA() + cmd->offset;
                 bufferView.SizeInBytes = cmd->size;
 
                 commandList->IASetIndexBuffer(&bufferView);
