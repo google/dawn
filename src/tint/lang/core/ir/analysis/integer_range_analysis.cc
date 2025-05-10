@@ -253,9 +253,12 @@ struct IntegerRangeAnalysisImpl {
 
         // TODO(348701956): Support more binary operators
         switch (binary->Op()) {
-            case BinaryOp::kAdd: {
+            case BinaryOp::kAdd:
                 return ComputeAndCacheIntegerRangeForBinaryAdd(binary, range_lhs, range_rhs);
-            }
+
+            case BinaryOp::kSubtract:
+                return ComputeAndCacheIntegerRangeForBinarySubtract(binary, range_lhs, range_rhs);
+
             default:
                 return nullptr;
         }
@@ -782,6 +785,68 @@ struct IntegerRangeAnalysisImpl {
             // [min1, max1] + [min2, max2] => [min1 + min2, max1 + max2]
             std::optional<uint64_t> min_bound = SafeAddU32(lhs_u32.min_bound, rhs_u32.min_bound);
             std::optional<uint64_t> max_bound = SafeAddU32(lhs_u32.max_bound, rhs_u32.max_bound);
+            if (!min_bound || !max_bound) {
+                return nullptr;
+            }
+            auto result = integer_binary_range_info_map_.Add(
+                binary, IntegerRangeInfo(*min_bound, *max_bound));
+            return &result.value;
+        }
+    }
+
+    const IntegerRangeInfo* ComputeAndCacheIntegerRangeForBinarySubtract(
+        const Binary* binary,
+        const IntegerRangeInfo* lhs,
+        const IntegerRangeInfo* rhs) {
+        // Subtract two 32-bit signed integer values saved in int64_t. Return {} when either
+        // overflow or underflow happens.
+        auto SafeSubtractI32 = [](int64_t a, int64_t b) -> std::optional<int64_t> {
+            TINT_ASSERT(a >= i32::kLowestValue && a <= i32::kHighestValue);
+            TINT_ASSERT(b >= i32::kLowestValue && b <= i32::kHighestValue);
+
+            int64_t diff = a - b;
+            if (diff > i32::kHighestValue || diff < i32::kLowestValue) {
+                return {};
+            }
+            return diff;
+        };
+
+        // No-underflow Subtract between two 32-bit unsigned integer values saved in uint64_t.
+        // Return {} when underflow happens.
+        auto SafeSubtractU32 = [](uint64_t a, uint64_t b) -> std::optional<uint64_t> {
+            TINT_ASSERT(a <= u32::kHighestValue);
+            TINT_ASSERT(b <= u32::kHighestValue);
+
+            if (a < b) {
+                return {};
+            }
+            return a - b;
+        };
+
+        if (std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(lhs->range)) {
+            auto lhs_i32 = std::get<IntegerRangeInfo::SignedIntegerRange>(lhs->range);
+            auto rhs_i32 = std::get<IntegerRangeInfo::SignedIntegerRange>(rhs->range);
+
+            // [min1, max1] - [min2, max2] => [min1 - max2, max1 - min2]
+            std::optional<int64_t> min_bound =
+                SafeSubtractI32(lhs_i32.min_bound, rhs_i32.max_bound);
+            std::optional<int64_t> max_bound =
+                SafeSubtractI32(lhs_i32.max_bound, rhs_i32.min_bound);
+            if (!min_bound.has_value() || !max_bound.has_value()) {
+                return nullptr;
+            }
+            auto result = integer_binary_range_info_map_.Add(
+                binary, IntegerRangeInfo(*min_bound, *max_bound));
+            return &result.value;
+        } else {
+            auto lhs_u32 = std::get<IntegerRangeInfo::UnsignedIntegerRange>(lhs->range);
+            auto rhs_u32 = std::get<IntegerRangeInfo::UnsignedIntegerRange>(rhs->range);
+
+            // [min1, max1] - [min2, max2] => [min1 - max2, max1 - min2]
+            std::optional<uint64_t> min_bound =
+                SafeSubtractU32(lhs_u32.min_bound, rhs_u32.max_bound);
+            std::optional<uint64_t> max_bound =
+                SafeSubtractU32(lhs_u32.max_bound, rhs_u32.min_bound);
             if (!min_bound || !max_bound) {
                 return nullptr;
             }
