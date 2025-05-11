@@ -443,9 +443,6 @@ if (DAWN_BUILD_PROTOBUF AND EXISTS "${DAWN_PROTOBUF_DIR}/cmake")
   if (("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") AND WIN32)
     set(protobuf_HAVE_BUILTIN_ATOMICS 1)
   endif()
-
-  # Needs to come before SPIR-V Tools
-  include("third_party/protobuf.cmake")
 endif()
 
 add_subdirectory(third_party)
