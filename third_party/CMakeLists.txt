@@ -90,6 +90,11 @@ if (NOT TARGET absl::strings)
     add_subdirectory(${DAWN_ABSEIL_DIR} "${CMAKE_CURRENT_BINARY_DIR}/abseil")
 endif()
 
+if (DAWN_BUILD_PROTOBUF AND EXISTS "${DAWN_PROTOBUF_DIR}/cmake")
+  # Needs to come before SPIR-V Tools
+  include("third_party/protobuf.cmake")
+endif()
+
 ################################################################################
 # End of Emscripten enabled third party directories
 ################################################################################
