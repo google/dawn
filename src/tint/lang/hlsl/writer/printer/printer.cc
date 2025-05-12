@@ -27,6 +27,7 @@
 
 #include "src/tint/lang/hlsl/writer/printer/printer.h"
 
+#include <algorithm>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
@@ -579,6 +580,8 @@ class Printer : public tint::TextGenerator {
 
                         break;
                     }
+                    // All immediate address space instructions should have been converted to
+                    // uniform address space by the ChangeImmediateToUniform transform.
                     case core::AddressSpace::kImmediate:
                     default: {
                         TINT_ICE() << "unhandled address space " << space;
@@ -589,9 +592,6 @@ class Printer : public tint::TextGenerator {
     }
 
     void EmitUniformVariable(const core::ir::Var* var) {
-        auto* ptr = var->Result()->Type()->As<core::type::Pointer>();
-        TINT_ASSERT(ptr);
-
         auto bp = var->BindingPoint();
         TINT_ASSERT(bp.has_value());
 

@@ -242,6 +242,9 @@ struct Options {
     /// The binding point to use for information passed via root constants.
     std::optional<BindingPoint> root_constant_binding_point;
 
+    /// Immediate binding point info
+    std::optional<BindingPoint> immediate_binding_point;
+
     /// The bindings
     Bindings bindings;
 
@@ -263,6 +266,7 @@ struct Options {
                  array_length_from_uniform,
                  interstage_locations,
                  root_constant_binding_point,
+                 immediate_binding_point,
                  bindings,
                  pixel_local);
 };

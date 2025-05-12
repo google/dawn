@@ -53,9 +53,6 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
     for (auto* inst : *ir.root_block) {
         auto* var = inst->As<core::ir::Var>();
         auto* ptr = var->Result()->Type()->As<core::type::Pointer>();
-        if (ptr->AddressSpace() == core::AddressSpace::kImmediate) {
-            return Failure("immediate data is not supported by the HLSL backend");
-        }
         if (ptr->AddressSpace() == core::AddressSpace::kPixelLocal) {
             // Check the pixel_local variables have corresponding entries in the PLS attachment map.
             auto* str = ptr->StoreType()->As<core::type::Struct>();
