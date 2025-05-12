@@ -93,15 +93,16 @@ void foo() {
 
 TEST_F(MslWriterTest, EmitType_RuntimeArray) {
     auto* func = b.Function("foo", ty.void_());
+    auto* param =
+        b.FunctionParam("param", ty.ptr(core::AddressSpace::kStorage, ty.array<bool, 0>()));
+    func->SetParams({param});
     b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.array<bool, 0>()));
         b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + MetalArray() + R"(
-void foo() {
-  tint_array<bool, 1> a = {};
+void foo(device tint_array<bool, 1>* const param) {
 }
 )");
 }

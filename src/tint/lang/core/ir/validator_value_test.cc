@@ -475,7 +475,7 @@ TEST_F(IR_ValidatorTest, Var_NonResourceWithBindingPoint) {
 }
 
 TEST_F(IR_ValidatorTest, Var_Uniform_NotConstructible) {
-    auto* v = b.Var<uniform, array<vec4<f32>>>();
+    auto* v = b.Var<uniform, atomic<u32>>();
     v->SetBindingPoint(0, 0);
     mod.root_block->Append(v);
 
@@ -484,9 +484,9 @@ TEST_F(IR_ValidatorTest, Var_Uniform_NotConstructible) {
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(
-            R"(:2:45 error: var: vars in the 'uniform' address space must be host-shareable and constructible
-  %1:ptr<uniform, array<vec4<f32>>, read> = var undef @binding_point(0, 0)
-                                            ^^^
+            R"(:2:40 error: var: vars in the 'uniform' address space must be host-shareable and constructible
+  %1:ptr<uniform, atomic<u32>, read> = var undef @binding_point(0, 0)
+                                       ^^^
 )")) << res.Failure();
 }
 
@@ -671,6 +671,40 @@ TEST_F(IR_ValidatorTest, Var_InputAttachementIndex_WrongType) {
             R"(:2:37 error: var: '@input_attachment_index' is only valid for 'input_attachment' type var
   %1:ptr<handle, f32, read_write> = var undef @binding_point(0, 0) @input_attachment_index(0)
                                     ^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Var_RuntimeArray_NonStorage) {
+    auto* v = b.Var(ty.ptr(AddressSpace::kPrivate, ty.runtime_array(ty.f32()), read_write));
+    mod.root_block->Append(v);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(
+                    R"(:2:3 error: var: runtime arrays must be in the 'storage' address space
+  %1:ptr<private, array<f32>, read_write> = var undef
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Var_RuntimeArray_NonStorageInStruct) {
+    auto* str_ty = ty.Struct(mod.symbols.New("MyStruct"),
+                             {
+                                 {mod.symbols.New("a"), ty.runtime_array(ty.f32()), {}},
+                             });
+    auto* v = b.Var(ty.ptr(AddressSpace::kHandle, str_ty, read_write));
+    v->SetBindingPoint(0, 0);
+    v->SetInputAttachmentIndex(0);
+    mod.root_block->Append(v);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(
+                    R"(:6:3 error: var: runtime arrays must be in the 'storage' address space
+  %1:ptr<handle, MyStruct, read_write> = var undef @binding_point(0, 0) @input_attachment_index(0)
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure();
 }
 
