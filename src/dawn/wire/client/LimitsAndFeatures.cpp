@@ -46,13 +46,6 @@ WGPUStatus LimitsAndFeatures::GetLimits(WGPULimits* limits) const {
         // Store the WGPUChainedStruct to restore the chain after assignment.
         WGPUChainedStruct originalChainedStruct = *chain;
         switch (chain->sType) {
-            case (WGPUSType_DawnExperimentalImmediateDataLimits): {
-                auto* experimentalImmediateDataLimits =
-                    reinterpret_cast<WGPUDawnExperimentalImmediateDataLimits*>(chain);
-                // This assignment break the next field of WGPUChainedStruct head.
-                *experimentalImmediateDataLimits = mExperimentalImmediateDataLimits;
-                break;
-            }
             case (WGPUSType_DawnTexelCopyBufferRowAlignmentLimits): {
                 auto* texelCopyBufferRowAlignmentLimits =
                     reinterpret_cast<WGPUDawnTexelCopyBufferRowAlignmentLimits*>(chain);
@@ -104,13 +97,6 @@ void LimitsAndFeatures::SetLimits(const WGPULimits* limits) {
     // Handle other limits that chained after WGPUSupportedLimits
     for (auto* chain = limits->nextInChain; chain; chain = chain->next) {
         switch (chain->sType) {
-            case (WGPUSType_DawnExperimentalImmediateDataLimits): {
-                auto* experimentalImmediateDataLimits =
-                    reinterpret_cast<WGPUDawnExperimentalImmediateDataLimits*>(chain);
-                mExperimentalImmediateDataLimits = *experimentalImmediateDataLimits;
-                mExperimentalImmediateDataLimits.chain.next = nullptr;
-                break;
-            }
             case (WGPUSType_DawnTexelCopyBufferRowAlignmentLimits): {
                 auto* texelCopyBufferRowAlignmentLimits =
                     reinterpret_cast<WGPUDawnTexelCopyBufferRowAlignmentLimits*>(chain);

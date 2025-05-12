@@ -98,6 +98,11 @@ InstanceBase* AdapterBase::APIGetInstance() const {
 void AdapterBase::UpdateLimits() {
     mLimits = mPhysicalDevice->GetLimits();
 
+    // Disable unsafe limits if needed.
+    if (!mTogglesState.IsEnabled(Toggle::AllowUnsafeAPIs)) {
+        mLimits.v1.maxImmediateSize = 0;
+    }
+
     // Apply the tiered limits if needed.
     if (mUseTieredLimits) {
         ApplyLimitTiers(&mLimits);
@@ -287,8 +292,8 @@ ResultOrError<Ref<DeviceBase>> AdapterBase::CreateDeviceInternal(
     // toggles. Note that certain toggles in device toggles state may be overridden by user and
     // different from the adapter toggles state, and in this case a device may support features
     // that not supported by the adapter. We allow such toggles overriding for the convenience e.g.
-    // creating a device for internal usage with AllowUnsafeAPI enabled from an adapter that
-    // disabled AllowUnsafeAPIS.
+    // creating a device for internal usage with AllowUnsafeAPIs enabled from an adapter that
+    // disabled AllowUnsafeAPIs.
     for (wgpu::FeatureName requiredFeature : requiredFeatureSet) {
         FeatureValidationResult result =
             mPhysicalDevice->ValidateFeatureSupportedWithToggles(requiredFeature, deviceToggles);

@@ -99,20 +99,6 @@ interop::Interface<interop::GPUSupportedFeatures> GPUAdapter::getFeatures(Napi::
 
 interop::Interface<interop::GPUSupportedLimits> GPUAdapter::getLimits(Napi::Env env) {
     wgpu::Limits limits{};
-    wgpu::DawnExperimentalImmediateDataLimits immediateDataLimits{};
-
-    auto InsertInChain = [&](wgpu::ChainedStructOut* node) {
-        node->nextInChain = limits.nextInChain;
-        limits.nextInChain = node;
-    };
-
-    wgpu::ChainedStructOut** limitsListTail = &limits.nextInChain;
-    // Query the immediate data limits only if ChromiumExperimentalImmediateData feature
-    // is available on adapter.
-    if (adapter_.HasFeature(FeatureName::ChromiumExperimentalImmediate)) {
-        InsertInChain(&immediateDataLimits);
-    }
-
     if (!adapter_.GetLimits(&limits)) {
         Napi::Error::New(env, "failed to get adapter limits").ThrowAsJavaScriptException();
     }

@@ -40,8 +40,8 @@ constexpr uint32_t kRTSize = 1;
 
 class ImmediateDataTests : public DawnTest {
   protected:
-    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
-        return {wgpu::FeatureName::ChromiumExperimentalImmediate};
+    wgpu::Limits GetRequiredLimits(const wgpu::Limits&) override {
+        return wgpu::Limits{.maxImmediateSize = kDefaultMaxImmediateDataBytes};
     }
 
     void SetUp() override {
@@ -109,7 +109,7 @@ class ImmediateDataTests : public DawnTest {
         wgpu::PipelineLayoutDescriptor pipelineLayoutDesc;
         pipelineLayoutDesc.bindGroupLayoutCount = 1;
         pipelineLayoutDesc.bindGroupLayouts = &bindGroupLayout;
-        pipelineLayoutDesc.immediateDataRangeByteSize = kDefaultMaxImmediateDataBytes;
+        pipelineLayoutDesc.immediateSize = kDefaultMaxImmediateDataBytes;
         return device.CreatePipelineLayout(&pipelineLayoutDesc);
     }
 

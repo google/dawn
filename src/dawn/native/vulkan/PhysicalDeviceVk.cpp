@@ -546,8 +546,6 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     if (mDeviceInfo.HasExt(DeviceExt::ImageDrmFormatModifier)) {
         EnableFeature(Feature::DawnDrmFormatCapabilities);
     }
-
-    EnableFeature(Feature::ChromiumExperimentalImmediate);
 }
 
 MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits) {
@@ -737,12 +735,14 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsInternal(wgpu::FeatureLevel 
         }
     }
 
-    // vulkan needs to have enough push constant range size for all
+    // Vulkan needs to have enough push constant range size for all
     // internal and external immediate data usages.
-    constexpr uint32_t kMinVulkanPushConstants = 128;
-    DAWN_ASSERT(vkLimits.maxPushConstantsSize >= kMinVulkanPushConstants);
-    static_assert(kMinVulkanPushConstants >= sizeof(RenderImmediateConstants));
-    static_assert(kMinVulkanPushConstants >= sizeof(ComputeImmediateConstants));
+    constexpr uint32_t kVkGuaranteedMaxPushConstantsSize = 128;  // from Vulkan spec
+    static_assert(kVkGuaranteedMaxPushConstantsSize >=
+                  kDefaultMaxImmediateDataBytes + std::max(sizeof(RenderImmediateConstants),
+                                                           sizeof(ComputeImmediateConstants)));
+    DAWN_ASSERT(vkLimits.maxPushConstantsSize >= kVkGuaranteedMaxPushConstantsSize);
+    limits->v1.maxImmediateSize = kDefaultMaxImmediateDataBytes;
 
     if (mDeviceInfo.HasExt(DeviceExt::ExternalMemoryHost) &&
         mDeviceInfo.externalMemoryHostProperties.minImportedHostPointerAlignment <=

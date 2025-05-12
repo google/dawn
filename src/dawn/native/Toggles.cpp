@@ -563,7 +563,7 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "https://crbug.com/dawn/2260", ToggleStage::Instance}},
     {Toggle::ExposeWGSLExperimentalFeatures,
      {"expose_wgsl_experimental_features",
-      "Make the Instance expose the experimental features but not the unsage ones, so that safe "
+      "Make the Instance expose the experimental features but not the unsafe ones, so that safe "
       "experimental features can be used without the need for allow_unsafe_apis",
       "https://crbug.com/dawn/2260", ToggleStage::Instance}},
     {Toggle::DisablePolyfillsOnIntegerDivisonAndModulo,
@@ -700,6 +700,7 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "https://crbug.com/333424893", ToggleStage::Device}},
     // Comment to separate the }} so it is clearer what to copy-paste to add a toggle.
 }};
+
 }  // anonymous namespace
 
 void TogglesSet::Set(Toggle toggle, bool enabled) {

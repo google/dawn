@@ -396,10 +396,6 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
      {"Support the \"enable clip_distances;\" directive in WGSL.",
       "https://gpuweb.github.io/gpuweb/#dom-gpufeaturename-clip-distances",
       FeatureInfo::FeatureState::Stable}},
-    {Feature::ChromiumExperimentalImmediate,
-     {"Support the \"enable chromium_experimental_immediate;\" directive in WGSL.",
-      "https://github.com/gpuweb/gpuweb/blob/main/proposals/push-constants.md",
-      FeatureInfo::FeatureState::Experimental}},
     {Feature::DawnTexelCopyBufferRowAlignment,
      {"Expose the min row alignment in buffer for texel copy operations.",
       "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"

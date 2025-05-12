@@ -117,15 +117,10 @@ void Server::OnRequestDeviceCallback(RequestDeviceUserdata* data,
     // Query and report the adapter limits, including all known extension limits.
     WGPULimits limits = {};
 
-    // Chained DawnExperimentalImmediateDataLimits.
-    WGPUDawnExperimentalImmediateDataLimits experimentalImmediateDataLimits = {};
-    experimentalImmediateDataLimits.chain.sType = WGPUSType_DawnExperimentalImmediateDataLimits;
-    limits.nextInChain = &experimentalImmediateDataLimits.chain;
-
     // Chained DawnTexelCopyBufferRowAlignmentLimits.
     WGPUDawnTexelCopyBufferRowAlignmentLimits texelCopyBufferRowAlignmentLimits = {};
     texelCopyBufferRowAlignmentLimits.chain.sType = WGPUSType_DawnTexelCopyBufferRowAlignmentLimits;
-    experimentalImmediateDataLimits.chain.next = &texelCopyBufferRowAlignmentLimits.chain;
+    limits.nextInChain = &texelCopyBufferRowAlignmentLimits.chain;
 
     mProcs.deviceGetLimits(device, &limits);
     cmd.limits = &limits;

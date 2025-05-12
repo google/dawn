@@ -99,19 +99,12 @@ ResultOrError<UnpackedPtr<PipelineLayoutDescriptor>> ValidatePipelineLayoutDescr
 
     DAWN_TRY(ValidateBindingCounts(device->GetLimits(), bindingCounts, device->GetAdapter()));
 
-    // Validate immediateDataRangeByteSize.
-    if (descriptor->immediateDataRangeByteSize) {
-        DAWN_INVALID_IF(!device->HasFeature(Feature::ChromiumExperimentalImmediate),
-                        "Set non-zero immediateDatRangeByteSize without "
-                        "%s feature is not allowed.",
-                        ToAPI(Feature::ChromiumExperimentalImmediate));
-
-        uint32_t maxImmediateDataRangeByteSize =
-            device->GetLimits().experimentalImmediateDataLimits.maxImmediateDataRangeByteSize;
-
-        DAWN_INVALID_IF(descriptor->immediateDataRangeByteSize > maxImmediateDataRangeByteSize,
-                        "immediateDataRangeByteSize (%i) is larger than the maximum allowed (%i).",
-                        descriptor->immediateDataRangeByteSize, maxImmediateDataRangeByteSize);
+    // Validate immediateSize.
+    if (descriptor->immediateSize) {
+        uint32_t maxImmediateSize = device->GetLimits().v1.maxImmediateSize;
+        DAWN_INVALID_IF(descriptor->immediateSize > maxImmediateSize,
+                        "immediateSize (%i) is larger than the maximum allowed (%i).",
+                        descriptor->immediateSize, maxImmediateSize);
     }
 
     return unpacked;
@@ -134,7 +127,7 @@ PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device,
                                        const UnpackedPtr<PipelineLayoutDescriptor>& descriptor,
                                        ApiObjectBase::UntrackedByDeviceTag tag)
     : ApiObjectBase(device, descriptor->label),
-      mImmediateDataRangeByteSize(descriptor->immediateDataRangeByteSize) {
+      mImmediateDataRangeByteSize(descriptor->immediateSize) {
     DAWN_ASSERT(descriptor->bindGroupLayoutCount <= kMaxBindGroups);
 
     // According to WebGPU SPEC of CreatePipelineLayout(), if bindGroupLayouts[i] is null or
@@ -441,7 +434,7 @@ ResultOrError<Ref<PipelineLayoutBase>> PipelineLayoutBase::CreateDefault(
     PipelineLayoutDescriptor desc = {};
     desc.bindGroupLayouts = bgls.data();
     desc.bindGroupLayoutCount = static_cast<uint32_t>(kMaxBindGroupsTyped);
-    desc.immediateDataRangeByteSize = immediateDataRangeByteSize;
+    desc.immediateSize = immediateDataRangeByteSize;
 
     Ref<PipelineLayoutBase> result;
     DAWN_TRY_ASSIGN(result, device->CreatePipelineLayout(&desc, pipelineCompatibilityToken));
@@ -480,7 +473,7 @@ BindGroupLayoutBase* PipelineLayoutBase::GetFrontendBindGroupLayout(BindGroupInd
 
 const BindGroupLayoutInternalBase* PipelineLayoutBase::GetBindGroupLayout(
     BindGroupIndex group) const {
-        return GetFrontendBindGroupLayout(group)->GetInternalBindGroupLayout();
+    return GetFrontendBindGroupLayout(group)->GetInternalBindGroupLayout();
 }
 
 const BindGroupMask& PipelineLayoutBase::GetBindGroupLayoutsMask() const {

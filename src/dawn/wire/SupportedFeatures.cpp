@@ -113,7 +113,6 @@ bool IsFeatureSupported(WGPUFeatureName feature) {
         case WGPUFeatureName_DawnPartialLoadResolveTexture:
         case WGPUFeatureName_Subgroups:
         case WGPUFeatureName_ClipDistances:
-        case WGPUFeatureName_ChromiumExperimentalImmediate:
         case WGPUFeatureName_DawnTexelCopyBufferRowAlignment:
         case WGPUFeatureName_FlexibleTextureViews:
         case WGPUFeatureName_ChromiumExperimentalSubgroupMatrix:

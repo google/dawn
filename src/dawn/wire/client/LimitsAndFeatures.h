@@ -48,7 +48,6 @@ class LimitsAndFeatures {
 
   private:
     WGPULimits mLimits;
-    WGPUDawnExperimentalImmediateDataLimits mExperimentalImmediateDataLimits;
     WGPUDawnTexelCopyBufferRowAlignmentLimits mTexelCopyBufferRowAlignmentLimits;
     absl::flat_hash_set<WGPUFeatureName> mFeatures;
 };

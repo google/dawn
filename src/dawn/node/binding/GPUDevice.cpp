@@ -183,22 +183,10 @@ interop::Interface<interop::GPUSupportedFeatures> GPUDevice::getFeatures(Napi::E
 
 interop::Interface<interop::GPUSupportedLimits> GPUDevice::getLimits(Napi::Env env) {
     wgpu::Limits limits{};
-    wgpu::DawnExperimentalImmediateDataLimits immediateDataLimits{};
-
-    auto InsertInChain = [&](wgpu::ChainedStructOut* node) {
-        node->nextInChain = limits.nextInChain;
-        limits.nextInChain = node;
-    };
-
-    // Query the immediate data limits only if ChromiumExperimentalImmediateData feature
-    // is available on device.
-    if (device_.HasFeature(FeatureName::ChromiumExperimentalImmediate)) {
-        InsertInChain(&immediateDataLimits);
-    }
-
     if (!device_.GetLimits(&limits)) {
         Napi::Error::New(env, "failed to get device limits").ThrowAsJavaScriptException();
     }
+
     return interop::GPUSupportedLimits::Create<GPUSupportedLimits>(env, limits);
 }
 

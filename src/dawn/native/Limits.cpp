@@ -125,13 +125,8 @@
     X(v1,                              Maximum,                                  maxVertexBuffers,         8,         8,          8) \
     X(v1,                              Maximum,                               maxVertexAttributes,        16,        16,         30) \
     X(v1,                              Maximum,                        maxVertexBufferArrayStride,      2048,      2048,       2048) \
-    X(v1,                              Maximum,                               maxColorAttachments,         4,         8,          8)
-
-// These limits represents experimental features. The only element experimentalImmediateDataLimits
-// doesn't have tiers yet. Define compat and two tiers with the same value since the macros in this file expect more than one tier.
-//                                                                             compat   tier0  tier1
-#define LIMITS_EXPERIMENTAL(X) \
-    X(experimentalImmediateDataLimits, Maximum, maxImmediateDataRangeByteSize,     16,     16,    16)
+    X(v1,                              Maximum,                               maxColorAttachments,         4,         8,          8) \
+    X(v1,                              Maximum,                               maxImmediateSize,            0,         0,         16)
 
 // clang-format on
 
@@ -157,8 +152,7 @@
     LIMITS_ATTACHMENTS(X)                  \
     LIMITS_INTER_STAGE_SHADER_VARIABLES(X) \
     LIMITS_TEXTURE_DIMENSIONS(X)           \
-    LIMITS_OTHER(X)                        \
-    LIMITS_EXPERIMENTAL(X)
+    LIMITS_OTHER(X)
 
 namespace dawn::native {
 namespace {
@@ -274,17 +268,9 @@ MaybeError ValidateAndUnpackLimitsIn(const Limits* chainedLimits,
     out->v1 = **unpacked;
     out->v1.nextInChain = nullptr;
 
-    if (auto* requiredExperimentalImmediateDataLimits =
-            unpacked.Get<DawnExperimentalImmediateDataLimits>()) {
-        DAWN_INVALID_IF(
-            !supportedFeatures.contains(wgpu::FeatureName::ChromiumExperimentalImmediate),
-            "ImmediateData is not supported without ChromiumExperimentalImmediateData supported.");
-        out->experimentalImmediateDataLimits = *requiredExperimentalImmediateDataLimits;
-        out->experimentalImmediateDataLimits.nextInChain = nullptr;
-    }
-
     // TODO(crbug.com/378361783): Add validation and default values to support requiring limits for
-    // DawnTexelCopyBufferRowAlignmentLimits.
+    // DawnTexelCopyBufferRowAlignmentLimits. Test this, see old test removed here:
+    // https://dawn-review.googlesource.com/c/dawn/+/240934/11/src/dawn/tests/unittests/native/LimitsTests.cpp#b269
     if (unpacked.Get<DawnTexelCopyBufferRowAlignmentLimits>()) {
         dawn::WarningLog()
             << "DawnTexelCopyBufferRowAlignmentLimits is not supported in required limits";
@@ -307,12 +293,6 @@ void UnpackLimitsIn(const Limits* chainedLimits, CombinedLimits* out) {
     // copy required v1 limits.
     out->v1 = **unpacked;
     out->v1.nextInChain = nullptr;
-
-    if (auto* requiredExperimentalImmediateDataLimits =
-            unpacked.Get<DawnExperimentalImmediateDataLimits>()) {
-        out->experimentalImmediateDataLimits = *requiredExperimentalImmediateDataLimits;
-        out->experimentalImmediateDataLimits.nextInChain = nullptr;
-    }
 }
 
 MaybeError ValidateLimits(const CombinedLimits& supportedLimits,
@@ -401,8 +381,8 @@ void stream::Stream<LimitsForCompilationRequest>::Write(Sink* s,
 }
 
 void NormalizeLimits(CombinedLimits* limits) {
-    // Enforce internal Dawn constants for some limits to ensure they don't go over fixed-size
-    // arrays in Dawn's internal code.
+    // Enforce internal Dawn constants for some limits to ensure they don't go over fixed limits
+    // in Dawn's internal code.
     limits->v1.maxVertexBufferArrayStride =
         std::min(limits->v1.maxVertexBufferArrayStride, kMaxVertexBufferArrayStride);
     limits->v1.maxColorAttachments =
@@ -432,17 +412,14 @@ void NormalizeLimits(CombinedLimits* limits) {
         std::min(limits->v1.maxStorageTexturesInFragmentStage, kMaxStorageTexturesPerShaderStage);
     limits->v1.maxUniformBuffersPerShaderStage =
         std::min(limits->v1.maxUniformBuffersPerShaderStage, kMaxUniformBuffersPerShaderStage);
+    limits->v1.maxImmediateSize =
+        std::min(limits->v1.maxImmediateSize, kMaxSupportedImmediateDataBytes);
 
     // Additional enforcement for dependent limits.
     limits->v1.maxStorageBufferBindingSize =
         std::min(limits->v1.maxStorageBufferBindingSize, limits->v1.maxBufferSize);
     limits->v1.maxUniformBufferBindingSize =
         std::min(limits->v1.maxUniformBufferBindingSize, limits->v1.maxBufferSize);
-
-    // Enforce immediate data bytes to ensure they don't go over a fixed limit in Dawn's internal
-    // code.
-    limits->experimentalImmediateDataLimits.maxImmediateDataRangeByteSize =
-        kMaxSupportedImmediateDataBytes;
 }
 
 void EnforceLimitSpecInvariants(Limits* limits, wgpu::FeatureLevel featureLevel) {
@@ -489,23 +466,6 @@ MaybeError FillLimits(Limits* outputLimits,
         **unpacked = combinedLimits.v1;
         // Recover origin chain.
         unpacked->nextInChain = originalChain;
-    }
-
-    if (auto* immediateDataLimits = unpacked.Get<DawnExperimentalImmediateDataLimits>()) {
-        wgpu::ChainedStructOut* originalChain = immediateDataLimits->nextInChain;
-        if (!supportedFeatures.IsEnabled(wgpu::FeatureName::ChromiumExperimentalImmediate)) {
-            // If immediate data features are not supported, return the default-initialized
-            // DawnExperimentalImmediateDataLimits object, where maxImmediateDataByteSize is
-            // WGPU_LIMIT_U32_UNDEFINED.
-            *immediateDataLimits = DawnExperimentalImmediateDataLimits{};
-        } else {
-            // If adapter supports immediate data features, always return the valid immediate data
-            // limits.
-            *immediateDataLimits = combinedLimits.experimentalImmediateDataLimits;
-        }
-
-        // Recover origin chain.
-        immediateDataLimits->nextInChain = originalChain;
     }
 
     if (auto* texelCopyBufferRowAlignmentLimits =

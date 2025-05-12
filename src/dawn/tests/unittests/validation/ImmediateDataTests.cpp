@@ -40,22 +40,40 @@ namespace {
 
 class ImmediateDataDisableTest : public ValidationTest {};
 
-// Check that creating a PipelineLayout with non-zero immediateDataRangeByteSize is disallowed
+// Check that creating a PipelineLayout with non-zero immediateSize is disallowed
 // without the feature enabled.
-TEST_F(ImmediateDataDisableTest, ImmediateDataRangeByteSizeNotAllowed) {
+TEST_F(ImmediateDataDisableTest, ImmediateSizeNotAllowed) {
     wgpu::PipelineLayoutDescriptor desc;
     desc.bindGroupLayoutCount = 0;
-    desc.immediateDataRangeByteSize = 1;
+    desc.immediateSize = 1;
 
     ASSERT_DEVICE_ERROR(device.CreatePipelineLayout(&desc));
 }
 
+// Check that SetImmediateData doesn't work (even with size=0) without maxImmediateSize>0.
+TEST_F(ImmediateDataDisableTest, SetImmediateData) {
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetImmediateData(0, nullptr, 0);
+        pass.End();
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+    {
+        const uint32_t data = 0;
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetImmediateData(0, &data, 4);
+        pass.End();
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+}
+
 class ImmediateDataTest : public ValidationTest {
   protected:
-    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
-        // Test only the non-coherent version, ad assume that the same validaiton code paths are
-        // taken for the coherent path
-        return {wgpu::FeatureName::ChromiumExperimentalImmediate};
+    wgpu::Limits GetRequiredLimits(const wgpu::Limits&) override {
+        return wgpu::Limits{.maxImmediateSize = kDefaultMaxImmediateDataBytes};
     }
 
     wgpu::BindGroupLayout CreateBindGroupLayout() {
@@ -71,44 +89,40 @@ class ImmediateDataTest : public ValidationTest {
         return device.CreateBindGroupLayout(&bindGroupLayoutDesc);
     }
 
-    wgpu::PipelineLayout CreatePipelineLayout(uint32_t requiredImmediateDataRangeByteSize) {
+    wgpu::PipelineLayout CreatePipelineLayout(uint32_t requiredImmediateSize) {
         wgpu::BindGroupLayout bindGroupLayout = CreateBindGroupLayout();
 
         wgpu::PipelineLayoutDescriptor pipelineLayoutDesc;
         pipelineLayoutDesc.bindGroupLayoutCount = 1;
         pipelineLayoutDesc.bindGroupLayouts = &bindGroupLayout;
-        pipelineLayoutDesc.immediateDataRangeByteSize = requiredImmediateDataRangeByteSize;
+        pipelineLayoutDesc.immediateSize = requiredImmediateSize;
         return device.CreatePipelineLayout(&pipelineLayoutDesc);
     }
 
     wgpu::ShaderModule mShaderModule;
 };
 
-// Check that non-zero immediateDataRangeByteSize is possible with feature enabled and size must
+// Check that non-zero immediateSize is possible with feature enabled and size must
 // below max size limits.
-TEST_F(ImmediateDataTest, ValidateImmediateDataRangeByteSize) {
-    DAWN_SKIP_TEST_IF(!device.HasFeature(wgpu::FeatureName::ChromiumExperimentalImmediate));
-
+TEST_F(ImmediateDataTest, ValidateImmediateSize) {
     wgpu::PipelineLayoutDescriptor desc;
     desc.bindGroupLayoutCount = 0;
 
-    // Success case with valid immediateDataRangeByteSize.
+    // Success case with valid immediateSize.
     {
-        desc.immediateDataRangeByteSize = kDefaultMaxImmediateDataBytes;
+        desc.immediateSize = kDefaultMaxImmediateDataBytes;
         device.CreatePipelineLayout(&desc);
     }
 
-    // Failed case with invalid immediateDataRangeByteSize that exceed limits.
+    // Failed case with invalid immediateSize that exceed limits.
     {
-        desc.immediateDataRangeByteSize = kDefaultMaxImmediateDataBytes + 1;
+        desc.immediateSize = kDefaultMaxImmediateDataBytes + 1;
         ASSERT_DEVICE_ERROR(device.CreatePipelineLayout(&desc));
     }
 }
 
 // Check that SetImmediateData offset and length must be aligned to 4 bytes.
 TEST_F(ImmediateDataTest, ValidateSetImmediateDataAlignment) {
-    DAWN_SKIP_TEST_IF(!device.HasFeature(wgpu::FeatureName::ChromiumExperimentalImmediate));
-
     // Success cases
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -149,8 +163,6 @@ TEST_F(ImmediateDataTest, ValidateSetImmediateDataAlignment) {
 
 // Check that SetImmediateData offset + length must be in bound.
 TEST_F(ImmediateDataTest, ValidateSetImmediateDataOOB) {
-    DAWN_SKIP_TEST_IF(!device.HasFeature(wgpu::FeatureName::ChromiumExperimentalImmediate));
-
     // Success cases
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -224,7 +236,6 @@ TEST_F(ImmediateDataTest, ValidateSetImmediateDataOOB) {
 
 // Check that pipelineLayout immediate data bytes compatible with shaders.
 TEST_F(ImmediateDataTest, ValidatePipelineLayoutImmediateDataBytesAndShaders) {
-    DAWN_SKIP_TEST_IF(!device.HasFeature(wgpu::FeatureName::ChromiumExperimentalImmediate));
     constexpr uint32_t kShaderImmediateDataBytes = 12u;
     wgpu::ShaderModule shaderModule = utils::CreateShaderModule(device, R"(
         enable chromium_experimental_immediate;
@@ -308,7 +319,6 @@ TEST_F(ImmediateDataTest, ValidatePipelineLayoutImmediateDataBytesAndShaders) {
 
 // Check that default pipelineLayout has too many immediate data bytes .
 TEST_F(ImmediateDataTest, ValidateDefaultPipelineLayout) {
-    DAWN_SKIP_TEST_IF(!device.HasFeature(wgpu::FeatureName::ChromiumExperimentalImmediate));
     wgpu::ShaderModule shaderModule = utils::CreateShaderModule(device, R"(
         enable chromium_experimental_immediate;
         var<immediate> fragmentConstants: vec4f;
