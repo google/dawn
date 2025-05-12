@@ -45,6 +45,7 @@
 #include "dawn/native/d3d11/BindGroupLayoutD3D11.h"
 #include "dawn/native/d3d11/BufferD3D11.h"
 #include "dawn/native/d3d11/CommandBufferD3D11.h"
+#include "dawn/native/d3d11/CommandRecordingContextD3D11.h"
 #include "dawn/native/d3d11/ComputePipelineD3D11.h"
 #include "dawn/native/d3d11/PhysicalDeviceD3D11.h"
 #include "dawn/native/d3d11/PipelineLayoutD3D11.h"
@@ -457,6 +458,23 @@ void Device::SetLabelImpl() {}
 
 void Device::DisposeKeyedMutex(ComPtr<IDXGIKeyedMutex> dxgiKeyedMutex) {
     // Nothing to do, the ComPtr will release the keyed mutex.
+}
+
+bool Device::ReduceMemoryUsageImpl() {
+    // D3D11 defers the deletion of resources until we call Flush().
+    // So trigger a Flush() here to force deleting any pending resources.
+    auto commandContext =
+        ToBackend(GetQueue())
+            ->GetScopedPendingCommandContext(ExecutionQueueBase::SubmitMode::Passive);
+    commandContext.Flush();
+
+    // Call Trim() to delete any internal resources created by the driver.
+    ComPtr<IDXGIDevice3> dxgiDevice3;
+    if (SUCCEEDED(mD3d11Device.As(&dxgiDevice3))) {
+        dxgiDevice3->Trim();
+    }
+
+    return false;
 }
 
 bool Device::MayRequireDuplicationOfIndirectParameters() const {

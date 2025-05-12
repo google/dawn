@@ -84,6 +84,8 @@ class Device final : public d3d::Device {
 
     void DisposeKeyedMutex(ComPtr<IDXGIKeyedMutex> dxgiKeyedMutex) override;
 
+    bool ReduceMemoryUsageImpl() override;
+
     uint32_t GetUAVSlotCount() const;
 
     ResultOrError<TextureViewBase*> GetOrCreateCachedImplicitPixelLocalStorageAttachment(
