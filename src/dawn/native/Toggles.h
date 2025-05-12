@@ -153,6 +153,7 @@ enum class Toggle {
     UseVulkanMemoryModel,
     VulkanScalarizeClampBuiltin,
     VulkanAddWorkToEmptyResolvePass,
+    VulkanDisableFramebufferCache,
 
     // Unresolved issues.
     NoWorkaroundSampleMaskBecomesZeroForAllButLastColorTarget,
