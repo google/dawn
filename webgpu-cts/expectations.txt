@@ -291,8 +291,8 @@ crbug.com/414844446 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call
 crbug.com/414844446 [ dawn-no-backend-validation intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:*;offset=true [ Skip ]
 crbug.com/414844446 [ dawn-no-backend-validation intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:*;offset=true [ Skip ]
 
-crbug.com/407076122 [ android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,subgroupAdd:compute,split:case="every_even" [ Skip ]
-crbug.com/407076122 [ android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,subgroupMul:compute,split:case="lower_half" [ Skip ]
+crbug.com/407076122 [ android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,subgroupAdd:compute,split:case="every_even" [ Failure ]
+crbug.com/407076122 [ android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,subgroupMul:compute,split:case="lower_half" [ Failure ]
 
 # Timeouts on error_scope
 crbug.com/367513506 [ asan win ] webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=100000 [ Skip ]
