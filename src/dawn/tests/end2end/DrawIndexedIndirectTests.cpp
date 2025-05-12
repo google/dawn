@@ -284,6 +284,9 @@ TEST_P(DrawIndexedIndirectTest, ValidateMultipleDraws) {
     // TODO(dawn:1549) Fails on Qualcomm-based Android devices.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsQualcomm());
 
+    // TODO(42242119): fail on Qualcomm Adreno X1.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsQualcomm());
+
     // It doesn't make sense to test invalid inputs when validation is disabled.
     DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
 
@@ -436,6 +439,9 @@ TEST_P(DrawIndexedIndirectTest, ValidateEncodeMultipleMixedDrawsOneIndirectBuffe
 
     // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+
+    // TODO(42242119): fail on Qualcomm Adreno X1.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsQualcomm());
 
     // It's necessary to for this feature to be disabled so that validation layers
     // can reject non-indexed indirect draws that use a nonzero firstInstance.

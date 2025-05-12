@@ -393,6 +393,9 @@ TEST_P(OcclusionQueryTests, RewriteNoDrawToZero) {
     // TODO(dawn:2247): Failing on ANGLE/D3D11
     DAWN_SUPPRESS_TEST_IF(IsANGLED3D11());
 
+    // TODO(42242119): hang/crash on Qualcomm Adreno X1.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsQualcomm());
+
     constexpr uint32_t kQueryCount = 1;
 
     wgpu::QuerySet querySet = CreateOcclusionQuerySet(kQueryCount);
@@ -433,6 +436,9 @@ TEST_P(OcclusionQueryTests, RewriteNoDrawToZero) {
 TEST_P(OcclusionQueryTests, RewriteNoDrawToZeroSeparateSubmit) {
     // TODO(dawn:1870): D3D11_QUERY_OCCLUSION_PREDICATE doesn't work on Intel Gen12 and Xe GPUs.
     DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsIntelGen12OrLater());
+
+    // TODO(42242119): hang/crash on Qualcomm Adreno X1.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsQualcomm());
 
     constexpr uint32_t kQueryCount = 1;
 

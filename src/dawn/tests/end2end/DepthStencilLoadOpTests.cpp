@@ -228,6 +228,9 @@ TEST_P(DepthStencilLoadOpTests, ClearBothMip0Then1) {
     // TODO(crbug.com/dawn/1828): depth16unorm broken on Apple GPUs.
     DAWN_SUPPRESS_TEST_IF(IsApple() && GetParam().mFormat == wgpu::TextureFormat::Depth16Unorm);
 
+    // TODO(42242119): fail on Qualcomm Adreno X1.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsQualcomm());
+
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     encoder.BeginRenderPass(&renderPassDescriptors[0]).End();
     encoder.BeginRenderPass(&renderPassDescriptors[1]).End();
@@ -242,6 +245,9 @@ TEST_P(DepthStencilLoadOpTests, ClearBothMip0Then1) {
 TEST_P(DepthStencilLoadOpTests, ClearBothMip1Then0) {
     // TODO(crbug.com/dawn/1828): depth16unorm broken on Apple GPUs.
     DAWN_SUPPRESS_TEST_IF(IsApple() && GetParam().mFormat == wgpu::TextureFormat::Depth16Unorm);
+
+    // TODO(42242119): fail on Qualcomm Adreno X1.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsQualcomm());
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     encoder.BeginRenderPass(&renderPassDescriptors[1]).End();
