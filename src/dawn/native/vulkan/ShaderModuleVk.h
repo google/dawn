@@ -47,19 +47,6 @@ struct ProgrammableStage;
 
 namespace vulkan {
 
-struct TransformedShaderModuleCacheKey {
-    uintptr_t layoutPtr;
-    std::string entryPoint;
-    PipelineConstantEntries constants;
-    bool emitPointSize;
-
-    bool operator==(const TransformedShaderModuleCacheKey& other) const;
-};
-
-struct TransformedShaderModuleCacheKeyHashFunc {
-    size_t operator()(const TransformedShaderModuleCacheKey& key) const;
-};
-
 class Device;
 class PipelineLayout;
 

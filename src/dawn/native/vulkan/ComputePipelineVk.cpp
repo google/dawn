@@ -121,20 +121,13 @@ MaybeError ComputePipeline::InitializeImpl() {
     // Try to see if we have anything in the blob cache.
     platform::metrics::DawnHistogramTimer cacheTimer(GetDevice()->GetPlatform());
     Ref<PipelineCache> cache = ToBackend(GetDevice()->GetOrCreatePipelineCache(GetCacheKey()));
-    if (cache->CacheHit()) {
-        DAWN_TRY(CheckVkSuccess(
-            device->fn.CreateComputePipelines(device->GetVkDevice(), cache->GetHandle(), 1,
-                                              &createInfo, nullptr, &*mHandle),
-            "CreateComputePipelines"));
-        cacheTimer.RecordMicroseconds("Vulkan.CreateComputePipelines.CacheHit");
-    } else {
-        cacheTimer.Reset();
-        DAWN_TRY(CheckVkSuccess(
-            device->fn.CreateComputePipelines(device->GetVkDevice(), cache->GetHandle(), 1,
-                                              &createInfo, nullptr, &*mHandle),
-            "CreateComputePipelines"));
-        cacheTimer.RecordMicroseconds("Vulkan.CreateComputePipelines.CacheMiss");
-    }
+    DAWN_TRY(
+        CheckVkSuccess(device->fn.CreateComputePipelines(device->GetVkDevice(), cache->GetHandle(),
+                                                         1, &createInfo, nullptr, &*mHandle),
+                       "CreateComputePipelines"));
+    cacheTimer.RecordMicroseconds(cache->CacheHit() ? "Vulkan.CreateComputePipelines.CacheHit"
+                                                    : "Vulkan.CreateComputePipelines.CacheMiss");
+
     DAWN_TRY(cache->DidCompilePipeline());
 
     SetLabelImpl();

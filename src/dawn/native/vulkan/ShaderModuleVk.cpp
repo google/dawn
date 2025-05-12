@@ -74,31 +74,6 @@ namespace dawn::native::vulkan {
 DAWN_SERIALIZABLE(struct, CompiledSpirv, COMPILED_SPIRV_MEMBERS){};
 #undef COMPILED_SPIRV_MEMBERS
 
-bool TransformedShaderModuleCacheKey::operator==(
-    const TransformedShaderModuleCacheKey& other) const {
-    if (layoutPtr != other.layoutPtr || entryPoint != other.entryPoint ||
-        constants.size() != other.constants.size()) {
-        return false;
-    }
-    if (!std::equal(constants.begin(), constants.end(), other.constants.begin())) {
-        return false;
-    }
-    if (emitPointSize != other.emitPointSize) {
-        return false;
-    }
-    return true;
-}
-
-size_t TransformedShaderModuleCacheKeyHashFunc::operator()(
-    const TransformedShaderModuleCacheKey& key) const {
-    size_t hash = 0;
-    HashCombine(&hash, key.layoutPtr, key.entryPoint, key.emitPointSize);
-    for (const auto& entry : key.constants) {
-        HashCombine(&hash, entry.first, entry.second);
-    }
-    return hash;
-}
-
 // static
 ResultOrError<Ref<ShaderModule>> ShaderModule::Create(
     Device* device,
@@ -157,14 +132,6 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
     bool emitPointSize,
     const ImmediateConstantMask& pipelineImmediateMask) {
     TRACE_EVENT0(GetDevice()->GetPlatform(), General, "ShaderModuleVk::GetHandleAndSpirv");
-
-    // Check to see if we have the handle and spirv cached already
-    // TODO(chromium:345359083): Improve the computation of the cache key. For example, it isn't
-    // ideal to use `reinterpret_cast<uintptr_t>(layout)` as the layout may be freed and
-    // reallocated during the runtime.
-    auto cacheKey = TransformedShaderModuleCacheKey{reinterpret_cast<uintptr_t>(layout),
-                                                    programmableStage.entryPoint.c_str(),
-                                                    programmableStage.constants, emitPointSize};
 
 #if TINT_BUILD_SPV_WRITER
     // Creation of module and spirv is deferred to this point when using tint generator

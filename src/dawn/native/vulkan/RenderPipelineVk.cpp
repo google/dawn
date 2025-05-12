@@ -612,20 +612,12 @@ MaybeError RenderPipeline::InitializeImpl() {
     // Try to see if we have anything in the blob cache.
     platform::metrics::DawnHistogramTimer cacheTimer(GetDevice()->GetPlatform());
     Ref<PipelineCache> cache = ToBackend(GetDevice()->GetOrCreatePipelineCache(GetCacheKey()));
-    if (cache->CacheHit()) {
-        DAWN_TRY(CheckVkSuccess(
-            device->fn.CreateGraphicsPipelines(device->GetVkDevice(), cache->GetHandle(), 1,
-                                               &createInfo, nullptr, &*mHandle),
-            "CreateGraphicsPipelines"));
-        cacheTimer.RecordMicroseconds("Vulkan.CreateGraphicsPipelines.CacheHit");
-    } else {
-        cacheTimer.Reset();
-        DAWN_TRY(CheckVkSuccess(
-            device->fn.CreateGraphicsPipelines(device->GetVkDevice(), cache->GetHandle(), 1,
-                                               &createInfo, nullptr, &*mHandle),
-            "CreateGraphicsPipelines"));
-        cacheTimer.RecordMicroseconds("Vulkan.CreateGraphicsPipelines.CacheMiss");
-    }
+    DAWN_TRY(
+        CheckVkSuccess(device->fn.CreateGraphicsPipelines(device->GetVkDevice(), cache->GetHandle(),
+                                                          1, &createInfo, nullptr, &*mHandle),
+                       "CreateGraphicsPipelines"));
+    cacheTimer.RecordMicroseconds(cache->CacheHit() ? "Vulkan.CreateGraphicsPipelines.CacheHit"
+                                                    : "Vulkan.CreateGraphicsPipelines.CacheMiss");
 
     DAWN_TRY(cache->DidCompilePipeline());
 
