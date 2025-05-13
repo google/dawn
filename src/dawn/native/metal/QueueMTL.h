@@ -79,6 +79,10 @@ class Queue final : public QueueBase {
     std::mutex mLastSubmittedCommandsMutex;
     NSPRef<id<MTLCommandBuffer>> mLastSubmittedCommands;
 
+    // The completed serial is updated in a Metal completion handler that can be fired on a
+    // different thread, so it needs to be atomic.
+    std::atomic<uint64_t> mCompletedSerial;
+
     // This mutex must be held to access mWaitingEvents (which may happen in a Metal driver
     // thread).
     // TODO(crbug.com/dawn/2065): If we atomically knew a conservative lower bound on the

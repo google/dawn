@@ -46,7 +46,8 @@ ResultOrError<Ref<Queue>> Queue::Create(Device* device, const QueueDescriptor* d
     return queue;
 }
 
-Queue::Queue(Device* device, const QueueDescriptor* descriptor) : QueueBase(device, descriptor) {}
+Queue::Queue(Device* device, const QueueDescriptor* descriptor)
+    : QueueBase(device, descriptor), mCompletedSerial(0) {}
 
 Queue::~Queue() = default;
 
@@ -161,12 +162,19 @@ MaybeError Queue::SubmitPendingCommandBuffer() {
     // Update the completed serial once the completed handler is fired. Make a local copy of
     // mLastSubmittedSerial so it is captured by value.
     ExecutionSerial pendingSerial = GetPendingCommandSerial();
-    // This ObjC block runs on a different thread
+    // this ObjC block runs on a different thread
     [*pendingCommands addCompletedHandler:^(id<MTLCommandBuffer>) {
         TRACE_EVENT_ASYNC_END0(platform, GPUWork, "DeviceMTL::SubmitPendingCommandBuffer",
                                uint64_t(pendingSerial));
 
-        this->UpdateCompletedSerial(pendingSerial);
+        // Do an atomic_max on mCompletedSerial since it might have been increased outside the
+        // CommandBufferMTL completed handlers if the device has been lost, or if they handlers fire
+        // in an unordered way.
+        uint64_t currentCompleted = mCompletedSerial.load();
+        while (uint64_t(pendingSerial) > currentCompleted &&
+               !mCompletedSerial.compare_exchange_weak(currentCompleted, uint64_t(pendingSerial))) {
+        }
+
         this->UpdateWaitingEvents(pendingSerial);
     }];
 
@@ -221,9 +229,20 @@ MaybeError Queue::SubmitPendingCommands() {
 }
 
 ResultOrError<ExecutionSerial> Queue::CheckAndUpdateCompletedSerials() {
-    // Metal serials are updated via a thread owned by Metal so we don't actually need to do
-    // anything, just return the latest completed serial.
-    return GetCompletedCommandSerial();
+    uint64_t frontendCompletedSerial{GetCompletedCommandSerial()};
+    // sometimes we increase the serials, in which case the completed serial in
+    // the device base will surpass the completed serial we have in the metal backend, so we
+    // must update ours when we see that the completed serial from device base has
+    // increased.
+    //
+    // This update has to be atomic otherwise there is a race with the `addCompletedHandler`
+    // call below and this call could set the mCompletedSerial backwards.
+    uint64_t current = mCompletedSerial.load();
+    while (frontendCompletedSerial > current &&
+           !mCompletedSerial.compare_exchange_weak(current, frontendCompletedSerial)) {
+    }
+
+    return ExecutionSerial(mCompletedSerial.load());
 }
 
 void Queue::ForceEventualFlushOfCommands() {
@@ -235,11 +254,12 @@ void Queue::ForceEventualFlushOfCommands() {
 Ref<WaitListEvent> Queue::CreateWorkDoneEvent(ExecutionSerial serial) {
     Ref<WaitListEvent> completionEvent = AcquireRef(new WaitListEvent());
     mWaitingEvents.Use([&](auto events) {
-        // Now that we hold the lock, check against completed serial before inserting.
+        // Now that we hold the lock, check against mCompletedSerial before inserting.
         // This serial may have just completed. If it did, mark the event complete.
         // Also check for device loss. Otherwise, we could enqueue the event
         // after mWaitingEvents has been flushed for device loss, and it'll never get cleaned up.
-        if (GetDevice()->IsLost() || serial <= GetCompletedCommandSerial()) {
+        if (GetDevice()->IsLost() ||
+            serial <= ExecutionSerial(mCompletedSerial.load(std::memory_order_acquire))) {
             completionEvent->Signal();
         } else {
             // Insert the event into the list which will be signaled inside Metal's queue
