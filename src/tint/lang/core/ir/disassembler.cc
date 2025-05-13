@@ -993,6 +993,10 @@ void Disassembler::EmitStructDecl(const core::type::Struct* str) {
             out_ << ", " << StyleAttribute("@builtin") << "("
                  << StyleLiteral(member->Attributes().builtin.value()) << ")";
         }
+        if (member->Attributes().binding_point.has_value()) {
+            out_ << ", ";
+            EmitBindingPoint(member->Attributes().binding_point.value());
+        }
         EmitLine();
     }
     out_ << "}";

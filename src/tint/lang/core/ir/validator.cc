@@ -1856,9 +1856,8 @@ void Validator::CheckType(const core::type::Type* root,
 
                 if (type != root) {
                     // Nesting pointer types inside structures is guarded by a capability.
-                    if (!(root->Is<core::type::Struct>() &&
-                          capabilities_.Contains(
-                              Capability::kAllowPointersAndHandlesInStructures))) {
+                    if (!(capabilities_.Contains(
+                            Capability::kAllowPointersAndHandlesInStructures))) {
                         diag() << "nested pointer types are not permitted";
                         return false;
                     }
