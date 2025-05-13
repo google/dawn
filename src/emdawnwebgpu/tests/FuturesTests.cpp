@@ -116,7 +116,7 @@ TEST_F(AdapterLevelTests, RequestDevice) {
 
 TEST_F(AdapterLevelTests, RequestDeviceThenDestroy) {
     wgpu::Device device = nullptr;
-    wgpu::DeviceLostReason reason;
+    wgpu::DeviceLostReason reason{};
 
     wgpu::DeviceDescriptor descriptor = {};
     descriptor.SetDeviceLostCallback(
@@ -134,12 +134,17 @@ TEST_F(AdapterLevelTests, RequestDeviceThenDestroy) {
 }
 
 TEST_F(AdapterLevelTests, RequestDeviceThenDrop) {
-    wgpu::DeviceLostReason reason;
+    wgpu::DeviceLostReason reason{};
 
     wgpu::DeviceDescriptor descriptor = {};
     descriptor.SetDeviceLostCallback(
         wgpu::CallbackMode::AllowSpontaneous,
-        [&reason](const wgpu::Device&, wgpu::DeviceLostReason r, wgpu::StringView) { reason = r; });
+        [&reason](const wgpu::Device& d, wgpu::DeviceLostReason r, wgpu::StringView) {
+            reason = r;
+            // d should be null even though this is called during wgpuDeviceRelease()
+            // so the allocation hasn't been freed yet.
+            EXPECT_EQ(nullptr, d.Get());
+        });
     wgpu::Device device = RequestDevice(&descriptor);
 
     auto deviceLostFuture = device.GetLostFuture();

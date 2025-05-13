@@ -1214,9 +1214,10 @@ wgpu::Device DawnTestBase::CreateDevice(std::string isolationKey) {
     DAWN_ASSERT(apiDevice);
 
     // The loss of the device is expected to happen at the end of the test so add it directly.
-    EXPECT_CALL(mDeviceLostCallback,
-                Call(CHandleIs(apiDevice.Get()), wgpu::DeviceLostReason::Destroyed, _))
-        .Times(AtMost(1));
+    // We don't know if the device will be dropped or Destroy()ed, so we can't check device=null.
+    EXPECT_CALL(mDeviceLostCallback, Call(_, wgpu::DeviceLostReason::Destroyed, _))
+        .Times(AtMost(1))
+        .RetiresOnSaturation();
 
     apiDevice.SetLoggingCallback([](wgpu::LoggingType type, wgpu::StringView message) {
         std::string_view view = {message.data, message.length};

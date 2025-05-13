@@ -223,6 +223,7 @@ void DeviceBase::DeviceLostEvent::Complete(EventCompletionType completionType) {
         mCallback(&device, ToAPI(mReason), ToOutputStringView(mMessage), userdata1, userdata2);
     }
 
+    // Break the ref cycle between DeviceBase and DeviceLostEvent.
     mDevice = nullptr;
 }
 
@@ -473,6 +474,13 @@ void DeviceBase::WillDropLastExternalRef() {
         // the lock.
         auto deviceLock(GetScopedLock());
 
+        // Set DeviceLostEvent to pass a null device to the callback (which may happen in Destroy()
+        // depending on the CallbackMode). This also makes DeviceLostEvent skip unregistering the
+        // UncapturedError and Logging callbacks; they'll be unregistered later in this function.
+        if (mLostEvent) {
+            mLostEvent->mDevice = nullptr;
+        }
+
         // DeviceBase uses RefCountedWithExternalCount to break refcycles.
         //
         // DeviceBase holds multiple Refs to various API objects (pipelines, buffers, etc.) which
@@ -502,7 +510,7 @@ void DeviceBase::WillDropLastExternalRef() {
 
     auto deviceLock(GetScopedLock());
     // Drop the device's reference to the queue. Because the application dropped the last external
-    // references, they can no longer get the queue from APIGetQueue().
+    // reference, it's UB if they try to get the queue from APIGetQueue().
     mQueue = nullptr;
 
     // Reset callbacks since after dropping the last external reference, the application may have

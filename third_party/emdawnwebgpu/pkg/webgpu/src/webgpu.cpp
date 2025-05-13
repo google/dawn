@@ -168,7 +168,7 @@ class RefCounted : NonMovable {
     return false;
   }
 
-  bool IsImported() { return mIsImportedFromJS; }
+  bool IsImported() const { return mIsImportedFromJS; }
 
  private:
   std::atomic<uint64_t> mRefCount = 1;
@@ -382,7 +382,6 @@ enum class EventType {
 };
 
 class EventManager;
-class TrackedEvent;
 
 class TrackedEvent : NonMovable {
  public:
@@ -730,6 +729,8 @@ struct WGPUQueueImpl final : public EventSource, public RefCounted {
   WGPUQueueImpl(const EventSource* source);
 };
 
+enum class DropDeviceFromDeviceLostEvent : bool { No, Yes };
+
 // Device is specially implemented in order to handle refcounting the Queue.
 struct WGPUDeviceImpl final : public EventSource,
                               public RefCountedWithExternalCount {
@@ -741,7 +742,7 @@ struct WGPUDeviceImpl final : public EventSource,
   // Injection constructor used when we already have a backing Device.
   WGPUDeviceImpl(const EventSource* source, WGPUQueue queue);
 
-  void Destroy();
+  void Destroy(DropDeviceFromDeviceLostEvent dropDevice);
   WGPUQueue GetQueue() const;
   WGPUFuture GetLostFuture() const;
 
@@ -936,7 +937,15 @@ class DeviceLostEvent final : public TrackedEvent {
 
   EventType GetType() override { return kType; }
 
-  void ReadyHook(WGPUDeviceLostReason reason, const char* message) {
+  // If dropDevice=Yes, drops the DeviceLostEvent->WGPUDeviceImpl ref so the
+  // device won't be passed to the callback, in preparation to free the device.
+  void ReadyHook(DropDeviceFromDeviceLostEvent dropDevice,
+                 WGPUDeviceLostReason reason,
+                 const char* message) {
+    if (dropDevice == DropDeviceFromDeviceLostEvent::Yes) {
+      mDevice = nullptr;
+    }
+
     mReason = reason;
     if (message) {
       mMessage = message;
@@ -949,9 +958,7 @@ class DeviceLostEvent final : public TrackedEvent {
       mMessage = "A valid external Instance reference no longer exists.";
     }
     if (mCallback) {
-      WGPUDevice device = mReason != WGPUDeviceLostReason_FailedCreation
-                              ? mDevice.Get()
-                              : nullptr;
+      WGPUDevice device = mDevice.Get();
       mCallback(&device, mReason, ToOutputStringView(mMessage), mUserdata1,
                 mUserdata2);
     }
@@ -1270,7 +1277,8 @@ void emwgpuOnCreateRenderPipelineCompleted(double futureId,
 void emwgpuOnDeviceLostCompleted(double futureId,
                                  WGPUDeviceLostReason reason,
                                  const char* message) {
-  GetEventManager().SetFutureReady<DeviceLostEvent>(futureId, reason, message);
+  GetEventManager().SetFutureReady<DeviceLostEvent>(
+      futureId, DropDeviceFromDeviceLostEvent::No, reason, message);
 }
 void emwgpuOnMapAsyncCompleted(double futureId,
                                WGPUMapAsyncStatus status,
@@ -1311,8 +1319,12 @@ void emwgpuOnRequestDeviceCompleted(double futureId,
     GetEventManager().SetFutureReady<RequestDeviceEvent>(futureId, status,
                                                          nullptr, message);
     GetEventManager().SetFutureReady<DeviceLostEvent>(
-        device->GetLostFuture().id, WGPUDeviceLostReason_FailedCreation,
-        "Device failed at creation.");
+        device->GetLostFuture().id, DropDeviceFromDeviceLostEvent::Yes,
+        WGPUDeviceLostReason_FailedCreation, "Device creation failed.");
+
+    // Free the device now that there should be no pointers to it.
+    [[maybe_unused]] bool deviceFreed = device->Release();
+    assert(deviceFreed);
   }
 }
 void emwgpuOnWorkDoneCompleted(double futureId,
@@ -1489,7 +1501,13 @@ WGPUDeviceImpl::WGPUDeviceImpl(const EventSource* source, WGPUQueue queue)
   mQueue.Acquire(queue);
 }
 
-void WGPUDeviceImpl::Destroy() {
+void WGPUDeviceImpl::Destroy(DropDeviceFromDeviceLostEvent dropDevice) {
+  // Ready the DeviceLostEvent now. dropDevice=Yes ensures we can't later
+  // try to pass an invalid device pointer to the callback.
+  GetEventManager().SetFutureReady<DeviceLostEvent>(
+      mDeviceLostFutureId, dropDevice, WGPUDeviceLostReason_Destroyed,
+      "Device was destroyed.");
+
   emwgpuDeviceDestroy(this);
 }
 
@@ -1499,6 +1517,11 @@ WGPUQueue WGPUDeviceImpl::GetQueue() const {
 }
 
 WGPUFuture WGPUDeviceImpl::GetLostFuture() const {
+  if (IsImported()) {
+    DEBUG_PRINTF("GetLostFuture cannot be called on an imported device.");
+    assert(false);
+  }
+  assert(mDeviceLostFutureId != kNullFutureId);
   return WGPUFuture{mDeviceLostFutureId};
 }
 
@@ -1515,8 +1538,13 @@ void WGPUDeviceImpl::OnUncapturedError(WGPUErrorType type,
 }
 
 void WGPUDeviceImpl::WillDropLastExternalRef() {
-  if (!IsImported()) {
-    Destroy();
+  if (IsImported()) {
+    // Note Destroy is responsible for readying the DeviceLostEvent. If the
+    // device was imported, that doesn't happen, which is fine because no
+    // callback can have been set.
+    assert(mDeviceLostFutureId == kNullFutureId);
+  } else {
+    Destroy(DropDeviceFromDeviceLostEvent::Yes);
   }
 }
 
@@ -1852,7 +1880,7 @@ WGPUShaderModule wgpuDeviceCreateShaderModule(
 }
 
 void wgpuDeviceDestroy(WGPUDevice device) {
-  device->Destroy();
+  device->Destroy(DropDeviceFromDeviceLostEvent::No);
 }
 
 WGPUFuture wgpuDeviceGetLostFuture(WGPUDevice device) {
