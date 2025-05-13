@@ -75,10 +75,7 @@ struct RecordedAttachment {
     // For 3d color attachment, it's the attachment's depthSlice.
     uint32_t depthOrArrayLayer;
 
-    bool operator==(const RecordedAttachment& other) const {
-        return ((other.texture == texture) && (other.mipLevel == mipLevel) &&
-                (other.depthOrArrayLayer == depthOrArrayLayer));
-    }
+    bool operator==(const RecordedAttachment& other) const = default;
 };
 
 enum class AttachmentType : uint8_t {

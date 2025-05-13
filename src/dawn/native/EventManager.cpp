@@ -79,8 +79,7 @@ class WrappingIterator {
 
     explicit WrappingIterator(typename Traits::WrappedIter wrappedIt) : mWrappedIt(wrappedIt) {}
 
-    bool operator!=(const WrappingIterator& rhs) const { return rhs.mWrappedIt != mWrappedIt; }
-    bool operator==(const WrappingIterator& rhs) const { return rhs.mWrappedIt == mWrappedIt; }
+    bool operator==(const WrappingIterator& rhs) const = default;
 
     difference_type operator-(const WrappingIterator& rhs) const {
         return mWrappedIt - rhs.mWrappedIt;

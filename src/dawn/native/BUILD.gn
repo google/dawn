@@ -318,7 +318,6 @@ source_set("sources") {
     "ObjectBase.h",
     "ObjectContentHasher.cpp",
     "ObjectContentHasher.h",
-    "PassResourceUsage.cpp",
     "PassResourceUsage.h",
     "PassResourceUsageTracker.cpp",
     "PassResourceUsageTracker.h",

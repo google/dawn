@@ -309,11 +309,6 @@ BufferBindingInfo BufferBindingInfo::From(const BufferBindingLayout& layout) {
     };
 }
 
-bool BufferBindingInfo::operator==(const BufferBindingInfo& other) const {
-    return type == other.type && minBindingSize == other.minBindingSize &&
-           hasDynamicOffset == other.hasDynamicOffset;
-}
-
 // TextureBindingInfo
 
 // static
@@ -324,11 +319,6 @@ TextureBindingInfo TextureBindingInfo::From(const TextureBindingLayout& layout) 
         .viewDimension = defaultedLayout.viewDimension,
         .multisampled = defaultedLayout.multisampled,
     };
-}
-
-bool TextureBindingInfo::operator==(const TextureBindingInfo& other) const {
-    return sampleType == other.sampleType && viewDimension == other.viewDimension &&
-           multisampled == other.multisampled;
 }
 
 // StorageTextureBindingInfo
@@ -344,10 +334,6 @@ StorageTextureBindingInfo StorageTextureBindingInfo::From(
     };
 }
 
-bool StorageTextureBindingInfo::operator==(const StorageTextureBindingInfo& other) const {
-    return format == other.format && viewDimension == other.viewDimension && access == other.access;
-}
-
 // SamplerBindingInfo
 
 // static
@@ -356,10 +342,6 @@ SamplerBindingInfo SamplerBindingInfo::From(const SamplerBindingLayout& layout) 
     return {
         .type = defaultedLayout.type,
     };
-}
-
-bool SamplerBindingInfo::operator==(const SamplerBindingInfo& other) const {
-    return type == other.type;
 }
 
 // SamplerBindingInfo
@@ -371,30 +353,6 @@ StaticSamplerBindingInfo StaticSamplerBindingInfo::From(const StaticSamplerBindi
         .sampledTextureBinding = BindingNumber{layout.sampledTextureBinding},
         .isUsedForSingleTextureBinding = layout.sampledTextureBinding < WGPU_LIMIT_U32_UNDEFINED,
     };
-}
-
-bool StaticSamplerBindingInfo::operator==(const StaticSamplerBindingInfo& other) const {
-    return sampler == other.sampler && sampledTextureBinding == other.sampledTextureBinding &&
-           isUsedForSingleTextureBinding == other.isUsedForSingleTextureBinding;
-}
-
-// ExternalTextureBindingLayout
-
-bool ExternalTextureBindingInfo::operator==(const ExternalTextureBindingInfo&) const {
-    return true;
-}
-
-// InputAttachmentBindingInfo
-
-bool InputAttachmentBindingInfo::operator==(const InputAttachmentBindingInfo& other) const {
-    return sampleType == other.sampleType;
-}
-
-// BindingInfo
-
-bool BindingInfo::operator==(const BindingInfo& other) const {
-    return binding == other.binding && visibility == other.visibility &&
-           arraySize == other.arraySize && bindingLayout == other.bindingLayout;
 }
 
 }  // namespace dawn::native

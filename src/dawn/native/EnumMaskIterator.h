@@ -55,9 +55,7 @@ class EnumMaskIterator final {
             return *this;
         }
 
-        bool operator==(const Iterator& other) const { return mIter == other.mIter; }
-
-        bool operator!=(const Iterator& other) const { return mIter != other.mIter; }
+        bool operator==(const Iterator& other) const = default;
 
         T operator*() const {
             U value = *mIter;

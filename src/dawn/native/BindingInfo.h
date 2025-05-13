@@ -78,7 +78,7 @@ struct BufferBindingInfo {
     // Always false in shader reflection.
     bool hasDynamicOffset = false;
 
-    bool operator==(const BufferBindingInfo& other) const;
+    bool operator==(const BufferBindingInfo& other) const = default;
 };
 
 // A mirror of wgpu::TextureBindingLayout for use inside dawn::native.
@@ -91,7 +91,7 @@ struct TextureBindingInfo {
     wgpu::TextureViewDimension viewDimension;
     bool multisampled;
 
-    bool operator==(const TextureBindingInfo& other) const;
+    bool operator==(const TextureBindingInfo& other) const = default;
 };
 
 // A mirror of wgpu::StorageTextureBindingLayout for use inside dawn::native.
@@ -102,7 +102,7 @@ struct StorageTextureBindingInfo {
     wgpu::TextureViewDimension viewDimension;
     wgpu::StorageTextureAccess access;
 
-    bool operator==(const StorageTextureBindingInfo& other) const;
+    bool operator==(const StorageTextureBindingInfo& other) const = default;
 };
 
 // A mirror of wgpu::SamplerBindingLayout for use inside dawn::native.
@@ -112,7 +112,7 @@ struct SamplerBindingInfo {
     // For shader reflection NonFiltering is never used and Filtering is used for any `sampler`.
     wgpu::SamplerBindingType type;
 
-    bool operator==(const SamplerBindingInfo& other) const;
+    bool operator==(const SamplerBindingInfo& other) const = default;
 };
 
 // A mirror of wgpu::StaticSamplerBindingLayout for use inside dawn::native.
@@ -127,19 +127,19 @@ struct StaticSamplerBindingInfo {
     // Whether this instance is statically paired with a single texture.
     bool isUsedForSingleTextureBinding = false;
 
-    bool operator==(const StaticSamplerBindingInfo& other) const;
+    bool operator==(const StaticSamplerBindingInfo& other) const = default;
 };
 
 // A mirror of wgpu::ExternalTextureBindingLayout for use inside dawn::native.
 struct ExternalTextureBindingInfo {
-    bool operator==(const ExternalTextureBindingInfo& other) const;
+    bool operator==(const ExternalTextureBindingInfo& other) const = default;
 };
 
 // Internal to vulkan only.
 struct InputAttachmentBindingInfo {
     wgpu::TextureSampleType sampleType;
 
-    bool operator==(const InputAttachmentBindingInfo& other) const;
+    bool operator==(const InputAttachmentBindingInfo& other) const = default;
 };
 
 struct BindingInfo {
@@ -159,7 +159,7 @@ struct BindingInfo {
                  InputAttachmentBindingInfo>
         bindingLayout;
 
-    bool operator==(const BindingInfo& other) const;
+    bool operator==(const BindingInfo& other) const = default;
 };
 
 BindingInfoType GetBindingInfoType(const BindingInfo& bindingInfo);
@@ -169,9 +169,7 @@ struct BindingSlot {
     BindGroupIndex group;
     BindingNumber binding;
 
-    constexpr bool operator==(const BindingSlot& rhs) const {
-        return group == rhs.group && binding == rhs.binding;
-    }
+    constexpr bool operator==(const BindingSlot& rhs) const = default;
 };
 
 struct PerStageBindingCounts {
