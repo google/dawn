@@ -141,10 +141,10 @@ class PhysicalDeviceBase : public RefCounted {
     wgpu::AdapterType mAdapterType = wgpu::AdapterType::Unknown;
     gpu_info::DriverVersion mDriverVersion;
     std::string mDriverDescription;
-    // Subgroup min/max size set to 0 by default, which means the subgroup feature is not supported.
-    // The actual value will be set by the backend implementation if the feature is supported.
-    uint32_t mSubgroupMinSize = 0;
-    uint32_t mSubgroupMaxSize = 0;
+    // When the feature is *not* supported, these must be 4 and 128. Set those defaults now, but a
+    // backend may override this.
+    uint32_t mSubgroupMinSize = 4;
+    uint32_t mSubgroupMaxSize = 128;
 
     // Juat a wrapper of ValidateFeatureSupportedWithToggles, return true if a feature is supported
     // by this adapter AND suitable with given toggles.
