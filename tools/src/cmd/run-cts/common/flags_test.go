@@ -1,4 +1,4 @@
-// Copyright 2022 The Dawn & Tint Authors
+// Copyright 2025 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,64 +25,33 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-package testlist
+package common
 
+// Write unittests for defaultCtsPath().
 import (
-	"context"
-	"flag"
-	"os"
-	"strings"
+	"path/filepath"
+	"testing"
 
-	"dawn.googlesource.com/dawn/tools/src/cmd/cts/common"
 	"dawn.googlesource.com/dawn/tools/src/fileutils"
+	"dawn.googlesource.com/dawn/tools/src/oswrapper"
+	"github.com/stretchr/testify/require"
 )
 
-func init() {
-	common.Register(&cmd{})
+func TestDefaultCtsPath_NoDawnRoot(t *testing.T) {
+	wrapper := oswrapper.CreateMemMapOSWrapper()
+	require.Equal(t, defaultCtsPath(wrapper), "")
 }
 
-type arrayFlags []string
-
-func (i *arrayFlags) String() string {
-	return strings.Join((*i), " ")
+func TestDefaultCtsPath_NoCts(t *testing.T) {
+	wrapper, err := fileutils.CreateMemMapOSWrapperWithFakeDawnRoot()
+	require.NoErrorf(t, err, "Error creating fake Dawn root: %v", err)
+	require.Equal(t, defaultCtsPath(wrapper), "")
 }
 
-func (i *arrayFlags) Set(value string) error {
-	*i = append(*i, value)
-	return nil
-}
-
-type cmd struct {
-	flags struct {
-		ctsDir    string
-		nodePath  string
-		output    string
-		testQuery string
-	}
-}
-
-func (cmd) Name() string {
-	return "update-testlist"
-}
-
-func (cmd) Desc() string {
-	return "updates a CTS test list file"
-}
-
-func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, error) {
-	flag.StringVar(&c.flags.ctsDir, "cts", common.DefaultCTSPath(cfg.OsWrapper), "path to the CTS")
-	flag.StringVar(&c.flags.nodePath, "node", fileutils.NodePath(cfg.OsWrapper), "path to node")
-	flag.StringVar(&c.flags.output, "out", common.DefaultTestListPath(cfg.OsWrapper), "output testlist path")
-	flag.StringVar(&c.flags.testQuery, "test-query", "webgpu:*", "cts test query to generate test list")
-
-	return nil, nil
-}
-
-func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
-	list, err := common.GenTestList(ctx, c.flags.ctsDir, c.flags.nodePath, c.flags.testQuery)
-	if err != nil {
-		return err
-	}
-
-	return os.WriteFile(c.flags.output, []byte(list), 0666)
+func TestDefaultCtsPath_CtsExists(t *testing.T) {
+	wrapper, err := fileutils.CreateMemMapOSWrapperWithFakeDawnRoot()
+	require.NoErrorf(t, err, "Error creating fake Dawn root: %v", err)
+	expectedPath := filepath.Join(fileutils.DawnRoot(wrapper), "third_party", "webgpu-cts")
+	wrapper.MkdirAll(expectedPath, 0o666)
+	require.Equal(t, defaultCtsPath(wrapper), expectedPath)
 }

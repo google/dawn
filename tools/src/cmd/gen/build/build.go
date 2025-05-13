@@ -84,7 +84,7 @@ func (c *Cmd) RegisterFlags(ctx context.Context, cfg *common.Config) ([]string, 
 // TODO(crbug.com/344014313): Add unittests once fileutils is converted to
 // support dependency injection.
 func (c Cmd) Run(ctx context.Context, cfg *common.Config) error {
-	p := NewProject(CanonicalizePath(path.Join(fileutils.DawnRoot(), srcTint)), cfg)
+	p := NewProject(CanonicalizePath(path.Join(fileutils.DawnRoot(cfg.OsWrapper), srcTint)), cfg)
 
 	for _, stage := range []struct {
 		desc string
@@ -689,7 +689,7 @@ func emitBuildFiles(p *Project, fsReaderWriter oswrapper.FilesystemReaderWriter)
 			w := &bytes.Buffer{}
 
 			// Write the header
-			relTmplPath, err := filepath.Rel(fileutils.DawnRoot(), tmplPath)
+			relTmplPath, err := filepath.Rel(fileutils.DawnRoot(fsReaderWriter), tmplPath)
 			if err != nil {
 				return nil, err
 			}

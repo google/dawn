@@ -46,6 +46,7 @@ import (
 	"dawn.googlesource.com/dawn/tools/src/container"
 	"dawn.googlesource.com/dawn/tools/src/cts/query"
 	"dawn.googlesource.com/dawn/tools/src/fileutils"
+	"dawn.googlesource.com/dawn/tools/src/oswrapper"
 	"dawn.googlesource.com/dawn/tools/src/subcmd"
 	luciauth "go.chromium.org/luci/auth"
 	"go.chromium.org/luci/auth/client/authcli"
@@ -89,6 +90,8 @@ func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, e
 	return []string{"[cases | timing]"}, nil
 }
 
+// TODO(crbug.com/344014313): Split this up into testable helper functions and
+// add coverage (browser.Open() likely prevents testing of Run() itself).
 func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 	ctx, stop := context.WithCancel(context.Background())
 	defer stop()
@@ -98,7 +101,7 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 	var err error
 	switch flag.Arg(0) {
 	case "case", "cases":
-		data, err = loadCasesData(c.flags.testQuery)
+		data, err = loadCasesData(c.flags.testQuery, cfg.OsWrapper)
 
 	case "time", "times", "timing":
 		// Validate command line arguments
@@ -155,9 +158,10 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 	}
 }
 
+// TODO(crbug.com/344014313): Add unittests for this function.
 // loadCasesData creates the JSON payload for a cases visualization
-func loadCasesData(testQuery string) (string, error) {
-	testlist, err := common.GenTestList(context.Background(), common.DefaultCTSPath(), fileutils.NodePath(), testQuery)
+func loadCasesData(testQuery string, fsReader oswrapper.FilesystemReader) (string, error) {
+	testlist, err := common.GenTestList(context.Background(), common.DefaultCTSPath(fsReader), fileutils.NodePath(fsReader), testQuery)
 	if err != nil {
 		return "", err
 	}

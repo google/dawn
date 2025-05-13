@@ -53,7 +53,10 @@ func TestThisDir(t *testing.T) {
 }
 
 func TestDawnRoot(t *testing.T) {
-	dr := fileutils.DawnRoot()
+	// We use a real wrapper here since ThisDir() is going to be based on the
+	// actual filesystem anyways.
+	wrapper := oswrapper.GetRealOSWrapper()
+	dr := fileutils.DawnRoot(wrapper)
 	rel, err := filepath.Rel(dr, fileutils.ThisDir())
 	if err != nil {
 		t.Fatalf("%v", err)
@@ -107,6 +110,50 @@ func TestExpandHome(t *testing.T) {
 
 			expandedPath := fileutils.ExpandHome(testCase.input, wrapper)
 			require.Equal(t, testCase.want, expandedPath)
+		})
+	}
+}
+
+func TestBuildPath(t *testing.T) {
+	tests := []struct {
+		name    string
+		setupFS func(fs oswrapper.MemMapOSWrapper) (expectedPath string) // Sets up FS and returns expected path
+		want    string
+	}{
+		{
+			name: "out/active exists",
+			setupFS: func(fs oswrapper.MemMapOSWrapper) string {
+				require.NoError(t, fileutils.SetUpFakeDawnRoot(fs))
+				fakeDawnRoot := fileutils.DawnRoot(fs)
+				require.NotEmpty(t, fakeDawnRoot, "Failed to find fake Dawn root")
+
+				expected := filepath.Join(fakeDawnRoot, "out", "active")
+				require.NoError(t, fs.MkdirAll(expected, 0777))
+				return expected
+			},
+		},
+		{
+			name: "out/active does not exist",
+			setupFS: func(fs oswrapper.MemMapOSWrapper) string {
+				require.NoError(t, fileutils.SetUpFakeDawnRoot(fs))
+				return "" // Expect empty string as out/active won't be found.
+			},
+		},
+		{
+			name: "dawn root does not exist",
+			setupFS: func(fs oswrapper.MemMapOSWrapper) string {
+				return "" // Expect empty string as dawn root won't be found.
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			wrapper := oswrapper.CreateMemMapOSWrapper()
+			expectedPath := tc.setupFS(wrapper)
+
+			got := fileutils.BuildPath(wrapper)
+			require.Equal(t, expectedPath, got)
 		})
 	}
 }

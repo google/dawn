@@ -76,9 +76,6 @@ const (
 // allOutputFormats holds all the supported outputFormats
 var allOutputFormats = []outputFormat{wgsl, spvasm, msl, hlslDXC, hlslDXCIR, hlslFXC, hlslFXCIR, glsl}
 
-// The root directory of the dawn project
-var dawnRoot = fileutils.DawnRoot()
-
 // The default non-flag arguments to the command
 var defaultArgs = []string{"test/tint"}
 
@@ -93,10 +90,13 @@ var directoryGlobs = []string{
 // These directories contain large corpora of tests for which the generated code
 // is uninteresting.
 // These paths use unix-style slashes and do not contain the '/test/tint' prefix.
-var dirsWithNoPassExpectations = []string{
-	filepath.ToSlash(dawnRoot) + "/test/tint/benchmark/",
-	filepath.ToSlash(dawnRoot) + "/test/tint/unittest/",
-	filepath.ToSlash(dawnRoot) + "/test/tint/vk-gl-cts/",
+func dirsWithNoPassExpectations(fsReader oswrapper.FilesystemReader) []string {
+	dawnRoot := fileutils.DawnRoot(fsReader)
+	return []string{
+		filepath.ToSlash(dawnRoot) + "/test/tint/benchmark/",
+		filepath.ToSlash(dawnRoot) + "/test/tint/unittest/",
+		filepath.ToSlash(dawnRoot) + "/test/tint/vk-gl-cts/",
+	}
 }
 
 func main() {
@@ -148,7 +148,7 @@ func run(fsReaderWriter oswrapper.FilesystemReaderWriter) error {
 	flag.StringVar(&ignore, "ignore", "**.expected.*", "files to ignore in globs")
 	flag.StringVar(&dxcPath, "dxcompiler", "", "path to DXC DLL for validating HLSL output")
 	flag.StringVar(&fxcPath, "fxc", "", "path to FXC DLL for validating HLSL output")
-	flag.StringVar(&tintPath, "tint", defaultTintPath(), "path to the tint executable")
+	flag.StringVar(&tintPath, "tint", defaultTintPath(fsReaderWriter), "path to the tint executable")
 	flag.StringVar(&xcrunPath, "xcrun", "", "path to xcrun executable for validating MSL output")
 	flag.BoolVar(&verbose, "verbose", false, "print all run tests, including rows that all pass")
 	flag.BoolVar(&generateExpected, "generate-expected", false, "create or update all expected outputs")
@@ -190,7 +190,7 @@ func run(fsReaderWriter oswrapper.FilesystemReaderWriter) error {
 
 		// Make absolute
 		if !filepath.IsAbs(arg) {
-			arg = filepath.Join(dawnRoot, arg)
+			arg = filepath.Join(fileutils.DawnRoot(fsReaderWriter), arg)
 		}
 
 		switch {
@@ -816,12 +816,12 @@ func (j job) run(cfg runConfig, fsReaderWriter oswrapper.FilesystemReaderWriter,
 		timeTaken := time.Since(start)
 
 		out = strings.ReplaceAll(out, "\r\n", "\n")
-		out = strings.ReplaceAll(out, filepath.ToSlash(dawnRoot), "<dawn>")
+		out = strings.ReplaceAll(out, filepath.ToSlash(fileutils.DawnRoot(fsReaderWriter)), "<dawn>")
 		out, hashes := extractValidationHashes(out)
 		matched := expected == "" || expected == out
 
 		canEmitPassExpectationFile := true
-		for _, noPass := range dirsWithNoPassExpectations {
+		for _, noPass := range dirsWithNoPassExpectations(fsReaderWriter) {
 			if strings.HasPrefix(filepath.ToSlash(j.file), noPass) {
 				canEmitPassExpectationFile = false
 				break
@@ -1241,12 +1241,11 @@ type ValidationCacheFileKnownGood struct {
 	Hashes []string
 }
 
-func validationCachePath() string {
-	return filepath.Join(fileutils.DawnRoot(), "test", "tint", "validation.cache")
+func validationCachePath(fsReader oswrapper.FilesystemReader) string {
+	return filepath.Join(fileutils.DawnRoot(fsReader), "test", "tint", "validation.cache")
 }
 
-// TODO(crbug.com/344014313): Add unittest coverage once DawnRoot() uses
-// dependency injection.
+// TODO(crbug.com/344014313): Add unittest coverage.
 // loadValidationCache attempts to load the validation cache.
 // Returns an empty cache if the file could not be loaded, or if toolchains have changed.
 func loadValidationCache(
@@ -1257,7 +1256,7 @@ func loadValidationCache(
 		knownGood:     knownGoodHashes{},
 	}
 
-	file, err := fsReader.Open(validationCachePath())
+	file, err := fsReader.Open(validationCachePath(fsReader))
 	if err != nil {
 		if verbose {
 			fmt.Println(err)
@@ -1288,10 +1287,9 @@ func loadValidationCache(
 	return out
 }
 
-// TODO(crbug.com/344014313): Add unittest coverage once DawnRoot() uses
-// dependency injection.
+// TODO(crbug.com/344014313): Add unittest coverage.
 // saveValidationCache saves the validation cache file.
-func saveValidationCache(vc validationCache, fsWriter oswrapper.FilesystemWriter) {
+func saveValidationCache(vc validationCache, fsReaderWriter oswrapper.FilesystemReaderWriter) {
 	out := ValidationCacheFile{
 		ToolchainHash: vc.toolchainHash,
 		KnownGood:     make([]ValidationCacheFileKnownGood, 0, len(vc.knownGood)),
@@ -1319,7 +1317,7 @@ func saveValidationCache(vc validationCache, fsWriter oswrapper.FilesystemWriter
 		return false
 	})
 
-	file, err := fsWriter.Create(validationCachePath())
+	file, err := fsReaderWriter.Create(validationCachePath(fsReaderWriter))
 	if err != nil {
 		fmt.Printf("WARNING: failed to save the validation cache file: %v\n", err)
 	}
@@ -1333,6 +1331,6 @@ func saveValidationCache(vc validationCache, fsWriter oswrapper.FilesystemWriter
 }
 
 // defaultTintPath returns the default path to the tint executable
-func defaultTintPath() string {
-	return filepath.Join(fileutils.DawnRoot(), "out", "active", "tint"+fileutils.ExeExt)
+func defaultTintPath(fsReader oswrapper.FilesystemReader) string {
+	return filepath.Join(fileutils.DawnRoot(fsReader), "out", "active", "tint"+fileutils.ExeExt)
 }

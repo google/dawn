@@ -87,8 +87,8 @@ func run(osWrapper oswrapper.OSWrapper) error {
 	flag.BoolVar(&check, "check", false, "check that all the end-to-end test do not fail")
 	flag.BoolVar(&t.dump, "dump", false, "dumps shader input/output from fuzzer")
 	flag.StringVar(&t.filter, "filter", "", "filter the fuzzers run to those with this substring")
-	flag.StringVar(&t.corpus, "corpus", defaultCorpusDir(), "the corpus directory")
-	flag.StringVar(&build, "build", defaultBuildDir(), "the build directory")
+	flag.StringVar(&t.corpus, "corpus", defaultCorpusDir(osWrapper), "the corpus directory")
+	flag.StringVar(&build, "build", defaultBuildDir(osWrapper), "the build directory")
 	flag.StringVar(&t.out, "out", "<tmp>", "the directory to hold generated test files")
 	flag.IntVar(&t.numProcesses, "j", runtime.NumCPU(), "number of concurrent fuzzers to run")
 	flag.Parse()
@@ -134,7 +134,7 @@ func run(osWrapper oswrapper.OSWrapper) error {
 	}
 
 	// Run the fuzzers
-	return t.run()
+	return t.run(osWrapper)
 }
 
 type tool struct {
@@ -199,33 +199,20 @@ func (t tool) check(osWrapper oswrapper.OSWrapper) error {
 	return nil
 }
 
-// TODO(crbug.com/344014313): Add unittests once fileutils is converted to use
-// dependency injection.
+// TODO(crbug.com/416755658): Add unittest coverage when exec calls are done
+// via dependency injection.
 // run() runs the fuzzers across t.numProcesses processes.
 // The fuzzers will use t.corpus as the seed directory.
 // New cases are written to t.out.
 // Blocks until a fuzzer errors, or the process is interrupted.
-func (t tool) run() error {
+func (t tool) run(fsReader oswrapper.FilesystemReader) error {
 	ctx := utils.CancelOnInterruptContext(context.Background())
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	dictPath, err := filepath.Abs(filepath.Join(fileutils.DawnRoot(), wgslDictionaryRelPath))
-	if err != nil || !fileutils.IsFile(dictPath) {
-		return fmt.Errorf("failed to obtain the dictionary.txt path: %w", err)
-	}
-
-	args := []string{t.out, t.corpus,
-		"-dict=" + dictPath,
-	}
-	if t.verbose {
-		args = append(args, "--verbose")
-	}
-	if t.dump {
-		args = append(args, "--dump")
-	}
-	if t.filter != "" {
-		args = append(args, "--filter="+t.filter)
+	args, err := t.generateFuzzerArgs(fsReader)
+	if err != nil {
+		return err
 	}
 
 	fmt.Println("running", t.numProcesses, "fuzzer instances")
@@ -258,10 +245,33 @@ func (t tool) run() error {
 	return nil
 }
 
-func defaultCorpusDir() string {
-	return filepath.Join(fileutils.DawnRoot(), "test/tint")
+// TODO(crbug.com/344014313): Add unittests once fileutils is converted to use
+// dependency injection.
+func (t tool) generateFuzzerArgs(fsReader oswrapper.FilesystemReader) ([]string, error) {
+	dictPath, err := filepath.Abs(filepath.Join(fileutils.DawnRoot(fsReader), wgslDictionaryRelPath))
+	if err != nil || !fileutils.IsFile(dictPath) {
+		return []string{}, fmt.Errorf("failed to obtain the dictionary.txt path: %w", err)
+	}
+
+	args := []string{t.out, t.corpus,
+		"-dict=" + dictPath,
+	}
+	if t.verbose {
+		args = append(args, "--verbose")
+	}
+	if t.dump {
+		args = append(args, "--dump")
+	}
+	if t.filter != "" {
+		args = append(args, "--filter="+t.filter)
+	}
+	return args, nil
 }
 
-func defaultBuildDir() string {
-	return filepath.Join(fileutils.DawnRoot(), "out/active")
+func defaultCorpusDir(fsReader oswrapper.FilesystemReader) string {
+	return filepath.Join(fileutils.DawnRoot(fsReader), "test", "tint")
+}
+
+func defaultBuildDir(fsReader oswrapper.FilesystemReader) string {
+	return filepath.Join(fileutils.DawnRoot(fsReader), "out", "active")
 }

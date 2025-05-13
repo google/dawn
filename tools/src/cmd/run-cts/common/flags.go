@@ -37,6 +37,7 @@ import (
 	"runtime"
 
 	"dawn.googlesource.com/dawn/tools/src/fileutils"
+	"dawn.googlesource.com/dawn/tools/src/oswrapper"
 	"dawn.googlesource.com/dawn/tools/src/subcmd"
 	"dawn.googlesource.com/dawn/tools/src/term"
 )
@@ -54,15 +55,15 @@ type Flags struct {
 	Npx              string // Path to the npx executable
 }
 
-func (f *Flags) Register() {
+func (f *Flags) Register(fsReader oswrapper.FilesystemReader) {
 	flag.BoolVar(&f.Verbose, "verbose", false, "print extra information while testing")
 	flag.BoolVar(&f.Colors, "colors", term.CanUseAnsiEscapeSequences(), "enable / disable colors")
 	flag.IntVar(&f.NumRunners, "j", runtime.NumCPU()/2, "number of concurrent runners. 0 runs serially")
 	flag.StringVar(&f.Log, "log", "", "path to log file of tests run and result")
 	flag.StringVar(&f.ResultsPath, "output", "", "path to write test results file")
 	flag.StringVar(&f.ExpectationsPath, "expect", "", "path to expectations file")
-	flag.StringVar(&f.CTS, "cts", defaultCtsPath(), "root directory of WebGPU CTS")
-	flag.StringVar(&f.Node, "node", fileutils.NodePath(), "path to node executable")
+	flag.StringVar(&f.CTS, "cts", defaultCtsPath(fsReader), "root directory of WebGPU CTS")
+	flag.StringVar(&f.Node, "node", fileutils.NodePath(fsReader), "path to node executable")
 	flag.StringVar(&f.Npx, "npx", defaultNpxPath(), "path to npx executable")
 }
 
@@ -159,10 +160,10 @@ func (s *State) Close(results Results) error {
 
 // defaultCtsPath looks for the webgpu-cts directory in dawn's third_party
 // directory. This is used as the default for the --cts command line flag.
-func defaultCtsPath() string {
-	if dawnRoot := fileutils.DawnRoot(); dawnRoot != "" {
-		cts := filepath.Join(dawnRoot, "third_party/webgpu-cts")
-		if info, err := os.Stat(cts); err == nil && info.IsDir() {
+func defaultCtsPath(fsReader oswrapper.FilesystemReader) string {
+	if dawnRoot := fileutils.DawnRoot(fsReader); dawnRoot != "" {
+		cts := filepath.Join(dawnRoot, "third_party", "webgpu-cts")
+		if info, err := fsReader.Stat(cts); err == nil && info.IsDir() {
 			return cts
 		}
 	}

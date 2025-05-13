@@ -32,7 +32,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"os"
 	"strings"
 	"sync"
 	"time"
@@ -42,6 +41,7 @@ import (
 	"dawn.googlesource.com/dawn/tools/src/cov"
 	"dawn.googlesource.com/dawn/tools/src/fileutils"
 	"dawn.googlesource.com/dawn/tools/src/git"
+	"dawn.googlesource.com/dawn/tools/src/oswrapper"
 	"dawn.googlesource.com/dawn/tools/src/progressbar"
 	"dawn.googlesource.com/dawn/tools/src/term"
 )
@@ -77,6 +77,8 @@ type Coverage struct {
 	OutputFile string
 }
 
+// TODO(crbug.com/344014313): Split into smaller functions and add unittest
+// coverage.
 // StreamResults reads from the chan 'results', printing the results in test-id
 // sequential order.
 // Once all the results have been printed, a summary will be printed and the
@@ -88,7 +90,8 @@ func StreamResults(
 	verbose bool,
 	coverage *Coverage, // Optional coverage generation info
 	numTestCases int, // Total number of test cases
-	stream <-chan Result) (Results, error) {
+	stream <-chan Result,
+	fsReaderWriter oswrapper.FilesystemReaderWriter) (Results, error) {
 	// If the context was already cancelled then just return
 	if err := ctx.Err(); err != nil {
 		return nil, err
@@ -222,7 +225,7 @@ func StreamResults(
 		// Obtain the current git revision
 		revision := "HEAD"
 		if g, err := git.New(""); err == nil {
-			if r, err := g.Open(fileutils.DawnRoot()); err == nil {
+			if r, err := g.Open(fileutils.DawnRoot(fsReaderWriter)); err == nil {
 				if l, err := r.Log(&git.LogOptions{From: "HEAD", To: "HEAD"}); err == nil {
 					revision = l[0].Hash.String()
 				}
@@ -230,7 +233,7 @@ func StreamResults(
 		}
 
 		if coverage.OutputFile != "" {
-			file, err := os.Create(coverage.OutputFile)
+			file, err := fsReaderWriter.Create(coverage.OutputFile)
 			if err != nil {
 				return nil, fmt.Errorf("failed to create the coverage file: %w", err)
 			}
@@ -254,7 +257,7 @@ func StreamResults(
 				fmt.Fprintln(stdout)
 				fmt.Fprintln(stdout, term.Blue+"Serving coverage view at "+url+term.Reset)
 				return browser.Open(url)
-			})
+			}, fsReaderWriter)
 			if err != nil {
 				return nil, err
 			}

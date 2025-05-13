@@ -31,7 +31,6 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
@@ -40,6 +39,7 @@ import (
 	"dawn.googlesource.com/dawn/tools/src/cov"
 	"dawn.googlesource.com/dawn/tools/src/dawn/node"
 	"dawn.googlesource.com/dawn/tools/src/fileutils"
+	"dawn.googlesource.com/dawn/tools/src/oswrapper"
 )
 
 type flags struct {
@@ -90,12 +90,12 @@ func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, e
 	unrollConstEvalLoopsDefault := runtime.GOOS != "windows"
 
 	backendDefault := "default"
-	if vkIcdFilenames := os.Getenv("VK_ICD_FILENAMES"); vkIcdFilenames != "" {
+	if vkIcdFilenames := cfg.OsWrapper.Getenv("VK_ICD_FILENAMES"); vkIcdFilenames != "" {
 		backendDefault = "vulkan"
 	}
 
-	c.flags.Flags.Register()
-	flag.StringVar(&c.flags.bin, "bin", fileutils.BuildPath(), "path to the directory holding cts.js and dawn.node")
+	c.flags.Flags.Register(cfg.OsWrapper)
+	flag.StringVar(&c.flags.bin, "bin", fileutils.BuildPath(cfg.OsWrapper), "path to the directory holding cts.js and dawn.node")
 	flag.BoolVar(&c.flags.isolated, "isolate", false, "run each test in an isolated process")
 	flag.BoolVar(&c.flags.build, "build", true, "attempt to build the CTS before running")
 	flag.BoolVar(&c.flags.validate, "validate", false, "enable backend validation")
@@ -119,9 +119,11 @@ func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, e
 	return []string{"[query]"}, nil
 }
 
+// TODO(crbug.com/416755658): Add unittest coverage when there is a way to fake
+// the node process.
 func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 	// Process the command line flags
-	if err := c.processFlags(); err != nil {
+	if err := c.processFlags(cfg.OsWrapper); err != nil {
 		return err
 	}
 
@@ -142,7 +144,7 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 	}
 	fmt.Printf("Testing %d test cases...\n", len(testCases))
 
-	var runner func(ctx context.Context, testCases []common.TestCase, results chan<- common.Result)
+	var runner func(ctx context.Context, testCases []common.TestCase, results chan<- common.Result, fsReader oswrapper.FilesystemReader)
 	if c.flags.isolated {
 		fmt.Println("Running in parallel isolated...")
 		runner = c.runTestCasesWithCmdline
@@ -153,7 +155,7 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 
 	resultStream := make(chan common.Result, 256)
 	go func() {
-		runner(ctx, testCases, resultStream)
+		runner(ctx, testCases, resultStream, cfg.OsWrapper)
 		close(resultStream)
 	}()
 
@@ -163,7 +165,8 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 		c.flags.Verbose,
 		c.coverage,
 		len(testCases),
-		resultStream)
+		resultStream,
+		cfg.OsWrapper)
 	if err != nil {
 		return err
 	}
@@ -175,10 +178,12 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 	return nil
 }
 
-func (c *cmd) processFlags() error {
+// TODO(crbug.com/344014313): Add unittest coverage.
+func (c *cmd) processFlags(fsReader oswrapper.FilesystemReader) error {
 	// Check mandatory arguments
 	if c.flags.bin == "" {
-		return fmt.Errorf("-bin is not set. It defaults to <dawn>/out/active (%v) which does not exist", filepath.Join(fileutils.DawnRoot(), "out/active"))
+		return fmt.Errorf("-bin is not set. It defaults to <dawn>/out/active (%v) which does not exist",
+			filepath.Join(fileutils.DawnRoot(fsReader), "out/active"))
 	}
 	if !fileutils.IsDir(c.flags.bin) {
 		return fmt.Errorf("'%v' is not a directory", c.flags.bin)
@@ -234,6 +239,8 @@ func (c *cmd) processFlags() error {
 	return nil
 }
 
+// TODO(crbug.com/416755658): Add unittest coverage when exec is handled via
+// dependency injection.
 func (c *cmd) maybeInitCoverage() error {
 	if !c.flags.genCoverage && c.flags.coverageFile == "" {
 		return nil
