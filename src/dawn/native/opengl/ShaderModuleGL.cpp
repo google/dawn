@@ -110,7 +110,16 @@ DAWN_MAKE_CACHE_REQUEST(GLSLCompilationRequest, GLSL_COMPILATION_REQUEST_MEMBERS
 
 #define GLSL_COMPILATION_MEMBERS(X) X(std::string, glsl)
 
-DAWN_SERIALIZABLE(struct, GLSLCompilation, GLSL_COMPILATION_MEMBERS){};
+// clang-format off
+DAWN_SERIALIZABLE(struct, GLSLCompilation, GLSL_COMPILATION_MEMBERS) {
+    static ResultOrError<GLSLCompilation> FromValidatedBlob(Blob blob) {
+        GLSLCompilation result;
+        DAWN_TRY_ASSIGN(result, FromBlob(std::move(blob)));
+        DAWN_INVALID_IF(result.glsl.empty(), "Cached GLSLCompilation result has no GLSL");
+        return result;
+    }
+};
+// clang-format on
 #undef GLSL_COMPILATION_MEMBERS
 
 }  // namespace
@@ -561,7 +570,7 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
 
     CacheResult<GLSLCompilation> compilationResult;
     DAWN_TRY_LOAD_OR_RUN(
-        compilationResult, GetDevice(), std::move(req), GLSLCompilation::FromBlob,
+        compilationResult, GetDevice(), std::move(req), GLSLCompilation::FromValidatedBlob,
         [](GLSLCompilationRequest r) -> ResultOrError<GLSLCompilation> {
             // Requires Tint Program here right before actual using.
             auto inputProgram = r.inputProgram.UnsafeGetValue()->GetTintProgram();

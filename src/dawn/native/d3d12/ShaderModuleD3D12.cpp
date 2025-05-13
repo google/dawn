@@ -383,8 +383,9 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     req.hlsl.maxSubgroupSize = device->GetAdapter()->GetPhysicalDevice()->GetSubgroupMaxSize();
 
     CacheResult<d3d::CompiledShader> compiledShader;
-    DAWN_TRY_LOAD_OR_RUN(compiledShader, device, std::move(req), d3d::CompiledShader::FromBlob,
-                         d3d::CompileShader, "D3D12.CompileShader");
+    DAWN_TRY_LOAD_OR_RUN(compiledShader, device, std::move(req),
+                         d3d::CompiledShader::FromValidatedBlob, d3d::CompileShader,
+                         "D3D12.CompileShader");
 
     if (device->IsToggleEnabled(Toggle::DumpShaders)) {
         if (device->IsToggleEnabled(Toggle::UseDXC)) {
