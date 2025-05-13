@@ -84,6 +84,9 @@ config("internal_config") {
   if (dawn_enable_null) {
     defines += [ "DAWN_ENABLE_BACKEND_NULL" ]
   }
+  if (dawn_enable_webgpu_on_webgpu) {
+    defines += [ "DAWN_ENABLE_BACKEND_WEBGPU" ]
+  }
   if (dawn_enable_opengl) {
     defines += [ "DAWN_ENABLE_BACKEND_OPENGL" ]
   }

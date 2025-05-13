@@ -160,6 +160,7 @@ source_set("headers") {
     "${dawn_root}/include/dawn/native/NullBackend.h",
     "${dawn_root}/include/dawn/native/OpenGLBackend.h",
     "${dawn_root}/include/dawn/native/VulkanBackend.h",
+    "${dawn_root}/include/dawn/native/WebGPUBackend.h",
   ]
 }
 
@@ -701,6 +702,14 @@ source_set("sources") {
     ]
   }
 
+  if (dawn_enable_webgpu_on_webgpu) {
+    sources += [
+      "webgpu/BackendWGPU.cpp",
+      "webgpu/BackendWGPU.h",
+      "webgpu/Forward.h",
+    ]
+  }
+
   if ((dawn_enable_opengl || dawn_enable_vulkan) &&
       dawn_enable_spirv_validation) {
     sources += [
@@ -955,6 +964,9 @@ dawn_component("native") {
   }
   if (dawn_enable_null) {
     sources += [ "null/NullBackend.cpp" ]
+  }
+  if (dawn_enable_webgpu_on_webgpu) {
+    sources += [ "webgpu/WebGPUBackend.cpp" ]
   }
   if (dawn_enable_opengl) {
     sources += [ "opengl/OpenGLBackend.cpp" ]

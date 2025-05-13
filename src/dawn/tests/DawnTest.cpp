@@ -848,6 +848,10 @@ bool DawnTestBase::IsNull() const {
     return mParam.adapterProperties.backendType == wgpu::BackendType::Null;
 }
 
+bool DawnTestBase::IsWebGPUOnWebGPU() const {
+    return mParam.adapterProperties.backendType == wgpu::BackendType::WebGPU;
+}
+
 bool DawnTestBase::IsOpenGL() const {
     return mParam.adapterProperties.backendType == wgpu::BackendType::OpenGL;
 }

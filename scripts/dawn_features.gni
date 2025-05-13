@@ -85,6 +85,10 @@ declare_args() {
   # (required for unittests, obviously non-conformant)
   dawn_enable_null = true
 
+  # Enables the compilation of Dawn's WebGPU backend
+  # (used for debugging purpose, capture and replay)
+  dawn_enable_webgpu_on_webgpu = dawn_standalone
+
   # Enables the compilation of Dawn's OpenGL backend
   # (best effort, non-conformant)
   dawn_enable_desktop_gl = is_linux && !is_chromeos

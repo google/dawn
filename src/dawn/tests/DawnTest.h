@@ -253,6 +253,7 @@ class DawnTestBase {
     bool IsD3D12() const;
     bool IsMetal() const;
     bool IsNull() const;
+    bool IsWebGPUOnWebGPU() const;
     bool IsOpenGL() const;
     bool IsOpenGLES() const;
     bool IsVulkan() const;

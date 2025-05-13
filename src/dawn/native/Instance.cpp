@@ -90,6 +90,11 @@ namespace null {
 BackendConnection* Connect(InstanceBase* instance);
 }
 #endif  // defined(DAWN_ENABLE_BACKEND_NULL)
+#if defined(DAWN_ENABLE_BACKEND_WEBGPU)
+namespace webgpu {
+BackendConnection* Connect(InstanceBase* instance);
+}
+#endif  // defined(DAWN_ENABLE_BACKEND_WEBGPU)
 #if defined(DAWN_ENABLE_BACKEND_OPENGL)
 namespace opengl {
 BackendConnection* Connect(InstanceBase* instance, wgpu::BackendType backendType);
@@ -397,6 +402,12 @@ BackendConnection* InstanceBase::GetBackendConnection(wgpu::BackendType backendT
             Register(null::Connect(this), wgpu::BackendType::Null);
             break;
 #endif  // defined(DAWN_ENABLE_BACKEND_NULL)
+
+#if defined(DAWN_ENABLE_BACKEND_WEBGPU)
+        case wgpu::BackendType::WebGPU:
+            Register(webgpu::Connect(this), wgpu::BackendType::WebGPU);
+            break;
+#endif  // defined(DAWN_ENABLE_BACKEND_WEBGPU)
 
 #if defined(DAWN_ENABLE_BACKEND_D3D11)
         case wgpu::BackendType::D3D11:
