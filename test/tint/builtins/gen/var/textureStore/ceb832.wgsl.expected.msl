@@ -12,7 +12,11 @@ void textureStore_ceb832(tint_module_vars_struct tint_module_vars) {
   uint2 arg_1 = uint2(1u);
   uint arg_2 = 1u;
   int4 arg_3 = int4(1);
-  tint_module_vars.arg_0.write(arg_3, arg_1, arg_2);
+  uint2 const v = arg_1;
+  uint const v_1 = arg_2;
+  int4 const v_2 = arg_3;
+  const_cast<texture2d_array<int, access::read_write>thread &>(tint_module_vars.arg_0).fence();
+  tint_module_vars.arg_0.write(v_2, v, v_1);
   const_cast<texture2d_array<int, access::read_write>thread &>(tint_module_vars.arg_0).fence();
 }
 
@@ -34,7 +38,11 @@ void textureStore_ceb832(tint_module_vars_struct tint_module_vars) {
   uint2 arg_1 = uint2(1u);
   uint arg_2 = 1u;
   int4 arg_3 = int4(1);
-  tint_module_vars.arg_0.write(arg_3, arg_1, arg_2);
+  uint2 const v = arg_1;
+  uint const v_1 = arg_2;
+  int4 const v_2 = arg_3;
+  const_cast<texture2d_array<int, access::read_write>thread &>(tint_module_vars.arg_0).fence();
+  tint_module_vars.arg_0.write(v_2, v, v_1);
   const_cast<texture2d_array<int, access::read_write>thread &>(tint_module_vars.arg_0).fence();
 }
 

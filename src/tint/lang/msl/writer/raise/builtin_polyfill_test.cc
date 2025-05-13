@@ -3073,7 +3073,7 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureStore_3d) {
 }
 
 // Test that we insert a fence after the store to ensure that it is ordered before the load.
-TEST_F(MslWriter_BuiltinPolyfillTest, TextureStoreToReadWriteBeforeLoad) {
+TEST_F(MslWriter_BuiltinPolyfillTest, TextureStoreToReadWriteBeforeAndAfterLoad) {
     auto format = core::TexelFormat::kRgba8Unorm;
     auto* texture_ty =
         ty.storage_texture(core::type::TextureDimension::k2d, format, core::Access::kReadWrite);
@@ -3083,17 +3083,20 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureStoreToReadWriteBeforeLoad) {
     auto* func = b.Function("foo", ty.vec4<f32>());
     func->SetParams({t, coords, value});
     b.Append(func->Block(), [&] {
+        auto* before = b.Call<vec4<f32>>(core::BuiltinFn::kTextureLoad, t, coords);
         b.Call<void>(core::BuiltinFn::kTextureStore, t, coords, value);
-        auto* result = b.Call<vec4<f32>>(core::BuiltinFn::kTextureLoad, t, coords);
-        b.Return(func, result);
+        auto* after = b.Call<vec4<f32>>(core::BuiltinFn::kTextureLoad, t, coords);
+        b.Return(func, b.Add<vec4<f32>>(before, after));
     });
 
     auto* src = R"(
 %foo = func(%t:texture_storage_2d<rgba8unorm, read_write>, %coords:vec2<i32>, %value:vec4<f32>):vec4<f32> {
   $B1: {
-    %5:void = textureStore %t, %coords, %value
-    %6:vec4<f32> = textureLoad %t, %coords
-    ret %6
+    %5:vec4<f32> = textureLoad %t, %coords
+    %6:void = textureStore %t, %coords, %value
+    %7:vec4<f32> = textureLoad %t, %coords
+    %8:vec4<f32> = add %5, %7
+    ret %8
   }
 }
 )";
@@ -3103,11 +3106,15 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureStoreToReadWriteBeforeLoad) {
 %foo = func(%t:texture_storage_2d<rgba8unorm, read_write>, %coords:vec2<i32>, %value:vec4<f32>):vec4<f32> {
   $B1: {
     %5:vec2<u32> = convert %coords
-    %6:void = %t.write %value, %5
+    %6:vec4<f32> = %t.read %5
     %7:void = %t.fence
     %8:vec2<u32> = convert %coords
-    %9:vec4<f32> = %t.read %8
-    ret %9
+    %9:void = %t.write %value, %8
+    %10:void = %t.fence
+    %11:vec2<u32> = convert %coords
+    %12:vec4<f32> = %t.read %11
+    %13:vec4<f32> = add %6, %12
+    ret %13
   }
 }
 )";

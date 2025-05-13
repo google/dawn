@@ -888,6 +888,12 @@ struct State {
         }
 
         b.InsertBefore(builtin, [&] {
+            // If we are writing to a read-write texture, add a fence to ensure that any prior reads
+            // to the texture from the same thread have completed before we write any values.
+            if (tex_type->Access() == core::Access::kReadWrite) {
+                b.MemberCall<msl::ir::MemberBuiltinCall>(ty.void_(), msl::BuiltinFn::kFence, tex);
+            }
+
             // Convert the coordinates to unsigned integers if necessary.
             if (coords->Type()->IsSignedIntegerScalarOrVector()) {
                 coords = b.Convert(ty.MatchWidth(ty.u32(), coords->Type()), coords)->Result();

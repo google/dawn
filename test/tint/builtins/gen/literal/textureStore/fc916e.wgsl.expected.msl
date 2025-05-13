@@ -9,6 +9,7 @@ struct tint_module_vars_struct {
 };
 
 void textureStore_fc916e(tint_module_vars_struct tint_module_vars) {
+  const_cast<texture2d_array<uint, access::read_write>thread &>(tint_module_vars.arg_0).fence();
   tint_module_vars.arg_0.write(uint4(1u), uint2(1u), 1);
   const_cast<texture2d_array<uint, access::read_write>thread &>(tint_module_vars.arg_0).fence();
 }
@@ -28,6 +29,7 @@ struct tint_module_vars_struct {
 };
 
 void textureStore_fc916e(tint_module_vars_struct tint_module_vars) {
+  const_cast<texture2d_array<uint, access::read_write>thread &>(tint_module_vars.arg_0).fence();
   tint_module_vars.arg_0.write(uint4(1u), uint2(1u), 1);
   const_cast<texture2d_array<uint, access::read_write>thread &>(tint_module_vars.arg_0).fence();
 }

@@ -12,9 +12,11 @@ void textureStore_1af236(tint_module_vars_struct tint_module_vars) {
   int2 arg_1 = int2(1);
   int arg_2 = 1;
   float4 arg_3 = float4(1.0f);
-  int const v = arg_2;
-  float4 const v_1 = arg_3;
-  tint_module_vars.arg_0.write(v_1, uint2(arg_1), v);
+  int2 const v = arg_1;
+  int const v_1 = arg_2;
+  float4 const v_2 = arg_3;
+  const_cast<texture2d_array<float, access::read_write>thread &>(tint_module_vars.arg_0).fence();
+  tint_module_vars.arg_0.write(v_2, uint2(v), v_1);
   const_cast<texture2d_array<float, access::read_write>thread &>(tint_module_vars.arg_0).fence();
 }
 
@@ -36,9 +38,11 @@ void textureStore_1af236(tint_module_vars_struct tint_module_vars) {
   int2 arg_1 = int2(1);
   int arg_2 = 1;
   float4 arg_3 = float4(1.0f);
-  int const v = arg_2;
-  float4 const v_1 = arg_3;
-  tint_module_vars.arg_0.write(v_1, uint2(arg_1), v);
+  int2 const v = arg_1;
+  int const v_1 = arg_2;
+  float4 const v_2 = arg_3;
+  const_cast<texture2d_array<float, access::read_write>thread &>(tint_module_vars.arg_0).fence();
+  tint_module_vars.arg_0.write(v_2, uint2(v), v_1);
   const_cast<texture2d_array<float, access::read_write>thread &>(tint_module_vars.arg_0).fence();
 }
 

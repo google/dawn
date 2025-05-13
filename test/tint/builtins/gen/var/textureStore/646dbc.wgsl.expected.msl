@@ -11,8 +11,10 @@ struct tint_module_vars_struct {
 void textureStore_646dbc(tint_module_vars_struct tint_module_vars) {
   int3 arg_1 = int3(1);
   int4 arg_2 = int4(1);
-  int4 const v = arg_2;
-  tint_module_vars.arg_0.write(v, uint3(arg_1));
+  int3 const v = arg_1;
+  int4 const v_1 = arg_2;
+  const_cast<texture3d<int, access::read_write>thread &>(tint_module_vars.arg_0).fence();
+  tint_module_vars.arg_0.write(v_1, uint3(v));
   const_cast<texture3d<int, access::read_write>thread &>(tint_module_vars.arg_0).fence();
 }
 
@@ -33,8 +35,10 @@ struct tint_module_vars_struct {
 void textureStore_646dbc(tint_module_vars_struct tint_module_vars) {
   int3 arg_1 = int3(1);
   int4 arg_2 = int4(1);
-  int4 const v = arg_2;
-  tint_module_vars.arg_0.write(v, uint3(arg_1));
+  int3 const v = arg_1;
+  int4 const v_1 = arg_2;
+  const_cast<texture3d<int, access::read_write>thread &>(tint_module_vars.arg_0).fence();
+  tint_module_vars.arg_0.write(v_1, uint3(v));
   const_cast<texture3d<int, access::read_write>thread &>(tint_module_vars.arg_0).fence();
 }
 
