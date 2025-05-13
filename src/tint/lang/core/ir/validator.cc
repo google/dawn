@@ -414,6 +414,15 @@ constexpr BuiltinChecker kSampleIndexChecker{
     /* type_error */ "sample_index must be an u32",
 };
 
+constexpr BuiltinChecker kSubgroupIdChecker{
+    /* name */ "subgroup_id",
+    /* stages */
+    EnumSet<Function::PipelineStage>(Function::PipelineStage::kCompute),
+    /* direction */ BuiltinChecker::IODirection::kInput,
+    /* type_check */ [](const core::type::Type* ty) -> bool { return ty->Is<core::type::U32>(); },
+    /* type_error */ "subgroup_id must be an u32",
+};
+
 constexpr BuiltinChecker kSubgroupInvocationIdChecker{
     /* name */ "subgroup_invocation_id",
     /* stages */
@@ -476,6 +485,8 @@ const BuiltinChecker& BuiltinCheckerFor(BuiltinValue builtin) {
             return kNumWorkgroupsChecker;
         case BuiltinValue::kSampleIndex:
             return kSampleIndexChecker;
+        case BuiltinValue::kSubgroupId:
+            return kSubgroupIdChecker;
         case BuiltinValue::kSubgroupInvocationId:
             return kSubgroupInvocationIdChecker;
         case BuiltinValue::kSubgroupSize:
