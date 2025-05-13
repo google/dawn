@@ -90,7 +90,29 @@ struct State {
         Vector<spirv::ir::BuiltinCall*, 4> builtin_worklist;
         for (auto* inst : ir.Instructions()) {
             if (auto* builtin = inst->As<spirv::ir::BuiltinCall>()) {
-                builtin_worklist.Push(builtin);
+                switch (builtin->Func()) {
+                    case spirv::BuiltinFn::kAtomicLoad:
+                    case spirv::BuiltinFn::kAtomicStore:
+                    case spirv::BuiltinFn::kAtomicExchange:
+                    case spirv::BuiltinFn::kAtomicCompareExchange:
+                    case spirv::BuiltinFn::kAtomicIAdd:
+                    case spirv::BuiltinFn::kAtomicISub:
+                    case spirv::BuiltinFn::kAtomicSMax:
+                    case spirv::BuiltinFn::kAtomicSMin:
+                    case spirv::BuiltinFn::kAtomicUMax:
+                    case spirv::BuiltinFn::kAtomicUMin:
+                    case spirv::BuiltinFn::kAtomicAnd:
+                    case spirv::BuiltinFn::kAtomicOr:
+                    case spirv::BuiltinFn::kAtomicXor:
+                    case spirv::BuiltinFn::kAtomicIIncrement:
+                    case spirv::BuiltinFn::kAtomicIDecrement:
+                        builtin_worklist.Push(builtin);
+                        break;
+                    default:
+                        // Ignore any unknown instruction. The `Texture` transform runs after this
+                        // one which will catch any unknown instructions.
+                        break;
+                }
             }
         }
 

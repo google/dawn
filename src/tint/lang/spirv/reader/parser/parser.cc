@@ -1430,19 +1430,28 @@ class Parser {
     }
 
     void EmitImageGather(const spvtools::opt::Instruction& inst) {
-        Vector<core::ir::Value*, 4> args;
-
         auto sampled_image = Value(inst.GetSingleWordInOperand(0));
         auto* coord = Value(inst.GetSingleWordInOperand(1));
         auto* comp = Value(inst.GetSingleWordInOperand(2));
 
-        core::ir::Value* operands = b_.Zero(ty_.i32());
+        Vector<core::ir::Value*, 4> args = {sampled_image, coord, comp};
+
         if (inst.NumInOperands() > 3) {
-            operands = Value(inst.GetSingleWordInOperand(3));
+            uint32_t literal_mask = inst.GetSingleWordInOperand(3);
+            args.Push(b_.Constant(i32(literal_mask)));
+
+            if (literal_mask != 0) {
+                TINT_ASSERT(static_cast<spv::ImageOperandsMask>(literal_mask) ==
+                            spv::ImageOperandsMask::ConstOffset);
+                TINT_ASSERT(inst.NumInOperands() > 4);
+                args.Push(Value(inst.GetSingleWordInOperand(4)));
+            }
+        } else {
+            args.Push(b_.Zero(ty_.i32()));
         }
 
         Emit(b_.Call<spirv::ir::BuiltinCall>(Type(inst.type_id()), spirv::BuiltinFn::kImageGather,
-                                             Vector{sampled_image, coord, comp, operands}),
+                                             args),
              inst.result_id());
     }
 

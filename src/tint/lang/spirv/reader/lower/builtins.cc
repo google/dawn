@@ -235,6 +235,10 @@ struct State {
                 case spirv::BuiltinFn::kAtomicIDecrement:
                     // Ignore Atomics, they'll be handled by the `Atomics` transform.
                     break;
+                case spirv::BuiltinFn::kSampledImage:
+                case spirv::BuiltinFn::kImageGather:
+                    // Ignore image methods, they'll be handled by the `Texture` transform.
+                    break;
                 default:
                     TINT_UNREACHABLE() << "unknown spirv builtin: " << builtin->Func();
             }
