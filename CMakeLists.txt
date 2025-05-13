@@ -439,12 +439,6 @@ set(TINT_SPIRV_TOOLS_DIR   ${DAWN_SPIRV_TOOLS_DIR})
 ################################################################################
 # Run on all subdirectories
 ################################################################################
-if (DAWN_BUILD_PROTOBUF AND EXISTS "${DAWN_PROTOBUF_DIR}/cmake")
-  if (("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") AND WIN32)
-    set(protobuf_HAVE_BUILTIN_ATOMICS 1)
-  endif()
-endif()
-
 add_subdirectory(third_party)
 
 # TODO(crbug.com/tint/455): Tint does not currently build with CMake when

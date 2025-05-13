@@ -47,6 +47,38 @@ if (DAWN_FETCH_DEPENDENCIES)
     )
 endif ()
 
+set(ABSL_ROOT_DIR ${DAWN_ABSEIL_DIR})
+if (NOT TARGET absl::strings)
+    # Recommended setting for compatibility with future abseil releases.
+    set(ABSL_PROPAGATE_CXX_STD ON CACHE BOOL "" FORCE)
+    message(STATUS "Dawn: using Abseil at ${DAWN_ABSEIL_DIR}")
+    if (("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") OR
+    ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang"))
+        add_compile_options(
+                -Wno-array-parameter
+                -Wno-deprecated-builtins
+                -Wno-unknown-warning-option
+                -Wno-gcc-compat
+                -Wno-unreachable-code-break
+                -Wno-nullability-extension
+                -Wno-shadow
+        )
+    endif()
+
+    add_subdirectory(${DAWN_ABSEIL_DIR} "${CMAKE_CURRENT_BINARY_DIR}/abseil")
+endif()
+
+if (DAWN_BUILD_PROTOBUF AND EXISTS "${DAWN_PROTOBUF_DIR}/cmake")
+    if (("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") AND WIN32)
+        set(protobuf_HAVE_BUILTIN_ATOMICS 1)
+    endif()
+endif()
+
+if (DAWN_BUILD_PROTOBUF AND EXISTS "${DAWN_PROTOBUF_DIR}/cmake")
+    # Needs to come before SPIR-V Tools
+    include("protobuf.cmake")
+endif()
+
 ################################################################################
 # Start of Emscripten enabled third party directories
 #   To minimize the number of third party targets to make when building with
@@ -68,33 +100,6 @@ if ((DAWN_BUILD_TESTS OR TINT_BUILD_TESTS) AND NOT TARGET gmock)
 
     add_subdirectory(${DAWN_GOOGLETEST_DIR} "${CMAKE_CURRENT_BINARY_DIR}/googletest" EXCLUDE_FROM_ALL)
 endif()
-
-set(ABSL_ROOT_DIR ${DAWN_ABSEIL_DIR})
-if (NOT TARGET absl::strings)
-    # Recommended setting for compatibility with future abseil releases.
-    set(ABSL_PROPAGATE_CXX_STD ON CACHE BOOL "" FORCE)
-    message(STATUS "Dawn: using Abseil at ${DAWN_ABSEIL_DIR}")
-    if (("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") OR
-        ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang"))
-        add_compile_options(
-            -Wno-array-parameter
-            -Wno-deprecated-builtins
-            -Wno-unknown-warning-option
-            -Wno-gcc-compat
-            -Wno-unreachable-code-break
-            -Wno-nullability-extension
-            -Wno-shadow
-        )
-    endif()
-
-    add_subdirectory(${DAWN_ABSEIL_DIR} "${CMAKE_CURRENT_BINARY_DIR}/abseil")
-endif()
-
-if (DAWN_BUILD_PROTOBUF AND EXISTS "${DAWN_PROTOBUF_DIR}/cmake")
-  # Needs to come before SPIR-V Tools
-  include("third_party/protobuf.cmake")
-endif()
-
 ################################################################################
 # End of Emscripten enabled third party directories
 ################################################################################
