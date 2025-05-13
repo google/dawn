@@ -1396,6 +1396,9 @@ class Parser {
                 case spv::Op::OpImageGather:
                     EmitImageGather(inst);
                     break;
+                case spv::Op::OpImageSampleImplicitLod:
+                    EmitImageSampleImplicitLod(inst);
+                    break;
                 default:
                     TINT_UNIMPLEMENTED()
                         << "unhandled SPIR-V instruction: " << static_cast<uint32_t>(inst.opcode());
@@ -1452,6 +1455,32 @@ class Parser {
 
         Emit(b_.Call<spirv::ir::BuiltinCall>(Type(inst.type_id()), spirv::BuiltinFn::kImageGather,
                                              args),
+             inst.result_id());
+    }
+
+    void EmitImageSampleImplicitLod(const spvtools::opt::Instruction& inst) {
+        auto sampled_image = Value(inst.GetSingleWordInOperand(0));
+        auto* coord = Value(inst.GetSingleWordInOperand(1));
+
+        Vector<core::ir::Value*, 4> args = {sampled_image, coord};
+
+        if (inst.NumInOperands() > 2) {
+            uint32_t literal_mask = inst.GetSingleWordInOperand(2);
+            args.Push(b_.Constant(i32(literal_mask)));
+
+            if (literal_mask != 0) {
+                TINT_ASSERT(inst.NumInOperands() > 3);
+            }
+
+            for (uint32_t i = 3; i < inst.NumInOperands(); ++i) {
+                args.Push(Value(inst.GetSingleWordInOperand(i)));
+            }
+        } else {
+            args.Push(b_.Zero(ty_.i32()));
+        }
+
+        Emit(b_.Call<spirv::ir::BuiltinCall>(Type(inst.type_id()),
+                                             spirv::BuiltinFn::kImageSampleImplicitLod, args),
              inst.result_id());
     }
 

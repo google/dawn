@@ -237,6 +237,7 @@ struct State {
                     break;
                 case spirv::BuiltinFn::kSampledImage:
                 case spirv::BuiltinFn::kImageGather:
+                case spirv::BuiltinFn::kImageSampleImplicitLod:
                     // Ignore image methods, they'll be handled by the `Texture` transform.
                     break;
                 default:

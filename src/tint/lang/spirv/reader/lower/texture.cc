@@ -46,6 +46,13 @@ namespace {
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
+enum class ImageOperandsMask : uint32_t {
+    kBias = 0x00000001,
+    kLod = 0x00000002,
+    kGrad = 0x00000004,
+    kConstOffset = 0x00000008,
+};
+
 /// PIMPL state for the transform.
 struct State {
     /// The IR module.
@@ -97,6 +104,7 @@ struct State {
                 switch (builtin->Func()) {
                     case spirv::BuiltinFn::kSampledImage:
                     case spirv::BuiltinFn::kImageGather:
+                    case spirv::BuiltinFn::kImageSampleImplicitLod:
                         builtin_worklist.Push(builtin);
                         break;
                     default:
@@ -112,6 +120,9 @@ struct State {
                     break;
                 case spirv::BuiltinFn::kImageGather:
                     ImageGather(builtin);
+                    break;
+                case spirv::BuiltinFn::kImageSampleImplicitLod:
+                    ImageSampleImplicitLod(builtin);
                     break;
                 default:
                     break;
@@ -138,7 +149,71 @@ struct State {
         return {inst->Operands()[0], inst->Operands()[1]};
     }
 
+    void ProcessCoords(const core::type::Type* type,
+                       core::ir::Value* coords,
+                       Vector<core::ir::Value*, 5>& new_args) {
+        if (!IsTextureArray(type->As<core::type::Texture>()->Dim())) {
+            new_args.Push(coords);
+            return;
+        }
+
+        auto* coords_ty = coords->Type()->As<core::type::Vector>();
+        TINT_ASSERT(coords_ty);
+
+        auto* new_coords_ty = ty.vec(coords_ty->Type(), coords_ty->Width() - 1);
+        TINT_ASSERT(new_coords_ty->Width() != 4);
+
+        // New coords
+        uint32_t array_idx = 2;
+        Vector<uint32_t, 3> swizzle_idx = {0, 1};
+        if (new_coords_ty->Width() == 3) {
+            swizzle_idx.Push(2);
+            array_idx = 3;
+        }
+        new_args.Push(b.Swizzle(new_coords_ty, coords, swizzle_idx)->Result());
+
+        // Array index
+        auto* convert = b.Convert(ty.i32(), b.Swizzle(new_coords_ty->Type(), coords, {array_idx}));
+        new_args.Push(convert->Result());
+    }
+
+    void ProcessOffset(core::ir::Value* offset, Vector<core::ir::Value*, 5>& new_args) {
+        if (offset->Type()->IsUnsignedIntegerVector()) {
+            offset = b.Convert(ty.MatchWidth(ty.i32(), offset->Type()), offset)->Result();
+        }
+        new_args.Push(offset);
+    }
+
     void ImageGather(spirv::ir::BuiltinCall* call) {
+        const auto& args = call->Args();
+
+        b.InsertBefore(call, [&] {
+            core::ir::Value* tex = nullptr;
+            core::ir::Value* sampler = nullptr;
+            std::tie(tex, sampler) = GetTextureSampler(args[0]);
+
+            auto* coords = args[1];
+            auto* component = args[2];
+
+            Vector<core::ir::Value*, 5> new_args;
+            if (!tex->Type()->Is<core::type::DepthTexture>()) {
+                new_args.Push(component);
+            }
+            new_args.Push(tex);
+            new_args.Push(sampler);
+
+            ProcessCoords(tex->Type(), coords, new_args);
+
+            if (args.Length() > 4) {
+                ProcessOffset(args[4], new_args);
+            }
+
+            b.CallWithResult(call->DetachResult(), core::BuiltinFn::kTextureGather, new_args);
+        });
+        call->Destroy();
+    }
+
+    void ImageSampleImplicitLod(spirv::ir::BuiltinCall* call) {
         const auto& args = call->Args();
 
         auto* sampled_image = args[0];
@@ -148,49 +223,29 @@ struct State {
         std::tie(tex, sampler) = GetTextureSampler(sampled_image);
 
         auto* coords = args[1];
-        auto* component = args[2];
+        auto* operand_mask_value = args[2]->As<core::ir::Constant>();
+        TINT_ASSERT(operand_mask_value);
 
+        uint32_t operand_mask = operand_mask_value->Value()->ValueAs<uint32_t>();
+
+        uint32_t idx = 3;
         b.InsertBefore(call, [&] {
             Vector<core::ir::Value*, 5> new_args;
-            if (!tex->Type()->Is<core::type::DepthTexture>()) {
-                new_args.Push(component);
-            }
             new_args.Push(tex);
             new_args.Push(sampler);
 
-            if (IsTextureArray(tex->Type()->As<core::type::Texture>()->Dim())) {
-                auto* coords_ty = coords->Type()->As<core::type::Vector>();
-                TINT_ASSERT(coords_ty);
+            ProcessCoords(tex->Type(), coords, new_args);
 
-                auto* new_coords_ty = ty.vec(coords_ty->Type(), coords_ty->Width() - 1);
-                TINT_ASSERT(new_coords_ty->Width() != 4);
-
-                // New coords
-                uint32_t array_idx = 2;
-                Vector<uint32_t, 3> swizzle_idx = {0, 1};
-                if (new_coords_ty->Width() == 3) {
-                    swizzle_idx.Push(2);
-                    array_idx = 3;
-                }
-                new_args.Push(b.Swizzle(new_coords_ty, coords, swizzle_idx)->Result());
-
-                // Array index
-                auto* convert =
-                    b.Convert(ty.i32(), b.Swizzle(new_coords_ty->Type(), coords, {array_idx}));
-                new_args.Push(convert->Result());
-            } else {
-                new_args.Push(coords);
+            core::BuiltinFn fn = core::BuiltinFn::kTextureSample;
+            if ((operand_mask & static_cast<uint32_t>(ImageOperandsMask::kBias)) != 0) {
+                fn = core::BuiltinFn::kTextureSampleBias;
+                new_args.Push(args[idx++]);
+            }
+            if ((operand_mask & static_cast<uint32_t>(ImageOperandsMask::kConstOffset)) != 0) {
+                ProcessOffset(args[idx++], new_args);
             }
 
-            if (args.Length() > 4) {
-                auto* offset = args[4];
-                if (offset->Type()->IsUnsignedIntegerVector()) {
-                    offset = b.Convert(ty.MatchWidth(ty.i32(), offset->Type()), offset)->Result();
-                }
-                new_args.Push(offset);
-            }
-
-            b.CallWithResult(call->DetachResult(), core::BuiltinFn::kTextureGather, new_args);
+            b.CallWithResult(call->DetachResult(), fn, new_args);
         });
         call->Destroy();
     }
