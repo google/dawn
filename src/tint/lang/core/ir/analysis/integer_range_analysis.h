@@ -38,6 +38,7 @@ class Binary;
 class Constant;
 class Function;
 class FunctionParam;
+class Let;
 class Load;
 class Loop;
 class Value;
@@ -99,6 +100,10 @@ class IntegerRangeAnalysis {
     /// Returns the integer range info of a given `Access` variable if it is an integer variable and
     /// it has a meaningful range. Returns nullptr otherwise.
     const IntegerRangeInfo* GetInfo(const Access* access);
+
+    /// Returns the integer range info of a given `Let` variable if it is an integer variable and it
+    /// has a meaningful range. Returns nullptr otherwise.
+    const IntegerRangeInfo* GetInfo(const Let* let);
 
     /// Returns the integer range info of a given `Constant` if it is an integer.
     /// Returns nullptr otherwise.

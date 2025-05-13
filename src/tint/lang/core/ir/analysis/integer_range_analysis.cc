@@ -36,6 +36,7 @@
 #include "src/tint/lang/core/ir/exit_loop.h"
 #include "src/tint/lang/core/ir/function.h"
 #include "src/tint/lang/core/ir/if.h"
+#include "src/tint/lang/core/ir/let.h"
 #include "src/tint/lang/core/ir/load.h"
 #include "src/tint/lang/core/ir/loop.h"
 #include "src/tint/lang/core/ir/multi_in_block.h"
@@ -203,6 +204,8 @@ struct IntegerRangeAnalysisImpl {
         return GetInfo(function_param, index);
     }
 
+    const IntegerRangeInfo* GetInfo(const Let* let) { return GetInfo(let->Value()); }
+
     const IntegerRangeInfo* GetInfo(const Constant* constant) {
         if (!IsConstantInteger(constant)) {
             return nullptr;
@@ -225,11 +228,12 @@ struct IntegerRangeAnalysisImpl {
                 return GetInfo(param, 0);
             },
             [&](const InstructionResult* r) {
-                // TODO(348701956): Support more instruction types. e.g. Let, Convert, ...
+                // TODO(348701956): Support more instruction types. e.g. Convert, ...
                 return Switch(
                     r->Instruction(), [&](const Var* var) { return GetInfo(var); },
                     [&](const Load* load) { return GetInfo(load); },
                     [&](const Access* access) { return GetInfo(access); },
+                    [&](const Let* let) { return GetInfo(let); },
                     [&](const Binary* binary) { return GetInfo(binary); },
                     [](Default) { return nullptr; });
             },
@@ -912,6 +916,10 @@ const IntegerRangeInfo* IntegerRangeAnalysis::GetInfo(const Value* value) {
 
 const IntegerRangeInfo* IntegerRangeAnalysis::GetInfo(const Binary* binary) {
     return impl_->GetInfo(binary);
+}
+
+const IntegerRangeInfo* IntegerRangeAnalysis::GetInfo(const Let* let) {
+    return impl_->GetInfo(let);
 }
 
 }  // namespace tint::core::ir::analysis
