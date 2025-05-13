@@ -93,10 +93,7 @@ class BindGroupTracker : public BindGroupTrackerBase</*CanInheritBindGroups=*/tr
 
   private:
     struct ConstantBufferBinding {
-        bool operator==(const ConstantBufferBinding& rhs) const {
-            return buffer.Get() == rhs.buffer.Get() && firstConstant == rhs.firstConstant &&
-                   numConstants == rhs.numConstants;
-        }
+        bool operator==(const ConstantBufferBinding& rhs) const = default;
 
         ComPtr<ID3D11Buffer> buffer;
         UINT firstConstant = 0;

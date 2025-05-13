@@ -69,11 +69,7 @@ class Texture final : public TextureBase {
     ID3D11Resource* GetD3D11Resource() const;
 
     struct RTVKey {
-        bool operator==(const RTVKey& rhs) const {
-            return viewFormat == rhs.viewFormat && mipLevel == rhs.mipLevel &&
-                   baseSlice == rhs.baseSlice && sliceCount == rhs.sliceCount &&
-                   planeSlice == rhs.planeSlice;
-        }
+        bool operator==(const RTVKey& rhs) const = default;
 
         wgpu::TextureFormat viewFormat;
         uint32_t mipLevel;
@@ -120,12 +116,7 @@ class Texture final : public TextureBase {
         const TextureView* view);
 
     struct SRVKey {
-        bool operator==(const SRVKey& rhs) const {
-            return viewDimension == rhs.viewDimension && viewFormat == rhs.viewFormat &&
-                   aspects == rhs.aspects && mipLevel == rhs.mipLevel &&
-                   levelCount == rhs.levelCount && baseSlice == rhs.baseSlice &&
-                   sliceCount == rhs.sliceCount;
-        }
+        bool operator==(const SRVKey& rhs) const = default;
 
         wgpu::TextureViewDimension viewDimension;
         wgpu::TextureFormat viewFormat;
