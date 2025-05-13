@@ -111,12 +111,6 @@ class DepthStencilCopyTests : public DawnTestWithParams<DepthStencilCopyTestPara
 
         DAWN_TEST_UNSUPPORTED_IF(!mIsFormatSupported);
 
-        // Skip formats other than Depth24PlusStencil8 if we're specifically testing with the packed
-        // depth24_unorm_stencil8 toggle.
-        DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("use_packed_depth24_unorm_stencil8_format") &&
-                                 GetParam().mTextureFormat !=
-                                     wgpu::TextureFormat::Depth24PlusStencil8);
-
         // Draw a square in the bottom left quarter of the screen.
         mVertexModule = utils::CreateShaderModule(device, R"(
             @vertex

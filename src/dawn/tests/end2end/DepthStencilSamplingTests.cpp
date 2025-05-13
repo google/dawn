@@ -75,12 +75,6 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
 
         DAWN_TEST_UNSUPPORTED_IF(!mIsFormatSupported);
 
-        // Skip formats other than Depth24PlusStencil8 if we're specifically testing with the packed
-        // depth24_unorm_stencil8 toggle.
-        DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("use_packed_depth24_unorm_stencil8_format") &&
-                                 GetParam().mTextureFormat !=
-                                     wgpu::TextureFormat::Depth24PlusStencil8);
-
         wgpu::BufferDescriptor uniformBufferDesc;
         uniformBufferDesc.usage = wgpu::BufferUsage::Uniform | wgpu::BufferUsage::CopyDst;
         uniformBufferDesc.size = sizeof(float);
