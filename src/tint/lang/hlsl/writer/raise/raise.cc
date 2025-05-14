@@ -30,6 +30,7 @@
 #include <unordered_set>
 #include <utility>
 
+#include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/transform/add_empty_entry_point.h"
 #include "src/tint/lang/core/ir/transform/array_length_from_uniform.h"
 #include "src/tint/lang/core/ir/transform/binary_polyfill.h"
@@ -47,6 +48,8 @@
 #include "src/tint/lang/core/ir/transform/value_to_let.h"
 #include "src/tint/lang/core/ir/transform/vectorize_scalar_matrix_constructors.h"
 #include "src/tint/lang/core/ir/transform/zero_init_workgroup_memory.h"
+#include "src/tint/lang/core/type/u32.h"
+#include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/hlsl/writer/common/option_helpers.h"
 #include "src/tint/lang/hlsl/writer/common/options.h"
 #include "src/tint/lang/hlsl/writer/raise/binary_polyfill.h"
@@ -71,6 +74,32 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
             return result.Failure();     \
         }                                \
     } while (false)
+
+    // PrepareImmediateData must come before any transform that needs internal push constants.
+    core::ir::transform::PrepareImmediateDataConfig immediate_data_config;
+    if (options.first_index_offset) {
+        immediate_data_config.AddInternalImmediateData(
+            options.first_index_offset.value(), module.symbols.New("tint_first_index_offset"),
+            module.Types().u32());
+    }
+
+    if (options.first_instance_offset) {
+        immediate_data_config.AddInternalImmediateData(
+            options.first_instance_offset.value(), module.symbols.New("tint_first_instance_offset"),
+            module.Types().u32());
+    }
+
+    if (options.num_workgroups_start_offset) {
+        immediate_data_config.AddInternalImmediateData(
+            options.num_workgroups_start_offset.value(),
+            module.symbols.New("tint_num_workgroups_start_offset"),
+            module.Types().vec3(module.Types().u32()));
+    }
+    auto immediate_data_layout =
+        core::ir::transform::PrepareImmediateData(module, immediate_data_config);
+    if (immediate_data_layout != Success) {
+        return immediate_data_layout.Failure();
+    }
 
     tint::transform::multiplanar::BindingsMap multiplanar_map{};
     RemapperData remapper_data{};
@@ -169,12 +198,18 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     // ShaderIO must be run before DecomposeUniformAccess because it might
     // introduce a uniform buffer for kNumWorkgroups.
     {
-        raise::ShaderIOConfig config;
-        config.num_workgroups_binding = options.root_constant_binding_point;
-        config.first_index_offset_binding = options.root_constant_binding_point;
-        config.add_input_position_member = pixel_local_enabled;
-        config.truncate_interstage_variables = options.truncate_interstage_variables;
-        config.interstage_locations = std::move(options.interstage_locations);
+        raise::ShaderIOConfig config = {
+            .immediate_data_layout = immediate_data_layout.Get(),
+            .num_workgroups_binding = options.root_constant_binding_point,
+            .first_index_offset_binding = options.root_constant_binding_point,
+            .add_input_position_member = pixel_local_enabled,
+            .truncate_interstage_variables = options.truncate_interstage_variables,
+            .interstage_locations = std::move(options.interstage_locations),
+            .first_index_offset = options.first_index_offset,
+            .first_instance_offset = options.first_instance_offset,
+            .num_workgroups_start_offset = options.num_workgroups_start_offset,
+        };
+
         RUN_TRANSFORM(raise::ShaderIO, module, config);
     }
 

@@ -54,7 +54,9 @@ TEST_F(HlslWriterTransformTest, ShaderIONoInputsOrOutputs) {
 
     auto* expect = src;
 
-    Run(ShaderIO, ShaderIOConfig{});
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -139,7 +141,9 @@ foo_inputs = struct @align(16) {
 }
 )";
 
-    Run(ShaderIO, ShaderIOConfig{});
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -275,7 +279,9 @@ foo_inputs = struct @align(16) {
 }
 )";
 
-    Run(ShaderIO, ShaderIOConfig{});
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -391,7 +397,9 @@ foo_inputs = struct @align(16) {
 }
 )";
 
-    Run(ShaderIO, ShaderIOConfig{});
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -433,7 +441,9 @@ foo_outputs = struct @align(16) {
 }
 )";
 
-    Run(ShaderIO, ShaderIOConfig{});
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -474,7 +484,9 @@ foo_outputs = struct @align(16) {
 }
 )";
 
-    Run(ShaderIO, ShaderIOConfig{});
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -566,7 +578,9 @@ foo_outputs = struct @align(16) {
 }
 )";
 
-    Run(ShaderIO, ShaderIOConfig{});
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -637,7 +651,9 @@ foo_outputs = struct @align(4) {
 }
 )";
 
-    Run(ShaderIO, ShaderIOConfig{});
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -775,7 +791,9 @@ frag_outputs = struct @align(16) {
 }
 )";
 
-    Run(ShaderIO, ShaderIOConfig{});
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -859,7 +877,9 @@ $B1: {  # root
 }
 )";
 
-    Run(ShaderIO, ShaderIOConfig{});
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -936,7 +956,9 @@ $B1: {  # root
 }
 )";
 
-    Run(ShaderIO, ShaderIOConfig{});
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -983,7 +1005,9 @@ cmp_inputs = struct @align(16) {
 }
 )";
 
-    Run(ShaderIO, ShaderIOConfig{});
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -1032,7 +1056,9 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_Subgroup_NonStruct) {
 }
 )";
 
-    Run(ShaderIO, ShaderIOConfig{});
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -1112,7 +1138,9 @@ Inputs = struct @align(4) {
 }
 )";
 
-    Run(ShaderIO, ShaderIOConfig{});
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -1176,7 +1204,9 @@ foo_inputs = struct @align(16) {
 }
 )";
 
-    Run(ShaderIO, ShaderIOConfig{});
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -1240,7 +1270,9 @@ foo_inputs = struct @align(16) {
 }
 )";
 
-    Run(ShaderIO, ShaderIOConfig{});
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -1304,7 +1336,9 @@ foo_inputs = struct @align(16) {
 }
 )";
 
-    Run(ShaderIO, ShaderIOConfig{});
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -1351,7 +1385,73 @@ $B1: {  # root
 }
 )";
 
-    Run(ShaderIO, ShaderIOConfig{});
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterTransformTest, ShaderIOParameters_Immediate_NumWorkgroups_NonStruct) {
+    auto* num_workgroups = b.FunctionParam("num_wgs", ty.vec3<u32>());
+    num_workgroups->SetBuiltin(core::BuiltinValue::kNumWorkgroups);
+
+    auto* ep = b.ComputeFunction("foo");
+    ep->SetParams({num_workgroups});
+
+    b.Append(ep->Block(), [&] {
+        b.Multiply(ty.vec3<u32>(), num_workgroups, num_workgroups);
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func(%num_wgs:vec3<u32> [@num_workgroups]):void {
+  $B1: {
+    %3:vec3<u32> = mul %num_wgs, %num_wgs
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+tint_immediate_data_struct = struct @align(16), @block {
+  tint_num_workgroups_start_offset:vec3<u32> @offset(0)
+}
+
+$B1: {  # root
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+}
+
+%foo_inner = func(%num_wgs:vec3<u32>):void {
+  $B2: {
+    %4:vec3<u32> = mul %num_wgs, %num_wgs
+    ret
+  }
+}
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B3: {
+    %6:ptr<immediate, vec3<u32>, read> = access %tint_immediate_data, 0u
+    %7:vec3<u32> = load %6
+    %8:void = call %foo_inner, %7
+    ret
+  }
+}
+)";
+
+    // Refs to Raise() steps to setup push constant layout.
+    constexpr uint32_t num_workgroups_offset = 0u;
+
+    core::ir::transform::PrepareImmediateDataConfig prepare_immediate_data_layout_config;
+    prepare_immediate_data_layout_config.AddInternalImmediateData(
+        num_workgroups_offset, mod.symbols.New("tint_num_workgroups_start_offset"),
+        ty.vec3(ty.u32()));
+    auto layout =
+        core::ir::transform::PrepareImmediateData(mod, prepare_immediate_data_layout_config);
+
+    ShaderIOConfig config{layout.Get()};
+    config.num_workgroups_start_offset = num_workgroups_offset;
+    Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -1420,7 +1520,100 @@ $B1: {  # root
 }
 )";
 
-    Run(ShaderIO, ShaderIOConfig{});
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterTransformTest, ShaderIOParameters_Immediate_NumWorkgroups_Struct) {
+    auto* str_ty = ty.Struct(mod.symbols.New("Inputs"),
+                             {
+                                 {
+                                     mod.symbols.New("num_wgs"),
+                                     ty.vec3<u32>(),
+                                     core::IOAttributes{
+                                         /* location */ std::nullopt,
+                                         /* blend_src */ std::nullopt,
+                                         /* color */ std::nullopt,
+                                         /* builtin */ core::BuiltinValue::kNumWorkgroups,
+                                         /* interpolation */ std::nullopt,
+                                         /* invariant */ false,
+                                     },
+                                 },
+                             });
+
+    auto* str_param = b.FunctionParam("inputs", str_ty);
+
+    auto* ep = b.ComputeFunction("foo");
+    ep->SetParams({str_param});
+
+    b.Append(ep->Block(), [&] {
+        auto* num_workgroups = b.Access(ty.vec3<u32>(), str_param, 0_i);
+        b.Multiply(ty.vec3<u32>(), num_workgroups, num_workgroups);
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+Inputs = struct @align(16) {
+  num_wgs:vec3<u32> @offset(0), @builtin(num_workgroups)
+}
+
+%foo = @compute @workgroup_size(1u, 1u, 1u) func(%inputs:Inputs):void {
+  $B1: {
+    %3:vec3<u32> = access %inputs, 0i
+    %4:vec3<u32> = mul %3, %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+Inputs = struct @align(16) {
+  num_wgs:vec3<u32> @offset(0)
+}
+
+tint_immediate_data_struct = struct @align(16), @block {
+  tint_num_workgroups_start_offset:vec3<u32> @offset(0)
+}
+
+$B1: {  # root
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+}
+
+%foo_inner = func(%inputs:Inputs):void {
+  $B2: {
+    %4:vec3<u32> = access %inputs, 0i
+    %5:vec3<u32> = mul %4, %4
+    ret
+  }
+}
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B3: {
+    %7:ptr<immediate, vec3<u32>, read> = access %tint_immediate_data, 0u
+    %8:vec3<u32> = load %7
+    %9:Inputs = construct %8
+    %10:void = call %foo_inner, %9
+    ret
+  }
+}
+)";
+
+    // Refs to Raise() steps to setup push constant layout.
+    constexpr uint32_t num_workgroups_offset = 0u;
+
+    core::ir::transform::PrepareImmediateDataConfig prepare_immediate_data_layout_config;
+    prepare_immediate_data_layout_config.AddInternalImmediateData(
+        num_workgroups_offset, mod.symbols.New("tint_num_workgroups_start_offset"),
+        ty.vec3(ty.u32()));
+    auto layout =
+        core::ir::transform::PrepareImmediateData(mod, prepare_immediate_data_layout_config);
+
+    ShaderIOConfig config{layout.Get()};
+    config.num_workgroups_start_offset = num_workgroups_offset;
+    Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -1467,7 +1660,8 @@ $B1: {  # root
 }
 )";
 
-    ShaderIOConfig config;
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
     config.num_workgroups_binding = {1u, 23u};
     Run(ShaderIO, config);
 
@@ -1546,7 +1740,9 @@ $B1: {  # root
 }
 )";
 
-    Run(ShaderIO, ShaderIOConfig{});
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -1603,7 +1799,84 @@ $B1: {  # root
 }
 )";
 
-    Run(ShaderIO, ShaderIOConfig{});
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterTransformTest,
+       ShaderIOParameters_Immediate_NumWorkgroups_WithNonWorkgroupParamFirst) {
+    auto* invocation_id = b.FunctionParam("invoc_id", ty.vec3<u32>());
+    invocation_id->SetBuiltin(core::BuiltinValue::kLocalInvocationId);
+
+    auto* num_workgroups = b.FunctionParam("num_wgs", ty.vec3<u32>());
+    num_workgroups->SetBuiltin(core::BuiltinValue::kNumWorkgroups);
+
+    auto* ep = b.ComputeFunction("foo");
+    ep->SetParams({invocation_id, num_workgroups});
+
+    b.Append(ep->Block(), [&] {
+        b.Multiply(ty.vec3<u32>(), b.Access(ty.u32(), invocation_id, 0_u), num_workgroups);
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func(%invoc_id:vec3<u32> [@local_invocation_id], %num_wgs:vec3<u32> [@num_workgroups]):void {
+  $B1: {
+    %4:u32 = access %invoc_id, 0u
+    %5:vec3<u32> = mul %4, %num_wgs
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+tint_immediate_data_struct = struct @align(16), @block {
+  tint_num_workgroups_start_offset:vec3<u32> @offset(0)
+}
+
+foo_inputs = struct @align(16) {
+  invoc_id:vec3<u32> @offset(0), @builtin(local_invocation_id)
+}
+
+$B1: {  # root
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+}
+
+%foo_inner = func(%invoc_id:vec3<u32>, %num_wgs:vec3<u32>):void {
+  $B2: {
+    %5:u32 = access %invoc_id, 0u
+    %6:vec3<u32> = mul %5, %num_wgs
+    ret
+  }
+}
+%foo = @compute @workgroup_size(1u, 1u, 1u) func(%inputs:foo_inputs):void {
+  $B3: {
+    %9:vec3<u32> = access %inputs, 0u
+    %10:ptr<immediate, vec3<u32>, read> = access %tint_immediate_data, 0u
+    %11:vec3<u32> = load %10
+    %12:void = call %foo_inner, %9, %11
+    ret
+  }
+}
+)";
+
+    // Refs to Raise() steps to setup push constant layout.
+    constexpr uint32_t num_workgroups_offset = 0u;
+
+    core::ir::transform::PrepareImmediateDataConfig prepare_immediate_data_layout_config;
+    prepare_immediate_data_layout_config.AddInternalImmediateData(
+        num_workgroups_offset, mod.symbols.New("tint_num_workgroups_start_offset"),
+        ty.vec3(ty.u32()));
+    auto layout =
+        core::ir::transform::PrepareImmediateData(mod, prepare_immediate_data_layout_config);
+
+    ShaderIOConfig config{layout.Get()};
+    config.num_workgroups_start_offset = num_workgroups_offset;
+    Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -1660,7 +1933,84 @@ $B1: {  # root
 }
 )";
 
-    Run(ShaderIO, ShaderIOConfig{});
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterTransformTest,
+       ShaderIOParameters_Immediate_NumWorkgroups_WithNonWorkgroupParamLast) {
+    auto* num_workgroups = b.FunctionParam("num_wgs", ty.vec3<u32>());
+    num_workgroups->SetBuiltin(core::BuiltinValue::kNumWorkgroups);
+
+    auto* invocation_id = b.FunctionParam("invoc_id", ty.vec3<u32>());
+    invocation_id->SetBuiltin(core::BuiltinValue::kLocalInvocationId);
+
+    auto* ep = b.ComputeFunction("foo");
+    ep->SetParams({num_workgroups, invocation_id});
+
+    b.Append(ep->Block(), [&] {
+        b.Multiply(ty.vec3<u32>(), b.Access(ty.u32(), invocation_id, 0_u), num_workgroups);
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func(%num_wgs:vec3<u32> [@num_workgroups], %invoc_id:vec3<u32> [@local_invocation_id]):void {
+  $B1: {
+    %4:u32 = access %invoc_id, 0u
+    %5:vec3<u32> = mul %4, %num_wgs
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+tint_immediate_data_struct = struct @align(16), @block {
+  tint_num_workgroups_start_offset:vec3<u32> @offset(0)
+}
+
+foo_inputs = struct @align(16) {
+  invoc_id:vec3<u32> @offset(0), @builtin(local_invocation_id)
+}
+
+$B1: {  # root
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+}
+
+%foo_inner = func(%num_wgs:vec3<u32>, %invoc_id:vec3<u32>):void {
+  $B2: {
+    %5:u32 = access %invoc_id, 0u
+    %6:vec3<u32> = mul %5, %num_wgs
+    ret
+  }
+}
+%foo = @compute @workgroup_size(1u, 1u, 1u) func(%inputs:foo_inputs):void {
+  $B3: {
+    %9:ptr<immediate, vec3<u32>, read> = access %tint_immediate_data, 0u
+    %10:vec3<u32> = load %9
+    %11:vec3<u32> = access %inputs, 0u
+    %12:void = call %foo_inner, %10, %11
+    ret
+  }
+}
+)";
+
+    // Refs to Raise() steps to setup push constant layout.
+    constexpr uint32_t num_workgroups_offset = 0u;
+
+    core::ir::transform::PrepareImmediateDataConfig prepare_immediate_data_layout_config;
+    prepare_immediate_data_layout_config.AddInternalImmediateData(
+        num_workgroups_offset, mod.symbols.New("tint_num_workgroups_start_offset"),
+        ty.vec3(ty.u32()));
+    auto layout =
+        core::ir::transform::PrepareImmediateData(mod, prepare_immediate_data_layout_config);
+
+    ShaderIOConfig config{layout.Get()};
+    config.num_workgroups_start_offset = num_workgroups_offset;
+    Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -1757,7 +2107,123 @@ $B1: {  # root
 }
 )";
 
-    Run(ShaderIO, ShaderIOConfig{});
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterTransformTest, ShaderIOParameters_Immediate_NumWorkgroupsAndSubgroups_Mixed) {
+    auto* invocation_id = b.FunctionParam("invoc_id", ty.vec3<u32>());
+    invocation_id->SetBuiltin(core::BuiltinValue::kLocalInvocationId);
+
+    auto* num_workgroups = b.FunctionParam("num_wgs", ty.vec3<u32>());
+    num_workgroups->SetBuiltin(core::BuiltinValue::kNumWorkgroups);
+
+    auto* invocation_index = b.FunctionParam("invoc_index", ty.u32());
+    invocation_index->SetBuiltin(core::BuiltinValue::kLocalInvocationIndex);
+
+    auto* subgroup_invocation_id = b.FunctionParam("sg_id", ty.u32());
+    subgroup_invocation_id->SetBuiltin(core::BuiltinValue::kSubgroupInvocationId);
+
+    auto* global_invocation_id = b.FunctionParam("glob_id", ty.vec3<u32>());
+    global_invocation_id->SetBuiltin(core::BuiltinValue::kGlobalInvocationId);
+
+    auto* subgroup_size = b.FunctionParam("sg_size", ty.u32());
+    subgroup_size->SetBuiltin(core::BuiltinValue::kSubgroupSize);
+
+    auto* workgroup_id = b.FunctionParam("wg_id", ty.vec3<u32>());
+    workgroup_id->SetBuiltin(core::BuiltinValue::kWorkgroupId);
+
+    auto* ep = b.ComputeFunction("foo");
+    ep->SetParams({invocation_id, num_workgroups, invocation_index, subgroup_invocation_id,
+                   global_invocation_id, subgroup_size, workgroup_id});
+
+    b.Append(ep->Block(), [&] {
+        b.Let("l_invoc_id", invocation_id);
+        b.Let("l_num_wgs", num_workgroups);
+        b.Let("l_invoc_index", invocation_index);
+        b.Let("l_sg_id", subgroup_invocation_id);
+        b.Let("l_glob_id", global_invocation_id);
+        b.Let("l_sg_size", subgroup_size);
+        b.Let("l_wg_id", workgroup_id);
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func(%invoc_id:vec3<u32> [@local_invocation_id], %num_wgs:vec3<u32> [@num_workgroups], %invoc_index:u32 [@local_invocation_index], %sg_id:u32 [@subgroup_invocation_id], %glob_id:vec3<u32> [@global_invocation_id], %sg_size:u32 [@subgroup_size], %wg_id:vec3<u32> [@workgroup_id]):void {
+  $B1: {
+    %l_invoc_id:vec3<u32> = let %invoc_id
+    %l_num_wgs:vec3<u32> = let %num_wgs
+    %l_invoc_index:u32 = let %invoc_index
+    %l_sg_id:u32 = let %sg_id
+    %l_glob_id:vec3<u32> = let %glob_id
+    %l_sg_size:u32 = let %sg_size
+    %l_wg_id:vec3<u32> = let %wg_id
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+tint_immediate_data_struct = struct @align(16), @block {
+  tint_num_workgroups_start_offset:vec3<u32> @offset(0)
+}
+
+foo_inputs = struct @align(16) {
+  invoc_id:vec3<u32> @offset(0), @builtin(local_invocation_id)
+  invoc_index:u32 @offset(12), @builtin(local_invocation_index)
+  glob_id:vec3<u32> @offset(16), @builtin(global_invocation_id)
+  wg_id:vec3<u32> @offset(32), @builtin(workgroup_id)
+}
+
+$B1: {  # root
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+}
+
+%foo_inner = func(%invoc_id:vec3<u32>, %num_wgs:vec3<u32>, %invoc_index:u32, %sg_id:u32, %glob_id:vec3<u32>, %sg_size:u32, %wg_id:vec3<u32>):void {
+  $B2: {
+    %l_invoc_id:vec3<u32> = let %invoc_id
+    %l_num_wgs:vec3<u32> = let %num_wgs
+    %l_invoc_index:u32 = let %invoc_index
+    %l_sg_id:u32 = let %sg_id
+    %l_glob_id:vec3<u32> = let %glob_id
+    %l_sg_size:u32 = let %sg_size
+    %l_wg_id:vec3<u32> = let %wg_id
+    ret
+  }
+}
+%foo = @compute @workgroup_size(1u, 1u, 1u) func(%inputs:foo_inputs):void {
+  $B3: {
+    %19:vec3<u32> = access %inputs, 0u
+    %20:ptr<immediate, vec3<u32>, read> = access %tint_immediate_data, 0u
+    %21:vec3<u32> = load %20
+    %22:u32 = access %inputs, 1u
+    %23:u32 = hlsl.WaveGetLaneIndex
+    %24:vec3<u32> = access %inputs, 2u
+    %25:u32 = hlsl.WaveGetLaneCount
+    %26:vec3<u32> = access %inputs, 3u
+    %27:void = call %foo_inner, %19, %21, %22, %23, %24, %25, %26
+    ret
+  }
+}
+)";
+
+    // Refs to Raise() steps to setup push constant layout.
+    constexpr uint32_t num_workgroups_offset = 0u;
+
+    core::ir::transform::PrepareImmediateDataConfig prepare_immediate_data_layout_config;
+    prepare_immediate_data_layout_config.AddInternalImmediateData(
+        num_workgroups_offset, mod.symbols.New("tint_num_workgroups_start_offset"),
+        ty.vec3(ty.u32()));
+    auto layout =
+        core::ir::transform::PrepareImmediateData(mod, prepare_immediate_data_layout_config);
+
+    ShaderIOConfig config{layout.Get()};
+    config.num_workgroups_start_offset = num_workgroups_offset;
+    Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -1829,7 +2295,9 @@ foo_outputs = struct @align(16) {
 )";
 
     capabilities = core::ir::Capability::kAllowClipDistancesOnF32;
-    Run(ShaderIO, ShaderIOConfig{});
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -1903,7 +2371,9 @@ foo_outputs = struct @align(16) {
 )";
 
     capabilities = core::ir::Capability::kAllowClipDistancesOnF32;
-    Run(ShaderIO, ShaderIOConfig{});
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -1978,7 +2448,9 @@ foo_outputs = struct @align(16) {
 )";
 
     capabilities = core::ir::Capability::kAllowClipDistancesOnF32;
-    Run(ShaderIO, ShaderIOConfig{});
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -2054,7 +2526,9 @@ foo_outputs = struct @align(16) {
 )";
 
     capabilities = core::ir::Capability::kAllowClipDistancesOnF32;
-    Run(ShaderIO, ShaderIOConfig{});
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -2132,7 +2606,9 @@ foo_outputs = struct @align(16) {
 )";
 
     capabilities = core::ir::Capability::kAllowClipDistancesOnF32;
-    Run(ShaderIO, ShaderIOConfig{});
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -2212,7 +2688,9 @@ foo_outputs = struct @align(16) {
 )";
 
     capabilities = core::ir::Capability::kAllowClipDistancesOnF32;
-    Run(ShaderIO, ShaderIOConfig{});
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -2293,7 +2771,9 @@ foo_outputs = struct @align(16) {
 )";
 
     capabilities = core::ir::Capability::kAllowClipDistancesOnF32;
-    Run(ShaderIO, ShaderIOConfig{});
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -2375,7 +2855,9 @@ foo_outputs = struct @align(16) {
 )";
 
     capabilities = core::ir::Capability::kAllowClipDistancesOnF32;
-    Run(ShaderIO, ShaderIOConfig{});
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -2453,7 +2935,9 @@ foo_outputs = struct @align(16) {
 )";
 
     capabilities = core::ir::Capability::kAllowClipDistancesOnF32;
-    Run(ShaderIO, ShaderIOConfig{});
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -2538,7 +3022,8 @@ foo_outputs = struct @align(16) {
 }
 )";
 
-    ShaderIOConfig config;
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
     config.truncate_interstage_variables = false;  // Disabled
     Run(ShaderIO, config);
 
@@ -2625,7 +3110,8 @@ foo_outputs = struct @align(16) {
 }
 )";
 
-    ShaderIOConfig config;
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
     config.truncate_interstage_variables = true;
     config.interstage_locations[0] = true;
     config.interstage_locations[1] = true;
@@ -2714,7 +3200,8 @@ foo_outputs = struct @align(16) {
 }
 )";
 
-    ShaderIOConfig config;
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
     config.truncate_interstage_variables = true;
     config.interstage_locations[1] = true;
     config.interstage_locations[2] = true;
@@ -2802,7 +3289,8 @@ foo_outputs = struct @align(16) {
 }
 )";
 
-    ShaderIOConfig config;
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
     config.truncate_interstage_variables = true;
     config.interstage_locations[0] = true;
     config.interstage_locations[2] = true;
@@ -2890,7 +3378,8 @@ foo_outputs = struct @align(16) {
 }
 )";
 
-    ShaderIOConfig config;
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
     config.truncate_interstage_variables = true;
     config.interstage_locations[0] = true;
     config.interstage_locations[1] = true;
@@ -2977,7 +3466,8 @@ foo_outputs = struct @align(16) {
 }
 )";
 
-    ShaderIOConfig config;
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
     config.truncate_interstage_variables = true;
     config.interstage_locations[1] = true;
     Run(ShaderIO, config);
@@ -3062,7 +3552,8 @@ foo_outputs = struct @align(16) {
 }
 )";
 
-    ShaderIOConfig config;
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
     config.truncate_interstage_variables = true;
     Run(ShaderIO, config);
 
@@ -3148,7 +3639,8 @@ foo_outputs = struct @align(16) {
 }
 )";
 
-    ShaderIOConfig config;
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
     config.truncate_interstage_variables = true;
     config.interstage_locations[0] = true;
     config.interstage_locations[2] = true;
@@ -3276,7 +3768,8 @@ foo2_outputs = struct @align(16) {
 }
 )";
 
-    ShaderIOConfig config;
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
     config.truncate_interstage_variables = true;
     config.interstage_locations[0] = true;
     config.interstage_locations[2] = true;
@@ -3419,7 +3912,8 @@ foo2_outputs = struct @align(16) {
 }
 )";
 
-    ShaderIOConfig config;
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
     config.truncate_interstage_variables = true;
     config.interstage_locations[2] = true;
     config.interstage_locations[3] = true;
@@ -3490,8 +3984,86 @@ $B1: {  # root
 }
 )";
 
-    ShaderIOConfig config;
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
     config.first_index_offset_binding = {12, 34};
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterTransformTest, ShaderIOParameters_Immediate_FirstIndexOffset_VertexIndex) {
+    auto* vert_idx = b.FunctionParam("vert_idx", ty.u32());
+    vert_idx->SetBuiltin(core::BuiltinValue::kVertexIndex);
+
+    auto* ep = b.Function("foo", ty.vec4<f32>(), core::ir::Function::PipelineStage::kVertex);
+    ep->SetParams({vert_idx});
+    ep->SetReturnBuiltin(core::BuiltinValue::kPosition);
+
+    b.Append(ep->Block(), [&] {
+        b.Add(ty.u32(), vert_idx, vert_idx);
+        b.Return(ep, b.Construct(ty.vec4<f32>(), 0.5_f));
+    });
+
+    auto* src = R"(
+%foo = @vertex func(%vert_idx:u32 [@vertex_index]):vec4<f32> [@position] {
+  $B1: {
+    %3:u32 = add %vert_idx, %vert_idx
+    %4:vec4<f32> = construct 0.5f
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+tint_immediate_data_struct = struct @align(4), @block {
+  tint_first_index_offset:u32 @offset(0)
+}
+
+foo_inputs = struct @align(4) {
+  vert_idx:u32 @offset(0), @builtin(vertex_index)
+}
+
+foo_outputs = struct @align(16) {
+  tint_symbol:vec4<f32> @offset(0), @builtin(position)
+}
+
+$B1: {  # root
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+}
+
+%foo_inner = func(%vert_idx:u32):vec4<f32> {
+  $B2: {
+    %4:u32 = add %vert_idx, %vert_idx
+    %5:vec4<f32> = construct 0.5f
+    ret %5
+  }
+}
+%foo = @vertex func(%inputs:foo_inputs):foo_outputs {
+  $B3: {
+    %8:u32 = access %inputs, 0u
+    %9:ptr<immediate, u32, read> = access %tint_immediate_data, 0u
+    %10:u32 = load %9
+    %11:u32 = add %8, %10
+    %12:vec4<f32> = call %foo_inner, %11
+    %13:foo_outputs = construct %12
+    ret %13
+  }
+}
+)";
+
+    // Refs to Raise() steps to setup push constant layout.
+    constexpr uint32_t first_index_offset = 0u;
+
+    core::ir::transform::PrepareImmediateDataConfig prepare_immediate_data_layout_config;
+    prepare_immediate_data_layout_config.AddInternalImmediateData(
+        first_index_offset, mod.symbols.New("tint_first_index_offset"), ty.u32());
+    auto layout =
+        core::ir::transform::PrepareImmediateData(mod, prepare_immediate_data_layout_config);
+
+    ShaderIOConfig config{layout.Get()};
+    config.first_index_offset = first_index_offset;
     Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
@@ -3559,8 +4131,86 @@ $B1: {  # root
 }
 )";
 
-    ShaderIOConfig config;
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
     config.first_index_offset_binding = {12, 34};
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterTransformTest, ShaderIOParameters_Immediate_FirstIndexOffset_InstanceIndex) {
+    auto* inst_idx = b.FunctionParam("inst_idx", ty.u32());
+    inst_idx->SetBuiltin(core::BuiltinValue::kInstanceIndex);
+
+    auto* ep = b.Function("foo", ty.vec4<f32>(), core::ir::Function::PipelineStage::kVertex);
+    ep->SetParams({inst_idx});
+    ep->SetReturnBuiltin(core::BuiltinValue::kPosition);
+
+    b.Append(ep->Block(), [&] {
+        b.Add(ty.u32(), inst_idx, inst_idx);
+        b.Return(ep, b.Construct(ty.vec4<f32>(), 0.5_f));
+    });
+
+    auto* src = R"(
+%foo = @vertex func(%inst_idx:u32 [@instance_index]):vec4<f32> [@position] {
+  $B1: {
+    %3:u32 = add %inst_idx, %inst_idx
+    %4:vec4<f32> = construct 0.5f
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+tint_immediate_data_struct = struct @align(4), @block {
+  tint_first_instance_offset:u32 @offset(0)
+}
+
+foo_inputs = struct @align(4) {
+  inst_idx:u32 @offset(0), @builtin(instance_index)
+}
+
+foo_outputs = struct @align(16) {
+  tint_symbol:vec4<f32> @offset(0), @builtin(position)
+}
+
+$B1: {  # root
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+}
+
+%foo_inner = func(%inst_idx:u32):vec4<f32> {
+  $B2: {
+    %4:u32 = add %inst_idx, %inst_idx
+    %5:vec4<f32> = construct 0.5f
+    ret %5
+  }
+}
+%foo = @vertex func(%inputs:foo_inputs):foo_outputs {
+  $B3: {
+    %8:u32 = access %inputs, 0u
+    %9:ptr<immediate, u32, read> = access %tint_immediate_data, 0u
+    %10:u32 = load %9
+    %11:u32 = add %8, %10
+    %12:vec4<f32> = call %foo_inner, %11
+    %13:foo_outputs = construct %12
+    ret %13
+  }
+}
+)";
+
+    // Refs to Raise() steps to setup push constant layout.
+    constexpr uint32_t first_instance_offset = 0u;
+
+    core::ir::transform::PrepareImmediateDataConfig prepare_immediate_data_layout_config;
+    prepare_immediate_data_layout_config.AddInternalImmediateData(
+        first_instance_offset, mod.symbols.New("tint_first_instance_offset"), ty.u32());
+    auto layout =
+        core::ir::transform::PrepareImmediateData(mod, prepare_immediate_data_layout_config);
+
+    ShaderIOConfig config{layout.Get()};
+    config.first_instance_offset = first_instance_offset;
     Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
@@ -3636,8 +4286,99 @@ $B1: {  # root
 }
 )";
 
-    ShaderIOConfig config;
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
     config.first_index_offset_binding = {12, 34};
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterTransformTest, ShaderIOParameters_FirstIndexOffset_Immediate_Both) {
+    auto* vert_idx = b.FunctionParam("vert_idx", ty.u32());
+    vert_idx->SetBuiltin(core::BuiltinValue::kVertexIndex);
+
+    auto* inst_idx = b.FunctionParam("inst_idx", ty.u32());
+    inst_idx->SetBuiltin(core::BuiltinValue::kInstanceIndex);
+
+    auto* ep = b.Function("foo", ty.vec4<f32>(), core::ir::Function::PipelineStage::kVertex);
+    ep->SetParams({vert_idx, inst_idx});
+    ep->SetReturnBuiltin(core::BuiltinValue::kPosition);
+
+    b.Append(ep->Block(), [&] {
+        b.Add(ty.u32(), vert_idx, inst_idx);
+        b.Return(ep, b.Construct(ty.vec4<f32>(), 0.5_f));
+    });
+
+    auto* src = R"(
+%foo = @vertex func(%vert_idx:u32 [@vertex_index], %inst_idx:u32 [@instance_index]):vec4<f32> [@position] {
+  $B1: {
+    %4:u32 = add %vert_idx, %inst_idx
+    %5:vec4<f32> = construct 0.5f
+    ret %5
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+tint_immediate_data_struct = struct @align(4), @block {
+  tint_first_index_offset:u32 @offset(0)
+  tint_first_instance_offset:u32 @offset(4)
+}
+
+foo_inputs = struct @align(4) {
+  vert_idx:u32 @offset(0), @builtin(vertex_index)
+  inst_idx:u32 @offset(4), @builtin(instance_index)
+}
+
+foo_outputs = struct @align(16) {
+  tint_symbol:vec4<f32> @offset(0), @builtin(position)
+}
+
+$B1: {  # root
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+}
+
+%foo_inner = func(%vert_idx:u32, %inst_idx:u32):vec4<f32> {
+  $B2: {
+    %5:u32 = add %vert_idx, %inst_idx
+    %6:vec4<f32> = construct 0.5f
+    ret %6
+  }
+}
+%foo = @vertex func(%inputs:foo_inputs):foo_outputs {
+  $B3: {
+    %9:u32 = access %inputs, 0u
+    %10:ptr<immediate, u32, read> = access %tint_immediate_data, 0u
+    %11:u32 = load %10
+    %12:u32 = add %9, %11
+    %13:u32 = access %inputs, 1u
+    %14:ptr<immediate, u32, read> = access %tint_immediate_data, 1u
+    %15:u32 = load %14
+    %16:u32 = add %13, %15
+    %17:vec4<f32> = call %foo_inner, %12, %16
+    %18:foo_outputs = construct %17
+    ret %18
+  }
+}
+)";
+
+    // Refs to Raise() steps to setup push constant layout.
+    constexpr uint32_t first_index_offset = 0u;
+    constexpr uint32_t first_instance_offset = 4u;
+
+    core::ir::transform::PrepareImmediateDataConfig prepare_immediate_data_layout_config;
+    prepare_immediate_data_layout_config.AddInternalImmediateData(
+        first_index_offset, mod.symbols.New("tint_first_index_offset"), ty.u32());
+    prepare_immediate_data_layout_config.AddInternalImmediateData(
+        first_instance_offset, mod.symbols.New("tint_first_instance_offset"), ty.u32());
+    auto layout =
+        core::ir::transform::PrepareImmediateData(mod, prepare_immediate_data_layout_config);
+
+    ShaderIOConfig config{layout.Get()};
+    config.first_index_offset = first_index_offset;
+    config.first_instance_offset = first_instance_offset;
     Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
@@ -3713,8 +4454,99 @@ $B1: {  # root
 }
 )";
 
-    ShaderIOConfig config;
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
     config.first_index_offset_binding = {12, 34};
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterTransformTest, ShaderIOParameters_Immediate_FirstIndexOffset_BothReorder) {
+    auto* inst_idx = b.FunctionParam("inst_idx", ty.u32());
+    inst_idx->SetBuiltin(core::BuiltinValue::kInstanceIndex);
+
+    auto* vert_idx = b.FunctionParam("vert_idx", ty.u32());
+    vert_idx->SetBuiltin(core::BuiltinValue::kVertexIndex);
+
+    auto* ep = b.Function("foo", ty.vec4<f32>(), core::ir::Function::PipelineStage::kVertex);
+    ep->SetParams({inst_idx, vert_idx});
+    ep->SetReturnBuiltin(core::BuiltinValue::kPosition);
+
+    b.Append(ep->Block(), [&] {
+        b.Add(ty.u32(), vert_idx, inst_idx);
+        b.Return(ep, b.Construct(ty.vec4<f32>(), 0.5_f));
+    });
+
+    auto* src = R"(
+%foo = @vertex func(%inst_idx:u32 [@instance_index], %vert_idx:u32 [@vertex_index]):vec4<f32> [@position] {
+  $B1: {
+    %4:u32 = add %vert_idx, %inst_idx
+    %5:vec4<f32> = construct 0.5f
+    ret %5
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+tint_immediate_data_struct = struct @align(4), @block {
+  tint_first_index_offset:u32 @offset(0)
+  tint_first_instance_offset:u32 @offset(4)
+}
+
+foo_inputs = struct @align(4) {
+  vert_idx:u32 @offset(0), @builtin(vertex_index)
+  inst_idx:u32 @offset(4), @builtin(instance_index)
+}
+
+foo_outputs = struct @align(16) {
+  tint_symbol:vec4<f32> @offset(0), @builtin(position)
+}
+
+$B1: {  # root
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+}
+
+%foo_inner = func(%inst_idx:u32, %vert_idx:u32):vec4<f32> {
+  $B2: {
+    %5:u32 = add %vert_idx, %inst_idx
+    %6:vec4<f32> = construct 0.5f
+    ret %6
+  }
+}
+%foo = @vertex func(%inputs:foo_inputs):foo_outputs {
+  $B3: {
+    %9:u32 = access %inputs, 1u
+    %10:ptr<immediate, u32, read> = access %tint_immediate_data, 1u
+    %11:u32 = load %10
+    %12:u32 = add %9, %11
+    %13:u32 = access %inputs, 0u
+    %14:ptr<immediate, u32, read> = access %tint_immediate_data, 0u
+    %15:u32 = load %14
+    %16:u32 = add %13, %15
+    %17:vec4<f32> = call %foo_inner, %12, %16
+    %18:foo_outputs = construct %17
+    ret %18
+  }
+}
+)";
+
+    // Refs to Raise() steps to setup push constant layout.
+    constexpr uint32_t first_index_offset = 0u;
+    constexpr uint32_t first_instance_offset = 4u;
+
+    core::ir::transform::PrepareImmediateDataConfig prepare_immediate_data_layout_config;
+    prepare_immediate_data_layout_config.AddInternalImmediateData(
+        first_index_offset, mod.symbols.New("tint_first_index_offset"), ty.u32());
+    prepare_immediate_data_layout_config.AddInternalImmediateData(
+        first_instance_offset, mod.symbols.New("tint_first_instance_offset"), ty.u32());
+    auto layout =
+        core::ir::transform::PrepareImmediateData(mod, prepare_immediate_data_layout_config);
+
+    ShaderIOConfig config{layout.Get()};
+    config.first_index_offset = first_index_offset;
+    config.first_instance_offset = first_instance_offset;
     Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());

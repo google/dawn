@@ -245,6 +245,15 @@ struct Options {
     /// Immediate binding point info
     std::optional<BindingPoint> immediate_binding_point;
 
+    /// The offset of the first_index_offset push constant.
+    std::optional<uint32_t> first_index_offset;
+
+    /// The offset of the first_instance_offset push constant.
+    std::optional<uint32_t> first_instance_offset;
+
+    /// Offsets of num_workgroups push constant.
+    std::optional<uint32_t> num_workgroups_start_offset;
+
     /// The bindings
     Bindings bindings;
 
@@ -267,6 +276,9 @@ struct Options {
                  interstage_locations,
                  root_constant_binding_point,
                  immediate_binding_point,
+                 first_index_offset,
+                 first_instance_offset,
+                 num_workgroups_start_offset,
                  bindings,
                  pixel_local);
 };
