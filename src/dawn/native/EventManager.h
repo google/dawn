@@ -43,7 +43,6 @@
 #include "dawn/native/Error.h"
 #include "dawn/native/Forward.h"
 #include "dawn/native/IntegerTypes.h"
-#include "dawn/native/Queue.h"
 #include "dawn/native/SystemEvent.h"
 #include "dawn/native/WaitListEvent.h"
 #include "partition_alloc/pointers/raw_ptr.h"
@@ -51,6 +50,7 @@
 namespace dawn::native {
 
 struct InstanceDescriptor;
+class QueueBase;
 
 // Subcomponent of the Instance which tracks callback events for the Future-based callback
 // entrypoints. All events from this instance (regardless of whether from an adapter, device, queue,
