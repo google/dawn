@@ -577,6 +577,40 @@ var LibraryWebGPU = {
       setLimitValueU32('maxImmediateSize', {{{ C_STRUCTS.WGPULimits.maxImmediateSize }}});
     },
 
+    fillAdapterInfoStruct: (info, infoStruct) => {
+      {{{ gpu.makeCheckDescriptor('infoStruct') }}}
+
+      // Populate subgroup limits.
+      {{{ makeSetValue('infoStruct', C_STRUCTS.WGPUAdapterInfo.subgroupMinSize, 'info.subgroupMinSize', 'i32') }}};
+      {{{ makeSetValue('infoStruct', C_STRUCTS.WGPUAdapterInfo.subgroupMaxSize, 'info.subgroupMaxSize', 'i32') }}};
+
+      // Append all the strings together to condense into a single malloc.
+      var strs = info.vendor + info.architecture + info.device + info.description;
+      var strPtr = stringToNewUTF8(strs);
+
+      var vendorLen = lengthBytesUTF8(info.vendor);
+      WebGPU.setStringView(infoStruct + {{{ C_STRUCTS.WGPUAdapterInfo.vendor }}}, strPtr, vendorLen);
+      strPtr += vendorLen;
+
+      var architectureLen = lengthBytesUTF8(info.architecture);
+      WebGPU.setStringView(infoStruct + {{{ C_STRUCTS.WGPUAdapterInfo.architecture }}}, strPtr, architectureLen);
+      strPtr += architectureLen;
+
+      var deviceLen = lengthBytesUTF8(info.device);
+      WebGPU.setStringView(infoStruct + {{{ C_STRUCTS.WGPUAdapterInfo.device }}}, strPtr, deviceLen);
+      strPtr += deviceLen;
+
+      var descriptionLen = lengthBytesUTF8(info.description);
+      WebGPU.setStringView(infoStruct + {{{ C_STRUCTS.WGPUAdapterInfo.description }}}, strPtr, descriptionLen);
+      strPtr += descriptionLen;
+
+      {{{ makeSetValue('infoStruct', C_STRUCTS.WGPUAdapterInfo.backendType, gpu.BackendType.WebGPU, 'i32') }}};
+      var adapterType = info.isFallbackAdapter ? {{{ gpu.AdapterType.CPU }}} : {{{ gpu.AdapterType.Unknown }}};
+      {{{ makeSetValue('infoStruct', C_STRUCTS.WGPUAdapterInfo.adapterType, 'adapterType', 'i32') }}};
+      {{{ makeSetValue('infoStruct', C_STRUCTS.WGPUAdapterInfo.vendorID, '0', 'i32') }}};
+      {{{ makeSetValue('infoStruct', C_STRUCTS.WGPUAdapterInfo.deviceID, '0', 'i32') }}};
+    },
+
     // Maps from enum string back to enum number, for callbacks.
     {{{ WEBGPU_STRING_TO_INT_TABLES }}}
 
@@ -706,33 +740,7 @@ var LibraryWebGPU = {
   wgpuAdapterGetInfo__deps: ['$stringToNewUTF8', '$lengthBytesUTF8'],
   wgpuAdapterGetInfo: (adapterPtr, info) => {
     var adapter = WebGPU.getJsObject(adapterPtr);
-    {{{ gpu.makeCheckDescriptor('info') }}}
-
-    // Append all the strings together to condense into a single malloc.
-    var strs = adapter.info.vendor + adapter.info.architecture + adapter.info.device + adapter.info.description;
-    var strPtr = stringToNewUTF8(strs);
-
-    var vendorLen = lengthBytesUTF8(adapter.info.vendor);
-    WebGPU.setStringView(info + {{{ C_STRUCTS.WGPUAdapterInfo.vendor }}}, strPtr, vendorLen);
-    strPtr += vendorLen;
-
-    var architectureLen = lengthBytesUTF8(adapter.info.architecture);
-    WebGPU.setStringView(info + {{{ C_STRUCTS.WGPUAdapterInfo.architecture }}}, strPtr, architectureLen);
-    strPtr += architectureLen;
-
-    var deviceLen = lengthBytesUTF8(adapter.info.device);
-    WebGPU.setStringView(info + {{{ C_STRUCTS.WGPUAdapterInfo.device }}}, strPtr, deviceLen);
-    strPtr += deviceLen;
-
-    var descriptionLen = lengthBytesUTF8(adapter.info.description);
-    WebGPU.setStringView(info + {{{ C_STRUCTS.WGPUAdapterInfo.description }}}, strPtr, descriptionLen);
-    strPtr += descriptionLen;
-
-    {{{ makeSetValue('info', C_STRUCTS.WGPUAdapterInfo.backendType, gpu.BackendType.WebGPU, 'i32') }}};
-    var adapterType = adapter.info.isFallbackAdapter ? {{{ gpu.AdapterType.CPU }}} : {{{ gpu.AdapterType.Unknown }}};
-    {{{ makeSetValue('info', C_STRUCTS.WGPUAdapterInfo.adapterType, 'adapterType', 'i32') }}};
-    {{{ makeSetValue('info', C_STRUCTS.WGPUAdapterInfo.vendorID, '0', 'i32') }}};
-    {{{ makeSetValue('info', C_STRUCTS.WGPUAdapterInfo.deviceID, '0', 'i32') }}};
+    WebGPU.fillAdapterInfoStruct(adapter.info, info);
     return {{{ gpu.Status.Success }}};
   },
 
@@ -1836,36 +1844,8 @@ var LibraryWebGPU = {
 
   wgpuDeviceGetAdapterInfo__deps: ['$stringToNewUTF8', '$lengthBytesUTF8'],
   wgpuDeviceGetAdapterInfo: (devicePtr, adapterInfo) => {
-    // TODO(crbug.com/377760848): Avoid duplicated code with wgpuAdapterGetInfo,
-    // for example by deferring to wgpuAdapterGetInfo from webgpu.cpp.
     var device = WebGPU.getJsObject(devicePtr);
-    {{{ gpu.makeCheckDescriptor('adapterInfo') }}}
-
-    // Append all the strings together to condense into a single malloc.
-    var strs = device.adapterInfo.vendor + device.adapterInfo.architecture + device.adapterInfo.device + device.adapterInfo.description;
-    var strPtr = stringToNewUTF8(strs);
-
-    var vendorLen = lengthBytesUTF8(device.adapterInfo.vendor);
-    WebGPU.setStringView(adapterInfo + {{{ C_STRUCTS.WGPUAdapterInfo.vendor }}}, strPtr, vendorLen);
-    strPtr += vendorLen;
-
-    var architectureLen = lengthBytesUTF8(device.adapterInfo.architecture);
-    WebGPU.setStringView(adapterInfo + {{{ C_STRUCTS.WGPUAdapterInfo.architecture }}}, strPtr, architectureLen);
-    strPtr += architectureLen;
-
-    var deviceLen = lengthBytesUTF8(device.adapterInfo.device);
-    WebGPU.setStringView(adapterInfo + {{{ C_STRUCTS.WGPUAdapterInfo.device }}}, strPtr, deviceLen);
-    strPtr += deviceLen;
-
-    var descriptionLen = lengthBytesUTF8(device.adapterInfo.description);
-    WebGPU.setStringView(adapterInfo + {{{ C_STRUCTS.WGPUAdapterInfo.description }}}, strPtr, descriptionLen);
-    strPtr += descriptionLen;
-
-    {{{ makeSetValue('adapterInfo', C_STRUCTS.WGPUAdapterInfo.backendType, gpu.BackendType.WebGPU, 'i32') }}};
-    var adapterType = device.adapterInfo.isFallbackAdapter ? {{{ gpu.AdapterType.CPU }}} : {{{ gpu.AdapterType.Unknown }}};
-    {{{ makeSetValue('adapterInfo', C_STRUCTS.WGPUAdapterInfo.adapterType, 'adapterType', 'i32') }}};
-    {{{ makeSetValue('adapterInfo', C_STRUCTS.WGPUAdapterInfo.vendorID, '0', 'i32') }}};
-    {{{ makeSetValue('adapterInfo', C_STRUCTS.WGPUAdapterInfo.deviceID, '0', 'i32') }}};
+    WebGPU.fillAdapterInfoStruct(device.adapterInfo, adapterInfo);
     return {{{ gpu.Status.Success }}};
   },
 
