@@ -622,10 +622,10 @@ var LibraryWebGPU = {
   emwgpuWaitAny__sig: 'jppp',
 #if ASYNCIFY
   emwgpuWaitAny__async: true,
-  emwgpuWaitAny: (futurePtr, futureCount, timeoutNSPtr) => Asyncify.handleAsync(async () => {
+  emwgpuWaitAny: (futurePtr, futureCount, timeoutMSPtr) => Asyncify.handleAsync(async () => {
     var promises = [];
-    if (timeoutNSPtr) {
-      var timeoutMS = {{{ gpu.makeGetU64('timeoutNSPtr', 0) }}} / 1000000;
+    if (timeoutMSPtr) {
+      var timeoutMS = {{{ makeGetValue('timeoutMSPtr', 0, 'i32') }}};
       promises.length = futureCount + 1;
       promises[futureCount] = new Promise((resolve) => setTimeout(resolve, timeoutMS, 0));
     } else {

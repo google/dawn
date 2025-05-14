@@ -45,11 +45,13 @@ extern "C" {
 void emwgpuDelete(void* ptr);
 void emwgpuSetLabel(void* ptr, const char* data, size_t length);
 
-// Note that for the JS entry points, we pass uint64_t as pointer and deref it
-// in JS on the other side.
+// Note that for the JS entry points, we pass the FutureIDs as uint64_t pointer
+// and deref it in JS on the other side. The timeout, however, is converted to
+// a int32_t because it will be used with JS setTimeout which actually takes a
+// int32_t.
 double emwgpuWaitAny(FutureID const* futurePtr,
                      size_t futureCount,
-                     uint64_t const* timeoutNSPtr);
+                     int32_t const* timeoutMSPtr);
 WGPUTextureFormat emwgpuGetPreferredFormat();
 
 // Device functions, i.e. creation functions to create JS backing objects given
@@ -525,9 +527,17 @@ class EventManager : NonMovable {
         futureIdToInfo.emplace(infos[i].future.id, &infos[i]);
       }
 
-      bool hasTimeout = timeoutNS != UINT64_MAX;
+      // We need to clamp and convert the timeout to verify that the timeout in
+      // ms is less than the maximum value that JS setTimeout can take. If it
+      // would exceed the timeout, just assume that we are waiting until
+      // completion.
+      static constexpr uint64_t kNsInMs = 1000000;
+      uint64_t timeoutMS64 = timeoutNS / kNsInMs;
+      bool hasTimeout = timeoutMS64 <= INT32_MAX;
+      int32_t timeoutMS = static_cast<int32_t>(timeoutMS64);
+
       FutureID completedId = static_cast<FutureID>(emwgpuWaitAny(
-          futures.data(), count, hasTimeout ? &timeoutNS : nullptr));
+          futures.data(), count, hasTimeout ? &timeoutMS : nullptr));
       if (completedId == kNullFutureId) {
         return WGPUWaitStatus_TimedOut;
       }
@@ -1735,8 +1745,11 @@ WGPUFuture wgpuAdapterRequestDevice(
     return WGPUFuture{kNullFutureId};
   }
 
-  static const WGPUDeviceDescriptor kDefaultDescriptor =
-      WGPU_DEVICE_DESCRIPTOR_INIT;
+  static const WGPUDeviceDescriptor kDefaultDescriptor = []() {
+    WGPUDeviceDescriptor desc = WGPU_DEVICE_DESCRIPTOR_INIT;
+    desc.deviceLostCallbackInfo.mode = WGPUCallbackMode_AllowSpontaneous;
+    return desc;
+  }();
   if (descriptor == nullptr) {
     descriptor = &kDefaultDescriptor;
   }
