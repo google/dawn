@@ -172,6 +172,7 @@ struct Options {
 
 #if TINT_BUILD_MSL_WRITER
     std::string xcrun_path;
+    bool use_argument_buffers = false;
     std::unordered_map<uint32_t, uint32_t> pixel_local_attachments;
 #endif
 
@@ -431,6 +432,10 @@ When specified, automatically enables MSL validation)",
             opts->validate = true;
         }
     });
+
+    auto& use_argument_buffers = options.Add<BoolOption>(
+        "use-argument-buffers", "Use the Argument Buffers in MSL", Default{false});
+    TINT_DEFER(opts->use_argument_buffers = *use_argument_buffers.value);
 #endif  // TINT_BUILD_MSL_WRITER
 
 #if TINT_BUILD_HLSL_WRITER
@@ -1073,6 +1078,7 @@ bool GenerateMsl([[maybe_unused]] Options& options,
     gen_options.bindings = tint::msl::writer::GenerateBindings(ir.Get());
     gen_options.array_length_from_uniform.ubo_binding = 30;
     gen_options.disable_demote_to_helper = options.disable_demote_to_helper;
+    gen_options.use_argument_buffers = options.use_argument_buffers;
 
     // Add array_length_from_uniform entries for all storage buffers with runtime sized arrays.
     std::unordered_set<tint::BindingPoint> storage_bindings;

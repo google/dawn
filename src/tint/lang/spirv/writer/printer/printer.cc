@@ -700,7 +700,7 @@ class Printer {
         for (auto* member : str->Members()) {
             operands.push_back(Type(member->Type()));
 
-            if (str->StructFlags().Contains(core::type::kSpirvExplicitLayout)) {
+            if (str->StructFlags().Contains(core::type::kExplicitLayout)) {
                 // Generate struct member offset decoration.
                 module_.PushAnnot(spv::Op::OpMemberDecorate,
                                   {operands[0], member->Index(), U32Operand(SpvDecorationOffset),

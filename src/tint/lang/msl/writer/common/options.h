@@ -160,6 +160,9 @@ struct Options {
     /// Set to `true` to disable the polyfills on integer division and modulo.
     bool disable_polyfill_integer_div_mod = false;
 
+    /// Emit argument buffers
+    bool use_argument_buffers = false;
+
     /// The index to use when generating a UBO to receive storage buffer sizes.
     /// Defaults to 30, which is the last valid buffer slot.
     uint32_t buffer_size_ubo_index = 30;
@@ -190,6 +193,7 @@ struct Options {
                  disable_demote_to_helper,
                  emit_vertex_point_size,
                  disable_polyfill_integer_div_mod,
+                 use_argument_buffers,
                  buffer_size_ubo_index,
                  fixed_sample_mask,
                  pixel_local_attachments,

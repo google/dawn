@@ -230,11 +230,11 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-tint_arg_buffer_struct_1 = struct @align(1) {
+tint_arg_buffer_struct_1 = struct @align(1), @core.explicit_layout {
   a:ptr<storage, i32, read> @offset(0), @binding_point(0, 2)
 }
 
-tint_arg_buffer_struct_3 = struct @align(1) {
+tint_arg_buffer_struct_3 = struct @align(1), @core.explicit_layout {
   c:ptr<storage, f32, read_write> @offset(0), @binding_point(0, 2)
   b:ptr<storage, u32, read_write> @offset(0), @binding_point(0, 4)
 }
@@ -300,11 +300,11 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-tint_arg_buffer_struct_1 = struct @align(1) {
+tint_arg_buffer_struct_1 = struct @align(1), @core.explicit_layout {
   a:ptr<uniform, i32, read> @offset(0), @binding_point(0, 2)
 }
 
-tint_arg_buffer_struct_3 = struct @align(1) {
+tint_arg_buffer_struct_3 = struct @align(1), @core.explicit_layout {
   b:ptr<uniform, i32, read> @offset(0), @binding_point(0, 4)
 }
 
@@ -362,11 +362,11 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-tint_arg_buffer_struct_1 = struct @align(1) {
+tint_arg_buffer_struct_1 = struct @align(1), @core.explicit_layout {
   t:texture_2d<f32> @offset(0), @binding_point(0, 2)
 }
 
-tint_arg_buffer_struct_3 = struct @align(1) {
+tint_arg_buffer_struct_3 = struct @align(1), @core.explicit_layout {
   s:sampler @offset(0), @binding_point(0, 4)
 }
 
@@ -424,11 +424,11 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-tint_arg_buffer_struct_1 = struct @align(1) {
+tint_arg_buffer_struct_1 = struct @align(1), @core.explicit_layout {
   t:binding_array<texture_2d<f32>, 3> @offset(0), @binding_point(0, 2)
 }
 
-tint_arg_buffer_struct_3 = struct @align(1) {
+tint_arg_buffer_struct_3 = struct @align(1), @core.explicit_layout {
   s:binding_array<sampler, 3> @offset(0), @binding_point(0, 4)
 }
 
@@ -492,11 +492,11 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-tint_arg_buffer_struct_1 = struct @align(1) {
+tint_arg_buffer_struct_1 = struct @align(1), @core.explicit_layout {
   a:ptr<uniform, i32, read> @offset(0), @binding_point(0, 2)
 }
 
-tint_arg_buffer_struct_3 = struct @align(1) {
+tint_arg_buffer_struct_3 = struct @align(1), @core.explicit_layout {
   b:ptr<storage, i32, read_write> @offset(0), @binding_point(0, 4)
 }
 
@@ -567,11 +567,11 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-tint_arg_buffer_struct_1 = struct @align(1) {
+tint_arg_buffer_struct_1 = struct @align(1), @core.explicit_layout {
   a:ptr<storage, i32, read> @offset(0), @binding_point(0, 2)
 }
 
-tint_arg_buffer_struct_3 = struct @align(1) {
+tint_arg_buffer_struct_3 = struct @align(1), @core.explicit_layout {
   b:ptr<storage, i32, read_write> @offset(0), @binding_point(0, 4)
 }
 
@@ -644,11 +644,11 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-tint_arg_buffer_struct_1 = struct @align(1) {
+tint_arg_buffer_struct_1 = struct @align(1), @core.explicit_layout {
   a:ptr<storage, i32, read> @offset(0), @binding_point(0, 2)
 }
 
-tint_arg_buffer_struct_3 = struct @align(1) {
+tint_arg_buffer_struct_3 = struct @align(1), @core.explicit_layout {
   b:ptr<storage, i32, read_write> @offset(0), @binding_point(0, 4)
 }
 
@@ -728,11 +728,11 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-tint_arg_buffer_struct_1 = struct @align(1) {
+tint_arg_buffer_struct_1 = struct @align(1), @core.explicit_layout {
   a:ptr<storage, i32, read> @offset(0), @binding_point(0, 2)
 }
 
-tint_arg_buffer_struct_3 = struct @align(1) {
+tint_arg_buffer_struct_3 = struct @align(1), @core.explicit_layout {
   b:ptr<storage, i32, read_write> @offset(0), @binding_point(0, 4)
 }
 
@@ -813,11 +813,11 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-tint_arg_buffer_struct_1 = struct @align(1) {
+tint_arg_buffer_struct_1 = struct @align(1), @core.explicit_layout {
   t:texture_2d<f32> @offset(0), @binding_point(0, 2)
 }
 
-tint_arg_buffer_struct_3 = struct @align(1) {
+tint_arg_buffer_struct_3 = struct @align(1), @core.explicit_layout {
   s:sampler @offset(0), @binding_point(0, 4)
 }
 
@@ -896,11 +896,11 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-tint_arg_buffer_struct_1 = struct @align(1) {
+tint_arg_buffer_struct_1 = struct @align(1), @core.explicit_layout {
   t:binding_array<texture_2d<f32>, 3> @offset(0), @binding_point(0, 2)
 }
 
-tint_arg_buffer_struct_3 = struct @align(1) {
+tint_arg_buffer_struct_3 = struct @align(1), @core.explicit_layout {
   s:binding_array<sampler, 3> @offset(0), @binding_point(0, 4)
 }
 
@@ -977,11 +977,11 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-tint_arg_buffer_struct_1 = struct @align(1) {
+tint_arg_buffer_struct_1 = struct @align(1), @core.explicit_layout {
   a:ptr<storage, i32, read> @offset(0), @binding_point(0, 2)
 }
 
-tint_arg_buffer_struct_3 = struct @align(1) {
+tint_arg_buffer_struct_3 = struct @align(1), @core.explicit_layout {
   b:ptr<storage, i32, read_write> @offset(0), @binding_point(0, 4)
 }
 
@@ -1059,11 +1059,11 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-tint_arg_buffer_struct_1 = struct @align(1) {
+tint_arg_buffer_struct_1 = struct @align(1), @core.explicit_layout {
   a:ptr<storage, i32, read> @offset(0), @binding_point(0, 2)
 }
 
-tint_arg_buffer_struct_3 = struct @align(1) {
+tint_arg_buffer_struct_3 = struct @align(1), @core.explicit_layout {
   b:ptr<storage, i32, read_write> @offset(0), @binding_point(0, 4)
 }
 
@@ -1155,11 +1155,11 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-tint_arg_buffer_struct_1 = struct @align(1) {
+tint_arg_buffer_struct_1 = struct @align(1), @core.explicit_layout {
   a:ptr<storage, i32, read> @offset(0), @binding_point(0, 2)
 }
 
-tint_arg_buffer_struct_3 = struct @align(1) {
+tint_arg_buffer_struct_3 = struct @align(1), @core.explicit_layout {
   b:ptr<storage, i32, read_write> @offset(0), @binding_point(0, 4)
 }
 
@@ -1261,11 +1261,11 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-tint_arg_buffer_struct_1 = struct @align(1) {
+tint_arg_buffer_struct_1 = struct @align(1), @core.explicit_layout {
   a:ptr<storage, i32, read> @offset(0), @binding_point(0, 2)
 }
 
-tint_arg_buffer_struct_3 = struct @align(1) {
+tint_arg_buffer_struct_3 = struct @align(1), @core.explicit_layout {
   b:ptr<storage, i32, read_write> @offset(0), @binding_point(0, 4)
 }
 
@@ -1368,11 +1368,11 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-tint_arg_buffer_struct_1 = struct @align(1) {
+tint_arg_buffer_struct_1 = struct @align(1), @core.explicit_layout {
   tint_symbol:ptr<uniform, i32, read> @offset(0), @binding_point(0, 2)
 }
 
-tint_arg_buffer_struct_3 = struct @align(1) {
+tint_arg_buffer_struct_3 = struct @align(1), @core.explicit_layout {
   tint_symbol_1:ptr<storage, i32, read_write> @offset(0), @binding_point(0, 4)
 }
 

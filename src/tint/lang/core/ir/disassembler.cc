@@ -956,8 +956,8 @@ void Disassembler::EmitStructDecl(const core::type::Struct* str) {
             case core::type::kBlock:
                 out_ << ", " << StyleAttribute("@block");
                 break;
-            case core::type::kSpirvExplicitLayout:
-                out_ << ", " << StyleAttribute("@spirv.explicit_layout");
+            case core::type::kExplicitLayout:
+                out_ << ", " << StyleAttribute("@core.explicit_layout");
                 break;
         }
     }
