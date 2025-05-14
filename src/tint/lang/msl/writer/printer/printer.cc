@@ -28,11 +28,11 @@
 #include "src/tint/lang/msl/writer/printer/printer.h"
 
 #include <atomic>
+#include <cstddef>
 #include <cstdint>
 #include <string>
 #include <utility>
 
-#include "src/tint/lang/core/constant/composite.h"
 #include "src/tint/lang/core/constant/splat.h"
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/ir/access.h"
@@ -42,7 +42,6 @@
 #include "src/tint/lang/core/ir/construct.h"
 #include "src/tint/lang/core/ir/continue.h"
 #include "src/tint/lang/core/ir/convert.h"
-#include "src/tint/lang/core/ir/core_binary.h"
 #include "src/tint/lang/core/ir/core_builtin_call.h"
 #include "src/tint/lang/core/ir/core_unary.h"
 #include "src/tint/lang/core/ir/discard.h"
@@ -101,7 +100,6 @@
 #include "src/tint/lang/msl/type/level.h"
 #include "src/tint/lang/msl/writer/common/options.h"
 #include "src/tint/lang/msl/writer/common/printer_support.h"
-#include "src/tint/utils/containers/map.h"
 #include "src/tint/utils/macros/scoped_assignment.h"
 #include "src/tint/utils/rtti/switch.h"
 #include "src/tint/utils/text/string.h"
@@ -133,6 +131,7 @@ class Printer : public tint::TextGenerator {
                 core::ir::Capability::kAllowPointersAndHandlesInStructures,
                 core::ir::Capability::kAllowPrivateVarsInFunctions,
                 core::ir::Capability::kAllowAnyLetType,
+                core::ir::Capability::kAllowModuleScopeLets,
                 core::ir::Capability::kAllowWorkspacePointerInputToEntryPoint,
             });
         if (valid != Success) {
@@ -145,8 +144,14 @@ class Printer : public tint::TextGenerator {
             Line() << "using namespace metal;";
         }
 
-        // Module-scope declarations should have all been moved into the entry points.
-        TINT_ASSERT(ir_.root_block->IsEmpty());
+        // Module-scope declarations should have all been moved into the entry points with the
+        // exception of const as lets.
+
+        for (auto* inst : *ir_.root_block) {
+            auto let = inst->As<core::ir::Let>();
+            TINT_ASSERT(let);
+            EmitLet(let);
+        }
 
         // Determine which structures will need to be emitted with host-shareable memory layouts.
         FindHostShareableStructs();
@@ -657,8 +662,17 @@ class Printer : public tint::TextGenerator {
     /// @param l the let instruction
     void EmitLet(const core::ir::Let* l) {
         auto out = Line();
+
+        if (current_function_ == nullptr) {
+            // program scope let
+            out << "constexpr constant ";
+        }
         EmitType(out, l->Result()->Type());
-        out << " const " << NameOf(l->Result()) << " = ";
+        out << " ";
+        if (current_function_ != nullptr) {
+            out << "const ";
+        }
+        out << NameOf(l->Result()) << " = ";
         EmitAndTakeAddressIfNeeded(out, l->Value());
         out << ";";
     }

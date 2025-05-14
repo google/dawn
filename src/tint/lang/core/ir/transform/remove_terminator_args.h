@@ -49,6 +49,7 @@ const core::ir::Capabilities kRemoveTerminatorArgsCapabilities{
     core::ir::Capability::kAllowClipDistancesOnF32,
     core::ir::Capability::kAllowPrivateVarsInFunctions,
     core::ir::Capability::kAllowAnyLetType,
+    core::ir::Capability::kAllowModuleScopeLets,
     core::ir::Capability::kAllowWorkspacePointerInputToEntryPoint,
 };
 

@@ -50,6 +50,7 @@ const core::ir::Capabilities kValueToLetCapabilities{
     core::ir::Capability::kAllowPrivateVarsInFunctions,
     core::ir::Capability::kAllowAnyLetType,
     core::ir::Capability::kAllowWorkspacePointerInputToEntryPoint,
+    core::ir::Capability::kAllowModuleScopeLets,
 };
 
 /// Configuration for ValueToLet transform.

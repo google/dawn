@@ -1,4 +1,4 @@
-// Copyright 2023 The Dawn & Tint Authors
+// Copyright 2025 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,8 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_CORE_IR_TRANSFORM_RENAME_CONFLICTS_H_
-#define SRC_TINT_LANG_CORE_IR_TRANSFORM_RENAME_CONFLICTS_H_
+#ifndef SRC_TINT_LANG_MSL_WRITER_RAISE_MODULE_CONSTANT_H_
+#define SRC_TINT_LANG_MSL_WRITER_RAISE_MODULE_CONSTANT_H_
 
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/utils/result.h"
@@ -36,30 +36,29 @@ namespace tint::core::ir {
 class Module;
 }
 
-namespace tint::core::ir::transform {
+namespace tint::msl::writer::raise {
 
 /// The capabilities that the transform can support.
-const core::ir::Capabilities kRenameConflictsCapabilities{
+const core::ir::Capabilities kModuleConstant{
     core::ir::Capability::kAllow8BitIntegers,
     core::ir::Capability::kAllow64BitIntegers,
-    core::ir::Capability::kAllowOverrides,
     core::ir::Capability::kAllowPointersAndHandlesInStructures,
     core::ir::Capability::kAllowVectorElementPointer,
     core::ir::Capability::kAllowHandleVarsWithoutBindings,
     core::ir::Capability::kAllowClipDistancesOnF32,
     core::ir::Capability::kAllowPrivateVarsInFunctions,
     core::ir::Capability::kAllowAnyLetType,
-    core::ir::Capability::kAllowModuleScopeLets,
     core::ir::Capability::kAllowWorkspacePointerInputToEntryPoint,
+    core::ir::Capability::kAllowModuleScopeLets,
 };
 
-/// RenameConflicts is a transform that renames declarations which prevent identifiers from
-/// resolving to the correct declaration, and those with identical identifiers declared in the same
-/// scope or a parent scope.
+/// ModuleConstant is a transform that moves all const data associated with access to a module scope
+/// let. This transform is used to support 'program scope constants' in msl and thereby avoid the
+/// potential for copying of large const in nested loops.
 /// @param module the module to transform
 /// @returns success or failure
-Result<SuccessType> RenameConflicts(core::ir::Module& module);
+Result<SuccessType> ModuleConstant(core::ir::Module& module);
 
-}  // namespace tint::core::ir::transform
+}  // namespace tint::msl::writer::raise
 
-#endif  // SRC_TINT_LANG_CORE_IR_TRANSFORM_RENAME_CONFLICTS_H_
+#endif  // SRC_TINT_LANG_MSL_WRITER_RAISE_MODULE_CONSTANT_H_
