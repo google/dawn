@@ -315,6 +315,7 @@
             "ComputePassEncoder"
         ],
         "server_custom_pre_handler_commands": [
+            "DeviceCreateErrorBuffer",
             "BufferDestroy",
             "BufferUnmap"
         ]
