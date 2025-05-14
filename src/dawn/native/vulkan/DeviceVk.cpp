@@ -50,7 +50,6 @@
 #include "dawn/native/vulkan/CommandBufferVk.h"
 #include "dawn/native/vulkan/ComputePipelineVk.h"
 #include "dawn/native/vulkan/FencedDeleter.h"
-#include "dawn/native/vulkan/FramebufferCache.h"
 #include "dawn/native/vulkan/PhysicalDeviceVk.h"
 #include "dawn/native/vulkan/PipelineCacheVk.h"
 #include "dawn/native/vulkan/PipelineLayoutVk.h"
@@ -142,7 +141,6 @@ MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
         functions->CmdDrawIndexedIndirect = NoopDrawFunction<PFN_vkCmdDrawIndexedIndirect>::Fun;
     }
 
-    mFramebufferCache = std::make_unique<FramebufferCache>(this);
     mRenderPassCache = std::make_unique<RenderPassCache>(this);
 
     VkDeviceSize heapBlockSize =
@@ -390,10 +388,6 @@ uint32_t Device::GetGraphicsQueueFamily() const {
 
 MutexProtected<FencedDeleter>& Device::GetFencedDeleter() const {
     return *mDeleter;
-}
-
-FramebufferCache* Device::GetFramebufferCache() const {
-    return mFramebufferCache.get();
 }
 
 RenderPassCache* Device::GetRenderPassCache() const {
@@ -952,9 +946,8 @@ void Device::DestroyImpl() {
     // Allow recycled memory to be deleted.
     GetResourceMemoryAllocator()->FreeRecycledMemory();
 
-    // The VkFramebuffers and VkRenderPasses in the cache can be destroyed immediately since all
-    // commands referring to them are guaranteed to be finished executing.
-    mFramebufferCache = nullptr;
+    // The VkRenderPasses in the cache can be destroyed immediately since all commands referring
+    // to them are guaranteed to be finished executing.
     mRenderPassCache = nullptr;
 
     // Destroy the VkPipelineCache before VkDevice.
