@@ -680,17 +680,6 @@ crbug.com/407076125 [ dawn-backend-validation intel linux ] webgpu:api,operation
 crbug.com/407076125 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,image_copy:mip_levels:initMethod="WriteTexture";checkMethod="PartialCopyT2B";format="eac*";dimension="2d" [ Failure ]
 crbug.com/407076125 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,image_copy:mip_levels:initMethod="WriteTexture";checkMethod="PartialCopyT2B";format="etc2*";dimension="2d" [ Failure ]
 
-
-crbug.com/407109052 [ android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,smoothstep:f32:inputSource="storage_r";vectorize=2 [ Failure ]
-crbug.com/407109052 [ android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,smoothstep:f32:inputSource="storage_r";vectorize=3 [ Failure ]
-crbug.com/407109052 [ android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,smoothstep:f32:inputSource="storage_r";vectorize=4 [ Failure ]
-crbug.com/407109052 [ android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,smoothstep:f32:inputSource="storage_rw";vectorize=2 [ Failure ]
-crbug.com/407109052 [ android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,smoothstep:f32:inputSource="storage_rw";vectorize=3 [ Failure ]
-crbug.com/407109052 [ android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,smoothstep:f32:inputSource="storage_rw";vectorize=4 [ Failure ]
-crbug.com/407109052 [ android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,smoothstep:f32:inputSource="uniform";vectorize=2 [ Failure ]
-crbug.com/407109052 [ android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,smoothstep:f32:inputSource="uniform";vectorize=3 [ Failure ]
-crbug.com/407109052 [ android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,smoothstep:f32:inputSource="uniform";vectorize=4 [ Failure ]
-
 # textureLoad `texture_type="texture_multisampled_2d"` marked failing on all platforms
 crbug.com/407088846 webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:stage="*";texture_type="texture_multisampled_2d";* [ Failure ]
 
