@@ -105,6 +105,7 @@ struct State {
                     case spirv::BuiltinFn::kSampledImage:
                     case spirv::BuiltinFn::kImageGather:
                     case spirv::BuiltinFn::kImageSampleImplicitLod:
+                    case spirv::BuiltinFn::kImageWrite:
                         builtin_worklist.Push(builtin);
                         break;
                     default:
@@ -123,6 +124,9 @@ struct State {
                     break;
                 case spirv::BuiltinFn::kImageSampleImplicitLod:
                     ImageSampleImplicitLod(builtin);
+                    break;
+                case spirv::BuiltinFn::kImageWrite:
+                    ImageWrite(builtin);
                     break;
                 default:
                     break;
@@ -258,6 +262,26 @@ struct State {
             }
 
             b.CallWithResult(call->DetachResult(), fn, new_args);
+        });
+        call->Destroy();
+    }
+
+    void ImageWrite(spirv::ir::BuiltinCall* call) {
+        const auto& args = call->Args();
+
+        b.InsertBefore(call, [&] {
+            core::ir::Value* tex = args[0];
+            auto* coords = args[1];
+            auto* texel = args[2];
+
+            Vector<core::ir::Value*, 5> new_args;
+            new_args.Push(tex);
+
+            ProcessCoords(tex->Type(), coords, new_args);
+
+            new_args.Push(texel);
+
+            b.Call(call->Result()->Type(), core::BuiltinFn::kTextureStore, new_args);
         });
         call->Destroy();
     }

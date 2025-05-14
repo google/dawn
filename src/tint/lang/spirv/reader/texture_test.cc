@@ -1331,6 +1331,7 @@ TEST_P(ImageAccessTest, Variable) {
 
     EXPECT_IR(R"(
             OpCapability Shader
+            OpCapability StorageImageExtendedFormats
             OpMemoryModel Logical Simple
             OpEntryPoint Fragment %main "main"
             OpExecutionMode %main OriginUpperLeft
@@ -1344,10 +1345,13 @@ TEST_P(ImageAccessTest, Variable) {
      %int = OpTypeInt 32  1
     %uint = OpTypeInt 32  0
    %v2int = OpTypeVector %int 2
+   %v3int = OpTypeVector %int 3
+   %v4int = OpTypeVector %int 4
   %v2uint = OpTypeVector %uint 2
   %v3uint = OpTypeVector %uint 3
   %v4uint = OpTypeVector %uint 4
  %v2float = OpTypeVector %float 2
+ %v3float = OpTypeVector %float 3
  %v4float = OpTypeVector %float 4
    %im_ty = OpTypeImage )" +
                   params.spirv_type +
@@ -1371,7 +1375,10 @@ TEST_P(ImageAccessTest, Variable) {
       %wg = OpVariable %ptr_im_ty UniformConstant
 %offset2i = OpConstantComposite %v2int %int_10 %int_11
     %vi12 = OpConstantComposite %v2int %int_1 %int_2
+   %vi123 = OpConstantComposite %v3int %int_1 %int_2 %int_3
+  %vi1234 = OpConstantComposite %v4int %int_1 %int_2 %int_3 %int_4
     %vf12 = OpConstantComposite %v2float %float_1 %float_2
+   %vf123 = OpConstantComposite %v3float %float_1 %float_2 %float_3
   %vf1234 = OpConstantComposite %v4float %float_1 %float_2 %float_3 %float_4
     %vu12 = OpConstantComposite %v2uint %uint_1 %uint_2
    %vu123 = OpConstantComposite %v3uint %uint_1 %uint_2 %uint_3
@@ -1388,19 +1395,15 @@ TEST_P(ImageAccessTest, Variable) {
 )",
               R"(
 $B1: {  # root
-  %1:ptr<handle, sampler_comparison, read> = var undef @binding_point(0, 0)
   %wg:ptr<handle, )" +
                   params.wgsl_type +
-                  R"(<f32>, read> = var undef @binding_point(2, 0)
+                  R"(, read> = var undef @binding_point(2, 1)
 }
 
 %main = @fragment func():void {
   $B2: {
-    %4:)" + params.wgsl_type +
-                  R"(<f32> = load %wg
-    %5:sampler_comparison = load %1
-    %6:vec4<f32> = )" +
-                  params.wgsl_fn +
+    %3:)" + params.wgsl_type +
+                  R"( = load %wg)" + params.wgsl_fn +
                   R"(
     ret
   }
@@ -1408,14 +1411,15 @@ $B1: {  # root
 )");
 }
 
-INSTANTIATE_TEST_SUITE_P(DISABLED_SpirvReaderTest_ImageWrite_OptionalParams,
+INSTANTIATE_TEST_SUITE_P(SpirvReaderTest_ImageWrite_OptionalParams,
                          ImageAccessTest,
                          ::testing::Values(ImgData{
                              .name = "No extra params",
                              .spirv_type = "%float 2D 0 0 0 2 Rgba32f",
                              .spirv_fn = "OpImageWrite %im %vi12 %vf1234",
-                             .wgsl_type = "texture_storage_2d<rgba32float, write>;",
-                             .wgsl_fn = "textureStore(x_20, vi12, vf1234);",
+                             .wgsl_type = "texture_storage_2d<rgba32float, read_write>",
+                             .wgsl_fn = R"(
+    %4:void = textureStore %3, vec2<i32>(1i, 2i), vec4<f32>(1.0f, 2.0f, 3.0f, 4.0f))",
                          }));
 
 // SPIR-V's texel parameter is a scalar or vector with at least as many
@@ -1424,230 +1428,271 @@ INSTANTIATE_TEST_SUITE_P(DISABLED_SpirvReaderTest_ImageWrite_OptionalParams,
 // WGSL's texel parameter is a 4-element vector scalar or vector, with
 // component type equal to the 32-bit form of the channel type.
 INSTANTIATE_TEST_SUITE_P(
-    DISABLED_SpirvReaderTest_ImageWrite_ConvertTexelOperand_Arity_Float,
+    SpirvReaderTest_ImageWrite_ConvertTexelOperand_Arity_Float,
     ImageAccessTest,
-    ::testing::Values(
-        ImgData{
-            .name = "Source 1 component",
-            .spirv_type = "%float 2D 0 0 0 2 R32f",
-            .spirv_fn = "OpImageWrite %im %vi12 %float_1",
-            .wgsl_type = "texture_storage_2d<r32float, write>",
-            .wgsl_fn = "textureStore(x_20, vi12, vec4f(f1, 0.0f, 0.0f, 0.0f));",
-        },
-        ImgData{
-            .name = "Source 2 component, dest 1 component",
-            .spirv_type = "%float 2D 0 0 0 2 R32f",
-            .spirv_fn = "OpImageWrite %im %vi12 %vf12",
-            .wgsl_type = "texture_storage_2d<r32float, write>",
-            .wgsl_fn = "textureStore(x_20, vi12, vec4f(vf12, 0.0f, 0.0f));",
-        },
-        ImgData{
-            .name = "Source 3 component, dest 1 component",
-            .spirv_type = "%float 2D 0 0 0 2 R32f",
-            .spirv_fn = "OpImageWrite %im %vi12 %vf123",
-            .wgsl_type = "texture_storage_2d<r32float, write>;)",
-            .wgsl_fn = "textureStore(x_20, vi12, vec4f(vf123, 0.0f));",
-        },
-        ImgData{
-            .name = "Source 4 component, dest 1 component",
-            .spirv_type = "%float 2D 0 0 0 2 R32f",
-            .spirv_fn = "OpImageWrite %im %vi12 %vf1234",
-            .wgsl_type = "texture_storage_2d<r32float, write>",
-            .wgsl_fn = "textureStore(x_20, vi12, vf1234);",
-        },
-        ImgData{
-            .name = "Source 2 component, dest 2 component",
-            .spirv_type = "%float 2D 0 0 0 2 Rg32f",
-            .spirv_fn = "OpImageWrite %im %vi12 %vf12",
-            .wgsl_type = "texture_storage_2d<rg32float, write>",
-            .wgsl_fn = "textureStore(x_20, vi12, vec4f(vf12, 0.0f, 0.0f));",
-        },
-        ImgData{
-            .name = "Source 3 component, dest 2 component",
-            .spirv_type = "%float 2D 0 0 0 2 Rg32f",
-            .spirv_fn = "OpImageWrite %im %vi12 %vf123",
-            .wgsl_type = "texture_storage_2d<rg32float, write>",
-            .wgsl_fn = "textureStore(x_20, vi12, vec4f(vf123, 0.0f));",
-        },
-        ImgData{
-            .name = "Source 4 component, dest 2 component",
-            .spirv_type = "%float 2D 0 0 0 2 Rg32f",
-            .spirv_fn = "OpImageWrite %im %vi12 %vf1234",
-            .wgsl_type = "texture_storage_2d<rg32float, write>",
-            .wgsl_fn = "textureStore(x_20, vi12, vf1234);",
-        },
-        ImgData{
-            .name = "Source 4 component, dest 4 component",
-            .spirv_type = "%float 2D 0 0 0 2 Rgba32f",
-            .spirv_fn = "OpImageWrite %im %vi12 %vf1234",
-            .wgsl_type = "texture_storage_2d<rgba32float, write>",
-            .wgsl_fn = "textureStore(x_20, vi12, vf1234);",
-        }));
+    ::testing::Values(ImgData{.name = "Source 1 component",
+                              .spirv_type = "%float 2D 0 0 0 2 R32f",
+                              .spirv_fn = "OpImageWrite %im %vi12 %float_1",
+                              .wgsl_type = "texture_storage_2d<r32float, read_write>",
+                              .wgsl_fn = R"(
+    %4:vec4<f32> = construct 1.0f
+    %5:void = textureStore %3, vec2<i32>(1i, 2i), %4)"},
+                      ImgData{
+                          .name = "Source 2 component, dest 1 component",
+                          .spirv_type = "%float 2D 0 0 0 2 R32f",
+                          .spirv_fn = "OpImageWrite %im %vi12 %vf12",
+                          .wgsl_type = "texture_storage_2d<r32float, read_write>",
+                          .wgsl_fn = R"(
+    %4:vec4<f32> = construct vec2<f32>(1.0f, 2.0f), vec2<f32>(0.0f)
+    %5:void = textureStore %3, vec2<i32>(1i, 2i), %4)",
+                      },
+                      ImgData{
+                          .name = "Source 3 component, dest 1 component",
+                          .spirv_type = "%float 2D 0 0 0 2 R32f",
+                          .spirv_fn = "OpImageWrite %im %vi12 %vf123",
+                          .wgsl_type = "texture_storage_2d<r32float, read_write>",
+                          .wgsl_fn = R"(
+    %4:vec4<f32> = construct vec3<f32>(1.0f, 2.0f, 3.0f), 0.0f
+    %5:void = textureStore %3, vec2<i32>(1i, 2i), %4)",
+                      },
+                      ImgData{
+                          .name = "Source 4 component, dest 1 component",
+                          .spirv_type = "%float 2D 0 0 0 2 R32f",
+                          .spirv_fn = "OpImageWrite %im %vi12 %vf1234",
+                          .wgsl_type = "texture_storage_2d<r32float, read_write>",
+                          .wgsl_fn = R"(
+    %4:void = textureStore %3, vec2<i32>(1i, 2i), vec4<f32>(1.0f, 2.0f, 3.0f, 4.0f))",
+                      },
+                      ImgData{
+                          .name = "Source 2 component, dest 2 component",
+                          .spirv_type = "%float 2D 0 0 0 2 Rg32f",
+                          .spirv_fn = "OpImageWrite %im %vi12 %vf12",
+                          .wgsl_type = "texture_storage_2d<rg32float, read_write>",
+                          .wgsl_fn = R"(
+    %4:vec4<f32> = construct vec2<f32>(1.0f, 2.0f), vec2<f32>(0.0f)
+    %5:void = textureStore %3, vec2<i32>(1i, 2i), %4)",
+                      },
+                      ImgData{
+                          .name = "Source 3 component, dest 2 component",
+                          .spirv_type = "%float 2D 0 0 0 2 Rg32f",
+                          .spirv_fn = "OpImageWrite %im %vi12 %vf123",
+                          .wgsl_type = "texture_storage_2d<rg32float, read_write>",
+                          .wgsl_fn = R"(
+    %4:vec4<f32> = construct vec3<f32>(1.0f, 2.0f, 3.0f), 0.0f
+    %5:void = textureStore %3, vec2<i32>(1i, 2i), %4)",
+                      },
+                      ImgData{
+                          .name = "Source 4 component, dest 2 component",
+                          .spirv_type = "%float 2D 0 0 0 2 Rg32f",
+                          .spirv_fn = "OpImageWrite %im %vi12 %vf1234",
+                          .wgsl_type = "texture_storage_2d<rg32float, read_write>",
+                          .wgsl_fn = R"(
+    %4:void = textureStore %3, vec2<i32>(1i, 2i), vec4<f32>(1.0f, 2.0f, 3.0f, 4.0f))",
+                      },
+                      ImgData{
+                          .name = "Source 4 component, dest 4 component",
+                          .spirv_type = "%float 2D 0 0 0 2 Rgba32f",
+                          .spirv_fn = "OpImageWrite %im %vi12 %vf1234",
+                          .wgsl_type = "texture_storage_2d<rgba32float, read_write>",
+                          .wgsl_fn = R"(
+    %4:void = textureStore %3, vec2<i32>(1i, 2i), vec4<f32>(1.0f, 2.0f, 3.0f, 4.0f))",
+                      }));
 
 // As above, but unsigned integer.
-INSTANTIATE_TEST_SUITE_P(DISABLED_SpirvReaderTest_ImageWrite_ConvertTexelOperand_Arity_Uint,
+INSTANTIATE_TEST_SUITE_P(SpirvReaderTest_ImageWrite_ConvertTexelOperand_Arity_Uint,
                          ImageAccessTest,
                          ::testing::Values(
                              ImgData{
                                  .name = "Source 1 component",
                                  .spirv_type = "%uint 2D 0 0 0 2 R32ui",
                                  .spirv_fn = "OpImageWrite %im %vi12 %uint_1",
-                                 .wgsl_type = "texture_storage_2d<r32uint, write>",
-                                 .wgsl_fn = "textureStore(x_20, vi12, vec4u(u1, 0u, 0u, 0u));",
+                                 .wgsl_type = "texture_storage_2d<r32uint, read_write>",
+                                 .wgsl_fn = R"(
+    %4:vec4<u32> = construct 1u
+    %5:void = textureStore %3, vec2<i32>(1i, 2i), %4)",
                              },
                              ImgData{
                                  .name = "Source 2 component, dest 1 component",
                                  .spirv_type = "%uint 2D 0 0 0 2 R32ui",
                                  .spirv_fn = "OpImageWrite %im %vi12 %vu12",
-                                 .wgsl_type = "texture_storage_2d<r32uint, write>",
-                                 .wgsl_fn = "textureStore(x_20, vi12, vec4u(vu12, 0u, 0u));",
+                                 .wgsl_type = "texture_storage_2d<r32uint, read_write>",
+                                 .wgsl_fn = R"(
+    %4:vec4<u32> = construct vec2<u32>(1u, 2u), vec2<u32>(0u)
+    %5:void = textureStore %3, vec2<i32>(1i, 2i), %4)",
                              },
                              ImgData{
                                  .name = "Source 3 component, dest 1 component",
                                  .spirv_type = "%uint 2D 0 0 0 2 R32ui",
                                  .spirv_fn = "OpImageWrite %im %vi12 %vu123",
-                                 .wgsl_type = "texture_storage_2d<r32uint, write>",
-                                 .wgsl_fn = "textureStore(x_20, vi12, vec4u(vu123, 0u));",
+                                 .wgsl_type = "texture_storage_2d<r32uint, read_write>",
+                                 .wgsl_fn = R"(
+    %4:vec4<u32> = construct vec3<u32>(1u, 2u, 3u), 0u
+    %5:void = textureStore %3, vec2<i32>(1i, 2i), %4)",
                              },
                              ImgData{
                                  .name = "Source 4 component, dest 1 component",
                                  .spirv_type = "%uint 2D 0 0 0 2 R32ui",
                                  .spirv_fn = "OpImageWrite %im %vi12 %vu1234",
-                                 .wgsl_type = "texture_storage_2d<r32uint, write>",
-                                 .wgsl_fn = "textureStore(x_20, vi12, vu1234);",
+                                 .wgsl_type = "texture_storage_2d<r32uint, read_write>",
+                                 .wgsl_fn = R"(
+    %4:void = textureStore %3, vec2<i32>(1i, 2i), vec4<u32>(1u, 2u, 3u, 4u))",
                              },
                              ImgData{
                                  .name = "Source 2 component, dest 2 component",
                                  .spirv_type = "%uint 2D 0 0 0 2 Rg32ui",
                                  .spirv_fn = "OpImageWrite %im %vi12 %vu12",
-                                 .wgsl_type = "texture_storage_2d<rg32uint, write>",
-                                 .wgsl_fn = "textureStore(x_20, vi12, vec4u(vu12, 0u, 0u));",
+                                 .wgsl_type = "texture_storage_2d<rg32uint, read_write>",
+                                 .wgsl_fn = R"(
+    %4:vec4<u32> = construct vec2<u32>(1u, 2u), vec2<u32>(0u)
+    %5:void = textureStore %3, vec2<i32>(1i, 2i), %4)",
                              },
                              ImgData{
                                  .name = "Source 3 component, dest 2 component",
                                  .spirv_type = "%uint 2D 0 0 0 2 Rg32ui",
                                  .spirv_fn = "OpImageWrite %im %vi12 %vu123",
-                                 .wgsl_type = "texture_storage_2d<rg32uint, write>",
-                                 .wgsl_fn = "textureStore(x_20, vi12, vec4u(vu123, 0u));",
+                                 .wgsl_type = "texture_storage_2d<rg32uint, read_write>",
+                                 .wgsl_fn = R"(
+    %4:vec4<u32> = construct vec3<u32>(1u, 2u, 3u), 0u
+    %5:void = textureStore %3, vec2<i32>(1i, 2i), %4)",
                              },
                              ImgData{
                                  .name = "Source 4 component, dest 2 component",
                                  .spirv_type = "%uint 2D 0 0 0 2 Rg32ui",
                                  .spirv_fn = "OpImageWrite %im %vi12 %vu1234",
-                                 .wgsl_type = "texture_storage_2d<rg32uint, write>",
-                                 .wgsl_fn = "textureStore(x_20, vi12, vu1234);",
+                                 .wgsl_type = "texture_storage_2d<rg32uint, read_write>",
+                                 .wgsl_fn = R"(
+    %4:void = textureStore %3, vec2<i32>(1i, 2i), vec4<u32>(1u, 2u, 3u, 4u))",
                              },
                              ImgData{
                                  .name = "Source 4 component, dest 4 component",
                                  .spirv_type = "%uint 2D 0 0 0 2 Rgba32ui",
                                  .spirv_fn = "OpImageWrite %im %vi12 %vu1234",
-                                 .wgsl_type = "texture_storage_2d<rgba32uint, write>",
-                                 .wgsl_fn = "textureStore(x_20, vi12, vu1234);",
+                                 .wgsl_type = "texture_storage_2d<rgba32uint, read_write>",
+                                 .wgsl_fn = R"(
+    %4:void = textureStore %3, vec2<i32>(1i, 2i), vec4<u32>(1u, 2u, 3u, 4u))",
                              }));
 
 // As above, but signed integer.
-INSTANTIATE_TEST_SUITE_P(DISABLED_SpirvReaderTest_ImageWrite_ConvertTexelOperand_Arity_Sint,
+INSTANTIATE_TEST_SUITE_P(SpirvReaderTest_ImageWrite_ConvertTexelOperand_Arity_Sint,
                          ImageAccessTest,
                          ::testing::Values(
                              ImgData{
                                  .name = "Source 1 component",
                                  .spirv_type = "%int 2D 0 0 0 2 R32i",
                                  .spirv_fn = "OpImageWrite %im %vi12 %int_1",
-                                 .wgsl_type = "texture_storage_2d<r32sint, write>",
-                                 .wgsl_fn = "textureStore(x_20, vi12, vec4i(i1, 0i, 0i, 0i));",
+                                 .wgsl_type = "texture_storage_2d<r32sint, read_write>",
+                                 .wgsl_fn = R"(
+    %4:vec4<i32> = construct 1i
+    %5:void = textureStore %3, vec2<i32>(1i, 2i), %4)",
                              },
                              ImgData{
                                  .name = "Source 2 component, dest 1 component",
                                  .spirv_type = "%int 2D 0 0 0 2 R32i",
                                  .spirv_fn = "OpImageWrite %im %vi12 %vi12",
-                                 .wgsl_type = "texture_storage_2d<r32sint, write>",
-                                 .wgsl_fn = "textureStore(x_20, vi12, vec4i(vi12, 0i, 0i));",
+                                 .wgsl_type = "texture_storage_2d<r32sint, read_write>",
+                                 .wgsl_fn = R"(
+    %4:vec4<i32> = construct vec2<i32>(1i, 2i), vec2<i32>(0i)
+    %5:void = textureStore %3, vec2<i32>(1i, 2i), %4)",
                              },
                              ImgData{
                                  .name = "Source 3 component, dest 1 component",
                                  .spirv_type = "%int 2D 0 0 0 2 R32i",
                                  .spirv_fn = "OpImageWrite %im %vi12 %vi123",
-                                 .wgsl_type = "texture_storage_2d<r32sint, write>",
-                                 .wgsl_fn = "textureStore(x_20, vi12, vec4i(vi123, 0i));",
+                                 .wgsl_type = "texture_storage_2d<r32sint, read_write>",
+                                 .wgsl_fn = R"(
+    %4:vec4<i32> = construct vec3<i32>(1i, 2i, 3i), 0i
+    %5:void = textureStore %3, vec2<i32>(1i, 2i), %4)",
                              },
                              ImgData{
                                  .name = "Source 4 component, dest 1 component",
                                  .spirv_type = "%int 2D 0 0 0 2 R32i",
                                  .spirv_fn = "OpImageWrite %im %vi12 %vi1234",
-                                 .wgsl_type = "texture_storage_2d<r32sint, write>",
-                                 .wgsl_fn = "textureStore(x_20, vi12, vi1234);",
+                                 .wgsl_type = "texture_storage_2d<r32sint, read_write>",
+                                 .wgsl_fn = R"(
+    %4:void = textureStore %3, vec2<i32>(1i, 2i), vec4<i32>(1i, 2i, 3i, 4i))",
                              },
                              ImgData{
                                  .name = "Source 2 component, dest 2 component",
                                  .spirv_type = "%int 2D 0 0 0 2 Rg32i",
                                  .spirv_fn = "OpImageWrite %im %vi12 %vi12",
-                                 .wgsl_type = "texture_storage_2d<rg32sint, write>",
-                                 .wgsl_fn = "textureStore(x_20, vi12, vec4i(vi12, 0i, 0i));",
+                                 .wgsl_type = "texture_storage_2d<rg32sint, read_write>",
+                                 .wgsl_fn = R"(
+    %4:vec4<i32> = construct vec2<i32>(1i, 2i), vec2<i32>(0i)
+    %5:void = textureStore %3, vec2<i32>(1i, 2i), %4)",
                              },
                              ImgData{
                                  .name = "Source 3 component, dest 2 component",
                                  .spirv_type = "%int 2D 0 0 0 2 Rg32i",
                                  .spirv_fn = "OpImageWrite %im %vi12 %vi123",
-                                 .wgsl_type = "texture_storage_2d<rg32sint, write>",
-                                 .wgsl_fn = "textureStore(x_20, vi12, vec4i(vi123, 0i));",
+                                 .wgsl_type = "texture_storage_2d<rg32sint, read_write>",
+                                 .wgsl_fn = R"(
+    %4:vec4<i32> = construct vec3<i32>(1i, 2i, 3i), 0i
+    %5:void = textureStore %3, vec2<i32>(1i, 2i), %4)",
                              },
                              ImgData{
                                  .name = "Source 4 component, dest 2 component",
                                  .spirv_type = "%int 2D 0 0 0 2 Rg32i",
                                  .spirv_fn = "OpImageWrite %im %vi12 %vi1234",
-                                 .wgsl_type = "texture_storage_2d<rg32sint, write>",
-                                 .wgsl_fn = "textureStore(x_20, vi12, vi1234);",
+                                 .wgsl_type = "texture_storage_2d<rg32sint, read_write>",
+                                 .wgsl_fn = R"(
+    %4:void = textureStore %3, vec2<i32>(1i, 2i), vec4<i32>(1i, 2i, 3i, 4i))",
                              },
                              ImgData{
                                  .name = "Source 4 component, dest 4 component",
                                  .spirv_type = "%int 2D 0 0 0 2 Rgba32i",
                                  .spirv_fn = "OpImageWrite %im %vi12 %vi1234",
-                                 .wgsl_type = "texture_storage_2d<rgba32sint, write>",
-                                 .wgsl_fn = "textureStore(x_20, vi12, vi1234);",
+                                 .wgsl_type = "texture_storage_2d<rgba32sint, read_write>",
+                                 .wgsl_fn = R"(
+    %4:void = textureStore %3, vec2<i32>(1i, 2i), vec4<i32>(1i, 2i, 3i, 4i))",
                              }));
 
 // The texel operand signedness must match the channel type signedness.
 // SPIR-V validation checks that.
 // This suite is for the cases where they are integral and the same
 // signedness.
-INSTANTIATE_TEST_SUITE_P(DISABLED_SpirvReaderTest_ImageWrite_ConvertTexelOperand_SameSignedness,
+INSTANTIATE_TEST_SUITE_P(SpirvReaderTest_ImageWrite_ConvertTexelOperand_SameSignedness,
                          ImageAccessTest,
                          ::testing::Values(
                              ImgData{
                                  .name = "Sampled type is unsigned int, texel is unsigned int",
                                  .spirv_type = "%uint 2D 0 0 0 2 Rgba32ui",
                                  .spirv_fn = "OpImageWrite %im %vi12 %vu1234",
-                                 .wgsl_type = "texture_storage_2d<rgba32uint, write>",
-                                 .wgsl_fn = "textureStore(x_20, vi12, vu1234)",
+                                 .wgsl_type = "texture_storage_2d<rgba32uint, read_write>",
+                                 .wgsl_fn = R"(
+    %4:void = textureStore %3, vec2<i32>(1i, 2i), vec4<u32>(1u, 2u, 3u, 4u))",
                              },
                              ImgData{
                                  .name = "Sampled type is signed int, texel is signed int",
                                  .spirv_type = "%int 2D 0 0 0 2 Rgba32i",
                                  .spirv_fn = "OpImageWrite %im %vi12 %vi1234",
-                                 .wgsl_type = "texture_storage_2d<rgba32sint, write>",
-                                 .wgsl_fn = "textureStore(x_20, vi12, vi1234)",
+                                 .wgsl_type = "texture_storage_2d<rgba32sint, read_write>",
+                                 .wgsl_fn = R"(
+    %4:void = textureStore %3, vec2<i32>(1i, 2i), vec4<i32>(1i, 2i, 3i, 4i))",
                              }));
 
 // Show that zeros of the correct integer signedness are
 // created when expanding an integer vector.
-INSTANTIATE_TEST_SUITE_P(
-    DISABLED_SpirvReaderTest_ImageWrite_ConvertTexelOperand_Signedness_AndWidening,
-    ImageAccessTest,
-    ::testing::Values(
-        ImgData{
-            .name = "Source unsigned, dest unsigned",
-            .spirv_type = "%uint 2D 0 0 0 2 R32ui",
-            .spirv_fn = "OpImageWrite %im %vi12 %vu12",
-            .wgsl_type = "texture_storage_2d<r32uint, write>",
-            .wgsl_fn = "textureStore(x_20, vi12, vec4u(vu12, 0u, 0u))",
-        },
-        ImgData{
-            .name = "Source signed, dest signed",
-            .spirv_type = "%int 2D 0 0 0 2 R32i",
-            .spirv_fn = "OpImageWrite %im %vi12 %vi12",
-            .wgsl_type = "texture_storage_2d<r32sint, write>",
-            .wgsl_fn = "textureStore(x_20, vi12, vec4i(vi12, 0i, 0i))",
-        }));
+INSTANTIATE_TEST_SUITE_P(SpirvReaderTest_ImageWrite_ConvertTexelOperand_Signedness_AndWidening,
+                         ImageAccessTest,
+                         ::testing::Values(
+                             ImgData{
+                                 .name = "Source unsigned, dest unsigned",
+                                 .spirv_type = "%uint 2D 0 0 0 2 R32ui",
+                                 .spirv_fn = "OpImageWrite %im %vi12 %vu12",
+                                 .wgsl_type = "texture_storage_2d<r32uint, read_write>",
+                                 .wgsl_fn = R"(
+    %4:vec4<u32> = construct vec2<u32>(1u, 2u), vec2<u32>(0u)
+    %5:void = textureStore %3, vec2<i32>(1i, 2i), %4)",
+                             },
+                             ImgData{
+                                 .name = "Source signed, dest signed",
+                                 .spirv_type = "%int 2D 0 0 0 2 R32i",
+                                 .spirv_fn = "OpImageWrite %im %vi12 %vi12",
+                                 .wgsl_type = "texture_storage_2d<r32sint, read_write>",
+                                 .wgsl_fn = R"(
+    %4:vec4<i32> = construct vec2<i32>(1i, 2i), vec2<i32>(0i)
+    %5:void = textureStore %3, vec2<i32>(1i, 2i), %4)",
+                             }));
 
 INSTANTIATE_TEST_SUITE_P(
     DISABLED_SpirvReaderTest_ImageFetch_OptionalParams,

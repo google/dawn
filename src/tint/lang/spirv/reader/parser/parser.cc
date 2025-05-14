@@ -1399,6 +1399,9 @@ class Parser {
                 case spv::Op::OpImageSampleImplicitLod:
                     EmitImageSampleImplicitLod(inst);
                     break;
+                case spv::Op::OpImageWrite:
+                    EmitImageWrite(inst);
+                    break;
                 default:
                     TINT_UNIMPLEMENTED()
                         << "unhandled SPIR-V instruction: " << static_cast<uint32_t>(inst.opcode());
@@ -1481,6 +1484,47 @@ class Parser {
 
         Emit(b_.Call<spirv::ir::BuiltinCall>(Type(inst.type_id()),
                                              spirv::BuiltinFn::kImageSampleImplicitLod, args),
+             inst.result_id());
+    }
+
+    void EmitImageWrite(const spvtools::opt::Instruction& inst) {
+        auto* image = Value(inst.GetSingleWordInOperand(0));
+        auto* coord = Value(inst.GetSingleWordInOperand(1));
+        core::ir::Value* texel = Value(inst.GetSingleWordInOperand(2));
+
+        // Our intrinsic has a vec4 type, which matches what WGSL expects. Instead of creating more
+        // intrinsic entries, just turn the texel into a vec4.
+        auto* texel_ty = texel->Type();
+        if (texel_ty->IsScalar()) {
+            auto* c = b_.Construct(ty_.vec4(texel_ty), texel);
+            EmitWithoutSpvResult(c);
+            texel = c->Result();
+        } else {
+            auto* vec_ty = texel_ty->As<core::type::Vector>();
+            TINT_ASSERT(vec_ty);
+
+            core::ir::Instruction* c = nullptr;
+            if (vec_ty->Width() == 2) {
+                c = b_.Construct(ty_.vec4(vec_ty->Type()), texel, b_.Zero(vec_ty));
+            } else if (vec_ty->Width() == 3) {
+                c = b_.Construct(ty_.vec4(vec_ty->Type()), texel, b_.Zero(vec_ty->Type()));
+            }
+            if (c != nullptr) {
+                EmitWithoutSpvResult(c);
+                texel = c->Result();
+            }
+        }
+
+        Vector<core::ir::Value*, 4> args = {image, coord, texel};
+        if (inst.NumInOperands() > 3) {
+            uint32_t literal_mask = inst.GetSingleWordInOperand(3);
+            args.Push(b_.Constant(i32(literal_mask)));
+            TINT_ASSERT(literal_mask == 0);
+        } else {
+            args.Push(b_.Zero(ty_.i32()));
+        }
+
+        Emit(b_.Call<spirv::ir::BuiltinCall>(ty_.void_(), spirv::BuiltinFn::kImageWrite, args),
              inst.result_id());
     }
 
