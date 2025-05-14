@@ -184,6 +184,19 @@ struct State {
         new_args.Push(offset);
     }
 
+    uint32_t GetOperandMask(core::ir::Value* val) {
+        auto* op = val->As<core::ir::Constant>();
+        TINT_ASSERT(op);
+        return op->Value()->ValueAs<uint32_t>();
+    }
+
+    bool HasBias(uint32_t mask) {
+        return (mask & static_cast<uint32_t>(ImageOperandsMask::kBias)) != 0;
+    }
+    bool HasConstOffset(uint32_t mask) {
+        return (mask & static_cast<uint32_t>(ImageOperandsMask::kConstOffset)) != 0;
+    }
+
     void ImageGather(spirv::ir::BuiltinCall* call) {
         const auto& args = call->Args();
 
@@ -195,6 +208,8 @@ struct State {
             auto* coords = args[1];
             auto* component = args[2];
 
+            uint32_t operand_mask = GetOperandMask(args[3]);
+
             Vector<core::ir::Value*, 5> new_args;
             if (!tex->Type()->Is<core::type::DepthTexture>()) {
                 new_args.Push(component);
@@ -204,7 +219,7 @@ struct State {
 
             ProcessCoords(tex->Type(), coords, new_args);
 
-            if (args.Length() > 4) {
+            if (HasConstOffset(operand_mask)) {
                 ProcessOffset(args[4], new_args);
             }
 
@@ -223,10 +238,7 @@ struct State {
         std::tie(tex, sampler) = GetTextureSampler(sampled_image);
 
         auto* coords = args[1];
-        auto* operand_mask_value = args[2]->As<core::ir::Constant>();
-        TINT_ASSERT(operand_mask_value);
-
-        uint32_t operand_mask = operand_mask_value->Value()->ValueAs<uint32_t>();
+        uint32_t operand_mask = GetOperandMask(args[2]);
 
         uint32_t idx = 3;
         b.InsertBefore(call, [&] {
@@ -237,11 +249,11 @@ struct State {
             ProcessCoords(tex->Type(), coords, new_args);
 
             core::BuiltinFn fn = core::BuiltinFn::kTextureSample;
-            if ((operand_mask & static_cast<uint32_t>(ImageOperandsMask::kBias)) != 0) {
+            if (HasBias(operand_mask)) {
                 fn = core::BuiltinFn::kTextureSampleBias;
                 new_args.Push(args[idx++]);
             }
-            if ((operand_mask & static_cast<uint32_t>(ImageOperandsMask::kConstOffset)) != 0) {
+            if (HasConstOffset(operand_mask)) {
                 ProcessOffset(args[idx++], new_args);
             }
 
