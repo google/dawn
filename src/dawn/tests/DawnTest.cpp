@@ -1884,14 +1884,6 @@ void DawnTestBase::ResolveDeferredExpectationsNow() {
     }
 }
 
-bool utils::RGBA8::operator==(const utils::RGBA8& other) const {
-    return r == other.r && g == other.g && b == other.b && a == other.a;
-}
-
-bool utils::RGBA8::operator!=(const utils::RGBA8& other) const {
-    return !(*this == other);
-}
-
 bool utils::RGBA8::operator<=(const utils::RGBA8& other) const {
     return (r <= other.r && g <= other.g && b <= other.b && a <= other.a);
 }
