@@ -28,6 +28,7 @@
 #ifndef SRC_DAWN_COMMON_TYPEDINTEGER_H_
 #define SRC_DAWN_COMMON_TYPEDINTEGER_H_
 
+#include <compare>
 #include <limits>
 #include <type_traits>
 #include <utility>
@@ -101,16 +102,8 @@ class alignas(T) TypedIntegerImpl {
     // expect.
     explicit constexpr operator T() const { return static_cast<T>(this->mValue); }
 
-// Same-tag TypedInteger comparison operators
-#define TYPED_COMPARISON(op) \
-    constexpr bool operator op(const TypedIntegerImpl& rhs) const { return mValue op rhs.mValue; }
-    TYPED_COMPARISON(<)
-    TYPED_COMPARISON(<=)
-    TYPED_COMPARISON(>)
-    TYPED_COMPARISON(>=)
-    TYPED_COMPARISON(==)
-    TYPED_COMPARISON(!=)
-#undef TYPED_COMPARISON
+    // Same-tag TypedInteger comparison operators
+    constexpr auto operator<=>(const TypedIntegerImpl& rhs) const = default;
 
     // Increment / decrement operators for for-loop iteration
     constexpr TypedIntegerImpl& operator++() {
