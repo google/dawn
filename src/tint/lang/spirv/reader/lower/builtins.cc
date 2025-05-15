@@ -241,6 +241,7 @@ struct State {
                 case spirv::BuiltinFn::kImageQuerySamples:
                 case spirv::BuiltinFn::kImageQuerySize:
                 case spirv::BuiltinFn::kImageQuerySizeLod:
+                case spirv::BuiltinFn::kImageSampleExplicitLod:
                 case spirv::BuiltinFn::kImageSampleImplicitLod:
                 case spirv::BuiltinFn::kImageWrite:
                     // Ignore image methods, they'll be handled by the `Texture` transform.

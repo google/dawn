@@ -108,6 +108,7 @@ struct State {
                     case spirv::BuiltinFn::kImageQuerySamples:
                     case spirv::BuiltinFn::kImageQuerySize:
                     case spirv::BuiltinFn::kImageQuerySizeLod:
+                    case spirv::BuiltinFn::kImageSampleExplicitLod:
                     case spirv::BuiltinFn::kImageSampleImplicitLod:
                     case spirv::BuiltinFn::kImageWrite:
                         builtin_worklist.Push(builtin);
@@ -136,8 +137,9 @@ struct State {
                 case spirv::BuiltinFn::kImageQuerySizeLod:
                     ImageQuerySize(builtin);
                     break;
+                case spirv::BuiltinFn::kImageSampleExplicitLod:
                 case spirv::BuiltinFn::kImageSampleImplicitLod:
-                    ImageSampleImplicitLod(builtin);
+                    ImageSample(builtin);
                     break;
                 case spirv::BuiltinFn::kImageWrite:
                     ImageWrite(builtin);
@@ -211,6 +213,12 @@ struct State {
     bool HasBias(uint32_t mask) {
         return (mask & static_cast<uint32_t>(ImageOperandsMask::kBias)) != 0;
     }
+    bool HasGrad(uint32_t mask) {
+        return (mask & static_cast<uint32_t>(ImageOperandsMask::kGrad)) != 0;
+    }
+    bool HasLod(uint32_t mask) {
+        return (mask & static_cast<uint32_t>(ImageOperandsMask::kLod)) != 0;
+    }
     bool HasConstOffset(uint32_t mask) {
         return (mask & static_cast<uint32_t>(ImageOperandsMask::kConstOffset)) != 0;
     }
@@ -246,7 +254,7 @@ struct State {
         call->Destroy();
     }
 
-    void ImageSampleImplicitLod(spirv::ir::BuiltinCall* call) {
+    void ImageSample(spirv::ir::BuiltinCall* call) {
         const auto& args = call->Args();
 
         auto* sampled_image = args[0];
@@ -254,6 +262,8 @@ struct State {
         core::ir::Value* tex = nullptr;
         core::ir::Value* sampler = nullptr;
         std::tie(tex, sampler) = GetTextureSampler(sampled_image);
+
+        auto* tex_ty = tex->Type();
 
         auto* coords = args[1];
         uint32_t operand_mask = GetOperandMask(args[2]);
@@ -264,18 +274,51 @@ struct State {
             new_args.Push(tex);
             new_args.Push(sampler);
 
-            ProcessCoords(tex->Type(), coords, new_args);
+            ProcessCoords(tex_ty, coords, new_args);
 
             core::BuiltinFn fn = core::BuiltinFn::kTextureSample;
             if (HasBias(operand_mask)) {
                 fn = core::BuiltinFn::kTextureSampleBias;
                 new_args.Push(args[idx++]);
             }
+            if (HasLod(operand_mask)) {
+                fn = core::BuiltinFn::kTextureSampleLevel;
+
+                core::ir::Value* lod = args[idx++];
+
+                // Depth texture LOD in WGSL is i32/u32 but f32 in SPIR-V.
+                // Convert to i32
+                if (tex_ty->Is<core::type::DepthTexture>()) {
+                    lod = b.Convert(ty.i32(), lod)->Result();
+                }
+                new_args.Push(lod);
+            }
+            if (HasGrad(operand_mask)) {
+                fn = core::BuiltinFn::kTextureSampleGrad;
+                new_args.Push(args[idx++]);  // ddx
+                new_args.Push(args[idx++]);  // ddy
+            }
             if (HasConstOffset(operand_mask)) {
                 ProcessOffset(args[idx++], new_args);
             }
 
-            b.CallWithResult(call->DetachResult(), fn, new_args);
+            // Depth textures have a single value return in WGSL, but a vec4 in SPIR-V.
+            auto* call_ty = call->Result()->Type();
+            if (tex_ty->IsAnyOf<core::type::DepthTexture, core::type::DepthMultisampledTexture>()) {
+                call_ty = call_ty->DeepestElement();
+            }
+            auto* res = b.Call(call_ty, fn, new_args)->Result();
+
+            // Restore the vec4 result by padding with 0's.
+            if (call_ty != call->Result()->Type()) {
+                auto* vec = call->Result()->Type()->As<core::type::Vector>();
+                TINT_ASSERT(vec && vec->Width() == 4);
+
+                auto* z = b.Zero(call_ty);
+                res = b.Construct(call->Result()->Type(), res, z, z, z)->Result();
+            }
+
+            call->Result()->ReplaceAllUsesWith(res);
         });
         call->Destroy();
     }

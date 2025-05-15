@@ -1408,8 +1408,11 @@ class Parser {
                 case spv::Op::OpImageQuerySizeLod:
                     EmitImageQuerySizeLod(inst);
                     break;
+                case spv::Op::OpImageSampleExplicitLod:
+                    EmitImageSample(inst, spirv::BuiltinFn::kImageSampleExplicitLod);
+                    break;
                 case spv::Op::OpImageSampleImplicitLod:
-                    EmitImageSampleImplicitLod(inst);
+                    EmitImageSample(inst, spirv::BuiltinFn::kImageSampleImplicitLod);
                     break;
                 case spv::Op::OpImageWrite:
                     EmitImageWrite(inst);
@@ -1473,7 +1476,7 @@ class Parser {
              inst.result_id());
     }
 
-    void EmitImageSampleImplicitLod(const spvtools::opt::Instruction& inst) {
+    void EmitImageSample(const spvtools::opt::Instruction& inst, spirv::BuiltinFn fn) {
         auto sampled_image = Value(inst.GetSingleWordInOperand(0));
         auto* coord = Value(inst.GetSingleWordInOperand(1));
 
@@ -1494,9 +1497,7 @@ class Parser {
             args.Push(b_.Zero(ty_.u32()));
         }
 
-        Emit(b_.Call<spirv::ir::BuiltinCall>(Type(inst.type_id()),
-                                             spirv::BuiltinFn::kImageSampleImplicitLod, args),
-             inst.result_id());
+        Emit(b_.Call<spirv::ir::BuiltinCall>(Type(inst.type_id()), fn, args), inst.result_id());
     }
 
     void EmitImageWrite(const spvtools::opt::Instruction& inst) {
