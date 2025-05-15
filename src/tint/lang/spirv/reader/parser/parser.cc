@@ -1450,7 +1450,7 @@ class Parser {
 
         if (inst.NumInOperands() > 3) {
             uint32_t literal_mask = inst.GetSingleWordInOperand(3);
-            args.Push(b_.Constant(i32(literal_mask)));
+            args.Push(b_.Constant(u32(literal_mask)));
 
             if (literal_mask != 0) {
                 TINT_ASSERT(static_cast<spv::ImageOperandsMask>(literal_mask) ==
@@ -1459,7 +1459,7 @@ class Parser {
                 args.Push(Value(inst.GetSingleWordInOperand(4)));
             }
         } else {
-            args.Push(b_.Zero(ty_.i32()));
+            args.Push(b_.Zero(ty_.u32()));
         }
 
         Emit(b_.Call<spirv::ir::BuiltinCall>(Type(inst.type_id()), spirv::BuiltinFn::kImageGather,
@@ -1475,7 +1475,7 @@ class Parser {
 
         if (inst.NumInOperands() > 2) {
             uint32_t literal_mask = inst.GetSingleWordInOperand(2);
-            args.Push(b_.Constant(i32(literal_mask)));
+            args.Push(b_.Constant(u32(literal_mask)));
 
             if (literal_mask != 0) {
                 TINT_ASSERT(inst.NumInOperands() > 3);
@@ -1485,7 +1485,7 @@ class Parser {
                 args.Push(Value(inst.GetSingleWordInOperand(i)));
             }
         } else {
-            args.Push(b_.Zero(ty_.i32()));
+            args.Push(b_.Zero(ty_.u32()));
         }
 
         Emit(b_.Call<spirv::ir::BuiltinCall>(Type(inst.type_id()),
@@ -1524,10 +1524,10 @@ class Parser {
         Vector<core::ir::Value*, 4> args = {image, coord, texel};
         if (inst.NumInOperands() > 3) {
             uint32_t literal_mask = inst.GetSingleWordInOperand(3);
-            args.Push(b_.Constant(i32(literal_mask)));
+            args.Push(b_.Constant(u32(literal_mask)));
             TINT_ASSERT(literal_mask == 0);
         } else {
-            args.Push(b_.Zero(ty_.i32()));
+            args.Push(b_.Zero(ty_.u32()));
         }
 
         Emit(b_.Call<spirv::ir::BuiltinCall>(ty_.void_(), spirv::BuiltinFn::kImageWrite, args),

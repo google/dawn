@@ -436,7 +436,7 @@ $B1: {  # root
     %4:spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, rg32float, read_write> = load %2
     %5:sampler = load %1
     %6:spirv.sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, rg32float, read_write>> = spirv.sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, rg32float, read_write>> %4, %5
-    %7:vec4<f32> = spirv.image_gather %6, vec2<f32>(1.0f, 2.0f), 1i, 0i
+    %7:vec4<f32> = spirv.image_gather %6, vec2<f32>(1.0f, 2.0f), 1i, 0u
     ret
   }
 }
@@ -494,7 +494,7 @@ $B1: {  # root
     %4:sampler = load %2
     %5:spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write> = load %1
     %6:spirv.sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> %5, %4
-    %7:vec4<f32> = spirv.image_gather %6, vec2<f32>(1.0f, 2.0f), 1i, 0i
+    %7:vec4<f32> = spirv.image_gather %6, vec2<f32>(1.0f, 2.0f), 1i, 0u
     ret
   }
 }

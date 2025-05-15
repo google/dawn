@@ -240,6 +240,7 @@ enum attribute {
 enum usages {
   base
   bits
+  const_offset
   coords
   count
   depth
@@ -249,15 +250,19 @@ enum usages {
   exp
   height
   i
+  image
   image_operands
   insert
   level
   location
+  lod
   num_levels
   original_value
   refz
-  samples
   result
+  sample
+  samples
+  texel
   width
   x
 }

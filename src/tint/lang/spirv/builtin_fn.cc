@@ -102,14 +102,14 @@ const char* str(BuiltinFn i) {
             return "image_sample_dref_explicit_lod";
         case BuiltinFn::kImageWrite:
             return "image_write";
+        case BuiltinFn::kSampledImage:
+            return "sampled_image";
         case BuiltinFn::kMatrixTimesMatrix:
             return "matrix_times_matrix";
         case BuiltinFn::kMatrixTimesScalar:
             return "matrix_times_scalar";
         case BuiltinFn::kMatrixTimesVector:
             return "matrix_times_vector";
-        case BuiltinFn::kSampledImage:
-            return "sampled_image";
         case BuiltinFn::kSelect:
             return "select";
         case BuiltinFn::kVectorTimesMatrix:
