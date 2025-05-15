@@ -26,6 +26,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import re
+import sys
 
 NONINCLUSIVE_REGEXES = [
     r"(?i)black[-_]?list",
@@ -140,6 +141,13 @@ def _NonInclusiveFileFilter(file):
     return file.LocalPath().replace('\\', '/') not in filter_list
 
 
+def _HasNoStrayWhitespaceFilter(file):
+    filter_list = [
+        "third_party/webgpu-headers/webgpu.h.diff",  # Generated diff file
+    ]
+    return file.LocalPath().replace('\\', '/') not in filter_list
+
+
 def _CheckNoStaleGen(input_api, output_api):
     results = []
     try:
@@ -160,11 +168,28 @@ def _CheckNoStaleGen(input_api, output_api):
     return results
 
 
+def _CheckWebgpuHeaderDiff(input_api, output_api):
+    results = []
+    try:
+        input_api.subprocess.check_call_out(
+            [sys.executable, "third_party/webgpu-headers/cli", "check"],
+            stdout=input_api.subprocess.PIPE,
+            stderr=input_api.subprocess.PIPE,
+            cwd=input_api.change.RepositoryRoot())
+    except input_api.subprocess.CalledProcessError as e:
+        if input_api.is_committing:
+            results.append(output_api.PresubmitError('%s' % (e, )))
+        else:
+            results.append(output_api.PresubmitPromptWarning('%s' % (e, )))
+    return results
+
+
 def _DoCommonChecks(input_api, output_api):
     results = []
     results.extend(
         input_api.canned_checks.CheckForCommitObjects(input_api, output_api))
     results.extend(_CheckNoStaleGen(input_api, output_api))
+    results.extend(_CheckWebgpuHeaderDiff(input_api, output_api))
 
     result_factory = output_api.PresubmitPromptWarning
     if input_api.is_committing:
@@ -187,7 +212,9 @@ def _DoCommonChecks(input_api, output_api):
         input_api.canned_checks.CheckChangeTodoHasOwner(input_api, output_api))
     results.extend(
         input_api.canned_checks.CheckChangeHasNoStrayWhitespace(
-            input_api, output_api))
+            input_api,
+            output_api,
+            source_file_filter=_HasNoStrayWhitespaceFilter))
 
     results.extend(
         input_api.canned_checks.CheckChangeHasDescription(

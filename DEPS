@@ -384,6 +384,11 @@ deps = {
     'condition': 'dawn_node',
   },
 
+  # Upstream webgpu.h headers for testing purposes
+  'third_party/webgpu-headers/src': {
+    'url': '{chromium_git}/external/github.com/webgpu-native/webgpu-headers@60cd9020309b87a30cd7240aad32accd24262a5e',
+  },
+
   'tools/golang': {
     'packages': [{
       'package': 'infra/3pp/tools/go/${{platform}}',
