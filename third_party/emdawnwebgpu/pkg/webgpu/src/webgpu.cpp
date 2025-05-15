@@ -29,8 +29,16 @@
 #ifndef NDEBUG
 #include <cstdio>
 #define DEBUG_PRINTF(...) fprintf(stderr, __VA_ARGS__)
+#define DCHECK_PRINTF(condition, ...) \
+  do {                                \
+    if (!(condition)) {               \
+      fprintf(stderr, __VA_ARGS__);   \
+      assert(false);                  \
+    }                                 \
+  } while (0)
 #else
 #define DEBUG_PRINTF(...)
+#define DCHECK_PRINTF(...)
 #endif
 
 using FutureID = uint64_t;
@@ -383,6 +391,25 @@ enum class EventType {
   WorkDone,
 };
 
+bool ValidateCallbackMode(WGPUCallbackMode mode, bool hasCallback) {
+  if (mode == WGPUCallbackMode_WaitAnyOnly ||
+      mode == WGPUCallbackMode_AllowProcessEvents ||
+      mode == WGPUCallbackMode_AllowSpontaneous ||
+      (int(mode) == 0 && !hasCallback)) {
+    return true;
+  } else {
+    DEBUG_PRINTF("Invalid WGPUCallbackMode %d\n", mode);
+    return false;
+  }
+}
+
+template <typename CallbackInfo>
+bool ValidateCallbackMode(const CallbackInfo& info) {
+  // This small templated function delegates to the larger non-templated
+  // function to avoid unnecessary monomorphization.
+  return ValidateCallbackMode(info.mode, info.callback);
+}
+
 class EventManager;
 
 class TrackedEvent : NonMovable {
@@ -393,7 +420,13 @@ class TrackedEvent : NonMovable {
 
  protected:
   TrackedEvent(InstanceID instance, WGPUCallbackMode mode)
-      : mInstanceId(instance), mMode(mode) {}
+      : mInstanceId(instance),
+        // Mode can only be 0 if there's no callback, so just pick any default.
+        mMode(int(mode) == 0 ? WGPUCallbackMode_AllowSpontaneous : mode) {
+    assert(mMode == WGPUCallbackMode_WaitAnyOnly ||
+           mMode == WGPUCallbackMode_AllowProcessEvents ||
+           mMode == WGPUCallbackMode_AllowSpontaneous);
+  }
 
  private:
   friend class EventManager;
@@ -523,8 +556,11 @@ class EventManager : NonMovable {
       std::vector<FutureID> futures;
       std::unordered_map<FutureID, WGPUFutureWaitInfo*> futureIdToInfo;
       for (size_t i = 0; i < count; ++i) {
-        futures.push_back(infos[i].future.id);
-        futureIdToInfo.emplace(infos[i].future.id, &infos[i]);
+        FutureID id = infos[i].future.id;
+        DCHECK_PRINTF(id != kNullFutureId && id < mNextFutureId,
+                      "Invalid future id %" PRIu64 "\n", id);
+        futures.push_back(id);
+        futureIdToInfo.emplace(id, &infos[i]);
       }
 
       // We need to clamp and convert the timeout to verify that the timeout in
@@ -600,7 +636,7 @@ class EventManager : NonMovable {
     return anyCompleted ? WGPUWaitStatus_Success : WGPUWaitStatus_TimedOut;
   }
 
-  std::pair<FutureID, bool> TrackEvent(std::unique_ptr<TrackedEvent> event) {
+  FutureID TrackEvent(std::unique_ptr<TrackedEvent> event) {
     FutureID futureId = mNextFutureId++;
     InstanceID instance = event->mInstanceId;
     std::unique_lock<std::mutex> lock(mMutex);
@@ -612,22 +648,19 @@ class EventManager : NonMovable {
           // The instance has already been unregistered so just complete this
           // event as shutdown now.
           event->Complete(futureId, EventCompletionType::Shutdown);
-          return {futureId, false};
+          return futureId;
         }
         it->second.insert(futureId);
-        mEvents.try_emplace(futureId, std::move(event));
         break;
       }
-      case WGPUCallbackMode_AllowSpontaneous: {
-        mEvents.try_emplace(futureId, std::move(event));
+      // Any invalid callback mode should already have been validated by
+      // ValidateCallbackMode, but it still may be 0 if there's no callback.
+      default:
+      case WGPUCallbackMode_AllowSpontaneous:
         break;
-      }
-      default: {
-        // Invalid callback mode, so we just return kNullFutureId.
-        return {kNullFutureId, false};
-      }
     }
-    return {futureId, true};
+    mEvents.try_emplace(futureId, std::move(event));
+    return futureId;
   }
 
   template <typename Event, typename... ReadyArgs>
@@ -747,7 +780,7 @@ struct WGPUDeviceImpl final : public EventSource,
  public:
   // Reservation constructor used when calling RequestDevice.
   WGPUDeviceImpl(const EventSource* source,
-                 const WGPUDeviceDescriptor* descriptor,
+                 const WGPUDeviceDescriptor& descriptor,
                  WGPUQueue queue);
   // Injection constructor used when we already have a backing Device.
   WGPUDeviceImpl(const EventSource* source, WGPUQueue queue);
@@ -1333,7 +1366,7 @@ void emwgpuOnRequestDeviceCompleted(double futureId,
         WGPUDeviceLostReason_FailedCreation, "Device creation failed.");
 
     // Free the device now that there should be no pointers to it.
-    [[maybe_unused]] bool deviceFreed = device->Release();
+    bool deviceFreed = device->Release();
     assert(deviceFreed);
   }
 }
@@ -1437,11 +1470,11 @@ WGPUFuture WGPUBufferImpl::MapAsync(WGPUMapMode mode,
                                     size_t offset,
                                     size_t size,
                                     WGPUBufferMapCallbackInfo callbackInfo) {
-  auto [futureId, tracked] = GetEventManager().TrackEvent(
-      std::make_unique<MapAsyncEvent>(GetInstanceId(), this, callbackInfo));
-  if (!tracked) {
+  if (!ValidateCallbackMode(callbackInfo)) {
     return WGPUFuture{kNullFutureId};
   }
+  FutureID futureId = GetEventManager().TrackEvent(
+      std::make_unique<MapAsyncEvent>(GetInstanceId(), this, callbackInfo));
 
   if (mMapState == WGPUBufferMapState_Pending) {
     GetEventManager().SetFutureReady<MapAsyncEvent>(
@@ -1495,14 +1528,14 @@ void WGPUBufferImpl::WillDropLastExternalRef() {
 // ----------------------------------------------------------------------------
 
 WGPUDeviceImpl::WGPUDeviceImpl(const EventSource* source,
-                               const WGPUDeviceDescriptor* descriptor,
+                               const WGPUDeviceDescriptor& descriptor,
                                WGPUQueue queue)
     : EventSource(source),
-      mUncapturedErrorCallbackInfo(descriptor->uncapturedErrorCallbackInfo) {
+      mUncapturedErrorCallbackInfo(descriptor.uncapturedErrorCallbackInfo) {
   // Create the DeviceLostEvent now.
-  std::tie(mDeviceLostFutureId, std::ignore) =
+  mDeviceLostFutureId =
       GetEventManager().TrackEvent(std::make_unique<DeviceLostEvent>(
-          source->GetInstanceId(), this, descriptor->deviceLostCallbackInfo));
+          source->GetInstanceId(), this, descriptor.deviceLostCallbackInfo));
   mQueue.Acquire(queue);
 }
 
@@ -1630,12 +1663,12 @@ WGPUShaderModuleImpl::WGPUShaderModuleImpl(const EventSource* source)
 
 WGPUFuture WGPUShaderModuleImpl::GetCompilationInfo(
     WGPUCompilationInfoCallbackInfo callbackInfo) {
-  auto [futureId, tracked] =
-      GetEventManager().TrackEvent(std::make_unique<CompilationInfoEvent>(
-          GetInstanceId(), this, callbackInfo));
-  if (!tracked) {
+  if (!ValidateCallbackMode(callbackInfo)) {
     return WGPUFuture{kNullFutureId};
   }
+  FutureID futureId =
+      GetEventManager().TrackEvent(std::make_unique<CompilationInfoEvent>(
+          GetInstanceId(), this, callbackInfo));
 
   // If we already have the compilation info cached, we don't need to call into
   // JS.
@@ -1738,26 +1771,24 @@ WGPUFuture wgpuAdapterRequestDevice(
     WGPUAdapter adapter,
     const WGPUDeviceDescriptor* descriptor,
     WGPURequestDeviceCallbackInfo callbackInfo) {
-  auto [futureId, tracked] =
-      GetEventManager().TrackEvent(std::make_unique<RequestDeviceEvent>(
-          adapter->GetInstanceId(), callbackInfo));
-  if (!tracked) {
-    return WGPUFuture{kNullFutureId};
-  }
-
-  static const WGPUDeviceDescriptor kDefaultDescriptor = []() {
-    WGPUDeviceDescriptor desc = WGPU_DEVICE_DESCRIPTOR_INIT;
-    desc.deviceLostCallbackInfo.mode = WGPUCallbackMode_AllowSpontaneous;
-    return desc;
-  }();
+  static const WGPUDeviceDescriptor kDefaultDescriptor =
+      WGPU_DEVICE_DESCRIPTOR_INIT;
   if (descriptor == nullptr) {
     descriptor = &kDefaultDescriptor;
   }
 
+  if (!ValidateCallbackMode(callbackInfo) ||
+      !ValidateCallbackMode(descriptor->deviceLostCallbackInfo)) {
+    return WGPUFuture{kNullFutureId};
+  }
+  FutureID futureId =
+      GetEventManager().TrackEvent(std::make_unique<RequestDeviceEvent>(
+          adapter->GetInstanceId(), callbackInfo));
+
   // For RequestDevice, we always create a Device and Queue up front. The
   // Device is also immediately associated with the DeviceLostEvent.
   WGPUQueue queue = new WGPUQueueImpl(adapter);
-  WGPUDevice device = new WGPUDeviceImpl(adapter, descriptor, queue);
+  WGPUDevice device = new WGPUDeviceImpl(adapter, *descriptor, queue);
   auto deviceLostFutureId = device->GetLostFuture().id;
 
   emwgpuAdapterRequestDevice(adapter, futureId, deviceLostFutureId, device,
@@ -1855,12 +1886,12 @@ WGPUFuture wgpuDeviceCreateComputePipelineAsync(
     WGPUDevice device,
     const WGPUComputePipelineDescriptor* descriptor,
     WGPUCreateComputePipelineAsyncCallbackInfo callbackInfo) {
-  auto [futureId, tracked] =
-      GetEventManager().TrackEvent(std::make_unique<CreateComputePipelineEvent>(
-          device->GetInstanceId(), callbackInfo));
-  if (!tracked) {
+  if (!ValidateCallbackMode(callbackInfo)) {
     return WGPUFuture{kNullFutureId};
   }
+  FutureID futureId =
+      GetEventManager().TrackEvent(std::make_unique<CreateComputePipelineEvent>(
+          device->GetInstanceId(), callbackInfo));
 
   WGPUComputePipeline pipeline = emwgpuCreateComputePipeline(device);
   emwgpuDeviceCreateComputePipelineAsync(device, futureId, descriptor,
@@ -1872,12 +1903,12 @@ WGPUFuture wgpuDeviceCreateRenderPipelineAsync(
     WGPUDevice device,
     const WGPURenderPipelineDescriptor* descriptor,
     WGPUCreateRenderPipelineAsyncCallbackInfo callbackInfo) {
-  auto [futureId, tracked] =
-      GetEventManager().TrackEvent(std::make_unique<CreateRenderPipelineEvent>(
-          device->GetInstanceId(), callbackInfo));
-  if (!tracked) {
+  if (!ValidateCallbackMode(callbackInfo)) {
     return WGPUFuture{kNullFutureId};
   }
+  FutureID futureId =
+      GetEventManager().TrackEvent(std::make_unique<CreateRenderPipelineEvent>(
+          device->GetInstanceId(), callbackInfo));
 
   WGPURenderPipeline pipeline = emwgpuCreateRenderPipeline(device);
   emwgpuDeviceCreateRenderPipelineAsync(device, futureId, descriptor, pipeline);
@@ -1906,12 +1937,12 @@ WGPUQueue wgpuDeviceGetQueue(WGPUDevice device) {
 
 WGPUFuture wgpuDevicePopErrorScope(WGPUDevice device,
                                    WGPUPopErrorScopeCallbackInfo callbackInfo) {
-  auto [futureId, tracked] =
-      GetEventManager().TrackEvent(std::make_unique<PopErrorScopeEvent>(
-          device->GetInstanceId(), callbackInfo));
-  if (!tracked) {
+  if (!ValidateCallbackMode(callbackInfo)) {
     return WGPUFuture{kNullFutureId};
   }
+  FutureID futureId =
+      GetEventManager().TrackEvent(std::make_unique<PopErrorScopeEvent>(
+          device->GetInstanceId(), callbackInfo));
 
   emwgpuDevicePopErrorScope(device, futureId);
   return WGPUFuture{futureId};
@@ -1929,12 +1960,12 @@ WGPUFuture wgpuInstanceRequestAdapter(
     WGPUInstance instance,
     WGPURequestAdapterOptions const* options,
     WGPURequestAdapterCallbackInfo callbackInfo) {
-  auto [futureId, tracked] =
-      GetEventManager().TrackEvent(std::make_unique<RequestAdapterEvent>(
-          instance->GetInstanceId(), callbackInfo));
-  if (!tracked) {
+  if (!ValidateCallbackMode(callbackInfo)) {
     return WGPUFuture{kNullFutureId};
   }
+  FutureID futureId =
+      GetEventManager().TrackEvent(std::make_unique<RequestAdapterEvent>(
+          instance->GetInstanceId(), callbackInfo));
 
   WGPUAdapter adapter = emwgpuCreateAdapter(instance);
   emwgpuInstanceRequestAdapter(instance, futureId, options, adapter);
@@ -1963,11 +1994,11 @@ WGPUWaitStatus wgpuInstanceWaitAny(WGPUInstance instance,
 WGPUFuture wgpuQueueOnSubmittedWorkDone(
     WGPUQueue queue,
     WGPUQueueWorkDoneCallbackInfo callbackInfo) {
-  auto [futureId, tracked] = GetEventManager().TrackEvent(
-      std::make_unique<WorkDoneEvent>(queue->GetInstanceId(), callbackInfo));
-  if (!tracked) {
+  if (!ValidateCallbackMode(callbackInfo)) {
     return WGPUFuture{kNullFutureId};
   }
+  FutureID futureId = GetEventManager().TrackEvent(
+      std::make_unique<WorkDoneEvent>(queue->GetInstanceId(), callbackInfo));
 
   emwgpuQueueOnSubmittedWorkDone(queue, futureId);
   return WGPUFuture{futureId};
