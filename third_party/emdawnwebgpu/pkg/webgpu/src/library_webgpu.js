@@ -574,7 +574,9 @@ var LibraryWebGPU = {
       setLimitValueU32('maxComputeWorkgroupsPerDimension', {{{ C_STRUCTS.WGPULimits.maxComputeWorkgroupsPerDimension }}});
 
       // Non-standard. If this is undefined, it will correctly just cast to 0.
-      setLimitValueU32('maxImmediateSize', {{{ C_STRUCTS.WGPULimits.maxImmediateSize }}});
+      if (limits.maxImmediateSize !== undefined) {
+        setLimitValueU32('maxImmediateSize', {{{ C_STRUCTS.WGPULimits.maxImmediateSize }}});
+      }
     },
 
     fillAdapterInfoStruct: (info, infoStruct) => {
