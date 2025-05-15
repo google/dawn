@@ -27,6 +27,8 @@
 
 #include "src/tint/lang/wgsl/resolver/eval_test.h"
 
+#include <numbers>
+
 #include "src/tint/utils/result.h"
 
 using namespace tint::core::number_suffixes;  // NOLINT
@@ -412,15 +414,17 @@ INSTANTIATE_TEST_SUITE_P(  //
 
 template <typename T>
 std::vector<Case> AcosCases() {
+    auto pi = std::numbers::pi_v<UnwrapNumber<T>>;
+
     return {
         // If i is +/-0, +/-0 is returned
         C({T(0.87758256189)}, T(0.5)).FloatComp(),
 
         C({T(1.0)}, T(0.0)),
-        C({-T(1.0)}, kPi<T>).FloatComp(),
+        C({-T(1.0)}, T(pi)).FloatComp(),
 
         // Vector tests
-        C({Vec(T(1.0), -T(1.0))}, Vec(T(0), kPi<T>)).FloatComp(),
+        C({Vec(T(1.0), -T(1.0))}, Vec(T(0), T(pi))).FloatComp(),
 
         E({T(1.1)},
           "12:34 error: acos must be called with a value in the range [-1 .. 1] (inclusive)"),
@@ -438,12 +442,13 @@ INSTANTIATE_TEST_SUITE_P(  //
 
 template <typename T>
 std::vector<Case> AcoshCases() {
+    auto pi = std::numbers::pi_v<UnwrapNumber<T>>;
     return {
         C({T(1.0)}, T(0.0)),
-        C({T(11.5919532755)}, kPi<T>).FloatComp(),
+        C({T(11.5919532755)}, T(pi)).FloatComp(),
 
         // Vector tests
-        C({Vec(T(1.0), T(11.5919532755))}, Vec(T(0), kPi<T>)).FloatComp(),
+        C({Vec(T(1.0), T(11.5919532755))}, Vec(T(0), T(pi))).FloatComp(),
 
         E({T::Smallest()}, "12:34 error: acosh must be called with a value >= 1.0"),
         E({-T(1.1)}, "12:34 error: acosh must be called with a value >= 1.0"),
@@ -1017,7 +1022,7 @@ std::vector<Case> FaceForwardCases() {
         auto x = builder::As<T>(v.args[0]);
         auto y = builder::As<T>(v.args[1]);
         auto z = builder::As<T>(v.args[2]);
-        auto rads = T(degs) * kPi<T> / T(180);
+        auto rads = T(degs) * std::numbers::pi_v<UnwrapNumber<T>> / T(180);
         auto x2 = T(x * std::cos(rads) - y * std::sin(rads));
         auto y2 = T(x * std::sin(rads) + y * std::cos(rads));
         return Vec(x2, y2, z);
@@ -2284,8 +2289,8 @@ std::vector<Case> RefractCases() {
     auto eta = [](auto angle1, auto angle2) {
         // Snell's law: sin(angle1) / sin(angle2) == n2 / n1
         // We want the ratio of n1 to n2, so sin(angle2) / sin(angle1)
-        auto angle1_rads = T(angle1) * kPi<T> / T(180);
-        auto angle2_rads = T(angle2) * kPi<T> / T(180);
+        auto angle1_rads = T(angle1) * std::numbers::pi_v<UnwrapNumber<T>> / T(180);
+        auto angle2_rads = T(angle2) * std::numbers::pi_v<UnwrapNumber<T>> / T(180);
         return T(std::sin(angle2_rads) / std::sin(angle1_rads));
     };
 

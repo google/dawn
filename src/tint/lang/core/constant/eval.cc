@@ -29,6 +29,7 @@
 
 #include <algorithm>
 #include <limits>
+#include <numbers>
 #include <string>
 #include <type_traits>
 #include <utility>
@@ -2456,8 +2457,7 @@ Eval::Result Eval::degrees(const core::type::Type* ty,
             using NumberT = decltype(e);
             using T = UnwrapNumber<NumberT>;
 
-            auto pi = kPi<T>;
-            auto scale = Div(source, NumberT(180), NumberT(pi));
+            auto scale = Div(source, NumberT(180), NumberT(std::numbers::pi_v<T>));
             if (scale != Success) {
                 AddNote(source) << "when calculating degrees";
                 return error;
@@ -3389,8 +3389,7 @@ Eval::Result Eval::radians(const core::type::Type* ty,
             using NumberT = decltype(e);
             using T = UnwrapNumber<NumberT>;
 
-            auto pi = kPi<T>;
-            auto scale = Div(source, NumberT(pi), NumberT(180));
+            auto scale = Div(source, NumberT(std::numbers::pi_v<T>), NumberT(180));
             if (scale != Success) {
                 AddNote(source) << "when calculating radians";
                 return error;

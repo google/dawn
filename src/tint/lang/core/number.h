@@ -302,15 +302,13 @@ static_assert(std::numeric_limits<float>::has_quiet_NaN);
 static_assert(std::numeric_limits<double>::has_infinity);
 static_assert(std::numeric_limits<double>::has_quiet_NaN);
 
-template <typename T, std::enable_if_t<IsFloatingPoint<T>>* = nullptr>
-inline const auto kPi = T(UnwrapNumber<T>(3.14159265358979323846));
-
 /// True iff T is an abstract number type
 template <typename T>
 constexpr bool IsAbstract = std::is_same_v<T, AInt> || std::is_same_v<T, AFloat>;
 
 /// @returns the friendly name of Number type T
-template <typename T, std::enable_if_t<IsNumber<T>>* = nullptr>
+template <typename T>
+    requires(IsNumber<T>)
 const char* FriendlyName() {
     if constexpr (std::is_same_v<T, AInt>) {
         return "abstract-int";
@@ -330,7 +328,8 @@ const char* FriendlyName() {
 }
 
 /// @returns the friendly name of T when T is bool
-template <typename T, std::enable_if_t<std::is_same_v<T, bool>>* = nullptr>
+template <typename T>
+    requires(std::is_same_v<T, bool>)
 const char* FriendlyName() {
     return "bool";
 }
@@ -426,7 +425,8 @@ bool operator!=(Number<A> a, Number<B> b) {
 /// @param b the RHS number
 /// @returns true if the numbers `a` and `b` are exactly equal.
 template <typename A, typename B>
-std::enable_if_t<IsNumeric<B>, bool> operator==(Number<A> a, B b) {
+    requires(IsNumeric<B>)
+bool operator==(Number<A> a, B b) {
     return a == Number<B>(b);
 }
 
@@ -435,7 +435,8 @@ std::enable_if_t<IsNumeric<B>, bool> operator==(Number<A> a, B b) {
 /// @param b the RHS number
 /// @returns true if the numbers `a` and `b` are exactly unequal.
 template <typename A, typename B>
-std::enable_if_t<IsNumeric<B>, bool> operator!=(Number<A> a, B b) {
+    requires(IsNumeric<B>)
+bool operator!=(Number<A> a, B b) {
     return !(a == b);
 }
 
@@ -444,7 +445,8 @@ std::enable_if_t<IsNumeric<B>, bool> operator!=(Number<A> a, B b) {
 /// @param b the RHS number
 /// @returns true if the numbers `a` and `b` are exactly equal.
 template <typename A, typename B>
-std::enable_if_t<IsNumeric<A>, bool> operator==(A a, Number<B> b) {
+    requires(IsNumeric<A>)
+bool operator==(A a, Number<B> b) {
     return Number<A>(a) == b;
 }
 
@@ -453,7 +455,8 @@ std::enable_if_t<IsNumeric<A>, bool> operator==(A a, Number<B> b) {
 /// @param b the RHS number
 /// @returns true if the numbers `a` and `b` are exactly unequal.
 template <typename A, typename B>
-std::enable_if_t<IsNumeric<A>, bool> operator!=(A a, Number<B> b) {
+    requires(IsNumeric<A>)
+bool operator!=(A a, Number<B> b) {
     return !(a == b);
 }
 
@@ -496,7 +499,8 @@ inline std::optional<AInt> CheckedAdd(AInt a, AInt b) {
 /// @param a the LHS number
 /// @param b the RHS number
 /// @returns a + b, or an empty optional if the resulting value overflowed the float value
-template <typename FloatingPointT, typename = std::enable_if_t<IsFloatingPoint<FloatingPointT>>>
+template <typename FloatingPointT>
+    requires(IsFloatingPoint<FloatingPointT>)
 inline std::optional<FloatingPointT> CheckedAdd(FloatingPointT a, FloatingPointT b) {
     auto result = FloatingPointT{a.value + b.value};
     if (!std::isfinite(result.value)) {
@@ -532,7 +536,8 @@ inline std::optional<AInt> CheckedSub(AInt a, AInt b) {
 /// @param a the LHS number
 /// @param b the RHS number
 /// @returns a + b, or an empty optional if the resulting value overflowed the float value
-template <typename FloatingPointT, typename = std::enable_if_t<IsFloatingPoint<FloatingPointT>>>
+template <typename FloatingPointT>
+    requires(IsFloatingPoint<FloatingPointT>)
 inline std::optional<FloatingPointT> CheckedSub(FloatingPointT a, FloatingPointT b) {
     auto result = FloatingPointT{a.value - b.value};
     if (!std::isfinite(result.value)) {
@@ -580,7 +585,8 @@ inline std::optional<AInt> CheckedMul(AInt a, AInt b) {
 /// @param a the LHS number
 /// @param b the RHS number
 /// @returns a * b, or an empty optional if the resulting value overflowed the float value
-template <typename FloatingPointT, typename = std::enable_if_t<IsFloatingPoint<FloatingPointT>>>
+template <typename FloatingPointT>
+    requires(IsFloatingPoint<FloatingPointT>)
 inline std::optional<FloatingPointT> CheckedMul(FloatingPointT a, FloatingPointT b) {
     auto result = FloatingPointT{a.value * b.value};
     if (!std::isfinite(result.value)) {
@@ -607,7 +613,8 @@ inline std::optional<AInt> CheckedDiv(AInt a, AInt b) {
 /// @param a the LHS number
 /// @param b the RHS number
 /// @returns a / b, or an empty optional if the resulting value overflowed the float value
-template <typename FloatingPointT, typename = std::enable_if_t<IsFloatingPoint<FloatingPointT>>>
+template <typename FloatingPointT>
+    requires(IsFloatingPoint<FloatingPointT>)
 inline std::optional<FloatingPointT> CheckedDiv(FloatingPointT a, FloatingPointT b) {
     if (b == FloatingPointT{0.0}) {
         return {};
@@ -653,7 +660,8 @@ inline std::optional<AInt> CheckedMod(AInt a, AInt b) {
 /// @param b the RHS number
 /// @returns the remainder of a / b, or an empty optional if the resulting value overflowed the
 /// float value
-template <typename FloatingPointT, typename = std::enable_if_t<IsFloatingPoint<FloatingPointT>>>
+template <typename FloatingPointT>
+    requires(IsFloatingPoint<FloatingPointT>)
 inline std::optional<FloatingPointT> CheckedMod(FloatingPointT a, FloatingPointT b) {
     if (b == FloatingPointT{0.0}) {
         return {};
@@ -680,7 +688,8 @@ inline std::optional<AInt> CheckedMadd(AInt a, AInt b, AInt c) {
 /// @param exp the exponent
 /// @returns the value of `base` raised to the power `exp`, or an empty optional if the operation
 /// cannot be performed.
-template <typename FloatingPointT, typename = std::enable_if_t<IsFloatingPoint<FloatingPointT>>>
+template <typename FloatingPointT>
+    requires(IsFloatingPoint<FloatingPointT>)
 inline std::optional<FloatingPointT> CheckedPow(FloatingPointT base, FloatingPointT exp) {
     static_assert(IsNumber<FloatingPointT>);
     if ((base < 0) || (base == 0 && exp <= 0)) {
