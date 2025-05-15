@@ -107,7 +107,13 @@ def _gen_header_diff(temp_dir, output_dir):
                                     dawn_header.readlines(),
                                     fromfile='webgpu_header',
                                     tofile='dawn_header')
-        diff_file.writelines(diff)
+        # Skip writing all the line numbers as these all change every time
+        # anything in the file changes.
+        for line in diff:
+            if line.startswith('@@'):
+                diff_file.writelines('@@\n')
+            else:
+                diff_file.writelines(line)
 
 
 # Helper that verifies that all the necessary dependencies to run checks are
