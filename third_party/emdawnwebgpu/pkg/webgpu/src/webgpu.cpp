@@ -1366,7 +1366,7 @@ void emwgpuOnRequestDeviceCompleted(double futureId,
         WGPUDeviceLostReason_FailedCreation, "Device creation failed.");
 
     // Free the device now that there should be no pointers to it.
-    bool deviceFreed = device->Release();
+    [[maybe_unused]] bool deviceFreed = device->Release();
     assert(deviceFreed);
   }
 }
