@@ -2935,7 +2935,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureDimensions_2D_ImplicitLod) {
     auto* expect = R"(
 %foo = func(%t:spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>):vec2<u32> {
   $B1: {
-    %3:vec2<u32> = spirv.image_query_size_lod %t, 0u
+    %3:vec2<u32> = spirv.image_query_size_lod<u32> %t, 0u
     ret %3
   }
 }
@@ -2971,7 +2971,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureDimensions_2D_ExplicitLod) {
     auto* expect = R"(
 %foo = func(%t:spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>, %lod:i32):vec2<u32> {
   $B1: {
-    %4:vec2<u32> = spirv.image_query_size_lod %t, %lod
+    %4:vec2<u32> = spirv.image_query_size_lod<u32> %t, %lod
     ret %4
   }
 }
@@ -3007,7 +3007,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureDimensions_2DArray) {
     auto* expect = R"(
 %foo = func(%t:spirv.image<f32, 2d, not_depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>):vec2<u32> {
   $B1: {
-    %3:vec3<u32> = spirv.image_query_size_lod %t, 0u
+    %3:vec3<u32> = spirv.image_query_size_lod<u32> %t, 0u
     %4:vec2<u32> = swizzle %3, xy
     ret %4
   }
@@ -3044,7 +3044,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureDimensions_Multisampled) {
     auto* expect = R"(
 %foo = func(%t:spirv.image<f32, 2d, not_depth, non_arrayed, multi_sampled, sampling_compatible, undefined, read_write>):vec2<u32> {
   $B1: {
-    %3:vec2<u32> = spirv.image_query_size %t
+    %3:vec2<u32> = spirv.image_query_size<u32> %t
     ret %3
   }
 }
@@ -3505,7 +3505,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureNumLayers_2DArray) {
     auto* expect = R"(
 %foo = func(%t:spirv.image<f32, 2d, not_depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>):u32 {
   $B1: {
-    %3:vec3<u32> = spirv.image_query_size_lod %t, 0u
+    %3:vec3<u32> = spirv.image_query_size_lod<u32> %t, 0u
     %4:u32 = access %3, 2u
     ret %4
   }
@@ -3542,7 +3542,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureNumLayers_CubeArray) {
     auto* expect = R"(
 %foo = func(%t:spirv.image<f32, cube, not_depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>):u32 {
   $B1: {
-    %3:vec3<u32> = spirv.image_query_size_lod %t, 0u
+    %3:vec3<u32> = spirv.image_query_size_lod<u32> %t, 0u
     %4:u32 = access %3, 2u
     ret %4
   }
@@ -3578,7 +3578,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureNumLayers_Depth2DArray) {
     auto* expect = R"(
 %foo = func(%t:spirv.image<f32, 2d, depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>):u32 {
   $B1: {
-    %3:vec3<u32> = spirv.image_query_size_lod %t, 0u
+    %3:vec3<u32> = spirv.image_query_size_lod<u32> %t, 0u
     %4:u32 = access %3, 2u
     ret %4
   }
@@ -3614,7 +3614,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureNumLayers_DepthCubeArray) {
     auto* expect = R"(
 %foo = func(%t:spirv.image<f32, cube, depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>):u32 {
   $B1: {
-    %3:vec3<u32> = spirv.image_query_size_lod %t, 0u
+    %3:vec3<u32> = spirv.image_query_size_lod<u32> %t, 0u
     %4:u32 = access %3, 2u
     ret %4
   }
@@ -3652,7 +3652,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureNumLayers_Storage2DArray) {
     auto* expect = R"(
 %foo = func(%t:spirv.image<f32, 2d, not_depth, arrayed, single_sampled, rw_op_compatible, r32float, write>):u32 {
   $B1: {
-    %3:vec3<u32> = spirv.image_query_size %t
+    %3:vec3<u32> = spirv.image_query_size<u32> %t
     %4:u32 = access %3, 2u
     ret %4
   }

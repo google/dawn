@@ -297,50 +297,50 @@ fn image_gather(sampled_image< image<f32, dim_cube, is_depth, is_arrayed, single
                 coords: vec4<f32>, component: C, image_operands: B) -> vec4<f32>
 
 implicit(T: fiu32, F: texel_format, A: access)
-fn image_query_size(image<T, dim_1d, non_depth, non_arrayed, single_sampled, rw_op_compatible, F, A>) -> u32
+fn image_query_size<R: iu32>(image<T, dim_1d, non_depth, non_arrayed, single_sampled, rw_op_compatible, F, A>) -> R
 implicit(T: fiu32, F: texel_format, A: access)
-fn image_query_size(image<T, dim_2d, non_depth, non_arrayed, single_sampled, rw_op_compatible, F, A>) -> vec2<u32>
+fn image_query_size<R: iu32>(image<T, dim_2d, non_depth, non_arrayed, single_sampled, rw_op_compatible, F, A>) -> vec2<R>
 implicit(T: fiu32, F: texel_format, A: access)
-fn image_query_size(image<T, dim_2d, non_depth, is_arrayed, single_sampled, rw_op_compatible, F, A>) -> vec3<u32>
+fn image_query_size<R: iu32>(image<T, dim_2d, non_depth, is_arrayed, single_sampled, rw_op_compatible, F, A>) -> vec3<R>
 implicit(T: fiu32, F: texel_format, A: access)
-fn image_query_size(image<T, dim_3d, non_depth, non_arrayed, single_sampled, rw_op_compatible, F, A>) -> vec3<u32>
+fn image_query_size<R: iu32>(image<T, dim_3d, non_depth, non_arrayed, single_sampled, rw_op_compatible, F, A>) -> vec3<R>
 implicit(T: fiu32, F: texel_format, A: access)
-fn image_query_size(image<T, dim_cube, non_depth, non_arrayed, single_sampled, rw_op_compatible, F, A>) -> vec2<u32>
+fn image_query_size<R: iu32>(image<T, dim_cube, non_depth, non_arrayed, single_sampled, rw_op_compatible, F, A>) -> vec2<R>
 implicit(T: fiu32, F: texel_format, A: access)
-fn image_query_size(image<T, dim_cube, non_depth, is_arrayed, single_sampled, rw_op_compatible, F, A>) -> vec3<u32>
+fn image_query_size<R: iu32>(image<T, dim_cube, non_depth, is_arrayed, single_sampled, rw_op_compatible, F, A>) -> vec3<R>
 implicit(T: fiu32, S: sampled, F: texel_format, A: access)
-fn image_query_size(image<T, dim_2d, non_depth, non_arrayed, multi_sampled, S, F, A>) -> vec2<u32>
+fn image_query_size<R: iu32>(image<T, dim_2d, non_depth, non_arrayed, multi_sampled, S, F, A>) -> vec2<R>
 implicit(F: texel_format, A: access)
-fn image_query_size(image<f32, dim_2d, is_depth, non_arrayed, single_sampled, rw_op_compatible, F, A>) -> vec2<u32>
+fn image_query_size<R: iu32>(image<f32, dim_2d, is_depth, non_arrayed, single_sampled, rw_op_compatible, F, A>) -> vec2<R>
 implicit(F: texel_format, A: access)
-fn image_query_size(image<f32, dim_2d, is_depth, is_arrayed, single_sampled, rw_op_compatible, F, A> ) -> vec3<u32>
+fn image_query_size<R: iu32>(image<f32, dim_2d, is_depth, is_arrayed, single_sampled, rw_op_compatible, F, A> ) -> vec3<R>
 implicit(F: texel_format, A: access)
-fn image_query_size(image<f32, dim_cube, is_depth, non_arrayed, single_sampled, rw_op_compatible, F, A>) -> vec2<u32>
+fn image_query_size<R: iu32>(image<f32, dim_cube, is_depth, non_arrayed, single_sampled, rw_op_compatible, F, A>) -> vec2<R>
 implicit(F: texel_format, A: access)
-fn image_query_size(image<f32, dim_cube, is_depth, is_arrayed, single_sampled, rw_op_compatible, F, A>) -> vec3<u32>
+fn image_query_size<R: iu32>(image<f32, dim_cube, is_depth, is_arrayed, single_sampled, rw_op_compatible, F, A>) -> vec3<R>
 implicit(S: sampled, F: texel_format, A: access)
-fn image_query_size(image<f32, dim_2d, is_depth, non_arrayed, multi_sampled, S, F, A>) -> vec2<u32>
+fn image_query_size<R: iu32>(image<f32, dim_2d, is_depth, non_arrayed, multi_sampled, S, F, A>) -> vec2<R>
 
 implicit(T: fiu32, L: iu32, S: sampled, F: texel_format, A: access)
-fn image_query_size_lod(image<T, dim_1d, non_depth, non_arrayed, single_sampled, S, F, A>, L) -> u32
+fn image_query_size_lod<R: iu32>(image<T, dim_1d, non_depth, non_arrayed, single_sampled, S, F, A>, L) -> R
 implicit(T: fiu32, L: iu32, S: sampled, F: texel_format, A: access)
-fn image_query_size_lod(image<T, dim_2d, non_depth, non_arrayed, single_sampled, S, F, A>, L) -> vec2<u32>
+fn image_query_size_lod<R: iu32>(image<T, dim_2d, non_depth, non_arrayed, single_sampled, S, F, A>, L) -> vec2<R>
 implicit(T: fiu32, L: iu32, S: sampled, F: texel_format, A: access)
-fn image_query_size_lod(image<T, dim_2d, non_depth, is_arrayed, single_sampled, S, F, A>, L) -> vec3<u32>
+fn image_query_size_lod<R: iu32>(image<T, dim_2d, non_depth, is_arrayed, single_sampled, S, F, A>, L) -> vec3<R>
 implicit(T: fiu32, L: iu32, S: sampled, F: texel_format, A: access)
-fn image_query_size_lod(image<T, dim_3d, non_depth, non_arrayed, single_sampled, S, F, A>, L) -> vec3<u32>
+fn image_query_size_lod<R: iu32>(image<T, dim_3d, non_depth, non_arrayed, single_sampled, S, F, A>, L) -> vec3<R>
 implicit(T: fiu32, L: iu32, S: sampled, F: texel_format, A: access)
-fn image_query_size_lod(image<T, dim_cube, non_depth, non_arrayed, single_sampled, S, F, A>, L) -> vec2<u32>
+fn image_query_size_lod<R: iu32>(image<T, dim_cube, non_depth, non_arrayed, single_sampled, S, F, A>, L) -> vec2<R>
 implicit(T: fiu32, L: iu32, S: sampled, F: texel_format, A: access)
-fn image_query_size_lod(image<T, dim_cube, non_depth, is_arrayed, single_sampled, S, F, A>, L) -> vec3<u32>
+fn image_query_size_lod<R: iu32>(image<T, dim_cube, non_depth, is_arrayed, single_sampled, S, F, A>, L) -> vec3<R>
 implicit(L: iu32, S: sampled, F: texel_format, A: access)
-fn image_query_size_lod(image<f32, dim_2d, is_depth, non_arrayed, single_sampled, S, F, A>, L) -> vec2<u32>
+fn image_query_size_lod<R: iu32>(image<f32, dim_2d, is_depth, non_arrayed, single_sampled, S, F, A>, L) -> vec2<R>
 implicit(L: iu32, S: sampled, F: texel_format, A: access)
-fn image_query_size_lod(image<f32, dim_2d, is_depth, is_arrayed, single_sampled, S, F, A>, L) -> vec3<u32>
+fn image_query_size_lod<R: iu32>(image<f32, dim_2d, is_depth, is_arrayed, single_sampled, S, F, A>, L) -> vec3<R>
 implicit(L: iu32, S: sampled, F: texel_format, A: access)
-fn image_query_size_lod(image<f32, dim_cube, is_depth, non_arrayed, single_sampled, S, F, A>, L) -> vec2<u32>
+fn image_query_size_lod<R: iu32>(image<f32, dim_cube, is_depth, non_arrayed, single_sampled, S, F, A>, L) -> vec2<R>
 implicit(L: iu32, S: sampled, F: texel_format, A: access)
-fn image_query_size_lod(image<f32, dim_cube, is_depth, is_arrayed, single_sampled, S, F, A>, L) -> vec3<u32>
+fn image_query_size_lod<R: iu32>(image<f32, dim_cube, is_depth, is_arrayed, single_sampled, S, F, A>, L) -> vec3<R>
 
 implicit(T: fiu32, D: depth, R: arrayed, S: sampled, F: texel_format, A: access)
 fn image_query_levels<Z: iu32>(image<T, dim_1d_2d_3d_or_cube, D, R, single_sampled, S, F, A>) -> Z

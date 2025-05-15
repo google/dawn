@@ -362,6 +362,51 @@ $B1: {  # root
 )");
 }
 
+TEST_F(SpirvReaderTest, ImageQuerySize) {
+    EXPECT_IR(R"(
+           OpCapability Shader
+           OpCapability Sampled1D
+           OpCapability ImageQuery
+           OpMemoryModel Logical Simple
+           OpEntryPoint Fragment %main "main"
+           OpExecutionMode %main OriginUpperLeft
+           OpName %10 "wg"
+           OpDecorate %10 DescriptorSet 2
+           OpDecorate %10 Binding 0
+    %int = OpTypeInt 32 1
+  %float = OpTypeFloat 32
+    %tex = OpTypeImage %float 1D 0 0 0 2 R32f
+%ptr_tex = OpTypePointer UniformConstant %tex
+   %void = OpTypeVoid
+ %voidfn = OpTypeFunction %void
+
+     %10 = OpVariable %ptr_tex UniformConstant
+
+   %main = OpFunction %void None %voidfn
+  %entry = OpLabel
+     %im = OpLoad %tex %10
+ %result = OpImageQuerySize %int %im
+     %r2 = OpIAdd %int %result %result
+           OpReturn
+           OpFunctionEnd
+        )",
+              R"(
+$B1: {  # root
+  %wg:ptr<handle, texture_storage_1d<r32float, read_write>, read> = var undef @binding_point(2, 0)
+}
+
+%main = @fragment func():void {
+  $B2: {
+    %3:texture_storage_1d<r32float, read_write> = load %wg
+    %4:u32 = textureDimensions %3
+    %5:i32 = convert %4
+    %6:i32 = add %5, %5
+    ret
+  }
+}
+)");
+}
+
 struct ImgData {
     std::string name;
     std::string spirv_type;
@@ -2078,10 +2123,9 @@ TEST_P(MultiSampledImageAccessTest, Variable) {
             OpMemoryModel Logical Simple
             OpEntryPoint Fragment %main "main"
             OpExecutionMode %main OriginUpperLeft
-            OpDecorate %10 DescriptorSet 0
-            OpDecorate %10 Binding 0
-            OpDecorate %20 DescriptorSet 2
-            OpDecorate %20 Binding 1
+            OpName %wg "wg"
+            OpDecorate %wg DescriptorSet 2
+            OpDecorate %wg Binding 1
 
    %float = OpTypeFloat 32
      %int = OpTypeInt 32  1
@@ -2095,8 +2139,6 @@ TEST_P(MultiSampledImageAccessTest, Variable) {
     %void = OpTypeVoid
   %voidfn = OpTypeFunction %void
 
- %sampler = OpTypeSampler
-%ptr_sampler = OpTypePointer UniformConstant %sampler
    %im_ty = OpTypeImage )" +
                   params.spirv_type + R"(
 %ptr_im_ty = OpTypePointer UniformConstant %im_ty
@@ -2107,21 +2149,32 @@ TEST_P(MultiSampledImageAccessTest, Variable) {
     %vi12 = OpConstantComposite %v2int %int_1 %int_2
    %vi123 = OpConstantComposite %v3int %int_1 %int_2 %int_3
 
-     %10 = OpVariable %ptr_sampler UniformConstant
-     %20 = OpVariable %ptr_im_ty UniformConstant
+     %wg = OpVariable %ptr_im_ty UniformConstant
 
    %main = OpFunction %void None %voidfn
   %entry = OpLabel
 
-    %sam = OpLoad %sampler %10
-     %im = OpLoad %im_ty %20
+     %im = OpLoad %im_ty %wg
 )" + params.spirv_fn +
                   R"(
      OpReturn
      OpFunctionEnd
   )",
               R"(
-    ...
+$B1: {  # root
+  %wg:ptr<handle, )" +
+                  params.wgsl_type +
+                  R"(, read> = var undef @binding_point(2, 1)
+}
+
+%main = @fragment func():void {
+  $B2: {
+    %3:)" + params.wgsl_type +
+                  R"( = load %wg)" + params.wgsl_fn +
+                  R"(
+    ret
+  }
+}
 )");
 }
 
@@ -2152,110 +2205,113 @@ INSTANTIATE_TEST_SUITE_P(DISABLED_SpirvReaderTest_ConvertResultSignedness,
 
 // ImageQuerySize requires storage image or multisampled
 // For storage image, use another instruction to indicate whether it is readonly or writeonly.
-INSTANTIATE_TEST_SUITE_P(
-    DISABLED_SpirvReaderTest_ImageQuerySize_NonArrayed_SignedResult,
-    MultiSampledImageAccessTest,
-    ::testing::Values(
-        ImgData{
-            .name = "1D storage image",
-            .spirv_type = "%float 1D 0 0 0 2 Rgba32f",
-            .spirv_fn = "%99 = OpImageQuerySize %int %im\n"
-                        "%98 = OpImageRead %v4float %im %int_1",  // Implicitly mark as
-            .wgsl_type = "texture_1d<f32>",
-            .wgsl_fn = "let x_99 = i32(textureDimensions(x_20))",
-        },
-        ImgData{
-            .name = "2D storage image",
-            .spirv_type = "%float 2D 0 0 0 2 Rgba32f",
-            .spirv_fn = "%99 = OpImageQuerySize %v2int %im\n"
-                        "%98 = OpImageRead %v4float %im %vi12",  // Implicitly mark as
-                                                                 // NonWritable
-            .wgsl_type = "texture_2d<f32>",
-            .wgsl_fn = "let x_99 = vec2i(textureDimensions(x_20))",
-        },
-        ImgData{
-            .name = "3D storage image",
-            .spirv_type = "%float 3D 0 0 0 2 Rgba32f",
-            .spirv_fn = "%99 = OpImageQuerySize %v3int %im\n"
-                        "%98 = OpImageRead %v4float %im %vi123",  // Implicitly mark as
-                                                                  // NonWritable
-            .wgsl_type = "texture_3d<f32>",
-            .wgsl_fn = "let x_99 = vec3i(textureDimensions(x_20))",
-        },
-        ImgData{
-            .name = "Multisampled",
-            .spirv_type = "%float 2D 0 0 1 1 Unknown",
-            .spirv_fn = "%99 = OpImageQuerySize %v2int %im",
-            .wgsl_type = "texture_multisampled_2d<f32>",
-            .wgsl_fn = "let x_99 = vec2i(textureDimensions(x_20))",
-        }));
+INSTANTIATE_TEST_SUITE_P(SpirvReaderTest_ImageQuerySize_NonArrayed_SignedResult,
+                         MultiSampledImageAccessTest,
+                         ::testing::Values(
+                             ImgData{
+                                 .name = "1D storage image",
+                                 .spirv_type = "%float 1D 0 0 0 2 Rgba32f",
+                                 .spirv_fn = "%99 = OpImageQuerySize %int %im",
+                                 .wgsl_type = "texture_storage_1d<rgba32float, read_write>",
+                                 .wgsl_fn = R"(
+    %4:u32 = textureDimensions %3
+    %5:i32 = convert %4)",
+                             },
+                             ImgData{
+                                 .name = "2D storage image",
+                                 .spirv_type = "%float 2D 0 0 0 2 Rgba32f",
+                                 .spirv_fn = "%99 = OpImageQuerySize %v2int %im",
+                                 .wgsl_type = "texture_storage_2d<rgba32float, read_write>",
+                                 .wgsl_fn = R"(
+    %4:vec2<u32> = textureDimensions %3
+    %5:vec2<i32> = convert %4)",
+                             },
+                             ImgData{
+                                 .name = "3D storage image",
+                                 .spirv_type = "%float 3D 0 0 0 2 Rgba32f",
+                                 .spirv_fn = "%99 = OpImageQuerySize %v3int %im",
+                                 .wgsl_type = "texture_storage_3d<rgba32float, read_write>",
+                                 .wgsl_fn = R"(
+    %4:vec3<u32> = textureDimensions %3
+    %5:vec3<i32> = convert %4)",
+                             },
+                             ImgData{
+                                 .name = "Multisampled",
+                                 .spirv_type = "%float 2D 0 0 1 1 Unknown",
+                                 .spirv_fn = "%99 = OpImageQuerySize %v2int %im",
+                                 .wgsl_type = "texture_multisampled_2d<f32>",
+                                 .wgsl_fn = R"(
+    %4:vec2<u32> = textureDimensions %3
+    %5:vec2<i32> = convert %4)",
+                             }));
 
 // ImageQuerySize requires storage image or multisampled
 // For storage image, use another instruction to indicate whether it is readonly or writeonly.
-INSTANTIATE_TEST_SUITE_P(
-    DISABLED_SpirvReaderTest_ImageQuerySize_Arrayed_SignedResult,
-    MultiSampledImageAccessTest,
-    ::testing::Values(ImgData{
-        .name = "2D array storage image",
-        .spirv_type = "%float 2D 0 1 0 2 Rgba32f",
-        .spirv_fn = "%99 = OpImageQuerySize %v3int %im\n"
-                    "%98 = OpImageRead %v4float %im %vi123",
-        .wgsl_type = "texture_2d_array<f32>",
-        .wgsl_fn = "let x_99 = vec3i(vec3u(textureDimensions(x_20), textureNumLayers(x_20)))",
-    }));
+INSTANTIATE_TEST_SUITE_P(SpirvReaderTest_ImageQuerySize_Arrayed_SignedResult,
+                         MultiSampledImageAccessTest,
+                         ::testing::Values(ImgData{
+                             .name = "2D array storage image",
+                             .spirv_type = "%float 2D 0 1 0 2 Rgba32f",
+                             .spirv_fn = "%99 = OpImageQuerySize %v3int %im",
+                             .wgsl_type = "texture_storage_2d_array<rgba32float, read_write>",
+                             .wgsl_fn = R"(
+    %4:vec2<u32> = textureDimensions %3
+    %5:vec2<i32> = convert %4
+    %6:u32 = textureNumLayers %3
+    %7:i32 = convert %6
+    %8:vec3<i32> = construct %5, %7)",
+                         }));
 
 // ImageQuerySize requires storage image or multisampled
 // For storage image, use another instruction to indicate whether it is readonly or writeonly.
-INSTANTIATE_TEST_SUITE_P(
-    DISABLED_SpirvReaderTest_ImageQuerySize_NonArrayed_UnsignedResult,
-    MultiSampledImageAccessTest,
-    ::testing::Values(
-        ImgData{
-            .name = "1D storage image",
-            .spirv_type = "%float 1D 0 0 0 2 Rgba32f",
-            .spirv_fn = "%99 = OpImageQuerySize %uint %im\n"
-                        "%98 = OpImageRead %v4float %im %int_1",  // Implicitly mark as
-                                                                  // NonWritable
-            .wgsl_type = "texture_1d<f32>",
-            .wgsl_fn = "let x_99 = textureDimensions(x_20)",
-        },
-        ImgData{
-            .name = "2D storage image",
-            .spirv_type = "%float 2D 0 0 0 2 Rgba32f",
-            .spirv_fn = "%99 = OpImageQuerySize %v2uint %im\n"
-                        "%98 = OpImageRead %v4float %im %vi12",  // Implicitly mark as
-                                                                 // NonWritable
-            .wgsl_type = "texture_2d<f32>",
-            .wgsl_fn = "let x_99 = textureDimensions(x_20)",
-        },
-        ImgData{
-            .name = "3D storage image",
-            .spirv_type = "%float 3D 0 0 0 2 Rgba32f",
-            .spirv_fn = "%99 = OpImageQuerySize %v3uint %im\n"
-                        "%98 = OpImageRead %v4float %im %vi123",  // Implicitly mark as
-                                                                  // NonWritable
-            .wgsl_type = "texture_3d<f32>",
-            .wgsl_fn = "let x_99 = textureDimensions(x_20)",
-        },
-        ImgData{
-            .name = "Multisampled",
-            .spirv_type = "%float 2D 0 0 1 1 Unknown",
-            .spirv_fn = "%99 = OpImageQuerySize %v2uint %im",
-            .wgsl_type = "texture_multisampled_2d<f32>",
-            .wgsl_fn = "let x_99 = textureDimensions(x_20)",
-        }));
+INSTANTIATE_TEST_SUITE_P(SpirvReaderTest_ImageQuerySize_NonArrayed_UnsignedResult,
+                         MultiSampledImageAccessTest,
+                         ::testing::Values(
+                             ImgData{
+                                 .name = "1D storage image",
+                                 .spirv_type = "%float 1D 0 0 0 2 Rgba32f",
+                                 .spirv_fn = "%99 = OpImageQuerySize %uint %im",
+                                 .wgsl_type = "texture_storage_1d<rgba32float, read_write>",
+                                 .wgsl_fn = R"(
+    %4:u32 = textureDimensions %3)",
+                             },
+                             ImgData{
+                                 .name = "2D storage image",
+                                 .spirv_type = "%float 2D 0 0 0 2 Rgba32f",
+                                 .spirv_fn = "%99 = OpImageQuerySize %v2uint %im",
+                                 .wgsl_type = "texture_storage_2d<rgba32float, read_write>",
+                                 .wgsl_fn = R"(
+    %4:vec2<u32> = textureDimensions %3)",
+                             },
+                             ImgData{
+                                 .name = "3D storage image",
+                                 .spirv_type = "%float 3D 0 0 0 2 Rgba32f",
+                                 .spirv_fn = "%99 = OpImageQuerySize %v3uint %im",
+                                 .wgsl_type = "texture_storage_3d<rgba32float, read_write>",
+                                 .wgsl_fn = R"(
+    %4:vec3<u32> = textureDimensions %3)",
+                             },
+                             ImgData{
+                                 .name = "Multisampled",
+                                 .spirv_type = "%float 2D 0 0 1 1 Unknown",
+                                 .spirv_fn = "%99 = OpImageQuerySize %v2uint %im",
+                                 .wgsl_type = "texture_multisampled_2d<f32>",
+                                 .wgsl_fn = R"(
+    %4:vec2<u32> = textureDimensions %3)",
+                             }));
 
-INSTANTIATE_TEST_SUITE_P(
-    DISABLED_SpirvReaderTest_ImageQuerySize_Arrayed_UnsignedResult,
-    MultiSampledImageAccessTest,
-    ::testing::Values(ImgData{
-        .name = "2D array storage image",
-        .spirv_type = "%float 2D 0 1 0 2 Rgba32f",
-        .spirv_fn = "%99 = OpImageQuerySize %v3uint %im\n"
-                    "%98 = OpImageRead %v4float %im %vi123",
-        .wgsl_type = "texture_2d_array<f32>",
-        .wgsl_fn = "let x_99 = vec3u(textureDimensions(x_20), textureNumLayers(x_20))",
-    }));
+INSTANTIATE_TEST_SUITE_P(SpirvReaderTest_ImageQuerySize_Arrayed_UnsignedResult,
+                         MultiSampledImageAccessTest,
+                         ::testing::Values(ImgData{
+                             .name = "2D array storage image",
+                             .spirv_type = "%float 2D 0 1 0 2 Rgba32f",
+                             .spirv_fn = "%99 = OpImageQuerySize %v3uint %im",
+                             .wgsl_type = "texture_storage_2d_array<rgba32float, read_write>",
+                             .wgsl_fn = R"(
+    %4:vec2<u32> = textureDimensions %3
+    %5:u32 = textureNumLayers %3
+    %6:vec3<u32> = construct %4, %5)",
+                         }));
 
 INSTANTIATE_TEST_SUITE_P(DISABLED_SpirvReaderTest_ImageQuerySamples_SignedResult,
                          MultiSampledImageAccessTest,

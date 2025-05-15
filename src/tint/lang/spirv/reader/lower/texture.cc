@@ -104,6 +104,7 @@ struct State {
                 switch (builtin->Func()) {
                     case spirv::BuiltinFn::kSampledImage:
                     case spirv::BuiltinFn::kImageGather:
+                    case spirv::BuiltinFn::kImageQuerySize:
                     case spirv::BuiltinFn::kImageSampleImplicitLod:
                     case spirv::BuiltinFn::kImageWrite:
                         builtin_worklist.Push(builtin);
@@ -121,6 +122,9 @@ struct State {
                     break;
                 case spirv::BuiltinFn::kImageGather:
                     ImageGather(builtin);
+                    break;
+                case spirv::BuiltinFn::kImageQuerySize:
+                    ImageQuerySize(builtin);
                     break;
                 case spirv::BuiltinFn::kImageSampleImplicitLod:
                     ImageSampleImplicitLod(builtin);
@@ -282,6 +286,49 @@ struct State {
             new_args.Push(texel);
 
             b.Call(call->Result()->Type(), core::BuiltinFn::kTextureStore, new_args);
+        });
+        call->Destroy();
+    }
+
+    void ImageQuerySize(spirv::ir::BuiltinCall* call) {
+        auto* image = call->Args()[0];
+
+        auto* tex_ty = image->Type()->As<core::type::Texture>();
+        TINT_ASSERT(tex_ty);
+
+        b.InsertBefore(call, [&] {
+            auto* type = call->Result()->Type();
+
+            // WGSL requires a `u32` result component where SPIR-V allows
+            // `i32` or `u32`
+            auto* wgsl_type = ty.MatchWidth(ty.u32(), type);
+
+            // A SPIR-V OpImageQuery will return the array `element` entry with
+            // the image query. In WGSL, these are two calls, the
+            // `textureDimensions` will get the width,height,depth but we also
+            // have to call `textureNumLayers` to get the elements and then
+            // re-inject that back into the result.
+            if (core::type::IsTextureArray(tex_ty->Dim())) {
+                wgsl_type = ty.vec(ty.u32(), wgsl_type->As<core::type::Vector>()->Width() - 1);
+            }
+
+            core::ir::Value* res =
+                b.Call(wgsl_type, core::BuiltinFn::kTextureDimensions, image)->Result();
+            if (type->IsSignedIntegerScalarOrVector()) {
+                res = b.Convert(ty.MatchWidth(ty.i32(), wgsl_type), res)->Result();
+            }
+
+            if (core::type::IsTextureArray(tex_ty->Dim())) {
+                core::ir::Value* layers =
+                    b.Call(ty.u32(), core::BuiltinFn::kTextureNumLayers, image)->Result();
+                if (type->IsSignedIntegerScalarOrVector()) {
+                    layers = b.Convert(ty.i32(), layers)->Result();
+                }
+
+                res = b.Construct(type, res, layers)->Result();
+            }
+
+            call->Result()->ReplaceAllUsesWith(res);
         });
         call->Destroy();
     }

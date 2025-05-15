@@ -995,8 +995,8 @@ struct State {
         }
 
         // Call the function.
-        core::ir::Instruction* result =
-            b.Call<spirv::ir::BuiltinCall>(result_ty, function, std::move(function_args));
+        core::ir::Instruction* result = b.CallExplicit<spirv::ir::BuiltinCall>(
+            result_ty, function, Vector{ty.u32()}, std::move(function_args));
         result->InsertBefore(builtin);
 
         // Swizzle the first two components from the result for arrayed textures.
@@ -1059,8 +1059,8 @@ struct State {
         }
 
         // Call the function.
-        auto* texture_call =
-            b.Call<spirv::ir::BuiltinCall>(ty.vec3<u32>(), function, std::move(function_args));
+        auto* texture_call = b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.vec3<u32>(), function, Vector{ty.u32()}, std::move(function_args));
         texture_call->InsertBefore(builtin);
 
         // Extract the third component to get the number of array layers.
