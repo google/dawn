@@ -6,7 +6,7 @@
 #         fuchsia
 #         linux ubuntu
 #         mac highsierra mojave catalina bigsur monterey ventura sonoma sequoia
-#         win win8 win10 ]
+#         win win8 win10 win11 ]
 # Devices
 # tags: [ android-nexus-5x android-pixel-2 android-pixel-4
 #             android-pixel-6 android-shield-android-tv android-sm-a135m
@@ -583,7 +583,7 @@ crbug.com/42251088 [ android-r ] webgpu:shader,execution,expression,call,builtin
 crbug.com/42251088 [ android-r ] webgpu:shader,execution,expression,call,builtin,atomics,atomicExchange:exchange_storage_basic:workgroupSize=1;dispatchSize=8;mapId="remap";scalarType="u32" [ Failure ]
 
 # DXC failures
-crbug.com/42241085 [ nvidia-0x2184 webgpu-dxc-enabled win10 ] webgpu:shader,execution,expression,call,builtin,tanh:f32:* [ Failure ]
+crbug.com/42241085 [ nvidia-0x2184 webgpu-dxc-enabled win ] webgpu:shader,execution,expression,call,builtin,tanh:f32:* [ Failure ]  # finder:disable-general UPF disabled until Dawn Win/GTX 1660 experiment is enabled crbug.com/413300864
 
 # Intel F16 failures with Vulkan
 crbug.com/42251216 [ intel-0x9bc5 ubuntu ] webgpu:shader,execution,expression,binary,f16_matrix_vector_multiplication:matrix_vector:inputSource="uniform";cols=4;rows=3 [ Failure ]
@@ -1024,6 +1024,34 @@ crbug.com/0000 [ clang-coverage dawn-no-backend-validation no-asan nvidia releas
 crbug.com/0000 [ android-14 android-pixel-6 arm dawn-no-backend-validation target-cpu-64 ] webgpu:shader,execution,expression,binary,af_matrix_subtraction:matrix:inputSource="const";cols=4;rows=4 [ Failure ]
 crbug.com/0000 [ android-14 android-pixel-6 arm dawn-no-backend-validation target-cpu-64 ] webgpu:shader,execution,expression,binary,af_matrix_scalar_multiplication:matrix_scalar:inputSource="const";cols=4;rows=4 [ Failure ]
 crbug.com/0000 [ android-14 android-pixel-6 arm target-cpu-64 ] webgpu:shader,execution,expression,call,builtin,subgroupShuffle:compute,split:predicate="*";op="subgroupShuffleXor" [ Failure ]
+
+# Win/GTX 1660 failures when going from Win10/driver 546.01 to Win11/driver 576.02
+# finder:disable-general UPF disabled until Dawn Win/GTX 1660 experiment is enabled crbug.com/413300864
+crbug.com/417768352 [ win11 nvidia-0x2184 dawn-backend-validation ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,sample_mask:writeMask=0;*;sampleMask=0 [ Failure ]
+crbug.com/417768352 [ win11 nvidia-0x2184 dawn-backend-validation ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,sample_mask:writeMask=15;*;sampleMask=0 [ Failure ]
+crbug.com/417768352 [ win11 nvidia-0x2184 dawn-backend-validation ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=*;sampleCount=1;rasterizationMask=* [ Failure ]
+crbug.com/417768352 [ win11 nvidia-0x2184 dawn-backend-validation ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=*;sampleCount=4;rasterizationMask=* [ Failure ]
+crbug.com/417770938 [ win11 nvidia-0x2184 dawn-backend-validation ] webgpu:api,validation,capability_checks,limits,maxComputeWorkgroupSizeY:createComputePipeline,at_over:* [ Failure ]
+crbug.com/417770938 [ win11 nvidia-0x2184 dawn-backend-validation ] webgpu:api,validation,capability_checks,limits,maxComputeWorkgroupStorageSize:createComputePipeline,at_over:* [ Failure ]
+crbug.com/417770938 [ win11 nvidia-0x2184 dawn-backend-validation ] webgpu:api,validation,capability_checks,limits,maxInterStageShaderVariables:createRenderPipeline,at_over:* [ Failure ]
+crbug.com/417770938 [ win11 nvidia-0x2184 dawn-backend-validation ] webgpu:api,validation,capability_checks,limits,maxSampledTexturesPerShaderStage:createPipeline,at_over:* [ Failure ]
+crbug.com/417770938 [ win11 nvidia-0x2184 dawn-backend-validation ] webgpu:api,validation,capability_checks,limits,maxSampledTexturesPerShaderStage:createPipelineLayout,at_over:* [ Failure ]
+crbug.com/417770938 [ win11 nvidia-0x2184 dawn-backend-validation ] webgpu:api,validation,capability_checks,limits,maxSamplersPerShaderStage:createPipeline,at_over:* [ Failure ]
+crbug.com/417770938 [ win11 nvidia-0x2184 dawn-backend-validation ] webgpu:api,validation,capability_checks,limits,maxSamplersPerShaderStage:createPipelineLayout,at_over:* [ Failure ]
+crbug.com/417770938 [ win11 nvidia-0x2184 dawn-backend-validation ] webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:createBindGroupLayout,at_over:* [ Failure ]
+crbug.com/417770938 [ win11 nvidia-0x2184 dawn-backend-validation ] webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:createPipeline,at_over:* [ Failure ]
+crbug.com/417770938 [ win11 nvidia-0x2184 dawn-backend-validation ] webgpu:api,validation,capability_checks,limits,maxStorageTexturesInFragmentStage:createPipeline,at_over:* [ Failure ]
+crbug.com/417770938 [ win11 nvidia-0x2184 dawn-backend-validation ] webgpu:api,validation,capability_checks,limits,maxStorageTexturesInFragmentStage:createPipelineLayout,at_over:* [ Failure ]
+crbug.com/417770938 [ win11 nvidia-0x2184 dawn-backend-validation ] webgpu:api,validation,capability_checks,limits,maxStorageTexturesInVertexStage:createPipeline,at_over:* [ Failure ]
+crbug.com/417770938 [ win11 nvidia-0x2184 dawn-backend-validation ] webgpu:api,validation,capability_checks,limits,maxStorageTexturesPerShaderStage:createBindGroupLayout,at_over:* [ Failure ]
+crbug.com/417770938 [ win11 nvidia-0x2184 dawn-backend-validation ] webgpu:api,validation,capability_checks,limits,maxStorageTexturesPerShaderStage:createPipeline,at_over:* [ Failure ]
+crbug.com/417770938 [ win11 nvidia-0x2184 dawn-backend-validation ] webgpu:api,validation,capability_checks,limits,maxTextureDimension2D:getCurrentTexture,at_over:* [ Failure ]
+crbug.com/417770938 [ win11 nvidia-0x2184 dawn-backend-validation ] webgpu:api,validation,capability_checks,limits,maxUniformBuffersPerShaderStage:createBindGroupLayout,at_over:* [ Failure ]
+crbug.com/417770938 [ win11 nvidia-0x2184 dawn-backend-validation ] webgpu:api,validation,capability_checks,limits,maxUniformBuffersPerShaderStage:createPipeline,at_over:* [ Failure ]
+crbug.com/417770938 [ win11 nvidia-0x2184 dawn-backend-validation ] webgpu:api,validation,capability_checks,limits,minStorageBufferOffsetAlignment:createBindGroup,at_over:* [ Failure ]
+crbug.com/417770938 [ win11 nvidia-0x2184 dawn-backend-validation ] webgpu:api,validation,capability_checks,limits,minUniformBufferOffsetAlignment:createBindGroup,at_over:* [ Failure ]
+crbug.com/417770938 [ win11 nvidia-0x2184 dawn-backend-validation ] webgpu:api,validation,state,device_lost,destroy:* [ Failure ]
+# finder:enable-general
 
 ################################################################################
 # Autogenerated Failure expectations. Please triage.
