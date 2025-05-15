@@ -25,7 +25,7 @@
 #include <vector>
 
 // Used for "implementation-defined logging" per webgpu.h spec.
-// This is a no-op in Release, to reduce code-size.
+// This is a no-op in NDEBUG builds, to reduce code-size.
 #ifndef NDEBUG
 #include <cstdio>
 #define DEBUG_PRINTF(...) fprintf(stderr, __VA_ARGS__)

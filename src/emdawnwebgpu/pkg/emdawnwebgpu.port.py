@@ -36,7 +36,7 @@ from typing import Union, Dict, Optional
 
 LICENSE = 'mixed licenses, see license files'
 
-# User options, e.g. --use-port=path/to/emdawnwebgpu.port.py:cpp_bindings=false:g=3:O=0
+# User options, e.g. --use-port=path/to/emdawnwebgpu.port.py:cpp_bindings=false
 OPTIONS = {
     'cpp_bindings':
     'Add the include path for <webgpu/webgpu_cpp.h> C++ bindings. Default: true.',
@@ -118,15 +118,26 @@ def process_args(ports):
 # otherwise. (ASSERTIONS implicitly affects library_webgpu.js, so it makes sense
 # for it to control this too - debuggability is most useful with assertions.)
 # Emscripten automatically handles necessary compile flags (LTO, PIC, wasm64).
-def _compute_flags(settings):
+def _compute_opt_level_flag(settings):
     value = _opts['opt_level']
     if value == 'auto':
         value = '0' if settings.ASSERTIONS else '2'
-    return [f'-O{value}']
+    return f'-O{value}'
+
+
+# Compute the library compile flags, either `-O0` or `-O2 -DNDEBUG` (see above).
+# NDEBUG affects <assert.h> and is used in `webgpu.cpp`.
+def _compute_library_compile_flags(settings):
+    opt_level_flag = _compute_opt_level_flag(settings)
+    flags = [opt_level_flag]
+    # Set NDEBUG if -O0 (similar to emcc's defaulting of -sASSERTIONS from -O).
+    if opt_level_flag != '-O0':
+        flags.append('-DNDEBUG')
+    return flags
 
 
 # Create a unique lib name for this version of the port and compile flags.
-def _get_lib_name(flags):
+def _get_lib_name(settings):
     # Compute a hash from all of the inputs to ports.build_port() so that
     # Emscripten knows when it needs to recompile.
     hash_value = 0
@@ -138,7 +149,8 @@ def _get_lib_name(flags):
     for filename in _files_affecting_port_build:
         add(open(filename, 'rb').read())
 
-    return f'lib_emdawnwebgpu-{hash_value:08x}{"".join(flags)}.a'
+    opt_level_flag = _compute_opt_level_flag(settings)
+    return f'lib_emdawnwebgpu-{hash_value:08x}{opt_level_flag}.a'
 
 
 def linker_setup(ports, settings):
@@ -166,15 +178,14 @@ def get(ports, settings, shared):
         # isn't needed until linking.
         return []
 
-    computed_flags = _compute_flags(settings)
-
     def create(final):
         # Note we don't use ports.install_header; instead we directly add the
         # include path via process_args(). The only thing we cache is the
         # compiled webgpu.cpp (which also includes webgpu/webgpu.h).
         includes = [_c_include_dir]
         # Always use -g. The linker can remove debug symbols in release builds.
-        flags = ['-g', '-std=c++17', '-fno-exceptions'] + computed_flags
+        flags = ['-g', '-std=c++17', '-fno-exceptions']
+        flags += _compute_library_compile_flags(settings)
 
         # IMPORTANT: Keep `_files_affecting_port_build` in sync with this.
         ports.build_port(_src_dir,
@@ -184,10 +195,9 @@ def get(ports, settings, shared):
                          flags=flags,
                          srcs=_srcs)
 
-    lib_name = _get_lib_name(computed_flags)
+    lib_name = _get_lib_name(settings)
     return [shared.cache.get_lib(lib_name, create, what='port')]
 
 
 def clear(ports, settings, shared):
-    computed_flags = _compute_flags(settings)
-    shared.cache.erase_lib(_get_lib_name(computed_flags))
+    shared.cache.erase_lib(_get_lib_name(settings))
