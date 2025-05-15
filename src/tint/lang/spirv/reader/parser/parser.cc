@@ -1399,6 +1399,9 @@ class Parser {
                 case spv::Op::OpImageQueryLevels:
                     EmitImageQuery(inst, spirv::BuiltinFn::kImageQueryLevels);
                     break;
+                case spv::Op::OpImageQuerySamples:
+                    EmitImageQuery(inst, spirv::BuiltinFn::kImageQuerySamples);
+                    break;
                 case spv::Op::OpImageQuerySize:
                     EmitImageQuery(inst, spirv::BuiltinFn::kImageQuerySize);
                     break;

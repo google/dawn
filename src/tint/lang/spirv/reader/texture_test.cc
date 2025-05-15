@@ -452,6 +452,51 @@ $B1: {  # root
 )");
 }
 
+TEST_F(SpirvReaderTest, ImageQuerySamples) {
+    EXPECT_IR(R"(
+           OpCapability Shader
+           OpCapability Sampled1D
+           OpCapability ImageQuery
+           OpMemoryModel Logical Simple
+           OpEntryPoint Fragment %main "main"
+           OpExecutionMode %main OriginUpperLeft
+           OpName %wg "wg"
+           OpDecorate %wg DescriptorSet 2
+           OpDecorate %wg Binding 0
+    %int = OpTypeInt 32 1
+  %float = OpTypeFloat 32
+    %tex = OpTypeImage %float 2D 0 0 1 1 R32f
+%ptr_tex = OpTypePointer UniformConstant %tex
+   %void = OpTypeVoid
+ %voidfn = OpTypeFunction %void
+
+     %wg = OpVariable %ptr_tex UniformConstant
+
+   %main = OpFunction %void None %voidfn
+  %entry = OpLabel
+     %im = OpLoad %tex %wg
+ %result = OpImageQuerySamples %int %im
+     %r2 = OpIAdd %int %result %result
+           OpReturn
+           OpFunctionEnd
+        )",
+              R"(
+$B1: {  # root
+  %wg:ptr<handle, texture_multisampled_2d<f32>, read> = var undef @binding_point(2, 0)
+}
+
+%main = @fragment func():void {
+  $B2: {
+    %3:texture_multisampled_2d<f32> = load %wg
+    %4:u32 = textureNumSamples %3
+    %5:i32 = convert %4
+    %6:i32 = add %5, %5
+    ret
+  }
+}
+)");
+}
+
 TEST_F(SpirvReaderTest, ImageQuerySizeLod) {
     EXPECT_IR(R"(
            OpCapability Shader
@@ -2458,25 +2503,28 @@ INSTANTIATE_TEST_SUITE_P(SpirvReaderTest_ImageQuerySize_Arrayed_UnsignedResult,
     %6:vec3<u32> = construct %4, %5)",
                          }));
 
-INSTANTIATE_TEST_SUITE_P(DISABLED_SpirvReaderTest_ImageQuerySamples_SignedResult,
+INSTANTIATE_TEST_SUITE_P(SpirvReaderTest_ImageQuerySamples_SignedResult,
                          MultiSampledImageAccessTest,
                          ::testing::Values(ImgData{
                              .name = "Multsample 2D",
                              .spirv_type = "%float 2D 0 0 1 1 Unknown",
                              .spirv_fn = "%99 = OpImageQuerySamples %int %im",
                              .wgsl_type = "texture_multisampled_2d<f32>",
-                             .wgsl_fn = "let x_99 = i32(textureNumSamples(x_20))",
+                             .wgsl_fn = R"(
+    %4:u32 = textureNumSamples %3
+    %5:i32 = convert %4)",
                          }));
 
 // Translation must inject a type coercion from unsigned to signed.
-INSTANTIATE_TEST_SUITE_P(DISABLED_SpirvReaderTest_ImageQuerySamples_UnsignedResult,
+INSTANTIATE_TEST_SUITE_P(SpirvReaderTest_ImageQuerySamples_UnsignedResult,
                          MultiSampledImageAccessTest,
                          ::testing::Values(ImgData{
                              .name = "Multisample 2D",
                              .spirv_type = "%float 2D 0 0 1 1 Unknown",
                              .spirv_fn = "%99 = OpImageQuerySamples %uint %im",
                              .wgsl_type = "texture_multisampled_2d<f32>",
-                             .wgsl_fn = "let x_99 = textureNumSamples(x_20)",
+                             .wgsl_fn = R"(
+    %4:u32 = textureNumSamples %3)",
                          }));
 
 using SampledImageCoordsTest = SpirvReaderTestWithParam<ImgData>;

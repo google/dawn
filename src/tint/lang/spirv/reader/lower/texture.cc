@@ -105,6 +105,7 @@ struct State {
                     case spirv::BuiltinFn::kSampledImage:
                     case spirv::BuiltinFn::kImageGather:
                     case spirv::BuiltinFn::kImageQueryLevels:
+                    case spirv::BuiltinFn::kImageQuerySamples:
                     case spirv::BuiltinFn::kImageQuerySize:
                     case spirv::BuiltinFn::kImageQuerySizeLod:
                     case spirv::BuiltinFn::kImageSampleImplicitLod:
@@ -126,7 +127,10 @@ struct State {
                     ImageGather(builtin);
                     break;
                 case spirv::BuiltinFn::kImageQueryLevels:
-                    ImageQueryLevels(builtin);
+                    ImageQuery(builtin, core::BuiltinFn::kTextureNumLevels);
+                    break;
+                case spirv::BuiltinFn::kImageQuerySamples:
+                    ImageQuery(builtin, core::BuiltinFn::kTextureNumSamples);
                     break;
                 case spirv::BuiltinFn::kImageQuerySize:
                 case spirv::BuiltinFn::kImageQuerySizeLod:
@@ -296,16 +300,15 @@ struct State {
         call->Destroy();
     }
 
-    void ImageQueryLevels(spirv::ir::BuiltinCall* call) {
+    void ImageQuery(spirv::ir::BuiltinCall* call, core::BuiltinFn fn) {
         auto* image = call->Args()[0];
 
         b.InsertBefore(call, [&] {
             auto* type = call->Result()->Type();
 
             // WGSL requires a `u32` result component where SPIR-V allows `i32` or `u32`
-            core::ir::Value* res = b.Call(ty.MatchWidth(ty.u32(), type),
-                                          core::BuiltinFn::kTextureNumLevels, Vector{image})
-                                       ->Result();
+            core::ir::Value* res =
+                b.Call(ty.MatchWidth(ty.u32(), type), fn, Vector{image})->Result();
             if (type->IsSignedIntegerScalarOrVector()) {
                 res = b.Convert(type, res)->Result();
             }
