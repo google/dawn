@@ -105,6 +105,7 @@ struct State {
                     case spirv::BuiltinFn::kSampledImage:
                     case spirv::BuiltinFn::kImageGather:
                     case spirv::BuiltinFn::kImageQuerySize:
+                    case spirv::BuiltinFn::kImageQuerySizeLod:
                     case spirv::BuiltinFn::kImageSampleImplicitLod:
                     case spirv::BuiltinFn::kImageWrite:
                         builtin_worklist.Push(builtin);
@@ -124,6 +125,7 @@ struct State {
                     ImageGather(builtin);
                     break;
                 case spirv::BuiltinFn::kImageQuerySize:
+                case spirv::BuiltinFn::kImageQuerySizeLod:
                     ImageQuerySize(builtin);
                     break;
                 case spirv::BuiltinFn::kImageSampleImplicitLod:
@@ -312,20 +314,22 @@ struct State {
                 wgsl_type = ty.vec(ty.u32(), wgsl_type->As<core::type::Vector>()->Width() - 1);
             }
 
-            core::ir::Value* res =
-                b.Call(wgsl_type, core::BuiltinFn::kTextureDimensions, image)->Result();
-            if (type->IsSignedIntegerScalarOrVector()) {
-                res = b.Convert(ty.MatchWidth(ty.i32(), wgsl_type), res)->Result();
+            Vector<core::ir::Value*, 2> args = {image};
+            if (call->Func() == spirv::BuiltinFn::kImageQuerySizeLod) {
+                args.Push(call->Args()[1]);
             }
+
+            core::ir::Value* res =
+                b.Call(wgsl_type, core::BuiltinFn::kTextureDimensions, args)->Result();
 
             if (core::type::IsTextureArray(tex_ty->Dim())) {
                 core::ir::Value* layers =
                     b.Call(ty.u32(), core::BuiltinFn::kTextureNumLayers, image)->Result();
-                if (type->IsSignedIntegerScalarOrVector()) {
-                    layers = b.Convert(ty.i32(), layers)->Result();
-                }
+                res = b.Construct(ty.MatchWidth(ty.u32(), type), res, layers)->Result();
+            }
 
-                res = b.Construct(type, res, layers)->Result();
+            if (type->IsSignedIntegerScalarOrVector()) {
+                res = b.Convert(type, res)->Result();
             }
 
             call->Result()->ReplaceAllUsesWith(res);

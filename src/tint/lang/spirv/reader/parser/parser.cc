@@ -1399,6 +1399,9 @@ class Parser {
                 case spv::Op::OpImageQuerySize:
                     EmitImageQuerySize(inst);
                     break;
+                case spv::Op::OpImageQuerySizeLod:
+                    EmitImageQuerySizeLod(inst);
+                    break;
                 case spv::Op::OpImageSampleImplicitLod:
                     EmitImageSampleImplicitLod(inst);
                     break;
@@ -1537,6 +1540,16 @@ class Parser {
         auto* ty = Type(inst.type_id());
         Emit(b_.CallExplicit<spirv::ir::BuiltinCall>(ty, spirv::BuiltinFn::kImageQuerySize,
                                                      Vector{ty->DeepestElement()}, image),
+             inst.result_id());
+    }
+
+    void EmitImageQuerySizeLod(const spvtools::opt::Instruction& inst) {
+        auto* image = Value(inst.GetSingleWordInOperand(0));
+        auto* level = Value(inst.GetSingleWordInOperand(1));
+
+        auto* ty = Type(inst.type_id());
+        Emit(b_.CallExplicit<spirv::ir::BuiltinCall>(ty, spirv::BuiltinFn::kImageQuerySizeLod,
+                                                     Vector{ty->DeepestElement()}, image, level),
              inst.result_id());
     }
 
