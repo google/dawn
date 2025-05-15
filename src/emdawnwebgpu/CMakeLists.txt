@@ -319,5 +319,29 @@ if (EMSCRIPTEN)
             # We need Asyncify or JSPI for Future tests.
             "-sJSPI=1"
         )
+
+        DawnJSONGenerator(
+            TARGET "emdawnwebgpu_link_test_cpp"
+            PRINT_NAME "emdawnwebgpu LinkTest.cpp"
+            OUTPUT_SOURCES EMDAWNWEBGPU_LINK_TEST_CPP_SOURCES
+        )
+        add_executable(emdawnwebgpu_link_test
+            ${EMDAWNWEBGPU_LINK_TEST_CPP_SOURCES}
+        )
+        # The test is just that this links, not that it runs (it doesn't do
+        # anything interesting), so just build to .js. Since it has a main()
+        # function, this is the same as building to .html, but skipping the
+        # .html file. It _is_ runnable if invoked via <script> or `node`.
+        set_target_properties(emdawnwebgpu_link_test PROPERTIES
+            SUFFIX ".js")
+        target_link_options(emdawnwebgpu_link_test
+            PRIVATE
+                --closure=1
+        )
+        target_link_libraries(
+            emdawnwebgpu_link_test
+            PUBLIC
+                emdawnwebgpu_c
+        )
     endif()
 endif()
