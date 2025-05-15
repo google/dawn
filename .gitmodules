@@ -148,7 +148,7 @@
 	gclient-condition = build_with_chromium
 [submodule "third_party/emsdk"]
 	path = third_party/emsdk
-	url = https://github.com/emscripten-core/emsdk.git
+	url = https://chromium.googlesource.com/external/github.com/emscripten-core/emsdk.git
 	gclient-condition = dawn_wasm
 [submodule "third_party/node-api-headers"]
 	path = third_party/node-api-headers
