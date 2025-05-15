@@ -104,6 +104,7 @@ struct State {
                 switch (builtin->Func()) {
                     case spirv::BuiltinFn::kSampledImage:
                     case spirv::BuiltinFn::kImageGather:
+                    case spirv::BuiltinFn::kImageQueryLevels:
                     case spirv::BuiltinFn::kImageQuerySize:
                     case spirv::BuiltinFn::kImageQuerySizeLod:
                     case spirv::BuiltinFn::kImageSampleImplicitLod:
@@ -123,6 +124,9 @@ struct State {
                     break;
                 case spirv::BuiltinFn::kImageGather:
                     ImageGather(builtin);
+                    break;
+                case spirv::BuiltinFn::kImageQueryLevels:
+                    ImageQueryLevels(builtin);
                     break;
                 case spirv::BuiltinFn::kImageQuerySize:
                 case spirv::BuiltinFn::kImageQuerySizeLod:
@@ -292,6 +296,25 @@ struct State {
         call->Destroy();
     }
 
+    void ImageQueryLevels(spirv::ir::BuiltinCall* call) {
+        auto* image = call->Args()[0];
+
+        b.InsertBefore(call, [&] {
+            auto* type = call->Result()->Type();
+
+            // WGSL requires a `u32` result component where SPIR-V allows `i32` or `u32`
+            core::ir::Value* res = b.Call(ty.MatchWidth(ty.u32(), type),
+                                          core::BuiltinFn::kTextureNumLevels, Vector{image})
+                                       ->Result();
+            if (type->IsSignedIntegerScalarOrVector()) {
+                res = b.Convert(type, res)->Result();
+            }
+
+            call->Result()->ReplaceAllUsesWith(res);
+        });
+        call->Destroy();
+    }
+
     void ImageQuerySize(spirv::ir::BuiltinCall* call) {
         auto* image = call->Args()[0];
 
@@ -301,8 +324,7 @@ struct State {
         b.InsertBefore(call, [&] {
             auto* type = call->Result()->Type();
 
-            // WGSL requires a `u32` result component where SPIR-V allows
-            // `i32` or `u32`
+            // WGSL requires a `u32` result component where SPIR-V allows `i32` or `u32`
             auto* wgsl_type = ty.MatchWidth(ty.u32(), type);
 
             // A SPIR-V OpImageQuery will return the array `element` entry with

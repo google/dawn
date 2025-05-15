@@ -407,6 +407,51 @@ $B1: {  # root
 )");
 }
 
+TEST_F(SpirvReaderTest, ImageQueryLevels) {
+    EXPECT_IR(R"(
+           OpCapability Shader
+           OpCapability Sampled1D
+           OpCapability ImageQuery
+           OpMemoryModel Logical Simple
+           OpEntryPoint Fragment %main "main"
+           OpExecutionMode %main OriginUpperLeft
+           OpName %wg "wg"
+           OpDecorate %wg DescriptorSet 2
+           OpDecorate %wg Binding 0
+    %int = OpTypeInt 32 1
+  %float = OpTypeFloat 32
+    %tex = OpTypeImage %float 1D 0 0 0 1 R32f
+%ptr_tex = OpTypePointer UniformConstant %tex
+   %void = OpTypeVoid
+ %voidfn = OpTypeFunction %void
+
+     %wg = OpVariable %ptr_tex UniformConstant
+
+   %main = OpFunction %void None %voidfn
+  %entry = OpLabel
+     %im = OpLoad %tex %wg
+ %result = OpImageQueryLevels %int %im
+     %r2 = OpIAdd %int %result %result
+           OpReturn
+           OpFunctionEnd
+        )",
+              R"(
+$B1: {  # root
+  %wg:ptr<handle, texture_1d<f32>, read> = var undef @binding_point(2, 0)
+}
+
+%main = @fragment func():void {
+  $B2: {
+    %3:texture_1d<f32> = load %wg
+    %4:u32 = textureNumLevels %3
+    %5:i32 = convert %4
+    %6:i32 = add %5, %5
+    ret
+  }
+}
+)");
+}
+
 TEST_F(SpirvReaderTest, ImageQuerySizeLod) {
     EXPECT_IR(R"(
            OpCapability Shader
@@ -2110,88 +2155,107 @@ INSTANTIATE_TEST_SUITE_P(SpirvReaderTest_ImageQuerySizeLod_NonArrayed_UnsignedRe
                          ::testing::Values(ImgData{
                              .name = "1D",
                              .spirv_type = "%float 1D 0 0 0 1 Unknown",
-                             .spirv_fn = "%99 = OpImageQuerySizeLod %uint %im %int_1\n",
+                             .spirv_fn = "%99 = OpImageQuerySizeLod %uint %im %int_1",
                              .wgsl_type = "texture_1d<f32>",
                              .wgsl_fn = R"(
     %4:u32 = textureDimensions %3, 1i)",
                          }));
 
-INSTANTIATE_TEST_SUITE_P(DISABLED_SpirvReaderTest_ImageQueryLevels_SignedResult,
+INSTANTIATE_TEST_SUITE_P(SpirvReaderTest_ImageQueryLevels_SignedResult,
                          SampledImageAccessTest,
                          ::testing::Values(
                              ImgData{
                                  .name = "2D",
                                  .spirv_type = "%float 2D 0 0 0 1 Unknown",
-                                 .spirv_fn = "%99 = OpImageQueryLevels %int %im\n",
+                                 .spirv_fn = "%99 = OpImageQueryLevels %int %im",
                                  .wgsl_type = "texture_2d<f32>",
-                                 .wgsl_fn = "let x_99 = i32(textureNumLevels(x_20))",
+                                 .wgsl_fn = R"(
+    %4:u32 = textureNumLevels %3
+    %5:i32 = convert %4)",
                              },
                              ImgData{
                                  .name = "2D array",
                                  .spirv_type = "%float 2D 0 1 0 1 Unknown",
-                                 .spirv_fn = "%99 = OpImageQueryLevels %int %im\n",
+                                 .spirv_fn = "%99 = OpImageQueryLevels %int %im",
                                  .wgsl_type = "texture_2d_array<f32>",
-                                 .wgsl_fn = "let x_99 = i32(textureNumLevels(x_20))",
+                                 .wgsl_fn = R"(
+    %4:u32 = textureNumLevels %3
+    %5:i32 = convert %4)",
                              },
                              ImgData{
                                  .name = "3D",
                                  .spirv_type = "%float 3D 0 0 0 1 Unknown",
-                                 .spirv_fn = "%99 = OpImageQueryLevels %int %im\n",
+                                 .spirv_fn = "%99 = OpImageQueryLevels %int %im",
                                  .wgsl_type = "texture_3d<f32>",
-                                 .wgsl_fn = "let x_99 = i32(textureNumLevels(x_20))",
+                                 .wgsl_fn = R"(
+    %4:u32 = textureNumLevels %3
+    %5:i32 = convert %4)",
                              },
                              ImgData{
                                  .name = "Cube",
                                  .spirv_type = "%float Cube 0 0 0 1 Unknown",
-                                 .spirv_fn = "%99 = OpImageQueryLevels %int %im\n",
+                                 .spirv_fn = "%99 = OpImageQueryLevels %int %im",
                                  .wgsl_type = "texture_cube<f32>",
-                                 .wgsl_fn = "let x_99 = i32(textureNumLevels(x_20))",
+                                 .wgsl_fn = R"(
+    %4:u32 = textureNumLevels %3
+    %5:i32 = convert %4)",
                              },
                              ImgData{
                                  .name = "Cube array",
                                  .spirv_type = "%float Cube 0 1 0 1 Unknown",
-                                 .spirv_fn = "%99 = OpImageQueryLevels %int %im\n",
+                                 .spirv_fn = "%99 = OpImageQueryLevels %int %im",
                                  .wgsl_type = "texture_cube_array<f32>",
-                                 .wgsl_fn = "let x_99 = i32(textureNumLevels(x_20))",
+                                 .wgsl_fn = R"(
+    %4:u32 = textureNumLevels %3
+    %5:i32 = convert %4)",
                              },
                              ImgData{
                                  .name = "depth 2d",
                                  .spirv_type = "%float 2D 1 0 0 1 Unknown",
-                                 .spirv_fn = "%99 = OpImageQueryLevels %int %im\n",
+                                 .spirv_fn = "%99 = OpImageQueryLevels %int %im",
                                  .wgsl_type = "texture_depth_2d",
-                                 .wgsl_fn = "let x_99 = i32(textureNumLevels(x_20))",
+                                 .wgsl_fn = R"(
+    %4:u32 = textureNumLevels %3
+    %5:i32 = convert %4)",
                              },
                              ImgData{
                                  .name = "depth 2d array",
                                  .spirv_type = "%float 2D 1 1 0 1 Unknown",
-                                 .spirv_fn = "%99 = OpImageQueryLevels %int %im\n",
+                                 .spirv_fn = "%99 = OpImageQueryLevels %int %im",
                                  .wgsl_type = "texture_depth_2d_array",
-                                 .wgsl_fn = "let x_99 = i32(textureNumLevels(x_20))",
+                                 .wgsl_fn = R"(
+    %4:u32 = textureNumLevels %3
+    %5:i32 = convert %4)",
                              },
                              ImgData{
                                  .name = "depth cube",
                                  .spirv_type = "%float Cube 1 0 0 1 Unknown",
-                                 .spirv_fn = "%99 = OpImageQueryLevels %int %im\n",
+                                 .spirv_fn = "%99 = OpImageQueryLevels %int %im",
                                  .wgsl_type = "texture_depth_cube",
-                                 .wgsl_fn = "let x_99 = i32(textureNumLevels(x_20))",
+                                 .wgsl_fn = R"(
+    %4:u32 = textureNumLevels %3
+    %5:i32 = convert %4)",
                              },
                              ImgData{
                                  .name = "depth cube array",
                                  .spirv_type = "%float Cube 1 1 0 1 Unknown",
-                                 .spirv_fn = "%99 = OpImageQueryLevels %int %im\n",
+                                 .spirv_fn = "%99 = OpImageQueryLevels %int %im",
                                  .wgsl_type = "texture_depth_cube_array",
-                                 .wgsl_fn = "let x_99 = i32(textureNumLevels(x_20))",
+                                 .wgsl_fn = R"(
+    %4:u32 = textureNumLevels %3
+    %5:i32 = convert %4)",
                              }));
 
 // Spot check that a value conversion is inserted when SPIR-V asks for an unsigned int result.
-INSTANTIATE_TEST_SUITE_P(DISABLED_SpirvReaderTest_ImageQueryLevels_UnsignedResult,
+INSTANTIATE_TEST_SUITE_P(SpirvReaderTest_ImageQueryLevels_UnsignedResult,
                          SampledImageAccessTest,
                          ::testing::Values(ImgData{
                              .name = "2D",
                              .spirv_type = "%float 2D 0 0 0 1 Unknown",
                              .spirv_fn = "%99 = OpImageQueryLevels %uint %im\n",
                              .wgsl_type = "texture_2d<f32>",
-                             .wgsl_fn = "let x_99 = textureNumLevels(x_20)",
+                             .wgsl_fn = R"(
+    %4:u32 = textureNumLevels %3)",
                          }));
 
 using MultiSampledImageAccessTest = SpirvReaderTestWithParam<ImgData>;
