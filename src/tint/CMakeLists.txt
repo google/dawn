@@ -31,12 +31,9 @@
 if(NOT TINT_BUILD_AS_OTHER_OS)
   if(APPLE)  # Must come before UNIX
     set(TINT_BUILD_IS_MAC TRUE)
-    set(TINT_BUILD_IS_MAC TRUE)
   elseif(UNIX)
     set(TINT_BUILD_IS_LINUX TRUE)
-    set(TINT_BUILD_IS_LINUX TRUE)
   elseif(WIN32)
-    set(TINT_BUILD_IS_WIN TRUE)
     set(TINT_BUILD_IS_WIN TRUE)
   endif()
 endif()
