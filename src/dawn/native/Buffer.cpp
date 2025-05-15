@@ -202,8 +202,11 @@ struct BufferBase::MapAsyncEvent final : public EventManager::TrackedEvent {
           mCallback(callbackInfo.callback),
           mUserdata1(callbackInfo.userdata1),
           mUserdata2(callbackInfo.userdata2) {
-        TRACE_EVENT_ASYNC_BEGIN0(device->GetPlatform(), General, "Buffer::APIMapAsync",
-                                 uint64_t(serial));
+        // `this` is used as a unique ID to match begin/end events for concurrent MapAsync calls.
+        // It's not a problem that same memory address could be reused for a future MapAsync call
+        // since it won't be concurrent with an earlier call.
+        TRACE_EVENT_NESTABLE_ASYNC_BEGIN0(device->GetPlatform(), General, "Buffer::APIMapAsync",
+                                          this);
     }
 
     // Create an event that's ready at creation (for errors, etc.)
@@ -216,19 +219,15 @@ struct BufferBase::MapAsyncEvent final : public EventManager::TrackedEvent {
           mBufferOrError(BufferErrorData{status, message}),
           mCallback(callbackInfo.callback),
           mUserdata1(callbackInfo.userdata1),
-          mUserdata2(callbackInfo.userdata2) {
-        TRACE_EVENT_ASYNC_BEGIN0(device->GetPlatform(), General, "Buffer::APIMapAsync",
-                                 uint64_t(kBeginningOfGPUTime));
-    }
+          mUserdata2(callbackInfo.userdata2) {}
 
     ~MapAsyncEvent() override { EnsureComplete(EventCompletionType::Shutdown); }
 
     void Complete(EventCompletionType completionType) override {
         if (const auto* queueAndSerial = GetIfQueueAndSerial()) {
             if (auto queue = queueAndSerial->queue.Promote()) {
-                TRACE_EVENT_ASYNC_END0(queue->GetDevice()->GetPlatform(), General,
-                                       "Buffer::APIMapAsync",
-                                       uint64_t(queueAndSerial->completionSerial));
+                TRACE_EVENT_NESTABLE_ASYNC_END0(queue->GetDevice()->GetPlatform(), General,
+                                                "Buffer::APIMapAsync", this);
             }
         }
 
