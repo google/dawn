@@ -579,6 +579,7 @@ var LibraryWebGPU = {
       }
     },
 
+    fillAdapterInfoStruct__deps: ['$stringToNewUTF8', '$lengthBytesUTF8'],
     fillAdapterInfoStruct: (info, infoStruct) => {
       {{{ gpu.makeCheckDescriptor('infoStruct') }}}
 
@@ -739,7 +740,6 @@ var LibraryWebGPU = {
     {{{ makeSetValue('supportedFeatures', C_STRUCTS.WGPUSupportedFeatures.featureCount, 'numFeatures', '*') }}};
   },
 
-  wgpuAdapterGetInfo__deps: ['$stringToNewUTF8', '$lengthBytesUTF8'],
   wgpuAdapterGetInfo: (adapterPtr, info) => {
     var adapter = WebGPU.getJsObject(adapterPtr);
     WebGPU.fillAdapterInfoStruct(adapter.info, info);
@@ -1844,7 +1844,6 @@ var LibraryWebGPU = {
     return device.features.has(WebGPU.FeatureName[featureEnumValue]);
   },
 
-  wgpuDeviceGetAdapterInfo__deps: ['$stringToNewUTF8', '$lengthBytesUTF8'],
   wgpuDeviceGetAdapterInfo: (devicePtr, adapterInfo) => {
     var device = WebGPU.getJsObject(devicePtr);
     WebGPU.fillAdapterInfoStruct(device.adapterInfo, adapterInfo);

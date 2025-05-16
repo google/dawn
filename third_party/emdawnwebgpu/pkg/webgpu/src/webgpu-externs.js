@@ -182,6 +182,10 @@ GPUAdapterInfo.prototype.architecture;
 GPUAdapterInfo.prototype.device;
 /** @type {string} */
 GPUAdapterInfo.prototype.description;
+/** @type {number} */
+GPUAdapterInfo.prototype.subgroupMinSize;
+/** @type {number} */
+GPUAdapterInfo.prototype.subgroupMaxSize;
 
 /** @constructor */
 function GPU() {}
