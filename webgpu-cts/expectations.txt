@@ -1036,6 +1036,7 @@ crbug.com/417768352 [ win11 nvidia-0x2184 dawn-backend-validation ] webgpu:api,o
 crbug.com/417768352 [ win11 nvidia-0x2184 dawn-backend-validation ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,sample_mask:writeMask=15;*;sampleMask=0 [ Failure ]
 crbug.com/417768352 [ win11 nvidia-0x2184 dawn-backend-validation ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=*;sampleCount=1;rasterizationMask=* [ Failure ]
 crbug.com/417768352 [ win11 nvidia-0x2184 dawn-backend-validation ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=*;sampleCount=4;rasterizationMask=* [ Failure ]
+crbug.com/417768352 [ win11 nvidia-0x2184 dawn-backend-validation ] webgpu:api,operation,rendering,3d_texture_slices:multiple_color_attachments,same_mip_level:sameTexture=true [ Failure ]
 crbug.com/417770938 [ win11 nvidia-0x2184 dawn-backend-validation ] webgpu:api,validation,capability_checks,limits,maxComputeWorkgroupSizeY:createComputePipeline,at_over:* [ Failure ]
 crbug.com/417770938 [ win11 nvidia-0x2184 dawn-backend-validation ] webgpu:api,validation,capability_checks,limits,maxComputeWorkgroupStorageSize:createComputePipeline,at_over:* [ Failure ]
 crbug.com/417770938 [ win11 nvidia-0x2184 dawn-backend-validation ] webgpu:api,validation,capability_checks,limits,maxInterStageShaderVariables:createRenderPipeline,at_over:* [ Failure ]
@@ -1056,6 +1057,10 @@ crbug.com/417770938 [ win11 nvidia-0x2184 dawn-backend-validation ] webgpu:api,v
 crbug.com/417770938 [ win11 nvidia-0x2184 dawn-backend-validation ] webgpu:api,validation,capability_checks,limits,minStorageBufferOffsetAlignment:createBindGroup,at_over:* [ Failure ]
 crbug.com/417770938 [ win11 nvidia-0x2184 dawn-backend-validation ] webgpu:api,validation,capability_checks,limits,minUniformBufferOffsetAlignment:createBindGroup,at_over:* [ Failure ]
 crbug.com/417770938 [ win11 nvidia-0x2184 dawn-backend-validation ] webgpu:api,validation,state,device_lost,destroy:* [ Failure ]
+crbug.com/418173490 [ win11 nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_array_2d_coords:stage="f";format="r8snorm";filt="linear";modeU="m";modeV="c";offset=true [ Failure ]
+crbug.com/418226002 [ win11 nvidia-0x2184 dawn-backend-validation ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_2D_Canvas:orientation="flipY";* [ Failure ]
+crbug.com/418226002 [ win11 nvidia-0x2184 dawn-backend-validation ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_ImageData:alpha="none";* [ Failure ]
+crbug.com/418226002 [ win11 nvidia-0x2184 dawn-backend-validation ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_ImageData:alpha="premultiply";* [ Failure ]
 # finder:enable-general
 
 ################################################################################
