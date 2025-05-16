@@ -263,6 +263,9 @@ struct IntegerRangeAnalysisImpl {
             case BinaryOp::kSubtract:
                 return ComputeAndCacheIntegerRangeForBinarySubtract(binary, range_lhs, range_rhs);
 
+            case BinaryOp::kMultiply:
+                return ComputeAndCacheIntegerRangeForBinaryMultiply(binary, range_lhs, range_rhs);
+
             default:
                 return nullptr;
         }
@@ -851,6 +854,76 @@ struct IntegerRangeAnalysisImpl {
                 SafeSubtractU32(lhs_u32.min_bound, rhs_u32.max_bound);
             std::optional<uint64_t> max_bound =
                 SafeSubtractU32(lhs_u32.max_bound, rhs_u32.min_bound);
+            if (!min_bound || !max_bound) {
+                return nullptr;
+            }
+            auto result = integer_binary_range_info_map_.Add(
+                binary, IntegerRangeInfo(*min_bound, *max_bound));
+            return &result.value;
+        }
+    }
+
+    const IntegerRangeInfo* ComputeAndCacheIntegerRangeForBinaryMultiply(
+        const Binary* binary,
+        const IntegerRangeInfo* lhs,
+        const IntegerRangeInfo* rhs) {
+        // Multiply two 32-bit non-negative signed integer values saved in int64_t. Return {} when
+        // overflow happens.
+        auto SafeMultiplyNonNegativeI32 = [](int64_t a, int64_t b) -> std::optional<int64_t> {
+            TINT_ASSERT(a >= 0 && a <= i32::kHighestValue);
+            TINT_ASSERT(b >= 0 && b <= i32::kHighestValue);
+
+            int64_t multiply = a * b;
+            if (multiply > i32::kHighestValue) {
+                return {};
+            }
+            return multiply;
+        };
+
+        // No-underflow multiply two 32-bit unsigned integer values saved in uint64_t.
+        // Return {} when underflow happens.
+        auto SafeMultiplyU32 = [](uint64_t a, uint64_t b) -> std::optional<uint64_t> {
+            TINT_ASSERT(a <= u32::kHighestValue);
+            TINT_ASSERT(b <= u32::kHighestValue);
+
+            uint64_t multiply = a * b;
+            if (multiply > u32::kHighestValue) {
+                return {};
+            }
+            return multiply;
+        };
+
+        if (std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(lhs->range)) {
+            auto lhs_i32 = std::get<IntegerRangeInfo::SignedIntegerRange>(lhs->range);
+            auto rhs_i32 = std::get<IntegerRangeInfo::SignedIntegerRange>(rhs->range);
+
+            // Currently we only handle multiplication with non-negative values, which means
+            // 0 <= min_bound <= max_bound
+            if (lhs_i32.min_bound < 0 || rhs_i32.min_bound < 0) {
+                return nullptr;
+            }
+
+            // min1 >= 0, min2 >= 0
+            // [min1, max1] * [min2, max2] => [min1 * min2, max1 * max2]
+            std::optional<int64_t> min_bound =
+                SafeMultiplyNonNegativeI32(lhs_i32.min_bound, rhs_i32.min_bound);
+            std::optional<int64_t> max_bound =
+                SafeMultiplyNonNegativeI32(lhs_i32.max_bound, rhs_i32.max_bound);
+            if (!min_bound.has_value() || !max_bound.has_value()) {
+                return nullptr;
+            }
+            auto result = integer_binary_range_info_map_.Add(
+                binary, IntegerRangeInfo(*min_bound, *max_bound));
+            return &result.value;
+        } else {
+            auto lhs_u32 = std::get<IntegerRangeInfo::UnsignedIntegerRange>(lhs->range);
+            auto rhs_u32 = std::get<IntegerRangeInfo::UnsignedIntegerRange>(rhs->range);
+
+            // [min1, max1] * [min2, max2] => [min1 * min2, max1 * max2]
+            std::optional<uint64_t> min_bound =
+                SafeMultiplyU32(lhs_u32.min_bound, rhs_u32.min_bound);
+            std::optional<uint64_t> max_bound =
+                SafeMultiplyU32(lhs_u32.max_bound, rhs_u32.max_bound);
             if (!min_bound || !max_bound) {
                 return nullptr;
             }
