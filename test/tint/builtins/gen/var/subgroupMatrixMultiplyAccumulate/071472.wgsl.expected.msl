@@ -1,10 +1,10 @@
-SKIP: FAILED
+SKIP: INVALID
 
 
 enable chromium_experimental_subgroup_matrix;
 enable f16;
 
-@internal(disable_validation__binding_point_collision) @group(0) @binding(0) var<storage, read_write> prevent_dce : array<f32, 1024>;
+@group(0) @binding(0) var<storage, read_write> prevent_dce : array<f32, 1024>;
 
 fn subgroupMatrixMultiplyAccumulate_071472() -> subgroup_matrix_result<f32, 8, 8> {
   var arg_0 = subgroup_matrix_left<f16, 8, 8>();
@@ -48,7 +48,7 @@ tint_module_vars_struct = struct @align(1) {
     %8:subgroup_matrix_left<f16, 8, 8> = load %arg_0
     %9:subgroup_matrix_right<f16, 8, 8> = load %arg_1
     %10:subgroup_matrix_result<f32, 8, 8> = load %arg_2
-    %11:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var
+    %11:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var undef
     %12:subgroup_matrix_result<f32, 8, 8> = load %11
     %13:void = msl.simdgroup_multiply_accumulate %12, %8, %9, %10
     %14:subgroup_matrix_result<f32, 8, 8> = load %11
@@ -57,7 +57,7 @@ tint_module_vars_struct = struct @align(1) {
     ret %16
   }
 }
-%compute_main = @compute @workgroup_size(1u, 1u, 1u) func(%prevent_dce:ptr<storage, array<f32, 1024>, read_write> [@binding_point(0, 0)]):void {
+%compute_main = @compute @workgroup_size(1i, 1i, 1i) func(%prevent_dce:ptr<storage, array<f32, 1024>, read_write> [@binding_point(0, 0)]):void {
   $B2: {
     %19:tint_module_vars_struct = construct %prevent_dce
     %tint_module_vars:tint_module_vars_struct = let %19

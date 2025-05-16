@@ -225,7 +225,7 @@ Increase hashLength in %v`,
 			// Restrict the permutations for subgroup matrix builtins to avoid combinatorial explosion.
 			if strings.HasPrefix(overload.Decl.Name, "subgroupMatrix") {
 				if t.Name == "AC" {
-					permutations = []int{64}
+					permutations = []int{1024}
 				} else {
 					permutations = []int{8}
 				}
