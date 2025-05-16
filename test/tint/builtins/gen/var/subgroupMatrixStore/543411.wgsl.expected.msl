@@ -19,16 +19,22 @@ struct SB_RW {
 
 struct tint_module_vars_struct {
   device SB_RW* sb_rw;
+  const constant tint_array<uint4, 1>* tint_storage_buffer_sizes;
 };
 
 void subgroupMatrixStore_543411(tint_module_vars_struct tint_module_vars) {
   uint arg_1 = 1u;
   simdgroup_float8x8 arg_2 = simdgroup_float8x8();
   uint arg_4 = 8u;
-  simdgroup_store(arg_2, (&(*tint_module_vars.sb_rw).arg_0[arg_1]), ulong(arg_4), ulong2(0ul), true);
+  uint const v = arg_1;
+  simdgroup_float8x8 const v_1 = arg_2;
+  uint const v_2 = max(arg_4, 8u);
+  if ((((v + (v_2 * 7u)) + 8u) <= (((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 4u))) {
+    simdgroup_store(v_1, (&(*tint_module_vars.sb_rw).arg_0[v]), ulong(v_2), ulong2(0ul), true);
+  }
 }
 
-kernel void compute_main(device SB_RW* sb_rw [[buffer(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sb_rw=sb_rw};
+kernel void compute_main(device SB_RW* sb_rw [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sb_rw=sb_rw, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
   subgroupMatrixStore_543411(tint_module_vars);
 }

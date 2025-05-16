@@ -25,24 +25,30 @@ struct tint_symbol_1 {
 simdgroup_half8x8 subgroupMatrixLoad_12b63e(tint_module_vars_struct tint_module_vars) {
   uint arg_1 = 1u;
   uint arg_3 = 8u;
-  simdgroup_half8x8 v = make_filled_simdgroup_matrix<half, 8, 8>(0.0h);
-  simdgroup_load(v, (&(*tint_module_vars.arg_0)[arg_1]), ulong(arg_3), ulong2(0ul), true);
-  simdgroup_half8x8 res = v;
+  uint const v = arg_1;
+  uint const v_1 = max(arg_3, 8u);
+  simdgroup_half8x8 v_2 = make_filled_simdgroup_matrix<half, 8, 8>(0.0h);
+  if ((((v + (v_1 * 7u)) + 8u) <= 1024u)) {
+    simdgroup_half8x8 v_3 = make_filled_simdgroup_matrix<half, 8, 8>(0.0h);
+    simdgroup_load(v_3, (&(*tint_module_vars.arg_0)[v]), ulong(v_1), ulong2(0ul), true);
+    v_2 = v_3;
+  }
+  simdgroup_half8x8 res = v_2;
   return res;
 }
 
 void compute_main_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
   {
-    uint v_1 = 0u;
-    v_1 = tint_local_index;
+    uint v_4 = 0u;
+    v_4 = tint_local_index;
     while(true) {
-      uint const v_2 = v_1;
-      if ((v_2 >= 1024u)) {
+      uint const v_5 = v_4;
+      if ((v_5 >= 1024u)) {
         break;
       }
-      (*tint_module_vars.arg_0)[v_2] = 0.0h;
+      (*tint_module_vars.arg_0)[v_5] = 0.0h;
       {
-        v_1 = (v_2 + 1u);
+        v_4 = (v_5 + 1u);
       }
       continue;
     }
@@ -51,7 +57,7 @@ void compute_main_inner(uint tint_local_index, tint_module_vars_struct tint_modu
   simdgroup_store(subgroupMatrixLoad_12b63e(tint_module_vars), (&(*tint_module_vars.prevent_dce)[0u]), ulong(64u), ulong2(0ul), false);
 }
 
-kernel void compute_main(uint tint_local_index [[thread_index_in_threadgroup]], device tint_array<half, 1024>* prevent_dce [[buffer(0)]], threadgroup tint_symbol_1* v_3 [[threadgroup(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce, .arg_0=(&(*v_3).tint_symbol)};
+kernel void compute_main(uint tint_local_index [[thread_index_in_threadgroup]], device tint_array<half, 1024>* prevent_dce [[buffer(0)]], threadgroup tint_symbol_1* v_6 [[threadgroup(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce, .arg_0=(&(*v_6).tint_symbol)};
   compute_main_inner(tint_local_index, tint_module_vars);
 }

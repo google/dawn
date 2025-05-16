@@ -25,9 +25,15 @@ struct tint_module_vars_struct {
 simdgroup_float8x8 subgroupMatrixLoad_4fd336(tint_module_vars_struct tint_module_vars) {
   uint arg_1 = 1u;
   uint arg_3 = 8u;
-  simdgroup_float8x8 v = make_filled_simdgroup_matrix<float, 8, 8>(0.0f);
-  simdgroup_load(v, (&(*tint_module_vars.sb_ro).arg_0[arg_1]), ulong(arg_3), ulong2(0ul), true);
-  simdgroup_float8x8 res = v;
+  uint const v = arg_1;
+  uint const v_1 = max(arg_3, 8u);
+  simdgroup_float8x8 v_2 = make_filled_simdgroup_matrix<float, 8, 8>(0.0f);
+  if ((((v + (v_1 * 7u)) + 8u) <= 1024u)) {
+    simdgroup_float8x8 v_3 = make_filled_simdgroup_matrix<float, 8, 8>(0.0f);
+    simdgroup_load(v_3, (&(*tint_module_vars.sb_ro).arg_0[v]), ulong(v_1), ulong2(0ul), true);
+    v_2 = v_3;
+  }
+  simdgroup_float8x8 res = v_2;
   return res;
 }
 

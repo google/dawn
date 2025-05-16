@@ -24,18 +24,29 @@ struct S_Nested {
 
 struct tint_module_vars_struct {
   device tint_array<float, 1>* tint_member;
+  const constant tint_array<uint4, 1>* tint_storage_buffer_sizes;
 };
 
 void foo(simdgroup_float8x8 m, tint_array<simdgroup_float8x8, 4> m_array, tint_array<tint_array<simdgroup_float8x8, 4>, 4> m_nested_array, S m_struct, S_Nested m_nested_struct, tint_module_vars_struct tint_module_vars) {
-  simdgroup_store(m, (&(*tint_module_vars.tint_member)[0u]), ulong(64u), ulong2(0ul), false);
-  simdgroup_store(m_array[0u], (&(*tint_module_vars.tint_member)[0u]), ulong(64u), ulong2(0ul), false);
-  simdgroup_store(m_nested_array[1u][2u], (&(*tint_module_vars.tint_member)[0u]), ulong(64u), ulong2(0ul), false);
-  simdgroup_store(m_struct.l, (&(*tint_module_vars.tint_member)[0u]), ulong(64u), ulong2(0ul), false);
-  simdgroup_store(m_nested_struct.s.r, (&(*tint_module_vars.tint_member)[0u]), ulong(64u), ulong2(0ul), false);
+  if ((((0u + (64u * 7u)) + 8u) <= ((*tint_module_vars.tint_storage_buffer_sizes)[0u].x / 4u))) {
+    simdgroup_store(m, (&(*tint_module_vars.tint_member)[0u]), ulong(64u), ulong2(0ul), false);
+  }
+  if ((((0u + (64u * 7u)) + 8u) <= ((*tint_module_vars.tint_storage_buffer_sizes)[0u].x / 4u))) {
+    simdgroup_store(m_array[0u], (&(*tint_module_vars.tint_member)[0u]), ulong(64u), ulong2(0ul), false);
+  }
+  if ((((0u + (64u * 7u)) + 8u) <= ((*tint_module_vars.tint_storage_buffer_sizes)[0u].x / 4u))) {
+    simdgroup_store(m_nested_array[1u][2u], (&(*tint_module_vars.tint_member)[0u]), ulong(64u), ulong2(0ul), false);
+  }
+  if ((((0u + (64u * 7u)) + 8u) <= ((*tint_module_vars.tint_storage_buffer_sizes)[0u].x / 4u))) {
+    simdgroup_store(m_struct.l, (&(*tint_module_vars.tint_member)[0u]), ulong(64u), ulong2(0ul), false);
+  }
+  if ((((0u + (64u * 7u)) + 8u) <= ((*tint_module_vars.tint_storage_buffer_sizes)[0u].x / 4u))) {
+    simdgroup_store(m_nested_struct.s.r, (&(*tint_module_vars.tint_member)[0u]), ulong(64u), ulong2(0ul), false);
+  }
 }
 
-kernel void v(device tint_array<float, 1>* v_1 [[buffer(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.tint_member=v_1};
+kernel void v(device tint_array<float, 1>* v_1 [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.tint_member=v_1, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
   simdgroup_float8x8 m = make_filled_simdgroup_matrix<float, 8, 8>(0.0f);
   tint_array<simdgroup_float8x8, 4> m_array = {};
   tint_array<tint_array<simdgroup_float8x8, 4>, 4> m_nested_array = {};

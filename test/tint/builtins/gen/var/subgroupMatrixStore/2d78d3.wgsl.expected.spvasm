@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 32
+; Bound: 43
 ; Schema: 0
                OpCapability Shader
                OpCapability VulkanMemoryModel
@@ -9,6 +9,7 @@
                OpCapability CooperativeMatrixKHR
                OpExtension "SPV_KHR_vulkan_memory_model"
                OpExtension "SPV_KHR_cooperative_matrix"
+         %27 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical Vulkan
                OpEntryPoint GLCompute %compute_main "compute_main"
                OpExecutionMode %compute_main LocalSize 1 1 1
@@ -41,6 +42,8 @@
          %13 = OpConstantComposite %14 %uint_0
 %_ptr_Function_14 = OpTypePointer Function %14
 %_ptr_StorageBuffer__runtimearr_uint = OpTypePointer StorageBuffer %_runtimearr_uint
+     %uint_7 = OpConstant %uint 7
+       %bool = OpTypeBool
 %_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
 %subgroupMatrixStore_2d78d3 = OpFunction %void None %8
           %9 = OpLabel
@@ -54,12 +57,23 @@
          %23 = OpLoad %uint %arg_1 None
          %24 = OpLoad %14 %arg_2 None
          %25 = OpLoad %uint %arg_4 None
-         %26 = OpAccessChain %_ptr_StorageBuffer_uint %21 %23
-               OpCooperativeMatrixStoreKHR %26 %24 %uint_1 %25 NonPrivatePointer
+         %26 = OpExtInst %uint %27 UMax %25 %uint_8
+         %28 = OpArrayLength %uint %sb_rw 0
+         %29 = OpIMul %uint %26 %uint_7
+         %31 = OpIAdd %uint %23 %29
+         %32 = OpIAdd %uint %31 %uint_8
+         %33 = OpULessThanEqual %bool %32 %28
+               OpSelectionMerge %35 None
+               OpBranchConditional %33 %36 %35
+         %36 = OpLabel
+         %37 = OpAccessChain %_ptr_StorageBuffer_uint %21 %23
+               OpCooperativeMatrixStoreKHR %37 %24 %uint_1 %26 NonPrivatePointer
+               OpBranch %35
+         %35 = OpLabel
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %8
-         %30 = OpLabel
-         %31 = OpFunctionCall %void %subgroupMatrixStore_2d78d3
+         %41 = OpLabel
+         %42 = OpFunctionCall %void %subgroupMatrixStore_2d78d3
                OpReturn
                OpFunctionEnd

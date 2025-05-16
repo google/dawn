@@ -24,6 +24,7 @@ struct S_Nested {
 
 struct tint_module_vars_struct {
   device tint_array<float, 1>* tint_member;
+  const constant tint_array<uint4, 1>* tint_storage_buffer_sizes;
 };
 
 simdgroup_float8x8 make_matrix() {
@@ -51,11 +52,26 @@ S_Nested make_nested_struct() {
   return m_nested_struct;
 }
 
-kernel void v(device tint_array<float, 1>* v_1 [[buffer(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.tint_member=v_1};
-  simdgroup_store(make_matrix(), (&(*tint_module_vars.tint_member)[0u]), ulong(64u), ulong2(0ul), false);
-  simdgroup_store(make_array()[0u], (&(*tint_module_vars.tint_member)[0u]), ulong(64u), ulong2(0ul), false);
-  simdgroup_store(make_nested_array()[1u][2u], (&(*tint_module_vars.tint_member)[0u]), ulong(64u), ulong2(0ul), false);
-  simdgroup_store(make_struct().l, (&(*tint_module_vars.tint_member)[0u]), ulong(64u), ulong2(0ul), false);
-  simdgroup_store(make_nested_struct().s.r, (&(*tint_module_vars.tint_member)[0u]), ulong(64u), ulong2(0ul), false);
+kernel void v(device tint_array<float, 1>* v_1 [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.tint_member=v_1, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
+  simdgroup_float8x8 const v_2 = make_matrix();
+  if ((((0u + (64u * 7u)) + 8u) <= ((*tint_module_vars.tint_storage_buffer_sizes)[0u].x / 4u))) {
+    simdgroup_store(v_2, (&(*tint_module_vars.tint_member)[0u]), ulong(64u), ulong2(0ul), false);
+  }
+  simdgroup_float8x8 const v_3 = make_array()[0u];
+  if ((((0u + (64u * 7u)) + 8u) <= ((*tint_module_vars.tint_storage_buffer_sizes)[0u].x / 4u))) {
+    simdgroup_store(v_3, (&(*tint_module_vars.tint_member)[0u]), ulong(64u), ulong2(0ul), false);
+  }
+  simdgroup_float8x8 const v_4 = make_nested_array()[1u][2u];
+  if ((((0u + (64u * 7u)) + 8u) <= ((*tint_module_vars.tint_storage_buffer_sizes)[0u].x / 4u))) {
+    simdgroup_store(v_4, (&(*tint_module_vars.tint_member)[0u]), ulong(64u), ulong2(0ul), false);
+  }
+  simdgroup_float8x8 const v_5 = make_struct().l;
+  if ((((0u + (64u * 7u)) + 8u) <= ((*tint_module_vars.tint_storage_buffer_sizes)[0u].x / 4u))) {
+    simdgroup_store(v_5, (&(*tint_module_vars.tint_member)[0u]), ulong(64u), ulong2(0ul), false);
+  }
+  simdgroup_float8x8 const v_6 = make_nested_struct().s.r;
+  if ((((0u + (64u * 7u)) + 8u) <= ((*tint_module_vars.tint_storage_buffer_sizes)[0u].x / 4u))) {
+    simdgroup_store(v_6, (&(*tint_module_vars.tint_member)[0u]), ulong(64u), ulong2(0ul), false);
+  }
 }

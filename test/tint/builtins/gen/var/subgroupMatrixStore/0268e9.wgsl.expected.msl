@@ -25,21 +25,26 @@ void subgroupMatrixStore_0268e9(tint_module_vars_struct tint_module_vars) {
   uint arg_1 = 1u;
   simdgroup_float8x8 arg_2 = simdgroup_float8x8();
   uint arg_4 = 8u;
-  simdgroup_store(arg_2, (&(*tint_module_vars.arg_0)[arg_1]), ulong(arg_4), ulong2(0ul), true);
+  uint const v = arg_1;
+  simdgroup_float8x8 const v_1 = arg_2;
+  uint const v_2 = max(arg_4, 8u);
+  if ((((v + (v_2 * 7u)) + 8u) <= 1024u)) {
+    simdgroup_store(v_1, (&(*tint_module_vars.arg_0)[v]), ulong(v_2), ulong2(0ul), true);
+  }
 }
 
 void compute_main_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
   {
-    uint v = 0u;
-    v = tint_local_index;
+    uint v_3 = 0u;
+    v_3 = tint_local_index;
     while(true) {
-      uint const v_1 = v;
-      if ((v_1 >= 1024u)) {
+      uint const v_4 = v_3;
+      if ((v_4 >= 1024u)) {
         break;
       }
-      (*tint_module_vars.arg_0)[v_1] = 0.0f;
+      (*tint_module_vars.arg_0)[v_4] = 0.0f;
       {
-        v = (v_1 + 1u);
+        v_3 = (v_4 + 1u);
       }
       continue;
     }
@@ -48,7 +53,7 @@ void compute_main_inner(uint tint_local_index, tint_module_vars_struct tint_modu
   subgroupMatrixStore_0268e9(tint_module_vars);
 }
 
-kernel void compute_main(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v_2 [[threadgroup(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0=(&(*v_2).tint_symbol)};
+kernel void compute_main(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v_5 [[threadgroup(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0=(&(*v_5).tint_symbol)};
   compute_main_inner(tint_local_index, tint_module_vars);
 }
