@@ -10,7 +10,7 @@ struct SB_RW {
 @group(0) @binding(1) var<storage, read_write> sb_rw : SB_RW;
 
 fn subgroupMatrixLoad_52acb0() -> subgroup_matrix_right<f16, 8, 8> {
-  var res : subgroup_matrix_right<f16, 8, 8> = subgroupMatrixLoad<subgroup_matrix_right<f16, 8, 8>>(&(sb_rw.arg_0), 1u, true, 1u);
+  var res : subgroup_matrix_right<f16, 8, 8> = subgroupMatrixLoad<subgroup_matrix_right<f16, 8, 8>>(&(sb_rw.arg_0), 1u, true, 8u);
   return res;
 }
 

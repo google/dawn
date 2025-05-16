@@ -24,7 +24,7 @@ struct tint_module_vars_struct {
 
 simdgroup_half8x8 subgroupMatrixLoad_0cc7b0(tint_module_vars_struct tint_module_vars) {
   simdgroup_half8x8 v = make_filled_simdgroup_matrix<half, 8, 8>(0.0h);
-  simdgroup_load(v, (&(*tint_module_vars.sb_rw).arg_0[1u]), ulong(1u), ulong2(0ul), true);
+  simdgroup_load(v, (&(*tint_module_vars.sb_rw).arg_0[1u]), ulong(8u), ulong2(0ul), true);
   simdgroup_half8x8 res = v;
   return res;
 }

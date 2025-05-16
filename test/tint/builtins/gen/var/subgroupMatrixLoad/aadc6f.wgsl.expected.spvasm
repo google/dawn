@@ -63,7 +63,7 @@
       %arg_3 = OpVariable %_ptr_Function_uint Function
         %res = OpVariable %_ptr_Function_13 Function
                OpStore %arg_1 %uint_1
-               OpStore %arg_3 %uint_1
+               OpStore %arg_3 %uint_8
          %22 = OpAccessChain %_ptr_StorageBuffer__runtimearr_int %sb_rw %uint_0
          %25 = OpLoad %uint %arg_1 None
          %26 = OpLoad %uint %arg_3 None

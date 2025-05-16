@@ -43,7 +43,7 @@ var<workgroup> arg_0: array<f32, 1024>;
 
 // fn subgroupMatrixStore(ptr<workgroup, array<f32, 1024>, read_write>, u32, subgroup_matrix<right, f32, 8, 8>, @const bool, u32)
 fn subgroupMatrixStore_c4a7ce() {
-  subgroupMatrixStore(&arg_0, 1u, subgroup_matrix_right<f32, 8, 8>(), true, 1u);
+  subgroupMatrixStore(&arg_0, 1u, subgroup_matrix_right<f32, 8, 8>(), true, 8u);
 }
 @compute @workgroup_size(1)
 fn compute_main() {

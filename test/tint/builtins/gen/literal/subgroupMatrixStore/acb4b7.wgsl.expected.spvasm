@@ -48,7 +48,7 @@
          %12 = OpLabel
          %13 = OpAccessChain %_ptr_StorageBuffer__arr_float_uint_1024 %1 %uint_0 %uint_0
          %22 = OpAccessChain %_ptr_StorageBuffer_float %13 %uint_1
-               OpCooperativeMatrixStoreKHR %22 %16 %uint_1 %uint_1 NonPrivatePointer
+               OpCooperativeMatrixStoreKHR %22 %16 %uint_1 %uint_8 NonPrivatePointer
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %11

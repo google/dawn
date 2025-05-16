@@ -11,7 +11,7 @@ fn subgroupMatrixStore_fb7663() {
   var arg_1 = 1u;
   var arg_2 = subgroup_matrix_left<f16, 8, 8>();
   const arg_3 = true;
-  var arg_4 = 1u;
+  var arg_4 = 8u;
   subgroupMatrixStore(&(sb_rw.arg_0), arg_1, arg_2, arg_3, arg_4);
 }
 

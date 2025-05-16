@@ -47,7 +47,7 @@ var<workgroup> arg_0: array<i32, 1024>;
 fn subgroupMatrixLoad_b354d2() -> subgroup_matrix_result<i32, 8, 8>{
   var arg_1 = 1u;
   const arg_2 = true;
-  var arg_3 = 1u;
+  var arg_3 = 8u;
   var res: subgroup_matrix_result<i32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_result<i32, 8, 8>>(&arg_0, arg_1, arg_2, arg_3);
   return res;
 }

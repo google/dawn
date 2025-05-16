@@ -48,7 +48,7 @@ struct SB_RW {
 
 // fn subgroupMatrixLoad<T: subgroup_matrix<result, u32, 8, 8>>(ptr<storage, runtime_array<u32>, read_write>, u32, @const bool, u32) -> subgroup_matrix<result, u32, 8, 8>
 fn subgroupMatrixLoad_12ca82() -> subgroup_matrix_result<u32, 8, 8>{
-  var res: subgroup_matrix_result<u32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_result<u32, 8, 8>>(&sb_rw.arg_0, 1u, true, 1u);
+  var res: subgroup_matrix_result<u32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_result<u32, 8, 8>>(&sb_rw.arg_0, 1u, true, 8u);
   return res;
 }
 @compute @workgroup_size(1)

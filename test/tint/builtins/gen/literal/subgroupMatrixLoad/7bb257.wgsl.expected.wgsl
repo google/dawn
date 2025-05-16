@@ -5,7 +5,7 @@ enable chromium_experimental_subgroup_matrix;
 var<workgroup> arg_0 : array<i32, 1024>;
 
 fn subgroupMatrixLoad_7bb257() -> subgroup_matrix_left<i32, 8, 8> {
-  var res : subgroup_matrix_left<i32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_left<i32, 8, 8>>(&(arg_0), 1u, true, 1u);
+  var res : subgroup_matrix_left<i32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_left<i32, 8, 8>>(&(arg_0), 1u, true, 8u);
   return res;
 }
 

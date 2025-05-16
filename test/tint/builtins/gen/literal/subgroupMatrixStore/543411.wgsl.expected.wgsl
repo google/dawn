@@ -7,7 +7,7 @@ struct SB_RW {
 @group(0) @binding(0) var<storage, read_write> sb_rw : SB_RW;
 
 fn subgroupMatrixStore_543411() {
-  subgroupMatrixStore(&(sb_rw.arg_0), 1u, subgroup_matrix_right<f32, 8, 8>(), true, 1u);
+  subgroupMatrixStore(&(sb_rw.arg_0), 1u, subgroup_matrix_right<f32, 8, 8>(), true, 8u);
 }
 
 @compute @workgroup_size(1)

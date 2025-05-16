@@ -9,7 +9,7 @@ struct SB_RO {
 @group(0) @binding(1) var<storage, read> sb_ro : SB_RO;
 
 fn subgroupMatrixLoad_0f48aa() -> subgroup_matrix_result<f32, 8, 8> {
-  var res : subgroup_matrix_result<f32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 8>>(&(sb_ro.arg_0), 1u, true, 1u);
+  var res : subgroup_matrix_result<f32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_result<f32, 8, 8>>(&(sb_ro.arg_0), 1u, true, 8u);
   return res;
 }
 

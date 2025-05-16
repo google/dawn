@@ -49,7 +49,7 @@
       %arg_4 = OpVariable %_ptr_Function_uint Function
                OpStore %arg_1 %uint_1
                OpStore %arg_2 %13
-               OpStore %arg_4 %uint_1
+               OpStore %arg_4 %uint_8
          %21 = OpAccessChain %_ptr_StorageBuffer__runtimearr_uint %sb_rw %uint_0
          %23 = OpLoad %uint %arg_1 None
          %24 = OpLoad %14 %arg_2 None

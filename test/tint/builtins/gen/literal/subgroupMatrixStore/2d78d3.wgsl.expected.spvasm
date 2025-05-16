@@ -41,7 +41,7 @@
           %9 = OpLabel
          %10 = OpAccessChain %_ptr_StorageBuffer__runtimearr_uint %sb_rw %uint_0
          %18 = OpAccessChain %_ptr_StorageBuffer_uint %10 %uint_1
-               OpCooperativeMatrixStoreKHR %18 %13 %uint_1 %uint_1 NonPrivatePointer
+               OpCooperativeMatrixStoreKHR %18 %13 %uint_1 %uint_8 NonPrivatePointer
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %8

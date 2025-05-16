@@ -46,7 +46,7 @@ struct SB_RW {
 
 // fn subgroupMatrixStore(ptr<storage, runtime_array<i32>, read_write>, u32, subgroup_matrix<result, i32, 8, 8>, @const bool, u32)
 fn subgroupMatrixStore_476cdf() {
-  subgroupMatrixStore(&sb_rw.arg_0, 1u, subgroup_matrix_result<i32, 8, 8>(), true, 1u);
+  subgroupMatrixStore(&sb_rw.arg_0, 1u, subgroup_matrix_result<i32, 8, 8>(), true, 8u);
 }
 @compute @workgroup_size(1)
 fn compute_main() {

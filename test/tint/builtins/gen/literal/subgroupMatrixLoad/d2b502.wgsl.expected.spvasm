@@ -66,7 +66,7 @@
         %res = OpVariable %_ptr_Function_13 Function
          %19 = OpAccessChain %_ptr_StorageBuffer__arr_half_uint_1024 %8 %uint_0 %uint_0
          %22 = OpAccessChain %_ptr_StorageBuffer_half %19 %uint_1
-         %25 = OpCooperativeMatrixLoadKHR %13 %22 %uint_1 %uint_1 NonPrivatePointer
+         %25 = OpCooperativeMatrixLoadKHR %13 %22 %uint_1 %uint_8 NonPrivatePointer
                OpStore %res %25
          %28 = OpLoad %13 %res None
                OpReturnValue %28

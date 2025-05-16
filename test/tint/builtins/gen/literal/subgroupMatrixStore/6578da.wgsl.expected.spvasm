@@ -43,7 +43,7 @@
 %subgroupMatrixStore_6578da = OpFunction %void None %11
          %12 = OpLabel
          %19 = OpAccessChain %_ptr_Workgroup_int %arg_0 %uint_1
-               OpCooperativeMatrixStoreKHR %19 %13 %uint_1 %uint_1 NonPrivatePointer
+               OpCooperativeMatrixStoreKHR %19 %13 %uint_1 %uint_8 NonPrivatePointer
                OpReturn
                OpFunctionEnd
 %compute_main_inner = OpFunction %void None %25

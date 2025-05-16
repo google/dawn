@@ -6,7 +6,7 @@ enable f16;
 var<workgroup> arg_0 : array<f16, 1024>;
 
 fn subgroupMatrixLoad_a13603() -> subgroup_matrix_left<f16, 8, 8> {
-  var res : subgroup_matrix_left<f16, 8, 8> = subgroupMatrixLoad<subgroup_matrix_left<f16, 8, 8>>(&(arg_0), 1u, true, 1u);
+  var res : subgroup_matrix_left<f16, 8, 8> = subgroupMatrixLoad<subgroup_matrix_left<f16, 8, 8>>(&(arg_0), 1u, true, 8u);
   return res;
 }
 

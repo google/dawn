@@ -59,7 +59,7 @@
          %18 = OpLabel
         %res = OpVariable %_ptr_Function_13 Function
          %19 = OpAccessChain %_ptr_Workgroup_uint %arg_0 %uint_1
-         %21 = OpCooperativeMatrixLoadKHR %13 %19 %uint_1 %uint_1 NonPrivatePointer
+         %21 = OpCooperativeMatrixLoadKHR %13 %19 %uint_1 %uint_8 NonPrivatePointer
                OpStore %res %21
          %24 = OpLoad %13 %res None
                OpReturnValue %24

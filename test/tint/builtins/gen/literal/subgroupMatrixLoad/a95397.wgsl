@@ -50,7 +50,7 @@ struct SB_RO {
 
 // fn subgroupMatrixLoad<T: subgroup_matrix<right, f16, 8, 8>>(ptr<storage, runtime_array<f16>, read>, u32, @const bool, u32) -> subgroup_matrix<right, f16, 8, 8>
 fn subgroupMatrixLoad_a95397() -> subgroup_matrix_right<f16, 8, 8>{
-  var res: subgroup_matrix_right<f16, 8, 8> = subgroupMatrixLoad<subgroup_matrix_right<f16, 8, 8>>(&sb_ro.arg_0, 1u, true, 1u);
+  var res: subgroup_matrix_right<f16, 8, 8> = subgroupMatrixLoad<subgroup_matrix_right<f16, 8, 8>>(&sb_ro.arg_0, 1u, true, 8u);
   return res;
 }
 @compute @workgroup_size(1)
