@@ -335,11 +335,20 @@ message(STATUS "Webgpu IDL path: ${WEBGPU_IDL_PATH}")
 message(STATUS "Go exe: ${GO_EXECUTABLE}")
 message(STATUS "")
 
-option(DAWN_FETCH_DEPENDENCIES "Use fetch_dawn_dependencies.py as an alternative to using depot_tools" OFF)
-option(DAWN_BUILD_MONOLITHIC_LIBRARY "Bundle all dawn components into a single shared library." ON)
+set(DAWN_BUILD_MONOLITHIC_LIBRARY "STATIC" CACHE STRING "Build monolithic library: SHARED, STATIC, or OFF.")
 
-message(STATUS "Dawn fetch dependencies: ${DAWN_FETCH_DEPENDENCIES}")
+set_property(CACHE DAWN_BUILD_MONOLITHIC_LIBRARY PROPERTY STRINGS "OFF" "SHARED" "STATIC")
+
+string(TOUPPER "${DAWN_BUILD_MONOLITHIC_LIBRARY}" _option_upper)
+
+if(NOT _option_upper STREQUAL "OFF" AND
+   NOT _option_upper STREQUAL "SHARED" AND
+   NOT _option_upper STREQUAL "STATIC")
+    message(FATAL_ERROR "DAWN_BUILD_MONOLITHIC_LIBRARY must be SHARED, STATIC, or OFF, but was \"${DAWN_BUILD_MONOLITHIC_LIBRARY}\".")
+endif()
+
 message(STATUS "Dawn build monolithic library: ${DAWN_BUILD_MONOLITHIC_LIBRARY}")
+message(STATUS "Dawn fetch dependencies: ${DAWN_FETCH_DEPENDENCIES}")
 message(STATUS "")
 
 # Much of the backend code is shared among desktop OpenGL and OpenGL ES
