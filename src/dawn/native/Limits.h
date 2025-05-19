@@ -85,6 +85,7 @@ CombinedLimits ApplyLimitTiers(const CombinedLimits& limits);
 struct LimitsForCompilationRequest {
     static LimitsForCompilationRequest Create(const Limits& limits);
     DAWN_VISITABLE_MEMBERS(LIMITS_FOR_COMPILATION_REQUEST_MEMBERS)
+    bool operator==(const LimitsForCompilationRequest& other) const = default;
 };
 
 // Enforce restriction for limit values, including:

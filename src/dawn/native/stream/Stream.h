@@ -104,6 +104,14 @@ MaybeError StreamOut(Source* s, T* v, Ts*... vs) {
     return StreamOut(s, vs...);
 }
 
+// Helper to call StreamIn on an empty parameter pack, e.g. for a DAWN_SERIALIZABLE struct with no
+// member. Do nothing.
+constexpr void StreamIn(Sink* s);
+
+// Helper to call StreamOut on an empty parameter pack, e.g. for a DAWN_SERIALIZABLE struct with no
+// member. Do nothing and return success.
+MaybeError StreamOut(Source* s);
+
 // Stream specialization for fundamental types.
 template <typename T>
 class Stream<T, std::enable_if_t<std::is_fundamental_v<T>>> {

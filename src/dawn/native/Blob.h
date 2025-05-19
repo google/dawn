@@ -61,6 +61,8 @@ class Blob {
     uint8_t* Data();
     size_t Size() const;
 
+    bool operator==(const Blob& other) const;
+
   private:
     // The constructor should be responsible to take ownership of |data| and releases ownership by
     // calling |deleter|. The deleter function is called at ~Blob() and during std::move.

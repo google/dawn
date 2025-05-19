@@ -56,6 +56,7 @@
 #include "dawn/native/Limits.h"
 #include "dawn/native/ObjectBase.h"
 #include "dawn/native/PerStage.h"
+#include "dawn/native/Serializable.h"
 #include "dawn/native/dawn_platform.h"
 #include "tint/tint.h"
 
@@ -166,24 +167,158 @@ RequiredBufferSizes ComputeRequiredBufferSizesForLayout(const EntryPointMetadata
                                                         const PipelineLayoutBase* layout);
 
 // Shader metadata for a binding, very similar to information contained in a pipeline layout.
-struct ShaderBindingInfo {
-    BindingNumber binding;
-    BindingIndex arraySize;
-
-    // The variable name of the binding resource.
-    std::string name;
-
-    std::variant<BufferBindingInfo,
-                 SamplerBindingInfo,
-                 TextureBindingInfo,
-                 StorageTextureBindingInfo,
-                 ExternalTextureBindingInfo,
-                 InputAttachmentBindingInfo>
-        bindingInfo;
-};
+using ShaderBindingInfoVariant = std::variant<BufferBindingInfo,
+                                              SamplerBindingInfo,
+                                              TextureBindingInfo,
+                                              StorageTextureBindingInfo,
+                                              ExternalTextureBindingInfo,
+                                              InputAttachmentBindingInfo>;
+#define SHADER_BINDING_INFO_MEMBER(X)              \
+    X(BindingNumber, binding)                      \
+    X(BindingIndex, arraySize)                     \
+    /*The variable name of the binding resource.*/ \
+    X(std::string, name)                           \
+    X(ShaderBindingInfoVariant, bindingInfo)
+DAWN_SERIALIZABLE(struct, ShaderBindingInfo, SHADER_BINDING_INFO_MEMBER){};
+#undef SHADER_BINDING_INFO_MEMBER
 
 using BindingGroupInfoMap = absl::flat_hash_map<BindingNumber, ShaderBindingInfo>;
 using BindingInfoArray = ityp::array<BindGroupIndex, BindingGroupInfoMap, kMaxBindGroups>;
+
+// Define types for the shader reflection data structures in detail namespaces to prevent messing
+// up dawn::native namespace. These types can be exposed within EntryPointMetadata if needed.
+namespace detail {
+#define SAMPLER_TEXTURE_PAIR_MEMBER(X) \
+    X(BindingSlot, sampler)            \
+    X(BindingSlot, texture)
+DAWN_SERIALIZABLE(struct, SamplerTexturePair, SAMPLER_TEXTURE_PAIR_MEMBER){};
+#undef SAMPLER_TEXTURE_PAIR_MEMBER
+
+/// Match tint::inspector::Inspector::LevelSampleInfo
+enum class TextureQueryType : uint8_t { TextureNumLevels, TextureNumSamples };
+
+#define TEXTURE_METADATE_QUERY_MEMBER(X) \
+    X(TextureQueryType, type)            \
+    X(uint32_t, group)                   \
+    X(uint32_t, binding)
+DAWN_SERIALIZABLE(struct, TextureMetadataQuery, TEXTURE_METADATE_QUERY_MEMBER) {
+    using TextureQueryType = TextureQueryType;
+};
+#undef TEXTURE_METADATE_QUERY_MEMBER
+
+// Structure to record the basic types (float, int and uint) of the fragment shader framebuffer
+// input/outputs (inputs being "framebuffer fetch").
+#define FRAGMENT_RENDER_ATTACHMENT_INFO_MEMBER(X) \
+    X(TextureComponentType, baseType)             \
+    X(uint8_t, componentCount)                    \
+    X(uint8_t, blendSrc)
+DAWN_SERIALIZABLE(struct, FragmentRenderAttachmentInfo, FRAGMENT_RENDER_ATTACHMENT_INFO_MEMBER){};
+#undef FRAGMENT_RENDER_ATTACHMENT_INFO_MEMBER
+
+#define INTER_STAGE_VARIABLE_INFO_MEMBER(X) \
+    X(std::string, name)                    \
+    X(InterStageComponentType, baseType)    \
+    X(uint32_t, componentCount)             \
+    X(InterpolationType, interpolationType) \
+    X(InterpolationSampling, interpolationSampling)
+DAWN_SERIALIZABLE(struct, InterStageVariableInfo, INTER_STAGE_VARIABLE_INFO_MEMBER){};
+#undef INTER_STAGE_VARIABLE_INFO_MEMBER
+
+// Match tint::OverrideId
+#define OVERRIDE_ID_MEMBER(X) X(uint16_t, value)
+DAWN_SERIALIZABLE(struct, OverrideId, OVERRIDE_ID_MEMBER){};
+#undef OVERRIDE_ID_MEMBER
+
+enum class OverrideType { Boolean, Float32, Uint32, Int32, Float16 };
+
+#define OVERRIDE_MEMBER(X) \
+    X(OverrideId, id)      \
+    X(OverrideType, type)  \
+    X(bool, isInitialized) \
+    X(bool, isUsed)
+DAWN_SERIALIZABLE(struct, Override, OVERRIDE_MEMBER) {
+    using Type = OverrideType;
+};
+#undef OVERRIDE_MEMBER
+
+using OverridesMap = absl::flat_hash_map<std::string, Override>;
+}  // namespace detail
+
+// Contains all the reflection data for a valid (ShaderModule, entryPoint, stage). This structure is
+// serializable and doesn't depend on the shader program, thus it can outlive the shader program and
+// get cached on disk. They are stored in the ShaderModuleBase so pointers to EntryPointMetadata are
+// safe to store as long as you also keep a Ref to the ShaderModuleBase.
+#define ENTRY_POINT_METADATA_MEMBER(X)                                                            \
+    /* It is valid for a shader to contain entry points that go over limits. To keep this      */ \
+    /* structure with packed arrays and bitsets, we still validate against limits when doing   */ \
+    /* reflection, but store the errors in this vector, for later use if the application tries */ \
+    /* to use the entry point.                                                                 */ \
+    X(std::vector<std::string>, infringedLimitErrors)                                             \
+    /* bindings[G][B] is the reflection data for the binding defined with @group(G) @binding(B)*/ \
+    X(BindingInfoArray, bindings)                                                                 \
+    /* Contains the reflection information of all sampler and non-sampler texture (storage     */ \
+    /* texture not included) usage in the entry point. For non-sampler usage,                  */ \
+    /* nonSamplerBindingPoint is used for sampler slot.                                        */ \
+    X(std::vector<detail::SamplerTexturePair>, samplerAndNonSamplerTexturePairs)                  \
+    X(std::vector<detail::TextureMetadataQuery>, textureQueries)                                  \
+    /* The set of vertex attributes this entryPoint uses.*/                                       \
+    X(PerVertexAttribute<VertexFormatBaseType>, vertexInputBaseTypes)                             \
+    X(VertexAttributeMask, usedVertexInputs)                                                      \
+    /* An array to record the basic types of the fragment shader framebuffer input/outputs.*/     \
+    X(PerColorAttachment<detail::FragmentRenderAttachmentInfo>, fragmentOutputVariables)          \
+    X(ColorAttachmentMask, fragmentOutputMask)                                                    \
+    X(PerColorAttachment<detail::FragmentRenderAttachmentInfo>, fragmentInputVariables)           \
+    X(ColorAttachmentMask, fragmentInputMask)                                                     \
+    /* Now that we only support vertex and fragment stages, there can't be both inter-stage    */ \
+    /* inputs and outputs in one shader stage.                                                 */ \
+    X(std::vector<bool>, usedInterStageVariables)                                                 \
+    X(std::vector<detail::InterStageVariableInfo>, interStageVariables)                           \
+    X(uint32_t, totalInterStageShaderVariables)                                                   \
+    /* The shader stage for this entry point.*/                                                   \
+    X(SingleShaderStage, stage)                                                                   \
+    /* Map identifier to override variable. */                                                    \
+    /* Identifier is unique: either the variable name or the numeric ID if specified */           \
+    X(detail::OverridesMap, overrides)                                                            \
+    /* Override variables that are not initialized in shaders. They need value initialization  */ \
+    /* from pipeline stage or it is a validation error                                         */ \
+    X(absl::flat_hash_set<std::string>, uninitializedOverrides)                                   \
+    /* Store constants with shader initialized values as well.                                 */ \
+    /* This is used by metal backend to set values with default initializers that are not      */ \
+    /* overridden.                                                                             */ \
+    X(absl::flat_hash_set<std::string>, initializedOverrides)                                     \
+    /* Reflection information about potential `pixel_local` variable use. */                      \
+    X(bool, usesPixelLocal)                                                                       \
+    X(size_t, pixelLocalBlockSize)                                                                \
+    X(std::vector<PixelLocalMemberType>, pixelLocalMembers)                                       \
+    X(bool, usesFragDepth)                                                                        \
+    X(bool, usesInstanceIndex)                                                                    \
+    X(bool, usesNumWorkgroups)                                                                    \
+    X(bool, usesSampleMaskOutput)                                                                 \
+    X(bool, usesSampleIndex)                                                                      \
+    X(bool, usesVertexIndex)                                                                      \
+    X(bool, usesTextureLoadWithDepthTexture)                                                      \
+    X(bool, usesDepthTextureWithNonComparisonSampler)                                             \
+    X(bool, usesSubgroupMatrix)                                                                   \
+    /* Immediate Data block byte size */                                                          \
+    X(uint32_t, immediateDataRangeByteSize)                                                       \
+    /* Number of texture+sampler combinations, computed as 1 for every texture+sampler         */ \
+    /* combination + 1 for every texture used without a sampler that wasn't previously counted.*/ \
+    /* Note: this is only set in compatibility mode.                                           */ \
+    X(uint32_t, numTextureSamplerCombinations)
+DAWN_SERIALIZABLE(struct, EntryPointMetadata, ENTRY_POINT_METADATA_MEMBER) {
+    using SamplerTexturePair = detail::SamplerTexturePair;
+    // TODO(crbug.com/409438000): Remove the hack of sampler placeholders for non-sampler texture.
+    static constexpr const BindingSlot nonSamplerBindingPoint{
+        {BindGroupIndex{std::numeric_limits<uint32_t>::max()},
+         BindingNumber{std::numeric_limits<uint32_t>::max()}}};
+
+    using TextureMetadataQuery = detail::TextureMetadataQuery;
+    using FragmentRenderAttachmentInfo = detail::FragmentRenderAttachmentInfo;
+    using InterStageVariableInfo = detail::InterStageVariableInfo;
+    using OverrideId = detail::OverrideId;
+    using Override = detail::Override;
+};
+#undef ENTRY_POINT_METADATA_MEMBER
 
 // The WebGPU override variables only support these scalar types
 union OverrideScalar {
@@ -192,140 +327,6 @@ union OverrideScalar {
     float f32;
     int32_t i32;
     uint32_t u32;
-};
-
-// Contains all the reflection data for a valid (ShaderModule, entryPoint, stage). They are
-// stored in the ShaderModuleBase and destroyed only when the shader program is destroyed so
-// pointers to EntryPointMetadata are safe to store as long as you also keep a Ref to the
-// ShaderModuleBase.
-struct EntryPointMetadata {
-    // It is valid for a shader to contain entry points that go over limits. To keep this
-    // structure with packed arrays and bitsets, we still validate against limits when
-    // doing reflection, but store the errors in this vector, for later use if the application
-    // tries to use the entry point.
-    std::vector<std::string> infringedLimitErrors;
-
-    // bindings[G][B] is the reflection data for the binding defined with @group(G) @binding(B)
-    BindingInfoArray bindings;
-
-    struct SamplerTexturePair {
-        BindingSlot sampler;
-        BindingSlot texture;
-    };
-    // TODO(crbug.com/409438000): Remove the hack of sampler placeholders for non-sampler texture.
-    static constexpr const BindingSlot nonSamplerBindingPoint = {
-        BindGroupIndex(std::numeric_limits<uint32_t>::max()),
-        BindingNumber(std::numeric_limits<uint32_t>::max())};
-    // Contains the reflection information of all sampler and non-sampler texture (storage texture
-    // not included) usage in the entry point. For non-sampler usage, nonSamplerBindingPoint is used
-    // for sampler slot.
-    std::vector<SamplerTexturePair> samplerAndNonSamplerTexturePairs;
-
-    /// Match tint::inspector::Inspector::LevelSampleInfo
-    struct TextureMetadataQuery {
-        /// The information needed to be supplied.
-        enum class TextureQueryType : uint8_t {
-            /// Texture Num Levels
-            TextureNumLevels,
-            /// Texture Num Samples
-            TextureNumSamples,
-        };
-        /// The type of function
-        TextureQueryType type = TextureQueryType::TextureNumLevels;
-        /// The group number
-        uint32_t group = 0;
-        /// The binding number
-        uint32_t binding = 0;
-    };
-    std::vector<TextureMetadataQuery> textureQueries;
-
-    // The set of vertex attributes this entryPoint uses.
-    PerVertexAttribute<VertexFormatBaseType> vertexInputBaseTypes;
-    VertexAttributeMask usedVertexInputs;
-
-    // An array to record the basic types (float, int and uint) of the fragment shader framebuffer
-    // input/outputs (inputs being "framebuffer fetch").
-    struct FragmentRenderAttachmentInfo {
-        TextureComponentType baseType;
-        uint8_t componentCount;
-        uint8_t blendSrc;
-    };
-    PerColorAttachment<FragmentRenderAttachmentInfo> fragmentOutputVariables;
-    ColorAttachmentMask fragmentOutputMask;
-
-    PerColorAttachment<FragmentRenderAttachmentInfo> fragmentInputVariables;
-    ColorAttachmentMask fragmentInputMask;
-
-    struct InterStageVariableInfo {
-        std::string name;
-        InterStageComponentType baseType;
-        uint32_t componentCount;
-        InterpolationType interpolationType;
-        InterpolationSampling interpolationSampling;
-    };
-    // Now that we only support vertex and fragment stages, there can't be both inter-stage
-    // inputs and outputs in one shader stage.
-    std::vector<bool> usedInterStageVariables;
-    std::vector<InterStageVariableInfo> interStageVariables;
-    uint32_t totalInterStageShaderVariables;
-
-    // The shader stage for this entry point.
-    SingleShaderStage stage;
-
-    struct Override {
-        tint::OverrideId id;
-
-        // Match tint::inspector::Override::Type
-        // Bool is defined as a macro on linux X11 and cannot compile
-        enum class Type { Boolean, Float32, Uint32, Int32, Float16 } type;
-
-        // If the constant doesn't not have an initializer in the shader
-        // Then it is required for the pipeline stage to have a constant record to initialize a
-        // value
-        bool isInitialized;
-
-        // Set to true if the override is used in the entry point
-        bool isUsed = true;
-    };
-
-    using OverridesMap = absl::flat_hash_map<std::string, Override>;
-
-    // Map identifier to override variable
-    // Identifier is unique: either the variable name or the numeric ID if specified
-    OverridesMap overrides;
-
-    // Override variables that are not initialized in shaders
-    // They need value initialization from pipeline stage or it is a validation error
-    absl::flat_hash_set<std::string> uninitializedOverrides;
-
-    // Store constants with shader initialized values as well
-    // This is used by metal backend to set values with default initializers that are not
-    // overridden
-    absl::flat_hash_set<std::string> initializedOverrides;
-
-    // Reflection information about potential `pixel_local` variable use.
-    bool usesPixelLocal = false;
-    size_t pixelLocalBlockSize = 0;
-    std::vector<PixelLocalMemberType> pixelLocalMembers;
-
-    bool usesFragDepth = false;
-    bool usesInstanceIndex = false;
-    bool usesNumWorkgroups = false;
-    bool usesSampleMaskOutput = false;
-    bool usesSampleIndex = false;
-    bool usesVertexIndex = false;
-    bool usesTextureLoadWithDepthTexture = false;
-    bool usesDepthTextureWithNonComparisonSampler = false;
-    bool usesSubgroupMatrix = false;
-
-    // Immediate Data block byte size
-    uint32_t immediateDataRangeByteSize = 0;
-
-    // Number of texture+sampler combinations, computed as
-    // 1 for every texture+sampler combination + 1 for every texture used
-    // without a sampler that wasn't previously counted.
-    // Note: this is only set in compatibility mode.
-    uint32_t numTextureSamplerCombinations = 0;
 };
 
 class ShaderModuleBase : public RefCountedWithExternalCount<ApiObjectBase>,

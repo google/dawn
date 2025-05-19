@@ -121,6 +121,8 @@ struct Bindings {
     /// The binding points that will be ignored by the rebustness transform.
     std::vector<BindingPoint> ignored_by_robustness_transform;
 
+    bool operator==(const Bindings& other) const = default;
+
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(Bindings,
                  uniform,
@@ -145,6 +147,8 @@ struct ArrayLengthFromUniformOptions {
     /// The mapping from the storage buffer binding points in WGSL binding-point space to the index
     /// into the uniform buffer where the length of the buffer is stored.
     std::unordered_map<BindingPoint, uint32_t> bindpoint_to_size_index;
+
+    bool operator==(const ArrayLengthFromUniformOptions& other) const = default;
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(ArrayLengthFromUniformOptions, ubo_binding, bindpoint_to_size_index);
@@ -177,6 +181,8 @@ struct PixelLocalOptions {
 
     /// The bind group index of all pixel local storage attachments
     uint32_t group_index = 0;
+
+    bool operator==(const PixelLocalOptions& other) const = default;
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(PixelLocalOptions, attachments, group_index);
@@ -259,6 +265,8 @@ struct Options {
 
     /// Pixel local configuration
     PixelLocalOptions pixel_local;
+
+    bool operator==(const Options& other) const = default;
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(Options,

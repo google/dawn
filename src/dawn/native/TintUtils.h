@@ -76,7 +76,7 @@ constexpr tint::BindingPoint ToTint(const BindingSlot& slot) {
 }
 
 constexpr BindingSlot FromTint(const tint::BindingPoint& tintBindingPoint) {
-    return {BindGroupIndex(tintBindingPoint.group), BindingNumber(tintBindingPoint.binding)};
+    return {{BindGroupIndex(tintBindingPoint.group), BindingNumber(tintBindingPoint.binding)}};
 }
 
 }  // namespace dawn::native

@@ -54,6 +54,10 @@ class CacheKey : public stream::ByteVectorSink {
         // stream::StreamIn<T>.
         friend constexpr void StreamIn(stream::Sink*, const UnsafeUnkeyedValue&) {}
 
+        // Enabling DAWN_SERIALIZABLE classes with UnsafeUnkeyedValue member to use default equality
+        // operator. Equality comparison always returns true for the same type UnsafeUnkeyedValues.
+        bool operator==(const UnsafeUnkeyedValue<T>& other) const { return true; }
+
       private:
         T mValue;
     };

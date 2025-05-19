@@ -379,12 +379,11 @@ BindingInfo CreateSampledTextureBindingForExternalTexture(BindingNumber binding,
     return {
         .binding = binding,
         .visibility = visibility,
-        .bindingLayout =
-            TextureBindingInfo{
-                .sampleType = wgpu::TextureSampleType::Float,
-                .viewDimension = wgpu::TextureViewDimension::e2D,
-                .multisampled = false,
-            },
+        .bindingLayout = TextureBindingInfo{{
+            .sampleType = wgpu::TextureSampleType::Float,
+            .viewDimension = wgpu::TextureViewDimension::e2D,
+            .multisampled = false,
+        }},
     };
 }
 
@@ -393,12 +392,11 @@ BindingInfo CreateUniformBindingForExternalTexture(BindingNumber binding,
     return {
         .binding = binding,
         .visibility = visibility,
-        .bindingLayout =
-            BufferBindingInfo{
-                .type = wgpu::BufferBindingType::Uniform,
-                .minBindingSize = 0,
-                .hasDynamicOffset = false,
-            },
+        .bindingLayout = BufferBindingInfo{{
+            .type = wgpu::BufferBindingType::Uniform,
+            .minBindingSize = 0,
+            .hasDynamicOffset = false,
+        }},
     };
 }
 
@@ -414,7 +412,7 @@ BindingInfo ConvertToBindingInfoNoArray(const UnpackedPtr<BindGroupLayoutEntry>&
     } else if (binding->texture.sampleType != wgpu::TextureSampleType::BindingNotUsed) {
         auto textureBindingInfo = TextureBindingInfo::From(binding->texture);
         if (binding->texture.viewDimension == kInternalInputAttachmentDim) {
-            bindingInfo.bindingLayout = InputAttachmentBindingInfo{textureBindingInfo.sampleType};
+            bindingInfo.bindingLayout = InputAttachmentBindingInfo{{textureBindingInfo.sampleType}};
         } else {
             bindingInfo.bindingLayout = textureBindingInfo;
         }

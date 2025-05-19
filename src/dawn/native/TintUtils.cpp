@@ -180,7 +180,7 @@ std::unordered_map<tint::OverrideId, double> BuildSubstituteOverridesTransformCo
     for (const auto& [key, value] : constants) {
         const auto& o = metadata.overrides.at(key);
 
-        map.insert({o.id, value});
+        map.insert({{o.id.value}, value});
     }
     return map;
 }

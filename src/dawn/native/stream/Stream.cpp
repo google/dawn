@@ -33,6 +33,12 @@
 
 namespace dawn::native::stream {
 
+constexpr void StreamIn(Sink* s) {}
+
+MaybeError StreamOut(Source* s) {
+    return {};
+}
+
 template <>
 void Stream<std::string>::Write(Sink* s, const std::string& t) {
     StreamIn(s, t.length());

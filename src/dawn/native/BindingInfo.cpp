@@ -302,11 +302,11 @@ MaybeError ValidateBindingCounts(const CombinedLimits& limits,
 // static
 BufferBindingInfo BufferBindingInfo::From(const BufferBindingLayout& layout) {
     BufferBindingLayout defaultedLayout = layout.WithTrivialFrontendDefaults();
-    return {
+    return {{
         .type = defaultedLayout.type,
         .minBindingSize = defaultedLayout.minBindingSize,
         .hasDynamicOffset = defaultedLayout.hasDynamicOffset,
-    };
+    }};
 }
 
 // TextureBindingInfo
@@ -314,11 +314,11 @@ BufferBindingInfo BufferBindingInfo::From(const BufferBindingLayout& layout) {
 // static
 TextureBindingInfo TextureBindingInfo::From(const TextureBindingLayout& layout) {
     TextureBindingLayout defaultedLayout = layout.WithTrivialFrontendDefaults();
-    return {
+    return {{
         .sampleType = defaultedLayout.sampleType,
         .viewDimension = defaultedLayout.viewDimension,
         .multisampled = defaultedLayout.multisampled,
-    };
+    }};
 }
 
 // StorageTextureBindingInfo
@@ -327,11 +327,11 @@ TextureBindingInfo TextureBindingInfo::From(const TextureBindingLayout& layout) 
 StorageTextureBindingInfo StorageTextureBindingInfo::From(
     const StorageTextureBindingLayout& layout) {
     StorageTextureBindingLayout defaultedLayout = layout.WithTrivialFrontendDefaults();
-    return {
+    return {{
         .format = defaultedLayout.format,
         .viewDimension = defaultedLayout.viewDimension,
         .access = defaultedLayout.access,
-    };
+    }};
 }
 
 // SamplerBindingInfo
@@ -339,9 +339,9 @@ StorageTextureBindingInfo StorageTextureBindingInfo::From(
 // static
 SamplerBindingInfo SamplerBindingInfo::From(const SamplerBindingLayout& layout) {
     SamplerBindingLayout defaultedLayout = layout.WithTrivialFrontendDefaults();
-    return {
+    return {{
         .type = defaultedLayout.type,
-    };
+    }};
 }
 
 // SamplerBindingInfo

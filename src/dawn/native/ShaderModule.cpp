@@ -320,6 +320,10 @@ ResultOrError<InterpolationSampling> TintInterpolationSamplingToInterpolationSam
     DAWN_UNREACHABLE();
 }
 
+EntryPointMetadata::OverrideId FromTintOverrideId(tint::OverrideId id) {
+    return EntryPointMetadata::OverrideId{{id.value}};
+}
+
 EntryPointMetadata::Override::Type FromTintOverrideType(tint::inspector::Override::Type type) {
     switch (type) {
         case tint::inspector::Override::Type::kBool:
@@ -677,8 +681,8 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
     if (!entryPoint.overrides.empty()) {
         for (auto& c : entryPoint.overrides) {
             auto id = name2Id.at(c.name);
-            EntryPointMetadata::Override override = {id, FromTintOverrideType(c.type),
-                                                     c.is_initialized};
+            EntryPointMetadata::Override override = {
+                {FromTintOverrideId(id), FromTintOverrideType(c.type), c.is_initialized}};
 
             std::string identifier = c.is_id_specified ? std::to_string(override.id.value) : c.name;
             metadata->overrides[identifier] = override;
@@ -705,8 +709,9 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
         }
 
         auto id = name2Id.at(o.name);
-        EntryPointMetadata::Override override = {id, FromTintOverrideType(o.type), o.is_initialized,
-                                                 /* isUsed */ false};
+        EntryPointMetadata::Override override = {{FromTintOverrideId(id),
+                                                  FromTintOverrideType(o.type), o.is_initialized,
+                                                  /* isUsed */ false}};
         metadata->overrides[identifier] = override;
     }
 
