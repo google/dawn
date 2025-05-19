@@ -162,27 +162,37 @@ void WaitQueueSerials(const QueueWaitSerialsMap& queueWaitSerials, Nanoseconds t
         auto waitSerial = queueAndSerial.second;
 
         auto* device = queue->GetDevice();
-        auto deviceLock(device->GetScopedLock());
-
-        [[maybe_unused]] bool error = device->ConsumedError(
-            [&]() -> MaybeError {
-                if (waitSerial > queue->GetLastSubmittedCommandSerial()) {
-                    // Serial has not been submitted yet. Submit it now.
-                    DAWN_TRY(queue->EnsureCommandsFlushed(waitSerial));
-                }
-                // Check the completed serial.
-                if (waitSerial > queue->GetCompletedCommandSerial()) {
-                    if (timeout > Nanoseconds(0)) {
-                        // Wait on the serial if it hasn't passed yet.
-                        [[maybe_unused]] bool waitResult = false;
-                        DAWN_TRY_ASSIGN(waitResult, queue->WaitForQueueSerial(waitSerial, timeout));
+        {
+            auto deviceLock(device->GetScopedLock());
+            [[maybe_unused]] bool error = device->ConsumedError(
+                [&]() -> MaybeError {
+                    if (waitSerial > queue->GetLastSubmittedCommandSerial()) {
+                        // Serial has not been submitted yet. Submit it now.
+                        DAWN_TRY(queue->EnsureCommandsFlushed(waitSerial));
                     }
-                    // Update completed serials.
-                    DAWN_TRY(queue->CheckPassedSerials());
-                }
-                return {};
-            }(),
-            "waiting for work in %s.", queue.Get());
+                    // Check the completed serial.
+                    if (waitSerial > queue->GetCompletedCommandSerial()) {
+                        if (timeout > Nanoseconds(0)) {
+                            // Wait on the serial if it hasn't passed yet.
+                            [[maybe_unused]] bool waitResult = false;
+                            DAWN_TRY_ASSIGN(waitResult,
+                                            queue->WaitForQueueSerial(waitSerial, timeout));
+                        }
+                    }
+                    return {};
+                }(),
+                "waiting for work in %s.", queue.Get());
+        }
+
+        // Checking and updating serials cannot hold the device-wide lock because it may cause user
+        // callbacks to fire. As a result, we update the serials without the lock, and only
+        // reacquire the lock if there was an error.
+        auto maybeError = queue->CheckPassedSerials();
+        if (maybeError.IsError()) {
+            auto deviceLock(device->GetScopedLock());
+            [[maybe_unused]] bool error = device->ConsumedError(
+                std::move(maybeError), "updating passed serials in %s", queue.Get());
+        }
     }
 }
 

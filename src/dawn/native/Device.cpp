@@ -594,6 +594,11 @@ void DeviceBase::Destroy() {
         // TODO(crbug.com/dawn/826): Cancel the tasks that are in flight if possible.
         mAsyncTaskManager->WaitAllPendingTasks();
         mCallbackTaskManager->HandleShutDown();
+
+        // Finish destroying all objects owned by the device. Note that this must be done before
+        // DestroyImpl() as it may relinquish resources that will be freed by backends in the
+        // DestroyImpl() call.
+        DestroyObjects();
     }
 
     // Disconnect the device, depending on which state we are currently in.
@@ -607,7 +612,6 @@ void DeviceBase::Destroy() {
             // complete before proceeding with destruction.
             // Ignore errors so that we can continue with destruction
             IgnoreErrors(mQueue->WaitForIdleForDestruction());
-            mQueue->AssumeCommandsComplete();
             break;
 
         case State::BeingDisconnected:
@@ -628,13 +632,10 @@ void DeviceBase::Destroy() {
 
     if (mState != State::BeingCreated) {
         // The GPU timeline is finished.
+        mQueue->AssumeCommandsComplete();
         DAWN_ASSERT(mQueue->GetCompletedCommandSerial() == mQueue->GetLastSubmittedCommandSerial());
-
-        // Finish destroying all objects owned by the device and tick the queue-related tasks
-        // since they should be complete. This must be done before DestroyImpl() it may
-        // relinquish resources that will be freed by backends in the DestroyImpl() call.
-        DestroyObjects();
         mQueue->Tick(mQueue->GetCompletedCommandSerial());
+
         // Call TickImpl once last time to clean up resources
         // Ignore errors so that we can continue with destruction
         IgnoreErrors(TickImpl());
