@@ -22,10 +22,10 @@ git submodule update --init --depth=1 third_party/googletest
 git submodule update --init --depth=1 third_party/emsdk
 python3 tools/activate-emsdk
 
-# Build
+# Build the package, and also test that the bindings can link.
 mkdir -p out/wasm
 third_party/emsdk/upstream/emscripten/emcmake cmake -S=. -B=out/wasm
-make -j4 -C out/wasm emdawnwebgpu_pkg
+make -j4 -C out/wasm emdawnwebgpu_pkg emdawnwebgpu_link_test
 
 # Create zip
 cat << EOF > out/wasm/emdawnwebgpu_pkg/VERSION.txt
