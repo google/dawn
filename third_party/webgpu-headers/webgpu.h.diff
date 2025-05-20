@@ -26,10 +26,8 @@
 -struct WGPUAdapterInfo;
 +struct WGPUAdapterPropertiesSubgroups;
  struct WGPUBindGroupEntry;
-+struct WGPUBindGroupLayoutEntryArraySize;
  struct WGPUBlendComponent;
  struct WGPUBufferBindingLayout;
- struct WGPUBufferDescriptor;
 @@
  struct WGPUConstantEntry;
  struct WGPUExtent3D;
@@ -103,7 +101,6 @@
      WGPUSType_SurfaceColorManagement = 0x0000000A,
      WGPUSType_RequestAdapterWebXROptions = 0x0000000B,
 +    WGPUSType_AdapterPropertiesSubgroups = 0x0000000C,
-+    WGPUSType_BindGroupLayoutEntryArraySize = 0x0000000D,
 +    WGPUSType_TextureBindingViewDimensionDescriptor = 0x00020000,
      WGPUSType_Force32 = 0x7FFFFFFF
  } WGPUSType WGPU_ENUM_ATTRIBUTE;
@@ -179,26 +176,6 @@
  })
  
  typedef struct WGPUBindGroupEntry {
-@@
-     /*.textureView=*/NULL _wgpu_COMMA \
- })
- 
-+typedef struct WGPUBindGroupLayoutEntryArraySize {
-+    WGPUChainedStruct chain;
-+    uint32_t arraySize;
-+} WGPUBindGroupLayoutEntryArraySize WGPU_STRUCTURE_ATTRIBUTE;
-+
-+#define WGPU_BIND_GROUP_LAYOUT_ENTRY_ARRAY_SIZE_INIT _wgpu_MAKE_INIT_STRUCT(WGPUBindGroupLayoutEntryArraySize, { \
-+    /*.chain=*/_wgpu_MAKE_INIT_STRUCT(WGPUChainedStruct, { \
-+        /*.next=*/NULL _wgpu_COMMA \
-+        /*.sType=*/WGPUSType_BindGroupLayoutEntryArraySize _wgpu_COMMA \
-+    }) _wgpu_COMMA \
-+    /*.arraySize=*/0 _wgpu_COMMA \
-+})
-+
- typedef struct WGPUBlendComponent {
-     WGPUBlendOperation operation;
-     WGPUBlendFactor srcFactor;
 @@
  #define WGPU_BUFFER_BINDING_LAYOUT_INIT _wgpu_MAKE_INIT_STRUCT(WGPUBufferBindingLayout, { \
      /*.nextInChain=*/NULL _wgpu_COMMA \
@@ -379,9 +356,11 @@
  
  typedef struct WGPUTextureViewDescriptor {
 @@
+     /*.format=*/_wgpu_ENUM_ZERO_INIT(WGPUVertexFormat) _wgpu_COMMA \
+     /*.offset=*/0 _wgpu_COMMA \
      /*.shaderLocation=*/0 _wgpu_COMMA \
- })
- 
++})
++
 +typedef struct WGPUAdapterInfo {
 +    WGPUChainedStruct * nextInChain;
 +    WGPUStringView vendor;
@@ -408,27 +387,9 @@
 +    /*.deviceID=*/0 _wgpu_COMMA \
 +    /*.subgroupMinSize=*/0 _wgpu_COMMA \
 +    /*.subgroupMaxSize=*/0 _wgpu_COMMA \
-+})
-+
+ })
+ 
  typedef struct WGPUBindGroupDescriptor {
-     WGPUChainedStruct * nextInChain;
-     WGPUStringView label;
-@@
-     WGPUChainedStruct * nextInChain;
-     uint32_t binding;
-     WGPUShaderStage visibility;
--    uint32_t bindingArraySize;
-     WGPUBufferBindingLayout buffer;
-     WGPUSamplerBindingLayout sampler;
-     WGPUTextureBindingLayout texture;
-@@
-     /*.nextInChain=*/NULL _wgpu_COMMA \
-     /*.binding=*/0 _wgpu_COMMA \
-     /*.visibility=*/WGPUShaderStage_None _wgpu_COMMA \
--    /*.bindingArraySize=*/0 _wgpu_COMMA \
-     /*.buffer=*/_wgpu_STRUCT_ZERO_INIT _wgpu_COMMA \
-     /*.sampler=*/_wgpu_STRUCT_ZERO_INIT _wgpu_COMMA \
-     /*.texture=*/_wgpu_STRUCT_ZERO_INIT _wgpu_COMMA \
 @@
      /*.nextInChain=*/NULL _wgpu_COMMA \
      /*.format=*/WGPUTextureFormat_Undefined _wgpu_COMMA \

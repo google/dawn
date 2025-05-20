@@ -1481,6 +1481,13 @@ var LibraryWebGPU = {
 
     function makeEntry(entryPtr) {
       {{{ gpu.makeCheck('entryPtr') }}}
+#if ASSERTIONS
+      // bindingArraySize is not specced and thus not implemented yet. We don't pass it through
+      // because if we did, then existing apps using this version of the bindings could break when
+      // browsers start accepting bindingArraySize.
+      var bindingArraySize = {{{ gpu.makeGetU32('entryPtr', C_STRUCTS.WGPUBindGroupLayoutEntry.bindingArraySize) }}};
+      assert(bindingArraySize == 0 || bindingArraySize == 1);
+#endif
 
       return {
         "binding":

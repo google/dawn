@@ -141,7 +141,7 @@ struct BindingInfo {
     BindingNumber binding;
     wgpu::ShaderStage visibility;
 
-    // The size of the array this binding is part of. Each BindingInfy represents a single entry.
+    // The size of the array this binding is part of. Each BindingInfo represents a single entry.
     BindingIndex arraySize{1};
     // The index of this entry in the array. Must be 0 if this entry is not in an array.
     BindingIndex indexInArray{0};

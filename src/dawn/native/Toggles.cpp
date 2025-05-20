@@ -155,7 +155,7 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "https://crbug.com/dawn/673", ToggleStage::Device}},
     {Toggle::DisableBindGroupLayoutEntryArraySize,
      {"disable_bind_group_layout_entry_array_size",
-      "Disable uses of wgpu::BindGroupLayoutEntryArraySize.",
+      "Disable uses of BindGroupLayoutEntry.bindingArraySize > 0.",
       "https://issues.chromium.org/393558555", ToggleStage::Device}},
     {Toggle::UseD3D12SmallShaderVisibleHeapForTesting,
      {"use_d3d12_small_shader_visible_heap",

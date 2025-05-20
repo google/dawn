@@ -64,20 +64,24 @@ TEST_F(UnsafeAPIValidationTest, chromium_disable_uniformity_analysis) {
     )"));
 }
 
-// Check that using a wgpu::BindGroupLayoutEntryArraySize is an unsafe API.
+// Check that using bindingArraySize > 1 is an unsafe API.
 TEST_F(UnsafeAPIValidationTest, BindGroupLayoutEntryArraySize) {
-    wgpu::BindGroupLayoutEntryArraySize arraySize;
-    arraySize.arraySize = 1;
-
     wgpu::BindGroupLayoutEntry entry;
     entry.binding = 0;
     entry.visibility = wgpu::ShaderStage::Fragment;
     entry.texture.sampleType = wgpu::TextureSampleType::Float;
-    entry.nextInChain = &arraySize;
 
     wgpu::BindGroupLayoutDescriptor desc;
     desc.entryCount = 1;
     desc.entries = &entry;
+
+    entry.bindingArraySize = 0;
+    device.CreateBindGroupLayout(&desc);
+
+    entry.bindingArraySize = 1;
+    device.CreateBindGroupLayout(&desc);
+
+    entry.bindingArraySize = 2;
     ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&desc));
 }
 

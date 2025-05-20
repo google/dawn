@@ -39,7 +39,7 @@ LICENSE = 'mixed licenses, see license files'
 # User options, e.g. --use-port=path/to/emdawnwebgpu.port.py:cpp_bindings=false
 OPTIONS = {
     'cpp_bindings':
-    'Add the include path for <webgpu/webgpu_cpp.h> C++ bindings. Default: true.',
+    "Add the include path for Dawn-like <webgpu/webgpu_cpp.h> C++ bindings. Default: true.",
     'opt_level':
     "Optimization (-O) level for the bindings' Wasm layer. Default: choose based on -sASSERTIONS.",
 }

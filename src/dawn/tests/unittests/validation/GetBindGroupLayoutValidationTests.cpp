@@ -1018,13 +1018,10 @@ TEST_F(GetBindGroupLayoutTests, StageAggregation) {
 TEST_F(GetBindGroupLayoutTests, ArraySizeReflected) {
     DAWN_SKIP_TEST_IF(UsesWire());
 
-    wgpu::BindGroupLayoutEntryArraySize arraySize;
-
     wgpu::BindGroupLayoutEntry entry;
     entry.binding = 0;
     entry.visibility = wgpu::ShaderStage::Fragment;
     entry.texture.sampleType = wgpu::TextureSampleType::UnfilterableFloat;
-    entry.nextInChain = &arraySize;
 
     wgpu::BindGroupLayoutDescriptor bglDesc;
     bglDesc.entryCount = 1;
@@ -1037,13 +1034,13 @@ TEST_F(GetBindGroupLayoutTests, ArraySizeReflected) {
             _ = t[0];
         })");
 
-    arraySize.arraySize = 3;
+    entry.bindingArraySize = 3;
     EXPECT_THAT(device.CreateBindGroupLayout(&bglDesc),
                 BindGroupLayoutCacheEq(pipeline.GetBindGroupLayout(0)));
-    arraySize.arraySize = 2;
+    entry.bindingArraySize = 2;
     EXPECT_THAT(device.CreateBindGroupLayout(&bglDesc),
                 Not(BindGroupLayoutCacheEq(pipeline.GetBindGroupLayout(0))));
-    arraySize.arraySize = 1;
+    entry.bindingArraySize = 1;
     EXPECT_THAT(device.CreateBindGroupLayout(&bglDesc),
                 Not(BindGroupLayoutCacheEq(pipeline.GetBindGroupLayout(0))));
 }
@@ -1053,14 +1050,11 @@ TEST_F(GetBindGroupLayoutTests, ArraySizeTwoStages) {
     DAWN_SKIP_TEST_IF(UsesWire());
 
     // A BGL with arraySize = 3
-    wgpu::BindGroupLayoutEntryArraySize arraySize;
-    arraySize.arraySize = 3;
-
     wgpu::BindGroupLayoutEntry entry;
     entry.binding = 0;
     entry.visibility = wgpu::ShaderStage::Vertex | wgpu::ShaderStage::Fragment;
+    entry.bindingArraySize = 3;
     entry.texture.sampleType = wgpu::TextureSampleType::UnfilterableFloat;
-    entry.nextInChain = &arraySize;
 
     wgpu::BindGroupLayoutDescriptor bglDesc;
     bglDesc.entryCount = 1;

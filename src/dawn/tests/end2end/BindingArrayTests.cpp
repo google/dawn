@@ -163,9 +163,6 @@ TEST_P(SizedBindingArrayTests, ArrayEntryOversizedAndSurrounded) {
     // binding will be unused.
     wgpu::BindGroupLayout bgl;
     {
-        wgpu::BindGroupLayoutEntryArraySize arraySize;
-        arraySize.arraySize = 3;
-
         std::array<wgpu::BindGroupLayoutEntry, 3> entries;
 
         entries[0].binding = 0;
@@ -174,8 +171,8 @@ TEST_P(SizedBindingArrayTests, ArrayEntryOversizedAndSurrounded) {
 
         entries[1].binding = 1;
         entries[1].visibility = wgpu::ShaderStage::Fragment;
+        entries[1].bindingArraySize = 3;
         entries[1].texture.sampleType = wgpu::TextureSampleType::Float;
-        entries[1].nextInChain = &arraySize;
 
         entries[2].binding = 4;
         entries[2].visibility = wgpu::ShaderStage::Fragment;
@@ -246,15 +243,12 @@ TEST_P(SizedBindingArrayTests, NonArrayedBindingCompatibleWithArrayedBGLEntry) {
     // Create the BGL with an oversized array
     wgpu::BindGroupLayout bgl;
     {
-        wgpu::BindGroupLayoutEntryArraySize arraySize;
-        arraySize.arraySize = 2;
-
         wgpu::BindGroupLayoutEntry entry;
 
         entry.binding = 0;
         entry.visibility = wgpu::ShaderStage::Fragment;
+        entry.bindingArraySize = 2;
         entry.texture.sampleType = wgpu::TextureSampleType::Float;
-        entry.nextInChain = &arraySize;
 
         wgpu::BindGroupLayoutDescriptor bglDesc;
         bglDesc.entryCount = 1;

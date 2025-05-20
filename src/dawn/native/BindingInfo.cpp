@@ -27,6 +27,8 @@
 
 #include "dawn/native/BindingInfo.h"
 
+#include <algorithm>
+
 #include "dawn/common/MatchVariant.h"
 #include "dawn/native/Adapter.h"
 #include "dawn/native/ChainUtils.h"
@@ -54,10 +56,7 @@ BindingInfoType GetBindingInfoType(const BindingInfo& info) {
 
 void IncrementBindingCounts(BindingCounts* bindingCounts,
                             const UnpackedPtr<BindGroupLayoutEntry>& entry) {
-    uint32_t arraySize = 1;
-    if (const auto* arraySizeInfo = entry.Get<BindGroupLayoutEntryArraySize>()) {
-        arraySize = arraySizeInfo->arraySize;
-    }
+    uint32_t arraySize = std::max(1u, entry->bindingArraySize);
 
     bindingCounts->totalCount += arraySize;
 
