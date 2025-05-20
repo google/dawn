@@ -82,6 +82,7 @@ struct RobustnessConfig {
                  clamp_storage,
                  clamp_uniform,
                  clamp_workgroup,
+                 predicate_subgroup_matrix,
                  bindings_ignored,
                  disable_runtime_sized_array_index_clamping);
 };
