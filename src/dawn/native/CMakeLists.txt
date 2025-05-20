@@ -888,7 +888,7 @@ if (IOS)
     target_compile_options(dawn_native PRIVATE -fno-objc-arc)
 endif()
 
-if (NOT DAWN_BUILD_MONOLITHIC_LIBRARY STREQUAL "OFF")
+if (DAWN_BUILD_MONOLITHIC_LIBRARY)
     ###############################################################################
     # Do the 'complete_lib' build.
     # A convenience target that bundles dawn_native and procs calling it directly so that
@@ -903,7 +903,12 @@ if (NOT DAWN_BUILD_MONOLITHIC_LIBRARY STREQUAL "OFF")
     )
     # Bundle all objects of dawn_native, it's public dependencies and private dependencies.
     include(BundleLibraries)
-    bundle_libraries(webgpu_dawn ${DAWN_BUILD_MONOLITHIC_LIBRARY} dawn::dawn_native_objects)
+    if(BUILD_SHARED_LIBS)
+        bundle_libraries(webgpu_dawn SHARED dawn::dawn_native_objects)
+    else()
+        bundle_libraries(webgpu_dawn STATIC dawn::dawn_native_objects)
+    endif()
+
     add_library(dawn::webgpu_dawn ALIAS webgpu_dawn)
     # Compile backend specific sources along with webgpu_dawn_native_proc sources for export macros to get applied.
     target_sources(webgpu_dawn
@@ -911,7 +916,7 @@ if (NOT DAWN_BUILD_MONOLITHIC_LIBRARY STREQUAL "OFF")
         ${WEBGPU_DAWN_NATIVE_PROC_GEN_SOURCES}
         ${dawn_component_srcs}
     )
-    if(${DAWN_BUILD_MONOLITHIC_LIBRARY} MATCHES "SHARED")
+    if(BUILD_SHARED_LIBS)
         target_compile_definitions(webgpu_dawn
             PRIVATE
                 "WGPU_IMPLEMENTATION"
@@ -920,7 +925,8 @@ if (NOT DAWN_BUILD_MONOLITHIC_LIBRARY STREQUAL "OFF")
                 "WGPU_SHARED_LIBRARY"
                 "DAWN_NATIVE_SHARED_LIBRARY"
         )
-    elif(${DAWN_BUILD_MONOLITHIC_LIBRARY} MATCHES "STATIC")
+    
+    else()
         target_compile_definitions(webgpu_dawn
             PRIVATE
                 "WGPU_IMPLEMENTATION"

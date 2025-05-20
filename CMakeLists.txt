@@ -334,17 +334,9 @@ message(STATUS "Webgpu IDL path: ${WEBGPU_IDL_PATH}")
 message(STATUS "Go exe: ${GO_EXECUTABLE}")
 message(STATUS "")
 
-set(DAWN_BUILD_MONOLITHIC_LIBRARY "STATIC" CACHE STRING "Build monolithic library: SHARED, STATIC, or OFF.")
-
-set_property(CACHE DAWN_BUILD_MONOLITHIC_LIBRARY PROPERTY STRINGS "OFF" "SHARED" "STATIC")
+option(DAWN_BUILD_MONOLITHIC_LIBRARY "Build one big monolithic library file" ON)
 
 string(TOUPPER "${DAWN_BUILD_MONOLITHIC_LIBRARY}" _option_upper)
-
-if(NOT _option_upper STREQUAL "OFF" AND
-   NOT _option_upper STREQUAL "SHARED" AND
-   NOT _option_upper STREQUAL "STATIC")
-    message(FATAL_ERROR "DAWN_BUILD_MONOLITHIC_LIBRARY must be SHARED, STATIC, or OFF, but was \"${DAWN_BUILD_MONOLITHIC_LIBRARY}\".")
-endif()
 
 message(STATUS "Dawn build monolithic library: ${DAWN_BUILD_MONOLITHIC_LIBRARY}")
 message(STATUS "Dawn fetch dependencies: ${DAWN_FETCH_DEPENDENCIES}")
