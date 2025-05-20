@@ -254,7 +254,12 @@ struct Decoder {
         }
         fn_out->SetReturnType(Type(fn_in.return_type()));
         if (fn_in.has_pipeline_stage()) {
-            fn_out->SetStage(PipelineStage(fn_in.pipeline_stage()));
+            if (PipelineStage_IsValid(fn_in.pipeline_stage())) {
+                fn_out->SetStage(PipelineStage(fn_in.pipeline_stage()));
+            } else {
+                err_ << "invalid pipe line state, " << std::to_string(fn_in.pipeline_stage())
+                     << "\n";
+            }
         }
         if (fn_in.has_workgroup_size()) {
             auto& wg_size_in = fn_in.workgroup_size();
@@ -482,6 +487,11 @@ struct Decoder {
     }
 
     ir::CoreBinary* CreateInstructionBinary(const pb::InstructionBinary& binary_in) {
+        if (!BinaryOp_IsValid(binary_in.op())) {
+            err_ << "invalid binary op, " << std::to_string(binary_in.op()) << "\n";
+            return nullptr;
+        }
+
         auto* binary_out = mod_out_.CreateInstruction<ir::CoreBinary>();
         binary_out->SetOp(BinaryOp(binary_in.op()));
         return binary_out;
@@ -630,6 +640,10 @@ struct Decoder {
     }
 
     ir::CoreUnary* CreateInstructionUnary(const pb::InstructionUnary& unary_in) {
+        if (!UnaryOp_IsValid(unary_in.op())) {
+            err_ << "invalid unary op, " << std::to_string(unary_in.op()) << "\n";
+            return nullptr;
+        }
         auto* unary_out = mod_out_.CreateInstruction<ir::CoreUnary>();
         unary_out->SetOp(UnaryOp(unary_in.op()));
         return unary_out;
@@ -710,6 +724,11 @@ struct Decoder {
     }
 
     const type::Type* CreateTypeBasic(pb::TypeBasic basic_in) {
+        if (!TypeBasic_IsValid(basic_in)) {
+            err_ << "invalid basic type, " << std::to_string(basic_in) << "\n";
+            return mod_out_.Types().invalid();
+        }
+
         switch (basic_in) {
             case pb::TypeBasic::void_:
                 return mod_out_.Types().void_();
@@ -914,6 +933,10 @@ struct Decoder {
     }
 
     const type::Sampler* CreateTypeSampler(const pb::TypeSampler& sampler_in) {
+        if (!SamplerKind_IsValid(sampler_in.kind())) {
+            err_ << "invalid sampler kind, " << std::to_string(sampler_in.kind()) << "\n";
+            return nullptr;
+        }
         auto kind = SamplerKind(sampler_in.kind());
         return mod_out_.Types().Get<type::Sampler>(kind);
     }
@@ -932,6 +955,11 @@ struct Decoder {
     }
 
     const type::Type* CreateTypeBuiltinStruct(pb::TypeBuiltinStruct builtin_struct_in) {
+        if (!TypeBuiltinStruct_IsValid(builtin_struct_in)) {
+            err_ << "invalid builtin struct type, " << std::to_string(builtin_struct_in) << "\n";
+            return mod_out_.Types().invalid();
+        }
+
         auto& ty = mod_out_.Types();
         switch (builtin_struct_in) {
             case pb::TypeBuiltinStruct::AtomicCompareExchangeResultI32:
@@ -1223,6 +1251,11 @@ struct Decoder {
     // Enums
     ////////////////////////////////////////////////////////////////////////////
     core::AddressSpace AddressSpace(pb::AddressSpace in) {
+        if (!AddressSpace_IsValid(in)) {
+            err_ << "invalid address space, " << std::to_string(in) << "\n";
+            return core::AddressSpace::kUndefined;
+        }
+
         switch (in) {
             case pb::AddressSpace::function:
                 return core::AddressSpace::kFunction;
@@ -1249,6 +1282,11 @@ struct Decoder {
     }
 
     core::Access AccessControl(pb::AccessControl in) {
+        if (!AccessControl_IsValid(in)) {
+            err_ << "invalid access control, " << std::to_string(in) << "\n";
+            return core::Access::kUndefined;
+        }
+
         switch (in) {
             case pb::AccessControl::read:
                 return core::Access::kRead;
@@ -1331,6 +1369,11 @@ struct Decoder {
     }
 
     core::type::TextureDimension TextureDimension(pb::TextureDimension in) {
+        if (!TextureDimension_IsValid(in)) {
+            err_ << "invalid texture dimension, " << std::to_string(in) << "\n";
+            return core::type::TextureDimension::kNone;
+        }
+
         switch (in) {
             case pb::TextureDimension::_1d:
                 return core::type::TextureDimension::k1d;
@@ -1354,6 +1397,11 @@ struct Decoder {
     }
 
     core::TexelFormat TexelFormat(pb::TexelFormat in) {
+        if (!TexelFormat_IsValid(in)) {
+            err_ << "invalid texel format, " << std::to_string(in) << "\n";
+            return core::TexelFormat::kUndefined;
+        }
+
         switch (in) {
             case pb::TexelFormat::bgra8_unorm:
                 return core::TexelFormat::kBgra8Unorm;
@@ -1416,6 +1464,11 @@ struct Decoder {
     }
 
     core::InterpolationType InterpolationType(pb::InterpolationType in) {
+        if (!InterpolationType_IsValid(in)) {
+            err_ << "invalid interpolation type, " << std::to_string(in) << "\n";
+            return core::InterpolationType::kUndefined;
+        }
+
         switch (in) {
             case pb::InterpolationType::flat:
                 return core::InterpolationType::kFlat;
@@ -1432,6 +1485,11 @@ struct Decoder {
     }
 
     core::InterpolationSampling InterpolationSampling(pb::InterpolationSampling in) {
+        if (!InterpolationSampling_IsValid(in)) {
+            err_ << "invalid interpolation sampling, " << std::to_string(in) << "\n";
+            return core::InterpolationSampling::kUndefined;
+        }
+
         switch (in) {
             case pb::InterpolationSampling::center:
                 return core::InterpolationSampling::kCenter;
@@ -1452,6 +1510,11 @@ struct Decoder {
     }
 
     core::BuiltinValue BuiltinValue(pb::BuiltinValue in) {
+        if (!BuiltinValue_IsValid(in)) {
+            err_ << "invalid builtin value, " << std::to_string(in) << "\n";
+            return core::BuiltinValue::kUndefined;
+        }
+
         switch (in) {
             case pb::BuiltinValue::point_size:
                 return core::BuiltinValue::kPointSize;
@@ -1497,6 +1560,11 @@ struct Decoder {
     }
 
     core::BuiltinFn BuiltinFn(pb::BuiltinFn in) {
+        if (!BuiltinFn_IsValid(in)) {
+            err_ << "invalid builtin function, " << std::to_string(in) << "\n";
+            return core::BuiltinFn::kNone;
+        }
+
         switch (in) {
             case pb::BuiltinFn::abs:
                 return core::BuiltinFn::kAbs;
