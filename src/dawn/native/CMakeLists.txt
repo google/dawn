@@ -572,9 +572,11 @@ if (DAWN_ENABLE_WEBGPU_ON_WEBGPU)
     list(APPEND private_headers
         "webgpu/BackendWGPU.h"
         "webgpu/Forward.h"
+        "webgpu/PhysicalDeviceWGPU.h"
     )
     list(APPEND sources
         "webgpu/BackendWGPU.cpp"
+        "webgpu/PhysicalDeviceWGPU.cpp"
     )
 endif()
 

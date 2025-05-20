@@ -459,13 +459,25 @@ std::vector<Ref<PhysicalDeviceBase>> InstanceBase::EnumeratePhysicalDevices(
     DAWN_ASSERT(options);
 
     BackendsBitset backendsToFind;
-    if (options->backendType != wgpu::BackendType::Undefined) {
-        backendsToFind = {};
+    if (options.Get<RequestAdapterWebGPUBackendOptions>()) {
+        // User is selecting WebGPU-on-WebGPU. Ignore the backendType, it will
+        // be passed through to the inner WebGPU implementation.
+        backendsToFind.set(wgpu::BackendType::WebGPU);
+    } else if (options->backendType == wgpu::BackendType::WebGPU) {
+        // User is selecting WebGPU-on-WebGPU without RequestAdapterWebGPUBackendOptions.
+        // This is invalid, set no backends and warn.
+        ConsumedErrorAndWarnOnce(DAWN_VALIDATION_ERROR(
+            "Select WebGPU backend without RequestAdapterWebGPUBackendOptions is invalid."));
+    } else if (options->backendType != wgpu::BackendType::Undefined) {
+        // User is selecting a specific backend.
         if (!ConsumedErrorAndWarnOnce(ValidateBackendType(options->backendType))) {
             backendsToFind.set(options->backendType);
         }
     } else {
+        // User doesn't care about the backend.
         backendsToFind.set();
+        // Don't return WebGPU-on-WebGPU by default.
+        backendsToFind.flip(wgpu::BackendType::WebGPU);
     }
 
     std::vector<Ref<PhysicalDeviceBase>> discoveredPhysicalDevices;

@@ -482,8 +482,21 @@ void DawnTestEnvironment::SelectPreferredAdapterProperties(const native::Instanc
          {wgpu::FeatureLevel::Core, wgpu::FeatureLevel::Compatibility}) {
         wgpu::RequestAdapterOptions adapterOptions;
         adapterOptions.featureLevel = featureLevel;
+
+        auto adapters = instance->EnumerateAdapters(&adapterOptions);
+
+        // Include enumerating WebGPU-on-WebGPU backends.
+        wgpu::RequestAdapterWebGPUBackendOptions webgpuBackendOptions = {};
+        adapterOptions.nextInChain = &webgpuBackendOptions;
+
+        {
+            auto webgpuBackendAdapters = instance->EnumerateAdapters(&adapterOptions);
+            adapters.insert(adapters.end(), std::make_move_iterator(webgpuBackendAdapters.begin()),
+                            std::make_move_iterator(webgpuBackendAdapters.end()));
+        }
+
         // TODO(347047627): Use a webgpu.h version of enumerateAdapters
-        for (const native::Adapter& nativeAdapter : instance->EnumerateAdapters(&adapterOptions)) {
+        for (const native::Adapter& nativeAdapter : adapters) {
             wgpu::Adapter adapter = wgpu::Adapter(nativeAdapter.Get());
             wgpu::AdapterInfo info;
             adapter.GetInfo(&info);
@@ -741,10 +754,17 @@ DawnTestBase::DawnTestBase(const AdapterTestParam& param) : mParam(param) {
 
         wgpu::RequestAdapterOptions adapterOptions;
         adapterOptions.nextInChain = &deviceTogglesHelper.togglesDesc;
-        adapterOptions.backendType = gCurrentTest->mParam.adapterProperties.backendType;
         adapterOptions.featureLevel = gCurrentTest->mParam.adapterProperties.compatibilityMode
                                           ? wgpu::FeatureLevel::Compatibility
                                           : wgpu::FeatureLevel::Core;
+
+        wgpu::RequestAdapterWebGPUBackendOptions webgpuBackendOptions = {};
+        if (gCurrentTest->mParam.adapterProperties.backendType == wgpu::BackendType::WebGPU) {
+            adapterOptions.backendType = wgpu::BackendType::Undefined;
+            adapterOptions.nextInChain = &webgpuBackendOptions;
+        } else {
+            adapterOptions.backendType = gCurrentTest->mParam.adapterProperties.backendType;
+        }
 
         // Find the adapter that exactly matches our adapter properties.
         // TODO(347047627): Use a webgpu.h version of enumerateAdapters

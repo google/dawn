@@ -707,6 +707,8 @@ source_set("sources") {
       "webgpu/BackendWGPU.cpp",
       "webgpu/BackendWGPU.h",
       "webgpu/Forward.h",
+      "webgpu/PhysicalDeviceWGPU.cpp",
+      "webgpu/PhysicalDeviceWGPU.h",
     ]
   }
 
