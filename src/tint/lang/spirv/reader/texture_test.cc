@@ -1287,7 +1287,7 @@ INSTANTIATE_TEST_SUITE_P(
         }));
 
 INSTANTIATE_TEST_SUITE_P(
-    DISABLED_SpirvReaderTest_ImageSampleProjExplicitLod,
+    SpirvReaderTest_ImageSampleProjExplicitLod,
     SamplerTest,
     ::testing::Values(
         ImgData{
@@ -1296,7 +1296,11 @@ INSTANTIATE_TEST_SUITE_P(
             .spirv_fn =
                 "OpImageSampleProjExplicitLod %v4float %sampled_image %coords3 Lod %float_1",
             .wgsl_type = "texture_2d<f32>",
-            .wgsl_fn = "textureSampleLevel %4, %5, vec3<f32>(1.0f, 2.0f, 3.0f), 1.0f",
+            .wgsl_fn = R"(
+    %6:vec2<f32> = swizzle vec3<f32>(1.0f, 2.0f, 3.0f), xy
+    %7:f32 = swizzle vec3<f32>(1.0f, 2.0f, 3.0f), z
+    %8:vec2<f32> = div %6, %7
+    %9:vec4<f32> = textureSampleLevel %5, %4, %8, 1.0f)",
         },
         ImgData{
             .name = "2D Lod ConstOffset",
@@ -1304,8 +1308,11 @@ INSTANTIATE_TEST_SUITE_P(
             .spirv_fn = "OpImageSampleProjExplicitLod %v4float %sampled_image %coords3 "
                         "Lod|ConstOffset %float_1 %offset2i",
             .wgsl_type = "texture_2d<f32>",
-            .wgsl_fn =
-                "textureSampleLevel %4, %5, vec3<f32>(1.0f, 2.0f, 3.0f), 1.0f, vec2<i32>(10i, 11i)",
+            .wgsl_fn = R"(
+    %6:vec2<f32> = swizzle vec3<f32>(1.0f, 2.0f, 3.0f), xy
+    %7:f32 = swizzle vec3<f32>(1.0f, 2.0f, 3.0f), z
+    %8:vec2<f32> = div %6, %7
+    %9:vec4<f32> = textureSampleLevel %5, %4, %8, 1.0f, vec2<i32>(10i, 11i))",
         },
         ImgData{
             .name = "2D Grad",
@@ -1313,8 +1320,11 @@ INSTANTIATE_TEST_SUITE_P(
             .spirv_fn =
                 "OpImageSampleProjExplicitLod %v4float %sampled_image %coords3 Grad %vf12 %vf21",
             .wgsl_type = "texture_2d<f32>",
-            .wgsl_fn = "textureSampleGrad %4, %5, vec3<f32>(1.0f, 2.0f, 3.0f), vec2<f32>(1.0f, "
-                       "2.0f), vec2<f32>(2.0f, 1.0f)",
+            .wgsl_fn = R"(
+    %6:vec2<f32> = swizzle vec3<f32>(1.0f, 2.0f, 3.0f), xy
+    %7:f32 = swizzle vec3<f32>(1.0f, 2.0f, 3.0f), z
+    %8:vec2<f32> = div %6, %7
+    %9:vec4<f32> = textureSampleGrad %5, %4, %8, vec2<f32>(1.0f, 2.0f), vec2<f32>(2.0f, 1.0f))",
         },
         ImgData{
             .name = "2D Lod Grad ConstOffset",
@@ -1322,11 +1332,12 @@ INSTANTIATE_TEST_SUITE_P(
             .spirv_fn = "OpImageSampleProjExplicitLod %v4float %sampled_image %coords3 "
                         "Grad|ConstOffset %vf12 %vf21 %offset2i",
             .wgsl_type = "texture_2d<f32>",
-            .wgsl_fn = "textureSampleGrad %4, %5, vec3<f32>(1.0f, 2.0f, 3.0f), vec2<f32>(1.0f, "
-                       "2.0f), vec2<f32>(2.0f, 1.0f), vec2<i32>(10i, 20i)",
-        }
-
-        ));
+            .wgsl_fn = R"(
+    %6:vec2<f32> = swizzle vec3<f32>(1.0f, 2.0f, 3.0f), xy
+    %7:f32 = swizzle vec3<f32>(1.0f, 2.0f, 3.0f), z
+    %8:vec2<f32> = div %6, %7
+    %9:vec4<f32> = textureSampleGrad %5, %4, %8, vec2<f32>(1.0f, 2.0f), vec2<f32>(2.0f, 1.0f), vec2<i32>(10i, 11i))",
+        }));
 
 using SamplerComparisonTest = SpirvReaderTestWithParam<ImgData>;
 TEST_P(SamplerComparisonTest, Handle) {

@@ -111,6 +111,7 @@ struct State {
                     case spirv::BuiltinFn::kImageSampleExplicitLod:
                     case spirv::BuiltinFn::kImageSampleImplicitLod:
                     case spirv::BuiltinFn::kImageSampleProjImplicitLod:
+                    case spirv::BuiltinFn::kImageSampleProjExplicitLod:
                     case spirv::BuiltinFn::kImageWrite:
                         builtin_worklist.Push(builtin);
                         break;
@@ -141,6 +142,7 @@ struct State {
                 case spirv::BuiltinFn::kImageSampleExplicitLod:
                 case spirv::BuiltinFn::kImageSampleImplicitLod:
                 case spirv::BuiltinFn::kImageSampleProjImplicitLod:
+                case spirv::BuiltinFn::kImageSampleProjExplicitLod:
                     ImageSample(builtin);
                     break;
                 case spirv::BuiltinFn::kImageWrite:
@@ -282,7 +284,8 @@ struct State {
         auto* coords = args[1];
         uint32_t operand_mask = GetOperandMask(args[2]);
 
-        bool is_proj = call->Func() == spirv::BuiltinFn::kImageSampleProjImplicitLod;
+        bool is_proj = call->Func() == spirv::BuiltinFn::kImageSampleProjImplicitLod ||
+                       call->Func() == spirv::BuiltinFn::kImageSampleProjExplicitLod;
 
         uint32_t idx = 3;
         b.InsertBefore(call, [&] {

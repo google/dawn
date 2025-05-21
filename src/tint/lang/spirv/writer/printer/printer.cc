@@ -1435,6 +1435,9 @@ class Printer {
             case spirv::BuiltinFn::kImageSampleProjImplicitLod:
                 op = spv::Op::OpImageSampleProjImplicitLod;
                 break;
+            case spirv::BuiltinFn::kImageSampleProjExplicitLod:
+                op = spv::Op::OpImageSampleProjExplicitLod;
+                break;
             case spirv::BuiltinFn::kImageSampleDrefImplicitLod:
                 op = spv::Op::OpImageSampleDrefImplicitLod;
                 break;
