@@ -96,7 +96,16 @@ class Wrappers {
   Wrappers(Napi::Env env) {
 {{-   range $ := .Declarations}}
 {{-     if IsInterfaceOrNamespace $}}
+{{-       if and (IsInterface $) ($.Inherits)}}
+    {
+      // It's an interface and it inherits from another class, pass the class it inherits
+      // from to its Class factory
+      Napi::Value baseClassValue = {{$.Inherits}}_ctor.Value();
+      {{$.Name}}_ctor = Napi::Persistent(W{{$.Name}}::Class(env, baseClassValue));
+    }
+{{-       else}}
     {{$.Name}}_ctor = Napi::Persistent(W{{$.Name}}::Class(env));
+{{-       end}}
 {{-     end}}
 {{-   end}}
   }
@@ -158,8 +167,14 @@ Wrappers* Wrappers::instance = nullptr;
 {{-  if IsInterface $}}
     std::unique_ptr<{{$.Name}}> impl;
 {{-  end}}
+{{-  if and (IsInterface $) ($.Inherits) }}
+    // This class inherits from another, require the class factory to
+    // receive the base class so it can setup inheritance.
+    static Napi::Function Class(Napi::Env env, Napi::Value baseClassValue) {
+{{-  else}}
     static Napi::Function Class(Napi::Env env) {
-      return DefineClass(env, "{{$.Name}}", {
+{{-  end}}
+      auto func = DefineClass(env, "{{$.Name}}", {
 {{   if $s := SetlikeOf $}}
         InstanceMethod("has", &W{{$.Name}}::has),
         InstanceMethod("keys", &W{{$.Name}}::keys),
@@ -180,6 +195,12 @@ Wrappers* Wrappers::instance = nullptr;
         StaticValue("{{$c.Name}}", ToJS(env, {{$.Name}}::{{$c.Name}}), napi_default_jsproperty),
 {{-  end}}
       });
+
+{{-  if and (IsInterface $) ($.Inherits)}}
+      // It inherits from another class, setup the prototype chain.
+      ChainPrototype(baseClassValue, func);
+{{-  end}}
+      return func;
     }
 
     W{{$.Name}}(const Napi::CallbackInfo& info) : ObjectWrap(info) {}

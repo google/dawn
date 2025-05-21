@@ -829,6 +829,8 @@ Napi::Value CatchExceptionIntoPromise(Napi::Env env, F&& f) {
     return deferred.Promise();
 }
 
+void ChainPrototype(Napi::Value baseClassValue, Napi::Function derivedClassConstructor);
+
 }  // namespace wgpu::interop
 
 #endif  // SRC_DAWN_NODE_INTEROP_CORE_H_
