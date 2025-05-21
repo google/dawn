@@ -2450,6 +2450,13 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
             RegisterStore(args[0]);
             break;
 
+        case wgsl::BuiltinFn::kSubgroupMatrixLoad:
+            RegisterLoad(args[0]);
+            break;
+        case wgsl::BuiltinFn::kSubgroupMatrixStore:
+            RegisterStore(args[0]);
+            break;
+
         default:
             break;
     }
