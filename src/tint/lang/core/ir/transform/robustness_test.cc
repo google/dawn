@@ -61,6 +61,8 @@ inline std::ostream& operator<<(std::ostream& out, BindingVariableCase c) {
 }
 using IR_BindingVariableRobustnessTest = TransformTestWithParam<BindingVariableCase>;
 
+using IR_RobustnessWithIntegerRangeAnalysisTest = TransformTest;
+
 ////////////////////////////////////////////////////////////////
 // These tests use the function address space.
 // Test clamping of vectors, matrices, and fixed-size arrays.
@@ -4166,6 +4168,808 @@ $B1: {  # root
 
     RobustnessConfig cfg;
     cfg.predicate_subgroup_matrix = GetParam();
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, AccessArrayWithIndex_MaxBound_Equal_Limit) {
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        Var* idx = nullptr;
+        // arr = array<u32, 20>
+        auto* arr = b.Var("arr", ty.ptr(function, ty.array<u32, 20>()));
+        auto* loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            // idx = 0u
+            idx = b.Var("idx", 0_u);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // idx < 20u
+            auto* binary = b.LessThan<bool>(b.Load(idx), 20_u);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            // access_arr = arr[idx]
+            // idx: [0u, 19u]
+            auto* load_idx = b.Load(idx);
+            auto* access_arr = b.Access(ty.ptr<function, u32>(), arr, load_idx);
+            b.Load(access_arr);
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            // idx++
+            b.Store(idx, b.Add<u32>(b.Load(idx), 1_u));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* expect = R"(
+%func = func():void {
+  $B1: {
+    %arr:ptr<function, array<u32, 20>, read_write> = var undef
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, u32, read_write> = var 0u
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %4:u32 = load %idx
+        %5:bool = lt %4, 20u
+        if %5 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        %6:u32 = load %idx
+        %7:ptr<function, u32, read_write> = access %arr, %6
+        %8:u32 = load %7
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %9:u32 = load %idx
+        %10:u32 = add %9, 1u
+        store %idx, %10
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    cfg.clamp_function = true;
+    cfg.use_integer_range_analysis = true;
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, AccessArrayWithIndex_MaxBound_LessThan_Limit) {
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        Var* idx = nullptr;
+        // arr = array<u32, 20>
+        auto* arr = b.Var("arr", ty.ptr(function, ty.array<u32, 20>()));
+        auto* loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            // idx = 0u
+            idx = b.Var("idx", 0_u);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // idx < 19u
+            auto* binary = b.LessThan<bool>(b.Load(idx), 19_u);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            // access_arr = arr[idx]
+            // idx: [0u, 18u]
+            auto* load_idx = b.Load(idx);
+            auto* access_arr = b.Access(ty.ptr<function, u32>(), arr, load_idx);
+            b.Load(access_arr);
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            // idx++
+            b.Store(idx, b.Add<u32>(b.Load(idx), 1_u));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* expect = R"(
+%func = func():void {
+  $B1: {
+    %arr:ptr<function, array<u32, 20>, read_write> = var undef
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, u32, read_write> = var 0u
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %4:u32 = load %idx
+        %5:bool = lt %4, 19u
+        if %5 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        %6:u32 = load %idx
+        %7:ptr<function, u32, read_write> = access %arr, %6
+        %8:u32 = load %7
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %9:u32 = load %idx
+        %10:u32 = add %9, 1u
+        store %idx, %10
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    cfg.clamp_function = true;
+    cfg.use_integer_range_analysis = true;
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, AccessArrayWithIndex_MaxBound_GreaterThan_Limit) {
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        Var* idx = nullptr;
+        // arr = array<u32, 20>
+        auto* arr = b.Var("arr", ty.ptr(function, ty.array<u32, 20>()));
+        auto* loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            // idx = 0u
+            idx = b.Var("idx", 0_u);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // idx < 21u
+            auto* binary = b.LessThan<bool>(b.Load(idx), 21_u);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            // access_arr = arr[idx]
+            // idx: [0, 20u]
+            auto* load_idx = b.Load(idx);
+            auto* access_arr = b.Access(ty.ptr<function, u32>(), arr, load_idx);
+            b.Load(access_arr);
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            // idx++
+            b.Store(idx, b.Add<u32>(b.Load(idx), 1_u));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* expect = R"(
+%func = func():void {
+  $B1: {
+    %arr:ptr<function, array<u32, 20>, read_write> = var undef
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, u32, read_write> = var 0u
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %4:u32 = load %idx
+        %5:bool = lt %4, 21u
+        if %5 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        %6:u32 = load %idx
+        %7:u32 = min %6, 19u
+        %8:ptr<function, u32, read_write> = access %arr, %7
+        %9:u32 = load %8
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %10:u32 = load %idx
+        %11:u32 = add %10, 1u
+        store %idx, %11
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    cfg.clamp_function = true;
+    cfg.use_integer_range_analysis = true;
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, AccessArrayWithIndex_IndexNoRange) {
+    auto* func = b.Function("func", ty.void_());
+    auto* param = b.FunctionParam("param", ty.u32());
+    func->AppendParam(param);
+    b.Append(func->Block(), [&] {
+        // arr = array<u32, 20>
+        auto* arr = b.Var("arr", ty.ptr(function, ty.array<u32, 20>()));
+        auto* access_arr = b.Access(ty.ptr<function, u32>(), arr, param);
+        b.Load(access_arr);
+        b.Return(func);
+    });
+
+    auto* expect = R"(
+%func = func(%param:u32):void {
+  $B1: {
+    %arr:ptr<function, array<u32, 20>, read_write> = var undef
+    %4:u32 = min %param, 19u
+    %5:ptr<function, u32, read_write> = access %arr, %4
+    %6:u32 = load %5
+    ret
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    cfg.clamp_function = true;
+    cfg.use_integer_range_analysis = true;
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, AccessArrayWithExpression_MaxBound_Equal_Limit) {
+    auto* func = b.ComputeFunction("my_func", 4_u, 1_u, 1_u);
+    auto* local_invocation_id = b.FunctionParam("local_id", mod.Types().vec3<u32>());
+    local_invocation_id->SetBuiltin(tint::core::BuiltinValue::kLocalInvocationId);
+    func->SetParams({local_invocation_id});
+
+    b.Append(func->Block(), [&] {
+        Var* idx = nullptr;
+
+        // factor = 4
+        auto* factor = b.Constant(4_u);
+        // arr = array<u32, 32>
+        auto* arr = b.Var("arr", ty.ptr(function, ty.array<u32, 32>()));
+        auto* loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            // idx = 0
+            idx = b.Var("idx", 0_u);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // idx < 8
+            auto* binary = b.LessThan<bool>(b.Load(idx), 8_u);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+
+            // access_idx = idx * factor + local_id.x
+            // access_idx: [0, 31] (idx: [0, 7], factor = 4, local_id.x: [0, 3])
+            auto* load_idx = b.Load(idx);
+            auto* multiply = b.Multiply<u32>(load_idx, factor);
+            auto* access_local_id_x = b.Access(ty.u32(), local_invocation_id, 0_u);
+            auto* access_idx = b.Add<u32>(multiply, access_local_id_x);
+
+            // access_arr = arr[access_idx]
+            auto* access_arr = b.Access(ty.ptr<function, u32>(), arr, access_idx);
+            b.Load(access_arr);
+
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            // idx++
+            b.Store(idx, b.Add<u32>(b.Load(idx), 1_u));
+            b.NextIteration(loop);
+        });
+
+        b.Return(func);
+    });
+
+    auto* expect = R"(
+%my_func = @compute @workgroup_size(4u, 1u, 1u) func(%local_id:vec3<u32> [@local_invocation_id]):void {
+  $B1: {
+    %arr:ptr<function, array<u32, 32>, read_write> = var undef
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, u32, read_write> = var 0u
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %5:u32 = load %idx
+        %6:bool = lt %5, 8u
+        if %6 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        %7:u32 = load %idx
+        %8:u32 = mul %7, 4u
+        %9:u32 = access %local_id, 0u
+        %10:u32 = add %8, %9
+        %11:ptr<function, u32, read_write> = access %arr, %10
+        %12:u32 = load %11
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %13:u32 = load %idx
+        %14:u32 = add %13, 1u
+        store %idx, %14
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    cfg.clamp_function = true;
+    cfg.use_integer_range_analysis = true;
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, AccessArrayWithIndex_I32_NegativeMinBound) {
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        Var* idx = nullptr;
+        // arr = array<u32, 20>
+        auto* arr = b.Var("arr", ty.ptr(function, ty.array<u32, 20>()));
+        auto* loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            // idx = -1
+            idx = b.Var("idx", -1_i);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // idx < 20
+            auto* binary = b.LessThan<bool>(b.Load(idx), 20_i);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            // access_arr = arr[idx]
+            // idx: [-1, 19]
+            auto* load_idx = b.Load(idx);
+            auto* access_arr = b.Access(ty.ptr<function, u32>(), arr, load_idx);
+            b.Load(access_arr);
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            // idx++
+            b.Store(idx, b.Add<i32>(b.Load(idx), 1_i));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* expect = R"(
+%func = func():void {
+  $B1: {
+    %arr:ptr<function, array<u32, 20>, read_write> = var undef
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, i32, read_write> = var -1i
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %4:i32 = load %idx
+        %5:bool = lt %4, 20i
+        if %5 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        %6:i32 = load %idx
+        %7:u32 = convert %6
+        %8:u32 = min %7, 19u
+        %9:ptr<function, u32, read_write> = access %arr, %8
+        %10:u32 = load %9
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %11:i32 = load %idx
+        %12:i32 = add %11, 1i
+        store %idx, %12
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    cfg.clamp_function = true;
+    cfg.use_integer_range_analysis = true;
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, AccessArrayWithIndex_MaxBound_Equal_Limit_I32) {
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        Var* idx = nullptr;
+        // arr = array<u32, 20>
+        auto* arr = b.Var("arr", ty.ptr(function, ty.array<u32, 20>()));
+        auto* loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            // idx = 0
+            idx = b.Var("idx", 0_i);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // idx < 20
+            auto* binary = b.LessThan<bool>(b.Load(idx), 20_i);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            // access_arr = arr[idx]
+            // idx: [0, 19]
+            auto* load_idx = b.Load(idx);
+            auto* access_arr = b.Access(ty.ptr<function, u32>(), arr, load_idx);
+            b.Load(access_arr);
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            // idx++
+            b.Store(idx, b.Add<i32>(b.Load(idx), 1_i));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* expect = R"(
+%func = func():void {
+  $B1: {
+    %arr:ptr<function, array<u32, 20>, read_write> = var undef
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, i32, read_write> = var 0i
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %4:i32 = load %idx
+        %5:bool = lt %4, 20i
+        if %5 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        %6:i32 = load %idx
+        %7:ptr<function, u32, read_write> = access %arr, %6
+        %8:u32 = load %7
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %9:i32 = load %idx
+        %10:i32 = add %9, 1i
+        store %idx, %10
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    cfg.clamp_function = true;
+    cfg.use_integer_range_analysis = true;
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest,
+       AccessArrayWithIndex_MaxBound_LessThan_Limit_I32) {
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        Var* idx = nullptr;
+        // arr = array<u32, 20>
+        auto* arr = b.Var("arr", ty.ptr(function, ty.array<u32, 20>()));
+        auto* loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            // idx = 0
+            idx = b.Var("idx", 0_i);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // idx < 19
+            auto* binary = b.LessThan<bool>(b.Load(idx), 19_i);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            // access_arr = arr[idx]
+            // idx: [0, 18]
+            auto* load_idx = b.Load(idx);
+            auto* access_arr = b.Access(ty.ptr<function, u32>(), arr, load_idx);
+            b.Load(access_arr);
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            // idx++
+            b.Store(idx, b.Add<i32>(b.Load(idx), 1_i));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* expect = R"(
+%func = func():void {
+  $B1: {
+    %arr:ptr<function, array<u32, 20>, read_write> = var undef
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, i32, read_write> = var 0i
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %4:i32 = load %idx
+        %5:bool = lt %4, 19i
+        if %5 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        %6:i32 = load %idx
+        %7:ptr<function, u32, read_write> = access %arr, %6
+        %8:u32 = load %7
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %9:i32 = load %idx
+        %10:i32 = add %9, 1i
+        store %idx, %10
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    cfg.clamp_function = true;
+    cfg.use_integer_range_analysis = true;
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest,
+       AccessArrayWithIndex_MaxBound_GreaterThan_Limit_I32) {
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        Var* idx = nullptr;
+        // arr = array<u32, 20>
+        auto* arr = b.Var("arr", ty.ptr(function, ty.array<u32, 20>()));
+        auto* loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            // idx = 0
+            idx = b.Var("idx", 0_i);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // idx < 21
+            auto* binary = b.LessThan<bool>(b.Load(idx), 21_i);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            // access_arr = arr[idx]
+            // idx: [0, 20]
+            auto* load_idx = b.Load(idx);
+            auto* access_arr = b.Access(ty.ptr<function, u32>(), arr, load_idx);
+            b.Load(access_arr);
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            // idx++
+            b.Store(idx, b.Add<i32>(b.Load(idx), 1_i));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* expect = R"(
+%func = func():void {
+  $B1: {
+    %arr:ptr<function, array<u32, 20>, read_write> = var undef
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, i32, read_write> = var 0i
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %4:i32 = load %idx
+        %5:bool = lt %4, 21i
+        if %5 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        %6:i32 = load %idx
+        %7:u32 = convert %6
+        %8:u32 = min %7, 19u
+        %9:ptr<function, u32, read_write> = access %arr, %8
+        %10:u32 = load %9
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %11:i32 = load %idx
+        %12:i32 = add %11, 1i
+        store %idx, %12
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    cfg.clamp_function = true;
+    cfg.use_integer_range_analysis = true;
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, AccessArrayWithIndex_IndexNoRange_I32) {
+    auto* func = b.Function("func", ty.void_());
+    auto* param = b.FunctionParam("param", ty.i32());
+    func->AppendParam(param);
+    b.Append(func->Block(), [&] {
+        // arr = array<u32, 20>
+        auto* arr = b.Var("arr", ty.ptr(function, ty.array<u32, 20>()));
+        auto* access_arr = b.Access(ty.ptr<function, u32>(), arr, param);
+        b.Load(access_arr);
+        b.Return(func);
+    });
+
+    auto* expect = R"(
+%func = func(%param:i32):void {
+  $B1: {
+    %arr:ptr<function, array<u32, 20>, read_write> = var undef
+    %4:u32 = convert %param
+    %5:u32 = min %4, 19u
+    %6:ptr<function, u32, read_write> = access %arr, %5
+    %7:u32 = load %6
+    ret
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    cfg.clamp_function = true;
+    cfg.use_integer_range_analysis = true;
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, AccessArrayWithIndex_DynamicSizedArray) {
+    // arr = array<u32>
+    auto* arr = b.Var("arr", ty.ptr(storage, ty.array<u32>()));
+    arr->SetBindingPoint(0, 0);
+    mod.root_block->Append(arr);
+
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        Var* idx = nullptr;
+        auto* loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            // idx = 0u
+            idx = b.Var("idx", 0_u);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // idx < 20u
+            auto* binary = b.LessThan<bool>(b.Load(idx), 20_u);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            // access_arr = arr[idx]
+            // idx: [0u, 19u]
+            auto* load_idx = b.Load(idx);
+            auto* access_arr = b.Access(ty.ptr<storage, u32>(), arr, load_idx);
+            b.Load(access_arr);
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            // idx++
+            b.Store(idx, b.Add<u32>(b.Load(idx), 1_u));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* expect = R"(
+$B1: {  # root
+  %arr:ptr<storage, array<u32>, read_write> = var undef @binding_point(0, 0)
+}
+
+%func = func():void {
+  $B2: {
+    loop [i: $B3, b: $B4, c: $B5] {  # loop_1
+      $B3: {  # initializer
+        %idx:ptr<function, u32, read_write> = var 0u
+        next_iteration  # -> $B4
+      }
+      $B4: {  # body
+        %4:u32 = load %idx
+        %5:bool = lt %4, 20u
+        if %5 [t: $B6, f: $B7] {  # if_1
+          $B6: {  # true
+            exit_if  # if_1
+          }
+          $B7: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        %6:u32 = load %idx
+        %7:u32 = arrayLength %arr
+        %8:u32 = sub %7, 1u
+        %9:u32 = min %6, %8
+        %10:ptr<storage, u32, read_write> = access %arr, %9
+        %11:u32 = load %10
+        continue  # -> $B5
+      }
+      $B5: {  # continuing
+        %12:u32 = load %idx
+        %13:u32 = add %12, 1u
+        store %idx, %13
+        next_iteration  # -> $B4
+      }
+    }
+    ret
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    cfg.clamp_function = true;
+    cfg.clamp_storage = true;
+    cfg.use_integer_range_analysis = true;
     Run(Robustness, cfg);
 
     EXPECT_EQ(expect, str());

@@ -28,7 +28,9 @@
 #include "src/tint/lang/core/ir/transform/robustness.h"
 
 #include <algorithm>
+#include <optional>
 
+#include "src/tint/lang/core/ir/analysis/integer_range_analysis.h"
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/validator.h"
@@ -57,6 +59,9 @@ struct State {
     /// The type manager.
     core::type::Manager& ty{ir.Types()};
 
+    /// For integer range analysis when needed
+    std::optional<ir::analysis::IntegerRangeAnalysis> integer_range_analysis = {};
+
     /// Process the module.
     void Process() {
         // Find the access instructions that may need to be clamped.
@@ -65,6 +70,11 @@ struct State {
         Vector<ir::StoreVectorElement*, 64> vector_stores;
         Vector<ir::CoreBuiltinCall*, 64> subgroup_matrix_calls;
         Vector<ir::CoreBuiltinCall*, 64> texture_calls;
+
+        if (config.use_integer_range_analysis) {
+            integer_range_analysis.emplace(&ir);
+        }
+
         for (auto* inst : ir.Instructions()) {
             tint::Switch(
                 inst,  //
@@ -215,6 +225,49 @@ struct State {
         inst->SetOperand(op_idx, clamped_idx);
     }
 
+    /// Check if operand @p idx may be less than 0 or greater than @p limit with integer range
+    /// analysis algorithm.
+    /// @param idx the index to check
+    /// @param limit the upper limit @idx to compare with.
+    /// @returns true when @idx may be out of bound, false otherwise
+    bool IndexMayOutOfBound(ir::Value* idx, ir::Value* limit) {
+        // Return true when integer range analysis is disabled.
+        if (!integer_range_analysis.has_value()) {
+            return true;
+        }
+
+        // Return true when `limit` is not a constant value.
+        auto* const_limit = limit->As<ir::Constant>();
+        if (!const_limit) {
+            return true;
+        }
+
+        // Return true when we cannot get a valid range for `idx`.
+        const auto* integer_range = integer_range_analysis->GetInfo(idx);
+        if (!integer_range) {
+            return true;
+        }
+
+        TINT_ASSERT(const_limit->Value()->Type()->Is<type::U32>());
+        uint32_t const_limit_value = const_limit->Value()->ValueAs<uint32_t>();
+
+        using SignedIntegerRange = ir::analysis::IntegerRangeInfo::SignedIntegerRange;
+        using UnsignedIntegerRange = ir::analysis::IntegerRangeInfo::UnsignedIntegerRange;
+
+        // Return true when `idx` may be negative or the upper bound of `idx` is greater than
+        // `limit`.
+        if (std::holds_alternative<UnsignedIntegerRange>(integer_range->range)) {
+            UnsignedIntegerRange range = std::get<UnsignedIntegerRange>(integer_range->range);
+            return range.max_bound > static_cast<uint64_t>(const_limit_value);
+        } else {
+            SignedIntegerRange range = std::get<SignedIntegerRange>(integer_range->range);
+            if (range.min_bound < 0) {
+                return true;
+            }
+            return range.max_bound > static_cast<int64_t>(const_limit_value);
+        }
+    }
+
     /// Clamp the indices of an access instruction to ensure they are within the limits of the types
     /// that they are indexing into.
     /// @param access the access instruction
@@ -262,7 +315,7 @@ struct State {
                 });
 
             // If there's a dynamic limit that needs enforced, clamp the index operand.
-            if (limit) {
+            if (limit && IndexMayOutOfBound(idx, limit)) {
                 ClampOperand(access, ir::Access::kIndicesOperandOffset + i, limit);
             }
 
