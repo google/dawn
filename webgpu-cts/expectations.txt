@@ -122,21 +122,6 @@ crbug.com/42240909 [ android ] webgpu:web_platform,canvas,configure:viewFormats:
 # sample_mask tests causing instability
 crbug.com/42251115 [ qualcomm ] webgpu:api,operation,render_pipeline,sample_mask:* [ Skip ]
 
-# Windows x86 FXC "bit 22" failures
-crbug.com/42250788 [ target-cpu-32 webgpu-dxc-disabled win10 ] webgpu:shader,execution,expression,binary,bitwise:bitwise_and_compound:type="i32";inputSource="const";* [ Skip ]
-crbug.com/42250788 [ target-cpu-32 webgpu-dxc-disabled win10 ] webgpu:shader,execution,expression,binary,bitwise:bitwise_and_compound:type="u32";inputSource="const";* [ Skip ]
-crbug.com/42250788 [ target-cpu-32 webgpu-dxc-disabled win10 ] webgpu:shader,execution,expression,binary,bitwise:bitwise_exclusive_or:type="i32";inputSource="const";* [ Skip ]
-crbug.com/42250788 [ target-cpu-32 webgpu-dxc-disabled win10 ] webgpu:shader,execution,expression,binary,bitwise:bitwise_exclusive_or:type="u32";inputSource="const";* [ Skip ]
-crbug.com/42250788 [ target-cpu-32 webgpu-dxc-disabled win10 ] webgpu:shader,execution,expression,binary,bitwise:bitwise_exclusive_or_compound:type="i32";inputSource="const";* [ Skip ]
-crbug.com/42250788 [ target-cpu-32 webgpu-dxc-disabled win10 ] webgpu:shader,execution,expression,binary,bitwise:bitwise_exclusive_or_compound:type="u32";inputSource="const";* [ Skip ]
-crbug.com/42250788 [ target-cpu-32 webgpu-dxc-disabled win10 ] webgpu:shader,execution,expression,binary,bitwise_shift:shift_right_concrete:type="i32";inputSource="const";* [ Skip ]
-crbug.com/42250788 [ target-cpu-32 webgpu-dxc-disabled win10 ] webgpu:shader,execution,expression,binary,i32_arithmetic:division:inputSource="const";* [ Skip ]
-crbug.com/42250788 [ target-cpu-32 webgpu-dxc-disabled win10 ] webgpu:shader,execution,expression,binary,i32_arithmetic:division_scalar_vector:inputSource="const";* [ Skip ]
-crbug.com/42250788 [ target-cpu-32 webgpu-dxc-disabled win10 ] webgpu:shader,execution,expression,binary,i32_arithmetic:division_vector_scalar:inputSource="const";* [ Skip ]
-crbug.com/42250788 [ target-cpu-32 webgpu-dxc-disabled win10 ] webgpu:shader,execution,expression,call,builtin,pack4x8snorm:pack:inputSource="const" [ Skip ]
-crbug.com/42250788 [ target-cpu-32 webgpu-dxc-disabled win10 ] webgpu:shader,execution,expression,unary,i32_arithmetic:negation:inputSource="const";* [ Skip ]
-crbug.com/42250788 [ target-cpu-32 webgpu-dxc-disabled win10 ] webgpu:shader,execution,expression,unary,i32_complement:i32_complement:inputSource="const";* [ Skip ]
-crbug.com/42250788 [ target-cpu-32 webgpu-dxc-disabled win10 ] webgpu:shader,execution,expression,unary,u32_complement:u32_complement:inputSource="const";* [ Skip ]
 
 # D3D12 create command queue failed with DXGI_ERROR_DEVICE_REMOVED. Skipped because these tests likely cause downstream flakes.
 crbug.com/41491936 [ nvidia-0x2184 win10 ] webgpu:api,validation,capability_checks,* [ Skip ]
