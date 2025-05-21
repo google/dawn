@@ -90,6 +90,8 @@ add_subdirectory(binding)
 add_subdirectory(interop)
 
 add_library(dawn_node SHARED
+    "ManualConstructors.cpp"
+    "ManualConstructors.h"
     "Module.cpp"
 )
 common_compile_options(dawn_node)

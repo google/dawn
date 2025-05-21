@@ -67,6 +67,7 @@ namespace wgpu::interop {
 // Primitive JavaScript types
 ////////////////////////////////////////////////////////////////////////////////
 using Object = Napi::Object;
+using Event = Napi::Object;
 using ArrayBuffer = Napi::ArrayBuffer;
 using Int8Array = Napi::TypedArrayOf<int8_t>;
 using Int16Array = Napi::TypedArrayOf<int16_t>;

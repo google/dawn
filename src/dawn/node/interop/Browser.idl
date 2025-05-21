@@ -40,12 +40,6 @@ dictionary EventInit {
 
 [LegacyNoInterfaceObject] interface Navigator {};
 
-[LegacyNoInterfaceObject] interface Event {
-  readonly attribute boolean bubbles;
-  readonly attribute boolean cancelable;
-  attribute boolean returnValue;
-};
-
 [LegacyNoInterfaceObject] interface WorkerNavigator{};
 
 [LegacyNoInterfaceObject] interface EventListener {
@@ -86,3 +80,7 @@ typedef (ArrayBuffer or /* SharedArrayBuffer or [AllowShared] */ ArrayBufferView
 [LegacyNoInterfaceObject] interface VideoFrame {};
 
 enum PredefinedColorSpace { "srgb", "display-p3" };
+
+// Add this annotation to GPUUncapturedErrorEvent as we need to treat it special.
+[ManualImplementation]
+interface GPUUncapturedErrorEvent {};

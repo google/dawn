@@ -624,7 +624,7 @@ void GPUDevice::removeEventListener(
     UNIMPLEMENTED(env);
 }
 
-bool GPUDevice::dispatchEvent(Napi::Env env, interop::Interface<interop::Event> event) {
+bool GPUDevice::dispatchEvent(Napi::Env env, interop::Event event) {
     // TODO(dawn:1348): Implement support for the "unhandlederror" event.
     UNIMPLEMENTED(env, {});
 }

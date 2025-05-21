@@ -277,7 +277,11 @@ shared_library("dawn_node") {
   output_name = "dawn"
   output_extension = "node"
   output_prefix_override = true  # dawn.node, not libdawn.node
-  sources = [ "Module.cpp" ]
+  sources = [
+    "ManualConstructors.cpp",
+    "ManualConstructors.h",
+    "Module.cpp",
+  ]
   deps = [
     ":copy_cts_js",
     ":copy_index_js",
