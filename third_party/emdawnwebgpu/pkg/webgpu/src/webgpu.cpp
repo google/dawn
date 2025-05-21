@@ -220,20 +220,20 @@ class RefCountedWithExternalCount : public RefCounted {
 template <typename T>
 class Ref {
  public:
-  static_assert(std::is_convertible_v<T, RefCounted*>,
-                "Cannot make a Ref<T> when T is not a Refcounted type.");
-
-  Ref() : mValue(nullptr) {}
+  Ref() : mValue(nullptr) {
+    static_assert(std::is_convertible_v<T*, RefCounted*>,
+                  "Cannot make a Ref<T> when T is not a Refcounted type.");
+  }
   ~Ref() { Release(mValue); }
 
   // Constructors from nullptr.
   // NOLINTNEXTLINE(runtime/explicit)
   constexpr Ref(std::nullptr_t) : Ref() {}
 
-  // Constructors from T.
+  // Constructors from T*.
   // NOLINTNEXTLINE(runtime/explicit)
-  Ref(T value) : mValue(value) { AddRef(value); }
-  Ref<T>& operator=(const T& value) {
+  Ref(T* value) : mValue(value) { AddRef(value); }
+  Ref<T>& operator=(T* value) {
     Set(value);
     return *this;
   }
@@ -256,29 +256,29 @@ class Ref {
   explicit operator bool() const { return !!mValue; }
 
   // Smart pointer methods.
-  const T& Get() const { return mValue; }
-  T& Get() { return mValue; }
-  const T operator->() const { return mValue; }
-  T operator->() { return mValue; }
+  const T* Get() const { return mValue; }
+  T* Get() { return mValue; }
+  const T* operator->() const { return mValue; }
+  T* operator->() { return mValue; }
 
-  [[nodiscard]] T Detach() {
-    T value = mValue;
+  [[nodiscard]] T* Detach() {
+    T* value = mValue;
     mValue = nullptr;
     return value;
   }
 
-  void Acquire(T value) {
+  void Acquire(T* value) {
     Release(mValue);
     mValue = value;
   }
 
  private:
-  static void AddRef(T value) {
+  static void AddRef(T* value) {
     if (value != nullptr) {
       value->RefCounted::AddRef();
     }
   }
-  static void Release(T value) {
+  static void Release(T* value) {
     if (value != nullptr && value->RefCounted::Release()) {
       delete value;
       // emwgpuDelete() removes the pointer from the jsObjects mapping.
@@ -289,7 +289,7 @@ class Ref {
     }
   }
 
-  void Set(T value) {
+  void Set(T* value) {
     if (mValue != value) {
       // Ensure that the new value is referenced before the old is released to
       // prevent any transitive frees that may affect the new value.
@@ -299,18 +299,18 @@ class Ref {
     }
   }
 
-  T mValue;
+  T* mValue;
 };
 
 template <typename T>
-Ref<T*> AcquireRef(T* pointee) {
-  Ref<T*> ref;
+Ref<T> AcquireRef(T* pointee) {
+  Ref<T> ref;
   ref.Acquire(pointee);
   return ref;
 }
 
 template <typename T>
-auto ReturnToAPI(Ref<T*>&& object) {
+auto ReturnToAPI(Ref<T>&& object) {
   if constexpr (T::HasExternalRefCount) {
     // For an object which has external ref count, just need to increase the
     // external ref count, and keep the total ref count unchanged.
@@ -794,7 +794,7 @@ struct WGPUDeviceImpl final : public EventSource,
  private:
   void WillDropLastExternalRef() override;
 
-  Ref<WGPUQueue> mQueue;
+  Ref<WGPUQueueImpl> mQueue;
   WGPUUncapturedErrorCallbackInfo mUncapturedErrorCallbackInfo =
       WGPU_UNCAPTURED_ERROR_CALLBACK_INFO_INIT;
   FutureID mDeviceLostFutureId = kNullFutureId;
@@ -902,12 +902,12 @@ class CompilationInfoEvent final : public TrackedEvent {
   void* mUserdata1 = nullptr;
   void* mUserdata2 = nullptr;
 
-  Ref<WGPUShaderModule> mShader;
+  Ref<WGPUShaderModuleImpl> mShader;
   WGPUCompilationInfoRequestStatus mStatus =
       WGPUCompilationInfoRequestStatus_Success;
 };
 
-template <typename Pipeline, EventType Type, typename CallbackInfo>
+template <typename PipelineImpl, EventType Type, typename CallbackInfo>
 class CreatePipelineEventBase final : public TrackedEvent {
  public:
   static constexpr EventType kType = Type;
@@ -921,7 +921,7 @@ class CreatePipelineEventBase final : public TrackedEvent {
   EventType GetType() override { return kType; }
 
   void ReadyHook(WGPUCreatePipelineAsyncStatus status,
-                 Pipeline pipeline,
+                 PipelineImpl* pipeline,
                  const char* message) {
     mStatus = status;
     mPipeline.Acquire(pipeline);
@@ -951,15 +951,15 @@ class CreatePipelineEventBase final : public TrackedEvent {
   void* mUserdata2 = nullptr;
 
   WGPUCreatePipelineAsyncStatus mStatus = WGPUCreatePipelineAsyncStatus_Success;
-  Ref<Pipeline> mPipeline;
+  Ref<PipelineImpl> mPipeline;
   std::string mMessage;
 };
 using CreateComputePipelineEvent =
-    CreatePipelineEventBase<WGPUComputePipeline,
+    CreatePipelineEventBase<WGPUComputePipelineImpl,
                             EventType::CreateComputePipeline,
                             WGPUCreateComputePipelineAsyncCallbackInfo>;
 using CreateRenderPipelineEvent =
-    CreatePipelineEventBase<WGPURenderPipeline,
+    CreatePipelineEventBase<WGPURenderPipelineImpl,
                             EventType::CreateRenderPipeline,
                             WGPUCreateRenderPipelineAsyncCallbackInfo>;
 
@@ -1012,7 +1012,7 @@ class DeviceLostEvent final : public TrackedEvent {
   void* mUserdata1 = nullptr;
   void* mUserdata2 = nullptr;
 
-  Ref<WGPUDevice> mDevice;
+  Ref<WGPUDeviceImpl> mDevice;
 
   WGPUDeviceLostReason mReason;
   std::string mMessage;
@@ -1120,7 +1120,7 @@ class MapAsyncEvent final : public TrackedEvent {
   void* mUserdata1 = nullptr;
   void* mUserdata2 = nullptr;
 
-  Ref<WGPUBuffer> mBuffer;
+  Ref<WGPUBufferImpl> mBuffer;
   WGPUMapAsyncStatus mStatus = WGPUMapAsyncStatus_Success;
   std::string mMessage;
 };
@@ -1168,7 +1168,7 @@ class RequestAdapterEvent final : public TrackedEvent {
   void* mUserdata2 = nullptr;
 
   WGPURequestAdapterStatus mStatus;
-  Ref<WGPUAdapter> mAdapter;
+  Ref<WGPUAdapterImpl> mAdapter;
   std::string mMessage;
 };
 
@@ -1215,7 +1215,7 @@ class RequestDeviceEvent final : public TrackedEvent {
   void* mUserdata2 = nullptr;
 
   WGPURequestDeviceStatus mStatus;
-  Ref<WGPUDevice> mDevice;
+  Ref<WGPUDeviceImpl> mDevice;
   std::string mMessage;
 };
 
