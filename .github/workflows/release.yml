@@ -29,7 +29,8 @@ jobs:
           tag_name: ${{ steps.build.outputs.PKG_VERSION }}
           # User-facing release info
           name: ${{ steps.build.outputs.PKG_VERSION }}
-          body_path: out/wasm/emdawnwebgpu_pkg/VERSION.txt
+          body_path: RELEASE_INFO.md
           # Files to release (one per line)
           files: |
+            ${{ steps.build.outputs.REMOTE_PORT_FILE }}
             ${{ steps.build.outputs.PKG_FILE }}

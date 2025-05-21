@@ -34,7 +34,7 @@ import os
 import zlib
 from typing import Union, Dict, Optional
 
-LICENSE = 'mixed licenses, see license files'
+LICENSE = "Some files: BSD 3-Clause License. Other files: Emscripten's license (available under both MIT License and University of Illinois/NCSA Open Source License)"
 
 # User options, e.g. --use-port=path/to/emdawnwebgpu.port.py:cpp_bindings=false
 OPTIONS = {
