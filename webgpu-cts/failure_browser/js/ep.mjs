@@ -179,7 +179,11 @@ function parentOf(path) {
 function prestratify(rows) {
   const hdict = {};
   for (const row of rows) {
-    row.id = row.pathString;
+    // d3 requires id to be unique for each counted item.
+    // Rows may have the same path but different tags, etc.
+    // Include the line number to cover for any differentiating
+    // properties.
+    row.id = `${row.pathString} ${row.lineNumber}`;
   }
   let worklist = rows;
   while(worklist.length > 0) {
