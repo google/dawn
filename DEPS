@@ -366,6 +366,8 @@ deps = {
 
   # Dependencies required to build / run WebAssembly bindings
   'third_party/emsdk': {
+    # Note: Always use an emsdk hash referring to a tagged release, just so
+    # emsdk and emscripten are always in sync with an exact release.
     'url': '{chromium_git}/external/github.com/emscripten-core/emsdk.git@419021fa040428bc69ef1559b325addb8e10211f',
     'condition': 'dawn_wasm',
   },
