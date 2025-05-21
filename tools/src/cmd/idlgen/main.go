@@ -126,6 +126,7 @@ func run() error {
 		"EnumEntryName":              enumEntryName,
 		"Eval":                       g.eval,
 		"HasAnnotation":              hasAnnotation,
+		"HasConstructor":             hasConstructor,
 		"FlattenedAttributesOf":      g.flattenedAttributesOf,
 		"FlattenedConstantsOf":       g.flattenedConstantsOf,
 		"FlattenedMethodsOf":         g.flattenedMethodsOf,
@@ -577,6 +578,17 @@ func hasAnnotation(obj interface{}, name string) bool {
 		return findAnnotation(obj.Annotations, name) != nil || findAnnotation(obj.TypeAnnotations, name) != nil
 	}
 	panic("Unhandled AST node type in hasAnnotation")
+}
+
+func hasConstructor(obj interface{}) bool {
+	iface := obj.(*ast.Interface)
+	for _, member := range iface.Members {
+		member := member.(*ast.Member)
+		if isInitializer(member) {
+			return true
+		}
+	}
+	return false
 }
 
 // Method describes a WebIDL interface method

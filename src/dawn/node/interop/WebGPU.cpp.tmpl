@@ -54,6 +54,11 @@ namespace interop {
 
 namespace {
 
+// This is passed to constructors so that constructor can
+// check if it's being called legitimately from C++ or
+// illegitimately from JavaScript.
+static void* kInternalConstructionMarker = nullptr;
+
 {{template "Wrappers" $}}
 
 }  // namespace
@@ -201,7 +206,15 @@ Wrappers* Wrappers::instance = nullptr;
       return func;
     }
 
-    W{{$.Name}}(const Napi::CallbackInfo& info) : ObjectWrap(info) {}
+    W{{$.Name}}(const Napi::CallbackInfo& info) : ObjectWrap(info) {
+{{-   if and (IsInterface $) (not (HasConstructor $))}}
+        // Check if the first argument is our internal Napi::External<void> marker
+        // to prevent JavaScript from constructing this non-constructable object.
+        if (info.Length() < 1 || !info[0].IsExternal() || info[0].As<Napi::External<void>>().Data() != &kInternalConstructionMarker) {
+           Napi::TypeError::New(info.Env(), "Failed to construct '{{$.Name}}': Illegal constructor").ThrowAsJavaScriptException();
+         }
+{{-   end}}
+    }
 
 {{-  if $s := SetlikeOf $}}
     Napi::Value has(const Napi::CallbackInfo& info) {
@@ -385,7 +398,10 @@ std::ostream& operator<<(std::ostream& o, const {{$.Name}}& dict) {
 
 Interface<{{$.Name}}> {{$.Name}}::Bind(Napi::Env env, std::unique_ptr<{{$.Name}}>&& impl) {
   auto* wrappers = Wrappers::For(env);
-  auto object = wrappers->{{$.Name}}_ctor.New({});
+  // Pass in kInternalConstructionMarker to allow this instance to actually be constructed.
+  auto object = wrappers->{{$.Name}}_ctor.New({
+    Napi::External<void>::New(env, &kInternalConstructionMarker)
+  });
   auto* wrapper = Wrappers::W{{$.Name}}::Unwrap(object);
   wrapper->impl = std::move(impl);
 
