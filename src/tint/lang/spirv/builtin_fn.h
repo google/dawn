@@ -74,6 +74,7 @@ enum class BuiltinFn : uint8_t {
     kImageQuerySamples,
     kImageRead,
     kImageSampleImplicitLod,
+    kImageSampleProjImplicitLod,
     kImageSampleExplicitLod,
     kImageSampleDrefImplicitLod,
     kImageSampleDrefExplicitLod,

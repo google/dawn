@@ -110,6 +110,7 @@ struct State {
                     case spirv::BuiltinFn::kImageQuerySizeLod:
                     case spirv::BuiltinFn::kImageSampleExplicitLod:
                     case spirv::BuiltinFn::kImageSampleImplicitLod:
+                    case spirv::BuiltinFn::kImageSampleProjImplicitLod:
                     case spirv::BuiltinFn::kImageWrite:
                         builtin_worklist.Push(builtin);
                         break;
@@ -139,6 +140,7 @@ struct State {
                     break;
                 case spirv::BuiltinFn::kImageSampleExplicitLod:
                 case spirv::BuiltinFn::kImageSampleImplicitLod:
+                case spirv::BuiltinFn::kImageSampleProjImplicitLod:
                     ImageSample(builtin);
                     break;
                 case spirv::BuiltinFn::kImageWrite:
@@ -170,9 +172,10 @@ struct State {
     }
 
     void ProcessCoords(const core::type::Type* type,
+                       bool is_proj,
                        core::ir::Value* coords,
                        Vector<core::ir::Value*, 5>& new_args) {
-        if (!IsTextureArray(type->As<core::type::Texture>()->Dim())) {
+        if (!is_proj && !IsTextureArray(type->As<core::type::Texture>()->Dim())) {
             new_args.Push(coords);
             return;
         }
@@ -180,21 +183,32 @@ struct State {
         auto* coords_ty = coords->Type()->As<core::type::Vector>();
         TINT_ASSERT(coords_ty);
 
-        auto* new_coords_ty = ty.vec(coords_ty->Type(), coords_ty->Width() - 1);
-        TINT_ASSERT(new_coords_ty->Width() != 4);
+        uint32_t new_coords_width = coords_ty->Width() - 1;
+        auto* new_coords_ty = ty.MatchWidth(coords_ty->Type(), new_coords_width);
 
-        // New coords
-        uint32_t array_idx = 2;
-        Vector<uint32_t, 3> swizzle_idx = {0, 1};
-        if (new_coords_ty->Width() == 3) {
-            swizzle_idx.Push(2);
-            array_idx = 3;
+        Vector<uint32_t, 3> swizzle_idx = {0};
+        if (new_coords_width >= 2) {
+            swizzle_idx.Push(1);
         }
-        new_args.Push(b.Swizzle(new_coords_ty, coords, swizzle_idx)->Result());
+        if (new_coords_width == 3) {
+            swizzle_idx.Push(2);
+        }
+        auto* swizzle = b.Swizzle(new_coords_ty, coords, swizzle_idx);
+        auto* last = b.Swizzle(coords_ty->Type(), coords, Vector{new_coords_width});
 
-        // Array index
-        auto* convert = b.Convert(ty.i32(), b.Swizzle(new_coords_ty->Type(), coords, {array_idx}));
-        new_args.Push(convert->Result());
+        if (is_proj) {
+            // New coords
+            // Divide the coordinates by the last value to simulate the
+            // projection behaviour.
+            new_args.Push(b.Divide(new_coords_ty, swizzle, last)->Result());
+        } else {
+            TINT_ASSERT(new_coords_ty->Is<core::type::Vector>());
+
+            // New coords
+            new_args.Push(swizzle->Result());
+            // Array index
+            new_args.Push(b.Convert(ty.i32(), last)->Result());
+        }
     }
 
     void ProcessOffset(core::ir::Value* offset, Vector<core::ir::Value*, 5>& new_args) {
@@ -243,7 +257,7 @@ struct State {
             new_args.Push(tex);
             new_args.Push(sampler);
 
-            ProcessCoords(tex->Type(), coords, new_args);
+            ProcessCoords(tex->Type(), false, coords, new_args);
 
             if (HasConstOffset(operand_mask)) {
                 ProcessOffset(args[4], new_args);
@@ -268,13 +282,15 @@ struct State {
         auto* coords = args[1];
         uint32_t operand_mask = GetOperandMask(args[2]);
 
+        bool is_proj = call->Func() == spirv::BuiltinFn::kImageSampleProjImplicitLod;
+
         uint32_t idx = 3;
         b.InsertBefore(call, [&] {
             Vector<core::ir::Value*, 5> new_args;
             new_args.Push(tex);
             new_args.Push(sampler);
 
-            ProcessCoords(tex_ty, coords, new_args);
+            ProcessCoords(tex_ty, is_proj, coords, new_args);
 
             core::BuiltinFn fn = core::BuiltinFn::kTextureSample;
             if (HasBias(operand_mask)) {
@@ -334,7 +350,7 @@ struct State {
             Vector<core::ir::Value*, 5> new_args;
             new_args.Push(tex);
 
-            ProcessCoords(tex->Type(), coords, new_args);
+            ProcessCoords(tex->Type(), false, coords, new_args);
 
             new_args.Push(texel);
 

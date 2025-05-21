@@ -693,6 +693,74 @@ fn image_sample_implicit_lod(image: sampled_image< image<f32, dim_cube, is_depth
 
 
 //////////////////////////////////////////////
+// Image Sample Proj Implicit Lod
+//////////////////////////////////////////////
+implicit(T: fiu32, F: texel_format)
+fn image_sample_proj_implicit_lod(image: sampled_image< image<T, dim_1d, non_depth, non_arrayed, single_sampled, sampling_compatible, F, readable> >,
+                                  coords: vec2<f32>,
+                                  image_operands: u32) -> vec4<f32>
+
+implicit(T: fiu32, F: texel_format)
+fn image_sample_proj_implicit_lod(image: sampled_image< image<T, dim_2d, non_depth, non_arrayed, single_sampled, sampling_compatible, F, readable> >,
+                                  coords: vec3<f32>,
+                                  image_operands: u32) -> vec4<f32>
+
+implicit(T: fiu32, F: texel_format)
+fn image_sample_proj_implicit_lod(image: sampled_image< image<T, dim_2d, non_depth, non_arrayed, single_sampled, sampling_compatible, F, readable> >,
+                                  coords: vec3<f32>,
+                                  image_operands: u32,
+                                  bias: f32) -> vec4<f32>
+
+implicit(T: fiu32, Z: iu32, F: texel_format)
+fn image_sample_proj_implicit_lod(image: sampled_image< image<T, dim_2d, non_depth, non_arrayed, single_sampled, sampling_compatible, F, readable> >,
+                                  coords: vec3<f32>,
+                                  image_operands: u32,
+                                  bias: f32,
+                                  const_offset: vec2<Z>) -> vec4<f32>
+
+implicit(T: fiu32, Z: iu32, F: texel_format)
+fn image_sample_proj_implicit_lod(image: sampled_image< image<T, dim_2d, non_depth, non_arrayed, single_sampled, sampling_compatible, F, readable> >,
+                                  coords: vec3<f32>,
+                                  image_operands: u32,
+                                  const_offset: vec2<Z>) -> vec4<f32>
+
+implicit(T: fiu32, F: texel_format)
+fn image_sample_proj_implicit_lod(image: sampled_image< image<T, dim_3d, non_depth, non_arrayed, single_sampled, sampling_compatible, F, readable> >,
+                                  coords: vec4<f32>,
+                                  image_operands: u32) -> vec4<f32>
+
+implicit(T: fiu32, F: texel_format)
+fn image_sample_proj_implicit_lod(image: sampled_image< image<T, dim_3d, non_depth, non_arrayed, single_sampled, sampling_compatible, F, readable> >,
+                                  coords: vec4<f32>,
+                                  image_operands: u32,
+                                  bias: f32) -> vec4<f32>
+
+implicit(T: fiu32, Z: iu32, F: texel_format)
+fn image_sample_proj_implicit_lod(image: sampled_image< image<T, dim_3d, non_depth, non_arrayed, single_sampled, sampling_compatible, F, readable> >,
+                                  coords: vec4<f32>,
+                                  image_operands: u32,
+                                  bias: f32,
+                                  const_offset: vec3<Z>) -> vec4<f32>
+
+implicit(T: fiu32, Z: iu32, F: texel_format)
+fn image_sample_proj_implicit_lod(image: sampled_image< image<T, dim_3d, non_depth, non_arrayed, single_sampled, sampling_compatible, F, readable> >,
+                                  coords: vec4<f32>,
+                                  image_operands: u32,
+                                  const_offset: vec3<Z>) -> vec4<f32>
+
+implicit(F: texel_format)
+fn image_sample_proj_implicit_lod(image: sampled_image< image<f32, dim_2d, is_depth, non_arrayed, single_sampled, sampling_compatible, F, readable> >,
+                                  coords: vec3<f32>,
+                                  image_operands: u32) -> vec4<f32>
+
+implicit(Z: iu32, F: texel_format)
+fn image_sample_proj_implicit_lod(image: sampled_image< image<f32, dim_2d, is_depth, non_arrayed, single_sampled, sampling_compatible, F, readable> >,
+                                  coords: vec3<f32>,
+                                  image_operands: u32,
+                                  const_offset: vec2<Z>) -> vec4<f32>
+
+
+//////////////////////////////////////////////
 // Image Sample Explicit Lod
 //////////////////////////////////////////////
 implicit(T: fiu32, F: texel_format)

@@ -1414,6 +1414,9 @@ class Parser {
                 case spv::Op::OpImageSampleImplicitLod:
                     EmitImageSample(inst, spirv::BuiltinFn::kImageSampleImplicitLod);
                     break;
+                case spv::Op::OpImageSampleProjImplicitLod:
+                    EmitImageSample(inst, spirv::BuiltinFn::kImageSampleProjImplicitLod);
+                    break;
                 case spv::Op::OpImageWrite:
                     EmitImageWrite(inst);
                     break;
