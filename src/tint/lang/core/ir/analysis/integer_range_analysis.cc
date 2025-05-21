@@ -39,6 +39,7 @@
 #include "src/tint/lang/core/ir/let.h"
 #include "src/tint/lang/core/ir/load.h"
 #include "src/tint/lang/core/ir/loop.h"
+#include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/multi_in_block.h"
 #include "src/tint/lang/core/ir/next_iteration.h"
 #include "src/tint/lang/core/ir/store.h"
@@ -107,65 +108,23 @@ IntegerRangeInfo::IntegerRangeInfo(uint64_t min_bound, uint64_t max_bound) {
 }
 
 struct IntegerRangeAnalysisImpl {
-    explicit IntegerRangeAnalysisImpl(Function* func) : function_(func) {
-        // Analyze all of the loops in the function.
-        Traverse(func->Block(), [&](Loop* l) { AnalyzeLoop(l); });
+    explicit IntegerRangeAnalysisImpl(Module* ir_module) {
+        for (Function* func : ir_module->functions) {
+            // Analyze all the function parameters.
+            AnalyzeFunctionParameters(func);
+
+            // Analyze all of the loops in the function.
+            Traverse(func->Block(), [&](Loop* l) { AnalyzeLoop(l); });
+        }
     }
 
     const IntegerRangeInfo* GetInfo(const FunctionParam* param, uint32_t index) {
-        if (!param->Type()->IsIntegerScalarOrVector()) {
+        const auto& range_info = integer_function_param_range_info_map_.Get(param);
+        if (!range_info) {
             return nullptr;
         }
-
-        // Currently we only support the query of ranges of `local_invocation_id` or
-        // `local_invocation_index`.
-        if (!param->Builtin()) {
-            return nullptr;
-        }
-
-        switch (*param->Builtin()) {
-            case BuiltinValue::kLocalInvocationIndex:
-            case BuiltinValue::kLocalInvocationId:
-                break;
-            default:
-                return nullptr;
-        }
-
-        const auto& info = integer_function_param_range_info_map_.GetOrAdd(
-            param, [&]() -> Vector<IntegerRangeInfo, 3> {
-                switch (*param->Builtin()) {
-                    case BuiltinValue::kLocalInvocationIndex: {
-                        // We shouldn't be trying to use range analysis on a module that has
-                        // non-constant workgroup sizes, since we will always have replaced pipeline
-                        // overrides with constant values early in the pipeline.
-                        TINT_ASSERT(function_->WorkgroupSizeAsConst().has_value());
-                        std::array<uint32_t, 3> workgroup_size =
-                            function_->WorkgroupSizeAsConst().value();
-                        uint64_t max_bound =
-                            workgroup_size[0] * workgroup_size[1] * workgroup_size[2] - 1u;
-                        constexpr uint64_t kMinBound = 0;
-
-                        return {IntegerRangeInfo(kMinBound, max_bound)};
-                    }
-                    case BuiltinValue::kLocalInvocationId: {
-                        TINT_ASSERT(function_->WorkgroupSizeAsConst().has_value());
-                        std::array<uint32_t, 3> workgroup_size =
-                            function_->WorkgroupSizeAsConst().value();
-
-                        constexpr uint64_t kMinBound = 0;
-                        Vector<IntegerRangeInfo, 3> integerRanges;
-                        for (uint32_t size_x_y_z : workgroup_size) {
-                            integerRanges.Push({kMinBound, size_x_y_z - 1u});
-                        }
-                        return integerRanges;
-                    }
-                    default:
-                        TINT_UNREACHABLE();
-                }
-            });
-
-        TINT_ASSERT(info.Length() > index);
-        return &info[index];
+        TINT_ASSERT(range_info.value->Length() > index);
+        return &(*range_info.value)[index];
     }
 
     const IntegerRangeInfo* GetInfo(const Var* var) {
@@ -743,6 +702,52 @@ struct IntegerRangeAnalysisImpl {
     }
 
   private:
+    void AnalyzeFunctionParameters(const Function* func) {
+        for (const auto* param : func->Params()) {
+            if (!param->Type()->IsIntegerScalarOrVector()) {
+                return;
+            }
+
+            // Currently we only support the query of ranges of `local_invocation_id` or
+            // `local_invocation_index`.
+            if (!param->Builtin()) {
+                return;
+            }
+
+            switch (*param->Builtin()) {
+                case BuiltinValue::kLocalInvocationIndex: {
+                    // We shouldn't be trying to use range analysis on a module that has
+                    // non-constant workgroup sizes, since we will always have replaced pipeline
+                    // overrides with constant values early in the pipeline.
+                    TINT_ASSERT(func->WorkgroupSizeAsConst().has_value());
+                    std::array<uint32_t, 3> workgroup_size = func->WorkgroupSizeAsConst().value();
+                    uint64_t max_bound =
+                        workgroup_size[0] * workgroup_size[1] * workgroup_size[2] - 1u;
+                    constexpr uint64_t kMinBound = 0;
+                    integer_function_param_range_info_map_.Add(
+                        param,
+                        Vector<IntegerRangeInfo, 3>({IntegerRangeInfo(kMinBound, max_bound)}));
+                    break;
+                }
+                case BuiltinValue::kLocalInvocationId: {
+                    TINT_ASSERT(func->WorkgroupSizeAsConst().has_value());
+                    std::array<uint32_t, 3> workgroup_size = func->WorkgroupSizeAsConst().value();
+
+                    constexpr uint64_t kMinBound = 0;
+                    Vector<IntegerRangeInfo, 3> integerRanges;
+                    for (uint32_t size_x_y_z : workgroup_size) {
+                        integerRanges.Push({kMinBound, size_x_y_z - 1u});
+                    }
+                    integer_function_param_range_info_map_.Add(param, integerRanges);
+                }
+
+                break;
+                default:
+                    break;
+            }
+        }
+    }
+
     const IntegerRangeInfo* ComputeAndCacheIntegerRangeForBinaryAdd(const Binary* binary,
                                                                     const IntegerRangeInfo* lhs,
                                                                     const IntegerRangeInfo* rhs) {
@@ -933,7 +938,6 @@ struct IntegerRangeAnalysisImpl {
         }
     }
 
-    Function* function_;
     Hashmap<const FunctionParam*, Vector<IntegerRangeInfo, 3>, 4>
         integer_function_param_range_info_map_;
     Hashmap<const Var*, IntegerRangeInfo, 8> integer_var_range_info_map_;
@@ -941,8 +945,9 @@ struct IntegerRangeAnalysisImpl {
     Hashmap<const Binary*, IntegerRangeInfo, 8> integer_binary_range_info_map_;
 };
 
-IntegerRangeAnalysis::IntegerRangeAnalysis(Function* func)
-    : impl_(new IntegerRangeAnalysisImpl(func)) {}
+IntegerRangeAnalysis::IntegerRangeAnalysis(Module* ir_module)
+    : impl_(new IntegerRangeAnalysisImpl(ir_module)) {}
+
 IntegerRangeAnalysis::~IntegerRangeAnalysis() = default;
 
 const IntegerRangeInfo* IntegerRangeAnalysis::GetInfo(const FunctionParam* param, uint32_t index) {

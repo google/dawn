@@ -41,6 +41,7 @@ class FunctionParam;
 class Let;
 class Load;
 class Loop;
+class Module;
 class Value;
 class Var;
 }  // namespace tint::core::ir
@@ -72,8 +73,9 @@ struct IntegerRangeAnalysisImpl;
 class IntegerRangeAnalysis {
   public:
     /// Constructor
-    /// @param func the function to cache analyses for
-    explicit IntegerRangeAnalysis(Function* func);
+    /// @module ir_module the ir module to cache analyses for
+    explicit IntegerRangeAnalysis(Module* ir_module);
+
     ~IntegerRangeAnalysis();
 
     /// Returns the integer range info of a given parameter with given index, if it is an integer

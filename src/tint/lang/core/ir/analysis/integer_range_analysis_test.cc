@@ -66,7 +66,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, LocalInvocationIndex_u32_XYZ) {
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     auto* info = analysis.GetInfo(localInvocationIndex);
     ASSERT_NE(nullptr, info);
     ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info->range));
@@ -102,7 +102,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, LocalInvocationIndex_i32_XYZ) {
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     auto* info = analysis.GetInfo(localInvocationIndex);
     ASSERT_NE(nullptr, info);
     ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info->range));
@@ -138,7 +138,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, LocalInvocationIndex_1_Y_1) {
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     auto* info = analysis.GetInfo(localInvocationIndex);
     ASSERT_NE(nullptr, info);
     ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info->range));
@@ -174,7 +174,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, LocalInvocationIndex_1_1_Z) {
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     auto* info = analysis.GetInfo(localInvocationIndex);
     ASSERT_NE(nullptr, info);
     ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info->range));
@@ -228,7 +228,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, LocalInvocationID_u32_XYZ) {
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
 
     std::array<uint32_t, 3> expected_max_bounds = {3u, 2u, 1u};
     for (uint32_t i = 0; i < expected_max_bounds.size(); ++i) {
@@ -271,7 +271,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, LocalInvocationID_u32_1_Y_1) {
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
 
     std::array<uint32_t, 3> expected_max_bounds = {0u, 7u, 0u};
     for (uint32_t i = 0; i < expected_max_bounds.size(); ++i) {
@@ -314,7 +314,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, LocalInvocationID_u32_1_1_Z) {
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
 
     std::array<uint32_t, 3> expected_max_bounds = {0u, 0u, 15u};
     for (uint32_t i = 0; i < expected_max_bounds.size(); ++i) {
@@ -362,7 +362,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopInitializer_Success_sint) {
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
 }
 
@@ -399,7 +399,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopInitializer_Success_uint) {
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
 }
 
@@ -427,7 +427,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopInitializer_Failure_MissingInitia
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(nullptr, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
 }
 
@@ -459,7 +459,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopInitializer_Failure_MissingVarIni
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(nullptr, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
 }
 
@@ -496,7 +496,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopInitializer_Failure_NotInitialize
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(nullptr, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
 }
 
@@ -535,7 +535,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopInitializer_Failure_NotInitialize
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(nullptr, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
 }
 
@@ -581,7 +581,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopInitializer_Failure_InitializerTo
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(nullptr, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
 }
 
@@ -630,7 +630,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopContinuing_Success_AddOne_sint) {
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary,
               analysis.GetBinaryToUpdateLoopControlVariableInContinuingBlockForTest(loop, idx));
@@ -681,7 +681,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopContinuing_Success_AddOne_uint) {
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary,
               analysis.GetBinaryToUpdateLoopControlVariableInContinuingBlockForTest(loop, idx));
@@ -732,7 +732,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopContinuing_Success_OneAddLoopCont
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary,
               analysis.GetBinaryToUpdateLoopControlVariableInContinuingBlockForTest(loop, idx));
@@ -783,7 +783,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopContinuing_Success_OneAddLoopCont
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary,
               analysis.GetBinaryToUpdateLoopControlVariableInContinuingBlockForTest(loop, idx));
@@ -834,7 +834,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopContinuing_Success_MinusOne_sint)
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary,
               analysis.GetBinaryToUpdateLoopControlVariableInContinuingBlockForTest(loop, idx));
@@ -885,7 +885,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopContinuing_Success_MinusOne_uint)
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary,
               analysis.GetBinaryToUpdateLoopControlVariableInContinuingBlockForTest(loop, idx));
@@ -933,7 +933,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopContinuing_Failure_TooFewInstruct
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(nullptr,
               analysis.GetBinaryToUpdateLoopControlVariableInContinuingBlockForTest(loop, idx));
@@ -985,7 +985,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopContinuing_Failure_TooManyInstruc
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(nullptr,
               analysis.GetBinaryToUpdateLoopControlVariableInContinuingBlockForTest(loop, idx));
@@ -1035,7 +1035,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopContinuing_Failure_FirstInstructi
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(nullptr,
               analysis.GetBinaryToUpdateLoopControlVariableInContinuingBlockForTest(loop, idx));
@@ -1090,7 +1090,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopContinuing_Failure_NoLoadFromLoop
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(nullptr,
               analysis.GetBinaryToUpdateLoopControlVariableInContinuingBlockForTest(loop, idx));
 }
@@ -1139,7 +1139,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopContinuing_Failure_SecondInstruct
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(nullptr,
               analysis.GetBinaryToUpdateLoopControlVariableInContinuingBlockForTest(loop, idx));
@@ -1189,7 +1189,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopContinuing_Failure_AddTwo) {
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(nullptr,
               analysis.GetBinaryToUpdateLoopControlVariableInContinuingBlockForTest(loop, idx));
@@ -1239,7 +1239,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopContinuing_Failure_MinusTwo) {
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(nullptr,
               analysis.GetBinaryToUpdateLoopControlVariableInContinuingBlockForTest(loop, idx));
@@ -1289,7 +1289,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopContinuing_Failure_OneMinusLoopCo
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(nullptr,
               analysis.GetBinaryToUpdateLoopControlVariableInContinuingBlockForTest(loop, idx));
@@ -1341,7 +1341,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopContinuing_Failure_AddNonConstant
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(nullptr,
               analysis.GetBinaryToUpdateLoopControlVariableInContinuingBlockForTest(loop, idx));
@@ -1393,7 +1393,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopContinuing_Failure_MinusNonConsta
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(nullptr,
               analysis.GetBinaryToUpdateLoopControlVariableInContinuingBlockForTest(loop, idx));
@@ -1443,7 +1443,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopContinuing_Failure_NeitherAddNorM
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(nullptr,
               analysis.GetBinaryToUpdateLoopControlVariableInContinuingBlockForTest(loop, idx));
@@ -1501,7 +1501,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopContinuing_Failure_NoStoreFromLoo
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(nullptr,
               analysis.GetBinaryToUpdateLoopControlVariableInContinuingBlockForTest(loop, idx));
@@ -1556,7 +1556,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopContinuing_Failure_NoStoreToLoopC
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(nullptr,
               analysis.GetBinaryToUpdateLoopControlVariableInContinuingBlockForTest(loop, idx));
@@ -1625,7 +1625,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_index_LessThan_Const
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
@@ -1700,7 +1700,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_Constant_LessThan_in
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
@@ -1776,7 +1776,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_index_LessThan_Const
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
@@ -1851,7 +1851,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_Constant_LessThan_in
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
@@ -1927,7 +1927,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_index_LessThanEqual_
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
     const IntegerRangeInfo* info = analysis.GetInfo(idx);
@@ -2002,7 +2002,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_index_LessThanEqual_
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
     const IntegerRangeInfo* info = analysis.GetInfo(idx);
@@ -2076,7 +2076,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_constant_LessThanEqu
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
@@ -2151,7 +2151,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_constant_LessThanEqu
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
@@ -2227,7 +2227,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_index_GreaterThan_co
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
@@ -2303,7 +2303,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_index_GreaterThan_co
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
@@ -2379,7 +2379,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_constant_GreaterThan
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
@@ -2455,7 +2455,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_constant_GreaterThan
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
@@ -2531,7 +2531,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_index_GreaterThanEqu
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
@@ -2607,7 +2607,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_index_GreaterThanEqu
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
@@ -2683,7 +2683,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_Constant_GreaterThan
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
@@ -2759,7 +2759,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_Constant_GreaterThan
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
@@ -2836,7 +2836,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_InstructionsOtherTha
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 }
@@ -2904,7 +2904,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_FirstInstructionIsNo
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 }
@@ -2972,7 +2972,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_NoLoadFromLoopContro
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 }
@@ -3052,7 +3052,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_StoreLoopControlVari
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 }
@@ -3120,7 +3120,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_SecondInstructionNot
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 }
@@ -3188,7 +3188,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_BinaryOpIsNotCompari
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 }
@@ -3256,7 +3256,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_IndexCompareWithNonC
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 }
@@ -3324,7 +3324,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_NonConstCompareWithI
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 }
@@ -3393,7 +3393,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_NonIndexCompareWithC
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 }
@@ -3462,7 +3462,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_ConstCompareWithNonI
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 }
@@ -3528,7 +3528,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Index_LessThan_Zero_
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 }
@@ -3594,7 +3594,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Zero_GreaterThan_Ind
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 }
@@ -3660,7 +3660,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Index_GreaterThan_Ma
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 }
@@ -3726,7 +3726,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Max_u32_LessThan_Ind
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 }
@@ -3792,7 +3792,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Index_LessThan_Min_I
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 }
@@ -3858,7 +3858,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Min_I32_GreaterThan_
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 }
@@ -3924,7 +3924,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Index_GreaterThan_Ma
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 }
@@ -3990,7 +3990,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Max_I32_LessThan_Ind
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 }
@@ -4056,7 +4056,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Index_LessThanEqual_
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 }
@@ -4122,7 +4122,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Index_LessThanEqual_
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 }
@@ -4188,7 +4188,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Min_i32_LessThanEqua
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 }
@@ -4254,7 +4254,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Min_u32_LessThanEqua
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 }
@@ -4320,7 +4320,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Index_GreaterThanEqu
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 }
@@ -4386,7 +4386,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Index_GreaterThanEqu
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 }
@@ -4452,7 +4452,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Max_i32_GreaterThanE
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 }
@@ -4518,7 +4518,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Max_u32_GreaterThanE
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 }
@@ -4587,7 +4587,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_NotIfElseAfterCompar
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 }
@@ -4656,7 +4656,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_NotUseLastComparison
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 }
@@ -4727,7 +4727,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_MultipleInstructions
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 }
@@ -4792,7 +4792,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_ExitLoopInTrueBlock)
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 }
@@ -4862,7 +4862,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_TooManyInstructionsI
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 }
@@ -4927,7 +4927,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_NoExitLoopInFalseBlo
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 }
@@ -4995,7 +4995,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_LessThanEqual_init_equal
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
 
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
@@ -5072,7 +5072,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_LessThanEqual_init_equal
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
 
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
@@ -5149,7 +5149,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_LessThanEqual_init_great
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
 
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
@@ -5220,7 +5220,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_LessThanEqual_init_great
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
 
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
@@ -5291,7 +5291,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_index_LessThanEqual_cons
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
 
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
@@ -5362,7 +5362,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_GreaterThanEqual_init_eq
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
@@ -5438,7 +5438,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_GreaterThanEqual_init_eq
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
@@ -5514,7 +5514,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_GreaterThanEqual_init_le
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
@@ -5585,7 +5585,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_GreaterThanEqual_init_le
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
@@ -5657,7 +5657,7 @@ TEST_F(IR_IntegerRangeAnalysisTest,
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
@@ -5728,7 +5728,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_index_LessThanEqual_max_
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
     const IntegerRangeInfo* info = analysis.GetInfo(idx);
@@ -5803,7 +5803,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_index_LessThanEqual_max_
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
     const IntegerRangeInfo* info = analysis.GetInfo(idx);
@@ -5878,7 +5878,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_index_GreaterThanEqual_m
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
     const IntegerRangeInfo* info = analysis.GetInfo(idx);
@@ -5953,7 +5953,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_index_GreaterThanEqual_m
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
     const IntegerRangeInfo* info = analysis.GetInfo(idx);
@@ -6028,7 +6028,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_LessThan_init_greater_th
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
 
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
@@ -6099,7 +6099,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_LessThan_init_equals_rhs
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
 
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
@@ -6170,7 +6170,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_LessThan_init_greater_th
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
 
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
@@ -6241,7 +6241,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_LessThan_init_equals_rhs
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
 
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
@@ -6312,7 +6312,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_index_LessThan_constant_
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
 
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
@@ -6383,7 +6383,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_GreaterThan_init_less_th
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
 
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
@@ -6454,7 +6454,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_GreaterThan_init_equals_
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
 
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
@@ -6525,7 +6525,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_GreaterThan_init_less_th
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
 
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
@@ -6596,7 +6596,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_GreaterThan_init_equals_
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
 
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
@@ -6667,7 +6667,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_index_GreaterThan_consta
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
 
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
@@ -6738,7 +6738,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_LessThanEqual_init_e
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
@@ -6813,7 +6813,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_LessThanEqual_init_e
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
@@ -6889,7 +6889,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_LessThanEqual_init_L
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
@@ -6960,7 +6960,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_LessThanEqual_init_L
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
@@ -7032,7 +7032,7 @@ TEST_F(IR_IntegerRangeAnalysisTest,
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
@@ -7103,7 +7103,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_min_u32_add_1_LessThanEq
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
     const IntegerRangeInfo* info = analysis.GetInfo(idx);
@@ -7178,7 +7178,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_min_i32_add_1_LessThanEq
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
     const IntegerRangeInfo* info = analysis.GetInfo(idx);
@@ -7254,7 +7254,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_GreaterThanEqual_ini
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
@@ -7330,7 +7330,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_GreaterThanEqual_ini
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
@@ -7407,7 +7407,7 @@ TEST_F(IR_IntegerRangeAnalysisTest,
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
@@ -7479,7 +7479,7 @@ TEST_F(IR_IntegerRangeAnalysisTest,
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
@@ -7551,7 +7551,7 @@ TEST_F(IR_IntegerRangeAnalysisTest,
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
@@ -7622,7 +7622,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_max_u32_minus_1_GreaterT
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
     const IntegerRangeInfo* info = analysis.GetInfo(idx);
@@ -7697,7 +7697,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_max_i32_minus_1_GreaterT
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
     const IntegerRangeInfo* info = analysis.GetInfo(idx);
@@ -7773,7 +7773,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_LessThan_init_equals
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
@@ -7844,7 +7844,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_LessThan_init_equals
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
@@ -7915,7 +7915,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_LessThan_init_LessTh
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
@@ -7986,7 +7986,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_LessThan_init_LessTh
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
@@ -8057,7 +8057,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_constant_LessThan_in
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
@@ -8129,7 +8129,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_GreaterThan_init_equ
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
@@ -8200,7 +8200,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_GreaterThan_init_equ
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
@@ -8271,7 +8271,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_GreaterThan_init_Gre
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
@@ -8342,7 +8342,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_GreaterThan_init_Gre
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
@@ -8413,7 +8413,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_constant_GreaterThan
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
@@ -8488,7 +8488,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, LoadFromLoopControlVariableWithRange) {
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
 
     const IntegerRangeInfo* idx_info = analysis.GetInfo(idx);
     EXPECT_NE(nullptr, idx_info);
@@ -8576,7 +8576,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, LoadFromLoopControlVariableWithoutRange) {
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
@@ -8612,7 +8612,7 @@ $B1: {  # root
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(nullptr, analysis.GetInfo(load_a));
 }
 
@@ -8645,7 +8645,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AccessToLocalInvocationID) {
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
 
     auto* access_x_info = analysis.GetInfo(access_x);
     ASSERT_NE(nullptr, access_x_info);
@@ -8696,7 +8696,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, NotAccessToFunctionParam) {
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     auto* info = analysis.GetInfo(access);
     ASSERT_EQ(nullptr, info);
 }
@@ -8730,7 +8730,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AccessToFunctionParamNoRange) {
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     ASSERT_EQ(nullptr, analysis.GetInfo(access_x));
     ASSERT_EQ(nullptr, analysis.GetInfo(access_y));
     ASSERT_EQ(nullptr, analysis.GetInfo(access_z));
@@ -8757,7 +8757,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AccessToNonIntegerFunctionParam) {
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     auto* info = analysis.GetInfo(access);
     ASSERT_EQ(nullptr, info);
 }
@@ -8789,7 +8789,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, NonConstantAccessIndex) {
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
 
     auto* access_x_info = analysis.GetInfo(access_x);
     ASSERT_EQ(nullptr, access_x_info);
@@ -8815,7 +8815,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, SignedIntegerScalarConstant) {
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     auto* info = analysis.GetInfo(constant);
     ASSERT_NE(nullptr, info);
     ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info->range));
@@ -8844,7 +8844,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, UnsignedIntegerScalarConstant) {
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     auto* info = analysis.GetInfo(constant);
     ASSERT_NE(nullptr, info);
     ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info->range));
@@ -8873,7 +8873,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, NonIntegerConstant) {
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
     auto* info = analysis.GetInfo(constant);
     ASSERT_EQ(nullptr, info);
 }
@@ -8902,7 +8902,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ValueAsScalarFunctionParameter) {
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
 
     // Range of `add->LHS()` (`localInvocationIndex`)
     auto* info = analysis.GetInfo(add->LHS());
@@ -8945,7 +8945,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ValueAsVectorFunctionParameter) {
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
 
     auto* info = analysis.GetInfo(value);
     ASSERT_EQ(nullptr, info);
@@ -8979,7 +8979,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ValueAsAccess) {
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
 
     // Range of `add->LHS()` (`local_id.x`)
     auto* info_lhs = analysis.GetInfo(add->LHS());
@@ -9072,7 +9072,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ValueAsLoadAndConstant) {
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
 
     // Range of `add->LHS()` (`idx`)
     auto* info_lhs = analysis.GetInfo(add->LHS());
@@ -9168,7 +9168,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ValueAsVar) {
 
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
 
     // Range of `value`
     auto* info = analysis.GetInfo(value);
@@ -9213,7 +9213,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, LetWithAccess) {
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
 
     auto* info = analysis.GetInfo(let);
     ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info->range));
@@ -9288,7 +9288,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, LetWithLoad) {
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
 
     auto* info = analysis.GetInfo(let);
     ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info->range));
@@ -9328,7 +9328,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, LetWithBinary) {
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
 
     auto* info = analysis.GetInfo(let);
     ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info->range));
@@ -9368,7 +9368,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, LetAsOperand) {
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
 
     auto* info_let = analysis.GetInfo(let);
     ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info_let->range));
@@ -9463,7 +9463,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, MultipleBinaryAdds) {
 
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
 
     // Range of `add` (`idx + (local_id.x + local_id.y)`)
     // access_x: [0, 3], access_y: [0, 2], idx: [0, 9]
@@ -9503,7 +9503,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryAdd_U32_Overflow) {
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
 
     // Range of `add` (`local_id.x + 4294967289`)
     // local_id.x: [0, 7], 4294967289 > u32::kHighestValue - 7
@@ -9580,7 +9580,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryAdd_I32_Overflow) {
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
 
     // Range of `add` (`idx + 2147483639`)
     // idx: [0, 9], 2147483639 > i32::kHighestValue - 9
@@ -9657,7 +9657,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryAdd_I32_Underflow) {
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
 
     // Range of `add` (`idx + (-2147483640)`)
     // idx: [-9, 0], -2147483640 < i32::kLowestValue + 9
@@ -9740,7 +9740,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinarySubtract_Success_U32) {
 
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
 
     // Range of `subtract` (`idx - local_id.x`)
     // idx: [4, 9] local_id.x: [0, 3]
@@ -9867,7 +9867,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinarySubtract_Success_I32) {
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
 
     // Range of `subtract` (`idx - idy`)
     // idx: [5, 9], idy: [1, 3]
@@ -9994,7 +9994,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinarySubtract_Failure_Underflow_U32) {
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
 
     // Range of `subtract` (`idx - idy`)
     // idx: [5, 9], idy: [1, 7], idx.min_bound < idy.max_bound
@@ -10071,7 +10071,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinarySubtract_Failure_Overflow_I32) {
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
 
     // Range of `subtract` (`idx - (-2147483640)`)
     // idx: [0, 8], 2147483640 > i32::kHighestValue - 8
@@ -10148,7 +10148,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinarySubtract_Failure_Underflow_I32) {
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
 
     // Range of `subtract` (`idx - 2147483640`)
     // idx: [-9, 0], idx < i32::kLowestValue + 2147483640
@@ -10271,7 +10271,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryMultiply_Success_I32) {
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
 
     // Range of `multiply` (`idx * idy`)
     // idx: [5, 9], idy: [1, 3]
@@ -10398,7 +10398,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryMultiply_Success_U32) {
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
 
     // Range of `multiply` (`idx * idy`)
     // idx: [3, 10], idy: [6, 19]
@@ -10525,7 +10525,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryMultiply_Failure_negative_lhs) {
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
 
     // Range of `multiply` (`idx * idy`)
     // idx: [-5, 9], idy: [1, 3]
@@ -10648,7 +10648,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryMultiply_Failure_negative_rhs) {
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
 
     // Range of `multiply` (`idx * idy`)
     // idx: [5, 9], idy: [-1, 3]
@@ -10725,7 +10725,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryMultiply_Failure_Overflow_MaxBound_I32
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
 
     // Range of `multiply` (`idx * 268435456`)
     // idx: [0, 8], 268435456 > i32::kHighestValue / 8
@@ -10802,7 +10802,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryMultiply_Failure_Overflow_MinBound_I32
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
 
     // Range of `multiply` (`idx * 134217728`)
     // idx: [16, 20], 134217728 > i32::kHighestValue / 16
@@ -10879,7 +10879,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryMultiply_Failure_Overflow_MaxBound_U32
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
 
     // Range of `multiply` (`idx * 536870912`)
     // idx: [0, 8], 536870912 > u32::kHighestValue / 8
@@ -10956,7 +10956,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryMultiply_Failure_Overflow_MinBound_U32
     EXPECT_EQ(src, str());
     EXPECT_EQ(Validate(mod), Success);
 
-    IntegerRangeAnalysis analysis(func);
+    IntegerRangeAnalysis analysis(&mod);
 
     // Range of `multiply` (`idx * 268435456`)
     // idx: [16, 20], 268435456 > u32::kHighestValue / 16
