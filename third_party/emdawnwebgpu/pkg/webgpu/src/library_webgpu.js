@@ -1745,6 +1745,7 @@ var LibraryWebGPU = {
         "lodMaxClamp": {{{ makeGetValue('descriptor', C_STRUCTS.WGPUSamplerDescriptor.lodMaxClamp, 'float') }}},
         "compare": WebGPU.CompareFunction[
             {{{ gpu.makeGetU32('descriptor', C_STRUCTS.WGPUSamplerDescriptor.compare) }}}],
+        "maxAnisotropy": {{{ makeGetValue('descriptor', C_STRUCTS.WGPUSamplerDescriptor.maxAnisotropy, 'u16') }}},
       };
     }
 
