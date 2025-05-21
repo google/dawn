@@ -336,8 +336,6 @@ message(STATUS "")
 
 option(DAWN_BUILD_MONOLITHIC_LIBRARY "Build one big monolithic library file" ON)
 
-string(TOUPPER "${DAWN_BUILD_MONOLITHIC_LIBRARY}" _option_upper)
-
 message(STATUS "Dawn build monolithic library: ${DAWN_BUILD_MONOLITHIC_LIBRARY}")
 message(STATUS "Dawn fetch dependencies: ${DAWN_FETCH_DEPENDENCIES}")
 message(STATUS "")
