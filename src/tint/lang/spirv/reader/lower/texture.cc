@@ -51,6 +51,7 @@ enum class ImageOperandsMask : uint32_t {
     kLod = 0x00000002,
     kGrad = 0x00000004,
     kConstOffset = 0x00000008,
+    kSample = 0x00000040,
 };
 
 /// PIMPL state for the transform.
@@ -103,6 +104,7 @@ struct State {
             if (auto* builtin = inst->As<spirv::ir::BuiltinCall>()) {
                 switch (builtin->Func()) {
                     case spirv::BuiltinFn::kSampledImage:
+                    case spirv::BuiltinFn::kImageFetch:
                     case spirv::BuiltinFn::kImageGather:
                     case spirv::BuiltinFn::kImageQueryLevels:
                     case spirv::BuiltinFn::kImageQuerySamples:
@@ -125,6 +127,9 @@ struct State {
             switch (builtin->Func()) {
                 case spirv::BuiltinFn::kSampledImage:
                     SampledImage(builtin);
+                    break;
+                case spirv::BuiltinFn::kImageFetch:
+                    ImageFetch(builtin);
                     break;
                 case spirv::BuiltinFn::kImageGather:
                     ImageGather(builtin);
@@ -196,7 +201,8 @@ struct State {
             swizzle_idx.Push(2);
         }
         auto* swizzle = b.Swizzle(new_coords_ty, coords, swizzle_idx);
-        auto* last = b.Swizzle(coords_ty->Type(), coords, Vector{new_coords_width});
+        core::ir::Value* last =
+            b.Swizzle(coords_ty->Type(), coords, Vector{new_coords_width})->Result();
 
         if (is_proj) {
             // New coords
@@ -209,7 +215,10 @@ struct State {
             // New coords
             new_args.Push(swizzle->Result());
             // Array index
-            new_args.Push(b.Convert(ty.i32(), last)->Result());
+            if (!last->Type()->Is<core::type::I32>()) {
+                last = b.Convert(ty.i32(), last)->Result();
+            }
+            new_args.Push(last);
         }
     }
 
@@ -237,6 +246,66 @@ struct State {
     }
     bool HasConstOffset(uint32_t mask) {
         return (mask & static_cast<uint32_t>(ImageOperandsMask::kConstOffset)) != 0;
+    }
+    bool HasSample(uint32_t mask) {
+        return (mask & static_cast<uint32_t>(ImageOperandsMask::kSample)) != 0;
+    }
+
+    void ImageFetch(spirv::ir::BuiltinCall* call) {
+        const auto& args = call->Args();
+
+        b.InsertBefore(call, [&] {
+            core::ir::Value* tex = args[0];
+            auto* coords = args[1];
+
+            auto* tex_ty = tex->Type();
+            uint32_t operand_mask = GetOperandMask(args[2]);
+
+            Vector<core::ir::Value*, 5> new_args = {tex};
+            ProcessCoords(tex->Type(), false, coords, new_args);
+
+            uint32_t idx = 3;
+            if (HasLod(operand_mask)) {
+                core::ir::Value* lod = args[idx++];
+
+                if (!lod->Type()->Is<core::type::I32>()) {
+                    lod = b.Convert(ty.i32(), lod)->Result();
+                }
+                new_args.Push(lod);
+            } else if (!tex_ty->IsAnyOf<core::type::DepthMultisampledTexture,
+                                        core::type::MultisampledTexture,
+                                        core::type::StorageTexture>()) {
+                // textureLoad requires an explicit level-of-detail parameter for non-multisampled
+                // and non-storage texture types.
+                new_args.Push(b.Zero(ty.i32()));
+            }
+            if (HasSample(operand_mask)) {
+                core::ir::Value* sample = args[idx++];
+
+                if (!sample->Type()->Is<core::type::I32>()) {
+                    sample = b.Convert(ty.i32(), sample)->Result();
+                }
+                new_args.Push(sample);
+            }
+
+            // Depth textures have a single value return in WGSL, but a vec4 in SPIR-V.
+            auto* call_ty = call->Result()->Type();
+            if (tex_ty->IsAnyOf<core::type::DepthTexture, core::type::DepthMultisampledTexture>()) {
+                call_ty = call_ty->DeepestElement();
+            }
+            auto* res = b.Call(call_ty, core::BuiltinFn::kTextureLoad, new_args)->Result();
+
+            // Restore the vec4 result by padding with 0's.
+            if (call_ty != call->Result()->Type()) {
+                auto* vec = call->Result()->Type()->As<core::type::Vector>();
+                TINT_ASSERT(vec && vec->Width() == 4);
+
+                auto* z = b.Zero(call_ty);
+                res = b.Construct(call->Result()->Type(), res, z, z, z)->Result();
+            }
+            call->Result()->ReplaceAllUsesWith(res);
+        });
+        call->Destroy();
     }
 
     void ImageGather(spirv::ir::BuiltinCall* call) {

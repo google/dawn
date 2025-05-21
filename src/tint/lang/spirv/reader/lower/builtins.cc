@@ -236,6 +236,7 @@ struct State {
                     // Ignore Atomics, they'll be handled by the `Atomics` transform.
                     break;
                 case spirv::BuiltinFn::kSampledImage:
+                case spirv::BuiltinFn::kImageFetch:
                 case spirv::BuiltinFn::kImageGather:
                 case spirv::BuiltinFn::kImageQueryLevels:
                 case spirv::BuiltinFn::kImageQuerySamples:

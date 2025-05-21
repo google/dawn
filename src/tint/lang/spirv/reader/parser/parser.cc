@@ -1393,6 +1393,9 @@ class Parser {
                 case spv::Op::OpSampledImage:
                     EmitSampledImage(inst);
                     break;
+                case spv::Op::OpImageFetch:
+                    EmitImageFetch(inst);
+                    break;
                 case spv::Op::OpImageGather:
                     EmitImageGather(inst);
                     break;
@@ -1453,6 +1456,28 @@ class Parser {
         Emit(b_.CallExplicit<spirv::ir::BuiltinCall>(Type(inst.type_id()),
                                                      spirv::BuiltinFn::kSampledImage,
                                                      Vector{tex->Type()}, Args(inst, 2)),
+             inst.result_id());
+    }
+
+    void EmitImageFetch(const spvtools::opt::Instruction& inst) {
+        auto sampled_image = Value(inst.GetSingleWordInOperand(0));
+        auto* coord = Value(inst.GetSingleWordInOperand(1));
+
+        Vector<core::ir::Value*, 4> args = {sampled_image, coord};
+
+        if (inst.NumInOperands() > 2) {
+            uint32_t literal_mask = inst.GetSingleWordInOperand(2);
+            args.Push(b_.Constant(u32(literal_mask)));
+
+            if (literal_mask != 0) {
+                args.Push(Value(inst.GetSingleWordInOperand(3)));
+            }
+        } else {
+            args.Push(b_.Zero(ty_.u32()));
+        }
+
+        Emit(b_.Call<spirv::ir::BuiltinCall>(Type(inst.type_id()), spirv::BuiltinFn::kImageFetch,
+                                             args),
              inst.result_id());
     }
 
