@@ -94,6 +94,19 @@ bool SkipDebugMessage(const D3D11_MESSAGE& message) {
             // This is video decoder's error which must happen externally because Dawn doesn't
             // handle video directly. So ignore it.
             return true;
+        case D3D11_MESSAGE_ID_DEVICE_DRAWINSTANCED_INSTANCEPOS_OVERFLOW:
+        case D3D11_MESSAGE_ID_DEVICE_DRAWINDEXEDINSTANCED_INSTANCEPOS_OVERFLOW:
+            // Some clients use workarounds such as packing uniform data in a 32 bits BaseInstance
+            // value to avoid needing an uniform buffer. See
+            // https://source.chromium.org/chromium/chromium/src/+/main:third_party/skia/src/gpu/graphite/dawn/DawnResourceProvider.cpp;drc=d29622dea776ec762e8a69c8c65b87f8e9ee8908;l=398
+            // for one example.
+            // The embedded data would cause BaseInstance + InstanceCount to overflow. This is not
+            // an error because the workarounds always use InstanceCount=1 and we never invoke any
+            // vertex shader at (BaseInstance + InstanceCount)-th instance.
+            // Furthermore, the behavior of overflown InstanceID is already well documented in
+            // https://learn.microsoft.com/en-us/windows/win32/direct3d11/d3d10-graphics-programming-guide-input-assembler-stage-using#instanceid
+            // i.e. it will wrap to 0.
+            return true;
         default:
             return false;
     }
