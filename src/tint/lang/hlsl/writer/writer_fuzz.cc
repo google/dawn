@@ -43,6 +43,7 @@ namespace {
 struct FuzzedOptions {
     bool strip_all_names;
     bool disable_robustness;
+    bool enable_integer_range_analysis;
     bool disable_workgroup_init;
     bool polyfill_reflect_vec2_f32;
     bool polyfill_dot_4x8_packed;
@@ -54,6 +55,7 @@ struct FuzzedOptions {
     TINT_REFLECT(FuzzedOptions,
                  strip_all_names,
                  disable_robustness,
+                 enable_integer_range_analysis,
                  disable_workgroup_init,
                  polyfill_reflect_vec2_f32,
                  polyfill_dot_4x8_packed,
@@ -68,6 +70,7 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
     Options options;
     options.strip_all_names = fuzzed_options.strip_all_names;
     options.disable_robustness = fuzzed_options.disable_robustness;
+    options.enable_integer_range_analysis = fuzzed_options.enable_integer_range_analysis;
     options.disable_workgroup_init = fuzzed_options.disable_workgroup_init;
     options.polyfill_reflect_vec2_f32 = fuzzed_options.polyfill_reflect_vec2_f32;
     options.polyfill_dot_4x8_packed = fuzzed_options.polyfill_dot_4x8_packed;

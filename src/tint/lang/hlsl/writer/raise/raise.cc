@@ -173,6 +173,8 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         // means nothing gets written to memory.
         config.clamp_texture = false;
 
+        config.use_integer_range_analysis = options.enable_integer_range_analysis;
+
         RUN_TRANSFORM(core::ir::transform::Robustness, module, config);
     }
 

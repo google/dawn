@@ -594,19 +594,19 @@ TEST_P(ShaderRobustnessPerf, Run) {
     RunTest();
 }
 
-DAWN_INSTANTIATE_TEST_P(ShaderRobustnessPerf,
-                        {D3D12Backend(), D3D12Backend({"disable_robustness"}, {}), MetalBackend(),
-                         MetalBackend({"disable_robustness"}, {}), OpenGLBackend(),
-                         OpenGLBackend({"disable_robustness"}, {}), VulkanBackend(),
-                         VulkanBackend({"disable_robustness"}, {})},
-                        {MatMulMethod::MatMulFloatOneDimSharedArray,
-                         MatMulMethod::MatMulFloatTwoDimSharedArray,
-                         MatMulMethod::MatMulVec4OneDimSharedArray,
-                         MatMulMethod::MatMulVec4TwoDimSharedArray},
-                        {ElemType::F32, ElemType::F16},
-                        {512u},
-                        {512u},
-                        {512u});
+DAWN_INSTANTIATE_TEST_P(
+    ShaderRobustnessPerf,
+    {D3D12Backend({"use_tint_ir"}), D3D12Backend({"disable_robustness", "use_tint_ir"}, {}),
+     D3D12Backend({"enable_integer_range_analysis_in_robustness", "use_tint_ir"}, {}),
+     MetalBackend(), MetalBackend({"disable_robustness"}, {}), OpenGLBackend(),
+     OpenGLBackend({"disable_robustness"}, {}), VulkanBackend(),
+     VulkanBackend({"disable_robustness"}, {})},
+    {MatMulMethod::MatMulFloatOneDimSharedArray, MatMulMethod::MatMulFloatTwoDimSharedArray,
+     MatMulMethod::MatMulVec4OneDimSharedArray, MatMulMethod::MatMulVec4TwoDimSharedArray},
+    {ElemType::F32, ElemType::F16},
+    {512u},
+    {512u},
+    {512u});
 
 }  // anonymous namespace
 }  // namespace dawn
