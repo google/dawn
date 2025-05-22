@@ -549,6 +549,71 @@ TEST_F(SpirvWriterTest, TextureVar_Load) {
     EXPECT_INST("%load = OpLoad %3 %v");
 }
 
+TEST_F(SpirvWriterTest, TextureVar_TextureParamTextureLoad_NoDva) {
+    auto* tex =
+        b.Var("tex", handle, ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()),
+              core::Access::kReadWrite);
+    tex->SetBindingPoint(0, 0);
+    mod.root_block->Append(tex);
+
+    auto* t = b.FunctionParam("texparam",
+                              ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()));
+
+    auto* fn = b.Function("f", ty.void_());
+    fn->SetParams({t});
+    b.Append(fn->Block(), [&] {
+        b.Let("p", b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, t,
+                          b.Splat(ty.vec2<u32>(), 0_u), 0_u));
+        b.Return(fn);
+    });
+
+    auto* fn2 = b.Function("g", ty.void_());
+    b.Append(fn2->Block(), [&] {
+        auto* t2 = b.Load(tex);
+        b.Call(ty.void_(), fn, t2);
+        b.Return(fn2);
+    });
+
+    Options opts{};
+    opts.dva_transform_handle = false;
+
+    ASSERT_TRUE(Generate(opts)) << Error() << output_;
+    EXPECT_INST("OpFunctionParameter");
+}
+
+TEST_F(SpirvWriterTest, TextureVar_TextureParamTextureLoad_Dva) {
+    auto* tex =
+        b.Var("tex", handle, ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()),
+              core::Access::kReadWrite);
+    tex->SetBindingPoint(0, 0);
+    mod.root_block->Append(tex);
+
+    auto* t = b.FunctionParam("texparam",
+                              ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()));
+
+    auto* fn = b.Function("f", ty.void_());
+    fn->SetParams({t});
+    b.Append(fn->Block(), [&] {
+        b.Let("p", b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, t,
+                          b.Splat(ty.vec2<u32>(), 0_u), 0_u));
+        b.Return(fn);
+    });
+
+    auto* fn2 = b.Function("g", ty.void_());
+    b.Append(fn2->Block(), [&] {
+        auto* t2 = b.Load(tex);
+        b.Call(ty.void_(), fn, t2);
+        b.Return(fn2);
+    });
+
+    Options opts{};
+    opts.dva_transform_handle = true;
+
+    ASSERT_TRUE(Generate(opts)) << Error() << output_;
+    // Consider a EXPECT_NOT_INST macro.
+    ASSERT_TRUE(output_.find("OpFunctionParameter") == std::string::npos) << output_;
+}
+
 TEST_F(SpirvWriterTest, ReadOnlyStorageTextureVar) {
     auto format = core::TexelFormat::kRgba8Unorm;
     auto* v = b.Var("v", ty.ptr(core::AddressSpace::kHandle,

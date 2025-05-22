@@ -144,6 +144,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     core::ir::transform::DirectVariableAccessOptions dva_options;
     dva_options.transform_function = true;
     dva_options.transform_private = true;
+    dva_options.transform_handle = options.dva_transform_handle;
     RUN_TRANSFORM(core::ir::transform::DirectVariableAccess, module, dva_options);
 
     if (options.pass_matrix_by_pointer) {

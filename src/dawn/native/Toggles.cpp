@@ -642,6 +642,10 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
     {Toggle::VulkanScalarizeClampBuiltin,
      {"vulkan_scalarize_clamp_builtin", "Scalarize calls to the clamp builtin.",
       "https://crbug.com/407109052", ToggleStage::Device}},
+    {Toggle::VulkanDirectVariableAccessTransformHandle,
+     {"vulkan_direct_variable_access_transform_handle",
+      "Transform handles using direct variable access.", "https://crbug.com/387000529",
+      ToggleStage::Device}},
     {Toggle::VulkanAddWorkToEmptyResolvePass,
      {"vulkan_add_work_to_empty_resolve_pass",
       "Adds a small amount of work to empty render passes which perform a resolve. This toggle is "

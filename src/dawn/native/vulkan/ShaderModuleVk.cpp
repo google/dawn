@@ -286,7 +286,8 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
         GetDevice()->IsToggleEnabled(Toggle::UseVulkanMemoryModel);
     req.tintOptions.scalarize_clamp_builtin =
         GetDevice()->IsToggleEnabled(Toggle::VulkanScalarizeClampBuiltin);
-
+    req.tintOptions.dva_transform_handle =
+        GetDevice()->IsToggleEnabled(Toggle::VulkanDirectVariableAccessTransformHandle);
     // Pass matrices to user functions by pointer on Qualcomm devices to workaround a known bug.
     // See crbug.com/tint/2045.
     if (ToBackend(GetDevice()->GetPhysicalDevice())->IsAndroidQualcomm()) {

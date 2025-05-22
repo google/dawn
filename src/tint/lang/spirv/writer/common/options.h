@@ -204,6 +204,9 @@ struct Options {
     /// Set to `true` if the clamp builtin should be scalarized for vector operations
     bool scalarize_clamp_builtin = false;
 
+    /// Set to `true` if handles should be transformed by direct variable access.
+    bool dva_transform_handle = false;
+
     /// Offsets of the minDepth and maxDepth push constants.
     std::optional<RangeOffsets> depth_range_offsets = std::nullopt;
 
@@ -228,6 +231,7 @@ struct Options {
                  disable_polyfill_integer_div_mod,
                  use_vulkan_memory_model,
                  scalarize_clamp_builtin,
+                 dva_transform_handle,
                  depth_range_offsets);
 };
 

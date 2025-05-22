@@ -831,6 +831,12 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         deviceToggles->Default(Toggle::PolyfillPackUnpack4x8Norm, true);
     }
 
+    if (gpu_info::IsARM(GetVendorId())) {
+        // chromium:387000529: Arm devices have issues passing texture handles as parameters to
+        // functions for accesses without a sampler (TextureLoad).
+        deviceToggles->Default(Toggle::VulkanDirectVariableAccessTransformHandle, true);
+    }
+
     if (IsAndroidSamsung() || IsAndroidQualcomm() || IsAndroidHuawei()) {
         deviceToggles->Default(Toggle::IgnoreImportedAHardwareBufferVulkanImageSize, true);
     }

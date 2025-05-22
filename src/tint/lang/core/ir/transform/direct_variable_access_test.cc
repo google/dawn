@@ -5189,6 +5189,80 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_LocalTextureParamTextureLoad) {
+    auto* tex =
+        b.Var("tex", handle, ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()),
+              core::Access::kReadWrite);
+    tex->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(tex);
+
+    auto* t = b.FunctionParam("texparam",
+                              ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()));
+
+    auto* fn = b.Function("f", ty.void_());
+    fn->SetParams({t});
+    b.Append(fn->Block(), [&] {
+        b.Let("p", b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, t,
+                          b.Splat(ty.vec2<u32>(), 0_u), 0_u));
+        b.Return(fn);
+    });
+
+    auto* fn2 = b.Function("g", ty.void_());
+    b.Append(fn2->Block(), [&] {
+        auto* t2 = b.Load(tex);
+        b.Call(ty.void_(), fn, t2);
+        b.Return(fn2);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %tex:ptr<handle, texture_2d<f32>, read_write> = var undef @binding_point(0, 0)
+}
+
+%f = func(%texparam:texture_2d<f32>):void {
+  $B2: {
+    %4:vec4<f32> = textureLoad %texparam, vec2<u32>(0u), 0u
+    %p:vec4<f32> = let %4
+    ret
+  }
+}
+%g = func():void {
+  $B3: {
+    %7:texture_2d<f32> = load %tex
+    %8:void = call %f, %7
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %tex:ptr<handle, texture_2d<f32>, read_write> = var undef @binding_point(0, 0)
+}
+
+%f = func():void {
+  $B2: {
+    %3:texture_2d<f32> = load %tex
+    %4:vec4<f32> = textureLoad %3, vec2<u32>(0u), 0u
+    %p:vec4<f32> = let %4
+    ret
+  }
+}
+%g = func():void {
+  $B3: {
+    %7:void = call %f
+    ret
+  }
+}
+)";
+
+    Run(DirectVariableAccess, kTransformHandle);
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_ParamTextureLocalSampler) {
     auto* tex_ty = ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32());
     auto* tex = b.Var("tex", handle, tex_ty, core::Access::kReadWrite);
