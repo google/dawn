@@ -70,6 +70,7 @@ class IRToProgramRoundtripTest : public testing::Test {
         Source::File file("test.wgsl", std::string(input));
         auto ir_module = wgsl::reader::WgslToIR(&file, options);
         if (ir_module != Success) {
+            result.err = ir_module.Failure().reason;
             return result;
         }
 
@@ -261,7 +262,9 @@ enable dual_source_blending;
 struct S {
   a : i32,
   @location(0u) @blend_src(0u)
-  b : u32,
+  b0 : u32,
+  @location(0u) @blend_src(1u)
+  b1 : u32,
   c : f32,
 }
 
@@ -2005,6 +2008,8 @@ var<private> v : array<i32, 4u> = array<i32, 4u>();
 TEST_F(IRToProgramRoundtripTest, ModuleScopeVar_Private_array_Zero) {
     RUN_TEST(R"(
 var<private> v : array<i32, 4u> = array<i32, 4u>(0i, 0i, 0i, 0i);
+)",
+             R"(
 var<private> v : array<i32, 4u> = array<i32, 4u>();
 )");
 }
@@ -2086,8 +2091,10 @@ var<private> v : vec3<f32> = vec3<f32>();
 
 TEST_F(IRToProgramRoundtripTest, ModuleScopeVar_Private_vec3f_Zero) {
     RUN_TEST(R"(
-var<private> v : vec3<f32> = vec3<f32>(0f);",
-             "var<private> v : vec3<f32> = vec3<f32>();
+var<private> v : vec3<f32> = vec3<f32>(0f);
+)",
+             R"(
+var<private> v : vec3<f32> = vec3<f32>();
 )");
 }
 
@@ -2112,6 +2119,8 @@ var<private> v : mat2x3<f32> = mat2x3<f32>();
 TEST_F(IRToProgramRoundtripTest, ModuleScopeVar_Private_mat2x3f_Scalars_SameValue) {
     RUN_TEST(R"(
 var<private> v : mat2x3<f32> = mat2x3<f32>(4.0f, 4.0f, 4.0f, 4.0f, 4.0f, 4.0f);
+)",
+             R"(
 var<private> v : mat2x3<f32> = mat2x3<f32>(vec3<f32>(4.0f), vec3<f32>(4.0f));
 )");
 }
@@ -2119,6 +2128,8 @@ var<private> v : mat2x3<f32> = mat2x3<f32>(vec3<f32>(4.0f), vec3<f32>(4.0f));
 TEST_F(IRToProgramRoundtripTest, ModuleScopeVar_Private_mat2x3f_Scalars) {
     RUN_TEST(R"(
 var<private> v : mat2x3<f32> = mat2x3<f32>(1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f);
+)",
+             R"(
 var<private> v : mat2x3<f32> = mat2x3<f32>(vec3<f32>(1.0f, 2.0f, 3.0f), vec3<f32>(4.0f, 5.0f, 6.0f));
 )");
 }
@@ -2133,6 +2144,8 @@ var<private> v : mat2x3<f32> = mat2x3<f32>(vec3<f32>(1.0f, 2.0f, 3.0f), vec3<f32
 TEST_F(IRToProgramRoundtripTest, ModuleScopeVar_Private_mat2x3f_Columns_SameValue) {
     RUN_TEST(R"(
 var<private> v : mat2x3<f32> = mat2x3<f32>(vec3<f32>(4.0f, 4.0f, 4.0f), vec3<f32>(4.0f, 4.0f, 4.0f));
+)",
+             R"(
 var<private> v : mat2x3<f32> = mat2x3<f32>(vec3<f32>(4.0f), vec3<f32>(4.0f));
 )");
 }
@@ -3434,7 +3447,14 @@ TEST_F(IRToProgramRoundtripTest, SubgroupMatrixConstruct) {
 enable chromium_experimental_subgroup_matrix;
 
 fn f() {
-  var m = subgroup_matrix_left<f32, 8, 8>>();
+  var m = subgroup_matrix_left<f32, 8, 8>();
+}
+)",
+             R"(
+enable chromium_experimental_subgroup_matrix;
+
+fn f() {
+  var m : subgroup_matrix_left<f32, 8, 8> = subgroup_matrix_left<f32, 8, 8>();
 }
 )");
 }
