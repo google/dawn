@@ -178,29 +178,83 @@ struct State {
         return {inst->Operands()[0], inst->Operands()[1]};
     }
 
+    uint32_t CoordsRequiredForDim(core::type::TextureDimension dim, bool is_proj) {
+        uint32_t ret = 0;
+        if (is_proj) {
+            ++ret;
+        }
+
+        switch (dim) {
+            case core::type::TextureDimension::k1d:
+                ret += 1;
+                break;
+            case core::type::TextureDimension::k2d:
+                ret += 2;
+                break;
+            case core::type::TextureDimension::k2dArray:
+            case core::type::TextureDimension::k3d:
+            case core::type::TextureDimension::kCube:
+                ret += 3;
+                break;
+            case core::type::TextureDimension::kCubeArray:
+                ret += 4;
+                break;
+            default:
+                TINT_UNREACHABLE();
+        }
+
+        return ret;
+    }
+
+    uint32_t Length(const core::type::Type* type) {
+        if (type->IsScalar()) {
+            return 1;
+        }
+        if (auto* vec = type->As<core::type::Vector>()) {
+            return vec->Width();
+        }
+        TINT_UNREACHABLE();
+    }
+
     void ProcessCoords(const core::type::Type* type,
                        bool is_proj,
                        core::ir::Value* coords,
                        Vector<core::ir::Value*, 5>& new_args) {
-        if (!is_proj && !IsTextureArray(type->As<core::type::Texture>()->Dim())) {
-            new_args.Push(coords);
+        auto* tex_ty = type->As<core::type::Texture>();
+        TINT_ASSERT(tex_ty);
+
+        auto coords_received = Length(coords->Type());
+
+        auto mk_coords = [&](uint32_t count) -> core::ir::Value* {
+            if (count == coords_received) {
+                return coords;
+            }
+
+            Vector<uint32_t, 3> swizzle_idx = {0};
+            for (uint32_t i = 1; i < count; ++i) {
+                swizzle_idx.Push(i);
+            }
+
+            auto* new_ty = ty.MatchWidth(coords->Type()->DeepestElement(), count);
+            return b.Swizzle(new_ty, coords, swizzle_idx)->Result();
+        };
+
+        auto coords_needed = CoordsRequiredForDim(tex_ty->Dim(), is_proj);
+        TINT_ASSERT(coords_needed <= coords_received);
+
+        if (!is_proj && !IsTextureArray(tex_ty->Dim())) {
+            new_args.Push(mk_coords(coords_needed));
             return;
         }
 
         auto* coords_ty = coords->Type()->As<core::type::Vector>();
         TINT_ASSERT(coords_ty);
 
-        uint32_t new_coords_width = coords_ty->Width() - 1;
+        // The array / projection index, is on the end
+        uint32_t new_coords_width = coords_needed - 1;
         auto* new_coords_ty = ty.MatchWidth(coords_ty->Type(), new_coords_width);
 
-        Vector<uint32_t, 3> swizzle_idx = {0};
-        if (new_coords_width >= 2) {
-            swizzle_idx.Push(1);
-        }
-        if (new_coords_width == 3) {
-            swizzle_idx.Push(2);
-        }
-        auto* swizzle = b.Swizzle(new_coords_ty, coords, swizzle_idx);
+        auto* swizzle = mk_coords(new_coords_width);
         core::ir::Value* last =
             b.Swizzle(coords_ty->Type(), coords, Vector{new_coords_width})->Result();
 
@@ -213,7 +267,7 @@ struct State {
             TINT_ASSERT(new_coords_ty->Is<core::type::Vector>());
 
             // New coords
-            new_args.Push(swizzle->Result());
+            new_args.Push(swizzle);
             // Array index
             if (!last->Type()->Is<core::type::I32>()) {
                 last = b.Convert(ty.i32(), last)->Result();
