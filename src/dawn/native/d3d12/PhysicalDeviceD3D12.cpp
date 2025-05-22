@@ -823,9 +823,10 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
     }
 
     // Use packed DXGI_FORMAT_D24_UNORM_S8_UINT format on Qualcomm devices to workaround texture
-    // loading/sampling issues for depth24plus-stencil8 texture.
+    // loading/sampling issues for depth24plus-stencil8 texture. Note that Qualcomm D3D12 drivers
+    // only report ACPI ids.
     // See https://crbug.com/411268750 for more information.
-    if (gpu_info::IsQualcomm_ACPI(vendorId) || gpu_info::IsQualcomm_PCI(vendorId)) {
+    if (gpu_info::IsQualcomm_ACPI(vendorId)) {
         deviceToggles->Default(Toggle::UsePackedDepth24UnormStencil8Format, true);
     }
 
