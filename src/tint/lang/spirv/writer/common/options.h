@@ -159,6 +159,9 @@ struct Options {
     /// Set to `true` to disable software robustness that prevents out-of-bounds accesses.
     bool disable_robustness = false;
 
+    /// Set to `true` to enable integer range analysis in robustness transform.
+    bool enable_integer_range_analysis = false;
+
     /// Set to `true` to skip robustness transform on textures.
     bool disable_image_robustness = false;
 
@@ -211,6 +214,7 @@ struct Options {
                  statically_paired_texture_binding_points,
                  strip_all_names,
                  disable_robustness,
+                 enable_integer_range_analysis,
                  disable_image_robustness,
                  disable_runtime_sized_array_index_clamping,
                  disable_workgroup_init,
