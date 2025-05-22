@@ -2428,8 +2428,8 @@ INSTANTIATE_TEST_SUITE_P(SpirvReaderTest_ImageQueryLevels_UnsignedResult,
     %4:u32 = textureNumLevels %3)",
                          }));
 
-using MultiSampledImageAccessTest = SpirvReaderTestWithParam<ImgData>;
-TEST_P(MultiSampledImageAccessTest, Variable) {
+using NoSamplerImageAccessTest = SpirvReaderTestWithParam<ImgData>;
+TEST_P(NoSamplerImageAccessTest, Variable) {
     auto& params = GetParam();
     EXPECT_IR(R"(
             OpCapability Shader
@@ -2448,6 +2448,7 @@ TEST_P(MultiSampledImageAccessTest, Variable) {
     %uint = OpTypeInt 32  0
    %v2int = OpTypeVector %int 2
    %v3int = OpTypeVector %int 3
+   %v4int = OpTypeVector %int 4
   %v2uint = OpTypeVector %uint 2
   %v3uint = OpTypeVector %uint 3
   %v4uint = OpTypeVector %uint 4
@@ -2494,35 +2495,38 @@ $B1: {  # root
 )");
 }
 
-INSTANTIATE_TEST_SUITE_P(DISABLED_SpirvReaderTest_ConvertResultSignedness,
-                         MultiSampledImageAccessTest,
+INSTANTIATE_TEST_SUITE_P(SpirvReaderTest_CheckResultSignedness,
+                         NoSamplerImageAccessTest,
                          ::testing::Values(
                              ImgData{
                                  .name = "no conversion, float -> v4float",
                                  .spirv_type = "%float 2D 0 0 0 2 Rgba32f",
                                  .spirv_fn = "%99 = OpImageRead %v4float %im %vi12",
-                                 .wgsl_type = "texture_2d<f32>",
-                                 .wgsl_fn = "let x_99 = textureLoad(x_20, vi12, 0i)",
+                                 .wgsl_type = "texture_storage_2d<rgba32float, read_write>",
+                                 .wgsl_fn = R"(
+    %4:vec4<f32> = textureLoad %3, vec2<i32>(1i, 2i))",
                              },
                              ImgData{
                                  .name = "no conversion, uint -> v4uint",
                                  .spirv_type = "%uint 2D 0 0 0 2 Rgba32ui",
                                  .spirv_fn = "%99 = OpImageRead %v4uint %im %vi12",
-                                 .wgsl_type = "texture_2d<u32>",
-                                 .wgsl_fn = "let x_99 = textureLoad(x_20, vi12, 0i)",
+                                 .wgsl_type = "texture_storage_2d<rgba32uint, read_write>",
+                                 .wgsl_fn = R"(
+    %4:vec4<u32> = textureLoad %3, vec2<i32>(1i, 2i))",
                              },
                              ImgData{
                                  .name = "no conversion, int -> v4int",
                                  .spirv_type = "%int 2D 0 0 0 2 Rgba32i",
                                  .spirv_fn = "%99 = OpImageRead %v4int %im %vi12",
-                                 .wgsl_type = "texture_2d<i32>",
-                                 .wgsl_fn = "let x_99 = textureLoad(x_20, vi12, 0i)",
+                                 .wgsl_type = "texture_storage_2d<rgba32sint, read_write>",
+                                 .wgsl_fn = R"(
+    %4:vec4<i32> = textureLoad %3, vec2<i32>(1i, 2i))",
                              }));
 
 // ImageQuerySize requires storage image or multisampled
 // For storage image, use another instruction to indicate whether it is readonly or writeonly.
 INSTANTIATE_TEST_SUITE_P(SpirvReaderTest_ImageQuerySize_NonArrayed_SignedResult,
-                         MultiSampledImageAccessTest,
+                         NoSamplerImageAccessTest,
                          ::testing::Values(
                              ImgData{
                                  .name = "1D storage image",
@@ -2564,7 +2568,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvReaderTest_ImageQuerySize_NonArrayed_SignedResult,
 // ImageQuerySize requires storage image or multisampled
 // For storage image, use another instruction to indicate whether it is readonly or writeonly.
 INSTANTIATE_TEST_SUITE_P(SpirvReaderTest_ImageQuerySize_Arrayed_SignedResult,
-                         MultiSampledImageAccessTest,
+                         NoSamplerImageAccessTest,
                          ::testing::Values(ImgData{
                              .name = "2D array storage image",
                              .spirv_type = "%float 2D 0 1 0 2 Rgba32f",
@@ -2580,7 +2584,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvReaderTest_ImageQuerySize_Arrayed_SignedResult,
 // ImageQuerySize requires storage image or multisampled
 // For storage image, use another instruction to indicate whether it is readonly or writeonly.
 INSTANTIATE_TEST_SUITE_P(SpirvReaderTest_ImageQuerySize_NonArrayed_UnsignedResult,
-                         MultiSampledImageAccessTest,
+                         NoSamplerImageAccessTest,
                          ::testing::Values(
                              ImgData{
                                  .name = "1D storage image",
@@ -2616,7 +2620,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvReaderTest_ImageQuerySize_NonArrayed_UnsignedResul
                              }));
 
 INSTANTIATE_TEST_SUITE_P(SpirvReaderTest_ImageQuerySize_Arrayed_UnsignedResult,
-                         MultiSampledImageAccessTest,
+                         NoSamplerImageAccessTest,
                          ::testing::Values(ImgData{
                              .name = "2D array storage image",
                              .spirv_type = "%float 2D 0 1 0 2 Rgba32f",
@@ -2629,7 +2633,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvReaderTest_ImageQuerySize_Arrayed_UnsignedResult,
                          }));
 
 INSTANTIATE_TEST_SUITE_P(SpirvReaderTest_ImageQuerySamples_SignedResult,
-                         MultiSampledImageAccessTest,
+                         NoSamplerImageAccessTest,
                          ::testing::Values(ImgData{
                              .name = "Multsample 2D",
                              .spirv_type = "%float 2D 0 0 1 1 Unknown",
@@ -2642,7 +2646,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvReaderTest_ImageQuerySamples_SignedResult,
 
 // Translation must inject a type coercion from unsigned to signed.
 INSTANTIATE_TEST_SUITE_P(SpirvReaderTest_ImageQuerySamples_UnsignedResult,
-                         MultiSampledImageAccessTest,
+                         NoSamplerImageAccessTest,
                          ::testing::Values(ImgData{
                              .name = "Multisample 2D",
                              .spirv_type = "%float 2D 0 0 1 1 Unknown",
@@ -3096,13 +3100,14 @@ TEST_P(NonSampledImageCoordsTest, MakeCoordinateOperandsForImageAccess) {
     auto& params = GetParam();
     EXPECT_IR(R"(
            OpCapability Shader
+           OpCapability Image1D
+           OpCapability Sampled1D
            OpMemoryModel Logical Simple
            OpEntryPoint Fragment %100 "main"
            OpExecutionMode %100 OriginUpperLeft
-           OpDecorate %10 DescriptorSet 0
-           OpDecorate %10 Binding 0
+           OpName %20 "wg"
            OpDecorate %20 DescriptorSet 2
-           OpDecorate %20 Binding 1
+           OpDecorate %20 Binding 0
 
    %void = OpTypeVoid
  %voidfn = OpTypeFunction %void
@@ -3133,19 +3138,15 @@ TEST_P(NonSampledImageCoordsTest, MakeCoordinateOperandsForImageAccess) {
   %vu123 = OpConstantComposite %v3uint %uint_1 %uint_2 %uint_3
  %vf1234 = OpConstantComposite %v4float %float_1 %float_2 %float_3 %float_4
 
-%sampler = OpTypeSampler
-%ptr_sampler = OpTypePointer UniformConstant %sampler
   %im_ty = OpTypeImage )" +
                   params.spirv_type + R"(
 %ptr_im_ty = OpTypePointer UniformConstant %im_ty
 
-     %10 = OpVariable %ptr_sampler UniformConstant
      %20 = OpVariable %ptr_im_ty UniformConstant
 
      %100 = OpFunction %void None %voidfn
    %entry = OpLabel
 
-    %sam = OpLoad %sampler %10
      %im = OpLoad %im_ty %20
 )" + params.spirv_fn +
                   R"(
@@ -3154,132 +3155,129 @@ TEST_P(NonSampledImageCoordsTest, MakeCoordinateOperandsForImageAccess) {
 )",
               R"(
 $B1: {  # root
-  %1:ptr<handle, sampler, read> = var undef @binding_point(0, 0)
   %wg:ptr<handle, )" +
                   params.wgsl_type +
-                  R"(<f32>, read> = var undef @binding_point(2, 0)
+                  R"(, read> = var undef @binding_point(2, 0)
 }
 
 %main = @fragment func():void {
   $B2: {
-    %4:)" + params.wgsl_type +
-                  R"(<f32> = load %wg
-    %5:sampler = load %1
-    %6:vec4<f32> = )" +
-                  params.wgsl_fn +
-                  R"(
+    %3:)" + params.wgsl_type +
+                  R"( = load %wg)" + params.wgsl_fn + R"(
     ret
   }
 }
 )");
 }
 
-// In SPIR-V, image read, fetch, and write use integer coordinates. Prove that we preserve signed
-// integer coordinates.
-INSTANTIATE_TEST_SUITE_P(DISABLED_SpirvReaderTest_PreserveIntCoords_NonArrayed,
+INSTANTIATE_TEST_SUITE_P(SpirvReaderTest,
                          NonSampledImageCoordsTest,
                          ::testing::Values(
                              ImgData{
-                                 .name = "1D Read",
+                                 .name = "1D Read signed",
                                  .spirv_type = "%float 1D 0 0 0 2 R32f",
                                  .spirv_fn = "%result = OpImageRead %v4float %im %int_1",
-                                 .wgsl_type = "",
-                                 .wgsl_fn = "i1",
+                                 .wgsl_type = "texture_storage_1d<r32float, read_write>",
+                                 .wgsl_fn = R"(
+    %4:vec4<f32> = textureLoad %3, 1i)",
                              },
                              ImgData{
-                                 .name = "1D Write",
+                                 .name = "1D Write signed",
                                  .spirv_type = "%float 1D 0 0 0 2 R32f",
                                  .spirv_fn = "OpImageWrite %im %int_1 %vf1234",
-                                 .wgsl_type = "",
-                                 .wgsl_fn = "i1",
+                                 .wgsl_type = "texture_storage_1d<r32float, read_write>",
+                                 .wgsl_fn = R"(
+    %4:void = textureStore %3, 1i, vec4<f32>(1.0f, 2.0f, 3.0f, 4.0f))",
                              },
                              ImgData{
-                                 .name = "2D read",
+                                 .name = "2D read signed",
                                  .spirv_type = "%float 2D 0 0 0 2 R32f",
                                  .spirv_fn = "%result = OpImageRead %v4float %im %vi12",
-                                 .wgsl_type = "",
-                                 .wgsl_fn = "vi12",
+                                 .wgsl_type = "texture_storage_2d<r32float, read_write>",
+                                 .wgsl_fn = R"(
+    %4:vec4<f32> = textureLoad %3, vec2<i32>(1i, 2i))",
                              },
                              ImgData{
-                                 .name = "2D write",
+                                 .name = "2D write signed",
                                  .spirv_type = "%float 2D 0 0 0 2 R32f",
                                  .spirv_fn = "OpImageWrite %im %vi12 %vf1234",
-                                 .wgsl_type = "",
-                                 .wgsl_fn = "vi12",
-                             }));
-
-// In SPIR-V, image read, fetch, and write use integer coordinates. Prove that we preserve signed
-// integer coordinates.
-INSTANTIATE_TEST_SUITE_P(DISABLED_SpirvReaderTest_PreserveIntCoords_Arrayed,
-                         NonSampledImageCoordsTest,
-                         ::testing::Values(
+                                 .wgsl_type = "texture_storage_2d<r32float, read_write>",
+                                 .wgsl_fn = R"(
+    %4:void = textureStore %3, vec2<i32>(1i, 2i), vec4<f32>(1.0f, 2.0f, 3.0f, 4.0f))",
+                             },
                              ImgData{
-                                 .name = "2D read",
+                                 .name = "2D array read signed",
                                  .spirv_type = "%float 2D 0 1 0 2 R32f",
                                  .spirv_fn = "%result = OpImageRead %v4float %im %vi123",
-                                 .wgsl_type = "",
-                                 .wgsl_fn = "vi123.xy",
+                                 .wgsl_type = "texture_storage_2d_array<r32float, read_write>",
+                                 .wgsl_fn = R"(
+    %4:vec2<i32> = swizzle vec3<i32>(1i, 2i, 3i), xy
+    %5:i32 = swizzle vec3<i32>(1i, 2i, 3i), z
+    %6:vec4<f32> = textureLoad %3, %4, %5)",
                              },
                              ImgData{
-                                 .name = "2D write",
+                                 .name = "2D array write signed",
                                  .spirv_type = "%float 2D 0 1 0 2 R32f",
                                  .spirv_fn = "OpImageWrite %im %vi123 %vf1234",
-                                 .wgsl_type = "",
-                                 .wgsl_fn = "vi123.xy",
-                             }));
-
-// In SPIR-V, image read, fetch, and write use integer coordinates. Prove that we convert unsigned
-// integer coordinates to signed.
-INSTANTIATE_TEST_SUITE_P(DISABLED_SpirvReaderTest_ConvertUintCoords_NonArrayed,
-                         NonSampledImageCoordsTest,
-                         ::testing::Values(
+                                 .wgsl_type = "texture_storage_2d_array<r32float, read_write>",
+                                 .wgsl_fn = R"(
+    %4:vec2<i32> = swizzle vec3<i32>(1i, 2i, 3i), xy
+    %5:i32 = swizzle vec3<i32>(1i, 2i, 3i), z
+    %6:void = textureStore %3, %4, %5, vec4<f32>(1.0f, 2.0f, 3.0f, 4.0f))",
+                             },
                              ImgData{
-                                 .name = "1D read",
+                                 .name = "1D read unsigned",
                                  .spirv_type = "%float 1D 0 0 0 2 R32f",
                                  .spirv_fn = "%result = OpImageRead %v4float %im %uint_1",
-                                 .wgsl_type = "",
-                                 .wgsl_fn = "i32(u1)",
+                                 .wgsl_type = "texture_storage_1d<r32float, read_write>",
+                                 .wgsl_fn = R"(
+    %4:vec4<f32> = textureLoad %3, 1u)",
                              },
                              ImgData{
-                                 .name = "1D write",
+                                 .name = "1D write unsigned",
                                  .spirv_type = "%float 1D 0 0 0 2 R32f",
                                  .spirv_fn = "OpImageWrite %im %uint_1 %vf1234",
-                                 .wgsl_type = "",
-                                 .wgsl_fn = "i32(u1)",
+                                 .wgsl_type = "texture_storage_1d<r32float, read_write>",
+                                 .wgsl_fn = R"(
+    %4:void = textureStore %3, 1u, vec4<f32>(1.0f, 2.0f, 3.0f, 4.0f))",
                              },
                              ImgData{
-                                 .name = "2D read",
+                                 .name = "2D read unsigned",
                                  .spirv_type = "%float 2D 0 0 0 2 R32f",
                                  .spirv_fn = "%result = OpImageRead %v4float %im %vu12",
-                                 .wgsl_type = "",
-                                 .wgsl_fn = "vec2i(vu12)",
+                                 .wgsl_type = "texture_storage_2d<r32float, read_write>",
+                                 .wgsl_fn = R"(
+    %4:vec4<f32> = textureLoad %3, vec2<u32>(1u, 2u))",
                              },
                              ImgData{
-                                 .name = "2D write",
+                                 .name = "2D write unsigned",
                                  .spirv_type = "%float 2D 0 0 0 2 R32f",
                                  .spirv_fn = "OpImageWrite %im %vu12 %vf1234",
-                                 .wgsl_type = "",
-                                 .wgsl_fn = "vec2i(vu12)",
-                             }));
-
-// In SPIR-V, image read, fetch, and write use integer coordinates. Prove that we convert unsigned
-// integer coordinates to signed.
-INSTANTIATE_TEST_SUITE_P(DISABLED_SpirvReaderTest_ConvertUintCoords_Arrayed,
-                         NonSampledImageCoordsTest,
-                         ::testing::Values(
-                             ImgData{
-                                 .name = "2D read",
-                                 .spirv_type = "%float 2D 0 1 0 2 R32f",
-                                 .spirv_fn = "%result = OpImageRead %v4float %im %vu123",
-                                 .wgsl_type = "",
-                                 .wgsl_fn = "vec2i(vu123.xy)",
+                                 .wgsl_type = "texture_storage_2d<r32float, read_write>",
+                                 .wgsl_fn = R"(
+    %4:void = textureStore %3, vec2<u32>(1u, 2u), vec4<f32>(1.0f, 2.0f, 3.0f, 4.0f))",
                              },
                              ImgData{
-                                 .name = "2D write",
+                                 .name = "2D array read unsigned",
+                                 .spirv_type = "%float 2D 0 1 0 2 R32f",
+                                 .spirv_fn = "%result = OpImageRead %v4float %im %vu123",
+                                 .wgsl_type = "texture_storage_2d_array<r32float, read_write>",
+                                 .wgsl_fn = R"(
+    %4:vec2<u32> = swizzle vec3<u32>(1u, 2u, 3u), xy
+    %5:u32 = swizzle vec3<u32>(1u, 2u, 3u), z
+    %6:i32 = convert %5
+    %7:vec4<f32> = textureLoad %3, %4, %6)",
+                             },
+                             ImgData{
+                                 .name = "2D array write unsigned",
                                  .spirv_type = "%float 2D 0 1 0 2 R32f",
                                  .spirv_fn = "OpImageWrite %im %vu123 %vf1234",
-                                 .wgsl_type = "",
-                                 .wgsl_fn = "vec2i(vu123.xy)",
+                                 .wgsl_type = "texture_storage_2d_array<r32float, read_write>",
+                                 .wgsl_fn = R"(
+    %4:vec2<u32> = swizzle vec3<u32>(1u, 2u, 3u), xy
+    %5:u32 = swizzle vec3<u32>(1u, 2u, 3u), z
+    %6:i32 = convert %5
+    %7:void = textureStore %3, %4, %6, vec4<f32>(1.0f, 2.0f, 3.0f, 4.0f))",
                              }));
 
 // An ad-hoc test to prove we never had the issue feared in crbug.com/tint/265.
@@ -3742,7 +3740,7 @@ return;
 )");
 }
 
-TEST_F(SpirvReaderTest, DISABLED_ReadWriteStorageTexture) {
+TEST_F(SpirvReaderTest, ReadWriteStorageTexture) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpCapability StorageImageExtendedFormats
@@ -3777,19 +3775,18 @@ TEST_F(SpirvReaderTest, DISABLED_ReadWriteStorageTexture) {
                OpFunctionEnd
   )",
               R"(
-@group(0) @binding(0) var RWTexture2D : texture_storage_2d<rgba32float, read_write>;
-
-const x_9 = vec2u(1u);
-
-fn main_1() {
-  let x_31 = textureLoad(RWTexture2D, vec2i(x_9));
-  textureStore(RWTexture2D, vec2i(x_9), (x_31 + x_31));
-  return;
+$B1: {  # root
+  %RWTexture2D:ptr<handle, texture_storage_2d<rgba32float, read_write>, read> = var undef @binding_point(0, 0)
 }
 
-@compute @workgroup_size(8i, 8i, 1i)
-fn main() {
-  main_1();
+%main = @compute @workgroup_size(8u, 8u, 1u) func():void {
+  $B2: {
+    %3:texture_storage_2d<rgba32float, read_write> = load %RWTexture2D
+    %4:vec4<f32> = textureLoad %3, vec2<u32>(1u)
+    %5:vec4<f32> = add %4, %4
+    %6:void = textureStore %3, vec2<u32>(1u), %5
+    ret
+  }
 }
 )");
 }

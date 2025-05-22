@@ -104,6 +104,7 @@ struct State {
             if (auto* builtin = inst->As<spirv::ir::BuiltinCall>()) {
                 switch (builtin->Func()) {
                     case spirv::BuiltinFn::kSampledImage:
+                    case spirv::BuiltinFn::kImageRead:
                     case spirv::BuiltinFn::kImageFetch:
                     case spirv::BuiltinFn::kImageGather:
                     case spirv::BuiltinFn::kImageQueryLevels:
@@ -127,6 +128,9 @@ struct State {
             switch (builtin->Func()) {
                 case spirv::BuiltinFn::kSampledImage:
                     SampledImage(builtin);
+                    break;
+                case spirv::BuiltinFn::kImageRead:
+                    ImageFetch(builtin);
                     break;
                 case spirv::BuiltinFn::kImageFetch:
                     ImageFetch(builtin);

@@ -1394,7 +1394,10 @@ class Parser {
                     EmitSampledImage(inst);
                     break;
                 case spv::Op::OpImageFetch:
-                    EmitImageFetch(inst);
+                    EmitImageFetchOrRead(inst, spirv::BuiltinFn::kImageFetch);
+                    break;
+                case spv::Op::OpImageRead:
+                    EmitImageFetchOrRead(inst, spirv::BuiltinFn::kImageRead);
                     break;
                 case spv::Op::OpImageGather:
                     EmitImageGather(inst);
@@ -1459,7 +1462,7 @@ class Parser {
              inst.result_id());
     }
 
-    void EmitImageFetch(const spvtools::opt::Instruction& inst) {
+    void EmitImageFetchOrRead(const spvtools::opt::Instruction& inst, spirv::BuiltinFn fn) {
         auto sampled_image = Value(inst.GetSingleWordInOperand(0));
         auto* coord = Value(inst.GetSingleWordInOperand(1));
 
@@ -1476,9 +1479,7 @@ class Parser {
             args.Push(b_.Zero(ty_.u32()));
         }
 
-        Emit(b_.Call<spirv::ir::BuiltinCall>(Type(inst.type_id()), spirv::BuiltinFn::kImageFetch,
-                                             args),
-             inst.result_id());
+        Emit(b_.Call<spirv::ir::BuiltinCall>(Type(inst.type_id()), fn, args), inst.result_id());
     }
 
     void EmitImageGather(const spvtools::opt::Instruction& inst) {
