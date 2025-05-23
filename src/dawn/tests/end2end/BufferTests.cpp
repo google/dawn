@@ -62,6 +62,13 @@ class BufferMappingTests : public DawnTestWithParams<BufferMappingTestParams> {
                                  GetParam().mFutureCallbackMode == wgpu::CallbackMode::WaitAnyOnly);
     }
 
+    bool IsSpontaneous() const {
+        return GetParam().mFutureCallbackMode == wgpu::CallbackMode::AllowSpontaneous;
+    }
+    bool IsProcessEvents() const {
+        return GetParam().mFutureCallbackMode == wgpu::CallbackMode::AllowProcessEvents;
+    }
+
     void MapAsyncAndWait(const wgpu::Buffer& buffer,
                          wgpu::MapMode mode,
                          size_t offset,
@@ -234,6 +241,10 @@ TEST_P(BufferMappingTests, MapRead_Large) {
 
 // Test that GetConstMappedRange works inside map-read callback
 TEST_P(BufferMappingTests, MapRead_InCallback) {
+    // TODO(crbug.com/417802523): There is a Lock inversion bug when processing events in the
+    // callback.
+    DAWN_TEST_UNSUPPORTED_IF(IsSpontaneous() || IsProcessEvents());
+
     constexpr size_t kBufferSize = 12;
     wgpu::Buffer buffer = CreateMapReadBuffer(kBufferSize);
 
@@ -551,6 +562,10 @@ TEST_P(BufferMappingTests, OffsetNotUpdatedOnError) {
 
 // Test that Get(Const)MappedRange work inside map-write callback.
 TEST_P(BufferMappingTests, MapWrite_InCallbackDefault) {
+    // TODO(crbug.com/417802523): There is a Lock inversion bug when processing events in the
+    // callback.
+    DAWN_TEST_UNSUPPORTED_IF(IsSpontaneous() || IsProcessEvents());
+
     wgpu::Buffer buffer = CreateMapWriteBuffer(4);
 
     static constexpr uint32_t myData = 2934875;
@@ -573,6 +588,10 @@ TEST_P(BufferMappingTests, MapWrite_InCallbackDefault) {
 
 // Test that Get(Const)MappedRange with range work inside map-write callback.
 TEST_P(BufferMappingTests, MapWrite_InCallbackRange) {
+    // TODO(crbug.com/417802523): There is a Lock inversion bug when processing events in the
+    // callback.
+    DAWN_TEST_UNSUPPORTED_IF(IsSpontaneous() || IsProcessEvents());
+
     wgpu::Buffer buffer = CreateMapWriteBuffer(4);
 
     static constexpr uint32_t myData = 2934875;
