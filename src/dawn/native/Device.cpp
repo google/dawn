@@ -1197,7 +1197,7 @@ BufferBase* DeviceBase::APICreateBuffer(const BufferDescriptor* rawDescriptor) {
     // 2. Error handling.
     Ref<BufferBase> buffer;
     std::unique_ptr<ErrorData> deferredError;
-    if (DAWN_LIKELY(resultOrError.IsSuccess())) {
+    if (resultOrError.IsSuccess()) [[likely]] {
         buffer = resultOrError.AcquireSuccess();
     } else {
         // Make an error buffer, but don't consume the ErrorData yet until we've tried to map,

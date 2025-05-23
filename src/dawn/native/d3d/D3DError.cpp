@@ -104,7 +104,7 @@ const char* HRESULTAsString(HRESULT result) {
 }
 
 MaybeError CheckHRESULTImpl(HRESULT result, const char* context) {
-    if (DAWN_LIKELY(SUCCEEDED(result))) {
+    if (SUCCEEDED(result)) [[likely]] {
         return {};
     }
 
