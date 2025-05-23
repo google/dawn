@@ -73,7 +73,6 @@ class IRToProgramRoundtripTest : public testing::Test {
             result.err = ir_module.Failure().reason;
             return result;
         }
-
         result.ir_pre_raise = core::ir::Disassembler(ir_module.Get()).Plain();
 
         if (auto res = tint::wgsl::writer::Raise(ir_module.Get()); res != Success) {
@@ -2766,6 +2765,44 @@ fn n() {
 fn f() {
   var i : i32 = 0i;
   for(n(); (i < 10i); i = (i + 1i)) {
+  }
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, Loop_WithRequiredContinues) {
+    RUN_TEST(R"(
+var<private> v : u32;
+
+var<private> v_1 : bool;
+
+var<private> v_2 : bool;
+
+fn f() {
+  let v_3 = v_1;
+  let v_4 = v_2;
+  loop {
+    var v_5 : u32;
+    if (v_3) {
+      break;
+    } else {
+      if (v_4) {
+        v_5 = 0u;
+        continue;
+      } else {
+        v_5 = 1u;
+      }
+      if (true) {
+        v_5 = 2u;
+        continue;
+      }
+      v_5 = 3u;
+      continue;
+    }
+
+    continuing {
+      v = v_5;
+    }
   }
 }
 )");

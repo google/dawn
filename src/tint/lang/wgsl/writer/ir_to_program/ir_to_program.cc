@@ -367,7 +367,7 @@ class State {
             [&](const core::ir::Binary* i) { Binary(i); },                          //
             [&](const core::ir::BreakIf* i) { BreakIf(i); },                        //
             [&](const core::ir::Call* i) { Call(i); },                              //
-            [&](const core::ir::Continue*) {},                                      //
+            [&](const core::ir::Continue* c) { EmitContinue(c); },                  //
             [&](const core::ir::ExitIf*) {},                                        //
             [&](const core::ir::ExitLoop* i) { ExitLoop(i); },                      //
             [&](const core::ir::ExitSwitch* i) { ExitSwitch(i); },                  //
@@ -546,6 +546,15 @@ class State {
             return;  // No need to emit
         }
         Append(b.Break());
+    }
+
+    void EmitContinue(const core::ir::Continue* c) {
+        auto* loop = c->Loop();
+        // No need to emit the continue as the last statement in loop as it's implicit
+        if (loop->Body()->Terminator() == c) {
+            return;
+        }
+        Append(b.Continue());
     }
 
     void ExitLoop(const core::ir::ExitLoop*) { Append(b.Break()); }
