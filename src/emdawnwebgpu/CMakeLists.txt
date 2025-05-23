@@ -25,6 +25,8 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+set(EM_BUILD_GEN_DIR "${DAWN_BUILD_GEN_DIR}/src/emdawnwebgpu")
+
 DawnJSONGenerator(
     TARGET "emdawnwebgpu_headers"
     PRINT_NAME "Dawn WebGPU Emscripten headers"
@@ -32,6 +34,12 @@ DawnJSONGenerator(
 )
 add_custom_target(emdawnwebgpu_headers_gen
     DEPENDS ${EMDAWNWEBGPU_HEADERS_GEN_HEADERS}
+)
+# Also copy the webgpu_glfw.h file.
+add_custom_command(TARGET emdawnwebgpu_headers_gen POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy
+        "${DAWN_INCLUDE_DIR}/webgpu/webgpu_glfw.h"
+        "${EM_BUILD_GEN_DIR}/include/webgpu/"
 )
 
 DawnJSONGenerator(
@@ -63,7 +71,6 @@ add_custom_target(emdawnwebgpu_js_gen
 #   which we generate directly instead of using "gen_sig_info.py"
 if (EMSCRIPTEN)
     set(EM_SRC_DIR "${DAWN_SRC_DIR}/emdawnwebgpu")
-    set(EM_BUILD_GEN_DIR "${DAWN_BUILD_GEN_DIR}/src/emdawnwebgpu")
 
     function(webgpu_gen_struct_info)
         cmake_parse_arguments(PARSE_ARGV 0 arg
@@ -274,6 +281,11 @@ if (EMSCRIPTEN)
         COMMAND ${CMAKE_COMMAND} -E copy
             "${DAWN_INCLUDE_DIR}/webgpu/webgpu_enum_class_bitmasks.h"
             "${CMAKE_BINARY_DIR}/emdawnwebgpu_pkg/webgpu_cpp/include/webgpu/"
+
+        # Copy webgpu_glfw.h
+        COMMAND ${CMAKE_COMMAND} -E copy
+            "${EM_BUILD_GEN_DIR}/include/webgpu/webgpu_glfw.h"
+            "${CMAKE_BINARY_DIR}/emdawnwebgpu_pkg/webgpu/include/webgpu/"
 
         # Copy generated files
         COMMAND ${CMAKE_COMMAND} -E copy
