@@ -1,6 +1,10 @@
 #include <metal_stdlib>
 using namespace metal;
 
+struct tint_module_vars_struct {
+  device uint* tint_member;
+};
+
 template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -13,17 +17,12 @@ struct tint_array {
   T elements[N];
 };
 
-struct tint_module_vars_struct {
-  device uint* tint_member;
-};
-constexpr constant tint_array<uint, 4> v_1 = tint_array<uint, 4>{0u, 1u, 2u, 4u};
-
 uint foo(tint_module_vars_struct tint_module_vars) {
-  return v_1[min((*tint_module_vars.tint_member), 3u)];
+  return tint_array<uint, 4>{0u, 1u, 2u, 4u}[min((*tint_module_vars.tint_member), 3u)];
 }
 
-kernel void v_2(device uint* v_3 [[buffer(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.tint_member=v_3};
-  uint const v = v_1[min((*tint_module_vars.tint_member), 3u)];
+kernel void v_1(device uint* v_2 [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.tint_member=v_2};
+  uint const v = tint_array<uint, 4>{0u, 1u, 2u, 4u}[min((*tint_module_vars.tint_member), 3u)];
   (*tint_module_vars.tint_member) = (v + foo(tint_module_vars));
 }
