@@ -107,6 +107,13 @@ bool SkipDebugMessage(const D3D11_MESSAGE& message) {
             // https://learn.microsoft.com/en-us/windows/win32/direct3d11/d3d10-graphics-programming-guide-input-assembler-stage-using#instanceid
             // i.e. it will wrap to 0.
             return true;
+        case D3D11_MESSAGE_ID_CREATETEXTURE2D_INVALIDDIMENSIONS:
+        case D3D11_MESSAGE_ID_CREATETEXTURE2D_INVALIDARG_RETURN:
+            // External video decoder sometimes attempts to create a multiplanar texture with
+            // non-even dimensions. This is not supported by D3D11 runtime, but the error should
+            // already be handled by the call sites. Chromium's video decoder already does that so
+            // it's better we don't treat this as a fatal error.
+            return true;
         default:
             return false;
     }
