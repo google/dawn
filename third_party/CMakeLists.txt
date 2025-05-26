@@ -366,6 +366,8 @@ function(AddSubdirectoryDXC)
             TARGET copy_dxil_dll
             COMMAND ${CMAKE_COMMAND} -E copy_if_different ${DXIL_DLL_PATH} $<TARGET_FILE_DIR:dxcompiler>
             COMMENT "Copying ${DXIL_DLL_PATH} to $<TARGET_FILE_DIR:dxcompiler>")
+        # Ensure folder "$<TARGET_FILE_DIR:dxcompiler>" exists when copying the dll
+        add_dependencies(copy_dxil_dll dxcompiler)
         # Make dxc target depend on copy_dxil_dll
         add_dependencies(dxc copy_dxil_dll)
     endif()
