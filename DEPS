@@ -233,7 +233,7 @@ deps = {
     'condition': 'dawn_standalone',
   },
   'third_party/libFuzzer/src': {
-    'url': '{chromium_git}/external/github.com/llvm/llvm-project/compiler-rt/lib/fuzzer.git' + '@' + '26cc39e59b2bf5cbc20486296248a842c536878d',
+    'url': '{chromium_git}/external/github.com/llvm/llvm-project/compiler-rt/lib/fuzzer.git' + '@' + 'e31b99917861f891308269c36a32363b120126bb',
     'condition': 'dawn_standalone',
   },
   'third_party/googletest': {
