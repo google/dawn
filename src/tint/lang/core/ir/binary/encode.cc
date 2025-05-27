@@ -69,6 +69,7 @@
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/core/texel_format.h"
 #include "src/tint/lang/core/type/array.h"
+#include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/bool.h"
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
 #include "src/tint/lang/core/type/depth_texture.h"
@@ -426,6 +427,15 @@ struct Encoder {
                         default:
                             TINT_ICE() << "invalid subgroup matrix kind: " << ToString(s->Kind());
                     }
+                },
+                [&](const core::type::BindingArray*) {
+                    // There is no 'unknown/unspecified' value to set the type
+                    // to, so just using void, since the encode will fail due to
+                    // writing to err_.
+                    // TODO(crbug.com/419314986): Add BindingArray to ir.proto
+                    //  and implemented encode/decode, once the feature is complete
+                    type_out.set_basic(pb::TypeBasic::void_);
+                    err_ << "BindingType is not currently implemented in IR";
                 },
                 TINT_ICE_ON_NO_MATCH);
 
