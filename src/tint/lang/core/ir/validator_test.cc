@@ -1208,6 +1208,34 @@ TEST_F(IR_ValidatorTest, Scoping_UseBeforeDecl) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Scoping_UseAfterNestedDecl_InTerminator) {
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* outer = b.If(true);
+        outer->AddResult(b.InstructionResult<u32>());
+
+        b.Append(outer->True(), [&] {
+            Let* decl = nullptr;
+            auto* inner = b.If(true);
+            b.Append(inner->True(), [&] {
+                decl = b.Let("decl", 42_u);
+                b.ExitIf(inner);
+            });
+            b.ExitIf(outer, decl);
+        });
+
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:11:17 error: exit_if: %decl is not in scope
+        exit_if %decl  # if_1
+                ^^^^^
+)")) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, OverrideWithoutCapability) {
     b.Append(mod.root_block, [&] { b.Override("a", 1_u); });
 
