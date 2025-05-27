@@ -4932,6 +4932,70 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_NoExitLoopInFalseBlo
     EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 }
 
+TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_EmptyFalseBlock) {
+    Var* idx = nullptr;
+    Loop* loop = nullptr;
+    Binary* binary = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            // idx = 0
+            idx = b.Var("idx", 0_i);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // idx < 10
+            binary = b.LessThan<bool>(b.Load(idx), 10_i);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.ExitLoop(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            // idx++
+            b.Store(idx, b.Add<i32>(b.Load(idx), 1_i));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, i32, read_write> = var 0i
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %3:i32 = load %idx
+        %4:bool = lt %3, 10i
+        if %4 [t: $B5] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+        }
+        exit_loop  # loop_1
+      }
+      $B4: {  # continuing
+        %5:i32 = load %idx
+        %6:i32 = add %5, 1i
+        store %idx, %6
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(&mod);
+    EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
+    EXPECT_EQ(nullptr, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
+}
+
 TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_LessThanEqual_init_equals_rhs_i32) {
     Var* idx = nullptr;
     Loop* loop = nullptr;

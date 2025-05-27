@@ -692,7 +692,8 @@ struct IntegerRangeAnalysisImpl {
         if (!if_on_exit_condition->True()->Terminator()->As<ExitIf>()) {
             return compare_info;
         }
-        if (!if_on_exit_condition->False()->Front()->As<ExitLoop>()) {
+        const auto* front_inst = if_on_exit_condition->False()->Front();
+        if (!front_inst || !front_inst->As<ExitLoop>()) {
             return compare_info;
         }
 
