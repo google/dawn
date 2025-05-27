@@ -257,5 +257,15 @@
             "mac",
             "win"
         ]
+    },
+    "138": {
+        "name": "m138",
+        "chromium_project": "chromium-m138",
+        "ref": "refs/heads/chromium/7204",
+        "platforms": [
+            "linux",
+            "mac",
+            "win"
+        ]
     }
 }
