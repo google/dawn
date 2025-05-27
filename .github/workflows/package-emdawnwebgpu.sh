@@ -38,7 +38,7 @@ else
     PKG_VERSION=v${VERSION_DATETIME}
 fi
 PKG_FILE=emdawnwebgpu_pkg-${PKG_VERSION}.zip
-REMOTE_PORT_FILE=emdawnwebgpu-${PKG_VERSION}.port.py
+REMOTE_PORT_FILE=emdawnwebgpu-${PKG_VERSION}.remoteport.py
 
 # Initialize dependencies. We could use gclient for this, but then we still have to
 # install gclient, and it takes a long time. We only need a few deps for emdawnwebgpu.
@@ -64,7 +64,7 @@ EMSDK_VERSION=$(python3 tools/activate-emsdk --get-emsdk-version)
 
 # Create zip
 cat << EOF > out/wasm/emdawnwebgpu_pkg/VERSION.txt
-Dawn release ${PKG_VERSION} at revision <https://dawn.googlesource.com/dawn/+/${SHA}>.
+Dawn release ${PKG_VERSION} at revision <https://dawn.googlesource.com/dawn/+log/${SHA}>.
 Built/tested with emsdk release ${EMSDK_VERSION}.
 EOF
 (cd out/wasm && zip -9roX - emdawnwebgpu_pkg > "../../${PKG_FILE}")
@@ -96,7 +96,8 @@ EOF
 cat << EOF > RELEASE_INFO.md
 $(cat out/wasm/emdawnwebgpu_pkg/VERSION.txt)
 
-For instructions, see the README (included in the zip and the port file docstring).
+Use either the \`emdawnwebgpu-*.remoteport.py\` file (Emscripten 4.0.10+) or the \`emdawnwebgpu_pkg-*.zip\`.
+For full instructions, see the [README](https://dawn.googlesource.com/dawn/+/${SHA}/src/emdawnwebgpu/pkg/README.md) which is included in both files.
 EOF
 
 # Save version numbers for later steps
