@@ -189,7 +189,8 @@ struct State {
 }  // namespace
 
 Result<SuccessType> ConversionPolyfill(Module& ir, const ConversionPolyfillConfig& config) {
-    auto result = ValidateAndDumpIfNeeded(ir, "core.ConversionPolyfill");
+    auto result =
+        ValidateAndDumpIfNeeded(ir, "core.ConversionPolyfill", kConversionPolyfillCapabilities);
     if (result != Success) {
         return result;
     }

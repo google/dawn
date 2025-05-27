@@ -158,7 +158,9 @@ struct State {
 }  // namespace
 
 Result<SuccessType> SimdBallot(core::ir::Module& ir) {
-    auto result = ValidateAndDumpIfNeeded(ir, "msl.SimdBallot");
+    auto result = ValidateAndDumpIfNeeded(
+        ir, "msl.SimdBallot",
+        tint::core::ir::Capabilities{tint::core::ir::Capability::kAllowDuplicateBindings});
     if (result != Success) {
         return result.Failure();
     }

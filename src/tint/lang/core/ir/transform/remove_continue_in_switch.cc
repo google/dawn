@@ -118,6 +118,7 @@ Result<SuccessType> RemoveContinueInSwitch(Module& ir) {
                                               core::ir::Capability::kAllowVectorElementPointer,
                                               core::ir::Capability::kAllowHandleVarsWithoutBindings,
                                               core::ir::Capability::kAllowClipDistancesOnF32,
+                                              core::ir::Capability::kAllowDuplicateBindings,
                                           });
     if (result != Success) {
         return result;
