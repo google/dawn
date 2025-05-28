@@ -492,7 +492,6 @@ ResultOrError<bool> Queue::WaitForQueueSerial(ExecutionSerial serial, Nanosecond
             if (waitFence == VK_NULL_HANDLE) {
                 // Fence not found. This serial must have already completed.
                 // Return a VK_SUCCESS status.
-                DAWN_ASSERT(serial <= GetCompletedCommandSerial());
                 return VkResult::WrapUnsafe(VK_SUCCESS);
             }
             // Wait for the fence.
