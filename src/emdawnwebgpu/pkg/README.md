@@ -17,7 +17,7 @@ and then report it at <https://crbug.com/new?component=1570785&noWizard=True>.
 
 First, start with either:
 
-- A "remote" port file `emdawnwebgpu-v*.port.py` (requires Emscripten 4.0.10+).
+- A "remote" port file `emdawnwebgpu-v*.remoteport.py` (requires Emscripten 4.0.10+).
 - An `emdawnwebgpu_pkg` containing a local port file `emdawnwebgpu.port.py`.
   (Either from a pre-built zip release, or from a Dawn build output directory.)
 
@@ -26,7 +26,7 @@ First, start with either:
 Pass the following flag to `emcc`, during both compile and link, to set the
 include paths and link the implementation:
 
-    --use-port=path/to/emdawnwebgpu*.port.py
+    --use-port=path/to/emdawnwebgpu_port_or_remoteport_file.py
 
 If (and only if) using Emscripten before 4.0.7, also pass this flag during link:
 
@@ -37,7 +37,9 @@ If (and only if) using Emscripten before 4.0.7, also pass this flag during link:
 Options can be set by appending `:key1=value:key2=value` to `--use-port`.
 For information about port options, run:
 
-    emcc --use-port=path/to/emdawnwebgpu*.port.py:help
+    emcc --use-port=emdawnwebgpu:help
+    emcc --use-port=path/to/emdawnwebgpu.port.py:help
+    emcc --use-port=path/to/emdawnwebgpu-*.remoteport.py:help
 
 ### C++ bindings
 
@@ -46,12 +48,14 @@ By default, C++ bindings are provided in the include path. Note that unlike
 for any reason (you have custom bindings, you're using a pinned snapshot of
 `webgpu_cpp.h`, etc.), you can set the option `cpp_bindings=false`:
 
-    --use-port=path/to/emdawnwebgpu*.port.py:cpp_bindings=false
+    --use-port=emdawnwebgpu:cpp_bindings=false
+    --use-port=path/to/emdawnwebgpu.port.py:cpp_bindings=false
+    --use-port=path/to/emdawnwebgpu-*.remoteport.py:cpp_bindings=false
 
 ## Embuilder
 
 If your build process needs a separate step to build the port before linking,
-use Emscripten's `embuilder` (with `opt_level` set explicitly):
+use Emscripten's `embuilder`.
 
-    embuilder build path/to/emdawnwebgpu*.port.py:opt_level=0
-    embuilder build path/to/emdawnwebgpu*.port.py:opt_level=2
+Under `embuilder`, some options cannot be set automatically, so they must be
+set manually. See `OPTIONS` in `emdawnwebgpu.port.py` for details.
