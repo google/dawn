@@ -115,6 +115,17 @@ bool HasImmediateConstants(Member Object::*ptr,
            GetImmediateConstantBlockBits(offset, size).to_ulong();
 }
 
+template <typename Object, typename Member>
+std::optional<uint32_t> GetImmediateByteOffsetInPipelineIfAny(
+    Member Object::* ptr,
+    const ImmediateConstantMask& pipelineImmediateMask) {
+    if (!HasImmediateConstants(ptr, pipelineImmediateMask)) {
+        return std::nullopt;
+    }
+
+    return GetImmediateByteOffsetInPipeline(ptr, pipelineImmediateMask);
+}
+
 }  // namespace dawn::native
 
 #endif  // SRC_DAWN_NATIVE_IMMEDIATECONSTANTSLAYOUT_H_

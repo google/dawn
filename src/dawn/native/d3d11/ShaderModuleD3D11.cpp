@@ -33,6 +33,7 @@
 
 #include "dawn/common/Assert.h"
 #include "dawn/common/Log.h"
+#include "dawn/native/ImmediateConstantsLayout.h"
 #include "dawn/native/Pipeline.h"
 #include "dawn/native/TintUtils.h"
 #include "dawn/native/d3d/D3DCompilationRequest.h"
@@ -80,6 +81,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     SingleShaderStage stage,
     const PipelineLayout* layout,
     uint32_t compileFlags,
+    const ImmediateConstantMask& pipelineImmediateMask,
     const std::optional<dawn::native::d3d::InterStageShaderVariablesMask>& usedInterstageVariables,
     const std::optional<tint::hlsl::writer::PixelLocalOptions>& pixelLocalOptions) {
     Device* device = ToBackend(GetDevice());
@@ -193,23 +195,34 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     req.hlsl.inputProgram = UseTintProgram();
     req.hlsl.entryPointName = programmableStage.entryPoint.c_str();
     req.hlsl.stage = stage;
-    // Put the firstIndex into the internally reserved group and binding to avoid conflicting with
-    // any existing bindings.
-    if (!useTintIR) {
-        req.hlsl.firstIndexOffsetRegisterSpace = PipelineLayout::kReservedConstantsBindGroupIndex;
-        req.hlsl.firstIndexOffsetShaderRegister = PipelineLayout::kFirstIndexOffsetBindingNumber;
-        // Remap to the desired space and binding, [0, kFirstIndexOffsetConstantBufferSlot].
-        {
-            tint::BindingPoint srcBindingPoint{req.hlsl.firstIndexOffsetRegisterSpace,
-                                               req.hlsl.firstIndexOffsetShaderRegister};
-            // D3D11 (HLSL SM5.0) doesn't support spaces, so we have to put the firstIndex in the
-            // default space(0)
-            tint::BindingPoint dstBindingPoint{0u,
-                                               PipelineLayout::kFirstIndexOffsetConstantBufferSlot};
 
-            bindings.uniform.emplace(srcBindingPoint,
-                                     tint::hlsl::writer::binding::Uniform{dstBindingPoint.group,
+    if (!useTintIR) {
+        if (stage == SingleShaderStage::Vertex) {
+            // Put the firstIndex into the internally reserved group and binding to avoid
+            // conflicting with any existing bindings.
+            req.hlsl.firstIndexOffsetRegisterSpace =
+                PipelineLayout::kReservedConstantsBindGroupIndex;
+            req.hlsl.firstIndexOffsetShaderRegister =
+                PipelineLayout::kFirstIndexOffsetBindingNumber;
+            // Remap to the desired space and binding, [0, kFirstIndexOffsetConstantBufferSlot].
+            {
+                tint::BindingPoint srcBindingPoint{req.hlsl.firstIndexOffsetRegisterSpace,
+                                                   req.hlsl.firstIndexOffsetShaderRegister};
+                // D3D11 (HLSL SM5.0) doesn't support spaces, so we have to put the firstIndex in
+                // the default space(0)
+                tint::BindingPoint dstBindingPoint{
+                    0u, PipelineLayout::kFirstIndexOffsetConstantBufferSlot};
+
+                bindings.uniform.emplace(
+                    srcBindingPoint, tint::hlsl::writer::binding::Uniform{dstBindingPoint.group,
                                                                           dstBindingPoint.binding});
+            }
+        }
+
+        if (entryPoint.usesNumWorkgroups) {
+            DAWN_ASSERT(stage == SingleShaderStage::Compute);
+            req.hlsl.tintOptions.root_constant_binding_point =
+                tint::BindingPoint{0, PipelineLayout::kNumWorkgroupsConstantBufferSlot};
         }
     }
 
@@ -224,14 +237,20 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
         device->IsToggleEnabled(Toggle::DisableWorkgroupInit);
     req.hlsl.tintOptions.bindings = std::move(bindings);
 
-    if (entryPoint.usesNumWorkgroups) {
-        DAWN_ASSERT(stage == SingleShaderStage::Compute);
-        req.hlsl.tintOptions.root_constant_binding_point =
-            tint::BindingPoint{0, PipelineLayout::kNumWorkgroupsConstantBufferSlot};
-    } else if (useTintIR && stage == SingleShaderStage::Vertex) {
-        // For vertex shaders, use root constant to add FirstIndexOffset, if needed
-        req.hlsl.tintOptions.root_constant_binding_point =
-            tint::BindingPoint{0, PipelineLayout::kFirstIndexOffsetConstantBufferSlot};
+    // Immediate data available in TintIR only.
+    if (useTintIR) {
+        req.hlsl.tintOptions.immediate_binding_point =
+            tint::BindingPoint{0, PipelineLayout::kReservedConstantBufferSlot};
+        if (stage == SingleShaderStage::Compute) {
+            req.hlsl.tintOptions.num_workgroups_start_offset =
+                GetImmediateByteOffsetInPipelineIfAny(&ComputeImmediateConstants::numWorkgroups,
+                                                      pipelineImmediateMask);
+        } else {
+            req.hlsl.tintOptions.first_index_offset = GetImmediateByteOffsetInPipelineIfAny(
+                &RenderImmediateConstants::firstVertex, pipelineImmediateMask);
+            req.hlsl.tintOptions.first_instance_offset = GetImmediateByteOffsetInPipelineIfAny(
+                &RenderImmediateConstants::firstInstance, pipelineImmediateMask);
+        }
     }
 
     if (stage == SingleShaderStage::Vertex) {

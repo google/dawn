@@ -30,6 +30,7 @@
 
 #include "absl/container/flat_hash_set.h"
 #include "absl/container/inlined_vector.h"
+#include "dawn/common/Constants.h"
 #include "dawn/common/MutexProtected.h"
 #include "dawn/common/NonCopyable.h"
 #include "dawn/common/Ref.h"
@@ -107,11 +108,9 @@ class CommandRecordingContext {
     ComPtr<ID3D11Multithread> mD3D11Multithread;
     ComPtr<ID3DUserDefinedAnnotation> mD3DUserDefinedAnnotation;
 
-    // The maximum number of builtin elements is 4 (vec4). It must be multiple of 4.
-    static constexpr size_t kMaxNumBuiltinElements = 4;
     // The uniform buffer for built-in variables.
     Ref<GPUUsableBuffer> mUniformBuffer;
-    std::array<uint32_t, kMaxNumBuiltinElements> mUniformBufferData;
+    std::array<uint32_t, kMaxImmediateConstantsPerPipeline> mUniformBufferData{};
     bool mUniformBufferDirty = true;
 
     absl::flat_hash_set<Ref<d3d::KeyedMutex>> mAcquiredKeyedMutexes;
@@ -168,8 +167,8 @@ class ScopedCommandRecordingContext : public CommandRecordingContext::Guard {
     void Flush() const;
     void Flush1(D3D11_CONTEXT_TYPE ContextType, HANDLE hEvent) const;
 
-    // Write the built-in variable value to the uniform buffer.
-    void WriteUniformBuffer(uint32_t offset, uint32_t element) const;
+    // Write immediate data to the uniform buffer.
+    void WriteUniformBufferRange(uint32_t offset, const void* data, size_t size) const;
     MaybeError FlushUniformBuffer() const;
 
     MaybeError AcquireKeyedMutex(Ref<d3d::KeyedMutex> keyedMutex) const;
