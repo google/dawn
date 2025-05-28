@@ -59,7 +59,6 @@
 /tools/clang
 /tools/cmake*
 /tools/golang
-/tools/memory
 /out
 
 # Tint test validation cache file
