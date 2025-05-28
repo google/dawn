@@ -819,14 +819,6 @@ struct Decoder {
             auto index = static_cast<uint32_t>(members_out.Length());
             auto align = member_in.align();
             auto size = member_in.size();
-            if (DAWN_UNLIKELY(align == 0)) {
-                err_ << "struct member must have non-zero alignment\n";
-                align = 1;
-            }
-            if (DAWN_UNLIKELY(size == 0)) {
-                err_ << "struct member must have non-zero size\n";
-                size = 1;
-            }
             core::IOAttributes attributes_out{};
             if (member_in.has_attributes()) {
                 auto& attributes_in = member_in.attributes();
@@ -870,15 +862,6 @@ struct Decoder {
         auto* element = Type(array_in.element());
         uint32_t stride = array_in.stride();
         uint32_t count = array_in.count();
-        if (element->Align() == 0 || element->Size() == 0) {
-            err_ << "cannot create an array of an unsized type\n";
-            return mod_out_.Types().invalid();
-        }
-        uint32_t implicit_stride = tint::RoundUp(element->Align(), element->Size());
-        if (stride < implicit_stride) {
-            err_ << "array element stride is smaller than the implicit stride\n";
-            return mod_out_.Types().invalid();
-        }
         if (count >= internal_limits::kMaxArrayElementCount) {
             err_ << "array count (" << count << ") must be less than "
                  << internal_limits::kMaxArrayElementCount << "\n";
