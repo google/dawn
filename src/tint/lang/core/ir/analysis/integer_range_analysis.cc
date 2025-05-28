@@ -32,6 +32,7 @@
 #include "src/tint/lang/core/constant/scalar.h"
 #include "src/tint/lang/core/ir/access.h"
 #include "src/tint/lang/core/ir/binary.h"
+#include "src/tint/lang/core/ir/convert.h"
 #include "src/tint/lang/core/ir/exit_if.h"
 #include "src/tint/lang/core/ir/exit_loop.h"
 #include "src/tint/lang/core/ir/function.h"
@@ -177,6 +178,57 @@ struct IntegerRangeAnalysisImpl {
         return &range_info;
     }
 
+    const IntegerRangeInfo* GetInfo(const Convert* convert) {
+        const IntegerRangeInfo* existing_range = integer_convert_range_info_map_.Get(convert).value;
+        if (existing_range) {
+            return existing_range;
+        }
+
+        auto* result_type = convert->Result()->Type();
+        if (!result_type->IsIntegerScalar()) {
+            return nullptr;
+        }
+
+        const auto* operand = convert->Operand(Convert::kValueOperandOffset);
+        const IntegerRangeInfo* operand_range_info = GetInfo(operand);
+        if (!operand_range_info) {
+            return nullptr;
+        }
+        auto* operand_type = operand->Type();
+        TINT_ASSERT(operand_type->IsIntegerScalar());
+
+        if (operand_type == result_type) {
+            return operand_range_info;
+        }
+
+        if (std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(
+                operand_range_info->range)) {
+            // result = convert<u32>(operand), operand cannot be negative.
+            TINT_ASSERT(result_type->As<type::U32>());
+            const auto& range =
+                std::get<IntegerRangeInfo::SignedIntegerRange>(operand_range_info->range);
+            if (range.min_bound < 0) {
+                return nullptr;
+            }
+            auto result = integer_convert_range_info_map_.Add(
+                convert, IntegerRangeInfo(static_cast<uint64_t>(range.min_bound),
+                                          static_cast<uint64_t>(range.max_bound)));
+            return &result.value;
+        } else {
+            // result = convert<i32>(operand), operand cannot be greater than `i32::kHighestValue`.
+            TINT_ASSERT(result_type->As<type::I32>());
+            const auto& range =
+                std::get<IntegerRangeInfo::UnsignedIntegerRange>(operand_range_info->range);
+            if (range.max_bound > i32::kHighestValue) {
+                return nullptr;
+            }
+            auto result = integer_convert_range_info_map_.Add(
+                convert, IntegerRangeInfo(static_cast<int64_t>(range.min_bound),
+                                          static_cast<int64_t>(range.max_bound)));
+            return &result.value;
+        }
+    }
+
     const IntegerRangeInfo* GetInfo(const Value* value) {
         return Switch(
             value, [&](const Constant* constant) { return GetInfo(constant); },
@@ -187,13 +239,14 @@ struct IntegerRangeAnalysisImpl {
                 return GetInfo(param, 0);
             },
             [&](const InstructionResult* r) {
-                // TODO(348701956): Support more instruction types. e.g. Convert, ...
+                // TODO(348701956): Support more instruction types
                 return Switch(
                     r->Instruction(), [&](const Var* var) { return GetInfo(var); },
                     [&](const Load* load) { return GetInfo(load); },
                     [&](const Access* access) { return GetInfo(access); },
                     [&](const Let* let) { return GetInfo(let); },
                     [&](const Binary* binary) { return GetInfo(binary); },
+                    [&](const Convert* convert) { return GetInfo(convert); },
                     [](Default) { return nullptr; });
             },
             [](Default) { return nullptr; });
@@ -944,6 +997,7 @@ struct IntegerRangeAnalysisImpl {
     Hashmap<const Var*, IntegerRangeInfo, 8> integer_var_range_info_map_;
     Hashmap<const Constant*, IntegerRangeInfo, 8> integer_constant_range_info_map_;
     Hashmap<const Binary*, IntegerRangeInfo, 8> integer_binary_range_info_map_;
+    Hashmap<const Convert*, IntegerRangeInfo, 8> integer_convert_range_info_map_;
 };
 
 IntegerRangeAnalysis::IntegerRangeAnalysis(Module* ir_module)
@@ -999,6 +1053,10 @@ const IntegerRangeInfo* IntegerRangeAnalysis::GetInfo(const Binary* binary) {
 
 const IntegerRangeInfo* IntegerRangeAnalysis::GetInfo(const Let* let) {
     return impl_->GetInfo(let);
+}
+
+const IntegerRangeInfo* IntegerRangeAnalysis::GetInfo(const Convert* convert) {
+    return impl_->GetInfo(convert);
 }
 
 }  // namespace tint::core::ir::analysis
