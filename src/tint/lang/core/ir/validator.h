@@ -70,9 +70,6 @@ enum class Capability : uint8_t {
     /// Allows workgroup address space pointers as entry point inputs. Used by
     /// the MSL backend.
     kAllowWorkspacePointerInputToEntryPoint,
-    /// Allows binding points to be non-unique. Used after BindingRemapper is
-    /// invoked by MSL & GLSL backends.
-    kAllowDuplicateBindings,
 };
 
 /// Capabilities is a set of Capability

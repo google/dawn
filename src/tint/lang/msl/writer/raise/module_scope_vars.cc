@@ -346,7 +346,6 @@ Result<SuccessType> ModuleScopeVars(core::ir::Module& ir) {
                                 core::ir::Capabilities{
                                     core::ir::Capability::kAllowPointersAndHandlesInStructures,
                                     core::ir::Capability::kAllowWorkspacePointerInputToEntryPoint,
-                                    core::ir::Capability::kAllowDuplicateBindings,
                                 });
     if (result != Success) {
         return result.Failure();

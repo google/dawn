@@ -278,8 +278,7 @@ struct State {
 Result<SuccessType> BitcastPolyfill(core::ir::Module& ir) {
     auto result = ValidateAndDumpIfNeeded(
         ir, "glsl.BitcastPolyfill",
-        core::ir::Capabilities{core::ir::Capability::kAllowHandleVarsWithoutBindings,
-                               core::ir::Capability::kAllowDuplicateBindings});
+        core::ir::Capabilities{core::ir::Capability::kAllowHandleVarsWithoutBindings});
     if (result != Success) {
         return result.Failure();
     }

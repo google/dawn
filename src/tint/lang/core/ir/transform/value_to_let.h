@@ -51,7 +51,6 @@ const core::ir::Capabilities kValueToLetCapabilities{
     core::ir::Capability::kAllowAnyLetType,
     core::ir::Capability::kAllowWorkspacePointerInputToEntryPoint,
     core::ir::Capability::kAllowModuleScopeLets,
-    core::ir::Capability::kAllowDuplicateBindings,
 };
 
 /// Configuration for ValueToLet transform.

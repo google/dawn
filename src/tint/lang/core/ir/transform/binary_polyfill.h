@@ -28,7 +28,6 @@
 #ifndef SRC_TINT_LANG_CORE_IR_TRANSFORM_BINARY_POLYFILL_H_
 #define SRC_TINT_LANG_CORE_IR_TRANSFORM_BINARY_POLYFILL_H_
 
-#include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/utils/reflection.h"
 #include "src/tint/utils/result.h"
 
@@ -38,9 +37,6 @@ class Module;
 }
 
 namespace tint::core::ir::transform {
-
-/// The capabilities that the transform can support.
-const Capabilities kBinaryPolyfillCapabilities{Capability::kAllowDuplicateBindings};
 
 /// The set of polyfills that should be applied.
 struct BinaryPolyfillConfig {

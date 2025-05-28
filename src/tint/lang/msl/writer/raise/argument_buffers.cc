@@ -308,9 +308,7 @@ struct State {
 }  // namespace
 
 Result<SuccessType> ArgumentBuffers(core::ir::Module& ir) {
-    auto result = ValidateAndDumpIfNeeded(
-        ir, "msl.ArgumentBuffers",
-        tint::core::ir::Capabilities{tint::core::ir::Capability::kAllowDuplicateBindings});
+    auto result = ValidateAndDumpIfNeeded(ir, "msl.ArgumentBuffers");
     if (result != Success) {
         return result.Failure();
     }

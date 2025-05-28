@@ -1145,7 +1145,7 @@ struct State {
 }  // namespace
 
 Result<SuccessType> BuiltinPolyfill(Module& ir, const BuiltinPolyfillConfig& config) {
-    auto result = ValidateAndDumpIfNeeded(ir, "core.BuiltinPolyfill", kBuiltinPolyfillCapabilities);
+    auto result = ValidateAndDumpIfNeeded(ir, "core.BuiltinPolyfill");
     if (result != Success) {
         return result;
     }

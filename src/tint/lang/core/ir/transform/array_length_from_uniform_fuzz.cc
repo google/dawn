@@ -52,4 +52,4 @@ Result<SuccessType> ArrayLengthFromUniformFuzzer(
 }  // namespace tint::core::ir::transform
 
 TINT_IR_MODULE_FUZZER(tint::core::ir::transform::ArrayLengthFromUniformFuzzer,
-                      tint::core::ir::transform::kArrayLengthFromUniformCapabilities);
+                      tint::core::ir::Capabilities{});

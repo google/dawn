@@ -640,9 +640,7 @@ struct State {
 }  // namespace
 
 Result<SuccessType> PackedVec3(core::ir::Module& ir) {
-    auto result = ValidateAndDumpIfNeeded(
-        ir, "msl.PackedVec3",
-        tint::core::ir::Capabilities{tint::core::ir::Capability::kAllowDuplicateBindings});
+    auto result = ValidateAndDumpIfNeeded(ir, "msl.PackedVec3");
     if (result != Success) {
         return result.Failure();
     }
