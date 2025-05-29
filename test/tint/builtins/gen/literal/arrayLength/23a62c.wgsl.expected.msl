@@ -4,6 +4,10 @@
 #include <metal_stdlib>
 using namespace metal;
 
+struct tint_array_lengths_struct {
+  uint tint_array_length_0_1;
+};
+
 template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -26,14 +30,14 @@ struct tint_module_vars_struct {
   const constant tint_array<uint4, 1>* tint_storage_buffer_sizes;
 };
 
-uint arrayLength_23a62c(tint_module_vars_struct tint_module_vars) {
-  uint res = (((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 4u);
+uint arrayLength_23a62c(tint_array_lengths_struct tint_array_lengths, tint_module_vars_struct tint_module_vars) {
+  uint res = tint_array_lengths.tint_array_length_0_1;
   return res;
 }
 
 fragment void fragment_main(device uint* prevent_dce [[buffer(0)]], device SB_RW* sb_rw [[buffer(1)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce, .sb_rw=sb_rw, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
-  (*tint_module_vars.prevent_dce) = arrayLength_23a62c(tint_module_vars);
+  (*tint_module_vars.prevent_dce) = arrayLength_23a62c(tint_array_lengths_struct{.tint_array_length_0_1=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 4u)}, tint_module_vars);
 }
 //
 // compute_main
@@ -41,6 +45,10 @@ fragment void fragment_main(device uint* prevent_dce [[buffer(0)]], device SB_RW
 #include <metal_stdlib>
 using namespace metal;
 
+struct tint_array_lengths_struct {
+  uint tint_array_length_0_1;
+};
+
 template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -63,12 +71,12 @@ struct tint_module_vars_struct {
   const constant tint_array<uint4, 1>* tint_storage_buffer_sizes;
 };
 
-uint arrayLength_23a62c(tint_module_vars_struct tint_module_vars) {
-  uint res = (((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 4u);
+uint arrayLength_23a62c(tint_array_lengths_struct tint_array_lengths, tint_module_vars_struct tint_module_vars) {
+  uint res = tint_array_lengths.tint_array_length_0_1;
   return res;
 }
 
 kernel void compute_main(device uint* prevent_dce [[buffer(0)]], device SB_RW* sb_rw [[buffer(1)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce, .sb_rw=sb_rw, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
-  (*tint_module_vars.prevent_dce) = arrayLength_23a62c(tint_module_vars);
+  (*tint_module_vars.prevent_dce) = arrayLength_23a62c(tint_array_lengths_struct{.tint_array_length_0_1=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 4u)}, tint_module_vars);
 }

@@ -18,11 +18,15 @@ struct tint_struct {
   const constant tint_array<uint4, 1>* tint_member_1;
 };
 
+struct tint_struct_1 {
+  uint tint_member_2;
+};
+
 void v(uint v_1, tint_struct v_2) {
   int const v_3 = 0;
   int const v_4 = 0;
   int const v_5 = 0;
-  uint const v_6 = (*v_2.tint_member)[min(v_1, (((*v_2.tint_member_1)[0u].x / 4u) - 1u))];
+  uint const v_6 = (*v_2.tint_member)[min(v_1, (tint_struct_1{.tint_member_2=((*v_2.tint_member_1)[0u].x / 4u)}.tint_member_2 - 1u))];
 }
 
 kernel void tint_entry_point(uint v_8 [[thread_index_in_threadgroup]], const device tint_array<uint, 1>* v_9 [[buffer(0)]], const constant tint_array<uint4, 1>* v_10 [[buffer(30)]]) {

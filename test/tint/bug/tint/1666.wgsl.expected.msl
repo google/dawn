@@ -13,6 +13,10 @@ struct tint_array {
   T elements[N];
 };
 
+struct tint_array_lengths_struct {
+  uint tint_array_length_0_0;
+};
+
 struct tint_module_vars_struct {
   const device tint_array<float, 1>* rarr;
   const constant tint_array<uint4, 1>* tint_storage_buffer_sizes;
@@ -34,16 +38,16 @@ void fixed_size_array() {
   int const x = arr[min(uint(idx), 1u)];
 }
 
-void runtime_size_array(tint_module_vars_struct tint_module_vars) {
+void runtime_size_array(tint_array_lengths_struct tint_array_lengths, tint_module_vars_struct tint_module_vars) {
   int const idx = -1;
-  uint const v_1 = (((*tint_module_vars.tint_storage_buffer_sizes)[0u].x / 4u) - 1u);
-  float const x = (*tint_module_vars.rarr)[min(uint(idx), v_1)];
+  float const x = (*tint_module_vars.rarr)[min(uint(idx), (tint_array_lengths.tint_array_length_0_0 - 1u))];
 }
 
 kernel void f(const device tint_array<float, 1>* rarr [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.rarr=rarr, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
+  tint_array_lengths_struct const v_1 = tint_array_lengths_struct{.tint_array_length_0_0=((*tint_module_vars.tint_storage_buffer_sizes)[0u].x / 4u)};
   vector();
   v();
   fixed_size_array();
-  runtime_size_array(tint_module_vars);
+  runtime_size_array(v_1, tint_module_vars);
 }

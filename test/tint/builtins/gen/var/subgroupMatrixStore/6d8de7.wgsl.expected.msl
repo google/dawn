@@ -1,6 +1,10 @@
 #include <metal_stdlib>
 using namespace metal;
 
+struct tint_array_lengths_struct {
+  uint tint_array_length_0_0;
+};
+
 template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -22,19 +26,19 @@ struct tint_module_vars_struct {
   const constant tint_array<uint4, 1>* tint_storage_buffer_sizes;
 };
 
-void subgroupMatrixStore_6d8de7(tint_module_vars_struct tint_module_vars) {
+void subgroupMatrixStore_6d8de7(tint_array_lengths_struct tint_array_lengths, tint_module_vars_struct tint_module_vars) {
   uint arg_1 = 1u;
   simdgroup_half8x8 arg_2 = simdgroup_half8x8();
   uint arg_4 = 8u;
   uint const v = arg_1;
   simdgroup_half8x8 const v_1 = arg_2;
   uint const v_2 = max(arg_4, 8u);
-  if ((((v + (v_2 * 7u)) + 8u) <= (((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 2u))) {
+  if ((((v + (v_2 * 7u)) + 8u) <= tint_array_lengths.tint_array_length_0_0)) {
     simdgroup_store(v_1, (&(*tint_module_vars.sb_rw).arg_0[v]), ulong(v_2), ulong2(0ul), true);
   }
 }
 
 kernel void compute_main(device SB_RW* sb_rw [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sb_rw=sb_rw, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
-  subgroupMatrixStore_6d8de7(tint_module_vars);
+  subgroupMatrixStore_6d8de7(tint_array_lengths_struct{.tint_array_length_0_0=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 2u)}, tint_module_vars);
 }

@@ -1,6 +1,10 @@
 #include <metal_stdlib>
 using namespace metal;
 
+struct tint_array_lengths_struct {
+  uint tint_array_length_0_1;
+};
+
 template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -23,13 +27,13 @@ struct tint_module_vars_struct {
   const constant tint_array<uint4, 1>* tint_storage_buffer_sizes;
 };
 
-simdgroup_float8x8 subgroupMatrixLoad_e5caba(tint_module_vars_struct tint_module_vars) {
+simdgroup_float8x8 subgroupMatrixLoad_e5caba(tint_array_lengths_struct tint_array_lengths, tint_module_vars_struct tint_module_vars) {
   uint arg_1 = 1u;
   uint arg_3 = 8u;
   uint const v = arg_1;
   uint const v_1 = max(arg_3, 8u);
   simdgroup_float8x8 v_2 = make_filled_simdgroup_matrix<float, 8, 8>(0.0f);
-  if ((((v + (v_1 * 7u)) + 8u) <= (((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 4u))) {
+  if ((((v + (v_1 * 7u)) + 8u) <= tint_array_lengths.tint_array_length_0_1)) {
     simdgroup_float8x8 v_3 = make_filled_simdgroup_matrix<float, 8, 8>(0.0f);
     simdgroup_load(v_3, (&(*tint_module_vars.sb_rw).arg_0[v]), ulong(v_1), ulong2(0ul), true);
     v_2 = v_3;
@@ -40,5 +44,5 @@ simdgroup_float8x8 subgroupMatrixLoad_e5caba(tint_module_vars_struct tint_module
 
 kernel void compute_main(device tint_array<float, 1024>* prevent_dce [[buffer(0)]], device SB_RW* sb_rw [[buffer(1)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce, .sb_rw=sb_rw, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
-  simdgroup_store(subgroupMatrixLoad_e5caba(tint_module_vars), (&(*tint_module_vars.prevent_dce)[0u]), ulong(64u), ulong2(0ul), false);
+  simdgroup_store(subgroupMatrixLoad_e5caba(tint_array_lengths_struct{.tint_array_length_0_1=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 4u)}, tint_module_vars), (&(*tint_module_vars.prevent_dce)[0u]), ulong(64u), ulong2(0ul), false);
 }

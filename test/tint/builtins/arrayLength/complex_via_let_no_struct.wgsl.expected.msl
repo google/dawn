@@ -18,9 +18,13 @@ struct tint_module_vars_struct {
   const constant tint_array<uint4, 1>* tint_storage_buffer_sizes;
 };
 
+struct tint_array_lengths_struct {
+  uint tint_array_length_0_0;
+};
+
 kernel void v(const device tint_array<int, 1>* G [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.G=G, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
   const device tint_array<int, 1>* const p = tint_module_vars.G;
   const device tint_array<int, 1>* const p2 = p;
-  uint const l1 = ((*tint_module_vars.tint_storage_buffer_sizes)[0u].x / 4u);
+  uint const l1 = tint_array_lengths_struct{.tint_array_length_0_0=((*tint_module_vars.tint_storage_buffer_sizes)[0u].x / 4u)}.tint_array_length_0_0;
 }

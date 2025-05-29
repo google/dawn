@@ -1,6 +1,10 @@
 #include <metal_stdlib>
 using namespace metal;
 
+struct tint_array_lengths_struct {
+  uint tint_array_length_0_0;
+};
+
 template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -25,10 +29,9 @@ struct FSUniforms {
 struct tint_module_vars_struct {
   thread uint* idx;
   const device FSUniforms* _storage;
-  const constant tint_array<uint4, 1>* tint_storage_buffer_sizes;
 };
 
-void v(tint_module_vars_struct tint_module_vars) {
+void v(tint_array_lengths_struct tint_array_lengths, tint_module_vars_struct tint_module_vars) {
   int2 v_1 = int2(0);
   {
     uint2 tint_loop_idx = uint2(4294967295u);
@@ -36,7 +39,7 @@ void v(tint_module_vars_struct tint_module_vars) {
       if (all((tint_loop_idx == uint2(0u)))) {
         break;
       }
-      if ((v_1.y >= (*tint_module_vars._storage).fsUniformData[min((*tint_module_vars.idx), ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 128u) - 1u))].size.y)) {
+      if ((v_1.y >= (*tint_module_vars._storage).fsUniformData[min((*tint_module_vars.idx), (tint_array_lengths.tint_array_length_0_0 - 1u))].size.y)) {
         break;
       }
       {

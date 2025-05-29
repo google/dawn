@@ -58,6 +58,10 @@ struct tint_module_vars_struct {
   const constant tint_array<uint4, 1>* tint_storage_buffer_sizes;
 };
 
+struct tint_array_lengths_struct {
+  uint tint_array_length_0_0;
+};
+
 void tint_store_and_preserve_padding_3(device tint_array<tint_packed_vec3_f32_array_element, 2>* const target, tint_array<float3, 2> value_param) {
   {
     uint v = 0u;
@@ -95,31 +99,32 @@ void tint_store_and_preserve_padding(device tint_array<tint_packed_vec3_f32_arra
 }
 
 void main_inner(uint idx, tint_module_vars_struct tint_module_vars) {
-  (*tint_module_vars.sb).arr[min(idx, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 544u) - 1u))].scalar_f32 = 0.0f;
-  (*tint_module_vars.sb).arr[min(idx, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 544u) - 1u))].scalar_i32 = 0;
-  (*tint_module_vars.sb).arr[min(idx, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 544u) - 1u))].scalar_u32 = 0u;
-  (*tint_module_vars.sb).arr[min(idx, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 544u) - 1u))].vec2_f32 = float2(0.0f);
-  (*tint_module_vars.sb).arr[min(idx, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 544u) - 1u))].vec2_i32 = int2(0);
-  (*tint_module_vars.sb).arr[min(idx, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 544u) - 1u))].vec2_u32 = uint2(0u);
-  (*tint_module_vars.sb).arr[min(idx, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 544u) - 1u))].vec3_f32 = packed_float3(float3(0.0f));
-  (*tint_module_vars.sb).arr[min(idx, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 544u) - 1u))].vec3_i32 = packed_int3(int3(0));
-  (*tint_module_vars.sb).arr[min(idx, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 544u) - 1u))].vec3_u32 = packed_uint3(uint3(0u));
-  (*tint_module_vars.sb).arr[min(idx, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 544u) - 1u))].vec4_f32 = float4(0.0f);
-  (*tint_module_vars.sb).arr[min(idx, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 544u) - 1u))].vec4_i32 = int4(0);
-  (*tint_module_vars.sb).arr[min(idx, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 544u) - 1u))].vec4_u32 = uint4(0u);
-  (*tint_module_vars.sb).arr[min(idx, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 544u) - 1u))].mat2x2_f32 = float2x2(float2(0.0f), float2(0.0f));
-  tint_store_and_preserve_padding((&(*tint_module_vars.sb).arr[min(idx, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 544u) - 1u))].mat2x3_f32), float2x3(float3(0.0f), float3(0.0f)));
-  (*tint_module_vars.sb).arr[min(idx, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 544u) - 1u))].mat2x4_f32 = float2x4(float4(0.0f), float4(0.0f));
-  (*tint_module_vars.sb).arr[min(idx, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 544u) - 1u))].mat3x2_f32 = float3x2(float2(0.0f), float2(0.0f), float2(0.0f));
-  tint_store_and_preserve_padding_1((&(*tint_module_vars.sb).arr[min(idx, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 544u) - 1u))].mat3x3_f32), float3x3(float3(0.0f), float3(0.0f), float3(0.0f)));
-  (*tint_module_vars.sb).arr[min(idx, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 544u) - 1u))].mat3x4_f32 = float3x4(float4(0.0f), float4(0.0f), float4(0.0f));
-  (*tint_module_vars.sb).arr[min(idx, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 544u) - 1u))].mat4x2_f32 = float4x2(float2(0.0f), float2(0.0f), float2(0.0f), float2(0.0f));
-  tint_store_and_preserve_padding_2((&(*tint_module_vars.sb).arr[min(idx, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 544u) - 1u))].mat4x3_f32), float4x3(float3(0.0f), float3(0.0f), float3(0.0f), float3(0.0f)));
-  (*tint_module_vars.sb).arr[min(idx, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 544u) - 1u))].mat4x4_f32 = float4x4(float4(0.0f), float4(0.0f), float4(0.0f), float4(0.0f));
-  tint_store_and_preserve_padding_3((&(*tint_module_vars.sb).arr[min(idx, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 544u) - 1u))].arr2_vec3_f32), tint_array<float3, 2>{});
+  tint_array_lengths_struct const v_2 = tint_array_lengths_struct{.tint_array_length_0_0=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 544u)};
+  (*tint_module_vars.sb).arr[min(idx, (v_2.tint_array_length_0_0 - 1u))].scalar_f32 = 0.0f;
+  (*tint_module_vars.sb).arr[min(idx, (v_2.tint_array_length_0_0 - 1u))].scalar_i32 = 0;
+  (*tint_module_vars.sb).arr[min(idx, (v_2.tint_array_length_0_0 - 1u))].scalar_u32 = 0u;
+  (*tint_module_vars.sb).arr[min(idx, (v_2.tint_array_length_0_0 - 1u))].vec2_f32 = float2(0.0f);
+  (*tint_module_vars.sb).arr[min(idx, (v_2.tint_array_length_0_0 - 1u))].vec2_i32 = int2(0);
+  (*tint_module_vars.sb).arr[min(idx, (v_2.tint_array_length_0_0 - 1u))].vec2_u32 = uint2(0u);
+  (*tint_module_vars.sb).arr[min(idx, (v_2.tint_array_length_0_0 - 1u))].vec3_f32 = packed_float3(float3(0.0f));
+  (*tint_module_vars.sb).arr[min(idx, (v_2.tint_array_length_0_0 - 1u))].vec3_i32 = packed_int3(int3(0));
+  (*tint_module_vars.sb).arr[min(idx, (v_2.tint_array_length_0_0 - 1u))].vec3_u32 = packed_uint3(uint3(0u));
+  (*tint_module_vars.sb).arr[min(idx, (v_2.tint_array_length_0_0 - 1u))].vec4_f32 = float4(0.0f);
+  (*tint_module_vars.sb).arr[min(idx, (v_2.tint_array_length_0_0 - 1u))].vec4_i32 = int4(0);
+  (*tint_module_vars.sb).arr[min(idx, (v_2.tint_array_length_0_0 - 1u))].vec4_u32 = uint4(0u);
+  (*tint_module_vars.sb).arr[min(idx, (v_2.tint_array_length_0_0 - 1u))].mat2x2_f32 = float2x2(float2(0.0f), float2(0.0f));
+  tint_store_and_preserve_padding((&(*tint_module_vars.sb).arr[min(idx, (v_2.tint_array_length_0_0 - 1u))].mat2x3_f32), float2x3(float3(0.0f), float3(0.0f)));
+  (*tint_module_vars.sb).arr[min(idx, (v_2.tint_array_length_0_0 - 1u))].mat2x4_f32 = float2x4(float4(0.0f), float4(0.0f));
+  (*tint_module_vars.sb).arr[min(idx, (v_2.tint_array_length_0_0 - 1u))].mat3x2_f32 = float3x2(float2(0.0f), float2(0.0f), float2(0.0f));
+  tint_store_and_preserve_padding_1((&(*tint_module_vars.sb).arr[min(idx, (v_2.tint_array_length_0_0 - 1u))].mat3x3_f32), float3x3(float3(0.0f), float3(0.0f), float3(0.0f)));
+  (*tint_module_vars.sb).arr[min(idx, (v_2.tint_array_length_0_0 - 1u))].mat3x4_f32 = float3x4(float4(0.0f), float4(0.0f), float4(0.0f));
+  (*tint_module_vars.sb).arr[min(idx, (v_2.tint_array_length_0_0 - 1u))].mat4x2_f32 = float4x2(float2(0.0f), float2(0.0f), float2(0.0f), float2(0.0f));
+  tint_store_and_preserve_padding_2((&(*tint_module_vars.sb).arr[min(idx, (v_2.tint_array_length_0_0 - 1u))].mat4x3_f32), float4x3(float3(0.0f), float3(0.0f), float3(0.0f), float3(0.0f)));
+  (*tint_module_vars.sb).arr[min(idx, (v_2.tint_array_length_0_0 - 1u))].mat4x4_f32 = float4x4(float4(0.0f), float4(0.0f), float4(0.0f), float4(0.0f));
+  tint_store_and_preserve_padding_3((&(*tint_module_vars.sb).arr[min(idx, (v_2.tint_array_length_0_0 - 1u))].arr2_vec3_f32), tint_array<float3, 2>{});
 }
 
-kernel void v_2(uint idx [[thread_index_in_threadgroup]], device S_packed_vec3* sb [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
+kernel void v_3(uint idx [[thread_index_in_threadgroup]], device S_packed_vec3* sb [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sb=sb, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
   main_inner(idx, tint_module_vars);
 }

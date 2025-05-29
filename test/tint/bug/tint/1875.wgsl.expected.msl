@@ -1,6 +1,10 @@
 #include <metal_stdlib>
 using namespace metal;
 
+struct tint_array_lengths_struct {
+  uint tint_array_length_0_0;
+};
+
 template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -23,22 +27,23 @@ struct tint_module_vars_struct {
   const constant tint_array<uint4, 1>* tint_storage_buffer_sizes;
 };
 
-void push_output(uint value, tint_module_vars_struct tint_module_vars) {
-  (*tint_module_vars.outputs).data[min((*tint_module_vars.count), ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 4u) - 1u))] = value;
+void push_output(uint value, tint_array_lengths_struct tint_array_lengths, tint_module_vars_struct tint_module_vars) {
+  (*tint_module_vars.outputs).data[min((*tint_module_vars.count), (tint_array_lengths.tint_array_length_0_0 - 1u))] = value;
   (*tint_module_vars.count) = ((*tint_module_vars.count) + 1u);
 }
 
 kernel void v(device Outputs* outputs [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
   thread uint count = 0u;
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.count=(&count), .outputs=outputs, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
-  device Outputs* const v_1 = tint_module_vars.outputs;
+  tint_array_lengths_struct const v_1 = tint_array_lengths_struct{.tint_array_length_0_0=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 4u)};
+  device Outputs* const v_2 = tint_module_vars.outputs;
   uint a = 0u;
   uint b = 10u;
   uint c = 4294967294u;
   a = (a + 1u);
   b = (b + 1u);
   c = (c + 1u);
-  push_output(a, tint_module_vars);
-  push_output(b, tint_module_vars);
-  push_output(c, tint_module_vars);
+  push_output(a, v_1, tint_module_vars);
+  push_output(b, v_1, tint_module_vars);
+  push_output(c, v_1, tint_module_vars);
 }

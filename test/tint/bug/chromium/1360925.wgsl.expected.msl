@@ -1,6 +1,10 @@
 #include <metal_stdlib>
 using namespace metal;
 
+struct tint_array_lengths_struct {
+  uint tint_array_length_0_0;
+};
+
 template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -15,9 +19,8 @@ struct tint_array {
 
 struct tint_module_vars_struct {
   const device tint_array<int, 1>* G;
-  const constant tint_array<uint4, 1>* tint_storage_buffer_sizes;
 };
 
-void n(tint_module_vars_struct tint_module_vars) {
+void n(tint_array_lengths_struct tint_array_lengths, tint_module_vars_struct tint_module_vars) {
   const device tint_array<int, 1>* const p = tint_module_vars.G;
 }
