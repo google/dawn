@@ -1,4 +1,4 @@
-// Copyright 2024 The Dawn & Tint Authors
+// Copyright 2025 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,32 +25,22 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_CORE_IR_TRANSFORM_SINGLE_ENTRY_POINT_H_
-#define SRC_TINT_LANG_CORE_IR_TRANSFORM_SINGLE_ENTRY_POINT_H_
+#include "src/tint/lang/core/ir/transform/single_entry_point.h"
 
+#include "src/tint/cmd/fuzz/ir/fuzz.h"
 #include "src/tint/lang/core/ir/validator.h"
-#include "src/tint/utils/result.h"
-
-// Forward declarations.
-namespace tint::core::ir {
-class Module;
-}
 
 namespace tint::core::ir::transform {
+namespace {
 
-/// The capabilities that the transform can support.
-const Capabilities kSingleEntryPointCapabilities{
-    Capability::kAllowMultipleEntryPoints,
-    Capability::kAllowOverrides,
-};
+Result<SuccessType> SingleEntryPointFuzzer(Module& module,
+                                           const fuzz::ir::Context&,
+                                           std::string name) {
+    return SingleEntryPoint(module, name);
+}
 
-/// Strip a module down to a single entry point, removing any unused functions and module-scope
-/// declarations.
-/// @param module the module to transform
-/// @param entry_point_name the entry point name
-/// @returns success or failure
-Result<SuccessType> SingleEntryPoint(Module& module, std::string_view entry_point_name);
-
+}  // namespace
 }  // namespace tint::core::ir::transform
 
-#endif  // SRC_TINT_LANG_CORE_IR_TRANSFORM_SINGLE_ENTRY_POINT_H_
+TINT_IR_MODULE_FUZZER(tint::core::ir::transform::SingleEntryPointFuzzer,
+                      tint::core::ir::transform::kSingleEntryPointCapabilities);

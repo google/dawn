@@ -84,7 +84,6 @@ class IR_SingleEntryPointTest : public TransformTest {
         return var->Result();
     }
 };
-using IR_SingleEntryPointDeathTest = IR_SingleEntryPointTest;
 
 TEST_F(IR_SingleEntryPointTest, EntryPointNotFound) {
     EntryPoint("main");
@@ -99,7 +98,9 @@ TEST_F(IR_SingleEntryPointTest, EntryPointNotFound) {
 
     EXPECT_EQ(src, str());
 
-    EXPECT_DEATH_IF_SUPPORTED({ Run(SingleEntryPoint, "foo"); }, "internal compiler error");
+    auto result = SingleEntryPoint(mod, "foo");
+    ASSERT_TRUE(result != Success);
+    EXPECT_EQ(result.Failure().reason, "entry point 'foo' not found");
 }
 
 TEST_F(IR_SingleEntryPointTest, NoChangesNeeded) {

@@ -197,6 +197,7 @@ tint_fuzz_source_set("fuzz") {
     "remove_terminator_args_fuzz.cc",
     "rename_conflicts_fuzz.cc",
     "robustness_fuzz.cc",
+    "single_entry_point_fuzz.cc",
     "std140_fuzz.cc",
     "substitute_overrides_fuzz.cc",
     "value_to_let_fuzz.cc",

@@ -202,6 +202,7 @@ tint_add_target(tint_lang_core_ir_transform_fuzz fuzz
   lang/core/ir/transform/remove_terminator_args_fuzz.cc
   lang/core/ir/transform/rename_conflicts_fuzz.cc
   lang/core/ir/transform/robustness_fuzz.cc
+  lang/core/ir/transform/single_entry_point_fuzz.cc
   lang/core/ir/transform/std140_fuzz.cc
   lang/core/ir/transform/substitute_overrides_fuzz.cc
   lang/core/ir/transform/value_to_let_fuzz.cc
