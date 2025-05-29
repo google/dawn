@@ -42,9 +42,12 @@ dictionary EventInit {
 
 [LegacyNoInterfaceObject] interface WorkerNavigator{};
 
-[LegacyNoInterfaceObject] interface EventListener {
+[LegacyNoInterfaceObject] interface EventListenerInterface {
   undefined handleEvent(Event event);
 };
+callback EventListenerCallback = undefined (Event event);
+typedef(EventListenerInterface or EventListenerCallback) EventListener;
+typedef EventListenerCallback? EventHandler;
 
 [LegacyNoInterfaceObject] interface EventTarget {
   undefined addEventListener(DOMString type, EventListener? callback, optional (AddEventListenerOptions or boolean) options);

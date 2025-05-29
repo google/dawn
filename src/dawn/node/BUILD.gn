@@ -166,6 +166,8 @@ static_library("dawn_node_binding") {
     "binding/Converter.h",
     "binding/Errors.cpp",
     "binding/Errors.h",
+    "binding/EventTarget.cpp",
+    "binding/EventTarget.h",
     "binding/Flags.cpp",
     "binding/Flags.h",
     "binding/GPU.cpp",

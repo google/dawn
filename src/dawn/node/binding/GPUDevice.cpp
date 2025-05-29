@@ -144,7 +144,8 @@ GPUDevice::GPUDevice(Napi::Env env,
                      wgpu::Device device,
                      interop::Promise<interop::Interface<interop::GPUDeviceLostInfo>> lost_promise,
                      std::shared_ptr<AsyncRunner> async)
-    : env_(env),
+    : EventTarget(env),
+      env_(env),
       device_(device),
       async_(async),
       lost_promise_(lost_promise),
@@ -604,29 +605,6 @@ void GPUDevice::setOnuncapturederror(Napi::Env env,
                                      interop::Interface<interop::EventHandler> value) {
     // TODO(dawn:1348): Implement support for the "unhandlederror" event.
     UNIMPLEMENTED(env);
-}
-
-void GPUDevice::addEventListener(
-    Napi::Env env,
-    std::string type,
-    std::optional<interop::Interface<interop::EventListener>> callback,
-    std::optional<std::variant<interop::AddEventListenerOptions, bool>> options) {
-    // TODO(dawn:1348): Implement support for the "unhandlederror" event.
-    UNIMPLEMENTED(env);
-}
-
-void GPUDevice::removeEventListener(
-    Napi::Env env,
-    std::string type,
-    std::optional<interop::Interface<interop::EventListener>> callback,
-    std::optional<std::variant<interop::EventListenerOptions, bool>> options) {
-    // TODO(dawn:1348): Implement support for the "unhandlederror" event.
-    UNIMPLEMENTED(env);
-}
-
-bool GPUDevice::dispatchEvent(Napi::Env env, interop::Event event) {
-    // TODO(dawn:1348): Implement support for the "unhandlederror" event.
-    UNIMPLEMENTED(env, {});
 }
 
 }  // namespace wgpu::binding

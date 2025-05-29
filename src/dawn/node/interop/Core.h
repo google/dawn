@@ -393,6 +393,19 @@ class Converter<Napi::TypedArrayOf<T>> {
 };
 
 template <>
+class Converter<Napi::Function> {
+  public:
+    static inline Result FromJS(Napi::Env, Napi::Value value, Napi::Function& out) {
+        if (value.IsFunction()) {
+            out = value.As<Napi::Function>();
+            return Success;
+        }
+        return Error("value is not a Function");
+    }
+    static inline Napi::Value ToJS(Napi::Env, Napi::Function value) { return value; }
+};
+
+template <>
 class Converter<std::string> {
   public:
     static Result FromJS(Napi::Env, Napi::Value, std::string&);
