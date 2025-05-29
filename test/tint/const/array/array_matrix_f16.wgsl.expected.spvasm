@@ -1,0 +1,89 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 60
+; Schema: 0
+               OpCapability Shader
+               OpCapability Float16
+               OpCapability UniformAndStorageBuffer16BitAccess
+               OpCapability StorageBuffer16BitAccess
+         %37 = OpExtInstImport "GLSL.std.450"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpMemberName %s_block_tint_explicit_layout 0 "inner"
+               OpName %s_block_tint_explicit_layout "s_block_tint_explicit_layout"
+               OpName %main "main"
+               OpName %q "q"
+               OpName %tint_f16_to_u32 "tint_f16_to_u32"
+               OpName %value "value"
+               OpDecorate %_runtimearr_uint ArrayStride 4
+               OpMemberDecorate %s_block_tint_explicit_layout 0 Offset 0
+               OpDecorate %s_block_tint_explicit_layout Block
+               OpDecorate %1 DescriptorSet 0
+               OpDecorate %1 Binding 0
+               OpDecorate %1 Coherent
+       %uint = OpTypeInt 32 0
+%_runtimearr_uint = OpTypeRuntimeArray %uint
+%s_block_tint_explicit_layout = OpTypeStruct %_runtimearr_uint
+%_ptr_StorageBuffer_s_block_tint_explicit_layout = OpTypePointer StorageBuffer %s_block_tint_explicit_layout
+          %1 = OpVariable %_ptr_StorageBuffer_s_block_tint_explicit_layout StorageBuffer
+       %half = OpTypeFloat 16
+     %v2half = OpTypeVector %half 2
+ %mat3v2half = OpTypeMatrix %v2half 3
+     %uint_2 = OpConstant %uint 2
+%_arr_mat3v2half_uint_2 = OpTypeArray %mat3v2half %uint_2
+%_ptr_Private__arr_mat3v2half_uint_2 = OpTypePointer Private %_arr_mat3v2half_uint_2
+%half_0x0p_0 = OpConstant %half 0x0p+0
+%half_0x1p_0 = OpConstant %half 0x1p+0
+         %15 = OpConstantComposite %v2half %half_0x0p_0 %half_0x1p_0
+%half_0x1p_1 = OpConstant %half 0x1p+1
+%half_0x1_8p_1 = OpConstant %half 0x1.8p+1
+         %18 = OpConstantComposite %v2half %half_0x1p_1 %half_0x1_8p_1
+         %14 = OpConstantComposite %mat3v2half %15 %18 %18
+         %13 = OpConstantComposite %_arr_mat3v2half_uint_2 %14 %14
+          %6 = OpVariable %_ptr_Private__arr_mat3v2half_uint_2 Private %13
+       %void = OpTypeVoid
+         %23 = OpTypeFunction %void
+%_ptr_Function_uint = OpTypePointer Function %uint
+     %uint_0 = OpConstant %uint 0
+%_ptr_StorageBuffer__runtimearr_uint = OpTypePointer StorageBuffer %_runtimearr_uint
+     %uint_1 = OpConstant %uint 1
+        %int = OpTypeInt 32 1
+      %int_0 = OpConstant %int 0
+%_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
+%_ptr_Private_v2half = OpTypePointer Private %v2half
+%_ptr_Private_half = OpTypePointer Private %half
+         %50 = OpTypeFunction %uint %half
+       %bool = OpTypeBool
+%half_0x1_ffcp_15 = OpConstant %half 0x1.ffcp+15
+%uint_4294967295 = OpConstant %uint 4294967295
+       %main = OpFunction %void None %23
+         %24 = OpLabel
+          %q = OpVariable %_ptr_Function_uint Function
+               OpStore %q %uint_0
+         %28 = OpAccessChain %_ptr_StorageBuffer__runtimearr_uint %1 %uint_0
+         %30 = OpArrayLength %uint %1 0
+         %31 = OpISub %uint %30 %uint_1
+         %33 = OpBitcast %uint %int_0
+         %36 = OpExtInst %uint %37 UMin %33 %31
+         %38 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0 %36
+         %40 = OpLoad %uint %q None
+         %41 = OpExtInst %uint %37 UMin %40 %uint_1
+         %42 = OpAccessChain %_ptr_Private_v2half %6 %41 %uint_0
+         %44 = OpAccessChain %_ptr_Private_half %42 %uint_0
+         %46 = OpLoad %half %44 None
+         %47 = OpFunctionCall %uint %tint_f16_to_u32 %46
+               OpStore %38 %47 None
+               OpReturn
+               OpFunctionEnd
+%tint_f16_to_u32 = OpFunction %uint None %50
+      %value = OpFunctionParameter %half
+         %51 = OpLabel
+         %52 = OpConvertFToU %uint %value
+         %53 = OpFOrdGreaterThanEqual %bool %value %half_0x0p_0
+         %55 = OpSelect %uint %53 %52 %uint_0
+         %56 = OpFOrdLessThanEqual %bool %value %half_0x1_ffcp_15
+         %58 = OpSelect %uint %56 %55 %uint_4294967295
+               OpReturnValue %58
+               OpFunctionEnd
