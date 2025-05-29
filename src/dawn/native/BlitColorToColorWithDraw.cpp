@@ -68,7 +68,7 @@ std::string GenerateExpandFS(const BlitColorToColorWithDrawPipelineKey& pipeline
     std::ostringstream finalStream;
     finalStream << absl::StrFormat(
         "struct Params {\n"
-        "offset: vec2i,\n"
+        "offset : vec2i,\n"
         "};\n"
         "@group(1) @binding(0) var<uniform> params : Params;\n");
     for (auto i : pipelineKey.attachmentsToExpandResolve) {
@@ -390,12 +390,13 @@ MaybeError ExpandResolveTextureWithDraw(
         // TODO(417770951): Use immediates as offsets.
         Ref<BufferBase> paramsBuffer;
         if (expandResolveRect) {
-            DAWN_TRY_ASSIGN(
-                paramsBuffer,
-                utils::CreateBufferFromData(
-                    device, wgpu::BufferUsage::Uniform,
-                    {expandResolveRect->resolveOffsetX - expandResolveRect->colorOffsetX,
-                     expandResolveRect->resolveOffsetY - expandResolveRect->colorOffsetY}));
+            DAWN_TRY_ASSIGN(paramsBuffer,
+                            utils::CreateBufferFromData(
+                                device, wgpu::BufferUsage::Uniform,
+                                {static_cast<int32_t>(expandResolveRect->resolveOffsetX) -
+                                     static_cast<int32_t>(expandResolveRect->colorOffsetX),
+                                 static_cast<int32_t>(expandResolveRect->resolveOffsetY) -
+                                     static_cast<int32_t>(expandResolveRect->colorOffsetY)}));
         } else {
             DAWN_TRY_ASSIGN(paramsBuffer, utils::CreateBufferFromData(
                                               device, wgpu::BufferUsage::Uniform, {0, 0}));
@@ -485,11 +486,12 @@ MaybeError ResolveMultisampleWithDraw(DeviceBase* device,
     DAWN_TRY_ASSIGN(bindGroupLayout, pipeline->GetBindGroupLayout(0));
 
     Ref<BufferBase> paramsBuffer;
-    DAWN_TRY_ASSIGN(paramsBuffer,
-                    utils::CreateBufferFromData(device, wgpu::BufferUsage::Uniform,
-                                                {rect.resolveOffsetX - rect.colorOffsetX,
-                                                 rect.resolveOffsetY - rect.colorOffsetY}));
-
+    DAWN_TRY_ASSIGN(
+        paramsBuffer,
+        utils::CreateBufferFromData(
+            device, wgpu::BufferUsage::Uniform,
+            {static_cast<int32_t>(rect.resolveOffsetX) - static_cast<int32_t>(rect.colorOffsetX),
+             static_cast<int32_t>(rect.resolveOffsetY) - static_cast<int32_t>(rect.colorOffsetY)}));
     Ref<BindGroupBase> bindGroup;
     DAWN_TRY_ASSIGN(bindGroup,
                     utils::MakeBindGroup(device, bindGroupLayout, {{0, paramsBuffer}, {1, src}},

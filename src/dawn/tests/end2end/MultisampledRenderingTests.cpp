@@ -1607,8 +1607,8 @@ class DawnLoadResolveTextureTest : public MultisampledRenderingTest {
         return HasToggleEnabled("resolve_multiple_attachments_in_separate_passes");
     }
 
-    void TestPartialRect(const wgpu::RenderPassDescriptorResolveRect& rect,
-                         const std::vector<Point>& points) {
+    void TestExpandAndResolveWithRect(const wgpu::RenderPassDescriptorResolveRect& rect,
+                                      const std::vector<Point>& points) {
         DAWN_TEST_UNSUPPORTED_IF(
             !SupportsFeatures({wgpu::FeatureName::DawnPartialLoadResolveTexture}));
 
@@ -1680,11 +1680,171 @@ class DawnLoadResolveTextureTest : public MultisampledRenderingTest {
         VerifyPoints(points);
     }
 
-    void VerifyPoints(const std::vector<Point> points) {
+    // Test that wgpu::LoadOp::Clear or wgpu::LoadOp::Load works with
+    // wgpu::RenderPassDescriptorResolveRect.
+    void TestLoadOrClearThenPartialResolve(
+        const wgpu::RenderPassDescriptorResolveRect& rect,
+        const std::vector<Point>& points,
+        wgpu::LoadOp loadOp,
+        const wgpu::Color& initialColor,
+        const std::optional<wgpu::Color>& userDrawColor = std::nullopt) {
+        DAWN_TEST_UNSUPPORTED_IF(
+            !SupportsFeatures({wgpu::FeatureName::DawnPartialLoadResolveTexture}));
+
+        constexpr uint32_t msaaWidth = 3;
+        constexpr uint32_t msaaHeight = 3;
+        constexpr uint32_t resolveWidth = 4;
+        constexpr uint32_t resolveHeight = 4;
+
+        auto multiSampledTexture =
+            CreateTextureForRenderAttachment(kColorFormat, 4, 1, 1,
+                                             /*transientAttachment=*/false,
+                                             /*supportsTextureBinding=*/false,
+                                             /*supportsCopyDst=*/false,
+                                             /*width*/ msaaWidth,
+                                             /*height*/ msaaHeight);
+        auto multiSampledTextureView = multiSampledTexture.CreateView();
+
+        mResolveTexture =
+            CreateTextureForRenderAttachment(kColorFormat, 1, 1, 1, /*transientAttachment=*/false,
+                                             /*supportsTextureBinding=*/true,
+                                             /*supportsCopyDst=*/false,
+                                             /*width*/ resolveWidth,
+                                             /*height*/ resolveHeight);
+        auto singleSampledTextureView = mResolveTexture.CreateView();
+
+        wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+
+        // Initial clear of MSAA texture if loading.
+        if (loadOp == wgpu::LoadOp::Load) {
+            utils::ComboRenderPassDescriptor renderPass = CreateComboRenderPassDescriptorForTest(
+                {multiSampledTextureView}, {nullptr}, wgpu::LoadOp::Clear, wgpu::LoadOp::Clear,
+                /*testDepth=*/false);
+            renderPass.cColorAttachments[0].storeOp = wgpu::StoreOp::Store;
+            renderPass.cColorAttachments[0].clearValue = initialColor;
+
+            wgpu::RenderPassEncoder renderPassEncoder = commandEncoder.BeginRenderPass(&renderPass);
+            renderPassEncoder.End();
+        }
+
+        // Create render pass with configurable wgpu::LoadOp and
+        // wgpu::RenderPassDescriptorResolveRect.
+        {
+            utils::ComboRenderPassDescriptor renderPass = CreateComboRenderPassDescriptorForTest(
+                {multiSampledTextureView}, {singleSampledTextureView}, loadOp, wgpu::LoadOp::Clear,
+                /*testDepth=*/false);
+            renderPass.cColorAttachments[0].storeOp = wgpu::StoreOp::Store;
+            // The clearValue takes effect only when the load operation is set to
+            // wgpu::LoadOp::Clear.
+            renderPass.cColorAttachments[0].clearValue = initialColor;
+            renderPass.nextInChain = &rect;
+            if (userDrawColor) {
+                wgpu::RenderPipeline pipeline = CreateRenderPipelineWithOneOutputForTest(
+                    /*testDepth=*/false, /*sampleMask=*/0xFFFFFFFF,
+                    /*alphaToCoverageEnabled=*/false,
+                    /*flipTriangle=*/false, /*enableExpandResolveLoadOp=*/false);
+                EncodeRenderPassForTest(commandEncoder, renderPass, pipeline, *userDrawColor);
+            } else {
+                wgpu::RenderPassEncoder renderPassEncoder =
+                    commandEncoder.BeginRenderPass(&renderPass);
+                renderPassEncoder.End();
+            }
+        }
+
+        wgpu::CommandBuffer commandBuffer = commandEncoder.Finish();
+        queue.Submit(1, &commandBuffer);
+
+        VerifyPoints(points);
+        // When no user drawing is performed (userDrawColor is not set) verify the entire MSAA
+        // texture has uniform color (initialColor).
+        if (!userDrawColor) {
+            VerifyAllMSAAPointsOfSameColor(initialColor, multiSampledTexture);
+        }
+    }
+
+    void VerifyPoints(const std::vector<Point>& points,
+                      const std::optional<wgpu::Texture>& resolveTexture = std::nullopt) {
+        const auto& texture = resolveTexture.value_or(mResolveTexture);
         for (const Point& point : points) {
-            VerifyResolveTarget(point.color, mResolveTexture, /*mipmapLevel=*/0, /*arrayLayer=*/0,
+            VerifyResolveTarget(point.color, texture, /*mipmapLevel=*/0, /*arrayLayer=*/0,
                                 /*msaaCoverage=*/point.msaaCoverage, /*x=*/point.x, /*y=*/point.y);
         }
+    }
+
+    // Verify the points of an MSAA teture.
+    void VerifyMSAAPoints(const std::vector<Point>& points, const wgpu::Texture& msaaTexture) {
+        // Resolve the MSAA texture to single sampled texture.
+        auto singleSampledTexture =
+            CreateTextureForRenderAttachment(kColorFormat, 1, 1, 1,
+                                             /*transientAttachment=*/false,
+                                             /*supportsTextureBinding=*/true,
+                                             /*supportsCopyDst=*/false,
+                                             /*width*/ msaaTexture.GetWidth(),
+                                             /*height*/ msaaTexture.GetHeight());
+        auto singleSampledTextureView = singleSampledTexture.CreateView();
+        wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+        {
+            utils::ComboRenderPassDescriptor renderPass = CreateComboRenderPassDescriptorForTest(
+                {msaaTexture.CreateView()}, {singleSampledTextureView}, wgpu::LoadOp::Load,
+                wgpu::LoadOp::Clear,
+                /*testDepth=*/false);
+            renderPass.cColorAttachments[0].storeOp = wgpu::StoreOp::Discard;
+
+            wgpu::RenderPassEncoder renderPassEncoder = commandEncoder.BeginRenderPass(&renderPass);
+            renderPassEncoder.End();
+        }
+
+        wgpu::CommandBuffer commandBuffer = commandEncoder.Finish();
+        queue.Submit(1, &commandBuffer);
+        VerifyPoints(points, singleSampledTexture);
+    }
+
+    // Verify all the points of an MSAA teture are of the same color.
+    void VerifyAllMSAAPointsOfSameColor(const wgpu::Color& color,
+                                        const wgpu::Texture& msaaTexture) {
+        auto textureWidth = msaaTexture.GetWidth();
+        auto textureHeight = msaaTexture.GetHeight();
+        std::vector<Point> points(textureWidth * textureHeight);
+        for (size_t i = 0; i < points.size(); ++i) {
+            uint32_t x = i % (textureWidth);
+            uint32_t y = i / (textureWidth);
+            points[i] = {x, y, color};
+        }
+        VerifyMSAAPoints(points, msaaTexture);
+    }
+
+    void TestLoadOrClearThenPartialResolve(wgpu::LoadOp loadOp,
+                                           const wgpu::Color& initialColor,
+                                           const wgpu::Color& userDrawColor) {
+        constexpr wgpu::Color kBlack = {0.0f, 0.0f, 0.0f, 0.0f};
+        wgpu::RenderPassDescriptorResolveRect rect{};
+        rect.colorOffsetX = 1;
+        rect.colorOffsetY = 2;
+        rect.resolveOffsetX = 2;
+        rect.resolveOffsetY = 2;
+        rect.width = 1;
+        rect.height = 1;
+
+        // Only the single point at coordinate {resolveOffsetX, resolveOffsetY} in the resolve
+        // texture is modified. All other points in the resolve texture remain unchanged.
+        std::vector<Point> points = {
+            {1, 1, kBlack}, {2, 1, kBlack}, {3, 1, kBlack}, {1, 2, kBlack}, {2, 2, initialColor},
+            {3, 2, kBlack}, {1, 3, kBlack}, {2, 3, kBlack}, {3, 3, kBlack},
+        };
+
+        // Test wgpu::LoadOp::Clear or wgpu::LoadOp::Load without user draw.
+        TestLoadOrClearThenPartialResolve(rect, points, loadOp, initialColor);
+
+        // If user draws, the resolve texture color is mixed with initial color and user draw color.
+        const wgpu::Color finalColor = {
+            (initialColor.r + userDrawColor.r) / 2.0, (initialColor.g + userDrawColor.g) / 2.0,
+            (initialColor.b + userDrawColor.b) / 2.0, (initialColor.a + userDrawColor.a) / 2.0};
+        points[4] = {2, 2, finalColor};
+        rect.colorOffsetX = 1;
+        rect.colorOffsetY = 1;
+
+        // Test wgpu::LoadOp::Clear or wgpu::LoadOp::Load  with user draw.
+        TestLoadOrClearThenPartialResolve(rect, points, loadOp, initialColor, userDrawColor);
     }
 };
 
@@ -2660,7 +2820,7 @@ TEST_P(DawnLoadResolveTextureTest, ExpandResolveWithSmallerMSAATexture) {
         {2, 1, kGreen},
         {3, 0, kRed},
     };
-    TestPartialRect(rect, points);
+    TestExpandAndResolveWithRect(rect, points);
 }
 
 // Test RenderPassDescriptorResolveRect works correctly with non zero offset when rendering with
@@ -2676,7 +2836,19 @@ TEST_P(DawnLoadResolveTextureTest, ExpandResolveDifferentNonZeroOffsetsWithSmall
     std::vector<Point> points = {
         {5, 4, kGreen},
     };
-    TestPartialRect(rect, points);
+    TestExpandAndResolveWithRect(rect, points);
+}
+
+// Test that RenderPassDescriptorResolveRect works with wgpu::LoadOp::Clear.
+TEST_P(DawnLoadResolveTextureTest, ClearThenPartialResolve) {
+    TestLoadOrClearThenPartialResolve(wgpu::LoadOp::Clear, /*initialColor*/ kRed,
+                                      /*userDrawColor*/ kGreen);
+}
+
+// Test that RenderPassDescriptorResolveRect works with wgpu::LoadOp::Load.
+TEST_P(DawnLoadResolveTextureTest, LoadThenPartialResolve) {
+    TestLoadOrClearThenPartialResolve(wgpu::LoadOp::Clear, /*initialColor*/ kGreen,
+                                      /*userDrawColor*/ kRed);
 }
 
 DAWN_INSTANTIATE_TEST(MultisampledRenderingTest,

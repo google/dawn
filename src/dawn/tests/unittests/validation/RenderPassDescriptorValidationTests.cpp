@@ -2140,28 +2140,6 @@ TEST_F(DawnPartialLoadResolveTextureValidationTest, ExpandResolveRectInvalidSize
     AssertBeginRenderPassError(&renderPass);
 }
 
-// ExpandResolveRect must be used with wgpu::LoadOp::ExpandResolveTexture.
-TEST_F(DawnPartialLoadResolveTextureValidationTest, ExpandResolveRectInvalidLoadOp) {
-    auto multisampledTexture =
-        CreateTexture(device, wgpu::TextureDimension::e2D, kColorFormat, kSize, kSize, kArrayLayers,
-                      kLevelCount, /*sampleCount=*/4, wgpu::TextureUsage::RenderAttachment);
-
-    // Create a resolve texture with sample count = 1.
-    auto resolveTarget = CreateCompatibleResolveTextureView();
-
-    wgpu::RenderPassDescriptorExpandResolveRect rect{};
-    rect.x = rect.y = 0;
-    rect.width = rect.height = 1;
-
-    auto renderPass = CreateMultisampledRenderPass();
-    renderPass.nextInChain = &rect;
-    renderPass.cColorAttachments[0].view = multisampledTexture.CreateView();
-    renderPass.cColorAttachments[0].resolveTarget = resolveTarget;
-    renderPass.cColorAttachments[0].loadOp = wgpu::LoadOp::Load;
-
-    AssertBeginRenderPassError(&renderPass);
-}
-
 // Test that using a valid ResolveRect with LoadOp::ExpandResolveTexture doesn't raise
 // any error.
 TEST_F(DawnPartialLoadResolveTextureValidationTest, ResolveRectValid) {

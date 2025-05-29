@@ -243,15 +243,16 @@ MaybeError RenderPassWorkaroundsHelper::ApplyOnPostEncoding(
         for (auto i : cmd->attachmentState->GetColorAttachmentsMask()) {
             auto& attachmentInfo = cmd->colorAttachments[i];
             TextureViewBase* resolveTarget = attachmentInfo.resolveTarget.Get();
-            if (attachmentInfo.loadOp == wgpu::LoadOp::ExpandResolveTexture) {
-                // Save the color and resolve targets together for an explicit resolve pass
-                // after this one ends, then remove the resolve target from this pass and
-                // force the storeOp to Store.
-                temporaryResolveAttachments.emplace_back(attachmentInfo.view.Get(), resolveTarget,
-                                                         attachmentInfo.storeOp);
-                attachmentInfo.storeOp = wgpu::StoreOp::Store;
-                attachmentInfo.resolveTarget = nullptr;
+            if (!resolveTarget) {
+                continue;
             }
+            // Save the color and resolve targets together for an explicit resolve pass
+            // after this one ends, then remove the resolve target from this pass and
+            // force the storeOp to Store.
+            temporaryResolveAttachments.emplace_back(attachmentInfo.view.Get(), resolveTarget,
+                                                     attachmentInfo.storeOp);
+            attachmentInfo.storeOp = wgpu::StoreOp::Store;
+            attachmentInfo.resolveTarget = nullptr;
         }
         for (auto& deferredResolve : temporaryResolveAttachments) {
             passEndOperations.emplace_back([device, encoder, resolveRect = *expandResolveRect,
