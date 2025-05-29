@@ -64,6 +64,10 @@ static void* kInternalConstructionMarker = nullptr;
 
 }  // namespace
 
+const Constructors* ConstructorsFor(Napi::Env env) {
+  return Wrappers::For(env);
+}
+
 {{ range $ := .Declarations}}
 {{-        if IsDictionary $}}{{template "Dictionary" $}}
 {{-   else if IsInterface  $}}

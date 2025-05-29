@@ -119,42 +119,6 @@ interop::Interface<interop::GPUAdapterInfo> GPUAdapter::getInfo(Napi::Env env) {
     return interop::GPUAdapterInfo::Create<GPUAdapterInfo>(env, info);
 }
 
-namespace {
-// Returns a string representation of the wgpu::ErrorType
-const char* str(wgpu::ErrorType ty) {
-    switch (ty) {
-        case wgpu::ErrorType::NoError:
-            return "no error";
-        case wgpu::ErrorType::Validation:
-            return "validation";
-        case wgpu::ErrorType::OutOfMemory:
-            return "out of memory";
-        case wgpu::ErrorType::Internal:
-            return "internal";
-        case wgpu::ErrorType::Unknown:
-        default:
-            return "unknown";
-    }
-}
-
-// There's something broken with Node when attempting to write more than 65536 bytes to cout.
-// Split the string up into writes of 4k chunks.
-// Likely related: https://github.com/nodejs/node/issues/12921
-void chunkedWrite(wgpu::StringView msg) {
-    while (msg.length != 0) {
-        int n;
-        if (msg.length > 4096) {
-            n = printf("%.4096s", msg.data);
-        } else {
-            n = printf("%.*s", static_cast<int>(msg.length), msg.data);
-        }
-        msg.data += n;
-        msg.length -= n;
-    }
-}
-
-}  // namespace
-
 interop::Promise<interop::Interface<interop::GPUDevice>> GPUAdapter::requestDevice(
     Napi::Env env,
     interop::GPUDeviceDescriptor descriptor) {
@@ -239,11 +203,7 @@ interop::Promise<interop::Interface<interop::GPUDevice>> GPUAdapter::requestDevi
             }
         },
         device_lost_ctx);
-    desc.SetUncapturedErrorCallback(
-        [](const wgpu::Device&, ErrorType type, wgpu::StringView message) {
-            printf("%s:\n", str(type));
-            chunkedWrite(message);
-        });
+    desc.SetUncapturedErrorCallback(GPUDevice::handleUncapturedErrorCallback);
 
     // Propagate enabled/disabled dawn features
     TogglesLoader togglesLoader(flags_);
