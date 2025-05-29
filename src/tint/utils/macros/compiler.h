@@ -55,6 +55,7 @@
 #define TINT_DISABLE_WARNING_UNREACHABLE_CODE __pragma(warning(disable : 4702))
 #define TINT_DISABLE_WARNING_UNSAFE_BUFFER_USAGE /* currently no-op */
 #define TINT_DISABLE_WARNING_UNUSED_PARAMETER __pragma(warning(disable : 4100))
+#define TINT_DISABLE_WARNING_UNSUED_VARIABLE __pragma(warning(disable : 4189))
 #define TINT_DISABLE_WARNING_UNUSED_VALUE    /* currently no-op */
 #define TINT_DISABLE_WARNING_WEAK_VTABLES    /* currently no-op */
 #define TINT_DISABLE_WARNING_ZERO_AS_NULLPTR /* currently no-op */
@@ -77,6 +78,7 @@
 #define TINT_BEGIN_DISABLE_PROTOBUF_WARNINGS()      \
     __pragma(warning(push))                         \
     TINT_DISABLE_WARNING_UNUSED_PARAMETER           \
+    TINT_DISABLE_WARNING_UNSUED_VARIABLE            \
     TINT_REQUIRE_SEMICOLON
 #define TINT_END_DISABLE_PROTOBUF_WARNINGS() \
     __pragma(warning(pop))                   \
