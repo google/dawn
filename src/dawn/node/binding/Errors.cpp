@@ -27,6 +27,9 @@
 
 #include "src/dawn/node/binding/Errors.h"
 
+#include <tuple>
+#include <utility>
+
 namespace wgpu::binding {
 
 namespace {
@@ -189,6 +192,43 @@ Napi::Error Errors::NotAllowedError(Napi::Env env, std::string message) {
 
 Napi::Error Errors::GPUPipelineError(Napi::Env env, std::string message) {
     return New(env, kGPUPipelineError, message);
+}
+
+GPUPipelineError::GPUPipelineError(
+    const std::tuple<interop::DefaultedParameter<std::string>, interop::GPUPipelineErrorInit>& args)
+    : message_(std::move(std::get<0>(args))), reason_(std::get<1>(args).reason) {}
+
+std::string GPUPipelineError::getName(Napi::Env) {
+    return "GPUPipelineError";
+}
+uint16_t GPUPipelineError::getCode(Napi::Env) {
+    return 0;
+}
+std::string GPUPipelineError::getMessage(Napi::Env) {
+    return message_;
+}
+interop::GPUPipelineErrorReason GPUPipelineError::getReason(Napi::Env) {
+    return reason_;
+}
+
+GPUOutOfMemoryError::GPUOutOfMemoryError(const std::tuple<std::string>& args)
+    : message_(std::move(std::get<0>(args))) {}
+
+std::string GPUOutOfMemoryError::getMessage(Napi::Env) {
+    return message_;
+}
+
+GPUValidationError::GPUValidationError(const std::tuple<std::string>& args)
+    : message_(std::move(std::get<0>(args))) {}
+std::string GPUValidationError::getMessage(Napi::Env) {
+    return message_;
+}
+
+GPUInternalError::GPUInternalError(const std::tuple<std::string>& args)
+    : message_(std::move(std::get<0>(args))) {}
+
+std::string GPUInternalError::getMessage(Napi::Env) {
+    return message_;
 }
 
 }  // namespace wgpu::binding

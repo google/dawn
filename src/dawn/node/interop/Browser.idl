@@ -69,7 +69,11 @@ typedef(ArrayBufferView or ArrayBuffer) BufferSource;
 typedef (ArrayBuffer or /* SharedArrayBuffer or [AllowShared] */ ArrayBufferView) AllowSharedBufferSource;
 
 // Interfaces used in the WebGPU IDL that don't have an equivalent in the NAPI world.
-[LegacyNoInterfaceObject] interface DOMException {};
+[LegacyNoInterfaceObject] interface DOMException {
+  readonly attribute DOMString name;
+  readonly attribute DOMString message;
+  readonly attribute unsigned short code;
+};
 [LegacyNoInterfaceObject] interface EventHandler{};
 [LegacyNoInterfaceObject] interface HTMLCanvasElement {};
 [LegacyNoInterfaceObject] interface HTMLImageElement {};

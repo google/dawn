@@ -48,6 +48,7 @@ See:
 #include <unordered_map>
 
 #include "src/dawn/node/utils/Debug.h"
+#include "src/dawn/node/binding/Errors.h"
 
 namespace wgpu {
 namespace interop {
@@ -207,12 +208,33 @@ Wrappers* Wrappers::instance = nullptr;
     }
 
     W{{$.Name}}(const Napi::CallbackInfo& info) : ObjectWrap(info) {
-{{-   if and (IsInterface $) (not (HasConstructor $))}}
+{{-   if IsInterface $}}
+{{-     if HasConstructor $}}
+
+{{-  range $m := $.Members}}
+{{-    if IsInitializer $m}}
+      {
+        {{template "ParameterTupleDecl" $m}}
+        auto res = FromJS(info, args);
+        if (res) {
+          impl = std::make_unique<wgpu::binding::{{$.Name}}>(args);
+        }
+      }
+      // No constructor matched.
+      if (impl == nullptr) {
+        Napi::TypeError::New(info.Env(), "No constructor matched.").ThrowAsJavaScriptException();
+      }
+{{-      end}}
+{{-  end}}
+
+
+{{-     else}}
         // Check if the first argument is our internal Napi::External<void> marker
         // to prevent JavaScript from constructing this non-constructable object.
         if (info.Length() < 1 || !info[0].IsExternal() || info[0].As<Napi::External<void>>().Data() != &kInternalConstructionMarker) {
            Napi::TypeError::New(info.Env(), "Failed to construct '{{$.Name}}': Illegal constructor").ThrowAsJavaScriptException();
          }
+{{-     end}}
 {{-   end}}
     }
 
@@ -249,21 +271,7 @@ Wrappers* Wrappers::instance = nullptr;
 {{-    range $overload_idx, $o := $m.Overloads}}
 {{- $overloaded := gt (len $m.Overloads) 1}}
       { {{if $overloaded}}// Overload {{$overload_idx}}{{end}}
-        std::tuple<
-{{-        range $i, $p := $o.Parameters}}
-{{-          if $i}}, {{end}}
-{{-          if      $p.Init    }}DefaultedParameter<{{template "Type" $p.Type}}>
-{{-          else if $p.Optional}}std::optional<{{template "Type" $p.Type}}>
-{{-          else               }}{{template "Type" $p.Type}}
-{{-          end}}
-{{-        end}}> args;
-
-{{-        range $i, $p := $o.Parameters}}
-{{-          if $p.Init}}
-        std::get<{{$i}} /* {{$p.Name}} */>(args).default_value = {{Eval "Literal" "Value" $p.Init "Type" $p.Type}};
-{{-          end}}
-{{-        end}}
-
+        {{template "ParameterTupleDecl" $o}}
         auto res = FromJS(info, args);
         if (res) {
           {{/* indent */}}INTEROP_LOG(
@@ -308,6 +316,29 @@ Wrappers* Wrappers::instance = nullptr;
   };
 {{end}}
 
+{{- /*
+--------------------------------------------------------------------------------
+-- Emits a tuple "args" for function argument conversion from JS to C++
+--------------------------------------------------------------------------------
+
+*/ -}}
+{{- define "ParameterTupleDecl"}}
+        std::tuple<
+{{-        range $i, $p := $.Parameters}}
+{{-          if $i}}, {{end}}
+{{-          if      $p.Init    }}DefaultedParameter<{{template "Type" $p.Type}}>
+{{-          else if $p.Optional}}std::optional<{{template "Type" $p.Type}}>
+{{-          else               }}{{template "Type" $p.Type}}
+{{-          end}}
+{{-        end}}> args;
+
+{{-        range $i, $p := $.Parameters}}
+{{-          if $p.Init}}
+        std::get<{{$i}} /* {{$p.Name}} */>(args).default_value = {{Eval "Literal" "Value" $p.Init "Type" $p.Type}};
+{{-          end}}
+{{-        end}}
+
+{{- end}}
 
 {{- /*
 --------------------------------------------------------------------------------
