@@ -357,9 +357,6 @@ class Printer : public tint::TextGenerator {
                 case core::ir::Function::PipelineStage::kUndefined:
                     break;
             }
-            if (func->IsEntryPoint()) {
-                result_.workgroup_info.allocations.insert({func_name, {}});
-            }
 
             EmitType(out, func->ReturnType());
             out << " " << func_name << "(";
@@ -428,7 +425,7 @@ class Printer : public tint::TextGenerator {
                     func->Stage() == core::ir::Function::PipelineStage::kCompute) {
                     auto* ty = ptr->StoreType();
 
-                    auto& allocations = result_.workgroup_info.allocations.at(func_name);
+                    auto& allocations = result_.workgroup_info.allocations;
                     out << " [[threadgroup(" << allocations.size() << ")]]";
                     allocations.push_back(ty->Size());
 

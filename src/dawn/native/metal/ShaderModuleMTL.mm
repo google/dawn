@@ -386,14 +386,12 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
                 )" +
                   msl;
 
-            auto workgroupAllocations = std::move(
-                result->workgroup_info.allocations.at(r.tintOptions.remapped_entry_point_name));
             return MslCompilation{{
                 std::move(msl),
                 r.tintOptions.remapped_entry_point_name,
                 result->needs_storage_buffer_sizes,
                 result->has_invariant_attribute,
-                std::move(workgroupAllocations),
+                std::move(result->workgroup_info.allocations),
                 localSize,
             }};
         },
