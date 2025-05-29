@@ -2261,6 +2261,64 @@ TEST_F(SpirvParserTest, Loop_Body_If_Continue) {
 )");
 }
 
+TEST_F(SpirvParserTest, Loop_ContinueUseBodyValue) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+        %i32 = OpTypeInt 32 1
+       %bool = OpTypeBool
+        %one = OpConstant %i32 1
+        %two = OpConstant %i32 2
+      %three = OpConstant %i32 3
+       %true = OpConstantTrue %bool
+      %false = OpConstantFalse %bool
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+         %10 = OpLabel
+               OpBranch %20
+         %20 = OpLabel
+               OpLoopMerge %99 %50 None
+               OpBranchConditional %true %30 %99
+         %30 = OpLabel
+         %40 = OpIAdd %i32 %one %two
+               OpBranch %50
+         %50 = OpLabel
+         %41 = OpIAdd %i32 %40 %40
+               OpBranch %20
+         %99 = OpLabel
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    loop [b: $B2, c: $B3] {  # loop_1
+      $B2: {  # body
+        if true [t: $B4, f: $B5] {  # if_1
+          $B4: {  # true
+            %2:i32 = spirv.add<i32> 1i, 2i
+            continue %2  # -> $B3
+          }
+          $B5: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        unreachable
+      }
+      $B3 (%3:i32): {  # continuing
+        %4:i32 = spirv.add<i32> %3, %3
+        next_iteration  # -> $B2
+      }
+    }
+    ret
+  }
+}
+)");
+}
+
 TEST_F(SpirvParserTest, Loop_Body_Switch) {
     EXPECT_IR(R"(
                OpCapability Shader

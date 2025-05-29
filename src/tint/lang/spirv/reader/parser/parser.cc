@@ -725,9 +725,41 @@ class Parser {
                 break;
             }
 
-            auto* ctrl = blk->Parent();
-
             TINT_ASSERT(blk->Terminator());
+
+            core::ir::ControlInstruction* ctrl = tint::Switch(
+                blk->Terminator(),  //
+                [&](core::ir::ExitIf* ei) { return ei->If(); },
+                [&](core::ir::ExitSwitch* es) { return es->Switch(); },
+                [&](core::ir::ExitLoop* el) { return el->Loop(); },
+                [&](core::ir::Continue* cont) {
+                    // The propagation is going through a `continue`. This means
+                    // this is the only path to the continuing block, but it also
+                    // means we're current in the continuing block. We can't do
+                    // normal propagation here, we have to pass a block param
+                    // instead.
+
+                    auto* param = b_.BlockParam(src->Type());
+
+                    // We're in the continuing block, so make the block param available in the
+                    // scope.
+                    id_stack_.back().insert(id);
+
+                    auto* loop = cont->Loop();
+                    loop->Continuing()->AddParam(param);
+
+                    cont->PushOperand(src);
+
+                    // Set the src to the param so we return param as the new
+                    // value.
+                    src = param;
+                    return nullptr;
+                },  //
+                TINT_ICE_ON_NO_MATCH);
+
+            if (!ctrl) {
+                break;
+            }
 
             // Add ourselves as part of the terminator return value
             blk->Terminator()->PushOperand(src);
@@ -1441,8 +1473,25 @@ class Parser {
             auto* loop = StopWalkingAt(src.id())->As<core::ir::Loop>();
             TINT_ASSERT(loop);
 
+            auto continue_id = loop_merge_inst->GetSingleWordInOperand(1);
+            if (continue_id != src.id()) {
+                const auto& bb_continue = current_spirv_function_->FindBlock(continue_id);
+
+                // Emit the continuing block.
+                EmitBlockParent(loop->Continuing(), *bb_continue);
+            }
+
+            // Add the body terminator after processing the continuing block in
+            // case we've propagated values through the continue.
             if (!loop->Body()->Terminator()) {
-                loop->Body()->Append(b_.Continue(loop));
+                if (loop->Continuing()->Params().IsEmpty()) {
+                    loop->Body()->Append(b_.Continue(loop));
+                } else {
+                    loop->Body()->Append(b_.Unreachable());
+                }
+            }
+            if (!loop->Continuing()->Terminator()) {
+                loop->Continuing()->Append(b_.NextIteration(loop));
             }
 
             current_blocks_.erase(loop->Body());
@@ -2037,15 +2086,6 @@ class Parser {
         walk_stop_blocks_.insert({merge_id, loop});
         if (continue_id != header_id) {
             walk_stop_blocks_.insert({continue_id, loop});
-
-            const auto& bb_continue = current_spirv_function_->FindBlock(continue_id);
-
-            // Emit the continuing block.
-            EmitBlockParent(loop->Continuing(), *bb_continue);
-        }
-
-        if (!loop->Continuing()->Terminator()) {
-            loop->Continuing()->Append(b_.NextIteration(loop));
         }
 
         // The remainder of the loop body will process when we hit the
