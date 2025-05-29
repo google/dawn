@@ -989,7 +989,7 @@ absl_source_set("log") {
   ]
 }
 
-# There are seperated absl/log:globals and absl/log/internal:globals
+# There are separated absl/log:globals and absl/log/internal:globals
 # targets in the original GN files. Renamed to log_global and
 # _log_global respectively.
 
