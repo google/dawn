@@ -68,6 +68,9 @@ void Register(const IRFuzzer& fuzzer) {
             const Program& program, const fuzz::wgsl::Context& context,
             Slice<const std::byte> data) {
             if (program.AST().Enables().Any(tint::wgsl::reader::IsUnsupportedByIR)) {
+                if (context.options.verbose) {
+                    std::cout << "   - Features are not supported by IR.\n";
+                }
                 return;
             }
 
@@ -80,6 +83,9 @@ void Register(const IRFuzzer& fuzzer) {
             auto substituteOverridesResult =
                 tint::core::ir::transform::SubstituteOverrides(ir.Get(), cfg);
             if (substituteOverridesResult != Success) {
+                if (context.options.verbose) {
+                    std::cout << "   - Substitute overrides failed.\n";
+                }
                 return;
             }
 
