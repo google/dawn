@@ -33,7 +33,6 @@
 #include <utility>
 #include <vector>
 
-#include "dawn/common/BitSetRangeIterator.h"
 #include "dawn/common/WindowsUtils.h"
 #include "dawn/native/ApplyClearColorValueWithDrawHelper.h"
 #include "dawn/native/ChainUtils.h"
@@ -41,7 +40,6 @@
 #include "dawn/native/CommandValidation.h"
 #include "dawn/native/Commands.h"
 #include "dawn/native/ExternalTexture.h"
-#include "dawn/native/ImmediateConstantsTracker.h"
 #include "dawn/native/RenderBundle.h"
 #include "dawn/native/d3d/D3DError.h"
 #include "dawn/native/d3d11/BindGroupTrackerD3D11.h"
@@ -217,44 +215,6 @@ HandlePixelLocalStorageAndGetPixelLocalStorageUAVs(
 
     return pixelLocalStorageUAVs;
 }
-
-template <typename T>
-class ImmediateConstantTracker : public T {
-  public:
-    ImmediateConstantTracker() = default;
-
-    MaybeError Apply(const ScopedSwapStateCommandRecordingContext* commandContext) {
-        auto* lastPipeline = this->mLastPipeline;
-        if (!lastPipeline) {
-            return {};
-        }
-
-        ImmediateConstantMask uploadBits = this->mDirty & lastPipeline->GetImmediateMask();
-        uint32_t immediateRangeStartOffset = 0;
-        uint32_t immediateContentStartOffset = 0;
-        for (auto&& [offset, size] : IterateRanges(uploadBits)) {
-            immediateContentStartOffset =
-                static_cast<uint32_t>(offset) * kImmediateConstantElementByteSize;
-            commandContext->WriteUniformBufferRange(
-                immediateRangeStartOffset,
-                this->mContent.template Get<uint32_t>(immediateContentStartOffset),
-                size * kImmediateConstantElementByteSize);
-            immediateRangeStartOffset += size * kImmediateConstantElementByteSize;
-        }
-
-        // Reset all dirty bits after uploading.
-        this->mDirty.reset();
-
-        return commandContext->FlushUniformBuffer();
-    }
-
-    uint32_t GetFirstIndexContentStartOffset() {
-        uint32_t startIndex =
-            offsetof(RenderImmediateConstants, firstVertex) / kImmediateConstantElementByteSize;
-        ImmediateConstantMask prefixBits = ImmediateConstantMask((1u << startIndex) - 1u);
-        return (prefixBits & this->mDirty).count() * kImmediateConstantElementByteSize;
-    }
-};
 
 }  // namespace
 
@@ -536,8 +496,6 @@ MaybeError CommandBuffer::ExecuteComputePass(
     ComputePipeline* lastPipeline = nullptr;
     ComputePassBindGroupTracker bindGroupTracker(commandContext);
 
-    ImmediateConstantTracker<ComputeImmediateConstantsTrackerBase> immediates = {};
-
     Command type;
     while (mCommands.NextCommandId(&type)) {
         switch (type) {
@@ -550,8 +508,8 @@ MaybeError CommandBuffer::ExecuteComputePass(
                 DispatchCmd* dispatch = mCommands.NextCommand<DispatchCmd>();
 
                 DAWN_TRY(bindGroupTracker.Apply());
-                immediates.SetNumWorkgroups(dispatch->x, dispatch->y, dispatch->z);
-                DAWN_TRY(immediates.Apply(commandContext));
+
+                DAWN_TRY(RecordNumWorkgroupsForDispatch(lastPipeline, commandContext, dispatch));
                 commandContext->GetD3D11DeviceContext3()->Dispatch(dispatch->x, dispatch->y,
                                                                    dispatch->z);
 
@@ -562,8 +520,8 @@ MaybeError CommandBuffer::ExecuteComputePass(
                 DispatchIndirectCmd* dispatch = mCommands.NextCommand<DispatchIndirectCmd>();
 
                 DAWN_TRY(bindGroupTracker.Apply());
+
                 auto* indirectBuffer = ToGPUUsableBuffer(dispatch->indirectBuffer.Get());
-                DAWN_TRY(immediates.Apply(commandContext));
 
                 if (lastPipeline->UsesNumWorkgroups()) {
                     // Copy indirect args into the uniform buffer for built-in workgroup variables.
@@ -585,7 +543,6 @@ MaybeError CommandBuffer::ExecuteComputePass(
                 lastPipeline = ToBackend(cmd->pipeline).Get();
                 lastPipeline->ApplyNow(commandContext);
                 bindGroupTracker.OnSetPipeline(lastPipeline);
-                immediates.OnSetPipeline(lastPipeline);
                 break;
             }
 
@@ -719,8 +676,6 @@ MaybeError CommandBuffer::ExecuteRenderPass(
     std::array<float, 4> blendColor = {0.0f, 0.0f, 0.0f, 0.0f};
     uint32_t stencilReference = 0;
 
-    ImmediateConstantTracker<RenderImmediateConstantsTrackerBase> immediates = {};
-
     auto DoRenderBundleCommand = [&](CommandIterator* iter, Command type) -> MaybeError {
         switch (type) {
             case Command::Draw: {
@@ -728,8 +683,8 @@ MaybeError CommandBuffer::ExecuteRenderPass(
 
                 DAWN_TRY(bindGroupTracker.Apply());
                 vertexBufferTracker.Apply(lastPipeline);
-                immediates.SetFirstIndexOffset(draw->firstVertex, draw->firstInstance);
-                DAWN_TRY(immediates.Apply(commandContext));
+                DAWN_TRY(RecordFirstIndexOffset(lastPipeline, commandContext, draw->firstVertex,
+                                                draw->firstInstance));
                 commandContext->GetD3D11DeviceContext3()->DrawInstanced(
                     draw->vertexCount, draw->instanceCount, draw->firstVertex, draw->firstInstance);
 
@@ -741,8 +696,8 @@ MaybeError CommandBuffer::ExecuteRenderPass(
 
                 DAWN_TRY(bindGroupTracker.Apply());
                 vertexBufferTracker.Apply(lastPipeline);
-                immediates.SetFirstIndexOffset(draw->baseVertex, draw->firstInstance);
-                DAWN_TRY(immediates.Apply(commandContext));
+                DAWN_TRY(RecordFirstIndexOffset(lastPipeline, commandContext, draw->baseVertex,
+                                                draw->firstInstance));
                 commandContext->GetD3D11DeviceContext3()->DrawIndexedInstanced(
                     draw->indexCount, draw->instanceCount, draw->firstIndex, draw->baseVertex,
                     draw->firstInstance);
@@ -758,7 +713,6 @@ MaybeError CommandBuffer::ExecuteRenderPass(
 
                 DAWN_TRY(bindGroupTracker.Apply());
                 vertexBufferTracker.Apply(lastPipeline);
-                DAWN_TRY(immediates.Apply(commandContext));
 
                 if (lastPipeline->UsesVertexIndex() || lastPipeline->UsesInstanceIndex()) {
                     // Copy StartVertexLocation and StartInstanceLocation into the uniform buffer
@@ -768,8 +722,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(
                         offsetof(D3D11_DRAW_INSTANCED_INDIRECT_ARGS, StartVertexLocation);
                     DAWN_TRY(Buffer::Copy(commandContext, indirectBuffer, offset,
                                           sizeof(uint32_t) * 2,
-                                          commandContext->GetInternalUniformBuffer(),
-                                          immediates.GetFirstIndexContentStartOffset()));
+                                          commandContext->GetInternalUniformBuffer(), 0));
                 }
 
                 ID3D11Buffer* d3dBuffer;
@@ -789,7 +742,6 @@ MaybeError CommandBuffer::ExecuteRenderPass(
 
                 DAWN_TRY(bindGroupTracker.Apply());
                 vertexBufferTracker.Apply(lastPipeline);
-                DAWN_TRY(immediates.Apply(commandContext));
 
                 if (lastPipeline->UsesVertexIndex() || lastPipeline->UsesInstanceIndex()) {
                     // Copy StartVertexLocation and StartInstanceLocation into the uniform buffer
@@ -799,8 +751,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(
                         offsetof(D3D11_DRAW_INDEXED_INSTANCED_INDIRECT_ARGS, BaseVertexLocation);
                     DAWN_TRY(Buffer::Copy(commandContext, indirectBuffer, offset,
                                           sizeof(uint32_t) * 2,
-                                          commandContext->GetInternalUniformBuffer(),
-                                          immediates.GetFirstIndexContentStartOffset()));
+                                          commandContext->GetInternalUniformBuffer(), 0));
                 }
 
                 ID3D11Buffer* d3dBuffer;
@@ -818,7 +769,6 @@ MaybeError CommandBuffer::ExecuteRenderPass(
                 lastPipeline = ToBackend(cmd->pipeline.Get());
                 lastPipeline->ApplyNow(commandContext, blendColor, stencilReference);
                 bindGroupTracker.OnSetPipeline(lastPipeline);
-                immediates.OnSetPipeline(lastPipeline);
 
                 break;
             }
@@ -1026,6 +976,40 @@ void CommandBuffer::HandleDebugCommands(
         default:
             DAWN_UNREACHABLE();
     }
+}
+
+MaybeError CommandBuffer::RecordFirstIndexOffset(
+    RenderPipeline* renderPipeline,
+    const ScopedSwapStateCommandRecordingContext* commandContext,
+    uint32_t firstVertex,
+    uint32_t firstInstance) {
+    constexpr uint32_t kFirstVertexOffset = 0;
+    constexpr uint32_t kFirstInstanceOffset = 1;
+
+    if (renderPipeline->UsesVertexIndex()) {
+        commandContext->WriteUniformBuffer(kFirstVertexOffset, firstVertex);
+    }
+    if (renderPipeline->UsesInstanceIndex()) {
+        commandContext->WriteUniformBuffer(kFirstInstanceOffset, firstInstance);
+    }
+
+    return commandContext->FlushUniformBuffer();
+}
+
+MaybeError CommandBuffer::RecordNumWorkgroupsForDispatch(
+    ComputePipeline* computePipeline,
+    const ScopedSwapStateCommandRecordingContext* commandContext,
+    DispatchCmd* dispatchCmd) {
+    if (!computePipeline->UsesNumWorkgroups()) {
+        // Workgroup size is not used in shader, so we don't need to update the uniform buffer. The
+        // original value in the uniform buffer will not be used, so we don't need to clear it.
+        return {};
+    }
+
+    commandContext->WriteUniformBuffer(/*offset=*/0, dispatchCmd->x);
+    commandContext->WriteUniformBuffer(/*offset=*/1, dispatchCmd->y);
+    commandContext->WriteUniformBuffer(/*offset=*/2, dispatchCmd->z);
+    return commandContext->FlushUniformBuffer();
 }
 
 }  // namespace dawn::native::d3d11
