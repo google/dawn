@@ -64,8 +64,9 @@ void Register(const IRFuzzer& fuzzer) {
 #if TINT_BUILD_WGSL_READER
     wgsl::Register({
         fuzzer.name,
-        [fn = fuzzer.fn](const Program& program, const fuzz::wgsl::Context& context,
-                         Slice<const std::byte> data) {
+        [fn = fuzzer.fn, pre_capabilities = fuzzer.pre_capabilities](
+            const Program& program, const fuzz::wgsl::Context& context,
+            Slice<const std::byte> data) {
             if (program.AST().Enables().Any(tint::wgsl::reader::IsUnsupportedByIR)) {
                 return;
             }
@@ -101,13 +102,18 @@ void Register(const IRFuzzer& fuzzer) {
                 }
             }
 
-            if (auto val = core::ir::Validate(ir.Get(),
-                                              core::ir::Capabilities{
-                                                  core::ir::Capability::kAllowMultipleEntryPoints,
-                                              });
-                val != Success) {
-                TINT_ICE() << val.Failure();
+            // Validate the IR against the fuzzer's preconditions before running.
+            // We don't consider validation failure here to be an issue, as it only signals that
+            // there is a bug somewhere in the components run above. Those components have their own
+            // IR fuzzers.
+            if (auto val = core::ir::Validate(ir.Get(), pre_capabilities); val != Success) {
+                if (context.options.verbose) {
+                    std::cout
+                        << "   Failed to validate against fuzzer capabilities before running\n";
+                }
+                return;
             }
+
             // Copy relevant options from wgsl::Context to ir::Context
             fuzz::ir::Context ir_context;
             ir_context.options.filter = context.options.filter;
