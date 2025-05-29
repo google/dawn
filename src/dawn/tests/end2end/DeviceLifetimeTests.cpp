@@ -53,6 +53,9 @@ TEST_P(DeviceLifetimeTests, DroppedBeforeQueue) {
 
 // Test that the device can be dropped while an onSubmittedWorkDone callback is in flight.
 TEST_P(DeviceLifetimeTests, DroppedWhileQueueOnSubmittedWorkDone) {
+    // TODO(crbug.com/413053623): implement webgpu::CommandBuffer
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
+
     // Submit some work.
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder(nullptr);
     wgpu::CommandBuffer commandBuffer = encoder.Finish();
@@ -69,6 +72,9 @@ TEST_P(DeviceLifetimeTests, DroppedWhileQueueOnSubmittedWorkDone) {
 
 // Test that the device can be dropped inside an onSubmittedWorkDone callback.
 TEST_P(DeviceLifetimeTests, DroppedInsideQueueOnSubmittedWorkDone) {
+    // TODO(crbug.com/413053623): implement webgpu::CommandBuffer
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
+
     // Submit some work.
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder(nullptr);
     wgpu::CommandBuffer commandBuffer = encoder.Finish();
@@ -142,6 +148,9 @@ TEST_P(DeviceLifetimeTests, DroppedBeforeBuffer) {
 
 // Test that the device can be dropped while a buffer created from it is being mapped.
 TEST_P(DeviceLifetimeTests, DroppedWhileMappingBuffer) {
+    // TODO(crbug.com/413053623): implement webgpu::Buffer
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
+
     wgpu::BufferDescriptor desc = {};
     desc.size = 4;
     desc.usage = wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst;
@@ -159,6 +168,9 @@ TEST_P(DeviceLifetimeTests, DroppedWhileMappingBuffer) {
 
 // Test that the device can be dropped before a mapped buffer created from it.
 TEST_P(DeviceLifetimeTests, DroppedBeforeMappedBuffer) {
+    // TODO(crbug.com/413053623): implement webgpu::Buffer
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
+
     wgpu::BufferDescriptor desc = {};
     desc.size = 4;
     desc.usage = wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst;
@@ -171,6 +183,9 @@ TEST_P(DeviceLifetimeTests, DroppedBeforeMappedBuffer) {
 
 // Test that the device can be dropped before a mapped at creation buffer created from it.
 TEST_P(DeviceLifetimeTests, DroppedBeforeMappedAtCreationBuffer) {
+    // TODO(crbug.com/413053623): implement webgpu::Buffer
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
+
     wgpu::BufferDescriptor desc = {};
     desc.size = 4;
     desc.usage = wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst;
@@ -183,6 +198,9 @@ TEST_P(DeviceLifetimeTests, DroppedBeforeMappedAtCreationBuffer) {
 // Test that the device can be dropped before a buffer created from it, then mapping the buffer
 // fails.
 TEST_P(DeviceLifetimeTests, DroppedThenMapBuffer) {
+    // TODO(crbug.com/413053623): implement webgpu::Buffer
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
+
     wgpu::BufferDescriptor desc = {};
     desc.size = 4;
     desc.usage = wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst;
@@ -201,6 +219,9 @@ TEST_P(DeviceLifetimeTests, DroppedThenMapBuffer) {
 // Test that the device can be dropped before a buffer created from it, then mapping the buffer
 // twice (one inside callback) will both fail.
 TEST_P(DeviceLifetimeTests, Dropped_ThenMapBuffer_ThenMapBufferInCallback) {
+    // TODO(crbug.com/413053623): implement webgpu::Buffer
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
+
     wgpu::BufferDescriptor desc = {};
     desc.size = 4;
     desc.usage = wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst;
@@ -229,6 +250,9 @@ TEST_P(DeviceLifetimeTests, Dropped_ThenMapBuffer_ThenMapBufferInCallback) {
 
 // Test that the device can be dropped inside a buffer map callback.
 TEST_P(DeviceLifetimeTests, DroppedInsideBufferMapCallback) {
+    // TODO(crbug.com/413053623): implement webgpu::Buffer
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
+
     wgpu::BufferDescriptor desc = {};
     desc.size = 4;
     desc.usage = wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst;
@@ -261,6 +285,9 @@ TEST_P(DeviceLifetimeTests, DroppedInsideBufferMapCallback) {
 
 // Test that the device can be dropped while a write buffer operation is enqueued.
 TEST_P(DeviceLifetimeTests, DroppedWhileWriteBuffer) {
+    // TODO(crbug.com/413053623): implement webgpu::Buffer
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
+
     wgpu::BufferDescriptor desc = {};
     desc.size = 4;
     desc.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
@@ -275,6 +302,9 @@ TEST_P(DeviceLifetimeTests, DroppedWhileWriteBuffer) {
 // a queue submit occurs. This is slightly different from the former test since it ensures
 // that pending work is flushed.
 TEST_P(DeviceLifetimeTests, DroppedWhileWriteBufferAndSubmit) {
+    // TODO(crbug.com/413053623): implement webgpu::Buffer
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
+
     wgpu::BufferDescriptor desc = {};
     desc.size = 4;
     desc.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
@@ -288,6 +318,9 @@ TEST_P(DeviceLifetimeTests, DroppedWhileWriteBufferAndSubmit) {
 
 // Test that the device can be dropped while createPipelineAsync is in flight
 TEST_P(DeviceLifetimeTests, DroppedWhileCreatePipelineAsync) {
+    // TODO(crbug.com/413053623): implement webgpu::ShaderModule
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
+
     wgpu::ComputePipelineDescriptor desc;
     desc.compute.module = utils::CreateShaderModule(device, R"(
     @compute @workgroup_size(1) fn main() {
@@ -307,6 +340,9 @@ TEST_P(DeviceLifetimeTests, DroppedWhileCreatePipelineAsync) {
 
 // Test that the device can be dropped inside a createPipelineAsync callback
 TEST_P(DeviceLifetimeTests, DroppedInsideCreatePipelineAsync) {
+    // TODO(crbug.com/413053623): implement webgpu::ShaderModule
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
+
     wgpu::ComputePipelineDescriptor desc;
     desc.compute.module = utils::CreateShaderModule(device, R"(
     @compute @workgroup_size(1) fn main() {
@@ -330,6 +366,9 @@ TEST_P(DeviceLifetimeTests, DroppedInsideCreatePipelineAsync) {
 // Test that the device can be dropped while createPipelineAsync which will hit the frontend cache
 // is in flight
 TEST_P(DeviceLifetimeTests, DroppedWhileCreatePipelineAsyncAlreadyCached) {
+    // TODO(crbug.com/413053623): implement webgpu::ShaderModule
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
+
     wgpu::ComputePipelineDescriptor desc;
     desc.compute.module = utils::CreateShaderModule(device, R"(
     @compute @workgroup_size(1) fn main() {
@@ -357,6 +396,9 @@ TEST_P(DeviceLifetimeTests, DroppedWhileCreatePipelineAsyncAlreadyCached) {
 // Test that the device can be dropped inside a createPipelineAsync callback which will hit the
 // frontend cache
 TEST_P(DeviceLifetimeTests, DroppedInsideCreatePipelineAsyncAlreadyCached) {
+    // TODO(crbug.com/413053623): implement webgpu::ShaderModule
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
+
     wgpu::ComputePipelineDescriptor desc;
     desc.compute.module = utils::CreateShaderModule(device, R"(
     @compute @workgroup_size(1) fn main() {
@@ -384,6 +426,9 @@ TEST_P(DeviceLifetimeTests, DroppedInsideCreatePipelineAsyncAlreadyCached) {
 // Test that the device can be dropped while createPipelineAsync which will race with a compilation
 // to add the same pipeline to the frontend cache
 TEST_P(DeviceLifetimeTests, DroppedWhileCreatePipelineAsyncRaceCache) {
+    // TODO(crbug.com/413053623): implement webgpu::ShaderModule
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
+
     wgpu::ComputePipelineDescriptor desc;
     desc.compute.module = utils::CreateShaderModule(device, R"(
     @compute @workgroup_size(1) fn main() {
@@ -407,6 +452,9 @@ TEST_P(DeviceLifetimeTests, DroppedWhileCreatePipelineAsyncRaceCache) {
 // Test that the device can be dropped inside a createPipelineAsync callback which will race
 // with a compilation to add the same pipeline to the frontend cache
 TEST_P(DeviceLifetimeTests, DroppedInsideCreatePipelineAsyncRaceCache) {
+    // TODO(crbug.com/413053623): implement webgpu::ShaderModule
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
+
     wgpu::ComputePipelineDescriptor desc;
     desc.compute.module = utils::CreateShaderModule(device, R"(
     @compute @workgroup_size(1) fn main() {
@@ -468,7 +516,8 @@ DAWN_INSTANTIATE_TEST(DeviceLifetimeTests,
                       NullBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
-                      VulkanBackend());
+                      VulkanBackend(),
+                      WebGPUBackend());
 
 }  // anonymous namespace
 }  // namespace dawn

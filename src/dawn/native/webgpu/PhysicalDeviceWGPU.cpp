@@ -28,12 +28,14 @@
 #include "dawn/native/webgpu/PhysicalDeviceWGPU.h"
 
 #include <string>
+#include <utility>
 
 #include "dawn/common/StringViewUtils.h"
 #include "dawn/native/ChainUtils.h"
 #include "dawn/native/Features_autogen.h"
 #include "dawn/native/Instance.h"
 #include "dawn/native/webgpu/BackendWGPU.h"
+#include "dawn/native/webgpu/DeviceWGPU.h"
 
 namespace dawn::native::webgpu {
 
@@ -132,7 +134,7 @@ ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(
     const UnpackedPtr<DeviceDescriptor>& descriptor,
     const TogglesState& deviceToggles,
     Ref<DeviceBase::DeviceLostEvent>&& lostEvent) {
-    DAWN_UNREACHABLE();
+    return Device::Create(adapter, mInnerAdapter, descriptor, deviceToggles, std::move(lostEvent));
 }
 
 void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info) const {

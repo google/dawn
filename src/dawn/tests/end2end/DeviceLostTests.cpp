@@ -104,6 +104,9 @@ TEST_P(DeviceLostTest, CreateBindGroupLayoutFails) {
 
 // Test that GetBindGroupLayout fails when device is lost
 TEST_P(DeviceLostTest, GetBindGroupLayoutFails) {
+    // TODO(crbug.com/413053623): implement webgpu::Pipeline
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
+
     wgpu::ShaderModule csModule = utils::CreateShaderModule(device, R"(
         struct UniformBuffer {
             pos : vec4f
@@ -178,6 +181,9 @@ TEST_P(DeviceLostTest, CreateRenderBundleEncoderFails) {
 
 // Tests that CreateComputePipeline fails when device is lost
 TEST_P(DeviceLostTest, CreateComputePipelineFails) {
+    // TODO(crbug.com/413053623): implement webgpu::ShaderModule
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
+
     wgpu::ShaderModule shader = utils::CreateShaderModule(device, "");
 
     WaitABit();
@@ -191,6 +197,9 @@ TEST_P(DeviceLostTest, CreateComputePipelineFails) {
 
 // Tests that CreateRenderPipeline fails when device is lost
 TEST_P(DeviceLostTest, CreateRenderPipelineFails) {
+    // TODO(crbug.com/413053623): implement webgpu::ShaderModule
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
+
     wgpu::ShaderModule shader = utils::CreateShaderModule(device, "");
 
     WaitABit();
@@ -250,6 +259,9 @@ TEST_P(DeviceLostTest, CreateBufferFails) {
 
 // Test that buffer.MapAsync for writing fails after device is lost
 TEST_P(DeviceLostTest, BufferMapAsyncFailsForWriting) {
+    // TODO(crbug.com/413053623): implement webgpu::Buffer
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
+
     wgpu::BufferDescriptor bufferDescriptor;
     bufferDescriptor.size = 4;
     bufferDescriptor.usage = wgpu::BufferUsage::MapWrite;
@@ -267,6 +279,9 @@ TEST_P(DeviceLostTest, BufferMapAsyncFailsForWriting) {
 // Test that BufferMapAsync for writing calls back with success when device lost after
 // mapping
 TEST_P(DeviceLostTest, BufferMapAsyncBeforeLossFailsForWriting) {
+    // TODO(crbug.com/413053623): implement webgpu::Buffer
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
+
     wgpu::BufferDescriptor bufferDescriptor;
     bufferDescriptor.size = 4;
     bufferDescriptor.usage = wgpu::BufferUsage::MapWrite;
@@ -282,6 +297,9 @@ TEST_P(DeviceLostTest, BufferMapAsyncBeforeLossFailsForWriting) {
 
 // Test that buffer.Unmap after device is lost
 TEST_P(DeviceLostTest, BufferUnmapAfterDeviceLost) {
+    // TODO(crbug.com/413053623): implement webgpu::Buffer
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
+
     wgpu::BufferDescriptor bufferDescriptor;
     bufferDescriptor.size = sizeof(float);
     bufferDescriptor.usage = wgpu::BufferUsage::MapWrite;
@@ -349,6 +367,9 @@ TEST_P(DeviceLostTest, CreateBuffer) {
 
 // Test that BufferMapAsync for reading fails after device is lost
 TEST_P(DeviceLostTest, BufferMapAsyncFailsForReading) {
+    // TODO(crbug.com/413053623): implement webgpu::Buffer
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
+
     wgpu::BufferDescriptor bufferDescriptor;
     bufferDescriptor.size = 4;
     bufferDescriptor.usage = wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst;
@@ -367,6 +388,9 @@ TEST_P(DeviceLostTest, BufferMapAsyncFailsForReading) {
 // Test that BufferMapAsync for reading calls back with success when device lost after
 // mapping
 TEST_P(DeviceLostTest, BufferMapAsyncBeforeLossFailsForReading) {
+    // TODO(crbug.com/413053623): implement webgpu::Buffer
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
+
     wgpu::BufferDescriptor bufferDescriptor;
     bufferDescriptor.size = sizeof(float);
     bufferDescriptor.usage = wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst;
@@ -396,6 +420,9 @@ TEST_P(DeviceLostTest, WriteBufferAfterDeviceLost) {
 
 // Test it's possible to GetMappedRange on a buffer created mapped after device loss
 TEST_P(DeviceLostTest, GetMappedRange_CreateBufferMappedAtCreationAfterLoss) {
+    // TODO(crbug.com/413053623): implement webgpu::Buffer
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
+
     LoseDeviceForTesting();
 
     wgpu::BufferDescriptor desc;
@@ -410,6 +437,9 @@ TEST_P(DeviceLostTest, GetMappedRange_CreateBufferMappedAtCreationAfterLoss) {
 
 // Test that device loss doesn't change the result of GetMappedRange, mappedAtCreation version.
 TEST_P(DeviceLostTest, GetMappedRange_CreateBufferMappedAtCreationBeforeLoss) {
+    // TODO(crbug.com/413053623): implement webgpu::Buffer
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
+
     wgpu::BufferDescriptor desc;
     desc.size = 4;
     desc.usage = wgpu::BufferUsage::CopySrc;
@@ -425,6 +455,9 @@ TEST_P(DeviceLostTest, GetMappedRange_CreateBufferMappedAtCreationBeforeLoss) {
 
 // Test that device loss doesn't change the result of GetMappedRange, mapping for reading version.
 TEST_P(DeviceLostTest, GetMappedRange_MapAsyncReading) {
+    // TODO(crbug.com/413053623): implement webgpu::Buffer
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
+
     wgpu::BufferDescriptor desc;
     desc.size = 4;
     desc.usage = wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst;
@@ -442,6 +475,9 @@ TEST_P(DeviceLostTest, GetMappedRange_MapAsyncReading) {
 
 // Test that device loss doesn't change the result of GetMappedRange, mapping for writing version.
 TEST_P(DeviceLostTest, GetMappedRange_MapAsyncWriting) {
+    // TODO(crbug.com/413053623): implement webgpu::Buffer
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
+
     wgpu::BufferDescriptor desc;
     desc.size = 4;
     desc.usage = wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc;
@@ -508,6 +544,9 @@ TEST_P(DeviceLostTest, DeviceLostDoesntCallUncapturedError) {
 // Test that WGPUCreatePipelineAsyncStatus_Success is returned when device is lost
 // before the callback of Create*PipelineAsync() is called.
 TEST_P(DeviceLostTest, DeviceLostBeforeCreatePipelineAsyncCallback) {
+    // TODO(crbug.com/413053623): implement webgpu::ShaderModule
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
+
     wgpu::ShaderModule csModule = utils::CreateShaderModule(device, R"(
         @compute @workgroup_size(1) fn main() {
         })");
@@ -530,6 +569,9 @@ TEST_P(DeviceLostTest, DeviceLostBeforeCreatePipelineAsyncCallback) {
 // references to bind group layouts such that the cache was non-empty at the end
 // of shut down.
 TEST_P(DeviceLostTest, FreeBindGroupAfterDeviceLossWithPendingCommands) {
+    // TODO(crbug.com/413053623): implement webgpu::BindGroup
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
+
     DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxStorageBuffersInFragmentStage < 1);
 
     wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
@@ -567,6 +609,9 @@ TEST_P(DeviceLostTest, FreeBindGroupAfterDeviceLossWithPendingCommands) {
 // This is a regression test for crbug.com/1365011 where ending a render pass with an indirect draw
 // in it after the device is lost would cause render commands to be leaked.
 TEST_P(DeviceLostTest, DeviceLostInRenderPassWithDrawIndirect) {
+    // TODO(crbug.com/413053623): implement webgpu::Pipeline, etc.
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
+
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 4u, 4u);
     utils::ComboRenderPipelineDescriptor desc;
     desc.vertex.module = utils::CreateShaderModule(device, R"(
@@ -597,6 +642,9 @@ TEST_P(DeviceLostTest, DeviceLostInRenderPassWithDrawIndirect) {
 
 // Attempting to set an object label after device loss should not cause an error.
 TEST_P(DeviceLostTest, SetLabelAfterDeviceLoss) {
+    // TODO(crbug.com/413053623): implement webgpu::Buffer
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
+
     std::string label = "test";
     wgpu::BufferDescriptor descriptor;
     descriptor.size = 4;
@@ -613,7 +661,8 @@ DAWN_INSTANTIATE_TEST(DeviceLostTest,
                       NullBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
-                      VulkanBackend());
+                      VulkanBackend(),
+                      WebGPUBackend());
 
 }  // anonymous namespace
 }  // namespace dawn
