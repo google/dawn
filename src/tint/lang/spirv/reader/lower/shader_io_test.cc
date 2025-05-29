@@ -38,6 +38,9 @@ using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
 class SpirvReader_ShaderIOTest : public core::ir::transform::TransformTest {
+  public:
+    void SetUp() override { capabilities.Add(core::ir::Capability::kAllowMultipleEntryPoints); }
+
   protected:
     core::IOAttributes BuiltinAttrs(core::BuiltinValue builtin) {
         core::IOAttributes attrs;

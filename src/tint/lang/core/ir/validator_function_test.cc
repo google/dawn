@@ -95,6 +95,37 @@ TEST_F(IR_ValidatorTest, Function_Duplicate) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Function_MultipleEntryPoints_WithCapability) {
+    auto* ep1 = ComputeEntryPoint("ep1");
+    ep1->Block()->Append(b.Return(ep1));
+
+    auto* ep2 = ComputeEntryPoint("ep2");
+    ep2->Block()->Append(b.Return(ep2));
+
+    auto res = ir::Validate(mod, Capabilities{
+                                     Capability::kAllowMultipleEntryPoints,
+                                 });
+    ASSERT_EQ(res, Success) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Function_MultipleEntryPoints_WithoutCapability) {
+    auto* ep1 = ComputeEntryPoint("ep1");
+    ep1->Block()->Append(b.Return(ep1));
+
+    auto* ep2 = ComputeEntryPoint("ep2");
+    ep2->Block()->Append(b.Return(ep2));
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:6:1 error: a module with multiple entry points requires the AllowMultipleEntryPoints capability
+%ep2 = @compute @workgroup_size(1u, 1u, 1u) func():void {
+^^^^
+)")) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Function_DuplicateEntryPointNames) {
     auto* c = ComputeEntryPoint("dup");
     c->Block()->Append(b.Return(c));
@@ -102,7 +133,9 @@ TEST_F(IR_ValidatorTest, Function_DuplicateEntryPointNames) {
     auto* f = FragmentEntryPoint("dup");
     f->Block()->Append(b.Return(f));
 
-    auto res = ir::Validate(mod);
+    auto res = ir::Validate(mod, Capabilities{
+                                     Capability::kAllowMultipleEntryPoints,
+                                 });
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr(R"(:6:1 error: entry point name 'dup' is not unique

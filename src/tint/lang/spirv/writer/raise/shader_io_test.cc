@@ -660,137 +660,6 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvWriter_ShaderIOTest, Struct_SharedByVertexAndFragment) {
-    auto* vec4f = ty.vec4<f32>();
-    auto* str_ty = ty.Struct(mod.symbols.New("Interface"),
-                             {
-                                 {
-                                     mod.symbols.New("position"),
-                                     vec4f,
-                                     core::IOAttributes{
-                                         .builtin = core::BuiltinValue::kPosition,
-                                     },
-                                 },
-                                 {
-                                     mod.symbols.New("color"),
-                                     vec4f,
-                                     core::IOAttributes{
-                                         .location = 0u,
-                                     },
-                                 },
-                             });
-
-    // Vertex shader.
-    {
-        auto* ep = b.Function("vert", str_ty);
-        ep->SetStage(core::ir::Function::PipelineStage::kVertex);
-
-        b.Append(ep->Block(), [&] {  //
-            auto* position = b.Construct(vec4f, 0_f);
-            auto* color = b.Construct(vec4f, 1_f);
-            b.Return(ep, b.Construct(str_ty, position, color));
-        });
-    }
-
-    // Fragment shader.
-    {
-        auto* ep = b.Function("frag", vec4f);
-        auto* inputs = b.FunctionParam("inputs", str_ty);
-        ep->SetStage(core::ir::Function::PipelineStage::kFragment);
-        ep->SetParams({inputs});
-        ep->SetReturnLocation(0u);
-
-        b.Append(ep->Block(), [&] {  //
-            auto* position = b.Access(vec4f, inputs, 0_u);
-            auto* color = b.Access(vec4f, inputs, 1_u);
-            b.Return(ep, b.Add(vec4f, position, color));
-        });
-    }
-
-    auto* src = R"(
-Interface = struct @align(16) {
-  position:vec4<f32> @offset(0), @builtin(position)
-  color:vec4<f32> @offset(16), @location(0)
-}
-
-%vert = @vertex func():Interface {
-  $B1: {
-    %2:vec4<f32> = construct 0.0f
-    %3:vec4<f32> = construct 1.0f
-    %4:Interface = construct %2, %3
-    ret %4
-  }
-}
-%frag = @fragment func(%inputs:Interface):vec4<f32> [@location(0)] {
-  $B2: {
-    %7:vec4<f32> = access %inputs, 0u
-    %8:vec4<f32> = access %inputs, 1u
-    %9:vec4<f32> = add %7, %8
-    ret %9
-  }
-}
-)";
-    EXPECT_EQ(src, str());
-
-    auto* expect = R"(
-Interface = struct @align(16) {
-  position:vec4<f32> @offset(0)
-  color:vec4<f32> @offset(16)
-}
-
-$B1: {  # root
-  %vert_position_Output:ptr<__out, vec4<f32>, write> = var undef @builtin(position)
-  %vert_loc0_Output:ptr<__out, vec4<f32>, write> = var undef @location(0)
-  %frag_position_Input:ptr<__in, vec4<f32>, read> = var undef @builtin(position)
-  %frag_loc0_Input:ptr<__in, vec4<f32>, read> = var undef @location(0)
-  %frag_loc0_Output:ptr<__out, vec4<f32>, write> = var undef @location(0)
-}
-
-%vert_inner = func():Interface {
-  $B2: {
-    %7:vec4<f32> = construct 0.0f
-    %8:vec4<f32> = construct 1.0f
-    %9:Interface = construct %7, %8
-    ret %9
-  }
-}
-%frag_inner = func(%inputs:Interface):vec4<f32> {
-  $B3: {
-    %12:vec4<f32> = access %inputs, 0u
-    %13:vec4<f32> = access %inputs, 1u
-    %14:vec4<f32> = add %12, %13
-    ret %14
-  }
-}
-%vert = @vertex func():void {
-  $B4: {
-    %16:Interface = call %vert_inner
-    %17:vec4<f32> = access %16, 0u
-    store %vert_position_Output, %17
-    %18:vec4<f32> = access %16, 1u
-    store %vert_loc0_Output, %18
-    ret
-  }
-}
-%frag = @fragment func():void {
-  $B5: {
-    %20:vec4<f32> = load %frag_position_Input
-    %21:vec4<f32> = load %frag_loc0_Input
-    %22:Interface = construct %20, %21
-    %23:vec4<f32> = call %frag_inner, %22
-    store %frag_loc0_Output, %23
-    ret
-  }
-}
-)";
-
-    core::ir::transform::ImmediateDataLayout immediate_data;
-    ShaderIOConfig config{immediate_data};
-    Run(ShaderIO, config);
-
-    EXPECT_EQ(expect, str());
-}
-
 TEST_F(SpirvWriter_ShaderIOTest, Struct_SharedWithBuffer) {
     auto* vec4f = ty.vec4<f32>();
     auto* str_ty =
@@ -964,8 +833,8 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-// Test that interpolation attributes are stripped from vertex inputs and fragment outputs.
-TEST_F(SpirvWriter_ShaderIOTest, InterpolationOnVertexInputOrFragmentOutput) {
+// Test that interpolation attributes are stripped from vertex inputs.
+TEST_F(SpirvWriter_ShaderIOTest, InterpolationOnVertexInput) {
     auto* str_ty = ty.Struct(mod.symbols.New("MyStruct"),
                              {
                                  {
@@ -982,45 +851,20 @@ TEST_F(SpirvWriter_ShaderIOTest, InterpolationOnVertexInputOrFragmentOutput) {
                                  },
                              });
 
-    // Vertex shader.
-    {
-        auto* ep = b.Function("vert", ty.vec4<f32>());
-        ep->SetReturnBuiltin(core::BuiltinValue::kPosition);
-        ep->SetReturnInvariant(true);
-        ep->SetStage(core::ir::Function::PipelineStage::kVertex);
+    auto* ep = b.Function("vert", ty.vec4<f32>());
+    ep->SetReturnBuiltin(core::BuiltinValue::kPosition);
+    ep->SetReturnInvariant(true);
+    ep->SetStage(core::ir::Function::PipelineStage::kVertex);
 
-        auto* str_param = b.FunctionParam("input", str_ty);
-        auto* ival = b.FunctionParam("ival", ty.i32());
-        ival->SetLocation(1);
-        ival->SetInterpolation(core::Interpolation{core::InterpolationType::kFlat});
-        ep->SetParams({str_param, ival});
+    auto* str_param = b.FunctionParam("input", str_ty);
+    auto* ival = b.FunctionParam("ival", ty.i32());
+    ival->SetLocation(1);
+    ival->SetInterpolation(core::Interpolation{core::InterpolationType::kFlat});
+    ep->SetParams({str_param, ival});
 
-        b.Append(ep->Block(), [&] {  //
-            b.Return(ep, b.Construct(ty.vec4<f32>(), 0.5_f));
-        });
-    }
-
-    // Fragment shader with struct output.
-    {
-        auto* ep = b.Function("frag1", str_ty);
-        ep->SetStage(core::ir::Function::PipelineStage::kFragment);
-
-        b.Append(ep->Block(), [&] {  //
-            b.Return(ep, b.Construct(str_ty, 0.5_f));
-        });
-    }
-
-    // Fragment shader with non-struct output.
-    {
-        auto* ep = b.Function("frag2", ty.i32());
-        ep->SetStage(core::ir::Function::PipelineStage::kFragment);
-        ep->SetReturnLocation(0);
-        ep->SetReturnInterpolation(core::Interpolation{core::InterpolationType::kFlat});
-
-        b.Append(ep->Block(), [&] {  //
-            b.Return(ep, b.Constant(42_i));
-        });
-    }
+    b.Append(ep->Block(), [&] {  //
+        b.Return(ep, b.Construct(ty.vec4<f32>(), 0.5_f));
+    });
 
     auto* src = R"(
 MyStruct = struct @align(4) {
@@ -1031,17 +875,6 @@ MyStruct = struct @align(4) {
   $B1: {
     %4:vec4<f32> = construct 0.5f
     ret %4
-  }
-}
-%frag1 = @fragment func():MyStruct {
-  $B2: {
-    %6:MyStruct = construct 0.5f
-    ret %6
-  }
-}
-%frag2 = @fragment func():i32 [@location(0), @interpolate(flat)] {
-  $B3: {
-    ret 42i
   }
 }
 )";
@@ -1056,49 +889,138 @@ $B1: {  # root
   %vert_loc1_Input:ptr<__in, f32, read> = var undef @location(1)
   %vert_loc1_Input_1:ptr<__in, i32, read> = var undef @location(1)  # %vert_loc1_Input_1: 'vert_loc1_Input'
   %vert_position_Output:ptr<__out, vec4<f32>, write> = var undef @invariant @builtin(position)
-  %frag1_loc1_Output:ptr<__out, f32, write> = var undef @location(1)
-  %frag2_loc0_Output:ptr<__out, i32, write> = var undef @location(0)
 }
 
 %vert_inner = func(%input:MyStruct, %ival:i32):vec4<f32> {
   $B2: {
-    %9:vec4<f32> = construct 0.5f
-    ret %9
-  }
-}
-%frag1_inner = func():MyStruct {
-  $B3: {
-    %11:MyStruct = construct 0.5f
-    ret %11
-  }
-}
-%frag2_inner = func():i32 {
-  $B4: {
-    ret 42i
+    %7:vec4<f32> = construct 0.5f
+    ret %7
   }
 }
 %vert = @vertex func():void {
-  $B5: {
-    %14:f32 = load %vert_loc1_Input
-    %15:MyStruct = construct %14
-    %16:i32 = load %vert_loc1_Input_1
-    %17:vec4<f32> = call %vert_inner, %15, %16
-    store %vert_position_Output, %17
+  $B3: {
+    %9:f32 = load %vert_loc1_Input
+    %10:MyStruct = construct %9
+    %11:i32 = load %vert_loc1_Input_1
+    %12:vec4<f32> = call %vert_inner, %10, %11
+    store %vert_position_Output, %12
     ret
+  }
+}
+)";
+
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+// Test that interpolation attributes are stripped from fragment struct outputs.
+TEST_F(SpirvWriter_ShaderIOTest, InterpolationOnFragmentOutput_Struct) {
+    auto* str_ty = ty.Struct(mod.symbols.New("MyStruct"),
+                             {
+                                 {
+                                     mod.symbols.New("color"),
+                                     ty.f32(),
+                                     core::IOAttributes{
+                                         .location = 1u,
+                                         .interpolation =
+                                             core::Interpolation{
+                                                 core::InterpolationType::kLinear,
+                                                 core::InterpolationSampling::kSample,
+                                             },
+                                     },
+                                 },
+                             });
+
+    auto* ep = b.Function("frag1", str_ty);
+    ep->SetStage(core::ir::Function::PipelineStage::kFragment);
+
+    b.Append(ep->Block(), [&] {  //
+        b.Return(ep, b.Construct(str_ty, 0.5_f));
+    });
+
+    auto* src = R"(
+MyStruct = struct @align(4) {
+  color:f32 @offset(0), @location(1), @interpolate(linear, sample)
+}
+
+%frag1 = @fragment func():MyStruct {
+  $B1: {
+    %2:MyStruct = construct 0.5f
+    ret %2
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+MyStruct = struct @align(4) {
+  color:f32 @offset(0)
+}
+
+$B1: {  # root
+  %frag1_loc1_Output:ptr<__out, f32, write> = var undef @location(1)
+}
+
+%frag1_inner = func():MyStruct {
+  $B2: {
+    %3:MyStruct = construct 0.5f
+    ret %3
   }
 }
 %frag1 = @fragment func():void {
-  $B6: {
-    %19:MyStruct = call %frag1_inner
-    %20:f32 = access %19, 0u
-    store %frag1_loc1_Output, %20
+  $B3: {
+    %5:MyStruct = call %frag1_inner
+    %6:f32 = access %5, 0u
+    store %frag1_loc1_Output, %6
     ret
   }
 }
+)";
+
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+// Test that interpolation attributes are stripped from fragment non-struct outputs.
+TEST_F(SpirvWriter_ShaderIOTest, InterpolationOnFragmentOutput_NonStruct) {
+    auto* ep = b.Function("frag2", ty.i32());
+    ep->SetStage(core::ir::Function::PipelineStage::kFragment);
+    ep->SetReturnLocation(0);
+    ep->SetReturnInterpolation(core::Interpolation{core::InterpolationType::kFlat});
+
+    b.Append(ep->Block(), [&] {  //
+        b.Return(ep, b.Constant(42_i));
+    });
+
+    auto* src = R"(
+%frag2 = @fragment func():i32 [@location(0), @interpolate(flat)] {
+  $B1: {
+    ret 42i
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %frag2_loc0_Output:ptr<__out, i32, write> = var undef @location(0)
+}
+
+%frag2_inner = func():i32 {
+  $B2: {
+    ret 42i
+  }
+}
 %frag2 = @fragment func():void {
-  $B7: {
-    %22:i32 = call %frag2_inner
-    store %frag2_loc0_Output, %22
+  $B3: {
+    %4:i32 = call %frag2_inner
+    store %frag2_loc0_Output, %4
     ret
   }
 }
@@ -1187,162 +1109,6 @@ $B1: {  # root
     %13:f32 = load %12
     %14:f32 = clamp %9, %11, %13
     store %foo_frag_depth_Output, %14
-    ret
-  }
-}
-)";
-
-    core::ir::transform::PrepareImmediateDataConfig immediate_data_config;
-    immediate_data_config.AddInternalImmediateData(4, mod.symbols.New("depth_min"), ty.f32());
-    immediate_data_config.AddInternalImmediateData(8, mod.symbols.New("depth_max"), ty.f32());
-    auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
-    EXPECT_EQ(immediate_data, Success);
-
-    ShaderIOConfig config{immediate_data.Get()};
-    config.depth_range_offsets = {4, 8};
-    Run(ShaderIO, config);
-
-    EXPECT_EQ(expect, str());
-}
-
-TEST_F(SpirvWriter_ShaderIOTest, ClampFragDepth_MultipleFragmentShaders) {
-    auto* str_ty =
-        ty.Struct(mod.symbols.New("Outputs"), {
-                                                  {
-                                                      mod.symbols.New("color"),
-                                                      ty.f32(),
-                                                      core::IOAttributes{
-                                                          .location = 0u,
-                                                      },
-                                                  },
-                                                  {
-                                                      mod.symbols.New("depth"),
-                                                      ty.f32(),
-                                                      core::IOAttributes{
-                                                          .builtin = core::BuiltinValue::kFragDepth,
-                                                      },
-                                                  },
-                                              });
-
-    auto make_entry_point = [&](std::string_view name) {
-        auto* ep = b.Function(name, str_ty);
-        ep->SetStage(core::ir::Function::PipelineStage::kFragment);
-        b.Append(ep->Block(), [&] {  //
-            b.Return(ep, b.Construct(str_ty, 0.5_f, 2_f));
-        });
-    };
-    make_entry_point("ep1");
-    make_entry_point("ep2");
-    make_entry_point("ep3");
-
-    auto* src = R"(
-Outputs = struct @align(4) {
-  color:f32 @offset(0), @location(0)
-  depth:f32 @offset(4), @builtin(frag_depth)
-}
-
-%ep1 = @fragment func():Outputs {
-  $B1: {
-    %2:Outputs = construct 0.5f, 2.0f
-    ret %2
-  }
-}
-%ep2 = @fragment func():Outputs {
-  $B2: {
-    %4:Outputs = construct 0.5f, 2.0f
-    ret %4
-  }
-}
-%ep3 = @fragment func():Outputs {
-  $B3: {
-    %6:Outputs = construct 0.5f, 2.0f
-    ret %6
-  }
-}
-)";
-    EXPECT_EQ(src, str());
-
-    auto* expect = R"(
-Outputs = struct @align(4) {
-  color:f32 @offset(0)
-  depth:f32 @offset(4)
-}
-
-tint_immediate_data_struct = struct @align(4), @block {
-  depth_min:f32 @offset(4)
-  depth_max:f32 @offset(8)
-}
-
-$B1: {  # root
-  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
-  %ep1_loc0_Output:ptr<__out, f32, write> = var undef @location(0)
-  %ep1_frag_depth_Output:ptr<__out, f32, write> = var undef @builtin(frag_depth)
-  %ep2_loc0_Output:ptr<__out, f32, write> = var undef @location(0)
-  %ep2_frag_depth_Output:ptr<__out, f32, write> = var undef @builtin(frag_depth)
-  %ep3_loc0_Output:ptr<__out, f32, write> = var undef @location(0)
-  %ep3_frag_depth_Output:ptr<__out, f32, write> = var undef @builtin(frag_depth)
-}
-
-%ep1_inner = func():Outputs {
-  $B2: {
-    %9:Outputs = construct 0.5f, 2.0f
-    ret %9
-  }
-}
-%ep2_inner = func():Outputs {
-  $B3: {
-    %11:Outputs = construct 0.5f, 2.0f
-    ret %11
-  }
-}
-%ep3_inner = func():Outputs {
-  $B4: {
-    %13:Outputs = construct 0.5f, 2.0f
-    ret %13
-  }
-}
-%ep1 = @fragment func():void {
-  $B5: {
-    %15:Outputs = call %ep1_inner
-    %16:f32 = access %15, 0u
-    store %ep1_loc0_Output, %16
-    %17:f32 = access %15, 1u
-    %18:ptr<immediate, f32, read> = access %tint_immediate_data, 0u
-    %19:f32 = load %18
-    %20:ptr<immediate, f32, read> = access %tint_immediate_data, 1u
-    %21:f32 = load %20
-    %22:f32 = clamp %17, %19, %21
-    store %ep1_frag_depth_Output, %22
-    ret
-  }
-}
-%ep2 = @fragment func():void {
-  $B6: {
-    %24:Outputs = call %ep2_inner
-    %25:f32 = access %24, 0u
-    store %ep2_loc0_Output, %25
-    %26:f32 = access %24, 1u
-    %27:ptr<immediate, f32, read> = access %tint_immediate_data, 0u
-    %28:f32 = load %27
-    %29:ptr<immediate, f32, read> = access %tint_immediate_data, 1u
-    %30:f32 = load %29
-    %31:f32 = clamp %26, %28, %30
-    store %ep2_frag_depth_Output, %31
-    ret
-  }
-}
-%ep3 = @fragment func():void {
-  $B7: {
-    %33:Outputs = call %ep3_inner
-    %34:f32 = access %33, 0u
-    store %ep3_loc0_Output, %34
-    %35:f32 = access %33, 1u
-    %36:ptr<immediate, f32, read> = access %tint_immediate_data, 0u
-    %37:f32 = load %36
-    %38:ptr<immediate, f32, read> = access %tint_immediate_data, 1u
-    %39:f32 = load %38
-    %40:f32 = clamp %35, %37, %39
-    store %ep3_frag_depth_Output, %40
     ret
   }
 }

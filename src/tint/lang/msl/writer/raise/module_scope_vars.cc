@@ -77,8 +77,7 @@ struct State {
         }
 
         // Create the structure to hold all module-scope variables.
-        // This includes all variables declared in the module, even those that are unused by one or
-        // more entry points.
+        // This includes all variables declared in the module, even those that are unused.
         CreateStruct();
 
         // Process functions in reverse-dependency order (i.e. root to leaves).

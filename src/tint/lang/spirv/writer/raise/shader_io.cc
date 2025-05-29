@@ -42,12 +42,6 @@ namespace tint::spirv::writer::raise {
 
 namespace {
 
-/// State that persists across the whole module and can be shared between entry points.
-struct PerModuleState {
-    /// The frag_depth clamp arguments.
-    core::ir::Value* frag_depth_clamp_args = nullptr;
-};
-
 /// PIMPL state for the parts of the shader IO transform specific to SPIR-V.
 /// For SPIR-V, we declare a global variable for each input and output. The wrapper entry point then
 /// loads from and stores to these variables. We also modify the type of the SampleMask builtin to
@@ -61,15 +55,9 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
     /// The configuration options.
     const ShaderIOConfig& config;
 
-    /// The per-module state object.
-    PerModuleState& module_state;
-
     /// Constructor
-    StateImpl(core::ir::Module& mod,
-              core::ir::Function* f,
-              const ShaderIOConfig& cfg,
-              PerModuleState& mod_state)
-        : ShaderIOBackendState(mod, f), config(cfg), module_state(mod_state) {}
+    StateImpl(core::ir::Module& mod, core::ir::Function* f, const ShaderIOConfig& cfg)
+        : ShaderIOBackendState(mod, f), config(cfg) {}
 
     /// Destructor
     ~StateImpl() override {}
@@ -212,9 +200,8 @@ Result<SuccessType> ShaderIO(core::ir::Module& ir, const ShaderIOConfig& config)
         return result;
     }
 
-    PerModuleState module_state;
     core::ir::transform::RunShaderIOBase(ir, [&](core::ir::Module& mod, core::ir::Function* func) {
-        return std::make_unique<StateImpl>(mod, func, config, module_state);
+        return std::make_unique<StateImpl>(mod, func, config);
     });
 
     return Success;

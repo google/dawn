@@ -208,8 +208,12 @@ core::BuiltinFn Convert(wgsl::BuiltinFn fn) {
 }  // namespace
 
 Result<SuccessType> Lower(core::ir::Module& mod) {
-    auto res = core::ir::ValidateAndDumpIfNeeded(
-        mod, "wgsl.Lower", core::ir::Capabilities{core::ir::Capability::kAllowOverrides});
+    auto res =
+        core::ir::ValidateAndDumpIfNeeded(mod, "wgsl.Lower",
+                                          core::ir::Capabilities{
+                                              core::ir::Capability::kAllowMultipleEntryPoints,
+                                              core::ir::Capability::kAllowOverrides,
+                                          });
     if (res != Success) {
         return res.Failure();
     }

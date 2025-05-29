@@ -50,6 +50,8 @@ enum class Capability : uint8_t {
     kAllowHandleVarsWithoutBindings,
     /// Allows module scoped lets
     kAllowModuleScopeLets,
+    /// Allows multiple entry points in the module.
+    kAllowMultipleEntryPoints,
     /// Allow overrides
     kAllowOverrides,
     /// Allows pointers and handle addressspace variables inside structures.

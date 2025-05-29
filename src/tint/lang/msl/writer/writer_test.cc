@@ -35,6 +35,29 @@ namespace {
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
+TEST_F(MslWriterTest, WorkgroupAllocations_NoAllocations) {
+    auto* var_a = b.Var("a", ty.ptr<workgroup, i32>());
+    auto* var_b = b.Var("b", ty.ptr<workgroup, i32>());
+    mod.root_block->Append(var_a);
+    mod.root_block->Append(var_b);
+
+    // No allocations, but still needs an entry in the map.
+    auto* bar = b.ComputeFunction("bar");
+    b.Append(bar->Block(), [&] { b.Return(bar); });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
+using namespace metal;
+
+kernel void bar() {
+}
+)");
+
+    ASSERT_EQ(output_.workgroup_info.allocations.size(), 1u);
+    ASSERT_EQ(output_.workgroup_info.allocations.count("bar"), 1u);
+    EXPECT_THAT(output_.workgroup_info.allocations.at("bar"), testing::ElementsAre());
+}
+
 TEST_F(MslWriterTest, WorkgroupAllocations) {
     auto* var_a = b.Var("a", ty.ptr<workgroup, i32>());
     auto* var_b = b.Var("b", ty.ptr<workgroup, i32>());
@@ -48,10 +71,6 @@ TEST_F(MslWriterTest, WorkgroupAllocations) {
         b.Store(var_a, b.Add<i32>(load_a, load_b));
         b.Return(foo);
     });
-
-    // No allocations, but still needs an entry in the map.
-    auto* bar = b.ComputeFunction("bar");
-    b.Append(bar->Block(), [&] { b.Return(bar); });
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
@@ -76,19 +95,14 @@ void foo_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) 
   (*tint_module_vars.a) = as_type<int>((as_type<uint>((*tint_module_vars.a)) + as_type<uint>((*tint_module_vars.b))));
 }
 
-kernel void bar() {
-}
-
 kernel void foo(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_2* v [[threadgroup(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=(&(*v).tint_symbol), .b=(&(*v).tint_symbol_1)};
   foo_inner(tint_local_index, tint_module_vars);
 }
 )");
-    ASSERT_EQ(output_.workgroup_info.allocations.size(), 2u);
+    ASSERT_EQ(output_.workgroup_info.allocations.size(), 1u);
     ASSERT_EQ(output_.workgroup_info.allocations.count("foo"), 1u);
-    ASSERT_EQ(output_.workgroup_info.allocations.count("bar"), 1u);
     EXPECT_THAT(output_.workgroup_info.allocations.at("foo"), testing::ElementsAre(8u));
-    EXPECT_THAT(output_.workgroup_info.allocations.at("bar"), testing::ElementsAre());
 }
 
 TEST_F(MslWriterTest, NeedsStorageBufferSizes_False) {

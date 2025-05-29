@@ -101,7 +101,11 @@ void Register(const IRFuzzer& fuzzer) {
                 }
             }
 
-            if (auto val = core::ir::Validate(ir.Get()); val != Success) {
+            if (auto val = core::ir::Validate(ir.Get(),
+                                              core::ir::Capabilities{
+                                                  core::ir::Capability::kAllowMultipleEntryPoints,
+                                              });
+                val != Success) {
                 TINT_ICE() << val.Failure();
             }
             // Copy relevant options from wgsl::Context to ir::Context

@@ -205,60 +205,6 @@ TEST_F(SpirvWriterTest, Function_EntryPoint_Vertex) {
     EXPECT_EQ(workgroup_info.z, 0u);
 }
 
-TEST_F(SpirvWriterTest, Function_EntryPoint_Multiple) {
-    auto* f1 = b.ComputeFunction("main1", 32_u, 4_u, 1_u);
-    b.Append(f1->Block(), [&] {  //
-        b.Return(f1);
-    });
-
-    auto* f2 = b.ComputeFunction("main2", 8_u, 2_u, 16_u);
-    b.Append(f2->Block(), [&] {  //
-        b.Return(f2);
-    });
-
-    auto* f3 = b.Function("main3", ty.void_(), core::ir::Function::PipelineStage::kFragment);
-    b.Append(f3->Block(), [&] {  //
-        b.Return(f3);
-    });
-
-    ASSERT_TRUE(Generate()) << Error() << output_;
-    EXPECT_INST(R"(
-               OpEntryPoint GLCompute %main1 "main1"
-               OpEntryPoint GLCompute %main2 "main2"
-               OpEntryPoint Fragment %main3 "main3"
-               OpExecutionMode %main1 LocalSize 32 4 1
-               OpExecutionMode %main2 LocalSize 8 2 16
-               OpExecutionMode %main3 OriginUpperLeft
-
-               ; Debug Information
-               OpName %main1 "main1"                ; id %1
-               OpName %main2 "main2"                ; id %5
-               OpName %main3 "main3"                ; id %7
-
-               ; Types, variables and constants
-       %void = OpTypeVoid
-          %3 = OpTypeFunction %void
-
-               ; Function main1
-      %main1 = OpFunction %void None %3
-          %4 = OpLabel
-               OpReturn
-               OpFunctionEnd
-
-               ; Function main2
-      %main2 = OpFunction %void None %3
-          %6 = OpLabel
-               OpReturn
-               OpFunctionEnd
-
-               ; Function main3
-      %main3 = OpFunction %void None %3
-          %8 = OpLabel
-               OpReturn
-               OpFunctionEnd
-)");
-}
-
 TEST_F(SpirvWriterTest, Function_ReturnValue) {
     auto* func = b.Function("foo", ty.i32());
     b.Append(func->Block(), [&] {  //
