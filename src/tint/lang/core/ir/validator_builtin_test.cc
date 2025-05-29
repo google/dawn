@@ -1022,6 +1022,19 @@ TEST_F(IR_ValidatorTest, Bitcast_NullResult) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Builtin_NoStage) {
+    auto* f = b.Function("f", ty.void_());
+    AddBuiltinParam(f, "id", BuiltinValue::kLocalInvocationId, ty.vec3<u32>());
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(
+                                          R"(builtins can only be decorated on entry point params
+)")) << res.Failure();
+}
+
 namespace {
 template <typename T>
 static const core::type::Type* TypeBuilder(core::type::Manager& m) {
