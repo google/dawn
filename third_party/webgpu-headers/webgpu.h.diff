@@ -7,7 +7,6 @@
 +#define WGPU_BREAKING_CHANGE_STRING_VIEW_LABELS
 +#define WGPU_BREAKING_CHANGE_STRING_VIEW_OUTPUT_STRUCTS
 +#define WGPU_BREAKING_CHANGE_STRING_VIEW_CALLBACKS
-+#define WGPU_BREAKING_CHANGE_QUEUE_WORK_DONE_CALLBACK_MESSAGE
  
  #if defined(WGPU_SHARED_LIBRARY)
  #    if defined(_WIN32)
@@ -110,6 +109,15 @@
 +    WGPUWGSLLanguageFeatureName_SizedBindingArray = 0x00000005,
      WGPUWGSLLanguageFeatureName_Force32 = 0x7FFFFFFF
  } WGPUWGSLLanguageFeatureName WGPU_ENUM_ATTRIBUTE;
+ 
+@@
+ 
+ typedef void (*WGPUPopErrorScopeCallback)(WGPUPopErrorScopeStatus status, WGPUErrorType type, WGPUStringView message, WGPU_NULLABLE void* userdata1, WGPU_NULLABLE void* userdata2) WGPU_FUNCTION_ATTRIBUTE;
+ 
+-typedef void (*WGPUQueueWorkDoneCallback)(WGPUQueueWorkDoneStatus status, WGPUStringView message, WGPU_NULLABLE void* userdata1, WGPU_NULLABLE void* userdata2) WGPU_FUNCTION_ATTRIBUTE;
++typedef void (*WGPUQueueWorkDoneCallback)(WGPUQueueWorkDoneStatus status, WGPU_NULLABLE void* userdata1, WGPU_NULLABLE void* userdata2) WGPU_FUNCTION_ATTRIBUTE;
+ 
+ typedef void (*WGPURequestAdapterCallback)(WGPURequestAdapterStatus status, WGPUAdapter adapter, WGPUStringView message, WGPU_NULLABLE void* userdata1, WGPU_NULLABLE void* userdata2) WGPU_FUNCTION_ATTRIBUTE;
  
 @@
  #define WGPU_BUFFER_BINDING_LAYOUT_INIT _wgpu_MAKE_INIT_STRUCT(WGPUBufferBindingLayout, { \

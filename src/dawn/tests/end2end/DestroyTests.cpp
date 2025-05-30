@@ -258,7 +258,7 @@ TEST_P(DestroyTest, GetQueueAfterDeviceDestroy) {
 
     wgpu::Queue queue = device.GetQueue();
     queue.OnSubmittedWorkDone(wgpu::CallbackMode::AllowProcessEvents,
-                              [](wgpu::QueueWorkDoneStatus status, wgpu::StringView) {
+                              [](wgpu::QueueWorkDoneStatus status) {
                                   EXPECT_EQ(status, wgpu::QueueWorkDoneStatus::Success);
                               });
 }

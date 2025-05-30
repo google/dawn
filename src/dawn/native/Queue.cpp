@@ -38,7 +38,6 @@
 
 #include "dawn/common/Constants.h"
 #include "dawn/common/FutureUtils.h"
-#include "dawn/common/StringViewUtils.h"
 #include "dawn/common/ityp_span.h"
 #include "dawn/native/BlitBufferToDepthStencil.h"
 #include "dawn/native/Buffer.h"
@@ -179,7 +178,6 @@ Future QueueBase::APIOnSubmittedWorkDone(const WGPUQueueWorkDoneCallbackInfo& ca
     struct WorkDoneEvent final : public EventManager::TrackedEvent {
         std::optional<WGPUQueueWorkDoneStatus> mEarlyStatus;
         WGPUQueueWorkDoneCallback mCallback;
-        std::string mMessage;
         raw_ptr<void> mUserdata1;
         raw_ptr<void> mUserdata2;
 
@@ -215,8 +213,7 @@ Future QueueBase::APIOnSubmittedWorkDone(const WGPUQueueWorkDoneCallbackInfo& ca
                 status = mEarlyStatus.value();
             }
 
-            mCallback(status, ToOutputStringView(mMessage), mUserdata1.ExtractAsDangling(),
-                      mUserdata2.ExtractAsDangling());
+            mCallback(status, mUserdata1.ExtractAsDangling(), mUserdata2.ExtractAsDangling());
         }
     };
 

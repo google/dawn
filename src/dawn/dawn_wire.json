@@ -189,8 +189,7 @@
         "queue work done callback": [
             { "name": "event manager", "type": "ObjectHandle" },
             { "name": "future", "type": "future" },
-            { "name": "status", "type": "queue work done status" },
-            { "name": "message", "type": "string view" }
+            { "name": "status", "type": "queue work done status" }
         ],
         "shader module get compilation info callback": [
             { "name": "event manager", "type": "ObjectHandle" },

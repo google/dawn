@@ -275,12 +275,13 @@ TEST_F(DeviceLevelTests, BufferMapAndWorkDone) {
     queue.Submit(1, &commands);
 
     wgpu::QueueWorkDoneStatus copyStatus;
-    EXPECT_EQ(instance.WaitAny(queue.OnSubmittedWorkDone(
-                                   wgpu::CallbackMode::AllowSpontaneous,
-                                   [&copyStatus](wgpu::QueueWorkDoneStatus status,
-                                                 wgpu::StringView) { copyStatus = status; }),
-                               UINT64_MAX),
-              wgpu::WaitStatus::Success);
+    EXPECT_EQ(
+        instance.WaitAny(queue.OnSubmittedWorkDone(wgpu::CallbackMode::AllowSpontaneous,
+                                                   [&copyStatus](wgpu::QueueWorkDoneStatus status) {
+                                                       copyStatus = status;
+                                                   }),
+                         UINT64_MAX),
+        wgpu::WaitStatus::Success);
     ASSERT_EQ(copyStatus, wgpu::QueueWorkDoneStatus::Success);
 
     // Map the readable buffer and verify the contents.

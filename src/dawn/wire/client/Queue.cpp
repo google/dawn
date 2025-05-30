@@ -28,10 +28,8 @@
 #include "dawn/wire/client/Queue.h"
 
 #include <memory>
-#include <string>
 #include <utility>
 
-#include "dawn/common/StringViewUtils.h"
 #include "dawn/wire/client/Client.h"
 #include "dawn/wire/client/EventManager.h"
 #include "partition_alloc/pointers/raw_ptr.h"
@@ -51,11 +49,8 @@ class WorkDoneEvent : public TrackedEvent {
 
     EventType GetType() override { return kType; }
 
-    WireResult ReadyHook(FutureID futureID,
-                         WGPUQueueWorkDoneStatus status,
-                         WGPUStringView message) {
+    WireResult ReadyHook(FutureID futureID, WGPUQueueWorkDoneStatus status) {
         mStatus = status;
-        mMessage = ToString(message);
         return WireResult::Success;
     }
 
@@ -63,12 +58,11 @@ class WorkDoneEvent : public TrackedEvent {
     void CompleteImpl(FutureID futureID, EventCompletionType completionType) override {
         if (completionType == EventCompletionType::Shutdown) {
             mStatus = WGPUQueueWorkDoneStatus_CallbackCancelled;
-            mMessage = "A valid external Instance reference no longer exists.";
         }
         void* userdata1 = mUserdata1.ExtractAsDangling();
         void* userdata2 = mUserdata2.ExtractAsDangling();
         if (mCallback) {
-            mCallback(mStatus, ToOutputStringView(mMessage), userdata1, userdata2);
+            mCallback(mStatus, userdata1, userdata2);
         }
     }
 
@@ -77,7 +71,6 @@ class WorkDoneEvent : public TrackedEvent {
     raw_ptr<void> mUserdata2;
 
     WGPUQueueWorkDoneStatus mStatus = WGPUQueueWorkDoneStatus_Success;
-    std::string mMessage;
 };
 
 }  // anonymous namespace
@@ -90,9 +83,8 @@ ObjectType Queue::GetObjectType() const {
 
 WireResult Client::DoQueueWorkDoneCallback(ObjectHandle eventManager,
                                            WGPUFuture future,
-                                           WGPUQueueWorkDoneStatus status,
-                                           WGPUStringView message) {
-    return GetEventManager(eventManager).SetFutureReady<WorkDoneEvent>(future.id, status, message);
+                                           WGPUQueueWorkDoneStatus status) {
+    return GetEventManager(eventManager).SetFutureReady<WorkDoneEvent>(future.id, status);
 }
 
 WGPUFuture Queue::OnSubmittedWorkDone(const WGPUQueueWorkDoneCallbackInfo& callbackInfo) {

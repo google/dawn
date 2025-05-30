@@ -2078,7 +2078,6 @@ var LibraryWebGPU = {
       _emwgpuOnWorkDoneCompleted(futureId, {{{ gpu.QueueWorkDoneStatus.Success }}});
     }, () => {
       {{{ runtimeKeepalivePop() }}}
-      // We could translate this into a status+message, but it's not supposed to ever happen.
       abort('Unexpected failure in GPUQueue.onSubmittedWorkDone().')
     }));
   },

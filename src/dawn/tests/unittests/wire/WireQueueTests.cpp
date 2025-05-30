@@ -27,8 +27,6 @@
 
 #include <memory>
 
-#include "dawn/common/StringViewUtils.h"
-#include "dawn/tests/StringViewMatchers.h"
 #include "dawn/tests/unittests/wire/WireFutureTest.h"
 #include "dawn/tests/unittests/wire/WireTest.h"
 #include "dawn/wire/WireClient.h"
@@ -38,12 +36,11 @@ namespace dawn::wire {
 namespace {
 
 using testing::_;
-using testing::EmptySizedString;
 using testing::InvokeWithoutArgs;
 using testing::Ne;
-using testing::NonEmptySizedString;
 using testing::Return;
-using testing::SizedString;
+
+static constexpr WGPUQueueWorkDoneStatus kError = static_cast<WGPUQueueWorkDoneStatus>(0);
 
 using WireQueueTestBase = WireFutureTest<wgpu::QueueWorkDoneCallback<void>*>;
 class WireQueueTests : public WireQueueTestBase {
@@ -61,14 +58,13 @@ TEST_P(WireQueueTests, OnSubmittedWorkDoneSuccess) {
     OnSubmittedWorkDone();
 
     EXPECT_CALL(api, OnQueueOnSubmittedWorkDone(apiQueue, _)).WillOnce(InvokeWithoutArgs([&] {
-        api.CallQueueOnSubmittedWorkDoneCallback(apiQueue, WGPUQueueWorkDoneStatus_Success,
-                                                 kEmptyOutputStringView);
+        api.CallQueueOnSubmittedWorkDoneCallback(apiQueue, WGPUQueueWorkDoneStatus_Success);
     }));
     FlushClient();
     FlushFutures();
 
     ExpectWireCallbacksWhen([&](auto& mockCb) {
-        EXPECT_CALL(mockCb, Call(wgpu::QueueWorkDoneStatus::Success, EmptySizedString())).Times(1);
+        EXPECT_CALL(mockCb, Call(wgpu::QueueWorkDoneStatus::Success)).Times(1);
 
         FlushCallbacks();
     });
@@ -79,15 +75,13 @@ TEST_P(WireQueueTests, OnSubmittedWorkDoneError) {
     OnSubmittedWorkDone();
 
     EXPECT_CALL(api, OnQueueOnSubmittedWorkDone(apiQueue, _)).WillOnce(InvokeWithoutArgs([&] {
-        api.CallQueueOnSubmittedWorkDoneCallback(apiQueue, WGPUQueueWorkDoneStatus_Error,
-                                                 ToOutputStringView("Some message"));
+        api.CallQueueOnSubmittedWorkDoneCallback(apiQueue, kError);
     }));
     FlushClient();
     FlushFutures();
 
     ExpectWireCallbacksWhen([&](auto& mockCb) {
-        EXPECT_CALL(mockCb, Call(wgpu::QueueWorkDoneStatus::Error, SizedString("Some message")))
-            .Times(1);
+        EXPECT_CALL(mockCb, Call(Ne(wgpu::QueueWorkDoneStatus::Success))).Times(1);
 
         FlushCallbacks();
     });
@@ -103,16 +97,13 @@ TEST_P(WireQueueTests, OnSubmittedWorkDoneBeforeDisconnectAfterReply) {
     OnSubmittedWorkDone();
 
     EXPECT_CALL(api, OnQueueOnSubmittedWorkDone(apiQueue, _)).WillOnce(InvokeWithoutArgs([&] {
-        api.CallQueueOnSubmittedWorkDoneCallback(apiQueue, WGPUQueueWorkDoneStatus_Error,
-                                                 ToOutputStringView("Some message"));
+        api.CallQueueOnSubmittedWorkDoneCallback(apiQueue, kError);
     }));
     FlushClient();
     FlushFutures();
 
     ExpectWireCallbacksWhen([&](auto& mockCb) {
-        EXPECT_CALL(mockCb,
-                    Call(wgpu::QueueWorkDoneStatus::CallbackCancelled, NonEmptySizedString()))
-            .Times(1);
+        EXPECT_CALL(mockCb, Call(wgpu::QueueWorkDoneStatus::CallbackCancelled)).Times(1);
 
         GetWireClient()->Disconnect();
     });
@@ -125,15 +116,12 @@ TEST_P(WireQueueTests, OnSubmittedWorkDoneBeforeDisconnectBeforeReply) {
     OnSubmittedWorkDone();
 
     EXPECT_CALL(api, OnQueueOnSubmittedWorkDone(apiQueue, _)).WillOnce(InvokeWithoutArgs([&] {
-        api.CallQueueOnSubmittedWorkDoneCallback(apiQueue, WGPUQueueWorkDoneStatus_Error,
-                                                 ToOutputStringView("Some message"));
+        api.CallQueueOnSubmittedWorkDoneCallback(apiQueue, kError);
     }));
     FlushClient();
 
     ExpectWireCallbacksWhen([&](auto& mockCb) {
-        EXPECT_CALL(mockCb,
-                    Call(wgpu::QueueWorkDoneStatus::CallbackCancelled, NonEmptySizedString()))
-            .Times(1);
+        EXPECT_CALL(mockCb, Call(wgpu::QueueWorkDoneStatus::CallbackCancelled)).Times(1);
 
         GetWireClient()->Disconnect();
     });
@@ -145,9 +133,7 @@ TEST_P(WireQueueTests, OnSubmittedWorkDoneAfterDisconnect) {
     GetWireClient()->Disconnect();
 
     ExpectWireCallbacksWhen([&](auto& mockCb) {
-        EXPECT_CALL(mockCb,
-                    Call(wgpu::QueueWorkDoneStatus::CallbackCancelled, NonEmptySizedString()))
-            .Times(1);
+        EXPECT_CALL(mockCb, Call(wgpu::QueueWorkDoneStatus::CallbackCancelled)).Times(1);
 
         OnSubmittedWorkDone();
     });
@@ -159,14 +145,12 @@ TEST_P(WireQueueTests, OnSubmittedWorkDoneInsideCallbackBeforeDisconnect) {
     OnSubmittedWorkDone();
 
     EXPECT_CALL(api, OnQueueOnSubmittedWorkDone(apiQueue, _)).WillOnce(InvokeWithoutArgs([&] {
-        api.CallQueueOnSubmittedWorkDoneCallback(apiQueue, WGPUQueueWorkDoneStatus_Error,
-                                                 ToOutputStringView("Some message"));
+        api.CallQueueOnSubmittedWorkDoneCallback(apiQueue, kError);
     }));
     FlushClient();
 
     ExpectWireCallbacksWhen([&](auto& mockCb) {
-        EXPECT_CALL(mockCb,
-                    Call(wgpu::QueueWorkDoneStatus::CallbackCancelled, NonEmptySizedString()))
+        EXPECT_CALL(mockCb, Call(wgpu::QueueWorkDoneStatus::CallbackCancelled))
             .Times(kNumRequests + 1)
             .WillOnce([&]() {
                 for (size_t i = 0; i < kNumRequests; i++) {
