@@ -286,7 +286,9 @@ struct State {
 }  // namespace
 
 Result<SuccessType> ReplaceNonIndexableMatVecStores(core::ir::Module& ir) {
-    auto result = ValidateAndDumpIfNeeded(ir, "hlsl.ReplaceNonIndexableMatVecStores");
+    auto result = ValidateAndDumpIfNeeded(
+        ir, "hlsl.ReplaceNonIndexableMatVecStores",
+        core::ir::Capabilities{core::ir::Capability::kAllowDuplicateBindings});
     if (result != Success) {
         return result.Failure();
     }

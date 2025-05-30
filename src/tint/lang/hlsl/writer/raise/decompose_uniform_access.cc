@@ -620,6 +620,7 @@ Result<SuccessType> DecomposeUniformAccess(core::ir::Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "hlsl.DecomposeUniformAccess",
                                           core::ir::Capabilities{
                                               core::ir::Capability::kAllowClipDistancesOnF32,
+                                              core::ir::Capability::kAllowDuplicateBindings,
                                           });
     if (result != Success) {
         return result.Failure();

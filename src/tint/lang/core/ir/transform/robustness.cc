@@ -568,7 +568,7 @@ struct State {
 }  // namespace
 
 Result<SuccessType> Robustness(Module& ir, const RobustnessConfig& config) {
-    auto result = ValidateAndDumpIfNeeded(ir, "core.Robustness");
+    auto result = ValidateAndDumpIfNeeded(ir, "core.Robustness", kRobustnessCapabilities);
     if (result != Success) {
         return result;
     }

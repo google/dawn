@@ -877,6 +877,7 @@ TEST_F(GlslWriterTest, BuiltinTextureDimensions_2d_WithU32Lod) {
     });
 
     Options opts{};
+    opts.bindings.texture_builtins_from_uniform.ubo_binding = {0, 1};
     opts.bindings.texture_builtins_from_uniform.ubo_bindingpoint_ordering = {{0, 0}};
     ASSERT_TRUE(Generate(opts)) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
@@ -887,7 +888,7 @@ struct TintTextureUniformData {
   uint tint_builtin_value_0;
 };
 
-layout(binding = 0, std140)
+layout(binding = 1, std140)
 uniform f_tint_symbol_ubo {
   TintTextureUniformData inner;
 } v_1;

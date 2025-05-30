@@ -1228,7 +1228,9 @@ struct State {
 }  // namespace
 
 Result<SuccessType> TexturePolyfill(core::ir::Module& ir, const TexturePolyfillConfig& cfg) {
-    auto result = ValidateAndDumpIfNeeded(ir, "glsl.TexturePolyfill");
+    auto result = ValidateAndDumpIfNeeded(
+        ir, "glsl.TexturePolyfill",
+        core::ir::Capabilities{core::ir::Capability::kAllowDuplicateBindings});
     if (result != Success) {
         return result.Failure();
     }

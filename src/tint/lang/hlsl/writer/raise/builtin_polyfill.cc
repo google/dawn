@@ -1936,6 +1936,7 @@ Result<SuccessType> BuiltinPolyfill(core::ir::Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "hlsl.BuiltinPolyfill",
                                           core::ir::Capabilities{
                                               core::ir::Capability::kAllowClipDistancesOnF32,
+                                              core::ir::Capability::kAllowDuplicateBindings,
                                           });
     if (result != Success) {
         return result.Failure();

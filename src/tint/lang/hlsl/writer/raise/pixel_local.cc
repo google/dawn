@@ -245,6 +245,7 @@ Result<SuccessType> PixelLocal(core::ir::Module& ir, const PixelLocalConfig& con
     auto result = ValidateAndDumpIfNeeded(ir, "hlsl.PixelLocal",
                                           core::ir::Capabilities{
                                               core::ir::Capability::kAllowClipDistancesOnF32,
+                                              core::ir::Capability::kAllowDuplicateBindings,
                                           });
     if (result != Success) {
         return result.Failure();

@@ -115,6 +115,7 @@ Result<SuccessType> OffsetFirstIndex(core::ir::Module& ir, const OffsetFirstInde
     auto result = ValidateAndDumpIfNeeded(ir, "glsl.OffsetFirstIndex",
                                           core::ir::Capabilities{
                                               core::ir::Capability::kAllowHandleVarsWithoutBindings,
+                                              core::ir::Capability::kAllowDuplicateBindings,
                                           });
     if (result != Success) {
         return result.Failure();

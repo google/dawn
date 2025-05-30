@@ -135,7 +135,8 @@ Result<SuccessType> ChangeImmediateToUniform(core::ir::Module& ir,
                                              const ChangeImmediateToUniformConfig& config) {
     auto result = ValidateAndDumpIfNeeded(
         ir, "hlsl.ChangeImmediateToUniform",
-        core::ir::Capabilities{core::ir::Capability::kAllowClipDistancesOnF32});
+        core::ir::Capabilities{core::ir::Capability::kAllowClipDistancesOnF32,
+                               core::ir::Capability::kAllowDuplicateBindings});
     if (result != Success) {
         return result.Failure();
     }

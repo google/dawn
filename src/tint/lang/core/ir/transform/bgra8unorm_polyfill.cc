@@ -182,7 +182,8 @@ struct State {
 }  // namespace
 
 Result<SuccessType> Bgra8UnormPolyfill(Module& ir) {
-    auto result = ValidateAndDumpIfNeeded(ir, "core.Bgra8UnormPolyfill");
+    auto result =
+        ValidateAndDumpIfNeeded(ir, "core.Bgra8UnormPolyfill", kBgra8UnormPolyfillCapabilities);
     if (result != Success) {
         return result;
     }

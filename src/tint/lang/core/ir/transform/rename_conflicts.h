@@ -51,6 +51,7 @@ const core::ir::Capabilities kRenameConflictsCapabilities{
     core::ir::Capability::kAllowAnyLetType,
     core::ir::Capability::kAllowModuleScopeLets,
     core::ir::Capability::kAllowWorkspacePointerInputToEntryPoint,
+    core::ir::Capability::kAllowDuplicateBindings,
 };
 
 /// RenameConflicts is a transform that renames declarations which prevent identifiers from

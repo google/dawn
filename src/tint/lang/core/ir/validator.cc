@@ -1385,7 +1385,6 @@ class Validator {
     core::ir::ReferencedModuleVars<const Module> referenced_module_vars_;
     Hashset<OverrideId, 8> seen_override_ids_;
     Hashset<std::string, 4> entry_point_names_;
-
     Hashset<ValidatedType, 16> validated_types_{};
 };
 
@@ -2264,7 +2263,18 @@ void Validator::CheckFunction(const Function* func) {
             func, CheckFrontFacingIfBoolFunc<Function>("entry point returns can not be 'bool'"),
             CheckFrontFacingIfBoolFunc<Function>("entry point return members can not be 'bool'"));
 
+        Hashset<BindingPoint, 4> binding_points{};
+
         for (auto var : referenced_module_vars_.TransitiveReferences(func)) {
+            if (!capabilities_.Contains(Capability::kAllowDuplicateBindings) &&
+                var->BindingPoint().has_value()) {
+                auto bp = var->BindingPoint().value();
+                if (!binding_points.Add(bp)) {
+                    AddError(var) << "found non-unique binding point, " << bp
+                                  << ", being referenced in entry point, " << NameOf(func);
+                }
+            }
+
             const auto* mv = var->Result()->Type()->As<core::type::MemoryView>();
             const auto* ty = var->Result()->Type()->UnwrapPtrOrRef();
             const auto attr = var->Attributes();
