@@ -29,6 +29,7 @@
 #include <unordered_set>
 #include <vector>
 
+#include "dawn/common/Constants.h"
 #include "dawn/common/StringViewUtils.h"
 #include "dawn/tests/MockCallback.h"
 #include "dawn/tests/StringViewMatchers.h"
@@ -127,8 +128,8 @@ TEST_P(WireInstanceTests, RequestAdapterSuccess) {
     fakeInfo.adapterType = WGPUAdapterType_IntegratedGPU;
     fakeInfo.vendorID = 0x134;
     fakeInfo.deviceID = 0x918;
-    fakeInfo.subgroupMinSize = 4;
-    fakeInfo.subgroupMaxSize = 128;
+    fakeInfo.subgroupMinSize = kDefaultSubgroupMinSize;
+    fakeInfo.subgroupMaxSize = kDefaultSubgroupMaxSize;
 
     wgpu::Limits fakeLimits = {};
     fakeLimits.maxTextureDimension1D = 433;

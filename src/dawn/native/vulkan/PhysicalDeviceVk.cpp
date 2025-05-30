@@ -473,7 +473,8 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         (mDeviceInfo.shaderSubgroupExtendedTypes.shaderSubgroupExtendedTypes == VK_TRUE);
 
     // Some devices (PowerVR GE8320) can apparently report subgroup size of 1.
-    const bool allowSubgroupSizeRanges = mSubgroupMinSize >= 4u && mSubgroupMaxSize <= 128u;
+    const bool allowSubgroupSizeRanges =
+        mSubgroupMinSize >= kDefaultSubgroupMinSize && mSubgroupMaxSize <= kDefaultSubgroupMaxSize;
     if (!kForceDisableSubgroups && hasBaseSubgroupSupport && hasRequiredF16Support &&
         allowSubgroupSizeRanges) {
         EnableFeature(Feature::Subgroups);

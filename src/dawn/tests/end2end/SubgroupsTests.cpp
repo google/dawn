@@ -74,10 +74,10 @@ class SubgroupsAdapterInfoTestBase : public DawnTestWithParams<Params> {
 
     // Checks valid values for min and max subgroup sizes, per spec.
     void CheckValidSizes(uint32_t subgroupMinSize, uint32_t subgroupMaxSize) {
-        EXPECT_GE(subgroupMinSize, 4u) << subgroupMinSize;
+        EXPECT_GE(subgroupMinSize, kDefaultSubgroupMinSize) << subgroupMinSize;
         EXPECT_TRUE(IsPowerOfTwo(subgroupMinSize)) << subgroupMinSize;
 
-        EXPECT_LE(subgroupMaxSize, 128u) << subgroupMaxSize;
+        EXPECT_LE(subgroupMaxSize, kDefaultSubgroupMaxSize) << subgroupMaxSize;
         EXPECT_TRUE(IsPowerOfTwo(subgroupMaxSize));
 
         EXPECT_LE(subgroupMinSize, subgroupMaxSize)
@@ -237,7 +237,7 @@ fn main(
                     // subgroup_size should be at least 1
                     (1 <= outputSubgroupSizeAt0) &&
                     // subgroup_size should be no larger than 128
-                    (outputSubgroupSizeAt0 <= 128) &&
+                    (outputSubgroupSizeAt0 <= kDefaultSubgroupMaxSize) &&
                     // subgroup_size should be a power of 2
                     ((outputSubgroupSizeAt0 & (outputSubgroupSizeAt0 - 1)) == 0))) {
                 testing::AssertionResult result = testing::AssertionFailure()
@@ -369,7 +369,7 @@ class SubgroupsShaderTestsFragment : public SubgroupsTestsBase<AdapterTestParam>
                     // subgroup_size should be at least 1
                     (1 <= outputSubgroupSizeAt0) &&
                     // subgroup_size should be no larger than 128
-                    (outputSubgroupSizeAt0 <= 128) &&
+                    (outputSubgroupSizeAt0 <= kDefaultSubgroupMaxSize) &&
                     // subgroup_size should be a power of 2
                     (IsPowerOfTwo(outputSubgroupSizeAt0)))) {
                 testing::AssertionResult result = testing::AssertionFailure()
