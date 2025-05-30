@@ -45,7 +45,6 @@ dawn_json_generator("kotlin_gen") {
   outputs = [
     "java/android/dawn/Adapter.kt",
     "java/android/dawn/AdapterInfo.kt",
-    "java/android/dawn/AdapterPropertiesSubgroups.kt",
     "java/android/dawn/AdapterType.kt",
     "java/android/dawn/AddressMode.kt",
     "java/android/dawn/AsyncHelpers.kt",

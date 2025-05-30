@@ -85,63 +85,6 @@ class SubgroupsAdapterInfoTestBase : public DawnTestWithParams<Params> {
     }
 };
 
-using SubgroupsPropertiesTests = SubgroupsAdapterInfoTestBase<SubgroupsAdapterInfoParams>;
-
-// Test that subgroupMinSize and subgroupMaxSize in wgpu::AdapterPropertiesSubgroups are valid.
-TEST_P(SubgroupsPropertiesTests, FromAdapter) {
-    wgpu::AdapterPropertiesSubgroups subgroup_properties;
-
-    // Write invalid values to start with, to make sure they are overwritten.
-    subgroup_properties.subgroupMinSize = 3;
-    subgroup_properties.subgroupMaxSize = 443;
-
-    wgpu::AdapterInfo info;
-    info.nextInChain = &subgroup_properties;
-
-    adapter.GetInfo(&info);
-
-    // Check the integrity of the struct.
-    EXPECT_EQ(subgroup_properties.sType, wgpu::SType::AdapterPropertiesSubgroups);
-    EXPECT_EQ(subgroup_properties.nextInChain, nullptr);
-
-    CheckValidSizes(subgroup_properties.subgroupMinSize, subgroup_properties.subgroupMaxSize);
-}
-
-// Test that subgroupMinSize and subgroupMaxSize in wgpu::AdapterPropertiesSubgroups are valid.
-TEST_P(SubgroupsPropertiesTests, FromDevice) {
-    wgpu::AdapterPropertiesSubgroups subgroup_properties;
-    wgpu::AdapterInfo info;
-    info.nextInChain = &subgroup_properties;
-
-    device.GetAdapterInfo(&info);
-
-    CheckValidSizes(subgroup_properties.subgroupMinSize, subgroup_properties.subgroupMaxSize);
-}
-
-// Test that subgroupMinSize and subgroupMaxSize in wgpu::AdapterPropertiesSubgroups are the same
-// between adapter and device.
-TEST_P(SubgroupsPropertiesTests, DeviceAndAdapterAgree) {
-    wgpu::AdapterPropertiesSubgroups adapter_subgroup_properties;
-    wgpu::AdapterInfo adapter_info;
-    adapter_info.nextInChain = &adapter_subgroup_properties;
-    adapter.GetInfo(&adapter_info);
-
-    wgpu::AdapterPropertiesSubgroups device_subgroup_properties;
-    wgpu::AdapterInfo device_info;
-    device_info.nextInChain = &device_subgroup_properties;
-    device.GetAdapterInfo(&device_info);
-
-    EXPECT_EQ(device_subgroup_properties.subgroupMinSize,
-              adapter_subgroup_properties.subgroupMinSize);
-    EXPECT_EQ(device_subgroup_properties.subgroupMaxSize,
-              adapter_subgroup_properties.subgroupMaxSize);
-}
-
-DAWN_INSTANTIATE_TEST_P(SubgroupsPropertiesTests,
-                        {D3D12Backend(), D3D12Backend({}, {"use_dxc"}), MetalBackend(),
-                         VulkanBackend()},
-                        {RequestSubgroups::WhenAvailable, RequestSubgroups::Never});
-
 using SubgroupsAdapterInfoTests = SubgroupsAdapterInfoTestBase<SubgroupsAdapterInfoParams>;
 
 // Test that subgroupMinSize and subgroupMaxSize in wgpu::AdapterInfo are valid.

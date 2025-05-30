@@ -1598,15 +1598,6 @@
             {"name": "max storage textures in fragment stage", "type": "uint32_t", "default": "limit u32 undefined"}
         ]
     },
-    "adapter properties subgroups": {
-        "category": "structure",
-        "chained": "out",
-        "chain roots": ["adapter info"],
-        "members": [
-            {"name": "subgroup min size", "type": "uint32_t", "default": "limit u32 undefined"},
-            {"name": "subgroup max size", "type": "uint32_t", "default": "limit u32 undefined"}
-        ]
-    },
     "dawn texel copy buffer row alignment limits": {
         "category": "structure",
         "chained": "out",
@@ -3797,7 +3788,6 @@
             {"value": 9, "name": "surface source XCB window"},
             {"value": 10, "name": "surface color management", "tags": ["upstream", "emscripten"]},
             {"value": 11, "name": "request adapter WebXR options", "tags": ["upstream", "emscripten"]},
-            {"value": 12, "name": "adapter properties subgroups"},
 
             {"value": 0, "name": "texture binding view dimension descriptor", "tags": ["compat"]},
 

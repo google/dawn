@@ -113,14 +113,6 @@ void Server::OnRequestAdapterCallback(RequestAdapterUserdata* data,
         propertiesChain = &(*propertiesChain)->next;
     }
 
-    // Query AdapterPropertiesSubgroups if the feature is supported.
-    WGPUAdapterPropertiesSubgroups subgroupsProperties = {};
-    subgroupsProperties.chain.sType = WGPUSType_AdapterPropertiesSubgroups;
-    if (mProcs.adapterHasFeature(adapter, WGPUFeatureName_Subgroups)) {
-        *propertiesChain = &subgroupsProperties.chain;
-        propertiesChain = &(*propertiesChain)->next;
-    }
-
     // Query AdapterPropertiesSubgroupMatrixConfigs if the feature is supported.
     FreeMembers<WGPUAdapterPropertiesSubgroupMatrixConfigs> subgroupMatrixConfigs(mProcs);
     // WGPUAdapterPropertiesSubgroupMatrixConfigs subgroupMatrixConfigs{};

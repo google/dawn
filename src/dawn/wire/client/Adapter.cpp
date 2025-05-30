@@ -182,13 +182,6 @@ void Adapter::SetInfo(const WGPUAdapterInfo* info) {
                 mVkProperties.driverVersion = vkProperties->driverVersion;
                 break;
             }
-            case WGPUSType_AdapterPropertiesSubgroups: {
-                auto* subgroupsProperties =
-                    reinterpret_cast<WGPUAdapterPropertiesSubgroups*>(chain);
-                mSubgroupsProperties.subgroupMinSize = subgroupsProperties->subgroupMinSize;
-                mSubgroupsProperties.subgroupMaxSize = subgroupsProperties->subgroupMaxSize;
-                break;
-            }
             case WGPUSType_AdapterPropertiesSubgroupMatrixConfigs: {
                 // Make a copy of the heap info in `mSubgroupMatrixConfigs`.
                 const auto* subgroupMatrixConfigs =
@@ -237,13 +230,6 @@ WGPUStatus Adapter::GetInfo(WGPUAdapterInfo* info) const {
             case WGPUSType_AdapterPropertiesVk: {
                 auto* vkProperties = reinterpret_cast<WGPUAdapterPropertiesVk*>(chain);
                 vkProperties->driverVersion = mVkProperties.driverVersion;
-                break;
-            }
-            case WGPUSType_AdapterPropertiesSubgroups: {
-                auto* subgroupsProperties =
-                    reinterpret_cast<WGPUAdapterPropertiesSubgroups*>(chain);
-                subgroupsProperties->subgroupMinSize = mSubgroupsProperties.subgroupMinSize;
-                subgroupsProperties->subgroupMaxSize = mSubgroupsProperties.subgroupMaxSize;
                 break;
             }
             case WGPUSType_AdapterPropertiesSubgroupMatrixConfigs: {

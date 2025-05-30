@@ -236,11 +236,6 @@ TEST_P(WireInstanceTests, RequestAdapterPassesChainedProperties) {
     fakeVkProperties.chain.sType = WGPUSType_AdapterPropertiesVk;
     fakeVkProperties.driverVersion = 0x801F6000;
 
-    WGPUAdapterPropertiesSubgroups fakeSubgroupsProperties = {};
-    fakeSubgroupsProperties.chain.sType = WGPUSType_AdapterPropertiesSubgroups;
-    fakeSubgroupsProperties.subgroupMinSize = 4;
-    fakeSubgroupsProperties.subgroupMaxSize = 128;
-
     WGPUSubgroupMatrixConfig fakeMatrixConfigs[3] = {
         {WGPUSubgroupMatrixComponentType_F32, WGPUSubgroupMatrixComponentType_F32, 8, 4, 2},
         {WGPUSubgroupMatrixComponentType_U32, WGPUSubgroupMatrixComponentType_I32, 4, 8, 16},
@@ -260,7 +255,6 @@ TEST_P(WireInstanceTests, RequestAdapterPassesChainedProperties) {
         WGPUFeatureName_AdapterPropertiesMemoryHeaps,
         WGPUFeatureName_AdapterPropertiesD3D,
         WGPUFeatureName_AdapterPropertiesVk,
-        WGPUFeatureName_Subgroups,
         WGPUFeatureName_ChromiumExperimentalSubgroupMatrix,
     };
     WGPUSupportedFeatures fakeFeatures = {fakeFeaturesList.size(), std::data(fakeFeaturesList)};
@@ -294,10 +288,6 @@ TEST_P(WireInstanceTests, RequestAdapterPassesChainedProperties) {
                             case WGPUSType_AdapterPropertiesVk:
                                 *reinterpret_cast<WGPUAdapterPropertiesVk*>(chain) =
                                     fakeVkProperties;
-                                break;
-                            case WGPUSType_AdapterPropertiesSubgroups:
-                                *reinterpret_cast<WGPUAdapterPropertiesSubgroups*>(chain) =
-                                    fakeSubgroupsProperties;
                                 break;
                             case WGPUSType_AdapterPropertiesSubgroupMatrixConfigs:
                                 *reinterpret_cast<WGPUAdapterPropertiesSubgroupMatrixConfigs*>(
@@ -367,17 +357,6 @@ TEST_P(WireInstanceTests, RequestAdapterPassesChainedProperties) {
                 adapter.GetInfo(reinterpret_cast<wgpu::AdapterInfo*>(&info));
                 // Expect them to match.
                 EXPECT_EQ(vkProperties.driverVersion, fakeVkProperties.driverVersion);
-
-                // Get the Subgroups properties.
-                WGPUAdapterPropertiesSubgroups subgroupsProperties = {};
-                subgroupsProperties.chain.sType = WGPUSType_AdapterPropertiesSubgroups;
-                info.nextInChain = &subgroupsProperties.chain;
-                adapter.GetInfo(reinterpret_cast<wgpu::AdapterInfo*>(&info));
-                // Expect them to match.
-                EXPECT_EQ(subgroupsProperties.subgroupMinSize,
-                          fakeSubgroupsProperties.subgroupMinSize);
-                EXPECT_EQ(subgroupsProperties.subgroupMaxSize,
-                          fakeSubgroupsProperties.subgroupMaxSize);
 
                 // Get the subgroup matrix properties.
                 WGPUAdapterPropertiesSubgroupMatrixConfigs subgroupMatrixConfigs = {};

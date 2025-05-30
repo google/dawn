@@ -20,15 +20,6 @@
  #define WGPU_COPY_STRIDE_UNDEFINED (UINT32_MAX)
  #define WGPU_DEPTH_CLEAR_VALUE_UNDEFINED (NAN)
 @@
- typedef struct WGPUTextureImpl* WGPUTexture WGPU_OBJECT_ATTRIBUTE;
- typedef struct WGPUTextureViewImpl* WGPUTextureView WGPU_OBJECT_ATTRIBUTE;
- 
--struct WGPUAdapterInfo;
-+struct WGPUAdapterPropertiesSubgroups;
- struct WGPUBindGroupEntry;
- struct WGPUBlendComponent;
- struct WGPUBufferBindingLayout;
-@@
  struct WGPUConstantEntry;
  struct WGPUExtent3D;
  struct WGPUFuture;
@@ -52,10 +43,7 @@
 +struct WGPUTextureBindingViewDimensionDescriptor;
  struct WGPUTextureViewDescriptor;
  struct WGPUVertexAttribute;
-+struct WGPUAdapterInfo;
  struct WGPUBindGroupDescriptor;
- struct WGPUBindGroupLayoutEntry;
- struct WGPUBlendState;
 @@
  struct WGPUFragmentState;
  struct WGPURenderPipelineDescriptor;
@@ -100,7 +88,6 @@
      WGPUSType_SurfaceSourceXCBWindow = 0x00000009,
      WGPUSType_SurfaceColorManagement = 0x0000000A,
      WGPUSType_RequestAdapterWebXROptions = 0x0000000B,
-+    WGPUSType_AdapterPropertiesSubgroups = 0x0000000C,
 +    WGPUSType_TextureBindingViewDimensionDescriptor = 0x00020000,
      WGPUSType_Force32 = 0x7FFFFFFF
  } WGPUSType WGPU_ENUM_ATTRIBUTE;
@@ -132,50 +119,6 @@
  
  typedef void (*WGPURequestAdapterCallback)(WGPURequestAdapterStatus status, WGPUAdapter adapter, WGPUStringView message, WGPU_NULLABLE void* userdata1, WGPU_NULLABLE void* userdata2) WGPU_FUNCTION_ATTRIBUTE;
  
-@@
-     /*.userdata2=*/NULL _wgpu_COMMA \
- })
- 
--typedef struct WGPUAdapterInfo {
--    WGPUChainedStruct * nextInChain;
--    WGPUStringView vendor;
--    WGPUStringView architecture;
--    WGPUStringView device;
--    WGPUStringView description;
--    WGPUBackendType backendType;
--    WGPUAdapterType adapterType;
--    uint32_t vendorID;
--    uint32_t deviceID;
-+typedef struct WGPUAdapterPropertiesSubgroups {
-+    WGPUChainedStruct chain;
-     uint32_t subgroupMinSize;
-     uint32_t subgroupMaxSize;
--} WGPUAdapterInfo WGPU_STRUCTURE_ATTRIBUTE;
--
--#define WGPU_ADAPTER_INFO_INIT _wgpu_MAKE_INIT_STRUCT(WGPUAdapterInfo, { \
--    /*.nextInChain=*/NULL _wgpu_COMMA \
--    /*.vendor=*/WGPU_STRING_VIEW_INIT _wgpu_COMMA \
--    /*.architecture=*/WGPU_STRING_VIEW_INIT _wgpu_COMMA \
--    /*.device=*/WGPU_STRING_VIEW_INIT _wgpu_COMMA \
--    /*.description=*/WGPU_STRING_VIEW_INIT _wgpu_COMMA \
--    /*.backendType=*/WGPUBackendType_Undefined _wgpu_COMMA \
--    /*.adapterType=*/_wgpu_ENUM_ZERO_INIT(WGPUAdapterType) _wgpu_COMMA \
--    /*.vendorID=*/0 _wgpu_COMMA \
--    /*.deviceID=*/0 _wgpu_COMMA \
--    /*.subgroupMinSize=*/0 _wgpu_COMMA \
--    /*.subgroupMaxSize=*/0 _wgpu_COMMA \
-+} WGPUAdapterPropertiesSubgroups WGPU_STRUCTURE_ATTRIBUTE;
-+
-+#define WGPU_ADAPTER_PROPERTIES_SUBGROUPS_INIT _wgpu_MAKE_INIT_STRUCT(WGPUAdapterPropertiesSubgroups, { \
-+    /*.chain=*/_wgpu_MAKE_INIT_STRUCT(WGPUChainedStruct, { \
-+        /*.next=*/NULL _wgpu_COMMA \
-+        /*.sType=*/WGPUSType_AdapterPropertiesSubgroups _wgpu_COMMA \
-+    }) _wgpu_COMMA \
-+    /*.subgroupMinSize=*/WGPU_LIMIT_U32_UNDEFINED _wgpu_COMMA \
-+    /*.subgroupMaxSize=*/WGPU_LIMIT_U32_UNDEFINED _wgpu_COMMA \
- })
- 
- typedef struct WGPUBindGroupEntry {
 @@
  #define WGPU_BUFFER_BINDING_LAYOUT_INIT _wgpu_MAKE_INIT_STRUCT(WGPUBufferBindingLayout, { \
      /*.nextInChain=*/NULL _wgpu_COMMA \
@@ -355,41 +298,6 @@
  })
  
  typedef struct WGPUTextureViewDescriptor {
-@@
-     /*.format=*/_wgpu_ENUM_ZERO_INIT(WGPUVertexFormat) _wgpu_COMMA \
-     /*.offset=*/0 _wgpu_COMMA \
-     /*.shaderLocation=*/0 _wgpu_COMMA \
-+})
-+
-+typedef struct WGPUAdapterInfo {
-+    WGPUChainedStruct * nextInChain;
-+    WGPUStringView vendor;
-+    WGPUStringView architecture;
-+    WGPUStringView device;
-+    WGPUStringView description;
-+    WGPUBackendType backendType;
-+    WGPUAdapterType adapterType;
-+    uint32_t vendorID;
-+    uint32_t deviceID;
-+    uint32_t subgroupMinSize;
-+    uint32_t subgroupMaxSize;
-+} WGPUAdapterInfo WGPU_STRUCTURE_ATTRIBUTE;
-+
-+#define WGPU_ADAPTER_INFO_INIT _wgpu_MAKE_INIT_STRUCT(WGPUAdapterInfo, { \
-+    /*.nextInChain=*/NULL _wgpu_COMMA \
-+    /*.vendor=*/WGPU_STRING_VIEW_INIT _wgpu_COMMA \
-+    /*.architecture=*/WGPU_STRING_VIEW_INIT _wgpu_COMMA \
-+    /*.device=*/WGPU_STRING_VIEW_INIT _wgpu_COMMA \
-+    /*.description=*/WGPU_STRING_VIEW_INIT _wgpu_COMMA \
-+    /*.backendType=*/WGPUBackendType_Undefined _wgpu_COMMA \
-+    /*.adapterType=*/_wgpu_ENUM_ZERO_INIT(WGPUAdapterType) _wgpu_COMMA \
-+    /*.vendorID=*/0 _wgpu_COMMA \
-+    /*.deviceID=*/0 _wgpu_COMMA \
-+    /*.subgroupMinSize=*/0 _wgpu_COMMA \
-+    /*.subgroupMaxSize=*/0 _wgpu_COMMA \
- })
- 
- typedef struct WGPUBindGroupDescriptor {
 @@
      /*.nextInChain=*/NULL _wgpu_COMMA \
      /*.format=*/WGPUTextureFormat_Undefined _wgpu_COMMA \
