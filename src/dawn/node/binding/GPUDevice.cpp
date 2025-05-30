@@ -301,8 +301,7 @@ interop::Interface<interop::GPUBuffer> GPUDevice::createBuffer(
         return {};
     }
 
-    return interop::GPUBuffer::Create<GPUBuffer>(env, device_.CreateBuffer(&desc), desc, device_,
-                                                 async_);
+    return interop::GPUBuffer::Create<GPUBuffer>(env, dawnBuffer, desc, device_, async_);
 }
 
 interop::Interface<interop::GPUTexture> GPUDevice::createTexture(
