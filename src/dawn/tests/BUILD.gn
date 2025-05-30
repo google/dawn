@@ -695,6 +695,10 @@ source_set("end2end_tests_sources") {
     "end2end/ViewportTests.cpp",
   ]
 
+  if (!is_debug) {
+    sources += [ "end2end/RuntimeTimeoutCompute.cpp" ]
+  }
+
   libs = []
 
   if (dawn_enable_d3d11 || dawn_enable_d3d12) {

@@ -53,6 +53,7 @@
 #include "dawn/tests/ToggleParser.h"
 #include "dawn/utils/TestUtils.h"
 #include "dawn/utils/TextureUtils.h"
+#include "dawn/utils/Timer.h"
 #include "dawn/webgpu_cpp_print.h"
 #include "partition_alloc/pointers/raw_ptr.h"
 
@@ -332,6 +333,11 @@ class DawnTestBase {
     // mDeferredExpectations get too big.
     void ResolveDeferredExpectationsNow();
 
+    // Starts the internal timer for the test and sets the max expected time. This
+    // 'max_expected_time' is not actually a test timeout as it simply checks an expectation at the
+    // end of the test.
+    void StartTestTimer(float expected_max_time);
+
   protected:
     wgpu::Instance instance;
     wgpu::Adapter adapter;
@@ -342,6 +348,8 @@ class DawnTestBase {
     WGPUDevice backendDevice = nullptr;
 
     uint64_t mLastWarningCount = 0;
+    std::unique_ptr<utils::Timer> mTimer;
+    float mExpectedTimeMaxSec = 0.0f;
 
     // Mock callbacks tracking errors and destruction. These are strict mocks because any errors or
     // device loss that aren't expected should result in test failures and not just some warnings

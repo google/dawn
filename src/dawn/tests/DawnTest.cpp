@@ -58,6 +58,7 @@
 #include "dawn/utils/SystemUtils.h"
 #include "dawn/utils/TerribleCommandBuffer.h"
 #include "dawn/utils/TestUtils.h"
+#include "dawn/utils/Timer.h"
 #include "dawn/utils/WGPUHelpers.h"
 #include "dawn/utils/WireHelper.h"
 #include "dawn/wire/WireClient.h"
@@ -1310,6 +1311,11 @@ void DawnTestBase::TearDown() {
     if (!UsesWire()) {
         EXPECT_EQ(mLastWarningCount, GetDeprecationWarningCountForTesting());
     }
+
+    if (mExpectedTimeMaxSec != 0.0f) {
+        float real_time_taken = mTimer->GetElapsedTime();
+        EXPECT_GE(mExpectedTimeMaxSec, real_time_taken);
+    }
 }
 
 void DawnTestBase::DestroyDevice(wgpu::Device deviceToDestroy) {
@@ -1888,6 +1894,12 @@ void DawnTestBase::ResolveExpectations() {
 
 std::unique_ptr<platform::Platform> DawnTestBase::CreateTestPlatform() {
     return nullptr;
+}
+
+void DawnTestBase::StartTestTimer(float expected_max_time) {
+    mTimer.reset(utils::CreateTimer());
+    mExpectedTimeMaxSec = expected_max_time;
+    mTimer->Start();
 }
 
 void DawnTestBase::ResolveDeferredExpectationsNow() {
