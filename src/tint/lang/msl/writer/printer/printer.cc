@@ -662,7 +662,9 @@ class Printer : public tint::TextGenerator {
 
         if (current_function_ == nullptr) {
             // program scope let
-            out << "constexpr constant ";
+            // TODO(crbug.com/419804339): This should be 'constexpr constant' but the matrix class
+            // (constructor) in metal is not constexpr.
+            out << "const constant ";
         }
         EmitType(out, l->Result()->Type());
         out << " ";

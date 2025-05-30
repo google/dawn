@@ -570,6 +570,9 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
      {"disable_polyfills_on_integer_div_and_mod",
       "Disable the Tint polyfills on integer division and modulo.", "https://crbug.com/tint/2128",
       ToggleStage::Device}},
+    {Toggle::MetalEnableModuleConstant,
+     {"metal_enable_module_constant_transform", "Enable the module constant transform.",
+      "https://crbug.com/419804339", ToggleStage::Device}},
     {Toggle::EnableImmediateErrorHandling,
      {"enable_immediate_error_handling",
       "Have the uncaptured error callback invoked immediately when an error occurs, rather than "

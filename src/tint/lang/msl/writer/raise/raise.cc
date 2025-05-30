@@ -160,10 +160,7 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
     RUN_TRANSFORM(raise::BinaryPolyfill, module);
     RUN_TRANSFORM(raise::BuiltinPolyfill, module);
 
-    // TODO(crbug.com/419804339): Fix backend compile failures for f16 types related to this
-    // transform
-    constexpr bool kEnabledModuleConstantTransform = false;
-    if (kEnabledModuleConstantTransform) {
+    if (options.enable_module_constant) {
         RUN_TRANSFORM(raise::ModuleConstant, module);
     }
 
