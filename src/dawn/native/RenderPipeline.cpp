@@ -131,8 +131,8 @@ MaybeError ValidateVertexAttribute(DeviceBase* device,
     DAWN_INVALID_IF(attribute->offset > kMaxVertexBufferArrayStride - formatInfo.byteSize,
                     "Attribute offset (%u) + format size (%u for %s) must be <= the maximum vertex "
                     "buffer stride (%u). Offsets larger than the maximum vertex buffer stride are "
-                    "accomodated by setting buffer offsets when calling setVertexBuffer, which the "
-                    "attribute offset is added to.",
+                    "accommodated by setting buffer offsets when calling setVertexBuffer, which "
+                    "the attribute offset is added to.",
                     attribute->offset, formatInfo.byteSize, attribute->format,
                     kMaxVertexBufferArrayStride);
 
@@ -142,7 +142,7 @@ MaybeError ValidateVertexAttribute(DeviceBase* device,
     DAWN_INVALID_IF(
         vertexBufferStride > 0 && attribute->offset + formatInfo.byteSize > vertexBufferStride,
         "Attribute offset (%u) + format size (%u for %s) must be <= the vertex buffer stride (%u). "
-        "Offsets larger than the vertex buffer stride are accomodated by setting buffer offsets "
+        "Offsets larger than the vertex buffer stride are accommodated by setting buffer offsets "
         "when calling setVertexBuffer, which the attribute offset is added to.",
         attribute->offset, formatInfo.byteSize, attribute->format, vertexBufferStride);
 

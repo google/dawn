@@ -577,7 +577,7 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
      {"enable_immediate_error_handling",
       "Have the uncaptured error callback invoked immediately when an error occurs, rather than "
       "waiting for the next Tick. This enables using the stack trace in which the uncaptured error "
-      "occured when breaking into the uncaptured error callback.",
+      "occurred when breaking into the uncaptured error callback.",
       "https://crbug.com/dawn/1789", ToggleStage::Device}},
     {Toggle::VulkanUseStorageInputOutput16,
      {"vulkan_use_storage_input_output_16",

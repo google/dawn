@@ -893,7 +893,7 @@ class CopyTextureForBrowser_ColorSpace
                                                          dstTextureAlphaMode);
         }
 
-        return GetExpectedDataForSeperateSource(srcColorSpace, dstColorSpace);
+        return GetExpectedDataForSeparateSource(srcColorSpace, dstColorSpace);
     }
 
     std::vector<float> GeneratePremultipliedResult(std::vector<float> result) {
@@ -968,7 +968,7 @@ class CopyTextureForBrowser_ColorSpace
         DAWN_UNREACHABLE();
     }
 
-    std::vector<float> GetExpectedDataForSeperateSource(ColorSpace srcColorSpace,
+    std::vector<float> GetExpectedDataForSeparateSource(ColorSpace srcColorSpace,
                                                         ColorSpace dstColorSpace) {
         if (srcColorSpace == dstColorSpace) {
             return std::vector<float>{
