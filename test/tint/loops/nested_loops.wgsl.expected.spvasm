@@ -133,7 +133,7 @@
                OpStore %87 %86 None
                OpBranch %61
          %62 = OpLabel
-               OpBranch %42
+               OpBranch %18
          %42 = OpLabel
                OpBranch %18
          %16 = OpLabel

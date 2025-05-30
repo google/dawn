@@ -844,7 +844,7 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvWriter_MergeReturnTest, IfElse_Nested) {
+TEST_F(SpirvWriter_MergeReturnTest, IfElse_Nested_ReturnAtAllLevels) {
     auto* global = b.Var(ty.ptr<private_, i32>());
     mod.root_block->Append(global);
 
@@ -990,7 +990,149 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvWriter_MergeReturnTest, IfElse_Nested_TrivialMerge) {
+TEST_F(SpirvWriter_MergeReturnTest, IfElse_Nested_ReturnOnlyInner) {
+    auto* global = b.Var(ty.ptr<private_, i32>());
+    mod.root_block->Append(global);
+
+    auto* func = b.Function("foo", ty.i32());
+    auto* condA = b.FunctionParam("condA", ty.bool_());
+    auto* condB = b.FunctionParam("condB", ty.bool_());
+    auto* condC = b.FunctionParam("condC", ty.bool_());
+    func->SetParams({condA, condB, condC});
+
+    b.Append(func->Block(), [&] {
+        auto* ifelse_outer = b.If(condA);
+        b.Append(ifelse_outer->True(), [&] { b.ExitIf(ifelse_outer); });
+        b.Append(ifelse_outer->False(), [&] {
+            auto* ifelse_middle = b.If(condB);
+            b.Append(ifelse_middle->True(), [&] {
+                auto* ifelse_inner = b.If(condC);
+                b.Append(ifelse_inner->True(), [&] { b.Return(func, 1_i); });
+                b.Append(ifelse_inner->False(), [&] { b.ExitIf(ifelse_inner); });
+
+                b.Store(global, 1_i);
+                b.ExitIf(ifelse_middle);
+            });
+            b.Append(ifelse_middle->False(), [&] { b.ExitIf(ifelse_middle); });
+            b.Store(global, 2_i);
+            b.ExitIf(ifelse_outer);
+        });
+        b.Store(global, 3_i);
+        b.Return(func, b.Add(ty.i32(), 5_i, 6_i));
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %1:ptr<private, i32, read_write> = var undef
+}
+
+%foo = func(%condA:bool, %condB:bool, %condC:bool):i32 {
+  $B2: {
+    if %condA [t: $B3, f: $B4] {  # if_1
+      $B3: {  # true
+        exit_if  # if_1
+      }
+      $B4: {  # false
+        if %condB [t: $B5, f: $B6] {  # if_2
+          $B5: {  # true
+            if %condC [t: $B7, f: $B8] {  # if_3
+              $B7: {  # true
+                ret 1i
+              }
+              $B8: {  # false
+                exit_if  # if_3
+              }
+            }
+            store %1, 1i
+            exit_if  # if_2
+          }
+          $B6: {  # false
+            exit_if  # if_2
+          }
+        }
+        store %1, 2i
+        exit_if  # if_1
+      }
+    }
+    store %1, 3i
+    %6:i32 = add 5i, 6i
+    ret %6
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %1:ptr<private, i32, read_write> = var undef
+}
+
+%foo = func(%condA:bool, %condB:bool, %condC:bool):i32 {
+  $B2: {
+    %return_value:ptr<function, i32, read_write> = var undef
+    %continue_execution:ptr<function, bool, read_write> = var true
+    if %condA [t: $B3, f: $B4] {  # if_1
+      $B3: {  # true
+        exit_if  # if_1
+      }
+      $B4: {  # false
+        if %condB [t: $B5, f: $B6] {  # if_2
+          $B5: {  # true
+            if %condC [t: $B7, f: $B8] {  # if_3
+              $B7: {  # true
+                store %continue_execution, false
+                store %return_value, 1i
+                exit_if  # if_3
+              }
+              $B8: {  # false
+                exit_if  # if_3
+              }
+            }
+            %8:bool = load %continue_execution
+            if %8 [t: $B9] {  # if_4
+              $B9: {  # true
+                store %1, 1i
+                exit_if  # if_4
+              }
+            }
+            exit_if  # if_2
+          }
+          $B6: {  # false
+            exit_if  # if_2
+          }
+        }
+        %9:bool = load %continue_execution
+        if %9 [t: $B10] {  # if_5
+          $B10: {  # true
+            store %1, 2i
+            exit_if  # if_5
+          }
+        }
+        exit_if  # if_1
+      }
+    }
+    %10:bool = load %continue_execution
+    if %10 [t: $B11] {  # if_6
+      $B11: {  # true
+        store %1, 3i
+        %11:i32 = add 5i, 6i
+        store %return_value, %11
+        exit_if  # if_6
+      }
+    }
+    %12:i32 = load %return_value
+    ret %12
+  }
+}
+)";
+
+    Run(MergeReturn);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_MergeReturnTest, IfElse_Nested_ReturnAllLevels_TrivialMerge) {
     auto* global = b.Var(ty.ptr<private_, i32>());
     mod.root_block->Append(global);
 
@@ -1097,6 +1239,116 @@ $B1: {  # root
     if %8 [t: $B9] {  # if_4
       $B9: {  # true
         store %return_value, 3i
+        exit_if  # if_4
+      }
+    }
+    %9:i32 = load %return_value
+    ret %9
+  }
+}
+)";
+
+    Run(MergeReturn);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_MergeReturnTest, IfElse_Nested_ReturnOnlyInner_TrivialMerge) {
+    auto* func = b.Function("foo", ty.i32());
+    auto* condA = b.FunctionParam("condA", ty.bool_());
+    auto* condB = b.FunctionParam("condB", ty.bool_());
+    auto* condC = b.FunctionParam("condC", ty.bool_());
+    func->SetParams({condA, condB, condC});
+
+    b.Append(func->Block(), [&] {
+        auto* ifelse_outer = b.If(condA);
+        b.Append(ifelse_outer->True(), [&] { b.ExitIf(ifelse_outer); });
+        b.Append(ifelse_outer->False(), [&] {
+            auto* ifelse_middle = b.If(condB);
+            b.Append(ifelse_middle->True(), [&] {
+                auto* ifelse_inner = b.If(condC);
+                b.Append(ifelse_inner->True(), [&] { b.Return(func, 1_i); });
+                b.Append(ifelse_inner->False(), [&] { b.ExitIf(ifelse_inner); });
+
+                b.ExitIf(ifelse_middle);
+            });
+            b.Append(ifelse_middle->False(), [&] { b.ExitIf(ifelse_middle); });
+            b.ExitIf(ifelse_outer);
+        });
+        b.Return(func, b.Add(ty.i32(), 5_i, 6_i));
+    });
+
+    auto* src = R"(
+%foo = func(%condA:bool, %condB:bool, %condC:bool):i32 {
+  $B1: {
+    if %condA [t: $B2, f: $B3] {  # if_1
+      $B2: {  # true
+        exit_if  # if_1
+      }
+      $B3: {  # false
+        if %condB [t: $B4, f: $B5] {  # if_2
+          $B4: {  # true
+            if %condC [t: $B6, f: $B7] {  # if_3
+              $B6: {  # true
+                ret 1i
+              }
+              $B7: {  # false
+                exit_if  # if_3
+              }
+            }
+            exit_if  # if_2
+          }
+          $B5: {  # false
+            exit_if  # if_2
+          }
+        }
+        exit_if  # if_1
+      }
+    }
+    %5:i32 = add 5i, 6i
+    ret %5
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%condA:bool, %condB:bool, %condC:bool):i32 {
+  $B1: {
+    %return_value:ptr<function, i32, read_write> = var undef
+    %continue_execution:ptr<function, bool, read_write> = var true
+    if %condA [t: $B2, f: $B3] {  # if_1
+      $B2: {  # true
+        exit_if  # if_1
+      }
+      $B3: {  # false
+        if %condB [t: $B4, f: $B5] {  # if_2
+          $B4: {  # true
+            if %condC [t: $B6, f: $B7] {  # if_3
+              $B6: {  # true
+                store %continue_execution, false
+                store %return_value, 1i
+                exit_if  # if_3
+              }
+              $B7: {  # false
+                exit_if  # if_3
+              }
+            }
+            exit_if  # if_2
+          }
+          $B5: {  # false
+            exit_if  # if_2
+          }
+        }
+        exit_if  # if_1
+      }
+    }
+    %7:bool = load %continue_execution
+    if %7 [t: $B8] {  # if_4
+      $B8: {  # true
+        %8:i32 = add 5i, 6i
+        store %return_value, %8
         exit_if  # if_4
       }
     }

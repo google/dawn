@@ -60,7 +60,7 @@
                OpBranchConditional %32 %34 %33
          %34 = OpLabel
                OpStore %continue_execution %false None
-               OpBranch %33
+               OpBranch %24
          %33 = OpLabel
                OpBranch %24
          %24 = OpLabel
