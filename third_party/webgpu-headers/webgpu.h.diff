@@ -85,10 +85,7 @@
  typedef enum WGPULoadOp {
      WGPULoadOp_Undefined = 0x00000000,
 @@
-     WGPUSType_SurfaceSourceXCBWindow = 0x00000009,
-     WGPUSType_SurfaceColorManagement = 0x0000000A,
      WGPUSType_RequestAdapterWebXROptions = 0x0000000B,
-+    WGPUSType_TextureBindingViewDimensionDescriptor = 0x00020000,
      WGPUSType_Force32 = 0x7FFFFFFF
  } WGPUSType WGPU_ENUM_ATTRIBUTE;
 +
