@@ -171,6 +171,23 @@ struct State {
             return;
         }
 
+        // If we are nested somewhere inside a loop/switch instruction, we can just jump out of that
+        // instead of conditionalizing the subsequent instructions.
+        auto* exit_target = control->Block()->Parent();
+        while (exit_target) {
+            if (exit_target->IsAnyOf<core::ir::Loop, core::ir::Switch>()) {
+                b.InsertBefore(next, [&] {
+                    auto* load = b.Load(continue_execution);
+                    auto* cond = b.If(b.Not<bool>(load));
+                    b.Append(cond->True(), [&] {  //
+                        ExitFromControl(exit_target);
+                    });
+                });
+                return;
+            }
+            exit_target = exit_target->Block()->Parent();
+        }
+
         // If the next instruction is an unreachable, we've made it reachable and need to exit up
         // the control flow stack instead.
         if (next->Is<core::ir::Unreachable>()) {

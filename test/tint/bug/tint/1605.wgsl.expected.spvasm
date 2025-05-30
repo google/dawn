@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 100
+; Bound: 101
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -52,7 +52,7 @@
       %false = OpConstantFalse %bool
      %int_n1 = OpConstant %int -1
        %void = OpTypeVoid
-         %97 = OpTypeFunction %void
+         %98 = OpTypeFunction %void
      %func_3 = OpFunction %bool None %7
           %8 = OpLabel
 %return_value = OpVariable %_ptr_Function_bool Function %11
@@ -97,65 +97,66 @@
                OpLoopMerge %51 %49 None
                OpBranch %48
          %48 = OpLabel
-         %74 = OpLoad %v2uint %tint_loop_idx_0 None
-         %75 = OpIEqual %v2bool %74 %34
-         %76 = OpAll %bool %75
-               OpSelectionMerge %77 None
-               OpBranchConditional %76 %78 %77
+         %75 = OpLoad %v2uint %tint_loop_idx_0 None
+         %76 = OpIEqual %v2bool %75 %34
+         %77 = OpAll %bool %76
+               OpSelectionMerge %78 None
+               OpBranchConditional %77 %79 %78
+         %79 = OpLabel
+               OpBranch %51
          %78 = OpLabel
+         %80 = OpLoad %int %j None
+         %81 = OpIEqual %bool %80 %int_1
+               OpSelectionMerge %82 None
+               OpBranchConditional %81 %82 %83
+         %83 = OpLabel
                OpBranch %51
-         %77 = OpLabel
-         %79 = OpLoad %int %j None
-         %80 = OpIEqual %bool %79 %int_1
-               OpSelectionMerge %81 None
-               OpBranchConditional %80 %81 %82
          %82 = OpLabel
-               OpBranch %51
-         %81 = OpLabel
                OpStore %continue_execution %false None
                OpStore %return_value %false None
                OpBranch %51
          %49 = OpLabel
-         %83 = OpAccessChain %_ptr_Function_uint %tint_loop_idx_0 %uint_0
-         %84 = OpLoad %uint %83 None
-%tint_low_inc_1 = OpISub %uint %84 %uint_1
-         %86 = OpAccessChain %_ptr_Function_uint %tint_loop_idx_0 %uint_0
-               OpStore %86 %tint_low_inc_1 None
-         %87 = OpIEqual %bool %tint_low_inc_1 %uint_4294967295
-%tint_carry_1 = OpSelect %uint %87 %uint_1 %uint_0
-         %89 = OpAccessChain %_ptr_Function_uint %tint_loop_idx_0 %uint_1
-         %90 = OpLoad %uint %89 None
-         %91 = OpISub %uint %90 %tint_carry_1
-         %92 = OpAccessChain %_ptr_Function_uint %tint_loop_idx_0 %uint_1
-               OpStore %92 %91 None
-         %93 = OpLoad %int %j None
-         %94 = OpIAdd %int %93 %int_1
-               OpStore %j %94 None
+         %84 = OpAccessChain %_ptr_Function_uint %tint_loop_idx_0 %uint_0
+         %85 = OpLoad %uint %84 None
+%tint_low_inc_1 = OpISub %uint %85 %uint_1
+         %87 = OpAccessChain %_ptr_Function_uint %tint_loop_idx_0 %uint_0
+               OpStore %87 %tint_low_inc_1 None
+         %88 = OpIEqual %bool %tint_low_inc_1 %uint_4294967295
+%tint_carry_1 = OpSelect %uint %88 %uint_1 %uint_0
+         %90 = OpAccessChain %_ptr_Function_uint %tint_loop_idx_0 %uint_1
+         %91 = OpLoad %uint %90 None
+         %92 = OpISub %uint %91 %tint_carry_1
+         %93 = OpAccessChain %_ptr_Function_uint %tint_loop_idx_0 %uint_1
+               OpStore %93 %92 None
+         %94 = OpLoad %int %j None
+         %95 = OpIAdd %int %94 %int_1
+               OpStore %j %95 None
                OpBranch %50
          %51 = OpLabel
          %52 = OpLoad %bool %continue_execution None
-               OpSelectionMerge %53 None
-               OpBranchConditional %52 %54 %53
+         %53 = OpLogicalNot %bool %52
+               OpSelectionMerge %54 None
+               OpBranchConditional %53 %55 %54
+         %55 = OpLabel
+               OpBranch %18
          %54 = OpLabel
                OpBranch %16
-         %53 = OpLabel
-               OpBranch %18
          %16 = OpLabel
-         %55 = OpAccessChain %_ptr_Function_uint %tint_loop_idx %uint_0
-         %57 = OpLoad %uint %55 None
-%tint_low_inc = OpISub %uint %57 %uint_1
-         %60 = OpAccessChain %_ptr_Function_uint %tint_loop_idx %uint_0
-               OpStore %60 %tint_low_inc None
-         %61 = OpIEqual %bool %tint_low_inc %uint_4294967295
- %tint_carry = OpSelect %uint %61 %uint_1 %uint_0
-         %63 = OpAccessChain %_ptr_Function_uint %tint_loop_idx %uint_1
-         %64 = OpLoad %uint %63 None
-         %65 = OpISub %uint %64 %tint_carry
-         %66 = OpAccessChain %_ptr_Function_uint %tint_loop_idx %uint_1
-               OpStore %66 %65 None
-         %67 = OpLoad %int %i None
-         %68 = OpIAdd %int %67 %int_1
-               OpStore %i %68 None
+         %56 = OpAccessChain %_ptr_Function_uint %tint_loop_idx %uint_0
+         %58 = OpLoad %uint %56 None
+%tint_low_inc = OpISub %uint %58 %uint_1
+         %61 = OpAccessChain %_ptr_Function_uint %tint_loop_idx %uint_0
+               OpStore %61 %tint_low_inc None
+         %62 = OpIEqual %bool %tint_low_inc %uint_4294967295
+ %tint_carry = OpSelect %uint %62 %uint_1 %uint_0
+         %64 = OpAccessChain %_ptr_Function_uint %tint_loop_idx %uint_1
+         %65 = OpLoad %uint %64 None
+         %66 = OpISub %uint %65 %tint_carry
+         %67 = OpAccessChain %_ptr_Function_uint %tint_loop_idx %uint_1
+               OpStore %67 %66 None
+         %68 = OpLoad %int %i None
+         %69 = OpIAdd %int %68 %int_1
+               OpStore %i %69 None
                OpBranch %17
          %18 = OpLabel
          %19 = OpLoad %bool %continue_execution None
@@ -168,8 +169,8 @@
          %22 = OpLoad %bool %return_value None
                OpReturnValue %22
                OpFunctionEnd
-       %main = OpFunction %void None %97
-         %98 = OpLabel
-         %99 = OpFunctionCall %bool %func_3
+       %main = OpFunction %void None %98
+         %99 = OpLabel
+        %100 = OpFunctionCall %bool %func_3
                OpReturn
                OpFunctionEnd
