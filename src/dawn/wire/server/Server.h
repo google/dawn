@@ -250,7 +250,9 @@ class Server : public ServerBase {
     void OnBufferMapAsyncCallback(MapUserdata* userdata,
                                   WGPUMapAsyncStatus status,
                                   WGPUStringView message);
-    void OnQueueWorkDone(QueueWorkDoneUserdata* userdata, WGPUQueueWorkDoneStatus status);
+    void OnQueueWorkDone(QueueWorkDoneUserdata* userdata,
+                         WGPUQueueWorkDoneStatus status,
+                         WGPUStringView message);
     void OnCreateComputePipelineAsyncCallback(CreatePipelineAsyncUserData* userdata,
                                               WGPUCreatePipelineAsyncStatus status,
                                               WGPUComputePipeline pipeline,

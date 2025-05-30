@@ -32,11 +32,14 @@
 
 namespace dawn::wire::server {
 
-void Server::OnQueueWorkDone(QueueWorkDoneUserdata* data, WGPUQueueWorkDoneStatus status) {
+void Server::OnQueueWorkDone(QueueWorkDoneUserdata* data,
+                             WGPUQueueWorkDoneStatus status,
+                             WGPUStringView message) {
     ReturnQueueWorkDoneCallbackCmd cmd;
     cmd.eventManager = data->eventManager;
     cmd.future = data->future;
     cmd.status = status;
+    cmd.message = message;
 
     SerializeCommand(cmd);
 }

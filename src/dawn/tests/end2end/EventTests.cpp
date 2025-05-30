@@ -202,7 +202,8 @@ class EventCompletionTests : public DawnTestWithParams<EventCompletionTestParams
 
     wgpu::Future OnSubmittedWorkDone(wgpu::QueueWorkDoneStatus expectedStatus) {
         return testQueue.OnSubmittedWorkDone(
-            GetCallbackMode(), [this, expectedStatus](wgpu::QueueWorkDoneStatus status) {
+            GetCallbackMode(),
+            [this, expectedStatus](wgpu::QueueWorkDoneStatus status, wgpu::StringView) {
                 mCallbacksCompletedCount++;
                 ASSERT_EQ(status, expectedStatus);
             });
@@ -413,8 +414,9 @@ TEST_P(EventCompletionTests, WorkDoneDropInstanceBeforeEvent) {
     testInstance = nullptr;  // Drop the last external ref to the instance.
 
     wgpu::QueueWorkDoneStatus status = kStatusUninitialized;
-    testQueue.OnSubmittedWorkDone(GetCallbackMode(),
-                                  [&status](wgpu::QueueWorkDoneStatus result) { status = result; });
+    testQueue.OnSubmittedWorkDone(
+        GetCallbackMode(),
+        [&status](wgpu::QueueWorkDoneStatus result, wgpu::StringView) { status = result; });
 
     ASSERT_EQ(status, wgpu::QueueWorkDoneStatus::CallbackCancelled);
 }
@@ -428,8 +430,9 @@ TEST_P(EventCompletionTests, WorkDoneDropInstanceAfterEvent) {
     UseSecondInstance();
 
     wgpu::QueueWorkDoneStatus status = kStatusUninitialized;
-    testQueue.OnSubmittedWorkDone(GetCallbackMode(),
-                                  [&status](wgpu::QueueWorkDoneStatus result) { status = result; });
+    testQueue.OnSubmittedWorkDone(
+        GetCallbackMode(),
+        [&status](wgpu::QueueWorkDoneStatus result, wgpu::StringView) { status = result; });
 
     ASSERT_EQ(status, kStatusUninitialized);
     testInstance = nullptr;  // Drop the last external ref to the instance.
@@ -496,10 +499,11 @@ TEST_P(WaitAnyTests, UnsupportedTimeout) {
     }
 
     for (uint64_t timeout : {uint64_t(1), uint64_t(0), UINT64_MAX}) {
-        wgpu::WaitStatus status = instance2.WaitAny(
-            device2.GetQueue().OnSubmittedWorkDone(wgpu::CallbackMode::WaitAnyOnly,
-                                                   [](wgpu::QueueWorkDoneStatus) {}),
-            timeout);
+        wgpu::WaitStatus status =
+            instance2.WaitAny(device2.GetQueue().OnSubmittedWorkDone(
+                                  wgpu::CallbackMode::WaitAnyOnly,
+                                  [](wgpu::QueueWorkDoneStatus, wgpu::StringView) {}),
+                              timeout);
         if (timeout == 0) {
             ASSERT_TRUE(status == wgpu::WaitStatus::Success ||
                         status == wgpu::WaitStatus::TimedOut);
@@ -533,8 +537,9 @@ TEST_P(WaitAnyTests, UnsupportedCount) {
         for (size_t count : {kTimedWaitAnyMaxCountDefault, kTimedWaitAnyMaxCountDefault + 1}) {
             std::vector<wgpu::FutureWaitInfo> infos;
             for (size_t i = 0; i < count; ++i) {
-                infos.push_back({queue2.OnSubmittedWorkDone(wgpu::CallbackMode::WaitAnyOnly,
-                                                            [](wgpu::QueueWorkDoneStatus) {})});
+                infos.push_back({queue2.OnSubmittedWorkDone(
+                    wgpu::CallbackMode::WaitAnyOnly,
+                    [](wgpu::QueueWorkDoneStatus, wgpu::StringView) {})});
             }
             wgpu::WaitStatus status = instance2.WaitAny(infos.size(), infos.data(), timeout);
             if (timeout == 0) {
@@ -579,9 +584,9 @@ TEST_P(WaitAnyTests, UnsupportedMixedSources) {
     for (uint64_t timeout : {uint64_t(0), uint64_t(1)}) {
         std::vector<wgpu::FutureWaitInfo> infos{{
             {queue2.OnSubmittedWorkDone(wgpu::CallbackMode::WaitAnyOnly,
-                                        [](wgpu::QueueWorkDoneStatus) {})},
+                                        [](wgpu::QueueWorkDoneStatus, wgpu::StringView) {})},
             {queue3.OnSubmittedWorkDone(wgpu::CallbackMode::WaitAnyOnly,
-                                        [](wgpu::QueueWorkDoneStatus) {})},
+                                        [](wgpu::QueueWorkDoneStatus, wgpu::StringView) {})},
         }};
         wgpu::WaitStatus status = instance2.WaitAny(infos.size(), infos.data(), timeout);
         if (timeout == 0) {
@@ -653,7 +658,7 @@ TEST_P(WaitAnyTests, WaitHeavyWorksOneByOne) {
     for (auto& future : futures) {
         HeavySubmit();
         future = queue.OnSubmittedWorkDone(wgpu::CallbackMode::WaitAnyOnly,
-                                           [](wgpu::QueueWorkDoneStatus) {});
+                                           [](wgpu::QueueWorkDoneStatus, wgpu::StringView) {});
     }
 
     for (const auto& future : futures) {
@@ -680,7 +685,7 @@ class FutureTests : public DawnTest {};
 TEST_P(FutureTests, MixedSourcePolling) {
     // OnSubmittedWorkDone is implemented via a queue serial.
     device.GetQueue().OnSubmittedWorkDone(wgpu::CallbackMode::AllowProcessEvents,
-                                          [](wgpu::QueueWorkDoneStatus) {});
+                                          [](wgpu::QueueWorkDoneStatus, wgpu::StringView) {});
 
     // PopErrorScope is implemented via a signal.
     device.PushErrorScope(wgpu::ErrorFilter::Validation);
