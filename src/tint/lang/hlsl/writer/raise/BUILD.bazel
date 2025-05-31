@@ -78,7 +78,6 @@ cc_library(
     "//src/tint/lang/hlsl/intrinsic",
     "//src/tint/lang/hlsl/ir",
     "//src/tint/lang/hlsl/type",
-    "//src/tint/lang/hlsl/writer/common",
     "//src/tint/utils",
     "//src/tint/utils/containers",
     "//src/tint/utils/diagnostic",
@@ -90,7 +89,12 @@ cc_library(
     "//src/tint/utils/symbol",
     "//src/tint/utils/text",
     "//src/utils",
-  ],
+  ] + select({
+    ":tint_build_hlsl_writer": [
+      "//src/tint/lang/hlsl/writer/common",
+    ],
+    "//conditions:default": [],
+  }),
   copts = COPTS,
   visibility = ["//visibility:public"],
 )
@@ -119,8 +123,6 @@ cc_library(
     "//src/tint/lang/core/ir/transform",
     "//src/tint/lang/core/ir/transform:test",
     "//src/tint/lang/core/type",
-    "//src/tint/lang/hlsl/writer/common",
-    "//src/tint/lang/hlsl/writer/raise",
     "//src/tint/utils",
     "//src/tint/utils/containers",
     "//src/tint/utils/diagnostic",
@@ -133,8 +135,19 @@ cc_library(
     "//src/tint/utils/text",
     "@gtest",
     "//src/utils",
-  ],
+  ] + select({
+    ":tint_build_hlsl_writer": [
+      "//src/tint/lang/hlsl/writer/common",
+      "//src/tint/lang/hlsl/writer/raise",
+    ],
+    "//conditions:default": [],
+  }),
   copts = COPTS,
   visibility = ["//visibility:public"],
+)
+
+alias(
+  name = "tint_build_hlsl_writer",
+  actual = "//src/tint:tint_build_hlsl_writer_true",
 )
 
