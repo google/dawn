@@ -262,6 +262,15 @@ function(tint_fuzz_compile_options TARGET)
   set_target_properties(${TARGET} PROPERTIES FOLDER "Fuzzers")
 endfunction()
 
+function(tint_cmd_compile_options TARGET)
+  if (TINT_ENABLE_INSTALL)
+    install(TARGETS ${TARGET}
+      RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    )
+  endif()
+  tint_default_compile_options(${TARGET})
+endfunction()
+
 function(tint_test_cmd_compile_options TARGET)
   tint_test_compile_options(${TARGET})
 
@@ -408,7 +417,7 @@ function(tint_add_target TARGET KIND)
     tint_proto_compile_options(${TARGET})
   elseif(${KIND} STREQUAL cmd)
     add_executable(${TARGET})
-    tint_default_compile_options(${TARGET})
+    tint_cmd_compile_options(${TARGET})
   elseif(${KIND} STREQUAL test_cmd)
     add_executable(${TARGET})
     tint_test_cmd_compile_options(${TARGET})
