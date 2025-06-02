@@ -302,9 +302,8 @@ MaybeError ValidateTextureSize(const DeviceBase* device,
             break;
     }
 
-    if (DAWN_UNLIKELY(descriptor->size.width > maxExtent.width ||
-                      descriptor->size.height > maxExtent.height ||
-                      descriptor->size.depthOrArrayLayers > maxExtent.depthOrArrayLayers)) {
+    if (descriptor->size.width > maxExtent.width || descriptor->size.height > maxExtent.height ||
+        descriptor->size.depthOrArrayLayers > maxExtent.depthOrArrayLayers) [[unlikely]] {
         Limits adapterLimits;
         wgpu::Status status = device->GetAdapter()->APIGetLimits(&adapterLimits);
         DAWN_ASSERT(status == wgpu::Status::Success);
@@ -1218,9 +1217,9 @@ void TextureBase::SetIsSubresourceContentInitialized(bool isInitialized,
 
 MaybeError TextureBase::ValidateCanUseInSubmitNow() const {
     DAWN_ASSERT(!IsError());
-    if (DAWN_UNLIKELY(mState.destroyed || !mState.hasAccess)) {
+    if (mState.destroyed || !mState.hasAccess) [[unlikely]] {
         DAWN_INVALID_IF(mState.destroyed, "Destroyed texture %s used in a submit.", this);
-        if (DAWN_UNLIKELY(!mState.hasAccess)) {
+        if (!mState.hasAccess) [[unlikely]] {
             if (mSharedResourceMemoryContents != nullptr) {
                 Ref<SharedTextureMemoryBase> memory =
                     mSharedResourceMemoryContents->GetSharedResourceMemory()

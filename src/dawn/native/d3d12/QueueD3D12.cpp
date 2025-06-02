@@ -171,7 +171,7 @@ bool Queue::HasPendingCommands() const {
 
 ResultOrError<ExecutionSerial> Queue::CheckAndUpdateCompletedSerials() {
     ExecutionSerial completedSerial = ExecutionSerial(mFence->GetCompletedValue());
-    if (DAWN_UNLIKELY(completedSerial == ExecutionSerial(UINT64_MAX))) {
+    if (completedSerial == ExecutionSerial(UINT64_MAX)) [[unlikely]] {
         // GetCompletedValue returns UINT64_MAX if the device was removed.
         // Try to query the failure reason.
         ID3D12Device* d3d12Device = ToBackend(GetDevice())->GetD3D12Device();

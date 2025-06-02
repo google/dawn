@@ -174,7 +174,7 @@ ResultOrError<ShaderModuleEntryPoint> ValidateProgrammableStage(DeviceBase* devi
     }
 
     // Validate if any overridable constant is left uninitialized
-    if (DAWN_UNLIKELY(numUninitializedConstants > 0)) {
+    if (numUninitializedConstants > 0) [[unlikely]] {
         std::string uninitializedConstantsArray;
         bool isFirst = true;
         for (std::string identifier : metadata.uninitializedOverrides) {

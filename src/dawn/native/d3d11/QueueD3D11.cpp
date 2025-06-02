@@ -409,7 +409,7 @@ MaybeError MonitoredFenceQueue::NextSerial() {
 
 ResultOrError<ExecutionSerial> MonitoredFenceQueue::CheckAndUpdateCompletedSerials() {
     ExecutionSerial completedSerial = ExecutionSerial(mFence->GetCompletedValue());
-    if (DAWN_UNLIKELY(completedSerial == ExecutionSerial(UINT64_MAX))) {
+    if (completedSerial == ExecutionSerial(UINT64_MAX)) [[unlikely]] {
         // GetCompletedValue returns UINT64_MAX if the device was removed.
         // Try to query the failure reason.
         ID3D11Device* d3d11Device = ToBackend(GetDevice())->GetD3D11Device();

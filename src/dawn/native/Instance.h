@@ -93,7 +93,7 @@ class InstanceBase final : public ErrorSink, public RefCountedWithExternalCount<
 
     template <typename T>
     [[nodiscard]] bool ConsumedErrorAndWarnOnce(ResultOrError<T> resultOrError, T* result) {
-        if (DAWN_UNLIKELY(resultOrError.IsError())) {
+        if (resultOrError.IsError()) [[unlikely]] {
             return ConsumedErrorAndWarnOnce(resultOrError.AcquireError());
         }
         *result = resultOrError.AcquireSuccess();

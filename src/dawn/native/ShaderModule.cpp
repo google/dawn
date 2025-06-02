@@ -1236,8 +1236,8 @@ ResultOrError<Extent3D> ValidateComputeStageWorkgroupSize(
                     "minimum allowed (1, 1, 1).",
                     x, y, z);
 
-    if (DAWN_UNLIKELY(x > limits.maxComputeWorkgroupSizeX || y > limits.maxComputeWorkgroupSizeY ||
-                      z > limits.maxComputeWorkgroupSizeZ)) {
+    if (x > limits.maxComputeWorkgroupSizeX || y > limits.maxComputeWorkgroupSizeY ||
+        z > limits.maxComputeWorkgroupSizeZ) [[unlikely]] {
         uint32_t maxComputeWorkgroupSizeXAdapterLimit =
             adaterSupportedlimits.maxComputeWorkgroupSizeX;
         uint32_t maxComputeWorkgroupSizeYAdapterLimit =

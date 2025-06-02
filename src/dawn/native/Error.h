@@ -118,7 +118,7 @@ struct IsResultOrError<ResultOrError<T>> {
     DAWN_MAKE_ERROR(InternalErrorType::Validation, absl::StrFormat(__VA_ARGS__))
 
 #define DAWN_INVALID_IF(EXPR, ...)                                                           \
-    if (DAWN_UNLIKELY(EXPR)) {                                                               \
+    if (EXPR) [[unlikely]] {                                                                 \
         return DAWN_MAKE_ERROR(InternalErrorType::Validation, absl::StrFormat(__VA_ARGS__)); \
     }                                                                                        \
     for (;;)                                                                                 \
@@ -136,7 +136,7 @@ struct IsResultOrError<ResultOrError<T>> {
     DAWN_MAKE_ERROR(InternalErrorType::Internal, absl::StrFormat(__VA_ARGS__))
 
 #define DAWN_INTERNAL_ERROR_IF(EXPR, ...)                                                  \
-    if (DAWN_UNLIKELY(EXPR)) {                                                             \
+    if (EXPR) [[unlikely]] {                                                               \
         return DAWN_MAKE_ERROR(InternalErrorType::Internal, absl::StrFormat(__VA_ARGS__)); \
     }                                                                                      \
     for (;;)                                                                               \
@@ -194,7 +194,7 @@ std::string MakeIncreaseLimitMessage(std::string_view limitName, T adapterLimitV
 #define DAWN_TRY_WITH_CLEANUP(EXPR, BODY)                                       \
     {                                                                           \
         auto DAWN_LOCAL_VAR(Result) = EXPR;                                     \
-        if (DAWN_UNLIKELY(DAWN_LOCAL_VAR(Result).IsError())) {                  \
+        if (DAWN_LOCAL_VAR(Result).IsError()) [[unlikely]] {                    \
             auto DAWN_LOCAL_VAR(Error) = DAWN_LOCAL_VAR(Result).AcquireError(); \
             {BODY} /* comment to force the formatter to insert a newline */     \
             DAWN_APPEND_ERROR_BACKTRACE(DAWN_LOCAL_VAR(Error));                 \
@@ -253,7 +253,7 @@ std::string MakeIncreaseLimitMessage(std::string_view limitName, T adapterLimitV
 #define DAWN_TRY_ASSIGN_WITH_CLEANUP_IMPL_4_(VAR, EXPR, BODY, RET)              \
     {                                                                           \
         auto DAWN_LOCAL_VAR(Result) = EXPR;                                     \
-        if (DAWN_UNLIKELY(DAWN_LOCAL_VAR(Result).IsError())) {                  \
+        if (DAWN_LOCAL_VAR(Result).IsError()) [[unlikely]] {                    \
             auto DAWN_LOCAL_VAR(Error) = DAWN_LOCAL_VAR(Result).AcquireError(); \
             {BODY} /* comment to force the formatter to insert a newline */     \
             DAWN_APPEND_ERROR_BACKTRACE(DAWN_LOCAL_VAR(Error));                 \

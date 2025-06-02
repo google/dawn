@@ -121,7 +121,7 @@ auto GetOrCreate(ContentLessObjectCache<RefCountedT>& cache,
         result = createFn();
     } else {
         auto resultOrError = createFn();
-        if (DAWN_UNLIKELY(resultOrError.IsError())) {
+        if (resultOrError.IsError()) [[unlikely]] {
             return ReturnType(std::move(resultOrError.AcquireError()));
         }
         result = resultOrError.AcquireSuccess();
