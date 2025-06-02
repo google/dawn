@@ -73,7 +73,7 @@ TEST_P(RuntimeTimeoutComputeTest, LargeConstantArrayInLoop) {
     DAWN_SKIP_TEST_IF_BASE(IsCPU() || IsWARP(), "timeout",
                            "skipping because software rendering is slow");
     // Test disable due to CI failures. See crbug.com/421869294
-    DAWN_SKIP_TEST_IF_BASE(IsMetal() && IsIntelGen9(), "timeout", "device found to be slow on CI");
+    DAWN_SKIP_TEST_IF_BASE(IsIntel(), "timeout", "device found to be slow on CI");
 
     std::string kShaderCode = R"(
 @group(0)@binding(0) var < storage,read_write > A: array < i32 >;
