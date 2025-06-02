@@ -471,7 +471,7 @@ TEST_P(Type_StorageTextureDimension, Test) {
     auto* v =
         b.Var("v", AddressSpace::kHandle,
               ty.storage_texture(dim, core::TexelFormat::kRgba32Float, core::Access::kReadWrite),
-              read_write);
+              core::Access::kRead);
     v->SetBindingPoint(0, 0);
     mod.root_block->Append(v);
 
@@ -1008,5 +1008,62 @@ TEST_F(IR_ValidatorTest, Int64Type_InstructionOperand_Allowed) {
     auto res = ir::Validate(mod, Capabilities{Capability::kAllow64BitIntegers});
     ASSERT_EQ(res, Success) << res.Failure();
 }
+
+using AddressSpace_AccessMode = IRTestParamHelper<std::tuple<
+    /* address */ AddressSpace,
+    /* access mode */ core::Access>>;
+
+TEST_P(AddressSpace_AccessMode, Test) {
+    auto aspace = std::get<0>(GetParam());
+    auto access = std::get<1>(GetParam());
+
+    if (aspace == AddressSpace::kFunction) {
+        auto* fn = b.Function("my_func", ty.void_());
+        b.Append(fn->Block(), [&] {
+            b.Var("v", aspace, ty.u32(), access);
+            b.Return(fn);
+        });
+    } else {
+        const core::type::Type* sampler_ty = ty.sampler();
+        const core::type::Type* u32_ty = ty.u32();
+        auto* type = aspace == AddressSpace::kHandle ? sampler_ty : u32_ty;
+        auto* v = b.Var("v", aspace, type, access);
+        if (aspace != AddressSpace::kPrivate && aspace != AddressSpace::kWorkgroup) {
+            v->SetBindingPoint(0, 0);
+        }
+        mod.root_block->Append(v);
+    }
+
+    auto pass = true;
+    switch (access) {
+        case core::Access::kWrite:
+        case core::Access::kReadWrite:
+            pass = aspace != AddressSpace::kUniform && aspace != AddressSpace::kHandle;
+            break;
+        case core::Access::kRead:
+        default:
+            break;
+    }
+    auto res = ir::Validate(mod);
+    if (pass) {
+        ASSERT_EQ(res, Success);
+    } else {
+        ASSERT_NE(res, Success);
+        EXPECT_THAT(res.Failure().reason,
+                    testing::HasSubstr("uniform and handle pointers must be read access"));
+    }
+}
+
+INSTANTIATE_TEST_SUITE_P(IR_ValidatorTest,
+                         AddressSpace_AccessMode,
+                         testing::Combine(testing::Values(AddressSpace::kFunction,
+                                                          AddressSpace::kPrivate,
+                                                          AddressSpace::kWorkgroup,
+                                                          AddressSpace::kUniform,
+                                                          AddressSpace::kStorage,
+                                                          AddressSpace::kHandle),
+                                          testing::Values(core::Access::kRead,
+                                                          core::Access::kWrite,
+                                                          core::Access::kReadWrite)));
 
 }  // namespace tint::core::ir

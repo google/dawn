@@ -797,7 +797,7 @@ TEST_F(IR_ValidatorTest, Var_RuntimeArray_NonStorageInStruct) {
                              {
                                  {mod.symbols.New("a"), ty.runtime_array(ty.f32()), {}},
                              });
-    auto* v = b.Var(ty.ptr(AddressSpace::kHandle, str_ty, read_write));
+    auto* v = b.Var(ty.ptr(AddressSpace::kHandle, str_ty, read));
     v->SetBindingPoint(0, 0);
     v->SetInputAttachmentIndex(0);
     mod.root_block->Append(v);
@@ -807,8 +807,8 @@ TEST_F(IR_ValidatorTest, Var_RuntimeArray_NonStorageInStruct) {
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr(
                     R"(:6:3 error: var: runtime arrays must be in the 'storage' address space
-  %1:ptr<handle, MyStruct, read_write> = var undef @binding_point(0, 0) @input_attachment_index(0)
-  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  %1:ptr<handle, MyStruct, read> = var undef @binding_point(0, 0) @input_attachment_index(0)
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure();
 }
 

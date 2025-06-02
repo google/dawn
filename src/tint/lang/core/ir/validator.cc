@@ -1854,6 +1854,14 @@ void Validator::CheckType(const core::type::Type* root,
                     return false;
                 }
 
+                if (ptr->AddressSpace() == AddressSpace::kUniform ||
+                    ptr->AddressSpace() == AddressSpace::kHandle) {
+                    if (ptr->Access() != core::Access::kRead) {
+                        diag() << "uniform and handle pointers must be read access";
+                        return false;
+                    }
+                }
+
                 if (type != root) {
                     // Nesting pointer types inside structures is guarded by a capability.
                     if (!(capabilities_.Contains(

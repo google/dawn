@@ -552,7 +552,7 @@ TEST_F(SpirvWriterTest, TextureVar_Load) {
 TEST_F(SpirvWriterTest, TextureVar_TextureParamTextureLoad_NoDva) {
     auto* tex =
         b.Var("tex", handle, ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()),
-              core::Access::kReadWrite);
+              core::Access::kRead);
     tex->SetBindingPoint(0, 0);
     mod.root_block->Append(tex);
 
@@ -584,7 +584,7 @@ TEST_F(SpirvWriterTest, TextureVar_TextureParamTextureLoad_NoDva) {
 TEST_F(SpirvWriterTest, TextureVar_TextureParamTextureLoad_Dva) {
     auto* tex =
         b.Var("tex", handle, ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()),
-              core::Access::kReadWrite);
+              core::Access::kRead);
     tex->SetBindingPoint(0, 0);
     mod.root_block->Append(tex);
 

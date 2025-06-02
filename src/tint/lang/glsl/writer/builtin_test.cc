@@ -817,7 +817,7 @@ void main() {
 
 TEST_F(GlslWriterTest, BuiltinTextureDimensions_1d) {
     auto* type = ty.sampled_texture(core::type::TextureDimension::k1d, ty.f32());
-    auto* var = b.Var("v", handle, type, core::Access::kReadWrite);
+    auto* var = b.Var("v", handle, type, core::Access::kRead);
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
 
@@ -843,7 +843,7 @@ void main() {
 
 TEST_F(GlslWriterTest, BuiltinTextureDimensions_2d_WithoutLod) {
     auto* type = ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32());
-    auto* var = b.Var("v", handle, type, core::Access::kReadWrite);
+    auto* var = b.Var("v", handle, type, core::Access::kRead);
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
 
@@ -866,7 +866,7 @@ void main() {
 
 TEST_F(GlslWriterTest, BuiltinTextureDimensions_2d_WithU32Lod) {
     auto* type = ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32());
-    auto* var = b.Var("v", handle, type, core::Access::kReadWrite);
+    auto* var = b.Var("v", handle, type, core::Access::kRead);
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
 
@@ -901,7 +901,7 @@ void main() {
 
 TEST_F(GlslWriterTest, BuiltinTextureDimensions_2dArray) {
     auto* type = ty.sampled_texture(core::type::TextureDimension::k2dArray, ty.f32());
-    auto* var = b.Var("v", handle, type, core::Access::kReadWrite);
+    auto* var = b.Var("v", handle, type, core::Access::kRead);
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
 
@@ -925,7 +925,7 @@ void main() {
 TEST_F(GlslWriterTest, BuiltinTextureDimensions_Storage1D) {
     auto* type = ty.storage_texture(core::type::TextureDimension::k2d, core::TexelFormat::kR32Float,
                                     core::Access::kRead);
-    auto* var = b.Var("v", handle, type, core::Access::kReadWrite);
+    auto* var = b.Var("v", handle, type, core::Access::kRead);
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
 
@@ -948,7 +948,7 @@ void main() {
 
 TEST_F(GlslWriterTest, BuiltinTextureDimensions_DepthMultisampled) {
     auto* type = ty.Get<core::type::DepthMultisampledTexture>(core::type::TextureDimension::k2d);
-    auto* var = b.Var("v", handle, type, core::Access::kReadWrite);
+    auto* var = b.Var("v", handle, type, core::Access::kRead);
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
 
@@ -1025,7 +1025,7 @@ void main() {
 TEST_F(GlslWriterTest, TextureNumLayers_2DArray) {
     auto* var =
         b.Var("v", handle, ty.sampled_texture(core::type::TextureDimension::k2dArray, ty.f32()),
-              core::Access::kReadWrite);
+              core::Access::kRead);
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
 
@@ -1049,7 +1049,7 @@ void main() {
 TEST_F(GlslWriterTest, TextureNumLayers_Depth2DArray) {
     auto* var =
         b.Var("v", handle, ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2dArray),
-              core::Access::kReadWrite);
+              core::Access::kRead);
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
 
@@ -1073,7 +1073,7 @@ void main() {
 TEST_F(GlslWriterTest, TextureNumLayers_CubeArray) {
     auto* var =
         b.Var("v", handle, ty.sampled_texture(core::type::TextureDimension::kCubeArray, ty.f32()),
-              core::Access::kReadWrite);
+              core::Access::kRead);
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
 
@@ -1100,7 +1100,7 @@ void main() {
 TEST_F(GlslWriterTest, TextureNumLayers_DepthCubeArray) {
     auto* var = b.Var("v", handle,
                       ty.Get<core::type::DepthTexture>(core::type::TextureDimension::kCubeArray),
-                      core::Access::kReadWrite);
+                      core::Access::kRead);
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
 
@@ -1128,7 +1128,7 @@ TEST_F(GlslWriterTest, TextureNumLayers_Storage2DArray) {
     auto* storage_ty = ty.storage_texture(core::type::TextureDimension::k2dArray,
                                           core::TexelFormat::kRg32Float, core::Access::kRead);
 
-    auto* var = b.Var("v", handle, storage_ty, core::Access::kReadWrite);
+    auto* var = b.Var("v", handle, storage_ty, core::Access::kRead);
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
 

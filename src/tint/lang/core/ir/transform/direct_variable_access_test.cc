@@ -5062,11 +5062,11 @@ using IR_DirectVariableAccessTest_HandleAS = TransformTest;
 TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_LocalTextureSampler) {
     auto* tex =
         b.Var("tex", handle, ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()),
-              core::Access::kReadWrite);
+              core::Access::kRead);
     tex->SetBindingPoint(0, 0);
     b.ir.root_block->Append(tex);
 
-    auto* samp = b.Var("samp", handle, ty.sampler(), core::Access::kReadWrite);
+    auto* samp = b.Var("samp", handle, ty.sampler(), core::Access::kRead);
     samp->SetBindingPoint(0, 1);
     b.ir.root_block->Append(samp);
 
@@ -5082,8 +5082,8 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_LocalTextureSampler) {
 
     auto* src = R"(
 $B1: {  # root
-  %tex:ptr<handle, texture_2d<f32>, read_write> = var undef @binding_point(0, 0)
-  %samp:ptr<handle, sampler, read_write> = var undef @binding_point(0, 1)
+  %tex:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
+  %samp:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
 }
 
 %f = func():void {
@@ -5109,11 +5109,11 @@ $B1: {  # root
 TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_LocalTextureParamSampler) {
     auto* tex =
         b.Var("tex", handle, ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()),
-              core::Access::kReadWrite);
+              core::Access::kRead);
     tex->SetBindingPoint(0, 0);
     b.ir.root_block->Append(tex);
 
-    auto* samp = b.Var("samp", handle, ty.sampler(), core::Access::kReadWrite);
+    auto* samp = b.Var("samp", handle, ty.sampler(), core::Access::kRead);
     samp->SetBindingPoint(0, 1);
     b.ir.root_block->Append(samp);
 
@@ -5138,8 +5138,8 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_LocalTextureParamSampler) {
 
     auto* src = R"(
 $B1: {  # root
-  %tex:ptr<handle, texture_2d<f32>, read_write> = var undef @binding_point(0, 0)
-  %samp:ptr<handle, sampler, read_write> = var undef @binding_point(0, 1)
+  %tex:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
+  %samp:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
 }
 
 %f = func(%s:sampler):void {
@@ -5163,8 +5163,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %tex:ptr<handle, texture_2d<f32>, read_write> = var undef @binding_point(0, 0)
-  %samp:ptr<handle, sampler, read_write> = var undef @binding_point(0, 1)
+  %tex:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
+  %samp:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
 }
 
 %f = func():void {
@@ -5192,7 +5192,7 @@ $B1: {  # root
 TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_LocalTextureParamTextureLoad) {
     auto* tex =
         b.Var("tex", handle, ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()),
-              core::Access::kReadWrite);
+              core::Access::kRead);
     tex->SetBindingPoint(0, 0);
     b.ir.root_block->Append(tex);
 
@@ -5216,7 +5216,7 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_LocalTextureParamTextureLoa
 
     auto* src = R"(
 $B1: {  # root
-  %tex:ptr<handle, texture_2d<f32>, read_write> = var undef @binding_point(0, 0)
+  %tex:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
 }
 
 %f = func(%texparam:texture_2d<f32>):void {
@@ -5239,7 +5239,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %tex:ptr<handle, texture_2d<f32>, read_write> = var undef @binding_point(0, 0)
+  %tex:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
 }
 
 %f = func():void {
@@ -5265,11 +5265,11 @@ $B1: {  # root
 
 TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_ParamTextureLocalSampler) {
     auto* tex_ty = ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32());
-    auto* tex = b.Var("tex", handle, tex_ty, core::Access::kReadWrite);
+    auto* tex = b.Var("tex", handle, tex_ty, core::Access::kRead);
     tex->SetBindingPoint(0, 0);
     b.ir.root_block->Append(tex);
 
-    auto* samp = b.Var("samp", handle, ty.sampler(), core::Access::kReadWrite);
+    auto* samp = b.Var("samp", handle, ty.sampler(), core::Access::kRead);
     samp->SetBindingPoint(0, 1);
     b.ir.root_block->Append(samp);
 
@@ -5294,8 +5294,8 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_ParamTextureLocalSampler) {
 
     auto* src = R"(
 $B1: {  # root
-  %tex:ptr<handle, texture_2d<f32>, read_write> = var undef @binding_point(0, 0)
-  %samp:ptr<handle, sampler, read_write> = var undef @binding_point(0, 1)
+  %tex:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
+  %samp:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
 }
 
 %f = func(%t:texture_2d<f32>):void {
@@ -5319,8 +5319,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %tex:ptr<handle, texture_2d<f32>, read_write> = var undef @binding_point(0, 0)
-  %samp:ptr<handle, sampler, read_write> = var undef @binding_point(0, 1)
+  %tex:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
+  %samp:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
 }
 
 %f = func():void {
@@ -5347,11 +5347,11 @@ $B1: {  # root
 
 TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_ParamTextureParamSampler) {
     auto* tex_ty = ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32());
-    auto* tex = b.Var("tex", handle, tex_ty, core::Access::kReadWrite);
+    auto* tex = b.Var("tex", handle, tex_ty, core::Access::kRead);
     tex->SetBindingPoint(0, 0);
     b.ir.root_block->Append(tex);
 
-    auto* samp = b.Var("samp", handle, ty.sampler(), core::Access::kReadWrite);
+    auto* samp = b.Var("samp", handle, ty.sampler(), core::Access::kRead);
     samp->SetBindingPoint(0, 1);
     b.ir.root_block->Append(samp);
 
@@ -5376,8 +5376,8 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_ParamTextureParamSampler) {
 
     auto* src = R"(
 $B1: {  # root
-  %tex:ptr<handle, texture_2d<f32>, read_write> = var undef @binding_point(0, 0)
-  %samp:ptr<handle, sampler, read_write> = var undef @binding_point(0, 1)
+  %tex:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
+  %samp:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
 }
 
 %f = func(%t:texture_2d<f32>, %s:sampler):void {
@@ -5401,8 +5401,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %tex:ptr<handle, texture_2d<f32>, read_write> = var undef @binding_point(0, 0)
-  %samp:ptr<handle, sampler, read_write> = var undef @binding_point(0, 1)
+  %tex:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
+  %samp:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
 }
 
 %f = func():void {
@@ -5429,11 +5429,11 @@ $B1: {  # root
 
 TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_MultiFunction) {
     auto* tex_ty = ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32());
-    auto* tex = b.Var("tex", handle, tex_ty, core::Access::kReadWrite);
+    auto* tex = b.Var("tex", handle, tex_ty, core::Access::kRead);
     tex->SetBindingPoint(0, 0);
     b.ir.root_block->Append(tex);
 
-    auto* samp = b.Var("samp", handle, ty.sampler(), core::Access::kReadWrite);
+    auto* samp = b.Var("samp", handle, ty.sampler(), core::Access::kRead);
     samp->SetBindingPoint(0, 1);
     b.ir.root_block->Append(samp);
 
@@ -5466,8 +5466,8 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_MultiFunction) {
 
     auto* src = R"(
 $B1: {  # root
-  %tex:ptr<handle, texture_2d<f32>, read_write> = var undef @binding_point(0, 0)
-  %samp:ptr<handle, sampler, read_write> = var undef @binding_point(0, 1)
+  %tex:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
+  %samp:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
 }
 
 %f = func(%t:texture_2d<f32>, %s:sampler):void {
@@ -5497,8 +5497,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %tex:ptr<handle, texture_2d<f32>, read_write> = var undef @binding_point(0, 0)
-  %samp:ptr<handle, sampler, read_write> = var undef @binding_point(0, 1)
+  %tex:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
+  %samp:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
 }
 
 %f = func():void {
@@ -5531,11 +5531,11 @@ $B1: {  # root
 
 TEST_F(IR_DirectVariableAccessTest_HandleAS, Disabled_MultiFunction) {
     auto* tex_ty = ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32());
-    auto* tex = b.Var("tex", handle, tex_ty, core::Access::kReadWrite);
+    auto* tex = b.Var("tex", handle, tex_ty, core::Access::kRead);
     tex->SetBindingPoint(0, 0);
     b.ir.root_block->Append(tex);
 
-    auto* samp = b.Var("samp", handle, ty.sampler(), core::Access::kReadWrite);
+    auto* samp = b.Var("samp", handle, ty.sampler(), core::Access::kRead);
     samp->SetBindingPoint(0, 1);
     b.ir.root_block->Append(samp);
 
@@ -5568,8 +5568,8 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, Disabled_MultiFunction) {
 
     auto* src = R"(
 $B1: {  # root
-  %tex:ptr<handle, texture_2d<f32>, read_write> = var undef @binding_point(0, 0)
-  %samp:ptr<handle, sampler, read_write> = var undef @binding_point(0, 1)
+  %tex:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
+  %samp:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
 }
 
 %f = func(%t:texture_2d<f32>, %s:sampler):void {
@@ -5606,11 +5606,11 @@ $B1: {  # root
 
 TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_DuplicateParam) {
     auto* tex_ty = ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32());
-    auto* tex = b.Var("tex", handle, tex_ty, core::Access::kReadWrite);
+    auto* tex = b.Var("tex", handle, tex_ty, core::Access::kRead);
     tex->SetBindingPoint(0, 0);
     b.ir.root_block->Append(tex);
 
-    auto* samp = b.Var("samp", handle, ty.sampler(), core::Access::kReadWrite);
+    auto* samp = b.Var("samp", handle, ty.sampler(), core::Access::kRead);
     samp->SetBindingPoint(0, 1);
     b.ir.root_block->Append(samp);
 
@@ -5639,8 +5639,8 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_DuplicateParam) {
 
     auto* src = R"(
 $B1: {  # root
-  %tex:ptr<handle, texture_2d<f32>, read_write> = var undef @binding_point(0, 0)
-  %samp:ptr<handle, sampler, read_write> = var undef @binding_point(0, 1)
+  %tex:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
+  %samp:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
 }
 
 %f = func(%t1:texture_2d<f32>, %t2:texture_2d<f32>):void {
@@ -5667,8 +5667,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %tex:ptr<handle, texture_2d<f32>, read_write> = var undef @binding_point(0, 0)
-  %samp:ptr<handle, sampler, read_write> = var undef @binding_point(0, 1)
+  %tex:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
+  %samp:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
 }
 
 %f = func():void {
@@ -5698,14 +5698,14 @@ $B1: {  # root
 
 TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_Fork) {
     auto* tex_ty = ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32());
-    auto* tex1 = b.Var("tex1", handle, tex_ty, core::Access::kReadWrite);
+    auto* tex1 = b.Var("tex1", handle, tex_ty, core::Access::kRead);
     tex1->SetBindingPoint(0, 0);
     b.ir.root_block->Append(tex1);
-    auto* tex2 = b.Var("tex2", handle, tex_ty, core::Access::kReadWrite);
+    auto* tex2 = b.Var("tex2", handle, tex_ty, core::Access::kRead);
     tex2->SetBindingPoint(0, 1);
     b.ir.root_block->Append(tex2);
 
-    auto* samp = b.Var("samp", handle, ty.sampler(), core::Access::kReadWrite);
+    auto* samp = b.Var("samp", handle, ty.sampler(), core::Access::kRead);
     samp->SetBindingPoint(0, 2);
     b.ir.root_block->Append(samp);
 
@@ -5736,9 +5736,9 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_Fork) {
 
     auto* src = R"(
 $B1: {  # root
-  %tex1:ptr<handle, texture_2d<f32>, read_write> = var undef @binding_point(0, 0)
-  %tex2:ptr<handle, texture_2d<f32>, read_write> = var undef @binding_point(0, 1)
-  %samp:ptr<handle, sampler, read_write> = var undef @binding_point(0, 2)
+  %tex1:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
+  %tex2:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 1)
+  %samp:ptr<handle, sampler, read> = var undef @binding_point(0, 2)
 }
 
 %f = func(%t:texture_2d<f32>):void {
@@ -5769,9 +5769,9 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %tex1:ptr<handle, texture_2d<f32>, read_write> = var undef @binding_point(0, 0)
-  %tex2:ptr<handle, texture_2d<f32>, read_write> = var undef @binding_point(0, 1)
-  %samp:ptr<handle, sampler, read_write> = var undef @binding_point(0, 2)
+  %tex1:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
+  %tex2:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 1)
+  %samp:ptr<handle, sampler, read> = var undef @binding_point(0, 2)
 }
 
 %f = func():void {
