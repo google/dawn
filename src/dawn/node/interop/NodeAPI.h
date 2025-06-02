@@ -31,6 +31,6 @@
 // Dawn is built with exceptions disabled.
 #define NAPI_DISABLE_CPP_EXCEPTIONS
 
-#include "napi.h"  // NOLINT(build/include_directory) - external include
+#include <napi.h>
 
 #endif  // SRC_DAWN_NODE_INTEROP_NODEAPI_H_

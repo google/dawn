@@ -30,7 +30,7 @@ namespace wgpu::binding {
 class EventTarget : public virtual interop::EventTarget {
   public:
     explicit EventTarget(Napi::Env env);
-    ~EventTarget();
+    ~EventTarget() override;
 
     void addEventListener(
         Napi::Env,

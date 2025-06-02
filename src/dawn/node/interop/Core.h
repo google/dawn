@@ -670,16 +670,16 @@ class Converter<std::unordered_map<K, V>> {
         std::unordered_map<K, V> map(keys.Length());
         for (uint32_t i = 0; i < static_cast<uint32_t>(keys.Length()); i++) {
             K key{};
-            V value{};
+            V val{};
             auto key_res = Converter<K>::FromJS(env, keys[i], key);
             if (!key_res) {
                 return key_res.Append("for object key");
             }
-            auto value_res = Converter<V>::FromJS(env, obj.Get(keys[i]), value);
+            auto value_res = Converter<V>::FromJS(env, obj.Get(keys[i]), val);
             if (!value_res) {
                 return value_res.Append("for object value of key: ", key);
             }
-            map[key] = value;
+            map[key] = val;
         }
         out = std::move(map);
         return Success;

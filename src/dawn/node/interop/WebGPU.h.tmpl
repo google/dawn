@@ -148,7 +148,7 @@ public:
     return Bind(env, std::make_unique<T>(std::forward<ARGS>(args)...));
   }
 
-  virtual ~{{$.Name}}();
+  virtual ~{{$.Name}}() {{- if $.Inherits }} override{{end}};
   {{$.Name}}();
 {{-  if $s := SetlikeOf $}}
 {{-    template "InterfaceSetlike" $s}}

@@ -354,7 +354,7 @@ Wrappers* Wrappers::instance = nullptr;
 Result Converter<{{$.Name}}>::FromJS(Napi::Env env, Napi::Value value, {{$.Name}}& out) {
   auto object = value.ToObject();
   Result res;
-{{- template "DictionaryMembersFromJS" $}};
+{{- template "DictionaryMembersFromJS" $}}
   return Success;
 }
 
@@ -394,6 +394,8 @@ std::ostream& operator<<(std::ostream& o, const {{$.Name}}& dict) {
   if (!res) {
     return res.Append("while converting member '{{$m.Name}}'");
   }
+{{-    else}}
+  (void)object;
 {{-    end}}
 {{- end}}
 

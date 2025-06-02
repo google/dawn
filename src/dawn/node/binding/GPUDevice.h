@@ -60,7 +60,7 @@ class GPUDevice final : public interop::GPUDevice, EventTarget {
               wgpu::Device device,
               interop::Promise<interop::Interface<interop::GPUDeviceLostInfo>> lost_promise,
               std::shared_ptr<AsyncRunner> async);
-    ~GPUDevice();
+    ~GPUDevice() override;
 
     void ForceLoss(wgpu::DeviceLostReason reason, const char* message);
 
