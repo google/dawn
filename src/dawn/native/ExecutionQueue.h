@@ -94,11 +94,11 @@ class ExecutionQueueBase {
     // example, until the client has explictly issued a submission.
     enum class SubmitMode { Normal, Passive };
 
-  protected:
     // Currently, the queue has two paths for serial updating, one is via DeviceBase::Tick which
     // calls into the backend specific polling mechanisms implemented in
     // CheckAndUpdateCompletedSerials. Alternatively, the backend can actively call
     // UpdateCompletedSerial when a new serial is complete to make forward progress proactively.
+    // TODO(crbug.com/421945313): This shouldn't need to be public once we fix lock ordering.
     void UpdateCompletedSerial(ExecutionSerial completedSerial);
 
   private:

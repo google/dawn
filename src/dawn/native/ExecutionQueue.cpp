@@ -51,7 +51,15 @@ MaybeError ExecutionQueueBase::CheckPassedSerials() {
     DAWN_ASSERT(completedSerial <=
                 ExecutionSerial(mLastSubmittedSerial.load(std::memory_order_acquire)));
 
-    UpdateCompletedSerial(completedSerial);
+    // Atomically set mCompletedSerial to completedSerial if completedSerial is larger.
+    uint64_t current = mCompletedSerial.load(std::memory_order_acquire);
+    while (uint64_t(completedSerial) > current &&
+           !mCompletedSerial.compare_exchange_weak(current, uint64_t(completedSerial),
+                                                   std::memory_order_acq_rel)) {
+    }
+    // TODO(crbug.com/421945313): We should call |UpdateCompletedSerial| here also, but since some
+    // backends rely on the device lock for safe use of |CheckAndUpdateCompletedSerials|, we
+    // separate that call out for now.
     return {};
 }
 

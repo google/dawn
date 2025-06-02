@@ -178,21 +178,16 @@ void WaitQueueSerials(const QueueWaitSerialsMap& queueWaitSerials, Nanoseconds t
                             DAWN_TRY_ASSIGN(waitResult,
                                             queue->WaitForQueueSerial(waitSerial, timeout));
                         }
+                        // Update completed serials.
+                        DAWN_TRY(queue->CheckPassedSerials());
                     }
                     return {};
                 }(),
                 "waiting for work in %s.", queue.Get());
         }
-
-        // Checking and updating serials cannot hold the device-wide lock because it may cause user
-        // callbacks to fire. As a result, we update the serials without the lock, and only
-        // reacquire the lock if there was an error.
-        auto maybeError = queue->CheckPassedSerials();
-        if (maybeError.IsError()) {
-            auto deviceLock(device->GetScopedLock());
-            [[maybe_unused]] bool error = device->ConsumedError(
-                std::move(maybeError), "updating passed serials in %s", queue.Get());
-        }
+        // TODO(crbug.com/421945313): Checking and updating serials cannot hold the device-wide lock
+        // because it may cause user callbacks to fire.
+        queue->UpdateCompletedSerial(queue->GetCompletedCommandSerial());
     }
 }
 
