@@ -81,8 +81,8 @@ enum WGSLLanguageFeatureName {
 
 // TODO(crbug.com/354751907) Move to GPUAdapterInfo
 interface GPUSupportedLimits {
-    readonly attribute (unsigned long or undefined) maxStorageBuffersInFragmentStage;
-    readonly attribute (unsigned long or undefined) maxStorageTexturesInFragmentStage;
-    readonly attribute (unsigned long or undefined) maxStorageBuffersInVertexStage;
-    readonly attribute (unsigned long or undefined) maxStorageTexturesInVertexStage;
+    readonly attribute unsigned long maxStorageBuffersInFragmentStage;
+    readonly attribute unsigned long maxStorageTexturesInFragmentStage;
+    readonly attribute unsigned long maxStorageBuffersInVertexStage;
+    readonly attribute unsigned long maxStorageTexturesInVertexStage;
 };
