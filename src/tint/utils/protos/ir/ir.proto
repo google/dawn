@@ -73,6 +73,8 @@ enum TypeBasic {
     u32 = 3;
     f32 = 4;
     f16 = 5;
+    i8 = 6;
+    u8 = 7;
 }
 
 message TypeVector {

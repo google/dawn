@@ -141,6 +141,9 @@ BuiltinType ParseBuiltinType(std::string_view str) {
     if (str == "i32") {
         return BuiltinType::kI32;
     }
+    if (str == "i8") {
+        return BuiltinType::kI8;
+    }
     if (str == "input_attachment") {
         return BuiltinType::kInputAttachment;
     }
@@ -297,6 +300,9 @@ BuiltinType ParseBuiltinType(std::string_view str) {
     if (str == "u32") {
         return BuiltinType::kU32;
     }
+    if (str == "u8") {
+        return BuiltinType::kU8;
+    }
     if (str == "vec2") {
         return BuiltinType::kVec2;
     }
@@ -415,6 +421,8 @@ std::string_view ToString(BuiltinType value) {
             return "f32";
         case BuiltinType::kI32:
             return "i32";
+        case BuiltinType::kI8:
+            return "i8";
         case BuiltinType::kInputAttachment:
             return "input_attachment";
         case BuiltinType::kMat2X2:
@@ -519,6 +527,8 @@ std::string_view ToString(BuiltinType value) {
             return "texture_storage_3d";
         case BuiltinType::kU32:
             return "u32";
+        case BuiltinType::kU8:
+            return "u8";
         case BuiltinType::kVec2:
             return "vec2";
         case BuiltinType::kVec2F:

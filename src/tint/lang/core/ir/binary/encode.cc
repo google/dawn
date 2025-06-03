@@ -77,6 +77,7 @@
 #include "src/tint/lang/core/type/f16.h"
 #include "src/tint/lang/core/type/f32.h"
 #include "src/tint/lang/core/type/i32.h"
+#include "src/tint/lang/core/type/i8.h"
 #include "src/tint/lang/core/type/input_attachment.h"
 #include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/core/type/multisampled_texture.h"
@@ -85,6 +86,7 @@
 #include "src/tint/lang/core/type/sampler.h"
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/u32.h"
+#include "src/tint/lang/core/type/u8.h"
 #include "src/tint/lang/core/type/void.h"
 #include "src/tint/utils/internal_limits.h"
 #include "src/tint/utils/macros/compiler.h"
@@ -385,6 +387,8 @@ struct Encoder {
                 [&](const core::type::U32*) { type_out.set_basic(pb::TypeBasic::u32); },
                 [&](const core::type::F32*) { type_out.set_basic(pb::TypeBasic::f32); },
                 [&](const core::type::F16*) { type_out.set_basic(pb::TypeBasic::f16); },
+                [&](const core::type::I8*) { type_out.set_basic((pb::TypeBasic::i8)); },
+                [&](const core::type::U8*) { type_out.set_basic((pb::TypeBasic::u8)); },
                 [&](const core::type::Vector* v) { TypeVector(*type_out.mutable_vector(), v); },
                 [&](const core::type::Matrix* m) { TypeMatrix(*type_out.mutable_matrix(), m); },
                 [&](const core::type::Pointer* m) { TypePointer(*type_out.mutable_pointer(), m); },

@@ -742,6 +742,10 @@ struct Decoder {
                 return mod_out_.Types().f32();
             case pb::TypeBasic::f16:
                 return mod_out_.Types().f16();
+            case pb::TypeBasic::i8:
+                return mod_out_.Types().i8();
+            case pb::TypeBasic::u8:
+                return mod_out_.Types().u8();
 
             case pb::TypeBasic::TypeBasic_INT_MIN_SENTINEL_DO_NOT_USE_:
             case pb::TypeBasic::TypeBasic_INT_MAX_SENTINEL_DO_NOT_USE_:
