@@ -364,7 +364,7 @@ DeviceBase::DeviceBase(AdapterBase* adapter,
     mLimits.hostMappedPointerLimits = GetPhysicalDevice()->GetLimits().hostMappedPointerLimits;
 
     // Handle maxXXXPerStage/maxXXXInStage.
-    EnforceLimitSpecInvariants(&mLimits.v1, effectiveFeatureLevel);
+    EnforceLimitSpecInvariants(&mLimits, effectiveFeatureLevel);
 
     if (mLimits.v1.maxStorageBuffersInFragmentStage < 1) {
         // If there is no storage buffer in fragment stage, UseBlitForB2T is not possible.
@@ -404,7 +404,7 @@ DeviceBase::DeviceBase(AdapterBase* adapter,
 
 DeviceBase::DeviceBase() : mState(State::Alive), mToggles(ToggleStage::Device) {
     GetDefaultLimits(&mLimits, wgpu::FeatureLevel::Core);
-    EnforceLimitSpecInvariants(&mLimits.v1, wgpu::FeatureLevel::Core);
+    EnforceLimitSpecInvariants(&mLimits, wgpu::FeatureLevel::Core);
     mFormatTable = BuildFormatTable(this);
 
     DeviceDescriptor desc = {};

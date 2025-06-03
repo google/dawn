@@ -504,126 +504,126 @@ TEST(Limits, NormalizeLimits) {
 TEST(Limits, FixupDeviceLimits) {
     // Test maxXXXInStage is raised to maxXXXPerStage in core
     {
-        Limits limits;
-        limits.maxStorageBuffersInFragmentStage = 1;
-        limits.maxStorageBuffersInVertexStage = 2;
-        limits.maxStorageBuffersPerShaderStage = 3;
+        CombinedLimits limits;
+        limits.v1.maxStorageBuffersInFragmentStage = 1;
+        limits.v1.maxStorageBuffersInVertexStage = 2;
+        limits.v1.maxStorageBuffersPerShaderStage = 3;
 
-        limits.maxStorageTexturesInFragmentStage = 4;
-        limits.maxStorageTexturesInVertexStage = 5;
-        limits.maxStorageTexturesPerShaderStage = 6;
+        limits.v1.maxStorageTexturesInFragmentStage = 4;
+        limits.v1.maxStorageTexturesInVertexStage = 5;
+        limits.v1.maxStorageTexturesPerShaderStage = 6;
 
         EnforceLimitSpecInvariants(&limits, wgpu::FeatureLevel::Core);
 
-        EXPECT_EQ(limits.maxStorageBuffersInFragmentStage, 3u);
-        EXPECT_EQ(limits.maxStorageBuffersInVertexStage, 3u);
-        EXPECT_EQ(limits.maxStorageBuffersPerShaderStage, 3u);
+        EXPECT_EQ(limits.v1.maxStorageBuffersInFragmentStage, 3u);
+        EXPECT_EQ(limits.v1.maxStorageBuffersInVertexStage, 3u);
+        EXPECT_EQ(limits.v1.maxStorageBuffersPerShaderStage, 3u);
 
-        EXPECT_EQ(limits.maxStorageTexturesInFragmentStage, 6u);
-        EXPECT_EQ(limits.maxStorageTexturesInVertexStage, 6u);
-        EXPECT_EQ(limits.maxStorageTexturesPerShaderStage, 6u);
+        EXPECT_EQ(limits.v1.maxStorageTexturesInFragmentStage, 6u);
+        EXPECT_EQ(limits.v1.maxStorageTexturesInVertexStage, 6u);
+        EXPECT_EQ(limits.v1.maxStorageTexturesPerShaderStage, 6u);
     }
 
     // Test maxXXXInStage are not raised to maxXXXPerStage in compat
     {
-        Limits limits;
-        limits.maxStorageBuffersInFragmentStage = 1;
-        limits.maxStorageBuffersInVertexStage = 2;
-        limits.maxStorageBuffersPerShaderStage = 3;
+        CombinedLimits limits;
+        limits.v1.maxStorageBuffersInFragmentStage = 1;
+        limits.v1.maxStorageBuffersInVertexStage = 2;
+        limits.v1.maxStorageBuffersPerShaderStage = 3;
 
-        limits.maxStorageTexturesInFragmentStage = 4;
-        limits.maxStorageTexturesInVertexStage = 5;
-        limits.maxStorageTexturesPerShaderStage = 6;
+        limits.v1.maxStorageTexturesInFragmentStage = 4;
+        limits.v1.maxStorageTexturesInVertexStage = 5;
+        limits.v1.maxStorageTexturesPerShaderStage = 6;
 
         EnforceLimitSpecInvariants(&limits, wgpu::FeatureLevel::Compatibility);
 
-        EXPECT_EQ(limits.maxStorageBuffersInFragmentStage, 1u);
-        EXPECT_EQ(limits.maxStorageBuffersInVertexStage, 2u);
-        EXPECT_EQ(limits.maxStorageBuffersPerShaderStage, 3u);
+        EXPECT_EQ(limits.v1.maxStorageBuffersInFragmentStage, 1u);
+        EXPECT_EQ(limits.v1.maxStorageBuffersInVertexStage, 2u);
+        EXPECT_EQ(limits.v1.maxStorageBuffersPerShaderStage, 3u);
 
-        EXPECT_EQ(limits.maxStorageTexturesInFragmentStage, 4u);
-        EXPECT_EQ(limits.maxStorageTexturesInVertexStage, 5u);
-        EXPECT_EQ(limits.maxStorageTexturesPerShaderStage, 6u);
+        EXPECT_EQ(limits.v1.maxStorageTexturesInFragmentStage, 4u);
+        EXPECT_EQ(limits.v1.maxStorageTexturesInVertexStage, 5u);
+        EXPECT_EQ(limits.v1.maxStorageTexturesPerShaderStage, 6u);
     }
 
     // Test maxXXXPerStage is raised to maxXXXInStage in core
     {
-        Limits limits;
-        limits.maxStorageBuffersInFragmentStage = 3;
-        limits.maxStorageBuffersInVertexStage = 2;
-        limits.maxStorageBuffersPerShaderStage = 1;
+        CombinedLimits limits;
+        limits.v1.maxStorageBuffersInFragmentStage = 3;
+        limits.v1.maxStorageBuffersInVertexStage = 2;
+        limits.v1.maxStorageBuffersPerShaderStage = 1;
 
-        limits.maxStorageTexturesInFragmentStage = 6;
-        limits.maxStorageTexturesInVertexStage = 5;
-        limits.maxStorageTexturesPerShaderStage = 4;
-
-        EnforceLimitSpecInvariants(&limits, wgpu::FeatureLevel::Core);
-
-        EXPECT_EQ(limits.maxStorageBuffersInFragmentStage, 3u);
-        EXPECT_EQ(limits.maxStorageBuffersInVertexStage, 3u);
-        EXPECT_EQ(limits.maxStorageBuffersPerShaderStage, 3u);
-
-        EXPECT_EQ(limits.maxStorageTexturesInFragmentStage, 6u);
-        EXPECT_EQ(limits.maxStorageTexturesInVertexStage, 6u);
-        EXPECT_EQ(limits.maxStorageTexturesPerShaderStage, 6u);
-
-        limits.maxStorageBuffersInFragmentStage = 2;
-        limits.maxStorageBuffersInVertexStage = 3;
-        limits.maxStorageBuffersPerShaderStage = 1;
-
-        limits.maxStorageTexturesInFragmentStage = 5;
-        limits.maxStorageTexturesInVertexStage = 6;
-        limits.maxStorageTexturesPerShaderStage = 4;
+        limits.v1.maxStorageTexturesInFragmentStage = 6;
+        limits.v1.maxStorageTexturesInVertexStage = 5;
+        limits.v1.maxStorageTexturesPerShaderStage = 4;
 
         EnforceLimitSpecInvariants(&limits, wgpu::FeatureLevel::Core);
 
-        EXPECT_EQ(limits.maxStorageBuffersInFragmentStage, 3u);
-        EXPECT_EQ(limits.maxStorageBuffersInVertexStage, 3u);
-        EXPECT_EQ(limits.maxStorageBuffersPerShaderStage, 3u);
+        EXPECT_EQ(limits.v1.maxStorageBuffersInFragmentStage, 3u);
+        EXPECT_EQ(limits.v1.maxStorageBuffersInVertexStage, 3u);
+        EXPECT_EQ(limits.v1.maxStorageBuffersPerShaderStage, 3u);
 
-        EXPECT_EQ(limits.maxStorageTexturesInFragmentStage, 6u);
-        EXPECT_EQ(limits.maxStorageTexturesInVertexStage, 6u);
-        EXPECT_EQ(limits.maxStorageTexturesPerShaderStage, 6u);
+        EXPECT_EQ(limits.v1.maxStorageTexturesInFragmentStage, 6u);
+        EXPECT_EQ(limits.v1.maxStorageTexturesInVertexStage, 6u);
+        EXPECT_EQ(limits.v1.maxStorageTexturesPerShaderStage, 6u);
+
+        limits.v1.maxStorageBuffersInFragmentStage = 2;
+        limits.v1.maxStorageBuffersInVertexStage = 3;
+        limits.v1.maxStorageBuffersPerShaderStage = 1;
+
+        limits.v1.maxStorageTexturesInFragmentStage = 5;
+        limits.v1.maxStorageTexturesInVertexStage = 6;
+        limits.v1.maxStorageTexturesPerShaderStage = 4;
+
+        EnforceLimitSpecInvariants(&limits, wgpu::FeatureLevel::Core);
+
+        EXPECT_EQ(limits.v1.maxStorageBuffersInFragmentStage, 3u);
+        EXPECT_EQ(limits.v1.maxStorageBuffersInVertexStage, 3u);
+        EXPECT_EQ(limits.v1.maxStorageBuffersPerShaderStage, 3u);
+
+        EXPECT_EQ(limits.v1.maxStorageTexturesInFragmentStage, 6u);
+        EXPECT_EQ(limits.v1.maxStorageTexturesInVertexStage, 6u);
+        EXPECT_EQ(limits.v1.maxStorageTexturesPerShaderStage, 6u);
     }
 
     // Test maxXXXPerStage is raised to maxXXXInStage compat
     {
-        Limits limits;
-        limits.maxStorageBuffersInFragmentStage = 3;
-        limits.maxStorageBuffersInVertexStage = 2;
-        limits.maxStorageBuffersPerShaderStage = 1;
+        CombinedLimits limits;
+        limits.v1.maxStorageBuffersInFragmentStage = 3;
+        limits.v1.maxStorageBuffersInVertexStage = 2;
+        limits.v1.maxStorageBuffersPerShaderStage = 1;
 
-        limits.maxStorageTexturesInFragmentStage = 6;
-        limits.maxStorageTexturesInVertexStage = 5;
-        limits.maxStorageTexturesPerShaderStage = 4;
-
-        EnforceLimitSpecInvariants(&limits, wgpu::FeatureLevel::Compatibility);
-
-        EXPECT_EQ(limits.maxStorageBuffersInFragmentStage, 3u);
-        EXPECT_EQ(limits.maxStorageBuffersInVertexStage, 2u);
-        EXPECT_EQ(limits.maxStorageBuffersPerShaderStage, 3u);
-
-        EXPECT_EQ(limits.maxStorageTexturesInFragmentStage, 6u);
-        EXPECT_EQ(limits.maxStorageTexturesInVertexStage, 5u);
-        EXPECT_EQ(limits.maxStorageTexturesPerShaderStage, 6u);
-
-        limits.maxStorageBuffersInFragmentStage = 2;
-        limits.maxStorageBuffersInVertexStage = 3;
-        limits.maxStorageBuffersPerShaderStage = 1;
-
-        limits.maxStorageTexturesInFragmentStage = 5;
-        limits.maxStorageTexturesInVertexStage = 6;
-        limits.maxStorageTexturesPerShaderStage = 4;
+        limits.v1.maxStorageTexturesInFragmentStage = 6;
+        limits.v1.maxStorageTexturesInVertexStage = 5;
+        limits.v1.maxStorageTexturesPerShaderStage = 4;
 
         EnforceLimitSpecInvariants(&limits, wgpu::FeatureLevel::Compatibility);
 
-        EXPECT_EQ(limits.maxStorageBuffersInFragmentStage, 2u);
-        EXPECT_EQ(limits.maxStorageBuffersInVertexStage, 3u);
-        EXPECT_EQ(limits.maxStorageBuffersPerShaderStage, 3u);
+        EXPECT_EQ(limits.v1.maxStorageBuffersInFragmentStage, 3u);
+        EXPECT_EQ(limits.v1.maxStorageBuffersInVertexStage, 2u);
+        EXPECT_EQ(limits.v1.maxStorageBuffersPerShaderStage, 3u);
 
-        EXPECT_EQ(limits.maxStorageTexturesInFragmentStage, 5u);
-        EXPECT_EQ(limits.maxStorageTexturesInVertexStage, 6u);
-        EXPECT_EQ(limits.maxStorageTexturesPerShaderStage, 6u);
+        EXPECT_EQ(limits.v1.maxStorageTexturesInFragmentStage, 6u);
+        EXPECT_EQ(limits.v1.maxStorageTexturesInVertexStage, 5u);
+        EXPECT_EQ(limits.v1.maxStorageTexturesPerShaderStage, 6u);
+
+        limits.v1.maxStorageBuffersInFragmentStage = 2;
+        limits.v1.maxStorageBuffersInVertexStage = 3;
+        limits.v1.maxStorageBuffersPerShaderStage = 1;
+
+        limits.v1.maxStorageTexturesInFragmentStage = 5;
+        limits.v1.maxStorageTexturesInVertexStage = 6;
+        limits.v1.maxStorageTexturesPerShaderStage = 4;
+
+        EnforceLimitSpecInvariants(&limits, wgpu::FeatureLevel::Compatibility);
+
+        EXPECT_EQ(limits.v1.maxStorageBuffersInFragmentStage, 2u);
+        EXPECT_EQ(limits.v1.maxStorageBuffersInVertexStage, 3u);
+        EXPECT_EQ(limits.v1.maxStorageBuffersPerShaderStage, 3u);
+
+        EXPECT_EQ(limits.v1.maxStorageTexturesInFragmentStage, 5u);
+        EXPECT_EQ(limits.v1.maxStorageTexturesInVertexStage, 6u);
+        EXPECT_EQ(limits.v1.maxStorageTexturesPerShaderStage, 6u);
     }
 }
 
