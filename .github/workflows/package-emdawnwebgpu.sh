@@ -76,6 +76,7 @@ cat << EOF > "$REMOTE_PORT_FILE"
 # University of Illinois/NCSA Open Source License.  Both these licenses can be
 # found in the LICENSE file.
 
+# https://dawn.googlesource.com/dawn/+/${SHA}/src/emdawnwebgpu/pkg/README.md
 r"""
 $(cat out/wasm/emdawnwebgpu_pkg/README.md)
 """
@@ -87,9 +88,13 @@ SHA512 = '${PKG_FILE_SHA512}'
 PORT_FILE = 'emdawnwebgpu_pkg/emdawnwebgpu.port.py'
 
 # Port information (required)
-URL = 'https://dawn.googlesource.com/dawn/+/refs/heads/main/src/emdawnwebgpu/'
-DESCRIPTION = "Emdawnwebgpu is a fork of Emscripten's original USE_WEBGPU, implementing a newer, more stable version of the standardized webgpu.h interface."
+
+# - Visible in emcc --show-ports and emcc --use-port=emdawnwebgpu:help
 LICENSE = "Some files: BSD 3-Clause License. Other files: Emscripten's license (available under both MIT License and University of Illinois/NCSA Open Source License)"
+
+# - Visible in emcc --use-port=emdawnwebgpu:help
+DESCRIPTION = "Emdawnwebgpu implements webgpu.h on WebGPU, replacing -sUSE_WEBGPU. **For info on usage and filing feedback, see link below.**"
+URL = 'https://dawn.googlesource.com/dawn/+/${SHA}/src/emdawnwebgpu/pkg/README.md'
 EOF
 
 # Create RELEASE_INFO.md

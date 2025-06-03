@@ -18,7 +18,8 @@ Native. For the future of this fork, please see <https://crbug.com/371024051>.
 ## Using emdawnwebgpu pre-built releases
 
 Pre-built releases are published at <https://github.com/google/dawn/releases>.
-See the [included README](./pkg/README.md) on how to use them.
+
+**See the [included README](./pkg/README.md) on how to use them.**
 
 TODO(crbug.com/371024051): Link to a sample project in that README.
 
