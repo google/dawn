@@ -60,7 +60,7 @@ TEST_P(DeviceLifetimeTests, DroppedWhileQueueOnSubmittedWorkDone) {
 
     // Ask for an onSubmittedWorkDone callback and drop the device.
     queue.OnSubmittedWorkDone(wgpu::CallbackMode::AllowProcessEvents,
-                              [](wgpu::QueueWorkDoneStatus status) {
+                              [](wgpu::QueueWorkDoneStatus status, wgpu::StringView) {
                                   EXPECT_EQ(status, wgpu::QueueWorkDoneStatus::Success);
                               });
 
@@ -76,7 +76,7 @@ TEST_P(DeviceLifetimeTests, DroppedInsideQueueOnSubmittedWorkDone) {
 
     // Ask for an onSubmittedWorkDone callback and drop the device inside the callback.
     queue.OnSubmittedWorkDone(wgpu::CallbackMode::AllowProcessEvents,
-                              [this](wgpu::QueueWorkDoneStatus status) {
+                              [this](wgpu::QueueWorkDoneStatus status, wgpu::StringView) {
                                   EXPECT_EQ(status, wgpu::QueueWorkDoneStatus::Success);
                                   this->device = nullptr;
                               });
