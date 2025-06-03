@@ -1,0 +1,72 @@
+SKIP: FAILED
+
+
+enable chromium_experimental_subgroup_matrix;
+
+@group(0) @binding(0) var<storage, read_write> prevent_dce : array<f32, 1024>;
+
+fn subgroupMatrixMultiplyAccumulate_e07f32() -> subgroup_matrix_result<f32, 8, 8> {
+  var arg_0 = subgroup_matrix_left<u8, 8, 8>();
+  var arg_1 = subgroup_matrix_right<u8, 8, 8>();
+  var arg_2 = subgroup_matrix_result<f32, 8, 8>();
+  var res : subgroup_matrix_result<f32, 8, 8> = subgroupMatrixMultiplyAccumulate(arg_0, arg_1, arg_2);
+  return res;
+}
+
+@compute @workgroup_size(1)
+fn compute_main() {
+  subgroupMatrixStore(&(prevent_dce), 0, subgroupMatrixMultiplyAccumulate_e07f32(), false, 64);
+}
+
+Failed to generate SPIR-V: :20:45 error: spirv.cooperative_matrix_mul_add: no matching call to 'spirv.cooperative_matrix_mul_add(subgroup_matrix_left<u8, 8, 8>, subgroup_matrix_right<u8, 8, 8>, subgroup_matrix_result<f32, 8, 8>, u32)'
+
+1 candidate function:
+ • 'spirv.cooperative_matrix_mul_add(subgroup_matrix<left, T, K, R>  ✗ , subgroup_matrix<right, T, C, K>  ✗ , subgroup_matrix<result, TR, C, R>  ✓ , u32  ✓ ) -> subgroup_matrix<result, TR, C, R>' where:
+      ✗  'T' is 'f32', 'f16', 'u32' or 'i32'
+      ✓  'TR' is 'f32', 'f16', 'u32' or 'i32'
+
+    %12:subgroup_matrix_result<f32, 8, 8> = spirv.cooperative_matrix_mul_add %9, %10, %11, 0u
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:10:3 note: in block
+  $B2: {
+  ^^^
+
+note: # Disassembly
+prevent_dce_block = struct @align(4), @block {
+  inner:array<f32, 1024> @offset(0)
+}
+
+$B1: {  # root
+  %1:ptr<storage, prevent_dce_block, read_write> = var undef @binding_point(0, 0)
+}
+
+%subgroupMatrixMultiplyAccumulate_e07f32 = func():subgroup_matrix_result<f32, 8, 8> {
+  $B2: {
+    %3:subgroup_matrix_left<u8, 8, 8> = construct
+    %arg_0:ptr<function, subgroup_matrix_left<u8, 8, 8>, read_write> = var %3
+    %5:subgroup_matrix_right<u8, 8, 8> = construct
+    %arg_1:ptr<function, subgroup_matrix_right<u8, 8, 8>, read_write> = var %5
+    %7:subgroup_matrix_result<f32, 8, 8> = construct
+    %arg_2:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var %7
+    %9:subgroup_matrix_left<u8, 8, 8> = load %arg_0
+    %10:subgroup_matrix_right<u8, 8, 8> = load %arg_1
+    %11:subgroup_matrix_result<f32, 8, 8> = load %arg_2
+    %12:subgroup_matrix_result<f32, 8, 8> = spirv.cooperative_matrix_mul_add %9, %10, %11, 0u
+    %res:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var %12
+    %14:subgroup_matrix_result<f32, 8, 8> = load %res
+    ret %14
+  }
+}
+%compute_main = @compute @workgroup_size(1i, 1i, 1i) func():void {
+  $B3: {
+    %16:subgroup_matrix_result<f32, 8, 8> = call %subgroupMatrixMultiplyAccumulate_e07f32
+    %17:ptr<storage, array<f32, 1024>, read_write> = access %1, 0u
+    %18:ptr<storage, f32, read_write> = access %17, 0u
+    %19:void = spirv.cooperative_matrix_store %18, %16, 0u, 64u, 32u
+    ret
+  }
+}
+
+
+tint executable returned error: exit status 1

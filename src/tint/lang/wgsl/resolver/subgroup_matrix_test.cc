@@ -86,7 +86,9 @@ INSTANTIATE_TEST_SUITE_P(ResolverTest,
                              // Test different element types.
                              Case<f16, 8, 8>(core::SubgroupMatrixKind::kResult),
                              Case<i32, 8, 8>(core::SubgroupMatrixKind::kResult),
-                             Case<u32, 8, 8>(core::SubgroupMatrixKind::kResult)));
+                             Case<u32, 8, 8>(core::SubgroupMatrixKind::kResult),
+                             Case<i8, 8, 8>(core::SubgroupMatrixKind::kResult),
+                             Case<u8, 8, 8>(core::SubgroupMatrixKind::kResult)));
 
 TEST_F(ResolverSubgroupMatrixTest, SignedColumnCount) {
     Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
@@ -158,7 +160,8 @@ TEST_F(ResolverSubgroupMatrixTest, BadType) {
     Alias("left", ty("subgroup_matrix_result", ty.bool_(), 8_a, 8_a));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(error: subgroup_matrix element type must be f32, f16, i32, or u32)");
+    EXPECT_EQ(r()->error(),
+              R"(error: subgroup_matrix element type must be f32, f16, i32, u32, i8 or u8)");
 }
 
 TEST_F(ResolverSubgroupMatrixTest, NonConstantColumnCount) {

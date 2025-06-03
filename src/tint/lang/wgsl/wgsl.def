@@ -206,7 +206,7 @@ match fi32: f32 | i32
 match f32_f16: f32 | f16
 match iu32: i32 | u32
 
-match subgroup_matrix_elements: f32 | f16 | u32 | i32
+match subgroup_matrix_elements: f32 | f16 | u32 | i32 | u8 | i8
 match subgroup_matrix_kind_left : subgroup_matrix_kind.left
 match subgroup_matrix_kind_right : subgroup_matrix_kind.right
 match subgroup_matrix_kind_result : subgroup_matrix_kind.result

@@ -1405,5 +1405,119 @@ TEST_F(ResolverVariableTest, Let_UseTemplatedIdent) {
 56:78 note: 'let a' declared here)");
 }
 
+TEST_F(ResolverVariableTest, ScalarI8) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+
+    GlobalVar("v", ty.i8(), core::AddressSpace::kPrivate);
+
+    EXPECT_FALSE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(r()->error(), R"(error: i8 cannot be used as the type of a var)");
+}
+
+TEST_F(ResolverVariableTest, ScalarU8) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+
+    GlobalVar("v", ty.u8(), core::AddressSpace::kPrivate);
+
+    EXPECT_FALSE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(r()->error(), R"(error: u8 cannot be used as the type of a var)");
+}
+
+TEST_F(ResolverVariableTest, Vec2I8) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+
+    GlobalVar("v", ty.vec2<i8>(), core::AddressSpace::kPrivate);
+
+    EXPECT_FALSE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(r()->error(),
+              R"(error: vector element type must be 'bool', 'f32', 'f16', 'i32' or 'u32')");
+}
+
+TEST_F(ResolverVariableTest, Vec2U8) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+
+    GlobalVar("v", ty.vec2<u8>(), core::AddressSpace::kPrivate);
+
+    EXPECT_FALSE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(r()->error(),
+              R"(error: vector element type must be 'bool', 'f32', 'f16', 'i32' or 'u32')");
+}
+
+TEST_F(ResolverVariableTest, Vec3I8) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+
+    GlobalVar("v", ty.vec2<i8>(), core::AddressSpace::kPrivate);
+
+    EXPECT_FALSE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(r()->error(),
+              R"(error: vector element type must be 'bool', 'f32', 'f16', 'i32' or 'u32')");
+}
+
+TEST_F(ResolverVariableTest, Vec3U8) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+
+    GlobalVar("v", ty.vec2<u8>(), core::AddressSpace::kPrivate);
+
+    EXPECT_FALSE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(r()->error(),
+              R"(error: vector element type must be 'bool', 'f32', 'f16', 'i32' or 'u32')");
+}
+
+TEST_F(ResolverVariableTest, Vec4I8) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+
+    GlobalVar("v", ty.vec2<i8>(), core::AddressSpace::kPrivate);
+
+    EXPECT_FALSE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(r()->error(),
+              R"(error: vector element type must be 'bool', 'f32', 'f16', 'i32' or 'u32')");
+}
+
+TEST_F(ResolverVariableTest, Vec4U8) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+
+    GlobalVar("v", ty.vec2<u8>(), core::AddressSpace::kPrivate);
+
+    EXPECT_FALSE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(r()->error(),
+              R"(error: vector element type must be 'bool', 'f32', 'f16', 'i32' or 'u32')");
+}
+
+TEST_F(ResolverVariableTest, ArrayI8) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+
+    GlobalVar("v", ty.array<i8, 4>(), core::AddressSpace::kPrivate);
+
+    EXPECT_FALSE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(r()->error(), R"(error: i8 cannot be used as an element type of an array)");
+}
+
+TEST_F(ResolverVariableTest, ArrayU8) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+
+    GlobalVar("v", ty.array<u8, 4>(), core::AddressSpace::kPrivate);
+
+    EXPECT_FALSE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(r()->error(), R"(error: u8 cannot be used as an element type of an array)");
+}
+
+TEST_F(ResolverVariableTest, MatrixI8) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+
+    GlobalVar("v", ty.mat4x4<i8>(), core::AddressSpace::kPrivate);
+
+    EXPECT_FALSE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(r()->error(), R"(error: matrix element type must be 'f32' or 'f16')");
+}
+
+TEST_F(ResolverVariableTest, MatrixU8) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+
+    GlobalVar("v", ty.mat2x2<u8>(), core::AddressSpace::kPrivate);
+
+    EXPECT_FALSE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(r()->error(), R"(error: matrix element type must be 'f32' or 'f16')");
+}
+
 }  // namespace
 }  // namespace tint::resolver
