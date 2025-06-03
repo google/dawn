@@ -56,38 +56,11 @@ run_built_binary_script =
     "$dawn_root/third_party/gn/dxc/build/run_built_binary.py"
 
 config("common_config") {
-  # Add include paths for Node API headers, and handle the fact that they produce many warnings.
-  if (is_win) {
-    # -isystem is not supported (MSVC or clang-cl.exe).
-    include_dirs = [
-      "${dawn_node_addon_api_dir}",
-      "${dawn_node_api_headers_dir}/include",
-    ]
-    if (is_clang) {
-      # Clang (clang-cl.exe). Disable the warnings produced by Node headers.
-      cflags = [
-        "-Wno-extra-semi",
-        "-Wno-extra-semi-stmt",
-        "-Wno-inconsistent-missing-destructor-override",
-        "-Wno-shadow",
-        "-Wno-shadow-field",
-        "-Wno-suggest-destructor-override",
-      ]
-    } else {
-      # MSVC. Just disable most warnings.
-      cflags = [ "/W0" ]
-    }
-  } else {
-    # -isystem should be supported (Clang or GCC).
-    # GN does not have a feature to support -isystem (like CMake's
-    # target_include_directories SYSTEM option), so we set it directly via cflags.
-    # Note this may have slightly weird behavior (e.g. https://crbug.com/41400937).
-    cflags = [
-      "-isystem" + rebase_path(dawn_node_addon_api_dir, root_build_dir),
-      "-isystem" +
-          rebase_path("${dawn_node_api_headers_dir}/include", root_build_dir),
-    ]
-  }
+  # Add include paths for Node API headers.
+  include_dirs = [
+    "${dawn_node_addon_api_dir}",
+    "${dawn_node_api_headers_dir}/include",
+  ]
 }
 
 template("idlgen") {

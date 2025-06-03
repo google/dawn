@@ -129,9 +129,10 @@ createErrorFromWGPUError(Napi::Env env, wgpu::ErrorType type, wgpu::StringView m
             // This error type is reserved for when translating an error type from a newer
             // implementation (e.g. the browser added a new error type) to another (e.g.
             // you're using an older version of Emscripten). It shouldn't happen in Dawn.
-            assert(false);
-            return {};
+            break;
     }
+    assert(false);
+    return {};
 }
 
 static std::mutex s_device_to_js_map_mutex_;

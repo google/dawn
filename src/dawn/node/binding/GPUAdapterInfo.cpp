@@ -27,6 +27,7 @@
 
 #include "src/dawn/node/binding/GPUAdapterInfo.h"
 
+#include <cassert>
 #include <cctype>
 #include <iomanip>
 #include <sstream>
@@ -51,6 +52,8 @@ interop::GPUSubgroupMatrixComponentType SubgroupMatrixComponentType(
         case SubgroupMatrixComponentType::I32:
             return interop::GPUSubgroupMatrixComponentType::kI32;
     }
+    assert(false);
+    return interop::GPUSubgroupMatrixComponentType::kF32;
 }
 
 struct GPUSubgroupMatrixConfig : public interop::GPUSubgroupMatrixConfig {
