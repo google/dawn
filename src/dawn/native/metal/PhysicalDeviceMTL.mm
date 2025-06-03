@@ -641,7 +641,10 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     // Memoryless storage mode and programmable blending are available only from the Apple2
     // family of GPUs on.
     if ([*mDevice supportsFamily:MTLGPUFamilyApple2]) {
+        // Programmable blending doesn't seem to work as expected on the iOS simulator.
+#if !defined(TARGET_OS_SIMULATOR)
         EnableFeature(Feature::FramebufferFetch);
+#endif
         EnableFeature(Feature::TransientAttachments);
     }
 
