@@ -570,18 +570,6 @@ class Validator {
     /// @returns true on success, false otherwise
     bool CheckF16Enabled(const Source& source) const;
 
-    /// Validates that 'chromium_experimental_subgroup_matrix' extension is enabled for i8 usage at
-    /// @p source
-    /// @param source the source of the i8 usage
-    /// @returns true on success, false otherwise
-    bool CheckI8Enabled(const Source& source) const;
-
-    /// Validates that 'chromium_experimental_subgroup_matrix' extension is enabled for u8 usage at
-    /// @p source
-    /// @param source the source of the u8 usage
-    /// @returns true on success, false otherwise
-    bool CheckU8Enabled(const Source& source) const;
-
     /// Validates there are no duplicate attributes
     /// @param attributes the list of attributes to validate
     /// @returns true on success, false otherwise.

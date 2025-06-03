@@ -166,12 +166,6 @@ class Resolver {
     /// @returns a new f16, if the f16 extension is enabled, otherwise nullptr
     const core::type::F16* F16(const ast::Identifier* ident);
 
-    /// @returns a new i8, if the subgroup matrix extension is enabled, otherwise nullptr
-    const core::type::I8* I8(const ast::Identifier* ident);
-
-    /// @returns a new u8, if the subgroup matrix extension is enabled, otherwise nullptr
-    const core::type::U8* U8(const ast::Identifier* ident);
-
     /// @returns a vector with the element type @p el of width @p n resolved from the identifier @p
     /// ident.
     const core::type::Vector* Vec(const ast::Identifier* ident,

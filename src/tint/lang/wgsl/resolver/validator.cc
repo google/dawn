@@ -40,7 +40,6 @@
 #include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
 #include "src/tint/lang/core/type/depth_texture.h"
-#include "src/tint/lang/core/type/i8.h"
 #include "src/tint/lang/core/type/input_attachment.h"
 #include "src/tint/lang/core/type/multisampled_texture.h"
 #include "src/tint/lang/core/type/pointer.h"
@@ -50,7 +49,6 @@
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/subgroup_matrix.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
-#include "src/tint/lang/core/type/u8.h"
 #include "src/tint/lang/wgsl/ast/alias.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
 #include "src/tint/lang/wgsl/ast/blend_src_attribute.h"
@@ -217,10 +215,9 @@ diag::Diagnostic* Validator::MaybeAddDiagnostic(wgsl::DiagnosticRule rule,
 
 // https://gpuweb.github.io/gpuweb/wgsl/#plain-types-section
 bool Validator::IsPlain(const core::type::Type* type) const {
-    return type->IsAnyOf<core::type::Scalar, core::type::Atomic, core::type::Vector,
-                         core::type::Matrix, sem::Array, core::type::Struct,
-                         core::type::SubgroupMatrix>() &&
-           !type->IsAnyOf<core::type::I8, core::type::U8>();
+    return type
+        ->IsAnyOf<core::type::Scalar, core::type::Atomic, core::type::Vector, core::type::Matrix,
+                  sem::Array, core::type::Struct, core::type::SubgroupMatrix>();
 }
 
 // https://gpuweb.github.io/gpuweb/wgsl.html#storable-types
@@ -476,10 +473,8 @@ bool Validator::SubgroupMatrix(const core::type::SubgroupMatrix* t, const Source
                          << style::Code("chromium_experimental_subgroup_matrix");
         return false;
     }
-    if (!t->Type()
-             ->IsAnyOf<core::type::F32, core::type::F16, core::type::I32, core::type::U32,
-                       core::type::I8, core::type::U8>()) {
-        AddError(source) << "subgroup_matrix element type must be f32, f16, i32, u32, i8 or u8";
+    if (!t->Type()->IsAnyOf<core::type::F32, core::type::F16, core::type::I32, core::type::U32>()) {
+        AddError(source) << "subgroup_matrix element type must be f32, f16, i32, or u32";
         return false;
     }
 
@@ -2088,28 +2083,6 @@ bool Validator::CheckF16Enabled(const Source& source) const {
     return true;
 }
 
-bool Validator::CheckI8Enabled(const Source& source) const {
-    // Validate if i8 type is allowed.
-    if (!enabled_extensions_.Contains(wgsl::Extension::kChromiumExperimentalSubgroupMatrix)) {
-        AddError(source) << style::Type("i8") << " type used without "
-                         << style::Code("chromium_experimental_subgroup_matrix")
-                         << " extension enabled";
-        return false;
-    }
-    return true;
-}
-
-bool Validator::CheckU8Enabled(const Source& source) const {
-    // Validate if u8 type is allowed.
-    if (!enabled_extensions_.Contains(wgsl::Extension::kChromiumExperimentalSubgroupMatrix)) {
-        AddError(source) << style::Type("u8") << " type used without "
-                         << style::Code("chromium_experimental_subgroup_matrix")
-                         << " extension enabled";
-        return false;
-    }
-    return true;
-}
-
 bool Validator::FunctionCall(const sem::Call* call, sem::Statement* current_statement) const {
     auto* decl = call->Declaration();
     auto* target = call->Target()->As<sem::Function>();
@@ -2305,8 +2278,7 @@ bool Validator::SubgroupMatrixConstructor(
 }
 
 bool Validator::Vector(const core::type::Type* el_ty, const Source& source) const {
-    if (!el_ty->Is<core::type::Scalar>() || el_ty->Is<core::type::I8>() ||
-        el_ty->Is<core::type::U8>()) {
+    if (!el_ty->Is<core::type::Scalar>()) {
         AddError(source) << "vector element type must be " << style::Type("bool") << ", "
                          << style::Type("f32") << ", " << style::Type("f16") << ", "
                          << style::Type("i32") << " or " << style::Type("u32");
