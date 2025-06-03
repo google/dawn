@@ -50,10 +50,15 @@ struct TextureCopySubresource {
         D3D12_BOX sourceRegion;
         D3D12_TEXTURE_COPY_LOCATION bufferLocation;
 
+        // Returns x,y,z offset in buffer (from sourceRegion if B2T, or destinationOffset if T2B)
         Origin3D GetBufferOffset(BufferTextureCopyDirection direction) const;
+        // Returns x,y,z offset in texture (from destinationOffset if B2T, or sourceRegion if T2B)
         Origin3D GetTextureOffset(BufferTextureCopyDirection direction) const;
+        // Returns width,height,depth of source region
         Extent3D GetCopySize() const;
+        // Returns 512-byte aligned offset into buffer
         uint64_t GetAlignedOffset() const;
+        // Returns width,height,depth of buffer footprint
         Extent3D GetBufferSize() const;
 
         void SetAlignedOffset(uint64_t alignedOffset);
@@ -78,7 +83,7 @@ struct TextureCopySplits {
 // details in Compute{2D|3D}TextureCopySplits about how we generate copy regions for 2D array
 // and 3D textures based on this function.
 // The resulting copies triggered by API like CopyTextureRegion are equivalent to the copy
-// regions defines by the arguments of TextureCopySubresource returned by this function and its
+// regions defined by the arguments of TextureCopySubresource returned by this function and its
 // counterparts. These arguments should strictly conform to particular invariants. Otherwise,
 // D3D12 driver may report validation errors when we call CopyTextureRegion. Some important
 // invariants are listed below. For more details

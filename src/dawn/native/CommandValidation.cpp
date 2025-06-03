@@ -269,7 +269,7 @@ ResultOrError<uint64_t> ComputeRequiredBytesInCopy(const TexelBlockInfo& blockIn
     }
 
     // Check for potential overflows for the rest of the computations. We have the following
-    // inequalities:
+    // invariants:
     //
     //   bytesInLastRow <= bytesPerRow
     //   heightInBlocks <= rowsPerImage
