@@ -122,8 +122,8 @@ class GPUDevice final : public interop::GPUDevice, EventTarget {
         Napi::Env env) override;
     std::string getLabel(Napi::Env) override;
     void setLabel(Napi::Env, std::string value) override;
-    interop::Interface<interop::EventHandler> getOnuncapturederror(Napi::Env) override;
-    void setOnuncapturederror(Napi::Env, interop::Interface<interop::EventHandler> value) override;
+    interop::EventHandler getOnuncapturederror(Napi::Env) override;
+    void setOnuncapturederror(Napi::Env, interop::EventHandler value) override;
 
     void handleUncapturedError(ErrorType type, wgpu::StringView message);
     static void handleUncapturedErrorCallback(const wgpu::Device& device,

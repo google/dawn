@@ -77,7 +77,6 @@ typedef (ArrayBuffer or /* SharedArrayBuffer or [AllowShared] */ ArrayBufferView
   readonly attribute DOMString message;
   readonly attribute unsigned short code;
 };
-[LegacyNoInterfaceObject] interface EventHandler{};
 [LegacyNoInterfaceObject] interface HTMLCanvasElement {};
 [LegacyNoInterfaceObject] interface HTMLImageElement {};
 [LegacyNoInterfaceObject] interface HTMLVideoElement {};
