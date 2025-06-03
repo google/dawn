@@ -29,6 +29,7 @@
 #define SRC_DAWN_COMMON_TYPEDINTEGER_H_
 
 #include <compare>
+#include <concepts>
 #include <limits>
 #include <type_traits>
 #include <utility>
@@ -71,7 +72,8 @@ template <typename Tag, typename T>
 class TypedIntegerImpl;
 }  // namespace detail
 
-template <typename Tag, typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
+template <typename Tag, typename T>
+    requires std::integral<T>
 #if defined(DAWN_ENABLE_ASSERTS)
 using TypedInteger = detail::TypedIntegerImpl<Tag, T>;
 #else
@@ -91,7 +93,8 @@ class alignas(T) TypedIntegerImpl {
     }
 
     // Construction from non-narrowing integral types.
-    template <typename I, typename = std::enable_if_t<std::is_integral<I>::value>>
+    template <typename I>
+        requires std::integral<I>
     explicit constexpr TypedIntegerImpl(I rhs) : mValue(static_cast<T>(rhs)) {
         static_assert(std::numeric_limits<I>::max() <= std::numeric_limits<T>::max());
         static_assert(std::numeric_limits<I>::min() >= std::numeric_limits<T>::min());
@@ -135,22 +138,18 @@ class alignas(T) TypedIntegerImpl {
     }
 
     template <typename T2 = T>
-    static constexpr std::enable_if_t<std::is_unsigned<T2>::value, decltype(T(0) + T2(0))> AddImpl(
-        TypedIntegerImpl<Tag, T> lhs,
-        TypedIntegerImpl<Tag, T2> rhs) {
-        static_assert(std::is_same<T, T2>::value);
-
+        requires(std::unsigned_integral<T2> && std::same_as<T, T2>)
+    static constexpr decltype(T(0) + T2(0)) AddImpl(TypedIntegerImpl<Tag, T> lhs,
+                                                    TypedIntegerImpl<Tag, T2> rhs) {
         // Overflow would wrap around
         DAWN_ASSERT(lhs.mValue + rhs.mValue >= lhs.mValue);
         return lhs.mValue + rhs.mValue;
     }
 
     template <typename T2 = T>
-    static constexpr std::enable_if_t<std::is_signed<T2>::value, decltype(T(0) + T2(0))> AddImpl(
-        TypedIntegerImpl<Tag, T> lhs,
-        TypedIntegerImpl<Tag, T2> rhs) {
-        static_assert(std::is_same<T, T2>::value);
-
+        requires(std::signed_integral<T2> && std::same_as<T, T2>)
+    static constexpr decltype(T(0) + T2(0)) AddImpl(TypedIntegerImpl<Tag, T> lhs,
+                                                    TypedIntegerImpl<Tag, T2> rhs) {
         if (lhs.mValue > 0) {
             // rhs is positive: |rhs| is at most the distance between max and |lhs|.
             // rhs is negative: (positive + negative) won't overflow
@@ -165,22 +164,18 @@ class alignas(T) TypedIntegerImpl {
     }
 
     template <typename T2 = T>
-    static constexpr std::enable_if_t<std::is_unsigned<T>::value, decltype(T(0) - T2(0))> SubImpl(
-        TypedIntegerImpl<Tag, T> lhs,
-        TypedIntegerImpl<Tag, T2> rhs) {
-        static_assert(std::is_same<T, T2>::value);
-
+        requires(std::unsigned_integral<T> && std::same_as<T, T2>)
+    static constexpr decltype(T(0) - T2(0)) SubImpl(TypedIntegerImpl<Tag, T> lhs,
+                                                    TypedIntegerImpl<Tag, T2> rhs) {
         // Overflow would wrap around
         DAWN_ASSERT(lhs.mValue - rhs.mValue <= lhs.mValue);
         return lhs.mValue - rhs.mValue;
     }
 
     template <typename T2 = T>
-    static constexpr std::enable_if_t<std::is_signed<T>::value, decltype(T(0) - T2(0))> SubImpl(
-        TypedIntegerImpl<Tag, T> lhs,
-        TypedIntegerImpl<Tag, T2> rhs) {
-        static_assert(std::is_same<T, T2>::value);
-
+        requires(std::signed_integral<T> && std::same_as<T, T2>)
+    static constexpr decltype(T(0) - T2(0)) SubImpl(TypedIntegerImpl<Tag, T> lhs,
+                                                    TypedIntegerImpl<Tag, T2> rhs) {
         if (lhs.mValue > 0) {
             // rhs is positive: positive minus positive won't overflow
             // rhs is negative: |rhs| isn't less than the (negative) distance between |lhs|
@@ -195,8 +190,8 @@ class alignas(T) TypedIntegerImpl {
     }
 
     template <typename T2 = T>
-    constexpr std::enable_if_t<std::is_signed<T2>::value, TypedIntegerImpl> operator-() const {
-        static_assert(std::is_same<T, T2>::value);
+        requires(std::signed_integral<T2> && std::same_as<T, T2>)
+    constexpr TypedIntegerImpl operator-() const {
         // The negation of the most negative value cannot be represented.
         DAWN_ASSERT(this->mValue != std::numeric_limits<T>::min());
         return TypedIntegerImpl(-this->mValue);
@@ -270,17 +265,20 @@ constexpr ::dawn::detail::TypedIntegerImpl<Tag, T> PlusOne(
 }
 
 template <typename T>
-constexpr std::enable_if_t<std::is_integral<T>::value, T> Add(T lhs, T rhs) {
+    requires std::integral<T>
+constexpr T Add(T lhs, T rhs) {
     return static_cast<T>(lhs + rhs);
 }
 
 template <typename T>
-constexpr std::enable_if_t<std::is_integral<T>::value, T> Sub(T lhs, T rhs) {
+    requires std::integral<T>
+constexpr T Sub(T lhs, T rhs) {
     return static_cast<T>(lhs - rhs);
 }
 
 template <typename T>
-constexpr std::enable_if_t<std::is_integral<T>::value, T> PlusOne(T value) {
+    requires std::integral<T>
+constexpr T PlusOne(T value) {
     return static_cast<T>(value + 1);
 }
 
