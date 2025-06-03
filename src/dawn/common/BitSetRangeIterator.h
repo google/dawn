@@ -152,8 +152,10 @@ void BitSetRangeIterator<N, T>::Iterator::Advance() {
 
     mSize = rangeCount;
     mBits = ~mBits;
-    mBits <<= mOffset;
-    mBits >>= mOffset;
+
+    // Clear the bits for the current range.
+    mBits <<= rangeCount;
+    mBits >>= rangeCount;
 }
 
 // Helper to avoid needing to specify the template parameter size

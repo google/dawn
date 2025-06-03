@@ -38,15 +38,16 @@ namespace {
 class BitSetRangeIteratorTest : public testing::Test {
   protected:
     template <size_t N>
-    void RunSingleBitRangesTests() {
+    void RunSingleBitSetRangeTests(uint32_t offset, uint32_t size) {
         std::bitset<N> stateBits;
-        uint32_t bitSize = stateBits.size();
 
         std::vector<std::pair<uint32_t, size_t>> expectedRanges;
-        expectedRanges.push_back({bitSize / 4u * 3u, 1});
+        expectedRanges.push_back({offset, size});
 
         for (const auto& range : expectedRanges) {
-            stateBits.set(range.first);
+            for (uint32_t i = 0; i < range.second; ++i) {
+                stateBits.set(range.first + i);
+            }
         }
 
         std::vector<std::pair<uint32_t, size_t>> foundRanges;
@@ -59,6 +60,11 @@ class BitSetRangeIteratorTest : public testing::Test {
             EXPECT_EQ(expectedRanges[i].first, foundRanges[i].first);
             EXPECT_EQ(expectedRanges[i].second, foundRanges[i].second);
         }
+    }
+
+    template <size_t N>
+    void RunSingleBitTests() {
+        RunSingleBitSetRangeTests<N>(N / 4u * 3u, 1);
     }
 
     template <size_t N>
@@ -139,20 +145,20 @@ class BitSetRangeIteratorTest : public testing::Test {
 };
 
 // Test basic range iteration with single bits (each range has size 1)
-TEST_F(BitSetRangeIteratorTest, SingleBitRanges) {
+TEST_F(BitSetRangeIteratorTest, SingleBit) {
     // Smaller than 1 word
     {
-        RunSingleBitRangesTests<kBitsPerWord - 1>();
+        RunSingleBitTests<kBitsPerWord - 1>();
     }
 
     // Equal to 1 word
     {
-        RunSingleBitRangesTests<kBitsPerWord>();
+        RunSingleBitTests<kBitsPerWord>();
     }
 
     // Larger than 1 word
     {
-        RunSingleBitRangesTests<kBitsPerWord * 2 - 1>();
+        RunSingleBitTests<kBitsPerWord * 2 - 1>();
     }
 }
 
@@ -215,6 +221,24 @@ TEST_F(BitSetRangeIteratorTest, CrossWordBoundaryRanges) {
     EXPECT_EQ(1u, foundRanges.size());
     EXPECT_EQ(kBitsPerWord - 2, foundRanges[0].first);
     EXPECT_EQ(4u, foundRanges[0].second);
+}
+
+// Test ranges that start from first bit.
+TEST_F(BitSetRangeIteratorTest, SingleBitSetRange) {
+    // Smaller than 1 word
+    {
+        RunSingleBitSetRangeTests<kBitsPerWord - 1>(0, kBitsPerWord - 1);
+    }
+
+    // Equal to 1 word
+    {
+        RunSingleBitSetRangeTests<kBitsPerWord>(0, kBitsPerWord - 1);
+    }
+
+    // Larger than 1 word
+    {
+        RunSingleBitSetRangeTests<kBitsPerWord * 2>(kBitsPerWord / 2, kBitsPerWord);
+    }
 }
 
 }  // anonymous namespace
