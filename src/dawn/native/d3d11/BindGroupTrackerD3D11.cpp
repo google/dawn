@@ -758,6 +758,12 @@ MaybeError RenderPassBindGroupTracker::Apply() {
         // D3D11 uav slot allocated in reverse order.
         for (BindingIndex bindingIndex : Range(group->GetLayout()->GetBindingCount())) {
             const BindingInfo& bindingInfo = group->GetLayout()->GetBindingInfo(bindingIndex);
+
+            // Skip if this binding isn't visible in the fragment shader.
+            if (!(bindingInfo.visibility & wgpu::ShaderStage::Fragment)) {
+                continue;
+            }
+
             uint32_t pos = indices[bindingIndex][kFragment] - uavStartSlot;
             DAWN_TRY(MatchVariant(
                 bindingInfo.bindingLayout,
