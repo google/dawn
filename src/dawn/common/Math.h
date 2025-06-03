@@ -131,14 +131,6 @@ DAWN_FORCE_INLINE const T* AlignPtr(const T* ptr, size_t alignment) {
                                       ~(alignment - 1));
 }
 
-template <typename destType, typename sourceType>
-destType BitCast(const sourceType& source) {
-    static_assert(sizeof(destType) == sizeof(sourceType), "BitCast: cannot lose precision.");
-    destType output;
-    std::memcpy(&output, &source, sizeof(destType));
-    return output;
-}
-
 uint16_t Float32ToFloat16(float fp32);
 float Float16ToFloat32(uint16_t fp16);
 bool IsFloat16NaN(uint16_t fp16);
