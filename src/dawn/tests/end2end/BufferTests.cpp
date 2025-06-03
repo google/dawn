@@ -1067,7 +1067,8 @@ DAWN_INSTANTIATE_TEST(BufferMappedAtCreationTests,
                       MetalBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
-                      VulkanBackend());
+                      VulkanBackend(),
+                      WebGPUBackend());
 
 class BufferTests : public DawnTest {};
 
@@ -1300,7 +1301,8 @@ DAWN_INSTANTIATE_TEST(BufferTests,
                       MetalBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
-                      VulkanBackend());
+                      VulkanBackend(),
+                      WebGPUBackend());
 
 class BufferNoSuballocationTests : public DawnTest {};
 
@@ -1333,7 +1335,8 @@ DAWN_INSTANTIATE_TEST(BufferNoSuballocationTests,
                       MetalBackend({"disable_resource_suballocation"}),
                       OpenGLBackend({"disable_resource_suballocation"}),
                       OpenGLESBackend({"disable_resource_suballocation"}),
-                      VulkanBackend({"disable_resource_suballocation"}));
+                      VulkanBackend({"disable_resource_suballocation"}),
+                      WebGPUBackend({"disable_resource_suballocation"}));
 
 class BufferMapExtendedUsagesTests : public DawnTest {
   protected:

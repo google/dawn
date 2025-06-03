@@ -70,7 +70,8 @@ bool Buffer::IsCPUWritableAtCreation() const {
 }
 
 MaybeError Buffer::MapAtCreationImpl() {
-    return DAWN_UNIMPLEMENTED_ERROR("Not implemented");
+    mMappedData = ToBackend(GetDevice())->wgpu.bufferGetMappedRange(mInnerBuffer, 0, GetSize());
+    return {};
 }
 
 MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) {
