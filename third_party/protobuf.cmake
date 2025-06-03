@@ -39,14 +39,11 @@ add_subdirectory("${DAWN_PROTOBUF_DIR}")
 target_compile_definitions(libprotobuf PUBLIC "-DPROTOBUF_ENABLE_DEBUG_LOGGING_MAY_LEAK_PII=0")
 
 # Allowing usage of enable_if() and nullability extensions in abseil and avoid shadowing errors
-if (("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") OR
-    ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang"))
-  target_compile_options(libprotobuf PUBLIC
-          -Wno-gcc-compat
-          -Wno-unreachable-code-break
-          -Wno-nullability-extension
-          -Wno-shadow)
-endif()
+target_compile_options(libprotobuf PUBLIC
+        -Wno-gcc-compat
+        -Wno-unreachable-code-break
+        -Wno-nullability-extension
+        -Wno-shadow)
 
 # A simplified version of protobuf_generate()
 function(generate_protos)
