@@ -165,6 +165,10 @@ struct State {
         if (inst->IsAnyOf<core::ir::Var, core::ir::Let, core::ir::Phony>()) {
             return;
         }
+        // Never put handle types in lets or phonys
+        if (inst->Result()->Type()->IsHandle()) {
+            return;
+        }
         if (inst->Is<core::ir::Call>() && !value->IsUsed()) {
             bool must_use =
                 inst->Is<core::ir::BuiltinCall>() && !value->Type()->Is<core::type::Void>();
