@@ -53,9 +53,6 @@ TEST_P(DeviceLifetimeTests, DroppedBeforeQueue) {
 
 // Test that the device can be dropped while an onSubmittedWorkDone callback is in flight.
 TEST_P(DeviceLifetimeTests, DroppedWhileQueueOnSubmittedWorkDone) {
-    // TODO(crbug.com/413053623): implement webgpu::CommandBuffer
-    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
-
     // Submit some work.
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder(nullptr);
     wgpu::CommandBuffer commandBuffer = encoder.Finish();
@@ -72,9 +69,6 @@ TEST_P(DeviceLifetimeTests, DroppedWhileQueueOnSubmittedWorkDone) {
 
 // Test that the device can be dropped inside an onSubmittedWorkDone callback.
 TEST_P(DeviceLifetimeTests, DroppedInsideQueueOnSubmittedWorkDone) {
-    // TODO(crbug.com/413053623): implement webgpu::CommandBuffer
-    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
-
     // Submit some work.
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder(nullptr);
     wgpu::CommandBuffer commandBuffer = encoder.Finish();
@@ -148,9 +142,6 @@ TEST_P(DeviceLifetimeTests, DroppedBeforeBuffer) {
 
 // Test that the device can be dropped while a buffer created from it is being mapped.
 TEST_P(DeviceLifetimeTests, DroppedWhileMappingBuffer) {
-    // TODO(crbug.com/413053623): implement webgpu::Buffer
-    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
-
     wgpu::BufferDescriptor desc = {};
     desc.size = 4;
     desc.usage = wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst;
@@ -168,9 +159,6 @@ TEST_P(DeviceLifetimeTests, DroppedWhileMappingBuffer) {
 
 // Test that the device can be dropped before a mapped buffer created from it.
 TEST_P(DeviceLifetimeTests, DroppedBeforeMappedBuffer) {
-    // TODO(crbug.com/413053623): implement webgpu::Buffer
-    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
-
     wgpu::BufferDescriptor desc = {};
     desc.size = 4;
     desc.usage = wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst;
@@ -183,7 +171,7 @@ TEST_P(DeviceLifetimeTests, DroppedBeforeMappedBuffer) {
 
 // Test that the device can be dropped before a mapped at creation buffer created from it.
 TEST_P(DeviceLifetimeTests, DroppedBeforeMappedAtCreationBuffer) {
-    // TODO(crbug.com/413053623): implement webgpu::Buffer
+    // TODO(crbug.com/413053623): implement webgpu::Buffer::MapAtCreationImpl
     DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
 
     wgpu::BufferDescriptor desc = {};
@@ -198,9 +186,6 @@ TEST_P(DeviceLifetimeTests, DroppedBeforeMappedAtCreationBuffer) {
 // Test that the device can be dropped before a buffer created from it, then mapping the buffer
 // fails.
 TEST_P(DeviceLifetimeTests, DroppedThenMapBuffer) {
-    // TODO(crbug.com/413053623): implement webgpu::Buffer
-    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
-
     wgpu::BufferDescriptor desc = {};
     desc.size = 4;
     desc.usage = wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst;
@@ -219,9 +204,6 @@ TEST_P(DeviceLifetimeTests, DroppedThenMapBuffer) {
 // Test that the device can be dropped before a buffer created from it, then mapping the buffer
 // twice (one inside callback) will both fail.
 TEST_P(DeviceLifetimeTests, Dropped_ThenMapBuffer_ThenMapBufferInCallback) {
-    // TODO(crbug.com/413053623): implement webgpu::Buffer
-    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
-
     wgpu::BufferDescriptor desc = {};
     desc.size = 4;
     desc.usage = wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst;
@@ -250,9 +232,6 @@ TEST_P(DeviceLifetimeTests, Dropped_ThenMapBuffer_ThenMapBufferInCallback) {
 
 // Test that the device can be dropped inside a buffer map callback.
 TEST_P(DeviceLifetimeTests, DroppedInsideBufferMapCallback) {
-    // TODO(crbug.com/413053623): implement webgpu::Buffer
-    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
-
     wgpu::BufferDescriptor desc = {};
     desc.size = 4;
     desc.usage = wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst;
@@ -285,9 +264,6 @@ TEST_P(DeviceLifetimeTests, DroppedInsideBufferMapCallback) {
 
 // Test that the device can be dropped while a write buffer operation is enqueued.
 TEST_P(DeviceLifetimeTests, DroppedWhileWriteBuffer) {
-    // TODO(crbug.com/413053623): implement webgpu::Buffer
-    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
-
     wgpu::BufferDescriptor desc = {};
     desc.size = 4;
     desc.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
@@ -302,9 +278,6 @@ TEST_P(DeviceLifetimeTests, DroppedWhileWriteBuffer) {
 // a queue submit occurs. This is slightly different from the former test since it ensures
 // that pending work is flushed.
 TEST_P(DeviceLifetimeTests, DroppedWhileWriteBufferAndSubmit) {
-    // TODO(crbug.com/413053623): implement webgpu::Buffer
-    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
-
     wgpu::BufferDescriptor desc = {};
     desc.size = 4;
     desc.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;

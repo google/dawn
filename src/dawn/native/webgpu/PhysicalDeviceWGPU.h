@@ -50,6 +50,7 @@ class PhysicalDevice : public PhysicalDeviceBase {
         const Surface* surface) const override;
 
     const DawnProcTable& GetFunctions() const;
+    Backend* GetBackend() const;
 
   private:
     explicit PhysicalDevice(Backend* backend, WGPUAdapter innerAdapter);

@@ -25,39 +25,26 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_NATIVE_WEBGPU_QUEUEWGPU_H_
-#define SRC_DAWN_NATIVE_WEBGPU_QUEUEWGPU_H_
+#ifndef SRC_DAWN_NATIVE_WEBGPU_COMMANDBUFFERWGPU_H_
+#define SRC_DAWN_NATIVE_WEBGPU_COMMANDBUFFERWGPU_H_
 
-#include "dawn/native/Queue.h"
+#include "dawn/native/CommandBuffer.h"
 
 #include "dawn/native/webgpu/Forward.h"
 
 namespace dawn::native::webgpu {
 
-class Device;
-
-class Queue final : public QueueBase {
+class CommandBuffer final : public CommandBufferBase {
   public:
-    static ResultOrError<Ref<Queue>> Create(Device* device, const QueueDescriptor* descriptor);
+    static Ref<CommandBuffer> Create(CommandEncoder* encoder,
+                                     const CommandBufferDescriptor* descriptor);
+
+    WGPUCommandBuffer Encode();
 
   private:
-    Queue(Device* device, const QueueDescriptor* descriptor);
-    ~Queue() override;
-    MaybeError SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) override;
-    MaybeError WriteBufferImpl(BufferBase* buffer,
-                               uint64_t bufferOffset,
-                               const void* data,
-                               size_t size) override;
-    ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials() override;
-    void ForceEventualFlushOfCommands() override;
-    bool HasPendingCommands() const override;
-    MaybeError SubmitPendingCommands() override;
-    ResultOrError<bool> WaitForQueueSerial(ExecutionSerial serial, Nanoseconds timeout) override;
-    MaybeError WaitForIdleForDestruction() override;
-
-    WGPUQueue mInnerQueue = nullptr;
+    CommandBuffer(CommandEncoder* encoder, const CommandBufferDescriptor* descriptor);
 };
 
 }  // namespace dawn::native::webgpu
 
-#endif  // SRC_DAWN_NATIVE_WEBGPU_QUEUEWGPU_H_
+#endif  // SRC_DAWN_NATIVE_WEBGPU_COMMANDBUFFERWGPU_H_

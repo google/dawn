@@ -50,6 +50,9 @@
 #include "dawn/native/Surface.h"
 #include "dawn/native/SwapChain.h"
 #include "dawn/native/Texture.h"
+#include "dawn/native/webgpu/BackendWGPU.h"
+#include "dawn/native/webgpu/BufferWGPU.h"
+#include "dawn/native/webgpu/CommandBufferWGPU.h"
 #include "dawn/native/webgpu/PhysicalDeviceWGPU.h"
 #include "dawn/native/webgpu/QueueWGPU.h"
 
@@ -115,6 +118,10 @@ WGPUDevice Device::GetInnerHandle() const {
     return mInnerDevice;
 }
 
+WGPUInstance Device::GetInnerInstance() const {
+    return ToBackend(GetPhysicalDevice())->GetBackend()->GetInnerInstance();
+}
+
 MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
     Ref<Queue> queue;
     DAWN_TRY_ASSIGN(queue, Queue::Create(this, &descriptor->defaultQueue));
@@ -134,12 +141,14 @@ ResultOrError<Ref<BindGroupLayoutInternalBase>> Device::CreateBindGroupLayoutImp
 }
 ResultOrError<Ref<BufferBase>> Device::CreateBufferImpl(
     const UnpackedPtr<BufferDescriptor>& descriptor) {
-    return Ref<BufferBase>{nullptr};
+    return Buffer::Create(this, descriptor);
 }
 ResultOrError<Ref<CommandBufferBase>> Device::CreateCommandBuffer(
     CommandEncoder* encoder,
     const CommandBufferDescriptor* descriptor) {
-    return Ref<CommandBufferBase>{nullptr};
+    // This is called by CommandEncoder::Finish
+    // TODO(crbug.com/413053623): Store CommandEncoderDescriptor and assign here.
+    return CommandBuffer::Create(encoder, descriptor);
 }
 Ref<ComputePipelineBase> Device::CreateUninitializedComputePipelineImpl(
     const UnpackedPtr<ComputePipelineDescriptor>& descriptor) {

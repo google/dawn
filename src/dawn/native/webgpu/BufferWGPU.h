@@ -25,10 +25,10 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_NATIVE_WEBGPU_QUEUEWGPU_H_
-#define SRC_DAWN_NATIVE_WEBGPU_QUEUEWGPU_H_
+#ifndef SRC_DAWN_NATIVE_WEBGPU_BUFFERWGPU_H_
+#define SRC_DAWN_NATIVE_WEBGPU_BUFFERWGPU_H_
 
-#include "dawn/native/Queue.h"
+#include "dawn/native/Buffer.h"
 
 #include "dawn/native/webgpu/Forward.h"
 
@@ -36,28 +36,27 @@ namespace dawn::native::webgpu {
 
 class Device;
 
-class Queue final : public QueueBase {
+class Buffer final : public BufferBase {
   public:
-    static ResultOrError<Ref<Queue>> Create(Device* device, const QueueDescriptor* descriptor);
+    static ResultOrError<Ref<Buffer>> Create(Device* device,
+                                             const UnpackedPtr<BufferDescriptor>& descriptor);
+    Buffer(Device* device, const UnpackedPtr<BufferDescriptor>& descriptor, WGPUBuffer innerBuffer);
+
+    WGPUBuffer GetInnerHandle() const;
 
   private:
-    Queue(Device* device, const QueueDescriptor* descriptor);
-    ~Queue() override;
-    MaybeError SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) override;
-    MaybeError WriteBufferImpl(BufferBase* buffer,
-                               uint64_t bufferOffset,
-                               const void* data,
-                               size_t size) override;
-    ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials() override;
-    void ForceEventualFlushOfCommands() override;
-    bool HasPendingCommands() const override;
-    MaybeError SubmitPendingCommands() override;
-    ResultOrError<bool> WaitForQueueSerial(ExecutionSerial serial, Nanoseconds timeout) override;
-    MaybeError WaitForIdleForDestruction() override;
+    MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) override;
+    void UnmapImpl() override;
+    void DestroyImpl() override;
+    bool IsCPUWritableAtCreation() const override;
+    MaybeError MapAtCreationImpl() override;
+    void* GetMappedPointer() override;
 
-    WGPUQueue mInnerQueue = nullptr;
+    WGPUBuffer mInnerBuffer = nullptr;
+
+    raw_ptr<void> mMappedData = nullptr;
 };
 
 }  // namespace dawn::native::webgpu
 
-#endif  // SRC_DAWN_NATIVE_WEBGPU_QUEUEWGPU_H_
+#endif  // SRC_DAWN_NATIVE_WEBGPU_BUFFERWGPU_H_

@@ -56,6 +56,8 @@ class Device final : public DeviceBase {
 
     WGPUDevice GetInnerHandle() const;
 
+    WGPUInstance GetInnerInstance() const;
+
     const DawnProcTable& wgpu;
 
   private:

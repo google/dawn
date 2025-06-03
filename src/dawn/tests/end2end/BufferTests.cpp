@@ -642,8 +642,8 @@ TEST_P(BufferMappingTests, RegressChromium1421170) {
 }
 
 DAWN_INSTANTIATE_TEST_P(BufferMappingTests,
-                        {D3D11Backend(), D3D12Backend(), MetalBackend(), VulkanBackend(),
-                         OpenGLBackend(), OpenGLESBackend()},
+                        {D3D11Backend(), D3D12Backend(), MetalBackend(), OpenGLBackend(),
+                         OpenGLESBackend(), VulkanBackend(), WebGPUBackend()},
                         std::initializer_list<wgpu::CallbackMode>{
                             wgpu::CallbackMode::WaitAnyOnly, wgpu::CallbackMode::AllowProcessEvents,
                             wgpu::CallbackMode::AllowSpontaneous});

@@ -27,7 +27,11 @@
 
 #include "dawn/native/webgpu/QueueWGPU.h"
 
+#include <vector>
+
 #include "dawn/native/Queue.h"
+#include "dawn/native/webgpu/BufferWGPU.h"
+#include "dawn/native/webgpu/CommandBufferWGPU.h"
 #include "dawn/native/webgpu/DeviceWGPU.h"
 
 namespace dawn::native::webgpu {
@@ -37,12 +41,35 @@ ResultOrError<Ref<Queue>> Queue::Create(Device* device, const QueueDescriptor* d
     return AcquireRef(new Queue(device, descriptor));
 }
 
-Queue::Queue(Device* device, const QueueDescriptor* descriptor) : QueueBase(device, descriptor) {}
+Queue::Queue(Device* device, const QueueDescriptor* descriptor)
+    : QueueBase(device, descriptor),
+      mInnerQueue(device->wgpu.deviceGetQueue(device->GetInnerHandle())) {}
 
-Queue::~Queue() = default;
+Queue::~Queue() {
+    if (mInnerQueue) {
+        ToBackend(GetDevice())->wgpu.queueRelease(mInnerQueue);
+        mInnerQueue = nullptr;
+    }
+}
 
 MaybeError Queue::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) {
-    // TODO(crbug.com/413053623): finish implementing WebGPU backend.
+    if (commandCount == 0 || commands == nullptr) {
+        return {};
+    }
+
+    auto& wgpu = ToBackend(GetDevice())->wgpu;
+
+    std::vector<WGPUCommandBuffer> innerCommandBuffers(commandCount);
+    for (uint32_t i = 0; i < commandCount; ++i) {
+        innerCommandBuffers[i] = ToBackend(commands[i])->Encode();
+    }
+
+    wgpu.queueSubmit(mInnerQueue, commandCount, innerCommandBuffers.data());
+
+    for (uint32_t i = 0; i < commandCount; ++i) {
+        wgpu.commandBufferRelease(innerCommandBuffers[i]);
+    }
+
     return {};
 }
 
@@ -50,7 +77,9 @@ MaybeError Queue::WriteBufferImpl(BufferBase* buffer,
                                   uint64_t bufferOffset,
                                   const void* data,
                                   size_t size) {
-    // TODO(crbug.com/413053623): finish implementing WebGPU backend.
+    auto innerBuffer = ToBackend(buffer)->GetInnerHandle();
+    ToBackend(GetDevice())
+        ->wgpu.queueWriteBuffer(mInnerQueue, innerBuffer, bufferOffset, data, size);
     return {};
 }
 

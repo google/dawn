@@ -79,6 +79,10 @@ const DawnProcTable& PhysicalDevice::GetFunctions() const {
     return mBackend->GetFunctions();
 }
 
+Backend* PhysicalDevice::GetBackend() const {
+    return mBackend;
+}
+
 bool PhysicalDevice::SupportsExternalImages() const {
     return false;
 }
