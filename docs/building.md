@@ -130,3 +130,20 @@ The solution to this problem is to use a full version llvm, like what you would
 get via homebrew, `brew install llvm`, and use something like `CC=<path to full
 clang> cmake ..` to setup a build using that toolchain.
 
+### Reproducing bot specific environments on Windows + CMake
+When investigating build issues being seen by CI/CQ it is sometimes necessary
+to replicate the exact environment from a builder/bot for local debugging.
+
+As part of a Dawn checkout the toolchains used by the builders should already be
+checked out in your repo. For Windows, using CMake, to use them instead of the
+system installed toolchain, there is a script supplied to set up the
+environment.
+
+Instead of using the system batch file to set up the environment, i.e.
+```sh
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat
+```
+use the appropriate script from `third_party\depot_tools\win_toolchain`, i.e.
+```sh
+ C:\src\dawn\third_party\depot_tools\win_toolchain\vs_files\68a20d6dee\Windows Kits\10\bin\SetEnv.cmd
+```
