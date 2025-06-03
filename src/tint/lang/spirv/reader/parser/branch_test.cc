@@ -1379,7 +1379,7 @@ TEST_F(SpirvParserTest, Loop) {
             exit_loop  # loop_1
           }
         }
-        continue  # -> $B3
+        unreachable
       }
       $B3: {  # continuing
         next_iteration  # -> $B2
@@ -1470,7 +1470,7 @@ TEST_F(SpirvParserTest, Loop_Infinite_BranchConditional) {
             unreachable
           }
         }
-        continue  # -> $B3
+        unreachable
       }
       $B3: {  # continuing
         next_iteration  # -> $B2
@@ -1523,7 +1523,7 @@ TEST_F(SpirvParserTest, Loop_BranchConditional) {
             exit_loop  # loop_1
           }
         }
-        continue  # -> $B3
+        unreachable
       }
       $B3: {  # continuing
         next_iteration  # -> $B2
@@ -1576,7 +1576,7 @@ TEST_F(SpirvParserTest, Loop_Branch) {
             exit_loop  # loop_1
           }
         }
-        continue  # -> $B3
+        unreachable
       }
       $B3: {  # continuing
         next_iteration  # -> $B2
@@ -1630,7 +1630,7 @@ TEST_F(SpirvParserTest, Loop_BranchMergeOrContinue) {
             continue  # -> $B3
           }
         }
-        continue  # -> $B3
+        unreachable
       }
       $B3: {  # continuing
         next_iteration  # -> $B2
@@ -1684,7 +1684,7 @@ TEST_F(SpirvParserTest, Loop_HeaderHasBreakIf) {
             exit_loop  # loop_1
           }
         }
-        continue  # -> $B3
+        unreachable
       }
       $B3: {  # continuing
         next_iteration  # -> $B2
@@ -1737,7 +1737,7 @@ TEST_F(SpirvParserTest, Loop_HeaderHasBreakUnless) {
             continue  # -> $B3
           }
         }
-        continue  # -> $B3
+        unreachable
       }
       $B3: {  # continuing
         next_iteration  # -> $B2
@@ -1790,7 +1790,7 @@ TEST_F(SpirvParserTest, Loop_BodyHasBreak) {
             exit_loop  # loop_1
           }
         }
-        continue  # -> $B3
+        unreachable
       }
       $B3: {  # continuing
         next_iteration  # -> $B2
@@ -1854,7 +1854,7 @@ TEST_F(SpirvParserTest, Loop_BodyHasBreakIf) {
             exit_loop  # loop_1
           }
         }
-        continue  # -> $B3
+        unreachable
       }
       $B3: {  # continuing
         next_iteration  # -> $B2
@@ -1918,7 +1918,7 @@ TEST_F(SpirvParserTest, Loop_BodyHasBreakUnless) {
             exit_loop  # loop_1
           }
         }
-        continue  # -> $B3
+        unreachable
       }
       $B3: {  # continuing
         next_iteration  # -> $B2
@@ -1987,7 +1987,7 @@ TEST_F(SpirvParserTest, Loop_BodyIf) {
             exit_loop  # loop_1
           }
         }
-        continue  # -> $B3
+        unreachable
       }
       $B3: {  # continuing
         next_iteration  # -> $B2
@@ -2054,7 +2054,7 @@ TEST_F(SpirvParserTest, Loop_BodyIfBreak) {
             exit_loop  # loop_1
           }
         }
-        continue  # -> $B3
+        unreachable
       }
       $B3: {  # continuing
         next_iteration  # -> $B2
@@ -2118,7 +2118,7 @@ TEST_F(SpirvParserTest, Loop_BodyHasContinueIf) {
             exit_loop  # loop_1
           }
         }
-        continue  # -> $B3
+        unreachable
       }
       $B3: {  # continuing
         next_iteration  # -> $B2
@@ -2182,7 +2182,7 @@ TEST_F(SpirvParserTest, Loop_BodyHasContinueUnless) {
             exit_loop  # loop_1
           }
         }
-        continue  # -> $B3
+        unreachable
       }
       $B3: {  # continuing
         next_iteration  # -> $B2
@@ -2249,7 +2249,7 @@ TEST_F(SpirvParserTest, Loop_Body_If_Continue) {
             exit_loop  # loop_1
           }
         }
-        continue  # -> $B3
+        unreachable
       }
       $B3: {  # continuing
         next_iteration  # -> $B2
@@ -2379,7 +2379,7 @@ TEST_F(SpirvParserTest, Loop_Body_Switch) {
             exit_loop  # loop_1
           }
         }
-        continue  # -> $B3
+        unreachable
       }
       $B3: {  # continuing
         next_iteration  # -> $B2
@@ -2450,7 +2450,7 @@ TEST_F(SpirvParserTest, Loop_Body_Switch_CaseContinues) {
             exit_loop  # loop_1
           }
         }
-        continue  # -> $B3
+        unreachable
       }
       $B3: {  # continuing
         next_iteration  # -> $B2
@@ -2505,7 +2505,7 @@ TEST_F(SpirvParserTest, Loop_Continue_Sequence) {
             exit_loop  # loop_1
           }
         }
-        continue  # -> $B3
+        unreachable
       }
       $B3: {  # continuing
         next_iteration  # -> $B2
@@ -2566,7 +2566,7 @@ TEST_F(SpirvParserTest, Loop_Continue_ContainsIf) {
             exit_loop  # loop_1
           }
         }
-        continue  # -> $B3
+        unreachable
       }
       $B3: {  # continuing
         if true [t: $B6, f: $B7] {  # if_2
@@ -2628,7 +2628,7 @@ TEST_F(SpirvParserTest, Loop_Continue_HasBreakIf) {
             exit_loop  # loop_1
           }
         }
-        continue  # -> $B3
+        unreachable
       }
       $B3: {  # continuing
         break_if false  # -> [t: exit_loop loop_1, f: $B2]
@@ -2682,7 +2682,7 @@ TEST_F(SpirvParserTest, Loop_Continue_HasBreakUnless) {
             exit_loop  # loop_1
           }
         }
-        continue  # -> $B3
+        unreachable
       }
       $B3: {  # continuing
         %2:bool = not false
@@ -2750,7 +2750,7 @@ TEST_F(SpirvParserTest, Loop_Loop) {
                     exit_loop  # loop_2
                   }
                 }
-                continue  # -> $B7
+                unreachable
               }
               $B7: {  # continuing
                 next_iteration  # -> $B6
@@ -2762,7 +2762,7 @@ TEST_F(SpirvParserTest, Loop_Loop) {
             exit_loop  # loop_1
           }
         }
-        continue  # -> $B3
+        unreachable
       }
       $B3: {  # continuing
         next_iteration  # -> $B2
@@ -2837,7 +2837,7 @@ TEST_F(SpirvParserTest, Loop_Loop_InnerBreak) {
                     exit_loop  # loop_2
                   }
                 }
-                continue  # -> $B7
+                unreachable
               }
               $B7: {  # continuing
                 next_iteration  # -> $B6
@@ -2849,7 +2849,7 @@ TEST_F(SpirvParserTest, Loop_Loop_InnerBreak) {
             exit_loop  # loop_1
           }
         }
-        continue  # -> $B3
+        unreachable
       }
       $B3: {  # continuing
         next_iteration  # -> $B2
@@ -2924,7 +2924,7 @@ TEST_F(SpirvParserTest, Loop_Loop_InnerContinue) {
                     exit_loop  # loop_2
                   }
                 }
-                continue  # -> $B7
+                unreachable
               }
               $B7: {  # continuing
                 next_iteration  # -> $B6
@@ -2936,7 +2936,7 @@ TEST_F(SpirvParserTest, Loop_Loop_InnerContinue) {
             exit_loop  # loop_1
           }
         }
-        continue  # -> $B3
+        unreachable
       }
       $B3: {  # continuing
         next_iteration  # -> $B2
@@ -3003,7 +3003,7 @@ TEST_F(SpirvParserTest, Loop_Loop_InnerContinueBreaks) {
                     exit_loop  # loop_2
                   }
                 }
-                continue  # -> $B7
+                unreachable
               }
               $B7: {  # continuing
                 %2:bool = not true
@@ -3016,7 +3016,7 @@ TEST_F(SpirvParserTest, Loop_Loop_InnerContinueBreaks) {
             exit_loop  # loop_1
           }
         }
-        continue  # -> $B3
+        unreachable
       }
       $B3: {  # continuing
         next_iteration  # -> $B2
@@ -3078,7 +3078,7 @@ TEST_F(SpirvParserTest, Loop_MergeBlockIsLoop) {
             exit_loop  # loop_1
           }
         }
-        continue  # -> $B5
+        unreachable
       }
       $B5: {  # continuing
         next_iteration  # -> $B4
@@ -3142,7 +3142,7 @@ TEST_F(SpirvParserTest, MergeIsAlsoMultiBlockLoopHeader) {
             exit_loop  # loop_1
           }
         }
-        continue  # -> $B5
+        unreachable
       }
       $B5: {  # continuing
         next_iteration  # -> $B4
@@ -3437,7 +3437,7 @@ TEST_F(SpirvParserTest, Loop_SingleBlock_BothBackedge) {
             unreachable
           }
         }
-        continue  # -> $B3
+        unreachable
       }
       $B3: {  # continuing
         next_iteration  # -> $B2
@@ -3729,7 +3729,7 @@ TEST_F(SpirvParserTest, Loop_Never) {
             unreachable
           }
         }
-        continue  # -> $B3
+        unreachable
       }
       $B3: {  # continuing
         %4:i32 = spirv.add<i32> 2i, 2i
@@ -3790,7 +3790,7 @@ TEST_F(SpirvParserTest, Loop_TrueToBody_FalseBreaks) {
             exit_loop  # loop_1
           }
         }
-        continue  # -> $B3
+        unreachable
       }
       $B3: {  # continuing
         %4:i32 = spirv.add<i32> 3i, 3i
@@ -3851,7 +3851,7 @@ TEST_F(SpirvParserTest, Loop_FalseToBody_TrueBreaks) {
             exit_loop  # loop_1
           }
         }
-        continue  # -> $B3
+        unreachable
       }
       $B3: {  # continuing
         %4:i32 = spirv.add<i32> 3i, 3i
@@ -4025,7 +4025,7 @@ TEST_F(SpirvParserTest, Loop_BodyConditionallyBreaks_FromTrue) {
             continue  # -> $B3
           }
         }
-        continue  # -> $B3
+        unreachable
       }
       $B3: {  # continuing
         %3:i32 = spirv.add<i32> 2i, 2i
@@ -4084,7 +4084,7 @@ TEST_F(SpirvParserTest, Loop_BodyConditionallyBreaks_FromFalse) {
             exit_loop  # loop_1
           }
         }
-        continue  # -> $B3
+        unreachable
       }
       $B3: {  # continuing
         %3:i32 = spirv.add<i32> 2i, 2i
@@ -4145,7 +4145,7 @@ TEST_F(SpirvParserTest, Loop_BodyConditionallyBreaks_FromTrue_Early) {
             continue  # -> $B3
           }
         }
-        continue  # -> $B3
+        unreachable
       }
       $B3: {  # continuing
         %4:i32 = spirv.add<i32> 3i, 3i
@@ -4206,7 +4206,7 @@ TEST_F(SpirvParserTest, Loop_BodyConditionallyBreaks_FromFalse_Early) {
             exit_loop  # loop_1
           }
         }
-        continue  # -> $B3
+        unreachable
       }
       $B3: {  # continuing
         %4:i32 = spirv.add<i32> 3i, 3i
@@ -4607,7 +4607,7 @@ TEST_F(SpirvParserTest, Branch_LoopBreak_FromContinueConstructTail) {
             exit_loop  # loop_1
           }
         }
-        continue  # -> $B3
+        unreachable
       }
       $B3: {  # continuing
         %2:bool = not true
@@ -4940,7 +4940,7 @@ TEST_F(SpirvParserTest, BranchConditional_Back_SingleBlock_LoopBreak_OnTrue) {
             continue  # -> $B3
           }
         }
-        continue  # -> $B3
+        unreachable
       }
       $B3: {  # continuing
         next_iteration  # -> $B2
@@ -4995,7 +4995,7 @@ TEST_F(SpirvParserTest, BranchConditional_Back_SingleBlock_LoopBreak_OnFalse) {
             exit_loop  # loop_1
           }
         }
-        continue  # -> $B3
+        unreachable
       }
       $B3: {  # continuing
         next_iteration  # -> $B2
@@ -5506,7 +5506,7 @@ TEST_F(SpirvParserTest, BranchConditional_LoopBreak_SingleBlock_LoopBreak) {
             unreachable
           }
         }
-        continue  # -> $B3
+        unreachable
       }
       $B3: {  # continuing
         %5:i32 = spirv.add<i32> 3i, 3i
@@ -5570,7 +5570,7 @@ TEST_F(SpirvParserTest, BranchConditional_LoopBreak_MultiBlock_LoopBreak) {
             unreachable
           }
         }
-        continue  # -> $B3
+        unreachable
       }
       $B3: {  # continuing
         %6:i32 = spirv.add<i32> 1i, 2i
@@ -5804,7 +5804,7 @@ TEST_F(SpirvParserTest, BranchConditional_LoopBreak_Forward_OnTrue) {
             exit_loop  # loop_1
           }
         }
-        continue  # -> $B3
+        unreachable
       }
       $B3: {  # continuing
         %6:i32 = spirv.add<i32> 1i, 3i
@@ -5872,7 +5872,7 @@ TEST_F(SpirvParserTest, BranchConditional_LoopBreak_Forward_OnFalse) {
             continue  # -> $B3
           }
         }
-        continue  # -> $B3
+        unreachable
       }
       $B3: {  # continuing
         %6:i32 = spirv.add<i32> 1i, 3i
@@ -5932,7 +5932,7 @@ TEST_F(SpirvParserTest, BranchConditional_Continue_Continue_FromHeader) {
             unreachable
           }
         }
-        continue  # -> $B3
+        unreachable
       }
       $B3: {  # continuing
         %5:i32 = spirv.add<i32> 3i, 3i
@@ -5996,7 +5996,7 @@ TEST_F(SpirvParserTest, BranchConditional_Continue_Continue_AfterHeader_Uncondit
             unreachable
           }
         }
-        continue  # -> $B3
+        unreachable
       }
       $B3: {  # continuing
         %6:i32 = spirv.add<i32> 1i, 2i
@@ -6476,7 +6476,7 @@ TEST_F(SpirvParserTest, BranchConditional_Continue_Forward_OnTrue) {
             continue  # -> $B3
           }
         }
-        continue  # -> $B3
+        unreachable
       }
       $B3: {  # continuing
         %6:i32 = spirv.add<i32> 1i, 3i
@@ -6544,7 +6544,7 @@ TEST_F(SpirvParserTest, BranchConditional_Continue_Forward_OnFalse) {
             continue  # -> $B3
           }
         }
-        continue  # -> $B3
+        unreachable
       }
       $B3: {  # continuing
         %6:i32 = spirv.add<i32> 1i, 3i
