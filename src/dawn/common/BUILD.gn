@@ -273,6 +273,8 @@ if (is_win || is_linux || is_chromeos || is_mac || is_fuchsia || is_android ||
       "ContentLessObjectCache.h",
       "ContentLessObjectCacheable.h",
       "CoreFoundationRef.h",
+      "Defer.cpp",
+      "Defer.h",
       "DynamicLib.cpp",
       "DynamicLib.h",
       "Enumerator.h",
