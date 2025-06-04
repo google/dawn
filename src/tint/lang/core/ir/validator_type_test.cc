@@ -530,6 +530,38 @@ INSTANTIATE_TEST_SUITE_P(
                     std::make_tuple(false, core::type::TextureDimension::kCubeArray),
                     std::make_tuple(false, core::type::TextureDimension::kNone)));
 
+using Type_InputAttachmentComponentType = TypeTest;
+
+TEST_P(Type_InputAttachmentComponentType, Test) {
+    bool allowed = std::get<0>(GetParam());
+    auto* type = std::get<1>(GetParam())(ty);
+    b.Append(mod.root_block, [&] {
+        auto* var = b.Var("m", AddressSpace::kHandle, ty.input_attachment(type));
+        var->SetBindingPoint(0, 0);
+    });
+
+    auto res = ir::Validate(mod);
+    if (allowed) {
+        ASSERT_EQ(res, Success) << res.Failure();
+    } else {
+        ASSERT_NE(res, Success);
+        EXPECT_THAT(
+            res.Failure().reason,
+            testing::HasSubstr(":2:3 error: var: invalid input attachment component type: '" +
+                               type->FriendlyName()))
+            << res.Failure();
+    }
+}
+
+INSTANTIATE_TEST_SUITE_P(IR_ValidatorTest,
+                         Type_InputAttachmentComponentType,
+                         testing::Values(std::make_tuple(true, TypeBuilder<f32>),
+                                         std::make_tuple(true, TypeBuilder<i32>),
+                                         std::make_tuple(true, TypeBuilder<u32>),
+                                         std::make_tuple(false, TypeBuilder<f16>),
+                                         std::make_tuple(false, TypeBuilder<core::type::Bool>),
+                                         std::make_tuple(false, TypeBuilder<core::type::Void>)));
+
 using IR_ValidatorRefTypeTest = IRTestParamHelper<std::tuple</* holds_ref */ bool,
                                                              /* refs_allowed */ bool,
                                                              /* type_builder */ TypeBuilderFn>>;

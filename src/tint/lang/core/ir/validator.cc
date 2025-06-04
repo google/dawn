@@ -1971,6 +1971,13 @@ void Validator::CheckType(const core::type::Type* root,
                         return true;
                 }
             },
+            [&](const core::type::InputAttachment* i) {
+                if (!i->Type()->IsAnyOf<core::type::F32, core::type::I32, core::type::U32>()) {
+                    diag() << "invalid input attachment component type: " << NameOf(i->Type());
+                    return false;
+                }
+                return true;
+            },
             [&](const core::type::SubgroupMatrix* m) {
                 if (!m->Type()
                          ->IsAnyOf<core::type::F16, core::type::F32, core::type::I8,
