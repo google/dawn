@@ -1862,8 +1862,13 @@ void Validator::CheckType(const core::type::Type* root,
                     }
                 }
 
-                if (ptr->StoreType()->IsHandle()) {
-                    if (ptr->AddressSpace() != AddressSpace::kHandle) {
+                if (ptr->AddressSpace() == AddressSpace::kHandle) {
+                    if (!ptr->StoreType()->IsHandle()) {
+                        diag() << "the 'handle' address space can only be used for handle types";
+                        return false;
+                    }
+                } else {
+                    if (ptr->StoreType()->IsHandle()) {
                         diag() << "handle types can only be declared in the 'handle' address space";
                         return false;
                     }
