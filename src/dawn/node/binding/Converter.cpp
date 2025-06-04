@@ -1375,8 +1375,9 @@ bool Converter::Convert(wgpu::BindGroupLayoutEntry& out,
                         const interop::GPUBindGroupLayoutEntry& in) {
     // TODO(crbug.com/dawn/1129): External textures
     return Convert(out.binding, in.binding) && Convert(out.visibility, in.visibility) &&
-           Convert(out.buffer, in.buffer) && Convert(out.sampler, in.sampler) &&
-           Convert(out.texture, in.texture) && Convert(out.storageTexture, in.storageTexture);
+           Convert(out.bindingArraySize, in.bindingArraySize) && Convert(out.buffer, in.buffer) &&
+           Convert(out.sampler, in.sampler) && Convert(out.texture, in.texture) &&
+           Convert(out.storageTexture, in.storageTexture);
 }
 
 bool Converter::Convert(wgpu::BufferBindingLayout& out, const interop::GPUBufferBindingLayout& in) {
