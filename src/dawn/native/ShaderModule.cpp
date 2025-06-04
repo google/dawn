@@ -379,7 +379,7 @@ ResultOrError<PixelLocalMemberType> FromTintPixelLocalMemberType(
 ResultOrError<tint::Program> ParseWGSL(const tint::Source::File* file,
                                        const tint::wgsl::AllowedFeatures& allowedFeatures,
                                        const std::vector<tint::wgsl::Extension>& internalExtensions,
-                                       OwnedCompilationMessages* outMessages) {
+                                       ParsedCompilationMessages* outMessages) {
     tint::wgsl::reader::Options options;
     options.allowed_features = allowedFeatures;
     options.allowed_features.extensions.insert(internalExtensions.begin(),
@@ -398,7 +398,7 @@ ResultOrError<tint::Program> ParseWGSL(const tint::Source::File* file,
 #if TINT_BUILD_SPV_READER
 ResultOrError<tint::Program> ParseSPIRV(const std::vector<uint32_t>& spirv,
                                         const tint::wgsl::AllowedFeatures& allowedFeatures,
-                                        OwnedCompilationMessages* outMessages,
+                                        ParsedCompilationMessages* outMessages,
                                         const DawnShaderModuleSPIRVOptionsDescriptor* optionsDesc) {
     tint::spirv::reader::Options options;
     if (optionsDesc) {
@@ -1310,7 +1310,7 @@ MaybeError ParseShaderModule(DeviceBase* device,
                              const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
                              const std::vector<tint::wgsl::Extension>& internalExtensions,
                              ShaderModuleParseResult* parseResult,
-                             OwnedCompilationMessages* outMessages) {
+                             ParsedCompilationMessages* outMessages) {
     DAWN_ASSERT(parseResult != nullptr);
 
     // We assume that the descriptor chain has already been validated.
@@ -1723,7 +1723,7 @@ Future ShaderModuleBase::APIGetCompilationInfo(
     return {futureID};
 }
 
-OwnedCompilationMessages* ShaderModuleBase::GetCompilationMessages() const {
+const OwnedCompilationMessages* ShaderModuleBase::GetCompilationMessages() const {
     return mCompilationMessages.get();
 }
 
@@ -1741,6 +1741,11 @@ std::string ShaderModuleBase::GetCompilationLog() const {
     }
 
     return t.str();
+}
+
+void ShaderModuleBase::SetCompilationMessagesForTesting(
+    std::unique_ptr<OwnedCompilationMessages>* compilationMessages) {
+    mCompilationMessages = std::move(*compilationMessages);
 }
 
 MaybeError ShaderModuleBase::InitializeBase(

@@ -135,7 +135,7 @@ MaybeError ParseShaderModule(DeviceBase* device,
                              const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
                              const std::vector<tint::wgsl::Extension>& internalExtensions,
                              ShaderModuleParseResult* parseResult,
-                             OwnedCompilationMessages* outMessages);
+                             ParsedCompilationMessages* outMessages);
 
 MaybeError ValidateCompatibilityWithPipelineLayout(DeviceBase* device,
                                                    const EntryPointMetadata& entryPoint,
@@ -385,8 +385,10 @@ class ShaderModuleBase : public RefCountedWithExternalCount<ApiObjectBase>,
 
     Future APIGetCompilationInfo(const WGPUCompilationInfoCallbackInfo& callbackInfo);
 
-    OwnedCompilationMessages* GetCompilationMessages() const;
+    const OwnedCompilationMessages* GetCompilationMessages() const;
     std::string GetCompilationLog() const;
+    void SetCompilationMessagesForTesting(
+        std::unique_ptr<OwnedCompilationMessages>* compilationMessages);
 
     // Return nullable tintProgram directly without any recreation, can be used for testing the
     // releasing/recreation behaviors.
@@ -432,7 +434,7 @@ class ShaderModuleBase : public RefCountedWithExternalCount<ApiObjectBase>,
     };
     MutexProtected<TintData> mTintData;
 
-    std::unique_ptr<OwnedCompilationMessages> mCompilationMessages;
+    std::unique_ptr<const OwnedCompilationMessages> mCompilationMessages;
 
     const std::vector<tint::wgsl::Extension> mInternalExtensions;
 };

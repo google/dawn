@@ -216,7 +216,7 @@ class DeviceBase : public ErrorSink,
     ResultOrError<Ref<ShaderModuleBase>> CreateShaderModule(
         const ShaderModuleDescriptor* descriptor,
         const std::vector<tint::wgsl::Extension>& internalExtensions = {},
-        std::unique_ptr<OwnedCompilationMessages>* compilationMessages = nullptr);
+        ParsedCompilationMessages* compilationMessages = nullptr);
     ResultOrError<Ref<SwapChainBase>> CreateSwapChain(Surface* surface,
                                                       SwapChainBase* previousSwapChain,
                                                       const SurfaceConfiguration* config);

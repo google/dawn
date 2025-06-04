@@ -51,7 +51,7 @@ ResultOrError<tint::Program> RunTransforms(tint::ast::transform::Manager* transf
                                            const tint::Program* program,
                                            const tint::ast::transform::DataMap& inputs,
                                            tint::ast::transform::DataMap* outputs,
-                                           OwnedCompilationMessages* outMessages) {
+                                           ParsedCompilationMessages* outMessages) {
     DAWN_ASSERT(program != nullptr);
     tint::ast::transform::DataMap transform_outputs;
     tint::Program result = transformManager->Run(*program, inputs, transform_outputs);

@@ -1413,8 +1413,7 @@ ShaderModuleBase* DeviceBase::APICreateShaderModule(const ShaderModuleDescriptor
     utils::TraceLabel label = utils::GetLabelForTrace(descriptor->label);
     TRACE_EVENT1(GetPlatform(), General, "DeviceBase::APICreateShaderModule", "label", label.label);
 
-    std::unique_ptr<OwnedCompilationMessages> compilationMessages(
-        std::make_unique<OwnedCompilationMessages>());
+    ParsedCompilationMessages compilationMessages;
     auto resultOrError =
         CreateShaderModule(descriptor, /*internalExtensions=*/{}, &compilationMessages);
 
@@ -1435,21 +1434,21 @@ ShaderModuleBase* DeviceBase::APICreateShaderModule(const ShaderModuleDescriptor
     DAWN_ASSERT(consumedError);
     DAWN_ASSERT(result == nullptr);
     // The compilation messages should still be hold valid if shader module creation failed.
-    DAWN_ASSERT(compilationMessages != nullptr);
     // Move the compilation messages to the error shader module so the application can later
     // retrieve it with GetCompilationInfo.
-    result = ShaderModuleBase::MakeError(this, descriptor ? descriptor->label : nullptr,
-                                         std::move(compilationMessages));
+    result = ShaderModuleBase::MakeError(
+        this, descriptor ? descriptor->label : nullptr,
+        std::make_unique<OwnedCompilationMessages>(std::move(compilationMessages)));
     return ReturnToAPI(std::move(result));
 }
 
 ShaderModuleBase* DeviceBase::APICreateErrorShaderModule(const ShaderModuleDescriptor* descriptor,
                                                          StringView errorMessage) {
-    std::unique_ptr<OwnedCompilationMessages> compilationMessages(
-        std::make_unique<OwnedCompilationMessages>());
-    compilationMessages->AddUnanchoredMessage(errorMessage, wgpu::CompilationMessageType::Error);
+    ParsedCompilationMessages compilationMessages;
+    compilationMessages.AddUnanchoredMessage(errorMessage, wgpu::CompilationMessageType::Error);
     Ref<ShaderModuleBase> result = ShaderModuleBase::MakeError(
-        this, descriptor ? descriptor->label : nullptr, std::move(compilationMessages));
+        this, descriptor ? descriptor->label : nullptr,
+        std::make_unique<OwnedCompilationMessages>(std::move(compilationMessages)));
     auto log = result->GetCompilationLog();
 
     std::unique_ptr<ErrorData> errorData = DAWN_VALIDATION_ERROR(
@@ -2118,7 +2117,7 @@ ResultOrError<Ref<SamplerBase>> DeviceBase::CreateSampler(const SamplerDescripto
 ResultOrError<Ref<ShaderModuleBase>> DeviceBase::CreateShaderModule(
     const ShaderModuleDescriptor* descriptor,
     const std::vector<tint::wgsl::Extension>& internalExtensions,
-    std::unique_ptr<OwnedCompilationMessages>* compilationMessages) {
+    ParsedCompilationMessages* compilationMessages) {
     DAWN_TRY(ValidateIsAlive());
 
     // Unpack and validate the descriptor chain before doing further validation or cache lookups.
@@ -2162,16 +2161,14 @@ ResultOrError<Ref<ShaderModuleBase>> DeviceBase::CreateShaderModule(
 
     return GetOrCreate(
         mCaches->shaderModules, &blueprint, [&]() -> ResultOrError<Ref<ShaderModuleBase>> {
-            std::unique_ptr<OwnedCompilationMessages> inplaceCompilationMessages;
             // If the compilationMessages is nullptr, caller of this function assumes that the
             // shader creation will succeed and doesn't care the compilation messages. However we
             // still use a inplace compile messages to ensure every shader module in the cache have
             // a valid OwnedCompilationMessages.
+            ParsedCompilationMessages inplaceCompilationMessages;
             if (compilationMessages == nullptr) {
-                inplaceCompilationMessages = std::make_unique<OwnedCompilationMessages>();
                 compilationMessages = &inplaceCompilationMessages;
             }
-            auto* unownedMessages = compilationMessages->get();
 
             SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(GetPlatform(), "CreateShaderModuleUS");
 
@@ -2181,13 +2178,16 @@ ResultOrError<Ref<ShaderModuleBase>> DeviceBase::CreateShaderModule(
                 // Try to validate and parse the shader code, and if an error occurred return it
                 // without updating the cache.
                 DAWN_TRY(ParseShaderModule(this, unpacked, internalExtensions, &parseResult,
-                                           unownedMessages));
+                                           compilationMessages));
 
                 Ref<ShaderModuleBase> shaderModule;
                 // If created successfully, compilation messages are moved into the shader module.
+                DAWN_ASSERT(compilationMessages);
+                auto ownedCompilationMessages =
+                    std::make_unique<OwnedCompilationMessages>(std::move(*compilationMessages));
                 DAWN_TRY_ASSIGN(shaderModule,
                                 CreateShaderModuleImpl(unpacked, internalExtensions, &parseResult,
-                                                       compilationMessages));
+                                                       &ownedCompilationMessages));
                 shaderModule->SetContentHash(blueprintHash);
                 return shaderModule;
             }();

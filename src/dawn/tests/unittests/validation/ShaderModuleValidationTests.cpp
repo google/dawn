@@ -25,11 +25,14 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <memory>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "dawn/common/Constants.h"
+#include "dawn/native/CompilationMessages.h"
 #include "dawn/native/ShaderModule.h"
 #include "dawn/tests/unittests/validation/ValidationTest.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
@@ -316,13 +319,19 @@ TEST_F(ShaderModuleValidationTest, GetCompilationMessages) {
         })");
 
     native::ShaderModuleBase* shaderModuleBase = native::FromAPI(shaderModule.Get());
-    native::OwnedCompilationMessages* messages = shaderModuleBase->GetCompilationMessages();
-    messages->ClearMessages();
-    messages->AddMessageForTesting("Info Message");
-    messages->AddMessageForTesting("Warning Message", wgpu::CompilationMessageType::Warning);
-    messages->AddMessageForTesting("Error Message", wgpu::CompilationMessageType::Error, 3, 4);
-    messages->AddMessageForTesting("Complete Message", wgpu::CompilationMessageType::Info, 3, 4, 5,
-                                   6);
+
+    // Build a list of messages to test.
+    native::ParsedCompilationMessages messages;
+    messages.AddMessageForTesting("Info Message");
+    messages.AddMessageForTesting("Warning Message", wgpu::CompilationMessageType::Warning);
+    messages.AddMessageForTesting("Error Message", wgpu::CompilationMessageType::Error, 3, 4);
+    messages.AddMessageForTesting("Complete Message", wgpu::CompilationMessageType::Info, 3, 4, 5,
+                                  6);
+    auto ownedMessages = std::make_unique<native::OwnedCompilationMessages>(std::move(messages));
+    // Set the messages on the shader module base.
+    shaderModuleBase->SetCompilationMessagesForTesting(&ownedMessages);
+    // Assert that the messages are set.
+    ASSERT_EQ(ownedMessages, nullptr);
 
     shaderModule.GetCompilationInfo(
         wgpu::CallbackMode::AllowSpontaneous,
