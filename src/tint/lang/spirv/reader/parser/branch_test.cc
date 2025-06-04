@@ -520,21 +520,21 @@ TEST_F(SpirvParserTest, BranchConditional_HoistingMultiExit) {
  %main_start = OpLabel
                OpBranch %10
          %10 = OpLabel
-               OpLoopMerge %merge %cont None
+               OpLoopMerge %99 %80 None
                OpBranch %20
          %20 = OpLabel
         %foo = OpIAdd %i32 %one %two
                OpSelectionMerge %50 None
                OpBranchConditional %true %30 %40
          %30 = OpLabel
-               OpBranch %merge
+               OpBranch %99
          %40 = OpLabel
-               OpBranch %merge
+               OpBranch %99
          %50 = OpLabel
                OpUnreachable
-       %cont = OpLabel
+         %80 = OpLabel
                OpBranch %10
-      %merge = OpLabel
+         %99 = OpLabel
        %foo2 = OpCopyObject %i32 %foo
                OpReturn
                OpFunctionEnd
@@ -553,22 +553,13 @@ TEST_F(SpirvParserTest, BranchConditional_HoistingMultiExit) {
             exit_loop %3  # loop_1
           }
         }
-        if true [t: $B6, f: $B7] {  # if_2
-          $B6: {  # true
-            %4:i32 = let %3
-            ret
-          }
-          $B7: {  # false
-            unreachable
-          }
-        }
         unreachable
       }
       $B3: {  # continuing
         next_iteration  # -> $B2
       }
     }
-    %5:i32 = let %2
+    %4:i32 = let %2
     ret
   }
 }

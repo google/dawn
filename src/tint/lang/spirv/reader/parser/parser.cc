@@ -1851,6 +1851,11 @@ class Parser {
             true_blocks.pop_back();
             false_blocks.pop_back();
         }
+
+        // If this is already a stop block, so it can't be a premerge
+        if (id.has_value() && walk_stop_blocks_.contains(id.value())) {
+            return std::nullopt;
+        }
         return id;
     }
 
