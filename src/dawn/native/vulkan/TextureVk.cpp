@@ -632,6 +632,9 @@ VkImageUsageFlags VulkanImageUsage(const DeviceBase* device,
             }
         }
     }
+    if (usage & wgpu::TextureUsage::TransientAttachment) {
+        flags |= VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT;
+    }
 
     // Choosing Vulkan image usages should not know about kReadOnlyRenderAttachment because that's
     // a property of when the image is used, not of the creation.
@@ -1362,10 +1365,12 @@ MaybeError InternalTexture::Initialize(VkImageUsageFlags extraUsages) {
         createInfo.flags |= VK_IMAGE_CREATE_2D_ARRAY_COMPATIBLE_BIT;
     }
 
-    // We always set VK_IMAGE_USAGE_TRANSFER_DST_BIT unconditionally because the Vulkan images
-    // that are used in vkCmdClearColorImage() must have been created with this flag, which is
-    // also required for the implementation of robust resource initialization.
-    createInfo.usage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+    // Zero initialization and various workarounds need to copy to the images. Always add
+    // VK_IMAGE_USAGE_TRANSFER_DST_BIT to allow for these use cases, unless the image is a transient
+    // attachment and incompatible with transfers.
+    if (!(GetInternalUsage() & wgpu::TextureUsage::TransientAttachment)) {
+        createInfo.usage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+    }
 
     DAWN_TRY(CheckVkOOMThenSuccess(
         device->fn.CreateImage(device->GetVkDevice(), &createInfo, nullptr, &*mHandle),
@@ -1772,10 +1777,12 @@ MaybeError ExternalVkImageTexture::Initialize(const ExternalImageDescriptorVk* d
     baseCreateInfo.queueFamilyIndexCount = 0;
     baseCreateInfo.pQueueFamilyIndices = nullptr;
 
-    // We always set VK_IMAGE_USAGE_TRANSFER_DST_BIT unconditionally because the Vulkan images
-    // that are used in vkCmdClearColorImage() must have been created with this flag, which is
-    // also required for the implementation of robust resource initialization.
-    baseCreateInfo.usage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+    // Zero initialization and various workarounds need to copy to the images. Always add
+    // VK_IMAGE_USAGE_TRANSFER_DST_BIT to allow for these use cases, unless the image is a transient
+    // attachment and incompatible with transfers.
+    if (!(GetInternalUsage() & wgpu::TextureUsage::TransientAttachment)) {
+        baseCreateInfo.usage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+    }
 
     VkImageFormatListCreateInfo imageFormatListInfo = {};
     PNextChainBuilder createInfoChain(&baseCreateInfo);
