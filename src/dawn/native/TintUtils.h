@@ -57,10 +57,10 @@ template <typename T>
     requires(tint::HasReflection<T>)
 class stream::Stream<T> {
   public:
-    static void Write(Sink* s, const T& v) {
+    static void Write(stream::Sink* s, const T& v) {
         tint::ForeachField(v, [&](const auto& f) { StreamIn(s, f); });
     }
-    static MaybeError Read(Source* s, T* v) {
+    static MaybeError Read(stream::Source* s, T* v) {
         MaybeError error = {};
         tint::ForeachField(*v, [&](auto& f) {
             if (!error.IsError()) {
