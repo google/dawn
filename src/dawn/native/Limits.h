@@ -38,6 +38,7 @@
 
 namespace dawn::native {
 
+// TODO(crbug.com/421950205): Replace this with dawn::utils::ComboLimits.
 struct CombinedLimits {
     Limits v1;
     DawnHostMappedPointerLimits hostMappedPointerLimits;

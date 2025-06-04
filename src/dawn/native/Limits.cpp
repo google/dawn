@@ -331,17 +331,17 @@ void ApplyLimitTiers(CombinedLimits* limits) {
         }                                                            \
     }
 
-#define X_CHECK_BETTER_AND_CLAMP(Scope, Class, limitName, ...)                             \
-    {                                                                                      \
-        constexpr std::array<decltype(Limits::limitName), kTierCount> tiers{__VA_ARGS__};  \
-        decltype(Limits::limitName) tierValue = tiers[i - 1];                              \
-        if (CheckLimit<LimitClass::Class>::IsBetter(tierValue, limits->Scope.limitName)) { \
-            /* The tier is better. Go to the next tier. */                                 \
-            continue;                                                                      \
-        } else if (tierValue != limits->Scope.limitName) {                                 \
-            /* Better than the tier. Degrade |limits| to the tier. */                      \
-            limits->Scope.limitName = tiers[i - 1];                                        \
-        }                                                                                  \
+#define X_CHECK_BETTER_AND_CLAMP(Scope, Class, limitName, ...)                                  \
+    {                                                                                           \
+        constexpr std::array<decltype(limits->Scope.limitName), kTierCount> tiers{__VA_ARGS__}; \
+        auto tierValue = tiers[i - 1];                                                          \
+        if (CheckLimit<LimitClass::Class>::IsBetter(tierValue, limits->Scope.limitName)) {      \
+            /* The tier is better. Go to the next tier. */                                      \
+            continue;                                                                           \
+        } else if (tierValue != limits->Scope.limitName) {                                      \
+            /* Better than the tier. Degrade |limits| to the tier. */                           \
+            limits->Scope.limitName = tiers[i - 1];                                             \
+        }                                                                                       \
     }
 
     LIMITS_EACH_GROUP(X_EACH_GROUP)

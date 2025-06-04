@@ -1397,6 +1397,16 @@ class MultiGeneratorFromDawnJSON(Generator):
                            'src/' + native_dir + '/ObjectType_autogen.cpp',
                            frontend_params))
 
+        if 'dawn_utils' in targets:
+            renders.append(
+                FileRender('dawn/utils/ComboLimits.h',
+                           'src/dawn/utils/ComboLimits.h',
+                           [RENDER_PARAMS_BASE, params_dawn]))
+            renders.append(
+                FileRender('dawn/utils/ComboLimits.cpp',
+                           'src/dawn/utils/ComboLimits.cpp',
+                           [RENDER_PARAMS_BASE, params_dawn]))
+
         if 'wire' in targets:
             params_dawn_wire = parse_json(
                 loaded_json,

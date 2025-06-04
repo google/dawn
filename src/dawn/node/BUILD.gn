@@ -211,6 +211,7 @@ static_library("dawn_node_binding") {
   deps = [
     ":dawn_node_interop",
     "$dawn_root/src/dawn/native:native",
+    "$dawn_root/src/dawn/utils:wgpu_utils",
   ]
 }
 

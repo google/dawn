@@ -47,10 +47,11 @@ struct GLFWindowDestroyer {
 
 class SurfaceTests : public DawnTest {
   protected:
-    wgpu::Limits GetRequiredLimits(const wgpu::Limits& supported) override {
+    void GetRequiredLimits(const dawn::utils::ComboLimits& supported,
+                           dawn::utils::ComboLimits& required) override {
         // Just copy all the limits, though all we really care about is
         // maxStorageBuffersInFragmentStage
-        return supported;
+        supported.UnlinkedCopyTo(&required);
     }
 
   public:

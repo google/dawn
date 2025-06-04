@@ -31,6 +31,7 @@
 #include <webgpu/webgpu_cpp.h>
 
 #include "dawn/native/DawnNative.h"
+#include "dawn/utils/ComboLimits.h"
 #include "src/dawn/node/interop/NodeAPI.h"
 #include "src/dawn/node/interop/WebGPU.h"
 
@@ -39,7 +40,7 @@ namespace wgpu::binding {
 // GPUSupportedLimits is an implementation of interop::GPUSupportedLimits.
 class GPUSupportedLimits final : public interop::GPUSupportedLimits {
   public:
-    explicit GPUSupportedLimits(wgpu::Limits limits);
+    explicit GPUSupportedLimits(const dawn::utils::ComboLimits& limits);
 
     // interop::GPUSupportedLimits interface compliance
     uint32_t getMaxTextureDimension1D(Napi::Env) override;
@@ -79,7 +80,7 @@ class GPUSupportedLimits final : public interop::GPUSupportedLimits {
     uint32_t getMaxStorageTexturesInVertexStage(Napi::Env) override;
 
   private:
-    wgpu::Limits limits_;
+    dawn::utils::ComboLimits limits_;
 };
 
 }  // namespace wgpu::binding

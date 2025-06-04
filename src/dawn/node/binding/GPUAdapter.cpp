@@ -34,6 +34,7 @@
 #include <utility>
 #include <vector>
 
+#include "dawn/utils/ComboLimits.h"
 #include "src/dawn/node/binding/Converter.h"
 #include "src/dawn/node/binding/Errors.h"
 #include "src/dawn/node/binding/Flags.h"
@@ -98,8 +99,8 @@ interop::Interface<interop::GPUSupportedFeatures> GPUAdapter::getFeatures(Napi::
 }
 
 interop::Interface<interop::GPUSupportedLimits> GPUAdapter::getLimits(Napi::Env env) {
-    wgpu::Limits limits{};
-    if (!adapter_.GetLimits(&limits)) {
+    dawn::utils::ComboLimits limits;
+    if (!adapter_.GetLimits(limits.GetLinked())) {
         Napi::Error::New(env, "failed to get adapter limits").ThrowAsJavaScriptException();
     }
 
@@ -146,12 +147,12 @@ interop::Promise<interop::Interface<interop::GPUDevice>> GPUAdapter::requestDevi
         env, PROMISE_INFO, async_);
     auto promise = ctx->promise;
 
-    wgpu::Limits limits;
+    dawn::utils::ComboLimits limits;
 #define COPY_LIMIT(LIMIT)                                                                        \
     if (descriptor.requiredLimits.count(#LIMIT)) {                                               \
         auto jsLimitVariant = descriptor.requiredLimits[#LIMIT];                                 \
         if (!std::holds_alternative<interop::UndefinedType>(jsLimitVariant)) {                   \
-            using DawnLimitType = decltype(WGPULimits::LIMIT);                                   \
+            using DawnLimitType = decltype(dawn::utils::ComboLimits::LIMIT);                     \
             DawnLimitType* dawnLimit = &limits.LIMIT;                                            \
             uint64_t jsLimit = std::get<interop::GPUSize64>(jsLimitVariant);                     \
             if (jsLimit > std::numeric_limits<DawnLimitType>::max() - 1) {                       \
@@ -175,7 +176,7 @@ interop::Promise<interop::Interface<interop::GPUDevice>> GPUAdapter::requestDevi
 
     desc.requiredFeatureCount = requiredFeatures.size();
     desc.requiredFeatures = requiredFeatures.data();
-    desc.requiredLimits = &limits;
+    desc.requiredLimits = limits.GetLinked();
 
     // Set the device callbacks.
     using DeviceLostContext = AsyncContext<interop::Interface<interop::GPUDeviceLostInfo>>;

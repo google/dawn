@@ -254,8 +254,8 @@ interop::Interface<interop::GPUSupportedFeatures> GPUDevice::getFeatures(Napi::E
 }
 
 interop::Interface<interop::GPUSupportedLimits> GPUDevice::getLimits(Napi::Env env) {
-    wgpu::Limits limits{};
-    if (!device_.GetLimits(&limits)) {
+    dawn::utils::ComboLimits limits;
+    if (!device_.GetLimits(limits.GetLinked())) {
         Napi::Error::New(env, "failed to get device limits").ThrowAsJavaScriptException();
     }
 

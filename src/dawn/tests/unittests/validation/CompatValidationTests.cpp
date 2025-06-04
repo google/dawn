@@ -1964,8 +1964,8 @@ INSTANTIATE_TEST_SUITE_P(,
 
 class CompatLayoutLimitsTests : public CompatValidationTest {
   protected:
-    wgpu::Limits GetRequiredLimits(const wgpu::Limits& supported) override {
-        wgpu::Limits required = {};
+    void GetRequiredLimits(const dawn::utils::ComboLimits& supported,
+                           dawn::utils::ComboLimits& required) override {
         required.maxStorageBuffersInFragmentStage = supported.maxStorageBuffersInFragmentStage / 2;
         required.maxStorageBuffersInVertexStage = supported.maxStorageBuffersInVertexStage / 2;
         required.maxStorageTexturesInFragmentStage =
@@ -1973,7 +1973,6 @@ class CompatLayoutLimitsTests : public CompatValidationTest {
         required.maxStorageTexturesInVertexStage = supported.maxStorageTexturesInVertexStage / 2;
         required.maxStorageBuffersPerShaderStage = supported.maxStorageBuffersPerShaderStage;
         required.maxStorageTexturesPerShaderStage = supported.maxStorageTexturesPerShaderStage;
-        return required;
     }
 
     void DoBindGroupLayoutTest(uint32_t limitInStage,
@@ -2032,7 +2031,7 @@ class CompatLayoutLimitsTests : public CompatValidationTest {
 // Test that in compat we get an error if we use more than maxStorageBuffersInFragmentStage
 // when it's lower than maxStorageBuffersPerShaderStage in createBindGroupLayout
 TEST_F(CompatLayoutLimitsTests, CanNotPassLimitOfStorageBuffersInFragmentStageBindGroupLayout) {
-    const auto limits = GetSupportedLimits();
+    const auto& limits = GetSupportedLimits();
     wgpu::BindGroupLayoutEntry entry;
     entry.visibility = wgpu::ShaderStage::Fragment;
     entry.buffer.type = wgpu::BufferBindingType::ReadOnlyStorage;
@@ -2044,7 +2043,7 @@ TEST_F(CompatLayoutLimitsTests, CanNotPassLimitOfStorageBuffersInFragmentStageBi
 // Test that in compat we get an error if we use more than maxStorageBuffersInVertexStage
 // when it's lower than maxStorageBuffersPerShaderStage in createBindGroupLayout
 TEST_F(CompatLayoutLimitsTests, CanNotPassLimitOfStorageBuffersInVertexStageBindGroupLayout) {
-    const auto limits = GetSupportedLimits();
+    const auto& limits = GetSupportedLimits();
     wgpu::BindGroupLayoutEntry entry;
     entry.visibility = wgpu::ShaderStage::Vertex;
     entry.buffer.type = wgpu::BufferBindingType::ReadOnlyStorage;
@@ -2056,7 +2055,7 @@ TEST_F(CompatLayoutLimitsTests, CanNotPassLimitOfStorageBuffersInVertexStageBind
 // Test that in compat we get an error if we use more than maxStorageTexturesInVertexStage
 // when it's lower than maxStorageTexturesPerShaderStage in createBindGroupLayout
 TEST_F(CompatLayoutLimitsTests, CanNotPassLimitOfStorageTexturesInVertexStageBindGroupLayout) {
-    const auto limits = GetSupportedLimits();
+    const auto& limits = GetSupportedLimits();
     wgpu::BindGroupLayoutEntry entry;
     entry.visibility = wgpu::ShaderStage::Vertex;
     entry.storageTexture.format = wgpu::TextureFormat::R32Float;
@@ -2069,7 +2068,7 @@ TEST_F(CompatLayoutLimitsTests, CanNotPassLimitOfStorageTexturesInVertexStageBin
 // Test that in compat we get an error if we use more than maxStorageBuffersInFragmentStage
 // when it's lower than maxStorageBuffersPerShaderStage in createPipelineLayout
 TEST_F(CompatLayoutLimitsTests, CanNotPassLimitOfStorageBuffersInFragmentStagePipelineLayout) {
-    const auto limits = GetSupportedLimits();
+    const auto& limits = GetSupportedLimits();
     wgpu::BindGroupLayoutEntry entry;
     entry.visibility = wgpu::ShaderStage::Fragment;
     entry.buffer.type = wgpu::BufferBindingType::ReadOnlyStorage;
@@ -2081,7 +2080,7 @@ TEST_F(CompatLayoutLimitsTests, CanNotPassLimitOfStorageBuffersInFragmentStagePi
 // Test that in compat we get an error if we use more than maxStorageBuffersInVertexStage
 // when it's lower than maxStorageBuffersPerShaderStage in createPipelineLayout
 TEST_F(CompatLayoutLimitsTests, CanNotPassLimitOfStorageBuffersInVertexStagePipelineLayout) {
-    const auto limits = GetSupportedLimits();
+    const auto& limits = GetSupportedLimits();
     wgpu::BindGroupLayoutEntry entry;
     entry.visibility = wgpu::ShaderStage::Vertex;
     entry.buffer.type = wgpu::BufferBindingType::ReadOnlyStorage;
@@ -2093,7 +2092,7 @@ TEST_F(CompatLayoutLimitsTests, CanNotPassLimitOfStorageBuffersInVertexStagePipe
 // Test that in compat we get an error if we use more than maxStorageTexturesInVertexStage
 // when it's lower than maxStorageTexturesPerShaderStage in createPipelineLayout
 TEST_F(CompatLayoutLimitsTests, CanNotPassLimitOfStorageTexturesInVertexStagePipelineLayout) {
-    const auto limits = GetSupportedLimits();
+    const auto& limits = GetSupportedLimits();
     wgpu::BindGroupLayoutEntry entry;
     entry.visibility = wgpu::ShaderStage::Vertex;
     entry.storageTexture.format = wgpu::TextureFormat::R32Float;

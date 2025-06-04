@@ -40,8 +40,9 @@ constexpr uint32_t kRTSize = 1;
 
 class ImmediateDataTests : public DawnTest {
   protected:
-    wgpu::Limits GetRequiredLimits(const wgpu::Limits&) override {
-        return wgpu::Limits{.maxImmediateSize = kDefaultMaxImmediateDataBytes};
+    void GetRequiredLimits(const dawn::utils::ComboLimits& supported,
+                           dawn::utils::ComboLimits& required) override {
+        required.maxImmediateSize = kDefaultMaxImmediateDataBytes;
     }
 
     void SetUp() override {

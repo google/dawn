@@ -35,9 +35,8 @@ namespace wgpu::binding {
 // wgpu::bindings::GPUSupportedLimits
 ////////////////////////////////////////////////////////////////////////////////
 
-GPUSupportedLimits::GPUSupportedLimits(wgpu::Limits limits) : limits_(std::move(limits)) {
-    // Clear to prevent using invalid pointer.
-    limits_.nextInChain = nullptr;
+GPUSupportedLimits::GPUSupportedLimits(const dawn::utils::ComboLimits& limits) {
+    limits.UnlinkedCopyTo(&limits_);
 }
 
 uint32_t GPUSupportedLimits::getMaxTextureDimension1D(Napi::Env) {

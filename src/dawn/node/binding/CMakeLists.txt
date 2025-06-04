@@ -108,4 +108,5 @@ target_link_libraries(dawn_node_binding
         dawncpp
         dawn_node_interop
         dawn_warnings_config
+        dawn::dawn_wgpu_utils
 )

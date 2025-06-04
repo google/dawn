@@ -274,8 +274,8 @@ TEST_F(RequestDeviceCoreValidationTest, Explicit) {
         .WillOnce(WithArgs<1>([](wgpu::Device device) {
             EXPECT_TRUE(device.HasFeature(wgpu::FeatureName::CoreFeaturesAndLimits));
             // Check one of limits to be greater than compat tier.
-            wgpu::Limits limits;
-            device.GetLimits(&limits);
+            dawn::utils::ComboLimits limits;
+            device.GetLimits(limits.GetLinked());
             EXPECT_GT(limits.maxStorageBuffersInVertexStage, 0u);
         }));
     adapter.RequestDevice(&descriptor, wgpu::CallbackMode::AllowSpontaneous,
@@ -292,8 +292,8 @@ TEST_F(RequestDeviceCoreValidationTest, Implicit) {
         .WillOnce(WithArgs<1>([](wgpu::Device device) {
             EXPECT_TRUE(device.HasFeature(wgpu::FeatureName::CoreFeaturesAndLimits));
             // Check one of limits to be greater than compat tier.
-            wgpu::Limits limits;
-            device.GetLimits(&limits);
+            dawn::utils::ComboLimits limits;
+            device.GetLimits(limits.GetLinked());
             EXPECT_GT(limits.maxStorageBuffersInVertexStage, 0u);
         }));
     adapter.RequestDevice(&descriptor, wgpu::CallbackMode::AllowSpontaneous,
@@ -318,8 +318,8 @@ TEST_F(RequestDeviceCompatValidationTest, CreateCore) {
         .WillOnce(WithArgs<1>([](wgpu::Device device) {
             EXPECT_TRUE(device.HasFeature(wgpu::FeatureName::CoreFeaturesAndLimits));
             // Check one of limits to be greater than compat tier.
-            wgpu::Limits limits;
-            device.GetLimits(&limits);
+            dawn::utils::ComboLimits limits;
+            device.GetLimits(limits.GetLinked());
             EXPECT_GT(limits.maxStorageBuffersInVertexStage, 0u);
         }));
     adapter.RequestDevice(&descriptor, wgpu::CallbackMode::AllowSpontaneous,
@@ -336,8 +336,8 @@ TEST_F(RequestDeviceCompatValidationTest, CreateCompat) {
         .WillOnce(WithArgs<1>([](wgpu::Device device) {
             EXPECT_FALSE(device.HasFeature(wgpu::FeatureName::CoreFeaturesAndLimits));
             // Check one of limits to be compat tier.
-            wgpu::Limits limits;
-            device.GetLimits(&limits);
+            dawn::utils::ComboLimits limits;
+            device.GetLimits(limits.GetLinked());
             EXPECT_EQ(limits.maxStorageBuffersInVertexStage, 0u);
         }));
     adapter.RequestDevice(&descriptor, wgpu::CallbackMode::AllowSpontaneous,
@@ -351,8 +351,9 @@ class RequestDeviceWithImmediateDataValidationTest : public ValidationTest {
         DAWN_SKIP_TEST_IF(UsesWire());
     }
 
-    wgpu::Limits GetRequiredLimits(const wgpu::Limits&) override {
-        return wgpu::Limits{.maxImmediateSize = kDefaultMaxImmediateDataBytes};
+    void GetRequiredLimits(const dawn::utils::ComboLimits& supported,
+                           dawn::utils::ComboLimits& required) override {
+        required.maxImmediateSize = kDefaultMaxImmediateDataBytes;
     }
 
     MockCppCallback<void (*)(wgpu::RequestDeviceStatus, wgpu::Device, wgpu::StringView)>

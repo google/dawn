@@ -72,8 +72,9 @@ TEST_F(ImmediateDataDisableTest, SetImmediateData) {
 
 class ImmediateDataTest : public ValidationTest {
   protected:
-    wgpu::Limits GetRequiredLimits(const wgpu::Limits&) override {
-        return wgpu::Limits{.maxImmediateSize = kDefaultMaxImmediateDataBytes};
+    void GetRequiredLimits(const dawn::utils::ComboLimits& supported,
+                           dawn::utils::ComboLimits& required) override {
+        required.maxImmediateSize = kDefaultMaxImmediateDataBytes;
     }
 
     wgpu::BindGroupLayout CreateBindGroupLayout() {

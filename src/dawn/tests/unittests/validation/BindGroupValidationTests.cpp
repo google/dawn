@@ -1081,7 +1081,7 @@ TEST_F(BindGroupValidationTest, BufferBindingOOB) {
 
 // Tests constraints to be sure the uniform buffer binding isn't too large
 TEST_F(BindGroupValidationTest, MaxUniformBufferBindingSize) {
-    wgpu::Limits supportedLimits = GetSupportedLimits();
+    const auto& supportedLimits = GetSupportedLimits();
 
     wgpu::BufferDescriptor descriptor;
     descriptor.size = 2 * supportedLimits.maxUniformBufferBindingSize;
@@ -1124,7 +1124,7 @@ TEST_F(BindGroupValidationTest, MaxUniformBufferBindingSize) {
 
 // Tests constraints to be sure the storage buffer binding isn't too large
 TEST_F(BindGroupValidationTest, MaxStorageBufferBindingSize) {
-    wgpu::Limits supportedLimits = GetSupportedLimits();
+    const auto& supportedLimits = GetSupportedLimits();
 
     wgpu::BufferDescriptor descriptor;
     descriptor.size = 2 * supportedLimits.maxStorageBufferBindingSize;
@@ -1426,7 +1426,7 @@ TEST_F(BindGroupLayoutValidationTest, PerStageLimits) {
         wgpu::BindGroupLayoutEntry otherEntry;
     };
 
-    wgpu::Limits limits = GetSupportedLimits();
+    const auto& limits = GetSupportedLimits();
 
     std::array<TestInfo, 7> kTestInfos = {
         TestInfo{limits.maxSampledTexturesPerShaderStage,
@@ -1528,7 +1528,7 @@ TEST_F(BindGroupLayoutValidationTest, PerStageLimitsWithExternalTexture) {
         wgpu::BindGroupLayoutEntry otherEntry;
     };
 
-    wgpu::Limits limits = GetSupportedLimits();
+    const auto& limits = GetSupportedLimits();
 
     std::array<TestInfo, 3> kTestInfos = {
         TestInfo{limits.maxSampledTexturesPerShaderStage, kSampledTexturesPerExternalTexture,
@@ -1618,7 +1618,7 @@ TEST_F(BindGroupLayoutValidationTest, DynamicBufferNumberLimit) {
     std::vector<wgpu::BindGroupLayoutEntry> maxStorageDB;
     std::vector<wgpu::BindGroupLayoutEntry> maxReadonlyStorageDB;
 
-    wgpu::Limits limits = GetSupportedLimits();
+    const auto& limits = GetSupportedLimits();
 
     // In this test, we use all the same shader stage. Ensure that this does not exceed the
     // per-stage limit.
@@ -2163,7 +2163,7 @@ TEST_F(BindGroupLayoutValidationTest, ArraySizeCountsTowardsLimit) {
     desc.entryCount = 2;
     desc.entries = entries;
 
-    wgpu::Limits limits = GetSupportedLimits();
+    const auto& limits = GetSupportedLimits();
 
     // Success case: we are just at the limit with the bindingArraySize.
     entries[0].bindingArraySize = limits.maxSampledTexturesPerShaderStage - 1;

@@ -359,7 +359,7 @@ TEST_F(TextureValidationTest, MipLevelCount) {
 // Test the validation of array layer count
 TEST_F(TextureValidationTest, ArrayLayerCount) {
     wgpu::TextureDescriptor defaultDescriptor = CreateDefaultTextureDescriptor();
-    wgpu::Limits supportedLimits = GetSupportedLimits();
+    const auto& supportedLimits = GetSupportedLimits();
 
     // Array layer count exceeding maxTextureArrayLayers is not allowed for 2D texture
     {
@@ -386,7 +386,7 @@ TEST_F(TextureValidationTest, ArrayLayerCount) {
 
 // Test the validation of 1D texture size
 TEST_F(TextureValidationTest, 1DTextureSize) {
-    wgpu::Limits supportedLimits = GetSupportedLimits();
+    const auto& supportedLimits = GetSupportedLimits();
 
     wgpu::TextureDescriptor defaultDescriptor;
     defaultDescriptor.size = {4, 1, 1};
@@ -432,7 +432,7 @@ TEST_F(TextureValidationTest, 1DTextureSize) {
 // Test the validation of 2D texture size
 TEST_F(TextureValidationTest, 2DTextureSize) {
     wgpu::TextureDescriptor defaultDescriptor = CreateDefaultTextureDescriptor();
-    wgpu::Limits supportedLimits = GetSupportedLimits();
+    const auto& supportedLimits = GetSupportedLimits();
 
     // Out-of-bound texture dimension is not allowed
     {
@@ -482,7 +482,7 @@ TEST_F(TextureValidationTest, 3DTextureSize) {
     wgpu::TextureDescriptor defaultDescriptor = CreateDefaultTextureDescriptor();
     defaultDescriptor.dimension = wgpu::TextureDimension::e3D;
     defaultDescriptor.usage = wgpu::TextureUsage::TextureBinding;
-    wgpu::Limits supportedLimits = GetSupportedLimits();
+    const auto& supportedLimits = GetSupportedLimits();
 
     // Out-of-bound texture dimension is not allowed
     {

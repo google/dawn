@@ -28,11 +28,20 @@
 import("../../../scripts/dawn_overrides_with_defaults.gni")
 import("../../../scripts/tint_overrides_with_defaults.gni")
 
+import("${dawn_root}/generator/dawn_generator.gni")
 import("${dawn_root}/scripts/dawn_features.gni")
 
 ###############################################################################
 # Utils for tests and samples
 ###############################################################################
+
+dawn_json_generator("dawn_utils_gen") {
+  target = "dawn_utils"
+  outputs = [
+    "src/dawn/utils/ComboLimits.h",
+    "src/dawn/utils/ComboLimits.cpp",
+  ]
+}
 
 static_library("wgpu_utils") {
   configs += [
@@ -41,7 +50,8 @@ static_library("wgpu_utils") {
     "${dawn_root}/src/tint:tint_public_config",
   ]
 
-  sources = [
+  sources = get_target_outputs(":dawn_utils_gen")
+  sources += [
     "ComboRenderBundleEncoderDescriptor.cpp",
     "ComboRenderBundleEncoderDescriptor.h",
     "ComboRenderPipelineDescriptor.cpp",
@@ -56,7 +66,7 @@ static_library("wgpu_utils") {
     "${dawn_root}/include/dawn:cpp_headers",
     "${dawn_root}/src/dawn/common",
   ]
-  deps = []
+  deps = [ ":dawn_utils_gen" ]
   if (tint_build_spv_reader) {
     deps += [ "${dawn_spirv_tools_dir}:spvtools_opt" ]
   }

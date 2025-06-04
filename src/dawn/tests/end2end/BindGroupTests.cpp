@@ -42,15 +42,14 @@ constexpr static uint32_t kRTSize = 8;
 
 class BindGroupTests : public DawnTest {
   protected:
-    wgpu::Limits GetRequiredLimits(const wgpu::Limits& supported) override {
+    void GetRequiredLimits(const dawn::utils::ComboLimits& supported,
+                           dawn::utils::ComboLimits& required) override {
         // TODO(crbug.com/383593270): Enable all the limits.
-        wgpu::Limits required = {};
         required.maxStorageBuffersInVertexStage = supported.maxStorageBuffersInVertexStage;
         required.maxStorageBuffersInFragmentStage = supported.maxStorageBuffersInFragmentStage;
         required.maxStorageBuffersPerShaderStage = supported.maxStorageBuffersPerShaderStage;
         required.maxStorageTexturesInFragmentStage = supported.maxStorageTexturesInFragmentStage;
         required.maxStorageTexturesPerShaderStage = supported.maxStorageTexturesPerShaderStage;
-        return required;
     }
 
     void SetUp() override {

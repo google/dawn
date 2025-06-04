@@ -41,7 +41,10 @@ namespace {
 
 class MaxLimitTests : public DawnTest {
   public:
-    wgpu::Limits GetRequiredLimits(const wgpu::Limits& supported) override { return supported; }
+    void GetRequiredLimits(const dawn::utils::ComboLimits& supported,
+                           dawn::utils::ComboLimits& required) override {
+        supported.UnlinkedCopyTo(&required);
+    }
 };
 
 // Test using the maximum amount of workgroup memory works
@@ -266,11 +269,11 @@ TEST_P(MaxLimitTests, MaxDynamicBuffers) {
     // TODO(https://anglebug.com/8177) Causes assertion failure in ANGLE.
     DAWN_SUPPRESS_TEST_IF(IsANGLE() && IsWindows());
 
-    wgpu::Limits limits = GetSupportedLimits();
+    const auto& limits = GetSupportedLimits();
 
-    DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxStorageBuffersInFragmentStage <
+    DAWN_TEST_UNSUPPORTED_IF(limits.maxStorageBuffersInFragmentStage <
                              limits.maxStorageBuffersPerShaderStage);
-    DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxStorageBuffersInVertexStage <
+    DAWN_TEST_UNSUPPORTED_IF(limits.maxStorageBuffersInVertexStage <
                              limits.maxStorageBuffersPerShaderStage);
 
     std::vector<wgpu::BindGroupLayoutEntry> bglEntries;
@@ -426,7 +429,7 @@ TEST_P(MaxLimitTests, MaxStorageBuffersPerShaderStage) {
     // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
 
-    wgpu::Limits limits = GetSupportedLimits();
+    const auto& limits = GetSupportedLimits();
 
     std::vector<wgpu::BindGroupLayoutEntry> bglEntries;
     std::vector<wgpu::BindGroupEntry> bgEntries;
@@ -551,7 +554,7 @@ TEST_P(MaxLimitTests, ReallyLargeBindGroup) {
     // TODO(crbug.com/dawn/590): Failing on Pixel4
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
 
-    wgpu::Limits limits = GetSupportedLimits();
+    const auto& limits = GetSupportedLimits();
 
     std::ostringstream interface;
     std::ostringstream body;
@@ -705,7 +708,7 @@ TEST_P(MaxLimitTests, WriteToMaxFragmentCombinedOutputResources) {
     // there is at least one color attachment, and as many of the buffer/textures as possible,
     // splitting a shared remaining count between the two resources if they are not separately
     // defined, or exceed the combined limit.
-    wgpu::Limits limits = GetSupportedLimits();
+    const auto& limits = GetSupportedLimits();
     uint32_t attachmentCount = limits.maxColorAttachments;
     uint32_t storageBuffers = limits.maxStorageBuffersPerShaderStage;
     uint32_t storageTextures = limits.maxStorageTexturesPerShaderStage;
@@ -838,13 +841,15 @@ TEST_P(MaxLimitTests, WriteToMaxFragmentCombinedOutputResources) {
 // Verifies that supported buffer limits do not exceed maxBufferSize.
 TEST_P(MaxLimitTests, MaxBufferSizes) {
     // Base limits without tiering.
-    wgpu::Limits baseLimits = GetAdapterLimits();
+    dawn::utils::ComboLimits baseLimits;
+    GetAdapterLimits().UnlinkedCopyTo(&baseLimits);
     EXPECT_LE(baseLimits.maxStorageBufferBindingSize, baseLimits.maxBufferSize);
     EXPECT_LE(baseLimits.maxUniformBufferBindingSize, baseLimits.maxBufferSize);
 
     // Base limits with tiering.
     GetAdapter().SetUseTieredLimits(true);
-    wgpu::Limits tieredLimits = GetAdapterLimits();
+    dawn::utils::ComboLimits tieredLimits;
+    GetAdapterLimits().UnlinkedCopyTo(&tieredLimits);
     EXPECT_LE(tieredLimits.maxStorageBufferBindingSize, tieredLimits.maxBufferSize);
     EXPECT_LE(tieredLimits.maxUniformBufferBindingSize, tieredLimits.maxBufferSize);
 
@@ -895,7 +900,7 @@ class MaxInterStageShaderVariablesLimitTests : public MaxLimitTests {
     // Allocate the inter-stage shader variables that consume as many inter-stage shader variables
     // as possible.
     uint32_t GetInterStageVariableCount(const MaxInterStageLimitTestsSpec& spec) {
-        wgpu::Limits baseLimits = GetAdapterLimits();
+        const auto& baseLimits = GetAdapterLimits();
 
         uint32_t builtinVariableCount = 0;
         if (spec.renderPointLists) {
@@ -1132,7 +1137,7 @@ TEST_P(MaxInterStageShaderVariablesLimitTests, RenderPointList_ClipDistances) {
 TEST_P(MaxInterStageShaderVariablesLimitTests, MaxLocation_ClipDistances) {
     DAWN_TEST_UNSUPPORTED_IF(!mSupportsClipDistances);
 
-    wgpu::Limits baseLimits = GetAdapterLimits();
+    const auto& baseLimits = GetAdapterLimits();
 
     constexpr std::array<wgpu::PrimitiveTopology, 2> kPrimitives = {
         {wgpu::PrimitiveTopology::TriangleList, wgpu::PrimitiveTopology::PointList}};
@@ -1200,7 +1205,7 @@ class MaxVertexAttributesPipelineCreationTests : public MaxLimitTests {
 
   private:
     wgpu::RenderPipeline CreateRenderPipeline(const TestSpec& spec) {
-        wgpu::Limits baseLimits = GetAdapterLimits();
+        const auto& baseLimits = GetAdapterLimits();
         uint32_t maxVertexAttributes = baseLimits.maxVertexAttributes;
 
         // In compatibility mode @builtin(vertex_index) and @builtin(instance_index) each use an

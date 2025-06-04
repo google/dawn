@@ -120,11 +120,10 @@ class MatrixVectorMultiplyPerf : public DawnPerfTestWithParams<MatrixVectorMulti
         return requirements;
     }
 
-    wgpu::Limits GetRequiredLimits(const wgpu::Limits& supported) override {
-        wgpu::Limits required = {};
+    void GetRequiredLimits(const dawn::utils::ComboLimits& supported,
+                           dawn::utils::ComboLimits& required) override {
         required.maxStorageBufferBindingSize =
             BytesPerElement() * GetParam().mRows * GetParam().mCols;
-        return required;
     }
 
   private:

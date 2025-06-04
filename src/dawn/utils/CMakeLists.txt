@@ -34,22 +34,31 @@ if (TINT_BUILD_SPV_READER)
       list(APPEND private_wgpu_depends SPIRV-Tools-opt)
 endif()
 
+DawnJSONGenerator(
+    TARGET "dawn_utils"
+    PRINT_NAME "Dawn native utilities"
+    OUTPUT_HEADERS DAWN_UTILS_GEN_HEADERS
+    OUTPUT_SOURCES DAWN_UTILS_GEN_SOURCES
+)
 dawn_add_library(
   dawn_wgpu_utils
   ENABLE_EMSCRIPTEN
   UTILITY_TARGET dawn_internal_config
   PRIVATE_HEADERS
+    "${DAWN_UTILS_GEN_HEADERS}"
     "ComboRenderBundleEncoderDescriptor.h"
     "ComboRenderPipelineDescriptor.h"
     "TextureUtils.h"
     "WGPUHelpers.h"
   SOURCES
+    "${DAWN_UTILS_GEN_SOURCES}"
     "ComboRenderBundleEncoderDescriptor.cpp"
     "ComboRenderPipelineDescriptor.cpp"
     "TextureUtils.cpp"
     "WGPUHelpers.cpp"
   DEPENDS
     webgpu_cpp
+    dawn_internal_config
     dawn::dawn_common
   PRIVATE_DEPENDS
     ${private_wgpu_depends}
