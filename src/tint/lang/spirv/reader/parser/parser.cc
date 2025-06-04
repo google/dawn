@@ -750,19 +750,20 @@ class Parser {
 
                     cont->PushOperand(src);
 
-                    // Set the src to the param so we return param as the new
-                    // value.
+                    // Set `src` as the `param` so it's returned as the new value
                     src = param;
                     return nullptr;
-                },  //
+                },                                                      //
+                [&](core::ir::Unreachable*) { return blk->Parent(); },  //
                 TINT_ICE_ON_NO_MATCH);
-
             if (!ctrl) {
                 break;
             }
 
-            // Add ourselves as part of the terminator return value
-            blk->Terminator()->PushOperand(src);
+            for (auto& exit : ctrl->Exits()) {
+                exit->PushOperand(src);
+            }
+
             // Add a new result to the control instruction
             ctrl->AddResult(b_.InstructionResult(src->Type()));
             // The source instruction is now the control result we just inserted
