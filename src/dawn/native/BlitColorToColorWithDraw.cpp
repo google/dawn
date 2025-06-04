@@ -27,6 +27,7 @@
 
 #include "dawn/native/BlitColorToColorWithDraw.h"
 
+#include <limits>
 #include <sstream>
 #include <string>
 #include <utility>
@@ -49,28 +50,54 @@ namespace dawn::native {
 
 namespace {
 
-constexpr char kBlitToColorVS[] = R"(
+constexpr std::string_view kVertexOutputsStruct = R"(
+struct VertexOutputs {
+  @builtin(position) position : vec4<f32>,
+  @location(0) @interpolate(flat) offsets : vec2i,
+};
+)";
+
+std::string GenerateBlitToColorVS() {
+    constexpr std::string_view kBlitToColorVS = R"(
+// Unpack a u32 into two i32 values, each was originally two 16-bit signed
+// integer.
+fn unpack_offsets(offsets : u32) -> vec2<i32> {
+  // First extract the high and low 16-bit values, then convert to u32 for
+  // zero-extension.
+  var offsets_bits = vec2u((offsets >> 16) & 0xFFFFu, offsets & 0xFFFFu);
+  // For each 16-bit value, if the sign bit is set (0x8000), perform sign
+  // extension by setting the upper 16 bits to 1s (0xFFFF0000).
+  offsets_bits = select(
+      offsets_bits,
+      offsets_bits | vec2u(0xFFFF0000u),
+      // Check if negative.
+      (offsets_bits & vec2u(0x8000u)) != vec2u(0u),
+  );
+  // Reinterpret the final 32-bit values as signed integers.
+  return bitcast<vec2i>(offsets_bits);
+}
 
 @vertex fn vert_fullscreen_quad(
   @builtin(vertex_index) vertex_index : u32,
-) -> @builtin(position) vec4f {
+  @builtin(instance_index) instance_index : u32
+) -> VertexOutputs {
+  var output : VertexOutputs;
   const pos = array(
       vec2f(-1.0, -1.0),
-      vec2f( 3.0, -1.0),
-      vec2f(-1.0,  3.0));
-  return vec4f(pos[vertex_index], 0.0, 1.0);
+      vec2f(3.0, -1.0),
+      vec2f(-1.0, 3.0));
+  output.position = vec4f(pos[vertex_index], 0.0, 1.0);
+  output.offsets = unpack_offsets(instance_index);
+  return output;
 }
 )";
+    return std::string(kVertexOutputsStruct) + "\n" + std::string(kBlitToColorVS);
+}
 
 std::string GenerateExpandFS(const BlitColorToColorWithDrawPipelineKey& pipelineKey) {
     std::ostringstream outputStructStream;
     std::ostringstream assignOutputsStream;
     std::ostringstream finalStream;
-    finalStream << absl::StrFormat(
-        "struct Params {\n"
-        "offset : vec2i,\n"
-        "};\n"
-        "@group(1) @binding(0) var<uniform> params : Params;\n");
     for (auto i : pipelineKey.attachmentsToExpandResolve) {
         finalStream << absl::StrFormat("@group(0) @binding(%u) var srcTex%u : texture_2d<f32>;\n",
                                        i, i);
@@ -78,14 +105,15 @@ std::string GenerateExpandFS(const BlitColorToColorWithDrawPipelineKey& pipeline
         outputStructStream << absl::StrFormat("@location(%u) output%u : vec4f,\n", i, i);
 
         assignOutputsStream << absl::StrFormat(
-            "\toutputColor.output%u = textureLoad(srcTex%u, vec2i(position.xy) + "
-            "params.offset, 0);\n",
+            "\toutputColor.output%u = textureLoad(srcTex%u, vec2i(input.position.xy) + "
+            "input.offsets, 0);\n",
             i, i);
     }
 
+    finalStream << kVertexOutputsStruct << "\n";
     finalStream << "struct OutputColor {\n" << outputStructStream.str() << "}\n\n";
     finalStream << R"(
-@fragment fn expand_multisample(@builtin(position) position : vec4f) -> OutputColor {
+@fragment fn expand_multisample(input: VertexOutputs) -> OutputColor {
     var outputColor : OutputColor;
 )" << assignOutputsStream.str()
                 << R"(
@@ -98,17 +126,14 @@ std::string GenerateExpandFS(const BlitColorToColorWithDrawPipelineKey& pipeline
 // Generate the fragment shader to average multiple samples into one.
 std::string GenerateResolveFS(uint32_t sampleCount) {
     std::ostringstream ss;
-
+    ss << kVertexOutputsStruct << "\n";
     ss << R"(
-@group(0) @binding(0) var<uniform> params : Params;
-@group(0) @binding(1) var srcTex : texture_multisampled_2d<f32>;
-struct Params {
-  offset: vec2i,
-};
+@group(0) @binding(0) var srcTex : texture_multisampled_2d<f32>;
+
 @fragment
-fn resolve_multisample(@builtin(position) position : vec4f) -> @location(0) vec4f {
+fn resolve_multisample(input: VertexOutputs) -> @location(0) vec4f {
     var sum = vec4f(0.0, 0.0, 0.0, 0.0);
-    var offsetPos = vec2i(position.xy) - params.offset;)";
+    var offsetPos = vec2i(input.position.xy) - input.offsets;)";
     ss << "\n";
     for (uint32_t sample = 0; sample < sampleCount; ++sample) {
         ss << absl::StrFormat("    sum += textureLoad(srcTex, offsetPos, %u);\n", sample);
@@ -134,7 +159,8 @@ ResultOrError<Ref<RenderPipelineBase>> GetOrCreateExpandMultisamplePipeline(
     ShaderSourceWGSL wgslDesc = {};
     ShaderModuleDescriptor shaderModuleDesc = {};
     shaderModuleDesc.nextInChain = &wgslDesc;
-    wgslDesc.code = kBlitToColorVS;
+    const std::string vsCode = GenerateBlitToColorVS();
+    wgslDesc.code = vsCode.c_str();
 
     Ref<ShaderModuleBase> vshaderModule;
     DAWN_TRY_ASSIGN(vshaderModule, device->CreateShaderModule(&shaderModuleDesc));
@@ -210,22 +236,8 @@ ResultOrError<Ref<RenderPipelineBase>> GetOrCreateExpandMultisamplePipeline(
     DAWN_TRY_ASSIGN(bindGroupLayout,
                     device->CreateBindGroupLayout(&bglDesc, /* allowInternalBinding */ true));
 
-    Ref<BindGroupLayoutBase> bindGroupLayout1;
-    DAWN_TRY_ASSIGN(bindGroupLayout1,
-                    utils::MakeBindGroupLayout(
-                        device,
-                        {
-                            {0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Uniform},
-                        },
-                        /* allowInternalBinding */ true));
-
-    std::array<BindGroupLayoutBase*, 2> bindGroupLayouts = {bindGroupLayout.Get(),
-                                                            bindGroupLayout1.Get()};
     Ref<PipelineLayoutBase> pipelineLayout;
-    PipelineLayoutDescriptor descriptor;
-    descriptor.bindGroupLayoutCount = bindGroupLayouts.size();
-    descriptor.bindGroupLayouts = bindGroupLayouts.data();
-    DAWN_TRY_ASSIGN(pipelineLayout, device->CreatePipelineLayout(&descriptor));
+    DAWN_TRY_ASSIGN(pipelineLayout, utils::MakeBasicPipelineLayout(device, bindGroupLayout));
 
     renderPipelineDesc.layout = pipelineLayout.Get();
 
@@ -252,7 +264,8 @@ ResultOrError<Ref<RenderPipelineBase>> GetOrCreateResolveMultisamplePipeline(
     ShaderSourceWGSL wgslDesc = {};
     ShaderModuleDescriptor shaderModuleDesc = {};
     shaderModuleDesc.nextInChain = &wgslDesc;
-    wgslDesc.code = kBlitToColorVS;
+    const std::string vsCode = GenerateBlitToColorVS();
+    wgslDesc.code = vsCode.c_str();
 
     Ref<ShaderModuleBase> vshaderModule;
     DAWN_TRY_ASSIGN(vshaderModule, device->CreateShaderModule(&shaderModuleDesc));
@@ -288,6 +301,19 @@ ResultOrError<Ref<RenderPipelineBase>> GetOrCreateResolveMultisamplePipeline(
 }
 
 }  // namespace
+
+// Since texture dimensions never exceed 16 bits, we can safely store offsets in 16 bits. This
+// allows packing two signed 16-bit offsets (each within −32,768 ~ +32,767) into a single 32-bit
+// unsigned integer for efficient storage and retrieval.
+uint32_t PackOffsets(const RenderPassDescriptorResolveRect& expandResolveRect) {
+    const auto offsetX = static_cast<int32_t>(expandResolveRect.resolveOffsetX) -
+                         static_cast<int32_t>(expandResolveRect.colorOffsetX);
+    const auto offsetY = static_cast<int32_t>(expandResolveRect.resolveOffsetY) -
+                         static_cast<int32_t>(expandResolveRect.colorOffsetY);
+    DAWN_ASSERT(std::abs(offsetX) < std::numeric_limits<int16_t>::max());
+    DAWN_ASSERT(std::abs(offsetY) < std::numeric_limits<int16_t>::max());
+    return static_cast<uint32_t>(offsetX & 0xffff) | static_cast<uint32_t>(offsetY << 16);
+}
 
 MaybeError ExpandResolveTextureWithDraw(
     DeviceBase* device,
@@ -382,38 +408,6 @@ MaybeError ExpandResolveTextureWithDraw(
     } else if (auto* resolveRect = renderPassDescriptor.Get<RenderPassDescriptorResolveRect>()) {
         expandResolveRect = *resolveRect;
     }
-
-    Ref<BindGroupLayoutBase> bgl1;
-    DAWN_TRY_ASSIGN(bgl1, pipeline->GetBindGroupLayout(1));
-    Ref<BindGroupBase> bindGroup1;
-    {
-        // TODO(417770951): Use immediates as offsets.
-        Ref<BufferBase> paramsBuffer;
-        if (expandResolveRect) {
-            DAWN_TRY_ASSIGN(paramsBuffer,
-                            utils::CreateBufferFromData(
-                                device, wgpu::BufferUsage::Uniform,
-                                {static_cast<int32_t>(expandResolveRect->resolveOffsetX) -
-                                     static_cast<int32_t>(expandResolveRect->colorOffsetX),
-                                 static_cast<int32_t>(expandResolveRect->resolveOffsetY) -
-                                     static_cast<int32_t>(expandResolveRect->colorOffsetY)}));
-        } else {
-            DAWN_TRY_ASSIGN(paramsBuffer, utils::CreateBufferFromData(
-                                              device, wgpu::BufferUsage::Uniform, {0, 0}));
-        }
-
-        BindGroupEntry bgEntry = {};
-        bgEntry.binding = 0;
-        bgEntry.buffer = paramsBuffer.Get();
-        BindGroupDescriptor bgDesc = {};
-
-        bgDesc.layout = bgl1.Get();
-        bgDesc.entryCount = 1;
-        bgDesc.entries = &bgEntry;
-        DAWN_TRY_ASSIGN(bindGroup1,
-                        device->CreateBindGroup(&bgDesc, UsageValidationMode::Internal));
-    }
-    renderEncoder->APISetBindGroup(1, bindGroup1.Get());
     renderEncoder->APISetPipeline(pipeline.Get());
 
     if (expandResolveRect) {
@@ -423,8 +417,15 @@ MaybeError ExpandResolveTextureWithDraw(
                                          expandResolveRect->colorOffsetY, expandResolveRect->width,
                                          expandResolveRect->height);
     }
+    // The texture size never exceeds 16 bits. We pack two values {offsetX, offsetY} into a 32-bit
+    // firstInstance value, which avoids creating a uniform buffer.
+    const auto offsets = expandResolveRect ? PackOffsets(expandResolveRect.value()) : 0;
     // Draw to perform the blit.
-    renderEncoder->APIDraw(3);
+    renderEncoder->APIDraw(/*vertexCount=*/3,
+                           /*instanceCount=*/1,
+                           /*firstVertex=*/0,
+                           /*firstInstance=*/offsets);
+
     // After expanding the resolve texture, we reset the scissor rect to the full size of the color
     // attachment to prevent the previous scissor rect from affecting all subsequent user draws.
     if (expandResolveRect) {
@@ -485,18 +486,9 @@ MaybeError ResolveMultisampleWithDraw(DeviceBase* device,
     Ref<BindGroupLayoutBase> bindGroupLayout;
     DAWN_TRY_ASSIGN(bindGroupLayout, pipeline->GetBindGroupLayout(0));
 
-    Ref<BufferBase> paramsBuffer;
-    DAWN_TRY_ASSIGN(
-        paramsBuffer,
-        utils::CreateBufferFromData(
-            device, wgpu::BufferUsage::Uniform,
-            {static_cast<int32_t>(rect.resolveOffsetX) - static_cast<int32_t>(rect.colorOffsetX),
-             static_cast<int32_t>(rect.resolveOffsetY) - static_cast<int32_t>(rect.colorOffsetY)}));
     Ref<BindGroupBase> bindGroup;
-    DAWN_TRY_ASSIGN(bindGroup,
-                    utils::MakeBindGroup(device, bindGroupLayout, {{0, paramsBuffer}, {1, src}},
-                                         UsageValidationMode::Internal));
-
+    DAWN_TRY_ASSIGN(bindGroup, utils::MakeBindGroup(device, bindGroupLayout, {{0, src}},
+                                                    UsageValidationMode::Internal));
     // Color attachment descriptor.
     RenderPassColorAttachment colorAttachmentDesc;
     colorAttachmentDesc.view = dst;
@@ -514,7 +506,13 @@ MaybeError ResolveMultisampleWithDraw(DeviceBase* device,
     renderEncoder->APISetPipeline(pipeline.Get());
     renderEncoder->APISetScissorRect(rect.resolveOffsetX, rect.resolveOffsetY, rect.width,
                                      rect.height);
-    renderEncoder->APIDraw(3);
+    // The texture size never exceeds 16 bits. We pack two values {offsetX, offsetY} into a 32-bit
+    // firstInstance value, which avoids creating a uniform buffer.
+    const auto offsets = PackOffsets(rect);
+    renderEncoder->APIDraw(/*vertexCount=*/3,
+                           /*instanceCount=*/1,
+                           /*firstVertex=*/0,
+                           /*firstInstance=*/offsets);
     renderEncoder->End();
 
     return {};
