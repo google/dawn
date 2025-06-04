@@ -1862,6 +1862,13 @@ void Validator::CheckType(const core::type::Type* root,
                     }
                 }
 
+                if (ptr->StoreType()->IsHandle()) {
+                    if (ptr->AddressSpace() != AddressSpace::kHandle) {
+                        diag() << "handle types can only be declared in the 'handle' address space";
+                        return false;
+                    }
+                }
+
                 if (type != root) {
                     // Nesting pointer types inside structures is guarded by a capability.
                     if (!(capabilities_.Contains(
@@ -2601,13 +2608,6 @@ void Validator::CheckVar(const Var* var) {
         AddError(var) << "result type " << NameOf(result_type)
                       << " must be a pointer or a reference";
         return;
-    }
-
-    if (mv->UnwrapPtrOrRef()->IsHandle()) {
-        if (mv->AddressSpace() != AddressSpace::kHandle) {
-            AddError(var) << "handle types can only be declared in the 'handle' address space";
-            return;
-        }
     }
 
     if (var->Block() != mod_.root_block && mv->AddressSpace() != AddressSpace::kFunction) {

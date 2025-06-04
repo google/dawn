@@ -707,9 +707,9 @@ TEST_F(IR_ValidatorTest, Var_Sampler_NonHandleAddressSpace) {
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(
-            R"(:2:42 error: var: handle types can only be declared in the 'handle' address space
+            R"(:2:3 error: var: handle types can only be declared in the 'handle' address space
   %1:ptr<private, sampler, read_write> = var undef
-                                         ^^^
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure();
 }
 
@@ -722,9 +722,9 @@ TEST_F(IR_ValidatorTest, Var_Texture_NonHandleAddressSpace) {
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(
-            R"(:2:42 error: var: handle types can only be declared in the 'handle' address space
+            R"(:2:3 error: var: handle types can only be declared in the 'handle' address space
   %1:ptr<private, sampler, read_write> = var undef
-                                         ^^^
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure();
 }
 
@@ -740,9 +740,9 @@ TEST_F(IR_ValidatorTest, Var_BindingArray_Texture_NonHandleAddressSpace) {
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(
-            R"(:2:62 error: var: handle types can only be declared in the 'handle' address space
+            R"(:2:3 error: var: handle types can only be declared in the 'handle' address space
   %1:ptr<private, binding_array<texture_2d<f32>, 4>, read> = var undef
-                                                             ^^^
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure();
 }
 

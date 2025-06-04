@@ -238,6 +238,22 @@ TEST_F(IR_ValidatorTest, AbstractInt_FunctionParam) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, FunctionParam_InvalidHandleAddressSpace) {
+    auto* type = ty.ptr(AddressSpace::kFunction, ty.sampler());
+    auto* fn = b.Function("my_func", ty.void_());
+    fn->SetParams(Vector{b.FunctionParam(type)});
+    b.Append(fn->Block(), [&] {  //
+        b.Return(fn);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr("handle types can only be declared in the 'handle' address space"))
+        << res.Failure();
+}
+
 using TypeTest = IRTestParamHelper<std::tuple<
     /* allowed */ bool,
     /* type_builder */ TypeBuilderFn>>;
