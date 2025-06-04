@@ -62,6 +62,7 @@ message Type {
         TypeSubgroupMatrix subgroup_matrix_right = 17;
         TypeSubgroupMatrix subgroup_matrix_result = 18;
         TypeBuiltinStruct builtin_struct = 19;
+        TypeBindingArray binding_array = 20;
     }
 }
 
@@ -92,6 +93,11 @@ message TypeArray {
     uint32 element = 1;  // Module.types
     uint32 stride = 2;
     uint32 count = 3;
+}
+
+message TypeBindingArray {
+    uint32 element = 1;  // Module.types
+    uint32 count = 2;
 }
 
 message TypePointer {

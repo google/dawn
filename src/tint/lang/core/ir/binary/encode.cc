@@ -395,6 +395,9 @@ struct Encoder {
                 [&](const core::type::Struct* s) { TypeStruct(*type_out.mutable_struct_(), s); },
                 [&](const core::type::Atomic* a) { TypeAtomic(*type_out.mutable_atomic(), a); },
                 [&](const core::type::Array* m) { TypeArray(*type_out.mutable_array(), m); },
+                [&](const core::type::BindingArray* a) {
+                    TypeBindingArray(*type_out.mutable_binding_array(), a);
+                },
                 [&](const core::type::DepthTexture* t) {
                     TypeDepthTexture(*type_out.mutable_depth_texture(), t);
                 },
@@ -431,15 +434,6 @@ struct Encoder {
                         default:
                             TINT_ICE() << "invalid subgroup matrix kind: " << ToString(s->Kind());
                     }
-                },
-                [&](const core::type::BindingArray*) {
-                    // There is no 'unknown/unspecified' value to set the type
-                    // to, so just using void, since the encode will fail due to
-                    // writing to err_.
-                    // TODO(crbug.com/419314986): Add BindingArray to ir.proto
-                    //  and implemented encode/decode, once the feature is complete
-                    type_out.set_basic(pb::TypeBasic::void_);
-                    err_ << "BindingType is not currently implemented in IR";
                 },
                 TINT_ICE_ON_NO_MATCH);
 
@@ -514,6 +508,21 @@ struct Encoder {
                 }
             },
             [&](const core::type::RuntimeArrayCount*) { array_out.set_count(0); },
+            TINT_ICE_ON_NO_MATCH);
+    }
+
+    void TypeBindingArray(pb::TypeBindingArray& array_out,
+                          const core::type::BindingArray* array_in) {
+        array_out.set_element(Type(array_in->ElemType()));
+        tint::Switch(
+            array_in->Count(),  //
+            [&](const core::type::ConstantArrayCount* c) {
+                array_out.set_count(c->value);
+                if (c->value >= internal_limits::kMaxArrayElementCount) {
+                    err_ << "binding_array count (" << c->value << ") must be less than "
+                         << internal_limits::kMaxArrayElementCount << "\n";
+                }
+            },
             TINT_ICE_ON_NO_MATCH);
     }
 

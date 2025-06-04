@@ -35,6 +35,7 @@
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/control_instruction.h"
 #include "src/tint/lang/core/ir/module.h"
+#include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/builtin_structs.h"
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
 #include "src/tint/lang/core/type/depth_texture.h"
@@ -688,6 +689,8 @@ struct Decoder {
                 return CreateTypeAtomic(type_in.atomic());
             case pb::Type::KindCase::kArray:
                 return CreateTypeArray(type_in.array());
+            case pb::Type::KindCase::kBindingArray:
+                return CreateTypeBindingArray(type_in.binding_array());
             case pb::Type::KindCase::kDepthTexture:
                 return CreateTypeDepthTexture(type_in.depth_texture());
             case pb::Type::KindCase::kSampledTexture:
@@ -874,6 +877,19 @@ struct Decoder {
 
         return count > 0 ? mod_out_.Types().array(element, count, stride)
                          : mod_out_.Types().runtime_array(element, stride);
+    }
+
+    const type::Type* CreateTypeBindingArray(const pb::TypeBindingArray& array_in) {
+        auto* element = Type(array_in.element());
+        uint32_t count = array_in.count();
+
+        if (count >= internal_limits::kMaxArrayElementCount) {
+            err_ << "binding_array count (" << count << ") must be less than "
+                 << internal_limits::kMaxArrayElementCount << "\n";
+            return mod_out_.Types().invalid();
+        }
+
+        return mod_out_.Types().binding_array(element, count);
     }
 
     const type::Type* CreateTypeDepthTexture(const pb::TypeDepthTexture& texture_in) {
