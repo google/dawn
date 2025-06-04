@@ -158,6 +158,11 @@ class State {
         Symbol name;  // Name of the variable
     };
 
+    /// The structure for a reusable value
+    struct ReusableValue {
+        const core::ir::Value* expr = nullptr;
+    };
+
     /// The structure for an inlined value
     struct InlinedValue {
         const ast::Expression* expr = nullptr;
@@ -168,7 +173,7 @@ class State {
     /// ICE.
     struct ConsumedValue {};
 
-    using ValueBinding = std::variant<VariableValue, InlinedValue, ConsumedValue>;
+    using ValueBinding = std::variant<VariableValue, InlinedValue, ConsumedValue, ReusableValue>;
 
     /// IR values to their representation
     Hashmap<const core::ir::Value*, ValueBinding, 32> bindings_;
@@ -755,7 +760,18 @@ class State {
             TINT_ICE_ON_NO_MATCH);
     }
 
-    void Load(const core::ir::Load* l) { Bind(l->Result(), Expr(l->From())); }
+    void Load(const core::ir::Load* l) {
+        bool reusable = false;
+        // Read-only pointer is reusable inline
+        if (auto* ptr = l->From()->Type()->As<core::type::Reference>()) {
+            reusable = ptr->Access() == core::Access::kRead;
+        }
+        if (reusable) {
+            Bind(l->Result(), l->From());
+        } else {
+            Bind(l->Result(), Expr(l->From()));
+        }
+    }
 
     void LoadVectorElement(const core::ir::LoadVectorElement* l) {
         auto* vec = Expr(l->From());
@@ -923,6 +939,9 @@ class State {
 
                         if constexpr (std::is_same_v<T, VariableValue>) {
                             return b.Expr(got.name);
+                        }
+                        if constexpr (std::is_same_v<T, ReusableValue>) {
+                            return Expr(got.expr);
                         }
 
                         if constexpr (std::is_same_v<T, InlinedValue>) {
@@ -1229,6 +1248,15 @@ class State {
             }
             return b.Symbols().New("v");
         });
+    }
+
+    void Bind(const core::ir::Value* value, const core::ir::Value* expr) {
+        TINT_ASSERT(value);
+        if (value->IsUsed()) {
+            bindings_.Replace(value, ReusableValue{expr});
+        } else {
+            Append(b.Assign(b.Phony(), Expr(expr)));
+        }
     }
 
     /// Associates the IR value @p value with the AST expression @p expr if it is used, otherwise
