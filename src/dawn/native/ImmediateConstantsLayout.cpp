@@ -1,4 +1,4 @@
-// Copyright 2023 The Dawn & Tint Authors
+// Copyright 2025 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,40 +25,11 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_NATIVE_D3D11_COMMANDBUFFERD3D11_H_
-#define SRC_DAWN_NATIVE_D3D11_COMMANDBUFFERD3D11_H_
-
-#include "dawn/native/CommandBuffer.h"
+#include "dawn/native/ImmediateConstantsLayout.h"
 
 namespace dawn::native {
-enum class Command;
-struct BeginRenderPassCmd;
-struct DispatchCmd;
+uint32_t GetImmediateIndexInPipeline(const uint32_t layoutOffset,
+                                     const ImmediateConstantMask& pipelineImmediateMask) {
+    return (((1u << layoutOffset) - 1u) & pipelineImmediateMask).count();
+}
 }  // namespace dawn::native
-
-namespace dawn::native::d3d11 {
-
-class ComputePipeline;
-class RenderPipeline;
-class ScopedSwapStateCommandRecordingContext;
-
-class CommandBuffer final : public CommandBufferBase {
-  public:
-    static Ref<CommandBuffer> Create(CommandEncoder* encoder,
-                                     const CommandBufferDescriptor* descriptor);
-    MaybeError Execute(const ScopedSwapStateCommandRecordingContext* commandContext);
-
-  private:
-    using CommandBufferBase::CommandBufferBase;
-
-    MaybeError ExecuteComputePass(const ScopedSwapStateCommandRecordingContext* commandContext);
-    MaybeError ExecuteRenderPass(BeginRenderPassCmd* renderPass,
-                                 const ScopedSwapStateCommandRecordingContext* commandContext);
-    void HandleDebugCommands(const ScopedSwapStateCommandRecordingContext* commandContext,
-                             CommandIterator* iter,
-                             Command command);
-};
-
-}  // namespace dawn::native::d3d11
-
-#endif  // SRC_DAWN_NATIVE_D3D11_COMMANDBUFFERD3D11_H_

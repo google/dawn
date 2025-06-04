@@ -206,6 +206,7 @@ set(sources
     "ExternalTexture.cpp"
     "Features.cpp"
     "Format.cpp"
+    "ImmediateConstantsLayout.cpp"
     "ImmediateConstantsTracker.cpp"
     "IndirectDrawMetadata.cpp"
     "IndirectDrawValidationEncoder.cpp"

@@ -33,6 +33,7 @@
 #include <limits>
 
 #include "dawn/common/Assert.h"
+#include "dawn/common/BitSetRangeIterator.h"
 #include "dawn/common/Math.h"
 #include "dawn/common/Platform.h"
 #include "dawn/common/TypedInteger.h"
@@ -240,6 +241,10 @@ class bitset : private ::std::bitset<N> {
 
     friend bitset operator^(const bitset& lhs, const bitset& rhs) noexcept {
         return bitset(static_cast<const Base&>(lhs) ^ static_cast<const Base&>(rhs));
+    }
+
+    friend BitSetRangeIterator<N, Index> IterateRanges(const bitset& bitset) {
+        return BitSetRangeIterator<N, Index>(static_cast<const Base&>(bitset));
     }
 
     friend struct std::hash<bitset>;

@@ -36,6 +36,7 @@
 
 #include "dawn/common/Range.h"
 #include "dawn/native/CreatePipelineAsyncEvent.h"
+#include "dawn/native/ImmediateConstantsLayout.h"
 #include "dawn/native/d3d/D3DError.h"
 #include "dawn/native/d3d/ShaderUtils.h"
 #include "dawn/native/d3d11/DeviceD3D11.h"
@@ -234,6 +235,16 @@ RenderPipeline::RenderPipeline(Device* device,
       mD3DPrimitiveTopology(D3DPrimitiveTopology(GetPrimitiveTopology())) {}
 
 MaybeError RenderPipeline::InitializeImpl() {
+    // Set firstVertex and firstInstance bits together to ensure non immediate case has correct
+    // offset.
+    // TODO(crbug.com/366291600): Setting these bits respectively after immediate covers all cases.
+    if (UsesVertexIndex() || UsesInstanceIndex()) {
+        mImmediateMask |= GetImmediateConstantBlockBits(
+            offsetof(RenderImmediateConstants, firstVertex), kImmediateConstantElementByteSize);
+        mImmediateMask |= GetImmediateConstantBlockBits(
+            offsetof(RenderImmediateConstants, firstInstance), kImmediateConstantElementByteSize);
+    }
+
     DAWN_TRY(InitializeRasterizerState());
     DAWN_TRY(InitializeBlendState());
     DAWN_TRY(InitializeShaders());
@@ -462,18 +473,16 @@ MaybeError RenderPipeline::InitializeShaders() {
             additionalCompileFlags |= D3DCOMPILE_IEEE_STRICTNESS;
         }
 
-        DAWN_TRY_ASSIGN(
-            compiledShader[SingleShaderStage::Vertex],
-            ToBackend(programmableStage.module)
-                ->Compile(programmableStage, SingleShaderStage::Vertex, ToBackend(GetLayout()),
-                          compileFlags | additionalCompileFlags, usedInterstageVariables));
+        DAWN_TRY_ASSIGN(compiledShader[SingleShaderStage::Vertex],
+                        ToBackend(programmableStage.module)
+                            ->Compile(programmableStage, SingleShaderStage::Vertex,
+                                      ToBackend(GetLayout()), compileFlags | additionalCompileFlags,
+                                      GetImmediateMask(), usedInterstageVariables));
         const Blob& shaderBlob = compiledShader[SingleShaderStage::Vertex].shaderBlob;
         DAWN_TRY(CheckHRESULT(device->GetD3D11Device()->CreateVertexShader(
                                   shaderBlob.Data(), shaderBlob.Size(), nullptr, &mVertexShader),
                               "D3D11 create vertex shader"));
         DAWN_TRY(InitializeInputLayout(shaderBlob));
-        mUsesVertexIndex = compiledShader[SingleShaderStage::Vertex].usesVertexIndex;
-        mUsesInstanceIndex = compiledShader[SingleShaderStage::Vertex].usesInstanceIndex;
     }
 
     std::optional<tint::hlsl::writer::PixelLocalOptions> pixelLocalOptions;
@@ -530,11 +539,12 @@ MaybeError RenderPipeline::InitializeShaders() {
             additionalCompileFlags |= D3DCOMPILE_IEEE_STRICTNESS;
         }
 
-        DAWN_TRY_ASSIGN(compiledShader[SingleShaderStage::Fragment],
-                        ToBackend(programmableStage.module)
-                            ->Compile(programmableStage, SingleShaderStage::Fragment,
-                                      ToBackend(GetLayout()), compileFlags | additionalCompileFlags,
-                                      usedInterstageVariables, pixelLocalOptions));
+        DAWN_TRY_ASSIGN(
+            compiledShader[SingleShaderStage::Fragment],
+            ToBackend(programmableStage.module)
+                ->Compile(programmableStage, SingleShaderStage::Fragment, ToBackend(GetLayout()),
+                          compileFlags | additionalCompileFlags, GetImmediateMask(),
+                          usedInterstageVariables, pixelLocalOptions));
         DAWN_TRY(CheckHRESULT(device->GetD3D11Device()->CreatePixelShader(
                                   compiledShader[SingleShaderStage::Fragment].shaderBlob.Data(),
                                   compiledShader[SingleShaderStage::Fragment].shaderBlob.Size(),
