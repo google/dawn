@@ -52,6 +52,7 @@ TINT_END_DISABLE_WARNING(NEWLINE_EOF);
 
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
+#include "src/tint/lang/core/ir/referenced_module_vars.h"
 #include "src/tint/lang/core/type/builtin_structs.h"
 #include "src/tint/lang/spirv/builtin_fn.h"
 #include "src/tint/lang/spirv/ir/builtin_call.h"
@@ -992,6 +993,41 @@ class Parser {
 
             // Set the entry point name.
             ir_.SetName(func, entry_point.GetOperand(2).AsString());
+
+            // For vertex shaders, must make sure the `position` builtin is referenced. In SPIR-V it
+            // can be referenced in the `OpEntryPoint` without any usages. When translating we need
+            // to make sure we insert a fake write if there are no usages.
+            if (func->IsVertex()) {
+                core::ir::ReferencedModuleVars<const core::ir::Module> referenced(ir_);
+                for (uint32_t i = 3; i < entry_point.NumInOperands(); ++i) {
+                    auto interface_id = entry_point.GetSingleWordInOperand(i);
+                    auto* val = Value(interface_id);
+                    TINT_ASSERT(val);
+
+                    auto* inst_result = val->As<core::ir::InstructionResult>();
+                    TINT_ASSERT(inst_result);
+
+                    auto* var = inst_result->Instruction()->As<core::ir::Var>();
+                    TINT_ASSERT(var);
+
+                    auto builtin = var->Builtin();
+                    if (!builtin.has_value() || builtin.value() != core::BuiltinValue::kPosition) {
+                        continue;
+                    }
+
+                    auto refs = referenced.TransitiveReferences(func);
+                    // The referenced variables does not contain the var which has the `position`
+                    // builtin, then we need to create a fake store.
+                    if (!refs.Contains(var)) {
+                        auto* store = b_.Store(var, b_.Zero(var->Result()->Type()->UnwrapPtr()));
+                        store->InsertBefore(func->Block()->Front());
+                    }
+
+                    // There should only be one `position` so we're done if we've processed the
+                    // first one found.
+                    break;
+                }
+            }
         }
 
         // Handle OpExecutionMode declarations.

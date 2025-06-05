@@ -130,21 +130,130 @@ $B1: {  # root
 )");
 }
 
-TEST_F(SpirvParserTest, DISABLED_VertexShader) {
+TEST_F(SpirvParserTest, VertexShader_PositionUnused) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpMemoryModel Logical GLSL450
-               OpEntryPoint Vertex %main "main"
+               OpEntryPoint Vertex %main "main" %position
+               OpName %position "position"
+               OpDecorate %position BuiltIn Position
        %void = OpTypeVoid
+      %float = OpTypeFloat 32
     %ep_type = OpTypeFunction %void
+    %v4float = OpTypeVector %float 4
+        %ptr = OpTypePointer Output %v4float
+   %position = OpVariable %ptr Output
        %main = OpFunction %void None %ep_type
  %main_start = OpLabel
                OpReturn
                OpFunctionEnd
 )",
               R"(
+$B1: {  # root
+  %position:ptr<__out, vec4<f32>, read_write> = var undef @builtin(position)
+}
+
 %main = @vertex func():void {
-  $B1: {
+  $B2: {
+    store %position, vec4<f32>(0.0f)
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, VertexShader_PositionUsed) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Vertex %main "main" %position
+               OpName %position "position"
+               OpDecorate %position BuiltIn Position
+       %void = OpTypeVoid
+      %float = OpTypeFloat 32
+    %ep_type = OpTypeFunction %void
+    %v4float = OpTypeVector %float 4
+        %ptr = OpTypePointer Output %v4float
+         %f1 = OpConstant %float 1
+         %f2 = OpConstant %float 2
+         %f3 = OpConstant %float 3
+         %f4 = OpConstant %float 4
+         %v4 = OpConstantComposite %v4float %f1 %f2 %f3 %f4
+   %position = OpVariable %ptr Output
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+               OpStore %position %v4
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %position:ptr<__out, vec4<f32>, read_write> = var undef @builtin(position)
+}
+
+%main = @vertex func():void {
+  $B2: {
+    store %position, vec4<f32>(1.0f, 2.0f, 3.0f, 4.0f)
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, VertexShader_PositionUsed_Transitive) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Vertex %main "main" %position
+               OpName %position "position"
+               OpDecorate %position BuiltIn Position
+       %void = OpTypeVoid
+      %float = OpTypeFloat 32
+    %ep_type = OpTypeFunction %void
+    %v4float = OpTypeVector %float 4
+        %ptr = OpTypePointer Output %v4float
+         %f1 = OpConstant %float 1
+         %f2 = OpConstant %float 2
+         %f3 = OpConstant %float 3
+         %f4 = OpConstant %float 4
+         %v4 = OpConstantComposite %v4float %f1 %f2 %f3 %f4
+   %position = OpVariable %ptr Output
+          %c = OpFunction %void None %ep_type
+         %c1 = OpLabel
+               OpStore %position %v4
+               OpReturn
+               OpFunctionEnd
+          %b = OpFunction %void None %ep_type
+         %b1 = OpLabel
+         %b2 = OpFunctionCall %void %c
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+         %a1 = OpFunctionCall %void %b
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %position:ptr<__out, vec4<f32>, read_write> = var undef @builtin(position)
+}
+
+%2 = func():void {
+  $B2: {
+    store %position, vec4<f32>(1.0f, 2.0f, 3.0f, 4.0f)
+    ret
+  }
+}
+%3 = func():void {
+  $B3: {
+    %4:void = call %2
+    ret
+  }
+}
+%main = @vertex func():void {
+  $B4: {
+    %6:void = call %3
     ret
   }
 }

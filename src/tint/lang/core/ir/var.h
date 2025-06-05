@@ -118,6 +118,8 @@ class Var : public Castable<Var, OperandInstruction<1, 1>> {
         TINT_ASSERT(!attributes_.builtin.has_value());
         attributes_.builtin = val;
     }
+    /// Returns the builtin information, if available
+    std::optional<core::BuiltinValue> Builtin() const { return attributes_.builtin; }
 
     /// Resets the IO attributes
     void ResetAttributes() { attributes_ = {}; }
