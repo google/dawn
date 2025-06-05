@@ -168,6 +168,7 @@ struct Options {
 
 #if TINT_BUILD_SPV_WRITER
     bool use_storage_input_output_16 = true;
+    tint::spirv::writer::SpvVersion spirv_version = tint::spirv::writer::SpvVersion::kSpv13;
 #endif  // TINT_BULD_SPV_WRITER
 
 #if TINT_BUILD_MSL_WRITER
@@ -410,6 +411,16 @@ violations that may be produced)",
         options.Add<BoolOption>("use-storage-input-output-16",
                                 "Use the StorageInputOutput16 SPIR-V capability", Default{true});
     TINT_DEFER(opts->use_storage_input_output_16 = *use_storage_input_output_16.value);
+
+    tint::Vector<EnumName<tint::spirv::writer::SpvVersion>, 2> version_enum_names{
+        EnumName(tint::spirv::writer::SpvVersion::kSpv13, "1.3"),
+        EnumName(tint::spirv::writer::SpvVersion::kSpv14, "1.4"),
+    };
+    auto& spirv_version = options.Add<EnumOption<tint::spirv::writer::SpvVersion>>(
+        "spirv-version", R"(Specify the SPIR-V binary version.
+Valid values are 1.3 and 1.4)",
+        version_enum_names, Default{tint::spirv::writer::SpvVersion::kSpv13});
+    TINT_DEFER(opts->spirv_version = *spirv_version.value);
 #endif  // TINT_BUILD_SPV_WRITER
 
 #if TINT_BUILD_GLSL_WRITER
@@ -890,6 +901,7 @@ bool GenerateSpirv([[maybe_unused]] Options& options,
     gen_options.disable_robustness = !options.enable_robustness;
     gen_options.disable_workgroup_init = options.disable_workgroup_init;
     gen_options.use_storage_input_output_16 = options.use_storage_input_output_16;
+    gen_options.spirv_version = options.spirv_version;
 
     auto entry_point = inspector.GetEntryPoint(options.ep_name);
 

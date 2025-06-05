@@ -39,5 +39,31 @@ TEST(TintCheckAllFieldsReflected, SpirvWriterCommonOptionsTest) {
     TINT_ASSERT_ALL_FIELDS_REFLECTED(Options);
 }
 
+using SpirvWriterOptionsTest = ::testing::Test;
+
+TEST_F(SpirvWriterOptionsTest, SpirvVersionLess) {
+    Options options;
+
+    // Default is SPIR-V 1.3
+    EXPECT_FALSE(options.SpirvVersionLess(1, 0));
+    EXPECT_FALSE(options.SpirvVersionLess(1, 1));
+    EXPECT_FALSE(options.SpirvVersionLess(1, 2));
+    EXPECT_FALSE(options.SpirvVersionLess(1, 3));
+    EXPECT_TRUE(options.SpirvVersionLess(1, 4));
+    EXPECT_TRUE(options.SpirvVersionLess(1, 5));
+    EXPECT_TRUE(options.SpirvVersionLess(1, 6));
+    EXPECT_TRUE(options.SpirvVersionLess(1, 7));
+
+    options.spirv_version = SpvVersion::kSpv14;
+    EXPECT_FALSE(options.SpirvVersionLess(1, 0));
+    EXPECT_FALSE(options.SpirvVersionLess(1, 1));
+    EXPECT_FALSE(options.SpirvVersionLess(1, 2));
+    EXPECT_FALSE(options.SpirvVersionLess(1, 3));
+    EXPECT_FALSE(options.SpirvVersionLess(1, 4));
+    EXPECT_TRUE(options.SpirvVersionLess(1, 5));
+    EXPECT_TRUE(options.SpirvVersionLess(1, 6));
+    EXPECT_TRUE(options.SpirvVersionLess(1, 7));
+}
+
 }  // namespace
 }  // namespace tint::spirv::writer

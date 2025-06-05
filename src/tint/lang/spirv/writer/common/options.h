@@ -129,6 +129,12 @@ struct Bindings {
                  input_attachment);
 };
 
+/// Supported SPIR-V binary versions.
+enum class SpvVersion : uint32_t {
+    kSpv13 = 0x10300u,  // SPIR-V 1.3
+    kSpv14 = 0x10400u,  // SPIR-V 1.4
+};
+
 /// Configuration options used for generating SPIR-V.
 struct Options {
     struct RangeOffsets {
@@ -210,6 +216,15 @@ struct Options {
     /// Offsets of the minDepth and maxDepth push constants.
     std::optional<RangeOffsets> depth_range_offsets = std::nullopt;
 
+    /// SPIR-V binary version.
+    SpvVersion spirv_version = SpvVersion::kSpv13;
+
+    /// Returns true if the binary version is less than major.minor.
+    bool SpirvVersionLess(uint32_t major, uint32_t minor) const {
+        return static_cast<uint32_t>(spirv_version) <
+               (((major & 0xffff) << 16) | ((minor & 0xffff) << 8));
+    }
+
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(Options,
                  remapped_entry_point_name,
@@ -232,9 +247,17 @@ struct Options {
                  use_vulkan_memory_model,
                  scalarize_clamp_builtin,
                  dva_transform_handle,
-                 depth_range_offsets);
+                 depth_range_offsets,
+                 spirv_version);
 };
 
 }  // namespace tint::spirv::writer
+
+namespace tint {
+
+/// Reflect enum information for SPIR-V version.
+TINT_REFLECT_ENUM_RANGE(spirv::writer::SpvVersion, kSpv13, kSpv14);
+
+}  // namespace tint
 
 #endif  // SRC_TINT_LANG_SPIRV_WRITER_COMMON_OPTIONS_H_
