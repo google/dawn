@@ -405,11 +405,26 @@ struct State {
             const bool entry_point = func->IsEntryPoint();
             auto* var_type = var->Result()->Type()->UnwrapPtr();
 
-            // Use a scalar u32 for sample_mask builtins for entry point parameters.
-            if (entry_point && var->Attributes().builtin == core::BuiltinValue::kSampleMask) {
-                TINT_ASSERT(var_type->Is<core::type::Array>());
-                TINT_ASSERT(var_type->As<core::type::Array>()->ConstantCount() == 1u);
-                var_type = ty.u32();
+            // The SPIR_V type may not match the required WGSL entry point type, swap them as
+            // needed.
+            if (entry_point && var->Attributes().builtin.has_value()) {
+                switch (var->Attributes().builtin.value()) {
+                    case core::BuiltinValue::kSampleMask: {
+                        // Use a scalar u32 for sample_mask builtins
+                        TINT_ASSERT(var_type->Is<core::type::Array>());
+                        TINT_ASSERT(var_type->As<core::type::Array>()->ConstantCount() == 1u);
+                        var_type = ty.u32();
+                        break;
+                    }
+                    case core::BuiltinValue::kInstanceIndex: {
+                        // Use a scalar u32 for instance_index builtin
+                        var_type = ty.u32();
+                        break;
+                    }
+                    default: {
+                        break;
+                    }
+                }
             }
 
             // Create a new function parameter for the input.
@@ -437,24 +452,43 @@ struct State {
             });
 
             core::ir::Value* result = param;
-            if (entry_point && var->Attributes().builtin == core::BuiltinValue::kSampleMask) {
-                // Construct an array from the scalar sample_mask builtin value for entry points.
+            if (entry_point && var->Attributes().builtin.has_value()) {
+                switch (var->Attributes().builtin.value()) {
+                    case core::BuiltinValue::kSampleMask: {
+                        // Construct an array from the scalar sample_mask builtin value for entry
+                        // points.
 
-                auto* mask_ty = var->Result()->Type()->UnwrapPtr()->As<core::type::Array>();
-                TINT_ASSERT(mask_ty);
+                        auto* mask_ty = var->Result()->Type()->UnwrapPtr()->As<core::type::Array>();
+                        TINT_ASSERT(mask_ty);
 
-                // If the SPIR-V mask was an i32, need to convert from the u32 provided by WGSL.
-                if (mask_ty->ElemType()->IsSignedIntegerScalar()) {
-                    auto* conv = b.Convert(ty.i32(), result);
-                    func->Block()->Prepend(conv);
+                        // If the SPIR-V mask was an i32, need to convert from the u32 provided by
+                        // WGSL.
+                        if (mask_ty->ElemType()->IsSignedIntegerScalar()) {
+                            auto* conv = b.Convert(ty.i32(), result);
+                            func->Block()->Prepend(conv);
 
-                    auto* construct = b.Construct(mask_ty, conv);
-                    construct->InsertAfter(conv);
-                    result = construct->Result();
-                } else {
-                    auto* construct = b.Construct(mask_ty, result);
-                    func->Block()->Prepend(construct);
-                    result = construct->Result();
+                            auto* construct = b.Construct(mask_ty, conv);
+                            construct->InsertAfter(conv);
+                            result = construct->Result();
+                        } else {
+                            auto* construct = b.Construct(mask_ty, result);
+                            func->Block()->Prepend(construct);
+                            result = construct->Result();
+                        }
+                        break;
+                    }
+                    case core::BuiltinValue::kInstanceIndex: {
+                        auto* idx_ty = var->Result()->Type()->UnwrapPtr();
+                        if (idx_ty->IsSignedIntegerScalar()) {
+                            auto* conv = b.Convert(ty.i32(), result);
+                            func->Block()->Prepend(conv);
+                            result = conv->Result();
+                        }
+                        break;
+                    }
+                    default: {
+                        break;
+                    }
                 }
             }
             return result;
