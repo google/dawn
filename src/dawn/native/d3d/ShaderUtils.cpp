@@ -228,7 +228,7 @@ ResultOrError<ComPtr<ID3DBlob>> CompileShaderFXC(const d3d::D3DBytecodeCompilati
 }
 
 MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
-                           CacheKey::UnsafeUnkeyedValue<dawn::platform::Platform*> tracePlatform,
+                           UnsafeUnserializedValue<dawn::platform::Platform*> tracePlatform,
                            CompiledShader* compiledShader) {
     tint::ast::transform::Manager transformManager;
     tint::ast::transform::DataMap transformInputs;

@@ -55,19 +55,19 @@ namespace {
 using OptionalVertexPullingTransformConfig = std::optional<tint::VertexPullingConfig>;
 using SubstituteOverrideConfig = std::unordered_map<tint::OverrideId, double>;
 
-#define MSL_COMPILATION_REQUEST_MEMBERS(X)                                                \
-    X(SingleShaderStage, stage)                                                           \
-    X(ShaderModuleBase::ShaderModuleHash, shaderModuleHash)                               \
-    X(CacheKey::UnsafeUnkeyedValue<ShaderModuleBase::ScopedUseTintProgram>, inputProgram) \
-    X(SubstituteOverrideConfig, substituteOverrideConfig)                                 \
-    X(LimitsForCompilationRequest, limits)                                                \
-    X(CacheKey::UnsafeUnkeyedValue<LimitsForCompilationRequest>, adapterSupportedLimits)  \
-    X(uint32_t, maxSubgroupSize)                                                          \
-    X(std::string, entryPointName)                                                        \
-    X(bool, usesSubgroupMatrix)                                                           \
-    X(bool, disableSymbolRenaming)                                                        \
-    X(tint::msl::writer::Options, tintOptions)                                            \
-    X(CacheKey::UnsafeUnkeyedValue<dawn::platform::Platform*>, platform)
+#define MSL_COMPILATION_REQUEST_MEMBERS(X)                                           \
+    X(SingleShaderStage, stage)                                                      \
+    X(ShaderModuleBase::ShaderModuleHash, shaderModuleHash)                          \
+    X(UnsafeUnserializedValue<ShaderModuleBase::ScopedUseTintProgram>, inputProgram) \
+    X(SubstituteOverrideConfig, substituteOverrideConfig)                            \
+    X(LimitsForCompilationRequest, limits)                                           \
+    X(UnsafeUnserializedValue<LimitsForCompilationRequest>, adapterSupportedLimits)  \
+    X(uint32_t, maxSubgroupSize)                                                     \
+    X(std::string, entryPointName)                                                   \
+    X(bool, usesSubgroupMatrix)                                                      \
+    X(bool, disableSymbolRenaming)                                                   \
+    X(tint::msl::writer::Options, tintOptions)                                       \
+    X(UnsafeUnserializedValue<dawn::platform::Platform*>, platform)
 
 DAWN_MAKE_CACHE_REQUEST(MslCompilationRequest, MSL_COMPILATION_REQUEST_MEMBERS);
 #undef MSL_COMPILATION_REQUEST_MEMBERS
@@ -275,12 +275,12 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
     MslCompilationRequest req = {};
     req.stage = stage;
     req.shaderModuleHash = programmableStage.module->GetHash();
-    req.inputProgram = programmableStage.module->UseTintProgram();
+    req.inputProgram = UnsafeUnserializedValue(programmableStage.module->UseTintProgram());
     req.substituteOverrideConfig = BuildSubstituteOverridesTransformConfig(programmableStage);
     req.entryPointName = programmableStage.entryPoint.c_str();
     req.disableSymbolRenaming = device->IsToggleEnabled(Toggle::DisableSymbolRenaming);
     req.usesSubgroupMatrix = programmableStage.metadata->usesSubgroupMatrix;
-    req.platform = UnsafeUnkeyedValue(device->GetPlatform());
+    req.platform = UnsafeUnserializedValue(device->GetPlatform());
 
     req.tintOptions.strip_all_names = !req.disableSymbolRenaming;
     req.tintOptions.remapped_entry_point_name = device->GetIsolatedEntryPointName();
@@ -305,8 +305,8 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
         device->IsToggleEnabled(Toggle::EnableIntegerRangeAnalysisInRobustness);
 
     req.limits = LimitsForCompilationRequest::Create(device->GetLimits().v1);
-    req.adapterSupportedLimits =
-        LimitsForCompilationRequest::Create(device->GetAdapter()->GetLimits().v1);
+    req.adapterSupportedLimits = UnsafeUnserializedValue(
+        LimitsForCompilationRequest::Create(device->GetAdapter()->GetLimits().v1));
     req.maxSubgroupSize = device->GetAdapter()->GetPhysicalDevice()->GetSubgroupMaxSize();
 
     CacheResult<MslCompilation> mslCompilation;

@@ -134,7 +134,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     const bool useTintIR = device->IsToggleEnabled(Toggle::UseTintIR);
 
     d3d::D3DCompilationRequest req = {};
-    req.tracePlatform = UnsafeUnkeyedValue(device->GetPlatform());
+    req.tracePlatform = UnsafeUnserializedValue(device->GetPlatform());
     req.hlsl.shaderModel = ToBackend(device->GetPhysicalDevice())
                                ->GetAppliedShaderModelUnderToggles(device->GetTogglesState());
     req.hlsl.disableSymbolRenaming = device->IsToggleEnabled(Toggle::DisableSymbolRenaming);
@@ -154,13 +154,14 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
             ToBackend(device->GetPhysicalDevice())->GetBackend()->GetDxcVersion();
 
         req.bytecode.compiler = d3d::Compiler::DXC;
-        req.bytecode.dxcLibrary = device->GetDxcLibrary().Get();
-        req.bytecode.dxcCompiler = device->GetDxcCompiler().Get();
+        req.bytecode.dxcLibrary = UnsafeUnserializedValue(device->GetDxcLibrary().Get());
+        req.bytecode.dxcCompiler = UnsafeUnserializedValue(device->GetDxcCompiler().Get());
         req.bytecode.compilerVersion = dxcVersionInfo.DxcCompilerVersion;
         req.bytecode.dxcShaderProfile = device->GetDxcShaderProfiles()[stage];
     } else {
         req.bytecode.compiler = d3d::Compiler::FXC;
-        req.bytecode.d3dCompile = std::move(pD3DCompile{device->GetFunctions()->d3dCompile});
+        req.bytecode.d3dCompile =
+            UnsafeUnserializedValue(pD3DCompile{device->GetFunctions()->d3dCompile});
         req.bytecode.compilerVersion = D3D_COMPILER_VERSION;
         switch (stage) {
             case SingleShaderStage::Vertex:
@@ -322,7 +323,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     }
 
     req.hlsl.shaderModuleHash = GetHash();
-    req.hlsl.inputProgram = UseTintProgram();
+    req.hlsl.inputProgram = UnsafeUnserializedValue(UseTintProgram());
     req.hlsl.entryPointName = programmableStage.entryPoint.c_str();
     req.hlsl.stage = stage;
     if (!useTintIR) {
@@ -380,8 +381,8 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
         device->IsToggleEnabled(Toggle::EnableIntegerRangeAnalysisInRobustness);
 
     req.hlsl.limits = LimitsForCompilationRequest::Create(device->GetLimits().v1);
-    req.hlsl.adapterSupportedLimits =
-        LimitsForCompilationRequest::Create(device->GetAdapter()->GetLimits().v1);
+    req.hlsl.adapterSupportedLimits = UnsafeUnserializedValue(
+        LimitsForCompilationRequest::Create(device->GetAdapter()->GetLimits().v1));
     req.hlsl.maxSubgroupSize = device->GetAdapter()->GetPhysicalDevice()->GetSubgroupMaxSize();
 
     CacheResult<d3d::CompiledShader> compiledShader;

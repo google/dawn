@@ -436,6 +436,17 @@ TEST(SerializeTests, TintSemBindingPoint) {
     EXPECT_CACHE_KEY_EQ(bp, expected);
 }
 
+// Test that ByteVectorSink serialization skip UnsafeUnserializedValue as expected.
+TEST(SerializeTests, UnsafeUnserializedValue) {
+    std::pair<uint32_t, UnsafeUnserializedValue<uint32_t>> input{123, 456};
+
+    ByteVectorSink expected;
+    // The second UnsafeUnserializedValue<uint32_t> is not serialized.
+    StreamIn(&expected, uint32_t(123));
+
+    EXPECT_CACHE_KEY_EQ(input, expected);
+}
+
 // Test that serializing then deserializing a param pack yields the same values.
 TEST(StreamTests, SerializeDeserializeParamPack) {
     int a = 1;
@@ -585,6 +596,32 @@ TEST(StreamTests, SerializeDeserializeItypArray) {
     }
 }
 
+// Test that serializing then deserializing a UnsafeUnserializedValue<T> yields the default
+// constructed T.
+TEST(StreamTests, UnsafeUnserializedValue) {
+    using ValueType = std::string;
+    using Type = UnsafeUnserializedValue<ValueType>;
+    ValueType init1 = "hello";
+    ValueType init2 = "world";
+
+    Type in = Type(ValueType(init1));
+    ASSERT_EQ(in.UnsafeGetValue(), init1);
+
+    ByteVectorSink sink;
+    StreamIn(&sink, in);
+
+    BlobSource src(CreateBlob(sink));
+    // Initialize the UnsafeUnserializedValue to a value different from default constructed. When
+    // deserializing, it should be assigned to default constructed value.
+    Type out = Type(ValueType(init2));
+    ASSERT_EQ(out.UnsafeGetValue(), init2);
+    // Do the deserialization.
+    auto err = StreamOut(&src, &out);
+    EXPECT_FALSE(err.IsError());
+    // Check that the UnsafeUnserializedValue was set to default constructed value.
+    EXPECT_EQ(out.UnsafeGetValue(), ValueType());
+}
+
 template <size_t N>
 std::bitset<N - 1> BitsetFromBitString(const char (&str)[N]) {
     // N - 1 because the last character is the null terminator.
@@ -614,6 +651,8 @@ static auto kStreamValueVectorParams = std::make_tuple(
         BitsetFromBitString("100110010101011001100110101011001100101010110011001011011"),
         BitsetFromBitString("000110010101011000100110101011001100101010010011001010100"),
         BitsetFromBitString("111111111111111111111111111111111111111111111111111111111"), 0},
+    // Test std::optional.
+    std::vector<std::optional<std::string>>{std::nullopt, "", "abc"},
     // Test unordered_maps.
     std::vector<std::unordered_map<int, int>>{{},
                                               {{4, 5}, {6, 8}, {99, 42}, {0, 0}},

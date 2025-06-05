@@ -92,18 +92,18 @@ opengl::CombinedSampler* AppendCombinedSampler(opengl::CombinedSamplerInfo* info
 using InterstageLocationAndName = std::pair<uint32_t, std::string>;
 using SubstituteOverrideConfig = std::unordered_map<tint::OverrideId, double>;
 
-#define GLSL_COMPILATION_REQUEST_MEMBERS(X)                                               \
-    X(ShaderModuleBase::ShaderModuleHash, shaderModuleHash)                               \
-    X(CacheKey::UnsafeUnkeyedValue<ShaderModuleBase::ScopedUseTintProgram>, inputProgram) \
-    X(std::string, entryPointName)                                                        \
-    X(SingleShaderStage, stage)                                                           \
-    X(SubstituteOverrideConfig, substituteOverrideConfig)                                 \
-    X(LimitsForCompilationRequest, limits)                                                \
-    X(CacheKey::UnsafeUnkeyedValue<LimitsForCompilationRequest>, adapterSupportedLimits)  \
-    X(bool, disableSymbolRenaming)                                                        \
-    X(std::vector<InterstageLocationAndName>, interstageVariables)                        \
-    X(tint::glsl::writer::Options, tintOptions)                                           \
-    X(CacheKey::UnsafeUnkeyedValue<dawn::platform::Platform*>, platform)
+#define GLSL_COMPILATION_REQUEST_MEMBERS(X)                                          \
+    X(ShaderModuleBase::ShaderModuleHash, shaderModuleHash)                          \
+    X(UnsafeUnserializedValue<ShaderModuleBase::ScopedUseTintProgram>, inputProgram) \
+    X(std::string, entryPointName)                                                   \
+    X(SingleShaderStage, stage)                                                      \
+    X(SubstituteOverrideConfig, substituteOverrideConfig)                            \
+    X(LimitsForCompilationRequest, limits)                                           \
+    X(UnsafeUnserializedValue<LimitsForCompilationRequest>, adapterSupportedLimits)  \
+    X(bool, disableSymbolRenaming)                                                   \
+    X(std::vector<InterstageLocationAndName>, interstageVariables)                   \
+    X(tint::glsl::writer::Options, tintOptions)                                      \
+    X(UnsafeUnserializedValue<dawn::platform::Platform*>, platform)
 
 DAWN_MAKE_CACHE_REQUEST(GLSLCompilationRequest, GLSL_COMPILATION_REQUEST_MEMBERS);
 #undef GLSL_COMPILATION_REQUEST_MEMBERS
@@ -475,7 +475,7 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
     GLSLCompilationRequest req = {};
 
     req.shaderModuleHash = GetHash();
-    req.inputProgram = UseTintProgram();
+    req.inputProgram = UnsafeUnserializedValue(UseTintProgram());
 
     // Since (non-Vulkan) GLSL does not support descriptor sets, generate a
     // mapping from the original group/binding pair to a binding-only
@@ -512,8 +512,8 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
     req.entryPointName = programmableStage.entryPoint;
     req.substituteOverrideConfig = BuildSubstituteOverridesTransformConfig(programmableStage);
     req.limits = LimitsForCompilationRequest::Create(GetDevice()->GetLimits().v1);
-    req.adapterSupportedLimits =
-        LimitsForCompilationRequest::Create(GetDevice()->GetAdapter()->GetLimits().v1);
+    req.adapterSupportedLimits = UnsafeUnserializedValue(
+        LimitsForCompilationRequest::Create(GetDevice()->GetAdapter()->GetLimits().v1));
 
     if (GetDevice()->IsToggleEnabled(Toggle::GLUseArrayLengthFromUniform)) {
         *needsSSBOLengthUniformBuffer =
@@ -527,7 +527,7 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
         }
     }
 
-    req.platform = UnsafeUnkeyedValue(GetDevice()->GetPlatform());
+    req.platform = UnsafeUnserializedValue(GetDevice()->GetPlatform());
 
     req.tintOptions.version = tint::glsl::writer::Version(ToTintGLStandard(version.GetStandard()),
                                                           version.GetMajor(), version.GetMinor());

@@ -63,6 +63,46 @@ class Serializable {
         return CreateBlob(std::move(sink));
     }
 };
+
+// UnsafeUnserializedValue holds a value of type T that does nothing when StreamIn to a sink, calls
+// default constructor when StreamOut from a source, and always compares as equal between objects of
+// the same type UnsafeUnserializedValue<T>. This is used for members in DAWN_SERIALIZABLE or
+// DAWN_MAKE_CACHE_REQUEST to prevent a member to get streamed into cache key, or enable having
+// unserializabled fields that get computed by cache missed function and returned together with
+// cached fields.
+template <typename T>
+class UnsafeUnserializedValue {
+  public:
+    UnsafeUnserializedValue() = default;
+    explicit UnsafeUnserializedValue(T&& value) : mValue(std::forward<T>(value)) {}
+    UnsafeUnserializedValue(const UnsafeUnserializedValue<T>& other)
+        : mValue(other.UnsafeGetValue()) {}
+    UnsafeUnserializedValue<T>& operator=(UnsafeUnserializedValue<T>&& other) {
+        mValue = std::move(other.UnsafeGetValue());
+        return *this;
+    }
+
+    constexpr const T& UnsafeGetValue() const { return mValue; }
+    constexpr T& UnsafeGetValue() { return mValue; }
+
+    friend constexpr void StreamIn(stream::Sink*, const UnsafeUnserializedValue<T>&) {}
+    friend MaybeError StreamOut(stream::Source*, UnsafeUnserializedValue<T>* out) {
+        // Call default constructor to initialize the value.
+        out->mValue = T();
+        return {};
+    }
+    // Enabling DAWN_SERIALIZABLE classes with UnsafeUnserializedOptional member to use default
+    // equality operator. Equality comparison always returns true for the same type.
+    bool operator==(const UnsafeUnserializedValue<T>& other) const { return true; }
+
+  protected:
+    T mValue;
+};
+
+// Template deduction guide for UnsafeUnserializedValue to enable deducting type of
+// UnsafeUnserializedValue(T{}) to UnsafeUnserializedValue<T>.
+template <typename T>
+UnsafeUnserializedValue(T&& value) -> UnsafeUnserializedValue<std::decay_t<T>>;
 }  // namespace dawn::native
 
 // Helper macro to define a struct or class along with VisitAll methods to call

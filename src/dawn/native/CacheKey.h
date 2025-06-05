@@ -40,33 +40,7 @@ class CacheKey : public stream::ByteVectorSink {
     using stream::ByteVectorSink::ByteVectorSink;
 
     enum class Type { ComputePipeline, RenderPipeline, Shader };
-
-    template <typename T>
-    class UnsafeUnkeyedValue {
-      public:
-        UnsafeUnkeyedValue() = default;
-        // NOLINTNEXTLINE(runtime/explicit) allow implicit construction to decrease verbosity
-        UnsafeUnkeyedValue(T&& value) : mValue(std::forward<T>(value)) {}
-
-        const T& UnsafeGetValue() const { return mValue; }
-
-        // Friend definition of StreamIn which can be found by ADL to override
-        // stream::StreamIn<T>.
-        friend constexpr void StreamIn(stream::Sink*, const UnsafeUnkeyedValue&) {}
-
-        // Enabling DAWN_SERIALIZABLE classes with UnsafeUnkeyedValue member to use default equality
-        // operator. Equality comparison always returns true for the same type UnsafeUnkeyedValues.
-        bool operator==(const UnsafeUnkeyedValue<T>& other) const { return true; }
-
-      private:
-        T mValue;
-    };
 };
-
-template <typename T>
-CacheKey::UnsafeUnkeyedValue<T> UnsafeUnkeyedValue(T&& value) {
-    return CacheKey::UnsafeUnkeyedValue<T>(std::forward<T>(value));
-}
 
 }  // namespace dawn::native
 

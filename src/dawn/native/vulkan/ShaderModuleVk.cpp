@@ -116,18 +116,18 @@ ShaderModule::~ShaderModule() = default;
 
 using SubstituteOverrideConfig = std::unordered_map<tint::OverrideId, double>;
 
-#define SPIRV_COMPILATION_REQUEST_MEMBERS(X)                                              \
-    X(SingleShaderStage, stage)                                                           \
-    X(ShaderModuleBase::ShaderModuleHash, shaderModuleHash)                               \
-    X(CacheKey::UnsafeUnkeyedValue<ShaderModuleBase::ScopedUseTintProgram>, inputProgram) \
-    X(SubstituteOverrideConfig, substituteOverrideConfig)                                 \
-    X(LimitsForCompilationRequest, limits)                                                \
-    X(CacheKey::UnsafeUnkeyedValue<LimitsForCompilationRequest>, adapterSupportedLimits)  \
-    X(uint32_t, maxSubgroupSize)                                                          \
-    X(std::string_view, entryPointName)                                                   \
-    X(bool, usesSubgroupMatrix)                                                           \
-    X(tint::spirv::writer::Options, tintOptions)                                          \
-    X(CacheKey::UnsafeUnkeyedValue<dawn::platform::Platform*>, platform)
+#define SPIRV_COMPILATION_REQUEST_MEMBERS(X)                                         \
+    X(SingleShaderStage, stage)                                                      \
+    X(ShaderModuleBase::ShaderModuleHash, shaderModuleHash)                          \
+    X(UnsafeUnserializedValue<ShaderModuleBase::ScopedUseTintProgram>, inputProgram) \
+    X(SubstituteOverrideConfig, substituteOverrideConfig)                            \
+    X(LimitsForCompilationRequest, limits)                                           \
+    X(UnsafeUnserializedValue<LimitsForCompilationRequest>, adapterSupportedLimits)  \
+    X(uint32_t, maxSubgroupSize)                                                     \
+    X(std::string_view, entryPointName)                                              \
+    X(bool, usesSubgroupMatrix)                                                      \
+    X(tint::spirv::writer::Options, tintOptions)                                     \
+    X(UnsafeUnserializedValue<dawn::platform::Platform*>, platform)
 
 DAWN_MAKE_CACHE_REQUEST(SpirvCompilationRequest, SPIRV_COMPILATION_REQUEST_MEMBERS);
 #undef SPIRV_COMPILATION_REQUEST_MEMBERS
@@ -244,9 +244,9 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
     SpirvCompilationRequest req = {};
     req.stage = stage;
     req.shaderModuleHash = GetHash();
-    req.inputProgram = UseTintProgram();
+    req.inputProgram = UnsafeUnserializedValue(UseTintProgram());
     req.entryPointName = programmableStage.entryPoint;
-    req.platform = UnsafeUnkeyedValue(GetDevice()->GetPlatform());
+    req.platform = UnsafeUnserializedValue(GetDevice()->GetPlatform());
     req.substituteOverrideConfig = BuildSubstituteOverridesTransformConfig(programmableStage);
     req.usesSubgroupMatrix = programmableStage.metadata->usesSubgroupMatrix;
 
@@ -306,8 +306,8 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
         GetDevice()->IsToggleEnabled(Toggle::EnableIntegerRangeAnalysisInRobustness);
 
     req.limits = LimitsForCompilationRequest::Create(GetDevice()->GetLimits().v1);
-    req.adapterSupportedLimits =
-        LimitsForCompilationRequest::Create(GetDevice()->GetAdapter()->GetLimits().v1);
+    req.adapterSupportedLimits = UnsafeUnserializedValue(
+        LimitsForCompilationRequest::Create(GetDevice()->GetAdapter()->GetLimits().v1));
     req.maxSubgroupSize = GetDevice()->GetAdapter()->GetPhysicalDevice()->GetSubgroupMaxSize();
 
     CacheResult<CompiledSpirv> compilation;

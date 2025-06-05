@@ -33,12 +33,11 @@
 #include <functional>
 #include <limits>
 #include <memory>
+#include <optional>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
 #include <vector>
-
-#include <optional>
 
 #include "absl/container/flat_hash_map.h"
 #include "absl/container/flat_hash_set.h"
@@ -106,11 +105,13 @@ MaybeError StreamOut(Source* s, T* v, Ts*... vs) {
 
 // Helper to call StreamIn on an empty parameter pack, e.g. for a DAWN_SERIALIZABLE struct with no
 // member. Do nothing.
-constexpr void StreamIn(Sink* s);
+inline constexpr void StreamIn(Sink* s) {}
 
 // Helper to call StreamOut on an empty parameter pack, e.g. for a DAWN_SERIALIZABLE struct with no
 // member. Do nothing and return success.
-MaybeError StreamOut(Source* s);
+inline MaybeError StreamOut(Source* s) {
+    return {};
+}
 
 // Stream specialization for fundamental types.
 template <typename T>
@@ -254,9 +255,10 @@ class Stream<std::unique_ptr<T>, std::enable_if_t<!std::is_pointer_v<T>>> {
         bool notNullptr;
         DAWN_TRY(StreamOut(source, &notNullptr));
         if (notNullptr) {
-            T out;
-            DAWN_TRY(StreamOut(source, &out));
-            *t = std::make_unique<T>(std::move(out));
+            // Avoid using copy or move constructor of T.
+            std::unique_ptr<T> out = std::make_unique<T>();
+            DAWN_TRY(StreamOut(source, out.get()));
+            *t = std::move(out);
         } else {
             *t = nullptr;
         }
@@ -284,6 +286,18 @@ class Stream<std::optional<T>> {
         if (hasValue) {
             StreamIn(sink, *t);
         }
+    }
+    static MaybeError Read(Source* source, std::optional<T>* t) {
+        bool hasValue;
+        DAWN_TRY(StreamOut(source, &hasValue));
+        if (hasValue) {
+            T out;
+            DAWN_TRY(StreamOut(source, &out));
+            *t = std::move(out);
+        } else {
+            t->reset();
+        }
+        return {};
     }
 };
 
