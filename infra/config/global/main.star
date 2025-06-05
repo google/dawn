@@ -918,6 +918,7 @@ luci.cq(
     status_host = "chromium-cq-status.appspot.com",
     submit_max_burst = 4,
     submit_burst_delay = 480 * time.second,
+    gerrit_listener_type = cq.GERRIT_LISTENER_TYPE_LEGACY_POLLER,
 )
 
 def _create_dawn_cq_group(name, refs, refs_exclude = None):
