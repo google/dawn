@@ -31,6 +31,7 @@
 
 #include "src/tint/lang/core/ir/transform/helper_test.h"
 #include "src/tint/lang/core/type/array.h"
+#include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
@@ -5811,6 +5812,153 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_TextureBindingArrayParam) {
+    auto* texture_type = ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32());
+    auto* var_ts = b.Var("ts", ty.ptr<handle>(ty.binding_array(texture_type, 3u)));
+    var_ts->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var_ts);
+
+    auto* fn = b.Function("f", ty.void_());
+    auto* p = b.FunctionParam("p", ty.binding_array(texture_type, 3u));
+    fn->SetParams({p});
+
+    b.Append(fn->Block(), [&] {
+        auto* t = b.Access(texture_type, p, 0_i);
+        b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, t, b.Splat(ty.vec2<u32>(), 0_u), 0_u);
+        b.Return(fn);
+    });
+
+    auto* main = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(main->Block(), [&] {
+        auto* ts = b.Load(var_ts);
+        b.Call(fn, ts);
+        b.Return(main);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %ts:ptr<handle, binding_array<texture_2d<f32>, 3>, read> = var undef @binding_point(0, 0)
+}
+
+%f = func(%p:binding_array<texture_2d<f32>, 3>):void {
+  $B2: {
+    %4:texture_2d<f32> = access %p, 0i
+    %5:vec4<f32> = textureLoad %4, vec2<u32>(0u), 0u
+    ret
+  }
+}
+%main = @fragment func():void {
+  $B3: {
+    %7:binding_array<texture_2d<f32>, 3> = load %ts
+    %8:void = call %f, %7
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %ts:ptr<handle, binding_array<texture_2d<f32>, 3>, read> = var undef @binding_point(0, 0)
+}
+
+%f = func():void {
+  $B2: {
+    %3:binding_array<texture_2d<f32>, 3> = load %ts
+    %4:texture_2d<f32> = access %3, 0i
+    %5:vec4<f32> = textureLoad %4, vec2<u32>(0u), 0u
+    ret
+  }
+}
+%main = @fragment func():void {
+  $B3: {
+    %7:void = call %f
+    ret
+  }
+}
+)";
+
+    Run(DirectVariableAccess, kTransformHandle);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_TextureFromBindingArrayParam) {
+    auto* texture_type = ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32());
+    auto* var_ts = b.Var("ts", ty.ptr<handle>(ty.binding_array(texture_type, 3u)));
+    var_ts->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var_ts);
+
+    auto* fn = b.Function("f", ty.void_());
+    auto* p = b.FunctionParam("p", texture_type);
+    fn->SetParams({p});
+
+    b.Append(fn->Block(), [&] {
+        b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, p, b.Splat(ty.vec2<u32>(), 0_u), 0_u);
+        b.Return(fn);
+    });
+
+    auto* main = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(main->Block(), [&] {
+        auto* t_ptr = b.Access(ty.ptr<handle>(texture_type), var_ts, 0_i);
+        auto* t = b.Load(t_ptr);
+
+        b.Call(fn, t);
+        b.Return(main);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %ts:ptr<handle, binding_array<texture_2d<f32>, 3>, read> = var undef @binding_point(0, 0)
+}
+
+%f = func(%p:texture_2d<f32>):void {
+  $B2: {
+    %4:vec4<f32> = textureLoad %p, vec2<u32>(0u), 0u
+    ret
+  }
+}
+%main = @fragment func():void {
+  $B3: {
+    %6:ptr<handle, texture_2d<f32>, read> = access %ts, 0i
+    %7:texture_2d<f32> = load %6
+    %8:void = call %f, %7
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %ts:ptr<handle, binding_array<texture_2d<f32>, 3>, read> = var undef @binding_point(0, 0)
+}
+
+%f = func(%p_indices:array<u32, 1>):void {
+  $B2: {
+    %4:u32 = access %p_indices, 0u
+    %5:ptr<handle, texture_2d<f32>, read> = access %ts, %4
+    %6:texture_2d<f32> = load %5
+    %7:vec4<f32> = textureLoad %6, vec2<u32>(0u), 0u
+    ret
+  }
+}
+%main = @fragment func():void {
+  $B3: {
+    %9:u32 = convert 0i
+    %10:array<u32, 1> = construct %9
+    %11:void = call %f, %10
+    ret
+  }
+}
+)";
+
+    Run(DirectVariableAccess, kTransformHandle);
+
+    EXPECT_EQ(expect, str());
+}
 }  // namespace handle_as_tests
 
 ////////////////////////////////////////////////////////////////////////////////
