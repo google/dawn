@@ -416,8 +416,9 @@ struct State {
                         var_type = ty.u32();
                         break;
                     }
-                    case core::BuiltinValue::kInstanceIndex: {
-                        // Use a scalar u32 for instance_index builtin
+                    case core::BuiltinValue::kInstanceIndex:
+                    case core::BuiltinValue::kLocalInvocationIndex: {
+                        // Use a scalar u32
                         var_type = ty.u32();
                         break;
                     }
@@ -477,7 +478,8 @@ struct State {
                         }
                         break;
                     }
-                    case core::BuiltinValue::kInstanceIndex: {
+                    case core::BuiltinValue::kInstanceIndex:
+                    case core::BuiltinValue::kLocalInvocationIndex: {
                         auto* idx_ty = var->Result()->Type()->UnwrapPtr();
                         if (idx_ty->IsSignedIntegerScalar()) {
                             auto* conv = b.Convert(ty.i32(), result);
