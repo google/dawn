@@ -38,17 +38,17 @@ bool WaitListEvent::IsSignaled() const {
 
 void WaitListEvent::Signal() {
     std::lock_guard<std::mutex> lock(mMutex);
-    DAWN_ASSERT(!mSignaled);
-    mSignaled.store(true, std::memory_order_release);
-    for (SyncWaiter* w : std::move(mSyncWaiters)) {
-        {
-            std::lock_guard<std::mutex> waiterLock(w->mutex);
-            w->waitDone = true;
+    if (!mSignaled.exchange(true, std::memory_order_release)) {
+        for (SyncWaiter* w : std::move(mSyncWaiters)) {
+            {
+                std::lock_guard<std::mutex> waiterLock(w->mutex);
+                w->waitDone = true;
+            }
+            w->cv.notify_all();
         }
-        w->cv.notify_all();
-    }
-    for (auto& sender : std::move(mAsyncWaiters)) {
-        std::move(sender).Signal();
+        for (auto& sender : std::move(mAsyncWaiters)) {
+            std::move(sender).Signal();
+        }
     }
 }
 
