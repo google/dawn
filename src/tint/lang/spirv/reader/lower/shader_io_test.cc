@@ -2109,6 +2109,76 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(SpirvReader_ShaderIOTest, SampleMask_I32) {
+    auto* arr = ty.array<i32, 1>();
+    auto* mask_in = b.Var("mask_in", ty.ptr(core::AddressSpace::kIn, arr));
+    mask_in->SetBuiltin(core::BuiltinValue::kSampleMask);
+
+    auto* mask_out = b.Var("mask_out", ty.ptr(core::AddressSpace::kOut, arr));
+    mask_out->SetBuiltin(core::BuiltinValue::kSampleMask);
+
+    mod.root_block->Append(mask_in);
+    mod.root_block->Append(mask_out);
+
+    auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(ep->Block(), [&] {
+        auto* mask_value = b.Load(mask_in);
+        auto* doubled = b.Multiply(ty.i32(), b.Access(ty.i32(), mask_value, 0_u), 2_i);
+        b.Store(mask_out, b.Construct(arr, doubled));
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %mask_in:ptr<__in, array<i32, 1>, read> = var undef @builtin(sample_mask)
+  %mask_out:ptr<__out, array<i32, 1>, read_write> = var undef @builtin(sample_mask)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %4:array<i32, 1> = load %mask_in
+    %5:i32 = access %4, 0u
+    %6:i32 = mul %5, 2i
+    %7:array<i32, 1> = construct %6
+    store %mask_out, %7
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %mask_out:ptr<private, array<i32, 1>, read_write> = var undef
+}
+
+%foo_inner = func(%mask_in:array<i32, 1>):void {
+  $B2: {
+    %4:i32 = access %mask_in, 0u
+    %5:i32 = mul %4, 2i
+    %6:array<i32, 1> = construct %5
+    store %mask_out, %6
+    ret
+  }
+}
+%foo = @fragment func(%mask_in_1:u32 [@sample_mask]):u32 [@sample_mask] {  # %mask_in_1: 'mask_in'
+  $B3: {
+    %9:i32 = convert %mask_in_1
+    %10:array<i32, 1> = construct %9
+    %11:void = call %foo_inner, %10
+    %12:array<i32, 1> = load %mask_out
+    %13:i32 = access %12, 0u
+    %14:u32 = convert %13
+    ret %14
+  }
+}
+)";
+
+    Run(ShaderIO);
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(SpirvReader_ShaderIOTest, PointSize) {
     auto* builtin_str =
         ty.Struct(mod.symbols.New("Builtins"), Vector{

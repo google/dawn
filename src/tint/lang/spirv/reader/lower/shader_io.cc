@@ -240,8 +240,16 @@ struct State {
 
                     // If we're dealing with sample_mask, extract the scalar from the array.
                     if (var_attributes.builtin == core::BuiltinValue::kSampleMask) {
+                        // The SPIR-V mask can be either i32 or u32, but WGSL is only u32. So,
+                        // convert if necessary.
+                        auto* access = b.Access(results.Back()->Type()->DeepestElement(),
+                                                results.Back(), u32(0))
+                                           ->Result();
+                        if (access->Type()->IsSignedIntegerScalar()) {
+                            access = b.Convert(ty.u32(), access)->Result();
+                        }
+                        results.Back() = access;
                         var_type = ty.u32();
-                        results.Back() = b.Access(ty.u32(), results.Back(), u32(0))->Result();
                     }
                 });
                 add_output(ir.NameOf(var), var_type, std::move(var_attributes));
@@ -431,9 +439,23 @@ struct State {
             core::ir::Value* result = param;
             if (entry_point && var->Attributes().builtin == core::BuiltinValue::kSampleMask) {
                 // Construct an array from the scalar sample_mask builtin value for entry points.
-                auto* construct = b.Construct(var->Result()->Type()->UnwrapPtr(), param);
-                func->Block()->Prepend(construct);
-                result = construct->Result();
+
+                auto* mask_ty = var->Result()->Type()->UnwrapPtr()->As<core::type::Array>();
+                TINT_ASSERT(mask_ty);
+
+                // If the SPIR-V mask was an i32, need to convert from the u32 provided by WGSL.
+                if (mask_ty->ElemType()->IsSignedIntegerScalar()) {
+                    auto* conv = b.Convert(ty.i32(), result);
+                    func->Block()->Prepend(conv);
+
+                    auto* construct = b.Construct(mask_ty, conv);
+                    construct->InsertAfter(conv);
+                    result = construct->Result();
+                } else {
+                    auto* construct = b.Construct(mask_ty, result);
+                    func->Block()->Prepend(construct);
+                    result = construct->Result();
+                }
             }
             return result;
         });
