@@ -34,12 +34,15 @@ if (TINT_BUILD_SPV_READER)
       list(APPEND private_wgpu_depends SPIRV-Tools-opt)
 endif()
 
-DawnJSONGenerator(
-    TARGET "dawn_utils"
-    PRINT_NAME "Dawn native utilities"
-    OUTPUT_HEADERS DAWN_UTILS_GEN_HEADERS
-    OUTPUT_SOURCES DAWN_UTILS_GEN_SOURCES
-)
+# TODO(crbug.com/422530025): Currently the generated files cannot be used with WASM.
+if (NOT EMSCRIPTEN)
+  DawnJSONGenerator(
+      TARGET "dawn_utils"
+      PRINT_NAME "Dawn native utilities"
+      OUTPUT_HEADERS DAWN_UTILS_GEN_HEADERS
+      OUTPUT_SOURCES DAWN_UTILS_GEN_SOURCES
+  )
+endif()
 dawn_add_library(
   dawn_wgpu_utils
   ENABLE_EMSCRIPTEN

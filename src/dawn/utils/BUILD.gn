@@ -50,8 +50,7 @@ static_library("wgpu_utils") {
     "${dawn_root}/src/tint:tint_public_config",
   ]
 
-  sources = get_target_outputs(":dawn_utils_gen")
-  sources += [
+  sources = [
     "ComboRenderBundleEncoderDescriptor.cpp",
     "ComboRenderBundleEncoderDescriptor.h",
     "ComboRenderPipelineDescriptor.cpp",
@@ -62,11 +61,20 @@ static_library("wgpu_utils") {
     "WGPUHelpers.h",
   ]
 
+  if (!is_wasm) {
+    # TODO(crbug.com/422530025): Currently the generated files cannot be used with WASM.
+    sources += get_target_outputs(":dawn_utils_gen")
+  }
+
   public_deps = [
     "${dawn_root}/include/dawn:cpp_headers",
     "${dawn_root}/src/dawn/common",
   ]
-  deps = [ ":dawn_utils_gen" ]
+  deps = []
+  if (!is_wasm) {
+    # TODO(crbug.com/422530025): Currently the generated files cannot be used with WASM.
+    deps += [ ":dawn_utils_gen" ]
+  }
   if (tint_build_spv_reader) {
     deps += [ "${dawn_spirv_tools_dir}:spvtools_opt" ]
   }
