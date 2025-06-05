@@ -365,6 +365,11 @@ struct State {
                     a->Result()->SetType(a->Result()->Type()->UnwrapPtr());
                     ReplaceInputPointerUses(var, a->Result());
                 },
+                [&](core::ir::Let* l) {
+                    // Fold away
+                    ReplaceInputPointerUses(var, l->Result());
+                    to_destroy.Push(l);
+                },
                 TINT_ICE_ON_NO_MATCH);
         });
 

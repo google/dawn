@@ -286,6 +286,100 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(SpirvReader_ShaderIOTest, Inputs_Copied) {
+    auto* val = b.Var("val", ty.ptr(core::AddressSpace::kIn, ty.u32()));
+    val->SetBuiltin(core::BuiltinValue::kSampleIndex);
+    mod.root_block->Append(val);
+
+    auto* f = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(f->Block(), [&] {
+        auto* c = b.Let("copy", val);
+        b.Let("res", b.Load(c));
+        b.Return(f);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %val:ptr<__in, u32, read> = var undef @builtin(sample_index)
+}
+
+%main = @fragment func():void {
+  $B2: {
+    %copy:ptr<__in, u32, read> = let %val
+    %4:u32 = load %copy
+    %res:u32 = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%main = @fragment func(%val:u32 [@sample_index]):void {
+  $B1: {
+    %res:u32 = let %val
+    ret
+  }
+}
+)";
+
+    Run(ShaderIO);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvReader_ShaderIOTest, Inputs_Copied_Chain) {
+    auto* val = b.Var("val", ty.ptr(core::AddressSpace::kIn, ty.u32()));
+    val->SetBuiltin(core::BuiltinValue::kSampleIndex);
+    mod.root_block->Append(val);
+
+    auto* f = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(f->Block(), [&] {
+        auto* c1 = b.Let("c1", val);
+        auto* c2 = b.Let("c2", c1);
+        auto* c3 = b.Let("c3", c2);
+        auto* c4 = b.Let("c4", c3);
+        auto* c5 = b.Let("c5", c4);
+        auto* c6 = b.Let("c6", c5);
+        b.Let("res", b.Load(c6));
+        b.Return(f);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %val:ptr<__in, u32, read> = var undef @builtin(sample_index)
+}
+
+%main = @fragment func():void {
+  $B2: {
+    %c1:ptr<__in, u32, read> = let %val
+    %c2:ptr<__in, u32, read> = let %c1
+    %c3:ptr<__in, u32, read> = let %c2
+    %c4:ptr<__in, u32, read> = let %c3
+    %c5:ptr<__in, u32, read> = let %c4
+    %c6:ptr<__in, u32, read> = let %c5
+    %9:u32 = load %c6
+    %res:u32 = let %9
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%main = @fragment func(%val:u32 [@sample_index]):void {
+  $B1: {
+    %res:u32 = let %val
+    ret
+  }
+}
+)";
+
+    Run(ShaderIO);
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(SpirvReader_ShaderIOTest, Inputs_UsedEntryPointAndHelper) {
     auto* gid = b.Var("gid", ty.ptr(core::AddressSpace::kIn, ty.vec3<u32>()));
     gid->SetBuiltin(core::BuiltinValue::kGlobalInvocationId);
