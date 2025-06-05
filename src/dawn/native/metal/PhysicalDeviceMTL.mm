@@ -445,7 +445,9 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
     // chromium:419804339: Module constant hoisting is broadly available as a msl transform but
     // there are execution correction issues with f16 for non apple silicon (Intel/AMD). Therefore
     // we only enable for apple silicon for now.
-    if (gpu_info::IsApple(vendorId)) {
+    // chromium:417519810: Mutiple cts tests will fail on AMD if module scope hoisting is not
+    // enabled on AMD. These failures will be internal compiler errors.
+    if (gpu_info::IsApple(vendorId) || gpu_info::IsAMD(vendorId)) {
         deviceToggles->Default(Toggle::MetalEnableModuleConstant, true);
     }
 
