@@ -558,7 +558,7 @@ MaybeError Texture::ClearTexture(const SubresourceRange& range,
             TexelCopyBufferLayout dataLayout;
             dataLayout.offset = 0;
             dataLayout.bytesPerRow = bytesPerRow;
-            dataLayout.rowsPerImage = largestMipSize.height;
+            dataLayout.rowsPerImage = largestMipSize.height / blockInfo.height;
 
             Extent3D mipSize = GetMipLevelSingleSubresourcePhysicalSize(level, Aspect::Color);
 
