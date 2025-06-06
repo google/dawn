@@ -380,6 +380,12 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
      {"Supports the \"enable subgroups;\" directive in WGSL.",
       "https://github.com/gpuweb/gpuweb/blob/main/proposals/subgroups.md",
       FeatureInfo::FeatureState::Stable}},
+    {Feature::TextureFormatsTier1,
+     {"Supports some new GPUTextureFormats with the RENDER_ATTACHMENT, blendable, multisampling "
+      "capabilities and the STORAGE_BINDING capability with the 'read-only' and 'write-only'"
+      "GPUStorageTextureAccesses ",
+      "https://gpuweb.github.io/gpuweb/#texture-formats-tier1",
+      FeatureInfo::FeatureState::Experimental}},
     {Feature::CoreFeaturesAndLimits,
      {"Lifts all compatibility mode restrictions (features and limits) to core when enabled on a "
       "device.",

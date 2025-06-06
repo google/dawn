@@ -1199,5 +1199,27 @@ TEST_F(TransientAttachmentValidationTest, FlagsBeyondRenderAttachment) {
     ASSERT_DEVICE_ERROR(device.CreateTexture(&desc));
 }
 
+class TextureFormatsTier1TextureTest : public TextureValidationTest {
+  protected:
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        return {wgpu::FeatureName::TextureFormatsTier1};
+    }
+};
+
+// Test that r8snorm, rg8snorm and rgba8snrom formats are valid as renderable texture if
+// 'texture-formats-tier1' is enabled.
+TEST_F(TextureFormatsTier1TextureTest, SNORMFormatsAreRenderableWithFeatureEnabled) {
+    const std::array kTestFormats = {wgpu::TextureFormat::R8Snorm, wgpu::TextureFormat::RG8Snorm,
+                                     wgpu::TextureFormat::RGBA8Snorm};
+    for (auto format : kTestFormats) {
+        wgpu::TextureDescriptor descriptor;
+        descriptor.size = {1, 1, 1};
+        descriptor.usage = wgpu::TextureUsage::RenderAttachment;
+        descriptor.format = format;
+
+        wgpu::Texture texture = device.CreateTexture(&descriptor);
+    }
+}
+
 }  // anonymous namespace
 }  // namespace dawn
