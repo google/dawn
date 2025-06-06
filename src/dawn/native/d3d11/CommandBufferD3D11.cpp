@@ -616,8 +616,14 @@ MaybeError CommandBuffer::ExecuteComputePass(
                 break;
             }
 
-            case Command::SetImmediateData:
-                return DAWN_UNIMPLEMENTED_ERROR("SetImmediateData unimplemented");
+            case Command::SetImmediateData: {
+                SetImmediateDataCmd* cmd = mCommands.NextCommand<SetImmediateDataCmd>();
+                DAWN_ASSERT(cmd->size > 0);
+                uint8_t* value = nullptr;
+                value = mCommands.NextData<uint8_t>(cmd->size);
+                immediates.SetImmediateData(cmd->offset, value, cmd->size);
+                break;
+            }
 
             default:
                 DAWN_UNREACHABLE();
@@ -869,6 +875,15 @@ MaybeError CommandBuffer::ExecuteRenderPass(
                 break;
             }
 
+            case Command::SetImmediateData: {
+                SetImmediateDataCmd* cmd = mCommands.NextCommand<SetImmediateDataCmd>();
+                DAWN_ASSERT(cmd->size > 0);
+                uint8_t* value = nullptr;
+                value = mCommands.NextData<uint8_t>(cmd->size);
+                immediates.SetImmediateData(cmd->offset, value, cmd->size);
+                break;
+            }
+
             default:
                 DAWN_UNREACHABLE();
                 break;
@@ -987,9 +1002,6 @@ MaybeError CommandBuffer::ExecuteRenderPass(
 
             case Command::WriteTimestamp:
                 return DAWN_UNIMPLEMENTED_ERROR("WriteTimestamp unimplemented");
-
-            case Command::SetImmediateData:
-                return DAWN_UNIMPLEMENTED_ERROR("SetImmediateData unimplemented");
 
             default: {
                 DAWN_TRY(DoRenderBundleCommand(&mCommands, type));

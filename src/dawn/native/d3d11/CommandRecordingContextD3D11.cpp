@@ -216,6 +216,8 @@ MaybeError ScopedSwapStateCommandRecordingContext::SetInternalUniformBuffer(
                                                       1, &bufferPtr);
     Get()->mD3D11DeviceContext3->CSSetConstantBuffers(PipelineLayout::kReservedConstantBufferSlot,
                                                       1, &bufferPtr);
+    Get()->mD3D11DeviceContext3->PSSetConstantBuffers(PipelineLayout::kReservedConstantBufferSlot,
+                                                      1, &bufferPtr);
 
     return {};
 }

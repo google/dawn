@@ -38,7 +38,10 @@
 namespace dawn {
 namespace {
 
-class ImmediateDataDisableTest : public ValidationTest {};
+class ImmediateDataDisableTest : public ValidationTest {
+  protected:
+    std::vector<const char*> GetEnabledToggles() override { return {"use_tint_ir"}; }
+};
 
 // Check that creating a PipelineLayout with non-zero immediateSize is disallowed
 // without the feature enabled.
@@ -76,6 +79,8 @@ class ImmediateDataTest : public ValidationTest {
                            dawn::utils::ComboLimits& required) override {
         required.maxImmediateSize = kDefaultMaxImmediateDataBytes;
     }
+
+    std::vector<const char*> GetEnabledToggles() override { return {"use_tint_ir"}; }
 
     wgpu::BindGroupLayout CreateBindGroupLayout() {
         wgpu::BindGroupLayoutEntry entries[1];

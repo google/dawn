@@ -36,6 +36,7 @@
 #include "dawn/native/Commands.h"
 #include "dawn/native/Device.h"
 #include "dawn/native/ObjectType_autogen.h"
+#include "dawn/native/PhysicalDevice.h"
 #include "dawn/native/ValidationUtils_autogen.h"
 #include "dawn/native/utils/WGPUHelpers.h"
 
@@ -136,6 +137,14 @@ void ProgrammableEncoder::APISetImmediateData(uint32_t offset, const void* data,
                 DAWN_INVALID_IF(size > maxImmediateSize - offset,
                                 "offset (%u) + size (%u): is larger than maxImmediateSize (%u).",
                                 offset, size, maxImmediateSize);
+                if (GetDevice()->GetPhysicalDevice()->GetBackendType() ==
+                        wgpu::BackendType::D3D11 ||
+                    GetDevice()->GetPhysicalDevice()->GetBackendType() ==
+                        wgpu::BackendType::D3D12) {
+                    const bool useTintIR = GetDevice()->IsToggleEnabled(Toggle::UseTintIR);
+                    DAWN_INVALID_IF(!useTintIR,
+                                    "SetImmediateData should not be used without tint ir.");
+                }
             }
 
             // Skip SetImmediateData when uploading constants are empty.
