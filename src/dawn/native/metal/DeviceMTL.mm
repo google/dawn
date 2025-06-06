@@ -320,11 +320,11 @@ id<MTLDevice> Device::GetMTLDevice() const {
     return mMtlDevice.Get();
 }
 
-MaybeError Device::CopyFromStagingToBufferImpl(BufferBase* source,
-                                               uint64_t sourceOffset,
-                                               BufferBase* destination,
-                                               uint64_t destinationOffset,
-                                               uint64_t size) {
+MaybeError Device::CopyFromStagingToBuffer(BufferBase* source,
+                                           uint64_t sourceOffset,
+                                           BufferBase* destination,
+                                           uint64_t destinationOffset,
+                                           uint64_t size) {
     // Metal validation layers forbid  0-sized copies, assert it is skipped prior to calling
     // this function.
     DAWN_ASSERT(size != 0);

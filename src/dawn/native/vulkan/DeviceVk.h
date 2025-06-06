@@ -99,11 +99,11 @@ class Device final : public DeviceBase {
 
     MaybeError TickImpl() override;
 
-    MaybeError CopyFromStagingToBufferImpl(BufferBase* source,
-                                           uint64_t sourceOffset,
-                                           BufferBase* destination,
-                                           uint64_t destinationOffset,
-                                           uint64_t size) override;
+    MaybeError CopyFromStagingToBuffer(BufferBase* source,
+                                       uint64_t sourceOffset,
+                                       BufferBase* destination,
+                                       uint64_t destinationOffset,
+                                       uint64_t size) override;
     MaybeError CopyFromStagingToTextureImpl(const BufferBase* source,
                                             const TexelCopyBufferLayout& src,
                                             const TextureCopy& dst,

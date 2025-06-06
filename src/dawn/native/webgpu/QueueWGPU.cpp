@@ -96,7 +96,7 @@ bool Queue::HasPendingCommands() const {
     return false;
 }
 
-MaybeError Queue::SubmitPendingCommands() {
+MaybeError Queue::SubmitPendingCommandsImpl() {
     return {};
 }
 

@@ -103,7 +103,7 @@ MaybeError Queue::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* co
     }
     TRACE_EVENT_END0(GetDevice()->GetPlatform(), Recording, "CommandBufferVk::RecordCommands");
 
-    DAWN_TRY(SubmitPendingCommands());
+    DAWN_TRY(SubmitPendingCommandsImpl());
 
     return {};
 }
@@ -318,7 +318,7 @@ void Queue::RecycleCompletedCommands(ExecutionSerial completedSerial) {
     mCommandsInFlight.ClearUpTo(completedSerial);
 }
 
-MaybeError Queue::SubmitPendingCommands() {
+MaybeError Queue::SubmitPendingCommandsImpl() {
     if (!mRecordingContext.needsSubmit) {
         return {};
     }

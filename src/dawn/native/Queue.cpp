@@ -110,7 +110,7 @@ class ErrorQueue : public QueueBase {
         DAWN_UNREACHABLE();
     }
     bool HasPendingCommands() const override { DAWN_UNREACHABLE(); }
-    MaybeError SubmitPendingCommands() override { DAWN_UNREACHABLE(); }
+    MaybeError SubmitPendingCommandsImpl() override { DAWN_UNREACHABLE(); }
     ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials() override { DAWN_UNREACHABLE(); }
     void ForceEventualFlushOfCommands() override { DAWN_UNREACHABLE(); }
     ResultOrError<bool> WaitForQueueSerial(ExecutionSerial serial, Nanoseconds timeout) override {
@@ -586,7 +586,9 @@ MaybeError QueueBase::SubmitInternal(uint32_t commandCount, CommandBufferBase* c
     }
     DAWN_ASSERT(!IsError());
 
+    mInSubmit = true;
     DAWN_TRY(SubmitImpl(commandCount, commands));
+    mInSubmit = false;
 
     // Call Tick() to flush pending work.
     DAWN_TRY(device->Tick());

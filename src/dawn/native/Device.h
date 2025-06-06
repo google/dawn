@@ -286,11 +286,11 @@ class DeviceBase : public ErrorSink,
     Blob LoadCachedBlob(const CacheKey& key);
     void StoreCachedBlob(const CacheKey& key, const Blob& blob);
 
-    MaybeError CopyFromStagingToBuffer(BufferBase* source,
-                                       uint64_t sourceOffset,
-                                       BufferBase* destination,
-                                       uint64_t destinationOffset,
-                                       uint64_t size);
+    virtual MaybeError CopyFromStagingToBuffer(BufferBase* source,
+                                               uint64_t sourceOffset,
+                                               BufferBase* destination,
+                                               uint64_t destinationOffset,
+                                               uint64_t size) = 0;
     MaybeError CopyFromStagingToTexture(BufferBase* source,
                                         const TexelCopyBufferLayout& src,
                                         const TextureCopy& dst,
@@ -539,11 +539,6 @@ class DeviceBase : public ErrorSink,
     // GPU or check errors.
     virtual void DestroyImpl() = 0;
 
-    virtual MaybeError CopyFromStagingToBufferImpl(BufferBase* source,
-                                                   uint64_t sourceOffset,
-                                                   BufferBase* destination,
-                                                   uint64_t destinationOffset,
-                                                   uint64_t size) = 0;
     virtual MaybeError CopyFromStagingToTextureImpl(const BufferBase* source,
                                                     const TexelCopyBufferLayout& src,
                                                     const TextureCopy& dst,

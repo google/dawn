@@ -96,6 +96,18 @@ MaybeError ExecutionQueueBase::EnsureCommandsFlushed(ExecutionSerial serial) {
     return {};
 }
 
+MaybeError ExecutionQueueBase::SubmitPendingCommands() {
+    if (mInSubmit) {
+        return {};
+    }
+
+    mInSubmit = true;
+    auto result = SubmitPendingCommandsImpl();
+    mInSubmit = false;
+
+    return result;
+}
+
 void ExecutionQueueBase::AssumeCommandsComplete() {
     // Bump serials so any pending callbacks can be fired.
     // TODO(crbug.com/dawn/831): This is called during device destroy, which is not

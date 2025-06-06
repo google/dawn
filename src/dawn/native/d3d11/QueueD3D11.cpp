@@ -280,7 +280,7 @@ ScopedSwapStateCommandRecordingContext Queue::GetScopedSwapStatePendingCommandCo
     });
 }
 
-MaybeError Queue::SubmitPendingCommands() {
+MaybeError Queue::SubmitPendingCommandsImpl() {
     bool needsSubmit = mPendingCommands.Use([&](auto pendingCommands) {
         pendingCommands->ReleaseKeyedMutexes();
         return mPendingCommandsNeedSubmit.exchange(false, std::memory_order_acq_rel);
@@ -304,7 +304,7 @@ MaybeError Queue::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* co
             DAWN_TRY(ToBackend(commands[i])->Execute(&commandContext));
         }
     }
-    DAWN_TRY(SubmitPendingCommands());
+    DAWN_TRY(SubmitPendingCommandsImpl());
     TRACE_EVENT_END0(GetDevice()->GetPlatform(), Recording, "CommandBufferD3D11::Execute");
 
     return {};

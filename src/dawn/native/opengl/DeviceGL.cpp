@@ -468,11 +468,11 @@ MaybeError Device::TickImpl() {
     return {};
 }
 
-MaybeError Device::CopyFromStagingToBufferImpl(BufferBase* source,
-                                               uint64_t sourceOffset,
-                                               BufferBase* destination,
-                                               uint64_t destinationOffset,
-                                               uint64_t size) {
+MaybeError Device::CopyFromStagingToBuffer(BufferBase* source,
+                                           uint64_t sourceOffset,
+                                           BufferBase* destination,
+                                           uint64_t destinationOffset,
+                                           uint64_t size) {
     return DAWN_UNIMPLEMENTED_ERROR("Device unable to copy from staging buffer.");
 }
 

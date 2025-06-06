@@ -69,7 +69,7 @@ class Queue final : public QueueBase {
     ResultOrError<bool> WaitForQueueSerial(ExecutionSerial serial, Nanoseconds timeout) override;
 
     bool HasPendingCommands() const override;
-    MaybeError SubmitPendingCommands() override;
+    MaybeError SubmitPendingCommandsImpl() override;
     ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials() override;
     void ForceEventualFlushOfCommands() override;
     MaybeError WaitForIdleForDestruction() override;

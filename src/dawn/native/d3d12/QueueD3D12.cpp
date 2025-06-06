@@ -119,10 +119,10 @@ MaybeError Queue::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* co
     TRACE_EVENT_END1(GetDevice()->GetPlatform(), Recording, "CommandBufferD3D12::RecordCommands",
                      "serial", uint64_t(pendingSerial));
 
-    return SubmitPendingCommands();
+    return SubmitPendingCommandsImpl();
 }
 
-MaybeError Queue::SubmitPendingCommands() {
+MaybeError Queue::SubmitPendingCommandsImpl() {
     Device* device = ToBackend(GetDevice());
     DAWN_ASSERT(device->IsLockedByCurrentThreadIfNeeded());
 

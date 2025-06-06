@@ -647,11 +647,11 @@ VulkanFunctions* Device::GetMutableFunctions() {
     return const_cast<VulkanFunctions*>(&fn);
 }
 
-MaybeError Device::CopyFromStagingToBufferImpl(BufferBase* source,
-                                               uint64_t sourceOffset,
-                                               BufferBase* destination,
-                                               uint64_t destinationOffset,
-                                               uint64_t size) {
+MaybeError Device::CopyFromStagingToBuffer(BufferBase* source,
+                                           uint64_t sourceOffset,
+                                           BufferBase* destination,
+                                           uint64_t destinationOffset,
+                                           uint64_t size) {
     // It is a validation error to do a 0-sized copy in Vulkan, check it is skipped prior to
     // calling this function.
     DAWN_ASSERT(size != 0);

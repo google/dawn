@@ -94,11 +94,11 @@ class Device final : public d3d::Device {
 
     void ReferenceUntilUnused(ComPtr<IUnknown> object);
 
-    MaybeError CopyFromStagingToBufferImpl(BufferBase* source,
-                                           uint64_t sourceOffset,
-                                           BufferBase* destination,
-                                           uint64_t destinationOffset,
-                                           uint64_t size) override;
+    MaybeError CopyFromStagingToBuffer(BufferBase* source,
+                                       uint64_t sourceOffset,
+                                       BufferBase* destination,
+                                       uint64_t destinationOffset,
+                                       uint64_t size) override;
 
     void CopyFromStagingToBufferHelper(CommandRecordingContext* commandContext,
                                        BufferBase* source,

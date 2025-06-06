@@ -661,10 +661,10 @@ MaybeError BufferBase::CopyFromStagingBuffer() {
 
     DAWN_TRY(
         GetDevice()->CopyFromStagingToBuffer(mStagingBuffer.Get(), 0, this, 0, GetAllocatedSize()));
-
     mStagingBuffer = nullptr;
 
-    return {};
+    return GetDevice()->GetDynamicUploader()->OnStagingMemoryFreePendingOnSubmit(
+        GetAllocatedSize());
 }
 
 void BufferBase::APIUnmap() {

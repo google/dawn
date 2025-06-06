@@ -64,7 +64,7 @@ class DeviceMock : public DeviceBase {
                 (override));
 
     MOCK_METHOD(MaybeError,
-                CopyFromStagingToBufferImpl,
+                CopyFromStagingToBuffer,
                 (BufferBase*, uint64_t, BufferBase*, uint64_t, uint64_t),
                 (override));
     MOCK_METHOD(

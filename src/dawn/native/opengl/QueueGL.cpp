@@ -275,7 +275,7 @@ bool Queue::HasPendingCommands() const {
     return mHasPendingCommands;
 }
 
-MaybeError Queue::SubmitPendingCommands() {
+MaybeError Queue::SubmitPendingCommandsImpl() {
     DAWN_TRY(SubmitFenceSync());
     return {};
 }
