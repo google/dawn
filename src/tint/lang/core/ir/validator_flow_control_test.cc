@@ -326,6 +326,25 @@ TEST_F(IR_ValidatorTest, Loop_EmptyBody) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Loop_NullResult) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    auto* loop = b.Loop();
+    loop->Body()->Append(b.Return(f));
+
+    loop->SetResults(Vector<InstructionResult*, 1>{nullptr});
+
+    f->Block()->Append(loop);
+    f->Block()->Append(b.Return(f));
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:3:5 error: loop: result is undefined
+    undef = loop [b: $B2] {  # loop_1
+    ^^^^^
+)")) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Switch_RootBlock) {
     auto* switch_ = b.Switch(1_i);
     auto* def = b.DefaultCase(switch_);
