@@ -416,6 +416,7 @@ struct State {
                         break;
                     }
                     case core::BuiltinValue::kInstanceIndex:
+                    case core::BuiltinValue::kVertexIndex:
                     case core::BuiltinValue::kLocalInvocationIndex:
                     case core::BuiltinValue::kSampleIndex: {
                         var_type = ty.u32();
@@ -484,6 +485,7 @@ struct State {
                         break;
                     }
                     case core::BuiltinValue::kInstanceIndex:
+                    case core::BuiltinValue::kVertexIndex:
                     case core::BuiltinValue::kLocalInvocationIndex:
                     case core::BuiltinValue::kSampleIndex: {
                         auto* idx_ty = var->Result()->Type()->UnwrapPtr();

@@ -2171,6 +2171,137 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(SpirvReader_ShaderIOTest, VertexIndex_i32) {
+    auto* idx = b.Var("inst_idx", ty.ptr(core::AddressSpace::kIn, ty.i32()));
+    idx->SetBuiltin(core::BuiltinValue::kVertexIndex);
+    mod.root_block->Append(idx);
+
+    auto* pos = b.Var("pos", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
+    pos->SetBuiltin(core::BuiltinValue::kPosition);
+    mod.root_block->Append(pos);
+
+    auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kVertex);
+    b.Append(ep->Block(), [&] {
+        auto* idx_value = b.Load(idx);
+        auto* doubled = b.Multiply(ty.i32(), idx_value, 2_i);
+        auto* conv = b.Convert(ty.f32(), doubled);
+        b.Store(pos, b.Construct(ty.vec4<f32>(), conv));
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %inst_idx:ptr<__in, i32, read> = var undef @builtin(vertex_index)
+  %pos:ptr<__out, vec4<f32>, read_write> = var undef @builtin(position)
+}
+
+%foo = @vertex func():void {
+  $B2: {
+    %4:i32 = load %inst_idx
+    %5:i32 = mul %4, 2i
+    %6:f32 = convert %5
+    %7:vec4<f32> = construct %6
+    store %pos, %7
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %pos:ptr<private, vec4<f32>, read_write> = var undef
+}
+
+%foo_inner = func(%inst_idx:i32):void {
+  $B2: {
+    %4:i32 = mul %inst_idx, 2i
+    %5:f32 = convert %4
+    %6:vec4<f32> = construct %5
+    store %pos, %6
+    ret
+  }
+}
+%foo = @vertex func(%inst_idx_1:u32 [@vertex_index]):vec4<f32> [@position] {  # %inst_idx_1: 'inst_idx'
+  $B3: {
+    %9:i32 = convert %inst_idx_1
+    %10:void = call %foo_inner, %9
+    %11:vec4<f32> = load %pos
+    ret %11
+  }
+}
+)";
+
+    Run(ShaderIO);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvReader_ShaderIOTest, VertexIndex_u32) {
+    auto* idx = b.Var("inst_idx", ty.ptr(core::AddressSpace::kIn, ty.u32()));
+    idx->SetBuiltin(core::BuiltinValue::kVertexIndex);
+    mod.root_block->Append(idx);
+
+    auto* pos = b.Var("pos", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
+    pos->SetBuiltin(core::BuiltinValue::kPosition);
+    mod.root_block->Append(pos);
+
+    auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kVertex);
+    b.Append(ep->Block(), [&] {
+        auto* idx_value = b.Load(idx);
+        auto* doubled = b.Multiply(ty.u32(), idx_value, 2_u);
+        auto* conv = b.Convert(ty.f32(), doubled);
+        b.Store(pos, b.Construct(ty.vec4<f32>(), conv));
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %inst_idx:ptr<__in, u32, read> = var undef @builtin(vertex_index)
+  %pos:ptr<__out, vec4<f32>, read_write> = var undef @builtin(position)
+}
+
+%foo = @vertex func():void {
+  $B2: {
+    %4:u32 = load %inst_idx
+    %5:u32 = mul %4, 2u
+    %6:f32 = convert %5
+    %7:vec4<f32> = construct %6
+    store %pos, %7
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %pos:ptr<private, vec4<f32>, read_write> = var undef
+}
+
+%foo_inner = func(%inst_idx:u32):void {
+  $B2: {
+    %4:u32 = mul %inst_idx, 2u
+    %5:f32 = convert %4
+    %6:vec4<f32> = construct %5
+    store %pos, %6
+    ret
+  }
+}
+%foo = @vertex func(%inst_idx_1:u32 [@vertex_index]):vec4<f32> [@position] {  # %inst_idx_1: 'inst_idx'
+  $B3: {
+    %9:void = call %foo_inner, %inst_idx_1
+    %10:vec4<f32> = load %pos
+    ret %10
+  }
+}
+)";
+
+    Run(ShaderIO);
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(SpirvReader_ShaderIOTest, LocalInvocationIndex_i32) {
     auto* idx = b.Var("idx", ty.ptr(core::AddressSpace::kIn, ty.i32()));
     idx->SetBuiltin(core::BuiltinValue::kLocalInvocationIndex);
