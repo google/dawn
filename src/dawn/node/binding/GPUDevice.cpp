@@ -135,6 +135,30 @@ createErrorFromWGPUError(Napi::Env env, wgpu::ErrorType type, wgpu::StringView m
     return {};
 }
 
+Napi::Value createGPUPipelineError(Napi::Env env,
+                                   wgpu::CreatePipelineAsyncStatus status,
+                                   wgpu::StringView message) {
+    Napi::Object pipeline_error_init = Napi::Object::New(env);
+    const char* reason = "invalid";  // this is an illegal reason
+    switch (status) {
+        case wgpu::CreatePipelineAsyncStatus::InternalError:
+            reason = "internal";
+            break;
+        case wgpu::CreatePipelineAsyncStatus::ValidationError:
+            reason = "validation";
+            break;
+        case wgpu::CreatePipelineAsyncStatus::Success:
+        case wgpu::CreatePipelineAsyncStatus::CallbackCancelled:
+            break;
+    }
+
+    pipeline_error_init.Set("reason", reason);
+
+    auto constructors = interop::ConstructorsFor(env);
+    return constructors->GPUPipelineError_ctor.New(
+        {Napi::String::New(env, std::string(message)), pipeline_error_init});
+}
+
 static std::mutex s_device_to_js_map_mutex_;
 static std::unordered_map<WGPUDevice, GPUDevice*> s_device_to_js_map_;
 
@@ -481,14 +505,14 @@ GPUDevice::createComputePipelineAsync(Napi::Env env,
         &desc, wgpu::CallbackMode::AllowProcessEvents,
         [ctx = std::move(ctx), label = CopyLabel(desc.label)](
             wgpu::CreatePipelineAsyncStatus status, wgpu::ComputePipeline pipeline,
-            wgpu::StringView) {
+            wgpu::StringView message) {
             switch (status) {
                 case wgpu::CreatePipelineAsyncStatus::Success:
                     ctx->promise.Resolve(interop::GPUComputePipeline::Create<GPUComputePipeline>(
                         ctx->env, pipeline, label));
                     break;
                 default:
-                    ctx->promise.Reject(Errors::GPUPipelineError(ctx->env));
+                    ctx->promise.Reject(createGPUPipelineError(ctx->env, status, message));
                     break;
             }
         });
@@ -514,14 +538,14 @@ GPUDevice::createRenderPipelineAsync(Napi::Env env,
         &desc, wgpu::CallbackMode::AllowProcessEvents,
         [ctx = std::move(ctx), label = CopyLabel(desc.label)](
             wgpu::CreatePipelineAsyncStatus status, wgpu::RenderPipeline pipeline,
-            wgpu::StringView) {
+            wgpu::StringView message) {
             switch (status) {
                 case wgpu::CreatePipelineAsyncStatus::Success:
                     ctx->promise.Resolve(interop::GPURenderPipeline::Create<GPURenderPipeline>(
                         ctx->env, pipeline, label));
                     break;
                 default:
-                    ctx->promise.Reject(Errors::GPUPipelineError(ctx->env));
+                    ctx->promise.Reject(createGPUPipelineError(ctx->env, status, message));
                     break;
             }
         });

@@ -62,14 +62,13 @@ constexpr char kReadOnlyError[] = "ReadOnlyError";
 constexpr char kVersionError[] = "VersionError";
 constexpr char kOperationError[] = "OperationError";
 constexpr char kNotAllowedError[] = "NotAllowedError";
-constexpr char kGPUPipelineError[] = "GPUPipelineError";
 
-static Napi::Error New(Napi::Env env, std::string name, std::string message, uint16_t code = 0) {
-    auto err = Napi::Error::New(env);
-    err.Set("name", name);
-    err.Set("message", message.empty() ? name : message);
-    err.Set("code", static_cast<double>(code));
-    return err;
+static Napi::Error New(Napi::Env env, std::string name, std::string message) {
+    auto constructors = interop::ConstructorsFor(env);
+    auto domException = constructors->DOMException_ctor.New(
+        {Napi::String::New(env, message), Napi::String::New(env, name)});
+    // Note: This works because DOMException extends Error.
+    return domException.As<Napi::Error>();
 }
 
 }  // namespace
@@ -188,27 +187,6 @@ Napi::Error Errors::OperationError(Napi::Env env, std::string message) {
 
 Napi::Error Errors::NotAllowedError(Napi::Env env, std::string message) {
     return New(env, kNotAllowedError, message);
-}
-
-Napi::Error Errors::GPUPipelineError(Napi::Env env, std::string message) {
-    return New(env, kGPUPipelineError, message);
-}
-
-GPUPipelineError::GPUPipelineError(
-    const std::tuple<interop::DefaultedParameter<std::string>, interop::GPUPipelineErrorInit>& args)
-    : message_(std::move(std::get<0>(args))), reason_(std::get<1>(args).reason) {}
-
-std::string GPUPipelineError::getName(Napi::Env) {
-    return "GPUPipelineError";
-}
-uint16_t GPUPipelineError::getCode(Napi::Env) {
-    return 0;
-}
-std::string GPUPipelineError::getMessage(Napi::Env) {
-    return message_;
-}
-interop::GPUPipelineErrorReason GPUPipelineError::getReason(Napi::Env) {
-    return reason_;
 }
 
 GPUOutOfMemoryError::GPUOutOfMemoryError(const std::tuple<std::string>& args)

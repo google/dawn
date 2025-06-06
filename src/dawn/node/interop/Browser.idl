@@ -72,11 +72,6 @@ typedef(ArrayBufferView or ArrayBuffer) BufferSource;
 typedef (ArrayBuffer or /* SharedArrayBuffer or [AllowShared] */ ArrayBufferView) AllowSharedBufferSource;
 
 // Interfaces used in the WebGPU IDL that don't have an equivalent in the NAPI world.
-[LegacyNoInterfaceObject] interface DOMException {
-  readonly attribute DOMString name;
-  readonly attribute DOMString message;
-  readonly attribute unsigned short code;
-};
 [LegacyNoInterfaceObject] interface HTMLCanvasElement {};
 [LegacyNoInterfaceObject] interface HTMLImageElement {};
 [LegacyNoInterfaceObject] interface HTMLVideoElement {};
@@ -87,6 +82,6 @@ typedef (ArrayBuffer or /* SharedArrayBuffer or [AllowShared] */ ArrayBufferView
 
 enum PredefinedColorSpace { "srgb", "display-p3" };
 
-// Add this annotation to GPUUncapturedErrorEvent as we need to treat it special.
-[ManualImplementation]
-interface GPUUncapturedErrorEvent {};
+// Add this annotation to these classes as we need to treat them special.
+[ManualImplementation] interface GPUUncapturedErrorEvent {};
+[ManualImplementation] interface GPUPipelineError {};
