@@ -421,7 +421,8 @@ struct State {
                         break;
                     }
                     case core::BuiltinValue::kLocalInvocationId:
-                    case core::BuiltinValue::kGlobalInvocationId: {
+                    case core::BuiltinValue::kGlobalInvocationId:
+                    case core::BuiltinValue::kWorkgroupId: {
                         var_type = ty.vec3<u32>();
                         break;
                     }
@@ -492,7 +493,8 @@ struct State {
                         break;
                     }
                     case core::BuiltinValue::kLocalInvocationId:
-                    case core::BuiltinValue::kGlobalInvocationId: {
+                    case core::BuiltinValue::kGlobalInvocationId:
+                    case core::BuiltinValue::kWorkgroupId: {
                         auto* idx_ty = var->Result()->Type()->UnwrapPtr();
                         auto* elem_ty = idx_ty->DeepestElement();
                         if (elem_ty->IsSignedIntegerScalar()) {
