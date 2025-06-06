@@ -2987,63 +2987,6 @@ INSTANTIATE_TEST_SUITE_P(
             .wgsl_fn = "vf123.xy",
         }));
 
-INSTANTIATE_TEST_SUITE_P(SpirvReaderTest_ImageFetch,
-                         SampledImageCoordsTest,
-                         ::testing::Values(
-                             ImgData{
-                                 .name = "1d signed",
-                                 .spirv_type = "%float 1D 0 0 0 1 Unknown",
-                                 .spirv_fn = "%result = OpImageFetch %v4float %im %int_1",
-                                 .wgsl_type = "texture_1d<f32>",
-                                 .wgsl_fn = R"(
-    %6:vec4<f32> = textureLoad %5, 1i, 0i)",
-                             },
-                             ImgData{
-                                 .name = "2d signed",
-                                 .spirv_type = "%float 2D 0 0 0 1 Unknown",
-                                 .spirv_fn = "%result = OpImageFetch %v4float %im %vi12",
-                                 .wgsl_type = "texture_2d<f32>",
-                                 .wgsl_fn = R"(
-    %6:vec4<f32> = textureLoad %5, vec2<i32>(1i, 2i), 0i)",
-                             },
-                             ImgData{
-                                 .name = "2D array signed",
-                                 .spirv_type = "%float 2D 0 1 0 1 Unknown",
-                                 .spirv_fn = "%result = OpImageFetch %v4float %im %vi123",
-                                 .wgsl_type = "texture_2d_array<f32>",
-                                 .wgsl_fn = R"(
-    %6:vec2<i32> = swizzle vec3<i32>(1i, 2i, 3i), xy
-    %7:i32 = swizzle vec3<i32>(1i, 2i, 3i), z
-    %8:vec4<f32> = textureLoad %5, %6, %7, 0i)",
-                             },
-                             ImgData{
-                                 .name = "1D unsigned",
-                                 .spirv_type = "%float 1D 0 0 0 1 Unknown",
-                                 .spirv_fn = "%result = OpImageFetch %v4float %im %uint_1",
-                                 .wgsl_type = "texture_1d<f32>",
-                                 .wgsl_fn = R"(
-    %6:vec4<f32> = textureLoad %5, 1u, 0i)",
-                             },
-                             ImgData{
-                                 .name = "2D unsigned",
-                                 .spirv_type = "%float 2D 0 0 0 1 Unknown",
-                                 .spirv_fn = "%result = OpImageFetch %v4float %im %vu12",
-                                 .wgsl_type = "texture_2d<f32>",
-                                 .wgsl_fn = R"(
-    %6:vec4<f32> = textureLoad %5, vec2<u32>(1u, 2u), 0i)",
-                             },
-                             ImgData{
-                                 .name = "2D array unsigned",
-                                 .spirv_type = "%float 2D 0 1 0 1 Unknown",
-                                 .spirv_fn = "%result = OpImageFetch %v4float %im %vu123",
-                                 .wgsl_type = "texture_2d_array<f32>",
-                                 .wgsl_fn = R"(
-    %6:vec2<u32> = swizzle vec3<u32>(1u, 2u, 3u), xy
-    %7:u32 = swizzle vec3<u32>(1u, 2u, 3u), z
-    %8:i32 = convert %7
-    %9:vec4<f32> = textureLoad %5, %6, %8, 0i)",
-                             }));
-
 // Metal requires comparison sampling with explicit Level-of-detail to use Lod 0.  The SPIR-V reader
 // requires the operand to be parsed as a constant 0 value. SPIR-V validation requires the Lod
 // parameter to be a floating point value for non-fetch operations. So only test float values.
@@ -3170,6 +3113,63 @@ $B1: {  # root
 )");
 }
 
+INSTANTIATE_TEST_SUITE_P(SpirvReaderTest_ImageFetch,
+                         NonSampledImageCoordsTest,
+                         ::testing::Values(
+                             ImgData{
+                                 .name = "1d signed",
+                                 .spirv_type = "%float 1D 0 0 0 1 Unknown",
+                                 .spirv_fn = "%result = OpImageFetch %v4float %im %int_1",
+                                 .wgsl_type = "texture_1d<f32>",
+                                 .wgsl_fn = R"(
+    %4:vec4<f32> = textureLoad %3, 1i, 0i)",
+                             },
+                             ImgData{
+                                 .name = "2d signed",
+                                 .spirv_type = "%float 2D 0 0 0 1 Unknown",
+                                 .spirv_fn = "%result = OpImageFetch %v4float %im %vi12",
+                                 .wgsl_type = "texture_2d<f32>",
+                                 .wgsl_fn = R"(
+    %4:vec4<f32> = textureLoad %3, vec2<i32>(1i, 2i), 0i)",
+                             },
+                             ImgData{
+                                 .name = "2D array signed",
+                                 .spirv_type = "%float 2D 0 1 0 1 Unknown",
+                                 .spirv_fn = "%result = OpImageFetch %v4float %im %vi123",
+                                 .wgsl_type = "texture_2d_array<f32>",
+                                 .wgsl_fn = R"(
+    %4:vec2<i32> = swizzle vec3<i32>(1i, 2i, 3i), xy
+    %5:i32 = swizzle vec3<i32>(1i, 2i, 3i), z
+    %6:vec4<f32> = textureLoad %3, %4, %5, 0i)",
+                             },
+                             ImgData{
+                                 .name = "1D unsigned",
+                                 .spirv_type = "%float 1D 0 0 0 1 Unknown",
+                                 .spirv_fn = "%result = OpImageFetch %v4float %im %uint_1",
+                                 .wgsl_type = "texture_1d<f32>",
+                                 .wgsl_fn = R"(
+    %4:vec4<f32> = textureLoad %3, 1u, 0i)",
+                             },
+                             ImgData{
+                                 .name = "2D unsigned",
+                                 .spirv_type = "%float 2D 0 0 0 1 Unknown",
+                                 .spirv_fn = "%result = OpImageFetch %v4float %im %vu12",
+                                 .wgsl_type = "texture_2d<f32>",
+                                 .wgsl_fn = R"(
+    %4:vec4<f32> = textureLoad %3, vec2<u32>(1u, 2u), 0i)",
+                             },
+                             ImgData{
+                                 .name = "2D array unsigned",
+                                 .spirv_type = "%float 2D 0 1 0 1 Unknown",
+                                 .spirv_fn = "%result = OpImageFetch %v4float %im %vu123",
+                                 .wgsl_type = "texture_2d_array<f32>",
+                                 .wgsl_fn = R"(
+    %4:vec2<u32> = swizzle vec3<u32>(1u, 2u, 3u), xy
+    %5:u32 = swizzle vec3<u32>(1u, 2u, 3u), z
+    %6:i32 = convert %5
+    %7:vec4<f32> = textureLoad %3, %4, %6, 0i)",
+                             }));
+
 INSTANTIATE_TEST_SUITE_P(SpirvReaderTest,
                          NonSampledImageCoordsTest,
                          ::testing::Values(
@@ -3283,7 +3283,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvReaderTest,
 // An ad-hoc test to prove we never had the issue feared in crbug.com/tint/265.
 // Never create a const-declaration for a pointer to a texture or sampler. Code generation always
 // traces back to the memory object declaration.
-TEST_F(SpirvReaderTest, DISABLED_NeverGenerateConstDeclForHandle_UseVariableDirectly) {
+TEST_F(SpirvReaderTest, NeverGenerateConstDeclForHandle_UseVariableDirectly) {
     EXPECT_IR(R"(
     OpCapability Shader
     OpCapability Sampled1D
@@ -3350,16 +3350,14 @@ $B1: {  # root
 %main = @fragment func():void {
   $B2: {
     %var:ptr<function, vec4<f32>, read_write> = var undef
-    %5:ptr<handle, texture_2d<f32>, read> = let %1
-    %6:ptr<handle, sampler, read> = let %2
-    %7:texture_2d<f32> = load %5
-    %8:sampler = load %6
-    %9:vec4<f32> = textureSample %7, %8, vec2<f32>(0.0f)
-    %10:texture_2d<f32> = load %5
-    %11:sampler = load %6
-    %12:vec4<f32> = textureSample %10, %11, vec2<f32>(0.0f)
-    %13:vec4<f32> = add %9, %12
-    store %var, %13
+    %5:texture_2d<f32> = load %1
+    %6:sampler = load %2
+    %7:vec4<f32> = textureSample %5, %6, vec2<f32>(0.0f)
+    %8:texture_2d<f32> = load %1
+    %9:sampler = load %2
+    %10:vec4<f32> = textureSample %8, %9, vec2<f32>(0.0f)
+    %11:vec4<f32> = add %7, %10
+    store %var, %11
     ret
   }
 }
@@ -3419,6 +3417,7 @@ TEST_F(SpirvReaderTest, SamplerLoadedInEnclosingConstruct_DontGenerateVar) {
      %30 = OpLabel
     %si0 = OpSampledImage %si %1 %2
      %t0 = OpImageSampleImplicitLod %v4float %si0 %v2_0
+     %t1 = OpImageSampleImplicitLod %v4float %si0 %v2_0
            OpBranch %80
 
      %80 = OpLabel
@@ -3443,6 +3442,7 @@ $B1: {  # root
         if true [t: $B4, f: $B5] {  # if_1
           $B4: {  # true
             %6:vec4<f32> = textureSample %4, %5, vec2<f32>(0.0f)
+            %7:vec4<f32> = textureSample %4, %5, vec2<f32>(0.0f)
             exit_if  # if_1
           }
           $B5: {  # false
@@ -3452,6 +3452,66 @@ $B1: {  # root
         exit_switch  # switch_1
       }
     }
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvReaderTest, SamplerLoaded_MultiUsage) {
+    EXPECT_IR(R"(
+           OpCapability Shader
+           OpCapability Sampled1D
+           OpCapability Image1D
+           OpCapability StorageImageExtendedFormats
+           OpCapability ImageQuery
+           OpMemoryModel Logical Simple
+           OpEntryPoint Fragment %100 "main"
+           OpExecutionMode %100 OriginUpperLeft
+
+           OpName %var_im "var_im"
+           OpName %var_s "var_s"
+           OpDecorate %var_im DescriptorSet 0
+           OpDecorate %var_im Binding 0
+           OpDecorate %var_s DescriptorSet 0
+           OpDecorate %var_s Binding 1
+  %float = OpTypeFloat 32
+%v4float = OpTypeVector %float 4
+%v2float = OpTypeVector %float 2
+   %v2_0 = OpConstantNull %v2float
+     %im = OpTypeImage %float 2D 0 0 0 1 Unknown
+     %si = OpTypeSampledImage %im
+      %s = OpTypeSampler
+ %ptr_im = OpTypePointer UniformConstant %im
+  %ptr_s = OpTypePointer UniformConstant %s
+ %var_im = OpVariable %ptr_im UniformConstant
+  %var_s = OpVariable %ptr_s UniformConstant
+   %void = OpTypeVoid
+ %voidfn = OpTypeFunction %void
+
+    %100 = OpFunction %void None %voidfn
+  %entry = OpLabel
+      %1 = OpLoad %im %var_im
+      %2 = OpLoad %s %var_s
+    %si0 = OpSampledImage %si %1 %2
+     %t0 = OpImageSampleImplicitLod %v4float %si0 %v2_0
+    %si1 = OpSampledImage %si %1 %2
+     %t2 = OpImageSampleImplicitLod %v4float %si1 %v2_0
+           OpReturn
+           OpFunctionEnd
+  )",
+              R"(
+$B1: {  # root
+  %var_im:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
+  %var_s:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+}
+
+%main = @fragment func():void {
+  $B2: {
+    %4:texture_2d<f32> = load %var_im
+    %5:sampler = load %var_s
+    %6:vec4<f32> = textureSample %4, %5, vec2<f32>(0.0f)
+    %7:vec4<f32> = textureSample %4, %5, vec2<f32>(0.0f)
     ret
   }
 }
