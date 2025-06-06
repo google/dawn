@@ -340,6 +340,8 @@ DAWN_NATIVE_EXPORT MemoryUsageInfo ComputeEstimatedMemoryUsageInfo(WGPUDevice de
 struct DAWN_NATIVE_EXPORT AllocatorMemoryInfo {
     uint64_t totalUsedMemory = 0;
     uint64_t totalAllocatedMemory = 0;
+    uint64_t totalLazyAllocatedMemory = 0;
+    uint64_t totalLazyUsedMemory = 0;
 };
 DAWN_NATIVE_EXPORT AllocatorMemoryInfo GetAllocatorMemoryInfo(WGPUDevice device);
 

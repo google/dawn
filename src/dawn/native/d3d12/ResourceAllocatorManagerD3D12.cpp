@@ -467,7 +467,8 @@ ResultOrError<ResourceHeapAllocation> ResourceAllocatorManager::CreatePlacedReso
 
     ResourceMemoryAllocation allocation;
     DAWN_TRY_ASSIGN(allocation,
-                    allocator->Allocate(resourceInfo.SizeInBytes, resourceInfo.Alignment));
+                    allocator->Allocate(resourceInfo.SizeInBytes, resourceInfo.Alignment,
+                                        /*isLazyMemoryType=*/false));
     if (allocation.GetInfo().mMethod == AllocationMethod::kInvalid) {
         return ResourceHeapAllocation{};  // invalid
     }

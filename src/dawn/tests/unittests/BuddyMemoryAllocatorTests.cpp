@@ -57,7 +57,7 @@ class PlaceholderBuddyResourceAllocator {
 
     ResourceMemoryAllocation Allocate(uint64_t allocationSize, uint64_t alignment = 1) {
         ResultOrError<ResourceMemoryAllocation> result =
-            mAllocator.Allocate(allocationSize, alignment);
+            mAllocator.Allocate(allocationSize, alignment, /*isLazyMemoryType=*/false);
         return (result.IsSuccess()) ? result.AcquireSuccess() : ResourceMemoryAllocation{};
     }
 

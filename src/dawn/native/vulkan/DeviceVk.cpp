@@ -1036,6 +1036,8 @@ AllocatorMemoryInfo Device::GetAllocatorMemoryInfo() const {
     AllocatorMemoryInfo info = {};
     info.totalAllocatedMemory = GetResourceMemoryAllocator()->GetTotalAllocatedMemory();
     info.totalUsedMemory = GetResourceMemoryAllocator()->GetTotalUsedMemory();
+    info.totalLazyAllocatedMemory = GetResourceMemoryAllocator()->GetTotalLazyAllocatedMemory();
+    info.totalLazyUsedMemory = GetResourceMemoryAllocator()->GetTotalLazyUsedMemory();
     return info;
 }
 
