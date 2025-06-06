@@ -419,6 +419,7 @@ struct State {
                     case core::BuiltinValue::kVertexIndex:
                     case core::BuiltinValue::kLocalInvocationIndex:
                     case core::BuiltinValue::kSubgroupInvocationId:
+                    case core::BuiltinValue::kSubgroupSize:
                     case core::BuiltinValue::kSampleIndex: {
                         var_type = ty.u32();
                         break;
@@ -490,6 +491,7 @@ struct State {
                     case core::BuiltinValue::kVertexIndex:
                     case core::BuiltinValue::kLocalInvocationIndex:
                     case core::BuiltinValue::kSubgroupInvocationId:
+                    case core::BuiltinValue::kSubgroupSize:
                     case core::BuiltinValue::kSampleIndex: {
                         auto* idx_ty = var->Result()->Type()->UnwrapPtr();
                         if (idx_ty->IsSignedIntegerScalar()) {
