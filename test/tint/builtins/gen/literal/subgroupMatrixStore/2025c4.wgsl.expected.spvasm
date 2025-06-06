@@ -1,0 +1,71 @@
+SKIP: FAILED
+
+
+enable chromium_experimental_subgroup_matrix;
+
+struct SB_RW {
+  arg_0 : array<i32>,
+}
+
+@group(0) @binding(0) var<storage, read_write> sb_rw : SB_RW;
+
+fn subgroupMatrixStore_2025c4() {
+  subgroupMatrixStore(&(sb_rw.arg_0), 1u, subgroup_matrix_left<i8, 8, 8>(), true, 8u);
+}
+
+@compute @workgroup_size(1)
+fn compute_main() {
+  subgroupMatrixStore_2025c4();
+}
+
+Failed to generate SPIR-V: :22:20 error: spirv.cooperative_matrix_store: no matching call to 'spirv.cooperative_matrix_store(ptr<storage, i32, read_write>, subgroup_matrix_left<i8, 8, 8>, u32, u32, u32)'
+
+1 candidate function:
+ • 'spirv.cooperative_matrix_store(ptr<workgroup' or 'storage, S, write' or 'read_write>  ✓ , subgroup_matrix<K, S, C, R>  ✗ , u32  ✓ , u32  ✓ , u32  ✓ )' where:
+      ✓  'S' is 'f32', 'i32', 'u32' or 'f16'
+
+        %12:void = spirv.cooperative_matrix_store %11, %4, 1u, 8u, 32u
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:20:7 note: in block
+      $B3: {  # true
+      ^^^
+
+note: # Disassembly
+SB_RW = struct @align(4), @block {
+  arg_0:array<i32> @offset(0)
+}
+
+$B1: {  # root
+  %sb_rw:ptr<storage, SB_RW, read_write> = var undef @binding_point(0, 0)
+}
+
+%subgroupMatrixStore_2025c4 = func():void {
+  $B2: {
+    %3:ptr<storage, array<i32>, read_write> = access %sb_rw, 0u
+    %4:subgroup_matrix_left<i8, 8, 8> = construct
+    %5:u32 = spirv.array_length %sb_rw, 0u
+    %6:u32 = mul %5, 4u
+    %7:u32 = mul 8u, 7u
+    %8:u32 = add 1u, %7
+    %9:u32 = add %8, 8u
+    %10:bool = lte %9, %6
+    if %10 [t: $B3] {  # if_1
+      $B3: {  # true
+        %11:ptr<storage, i32, read_write> = access %3, 1u
+        %12:void = spirv.cooperative_matrix_store %11, %4, 1u, 8u, 32u
+        exit_if  # if_1
+      }
+    }
+    ret
+  }
+}
+%compute_main = @compute @workgroup_size(1i, 1i, 1i) func():void {
+  $B4: {
+    %14:void = call %subgroupMatrixStore_2025c4
+    ret
+  }
+}
+
+
+tint executable returned error: exit status 1

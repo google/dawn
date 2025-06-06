@@ -53,7 +53,14 @@ See:
 {{- $b := 0 -}}
 {{- if and (or $overload.CanBeUsedInStage.Fragment $overload.CanBeUsedInStage.Compute) (and $overload.ReturnType (IsDeclarable $overload.ReturnType))}}
 {{-   if (HasPrefix $overload.ReturnType.Target.Name "subgroup_matrix") -}}
+{{-     $return_element_type := Eval "Type" (index $overload.ReturnType.TemplateArguments 1) -}}
+{{-     if eq "i8" $return_element_type -}}
+@group(0) @binding({{$b}}) var<storage, read_write> prevent_dce : array<i32, 1024>;
+{{-     else if eq "u8" $return_element_type -}}
+@group(0) @binding({{$b}}) var<storage, read_write> prevent_dce : array<u32, 1024>;
+{{-     else -}}
 @group(0) @binding({{$b}}) var<storage, read_write> prevent_dce : array<{{ElementType $overload.ReturnType}}, 1024>;
+{{-     end -}}
 {{-   else if and (IsHostShareable $overload.ReturnType) (not (HasPrefix $overload.ReturnType.Target.Name "mat"))}}
 @group(0) @binding({{$b}}) var<storage, read_write> prevent_dce : {{template "Type" $overload.ReturnType -}};
 {{-   else}}

@@ -1,0 +1,72 @@
+SKIP: FAILED
+
+
+enable chromium_experimental_subgroup_matrix;
+
+var<workgroup> arg_0 : array<i32, 1024>;
+
+fn subgroupMatrixStore_e59232() {
+  subgroupMatrixStore(&(arg_0), 1u, subgroup_matrix_result<i8, 8, 8>(), true, 8u);
+}
+
+@compute @workgroup_size(1)
+fn compute_main() {
+  subgroupMatrixStore_e59232();
+}
+
+Failed to generate SPIR-V: :9:15 error: spirv.cooperative_matrix_store: no matching call to 'spirv.cooperative_matrix_store(ptr<workgroup, i32, read_write>, subgroup_matrix_result<i8, 8, 8>, u32, u32, u32)'
+
+1 candidate function:
+ • 'spirv.cooperative_matrix_store(ptr<workgroup' or 'storage, S, write' or 'read_write>  ✓ , subgroup_matrix<K, S, C, R>  ✗ , u32  ✓ , u32  ✓ , u32  ✓ )' where:
+      ✓  'S' is 'f32', 'i32', 'u32' or 'f16'
+
+    %5:void = spirv.cooperative_matrix_store %4, %3, 1u, 8u, 32u
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:6:3 note: in block
+  $B2: {
+  ^^^
+
+note: # Disassembly
+$B1: {  # root
+  %arg_0:ptr<workgroup, array<i32, 1024>, read_write> = var undef
+}
+
+%subgroupMatrixStore_e59232 = func():void {
+  $B2: {
+    %3:subgroup_matrix_result<i8, 8, 8> = construct
+    %4:ptr<workgroup, i32, read_write> = access %arg_0, 1u
+    %5:void = spirv.cooperative_matrix_store %4, %3, 1u, 8u, 32u
+    ret
+  }
+}
+%compute_main = @compute @workgroup_size(1i, 1i, 1i) func(%tint_local_index:u32 [@local_invocation_index]):void {
+  $B3: {
+    loop [i: $B4, b: $B5, c: $B6] {  # loop_1
+      $B4: {  # initializer
+        next_iteration %tint_local_index  # -> $B5
+      }
+      $B5 (%idx:u32): {  # body
+        %9:bool = gte %idx, 1024u
+        if %9 [t: $B7] {  # if_1
+          $B7: {  # true
+            exit_loop  # loop_1
+          }
+        }
+        %10:ptr<workgroup, i32, read_write> = access %arg_0, %idx
+        store %10, 0i
+        continue  # -> $B6
+      }
+      $B6: {  # continuing
+        %11:u32 = add %idx, 1u
+        next_iteration %11  # -> $B5
+      }
+    }
+    %12:void = workgroupBarrier
+    %13:void = call %subgroupMatrixStore_e59232
+    ret
+  }
+}
+
+
+tint executable returned error: exit status 1

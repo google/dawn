@@ -1,0 +1,84 @@
+SKIP: FAILED
+
+
+enable chromium_experimental_subgroup_matrix;
+
+struct SB_RW {
+  arg_0 : array<i32, 1024>,
+}
+
+@group(0) @binding(0) var<storage, read_write> sb_rw : SB_RW;
+
+fn subgroupMatrixStore_f79102() {
+  var arg_1 = 1u;
+  var arg_2 = subgroup_matrix_left<i8, 8, 8>();
+  const arg_3 = true;
+  var arg_4 = 8u;
+  subgroupMatrixStore(&(sb_rw.arg_0), arg_1, arg_2, arg_3, arg_4);
+}
+
+@compute @workgroup_size(1)
+fn compute_main() {
+  subgroupMatrixStore_f79102();
+}
+
+Failed to generate SPIR-V: :31:20 error: spirv.cooperative_matrix_store: no matching call to 'spirv.cooperative_matrix_store(ptr<storage, i32, read_write>, subgroup_matrix_left<i8, 8, 8>, u32, u32, u32)'
+
+1 candidate function:
+ • 'spirv.cooperative_matrix_store(ptr<workgroup' or 'storage, S, write' or 'read_write>  ✓ , subgroup_matrix<K, S, C, R>  ✗ , u32  ✓ , u32  ✓ , u32  ✓ )' where:
+      ✓  'S' is 'f32', 'i32', 'u32' or 'f16'
+
+        %17:void = spirv.cooperative_matrix_store %16, %9, 1u, %11, 32u
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:29:7 note: in block
+      $B3: {  # true
+      ^^^
+
+note: # Disassembly
+SB_RW = struct @align(4) {
+  arg_0:array<i32, 1024> @offset(0)
+}
+
+sb_rw_block = struct @align(4), @block {
+  inner:SB_RW @offset(0)
+}
+
+$B1: {  # root
+  %1:ptr<storage, sb_rw_block, read_write> = var undef @binding_point(0, 0)
+}
+
+%subgroupMatrixStore_f79102 = func():void {
+  $B2: {
+    %arg_1:ptr<function, u32, read_write> = var 1u
+    %4:subgroup_matrix_left<i8, 8, 8> = construct
+    %arg_2:ptr<function, subgroup_matrix_left<i8, 8, 8>, read_write> = var %4
+    %arg_4:ptr<function, u32, read_write> = var 8u
+    %7:ptr<storage, array<i32, 1024>, read_write> = access %1, 0u, 0u
+    %8:u32 = load %arg_1
+    %9:subgroup_matrix_left<i8, 8, 8> = load %arg_2
+    %10:u32 = load %arg_4
+    %11:u32 = max %10, 8u
+    %12:u32 = mul %11, 7u
+    %13:u32 = add %8, %12
+    %14:u32 = add %13, 8u
+    %15:bool = lte %14, 4096u
+    if %15 [t: $B3] {  # if_1
+      $B3: {  # true
+        %16:ptr<storage, i32, read_write> = access %7, %8
+        %17:void = spirv.cooperative_matrix_store %16, %9, 1u, %11, 32u
+        exit_if  # if_1
+      }
+    }
+    ret
+  }
+}
+%compute_main = @compute @workgroup_size(1i, 1i, 1i) func():void {
+  $B4: {
+    %19:void = call %subgroupMatrixStore_f79102
+    ret
+  }
+}
+
+
+tint executable returned error: exit status 1

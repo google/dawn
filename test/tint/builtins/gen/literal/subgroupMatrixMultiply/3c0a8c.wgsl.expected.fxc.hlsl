@@ -1,12 +1,12 @@
 SKIP: FAILED
 
-<dawn>/test/tint/builtins/gen/literal/subgroupMatrixMultiply/3c0a8c.wgsl:42:62 error: type 'u8' cannot be used in address space 'storage' as it is non-host-shareable
-@group(0) @binding(0) var<storage, read_write> prevent_dce : array<u8, 1024>;
-                                                             ^^^^^^^^^^^^^^^
+..\..\src\tint\lang\wgsl\ast\transform\transform.cc:188 internal compiler error: TINT_UNREACHABLE Unhandled type: tint::core::type::SubgroupMatrix
 
-<dawn>/test/tint/builtins/gen/literal/subgroupMatrixMultiply/3c0a8c.wgsl:42:23 note: while instantiating 'var' prevent_dce
-@group(0) @binding(0) var<storage, read_write> prevent_dce : array<u8, 1024>;
-                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************
 
-
-tint executable returned error: exit status 1
+tint executable returned error: exit status 0xc000001d

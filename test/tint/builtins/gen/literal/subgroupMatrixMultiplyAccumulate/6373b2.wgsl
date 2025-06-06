@@ -39,7 +39,7 @@
 
 
 enable chromium_experimental_subgroup_matrix;
-@group(0) @binding(0) var<storage, read_write> prevent_dce : array<u8, 1024>;
+@group(0) @binding(0) var<storage, read_write> prevent_dce : array<u32, 1024>;
 
 
 // fn subgroupMatrixMultiplyAccumulate(subgroup_matrix<left, u32, 8, 8>, subgroup_matrix<right, u32, 8, 8>, subgroup_matrix<result, u8, 8, 8>) -> subgroup_matrix<result, u8, 8, 8>

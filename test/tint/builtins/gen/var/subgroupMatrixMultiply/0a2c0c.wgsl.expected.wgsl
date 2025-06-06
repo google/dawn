@@ -1,12 +1,17 @@
 SKIP: FAILED
 
-<dawn>/test/tint/builtins/gen/var/subgroupMatrixMultiply/0a2c0c.wgsl:42:62 error: type 'u8' cannot be used in address space 'storage' as it is non-host-shareable
-@group(0) @binding(0) var<storage, read_write> prevent_dce : array<u8, 1024>;
-                                                             ^^^^^^^^^^^^^^^
+enable chromium_experimental_subgroup_matrix;
 
-<dawn>/test/tint/builtins/gen/var/subgroupMatrixMultiply/0a2c0c.wgsl:42:23 note: while instantiating 'var' prevent_dce
-@group(0) @binding(0) var<storage, read_write> prevent_dce : array<u8, 1024>;
-                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+@group(0) @binding(0) var<storage, read_write> prevent_dce : array<u32, 1024>;
 
+fn subgroupMatrixMultiply_0a2c0c() -> subgroup_matrix_result<u8, 8, 8> {
+  var arg_0 = subgroup_matrix_left<f32, 8, 8>();
+  var arg_1 = subgroup_matrix_right<f32, 8, 8>();
+  var res : subgroup_matrix_result<u8, 8, 8> = subgroupMatrixMultiply<u8>(arg_0, arg_1);
+  return res;
+}
 
-tint executable returned error: exit status 1
+@compute @workgroup_size(1)
+fn compute_main() {
+  subgroupMatrixStore(&(prevent_dce), 0, subgroupMatrixMultiply_0a2c0c(), false, 64);
+}

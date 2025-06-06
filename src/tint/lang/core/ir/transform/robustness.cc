@@ -453,9 +453,13 @@ struct State {
 
         // Some matrix components types are packed together into a single array element.
         // Take that into account here by scaling the array length to number of components.
-        // TODO(crbug.com/403609083): I8 and U8 will be 4 components per element.
-        TINT_ASSERT((matrix_ty->Type()->IsAnyOf<type::F16, type::F32, type::I32, type::U32>()));
-        uint32_t components_per_element = 1;
+        uint32_t components_per_element = 0;
+        if (matrix_ty->Type()->IsAnyOf<type::I8, type::U8>()) {
+            components_per_element = 4;
+        } else {
+            TINT_ASSERT((matrix_ty->Type()->IsAnyOf<type::F16, type::F32, type::I32, type::U32>()));
+            components_per_element = 1;
+        }
 
         // Get the length of the array (in terms of matrix elements).
         auto* arr_ty = arr->Type()->UnwrapPtr()->As<core::type::Array>();

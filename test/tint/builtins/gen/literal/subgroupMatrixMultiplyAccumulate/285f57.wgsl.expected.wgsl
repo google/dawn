@@ -1,12 +1,15 @@
 SKIP: FAILED
 
-<dawn>/test/tint/builtins/gen/literal/subgroupMatrixMultiplyAccumulate/285f57.wgsl:42:62 error: type 'u8' cannot be used in address space 'storage' as it is non-host-shareable
-@group(0) @binding(0) var<storage, read_write> prevent_dce : array<u8, 1024>;
-                                                             ^^^^^^^^^^^^^^^
+enable chromium_experimental_subgroup_matrix;
 
-<dawn>/test/tint/builtins/gen/literal/subgroupMatrixMultiplyAccumulate/285f57.wgsl:42:23 note: while instantiating 'var' prevent_dce
-@group(0) @binding(0) var<storage, read_write> prevent_dce : array<u8, 1024>;
-                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+@group(0) @binding(0) var<storage, read_write> prevent_dce : array<u32, 1024>;
 
+fn subgroupMatrixMultiplyAccumulate_285f57() -> subgroup_matrix_result<u8, 8, 8> {
+  var res : subgroup_matrix_result<u8, 8, 8> = subgroupMatrixMultiplyAccumulate(subgroup_matrix_left<i32, 8, 8>(), subgroup_matrix_right<i32, 8, 8>(), subgroup_matrix_result<u8, 8, 8>());
+  return res;
+}
 
-tint executable returned error: exit status 1
+@compute @workgroup_size(1)
+fn compute_main() {
+  subgroupMatrixStore(&(prevent_dce), 0, subgroupMatrixMultiplyAccumulate_285f57(), false, 64);
+}

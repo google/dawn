@@ -1,0 +1,90 @@
+SKIP: FAILED
+
+
+enable chromium_experimental_subgroup_matrix;
+
+@group(0) @binding(0) var<storage, read_write> prevent_dce : array<u32, 1024>;
+
+struct SB_RW {
+  arg_0 : array<u32, 1024>,
+}
+
+@group(0) @binding(1) var<storage, read_write> sb_rw : SB_RW;
+
+fn subgroupMatrixLoad_3f3203() -> subgroup_matrix_result<u8, 8, 8> {
+  var res : subgroup_matrix_result<u8, 8, 8> = subgroupMatrixLoad<subgroup_matrix_result<u8, 8, 8>>(&(sb_rw.arg_0), 1u, true, 8u);
+  return res;
+}
+
+@compute @workgroup_size(1)
+fn compute_main() {
+  subgroupMatrixStore(&(prevent_dce), 0, subgroupMatrixLoad_3f3203(), false, 64);
+}
+
+Failed to generate SPIR-V: :22:43 error: spirv.cooperative_matrix_load: no matching call to 'spirv.cooperative_matrix_load<subgroup_matrix_result<u8, 8, 8>>(ptr<storage, u32, read_write>, u32, u32, u32)'
+
+1 candidate function:
+ • 'spirv.cooperative_matrix_load<T  ✗ >(ptr<workgroup' or 'storage, S, read' or 'read_write>  ✗ , u32  ✓ , u32  ✓ , u32  ✓ ) -> T' where:
+      ✗  'T' is 'subgroup_matrix<K, S, C, R>'
+      ✗  'S' is 'f32', 'i32', 'u32' or 'f16'
+
+    %6:subgroup_matrix_result<u8, 8, 8> = spirv.cooperative_matrix_load<subgroup_matrix_result<u8, 8, 8>> %5, 1u, 8u, 32u
+                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:19:3 note: in block
+  $B2: {
+  ^^^
+
+:33:16 error: spirv.cooperative_matrix_store: no matching call to 'spirv.cooperative_matrix_store(ptr<storage, u32, read_write>, subgroup_matrix_result<u8, 8, 8>, u32, u32, u32)'
+
+1 candidate function:
+ • 'spirv.cooperative_matrix_store(ptr<workgroup' or 'storage, S, write' or 'read_write>  ✓ , subgroup_matrix<K, S, C, R>  ✗ , u32  ✓ , u32  ✓ , u32  ✓ )' where:
+      ✓  'S' is 'f32', 'i32', 'u32' or 'f16'
+
+    %13:void = spirv.cooperative_matrix_store %12, %10, 0u, 64u, 32u
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:29:3 note: in block
+  $B3: {
+  ^^^
+
+note: # Disassembly
+SB_RW = struct @align(4) {
+  arg_0:array<u32, 1024> @offset(0)
+}
+
+prevent_dce_block = struct @align(4), @block {
+  inner:array<u32, 1024> @offset(0)
+}
+
+sb_rw_block = struct @align(4), @block {
+  inner:SB_RW @offset(0)
+}
+
+$B1: {  # root
+  %1:ptr<storage, prevent_dce_block, read_write> = var undef @binding_point(0, 0)
+  %2:ptr<storage, sb_rw_block, read_write> = var undef @binding_point(0, 1)
+}
+
+%subgroupMatrixLoad_3f3203 = func():subgroup_matrix_result<u8, 8, 8> {
+  $B2: {
+    %4:ptr<storage, array<u32, 1024>, read_write> = access %2, 0u, 0u
+    %5:ptr<storage, u32, read_write> = access %4, 1u
+    %6:subgroup_matrix_result<u8, 8, 8> = spirv.cooperative_matrix_load<subgroup_matrix_result<u8, 8, 8>> %5, 1u, 8u, 32u
+    %res:ptr<function, subgroup_matrix_result<u8, 8, 8>, read_write> = var %6
+    %8:subgroup_matrix_result<u8, 8, 8> = load %res
+    ret %8
+  }
+}
+%compute_main = @compute @workgroup_size(1i, 1i, 1i) func():void {
+  $B3: {
+    %10:subgroup_matrix_result<u8, 8, 8> = call %subgroupMatrixLoad_3f3203
+    %11:ptr<storage, array<u32, 1024>, read_write> = access %1, 0u
+    %12:ptr<storage, u32, read_write> = access %11, 0u
+    %13:void = spirv.cooperative_matrix_store %12, %10, 0u, 64u, 32u
+    ret
+  }
+}
+
+
+tint executable returned error: exit status 1
