@@ -115,6 +115,7 @@ tint_add_target(tint_lang_spirv_reader_parser_test test
   lang/spirv/reader/parser/memory_test.cc
   lang/spirv/reader/parser/misc_test.cc
   lang/spirv/reader/parser/name_test.cc
+  lang/spirv/reader/parser/phi_test.cc
   lang/spirv/reader/parser/struct_test.cc
   lang/spirv/reader/parser/unary_test.cc
   lang/spirv/reader/parser/var_test.cc

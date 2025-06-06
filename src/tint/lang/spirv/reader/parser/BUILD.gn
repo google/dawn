@@ -112,6 +112,7 @@ if (tint_build_unittests) {
         "memory_test.cc",
         "misc_test.cc",
         "name_test.cc",
+        "phi_test.cc",
         "struct_test.cc",
         "unary_test.cc",
         "var_test.cc",
