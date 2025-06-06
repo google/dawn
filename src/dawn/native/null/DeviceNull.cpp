@@ -236,10 +236,9 @@ ResultOrError<Ref<SamplerBase>> Device::CreateSamplerImpl(const SamplerDescripto
 ResultOrError<Ref<ShaderModuleBase>> Device::CreateShaderModuleImpl(
     const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
     const std::vector<tint::wgsl::Extension>& internalExtensions,
-    ShaderModuleParseResult* parseResult,
-    std::unique_ptr<OwnedCompilationMessages>* compilationMessages) {
+    ShaderModuleParseResult* parseResult) {
     Ref<ShaderModule> module = AcquireRef(new ShaderModule(this, descriptor, internalExtensions));
-    DAWN_TRY(module->Initialize(parseResult, compilationMessages));
+    DAWN_TRY(module->Initialize(parseResult));
     return module;
 }
 ResultOrError<Ref<SwapChainBase>> Device::CreateSwapChainImpl(Surface* surface,
@@ -576,10 +575,8 @@ void SwapChain::DetachFromSurfaceImpl() {
 
 // ShaderModule
 
-MaybeError ShaderModule::Initialize(
-    ShaderModuleParseResult* parseResult,
-    std::unique_ptr<OwnedCompilationMessages>* compilationMessages) {
-    return InitializeBase(parseResult, compilationMessages);
+MaybeError ShaderModule::Initialize(ShaderModuleParseResult* parseResult) {
+    return InitializeBase(parseResult);
 }
 
 uint32_t Device::GetOptimalBytesPerRowAlignment() const {

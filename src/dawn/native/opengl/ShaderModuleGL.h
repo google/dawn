@@ -86,8 +86,7 @@ class ShaderModule final : public ShaderModuleBase {
         Device* device,
         const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
         const std::vector<tint::wgsl::Extension>& internalExtensions,
-        ShaderModuleParseResult* parseResult,
-        std::unique_ptr<OwnedCompilationMessages>* compilationMessages);
+        ShaderModuleParseResult* parseResult);
 
     ResultOrError<GLuint> CompileShader(const OpenGLFunctions& gl,
                                         const ProgrammableStage& programmableStage,
@@ -107,8 +106,7 @@ class ShaderModule final : public ShaderModuleBase {
                  const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
                  std::vector<tint::wgsl::Extension> internalExtensions);
     ~ShaderModule() override = default;
-    MaybeError Initialize(ShaderModuleParseResult* parseResult,
-                          std::unique_ptr<OwnedCompilationMessages>* compilationMessages);
+    MaybeError Initialize(ShaderModuleParseResult* parseResult);
 };
 
 }  // namespace opengl

@@ -62,8 +62,7 @@ class ShaderModule final : public ShaderModuleBase {
         Device* device,
         const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
         const std::vector<tint::wgsl::Extension>& internalExtensions,
-        ShaderModuleParseResult* parseResult,
-        std::unique_ptr<OwnedCompilationMessages>* compilationMessages);
+        ShaderModuleParseResult* parseResult);
 
     // Caller is responsible for destroying the `VkShaderModule` returned.
     ResultOrError<ModuleAndSpirv> GetHandleAndSpirv(SingleShaderStage stage,
@@ -77,8 +76,7 @@ class ShaderModule final : public ShaderModuleBase {
                  const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
                  std::vector<tint::wgsl::Extension> internalExtensions);
     ~ShaderModule() override;
-    MaybeError Initialize(ShaderModuleParseResult* parseResult,
-                          std::unique_ptr<OwnedCompilationMessages>* compilationMessages);
+    MaybeError Initialize(ShaderModuleParseResult* parseResult);
     void DestroyImpl() override;
 };
 

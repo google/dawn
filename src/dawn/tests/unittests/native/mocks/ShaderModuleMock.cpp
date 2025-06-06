@@ -50,15 +50,13 @@ ShaderModuleMock::~ShaderModuleMock() = default;
 Ref<ShaderModuleMock> ShaderModuleMock::Create(
     DeviceMock* device,
     const UnpackedPtr<ShaderModuleDescriptor>& descriptor) {
-    ShaderModuleParseResult parseResult;
-    ParsedCompilationMessages compilationMessages;
-    ParseShaderModule(device, descriptor, {}, &parseResult, &compilationMessages).AcquireSuccess();
-    auto ownedCompilationMessages =
-        std::make_unique<OwnedCompilationMessages>(std::move(compilationMessages));
+    ShaderModuleParseResult parseResult{};
+    ParseShaderModule(device, descriptor, {}, /* needReflection*/ true, &parseResult)
+        .AcquireSuccess();
 
     Ref<ShaderModuleMock> shaderModule =
         AcquireRef(new NiceMock<ShaderModuleMock>(device, descriptor));
-    shaderModule->InitializeBase(&parseResult, &ownedCompilationMessages).AcquireSuccess();
+    shaderModule->InitializeBase(&parseResult).AcquireSuccess();
     return shaderModule;
 }
 

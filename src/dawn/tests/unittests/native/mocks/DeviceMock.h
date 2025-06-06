@@ -118,8 +118,7 @@ class DeviceMock : public DeviceBase {
                 CreateShaderModuleImpl,
                 (const UnpackedPtr<ShaderModuleDescriptor>&,
                  const std::vector<tint::wgsl::Extension>&,
-                 ShaderModuleParseResult*,
-                 std::unique_ptr<OwnedCompilationMessages>*),
+                 ShaderModuleParseResult*),
                 (override));
     MOCK_METHOD(ResultOrError<Ref<SwapChainBase>>,
                 CreateSwapChainImpl,

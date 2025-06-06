@@ -282,10 +282,8 @@ ResultOrError<Ref<SamplerBase>> Device::CreateSamplerImpl(const SamplerDescripto
 ResultOrError<Ref<ShaderModuleBase>> Device::CreateShaderModuleImpl(
     const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
     const std::vector<tint::wgsl::Extension>& internalExtensions,
-    ShaderModuleParseResult* parseResult,
-    std::unique_ptr<OwnedCompilationMessages>* compilationMessages) {
-    return ShaderModule::Create(this, descriptor, internalExtensions, parseResult,
-                                compilationMessages);
+    ShaderModuleParseResult* parseResult) {
+    return ShaderModule::Create(this, descriptor, internalExtensions, parseResult);
 }
 ResultOrError<Ref<SwapChainBase>> Device::CreateSwapChainImpl(Surface* surface,
                                                               SwapChainBase* previousSwapChain,

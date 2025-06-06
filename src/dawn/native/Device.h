@@ -216,7 +216,7 @@ class DeviceBase : public ErrorSink,
     ResultOrError<Ref<ShaderModuleBase>> CreateShaderModule(
         const ShaderModuleDescriptor* descriptor,
         const std::vector<tint::wgsl::Extension>& internalExtensions = {},
-        ParsedCompilationMessages* compilationMessages = nullptr);
+        ShaderModuleParseResult* outputParseResult = nullptr);
     ResultOrError<Ref<SwapChainBase>> CreateSwapChain(Surface* surface,
                                                       SwapChainBase* previousSwapChain,
                                                       const SurfaceConfiguration* config);
@@ -482,8 +482,7 @@ class DeviceBase : public ErrorSink,
     virtual ResultOrError<Ref<ShaderModuleBase>> CreateShaderModuleImpl(
         const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
         const std::vector<tint::wgsl::Extension>& internalExtensions,
-        ShaderModuleParseResult* parseResult,
-        std::unique_ptr<OwnedCompilationMessages>* compilationMessages) = 0;
+        ShaderModuleParseResult* parseResult) = 0;
     // Note that previousSwapChain may be nullptr, or come from a different backend.
     virtual ResultOrError<Ref<SwapChainBase>> CreateSwapChainImpl(
         Surface* surface,
