@@ -410,7 +410,6 @@ struct State {
             if (entry_point && var->Attributes().builtin.has_value()) {
                 switch (var->Attributes().builtin.value()) {
                     case core::BuiltinValue::kSampleMask: {
-                        // Use a scalar u32 for sample_mask builtins
                         TINT_ASSERT(var_type->Is<core::type::Array>());
                         TINT_ASSERT(var_type->As<core::type::Array>()->ConstantCount() == 1u);
                         var_type = ty.u32();
@@ -418,8 +417,11 @@ struct State {
                     }
                     case core::BuiltinValue::kInstanceIndex:
                     case core::BuiltinValue::kLocalInvocationIndex: {
-                        // Use a scalar u32
                         var_type = ty.u32();
+                        break;
+                    }
+                    case core::BuiltinValue::kLocalInvocationId: {
+                        var_type = ty.vec3<u32>();
                         break;
                     }
                     default: {
@@ -483,6 +485,16 @@ struct State {
                         auto* idx_ty = var->Result()->Type()->UnwrapPtr();
                         if (idx_ty->IsSignedIntegerScalar()) {
                             auto* conv = b.Convert(ty.i32(), result);
+                            func->Block()->Prepend(conv);
+                            result = conv->Result();
+                        }
+                        break;
+                    }
+                    case core::BuiltinValue::kLocalInvocationId: {
+                        auto* idx_ty = var->Result()->Type()->UnwrapPtr();
+                        auto* elem_ty = idx_ty->DeepestElement();
+                        if (elem_ty->IsSignedIntegerScalar()) {
+                            auto* conv = b.Convert(ty.MatchWidth(ty.i32(), idx_ty), result);
                             func->Block()->Prepend(conv);
                             result = conv->Result();
                         }

@@ -2261,6 +2261,96 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(SpirvReader_ShaderIOTest, LocalInvocationId_i32) {
+    auto* idx = b.Var("idx", ty.ptr(core::AddressSpace::kIn, ty.vec3<i32>()));
+    idx->SetBuiltin(core::BuiltinValue::kLocalInvocationId);
+    mod.root_block->Append(idx);
+
+    auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    ep->SetWorkgroupSize(b.Constant(1_u), b.Constant(1_u), b.Constant(1_u));
+    b.Append(ep->Block(), [&] {
+        auto* idx_value = b.Load(idx);
+        b.Let("a", b.Multiply(ty.vec3<i32>(), idx_value, b.Splat(ty.vec3<i32>(), 2_i)));
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %idx:ptr<__in, vec3<i32>, read> = var undef @builtin(local_invocation_id)
+}
+
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:vec3<i32> = load %idx
+    %4:vec3<i32> = mul %3, vec3<i32>(2i)
+    %a:vec3<i32> = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func(%idx:vec3<u32> [@local_invocation_id]):void {
+  $B1: {
+    %3:vec3<i32> = convert %idx
+    %4:vec3<i32> = mul %3, vec3<i32>(2i)
+    %a:vec3<i32> = let %4
+    ret
+  }
+}
+)";
+
+    Run(ShaderIO);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvReader_ShaderIOTest, LocalInvocationId_u32) {
+    auto* idx = b.Var("idx", ty.ptr(core::AddressSpace::kIn, ty.vec3<u32>()));
+    idx->SetBuiltin(core::BuiltinValue::kLocalInvocationId);
+    mod.root_block->Append(idx);
+
+    auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    ep->SetWorkgroupSize(b.Constant(1_u), b.Constant(1_u), b.Constant(1_u));
+    b.Append(ep->Block(), [&] {
+        auto* idx_value = b.Load(idx);
+        b.Let("a", b.Multiply(ty.vec3<u32>(), idx_value, b.Splat(ty.vec3<u32>(), 2_u)));
+
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %idx:ptr<__in, vec3<u32>, read> = var undef @builtin(local_invocation_id)
+}
+
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:vec3<u32> = load %idx
+    %4:vec3<u32> = mul %3, vec3<u32>(2u)
+    %a:vec3<u32> = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func(%idx:vec3<u32> [@local_invocation_id]):void {
+  $B1: {
+    %3:vec3<u32> = mul %idx, vec3<u32>(2u)
+    %a:vec3<u32> = let %3
+    ret
+  }
+}
+)";
+
+    Run(ShaderIO);
+
+    EXPECT_EQ(expect, str());
+}
+
 // Test that a sample mask array is converted to a scalar u32 for the entry point.
 TEST_F(SpirvReader_ShaderIOTest, SampleMask) {
     auto* arr = ty.array<u32, 1>();
