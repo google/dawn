@@ -839,7 +839,8 @@ class Parser {
                         // Set `src` as the `param` so it's returned as the new value
                         src = param;
                         return nullptr;
-                    },  //
+                    },                                                      //
+                    [&](core::ir::Unreachable*) { return blk->Parent(); },  //
                     TINT_ICE_ON_NO_MATCH);
 
                 if (!ctrl) {
@@ -849,6 +850,15 @@ class Parser {
                 for (auto& exit : ctrl->Exits()) {
                     exit->PushOperand(src);
                 }
+            }
+
+            // If this control has no exits, then we don't need to add the result through the
+            // control as we're jumping over the control to its parent control. (This is an
+            // `if` inside a `loop` where the `if` is doing a `break`).
+            if (ctrl->Exits().IsEmpty()) {
+                TINT_ASSERT(ctrl->Is<core::ir::If>());
+                blk = ctrl->Block();
+                continue;
             }
 
             // Add a new result to the control instruction

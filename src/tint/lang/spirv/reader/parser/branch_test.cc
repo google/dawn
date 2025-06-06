@@ -566,6 +566,83 @@ TEST_F(SpirvParserTest, BranchConditional_HoistingMultiExit) {
 )");
 }
 
+TEST_F(SpirvParserTest, BranchConditional_HoistingMultiExit_FromMiddle) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+        %i32 = OpTypeInt 32 1
+       %bool = OpTypeBool
+        %one = OpConstant %i32 1
+        %two = OpConstant %i32 2
+       %true = OpConstantTrue %bool
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+               OpBranch %10
+         %10 = OpLabel
+               OpLoopMerge %99 %80 None
+               OpBranch %20
+         %20 = OpLabel
+               OpSelectionMerge %50 None
+               OpBranchConditional %true %30 %30
+         %30 = OpLabel
+        %foo = OpIAdd %i32 %one %two
+               OpSelectionMerge %60 None
+               OpBranchConditional %true %65 %70
+         %65 = OpLabel
+               OpBranch %99
+         %70 = OpLabel
+               OpBranch %99
+         %60 = OpLabel
+               OpUnreachable
+         %50 = OpLabel
+               OpUnreachable
+         %80 = OpLabel
+               OpBranch %10
+         %99 = OpLabel
+       %foo2 = OpCopyObject %i32 %foo
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = loop [b: $B2, c: $B3] {  # loop_1
+      $B2: {  # body
+        %3:bool = or true, true
+        if %3 [t: $B4, f: $B5] {  # if_1
+          $B4: {  # true
+            %4:i32 = spirv.add<i32> 1i, 2i
+            if true [t: $B6, f: $B7] {  # if_2
+              $B6: {  # true
+                exit_loop %4  # loop_1
+              }
+              $B7: {  # false
+                exit_loop %4  # loop_1
+              }
+            }
+            unreachable
+          }
+          $B5: {  # false
+            unreachable
+          }
+        }
+        unreachable
+      }
+      $B3: {  # continuing
+        next_iteration  # -> $B2
+      }
+    }
+    %5:i32 = let %2
+    ret
+  }
+}
+)");
+}
+
 TEST_F(SpirvParserTest, BranchConditional_HoistingIntoNested) {
     EXPECT_IR(R"(
                OpCapability Shader
