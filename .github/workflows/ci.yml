@@ -107,7 +107,66 @@ jobs:
         path: Dawn-${{ github.sha }}-${{ matrix.os }}-${{ matrix.build_type }}.tar.gz
   
   mobile:
-    name: Build iOS and Android
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Android builds
+          - platform: android
+            arch: arm64-v8a
+            toolchain_file: $ANDROID_NDK/build/cmake/android.toolchain.cmake
+            cmake_args: -DANDROID_ABI=arm64-v8a -DANDROID_PLATFORM=android-26
+            output_dir: out/android_arm64-v8a
+            library_path: src/dawn/native/libwebgpu_dawn.so
+            strip_tool: $ANDROID_NDK/toolchains/llvm/prebuilt/darwin-x86_64/bin/llvm-strip
+          - platform: android
+            arch: armeabi-v7a
+            toolchain_file: $ANDROID_NDK/build/cmake/android.toolchain.cmake
+            cmake_args: -DANDROID_ABI=armeabi-v7a -DANDROID_PLATFORM=android-26
+            output_dir: out/android_armeabi-v7a
+            library_path: src/dawn/native/libwebgpu_dawn.so
+            strip_tool: $ANDROID_NDK/toolchains/llvm/prebuilt/darwin-x86_64/bin/llvm-strip
+          - platform: android
+            arch: x86
+            toolchain_file: $ANDROID_NDK/build/cmake/android.toolchain.cmake
+            cmake_args: -DANDROID_ABI=x86 -DANDROID_PLATFORM=android-26
+            output_dir: out/android_x86
+            library_path: src/dawn/native/libwebgpu_dawn.so
+            strip_tool: $ANDROID_NDK/toolchains/llvm/prebuilt/darwin-x86_64/bin/llvm-strip
+          - platform: android
+            arch: x86_64
+            toolchain_file: $ANDROID_NDK/build/cmake/android.toolchain.cmake
+            cmake_args: -DANDROID_ABI=x86_64 -DANDROID_PLATFORM=android-26
+            output_dir: out/android_x86_64
+            library_path: src/dawn/native/libwebgpu_dawn.so
+            strip_tool: $ANDROID_NDK/toolchains/llvm/prebuilt/darwin-x86_64/bin/llvm-strip
+          # iOS builds
+          - platform: ios
+            arch: arm64
+            toolchain_file: build-tools/apple.toolchain.cmake
+            cmake_args: -DPLATFORM=OS64 -DDEPLOYMENT_TARGET=13.0 -DENABLE_BITCODE=OFF -DENABLE_ARC=OFF -DENABLE_VISIBILITY=OFF
+            output_dir: out/ios_arm64
+            library_path: src/dawn/native/libwebgpu_dawn.a
+          - platform: ios
+            arch: sim_arm64
+            toolchain_file: build-tools/apple.toolchain.cmake
+            cmake_args: -DPLATFORM=SIMULATORARM64 -DDEPLOYMENT_TARGET=13.0 -DENABLE_BITCODE=OFF -DENABLE_ARC=OFF -DENABLE_VISIBILITY=OFF
+            output_dir: out/ios_sim_arm64
+            library_path: src/dawn/native/libwebgpu_dawn.a
+          - platform: ios
+            arch: sim_x86_64
+            toolchain_file: build-tools/apple.toolchain.cmake
+            cmake_args: -DPLATFORM=SIMULATOR64 -DDEPLOYMENT_TARGET=13.0 -DENABLE_BITCODE=OFF -DENABLE_ARC=OFF -DENABLE_VISIBILITY=OFF
+            output_dir: out/ios_sim_x86_64
+            library_path: src/dawn/native/libwebgpu_dawn.a
+          - platform: macos
+            arch: universal
+            toolchain_file: build-tools/apple.toolchain.cmake
+            cmake_args: -DPLATFORM=MAC_UNIVERSAL -DDEPLOYMENT_TARGET=11.0 -DENABLE_BITCODE=OFF -DENABLE_ARC=OFF -DENABLE_VISIBILITY=OFF
+            output_dir: out/macos_universal
+            library_path: src/dawn/native/libwebgpu_dawn.a
+
+    name: Build-${{ matrix.platform }}-${{ matrix.arch }}
     runs-on: macos-latest-large
     steps:
       - uses: actions/checkout@v4
@@ -141,26 +200,83 @@ jobs:
           patch -p1 < bundle_libraries.patch
 
       - name: Setup Android NDK
+        if: matrix.platform == 'android'
         id: setup-ndk
         uses: nttld/setup-ndk@v1
         with:
           ndk-version: r26d
   
       - name: Set ANDROID_NDK
+        if: matrix.platform == 'android'
         run: echo "ANDROID_NDK=${{ steps.setup-ndk.outputs.ndk-path }}" >> $GITHUB_ENV
   
       - name: Setup Ninja
         uses: seanmiddleditch/gha-setup-ninja@master
     
       - name: Download Apple toolchain
+        if: matrix.platform != 'android'
         run: |
           mkdir -p build-tools
           # Download the ios-cmake toolchain file
           curl -L https://raw.githubusercontent.com/leetal/ios-cmake/master/ios.toolchain.cmake -o build-tools/apple.toolchain.cmake
     
-      - name: Build Android arm64-v8a
+      - name: Build ${{ matrix.platform }} ${{ matrix.arch }}
         run: |
-          cmake -S . -B out/android_arm64-v8a -G Ninja \
+          cmake -S . -B ${{ matrix.output_dir }} -G Ninja \
+            -DCMAKE_TOOLCHAIN_FILE=${{ matrix.toolchain_file }} \
+            ${{ matrix.cmake_args }} \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_SAMPLES=OFF \
+            -DTINT_BUILD_TESTS=OFF \
+            -DTINT_BUILD_CMD_TOOLS=OFF \
+            -DTINT_BUILD_IR_BINARY=OFF \
+            -DDAWN_BUILD_SAMPLES=OFF \
+            -DDAWN_USE_GLFW=OFF \
+            -DDAWN_FETCH_DEPENDENCIES=ON \
+            -DDAWN_BUILD_MONOLITHIC_LIBRARY=ON \
+            -DDAWN_ENABLE_OPENGLES=OFF \
+            -DDAWN_ENABLE_DESKTOP_GL=OFF
+          ninja -C ${{ matrix.output_dir }}
+    
+      - name: Strip Android binaries
+        if: matrix.platform == 'android'
+        run: |
+          ${{ matrix.strip_tool }} ${{ matrix.output_dir }}/${{ matrix.library_path }}
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ matrix.platform }}-${{ matrix.arch }}
+          path: ${{ matrix.output_dir }}/${{ matrix.library_path }}
+
+  package-mobile:
+    name: Package Mobile Artifacts
+    runs-on: macos-latest
+    needs: mobile
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: build-*
+          path: artifacts
+
+      - name: Setup Android NDK (for header generation)
+        id: setup-ndk
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r26d
+
+      - name: Set ANDROID_NDK
+        run: echo "ANDROID_NDK=${{ steps.setup-ndk.outputs.ndk-path }}" >> $GITHUB_ENV
+
+      - name: Setup Ninja
+        uses: seanmiddleditch/gha-setup-ninja@master
+
+      - name: Generate headers (using one Android build)
+        run: |
+          cmake -S . -B out/headers -G Ninja \
             -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK/build/cmake/android.toolchain.cmake \
             -DANDROID_ABI=arm64-v8a \
             -DANDROID_PLATFORM=android-26 \
@@ -175,186 +291,33 @@ jobs:
             -DDAWN_BUILD_MONOLITHIC_LIBRARY=ON \
             -DDAWN_ENABLE_OPENGLES=OFF \
             -DDAWN_ENABLE_DESKTOP_GL=OFF
-          ninja -C out/android_arm64-v8a
-    
-      - name: Build Android armeabi-v7a
-        run: |
-          cmake -S . -B out/android_armeabi-v7a -G Ninja \
-            -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK/build/cmake/android.toolchain.cmake \
-            -DANDROID_ABI=armeabi-v7a \
-            -DANDROID_PLATFORM=android-26 \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DBUILD_SAMPLES=OFF \
-            -DTINT_BUILD_TESTS=OFF \
-            -DTINT_BUILD_CMD_TOOLS=OFF \
-            -DTINT_BUILD_IR_BINARY=OFF \
-            -DDAWN_BUILD_SAMPLES=OFF \
-            -DDAWN_USE_GLFW=OFF \
-            -DDAWN_FETCH_DEPENDENCIES=ON \
-            -DDAWN_BUILD_MONOLITHIC_LIBRARY=ON \
-            -DDAWN_ENABLE_OPENGLES=OFF \
-            -DDAWN_ENABLE_DESKTOP_GL=OFF
-          ninja -C out/android_armeabi-v7a
-    
-      - name: Build Android x86
-        run: |
-          cmake -S . -B out/android_x86 -G Ninja \
-            -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK/build/cmake/android.toolchain.cmake \
-            -DANDROID_ABI=x86 \
-            -DANDROID_PLATFORM=android-26 \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DBUILD_SAMPLES=OFF \
-            -DTINT_BUILD_TESTS=OFF \
-            -DTINT_BUILD_CMD_TOOLS=OFF \
-            -DTINT_BUILD_IR_BINARY=OFF \
-            -DDAWN_BUILD_SAMPLES=OFF \
-            -DDAWN_USE_GLFW=OFF \
-            -DDAWN_FETCH_DEPENDENCIES=ON \
-            -DDAWN_BUILD_MONOLITHIC_LIBRARY=ON \
-            -DDAWN_ENABLE_OPENGLES=OFF \
-            -DDAWN_ENABLE_DESKTOP_GL=OFF
-          ninja -C out/android_x86
-    
-      - name: Build Android x86_64
-        run: |
-          cmake -S . -B out/android_x86_64 -G Ninja \
-            -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK/build/cmake/android.toolchain.cmake \
-            -DANDROID_ABI=x86_64 \
-            -DANDROID_PLATFORM=android-26 \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DBUILD_SAMPLES=OFF \
-            -DTINT_BUILD_TESTS=OFF \
-            -DTINT_BUILD_CMD_TOOLS=OFF \
-            -DTINT_BUILD_IR_BINARY=OFF \
-            -DDAWN_BUILD_SAMPLES=OFF \
-            -DDAWN_USE_GLFW=OFF \
-            -DDAWN_FETCH_DEPENDENCIES=ON \
-            -DDAWN_BUILD_MONOLITHIC_LIBRARY=ON \
-            -DDAWN_ENABLE_OPENGLES=OFF \
-            -DDAWN_ENABLE_DESKTOP_GL=OFF
-          ninja -C out/android_x86_64
-    
-      - name: Build iOS arm64
-        run: |
-          cmake -S . -B out/ios_arm64 -G Ninja \
-            -DCMAKE_TOOLCHAIN_FILE=build-tools/apple.toolchain.cmake \
-            -DPLATFORM=OS64 \
-            -DDEPLOYMENT_TARGET=13.0 \
-            -DENABLE_BITCODE=OFF \
-            -DENABLE_ARC=OFF \
-            -DENABLE_VISIBILITY=OFF \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DBUILD_SAMPLES=OFF \
-            -DTINT_BUILD_TESTS=OFF \
-            -DTINT_BUILD_CMD_TOOLS=OFF \
-            -DTINT_BUILD_IR_BINARY=OFF \
-            -DDAWN_BUILD_SAMPLES=OFF \
-            -DDAWN_USE_GLFW=OFF \
-            -DDAWN_FETCH_DEPENDENCIES=ON \
-            -DDAWN_BUILD_MONOLITHIC_LIBRARY=ON \
-            -DDAWN_ENABLE_OPENGLES=OFF \
-            -DDAWN_ENABLE_DESKTOP_GL=OFF
-          ninja -C out/ios_arm64
-    
-      - name: Build iOS Simulator arm64
-        run: |
-          cmake -S . -B out/ios_sim_arm64 -G Ninja \
-            -DCMAKE_TOOLCHAIN_FILE=build-tools/apple.toolchain.cmake \
-            -DPLATFORM=SIMULATORARM64 \
-            -DDEPLOYMENT_TARGET=13.0 \
-            -DENABLE_BITCODE=OFF \
-            -DENABLE_ARC=OFF \
-            -DENABLE_VISIBILITY=OFF \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DBUILD_SAMPLES=OFF \
-            -DTINT_BUILD_TESTS=OFF \
-            -DTINT_BUILD_CMD_TOOLS=OFF \
-            -DTINT_BUILD_IR_BINARY=OFF \
-            -DDAWN_BUILD_SAMPLES=OFF \
-            -DDAWN_USE_GLFW=OFF \
-            -DDAWN_FETCH_DEPENDENCIES=ON \
-            -DDAWN_BUILD_MONOLITHIC_LIBRARY=ON \
-            -DDAWN_ENABLE_OPENGLES=OFF \
-            -DDAWN_ENABLE_DESKTOP_GL=OFF
-          ninja -C out/ios_sim_arm64
-    
-      - name: Build iOS Simulator x86_64
-        run: |
-          cmake -S . -B out/ios_sim_x86_64 -G Ninja \
-            -DCMAKE_TOOLCHAIN_FILE=build-tools/apple.toolchain.cmake \
-            -DPLATFORM=SIMULATOR64 \
-            -DDEPLOYMENT_TARGET=13.0 \
-            -DENABLE_BITCODE=OFF \
-            -DENABLE_ARC=OFF \
-            -DENABLE_VISIBILITY=OFF \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DBUILD_SAMPLES=OFF \
-            -DTINT_BUILD_TESTS=OFF \
-            -DTINT_BUILD_CMD_TOOLS=OFF \
-            -DTINT_BUILD_IR_BINARY=OFF \
-            -DDAWN_BUILD_SAMPLES=OFF \
-            -DDAWN_USE_GLFW=OFF \
-            -DDAWN_FETCH_DEPENDENCIES=ON \
-            -DDAWN_BUILD_MONOLITHIC_LIBRARY=ON \
-            -DDAWN_ENABLE_OPENGLES=OFF \
-            -DDAWN_ENABLE_DESKTOP_GL=OFF
-          ninja -C out/ios_sim_x86_64
-    
-      - name: Build macOS Universal
-        run: |
-          cmake -S . -B out/macos_universal -G Ninja \
-            -DCMAKE_TOOLCHAIN_FILE=build-tools/apple.toolchain.cmake \
-            -DPLATFORM=MAC_UNIVERSAL \
-            -DDEPLOYMENT_TARGET=11.0 \
-            -DENABLE_BITCODE=OFF \
-            -DENABLE_ARC=OFF \
-            -DENABLE_VISIBILITY=OFF \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DBUILD_SAMPLES=OFF \
-            -DTINT_BUILD_TESTS=OFF \
-            -DTINT_BUILD_CMD_TOOLS=OFF \
-            -DTINT_BUILD_IR_BINARY=OFF \
-            -DDAWN_BUILD_SAMPLES=OFF \
-            -DDAWN_USE_GLFW=OFF \
-            -DDAWN_FETCH_DEPENDENCIES=ON \
-            -DDAWN_BUILD_MONOLITHIC_LIBRARY=ON \
-            -DDAWN_ENABLE_OPENGLES=OFF \
-            -DDAWN_ENABLE_DESKTOP_GL=OFF
-          ninja -C out/macos_universal
-    
-      - name: Strip Android binaries
-        run: |
-          $ANDROID_NDK/toolchains/llvm/prebuilt/darwin-x86_64/bin/llvm-strip out/android_arm64-v8a/src/dawn/native/libwebgpu_dawn.so
-          $ANDROID_NDK/toolchains/llvm/prebuilt/darwin-x86_64/bin/llvm-strip out/android_armeabi-v7a/src/dawn/native/libwebgpu_dawn.so
-          $ANDROID_NDK/toolchains/llvm/prebuilt/darwin-x86_64/bin/llvm-strip out/android_x86/src/dawn/native/libwebgpu_dawn.so
-          $ANDROID_NDK/toolchains/llvm/prebuilt/darwin-x86_64/bin/llvm-strip out/android_x86_64/src/dawn/native/libwebgpu_dawn.so
-    
+
       - name: Create iOS Simulator fat binary
         run: |
           mkdir -p libs/apple/iphonesimulator
           lipo -create \
-            out/ios_sim_x86_64/src/dawn/native/libwebgpu_dawn.a \
-            out/ios_sim_arm64/src/dawn/native/libwebgpu_dawn.a \
+            artifacts/build-ios-sim_x86_64/libwebgpu_dawn.a \
+            artifacts/build-ios-sim_arm64/libwebgpu_dawn.a \
             -output libs/apple/iphonesimulator/libwebgpu_dawn.a
-    
+
       - name: Create XCFramework
         run: |
           xcodebuild -create-xcframework \
             -library libs/apple/iphonesimulator/libwebgpu_dawn.a \
-            -library out/ios_arm64/src/dawn/native/libwebgpu_dawn.a \
-            -library out/macos_universal/src/dawn/native/libwebgpu_dawn.a \
+            -library artifacts/build-ios-arm64/libwebgpu_dawn.a \
+            -library artifacts/build-macos-universal/libwebgpu_dawn.a \
             -output Dawn-${{ github.sha }}-Apple.xcframework
-    
+
       - name: Copy headers
         run: |
           mkdir -p Dawn-${{ github.sha }}-headers/webgpu
           mkdir -p Dawn-${{ github.sha }}-headers/dawn
-          cp -a out/android_arm64-v8a/gen/include/webgpu/* Dawn-${{ github.sha }}-headers/webgpu/
-          cp -a out/android_arm64-v8a/gen/include/dawn/* Dawn-${{ github.sha }}-headers/dawn/
+          cp -a out/headers/gen/include/webgpu/* Dawn-${{ github.sha }}-headers/webgpu/
+          cp -a out/headers/gen/include/dawn/* Dawn-${{ github.sha }}-headers/dawn/
           cp -a include/webgpu/* Dawn-${{ github.sha }}-headers/webgpu/
           cp -a include/dawn/* Dawn-${{ github.sha }}-headers/dawn/
           cp src/dawn/dawn.json Dawn-${{ github.sha }}-headers/
-    
+
       - name: Package Android libraries
         run: |
           mkdir -p Dawn-${{ github.sha }}-Android/arm64-v8a
@@ -362,29 +325,29 @@ jobs:
           mkdir -p Dawn-${{ github.sha }}-Android/x86
           mkdir -p Dawn-${{ github.sha }}-Android/x86_64
           
-          cp out/android_arm64-v8a/src/dawn/native/libwebgpu_dawn.so Dawn-${{ github.sha }}-Android/arm64-v8a/
-          cp out/android_armeabi-v7a/src/dawn/native/libwebgpu_dawn.so Dawn-${{ github.sha }}-Android/armeabi-v7a/
-          cp out/android_x86/src/dawn/native/libwebgpu_dawn.so Dawn-${{ github.sha }}-Android/x86/
-          cp out/android_x86_64/src/dawn/native/libwebgpu_dawn.so Dawn-${{ github.sha }}-Android/x86_64/
-    
+          cp artifacts/build-android-arm64-v8a/libwebgpu_dawn.so Dawn-${{ github.sha }}-Android/arm64-v8a/
+          cp artifacts/build-android-armeabi-v7a/libwebgpu_dawn.so Dawn-${{ github.sha }}-Android/armeabi-v7a/
+          cp artifacts/build-android-x86/libwebgpu_dawn.so Dawn-${{ github.sha }}-Android/x86/
+          cp artifacts/build-android-x86_64/libwebgpu_dawn.so Dawn-${{ github.sha }}-Android/x86_64/
+
       - name: Create archives
         run: |
           tar -czf Dawn-${{ github.sha }}-Android.tar.gz Dawn-${{ github.sha }}-Android
           tar -czf Dawn-${{ github.sha }}-Apple.xcframework.tar.gz Dawn-${{ github.sha }}-Apple.xcframework
           tar -czf Dawn-${{ github.sha }}-headers.tar.gz Dawn-${{ github.sha }}-headers
-    
+
       - name: Upload Android artifacts
         uses: actions/upload-artifact@v4
         with:
           name: Dawn-${{ github.sha }}-Android
           path: Dawn-${{ github.sha }}-Android.tar.gz
-    
+
       - name: Upload Apple artifacts
         uses: actions/upload-artifact@v4
         with:
           name: Dawn-${{ github.sha }}-Apple
           path: Dawn-${{ github.sha }}-Apple.xcframework.tar.gz
-    
+
       - name: Upload headers
         uses: actions/upload-artifact@v4
         with:
