@@ -278,6 +278,9 @@ struct IntegerRangeAnalysisImpl {
             case BinaryOp::kMultiply:
                 return ComputeAndCacheIntegerRangeForBinaryMultiply(binary, range_lhs, range_rhs);
 
+            case BinaryOp::kDivide:
+                return ComputeAndCacheIntegerRangeForBinaryDivide(binary, range_lhs, range_rhs);
+
             default:
                 return nullptr;
         }
@@ -988,6 +991,49 @@ struct IntegerRangeAnalysisImpl {
             }
             auto result = integer_binary_range_info_map_.Add(
                 binary, IntegerRangeInfo(*min_bound, *max_bound));
+            return &result.value;
+        }
+    }
+
+    const IntegerRangeInfo* ComputeAndCacheIntegerRangeForBinaryDivide(
+        const Binary* binary,
+        const IntegerRangeInfo* lhs,
+        const IntegerRangeInfo* rhs) {
+        if (std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(lhs->range)) {
+            auto lhs_i32 = std::get<IntegerRangeInfo::SignedIntegerRange>(lhs->range);
+            auto rhs_i32 = std::get<IntegerRangeInfo::SignedIntegerRange>(rhs->range);
+
+            // Currently we require `lhs` must be non-negative, and `rhs` must be positive.
+            // 0 <= lhs.min_bound <= lhs.max_bound
+            if (lhs_i32.min_bound < 0) {
+                return nullptr;
+            }
+            // 0 < rhs.min_bound <= rhs.max_bound
+            if (rhs_i32.min_bound <= 0) {
+                return nullptr;
+            }
+
+            // min1 >= 0, min2 > 0
+            // [min1, max1] / [min2, max2] => [min1 / max2, max1 / min2]
+            int64_t min_bound = lhs_i32.min_bound / rhs_i32.max_bound;
+            int64_t max_bound = lhs_i32.max_bound / rhs_i32.min_bound;
+            auto result =
+                integer_binary_range_info_map_.Add(binary, IntegerRangeInfo(min_bound, max_bound));
+            return &result.value;
+        } else {
+            auto lhs_u32 = std::get<IntegerRangeInfo::UnsignedIntegerRange>(lhs->range);
+            auto rhs_u32 = std::get<IntegerRangeInfo::UnsignedIntegerRange>(rhs->range);
+
+            // `rhs` must be positive.
+            if (rhs_u32.min_bound == 0) {
+                return nullptr;
+            }
+
+            // [min1, max1] / [min2, max2] => [min1 / max2, max1 / min2]
+            uint64_t min_bound = lhs_u32.min_bound / rhs_u32.max_bound;
+            uint64_t max_bound = lhs_u32.max_bound / rhs_u32.min_bound;
+            auto result =
+                integer_binary_range_info_map_.Add(binary, IntegerRangeInfo(min_bound, max_bound));
             return &result.value;
         }
     }

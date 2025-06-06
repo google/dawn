@@ -11351,5 +11351,1269 @@ TEST_F(IR_IntegerRangeAnalysisTest, Convert_Failure_ConvertToNonInteger) {
     ASSERT_EQ(nullptr, info);
 }
 
+TEST_F(IR_IntegerRangeAnalysisTest, Divide_Success_Divisible_I32) {
+    Var* idx = nullptr;
+    Binary* divide = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            // idx = 4
+            idx = b.Var("idx", 4_i);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // idx < 9
+            auto* binary = b.LessThan<bool>(b.Load(idx), 9_i);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+
+            Var* idy = nullptr;
+            auto* loop2 = b.Loop();
+            b.Append(loop2->Initializer(), [&] {
+                // idy = 1
+                idy = b.Var("idy", 1_i);
+                b.NextIteration(loop2);
+            });
+            b.Append(loop2->Body(), [&] {
+                // idy < 3
+                auto* binary_inner = b.LessThan<bool>(b.Load(idy), 3_i);
+                auto* ifelse_inner = b.If(binary_inner);
+                b.Append(ifelse_inner->True(), [&] { b.ExitIf(ifelse_inner); });
+                b.Append(ifelse_inner->False(), [&] { b.ExitLoop(loop2); });
+                auto* loadx = b.Load(idx);
+                auto* loady = b.Load(idy);
+                // divide = idx / idy
+                divide = b.Divide<i32>(loadx, loady);
+                b.Continue(loop2);
+            });
+            b.Append(loop2->Continuing(), [&] {
+                // idy++
+                b.Store(idy, b.Add<i32>(b.Load(idy), 1_i));
+                b.NextIteration(loop2);
+            });
+
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            // idx++
+            b.Store(idx, b.Add<i32>(b.Load(idx), 1_i));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, i32, read_write> = var 4i
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %3:i32 = load %idx
+        %4:bool = lt %3, 9i
+        if %4 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        loop [i: $B7, b: $B8, c: $B9] {  # loop_2
+          $B7: {  # initializer
+            %idy:ptr<function, i32, read_write> = var 1i
+            next_iteration  # -> $B8
+          }
+          $B8: {  # body
+            %6:i32 = load %idy
+            %7:bool = lt %6, 3i
+            if %7 [t: $B10, f: $B11] {  # if_2
+              $B10: {  # true
+                exit_if  # if_2
+              }
+              $B11: {  # false
+                exit_loop  # loop_2
+              }
+            }
+            %8:i32 = load %idx
+            %9:i32 = load %idy
+            %10:i32 = div %8, %9
+            continue  # -> $B9
+          }
+          $B9: {  # continuing
+            %11:i32 = load %idy
+            %12:i32 = add %11, 1i
+            store %idy, %12
+            next_iteration  # -> $B8
+          }
+        }
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %13:i32 = load %idx
+        %14:i32 = add %13, 1i
+        store %idx, %14
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(&mod);
+
+    // Range of `divide` (`idx / idy`)
+    // idx: [4, 8], idy: [1, 2]
+    auto* info = analysis.GetInfo(divide);
+    ASSERT_NE(nullptr, info);
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info->range));
+    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info->range);
+    EXPECT_EQ(2, range.min_bound);
+    EXPECT_EQ(8, range.max_bound);
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, Divide_Success_Divisible_U32) {
+    Var* idx = nullptr;
+    Binary* divide = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            // idx = 4
+            idx = b.Var("idx", 4_u);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // idx < 9
+            auto* binary = b.LessThan<bool>(b.Load(idx), 9_u);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+
+            Var* idy = nullptr;
+            auto* loop2 = b.Loop();
+            b.Append(loop2->Initializer(), [&] {
+                // idy = 1
+                idy = b.Var("idy", 1_u);
+                b.NextIteration(loop2);
+            });
+            b.Append(loop2->Body(), [&] {
+                // idy < 3
+                auto* binary_inner = b.LessThan<bool>(b.Load(idy), 3_u);
+                auto* ifelse_inner = b.If(binary_inner);
+                b.Append(ifelse_inner->True(), [&] { b.ExitIf(ifelse_inner); });
+                b.Append(ifelse_inner->False(), [&] { b.ExitLoop(loop2); });
+                auto* loadx = b.Load(idx);
+                auto* loady = b.Load(idy);
+                // divide = idx / idy
+                divide = b.Divide<u32>(loadx, loady);
+                b.Continue(loop2);
+            });
+            b.Append(loop2->Continuing(), [&] {
+                // idy++
+                b.Store(idy, b.Add<u32>(b.Load(idy), 1_u));
+                b.NextIteration(loop2);
+            });
+
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            // idx++
+            b.Store(idx, b.Add<u32>(b.Load(idx), 1_u));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, u32, read_write> = var 4u
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %3:u32 = load %idx
+        %4:bool = lt %3, 9u
+        if %4 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        loop [i: $B7, b: $B8, c: $B9] {  # loop_2
+          $B7: {  # initializer
+            %idy:ptr<function, u32, read_write> = var 1u
+            next_iteration  # -> $B8
+          }
+          $B8: {  # body
+            %6:u32 = load %idy
+            %7:bool = lt %6, 3u
+            if %7 [t: $B10, f: $B11] {  # if_2
+              $B10: {  # true
+                exit_if  # if_2
+              }
+              $B11: {  # false
+                exit_loop  # loop_2
+              }
+            }
+            %8:u32 = load %idx
+            %9:u32 = load %idy
+            %10:u32 = div %8, %9
+            continue  # -> $B9
+          }
+          $B9: {  # continuing
+            %11:u32 = load %idy
+            %12:u32 = add %11, 1u
+            store %idy, %12
+            next_iteration  # -> $B8
+          }
+        }
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %13:u32 = load %idx
+        %14:u32 = add %13, 1u
+        store %idx, %14
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(&mod);
+
+    // Range of `divide` (`idx / idy`)
+    // idx: [4u, 8u], idy: [1u, 2u]
+    auto* info = analysis.GetInfo(divide);
+    ASSERT_NE(nullptr, info);
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info->range));
+    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info->range);
+    EXPECT_EQ(2u, range.min_bound);
+    EXPECT_EQ(8u, range.max_bound);
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, Divide_Success_Nondivisible_GreaterThanOne) {
+    Var* idx = nullptr;
+    Binary* divide = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            // idx = 8
+            idx = b.Var("idx", 8_i);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // idx < 17
+            auto* binary = b.LessThan<bool>(b.Load(idx), 17_i);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+
+            Var* idy = nullptr;
+            auto* loop2 = b.Loop();
+            b.Append(loop2->Initializer(), [&] {
+                // idy = 2
+                idy = b.Var("idy", 2_i);
+                b.NextIteration(loop2);
+            });
+            b.Append(loop2->Body(), [&] {
+                // idy < 4
+                auto* binary_inner = b.LessThan<bool>(b.Load(idy), 4_i);
+                auto* ifelse_inner = b.If(binary_inner);
+                b.Append(ifelse_inner->True(), [&] { b.ExitIf(ifelse_inner); });
+                b.Append(ifelse_inner->False(), [&] { b.ExitLoop(loop2); });
+                auto* loadx = b.Load(idx);
+                auto* loady = b.Load(idy);
+                // divide = idx / idy
+                divide = b.Divide<i32>(loadx, loady);
+                b.Continue(loop2);
+            });
+            b.Append(loop2->Continuing(), [&] {
+                // idy++
+                b.Store(idy, b.Add<i32>(b.Load(idy), 1_i));
+                b.NextIteration(loop2);
+            });
+
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            // idx++
+            b.Store(idx, b.Add<i32>(b.Load(idx), 1_i));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, i32, read_write> = var 8i
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %3:i32 = load %idx
+        %4:bool = lt %3, 17i
+        if %4 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        loop [i: $B7, b: $B8, c: $B9] {  # loop_2
+          $B7: {  # initializer
+            %idy:ptr<function, i32, read_write> = var 2i
+            next_iteration  # -> $B8
+          }
+          $B8: {  # body
+            %6:i32 = load %idy
+            %7:bool = lt %6, 4i
+            if %7 [t: $B10, f: $B11] {  # if_2
+              $B10: {  # true
+                exit_if  # if_2
+              }
+              $B11: {  # false
+                exit_loop  # loop_2
+              }
+            }
+            %8:i32 = load %idx
+            %9:i32 = load %idy
+            %10:i32 = div %8, %9
+            continue  # -> $B9
+          }
+          $B9: {  # continuing
+            %11:i32 = load %idy
+            %12:i32 = add %11, 1i
+            store %idy, %12
+            next_iteration  # -> $B8
+          }
+        }
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %13:i32 = load %idx
+        %14:i32 = add %13, 1i
+        store %idx, %14
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(&mod);
+
+    // Range of `divide` (`idx / idy`)
+    // idx: [8, 16], idy: [2, 3]
+    auto* info = analysis.GetInfo(divide);
+    ASSERT_NE(nullptr, info);
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info->range));
+    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info->range);
+    EXPECT_EQ(2, range.min_bound);
+    EXPECT_EQ(8, range.max_bound);
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, Divide_Success_Nondivisible_LessThanOne) {
+    Var* idx = nullptr;
+    Binary* divide = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            // idx = 8
+            idx = b.Var("idx", 8_i);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // idx < 17
+            auto* binary = b.LessThan<bool>(b.Load(idx), 17_i);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+
+            Var* idy = nullptr;
+            auto* loop2 = b.Loop();
+            b.Append(loop2->Initializer(), [&] {
+                // idy = 6
+                idy = b.Var("idy", 6_i);
+                b.NextIteration(loop2);
+            });
+            b.Append(loop2->Body(), [&] {
+                // idy < 10
+                auto* binary_inner = b.LessThan<bool>(b.Load(idy), 10_i);
+                auto* ifelse_inner = b.If(binary_inner);
+                b.Append(ifelse_inner->True(), [&] { b.ExitIf(ifelse_inner); });
+                b.Append(ifelse_inner->False(), [&] { b.ExitLoop(loop2); });
+                auto* loadx = b.Load(idx);
+                auto* loady = b.Load(idy);
+                // divide = idx / idy
+                divide = b.Divide<i32>(loadx, loady);
+                b.Continue(loop2);
+            });
+            b.Append(loop2->Continuing(), [&] {
+                // idy++
+                b.Store(idy, b.Add<i32>(b.Load(idy), 1_i));
+                b.NextIteration(loop2);
+            });
+
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            // idx++
+            b.Store(idx, b.Add<i32>(b.Load(idx), 1_i));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, i32, read_write> = var 8i
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %3:i32 = load %idx
+        %4:bool = lt %3, 17i
+        if %4 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        loop [i: $B7, b: $B8, c: $B9] {  # loop_2
+          $B7: {  # initializer
+            %idy:ptr<function, i32, read_write> = var 6i
+            next_iteration  # -> $B8
+          }
+          $B8: {  # body
+            %6:i32 = load %idy
+            %7:bool = lt %6, 10i
+            if %7 [t: $B10, f: $B11] {  # if_2
+              $B10: {  # true
+                exit_if  # if_2
+              }
+              $B11: {  # false
+                exit_loop  # loop_2
+              }
+            }
+            %8:i32 = load %idx
+            %9:i32 = load %idy
+            %10:i32 = div %8, %9
+            continue  # -> $B9
+          }
+          $B9: {  # continuing
+            %11:i32 = load %idy
+            %12:i32 = add %11, 1i
+            store %idy, %12
+            next_iteration  # -> $B8
+          }
+        }
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %13:i32 = load %idx
+        %14:i32 = add %13, 1i
+        store %idx, %14
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(&mod);
+
+    // Range of `divide` (`idx / idy`)
+    // idx: [8, 16], idy: [6, 9]
+    auto* info = analysis.GetInfo(divide);
+    ASSERT_NE(nullptr, info);
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info->range));
+    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info->range);
+    EXPECT_EQ(0, range.min_bound);
+    EXPECT_EQ(2, range.max_bound);
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, Divide_Success_ZeroLHS_I32) {
+    Var* idx = nullptr;
+    Binary* divide = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            // idx = 0
+            idx = b.Var("idx", 0_i);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // idx < 17
+            auto* binary = b.LessThan<bool>(b.Load(idx), 17_i);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+
+            Var* idy = nullptr;
+            auto* loop2 = b.Loop();
+            b.Append(loop2->Initializer(), [&] {
+                // idy = 4
+                idy = b.Var("idy", 4_i);
+                b.NextIteration(loop2);
+            });
+            b.Append(loop2->Body(), [&] {
+                // idy < 9
+                auto* binary_inner = b.LessThan<bool>(b.Load(idy), 9_i);
+                auto* ifelse_inner = b.If(binary_inner);
+                b.Append(ifelse_inner->True(), [&] { b.ExitIf(ifelse_inner); });
+                b.Append(ifelse_inner->False(), [&] { b.ExitLoop(loop2); });
+                auto* loadx = b.Load(idx);
+                auto* loady = b.Load(idy);
+                // divide = idx / idy
+                divide = b.Divide<i32>(loadx, loady);
+                b.Continue(loop2);
+            });
+            b.Append(loop2->Continuing(), [&] {
+                // idy++
+                b.Store(idy, b.Add<i32>(b.Load(idy), 1_i));
+                b.NextIteration(loop2);
+            });
+
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            // idx++
+            b.Store(idx, b.Add<i32>(b.Load(idx), 1_i));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, i32, read_write> = var 0i
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %3:i32 = load %idx
+        %4:bool = lt %3, 17i
+        if %4 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        loop [i: $B7, b: $B8, c: $B9] {  # loop_2
+          $B7: {  # initializer
+            %idy:ptr<function, i32, read_write> = var 4i
+            next_iteration  # -> $B8
+          }
+          $B8: {  # body
+            %6:i32 = load %idy
+            %7:bool = lt %6, 9i
+            if %7 [t: $B10, f: $B11] {  # if_2
+              $B10: {  # true
+                exit_if  # if_2
+              }
+              $B11: {  # false
+                exit_loop  # loop_2
+              }
+            }
+            %8:i32 = load %idx
+            %9:i32 = load %idy
+            %10:i32 = div %8, %9
+            continue  # -> $B9
+          }
+          $B9: {  # continuing
+            %11:i32 = load %idy
+            %12:i32 = add %11, 1i
+            store %idy, %12
+            next_iteration  # -> $B8
+          }
+        }
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %13:i32 = load %idx
+        %14:i32 = add %13, 1i
+        store %idx, %14
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(&mod);
+
+    // Range of `divide` (`idx / idy`)
+    // idx: [0, 16], idy: [4, 8]
+    auto* info = analysis.GetInfo(divide);
+    ASSERT_NE(nullptr, info);
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info->range));
+    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info->range);
+    EXPECT_EQ(0, range.min_bound);
+    EXPECT_EQ(4, range.max_bound);
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, Divide_Success_ZeroLHS_U32) {
+    Var* idx = nullptr;
+    Binary* divide = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            // idx = 0
+            idx = b.Var("idx", 0_u);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // idx < 17
+            auto* binary = b.LessThan<bool>(b.Load(idx), 17_u);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+
+            Var* idy = nullptr;
+            auto* loop2 = b.Loop();
+            b.Append(loop2->Initializer(), [&] {
+                // idy = 4
+                idy = b.Var("idy", 4_u);
+                b.NextIteration(loop2);
+            });
+            b.Append(loop2->Body(), [&] {
+                // idy < 9
+                auto* binary_inner = b.LessThan<bool>(b.Load(idy), 9_u);
+                auto* ifelse_inner = b.If(binary_inner);
+                b.Append(ifelse_inner->True(), [&] { b.ExitIf(ifelse_inner); });
+                b.Append(ifelse_inner->False(), [&] { b.ExitLoop(loop2); });
+                auto* loadx = b.Load(idx);
+                auto* loady = b.Load(idy);
+                // divide = idx / idy
+                divide = b.Divide<u32>(loadx, loady);
+                b.Continue(loop2);
+            });
+            b.Append(loop2->Continuing(), [&] {
+                // idy++
+                b.Store(idy, b.Add<u32>(b.Load(idy), 1_u));
+                b.NextIteration(loop2);
+            });
+
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            // idx++
+            b.Store(idx, b.Add<u32>(b.Load(idx), 1_u));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, u32, read_write> = var 0u
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %3:u32 = load %idx
+        %4:bool = lt %3, 17u
+        if %4 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        loop [i: $B7, b: $B8, c: $B9] {  # loop_2
+          $B7: {  # initializer
+            %idy:ptr<function, u32, read_write> = var 4u
+            next_iteration  # -> $B8
+          }
+          $B8: {  # body
+            %6:u32 = load %idy
+            %7:bool = lt %6, 9u
+            if %7 [t: $B10, f: $B11] {  # if_2
+              $B10: {  # true
+                exit_if  # if_2
+              }
+              $B11: {  # false
+                exit_loop  # loop_2
+              }
+            }
+            %8:u32 = load %idx
+            %9:u32 = load %idy
+            %10:u32 = div %8, %9
+            continue  # -> $B9
+          }
+          $B9: {  # continuing
+            %11:u32 = load %idy
+            %12:u32 = add %11, 1u
+            store %idy, %12
+            next_iteration  # -> $B8
+          }
+        }
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %13:u32 = load %idx
+        %14:u32 = add %13, 1u
+        store %idx, %14
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(&mod);
+
+    // Range of `divide` (`idx / idy`)
+    // idx: [0, 16u], idy: [4u, 8u]
+    auto* info = analysis.GetInfo(divide);
+    ASSERT_NE(nullptr, info);
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info->range));
+    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info->range);
+    EXPECT_EQ(0u, range.min_bound);
+    EXPECT_EQ(4u, range.max_bound);
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, Divide_Failure_NegativeLHS) {
+    Var* idx = nullptr;
+    Binary* divide = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            // idx = -1
+            idx = b.Var("idx", -1_i);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // idx < 17
+            auto* binary = b.LessThan<bool>(b.Load(idx), 17_i);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+
+            Var* idy = nullptr;
+            auto* loop2 = b.Loop();
+            b.Append(loop2->Initializer(), [&] {
+                // idy = 4
+                idy = b.Var("idy", 4_i);
+                b.NextIteration(loop2);
+            });
+            b.Append(loop2->Body(), [&] {
+                // idy < 9
+                auto* binary_inner = b.LessThan<bool>(b.Load(idy), 9_i);
+                auto* ifelse_inner = b.If(binary_inner);
+                b.Append(ifelse_inner->True(), [&] { b.ExitIf(ifelse_inner); });
+                b.Append(ifelse_inner->False(), [&] { b.ExitLoop(loop2); });
+                auto* loadx = b.Load(idx);
+                auto* loady = b.Load(idy);
+                // divide = idx / idy
+                divide = b.Divide<i32>(loadx, loady);
+                b.Continue(loop2);
+            });
+            b.Append(loop2->Continuing(), [&] {
+                // idy++
+                b.Store(idy, b.Add<i32>(b.Load(idy), 1_i));
+                b.NextIteration(loop2);
+            });
+
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            // idx++
+            b.Store(idx, b.Add<i32>(b.Load(idx), 1_i));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, i32, read_write> = var -1i
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %3:i32 = load %idx
+        %4:bool = lt %3, 17i
+        if %4 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        loop [i: $B7, b: $B8, c: $B9] {  # loop_2
+          $B7: {  # initializer
+            %idy:ptr<function, i32, read_write> = var 4i
+            next_iteration  # -> $B8
+          }
+          $B8: {  # body
+            %6:i32 = load %idy
+            %7:bool = lt %6, 9i
+            if %7 [t: $B10, f: $B11] {  # if_2
+              $B10: {  # true
+                exit_if  # if_2
+              }
+              $B11: {  # false
+                exit_loop  # loop_2
+              }
+            }
+            %8:i32 = load %idx
+            %9:i32 = load %idy
+            %10:i32 = div %8, %9
+            continue  # -> $B9
+          }
+          $B9: {  # continuing
+            %11:i32 = load %idy
+            %12:i32 = add %11, 1i
+            store %idy, %12
+            next_iteration  # -> $B8
+          }
+        }
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %13:i32 = load %idx
+        %14:i32 = add %13, 1i
+        store %idx, %14
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(&mod);
+
+    // Range of `divide` (`idx / idy`)
+    // idx: [-1, 16], idy: [4, 8]
+    auto* info = analysis.GetInfo(divide);
+    ASSERT_EQ(nullptr, info);
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, Divide_Failure_NegativeRHS) {
+    Var* idx = nullptr;
+    Binary* divide = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            // idx = 4
+            idx = b.Var("idx", 4_i);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // idx < 17
+            auto* binary = b.LessThan<bool>(b.Load(idx), 17_i);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+
+            Var* idy = nullptr;
+            auto* loop2 = b.Loop();
+            b.Append(loop2->Initializer(), [&] {
+                // idy = -4
+                idy = b.Var("idy", -4_i);
+                b.NextIteration(loop2);
+            });
+            b.Append(loop2->Body(), [&] {
+                // idy < 9
+                auto* binary_inner = b.LessThan<bool>(b.Load(idy), 9_i);
+                auto* ifelse_inner = b.If(binary_inner);
+                b.Append(ifelse_inner->True(), [&] { b.ExitIf(ifelse_inner); });
+                b.Append(ifelse_inner->False(), [&] { b.ExitLoop(loop2); });
+                auto* loadx = b.Load(idx);
+                auto* loady = b.Load(idy);
+                // divide = idx / idy
+                divide = b.Divide<i32>(loadx, loady);
+                b.Continue(loop2);
+            });
+            b.Append(loop2->Continuing(), [&] {
+                // idy++
+                b.Store(idy, b.Add<i32>(b.Load(idy), 1_i));
+                b.NextIteration(loop2);
+            });
+
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            // idx++
+            b.Store(idx, b.Add<i32>(b.Load(idx), 1_i));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, i32, read_write> = var 4i
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %3:i32 = load %idx
+        %4:bool = lt %3, 17i
+        if %4 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        loop [i: $B7, b: $B8, c: $B9] {  # loop_2
+          $B7: {  # initializer
+            %idy:ptr<function, i32, read_write> = var -4i
+            next_iteration  # -> $B8
+          }
+          $B8: {  # body
+            %6:i32 = load %idy
+            %7:bool = lt %6, 9i
+            if %7 [t: $B10, f: $B11] {  # if_2
+              $B10: {  # true
+                exit_if  # if_2
+              }
+              $B11: {  # false
+                exit_loop  # loop_2
+              }
+            }
+            %8:i32 = load %idx
+            %9:i32 = load %idy
+            %10:i32 = div %8, %9
+            continue  # -> $B9
+          }
+          $B9: {  # continuing
+            %11:i32 = load %idy
+            %12:i32 = add %11, 1i
+            store %idy, %12
+            next_iteration  # -> $B8
+          }
+        }
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %13:i32 = load %idx
+        %14:i32 = add %13, 1i
+        store %idx, %14
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(&mod);
+
+    // Range of `divide` (`idx / idy`)
+    // idx: [0, 16], idy: [-4, 8]
+    auto* info = analysis.GetInfo(divide);
+    ASSERT_EQ(nullptr, info);
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, Divide_Failure_ZeroRHS_I32) {
+    Var* idx = nullptr;
+    Binary* divide = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            // idx = 4
+            idx = b.Var("idx", 4_i);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // idx < 17
+            auto* binary = b.LessThan<bool>(b.Load(idx), 17_i);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+
+            Var* idy = nullptr;
+            auto* loop2 = b.Loop();
+            b.Append(loop2->Initializer(), [&] {
+                // idy = 0
+                idy = b.Var("idy", 0_i);
+                b.NextIteration(loop2);
+            });
+            b.Append(loop2->Body(), [&] {
+                // idy < 9
+                auto* binary_inner = b.LessThan<bool>(b.Load(idy), 9_i);
+                auto* ifelse_inner = b.If(binary_inner);
+                b.Append(ifelse_inner->True(), [&] { b.ExitIf(ifelse_inner); });
+                b.Append(ifelse_inner->False(), [&] { b.ExitLoop(loop2); });
+                auto* loadx = b.Load(idx);
+                auto* loady = b.Load(idy);
+                // divide = idx / idy
+                divide = b.Divide<i32>(loadx, loady);
+                b.Continue(loop2);
+            });
+            b.Append(loop2->Continuing(), [&] {
+                // idy++
+                b.Store(idy, b.Add<i32>(b.Load(idy), 1_i));
+                b.NextIteration(loop2);
+            });
+
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            // idx++
+            b.Store(idx, b.Add<i32>(b.Load(idx), 1_i));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, i32, read_write> = var 4i
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %3:i32 = load %idx
+        %4:bool = lt %3, 17i
+        if %4 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        loop [i: $B7, b: $B8, c: $B9] {  # loop_2
+          $B7: {  # initializer
+            %idy:ptr<function, i32, read_write> = var 0i
+            next_iteration  # -> $B8
+          }
+          $B8: {  # body
+            %6:i32 = load %idy
+            %7:bool = lt %6, 9i
+            if %7 [t: $B10, f: $B11] {  # if_2
+              $B10: {  # true
+                exit_if  # if_2
+              }
+              $B11: {  # false
+                exit_loop  # loop_2
+              }
+            }
+            %8:i32 = load %idx
+            %9:i32 = load %idy
+            %10:i32 = div %8, %9
+            continue  # -> $B9
+          }
+          $B9: {  # continuing
+            %11:i32 = load %idy
+            %12:i32 = add %11, 1i
+            store %idy, %12
+            next_iteration  # -> $B8
+          }
+        }
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %13:i32 = load %idx
+        %14:i32 = add %13, 1i
+        store %idx, %14
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(&mod);
+
+    // Range of `divide` (`idx / idy`)
+    // idx: [4, 16], idy: [0, 8]
+    auto* info = analysis.GetInfo(divide);
+    ASSERT_EQ(nullptr, info);
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, Divide_Failure_ZeroRHS_U32) {
+    Var* idx = nullptr;
+    Binary* divide = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            // idx = 4
+            idx = b.Var("idx", 4_u);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // idx < 9
+            auto* binary = b.LessThan<bool>(b.Load(idx), 9_u);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+
+            Var* idy = nullptr;
+            auto* loop2 = b.Loop();
+            b.Append(loop2->Initializer(), [&] {
+                // idy = 0
+                idy = b.Var("idy", 0_u);
+                b.NextIteration(loop2);
+            });
+            b.Append(loop2->Body(), [&] {
+                // idy < 3
+                auto* binary_inner = b.LessThan<bool>(b.Load(idy), 3_u);
+                auto* ifelse_inner = b.If(binary_inner);
+                b.Append(ifelse_inner->True(), [&] { b.ExitIf(ifelse_inner); });
+                b.Append(ifelse_inner->False(), [&] { b.ExitLoop(loop2); });
+                auto* loadx = b.Load(idx);
+                auto* loady = b.Load(idy);
+                // divide = idx / idy
+                divide = b.Divide<u32>(loadx, loady);
+                b.Continue(loop2);
+            });
+            b.Append(loop2->Continuing(), [&] {
+                // idy++
+                b.Store(idy, b.Add<u32>(b.Load(idy), 1_u));
+                b.NextIteration(loop2);
+            });
+
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            // idx++
+            b.Store(idx, b.Add<u32>(b.Load(idx), 1_u));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, u32, read_write> = var 4u
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %3:u32 = load %idx
+        %4:bool = lt %3, 9u
+        if %4 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        loop [i: $B7, b: $B8, c: $B9] {  # loop_2
+          $B7: {  # initializer
+            %idy:ptr<function, u32, read_write> = var 0u
+            next_iteration  # -> $B8
+          }
+          $B8: {  # body
+            %6:u32 = load %idy
+            %7:bool = lt %6, 3u
+            if %7 [t: $B10, f: $B11] {  # if_2
+              $B10: {  # true
+                exit_if  # if_2
+              }
+              $B11: {  # false
+                exit_loop  # loop_2
+              }
+            }
+            %8:u32 = load %idx
+            %9:u32 = load %idy
+            %10:u32 = div %8, %9
+            continue  # -> $B9
+          }
+          $B9: {  # continuing
+            %11:u32 = load %idy
+            %12:u32 = add %11, 1u
+            store %idy, %12
+            next_iteration  # -> $B8
+          }
+        }
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %13:u32 = load %idx
+        %14:u32 = add %13, 1u
+        store %idx, %14
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(&mod);
+
+    // Range of `divide` (`idx / idy`)
+    // idx: [4u, 8u], idy: [0u, 2u]
+    auto* info = analysis.GetInfo(divide);
+    ASSERT_EQ(nullptr, info);
+}
+
 }  // namespace
 }  // namespace tint::core::ir::analysis
