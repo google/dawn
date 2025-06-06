@@ -237,6 +237,12 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
 
     if (mFunctions.IsGLExtensionSupported("GL_KHR_texture_compression_astc_ldr")) {
         EnableFeature(Feature::TextureCompressionASTC);
+
+        // GL_KHR_texture_compression_astc_sliced_3d is an extension in OpenGL ES 3.1.
+        // https://registry.khronos.org/OpenGL/extensions/KHR/KHR_texture_compression_astc_sliced_3d.txt
+        if (mFunctions.IsGLExtensionSupported("GL_KHR_texture_compression_astc_sliced_3d")) {
+            EnableFeature(Feature::TextureCompressionASTCSliced3D);
+        }
     }
 
     // ETC2 is core in ES 3.0.
