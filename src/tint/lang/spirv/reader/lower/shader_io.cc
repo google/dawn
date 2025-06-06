@@ -416,7 +416,8 @@ struct State {
                         break;
                     }
                     case core::BuiltinValue::kInstanceIndex:
-                    case core::BuiltinValue::kLocalInvocationIndex: {
+                    case core::BuiltinValue::kLocalInvocationIndex:
+                    case core::BuiltinValue::kSampleIndex: {
                         var_type = ty.u32();
                         break;
                     }
@@ -483,7 +484,8 @@ struct State {
                         break;
                     }
                     case core::BuiltinValue::kInstanceIndex:
-                    case core::BuiltinValue::kLocalInvocationIndex: {
+                    case core::BuiltinValue::kLocalInvocationIndex:
+                    case core::BuiltinValue::kSampleIndex: {
                         auto* idx_ty = var->Result()->Type()->UnwrapPtr();
                         if (idx_ty->IsSignedIntegerScalar()) {
                             auto* conv = b.Convert(ty.i32(), result);
