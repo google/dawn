@@ -50,8 +50,6 @@ cc_binary(
     "//src/tint/lang/core/ir",
     "//src/tint/lang/core/ir/transform",
     "//src/tint/lang/core/type",
-    "//src/tint/lang/hlsl/writer/common",
-    "//src/tint/lang/hlsl/writer/helpers",
     "//src/tint/lang/msl/ir/transform",
     "//src/tint/lang/wgsl",
     "//src/tint/lang/wgsl/ast",
@@ -89,6 +87,8 @@ cc_binary(
     ":tint_build_hlsl_writer": [
       "//src/tint/lang/hlsl/validate",
       "//src/tint/lang/hlsl/writer",
+      "//src/tint/lang/hlsl/writer/common",
+      "//src/tint/lang/hlsl/writer/helpers",
     ],
     "//conditions:default": [],
   }) + select({

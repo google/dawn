@@ -34,9 +34,11 @@
 #                       Do not modify this file directly
 ################################################################################
 
+if(TINT_BUILD_HLSL_WRITER)
 ################################################################################
 # Target:    tint_lang_hlsl_writer_helpers
 # Kind:      lib
+# Condition: TINT_BUILD_HLSL_WRITER
 ################################################################################
 tint_add_target(tint_lang_hlsl_writer_helpers lib
   lang/hlsl/writer/helpers/generate_bindings.cc
@@ -49,7 +51,6 @@ tint_target_add_dependencies(tint_lang_hlsl_writer_helpers lib
   tint_lang_core_constant
   tint_lang_core_ir
   tint_lang_core_type
-  tint_lang_hlsl_writer_common
   tint_lang_wgsl
   tint_lang_wgsl_ast
   tint_lang_wgsl_program
@@ -69,3 +70,11 @@ tint_target_add_dependencies(tint_lang_hlsl_writer_helpers lib
 tint_target_add_external_dependencies(tint_lang_hlsl_writer_helpers lib
   "src_utils"
 )
+
+if(TINT_BUILD_HLSL_WRITER)
+  tint_target_add_dependencies(tint_lang_hlsl_writer_helpers lib
+    tint_lang_hlsl_writer_common
+  )
+endif(TINT_BUILD_HLSL_WRITER)
+
+endif(TINT_BUILD_HLSL_WRITER)

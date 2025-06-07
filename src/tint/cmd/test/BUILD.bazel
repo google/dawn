@@ -55,8 +55,6 @@ cc_binary(
     "//src/tint/lang/glsl/ir:test",
     "//src/tint/lang/hlsl/ir:test",
     "//src/tint/lang/hlsl/type:test",
-    "//src/tint/lang/hlsl/writer/common:test",
-    "//src/tint/lang/hlsl/writer/raise:test",
     "//src/tint/lang/msl/ir/transform:test",
     "//src/tint/lang/msl/ir:test",
     "//src/tint/lang/msl/type:test",
@@ -103,6 +101,8 @@ cc_binary(
   }) + select({
     ":tint_build_hlsl_writer": [
       "//src/tint/lang/hlsl/writer/ast_printer:test",
+      "//src/tint/lang/hlsl/writer/common:test",
+      "//src/tint/lang/hlsl/writer/raise:test",
       "//src/tint/lang/hlsl/writer:test",
     ],
     "//conditions:default": [],

@@ -34,9 +34,11 @@
 #                       Do not modify this file directly
 ################################################################################
 
+if(TINT_BUILD_HLSL_WRITER)
 ################################################################################
 # Target:    tint_lang_hlsl_writer_raise
 # Kind:      lib
+# Condition: TINT_BUILD_HLSL_WRITER
 ################################################################################
 tint_add_target(tint_lang_hlsl_writer_raise lib
   lang/hlsl/writer/raise/binary_polyfill.cc
@@ -77,7 +79,6 @@ tint_target_add_dependencies(tint_lang_hlsl_writer_raise lib
   tint_lang_hlsl_intrinsic
   tint_lang_hlsl_ir
   tint_lang_hlsl_type
-  tint_lang_hlsl_writer_common
   tint_utils
   tint_utils_containers
   tint_utils_diagnostic
@@ -94,9 +95,18 @@ tint_target_add_external_dependencies(tint_lang_hlsl_writer_raise lib
   "src_utils"
 )
 
+if(TINT_BUILD_HLSL_WRITER)
+  tint_target_add_dependencies(tint_lang_hlsl_writer_raise lib
+    tint_lang_hlsl_writer_common
+  )
+endif(TINT_BUILD_HLSL_WRITER)
+
+endif(TINT_BUILD_HLSL_WRITER)
+if(TINT_BUILD_HLSL_WRITER)
 ################################################################################
 # Target:    tint_lang_hlsl_writer_raise_test
 # Kind:      test
+# Condition: TINT_BUILD_HLSL_WRITER
 ################################################################################
 tint_add_target(tint_lang_hlsl_writer_raise_test test
   lang/hlsl/writer/raise/binary_polyfill_test.cc
@@ -121,8 +131,6 @@ tint_target_add_dependencies(tint_lang_hlsl_writer_raise_test test
   tint_lang_core_ir_transform
   tint_lang_core_ir_transform_test
   tint_lang_core_type
-  tint_lang_hlsl_writer_common
-  tint_lang_hlsl_writer_raise
   tint_utils
   tint_utils_containers
   tint_utils_diagnostic
@@ -140,9 +148,19 @@ tint_target_add_external_dependencies(tint_lang_hlsl_writer_raise_test test
   "src_utils"
 )
 
+if(TINT_BUILD_HLSL_WRITER)
+  tint_target_add_dependencies(tint_lang_hlsl_writer_raise_test test
+    tint_lang_hlsl_writer_common
+    tint_lang_hlsl_writer_raise
+  )
+endif(TINT_BUILD_HLSL_WRITER)
+
+endif(TINT_BUILD_HLSL_WRITER)
+if(TINT_BUILD_HLSL_WRITER)
 ################################################################################
 # Target:    tint_lang_hlsl_writer_raise_fuzz
 # Kind:      fuzz
+# Condition: TINT_BUILD_HLSL_WRITER
 ################################################################################
 tint_add_target(tint_lang_hlsl_writer_raise_fuzz fuzz
   lang/hlsl/writer/raise/promote_initializers_fuzz.cc
@@ -155,7 +173,6 @@ tint_target_add_dependencies(tint_lang_hlsl_writer_raise_fuzz fuzz
   tint_lang_core_constant
   tint_lang_core_ir
   tint_lang_core_type
-  tint_lang_hlsl_writer_raise
   tint_utils
   tint_utils_bytes
   tint_utils_containers
@@ -172,3 +189,11 @@ tint_target_add_dependencies(tint_lang_hlsl_writer_raise_fuzz fuzz
 tint_target_add_external_dependencies(tint_lang_hlsl_writer_raise_fuzz fuzz
   "src_utils"
 )
+
+if(TINT_BUILD_HLSL_WRITER)
+  tint_target_add_dependencies(tint_lang_hlsl_writer_raise_fuzz fuzz
+    tint_lang_hlsl_writer_raise
+  )
+endif(TINT_BUILD_HLSL_WRITER)
+
+endif(TINT_BUILD_HLSL_WRITER)

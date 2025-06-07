@@ -50,7 +50,6 @@ cc_library(
     "//src/tint/lang/core/constant",
     "//src/tint/lang/core/ir/transform",
     "//src/tint/lang/core/type",
-    "//src/tint/lang/hlsl/writer/common",
     "//src/tint/lang/wgsl",
     "//src/tint/lang/wgsl/ast",
     "//src/tint/lang/wgsl/ast/transform",
@@ -72,6 +71,7 @@ cc_library(
   ] + select({
     ":tint_build_hlsl_writer": [
       "//src/tint/lang/hlsl/writer/ast_raise",
+      "//src/tint/lang/hlsl/writer/common",
     ],
     "//conditions:default": [],
   }),
@@ -119,7 +119,6 @@ cc_library(
     "//src/tint/lang/core",
     "//src/tint/lang/core/constant",
     "//src/tint/lang/core/type",
-    "//src/tint/lang/hlsl/writer/common",
     "//src/tint/lang/wgsl",
     "//src/tint/lang/wgsl/ast",
     "//src/tint/lang/wgsl/ast/transform",
@@ -145,6 +144,7 @@ cc_library(
       "//src/tint/lang/hlsl/writer",
       "//src/tint/lang/hlsl/writer/ast_printer",
       "//src/tint/lang/hlsl/writer/ast_raise",
+      "//src/tint/lang/hlsl/writer/common",
     ],
     "//conditions:default": [],
   }),

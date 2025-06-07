@@ -34,9 +34,11 @@
 #                       Do not modify this file directly
 ################################################################################
 
+if(TINT_BUILD_HLSL_WRITER)
 ################################################################################
 # Target:    tint_lang_hlsl_writer_printer
 # Kind:      lib
+# Condition: TINT_BUILD_HLSL_WRITER
 ################################################################################
 tint_add_target(tint_lang_hlsl_writer_printer lib
   lang/hlsl/writer/printer/printer.cc
@@ -54,7 +56,6 @@ tint_target_add_dependencies(tint_lang_hlsl_writer_printer lib
   tint_lang_hlsl_intrinsic
   tint_lang_hlsl_ir
   tint_lang_hlsl_type
-  tint_lang_hlsl_writer_common
   tint_lang_wgsl_ast
   tint_utils
   tint_utils_containers
@@ -73,3 +74,11 @@ tint_target_add_dependencies(tint_lang_hlsl_writer_printer lib
 tint_target_add_external_dependencies(tint_lang_hlsl_writer_printer lib
   "src_utils"
 )
+
+if(TINT_BUILD_HLSL_WRITER)
+  tint_target_add_dependencies(tint_lang_hlsl_writer_printer lib
+    tint_lang_hlsl_writer_common
+  )
+endif(TINT_BUILD_HLSL_WRITER)
+
+endif(TINT_BUILD_HLSL_WRITER)

@@ -7,6 +7,8 @@ if (WIN32)
 endif ()
 set(DAWN_FETCH_DEPENDENCIES ON CACHE BOOL "")
 set(DAWN_ENABLE_INSTALL ON CACHE BOOL "")
+set(TINT_BUILD_CMD_TOOLS ON CACHE BOOL "")
+set(TINT_ENABLE_INSTALL ON CACHE BOOL "")
 
 if (CMAKE_SYTEM_NAME STREQUAL "Linux")
     # `sccache` seems effective only on linux.
