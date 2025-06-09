@@ -117,10 +117,6 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
         }
     }
 
-    return Success;
-}
-
-Result<Output> Generate(core::ir::Module& ir, const Options& options) {
     {
         auto res = ValidateBindingOptions(options);
         if (res != Success) {
@@ -128,6 +124,10 @@ Result<Output> Generate(core::ir::Module& ir, const Options& options) {
         }
     }
 
+    return Success;
+}
+
+Result<Output> Generate(core::ir::Module& ir, const Options& options) {
     Output output;
 
     // Raise from core-dialect to MSL-dialect.
