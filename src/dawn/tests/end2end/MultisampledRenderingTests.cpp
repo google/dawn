@@ -2837,6 +2837,12 @@ TEST_P(DawnLoadResolveTextureTest, ExpandResolveDifferentNonZeroOffsetsWithSmall
         {5, 4, kGreen},
     };
     TestExpandAndResolveWithRect(rect, points);
+    points = {
+        {4, 4, kGreen},
+    };
+    // Test when resolveOffsetX - colorOffsetX and resolveOffsetY - colorOffsetY are different.
+    rect.resolveOffsetX = 2;
+    TestExpandAndResolveWithRect(rect, points);
 }
 
 // Test that RenderPassDescriptorResolveRect works with wgpu::LoadOp::Clear.

@@ -64,7 +64,7 @@ std::string GenerateBlitToColorVS() {
 fn unpack_offsets(offsets : u32) -> vec2<i32> {
   // First extract the high and low 16-bit values, then convert to u32 for
   // zero-extension.
-  var offsets_bits = vec2u((offsets >> 16) & 0xFFFFu, offsets & 0xFFFFu);
+  var offsets_bits = vec2u(offsets & 0xFFFFu, (offsets >> 16) & 0xFFFFu);
   // For each 16-bit value, if the sign bit is set (0x8000), perform sign
   // extension by setting the upper 16 bits to 1s (0xFFFF0000).
   offsets_bits = select(
