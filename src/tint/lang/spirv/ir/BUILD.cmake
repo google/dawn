@@ -41,6 +41,8 @@
 tint_add_target(tint_lang_spirv_ir lib
   lang/spirv/ir/builtin_call.cc
   lang/spirv/ir/builtin_call.h
+  lang/spirv/ir/copy_logical.cc
+  lang/spirv/ir/copy_logical.h
   lang/spirv/ir/literal_operand.cc
   lang/spirv/ir/literal_operand.h
 )

@@ -35,6 +35,9 @@
 namespace tint::core::ir {
 class Module;
 }
+namespace tint::spirv::writer {
+enum class SpvVersion : uint32_t;
+}
 
 namespace tint::spirv::writer::raise {
 
@@ -48,7 +51,7 @@ const core::ir::Capabilities kForkExplicitLayoutTypesCapabilities{
 ///
 /// @param module the module to transform
 /// @returns success or failure
-Result<SuccessType> ForkExplicitLayoutTypes(core::ir::Module& module);
+Result<SuccessType> ForkExplicitLayoutTypes(core::ir::Module& module, SpvVersion version);
 
 }  // namespace tint::spirv::writer::raise
 

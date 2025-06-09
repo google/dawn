@@ -1,4 +1,4 @@
-// Copyright 2024 The Dawn & Tint Authors
+// Copyright 2025 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,19 +25,32 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/spirv/writer/common/options.h"
+#include "src/tint/lang/spirv/ir/copy_logical.h"
 
-#include <gtest/gtest.h>
+#include "src/tint/lang/core/ir/clone_context.h"
+#include "src/tint/lang/core/ir/module.h"
+#include "src/tint/utils/ice/ice.h"
 
-namespace tint::spirv::writer {
-namespace {
+TINT_INSTANTIATE_TYPEINFO(tint::spirv::ir::CopyLogical);
 
-TEST(TintCheckAllFieldsReflected, SpirvWriterCommonOptionsTest) {
-    TINT_ASSERT_ALL_FIELDS_REFLECTED(binding::BindingInfo);
-    TINT_ASSERT_ALL_FIELDS_REFLECTED(binding::ExternalTexture);
-    TINT_ASSERT_ALL_FIELDS_REFLECTED(Bindings);
-    TINT_ASSERT_ALL_FIELDS_REFLECTED(Options);
+namespace tint::spirv::ir {
+
+CopyLogical::CopyLogical(Id id, core::ir::InstructionResult* result, core::ir::Value* arg)
+    : Base(id) {
+    AddOperand(CopyLogical::kArgOperandOffset, arg);
+    AddResult(result);
 }
 
-}  // namespace
-}  // namespace tint::spirv::writer
+CopyLogical::~CopyLogical() = default;
+
+CopyLogical* CopyLogical::Clone(core::ir::CloneContext& ctx) {
+    auto* new_result = ctx.Clone(Result());
+    auto* arg = ctx.Remap(Arg());
+    return ctx.ir.CreateInstruction<CopyLogical>(new_result, arg);
+}
+
+std::string CopyLogical::FriendlyName() const {
+    return std::string("spirv.copy_logical");
+}
+
+}  // namespace tint::spirv::ir

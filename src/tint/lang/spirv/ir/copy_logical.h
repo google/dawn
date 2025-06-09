@@ -1,4 +1,4 @@
-// Copyright 2024 The Dawn & Tint Authors
+// Copyright 2025 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,19 +25,49 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/spirv/writer/common/options.h"
+#ifndef SRC_TINT_LANG_SPIRV_IR_COPY_LOGICAL_H_
+#define SRC_TINT_LANG_SPIRV_IR_COPY_LOGICAL_H_
 
-#include <gtest/gtest.h>
+#include <string>
 
-namespace tint::spirv::writer {
-namespace {
+#include "src/tint/lang/core/ir/call.h"
+#include "src/tint/utils/rtti/castable.h"
 
-TEST(TintCheckAllFieldsReflected, SpirvWriterCommonOptionsTest) {
-    TINT_ASSERT_ALL_FIELDS_REFLECTED(binding::BindingInfo);
-    TINT_ASSERT_ALL_FIELDS_REFLECTED(binding::ExternalTexture);
-    TINT_ASSERT_ALL_FIELDS_REFLECTED(Bindings);
-    TINT_ASSERT_ALL_FIELDS_REFLECTED(Options);
-}
+namespace tint::spirv::ir {
 
-}  // namespace
-}  // namespace tint::spirv::writer
+/// A spirv OpCopyLogical instruction in the IR.
+class CopyLogical final : public Castable<CopyLogical, core::ir::Call> {
+  public:
+    /// The offset in Operands() for Arg.
+    static constexpr size_t kArgOperandOffset = 0;
+
+    /// The number of results.
+    static constexpr size_t kNumResults = 1;
+
+    /// The number of operands.
+    static constexpr size_t kNumOperands = 1;
+
+    /// Constructor
+    /// @param id the instruction id
+    /// @param result the result value
+    /// @param arg the object to copy
+    CopyLogical(Id id, core::ir::InstructionResult* result, core::ir::Value* arg);
+
+    ~CopyLogical() override;
+
+    /// @copydoc Instruction::Clone()
+    CopyLogical* Clone(core::ir::CloneContext& ctx) override;
+
+    /// @returns The argument being copied.
+    core::ir::Value* Arg() { return Operand(kArgOperandOffset); }
+
+    /// @returns The argument being copied.
+    const core::ir::Value* Arg() const { return Operand(kArgOperandOffset); }
+
+    /// @returns the friendly name for the instruction
+    std::string FriendlyName() const override;
+};
+
+}  // namespace tint::spirv::ir
+
+#endif  // SRC_TINT_LANG_SPIRV_IR_COPY_LOGICAL_H_

@@ -91,6 +91,7 @@
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/core/type/void.h"
 #include "src/tint/lang/spirv/ir/builtin_call.h"
+#include "src/tint/lang/spirv/ir/copy_logical.h"
 #include "src/tint/lang/spirv/ir/literal_operand.h"
 #include "src/tint/lang/spirv/type/explicit_layout_array.h"
 #include "src/tint/lang/spirv/type/sampled_image.h"
@@ -863,7 +864,7 @@ class Printer {
             }
 
             auto* ptr = var->Result()->Type()->As<core::type::Pointer>();
-            if (options_.SpirvVersionLess(1, 4)) {
+            if (options_.spirv_version < SpvVersion::kSpv14) {
                 // In SPIR-V 1.3 or earlier, OpEntryPoint should list only statically used
                 // input/output variables.
                 if (!(ptr->AddressSpace() == core::AddressSpace::kIn ||
@@ -995,6 +996,7 @@ class Printer {
                 [&](core::ir::If* i) { EmitIf(i); },                                  //
                 [&](core::ir::Terminator* t) { EmitTerminator(t); },                  //
                 [&](core::ir::Discard* t) { EmitDiscard(t); },                        //
+                [&](spirv::ir::CopyLogical* c) { EmitCopyLogical(c); },               //
                 TINT_ICE_ON_NO_MATCH);
 
             // Set the name for the SPIR-V result ID if provided in the module.
@@ -1656,6 +1658,16 @@ class Printer {
             operands.push_back(Value(arg));
         }
         current_function_.PushInst(op, operands);
+    }
+
+    /// Emit an OpCopyLogical instruction.
+    /// @param copy The logical copy instruction to emit
+    void EmitCopyLogical(spirv::ir::CopyLogical* copy) {
+        auto id = Value(copy);
+
+        OperandList operands = {Type(copy->Result()->Type()), id};
+        operands.push_back(Value(copy->Arg()));
+        current_function_.PushInst(spv::Op::OpCopyLogical, operands);
     }
 
     uint32_t ImportGlslStd450() {

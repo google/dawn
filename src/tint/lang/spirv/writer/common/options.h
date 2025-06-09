@@ -219,12 +219,6 @@ struct Options {
     /// SPIR-V binary version.
     SpvVersion spirv_version = SpvVersion::kSpv13;
 
-    /// Returns true if the binary version is less than major.minor.
-    bool SpirvVersionLess(uint32_t major, uint32_t minor) const {
-        return static_cast<uint32_t>(spirv_version) <
-               (((major & 0xffff) << 16) | ((minor & 0xffff) << 8));
-    }
-
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(Options,
                  remapped_entry_point_name,

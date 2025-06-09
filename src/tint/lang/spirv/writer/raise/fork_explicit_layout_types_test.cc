@@ -32,6 +32,7 @@
 #include "src/tint/lang/core/ir/transform/helper_test.h"
 #include "src/tint/lang/core/type/struct.h"
 #include "src/tint/lang/spirv/ir/builtin_call.h"
+#include "src/tint/lang/spirv/writer/common/options.h"
 
 namespace tint::spirv::writer::raise {
 namespace {
@@ -76,7 +77,7 @@ $B1: {  # root
 )";
     EXPECT_EQ(src, str());
 
-    Run(ForkExplicitLayoutTypes);
+    Run(ForkExplicitLayoutTypes, SpvVersion::kSpv13);
 
     EXPECT_EQ(src, str());
 }
@@ -106,7 +107,7 @@ $B1: {  # root
 )";
     EXPECT_EQ(src, str());
 
-    Run(ForkExplicitLayoutTypes);
+    Run(ForkExplicitLayoutTypes, SpvVersion::kSpv13);
 
     EXPECT_EQ(src, str());
 }
@@ -185,7 +186,7 @@ $B1: {  # root
 }
 )";
 
-    Run(ForkExplicitLayoutTypes);
+    Run(ForkExplicitLayoutTypes, SpvVersion::kSpv13);
 
     EXPECT_EQ(expect, str());
 }
@@ -212,7 +213,7 @@ $B1: {  # root
 
 )";
 
-    Run(ForkExplicitLayoutTypes);
+    Run(ForkExplicitLayoutTypes, SpvVersion::kSpv13);
 
     EXPECT_EQ(expect, str());
 }
@@ -254,7 +255,7 @@ $B1: {  # root
 
 )";
 
-    Run(ForkExplicitLayoutTypes);
+    Run(ForkExplicitLayoutTypes, SpvVersion::kSpv13);
 
     EXPECT_EQ(expect, str());
 }
@@ -298,7 +299,7 @@ $B1: {  # root
 
 )";
 
-    Run(ForkExplicitLayoutTypes);
+    Run(ForkExplicitLayoutTypes, SpvVersion::kSpv13);
 
     EXPECT_EQ(expect, str());
 }
@@ -342,7 +343,7 @@ $B1: {  # root
 
 )";
 
-    Run(ForkExplicitLayoutTypes);
+    Run(ForkExplicitLayoutTypes, SpvVersion::kSpv13);
 
     EXPECT_EQ(expect, str());
 }
@@ -386,7 +387,7 @@ $B1: {  # root
 
 )";
 
-    Run(ForkExplicitLayoutTypes);
+    Run(ForkExplicitLayoutTypes, SpvVersion::kSpv13);
 
     EXPECT_EQ(expect, str());
 }
@@ -421,7 +422,7 @@ $B1: {  # root
 
 )";
 
-    Run(ForkExplicitLayoutTypes);
+    Run(ForkExplicitLayoutTypes, SpvVersion::kSpv13);
 
     EXPECT_EQ(expect, str());
 }
@@ -480,7 +481,7 @@ $B1: {  # root
 }
 )";
 
-    Run(ForkExplicitLayoutTypes);
+    Run(ForkExplicitLayoutTypes, SpvVersion::kSpv13);
 
     EXPECT_EQ(expect, str());
 }
@@ -554,7 +555,7 @@ $B1: {  # root
 }
 )";
 
-    Run(ForkExplicitLayoutTypes);
+    Run(ForkExplicitLayoutTypes, SpvVersion::kSpv13);
 
     EXPECT_EQ(expect, str());
 }
@@ -657,7 +658,7 @@ $B1: {  # root
 }
 )";
 
-    Run(ForkExplicitLayoutTypes);
+    Run(ForkExplicitLayoutTypes, SpvVersion::kSpv13);
 
     EXPECT_EQ(expect, str());
 }
@@ -734,7 +735,7 @@ $B1: {  # root
 }
 )";
 
-    Run(ForkExplicitLayoutTypes);
+    Run(ForkExplicitLayoutTypes, SpvVersion::kSpv13);
 
     EXPECT_EQ(expect, str());
 }
@@ -840,7 +841,7 @@ $B1: {  # root
 }
 )";
 
-    Run(ForkExplicitLayoutTypes);
+    Run(ForkExplicitLayoutTypes, SpvVersion::kSpv13);
 
     EXPECT_EQ(expect, str());
 }
@@ -949,7 +950,7 @@ $B1: {  # root
 }
 )";
 
-    Run(ForkExplicitLayoutTypes);
+    Run(ForkExplicitLayoutTypes, SpvVersion::kSpv13);
 
     EXPECT_EQ(expect, str());
 }
@@ -1071,7 +1072,7 @@ $B1: {  # root
 }
 )";
 
-    Run(ForkExplicitLayoutTypes);
+    Run(ForkExplicitLayoutTypes, SpvVersion::kSpv13);
 
     EXPECT_EQ(expect, str());
 }
@@ -1167,7 +1168,7 @@ $B1: {  # root
 }
 )";
 
-    Run(ForkExplicitLayoutTypes);
+    Run(ForkExplicitLayoutTypes, SpvVersion::kSpv13);
 
     EXPECT_EQ(expect, str());
 }
@@ -1257,7 +1258,7 @@ $B1: {  # root
 }
 )";
 
-    Run(ForkExplicitLayoutTypes);
+    Run(ForkExplicitLayoutTypes, SpvVersion::kSpv13);
 
     EXPECT_EQ(expect, str());
 }
@@ -1330,7 +1331,7 @@ $B1: {  # root
 }
 )";
 
-    Run(ForkExplicitLayoutTypes);
+    Run(ForkExplicitLayoutTypes, SpvVersion::kSpv13);
 
     EXPECT_EQ(expect, str());
 }
@@ -1440,7 +1441,7 @@ $B1: {  # root
 }
 )";
 
-    Run(ForkExplicitLayoutTypes);
+    Run(ForkExplicitLayoutTypes, SpvVersion::kSpv13);
 
     EXPECT_EQ(expect, str());
 }
@@ -1539,7 +1540,7 @@ $B1: {  # root
 }
 )";
 
-    Run(ForkExplicitLayoutTypes);
+    Run(ForkExplicitLayoutTypes, SpvVersion::kSpv13);
 
     EXPECT_EQ(expect, str());
 }
@@ -1698,7 +1699,7 @@ $B1: {  # root
 }
 )";
 
-    Run(ForkExplicitLayoutTypes);
+    Run(ForkExplicitLayoutTypes, SpvVersion::kSpv13);
 
     EXPECT_EQ(expect, str());
 }
@@ -1772,7 +1773,7 @@ $B1: {  # root
 }
 )";
 
-    Run(ForkExplicitLayoutTypes);
+    Run(ForkExplicitLayoutTypes, SpvVersion::kSpv13);
 
     EXPECT_EQ(expect, str());
 }
@@ -1875,7 +1876,7 @@ $B1: {  # root
 }
 )";
 
-    Run(ForkExplicitLayoutTypes);
+    Run(ForkExplicitLayoutTypes, SpvVersion::kSpv13);
 
     EXPECT_EQ(expect, str());
 }
@@ -1952,7 +1953,7 @@ $B1: {  # root
 }
 )";
 
-    Run(ForkExplicitLayoutTypes);
+    Run(ForkExplicitLayoutTypes, SpvVersion::kSpv13);
 
     EXPECT_EQ(expect, str());
 }
@@ -2058,7 +2059,7 @@ $B1: {  # root
 }
 )";
 
-    Run(ForkExplicitLayoutTypes);
+    Run(ForkExplicitLayoutTypes, SpvVersion::kSpv13);
 
     EXPECT_EQ(expect, str());
 }
@@ -2169,7 +2170,7 @@ $B1: {  # root
 }
 )";
 
-    Run(ForkExplicitLayoutTypes);
+    Run(ForkExplicitLayoutTypes, SpvVersion::kSpv13);
 
     EXPECT_EQ(expect, str());
 }
@@ -2223,7 +2224,7 @@ $B1: {  # root
 }
 )";
 
-    Run(ForkExplicitLayoutTypes);
+    Run(ForkExplicitLayoutTypes, SpvVersion::kSpv13);
 
     EXPECT_EQ(expect, str());
 }
@@ -2336,7 +2337,7 @@ $B1: {  # root
 }
 )";
 
-    Run(ForkExplicitLayoutTypes);
+    Run(ForkExplicitLayoutTypes, SpvVersion::kSpv13);
 
     EXPECT_EQ(expect, str());
 }
@@ -2436,7 +2437,7 @@ $B1: {  # root
 }
 )";
 
-    Run(ForkExplicitLayoutTypes);
+    Run(ForkExplicitLayoutTypes, SpvVersion::kSpv13);
 
     EXPECT_EQ(expect, str());
 }
@@ -2500,7 +2501,257 @@ $B1: {  # root
 }
 )";
 
-    Run(ForkExplicitLayoutTypes);
+    Run(ForkExplicitLayoutTypes, SpvVersion::kSpv13);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_ForkExplicitLayoutTypesTest, Spv14_CopyLogical_StructRemoveLayout) {
+    auto* structure = ty.Struct(mod.symbols.New("MyStruct"), {
+                                                                 {mod.symbols.New("a"), ty.u32()},
+                                                                 {mod.symbols.New("b"), ty.u32()},
+                                                             });
+
+    auto* ssbo = b.Var("ssbo", ty.ptr(storage, structure));
+    ssbo->SetBindingPoint(0, 0);
+    mod.root_block->Append(ssbo);
+
+    auto* wg = b.Var("wg", ty.ptr(workgroup, structure));
+    mod.root_block->Append(wg);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* load = b.Load(ssbo);
+        b.Store(wg, load);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+MyStruct = struct @align(4) {
+  a:u32 @offset(0)
+  b:u32 @offset(4)
+}
+
+$B1: {  # root
+  %ssbo:ptr<storage, MyStruct, read_write> = var undef @binding_point(0, 0)
+  %wg:ptr<workgroup, MyStruct, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %4:MyStruct = load %ssbo
+    store %wg, %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+MyStruct = struct @align(4) {
+  a:u32 @offset(0)
+  b:u32 @offset(4)
+}
+
+MyStruct_tint_explicit_layout = struct @align(4), @core.explicit_layout {
+  a:u32 @offset(0)
+  b:u32 @offset(4)
+}
+
+$B1: {  # root
+  %ssbo:ptr<storage, MyStruct_tint_explicit_layout, read_write> = var undef @binding_point(0, 0)
+  %wg:ptr<workgroup, MyStruct, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %4:MyStruct_tint_explicit_layout = load %ssbo
+    %5:MyStruct = spirv.copy_logical %4
+    store %wg, %5
+    ret
+  }
+}
+)";
+
+    Run(ForkExplicitLayoutTypes, SpvVersion::kSpv14);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_ForkExplicitLayoutTypesTest, Spv14_CopyLogical_StructAddLayout) {
+    auto* structure = ty.Struct(mod.symbols.New("MyStruct"), {
+                                                                 {mod.symbols.New("a"), ty.u32()},
+                                                                 {mod.symbols.New("b"), ty.u32()},
+                                                             });
+
+    auto* ssbo = b.Var("ssbo", ty.ptr(storage, structure));
+    ssbo->SetBindingPoint(0, 0);
+    mod.root_block->Append(ssbo);
+
+    auto* wg = b.Var("wg", ty.ptr(workgroup, structure));
+    mod.root_block->Append(wg);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* load = b.Load(wg);
+        b.Store(ssbo, load);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+MyStruct = struct @align(4) {
+  a:u32 @offset(0)
+  b:u32 @offset(4)
+}
+
+$B1: {  # root
+  %ssbo:ptr<storage, MyStruct, read_write> = var undef @binding_point(0, 0)
+  %wg:ptr<workgroup, MyStruct, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %4:MyStruct = load %wg
+    store %ssbo, %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+MyStruct = struct @align(4) {
+  a:u32 @offset(0)
+  b:u32 @offset(4)
+}
+
+MyStruct_tint_explicit_layout = struct @align(4), @core.explicit_layout {
+  a:u32 @offset(0)
+  b:u32 @offset(4)
+}
+
+$B1: {  # root
+  %ssbo:ptr<storage, MyStruct_tint_explicit_layout, read_write> = var undef @binding_point(0, 0)
+  %wg:ptr<workgroup, MyStruct, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %4:MyStruct = load %wg
+    %5:MyStruct_tint_explicit_layout = spirv.copy_logical %4
+    store %ssbo, %5
+    ret
+  }
+}
+)";
+
+    Run(ForkExplicitLayoutTypes, SpvVersion::kSpv14);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_ForkExplicitLayoutTypesTest, Spv14_CopyLogical_ArrayRemoveLayout) {
+    auto* array_ty = ty.array(ty.u32(), 4, 4);
+    auto* ssbo = b.Var("ssbo", ty.ptr(storage, array_ty));
+    ssbo->SetBindingPoint(0, 0);
+    mod.root_block->Append(ssbo);
+
+    auto* wg = b.Var("wg", ty.ptr(workgroup, array_ty));
+    mod.root_block->Append(wg);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* load = b.Load(ssbo);
+        b.Store(wg, load);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %ssbo:ptr<storage, array<u32, 4>, read_write> = var undef @binding_point(0, 0)
+  %wg:ptr<workgroup, array<u32, 4>, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %4:array<u32, 4> = load %ssbo
+    store %wg, %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %ssbo:ptr<storage, spirv.explicit_layout_array<u32, 4>, read_write> = var undef @binding_point(0, 0)
+  %wg:ptr<workgroup, array<u32, 4>, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %4:spirv.explicit_layout_array<u32, 4> = load %ssbo
+    %5:array<u32, 4> = spirv.copy_logical %4
+    store %wg, %5
+    ret
+  }
+}
+)";
+
+    Run(ForkExplicitLayoutTypes, SpvVersion::kSpv14);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_ForkExplicitLayoutTypesTest, Spv14_CopyLogical_ArrayAddLayout) {
+    auto* array_ty = ty.array(ty.u32(), 4, 4);
+    auto* ssbo = b.Var("ssbo", ty.ptr(storage, array_ty));
+    ssbo->SetBindingPoint(0, 0);
+    mod.root_block->Append(ssbo);
+
+    auto* wg = b.Var("wg", ty.ptr(workgroup, array_ty));
+    mod.root_block->Append(wg);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* load = b.Load(wg);
+        b.Store(ssbo, load);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %ssbo:ptr<storage, array<u32, 4>, read_write> = var undef @binding_point(0, 0)
+  %wg:ptr<workgroup, array<u32, 4>, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %4:array<u32, 4> = load %wg
+    store %ssbo, %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %ssbo:ptr<storage, spirv.explicit_layout_array<u32, 4>, read_write> = var undef @binding_point(0, 0)
+  %wg:ptr<workgroup, array<u32, 4>, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %4:array<u32, 4> = load %wg
+    %5:spirv.explicit_layout_array<u32, 4> = spirv.copy_logical %4
+    store %ssbo, %5
+    ret
+  }
+}
+)";
+
+    Run(ForkExplicitLayoutTypes, SpvVersion::kSpv14);
 
     EXPECT_EQ(expect, str());
 }

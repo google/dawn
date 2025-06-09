@@ -183,7 +183,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
 
     // ForkExplicitLayoutTypes must come after Std140, since it rewrites host-shareable array types
     // to use the explicitly laid array type defined by the SPIR-V dialect.
-    RUN_TRANSFORM(raise::ForkExplicitLayoutTypes, module);
+    RUN_TRANSFORM(raise::ForkExplicitLayoutTypes, module, options.spirv_version);
 
     RUN_TRANSFORM(raise::VarForDynamicIndex, module);
 
