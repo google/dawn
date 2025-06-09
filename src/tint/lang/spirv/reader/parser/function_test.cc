@@ -74,6 +74,101 @@ TEST_F(SpirvParserTest, LocalSize) {
 )");
 }
 
+TEST_F(SpirvParserTest, WorkgroupSize_Constant) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpDecorate %gl_WorkGroupSize BuiltIn WorkgroupSize
+       %void = OpTypeVoid
+       %uint = OpTypeInt 32 0
+     %v3uint = OpTypeVector %uint 3
+     %uint_3 = OpConstant %uint 3
+     %uint_5 = OpConstant %uint 5
+     %uint_7 = OpConstant %uint 7
+%gl_WorkGroupSize = OpConstantComposite %v3uint %uint_3 %uint_5 %uint_7
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(3u, 5u, 7u) func():void {
+  $B1: {
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, WorkgroupSize_SpecConstant_Mixed) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpDecorate %gl_WorkGroupSize BuiltIn WorkgroupSize
+       %void = OpTypeVoid
+       %uint = OpTypeInt 32 0
+     %v3uint = OpTypeVector %uint 3
+     %uint_3 = OpSpecConstant %uint 3
+     %uint_5 = OpConstant %uint 5
+     %uint_7 = OpSpecConstant %uint 7
+%gl_WorkGroupSize = OpSpecConstantComposite %v3uint %uint_3 %uint_5 %uint_7
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %1:u32 = override 3u
+  %2:u32 = override 7u
+}
+
+%main = @compute @workgroup_size(%1, 5u, %2) func():void {
+  $B2: {
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, WorkgroupSize_SpecConstant) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpDecorate %gl_WorkGroupSize BuiltIn WorkgroupSize
+       %void = OpTypeVoid
+       %uint = OpTypeInt 32 0
+     %v3uint = OpTypeVector %uint 3
+     %uint_3 = OpSpecConstant %uint 3
+     %uint_5 = OpSpecConstant %uint 5
+     %uint_7 = OpSpecConstant %uint 7
+%gl_WorkGroupSize = OpSpecConstantComposite %v3uint %uint_3 %uint_5 %uint_7
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %1:u32 = override 3u
+  %2:u32 = override 5u
+  %3:u32 = override 7u
+}
+
+%main = @compute @workgroup_size(%1, %2, %3) func():void {
+  $B2: {
+    ret
+  }
+}
+)");
+}
+
 TEST_F(SpirvParserTest, FragmentShader) {
     EXPECT_IR(R"(
                OpCapability Shader

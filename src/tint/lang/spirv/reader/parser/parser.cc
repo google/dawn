@@ -1183,6 +1183,39 @@ class Parser {
                     // first one found.
                     break;
                 }
+            } else if (func->IsCompute()) {
+                // Search for `WorkgroupSize` decorated Ids
+                for (const spvtools::opt::Instruction& inst :
+                     spirv_context_->module()->annotations()) {
+                    if (inst.opcode() != spv::Op::OpDecorate ||
+                        inst.GetSingleWordInOperand(1) != uint32_t(spv::Decoration::BuiltIn) ||
+                        inst.GetSingleWordInOperand(2) != uint32_t(spv::BuiltIn::WorkgroupSize)) {
+                        continue;
+                    }
+                    uint32_t id = inst.GetSingleWordInOperand(0);
+
+                    Vector<core::ir::Value*, 3> args;
+                    if (auto* c = SpvConstant(id)) {
+                        auto* vals = c->AsVectorConstant();
+                        TINT_ASSERT(vals);
+
+                        for (auto& el : vals->GetComponents()) {
+                            args.Push(b_.Constant(Constant(el)));
+                        }
+                    } else {
+                        TINT_ASSERT(spec_composites_.contains(id));
+
+                        auto info = spec_composites_[id];
+                        TINT_ASSERT(info.args.Length() == 3);
+
+                        for (auto arg : info.args) {
+                            args.Push(Value(arg));
+                        }
+                    }
+                    func->SetWorkgroupSize(args[0], args[1], args[2]);
+
+                    break;
+                }
             }
         }
 
