@@ -125,7 +125,7 @@ WGPUInstance Device::GetInnerInstance() const {
 MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
     Ref<Queue> queue;
     DAWN_TRY_ASSIGN(queue, Queue::Create(this, &descriptor->defaultQueue));
-    return DeviceBase::Initialize(std::move(queue));
+    return DeviceBase::Initialize(descriptor, std::move(queue));
 }
 
 ResultOrError<Ref<BindGroupBase>> Device::CreateBindGroupImpl(

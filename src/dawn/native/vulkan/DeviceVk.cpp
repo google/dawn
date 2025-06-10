@@ -188,7 +188,7 @@ MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
     Ref<Queue> queue;
     DAWN_TRY_ASSIGN(queue, Queue::Create(this, &descriptor->defaultQueue, mMainQueueFamily));
 
-    return DeviceBase::Initialize(std::move(queue));
+    return DeviceBase::Initialize(descriptor, std::move(queue));
 }
 
 Device::~Device() {

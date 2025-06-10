@@ -187,7 +187,7 @@ MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
         }
     }
 
-    return DeviceBase::Initialize(std::move(queue));
+    return DeviceBase::Initialize(descriptor, std::move(queue));
 }
 
 ResultOrError<Ref<BindGroupBase>> Device::CreateBindGroupImpl(

@@ -203,7 +203,7 @@ MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
     Ref<Queue> queue;
     DAWN_TRY_ASSIGN(queue, Queue::Create(this, &descriptor->defaultQueue));
 
-    DAWN_TRY(DeviceBase::Initialize(queue));
+    DAWN_TRY(DeviceBase::Initialize(descriptor, queue));
     DAWN_TRY(queue->InitializePendingContext());
 
     SetLabelImpl();

@@ -210,7 +210,7 @@ MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
         DAWN_GL_TRY(gl, GetIntegerv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &mMaxTextureMaxAnisotropy));
     }
 
-    DAWN_TRY(DeviceBase::Initialize(std::move(queue)));
+    DAWN_TRY(DeviceBase::Initialize(descriptor, std::move(queue)));
 
     // Create internal buffers needed for workarounds.
     if (mTextureBuiltinsBuffer.Get() == nullptr) {

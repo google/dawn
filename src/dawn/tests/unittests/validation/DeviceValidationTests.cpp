@@ -37,7 +37,9 @@
 namespace dawn {
 namespace {
 
+using testing::_;
 using testing::EmptySizedString;
+using testing::InSequence;
 using testing::IsNull;
 using testing::MockCppCallback;
 using testing::NonEmptySizedString;
@@ -46,13 +48,14 @@ using testing::WithArgs;
 
 class RequestDeviceValidationTest : public ValidationTest {
   protected:
+    using MockDeviceLostCallback = MockCppCallback<wgpu::DeviceLostCallback<void>*>;
+
     void SetUp() override {
         ValidationTest::SetUp();
         DAWN_SKIP_TEST_IF(UsesWire());
     }
 
-    MockCppCallback<void (*)(wgpu::RequestDeviceStatus, wgpu::Device, wgpu::StringView)>
-        mRequestDeviceCallback;
+    MockCppCallback<wgpu::RequestDeviceCallback<void>*> mRequestDeviceCallback;
 };
 
 // Test that requesting a device without specifying limits is valid.
@@ -222,6 +225,61 @@ TEST_F(RequestDeviceValidationTest, LowerIsBetter) {
         }));
     adapter.RequestDevice(&descriptor, wgpu::CallbackMode::AllowSpontaneous,
                           mRequestDeviceCallback.Callback());
+}
+
+// Test that if an error occurs when requesting a device, the device lost callback is called
+// appropriately.
+TEST_F(RequestDeviceValidationTest, ErrorTriggersDeviceLost) {
+    // Invalid descriptor chains:
+    //   - ChainedStruct: This should cause an early validation error.
+    //   - DawnFakeDeviceInitializeErrorForTesting: This should cause an internal device error.
+    wgpu::ChainedStruct chain1;
+    wgpu::DawnFakeDeviceInitializeErrorForTesting chain2;
+    std::array<wgpu::ChainedStruct*, 2> chains = {&chain1, &chain2};
+
+    for (const auto* chain : chains) {
+        SCOPED_TRACE(absl::StrFormat("Chain SType: %s", chain->sType));
+        {
+            wgpu::DeviceDescriptor descriptor;
+            descriptor.nextInChain = chain;
+
+            // Device lost callback mode: AllowSpontaneous.
+            MockDeviceLostCallback lostCb;
+            descriptor.SetDeviceLostCallback(wgpu::CallbackMode::AllowSpontaneous,
+                                             lostCb.Callback());
+
+            // When in spontaneous mode, the request device callback should fire immediately before
+            // the device lost callback.
+            InSequence s;
+            EXPECT_CALL(mRequestDeviceCallback,
+                        Call(wgpu::RequestDeviceStatus::Error, IsNull(), NonEmptySizedString()))
+                .Times(1);
+            EXPECT_CALL(lostCb, Call(_, wgpu::DeviceLostReason::FailedCreation, _)).Times(1);
+            adapter.RequestDevice(&descriptor, wgpu::CallbackMode::AllowSpontaneous,
+                                  mRequestDeviceCallback.Callback());
+        }
+        {
+            wgpu::DeviceDescriptor descriptor;
+            descriptor.nextInChain = chain;
+
+            // Device lost callback mode: AllowProcessEvents.
+            MockDeviceLostCallback lostCb;
+            descriptor.SetDeviceLostCallback(wgpu::CallbackMode::AllowProcessEvents,
+                                             lostCb.Callback());
+
+            EXPECT_CALL(mRequestDeviceCallback,
+                        Call(wgpu::RequestDeviceStatus::Error, IsNull(), NonEmptySizedString()))
+                .Times(1);
+            adapter.RequestDevice(&descriptor, wgpu::CallbackMode::AllowSpontaneous,
+                                  mRequestDeviceCallback.Callback());
+
+            // When in a non-spontaneous mode for the device lost, the request device callback
+            // should fire, but the device lost callback should only fire when the Instance level
+            // API is called.
+            EXPECT_CALL(lostCb, Call(_, wgpu::DeviceLostReason::FailedCreation, _)).Times(1);
+            instance.ProcessEvents();
+        }
+    }
 }
 
 class DeviceTickValidationTest : public ValidationTest {};

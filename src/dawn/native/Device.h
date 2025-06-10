@@ -88,14 +88,11 @@ class DeviceBase : public ErrorSink,
     struct DeviceLostEvent final : public EventManager::TrackedEvent {
         static Ref<DeviceLostEvent> Create(const DeviceDescriptor* descriptor);
 
-        // Event result fields need to be public so that they can easily be updated prior to
-        // completing the event.
-        wgpu::DeviceLostReason mReason;
-        std::string mMessage;
+        // Sets the device lost event's fields and sets the event to be ready.
+        void SetLost(EventManager* eventManager,
+                     wgpu::DeviceLostReason reason,
+                     std::string_view message);
 
-        WGPUDeviceLostCallback mCallback = nullptr;
-        raw_ptr<void> mUserdata1;
-        raw_ptr<void> mUserdata2;
         // Note that the device is set when the event is passed to construct a device.
         Ref<DeviceBase> mDevice = nullptr;
 
@@ -104,6 +101,13 @@ class DeviceBase : public ErrorSink,
         ~DeviceLostEvent() override;
 
         void Complete(EventCompletionType completionType) override;
+
+        wgpu::DeviceLostReason mReason;
+        std::string mMessage;
+
+        WGPUDeviceLostCallback mCallback = nullptr;
+        raw_ptr<void> mUserdata1;
+        raw_ptr<void> mUserdata2;
     };
 
     DeviceBase(AdapterBase* adapter,
@@ -442,7 +446,8 @@ class DeviceBase : public ErrorSink,
 
     void ForceEnableFeatureForTesting(Feature feature);
 
-    MaybeError Initialize(Ref<QueueBase> defaultQueue);
+    MaybeError Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor,
+                          Ref<QueueBase> defaultQueue);
     void DestroyObjects();
     void Destroy();
 

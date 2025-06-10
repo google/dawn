@@ -194,6 +194,20 @@ Ref<DeviceBase::DeviceLostEvent> DeviceBase::DeviceLostEvent::Create(
     return AcquireRef(new DeviceBase::DeviceLostEvent(deviceLostCallbackInfo));
 }
 
+void DeviceBase::DeviceLostEvent::SetLost(EventManager* eventManager,
+                                          wgpu::DeviceLostReason reason,
+                                          std::string_view message) {
+    mReason = reason;
+    mMessage = message;
+    eventManager->SetFutureReady(this);
+    if (mDevice) {
+        // If the device was already set, then the device must be associated with this event. Since
+        // the event should only be set and triggered once, unset the event in the device now.
+        mDevice->mLostFuture = GetFuture();
+        mDevice->mLostEvent = nullptr;
+    }
+}
+
 void DeviceBase::DeviceLostEvent::Complete(EventCompletionType completionType) {
     if (completionType == EventCompletionType::Shutdown) {
         mReason = wgpu::DeviceLostReason::CallbackCancelled;
@@ -420,7 +434,8 @@ DeviceBase::~DeviceBase() {
     mQueue = nullptr;
 }
 
-MaybeError DeviceBase::Initialize(Ref<QueueBase> defaultQueue) {
+MaybeError DeviceBase::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor,
+                                  Ref<QueueBase> defaultQueue) {
     mQueue = std::move(defaultQueue);
 
     SetWGSLExtensionAllowList();
@@ -438,6 +453,11 @@ MaybeError DeviceBase::Initialize(Ref<QueueBase> defaultQueue) {
     // alive.
     mState = State::Alive;
 
+    // Fake an error after the creation of a device here for testing.
+    if (descriptor.Get<DawnFakeDeviceInitializeErrorForTesting>() != nullptr) {
+        return DAWN_INTERNAL_ERROR("DawnFakeDeviceInitialzeErrorForTesting");
+    }
+
     DAWN_TRY_ASSIGN(mEmptyBindGroupLayout, CreateEmptyBindGroupLayout());
     DAWN_TRY_ASSIGN(mEmptyPipelineLayout, CreateEmptyPipelineLayout());
 
@@ -447,13 +467,13 @@ MaybeError DeviceBase::Initialize(Ref<QueueBase> defaultQueue) {
         constexpr char kEmptyFragmentShader[] = R"(
                 @fragment fn fs_empty_main() {}
             )";
-        ShaderModuleDescriptor descriptor;
+        ShaderModuleDescriptor shaderDesc;
         ShaderSourceWGSL wgslDesc;
         wgslDesc.code = kEmptyFragmentShader;
-        descriptor.nextInChain = &wgslDesc;
+        shaderDesc.nextInChain = &wgslDesc;
 
         DAWN_TRY_ASSIGN(mInternalPipelineStore->placeholderFragmentShader,
-                        CreateShaderModule(&descriptor, /* internalExtensions */ {}));
+                        CreateShaderModule(&shaderDesc, /* internalExtensions */ {}));
     }
 
     if (HasFeature(Feature::ImplicitDeviceSynchronization)) {
@@ -673,11 +693,7 @@ void DeviceBase::APIDestroy() {
 
 void DeviceBase::HandleDeviceLost(wgpu::DeviceLostReason reason, std::string_view message) {
     if (mLostEvent != nullptr) {
-        mLostEvent->mReason = reason;
-        mLostEvent->mMessage = message;
-        GetInstance()->GetEventManager()->SetFutureReady(mLostEvent.Get());
-        mLostFuture = mLostEvent->GetFuture();
-        mLostEvent = nullptr;
+        mLostEvent->SetLost(GetInstance()->GetEventManager(), reason, message);
     }
 }
 

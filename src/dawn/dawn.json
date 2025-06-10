@@ -2158,6 +2158,13 @@
             {"name": "fake OOM at device", "type": "bool"}
         ]
     },
+    "dawn fake device initialize error for testing": {
+        "category": "structure",
+        "chained": "in",
+        "chain roots": ["device descriptor"],
+        "tags": ["dawn"],
+        "members": []
+    },
     "shared fence type": {
         "category": "enum",
         "tags": ["dawn", "native"],
@@ -3864,7 +3871,8 @@
             {"value": 66, "name": "dawn device allocator control", "tags": ["dawn"]},
             {"value": 67, "name": "dawn host mapped pointer limits", "tags": ["dawn"]},
             {"value": 68, "name": "render pass descriptor resolve rect", "tags": ["dawn"]},
-            {"value": 69, "name": "request adapter WebGPU backend options", "tags": ["dawn", "native"]}
+            {"value": 69, "name": "request adapter WebGPU backend options", "tags": ["dawn", "native"]},
+            {"value": 70, "name": "dawn fake device initialize error for testing", "tags": ["dawn"]}
         ]
     },
     "texture": {
