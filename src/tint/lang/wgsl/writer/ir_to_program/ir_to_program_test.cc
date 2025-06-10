@@ -95,6 +95,18 @@ fn f() {
 )");
 }
 
+TEST_F(IRToProgramTest, SingleFunction_Unreachable) {
+    auto* fn = b.Function("f", ty.u32());
+
+    fn->Block()->Append(b.Unreachable());
+
+    EXPECT_WGSL(R"(
+fn f() -> u32 {
+  return u32();
+}
+)");
+}
+
 TEST_F(IRToProgramTest, SingleFunction_Return_i32) {
     auto* fn = b.Function("f", ty.i32());
 
@@ -2187,6 +2199,7 @@ fn f() -> f32 {
   } else {
     return 2.0f;
   }
+  return f32();
 }
 )");
 }

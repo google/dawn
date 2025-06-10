@@ -179,6 +179,9 @@ class State {
     /// Map of struct to output program name.
     Hashmap<const core::type::Struct*, Symbol, 8> structs_;
 
+    /// The current function being emitted.
+    const core::ir::Function* current_function_ = nullptr;
+
     /// True if 'diagnostic(off, derivative_uniformity)' has been emitted
     bool disabled_derivative_uniformity_ = false;
 
@@ -194,6 +197,7 @@ class State {
     }
     const ast::Function* Fn(const core::ir::Function* fn) {
         TINT_SCOPED_ASSIGNMENT(nesting_depth_, nesting_depth_ + 1);
+        TINT_SCOPED_ASSIGNMENT(current_function_, fn);
 
         // Emit parameters.
         static constexpr size_t N = decltype(ast::Function::params)::static_length;
@@ -368,9 +372,24 @@ class State {
             [&](const core::ir::Switch* i) { Switch(i); },                          //
             [&](const core::ir::Swizzle* i) { Swizzle(i); },                        //
             [&](const core::ir::Unary* i) { Unary(i); },                            //
-            [&](const core::ir::Unreachable*) {},                                   //
+            [&](const core::ir::Unreachable* u) { Unreachable(u); },                //
             [&](const core::ir::Var* i) { Var(i); },                                //
             TINT_ICE_ON_NO_MATCH);
+    }
+
+    // In the case of an `unreachable` as the last statement in a non-void function, swap it to a
+    // `return` of the zero value for the return type. This is to satisfy the requirement for WGSL
+    // to always end in a `return` but `unreachable` really only meaning undefined behaviour if you
+    // get here.
+    void Unreachable(const core::ir::Unreachable* u) {
+        if (current_function_->ReturnType()->Is<core::type::Void>()) {
+            return;
+        }
+        if (u != current_function_->Block()->Terminator()) {
+            return;
+        }
+
+        Append(b.Return(b.Call(Type(current_function_->ReturnType()))));
     }
 
     void If(const core::ir::If* if_) {

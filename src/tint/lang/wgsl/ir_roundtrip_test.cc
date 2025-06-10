@@ -2318,6 +2318,17 @@ fn f() -> f32 {
     return 2.0f;
   }
 }
+)",
+             R"(
+fn f() -> f32 {
+  var cond : bool = true;
+  if (cond) {
+    return 1.0f;
+  } else {
+    return 2.0f;
+  }
+  return f32();
+}
 )");
 }
 
@@ -2639,6 +2650,7 @@ fn f() -> i32 {
       }
     }
   }
+  return i32();
 }
 )");
 }
@@ -3351,6 +3363,24 @@ fn f() -> i32 {
     }
   }
 }
+)",
+             R"(
+fn f() -> i32 {
+  var i : i32;
+  switch(i) {
+    case 0i: {
+      return i;
+    }
+    case 1i: {
+      var i_1 : i32 = (i + 1i);
+      return i_1;
+    }
+    default: {
+      return i;
+    }
+  }
+  return i32();
+}
 )");
 }
 
@@ -3370,6 +3400,24 @@ fn f() -> i32 {
       return i;
     }
   }
+}
+)",
+             R"(
+fn f() -> i32 {
+  var i : i32;
+  switch(i) {
+    case 0i: {
+      return i;
+    }
+    case 1i: {
+      let i_1 = (i + 1i);
+      return i_1;
+    }
+    default: {
+      return i;
+    }
+  }
+  return i32();
 }
 )");
 }
