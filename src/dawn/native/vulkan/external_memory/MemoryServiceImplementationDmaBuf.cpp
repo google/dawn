@@ -265,6 +265,16 @@ class ServiceImplementationDmaBuf : public ServiceImplementation {
         memoryRequirements.memoryTypeBits &= fdProperties.memoryTypeBits;
         int memoryTypeIndex = mDevice->GetResourceMemoryAllocator()->FindBestTypeIndex(
             memoryRequirements, MemoryKind::DeviceLocal);
+        // Some devices may fail to find device local memory for these FD imports (likely from
+        // camera).  When this occurs we can alternatively use host memory even though there could
+        // be performance consequences. This issue was discovered on AMD
+        // (https://www.techpowerup.com/gpu-specs/amd-mendocino.g1022).
+        // See crbug.com/422128949
+        if (memoryTypeIndex == -1) {
+            memoryTypeIndex = mDevice->GetResourceMemoryAllocator()->FindBestTypeIndex(
+                memoryRequirements, MemoryKind::HostCached);
+        }
+
         DAWN_INVALID_IF(memoryTypeIndex == -1,
                         "Unable to find an appropriate memory type for import.");
 
