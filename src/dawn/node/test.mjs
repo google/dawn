@@ -12,6 +12,14 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const dawnNodePath = join(__dirname, '..', '..', '..', 'out', 'active', 'dawn.node');
 const { create, globals } = require(dawnNodePath);
 
+// Save these before they might get replaced by the following assignment
+const globalsBeforeGlobalAssignment = {
+  DOMException,
+  EventTarget,
+  Error,
+  Event,
+};
+
 Object.assign(globalThis, globals);
 
 const assert = {
@@ -47,6 +55,14 @@ describe('tests', async () => {
 
     await new Promise(r => setTimeout(r, 1000));
   })
+
+  await describe('global tests', async () => {
+    // Check that these globals were not replaced when we added dawn.node's globals
+    assert.ok(() => globalsBeforeGlobalAssignment.EventTarget === EventTarget);
+    assert.ok(() => globalsBeforeGlobalAssignment.Event === Event);
+    assert.ok(() => globalsBeforeGlobalAssignment.Error === Error);
+    assert.ok(() => globalsBeforeGlobalAssignment.DOMException === DOMException);
+  });
 
   await describe('device tests', async () => {
 

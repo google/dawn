@@ -70,10 +70,7 @@ const Constructors* ConstructorsFor(Napi::Env env) {
 
 {{ range $ := .Declarations}}
 {{-        if IsDictionary $}}{{template "Dictionary" $}}
-{{-   else if IsInterface  $}}
-{{-     if not (HasAnnotation $ "ManualImplementation")}}
-  {{template "Interface"  $}}
-{{-     end}}
+{{-   else if IsInterface  $}}{{template "Interface"  $}}
 {{-   else if IsEnum       $}}{{template "Enum"       $}}
 {{-   end}}
 {{- end}}
@@ -425,6 +422,7 @@ std::ostream& operator<<(std::ostream& o, const {{$.Name}}& dict) {
 {{- define "Interface"}}
 {{$.Name}}::{{$.Name}}() = default;
 
+{{-  if not (HasAnnotation $ "ManualImplementation")}}
 {{$.Name}}* {{$.Name}}::Unwrap(Napi::Object object) {
   auto* wrappers = Wrappers::For(object.Env());
   if (!object.InstanceOf(wrappers->{{$.Name}}_ctor.Value())) {
@@ -453,6 +451,7 @@ Interface<{{$.Name}}> {{$.Name}}::Bind(Napi::Env env, std::unique_ptr<{{$.Name}}
 
   return Interface<{{$.Name}}>(object);
 }
+{{-  end}}
 
 {{$.Name}}::~{{$.Name}}() = default;
 {{ end}}

@@ -140,6 +140,7 @@ public:
 // interface {{$.Name}}
 class {{$.Name}} {{- if $.Inherits }} : public virtual {{$.Inherits}}{{end}} {
 public:
+{{-  if not (HasAnnotation $ "ManualImplementation")}}
   static Interface<{{$.Name}}> Bind(Napi::Env, std::unique_ptr<{{$.Name}}>&&);
   static {{$.Name}}* Unwrap(Napi::Object);
 
@@ -147,7 +148,7 @@ public:
   static inline Interface<{{$.Name}}> Create(Napi::Env env, ARGS&& ... args) {
     return Bind(env, std::make_unique<T>(std::forward<ARGS>(args)...));
   }
-
+{{-  end}}
   virtual ~{{$.Name}}() {{- if $.Inherits }} override{{end}};
   {{$.Name}}();
 {{-  if $s := SetlikeOf $}}

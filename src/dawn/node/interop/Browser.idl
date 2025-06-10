@@ -49,7 +49,7 @@ callback EventListenerCallback = undefined (Event event);
 typedef(EventListenerInterface or EventListenerCallback) EventListener;
 typedef EventListenerCallback? EventHandler;
 
-[LegacyNoInterfaceObject] interface EventTarget {
+[LegacyNoInterfaceObject] [ManualImplementation] interface EventTarget {
   undefined addEventListener(DOMString type, EventListener? callback, optional (AddEventListenerOptions or boolean) options);
   undefined removeEventListener(DOMString type, EventListener? callback, optional (EventListenerOptions or boolean) options);
   boolean dispatchEvent(Event event);

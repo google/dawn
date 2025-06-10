@@ -54,6 +54,9 @@ ManualConstructors::ManualConstructors(Napi::Env env) {
     Napi::Object global = env.Global();
     DOMException_ctor = Napi::Persistent(global.Get("DOMException").As<Napi::Function>());
 
+    // Lookup the EventTarget class
+    EventTarget_ctor = Napi::Persistent(global.Get("EventTarget").As<Napi::Function>());
+
     // Define GPUUncapturedErrorEvent as a JavaScript object because it
     // must inherit from Event otherwise it can not be passed to an EventTarget
     // and this is apparently impossible in Napi if it's a C++ based object.
