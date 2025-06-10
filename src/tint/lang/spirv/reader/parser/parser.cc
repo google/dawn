@@ -1125,6 +1125,16 @@ class Parser {
         current_spirv_function_ = nullptr;
     }
 
+    std::optional<uint32_t> Position(const core::type::Struct* str) {
+        for (auto* mem : str->Members()) {
+            auto builtin = mem->Attributes().builtin;
+            if (builtin.has_value() && builtin.value() == core::BuiltinValue::kPosition) {
+                return {mem->Index()};
+            }
+        }
+        return {};
+    }
+
     /// Emit entry point attributes.
     void EmitEntryPointAttributes() {
         // Handle OpEntryPoint declarations.
@@ -1166,17 +1176,65 @@ class Parser {
                     auto* var = inst_result->Instruction()->As<core::ir::Var>();
                     TINT_ASSERT(var);
 
-                    auto builtin = var->Builtin();
-                    if (!builtin.has_value() || builtin.value() != core::BuiltinValue::kPosition) {
-                        continue;
-                    }
+                    if (auto* str = var->Result()->Type()->UnwrapPtr()->As<core::type::Struct>()) {
+                        auto p = Position(str);
+                        if (!p.has_value()) {
+                            continue;
+                        }
 
-                    auto refs = referenced.TransitiveReferences(func);
-                    // The referenced variables does not contain the var which has the `position`
-                    // builtin, then we need to create a fake store.
-                    if (!refs.Contains(var)) {
-                        auto* store = b_.Store(var, b_.Zero(var->Result()->Type()->UnwrapPtr()));
-                        store->InsertBefore(func->Block()->Front());
+                        auto refs = referenced.TransitiveReferences(func);
+                        if (refs.Contains(var)) {
+                            // The `var` is referenced, but we need to determine if there is an
+                            // `access` usage which references `position` which is then used in a
+                            // `store` instruction.
+
+                            bool accessed = false;
+                            for (auto& usage : var->Result()->UsagesUnsorted()) {
+                                if (auto* access = usage->instruction->As<core::ir::Access>()) {
+                                    if (access->Indices().IsEmpty()) {
+                                        continue;
+                                    }
+
+                                    auto* cnst = access->Indices()[0]->As<core::ir::Constant>();
+                                    TINT_ASSERT(cnst);
+
+                                    if (cnst->Value()->ValueAs<uint32_t>() == p.value()) {
+                                        accessed = true;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if (accessed) {
+                                break;
+                            }
+                        }
+
+                        auto* mem_ty = str->Members()[p.value()]->Type();
+                        auto* type = ty_.ptr(
+                            var->Result()->Type()->As<core::type::Pointer>()->AddressSpace(),
+                            mem_ty);
+                        auto* access = b_.Access(type, var, u32(p.value()));
+                        access->InsertBefore(func->Block()->Front());
+
+                        auto* store = b_.Store(access, b_.Zero(mem_ty));
+                        store->InsertAfter(access);
+
+                    } else {
+                        auto builtin = var->Builtin();
+                        if (!builtin.has_value() ||
+                            builtin.value() != core::BuiltinValue::kPosition) {
+                            continue;
+                        }
+
+                        auto refs = referenced.TransitiveReferences(func);
+                        // The referenced variables does not contain the var which has the
+                        // `position` builtin, then we need to create a fake store.
+                        if (!refs.Contains(var)) {
+                            auto* store =
+                                b_.Store(var, b_.Zero(var->Result()->Type()->UnwrapPtr()));
+                            store->InsertBefore(func->Block()->Front());
+                        }
                     }
 
                     // There should only be one `position` so we're done if we've processed the

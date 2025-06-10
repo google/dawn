@@ -225,6 +225,92 @@ $B1: {  # root
 )");
 }
 
+TEST_F(SpirvParserTest, VertexShader_PositionUnused_Struct) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Vertex %main "main" %1
+               OpDecorate %str Block
+               OpMemberDecorate %str 0 BuiltIn Position
+       %void = OpTypeVoid
+      %float = OpTypeFloat 32
+    %ep_type = OpTypeFunction %void
+    %v4float = OpTypeVector %float 4
+        %str = OpTypeStruct %v4float
+    %str_ptr = OpTypePointer Output %str
+          %1 = OpVariable %str_ptr Output
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+tint_symbol_1 = struct @align(16) {
+  tint_symbol:vec4<f32> @offset(0), @builtin(position)
+}
+
+$B1: {  # root
+  %1:ptr<__out, tint_symbol_1, read_write> = var undef
+}
+
+%main = @vertex func():void {
+  $B2: {
+    %3:ptr<__out, vec4<f32>, read_write> = access %1, 0u
+    store %3, vec4<f32>(0.0f)
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, VertexShader_PositionUsed_Struct) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Vertex %main "main" %1
+               OpDecorate %str Block
+               OpMemberDecorate %str 0 BuiltIn Position
+       %void = OpTypeVoid
+      %float = OpTypeFloat 32
+       %uint = OpTypeInt 32 0
+    %ep_type = OpTypeFunction %void
+    %v4float = OpTypeVector %float 4
+        %str = OpTypeStruct %v4float
+    %str_ptr = OpTypePointer Output %str
+%ptr_v4float = OpTypePointer Output %v4float
+     %uint_0 = OpConstant %uint 0
+        %one = OpConstant %float 1
+        %two = OpConstant %float 2
+      %three = OpConstant %float 3
+       %four = OpConstant %float 4
+          %3 = OpConstantComposite %v4float %one %two %three %four
+          %1 = OpVariable %str_ptr Output
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+          %2 = OpAccessChain %ptr_v4float %1 %uint_0
+               OpStore %2 %3
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+tint_symbol_1 = struct @align(16) {
+  tint_symbol:vec4<f32> @offset(0), @builtin(position)
+}
+
+$B1: {  # root
+  %1:ptr<__out, tint_symbol_1, read_write> = var undef
+}
+
+%main = @vertex func():void {
+  $B2: {
+    %3:ptr<__out, vec4<f32>, read_write> = access %1, 0u
+    store %3, vec4<f32>(1.0f, 2.0f, 3.0f, 4.0f)
+    ret
+  }
+}
+)");
+}
+
 TEST_F(SpirvParserTest, VertexShader_PositionUnused) {
     EXPECT_IR(R"(
                OpCapability Shader
