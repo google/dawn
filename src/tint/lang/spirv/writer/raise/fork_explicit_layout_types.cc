@@ -91,8 +91,10 @@ struct State {
 
                 case core::AddressSpace::kFunction:
                 case core::AddressSpace::kPrivate:
-                    // TODO(crbug.com/401585324): Only do this for SPIR-V 1.5 and later.
-                    RecordTypesThatMustNotHaveExplicitLayout(ptr);
+                    // In SPIR-V 1.4 and earlier, Vulkan allowed explicit layout decorations.
+                    if (version > SpvVersion::kSpv14) {
+                        RecordTypesThatMustNotHaveExplicitLayout(ptr);
+                    }
                     break;
 
                 case core::AddressSpace::kWorkgroup:

@@ -133,6 +133,7 @@ struct Bindings {
 enum class SpvVersion : uint32_t {
     kSpv13 = 0x10300u,  // SPIR-V 1.3
     kSpv14 = 0x10400u,  // SPIR-V 1.4
+    kSpv15 = 0x10500u,  // SPIR-V 1.5, for testing purposes only
 };
 
 /// Configuration options used for generating SPIR-V.
