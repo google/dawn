@@ -32,23 +32,31 @@ ComboLimits::ComboLimits() = default;
 
 {% set limits_and_extensions = [types['limits']] + types['limits'].extensions %}
 void ComboLimits::UnlinkedCopyTo(ComboLimits* dst) const {
-    {% for type in limits_and_extensions %}
+    {% for type in limits_and_extensions if not type.ifndef_emscripten %}
         *static_cast<wgpu::{{as_cppType(type.name)}}*>(dst) = *this;
-    {% endfor %}
-    {% for type in limits_and_extensions %}
         dst->wgpu::{{as_cppType(type.name)}}::nextInChain = nullptr;
     {% endfor %}
+#ifndef __EMSCRIPTEN__
+    {% for type in limits_and_extensions if type.ifndef_emscripten %}
+        *static_cast<wgpu::{{as_cppType(type.name)}}*>(dst) = *this;
+        dst->wgpu::{{as_cppType(type.name)}}::nextInChain = nullptr;
+    {% endfor %}
+#endif
 }
 
 wgpu::Limits* ComboLimits::GetLinked() {
-    {% for type in limits_and_extensions %}
+    this->wgpu::Limits::nextInChain =
+    {% for type in types['limits'].extensions if not type.ifndef_emscripten%}
+            static_cast<wgpu::{{as_cppType(type.name)}}*>(this);
         this->wgpu::{{as_cppType(type.name)}}::nextInChain =
-            {% if loop.nextitem %}
-                static_cast<wgpu::{{as_cppType(loop.nextitem.name)}}*>(this);
-            {% else %}
-                nullptr;
-            {% endif %}
     {% endfor %}
+#ifndef __EMSCRIPTEN__
+    {% for type in types['limits'].extensions if type.ifndef_emscripten %}
+            static_cast<wgpu::{{as_cppType(type.name)}}*>(this);
+        this->wgpu::{{as_cppType(type.name)}}::nextInChain =
+    {% endfor %}
+#endif
+        nullptr;
     return this;
 }
 
