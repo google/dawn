@@ -1868,6 +1868,21 @@ TEST_F(IR_ValidatorTest, Return_UnexpectedValue) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Return_UnexpectedValue_NullValue_WithVoid) {
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {  //
+        b.Return(f, nullptr);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:3:5 error: return: unexpected return value
+    ret undef
+    ^^^^^^^^^
+)")) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Return_MissingValue) {
     auto* f = b.Function("my_func", ty.i32());
     b.Append(f->Block(), [&] {  //

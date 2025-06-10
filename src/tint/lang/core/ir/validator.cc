@@ -3626,7 +3626,7 @@ void Validator::CheckReturn(const Return* ret) {
     }
 
     if (func->ReturnType()->Is<core::type::Void>()) {
-        if (ret->Value()) {
+        if (ret->HasValue()) {
             AddError(ret) << "unexpected return value";
         }
     } else {
