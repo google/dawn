@@ -284,6 +284,7 @@ if (is_win || is_linux || is_chromeos || is_mac || is_fuchsia || is_android ||
       "GPUInfo.h",
       "HashUtils.h",
       "IOKitRef.h",
+      "LRUCache.h",
       "LinkedList.h",
       "Log.cpp",
       "Log.h",

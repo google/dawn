@@ -28,9 +28,12 @@
 #ifndef SRC_DAWN_NATIVE_TEXTURE_H_
 #define SRC_DAWN_NATIVE_TEXTURE_H_
 
+#include <memory>
 #include <string>
 #include <vector>
 
+#include "dawn/common/LRUCache.h"
+#include "dawn/common/RefCountedWithExternalCount.h"
 #include "dawn/common/WeakRef.h"
 #include "dawn/common/ityp_array.h"
 #include "dawn/common/ityp_bitset.h"
@@ -84,7 +87,31 @@ static constexpr wgpu::TextureUsage kTextureViewOnlyUsages =
     kShaderTextureUsages | kResolveTextureLoadAndStoreUsages |
     wgpu::TextureUsage::TransientAttachment | wgpu::TextureUsage::StorageAttachment;
 
-class TextureBase : public SharedResource {
+// A flattened version of TextureViewDescriptor used to query the texture view cache.
+struct TextureViewQuery {
+    explicit TextureViewQuery(const UnpackedPtr<TextureViewDescriptor>& desc);
+    bool operator==(const TextureViewQuery& b) const = default;
+
+    // TextureViewDescriptor fields (label ignored)
+    wgpu::TextureFormat format;
+    wgpu::TextureViewDimension dimension;
+    uint32_t baseMipLevel;
+    uint32_t mipLevelCount;
+    uint32_t baseArrayLayer;
+    uint32_t arrayLayerCount;
+    wgpu::TextureAspect aspect;
+    wgpu::TextureUsage usage;
+
+    // Update with fields from relevant chained structs as they are added.
+};
+
+static const size_t kDefaultTextureViewCacheCapacity = 4;
+struct TextureViewCacheFuncs {
+    size_t operator()(const TextureViewQuery& desc) const;
+    bool operator()(const TextureViewQuery& a, const TextureViewQuery& b) const;
+};
+
+class TextureBase : public RefCountedWithExternalCount<SharedResource> {
   public:
     enum class ClearValue { Zero, NonZero };
 
@@ -164,6 +191,11 @@ class TextureBase : public SharedResource {
 
     uint64_t ComputeEstimatedByteSize() const;
 
+    template <typename CreateFn>
+    ResultOrError<Ref<TextureViewBase>> GetOrCreateViewFromCache(
+        const UnpackedPtr<TextureViewDescriptor>& desc,
+        CreateFn createFn);
+
     // Dawn API
     TextureViewBase* APICreateView(const TextureViewDescriptor* descriptor = nullptr);
     TextureViewBase* APICreateErrorView(const TextureViewDescriptor* descriptor = nullptr);
@@ -201,6 +233,9 @@ class TextureBase : public SharedResource {
 
     std::string GetSizeLabel() const;
 
+    void WillAddFirstExternalRef() override;
+    void WillDropLastExternalRef() override;
+
     wgpu::TextureDimension mDimension;
     // Only used for compatibility mode
     wgpu::TextureViewDimension mCompatibilityTextureBindingViewDimension =
@@ -219,9 +254,26 @@ class TextureBase : public SharedResource {
     // is destroyed.
     ApiObjectList mTextureViews;
 
+    using TextureViewCache =
+        LRUCache<TextureViewQuery, Ref<TextureViewBase>, ErrorData, TextureViewCacheFuncs>;
+    std::unique_ptr<TextureViewCache> mTextureViewCache;
+
     // TODO(crbug.com/dawn/845): Use a more optimized data structure to save space
     std::vector<bool> mIsSubresourceContentInitializedAtIndex;
 };
+
+template <typename CreateFn>
+ResultOrError<Ref<TextureViewBase>> TextureBase::GetOrCreateViewFromCache(
+    const UnpackedPtr<TextureViewDescriptor>& desc,
+    CreateFn createFn) {
+    TextureViewQuery query(desc);
+
+    if (!mTextureViewCache) {
+        return createFn(query);
+    }
+
+    return mTextureViewCache->GetOrCreate(query, createFn);
+}
 
 class TextureViewBase : public ApiObjectBase {
   public:

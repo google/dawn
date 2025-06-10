@@ -608,6 +608,7 @@ wgpu::Status Surface::APIGetCapabilities(AdapterBase* adapter,
 
 void Surface::APIGetCurrentTexture(SurfaceTexture* surfaceTexture) const {
     MaybeError maybeError = GetCurrentTexture(surfaceTexture);
+
     if (!GetCurrentDevice()) {
         [[maybe_unused]] bool error = mInstance->ConsumedError(std::move(maybeError));
     } else {

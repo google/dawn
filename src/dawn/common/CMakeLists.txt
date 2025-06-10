@@ -69,6 +69,7 @@ set(private_headers
     "ityp_vector.h"
     "LinkedList.h"
     "Log.h"
+    "LRUCache.h"
     "MatchVariant.h"
     "Math.h"
     "Mutex.h"

@@ -33,6 +33,7 @@
 #include "absl/strings/str_format.h"
 #include "dawn/common/Assert.h"
 #include "dawn/common/Constants.h"
+#include "dawn/common/HashUtils.h"
 #include "dawn/common/Math.h"
 #include "dawn/native/Adapter.h"
 #include "dawn/native/BlitBufferToTexture.h"
@@ -925,7 +926,7 @@ bool IsValidSampleCount(uint32_t sampleCount) {
 TextureBase::TextureState::TextureState() : hasAccess(true), destroyed(false) {}
 
 TextureBase::TextureBase(DeviceBase* device, const UnpackedPtr<TextureDescriptor>& descriptor)
-    : SharedResource(device, descriptor->label),
+    : RefCountedWithExternalCount<SharedResource>(device, descriptor->label),
       mDimension(descriptor->dimension),
       mCompatibilityTextureBindingViewDimension(
           ResolveDefaultCompatiblityTextureBindingViewDimension(device, descriptor)),
@@ -965,7 +966,7 @@ static constexpr Format kUnusedFormat;
 TextureBase::TextureBase(DeviceBase* device,
                          const TextureDescriptor* descriptor,
                          ObjectBase::ErrorTag tag)
-    : SharedResource(device, tag, descriptor->label),
+    : RefCountedWithExternalCount<SharedResource>(device, tag, descriptor->label),
       mDimension(descriptor->dimension),
       mFormat(kUnusedFormat),
       mBaseSize(descriptor->size),
@@ -986,6 +987,9 @@ void TextureBase::DestroyImpl() {
     //   is implicitly destroyed. This case is thread-safe because there are no
     //   other threads using the texture since there are no other live refs.
     mState.destroyed = true;
+
+    // Drop all the cache references to TextureViews.
+    mTextureViewCache = nullptr;
 
     // Destroy all of the views associated with the texture as well.
     mTextureViews.Destroy();
@@ -1010,6 +1014,21 @@ void TextureBase::FormatLabel(absl::FormatSink* s) const {
     } else if (!IsError()) {
         s->Append(absl::StrFormat(" (unlabeled %s, %s)", GetSizeLabel(), mFormat->format));
     }
+}
+
+void TextureBase::WillAddFirstExternalRef() {
+    // Only enable the view cache once an external reference has been added. This prevents textures
+    // created for internal uses, such as workarounds, from being kept alive by the views in the
+    // cache.
+    if (!IsError()) {
+        mTextureViewCache = std::make_unique<TextureViewCache>(kDefaultTextureViewCacheCapacity);
+    }
+}
+
+void TextureBase::WillDropLastExternalRef() {
+    // Drop all the additional references to TextureViews that we were holding as a part of the
+    // cache.
+    mTextureViewCache = nullptr;
 }
 
 std::string TextureBase::GetSizeLabel() const {
@@ -1431,6 +1450,36 @@ wgpu::TextureFormat TextureBase::APIGetFormat() const {
 
 wgpu::TextureUsage TextureBase::APIGetUsage() const {
     return mUsage;
+}
+
+// TextureViewQuery
+
+TextureViewQuery::TextureViewQuery(const UnpackedPtr<TextureViewDescriptor>& desc) {
+    // TextureViewDescriptor fields
+    format = desc->format;
+    dimension = desc->dimension;
+    baseMipLevel = desc->baseMipLevel;
+    mipLevelCount = desc->mipLevelCount;
+    baseArrayLayer = desc->baseArrayLayer;
+    arrayLayerCount = desc->arrayLayerCount;
+    aspect = desc->aspect;
+    usage = desc->usage;
+}
+
+// TextureViewCacheFuncs
+
+size_t TextureViewCacheFuncs::operator()(const TextureViewQuery& desc) const {
+    size_t hash = Hash(desc.format);
+
+    HashCombine(&hash, desc.dimension, desc.aspect, desc.usage);
+    HashCombine(&hash, desc.baseMipLevel, desc.mipLevelCount, desc.baseArrayLayer,
+                desc.arrayLayerCount);
+
+    return hash;
+}
+
+bool TextureViewCacheFuncs::operator()(const TextureViewQuery& a, const TextureViewQuery& b) const {
+    return a == b;
 }
 
 // TextureViewBase
