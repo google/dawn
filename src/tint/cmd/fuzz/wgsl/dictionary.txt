@@ -429,6 +429,7 @@
 "tan"
 "tanh"
 "texel"
+"texel_buffers"
 "textureBarrier"
 "textureDimensions"
 "textureGather"

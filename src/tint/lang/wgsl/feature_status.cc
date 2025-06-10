@@ -37,6 +37,7 @@ FeatureStatus GetLanguageFeatureStatus(LanguageFeature f) {
             // Experimental features
             ///////////////////////////////////////////////////////////////////
         case LanguageFeature::kSizedBindingArray:
+        case LanguageFeature::kTexelBuffers:
             return FeatureStatus::kUnsafeExperimental;
 
             ////////////////////////////////////////////////////////////////////
