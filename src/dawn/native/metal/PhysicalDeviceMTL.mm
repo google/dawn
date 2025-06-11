@@ -650,7 +650,8 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     // family of GPUs on.
     if ([*mDevice supportsFamily:MTLGPUFamilyApple2]) {
         // Programmable blending doesn't seem to work as expected on the iOS simulator.
-#if !defined(TARGET_OS_SIMULATOR)
+        // NOTE: TARGET_OS_SIMULATOR can be defined but set to false for MacOS builds.
+#if !defined(TARGET_OS_SIMULATOR) || !TARGET_OS_SIMULATOR
         EnableFeature(Feature::FramebufferFetch);
 #endif
         EnableFeature(Feature::TransientAttachments);
