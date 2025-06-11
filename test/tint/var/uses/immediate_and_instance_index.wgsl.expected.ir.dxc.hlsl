@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 struct main_outputs {
   float4 tint_symbol : SV_Position;
 };
