@@ -3872,11 +3872,10 @@ TEST_F(SpirvParserTest, Loop_Never) {
         unreachable
       }
       $B3: {  # continuing
-        %4:i32 = spirv.add<i32> 2i, 2i
         next_iteration  # -> $B2
       }
     }
-    %5:i32 = spirv.add<i32> 3i, 3i
+    %4:i32 = spirv.add<i32> 3i, 3i
     ret
   }
 }
@@ -4109,7 +4108,6 @@ TEST_F(SpirvParserTest, Loop_BodyAlwaysBreaks) {
         exit_loop  # loop_1
       }
       $B3: {  # continuing
-        %3:i32 = spirv.add<i32> 2i, 2i
         next_iteration  # -> $B2
       }
     }
@@ -4602,7 +4600,6 @@ TEST_F(SpirvParserTest, Branch_LoopBreak_MultiBlockLoop_FromBody) {
         exit_loop  # loop_1
       }
       $B3: {  # continuing
-        %3:i32 = spirv.add<i32> 2i, 2i
         next_iteration  # -> $B2
       }
     }
@@ -5649,11 +5646,10 @@ TEST_F(SpirvParserTest, BranchConditional_LoopBreak_SingleBlock_LoopBreak) {
         unreachable
       }
       $B3: {  # continuing
-        %5:i32 = spirv.add<i32> 3i, 3i
         next_iteration  # -> $B2
       }
     }
-    %6:i32 = spirv.add<i32> 1i, 3i
+    %5:i32 = spirv.add<i32> 1i, 3i
     ret
   }
 }
@@ -5713,11 +5709,10 @@ TEST_F(SpirvParserTest, BranchConditional_LoopBreak_MultiBlock_LoopBreak) {
         unreachable
       }
       $B3: {  # continuing
-        %6:i32 = spirv.add<i32> 1i, 2i
         next_iteration  # -> $B2
       }
     }
-    %7:i32 = spirv.add<i32> 1i, 3i
+    %6:i32 = spirv.add<i32> 1i, 3i
     ret
   }
 }
@@ -7126,6 +7121,73 @@ TEST_F(SpirvParserTest, FalseBranch_SwitchBreak) {
           }
         }
         exit_switch  # switch_1
+      }
+    }
+    ret
+  }
+}
+)");
+}
+TEST_F(SpirvParserTest, ConvertHoisted) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical Simple
+               OpEntryPoint Fragment %100 "main"
+               OpExecutionMode %100 OriginUpperLeft
+       %void = OpTypeVoid
+          %2 = OpTypeFunction %void
+       %bool = OpTypeBool
+       %uint = OpTypeInt 32 0
+      %float = OpTypeFloat 32
+       %true = OpConstantTrue %bool
+   %float_50 = OpConstant %float 50
+        %100 = OpFunction %void None %2
+         %10 = OpLabel
+               OpBranch %30
+         %30 = OpLabel
+               OpLoopMerge %90 %80 None
+               OpBranchConditional %true %90 %40
+         %40 = OpLabel
+               OpSelectionMerge %50 None
+               OpBranchConditional %true %45 %50
+         %45 = OpLabel
+        %600 = OpCopyObject %float %float_50
+               OpBranch %50
+         %50 = OpLabel
+               OpBranch %90
+         %80 = OpLabel
+         %82 = OpConvertFToU %uint %600
+               OpBranch %30
+         %90 = OpLabel
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @fragment func():void {
+  $B1: {
+    loop [b: $B2, c: $B3] {  # loop_1
+      $B2: {  # body
+        if true [t: $B4, f: $B5] {  # if_1
+          $B4: {  # true
+            exit_loop  # loop_1
+          }
+          $B5: {  # false
+            if true [t: $B6, f: $B7] {  # if_2
+              $B6: {  # true
+                %2:f32 = let 50.0f
+                exit_if  # if_2
+              }
+              $B7: {  # false
+                exit_if  # if_2
+              }
+            }
+            exit_loop  # loop_1
+          }
+        }
+        unreachable
+      }
+      $B3: {  # continuing
+        next_iteration  # -> $B2
       }
     }
     ret

@@ -1300,7 +1300,7 @@ class Parser {
         }
     }
 
-    bool InBlock(core::ir::Block* blk) { return current_blocks_.count(blk) > 0; }
+    bool InBlock(core::ir::Block* blk) { return current_blocks_.contains(blk); }
 
     // A block parent is a container for a scope, like a `{}`d section in code. It controls the
     // block addition to the current blocks and the ID stack entry for the block.
@@ -1774,7 +1774,14 @@ class Parser {
             id_stack_.emplace_back();
 
             auto continue_id = loop_merge_inst->GetSingleWordInOperand(1);
-            if (continue_id != src.id()) {
+
+            // We only need to emit the continuing block if:
+            //  a) It is not the loop header
+            //  b) It has inbound branches. This works around a case where you can have a continuing
+            //     where uses values which are very difficult to propagate, but the continuing is
+            //     never reached anyway, so the propagation is useless.
+            if (continue_id != src.id() &&
+                !loop->Continuing()->InboundSiblingBranches().IsEmpty()) {
                 const auto& bb_continue = current_spirv_function_->FindBlock(continue_id);
 
                 current_blocks_.insert(loop->Continuing());
