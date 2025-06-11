@@ -815,7 +815,8 @@ TEST_P(BufferMappingCallbackTests, EmptySubmissionWriteAndThenMap) {
 }
 
 DAWN_INSTANTIATE_TEST_P(BufferMappingCallbackTests,
-                        {D3D11Backend(), D3D12Backend(), MetalBackend(), VulkanBackend()},
+                        {D3D11Backend(), D3D12Backend(), MetalBackend(), VulkanBackend(),
+                         WebGPUBackend()},
                         std::initializer_list<wgpu::CallbackMode>{
                             wgpu::CallbackMode::WaitAnyOnly, wgpu::CallbackMode::AllowProcessEvents,
                             wgpu::CallbackMode::AllowSpontaneous});

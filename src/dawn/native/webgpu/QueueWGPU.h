@@ -28,6 +28,9 @@
 #ifndef SRC_DAWN_NATIVE_WEBGPU_QUEUEWGPU_H_
 #define SRC_DAWN_NATIVE_WEBGPU_QUEUEWGPU_H_
 
+#include <deque>
+#include <utility>
+#include "dawn/common/MutexProtected.h"
 #include "dawn/native/Queue.h"
 
 #include "dawn/native/webgpu/Forward.h"
@@ -54,8 +57,11 @@ class Queue final : public QueueBase {
     MaybeError SubmitPendingCommandsImpl() override;
     ResultOrError<bool> WaitForQueueSerial(ExecutionSerial serial, Nanoseconds timeout) override;
     MaybeError WaitForIdleForDestruction() override;
+    MaybeError SubmitFutureSync();
 
     WGPUQueue mInnerQueue = nullptr;
+    MutexProtected<std::deque<std::pair<WGPUFuture, ExecutionSerial>>> mFuturesInFlight;
+    bool mHasPendingCommands = false;
 };
 
 }  // namespace dawn::native::webgpu
