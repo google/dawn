@@ -6365,6 +6365,680 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, LoadVectorWithIndex_MaxBound_Equal_Limit) {
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        Var* idx = nullptr;
+        // v = vec4u()
+        auto* v = b.Var("v", ty.ptr(function, ty.vec4<u32>()));
+        auto* loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            // idx = 0u
+            idx = b.Var("idx", 0_u);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // idx < 4u
+            auto* binary = b.LessThan<bool>(b.Load(idx), 4_u);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            // v[idx]
+            // idx: [0u, 3u]
+            auto* loadx = b.Load(idx);
+            b.LoadVectorElement(v, loadx);
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            // idx++
+            b.Store(idx, b.Add<u32>(b.Load(idx), 1_u));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* expect = R"(
+%func = func():void {
+  $B1: {
+    %v:ptr<function, vec4<u32>, read_write> = var undef
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, u32, read_write> = var 0u
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %4:u32 = load %idx
+        %5:bool = lt %4, 4u
+        if %5 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        %6:u32 = load %idx
+        %7:u32 = load_vector_element %v, %6
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %8:u32 = load %idx
+        %9:u32 = add %8, 1u
+        store %idx, %9
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    cfg.clamp_function = true;
+    cfg.use_integer_range_analysis = true;
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, LoadVectorWithIndex_MaxBound_LessThan_Limit) {
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        Var* idx = nullptr;
+        // v = vec3u()
+        auto* v = b.Var("v", ty.ptr(function, ty.vec3<u32>()));
+        auto* loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            // idx = 0u
+            idx = b.Var("idx", 0_u);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // idx < 2u
+            auto* binary = b.LessThan<bool>(b.Load(idx), 2_u);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            // v[idx]
+            // idx: [0u, 1u]
+            auto* loadx = b.Load(idx);
+            b.LoadVectorElement(v, loadx);
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            // idx++
+            b.Store(idx, b.Add<u32>(b.Load(idx), 1_u));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* expect = R"(
+%func = func():void {
+  $B1: {
+    %v:ptr<function, vec3<u32>, read_write> = var undef
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, u32, read_write> = var 0u
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %4:u32 = load %idx
+        %5:bool = lt %4, 2u
+        if %5 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        %6:u32 = load %idx
+        %7:u32 = load_vector_element %v, %6
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %8:u32 = load %idx
+        %9:u32 = add %8, 1u
+        store %idx, %9
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    cfg.clamp_function = true;
+    cfg.use_integer_range_analysis = true;
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, LoadVectorWithIndex_MaxBound_GreaterThan_Limit) {
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        Var* idx = nullptr;
+        // v = vec4u()
+        auto* v = b.Var("v", ty.ptr(function, ty.vec4<u32>()));
+        auto* loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            // idx = 0u
+            idx = b.Var("idx", 0_u);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // idx < 5u
+            auto* binary = b.LessThan<bool>(b.Load(idx), 5_u);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            // v[idx]
+            // idx: [0u, 4u]
+            auto* loadx = b.Load(idx);
+            b.LoadVectorElement(v, loadx);
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            // idx++
+            b.Store(idx, b.Add<u32>(b.Load(idx), 1_u));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* expect = R"(
+%func = func():void {
+  $B1: {
+    %v:ptr<function, vec4<u32>, read_write> = var undef
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, u32, read_write> = var 0u
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %4:u32 = load %idx
+        %5:bool = lt %4, 5u
+        if %5 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        %6:u32 = load %idx
+        %7:u32 = min %6, 3u
+        %8:u32 = load_vector_element %v, %7
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %9:u32 = load %idx
+        %10:u32 = add %9, 1u
+        store %idx, %10
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    cfg.clamp_function = true;
+    cfg.use_integer_range_analysis = true;
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, LoadVectorWithIndex_IndexNoRange) {
+    auto* func = b.Function("func", ty.void_());
+    auto* param = b.FunctionParam("param", ty.u32());
+    func->AppendParam(param);
+    b.Append(func->Block(), [&] {
+        // v = vec4u()
+        auto* v = b.Var("v", ty.ptr(function, ty.vec4<u32>()));
+        b.LoadVectorElement(v, param);
+        b.Return(func);
+    });
+
+    auto* expect = R"(
+%func = func(%param:u32):void {
+  $B1: {
+    %v:ptr<function, vec4<u32>, read_write> = var undef
+    %4:u32 = min %param, 3u
+    %5:u32 = load_vector_element %v, %4
+    ret
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    cfg.clamp_function = true;
+    cfg.use_integer_range_analysis = true;
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, LoadVectorWithIndex_I32_NegativeMinBound) {
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        Var* idx = nullptr;
+        // v = vec4u()
+        auto* v = b.Var("v", ty.ptr(function, ty.vec4<u32>()));
+        auto* loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            // idx = -1
+            idx = b.Var("idx", -1_i);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // idx < 4
+            auto* binary = b.LessThan<bool>(b.Load(idx), 4_i);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            // v[idx]
+            // idx: [-1, 3]
+            auto* loadx = b.Load(idx);
+            b.LoadVectorElement(v, loadx);
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            // idx++
+            b.Store(idx, b.Add<i32>(b.Load(idx), 1_i));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* expect = R"(
+%func = func():void {
+  $B1: {
+    %v:ptr<function, vec4<u32>, read_write> = var undef
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, i32, read_write> = var -1i
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %4:i32 = load %idx
+        %5:bool = lt %4, 4i
+        if %5 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        %6:i32 = load %idx
+        %7:u32 = convert %6
+        %8:u32 = min %7, 3u
+        %9:u32 = load_vector_element %v, %8
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %10:i32 = load %idx
+        %11:i32 = add %10, 1i
+        store %idx, %11
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    cfg.clamp_function = true;
+    cfg.use_integer_range_analysis = true;
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, StoreVectorWithIndex_MaxBound_Equal_Limit) {
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        Var* idx = nullptr;
+        // v = vec4u()
+        auto* v = b.Var("v", ty.ptr(function, ty.vec4<u32>()));
+        auto* loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            // idx = 0u
+            idx = b.Var("idx", 0_u);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // idx < 4u
+            auto* binary = b.LessThan<bool>(b.Load(idx), 4_u);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            // v[idx] = 0u
+            // idx: [0u, 3u]
+            auto* loadx = b.Load(idx);
+            b.StoreVectorElement(v, loadx, b.Constant(0_u));
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            // idx++
+            b.Store(idx, b.Add<u32>(b.Load(idx), 1_u));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* expect = R"(
+%func = func():void {
+  $B1: {
+    %v:ptr<function, vec4<u32>, read_write> = var undef
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, u32, read_write> = var 0u
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %4:u32 = load %idx
+        %5:bool = lt %4, 4u
+        if %5 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        %6:u32 = load %idx
+        store_vector_element %v, %6, 0u
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %7:u32 = load %idx
+        %8:u32 = add %7, 1u
+        store %idx, %8
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    cfg.clamp_function = true;
+    cfg.use_integer_range_analysis = true;
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, StoreVectorWithIndex_MaxBound_LessThan_Limit) {
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        Var* idx = nullptr;
+        // v = vec3u()
+        auto* v = b.Var("v", ty.ptr(function, ty.vec3<u32>()));
+        auto* loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            // idx = 0u
+            idx = b.Var("idx", 0_u);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // idx < 2u
+            auto* binary = b.LessThan<bool>(b.Load(idx), 2_u);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            // v[idx]
+            // idx: [0u, 1u]
+            auto* loadx = b.Load(idx);
+            b.StoreVectorElement(v, loadx, b.Constant(0_u));
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            // idx++
+            b.Store(idx, b.Add<u32>(b.Load(idx), 1_u));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* expect = R"(
+%func = func():void {
+  $B1: {
+    %v:ptr<function, vec3<u32>, read_write> = var undef
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, u32, read_write> = var 0u
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %4:u32 = load %idx
+        %5:bool = lt %4, 2u
+        if %5 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        %6:u32 = load %idx
+        store_vector_element %v, %6, 0u
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %7:u32 = load %idx
+        %8:u32 = add %7, 1u
+        store %idx, %8
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    cfg.clamp_function = true;
+    cfg.use_integer_range_analysis = true;
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, StoreVectorWithIndex_MaxBound_GreaterThan_Limit) {
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        Var* idx = nullptr;
+        // v = vec4u()
+        auto* v = b.Var("v", ty.ptr(function, ty.vec4<u32>()));
+        auto* loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            // idx = 0u
+            idx = b.Var("idx", 0_u);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // idx < 5u
+            auto* binary = b.LessThan<bool>(b.Load(idx), 5_u);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            // v[idx]
+            // idx: [0u, 4u]
+            auto* loadx = b.Load(idx);
+            b.StoreVectorElement(v, loadx, b.Constant(0_u));
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            // idx++
+            b.Store(idx, b.Add<u32>(b.Load(idx), 1_u));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* expect = R"(
+%func = func():void {
+  $B1: {
+    %v:ptr<function, vec4<u32>, read_write> = var undef
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, u32, read_write> = var 0u
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %4:u32 = load %idx
+        %5:bool = lt %4, 5u
+        if %5 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        %6:u32 = load %idx
+        %7:u32 = min %6, 3u
+        store_vector_element %v, %7, 0u
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %8:u32 = load %idx
+        %9:u32 = add %8, 1u
+        store %idx, %9
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    cfg.clamp_function = true;
+    cfg.use_integer_range_analysis = true;
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, StoreVectorWithIndex_IndexNoRange) {
+    auto* func = b.Function("func", ty.void_());
+    auto* param = b.FunctionParam("param", ty.u32());
+    func->AppendParam(param);
+    b.Append(func->Block(), [&] {
+        // v = vec4u()
+        auto* v = b.Var("v", ty.ptr(function, ty.vec4<u32>()));
+        b.StoreVectorElement(v, param, b.Constant(0_u));
+        b.Return(func);
+    });
+
+    auto* expect = R"(
+%func = func(%param:u32):void {
+  $B1: {
+    %v:ptr<function, vec4<u32>, read_write> = var undef
+    %4:u32 = min %param, 3u
+    store_vector_element %v, %4, 0u
+    ret
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    cfg.clamp_function = true;
+    cfg.use_integer_range_analysis = true;
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, StoreVectorWithIndex_I32_NegativeMinBound) {
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        Var* idx = nullptr;
+        // v = vec4u()
+        auto* v = b.Var("v", ty.ptr(function, ty.vec4<u32>()));
+        auto* loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            // idx = -1
+            idx = b.Var("idx", -1_i);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // idx < 4
+            auto* binary = b.LessThan<bool>(b.Load(idx), 4_i);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            // v[idx]
+            // idx: [-1, 3]
+            auto* loadx = b.Load(idx);
+            b.StoreVectorElement(v, loadx, b.Constant(0_u));
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            // idx++
+            b.Store(idx, b.Add<i32>(b.Load(idx), 1_i));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    auto* expect = R"(
+%func = func():void {
+  $B1: {
+    %v:ptr<function, vec4<u32>, read_write> = var undef
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, i32, read_write> = var -1i
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %4:i32 = load %idx
+        %5:bool = lt %4, 4i
+        if %5 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        %6:i32 = load %idx
+        %7:u32 = convert %6
+        %8:u32 = min %7, 3u
+        store_vector_element %v, %8, 0u
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %9:i32 = load %idx
+        %10:i32 = add %9, 1i
+        store %idx, %10
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    cfg.clamp_function = true;
+    cfg.use_integer_range_analysis = true;
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(expect, str());
+}
+
 INSTANTIATE_TEST_SUITE_P(, IR_RobustnessTest, testing::Values(false, true));
 
 INSTANTIATE_TEST_SUITE_P(,

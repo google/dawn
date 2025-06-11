@@ -216,13 +216,15 @@ struct State {
             // Generate a new constant index that is clamped to the limit.
             clamped_idx = b.Constant(u32(std::min(const_idx->Value()->ValueAs<uint32_t>(),
                                                   const_limit->Value()->ValueAs<uint32_t>())));
-        } else {
+        } else if (IndexMayOutOfBound(idx, limit)) {
             // Clamp it to the dynamic limit.
             clamped_idx = b.Call(ty.u32(), core::BuiltinFn::kMin, CastToU32(idx), limit)->Result();
         }
 
-        // Replace the index operand with the clamped version.
-        inst->SetOperand(op_idx, clamped_idx);
+        if (clamped_idx != nullptr) {
+            // Replace the index operand with the clamped version.
+            inst->SetOperand(op_idx, clamped_idx);
+        }
     }
 
     /// Check if operand @p idx may be less than 0 or greater than @p limit with integer range
@@ -315,7 +317,7 @@ struct State {
                 });
 
             // If there's a dynamic limit that needs enforced, clamp the index operand.
-            if (limit && IndexMayOutOfBound(idx, limit)) {
+            if (limit) {
                 ClampOperand(access, ir::Access::kIndicesOperandOffset + i, limit);
             }
 
