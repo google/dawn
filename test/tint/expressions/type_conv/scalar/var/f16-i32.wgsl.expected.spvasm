@@ -1,12 +1,13 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 28
+; Bound: 23
 ; Schema: 0
                OpCapability Shader
                OpCapability Float16
                OpCapability UniformAndStorageBuffer16BitAccess
                OpCapability StorageBuffer16BitAccess
+         %17 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
                OpExecutionMode %unused_entry_point LocalSize 1 1 1
@@ -25,10 +26,7 @@
         %int = OpTypeInt 32 1
          %14 = OpTypeFunction %int %half
 %half_n0x1_ffcp_15 = OpConstant %half -0x1.ffcp+15
-       %bool = OpTypeBool
-%int_n2147483648 = OpConstant %int -2147483648
 %half_0x1_ffcp_15 = OpConstant %half 0x1.ffcp+15
-%int_2147483647 = OpConstant %int 2147483647
           %f = OpFunction %void None %7
           %8 = OpLabel
           %9 = OpLoad %half %u None
@@ -38,14 +36,11 @@
 %tint_f16_to_i32 = OpFunction %int None %14
       %value = OpFunctionParameter %half
          %15 = OpLabel
-         %16 = OpConvertFToS %int %value
-         %17 = OpFOrdGreaterThanEqual %bool %value %half_n0x1_ffcp_15
-         %20 = OpSelect %int %17 %16 %int_n2147483648
-         %22 = OpFOrdLessThanEqual %bool %value %half_0x1_ffcp_15
-         %24 = OpSelect %int %22 %20 %int_2147483647
-               OpReturnValue %24
+         %16 = OpExtInst %half %17 NClamp %value %half_n0x1_ffcp_15 %half_0x1_ffcp_15
+         %20 = OpConvertFToS %int %16
+               OpReturnValue %20
                OpFunctionEnd
 %unused_entry_point = OpFunction %void None %7
-         %27 = OpLabel
+         %22 = OpLabel
                OpReturn
                OpFunctionEnd

@@ -6,7 +6,7 @@ float m() {
   return float(t);
 }
 uint tint_f32_to_u32(float value) {
-  return mix(4294967295u, mix(0u, uint(value), (value >= 0.0f)), (value <= 4294967040.0f));
+  return uint(clamp(value, 0.0f, 4294967040.0f));
 }
 void f() {
   uint v = tint_f32_to_u32(m());

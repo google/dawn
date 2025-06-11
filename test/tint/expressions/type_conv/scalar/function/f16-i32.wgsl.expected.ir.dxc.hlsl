@@ -6,7 +6,7 @@ float16_t m() {
 }
 
 int tint_f16_to_i32(float16_t value) {
-  return (((value <= float16_t(65504.0h))) ? ((((value >= float16_t(-65504.0h))) ? (int(value)) : (int(-2147483648)))) : (int(2147483647)));
+  return int(clamp(value, float16_t(-65504.0h), float16_t(65504.0h)));
 }
 
 void f() {

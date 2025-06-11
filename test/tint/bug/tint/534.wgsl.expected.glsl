@@ -31,7 +31,7 @@ uint ConvertToFp16FloatValue(float fp32) {
   return 1u;
 }
 uvec4 tint_v4f32_to_v4u32(vec4 value) {
-  return mix(uvec4(4294967295u), mix(uvec4(0u), uvec4(value), greaterThanEqual(value, vec4(0.0f))), lessThanEqual(value, vec4(4294967040.0f)));
+  return uvec4(clamp(value, vec4(0.0f), vec4(4294967040.0f)));
 }
 void main_inner(uvec3 GlobalInvocationID) {
   uvec2 size = uvec2(textureSize(src, 0));

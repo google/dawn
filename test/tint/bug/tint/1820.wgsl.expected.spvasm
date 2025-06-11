@@ -1,9 +1,10 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 45
+; Bound: 40
 ; Schema: 0
                OpCapability Shader
+         %34 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
                OpExecutionMode %unused_entry_point LocalSize 1 1 1
@@ -30,10 +31,7 @@
          %28 = OpTypeFunction %void
          %31 = OpTypeFunction %int %float
 %float_n2_14748365e_09 = OpConstant %float -2.14748365e+09
-       %bool = OpTypeBool
-%int_n2147483648 = OpConstant %int -2147483648
 %float_2_14748352e_09 = OpConstant %float 2.14748352e+09
-%int_2147483647 = OpConstant %int 2147483647
         %foo = OpFunction %void None %9
           %x = OpFunctionParameter %float
          %10 = OpLabel
@@ -70,14 +68,11 @@
 %tint_f32_to_i32 = OpFunction %int None %31
       %value = OpFunctionParameter %float
          %32 = OpLabel
-         %33 = OpConvertFToS %int %value
-         %34 = OpFOrdGreaterThanEqual %bool %value %float_n2_14748365e_09
-         %37 = OpSelect %int %34 %33 %int_n2147483648
-         %39 = OpFOrdLessThanEqual %bool %value %float_2_14748352e_09
-         %41 = OpSelect %int %39 %37 %int_2147483647
-               OpReturnValue %41
+         %33 = OpExtInst %float %34 NClamp %value %float_n2_14748365e_09 %float_2_14748352e_09
+         %37 = OpConvertFToS %int %33
+               OpReturnValue %37
                OpFunctionEnd
 %unused_entry_point = OpFunction %void None %28
-         %44 = OpLabel
+         %39 = OpLabel
                OpReturn
                OpFunctionEnd

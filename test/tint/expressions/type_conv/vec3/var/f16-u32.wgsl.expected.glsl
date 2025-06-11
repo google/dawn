@@ -3,7 +3,7 @@
 
 f16vec3 u = f16vec3(1.0hf);
 uvec3 tint_v3f16_to_v3u32(f16vec3 value) {
-  return mix(uvec3(4294967295u), mix(uvec3(0u), uvec3(value), greaterThanEqual(value, f16vec3(0.0hf))), lessThanEqual(value, f16vec3(65504.0hf)));
+  return uvec3(clamp(value, f16vec3(0.0hf), f16vec3(65504.0hf)));
 }
 void f() {
   uvec3 v = tint_v3f16_to_v3u32(u);

@@ -6,7 +6,7 @@ struct tint_module_vars_struct {
 };
 
 uint4 tint_v4f16_to_v4u32(half4 value) {
-  return select(uint4(4294967295u), select(uint4(0u), uint4(value), (value >= half4(0.0h))), (value <= half4(65504.0h)));
+  return uint4(clamp(value, half4(0.0h), half4(65504.0h)));
 }
 
 void f(tint_module_vars_struct tint_module_vars) {

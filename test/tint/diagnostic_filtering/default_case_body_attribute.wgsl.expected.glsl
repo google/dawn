@@ -17,7 +17,7 @@ precision highp int;
 uniform highp sampler2D f_t_s;
 layout(location = 0) in float tint_interstage_location0;
 int tint_f32_to_i32(float value) {
-  return mix(2147483647, mix((-2147483647 - 1), int(value), (value >= -2147483648.0f)), (value <= 2147483520.0f));
+  return int(clamp(value, -2147483648.0f, 2147483520.0f));
 }
 void main_inner(float x) {
   switch(tint_f32_to_i32(x)) {

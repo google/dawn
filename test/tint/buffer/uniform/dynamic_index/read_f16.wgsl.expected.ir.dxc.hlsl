@@ -8,11 +8,11 @@ cbuffer cbuffer_ub : register(b0) {
 };
 RWByteAddressBuffer s : register(u1);
 int tint_f16_to_i32(float16_t value) {
-  return (((value <= float16_t(65504.0h))) ? ((((value >= float16_t(-65504.0h))) ? (int(value)) : (int(-2147483648)))) : (int(2147483647)));
+  return int(clamp(value, float16_t(-65504.0h), float16_t(65504.0h)));
 }
 
 int tint_f32_to_i32(float value) {
-  return (((value <= 2147483520.0f)) ? ((((value >= -2147483648.0f)) ? (int(value)) : (int(-2147483648)))) : (int(2147483647)));
+  return int(clamp(value, -2147483648.0f, 2147483520.0f));
 }
 
 vector<float16_t, 2> tint_bitcast_to_f16(uint src) {

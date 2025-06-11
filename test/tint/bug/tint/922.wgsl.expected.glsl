@@ -122,7 +122,7 @@ Mat4x4_ x_Mat4x4_1(Mat4x3_ m16) {
   return x_e15;
 }
 int tint_f32_to_i32(float value) {
-  return mix(2147483647, mix((-2147483647 - 1), int(value), (value >= -2147483648.0f)), (value <= 2147483520.0f));
+  return int(clamp(value, -2147483648.0f, 2147483520.0f));
 }
 void main1() {
   Mat4x3_ t_PosMtx = Mat4x3_(vec4(0.0f), vec4(0.0f), vec4(0.0f));

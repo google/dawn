@@ -63,7 +63,7 @@ vec3 toVoxelPos(vec3 position) {
   return vec3(gz, gz, gz);
 }
 uvec3 tint_v3f32_to_v3u32(vec3 value) {
-  return mix(uvec3(4294967295u), mix(uvec3(0u), uvec3(value), greaterThanEqual(value, vec3(0.0f))), lessThanEqual(value, vec3(4294967040.0f)));
+  return uvec3(clamp(value, vec3(0.0f), vec3(4294967040.0f)));
 }
 uint toIndex1D(uint gridSize, vec3 voxelPos) {
   uvec3 icoord = tint_v3f32_to_v3u32(voxelPos);

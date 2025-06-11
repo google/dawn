@@ -7,7 +7,7 @@ float16_t m() {
   return float16_t(t);
 }
 int tint_f16_to_i32(float16_t value) {
-  return mix(2147483647, mix((-2147483647 - 1), int(value), (value >= -65504.0hf)), (value <= 65504.0hf));
+  return int(clamp(value, -65504.0hf, 65504.0hf));
 }
 void f() {
   int v = tint_f16_to_i32(m());

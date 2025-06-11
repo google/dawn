@@ -6,7 +6,7 @@ float3 m() {
 }
 
 uint3 tint_v3f32_to_v3u32(float3 value) {
-  return (((value <= (4294967040.0f).xxx)) ? ((((value >= (0.0f).xxx)) ? (uint3(value)) : ((0u).xxx))) : ((4294967295u).xxx));
+  return uint3(clamp(value, (0.0f).xxx, (4294967040.0f).xxx));
 }
 
 void f() {

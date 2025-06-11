@@ -63,7 +63,7 @@ struct tint_module_vars_struct {
 };
 
 int tint_f32_to_i32(float value) {
-  return select(2147483647, select((-2147483647 - 1), int(value), (value >= -2147483648.0f)), (value <= 2147483520.0f));
+  return int(clamp(value, -2147483648.0f, 2147483520.0f));
 }
 
 tint_array<float3, 2> tint_load_array_packed_vec3(const device tint_array<tint_packed_vec3_f32_array_element, 2>* const from) {

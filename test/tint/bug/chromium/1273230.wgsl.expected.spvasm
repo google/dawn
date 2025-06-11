@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 323
+; Bound: 316
 ; Schema: 0
                OpCapability Shader
          %76 = OpExtInstImport "GLSL.std.450"
@@ -202,13 +202,9 @@
     %float_3 = OpConstant %float 3
       %int_1 = OpConstant %int 1
         %305 = OpTypeFunction %v3uint %v3float
-        %309 = OpConstantNull %v3float
-     %v3bool = OpTypeVector %bool 3
-        %312 = OpConstantNull %v3uint
+        %308 = OpConstantNull %v3float
 %float_4_29496704e_09 = OpConstant %float 4.29496704e+09
-        %314 = OpConstantComposite %v3float %float_4_29496704e_09 %float_4_29496704e_09 %float_4_29496704e_09
-%uint_4294967295 = OpConstant %uint 4294967295
-        %317 = OpConstantComposite %v3uint %uint_4294967295 %uint_4294967295 %uint_4294967295
+        %309 = OpConstantComposite %v3float %float_4_29496704e_09 %float_4_29496704e_09 %float_4_29496704e_09
  %toVoxelPos = OpFunction %v3float None %34
    %position = OpFunctionParameter %v3float
          %35 = OpLabel
@@ -490,16 +486,13 @@
 %tint_v3f32_to_v3u32 = OpFunction %v3uint None %305
       %value = OpFunctionParameter %v3float
         %306 = OpLabel
-        %307 = OpConvertFToU %v3uint %value
-        %308 = OpFOrdGreaterThanEqual %v3bool %value %309
-        %311 = OpSelect %v3uint %308 %307 %312
-        %313 = OpFOrdLessThanEqual %v3bool %value %314
-        %316 = OpSelect %v3uint %313 %311 %317
-               OpReturnValue %316
+        %307 = OpExtInst %v3float %76 NClamp %value %308 %309
+        %311 = OpConvertFToU %v3uint %307
+               OpReturnValue %311
                OpFunctionEnd
  %main_count = OpFunction %void None %177
-        %320 = OpLabel
-        %321 = OpLoad %v3uint %main_count_global_invocation_id_Input None
-        %322 = OpFunctionCall %void %main_count_inner %321
+        %313 = OpLabel
+        %314 = OpLoad %v3uint %main_count_global_invocation_id_Input None
+        %315 = OpFunctionCall %void %main_count_inner %314
                OpReturn
                OpFunctionEnd

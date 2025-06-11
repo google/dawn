@@ -23,7 +23,7 @@ struct tint_array_lengths_struct {
 };
 
 uint tint_f16_to_u32(half value) {
-  return select(4294967295u, select(0u, uint(value), (value >= 0.0h)), (value <= 65504.0h));
+  return uint(clamp(value, 0.0h, 65504.0h));
 }
 
 kernel void v(device tint_array<uint, 1>* s [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {

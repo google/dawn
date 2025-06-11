@@ -13,9 +13,10 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 47
+; Bound: 42
 ; Schema: 0
                OpCapability Shader
+         %33 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint Fragment %main "main" %main_loc0_Input
                OpExecutionMode %main OriginUpperLeft
@@ -50,11 +51,8 @@
          %27 = OpConstantNull %v2float
          %30 = OpTypeFunction %int %float
 %float_n2_14748365e_09 = OpConstant %float -2.14748365e+09
-       %bool = OpTypeBool
-%int_n2147483648 = OpConstant %int -2147483648
 %float_2_14748352e_09 = OpConstant %float 2.14748352e+09
-%int_2147483647 = OpConstant %int 2147483647
-         %43 = OpTypeFunction %void
+         %38 = OpTypeFunction %void
  %main_inner = OpFunction %void None %13
           %x = OpFunctionParameter %float
          %14 = OpLabel
@@ -75,16 +73,13 @@
 %tint_f32_to_i32 = OpFunction %int None %30
       %value = OpFunctionParameter %float
          %31 = OpLabel
-         %32 = OpConvertFToS %int %value
-         %33 = OpFOrdGreaterThanEqual %bool %value %float_n2_14748365e_09
-         %36 = OpSelect %int %33 %32 %int_n2147483648
-         %38 = OpFOrdLessThanEqual %bool %value %float_2_14748352e_09
-         %40 = OpSelect %int %38 %36 %int_2147483647
-               OpReturnValue %40
+         %32 = OpExtInst %float %33 NClamp %value %float_n2_14748365e_09 %float_2_14748352e_09
+         %36 = OpConvertFToS %int %32
+               OpReturnValue %36
                OpFunctionEnd
-       %main = OpFunction %void None %43
-         %44 = OpLabel
-         %45 = OpLoad %float %main_loc0_Input None
-         %46 = OpFunctionCall %void %main_inner %45
+       %main = OpFunction %void None %38
+         %39 = OpLabel
+         %40 = OpLoad %float %main_loc0_Input None
+         %41 = OpFunctionCall %void %main_inner %40
                OpReturn
                OpFunctionEnd

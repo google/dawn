@@ -6,7 +6,7 @@ vector<float16_t, 2> m() {
 }
 
 int2 tint_v2f16_to_v2i32(vector<float16_t, 2> value) {
-  return (((value <= (float16_t(65504.0h)).xx)) ? ((((value >= (float16_t(-65504.0h)).xx)) ? (int2(value)) : ((int(-2147483648)).xx))) : ((int(2147483647)).xx));
+  return int2(clamp(value, (float16_t(-65504.0h)).xx, (float16_t(65504.0h)).xx));
 }
 
 void f() {

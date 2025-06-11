@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 121
+; Bound: 116
 ; Schema: 0
                OpCapability Shader
          %58 = OpExtInstImport "GLSL.std.450"
@@ -79,10 +79,8 @@
 %_ptr_StorageBuffer_int = OpTypePointer StorageBuffer %int
         %105 = OpTypeFunction %int %float
 %float_n2_14748365e_09 = OpConstant %float -2.14748365e+09
-%int_n2147483648 = OpConstant %int -2147483648
 %float_2_14748352e_09 = OpConstant %float 2.14748352e+09
-%int_2147483647 = OpConstant %int 2147483647
-        %117 = OpTypeFunction %void
+        %112 = OpTypeFunction %void
 %accept_value = OpFunction %int None %12
         %val = OpFunctionParameter %int
          %13 = OpLabel
@@ -179,16 +177,13 @@
 %tint_f32_to_i32 = OpFunction %int None %105
       %value = OpFunctionParameter %float
         %106 = OpLabel
-        %107 = OpConvertFToS %int %value
-        %108 = OpFOrdGreaterThanEqual %bool %value %float_n2_14748365e_09
-        %110 = OpSelect %int %108 %107 %int_n2147483648
-        %112 = OpFOrdLessThanEqual %bool %value %float_2_14748352e_09
-        %114 = OpSelect %int %112 %110 %int_2147483647
-               OpReturnValue %114
+        %107 = OpExtInst %float %58 NClamp %value %float_n2_14748365e_09 %float_2_14748352e_09
+        %110 = OpConvertFToS %int %107
+               OpReturnValue %110
                OpFunctionEnd
-       %main = OpFunction %void None %117
-        %118 = OpLabel
-        %119 = OpLoad %uint %main_local_invocation_index_Input None
-        %120 = OpFunctionCall %void %main_inner %119
+       %main = OpFunction %void None %112
+        %113 = OpLabel
+        %114 = OpLoad %uint %main_local_invocation_index_Input None
+        %115 = OpFunctionCall %void %main_inner %114
                OpReturn
                OpFunctionEnd

@@ -1,9 +1,10 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 43
+; Bound: 35
 ; Schema: 0
                OpCapability Shader
+         %27 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
                OpExecutionMode %unused_entry_point LocalSize 1 1 1
@@ -29,14 +30,8 @@
          %24 = OpTypeFunction %v3int %v3float
 %float_n2_14748365e_09 = OpConstant %float -2.14748365e+09
          %28 = OpConstantComposite %v3float %float_n2_14748365e_09 %float_n2_14748365e_09 %float_n2_14748365e_09
-       %bool = OpTypeBool
-     %v3bool = OpTypeVector %bool 3
-%int_n2147483648 = OpConstant %int -2147483648
-         %33 = OpConstantComposite %v3int %int_n2147483648 %int_n2147483648 %int_n2147483648
 %float_2_14748352e_09 = OpConstant %float 2.14748352e+09
-         %36 = OpConstantComposite %v3float %float_2_14748352e_09 %float_2_14748352e_09 %float_2_14748352e_09
-%int_2147483647 = OpConstant %int 2147483647
-         %39 = OpConstantComposite %v3int %int_2147483647 %int_2147483647 %int_2147483647
+         %30 = OpConstantComposite %v3float %float_2_14748352e_09 %float_2_14748352e_09 %float_2_14748352e_09
           %m = OpFunction %v3float None %7
           %8 = OpLabel
                OpStore %t %float_1 None
@@ -55,14 +50,11 @@
 %tint_v3f32_to_v3i32 = OpFunction %v3int None %24
       %value = OpFunctionParameter %v3float
          %25 = OpLabel
-         %26 = OpConvertFToS %v3int %value
-         %27 = OpFOrdGreaterThanEqual %v3bool %value %28
-         %32 = OpSelect %v3int %27 %26 %33
-         %35 = OpFOrdLessThanEqual %v3bool %value %36
-         %38 = OpSelect %v3int %35 %32 %39
-               OpReturnValue %38
+         %26 = OpExtInst %v3float %27 NClamp %value %28 %30
+         %32 = OpConvertFToS %v3int %26
+               OpReturnValue %32
                OpFunctionEnd
 %unused_entry_point = OpFunction %void None %14
-         %42 = OpLabel
+         %34 = OpLabel
                OpReturn
                OpFunctionEnd

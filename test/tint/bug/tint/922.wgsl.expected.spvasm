@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 247
+; Bound: 242
 ; Schema: 0
                OpCapability Shader
         %159 = OpExtInstImport "GLSL.std.450"
@@ -263,9 +263,7 @@
         %217 = OpTypeFunction %VertexOutput %v3float %v2float %v4float %v3float %float
         %225 = OpTypeFunction %int %float
 %float_n2_14748365e_09 = OpConstant %float -2.14748365e+09
-%int_n2147483648 = OpConstant %int -2147483648
 %float_2_14748352e_09 = OpConstant %float 2.14748352e+09
-%int_2147483647 = OpConstant %int 2147483647
         %Mul = OpFunction %v4float None %60
          %m8 = OpFunctionParameter %Mat4x4_
           %v = OpFunctionParameter %v4float
@@ -444,27 +442,24 @@
 %tint_f32_to_i32 = OpFunction %int None %225
       %value = OpFunctionParameter %float
         %226 = OpLabel
-        %227 = OpConvertFToS %int %value
-        %228 = OpFOrdGreaterThanEqual %bool %value %float_n2_14748365e_09
-        %230 = OpSelect %int %228 %227 %int_n2147483648
-        %232 = OpFOrdLessThanEqual %bool %value %float_2_14748352e_09
-        %234 = OpSelect %int %232 %230 %int_2147483647
-               OpReturnValue %234
+        %227 = OpExtInst %float %159 NClamp %value %float_n2_14748365e_09 %float_2_14748352e_09
+        %230 = OpConvertFToS %int %227
+               OpReturnValue %230
                OpFunctionEnd
        %main = OpFunction %void None %148
-        %237 = OpLabel
-        %238 = OpLoad %v3float %main_loc0_Input None
-        %239 = OpLoad %v2float %main_loc1_Input None
-        %240 = OpLoad %v4float %main_loc2_Input None
-        %241 = OpLoad %v3float %main_loc3_Input None
-        %242 = OpLoad %float %main_loc4_Input None
-        %243 = OpFunctionCall %VertexOutput %main_inner %238 %239 %240 %241 %242
-        %244 = OpCompositeExtract %v4float %243 0
-               OpStore %main_loc0_Output %244 None
-        %245 = OpCompositeExtract %v2float %243 1
-               OpStore %main_loc1_Output %245 None
-        %246 = OpCompositeExtract %v4float %243 2
-               OpStore %main_position_Output %246 None
+        %232 = OpLabel
+        %233 = OpLoad %v3float %main_loc0_Input None
+        %234 = OpLoad %v2float %main_loc1_Input None
+        %235 = OpLoad %v4float %main_loc2_Input None
+        %236 = OpLoad %v3float %main_loc3_Input None
+        %237 = OpLoad %float %main_loc4_Input None
+        %238 = OpFunctionCall %VertexOutput %main_inner %233 %234 %235 %236 %237
+        %239 = OpCompositeExtract %v4float %238 0
+               OpStore %main_loc0_Output %239 None
+        %240 = OpCompositeExtract %v2float %238 1
+               OpStore %main_loc1_Output %240 None
+        %241 = OpCompositeExtract %v4float %238 2
+               OpStore %main_position_Output %241 None
                OpStore %main___point_size_Output %float_1 None
                OpReturn
                OpFunctionEnd

@@ -40,7 +40,7 @@ cbuffer cbuffer_arg_0_params : register(b2, space1) {
   uint4 arg_0_params[17];
 };
 uint2 tint_v2f32_to_v2u32(float2 value) {
-  return (((value <= (4294967040.0f).xx)) ? ((((value >= (0.0f).xx)) ? (uint2(value)) : ((0u).xx))) : ((4294967295u).xx));
+  return uint2(clamp(value, (0.0f).xx, (4294967040.0f).xx));
 }
 
 float3 tint_GammaCorrection(float3 v, tint_GammaTransferParams params) {
@@ -182,7 +182,7 @@ cbuffer cbuffer_arg_0_params : register(b2, space1) {
   uint4 arg_0_params[17];
 };
 uint2 tint_v2f32_to_v2u32(float2 value) {
-  return (((value <= (4294967040.0f).xx)) ? ((((value >= (0.0f).xx)) ? (uint2(value)) : ((0u).xx))) : ((4294967295u).xx));
+  return uint2(clamp(value, (0.0f).xx, (4294967040.0f).xx));
 }
 
 float3 tint_GammaCorrection(float3 v, tint_GammaTransferParams params) {
@@ -318,7 +318,7 @@ cbuffer cbuffer_arg_0_params : register(b2, space1) {
   uint4 arg_0_params[17];
 };
 uint2 tint_v2f32_to_v2u32(float2 value) {
-  return (((value <= (4294967040.0f).xx)) ? ((((value >= (0.0f).xx)) ? (uint2(value)) : ((0u).xx))) : ((4294967295u).xx));
+  return uint2(clamp(value, (0.0f).xx, (4294967040.0f).xx));
 }
 
 float3 tint_GammaCorrection(float3 v, tint_GammaTransferParams params) {

@@ -120,6 +120,9 @@ crbug.com/42241110 webgpu:api,validation,error_scope:simple:errorType="out-of-me
 # point.
 ################################################################################
 
+crbug.com/397473068 webgpu:shader,execution,expression,unary,i32_conversion:f32:* [ Failure ]
+crbug.com/397473068 webgpu:shader,execution,expression,unary,u32_conversion:f32:* [ Failure ]
+
 ### TEMPORARY ANDROID SKIPS
 
 # Compressed texture image_copy failures on Pixel 6

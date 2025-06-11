@@ -7,7 +7,7 @@ f16vec3 m() {
   return f16vec3(t);
 }
 ivec3 tint_v3f16_to_v3i32(f16vec3 value) {
-  return mix(ivec3(2147483647), mix(ivec3((-2147483647 - 1)), ivec3(value), greaterThanEqual(value, f16vec3(-65504.0hf))), lessThanEqual(value, f16vec3(65504.0hf)));
+  return ivec3(clamp(value, f16vec3(-65504.0hf), f16vec3(65504.0hf)));
 }
 void f() {
   ivec3 v = tint_v3f16_to_v3i32(m());

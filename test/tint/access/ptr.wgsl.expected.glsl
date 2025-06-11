@@ -30,7 +30,7 @@ int accept_ptr_to_struct_access_pass_ptr(inout S val) {
   return val.a;
 }
 int tint_f32_to_i32(float value) {
-  return mix(2147483647, mix((-2147483647 - 1), int(value), (value >= -2147483648.0f)), (value <= 2147483520.0f));
+  return int(clamp(value, -2147483648.0f, 2147483520.0f));
 }
 int accept_ptr_vec_access_elements(inout vec3 v1) {
   v1.x = cross(v1, v1).x;

@@ -12,7 +12,7 @@ layout(location = 0) in float tint_interstage_location0;
 layout(location = 1) in vec2 tint_interstage_location1;
 layout(location = 0) out int foo_loc0_Output;
 int tint_f32_to_i32(float value) {
-  return mix(2147483647, mix((-2147483647 - 1), int(value), (value >= -2147483648.0f)), (value <= 2147483520.0f));
+  return int(clamp(value, -2147483648.0f, 2147483520.0f));
 }
 int foo_inner(float v_1, vec2 coord) {
   if ((v_1 == 0.0f)) {

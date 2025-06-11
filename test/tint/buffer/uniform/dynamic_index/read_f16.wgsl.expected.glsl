@@ -113,10 +113,10 @@ buffer s_block_1_ssbo {
   int inner;
 } v_1;
 int tint_f16_to_i32(float16_t value) {
-  return mix(2147483647, mix((-2147483647 - 1), int(value), (value >= -65504.0hf)), (value <= 65504.0hf));
+  return int(clamp(value, -65504.0hf, 65504.0hf));
 }
 int tint_f32_to_i32(float value) {
-  return mix(2147483647, mix((-2147483647 - 1), int(value), (value >= -2147483648.0f)), (value <= 2147483520.0f));
+  return int(clamp(value, -2147483648.0f, 2147483520.0f));
 }
 void main_inner(uint idx) {
   float scalar_f32 = v.inner.arr[min(idx, 7u)].scalar_f32;

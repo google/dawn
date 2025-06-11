@@ -6,7 +6,7 @@ struct tint_module_vars_struct {
 };
 
 uint tint_f32_to_u32(float value) {
-  return select(4294967295u, select(0u, uint(value), (value >= 0.0f)), (value <= 4294967040.0f));
+  return uint(clamp(value, 0.0f, 4294967040.0f));
 }
 
 void f(tint_module_vars_struct tint_module_vars) {

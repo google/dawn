@@ -34,7 +34,7 @@ int accept_ptr_to_struct_access_pass_ptr(inout S val) {
 }
 
 int tint_f32_to_i32(float value) {
-  return (((value <= 2147483520.0f)) ? ((((value >= -2147483648.0f)) ? (int(value)) : (int(-2147483648)))) : (int(2147483647)));
+  return int(clamp(value, -2147483648.0f, 2147483520.0f));
 }
 
 int accept_ptr_vec_access_elements(inout float3 v1) {

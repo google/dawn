@@ -6,7 +6,7 @@ struct tint_module_vars_struct {
 };
 
 int3 tint_v3f16_to_v3i32(half3 value) {
-  return select(int3(2147483647), select(int3((-2147483647 - 1)), int3(value), (value >= half3(-65504.0h))), (value <= half3(65504.0h)));
+  return int3(clamp(value, half3(-65504.0h), half3(65504.0h)));
 }
 
 void f(tint_module_vars_struct tint_module_vars) {

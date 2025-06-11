@@ -1,7 +1,7 @@
 
 static float4 u = (1.0f).xxxx;
 uint4 tint_v4f32_to_v4u32(float4 value) {
-  return (((value <= (4294967040.0f).xxxx)) ? ((((value >= (0.0f).xxxx)) ? (uint4(value)) : ((0u).xxxx))) : ((4294967295u).xxxx));
+  return uint4(clamp(value, (0.0f).xxxx, (4294967040.0f).xxxx));
 }
 
 void f() {

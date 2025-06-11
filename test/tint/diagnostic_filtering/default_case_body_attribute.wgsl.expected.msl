@@ -23,7 +23,7 @@ struct main_inputs {
 };
 
 int tint_f32_to_i32(float value) {
-  return select(2147483647, select((-2147483647 - 1), int(value), (value >= -2147483648.0f)), (value <= 2147483520.0f));
+  return int(clamp(value, -2147483648.0f, 2147483520.0f));
 }
 
 void main_inner(float x, tint_module_vars_struct tint_module_vars) {
