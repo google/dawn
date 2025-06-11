@@ -210,6 +210,12 @@ const core::type::StorageTexture* Manager::storage_texture(TextureDimension dim,
     return Get<core::type::StorageTexture>(dim, format, access, subtype);
 }
 
+const core::type::TexelBuffer* Manager::texel_buffer(core::TexelFormat format,
+                                                     core::Access access) {
+    const auto* subtype = SubtypeFor(format, *this);
+    return Get<core::type::TexelBuffer>(format, access, subtype);
+}
+
 const core::type::DepthTexture* Manager::depth_texture(TextureDimension dim) {
     return Get<core::type::DepthTexture>(dim);
 }

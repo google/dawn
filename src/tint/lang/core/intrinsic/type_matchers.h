@@ -643,6 +643,32 @@ inline const type::ExternalTexture* BuildTextureExternal(intrinsic::MatchState& 
     return state.types.external_texture();
 }
 
+inline bool MatchTexelBuffer(intrinsic::MatchState&,
+                             const type::Type* ty,
+                             intrinsic::Number& F,
+                             intrinsic::Number& A) {
+    if (ty->Is<intrinsic::Any>()) {
+        F = intrinsic::Number::any;
+        A = intrinsic::Number::any;
+        return true;
+    }
+    if (auto* v = ty->As<type::TexelBuffer>()) {
+        F = intrinsic::Number(static_cast<uint32_t>(v->TexelFormat()));
+        A = intrinsic::Number(static_cast<uint32_t>(v->Access()));
+        return true;
+    }
+    return false;
+}
+
+inline const type::TexelBuffer* BuildTexelBuffer(intrinsic::MatchState& state,
+                                                 const type::Type*,
+                                                 intrinsic::Number F,
+                                                 intrinsic::Number A) {
+    auto format = static_cast<TexelFormat>(F.Value());
+    auto access = static_cast<Access>(A.Value());
+    return state.types.texel_buffer(format, access);
+}
+
 inline bool MatchInputAttachment(intrinsic::MatchState&,
                                  const type::Type* ty,
                                  const type::Type*& T) {

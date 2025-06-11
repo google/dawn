@@ -169,6 +169,7 @@ type texture_storage_2d<F: texel_format, A: access>
 type texture_storage_2d_array<F: texel_format, A: access>
 type texture_storage_3d<F: texel_format, A: access>
 type texture_external
+type texel_buffer<F: texel_format, A: access>
 type input_attachment<T>
 
 @display("__modf_result_{T}")        type __modf_result<T>
