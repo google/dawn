@@ -125,6 +125,7 @@ def _NonInclusiveFileFilter(file):
         "src/dawn/common/GPUInfo.cpp",  # External URL
         "src/dawn/common/ThreadLocal.cpp",  # External URL
         "src/dawn/native/metal/BackendMTL.mm",  # OSX Constant
+        "src/dawn/native/metal/PhysicalDeviceMTL.mm",  # OSX deprecated API
         "src/dawn/native/vulkan/SamplerVk.cpp",  # External URL
         "src/dawn/native/vulkan/TextureVk.cpp",  # External URL
         "src/tools/src/cmd/run-cts/main.go",  # Terminal type name
