@@ -168,7 +168,8 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     }
 
     raise::PolyfillConfig config = {.use_vulkan_memory_model = options.use_vulkan_memory_model,
-                                    .scalarize_clamp_builtin = options.scalarize_clamp_builtin};
+                                    .scalarize_clamp_builtin = options.scalarize_clamp_builtin,
+                                    .version = options.spirv_version};
     RUN_TRANSFORM(raise::BuiltinPolyfill, module, config);
     RUN_TRANSFORM(raise::ExpandImplicitSplats, module);
     // kAllowAnyInputAttachmentIndexType required after ExpandImplicitSplats

@@ -1511,6 +1511,7 @@ implicit(T: f32_f16, N: num, M: num) fn matrix_times_vector(mat<N, M, T>, vec<N,
 
 
 implicit(T: scalar) fn select(bool, T, T) -> T
+implicit(N: num, T: scalar) fn select(bool, vec<N, T>, vec<N, T>) -> vec<N, T>
 implicit(N: num, T: scalar) fn select(vec<N, bool>, vec<N, T>, vec<N, T>) -> vec<N, T>
 
 implicit(T: f32_f16, N: num, M: num) fn vector_times_matrix(vec<N, T>, mat<M, N, T>) -> vec<M, T>

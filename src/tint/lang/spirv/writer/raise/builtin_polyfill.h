@@ -28,6 +28,7 @@
 #ifndef SRC_TINT_LANG_SPIRV_WRITER_RAISE_BUILTIN_POLYFILL_H_
 #define SRC_TINT_LANG_SPIRV_WRITER_RAISE_BUILTIN_POLYFILL_H_
 
+#include "src/tint/lang/spirv/writer/common/options.h"
 #include "src/tint/utils/result.h"
 
 // Forward declarations.
@@ -41,6 +42,7 @@ namespace tint::spirv::writer::raise {
 struct PolyfillConfig {
     bool use_vulkan_memory_model = false;
     bool scalarize_clamp_builtin = false;
+    SpvVersion version = SpvVersion::kSpv13;
 };
 
 /// BuiltinPolyfill is a transform that replaces calls to builtins with polyfills and calls to

@@ -536,17 +536,19 @@ struct State {
             builtin->Args()[0],
         };
 
-        // If the condition is scalar and the objects are vectors, we need to splat the condition
-        // into a vector of the same size.
-        // TODO(jrprice): We don't need to do this if we're targeting SPIR-V 1.4 or newer.
-        auto* vec = builtin->Result()->Type()->As<core::type::Vector>();
-        if (vec && args[0]->Type()->Is<core::type::Scalar>()) {
-            Vector<core::ir::Value*, 4> elements;
-            elements.Resize(vec->Width(), args[0]);
+        if (config.version < SpvVersion::kSpv14) {
+            // If the condition is scalar and the objects are vectors, we need to splat the
+            // condition into a vector of the same size.
+            auto* vec = builtin->Result()->Type()->As<core::type::Vector>();
+            if (vec && args[0]->Type()->Is<core::type::Scalar>()) {
+                Vector<core::ir::Value*, 4> elements;
+                elements.Resize(vec->Width(), args[0]);
 
-            auto* construct = b.Construct(ty.vec(ty.bool_(), vec->Width()), std::move(elements));
-            construct->InsertBefore(builtin);
-            args[0] = construct->Result();
+                auto* construct =
+                    b.Construct(ty.vec(ty.bool_(), vec->Width()), std::move(elements));
+                construct->InsertBefore(builtin);
+                args[0] = construct->Result();
+            }
         }
 
         // Replace the builtin call with a call to the spirv.select intrinsic.

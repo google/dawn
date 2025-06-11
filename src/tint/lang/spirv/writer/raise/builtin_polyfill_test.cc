@@ -1376,6 +1376,43 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, Select_ScalarCondition_VectorOperands) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(SpirvWriter_BuiltinPolyfillTest, Select_ScalarCondition_VectorOperands_Spv14) {
+    auto* argf = b.FunctionParam("argf", ty.vec4<i32>());
+    auto* argt = b.FunctionParam("argt", ty.vec4<i32>());
+    auto* cond = b.FunctionParam("cond", ty.bool_());
+    auto* func = b.Function("foo", ty.vec4<i32>());
+    func->SetParams({argf, argt, cond});
+
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call(ty.vec4<i32>(), core::BuiltinFn::kSelect, argf, argt, cond);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%argf:vec4<i32>, %argt:vec4<i32>, %cond:bool):vec4<i32> {
+  $B1: {
+    %5:vec4<i32> = select %argf, %argt, %cond
+    ret %5
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%argf:vec4<i32>, %argt:vec4<i32>, %cond:bool):vec4<i32> {
+  $B1: {
+    %5:vec4<i32> = spirv.select %cond, %argt, %argf
+    ret %5
+  }
+}
+)";
+
+    PolyfillConfig config{.version = SpvVersion::kSpv14};
+    Run(BuiltinPolyfill, config);
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureLoad_2D) {
     auto* t = b.FunctionParam("t", ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()));
     auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
