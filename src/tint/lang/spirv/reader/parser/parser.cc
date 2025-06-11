@@ -3293,7 +3293,9 @@ class Parser {
             // Create the interpolation field with the default values on first call.
             if (!io_attributes.interpolation.has_value()) {
                 io_attributes.interpolation = core::Interpolation{
-                    core::InterpolationType::kPerspective, core::InterpolationSampling::kCenter};
+                    .type = core::InterpolationType::kPerspective,
+                    .sampling = core::InterpolationSampling::kCenter,
+                };
             }
             return io_attributes.interpolation.value();
         };
@@ -3339,6 +3341,22 @@ class Parser {
                     break;
                 default:
                     TINT_UNIMPLEMENTED() << "unhandled decoration " << d;
+            }
+        }
+
+        if (io_attributes.interpolation.has_value()) {
+            // WGSL requires that '@interpolate(flat)' needs to be paired with '@location', however
+            // SPIR-V requires all fragment shader integer Inputs are 'flat'. If the decorations do
+            // not contain a spv::Decoration::Location, then remove the interpolation decoration.
+            //
+            // The `perspective,center` interpolation is the default value if one isn't provided.
+            // Just strip it off. This keeps us from accidentally applying interpolation where it
+            // isn't permitted, and it isn't necessary.
+            if ((io_attributes.interpolation->type == core::InterpolationType::kFlat &&
+                 !io_attributes.location.has_value()) ||
+                (io_attributes.interpolation->type == core::InterpolationType::kPerspective &&
+                 io_attributes.interpolation->sampling == core::InterpolationSampling::kCenter)) {
+                io_attributes.interpolation = std::nullopt;
             }
         }
 

@@ -1328,5 +1328,41 @@ $B1: {  # root
 )");
 }
 
+TEST_F(SpirvParserTest, InterpolationFlatNoLocation) {
+    EXPECT_IR(R"(
+             OpCapability Shader
+             OpCapability SampleRateShading
+             OpMemoryModel Logical Simple
+             OpEntryPoint Fragment %3 "main" %gl_SampleID
+             OpExecutionMode %3 OriginUpperLeft
+             OpDecorate %gl_SampleID BuiltIn SampleId
+             OpDecorate %gl_SampleID Flat
+     %void = OpTypeVoid
+        %5 = OpTypeFunction %void
+    %float = OpTypeFloat 32
+     %uint = OpTypeInt 32 0
+      %int = OpTypeInt 32 1
+%_ptr_Input_uint = OpTypePointer Input %uint
+%gl_SampleID = OpVariable %_ptr_Input_uint Input
+        %3 = OpFunction %void None %5
+       %10 = OpLabel
+        %2 = OpLoad %uint %gl_SampleID
+             OpReturn
+             OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %1:ptr<__in, u32, read> = var undef @builtin(sample_index)
+}
+
+%main = @fragment func():void {
+  $B2: {
+    %3:u32 = load %1
+    ret
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader
