@@ -107,6 +107,8 @@ bool Platform::IsFeatureEnabled(Features feature) {
 #endif
         case Features::kWebGPUUseVulkanMemoryModel:
             return false;
+        case Features::kWebGPUEnableRangeAnalysisForRobustness:
+            return true;
     }
     return false;
 }

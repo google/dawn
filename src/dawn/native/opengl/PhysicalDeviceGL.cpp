@@ -41,6 +41,7 @@
 #include "dawn/native/opengl/DisplayEGL.h"
 #include "dawn/native/opengl/SwapChainEGL.h"
 #include "dawn/native/opengl/UtilsGL.h"
+#include "dawn/platform/DawnPlatform.h"
 
 namespace dawn::native::opengl {
 
@@ -494,6 +495,12 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
     deviceToggles->Default(
         Toggle::GLUseArrayLengthFromUniform,
         mVendorId == gpu_info::kVendorID_ImgTec || mVendorId == gpu_info::kVendorID_Nvidia);
+
+    // Enable the integer range analysis for shader robustness by default if the corresponding
+    // platform feature is enabled.
+    deviceToggles->Default(
+        Toggle::EnableIntegerRangeAnalysisInRobustness,
+        platform->IsFeatureEnabled(platform::Features::kWebGPUEnableRangeAnalysisForRobustness));
 }
 
 ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(
