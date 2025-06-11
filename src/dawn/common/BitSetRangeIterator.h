@@ -40,8 +40,6 @@
 namespace dawn {
 
 // Similar to BitSetIterator but returns ranges of consecutive bits as (offset, size) pairs
-// TODO(crbug.com/366291600): // Specialization  for bitset size fits in uint64_t to skip
-// loops for bits across words boundary.
 template <size_t N, typename T>
 class BitSetRangeIterator final {
   public:
@@ -51,32 +49,27 @@ class BitSetRangeIterator final {
 
     class Iterator final {
       public:
-        explicit Iterator(const std::bitset<N>& bits, uint32_t offset = 0, uint32_t size = 0);
+        constexpr explicit Iterator(const std::bitset<N>& bits,
+                                    uint32_t offset = 0,
+                                    uint32_t size = 0);
         Iterator& operator++();
 
         bool operator==(const Iterator& other) const = default;
 
         // Returns a pair of offset and size of the current range
-        std::pair<T, size_t> operator*() const {
-            using U = UnderlyingType<T>;
-            DAWN_ASSERT(static_cast<U>(mOffset) <= std::numeric_limits<U>::max());
-            DAWN_ASSERT(static_cast<size_t>(mSize) <= std::numeric_limits<size_t>::max());
-            return std::make_pair(static_cast<T>(static_cast<U>(mOffset)),
-                                  static_cast<size_t>(mSize));
-        }
+        std::pair<T, size_t> operator*() const;
 
       private:
         void Advance();
-        size_t ScanForwardAndShiftBits();
 
         static constexpr size_t kBitsPerWord = sizeof(uint64_t) * 8;
-        std::bitset<N> mBits;
-        uint32_t mOffset{0};
-        uint32_t mSize{0};
+        std::bitset<N> mBits;  // The original bitset shifted by mOffset + mSize.
+        uint32_t mOffset;
+        uint32_t mSize;
     };
 
     Iterator begin() const { return Iterator(mBits); }
-    Iterator end() const { return Iterator(std::bitset<N>(0), N, 0); }
+    constexpr Iterator end() const { return Iterator(std::bitset<N>(), N, 0); }
 
   private:
     const std::bitset<N> mBits;
@@ -96,10 +89,18 @@ BitSetRangeIterator<N, T>& BitSetRangeIterator<N, T>::operator=(const BitSetRang
 }
 
 template <size_t N, typename T>
-BitSetRangeIterator<N, T>::Iterator::Iterator(const std::bitset<N>& bits,
-                                              uint32_t offset,
-                                              uint32_t size)
+constexpr BitSetRangeIterator<N, T>::Iterator::Iterator(const std::bitset<N>& bits,
+                                                        uint32_t offset,
+                                                        uint32_t size)
     : mBits(bits), mOffset(offset), mSize(size) {
+    // If the full range is set, directly compute the range. This avoids checking for the full range
+    // in each call to Advance as that can only happen in the first iteration.
+    if (mBits.all()) {
+        mSize = N;
+        mBits.reset();
+        return;
+    }
+
     Advance();
 }
 
@@ -110,52 +111,60 @@ typename BitSetRangeIterator<N, T>::Iterator& BitSetRangeIterator<N, T>::Iterato
 }
 
 template <size_t N, typename T>
-size_t BitSetRangeIterator<N, T>::Iterator::ScanForwardAndShiftBits() {
-    if (mBits.none()) {
-        return N;  // Or some other indicator that there are no bits.
-    }
-
-    constexpr std::bitset<N> wordMask(std::numeric_limits<uint64_t>::max());
-    size_t offset = 0;
-    while ((mBits & wordMask).to_ullong() == 0) {
-        offset += kBitsPerWord;
-        mBits >>= kBitsPerWord;
-    }
-
-    size_t nextBit = static_cast<size_t>(
-        std::countr_zero(static_cast<uint64_t>((mBits & wordMask).to_ullong())));
-    mBits >>= nextBit;
-    return offset + nextBit;
+std::pair<T, size_t> BitSetRangeIterator<N, T>::Iterator::operator*() const {
+    using U = UnderlyingType<T>;
+    DAWN_ASSERT(static_cast<U>(mOffset) <= std::numeric_limits<U>::max());
+    DAWN_ASSERT(static_cast<size_t>(mSize) <= std::numeric_limits<size_t>::max());
+    return std::make_pair(static_cast<T>(static_cast<U>(mOffset)), static_cast<size_t>(mSize));
 }
 
 template <size_t N, typename T>
 void BitSetRangeIterator<N, T>::Iterator::Advance() {
+    constexpr std::bitset<N> kBlockMask(std::numeric_limits<uint64_t>::max());
+
     // Bits are currently shifted to mOffset + mSize.
     mOffset += mSize;
+    mSize = 0;
 
-    size_t rangeStart = ScanForwardAndShiftBits();
-    if (rangeStart == N) {
-        // Reached the end, no more ranges.
+    // There are no more 1s, so there are no more ranges.
+    if (mBits.none()) {
         mOffset = N;
-        mSize = 0;
         return;
     }
 
-    mOffset += rangeStart;
-    mBits = ~mBits;
+    // Look for the next 1, shifting mBits as we go and accounting for it in mOffset.
+    // The loop jumps in blocks of 64bit while the rest of the code dose the last sub-64bit count.
+    {
+        if constexpr (N > kBitsPerWord) {
+            while ((mBits & kBlockMask).to_ullong() == 0) {
+                mOffset += kBitsPerWord;
+                mBits >>= kBitsPerWord;
+            }
+        }
 
-    size_t rangeCount = ScanForwardAndShiftBits();
-    if (rangeCount == N) {
-        // All bits until the end of the set are set.
-        rangeCount = N - mOffset;
+        size_t nextBit = static_cast<size_t>(
+            std::countr_zero(static_cast<uint64_t>((mBits & kBlockMask).to_ullong())));
+        mOffset += nextBit;
+        mBits >>= nextBit;
     }
 
-    mSize = rangeCount;
-    mBits = ~mBits;
+    // Look for the next 0, shifting mBits as we go and accounting for it in mSize. There is a next
+    // zero bit because the case with all bits set to 1 is handled in the iterator constructor.
+    // The loop jumps in blocks of 64bit while the rest of the code dose the last sub-64bit count.
+    DAWN_ASSERT(!mBits.all());
+    {
+        if constexpr (N > kBitsPerWord) {
+            while ((mBits & kBlockMask).to_ullong() == kBlockMask) {
+                mSize += kBitsPerWord;
+                mBits >>= kBitsPerWord;
+            }
+        }
 
-    // Clear the bits for the current range.
-    mBits <<= rangeCount;
-    mBits >>= rangeCount;
+        size_t nextBit = static_cast<size_t>(
+            std::countr_one(static_cast<uint64_t>((mBits & kBlockMask).to_ullong())));
+        mSize += nextBit;
+        mBits >>= nextBit;
+    }
 }
 
 // Helper to avoid needing to specify the template parameter size

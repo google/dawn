@@ -37,34 +37,36 @@ namespace {
 
 class BitSetRangeIteratorTest : public testing::Test {
   protected:
+    struct Range {
+        uint32_t offset;
+        size_t size;
+    };
+
     template <size_t N>
-    void RunSingleBitSetRangeTests(uint32_t offset, uint32_t size) {
+    void RunBitSetRangeTests(std::vector<Range> ranges) {
         std::bitset<N> stateBits;
 
-        std::vector<std::pair<uint32_t, size_t>> expectedRanges;
-        expectedRanges.push_back({offset, size});
-
-        for (const auto& range : expectedRanges) {
-            for (uint32_t i = 0; i < range.second; ++i) {
-                stateBits.set(range.first + i);
+        for (const auto& range : ranges) {
+            for (uint32_t i = 0; i < range.size; ++i) {
+                stateBits.set(range.offset + i);
             }
         }
 
-        std::vector<std::pair<uint32_t, size_t>> foundRanges;
-        for (auto range : IterateBitSetRanges(stateBits)) {
-            foundRanges.push_back(range);
+        std::vector<Range> foundRanges;
+        for (auto [offset, size] : IterateBitSetRanges(stateBits)) {
+            foundRanges.push_back({offset, size});
         }
 
-        EXPECT_EQ(expectedRanges.size(), foundRanges.size());
-        for (size_t i = 0; i < expectedRanges.size(); ++i) {
-            EXPECT_EQ(expectedRanges[i].first, foundRanges[i].first);
-            EXPECT_EQ(expectedRanges[i].second, foundRanges[i].second);
+        EXPECT_EQ(ranges.size(), foundRanges.size());
+        for (size_t i = 0; i < ranges.size(); ++i) {
+            EXPECT_EQ(ranges[i].offset, foundRanges[i].offset);
+            EXPECT_EQ(ranges[i].size, foundRanges[i].size);
         }
     }
 
     template <size_t N>
     void RunSingleBitTests() {
-        RunSingleBitSetRangeTests<N>(N / 4u * 3u, 1);
+        RunBitSetRangeTests<N>({{N / 4u * 3u, 1}});
     }
 
     template <size_t N>
@@ -147,37 +149,25 @@ class BitSetRangeIteratorTest : public testing::Test {
 // Test basic range iteration with single bits (each range has size 1)
 TEST_F(BitSetRangeIteratorTest, SingleBit) {
     // Smaller than 1 word
-    {
-        RunSingleBitTests<kBitsPerWord - 1>();
-    }
+    RunSingleBitTests<kBitsPerWord - 1>();
 
     // Equal to 1 word
-    {
-        RunSingleBitTests<kBitsPerWord>();
-    }
+    RunSingleBitTests<kBitsPerWord>();
 
     // Larger than 1 word
-    {
-        RunSingleBitTests<kBitsPerWord * 2 - 1>();
-    }
+    RunSingleBitTests<kBitsPerWord * 2 - 1>();
 }
 
 // Test ranges with consecutive bits
 TEST_F(BitSetRangeIteratorTest, ConsecutiveBitRanges) {
     // Smaller than 1 word
-    {
-        RunConsecutiveBitRangesTests<kBitsPerWord - 1>();
-    }
+    RunConsecutiveBitRangesTests<kBitsPerWord - 1>();
 
     // Equal to 1 word
-    {
-        RunConsecutiveBitRangesTests<kBitsPerWord>();
-    }
+    RunConsecutiveBitRangesTests<kBitsPerWord>();
 
     // Larger than 1 word
-    {
-        RunConsecutiveBitRangesTests<kBitsPerWord * 2 - 1>();
-    }
+    RunConsecutiveBitRangesTests<kBitsPerWord * 2 - 1>();
 }
 
 // Test an empty iterator
@@ -190,55 +180,35 @@ TEST_F(BitSetRangeIteratorTest, EmptySet) {
 // Test iterating a result of combining two bitsets
 TEST_F(BitSetRangeIteratorTest, NonLValueBitset) {
     // Smaller than 1 word
-    {
-        RunNonLValueBitset<kBitsPerWord - 1>();
-    }
+    RunNonLValueBitset<kBitsPerWord - 1>();
 
     // Equal to 1 word
-    {
-        RunNonLValueBitset<kBitsPerWord>();
-    }
+    RunNonLValueBitset<kBitsPerWord>();
 
     // Larger than 1 word
-    {
-        RunNonLValueBitset<kBitsPerWord * 2 - 1>();
-    }
+    RunNonLValueBitset<kBitsPerWord * 2 - 1>();
 }
 
 // Test ranges that cross word boundaries
 TEST_F(BitSetRangeIteratorTest, CrossWordBoundaryRanges) {
-    std::bitset<kBitsPerWord * 2> stateBits;
-    // Set a range that crosses bit word boundary
-    for (uint32_t i = kBitsPerWord - 2; i <= kBitsPerWord + 1; ++i) {
-        stateBits.set(i);
-    }
+    // One range that crosses the boundary.
+    // RunBitSetRangeTests<kBitsPerWord * 2>({{kBitsPerWord - 2, 4}});
 
-    std::vector<std::pair<uint32_t, size_t>> foundRanges;
-    for (auto range : IterateBitSetRanges(stateBits)) {
-        foundRanges.push_back(range);
-    }
-
-    EXPECT_EQ(1u, foundRanges.size());
-    EXPECT_EQ(kBitsPerWord - 2, foundRanges[0].first);
-    EXPECT_EQ(4u, foundRanges[0].second);
+    // One range that crosses the boundary then another one.
+    RunBitSetRangeTests<kBitsPerWord * 3>(
+        {{kBitsPerWord - 1, 2 + kBitsPerWord}, {kBitsPerWord * 2 + 2, 1}});
 }
 
 // Test ranges that start from first bit.
-TEST_F(BitSetRangeIteratorTest, SingleBitSetRange) {
+TEST_F(BitSetRangeIteratorTest, RangeWithZeroethBit) {
     // Smaller than 1 word
-    {
-        RunSingleBitSetRangeTests<kBitsPerWord - 1>(0, kBitsPerWord - 1);
-    }
+    RunBitSetRangeTests<kBitsPerWord - 1>({{0, kBitsPerWord - 1}});
 
     // Equal to 1 word
-    {
-        RunSingleBitSetRangeTests<kBitsPerWord>(0, kBitsPerWord - 1);
-    }
+    RunBitSetRangeTests<kBitsPerWord>({{0, kBitsPerWord - 1}});
 
     // Larger than 1 word
-    {
-        RunSingleBitSetRangeTests<kBitsPerWord * 2>(kBitsPerWord / 2, kBitsPerWord);
-    }
+    RunBitSetRangeTests<kBitsPerWord * 2>({{kBitsPerWord / 2, kBitsPerWord}});
 }
 
 }  // anonymous namespace
