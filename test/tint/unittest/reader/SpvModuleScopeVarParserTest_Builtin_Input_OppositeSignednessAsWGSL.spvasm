@@ -6,9 +6,9 @@
 ; Schema: 0
 OpCapability Shader
 OpMemoryModel Logical Simple
-OpEntryPoint Fragment %2 "main"
-OpExecutionMode %2 OriginUpperLeft
+OpEntryPoint Vertex %2 "main" %gl_VertexIndex %gl_Position
 OpDecorate %gl_VertexIndex BuiltIn VertexIndex
+OpDecorate %gl_Position BuiltIn Position
 %void = OpTypeVoid
 %4 = OpTypeFunction %void
 %bool = OpTypeBool
@@ -35,7 +35,9 @@ OpDecorate %gl_VertexIndex BuiltIn VertexIndex
 %mat3v2float = OpTypeMatrix %v2float 3
 %_arr_uint_uint_2 = OpTypeArray %uint %uint_2
 %_ptr_Input_int = OpTypePointer Input %int
+%_ptr_Output_v4float = OpTypePointer Output %v4float
 %gl_VertexIndex = OpVariable %_ptr_Input_int Input
+%gl_Position = OpVariable %_ptr_Output_v4float Output
 %2 = OpFunction %void None %4
 %29 = OpLabel
 OpReturn

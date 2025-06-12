@@ -6,7 +6,7 @@
 ; Schema: 0
 OpCapability Shader
 OpMemoryModel Logical Simple
-OpEntryPoint Fragment %2 "main"
+OpEntryPoint Fragment %2 "main" %gl_SampleMask
 OpExecutionMode %2 OriginUpperLeft
 OpDecorate %gl_SampleMask BuiltIn SampleMask
 %void = OpTypeVoid

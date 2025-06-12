@@ -6,7 +6,7 @@
 ; Schema: 0
 OpCapability Shader
 OpMemoryModel Logical Simple
-OpEntryPoint Fragment %2 "main"
+OpEntryPoint Fragment %2 "main"  ; No interface entries, expect var to be dropped
 OpExecutionMode %2 OriginUpperLeft
 %void = OpTypeVoid
 %4 = OpTypeFunction %void
