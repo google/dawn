@@ -152,8 +152,22 @@ class Parser {
         // TODO(crbug.com/tint/1907): Handle annotation instructions.
 
         RemapSamplers();
+        AddRefToOutputsIfNeeded();
 
         return std::move(ir_);
+    }
+
+    void AddRefToOutputsIfNeeded() {
+        for (auto& entry_point : spirv_context_->module()->entry_points()) {
+            uint32_t spv_id = entry_point.GetSingleWordInOperand(1);
+            TINT_ASSERT(functions_.Contains(spv_id));
+
+            auto* func = *(functions_.Get(spv_id));
+            for (uint32_t i = 3; i < entry_point.NumInOperands(); ++i) {
+                auto* val = Value(entry_point.GetSingleWordInOperand(i));
+                b_.Phony(val)->InsertBefore(func->Block()->Front());
+            }
+        }
     }
 
     void RemapSamplers() {
@@ -1125,16 +1139,6 @@ class Parser {
         current_spirv_function_ = nullptr;
     }
 
-    std::optional<uint32_t> Position(const core::type::Struct* str) {
-        for (auto* mem : str->Members()) {
-            auto builtin = mem->Attributes().builtin;
-            if (builtin.has_value() && builtin.value() == core::BuiltinValue::kPosition) {
-                return {mem->Index()};
-            }
-        }
-        return {};
-    }
-
     /// Emit entry point attributes.
     void EmitEntryPointAttributes() {
         // Handle OpEntryPoint declarations.
@@ -1160,88 +1164,7 @@ class Parser {
             // Set the entry point name.
             ir_.SetName(func, entry_point.GetOperand(2).AsString());
 
-            // For vertex shaders, must make sure the `position` builtin is referenced. In SPIR-V it
-            // can be referenced in the `OpEntryPoint` without any usages. When translating we need
-            // to make sure we insert a fake write if there are no usages.
-            if (func->IsVertex()) {
-                core::ir::ReferencedModuleVars<const core::ir::Module> referenced(ir_);
-                for (uint32_t i = 3; i < entry_point.NumInOperands(); ++i) {
-                    auto interface_id = entry_point.GetSingleWordInOperand(i);
-                    auto* val = Value(interface_id);
-                    TINT_ASSERT(val);
-
-                    auto* inst_result = val->As<core::ir::InstructionResult>();
-                    TINT_ASSERT(inst_result);
-
-                    auto* var = inst_result->Instruction()->As<core::ir::Var>();
-                    TINT_ASSERT(var);
-
-                    if (auto* str = var->Result()->Type()->UnwrapPtr()->As<core::type::Struct>()) {
-                        auto p = Position(str);
-                        if (!p.has_value()) {
-                            continue;
-                        }
-
-                        auto refs = referenced.TransitiveReferences(func);
-                        if (refs.Contains(var)) {
-                            // The `var` is referenced, but we need to determine if there is an
-                            // `access` usage which references `position` which is then used in a
-                            // `store` instruction.
-
-                            bool accessed = false;
-                            for (auto& usage : var->Result()->UsagesUnsorted()) {
-                                if (auto* access = usage->instruction->As<core::ir::Access>()) {
-                                    if (access->Indices().IsEmpty()) {
-                                        continue;
-                                    }
-
-                                    auto* cnst = access->Indices()[0]->As<core::ir::Constant>();
-                                    TINT_ASSERT(cnst);
-
-                                    if (cnst->Value()->ValueAs<uint32_t>() == p.value()) {
-                                        accessed = true;
-                                        break;
-                                    }
-                                }
-                            }
-
-                            if (accessed) {
-                                break;
-                            }
-                        }
-
-                        auto* mem_ty = str->Members()[p.value()]->Type();
-                        auto* type = ty_.ptr(
-                            var->Result()->Type()->As<core::type::Pointer>()->AddressSpace(),
-                            mem_ty);
-                        auto* access = b_.Access(type, var, u32(p.value()));
-                        access->InsertBefore(func->Block()->Front());
-
-                        auto* store = b_.Store(access, b_.Zero(mem_ty));
-                        store->InsertAfter(access);
-
-                    } else {
-                        auto builtin = var->Builtin();
-                        if (!builtin.has_value() ||
-                            builtin.value() != core::BuiltinValue::kPosition) {
-                            continue;
-                        }
-
-                        auto refs = referenced.TransitiveReferences(func);
-                        // The referenced variables does not contain the var which has the
-                        // `position` builtin, then we need to create a fake store.
-                        if (!refs.Contains(var)) {
-                            auto* store =
-                                b_.Store(var, b_.Zero(var->Result()->Type()->UnwrapPtr()));
-                            store->InsertBefore(func->Block()->Front());
-                        }
-                    }
-
-                    // There should only be one `position` so we're done if we've processed the
-                    // first one found.
-                    break;
-                }
-            } else if (func->IsCompute()) {
+            if (func->IsCompute()) {
                 // Search for `WorkgroupSize` decorated Ids
                 for (const spvtools::opt::Instruction& inst :
                      spirv_context_->module()->annotations()) {

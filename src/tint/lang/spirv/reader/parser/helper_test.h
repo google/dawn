@@ -77,6 +77,7 @@ class SpirvParserTestHelperBase : public BASE {
                                     core::ir::Capabilities{
                                         core::ir::Capability::kAllowMultipleEntryPoints,
                                         core::ir::Capability::kAllowOverrides,
+                                        core::ir::Capability::kAllowPhonyInstructions,
                                         core::ir::Capability::kAllowVectorElementPointer,
                                     });
         if (validated != Success) {

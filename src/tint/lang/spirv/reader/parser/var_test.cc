@@ -1357,7 +1357,41 @@ $B1: {  # root
 
 %main = @fragment func():void {
   $B2: {
+    undef = phony %1
     %3:u32 = load %1
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, VarMarkedFragDepth) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpCapability SampleRateShading
+               OpMemoryModel Logical Simple
+               OpEntryPoint Fragment %2 "main" %gl_FragDepth
+               OpExecutionMode %2 OriginUpperLeft
+               OpDecorate %gl_FragDepth BuiltIn FragDepth
+       %void = OpTypeVoid
+          %4 = OpTypeFunction %void
+      %float = OpTypeFloat 32
+    %float_0 = OpConstant %float 0
+%_ptr_Output_float = OpTypePointer Output %float
+%gl_FragDepth = OpVariable %_ptr_Output_float Output %float_0
+          %2 = OpFunction %void None %4
+         %29 = OpLabel
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %1:ptr<__out, f32, read_write> = var 0.0f @builtin(frag_depth)
+}
+
+%main = @fragment func():void {
+  $B2: {
+    undef = phony %1
     ret
   }
 }
