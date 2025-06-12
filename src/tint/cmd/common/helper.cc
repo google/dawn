@@ -45,6 +45,7 @@
 #include "src/tint/lang/wgsl/reader/reader.h"
 #endif
 
+#include "src/tint/lang/core/ir/disassembler.h"
 #include "src/tint/utils/diagnostic/formatter.h"
 #include "src/tint/utils/rtti/traits.h"
 #include "src/tint/utils/text/string.h"
@@ -126,7 +127,8 @@ tint::Program ReadSpirv(const std::vector<uint32_t>& data, const LoadProgramOpti
         writer_options.allowed_features = opts.spirv_reader_options.allowed_features;
         auto prog_result = tint::wgsl::writer::ProgramFromIR(result.Get(), writer_options);
         if (prog_result != Success) {
-            std::cerr << "Failed to convert IR to Program:\n\n" << prog_result.Failure() << "\n";
+            std::cerr << "Failed to convert IR to Program:\n\n" << prog_result.Failure() << "\n\n";
+            std::cerr << tint::core::ir::Disassembler(result.Get()).Plain() << "\n";
             exit(1);
         }
 
