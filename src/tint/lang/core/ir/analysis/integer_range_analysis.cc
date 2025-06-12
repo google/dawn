@@ -194,12 +194,9 @@ struct IntegerRangeAnalysisImpl {
         if (!operand_range_info) {
             return nullptr;
         }
-        auto* operand_type = operand->Type();
-        TINT_ASSERT(operand_type->IsIntegerScalar());
 
-        if (operand_type == result_type) {
-            return operand_range_info;
-        }
+        TINT_ASSERT(operand->Type()->IsIntegerScalar());
+        TINT_ASSERT(operand->Type() != result_type);
 
         if (std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(
                 operand_range_info->range)) {
