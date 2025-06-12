@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 enable chromium_experimental_subgroup_matrix;
 
 @group(0) @binding(0) var<storage, read_write> prevent_dce : array<u32, 1024>;

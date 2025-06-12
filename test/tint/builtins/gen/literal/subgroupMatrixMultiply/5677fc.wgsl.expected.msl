@@ -1,4 +1,4 @@
-SKIP: INVALID
+SKIP: FAILED
 
 
 enable chromium_experimental_subgroup_matrix;

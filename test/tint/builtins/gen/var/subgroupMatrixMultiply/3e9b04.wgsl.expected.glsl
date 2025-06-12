@@ -1,4 +1,4 @@
-SKIP: INVALID
+SKIP: FAILED
 
 subgroup matrices are not supported by the GLSL backend
 
