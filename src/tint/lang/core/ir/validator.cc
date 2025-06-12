@@ -2633,9 +2633,10 @@ void Validator::CheckVar(const Var* var) {
     // Check that initializer and result type match
     if (var->Initializer()) {
         if (mv->AddressSpace() != AddressSpace::kFunction &&
-            mv->AddressSpace() != AddressSpace::kPrivate) {
-            AddError(var)
-                << "only variables in the function or private address space may be initialized";
+            mv->AddressSpace() != AddressSpace::kPrivate &&
+            mv->AddressSpace() != AddressSpace::kOut) {
+            AddError(var) << "only variables in the function, private, or __out address space may "
+                             "be initialized";
             return;
         }
 

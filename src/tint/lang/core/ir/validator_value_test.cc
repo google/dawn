@@ -415,7 +415,7 @@ TEST_F(IR_ValidatorTest, Var_Init_InvalidAddressSpace) {
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(
-            R"(:3:38 error: var: only variables in the function or private address space may be initialized
+            R"(:3:38 error: var: only variables in the function, private, or __out address space may be initialized
   %s:ptr<storage, f32, read_write> = var 1.0f
                                      ^^^
 )")) << res.Failure();
