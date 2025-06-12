@@ -205,7 +205,7 @@ enum class TextureQueryType : uint8_t { TextureNumLevels, TextureNumSamples };
     X(uint32_t, group)                   \
     X(uint32_t, binding)
 DAWN_SERIALIZABLE(struct, TextureMetadataQuery, TEXTURE_METADATE_QUERY_MEMBER) {
-    using TextureQueryType = TextureQueryType;
+    using TextureQueryType = detail::TextureQueryType;
 };
 #undef TEXTURE_METADATE_QUERY_MEMBER
 
