@@ -47,18 +47,14 @@ struct TextureCopySubresource {
     struct CopyInfo {
         // The 512-byte aligned offset into buffer
         uint64_t alignedOffset = 0;
-        Origin3D destinationOffset;
-        // width,height,depth of buffer
+        // Offset into texture
+        Origin3D textureOffset;
+        // Offset into buffer
+        Origin3D bufferOffset;
+        // width,height,depth of the texture linearly laid out in the buffer
         Extent3D bufferSize;
-
-        D3D12_BOX sourceRegion;
-
-        // Returns x,y,z offset in buffer (from sourceRegion if B2T, or destinationOffset if T2B)
-        Origin3D GetBufferOffset(BufferTextureCopyDirection direction) const;
-        // Returns x,y,z offset in texture (from destinationOffset if B2T, or sourceRegion if T2B)
-        Origin3D GetTextureOffset(BufferTextureCopyDirection direction) const;
-        // Returns width,height,depth of source region
-        Extent3D GetCopySize() const;
+        // width,height,depth to copy
+        Extent3D copySize;
     };
 
     CopyInfo* AddCopy();
@@ -95,23 +91,20 @@ struct TextureCopySplits {
 //   - Copy region(s) combined should exactly be equivalent to the texture region to be copied.
 //   - Every pixel accessed by every copy region should not be out of the bound of the copied
 //     texture and buffer.
-TextureCopySubresource Compute2DTextureCopySubresource(BufferTextureCopyDirection direction,
-                                                       Origin3D origin,
+TextureCopySubresource Compute2DTextureCopySubresource(Origin3D origin,
                                                        Extent3D copySize,
                                                        const TexelBlockInfo& blockInfo,
                                                        uint64_t offset,
                                                        uint32_t bytesPerRow);
 
-TextureCopySplits Compute2DTextureCopySplits(BufferTextureCopyDirection direction,
-                                             Origin3D origin,
+TextureCopySplits Compute2DTextureCopySplits(Origin3D origin,
                                              Extent3D copySize,
                                              const TexelBlockInfo& blockInfo,
                                              uint64_t offset,
                                              uint32_t bytesPerRow,
                                              uint32_t rowsPerImage);
 
-TextureCopySubresource Compute3DTextureCopySplits(BufferTextureCopyDirection direction,
-                                                  Origin3D origin,
+TextureCopySubresource Compute3DTextureCopySplits(Origin3D origin,
                                                   Extent3D copySize,
                                                   const TexelBlockInfo& blockInfo,
                                                   uint64_t offset,
@@ -121,7 +114,6 @@ TextureCopySubresource Compute3DTextureCopySplits(BufferTextureCopyDirection dir
 // Compute the `TextureCopySubresource` for one subresource of a 2D texture with relaxed row pitch
 // and offset.
 TextureCopySubresource Compute2DTextureCopySubresourceWithRelaxedRowPitchAndOffset(
-    BufferTextureCopyDirection direction,
     Origin3D origin,
     Extent3D copySize,
     const TexelBlockInfo& blockInfo,
@@ -131,7 +123,6 @@ TextureCopySubresource Compute2DTextureCopySubresourceWithRelaxedRowPitchAndOffs
 // Compute the `TextureCopySubresource` for one subresource of a 3D texture with relaxed row pitch
 // and offset.
 TextureCopySubresource Compute3DTextureCopySubresourceWithRelaxedRowPitchAndOffset(
-    BufferTextureCopyDirection direction,
     Origin3D origin,
     Extent3D copySize,
     const TexelBlockInfo& blockInfo,

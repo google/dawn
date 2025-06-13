@@ -58,82 +58,14 @@ uint64_t AlignDownForDataPlacement(uint32_t offset) {
     return offset & ~static_cast<uint64_t>(D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT - 1);
 }
 
-void ComputeSourceRegionForCopyInfo(TextureCopySubresource::CopyInfo* copyInfo,
-                                    BufferTextureCopyDirection direction,
-                                    Origin3D bufferOffset,
-                                    Origin3D textureOffset,
-                                    Extent3D copySize) {
-    switch (direction) {
-        case BufferTextureCopyDirection::B2T:
-            copyInfo->sourceRegion = ComputeD3D12BoxFromOffsetAndSize(bufferOffset, copySize);
-            copyInfo->destinationOffset = textureOffset;
-            break;
-        case BufferTextureCopyDirection::T2B:
-            copyInfo->sourceRegion = ComputeD3D12BoxFromOffsetAndSize(textureOffset, copySize);
-            copyInfo->destinationOffset = bufferOffset;
-            break;
-        default:
-            DAWN_UNREACHABLE();
-    }
-}
-
-void FillAlignedOffsetAndBufferSize(TextureCopySubresource::CopyInfo* copyInfo,
-                                    uint64_t alignedOffset,
-                                    Extent3D bufferSize) {
-    copyInfo->alignedOffset = alignedOffset;
-    copyInfo->bufferSize = bufferSize;
-}
-
 }  // namespace
-
-Extent3D TextureCopySubresource::CopyInfo::GetCopySize() const {
-    return {sourceRegion.right - sourceRegion.left, sourceRegion.bottom - sourceRegion.top,
-            sourceRegion.back - sourceRegion.front};
-}
-
-Origin3D TextureCopySubresource::CopyInfo::GetBufferOffset(
-    BufferTextureCopyDirection direction) const {
-    switch (direction) {
-        case BufferTextureCopyDirection::B2T:
-            return {sourceRegion.left, sourceRegion.top, sourceRegion.front};
-        case BufferTextureCopyDirection::T2B:
-            return destinationOffset;
-        default:
-            DAWN_UNREACHABLE();
-    }
-}
-
-Origin3D TextureCopySubresource::CopyInfo::GetTextureOffset(
-    BufferTextureCopyDirection direction) const {
-    switch (direction) {
-        case BufferTextureCopyDirection::B2T:
-            return destinationOffset;
-        case BufferTextureCopyDirection::T2B:
-            return {sourceRegion.left, sourceRegion.top, sourceRegion.front};
-        default:
-            DAWN_UNREACHABLE();
-    }
-}
 
 TextureCopySubresource::CopyInfo* TextureCopySubresource::AddCopy() {
     DAWN_ASSERT(this->count < kMaxTextureCopyRegions);
     return &this->copies[this->count++];
 }
 
-void FillTextureCopySubresourceCopyInfo(TextureCopySubresource::CopyInfo* copyInfo,
-                                        BufferTextureCopyDirection direction,
-                                        Origin3D bufferOffset,
-                                        Origin3D textureOffset,
-                                        Extent3D copySize,
-                                        Extent3D bufferSize,
-                                        uint64_t alignedOffset,
-                                        uint32_t bytesPerRow) {
-    ComputeSourceRegionForCopyInfo(copyInfo, direction, bufferOffset, textureOffset, copySize);
-    FillAlignedOffsetAndBufferSize(copyInfo, alignedOffset, bufferSize);
-}
-
-TextureCopySubresource Compute2DTextureCopySubresource(BufferTextureCopyDirection direction,
-                                                       Origin3D origin,
+TextureCopySubresource Compute2DTextureCopySubresource(Origin3D origin,
                                                        Extent3D copySize,
                                                        const TexelBlockInfo& blockInfo,
                                                        uint64_t offset,
@@ -150,14 +82,11 @@ TextureCopySubresource Compute2DTextureCopySubresource(BufferTextureCopyDirectio
     // without further translation.
     if (offset == alignedOffset) {
         TextureCopySubresource::CopyInfo* copyInfo = copy.AddCopy();
-
-        Origin3D textureOffset = origin;
-        Origin3D bufferOffset = {0, 0, 0};
-
-        Extent3D bufferSize = copySize;
-
-        FillTextureCopySubresourceCopyInfo(copyInfo, direction, bufferOffset, textureOffset,
-                                           copySize, bufferSize, alignedOffset, bytesPerRow);
+        copyInfo->bufferOffset = {0, 0, 0};
+        copyInfo->textureOffset = origin;
+        copyInfo->copySize = copySize;
+        copyInfo->alignedOffset = alignedOffset;
+        copyInfo->bufferSize = copySize;
         return copy;
     }
 
@@ -217,16 +146,12 @@ TextureCopySubresource Compute2DTextureCopySubresource(BufferTextureCopyDirectio
         //  |----------------------------------|
 
         TextureCopySubresource::CopyInfo* copyInfo = copy.AddCopy();
-
-        Origin3D textureOffset = origin;
-        Origin3D bufferOffset = texelOffset;
-
-        Extent3D bufferSize = {copySize.width + texelOffset.x, copySize.height + texelOffset.y,
-                               copySize.depthOrArrayLayers};
-
-        FillTextureCopySubresourceCopyInfo(copyInfo, direction, bufferOffset, textureOffset,
-                                           copySize, bufferSize, alignedOffset, bytesPerRow);
-
+        copyInfo->bufferOffset = texelOffset;
+        copyInfo->textureOffset = origin;
+        copyInfo->copySize = copySize;
+        copyInfo->alignedOffset = alignedOffset;
+        copyInfo->bufferSize = {copySize.width + texelOffset.x, copySize.height + texelOffset.y,
+                                copySize.depthOrArrayLayers};
         return copy;
     }
 
@@ -265,49 +190,48 @@ TextureCopySubresource Compute2DTextureCopySubresource(BufferTextureCopyDirectio
     //  |---------|
 
     // Copy 0
-    Origin3D textureOffset0 = origin;
-
     DAWN_ASSERT(bytesPerRow > byteOffsetInRowPitch);
-    uint32_t texelsPerRow = bytesPerRow / blockInfo.byteSize * blockInfo.width;
-    Extent3D copySize0 = {texelsPerRow - texelOffset.x, copySize.height,
-                          copySize.depthOrArrayLayers};
-
-    Origin3D bufferOffset0 = texelOffset;
-    Extent3D bufferSize0 = {texelsPerRow, copySize.height + texelOffset.y,
-                            copySize.depthOrArrayLayers};
-
+    const uint32_t texelsPerRow = bytesPerRow / blockInfo.byteSize * blockInfo.width;
+    const Extent3D copySize0 = {texelsPerRow - texelOffset.x, copySize.height,
+                                copySize.depthOrArrayLayers};
     TextureCopySubresource::CopyInfo* copyInfo0 = copy.AddCopy();
-    FillTextureCopySubresourceCopyInfo(copyInfo0, direction, bufferOffset0, textureOffset0,
-                                       copySize0, bufferSize0, alignedOffset, bytesPerRow);
+    copyInfo0->bufferOffset = texelOffset;
+    copyInfo0->textureOffset = origin;
+    copyInfo0->copySize = copySize0;
+    copyInfo0->alignedOffset = alignedOffset;
+    copyInfo0->bufferSize = {texelsPerRow, copySize.height + texelOffset.y,
+                             copySize.depthOrArrayLayers};
 
     // Copy 1
-    uint64_t offsetForCopy1 = offset + copySize0.width / blockInfo.width * blockInfo.byteSize;
-    uint64_t alignedOffsetForCopy1 = AlignDownForDataPlacement(offsetForCopy1);
-    Origin3D texelOffsetForCopy1 = ComputeTexelOffsets(
+    const uint64_t offsetForCopy1 = offset + copySize0.width / blockInfo.width * blockInfo.byteSize;
+    const uint64_t alignedOffsetForCopy1 = AlignDownForDataPlacement(offsetForCopy1);
+    const Origin3D texelOffsetForCopy1 = ComputeTexelOffsets(
         blockInfo, static_cast<uint32_t>(offsetForCopy1 - alignedOffsetForCopy1), bytesPerRow);
 
     DAWN_ASSERT(texelOffsetForCopy1.y <= blockInfo.height);
     DAWN_ASSERT(texelOffsetForCopy1.z == 0);
 
-    Origin3D textureOffset1 = {origin.x + copySize0.width, origin.y, origin.z};
+    const Origin3D textureOffset1 = {origin.x + copySize0.width, origin.y, origin.z};
 
     DAWN_ASSERT(copySize.width > copySize0.width);
-    Extent3D copySize1 = {copySize.width - copySize0.width, copySize.height,
-                          copySize.depthOrArrayLayers};
+    const Extent3D copySize1 = {copySize.width - copySize0.width, copySize.height,
+                                copySize.depthOrArrayLayers};
 
-    Origin3D bufferOffset1 = texelOffsetForCopy1;
-    Extent3D bufferSize1 = {copySize1.width + texelOffsetForCopy1.x,
-                            copySize.height + texelOffsetForCopy1.y, copySize.depthOrArrayLayers};
+    const Origin3D bufferOffset1 = texelOffsetForCopy1;
+    const Extent3D bufferSize1 = {copySize1.width + texelOffsetForCopy1.x,
+                                  copySize.height + texelOffsetForCopy1.y,
+                                  copySize.depthOrArrayLayers};
 
     TextureCopySubresource::CopyInfo* copyInfo1 = copy.AddCopy();
-    FillTextureCopySubresourceCopyInfo(copyInfo1, direction, bufferOffset1, textureOffset1,
-                                       copySize1, bufferSize1, alignedOffsetForCopy1, bytesPerRow);
-
+    copyInfo1->bufferOffset = bufferOffset1;
+    copyInfo1->textureOffset = textureOffset1;
+    copyInfo1->copySize = copySize1;
+    copyInfo1->alignedOffset = alignedOffsetForCopy1;
+    copyInfo1->bufferSize = bufferSize1;
     return copy;
 }
 
-TextureCopySplits Compute2DTextureCopySplits(BufferTextureCopyDirection direction,
-                                             Origin3D origin,
+TextureCopySplits Compute2DTextureCopySplits(Origin3D origin,
                                              Extent3D copySize,
                                              const TexelBlockInfo& blockInfo,
                                              uint64_t offset,
@@ -334,7 +258,7 @@ TextureCopySplits Compute2DTextureCopySplits(BufferTextureCopyDirection directio
     copyFirstLayerOrigin.z = 0;
 
     copies.copySubresources[0] = Compute2DTextureCopySubresource(
-        direction, copyFirstLayerOrigin, copyOneLayerSize, blockInfo, offset, bytesPerRow);
+        copyFirstLayerOrigin, copyOneLayerSize, blockInfo, offset, bytesPerRow);
 
     // When the copy only refers one texture 2D array layer,
     // copies.copySubresources[1] will never be used so we can safely early return here.
@@ -352,16 +276,14 @@ TextureCopySplits Compute2DTextureCopySplits(BufferTextureCopyDirection directio
         copies.copySubresources[1].copies[1].alignedOffset = alignedOffset1;
     } else {
         const uint64_t bufferOffsetNextLayer = offset + bytesPerLayer;
-        copies.copySubresources[1] =
-            Compute2DTextureCopySubresource(direction, copyFirstLayerOrigin, copyOneLayerSize,
-                                            blockInfo, bufferOffsetNextLayer, bytesPerRow);
+        copies.copySubresources[1] = Compute2DTextureCopySubresource(
+            copyFirstLayerOrigin, copyOneLayerSize, blockInfo, bufferOffsetNextLayer, bytesPerRow);
     }
 
     return copies;
 }
 
 void Recompute3DTextureCopyRegionWithEmptyFirstRowAndEvenCopyHeight(
-    BufferTextureCopyDirection direction,
     Origin3D origin,
     Extent3D copySize,
     const TexelBlockInfo& blockInfo,
@@ -461,40 +383,28 @@ void Recompute3DTextureCopyRegionWithEmptyFirstRowAndEvenCopyHeight(
 
     // Copy 0: copy copySize0.height - 1 rows
     TextureCopySubresource::CopyInfo& copy0 = copy.copies[i];
-    Extent3D copySize0 = copy0.GetCopySize();
-    copySize0.height = copySize.height - blockInfo.height;
-    uint32_t bufferHeight0 = rowsPerImage * blockInfo.height;  // rowsPerImageInTexels
-    copy0.bufferSize.height = bufferHeight0;
-    const Origin3D bufferOffset0 = copy0.GetBufferOffset(direction);
-    const Origin3D textureOffset0 = copy0.GetTextureOffset(direction);
-    ComputeSourceRegionForCopyInfo(&copy0, direction, bufferOffset0, textureOffset0, copySize0);
+    copy0.copySize.height = copySize.height - blockInfo.height;
+    copy0.bufferSize.height = rowsPerImage * blockInfo.height;  // rowsPerImageInTexels
 
     // Copy 1: move down 2 rows and copy the last row on image 0, and expand to all depth slices
     // but the last one.
     TextureCopySubresource::CopyInfo* copy1 = copy.AddCopy();
     *copy1 = copy0;
-    uint64_t alignedOffset1 = copy1->alignedOffset + 2 * bytesPerRow;
-    copy1->alignedOffset = alignedOffset1;
-    Origin3D textureOffset1 = textureOffset0;
-    Origin3D bufferOffset1 = bufferOffset0;
-    textureOffset1.y += copySize.height - blockInfo.height;
+    copy1->alignedOffset = copy1->alignedOffset + 2 * bytesPerRow;
+    copy1->textureOffset.y += copySize.height - blockInfo.height;
     // Offset two rows from the copy height for bufferOffset1 (See the figure above):
     //   - one for the row we advanced in the buffer: row (N + 4).
     //   - one for the last row we want to copy: row (N + 3) itself.
-    bufferOffset1.y = copySize.height - 2 * blockInfo.height;
-    Extent3D copySize1 = copySize0;
-    copySize1.height = blockInfo.height;
-    copySize1.depthOrArrayLayers--;
-    uint32_t bufferDepth1 = copy1->bufferSize.depthOrArrayLayers;
-    bufferDepth1--;
-    copy1->bufferSize.depthOrArrayLayers = bufferDepth1;
-    ComputeSourceRegionForCopyInfo(copy1, direction, bufferOffset1, textureOffset1, copySize1);
+    copy1->bufferOffset.y = copySize.height - 2 * blockInfo.height;
+    copy1->copySize.height = blockInfo.height;
+    copy1->copySize.depthOrArrayLayers--;
+    copy1->bufferSize.depthOrArrayLayers--;
 
     // Copy 2: copy the last row of the last image.
     uint64_t offsetForCopy0 =
-        OffsetToFirstCopiedTexel(blockInfo, bytesPerRow, copy0.alignedOffset, bufferOffset0);
+        OffsetToFirstCopiedTexel(blockInfo, bytesPerRow, copy0.alignedOffset, copy0.bufferOffset);
     uint64_t offsetForLastRowOfLastImage =
-        offsetForCopy0 + bytesPerRow * (copySize0.height / blockInfo.height +
+        offsetForCopy0 + bytesPerRow * (copy0.copySize.height / blockInfo.height +
                                         rowsPerImage * (copySize.depthOrArrayLayers - 1));
     uint64_t alignedOffsetForLastRowOfLastImage =
         AlignDownForDataPlacement(offsetForLastRowOfLastImage);
@@ -504,21 +414,19 @@ void Recompute3DTextureCopyRegionWithEmptyFirstRowAndEvenCopyHeight(
         bytesPerRow);
 
     TextureCopySubresource::CopyInfo* copy2 = copy.AddCopy();
-    uint64_t alignedOffset2 = alignedOffsetForLastRowOfLastImage;
-    Origin3D textureOffset2 = textureOffset1;
-    textureOffset2.z = origin.z + copySize.depthOrArrayLayers - 1;
-    Extent3D copySize2 = copySize1;
-    copySize2.depthOrArrayLayers = 1;
-    Origin3D bufferOffset2 = bufferOffset1;
-    bufferOffset2 = texelOffsetForLastRowOfLastImage;
-    DAWN_ASSERT(copySize2.height == blockInfo.height);
-    ComputeSourceRegionForCopyInfo(copy2, direction, bufferOffset2, textureOffset2, copySize2);
-    Extent3D bufferSize2 = {copy1->bufferSize.width, bufferOffset2.y + copySize2.height, 1};
-    FillAlignedOffsetAndBufferSize(copy2, alignedOffset2, bufferSize2);
+    copy2->alignedOffset = alignedOffsetForLastRowOfLastImage;
+    copy2->textureOffset = copy1->textureOffset;
+    copy2->textureOffset.z = origin.z + copySize.depthOrArrayLayers - 1;
+    copy2->copySize = copy1->copySize;
+    copy2->copySize.depthOrArrayLayers = 1;
+    copy2->bufferOffset = texelOffsetForLastRowOfLastImage;
+    copy2->bufferSize.width = copy1->bufferSize.width;
+    DAWN_ASSERT(copy2->copySize.height == blockInfo.height);
+    copy2->bufferSize.height = copy2->bufferOffset.y + copy2->copySize.height;
+    copy2->bufferSize.depthOrArrayLayers = 1;
 }
 
 void Recompute3DTextureCopyRegionWithEmptyFirstRowAndOddCopyHeight(
-    BufferTextureCopyDirection direction,
     Extent3D copySize,
     const TexelBlockInfo& blockInfo,
     uint32_t bytesPerRow,
@@ -536,39 +444,28 @@ void Recompute3DTextureCopyRegionWithEmptyFirstRowAndOddCopyHeight(
 
     // Copy 0: copy the first depth slice (image 0)
     TextureCopySubresource::CopyInfo& copy0 = copy.copies[i];
-    Extent3D copySize0 = copy0.GetCopySize();
-    copySize0.depthOrArrayLayers = 1;
+    copy0.copySize.depthOrArrayLayers = 1;
     const uint32_t kBufferDepth0 = 1u;
     copy0.bufferSize.depthOrArrayLayers = kBufferDepth0;
-    const Origin3D bufferOffset0 = copy0.GetBufferOffset(direction);
-    const Origin3D textureOffset0 = copy0.GetTextureOffset(direction);
-    ComputeSourceRegionForCopyInfo(&copy0, direction, bufferOffset0, textureOffset0, copySize0);
 
     // Copy 1: copy the rest depth slices in one shot
     TextureCopySubresource::CopyInfo* copy1 = copy.AddCopy();
     *copy1 = copy0;
     DAWN_ASSERT((copySize.height / blockInfo.height) % 2 == 1);
-    uint64_t alignedOffset1 =
-        copy0.alignedOffset + (copySize.height / blockInfo.height + 1) * bytesPerRow;
-    DAWN_ASSERT(alignedOffset1 % D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT == 0);
-    copy1->alignedOffset = alignedOffset1;
+    copy1->alignedOffset += (copySize.height / blockInfo.height + 1) * bytesPerRow;
+    DAWN_ASSERT(copy1->alignedOffset % D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT == 0);
     // textureOffset1.z should add one because the first slice has already been copied in copy0.
-    Origin3D textureOffset1 = textureOffset0;
-    textureOffset1.z++;
+    copy1->textureOffset.z++;
     // bufferOffset1.y should be 0 because we skipped the first depth slice and there is no empty
     // row in this copy region.
-    Origin3D bufferOffset1 = bufferOffset0;
-    bufferOffset1.y = 0;
-    Extent3D copySize1 = copySize0;
-    copySize1.height = copySize.height;
-    copySize1.depthOrArrayLayers = copySize.depthOrArrayLayers - 1;
+    copy1->bufferOffset.y = 0;
+    copy1->copySize.height = copySize.height;
+    copy1->copySize.depthOrArrayLayers = copySize.depthOrArrayLayers - 1;
     copy1->bufferSize.height = copySize.height;
     copy1->bufferSize.depthOrArrayLayers = copySize.depthOrArrayLayers - 1;
-    ComputeSourceRegionForCopyInfo(copy1, direction, bufferOffset1, textureOffset1, copySize1);
 }
 
-TextureCopySubresource Compute3DTextureCopySplits(BufferTextureCopyDirection direction,
-                                                  Origin3D origin,
+TextureCopySubresource Compute3DTextureCopySplits(Origin3D origin,
                                                   Extent3D copySize,
                                                   const TexelBlockInfo& blockInfo,
                                                   uint64_t offset,
@@ -588,8 +485,8 @@ TextureCopySubresource Compute3DTextureCopySplits(BufferTextureCopyDirection dir
 
     // Call Compute2DTextureCopySubresource and get copy regions. This function has already
     // forwarded "copySize.depthOrArrayLayers" to all depth slices.
-    TextureCopySubresource copySubresource = Compute2DTextureCopySubresource(
-        direction, origin, copySize, blockInfo, offset, bytesPerRow);
+    TextureCopySubresource copySubresource =
+        Compute2DTextureCopySubresource(origin, copySize, blockInfo, offset, bytesPerRow);
 
     DAWN_ASSERT(copySubresource.count <= 2);
     // If copySize.depthOrArrayLayers is 1, we can return copySubresource. Because we don't need to
@@ -636,8 +533,7 @@ TextureCopySubresource Compute3DTextureCopySplits(BufferTextureCopyDirection dir
                 // an empty row at each depth slice. We need a totally different approach to
                 // split the copy region.
                 Recompute3DTextureCopyRegionWithEmptyFirstRowAndEvenCopyHeight(
-                    direction, origin, copySize, blockInfo, bytesPerRow, rowsPerImage,
-                    copySubresource, i);
+                    origin, copySize, blockInfo, bytesPerRow, rowsPerImage, copySubresource, i);
             } else {
                 // If copyHeightInBlocks is odd and there is an empty row at the beginning of the
                 // first slice of the copy region, we can split the copy region into two copies:
@@ -646,7 +542,7 @@ TextureCopySubresource Compute3DTextureCopySplits(BufferTextureCopyDirection dir
                 // without an empty row. This is an easier case relative to cases with even copy
                 // height.
                 Recompute3DTextureCopyRegionWithEmptyFirstRowAndOddCopyHeight(
-                    direction, copySize, blockInfo, bytesPerRow, copySubresource, i);
+                    copySize, blockInfo, bytesPerRow, copySubresource, i);
             }
         }
     }
@@ -655,7 +551,6 @@ TextureCopySubresource Compute3DTextureCopySplits(BufferTextureCopyDirection dir
 }
 
 TextureCopySubresource Compute2DTextureCopySubresourceWithRelaxedRowPitchAndOffset(
-    BufferTextureCopyDirection direction,
     Origin3D origin,
     Extent3D copySize,
     const TexelBlockInfo& blockInfo,
@@ -676,21 +571,15 @@ TextureCopySubresource Compute2DTextureCopySubresourceWithRelaxedRowPitchAndOffs
     //                        |++++++++++++++++++++++|         |    |     |
     //                        |<-----CopyWidth------>|         |----------|
     //
-    Origin3D textureOffset = {origin.x, origin.y, 0};
-    Origin3D bufferOffset = {0, 0, 0};
-    Extent3D copySizeOneLayer = {copySize.width, copySize.height, 1};
-    ComputeSourceRegionForCopyInfo(copyInfo, direction, bufferOffset, textureOffset,
-                                   copySizeOneLayer);
-
-    Extent3D bufferSize = {copySize.width, copySize.height, 1};
-
-    FillAlignedOffsetAndBufferSize(copyInfo, offset, bufferSize);
-
+    copyInfo->textureOffset = {origin.x, origin.y, 0};
+    copyInfo->bufferOffset = {0, 0, 0};
+    copyInfo->copySize = {copySize.width, copySize.height, 1};
+    copyInfo->alignedOffset = offset;
+    copyInfo->bufferSize = {copySize.width, copySize.height, 1};
     return copy;
 }
 
 TextureCopySubresource Compute3DTextureCopySubresourceWithRelaxedRowPitchAndOffset(
-    BufferTextureCopyDirection direction,
     Origin3D origin,
     Extent3D copySize,
     const TexelBlockInfo& blockInfo,
@@ -703,7 +592,7 @@ TextureCopySubresource Compute3DTextureCopySubresourceWithRelaxedRowPitchAndOffs
 
     // You can visualize the data in the buffer (bufferLocation) like the inline comments.
     // * copy data is visualized as '+'.
-    uint32_t depthInCopy1 = copySize.depthOrArrayLayers - 1;
+    const uint32_t depthInCopy1 = copySize.depthOrArrayLayers - 1;
     if (depthInCopy1 > 0) {
         // `bufferLocation` in the 1st copy (first `depthInCopy1` images, optional):
         //
@@ -725,20 +614,12 @@ TextureCopySubresource Compute3DTextureCopySubresourceWithRelaxedRowPitchAndOffs
         // |---End of 2nd image-->|--------------------------------|----------|------------|
         //                        |<-----CopyWidth------>|
         //
-
-        Origin3D textureOffset1 = origin;
-        uint32_t offset1 = offset;
-
-        uint32_t rowsPerImage1 = rowsPerImage;
-
         auto* copyInfo1 = copy.AddCopy();
-        Extent3D copySize1 = {copySize.width, copySize.height, depthInCopy1};
-        ComputeSourceRegionForCopyInfo(copyInfo1, direction, bufferOffset, textureOffset1,
-                                       copySize1);
-
-        Extent3D bufferSize1 = {copySize.width, rowsPerImage1, depthInCopy1};
-
-        FillAlignedOffsetAndBufferSize(copyInfo1, offset1, bufferSize1);
+        copyInfo1->bufferOffset = bufferOffset;
+        copyInfo1->textureOffset = origin;
+        copyInfo1->copySize = {copySize.width, copySize.height, depthInCopy1};
+        copyInfo1->alignedOffset = offset;
+        copyInfo1->bufferSize = {copySize.width, rowsPerImage, depthInCopy1};
     }
 
     {
@@ -761,19 +642,15 @@ TextureCopySubresource Compute3DTextureCopySubresourceWithRelaxedRowPitchAndOffs
         //                                     End of all buffer data
         //
         DAWN_ASSERT(copySize.depthOrArrayLayers >= 1);
-        Origin3D textureOffset2 = {origin.x, origin.y, origin.z + depthInCopy1};
-        uint32_t offset2 = offset + bytesPerRow * rowsPerImage * depthInCopy1;
-        uint32_t depthInCopy2 = 1;
-        uint32_t rowsPerImage2 = copySize.height;
+        constexpr uint32_t depthInCopy2 = 1;
+        const uint32_t rowsPerImage2 = copySize.height;
 
         auto* copyInfo2 = copy.AddCopy();
-        Extent3D copySize2 = {copySize.width, copySize.height, depthInCopy2};
-        ComputeSourceRegionForCopyInfo(copyInfo2, direction, bufferOffset, textureOffset2,
-                                       copySize2);
-
-        Extent3D bufferSize2 = {copySize.width, rowsPerImage2, depthInCopy2};
-
-        FillAlignedOffsetAndBufferSize(copyInfo2, offset2, bufferSize2);
+        copyInfo2->bufferOffset = bufferOffset;
+        copyInfo2->textureOffset = {origin.x, origin.y, origin.z + depthInCopy1};
+        copyInfo2->copySize = {copySize.width, copySize.height, depthInCopy2};
+        copyInfo2->alignedOffset = offset + bytesPerRow * rowsPerImage * depthInCopy1;
+        copyInfo2->bufferSize = {copySize.width, rowsPerImage2, depthInCopy2};
     }
 
     return copy;
