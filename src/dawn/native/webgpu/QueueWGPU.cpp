@@ -35,6 +35,7 @@
 #include "dawn/native/webgpu/BufferWGPU.h"
 #include "dawn/native/webgpu/CommandBufferWGPU.h"
 #include "dawn/native/webgpu/DeviceWGPU.h"
+#include "dawn/native/webgpu/WebGPUError.h"
 
 namespace dawn::native::webgpu {
 
@@ -101,10 +102,7 @@ ResultOrError<ExecutionSerial> Queue::CheckAndUpdateCompletedSerials() {
             if (status == WGPUWaitStatus_TimedOut) {
                 return fenceSerial;
             }
-            if (status != WGPUWaitStatus_Success) {
-                return DAWN_FORMAT_INTERNAL_ERROR("inner instanceWaitAny status is (%s).",
-                                                  FromAPI(status));
-            }
+            DAWN_TRY(CheckWGPUSuccess(status, "instanceWaitAny"));
 
             // Update fenceSerial since future is ready.
             fenceSerial = tentativeSerial;
