@@ -1,92 +1,111 @@
-SKIP: FAILED
-
-
-enable chromium_experimental_subgroup_matrix;
-
-var<workgroup> arg_0 : array<u32, 1024>;
-
-fn subgroupMatrixStore_43b7fd() {
-  var arg_1 = 1u;
-  var arg_2 = subgroup_matrix_right<u8, 8, 8>();
-  const arg_3 = true;
-  var arg_4 = 8u;
-  subgroupMatrixStore(&(arg_0), arg_1, arg_2, arg_3, arg_4);
-}
-
-@compute @workgroup_size(1)
-fn compute_main() {
-  subgroupMatrixStore_43b7fd();
-}
-
-Failed to generate SPIR-V: :22:20 error: spirv.cooperative_matrix_store: no matching call to 'spirv.cooperative_matrix_store(ptr<workgroup, u32, read_write>, subgroup_matrix_right<u8, 8, 8>, u32, u32, u32)'
-
-1 candidate function:
- • 'spirv.cooperative_matrix_store(ptr<workgroup' or 'storage, S, write' or 'read_write>  ✓ , subgroup_matrix<K, S, C, R>  ✗ , u32  ✓ , u32  ✓ , u32  ✓ )' where:
-      ✓  'S' is 'f32', 'i32', 'u32' or 'f16'
-
-        %16:void = spirv.cooperative_matrix_store %15, %8, 1u, %10, 32u
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-:20:7 note: in block
-      $B3: {  # true
-      ^^^
-
-note: # Disassembly
-$B1: {  # root
-  %arg_0:ptr<workgroup, array<u32, 1024>, read_write> = var undef
-}
-
-%subgroupMatrixStore_43b7fd = func():void {
-  $B2: {
-    %arg_1:ptr<function, u32, read_write> = var 1u
-    %4:subgroup_matrix_right<u8, 8, 8> = construct
-    %arg_2:ptr<function, subgroup_matrix_right<u8, 8, 8>, read_write> = var %4
-    %arg_4:ptr<function, u32, read_write> = var 8u
-    %7:u32 = load %arg_1
-    %8:subgroup_matrix_right<u8, 8, 8> = load %arg_2
-    %9:u32 = load %arg_4
-    %10:u32 = max %9, 8u
-    %11:u32 = mul %10, 7u
-    %12:u32 = add %7, %11
-    %13:u32 = add %12, 8u
-    %14:bool = lte %13, 4096u
-    if %14 [t: $B3] {  # if_1
-      $B3: {  # true
-        %15:ptr<workgroup, u32, read_write> = access %arg_0, %7
-        %16:void = spirv.cooperative_matrix_store %15, %8, 1u, %10, 32u
-        exit_if  # if_1
-      }
-    }
-    ret
-  }
-}
-%compute_main = @compute @workgroup_size(1i, 1i, 1i) func(%tint_local_index:u32 [@local_invocation_index]):void {
-  $B4: {
-    loop [i: $B5, b: $B6, c: $B7] {  # loop_1
-      $B5: {  # initializer
-        next_iteration %tint_local_index  # -> $B6
-      }
-      $B6 (%idx:u32): {  # body
-        %20:bool = gte %idx, 1024u
-        if %20 [t: $B8] {  # if_2
-          $B8: {  # true
-            exit_loop  # loop_1
-          }
-        }
-        %21:ptr<workgroup, u32, read_write> = access %arg_0, %idx
-        store %21, 0u
-        continue  # -> $B7
-      }
-      $B7: {  # continuing
-        %22:u32 = add %idx, 1u
-        next_iteration %22  # -> $B6
-      }
-    }
-    %23:void = workgroupBarrier
-    %24:void = call %subgroupMatrixStore_43b7fd
-    ret
-  }
-}
-
-
-tint executable returned error: exit status 1
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 65
+; Schema: 0
+               OpCapability Shader
+               OpCapability VulkanMemoryModel
+               OpCapability VulkanMemoryModelDeviceScope
+               OpCapability CooperativeMatrixKHR
+               OpCapability Int8
+               OpExtension "SPV_KHR_vulkan_memory_model"
+               OpExtension "SPV_KHR_cooperative_matrix"
+         %28 = OpExtInstImport "GLSL.std.450"
+               OpMemoryModel Logical Vulkan
+               OpEntryPoint GLCompute %compute_main "compute_main" %compute_main_local_invocation_index_Input
+               OpExecutionMode %compute_main LocalSize 1 1 1
+               OpName %arg_0 "arg_0"
+               OpName %compute_main_local_invocation_index_Input "compute_main_local_invocation_index_Input"
+               OpName %subgroupMatrixStore_43b7fd "subgroupMatrixStore_43b7fd"
+               OpName %arg_1 "arg_1"
+               OpName %arg_2 "arg_2"
+               OpName %arg_4 "arg_4"
+               OpName %compute_main_inner "compute_main_inner"
+               OpName %tint_local_index "tint_local_index"
+               OpName %compute_main "compute_main"
+               OpDecorate %compute_main_local_invocation_index_Input BuiltIn LocalInvocationIndex
+       %uint = OpTypeInt 32 0
+  %uint_1024 = OpConstant %uint 1024
+%_arr_uint_uint_1024 = OpTypeArray %uint %uint_1024
+%_ptr_Workgroup__arr_uint_uint_1024 = OpTypePointer Workgroup %_arr_uint_uint_1024
+      %arg_0 = OpVariable %_ptr_Workgroup__arr_uint_uint_1024 Workgroup
+%_ptr_Input_uint = OpTypePointer Input %uint
+%compute_main_local_invocation_index_Input = OpVariable %_ptr_Input_uint Input
+       %void = OpTypeVoid
+         %10 = OpTypeFunction %void
+%_ptr_Function_uint = OpTypePointer Function %uint
+     %uint_1 = OpConstant %uint 1
+     %uint_3 = OpConstant %uint 3
+     %uint_8 = OpConstant %uint 8
+      %uchar = OpTypeInt 8 0
+         %16 = OpTypeCooperativeMatrixKHR %uchar %uint_3 %uint_8 %uint_8 %uint_1
+    %uchar_0 = OpConstant %uchar 0
+         %15 = OpConstantComposite %16 %uchar_0
+%_ptr_Function_16 = OpTypePointer Function %16
+     %uint_7 = OpConstant %uint 7
+  %uint_4096 = OpConstant %uint 4096
+       %bool = OpTypeBool
+%_ptr_Workgroup_uint = OpTypePointer Workgroup %uint
+         %43 = OpTypeFunction %void %uint
+     %uint_2 = OpConstant %uint 2
+ %uint_24840 = OpConstant %uint 24840
+     %uint_0 = OpConstant %uint 0
+%subgroupMatrixStore_43b7fd = OpFunction %void None %10
+         %11 = OpLabel
+      %arg_1 = OpVariable %_ptr_Function_uint Function
+      %arg_2 = OpVariable %_ptr_Function_16 Function
+      %arg_4 = OpVariable %_ptr_Function_uint Function
+               OpStore %arg_1 %uint_1
+               OpStore %arg_2 %15
+               OpStore %arg_4 %uint_8
+         %24 = OpLoad %uint %arg_1 None
+         %25 = OpLoad %16 %arg_2 None
+         %26 = OpLoad %uint %arg_4 None
+         %27 = OpExtInst %uint %28 UMax %26 %uint_8
+         %29 = OpIMul %uint %27 %uint_7
+         %31 = OpIAdd %uint %24 %29
+         %32 = OpIAdd %uint %31 %uint_8
+         %33 = OpULessThanEqual %bool %32 %uint_4096
+               OpSelectionMerge %36 None
+               OpBranchConditional %33 %37 %36
+         %37 = OpLabel
+         %38 = OpAccessChain %_ptr_Workgroup_uint %arg_0 %24
+               OpCooperativeMatrixStoreKHR %38 %25 %uint_1 %27 NonPrivatePointer
+               OpBranch %36
+         %36 = OpLabel
+               OpReturn
+               OpFunctionEnd
+%compute_main_inner = OpFunction %void None %43
+%tint_local_index = OpFunctionParameter %uint
+         %44 = OpLabel
+               OpBranch %45
+         %45 = OpLabel
+               OpBranch %48
+         %48 = OpLabel
+         %50 = OpPhi %uint %tint_local_index %45 %51 %47
+               OpLoopMerge %49 %47 None
+               OpBranch %46
+         %46 = OpLabel
+         %56 = OpUGreaterThanEqual %bool %50 %uint_1024
+               OpSelectionMerge %57 None
+               OpBranchConditional %56 %58 %57
+         %58 = OpLabel
+               OpBranch %49
+         %57 = OpLabel
+         %59 = OpAccessChain %_ptr_Workgroup_uint %arg_0 %50
+               OpStore %59 %uint_0 NonPrivatePointer
+               OpBranch %47
+         %47 = OpLabel
+         %51 = OpIAdd %uint %50 %uint_1
+               OpBranch %48
+         %49 = OpLabel
+               OpControlBarrier %uint_2 %uint_2 %uint_24840
+         %55 = OpFunctionCall %void %subgroupMatrixStore_43b7fd
+               OpReturn
+               OpFunctionEnd
+%compute_main = OpFunction %void None %10
+         %62 = OpLabel
+         %63 = OpLoad %uint %compute_main_local_invocation_index_Input None
+         %64 = OpFunctionCall %void %compute_main_inner %63
+               OpReturn
+               OpFunctionEnd

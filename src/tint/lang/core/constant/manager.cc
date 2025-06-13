@@ -175,6 +175,8 @@ const Value* Manager::Zero(const core::type::Type* type) {
         [&](const core::type::AbstractFloat*) { return Get(AFloat(0)); },  //
         [&](const core::type::I32*) { return Get(i32(0)); },               //
         [&](const core::type::U32*) { return Get(u32(0)); },               //
+        [&](const core::type::I8*) { return Get(i8(0)); },                 //
+        [&](const core::type::U8*) { return Get(u8(0)); },                 //
         [&](const core::type::U64*) { return Get(u64(0)); },               //
         [&](const core::type::F32*) { return Get(f32(0)); },               //
         [&](const core::type::F16*) { return Get(f16(0)); },               //
