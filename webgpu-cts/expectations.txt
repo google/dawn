@@ -287,14 +287,6 @@ crbug.com/367513506 [ linux nvidia ] webgpu:api,validation,error_scope:current_s
 crbug.com/367513506 [ android ] webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=100000 [ Skip ]
 crbug.com/367513506 [ android ] webgpu:api,validation,error_scope:current_scope:errorFilter="validation";stackDepth=100000 [ Skip ]
 
-# Failures that may be due to changes in robustness analysis
-crbug.com/424772881 [ intel mac ] webgpu:shader,execution,robust_access:linear_memory:addressSpace="workgroup";access="read";containerType="vector";shadowingMode="function-scope";isAtomic=false;baseType="bool" [ Failure ]
-crbug.com/424772881 [ intel mac ] webgpu:shader,execution,robust_access:linear_memory:addressSpace="workgroup";access="read";containerType="vector";shadowingMode="function-scope";isAtomic=false;baseType="bool" [ Failure ]
-crbug.com/424772881 [ intel mac ] webgpu:shader,execution,robust_access:linear_memory:addressSpace="workgroup";access="read";containerType="vector";shadowingMode="module-scope";isAtomic=false;baseType="bool" [ Failure ]
-crbug.com/424772881 [ intel mac ] webgpu:shader,execution,robust_access:linear_memory:addressSpace="workgroup";access="read";containerType="vector";shadowingMode="module-scope";isAtomic=false;baseType="bool" [ Failure ]
-crbug.com/424772881 [ intel mac ] webgpu:shader,execution,robust_access:linear_memory:addressSpace="workgroup";access="read";containerType="vector";shadowingMode="none";isAtomic=false;baseType="bool" [ Failure ]
-crbug.com/424772881 [ intel mac ] webgpu:shader,execution,robust_access:linear_memory:addressSpace="workgroup";access="read";containerType="vector";shadowingMode="none";isAtomic=false;baseType="bool" [ Failure ]
-
 # maxBufferSize test causing instability
 crbug.com/407109048 [ arm ] webgpu:api,validation,capability_checks,limits,maxBufferSize:* [ Skip ]
 
