@@ -181,6 +181,7 @@ dawn_add_library(
     PRIVATE_DEPENDS
         absl::inlined_vector
         absl::no_destructor
+        absl::overload
         dawn::partition_alloc
         dawn_shared_utils
         ${conditional_private_depends}

@@ -251,6 +251,7 @@ group("abseil") {
       "${dawn_root}/third_party/gn/abseil-cpp:flat_hash_set",
       "${dawn_root}/third_party/gn/abseil-cpp:inlined_vector",
       "${dawn_root}/third_party/gn/abseil-cpp:no_destructor",
+      "${dawn_root}/third_party/gn/abseil-cpp:overload",
     ]
   }
 }

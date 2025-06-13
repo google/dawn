@@ -920,6 +920,14 @@ absl_source_set("function_ref") {
   ]
 }
 
+absl_source_set("overload") {
+  public = [ "${dawn_abseil_dir}/absl/functional/overload.h" ]
+  deps = [
+    ":config",
+    ":type_traits",
+  ]
+}
+
 absl_source_set("utf8_for_code_point") {
   sources =
       [ "${dawn_abseil_dir}/absl/debugging/internal/utf8_for_code_point.cc" ]
