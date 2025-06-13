@@ -59,12 +59,6 @@ struct BufferSpec {
     uint32_t rowsPerImage;  // rows per image slice (user-defined)
 };
 
-Extent3D GetBufferSize(D3D12_TEXTURE_COPY_LOCATION bufferLocation) {
-    return {bufferLocation.PlacedFootprint.Footprint.Width,
-            bufferLocation.PlacedFootprint.Footprint.Height,
-            bufferLocation.PlacedFootprint.Footprint.Depth};
-}
-
 // Check that each copy region fits inside the buffer footprint
 void ValidateFootprints(const TextureSpec& textureSpec,
                         const BufferSpec& bufferSpec,
@@ -75,7 +69,7 @@ void ValidateFootprints(const TextureSpec& textureSpec,
         const auto& copy = copySplit.copies[i];
         Extent3D copySize = copy.GetCopySize();
         Origin3D bufferOffset = copy.GetBufferOffset(direction);
-        Extent3D bufferSize = GetBufferSize(copy.bufferLocation);
+        Extent3D bufferSize = copy.bufferSize;
         ASSERT_LE(bufferOffset.x + copySize.width, bufferSize.width);
         ASSERT_LE(bufferOffset.y + copySize.height, bufferSize.height);
         ASSERT_LE(bufferOffset.z + copySize.depthOrArrayLayers, bufferSize.depthOrArrayLayers);
@@ -112,7 +106,7 @@ void ValidateFootprints(const TextureSpec& textureSpec,
             uint32_t footprintHeightInBlocks = footprintHeight / textureSpec.blockHeight;
 
             uint64_t bufferSizeForFootprint =
-                copy.GetAlignedOffset() +
+                copy.alignedOffset +
                 utils::RequiredBytesInCopy(
                     bufferSpec.bytesPerRow, bufferSize.height / textureSpec.blockHeight,
                     footprintWidthInBlocks, footprintHeightInBlocks, bufferSize.depthOrArrayLayers,
@@ -129,8 +123,8 @@ void ValidateFootprints(const TextureSpec& textureSpec,
 void ValidateOffset(const TextureCopySubresource& copySplit) {
     for (uint32_t i = 0; i < copySplit.count; ++i) {
         ASSERT_TRUE(
-            Align(copySplit.copies[i].GetAlignedOffset(), D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT) ==
-            copySplit.copies[i].GetAlignedOffset());
+            Align(copySplit.copies[i].alignedOffset, D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT) ==
+            copySplit.copies[i].alignedOffset);
     }
 }
 
@@ -232,7 +226,7 @@ void ValidateBufferOffset(const TextureSpec& textureSpec,
         uint32_t rowPitchInBlocks = bufferSpec.bytesPerRow / textureSpec.texelBlockSizeInBytes;
         uint32_t slicePitchInBlocks = rowPitchInBlocks * bufferSpec.rowsPerImage;
         uint32_t absoluteOffsetInBlocks =
-            copy.GetAlignedOffset() / textureSpec.texelBlockSizeInBytes +
+            copy.alignedOffset / textureSpec.texelBlockSizeInBytes +
             bufferOffset.x / textureSpec.blockWidth +
             bufferOffset.y / textureSpec.blockHeight * rowPitchInBlocks;
 
@@ -292,7 +286,7 @@ std::ostream& operator<<(std::ostream& os, const TextureCopySubresource& copySpl
     os << "CopySplit\n";
     for (uint32_t i = 0; i < copySplit.count; ++i) {
         const auto& copy = copySplit.copies[i];
-        Extent3D bufferSize = GetBufferSize(copy.bufferLocation);
+        Extent3D bufferSize = copy.bufferSize;
         os << "  " << i << ": destinationOffset at (" << copy.destinationOffset.x << ", "
            << copy.destinationOffset.y << ", " << copy.destinationOffset.z << "), sourceRegion ("
            << copy.sourceRegion.left << ", " << copy.sourceRegion.top << ", "
