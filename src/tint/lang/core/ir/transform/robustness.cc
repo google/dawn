@@ -245,8 +245,8 @@ struct State {
         }
 
         // Return true when we cannot get a valid range for `idx`.
-        const auto* integer_range = integer_range_analysis->GetInfo(idx);
-        if (!integer_range) {
+        const auto& integer_range = integer_range_analysis->GetInfo(idx);
+        if (!integer_range.IsValid()) {
             return true;
         }
 
@@ -258,11 +258,11 @@ struct State {
 
         // Return true when `idx` may be negative or the upper bound of `idx` is greater than
         // `limit`.
-        if (std::holds_alternative<UnsignedIntegerRange>(integer_range->range)) {
-            UnsignedIntegerRange range = std::get<UnsignedIntegerRange>(integer_range->range);
+        if (std::holds_alternative<UnsignedIntegerRange>(integer_range.range)) {
+            UnsignedIntegerRange range = std::get<UnsignedIntegerRange>(integer_range.range);
             return range.max_bound > static_cast<uint64_t>(const_limit_value);
         } else {
-            SignedIntegerRange range = std::get<SignedIntegerRange>(integer_range->range);
+            SignedIntegerRange range = std::get<SignedIntegerRange>(integer_range.range);
             if (range.min_bound < 0) {
                 return true;
             }

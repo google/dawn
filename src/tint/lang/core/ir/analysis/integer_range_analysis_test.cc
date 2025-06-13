@@ -67,11 +67,11 @@ TEST_F(IR_IntegerRangeAnalysisTest, LocalInvocationIndex_u32_XYZ) {
     EXPECT_EQ(Validate(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
-    auto* info = analysis.GetInfo(localInvocationIndex);
-    ASSERT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info->range));
+    const IntegerRangeInfo& info = analysis.GetInfo(localInvocationIndex);
+    ASSERT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info.range));
 
-    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info->range);
+    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info.range);
     EXPECT_EQ(0u, range.min_bound);
     EXPECT_EQ(23u, range.max_bound);
 }
@@ -103,11 +103,11 @@ TEST_F(IR_IntegerRangeAnalysisTest, LocalInvocationIndex_i32_XYZ) {
     EXPECT_EQ(Validate(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
-    auto* info = analysis.GetInfo(localInvocationIndex);
-    ASSERT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info->range));
+    const IntegerRangeInfo& info = analysis.GetInfo(localInvocationIndex);
+    ASSERT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info.range));
 
-    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info->range);
+    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info.range);
     EXPECT_EQ(0u, range.min_bound);
     EXPECT_EQ(59u, range.max_bound);
 }
@@ -139,11 +139,11 @@ TEST_F(IR_IntegerRangeAnalysisTest, LocalInvocationIndex_1_Y_1) {
     EXPECT_EQ(Validate(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
-    auto* info = analysis.GetInfo(localInvocationIndex);
-    ASSERT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info->range));
+    const IntegerRangeInfo& info = analysis.GetInfo(localInvocationIndex);
+    ASSERT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info.range));
 
-    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info->range);
+    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info.range);
     EXPECT_EQ(0u, range.min_bound);
     EXPECT_EQ(7u, range.max_bound);
 }
@@ -175,11 +175,11 @@ TEST_F(IR_IntegerRangeAnalysisTest, LocalInvocationIndex_1_1_Z) {
     EXPECT_EQ(Validate(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
-    auto* info = analysis.GetInfo(localInvocationIndex);
-    ASSERT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info->range));
+    const IntegerRangeInfo& info = analysis.GetInfo(localInvocationIndex);
+    ASSERT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info.range));
 
-    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info->range);
+    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info.range);
     EXPECT_EQ(0u, range.min_bound);
     EXPECT_EQ(15u, range.max_bound);
 }
@@ -232,12 +232,12 @@ TEST_F(IR_IntegerRangeAnalysisTest, LocalInvocationID_u32_XYZ) {
 
     std::array<uint32_t, 3> expected_max_bounds = {3u, 2u, 1u};
     for (uint32_t i = 0; i < expected_max_bounds.size(); ++i) {
-        auto* info = analysis.GetInfo(localInvocationId, i);
+        const IntegerRangeInfo& info = analysis.GetInfo(localInvocationId, i);
 
-        ASSERT_NE(nullptr, info);
-        ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info->range));
+        ASSERT_TRUE(info.IsValid());
+        ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info.range));
 
-        const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info->range);
+        const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info.range);
         EXPECT_EQ(0u, range.min_bound);
         EXPECT_EQ(expected_max_bounds[i], range.max_bound);
     }
@@ -275,12 +275,12 @@ TEST_F(IR_IntegerRangeAnalysisTest, LocalInvocationID_u32_1_Y_1) {
 
     std::array<uint32_t, 3> expected_max_bounds = {0u, 7u, 0u};
     for (uint32_t i = 0; i < expected_max_bounds.size(); ++i) {
-        auto* info = analysis.GetInfo(localInvocationId, i);
+        const IntegerRangeInfo& info = analysis.GetInfo(localInvocationId, i);
 
-        ASSERT_NE(nullptr, info);
-        ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info->range));
+        ASSERT_TRUE(info.IsValid());
+        ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info.range));
 
-        const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info->range);
+        const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info.range);
         EXPECT_EQ(0u, range.min_bound);
         EXPECT_EQ(expected_max_bounds[i], range.max_bound);
     }
@@ -318,12 +318,12 @@ TEST_F(IR_IntegerRangeAnalysisTest, LocalInvocationID_u32_1_1_Z) {
 
     std::array<uint32_t, 3> expected_max_bounds = {0u, 0u, 15u};
     for (uint32_t i = 0; i < expected_max_bounds.size(); ++i) {
-        auto* info = analysis.GetInfo(localInvocationId, i);
+        const IntegerRangeInfo& info = analysis.GetInfo(localInvocationId, i);
 
-        ASSERT_NE(nullptr, info);
-        ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info->range));
+        ASSERT_TRUE(info.IsValid());
+        ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info.range));
 
-        const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info->range);
+        const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info.range);
         EXPECT_EQ(0u, range.min_bound);
         EXPECT_EQ(expected_max_bounds[i], range.max_bound);
     }
@@ -1629,11 +1629,11 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_index_LessThan_Const
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info->range));
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    ASSERT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info.range));
 
-    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info->range);
+    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info.range);
     EXPECT_EQ(0, range.min_bound);
     EXPECT_EQ(9, range.max_bound);
 }
@@ -1704,11 +1704,11 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_Constant_LessThan_in
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info->range));
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info.range));
 
-    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info->range);
+    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info.range);
     EXPECT_EQ(11, range.min_bound);
     EXPECT_EQ(20, range.max_bound);
 }
@@ -1780,11 +1780,11 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_index_LessThan_Const
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info->range));
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info.range));
 
-    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info->range);
+    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info.range);
     EXPECT_EQ(1u, range.min_bound);
     EXPECT_EQ(19u, range.max_bound);
 }
@@ -1855,11 +1855,11 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_Constant_LessThan_in
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info->range));
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info.range));
 
-    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info->range);
+    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info.range);
     EXPECT_EQ(11u, range.min_bound);
     EXPECT_EQ(20u, range.max_bound);
 }
@@ -1930,11 +1930,11 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_index_LessThanEqual_
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info->range));
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info.range));
 
-    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info->range);
+    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info.range);
     EXPECT_EQ(1, range.min_bound);
     EXPECT_EQ(10, range.max_bound);
 }
@@ -2005,11 +2005,11 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_index_LessThanEqual_
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info->range));
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info.range));
 
-    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info->range);
+    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info.range);
     EXPECT_EQ(1u, range.min_bound);
     EXPECT_EQ(10u, range.max_bound);
 }
@@ -2080,11 +2080,11 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_constant_LessThanEqu
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info->range));
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info.range));
 
-    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info->range);
+    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info.range);
     EXPECT_EQ(10, range.min_bound);
     EXPECT_EQ(20, range.max_bound);
 }
@@ -2155,11 +2155,11 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_constant_LessThanEqu
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info->range));
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info.range));
 
-    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info->range);
+    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info.range);
     EXPECT_EQ(10u, range.min_bound);
     EXPECT_EQ(20u, range.max_bound);
 }
@@ -2231,11 +2231,11 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_index_GreaterThan_co
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info->range));
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info.range));
 
-    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info->range);
+    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info.range);
     EXPECT_EQ(11, range.min_bound);
     EXPECT_EQ(20, range.max_bound);
 }
@@ -2307,11 +2307,11 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_index_GreaterThan_co
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info->range));
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info.range));
 
-    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info->range);
+    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info.range);
     EXPECT_EQ(11u, range.min_bound);
     EXPECT_EQ(20u, range.max_bound);
 }
@@ -2383,11 +2383,11 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_constant_GreaterThan
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info->range));
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info.range));
 
-    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info->range);
+    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info.range);
     EXPECT_EQ(0, range.min_bound);
     EXPECT_EQ(9, range.max_bound);
 }
@@ -2459,11 +2459,11 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_constant_GreaterThan
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info->range));
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info.range));
 
-    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info->range);
+    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info.range);
     EXPECT_EQ(0u, range.min_bound);
     EXPECT_EQ(9u, range.max_bound);
 }
@@ -2535,11 +2535,11 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_index_GreaterThanEqu
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info->range));
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info.range));
 
-    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info->range);
+    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info.range);
     EXPECT_EQ(10, range.min_bound);
     EXPECT_EQ(20, range.max_bound);
 }
@@ -2611,11 +2611,11 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_index_GreaterThanEqu
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info->range));
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info.range));
 
-    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info->range);
+    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info.range);
     EXPECT_EQ(10u, range.min_bound);
     EXPECT_EQ(20u, range.max_bound);
 }
@@ -2687,11 +2687,11 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_Constant_GreaterThan
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info->range));
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info.range));
 
-    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info->range);
+    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info.range);
     EXPECT_EQ(0, range.min_bound);
     EXPECT_EQ(10, range.max_bound);
 }
@@ -2763,11 +2763,11 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_Constant_GreaterThan
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info->range));
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info.range));
 
-    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info->range);
+    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info.range);
     EXPECT_EQ(0u, range.min_bound);
     EXPECT_EQ(10u, range.max_bound);
 }
@@ -5063,12 +5063,12 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_LessThanEqual_init_equal
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
 
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_NE(nullptr, info);
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_TRUE(info.IsValid());
 
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info->range));
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info.range));
 
-    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info->range);
+    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info.range);
     EXPECT_EQ(10, range.min_bound);
     EXPECT_EQ(10, range.max_bound);
 }
@@ -5140,12 +5140,12 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_LessThanEqual_init_equal
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
 
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_NE(nullptr, info);
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_TRUE(info.IsValid());
 
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info->range));
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info.range));
 
-    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info->range);
+    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info.range);
     EXPECT_EQ(10u, range.min_bound);
     EXPECT_EQ(10u, range.max_bound);
 }
@@ -5217,8 +5217,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_LessThanEqual_init_great
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
 
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_EQ(nullptr, info);
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_LessThanEqual_init_greater_than_rhs_u32) {
@@ -5288,8 +5288,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_LessThanEqual_init_great
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
 
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_EQ(nullptr, info);
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_index_LessThanEqual_constant_decreasing) {
@@ -5359,8 +5359,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_index_LessThanEqual_cons
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
 
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_EQ(nullptr, info);
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_GreaterThanEqual_init_equals_rhs_i32) {
@@ -5430,11 +5430,11 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_GreaterThanEqual_init_eq
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info->range));
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info.range));
 
-    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info->range);
+    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info.range);
     EXPECT_EQ(20, range.min_bound);
     EXPECT_EQ(20, range.max_bound);
 }
@@ -5506,11 +5506,11 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_GreaterThanEqual_init_eq
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info->range));
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info.range));
 
-    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info->range);
+    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info.range);
     EXPECT_EQ(20u, range.min_bound);
     EXPECT_EQ(20u, range.max_bound);
 }
@@ -5582,8 +5582,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_GreaterThanEqual_init_le
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_EQ(nullptr, info);
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_GreaterThanEqual_init_less_than_rhs_u32) {
@@ -5653,8 +5653,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_GreaterThanEqual_init_le
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_EQ(nullptr, info);
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest,
@@ -5725,8 +5725,8 @@ TEST_F(IR_IntegerRangeAnalysisTest,
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_EQ(nullptr, info);
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_index_LessThanEqual_max_u32_minus_1) {
@@ -5795,11 +5795,11 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_index_LessThanEqual_max_
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info->range));
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info.range));
 
-    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info->range);
+    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info.range);
     EXPECT_EQ(u32::kHighestValue - 1u, range.min_bound);
     EXPECT_EQ(u32::kHighestValue - 1u, range.max_bound);
 }
@@ -5870,11 +5870,11 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_index_LessThanEqual_max_
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info->range));
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info.range));
 
-    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info->range);
+    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info.range);
     EXPECT_EQ(i32::kHighestValue - 1, range.min_bound);
     EXPECT_EQ(i32::kHighestValue - 1, range.max_bound);
 }
@@ -5945,11 +5945,11 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_index_GreaterThanEqual_m
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info->range));
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info.range));
 
-    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info->range);
+    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info.range);
     EXPECT_EQ(u32::kLowestValue + 1u, range.min_bound);
     EXPECT_EQ(u32::kLowestValue + 1u, range.max_bound);
 }
@@ -6020,11 +6020,11 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_index_GreaterThanEqual_m
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info->range));
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info.range));
 
-    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info->range);
+    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info.range);
     EXPECT_EQ(i32::kLowestValue + 1, range.min_bound);
     EXPECT_EQ(i32::kLowestValue + 1, range.max_bound);
 }
@@ -6096,8 +6096,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_LessThan_init_greater_th
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
 
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_EQ(nullptr, info);
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_LessThan_init_equals_rhs_i32) {
@@ -6167,8 +6167,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_LessThan_init_equals_rhs
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
 
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_EQ(nullptr, info);
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_LessThan_init_greater_than_rhs_u32) {
@@ -6238,8 +6238,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_LessThan_init_greater_th
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
 
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_EQ(nullptr, info);
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_LessThan_init_equals_rhs_u32) {
@@ -6309,8 +6309,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_LessThan_init_equals_rhs
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
 
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_EQ(nullptr, info);
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_index_LessThan_constant_decreasing) {
@@ -6380,8 +6380,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_index_LessThan_constant_
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
 
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_EQ(nullptr, info);
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_GreaterThan_init_less_than_rhs_i32) {
@@ -6451,8 +6451,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_GreaterThan_init_less_th
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
 
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_EQ(nullptr, info);
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_GreaterThan_init_equals_rhs_i32) {
@@ -6522,8 +6522,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_GreaterThan_init_equals_
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
 
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_EQ(nullptr, info);
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_GreaterThan_init_less_than_rhs_u32) {
@@ -6593,8 +6593,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_GreaterThan_init_less_th
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
 
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_EQ(nullptr, info);
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_GreaterThan_init_equals_rhs_u32) {
@@ -6664,8 +6664,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_GreaterThan_init_equals_
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
 
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_EQ(nullptr, info);
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_index_GreaterThan_constant_increasing) {
@@ -6735,8 +6735,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_index_GreaterThan_consta
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
 
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_EQ(nullptr, info);
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_FALSE(info.IsValid());
 }
 
 // const_lhs <= index
@@ -6806,11 +6806,11 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_LessThanEqual_init_e
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info->range));
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info.range));
 
-    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info->range);
+    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info.range);
     EXPECT_EQ(20, range.min_bound);
     EXPECT_EQ(20, range.max_bound);
 }
@@ -6881,11 +6881,11 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_LessThanEqual_init_e
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info->range));
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info.range));
 
-    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info->range);
+    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info.range);
     EXPECT_EQ(20u, range.min_bound);
     EXPECT_EQ(20u, range.max_bound);
 }
@@ -6957,8 +6957,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_LessThanEqual_init_L
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_EQ(nullptr, info);
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_LessThanEqual_init_LessThan_lhs_u32) {
@@ -7028,8 +7028,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_LessThanEqual_init_L
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_EQ(nullptr, info);
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest,
@@ -7100,8 +7100,8 @@ TEST_F(IR_IntegerRangeAnalysisTest,
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_EQ(nullptr, info);
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_min_u32_add_1_LessThanEqual_index) {
@@ -7170,11 +7170,11 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_min_u32_add_1_LessThanEq
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info->range));
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info.range));
 
-    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info->range);
+    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info.range);
     EXPECT_EQ(u32::kLowestValue + 1u, range.min_bound);
     EXPECT_EQ(u32::kLowestValue + 1u, range.max_bound);
 }
@@ -7245,11 +7245,11 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_min_i32_add_1_LessThanEq
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info->range));
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info.range));
 
-    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info->range);
+    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info.range);
     EXPECT_EQ(i32::kLowestValue + 1, range.min_bound);
     EXPECT_EQ(i32::kLowestValue + 1, range.max_bound);
 }
@@ -7322,11 +7322,11 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_GreaterThanEqual_ini
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info->range));
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info.range));
 
-    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info->range);
+    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info.range);
     EXPECT_EQ(20, range.min_bound);
     EXPECT_EQ(20, range.max_bound);
 }
@@ -7398,11 +7398,11 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_GreaterThanEqual_ini
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info->range));
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info.range));
 
-    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info->range);
+    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info.range);
     EXPECT_EQ(20u, range.min_bound);
     EXPECT_EQ(20u, range.max_bound);
 }
@@ -7475,8 +7475,8 @@ TEST_F(IR_IntegerRangeAnalysisTest,
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_EQ(nullptr, info);
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest,
@@ -7547,8 +7547,8 @@ TEST_F(IR_IntegerRangeAnalysisTest,
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_EQ(nullptr, info);
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest,
@@ -7619,8 +7619,8 @@ TEST_F(IR_IntegerRangeAnalysisTest,
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_EQ(nullptr, info);
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_max_u32_minus_1_GreaterThanEqual_index) {
@@ -7689,11 +7689,11 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_max_u32_minus_1_GreaterT
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info->range));
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info.range));
 
-    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info->range);
+    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info.range);
     EXPECT_EQ(u32::kHighestValue - 1u, range.min_bound);
     EXPECT_EQ(u32::kHighestValue - 1u, range.max_bound);
 }
@@ -7764,11 +7764,11 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_max_i32_minus_1_GreaterT
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info->range));
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info.range));
 
-    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info->range);
+    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info.range);
     EXPECT_EQ(i32::kHighestValue - 1, range.min_bound);
     EXPECT_EQ(i32::kHighestValue - 1, range.max_bound);
 }
@@ -7841,8 +7841,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_LessThan_init_equals
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_EQ(nullptr, info);
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_LessThan_init_equals_lhs_u32) {
@@ -7912,8 +7912,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_LessThan_init_equals
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_EQ(nullptr, info);
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_LessThan_init_LessThan_lhs_i32) {
@@ -7983,8 +7983,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_LessThan_init_LessTh
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_EQ(nullptr, info);
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_LessThan_init_LessThan_lhs_u32) {
@@ -8054,8 +8054,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_LessThan_init_LessTh
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_EQ(nullptr, info);
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_constant_LessThan_index_increasing) {
@@ -8125,8 +8125,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_constant_LessThan_in
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_EQ(nullptr, info);
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_FALSE(info.IsValid());
 }
 
 // lhs > index
@@ -8197,8 +8197,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_GreaterThan_init_equ
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_EQ(nullptr, info);
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_GreaterThan_init_equals_lhs_u32) {
@@ -8268,8 +8268,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_GreaterThan_init_equ
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_EQ(nullptr, info);
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_GreaterThan_init_GreaterThan_lhs_i32) {
@@ -8339,8 +8339,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_GreaterThan_init_Gre
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_EQ(nullptr, info);
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_GreaterThan_init_GreaterThan_lhs_u32) {
@@ -8410,8 +8410,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_GreaterThan_init_Gre
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_EQ(nullptr, info);
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_constant_GreaterThan_index_decreasing) {
@@ -8481,8 +8481,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_constant_GreaterThan
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
-    const IntegerRangeInfo* info = analysis.GetInfo(idx);
-    EXPECT_EQ(nullptr, info);
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    EXPECT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, LoadFromLoopControlVariableWithRange) {
@@ -8554,20 +8554,20 @@ TEST_F(IR_IntegerRangeAnalysisTest, LoadFromLoopControlVariableWithRange) {
 
     IntegerRangeAnalysis analysis(&mod);
 
-    const IntegerRangeInfo* idx_info = analysis.GetInfo(idx);
-    EXPECT_NE(nullptr, idx_info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(idx_info->range));
+    const IntegerRangeInfo& idx_info = analysis.GetInfo(idx);
+    EXPECT_TRUE(idx_info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(idx_info.range));
 
-    const auto& range_idx = std::get<IntegerRangeInfo::SignedIntegerRange>(idx_info->range);
+    const auto& range_idx = std::get<IntegerRangeInfo::SignedIntegerRange>(idx_info.range);
     EXPECT_EQ(0, range_idx.min_bound);
     EXPECT_EQ(9, range_idx.max_bound);
 
-    const IntegerRangeInfo* load_idx_info = analysis.GetInfo(load_idx);
-    EXPECT_NE(nullptr, load_idx_info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(load_idx_info->range));
+    const IntegerRangeInfo& load_idx_info = analysis.GetInfo(load_idx);
+    EXPECT_TRUE(load_idx_info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(load_idx_info.range));
 
     const auto& range_load_idx =
-        std::get<IntegerRangeInfo::SignedIntegerRange>(load_idx_info->range);
+        std::get<IntegerRangeInfo::SignedIntegerRange>(load_idx_info.range);
     EXPECT_EQ(0, range_load_idx.min_bound);
     EXPECT_EQ(9, range_load_idx.max_bound);
 }
@@ -8644,10 +8644,10 @@ TEST_F(IR_IntegerRangeAnalysisTest, LoadFromLoopControlVariableWithoutRange) {
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
     EXPECT_EQ(binary, analysis.GetBinaryToCompareLoopControlVariableInLoopBodyForTest(loop, idx));
 
-    const IntegerRangeInfo* idx_info = analysis.GetInfo(idx);
-    EXPECT_EQ(nullptr, idx_info);
-    const IntegerRangeInfo* load_idx_info = analysis.GetInfo(idx);
-    EXPECT_EQ(nullptr, load_idx_info);
+    const IntegerRangeInfo& idx_info = analysis.GetInfo(idx);
+    EXPECT_FALSE(idx_info.IsValid());
+    const IntegerRangeInfo& load_idx_info = analysis.GetInfo(idx);
+    EXPECT_FALSE(load_idx_info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, LoadFromNonLoopControlVariable) {
@@ -8677,7 +8677,7 @@ $B1: {  # root
     EXPECT_EQ(Validate(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
-    EXPECT_EQ(nullptr, analysis.GetInfo(load_a));
+    EXPECT_FALSE(analysis.GetInfo(load_a).IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, AccessToLocalInvocationID) {
@@ -8711,30 +8711,30 @@ TEST_F(IR_IntegerRangeAnalysisTest, AccessToLocalInvocationID) {
 
     IntegerRangeAnalysis analysis(&mod);
 
-    auto* access_x_info = analysis.GetInfo(access_x);
-    ASSERT_NE(nullptr, access_x_info);
+    const auto& access_x_info = analysis.GetInfo(access_x);
+    ASSERT_TRUE(access_x_info.IsValid());
     ASSERT_TRUE(
-        std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(access_x_info->range));
+        std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(access_x_info.range));
     const auto& range_access_x =
-        std::get<IntegerRangeInfo::UnsignedIntegerRange>(access_x_info->range);
+        std::get<IntegerRangeInfo::UnsignedIntegerRange>(access_x_info.range);
     EXPECT_EQ(0u, range_access_x.min_bound);
     EXPECT_EQ(3u, range_access_x.max_bound);
 
-    auto* access_y_info = analysis.GetInfo(access_y);
-    ASSERT_NE(nullptr, access_x_info);
+    const auto& access_y_info = analysis.GetInfo(access_y);
+    ASSERT_TRUE(access_x_info.IsValid());
     ASSERT_TRUE(
-        std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(access_y_info->range));
+        std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(access_y_info.range));
     const auto& range_access_y =
-        std::get<IntegerRangeInfo::UnsignedIntegerRange>(access_y_info->range);
+        std::get<IntegerRangeInfo::UnsignedIntegerRange>(access_y_info.range);
     EXPECT_EQ(0u, range_access_y.min_bound);
     EXPECT_EQ(2u, range_access_y.max_bound);
 
-    auto* access_z_info = analysis.GetInfo(access_z);
-    ASSERT_NE(nullptr, access_x_info);
+    const auto& access_z_info = analysis.GetInfo(access_z);
+    ASSERT_TRUE(access_x_info.IsValid());
     ASSERT_TRUE(
-        std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(access_z_info->range));
+        std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(access_z_info.range));
     const auto& range_access_z =
-        std::get<IntegerRangeInfo::UnsignedIntegerRange>(access_z_info->range);
+        std::get<IntegerRangeInfo::UnsignedIntegerRange>(access_z_info.range);
     EXPECT_EQ(0u, range_access_z.min_bound);
     EXPECT_EQ(1u, range_access_z.max_bound);
 }
@@ -8761,8 +8761,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, NotAccessToFunctionParam) {
     EXPECT_EQ(Validate(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
-    auto* info = analysis.GetInfo(access);
-    ASSERT_EQ(nullptr, info);
+    const auto& info = analysis.GetInfo(access);
+    ASSERT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, AccessToFunctionParamNoRange) {
@@ -8795,9 +8795,9 @@ TEST_F(IR_IntegerRangeAnalysisTest, AccessToFunctionParamNoRange) {
     EXPECT_EQ(Validate(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
-    ASSERT_EQ(nullptr, analysis.GetInfo(access_x));
-    ASSERT_EQ(nullptr, analysis.GetInfo(access_y));
-    ASSERT_EQ(nullptr, analysis.GetInfo(access_z));
+    ASSERT_FALSE(analysis.GetInfo(access_x).IsValid());
+    ASSERT_FALSE(analysis.GetInfo(access_y).IsValid());
+    ASSERT_FALSE(analysis.GetInfo(access_z).IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, AccessToNonIntegerFunctionParam) {
@@ -8822,8 +8822,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, AccessToNonIntegerFunctionParam) {
     EXPECT_EQ(Validate(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
-    auto* info = analysis.GetInfo(access);
-    ASSERT_EQ(nullptr, info);
+    const auto& info = analysis.GetInfo(access);
+    ASSERT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, NonConstantAccessIndex) {
@@ -8855,8 +8855,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, NonConstantAccessIndex) {
 
     IntegerRangeAnalysis analysis(&mod);
 
-    auto* access_x_info = analysis.GetInfo(access_x);
-    ASSERT_EQ(nullptr, access_x_info);
+    const auto& access_x_info = analysis.GetInfo(access_x);
+    ASSERT_FALSE(access_x_info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, SignedIntegerScalarConstant) {
@@ -8880,10 +8880,10 @@ TEST_F(IR_IntegerRangeAnalysisTest, SignedIntegerScalarConstant) {
     EXPECT_EQ(Validate(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
-    auto* info = analysis.GetInfo(constant);
-    ASSERT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info->range));
-    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info->range);
+    const auto& info = analysis.GetInfo(constant);
+    ASSERT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info.range));
+    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info.range);
     EXPECT_EQ(10, range.min_bound);
     EXPECT_EQ(10, range.max_bound);
 }
@@ -8909,10 +8909,10 @@ TEST_F(IR_IntegerRangeAnalysisTest, UnsignedIntegerScalarConstant) {
     EXPECT_EQ(Validate(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
-    auto* info = analysis.GetInfo(constant);
-    ASSERT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info->range));
-    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info->range);
+    const auto& info = analysis.GetInfo(constant);
+    ASSERT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info.range));
+    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info.range);
     EXPECT_EQ(20u, range.min_bound);
     EXPECT_EQ(20u, range.max_bound);
 }
@@ -8938,8 +8938,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, NonIntegerConstant) {
     EXPECT_EQ(Validate(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
-    auto* info = analysis.GetInfo(constant);
-    ASSERT_EQ(nullptr, info);
+    const auto& info = analysis.GetInfo(constant);
+    ASSERT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, ValueAsScalarFunctionParameter) {
@@ -8969,18 +8969,18 @@ TEST_F(IR_IntegerRangeAnalysisTest, ValueAsScalarFunctionParameter) {
     IntegerRangeAnalysis analysis(&mod);
 
     // Range of `add->LHS()` (`localInvocationIndex`)
-    auto* info = analysis.GetInfo(add->LHS());
-    ASSERT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info->range));
-    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info->range);
+    const auto& info = analysis.GetInfo(add->LHS());
+    ASSERT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info.range));
+    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info.range);
     EXPECT_EQ(0u, range.min_bound);
     EXPECT_EQ(23u, range.max_bound);
 
     // Range of `add` (`localInvocationIndex + 5`)
-    auto* info_add = analysis.GetInfo(add);
-    ASSERT_NE(nullptr, info_add);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info_add->range));
-    const auto& range_add = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info_add->range);
+    const auto& info_add = analysis.GetInfo(add);
+    ASSERT_TRUE(info_add.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info_add.range));
+    const auto& range_add = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info_add.range);
     EXPECT_EQ(5u, range_add.min_bound);
     EXPECT_EQ(28u, range_add.max_bound);
 }
@@ -9011,8 +9011,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, ValueAsVectorFunctionParameter) {
 
     IntegerRangeAnalysis analysis(&mod);
 
-    auto* info = analysis.GetInfo(value);
-    ASSERT_EQ(nullptr, info);
+    const auto& info = analysis.GetInfo(value);
+    ASSERT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, ValueAsAccess) {
@@ -9046,26 +9046,26 @@ TEST_F(IR_IntegerRangeAnalysisTest, ValueAsAccess) {
     IntegerRangeAnalysis analysis(&mod);
 
     // Range of `add->LHS()` (`local_id.x`)
-    auto* info_lhs = analysis.GetInfo(add->LHS());
-    ASSERT_NE(nullptr, info_lhs);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info_lhs->range));
-    const auto& range_lhs = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info_lhs->range);
+    const auto& info_lhs = analysis.GetInfo(add->LHS());
+    ASSERT_TRUE(info_lhs.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info_lhs.range));
+    const auto& range_lhs = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info_lhs.range);
     EXPECT_EQ(0u, range_lhs.min_bound);
     EXPECT_EQ(3u, range_lhs.max_bound);
 
     // Range of `add->RHS()` (`local_id.y`)
-    auto* info_rhs = analysis.GetInfo(add->RHS());
-    ASSERT_NE(nullptr, info_rhs);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info_rhs->range));
-    const auto& range_rhs = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info_rhs->range);
+    const auto& info_rhs = analysis.GetInfo(add->RHS());
+    ASSERT_TRUE(info_rhs.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info_rhs.range));
+    const auto& range_rhs = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info_rhs.range);
     EXPECT_EQ(0u, range_rhs.min_bound);
     EXPECT_EQ(2u, range_rhs.max_bound);
 
     // Range of `add` (`local_id.x + local_id.y`)
-    auto* info_add = analysis.GetInfo(add);
-    ASSERT_NE(nullptr, info_add);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info_add->range));
-    const auto& range_add = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info_add->range);
+    const auto& info_add = analysis.GetInfo(add);
+    ASSERT_TRUE(info_add.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info_add.range));
+    const auto& range_add = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info_add.range);
     EXPECT_EQ(0u, range_add.min_bound);
     EXPECT_EQ(5u, range_add.max_bound);
 }
@@ -9139,26 +9139,26 @@ TEST_F(IR_IntegerRangeAnalysisTest, ValueAsLoadAndConstant) {
     IntegerRangeAnalysis analysis(&mod);
 
     // Range of `add->LHS()` (`idx`)
-    auto* info_lhs = analysis.GetInfo(add->LHS());
-    ASSERT_NE(nullptr, info_lhs);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info_lhs->range));
-    const auto& range_lhs = std::get<IntegerRangeInfo::SignedIntegerRange>(info_lhs->range);
+    const auto& info_lhs = analysis.GetInfo(add->LHS());
+    ASSERT_TRUE(info_lhs.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info_lhs.range));
+    const auto& range_lhs = std::get<IntegerRangeInfo::SignedIntegerRange>(info_lhs.range);
     EXPECT_EQ(0, range_lhs.min_bound);
     EXPECT_EQ(9, range_lhs.max_bound);
 
     // Range of `add->RHS()` (5)
-    auto* info_rhs = analysis.GetInfo(add->RHS());
-    ASSERT_NE(nullptr, info_rhs);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info_rhs->range));
-    const auto& range_rhs = std::get<IntegerRangeInfo::SignedIntegerRange>(info_rhs->range);
+    const auto& info_rhs = analysis.GetInfo(add->RHS());
+    ASSERT_TRUE(info_rhs.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info_rhs.range));
+    const auto& range_rhs = std::get<IntegerRangeInfo::SignedIntegerRange>(info_rhs.range);
     EXPECT_EQ(5, range_rhs.min_bound);
     EXPECT_EQ(5, range_rhs.max_bound);
 
     // Range of `add` (`idx + 5`)
-    auto* info_add = analysis.GetInfo(add);
-    ASSERT_NE(nullptr, info_add);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info_add->range));
-    const auto& range_add = std::get<IntegerRangeInfo::SignedIntegerRange>(info_add->range);
+    const auto& info_add = analysis.GetInfo(add);
+    ASSERT_TRUE(info_add.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info_add.range));
+    const auto& range_add = std::get<IntegerRangeInfo::SignedIntegerRange>(info_add.range);
     EXPECT_EQ(5, range_add.min_bound);
     EXPECT_EQ(14, range_add.max_bound);
 }
@@ -9235,18 +9235,18 @@ TEST_F(IR_IntegerRangeAnalysisTest, ValueAsVar) {
     IntegerRangeAnalysis analysis(&mod);
 
     // Range of `value`
-    auto* info = analysis.GetInfo(value);
-    ASSERT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info->range));
-    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info->range);
+    const auto& info = analysis.GetInfo(value);
+    ASSERT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info.range));
+    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info.range);
     EXPECT_EQ(0, range.min_bound);
     EXPECT_EQ(9, range.max_bound);
 
     // Range of `add` (`value + 5`)
-    auto* info_add = analysis.GetInfo(add);
-    ASSERT_NE(nullptr, info_add);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info_add->range));
-    const auto& range_add = std::get<IntegerRangeInfo::SignedIntegerRange>(info_add->range);
+    const auto& info_add = analysis.GetInfo(add);
+    ASSERT_TRUE(info_add.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info_add.range));
+    const auto& range_add = std::get<IntegerRangeInfo::SignedIntegerRange>(info_add.range);
     EXPECT_EQ(5, range_add.min_bound);
     EXPECT_EQ(14, range_add.max_bound);
 }
@@ -9279,9 +9279,9 @@ TEST_F(IR_IntegerRangeAnalysisTest, LetWithAccess) {
 
     IntegerRangeAnalysis analysis(&mod);
 
-    auto* info = analysis.GetInfo(let);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info->range));
-    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info->range);
+    const auto& info = analysis.GetInfo(let);
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info.range));
+    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info.range);
     EXPECT_EQ(0u, range.min_bound);
     EXPECT_EQ(3u, range.max_bound);
 }
@@ -9354,9 +9354,9 @@ TEST_F(IR_IntegerRangeAnalysisTest, LetWithLoad) {
 
     IntegerRangeAnalysis analysis(&mod);
 
-    auto* info = analysis.GetInfo(let);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info->range));
-    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info->range);
+    const auto& info = analysis.GetInfo(let);
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info.range));
+    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info.range);
     EXPECT_EQ(0, range.min_bound);
     EXPECT_EQ(9, range.max_bound);
 }
@@ -9394,9 +9394,9 @@ TEST_F(IR_IntegerRangeAnalysisTest, LetWithBinary) {
 
     IntegerRangeAnalysis analysis(&mod);
 
-    auto* info = analysis.GetInfo(let);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info->range));
-    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info->range);
+    const auto& info = analysis.GetInfo(let);
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info.range));
+    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info.range);
     EXPECT_EQ(0u, range.min_bound);
     EXPECT_EQ(5u, range.max_bound);
 }
@@ -9434,15 +9434,15 @@ TEST_F(IR_IntegerRangeAnalysisTest, LetAsOperand) {
 
     IntegerRangeAnalysis analysis(&mod);
 
-    auto* info_let = analysis.GetInfo(let);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info_let->range));
-    const auto& range_let = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info_let->range);
+    const auto& info_let = analysis.GetInfo(let);
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info_let.range));
+    const auto& range_let = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info_let.range);
     EXPECT_EQ(0u, range_let.min_bound);
     EXPECT_EQ(3u, range_let.max_bound);
 
-    auto* info_add = analysis.GetInfo(add);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info_add->range));
-    const auto& range_add = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info_add->range);
+    const auto& info_add = analysis.GetInfo(add);
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info_add.range));
+    const auto& range_add = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info_add.range);
     EXPECT_EQ(0u, range_add.min_bound);
     EXPECT_EQ(5u, range_add.max_bound);
 }
@@ -9531,10 +9531,10 @@ TEST_F(IR_IntegerRangeAnalysisTest, MultipleBinaryAdds) {
 
     // Range of `add` (`idx + (local_id.x + local_id.y)`)
     // access_x: [0, 3], access_y: [0, 2], idx: [0, 9]
-    auto* info_add = analysis.GetInfo(add);
-    ASSERT_NE(nullptr, info_add);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info_add->range));
-    const auto& range_add = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info_add->range);
+    const auto& info_add = analysis.GetInfo(add);
+    ASSERT_TRUE(info_add.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info_add.range));
+    const auto& range_add = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info_add.range);
     EXPECT_EQ(0u, range_add.min_bound);
     EXPECT_EQ(14u, range_add.max_bound);
 }
@@ -9571,8 +9571,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryAdd_U32_Overflow) {
 
     // Range of `add` (`local_id.x + 4294967289`)
     // local_id.x: [0, 7], 4294967289 > u32::kHighestValue - 7
-    auto* info = analysis.GetInfo(add);
-    ASSERT_EQ(nullptr, info);
+    const auto& info = analysis.GetInfo(add);
+    ASSERT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, BinaryAdd_I32_Overflow) {
@@ -9648,8 +9648,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryAdd_I32_Overflow) {
 
     // Range of `add` (`idx + 2147483639`)
     // idx: [0, 9], 2147483639 > i32::kHighestValue - 9
-    auto* info = analysis.GetInfo(add);
-    ASSERT_EQ(nullptr, info);
+    const auto& info = analysis.GetInfo(add);
+    ASSERT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, BinaryAdd_I32_Underflow) {
@@ -9725,8 +9725,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryAdd_I32_Underflow) {
 
     // Range of `add` (`idx + (-2147483640)`)
     // idx: [-9, 0], -2147483640 < i32::kLowestValue + 9
-    auto* info = analysis.GetInfo(add);
-    ASSERT_EQ(nullptr, info);
+    const auto& info = analysis.GetInfo(add);
+    ASSERT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, BinarySubtract_Success_U32) {
@@ -9808,10 +9808,10 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinarySubtract_Success_U32) {
 
     // Range of `subtract` (`idx - local_id.x`)
     // idx: [4, 9] local_id.x: [0, 3]
-    auto* info = analysis.GetInfo(subtract);
-    ASSERT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info->range));
-    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info->range);
+    const auto& info = analysis.GetInfo(subtract);
+    ASSERT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info.range));
+    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info.range);
     EXPECT_EQ(1u, range.min_bound);
     EXPECT_EQ(9u, range.max_bound);
 }
@@ -9935,10 +9935,10 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinarySubtract_Success_I32) {
 
     // Range of `subtract` (`idx - idy`)
     // idx: [5, 9], idy: [1, 3]
-    auto* info = analysis.GetInfo(subtract);
-    ASSERT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info->range));
-    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info->range);
+    const auto& info = analysis.GetInfo(subtract);
+    ASSERT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info.range));
+    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info.range);
     EXPECT_EQ(2, range.min_bound);
     EXPECT_EQ(8, range.max_bound);
 }
@@ -10062,8 +10062,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinarySubtract_Failure_Underflow_U32) {
 
     // Range of `subtract` (`idx - idy`)
     // idx: [5, 9], idy: [1, 7], idx.min_bound < idy.max_bound
-    auto* info = analysis.GetInfo(subtract);
-    ASSERT_EQ(nullptr, info);
+    const auto& info = analysis.GetInfo(subtract);
+    ASSERT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, BinarySubtract_Failure_Overflow_I32) {
@@ -10139,8 +10139,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinarySubtract_Failure_Overflow_I32) {
 
     // Range of `subtract` (`idx - (-2147483640)`)
     // idx: [0, 8], 2147483640 > i32::kHighestValue - 8
-    auto* info = analysis.GetInfo(subtract);
-    ASSERT_EQ(nullptr, info);
+    const auto& info = analysis.GetInfo(subtract);
+    ASSERT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, BinarySubtract_Failure_Underflow_I32) {
@@ -10216,8 +10216,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinarySubtract_Failure_Underflow_I32) {
 
     // Range of `subtract` (`idx - 2147483640`)
     // idx: [-9, 0], idx < i32::kLowestValue + 2147483640
-    auto* info = analysis.GetInfo(subtract);
-    ASSERT_EQ(nullptr, info);
+    const auto& info = analysis.GetInfo(subtract);
+    ASSERT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, BinaryMultiply_Success_I32) {
@@ -10339,10 +10339,10 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryMultiply_Success_I32) {
 
     // Range of `multiply` (`idx * idy`)
     // idx: [5, 9], idy: [1, 3]
-    auto* info = analysis.GetInfo(multiply);
-    ASSERT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info->range));
-    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info->range);
+    const auto& info = analysis.GetInfo(multiply);
+    ASSERT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info.range));
+    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info.range);
     EXPECT_EQ(5, range.min_bound);
     EXPECT_EQ(27, range.max_bound);
 }
@@ -10466,10 +10466,10 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryMultiply_Success_U32) {
 
     // Range of `multiply` (`idx * idy`)
     // idx: [3, 10], idy: [6, 19]
-    auto* info = analysis.GetInfo(multiply);
-    ASSERT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info->range));
-    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info->range);
+    const auto& info = analysis.GetInfo(multiply);
+    ASSERT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info.range));
+    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info.range);
     EXPECT_EQ(18u, range.min_bound);
     EXPECT_EQ(190u, range.max_bound);
 }
@@ -10593,8 +10593,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryMultiply_Failure_negative_lhs) {
 
     // Range of `multiply` (`idx * idy`)
     // idx: [-5, 9], idy: [1, 3]
-    auto* info = analysis.GetInfo(multiply);
-    ASSERT_EQ(nullptr, info);
+    const auto& info = analysis.GetInfo(multiply);
+    ASSERT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, BinaryMultiply_Failure_negative_rhs) {
@@ -10716,8 +10716,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryMultiply_Failure_negative_rhs) {
 
     // Range of `multiply` (`idx * idy`)
     // idx: [5, 9], idy: [-1, 3]
-    auto* info = analysis.GetInfo(multiply);
-    ASSERT_EQ(nullptr, info);
+    const auto& info = analysis.GetInfo(multiply);
+    ASSERT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, BinaryMultiply_Failure_Overflow_MaxBound_I32) {
@@ -10793,8 +10793,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryMultiply_Failure_Overflow_MaxBound_I32
 
     // Range of `multiply` (`idx * 268435456`)
     // idx: [0, 8], 268435456 > i32::kHighestValue / 8
-    auto* info = analysis.GetInfo(multiply);
-    ASSERT_EQ(nullptr, info);
+    const auto& info = analysis.GetInfo(multiply);
+    ASSERT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, BinaryMultiply_Failure_Overflow_MinBound_I32) {
@@ -10870,8 +10870,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryMultiply_Failure_Overflow_MinBound_I32
 
     // Range of `multiply` (`idx * 134217728`)
     // idx: [16, 20], 134217728 > i32::kHighestValue / 16
-    auto* info = analysis.GetInfo(multiply);
-    ASSERT_EQ(nullptr, info);
+    const auto& info = analysis.GetInfo(multiply);
+    ASSERT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, BinaryMultiply_Failure_Overflow_MaxBound_U32) {
@@ -10947,8 +10947,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryMultiply_Failure_Overflow_MaxBound_U32
 
     // Range of `multiply` (`idx * 536870912`)
     // idx: [0, 8], 536870912 > u32::kHighestValue / 8
-    auto* info = analysis.GetInfo(multiply);
-    ASSERT_EQ(nullptr, info);
+    const auto& info = analysis.GetInfo(multiply);
+    ASSERT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, BinaryMultiply_Failure_Overflow_MinBound_U32) {
@@ -11024,8 +11024,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryMultiply_Failure_Overflow_MinBound_U32
 
     // Range of `multiply` (`idx * 268435456`)
     // idx: [16, 20], 268435456 > u32::kHighestValue / 16
-    auto* info = analysis.GetInfo(multiply);
-    ASSERT_EQ(nullptr, info);
+    const auto& info = analysis.GetInfo(multiply);
+    ASSERT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, Convert_Success_U32ToI32) {
@@ -11052,11 +11052,11 @@ TEST_F(IR_IntegerRangeAnalysisTest, Convert_Success_U32ToI32) {
     EXPECT_EQ(Validate(mod), Success);
 
     IntegerRangeAnalysis analysis(&mod);
-    auto* info = analysis.GetInfo(convert);
-    ASSERT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info->range));
+    const auto& info = analysis.GetInfo(convert);
+    ASSERT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info.range));
 
-    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info->range);
+    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info.range);
     EXPECT_EQ(0, range.min_bound);
     EXPECT_EQ(23, range.max_bound);
 }
@@ -11128,11 +11128,11 @@ TEST_F(IR_IntegerRangeAnalysisTest, Convert_Success_I32ToU32) {
 
     IntegerRangeAnalysis analysis(&mod);
 
-    auto* info = analysis.GetInfo(convert);
-    ASSERT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info->range));
+    const auto& info = analysis.GetInfo(convert);
+    ASSERT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info.range));
 
-    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info->range);
+    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info.range);
     EXPECT_EQ(1u, range.min_bound);
     EXPECT_EQ(9u, range.max_bound);
 }
@@ -11204,8 +11204,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, Convert_Failure_NegativeI32ToU32) {
 
     IntegerRangeAnalysis analysis(&mod);
 
-    auto* info = analysis.GetInfo(convert);
-    ASSERT_EQ(nullptr, info);
+    const auto& info = analysis.GetInfo(convert);
+    ASSERT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, Convert_Failure_LargeU32ToI32) {
@@ -11276,8 +11276,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, Convert_Failure_LargeU32ToI32) {
 
     IntegerRangeAnalysis analysis(&mod);
 
-    auto* info = analysis.GetInfo(convert);
-    ASSERT_EQ(nullptr, info);
+    const auto& info = analysis.GetInfo(convert);
+    ASSERT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, Convert_Failure_ConvertToNonInteger) {
@@ -11347,8 +11347,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, Convert_Failure_ConvertToNonInteger) {
 
     IntegerRangeAnalysis analysis(&mod);
 
-    auto* info = analysis.GetInfo(convert);
-    ASSERT_EQ(nullptr, info);
+    const auto& info = analysis.GetInfo(convert);
+    ASSERT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, Divide_Success_Divisible_I32) {
@@ -11471,10 +11471,10 @@ TEST_F(IR_IntegerRangeAnalysisTest, Divide_Success_Divisible_I32) {
 
     // Range of `divide` (`idx / idy`)
     // idx: [4, 8], idy: [1, 2]
-    auto* info = analysis.GetInfo(divide);
-    ASSERT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info->range));
-    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info->range);
+    const auto& info = analysis.GetInfo(divide);
+    ASSERT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info.range));
+    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info.range);
     EXPECT_EQ(2, range.min_bound);
     EXPECT_EQ(8, range.max_bound);
 }
@@ -11599,10 +11599,10 @@ TEST_F(IR_IntegerRangeAnalysisTest, Divide_Success_Divisible_U32) {
 
     // Range of `divide` (`idx / idy`)
     // idx: [4u, 8u], idy: [1u, 2u]
-    auto* info = analysis.GetInfo(divide);
-    ASSERT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info->range));
-    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info->range);
+    const auto& info = analysis.GetInfo(divide);
+    ASSERT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info.range));
+    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info.range);
     EXPECT_EQ(2u, range.min_bound);
     EXPECT_EQ(8u, range.max_bound);
 }
@@ -11727,10 +11727,10 @@ TEST_F(IR_IntegerRangeAnalysisTest, Divide_Success_Nondivisible_GreaterThanOne) 
 
     // Range of `divide` (`idx / idy`)
     // idx: [8, 16], idy: [2, 3]
-    auto* info = analysis.GetInfo(divide);
-    ASSERT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info->range));
-    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info->range);
+    const auto& info = analysis.GetInfo(divide);
+    ASSERT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info.range));
+    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info.range);
     EXPECT_EQ(2, range.min_bound);
     EXPECT_EQ(8, range.max_bound);
 }
@@ -11855,10 +11855,10 @@ TEST_F(IR_IntegerRangeAnalysisTest, Divide_Success_Nondivisible_LessThanOne) {
 
     // Range of `divide` (`idx / idy`)
     // idx: [8, 16], idy: [6, 9]
-    auto* info = analysis.GetInfo(divide);
-    ASSERT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info->range));
-    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info->range);
+    const auto& info = analysis.GetInfo(divide);
+    ASSERT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info.range));
+    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info.range);
     EXPECT_EQ(0, range.min_bound);
     EXPECT_EQ(2, range.max_bound);
 }
@@ -11983,10 +11983,10 @@ TEST_F(IR_IntegerRangeAnalysisTest, Divide_Success_ZeroLHS_I32) {
 
     // Range of `divide` (`idx / idy`)
     // idx: [0, 16], idy: [4, 8]
-    auto* info = analysis.GetInfo(divide);
-    ASSERT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info->range));
-    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info->range);
+    const auto& info = analysis.GetInfo(divide);
+    ASSERT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info.range));
+    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info.range);
     EXPECT_EQ(0, range.min_bound);
     EXPECT_EQ(4, range.max_bound);
 }
@@ -12111,10 +12111,10 @@ TEST_F(IR_IntegerRangeAnalysisTest, Divide_Success_ZeroLHS_U32) {
 
     // Range of `divide` (`idx / idy`)
     // idx: [0, 16u], idy: [4u, 8u]
-    auto* info = analysis.GetInfo(divide);
-    ASSERT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info->range));
-    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info->range);
+    const auto& info = analysis.GetInfo(divide);
+    ASSERT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info.range));
+    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info.range);
     EXPECT_EQ(0u, range.min_bound);
     EXPECT_EQ(4u, range.max_bound);
 }
@@ -12239,8 +12239,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, Divide_Failure_NegativeLHS) {
 
     // Range of `divide` (`idx / idy`)
     // idx: [-1, 16], idy: [4, 8]
-    auto* info = analysis.GetInfo(divide);
-    ASSERT_EQ(nullptr, info);
+    const auto& info = analysis.GetInfo(divide);
+    ASSERT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, Divide_Failure_NegativeRHS) {
@@ -12363,8 +12363,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, Divide_Failure_NegativeRHS) {
 
     // Range of `divide` (`idx / idy`)
     // idx: [0, 16], idy: [-4, 8]
-    auto* info = analysis.GetInfo(divide);
-    ASSERT_EQ(nullptr, info);
+    const auto& info = analysis.GetInfo(divide);
+    ASSERT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, Divide_Failure_ZeroRHS_I32) {
@@ -12487,8 +12487,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, Divide_Failure_ZeroRHS_I32) {
 
     // Range of `divide` (`idx / idy`)
     // idx: [4, 16], idy: [0, 8]
-    auto* info = analysis.GetInfo(divide);
-    ASSERT_EQ(nullptr, info);
+    const auto& info = analysis.GetInfo(divide);
+    ASSERT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, Divide_Failure_ZeroRHS_U32) {
@@ -12611,8 +12611,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, Divide_Failure_ZeroRHS_U32) {
 
     // Range of `divide` (`idx / idy`)
     // idx: [4u, 8u], idy: [0u, 2u]
-    auto* info = analysis.GetInfo(divide);
-    ASSERT_EQ(nullptr, info);
+    const auto& info = analysis.GetInfo(divide);
+    ASSERT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Success_U32) {
@@ -12736,10 +12736,10 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Success_U32) {
     // Range of `shiftLeft` (`idx << idy`)
     // idx: [4u, 8u], idy: [1u, 2u]
     // shiftLeft: [4u << 1u, 8u << 2u] = [8u, 32u]
-    auto* info = analysis.GetInfo(shiftLeft);
-    ASSERT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info->range));
-    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info->range);
+    const auto& info = analysis.GetInfo(shiftLeft);
+    ASSERT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info.range));
+    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info.range);
     EXPECT_EQ(8u, range.min_bound);
     EXPECT_EQ(32u, range.max_bound);
 }
@@ -12865,10 +12865,10 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Success_I32_NonZero) {
     // Range of `shiftLeft` (`idx << idy`)
     // idx: [4, 8], idy: [1u, 2u]
     // shiftLeft: [4 << 1u, 8 << 2u] = [8, 32]
-    auto* info = analysis.GetInfo(shiftLeft);
-    ASSERT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info->range));
-    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info->range);
+    const auto& info = analysis.GetInfo(shiftLeft);
+    ASSERT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info.range));
+    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info.range);
     EXPECT_EQ(8, range.min_bound);
     EXPECT_EQ(32, range.max_bound);
 }
@@ -12994,10 +12994,10 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Success_I32_Zero) {
     // Range of `shiftLeft` (`idx << idy`)
     // idx: [0, 8], idy: [1u, 2u]
     // shiftLeft: [0 << 1u, 8 << 2u] = [0, 32]
-    auto* info = analysis.GetInfo(shiftLeft);
-    ASSERT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info->range));
-    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info->range);
+    const auto& info = analysis.GetInfo(shiftLeft);
+    ASSERT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info.range));
+    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info.range);
     EXPECT_EQ(0, range.min_bound);
     EXPECT_EQ(32, range.max_bound);
 }
@@ -13122,8 +13122,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Failure_I32_Negative) {
 
     // Range of `shiftLeft` (`idx << idy`)
     // idx: [-1, 8], idy: [1u, 2u]
-    auto* info = analysis.GetInfo(shiftLeft);
-    ASSERT_EQ(nullptr, info);
+    const auto& info = analysis.GetInfo(shiftLeft);
+    ASSERT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Failure_U32_NoLessThan32) {
@@ -13246,8 +13246,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Failure_U32_NoLessThan32) {
 
     // Range of `shiftLeft` (`idx << idy`)
     // idx: [4u, 8u], idy: [1u, 32u]
-    auto* info = analysis.GetInfo(shiftLeft);
-    ASSERT_EQ(nullptr, info);
+    const auto& info = analysis.GetInfo(shiftLeft);
+    ASSERT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Failure_I32_NoLessThan32) {
@@ -13370,8 +13370,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Failure_I32_NoLessThan32) {
 
     // Range of `shiftLeft` (`idx << idy`)
     // idx: [0, 8], idy: [1u, 33u]
-    auto* info = analysis.GetInfo(shiftLeft);
-    ASSERT_EQ(nullptr, info);
+    const auto& info = analysis.GetInfo(shiftLeft);
+    ASSERT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Failure_U32_Overflow) {
@@ -13495,8 +13495,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Failure_U32_Overflow) {
     // Range of `shiftLeft` (`idx << idy`)
     // idx: [0u, 4u], idy: [1u, 30u]
     // 4 << 30 = 4294967296L > u32::kHighestValue
-    auto* info = analysis.GetInfo(shiftLeft);
-    ASSERT_EQ(nullptr, info);
+    const auto& info = analysis.GetInfo(shiftLeft);
+    ASSERT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Failure_U32_HighestValue_Overflow) {
@@ -13570,8 +13570,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Failure_U32_HighestValue_Overflow)
 
     // Range of `shiftLeft` (`u32::HighestValue << idx`)
     // idx: [0u, 31u]
-    auto* info = analysis.GetInfo(shiftLeft);
-    ASSERT_EQ(nullptr, info);
+    const auto& info = analysis.GetInfo(shiftLeft);
+    ASSERT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Failure_I32_Overflow) {
@@ -13695,8 +13695,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Failure_I32_Overflow) {
     // Range of `shiftLeft` (`idx << idy`)
     // idx: [0, 4], idy: [1u, 29u]
     // 4 << 29 = 2147483648 > i32::kHighestValue
-    auto* info = analysis.GetInfo(shiftLeft);
-    ASSERT_EQ(nullptr, info);
+    const auto& info = analysis.GetInfo(shiftLeft);
+    ASSERT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Failure_I32_HighestValue_Overflow) {
@@ -13770,8 +13770,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Failure_I32_HighestValue_Overflow)
 
     // Range of `shiftLeft` (`i32::HighestValue << idx`)
     // idx: [0u, 31u]
-    auto* info = analysis.GetInfo(shiftLeft);
-    ASSERT_EQ(nullptr, info);
+    const auto& info = analysis.GetInfo(shiftLeft);
+    ASSERT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, ShiftRight_Success_U32_NonZero) {
@@ -13895,10 +13895,10 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftRight_Success_U32_NonZero) {
     // Range of `shiftRight` (`idx >> idy`)
     // idx: [4u, 8u], idy: [1u, 2u]
     // shiftRight: [4u >> 2u, 8u >> 1u] = [1u, 4u]
-    auto* info = analysis.GetInfo(shiftRight);
-    ASSERT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info->range));
-    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info->range);
+    const auto& info = analysis.GetInfo(shiftRight);
+    ASSERT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info.range));
+    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info.range);
     EXPECT_EQ(1u, range.min_bound);
     EXPECT_EQ(4u, range.max_bound);
 }
@@ -14024,10 +14024,10 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftRight_Success_I32_NonZero) {
     // Range of `shiftRight` (`idx >> idy`)
     // idx: [4, 8], idy: [1u, 2u]
     // shiftRight: [4 >> 2u, 8 >> 1u] = [1, 4]
-    auto* info = analysis.GetInfo(shiftRight);
-    ASSERT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info->range));
-    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info->range);
+    const auto& info = analysis.GetInfo(shiftRight);
+    ASSERT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info.range));
+    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info.range);
     EXPECT_EQ(1, range.min_bound);
     EXPECT_EQ(4, range.max_bound);
 }
@@ -14153,10 +14153,10 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftRight_Success_U32_Zero) {
     // Range of `shiftRight` (`idx >> idy`)
     // idx: [4u, 8u], idy: [1u, 4u]
     // shiftRight: [4u >> 4u, 8u >> 1u] = [0u, 4u]
-    auto* info = analysis.GetInfo(shiftRight);
-    ASSERT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info->range));
-    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info->range);
+    const auto& info = analysis.GetInfo(shiftRight);
+    ASSERT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info.range));
+    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info.range);
     EXPECT_EQ(0u, range.min_bound);
     EXPECT_EQ(4u, range.max_bound);
 }
@@ -14282,10 +14282,10 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftRight_Success_I32_Zero) {
     // Range of `shiftRight` (`idx >> idy`)
     // idx: [4, 8], idy: [4u, 5u]
     // shiftRight: [4 >> 5u, 8 >> 4u] = [0, 0]
-    auto* info = analysis.GetInfo(shiftRight);
-    ASSERT_NE(nullptr, info);
-    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info->range));
-    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info->range);
+    const auto& info = analysis.GetInfo(shiftRight);
+    ASSERT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info.range));
+    const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info.range);
     EXPECT_EQ(0, range.min_bound);
     EXPECT_EQ(0, range.max_bound);
 }
@@ -14410,8 +14410,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftRight_Failure_I32_Negative) {
 
     // Range of `shiftRight` (`idx >> idy`)
     // idx: [-4, 8], idy: [4u, 5u]
-    auto* info = analysis.GetInfo(shiftRight);
-    ASSERT_EQ(nullptr, info);
+    const auto& info = analysis.GetInfo(shiftRight);
+    ASSERT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, ShiftRight_Failure_U32_NoLessThan32) {
@@ -14488,8 +14488,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftRight_Failure_U32_NoLessThan32) {
 
     // Range of `shiftRight` (`u32::kHighestValue >> idx`)
     // idx: [4u, 32u]
-    auto* info = analysis.GetInfo(shiftRight);
-    ASSERT_EQ(nullptr, info);
+    const auto& info = analysis.GetInfo(shiftRight);
+    ASSERT_FALSE(info.IsValid());
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, ShiftRight_Failure_I32_NoLessThan32) {
@@ -14566,8 +14566,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftRight_Failure_I32_NoLessThan32) {
 
     // Range of `shiftRight` (`i32::kHighestValue >> idx`)
     // idx: [4, 32]
-    auto* info = analysis.GetInfo(shiftRight);
-    ASSERT_EQ(nullptr, info);
+    const auto& info = analysis.GetInfo(shiftRight);
+    ASSERT_FALSE(info.IsValid());
 }
 
 }  // namespace
