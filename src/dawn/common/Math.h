@@ -35,7 +35,6 @@
 
 #include <limits>
 #include <optional>
-#include <type_traits>
 
 #include "dawn/common/Assert.h"
 #include "dawn/common/Platform.h"
@@ -142,9 +141,8 @@ T FloatToUnorm(float value) {
 
 float SRGBToLinear(float srgb);
 
-template <typename T1,
-          typename T2,
-          typename Enable = typename std::enable_if<sizeof(T1) == sizeof(T2)>::type>
+template <typename T1, typename T2>
+    requires(sizeof(T1) == sizeof(T2))
 constexpr bool IsSubset(T1 subset, T2 set) {
     T2 bitsAlsoInSet = subset & set;
     return bitsAlsoInSet == subset;

@@ -28,9 +28,6 @@
 #ifndef SRC_DAWN_COMMON_RANGE_H_
 #define SRC_DAWN_COMMON_RANGE_H_
 
-#include <type_traits>
-#include <utility>
-
 namespace dawn {
 
 // An iterator over a range of numbers. Simplified version of Python's range() iterator that works
