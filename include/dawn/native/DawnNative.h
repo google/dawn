@@ -354,6 +354,8 @@ DAWN_NATIVE_EXPORT bool ReduceMemoryUsage(WGPUDevice device);
 // caches, etc.
 DAWN_NATIVE_EXPORT void PerformIdleTasks(const wgpu::Device& device);
 
+DAWN_NATIVE_EXPORT bool IsDeviceLost(WGPUDevice device);
+
 }  // namespace dawn::native
 
 #endif  // INCLUDE_DAWN_NATIVE_DAWNNATIVE_H_

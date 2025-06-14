@@ -297,4 +297,8 @@ void PerformIdleTasks(const wgpu::Device& device) {
     deviceBase->PerformIdleTasks();
 }
 
+bool IsDeviceLost(WGPUDevice device) {
+    return FromAPI(device)->IsLost();
+}
+
 }  // namespace dawn::native
