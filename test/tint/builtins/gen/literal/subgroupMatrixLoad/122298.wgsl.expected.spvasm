@@ -1,90 +1,76 @@
-SKIP: FAILED
-
-
-enable chromium_experimental_subgroup_matrix;
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : array<i32, 1024>;
-
-struct SB_RW {
-  arg_0 : array<i32, 1024>,
-}
-
-@group(0) @binding(1) var<storage, read_write> sb_rw : SB_RW;
-
-fn subgroupMatrixLoad_122298() -> subgroup_matrix_left<i8, 8, 8> {
-  var res : subgroup_matrix_left<i8, 8, 8> = subgroupMatrixLoad<subgroup_matrix_left<i8, 8, 8>>(&(sb_rw.arg_0), 1u, true, 8u);
-  return res;
-}
-
-@compute @workgroup_size(1)
-fn compute_main() {
-  subgroupMatrixStore(&(prevent_dce), 0, subgroupMatrixLoad_122298(), false, 64);
-}
-
-Failed to generate SPIR-V: :22:41 error: spirv.cooperative_matrix_load: no matching call to 'spirv.cooperative_matrix_load<subgroup_matrix_left<i8, 8, 8>>(ptr<storage, i32, read_write>, u32, u32, u32)'
-
-1 candidate function:
- • 'spirv.cooperative_matrix_load<T  ✗ >(ptr<workgroup' or 'storage, S, read' or 'read_write>  ✗ , u32  ✓ , u32  ✓ , u32  ✓ ) -> T' where:
-      ✗  'T' is 'subgroup_matrix<K, S, C, R>'
-      ✗  'S' is 'f32', 'i32', 'u32' or 'f16'
-
-    %6:subgroup_matrix_left<i8, 8, 8> = spirv.cooperative_matrix_load<subgroup_matrix_left<i8, 8, 8>> %5, 1u, 8u, 32u
-                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-:19:3 note: in block
-  $B2: {
-  ^^^
-
-:33:16 error: spirv.cooperative_matrix_store: no matching call to 'spirv.cooperative_matrix_store(ptr<storage, i32, read_write>, subgroup_matrix_left<i8, 8, 8>, u32, u32, u32)'
-
-1 candidate function:
- • 'spirv.cooperative_matrix_store(ptr<workgroup' or 'storage, S, write' or 'read_write>  ✓ , subgroup_matrix<K, S, C, R>  ✗ , u32  ✓ , u32  ✓ , u32  ✓ )' where:
-      ✓  'S' is 'f32', 'i32', 'u32' or 'f16'
-
-    %13:void = spirv.cooperative_matrix_store %12, %10, 0u, 64u, 32u
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-:29:3 note: in block
-  $B3: {
-  ^^^
-
-note: # Disassembly
-SB_RW = struct @align(4) {
-  arg_0:array<i32, 1024> @offset(0)
-}
-
-prevent_dce_block = struct @align(4), @block {
-  inner:array<i32, 1024> @offset(0)
-}
-
-sb_rw_block = struct @align(4), @block {
-  inner:SB_RW @offset(0)
-}
-
-$B1: {  # root
-  %1:ptr<storage, prevent_dce_block, read_write> = var undef @binding_point(0, 0)
-  %2:ptr<storage, sb_rw_block, read_write> = var undef @binding_point(0, 1)
-}
-
-%subgroupMatrixLoad_122298 = func():subgroup_matrix_left<i8, 8, 8> {
-  $B2: {
-    %4:ptr<storage, array<i32, 1024>, read_write> = access %2, 0u, 0u
-    %5:ptr<storage, i32, read_write> = access %4, 1u
-    %6:subgroup_matrix_left<i8, 8, 8> = spirv.cooperative_matrix_load<subgroup_matrix_left<i8, 8, 8>> %5, 1u, 8u, 32u
-    %res:ptr<function, subgroup_matrix_left<i8, 8, 8>, read_write> = var %6
-    %8:subgroup_matrix_left<i8, 8, 8> = load %res
-    ret %8
-  }
-}
-%compute_main = @compute @workgroup_size(1i, 1i, 1i) func():void {
-  $B3: {
-    %10:subgroup_matrix_left<i8, 8, 8> = call %subgroupMatrixLoad_122298
-    %11:ptr<storage, array<i32, 1024>, read_write> = access %1, 0u
-    %12:ptr<storage, i32, read_write> = access %11, 0u
-    %13:void = spirv.cooperative_matrix_store %12, %10, 0u, 64u, 32u
-    ret
-  }
-}
-
-
-tint executable returned error: exit status 1
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 38
+; Schema: 0
+               OpCapability Shader
+               OpCapability VulkanMemoryModel
+               OpCapability VulkanMemoryModelDeviceScope
+               OpCapability CooperativeMatrixKHR
+               OpCapability Int8
+               OpExtension "SPV_KHR_vulkan_memory_model"
+               OpExtension "SPV_KHR_cooperative_matrix"
+               OpMemoryModel Logical Vulkan
+               OpEntryPoint GLCompute %compute_main "compute_main"
+               OpExecutionMode %compute_main LocalSize 1 1 1
+               OpMemberName %prevent_dce_block_tint_explicit_layout 0 "inner"
+               OpName %prevent_dce_block_tint_explicit_layout "prevent_dce_block_tint_explicit_layout"
+               OpMemberName %SB_RW_tint_explicit_layout 0 "arg_0"
+               OpName %SB_RW_tint_explicit_layout "SB_RW_tint_explicit_layout"
+               OpMemberName %sb_rw_block_tint_explicit_layout 0 "inner"
+               OpName %sb_rw_block_tint_explicit_layout "sb_rw_block_tint_explicit_layout"
+               OpName %subgroupMatrixLoad_122298 "subgroupMatrixLoad_122298"
+               OpName %res "res"
+               OpName %compute_main "compute_main"
+               OpDecorate %_arr_int_uint_1024 ArrayStride 4
+               OpMemberDecorate %prevent_dce_block_tint_explicit_layout 0 Offset 0
+               OpDecorate %prevent_dce_block_tint_explicit_layout Block
+               OpDecorate %1 DescriptorSet 0
+               OpDecorate %1 Binding 0
+               OpMemberDecorate %SB_RW_tint_explicit_layout 0 Offset 0
+               OpMemberDecorate %sb_rw_block_tint_explicit_layout 0 Offset 0
+               OpDecorate %sb_rw_block_tint_explicit_layout Block
+               OpDecorate %8 DescriptorSet 0
+               OpDecorate %8 Binding 1
+        %int = OpTypeInt 32 1
+       %uint = OpTypeInt 32 0
+  %uint_1024 = OpConstant %uint 1024
+%_arr_int_uint_1024 = OpTypeArray %int %uint_1024
+%prevent_dce_block_tint_explicit_layout = OpTypeStruct %_arr_int_uint_1024
+%_ptr_StorageBuffer_prevent_dce_block_tint_explicit_layout = OpTypePointer StorageBuffer %prevent_dce_block_tint_explicit_layout
+          %1 = OpVariable %_ptr_StorageBuffer_prevent_dce_block_tint_explicit_layout StorageBuffer
+%SB_RW_tint_explicit_layout = OpTypeStruct %_arr_int_uint_1024
+%sb_rw_block_tint_explicit_layout = OpTypeStruct %SB_RW_tint_explicit_layout
+%_ptr_StorageBuffer_sb_rw_block_tint_explicit_layout = OpTypePointer StorageBuffer %sb_rw_block_tint_explicit_layout
+          %8 = OpVariable %_ptr_StorageBuffer_sb_rw_block_tint_explicit_layout StorageBuffer
+     %uint_3 = OpConstant %uint 3
+     %uint_8 = OpConstant %uint 8
+       %char = OpTypeInt 8 1
+     %uint_0 = OpConstant %uint 0
+         %13 = OpTypeCooperativeMatrixKHR %char %uint_3 %uint_8 %uint_8 %uint_0
+         %18 = OpTypeFunction %13
+%_ptr_StorageBuffer__arr_int_uint_1024 = OpTypePointer StorageBuffer %_arr_int_uint_1024
+%_ptr_StorageBuffer_int = OpTypePointer StorageBuffer %int
+     %uint_1 = OpConstant %uint 1
+%_ptr_Function_13 = OpTypePointer Function %13
+       %void = OpTypeVoid
+         %31 = OpTypeFunction %void
+    %uint_64 = OpConstant %uint 64
+%subgroupMatrixLoad_122298 = OpFunction %13 None %18
+         %19 = OpLabel
+        %res = OpVariable %_ptr_Function_13 Function
+         %20 = OpAccessChain %_ptr_StorageBuffer__arr_int_uint_1024 %8 %uint_0 %uint_0
+         %22 = OpAccessChain %_ptr_StorageBuffer_int %20 %uint_1
+         %25 = OpCooperativeMatrixLoadKHR %13 %22 %uint_1 %uint_8 NonPrivatePointer
+               OpStore %res %25
+         %28 = OpLoad %13 %res None
+               OpReturnValue %28
+               OpFunctionEnd
+%compute_main = OpFunction %void None %31
+         %32 = OpLabel
+         %33 = OpFunctionCall %13 %subgroupMatrixLoad_122298
+         %34 = OpAccessChain %_ptr_StorageBuffer__arr_int_uint_1024 %1 %uint_0
+         %35 = OpAccessChain %_ptr_StorageBuffer_int %34 %uint_0
+               OpCooperativeMatrixStoreKHR %35 %33 %uint_0 %uint_64 NonPrivatePointer
+               OpReturn
+               OpFunctionEnd

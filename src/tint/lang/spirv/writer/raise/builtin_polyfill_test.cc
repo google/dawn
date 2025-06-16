@@ -3985,6 +3985,80 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Workgroup_RowMajor_U3
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Storage_ColMajor_I8) {
+    auto* mat = ty.subgroup_matrix_result(ty.i8(), 8, 8);
+    auto* p = b.FunctionParam<ptr<storage, array<i32, 256>>>("p");
+    auto* func = b.Function("foo", mat);
+    func->SetParams({p});
+    b.Append(func->Block(), [&] {
+        auto* call = b.CallExplicit(mat, core::BuiltinFn::kSubgroupMatrixLoad, Vector{mat}, p, 64_u,
+                                    true, 32_u);
+        b.Return(func, call);
+    });
+
+    auto* src = R"(
+%foo = func(%p:ptr<storage, array<i32, 256>, read_write>):subgroup_matrix_result<i8, 8, 8> {
+  $B1: {
+    %3:subgroup_matrix_result<i8, 8, 8> = subgroupMatrixLoad<subgroup_matrix_result<i8, 8, 8>> %p, 64u, true, 32u
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%p:ptr<storage, array<i32, 256>, read_write>):subgroup_matrix_result<i8, 8, 8> {
+  $B1: {
+    %3:ptr<storage, i32, read_write> = access %p, 64u
+    %4:subgroup_matrix_result<i8, 8, 8> = spirv.cooperative_matrix_load<subgroup_matrix_result<i8, 8, 8>> %3, 1u, 32u, 32u
+    ret %4
+  }
+}
+)";
+
+    PolyfillConfig config{.use_vulkan_memory_model = true};
+    Run(BuiltinPolyfill, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Workgroup_RowMajor_U8) {
+    auto* mat = ty.subgroup_matrix_result(ty.u8(), 8, 8);
+    auto* p = b.FunctionParam<ptr<workgroup, array<u32, 256>>>("p");
+    auto* func = b.Function("foo", mat);
+    func->SetParams({p});
+    b.Append(func->Block(), [&] {
+        auto* call = b.CallExplicit(mat, core::BuiltinFn::kSubgroupMatrixLoad, Vector{mat}, p, 64_u,
+                                    false, 32_u);
+        b.Return(func, call);
+    });
+
+    auto* src = R"(
+%foo = func(%p:ptr<workgroup, array<u32, 256>, read_write>):subgroup_matrix_result<u8, 8, 8> {
+  $B1: {
+    %3:subgroup_matrix_result<u8, 8, 8> = subgroupMatrixLoad<subgroup_matrix_result<u8, 8, 8>> %p, 64u, false, 32u
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%p:ptr<workgroup, array<u32, 256>, read_write>):subgroup_matrix_result<u8, 8, 8> {
+  $B1: {
+    %3:ptr<workgroup, u32, read_write> = access %p, 64u
+    %4:subgroup_matrix_result<u8, 8, 8> = spirv.cooperative_matrix_load<subgroup_matrix_result<u8, 8, 8>> %3, 0u, 32u, 32u
+    ret %4
+  }
+}
+)";
+
+    PolyfillConfig config{.use_vulkan_memory_model = true};
+    Run(BuiltinPolyfill, config);
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixStore_Storage_ColMajor_F32) {
     auto* p = b.FunctionParam<ptr<storage, array<f32, 256>>>("p");
     auto* m = b.FunctionParam("m", ty.subgroup_matrix_result(ty.f32(), 8, 8));
