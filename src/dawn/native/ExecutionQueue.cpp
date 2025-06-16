@@ -29,6 +29,7 @@
 
 #include <atomic>
 #include <utility>
+#include <vector>
 
 namespace dawn::native {
 
@@ -78,12 +79,17 @@ void ExecutionQueueBase::UpdateCompletedSerial(ExecutionSerial completedSerial) 
            !mCompletedSerial.compare_exchange_weak(current, uint64_t(completedSerial),
                                                    std::memory_order_acq_rel)) {
     }
+
+    std::vector<Task> pending;
     mWaitingTasks.Use([&](auto tasks) {
         for (auto task : tasks->IterateUpTo(completedSerial)) {
-            task();
+            pending.push_back(std::move(task));
         }
         tasks->ClearUpTo(completedSerial);
     });
+    for (auto task : pending) {
+        task();
+    }
 }
 
 MaybeError ExecutionQueueBase::EnsureCommandsFlushed(ExecutionSerial serial) {
