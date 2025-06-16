@@ -27,6 +27,7 @@
 
 #include "src/tint/lang/spirv/reader/lower/lower.h"
 
+#include "src/tint/lang/core/ir/transform/dead_code_elimination.h"
 #include "src/tint/lang/core/ir/transform/remove_terminator_args.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/spirv/reader/lower/atomics.h"
@@ -46,6 +47,7 @@ Result<SuccessType> Lower(core::ir::Module& mod) {
         }                                \
     } while (false)
 
+    RUN_TRANSFORM(core::ir::transform::DeadCodeElimination, mod);
     RUN_TRANSFORM(lower::VectorElementPointer, mod);
     RUN_TRANSFORM(lower::ShaderIO, mod);
     RUN_TRANSFORM(lower::Builtins, mod);

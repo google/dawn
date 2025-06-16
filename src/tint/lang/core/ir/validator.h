@@ -75,6 +75,8 @@ enum class Capability : uint8_t {
     /// Allows binding points to be non-unique. Used after BindingRemapper is
     /// invoked by MSL & GLSL backends.
     kAllowDuplicateBindings,
+    /// Allows module scope `var`s to exist without an IO annotation
+    kAllowUnannotatedModuleIOVariables,
 };
 
 /// Capabilities is a set of Capability

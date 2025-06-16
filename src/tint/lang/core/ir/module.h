@@ -178,6 +178,10 @@ class Module {
     /// @returns the functions in the module, in dependency order
     Vector<const Function*, 16> DependencyOrderedFunctions() const;
 
+    /// Removes `func` from the module and destroys it.
+    /// @param func the function to destroy
+    void Destroy(Function* func);
+
     /// The block allocator
     BlockAllocator<Block> blocks;
 

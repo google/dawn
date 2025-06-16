@@ -2707,7 +2707,8 @@ void Validator::CheckVar(const Var* var) {
     }
 
     if (var->Block() == mod_.root_block) {
-        if (mv->AddressSpace() == AddressSpace::kIn || mv->AddressSpace() == AddressSpace::kOut) {
+        if ((mv->AddressSpace() == AddressSpace::kIn || mv->AddressSpace() == AddressSpace::kOut) &&
+            !capabilities_.Contains(Capability::kAllowUnannotatedModuleIOVariables)) {
             auto result = ValidateShaderIOAnnotations(var->Result()->Type(), var->BindingPoint(),
                                                       var->Attributes(), "module scope variable");
             if (result != Success) {
@@ -2759,8 +2760,10 @@ Result<SuccessType, std::string> Validator::ValidateShaderIOAnnotations(
     const core::IOAttributes& attr,
     const std::string& target_str) {
     EnumSet<IOAnnotation> annotations;
+
     // Since there is no entries in the set at this point, this should never fail.
     TINT_ASSERT(AddIOAnnotationsFromIOAttributes(annotations, attr) == Success);
+
     if (binding_point.has_value()) {
         annotations.Add(IOAnnotation::kBindingPoint);
     }
