@@ -2125,5 +2125,26 @@ testing::AssertionResult ExpectBetweenColors<T>::Check(const void* data, size_t 
 }
 
 template class ExpectBetweenColors<utils::RGBA8>;
+
+template <typename T>
+testing::AssertionResult ExpectBetweenSnormTextureBounds<T>::Check(const void* data, size_t size) {
+    DAWN_ASSERT(size == sizeof(T) * expectedLower.size());
+    DAWN_ASSERT(expectedLower.size() == expectedUpper.size());
+
+    const T* actual = static_cast<const T*>(data);
+
+    for (size_t i = 0; i < expectedLower.size(); ++i) {
+        if (!(actual[i] >= expectedLower[i] && actual[i] <= expectedUpper[i])) {
+            return testing::AssertionFailure()
+                   << absl::StrFormat("Expected data[%d] to be between %d and %d, actual %d\n", i,
+                                      expectedLower[i], expectedUpper[i], actual[i]);
+        }
+    }
+
+    return testing::AssertionSuccess();
+}
+
+template class ExpectBetweenSnormTextureBounds<int8_t>;
+
 }  // namespace detail
 }  // namespace dawn
