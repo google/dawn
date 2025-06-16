@@ -142,8 +142,8 @@ struct State {
 
         // Update all uses of the module-scope variable.
         value->ForEachUseUnsorted([&](core::ir::Usage use) {
-            if (auto* access = use.instruction->As<core::ir::Access>()) {
-                ReplaceOutputPointerAddressSpace(access->Result());
+            if (use.instruction->IsAnyOf<core::ir::Access, core::ir::Let>()) {
+                ReplaceOutputPointerAddressSpace(use.instruction->Result());
             } else if (use.instruction->Is<core::ir::Phony>()) {
                 use.instruction->Destroy();
             } else if (!use.instruction->IsAnyOf<core::ir::Load, core::ir::LoadVectorElement,

@@ -3420,5 +3420,60 @@ $B1: {  # root
 
     EXPECT_EQ(expect, str());
 }
+
+TEST_F(SpirvReader_ShaderIOTest, Outputs_ThroughLet) {
+    auto* position = b.Var("position", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
+    position->SetBuiltin(core::BuiltinValue::kPosition);
+
+    mod.root_block->Append(position);
+
+    auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kVertex);
+    b.Append(ep->Block(), [&] {  //
+        b.Let("tmp", position);
+        b.Store(position, b.Splat<vec4<f32>>(1_f));
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %position:ptr<__out, vec4<f32>, read_write> = var undef @builtin(position)
+}
+
+%foo = @vertex func():void {
+  $B2: {
+    %tmp:ptr<__out, vec4<f32>, read_write> = let %position
+    store %position, vec4<f32>(1.0f)
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %position:ptr<private, vec4<f32>, read_write> = var undef
+}
+
+%foo_inner = func():void {
+  $B2: {
+    %tmp:ptr<private, vec4<f32>, read_write> = let %position
+    store %position, vec4<f32>(1.0f)
+    ret
+  }
+}
+%foo = @vertex func():vec4<f32> [@position] {
+  $B3: {
+    %5:void = call %foo_inner
+    %6:vec4<f32> = load %position
+    ret %6
+  }
+}
+)";
+
+    Run(ShaderIO);
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader::lower
