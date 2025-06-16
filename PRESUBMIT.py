@@ -138,6 +138,93 @@ def CheckNonInclusiveLanguage(input_api, output_api):
     return []
 
 
+def _CalculateEnumeratedEntriesAndTypes(lines):
+    """Returns a dictionary of enumerated entries, and a list of all the 'types' encountered.
+
+    The implemented parsing is unsophisticated, and assumes a readable/well-formed .proto file.
+    Things like unmatched '{}'s will cause a crash. Missing ';'s or writing something like `} message Foo {` will also
+    cause misbehaviour.
+    Constructs like this are normally bad style, so if really needed, adding support for them is left as an exercise for
+    the reader.
+    """
+    push_re = re.compile(r'(\w+) {(.*)')
+    value_re = re.compile(r'(\w+) = (\d+);(.*)')
+    pop_re = re.compile(r'}(.*)')
+
+    prefix_stack = []
+    prefix_str = ""
+    enumerated_entries = {}
+    types = []
+    for l in lines:
+        l = l.strip().rstrip()
+        l = l.split("//", 1)[0]
+        while l:
+            if match := re.search(push_re, l):
+                prefix_stack.append(match.group(1))
+                prefix_str = '.'.join(prefix_stack)
+                types.append(prefix_str)
+                l = match.group(2)
+                continue
+            if match := re.search(value_re, l):
+                enumerated_entries[
+                    f"{prefix_str}.{match.group(1)}"] = match.group(2)
+                l = match.group(2)
+                continue
+            if match := re.search(pop_re, l):
+                prefix_stack.pop()
+                prefix_str = '_'.join(prefix_stack)
+                l = match.group(1)
+                continue
+            l = ""
+
+    return enumerated_entries, types
+
+
+def CheckIRBinaryCompatibility(input_api, output_api):
+    """Checks for changes to ir.proto that may cause compatibility issues"""
+    proto_file = None
+    old_entries, old_types = {}, []
+    new_entries, new_types = {}, []
+    for file in input_api.AffectedFiles(
+            include_deletes=False,
+            file_filter=lambda f: f.LocalPath().replace(
+                '\\', '/') == "src/tint/utils/protos/ir/ir.proto"):
+        if proto_file:
+            return [
+                output_api.PresubmitError(
+                    f"Unexpectedly found more than one ir.proto in change, [{file.AbsoluteLocalPath()}, {proto_file}]"
+                )
+            ]
+        proto_file = file.AbsoluteLocalPath()
+        old_entries, old_types = _CalculateEnumeratedEntriesAndTypes(
+            file.OldContents())
+        new_entries, new_types = _CalculateEnumeratedEntriesAndTypes(
+            file.NewContents())
+
+    changes = []
+    for k in old_entries:
+        if k not in new_entries:
+            changes.append(
+                f"entry '{k}' has been removed, old={old_entries[k]}")
+            continue
+        if old_entries[k] != new_entries[k]:
+            changes.append(
+                f"entry '{k}' has changed, old={old_entries[k]}, new={new_entries[k]}"
+            )
+            continue
+
+    for s in old_types:
+        if s not in new_types:
+            changes.append(f"type '{s}' has been removed")
+
+    if changes:
+        return [
+            output_api.PresubmitError(
+                "Incompatible changes detected in ir.proto", items=changes)
+        ]
+    return []
+
+
 def CheckNoStaleGen(input_api, output_api):
     """Checks that Tint generated files are not stale."""
     results = []
