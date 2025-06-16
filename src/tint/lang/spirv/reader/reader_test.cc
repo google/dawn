@@ -325,13 +325,12 @@ VertexOutputs = struct @align(16) {
 tint_symbol = struct @align(16) {
   main_position_Output:vec4<f32> @offset(0), @builtin(position)
   main_clip_distances_Output:array<f32, 1> @offset(16), @builtin(clip_distances)
-  main___point_size_Output:f32 @offset(20), @builtin(__point_size)
 }
 
 $B1: {  # root
   %main_position_Output:ptr<private, vec4<f32>, read_write> = var undef
   %main_clip_distances_Output:ptr<private, array<f32, 1>, read_write> = var undef
-  %main___point_size_Output:ptr<private, f32, read_write> = var undef
+  %main___point_size_Output:ptr<private, f32, read_write> = var 1.0f
 }
 
 %main_inner = func():VertexOutputs {
@@ -355,9 +354,8 @@ $B1: {  # root
     %10:void = call %main_inner_1
     %11:vec4<f32> = load %main_position_Output
     %12:array<f32, 1> = load %main_clip_distances_Output
-    %13:f32 = load %main___point_size_Output
-    %14:tint_symbol = construct %11, %12, %13
-    ret %14
+    %13:tint_symbol = construct %11, %12
+    ret %13
   }
 }
 )");

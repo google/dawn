@@ -3159,7 +3159,7 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvReader_ShaderIOTest, PointSize) {
+TEST_F(SpirvReader_ShaderIOTest, PointSize_Struct) {
     auto* builtin_str =
         ty.Struct(mod.symbols.New("Builtins"), Vector{
                                                    core::type::Manager::StructMemberDesc{
@@ -3230,6 +3230,74 @@ $B1: {  # root
     %6:void = call %foo_inner
     %7:ptr<private, vec4<f32>, read_write> = access %builtins, 0u
     %8:vec4<f32> = load %7
+    ret %8
+  }
+}
+)";
+
+    Run(ShaderIO);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvReader_ShaderIOTest, PointSize_Var) {
+    auto* ps = b.Var("point_size", ty.ptr(core::AddressSpace::kOut, ty.f32()));
+    ps->SetBuiltin(core::BuiltinValue::kPointSize);
+    mod.root_block->Append(ps);
+
+    auto* o = b.Var("other", ty.ptr<private_, f32>());
+    mod.root_block->Append(o);
+
+    auto* pos = b.Var("position", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
+    pos->SetBuiltin(core::BuiltinValue::kPosition);
+    mod.root_block->Append(pos);
+
+    auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kVertex);
+    b.Append(ep->Block(), [&] {  //
+        auto* v = b.Load(ps);
+        b.Store(o, v);
+
+        b.Store(pos, b.Zero(ty.vec4<f32>()));
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %point_size:ptr<__out, f32, read_write> = var undef @builtin(__point_size)
+  %other:ptr<private, f32, read_write> = var undef
+  %position:ptr<__out, vec4<f32>, read_write> = var undef @builtin(position)
+}
+
+%foo = @vertex func():void {
+  $B2: {
+    %5:f32 = load %point_size
+    store %other, %5
+    store %position, vec4<f32>(0.0f)
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %point_size:ptr<private, f32, read_write> = var 1.0f
+  %other:ptr<private, f32, read_write> = var undef
+  %position:ptr<private, vec4<f32>, read_write> = var undef
+}
+
+%foo_inner = func():void {
+  $B2: {
+    %5:f32 = load %point_size
+    store %other, %5
+    store %position, vec4<f32>(0.0f)
+    ret
+  }
+}
+%foo = @vertex func():vec4<f32> [@position] {
+  $B3: {
+    %7:void = call %foo_inner
+    %8:vec4<f32> = load %position
     ret %8
   }
 }

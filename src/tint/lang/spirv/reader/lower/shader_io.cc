@@ -38,7 +38,8 @@ namespace tint::spirv::reader::lower {
 
 namespace {
 
-using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
+using namespace tint::core::fluent_types;     // NOLINT
 
 /// PIMPL state for the transform.
 struct State {
@@ -236,6 +237,14 @@ struct State {
                     }
                 }
             } else {
+                // Don't want to emit point size as it doesn't exist in WGSL.
+                if (var->Attributes().builtin == core::BuiltinValue::kPointSize) {
+                    // TODO(dsinclair): Validate that all accesses of this variable are then used
+                    // only to assign the value of 1.0.
+                    var->SetInitializer(b.Constant(1.0_f));
+                    continue;
+                }
+
                 // Load the final result from the original variable.
                 b.Append(wrapper->Block(), [&] {
                     results.Push(b.Load(var)->Result());
@@ -254,6 +263,7 @@ struct State {
                         var_type = ty.u32();
                     }
                 });
+
                 add_output(ir.NameOf(var), var_type, std::move(var_attributes));
             }
         }
