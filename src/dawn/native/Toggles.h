@@ -156,7 +156,6 @@ enum class Toggle {
     VulkanDirectVariableAccessTransformHandle,
     VulkanAddWorkToEmptyResolvePass,
     EnableIntegerRangeAnalysisInRobustness,
-    VulkanDisableFramebufferCache,
 
     // Unresolved issues.
     NoWorkaroundSampleMaskBecomesZeroForAllButLastColorTarget,

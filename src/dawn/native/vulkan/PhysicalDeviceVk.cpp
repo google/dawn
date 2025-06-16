@@ -817,9 +817,6 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         // chromium:407109052: Qualcomm devices have a bug where the spirv extended op NClamp
         // modifies other components of a vector when one of the components is nan.
         deviceToggles->Default(Toggle::VulkanScalarizeClampBuiltin, true);
-
-        // chromium:416088623: Some Qualcomm devices have issues with reusing VkFramebuffers.
-        deviceToggles->Default(Toggle::VulkanDisableFramebufferCache, true);
     }
 
     if (IsAndroidARM()) {
@@ -843,11 +840,6 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
 
     if (IsAndroidSamsung() || IsAndroidQualcomm() || IsAndroidHuawei()) {
         deviceToggles->Default(Toggle::IgnoreImportedAHardwareBufferVulkanImageSize, true);
-    }
-
-    if (IsAndroidSwiftshader()) {
-        // Disable framebuffer caching to avoid timeout errors seen on some Android emulators.
-        deviceToggles->Default(Toggle::VulkanDisableFramebufferCache, true);
     }
 
     if (IsIntelMesa() && gpu_info::IsIntelGen12LP(GetVendorId(), GetDeviceId())) {
@@ -1039,14 +1031,6 @@ bool PhysicalDevice::IsIntelMesa() const {
         return mDeviceInfo.driverProperties.driverID == VK_DRIVER_ID_INTEL_OPEN_SOURCE_MESA_KHR;
     }
     return false;
-}
-
-bool PhysicalDevice::IsAndroidSwiftshader() const {
-#if DAWN_PLATFORM_IS(ANDROID)
-    return gpu_info::IsGoogle(GetVendorId());
-#else
-    return false;
-#endif
 }
 
 uint32_t PhysicalDevice::FindDefaultComputeSubgroupSize() const {
