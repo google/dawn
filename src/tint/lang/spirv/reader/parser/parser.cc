@@ -685,7 +685,7 @@ class Parser {
                 if (!attributes.interpolation.has_value()) {
                     attributes.interpolation =
                         core::Interpolation{core::InterpolationType::kPerspective,
-                                            core::InterpolationSampling::kCenter};
+                                            core::InterpolationSampling::kUndefined};
                 }
                 return attributes.interpolation.value();
             };
@@ -3217,7 +3217,7 @@ class Parser {
             if (!io_attributes.interpolation.has_value()) {
                 io_attributes.interpolation = core::Interpolation{
                     .type = core::InterpolationType::kPerspective,
-                    .sampling = core::InterpolationSampling::kCenter,
+                    .sampling = core::InterpolationSampling::kUndefined,
                 };
             }
             return io_attributes.interpolation.value();

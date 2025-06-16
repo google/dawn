@@ -331,12 +331,12 @@ INSTANTIATE_TEST_SUITE_P(
         LocationCase{
             "OpMemberDecorate %str 0 Location 2 "
             "OpMemberDecorate %str 0 NoPerspective ",
-            "tint_symbol:vec4<f32> @offset(0), @location(2), @interpolate(linear, center)",
+            "tint_symbol:vec4<f32> @offset(0), @location(2), @interpolate(linear)",
         },
         LocationCase{
             "OpMemberDecorate %str 0 Location 3 "
             "OpMemberDecorate %str 0 Flat ",
-            "tint_symbol:vec4<f32> @offset(0), @location(3), @interpolate(flat, center)",
+            "tint_symbol:vec4<f32> @offset(0), @location(3), @interpolate(flat)",
         },
         LocationCase{
             "OpMemberDecorate %str 0 Location 4 "

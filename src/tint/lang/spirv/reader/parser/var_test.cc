@@ -584,12 +584,12 @@ INSTANTIATE_TEST_SUITE_P(SpirvParser,
                              LocationCase{
                                  "OpDecorate %var Location 2 "
                                  "OpDecorate %var NoPerspective ",
-                                 "var undef @location(2) @interpolate(linear, center)",
+                                 "var undef @location(2) @interpolate(linear)",
                              },
                              LocationCase{
                                  "OpDecorate %var Location 3 "
                                  "OpDecorate %var Flat ",
-                                 "var undef @location(3) @interpolate(flat, center)",
+                                 "var undef @location(3) @interpolate(flat)",
                              },
                              LocationCase{
                                  "OpDecorate %var Location 4 "
