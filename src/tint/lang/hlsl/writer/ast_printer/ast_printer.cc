@@ -1532,7 +1532,7 @@ bool ASTPrinter::EmitValueConstructor(StringStream& out,
     // For single-value vector initializers, swizzle the scalar to the right
     // vector dimension using .x
     const bool is_single_value_vector_init =
-        type->IsScalarVector() && call->Arguments().Length() == 1 &&
+        type->Is<core::type::Vector>() && call->Arguments().Length() == 1 &&
         ctor->Parameters()[0]->Type()->Is<core::type::Scalar>();
 
     if (brackets) {

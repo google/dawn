@@ -170,8 +170,6 @@ class Type : public Castable<Type, UniqueNode> {
     bool IsBoolScalarOrVector() const;
     /// @returns true if this type is boolean vector
     bool IsBoolVector() const;
-    /// @returns true if this type is a vector of scalar type
-    bool IsScalarVector() const;
     /// @returns true if this type is a numeric scale or vector
     bool IsNumericScalarOrVector() const;
     /// @returns true if this type is a handle type
