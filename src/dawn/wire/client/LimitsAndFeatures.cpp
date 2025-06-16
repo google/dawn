@@ -46,20 +46,18 @@ WGPUStatus LimitsAndFeatures::GetLimits(WGPULimits* limits) const {
         // Store the WGPUChainedStruct to restore the chain after assignment.
         WGPUChainedStruct originalChainedStruct = *chain;
         switch (chain->sType) {
-            case WGPUSType_CompatibilityModeLimits: {
-                *reinterpret_cast<WGPUCompatibilityModeLimits*>(chain) = mCompatLimits;
-                break;
-            }
-            case WGPUSType_DawnTexelCopyBufferRowAlignmentLimits: {
-                *reinterpret_cast<WGPUDawnTexelCopyBufferRowAlignmentLimits*>(chain) =
-                    mTexelCopyBufferRowAlignmentLimits;
+            case (WGPUSType_DawnTexelCopyBufferRowAlignmentLimits): {
+                auto* texelCopyBufferRowAlignmentLimits =
+                    reinterpret_cast<WGPUDawnTexelCopyBufferRowAlignmentLimits*>(chain);
+                // This assignment break the next field of WGPUChainedStruct head.
+                *texelCopyBufferRowAlignmentLimits = mTexelCopyBufferRowAlignmentLimits;
                 break;
             }
             default:
                 // Fail if unknown sType found.
                 return WGPUStatus_Error;
         }
-        // Restore the chain (sType and next).
+        // Restore the chain.
         *chain = originalChainedStruct;
     }
     return WGPUStatus_Success;
@@ -99,17 +97,10 @@ void LimitsAndFeatures::SetLimits(const WGPULimits* limits) {
     // Handle other limits that chained after WGPUSupportedLimits
     for (auto* chain = limits->nextInChain; chain; chain = chain->next) {
         switch (chain->sType) {
-            case WGPUSType_CompatibilityModeLimits: {
-                mCompatLimits = *reinterpret_cast<WGPUCompatibilityModeLimits*>(chain);
-                DAWN_ASSERT(mCompatLimits.chain.sType == WGPUSType_CompatibilityModeLimits);
-                mCompatLimits.chain.next = nullptr;
-                break;
-            }
-            case WGPUSType_DawnTexelCopyBufferRowAlignmentLimits: {
-                mTexelCopyBufferRowAlignmentLimits =
-                    *reinterpret_cast<WGPUDawnTexelCopyBufferRowAlignmentLimits*>(chain);
-                DAWN_ASSERT(mTexelCopyBufferRowAlignmentLimits.chain.sType ==
-                            WGPUSType_DawnTexelCopyBufferRowAlignmentLimits);
+            case (WGPUSType_DawnTexelCopyBufferRowAlignmentLimits): {
+                auto* texelCopyBufferRowAlignmentLimits =
+                    reinterpret_cast<WGPUDawnTexelCopyBufferRowAlignmentLimits*>(chain);
+                mTexelCopyBufferRowAlignmentLimits = *texelCopyBufferRowAlignmentLimits;
                 mTexelCopyBufferRowAlignmentLimits.chain.next = nullptr;
                 break;
             }

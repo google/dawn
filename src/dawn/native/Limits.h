@@ -41,7 +41,6 @@ namespace dawn::native {
 // TODO(crbug.com/421950205): Replace this with dawn::utils::ComboLimits.
 struct CombinedLimits {
     Limits v1;
-    CompatibilityModeLimits compat;
     DawnHostMappedPointerLimits hostMappedPointerLimits;
     DawnTexelCopyBufferRowAlignmentLimits texelCopyBufferRowAlignmentLimits;
 };

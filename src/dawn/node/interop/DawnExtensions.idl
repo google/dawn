@@ -84,6 +84,7 @@ dictionary GPUBindGroupLayoutEntry {
     GPUSize32 bindingArraySize = 1;
 };
 
+// TODO(crbug.com/354751907) Move to GPUAdapterInfo
 interface GPUSupportedLimits {
     readonly attribute unsigned long maxStorageBuffersInFragmentStage;
     readonly attribute unsigned long maxStorageTexturesInFragmentStage;

@@ -345,14 +345,14 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
     // image uniforms, so this isn't technically correct for vertex shaders.
     DAWN_TRY_ASSIGN(limits->v1.maxStorageTexturesPerShaderStage,
                     Get(gl, GL_MAX_COMPUTE_IMAGE_UNIFORMS));
-    DAWN_TRY_ASSIGN(limits->compat.maxStorageTexturesInFragmentStage,
+    DAWN_TRY_ASSIGN(limits->v1.maxStorageTexturesInFragmentStage,
                     Get(gl, GL_MAX_FRAGMENT_IMAGE_UNIFORMS));
 
-    DAWN_TRY_ASSIGN(limits->compat.maxStorageBuffersInFragmentStage,
+    DAWN_TRY_ASSIGN(limits->v1.maxStorageBuffersInFragmentStage,
                     Get(gl, GL_MAX_FRAGMENT_SHADER_STORAGE_BLOCKS));
-    DAWN_TRY_ASSIGN(limits->compat.maxStorageTexturesInVertexStage,
+    DAWN_TRY_ASSIGN(limits->v1.maxStorageTexturesInVertexStage,
                     Get(gl, GL_MAX_VERTEX_IMAGE_UNIFORMS));
-    DAWN_TRY_ASSIGN(limits->compat.maxStorageBuffersInVertexStage,
+    DAWN_TRY_ASSIGN(limits->v1.maxStorageBuffersInVertexStage,
                     Get(gl, GL_MAX_VERTEX_SHADER_STORAGE_BLOCKS));
 
     DAWN_TRY_ASSIGN(limits->v1.maxUniformBuffersPerShaderStage,

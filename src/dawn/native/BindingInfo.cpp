@@ -166,12 +166,12 @@ MaybeError ValidateBindingCounts(const CombinedLimits& limits,
 
     uint32_t maxSampledTexturesPerShaderStage = limits.v1.maxSampledTexturesPerShaderStage;
     uint32_t maxSamplersPerShaderStage = limits.v1.maxSamplersPerShaderStage;
-    uint32_t maxStorageBuffersInFragmentStage = limits.compat.maxStorageBuffersInFragmentStage;
-    uint32_t maxStorageBuffersInVertexStage = limits.compat.maxStorageBuffersInVertexStage;
+    uint32_t maxStorageBuffersInFragmentStage = limits.v1.maxStorageBuffersInFragmentStage;
+    uint32_t maxStorageBuffersInVertexStage = limits.v1.maxStorageBuffersInVertexStage;
     uint32_t maxStorageBuffersPerShaderStage = limits.v1.maxStorageBuffersPerShaderStage;
     uint32_t maxUniformBuffersPerShaderStage = limits.v1.maxUniformBuffersPerShaderStage;
-    uint32_t maxStorageTexturesInFragmentStage = limits.compat.maxStorageTexturesInFragmentStage;
-    uint32_t maxStorageTexturesInVertexStage = limits.compat.maxStorageTexturesInVertexStage;
+    uint32_t maxStorageTexturesInFragmentStage = limits.v1.maxStorageTexturesInFragmentStage;
+    uint32_t maxStorageTexturesInVertexStage = limits.v1.maxStorageTexturesInVertexStage;
     uint32_t maxStorageTexturesPerShaderStage = limits.v1.maxStorageTexturesPerShaderStage;
     for (SingleShaderStage stage : IterateStages(kAllStages)) {
         uint32_t sampledTextureCount = bindingCounts.perStage[stage].sampledTextureCount;
@@ -261,14 +261,14 @@ MaybeError ValidateBindingCounts(const CombinedLimits& limits,
                                 "number of storage buffers used in fragment stage (%u) exceeds "
                                 "maxStorageBuffersInFragmentStage (%u).%s",
                                 storageBufferCount, maxStorageBuffersInFragmentStage,
-                                DAWN_INCREASE_LIMIT_MESSAGE(adapter->GetLimits().compat,
+                                DAWN_INCREASE_LIMIT_MESSAGE(adapter->GetLimits().v1,
                                                             maxStorageBuffersInFragmentStage,
                                                             storageBufferCount));
                 DAWN_INVALID_IF(storageTextureCount > maxStorageTexturesInFragmentStage,
                                 "number of storage textures used in fragment stage (%u) exceeds "
                                 "maxStorageTexturesInFragmentStage (%u).%s",
                                 storageTextureCount, maxStorageTexturesInFragmentStage,
-                                DAWN_INCREASE_LIMIT_MESSAGE(adapter->GetLimits().compat,
+                                DAWN_INCREASE_LIMIT_MESSAGE(adapter->GetLimits().v1,
                                                             maxStorageTexturesInFragmentStage,
                                                             storageTextureCount));
                 break;
@@ -277,14 +277,14 @@ MaybeError ValidateBindingCounts(const CombinedLimits& limits,
                                 "number of storage buffers used in vertex stage (%u) exceeds "
                                 "maxStorageBuffersInVertexStage (%u).%s",
                                 storageBufferCount, maxStorageBuffersInVertexStage,
-                                DAWN_INCREASE_LIMIT_MESSAGE(adapter->GetLimits().compat,
+                                DAWN_INCREASE_LIMIT_MESSAGE(adapter->GetLimits().v1,
                                                             maxStorageBuffersInVertexStage,
                                                             storageBufferCount));
                 DAWN_INVALID_IF(storageTextureCount > maxStorageTexturesInVertexStage,
                                 "number of storage textures used in vertex stage (%u) exceeds "
                                 "maxStorageTexturesInVertexStage (%u).%s",
                                 storageTextureCount, maxStorageTexturesInVertexStage,
-                                DAWN_INCREASE_LIMIT_MESSAGE(adapter->GetLimits().compat,
+                                DAWN_INCREASE_LIMIT_MESSAGE(adapter->GetLimits().v1,
                                                             maxStorageTexturesInVertexStage,
                                                             storageTextureCount));
                 break;
