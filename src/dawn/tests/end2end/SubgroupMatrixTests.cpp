@@ -60,6 +60,130 @@ uint32_t ComponentTypeToByteSize(wgpu::SubgroupMatrixComponentType c) {
     return 0;
 }
 
+/// A Matrix object holds the data and layout of a single matrix.
+/// Provides helper functions to get and set values in different formats and to fill the matrix with
+/// interesting values.
+struct Matrix {
+    Matrix(uint32_t c, uint32_t r, wgpu::SubgroupMatrixComponentType ct)
+        : cols(c), rows(r), component_type(ct), data(new uint8_t[TotalByteSize()]) {}
+    ~Matrix() { delete[] data; }
+
+    Matrix(const Matrix&) = delete;
+    Matrix& operator=(const Matrix&) = delete;
+
+    uint32_t TotalByteSize() const { return cols * rows * ComponentTypeToByteSize(component_type); }
+
+    void Fill(uint32_t value_offset = 0) {
+        // Pick values that should not cause precision issues for small matrix multiplies.
+        // Rotate through an odd number of values to catch bugs with majorness and strides.
+        constexpr auto kNumValues = 9;
+        constexpr float kFloatValues[kNumValues] = {
+            -1.0, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75, 1.0,
+        };
+        constexpr int32_t kSIntValues[kNumValues] = {
+            -43, -32, -21, -10, 0, 10, 21, 32, 43,
+        };
+        constexpr uint32_t kUIntValues[kNumValues] = {
+            0, 1, 2, 3, 11, 23, 37, 71, 101,
+        };
+        for (uint32_t r = 0; r < rows; r++) {
+            for (uint32_t c = 0; c < cols; c++) {
+                uint32_t index = (value_offset + (c + r * cols)) % kNumValues;
+                switch (component_type) {
+                    case wgpu::SubgroupMatrixComponentType::F16:
+                    case wgpu::SubgroupMatrixComponentType::F32:
+                        SetFloat(kFloatValues[index], c, r);
+                        break;
+                    case wgpu::SubgroupMatrixComponentType::I32:
+                        SetInt(kSIntValues[index], c, r);
+                        break;
+                    case wgpu::SubgroupMatrixComponentType::U32:
+                        SetInt(kUIntValues[index], c, r);
+                        break;
+                }
+            }
+        }
+    }
+
+    void FillWithZero() { memset(data, 0, TotalByteSize()); }
+
+    int64_t GetInt(uint32_t c, uint32_t r) const {
+        switch (component_type) {
+            case wgpu::SubgroupMatrixComponentType::U32:
+                return GetValue<uint32_t>(c, r);
+            case wgpu::SubgroupMatrixComponentType::I32:
+                return GetValue<int32_t>(c, r);
+            case wgpu::SubgroupMatrixComponentType::F32:
+            case wgpu::SubgroupMatrixComponentType::F16:
+                break;
+        }
+        abort();
+    }
+
+    float GetFloat(uint32_t c, uint32_t r) const {
+        switch (component_type) {
+            case wgpu::SubgroupMatrixComponentType::F32:
+                return GetValue<float>(c, r);
+            case wgpu::SubgroupMatrixComponentType::F16:
+                return Float16ToFloat32(GetValue<uint16_t>(c, r));
+            case wgpu::SubgroupMatrixComponentType::U32:
+            case wgpu::SubgroupMatrixComponentType::I32:
+                break;
+        }
+        abort();
+    }
+
+    void SetInt(int64_t value, uint32_t c, uint32_t r) {
+        switch (component_type) {
+            case wgpu::SubgroupMatrixComponentType::U32:
+                SetValue(static_cast<uint32_t>(value), c, r);
+                return;
+            case wgpu::SubgroupMatrixComponentType::I32:
+                SetValue(static_cast<int32_t>(value), c, r);
+                return;
+            case wgpu::SubgroupMatrixComponentType::F32:
+            case wgpu::SubgroupMatrixComponentType::F16:
+                break;
+        }
+        abort();
+    }
+
+    void SetFloat(float value, uint32_t c, uint32_t r) {
+        switch (component_type) {
+            case wgpu::SubgroupMatrixComponentType::F32:
+                SetValue(value, c, r);
+                return;
+            case wgpu::SubgroupMatrixComponentType::F16:
+                SetValue(Float32ToFloat16(value), c, r);
+                return;
+            case wgpu::SubgroupMatrixComponentType::U32:
+            case wgpu::SubgroupMatrixComponentType::I32:
+                break;
+        }
+        abort();
+    }
+
+    const uint32_t cols;
+    const uint32_t rows;
+    const wgpu::SubgroupMatrixComponentType component_type;
+    uint8_t* const data = nullptr;
+
+  private:
+    template <typename T>
+    T GetValue(uint32_t c, uint32_t r) const {
+        T value;
+        uint32_t index = c + r * cols;
+        memcpy(&value, data + index * sizeof(T), sizeof(T));
+        return value;
+    }
+
+    template <typename T>
+    void SetValue(T value, uint32_t c, uint32_t r) {
+        uint32_t index = c + r * cols;
+        memcpy(data + index * sizeof(T), &value, sizeof(T));
+    }
+};
+
 class SubgroupMatrixTest : public DawnTest {
   protected:
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
@@ -165,6 +289,31 @@ class SubgroupMatrixArithmeticTest : public DawnTestWithParams<MatrixMatrixArith
         }
         return features;
     }
+
+    void GenerateReferenceResult(Matrix& expected,
+                                 const Matrix& lhs,
+                                 const Matrix& rhs,
+                                 const Matrix& acc) {
+        const bool is_float = expected.component_type == wgpu::SubgroupMatrixComponentType::F16 ||
+                              expected.component_type == wgpu::SubgroupMatrixComponentType::F32;
+        for (uint32_t r = 0; r < expected.rows; r++) {
+            for (uint32_t c = 0; c < expected.cols; c++) {
+                if (is_float) {
+                    float ref = acc.GetFloat(c, r);
+                    for (uint32_t k = 0; k < lhs.cols; k++) {
+                        ref += lhs.GetFloat(k, r) * rhs.GetFloat(c, k);
+                    }
+                    expected.SetFloat(ref, c, r);
+                } else {
+                    int64_t ref = acc.GetInt(c, r);
+                    for (uint32_t k = 0; k < lhs.cols; k++) {
+                        ref += lhs.GetInt(k, r) * rhs.GetInt(c, k);
+                    }
+                    expected.SetInt(ref, c, r);
+                }
+            }
+        }
+    }
 };
 
 using SubgroupMatrix_MatrixMatrixArithmeticTest = SubgroupMatrixArithmeticTest;
@@ -183,7 +332,6 @@ TEST_P(SubgroupMatrix_MatrixMatrixArithmeticTest, MatrixMultiply) {
     // Test each supported config.
     for (size_t i = 0; i < subgroupMatrixConfigs.configCount; i++) {
         auto& config = subgroupMatrixConfigs.configs[i];
-        uint32_t componentByteSize = ComponentTypeToByteSize(config.componentType);
         uint32_t resultComponentByteSize = ComponentTypeToByteSize(config.resultComponentType);
 
         // Generate a shader that performs a matrix multiplication that matches the config.
@@ -199,6 +347,9 @@ TEST_P(SubgroupMatrix_MatrixMatrixArithmeticTest, MatrixMultiply) {
         shader << "alias ResultComponentType = "
                << ComponentTypeToWgslType(config.resultComponentType) << ";\n";
         shader << "\n";
+        shader << "alias LeftType = subgroup_matrix_left<ComponentType, K, M>;";
+        shader << "alias RightType = subgroup_matrix_right<ComponentType, N, K>;";
+        shader << "alias ResultType = subgroup_matrix_result<ResultComponentType, N, M>;";
         shader << "const M = " << config.M << ";\n";
         shader << "const N = " << config.N << ";\n";
         shader << "const K = " << config.K << ";\n";
@@ -209,118 +360,79 @@ TEST_P(SubgroupMatrix_MatrixMatrixArithmeticTest, MatrixMultiply) {
 
 @compute @workgroup_size(SubgroupMaxSize)
 fn main() {
-    let lhs = subgroupMatrixLoad<subgroup_matrix_left<ComponentType, K, M>>(&inputs,  0, true, M);
-    let rhs = subgroupMatrixLoad<subgroup_matrix_right<ComponentType, N, K>>(&inputs, K*M, true, K);
+    let lhs = subgroupMatrixLoad<LeftType>(&inputs,  0, false, K);
+    let rhs = subgroupMatrixLoad<RightType>(&inputs, K*M, false, N);
 )";
         switch (op) {
             case MatrixMultiply:
                 shader << "let result = subgroupMatrixMultiply<ResultComponentType>(lhs, rhs);\n";
                 break;
             case MatrixMultiplyAccumulate:
-                // Perform the multiplication twice, accumulating into a zero matrix the first time.
-                shader << "let zero = subgroup_matrix_result<ResultComponentType, N, M>();\n";
-                shader << "var result = subgroupMatrixMultiplyAccumulate(lhs, rhs, zero);\n";
+                // Accumulate into the output matrix.
+                shader << "var result = subgroupMatrixLoad<ResultType>(&output,  0, false, N);\n";
                 shader << "result = subgroupMatrixMultiplyAccumulate(lhs, rhs, result);\n";
                 break;
         }
         shader << R"(
-    subgroupMatrixStore(&output, 0, result, true, M);
+    subgroupMatrixStore(&output, 0, result, false, M);
 })";
 
         wgpu::ComputePipelineDescriptor csDesc;
         csDesc.compute.module = utils::CreateShaderModule(device, shader.str());
         wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&csDesc);
 
-        // Convert the matrix multiplication result value to the result component type.
-        auto toResultType = [&](auto value) -> uint32_t {
-            switch (config.resultComponentType) {
-                case wgpu::SubgroupMatrixComponentType::F32: {
-                    float valueF32 = static_cast<float>(value);
-                    return *reinterpret_cast<uint32_t*>(&valueF32);
-                }
-                case wgpu::SubgroupMatrixComponentType::F16: {
-                    uint16_t valueF16 = Float32ToFloat16(static_cast<float>(value));
-                    return (uint32_t(valueF16) << 16) | valueF16;
-                }
-                case wgpu::SubgroupMatrixComponentType::U32:
-                    return uint32_t(value);
-                case wgpu::SubgroupMatrixComponentType::I32:
-                    int32_t valueI32 = static_cast<int32_t>(value);
-                    return *reinterpret_cast<uint32_t*>(&valueI32);
-            }
-            return 0;
-        };
-
-        // Generate the value to fill the input matrices with as a 32-bit word, and generate the
-        // corresponding output value as well. Pack multiple copies of the value together if the
-        // size of the input component type is less than 32 bits.
-        uint32_t inputValue;
-        uint32_t outputValue;
-        switch (config.componentType) {
-            case wgpu::SubgroupMatrixComponentType::F32: {
-                float in = 0.5;
-                float out = in * in * config.K;
-                if (op == MatrixMultiplyAccumulate) {
-                    out *= 2;
-                }
-                inputValue = *reinterpret_cast<uint32_t*>(&in);
-                outputValue = toResultType(out);
-                break;
-            }
-            case wgpu::SubgroupMatrixComponentType::F16: {
-                float inF32 = 0.5;
-                uint16_t in = Float32ToFloat16(inF32);
-                float out = inF32 * inF32 * config.K;
-                if (op == MatrixMultiplyAccumulate) {
-                    out *= 2;
-                }
-                inputValue = (uint32_t(in) << 16) | in;
-                outputValue = toResultType(out);
-                break;
-            }
-            case wgpu::SubgroupMatrixComponentType::U32:
-            case wgpu::SubgroupMatrixComponentType::I32: {
-                uint32_t in = 2;
-                uint32_t out = in * in * config.K;
-                if (op == MatrixMultiplyAccumulate) {
-                    out *= 2;
-                }
-                inputValue = in;
-                outputValue = toResultType(out);
-                break;
-            }
+        // Create the input matrices and fill them with values.
+        Matrix inputLHS(config.K, config.M, config.componentType);
+        Matrix inputRHS(config.N, config.K, config.componentType);
+        Matrix acc(config.N, config.M, config.resultComponentType);
+        // Offset the values for each matrix so that they are all different.
+        inputLHS.Fill(0);
+        inputRHS.Fill(1);
+        if (op == MatrixMultiplyAccumulate) {
+            acc.Fill(3);
+        } else {
+            // If we are not accumulating then treat it as if the accumulator is zero.
+            acc.FillWithZero();
         }
 
-        uint32_t numInputElements = (config.M + config.N) * config.K;
-        std::vector<uint32_t> inValues(numInputElements * componentByteSize / 4, inputValue);
-        std::vector<uint32_t> expected(config.M * config.N * resultComponentByteSize / 4,
-                                       outputValue);
-        wgpu::Buffer inputs = utils::CreateBufferFromData(
-            device, inValues.data(), inValues.size() * 4, wgpu::BufferUsage::Storage);
+        // Create the input buffer and copy the input matrices to it.
+        wgpu::BufferDescriptor inputDescriptor{
+            .usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::Storage,
+            .size = inputLHS.TotalByteSize() + inputRHS.TotalByteSize(),
+            .mappedAtCreation = true,
+        };
+        wgpu::Buffer inputs = device.CreateBuffer(&inputDescriptor);
+        memcpy(inputs.GetMappedRange(), inputLHS.data, inputLHS.TotalByteSize());
+        memcpy(static_cast<uint8_t*>(inputs.GetMappedRange()) + inputLHS.TotalByteSize(),
+               inputRHS.data, inputRHS.TotalByteSize());
+        inputs.Unmap();
 
-        wgpu::BufferDescriptor outputDescriptor;
-        outputDescriptor.size = config.M * config.N * resultComponentByteSize;
-        outputDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::Storage;
+        // Create the output buffer and copy the accumulator to it.
+        wgpu::BufferDescriptor outputDescriptor{
+            .usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::Storage,
+            .size = config.M * config.N * resultComponentByteSize,
+            .mappedAtCreation = true,
+        };
         wgpu::Buffer output = device.CreateBuffer(&outputDescriptor);
+        memcpy(output.GetMappedRange(), acc.data, acc.TotalByteSize());
+        output.Unmap();
 
         wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
                                                          {{0, inputs}, {1, output}});
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetPipeline(pipeline);
+        pass.SetBindGroup(0, bindGroup);
+        pass.DispatchWorkgroups(1);
+        pass.End();
 
-        wgpu::CommandBuffer commands;
-        {
-            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-            wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
-            pass.SetPipeline(pipeline);
-            pass.SetBindGroup(0, bindGroup);
-            pass.DispatchWorkgroups(1);
-            pass.End();
-
-            commands = encoder.Finish();
-        }
-
+        wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
 
-        EXPECT_BUFFER_U32_RANGE_EQ(expected.data(), output, 0, expected.size());
+        // Verify the result against a reference implementation.
+        Matrix expected(config.N, config.M, config.resultComponentType);
+        GenerateReferenceResult(expected, inputLHS, inputRHS, acc);
+        EXPECT_BUFFER_U8_RANGE_EQ(expected.data, output, 0, expected.TotalByteSize());
     }
 }
 
