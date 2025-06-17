@@ -62,6 +62,9 @@ struct State {
     /// The set of output variables that have been processed.
     Hashset<core::ir::Var*, 4> output_variables{};
 
+    /// The set of structs used as input variable types
+    Hashset<const core::type::Struct*, 4> input_structs{};
+
     /// The mapping from functions to their transitively referenced output variables.
     core::ir::ReferencedModuleVars<core::ir::Module> referenced_output_vars{
         ir, [](const core::ir::Var* var) {
@@ -76,17 +79,27 @@ struct State {
         ProcessOutputs();
         ProcessInputs();
 
+        auto clean_members = [](const core::type::Struct* strct) {
+            for (auto* member : strct->Members()) {
+                // TODO(crbug.com/tint/745): Remove the const_cast.
+                const_cast<core::type::StructMember*>(member)->ResetAttributes();
+            }
+        };
+
         // Remove attributes from all of the original structs and module-scope output variables.
         // This is done last as we need to copy attributes during `ProcessEntryPointOutputs()` and
         // we need access to any struct locations during processing of inputs.
         for (auto& var : output_variables) {
             var->ResetAttributes();
             if (auto* str = var->Result()->Type()->UnwrapPtr()->As<core::type::Struct>()) {
-                for (auto* member : str->Members()) {
-                    // TODO(crbug.com/tint/745): Remove the const_cast.
-                    const_cast<core::type::StructMember*>(member)->ResetAttributes();
-                }
+                clean_members(str);
             }
+        }
+
+        // All input structs have been reduced to parameters on the entry point so remove any
+        // annotations from the structure members.
+        for (auto& strct : input_structs) {
+            clean_members(strct);
         }
     }
 
@@ -447,37 +460,9 @@ struct State {
 
         // Create a new function parameter for the input.
         core::ir::Value* param = nullptr;
-        if (!var->Attributes().location.has_value() ||
-            (var_type->IsScalar() || var_type->Is<core::type::Vector>())) {
-            param = b.FunctionParam(var_type);
-            func->AppendParam(param->As<core::ir::FunctionParam>());
+        b.InsertBefore(func->Block()->Front(),
+                       [&] { param = CreateParam(func, var_type, var->Attributes()); });
 
-            // Add attributes to the parameter
-            if (auto* str = param->Type()->UnwrapPtr()->As<core::type::Struct>()) {
-                for (const auto* const_member : str->Members()) {
-                    // TODO(crbug.com/tint/745): Remove the const_cast.
-                    auto* member = const_cast<core::type::StructMember*>(const_member);
-
-                    // Use the base variable attributes if not specified directly on the member.
-                    auto member_attributes = member->Attributes();
-                    if (auto base_loc = var->Attributes().location) {
-                        // Location values increment from the base location value on the variable.
-                        member->SetLocation(base_loc.value() + member->Index());
-                    }
-                    if (!member_attributes.interpolation) {
-                        member->SetInterpolation(var->Attributes().interpolation);
-                    }
-                }
-            } else {
-                // Set attributes directly on the function parameter.
-                param->As<core::ir::FunctionParam>()->SetAttributes(var->Attributes());
-            }
-        } else {
-            b.InsertBefore(func->Block()->Front(), [&] {
-                auto loc = var->Attributes().location.value();
-                param = CreateParam(func, var_type, loc, var->Attributes());
-            });
-        }
         if (auto name = ir.NameOf(var)) {
             ir.SetName(param, name);
         }
@@ -578,12 +563,15 @@ struct State {
 
     core::ir::Value* CreateParam(core::ir::Function* func,
                                  const core::type::Type* type,
-                                 uint32_t& loc,
-                                 const core::IOAttributes& attributes) {
+                                 core::IOAttributes& attributes) {
         if (type->IsScalar() || type->Is<core::type::Vector>()) {
             auto* fp = b.FunctionParam(type);
             fp->SetAttributes(attributes);
-            fp->SetLocation(loc++);
+
+            if (attributes.location.has_value()) {
+                attributes.location = {attributes.location.value() + 1};
+            }
+
             func->AppendParam(fp);
             return fp;
         }
@@ -599,7 +587,7 @@ struct State {
 
                 auto* ary_ty = ary->ElemType();
                 for (size_t i = 0; i < cnt; ++i) {
-                    params.Push(CreateParam(func, ary_ty, loc, attributes));
+                    params.Push(CreateParam(func, ary_ty, attributes));
                 }
             },
             [&](const core::type::Matrix* mat) {
@@ -607,17 +595,29 @@ struct State {
 
                 auto* row_ty = ty.vec(mat->DeepestElement(), mat->Rows());
                 for (size_t i = 0; i < mat->Columns(); ++i) {
-                    params.Push(CreateParam(func, row_ty, loc, attributes));
+                    params.Push(CreateParam(func, row_ty, attributes));
                 }
             },
             [&](const core::type::Struct* strct) {
                 params.Reserve(strct->Members().Length());
 
+                input_structs.Add(strct);
+
                 const auto& members = strct->Members();
                 auto len = members.Length();
                 for (size_t i = 0; i < len; ++i) {
                     auto& mem = members[i];
-                    params.Push(CreateParam(func, mem->Type(), loc, attributes));
+
+                    auto mem_attrs = mem->Attributes();
+                    if (attributes.location.has_value()) {
+                        mem_attrs.location = attributes.location.value();
+                    }
+                    if (!mem_attrs.interpolation) {
+                        mem_attrs.interpolation = attributes.interpolation;
+                    }
+
+                    params.Push(CreateParam(func, mem->Type(), mem_attrs));
+                    attributes.location = mem_attrs.location;
                 }
             },  //
             TINT_ICE_ON_NO_MATCH);

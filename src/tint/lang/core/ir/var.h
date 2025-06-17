@@ -131,6 +131,9 @@ class Var : public Castable<Var, OperandInstruction<1, 1>> {
     /// @returns the IO attributes
     const IOAttributes& Attributes() const { return attributes_; }
 
+    /// @returns the IO attributes
+    IOAttributes& Attributes() { return attributes_; }
+
     /// Destroys this instruction along with any assignment instructions, if the var is never read.
     void DestroyIfOnlyAssigned();
 

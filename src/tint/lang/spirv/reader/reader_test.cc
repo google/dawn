@@ -166,10 +166,10 @@ TEST_F(SpirvReaderTest, ShaderInputs) {
     EXPECT_EQ(got, R"(
 tint_symbol_2 = struct @align(16) {
   tint_symbol:vec4<f32> @offset(0)
-  tint_symbol_1:vec4<f32> @offset(16), @interpolate(linear)
+  tint_symbol_1:vec4<f32> @offset(16)
 }
 
-%main = @fragment func(%2:vec4<f32> [@position], %3:vec4<f32> [@location(1)], %4:vec4<f32> [@location(2)]):void {
+%main = @fragment func(%2:vec4<f32> [@position], %3:vec4<f32> [@location(1)], %4:vec4<f32> [@location(2), @interpolate(linear)]):void {
   $B1: {
     %5:tint_symbol_2 = construct %3, %4
     %6:vec4<f32> = access %5, 0u

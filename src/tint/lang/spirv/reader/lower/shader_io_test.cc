@@ -746,8 +746,8 @@ $B1: {  # root
 
     auto* expect = R"(
 Colors = struct @align(16) {
-  color1:vec4<f32> @offset(0), @location(1)
-  color2:vec4<f32> @offset(16), @location(2), @interpolate(linear, centroid)
+  color1:vec4<f32> @offset(0)
+  color2:vec4<f32> @offset(16)
 }
 
 %foo = func(%colors:Colors):void {
@@ -759,9 +759,10 @@ Colors = struct @align(16) {
     ret
   }
 }
-%main = @fragment func(%colors_1:Colors):void {  # %colors_1: 'colors'
+%main = @fragment func(%8:vec4<f32> [@location(1)], %9:vec4<f32> [@location(2), @interpolate(linear, centroid)]):void {
   $B2: {
-    %9:void = call %foo, %colors_1
+    %colors_1:Colors = construct %8, %9  # %colors_1: 'colors'
+    %11:void = call %foo, %colors_1
     ret
   }
 }
@@ -841,7 +842,7 @@ $B1: {  # root
     auto* expect = R"(
 Colors = struct @align(16) {
   color1:vec4<f32> @offset(0)
-  color2:vec4<f32> @offset(16), @interpolate(perspective, centroid)
+  color2:vec4<f32> @offset(16)
 }
 
 %foo = func(%colors:Colors):void {
@@ -853,7 +854,7 @@ Colors = struct @align(16) {
     ret
   }
 }
-%main = @fragment func(%8:vec4<f32> [@location(1)], %9:vec4<f32> [@location(2)]):void {
+%main = @fragment func(%8:vec4<f32> [@location(1)], %9:vec4<f32> [@location(2), @interpolate(perspective, centroid)]):void {
   $B2: {
     %colors_1:Colors = construct %8, %9  # %colors_1: 'colors'
     %11:void = call %foo, %colors_1
@@ -935,8 +936,8 @@ $B1: {  # root
 
     auto* expect = R"(
 Colors = struct @align(16) {
-  color1:vec4<f32> @offset(0), @location(1), @interpolate(perspective, centroid)
-  color2:vec4<f32> @offset(16), @location(2), @interpolate(linear, sample)
+  color1:vec4<f32> @offset(0)
+  color2:vec4<f32> @offset(16)
 }
 
 %foo = func(%colors:Colors):void {
@@ -948,9 +949,10 @@ Colors = struct @align(16) {
     ret
   }
 }
-%main = @fragment func(%colors_1:Colors):void {  # %colors_1: 'colors'
+%main = @fragment func(%8:vec4<f32> [@location(1), @interpolate(perspective, centroid)], %9:vec4<f32> [@location(2), @interpolate(linear, sample)]):void {
   $B2: {
-    %9:void = call %foo, %colors_1
+    %colors_1:Colors = construct %8, %9  # %colors_1: 'colors'
+    %11:void = call %foo, %colors_1
     ret
   }
 }
@@ -1025,8 +1027,8 @@ $B1: {  # root
 
     auto* expect = R"(
 Colors = struct @align(16) {
-  color1:vec4<f32> @offset(0), @location(1)
-  color2:vec4<f32> @offset(16), @location(2), @interpolate(linear, centroid)
+  color1:vec4<f32> @offset(0)
+  color2:vec4<f32> @offset(16)
 }
 
 %foo = func(%colors:Colors):void {
@@ -1037,9 +1039,10 @@ Colors = struct @align(16) {
     ret
   }
 }
-%main = @fragment func(%colors_1:Colors):void {  # %colors_1: 'colors'
+%main = @fragment func(%7:vec4<f32> [@location(1)], %8:vec4<f32> [@location(2), @interpolate(linear, centroid)]):void {
   $B2: {
-    %8:void = call %foo, %colors_1
+    %colors_1:Colors = construct %7, %8  # %colors_1: 'colors'
+    %10:void = call %foo, %colors_1
     ret
   }
 }
