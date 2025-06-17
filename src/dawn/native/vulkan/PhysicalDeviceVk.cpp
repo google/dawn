@@ -447,8 +447,9 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     // 2. subgroupSupportedStages includes compute and fragment stage bit, and
     // 3. subgroupSupportedOperations includes vote, ballot, shuffle, shuffle relative, arithmetic,
     //    and quad bits, and
-    // 4. VK_EXT_subgroup_size_control extension is valid, and both subgroupSizeControl
-    //    and computeFullSubgroups is TRUE in VkPhysicalDeviceSubgroupSizeControlFeaturesEXT.
+    // 4. VK_EXT_subgroup_size_control extension is valid, and subgroupSizeControl
+    //    is TRUE in VkPhysicalDeviceSubgroupSizeControlFeaturesEXT. This is required
+    //    to support VK_PIPELINE_SHADER_STAGE_CREATE_ALLOW_VARYING_SUBGROUP_SIZE_BIT.
     const bool hasBaseSubgroupSupport =
         (mDeviceInfo.properties.apiVersion >= VK_API_VERSION_1_1) &&
         (mDeviceInfo.subgroupProperties.supportedStages & VK_SHADER_STAGE_COMPUTE_BIT) &&
@@ -461,8 +462,7 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         (mDeviceInfo.subgroupProperties.supportedOperations & VK_SUBGROUP_FEATURE_ARITHMETIC_BIT) &&
         (mDeviceInfo.subgroupProperties.supportedOperations & VK_SUBGROUP_FEATURE_QUAD_BIT) &&
         (mDeviceInfo.HasExt(DeviceExt::SubgroupSizeControl)) &&
-        (mDeviceInfo.subgroupSizeControlFeatures.subgroupSizeControl == VK_TRUE) &&
-        (mDeviceInfo.subgroupSizeControlFeatures.computeFullSubgroups == VK_TRUE);
+        (mDeviceInfo.subgroupSizeControlFeatures.subgroupSizeControl == VK_TRUE);
 
     // If shader f16 is enabled we only enable subgroups if we extended subgroup support.
     // This means there is a vary narrow number of devices (~4%) will not get subgroup
