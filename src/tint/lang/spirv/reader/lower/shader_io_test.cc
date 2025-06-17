@@ -840,8 +840,8 @@ $B1: {  # root
 
     auto* expect = R"(
 Colors = struct @align(16) {
-  color1:vec4<f32> @offset(0), @location(1)
-  color2:vec4<f32> @offset(16), @location(2), @interpolate(perspective, centroid)
+  color1:vec4<f32> @offset(0)
+  color2:vec4<f32> @offset(16), @interpolate(perspective, centroid)
 }
 
 %foo = func(%colors:Colors):void {
@@ -853,9 +853,10 @@ Colors = struct @align(16) {
     ret
   }
 }
-%main = @fragment func(%colors_1:Colors):void {  # %colors_1: 'colors'
+%main = @fragment func(%8:vec4<f32> [@location(1)], %9:vec4<f32> [@location(2)]):void {
   $B2: {
-    %9:void = call %foo, %colors_1
+    %colors_1:Colors = construct %8, %9  # %colors_1: 'colors'
+    %11:void = call %foo, %colors_1
     ret
   }
 }
@@ -3534,6 +3535,240 @@ $B1: {  # root
     %5:void = call %foo_inner
     %6:vec4<f32> = load %position
     ret %6
+  }
+}
+)";
+
+    Run(ShaderIO);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvReader_ShaderIOTest, Input_Array) {
+    auto* ary = b.Var("ary", ty.ptr(core::AddressSpace::kIn, ty.array<f32, 2>()));
+    ary->SetLocation(1);
+    ary->SetInterpolation(core::Interpolation{
+        .type = core::InterpolationType::kFlat,
+    });
+    mod.root_block->Append(ary);
+
+    auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(ep->Block(), [&] {
+        auto* ld = b.Load(ary);
+        auto* access = b.Access(ty.f32(), ld, 1_u);
+        b.Add(ty.f32(), access, access);
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %ary:ptr<__in, array<f32, 2>, read> = var undef @location(1) @interpolate(flat)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:array<f32, 2> = load %ary
+    %4:f32 = access %3, 1u
+    %5:f32 = add %4, %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func(%2:f32 [@location(1), @interpolate(flat)], %3:f32 [@location(2), @interpolate(flat)]):void {
+  $B1: {
+    %ary:array<f32, 2> = construct %2, %3
+    %5:f32 = access %ary, 1u
+    %6:f32 = add %5, %5
+    ret
+  }
+}
+)";
+
+    Run(ShaderIO);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvReader_ShaderIOTest, Input_Matrix) {
+    auto* mat = b.Var("mat", ty.ptr(core::AddressSpace::kIn, ty.mat2x4<f32>()));
+    mat->SetLocation(1);
+    mat->SetInterpolation(core::Interpolation{
+        .type = core::InterpolationType::kFlat,
+    });
+    mod.root_block->Append(mat);
+
+    auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(ep->Block(), [&] {
+        auto* ld = b.Load(mat);
+        auto* access = b.Access(ty.f32(), ld, 1_u, 1_u);
+        b.Add(ty.f32(), access, access);
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %mat:ptr<__in, mat2x4<f32>, read> = var undef @location(1) @interpolate(flat)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:mat2x4<f32> = load %mat
+    %4:f32 = access %3, 1u, 1u
+    %5:f32 = add %4, %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func(%2:vec4<f32> [@location(1), @interpolate(flat)], %3:vec4<f32> [@location(2), @interpolate(flat)]):void {
+  $B1: {
+    %mat:mat2x4<f32> = construct %2, %3
+    %5:f32 = access %mat, 1u, 1u
+    %6:f32 = add %5, %5
+    ret
+  }
+}
+)";
+
+    Run(ShaderIO);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvReader_ShaderIOTest, Input_Struct) {
+    auto* S = ty.Struct(mod.symbols.New("S"), Vector{
+                                                  core::type::Manager::StructMemberDesc{
+                                                      mod.symbols.New("a"),
+                                                      ty.vec4<f32>(),
+                                                  },
+                                                  core::type::Manager::StructMemberDesc{
+                                                      mod.symbols.New("b"),
+                                                      ty.vec4<f32>(),
+                                                  },
+                                              });
+    auto* s = b.Var("s", ty.ptr(core::AddressSpace::kIn, S));
+    s->SetLocation(1);
+    s->SetInterpolation(core::Interpolation{
+        .type = core::InterpolationType::kFlat,
+    });
+    mod.root_block->Append(s);
+
+    auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(ep->Block(), [&] {
+        auto* ld = b.Load(s);
+        auto* access = b.Access(ty.f32(), ld, 1_u, 1_u);
+        b.Add(ty.f32(), access, access);
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+S = struct @align(16) {
+  a:vec4<f32> @offset(0)
+  b:vec4<f32> @offset(16)
+}
+
+$B1: {  # root
+  %s:ptr<__in, S, read> = var undef @location(1) @interpolate(flat)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:S = load %s
+    %4:f32 = access %3, 1u, 1u
+    %5:f32 = add %4, %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+S = struct @align(16) {
+  a:vec4<f32> @offset(0)
+  b:vec4<f32> @offset(16)
+}
+
+%foo = @fragment func(%2:vec4<f32> [@location(1), @interpolate(flat)], %3:vec4<f32> [@location(2), @interpolate(flat)]):void {
+  $B1: {
+    %s:S = construct %2, %3
+    %5:f32 = access %s, 1u, 1u
+    %6:f32 = add %5, %5
+    ret
+  }
+}
+)";
+
+    Run(ShaderIO);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvReader_ShaderIOTest, Input_ArrayOfStruct) {
+    auto* S = ty.Struct(mod.symbols.New("S"), Vector{
+                                                  core::type::Manager::StructMemberDesc{
+                                                      mod.symbols.New("a"),
+                                                      ty.vec4<f32>(),
+                                                  },
+                                                  core::type::Manager::StructMemberDesc{
+                                                      mod.symbols.New("b"),
+                                                      ty.vec4<f32>(),
+                                                  },
+                                              });
+    auto* s = b.Var("s", ty.ptr(core::AddressSpace::kIn, ty.array(S, 2)));
+    s->SetLocation(1);
+    s->SetInterpolation(core::Interpolation{
+        .type = core::InterpolationType::kFlat,
+    });
+    mod.root_block->Append(s);
+
+    auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(ep->Block(), [&] {
+        auto* ld = b.Load(s);
+        auto* access = b.Access(ty.f32(), ld, 1_u, 1_u, 2_u);
+        b.Add(ty.f32(), access, access);
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+S = struct @align(16) {
+  a:vec4<f32> @offset(0)
+  b:vec4<f32> @offset(16)
+}
+
+$B1: {  # root
+  %s:ptr<__in, array<S, 2>, read> = var undef @location(1) @interpolate(flat)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:array<S, 2> = load %s
+    %4:f32 = access %3, 1u, 1u, 2u
+    %5:f32 = add %4, %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+S = struct @align(16) {
+  a:vec4<f32> @offset(0)
+  b:vec4<f32> @offset(16)
+}
+
+%foo = @fragment func(%2:vec4<f32> [@location(1), @interpolate(flat)], %3:vec4<f32> [@location(2), @interpolate(flat)], %4:vec4<f32> [@location(3), @interpolate(flat)], %5:vec4<f32> [@location(4), @interpolate(flat)]):void {
+  $B1: {
+    %6:S = construct %2, %3
+    %7:S = construct %4, %5
+    %s:array<S, 2> = construct %6, %7
+    %9:f32 = access %s, 1u, 1u, 2u
+    %10:f32 = add %9, %9
+    ret
   }
 }
 )";

@@ -445,31 +445,40 @@ struct State {
         }
 
         // Create a new function parameter for the input.
-        auto* param = b.FunctionParam(var_type);
-        func->AppendParam(param);
-        if (auto name = ir.NameOf(var)) {
-            ir.SetName(param, name);
-        }
+        core::ir::Value* param = nullptr;
+        if (!var->Attributes().location.has_value() ||
+            (var_type->IsScalar() || var_type->Is<core::type::Vector>())) {
+            param = b.FunctionParam(var_type);
+            func->AppendParam(param->As<core::ir::FunctionParam>());
 
-        // Add attributes to the parameter
-        if (auto* str = param->Type()->UnwrapPtr()->As<core::type::Struct>()) {
-            for (const auto* const_member : str->Members()) {
-                // TODO(crbug.com/tint/745): Remove the const_cast.
-                auto* member = const_cast<core::type::StructMember*>(const_member);
+            // Add attributes to the parameter
+            if (auto* str = param->Type()->UnwrapPtr()->As<core::type::Struct>()) {
+                for (const auto* const_member : str->Members()) {
+                    // TODO(crbug.com/tint/745): Remove the const_cast.
+                    auto* member = const_cast<core::type::StructMember*>(const_member);
 
-                // Use the base variable attributes if not specified directly on the member.
-                auto member_attributes = member->Attributes();
-                if (auto base_loc = var->Attributes().location) {
-                    // Location values increment from the base location value on the variable.
-                    member->SetLocation(base_loc.value() + member->Index());
+                    // Use the base variable attributes if not specified directly on the member.
+                    auto member_attributes = member->Attributes();
+                    if (auto base_loc = var->Attributes().location) {
+                        // Location values increment from the base location value on the variable.
+                        member->SetLocation(base_loc.value() + member->Index());
+                    }
+                    if (!member_attributes.interpolation) {
+                        member->SetInterpolation(var->Attributes().interpolation);
+                    }
                 }
-                if (!member_attributes.interpolation) {
-                    member->SetInterpolation(var->Attributes().interpolation);
-                }
+            } else {
+                // Set attributes directly on the function parameter.
+                param->As<core::ir::FunctionParam>()->SetAttributes(var->Attributes());
             }
         } else {
-            // Set attributes directly on the function parameter.
-            param->SetAttributes(var->Attributes());
+            b.InsertBefore(func->Block()->Front(), [&] {
+                auto loc = var->Attributes().location.value();
+                param = CreateParam(func, var_type, loc, var->Attributes());
+            });
+        }
+        if (auto name = ir.NameOf(var)) {
+            ir.SetName(param, name);
         }
 
         core::ir::Value* result = param;
@@ -564,6 +573,55 @@ struct State {
 
             return param;
         });
+    }
+
+    core::ir::Value* CreateParam(core::ir::Function* func,
+                                 const core::type::Type* type,
+                                 uint32_t& loc,
+                                 const core::IOAttributes& attributes) {
+        if (type->IsScalar() || type->Is<core::type::Vector>()) {
+            auto* fp = b.FunctionParam(type);
+            fp->SetAttributes(attributes);
+            fp->SetLocation(loc++);
+            func->AppendParam(fp);
+            return fp;
+        }
+
+        Vector<core::ir::Value*, 4> params;
+        tint::Switch(
+            type,  //
+            [&](const core::type::Array* ary) {
+                auto cnt = ary->ConstantCount();
+                TINT_ASSERT(cnt.has_value());
+
+                params.Reserve(cnt.value());
+
+                auto* ary_ty = ary->ElemType();
+                for (size_t i = 0; i < cnt; ++i) {
+                    params.Push(CreateParam(func, ary_ty, loc, attributes));
+                }
+            },
+            [&](const core::type::Matrix* mat) {
+                params.Reserve(mat->Columns());
+
+                auto* row_ty = ty.vec(mat->DeepestElement(), mat->Rows());
+                for (size_t i = 0; i < mat->Columns(); ++i) {
+                    params.Push(CreateParam(func, row_ty, loc, attributes));
+                }
+            },
+            [&](const core::type::Struct* strct) {
+                params.Reserve(strct->Members().Length());
+
+                const auto& members = strct->Members();
+                auto len = members.Length();
+                for (size_t i = 0; i < len; ++i) {
+                    auto& mem = members[i];
+                    params.Push(CreateParam(func, mem->Type(), loc, attributes));
+                }
+            },  //
+            TINT_ICE_ON_NO_MATCH);
+
+        return b.Construct(type, params)->Result();
     }
 };
 
