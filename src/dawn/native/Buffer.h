@@ -47,6 +47,7 @@
 namespace dawn::native {
 
 struct CopyTextureToBufferCmd;
+class MemoryDump;
 
 enum class MapType : uint32_t;
 

@@ -34,7 +34,6 @@
 
 #include "dawn/common/Result.h"
 #include "dawn/native/ErrorData.h"
-#include "dawn/native/Toggles.h"
 #include "dawn/native/webgpu_absl_format.h"
 
 namespace dawn::native {

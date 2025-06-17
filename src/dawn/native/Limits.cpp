@@ -371,14 +371,13 @@ LimitsForCompilationRequest LimitsForCompilationRequest::Create(const Limits& li
     DAWN_INTERNAL_LIMITS_FOREACH_MEMBER_ASSIGNMENT(LIMITS_FOR_COMPILATION_REQUEST_MEMBERS)
     return result;
 }
+LimitsForShaderModuleParseRequest LimitsForShaderModuleParseRequest::Create(const Limits& limits) {
+    LimitsForShaderModuleParseRequest result;
+    DAWN_INTERNAL_LIMITS_FOREACH_MEMBER_ASSIGNMENT(LIMITS_FOR_SHADER_MODULE_PARSE_REQUEST_MEMBERS)
+    return result;
+}
 #undef DAWN_INTERNAL_LIMITS_FOREACH_MEMBER_ASSIGNMENT
 #undef DAWN_INTERNAL_LIMITS_MEMBER_ASSIGNMENT
-
-template <>
-void stream::Stream<LimitsForCompilationRequest>::Write(Sink* s,
-                                                        const LimitsForCompilationRequest& t) {
-    t.VisitAll([&](const auto&... members) { StreamIn(s, members...); });
-}
 
 void NormalizeLimits(CombinedLimits* limits) {
     // Enforce internal Dawn constants for some limits to ensure they don't go over fixed limits

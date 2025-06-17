@@ -75,6 +75,7 @@ class UnsafeUnserializedValue {
   public:
     UnsafeUnserializedValue() = default;
     explicit UnsafeUnserializedValue(T&& value) : mValue(std::forward<T>(value)) {}
+    explicit UnsafeUnserializedValue(const T& value) : mValue(value) {}
     UnsafeUnserializedValue(const UnsafeUnserializedValue<T>& other)
         : mValue(other.UnsafeGetValue()) {}
     UnsafeUnserializedValue<T>& operator=(UnsafeUnserializedValue<T>&& other) {

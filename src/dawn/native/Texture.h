@@ -49,6 +49,8 @@
 
 namespace dawn::native {
 
+class MemoryDump;
+
 enum class AllowMultiPlanarTextureFormat {
     No,
     SingleLayerOnly,

@@ -28,6 +28,7 @@
 #include "dawn/native/d3d/QueueD3D.h"
 
 #include <algorithm>
+#include <array>
 #include <utility>
 
 #include "dawn/native/WaitAnySystemEvent.h"

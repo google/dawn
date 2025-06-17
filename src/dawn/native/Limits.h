@@ -33,7 +33,7 @@
 #include "dawn/native/ChainUtils.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/Features.h"
-#include "dawn/native/VisitableMembers.h"
+#include "dawn/native/Serializable.h"
 #include "dawn/native/dawn_platform.h"
 
 namespace dawn::native {
@@ -83,10 +83,19 @@ CombinedLimits ApplyLimitTiers(const CombinedLimits& limits);
     X(uint32_t, maxComputeInvocationsPerWorkgroup) \
     X(uint32_t, maxComputeWorkgroupStorageSize)
 
-struct LimitsForCompilationRequest {
+DAWN_SERIALIZABLE(struct, LimitsForCompilationRequest, LIMITS_FOR_COMPILATION_REQUEST_MEMBERS) {
     static LimitsForCompilationRequest Create(const Limits& limits);
-    DAWN_VISITABLE_MEMBERS(LIMITS_FOR_COMPILATION_REQUEST_MEMBERS)
-    bool operator==(const LimitsForCompilationRequest& other) const = default;
+};
+
+#define LIMITS_FOR_SHADER_MODULE_PARSE_REQUEST_MEMBERS(X) \
+    X(uint32_t, maxVertexAttributes)                      \
+    X(uint32_t, maxInterStageShaderVariables)             \
+    X(uint32_t, maxColorAttachments)
+
+DAWN_SERIALIZABLE(struct,
+                  LimitsForShaderModuleParseRequest,
+                  LIMITS_FOR_SHADER_MODULE_PARSE_REQUEST_MEMBERS) {
+    static LimitsForShaderModuleParseRequest Create(const Limits& limits);
 };
 
 // Enforce restriction for limit values, including:

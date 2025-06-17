@@ -32,8 +32,6 @@
 #include <sstream>
 #include <string>
 
-#include "dawn/native/Device.h"
-
 namespace dawn::native {
 
 MaybeError ValidateSpirv(LogEmitter* logEmitter,

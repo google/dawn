@@ -30,7 +30,6 @@
 
 #include <dxgi1_4.h>
 #include <webgpu/webgpu_cpp_chained_struct.h>
-#include <windows.h>
 #include <wrl/client.h>
 
 #include <memory>

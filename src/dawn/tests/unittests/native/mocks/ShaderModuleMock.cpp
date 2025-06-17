@@ -31,6 +31,7 @@
 #include <utility>
 
 #include "dawn/native/ChainUtils.h"
+#include "dawn/native/ShaderModuleParseRequest.h"
 
 namespace dawn::native {
 
@@ -50,12 +51,16 @@ ShaderModuleMock::~ShaderModuleMock() = default;
 Ref<ShaderModuleMock> ShaderModuleMock::Create(
     DeviceMock* device,
     const UnpackedPtr<ShaderModuleDescriptor>& descriptor) {
-    ShaderModuleParseResult parseResult{};
-    ParseShaderModule(device, descriptor, {}, /* needReflection*/ true, &parseResult)
-        .AcquireSuccess();
 
     Ref<ShaderModuleMock> shaderModule =
         AcquireRef(new NiceMock<ShaderModuleMock>(device, descriptor));
+
+    ShaderModuleParseResult parseResult =
+        ParseShaderModule(BuildShaderModuleParseRequest(device, shaderModule->GetHash(), descriptor,
+                                                        {},
+                                                        /* needReflection*/ true))
+            .AcquireSuccess();
+
     shaderModule->InitializeBase(&parseResult).AcquireSuccess();
     return shaderModule;
 }

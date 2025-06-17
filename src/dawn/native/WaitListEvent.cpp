@@ -27,6 +27,10 @@
 
 #include "dawn/native/WaitListEvent.h"
 
+#include <array>
+
+#include "dawn/common/Ref.h"
+
 namespace dawn::native {
 
 WaitListEvent::WaitListEvent() = default;

@@ -872,9 +872,13 @@ std::vector<const char*> TogglesState::GetDisabledToggleNames() const {
     return enabledTogglesName;
 }
 
+const TogglesSet& TogglesState::GetEnabledToggles() const {
+    return mEnabledToggles;
+}
+
 // Allowing TogglesState to be used in cache key.
 void StreamIn(stream::Sink* s, const TogglesState& togglesState) {
-    StreamIn(s, togglesState.mEnabledToggles.bitset);
+    StreamIn(s, togglesState.GetEnabledToggles());
 }
 
 const char* ToggleEnumToName(Toggle toggle) {

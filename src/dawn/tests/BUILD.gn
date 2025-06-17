@@ -674,6 +674,7 @@ source_set("end2end_tests_sources") {
     "end2end/ShaderAtomicTests.cpp",
     "end2end/ShaderBuiltinPartialConstArgsErrorTests.cpp",
     "end2end/ShaderF16Tests.cpp",
+    "end2end/ShaderModuleCachingTests.cpp",
     "end2end/ShaderTests.cpp",
     "end2end/ShaderValidationTests.cpp",
     "end2end/StorageTextureTests.cpp",

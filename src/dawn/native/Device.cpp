@@ -48,6 +48,8 @@
 #include "dawn/native/BlitBufferToDepthStencil.h"
 #include "dawn/native/BlobCache.h"
 #include "dawn/native/Buffer.h"
+#include "dawn/native/CacheRequest.h"
+#include "dawn/native/CacheResult.h"
 #include "dawn/native/ChainUtils.h"
 #include "dawn/native/CommandBuffer.h"
 #include "dawn/native/CommandEncoder.h"
@@ -70,6 +72,7 @@
 #include "dawn/native/RenderBundleEncoder.h"
 #include "dawn/native/RenderPipeline.h"
 #include "dawn/native/Sampler.h"
+#include "dawn/native/ShaderModuleParseRequest.h"
 #include "dawn/native/SharedBufferMemory.h"
 #include "dawn/native/SharedFence.h"
 #include "dawn/native/SharedTextureMemory.h"
@@ -2131,15 +2134,6 @@ ResultOrError<Ref<ShaderModuleBase>> DeviceBase::CreateShaderModule(
     const ShaderModuleDescriptor* descriptor,
     const std::vector<tint::wgsl::Extension>& internalExtensions,
     ShaderModuleParseResult* outputParseResult) {
-    // ShaderModuleParseResult holds OwnedCompilationMessages, which would be used for creating
-    // error shader module if errors occurred. If the outputParseResult is not provided, create an
-    // inplace one.
-    std::optional<ShaderModuleParseResult> inplaceParseResult;
-    if (outputParseResult == nullptr) {
-        inplaceParseResult.emplace();
-        outputParseResult = &*inplaceParseResult;
-    }
-
     DAWN_TRY(ValidateIsAlive());
 
     // Unpack and validate the descriptor chain before doing further validation or cache
@@ -2182,21 +2176,42 @@ ResultOrError<Ref<ShaderModuleBase>> DeviceBase::CreateShaderModule(
     const size_t blueprintHash = blueprint.ComputeContentHash();
     blueprint.SetContentHash(blueprintHash);
 
-    // Check in-memory shader module cache first, and if missed call ParseShaderModule.
+    // Check in-memory shader module cache first, and if missed check the blob cache, and if missed
+    // again call ParseShaderModule.
     return GetOrCreate(
         mCaches->shaderModules, &blueprint, [&]() -> ResultOrError<Ref<ShaderModuleBase>> {
             SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(GetPlatform(), "CreateShaderModuleUS");
 
             auto resultOrError = [&]() -> ResultOrError<Ref<ShaderModuleBase>> {
-                // Try to validate and parse the shader code, and if an error occurred return it
-                // without updating the cache.
-                DAWN_TRY(ParseShaderModule(this, unpacked, internalExtensions,
-                                           /* needReflection */ true, outputParseResult));
+                ShaderModuleParseRequest req = BuildShaderModuleParseRequest(
+                    this, blueprint.GetHash(), unpacked, internalExtensions,
+                    /* needReflection */ true);
 
+                // Check blob cache first before calling ParseShaderModule. ShaderModuleParseResult
+                // returned from blob cache or ParseShaderModule will hold compilation messages and
+                // validation errors if any. ShaderModuleParseResult from ParseShaderModule also
+                // holds tint program.
+                CacheResult<ShaderModuleParseResult> result;
+                DAWN_TRY_LOAD_OR_RUN(result, this, std::move(req),
+                                     ShaderModuleParseResult::FromBlob, ParseShaderModule,
+                                     "ShaderModuleParsing");
+                GetBlobCache()->EnsureStored(result);
+                ShaderModuleParseResult parseResult = result.Acquire();
+
+                // If ShaderModuleParseResult has validation error, move the compilation messages to
+                // *outputParseResult so that we can create an error shader module from it, and then
+                // return the validation error.
+                if (parseResult.HasError()) {
+                    auto error = parseResult.cachedValidationError->ToErrorData();
+                    if (outputParseResult) {
+                        *outputParseResult = std::move(parseResult);
+                    }
+                    return error;
+                }
+                // Otherwise with no error, create a shader module from parse result and return it.
                 Ref<ShaderModuleBase> shaderModule;
-                // If created successfully, outputParseResult are moved into the shader module.
-                DAWN_TRY_ASSIGN(shaderModule, CreateShaderModuleImpl(unpacked, internalExtensions,
-                                                                     outputParseResult));
+                DAWN_TRY_ASSIGN(shaderModule,
+                                CreateShaderModuleImpl(unpacked, internalExtensions, &parseResult));
                 shaderModule->SetContentHash(blueprintHash);
                 return shaderModule;
             }();
@@ -2281,6 +2296,10 @@ bool DeviceBase::IsToggleEnabled(Toggle toggle) const {
 
 const TogglesState& DeviceBase::GetTogglesState() const {
     return mToggles;
+}
+
+const FeaturesSet& DeviceBase::GetEnabledFeatures() const {
+    return mEnabledFeatures;
 }
 
 void DeviceBase::ForceEnableFeatureForTesting(Feature feature) {
