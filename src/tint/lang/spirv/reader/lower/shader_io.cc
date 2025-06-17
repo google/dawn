@@ -75,6 +75,19 @@ struct State {
         // be propagated through.
         ProcessOutputs();
         ProcessInputs();
+
+        // Remove attributes from all of the original structs and module-scope output variables.
+        // This is done last as we need to copy attributes during `ProcessEntryPointOutputs()` and
+        // we need access to any struct locations during processing of inputs.
+        for (auto& var : output_variables) {
+            var->ResetAttributes();
+            if (auto* str = var->Result()->Type()->UnwrapPtr()->As<core::type::Struct>()) {
+                for (auto* member : str->Members()) {
+                    // TODO(crbug.com/tint/745): Remove the const_cast.
+                    const_cast<core::type::StructMember*>(member)->ResetAttributes();
+                }
+            }
+        }
     }
 
     /// Process output variables.
@@ -92,18 +105,6 @@ struct State {
         }
         for (auto& ep : entry_points) {
             ProcessEntryPointOutputs(ep);
-        }
-
-        // Remove attributes from all of the original structs and module-scope output variables.
-        // This is done last as we need to copy attributes during `ProcessEntryPointOutputs()`.
-        for (auto& var : output_variables) {
-            var->ResetAttributes();
-            if (auto* str = var->Result()->Type()->UnwrapPtr()->As<core::type::Struct>()) {
-                for (auto* member : str->Members()) {
-                    // TODO(crbug.com/tint/745): Remove the const_cast.
-                    const_cast<core::type::StructMember*>(member)->ResetAttributes();
-                }
-            }
         }
     }
 
