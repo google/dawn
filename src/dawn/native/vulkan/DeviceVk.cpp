@@ -104,7 +104,7 @@ MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
         // NOTE: If Vulkan backend validation is enabled then these labels must be set to associate
         // validation errors with a specific device. Backend validation errors will cause a crash
         // if labels are not set.
-        EmitLog(WGPULoggingType_Warning,
+        EmitLog(wgpu::LoggingType::Warning,
                 "Backend object labels are required to map Vulkan backend errors to a device.");
     }
 
@@ -1087,7 +1087,7 @@ void Device::PerformIdleTasksImpl() {
         MaybeError maybeError = mMonolithicPipelineCache->StoreOnIdle();
         if (maybeError.IsError()) {
             std::unique_ptr<ErrorData> error = maybeError.AcquireError();
-            EmitLog(WGPULoggingType_Error, error->GetFormattedMessage().c_str());
+            EmitLog(wgpu::LoggingType::Error, error->GetFormattedMessage().c_str());
             return;
         }
     }

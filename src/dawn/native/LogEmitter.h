@@ -1,4 +1,4 @@
-// Copyright 2021 The Dawn & Tint Authors
+// Copyright 2025 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,19 +25,18 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_NATIVE_SPIRVVALIDATION_H_
-#define SRC_DAWN_NATIVE_SPIRVVALIDATION_H_
+#ifndef SRC_DAWN_NATIVE_LOGEMITTER_H_
+#define SRC_DAWN_NATIVE_LOGEMITTER_H_
 
-#include "dawn/native/Error.h"
-#include "dawn/native/LogEmitter.h"
+#include <string>
 
-namespace dawn::native {
+#include "dawn/native/dawn_platform.h"
 
-MaybeError ValidateSpirv(LogEmitter* logEmitter,
-                         const uint32_t* spirv,
-                         size_t wordCount,
-                         bool dumpSpirv);
+// LogEmitter is an abstract class that only expose log emitting ability.
+class LogEmitter {
+  public:
+    virtual void EmitLog(std::string_view message) = 0;
+    virtual void EmitLog(wgpu::LoggingType type, std::string_view message) = 0;
+};
 
-}  // namespace dawn::native
-
-#endif  // SRC_DAWN_NATIVE_SPIRVVALIDATION_H_
+#endif  // SRC_DAWN_NATIVE_LOGEMITTER_H_

@@ -101,6 +101,7 @@ set(private_headers
     "IntegerTypes.h"
     "InternalPipelineStore.h"
     "Limits.h"
+    "LogEmitter.h"
     "ObjectBase.h"
     "ObjectContentHasher.h"
     "PassResourceUsage.h"

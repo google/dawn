@@ -91,7 +91,7 @@ void DumpDXCCompiledShader(Device* device,
 
     std::string logMessage = dumpedMsg.str();
     if (!logMessage.empty()) {
-        device->EmitLog(WGPULoggingType_Info, logMessage.c_str());
+        device->EmitLog(wgpu::LoggingType::Info, logMessage.c_str());
     }
 }
 }  // namespace

@@ -1346,7 +1346,7 @@ MaybeError ParseShaderModule(DeviceBase* device,
         if (device->IsToggleEnabled(Toggle::DumpShaders)) {
             std::ostringstream dumpedMsg;
             dumpedMsg << "// Dumped WGSL:\n" << std::string_view(wgslDesc->code) << "\n";
-            device->EmitLog(WGPULoggingType_Info, dumpedMsg.str().c_str());
+            device->EmitLog(wgpu::LoggingType::Info, dumpedMsg.str().c_str());
         }
 
         tint::Program program;

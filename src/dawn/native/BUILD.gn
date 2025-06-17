@@ -316,6 +316,7 @@ source_set("sources") {
     "InternalPipelineStore.h",
     "Limits.cpp",
     "Limits.h",
+    "LogEmitter.h",
     "ObjectBase.cpp",
     "ObjectBase.h",
     "ObjectContentHasher.cpp",

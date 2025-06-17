@@ -644,7 +644,7 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
         std::ostringstream dumpedMsg;
         dumpedMsg << "/* Dumped generated GLSL */\n" << compilationResult->glsl;
 
-        GetDevice()->EmitLog(WGPULoggingType_Info, dumpedMsg.str().c_str());
+        GetDevice()->EmitLog(wgpu::LoggingType::Info, dumpedMsg.str().c_str());
     }
 
     GLuint shader = DAWN_GL_TRY(gl, CreateShader(GLShaderType(stage)));

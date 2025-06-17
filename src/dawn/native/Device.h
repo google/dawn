@@ -53,6 +53,7 @@
 #include "dawn/native/Format.h"
 #include "dawn/native/Forward.h"
 #include "dawn/native/Limits.h"
+#include "dawn/native/LogEmitter.h"
 #include "dawn/native/ObjectBase.h"
 #include "dawn/native/ObjectType_autogen.h"
 #include "dawn/native/Toggles.h"
@@ -83,7 +84,8 @@ struct ShaderModuleParseResult;
 
 class DeviceBase : public ErrorSink,
                    public RefCountedWithExternalCount<RefCounted>,
-                   public WeakRefSupport<DeviceBase> {
+                   public WeakRefSupport<DeviceBase>,
+                   public LogEmitter {
   public:
     struct DeviceLostEvent final : public EventManager::TrackedEvent {
         static Ref<DeviceLostEvent> Create(const DeviceDescriptor* descriptor);
@@ -339,9 +341,9 @@ class DeviceBase : public ErrorSink,
     size_t GetLazyClearCountForTesting();
     void IncrementLazyClearCountForTesting();
     void EmitWarningOnce(std::string_view message);
-    void EmitLog(std::string_view message);
-    void EmitLog(WGPULoggingType loggingType, std::string_view message);
     void EmitCompilationLog(const ShaderModuleBase* module);
+    void EmitLog(std::string_view message) override;
+    void EmitLog(wgpu::LoggingType type, std::string_view message) override;
     void APIForceLoss(wgpu::DeviceLostReason reason, StringView message);
     QueueBase* GetQueue() const;
 

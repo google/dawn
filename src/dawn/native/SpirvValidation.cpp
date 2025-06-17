@@ -36,34 +36,35 @@
 
 namespace dawn::native {
 
-MaybeError ValidateSpirv(DeviceBase* device,
+MaybeError ValidateSpirv(LogEmitter* logEmitter,
                          const uint32_t* spirv,
                          size_t wordCount,
                          bool dumpSpirv) {
     spvtools::SpirvTools spirvTools(SPV_ENV_VULKAN_1_1);
-    spirvTools.SetMessageConsumer([device](spv_message_level_t level, const char*,
-                                           const spv_position_t& position, const char* message) {
-        WGPULoggingType wgpuLogLevel;
+    spirvTools.SetMessageConsumer([logEmitter](spv_message_level_t level, const char*,
+                                               const spv_position_t& position,
+                                               const char* message) {
+        wgpu::LoggingType wgpuLogLevel;
         switch (level) {
             case SPV_MSG_FATAL:
             case SPV_MSG_INTERNAL_ERROR:
             case SPV_MSG_ERROR:
-                wgpuLogLevel = WGPULoggingType_Error;
+                wgpuLogLevel = wgpu::LoggingType::Error;
                 break;
             case SPV_MSG_WARNING:
-                wgpuLogLevel = WGPULoggingType_Warning;
+                wgpuLogLevel = wgpu::LoggingType::Warning;
                 break;
             case SPV_MSG_INFO:
-                wgpuLogLevel = WGPULoggingType_Info;
+                wgpuLogLevel = wgpu::LoggingType::Info;
                 break;
             default:
-                wgpuLogLevel = WGPULoggingType_Error;
+                wgpuLogLevel = wgpu::LoggingType::Error;
                 break;
         }
 
         std::ostringstream ss;
         ss << "SPIRV line " << position.index << ": " << message << "\n";
-        device->EmitLog(wgpuLogLevel, ss.str().c_str());
+        logEmitter->EmitLog(wgpuLogLevel, ss.str().c_str());
     });
 
     // Don't prepare to emit friendly names. The preparation costs
@@ -82,7 +83,7 @@ MaybeError ValidateSpirv(DeviceBase* device,
         } else {
             dumpedMsg << "/* Failed to disassemble generated SPIRV */";
         }
-        device->EmitLog(WGPULoggingType_Info, dumpedMsg.str().c_str());
+        logEmitter->EmitLog(wgpu::LoggingType::Info, dumpedMsg.str().c_str());
     }
 
     DAWN_INVALID_IF(!valid, "Produced invalid SPIRV. Please file a bug at https://crbug.com/tint.");

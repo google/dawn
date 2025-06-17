@@ -1236,7 +1236,7 @@ BufferBase* DeviceBase::APICreateBuffer(const BufferDescriptor* rawDescriptor) {
         if (mapResult.IsError()) {
             // If we can't map, do "implementation-defined logging" and return null.
             auto error = mapResult.AcquireError();
-            EmitLog(WGPULoggingType_Error, error->GetFormattedMessage());
+            EmitLog(wgpu::LoggingType::Error, error->GetFormattedMessage());
             // deferredError is silenced because we drop it here.
             return nullptr;
         }
@@ -1489,7 +1489,7 @@ BufferBase* DeviceBase::APICreateErrorBuffer(const BufferDescriptor* desc) {
         auto error =
             DAWN_OUT_OF_MEMORY_ERROR("mappedAtCreation is not implemented for CreateErrorBuffer");
         error->AppendContext("calling %s.CreateBuffer(%s).", this, desc);
-        EmitLog(WGPULoggingType_Error, error->GetFormattedMessage());
+        EmitLog(wgpu::LoggingType::Error, error->GetFormattedMessage());
         return nullptr;
     }
 
@@ -1747,7 +1747,7 @@ void DeviceBase::IncrementLazyClearCountForTesting() {
 
 void DeviceBase::EmitWarningOnce(std::string_view message) {
     if (mWarnings.insert(std::string{message}).second) {
-        this->EmitLog(WGPULoggingType_Warning, message);
+        this->EmitLog(wgpu::LoggingType::Warning, message);
     }
 }
 
@@ -1768,29 +1768,29 @@ void DeviceBase::EmitCompilationLog(const ShaderModuleBase* module) {
         // Note: if there are multiple threads emitting logs, this may not actually be the exact
         // last message. This is probably not a huge problem since this message will be emitted
         // somewhere near the end.
-        EmitLog(WGPULoggingType_Warning,
+        EmitLog(wgpu::LoggingType::Warning,
                 "Reached the WGSL compilation log warning limit. To see all the compilation "
                 "logs, query them directly on the ShaderModule objects.");
     }
 
     auto msg = module->GetCompilationLog();
     if (!msg.empty()) {
-        EmitLog(WGPULoggingType_Warning, msg.c_str());
+        EmitLog(wgpu::LoggingType::Warning, msg.c_str());
     }
 }
 
 void DeviceBase::EmitLog(std::string_view message) {
-    this->EmitLog(WGPULoggingType_Info, message);
+    this->EmitLog(wgpu::LoggingType::Info, message);
 }
 
-void DeviceBase::EmitLog(WGPULoggingType loggingType, std::string_view message) {
+void DeviceBase::EmitLog(wgpu::LoggingType type, std::string_view message) {
     // Acquire a shared lock. This allows multiple threads to emit logs,
     // or even logs to be emitted re-entrantly. It will block if there is a call
     // to SetLoggingCallback. Applications should not call SetLoggingCallback inside
     // the logging callback or they will deadlock.
     std::shared_lock<std::shared_mutex> lock(mLoggingMutex);
     if (mLoggingCallbackInfo.callback) {
-        mLoggingCallbackInfo.callback(loggingType, ToOutputStringView(message),
+        mLoggingCallbackInfo.callback(ToAPI(type), ToOutputStringView(message),
                                       mLoggingCallbackInfo.userdata1,
                                       mLoggingCallbackInfo.userdata2);
     }
