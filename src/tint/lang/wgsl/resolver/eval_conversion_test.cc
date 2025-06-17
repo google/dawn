@@ -26,6 +26,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "src/tint/lang/core/constant/splat.h"
+#include "src/tint/lang/core/number.h"
 #include "src/tint/lang/wgsl/resolver/eval_test.h"
 #include "src/tint/lang/wgsl/sem/materialize.h"
 
@@ -165,7 +166,7 @@ INSTANTIATE_TEST_SUITE_P(
                          Success(1.9_f, 1_i),
                          Success(-1.9_f, -1_i),
                          Success(2_f, 2_i),
-                         Success(1e20_f, i32::Highest()),
+                         Success(1e20_f, i32(tint::core::kMaxI32WhichIsAlsoF32)),
                          Success(-1e20_f, i32::Lowest()),
                          // f32 -> u32
                          Success(0_f, 0_i),
@@ -173,7 +174,7 @@ INSTANTIATE_TEST_SUITE_P(
                          Success(1.9_f, 1_i),
                          Success(-1_f, u32::Lowest()),
                          Success(2_f, 2_i),
-                         Success(1e20_f, u32::Highest()),
+                         Success(1e20_f, u32(tint::core::kMaxU32WhichIsAlsoF32)),
                          Success(-1e20_f, u32::Lowest()),
                          // f32 -> bool
                          Success(0_f, false),
@@ -387,7 +388,8 @@ TEST_F(ConstEvalTest, Vec3_Convert_Large_f32_to_i32) {
 
     EXPECT_FALSE(sem->ConstantValue()->Index(0)->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->Index(0)->AllZero());
-    EXPECT_EQ(sem->ConstantValue()->Index(0)->ValueAs<AInt>(), i32::Highest());
+    EXPECT_EQ(sem->ConstantValue()->Index(0)->ValueAs<AInt>(),
+              i32(tint::core::kMaxI32WhichIsAlsoF32));
 
     EXPECT_FALSE(sem->ConstantValue()->Index(1)->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->Index(1)->AllZero());
@@ -395,7 +397,8 @@ TEST_F(ConstEvalTest, Vec3_Convert_Large_f32_to_i32) {
 
     EXPECT_FALSE(sem->ConstantValue()->Index(2)->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->Index(2)->AllZero());
-    EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<AInt>(), i32::Highest());
+    EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<AInt>(),
+              i32(tint::core::kMaxI32WhichIsAlsoF32));
 }
 
 TEST_F(ConstEvalTest, Vec3_Convert_Large_f32_to_u32) {
@@ -416,7 +419,8 @@ TEST_F(ConstEvalTest, Vec3_Convert_Large_f32_to_u32) {
 
     EXPECT_FALSE(sem->ConstantValue()->Index(0)->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->Index(0)->AllZero());
-    EXPECT_EQ(sem->ConstantValue()->Index(0)->ValueAs<AInt>(), u32::Highest());
+    EXPECT_EQ(sem->ConstantValue()->Index(0)->ValueAs<AInt>(),
+              u32(tint::core::kMaxU32WhichIsAlsoF32));
 
     EXPECT_TRUE(sem->ConstantValue()->Index(1)->AnyZero());
     EXPECT_TRUE(sem->ConstantValue()->Index(1)->AllZero());
@@ -424,7 +428,8 @@ TEST_F(ConstEvalTest, Vec3_Convert_Large_f32_to_u32) {
 
     EXPECT_FALSE(sem->ConstantValue()->Index(2)->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->Index(2)->AllZero());
-    EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<AInt>(), u32::Highest());
+    EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<AInt>(),
+              u32(tint::core::kMaxU32WhichIsAlsoF32));
 }
 
 TEST_F(ConstEvalTest, Vec3_Convert_Large_f32_to_f16) {

@@ -123,13 +123,13 @@ struct State {
                 // These values are chosen specifically to enable f32 clamping.
                 // See https://github.com/gpuweb/gpuweb/issues/5043
                 if (res_ty->IsSignedIntegerScalarOrVector()) {
-                    const int32_t kMaxI32WhichIsAlsoF32 = 0x7FFFFF80;
                     limits.low_limit_f = b.MatchWidth(f32(INT32_MIN), res_ty);
-                    limits.high_limit_f = b.MatchWidth(f32(kMaxI32WhichIsAlsoF32), res_ty);
+                    limits.high_limit_f =
+                        b.MatchWidth(f32(tint::core::kMaxI32WhichIsAlsoF32), res_ty);
                 } else {
-                    const uint32_t kMaxU32WhichIsAlsoF32 = 0xFFFFFF00;
                     limits.low_limit_f = b.MatchWidth(f32(0), res_ty);
-                    limits.high_limit_f = b.MatchWidth(f32(kMaxU32WhichIsAlsoF32), res_ty);
+                    limits.high_limit_f =
+                        b.MatchWidth(f32(tint::core::kMaxU32WhichIsAlsoF32), res_ty);
                 }
             } else if (src_el_ty->Is<type::F16>()) {
                 constexpr float MAX_F16 = 65504;

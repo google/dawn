@@ -129,6 +129,12 @@ struct NumberBase {
     static NumberT Inf() { return NumberT(std::numeric_limits<UnwrapNumber<NumberT>>::infinity()); }
 };
 
+// Largest integers representable in the source floating point format.
+// These values are chosen specifically to enable f32 clamping.
+// See https://github.com/gpuweb/gpuweb/issues/5043
+constexpr int32_t kMaxI32WhichIsAlsoF32 = 0x7FFFFF80;
+constexpr uint32_t kMaxU32WhichIsAlsoF32 = 0xFFFFFF00;
+
 /// Number wraps a integer or floating point number, enforcing explicit casting.
 template <typename T>
 struct Number : NumberBase<Number<T>> {
@@ -377,6 +383,21 @@ tint::Result<TO, ConversionFailure> CheckedConvert(Number<FROM> num) {
             if constexpr (IsSignedIntegral<FROM>) {
                 return ConversionFailure::kExceedsNegativeLimit;
             }
+        }
+    } else if constexpr (std::is_same_v<FROM, float> &&
+                         (std::is_same_v<TO, i32> || std::is_same_v<TO, u32>)) {
+        // The WGSL spec dictates that the conversion of f32 to u32/i32 saturates to integer
+        // values representable in float. This highly particular for f32 converting to u32/i32 for
+        // only the highest integer value.
+        const T kHighestIntWhichIsAlsoFloat = IsSignedIntegral<TO>
+                                                  ? static_cast<T>(kMaxI32WhichIsAlsoF32)
+                                                  : static_cast<T>(kMaxU32WhichIsAlsoF32);
+        if (value > kHighestIntWhichIsAlsoFloat) {
+            return TO(kHighestIntWhichIsAlsoFloat);
+        }
+
+        if (value < static_cast<T>(TO::kLowestValue)) {
+            return TO(TO::kLowestValue);
         }
     } else {
         if (value > static_cast<T>(TO::kHighestValue)) {
