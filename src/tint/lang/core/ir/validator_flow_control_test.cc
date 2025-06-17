@@ -105,7 +105,7 @@ TEST_F(IR_ValidatorTest, Discard_RootBlock) {
 )")) << res.Failure();
 }
 
-TEST_F(IR_ValidatorTest, Discard_NotInFragment) {
+TEST_F(IR_ValidatorTest, Discard_NotInFragmentViaFunction) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         b.Discard();
@@ -123,7 +123,25 @@ TEST_F(IR_ValidatorTest, Discard_NotInFragment) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(
         res.Failure().reason,
-        testing::HasSubstr(R"(:3:5 error: discard: cannot be called in non-fragment end point
+        testing::HasSubstr(R"(:3:5 error: discard: cannot be called in non-fragment entry point
+    discard
+    ^^^^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Discard_NotInFragmentViaEntryPoint) {
+    auto* ep = ComputeEntryPoint("ep");
+
+    b.Append(ep->Block(), [&] {
+        b.Discard();
+        b.Return(ep);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(R"(:3:5 error: discard: cannot be called in non-fragment entry point
     discard
     ^^^^^^^
 )")) << res.Failure();
