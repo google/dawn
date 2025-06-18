@@ -31,6 +31,7 @@
 #include <compare>
 #include <concepts>
 #include <limits>
+#include <ostream>
 #include <type_traits>
 #include <utility>
 
@@ -93,6 +94,8 @@ class alignas(T) TypedIntegerImpl {
     }
 
     // Construction from non-narrowing integral types.
+    // TODO(425911085): Consider allowing construction from narrowing types, but assert
+    // that it doesn't truncate.
     template <typename I>
         requires std::integral<I>
     explicit constexpr TypedIntegerImpl(I rhs) : mValue(static_cast<T>(rhs)) {
@@ -100,10 +103,17 @@ class alignas(T) TypedIntegerImpl {
         static_assert(std::numeric_limits<I>::min() >= std::numeric_limits<T>::min());
     }
 
-    // Allow explicit casts only to the underlying type. If you're casting out of an
-    // TypedInteger, you should know what what you're doing, and exactly what type you
-    // expect.
-    explicit constexpr operator T() const { return static_cast<T>(this->mValue); }
+    // Allow explicit casts to any integral type. If the type is smaller than T,
+    // we assert that no truncation occurs.
+    template <typename I>
+        requires std::integral<I>
+    explicit constexpr operator I() const {
+        if constexpr (sizeof(I) < sizeof(T)) {
+            // If downcasting, assert that the value is not truncated
+            DAWN_ASSERT(static_cast<I>(this->mValue) == this->mValue);
+        }
+        return static_cast<I>(this->mValue);
+    }
 
     // Same-tag TypedInteger comparison operators
     constexpr auto operator<=>(const TypedIntegerImpl& rhs) const = default;
@@ -190,6 +200,73 @@ class alignas(T) TypedIntegerImpl {
     }
 
     template <typename T2 = T>
+        requires(std::unsigned_integral<T2> && std::same_as<T, T2>)
+    static constexpr decltype(T(0) + T2(0)) MulImpl(TypedIntegerImpl<Tag, T> lhs,
+                                                    TypedIntegerImpl<Tag, T2> rhs) {
+        DAWN_ASSERT(lhs.mValue == 0 || rhs.mValue == 0 ||
+                    lhs.mValue <= (std::numeric_limits<T>::max() / rhs.mValue));
+        return lhs.mValue * rhs.mValue;
+    }
+
+    template <typename T2 = T>
+        requires(std::signed_integral<T2> && std::same_as<T, T2>)
+    static constexpr decltype(T(0) + T2(0)) MulImpl(TypedIntegerImpl<Tag, T> lhs,
+                                                    TypedIntegerImpl<Tag, T2> rhs) {
+        // https://wiki.sei.cmu.edu/confluence/display/c/INT32-C.+Ensure+that+operations+on+signed+integers+do+not+result+in+overflow
+        if (lhs.mValue > 0) {
+            if (rhs.mValue > 0) {
+                DAWN_ASSERT(lhs.mValue <= (std::numeric_limits<T>::max() / rhs.mValue));
+            } else {
+                DAWN_ASSERT(rhs.mValue >= (std::numeric_limits<T>::min() / lhs.mValue));
+            }
+        } else {
+            if (rhs.mValue > 0) {
+                DAWN_ASSERT(lhs.mValue >= (std::numeric_limits<T>::min() / rhs.mValue));
+            } else {
+                DAWN_ASSERT((lhs.mValue == 0) ||
+                            (rhs.mValue >= (std::numeric_limits<T>::max() / lhs.mValue)));
+            }
+        }
+        return lhs.mValue * rhs.mValue;
+    }
+
+    template <typename T2 = T>
+        requires(std::unsigned_integral<T2> && std::same_as<T, T2>)
+    static constexpr decltype(T(0) + T2(0)) DivImpl(TypedIntegerImpl<Tag, T> lhs,
+                                                    TypedIntegerImpl<Tag, T2> rhs) {
+        DAWN_ASSERT(rhs.mValue != 0);
+        return lhs.mValue / rhs.mValue;
+    }
+
+    template <typename T2 = T>
+        requires(std::signed_integral<T2> && std::same_as<T, T2>)
+    static constexpr decltype(T(0) + T2(0)) DivImpl(TypedIntegerImpl<Tag, T> lhs,
+                                                    TypedIntegerImpl<Tag, T2> rhs) {
+        // https://wiki.sei.cmu.edu/confluence/display/c/INT33-C.+Ensure+that+division+and+remainder+operations+do+not+result+in+divide-by-zero+errors
+        DAWN_ASSERT(!(rhs.mValue == 0 ||
+                      (rhs.mValue == -1 && lhs.mValue == std::numeric_limits<T>::min())));
+        return lhs.mValue / rhs.mValue;
+    }
+
+    template <typename T2 = T>
+        requires(std::unsigned_integral<T2> && std::same_as<T, T2>)
+    static constexpr decltype(T(0) + T2(0)) ModImpl(TypedIntegerImpl<Tag, T> lhs,
+                                                    TypedIntegerImpl<Tag, T2> rhs) {
+        DAWN_ASSERT(rhs.mValue != 0);
+        return lhs.mValue % rhs.mValue;
+    }
+
+    template <typename T2 = T>
+        requires(std::signed_integral<T2> && std::same_as<T, T2>)
+    static constexpr decltype(T(0) + T2(0)) ModImpl(TypedIntegerImpl<Tag, T> lhs,
+                                                    TypedIntegerImpl<Tag, T2> rhs) {
+        // https://wiki.sei.cmu.edu/confluence/display/c/INT33-C.+Ensure+that+division+and+remainder+operations+do+not+result+in+divide-by-zero+errors
+        DAWN_ASSERT(!(rhs.mValue == 0 ||
+                      (rhs.mValue == -1 && lhs.mValue == std::numeric_limits<T>::min())));
+        return lhs.mValue % rhs.mValue;
+    }
+
+    template <typename T2 = T>
         requires(std::signed_integral<T2> && std::same_as<T, T2>)
     constexpr TypedIntegerImpl operator-() const {
         // The negation of the most negative value cannot be represented.
@@ -209,12 +286,58 @@ class alignas(T) TypedIntegerImpl {
         return TypedIntegerImpl(result);
     }
 
+    constexpr TypedIntegerImpl operator*(TypedIntegerImpl rhs) const {
+        auto result = MulImpl(*this, rhs);
+        return TypedIntegerImpl(result);
+    }
+
+    constexpr TypedIntegerImpl operator/(TypedIntegerImpl rhs) const {
+        auto result = DivImpl(*this, rhs);
+        return TypedIntegerImpl{result};
+    }
+
+    constexpr TypedIntegerImpl operator%(TypedIntegerImpl rhs) const {
+        auto result = ModImpl(*this, rhs);
+        return TypedIntegerImpl{result};
+    }
+
+    constexpr TypedIntegerImpl& operator+=(const TypedIntegerImpl& rhs) {
+        *this = *this + rhs;
+        return *this;
+    }
+
+    constexpr TypedIntegerImpl& operator-=(const TypedIntegerImpl& rhs) {
+        *this = *this - rhs;
+        return *this;
+    }
+
+    constexpr TypedIntegerImpl& operator*=(const TypedIntegerImpl& rhs) {
+        *this = *this * rhs;
+        return *this;
+    }
+
+    constexpr TypedIntegerImpl& operator/=(const TypedIntegerImpl& rhs) {
+        *this = *this / rhs;
+        return *this;
+    }
+
+    constexpr TypedIntegerImpl& operator%=(const TypedIntegerImpl& rhs) {
+        *this = *this % rhs;
+        return *this;
+    }
+
     template <typename H>
     friend H AbslHashValue(H state, const TypedIntegerImpl& value) {
         H::combine(std::move(state), value.mValue);
         return std::move(state);
     }
 };
+
+template <typename Tag, typename T>
+std::ostream& operator<<(std::ostream& os, TypedIntegerImpl<Tag, T> value) {
+    os << static_cast<T>(value);
+    return os;
+}
 
 }  // namespace detail
 }  // namespace dawn
