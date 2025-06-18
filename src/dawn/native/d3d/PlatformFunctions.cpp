@@ -110,7 +110,7 @@ MaybeError PlatformFunctions::LoadKernelBase() {
     compareObjectHandles = &CompareObjectHandles;
 #else
     std::string error;
-    if (!mKernelBaseLib.Open("kernelbase.dll", &error) ||
+    if (!mKernelBaseLib.OpenSystemLibrary(L"kernelbase.dll", &error) ||
         !mKernelBaseLib.GetProc(&compareObjectHandles, "CompareObjectHandles", &error)) {
         return DAWN_INTERNAL_ERROR(error.c_str());
     }
