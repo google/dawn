@@ -63,7 +63,7 @@ struct State {
     core::type::Manager& ty{ir.Types()};
 
     // A map of single texture to the replacement var. Note, this doesn't just re-use the
-    // `texture_sampler_to_replacment` with the placeholder sampler because we can share an
+    // `texture_sampler_to_replacement` with the placeholder sampler because we can share an
     // individual texture with a texture,sampler pair. So, if we create the texture as `t1,s1` we
     // want to use that `t1` individually but if we look it up with `t1,sp` then we won't find it.
     // This secondary map exists to allow us access to textures which may have been created

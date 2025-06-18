@@ -191,7 +191,6 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         // Must come after DirectVariableAccess
         raise::TexturePolyfillConfig tex_config;
         tex_config.placeholder_sampler_bind_point = options.bindings.placeholder_sampler_bind_point;
-        tex_config.texture_builtins_from_uniform = options.bindings.texture_builtins_from_uniform;
         RUN_TRANSFORM(raise::TexturePolyfill, module, tex_config);
     }
 
