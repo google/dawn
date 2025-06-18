@@ -205,26 +205,18 @@ class ImmediateConstantTracker : public T {
             return;
         }
 
-        const ImmediateConstantMask& pipelineImmediateMask = lastPipeline->GetImmediateMask();
-
-        uint32_t pushConstantRangeStartOffset = 0;
-        uint32_t immediateContentStartOffset = 0;
-
+        const ImmediateConstantMask& pipelineMask = lastPipeline->GetImmediateMask();
         ImmediateConstantMask uploadBits = this->mDirty & lastPipeline->GetImmediateMask();
-        ImmediateConstantMask prefixBits = ImmediateConstantMask(0u);
-
-        // TODO(crbug.com/366291600): Add IterateBitRanges helper function to achieve iteration on
-        // ranges.
-        for (ImmediateConstantIndex i : lastPipeline->GetImmediateMask()) {
-            uint32_t index = static_cast<uint32_t>(i);
-            prefixBits = (1u << index) - 1u;
-            pushConstantRangeStartOffset =
-                (prefixBits & pipelineImmediateMask).count() * kImmediateConstantElementByteSize;
-            immediateContentStartOffset = index * kImmediateConstantElementByteSize;
+        for (auto&& [offset, size] : IterateRanges(uploadBits)) {
+            uint32_t immediateContentStartOffset =
+                static_cast<uint32_t>(offset) * kImmediateConstantElementByteSize;
+            uint32_t pushConstantRangeStartOffset =
+                GetImmediateIndexInPipeline(static_cast<uint32_t>(offset), pipelineMask) *
+                kImmediateConstantElementByteSize;
             device->fn.CmdPushConstants(
                 commandBuffer, ToBackend(lastPipeline)->GetVkLayout(),
                 ToBackend(lastPipeline->GetLayout())->GetImmediateDataRangeStage(),
-                pushConstantRangeStartOffset, kImmediateConstantElementByteSize,
+                pushConstantRangeStartOffset, size * kImmediateConstantElementByteSize,
                 this->mContent.template Get<uint32_t>(immediateContentStartOffset));
         }
 

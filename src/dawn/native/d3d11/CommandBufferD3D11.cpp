@@ -231,12 +231,10 @@ class ImmediateConstantTracker : public T {
 
         ImmediateConstantMask pipelineMask = lastPipeline->GetImmediateMask();
         ImmediateConstantMask uploadBits = this->mDirty & pipelineMask;
-        uint32_t immediateRangeStartOffset = 0;
-        uint32_t immediateContentStartOffset = 0;
         for (auto&& [offset, size] : IterateRanges(uploadBits)) {
-            immediateContentStartOffset =
+            uint32_t immediateContentStartOffset =
                 static_cast<uint32_t>(offset) * kImmediateConstantElementByteSize;
-            immediateRangeStartOffset =
+            uint32_t immediateRangeStartOffset =
                 GetImmediateIndexInPipeline(static_cast<uint32_t>(offset), pipelineMask);
             commandContext->WriteUniformBufferRange(
                 immediateRangeStartOffset,
