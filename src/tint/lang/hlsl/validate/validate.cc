@@ -50,7 +50,7 @@ TINT_BEGIN_DISABLE_ALL_WARNINGS();
 // # Use UUID emulation with clang to avoid compiling with ms-extensions
 #define __EMULATE_UUID
 #endif
-#include "dxc/dxcapi.h"
+#include <dxcapi.h>
 TINT_END_DISABLE_ALL_WARNINGS();
 
 // Disable warnings about old-style casts which result from using
