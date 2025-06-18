@@ -440,13 +440,6 @@
             {"name": "present modes", "type": "present mode", "annotation": "const*", "length": "present mode count"},
             {"name": "alpha mode count", "type": "size_t"},
             {"name": "alpha modes", "type": "composite alpha mode", "annotation": "const*", "length": "alpha mode count"}
-        ],
-        "methods": [
-            {
-                "name": "free members",
-                "returns": "void",
-                "args": []
-            }
         ]
     },
     "surface configuration": {

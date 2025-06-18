@@ -344,15 +344,15 @@ extern "C" {
 {% for function in by_category["function"] %}
     typedef {{as_cType(function.return_type.name)}} (*{{as_cProc(None, function.name)}})(
             {%- for arg in function.arguments -%}
-                {% if not loop.first %}, {% endif %}
+                {% if not loop.first %}, {% endif -%}
                 {{nullable_annotation(arg)}}{{as_annotated_cType(arg)}}
             {%- endfor -%}
         ) {{API}}_FUNCTION_ATTRIBUTE;
 {% endfor %}
 
-{% for type in by_category["object"] if len(c_methods(type)) > 0 %}
+{% for (type, methods) in c_methods_sorted_by_parent %}
     // Procs of {{type.name.CamelCase()}}
-    {% for method in c_methods(type) %}
+    {% for method in methods %}
         typedef {{as_cType(method.return_type.name)}} (*{{as_cProc(type.name, method.name)}})(
             {{-as_cType(type.name)}} {{as_varName(type.name)}}
             {%- for arg in method.arguments -%}
@@ -376,9 +376,9 @@ extern "C" {
         ) {{API}}_FUNCTION_ATTRIBUTE;
 {% endfor %}
 
-{% for type in by_category["object"] if len(c_methods(type)) > 0 %}
+{% for (type, methods) in c_methods_sorted_by_parent %}
     // Methods of {{type.name.CamelCase()}}
-    {% for method in c_methods(type) %}
+    {% for method in methods %}
         {{API}}_EXPORT {{as_cType(method.return_type.name)}} {{as_cMethod(type.name, method.name)}}(
             {{-as_cType(type.name)}} {{as_varName(type.name)}}
             {%- for arg in method.arguments -%}

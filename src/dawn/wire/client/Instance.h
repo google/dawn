@@ -36,6 +36,8 @@
 
 namespace dawn::wire::client {
 
+void APIFreeMembers(WGPUSupportedWGSLLanguageFeatures supportedFeatures);
+
 class Instance final : public RefCountedWithExternalCount<ObjectWithEventsBase> {
   public:
     explicit Instance(const ObjectBaseParams& params);
@@ -44,16 +46,16 @@ class Instance final : public RefCountedWithExternalCount<ObjectWithEventsBase> 
 
     WireResult Initialize(const WGPUInstanceDescriptor* descriptor);
 
-    WGPUFuture RequestAdapter(const WGPURequestAdapterOptions* options,
-                              const WGPURequestAdapterCallbackInfo& callbackInfo);
+    WGPUFuture APIRequestAdapter(const WGPURequestAdapterOptions* options,
+                                 const WGPURequestAdapterCallbackInfo& callbackInfo);
 
-    void ProcessEvents();
-    WGPUWaitStatus WaitAny(size_t count, WGPUFutureWaitInfo* infos, uint64_t timeoutNS);
+    void APIProcessEvents();
+    WGPUWaitStatus APIWaitAny(size_t count, WGPUFutureWaitInfo* infos, uint64_t timeoutNS);
 
-    bool HasWGSLLanguageFeature(WGPUWGSLLanguageFeatureName feature) const;
-    WGPUStatus GetWGSLLanguageFeatures(WGPUSupportedWGSLLanguageFeatures* features) const;
+    bool APIHasWGSLLanguageFeature(WGPUWGSLLanguageFeatureName feature) const;
+    WGPUStatus APIGetWGSLLanguageFeatures(WGPUSupportedWGSLLanguageFeatures* features) const;
 
-    WGPUSurface CreateSurface(const WGPUSurfaceDescriptor* desc) const;
+    WGPUSurface APICreateSurface(const WGPUSurfaceDescriptor* desc) const;
 
   private:
     void WillDropLastExternalRef() override;

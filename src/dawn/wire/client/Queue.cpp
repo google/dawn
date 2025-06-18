@@ -95,7 +95,7 @@ WireResult Client::DoQueueWorkDoneCallback(ObjectHandle eventManager,
     return GetEventManager(eventManager).SetFutureReady<WorkDoneEvent>(future.id, status, message);
 }
 
-WGPUFuture Queue::OnSubmittedWorkDone(const WGPUQueueWorkDoneCallbackInfo& callbackInfo) {
+WGPUFuture Queue::APIOnSubmittedWorkDone(const WGPUQueueWorkDoneCallbackInfo& callbackInfo) {
     // TODO(crbug.com/dawn/2052): Once we always return a future, change this to log to the instance
     // (note, not raise a validation error to the device) and return the null future.
     DAWN_ASSERT(callbackInfo.nextInChain == nullptr);
@@ -116,7 +116,10 @@ WGPUFuture Queue::OnSubmittedWorkDone(const WGPUQueueWorkDoneCallbackInfo& callb
     return {futureIDInternal};
 }
 
-void Queue::WriteBuffer(WGPUBuffer cBuffer, uint64_t bufferOffset, const void* data, size_t size) {
+void Queue::APIWriteBuffer(WGPUBuffer cBuffer,
+                           uint64_t bufferOffset,
+                           const void* data,
+                           size_t size) {
     Buffer* buffer = FromAPI(cBuffer);
 
     QueueWriteBufferCmd cmd;
@@ -129,11 +132,11 @@ void Queue::WriteBuffer(WGPUBuffer cBuffer, uint64_t bufferOffset, const void* d
     GetClient()->SerializeCommand(cmd);
 }
 
-void Queue::WriteTexture(const WGPUTexelCopyTextureInfo* destination,
-                         const void* data,
-                         size_t dataSize,
-                         const WGPUTexelCopyBufferLayout* dataLayout,
-                         const WGPUExtent3D* writeSize) {
+void Queue::APIWriteTexture(const WGPUTexelCopyTextureInfo* destination,
+                            const void* data,
+                            size_t dataSize,
+                            const WGPUTexelCopyBufferLayout* dataLayout,
+                            const WGPUExtent3D* writeSize) {
     QueueWriteTextureCmd cmd;
     cmd.queueId = GetWireId();
     cmd.destination = destination;

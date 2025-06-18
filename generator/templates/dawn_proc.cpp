@@ -78,8 +78,8 @@ void {{prefix}}ProcSetProcs(const {{Prefix}}ProcTable* procs_) {
     }
 {% endfor %}
 
-{% for type in by_category["object"] %}
-    {% for method in c_methods(type) %}
+{% for (type, methods) in c_methods_sorted_by_parent %}
+    {% for method in methods %}
         DAWN_NO_SANITIZE("cfi-icall")
         {{as_cType(method.return_type.name)}} {{as_cMethod(type.name, method.name)}}(
             {{-as_cType(type.name)}} {{as_varName(type.name)}}

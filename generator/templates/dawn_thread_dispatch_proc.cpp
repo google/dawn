@@ -43,8 +43,8 @@ void {{prefix}}ProcSetPerThreadProcs(const {{Prefix}}ProcTable* procs) {
     }
 {% endfor %}
 
-{% for type in by_category["object"] %}
-    {% for method in c_methods(type) %}
+{% for (type, methods) in c_methods_sorted_by_parent %}
+    {% for method in methods %}
         static {{as_cType(method.return_type.name)}} ThreadDispatch{{as_MethodSuffix(type.name, method.name)}}(
             {{-as_cType(type.name)}} {{as_varName(type.name)}}
             {%- for arg in method.arguments -%}
@@ -70,8 +70,8 @@ extern "C" {
         {% for function in by_category["function"] %}
             ThreadDispatch{{as_cppType(function.name)}},
         {% endfor %}
-        {% for type in by_category["object"] %}
-            {% for method in c_methods(type) %}
+        {% for (type, methods) in c_methods_sorted_by_parent %}
+            {% for method in methods %}
                 ThreadDispatch{{as_MethodSuffix(type.name, method.name)}},
             {% endfor %}
         {% endfor %}

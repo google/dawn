@@ -177,8 +177,8 @@ WireResult Instance::Initialize(const WGPUInstanceDescriptor* descriptor) {
     return WireResult::Success;
 }
 
-WGPUFuture Instance::RequestAdapter(const WGPURequestAdapterOptions* options,
-                                    const WGPURequestAdapterCallbackInfo& callbackInfo) {
+WGPUFuture Instance::APIRequestAdapter(const WGPURequestAdapterOptions* options,
+                                       const WGPURequestAdapterCallbackInfo& callbackInfo) {
     Client* client = GetClient();
     Ref<Adapter> adapter = client->Make<Adapter>(GetEventManagerHandle());
     auto [futureIDInternal, tracked] =
@@ -211,11 +211,11 @@ WireResult Client::DoInstanceRequestAdapterCallback(ObjectHandle eventManager,
                                              featuresCount, features);
 }
 
-void Instance::ProcessEvents() {
+void Instance::APIProcessEvents() {
     GetEventManager().ProcessPollEvents();
 }
 
-WGPUWaitStatus Instance::WaitAny(size_t count, WGPUFutureWaitInfo* infos, uint64_t timeoutNS) {
+WGPUWaitStatus Instance::APIWaitAny(size_t count, WGPUFutureWaitInfo* infos, uint64_t timeoutNS) {
     return GetEventManager().WaitAny(count, infos, timeoutNS);
 }
 
@@ -281,11 +281,11 @@ void Instance::GatherWGSLFeatures(const WGPUDawnWireWGSLControl* wgslControl,
     }
 }
 
-bool Instance::HasWGSLLanguageFeature(WGPUWGSLLanguageFeatureName feature) const {
+bool Instance::APIHasWGSLLanguageFeature(WGPUWGSLLanguageFeatureName feature) const {
     return mWGSLFeatures.contains(feature);
 }
 
-WGPUStatus Instance::GetWGSLLanguageFeatures(WGPUSupportedWGSLLanguageFeatures* features) const {
+WGPUStatus Instance::APIGetWGSLLanguageFeatures(WGPUSupportedWGSLLanguageFeatures* features) const {
     if (features == nullptr) {
         return WGPUStatus_Error;
     }
@@ -303,10 +303,14 @@ WGPUStatus Instance::GetWGSLLanguageFeatures(WGPUSupportedWGSLLanguageFeatures* 
     return WGPUStatus_Success;
 }
 
-WGPUSurface Instance::CreateSurface(const WGPUSurfaceDescriptor* desc) const {
+WGPUSurface Instance::APICreateSurface(const WGPUSurfaceDescriptor* desc) const {
     dawn::ErrorLog() << "Instance::CreateSurface is not supported in the wire. Use "
                         "dawn::wire::client::WireClient::InjectSurface instead.";
     return nullptr;
+}
+
+void APIFreeMembers(WGPUSupportedWGSLLanguageFeatures supportedFeatures) {
+    delete[] supportedFeatures.features;
 }
 
 }  // namespace dawn::wire::client
@@ -328,9 +332,4 @@ DAWN_WIRE_EXPORT WGPUInstance
 wgpuDawnWireClientCreateInstance(WGPUInstanceDescriptor const* descriptor) {
     DAWN_UNREACHABLE();
     return nullptr;
-}
-
-DAWN_WIRE_EXPORT void wgpuDawnWireClientSupportedWGSLLanguageFeaturesFreeMembers(
-    WGPUSupportedWGSLLanguageFeatures supportedFeatures) {
-    delete[] supportedFeatures.features;
 }

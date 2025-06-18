@@ -60,7 +60,7 @@ ObjectType Surface::GetObjectType() const {
     return ObjectType::Surface;
 }
 
-void Surface::Configure(const WGPUSurfaceConfiguration* config) {
+void Surface::APIConfigure(const WGPUSurfaceConfiguration* config) {
     mConfiguredDevice = FromAPI(config->device);
 
     mTextureDescriptor = {};
@@ -77,7 +77,7 @@ void Surface::Configure(const WGPUSurfaceConfiguration* config) {
     GetClient()->SerializeCommand(cmd);
 }
 
-void Surface::Unconfigure() {
+void Surface::APIUnconfigure() {
     mConfiguredDevice = nullptr;
 
     SurfaceUnconfigureCmd cmd;
@@ -85,14 +85,14 @@ void Surface::Unconfigure() {
     GetClient()->SerializeCommand(cmd);
 }
 
-WGPUTextureFormat Surface::GetPreferredFormat([[maybe_unused]] WGPUAdapter adapter) const {
+WGPUTextureFormat Surface::APIGetPreferredFormat([[maybe_unused]] WGPUAdapter adapter) const {
     dawn::ErrorLog() << "Surface::GetPreferrredFormat is deprecated, use "
                         "Surface::GetCapabilities().formats[0] instead.";
     return mSupportedFormats[0];
 }
 
-WGPUStatus Surface::GetCapabilities(WGPUAdapter adapter,
-                                    WGPUSurfaceCapabilities* capabilities) const {
+WGPUStatus Surface::APIGetCapabilities(WGPUAdapter adapter,
+                                       WGPUSurfaceCapabilities* capabilities) const {
     // Return the capabilities that were provided when injecting the surface.
     capabilities->nextInChain = nullptr;
     capabilities->usages = mSupportedUsages;
@@ -115,7 +115,7 @@ WGPUStatus Surface::GetCapabilities(WGPUAdapter adapter,
     return WGPUStatus_Success;
 }
 
-void Surface::GetCurrentTexture(WGPUSurfaceTexture* surfaceTexture) {
+void Surface::APIGetCurrentTexture(WGPUSurfaceTexture* surfaceTexture) {
     // Handle error cases that return no textures first.
     surfaceTexture->texture = nullptr;
 
@@ -145,11 +145,10 @@ void Surface::GetCurrentTexture(WGPUSurfaceTexture* surfaceTexture) {
     surfaceTexture->texture = ReturnToAPI(std::move(texture));
 }
 
-}  // namespace dawn::wire::client
-
-DAWN_WIRE_EXPORT void wgpuDawnWireClientSurfaceCapabilitiesFreeMembers(
-    WGPUSurfaceCapabilities capabilities) {
+void APIFreeMembers(WGPUSurfaceCapabilities capabilities) {
     delete[] capabilities.presentModes;
     delete[] capabilities.formats;
     delete[] capabilities.alphaModes;
 }
+
+}  // namespace dawn::wire::client

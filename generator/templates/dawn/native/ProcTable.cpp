@@ -44,9 +44,8 @@
 {% endfor %}
 
 namespace {{native_namespace}} {
-
-    {% for type in by_category["object"] %}
-        {% for method in c_methods(type) %}
+    {% for (type, methods) in c_methods_sorted_by_parent %}
+        {% for method in methods %}
             {% set suffix = as_MethodSuffix(type.name, method.name) %}
 
             {{as_cType(method.return_type.name)}} Native{{suffix}}(
@@ -56,7 +55,9 @@ namespace {{native_namespace}} {
                 {%- endfor -%}
             ) {
                 //* Perform conversion between C types and frontend types
-                auto self = FromAPI(cSelf);
+                {% if type.category == "object" %}
+                    auto self = FromAPI(cSelf);
+                {% endif %}
 
                 {% for arg in method.arguments %}
                     {% set varName = as_varName(arg.name) %}
@@ -85,12 +86,20 @@ namespace {{native_namespace}} {
                 {% if method.return_type.name.canonical_case() != "void" %}
                     auto result =
                 {%- endif %}
-                self->API{{method.name.CamelCase()}}(
-                    {%- for arg in method.arguments -%}
-                        {%- if not loop.first %}, {% endif -%}
-                        {{as_varName(arg.name)}}_
-                    {%- endfor -%}
-                );
+                {% if type.category == "object" %}
+                    self->API{{method.name.CamelCase()}}(
+                        {%- for arg in method.arguments -%}
+                            {%- if not loop.first %}, {% endif -%}
+                            {{as_varName(arg.name)}}_
+                        {%- endfor -%}
+                    );
+                {% elif type.category == "structure" %}
+                    API{{suffix}}(cSelf
+                        {%- for arg in method.arguments -%}
+                            , {{as_varName(arg.name)}}_
+                        {%- endfor -%}
+                    );
+                {% endif %}
                 {% if method.return_type.name.canonical_case() != "void" %}
                     {% if method.return_type.category in ["object", "enum", "bitmask"] %}
                         return ToAPI(result);
@@ -199,8 +208,8 @@ namespace {{native_namespace}} {
         {% for function in by_category["function"] %}
             procs.{{as_varName(function.name)}} = Native{{as_cppType(function.name)}};
         {% endfor %}
-        {% for type in by_category["object"] %}
-            {% for method in c_methods(type) %}
+        {% for (type, methods) in c_methods_sorted_by_parent %}
+            {% for method in methods %}
                 procs.{{as_varName(type.name, method.name)}} = Native{{as_MethodSuffix(type.name, method.name)}};
             {% endfor %}
         {% endfor %}

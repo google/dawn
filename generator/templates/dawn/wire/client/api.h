@@ -48,9 +48,9 @@ extern "C" {
         ) {{API}}_FUNCTION_ATTRIBUTE;
 {% endfor %}
 
-{% for type in by_category["object"] if len(c_methods(type)) > 0 %}
+{% for (type, methods) in c_methods_sorted_by_parent %}
     // Methods of {{type.name.CamelCase()}}
-    {% for method in c_methods(type) %}
+    {% for method in methods %}
         DAWN_WIRE_EXPORT {{as_cType(method.return_type.name)}} {{as_cMethodNamespaced(type.name, method.name, Name('dawn wire client'))}}(
             {{-as_cType(type.name)}} {{as_varName(type.name)}}
             {%- for arg in method.arguments -%}

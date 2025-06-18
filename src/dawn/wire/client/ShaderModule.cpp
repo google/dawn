@@ -117,7 +117,8 @@ ObjectType ShaderModule::GetObjectType() const {
     return ObjectType::ShaderModule;
 }
 
-WGPUFuture ShaderModule::GetCompilationInfo(const WGPUCompilationInfoCallbackInfo& callbackInfo) {
+WGPUFuture ShaderModule::APIGetCompilationInfo(
+    const WGPUCompilationInfoCallbackInfo& callbackInfo) {
     auto [futureIDInternal, tracked] =
         GetEventManager().TrackEvent(std::make_unique<CompilationInfoEvent>(callbackInfo, this));
     if (!tracked) {

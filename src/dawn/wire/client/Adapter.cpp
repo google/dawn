@@ -124,15 +124,15 @@ ObjectType Adapter::GetObjectType() const {
     return ObjectType::Adapter;
 }
 
-WGPUStatus Adapter::GetLimits(WGPULimits* limits) const {
+WGPUStatus Adapter::APIGetLimits(WGPULimits* limits) const {
     return mLimitsAndFeatures.GetLimits(limits);
 }
 
-bool Adapter::HasFeature(WGPUFeatureName feature) const {
+bool Adapter::APIHasFeature(WGPUFeatureName feature) const {
     return mLimitsAndFeatures.HasFeature(feature);
 }
 
-void Adapter::GetFeatures(WGPUSupportedFeatures* features) const {
+void Adapter::APIGetFeatures(WGPUSupportedFeatures* features) const {
     mLimitsAndFeatures.ToSupportedFeatures(features);
 }
 
@@ -205,7 +205,7 @@ void Adapter::SetInfo(const WGPUAdapterInfo* info) {
     }
 }
 
-WGPUStatus Adapter::GetInfo(WGPUAdapterInfo* info) const {
+WGPUStatus Adapter::APIGetInfo(WGPUAdapterInfo* info) const {
     // Loop through the chained struct.
     WGPUChainedStruct* chain = info->nextInChain;
     while (chain != nullptr) {
@@ -233,7 +233,7 @@ WGPUStatus Adapter::GetInfo(WGPUAdapterInfo* info) const {
                 break;
             }
             case WGPUSType_AdapterPropertiesSubgroupMatrixConfigs: {
-                if (!HasFeature(WGPUFeatureName_ChromiumExperimentalSubgroupMatrix)) {
+                if (!APIHasFeature(WGPUFeatureName_ChromiumExperimentalSubgroupMatrix)) {
                     return WGPUStatus_Error;
                 }
 
@@ -284,8 +284,8 @@ WGPUStatus Adapter::GetInfo(WGPUAdapterInfo* info) const {
     return WGPUStatus_Success;
 }
 
-WGPUFuture Adapter::RequestDevice(const WGPUDeviceDescriptor* descriptor,
-                                  const WGPURequestDeviceCallbackInfo& callbackInfo) {
+WGPUFuture Adapter::APIRequestDevice(const WGPUDeviceDescriptor* descriptor,
+                                     const WGPURequestDeviceCallbackInfo& callbackInfo) {
     Client* client = GetClient();
     Ref<Device> device = client->Make<Device>(GetEventManagerHandle(), this, descriptor);
     auto [futureIDInternal, tracked] =
@@ -308,7 +308,7 @@ WGPUFuture Adapter::RequestDevice(const WGPUDeviceDescriptor* descriptor,
     cmd.eventManagerHandle = GetEventManagerHandle();
     cmd.future = {futureIDInternal};
     cmd.deviceObjectHandle = device->GetWireHandle();
-    cmd.deviceLostFuture = device->GetLostFuture();
+    cmd.deviceLostFuture = device->APIGetLostFuture();
     cmd.descriptor = &wireDescriptor;
 
     client->SerializeCommand(cmd);
@@ -327,45 +327,41 @@ WireResult Client::DoAdapterRequestDeviceCallback(ObjectHandle eventManager,
                                             features);
 }
 
-WGPUInstance Adapter::GetInstance() const {
+WGPUInstance Adapter::APIGetInstance() const {
     dawn::ErrorLog() << "adapter.GetInstance not supported with dawn_wire.";
     return nullptr;
 }
 
-WGPUDevice Adapter::CreateDevice(const WGPUDeviceDescriptor*) {
+WGPUDevice Adapter::APICreateDevice(const WGPUDeviceDescriptor*) {
     dawn::ErrorLog() << "adapter.CreateDevice not supported with dawn_wire.";
     return nullptr;
 }
 
-WGPUStatus Adapter::GetFormatCapabilities(WGPUTextureFormat format,
-                                          WGPUDawnFormatCapabilities* capabilities) {
+WGPUStatus Adapter::APIGetFormatCapabilities(WGPUTextureFormat format,
+                                             WGPUDawnFormatCapabilities* capabilities) {
     dawn::ErrorLog() << "adapter.GetFormatCapabilities not supported with dawn_wire.";
     return WGPUStatus_Error;
 }
 
-}  // namespace dawn::wire::client
-
-DAWN_WIRE_EXPORT void wgpuDawnWireClientAdapterInfoFreeMembers(WGPUAdapterInfo info) {
+void APIFreeMembers(WGPUAdapterInfo info) {
     // This single delete is enough because everything is a single allocation.
     delete[] info.vendor.data;
 }
 
-DAWN_WIRE_EXPORT void wgpuDawnWireClientAdapterPropertiesMemoryHeapsFreeMembers(
-    WGPUAdapterPropertiesMemoryHeaps memoryHeapProperties) {
+void APIFreeMembers(WGPUAdapterPropertiesMemoryHeaps memoryHeapProperties) {
     delete[] memoryHeapProperties.heapInfo;
 }
 
-DAWN_WIRE_EXPORT void wgpuDawnWireClientDawnDrmFormatCapabilitiesFreeMembers(
-    WGPUDawnDrmFormatCapabilities capabilities) {
+void APIFreeMembers(WGPUDawnDrmFormatCapabilities capabilities) {
     delete[] capabilities.properties;
 }
 
-DAWN_WIRE_EXPORT void wgpuDawnWireClientSupportedFeaturesFreeMembers(
-    WGPUSupportedFeatures supportedFeatures) {
+void APIFreeMembers(WGPUSupportedFeatures supportedFeatures) {
     delete[] supportedFeatures.features;
 }
 
-DAWN_WIRE_EXPORT void wgpuDawnWireClientAdapterPropertiesSubgroupMatrixConfigsFreeMembers(
-    WGPUAdapterPropertiesSubgroupMatrixConfigs subgroupMatrixConfigs) {
+void APIFreeMembers(WGPUAdapterPropertiesSubgroupMatrixConfigs subgroupMatrixConfigs) {
     delete[] subgroupMatrixConfigs.configs;
 }
+
+}  // namespace dawn::wire::client
