@@ -379,7 +379,8 @@ struct State {
                         });
                         break;
                     }
-                    case core::BuiltinFn::kTextureSample: {
+                    case core::BuiltinFn::kTextureSample:
+                    case core::BuiltinFn::kTextureSampleLevel: {
                         // Add a new coord item so it's a vec2.
                         auto arg = call->Args()[2];
                         b.InsertBefore(call, [&] {
@@ -966,6 +967,9 @@ struct State {
 
             core::ir::Value* coords = args[idx++];
             switch (tex_type->Dim()) {
+                case core::type::TextureDimension::k1d:
+                    params.Push(coords);
+                    break;
                 case core::type::TextureDimension::k2d:
                     if (is_depth) {
                         coords = b.Construct(ty.vec3<f32>(), coords, depth_ref)->Result();

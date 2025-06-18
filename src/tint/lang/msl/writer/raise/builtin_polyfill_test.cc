@@ -2722,7 +2722,43 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureSampleGrad_WithOffset) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_BuiltinPolyfillTest, TextureSampleLevel) {
+TEST_F(MslWriter_BuiltinPolyfillTest, TextureSampleLevel_1d) {
+    auto* t = b.FunctionParam("t", ty.sampled_texture(core::type::TextureDimension::k1d, ty.f32()));
+    auto* s = b.FunctionParam("s", ty.sampler());
+    auto* coords = b.FunctionParam("coords", ty.f32());
+    auto* level = b.FunctionParam("level", ty.f32());
+    auto* func = b.Function("foo", ty.vec4<f32>());
+    func->SetParams({t, s, coords, level});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call<vec4<f32>>(core::BuiltinFn::kTextureSampleLevel, t, s, coords, level);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_1d<f32>, %s:sampler, %coords:f32, %level:f32):vec4<f32> {
+  $B1: {
+    %6:vec4<f32> = textureSampleLevel %t, %s, %coords, %level
+    ret %6
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_1d<f32>, %s:sampler, %coords:f32, %level:f32):vec4<f32> {
+  $B1: {
+    %6:vec4<f32> = %t.sample %s, %coords
+    ret %6
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_BuiltinPolyfillTest, TextureSampleLevel_2d) {
     auto* t = b.FunctionParam("t", ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()));
     auto* s = b.FunctionParam("s", ty.sampler());
     auto* coords = b.FunctionParam("coords", ty.vec2<f32>());

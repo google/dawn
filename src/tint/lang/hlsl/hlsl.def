@@ -797,6 +797,10 @@ implicit(N: num, T: f32_f16) fn frexp(vec<N, T>, vec<N, T>) -> vec<N, T>
                                    ddx: vec3<f32>,
                                    ddy: vec3<f32>) -> vec4<f32>
 
+@member_function fn SampleLevel(texture: texture_1d<f32>,
+                                sampler: sampler,
+                                 coords: f32,
+                                  level: f32) -> vec4<f32>
 @member_function fn SampleLevel(texture: texture_2d<f32>,
                                 sampler: sampler,
                                  coords: vec2<f32>,

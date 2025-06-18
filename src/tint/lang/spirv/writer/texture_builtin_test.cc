@@ -649,6 +649,17 @@ INSTANTIATE_TEST_SUITE_P(
     testing::Values(
         TextureBuiltinTestCase{
             kSampledTexture,
+            core::type::TextureDimension::k1d,
+            /* texel type */ kF32,
+            {{"coords", 1, kF32}, {"lod", 1, kF32}},
+            {"result", 4, kF32},
+            {
+                "%10 = OpSampledImage %11 %t %s",
+                "OpImageSampleExplicitLod %v4float %10 %coords Lod %lod",
+            },
+        },
+        TextureBuiltinTestCase{
+            kSampledTexture,
             core::type::TextureDimension::k2d,
             /* texel type */ kF32,
             {{"coords", 2, kF32}, {"lod", 1, kF32}},

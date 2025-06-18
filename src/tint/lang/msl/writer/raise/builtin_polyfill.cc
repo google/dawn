@@ -861,7 +861,12 @@ struct State {
                 tex_type->Dim() == core::type::TextureDimension::kCubeArray) {
                 lod_idx = 3;
             }
-            args[lod_idx] = b.Construct(ty.Get<msl::type::Level>(), args[lod_idx])->Result();
+            if (tex_type->Dim() == core::type::TextureDimension::k1d) {
+                // Remove level for 1d.
+                args.Resize(args.Length() - 1);
+            } else {
+                args[lod_idx] = b.Construct(ty.Get<msl::type::Level>(), args[lod_idx])->Result();
+            }
             // Call the `sample()` member function.
             auto* call = b.MemberCallWithResult<msl::ir::MemberBuiltinCall>(
                 builtin->DetachResult(), msl::BuiltinFn::kSample, tex, std::move(args));

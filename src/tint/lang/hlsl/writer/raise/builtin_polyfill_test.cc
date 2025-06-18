@@ -4751,6 +4751,66 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleLevel_1d) {
+    core::ir::Var* tex = nullptr;
+    core::ir::Var* sampler = nullptr;
+    b.Append(b.ir.root_block, [&] {
+        tex =
+            b.Var(ty.ptr(handle, ty.sampled_texture(core::type::TextureDimension::k1d, ty.f32())));
+        tex->SetBindingPoint(0, 0);
+
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
+        sampler->SetBindingPoint(0, 1);
+    });
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Value(1_f);
+
+        auto* t = b.Load(tex);
+        auto* s = b.Load(sampler);
+        b.Let("x", b.Call<vec4<f32>>(core::BuiltinFn::kTextureSampleLevel, t, s, coords, 0_f));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %1:ptr<handle, texture_1d<f32>, read> = var undef @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %4:texture_1d<f32> = load %1
+    %5:sampler = load %2
+    %6:vec4<f32> = textureSampleLevel %4, %5, 1.0f, 0.0f
+    %x:vec4<f32> = let %6
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %1:ptr<handle, texture_1d<f32>, read> = var undef @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %4:texture_1d<f32> = load %1
+    %5:sampler = load %2
+    %6:vec4<f32> = %4.SampleLevel %5, 1.0f, 0.0f
+    %x:vec4<f32> = let %6
+    ret
+  }
+}
+)";
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleLevel_2d) {
     core::ir::Var* tex = nullptr;
     core::ir::Var* sampler = nullptr;

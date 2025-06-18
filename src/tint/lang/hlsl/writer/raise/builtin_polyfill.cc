@@ -1467,6 +1467,7 @@ struct State {
             core::ir::Value* coords = args[2];
 
             switch (tex_type->Dim()) {
+                case core::type::TextureDimension::k1d:
                 case core::type::TextureDimension::k2d:
                     params.Push(coords);
                     params.Push(b.InsertConvertIfNeeded(ty.f32(), args[3]));  // Level
