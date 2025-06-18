@@ -86,8 +86,7 @@
         {%- endif -%}
     {%- elif member.type.category == "native" -%}
         //* Defaults in native types are either directly specified, or
-        //* explicitly defined per type, except for booleans, which we need to
-        //* convert into literals.
+        //* explicitly defined per type.
         {%- if member.default_value != None and member.type.name.get() != "bool" -%}
             //* Check to see if the default value is a known constant.
             {%- set constant = find_by_name(by_category["constant"], member.default_value) -%}
@@ -104,11 +103,10 @@
             {%- elif member.type.name.get() == "double" -%}
                 0.
             {%- elif member.type.name.get() == "bool" -%}
-                //* Explicitly use literals 0 and 1 for booleans.
                 {%- if member.default_value == "true" -%}
-                    1
+                    {{API}}_TRUE
                 {%- else -%}
-                    0
+                    {{API}}_FALSE
                 {%- endif -%}
             {%- elif "void" in member.type.name.get() -%}
                 //* For members, void types are always pointers. We should
@@ -228,6 +226,8 @@
 #  endif
 #endif
 
+#define WGPU_TRUE (UINT32_C(1))
+#define WGPU_FALSE (UINT32_C(0))
 {% for constant in by_category["constant"] %}
     #define {{API}}_{{constant.name.SNAKE_CASE()}} ({{constant.value}})
 {% endfor %}

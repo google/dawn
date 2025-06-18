@@ -12,15 +12,6 @@
  #if defined(WGPU_SHARED_LIBRARY)
  #    if defined(_WIN32)
 @@
- #  endif
- #endif
- 
--#define WGPU_TRUE (UINT32_C(1))
--#define WGPU_FALSE (UINT32_C(0))
- #define WGPU_ARRAY_LAYER_COUNT_UNDEFINED (UINT32_MAX)
- #define WGPU_COPY_STRIDE_UNDEFINED (UINT32_MAX)
- #define WGPU_DEPTH_CLEAR_VALUE_UNDEFINED (NAN)
-@@
  struct WGPUConstantEntry;
  struct WGPUExtent3D;
  struct WGPUFuture;
@@ -110,24 +101,6 @@
  } WGPUWGSLLanguageFeatureName WGPU_ENUM_ATTRIBUTE;
  
 @@
- #define WGPU_BUFFER_BINDING_LAYOUT_INIT _wgpu_MAKE_INIT_STRUCT(WGPUBufferBindingLayout, { \
-     /*.nextInChain=*/NULL _wgpu_COMMA \
-     /*.type=*/WGPUBufferBindingType_Undefined _wgpu_COMMA \
--    /*.hasDynamicOffset=*/WGPU_FALSE _wgpu_COMMA \
-+    /*.hasDynamicOffset=*/0 _wgpu_COMMA \
-     /*.minBindingSize=*/0 _wgpu_COMMA \
- })
- 
-@@
-     /*.label=*/WGPU_STRING_VIEW_INIT _wgpu_COMMA \
-     /*.usage=*/WGPUBufferUsage_None _wgpu_COMMA \
-     /*.size=*/0 _wgpu_COMMA \
--    /*.mappedAtCreation=*/WGPU_FALSE _wgpu_COMMA \
-+    /*.mappedAtCreation=*/0 _wgpu_COMMA \
- })
- 
- typedef struct WGPUColor {
-@@
      /*.id=*/0 _wgpu_COMMA \
  })
  
@@ -145,7 +118,7 @@
 +
 +#define WGPU_INSTANCE_CAPABILITIES_INIT _wgpu_MAKE_INIT_STRUCT(WGPUInstanceCapabilities, { \
 +    /*.nextInChain=*/NULL _wgpu_COMMA \
-+    /*.timedWaitAnyEnable=*/0 _wgpu_COMMA \
++    /*.timedWaitAnyEnable=*/WGPU_FALSE _wgpu_COMMA \
      /*.timedWaitAnyMaxCount=*/0 _wgpu_COMMA \
  })
  
@@ -174,15 +147,6 @@
  
  typedef struct WGPUMultisampleState {
 @@
-     /*.nextInChain=*/NULL _wgpu_COMMA \
-     /*.count=*/1 _wgpu_COMMA \
-     /*.mask=*/0xFFFFFFFF _wgpu_COMMA \
--    /*.alphaToCoverageEnabled=*/WGPU_FALSE _wgpu_COMMA \
-+    /*.alphaToCoverageEnabled=*/0 _wgpu_COMMA \
- })
- 
- typedef struct WGPUOrigin3D {
-@@
      WGPUChainedStruct * nextInChain;
      WGPUStringView label;
      size_t bindGroupLayoutCount;
@@ -199,45 +163,7 @@
 +    /*.stripIndexFormat=*/WGPUIndexFormat_Undefined _wgpu_COMMA \
      /*.frontFace=*/WGPUFrontFace_Undefined _wgpu_COMMA \
      /*.cullMode=*/WGPUCullMode_Undefined _wgpu_COMMA \
--    /*.unclippedDepth=*/WGPU_FALSE _wgpu_COMMA \
-+    /*.unclippedDepth=*/0 _wgpu_COMMA \
- })
- 
- typedef struct WGPUQuerySetDescriptor {
-@@
-     /*.colorFormats=*/NULL _wgpu_COMMA \
-     /*.depthStencilFormat=*/WGPUTextureFormat_Undefined _wgpu_COMMA \
-     /*.sampleCount=*/1 _wgpu_COMMA \
--    /*.depthReadOnly=*/WGPU_FALSE _wgpu_COMMA \
--    /*.stencilReadOnly=*/WGPU_FALSE _wgpu_COMMA \
-+    /*.depthReadOnly=*/0 _wgpu_COMMA \
-+    /*.stencilReadOnly=*/0 _wgpu_COMMA \
- })
- 
- typedef struct WGPURenderPassDepthStencilAttachment {
-@@
-     /*.depthLoadOp=*/WGPULoadOp_Undefined _wgpu_COMMA \
-     /*.depthStoreOp=*/WGPUStoreOp_Undefined _wgpu_COMMA \
-     /*.depthClearValue=*/WGPU_DEPTH_CLEAR_VALUE_UNDEFINED _wgpu_COMMA \
--    /*.depthReadOnly=*/WGPU_FALSE _wgpu_COMMA \
-+    /*.depthReadOnly=*/0 _wgpu_COMMA \
-     /*.stencilLoadOp=*/WGPULoadOp_Undefined _wgpu_COMMA \
-     /*.stencilStoreOp=*/WGPUStoreOp_Undefined _wgpu_COMMA \
-     /*.stencilClearValue=*/0 _wgpu_COMMA \
--    /*.stencilReadOnly=*/WGPU_FALSE _wgpu_COMMA \
-+    /*.stencilReadOnly=*/0 _wgpu_COMMA \
- })
- 
- typedef struct WGPURenderPassMaxDrawCount {
-@@
-         /*.next=*/NULL _wgpu_COMMA \
-         /*.sType=*/WGPUSType_RequestAdapterWebXROptions _wgpu_COMMA \
-     }) _wgpu_COMMA \
--    /*.xrCompatible=*/WGPU_FALSE _wgpu_COMMA \
-+    /*.xrCompatible=*/0 _wgpu_COMMA \
- })
- 
- typedef struct WGPUSamplerBindingLayout {
+     /*.unclippedDepth=*/WGPU_FALSE _wgpu_COMMA \
 @@
      /*.magFilter=*/WGPUFilterMode_Undefined _wgpu_COMMA \
      /*.minFilter=*/WGPUFilterMode_Undefined _wgpu_COMMA \
@@ -267,11 +193,9 @@
      /*.features=*/NULL _wgpu_COMMA \
  })
 @@
-     /*.nextInChain=*/NULL _wgpu_COMMA \
      /*.sampleType=*/WGPUTextureSampleType_Undefined _wgpu_COMMA \
      /*.viewDimension=*/WGPUTextureViewDimension_Undefined _wgpu_COMMA \
--    /*.multisampled=*/WGPU_FALSE _wgpu_COMMA \
-+    /*.multisampled=*/0 _wgpu_COMMA \
+     /*.multisampled=*/WGPU_FALSE _wgpu_COMMA \
 +})
 +
 +typedef struct WGPUTextureBindingViewDimensionDescriptor {
@@ -308,12 +232,6 @@
  typedef struct WGPUDeviceDescriptor {
 @@
  
- #define WGPU_FUTURE_WAIT_INFO_INIT _wgpu_MAKE_INIT_STRUCT(WGPUFutureWaitInfo, { \
-     /*.future=*/WGPU_FUTURE_INIT _wgpu_COMMA \
--    /*.completed=*/WGPU_FALSE _wgpu_COMMA \
-+    /*.completed=*/0 _wgpu_COMMA \
- })
- 
  typedef struct WGPUInstanceDescriptor {
      WGPUChainedStruct * nextInChain;
 -    size_t requiredFeatureCount;
@@ -342,15 +260,6 @@
      /*.clearValue=*/WGPU_COLOR_INIT _wgpu_COMMA \
  })
  
-@@
-     /*.nextInChain=*/NULL _wgpu_COMMA \
-     /*.featureLevel=*/WGPUFeatureLevel_Undefined _wgpu_COMMA \
-     /*.powerPreference=*/WGPUPowerPreference_Undefined _wgpu_COMMA \
--    /*.forceFallbackAdapter=*/WGPU_FALSE _wgpu_COMMA \
-+    /*.forceFallbackAdapter=*/0 _wgpu_COMMA \
-     /*.backendType=*/WGPUBackendType_Undefined _wgpu_COMMA \
-     /*.compatibleSurface=*/NULL _wgpu_COMMA \
- })
 @@
      /*.fragment=*/NULL _wgpu_COMMA \
  })
