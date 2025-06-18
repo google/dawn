@@ -107,6 +107,7 @@ enum language_feature {
   unrestricted_pointer_parameters
   sized_binding_array
   texel_buffers
+  texture_sample_level_1d
 
   // Language features used only for testing whose status will never change.
   chromium_testing_unimplemented

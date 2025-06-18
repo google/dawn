@@ -72,6 +72,9 @@ LanguageFeature ParseLanguageFeature(std::string_view str) {
     if (str == "texel_buffers") {
         return LanguageFeature::kTexelBuffers;
     }
+    if (str == "texture_sample_level_1d") {
+        return LanguageFeature::kTextureSampleLevel1D;
+    }
     if (str == "unrestricted_pointer_parameters") {
         return LanguageFeature::kUnrestrictedPointerParameters;
     }
@@ -102,6 +105,8 @@ std::string_view ToString(LanguageFeature value) {
             return "sized_binding_array";
         case LanguageFeature::kTexelBuffers:
             return "texel_buffers";
+        case LanguageFeature::kTextureSampleLevel1D:
+            return "texture_sample_level_1d";
         case LanguageFeature::kUnrestrictedPointerParameters:
             return "unrestricted_pointer_parameters";
     }
