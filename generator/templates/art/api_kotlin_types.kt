@@ -91,6 +91,9 @@
         {%- set ns = namespace(type_name='', default_value=default_value) -%}
         {%- if type.name.get() == 'float' -%}
             {%- set ns.type_name = 'Float' -%}
+            {%- if ns.default_value -%}
+                {%- set ns.default_value = "%.1ff"|format(ns.default_value[:-1]|float) -%}
+            {%- endif -%}
         {%- elif type.name.get() == 'double' -%}
             {%- set ns.type_name = 'Double' -%}
         {%- elif type.name.get() in ['int8_t', 'uint8_t'] -%}
