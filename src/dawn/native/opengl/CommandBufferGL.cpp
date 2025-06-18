@@ -286,15 +286,13 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
     void OnSetPipeline(RenderPipeline* pipeline) {
         BindGroupTrackerBase::OnSetPipeline(pipeline);
         mPipeline = pipeline;
-        ResetInternalUniformDataDirtyRange();
-        ResetInternalUniformDataDirtyRangeArrayLength();
+        ResetInternalUniformDataBindgroupAndDirtyRange();
     }
 
     void OnSetPipeline(ComputePipeline* pipeline) {
         BindGroupTrackerBase::OnSetPipeline(pipeline);
         mPipeline = pipeline;
-        ResetInternalUniformDataDirtyRange();
-        ResetInternalUniformDataDirtyRangeArrayLength();
+        ResetInternalUniformDataBindgroupAndDirtyRange();
     }
 
     MaybeError Apply(const OpenGLFunctions& gl) {
@@ -597,6 +595,20 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
 
     void ResetInternalUniformDataDirtyRangeArrayLength() {
         mDirtyRangeArrayLength = {mInternalArrayLengthBufferData.size(), 0};
+    }
+
+    void ResetInternalUniformDataBindgroupAndDirtyRange() {
+        // Mark bind groups that need emulated builtin uniforms dirty so that they can be updated
+        // properly, even if the bind group is not updated.
+        // TODO(crbug.com/408065421): This forces bindgroups with metadata to be completely set
+        // again each pipeline change. In the future we will want to optimize that to only recompute
+        // the metadata as needed, not force a rebind of all resources.
+        const auto& bindingInfo = mPipeline->GetBindingPointBuiltinDataInfo();
+        for (const auto& entry : bindingInfo) {
+            mDirtyBindGroupsObjectChangedOrIsDynamic.set(BindGroupIndex(entry.first.group));
+        }
+        ResetInternalUniformDataDirtyRange();
+        ResetInternalUniformDataDirtyRangeArrayLength();
     }
 
     raw_ptr<PipelineGL> mPipeline = nullptr;
