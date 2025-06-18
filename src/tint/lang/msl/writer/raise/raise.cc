@@ -32,6 +32,7 @@
 #include "src/tint/lang/core/ir/transform/binary_polyfill.h"
 #include "src/tint/lang/core/ir/transform/binding_remapper.h"
 #include "src/tint/lang/core/ir/transform/builtin_polyfill.h"
+#include "src/tint/lang/core/ir/transform/builtin_scalarize.h"
 #include "src/tint/lang/core/ir/transform/conversion_polyfill.h"
 #include "src/tint/lang/core/ir/transform/demote_to_helper.h"
 #include "src/tint/lang/core/ir/transform/multiplanar_external_texture.h"
@@ -159,6 +160,13 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
     RUN_TRANSFORM(raise::UnaryPolyfill, module);
     RUN_TRANSFORM(raise::BinaryPolyfill, module);
     RUN_TRANSFORM(raise::BuiltinPolyfill, module);
+
+    core::ir::transform::BuiltinScalarizeConfig scalarize_config{
+        .scalarize_clamp = options.scalarize_max_min_clamp,
+        .scalarize_max = options.scalarize_max_min_clamp,
+        .scalarize_min = options.scalarize_max_min_clamp,
+    };
+    RUN_TRANSFORM(core::ir::transform::BuiltinScalarize, module, scalarize_config);
 
     if (options.enable_module_constant) {
         RUN_TRANSFORM(raise::ModuleConstant, module);

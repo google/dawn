@@ -163,6 +163,9 @@ struct Options {
     /// Set to `true` to disable the polyfills on integer division and modulo.
     bool disable_polyfill_integer_div_mod = false;
 
+    /// Set to `true` to scalarize max min and clamp builtins.
+    bool scalarize_max_min_clamp = false;
+
     /// Set to `true` to enable the module constant transform
     bool enable_module_constant = false;
 
@@ -200,6 +203,7 @@ struct Options {
                  disable_demote_to_helper,
                  emit_vertex_point_size,
                  disable_polyfill_integer_div_mod,
+                 scalarize_max_min_clamp,
                  enable_module_constant,
                  use_argument_buffers,
                  buffer_size_ubo_index,

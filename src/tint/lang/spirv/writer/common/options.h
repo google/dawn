@@ -205,11 +205,11 @@ struct Options {
     /// Set to `true` to disable the polyfills on integer division and modulo.
     bool disable_polyfill_integer_div_mod = false;
 
+    /// Set to `true` to scalarize max min and clamp builtins.
+    bool scalarize_max_min_clamp = false;
+
     /// Set to `true` if the Vulkan Memory Model should be used
     bool use_vulkan_memory_model = false;
-
-    /// Set to `true` if the clamp builtin should be scalarized for vector operations
-    bool scalarize_clamp_builtin = false;
 
     /// Set to `true` if handles should be transformed by direct variable access.
     bool dva_transform_handle = false;
@@ -239,8 +239,8 @@ struct Options {
                  polyfill_dot_4x8_packed,
                  polyfill_pack_unpack_4x8_norm,
                  disable_polyfill_integer_div_mod,
+                 scalarize_max_min_clamp,
                  use_vulkan_memory_model,
-                 scalarize_clamp_builtin,
                  dva_transform_handle,
                  depth_range_offsets,
                  spirv_version);

@@ -295,6 +295,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
     req.tintOptions.bindings = std::move(bindings);
     req.tintOptions.disable_polyfill_integer_div_mod =
         device->IsToggleEnabled(Toggle::DisablePolyfillsOnIntegerDivisonAndModulo);
+    req.tintOptions.scalarize_max_min_clamp = device->IsToggleEnabled(Toggle::ScalarizeMaxMinClamp);
     req.tintOptions.enable_module_constant =
         device->IsToggleEnabled(Toggle::MetalEnableModuleConstant);
     req.tintOptions.vertex_pulling_config = std::move(vertexPullingTransformConfig);

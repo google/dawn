@@ -233,6 +233,9 @@ struct Options {
     /// Set to `true` to disable the polyfills on integer division and modulo.
     bool disable_polyfill_integer_div_mod = false;
 
+    /// Set to `true` to scalarize max, min, and clamp builtins.
+    bool scalarize_max_min_clamp = false;
+
     /// Set to `true` to generate polyfill for `pack4xI8`, `pack4xU8`, `pack4xI8Clamp`,
     /// `unpack4xI8` and `unpack4xU8` builtins
     bool polyfill_pack_unpack_4x8 = false;
@@ -282,6 +285,7 @@ struct Options {
                  polyfill_reflect_vec2_f32,
                  polyfill_dot_4x8_packed,
                  disable_polyfill_integer_div_mod,
+                 scalarize_max_min_clamp,
                  polyfill_pack_unpack_4x8,
                  compiler,
                  array_length_from_uniform,

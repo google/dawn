@@ -33,8 +33,6 @@
 #include "dawn/tests/DawnTest.h"
 #include "dawn/utils/WGPUHelpers.h"
 
-//
-
 namespace dawn {
 namespace {
 
@@ -69,10 +67,10 @@ class PolyfillBuiltinSimpleTests : public DawnTest {
     }
 };
 
-TEST_P(PolyfillBuiltinSimpleTests, ScalarizeClampBuiltin) {
+TEST_P(PolyfillBuiltinSimpleTests, ScalarizeClampBuiltinNanComponent) {
     // Some devices (Adreno) do not handle nan's correctly for the clamp function
-    // This test will fail on those devices without the builtin polyfill applied.
-    // See: crbug.com/407109052
+    // This test will fail on those devices without the builtin polyfill/scalarize
+    //  applied. See: crbug.com/407109052
     std::string kShaderCode = R"(
     @group(0) @binding(0) var<storage, read_write> in_out : array<u32, 2>;
     @compute @workgroup_size(1)
@@ -106,11 +104,85 @@ TEST_P(PolyfillBuiltinSimpleTests, ScalarizeClampBuiltin) {
     EXPECT_BUFFER_U32_RANGE_EQ(expected.data(), output, 0, expected.size());
 }
 
+TEST_P(PolyfillBuiltinSimpleTests, ScalarizeClampBuiltin) {
+    // Basic correctness test for scalariztion of clamp.
+    std::string kShaderCode = R"(
+    @group(0) @binding(0) var<storage, read_write> in_out : array<u32, 2>;
+    @compute @workgroup_size(1)
+    fn main() {
+        var x = vec2(5.0, -2.0);
+        var q = clamp(x, vec2(0.0), vec2(1.0));
+        in_out[0] = u32(q.x);
+        in_out[1] = u32(q.y);
+    }
+    )";
+
+    wgpu::ComputePipeline pipeline = CreateComputePipeline(kShaderCode);
+    uint32_t kDefaultVal = 0;
+    wgpu::Buffer output = CreateBuffer(2, kDefaultVal);
+    wgpu::BindGroup bindGroup =
+        utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0), {{0, output}});
+
+    wgpu::CommandBuffer commands;
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetPipeline(pipeline);
+        pass.SetBindGroup(0, bindGroup);
+        pass.DispatchWorkgroups(1);
+        pass.End();
+        commands = encoder.Finish();
+    }
+
+    queue.Submit(1, &commands);
+    std::vector<uint32_t> expected = {1, 0};
+    EXPECT_BUFFER_U32_RANGE_EQ(expected.data(), output, 0, expected.size());
+}
+
+TEST_P(PolyfillBuiltinSimpleTests, ScalarizeMinMaxBuiltin) {
+    // Basic correctness test for scalariztion of min and max.
+    std::string kShaderCode = R"(
+    @group(0) @binding(0) var<storage, read_write> in_out : array<u32, 2>;
+    @compute @workgroup_size(1)
+    fn main() {
+        var x = vec2(5.0, -2.0);
+        var q = min(vec2(3.0), max(x, vec2(2.0)));
+        in_out[0] = u32(q.x);
+        in_out[1] = u32(q.y);
+    }
+    )";
+
+    wgpu::ComputePipeline pipeline = CreateComputePipeline(kShaderCode);
+    uint32_t kDefaultVal = 0;
+    wgpu::Buffer output = CreateBuffer(2, kDefaultVal);
+    wgpu::BindGroup bindGroup =
+        utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0), {{0, output}});
+
+    wgpu::CommandBuffer commands;
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetPipeline(pipeline);
+        pass.SetBindGroup(0, bindGroup);
+        pass.DispatchWorkgroups(1);
+        pass.End();
+        commands = encoder.Finish();
+    }
+
+    queue.Submit(1, &commands);
+    std::vector<uint32_t> expected = {3, 2};
+    EXPECT_BUFFER_U32_RANGE_EQ(expected.data(), output, 0, expected.size());
+}
+
 DAWN_INSTANTIATE_TEST(PolyfillBuiltinSimpleTests,
                       D3D12Backend(),
+                      D3D11Backend(),
                       MetalBackend(),
                       VulkanBackend(),
-                      VulkanBackend({"vulkan_scalarize_clamp_builtin"}),
+                      D3D12Backend({"scalarize_max_min_clamp"}),
+                      MetalBackend({"scalarize_max_min_clamp"}),
+                      VulkanBackend({"scalarize_max_min_clamp"}),
+                      D3D11Backend({"scalarize_max_min_clamp"}),
                       OpenGLESBackend());
 
 }  // anonymous namespace

@@ -816,7 +816,7 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
 
         // chromium:407109052: Qualcomm devices have a bug where the spirv extended op NClamp
         // modifies other components of a vector when one of the components is nan.
-        deviceToggles->Default(Toggle::VulkanScalarizeClampBuiltin, true);
+        deviceToggles->Default(Toggle::ScalarizeMaxMinClamp, true);
     }
 
     if (IsAndroidARM()) {
