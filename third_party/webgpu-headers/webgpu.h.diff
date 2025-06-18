@@ -37,24 +37,6 @@
  struct WGPUVertexAttribute;
  struct WGPUBindGroupDescriptor;
 @@
- struct WGPUFragmentState;
- struct WGPURenderPipelineDescriptor;
- 
--struct WGPUBufferMapCallbackInfo;
--struct WGPUCompilationInfoCallbackInfo;
--struct WGPUCreateComputePipelineAsyncCallbackInfo;
--struct WGPUCreateRenderPipelineAsyncCallbackInfo;
--struct WGPUDeviceLostCallbackInfo;
--struct WGPUPopErrorScopeCallbackInfo;
--struct WGPUQueueWorkDoneCallbackInfo;
--struct WGPURequestAdapterCallbackInfo;
--struct WGPURequestDeviceCallbackInfo;
--struct WGPUUncapturedErrorCallbackInfo;
--
- typedef enum WGPUAdapterType {
-     WGPUAdapterType_DiscreteGPU = 0x00000001,
-     WGPUAdapterType_IntegratedGPU = 0x00000002,
-@@
      WGPUFeatureName_ClipDistances = 0x0000000F,
      WGPUFeatureName_DualSourceBlending = 0x00000010,
      WGPUFeatureName_Subgroups = 0x00000011,

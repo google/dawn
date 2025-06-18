@@ -247,6 +247,11 @@ typedef uint32_t {{API}}Bool;
     struct {{as_cType(type.name)}};
 {% endfor %}
 
+// Callback info structure forward declarations.
+{% for type in by_category["callback info"] %}
+    struct {{as_cType(type.name)}};
+{% endfor %}
+
 {% for type in by_category["enum"] %}
     typedef enum {{as_cType(type.name)}} {
         {% for value in type.values %}
@@ -282,7 +287,7 @@ typedef uint32_t {{API}}Bool;
 {% for type in by_category["callback function"] %}
     typedef {{as_cType(type.return_type.name)}} (*{{as_cType(type.name)}})(
         {%- for arg in type.arguments -%}
-        {% if arg.type.category == "structure" and arg.type.name.get() != "string view"%}struct {% endif %}{{as_annotated_cType(arg)}}{{", "}}
+        {% if arg.type.category == "structure" and arg.type.name.get() != "string view" %}struct {% endif %}{{as_annotated_cType(arg)}}{{", "}}
         {%- endfor -%}
     {{API}}_NULLABLE void* userdata1, {{API}}_NULLABLE void* userdata2) {{API}}_FUNCTION_ATTRIBUTE;
 
