@@ -141,6 +141,7 @@ Result<SuccessType> BinaryPolyfill(core::ir::Module& ir) {
                                           core::ir::Capabilities{
                                               core::ir::Capability::kAllowClipDistancesOnF32,
                                               core::ir::Capability::kAllowDuplicateBindings,
+                                              core::ir::Capability::kAllowNonCoreTypes,
                                           });
     if (result != Success) {
         return result.Failure();

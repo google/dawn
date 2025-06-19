@@ -737,6 +737,7 @@ Result<SuccessType> Texture(core::ir::Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "spirv.Texture",
                                           core::ir::Capabilities{
                                               core::ir::Capability::kAllowOverrides,
+                                              core::ir::Capability::kAllowNonCoreTypes,
                                           });
     if (result != Success) {
         return result.Failure();

@@ -53,6 +53,7 @@ const Capabilities kBuiltinScalarizeCapabilities{
     core::ir::Capability::kAllowWorkspacePointerInputToEntryPoint,
     core::ir::Capability::kAllowModuleScopeLets,
     core::ir::Capability::kAllowAnyInputAttachmentIndexType,
+    core::ir::Capability::kAllowNonCoreTypes,
 };
 
 /// The scalarizer configuration options

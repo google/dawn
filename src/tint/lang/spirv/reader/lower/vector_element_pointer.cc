@@ -156,6 +156,7 @@ Result<SuccessType> VectorElementPointer(core::ir::Module& ir) {
                                               core::ir::Capability::kAllowOverrides,
                                               core::ir::Capability::kAllowVectorElementPointer,
                                               core::ir::Capability::kAllowPhonyInstructions,
+                                              core::ir::Capability::kAllowNonCoreTypes,
                                           });
     if (result != Success) {
         return result.Failure();

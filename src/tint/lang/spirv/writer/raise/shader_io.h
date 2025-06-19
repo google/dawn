@@ -43,6 +43,7 @@ namespace tint::spirv::writer::raise {
 /// The capabilities that the transform can support.
 const core::ir::Capabilities kShaderIOCapabilities{
     core::ir::Capability::kAllowAnyInputAttachmentIndexType,
+    core::ir::Capability::kAllowNonCoreTypes,
 };
 
 /// ShaderIOConfig describes the set of configuration options for the ShaderIO transform.

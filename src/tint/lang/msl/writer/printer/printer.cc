@@ -133,6 +133,7 @@ class Printer : public tint::TextGenerator {
                 core::ir::Capability::kAllowAnyLetType,
                 core::ir::Capability::kAllowModuleScopeLets,
                 core::ir::Capability::kAllowWorkspacePointerInputToEntryPoint,
+                core::ir::Capability::kAllowNonCoreTypes,
             });
         if (valid != Success) {
             return std::move(valid.Failure());

@@ -43,6 +43,7 @@ const core::ir::Capabilities kStd140Capabilities{
     core::ir::Capability::kAllowHandleVarsWithoutBindings,
     core::ir::Capability::kAllowAnyInputAttachmentIndexType,
     core::ir::Capability::kAllowDuplicateBindings,
+    core::ir::Capability::kAllowNonCoreTypes,
 };
 
 /// Std140 is a transform that rewrites matrix types in the uniform address space to conform to

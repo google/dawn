@@ -77,6 +77,8 @@ enum class Capability : uint8_t {
     kAllowDuplicateBindings,
     /// Allows module scope `var`s to exist without an IO annotation
     kAllowUnannotatedModuleIOVariables,
+    /// Allows non-core types in the IR module
+    kAllowNonCoreTypes,
 };
 
 /// Capabilities is a set of Capability

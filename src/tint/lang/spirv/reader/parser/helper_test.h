@@ -79,6 +79,7 @@ class SpirvParserTestHelperBase : public BASE {
                                         core::ir::Capability::kAllowOverrides,
                                         core::ir::Capability::kAllowPhonyInstructions,
                                         core::ir::Capability::kAllowVectorElementPointer,
+                                        core::ir::Capability::kAllowNonCoreTypes,
                                     });
         if (validated != Success) {
             return validated.Failure();

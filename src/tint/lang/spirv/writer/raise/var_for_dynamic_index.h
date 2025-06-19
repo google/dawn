@@ -41,6 +41,7 @@ namespace tint::spirv::writer::raise {
 /// The capabilities that the transform can support.
 const core::ir::Capabilities kVarForDynamicIndex{
     core::ir::Capability::kAllowAnyInputAttachmentIndexType,
+    core::ir::Capability::kAllowNonCoreTypes,
 };
 
 /// VarForDynamicIndex is a transform that copies array and matrix values that are dynamically

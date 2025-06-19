@@ -43,6 +43,7 @@ namespace {
 // The capabilities that the transform can support.
 const core::ir::Capabilities kMergeReturnCapabilities{
     core::ir::Capability::kAllowAnyInputAttachmentIndexType,
+    core::ir::Capability::kAllowNonCoreTypes,
 };
 
 /// PIMPL state for the transform, for a single function.

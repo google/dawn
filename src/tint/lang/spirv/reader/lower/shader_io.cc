@@ -634,6 +634,7 @@ Result<SuccessType> ShaderIO(core::ir::Module& ir) {
                                               core::ir::Capability::kAllowMultipleEntryPoints,
                                               core::ir::Capability::kAllowOverrides,
                                               core::ir::Capability::kAllowPhonyInstructions,
+                                              core::ir::Capability::kAllowNonCoreTypes,
                                           });
     if (result != Success) {
         return result.Failure();

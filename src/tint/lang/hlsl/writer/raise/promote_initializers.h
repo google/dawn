@@ -43,6 +43,7 @@ const core::ir::Capabilities kPromoteInitializersCapabilities{
     core::ir::Capability::kAllowVectorElementPointer,
     core::ir::Capability::kAllowClipDistancesOnF32,
     core::ir::Capability::kAllowDuplicateBindings,
+    core::ir::Capability::kAllowNonCoreTypes,
 };
 
 /// PromoteInitializers is a transform that moves inline struct and array initializers to a `let`

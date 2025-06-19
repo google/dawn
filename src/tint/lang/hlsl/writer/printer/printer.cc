@@ -180,6 +180,7 @@ class Printer : public tint::TextGenerator {
             core::ir::Capability::kAllowVectorElementPointer,
             core::ir::Capability::kAllowClipDistancesOnF32,
             core::ir::Capability::kAllowDuplicateBindings,
+            core::ir::Capability::kAllowNonCoreTypes,
         };
         auto valid = core::ir::ValidateAndDumpIfNeeded(ir_, "hlsl.Printer", capabilities);
         if (valid != Success) {

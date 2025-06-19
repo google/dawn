@@ -44,6 +44,7 @@ namespace tint::spirv::writer::raise {
 /// The capabilities that the transform can support.
 const core::ir::Capabilities kForkExplicitLayoutTypesCapabilities{
     core::ir::Capability::kAllowAnyInputAttachmentIndexType,
+    core::ir::Capability::kAllowNonCoreTypes,
 };
 
 /// ForkExplicitLayoutTypes is a transform that forks array and structures types that are shared

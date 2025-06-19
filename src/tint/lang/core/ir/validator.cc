@@ -1822,6 +1822,15 @@ void Validator::CheckType(const core::type::Type* root,
         return;
     }
 
+    if (!capabilities_.Contains(Capability::kAllowNonCoreTypes)) {
+        // Check for core types (this is a hack to determine if the type is core, non-core types
+        // prefix their names with `lang.`, so we search for a `.` to find non-core)
+        if (root->FriendlyName().find(".") != std::string::npos) {
+            diag() << "non-core types not allowed in core IR";
+            return;
+        }
+    }
+
     if (!validated_types_.Add(ValidatedType{root, ignore_caps})) {
         return;
     }

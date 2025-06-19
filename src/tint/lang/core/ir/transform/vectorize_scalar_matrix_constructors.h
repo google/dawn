@@ -44,6 +44,7 @@ const core::ir::Capabilities kVectorizeScalarMatrixConstructorsCapabilities{
     core::ir::Capability::kAllowHandleVarsWithoutBindings,
     core::ir::Capability::kAllowClipDistancesOnF32,
     core::ir::Capability::kAllowDuplicateBindings,
+    core::ir::Capability::kAllowNonCoreTypes,
 };
 
 /// VectorizeScalarMatrixConstructors is a transform that replaces construct instructions that

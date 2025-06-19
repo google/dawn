@@ -6488,6 +6488,10 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, Unpack4x8Unorm) {
 }
 
 TEST_F(HlslWriter_BuiltinPolyfillTest, Pack4xI8) {
+    capabilities = core::ir::Capabilities{
+        core::ir::Capability::kAllowNonCoreTypes,
+    };
+
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         auto* u = b.Var("u", b.Splat(ty.vec4<i32>(), 2_i));
@@ -6526,6 +6530,10 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, Pack4xI8) {
 }
 
 TEST_F(HlslWriter_BuiltinPolyfillTest, Unpack4xI8) {
+    capabilities = core::ir::Capabilities{
+        core::ir::Capability::kAllowNonCoreTypes,
+    };
+
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         auto* u = b.Var("u", 2_u);
@@ -6564,6 +6572,10 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, Unpack4xI8) {
 }
 
 TEST_F(HlslWriter_BuiltinPolyfillTest, Pack4xU8) {
+    capabilities = core::ir::Capabilities{
+        core::ir::Capability::kAllowNonCoreTypes,
+    };
+
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         auto* u = b.Var("u", b.Splat(ty.vec4<u32>(), 2_u));
@@ -6602,6 +6614,10 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, Pack4xU8) {
 }
 
 TEST_F(HlslWriter_BuiltinPolyfillTest, Unpack4xU8) {
+    capabilities = core::ir::Capabilities{
+        core::ir::Capability::kAllowNonCoreTypes,
+    };
+
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         auto* u = b.Var("u", 2_u);
@@ -6715,6 +6731,10 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, Dot4I8Packed) {
 }
 
 TEST_F(HlslWriter_BuiltinPolyfillTest, Pack4xI8Clamp) {
+    capabilities = core::ir::Capabilities{
+        core::ir::Capability::kAllowNonCoreTypes,
+    };
+
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         auto* u = b.Var("u", b.Splat(ty.vec4<i32>(), 2_i));
