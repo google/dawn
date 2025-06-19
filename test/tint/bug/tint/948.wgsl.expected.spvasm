@@ -606,7 +606,7 @@
         %336 = OpAccessChain %_ptr_Function_float %nc %uint_3
       %x_285 = OpLoad %float %336 None
         %338 = OpFAdd %float %x_283 %x_285
-        %339 = OpExtInst %float %69 FMin %338 %float_1
+        %339 = OpExtInst %float %69 NMin %338 %float_1
                OpStore %alpha %339 None
       %x_290 = OpLoad %v4float %color None
       %x_292 = OpLoad %v4float %nc None

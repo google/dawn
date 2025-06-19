@@ -588,7 +588,7 @@
         %391 = OpAccessChain %_ptr_Function_v4float %frustumPlanes %390
         %392 = OpLoad %v4float %391 None
         %393 = OpDot %float %388 %392
-        %394 = OpExtInst %float %55 FMin %float_0 %393
+        %394 = OpExtInst %float %55 NMin %float_0 %393
         %395 = OpFAdd %float %387 %394
                OpStore %dp %395 None
                OpBranch %343

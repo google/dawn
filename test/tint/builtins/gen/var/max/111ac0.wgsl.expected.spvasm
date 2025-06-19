@@ -47,7 +47,7 @@
                OpStore %arg_1 %half_0x1p_0
          %12 = OpLoad %half %arg_0 None
          %13 = OpLoad %half %arg_1 None
-         %14 = OpExtInst %half %15 FMax %12 %13
+         %14 = OpExtInst %half %15 NMax %12 %13
                OpStore %res %14
          %17 = OpLoad %half %res None
                OpReturnValue %17
@@ -108,7 +108,7 @@
                OpStore %arg_1 %half_0x1p_0
          %12 = OpLoad %half %arg_0 None
          %13 = OpLoad %half %arg_1 None
-         %14 = OpExtInst %half %15 FMax %12 %13
+         %14 = OpExtInst %half %15 NMax %12 %13
                OpStore %res %14
          %17 = OpLoad %half %res None
                OpReturnValue %17
@@ -186,7 +186,7 @@
                OpStore %arg_1 %half_0x1p_0
          %17 = OpLoad %half %arg_0 None
          %18 = OpLoad %half %arg_1 None
-         %19 = OpExtInst %half %20 FMax %17 %18
+         %19 = OpExtInst %half %20 NMax %17 %18
                OpStore %res %19
          %22 = OpLoad %half %res None
                OpReturnValue %22

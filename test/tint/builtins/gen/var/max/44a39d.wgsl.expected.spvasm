@@ -44,7 +44,7 @@
                OpStore %arg_1 %float_1
          %12 = OpLoad %float %arg_0 None
          %13 = OpLoad %float %arg_1 None
-         %14 = OpExtInst %float %15 FMax %12 %13
+         %14 = OpExtInst %float %15 NMax %12 %13
                OpStore %res %14
          %17 = OpLoad %float %res None
                OpReturnValue %17
@@ -102,7 +102,7 @@
                OpStore %arg_1 %float_1
          %12 = OpLoad %float %arg_0 None
          %13 = OpLoad %float %arg_1 None
-         %14 = OpExtInst %float %15 FMax %12 %13
+         %14 = OpExtInst %float %15 NMax %12 %13
                OpStore %res %14
          %17 = OpLoad %float %res None
                OpReturnValue %17
@@ -173,7 +173,7 @@
                OpStore %arg_1 %float_1
          %15 = OpLoad %float %arg_0 None
          %16 = OpLoad %float %arg_1 None
-         %17 = OpExtInst %float %18 FMax %15 %16
+         %17 = OpExtInst %float %18 NMax %15 %16
                OpStore %res %17
          %20 = OpLoad %float %res None
                OpReturnValue %20

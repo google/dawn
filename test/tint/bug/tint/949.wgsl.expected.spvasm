@@ -547,7 +547,7 @@
       %x_185 = OpLoad %v3float %bitangent None
         %119 = OpDot %float %x_181 %x_182
         %120 = OpDot %float %x_184 %x_185
-        %121 = OpExtInst %float %83 FMax %119 %120
+        %121 = OpExtInst %float %83 NMax %119 %120
         %122 = OpExtInst %float %83 InverseSqrt %121
                OpStore %invmax %122 None
       %x_189 = OpLoad %v3float %tangent None
@@ -698,11 +698,11 @@
       %x_233 = OpLoad %v3float %vNormal_root None
       %x_234 = OpLoad %v3float %angleW None
         %266 = OpDot %float %x_233 %x_234
-        %267 = OpExtInst %float %83 FMax %float_0 %266
+        %267 = OpExtInst %float %83 NMax %float_0 %266
                OpStore %specComp %267 None
       %x_237 = OpLoad %float %specComp None
       %x_238 = OpLoad %float %glossiness_root None
-        %271 = OpExtInst %float %83 FMax %float_1 %x_238
+        %271 = OpExtInst %float %83 NMax %float_1 %x_238
         %272 = OpExtInst %float %83 Pow %x_237 %271
                OpStore %specComp %272 None
       %x_241 = OpLoad %float %specComp None

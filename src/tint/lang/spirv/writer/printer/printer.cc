@@ -1875,7 +1875,7 @@ class Printer {
                 break;
             case core::BuiltinFn::kMax:
                 if (result_ty->IsFloatScalarOrVector()) {
-                    glsl_ext_inst(GLSLstd450FMax);
+                    glsl_ext_inst(GLSLstd450NMax);
                 } else if (result_ty->IsSignedIntegerScalarOrVector()) {
                     glsl_ext_inst(GLSLstd450SMax);
                 } else if (result_ty->IsUnsignedIntegerScalarOrVector()) {
@@ -1884,7 +1884,7 @@ class Printer {
                 break;
             case core::BuiltinFn::kMin:
                 if (result_ty->IsFloatScalarOrVector()) {
-                    glsl_ext_inst(GLSLstd450FMin);
+                    glsl_ext_inst(GLSLstd450NMin);
                 } else if (result_ty->IsSignedIntegerScalarOrVector()) {
                     glsl_ext_inst(GLSLstd450SMin);
                 } else if (result_ty->IsUnsignedIntegerScalarOrVector()) {

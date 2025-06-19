@@ -700,7 +700,7 @@
       %_88_h = OpCompositeExtract %float %_87_f 0
         %219 = OpCompositeExtract %float %_87_f 1
         %220 = OpCompositeExtract %float %_87_f 2
-  %_skTemp20 = OpExtInst %float %48 FMin %219 %220
+  %_skTemp20 = OpExtInst %float %48 NMin %219 %220
       %_89_i = OpFSub %float %_88_h %_skTemp20
         %223 = OpFMul %float %_89_i %float_0_5
       %_90_j = OpFSub %float %_88_h %223
@@ -735,7 +735,7 @@
         %129 = OpLabel
         %254 = OpAccessChain %_ptr_Function_float %_84_a %uint_3
         %255 = OpLoad %float %254 None
-  %_skTemp23 = OpExtInst %float %48 FMax %255 %float_9_99999975en05
+  %_skTemp23 = OpExtInst %float %48 NMax %255 %float_9_99999975en05
         %257 = OpLoad %v4float %_84_a None
         %258 = OpVectorShuffle %v3float %257 %257 0 1 2
         %259 = OpCompositeConstruct %v3float %_skTemp23 %_skTemp23 %_skTemp23

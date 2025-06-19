@@ -292,7 +292,7 @@
         %154 = OpCompositeExtract %float %x_129 1
         %155 = OpCompositeExtract %float %x_129 2
         %156 = OpCompositeConstruct %v3float %153 %154 %155
-      %x_132 = OpExtInst %v3float %79 FMax %156 %x_38
+      %x_132 = OpExtInst %v3float %79 NMax %156 %x_38
       %x_133 = OpLoad %v4float %color None
         %159 = OpCompositeExtract %float %x_132 0
         %160 = OpCompositeExtract %float %x_132 1

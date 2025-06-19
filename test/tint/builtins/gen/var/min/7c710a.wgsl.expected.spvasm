@@ -49,7 +49,7 @@
                OpStore %arg_1 %11
          %14 = OpLoad %v4half %arg_0 None
          %15 = OpLoad %v4half %arg_1 None
-         %16 = OpExtInst %v4half %17 FMin %14 %15
+         %16 = OpExtInst %v4half %17 NMin %14 %15
                OpStore %res %16
          %19 = OpLoad %v4half %res None
                OpReturnValue %19
@@ -112,7 +112,7 @@
                OpStore %arg_1 %11
          %14 = OpLoad %v4half %arg_0 None
          %15 = OpLoad %v4half %arg_1 None
-         %16 = OpExtInst %v4half %17 FMin %14 %15
+         %16 = OpExtInst %v4half %17 NMin %14 %15
                OpStore %res %16
          %19 = OpLoad %v4half %res None
                OpReturnValue %19
@@ -192,7 +192,7 @@
                OpStore %arg_1 %16
          %19 = OpLoad %v4half %arg_0 None
          %20 = OpLoad %v4half %arg_1 None
-         %21 = OpExtInst %v4half %22 FMin %19 %20
+         %21 = OpExtInst %v4half %22 NMin %19 %20
                OpStore %res %21
          %24 = OpLoad %v4half %res None
                OpReturnValue %24

@@ -46,7 +46,7 @@
                OpStore %arg_1 %11
          %14 = OpLoad %v2float %arg_0 None
          %15 = OpLoad %v2float %arg_1 None
-         %16 = OpExtInst %v2float %17 FMin %14 %15
+         %16 = OpExtInst %v2float %17 NMin %14 %15
                OpStore %res %16
          %19 = OpLoad %v2float %res None
                OpReturnValue %19
@@ -106,7 +106,7 @@
                OpStore %arg_1 %11
          %14 = OpLoad %v2float %arg_0 None
          %15 = OpLoad %v2float %arg_1 None
-         %16 = OpExtInst %v2float %17 FMin %14 %15
+         %16 = OpExtInst %v2float %17 NMin %14 %15
                OpStore %res %16
          %19 = OpLoad %v2float %res None
                OpReturnValue %19
@@ -180,7 +180,7 @@
                OpStore %arg_1 %15
          %18 = OpLoad %v2float %arg_0 None
          %19 = OpLoad %v2float %arg_1 None
-         %20 = OpExtInst %v2float %21 FMin %18 %19
+         %20 = OpExtInst %v2float %21 NMin %18 %19
                OpStore %res %20
          %23 = OpLoad %v2float %res None
                OpReturnValue %23

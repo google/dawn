@@ -246,10 +246,10 @@
          %72 = OpLoad %float %70 None
          %73 = OpAccessChain %_ptr_Function_float %bbMax %uint_1
          %74 = OpLoad %float %73 None
-         %75 = OpExtInst %float %76 FMax %72 %74
+         %75 = OpExtInst %float %76 NMax %72 %74
          %77 = OpAccessChain %_ptr_Function_float %bbSize %uint_2
          %78 = OpLoad %float %77 None
-         %79 = OpExtInst %float %76 FMax %75 %78
+         %79 = OpExtInst %float %76 NMax %75 %78
                OpStore %cubeSize %79
          %81 = OpAccessChain %_ptr_Uniform_uint %1 %uint_0 %uint_1
          %83 = OpLoad %uint %81 None
