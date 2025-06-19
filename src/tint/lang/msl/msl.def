@@ -354,10 +354,12 @@ implicit(N: num, T: f32_f16) fn sign(vec<N, T>) -> vec<N, T>
 @stage("fragment", "compute") implicit(T: fiu32_f16) fn quad_shuffle_xor(T, u32) -> T
 @stage("fragment", "compute") implicit(N: num, T: fiu32_f16) fn quad_shuffle_xor(vec<N, T>, u32) -> vec<N, T>
 
+fn convert(__packed_vec3<bool>) -> vec3<bool>
 fn convert(__packed_vec3<u32>) -> vec3<u32>
 fn convert(__packed_vec3<i32>) -> vec3<i32>
 fn convert(__packed_vec3<f32>) -> vec3<f32>
 fn convert(__packed_vec3<f16>) -> vec3<f16>
+fn convert(vec3<bool>) -> __packed_vec3<bool>
 fn convert(vec3<u32>) -> __packed_vec3<u32>
 fn convert(vec3<i32>) -> __packed_vec3<i32>
 fn convert(vec3<f32>) -> __packed_vec3<f32>

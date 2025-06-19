@@ -3761,5 +3761,52 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+// Workgroup is the only address space that requires packed types that supports bool types.
+TEST_F(MslWriter_PackedVec3Test, WorkgroupVar_Vec3_Bool) {
+    auto* var = b.Var<workgroup, vec3<bool>>("v");
+    mod.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.vec3<bool>());
+    b.Append(func->Block(), [&] {  //
+        b.Store(var, b.Zero<vec3<bool>>());
+        b.Return(func, b.Load(var));
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %v:ptr<workgroup, vec3<bool>, read_write> = var undef
+}
+
+%foo = func():vec3<bool> {
+  $B2: {
+    store %v, vec3<bool>(false)
+    %3:vec3<bool> = load %v
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %v:ptr<workgroup, __packed_vec3<bool>, read_write> = var undef
+}
+
+%foo = func():vec3<bool> {
+  $B2: {
+    %3:__packed_vec3<bool> = msl.convert vec3<bool>(false)
+    store %v, %3
+    %4:__packed_vec3<bool> = load %v
+    %5:vec3<bool> = msl.convert %4
+    ret %5
+  }
+}
+)";
+
+    Run(PackedVec3);
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::msl::writer::raise
