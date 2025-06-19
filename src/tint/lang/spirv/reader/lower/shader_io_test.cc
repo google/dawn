@@ -3781,5 +3781,121 @@ S = struct @align(16) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(SpirvReader_ShaderIOTest, Output_StructArrayMatrix) {
+    auto* S = ty.Struct(mod.symbols.New("S"), Vector{
+                                                  core::type::Manager::StructMemberDesc{
+                                                      mod.symbols.New("a"),
+                                                      ty.array(ty.mat2x4<f32>(), 2),
+                                                  },
+                                                  core::type::Manager::StructMemberDesc{
+                                                      mod.symbols.New("b"),
+                                                      ty.vec4<f32>(),
+                                                  },
+                                                  core::type::Manager::StructMemberDesc{
+                                                      mod.symbols.New("c"),
+                                                      ty.f32(),
+                                                  },
+                                              });
+    auto* s = b.Var("s", ty.ptr(core::AddressSpace::kOut, ty.array(S, 2)));
+    s->SetLocation(1);
+    mod.root_block->Append(s);
+
+    auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(ep->Block(), [&] {
+        auto* a = b.Access(ty.ptr(core::AddressSpace::kOut, ty.f32(), core::Access::kReadWrite), s,
+                           1_u, 2_u);
+        b.Store(a, 1_f);
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+S = struct @align(16) {
+  a:array<mat2x4<f32>, 2> @offset(0)
+  b:vec4<f32> @offset(64)
+  c:f32 @offset(80)
+}
+
+$B1: {  # root
+  %s:ptr<__out, array<S, 2>, read_write> = var undef @location(1)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:ptr<__out, f32, read_write> = access %s, 1u, 2u
+    store %3, 1.0f
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+S = struct @align(16) {
+  a:array<mat2x4<f32>, 2> @offset(0)
+  b:vec4<f32> @offset(64)
+  c:f32 @offset(80)
+}
+
+tint_symbol_20 = struct @align(16) {
+  tint_symbol_3:vec4<f32> @offset(0), @location(1)
+  tint_symbol_4:vec4<f32> @offset(16), @location(2)
+  tint_symbol_6:vec4<f32> @offset(32), @location(3)
+  tint_symbol_7:vec4<f32> @offset(48), @location(4)
+  tint_symbol_8:vec4<f32> @offset(64), @location(5)
+  tint_symbol_9:f32 @offset(80), @location(6)
+  tint_symbol_13:vec4<f32> @offset(96), @location(7)
+  tint_symbol_14:vec4<f32> @offset(112), @location(8)
+  tint_symbol_16:vec4<f32> @offset(128), @location(9)
+  tint_symbol_17:vec4<f32> @offset(144), @location(10)
+  tint_symbol_18:vec4<f32> @offset(160), @location(11)
+  tint_symbol_19:f32 @offset(176), @location(12)
+}
+
+$B1: {  # root
+  %s:ptr<private, array<S, 2>, read_write> = var undef
+}
+
+%foo_inner = func():void {
+  $B2: {
+    %3:ptr<private, f32, read_write> = access %s, 1u, 2u
+    store %3, 1.0f
+    ret
+  }
+}
+%foo = @fragment func():tint_symbol_20 {
+  $B3: {
+    %5:void = call %foo_inner
+    %6:array<S, 2> = load %s
+    %7:S = access %6, 0u
+    %8:array<mat2x4<f32>, 2> = access %7, 0u
+    %9:mat2x4<f32> = access %8, 0u
+    %10:vec4<f32> = access %9, 0u
+    %11:vec4<f32> = access %9, 1u
+    %12:mat2x4<f32> = access %8, 1u
+    %13:vec4<f32> = access %12, 0u
+    %14:vec4<f32> = access %12, 1u
+    %15:vec4<f32> = access %7, 1u
+    %16:f32 = access %7, 2u
+    %17:S = access %6, 1u
+    %18:array<mat2x4<f32>, 2> = access %17, 0u
+    %19:mat2x4<f32> = access %18, 0u
+    %20:vec4<f32> = access %19, 0u
+    %21:vec4<f32> = access %19, 1u
+    %22:mat2x4<f32> = access %18, 1u
+    %23:vec4<f32> = access %22, 0u
+    %24:vec4<f32> = access %22, 1u
+    %25:vec4<f32> = access %17, 1u
+    %26:f32 = access %17, 2u
+    %27:tint_symbol_20 = construct %10, %11, %13, %14, %15, %16, %20, %21, %23, %24, %25, %26
+    ret %27
+  }
+}
+)";
+
+    Run(ShaderIO);
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader::lower
