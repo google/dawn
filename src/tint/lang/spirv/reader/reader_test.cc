@@ -362,8 +362,7 @@ $B1: {  # root
 )");
 }
 
-// TODO(dsinclair): Requires `Block` decoration support
-TEST_F(SpirvReaderTest, DISABLED_ClipDistances_gl_PerVertex) {
+TEST_F(SpirvReaderTest, ClipDistances_gl_PerVertex) {
     auto got = Run(R"(
                OpCapability Shader
                OpCapability ClipDistance

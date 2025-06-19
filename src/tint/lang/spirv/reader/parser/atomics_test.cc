@@ -117,8 +117,7 @@ TEST_F(SpirvParserDeathTest, AtomicExchange_float) {
     EXPECT_DEATH_IF_SUPPORTED({ auto _ = Run(src); }, "internal compiler error");
 }
 
-// TODO(dsinclair): Requires `Block` decoration support
-TEST_F(SpirvParserDeathTest, DISABLED_AtomicSMin_u32) {
+TEST_F(SpirvParserDeathTest, AtomicSMin_u32) {
     auto src = R"(
                OpCapability Shader
                OpExtension "SPV_KHR_storage_buffer_storage_class"
@@ -156,8 +155,7 @@ TEST_F(SpirvParserDeathTest, DISABLED_AtomicSMin_u32) {
     EXPECT_DEATH_IF_SUPPORTED({ auto _ = Run(src); }, "internal compiler error");
 }
 
-// TODO(dsinclair): Requires `Block` decoration support
-TEST_F(SpirvParserDeathTest, DISABLED_AtomicSMax_u32) {
+TEST_F(SpirvParserDeathTest, AtomicSMax_u32) {
     auto src = R"(
                OpCapability Shader
                OpExtension "SPV_KHR_storage_buffer_storage_class"
@@ -195,8 +193,7 @@ TEST_F(SpirvParserDeathTest, DISABLED_AtomicSMax_u32) {
     EXPECT_DEATH_IF_SUPPORTED({ auto _ = Run(src); }, "internal compiler error");
 }
 
-// TODO(dsinclair): Requires `Block` decoration support
-TEST_F(SpirvParserDeathTest, DISABLED_AtomicUMin_i32) {
+TEST_F(SpirvParserDeathTest, AtomicUMin_i32) {
     auto src = R"(
                OpCapability Shader
                OpExtension "SPV_KHR_storage_buffer_storage_class"
@@ -855,8 +852,7 @@ $B1: {  # root
 )");
 }
 
-// TODO(dsinclair): Requires `Block` decoration support
-TEST_F(SpirvParser_AtomicsTest, DISABLED_AtomicAdd) {
+TEST_F(SpirvParser_AtomicsTest, AtomicAdd) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpExtension "SPV_KHR_storage_buffer_storage_class"
@@ -929,8 +925,7 @@ $B1: {  # root
 )");
 }
 
-// TODO(dsinclair): Requires `Block` decoration support
-TEST_F(SpirvParser_AtomicsTest, DISABLED_AtomicSub) {
+TEST_F(SpirvParser_AtomicsTest, AtomicSub) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpExtension "SPV_KHR_storage_buffer_storage_class"
@@ -1003,8 +998,7 @@ $B1: {  # root
 )");
 }
 
-// TODO(dsinclair): Requires `Block` decoration support
-TEST_F(SpirvParser_AtomicsTest, DISABLED_AtomicAnd) {
+TEST_F(SpirvParser_AtomicsTest, AtomicAnd) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpExtension "SPV_KHR_storage_buffer_storage_class"
@@ -1077,8 +1071,7 @@ $B1: {  # root
 )");
 }
 
-// TODO(dsinclair): Requires `Block` decoration support
-TEST_F(SpirvParser_AtomicsTest, DISABLED_AtomicOr) {
+TEST_F(SpirvParser_AtomicsTest, AtomicOr) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpExtension "SPV_KHR_storage_buffer_storage_class"
@@ -1151,8 +1144,7 @@ $B1: {  # root
 )");
 }
 
-// TODO(dsinclair): Requires `Block` decoration support
-TEST_F(SpirvParser_AtomicsTest, DISABLED_AtomicXor) {
+TEST_F(SpirvParser_AtomicsTest, AtomicXor) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpExtension "SPV_KHR_storage_buffer_storage_class"
@@ -1225,8 +1217,7 @@ $B1: {  # root
 )");
 }
 
-// TODO(dsinclair): Requires `Block` decoration support
-TEST_F(SpirvParser_AtomicsTest, DISABLED_AtomicMax) {
+TEST_F(SpirvParser_AtomicsTest, AtomicMax) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpExtension "SPV_KHR_storage_buffer_storage_class"
@@ -1299,8 +1290,7 @@ $B1: {  # root
 )");
 }
 
-// TODO(dsinclair): Requires `Block` decoration support
-TEST_F(SpirvParser_AtomicsTest, DISABLED_AtomicMin) {
+TEST_F(SpirvParser_AtomicsTest, AtomicMin) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpExtension "SPV_KHR_storage_buffer_storage_class"
@@ -1373,8 +1363,7 @@ $B1: {  # root
 )");
 }
 
-// TODO(dsinclair): Requires `Block` decoration support
-TEST_F(SpirvParser_AtomicsTest, DISABLED_AtomicExchange) {
+TEST_F(SpirvParser_AtomicsTest, AtomicExchange) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpExtension "SPV_KHR_storage_buffer_storage_class"
@@ -1447,8 +1436,7 @@ $B1: {  # root
 )");
 }
 
-// TODO(dsinclair): Requires `Block` decoration support
-TEST_F(SpirvParser_AtomicsTest, DISABLED_AtomicCompareExchange) {
+TEST_F(SpirvParser_AtomicsTest, AtomicCompareExchange) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpExtension "SPV_KHR_storage_buffer_storage_class"
@@ -1521,8 +1509,7 @@ $B1: {  # root
 )");
 }
 
-// TODO(dsinclair): Requires `Block` decoration support
-TEST_F(SpirvParser_AtomicsTest, DISABLED_AtomicLoad) {
+TEST_F(SpirvParser_AtomicsTest, AtomicLoad) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpExtension "SPV_KHR_storage_buffer_storage_class"
@@ -1595,8 +1582,7 @@ $B1: {  # root
 )");
 }
 
-// TODO(dsinclair): Requires `Block` decoration support
-TEST_F(SpirvParser_AtomicsTest, DISABLED_AtomicStore) {
+TEST_F(SpirvParser_AtomicsTest, AtomicStore) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpExtension "SPV_KHR_storage_buffer_storage_class"
@@ -1669,8 +1655,7 @@ $B1: {  # root
 )");
 }
 
-// TODO(dsinclair): Requires `Block` decoration support
-TEST_F(SpirvParser_AtomicsTest, DISABLED_AtomicDecrement) {
+TEST_F(SpirvParser_AtomicsTest, AtomicDecrement) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpExtension "SPV_KHR_storage_buffer_storage_class"
@@ -1743,8 +1728,7 @@ $B1: {  # root
 )");
 }
 
-// TODO(dsinclair): Requires `Block` decoration support
-TEST_F(SpirvParser_AtomicsTest, DISABLED_AtomicIncrement) {
+TEST_F(SpirvParser_AtomicsTest, AtomicIncrement) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpExtension "SPV_KHR_storage_buffer_storage_class"
@@ -2250,8 +2234,7 @@ $B1: {  # root
 )");
 }
 
-// TODO(dsinclair): Requires `Block` decoration support
-TEST_F(SpirvParser_AtomicsTest, DISABLED_ReplaceAssignsAndDecls_StructOfArray) {
+TEST_F(SpirvParser_AtomicsTest, ReplaceAssignsAndDecls_StructOfArray) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpExtension "SPV_KHR_storage_buffer_storage_class"
@@ -2326,8 +2309,7 @@ $B1: {  # root
 )");
 }
 
-// TODO(dsinclair): Requires `Block` decoration support
-TEST_F(SpirvParser_AtomicsTest, DISABLED_ReplaceAssignsAndDecls_Let) {
+TEST_F(SpirvParser_AtomicsTest, ReplaceAssignsAndDecls_Let) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpExtension "SPV_KHR_storage_buffer_storage_class"

@@ -482,6 +482,10 @@ class Parser {
         uint32_t array_stride = 0;
         for (auto& deco : type->decorations()) {
             switch (spv::Decoration(deco[0])) {
+                case spv::Decoration::Block: {
+                    // Ignore, just means it's a memory block.
+                    break;
+                }
                 case spv::Decoration::ArrayStride: {
                     array_stride = deco[1];
                     break;

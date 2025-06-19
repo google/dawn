@@ -30,8 +30,7 @@
 namespace tint::spirv::reader {
 namespace {
 
-// TODO(dsinclair): Requires `Block` decoration support
-TEST_F(SpirvParserTest, DISABLED_ArrayLength_FromVar) {
+TEST_F(SpirvParserTest, ArrayLength_FromVar) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpExtension "SPV_KHR_storage_buffer_storage_class"
@@ -81,8 +80,7 @@ $B1: {  # root
 )");
 }
 
-// TODO(dsinclair): Requires `Block` decoration support
-TEST_F(SpirvParserTest, DISABLED_ArrayLength_FromCopyObject) {
+TEST_F(SpirvParserTest, ArrayLength_FromCopyObject) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpExtension "SPV_KHR_storage_buffer_storage_class"
@@ -134,8 +132,7 @@ $B1: {  # root
 )");
 }
 
-// TODO(dsinclair): Requires `Block` decoration support
-TEST_F(SpirvParserTest, DISABLED_ArrayLength_FromAccessChain) {
+TEST_F(SpirvParserTest, ArrayLength_FromAccessChain) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpExtension "SPV_KHR_storage_buffer_storage_class"
@@ -399,8 +396,7 @@ TEST_F(SpirvParserTest, Load_ArrayElement) {
 )");
 }
 
-// TODO(dsinclair): Requires `Block` decoration support
-TEST_F(SpirvParserTest, DISABLED_Store_RuntimeArrayElement) {
+TEST_F(SpirvParserTest, Store_RuntimeArrayElement) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpExtension "SPV_KHR_storage_buffer_storage_class"
@@ -1387,8 +1383,7 @@ TEST_F(SpirvParserTest, InBoundsAccessChain) {
 )");
 }
 
-// TODO(dsinclair): Requires `Block` decoration support
-TEST_F(SpirvParserTest, DISABLED_StorageBufferAccessMode) {
+TEST_F(SpirvParserTest, StorageBufferAccessMode) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpExtension "SPV_KHR_storage_buffer_storage_class"
