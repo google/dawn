@@ -264,7 +264,8 @@ $B1: {  # root
 )");
 }
 
-TEST_F(SpirvReaderTest, ClipDistances) {
+// TODO(dsinclair): Requires `ArrayStride` decoration support
+TEST_F(SpirvReaderTest, DISABLED_ClipDistances) {
     auto got = Run(R"(
                OpCapability Shader
                OpCapability ClipDistance
@@ -362,7 +363,8 @@ $B1: {  # root
 )");
 }
 
-TEST_F(SpirvReaderTest, ClipDistances_gl_PerVertex) {
+// TODO(dsinclair): Requires `Block` decoration support
+TEST_F(SpirvReaderTest, DISABLED_ClipDistances_gl_PerVertex) {
     auto got = Run(R"(
                OpCapability Shader
                OpCapability ClipDistance

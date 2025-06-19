@@ -226,7 +226,8 @@ $B1: {  # root
 )");
 }
 
-TEST_F(SpirvParserTest, VertexShader_PositionUnused_Struct) {
+// TODO(dsinclair): Requires `Block` decoration support
+TEST_F(SpirvParserTest, DISABLED_VertexShader_PositionUnused_Struct) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -263,7 +264,8 @@ $B1: {  # root
 )");
 }
 
-TEST_F(SpirvParserTest, VertexShader_PositionUsed_Struct) {
+// TODO(dsinclair): Requires `Block` decoration support
+TEST_F(SpirvParserTest, DISABLED_VertexShader_PositionUsed_Struct) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpMemoryModel Logical GLSL450

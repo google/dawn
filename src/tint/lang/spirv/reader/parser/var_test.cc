@@ -142,7 +142,8 @@ $B1: {  # root
 )");
 }
 
-TEST_F(SpirvParserTest, StorageVar_ReadOnly) {
+// TODO(dsinclair): Requires `Block` decoration support
+TEST_F(SpirvParserTest, DISABLED_StorageVar_ReadOnly) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpExtension "SPV_KHR_storage_buffer_storage_class"
@@ -182,7 +183,8 @@ $B1: {  # root
 )");
 }
 
-TEST_F(SpirvParserTest, StorageVar_ReadWrite) {
+// TODO(dsinclair): Requires `Block` decoration support
+TEST_F(SpirvParserTest, DISABLED_StorageVar_ReadWrite) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpExtension "SPV_KHR_storage_buffer_storage_class"
@@ -221,7 +223,8 @@ $B1: {  # root
 )");
 }
 
-TEST_F(SpirvParserTest, StorageVar_ReadOnly_And_ReadWrite) {
+// TODO(dsinclair): Requires `Block` decoration support
+TEST_F(SpirvParserTest, DISABLED_StorageVar_ReadOnly_And_ReadWrite) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpExtension "SPV_KHR_storage_buffer_storage_class"
@@ -265,7 +268,8 @@ $B1: {  # root
 )");
 }
 
-TEST_F(SpirvParserTest, UniformVar) {
+// TODO(dsinclair): Requires `Block` decoration support
+TEST_F(SpirvParserTest, DISABLED_UniformVar) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -1273,7 +1277,8 @@ $B1: {  # root
 )");
 }
 
-TEST_F(SpirvParserTest, Var_OpSpecConstantComposite_struct_Mixed) {
+// TODO(dsinclair): Requires `Block` decoration support
+TEST_F(SpirvParserTest, DISABLED_Var_OpSpecConstantComposite_struct_Mixed) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpExtension "SPV_KHR_storage_buffer_storage_class"

@@ -477,6 +477,19 @@ class Parser {
             }
         }
 
+        // TODO(crbug.com/1907): Handle decorations that affect the type
+        for (auto& deco : type->decorations()) {
+            switch (spv::Decoration(deco[0])) {
+                case spv::Decoration::SpecId: {
+                    // TODO(dsinclair): Trick clang, remove when actual decorations added
+                    break;
+                }
+                default: {
+                    TINT_UNIMPLEMENTED() << " unhandled type decoration " << deco[0];
+                }
+            }
+        }
+
         return types_.GetOrAdd(TypeKey{type, key_mode}, [&]() -> const core::type::Type* {
             switch (type->kind()) {
                 case spvtools::opt::analysis::Type::kVoid: {
@@ -650,8 +663,6 @@ class Parser {
         TINT_ASSERT(count_const);
         const uint64_t count_val = count_const->GetZeroExtendedValue();
         TINT_ASSERT(count_val <= UINT32_MAX);
-
-        // TODO(crbug.com/1907): Handle decorations that affect the array layout.
 
         return ty_.array(Type(arr_ty->element_type()), static_cast<uint32_t>(count_val));
     }
