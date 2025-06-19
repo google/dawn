@@ -3762,6 +3762,7 @@ $B1: {  # root
 }
 
 // Workgroup is the only address space that requires packed types that supports bool types.
+// These are rewritten as packed_vec3<u32> types since MSL does not support packed bool vectors.
 TEST_F(MslWriter_PackedVec3Test, WorkgroupVar_Vec3_Bool) {
     auto* var = b.Var<workgroup, vec3<bool>>("v");
     mod.root_block->Append(var);
@@ -3789,16 +3790,67 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<workgroup, __packed_vec3<bool>, read_write> = var undef
+  %v:ptr<workgroup, __packed_vec3<u32>, read_write> = var undef
 }
 
 %foo = func():vec3<bool> {
   $B2: {
-    %3:__packed_vec3<bool> = msl.convert vec3<bool>(false)
-    store %v, %3
-    %4:__packed_vec3<bool> = load %v
-    %5:vec3<bool> = msl.convert %4
-    ret %5
+    %3:vec3<u32> = convert vec3<bool>(false)
+    %4:__packed_vec3<u32> = msl.convert %3
+    store %v, %4
+    %5:__packed_vec3<u32> = load %v
+    %6:vec3<u32> = msl.convert %5
+    %7:vec3<bool> = convert %6
+    ret %7
+  }
+}
+)";
+
+    Run(PackedVec3);
+
+    EXPECT_EQ(expect, str());
+}
+
+// Workgroup is the only address space that requires packed types that supports bool types.
+// These are rewritten as packed_vec3<u32> types since MSL does not support packed bool vectors.
+TEST_F(MslWriter_PackedVec3Test, WorkgroupVar_Vec3_Bool_VectorElementLoadAndStore) {
+    auto* var = b.Var<workgroup, vec3<bool>>("v");
+    mod.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {  //
+        auto* el = b.LoadVectorElement(var, 0_u);
+        b.StoreVectorElement(var, 1_u, el);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %v:ptr<workgroup, vec3<bool>, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:bool = load_vector_element %v, 0u
+    store_vector_element %v, 1u, %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %v:ptr<workgroup, __packed_vec3<u32>, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:u32 = load_vector_element %v, 0u
+    %4:bool = convert %3
+    %5:u32 = convert %4
+    store_vector_element %v, 1u, %5
+    ret
   }
 }
 )";
