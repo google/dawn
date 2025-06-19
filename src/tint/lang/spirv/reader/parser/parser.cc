@@ -153,9 +153,58 @@ class Parser {
         // TODO(crbug.com/tint/1907): Handle annotation instructions.
 
         RemapSamplers();
+        RemapBufferBlockAddressSpace();
         AddRefToOutputsIfNeeded();
 
         return std::move(ir_);
+    }
+
+    // If the spir-v struct was marked as `BufferBlock` then we always treat this as a storage
+    // address space. We do this as a post-pass because we have to propagate the change through all
+    // the types that derive from the buffer block, e.g. any access needs to change from `Uniform`
+    // to `Storage` address space.
+    void RemapBufferBlockAddressSpace() {
+        for (auto* inst : *ir_.root_block) {
+            auto* var = inst->As<core::ir::Var>();
+            if (!var) {
+                continue;
+            }
+
+            auto* ptr = var->Result()->Type()->As<core::type::Pointer>();
+            TINT_ASSERT(ptr);
+
+            auto* str = ptr->UnwrapPtr()->As<core::type::Struct>();
+            if (!str) {
+                continue;
+            }
+            if (!storage_buffer_types_.contains(str)) {
+                continue;
+            }
+            auto iter = var_to_original_access_mode_.find(var);
+            TINT_ASSERT(iter != var_to_original_access_mode_.end());
+            auto access_mode = iter->second;
+
+            var->Result()->SetType(ty_.ptr(core::AddressSpace::kStorage, str, access_mode));
+            UpdateUsagesToStorageAddressSpace(var->Result(), access_mode);
+        }
+    }
+
+    void UpdateUsagesToStorageAddressSpace(core::ir::Value* val, core::Access access_mode) {
+        for (auto& usage : val->UsagesUnsorted()) {
+            if (usage->instruction->Results().IsEmpty()) {
+                continue;
+            }
+
+            auto* res = usage->instruction->Result();
+            auto* ptr = res->Type()->As<core::type::Pointer>();
+            if (!ptr) {
+                continue;
+            }
+            TINT_ASSERT(ptr->AddressSpace() == core::AddressSpace::kUniform);
+
+            res->SetType(ty_.ptr(core::AddressSpace::kStorage, ptr->StoreType(), access_mode));
+            UpdateUsagesToStorageAddressSpace(res, access_mode);
+        }
     }
 
     void AddRefToOutputsIfNeeded() {
@@ -478,25 +527,34 @@ class Parser {
             }
         }
 
-        // TODO(crbug.com/1907): Handle decorations that affect the type
-        uint32_t array_stride = 0;
-        for (auto& deco : type->decorations()) {
-            switch (spv::Decoration(deco[0])) {
-                case spv::Decoration::Block: {
-                    // Ignore, just means it's a memory block.
-                    break;
-                }
-                case spv::Decoration::ArrayStride: {
-                    array_stride = deco[1];
-                    break;
-                }
-                default: {
-                    TINT_UNIMPLEMENTED() << " unhandled type decoration " << deco[0];
+        return types_.GetOrAdd(TypeKey{type, key_mode}, [&]() -> const core::type::Type* {
+            // TODO(crbug.com/1907): Handle decorations that affect the type
+            uint32_t array_stride = 0;
+            bool set_as_storage_buffer = false;
+            for (auto& deco : type->decorations()) {
+                switch (spv::Decoration(deco[0])) {
+                    case spv::Decoration::Block: {
+                        // Ignore, just means it's a memory block.
+                        break;
+                    }
+                    case spv::Decoration::BufferBlock: {
+                        set_as_storage_buffer = true;
+                        break;
+                    }
+                    case spv::Decoration::ArrayStride: {
+                        array_stride = deco[1];
+                        break;
+                    }
+                    default: {
+                        TINT_UNIMPLEMENTED() << " unhandled type decoration " << deco[0];
+                    }
                 }
             }
-        }
+            // Storage buffer is only set ons structs
+            if (set_as_storage_buffer) {
+                TINT_ASSERT(type->kind() == spvtools::opt::analysis::Type::kStruct);
+            }
 
-        return types_.GetOrAdd(TypeKey{type, key_mode}, [&]() -> const core::type::Type* {
             switch (type->kind()) {
                 case spvtools::opt::analysis::Type::kVoid: {
                     return ty_.void_();
@@ -543,12 +601,15 @@ class Parser {
                     return ty_.runtime_array(Type(arr_ty->element_type()));
                 }
                 case spvtools::opt::analysis::Type::kStruct: {
-                    return EmitStruct(type->AsStruct());
+                    const core::type::Struct* str_ty = EmitStruct(type->AsStruct());
+                    if (set_as_storage_buffer) {
+                        storage_buffer_types_.insert(str_ty);
+                    }
+                    return str_ty;
                 }
                 case spvtools::opt::analysis::Type::kPointer: {
                     auto* ptr_ty = type->AsPointer();
                     auto* subtype = Type(ptr_ty->pointee_type(), access_mode);
-
                     // Handle is always a read pointer
                     if (subtype->IsHandle()) {
                         access_mode = core::Access::kRead;
@@ -684,7 +745,7 @@ class Parser {
 
     /// @param struct_ty a SPIR-V struct object
     /// @returns a Tint struct object
-    const core::type::Type* EmitStruct(const spvtools::opt::analysis::Struct* struct_ty) {
+    const core::type::Struct* EmitStruct(const spvtools::opt::analysis::Struct* struct_ty) {
         if (struct_ty->NumberOfComponents() == 0) {
             TINT_ICE() << "empty structures are not supported";
         }
@@ -3339,6 +3400,7 @@ class Parser {
             io_attributes.binding_point = {group.value(), binding.value()};
         }
         var->SetAttributes(std::move(io_attributes));
+        var_to_original_access_mode_.insert({var, access_mode});
 
         Emit(var, inst.result_id());
     }
@@ -3453,6 +3515,14 @@ class Parser {
 
     // The set of SPIR-V IDs which map to `OpSpecConstantComposite` information
     std::unordered_map<uint32_t, SpecComposite> spec_composites_;
+
+    // Structures which are marked with `BufferBlock` and need to be reported as `Storage` address
+    // space
+    std::unordered_set<const core::type::Struct*> storage_buffer_types_;
+
+    // Map of `var` to the access mode it was originally created with. This may be different from
+    // the current mode if we needed to set a default mode.
+    std::unordered_map<core::ir::Var*, core::Access> var_to_original_access_mode_;
 };
 
 }  // namespace
