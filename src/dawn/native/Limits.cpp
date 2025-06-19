@@ -67,26 +67,26 @@
 // Tiers for limits related to resource bindings.
 // TODO(crbug.com/dawn/685): Define these better. For now, use two tiers where one
 // offers slightly better than default limits.
-//                                                                 compat      tier0       tier1
-#define LIMITS_RESOURCE_BINDINGS(X)                                                               \
-    X(v1, Maximum,   maxDynamicUniformBuffersPerPipelineLayout,         8,         8,         10) \
-    X(v1, Maximum,   maxDynamicStorageBuffersPerPipelineLayout,         4,         4,          8) \
-    X(v1, Maximum,            maxSampledTexturesPerShaderStage,        16,        16,         16) \
-    X(v1, Maximum,                   maxSamplersPerShaderStage,        16,        16,         16) \
-    X(v1, Maximum,            maxStorageTexturesPerShaderStage,         4,         4,          8) \
-    X(v1, Maximum,           maxStorageTexturesInFragmentStage,         4,         4,          8) \
-    X(v1, Maximum,             maxStorageTexturesInVertexStage,         0,         4,          8) \
-    X(v1, Maximum,             maxUniformBuffersPerShaderStage,        12,        12,         12)
+//                                                                     compat      tier0       tier1
+#define LIMITS_RESOURCE_BINDINGS(X)                                                                   \
+    X(v1,     Maximum,   maxDynamicUniformBuffersPerPipelineLayout,         8,         8,         10) \
+    X(v1,     Maximum,   maxDynamicStorageBuffersPerPipelineLayout,         4,         4,          8) \
+    X(v1,     Maximum,            maxSampledTexturesPerShaderStage,        16,        16,         16) \
+    X(v1,     Maximum,                   maxSamplersPerShaderStage,        16,        16,         16) \
+    X(v1,     Maximum,            maxStorageTexturesPerShaderStage,         4,         4,          8) \
+    X(compat, Maximum,           maxStorageTexturesInFragmentStage,         4,         4,          8) \
+    X(compat, Maximum,             maxStorageTexturesInVertexStage,         0,         4,          8) \
+    X(v1,     Maximum,             maxUniformBuffersPerShaderStage,        12,        12,         12)
 
 // Tiers for limits related to storage buffer bindings. Should probably be merged with
 // LIMITS_RESOURCE_BINDINGS.
 // TODO(crbug.com/dawn/685): Define these better. For now, use two tiers where one
 // offers slightly better than default limits.
 //
-#define LIMITS_STORAGE_BUFFER_BINDINGS(X)                                                          \
-    X(v1, Maximum,             maxStorageBuffersPerShaderStage,         8,         8,          10) \
-    X(v1, Maximum,             maxStorageBuffersInFragmentStage,        4,         8,          10) \
-    X(v1, Maximum,             maxStorageBuffersInVertexStage,          0,         8,          10)
+#define LIMITS_STORAGE_BUFFER_BINDINGS(X)                                                              \
+    X(v1,     Maximum,             maxStorageBuffersPerShaderStage,         8,         8,          10) \
+    X(compat, Maximum,            maxStorageBuffersInFragmentStage,         4,         8,          10) \
+    X(compat, Maximum,              maxStorageBuffersInVertexStage,         0,         8,          10)
 
 // TODO(crbug.com/dawn/685):
 // These limits aren't really tiered and could probably be grouped better.
@@ -268,6 +268,11 @@ MaybeError ValidateAndUnpackLimitsIn(const Limits* chainedLimits,
     out->v1 = **unpacked;
     out->v1.nextInChain = nullptr;
 
+    if (auto* compatibilityModeLimits = unpacked.Get<CompatibilityModeLimits>()) {
+        out->compat = *compatibilityModeLimits;
+        out->compat.nextInChain = nullptr;
+    }
+
     // TODO(crbug.com/378361783): Add validation and default values to support requiring limits for
     // DawnTexelCopyBufferRowAlignmentLimits. Test this, see old test removed here:
     // https://dawn-review.googlesource.com/c/dawn/+/240934/11/src/dawn/tests/unittests/native/LimitsTests.cpp#b269
@@ -293,6 +298,11 @@ void UnpackLimitsIn(const Limits* chainedLimits, CombinedLimits* out) {
     // copy required v1 limits.
     out->v1 = **unpacked;
     out->v1.nextInChain = nullptr;
+
+    if (auto* compatibilityModeLimits = unpacked.Get<CompatibilityModeLimits>()) {
+        out->compat = *compatibilityModeLimits;
+        out->compat.nextInChain = nullptr;
+    }
 }
 
 MaybeError ValidateLimits(const CombinedLimits& supportedLimits,
@@ -401,18 +411,19 @@ void NormalizeLimits(CombinedLimits* limits) {
         std::min(limits->v1.maxStorageBuffersPerShaderStage, kMaxStorageBuffersPerShaderStage);
     limits->v1.maxStorageTexturesPerShaderStage =
         std::min(limits->v1.maxStorageTexturesPerShaderStage, kMaxStorageTexturesPerShaderStage);
-    limits->v1.maxStorageBuffersInVertexStage =
-        std::min(limits->v1.maxStorageBuffersInVertexStage, kMaxStorageBuffersPerShaderStage);
-    limits->v1.maxStorageTexturesInVertexStage =
-        std::min(limits->v1.maxStorageTexturesInVertexStage, kMaxStorageTexturesPerShaderStage);
-    limits->v1.maxStorageBuffersInFragmentStage =
-        std::min(limits->v1.maxStorageBuffersInFragmentStage, kMaxStorageBuffersPerShaderStage);
-    limits->v1.maxStorageTexturesInFragmentStage =
-        std::min(limits->v1.maxStorageTexturesInFragmentStage, kMaxStorageTexturesPerShaderStage);
     limits->v1.maxUniformBuffersPerShaderStage =
         std::min(limits->v1.maxUniformBuffersPerShaderStage, kMaxUniformBuffersPerShaderStage);
     limits->v1.maxImmediateSize =
         std::min(limits->v1.maxImmediateSize, kMaxSupportedImmediateDataBytes);
+    // Compat limits.
+    limits->compat.maxStorageBuffersInVertexStage =
+        std::min(limits->compat.maxStorageBuffersInVertexStage, kMaxStorageBuffersPerShaderStage);
+    limits->compat.maxStorageTexturesInVertexStage =
+        std::min(limits->compat.maxStorageTexturesInVertexStage, kMaxStorageTexturesPerShaderStage);
+    limits->compat.maxStorageBuffersInFragmentStage =
+        std::min(limits->compat.maxStorageBuffersInFragmentStage, kMaxStorageBuffersPerShaderStage);
+    limits->compat.maxStorageTexturesInFragmentStage = std::min(
+        limits->compat.maxStorageTexturesInFragmentStage, kMaxStorageTexturesPerShaderStage);
 
     // Additional enforcement for dependent limits.
     limits->v1.maxStorageBufferBindingSize =
@@ -428,12 +439,12 @@ void EnforceLimitSpecInvariants(CombinedLimits* limits, wgpu::FeatureLevel featu
     // and you request maxXXXInStage = 3 things work but, if you request
     // maxXXXInStage = 5 they'd fail because suddenly you're you'd also be required
     // to request maxXXXPerStage to 5. So, we auto-uprade the perStage limits.
-    limits->v1.maxStorageBuffersPerShaderStage =
-        Max(limits->v1.maxStorageBuffersPerShaderStage, limits->v1.maxStorageBuffersInVertexStage,
-            limits->v1.maxStorageBuffersInFragmentStage);
-    limits->v1.maxStorageTexturesPerShaderStage =
-        Max(limits->v1.maxStorageTexturesPerShaderStage, limits->v1.maxStorageTexturesInVertexStage,
-            limits->v1.maxStorageTexturesInFragmentStage);
+    limits->v1.maxStorageBuffersPerShaderStage = Max(
+        limits->v1.maxStorageBuffersPerShaderStage, limits->compat.maxStorageBuffersInVertexStage,
+        limits->compat.maxStorageBuffersInFragmentStage);
+    limits->v1.maxStorageTexturesPerShaderStage = Max(
+        limits->v1.maxStorageTexturesPerShaderStage, limits->compat.maxStorageTexturesInVertexStage,
+        limits->compat.maxStorageTexturesInFragmentStage);
 
     if (featureLevel != wgpu::FeatureLevel::Compatibility) {
         // In core mode the maxStorageXXXInYYYStage are always set to maxStorageXXXPerShaderStage
@@ -447,10 +458,13 @@ void EnforceLimitSpecInvariants(CombinedLimits* limits, wgpu::FeatureLevel featu
         //     device.limits.maxStorageBuffersPerShaderStage = 5;
         //     It's ok to use 5 storage buffers in fragment stage because in core
         //     we originally only had maxStorageBuffersPerShaderStage
-        limits->v1.maxStorageBuffersInFragmentStage = limits->v1.maxStorageBuffersPerShaderStage;
-        limits->v1.maxStorageTexturesInFragmentStage = limits->v1.maxStorageTexturesPerShaderStage;
-        limits->v1.maxStorageBuffersInVertexStage = limits->v1.maxStorageBuffersPerShaderStage;
-        limits->v1.maxStorageTexturesInVertexStage = limits->v1.maxStorageTexturesPerShaderStage;
+        limits->compat.maxStorageBuffersInFragmentStage =
+            limits->v1.maxStorageBuffersPerShaderStage;
+        limits->compat.maxStorageTexturesInFragmentStage =
+            limits->v1.maxStorageTexturesPerShaderStage;
+        limits->compat.maxStorageBuffersInVertexStage = limits->v1.maxStorageBuffersPerShaderStage;
+        limits->compat.maxStorageTexturesInVertexStage =
+            limits->v1.maxStorageTexturesPerShaderStage;
     }
 }
 
@@ -463,8 +477,16 @@ MaybeError FillLimits(Limits* outputLimits,
     {
         wgpu::ChainedStructOut* originalChain = unpacked->nextInChain;
         **unpacked = combinedLimits.v1;
-        // Recover origin chain.
+        // Recover original chain.
         unpacked->nextInChain = originalChain;
+    }
+
+    if (auto* compatibilityModeLimits = unpacked.Get<CompatibilityModeLimits>()) {
+        wgpu::ChainedStructOut* originalChain = compatibilityModeLimits->nextInChain;
+        *compatibilityModeLimits = combinedLimits.compat;
+
+        // Recover original chain.
+        compatibilityModeLimits->nextInChain = originalChain;
     }
 
     if (auto* texelCopyBufferRowAlignmentLimits =
@@ -478,7 +500,7 @@ MaybeError FillLimits(Limits* outputLimits,
             *texelCopyBufferRowAlignmentLimits = combinedLimits.texelCopyBufferRowAlignmentLimits;
         }
 
-        // Recover origin chain.
+        // Recover original chain.
         texelCopyBufferRowAlignmentLimits->nextInChain = originalChain;
     }
 
@@ -493,7 +515,7 @@ MaybeError FillLimits(Limits* outputLimits,
                 combinedLimits.hostMappedPointerLimits.hostMappedPointerAlignment;
         }
 
-        // Recover origin chain.
+        // Recover original chain.
         hostMappedPointerLimits->nextInChain = originalChain;
     }
 

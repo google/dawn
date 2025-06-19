@@ -8,6 +8,7 @@
 +#define WGPU_BREAKING_CHANGE_STRING_VIEW_OUTPUT_STRUCTS
 +#define WGPU_BREAKING_CHANGE_STRING_VIEW_CALLBACKS
 +#define WGPU_BREAKING_CHANGE_QUEUE_WORK_DONE_CALLBACK_MESSAGE
++#define WGPU_BREAKING_CHANGE_COMPATIBILITY_MODE_LIMITS
  
  #if defined(WGPU_SHARED_LIBRARY)
  #    if defined(_WIN32)
@@ -104,28 +105,6 @@
      /*.timedWaitAnyMaxCount=*/0 _wgpu_COMMA \
  })
  
-@@
-     uint32_t maxComputeWorkgroupSizeZ;
-     uint32_t maxComputeWorkgroupsPerDimension;
-     uint32_t maxImmediateSize;
-+    uint32_t maxStorageBuffersInVertexStage;
-+    uint32_t maxStorageTexturesInVertexStage;
-+    uint32_t maxStorageBuffersInFragmentStage;
-+    uint32_t maxStorageTexturesInFragmentStage;
- } WGPULimits WGPU_STRUCTURE_ATTRIBUTE;
- 
- #define WGPU_LIMITS_INIT _wgpu_MAKE_INIT_STRUCT(WGPULimits, { \
-@@
-     /*.maxComputeWorkgroupSizeZ=*/WGPU_LIMIT_U32_UNDEFINED _wgpu_COMMA \
-     /*.maxComputeWorkgroupsPerDimension=*/WGPU_LIMIT_U32_UNDEFINED _wgpu_COMMA \
-     /*.maxImmediateSize=*/WGPU_LIMIT_U32_UNDEFINED _wgpu_COMMA \
-+    /*.maxStorageBuffersInVertexStage=*/WGPU_LIMIT_U32_UNDEFINED _wgpu_COMMA \
-+    /*.maxStorageTexturesInVertexStage=*/WGPU_LIMIT_U32_UNDEFINED _wgpu_COMMA \
-+    /*.maxStorageBuffersInFragmentStage=*/WGPU_LIMIT_U32_UNDEFINED _wgpu_COMMA \
-+    /*.maxStorageTexturesInFragmentStage=*/WGPU_LIMIT_U32_UNDEFINED _wgpu_COMMA \
- })
- 
- typedef struct WGPUMultisampleState {
 @@
      WGPUChainedStruct * nextInChain;
      WGPUStringView label;

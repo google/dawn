@@ -115,12 +115,15 @@ void Server::OnRequestDeviceCallback(RequestDeviceUserdata* data,
     cmd.features = features.data();
 
     // Query and report the adapter limits, including all known extension limits.
+    // TODO(crbug.com/421950205): Use dawn::utils::ComboLimits here.
     WGPULimits limits = {};
-
+    // Chained CompatibilityModeLimits.
+    WGPUCompatibilityModeLimits compatLimits = WGPU_COMPATIBILITY_MODE_LIMITS_INIT;
+    limits.nextInChain = &compatLimits.chain;
     // Chained DawnTexelCopyBufferRowAlignmentLimits.
-    WGPUDawnTexelCopyBufferRowAlignmentLimits texelCopyBufferRowAlignmentLimits = {};
-    texelCopyBufferRowAlignmentLimits.chain.sType = WGPUSType_DawnTexelCopyBufferRowAlignmentLimits;
-    limits.nextInChain = &texelCopyBufferRowAlignmentLimits.chain;
+    WGPUDawnTexelCopyBufferRowAlignmentLimits texelCopyBufferRowAlignmentLimits =
+        WGPU_DAWN_TEXEL_COPY_BUFFER_ROW_ALIGNMENT_LIMITS_INIT;
+    compatLimits.chain.next = &texelCopyBufferRowAlignmentLimits.chain;
 
     mProcs.deviceGetLimits(device, &limits);
     cmd.limits = &limits;

@@ -383,7 +383,7 @@ DeviceBase::DeviceBase(AdapterBase* adapter,
     // Handle maxXXXPerStage/maxXXXInStage.
     EnforceLimitSpecInvariants(&mLimits, effectiveFeatureLevel);
 
-    if (mLimits.v1.maxStorageBuffersInFragmentStage < 1) {
+    if (mLimits.compat.maxStorageBuffersInFragmentStage < 1) {
         // If there is no storage buffer in fragment stage, UseBlitForB2T is not possible.
         mToggles.ForceSet(Toggle::UseBlitForB2T, false);
     }
