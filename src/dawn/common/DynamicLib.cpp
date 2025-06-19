@@ -81,7 +81,8 @@ bool DynamicLib::Open(const std::string& filename, std::string* error) {
     mHandle = LoadLibraryA(filename.c_str());
 #endif
     if (mHandle == nullptr && error != nullptr) {
-        *error = "Windows Error: " + std::to_string(GetLastError());
+        *error =
+            "DynamicLib.Open: " + filename + " Windows Error: " + std::to_string(GetLastError());
     }
 #elif DAWN_PLATFORM_IS(POSIX)
     mHandle = dlopen(filename.c_str(), RTLD_NOW);
