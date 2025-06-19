@@ -234,6 +234,7 @@ source_set("sources") {
     "Blob.h",
     "BlobCache.cpp",
     "BlobCache.h",
+    "BlockInfo.h",
     "BuddyAllocator.cpp",
     "BuddyAllocator.h",
     "BuddyMemoryAllocator.cpp",

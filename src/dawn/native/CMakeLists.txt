@@ -56,6 +56,7 @@ set(private_headers
     "BlitTextureToBuffer.h"
     "Blob.h"
     "BlobCache.h"
+    "BlockInfo.h"
     "BuddyAllocator.h"
     "BuddyMemoryAllocator.h"
     "Buffer.h"

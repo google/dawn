@@ -30,6 +30,7 @@
 
 #include <array>
 
+#include "dawn/native/BlockInfo.h"
 #include "dawn/native/d3d12/UtilsD3D12.h"
 #include "dawn/native/dawn_platform.h"
 
@@ -48,13 +49,13 @@ struct TextureCopySubresource {
         // The 512-byte aligned offset into buffer
         uint64_t alignedOffset = 0;
         // Offset into texture
-        Origin3D textureOffset;
+        TexelOrigin3D textureOffset;
         // Offset into buffer
-        Origin3D bufferOffset;
+        TexelOrigin3D bufferOffset;
         // width,height,depth of the texture linearly laid out in the buffer
-        Extent3D bufferSize;
+        TexelExtent3D bufferSize;
         // width,height,depth to copy
-        Extent3D copySize;
+        TexelExtent3D copySize;
     };
 
     CopyInfo* AddCopy();
