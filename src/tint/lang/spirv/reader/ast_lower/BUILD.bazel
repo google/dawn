@@ -44,6 +44,7 @@ cc_library(
     "decompose_strided_matrix.cc",
     "fold_trivial_lets.cc",
     "pass_workgroup_id_as_argument.cc",
+    "remove_unreachable_statements.cc",
     "transpose_row_major.cc",
   ],
   hdrs = [
@@ -52,6 +53,7 @@ cc_library(
     "decompose_strided_matrix.h",
     "fold_trivial_lets.h",
     "pass_workgroup_id_as_argument.h",
+    "remove_unreachable_statements.h",
     "transpose_row_major.h",
   ],
   deps = [
@@ -89,6 +91,7 @@ cc_library(
     "decompose_strided_matrix_test.cc",
     "fold_trivial_lets_test.cc",
     "pass_workgroup_id_as_argument_test.cc",
+    "remove_unreachable_statements_test.cc",
     "transpose_row_major_test.cc",
   ],
   deps = [

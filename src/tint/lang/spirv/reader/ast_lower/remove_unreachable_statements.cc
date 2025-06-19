@@ -25,7 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/wgsl/ast/transform/remove_unreachable_statements.h"
+#include "src/tint/lang/spirv/reader/ast_lower/remove_unreachable_statements.h"
 
 #include <memory>
 #include <unordered_map>
@@ -43,17 +43,18 @@
 #include "src/tint/utils/containers/map.h"
 #include "src/tint/utils/macros/scoped_assignment.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::RemoveUnreachableStatements);
+TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::RemoveUnreachableStatements);
 
-namespace tint::ast::transform {
+namespace tint::spirv::reader {
 
 RemoveUnreachableStatements::RemoveUnreachableStatements() = default;
 
 RemoveUnreachableStatements::~RemoveUnreachableStatements() = default;
 
-Transform::ApplyResult RemoveUnreachableStatements::Apply(const Program& src,
-                                                          const DataMap&,
-                                                          DataMap&) const {
+ast::transform::Transform::ApplyResult RemoveUnreachableStatements::Apply(
+    const Program& src,
+    const ast::transform::DataMap&,
+    ast::transform::DataMap&) const {
     ProgramBuilder b;
     program::CloneContext ctx{&b, &src, /* auto_clone_symbols */ true};
 
@@ -75,4 +76,4 @@ Transform::ApplyResult RemoveUnreachableStatements::Apply(const Program& src,
     return resolver::Resolve(b);
 }
 
-}  // namespace tint::ast::transform
+}  // namespace tint::spirv::reader

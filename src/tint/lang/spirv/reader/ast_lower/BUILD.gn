@@ -55,6 +55,8 @@ if (tint_build_spv_reader) {
       "fold_trivial_lets.h",
       "pass_workgroup_id_as_argument.cc",
       "pass_workgroup_id_as_argument.h",
+      "remove_unreachable_statements.cc",
+      "remove_unreachable_statements.h",
       "transpose_row_major.cc",
       "transpose_row_major.h",
     ]
@@ -93,6 +95,7 @@ if (tint_build_unittests) {
         "decompose_strided_matrix_test.cc",
         "fold_trivial_lets_test.cc",
         "pass_workgroup_id_as_argument_test.cc",
+        "remove_unreachable_statements_test.cc",
         "transpose_row_major_test.cc",
       ]
       deps = [

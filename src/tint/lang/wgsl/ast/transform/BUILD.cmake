@@ -79,8 +79,6 @@ tint_add_target(tint_lang_wgsl_ast_transform lib
   lang/wgsl/ast/transform/remove_continue_in_switch.h
   lang/wgsl/ast/transform/remove_phonies.cc
   lang/wgsl/ast/transform/remove_phonies.h
-  lang/wgsl/ast/transform/remove_unreachable_statements.cc
-  lang/wgsl/ast/transform/remove_unreachable_statements.h
   lang/wgsl/ast/transform/renamer.cc
   lang/wgsl/ast/transform/renamer.h
   lang/wgsl/ast/transform/robustness.cc
@@ -155,7 +153,6 @@ tint_add_target(tint_lang_wgsl_ast_transform_test test
   lang/wgsl/ast/transform/promote_side_effects_to_decl_test.cc
   lang/wgsl/ast/transform/remove_continue_in_switch_test.cc
   lang/wgsl/ast/transform/remove_phonies_test.cc
-  lang/wgsl/ast/transform/remove_unreachable_statements_test.cc
   lang/wgsl/ast/transform/renamer_test.cc
   lang/wgsl/ast/transform/robustness_test.cc
   lang/wgsl/ast/transform/simplify_pointers_test.cc

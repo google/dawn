@@ -25,19 +25,20 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_WGSL_AST_TRANSFORM_REMOVE_UNREACHABLE_STATEMENTS_H_
-#define SRC_TINT_LANG_WGSL_AST_TRANSFORM_REMOVE_UNREACHABLE_STATEMENTS_H_
+#ifndef SRC_TINT_LANG_SPIRV_READER_AST_LOWER_REMOVE_UNREACHABLE_STATEMENTS_H_
+#define SRC_TINT_LANG_SPIRV_READER_AST_LOWER_REMOVE_UNREACHABLE_STATEMENTS_H_
 
 #include <string>
 #include <unordered_map>
 
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
 
-namespace tint::ast::transform {
+namespace tint::spirv::reader {
 
 /// RemoveUnreachableStatements is a Transform that removes all statements
 /// marked as unreachable.
-class RemoveUnreachableStatements final : public Castable<RemoveUnreachableStatements, Transform> {
+class RemoveUnreachableStatements final
+    : public Castable<RemoveUnreachableStatements, ast::transform::Transform> {
   public:
     /// Constructor
     RemoveUnreachableStatements();
@@ -47,10 +48,10 @@ class RemoveUnreachableStatements final : public Castable<RemoveUnreachableState
 
     /// @copydoc Transform::Apply
     ApplyResult Apply(const Program& program,
-                      const DataMap& inputs,
-                      DataMap& outputs) const override;
+                      const ast::transform::DataMap& inputs,
+                      ast::transform::DataMap& outputs) const override;
 };
 
-}  // namespace tint::ast::transform
+}  // namespace tint::spirv::reader
 
-#endif  // SRC_TINT_LANG_WGSL_AST_TRANSFORM_REMOVE_UNREACHABLE_STATEMENTS_H_
+#endif  // SRC_TINT_LANG_SPIRV_READER_AST_LOWER_REMOVE_UNREACHABLE_STATEMENTS_H_

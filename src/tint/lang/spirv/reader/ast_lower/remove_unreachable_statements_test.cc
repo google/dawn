@@ -25,14 +25,14 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/wgsl/ast/transform/remove_unreachable_statements.h"
+#include "src/tint/lang/spirv/reader/ast_lower/remove_unreachable_statements.h"
 
 #include "src/tint/lang/wgsl/ast/transform/helper_test.h"
 
-namespace tint::ast::transform {
+namespace tint::spirv::reader {
 namespace {
 
-using RemoveUnreachableStatementsTest = TransformTest;
+using RemoveUnreachableStatementsTest = ast::transform::TransformTest;
 
 TEST_F(RemoveUnreachableStatementsTest, ShouldRunEmptyModule) {
     auto* src = R"()";
@@ -265,4 +265,4 @@ fn f() {
 }
 
 }  // namespace
-}  // namespace tint::ast::transform
+}  // namespace tint::spirv::reader
