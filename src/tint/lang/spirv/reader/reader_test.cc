@@ -264,8 +264,7 @@ $B1: {  # root
 )");
 }
 
-// TODO(dsinclair): Requires `ArrayStride` decoration support
-TEST_F(SpirvReaderTest, DISABLED_ClipDistances) {
+TEST_F(SpirvReaderTest, ClipDistances) {
     auto got = Run(R"(
                OpCapability Shader
                OpCapability ClipDistance

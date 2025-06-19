@@ -56,6 +56,7 @@ TINT_END_DISABLE_WARNING(NEWLINE_EOF);
 #include "src/tint/lang/core/type/builtin_structs.h"
 #include "src/tint/lang/spirv/builtin_fn.h"
 #include "src/tint/lang/spirv/ir/builtin_call.h"
+#include "src/tint/lang/spirv/type/explicit_layout_array.h"
 #include "src/tint/lang/spirv/type/image.h"
 #include "src/tint/lang/spirv/type/sampled_image.h"
 #include "src/tint/lang/spirv/validate/validate.h"
@@ -478,10 +479,11 @@ class Parser {
         }
 
         // TODO(crbug.com/1907): Handle decorations that affect the type
+        uint32_t array_stride = 0;
         for (auto& deco : type->decorations()) {
             switch (spv::Decoration(deco[0])) {
-                case spv::Decoration::SpecId: {
-                    // TODO(dsinclair): Trick clang, remove when actual decorations added
+                case spv::Decoration::ArrayStride: {
+                    array_stride = deco[1];
                     break;
                 }
                 default: {
@@ -530,7 +532,7 @@ class Parser {
                                    mat_ty->element_count());
                 }
                 case spvtools::opt::analysis::Type::kArray: {
-                    return EmitArray(type->AsArray());
+                    return EmitArray(type->AsArray(), array_stride);
                 }
                 case spvtools::opt::analysis::Type::kRuntimeArray: {
                     auto* arr_ty = type->AsRuntimeArray();
@@ -650,7 +652,8 @@ class Parser {
 
     /// @param arr_ty a SPIR-V array object
     /// @returns a Tint array object
-    const core::type::Type* EmitArray(const spvtools::opt::analysis::Array* arr_ty) {
+    const core::type::Type* EmitArray(const spvtools::opt::analysis::Array* arr_ty,
+                                      uint32_t array_stride) {
         const auto& length = arr_ty->length_info();
         TINT_ASSERT(!length.words.empty());
         if (length.words[0] != spvtools::opt::analysis::Array::LengthInfo::kConstant) {
@@ -664,7 +667,15 @@ class Parser {
         const uint64_t count_val = count_const->GetZeroExtendedValue();
         TINT_ASSERT(count_val <= UINT32_MAX);
 
-        return ty_.array(Type(arr_ty->element_type()), static_cast<uint32_t>(count_val));
+        auto* elem_ty = Type(arr_ty->element_type());
+        uint32_t implicit_stride = tint::RoundUp(elem_ty->Align(), elem_ty->Size());
+        if (array_stride == 0 || array_stride == implicit_stride) {
+            return ty_.array(elem_ty, static_cast<uint32_t>(count_val));
+        }
+
+        return ty_.Get<spirv::type::ExplicitLayoutArray>(
+            elem_ty, ty_.Get<core::type::ConstantArrayCount>(static_cast<uint32_t>(count_val)),
+            elem_ty->Align(), static_cast<uint32_t>(array_stride * count_val), array_stride);
     }
 
     /// @param struct_ty a SPIR-V struct object
