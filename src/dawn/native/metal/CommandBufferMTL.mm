@@ -159,7 +159,7 @@ NSRef<MTLComputePassDescriptor> CreateMTLComputePassDescriptor(BeginComputePassC
     MTLComputePassDescriptor* descriptor = descriptorRef.Get();
     // MTLDispatchTypeSerial is the same dispatch type as the deafult MTLComputeCommandEncoder.
     // MTLDispatchTypeConcurrent requires memory barriers to ensure multiple commands synchronize
-    // access to the same resources, which we may support it later.
+    // access to the same resources, which we may support it later. See crbug.com/425987598
     descriptor.dispatchType = MTLDispatchTypeSerial;
 
     SetSampleBufferAttachments(descriptor, computePass);
