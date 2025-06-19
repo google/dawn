@@ -554,6 +554,11 @@ class Parser {
             if (set_as_storage_buffer) {
                 TINT_ASSERT(type->kind() == spvtools::opt::analysis::Type::kStruct);
             }
+            // ArrayStride is only handled on the array type for now
+            if (array_stride > 0) {
+                TINT_ASSERT(type->kind() == spvtools::opt::analysis::Type::kArray ||
+                            type->kind() == spvtools::opt::analysis::Type::kRuntimeArray);
+            }
 
             switch (type->kind()) {
                 case spvtools::opt::analysis::Type::kVoid: {
