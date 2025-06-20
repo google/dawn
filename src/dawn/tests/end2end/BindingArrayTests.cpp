@@ -346,6 +346,119 @@ TEST_P(SizedBindingArrayTests, BindingArraySize1CompatibleWithNonArrayedBGL) {
     EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(42, 0, 0, 0), rp.color, 0, 0);
 }
 
+// Test passing sampled textures of binding_array as function arguments.
+TEST_P(SizedBindingArrayTests, BindingArraySampledTextureAsFunctionArgument) {
+    // Make the test pipeline
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+        @vertex fn vs() -> @builtin(position) vec4f {
+            return vec4f(0, 0, 0.5, 0.5);
+        }
+
+        fn load(t : texture_2d<f32>) -> f32 {
+            return textureLoad(t, vec2(0, 0), 0)[0];
+        }
+
+        @group(0) @binding(0) var ts : binding_array<texture_2d<f32>, 4>;
+        @fragment fn fs() -> @location(0) vec4f {
+            let r = load(ts[0]);
+            let g = load(ts[1]);
+            let b = load(ts[2]);
+            let a = load(ts[3]);
+            return vec4(r, g, b, a);
+        }
+    )");
+
+    utils::ComboRenderPipelineDescriptor pDesc;
+    pDesc.vertex.module = module;
+    pDesc.cFragment.module = module;
+    pDesc.cFragment.targetCount = 1;
+    pDesc.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+    pDesc.primitive.topology = wgpu::PrimitiveTopology::PointList;
+    wgpu::RenderPipeline testPipeline = device.CreateRenderPipeline(&pDesc);
+
+    // Create a bind group with textures of decreasing values
+    wgpu::BindGroup arrayGroup = utils::MakeBindGroup(device, testPipeline.GetBindGroupLayout(0),
+                                                      {
+                                                          {3, MakeTestR8Texture(0).CreateView()},
+                                                          {2, MakeTestR8Texture(1).CreateView()},
+                                                          {1, MakeTestR8Texture(2).CreateView()},
+                                                          {0, MakeTestR8Texture(3).CreateView()},
+                                                      });
+
+    // Run the test
+    auto rp = utils::CreateBasicRenderPass(device, 1, 1);
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
+
+    pass.SetPipeline(testPipeline);
+    pass.SetBindGroup(0, arrayGroup);
+    pass.Draw(1);
+    pass.End();
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(3, 2, 1, 0), rp.color, 0, 0);
+}
+
+// Test accessing a binding_array of sampled textures passed as function argument.
+TEST_P(SizedBindingArrayTests, BindingArrayOfSampledTexturesPassedAsArgument) {
+    // Crashes on the Intel Windows Vulkan shader compiler.
+    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsWindows() && IsIntel());
+
+    // Make the test pipeline
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+        @vertex fn vs() -> @builtin(position) vec4f {
+            return vec4f(0, 0, 0.5, 0.5);
+        }
+
+        @group(0) @binding(0) var ts : binding_array<texture_2d<f32>, 4>;
+        fn f(textures : binding_array<texture_2d<f32>, 4>) -> vec4f {
+            let r = textureLoad(textures[0], vec2(0, 0), 0)[0];
+            let g = textureLoad(textures[1], vec2(0, 0), 0)[0];
+            let b = textureLoad(textures[2], vec2(0, 0), 0)[0];
+            let a = textureLoad(textures[3], vec2(0, 0), 0)[0];
+            return vec4(r, g, b, a);
+        }
+
+        @fragment fn fs() -> @location(0) vec4f {
+            return f(ts);
+        }
+    )");
+
+    utils::ComboRenderPipelineDescriptor pDesc;
+    pDesc.vertex.module = module;
+    pDesc.cFragment.module = module;
+    pDesc.cFragment.targetCount = 1;
+    pDesc.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+    pDesc.primitive.topology = wgpu::PrimitiveTopology::PointList;
+    wgpu::RenderPipeline testPipeline = device.CreateRenderPipeline(&pDesc);
+
+    // Create a bind group with textures of decreasing values
+    wgpu::BindGroup arrayGroup = utils::MakeBindGroup(device, testPipeline.GetBindGroupLayout(0),
+                                                      {
+                                                          {3, MakeTestR8Texture(0).CreateView()},
+                                                          {2, MakeTestR8Texture(1).CreateView()},
+                                                          {1, MakeTestR8Texture(2).CreateView()},
+                                                          {0, MakeTestR8Texture(3).CreateView()},
+                                                      });
+
+    // Run the test
+    auto rp = utils::CreateBasicRenderPass(device, 1, 1);
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
+
+    pass.SetPipeline(testPipeline);
+    pass.SetBindGroup(0, arrayGroup);
+    pass.Draw(1);
+    pass.End();
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(3, 2, 1, 0), rp.color, 0, 0);
+}
+
 DAWN_INSTANTIATE_TEST(SizedBindingArrayTests, MetalBackend(), VulkanBackend());
 
 }  // anonymous namespace

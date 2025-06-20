@@ -817,6 +817,10 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         // chromium:407109052: Qualcomm devices have a bug where the spirv extended op NClamp
         // modifies other components of a vector when one of the components is nan.
         deviceToggles->Default(Toggle::ScalarizeMaxMinClamp, true);
+
+        // Qualcomm's shader compiler returns an internal error when binding_array<texture*> is
+        // passed by argument to functions.
+        deviceToggles->Default(Toggle::VulkanDirectVariableAccessTransformHandle, true);
     }
 
     if (IsAndroidARM()) {
@@ -840,6 +844,13 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
 
     if (IsAndroidSamsung() || IsAndroidQualcomm() || IsAndroidHuawei()) {
         deviceToggles->Default(Toggle::IgnoreImportedAHardwareBufferVulkanImageSize, true);
+    }
+
+    if (IsSwiftshader()) {
+        // Swiftshader doesn't handle propagating decorations for descriptors through
+        // OpCompositeExtract which happens when a binding_array is indexed "by value" instead of
+        // through a pointer.
+        deviceToggles->Default(Toggle::VulkanDirectVariableAccessTransformHandle, true);
     }
 
     if (IsIntelMesa() && gpu_info::IsIntelGen12LP(GetVendorId(), GetDeviceId())) {
@@ -1031,6 +1042,10 @@ bool PhysicalDevice::IsIntelMesa() const {
         return mDeviceInfo.driverProperties.driverID == VK_DRIVER_ID_INTEL_OPEN_SOURCE_MESA_KHR;
     }
     return false;
+}
+
+bool PhysicalDevice::IsSwiftshader() const {
+    return gpu_info::IsGoogleSwiftshader(GetVendorId(), GetDeviceId());
 }
 
 uint32_t PhysicalDevice::FindDefaultComputeSubgroupSize() const {

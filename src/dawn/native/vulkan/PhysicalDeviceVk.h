@@ -66,6 +66,7 @@ class PhysicalDevice : public PhysicalDeviceBase {
     bool IsAndroidSamsung() const;
     bool IsIntelMesa() const;
     bool IsAndroidHuawei() const;
+    bool IsSwiftshader() const;
 
     uint32_t GetDefaultComputeSubgroupSize() const;
 
