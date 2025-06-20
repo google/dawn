@@ -89,16 +89,34 @@ if ((DAWN_BUILD_TESTS OR TINT_BUILD_TESTS) AND NOT TARGET gmock)
     set(gtest_force_shared_crt ON CACHE BOOL "Controls whether a shared run-time library should be used even when Google Test is built as static library" FORCE)
     if (EMSCRIPTEN)
         # For Emscripten builds, we need to disable pthreads.
+        # https://discourse.cmake.org/t/set-definitions-for-external-sub-directory/1136
         set(gtest_disable_pthreads ON)
     endif()
 
-    # We don't use exceptions, so we don't need gtest to handle them. Emscripten
-    # builds in particular, with JSPI enabled, crash without this enabled.
-    # There doesn't seem to be an option to tell the gtest build files to do
-    # this, so we set it globally. (This seems to be the intended usage.)
-    add_definitions(-DGTEST_HAS_EXCEPTIONS=0)
-
     add_subdirectory(${DAWN_GOOGLETEST_DIR} "${CMAKE_CURRENT_BINARY_DIR}/googletest" EXCLUDE_FROM_ALL)
+
+    # The CMake target GTest::gmock_main always sets -fexceptions, which is
+    # incompatible with WASM JSPI (though works with Asyncify). The only way to
+    # avoid this is to define our own custom CMake rule for it.
+    # (This is based on GMock's internal `gmock_main_no_exception` target.)
+    add_library(gmock_main_wasmsafe
+        "${gtest_SOURCE_DIR}/src/gtest-all.cc"
+        "${gmock_SOURCE_DIR}/src/gmock-all.cc"
+        "${gmock_SOURCE_DIR}/src/gmock_main.cc"
+    )
+    target_compile_options(gmock_main_wasmsafe
+        PUBLIC
+            "-fno-exceptions"
+            "-fno-rtti"
+    )
+    target_include_directories(gmock_main_wasmsafe SYSTEM
+        PRIVATE
+            "${gtest_SOURCE_DIR}"
+            "${gmock_SOURCE_DIR}"
+        PUBLIC
+            "${gtest_SOURCE_DIR}/include"
+            "${gmock_SOURCE_DIR}/include"
+    )
 endif()
 ################################################################################
 # End of Emscripten enabled third party directories

@@ -312,7 +312,7 @@ if (EMSCRIPTEN)
         set(emdawnwebgpu_test_deps
             dawn::dawn_wgpu_utils
             emdawnwebgpu_cpp
-            gmock_main
+            gmock_main_wasmsafe
         )
 
         add_executable(emdawnwebgpu_tests_asyncify ${emdawnwebgpu_test_sources})
