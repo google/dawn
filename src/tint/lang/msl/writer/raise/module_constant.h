@@ -39,7 +39,7 @@ class Module;
 namespace tint::msl::writer::raise {
 
 /// The capabilities that the transform can support.
-const core::ir::Capabilities kModuleConstant{
+const core::ir::Capabilities kModuleConstantCapabilities{
     core::ir::Capability::kAllow8BitIntegers,
     core::ir::Capability::kAllow64BitIntegers,
     core::ir::Capability::kAllowPointersAndHandlesInStructures,
@@ -48,6 +48,7 @@ const core::ir::Capabilities kModuleConstant{
     core::ir::Capability::kAllowClipDistancesOnF32,
     core::ir::Capability::kAllowPrivateVarsInFunctions,
     core::ir::Capability::kAllowAnyLetType,
+    core::ir::Capability::kAllowNonCoreTypes,
     core::ir::Capability::kAllowWorkspacePointerInputToEntryPoint,
     core::ir::Capability::kAllowModuleScopeLets,
 };

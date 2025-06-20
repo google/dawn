@@ -79,7 +79,7 @@ struct State {
 }  // namespace
 
 Result<SuccessType> ModuleConstant(core::ir::Module& ir) {
-    auto result = ValidateAndDumpIfNeeded(ir, "msl.ModuleConstant", kModuleConstant);
+    auto result = ValidateAndDumpIfNeeded(ir, "msl.ModuleConstant", kModuleConstantCapabilities);
     if (result != Success) {
         return result;
     }
