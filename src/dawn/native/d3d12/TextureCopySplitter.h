@@ -49,13 +49,13 @@ struct TextureCopySubresource {
         // The 512-byte aligned offset into buffer
         uint64_t alignedOffset = 0;
         // Offset into texture
-        TexelOrigin3D textureOffset;
+        BlockOrigin3D textureOffset;
         // Offset into buffer
-        TexelOrigin3D bufferOffset;
+        BlockOrigin3D bufferOffset;
         // width,height,depth of the texture linearly laid out in the buffer
-        TexelExtent3D bufferSize;
+        BlockExtent3D bufferSize;
         // width,height,depth to copy
-        TexelExtent3D copySize;
+        BlockExtent3D copySize;
     };
 
     CopyInfo* AddCopy();

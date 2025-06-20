@@ -78,12 +78,12 @@ TypedTexelBlockInfo ToTypedTexelBlockInfo(const TextureSpec& textureSpec) {
 }
 
 // TODO(425944899): Store TexelOrigin3D in TextureSpec
-TexelOrigin3D ToTOrigin3D(const TextureSpec& textureSpec) {
+TexelOrigin3D ToTexelOrigin3D(const TextureSpec& textureSpec) {
     return TexelOrigin3D{textureSpec.x, textureSpec.y, textureSpec.z};
 }
 
 // TODO(425944899): Store TexelExtent3D in TextureSpec
-TexelExtent3D ToTExtent3D(const TextureSpec& textureSpec) {
+TexelExtent3D ToTexelExtent3D(const TextureSpec& textureSpec) {
     return TexelExtent3D{textureSpec.width, textureSpec.height, textureSpec.depthOrArrayLayers};
 }
 
@@ -95,9 +95,10 @@ void ValidateFootprints(const TextureSpec& textureSpec,
     TypedTexelBlockInfo blockInfo = ToTypedTexelBlockInfo(textureSpec);
     for (uint32_t i = 0; i < copySplit.count; ++i) {
         const auto& copy = copySplit.copies[i];
-        const TexelExtent3D& copySize = copy.copySize;
-        const TexelOrigin3D& bufferOffset = copy.bufferOffset;
-        const TexelExtent3D& bufferSize = copy.bufferSize;
+        // TODO(425944899): Rework this function to work in blocks, not texels
+        const TexelExtent3D& copySize = blockInfo.ToTexel(copy.copySize);
+        const TexelOrigin3D& bufferOffset = blockInfo.ToTexel(copy.bufferOffset);
+        const TexelExtent3D& bufferSize = blockInfo.ToTexel(copy.bufferSize);
         ASSERT_LE(bufferOffset.x + copySize.width, bufferSize.width);
         ASSERT_LE(bufferOffset.y + copySize.height, bufferSize.height);
         ASSERT_LE(bufferOffset.z + copySize.depthOrArrayLayers, bufferSize.depthOrArrayLayers);
@@ -170,19 +171,21 @@ bool InclusiveRangesOverlap(T minA, T maxA, T minB, T maxB) {
 }
 
 // Check that no pair of copy regions intersect each other
-void ValidateDisjoint(const TextureCopySubresource& copySplit) {
+void ValidateDisjoint(const TextureSpec& textureSpec, const TextureCopySubresource& copySplit) {
+    TypedTexelBlockInfo blockInfo = ToTypedTexelBlockInfo(textureSpec);
     for (uint32_t i = 0; i < copySplit.count; ++i) {
         const auto& a = copySplit.copies[i];
-        const TexelExtent3D& copySizeA = a.copySize;
-        const TexelOrigin3D& textureOffsetA = a.textureOffset;
+        // TODO(425944899): Rework this function to work in blocks, not texels
+        const TexelExtent3D& copySizeA = blockInfo.ToTexel(a.copySize);
+        const TexelOrigin3D& textureOffsetA = blockInfo.ToTexel(a.textureOffset);
         for (uint32_t j = i + 1; j < copySplit.count; ++j) {
             const auto& b = copySplit.copies[j];
             // If textureOffset.x is 0, and copySize.width is 2, we are copying pixel 0 and
             // 1. We never touch pixel 2 on x-axis. So the copied range on x-axis should be
             // [textureOffset.x, textureOffset.x + copySize.width - 1] and both ends are
             // included.
-            const TexelExtent3D& copySizeB = b.copySize;
-            const TexelOrigin3D& textureOffsetB = b.textureOffset;
+            const TexelExtent3D& copySizeB = blockInfo.ToTexel(b.copySize);
+            const TexelOrigin3D& textureOffsetB = blockInfo.ToTexel(b.textureOffset);
             bool overlapX =
                 InclusiveRangesOverlap(textureOffsetA.x, textureOffsetA.x + copySizeA.width - 1_tc,
                                        textureOffsetB.x, textureOffsetB.x + copySizeB.width - 1_tc);
@@ -201,9 +204,11 @@ void ValidateDisjoint(const TextureCopySubresource& copySplit) {
 void ValidateTextureBounds(const TextureSpec& textureSpec,
                            const TextureCopySubresource& copySplit) {
     ASSERT_GT(copySplit.count, 0u);
+    TypedTexelBlockInfo blockInfo = ToTypedTexelBlockInfo(textureSpec);
 
-    const TexelExtent3D& copySize0 = copySplit.copies[0].copySize;
-    const TexelOrigin3D& textureOffset0 = copySplit.copies[0].textureOffset;
+    // TODO(425944899): Rework this function to work in blocks, not texels
+    const TexelExtent3D& copySize0 = blockInfo.ToTexel(copySplit.copies[0].copySize);
+    const TexelOrigin3D& textureOffset0 = blockInfo.ToTexel(copySplit.copies[0].textureOffset);
     TexelCount minX = textureOffset0.x;
     TexelCount minY = textureOffset0.y;
     TexelCount minZ = textureOffset0.z;
@@ -213,11 +218,11 @@ void ValidateTextureBounds(const TextureSpec& textureSpec,
 
     for (uint32_t i = 1; i < copySplit.count; ++i) {
         const auto& copy = copySplit.copies[i];
-        const TexelOrigin3D& textureOffset = copy.textureOffset;
+        const TexelOrigin3D& textureOffset = blockInfo.ToTexel(copy.textureOffset);
         minX = std::min(minX, textureOffset.x);
         minY = std::min(minY, textureOffset.y);
         minZ = std::min(minZ, textureOffset.z);
-        const TexelExtent3D& copySize = copy.copySize;
+        const TexelExtent3D& copySize = blockInfo.ToTexel(copy.copySize);
         maxX = std::max(maxX, textureOffset.x + copySize.width);
         maxY = std::max(maxY, textureOffset.y + copySize.height);
         maxZ = std::max(maxZ, textureOffset.z + copySize.depthOrArrayLayers);
@@ -234,15 +239,18 @@ void ValidateTextureBounds(const TextureSpec& textureSpec,
 // Validate that the number of pixels copied is exactly equal to the number of pixels in the
 // texture region
 void ValidatePixelCount(const TextureSpec& textureSpec, const TextureCopySubresource& copySplit) {
-    TexelCount count{0};
+    TypedTexelBlockInfo blockInfo = ToTypedTexelBlockInfo(textureSpec);
+    TexelCount totalCopiedTexels{0};
     for (uint32_t i = 0; i < copySplit.count; ++i) {
         const auto& copy = copySplit.copies[i];
-        const TexelExtent3D& copySize = copy.copySize;
-        TexelCount copiedPixels = copySize.width * copySize.height * copySize.depthOrArrayLayers;
-        ASSERT_GT(copiedPixels, 0_tc);
-        count += copiedPixels;
+        // TODO(425944899): Rework this function to work in blocks, not texels
+        const TexelExtent3D& copySize = blockInfo.ToTexel(copy.copySize);
+        TexelCount copiedTexels = copySize.width * copySize.height * copySize.depthOrArrayLayers;
+        ASSERT_GT(copiedTexels, 0_tc);
+        totalCopiedTexels += copiedTexels;
     }
-    ASSERT_EQ(count, textureSpec.width * textureSpec.height * textureSpec.depthOrArrayLayers);
+    ASSERT_EQ(totalCopiedTexels,
+              textureSpec.width * textureSpec.height * textureSpec.depthOrArrayLayers);
 }
 
 // Check that every buffer offset is at the correct pixel location
@@ -256,23 +264,22 @@ void ValidateBufferOffset(const TextureSpec& textureSpec,
 
     for (uint32_t i = 0; i < copySplit.count; ++i) {
         const auto& copy = copySplit.copies[i];
-        const TexelOrigin3D& bufferOffset = copy.bufferOffset;
-        const TexelOrigin3D& textureOffset = copy.textureOffset;
+        const BlockOrigin3D& bufferOffset = copy.bufferOffset;
+        const BlockOrigin3D& textureOffset = copy.textureOffset;
         // Note that for relaxed, the row pitch (bytesPerRow) is not required to be 256 bytes,
         // but Dawn currently doesn't do anything about this.
         BlockCount rowPitchInBlocks = blockInfo.BytesToBlocks(bufferSpec.bytesPerRow);
         BlockCount slicePitchInBlocks = rowPitchInBlocks * bufferSpec.rowsPerImage;
-        BlockCount absoluteOffsetInBlocks =
-            blockInfo.BytesToBlocks(copy.alignedOffset) + blockInfo.ToBlockWidth(bufferOffset.x) +
-            blockInfo.ToBlockHeight(bufferOffset.y) * rowPitchInBlocks;
+        BlockCount absoluteOffsetInBlocks = blockInfo.BytesToBlocks(copy.alignedOffset) +
+                                            bufferOffset.x + bufferOffset.y * rowPitchInBlocks;
 
         // There is one empty row at most in a 2D copy region. However, it is not true for
         // a 3D texture copy region when we are copying the last row of each slice. We may
         // need to offset a lot rows and copy.bufferOffset.y may be big.
         if (dimension == wgpu::TextureDimension::e2D) {
-            ASSERT_LE(bufferOffset.y, textureSpec.blockHeight);
+            ASSERT_LE(bufferOffset.y, BlockCount{1});
         }
-        ASSERT_EQ(bufferOffset.z, 0_tc);
+        ASSERT_EQ(bufferOffset.z, 0_bc);
 
         ASSERT_GE(absoluteOffsetInBlocks, blockInfo.BytesToBlocks(bufferSpec.offset));
 
@@ -283,10 +290,9 @@ void ValidateBufferOffset(const TextureSpec& textureSpec,
         BlockCount yBlocks = (relativeOffsetInBlocks % slicePitchInBlocks) / rowPitchInBlocks;
         BlockCount xBlocks = relativeOffsetInBlocks % rowPitchInBlocks;
 
-        ASSERT_EQ(textureOffset.x - textureSpec.x, blockInfo.ToTexelWidth(xBlocks));
-        ASSERT_EQ(textureOffset.y - textureSpec.y, blockInfo.ToTexelHeight(yBlocks));
-        ASSERT_EQ(textureOffset.z - textureSpec.z, blockInfo.ToTexelDepth(z))
-            << "textureOffset: " << textureOffset.z;
+        ASSERT_EQ(textureOffset.x - blockInfo.ToBlockWidth(textureSpec.x), xBlocks);
+        ASSERT_EQ(textureOffset.y - blockInfo.ToBlockHeight(textureSpec.y), yBlocks);
+        ASSERT_EQ(textureOffset.z - blockInfo.ToBlockDepth(textureSpec.z), z);
     }
 }
 
@@ -297,7 +303,7 @@ void ValidateCopySplit(const TextureSpec& textureSpec,
                        bool relaxed) {
     ValidateFootprints(textureSpec, bufferSpec, copySplit, dimension);
     ValidateOffset(copySplit, relaxed);
-    ValidateDisjoint(copySplit);
+    ValidateDisjoint(textureSpec, copySplit);
     ValidateTextureBounds(textureSpec, copySplit);
     ValidatePixelCount(textureSpec, copySplit);
     ValidateBufferOffset(textureSpec, bufferSpec, copySplit, dimension, relaxed);
@@ -765,14 +771,14 @@ class CopySplitTest : public testing::TestWithParam<CopySplitTestParam> {
                 }
                 if (relaxed) {
                     copySplit = Compute2DTextureCopySubresourceWithRelaxedRowPitchAndOffset(
-                        ToTOrigin3D(textureSpec).ToOrigin3D(),
-                        ToTExtent3D(textureSpec).ToExtent3D(),
+                        ToTexelOrigin3D(textureSpec).ToOrigin3D(),
+                        ToTexelExtent3D(textureSpec).ToExtent3D(),
                         ToTypedTexelBlockInfo(textureSpec).ToTexelBlockInfo(), bufferSpec.offset,
                         bufferSpec.bytesPerRow);
                 } else {
                     copySplit = Compute2DTextureCopySubresource(
-                        ToTOrigin3D(textureSpec).ToOrigin3D(),
-                        ToTExtent3D(textureSpec).ToExtent3D(),
+                        ToTexelOrigin3D(textureSpec).ToOrigin3D(),
+                        ToTexelExtent3D(textureSpec).ToExtent3D(),
                         ToTypedTexelBlockInfo(textureSpec).ToTexelBlockInfo(), bufferSpec.offset,
                         bufferSpec.bytesPerRow);
                 }
@@ -781,14 +787,14 @@ class CopySplitTest : public testing::TestWithParam<CopySplitTestParam> {
             case wgpu::TextureDimension::e3D: {
                 if (relaxed) {
                     copySplit = Compute3DTextureCopySubresourceWithRelaxedRowPitchAndOffset(
-                        ToTOrigin3D(textureSpec).ToOrigin3D(),
-                        ToTExtent3D(textureSpec).ToExtent3D(),
+                        ToTexelOrigin3D(textureSpec).ToOrigin3D(),
+                        ToTexelExtent3D(textureSpec).ToExtent3D(),
                         ToTypedTexelBlockInfo(textureSpec).ToTexelBlockInfo(), bufferSpec.offset,
                         bufferSpec.bytesPerRow, static_cast<uint32_t>(bufferSpec.rowsPerImage));
                 } else {
                     copySplit = Compute3DTextureCopySplits(
-                        ToTOrigin3D(textureSpec).ToOrigin3D(),
-                        ToTExtent3D(textureSpec).ToExtent3D(),
+                        ToTexelOrigin3D(textureSpec).ToOrigin3D(),
+                        ToTexelExtent3D(textureSpec).ToExtent3D(),
                         ToTypedTexelBlockInfo(textureSpec).ToTexelBlockInfo(), bufferSpec.offset,
                         bufferSpec.bytesPerRow, static_cast<uint32_t>(bufferSpec.rowsPerImage));
                 }
@@ -856,6 +862,9 @@ TEST_P(CopySplitTest, TextureHeight) {
 TEST_P(CopySplitTest, TextureX) {
     for (TextureSpec textureSpec : kBaseTextureSpecs) {
         for (uint32_t val : kCheckValues) {
+            if (TexelCount{val} % textureSpec.blockWidth != 0_tc) {
+                continue;
+            }
             textureSpec.x = TexelCount{val};
             for (const BufferSpec& bufferSpec : BaseBufferSpecs(textureSpec)) {
                 DoTest(textureSpec, bufferSpec);
@@ -867,6 +876,9 @@ TEST_P(CopySplitTest, TextureX) {
 TEST_P(CopySplitTest, TextureY) {
     for (TextureSpec textureSpec : kBaseTextureSpecs) {
         for (uint32_t val : kCheckValues) {
+            if (TexelCount{val} % textureSpec.blockHeight != 0_tc) {
+                continue;
+            }
             textureSpec.y = TexelCount{val};
             for (const BufferSpec& bufferSpec : BaseBufferSpecs(textureSpec)) {
                 DoTest(textureSpec, bufferSpec);
