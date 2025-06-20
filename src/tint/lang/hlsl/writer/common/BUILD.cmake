@@ -34,9 +34,11 @@
 #                       Do not modify this file directly
 ################################################################################
 
+if(TINT_BUILD_HLSL_WRITER)
 ################################################################################
 # Target:    tint_lang_hlsl_writer_common
 # Kind:      lib
+# Condition: TINT_BUILD_HLSL_WRITER
 ################################################################################
 tint_add_target(tint_lang_hlsl_writer_common lib
   lang/hlsl/writer/common/option_helpers.cc
@@ -67,9 +69,12 @@ tint_target_add_external_dependencies(tint_lang_hlsl_writer_common lib
   "src_utils"
 )
 
+endif(TINT_BUILD_HLSL_WRITER)
+if(TINT_BUILD_HLSL_WRITER)
 ################################################################################
 # Target:    tint_lang_hlsl_writer_common_test
 # Kind:      test
+# Condition: TINT_BUILD_HLSL_WRITER
 ################################################################################
 tint_add_target(tint_lang_hlsl_writer_common_test test
   lang/hlsl/writer/common/options_test.cc
@@ -78,7 +83,6 @@ tint_add_target(tint_lang_hlsl_writer_common_test test
 tint_target_add_dependencies(tint_lang_hlsl_writer_common_test test
   tint_api_common
   tint_lang_core
-  tint_lang_hlsl_writer_common
   tint_utils
   tint_utils_containers
   tint_utils_ice
@@ -92,3 +96,11 @@ tint_target_add_external_dependencies(tint_lang_hlsl_writer_common_test test
   "gtest"
   "src_utils"
 )
+
+if(TINT_BUILD_HLSL_WRITER)
+  tint_target_add_dependencies(tint_lang_hlsl_writer_common_test test
+    tint_lang_hlsl_writer_common
+  )
+endif(TINT_BUILD_HLSL_WRITER)
+
+endif(TINT_BUILD_HLSL_WRITER)

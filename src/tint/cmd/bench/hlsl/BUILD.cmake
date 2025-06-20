@@ -50,8 +50,6 @@ tint_target_add_dependencies(tint_cmd_bench_hlsl_bench bench
   tint_lang_core_constant
   tint_lang_core_ir
   tint_lang_core_type
-  tint_lang_hlsl_writer_common
-  tint_lang_hlsl_writer_helpers
   tint_lang_wgsl
   tint_lang_wgsl_ast
   tint_lang_wgsl_program
@@ -76,6 +74,8 @@ tint_target_add_external_dependencies(tint_cmd_bench_hlsl_bench bench
 if(TINT_BUILD_HLSL_WRITER)
   tint_target_add_dependencies(tint_cmd_bench_hlsl_bench bench
     tint_lang_hlsl_writer
+    tint_lang_hlsl_writer_common
+    tint_lang_hlsl_writer_helpers
   )
 endif(TINT_BUILD_HLSL_WRITER)
 

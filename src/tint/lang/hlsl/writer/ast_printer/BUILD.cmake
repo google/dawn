@@ -51,7 +51,6 @@ tint_target_add_dependencies(tint_lang_hlsl_writer_ast_printer lib
   tint_lang_core_constant
   tint_lang_core_ir_transform
   tint_lang_core_type
-  tint_lang_hlsl_writer_common
   tint_lang_wgsl
   tint_lang_wgsl_ast
   tint_lang_wgsl_ast_transform
@@ -78,6 +77,7 @@ tint_target_add_external_dependencies(tint_lang_hlsl_writer_ast_printer lib
 if(TINT_BUILD_HLSL_WRITER)
   tint_target_add_dependencies(tint_lang_hlsl_writer_ast_printer lib
     tint_lang_hlsl_writer_ast_raise
+    tint_lang_hlsl_writer_common
   )
 endif(TINT_BUILD_HLSL_WRITER)
 
@@ -127,7 +127,6 @@ tint_target_add_dependencies(tint_lang_hlsl_writer_ast_printer_test test
   tint_lang_core
   tint_lang_core_constant
   tint_lang_core_type
-  tint_lang_hlsl_writer_common
   tint_lang_wgsl
   tint_lang_wgsl_ast
   tint_lang_wgsl_ast_transform
@@ -158,6 +157,7 @@ if(TINT_BUILD_HLSL_WRITER)
     tint_lang_hlsl_writer
     tint_lang_hlsl_writer_ast_printer
     tint_lang_hlsl_writer_ast_raise
+    tint_lang_hlsl_writer_common
   )
 endif(TINT_BUILD_HLSL_WRITER)
 
