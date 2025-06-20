@@ -53,6 +53,7 @@
 #include "src/tint/lang/spirv/writer/raise/expand_implicit_splats.h"
 #include "src/tint/lang/spirv/writer/raise/fork_explicit_layout_types.h"
 #include "src/tint/lang/spirv/writer/raise/handle_matrix_arithmetic.h"
+#include "src/tint/lang/spirv/writer/raise/keep_binding_array_as_pointer.h"
 #include "src/tint/lang/spirv/writer/raise/merge_return.h"
 #include "src/tint/lang/spirv/writer/raise/pass_matrix_by_pointer.h"
 #include "src/tint/lang/spirv/writer/raise/remove_unreachable_in_loop_continuing.h"
@@ -147,6 +148,13 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     dva_options.transform_private = true;
     dva_options.transform_handle = options.dva_transform_handle;
     RUN_TRANSFORM(core::ir::transform::DirectVariableAccess, module, dva_options);
+
+    // Fixup loads of binding_arrays of handles that may have been introduced by
+    // DirectVariableAccess (DVA). Vulkan drivers that need DVA of handle expect binding_arrays to
+    // stay as pointer and many mishandle by-value binding_arrays.
+    if (options.dva_transform_handle) {
+        RUN_TRANSFORM(raise::KeepBindingArrayAsPointer, module);
+    }
 
     if (options.pass_matrix_by_pointer) {
         // PassMatrixByPointer must come after PreservePadding+DirectVariableAccess.
