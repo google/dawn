@@ -63,13 +63,11 @@ DAWN_SERIALIZABLE(struct, BindingLocation, BINDING_LOCATION_MEMBERS){};
 
 bool operator<(const BindingLocation& a, const BindingLocation& b);
 
-#define COMBINED_SAMPLER_MEMBERS(X)                                                         \
-    X(BindingLocation, samplerLocation)                                                     \
-    X(BindingLocation, textureLocation)                                                     \
-    /* OpenGL requires a sampler with texelFetch. If this is true, the developer did not */ \
-    /* provide one and Dawn should bind a placeholder non-filtering sampler;  */            \
-    /* |samplerLocation| is unused. */                                                      \
-    X(bool, usePlaceholderSampler)
+#define COMBINED_SAMPLER_MEMBERS(X)                                                            \
+    /* OpenGL requires a sampler with texelFetch. If this is nullopt, the developer did not */ \
+    /* provide one and Dawn should bind a placeholder non-filtering sampler.  */               \
+    X(std::optional<BindingLocation>, samplerLocation)                                         \
+    X(BindingLocation, textureLocation)
 
 DAWN_SERIALIZABLE(struct, CombinedSampler, COMBINED_SAMPLER_MEMBERS) {
     std::string GetName() const;
@@ -77,8 +75,6 @@ DAWN_SERIALIZABLE(struct, CombinedSampler, COMBINED_SAMPLER_MEMBERS) {
 #undef COMBINED_SAMPLER_MEMBERS
 
 bool operator<(const CombinedSampler& a, const CombinedSampler& b);
-
-using CombinedSamplerInfo = std::vector<CombinedSampler>;
 
 class ShaderModule final : public ShaderModuleBase {
   public:
@@ -95,9 +91,8 @@ class ShaderModule final : public ShaderModuleBase {
                                         bool usesInstanceIndex,
                                         bool usesFragDepth,
                                         VertexAttributeMask bgraSwizzleAttributes,
-                                        CombinedSamplerInfo* combinedSamplers,
+                                        std::vector<CombinedSampler>* combinedSamplers,
                                         const PipelineLayout* layout,
-                                        bool* needsPlaceholderSampler,
                                         BindingPointToFunctionAndOffset* bindingPointToData,
                                         bool* needsSSBOLengthUniformBuffer);
 
