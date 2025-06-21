@@ -1370,17 +1370,38 @@ void ShaderModuleParseResult::SetValidationError(std::unique_ptr<ErrorData>&& er
     DAWN_ASSERT(HasError());
 }
 
+void DumpShaderFromDescriptor(LogEmitter* logEmitter,
+                              const UnpackedPtr<ShaderModuleDescriptor>& shaderModuleDesc) {
+#if TINT_BUILD_SPV_READER
+    if ([[maybe_unused]] const auto* spirvDesc = shaderModuleDesc.Get<ShaderSourceSPIRV>()) {
+        // Dump SPIR-V if enabled.
+#ifdef DAWN_ENABLE_SPIRV_VALIDATION
+        DumpSpirv(logEmitter, spirvDesc->code, spirvDesc->codeSize);
+#endif  // DAWN_ENABLE_SPIRV_VALIDATION
+        return;
+    }
+#else   // TINT_BUILD_SPV_READER
+    // SPIR-V is not enabled, so the descriptor should not contain it.
+    DAWN_ASSERT(shaderModuleDesc.Get<ShaderSourceSPIRV>() == nullptr);
+#endif  // TINT_BUILD_SPV_READER
+
+    // Dump WGSL.
+    const ShaderSourceWGSL* wgslDesc = shaderModuleDesc.Get<ShaderSourceWGSL>();
+    DAWN_ASSERT(wgslDesc != nullptr);
+    std::ostringstream dumpedMsg;
+    dumpedMsg << "// Dumped WGSL:\n" << std::string_view(wgslDesc->code) << "\n";
+    logEmitter->EmitLog(wgpu::LoggingType::Info, dumpedMsg.str().c_str());
+}
+
 ResultOrError<ShaderModuleParseResult> ParseShaderModule(ShaderModuleParseRequest req) {
     ShaderModuleParseResult outputParseResult;
 
     const ShaderModuleParseDeviceInfo& deviceInfo = req.deviceInfo;
-    LogEmitter* logEmitter = req.logEmitter.UnsafeGetValue();
-    bool dumpShaders = deviceInfo.toggles.Has(Toggle::DumpShaders);
 
 #if TINT_BUILD_SPV_READER
     // Handling SPIR-V if enabled.
     if (std::holds_alternative<ShaderModuleParseSpirvDescription>(req.shaderDescription)) {
-        // SpirV toggle should have been validated before chacking cache.
+        // SpirV toggle should have been validated before checking cache.
         DAWN_ASSERT(!deviceInfo.toggles.Has(Toggle::DisallowSpirv));
 
         ShaderModuleParseSpirvDescription& spirvDesc =
@@ -1389,7 +1410,7 @@ ResultOrError<ShaderModuleParseResult> ParseShaderModule(ShaderModuleParseReques
 
 #ifdef DAWN_ENABLE_SPIRV_VALIDATION
         MaybeError validationResult =
-            ValidateSpirv(logEmitter, spirvCode.data(), spirvCode.size(), dumpShaders);
+            ValidateSpirv(req.logEmitter.UnsafeGetValue(), spirvCode.data(), spirvCode.size());
         // If SpirV validation error occurs, store it into outputParseResult and return.
         if (validationResult.IsError()) {
             outputParseResult.SetValidationError(validationResult.AcquireError());
@@ -1410,17 +1431,10 @@ ResultOrError<ShaderModuleParseResult> ParseShaderModule(ShaderModuleParseReques
     if (std::holds_alternative<ShaderModuleParseWGSLDescription>(req.shaderDescription)) {
         ShaderModuleParseWGSLDescription wgslDesc =
             std::get<ShaderModuleParseWGSLDescription>(req.shaderDescription);
-        const StringView& wgsl = wgslDesc.wgsl.UnsafeGetValue();
         const std::vector<tint::wgsl::Extension>& internalExtensions =
             wgslDesc.internalExtensions.UnsafeGetValue();
-
+        const StringView& wgsl = wgslDesc.wgsl.UnsafeGetValue();
         auto tintFile = std::make_unique<tint::Source::File>("", wgsl);
-
-        if (dumpShaders) {
-            std::ostringstream dumpedMsg;
-            dumpedMsg << "// Dumped WGSL:\n" << std::string_view(wgsl) << "\n";
-            logEmitter->EmitLog(wgpu::LoggingType::Info, dumpedMsg.str().c_str());
-        }
 
         DAWN_TRY(ParseWGSL(std::move(tintFile), deviceInfo.wgslAllowedFeatures, internalExtensions,
                            &outputParseResult));

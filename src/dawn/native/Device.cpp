@@ -2151,7 +2151,7 @@ ResultOrError<Ref<ShaderModuleBase>> DeviceBase::CreateShaderModule(
                                    Branch<ShaderSourceSPIRV, DawnShaderModuleSPIRVOptionsDescriptor,
                                           ShaderModuleCompilationOptions>>()));
 
-    // Module type specific validation.
+    // Module type specific validation
     switch (moduleType) {
         case wgpu::SType::ShaderSourceSPIRV: {
             DAWN_INVALID_IF(!TINT_BUILD_SPV_READER || IsToggleEnabled(Toggle::DisallowSpirv),
@@ -2167,6 +2167,11 @@ ResultOrError<Ref<ShaderModuleBase>> DeviceBase::CreateShaderModule(
         }
         default:
             DAWN_UNREACHABLE();
+    }
+
+    // Dump shader source code if required.
+    if (IsToggleEnabled(Toggle::DumpShaders)) {
+        DumpShaderFromDescriptor(this, unpacked);
     }
 
     // Check the cache and do actual validation and parsing if cache missed.

@@ -31,12 +31,18 @@
 #include "dawn/native/Error.h"
 #include "dawn/native/LogEmitter.h"
 
+namespace spvtools {
+class SpirvTools;
+}
+
 namespace dawn::native {
 
-MaybeError ValidateSpirv(LogEmitter* logEmitter,
-                         const uint32_t* spirv,
-                         size_t wordCount,
-                         bool dumpSpirv);
+MaybeError ValidateSpirv(LogEmitter* logEmitter, const uint32_t* spirv, size_t wordCount);
+
+void DumpSpirv(LogEmitter* logEmitter,
+               const uint32_t* spirv,
+               size_t wordCount,
+               spvtools::SpirvTools* spirvTools = nullptr);
 
 }  // namespace dawn::native
 

@@ -29,15 +29,13 @@
 
 #include <spirv-tools/libspirv.hpp>
 
+#include <memory>
 #include <sstream>
 #include <string>
 
 namespace dawn::native {
 
-MaybeError ValidateSpirv(LogEmitter* logEmitter,
-                         const uint32_t* spirv,
-                         size_t wordCount,
-                         bool dumpSpirv) {
+MaybeError ValidateSpirv(LogEmitter* logEmitter, const uint32_t* spirv, size_t wordCount) {
     spvtools::SpirvTools spirvTools(SPV_ENV_VULKAN_1_1);
     spirvTools.SetMessageConsumer([logEmitter](spv_message_level_t level, const char*,
                                                const spv_position_t& position,
@@ -71,22 +69,36 @@ MaybeError ValidateSpirv(LogEmitter* logEmitter,
     val_opts.SetFriendlyNames(false);
 
     const bool valid = spirvTools.Validate(spirv, wordCount, val_opts);
-    if (dumpSpirv || !valid) {
-        std::ostringstream dumpedMsg;
-        std::string disassembly;
-        if (spirvTools.Disassemble(
-                spirv, wordCount, &disassembly,
-                SPV_BINARY_TO_TEXT_OPTION_FRIENDLY_NAMES | SPV_BINARY_TO_TEXT_OPTION_INDENT)) {
-            dumpedMsg << "/* Dumped generated SPIRV disassembly */\n" << disassembly;
-        } else {
-            dumpedMsg << "/* Failed to disassemble generated SPIRV */";
-        }
-        logEmitter->EmitLog(wgpu::LoggingType::Info, dumpedMsg.str().c_str());
+    // Dump the generated SPIRV if it is invalid.
+    if (!valid) {
+        DumpSpirv(logEmitter, spirv, wordCount, &spirvTools);
     }
 
     DAWN_INVALID_IF(!valid, "Produced invalid SPIRV. Please file a bug at https://crbug.com/tint.");
 
     return {};
+}
+
+void DumpSpirv(LogEmitter* logEmitter,
+               const uint32_t* spirv,
+               size_t wordCount,
+               spvtools::SpirvTools* spirvTools) {
+    std::unique_ptr<spvtools::SpirvTools> inplaceSpirvTools;
+    if (spirvTools == nullptr) {
+        inplaceSpirvTools = std::make_unique<spvtools::SpirvTools>(SPV_ENV_VULKAN_1_1);
+        spirvTools = inplaceSpirvTools.get();
+    }
+
+    std::ostringstream dumpedMsg;
+    std::string disassembly;
+    if (spirvTools->Disassemble(
+            spirv, wordCount, &disassembly,
+            SPV_BINARY_TO_TEXT_OPTION_FRIENDLY_NAMES | SPV_BINARY_TO_TEXT_OPTION_INDENT)) {
+        dumpedMsg << "/* Dumped SPIRV disassembly */\n" << disassembly;
+    } else {
+        dumpedMsg << "/* Failed to disassemble SPIRV */";
+    }
+    logEmitter->EmitLog(wgpu::LoggingType::Info, dumpedMsg.str().c_str());
 }
 
 }  // namespace dawn::native

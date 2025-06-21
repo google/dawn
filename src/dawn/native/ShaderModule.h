@@ -55,6 +55,7 @@
 #include "dawn/native/Forward.h"
 #include "dawn/native/IntegerTypes.h"
 #include "dawn/native/Limits.h"
+#include "dawn/native/LogEmitter.h"
 #include "dawn/native/ObjectBase.h"
 #include "dawn/native/PerStage.h"
 #include "dawn/native/Serializable.h"
@@ -152,6 +153,9 @@ struct ShaderModuleEntryPoint {
     bool defaulted;
     std::string name;
 };
+
+void DumpShaderFromDescriptor(LogEmitter* logEmitter,
+                              const UnpackedPtr<ShaderModuleDescriptor>& shaderModuleDesc);
 
 // Parse a shader module from a validated ShaderModuleDescriptor, and generate reflection
 // information if required. Validation errors generated during parsing are also made cacheable and
