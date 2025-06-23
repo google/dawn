@@ -87,7 +87,7 @@ func (cmd) Desc() string {
 }
 
 func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, error) {
-	unrollConstEvalLoopsDefault := runtime.GOOS != "windows"
+	unrollConstEvalLoopsDefault := false
 
 	backendDefault := "default"
 	if vkIcdFilenames := cfg.OsWrapper.Getenv("VK_ICD_FILENAMES"); vkIcdFilenames != "" {

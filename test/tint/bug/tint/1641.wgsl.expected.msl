@@ -20,13 +20,14 @@ struct Normals {
 struct main_outputs {
   float4 tint_symbol [[position]];
 };
+const constant tint_array<Normals, 1> v = tint_array<Normals, 1>{Normals{.f=float3(0.0f, 0.0f, 1.0f)}};
 
 float4 main_inner() {
   int const zero = 0;
-  return float4(tint_array<Normals, 1>{Normals{.f=float3(0.0f, 0.0f, 1.0f)}}[min(uint(zero), 0u)].f, 1.0f);
+  return float4(v[min(uint(zero), 0u)].f, 1.0f);
 }
 
-vertex main_outputs v() {
+vertex main_outputs v_1() {
   main_outputs tint_wrapper_result = {};
   tint_wrapper_result.tint_symbol = main_inner();
   return tint_wrapper_result;

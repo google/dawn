@@ -442,13 +442,10 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         deviceToggles->Default(Toggle::MetalRenderR8RG8UnormSmallMipToTempTexture, true);
     }
 
-    // chromium:419804339: Module constant hoisting is broadly available as a msl transform but
-    // there are execution correction issues with f16 for non apple silicon (Intel/AMD). Therefore
-    // we only enable for apple silicon for now.
-    // chromium:417519810: Mutiple cts tests will fail on AMD if module scope hoisting is not
-    // enabled on AMD. These failures will be internal compiler errors.
-    if (gpu_info::IsApple(vendorId) || gpu_info::IsAMD(vendorId)) {
-        deviceToggles->Default(Toggle::MetalEnableModuleConstant, true);
+    // chromium:419804339: Module constant hoisting is not supported for values containing f16
+    // types on Intel.
+    if (gpu_info::IsIntel(vendorId)) {
+        deviceToggles->Default(Toggle::MetalDisableModuleConstantF16, true);
     }
 
     // On some Intel GPUs vertex only render pipeline get wrong depth result if no fragment

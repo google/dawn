@@ -272,7 +272,7 @@ launch.json. For example:
 loop:nested_loops:preventValueOptimizations=false'
 <SNIP>
 Running:
-  Cmd: /home/user/src/dawn/third_party/node/node-linux-x64/bin/node -e "require('./out-node/common/runtime/cmdline.js');" -- placeholder-arg --gpu-provider /home/user/src/dawn/build-clang/cts.js --verbose --quiet --gpu-provider-flag verbose=1 --colors --unroll-const-eval-loops --gpu-provider-flag enable-dawn-features=allow_unsafe_apis "webgpu:shader,execution,flow_control,loop:nested_loops:preventValueOptimizations=false"
+  Cmd: /home/user/src/dawn/third_party/node/node-linux-x64/bin/node -e "require('./out-node/common/runtime/cmdline.js');" -- placeholder-arg --gpu-provider /home/user/src/dawn/build-clang/cts.js --verbose --quiet --gpu-provider-flag verbose=1 --colors --gpu-provider-flag enable-dawn-features=allow_unsafe_apis "webgpu:shader,execution,flow_control,loop:nested_loops:preventValueOptimizations=false"
   Dir: /home/user/src/dawn/third_party/webgpu-cts
 
   For VS Code launch.json:
@@ -289,7 +289,6 @@ Running:
         "--gpu-provider-flag",
         "verbose=1",
         "--colors",
-        "--unroll-const-eval-loops",
         "--gpu-provider-flag",
         "enable-dawn-features=allow_unsafe_apis",
         "webgpu:shader,execution,flow_control,loop:nested_loops:preventValueOptimizations=false"

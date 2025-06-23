@@ -610,6 +610,14 @@ crbug.com/373670504 [ android arm ] webgpu:shader,execution,expression,construct
 crbug.com/373670504 [ android arm ] webgpu:shader,execution,expression,constructor,non_zero:concrete_array_elements:inputSource="uniform";type="bool";length=5;infer_type=false [ Failure ]
 crbug.com/373670504 [ android arm ] webgpu:shader,execution,expression,constructor,non_zero:concrete_array_elements:inputSource="uniform";type="bool";length=5;infer_type=true [ Failure ]
 
+# Const bool arrays on Pixel 6
+crbug.com/422510023 [ android arm ] webgpu:shader,execution,expression,constructor,non_zero:concrete_array_elements:inputSource="const";type="bool";length=10;infer_type=false [ Failure ]
+crbug.com/422510023 [ android arm ] webgpu:shader,execution,expression,constructor,non_zero:concrete_array_elements:inputSource="const";type="bool";length=10;infer_type=true [ Failure ]
+crbug.com/422510023 [ android arm ] webgpu:shader,execution,expression,constructor,non_zero:concrete_array_elements:inputSource="const";type="bool";length=5;infer_type=false [ Failure ]
+crbug.com/422510023 [ android arm ] webgpu:shader,execution,expression,constructor,non_zero:concrete_array_elements:inputSource="const";type="bool";length=5;infer_type=true [ Failure ]
+crbug.com/422510023 [ android arm ] webgpu:shader,execution,expression,constructor,zero_value:array:type="bool";length=10 [ Failure ]
+crbug.com/422510023 [ android arm ] webgpu:shader,execution,expression,constructor,zero_value:array:type="bool";length=5 [ Failure ]
+
 # set_index_buffer_without_changing_buffer failing on Pixel 6
 crbug.com/373664074 [ android-t arm ] webgpu:api,operation,command_buffer,render,state_tracking:set_index_buffer_without_changing_buffer: [ Failure ]
 

@@ -82,7 +82,8 @@ $B1: {  # root
 }
 )";
 
-    Run(ModuleConstant);
+    ModuleConstantConfig cfg;
+    Run(ModuleConstant, cfg);
 
     EXPECT_EQ(expect, str());
 }
@@ -119,7 +120,8 @@ TEST_F(MslWriter_ModuleConstantTest, ConstVec3) {
   }
 }
 )";
-    Run(ModuleConstant);
+    ModuleConstantConfig cfg;
+    Run(ModuleConstant, cfg);
 
     EXPECT_EQ(expect, str());
 }
@@ -172,7 +174,8 @@ $B1: {  # root
   }
 }
 )";
-    Run(ModuleConstant);
+    ModuleConstantConfig cfg;
+    Run(ModuleConstant, cfg);
 
     EXPECT_EQ(expect, str());
 }
@@ -215,7 +218,8 @@ $B1: {  # root
 }
 )";
 
-    Run(ModuleConstant);
+    ModuleConstantConfig cfg;
+    Run(ModuleConstant, cfg);
 
     EXPECT_EQ(expect, str());
 }
@@ -273,7 +277,109 @@ $B1: {  # root
 }
 )";
 
-    Run(ModuleConstant);
+    ModuleConstantConfig cfg;
+    Run(ModuleConstant, cfg);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_ModuleConstantTest, DisableF16_ConstArrayStruct) {
+    auto* func = b.Function("foo", ty.u32());
+    auto* s = ty.Struct(mod.symbols.New("S"), {
+                                                  {mod.symbols.Register("a"), ty.u32()},
+                                                  {mod.symbols.Register("b"), ty.f16()},
+                                              });
+
+    b.Append(func->Block(), [&] {
+        auto array_struct_type = ty.array(s, 2);
+        auto* c = b.Composite(array_struct_type, b.Splat(s, 1_u), b.Splat(s, 2_u));
+        auto* index = b.Let(1_u);
+        auto* access = b.Access(ty.u32(), c, index, 0_u);
+        auto* r = b.Let("q", access);
+        b.Return(func, r);
+    });
+
+    auto* src = R"(
+S = struct @align(4) {
+  a:u32 @offset(0)
+  b:f16 @offset(4)
+}
+
+%foo = func():u32 {
+  $B1: {
+    %2:u32 = let 1u
+    %3:u32 = access array<S, 2>(S(1u), S(2u)), %2, 0u
+    %q:u32 = let %3
+    ret %q
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = src;
+
+    ModuleConstantConfig cfg{.disable_module_constant_f16 = true};
+    Run(ModuleConstant, cfg);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_ModuleConstantTest, EnableF16_ConstArrayStruct) {
+    auto* func = b.Function("foo", ty.u32());
+    auto* s = ty.Struct(mod.symbols.New("S"), {
+                                                  {mod.symbols.Register("a"), ty.u32()},
+                                                  {mod.symbols.Register("b"), ty.f16()},
+                                              });
+
+    b.Append(func->Block(), [&] {
+        auto array_struct_type = ty.array(s, 2);
+        auto* c = b.Composite(array_struct_type, b.Splat(s, 1_u), b.Splat(s, 2_u));
+        auto* index = b.Let(1_u);
+        auto* access = b.Access(ty.u32(), c, index, 0_u);
+        auto* r = b.Let("q", access);
+        b.Return(func, r);
+    });
+
+    auto* src = R"(
+S = struct @align(4) {
+  a:u32 @offset(0)
+  b:f16 @offset(4)
+}
+
+%foo = func():u32 {
+  $B1: {
+    %2:u32 = let 1u
+    %3:u32 = access array<S, 2>(S(1u), S(2u)), %2, 0u
+    %q:u32 = let %3
+    ret %q
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+S = struct @align(4) {
+  a:u32 @offset(0)
+  b:f16 @offset(4)
+}
+
+$B1: {  # root
+  %1:array<S, 2> = let array<S, 2>(S(1u), S(2u))
+}
+
+%foo = func():u32 {
+  $B2: {
+    %3:u32 = let 1u
+    %4:u32 = access %1, %3, 0u
+    %q:u32 = let %4
+    ret %q
+  }
+}
+)";
+
+    // Note the disable f16 is false by default.
+    ModuleConstantConfig cfg;
+    Run(ModuleConstant, cfg);
 
     EXPECT_EQ(expect, str());
 }
@@ -331,7 +437,49 @@ $B1: {  # root
 }
 )";
 
-    Run(ModuleConstant);
+    ModuleConstantConfig cfg;
+    Run(ModuleConstant, cfg);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_ModuleConstantTest, DisableF16_ConstStructArray) {
+    auto* func = b.Function("foo", ty.u32());
+    auto* s =
+        ty.Struct(mod.symbols.New("S"), {
+                                            {mod.symbols.Register("a"), ty.array(ty.u32(), 2)},
+                                            {mod.symbols.Register("b"), ty.array(ty.f16(), 2)},
+                                        });
+
+    b.Append(func->Block(), [&] {
+        auto* c = b.Splat(s, 1_u);
+        auto* index = b.Let(1_u);
+        auto* access = b.Access(ty.u32(), c, 0_u, index);
+        auto* r = b.Let("q", access);
+        b.Return(func, r);
+    });
+
+    auto* src = R"(
+S = struct @align(4) {
+  a:array<u32, 2> @offset(0)
+  b:array<f16, 2> @offset(8)
+}
+
+%foo = func():u32 {
+  $B1: {
+    %2:u32 = let 1u
+    %3:u32 = access S(1u), 0u, %2
+    %q:u32 = let %3
+    ret %q
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = src;
+
+    ModuleConstantConfig cfg{.disable_module_constant_f16 = true};
+    Run(ModuleConstant, cfg);
 
     EXPECT_EQ(expect, str());
 }
@@ -377,7 +525,211 @@ $B1: {  # root
 }
 )";
 
-    Run(ModuleConstant);
+    ModuleConstantConfig cfg;
+    Run(ModuleConstant, cfg);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_ModuleConstantTest, DisableF16_ConstVecArrayStruct) {
+    auto* func = b.Function("foo", ty.f16());
+    auto* s = ty.Struct(mod.symbols.New("S"), {
+                                                  {mod.symbols.Register("a"), ty.vec2(ty.f16())},
+                                                  {mod.symbols.Register("b"), ty.u32()},
+                                              });
+
+    b.Append(func->Block(), [&] {
+        auto array_struct_type = ty.array(s, 2);
+        auto* c = b.Composite(array_struct_type, b.Splat(s, 1_u), b.Splat(s, 2_u));
+        auto* index = b.Let(1_u);
+        auto* access = b.Access(ty.f16(), c, index, 0_u, 0_u);
+        auto* r = b.Let("q", access);
+        b.Return(func, r);
+    });
+
+    auto* src = R"(
+S = struct @align(4) {
+  a:vec2<f16> @offset(0)
+  b:u32 @offset(4)
+}
+
+%foo = func():f16 {
+  $B1: {
+    %2:u32 = let 1u
+    %3:f16 = access array<S, 2>(S(1u), S(2u)), %2, 0u, 0u
+    %q:f16 = let %3
+    ret %q
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = src;
+
+    ModuleConstantConfig cfg{.disable_module_constant_f16 = true};
+    Run(ModuleConstant, cfg);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_ModuleConstantTest, EnableF16_ConstVecArrayStruct) {
+    auto* func = b.Function("foo", ty.f16());
+    auto* s = ty.Struct(mod.symbols.New("S"), {
+                                                  {mod.symbols.Register("a"), ty.vec2(ty.f16())},
+                                                  {mod.symbols.Register("b"), ty.f16()},
+                                              });
+
+    b.Append(func->Block(), [&] {
+        auto array_struct_type = ty.array(s, 2);
+        auto* c = b.Composite(array_struct_type, b.Splat(s, 1_u), b.Splat(s, 2_u));
+        auto* index = b.Let(1_u);
+        auto* access = b.Access(ty.f16(), c, index, 0_u, 0_u);
+        auto* r = b.Let("q", access);
+        b.Return(func, r);
+    });
+
+    auto* src = R"(
+S = struct @align(4) {
+  a:vec2<f16> @offset(0)
+  b:f16 @offset(4)
+}
+
+%foo = func():f16 {
+  $B1: {
+    %2:u32 = let 1u
+    %3:f16 = access array<S, 2>(S(1u), S(2u)), %2, 0u, 0u
+    %q:f16 = let %3
+    ret %q
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+S = struct @align(4) {
+  a:vec2<f16> @offset(0)
+  b:f16 @offset(4)
+}
+
+$B1: {  # root
+  %1:array<S, 2> = let array<S, 2>(S(1u), S(2u))
+}
+
+%foo = func():f16 {
+  $B2: {
+    %3:u32 = let 1u
+    %4:f16 = access %1, %3, 0u, 0u
+    %q:f16 = let %4
+    ret %q
+  }
+}
+)";
+
+    // Note the disable f16 is false by default.
+    ModuleConstantConfig cfg;
+    Run(ModuleConstant, cfg);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_ModuleConstantTest, DisableF16_ConstMatStructArray) {
+    auto* func = b.Function("foo", ty.f16());
+    auto* s = ty.Struct(mod.symbols.New("S"),
+                        {
+                            {mod.symbols.Register("a"), ty.array(ty.u32(), 2)},
+                            {mod.symbols.Register("b"), ty.array(ty.mat3x3(ty.f16()), 3)},
+                        });
+
+    b.Append(func->Block(), [&] {
+        auto* c = b.Splat(s, 1_u);
+        auto* index = b.Let(1_u);
+        auto* access = b.Access(ty.f16(), c, 1_u, index, 0_u, 0_u);
+        auto* r = b.Let("q", access);
+        b.Return(func, r);
+    });
+
+    auto* src = R"(
+S = struct @align(8) {
+  a:array<u32, 2> @offset(0)
+  b:array<mat3x3<f16>, 3> @offset(8)
+}
+
+%foo = func():f16 {
+  $B1: {
+    %2:u32 = let 1u
+    %3:f16 = access S(1u), 1u, %2, 0u, 0u
+    %q:f16 = let %3
+    ret %q
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = src;
+
+    ModuleConstantConfig cfg{.disable_module_constant_f16 = true};
+    Run(ModuleConstant, cfg);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_ModuleConstantTest, EnabledF16_ConstMatStructArray) {
+    auto* func = b.Function("foo", ty.f16());
+    auto* s = ty.Struct(mod.symbols.New("S"),
+                        {
+                            {mod.symbols.Register("a"), ty.array(ty.u32(), 2)},
+                            {mod.symbols.Register("b"), ty.array(ty.mat3x3(ty.f16()), 3)},
+                        });
+
+    b.Append(func->Block(), [&] {
+        auto* c = b.Splat(s, 1_u);
+        auto* index = b.Let(1_u);
+        auto* access = b.Access(ty.f16(), c, 1_u, index, 0_u, 0_u);
+        auto* r = b.Let("q", access);
+        b.Return(func, r);
+    });
+
+    auto* src = R"(
+S = struct @align(8) {
+  a:array<u32, 2> @offset(0)
+  b:array<mat3x3<f16>, 3> @offset(8)
+}
+
+%foo = func():f16 {
+  $B1: {
+    %2:u32 = let 1u
+    %3:f16 = access S(1u), 1u, %2, 0u, 0u
+    %q:f16 = let %3
+    ret %q
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+S = struct @align(8) {
+  a:array<u32, 2> @offset(0)
+  b:array<mat3x3<f16>, 3> @offset(8)
+}
+
+$B1: {  # root
+  %1:S = let S(1u)
+}
+
+%foo = func():f16 {
+  $B2: {
+    %3:u32 = let 1u
+    %4:f16 = access %1, 1u, %3, 0u, 0u
+    %q:f16 = let %4
+    ret %q
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    // Note the disable f16 is false by default.
+    ModuleConstantConfig cfg;
+    Run(ModuleConstant, cfg);
 
     EXPECT_EQ(expect, str());
 }

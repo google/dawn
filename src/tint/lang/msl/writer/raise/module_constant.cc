@@ -42,8 +42,31 @@ namespace {
 /// PIMPL state for the transform.
 struct State {
     core::ir::Module& ir;
+    const ModuleConstantConfig& config;
     core::ir::Builder b{ir};
     core::type::Manager& ty{ir.Types()};
+
+    /// @returns true if @p type is or contains a f16 type
+    bool ContainsF16Type(const core::type::Type* type) {
+        if (type->Is<core::type::F16>()) {
+            return true;
+        }
+
+        if (type->IsScalar()) {
+            return false;
+        }
+
+        if (const auto* str = type->As<core::type::Struct>()) {
+            for (auto* member : str->Members()) {
+                if (ContainsF16Type(member->Type())) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        return ContainsF16Type(type->DeepestElement());
+    }
 
     void Process() {
         Hashmap<core::ir::Value*, core::ir::Value*, 16> object_to_var;
@@ -64,6 +87,11 @@ struct State {
             if (!curr_const->Type()->IsAnyOf<core::type::Array, core::type::Struct>()) {
                 continue;
             }
+
+            if (config.disable_module_constant_f16 && ContainsF16Type(curr_const->Type())) {
+                continue;
+            }
+
             // Declare a variable and copy the source object to it.
             auto* var = object_to_var.GetOrAdd(source_object, [&] {
                 // If the source object is a constant we use a module-scope variable
@@ -78,13 +106,13 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType> ModuleConstant(core::ir::Module& ir) {
+Result<SuccessType> ModuleConstant(core::ir::Module& ir, const ModuleConstantConfig& config) {
     auto result = ValidateAndDumpIfNeeded(ir, "msl.ModuleConstant", kModuleConstantCapabilities);
     if (result != Success) {
         return result;
     }
 
-    State{ir}.Process();
+    State{ir, config}.Process();
 
     return Success;
 }

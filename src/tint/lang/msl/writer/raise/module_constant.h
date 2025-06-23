@@ -53,12 +53,18 @@ const core::ir::Capabilities kModuleConstantCapabilities{
     core::ir::Capability::kAllowModuleScopeLets,
 };
 
+/// The set of polyfills that should be applied.
+struct ModuleConstantConfig {
+    // Set to true to disable module constant transform on constant data that has any f16.
+    bool disable_module_constant_f16 = false;
+};
+
 /// ModuleConstant is a transform that moves all const data associated with access to a module scope
 /// let. This transform is used to support 'program scope constants' in msl and thereby avoid the
 /// potential for copying of large const in nested loops.
 /// @param module the module to transform
 /// @returns success or failure
-Result<SuccessType> ModuleConstant(core::ir::Module& module);
+Result<SuccessType> ModuleConstant(core::ir::Module& module, const ModuleConstantConfig& config);
 
 }  // namespace tint::msl::writer::raise
 
