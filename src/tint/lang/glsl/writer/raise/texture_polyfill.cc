@@ -62,15 +62,14 @@ struct State {
     /// The type manager.
     core::type::Manager& ty{ir.Types()};
 
-    // A map of single texture to the replacement var. Note, this doesn't just re-use the
-    // `texture_sampler_to_replacement` with the placeholder sampler because we can share an
-    // individual texture with a texture,sampler pair. So, if we create the texture as `t1,s1` we
-    // want to use that `t1` individually but if we look it up with `t1,sp` then we won't find it.
-    // This secondary map exists to allow us access to textures which may have been created
-    // with a sampler.
-    Hashmap<core::ir::Var*, std::optional<core::ir::Var*>, 2> texture_to_replacement_{};
+    // A map of single texture to the replacement var for when the texture is used without a
+    // sampler. Textures not used with a sampler may not have any entry in
+    // `texture_sampler_to_replacement`. However we try as best we can to reuse a replacement from
+    // the texture+sampler replacement to minimize the number of new binding points created. (this
+    // is why we don't just add texture+placeholder_sampler in `texture_sampler_to_replacement`).
+    Hashmap<core::ir::Var*, core::ir::Var*, 2> texture_to_replacement_{};
 
-    // A map of the <texture,sampler> binding pair to the replacement var.
+    // A map of the <texture,sampler> binding pair to the replacement CombinedTextureSamplerVar.
     Hashmap<binding::CombinedTextureSamplerPair, core::ir::Var*, 2>
         texture_sampler_to_replacement_{};
 
@@ -86,7 +85,7 @@ struct State {
         UpgradeTexture1DVars();
         UpgradeTexture1DParams();
 
-        PopulateTextureInformation();
+        PopulateTextureReplacements();
 
         Vector<core::ir::CoreBuiltinCall*, 4> call_worklist;
         for (auto* inst : ir.Instructions()) {
@@ -167,51 +166,11 @@ struct State {
         }
     }
 
-    core::ir::Var* GetReplacement(core::ir::Var* tex,
-                                  core::ir::Var* sampler,
-                                  const core::type::Pointer* tex_ty) {
-        // Don't change storage textures
-        if (tex->Result()->Type()->UnwrapPtr()->Is<core::type::StorageTexture>()) {
-            return tex;
-        }
-
-        if (!sampler) {
-            auto existing_var = texture_to_replacement_.Get(tex);
-            if (existing_var) {
-                return existing_var->value();
-            }
-
-            replaced_textures_and_samplers_.Add(tex);
-
-            // If the texture wasn't already in the map this means it was an individual texture we
-            // hadn't seen yet. Create it and insert into the map for future use.
-            binding::CombinedTextureSamplerPair key{tex->BindingPoint().value(),
-                                                    cfg.placeholder_sampler_bind_point};
-            auto* replacement = MakeVar(key, tex, nullptr, tex_ty);
-            texture_to_replacement_.Add(tex, replacement);
-            return replacement;
-        }
-
-        auto tex_bp = tex->BindingPoint();
-        auto samp_bp = sampler->BindingPoint();
-        TINT_ASSERT(tex_bp.has_value() && samp_bp.has_value());
-
-        replaced_textures_and_samplers_.Add(tex);
-        replaced_textures_and_samplers_.Add(sampler);
-
-        binding::CombinedTextureSamplerPair key{tex_bp.value(), samp_bp.value()};
-        auto var = texture_sampler_to_replacement_.Get(key);
-        TINT_ASSERT(var);
-        return *(var.value);
-    }
-
-    // Get the `var` for a texture/sampler value. This means the value must be the result of a load.
-    core::ir::Var* VarForValue(core::ir::Value* val) {
-        if (!val) {
-            return nullptr;
-        }
-
-        auto* load = LoadForValue(val);
+    // Get the module root var a texture/sampler value comes from.
+    core::ir::Var* VarForValue(core::ir::Value* val) const {
+        auto* res = val->As<core::ir::InstructionResult>();
+        TINT_ASSERT(res);
+        auto* load = res->Instruction()->As<core::ir::Load>();
         TINT_ASSERT(load);
         auto* from = load->From()->As<core::ir::InstructionResult>();
         TINT_ASSERT(from);
@@ -220,23 +179,13 @@ struct State {
         return var;
     }
 
-    core::ir::Load* LoadForValue(core::ir::Value* val) {
-        if (!val) {
-            return nullptr;
-        }
-
-        auto* res = val->As<core::ir::InstructionResult>();
-        TINT_ASSERT(res);
-        auto* load = res->Instruction()->As<core::ir::Load>();
-        TINT_ASSERT(load);
-        return load;
-    }
-
+    // Returns the module root var that the texture and sampler come from (or nullptr for the
+    // sampler if it isn't an argument).
     struct SamplerTextureVars {
         core::ir::Var* texture;
         core::ir::Var* sampler;
     };
-    SamplerTextureVars GetTextureSamplerFor(core::ir::CoreBuiltinCall* call) {
+    SamplerTextureVars GetTextureSamplerFor(core::ir::CoreBuiltinCall* call) const {
         auto args = call->Args();
         switch (call->Func()) {
             case core::BuiltinFn::kTextureDimensions:
@@ -264,15 +213,23 @@ struct State {
         }
     }
 
-    core::ir::Var* MakeVar(binding::CombinedTextureSamplerPair& key,
-                           core::ir::Var* tex,
-                           core::ir::Var* sampler,
-                           const core::type::Pointer* tex_ty) {
+    // Creates the new root module var that will be used as the replacement for a texture+(sampler?)
+    // pair.
+    glsl::ir::CombinedTextureSamplerVar* MakeReplacement(binding::CombinedTextureSamplerPair& key,
+                                                         core::ir::Var* tex,
+                                                         core::ir::Var* sampler,
+                                                         const core::type::Pointer* tex_ty) {
         // Create a combined texture sampler variable and insert it into the root block.
         auto* result = b.InstructionResult(tex_ty);
         auto* var = ir.CreateInstruction<glsl::ir::CombinedTextureSamplerVar>(result, key.texture,
                                                                               key.sampler);
         ir.root_block->Append(var);
+
+        // Remember that we will need to remove the replaced variables.
+        replaced_textures_and_samplers_.Add(tex);
+        if (sampler) {
+            replaced_textures_and_samplers_.Add(sampler);
+        }
 
         // Set the variable name based on the original texture and sampler names if provided.
         StringStream name;
@@ -297,8 +254,11 @@ struct State {
     // This function builds up replacement combined textures. It creates a global mapping, one for
     // all the texture,sampler pairs and one with individual textures. The individual textures will
     // attempt to populate with the first texture from a texture,sampler pair but if we didn't see
-    // the texture in any pair we'll create it on the fly when getting the replacemnt later.
-    void PopulateTextureInformation() {
+    // the texture in any pair we'll create a new one.
+    void PopulateTextureReplacements() {
+        // The textures used on their own that we'll make sure have a replacement in the later
+        // loop.
+        Hashset<core::ir::Var*, 4> textures_used_without_samplers{};
         for (auto* inst : ir.Instructions()) {
             auto* call = inst->As<core::ir::CoreBuiltinCall>();
             if (!call || (!core::IsTexture(call->Func()) && !core::IsImageQuery(call->Func()))) {
@@ -309,24 +269,60 @@ struct State {
             auto* tex = tex_sampler.texture;
             auto* sampler = tex_sampler.sampler;
 
-            // No sampler, then we aren't going to be creating a combined sampler.
+            // No sampler, remember that we need to find at least one replacement for the texture.
             if (!sampler) {
+                textures_used_without_samplers.Add(tex);
                 continue;
             }
 
+            // Make a replacement for the texture+sampler.
             BindingPoint tex_bp = tex->BindingPoint().value();
             BindingPoint samp_bp = sampler->BindingPoint().value();
 
             binding::CombinedTextureSamplerPair key{tex_bp, samp_bp};
             auto* replacement = texture_sampler_to_replacement_.GetOrAdd(key, [&] {
-                return MakeVar(key, tex, sampler, tex->Result()->Type()->As<core::type::Pointer>());
+                return MakeReplacement(key, tex, sampler,
+                                       tex->Result()->Type()->As<core::type::Pointer>());
             });
 
+            // Mark the texture+sampler replacement as a replacement for the texture on its own.
             // Don't add depth textures here because the unsampled depth texture will need to be
             // created as a sampled texture, instead of a depth texture.
             if (!tex->Result()->Type()->UnwrapPtr()->Is<core::type::DepthTexture>()) {
                 texture_to_replacement_.Add(tex, replacement);
             }
+        }
+
+        // Create replacements for all textures used without samplers and that can't reuse an
+        // existing one.
+        auto sorted_textures_used_without_samplers = textures_used_without_samplers.Vector();
+        sorted_textures_used_without_samplers.Sort(
+            [](const core::ir::Var* v1, const core::ir::Var* v2) {
+                return v1->BindingPoint().value() < v2->BindingPoint().value();
+            });
+
+        for (auto tex : sorted_textures_used_without_samplers) {
+            if (texture_to_replacement_.Contains(tex)) {
+                continue;
+            }
+
+            auto* tex_ty = tex->Result()->Type()->UnwrapPtr()->As<core::type::Texture>();
+
+            // Storage textures don't need replacements so they are replaced with themselves.
+            if (tex_ty->Is<core::type::StorageTexture>()) {
+                texture_to_replacement_.Add(tex, tex);
+                continue;
+            }
+
+            // Depth textures used without a sampler need to be replaced with f32 sampled textures.
+            auto* replacement_ty = ty.ptr<handle>(tex_ty);
+            if (tex_ty->Is<core::type::DepthTexture>()) {
+                replacement_ty = ty.ptr<handle>(ty.sampled_texture(tex_ty->Dim(), ty.f32()));
+            }
+
+            binding::CombinedTextureSamplerPair key{tex->BindingPoint().value(),
+                                                    cfg.placeholder_sampler_bind_point};
+            texture_to_replacement_.Add(tex, MakeReplacement(key, tex, nullptr, replacement_ty));
         }
     }
 
@@ -444,28 +440,23 @@ struct State {
     // Must be called inside an insertion block
     core::ir::Value* GetNewTexture(core::ir::Value* tex, core::ir::Value* sampler = nullptr) {
         auto* t = VarForValue(tex);
-        auto* s = VarForValue(sampler);
 
-        auto* tex_ty = t->Result()->Type()->As<core::type::Pointer>();
-        TINT_ASSERT(tex_ty);
+        core::ir::Var* replacement;
+        if (sampler) {
+            auto* s = VarForValue(sampler);
 
-        // A depth texture gets turned into a SampledTexture of type `f32` when there is no
-        // sampler.
-        if (!sampler) {
-            if (tex_ty->StoreType()->Is<core::type::DepthTexture>()) {
-                tex_ty =
-                    ty.ptr(tex_ty->AddressSpace(),
-                           ty.sampled_texture(tex_ty->UnwrapPtr()->As<core::type::Texture>()->Dim(),
-                                              ty.f32()),
-                           tex_ty->Access());
-            }
+            auto t_bp = t->BindingPoint();
+            auto s_bp = s->BindingPoint();
+            TINT_ASSERT(t_bp.has_value() && s_bp.has_value());
+            binding::CombinedTextureSamplerPair key{t_bp.value(), s_bp.value()};
+
+            replacement = *texture_sampler_to_replacement_.Get(key).value;
+        } else {
+            replacement = *texture_to_replacement_.Get(t).value;
         }
-
-        auto* replacement = GetReplacement(t, s, tex_ty);
         TINT_ASSERT(replacement);
 
-        // In the storage case, we'll return the original texture. Nothing else to do in that
-        // case.
+        // In the storage case, we'll return the original texture. Nothing else to do in that case.
         if (replacement == t) {
             return tex;
         }
