@@ -109,6 +109,8 @@ bool Platform::IsFeatureEnabled(Features feature) {
             return false;
         case Features::kWebGPUEnableRangeAnalysisForRobustness:
             return true;
+        case Features::kWebGPUUseSpirv14:
+            return true;
     }
     return false;
 }

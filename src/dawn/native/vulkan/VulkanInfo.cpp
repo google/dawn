@@ -230,7 +230,8 @@ ResultOrError<VulkanDeviceInfo> GatherDeviceInfo(const PhysicalDevice& device) {
         }
 
         MarkPromotedExtensions(&info.extensions, info.properties.apiVersion);
-        info.extensions = EnsureDependencies(info.extensions, globalInfo.extensions);
+        info.extensions =
+            EnsureDependencies(info.extensions, globalInfo.extensions, info.properties.apiVersion);
     }
 
     // Gather general and extension features and properties

@@ -283,6 +283,9 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
         GetDevice()->IsToggleEnabled(Toggle::ScalarizeMaxMinClamp);
     req.tintOptions.use_vulkan_memory_model =
         GetDevice()->IsToggleEnabled(Toggle::UseVulkanMemoryModel);
+    req.tintOptions.spirv_version = GetDevice()->IsToggleEnabled(Toggle::UseSpirv14)
+                                        ? tint::spirv::writer::SpvVersion::kSpv14
+                                        : tint::spirv::writer::SpvVersion::kSpv13;
     req.tintOptions.dva_transform_handle =
         GetDevice()->IsToggleEnabled(Toggle::VulkanDirectVariableAccessTransformHandle);
     // Pass matrices to user functions by pointer on Qualcomm devices to workaround a known bug.
@@ -383,7 +386,9 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
 
 #ifdef DAWN_ENABLE_SPIRV_VALIDATION
     // Validate and if required dump the compiled SPIR-V code.
-    DAWN_TRY(ValidateSpirv(GetDevice(), compilation->spirv.data(), compilation->spirv.size()));
+    const bool spv14 = GetDevice()->IsToggleEnabled(Toggle::UseSpirv14);
+    DAWN_TRY(
+        ValidateSpirv(GetDevice(), compilation->spirv.data(), compilation->spirv.size(), spv14));
     if (GetDevice()->IsToggleEnabled(Toggle::DumpShaders)) {
         DumpSpirv(GetDevice(), compilation->spirv.data(), compilation->spirv.size());
     }
