@@ -744,7 +744,7 @@ ResultOrError<Ref<BufferBase::MapAsyncEvent>> BufferBase::UnmapInternal(WGPUMapA
 
     // If the buffer is already destroyed, we don't need to do anything.
     if (state == BufferState::Destroyed) {
-        return Ref<MapAsyncEvent>(nullptr);
+        return nullptr;
     }
 
     // For pending maps, set the pending event statuses, and return it. The caller is responsible
@@ -760,7 +760,7 @@ ResultOrError<Ref<BufferBase::MapAsyncEvent>> BufferBase::UnmapInternal(WGPUMapA
     }
 
     DAWN_TRY(Unmap());
-    return Ref<MapAsyncEvent>(nullptr);
+    return nullptr;
 }
 
 MaybeError BufferBase::ValidateMapAsync(wgpu::MapMode mode,

@@ -202,6 +202,7 @@ class [[nodiscard]] Result<Ref<T>, E> {
         requires std::convertible_to<U*, T*>
     Result(const Ref<U>& success);
     Result(std::unique_ptr<E> error);
+    constexpr Result(std::nullptr_t);
 
     template <typename U>
         requires std::convertible_to<U*, T*>
@@ -412,6 +413,9 @@ std::unique_ptr<E> Result<const T*, E>::AcquireError() {
 }
 
 // Implementation of Result<Ref<T>, E>
+template <typename T, typename E>
+constexpr Result<Ref<T>, E>::Result(std::nullptr_t) : Result(Ref<T>(nullptr)) {}
+
 template <typename T, typename E>
 template <typename U>
     requires std::convertible_to<U*, T*>
