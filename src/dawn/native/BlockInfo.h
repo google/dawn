@@ -194,23 +194,23 @@ struct TypedTexelBlockInfo {
     }
 
     // Convert from TexelOrigin3D to BlockOrigin3D
-    BlockOrigin3D ToBlock(const TexelOrigin3D& origin) {
+    BlockOrigin3D ToBlock(const TexelOrigin3D& origin) const {
         return {ToBlockWidth(origin.x), ToBlockHeight(origin.y), ToBlockDepth(origin.z)};
     }
 
     // Convert from TexelExtent3D to BlockExtent3D
-    BlockExtent3D ToBlock(const TexelExtent3D& extent) {
+    BlockExtent3D ToBlock(const TexelExtent3D& extent) const {
         return {ToBlockWidth(extent.width), ToBlockHeight(extent.height),
                 ToBlockDepth(extent.depthOrArrayLayers)};
     }
 
     // Convert from BlockOrigin3D to TexelOrigin3D
-    TexelOrigin3D ToTexel(const BlockOrigin3D& origin) {
+    TexelOrigin3D ToTexel(const BlockOrigin3D& origin) const {
         return {ToTexelWidth(origin.x), ToTexelHeight(origin.y), ToTexelDepth(origin.z)};
     }
 
     // Convert from BlockExtent3D to TexelExtent3D
-    TexelExtent3D ToTexel(const BlockExtent3D& extent) {
+    TexelExtent3D ToTexel(const BlockExtent3D& extent) const {
         return {ToTexelWidth(extent.width), ToTexelHeight(extent.height),
                 ToTexelDepth(extent.depthOrArrayLayers)};
     }

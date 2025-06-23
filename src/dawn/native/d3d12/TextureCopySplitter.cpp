@@ -251,16 +251,11 @@ TextureCopySubresource::CopyInfo* TextureCopySubresource::AddCopy() {
     return &this->copies[this->count++];
 }
 
-TextureCopySubresource Compute2DTextureCopySubresource(Origin3D origin_in,
-                                                       Extent3D copySize_in,
-                                                       const TexelBlockInfo& blockInfo_in,
+TextureCopySubresource Compute2DTextureCopySubresource(BlockOrigin3D origin,
+                                                       BlockExtent3D copySize,
+                                                       const TypedTexelBlockInfo& blockInfo,
                                                        uint64_t offset,
-                                                       uint32_t bytesPerRow_in) {
-    TypedTexelBlockInfo blockInfo{blockInfo_in};
-    BlockOrigin3D origin = blockInfo.ToBlock(origin_in);
-    BlockExtent3D copySize = blockInfo.ToBlock(copySize_in);
-    BlockCount blocksPerRow = blockInfo.BytesToBlocks(bytesPerRow_in);
-
+                                                       BlockCount blocksPerRow) {
     TextureCopySubresource copy;
 
     // The copies must be 512-aligned. To do this, we calculate the first 512-aligned address
@@ -420,15 +415,13 @@ TextureCopySubresource Compute2DTextureCopySubresource(Origin3D origin_in,
     return copy;
 }
 
-TextureCopySplits Compute2DTextureCopySplits(Origin3D origin,
-                                             Extent3D copySize,
-                                             const TexelBlockInfo& blockInfo,
+TextureCopySplits Compute2DTextureCopySplits(BlockOrigin3D origin,
+                                             BlockExtent3D copySize,
+                                             const TypedTexelBlockInfo& blockInfo,
                                              uint64_t offset,
-                                             uint32_t bytesPerRow,
-                                             uint32_t rowsPerImage) {
+                                             BlockCount blocksPerRow,
+                                             BlockCount rowsPerImage) {
     TextureCopySplits copies;
-
-    const uint64_t bytesPerLayer = bytesPerRow * rowsPerImage;
 
     // The function Compute2DTextureCopySubresource() decides how to split the copy based on:
     // - the alignment of the buffer offset with D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT (512)
@@ -441,20 +434,21 @@ TextureCopySplits Compute2DTextureCopySplits(Origin3D origin,
     // layer. Moreover, if "rowsPerImage" is even, both the first and second copy layers can
     // share the same copy split, so in this situation we just need to compute copy split once
     // and reuse it for all the layers.
-    Extent3D copyOneLayerSize = copySize;
-    Origin3D copyFirstLayerOrigin = origin;
-    copyOneLayerSize.depthOrArrayLayers = 1;
-    copyFirstLayerOrigin.z = 0;
+    BlockExtent3D copyOneLayerSize = copySize;
+    BlockOrigin3D copyFirstLayerOrigin = origin;
+    copyOneLayerSize.depthOrArrayLayers = BlockCount{1};
+    copyFirstLayerOrigin.z = BlockCount{0};
 
     copies.copySubresources[0] = Compute2DTextureCopySubresource(
-        copyFirstLayerOrigin, copyOneLayerSize, blockInfo, offset, bytesPerRow);
+        copyFirstLayerOrigin, copyOneLayerSize, blockInfo, offset, blocksPerRow);
 
     // When the copy only refers one texture 2D array layer,
     // copies.copySubresources[1] will never be used so we can safely early return here.
-    if (copySize.depthOrArrayLayers == 1) {
+    if (copySize.depthOrArrayLayers == BlockCount{1}) {
         return copies;
     }
 
+    const uint64_t bytesPerLayer = blockInfo.ToBytes(blocksPerRow * rowsPerImage);
     if (bytesPerLayer % D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT == 0) {
         copies.copySubresources[1] = copies.copySubresources[0];
         uint64_t alignedOffset0 =
@@ -466,24 +460,18 @@ TextureCopySplits Compute2DTextureCopySplits(Origin3D origin,
     } else {
         const uint64_t bufferOffsetNextLayer = offset + bytesPerLayer;
         copies.copySubresources[1] = Compute2DTextureCopySubresource(
-            copyFirstLayerOrigin, copyOneLayerSize, blockInfo, bufferOffsetNextLayer, bytesPerRow);
+            copyFirstLayerOrigin, copyOneLayerSize, blockInfo, bufferOffsetNextLayer, blocksPerRow);
     }
 
     return copies;
 }
 
-TextureCopySubresource Compute3DTextureCopySplits(Origin3D origin_in,
-                                                  Extent3D copySize_in,
-                                                  const TexelBlockInfo& blockInfo_in,
+TextureCopySubresource Compute3DTextureCopySplits(BlockOrigin3D origin,
+                                                  BlockExtent3D copySize,
+                                                  const TypedTexelBlockInfo& blockInfo,
                                                   uint64_t offset,
-                                                  uint32_t bytesPerRow,
-                                                  uint32_t rowsPerImage_in) {
-    TypedTexelBlockInfo blockInfo{blockInfo_in};
-    BlockOrigin3D origin = blockInfo.ToBlock(origin_in);
-    BlockExtent3D copySize = blockInfo.ToBlock(copySize_in);
-    BlockCount blocksPerRow = blockInfo.BytesToBlocks(bytesPerRow);
-    BlockCount rowsPerImage{rowsPerImage_in};
-
+                                                  BlockCount blocksPerRow,
+                                                  BlockCount rowsPerImage) {
     // To compute the copy region(s) for 3D textures, we call Compute2DTextureCopySubresource
     // and get copy region(s) for the first slice of the copy, then extend to all depth slices
     // and become a 3D copy. However, this doesn't work as easily as that due to some corner
@@ -498,9 +486,8 @@ TextureCopySubresource Compute3DTextureCopySplits(Origin3D origin_in,
 
     // Call Compute2DTextureCopySubresource and get copy regions. This function has already
     // forwarded "copySize.depthOrArrayLayers" to all depth slices.
-    TextureCopySubresource copySubresource = Compute2DTextureCopySubresource(
-        blockInfo.ToTexel(origin).ToOrigin3D(), blockInfo.ToTexel(copySize).ToExtent3D(),
-        blockInfo.ToTexelBlockInfo(), offset, bytesPerRow);
+    TextureCopySubresource copySubresource =
+        Compute2DTextureCopySubresource(origin, copySize, blockInfo, offset, blocksPerRow);
 
     DAWN_ASSERT(copySubresource.count <= 2);
     // If copySize.depthOrArrayLayers is 1, we can return copySubresource. Because we don't need to
@@ -535,6 +522,7 @@ TextureCopySubresource Compute3DTextureCopySplits(Origin3D origin_in,
             // bytesPerRow is definitely 256, and it is definitely a full copy on height.
             // Otherwise, bufferHeight won't be greater than rowsPerImage and there won't be
             // an empty row at the beginning of this copy region.
+            uint64_t bytesPerRow = blockInfo.ToBytes(blocksPerRow);
             DAWN_ASSERT(bytesPerRow == D3D12_TEXTURE_DATA_PITCH_ALIGNMENT);
             DAWN_ASSERT(copySize.height == rowsPerImage);
 
@@ -564,14 +552,11 @@ TextureCopySubresource Compute3DTextureCopySplits(Origin3D origin_in,
 }
 
 TextureCopySubresource Compute2DTextureCopySubresourceWithRelaxedRowPitchAndOffset(
-    Origin3D origin_in,
-    Extent3D copySize_in,
-    const TexelBlockInfo& blockInfo_in,
+    BlockOrigin3D origin,
+    BlockExtent3D copySize,
+    const TypedTexelBlockInfo& blockInfo,
     uint64_t offset,
-    uint32_t /*bytesPerRow*/) {
-    TypedTexelBlockInfo blockInfo{blockInfo_in};
-    BlockOrigin3D origin = blockInfo.ToBlock(origin_in);
-    BlockExtent3D copySize = blockInfo.ToBlock(copySize_in);
+    BlockCount /*blocksPerRow*/) {
     TextureCopySubresource copy;
     auto* copyInfo = copy.AddCopy();
 
@@ -596,20 +581,13 @@ TextureCopySubresource Compute2DTextureCopySubresourceWithRelaxedRowPitchAndOffs
 }
 
 TextureCopySubresource Compute3DTextureCopySubresourceWithRelaxedRowPitchAndOffset(
-    Origin3D origin_in,
-    Extent3D copySize_in,
-    const TexelBlockInfo& blockInfo_in,
+    BlockOrigin3D origin,
+    BlockExtent3D copySize,
+    const TypedTexelBlockInfo& blockInfo,
     uint64_t offset,
-    uint32_t bytesPerRow_in,
-    uint32_t rowsPerImage_in) {
-    TypedTexelBlockInfo blockInfo{blockInfo_in};
-    BlockOrigin3D origin = blockInfo.ToBlock(origin_in);
-    BlockExtent3D copySize = blockInfo.ToBlock(copySize_in);
-    BlockCount rowsPerImage{rowsPerImage_in};
-    BlockCount blocksPerRow = blockInfo.BytesToBlocks(bytesPerRow_in);
-
+    BlockCount blocksPerRow,
+    BlockCount rowsPerImage) {
     TextureCopySubresource copy;
-
     BlockOrigin3D bufferOffset{BlockCount{0}, BlockCount{0}, BlockCount{0}};
 
     // You can visualize the data in the buffer (bufferLocation) like the inline comments.

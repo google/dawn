@@ -87,6 +87,14 @@ TexelExtent3D ToTexelExtent3D(const TextureSpec& textureSpec) {
     return TexelExtent3D{textureSpec.width, textureSpec.height, textureSpec.depthOrArrayLayers};
 }
 
+BlockOrigin3D ToBlockOrigin3D(const TextureSpec& textureSpec) {
+    return ToTypedTexelBlockInfo(textureSpec).ToBlock(ToTexelOrigin3D(textureSpec));
+}
+
+BlockExtent3D ToBlockExtent3D(const TextureSpec& textureSpec) {
+    return ToTypedTexelBlockInfo(textureSpec).ToBlock(ToTexelExtent3D(textureSpec));
+}
+
 // Check that each copy region fits inside the buffer footprint
 void ValidateFootprints(const TextureSpec& textureSpec,
                         const BufferSpec& bufferSpec,
@@ -760,43 +768,41 @@ class CopySplitTest : public testing::TestWithParam<CopySplitTestParam> {
         trace << textureSpec << ", " << bufferSpec;
         SCOPED_TRACE(trace.str());
 
+        TypedTexelBlockInfo blockInfo = ToTypedTexelBlockInfo(textureSpec);
+        BlockCount blocksPerRow = blockInfo.BytesToBlocks(bufferSpec.bytesPerRow);
+        BlockCount rowsPerImage{bufferSpec.rowsPerImage};
+
         TextureCopySubresource copySplit;
         switch (dimension) {
             case wgpu::TextureDimension::e1D:
             case wgpu::TextureDimension::e2D: {
                 // Skip test cases that are clearly for 3D. Validation would catch
                 // these cases before reaching the TextureCopySplitter.
+                // TODO(425944899): Test Compute2DTextureCopySplits to cover e2D and
+                // depthOrArrayLayers>1
                 if (textureSpec.z > 0_tc || textureSpec.depthOrArrayLayers > 1_tc) {
                     return;
                 }
                 if (relaxed) {
                     copySplit = Compute2DTextureCopySubresourceWithRelaxedRowPitchAndOffset(
-                        ToTexelOrigin3D(textureSpec).ToOrigin3D(),
-                        ToTexelExtent3D(textureSpec).ToExtent3D(),
-                        ToTypedTexelBlockInfo(textureSpec).ToTexelBlockInfo(), bufferSpec.offset,
-                        bufferSpec.bytesPerRow);
+                        ToBlockOrigin3D(textureSpec), ToBlockExtent3D(textureSpec), blockInfo,
+                        bufferSpec.offset, blocksPerRow);
                 } else {
                     copySplit = Compute2DTextureCopySubresource(
-                        ToTexelOrigin3D(textureSpec).ToOrigin3D(),
-                        ToTexelExtent3D(textureSpec).ToExtent3D(),
-                        ToTypedTexelBlockInfo(textureSpec).ToTexelBlockInfo(), bufferSpec.offset,
-                        bufferSpec.bytesPerRow);
+                        ToBlockOrigin3D(textureSpec), ToBlockExtent3D(textureSpec), blockInfo,
+                        bufferSpec.offset, blocksPerRow);
                 }
                 break;
             }
             case wgpu::TextureDimension::e3D: {
                 if (relaxed) {
                     copySplit = Compute3DTextureCopySubresourceWithRelaxedRowPitchAndOffset(
-                        ToTexelOrigin3D(textureSpec).ToOrigin3D(),
-                        ToTexelExtent3D(textureSpec).ToExtent3D(),
-                        ToTypedTexelBlockInfo(textureSpec).ToTexelBlockInfo(), bufferSpec.offset,
-                        bufferSpec.bytesPerRow, static_cast<uint32_t>(bufferSpec.rowsPerImage));
+                        ToBlockOrigin3D(textureSpec), ToBlockExtent3D(textureSpec), blockInfo,
+                        bufferSpec.offset, blocksPerRow, rowsPerImage);
                 } else {
                     copySplit = Compute3DTextureCopySplits(
-                        ToTexelOrigin3D(textureSpec).ToOrigin3D(),
-                        ToTexelExtent3D(textureSpec).ToExtent3D(),
-                        ToTypedTexelBlockInfo(textureSpec).ToTexelBlockInfo(), bufferSpec.offset,
-                        bufferSpec.bytesPerRow, static_cast<uint32_t>(bufferSpec.rowsPerImage));
+                        ToBlockOrigin3D(textureSpec), ToBlockExtent3D(textureSpec), blockInfo,
+                        bufferSpec.offset, blocksPerRow, rowsPerImage);
                 }
                 break;
             }

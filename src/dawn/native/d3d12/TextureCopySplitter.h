@@ -92,44 +92,44 @@ struct TextureCopySplits {
 //   - Copy region(s) combined should exactly be equivalent to the texture region to be copied.
 //   - Every pixel accessed by every copy region should not be out of the bound of the copied
 //     texture and buffer.
-TextureCopySubresource Compute2DTextureCopySubresource(Origin3D origin,
-                                                       Extent3D copySize,
-                                                       const TexelBlockInfo& blockInfo,
+TextureCopySubresource Compute2DTextureCopySubresource(BlockOrigin3D origin,
+                                                       BlockExtent3D copySize,
+                                                       const TypedTexelBlockInfo& blockInfo,
                                                        uint64_t offset,
-                                                       uint32_t bytesPerRow);
+                                                       BlockCount blocksPerRow);
 
-TextureCopySplits Compute2DTextureCopySplits(Origin3D origin,
-                                             Extent3D copySize,
-                                             const TexelBlockInfo& blockInfo,
+TextureCopySplits Compute2DTextureCopySplits(BlockOrigin3D origin,
+                                             BlockExtent3D copySize,
+                                             const TypedTexelBlockInfo& blockInfo,
                                              uint64_t offset,
-                                             uint32_t bytesPerRow,
-                                             uint32_t rowsPerImage);
+                                             BlockCount blocksPerRow,
+                                             BlockCount rowsPerImage);
 
-TextureCopySubresource Compute3DTextureCopySplits(Origin3D origin,
-                                                  Extent3D copySize,
-                                                  const TexelBlockInfo& blockInfo,
+TextureCopySubresource Compute3DTextureCopySplits(BlockOrigin3D origin,
+                                                  BlockExtent3D copySize,
+                                                  const TypedTexelBlockInfo& blockInfo,
                                                   uint64_t offset,
-                                                  uint32_t bytesPerRow,
-                                                  uint32_t rowsPerImage);
+                                                  BlockCount blocksPerRow,
+                                                  BlockCount rowsPerImage);
 
 // Compute the `TextureCopySubresource` for one subresource of a 2D texture with relaxed row pitch
 // and offset.
 TextureCopySubresource Compute2DTextureCopySubresourceWithRelaxedRowPitchAndOffset(
-    Origin3D origin,
-    Extent3D copySize,
-    const TexelBlockInfo& blockInfo,
+    BlockOrigin3D origin,
+    BlockExtent3D copySize,
+    const TypedTexelBlockInfo& blockInfo,
     uint64_t offset,
-    uint32_t bytesPerRow);
+    BlockCount blocksPerRow);
 
 // Compute the `TextureCopySubresource` for one subresource of a 3D texture with relaxed row pitch
 // and offset.
 TextureCopySubresource Compute3DTextureCopySubresourceWithRelaxedRowPitchAndOffset(
-    Origin3D origin,
-    Extent3D copySize,
-    const TexelBlockInfo& blockInfo,
+    BlockOrigin3D origin,
+    BlockExtent3D copySize,
+    const TypedTexelBlockInfo& blockInfo,
     uint64_t offset,
-    uint32_t bytesPerRow,
-    uint32_t rowsPerImage);
+    BlockCount blocksPerRow,
+    BlockCount rowsPerImage);
 
 }  // namespace dawn::native::d3d12
 
