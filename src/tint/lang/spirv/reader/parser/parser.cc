@@ -1194,6 +1194,9 @@ class Parser {
 
     /// Emit the functions.
     void EmitFunctions() {
+        // Add all the functions in a first pass and then fill in the function bodies. This means
+        // the function will exist fixing an issues where calling a function that hasn't been seen
+        // generates the wrong signature.
         for (auto& func : *spirv_context_->module()) {
             current_spirv_function_ = &func;
 
@@ -1220,6 +1223,13 @@ class Parser {
             }
 
             functions_.Add(func.result_id(), current_function_);
+            current_spirv_function_ = nullptr;
+        }
+
+        for (auto& func : *spirv_context_->module()) {
+            current_spirv_function_ = &func;
+
+            current_function_ = Function(func.result_id());
             EmitBlockParent(current_function_->Block(), *func.entry());
 
             // No terminator was emitted, that means then end of block is
@@ -1227,8 +1237,8 @@ class Parser {
             if (!current_function_->Block()->Terminator()) {
                 current_function_->Block()->Append(b_.Unreachable());
             }
+            current_spirv_function_ = nullptr;
         }
-        current_spirv_function_ = nullptr;
     }
 
     /// Emit entry point attributes.

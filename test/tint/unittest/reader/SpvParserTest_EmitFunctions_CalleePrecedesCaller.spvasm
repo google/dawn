@@ -36,6 +36,7 @@ OpReturnValue %uint_0
 OpFunctionEnd
 %1 = OpFunction %void None %8
 %17 = OpLabel
+%cr = OpFunctionCall %void %root
 OpReturn
 OpFunctionEnd
 
