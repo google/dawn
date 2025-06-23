@@ -520,7 +520,7 @@ void Buffer::UnmapImpl() {
     }
 }
 
-void* Buffer::GetMappedPointer() {
+void* Buffer::GetMappedPointerImpl() {
     // The frontend asks that the pointer returned is from the start of the resource
     // irrespective of the offset passed in MapAsyncImpl, which is what mMappedData is.
     return mMappedData;

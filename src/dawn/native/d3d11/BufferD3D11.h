@@ -180,7 +180,7 @@ class Buffer : public BufferBase {
     void UnmapImpl() override;
     bool IsCPUWritableAtCreation() const override;
     MaybeError MapAtCreationImpl() override;
-    void* GetMappedPointer() override;
+    void* GetMappedPointerImpl() override;
 
     MaybeError InitializeToZero(const ScopedCommandRecordingContext* commandContext);
 
