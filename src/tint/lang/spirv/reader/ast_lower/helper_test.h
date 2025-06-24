@@ -25,8 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_WGSL_AST_TRANSFORM_HELPER_TEST_H_
-#define SRC_TINT_LANG_WGSL_AST_TRANSFORM_HELPER_TEST_H_
+#ifndef SRC_TINT_LANG_SPIRV_READER_AST_LOWER_HELPER_TEST_H_
+#define SRC_TINT_LANG_SPIRV_READER_AST_LOWER_HELPER_TEST_H_
 
 #include <memory>
 #include <string>
@@ -34,8 +34,8 @@
 #include <vector>
 
 #include "gtest/gtest.h"
-#include "src/tint/lang/wgsl/ast/transform/manager.h"
-#include "src/tint/lang/wgsl/ast/transform/transform.h"
+#include "src/tint/lang/spirv/reader/ast_lower/manager.h"
+#include "src/tint/lang/spirv/reader/ast_lower/transform.h"
 #include "src/tint/lang/wgsl/reader/reader.h"
 #include "src/tint/lang/wgsl/writer/writer.h"
 
@@ -178,4 +178,4 @@ using TransformTestWithParam = TransformTestBase<testing::TestWithParam<T>>;
 
 }  // namespace tint::ast::transform
 
-#endif  // SRC_TINT_LANG_WGSL_AST_TRANSFORM_HELPER_TEST_H_
+#endif  // SRC_TINT_LANG_SPIRV_READER_AST_LOWER_HELPER_TEST_H_

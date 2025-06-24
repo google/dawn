@@ -25,15 +25,15 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_WGSL_AST_TRANSFORM_MANAGER_H_
-#define SRC_TINT_LANG_WGSL_AST_TRANSFORM_MANAGER_H_
+#ifndef SRC_TINT_LANG_SPIRV_READER_AST_LOWER_MANAGER_H_
+#define SRC_TINT_LANG_SPIRV_READER_AST_LOWER_MANAGER_H_
 
 #include <memory>
 #include <utility>
 #include <vector>
 
-#include "src/tint/lang/wgsl/ast/transform/data.h"
-#include "src/tint/lang/wgsl/ast/transform/transform.h"
+#include "src/tint/lang/spirv/reader/ast_lower/data.h"
+#include "src/tint/lang/spirv/reader/ast_lower/transform.h"
 #include "src/tint/lang/wgsl/program/program.h"
 
 namespace tint::ast::transform {
@@ -75,4 +75,4 @@ class Manager {
 
 }  // namespace tint::ast::transform
 
-#endif  // SRC_TINT_LANG_WGSL_AST_TRANSFORM_MANAGER_H_
+#endif  // SRC_TINT_LANG_SPIRV_READER_AST_LOWER_MANAGER_H_

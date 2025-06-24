@@ -25,32 +25,21 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_WGSL_AST_TRANSFORM_SIMPLIFY_POINTERS_H_
-#define SRC_TINT_LANG_WGSL_AST_TRANSFORM_SIMPLIFY_POINTERS_H_
+#ifndef SRC_TINT_LANG_SPIRV_READER_AST_LOWER_UNSHADOW_H_
+#define SRC_TINT_LANG_SPIRV_READER_AST_LOWER_UNSHADOW_H_
 
-#include "src/tint/lang/wgsl/ast/transform/transform.h"
+#include "src/tint/lang/spirv/reader/ast_lower/transform.h"
 
 namespace tint::ast::transform {
 
-/// SimplifyPointers is a Transform that moves all usage of function-scope
-/// `let` statements of a pointer type into their places of usage, while also
-/// simplifying any chains of address-of or indirections operators.
-///
-/// Parameters of a pointer type are not adjusted.
-///
-/// Note: SimplifyPointers does not operate on module-scope `let`s, as these
-/// cannot be pointers: https://gpuweb.github.io/gpuweb/wgsl/#module-constants
-/// `A module-scope let-declared constant must be of constructible type.`
-///
-/// @note Depends on the following transforms to have been run first:
-/// * Unshadow
-class SimplifyPointers final : public Castable<SimplifyPointers, Transform> {
+/// Unshadow is a Transform that renames any variables that shadow another variable.
+class Unshadow final : public Castable<Unshadow, Transform> {
   public:
     /// Constructor
-    SimplifyPointers();
+    Unshadow();
 
     /// Destructor
-    ~SimplifyPointers() override;
+    ~Unshadow() override;
 
     /// @copydoc Transform::Apply
     ApplyResult Apply(const Program& program,
@@ -63,4 +52,4 @@ class SimplifyPointers final : public Castable<SimplifyPointers, Transform> {
 
 }  // namespace tint::ast::transform
 
-#endif  // SRC_TINT_LANG_WGSL_AST_TRANSFORM_SIMPLIFY_POINTERS_H_
+#endif  // SRC_TINT_LANG_SPIRV_READER_AST_LOWER_UNSHADOW_H_

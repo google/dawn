@@ -31,7 +31,7 @@
 #include <string>
 #include <unordered_map>
 
-#include "src/tint/lang/wgsl/ast/transform/transform.h"
+#include "src/tint/lang/spirv/reader/ast_lower/transform.h"
 
 namespace tint::spirv::reader {
 

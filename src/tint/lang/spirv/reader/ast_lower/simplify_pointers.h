@@ -1,4 +1,4 @@
-// Copyright 2023 The Dawn & Tint Authors
+// Copyright 2021 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,20 +25,42 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/wgsl/ast/transform/data.h"
+#ifndef SRC_TINT_LANG_SPIRV_READER_AST_LOWER_SIMPLIFY_POINTERS_H_
+#define SRC_TINT_LANG_SPIRV_READER_AST_LOWER_SIMPLIFY_POINTERS_H_
 
-TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::Data);
+#include "src/tint/lang/spirv/reader/ast_lower/transform.h"
 
 namespace tint::ast::transform {
 
-Data::Data() = default;
-Data::Data(const Data&) = default;
-Data::~Data() = default;
-Data& Data::operator=(const Data&) = default;
+/// SimplifyPointers is a Transform that moves all usage of function-scope
+/// `let` statements of a pointer type into their places of usage, while also
+/// simplifying any chains of address-of or indirections operators.
+///
+/// Parameters of a pointer type are not adjusted.
+///
+/// Note: SimplifyPointers does not operate on module-scope `let`s, as these
+/// cannot be pointers: https://gpuweb.github.io/gpuweb/wgsl/#module-constants
+/// `A module-scope let-declared constant must be of constructible type.`
+///
+/// @note Depends on the following transforms to have been run first:
+/// * Unshadow
+class SimplifyPointers final : public Castable<SimplifyPointers, Transform> {
+  public:
+    /// Constructor
+    SimplifyPointers();
 
-DataMap::DataMap() = default;
-DataMap::DataMap(DataMap&&) = default;
-DataMap::~DataMap() = default;
-DataMap& DataMap::operator=(DataMap&&) = default;
+    /// Destructor
+    ~SimplifyPointers() override;
+
+    /// @copydoc Transform::Apply
+    ApplyResult Apply(const Program& program,
+                      const DataMap& inputs,
+                      DataMap& outputs) const override;
+
+  private:
+    struct State;
+};
 
 }  // namespace tint::ast::transform
+
+#endif  // SRC_TINT_LANG_SPIRV_READER_AST_LOWER_SIMPLIFY_POINTERS_H_

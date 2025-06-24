@@ -34,8 +34,6 @@
 #                       Do not modify this file directly
 ################################################################################
 
-include(lang/wgsl/ast/transform/BUILD.cmake)
-
 ################################################################################
 # Target:    tint_lang_wgsl_ast
 # Kind:      lib

@@ -166,10 +166,6 @@ if (tint_build_unittests) {
       ]
     }
 
-    if (tint_build_wgsl_reader && tint_build_wgsl_writer) {
-      deps += [ "${tint_src_dir}/lang/wgsl/ast/transform:unittests" ]
-    }
-
     if (tint_build_wgsl_writer) {
       deps += [
         "${tint_src_dir}/lang/wgsl/writer:unittests",

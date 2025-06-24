@@ -25,10 +25,10 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/wgsl/ast/transform/simplify_pointers.h"
+#include "src/tint/lang/spirv/reader/ast_lower/simplify_pointers.h"
 
-#include "src/tint/lang/wgsl/ast/transform/helper_test.h"
-#include "src/tint/lang/wgsl/ast/transform/unshadow.h"
+#include "src/tint/lang/spirv/reader/ast_lower/helper_test.h"
+#include "src/tint/lang/spirv/reader/ast_lower/unshadow.h"
 
 namespace tint::ast::transform {
 namespace {

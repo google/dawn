@@ -1,4 +1,4 @@
-// Copyright 2021 The Dawn & Tint Authors
+// Copyright 2023 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,31 +25,20 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_WGSL_AST_TRANSFORM_UNSHADOW_H_
-#define SRC_TINT_LANG_WGSL_AST_TRANSFORM_UNSHADOW_H_
+#include "src/tint/lang/spirv/reader/ast_lower/data.h"
 
-#include "src/tint/lang/wgsl/ast/transform/transform.h"
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::Data);
 
 namespace tint::ast::transform {
 
-/// Unshadow is a Transform that renames any variables that shadow another variable.
-class Unshadow final : public Castable<Unshadow, Transform> {
-  public:
-    /// Constructor
-    Unshadow();
+Data::Data() = default;
+Data::Data(const Data&) = default;
+Data::~Data() = default;
+Data& Data::operator=(const Data&) = default;
 
-    /// Destructor
-    ~Unshadow() override;
-
-    /// @copydoc Transform::Apply
-    ApplyResult Apply(const Program& program,
-                      const DataMap& inputs,
-                      DataMap& outputs) const override;
-
-  private:
-    struct State;
-};
+DataMap::DataMap() = default;
+DataMap::DataMap(DataMap&&) = default;
+DataMap::~DataMap() = default;
+DataMap& DataMap::operator=(DataMap&&) = default;
 
 }  // namespace tint::ast::transform
-
-#endif  // SRC_TINT_LANG_WGSL_AST_TRANSFORM_UNSHADOW_H_

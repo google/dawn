@@ -25,12 +25,12 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_WGSL_AST_TRANSFORM_TRANSFORM_H_
-#define SRC_TINT_LANG_WGSL_AST_TRANSFORM_TRANSFORM_H_
+#ifndef SRC_TINT_LANG_SPIRV_READER_AST_LOWER_TRANSFORM_H_
+#define SRC_TINT_LANG_SPIRV_READER_AST_LOWER_TRANSFORM_H_
 
 #include <utility>
 
-#include "src/tint/lang/wgsl/ast/transform/data.h"
+#include "src/tint/lang/spirv/reader/ast_lower/data.h"
 #include "src/tint/lang/wgsl/program/program.h"
 #include "src/tint/utils/rtti/castable.h"
 
@@ -114,4 +114,4 @@ class Transform : public Castable<Transform> {
 
 }  // namespace tint::ast::transform
 
-#endif  // SRC_TINT_LANG_WGSL_AST_TRANSFORM_TRANSFORM_H_
+#endif  // SRC_TINT_LANG_SPIRV_READER_AST_LOWER_TRANSFORM_H_
