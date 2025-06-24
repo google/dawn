@@ -96,10 +96,14 @@ const char* str(BuiltinFn i) {
             return "image_sample_implicit_lod";
         case BuiltinFn::kImageSampleProjImplicitLod:
             return "image_sample_proj_implicit_lod";
+        case BuiltinFn::kImageSampleProjDrefImplicitLod:
+            return "image_sample_proj_dref_implicit_lod";
         case BuiltinFn::kImageSampleExplicitLod:
             return "image_sample_explicit_lod";
         case BuiltinFn::kImageSampleProjExplicitLod:
             return "image_sample_proj_explicit_lod";
+        case BuiltinFn::kImageSampleProjDrefExplicitLod:
+            return "image_sample_proj_dref_explicit_lod";
         case BuiltinFn::kImageSampleDrefImplicitLod:
             return "image_sample_dref_implicit_lod";
         case BuiltinFn::kImageSampleDrefExplicitLod:
@@ -249,6 +253,8 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kImageSampleProjExplicitLod:
         case BuiltinFn::kImageSampleDrefImplicitLod:
         case BuiltinFn::kImageSampleDrefExplicitLod:
+        case BuiltinFn::kImageSampleProjDrefImplicitLod:
+        case BuiltinFn::kImageSampleProjDrefExplicitLod:
         case BuiltinFn::kSampledImage:
         case BuiltinFn::kCooperativeMatrixLoad:
             return core::ir::Instruction::Accesses{core::ir::Instruction::Access::kLoad};

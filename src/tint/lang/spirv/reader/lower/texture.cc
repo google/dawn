@@ -151,6 +151,8 @@ struct State {
                         break;
                     case spirv::BuiltinFn::kImageSampleDrefImplicitLod:
                     case spirv::BuiltinFn::kImageSampleDrefExplicitLod:
+                    case spirv::BuiltinFn::kImageSampleProjDrefImplicitLod:
+                    case spirv::BuiltinFn::kImageSampleProjDrefExplicitLod:
                         depth_worklist.Push(builtin);
                         break;
                     default:
@@ -169,6 +171,8 @@ struct State {
             switch (builtin->Func()) {
                 case spirv::BuiltinFn::kImageSampleDrefImplicitLod:
                 case spirv::BuiltinFn::kImageSampleDrefExplicitLod:
+                case spirv::BuiltinFn::kImageSampleProjDrefImplicitLod:
+                case spirv::BuiltinFn::kImageSampleProjDrefExplicitLod:
                     ImageSampleDref(builtin);
                     break;
                 default:
@@ -617,13 +621,16 @@ struct State {
         auto* depth = args[2];
         uint32_t operand_mask = GetOperandMask(args[3]);
 
+        bool is_proj = call->Func() == spirv::BuiltinFn::kImageSampleProjDrefImplicitLod ||
+                       call->Func() == spirv::BuiltinFn::kImageSampleProjDrefExplicitLod;
+
         uint32_t idx = 4;
         b.InsertBefore(call, [&] {
             Vector<core::ir::Value*, 5> new_args;
             new_args.Push(tex);
             new_args.Push(sampler);
 
-            ProcessCoords(tex_ty, false, coords, new_args);
+            ProcessCoords(tex_ty, is_proj, coords, new_args);
             new_args.Push(depth);
 
             auto fn = core::BuiltinFn::kTextureSampleCompare;

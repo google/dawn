@@ -1784,6 +1784,12 @@ class Parser {
                 case spv::Op::OpImageSampleDrefExplicitLod:
                     EmitImageSampleDepth(inst, spirv::BuiltinFn::kImageSampleDrefExplicitLod);
                     break;
+                case spv::Op::OpImageSampleProjDrefImplicitLod:
+                    EmitImageSampleDepth(inst, spirv::BuiltinFn::kImageSampleProjDrefImplicitLod);
+                    break;
+                case spv::Op::OpImageSampleProjDrefExplicitLod:
+                    EmitImageSampleDepth(inst, spirv::BuiltinFn::kImageSampleProjDrefExplicitLod);
+                    break;
                 case spv::Op::OpPhi:
                     EmitPhi(inst);
                     break;
