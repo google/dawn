@@ -51,15 +51,9 @@ constexpr BlockCount operator""_bc(uint64_t v) {
 }
 
 struct TextureSpec {
-    TexelCount x;                    // origin.x in texels
-    TexelCount y;                    // origin.y in texels
-    TexelCount z;                    // origin.z in texels
-    TexelCount width;                // copySize.width in texels
-    TexelCount height;               // copySize.height in texels
-    TexelCount depthOrArrayLayers;   // copy size depth or array layers
-    uint32_t texelBlockSizeInBytes;  // bytes per block
-    TexelCount blockWidth{1};        // texel width per block
-    TexelCount blockHeight{1};       // texel height per block
+    TexelOrigin3D origin;
+    TexelExtent3D copySize;
+    TypedTexelBlockInfo blockInfo;
 };
 
 struct BufferSpec {
@@ -68,39 +62,12 @@ struct BufferSpec {
     BlockCount rowsPerImage;  // bock rows per image slice (user-defined)
 };
 
-// TODO(425944899): Store TypedTexelBlockInfo in TextureSpec
-TypedTexelBlockInfo ToTypedTexelBlockInfo(const TextureSpec& textureSpec) {
-    TypedTexelBlockInfo blockInfo;
-    blockInfo.byteSize = textureSpec.texelBlockSizeInBytes;
-    blockInfo.width = TexelCount{textureSpec.blockWidth};
-    blockInfo.height = TexelCount{textureSpec.blockHeight};
-    return blockInfo;
-}
-
-// TODO(425944899): Store TexelOrigin3D in TextureSpec
-TexelOrigin3D ToTexelOrigin3D(const TextureSpec& textureSpec) {
-    return TexelOrigin3D{textureSpec.x, textureSpec.y, textureSpec.z};
-}
-
-// TODO(425944899): Store TexelExtent3D in TextureSpec
-TexelExtent3D ToTexelExtent3D(const TextureSpec& textureSpec) {
-    return TexelExtent3D{textureSpec.width, textureSpec.height, textureSpec.depthOrArrayLayers};
-}
-
-BlockOrigin3D ToBlockOrigin3D(const TextureSpec& textureSpec) {
-    return ToTypedTexelBlockInfo(textureSpec).ToBlock(ToTexelOrigin3D(textureSpec));
-}
-
-BlockExtent3D ToBlockExtent3D(const TextureSpec& textureSpec) {
-    return ToTypedTexelBlockInfo(textureSpec).ToBlock(ToTexelExtent3D(textureSpec));
-}
-
 // Check that each copy region fits inside the buffer footprint
 void ValidateFootprints(const TextureSpec& textureSpec,
                         const BufferSpec& bufferSpec,
                         const TextureCopySubresource& copySplit,
                         wgpu::TextureDimension dimension) {
-    TypedTexelBlockInfo blockInfo = ToTypedTexelBlockInfo(textureSpec);
+    const TypedTexelBlockInfo& blockInfo = textureSpec.blockInfo;
     for (uint32_t i = 0; i < copySplit.count; ++i) {
         const auto& copy = copySplit.copies[i];
         // TODO(425944899): Rework this function to work in blocks, not texels
@@ -118,31 +85,32 @@ void ValidateFootprints(const TextureSpec& textureSpec,
         // current 2D texture splitter is doing, although Compute2DTextureCopySubresource
         // forwards "copySize.depthOrArrayLayers" to the copy region it generated. So skip
         // the test below for 2D textures with multiple layers.
-        if (textureSpec.depthOrArrayLayers <= 1_tc || dimension == wgpu::TextureDimension::e3D) {
-            BlockCount widthInBlocks = blockInfo.ToBlockWidth(textureSpec.width);
-            BlockCount heightInBlocks = blockInfo.ToBlockHeight(textureSpec.height);
+        if (textureSpec.copySize.depthOrArrayLayers <= 1_tc ||
+            dimension == wgpu::TextureDimension::e3D) {
+            BlockCount widthInBlocks = blockInfo.ToBlockWidth(textureSpec.copySize.width);
+            BlockCount heightInBlocks = blockInfo.ToBlockHeight(textureSpec.copySize.height);
             uint64_t minimumRequiredBufferSize =
                 bufferSpec.offset +
                 // TOOD(425944899): add overload of RequiredBytesInCopy that accepts strong types
                 utils::RequiredBytesInCopy(
                     bufferSpec.bytesPerRow, static_cast<uint32_t>(bufferSpec.rowsPerImage),
                     static_cast<uint32_t>(widthInBlocks), static_cast<uint32_t>(heightInBlocks),
-                    static_cast<uint32_t>(textureSpec.depthOrArrayLayers),
-                    textureSpec.texelBlockSizeInBytes);
+                    static_cast<uint32_t>(textureSpec.copySize.depthOrArrayLayers),
+                    blockInfo.byteSize);
 
             // The last pixel (buffer footprint) of each copy region depends on its
             // bufferOffset and copySize. It is not the last pixel where the bufferSize
             // ends.
-            ASSERT_EQ(bufferOffset.x % textureSpec.blockWidth, 0_tc);
-            ASSERT_EQ(copySize.width % textureSpec.blockWidth, 0_tc);
+            ASSERT_EQ(bufferOffset.x % blockInfo.width, 0_tc);
+            ASSERT_EQ(copySize.width % blockInfo.width, 0_tc);
             TexelCount footprintWidth = bufferOffset.x + copySize.width;
-            ASSERT_EQ(footprintWidth % textureSpec.blockWidth, 0_tc);
+            ASSERT_EQ(footprintWidth % blockInfo.width, 0_tc);
             BlockCount footprintWidthInBlocks = blockInfo.ToBlockWidth(footprintWidth);
 
-            ASSERT_EQ(bufferOffset.y % textureSpec.blockHeight, 0_tc);
-            ASSERT_EQ(copySize.height % textureSpec.blockHeight, 0_tc);
+            ASSERT_EQ(bufferOffset.y % blockInfo.height, 0_tc);
+            ASSERT_EQ(copySize.height % blockInfo.height, 0_tc);
             TexelCount footprintHeight = bufferOffset.y + copySize.height;
-            ASSERT_EQ(footprintHeight % textureSpec.blockHeight, 0_tc);
+            ASSERT_EQ(footprintHeight % blockInfo.height, 0_tc);
             BlockCount footprintHeightInBlocks = blockInfo.ToBlockHeight(footprintHeight);
 
             uint64_t bufferSizeForFootprint =
@@ -153,7 +121,7 @@ void ValidateFootprints(const TextureSpec& textureSpec,
                     static_cast<uint32_t>(footprintWidthInBlocks),
                     static_cast<uint32_t>(footprintHeightInBlocks),
                     static_cast<uint32_t>(blockInfo.ToBlockDepth(bufferSize.depthOrArrayLayers)),
-                    textureSpec.texelBlockSizeInBytes);
+                    blockInfo.byteSize);
 
             // The buffer footprint of each copy region should not exceed the minimum
             // required buffer size. Otherwise, pixels accessed by copy may be OOB.
@@ -180,7 +148,7 @@ bool InclusiveRangesOverlap(T minA, T maxA, T minB, T maxB) {
 
 // Check that no pair of copy regions intersect each other
 void ValidateDisjoint(const TextureSpec& textureSpec, const TextureCopySubresource& copySplit) {
-    TypedTexelBlockInfo blockInfo = ToTypedTexelBlockInfo(textureSpec);
+    const TypedTexelBlockInfo& blockInfo = textureSpec.blockInfo;
     for (uint32_t i = 0; i < copySplit.count; ++i) {
         const auto& a = copySplit.copies[i];
         // TODO(425944899): Rework this function to work in blocks, not texels
@@ -212,7 +180,7 @@ void ValidateDisjoint(const TextureSpec& textureSpec, const TextureCopySubresour
 void ValidateTextureBounds(const TextureSpec& textureSpec,
                            const TextureCopySubresource& copySplit) {
     ASSERT_GT(copySplit.count, 0u);
-    TypedTexelBlockInfo blockInfo = ToTypedTexelBlockInfo(textureSpec);
+    const TypedTexelBlockInfo& blockInfo = textureSpec.blockInfo;
 
     // TODO(425944899): Rework this function to work in blocks, not texels
     const TexelExtent3D& copySize0 = blockInfo.ToTexel(copySplit.copies[0].copySize);
@@ -236,18 +204,18 @@ void ValidateTextureBounds(const TextureSpec& textureSpec,
         maxZ = std::max(maxZ, textureOffset.z + copySize.depthOrArrayLayers);
     }
 
-    ASSERT_EQ(minX, textureSpec.x);
-    ASSERT_EQ(minY, textureSpec.y);
-    ASSERT_EQ(minZ, textureSpec.z);
-    ASSERT_EQ(maxX, textureSpec.x + textureSpec.width);
-    ASSERT_EQ(maxY, textureSpec.y + textureSpec.height);
-    ASSERT_EQ(maxZ, textureSpec.z + textureSpec.depthOrArrayLayers);
+    ASSERT_EQ(minX, textureSpec.origin.x);
+    ASSERT_EQ(minY, textureSpec.origin.y);
+    ASSERT_EQ(minZ, textureSpec.origin.z);
+    ASSERT_EQ(maxX, textureSpec.origin.x + textureSpec.copySize.width);
+    ASSERT_EQ(maxY, textureSpec.origin.y + textureSpec.copySize.height);
+    ASSERT_EQ(maxZ, textureSpec.origin.z + textureSpec.copySize.depthOrArrayLayers);
 }
 
 // Validate that the number of pixels copied is exactly equal to the number of pixels in the
 // texture region
 void ValidatePixelCount(const TextureSpec& textureSpec, const TextureCopySubresource& copySplit) {
-    TypedTexelBlockInfo blockInfo = ToTypedTexelBlockInfo(textureSpec);
+    const TypedTexelBlockInfo& blockInfo = textureSpec.blockInfo;
     TexelCount totalCopiedTexels{0};
     for (uint32_t i = 0; i < copySplit.count; ++i) {
         const auto& copy = copySplit.copies[i];
@@ -257,8 +225,8 @@ void ValidatePixelCount(const TextureSpec& textureSpec, const TextureCopySubreso
         ASSERT_GT(copiedTexels, 0_tc);
         totalCopiedTexels += copiedTexels;
     }
-    ASSERT_EQ(totalCopiedTexels,
-              textureSpec.width * textureSpec.height * textureSpec.depthOrArrayLayers);
+    ASSERT_EQ(totalCopiedTexels, textureSpec.copySize.width * textureSpec.copySize.height *
+                                     textureSpec.copySize.depthOrArrayLayers);
 }
 
 // Check that every buffer offset is at the correct pixel location
@@ -268,7 +236,7 @@ void ValidateBufferOffset(const TextureSpec& textureSpec,
                           wgpu::TextureDimension dimension,
                           bool relaxed) {
     ASSERT_GT(copySplit.count, 0u);
-    TypedTexelBlockInfo blockInfo = ToTypedTexelBlockInfo(textureSpec);
+    const TypedTexelBlockInfo& blockInfo = textureSpec.blockInfo;
 
     for (uint32_t i = 0; i < copySplit.count; ++i) {
         const auto& copy = copySplit.copies[i];
@@ -298,9 +266,9 @@ void ValidateBufferOffset(const TextureSpec& textureSpec,
         BlockCount yBlocks = (relativeOffsetInBlocks % slicePitchInBlocks) / rowPitchInBlocks;
         BlockCount xBlocks = relativeOffsetInBlocks % rowPitchInBlocks;
 
-        ASSERT_EQ(textureOffset.x - blockInfo.ToBlockWidth(textureSpec.x), xBlocks);
-        ASSERT_EQ(textureOffset.y - blockInfo.ToBlockHeight(textureSpec.y), yBlocks);
-        ASSERT_EQ(textureOffset.z - blockInfo.ToBlockDepth(textureSpec.z), z);
+        ASSERT_EQ(textureOffset.x - blockInfo.ToBlockWidth(textureSpec.origin.x), xBlocks);
+        ASSERT_EQ(textureOffset.y - blockInfo.ToBlockHeight(textureSpec.origin.y), yBlocks);
+        ASSERT_EQ(textureOffset.z - blockInfo.ToBlockDepth(textureSpec.origin.z), z);
     }
 }
 
@@ -318,12 +286,12 @@ void ValidateCopySplit(const TextureSpec& textureSpec,
 }
 
 std::ostream& operator<<(std::ostream& os, const TextureSpec& textureSpec) {
-    os << "TextureSpec(" << "[origin=(" << textureSpec.x << ", " << textureSpec.y << ", "
-       << textureSpec.z << "), copySize=(" << textureSpec.width << ", " << textureSpec.height
-       << ", " << textureSpec.depthOrArrayLayers
-       << ")], blockBytes=" << textureSpec.texelBlockSizeInBytes
-       << ", blockWidth=" << textureSpec.blockWidth << ", blockHeight=" << textureSpec.blockHeight
-       << ")";
+    os << "TextureSpec(" << "[origin=(" << textureSpec.origin.x << ", " << textureSpec.origin.y
+       << ", " << textureSpec.origin.z << "), copySize=(" << textureSpec.copySize.width << ", "
+       << textureSpec.copySize.height << ", " << textureSpec.copySize.depthOrArrayLayers
+       << ")], blockBytes=" << textureSpec.blockInfo.byteSize
+       << ", blockWidth=" << textureSpec.blockInfo.width
+       << ", blockHeight=" << textureSpec.blockInfo.height << ")";
     return os;
 }
 
@@ -352,395 +320,119 @@ std::ostream& operator<<(std::ostream& os, const TextureCopySubresource& copySpl
 // Define base texture sizes and offsets to test with: some aligned, some unaligned
 constexpr TextureSpec kBaseTextureSpecs[] = {
     // 1x1 2D copies
-    {.x = 0_tc,
-     .y = 0_tc,
-     .z = 0_tc,
-     .width = 1_tc,
-     .height = 1_tc,
-     .depthOrArrayLayers = 1_tc,
-     .texelBlockSizeInBytes = 4},
-    {.x = 0_tc,
-     .y = 0_tc,
-     .z = 0_tc,
-     .width = 64_tc,
-     .height = 1_tc,
-     .depthOrArrayLayers = 1_tc,
-     .texelBlockSizeInBytes = 4},
-    {.x = 0_tc,
-     .y = 0_tc,
-     .z = 0_tc,
-     .width = 128_tc,
-     .height = 1_tc,
-     .depthOrArrayLayers = 1_tc,
-     .texelBlockSizeInBytes = 4},
-    {.x = 0_tc,
-     .y = 0_tc,
-     .z = 0_tc,
-     .width = 192_tc,
-     .height = 1_tc,
-     .depthOrArrayLayers = 1_tc,
-     .texelBlockSizeInBytes = 4},
-    {.x = 31_tc,
-     .y = 16_tc,
-     .z = 0_tc,
-     .width = 1_tc,
-     .height = 1_tc,
-     .depthOrArrayLayers = 1_tc,
-     .texelBlockSizeInBytes = 4},
-    {.x = 64_tc,
-     .y = 16_tc,
-     .z = 0_tc,
-     .width = 1_tc,
-     .height = 1_tc,
-     .depthOrArrayLayers = 1_tc,
-     .texelBlockSizeInBytes = 4},
-    {.x = 64_tc,
-     .y = 16_tc,
-     .z = 8_tc,
-     .width = 1_tc,
-     .height = 1_tc,
-     .depthOrArrayLayers = 1_tc,
-     .texelBlockSizeInBytes = 4},
+    {.origin = {0_tc, 0_tc, 0_tc}, .copySize = {1_tc, 1_tc, 1_tc}, .blockInfo = {4, 1_tc, 1_tc}},
+    {.origin = {0_tc, 0_tc, 0_tc}, .copySize = {64_tc, 1_tc, 1_tc}, .blockInfo = {4, 1_tc, 1_tc}},
+    {.origin = {0_tc, 0_tc, 0_tc}, .copySize = {128_tc, 1_tc, 1_tc}, .blockInfo = {4, 1_tc, 1_tc}},
+    {.origin = {0_tc, 0_tc, 0_tc}, .copySize = {192_tc, 1_tc, 1_tc}, .blockInfo = {4, 1_tc, 1_tc}},
+    {.origin = {31_tc, 16_tc, 0_tc}, .copySize = {1_tc, 1_tc, 1_tc}, .blockInfo = {4, 1_tc, 1_tc}},
+    {.origin = {64_tc, 16_tc, 0_tc}, .copySize = {1_tc, 1_tc, 1_tc}, .blockInfo = {4, 1_tc, 1_tc}},
+    {.origin = {64_tc, 16_tc, 8_tc}, .copySize = {1_tc, 1_tc, 1_tc}, .blockInfo = {4, 1_tc, 1_tc}},
     // 2x1, 1x2, and 2x2
-    {.x = 0_tc,
-     .y = 0_tc,
-     .z = 0_tc,
-     .width = 64_tc,
-     .height = 2_tc,
-     .depthOrArrayLayers = 1_tc,
-     .texelBlockSizeInBytes = 4},
-    {.x = 0_tc,
-     .y = 0_tc,
-     .z = 0_tc,
-     .width = 64_tc,
-     .height = 1_tc,
-     .depthOrArrayLayers = 2_tc,
-     .texelBlockSizeInBytes = 4},
-    {.x = 0_tc,
-     .y = 0_tc,
-     .z = 0_tc,
-     .width = 64_tc,
-     .height = 2_tc,
-     .depthOrArrayLayers = 2_tc,
-     .texelBlockSizeInBytes = 4},
-    {.x = 0_tc,
-     .y = 0_tc,
-     .z = 0_tc,
-     .width = 128_tc,
-     .height = 2_tc,
-     .depthOrArrayLayers = 1_tc,
-     .texelBlockSizeInBytes = 4},
-    {.x = 0_tc,
-     .y = 0_tc,
-     .z = 0_tc,
-     .width = 128_tc,
-     .height = 1_tc,
-     .depthOrArrayLayers = 2_tc,
-     .texelBlockSizeInBytes = 4},
-    {.x = 0_tc,
-     .y = 0_tc,
-     .z = 0_tc,
-     .width = 128_tc,
-     .height = 2_tc,
-     .depthOrArrayLayers = 2_tc,
-     .texelBlockSizeInBytes = 4},
-    {.x = 0_tc,
-     .y = 0_tc,
-     .z = 0_tc,
-     .width = 192_tc,
-     .height = 2_tc,
-     .depthOrArrayLayers = 1_tc,
-     .texelBlockSizeInBytes = 4},
-    {.x = 0_tc,
-     .y = 0_tc,
-     .z = 0_tc,
-     .width = 192_tc,
-     .height = 1_tc,
-     .depthOrArrayLayers = 2_tc,
-     .texelBlockSizeInBytes = 4},
-    {.x = 0_tc,
-     .y = 0_tc,
-     .z = 0_tc,
-     .width = 192_tc,
-     .height = 2_tc,
-     .depthOrArrayLayers = 2_tc,
-     .texelBlockSizeInBytes = 4},
+    {.origin = {0_tc, 0_tc, 0_tc}, .copySize = {64_tc, 2_tc, 1_tc}, .blockInfo = {4, 1_tc, 1_tc}},
+    {.origin = {0_tc, 0_tc, 0_tc}, .copySize = {64_tc, 1_tc, 2_tc}, .blockInfo = {4, 1_tc, 1_tc}},
+    {.origin = {0_tc, 0_tc, 0_tc}, .copySize = {64_tc, 2_tc, 2_tc}, .blockInfo = {4, 1_tc, 1_tc}},
+    {.origin = {0_tc, 0_tc, 0_tc}, .copySize = {128_tc, 2_tc, 1_tc}, .blockInfo = {4, 1_tc, 1_tc}},
+    {.origin = {0_tc, 0_tc, 0_tc}, .copySize = {128_tc, 1_tc, 2_tc}, .blockInfo = {4, 1_tc, 1_tc}},
+    {.origin = {0_tc, 0_tc, 0_tc}, .copySize = {128_tc, 2_tc, 2_tc}, .blockInfo = {4, 1_tc, 1_tc}},
+    {.origin = {0_tc, 0_tc, 0_tc}, .copySize = {192_tc, 2_tc, 1_tc}, .blockInfo = {4, 1_tc, 1_tc}},
+    {.origin = {0_tc, 0_tc, 0_tc}, .copySize = {192_tc, 1_tc, 2_tc}, .blockInfo = {4, 1_tc, 1_tc}},
+    {.origin = {0_tc, 0_tc, 0_tc}, .copySize = {192_tc, 2_tc, 2_tc}, .blockInfo = {4, 1_tc, 1_tc}},
     // 1024x1024 2D and 3D
-    {.x = 0_tc,
-     .y = 0_tc,
-     .z = 0_tc,
-     .width = 1024_tc,
-     .height = 1024_tc,
-     .depthOrArrayLayers = 1_tc,
-     .texelBlockSizeInBytes = 4},
-    {.x = 256_tc,
-     .y = 512_tc,
-     .z = 0_tc,
-     .width = 1024_tc,
-     .height = 1024_tc,
-     .depthOrArrayLayers = 1_tc,
-     .texelBlockSizeInBytes = 4},
-    {.x = 64_tc,
-     .y = 48_tc,
-     .z = 0_tc,
-     .width = 1024_tc,
-     .height = 1024_tc,
-     .depthOrArrayLayers = 1_tc,
-     .texelBlockSizeInBytes = 4},
-    {.x = 64_tc,
-     .y = 48_tc,
-     .z = 16_tc,
-     .width = 1024_tc,
-     .height = 1024_tc,
-     .depthOrArrayLayers = 1024_tc,
-     .texelBlockSizeInBytes = 4},
+    {.origin = {0_tc, 0_tc, 0_tc},
+     .copySize = {1024_tc, 1024_tc, 1_tc},
+     .blockInfo = {4, 1_tc, 1_tc}},
+    {.origin = {256_tc, 512_tc, 0_tc},
+     .copySize = {1024_tc, 1024_tc, 1_tc},
+     .blockInfo = {4, 1_tc, 1_tc}},
+    {.origin = {64_tc, 48_tc, 0_tc},
+     .copySize = {1024_tc, 1024_tc, 1_tc},
+     .blockInfo = {4, 1_tc, 1_tc}},
+    {.origin = {64_tc, 48_tc, 16_tc},
+     .copySize = {1024_tc, 1024_tc, 1024_tc},
+     .blockInfo = {4, 1_tc, 1_tc}},
     // Non-power of two texture dims
-    {.x = 0_tc,
-     .y = 0_tc,
-     .z = 0_tc,
-     .width = 257_tc,
-     .height = 31_tc,
-     .depthOrArrayLayers = 1_tc,
-     .texelBlockSizeInBytes = 4},
-    {.x = 0_tc,
-     .y = 0_tc,
-     .z = 0_tc,
-     .width = 17_tc,
-     .height = 93_tc,
-     .depthOrArrayLayers = 1_tc,
-     .texelBlockSizeInBytes = 4},
-    {.x = 59_tc,
-     .y = 13_tc,
-     .z = 0_tc,
-     .width = 257_tc,
-     .height = 31_tc,
-     .depthOrArrayLayers = 1_tc,
-     .texelBlockSizeInBytes = 4},
-    {.x = 17_tc,
-     .y = 73_tc,
-     .z = 0_tc,
-     .width = 17_tc,
-     .height = 93_tc,
-     .depthOrArrayLayers = 1_tc,
-     .texelBlockSizeInBytes = 4},
-    {.x = 17_tc,
-     .y = 73_tc,
-     .z = 59_tc,
-     .width = 17_tc,
-     .height = 93_tc,
-     .depthOrArrayLayers = 99_tc,
-     .texelBlockSizeInBytes = 4},
+    {.origin = {0_tc, 0_tc, 0_tc}, .copySize = {257_tc, 31_tc, 1_tc}, .blockInfo = {4, 1_tc, 1_tc}},
+    {.origin = {0_tc, 0_tc, 0_tc}, .copySize = {17_tc, 93_tc, 1_tc}, .blockInfo = {4, 1_tc, 1_tc}},
+    {.origin = {59_tc, 13_tc, 0_tc},
+     .copySize = {257_tc, 31_tc, 1_tc},
+     .blockInfo = {4, 1_tc, 1_tc}},
+    {.origin = {17_tc, 73_tc, 0_tc},
+     .copySize = {17_tc, 93_tc, 1_tc},
+     .blockInfo = {4, 1_tc, 1_tc}},
+    {.origin = {17_tc, 73_tc, 59_tc},
+     .copySize = {17_tc, 93_tc, 99_tc},
+     .blockInfo = {4, 1_tc, 1_tc}},
     // 4x4 block size 2D copies
-    {.x = 0_tc,
-     .y = 0_tc,
-     .z = 0_tc,
-     .width = 4_tc,
-     .height = 4_tc,
-     .depthOrArrayLayers = 1_tc,
-     .texelBlockSizeInBytes = 8,
-     .blockWidth = 4_tc,
-     .blockHeight = 4_tc},
-    {.x = 64_tc,
-     .y = 16_tc,
-     .z = 0_tc,
-     .width = 4_tc,
-     .height = 4_tc,
-     .depthOrArrayLayers = 1_tc,
-     .texelBlockSizeInBytes = 8,
-     .blockWidth = 4_tc,
-     .blockHeight = 4_tc},
-    {.x = 64_tc,
-     .y = 16_tc,
-     .z = 8_tc,
-     .width = 4_tc,
-     .height = 4_tc,
-     .depthOrArrayLayers = 1_tc,
-     .texelBlockSizeInBytes = 8,
-     .blockWidth = 4_tc,
-     .blockHeight = 4_tc},
-    {.x = 0_tc,
-     .y = 0_tc,
-     .z = 0_tc,
-     .width = 4_tc,
-     .height = 4_tc,
-     .depthOrArrayLayers = 1_tc,
-     .texelBlockSizeInBytes = 16,
-     .blockWidth = 4_tc,
-     .blockHeight = 4_tc},
-    {.x = 64_tc,
-     .y = 16_tc,
-     .z = 0_tc,
-     .width = 4_tc,
-     .height = 4_tc,
-     .depthOrArrayLayers = 1_tc,
-     .texelBlockSizeInBytes = 16,
-     .blockWidth = 4_tc,
-     .blockHeight = 4_tc},
-    {.x = 64_tc,
-     .y = 16_tc,
-     .z = 8_tc,
-     .width = 4_tc,
-     .height = 4_tc,
-     .depthOrArrayLayers = 1_tc,
-     .texelBlockSizeInBytes = 16,
-     .blockWidth = 4_tc,
-     .blockHeight = 4_tc},
+    {.origin = {0_tc, 0_tc, 0_tc}, .copySize = {4_tc, 4_tc, 1_tc}, .blockInfo = {8, 4_tc, 4_tc}},
+    {.origin = {64_tc, 16_tc, 0_tc}, .copySize = {4_tc, 4_tc, 1_tc}, .blockInfo = {8, 4_tc, 4_tc}},
+    {.origin = {64_tc, 16_tc, 8_tc}, .copySize = {4_tc, 4_tc, 1_tc}, .blockInfo = {8, 4_tc, 4_tc}},
+    {.origin = {0_tc, 0_tc, 0_tc}, .copySize = {4_tc, 4_tc, 1_tc}, .blockInfo = {16, 4_tc, 4_tc}},
+    {.origin = {64_tc, 16_tc, 0_tc}, .copySize = {4_tc, 4_tc, 1_tc}, .blockInfo = {16, 4_tc, 4_tc}},
+    {.origin = {64_tc, 16_tc, 8_tc}, .copySize = {4_tc, 4_tc, 1_tc}, .blockInfo = {16, 4_tc, 4_tc}},
     // 4x4 block size 2D copies of 1024x1024 textures
-    {.x = 0_tc,
-     .y = 0_tc,
-     .z = 0_tc,
-     .width = 1024_tc,
-     .height = 1024_tc,
-     .depthOrArrayLayers = 1_tc,
-     .texelBlockSizeInBytes = 8,
-     .blockWidth = 4_tc,
-     .blockHeight = 4_tc},
-    {.x = 256_tc,
-     .y = 512_tc,
-     .z = 0_tc,
-     .width = 1024_tc,
-     .height = 1024_tc,
-     .depthOrArrayLayers = 1_tc,
-     .texelBlockSizeInBytes = 8,
-     .blockWidth = 4_tc,
-     .blockHeight = 4_tc},
-    {.x = 64_tc,
-     .y = 48_tc,
-     .z = 0_tc,
-     .width = 1024_tc,
-     .height = 1024_tc,
-     .depthOrArrayLayers = 1_tc,
-     .texelBlockSizeInBytes = 8,
-     .blockWidth = 4_tc,
-     .blockHeight = 4_tc},
-    {.x = 64_tc,
-     .y = 48_tc,
-     .z = 16_tc,
-     .width = 1024_tc,
-     .height = 1024_tc,
-     .depthOrArrayLayers = 1_tc,
-     .texelBlockSizeInBytes = 8,
-     .blockWidth = 4_tc,
-     .blockHeight = 4_tc},
-    {.x = 0_tc,
-     .y = 0_tc,
-     .z = 0_tc,
-     .width = 1024_tc,
-     .height = 1024_tc,
-     .depthOrArrayLayers = 1_tc,
-     .texelBlockSizeInBytes = 16,
-     .blockWidth = 4_tc,
-     .blockHeight = 4_tc},
-    {.x = 256_tc,
-     .y = 512_tc,
-     .z = 0_tc,
-     .width = 1024_tc,
-     .height = 1024_tc,
-     .depthOrArrayLayers = 1_tc,
-     .texelBlockSizeInBytes = 16,
-     .blockWidth = 4_tc,
-     .blockHeight = 4_tc},
-    {.x = 64_tc,
-     .y = 48_tc,
-     .z = 0_tc,
-     .width = 1024_tc,
-     .height = 1024_tc,
-     .depthOrArrayLayers = 1_tc,
-     .texelBlockSizeInBytes = 4,
-     .blockWidth = 16_tc,
-     .blockHeight = 4_tc},
-    {.x = 64_tc,
-     .y = 48_tc,
-     .z = 16_tc,
-     .width = 1024_tc,
-     .height = 1024_tc,
-     .depthOrArrayLayers = 1_tc,
-     .texelBlockSizeInBytes = 16,
-     .blockWidth = 4_tc,
-     .blockHeight = 4_tc},
+    {.origin = {0_tc, 0_tc, 0_tc},
+     .copySize = {1024_tc, 1024_tc, 1_tc},
+     .blockInfo = {8, 4_tc, 4_tc}},
+    {.origin = {256_tc, 512_tc, 0_tc},
+     .copySize = {1024_tc, 1024_tc, 1_tc},
+     .blockInfo = {8, 4_tc, 4_tc}},
+    {.origin = {64_tc, 48_tc, 0_tc},
+     .copySize = {1024_tc, 1024_tc, 1_tc},
+     .blockInfo = {8, 4_tc, 4_tc}},
+    {.origin = {64_tc, 48_tc, 16_tc},
+     .copySize = {1024_tc, 1024_tc, 1_tc},
+     .blockInfo = {8, 4_tc, 4_tc}},
+    {.origin = {0_tc, 0_tc, 0_tc},
+     .copySize = {1024_tc, 1024_tc, 1_tc},
+     .blockInfo = {16, 4_tc, 4_tc}},
+    {.origin = {256_tc, 512_tc, 0_tc},
+     .copySize = {1024_tc, 1024_tc, 1_tc},
+     .blockInfo = {16, 4_tc, 4_tc}},
+    {.origin = {64_tc, 48_tc, 0_tc},
+     .copySize = {1024_tc, 1024_tc, 1_tc},
+     .blockInfo = {4, 16_tc, 4_tc}},
+    {.origin = {64_tc, 48_tc, 16_tc},
+     .copySize = {1024_tc, 1024_tc, 1_tc},
+     .blockInfo = {16, 4_tc, 4_tc}},
     // 4x4 block size 3D copies
-    {.x = 0_tc,
-     .y = 0_tc,
-     .z = 0_tc,
-     .width = 64_tc,
-     .height = 4_tc,
-     .depthOrArrayLayers = 2_tc,
-     .texelBlockSizeInBytes = 8,
-     .blockWidth = 4_tc,
-     .blockHeight = 4_tc},
-    {.x = 0_tc,
-     .y = 0_tc,
-     .z = 0_tc,
-     .width = 64_tc,
-     .height = 4_tc,
-     .depthOrArrayLayers = 2_tc,
-     .texelBlockSizeInBytes = 16,
-     .blockWidth = 4_tc,
-     .blockHeight = 4_tc},
-    {.x = 0_tc,
-     .y = 0_tc,
-     .z = 0_tc,
-     .width = 64_tc,
-     .height = 4_tc,
-     .depthOrArrayLayers = 8_tc,
-     .texelBlockSizeInBytes = 16,
-     .blockWidth = 4_tc,
-     .blockHeight = 4_tc},
-    {.x = 0_tc,
-     .y = 0_tc,
-     .z = 0_tc,
-     .width = 128_tc,
-     .height = 4_tc,
-     .depthOrArrayLayers = 8_tc,
-     .texelBlockSizeInBytes = 8,
-     .blockWidth = 4_tc,
-     .blockHeight = 4_tc},
+    {.origin = {0_tc, 0_tc, 0_tc}, .copySize = {64_tc, 4_tc, 2_tc}, .blockInfo = {8, 4_tc, 4_tc}},
+    {.origin = {0_tc, 0_tc, 0_tc}, .copySize = {64_tc, 4_tc, 2_tc}, .blockInfo = {16, 4_tc, 4_tc}},
+    {.origin = {0_tc, 0_tc, 0_tc}, .copySize = {64_tc, 4_tc, 8_tc}, .blockInfo = {16, 4_tc, 4_tc}},
+    {.origin = {0_tc, 0_tc, 0_tc}, .copySize = {128_tc, 4_tc, 8_tc}, .blockInfo = {8, 4_tc, 4_tc}},
 };
 
 // Define base buffer sizes to work with: some offsets aligned, some unaligned. bytesPerRow
 // is the minimum required
 std::array<BufferSpec, 15> BaseBufferSpecs(const TextureSpec& textureSpec) {
-    TypedTexelBlockInfo blockInfo = ToTypedTexelBlockInfo(textureSpec);
-    uint32_t bytesPerRow = Align(blockInfo.ToBytes(blockInfo.ToBlockWidth(textureSpec.width)),
-                                 kTextureBytesPerRowAlignment);
+    const TypedTexelBlockInfo& blockInfo = textureSpec.blockInfo;
+    uint32_t bytesPerRow =
+        Align(blockInfo.ToBytes(blockInfo.ToBlockWidth(textureSpec.copySize.width)),
+              kTextureBytesPerRowAlignment);
 
     auto alignNonPow2 = [](uint32_t value, uint32_t size) -> uint32_t {
         return value == 0 ? 0 : ((value - 1) / size + 1) * size;
     };
 
+    BlockCount copyHeight = blockInfo.ToBlockHeight(textureSpec.copySize.height);
+
     return {
-        BufferSpec{alignNonPow2(0, textureSpec.texelBlockSizeInBytes), bytesPerRow,
-                   blockInfo.ToBlockHeight(textureSpec.height)},
-        BufferSpec{alignNonPow2(256, textureSpec.texelBlockSizeInBytes), bytesPerRow,
-                   blockInfo.ToBlockHeight(textureSpec.height)},
-        BufferSpec{alignNonPow2(512, textureSpec.texelBlockSizeInBytes), bytesPerRow,
-                   blockInfo.ToBlockHeight(textureSpec.height)},
-        BufferSpec{alignNonPow2(1024, textureSpec.texelBlockSizeInBytes), bytesPerRow,
-                   blockInfo.ToBlockHeight(textureSpec.height)},
-        BufferSpec{alignNonPow2(1024, textureSpec.texelBlockSizeInBytes), bytesPerRow,
-                   blockInfo.ToBlockHeight(textureSpec.height) * 2_bc},
+        BufferSpec{alignNonPow2(0, blockInfo.byteSize), bytesPerRow, copyHeight},
+        BufferSpec{alignNonPow2(256, blockInfo.byteSize), bytesPerRow, copyHeight},
+        BufferSpec{alignNonPow2(512, blockInfo.byteSize), bytesPerRow, copyHeight},
+        BufferSpec{alignNonPow2(1024, blockInfo.byteSize), bytesPerRow, copyHeight},
+        BufferSpec{alignNonPow2(1024, blockInfo.byteSize), bytesPerRow, copyHeight * 2_bc},
 
-        BufferSpec{alignNonPow2(32, textureSpec.texelBlockSizeInBytes), bytesPerRow,
-                   blockInfo.ToBlockHeight(textureSpec.height)},
-        BufferSpec{alignNonPow2(64, textureSpec.texelBlockSizeInBytes), bytesPerRow,
-                   blockInfo.ToBlockHeight(textureSpec.height)},
-        BufferSpec{alignNonPow2(64, textureSpec.texelBlockSizeInBytes), bytesPerRow,
-                   blockInfo.ToBlockHeight(textureSpec.height) * 2_bc},
+        BufferSpec{alignNonPow2(32, blockInfo.byteSize), bytesPerRow, copyHeight},
+        BufferSpec{alignNonPow2(64, blockInfo.byteSize), bytesPerRow, copyHeight},
+        BufferSpec{alignNonPow2(64, blockInfo.byteSize), bytesPerRow, copyHeight * 2_bc},
 
-        BufferSpec{alignNonPow2(31, textureSpec.texelBlockSizeInBytes), bytesPerRow,
-                   blockInfo.ToBlockHeight(textureSpec.height)},
-        BufferSpec{alignNonPow2(257, textureSpec.texelBlockSizeInBytes), bytesPerRow,
-                   blockInfo.ToBlockHeight(textureSpec.height)},
-        BufferSpec{alignNonPow2(384, textureSpec.texelBlockSizeInBytes), bytesPerRow,
-                   blockInfo.ToBlockHeight(textureSpec.height)},
-        BufferSpec{alignNonPow2(511, textureSpec.texelBlockSizeInBytes), bytesPerRow,
-                   blockInfo.ToBlockHeight(textureSpec.height)},
-        BufferSpec{alignNonPow2(513, textureSpec.texelBlockSizeInBytes), bytesPerRow,
-                   blockInfo.ToBlockHeight(textureSpec.height)},
-        BufferSpec{alignNonPow2(1023, textureSpec.texelBlockSizeInBytes), bytesPerRow,
-                   blockInfo.ToBlockHeight(textureSpec.height)},
-        BufferSpec{alignNonPow2(1023, textureSpec.texelBlockSizeInBytes), bytesPerRow,
-                   blockInfo.ToBlockHeight(textureSpec.height) * 2_bc},
+        BufferSpec{alignNonPow2(31, blockInfo.byteSize), bytesPerRow, copyHeight},
+        BufferSpec{alignNonPow2(257, blockInfo.byteSize), bytesPerRow, copyHeight},
+        BufferSpec{alignNonPow2(384, blockInfo.byteSize), bytesPerRow, copyHeight},
+        BufferSpec{alignNonPow2(511, blockInfo.byteSize), bytesPerRow, copyHeight},
+        BufferSpec{alignNonPow2(513, blockInfo.byteSize), bytesPerRow, copyHeight},
+        BufferSpec{alignNonPow2(1023, blockInfo.byteSize), bytesPerRow, copyHeight},
+        BufferSpec{alignNonPow2(1023, blockInfo.byteSize), bytesPerRow, copyHeight * 2_bc},
     };
 }
 
@@ -761,14 +453,15 @@ class CopySplitTest : public testing::TestWithParam<CopySplitTestParam> {
                 const BufferSpec& bufferSpec,
                 wgpu::TextureDimension dimension,
                 bool relaxed) {
-        DAWN_ASSERT(textureSpec.width % textureSpec.blockWidth == 0_tc &&
-                    textureSpec.height % textureSpec.blockHeight == 0_tc);
+        const TypedTexelBlockInfo& blockInfo = textureSpec.blockInfo;
+        DAWN_ASSERT(textureSpec.copySize.width % blockInfo.width == 0_tc &&
+                    textureSpec.copySize.height % blockInfo.height == 0_tc);
+
         // Add trace so that failures emit the input test specs
         std::stringstream trace;
         trace << textureSpec << ", " << bufferSpec;
         SCOPED_TRACE(trace.str());
 
-        TypedTexelBlockInfo blockInfo = ToTypedTexelBlockInfo(textureSpec);
         BlockCount blocksPerRow = blockInfo.BytesToBlocks(bufferSpec.bytesPerRow);
         BlockCount rowsPerImage{bufferSpec.rowsPerImage};
 
@@ -780,29 +473,33 @@ class CopySplitTest : public testing::TestWithParam<CopySplitTestParam> {
                 // these cases before reaching the TextureCopySplitter.
                 // TODO(425944899): Test Compute2DTextureCopySplits to cover e2D and
                 // depthOrArrayLayers>1
-                if (textureSpec.z > 0_tc || textureSpec.depthOrArrayLayers > 1_tc) {
+                if (textureSpec.origin.z > 0_tc || textureSpec.copySize.depthOrArrayLayers > 1_tc) {
                     return;
                 }
                 if (relaxed) {
                     copySplit = Compute2DTextureCopySubresourceWithRelaxedRowPitchAndOffset(
-                        ToBlockOrigin3D(textureSpec), ToBlockExtent3D(textureSpec), blockInfo,
-                        bufferSpec.offset, blocksPerRow);
+                        blockInfo.ToBlock(textureSpec.origin),
+                        blockInfo.ToBlock(textureSpec.copySize), blockInfo, bufferSpec.offset,
+                        blocksPerRow);
                 } else {
-                    copySplit = Compute2DTextureCopySubresource(
-                        ToBlockOrigin3D(textureSpec), ToBlockExtent3D(textureSpec), blockInfo,
-                        bufferSpec.offset, blocksPerRow);
+                    copySplit =
+                        Compute2DTextureCopySubresource(blockInfo.ToBlock(textureSpec.origin),
+                                                        blockInfo.ToBlock(textureSpec.copySize),
+                                                        blockInfo, bufferSpec.offset, blocksPerRow);
                 }
                 break;
             }
             case wgpu::TextureDimension::e3D: {
                 if (relaxed) {
                     copySplit = Compute3DTextureCopySubresourceWithRelaxedRowPitchAndOffset(
-                        ToBlockOrigin3D(textureSpec), ToBlockExtent3D(textureSpec), blockInfo,
-                        bufferSpec.offset, blocksPerRow, rowsPerImage);
+                        blockInfo.ToBlock(textureSpec.origin),
+                        blockInfo.ToBlock(textureSpec.copySize), blockInfo, bufferSpec.offset,
+                        blocksPerRow, rowsPerImage);
                 } else {
-                    copySplit = Compute3DTextureCopySplits(
-                        ToBlockOrigin3D(textureSpec), ToBlockExtent3D(textureSpec), blockInfo,
-                        bufferSpec.offset, blocksPerRow, rowsPerImage);
+                    copySplit = Compute3DTextureCopySplits(blockInfo.ToBlock(textureSpec.origin),
+                                                           blockInfo.ToBlock(textureSpec.copySize),
+                                                           blockInfo, bufferSpec.offset,
+                                                           blocksPerRow, rowsPerImage);
                 }
                 break;
             }
@@ -840,10 +537,10 @@ TEST_P(CopySplitTest, General) {
 TEST_P(CopySplitTest, TextureWidth) {
     for (TextureSpec textureSpec : kBaseTextureSpecs) {
         for (uint32_t val : kCheckValues) {
-            if (TexelCount{val} % textureSpec.blockWidth != 0_tc) {
+            if (TexelCount{val} % textureSpec.blockInfo.width != 0_tc) {
                 continue;
             }
-            textureSpec.width = TexelCount{val};
+            textureSpec.copySize.width = TexelCount{val};
             for (const BufferSpec& bufferSpec : BaseBufferSpecs(textureSpec)) {
                 DoTest(textureSpec, bufferSpec);
             }
@@ -854,10 +551,10 @@ TEST_P(CopySplitTest, TextureWidth) {
 TEST_P(CopySplitTest, TextureHeight) {
     for (TextureSpec textureSpec : kBaseTextureSpecs) {
         for (uint32_t val : kCheckValues) {
-            if (TexelCount{val} % textureSpec.blockHeight != 0_tc) {
+            if (TexelCount{val} % textureSpec.blockInfo.height != 0_tc) {
                 continue;
             }
-            textureSpec.height = TexelCount{val};
+            textureSpec.copySize.height = TexelCount{val};
             for (const BufferSpec& bufferSpec : BaseBufferSpecs(textureSpec)) {
                 DoTest(textureSpec, bufferSpec);
             }
@@ -868,10 +565,10 @@ TEST_P(CopySplitTest, TextureHeight) {
 TEST_P(CopySplitTest, TextureX) {
     for (TextureSpec textureSpec : kBaseTextureSpecs) {
         for (uint32_t val : kCheckValues) {
-            if (TexelCount{val} % textureSpec.blockWidth != 0_tc) {
+            if (TexelCount{val} % textureSpec.blockInfo.width != 0_tc) {
                 continue;
             }
-            textureSpec.x = TexelCount{val};
+            textureSpec.origin.x = TexelCount{val};
             for (const BufferSpec& bufferSpec : BaseBufferSpecs(textureSpec)) {
                 DoTest(textureSpec, bufferSpec);
             }
@@ -882,10 +579,10 @@ TEST_P(CopySplitTest, TextureX) {
 TEST_P(CopySplitTest, TextureY) {
     for (TextureSpec textureSpec : kBaseTextureSpecs) {
         for (uint32_t val : kCheckValues) {
-            if (TexelCount{val} % textureSpec.blockHeight != 0_tc) {
+            if (TexelCount{val} % textureSpec.blockInfo.height != 0_tc) {
                 continue;
             }
-            textureSpec.y = TexelCount{val};
+            textureSpec.origin.y = TexelCount{val};
             for (const BufferSpec& bufferSpec : BaseBufferSpecs(textureSpec)) {
                 DoTest(textureSpec, bufferSpec);
             }
@@ -896,7 +593,7 @@ TEST_P(CopySplitTest, TextureY) {
 TEST_P(CopySplitTest, TexelSize) {
     for (TextureSpec textureSpec : kBaseTextureSpecs) {
         for (uint32_t texelSize : {4, 8, 16, 32, 64}) {
-            textureSpec.texelBlockSizeInBytes = texelSize;
+            textureSpec.blockInfo.byteSize = texelSize;
             for (const BufferSpec& bufferSpec : BaseBufferSpecs(textureSpec)) {
                 DoTest(textureSpec, bufferSpec);
             }
@@ -908,8 +605,7 @@ TEST_P(CopySplitTest, BufferOffset) {
     for (const TextureSpec& textureSpec : kBaseTextureSpecs) {
         for (BufferSpec bufferSpec : BaseBufferSpecs(textureSpec)) {
             for (uint32_t val : kCheckValues) {
-                bufferSpec.offset = textureSpec.texelBlockSizeInBytes * val;
-
+                bufferSpec.offset = textureSpec.blockInfo.byteSize * val;
                 DoTest(textureSpec, bufferSpec);
             }
         }
@@ -958,15 +654,9 @@ INSTANTIATE_TEST_SUITE_P(
 TEST_F(CopySplitTest, Block4x4_3D_CopyOneRow_StraddleBytesPerRowOffset) {
     constexpr TexelCount blockDim = 4_tc;
     constexpr uint32_t bytesPerBlock = 8;
-    TextureSpec textureSpec = {.x = 0_tc,
-                               .y = 0_tc,
-                               .z = 0_tc,
-                               .width = 128_tc,
-                               .height = 1_tc * blockDim,
-                               .depthOrArrayLayers = 8_tc,
-                               .texelBlockSizeInBytes = bytesPerBlock,
-                               .blockWidth = blockDim,
-                               .blockHeight = blockDim};
+    TextureSpec textureSpec = {.origin = {0_tc, 0_tc, 0_tc},
+                               .copySize = {128_tc, 1_tc * blockDim, 8_tc},
+                               .blockInfo = {bytesPerBlock, blockDim, blockDim}};
     BufferSpec bufferSpec = {.offset = 3592, .bytesPerRow = 256, .rowsPerImage = 1_bc};
     DoTest(textureSpec, bufferSpec, wgpu::TextureDimension::e3D, false);
 }
@@ -974,15 +664,9 @@ TEST_F(CopySplitTest, Block4x4_3D_CopyOneRow_StraddleBytesPerRowOffset) {
 TEST_F(CopySplitTest, Block2x2_3D_CopyOneRow_StraddleBytesPerRowOffset) {
     constexpr TexelCount blockDim = 2_tc;
     constexpr uint32_t bytesPerBlock = 4;
-    TextureSpec textureSpec = {.x = 0_tc,
-                               .y = 0_tc,
-                               .z = 0_tc,
-                               .width = 128_tc,
-                               .height = 1_tc * blockDim,
-                               .depthOrArrayLayers = 8_tc,
-                               .texelBlockSizeInBytes = bytesPerBlock,
-                               .blockWidth = blockDim,
-                               .blockHeight = blockDim};
+    TextureSpec textureSpec = {.origin = {0_tc, 0_tc, 0_tc},
+                               .copySize = {128_tc, 1_tc * blockDim, 8_tc},
+                               .blockInfo = {bytesPerBlock, blockDim, blockDim}};
     BufferSpec bufferSpec = {.offset = 3592, .bytesPerRow = 256, .rowsPerImage = 1_bc};
     DoTest(textureSpec, bufferSpec, wgpu::TextureDimension::e3D, false);
 }
@@ -990,15 +674,9 @@ TEST_F(CopySplitTest, Block2x2_3D_CopyOneRow_StraddleBytesPerRowOffset) {
 TEST_F(CopySplitTest, Block1x1_3D_CopyOneRow_StraddleBytesPerRowOffset) {
     constexpr TexelCount blockDim = 1_tc;
     constexpr uint32_t bytesPerBlock = 4;
-    TextureSpec textureSpec = {.x = 0_tc,
-                               .y = 0_tc,
-                               .z = 0_tc,
-                               .width = 128_tc,
-                               .height = 1_tc * blockDim,
-                               .depthOrArrayLayers = 8_tc,
-                               .texelBlockSizeInBytes = bytesPerBlock,
-                               .blockWidth = blockDim,
-                               .blockHeight = blockDim};
+    TextureSpec textureSpec = {.origin = {0_tc, 0_tc, 0_tc},
+                               .copySize = {128_tc, 1_tc * blockDim, 8_tc},
+                               .blockInfo = {bytesPerBlock, blockDim, blockDim}};
     BufferSpec bufferSpec = {.offset = 3592, .bytesPerRow = 256, .rowsPerImage = 1_bc};
     DoTest(textureSpec, bufferSpec, wgpu::TextureDimension::e3D, false);
 }
