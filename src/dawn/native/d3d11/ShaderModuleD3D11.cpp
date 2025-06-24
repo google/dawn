@@ -86,14 +86,12 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     DAWN_ASSERT(!IsError());
 
     const EntryPointMetadata& entryPoint = GetEntryPoint(programmableStage.entryPoint);
-    const bool useTintIR = device->IsToggleEnabled(Toggle::UseTintIR);
 
     d3d::D3DCompilationRequest req = {};
     req.tracePlatform = UnsafeUnserializedValue(device->GetPlatform());
     req.hlsl.shaderModel = 50;
     req.hlsl.disableSymbolRenaming = device->IsToggleEnabled(Toggle::DisableSymbolRenaming);
     req.hlsl.dumpShaders = device->IsToggleEnabled(Toggle::DumpShaders);
-    req.hlsl.useTintIR = useTintIR;
     req.hlsl.tintOptions.remapped_entry_point_name = device->GetIsolatedEntryPointName();
 
     req.bytecode.hasShaderF16Feature = false;
@@ -193,37 +191,6 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     req.hlsl.inputProgram = UnsafeUnserializedValue(UseTintProgram());
     req.hlsl.entryPointName = programmableStage.entryPoint.c_str();
     req.hlsl.stage = stage;
-
-    if (!useTintIR) {
-        if (stage == SingleShaderStage::Vertex) {
-            // Put the firstIndex into the internally reserved group and binding to avoid
-            // conflicting with any existing bindings.
-            req.hlsl.firstIndexOffsetRegisterSpace =
-                PipelineLayout::kReservedConstantsBindGroupIndex;
-            req.hlsl.firstIndexOffsetShaderRegister =
-                PipelineLayout::kFirstIndexOffsetBindingNumber;
-            // Remap to the desired space and binding, [0, kFirstIndexOffsetConstantBufferSlot].
-            {
-                tint::BindingPoint srcBindingPoint{req.hlsl.firstIndexOffsetRegisterSpace,
-                                                   req.hlsl.firstIndexOffsetShaderRegister};
-                // D3D11 (HLSL SM5.0) doesn't support spaces, so we have to put the firstIndex in
-                // the default space(0)
-                tint::BindingPoint dstBindingPoint{
-                    0u, PipelineLayout::kFirstIndexOffsetConstantBufferSlot};
-
-                bindings.uniform.emplace(
-                    srcBindingPoint, tint::hlsl::writer::binding::Uniform{dstBindingPoint.group,
-                                                                          dstBindingPoint.binding});
-            }
-        }
-
-        if (entryPoint.usesNumWorkgroups) {
-            DAWN_ASSERT(stage == SingleShaderStage::Compute);
-            req.hlsl.tintOptions.root_constant_binding_point =
-                tint::BindingPoint{0, PipelineLayout::kNumWorkgroupsConstantBufferSlot};
-        }
-    }
-
     req.hlsl.substituteOverrideConfig = BuildSubstituteOverridesTransformConfig(programmableStage);
     req.hlsl.limits = LimitsForCompilationRequest::Create(device->GetLimits().v1);
     req.hlsl.adapterSupportedLimits = UnsafeUnserializedValue(
@@ -237,20 +204,16 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     req.hlsl.tintOptions.scalarize_max_min_clamp =
         device->IsToggleEnabled(Toggle::ScalarizeMaxMinClamp);
 
-    // Immediate data available in TintIR only.
-    if (useTintIR) {
-        req.hlsl.tintOptions.immediate_binding_point =
-            tint::BindingPoint{0, PipelineLayout::kReservedConstantBufferSlot};
-        if (stage == SingleShaderStage::Compute) {
-            req.hlsl.tintOptions.num_workgroups_start_offset =
-                GetImmediateByteOffsetInPipelineIfAny(&ComputeImmediateConstants::numWorkgroups,
-                                                      pipelineImmediateMask);
-        } else {
-            req.hlsl.tintOptions.first_index_offset = GetImmediateByteOffsetInPipelineIfAny(
-                &RenderImmediateConstants::firstVertex, pipelineImmediateMask);
-            req.hlsl.tintOptions.first_instance_offset = GetImmediateByteOffsetInPipelineIfAny(
-                &RenderImmediateConstants::firstInstance, pipelineImmediateMask);
-        }
+    req.hlsl.tintOptions.immediate_binding_point =
+        tint::BindingPoint{0, PipelineLayout::kReservedConstantBufferSlot};
+    if (stage == SingleShaderStage::Compute) {
+        req.hlsl.tintOptions.num_workgroups_start_offset = GetImmediateByteOffsetInPipelineIfAny(
+            &ComputeImmediateConstants::numWorkgroups, pipelineImmediateMask);
+    } else {
+        req.hlsl.tintOptions.first_index_offset = GetImmediateByteOffsetInPipelineIfAny(
+            &RenderImmediateConstants::firstVertex, pipelineImmediateMask);
+        req.hlsl.tintOptions.first_instance_offset = GetImmediateByteOffsetInPipelineIfAny(
+            &RenderImmediateConstants::firstInstance, pipelineImmediateMask);
     }
 
     if (stage == SingleShaderStage::Vertex) {

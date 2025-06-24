@@ -128,7 +128,6 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     DAWN_ASSERT(!IsError());
 
     const EntryPointMetadata& entryPoint = GetEntryPoint(programmableStage.entryPoint);
-    const bool useTintIR = device->IsToggleEnabled(Toggle::UseTintIR);
 
     d3d::D3DCompilationRequest req = {};
     req.tracePlatform = UnsafeUnserializedValue(device->GetPlatform());
@@ -136,7 +135,6 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
                                ->GetAppliedShaderModelUnderToggles(device->GetTogglesState());
     req.hlsl.disableSymbolRenaming = device->IsToggleEnabled(Toggle::DisableSymbolRenaming);
     req.hlsl.dumpShaders = device->IsToggleEnabled(Toggle::DumpShaders);
-    req.hlsl.useTintIR = useTintIR;
     req.hlsl.tintOptions.remapped_entry_point_name = device->GetIsolatedEntryPointName();
 
     req.bytecode.hasShaderF16Feature = device->HasFeature(Feature::ShaderF16);
@@ -323,10 +321,6 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     req.hlsl.inputProgram = UnsafeUnserializedValue(UseTintProgram());
     req.hlsl.entryPointName = programmableStage.entryPoint.c_str();
     req.hlsl.stage = stage;
-    if (!useTintIR) {
-        req.hlsl.firstIndexOffsetRegisterSpace = layout->GetFirstIndexOffsetRegisterSpace();
-        req.hlsl.firstIndexOffsetShaderRegister = layout->GetFirstIndexOffsetShaderRegister();
-    }
     req.hlsl.substituteOverrideConfig = BuildSubstituteOverridesTransformConfig(programmableStage);
     req.hlsl.tintOptions.disable_robustness = !device->IsRobustnessEnabled();
     req.hlsl.tintOptions.disable_workgroup_init =
@@ -341,7 +335,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
         DAWN_ASSERT(stage == SingleShaderStage::Compute);
         req.hlsl.tintOptions.root_constant_binding_point = tint::BindingPoint{
             layout->GetNumWorkgroupsRegisterSpace(), layout->GetNumWorkgroupsShaderRegister()};
-    } else if (useTintIR && stage == SingleShaderStage::Vertex) {
+    } else if (stage == SingleShaderStage::Vertex) {
         // For vertex shaders, use root constant to add FirstIndexOffset, if needed
         req.hlsl.tintOptions.root_constant_binding_point =
             tint::BindingPoint{layout->GetFirstIndexOffsetRegisterSpace(),

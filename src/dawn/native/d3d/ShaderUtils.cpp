@@ -47,24 +47,6 @@ namespace dawn::native::d3d {
 
 namespace {
 
-ResultOrError<tint::Program> RunTransforms(tint::ast::transform::Manager* transformManager,
-                                           const tint::Program* program,
-                                           const tint::ast::transform::DataMap& inputs,
-                                           tint::ast::transform::DataMap* outputs,
-                                           ParsedCompilationMessages* outMessages) {
-    DAWN_ASSERT(program != nullptr);
-    tint::ast::transform::DataMap transform_outputs;
-    tint::Program result = transformManager->Run(*program, inputs, transform_outputs);
-    if (outMessages != nullptr) {
-        DAWN_TRY(outMessages->AddMessages(result.Diagnostics()));
-    }
-    DAWN_INVALID_IF(!result.IsValid(), "Tint program failure: %s\n", result.Diagnostics().Str());
-    if (outputs != nullptr) {
-        *outputs = std::move(transform_outputs);
-    }
-    return std::move(result);
-}
-
 // Be careful that the return vector may contain the pointers that point to non-static memory.
 std::vector<const wchar_t*> GetDXCArguments(std::wstring_view entryPointNameW,
                                             const d3d::D3DBytecodeCompilationRequest& r) {
@@ -230,139 +212,74 @@ ResultOrError<ComPtr<ID3DBlob>> CompileShaderFXC(const d3d::D3DBytecodeCompilati
 MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
                            UnsafeUnserializedValue<dawn::platform::Platform*> tracePlatform,
                            CompiledShader* compiledShader) {
-    tint::ast::transform::Manager transformManager;
-    tint::ast::transform::DataMap transformInputs;
-
-    // Run before the renamer so that the entry point name matches `entryPointName` still.
-    transformManager.Add<tint::ast::transform::SingleEntryPoint>();
-    transformInputs.Add<tint::ast::transform::SingleEntryPoint::Config>(r.entryPointName.data());
-
-    if (r.useTintIR) {
-        r.tintOptions.strip_all_names = !r.disableSymbolRenaming;
-    } else {
-        // Needs to run before all other transforms so that they can use builtin names safely.
-        tint::ast::transform::Renamer::Remappings requestedNames = {
-            {std::string(r.entryPointName), r.tintOptions.remapped_entry_point_name}};
-        transformManager.Add<tint::ast::transform::Renamer>();
-        transformInputs.Add<tint::ast::transform::Renamer::Config>(
-            r.disableSymbolRenaming ? tint::ast::transform::Renamer::Target::kHlslKeywords
-                                    : tint::ast::transform::Renamer::Target::kAll,
-            std::move(requestedNames));
-    }
-
-    if (!r.useTintIR && r.stage == SingleShaderStage::Vertex) {
-        transformManager.Add<tint::ast::transform::FirstIndexOffset>();
-        transformInputs.Add<tint::ast::transform::FirstIndexOffset::BindingPoint>(
-            r.firstIndexOffsetShaderRegister, r.firstIndexOffsetRegisterSpace);
-    }
-
-    if (!r.useTintIR) {
-        tint::ast::transform::SubstituteOverride::Config cfg;
-        cfg.map = std::move(r.substituteOverrideConfig);
-
-        // This needs to run after SingleEntryPoint transform which removes unused overrides for
-        // current entry point.
-        transformManager.Add<tint::ast::transform::SubstituteOverride>();
-        transformInputs.Add<tint::ast::transform::SubstituteOverride::Config>(cfg);
-    }
-
-    // Requires Tint Program here right before actual using.
-    auto inputProgram = r.inputProgram.UnsafeGetValue()->GetTintProgram();
-    const tint::Program* tintInputProgram = &(inputProgram->program);
-    tint::Program transformedProgram;
-    tint::ast::transform::DataMap transformOutputs;
-    if (!r.useTintIR) {
-        TRACE_EVENT0(tracePlatform.UnsafeGetValue(), General, "RunTransforms");
-        DAWN_TRY_ASSIGN(transformedProgram,
-                        RunTransforms(&transformManager, tintInputProgram, transformInputs,
-                                      &transformOutputs, nullptr));
-    }
-
-    bool usesVertexIndex = false;
-    bool usesInstanceIndex = false;
-    if (!r.useTintIR && r.stage == SingleShaderStage::Vertex) {
-        if (auto* data = transformOutputs.Get<tint::ast::transform::FirstIndexOffset::Data>()) {
-            usesVertexIndex = data->has_vertex_index;
-            usesInstanceIndex = data->has_instance_index;
-        } else {
-            return DAWN_VALIDATION_ERROR("Transform output missing first index offset data.");
-        }
-    }
+    r.tintOptions.strip_all_names = !r.disableSymbolRenaming;
 
     TRACE_EVENT0(tracePlatform.UnsafeGetValue(), General, "tint::hlsl::writer::Generate");
+
+    // Convert the AST program to an IR module.
+    tint::Result<tint::core::ir::Module> ir;
+    {
+        SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(tracePlatform.UnsafeGetValue(),
+                                           "ShaderModuleProgramToIR");
+
+        // Requires Tint Program here right before actual using.
+        auto inputProgram = r.inputProgram.UnsafeGetValue()->GetTintProgram();
+        const tint::Program* tintInputProgram = &(inputProgram->program);
+
+        ir = tint::wgsl::reader::ProgramToLoweredIR(*tintInputProgram);
+        DAWN_INVALID_IF(ir != tint::Success, "An error occurred while generating Tint IR\n%s",
+                        ir.Failure().reason);
+    }
+
+    {
+        SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(tracePlatform.UnsafeGetValue(),
+                                           "ShaderModuleSingleEntryPoint");
+        auto singleEntryPointResult =
+            tint::core::ir::transform::SingleEntryPoint(ir.Get(), r.entryPointName);
+        DAWN_INVALID_IF(singleEntryPointResult != tint::Success,
+                        "Pipeline single entry point (IR) failed:\n%s",
+                        singleEntryPointResult.Failure().reason);
+    }
+
+    // this needs to run after SingleEntryPoint transform which removes unused
+    // overrides for the current entry point.
+    {
+        SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(tracePlatform.UnsafeGetValue(),
+                                           "ShaderModuleSubstituteOverrides");
+        tint::core::ir::transform::SubstituteOverridesConfig cfg;
+        cfg.map = std::move(r.substituteOverrideConfig);
+        auto substituteOverridesResult =
+            tint::core::ir::transform::SubstituteOverrides(ir.Get(), cfg);
+
+        DAWN_INVALID_IF(substituteOverridesResult != tint::Success,
+                        "Pipeline override substitution (IR) failed:\n%s",
+                        substituteOverridesResult.Failure().reason);
+    }
+
     tint::Result<tint::hlsl::writer::Output> result;
-    if (r.useTintIR) {
-        // Convert the AST program to an IR module.
-        tint::Result<tint::core::ir::Module> ir;
-        {
-            SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(tracePlatform.UnsafeGetValue(),
-                                               "ShaderModuleProgramToIR");
-            ir = tint::wgsl::reader::ProgramToLoweredIR(*tintInputProgram);
-            DAWN_INVALID_IF(ir != tint::Success, "An error occurred while generating Tint IR\n%s",
-                            ir.Failure().reason);
-        }
-
-        {
-            SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(tracePlatform.UnsafeGetValue(),
-                                               "ShaderModuleSingleEntryPoint");
-            auto singleEntryPointResult =
-                tint::core::ir::transform::SingleEntryPoint(ir.Get(), r.entryPointName);
-            DAWN_INVALID_IF(singleEntryPointResult != tint::Success,
-                            "Pipeline single entry point (IR) failed:\n%s",
-                            singleEntryPointResult.Failure().reason);
-        }
-
-        // this needs to run after SingleEntryPoint transform which removes unused
-        // overrides for the current entry point.
-        {
-            SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(tracePlatform.UnsafeGetValue(),
-                                               "ShaderModuleSubstituteOverrides");
-            tint::core::ir::transform::SubstituteOverridesConfig cfg;
-            cfg.map = std::move(r.substituteOverrideConfig);
-            auto substituteOverridesResult =
-                tint::core::ir::transform::SubstituteOverrides(ir.Get(), cfg);
-
-            DAWN_INVALID_IF(substituteOverridesResult != tint::Success,
-                            "Pipeline override substitution (IR) failed:\n%s",
-                            substituteOverridesResult.Failure().reason);
-        }
-
-        {
-            SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(tracePlatform.UnsafeGetValue(),
-                                               "ShaderModuleGenerateHLSL");
-            result = tint::hlsl::writer::Generate(ir.Get(), r.tintOptions);
-            DAWN_INVALID_IF(result != tint::Success, "An error occurred while generating HLSL:\n%s",
-                            result.Failure().reason);
-        }
-
-        // Workgroup validation has to come after `Generate` because it may require overrides to
-        // have been substituted.
-        if (r.stage == SingleShaderStage::Compute) {
-            // Validate workgroup size and workgroup storage size.
-            Extent3D _;
-            DAWN_TRY_ASSIGN(
-                _, ValidateComputeStageWorkgroupSize(
-                       result->workgroup_info.x, result->workgroup_info.y, result->workgroup_info.z,
-                       result->workgroup_info.storage_size, /* usesSubgroupMatrix */ false,
-                       r.maxSubgroupSize, r.limits, r.adapterSupportedLimits.UnsafeGetValue()));
-        }
-    } else {
-        // Validate workgroup size after program runs transforms.
-        if (r.stage == SingleShaderStage::Compute) {
-            Extent3D _;
-            DAWN_TRY_ASSIGN(_,
-                            ValidateComputeStageWorkgroupSize(
-                                transformedProgram, r.tintOptions.remapped_entry_point_name.c_str(),
-                                /* usesSubgroupMatrix */ false, r.maxSubgroupSize, r.limits,
-                                r.adapterSupportedLimits.UnsafeGetValue()));
-        }
-
-        result = tint::hlsl::writer::Generate(transformedProgram, r.tintOptions);
+    {
+        SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(tracePlatform.UnsafeGetValue(),
+                                           "ShaderModuleGenerateHLSL");
+        result = tint::hlsl::writer::Generate(ir.Get(), r.tintOptions);
         DAWN_INVALID_IF(result != tint::Success, "An error occurred while generating HLSL:\n%s",
                         result.Failure().reason);
     }
 
-    if (r.useTintIR && r.stage == SingleShaderStage::Vertex) {
+    // Workgroup validation has to come after `Generate` because it may require overrides to
+    // have been substituted.
+    if (r.stage == SingleShaderStage::Compute) {
+        // Validate workgroup size and workgroup storage size.
+        Extent3D _;
+        DAWN_TRY_ASSIGN(
+            _, ValidateComputeStageWorkgroupSize(
+                   result->workgroup_info.x, result->workgroup_info.y, result->workgroup_info.z,
+                   result->workgroup_info.storage_size, /* usesSubgroupMatrix */ false,
+                   r.maxSubgroupSize, r.limits, r.adapterSupportedLimits.UnsafeGetValue()));
+    }
+
+    bool usesVertexIndex = false;
+    bool usesInstanceIndex = false;
+    if (r.stage == SingleShaderStage::Vertex) {
         usesVertexIndex = result->has_vertex_index;
         usesInstanceIndex = result->has_instance_index;
     }

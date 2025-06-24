@@ -832,10 +832,6 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         deviceToggles->Default(Toggle::UsePackedDepth24UnormStencil8Format, true);
     }
 
-    // Use the Tint IR backend by default if the corresponding platform feature is enabled.
-    deviceToggles->Default(Toggle::UseTintIR,
-                           platform->IsFeatureEnabled(platform::Features::kWebGPUUseTintIR));
-
     // Enable the integer range analysis for shader robustness by default if the corresponding
     // platform feature is enabled.
     deviceToggles->Default(
