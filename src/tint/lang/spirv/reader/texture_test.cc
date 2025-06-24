@@ -1411,16 +1411,14 @@ $B1: {  # root
   %1:ptr<handle, sampler_comparison, read> = var undef @binding_point(0, 0)
   %wg:ptr<handle, )" +
                   params.wgsl_type +
-                  R"(<f32>, read> = var undef @binding_point(2, 0)
+                  R"(, read> = var undef @binding_point(2, 0)
 }
 
 %main = @fragment func():void {
   $B2: {
-    %4:)" + params.wgsl_type +
-                  R"(<f32> = load %wg
-    %5:sampler_comparison = load %1
-    %6:vec4<f32> = )" +
-                  params.wgsl_fn +
+    %4:sampler_comparison = load %1
+    %5:)" + params.wgsl_type +
+                  R"( = load %wg)" + params.wgsl_fn +
                   R"(
     ret
   }
@@ -1429,7 +1427,7 @@ $B1: {  # root
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    DISABLED_SpirvReaderTest_ImageSampleDrefImplicitLod,
+    SpirvReaderTest_ImageSampleDrefImplicitLod,
     SamplerComparisonTest,
     ::testing::Values(
         ImgData{
@@ -1437,7 +1435,8 @@ INSTANTIATE_TEST_SUITE_P(
             .spirv_type = "%float 2D 0 0 0 1 Unknown",
             .spirv_fn = "OpImageSampleDrefImplicitLod %float %sampled_image %coords2 %depth",
             .wgsl_type = "texture_depth_2d",
-            .wgsl_fn = "textureSampleCompare %4, %5, vec2<f32>(1.0f, 2.0f), 1.0f",
+            .wgsl_fn = R"(
+    %6:f32 = textureSampleCompare %5, %4, vec2<f32>(1.0f, 2.0f), 1.0f)",
         },
         ImgData{
             .name = "2D ConstOffset",
@@ -1445,15 +1444,19 @@ INSTANTIATE_TEST_SUITE_P(
             .spirv_fn = "OpImageSampleDrefImplicitLod %float %sampled_image %coords2 %depth "
                         "ConstOffset %offset2i",
             .wgsl_type = "texture_depth_2d",
-            .wgsl_fn = "textureSampleCompare %4, %5, vec2<f32>(1.0f, 2.0f), 1.0f, "
-                       "vec2<i32>(10i, 11i)",
+            .wgsl_fn = R"(
+    %6:f32 = textureSampleCompare %5, %4, vec2<f32>(1.0f, 2.0f), 1.0f, vec2<i32>(10i, 11i))",
         },
         ImgData{
             .name = "2D Array",
             .spirv_type = "%float 2D 0 1 0 1 Unknown",
             .spirv_fn = "OpImageSampleDrefImplicitLod %float %sampled_image %coords3 %depth",
             .wgsl_type = "texture_depth_2d_array",
-            .wgsl_fn = "textureSampleCompare %4, %5, vec2<f32>(1.0f, 2.0f), 3i, 1.0f",
+            .wgsl_fn = R"(
+    %6:vec2<f32> = swizzle vec3<f32>(1.0f, 2.0f, 3.0f), xy
+    %7:f32 = swizzle vec3<f32>(1.0f, 2.0f, 3.0f), z
+    %8:i32 = convert %7
+    %9:f32 = textureSampleCompare %5, %4, %6, %8, 1.0f)",
         },
         ImgData{
             .name = "2D Array ConstOffset",
@@ -1461,8 +1464,11 @@ INSTANTIATE_TEST_SUITE_P(
             .spirv_fn = "OpImageSampleDrefImplicitLod %float %sampled_image %coords3 %depth "
                         "ConstOffset %offset2i",
             .wgsl_type = "texture_depth_2d_array",
-            .wgsl_fn = "textureSampleCompare %4, %5, vec2<f32>(1.0f, 2.0f), 3i, 1.0f, "
-                       "vec2<i32>(10i, 11i)",
+            .wgsl_fn = R"(
+    %6:vec2<f32> = swizzle vec3<f32>(1.0f, 2.0f, 3.0f), xy
+    %7:f32 = swizzle vec3<f32>(1.0f, 2.0f, 3.0f), z
+    %8:i32 = convert %7
+    %9:f32 = textureSampleCompare %5, %4, %6, %8, 1.0f, vec2<i32>(10i, 11i))",
         }));
 
 INSTANTIATE_TEST_SUITE_P(
@@ -1567,7 +1573,7 @@ INSTANTIATE_TEST_SUITE_P(
 // This test shows the use of a sampled image used with both regular
 // sampling and depth-reference sampling.  The texture is a depth-texture,
 // and we use builtins textureSample and textureSampleCompare
-TEST_F(SpirvReaderTest, DISABLED_ImageSampleImplicitLod_BothDrefAndNonDref) {
+TEST_F(SpirvReaderTest, ImageSampleImplicitLod_BothDrefAndNonDref) {
     EXPECT_IR(R"(
            OpCapability Shader
            OpCapability Sampled1D
@@ -1627,11 +1633,12 @@ $B1: {  # root
 
 %main = @fragment func():void {
   $B2: {
-    %4:sampler = load %1
-    %5:sampler_comparison = load %2
+    %5:sampler = load %1
     %6:texture_depth_2d = load %wg
-    %7:vec4<f32> = textureSample %4, %6, vec2<f32>(1.0f, 2.0f)
-    %8:vec2<f32> = textureSampleCompare %6, %5, vec2<f32>(1.0f, 2.0f), 1.0f
+    %7:sampler_comparison = load %2
+    %8:f32 = textureSample %6, %5, vec2<f32>(1.0f, 2.0f)
+    %9:vec4<f32> = construct %8, 0.0f, 0.0f, 0.0f
+    %10:f32 = textureSampleCompare %6, %7, vec2<f32>(1.0f, 2.0f), 1.0f
     ret
   }
 }
@@ -3900,7 +3907,7 @@ $B1: {  # root
 )");
 }
 
-TEST_F(SpirvReaderTest, DISABLED_Image_UnknownDepth_DepthUse) {
+TEST_F(SpirvReaderTest, Image_UnknownDepth_DepthUse) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -3934,18 +3941,18 @@ TEST_F(SpirvReaderTest, DISABLED_Image_UnknownDepth_DepthUse) {
                OpFunctionEnd
     )",
               R"(
-@group(0) @binding(0) var x_7 : texture_depth_2d;
-
-@group(0) @binding(1) var x_8 : sampler_comparison;
-
-fn main_1() {
-  let x_23 = textureSampleCompare(x_7, x_8, vec2f(), 0.0f);
-  return;
+$B1: {  # root
+  %1:ptr<handle, texture_depth_2d, read> = var undef @binding_point(0, 0)
+  %2:ptr<handle, sampler_comparison, read> = var undef @binding_point(0, 1)
 }
 
-@fragment
-fn main() {
-  main_1();
+%main = @fragment func():void {
+  $B2: {
+    %4:texture_depth_2d = load %1
+    %5:sampler_comparison = load %2
+    %6:f32 = textureSampleCompare %4, %5, vec2<f32>(0.0f), 0.0f
+    ret
+  }
 }
 )");
 }

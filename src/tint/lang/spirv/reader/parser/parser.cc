@@ -1778,6 +1778,9 @@ class Parser {
                 case spv::Op::OpImageWrite:
                     EmitImageWrite(inst);
                     break;
+                case spv::Op::OpImageSampleDrefImplicitLod:
+                    EmitImageSampleDepth(inst, spirv::BuiltinFn::kImageSampleDrefImplicitLod);
+                    break;
                 case spv::Op::OpPhi:
                     EmitPhi(inst);
                     break;
@@ -2175,6 +2178,31 @@ class Parser {
             }
 
             for (uint32_t i = 3; i < inst.NumInOperands(); ++i) {
+                args.Push(Value(inst.GetSingleWordInOperand(i)));
+            }
+        } else {
+            args.Push(b_.Zero(ty_.u32()));
+        }
+
+        Emit(b_.Call<spirv::ir::BuiltinCall>(Type(inst.type_id()), fn, args), inst.result_id());
+    }
+
+    void EmitImageSampleDepth(const spvtools::opt::Instruction& inst, spirv::BuiltinFn fn) {
+        auto sampled_image = Value(inst.GetSingleWordInOperand(0));
+        auto* coord = Value(inst.GetSingleWordInOperand(1));
+        auto* dref = Value(inst.GetSingleWordInOperand(2));
+
+        Vector<core::ir::Value*, 4> args = {sampled_image, coord, dref};
+
+        if (inst.NumInOperands() > 3) {
+            uint32_t literal_mask = inst.GetSingleWordInOperand(3);
+            args.Push(b_.Constant(u32(literal_mask)));
+
+            if (literal_mask != 0) {
+                TINT_ASSERT(inst.NumInOperands() > 4);
+            }
+
+            for (uint32_t i = 4; i < inst.NumInOperands(); ++i) {
                 args.Push(Value(inst.GetSingleWordInOperand(i)));
             }
         } else {

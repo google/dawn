@@ -264,6 +264,46 @@ fn image_dref_gather(image: sampled_image< image<f32, dim_cube, is_depth, is_arr
                      dref: D,
                      image_operands: u32) -> vec4<f32>
 
+// Depth flag is not used in Vulkan, so accept the non-depth variants as well.
+implicit(D: f32, F: texel_format)
+fn image_dref_gather(image: sampled_image< image<f32, dim_2d, non_depth, non_arrayed, single_sampled, sampling_compatible, F, readable> >,
+                     coords: vec2<f32>,
+                     dref: D,
+                     image_operands: u32) -> vec4<f32>
+
+implicit(D: f32, F: texel_format, A: access, Z: iu32)
+fn image_dref_gather(image: sampled_image< image<f32, dim_2d, non_depth, non_arrayed, single_sampled, sampling_compatible, F, readable> >,
+                     coords: vec2<f32>,
+                     dref: D,
+                     image_operands: u32,
+                     const_offset: vec2<Z>) -> vec4<f32>
+
+implicit(D: f32, F: texel_format)
+fn image_dref_gather(image: sampled_image< image<f32, dim_2d, non_depth, is_arrayed, single_sampled, sampling_compatible, F, readable> >,
+                     coords: vec3<f32>,
+                     dref: D,
+                     image_operands: u32) -> vec4<f32>
+
+implicit(D: f32, F: texel_format, A: access, Z: iu32)
+fn image_dref_gather(image: sampled_image< image<f32, dim_2d, non_depth, is_arrayed, single_sampled, sampling_compatible, F, readable> >,
+                     coords: vec3<f32>,
+                     dref: D,
+                     image_operands: u32,
+                     const_offset: vec2<Z>) -> vec4<f32>
+
+implicit(D: f32, F: texel_format)
+fn image_dref_gather(image: sampled_image< image<f32, dim_cube, non_depth, non_arrayed, single_sampled, sampling_compatible, F, readable> >,
+                     coords: vec3<f32>,
+                     dref: D,
+                     image_operands: u32) -> vec4<f32>
+
+implicit(D: f32, F: texel_format)
+fn image_dref_gather(image: sampled_image< image<f32, dim_cube, non_depth, is_arrayed, single_sampled, sampling_compatible, F, readable> >,
+                     coords: vec4<f32>,
+                     dref: D,
+                     image_operands: u32) -> vec4<f32>
+
+
 //////////////////////////////////////////////
 // Image Fetch
 //////////////////////////////////////////////
@@ -1344,6 +1384,63 @@ fn image_sample_dref_implicit_lod(image: sampled_image< image<f32, dim_cube, is_
                              dref: f32,
                              image_operands: u32) -> f32
 
+// Depth flag is not used in Vulkan, so accept the non-depth variants as well.
+implicit(F: texel_format, N: num)
+fn image_sample_dref_implicit_lod(image: sampled_image< image<f32, dim_2d, non_depth, non_arrayed, single_sampled, sampling_compatible, F, readable> >,
+                             coords: vec<N, f32>,
+                             dref: f32,
+                             image_operands: u32) -> f32
+
+implicit(Z: iu32, F: texel_format, N: num)
+fn image_sample_dref_implicit_lod(image: sampled_image< image<f32, dim_2d, non_depth, non_arrayed, single_sampled, sampling_compatible, F, readable> >,
+                             coords: vec<N, f32>,
+                             dref: f32,
+                             image_operands: u32,
+                             const_offset: vec2<Z>) -> f32
+
+implicit(F: texel_format)
+fn image_sample_dref_implicit_lod(image: sampled_image< image<f32, dim_2d, non_depth, is_arrayed, single_sampled, sampling_compatible, F, readable> >,
+                             coords: vec3<f32>,
+                             dref: f32,
+                             image_operands: u32) -> f32
+
+implicit(F: texel_format)
+fn image_sample_dref_implicit_lod(image: sampled_image< image<f32, dim_2d, non_depth, is_arrayed, single_sampled, sampling_compatible, F, readable> >,
+                             coords: vec4<f32>,
+                             dref: f32,
+                             image_operands: u32) -> f32
+
+implicit(Z: iu32, F: texel_format)
+fn image_sample_dref_implicit_lod(image: sampled_image< image<f32, dim_2d, non_depth, is_arrayed, single_sampled, sampling_compatible, F, readable> >,
+                             coords: vec3<f32>,
+                             dref: f32,
+                             image_operands: u32,
+                             const_offset: vec2<Z>) -> f32
+
+implicit(Z: iu32, F: texel_format)
+fn image_sample_dref_implicit_lod(image: sampled_image< image<f32, dim_2d, non_depth, is_arrayed, single_sampled, sampling_compatible, F, readable> >,
+                             coords: vec4<f32>,
+                             dref: f32,
+                             image_operands: u32,
+                             const_offset: vec2<Z>) -> f32
+
+implicit(F: texel_format)
+fn image_sample_dref_implicit_lod(image: sampled_image< image<f32, dim_cube, non_depth, non_arrayed, single_sampled, sampling_compatible, F, readable> >,
+                             coords: vec3<f32>,
+                             dref: f32,
+                             image_operands: u32) -> f32
+
+implicit(F: texel_format)
+fn image_sample_dref_implicit_lod(image: sampled_image< image<f32, dim_cube, non_depth, non_arrayed, single_sampled, sampling_compatible, F, readable> >,
+                             coords: vec4<f32>,
+                             dref: f32,
+                             image_operands: u32) -> f32
+
+implicit(F: texel_format)
+fn image_sample_dref_implicit_lod(image: sampled_image< image<f32, dim_cube, non_depth, is_arrayed, single_sampled, sampling_compatible, F, readable> >,
+                             coords: vec4<f32>,
+                             dref: f32,
+                             image_operands: u32) -> f32
 
 //////////////////////////////////////////////
 // Image Sample Dref Explicit Lod
@@ -1413,6 +1510,74 @@ fn image_sample_dref_explicit_lod(image: sampled_image< image<f32, dim_cube, is_
                              dref: f32,
                              image_operands: u32,
                              lod: f32) -> f32
+
+// Depth flag is not used in Vulkan, so accept the non-depth variants as well.
+implicit(F: texel_format, N: num)
+fn image_sample_dref_explicit_lod(image: sampled_image< image<f32, dim_2d, non_depth, non_arrayed, single_sampled, sampling_compatible, F, readable> >,
+                             coords: vec<N, f32>,
+                             dref: f32,
+                             image_operands: u32,
+                             lod: f32) -> f32
+
+implicit(Z: iu32, F: texel_format, N: num)
+fn image_sample_dref_explicit_lod(image: sampled_image< image<f32, dim_2d, non_depth, non_arrayed, single_sampled, sampling_compatible, F, readable> >,
+                             coords: vec<N, f32>,
+                             dref: f32,
+                             image_operands: u32,
+                             lod: f32,
+                             const_offset: vec2<Z>) -> f32
+
+implicit(F: texel_format)
+fn image_sample_dref_explicit_lod(image: sampled_image< image<f32, dim_2d, non_depth, is_arrayed, single_sampled, sampling_compatible, F, readable> >,
+                             coords: vec3<f32>,
+                             dref: f32,
+                             image_operands: u32,
+                             lod: f32) -> f32
+
+implicit(F: texel_format)
+fn image_sample_dref_explicit_lod(image: sampled_image< image<f32, dim_2d, non_depth, is_arrayed, single_sampled, sampling_compatible, F, readable> >,
+                             coords: vec4<f32>,
+                             dref: f32,
+                             image_operands: u32,
+                             lod: f32) -> f32
+
+implicit(Z: iu32, F: texel_format)
+fn image_sample_dref_explicit_lod(image: sampled_image< image<f32, dim_2d, non_depth, is_arrayed, single_sampled, sampling_compatible, F, readable> >,
+                             coords: vec3<f32>,
+                             dref: f32,
+                             image_operands: u32,
+                             lod: f32,
+                             const_offset: vec2<Z>) -> f32
+
+implicit(Z: iu32, F: texel_format)
+fn image_sample_dref_explicit_lod(image: sampled_image< image<f32, dim_2d, non_depth, is_arrayed, single_sampled, sampling_compatible, F, readable> >,
+                             coords: vec4<f32>,
+                             dref: f32,
+                             image_operands: u32,
+                             lod: f32,
+                             const_offset: vec2<Z>) -> f32
+
+implicit(F: texel_format)
+fn image_sample_dref_explicit_lod(image: sampled_image< image<f32, dim_cube, non_depth, non_arrayed, single_sampled, sampling_compatible, F, readable> >,
+                             coords: vec3<f32>,
+                             dref: f32,
+                             image_operands: u32,
+                             lod: f32) -> f32
+
+implicit(F: texel_format)
+fn image_sample_dref_explicit_lod(image: sampled_image< image<f32, dim_cube, non_depth, non_arrayed, single_sampled, sampling_compatible, F, readable> >,
+                             coords: vec4<f32>,
+                             dref: f32,
+                             image_operands: u32,
+                             lod: f32) -> f32
+
+implicit(F: texel_format)
+fn image_sample_dref_explicit_lod(image: sampled_image< image<f32, dim_cube, non_depth, is_arrayed, single_sampled, sampling_compatible, F, readable> >,
+                             coords: vec4<f32>,
+                             dref: f32,
+                             image_operands: u32,
+                             lod: f32) -> f32
+
 
 
 //////////////////////////////////////////////
