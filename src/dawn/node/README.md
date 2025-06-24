@@ -2,6 +2,13 @@
 
 Note: This code is currently WIP. There are a number of [known issues](#known-issues).
 
+## npm package
+
+There is an npm package named `webgpu` which has dawn.node prebuilt and ready to use.
+See the [npm webgpu](https://www.npmjs.com/package/webgpu). It's build from the
+repo at: https://github.com/dawn-gpu/node-webgpu. See that repo for publishing/updating
+details.
+
 ## Building
 
 ### System requirements
