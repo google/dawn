@@ -74,7 +74,7 @@ const (
 )
 
 // allOutputFormats holds all the supported outputFormats
-var allOutputFormats = []outputFormat{wgsl, spvasm, msl, hlslDXC, hlslDXCIR, hlslFXC, hlslFXCIR, glsl}
+var allOutputFormats = []outputFormat{wgsl, spvasm, msl, hlslDXC, hlslFXC, glsl}
 
 // The default non-flag arguments to the command
 var defaultArgs = []string{"test/tint"}
@@ -239,6 +239,10 @@ func run(fsReaderWriter oswrapper.FilesystemReaderWriter) error {
 			parsed, err := parseOutputFormat(strings.TrimSpace(f))
 			if err != nil {
 				return err
+			}
+			// TODO(421916945): Remove when CQ is updated to stop using these formats.
+			if parsed[0] == hlslDXCIR || parsed[0] == hlslFXCIR {
+				continue
 			}
 			formats = append(formats, parsed...)
 		}
@@ -699,16 +703,11 @@ func (j job) run(cfg runConfig, fsReaderWriter oswrapper.FilesystemReaderWriter,
 			return status{code: skip, timeTaken: 0}
 		}
 
-		useIr := j.format == hlslDXCIR || j.format == hlslFXCIR
-
+		// TODO(421916945): Remove when IR expectations have been moved.
 		switch j.format {
 		case hlslDXC:
-			expectedFilePath += "dxc.hlsl"
-		case hlslDXCIR:
 			expectedFilePath += "ir.dxc.hlsl"
 		case hlslFXC:
-			expectedFilePath += "fxc.hlsl"
-		case hlslFXCIR:
 			expectedFilePath += "ir.fxc.hlsl"
 		default:
 			expectedFilePath += string(j.format)
@@ -758,10 +757,6 @@ func (j job) run(cfg runConfig, fsReaderWriter oswrapper.FilesystemReaderWriter,
 			"--print-hash",
 		}
 
-		if useIr {
-			args = append(args, "--use-ir")
-		}
-
 		if cfg.useIrReader {
 			args = append(args, "--use-ir-reader")
 		}
@@ -782,12 +777,12 @@ func (j job) run(cfg runConfig, fsReaderWriter oswrapper.FilesystemReaderWriter,
 		case spvasm, glsl:
 			args = append(args, "--validate") // spirv-val and glslang are statically linked, always available
 			validate = true
-		case hlslDXC, hlslDXCIR:
+		case hlslDXC:
 			if cfg.dxcPath != "" {
 				args = append(args, "--dxc", cfg.dxcPath)
 				validate = true
 			}
-		case hlslFXC, hlslFXCIR:
+		case hlslFXC:
 			if cfg.fxcPath != "" {
 				args = append(args, "--fxc", cfg.fxcPath)
 				validate = true

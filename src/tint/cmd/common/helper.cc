@@ -111,7 +111,7 @@ void PrintBindings(tint::inspector::Inspector& inspector, const std::string& ep_
 
 #if TINT_BUILD_SPV_READER
 tint::Program ReadSpirv(const std::vector<uint32_t>& data, const LoadProgramOptions& opts) {
-    if (opts.use_ir) {
+    if (opts.use_ir_reader) {
 #if TINT_BUILD_WGSL_WRITER
         // Parse the SPIR-V binary to a core Tint IR module.
         auto result = tint::spirv::reader::ReadIR(data, opts.spirv_reader_options);

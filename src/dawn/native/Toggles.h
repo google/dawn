@@ -131,6 +131,7 @@ enum class Toggle {
     ResolveMultipleAttachmentInSeparatePasses,
     D3D12CreateNotZeroedHeap,
     D3D12DontUseNotZeroedHeapFlagOnTexturesAsCommitedResources,
+    // TODO(421916945): Remove when CQ no longer uses this flag.
     UseTintIR,
     D3DDisableIEEEStrictness,
     PolyFillPacked4x8DotProduct,
