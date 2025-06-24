@@ -150,6 +150,7 @@ struct State {
                         builtin_worklist.Push(builtin);
                         break;
                     case spirv::BuiltinFn::kImageSampleDrefImplicitLod:
+                    case spirv::BuiltinFn::kImageSampleDrefExplicitLod:
                         depth_worklist.Push(builtin);
                         break;
                     default:
@@ -167,6 +168,7 @@ struct State {
         for (auto* builtin : depth_worklist) {
             switch (builtin->Func()) {
                 case spirv::BuiltinFn::kImageSampleDrefImplicitLod:
+                case spirv::BuiltinFn::kImageSampleDrefExplicitLod:
                     ImageSampleDref(builtin);
                     break;
                 default:
@@ -624,12 +626,19 @@ struct State {
             ProcessCoords(tex_ty, false, coords, new_args);
             new_args.Push(depth);
 
+            auto fn = core::BuiltinFn::kTextureSampleCompare;
+            if (HasLod(operand_mask)) {
+                fn = core::BuiltinFn::kTextureSampleCompareLevel;
+                idx++;  // Skip over the index
+
+                // Metal only supports Lod = 0 for comparison sampling without derivatives. So, WGSL
+                // doesn't take a level value, drop the LOD param.
+            }
             if (HasConstOffset(operand_mask)) {
                 ProcessOffset(args[idx++], new_args);
             }
 
-            b.CallWithResult(call->DetachResult(), core::BuiltinFn::kTextureSampleCompare,
-                             new_args);
+            b.CallWithResult(call->DetachResult(), fn, new_args);
         });
 
         call->Destroy();

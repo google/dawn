@@ -1379,6 +1379,7 @@ TEST_P(SamplerComparisonTest, Handle) {
 %float_3 = OpConstant %float 3
 %float_4 = OpConstant %float 4
 %float_5 = OpConstant %float 5
+%float_null = OpConstantNull %float
 %coords2 = OpConstantComposite %v2float %float_1 %float_2
 %coords3 = OpConstantComposite %v3float %float_1 %float_2 %float_3
 %coords4 = OpConstantComposite %v4float %float_1 %float_2 %float_3 %float_4
@@ -1469,27 +1470,40 @@ INSTANTIATE_TEST_SUITE_P(
     %7:f32 = swizzle vec3<f32>(1.0f, 2.0f, 3.0f), z
     %8:i32 = convert %7
     %9:f32 = textureSampleCompare %5, %4, %6, %8, 1.0f, vec2<i32>(10i, 11i))",
+        },
+        ImgData{
+            .name = "2D vec2 depth",
+            .spirv_type = "%float 2D 1 0 0 1 Unknown",
+            .spirv_fn = "OpImageSampleDrefImplicitLod %float %sampled_image %coords2 %float_1",
+            .wgsl_type = "texture_depth_2d",
+            .wgsl_fn = R"(
+    %6:f32 = textureSampleCompare %5, %4, vec2<f32>(1.0f, 2.0f), 1.0f)",
         }));
 
 INSTANTIATE_TEST_SUITE_P(
-    DISABLED_SpirvReaderTest_ImageSampleDrefExplicitLod,
+    SpirvReaderTest_ImageSampleDrefExplicitLod,
     SamplerComparisonTest,
     ::testing::Values(
         ImgData{
             .name = "2D",
             .spirv_type = "%float 2D 1 0 0 1 Unknown",
-            .spirv_fn = "OpImageSampleDrefExplicitLod %float %sampled_image %coords2 "
-                        "%depth Lod %float_0",
+            .spirv_fn =
+                "OpImageSampleDrefExplicitLod %float %sampled_image %coords2 %depth Lod %float_0",
             .wgsl_type = "texture_depth_2d",
-            .wgsl_fn = "textureSampleCompareLevel %4, %5, vec2<f32>(1.0f, 2.0f), 1.0f",
+            .wgsl_fn = R"(
+    %6:f32 = textureSampleCompareLevel %5, %4, vec2<f32>(1.0f, 2.0f), 1.0f)",
         },
         ImgData{
             .name = "2D array",
             .spirv_type = "%float 2D 1 1 0 1 Unknown",
-            .spirv_fn = "OpImageSampleDrefExplicitLod %float %sampled_image %coords3 "
-                        "%depth Lod %float_0",
+            .spirv_fn =
+                "OpImageSampleDrefExplicitLod %float %sampled_image %coords3 %depth Lod %float_0",
             .wgsl_type = "texture_depth_2d_array",
-            .wgsl_fn = "textureSampleCompareLevel %4, %5, vec2<f32>(1.0f, 2.0f), 3i, 1.0f",
+            .wgsl_fn = R"(
+    %6:vec2<f32> = swizzle vec3<f32>(1.0f, 2.0f, 3.0f), xy
+    %7:f32 = swizzle vec3<f32>(1.0f, 2.0f, 3.0f), z
+    %8:i32 = convert %7
+    %9:f32 = textureSampleCompareLevel %5, %4, %6, %8, 1.0f)",
         },
         ImgData{
             .name = "2D ConstOffset",
@@ -1497,8 +1511,8 @@ INSTANTIATE_TEST_SUITE_P(
             .spirv_fn = "OpImageSampleDrefExplicitLod %float %sampled_image %coords2 %depth "
                         "Lod|ConstOffset %float_0 %offset2i",
             .wgsl_type = "texture_depth_2d",
-            .wgsl_fn = "textureSampleCompareLevel %4, %5, vec2<f32>(1.0f, 2.0f), 1.0f, "
-                       "vec2<i32>(10i, 11i)",
+            .wgsl_fn = R"(
+    %6:f32 = textureSampleCompareLevel %5, %4, vec2<f32>(1.0f, 2.0f), 1.0f, vec2<i32>(10i, 11i))",
         },
         ImgData{
             .name = "2D array ConstOffset",
@@ -1506,26 +1520,44 @@ INSTANTIATE_TEST_SUITE_P(
             .spirv_fn = "OpImageSampleDrefExplicitLod %float %sampled_image %coords3 %depth "
                         "Lod|ConstOffset %float_0 %offset2i",
             .wgsl_type = "texture_depth_2d_array",
-            .wgsl_fn = "textureSampleCompareLevel %4, %5, vec2<f32>(1.0f, 2.0f), 3i, 1.0f, "
-                       "vec2<i32>(10i, 11i)",
+            .wgsl_fn = R"(
+    %6:vec2<f32> = swizzle vec3<f32>(1.0f, 2.0f, 3.0f), xy
+    %7:f32 = swizzle vec3<f32>(1.0f, 2.0f, 3.0f), z
+    %8:i32 = convert %7
+    %9:f32 = textureSampleCompareLevel %5, %4, %6, %8, 1.0f, vec2<i32>(10i, 11i))",
         },
         ImgData{
             .name = "Cube",
             .spirv_type = "%float Cube 1 0 0 1 Unknown",
-            .spirv_fn = "OpImageSampleDrefExplicitLod %float %sampled_image %coords3 "
-                        "%depth Lod %float_0",
+            .spirv_fn =
+                "OpImageSampleDrefExplicitLod %float %sampled_image %coords3 %depth Lod %float_0",
             .wgsl_type = "texture_depth_cube",
-            .wgsl_fn = "textureSampleCompareLevel %4, %5, vec3<f32>(1.0f, 2.0f, 3.0f), 1.0f",
+            .wgsl_fn = R"(
+    %6:f32 = textureSampleCompareLevel %5, %4, vec3<f32>(1.0f, 2.0f, 3.0f), 1.0f)",
         },
         ImgData{
             .name = "Cube array",
             .spirv_type = "%float Cube 1 1 0 1 Unknown",
-            .spirv_fn = "OpImageSampleDrefExplicitLod %float %sampled_image %coords4 "
-                        "%depth Lod %float_0",
+            .spirv_fn =
+                "OpImageSampleDrefExplicitLod %float %sampled_image %coords4 %depth Lod %float_0",
             .wgsl_type = "texture_depth_cube_array",
-            .wgsl_fn = "textureSampleCompareLevel %4, %5, vec3<f32>(1.0f, 2.0f, 3.0f), "
-                       "4i, 1.0f",
-        }));
+            .wgsl_fn = R"(
+    %6:vec3<f32> = swizzle vec4<f32>(1.0f, 2.0f, 3.0f, 4.0f), xyz
+    %7:f32 = swizzle vec4<f32>(1.0f, 2.0f, 3.0f, 4.0f), w
+    %8:i32 = convert %7
+    %9:f32 = textureSampleCompareLevel %5, %4, %6, %8, 1.0f)",
+        },
+        ImgData{
+            .name = "2d vec2 depth lod",
+            .spirv_type = "%float 2D 1 0 0 1 Unknown",
+            .spirv_fn =
+                "OpImageSampleDrefExplicitLod %float %sampled_image %coords2 %float_1 Lod %float_0",
+            .wgsl_type = "texture_depth_2d",
+            .wgsl_fn = R"(
+    %6:f32 = textureSampleCompareLevel %5, %4, vec2<f32>(1.0f, 2.0f), 1.0f)",
+        }
+
+        ));
 
 INSTANTIATE_TEST_SUITE_P(
     DISABLED_SpirvReaderTest_ImageSampleProjDrefImplicitLod,
@@ -1568,6 +1600,34 @@ INSTANTIATE_TEST_SUITE_P(
             .wgsl_type = "texture_depth_2d",
             .wgsl_fn = "textureSampleCompareLevel %4, %5, vec3<f32>(1.0f, 2.0f, 3.0f), 1.0f, 0.0f, "
                        "vec2<i32>(10i, 11i)",
+        }));
+
+// Metal requires comparison sampling with explicit Level-of-detail to use Lod 0.  The SPIR-V reader
+// requires the operand to be parsed as a constant 0 value. SPIR-V validation requires the Lod
+// parameter to be a floating point value for non-fetch operations. So only test float values.
+INSTANTIATE_TEST_SUITE_P(
+    SpirvReaderTest_ImageSampleDrefExplicitLod_CheckForLod0,
+    SamplerComparisonTest,
+    ::testing::Values(
+        ImgData{
+            .name = "2d 0.0",
+            .spirv_type = "%float 2D 1 0 0 1 Unknown",
+            .spirv_fn =
+                "OpImageSampleDrefExplicitLod %float %sampled_image %coords4 %float_1 Lod %float_0",
+            .wgsl_type = "texture_depth_2d",
+            .wgsl_fn = R"(
+    %6:vec2<f32> = swizzle vec4<f32>(1.0f, 2.0f, 3.0f, 4.0f), xy
+    %7:f32 = textureSampleCompareLevel %5, %4, %6, 1.0f)",
+        },
+        ImgData{
+            .name = "2D null",
+            .spirv_type = "%float 2D 1 0 0 1 Unknown",
+            .spirv_fn = "OpImageSampleDrefExplicitLod %float %sampled_image %coords4 %float_1 Lod "
+                        "%float_null",
+            .wgsl_type = "texture_depth_2d",
+            .wgsl_fn = R"(
+    %6:vec2<f32> = swizzle vec4<f32>(1.0f, 2.0f, 3.0f, 4.0f), xy
+    %7:f32 = textureSampleCompareLevel %5, %4, %6, 1.0f)",
         }));
 
 // This test shows the use of a sampled image used with both regular
@@ -2900,7 +2960,7 @@ INSTANTIATE_TEST_SUITE_P(
 // In SPIR-V, sampling and dref sampling operations use floating point coordinates.  Prove that we
 // preserve floating point-ness. Test across all such instructions.
 INSTANTIATE_TEST_SUITE_P(
-    DISABLED_SpirvReaderTest_PreserveFloatCoords_NonArrayed,
+    SpirvReaderTest_PreserveFloatCoords_NonArrayed,
     SampledImageCoordsTest,
     ::testing::Values(
         // Scalar cases
@@ -2908,48 +2968,35 @@ INSTANTIATE_TEST_SUITE_P(
             .name = "1D",
             .spirv_type = "%float 1D 0 0 0 1 Unknown",
             .spirv_fn = "%result = OpImageSampleImplicitLod %v4float %sampled_image %float_1",
-            .wgsl_type = "",
-            .wgsl_fn = "f1",
+            .wgsl_type = "texture_1d<f32>",
+            .wgsl_fn = R"(
+    %6:vec4<f32> = textureSample %5, %4, 1.0f)",
         },
         ImgData{
             .name = "1D lod",
             .spirv_type = "%float 1D 0 0 0 1 Unknown",
             .spirv_fn =
                 "%result = OpImageSampleExplicitLod %v4float %sampled_image %float_1 Lod %float_1",
-            .wgsl_type = "",
-            .wgsl_fn = "f1",
+            .wgsl_type = "texture_1d<f32>",
+            .wgsl_fn = R"(
+    %6:vec4<f32> = textureSampleLevel %5, %4, 1.0f, 1.0f)",
         },
         ImgData{
             .name = "2D vec2",
             .spirv_type = "%float 2D 0 0 0 1 Unknown",
             .spirv_fn = "%result = OpImageSampleImplicitLod %v4float %sampled_image %vf12",
-            .wgsl_type = "",
-            .wgsl_fn = "vf12",
+            .wgsl_type = "texture_2d<f32>",
+            .wgsl_fn = R"(
+    %6:vec4<f32> = textureSample %5, %4, vec2<f32>(1.0f, 2.0f))",
         },
         ImgData{
             .name = "2D vec2 lod",
             .spirv_type = "%float 2D 0 0 0 1 Unknown",
             .spirv_fn =
                 "%result = OpImageSampleExplicitLod %v4float %sampled_image %vf12 Lod %float_1",
-            .wgsl_type = "",
-            .wgsl_fn = "vf12",
-        },
-        ImgData{
-            .name = "2D vec2 depth",
-            .spirv_type = "%float 2D 1 0 0 1 Unknown",
-            .spirv_fn =
-                "%result = OpImageSampleDrefImplicitLod %float %sampled_image %vf12 %float_1",
-            .wgsl_type = "",
-            .wgsl_fn = "vf12",
-        },
-        ImgData{
-            .name = "2d vec2 depth lod",
-            .spirv_type = "%float 2D 1 0 0 1 Unknown",
-            .spirv_fn =
-                "%result = OpImageSampleDrefExplicitLod %float %sampled_image %vf12 %float_1 "
-                "Lod %float_0",
-            .wgsl_type = "",
-            .wgsl_fn = "vf12",
+            .wgsl_type = "texture_2d<f32>",
+            .wgsl_fn = R"(
+    %6:vec4<f32> = textureSampleLevel %5, %4, vec2<f32>(1.0f, 2.0f), 1.0f)",
         }));
 
 // In SPIR-V, sampling and dref sampling operations use floating point coordinates.  Prove that we
@@ -2992,30 +3039,6 @@ INSTANTIATE_TEST_SUITE_P(
                 "%float_0",
             .wgsl_type = "",
             .wgsl_fn = "vf123.xy",
-        }));
-
-// Metal requires comparison sampling with explicit Level-of-detail to use Lod 0.  The SPIR-V reader
-// requires the operand to be parsed as a constant 0 value. SPIR-V validation requires the Lod
-// parameter to be a floating point value for non-fetch operations. So only test float values.
-INSTANTIATE_TEST_SUITE_P(
-    DISABLED_SpirvReaderTest_ImageSampleDrefExplicitLod_CheckForLod0,
-    SampledImageCoordsTest,
-    ::testing::Values(
-        ImgData{
-            .name = "2d 0.0",
-            .spirv_type = "%float 2D 1 0 0 1 Unknown",
-            .spirv_fn = "%result = OpImageSampleDrefExplicitLod %float %sampled_image "
-                        "%vf1234 %float_1 Lod %float_0",
-            .wgsl_type = "",
-            .wgsl_fn = "vf1234.xy",
-        },
-        ImgData{
-            .name = "2D null",
-            .spirv_type = "%float 2D 1 0 0 1 Unknown",
-            .spirv_fn = "%result = OpImageSampleDrefExplicitLod %float %sampled_image "
-                        "%vf1234 %float_1 Lod %float_null",
-            .wgsl_type = "",
-            .wgsl_fn = "vf1234.xy",
         }));
 
 // This is like the previous test, but for Projection sampling.

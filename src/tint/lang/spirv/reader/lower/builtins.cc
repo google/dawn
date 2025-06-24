@@ -248,6 +248,7 @@ struct State {
                 case spirv::BuiltinFn::kImageSampleProjImplicitLod:
                 case spirv::BuiltinFn::kImageSampleProjExplicitLod:
                 case spirv::BuiltinFn::kImageSampleDrefImplicitLod:
+                case spirv::BuiltinFn::kImageSampleDrefExplicitLod:
                 case spirv::BuiltinFn::kImageWrite:
                     // Ignore image methods, they'll be handled by the `Texture` transform.
                     break;
