@@ -34,10 +34,9 @@
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/core/type/input_attachment.h"
-#include "src/tint/lang/hlsl/writer/ast_printer/ast_printer.h"
+#include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/hlsl/writer/printer/printer.h"
 #include "src/tint/lang/hlsl/writer/raise/raise.h"
-#include "src/tint/lang/wgsl/ast/pipeline_stage.h"
 
 namespace tint::hlsl::writer {
 
@@ -100,40 +99,6 @@ Result<Output> Generate(core::ir::Module& ir, const Options& options) {
     }
 
     return Print(ir, options);
-}
-
-Result<Output> Generate(const Program& program, const Options& options) {
-    if (!program.IsValid()) {
-        return Failure{program.Diagnostics().Str()};
-    }
-
-    // Sanitize the program.
-    auto sanitized_result = Sanitize(program, options);
-    if (!sanitized_result.program.IsValid()) {
-        return Failure{sanitized_result.program.Diagnostics().Str()};
-    }
-
-    // Generate the HLSL code.
-    auto impl = std::make_unique<ASTPrinter>(sanitized_result.program);
-    if (!impl->Generate()) {
-        return Failure{impl->Diagnostics().Str()};
-    }
-
-    Output output;
-    output.hlsl = impl->Result();
-
-    // Collect the list of entry points in the sanitized program.
-    for (auto* func : sanitized_result.program.AST().Functions()) {
-        if (func->IsEntryPoint()) {
-            auto name = func->name->symbol.Name();
-            output.entry_points.push_back({name, func->PipelineStage()});
-        }
-    }
-
-    output.used_array_length_from_uniform_indices =
-        std::move(sanitized_result.used_array_length_from_uniform_indices);
-
-    return output;
 }
 
 }  // namespace tint::hlsl::writer
