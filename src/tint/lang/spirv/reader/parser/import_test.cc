@@ -102,6 +102,31 @@ TEST_F(SpirvParserTest, Import_NonSemantic_IgnoredImport) {
 )");
 }
 
+TEST_F(SpirvParserTest, Import_VulkanMemoryModel_IgnoredImport) {
+    EXPECT_IR_SPV(R"(
+               OpCapability Shader
+               OpExtension "SPV_KHR_vulkan_memory_model"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+    %void_fn = OpTypeFunction %void
+
+       %main = OpFunction %void None %void_fn
+ %main_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+)",
+                  R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    ret
+  }
+}
+)",
+                  SPV_ENV_UNIVERSAL_1_3);
+}
+
 // TODO(dsinclair): internal compiler error: TINT_UNIMPLEMENTED unhandled SPIR-V type: [uint32]
 TEST_F(SpirvParserTest, DISABLED_Import_NonSemantic_IgnoredExtInsts) {
     // This is the clspv-compiled output of this OpenCL C:
