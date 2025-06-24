@@ -36,7 +36,6 @@
     X(kUnrestrictedPointerParameters, UnrestrictedPointerParameters)               \
     X(kSizedBindingArray, SizedBindingArray)                                       \
     X(kTexelBuffers, TexelBuffers)                                                 \
-    X(kTextureSampleLevel1D, TextureSampleLevel1d)                                 \
     /* ----------------- entries below are only for testing  ------------------ */ \
     X(kChromiumTestingUnimplemented, ChromiumTestingUnimplemented)                 \
     X(kChromiumTestingUnsafeExperimental, ChromiumTestingUnsafeExperimental)       \

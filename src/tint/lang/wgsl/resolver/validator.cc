@@ -2064,22 +2064,6 @@ bool Validator::RequiredFeaturesForBuiltinFn(const sem::Call* call) const {
         }
     }
 
-    if (builtin->Fn() == wgsl::BuiltinFn::kTextureSampleLevel) {
-        auto* tex = call->Arguments()[0];
-        auto* tex_type = tex->Type()->As<core::type::Texture>();
-
-        const auto feature = wgsl::LanguageFeature::kTextureSampleLevel1D;
-        if (tex_type->Dim() == core::type::TextureDimension::k1d &&
-            !allowed_features_.features.count(feature)) {
-            AddError(call->Declaration()->source)
-                << "built-in function " << style::Function(builtin->Fn()) << " requires the "
-                << style::Code(wgsl::ToString(feature))
-                << " language feature for 1d textures, which is not allowed in the current "
-                   "environment";
-            return false;
-        }
-    }
-
     const auto feature = builtin->RequiredLanguageFeature();
     if (feature != wgsl::LanguageFeature::kUndefined) {
         if (!allowed_features_.features.count(feature)) {

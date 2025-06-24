@@ -78,7 +78,6 @@ enum WGSLLanguageFeatureName {
     "pointer_composite_access",
     "sized_binding_array",
     "texel_buffers",
-    "texture_sample_level_1d",
 };
 
 dictionary GPUBindGroupLayoutEntry {

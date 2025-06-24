@@ -460,7 +460,6 @@
 "texture_depth_multisampled_2d"
 "texture_external"
 "texture_multisampled_2d"
-"texture_sample_level_1d"
 "texture_storage_1d"
 "texture_storage_2d"
 "texture_storage_2d_array"

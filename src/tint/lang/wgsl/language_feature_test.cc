@@ -69,7 +69,6 @@ static constexpr Case kValidCases[] = {
      LanguageFeature::kReadonlyAndReadwriteStorageTextures},
     {"sized_binding_array", LanguageFeature::kSizedBindingArray},
     {"texel_buffers", LanguageFeature::kTexelBuffers},
-    {"texture_sample_level_1d", LanguageFeature::kTextureSampleLevel1D},
     {"unrestricted_pointer_parameters", LanguageFeature::kUnrestrictedPointerParameters},
 };
 
@@ -104,12 +103,9 @@ static constexpr Case kInvalidCases[] = {
     {"teool_bffer", LanguageFeature::kUndefined},
     {"exezz_uffers", LanguageFeature::kUndefined},
     {"texel_bii11eps", LanguageFeature::kUndefined},
-    {"textXXre_sample_level_1d", LanguageFeature::kUndefined},
-    {"texnnure99samIIle_level_155", LanguageFeature::kUndefined},
-    {"texaSSurre_sample_lHHvel_Yd", LanguageFeature::kUndefined},
-    {"unkkestrictd_poiter_parameter", LanguageFeature::kUndefined},
-    {"jnrestricted_pRinter_paramtgrs", LanguageFeature::kUndefined},
-    {"unrestrbted_ponter_parameters", LanguageFeature::kUndefined},
+    {"unrestricted_pointer_parametXXrs", LanguageFeature::kUndefined},
+    {"unrestri55tIId_pointer_paramnnt99rs", LanguageFeature::kUndefined},
+    {"unraastrSScted_pointerHHrparameteYs", LanguageFeature::kUndefined},
 };
 
 using LanguageFeatureParseTest = testing::TestWithParam<Case>;
