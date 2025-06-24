@@ -226,81 +226,81 @@ implicit(N: num, T: f32_f16) fn dot(vec<N, T>, vec<N, T>) -> T
 //////////////////////////////////////////////
 // Image Dref Gather
 //////////////////////////////////////////////
-implicit(D: f32, F: texel_format)
+implicit(F: texel_format)
 fn image_dref_gather(image: sampled_image< image<f32, dim_2d, is_depth, non_arrayed, single_sampled, sampling_compatible, F, readable> >,
                      coords: vec2<f32>,
-                     dref: D,
+                     dref: f32,
                      image_operands: u32) -> vec4<f32>
 
-implicit(D: f32, F: texel_format, A: access, Z: iu32)
+implicit(F: texel_format, A: access, Z: iu32)
 fn image_dref_gather(image: sampled_image< image<f32, dim_2d, is_depth, non_arrayed, single_sampled, sampling_compatible, F, readable> >,
                      coords: vec2<f32>,
-                     dref: D,
+                     dref: f32,
                      image_operands: u32,
                      const_offset: vec2<Z>) -> vec4<f32>
 
-implicit(D: f32, F: texel_format)
+implicit(F: texel_format)
 fn image_dref_gather(image: sampled_image< image<f32, dim_2d, is_depth, is_arrayed, single_sampled, sampling_compatible, F, readable> >,
                      coords: vec3<f32>,
-                     dref: D,
+                     dref: f32,
                      image_operands: u32) -> vec4<f32>
 
-implicit(D: f32, F: texel_format, A: access, Z: iu32)
+implicit(F: texel_format, A: access, Z: iu32)
 fn image_dref_gather(image: sampled_image< image<f32, dim_2d, is_depth, is_arrayed, single_sampled, sampling_compatible, F, readable> >,
                      coords: vec3<f32>,
-                     dref: D,
+                     dref: f32,
                      image_operands: u32,
                      const_offset: vec2<Z>) -> vec4<f32>
 
-implicit(D: f32, F: texel_format)
+implicit(F: texel_format)
 fn image_dref_gather(image: sampled_image< image<f32, dim_cube, is_depth, non_arrayed, single_sampled, sampling_compatible, F, readable> >,
                      coords: vec3<f32>,
-                     dref: D,
+                     dref: f32,
                      image_operands: u32) -> vec4<f32>
 
-implicit(D: f32, F: texel_format)
+implicit(F: texel_format)
 fn image_dref_gather(image: sampled_image< image<f32, dim_cube, is_depth, is_arrayed, single_sampled, sampling_compatible, F, readable> >,
                      coords: vec4<f32>,
-                     dref: D,
+                     dref: f32,
                      image_operands: u32) -> vec4<f32>
 
 // Depth flag is not used in Vulkan, so accept the non-depth variants as well.
-implicit(D: f32, F: texel_format)
+implicit(F: texel_format)
 fn image_dref_gather(image: sampled_image< image<f32, dim_2d, non_depth, non_arrayed, single_sampled, sampling_compatible, F, readable> >,
                      coords: vec2<f32>,
-                     dref: D,
+                     dref: f32,
                      image_operands: u32) -> vec4<f32>
 
-implicit(D: f32, F: texel_format, A: access, Z: iu32)
+implicit(F: texel_format, A: access, Z: iu32)
 fn image_dref_gather(image: sampled_image< image<f32, dim_2d, non_depth, non_arrayed, single_sampled, sampling_compatible, F, readable> >,
                      coords: vec2<f32>,
-                     dref: D,
+                     dref: f32,
                      image_operands: u32,
                      const_offset: vec2<Z>) -> vec4<f32>
 
-implicit(D: f32, F: texel_format)
+implicit(F: texel_format)
 fn image_dref_gather(image: sampled_image< image<f32, dim_2d, non_depth, is_arrayed, single_sampled, sampling_compatible, F, readable> >,
                      coords: vec3<f32>,
-                     dref: D,
+                     dref: f32,
                      image_operands: u32) -> vec4<f32>
 
-implicit(D: f32, F: texel_format, A: access, Z: iu32)
+implicit(F: texel_format, A: access, Z: iu32)
 fn image_dref_gather(image: sampled_image< image<f32, dim_2d, non_depth, is_arrayed, single_sampled, sampling_compatible, F, readable> >,
                      coords: vec3<f32>,
-                     dref: D,
+                     dref: f32,
                      image_operands: u32,
                      const_offset: vec2<Z>) -> vec4<f32>
 
-implicit(D: f32, F: texel_format)
+implicit(F: texel_format)
 fn image_dref_gather(image: sampled_image< image<f32, dim_cube, non_depth, non_arrayed, single_sampled, sampling_compatible, F, readable> >,
                      coords: vec3<f32>,
-                     dref: D,
+                     dref: f32,
                      image_operands: u32) -> vec4<f32>
 
-implicit(D: f32, F: texel_format)
+implicit(F: texel_format)
 fn image_dref_gather(image: sampled_image< image<f32, dim_cube, non_depth, is_arrayed, single_sampled, sampling_compatible, F, readable> >,
                      coords: vec4<f32>,
-                     dref: D,
+                     dref: f32,
                      image_operands: u32) -> vec4<f32>
 
 

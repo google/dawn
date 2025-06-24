@@ -149,6 +149,7 @@ struct State {
                     case spirv::BuiltinFn::kImageWrite:
                         builtin_worklist.Push(builtin);
                         break;
+                    case spirv::BuiltinFn::kImageDrefGather:
                     case spirv::BuiltinFn::kImageSampleDrefImplicitLod:
                     case spirv::BuiltinFn::kImageSampleDrefExplicitLod:
                     case spirv::BuiltinFn::kImageSampleProjDrefImplicitLod:
@@ -174,6 +175,9 @@ struct State {
                 case spirv::BuiltinFn::kImageSampleProjDrefImplicitLod:
                 case spirv::BuiltinFn::kImageSampleProjDrefExplicitLod:
                     ImageSampleDref(builtin);
+                    break;
+                case spirv::BuiltinFn::kImageDrefGather:
+                    ImageGatherDref(builtin);
                     break;
                 default:
                     TINT_UNREACHABLE();
@@ -568,6 +572,40 @@ struct State {
                 res = b.Construct(call->Result()->Type(), res, z, z, z)->Result();
             }
             call->Result()->ReplaceAllUsesWith(res);
+        });
+        call->Destroy();
+    }
+
+    void ImageGatherDref(spirv::ir::BuiltinCall* call) {
+        const auto& args = call->Args();
+
+        b.InsertBefore(call, [&] {
+            core::ir::Value* tex = nullptr;
+            core::ir::Value* sampler = nullptr;
+            std::tie(tex, sampler) = GetTextureSampler(args[0]);
+
+            textures_to_convert_to_depth_.Add(tex);
+            samplers_to_convert_to_comparison_.Add(sampler);
+
+            auto* coords = args[1];
+            auto* dref = args[2];
+
+            uint32_t operand_mask = GetOperandMask(args[3]);
+
+            Vector<core::ir::Value*, 5> new_args;
+
+            new_args.Push(tex);
+            new_args.Push(sampler);
+
+            ProcessCoords(tex->Type(), false, coords, new_args);
+            new_args.Push(dref);
+
+            if (HasConstOffset(operand_mask)) {
+                ProcessOffset(args[4], new_args);
+            }
+
+            b.CallWithResult(call->DetachResult(), core::BuiltinFn::kTextureGatherCompare,
+                             new_args);
         });
         call->Destroy();
     }

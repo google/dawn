@@ -239,6 +239,7 @@ struct State {
                 case spirv::BuiltinFn::kImageRead:
                 case spirv::BuiltinFn::kImageFetch:
                 case spirv::BuiltinFn::kImageGather:
+                case spirv::BuiltinFn::kImageDrefGather:
                 case spirv::BuiltinFn::kImageQueryLevels:
                 case spirv::BuiltinFn::kImageQuerySamples:
                 case spirv::BuiltinFn::kImageQuerySize:
