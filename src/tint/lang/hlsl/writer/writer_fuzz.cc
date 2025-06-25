@@ -33,6 +33,7 @@
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/hlsl/validate/validate.h"
 #include "src/tint/lang/hlsl/writer/helpers/generate_bindings.h"
+#include "src/tint/lang/hlsl/writer/printer/printer.h"
 #include "src/tint/lang/hlsl/writer/writer.h"
 #include "src/tint/utils/command/command.h"
 
@@ -133,5 +134,4 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
 
 TINT_IR_MODULE_FUZZER(tint::hlsl::writer::IRFuzzer,
                       tint::core::ir::Capabilities{},
-                      tint::core::ir::Capabilities{
-                          tint::core::ir::Capability::kAllowModuleScopeLets});
+                      tint::hlsl::writer::kPrinterCapabilities);

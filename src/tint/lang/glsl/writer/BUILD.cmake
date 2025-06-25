@@ -162,7 +162,6 @@ tint_target_add_dependencies(tint_lang_glsl_writer_fuzz fuzz
   tint_cmd_fuzz_ir_fuzz
   tint_lang_core
   tint_lang_core_constant
-  tint_lang_core_intrinsic
   tint_lang_core_ir
   tint_lang_core_ir_transform
   tint_lang_core_type
@@ -188,6 +187,7 @@ if(TINT_BUILD_GLSL_WRITER)
     tint_lang_glsl_writer
     tint_lang_glsl_writer_common
     tint_lang_glsl_writer_helpers
+    tint_lang_glsl_writer_printer
   )
 endif(TINT_BUILD_GLSL_WRITER)
 

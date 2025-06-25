@@ -139,6 +139,7 @@ if (tint_build_hlsl_writer) {
       "${tint_src_dir}/lang/core/type",
       "${tint_src_dir}/lang/hlsl/writer/common",
       "${tint_src_dir}/lang/hlsl/writer/helpers",
+      "${tint_src_dir}/lang/hlsl/writer/printer",
       "${tint_src_dir}/lang/wgsl/ast",
       "${tint_src_dir}/utils",
       "${tint_src_dir}/utils/bytes",

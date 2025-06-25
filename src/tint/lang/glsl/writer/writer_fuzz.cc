@@ -28,14 +28,13 @@
 #include <iostream>
 
 #include "src/tint/cmd/fuzz/ir/fuzz.h"
-#include "src/tint/lang/core/ir/core_builtin_call.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/transform/single_entry_point.h"
 #include "src/tint/lang/core/ir/var.h"
-#include "src/tint/lang/core/type/input_attachment.h"
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/glsl/writer/helpers/generate_bindings.h"
+#include "src/tint/lang/glsl/writer/printer/printer.h"
 #include "src/tint/lang/glsl/writer/writer.h"
 
 namespace tint::glsl::writer {
@@ -148,5 +147,4 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module, const fuzz::ir::Context& 
 
 TINT_IR_MODULE_FUZZER(tint::glsl::writer::IRFuzzer,
                       tint::core::ir::Capabilities{},
-                      tint::core::ir::Capabilities{
-                          tint::core::ir::Capability::kAllowHandleVarsWithoutBindings});
+                      tint::glsl::writer::kPrinterCapabilities);

@@ -31,6 +31,7 @@
 #include "src/tint/lang/core/ir/disassembler.h"
 #include "src/tint/lang/spirv/validate/validate.h"
 #include "src/tint/lang/spirv/writer/helpers/generate_bindings.h"
+#include "src/tint/lang/spirv/writer/printer/printer.h"
 
 namespace tint::spirv::writer {
 namespace {
@@ -65,5 +66,4 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module, const fuzz::ir::Context&,
 
 TINT_IR_MODULE_FUZZER(tint::spirv::writer::IRFuzzer,
                       tint::core::ir::Capabilities{},
-                      tint::core::ir::Capabilities{
-                          tint::core::ir::Capability::kAllowAnyInputAttachmentIndexType});
+                      tint::spirv::writer::kPrinterCapabilities);

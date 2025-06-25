@@ -156,6 +156,7 @@ tint_target_add_dependencies(tint_lang_hlsl_writer_fuzz fuzz
   tint_lang_core_type
   tint_lang_hlsl_writer_common
   tint_lang_hlsl_writer_helpers
+  tint_lang_hlsl_writer_printer
   tint_lang_wgsl_ast
   tint_utils
   tint_utils_bytes

@@ -175,14 +175,7 @@ class Printer : public tint::TextGenerator {
 
     /// @returns the generated HLSL shader
     tint::Result<Output> Generate() {
-        core::ir::Capabilities capabilities{
-            core::ir::Capability::kAllowModuleScopeLets,
-            core::ir::Capability::kAllowVectorElementPointer,
-            core::ir::Capability::kAllowClipDistancesOnF32,
-            core::ir::Capability::kAllowDuplicateBindings,
-            core::ir::Capability::kAllowNonCoreTypes,
-        };
-        auto valid = core::ir::ValidateAndDumpIfNeeded(ir_, "hlsl.Printer", capabilities);
+        auto valid = core::ir::ValidateAndDumpIfNeeded(ir_, "hlsl.Printer", kPrinterCapabilities);
         if (valid != Success) {
             return std::move(valid.Failure());
         }

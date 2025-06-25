@@ -155,6 +155,7 @@ if (tint_build_msl_writer) {
         "${tint_src_dir}/lang/msl/writer",
         "${tint_src_dir}/lang/msl/writer/common",
         "${tint_src_dir}/lang/msl/writer/helpers",
+        "${tint_src_dir}/lang/msl/writer/printer",
       ]
     }
   }

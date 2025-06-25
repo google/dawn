@@ -205,6 +205,7 @@ if(TINT_BUILD_SPV_WRITER)
     tint_lang_spirv_writer
     tint_lang_spirv_writer_common
     tint_lang_spirv_writer_helpers
+    tint_lang_spirv_writer_printer
   )
 endif(TINT_BUILD_SPV_WRITER)
 

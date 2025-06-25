@@ -126,10 +126,7 @@ class Printer : public tint::TextGenerator {
 
     /// @returns the generated GLSL shader
     tint::Result<Output> Generate() {
-        auto valid = core::ir::ValidateAndDumpIfNeeded(
-            ir_, "glsl.Printer",
-            core::ir::Capabilities{core::ir::Capability::kAllowHandleVarsWithoutBindings,
-                                   core::ir::Capability::kAllowDuplicateBindings});
+        auto valid = core::ir::ValidateAndDumpIfNeeded(ir_, "glsl.Printer", kPrinterCapabilities);
         if (valid != Success) {
             return std::move(valid.Failure());
         }

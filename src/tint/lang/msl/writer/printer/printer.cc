@@ -124,18 +124,7 @@ class Printer : public tint::TextGenerator {
 
     /// @returns the generated MSL shader
     tint::Result<Output> Generate() {
-        auto valid = core::ir::ValidateAndDumpIfNeeded(
-            ir_, "msl.Printer",
-            core::ir::Capabilities{
-                core::ir::Capability::kAllow8BitIntegers,
-                core::ir::Capability::kAllow64BitIntegers,
-                core::ir::Capability::kAllowPointersAndHandlesInStructures,
-                core::ir::Capability::kAllowPrivateVarsInFunctions,
-                core::ir::Capability::kAllowAnyLetType,
-                core::ir::Capability::kAllowModuleScopeLets,
-                core::ir::Capability::kAllowWorkspacePointerInputToEntryPoint,
-                core::ir::Capability::kAllowNonCoreTypes,
-            });
+        auto valid = core::ir::ValidateAndDumpIfNeeded(ir_, "msl.Printer", kPrinterCapabilities);
         if (valid != Success) {
             return std::move(valid.Failure());
         }
