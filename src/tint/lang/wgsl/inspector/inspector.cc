@@ -570,7 +570,8 @@ const Inspector::EntryPointTextureMetadata& Inspector::ComputeTextureMetadata(
                 // textureLoad uses textureNumLevels to clamp the level, unless the texture type
                 // doesn't support mipmapping.
                 uses_num_levels = !texture_type->IsAnyOf<core::type::MultisampledTexture,
-                                                         core::type::DepthMultisampledTexture>();
+                                                         core::type::DepthMultisampledTexture,
+                                                         core::type::ExternalTexture>();
                 metadata.has_texture_load_with_depth_texture |=
                     texture_type
                         ->IsAnyOf<core::type::DepthTexture, core::type::DepthMultisampledTexture>();

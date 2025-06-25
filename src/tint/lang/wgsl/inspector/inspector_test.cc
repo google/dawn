@@ -3808,12 +3808,14 @@ TEST_F(InspectorTextureTest, TextureLoadMultipleInEP) {
 @group(2) @binding(3) var tex1: texture_2d<f32>;
 @group(1) @binding(4) var tex2: texture_multisampled_2d<f32>;
 @group(0) @binding(1) var tex3: texture_2d<f32>;
+@group(0) @binding(8) var tex4: texture_external;
 
 @compute @workgroup_size(1)
 fn main() {
   let num1 = textureLoad(tex1, vec2(0, 0), 0);
   let num2 = textureLoad(tex2, vec2(0, 0), 0);
   let num3 = textureLoad(tex3, vec2(0, 0), 0);
+  let num4 = textureLoad(tex4, vec2(0, 0));
 })";
 
     Inspector& inspector = Initialize(shader);

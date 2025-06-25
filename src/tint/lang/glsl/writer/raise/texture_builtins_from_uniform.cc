@@ -57,7 +57,7 @@ struct State {
     core::ir::Var* texture_uniform_data_ = nullptr;
 
     /// Map from binding point to index into uniform structure
-    Hashmap<BindingPoint, uint32_t, 2> binding_point_to_uniform_idx_{};
+    Hashmap<binding::BindingInfo, uint32_t, 2> binding_point_to_uniform_index_{};
 
     /// Maps from a function parameter to the replacement function parameter for texture uniform
     /// data
@@ -104,7 +104,7 @@ struct State {
         members.Reserve(count);
         for (uint32_t i = 0; i < count; ++i) {
             members.Push({ir.symbols.New("tint_builtin_value_" + std::to_string(i)), ty.u32()});
-            binding_point_to_uniform_idx_.Add(cfg.ubo_bindingpoint_ordering[i], i);
+            binding_point_to_uniform_index_.Add(cfg.ubo_bindingpoint_ordering[i], i);
         }
 
         auto* strct =
@@ -112,77 +112,32 @@ struct State {
 
         b.Append(ir.root_block, [&] {
             texture_uniform_data_ = b.Var(ty.ptr(uniform, strct, read));
-            texture_uniform_data_->SetBindingPoint(cfg.ubo_binding.group, cfg.ubo_binding.binding);
+            texture_uniform_data_->SetBindingPoint(0, cfg.ubo_binding.binding);
         });
     }
 
     // Note, assumes is called inside an insert block
-    core::ir::Access* GetUniformValue(const BindingPoint& binding) {
-        TINT_ASSERT(binding_point_to_uniform_idx_.Contains(binding));
-
-        uint32_t idx = *binding_point_to_uniform_idx_.Get(binding);
-        return b.Access(ty.ptr<uniform, u32, read>(), texture_uniform_data_, u32(idx));
+    core::ir::Value* FindSource(core::ir::Value* val) {
+        return tint::Switch(
+            val->As<core::ir::InstructionResult>()->Instruction(),
+            [&](core::ir::Var* v) { return v->Result(); },
+            [&](core::ir::Load* l) { return FindSource(l->From()); }, TINT_ICE_ON_NO_MATCH);
     }
 
-    core::ir::Value* FindSource(core::ir::Value* tex) {
-        core::ir::Value* res = nullptr;
-        while (res == nullptr) {
-            tint::Switch(
-                tex,
-                [&](core::ir::InstructionResult* r) {
-                    tint::Switch(
-                        r->Instruction(),                              //
-                        [&](core::ir::Var* v) { res = v->Result(); },  //
-                        [&](core::ir::Load* l) { tex = l->From(); },   //
-                        TINT_ICE_ON_NO_MATCH);
-                },
-                [&](core::ir::FunctionParam* fp) { res = fp; },
-
-                TINT_ICE_ON_NO_MATCH);
-        }
-        return res;
-    }
-
+    // Note, assumes is called inside an insert block
     core::ir::Value* GetAccessFromUniform(core::ir::Value* arg) {
         auto* src = FindSource(arg);
-        return tint::Switch(
-            src,
-            [&](core::ir::InstructionResult* r) -> core::ir::Value* {
-                if (auto* v = r->Instruction()->As<core::ir::Var>()) {
-                    auto* access = GetUniformValue(v->BindingPoint().value());
-                    return b.Load(access)->Result();
+        auto* inst = src->As<core::ir::InstructionResult>();
+        TINT_ASSERT(inst != nullptr);
+        auto* var = src->As<core::ir::InstructionResult>()->Instruction()->As<core::ir::Var>();
+        TINT_ASSERT(var != nullptr);
 
-                } else {
-                    TINT_UNREACHABLE() << "invalid instruction type";
-                }
-            },
-            [&](core::ir::FunctionParam* fp) { return AppendFunctionParam(fp); },
-            TINT_ICE_ON_NO_MATCH);
-    }
+        binding::BindingInfo binding = {var->BindingPoint()->binding};
+        TINT_ASSERT(binding_point_to_uniform_index_.Contains(binding));
+        uint32_t idx = *binding_point_to_uniform_index_.Get(binding);
 
-    core::ir::Value* AppendFunctionParam(core::ir::FunctionParam* fp) {
-        return texture_param_replacement_.GetOrAdd(fp, [&] {
-            auto* new_param = b.FunctionParam("tint_tex_value", ty.u32());
-            fp->Function()->AppendParam(new_param);
-            texture_param_replacement_.Add(fp, new_param);
-
-            AddUniformArgToCallSites(fp->Function(), fp->Index());
-            return new_param;
-        });
-    }
-
-    void AddUniformArgToCallSites(core::ir::Function* func, uint32_t tex_idx) {
-        for (auto usage : func->UsagesUnsorted()) {
-            auto* call = usage->instruction->As<core::ir::UserCall>();
-            if (!call) {
-                continue;
-            }
-
-            b.InsertBefore(call, [&] {
-                auto* val = GetAccessFromUniform(call->Args()[tex_idx]);
-                call->AppendArg(val);
-            });
-        }
+        auto* value_ptr = b.Access(ty.ptr<uniform, u32, read>(), texture_uniform_data_, u32(idx));
+        return b.Load(value_ptr)->Result();
     }
 
     void TextureFromUniform(core::ir::BuiltinCall* call) {
@@ -217,7 +172,8 @@ struct State {
 
 Result<SuccessType> TextureBuiltinsFromUniform(core::ir::Module& ir,
                                                const TextureBuiltinsFromUniformOptions& cfg) {
-    auto result = ValidateAndDumpIfNeeded(ir, "glsl.TextureBuiltinsFromUniform");
+    auto result = ValidateAndDumpIfNeeded(ir, "glsl.TextureBuiltinsFromUniform",
+                                          kTextureBuiltinFromUniformCapabilities);
     if (result != Success) {
         return result.Failure();
     }

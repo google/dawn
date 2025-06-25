@@ -10,11 +10,6 @@ struct Flip {
   uint value;
 };
 
-struct TintTextureUniformData {
-  uint tint_builtin_value_0;
-  uint tint_builtin_value_1;
-};
-
 layout(binding = 1, std140)
 uniform params_block_1_ubo {
   Params inner;
@@ -26,8 +21,8 @@ uniform flip_block_1_ubo {
 } v_1;
 shared vec3 tile[4][256];
 layout(binding = 0, std140)
-uniform tint_symbol_1_ubo {
-  TintTextureUniformData inner;
+uniform TintTextureUniformData_1_ubo {
+  uint tint_builtin_value_0;
 } v_2;
 uniform highp sampler2D inputTex_samp;
 uint tint_div_u32(uint lhs, uint rhs) {
@@ -51,7 +46,7 @@ void main_inner(uvec3 WorkGroupID, uvec3 LocalInvocationID, uint tint_local_inde
   }
   barrier();
   uint filterOffset = tint_div_u32((v.inner.filterDim - 1u), 2u);
-  uint v_5 = (v_2.inner.tint_builtin_value_0 - 1u);
+  uint v_5 = (v_2.tint_builtin_value_0 - 1u);
   uvec2 dims = uvec2(textureSize(inputTex_samp, int(min(uint(0), v_5))));
   uvec2 v_6 = ((WorkGroupID.xy * uvec2(v.inner.blockDim, 4u)) + (LocalInvocationID.xy * uvec2(4u, 1u)));
   uvec2 baseIndex = (v_6 - uvec2(filterOffset, 0u));

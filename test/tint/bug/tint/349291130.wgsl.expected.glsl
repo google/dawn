@@ -1,19 +1,14 @@
 #version 310 es
 
-
-struct TintTextureUniformData {
-  uint tint_builtin_value_0;
-};
-
 layout(binding = 0, std140)
-uniform tint_symbol_1_ubo {
-  TintTextureUniformData inner;
+uniform TintTextureUniformData_1_ubo {
+  uint tint_builtin_value_0;
 } v;
 layout(local_size_x = 6, local_size_y = 1, local_size_z = 1) in;
 void main() {
   {
     uvec2 tint_loop_idx = uvec2(4294967295u);
-    uint level = v.inner.tint_builtin_value_0;
+    uint level = v.tint_builtin_value_0;
     while(true) {
       if (all(equal(tint_loop_idx, uvec2(0u)))) {
         break;

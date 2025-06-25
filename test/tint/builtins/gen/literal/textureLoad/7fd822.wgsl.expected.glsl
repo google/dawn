@@ -5,22 +5,17 @@
 precision highp float;
 precision highp int;
 
-
-struct TintTextureUniformData {
-  uint tint_builtin_value_0;
-};
-
 layout(binding = 0, std430)
 buffer f_prevent_dce_block_ssbo {
   float inner;
 } v;
 layout(binding = 0, std140)
-uniform f_tint_symbol_ubo {
-  TintTextureUniformData inner;
+uniform f_TintTextureUniformData_ubo {
+  uint tint_builtin_value_0;
 } v_1;
 uniform highp sampler2D f_arg_0;
 float textureLoad_7fd822() {
-  uint v_2 = (v_1.inner.tint_builtin_value_0 - 1u);
+  uint v_2 = (v_1.tint_builtin_value_0 - 1u);
   uint v_3 = min(uint(1), v_2);
   ivec2 v_4 = ivec2(min(uvec2(1u), (uvec2(textureSize(f_arg_0, int(v_3))) - uvec2(1u))));
   float res = texelFetch(f_arg_0, v_4, int(v_3)).x;
@@ -34,22 +29,17 @@ void main() {
 //
 #version 310 es
 
-
-struct TintTextureUniformData {
-  uint tint_builtin_value_0;
-};
-
 layout(binding = 0, std430)
 buffer prevent_dce_block_1_ssbo {
   float inner;
 } v;
 layout(binding = 0, std140)
-uniform tint_symbol_1_ubo {
-  TintTextureUniformData inner;
+uniform TintTextureUniformData_1_ubo {
+  uint tint_builtin_value_0;
 } v_1;
 uniform highp sampler2D arg_0;
 float textureLoad_7fd822() {
-  uint v_2 = (v_1.inner.tint_builtin_value_0 - 1u);
+  uint v_2 = (v_1.tint_builtin_value_0 - 1u);
   uint v_3 = min(uint(1), v_2);
   ivec2 v_4 = ivec2(min(uvec2(1u), (uvec2(textureSize(arg_0, int(v_3))) - uvec2(1u))));
   float res = texelFetch(arg_0, v_4, int(v_3)).x;
@@ -65,23 +55,19 @@ void main() {
 #version 310 es
 
 
-struct TintTextureUniformData {
-  uint tint_builtin_value_0;
-};
-
 struct VertexOutput {
   vec4 pos;
   float prevent_dce;
 };
 
 layout(binding = 0, std140)
-uniform v_tint_symbol_ubo {
-  TintTextureUniformData inner;
+uniform v_TintTextureUniformData_ubo {
+  uint tint_builtin_value_0;
 } v;
 uniform highp sampler2D v_arg_0;
 layout(location = 0) flat out float tint_interstage_location0;
 float textureLoad_7fd822() {
-  uint v_1 = (v.inner.tint_builtin_value_0 - 1u);
+  uint v_1 = (v.tint_builtin_value_0 - 1u);
   uint v_2 = min(uint(1), v_1);
   ivec2 v_3 = ivec2(min(uvec2(1u), (uvec2(textureSize(v_arg_0, int(v_2))) - uvec2(1u))));
   float res = texelFetch(v_arg_0, v_3, int(v_2)).x;

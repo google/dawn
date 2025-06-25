@@ -1,17 +1,12 @@
 #version 310 es
 
-
-struct TintTextureUniformData {
-  uint tint_builtin_value_0;
-};
-
 layout(binding = 3, std430)
 buffer Result_1_ssbo {
   float values[];
 } result;
 layout(binding = 0, std140)
-uniform tint_symbol_1_ubo {
-  TintTextureUniformData inner;
+uniform TintTextureUniformData_1_ubo {
+  uint tint_builtin_value_0;
 } v;
 uniform highp sampler2DArray myTexture;
 void main_inner(uvec3 GlobalInvocationID) {
@@ -20,7 +15,7 @@ void main_inner(uvec3 GlobalInvocationID) {
   ivec2 v_1 = ivec2(GlobalInvocationID.xy);
   uint v_2 = (uint(textureSize(myTexture, 0).z) - 1u);
   uint v_3 = min(uint(0), v_2);
-  uint v_4 = (v.inner.tint_builtin_value_0 - 1u);
+  uint v_4 = (v.tint_builtin_value_0 - 1u);
   uint v_5 = min(uint(0), v_4);
   uvec2 v_6 = (uvec2(textureSize(myTexture, int(v_5)).xy) - uvec2(1u));
   ivec2 v_7 = ivec2(min(uvec2(v_1), v_6));

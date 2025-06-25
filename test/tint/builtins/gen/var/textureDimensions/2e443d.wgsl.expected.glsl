@@ -5,23 +5,18 @@
 precision highp float;
 precision highp int;
 
-
-struct TintTextureUniformData {
-  uint tint_builtin_value_0;
-};
-
 layout(binding = 0, std430)
 buffer f_prevent_dce_block_ssbo {
   uvec2 inner;
 } v;
 layout(binding = 0, std140)
-uniform f_tint_symbol_ubo {
-  TintTextureUniformData inner;
+uniform f_TintTextureUniformData_ubo {
+  uint tint_builtin_value_0;
 } v_1;
 uniform highp isampler2D f_arg_0;
 uvec2 textureDimensions_2e443d() {
   int arg_1 = 1;
-  uint v_2 = (v_1.inner.tint_builtin_value_0 - 1u);
+  uint v_2 = (v_1.tint_builtin_value_0 - 1u);
   uvec2 res = uvec2(textureSize(f_arg_0, int(min(uint(arg_1), v_2))));
   return res;
 }
@@ -33,23 +28,18 @@ void main() {
 //
 #version 310 es
 
-
-struct TintTextureUniformData {
-  uint tint_builtin_value_0;
-};
-
 layout(binding = 0, std430)
 buffer prevent_dce_block_1_ssbo {
   uvec2 inner;
 } v;
 layout(binding = 0, std140)
-uniform tint_symbol_1_ubo {
-  TintTextureUniformData inner;
+uniform TintTextureUniformData_1_ubo {
+  uint tint_builtin_value_0;
 } v_1;
 uniform highp isampler2D arg_0;
 uvec2 textureDimensions_2e443d() {
   int arg_1 = 1;
-  uint v_2 = (v_1.inner.tint_builtin_value_0 - 1u);
+  uint v_2 = (v_1.tint_builtin_value_0 - 1u);
   uvec2 res = uvec2(textureSize(arg_0, int(min(uint(arg_1), v_2))));
   return res;
 }
@@ -63,24 +53,20 @@ void main() {
 #version 310 es
 
 
-struct TintTextureUniformData {
-  uint tint_builtin_value_0;
-};
-
 struct VertexOutput {
   vec4 pos;
   uvec2 prevent_dce;
 };
 
 layout(binding = 0, std140)
-uniform v_tint_symbol_ubo {
-  TintTextureUniformData inner;
+uniform v_TintTextureUniformData_ubo {
+  uint tint_builtin_value_0;
 } v;
 uniform highp isampler2D v_arg_0;
 layout(location = 0) flat out uvec2 tint_interstage_location0;
 uvec2 textureDimensions_2e443d() {
   int arg_1 = 1;
-  uint v_1 = (v.inner.tint_builtin_value_0 - 1u);
+  uint v_1 = (v.tint_builtin_value_0 - 1u);
   uvec2 res = uvec2(textureSize(v_arg_0, int(min(uint(arg_1), v_1))));
   return res;
 }

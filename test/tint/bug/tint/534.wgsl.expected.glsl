@@ -8,11 +8,6 @@ struct Uniforms {
   uint channelCount;
 };
 
-struct TintTextureUniformData {
-  uint tint_builtin_value_0;
-  uint tint_builtin_value_1;
-};
-
 layout(binding = 2, std430)
 buffer OutputBuf_1_ssbo {
   uint result[];
@@ -22,8 +17,9 @@ uniform uniforms_block_1_ubo {
   Uniforms inner;
 } v_1;
 layout(binding = 0, std140)
-uniform tint_symbol_1_ubo {
-  TintTextureUniformData inner;
+uniform TintTextureUniformData_1_ubo {
+  uint tint_builtin_value_0;
+  uint tint_builtin_value_1;
 } v_2;
 uniform highp sampler2D src;
 uniform highp sampler2D dst;
@@ -41,12 +37,12 @@ void main_inner(uvec3 GlobalInvocationID) {
     srcTexCoord.y = ((size.y - dstTexCoord.y) - 1u);
   }
   uvec2 v_3 = srcTexCoord;
-  uint v_4 = (v_2.inner.tint_builtin_value_0 - 1u);
+  uint v_4 = (v_2.tint_builtin_value_0 - 1u);
   uint v_5 = min(uint(0), v_4);
   ivec2 v_6 = ivec2(min(v_3, (uvec2(textureSize(src, int(v_5))) - uvec2(1u))));
   vec4 srcColor = texelFetch(src, v_6, int(v_5));
   uvec2 v_7 = dstTexCoord;
-  uint v_8 = (v_2.inner.tint_builtin_value_1 - 1u);
+  uint v_8 = (v_2.tint_builtin_value_1 - 1u);
   uint v_9 = min(uint(0), v_8);
   ivec2 v_10 = ivec2(min(v_7, (uvec2(textureSize(dst, int(v_9))) - uvec2(1u))));
   vec4 dstColor = texelFetch(dst, v_10, int(v_9));

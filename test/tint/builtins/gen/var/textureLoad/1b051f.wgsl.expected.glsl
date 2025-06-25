@@ -5,18 +5,13 @@
 precision highp float;
 precision highp int;
 
-
-struct TintTextureUniformData {
-  uint tint_builtin_value_0;
-};
-
 layout(binding = 0, std430)
 buffer f_prevent_dce_block_ssbo {
   uvec4 inner;
 } v;
 layout(binding = 0, std140)
-uniform f_tint_symbol_ubo {
-  TintTextureUniformData inner;
+uniform f_TintTextureUniformData_ubo {
+  uint tint_builtin_value_0;
 } v_1;
 uniform highp usampler2DArray f_arg_0;
 uvec4 textureLoad_1b051f() {
@@ -27,7 +22,7 @@ uvec4 textureLoad_1b051f() {
   uint v_3 = arg_2;
   uint v_4 = arg_3;
   uint v_5 = min(v_3, (uint(textureSize(f_arg_0, 0).z) - 1u));
-  uint v_6 = min(v_4, (v_1.inner.tint_builtin_value_0 - 1u));
+  uint v_6 = min(v_4, (v_1.tint_builtin_value_0 - 1u));
   uvec2 v_7 = (uvec2(textureSize(f_arg_0, int(v_6)).xy) - uvec2(1u));
   ivec2 v_8 = ivec2(min(uvec2(v_2), v_7));
   ivec3 v_9 = ivec3(v_8, int(v_5));
@@ -42,18 +37,13 @@ void main() {
 //
 #version 310 es
 
-
-struct TintTextureUniformData {
-  uint tint_builtin_value_0;
-};
-
 layout(binding = 0, std430)
 buffer prevent_dce_block_1_ssbo {
   uvec4 inner;
 } v;
 layout(binding = 0, std140)
-uniform tint_symbol_1_ubo {
-  TintTextureUniformData inner;
+uniform TintTextureUniformData_1_ubo {
+  uint tint_builtin_value_0;
 } v_1;
 uniform highp usampler2DArray arg_0;
 uvec4 textureLoad_1b051f() {
@@ -64,7 +54,7 @@ uvec4 textureLoad_1b051f() {
   uint v_3 = arg_2;
   uint v_4 = arg_3;
   uint v_5 = min(v_3, (uint(textureSize(arg_0, 0).z) - 1u));
-  uint v_6 = min(v_4, (v_1.inner.tint_builtin_value_0 - 1u));
+  uint v_6 = min(v_4, (v_1.tint_builtin_value_0 - 1u));
   uvec2 v_7 = (uvec2(textureSize(arg_0, int(v_6)).xy) - uvec2(1u));
   ivec2 v_8 = ivec2(min(uvec2(v_2), v_7));
   ivec3 v_9 = ivec3(v_8, int(v_5));
@@ -81,18 +71,14 @@ void main() {
 #version 310 es
 
 
-struct TintTextureUniformData {
-  uint tint_builtin_value_0;
-};
-
 struct VertexOutput {
   vec4 pos;
   uvec4 prevent_dce;
 };
 
 layout(binding = 0, std140)
-uniform v_tint_symbol_ubo {
-  TintTextureUniformData inner;
+uniform v_TintTextureUniformData_ubo {
+  uint tint_builtin_value_0;
 } v;
 uniform highp usampler2DArray v_arg_0;
 layout(location = 0) flat out uvec4 tint_interstage_location0;
@@ -104,7 +90,7 @@ uvec4 textureLoad_1b051f() {
   uint v_2 = arg_2;
   uint v_3 = arg_3;
   uint v_4 = min(v_2, (uint(textureSize(v_arg_0, 0).z) - 1u));
-  uint v_5 = min(v_3, (v.inner.tint_builtin_value_0 - 1u));
+  uint v_5 = min(v_3, (v.tint_builtin_value_0 - 1u));
   uvec2 v_6 = (uvec2(textureSize(v_arg_0, int(v_5)).xy) - uvec2(1u));
   ivec2 v_7 = ivec2(min(uvec2(v_1), v_6));
   ivec3 v_8 = ivec3(v_7, int(v_4));

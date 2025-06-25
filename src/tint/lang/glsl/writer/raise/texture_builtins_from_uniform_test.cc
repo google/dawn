@@ -97,7 +97,7 @@ $B1: {  # root
 }
 )";
 
-    TextureBuiltinsFromUniformOptions cfg = {{0, 30u}, std::vector<BindingPoint>{{0, 0}}};
+    TextureBuiltinsFromUniformOptions cfg = {{30u}, {{0}}};
     Run(TextureBuiltinsFromUniform, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -151,7 +151,7 @@ $B1: {  # root
 }
 )";
 
-    TextureBuiltinsFromUniformOptions cfg = {{0, 30u}, std::vector<BindingPoint>{{0, 0}}};
+    TextureBuiltinsFromUniformOptions cfg = {{30u}, {{0}}};
     Run(TextureBuiltinsFromUniform, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -211,7 +211,7 @@ $B1: {  # root
 }
 )";
 
-    TextureBuiltinsFromUniformOptions cfg = {{0, 30u}, std::vector<BindingPoint>{{0, 0}}};
+    TextureBuiltinsFromUniformOptions cfg = {{30u}, {{0}}};
     Run(TextureBuiltinsFromUniform, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -271,7 +271,7 @@ $B1: {  # root
 }
 )";
 
-    TextureBuiltinsFromUniformOptions cfg = {{0, 30u}, std::vector<BindingPoint>{{0, 0}}};
+    TextureBuiltinsFromUniformOptions cfg = {{30u}, {{0}}};
     Run(TextureBuiltinsFromUniform, cfg);
     EXPECT_EQ(expect, str());
 }

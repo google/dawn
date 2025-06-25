@@ -107,11 +107,6 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         return immediate_data_layout.Failure();
     }
 
-    // Note, this comes before binding remapper as Dawn inserts _pre-remapping_ binding information.
-    // So, in order to move this later we'd need to update Dawn to send the _post-remapping_ data.
-    RUN_TRANSFORM(raise::TextureBuiltinsFromUniform, module,
-                  options.bindings.texture_builtins_from_uniform);
-
     // Note, this must come after Robustness as it may add `arrayLength`.
     // This also needs to come before binding remapper as Dawn inserts _pre-remapping_ binding
     // information. So, in order to move this later we'd need to update Dawn to send the
@@ -175,6 +170,12 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         dva_config.transform_handle = true;
         RUN_TRANSFORM(core::ir::transform::DirectVariableAccess, module, dva_config);
     }
+
+    // Note, this must come after remapping as it uses post-remapping indices for its options.
+    // Note, this must come after DirectVariableAccess as it doesn't handle tracing through function
+    // calls.
+    RUN_TRANSFORM(raise::TextureBuiltinsFromUniform, module,
+                  options.bindings.texture_builtins_from_uniform);
 
     if (!options.disable_workgroup_init) {
         RUN_TRANSFORM(core::ir::transform::ZeroInitWorkgroupMemory, module);
