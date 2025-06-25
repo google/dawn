@@ -697,12 +697,11 @@ func (j job) run(cfg runConfig, fsReaderWriter oswrapper.FilesystemReaderWriter,
 			return status{code: skip, timeTaken: 0}
 		}
 
-		// TODO(421916945): Remove when IR expectations have been moved.
 		switch j.format {
 		case hlslDXC:
-			expectedFilePath += "ir.dxc.hlsl"
+			expectedFilePath += "dxc.hlsl"
 		case hlslFXC:
-			expectedFilePath += "ir.fxc.hlsl"
+			expectedFilePath += "fxc.hlsl"
 		default:
 			expectedFilePath += string(j.format)
 		}
