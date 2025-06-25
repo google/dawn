@@ -128,7 +128,6 @@ cc_library(
     "exit_switch.h",
     "function.h",
     "function_param.h",
-    "ice.h",
     "if.h",
     "instruction.h",
     "instruction_result.h",
