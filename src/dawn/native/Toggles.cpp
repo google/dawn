@@ -532,9 +532,6 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "with CreateCommittedResource() as a workaround of some driver issues on Intel Gen9 and "
       "Gen11 GPUs.",
       "https://crbug.com/dawn/484", ToggleStage::Device}},
-    {Toggle::UseTintIR,
-     {"use_tint_ir", "Enable the use of the Tint IR for backend codegen.",
-      "https://crbug.com/tint/1718", ToggleStage::Device}},
     {Toggle::D3DDisableIEEEStrictness,
      {"d3d_disable_ieee_strictness",
       "Disable IEEE strictness when compiling shaders. It is otherwise enabled by default to "

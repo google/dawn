@@ -99,12 +99,6 @@ bool Platform::IsFeatureEnabled(Features feature) {
 #else
             return false;
 #endif
-        case Features::kWebGPUUseTintIR:
-#if defined(DAWN_OS_CHROMEOS)
-            return true;
-#else
-            return false;
-#endif
         case Features::kWebGPUUseVulkanMemoryModel:
             return false;
         case Features::kWebGPUEnableRangeAnalysisForRobustness:

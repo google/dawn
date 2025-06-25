@@ -293,10 +293,6 @@ If not provided, will be inferred from output filename extension:
                                              Parameter{"name"});
     TINT_DEFER(opts->output_file = output.value.value_or(""));
 
-    // TODO(421916945): Remove when CQ no longer uses this flag
-    [[maybe_unused]] auto& use_ir = options.Add<BoolOption>(
-        "use-ir", "Use the IR for writers and transforms when possible", Default{false});
-
     auto& use_ir_reader = options.Add<BoolOption>(
         "use-ir-reader", "Use the IR for the SPIR-V reader", Default{false});
     TINT_DEFER(opts->use_ir_reader = *use_ir_reader.value);

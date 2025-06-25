@@ -477,8 +477,8 @@ TEST_P(SizedBindingArrayTests, BindingArrayOfSampledTexturesPassedAsArgument) {
 }
 
 DAWN_INSTANTIATE_TEST(SizedBindingArrayTests,
-                      D3D11Backend({"use_tint_ir"}, {}),
-                      D3D12Backend({"use_tint_ir"}, {}),
+                      D3D11Backend(),
+                      D3D12Backend(),
                       MetalBackend(),
                       VulkanBackend());
 
