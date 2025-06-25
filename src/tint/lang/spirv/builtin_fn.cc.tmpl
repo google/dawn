@@ -43,6 +43,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kImageSampleDrefExplicitLod:
         case BuiltinFn::kImageSampleProjDrefImplicitLod:
         case BuiltinFn::kImageSampleProjDrefExplicitLod:
+        case BuiltinFn::kImage:
         case BuiltinFn::kSampledImage:
         case BuiltinFn::kCooperativeMatrixLoad:
             return core::ir::Instruction::Accesses{core::ir::Instruction::Access::kLoad};

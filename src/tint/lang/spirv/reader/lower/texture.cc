@@ -135,6 +135,7 @@ struct State {
                     case spirv::BuiltinFn::kSampledImage:
                         SampledImage(builtin);
                         break;
+                    case spirv::BuiltinFn::kImage:
                     case spirv::BuiltinFn::kImageRead:
                     case spirv::BuiltinFn::kImageFetch:
                     case spirv::BuiltinFn::kImageGather:
@@ -194,6 +195,9 @@ struct State {
 
         for (auto* builtin : builtin_worklist) {
             switch (builtin->Func()) {
+                case spirv::BuiltinFn::kImage:
+                    Image(builtin);
+                    break;
                 case spirv::BuiltinFn::kImageRead:
                     ImageFetch(builtin);
                     break;
@@ -517,6 +521,16 @@ struct State {
     }
     bool HasSample(uint32_t mask) {
         return (mask & static_cast<uint32_t>(ImageOperandsMask::kSample)) != 0;
+    }
+
+    void Image(spirv::ir::BuiltinCall* call) {
+        const auto& args = call->Args();
+        core::ir::Value* tex = nullptr;
+        [[maybe_unused]] core::ir::Value* sampler = nullptr;
+        std::tie(tex, sampler) = GetTextureSampler(args[0]);
+
+        call->Result()->ReplaceAllUsesWith(tex);
+        call->Destroy();
     }
 
     void ImageFetch(spirv::ir::BuiltinCall* call) {

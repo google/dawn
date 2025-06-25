@@ -1742,6 +1742,9 @@ class Parser {
                 case spv::Op::OpSampledImage:
                     EmitSampledImage(inst);
                     break;
+                case spv::Op::OpImage:
+                    EmitImage(inst);
+                    break;
                 case spv::Op::OpImageFetch:
                     EmitImageFetchOrRead(inst, spirv::BuiltinFn::kImageFetch);
                     break;
@@ -2119,6 +2122,14 @@ class Parser {
             TINT_ASSERT(blk == current_block_);
             AddValue(inst.result_id(), p);
         }
+    }
+
+    void EmitImage(const spvtools::opt::Instruction& inst) {
+        auto* si = Value(inst.GetSingleWordInOperand(0));
+        Emit(b_.CallExplicit<spirv::ir::BuiltinCall>(
+                 Type(inst.type_id()), spirv::BuiltinFn::kImage,
+                 Vector{si->Type()->As<spirv::type::SampledImage>()->Image()}, Args(inst, 2)),
+             inst.result_id());
     }
 
     void EmitSampledImage(const spvtools::opt::Instruction& inst) {

@@ -82,6 +82,7 @@ enum class BuiltinFn : uint8_t {
     kImageSampleDrefImplicitLod,
     kImageSampleDrefExplicitLod,
     kImageWrite,
+    kImage,
     kSampledImage,
     kMatrixTimesMatrix,
     kMatrixTimesScalar,

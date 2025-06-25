@@ -1515,6 +1515,9 @@ class Printer {
             case spirv::BuiltinFn::kNormalize:
                 ext_inst(GLSLstd450Normalize);
                 break;
+            case spirv::BuiltinFn::kImage:
+                op = spv::Op::OpImage;
+                break;
             case spirv::BuiltinFn::kSampledImage:
                 op = spv::Op::OpSampledImage;
                 break;

@@ -238,6 +238,67 @@ $B1: {  # root
 )");
 }
 
+TEST_F(SpirvReaderTest, Image) {
+    EXPECT_IR(R"(
+           OpCapability Shader
+           OpCapability ImageQuery
+           OpMemoryModel Logical Simple
+           OpEntryPoint Fragment %main "main"
+           OpExecutionMode %main OriginUpperLeft
+           OpName %10 "wg"
+           OpDecorate %var_sampler DescriptorSet 0
+           OpDecorate %var_sampler Binding 0
+           OpDecorate %10 DescriptorSet 2
+           OpDecorate %10 Binding 0
+    %int = OpTypeInt 32 1
+  %float = OpTypeFloat 32
+  %v2int = OpTypeVector %int 2
+%v2float = OpTypeVector %float 2
+%v4float = OpTypeVector %float 4
+    %tex = OpTypeImage %float 2D 0 0 0 1 Unknown
+%ptr_tex = OpTypePointer UniformConstant %tex
+%sampled_img = OpTypeSampledImage %tex
+%sampler = OpTypeSampler
+%ptr_sampler = OpTypePointer UniformConstant %sampler
+   %void = OpTypeVoid
+ %voidfn = OpTypeFunction %void
+
+  %int_1 = OpConstant %int 1
+%float_1 = OpConstant %float 1
+%float_2 = OpConstant %float 2
+%coords2 = OpConstantComposite %v2float %float_1 %float_2
+
+%var_sampler = OpVariable %ptr_sampler UniformConstant
+     %10 = OpVariable %ptr_tex UniformConstant
+
+   %main = OpFunction %void None %voidfn
+  %entry = OpLabel
+    %sam = OpLoad %sampler %var_sampler
+     %im = OpLoad %tex %10
+%sampled_image = OpSampledImage %sampled_img %im %sam
+ %result = OpImage %tex %sampled_image
+   %size = OpImageQueryLevels %int %result
+           OpReturn
+           OpFunctionEnd
+        )",
+              R"(
+$B1: {  # root
+  %1:ptr<handle, sampler, read> = var undef @binding_point(0, 0)
+  %wg:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(2, 0)
+}
+
+%main = @fragment func():void {
+  $B2: {
+    %4:sampler = load %1
+    %5:texture_2d<f32> = load %wg
+    %6:u32 = textureNumLevels %5
+    %7:i32 = convert %6
+    ret
+  }
+}
+)");
+}
+
 TEST_F(SpirvReaderTest, ImageGather) {
     EXPECT_IR(R"(
            OpCapability Shader
