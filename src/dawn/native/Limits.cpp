@@ -415,6 +415,33 @@ void NormalizeLimits(CombinedLimits* limits) {
         std::min(limits->v1.maxUniformBuffersPerShaderStage, kMaxUniformBuffersPerShaderStage);
     limits->v1.maxImmediateSize =
         std::min(limits->v1.maxImmediateSize, kMaxSupportedImmediateDataBytes);
+
+    if (limits->v1.maxDynamicUniformBuffersPerPipelineLayout >
+        kMaxDynamicUniformBuffersPerPipelineLayout) {
+        dawn::WarningLog() << "maxDynamicUniformBuffersPerPipelineLayout artificially reduced from "
+                           << limits->v1.maxDynamicUniformBuffersPerPipelineLayout << " to "
+                           << kMaxDynamicUniformBuffersPerPipelineLayout
+                           << " to fit dynamic offset allocation limit.";
+        limits->v1.maxDynamicUniformBuffersPerPipelineLayout =
+            kMaxDynamicUniformBuffersPerPipelineLayout;
+    }
+
+    if (limits->v1.maxDynamicStorageBuffersPerPipelineLayout >
+        kMaxDynamicStorageBuffersPerPipelineLayout) {
+        dawn::WarningLog() << "maxDynamicStorageBuffersPerPipelineLayout artificially reduced from "
+                           << limits->v1.maxDynamicStorageBuffersPerPipelineLayout << " to "
+                           << kMaxDynamicStorageBuffersPerPipelineLayout
+                           << " to fit dynamic offset allocation limit.";
+        limits->v1.maxDynamicStorageBuffersPerPipelineLayout =
+            kMaxDynamicStorageBuffersPerPipelineLayout;
+    }
+
+    limits->v1.maxDynamicUniformBuffersPerPipelineLayout =
+        std::min(limits->v1.maxDynamicUniformBuffersPerPipelineLayout,
+                 kMaxDynamicUniformBuffersPerPipelineLayout);
+    limits->v1.maxDynamicStorageBuffersPerPipelineLayout =
+        std::min(limits->v1.maxDynamicStorageBuffersPerPipelineLayout,
+                 kMaxDynamicStorageBuffersPerPipelineLayout);
     // Compat limits.
     limits->compat.maxStorageBuffersInVertexStage =
         std::min(limits->compat.maxStorageBuffersInVertexStage, kMaxStorageBuffersPerShaderStage);

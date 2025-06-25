@@ -525,7 +525,7 @@ class BindGroupTracker : public BindGroupTrackerBase<true, uint64_t> {
     void Apply(Encoder encoder) {
         BeforeApply();
         for (BindGroupIndex index : mDirtyBindGroupsObjectChangedOrIsDynamic) {
-            ApplyBindGroup(encoder, index, ToBackend(mBindGroups[index]), mDynamicOffsets[index],
+            ApplyBindGroup(encoder, index, ToBackend(mBindGroups[index]), GetDynamicOffsets(index),
                            ToBackend(mPipelineLayout));
         }
         AfterApply();
@@ -540,7 +540,7 @@ class BindGroupTracker : public BindGroupTrackerBase<true, uint64_t> {
                             id<MTLComputeCommandEncoder> compute,
                             BindGroupIndex index,
                             BindGroup* group,
-                            const ityp::vector<BindingIndex, uint64_t>& dynamicOffsets,
+                            const ityp::span<BindingIndex, uint64_t>& dynamicOffsets,
                             PipelineLayout* pipelineLayout) {
         // TODO(crbug.com/dawn/854): Maintain buffers and offsets arrays in BindGroup
         // so that we only have to do one setVertexBuffers and one setFragmentBuffers

@@ -175,9 +175,9 @@ class DescriptorSetTracker : public BindGroupTrackerBase<true, uint32_t> {
         BeforeApply();
         for (BindGroupIndex dirtyIndex : mDirtyBindGroupsObjectChangedOrIsDynamic) {
             VkDescriptorSet set = ToBackend(mBindGroups[dirtyIndex])->GetHandle();
-            uint32_t count = static_cast<uint32_t>(mDynamicOffsets[dirtyIndex].size());
-            const uint32_t* dynamicOffset =
-                count > 0 ? mDynamicOffsets[dirtyIndex].data() : nullptr;
+            const auto dynamicOffsetSpan = GetDynamicOffsets(dirtyIndex);
+            uint32_t count = static_cast<uint32_t>(dynamicOffsetSpan.size());
+            const uint32_t* dynamicOffset = count > 0 ? dynamicOffsetSpan.data() : nullptr;
             device->fn.CmdBindDescriptorSets(recordingContext->commandBuffer, bindPoint, mVkLayout,
                                              static_cast<uint32_t>(dirtyIndex), 1, &*set, count,
                                              dynamicOffset);

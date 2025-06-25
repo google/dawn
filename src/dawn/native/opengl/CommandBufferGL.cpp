@@ -298,7 +298,7 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
     MaybeError Apply(const OpenGLFunctions& gl) {
         BeforeApply();
         for (BindGroupIndex index : mDirtyBindGroupsObjectChangedOrIsDynamic) {
-            DAWN_TRY(ApplyBindGroup(gl, index, mBindGroups[index], mDynamicOffsets[index]));
+            DAWN_TRY(ApplyBindGroup(gl, index, mBindGroups[index], GetDynamicOffsets(index)));
         }
         DAWN_TRY(ApplyInternalUniforms(gl));
         DAWN_TRY(ApplyInternalArrayLengthUniforms(gl));
@@ -326,7 +326,7 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
     MaybeError ApplyBindGroup(const OpenGLFunctions& gl,
                               BindGroupIndex groupIndex,
                               BindGroupBase* group,
-                              const ityp::vector<BindingIndex, uint64_t>& dynamicOffsets) {
+                              const ityp::span<BindingIndex, uint64_t>& dynamicOffsets) {
         const auto& indices = ToBackend(mPipelineLayout)->GetBindingIndexInfo()[groupIndex];
 
         for (BindingIndex bindingIndex : Range(group->GetLayout()->GetBindingCount())) {

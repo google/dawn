@@ -108,6 +108,10 @@ static constexpr size_t kWireBufferAlignment = 8u;
 // Timestamp query quantization mask to perform a granularity of ~0.1ms.
 static constexpr uint32_t kTimestampQuantizationMask = 0xFFFF0000;
 
+// Max dynamic offset counts used to optimize Dawn internals.
+static constexpr uint32_t kMaxDynamicUniformBuffersPerPipelineLayout = 16u;
+static constexpr uint32_t kMaxDynamicStorageBuffersPerPipelineLayout = 16u;
+
 }  // namespace dawn
 
 #endif  // SRC_DAWN_COMMON_CONSTANTS_H_

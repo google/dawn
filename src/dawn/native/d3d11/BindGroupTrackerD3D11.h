@@ -86,7 +86,7 @@ class BindGroupTracker : public BindGroupTrackerBase</*CanInheritBindGroups=*/tr
         BindGroupBase* group,
         BindingIndex bindingIndex,
         const BufferBindingInfo& layout,
-        const ityp::vector<BindingIndex, uint64_t>& dynamicOffsets);
+        const ityp::span<BindingIndex, uint64_t>& dynamicOffsets);
 
     template <typename T>
     ResultOrError<ComPtr<T>> GetTextureD3DView(BindGroupBase* group, BindingIndex bindingIndex);
@@ -104,7 +104,7 @@ class BindGroupTracker : public BindGroupTrackerBase</*CanInheritBindGroups=*/tr
         BindGroupBase* group,
         BindingIndex bindingIndex,
         const BufferBindingInfo& layout,
-        const ityp::vector<BindingIndex, uint64_t>& dynamicOffsets);
+        const ityp::span<BindingIndex, uint64_t>& dynamicOffsets);
 
     ResultOrError<ComPtr<ID3D11ShaderResourceView>> GetTextureShaderResourceView(
         BindGroupBase* group,
