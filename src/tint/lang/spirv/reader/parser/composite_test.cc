@@ -205,12 +205,12 @@ TEST_F(SpirvParserTest, CompositeConstruct_Array_ArrayStride_EqualsElementSize_A
 )",
               R"(
 $B1: {  # root
-  %1:ptr<private, spirv.explicit_layout_array<vec3<u32>, 4>, read_write> = var undef
+  %1:ptr<private, spirv.explicit_layout_array<vec3<u32>, 4, stride=12>, read_write> = var undef
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %3:ptr<private, spirv.explicit_layout_array<vec3<u32>, 4>, read_write> = let %1
+    %3:ptr<private, spirv.explicit_layout_array<vec3<u32>, 4, stride=12>, read_write> = let %1
     ret
   }
 }
@@ -284,9 +284,9 @@ TEST_F(SpirvParserTest, CompositeConstruct_Array_ArrayStride) {
                OpFunctionEnd
 )",
               R"(
-%2 = func():spirv.explicit_layout_array<u32, 4> {
+%2 = func():spirv.explicit_layout_array<u32, 4, stride=16> {
   $B2: {
-    %3:spirv.explicit_layout_array<u32, 4> = construct 1u, 2u, 3u, 4u
+    %3:spirv.explicit_layout_array<u32, 4, stride=16> = construct 1u, 2u, 3u, 4u
     ret %3
   }
 )");

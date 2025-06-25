@@ -212,7 +212,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %buffer:ptr<storage, spirv.explicit_layout_array<u32, 4>, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, spirv.explicit_layout_array<u32, 4, stride=4>, read_write> = var undef @binding_point(0, 0)
 }
 
 )";
@@ -585,7 +585,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %buffer:ptr<storage, spirv.explicit_layout_array<u32, 1>, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, spirv.explicit_layout_array<u32, 1, stride=4>, read_write> = var undef @binding_point(0, 0)
   %mask_in:ptr<__in, array<u32, 1>, read> = var undef @builtin(sample_mask)
   %mask_out:ptr<__out, array<u32, 1>, read_write> = var undef @builtin(sample_mask)
 }
@@ -1984,18 +1984,18 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %buffer:ptr<storage, spirv.explicit_layout_array<u32, 4>, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, spirv.explicit_layout_array<u32, 4, stride=4>, read_write> = var undef @binding_point(0, 0)
 }
 
 %foo = func():void {
   $B2: {
-    %3:spirv.explicit_layout_array<u32, 4> = load %buffer
+    %3:spirv.explicit_layout_array<u32, 4, stride=4> = load %buffer
     %4:array<u32, 4> = call %tint_convert_explicit_layout, %3
     %local:ptr<function, array<u32, 4>, read_write> = var %4
     ret
   }
 }
-%tint_convert_explicit_layout = func(%tint_source:spirv.explicit_layout_array<u32, 4>):array<u32, 4> {
+%tint_convert_explicit_layout = func(%tint_source:spirv.explicit_layout_array<u32, 4, stride=4>):array<u32, 4> {
   $B3: {
     %8:ptr<function, array<u32, 4>, read_write> = var undef
     loop [i: $B4, b: $B5, c: $B6] {  # loop_1
@@ -2062,18 +2062,18 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %buffer:ptr<storage, spirv.explicit_layout_array<spirv.explicit_layout_array<u32, 4>, 3>, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, spirv.explicit_layout_array<spirv.explicit_layout_array<u32, 4, stride=4>, 3, stride=16>, read_write> = var undef @binding_point(0, 0)
 }
 
 %foo = func():void {
   $B2: {
-    %3:spirv.explicit_layout_array<spirv.explicit_layout_array<u32, 4>, 3> = load %buffer
+    %3:spirv.explicit_layout_array<spirv.explicit_layout_array<u32, 4, stride=4>, 3, stride=16> = load %buffer
     %4:array<array<u32, 4>, 3> = call %tint_convert_explicit_layout, %3
     %local:ptr<function, array<array<u32, 4>, 3>, read_write> = var %4
     ret
   }
 }
-%tint_convert_explicit_layout = func(%tint_source:spirv.explicit_layout_array<spirv.explicit_layout_array<u32, 4>, 3>):array<array<u32, 4>, 3> {
+%tint_convert_explicit_layout = func(%tint_source:spirv.explicit_layout_array<spirv.explicit_layout_array<u32, 4, stride=4>, 3, stride=16>):array<array<u32, 4>, 3> {
   $B3: {
     %8:ptr<function, array<array<u32, 4>, 3>, read_write> = var undef
     loop [i: $B4, b: $B5, c: $B6] {  # loop_1
@@ -2087,7 +2087,7 @@ $B1: {  # root
             exit_loop  # loop_1
           }
         }
-        %11:spirv.explicit_layout_array<u32, 4> = access %tint_source, %idx
+        %11:spirv.explicit_layout_array<u32, 4, stride=4> = access %tint_source, %idx
         %12:array<u32, 4> = call %tint_convert_explicit_layout_1, %11
         %14:ptr<function, array<u32, 4>, read_write> = access %8, %idx
         store %14, %12
@@ -2102,7 +2102,7 @@ $B1: {  # root
     ret %16
   }
 }
-%tint_convert_explicit_layout_1 = func(%tint_source_1:spirv.explicit_layout_array<u32, 4>):array<u32, 4> {  # %tint_convert_explicit_layout_1: 'tint_convert_explicit_layout', %tint_source_1: 'tint_source'
+%tint_convert_explicit_layout_1 = func(%tint_source_1:spirv.explicit_layout_array<u32, 4, stride=4>):array<u32, 4> {  # %tint_convert_explicit_layout_1: 'tint_convert_explicit_layout', %tint_source_1: 'tint_source'
   $B8: {
     %18:ptr<function, array<u32, 4>, read_write> = var undef
     loop [i: $B9, b: $B10, c: $B11] {  # loop_2
@@ -2171,21 +2171,21 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %buffer:ptr<storage, spirv.explicit_layout_array<u32, 4>, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, spirv.explicit_layout_array<u32, 4, stride=4>, read_write> = var undef @binding_point(0, 0)
 }
 
 %foo = func():void {
   $B2: {
     %local:ptr<function, array<u32, 4>, read_write> = var undef
     %4:array<u32, 4> = load %local
-    %5:spirv.explicit_layout_array<u32, 4> = call %tint_convert_explicit_layout, %4
+    %5:spirv.explicit_layout_array<u32, 4, stride=4> = call %tint_convert_explicit_layout, %4
     store %buffer, %5
     ret
   }
 }
-%tint_convert_explicit_layout = func(%tint_source:array<u32, 4>):spirv.explicit_layout_array<u32, 4> {
+%tint_convert_explicit_layout = func(%tint_source:array<u32, 4>):spirv.explicit_layout_array<u32, 4, stride=4> {
   $B3: {
-    %8:ptr<function, spirv.explicit_layout_array<u32, 4>, read_write> = var undef
+    %8:ptr<function, spirv.explicit_layout_array<u32, 4, stride=4>, read_write> = var undef
     loop [i: $B4, b: $B5, c: $B6] {  # loop_1
       $B4: {  # initializer
         next_iteration 0u  # -> $B5
@@ -2207,7 +2207,7 @@ $B1: {  # root
         next_iteration %13  # -> $B5
       }
     }
-    %14:spirv.explicit_layout_array<u32, 4> = load %8
+    %14:spirv.explicit_layout_array<u32, 4, stride=4> = load %8
     ret %14
   }
 }
@@ -2252,21 +2252,21 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %buffer:ptr<storage, spirv.explicit_layout_array<spirv.explicit_layout_array<u32, 4>, 3>, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, spirv.explicit_layout_array<spirv.explicit_layout_array<u32, 4, stride=4>, 3, stride=16>, read_write> = var undef @binding_point(0, 0)
 }
 
 %foo = func():void {
   $B2: {
     %local:ptr<function, array<array<u32, 4>, 3>, read_write> = var undef
     %4:array<array<u32, 4>, 3> = load %local
-    %5:spirv.explicit_layout_array<spirv.explicit_layout_array<u32, 4>, 3> = call %tint_convert_explicit_layout, %4
+    %5:spirv.explicit_layout_array<spirv.explicit_layout_array<u32, 4, stride=4>, 3, stride=16> = call %tint_convert_explicit_layout, %4
     store %buffer, %5
     ret
   }
 }
-%tint_convert_explicit_layout = func(%tint_source:array<array<u32, 4>, 3>):spirv.explicit_layout_array<spirv.explicit_layout_array<u32, 4>, 3> {
+%tint_convert_explicit_layout = func(%tint_source:array<array<u32, 4>, 3>):spirv.explicit_layout_array<spirv.explicit_layout_array<u32, 4, stride=4>, 3, stride=16> {
   $B3: {
-    %8:ptr<function, spirv.explicit_layout_array<spirv.explicit_layout_array<u32, 4>, 3>, read_write> = var undef
+    %8:ptr<function, spirv.explicit_layout_array<spirv.explicit_layout_array<u32, 4, stride=4>, 3, stride=16>, read_write> = var undef
     loop [i: $B4, b: $B5, c: $B6] {  # loop_1
       $B4: {  # initializer
         next_iteration 0u  # -> $B5
@@ -2279,8 +2279,8 @@ $B1: {  # root
           }
         }
         %11:array<u32, 4> = access %tint_source, %idx
-        %12:spirv.explicit_layout_array<u32, 4> = call %tint_convert_explicit_layout_1, %11
-        %14:ptr<function, spirv.explicit_layout_array<u32, 4>, read_write> = access %8, %idx
+        %12:spirv.explicit_layout_array<u32, 4, stride=4> = call %tint_convert_explicit_layout_1, %11
+        %14:ptr<function, spirv.explicit_layout_array<u32, 4, stride=4>, read_write> = access %8, %idx
         store %14, %12
         continue  # -> $B6
       }
@@ -2289,13 +2289,13 @@ $B1: {  # root
         next_iteration %15  # -> $B5
       }
     }
-    %16:spirv.explicit_layout_array<spirv.explicit_layout_array<u32, 4>, 3> = load %8
+    %16:spirv.explicit_layout_array<spirv.explicit_layout_array<u32, 4, stride=4>, 3, stride=16> = load %8
     ret %16
   }
 }
-%tint_convert_explicit_layout_1 = func(%tint_source_1:array<u32, 4>):spirv.explicit_layout_array<u32, 4> {  # %tint_convert_explicit_layout_1: 'tint_convert_explicit_layout', %tint_source_1: 'tint_source'
+%tint_convert_explicit_layout_1 = func(%tint_source_1:array<u32, 4>):spirv.explicit_layout_array<u32, 4, stride=4> {  # %tint_convert_explicit_layout_1: 'tint_convert_explicit_layout', %tint_source_1: 'tint_source'
   $B8: {
-    %18:ptr<function, spirv.explicit_layout_array<u32, 4>, read_write> = var undef
+    %18:ptr<function, spirv.explicit_layout_array<u32, 4, stride=4>, read_write> = var undef
     loop [i: $B9, b: $B10, c: $B11] {  # loop_2
       $B9: {  # initializer
         next_iteration 0u  # -> $B10
@@ -2317,7 +2317,7 @@ $B1: {  # root
         next_iteration %23  # -> $B10
       }
     }
-    %24:spirv.explicit_layout_array<u32, 4> = load %18
+    %24:spirv.explicit_layout_array<u32, 4, stride=4> = load %18
     ret %24
   }
 }
@@ -2366,21 +2366,21 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %buffer:ptr<storage, spirv.explicit_layout_array<u32, 4>, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, spirv.explicit_layout_array<u32, 4, stride=4>, read_write> = var undef @binding_point(0, 0)
 }
 
 %foo = func():void {
   $B2: {
     %local:ptr<function, array<u32, 4>, read_write> = var undef
-    %let_ptr:ptr<storage, spirv.explicit_layout_array<u32, 4>, read_write> = let %buffer
-    %5:spirv.explicit_layout_array<u32, 4> = load %let_ptr
+    %let_ptr:ptr<storage, spirv.explicit_layout_array<u32, 4, stride=4>, read_write> = let %buffer
+    %5:spirv.explicit_layout_array<u32, 4, stride=4> = load %let_ptr
     %6:array<u32, 4> = call %tint_convert_explicit_layout, %5
-    %8:spirv.explicit_layout_array<u32, 4> = call %tint_convert_explicit_layout_1, %6
+    %8:spirv.explicit_layout_array<u32, 4, stride=4> = call %tint_convert_explicit_layout_1, %6
     store %let_ptr, %8
     ret
   }
 }
-%tint_convert_explicit_layout = func(%tint_source:spirv.explicit_layout_array<u32, 4>):array<u32, 4> {
+%tint_convert_explicit_layout = func(%tint_source:spirv.explicit_layout_array<u32, 4, stride=4>):array<u32, 4> {
   $B3: {
     %11:ptr<function, array<u32, 4>, read_write> = var undef
     loop [i: $B4, b: $B5, c: $B6] {  # loop_1
@@ -2408,9 +2408,9 @@ $B1: {  # root
     ret %17
   }
 }
-%tint_convert_explicit_layout_1 = func(%tint_source_1:array<u32, 4>):spirv.explicit_layout_array<u32, 4> {  # %tint_convert_explicit_layout_1: 'tint_convert_explicit_layout', %tint_source_1: 'tint_source'
+%tint_convert_explicit_layout_1 = func(%tint_source_1:array<u32, 4>):spirv.explicit_layout_array<u32, 4, stride=4> {  # %tint_convert_explicit_layout_1: 'tint_convert_explicit_layout', %tint_source_1: 'tint_source'
   $B8: {
-    %19:ptr<function, spirv.explicit_layout_array<u32, 4>, read_write> = var undef
+    %19:ptr<function, spirv.explicit_layout_array<u32, 4, stride=4>, read_write> = var undef
     loop [i: $B9, b: $B10, c: $B11] {  # loop_2
       $B9: {  # initializer
         next_iteration 0u  # -> $B10
@@ -2432,7 +2432,7 @@ $B1: {  # root
         next_iteration %24  # -> $B10
       }
     }
-    %25:spirv.explicit_layout_array<u32, 4> = load %19
+    %25:spirv.explicit_layout_array<u32, 4, stride=4> = load %19
     ret %25
   }
 }
@@ -2481,7 +2481,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %buffer:ptr<storage, spirv.explicit_layout_array<u32, 4>, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, spirv.explicit_layout_array<u32, 4, stride=4>, read_write> = var undef @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -2540,22 +2540,22 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %buffer:ptr<storage, spirv.explicit_layout_array<spirv.explicit_layout_array<u32, 4>, 4>, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, spirv.explicit_layout_array<spirv.explicit_layout_array<u32, 4, stride=4>, 4, stride=16>, read_write> = var undef @binding_point(0, 0)
 }
 
 %foo = func():void {
   $B2: {
     %local:ptr<function, array<array<u32, 4>, 4>, read_write> = var undef
-    %4:ptr<storage, spirv.explicit_layout_array<u32, 4>, read_write> = access %buffer, 1u
-    %5:spirv.explicit_layout_array<u32, 4> = load %4
+    %4:ptr<storage, spirv.explicit_layout_array<u32, 4, stride=4>, read_write> = access %buffer, 1u
+    %5:spirv.explicit_layout_array<u32, 4, stride=4> = load %4
     %6:array<u32, 4> = call %tint_convert_explicit_layout, %5
-    %8:ptr<storage, spirv.explicit_layout_array<u32, 4>, read_write> = access %buffer, 2u
-    %9:spirv.explicit_layout_array<u32, 4> = call %tint_convert_explicit_layout_1, %6
+    %8:ptr<storage, spirv.explicit_layout_array<u32, 4, stride=4>, read_write> = access %buffer, 2u
+    %9:spirv.explicit_layout_array<u32, 4, stride=4> = call %tint_convert_explicit_layout_1, %6
     store %8, %9
     ret
   }
 }
-%tint_convert_explicit_layout = func(%tint_source:spirv.explicit_layout_array<u32, 4>):array<u32, 4> {
+%tint_convert_explicit_layout = func(%tint_source:spirv.explicit_layout_array<u32, 4, stride=4>):array<u32, 4> {
   $B3: {
     %12:ptr<function, array<u32, 4>, read_write> = var undef
     loop [i: $B4, b: $B5, c: $B6] {  # loop_1
@@ -2583,9 +2583,9 @@ $B1: {  # root
     ret %18
   }
 }
-%tint_convert_explicit_layout_1 = func(%tint_source_1:array<u32, 4>):spirv.explicit_layout_array<u32, 4> {  # %tint_convert_explicit_layout_1: 'tint_convert_explicit_layout', %tint_source_1: 'tint_source'
+%tint_convert_explicit_layout_1 = func(%tint_source_1:array<u32, 4>):spirv.explicit_layout_array<u32, 4, stride=4> {  # %tint_convert_explicit_layout_1: 'tint_convert_explicit_layout', %tint_source_1: 'tint_source'
   $B8: {
-    %20:ptr<function, spirv.explicit_layout_array<u32, 4>, read_write> = var undef
+    %20:ptr<function, spirv.explicit_layout_array<u32, 4, stride=4>, read_write> = var undef
     loop [i: $B9, b: $B10, c: $B11] {  # loop_2
       $B9: {  # initializer
         next_iteration 0u  # -> $B10
@@ -2607,7 +2607,7 @@ $B1: {  # root
         next_iteration %25  # -> $B10
       }
     }
-    %26:spirv.explicit_layout_array<u32, 4> = load %20
+    %26:spirv.explicit_layout_array<u32, 4, stride=4> = load %20
     ret %26
   }
 }
@@ -2667,27 +2667,27 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %buffer_0:ptr<storage, spirv.explicit_layout_array<u32, 4>, read_write> = var undef @binding_point(0, 0)
-  %buffer_1:ptr<storage, spirv.explicit_layout_array<u32, 4>, read_write> = var undef @binding_point(0, 1)
-  %buffer_2:ptr<storage, spirv.explicit_layout_array<u32, 4>, read_write> = var undef @binding_point(0, 2)
+  %buffer_0:ptr<storage, spirv.explicit_layout_array<u32, 4, stride=4>, read_write> = var undef @binding_point(0, 0)
+  %buffer_1:ptr<storage, spirv.explicit_layout_array<u32, 4, stride=4>, read_write> = var undef @binding_point(0, 1)
+  %buffer_2:ptr<storage, spirv.explicit_layout_array<u32, 4, stride=4>, read_write> = var undef @binding_point(0, 2)
 }
 
 %foo = func():void {
   $B2: {
     %local:ptr<function, array<u32, 4>, read_write> = var array<u32, 4>(0u)
-    %6:spirv.explicit_layout_array<u32, 4> = load %buffer_0
+    %6:spirv.explicit_layout_array<u32, 4, stride=4> = load %buffer_0
     %7:array<u32, 4> = call %tint_convert_explicit_layout, %6
     %let_0:array<u32, 4> = let %7
-    %10:spirv.explicit_layout_array<u32, 4> = load %buffer_1
+    %10:spirv.explicit_layout_array<u32, 4, stride=4> = load %buffer_1
     %11:array<u32, 4> = call %tint_convert_explicit_layout, %10
     %let_1:array<u32, 4> = let %11
-    %13:spirv.explicit_layout_array<u32, 4> = load %buffer_2
+    %13:spirv.explicit_layout_array<u32, 4, stride=4> = load %buffer_2
     %14:array<u32, 4> = call %tint_convert_explicit_layout, %13
     %let_2:array<u32, 4> = let %14
     ret
   }
 }
-%tint_convert_explicit_layout = func(%tint_source:spirv.explicit_layout_array<u32, 4>):array<u32, 4> {
+%tint_convert_explicit_layout = func(%tint_source:spirv.explicit_layout_array<u32, 4, stride=4>):array<u32, 4> {
   $B3: {
     %17:ptr<function, array<u32, 4>, read_write> = var undef
     loop [i: $B4, b: $B5, c: $B6] {  # loop_1
@@ -2770,7 +2770,7 @@ MyStruct = struct @align(4) {
 
 MyStruct_tint_explicit_layout = struct @align(4), @core.explicit_layout {
   i:u32 @offset(0)
-  arr:spirv.explicit_layout_array<u32, > @offset(4)
+  arr:spirv.explicit_layout_array<u32, , stride=4> @offset(4)
 }
 
 $B1: {  # root
@@ -2972,13 +2972,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %ssbo:ptr<storage, spirv.explicit_layout_array<u32, 4>, read_write> = var undef @binding_point(0, 0)
+  %ssbo:ptr<storage, spirv.explicit_layout_array<u32, 4, stride=4>, read_write> = var undef @binding_point(0, 0)
   %wg:ptr<workgroup, array<u32, 4>, read_write> = var undef
 }
 
 %foo = func():void {
   $B2: {
-    %4:spirv.explicit_layout_array<u32, 4> = load %ssbo
+    %4:spirv.explicit_layout_array<u32, 4, stride=4> = load %ssbo
     %5:array<u32, 4> = spirv.copy_logical %4
     store %wg, %5
     ret
@@ -3029,14 +3029,14 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %ssbo:ptr<storage, spirv.explicit_layout_array<u32, 4>, read_write> = var undef @binding_point(0, 0)
+  %ssbo:ptr<storage, spirv.explicit_layout_array<u32, 4, stride=4>, read_write> = var undef @binding_point(0, 0)
   %wg:ptr<workgroup, array<u32, 4>, read_write> = var undef
 }
 
 %foo = func():void {
   $B2: {
     %4:array<u32, 4> = load %wg
-    %5:spirv.explicit_layout_array<u32, 4> = spirv.copy_logical %4
+    %5:spirv.explicit_layout_array<u32, 4, stride=4> = spirv.copy_logical %4
     store %ssbo, %5
     ret
   }

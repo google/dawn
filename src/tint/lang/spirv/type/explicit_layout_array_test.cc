@@ -68,7 +68,7 @@ TEST_F(ExplicitLayoutArrayTest, FriendlyName) {
     core::type::Manager ty;
     auto* count = ty.Get<core::type::ConstantArrayCount>(4u);
     auto* a = ty.Get<ExplicitLayoutArray>(ty.u32(), count, 4u, 16u, 4u);
-    EXPECT_EQ(a->FriendlyName(), "spirv.explicit_layout_array<u32, 4>");
+    EXPECT_EQ(a->FriendlyName(), "spirv.explicit_layout_array<u32, 4, stride=4>");
 }
 
 TEST_F(ExplicitLayoutArrayTest, CloneArray) {
