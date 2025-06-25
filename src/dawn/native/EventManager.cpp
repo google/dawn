@@ -35,6 +35,7 @@
 
 #include "absl/strings/str_format.h"
 #include "dawn/common/Assert.h"
+#include "dawn/common/Atomic.h"
 #include "dawn/common/FutureUtils.h"
 #include "dawn/common/Log.h"
 #include "dawn/native/ChainUtils.h"
@@ -368,11 +369,7 @@ FutureID EventManager::TrackEvent(Ref<TrackedEvent>&& event) {
             return;
         }
         if (event->mCallbackMode != wgpu::CallbackMode::WaitAnyOnly) {
-            FutureID lastProcessedEventID = mLastProcessEventID.load(std::memory_order_acquire);
-            while (lastProcessedEventID < futureID &&
-                   !mLastProcessEventID.compare_exchange_weak(lastProcessedEventID, futureID,
-                                                              std::memory_order_acq_rel)) {
-            }
+            FetchMax(mLastProcessEventID, futureID);
         }
         (*events)->emplace(futureID, std::move(event));
     });
