@@ -799,17 +799,6 @@ def compute_kotlin_params(loaded_json, kotlin_json):
     def jni_name(type):
         return kt_file_path + '/' + type.name.CamelCase()
 
-    # We assume that if the final two parameters are named 'userdata' and 'callback' respectively
-    # that this is an async method that uses function pointer based callbacks.
-    def is_async_method(method):
-        if len(method.arguments) < 2:
-            return False  # Not enough parameters to be an async method.
-        if method.arguments[-1].name.get() != 'userdata':
-            return False
-        if method.arguments[-2].name.get() != 'callback':
-            return False
-        return True
-
     # A structure may need to know which other structures listed it as a chain root, e.g.
     # to know whether to mark the generated class 'open'.
     chain_children = defaultdict(list)
@@ -823,7 +812,6 @@ def compute_kotlin_params(loaded_json, kotlin_json):
     params_kotlin['include_structure'] = include_structure
     params_kotlin['kotlin_record_members'] = kotlin_record_members
     params_kotlin['jni_name'] = jni_name
-    params_kotlin['is_async_method'] = is_async_method
     params_kotlin['has_kotlin_classes'] = (
         by_category['callback function'] + by_category['callback info'] +
         by_category['enum'] + by_category['function pointer'] +
