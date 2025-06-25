@@ -33,6 +33,7 @@
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/ir/transform/helper_test.h"
 #include "src/tint/lang/core/number.h"
+#include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
 #include "src/tint/lang/core/type/depth_texture.h"
 #include "src/tint/lang/core/type/multisampled_texture.h"
@@ -5800,6 +5801,291 @@ $B1: {  # root
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
     Run(TexturePolyfill, cfg);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_TexturePolyfillTest, BindingArray_Texture2d_AccessThroughPointer) {
+    auto* texture_type = ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32());
+    core::ir::Var* textures = nullptr;
+    core::ir::Var* sampler = nullptr;
+    b.Append(b.ir.root_block, [&] {
+        textures = b.Var("textures", ty.ptr<handle>(ty.binding_array(texture_type, 3u)));
+        textures->SetBindingPoint(0, 0);
+
+        sampler = b.Var("sampler", ty.ptr(handle, ty.sampler()));
+        sampler->SetBindingPoint(0, 1);
+    });
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+
+        auto* ptr_texture = b.Access(ty.ptr<handle>(texture_type), textures, 1_u);
+        auto* t = b.Load(ptr_texture);
+        auto* s = b.Load(sampler);
+        b.Call<vec4<f32>>(core::BuiltinFn::kTextureSample, t, s, coords);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %textures:ptr<handle, binding_array<texture_2d<f32>, 3>, read> = var undef @binding_point(0, 0)
+  %sampler:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %4:vec2<f32> = construct 1.0f, 2.0f
+    %5:ptr<handle, texture_2d<f32>, read> = access %textures, 1u
+    %6:texture_2d<f32> = load %5
+    %7:sampler = load %sampler
+    %8:vec4<f32> = textureSample %6, %7, %4
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %textures_sampler:ptr<handle, binding_array<texture_2d<f32>, 3>, read> = combined_texture_sampler undef @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:vec2<f32> = construct 1.0f, 2.0f
+    %4:ptr<handle, texture_2d<f32>, read> = access %textures_sampler, 1u
+    %5:texture_2d<f32> = load %4
+    %6:vec4<f32> = glsl.texture %5, %3
+    ret
+  }
+}
+)";
+
+    TexturePolyfillConfig cfg;
+    cfg.placeholder_sampler_bind_point = {4, 0};
+    Run(TexturePolyfill, cfg);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_TexturePolyfillTest, BindingArray_Texture2d_AccessThroughValue) {
+    auto* texture_type = ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32());
+    core::ir::Var* textures = nullptr;
+    core::ir::Var* sampler = nullptr;
+    b.Append(b.ir.root_block, [&] {
+        textures = b.Var("textures", ty.ptr<handle>(ty.binding_array(texture_type, 3u)));
+        textures->SetBindingPoint(0, 0);
+
+        sampler = b.Var("sampler", ty.ptr(handle, ty.sampler()));
+        sampler->SetBindingPoint(0, 1);
+    });
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+
+        auto* textures_value = b.Load(textures);
+        auto* t = b.Access(texture_type, textures_value, 1_u);
+        auto* s = b.Load(sampler);
+        b.Call<vec4<f32>>(core::BuiltinFn::kTextureSample, t, s, coords);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %textures:ptr<handle, binding_array<texture_2d<f32>, 3>, read> = var undef @binding_point(0, 0)
+  %sampler:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %4:vec2<f32> = construct 1.0f, 2.0f
+    %5:binding_array<texture_2d<f32>, 3> = load %textures
+    %6:texture_2d<f32> = access %5, 1u
+    %7:sampler = load %sampler
+    %8:vec4<f32> = textureSample %6, %7, %4
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %textures_sampler:ptr<handle, binding_array<texture_2d<f32>, 3>, read> = combined_texture_sampler undef @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:vec2<f32> = construct 1.0f, 2.0f
+    %4:ptr<handle, texture_2d<f32>, read> = access %textures_sampler, 1u
+    %5:texture_2d<f32> = load %4
+    %6:vec4<f32> = glsl.texture %5, %3
+    ret
+  }
+}
+)";
+
+    TexturePolyfillConfig cfg;
+    cfg.placeholder_sampler_bind_point = {4, 0};
+    Run(TexturePolyfill, cfg);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_TexturePolyfillTest, BindingArray_Texture2d_TwoSampledUses) {
+    auto* texture_type = ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32());
+    core::ir::Var* textures = nullptr;
+    core::ir::Var* sampler1 = nullptr;
+    core::ir::Var* sampler2 = nullptr;
+    b.Append(b.ir.root_block, [&] {
+        textures = b.Var("textures", ty.ptr<handle>(ty.binding_array(texture_type, 3u)));
+        textures->SetBindingPoint(0, 0);
+
+        sampler1 = b.Var("sampler1", ty.ptr(handle, ty.sampler()));
+        sampler1->SetBindingPoint(0, 1);
+        sampler2 = b.Var("sampler2", ty.ptr(handle, ty.sampler()));
+        sampler2->SetBindingPoint(0, 2);
+    });
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+
+        auto* textures_value = b.Load(textures);
+        auto* t = b.Access(texture_type, textures_value, 1_u);
+        auto* s1 = b.Load(sampler1);
+        b.Call<vec4<f32>>(core::BuiltinFn::kTextureSample, t, s1, coords);
+        auto* s2 = b.Load(sampler2);
+        b.Call<vec4<f32>>(core::BuiltinFn::kTextureSample, t, s2, coords);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %textures:ptr<handle, binding_array<texture_2d<f32>, 3>, read> = var undef @binding_point(0, 0)
+  %sampler1:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %sampler2:ptr<handle, sampler, read> = var undef @binding_point(0, 2)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %5:vec2<f32> = construct 1.0f, 2.0f
+    %6:binding_array<texture_2d<f32>, 3> = load %textures
+    %7:texture_2d<f32> = access %6, 1u
+    %8:sampler = load %sampler1
+    %9:vec4<f32> = textureSample %7, %8, %5
+    %10:sampler = load %sampler2
+    %11:vec4<f32> = textureSample %7, %10, %5
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %textures_sampler1:ptr<handle, binding_array<texture_2d<f32>, 3>, read> = combined_texture_sampler undef @binding_point(0, 0)
+  %textures_sampler2:ptr<handle, binding_array<texture_2d<f32>, 3>, read> = combined_texture_sampler undef @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %4:vec2<f32> = construct 1.0f, 2.0f
+    %5:ptr<handle, texture_2d<f32>, read> = access %textures_sampler1, 1u
+    %6:texture_2d<f32> = load %5
+    %7:vec4<f32> = glsl.texture %6, %4
+    %8:ptr<handle, texture_2d<f32>, read> = access %textures_sampler2, 1u
+    %9:texture_2d<f32> = load %8
+    %10:vec4<f32> = glsl.texture %9, %4
+    ret
+  }
+}
+)";
+
+    capabilities = core::ir::Capabilities{core::ir::Capability::kAllowDuplicateBindings};
+
+    TexturePolyfillConfig cfg;
+    cfg.placeholder_sampler_bind_point = {4, 0};
+    Run(TexturePolyfill, cfg);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_TexturePolyfillTest, BindingArray_Texture2d_SampledAndUnsampledUses) {
+    auto* texture_type = ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32());
+    core::ir::Var* textures = nullptr;
+    core::ir::Var* sampler = nullptr;
+    b.Append(b.ir.root_block, [&] {
+        textures = b.Var("textures", ty.ptr<handle>(ty.binding_array(texture_type, 3u)));
+        textures->SetBindingPoint(0, 0);
+
+        sampler = b.Var("sampler", ty.ptr(handle, ty.sampler()));
+        sampler->SetBindingPoint(0, 1);
+    });
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* sample_coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+
+        auto* textures_value = b.Load(textures);
+        auto* t = b.Access(texture_type, textures_value, 1_u);
+        auto* s = b.Load(sampler);
+        b.Call<vec4<f32>>(core::BuiltinFn::kTextureSample, t, s, sample_coords);
+        auto* load_coords = b.Zero<vec2<i32>>();
+        auto* level = b.Zero<i32>();
+        b.Call<vec4<f32>>(core::BuiltinFn::kTextureLoad, t, load_coords, level);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %textures:ptr<handle, binding_array<texture_2d<f32>, 3>, read> = var undef @binding_point(0, 0)
+  %sampler:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %4:vec2<f32> = construct 1.0f, 2.0f
+    %5:binding_array<texture_2d<f32>, 3> = load %textures
+    %6:texture_2d<f32> = access %5, 1u
+    %7:sampler = load %sampler
+    %8:vec4<f32> = textureSample %6, %7, %4
+    %9:vec4<f32> = textureLoad %6, vec2<i32>(0i), 0i
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %textures_sampler:ptr<handle, binding_array<texture_2d<f32>, 3>, read> = combined_texture_sampler undef @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:vec2<f32> = construct 1.0f, 2.0f
+    %4:ptr<handle, texture_2d<f32>, read> = access %textures_sampler, 1u
+    %5:texture_2d<f32> = load %4
+    %6:vec4<f32> = glsl.texture %5, %3
+    %7:ptr<handle, texture_2d<f32>, read> = access %textures_sampler, 1u
+    %8:texture_2d<f32> = load %7
+    %9:vec4<f32> = glsl.texelFetch %8, vec2<i32>(0i), 0i
+    ret
+  }
+}
+)";
+
+    TexturePolyfillConfig cfg;
+    cfg.placeholder_sampler_bind_point = {4, 0};
+    Run(TexturePolyfill, cfg);
+
     EXPECT_EQ(expect, str());
 }
 

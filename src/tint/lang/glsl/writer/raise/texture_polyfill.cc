@@ -158,46 +158,63 @@ struct State {
 
         // Remove all replaced textures and samplers as they have been replaced by new globals.
         for (auto* var : replaced_textures_and_samplers_.Vector()) {
-            var->Result()->ForEachUseUnsorted([](core::ir::Usage use) {
-                TINT_ASSERT(use.instruction->Is<core::ir::Load>());
-                use.instruction->Destroy();
-            });
-            var->Destroy();
+            DeleteRecursively(var);
         }
     }
 
+    void DeleteRecursively(core::ir::Instruction* inst) {
+        inst->Result()->ForEachUseUnsorted(
+            [&](core::ir::Usage use) { DeleteRecursively(use.instruction); });
+        inst->Destroy();
+    }
+
     // Get the module root var a texture/sampler value comes from.
-    core::ir::Var* VarForValue(core::ir::Value* val) const {
-        auto* res = val->As<core::ir::InstructionResult>();
-        TINT_ASSERT(res);
-        auto* load = res->Instruction()->As<core::ir::Load>();
-        TINT_ASSERT(load);
-        auto* from = load->From()->As<core::ir::InstructionResult>();
-        TINT_ASSERT(from);
-        auto* var = from->Instruction()->As<core::ir::Var>();
-        TINT_ASSERT(var);
-        return var;
+    struct HandleVariablePath {
+        /// The root module variable.
+        core::ir::Var* var = nullptr;
+        /// The index in the binding_array, nullptr if not a binding_array.
+        core::ir::Value* index = nullptr;
+    };
+    HandleVariablePath PathForHandle(core::ir::Value* val) const {
+        // Because DirectVariableAccess for handles ran prior to this transform, we know that the
+        // chain to get to the variable is a mix of loads and accesses (but don't have guarantees on
+        // their order).
+        return Switch(
+            val->As<core::ir::InstructionResult>()->Instruction(),
+            [&](core::ir::Var* var) -> HandleVariablePath { return {var}; },
+            [&](core::ir::Load* load) -> HandleVariablePath { return PathForHandle(load->From()); },
+            [&](core::ir::Access* access) -> HandleVariablePath {
+                auto* binding_array = access->Object();
+                TINT_ASSERT(access->Indices().Length() == 1);
+                auto* index = access->Indices()[0];
+
+                HandleVariablePath path = PathForHandle(binding_array);
+                TINT_ASSERT(path.index == nullptr);
+                path.index = index;
+                return path;
+            },
+            TINT_ICE_ON_NO_MATCH);
     }
 
     // Returns the module root var that the texture and sampler come from (or nullptr for the
     // sampler if it isn't an argument).
-    struct SamplerTextureVars {
-        core::ir::Var* texture;
-        core::ir::Var* sampler;
+    struct SamplerTexturePaths {
+        HandleVariablePath texture;
+        HandleVariablePath sampler;
     };
-    SamplerTextureVars GetTextureSamplerFor(core::ir::CoreBuiltinCall* call) const {
+    SamplerTexturePaths GetTextureSamplerFor(core::ir::CoreBuiltinCall* call) const {
         auto args = call->Args();
         switch (call->Func()) {
             case core::BuiltinFn::kTextureDimensions:
             case core::BuiltinFn::kTextureLoad:
             case core::BuiltinFn::kTextureNumLayers:
             case core::BuiltinFn::kTextureStore:
-                return {VarForValue(args[0]), nullptr};
+                return {PathForHandle(args[0]), {}};
             case core::BuiltinFn::kTextureGather: {
                 if (args[0]->Type()->Is<core::type::Texture>()) {
-                    return {VarForValue(args[0]), VarForValue(args[1])};
+                    return {PathForHandle(args[0]), PathForHandle(args[1])};
                 }
-                return {VarForValue(args[1]), VarForValue(args[2])};
+                return {PathForHandle(args[1]), PathForHandle(args[2])};
             }
             case core::BuiltinFn::kTextureGatherCompare:
             case core::BuiltinFn::kTextureSample:
@@ -207,7 +224,7 @@ struct State {
             case core::BuiltinFn::kTextureSampleCompareLevel:
             case core::BuiltinFn::kTextureSampleGrad:
             case core::BuiltinFn::kTextureSampleLevel:
-                return {VarForValue(args[0]), VarForValue(args[1])};
+                return {PathForHandle(args[0]), PathForHandle(args[1])};
             default:
                 TINT_UNREACHABLE() << "unhandled texture function: " << call->Func();
         }
@@ -220,6 +237,9 @@ struct State {
                                                          core::ir::Var* sampler,
                                                          const core::type::Pointer* tex_ty) {
         // Create a combined texture sampler variable and insert it into the root block.
+        // TODO(411573957): Support binding_array<sampler> by expanding the result's type here to
+        // be a binding_array<T, NTextures * NSamplers>.
+        TINT_ASSERT(!sampler || sampler->Result()->Type()->UnwrapPtr()->Is<core::type::Sampler>());
         auto* result = b.InstructionResult(tex_ty);
         auto* var = ir.CreateInstruction<glsl::ir::CombinedTextureSamplerVar>(result, key.texture,
                                                                               key.sampler);
@@ -266,8 +286,8 @@ struct State {
             }
 
             auto tex_sampler = GetTextureSamplerFor(call);
-            auto* tex = tex_sampler.texture;
-            auto* sampler = tex_sampler.sampler;
+            auto* tex = tex_sampler.texture.var;
+            auto* sampler = tex_sampler.sampler.var;
 
             // No sampler, remember that we need to find at least one replacement for the texture.
             if (!sampler) {
@@ -439,29 +459,39 @@ struct State {
 
     // Must be called inside an insertion block
     core::ir::Value* GetNewTexture(core::ir::Value* tex, core::ir::Value* sampler = nullptr) {
-        auto* t = VarForValue(tex);
+        auto texture_path = PathForHandle(tex);
 
-        core::ir::Var* replacement;
+        core::ir::Var* replacement_var;
         if (sampler) {
-            auto* s = VarForValue(sampler);
+            auto sampler_path = PathForHandle(sampler);
+            // TODO(411573957): Support binding_array<sampler> by combining the sampler's index in
+            // its array to the texture's index in its array (if any).
+            TINT_ASSERT(sampler_path.index == nullptr);
 
-            auto t_bp = t->BindingPoint();
-            auto s_bp = s->BindingPoint();
+            auto t_bp = texture_path.var->BindingPoint();
+            auto s_bp = sampler_path.var->BindingPoint();
             TINT_ASSERT(t_bp.has_value() && s_bp.has_value());
             binding::CombinedTextureSamplerPair key{t_bp.value(), s_bp.value()};
 
-            replacement = *texture_sampler_to_replacement_.Get(key).value;
+            replacement_var = *texture_sampler_to_replacement_.Get(key).value;
         } else {
-            replacement = *texture_to_replacement_.Get(t).value;
+            replacement_var = *texture_to_replacement_.Get(texture_path.var).value;
         }
-        TINT_ASSERT(replacement);
+        TINT_ASSERT(replacement_var != nullptr);
 
         // In the storage case, we'll return the original texture. Nothing else to do in that case.
-        if (replacement == t) {
+        if (replacement_var == texture_path.var) {
             return tex;
         }
 
-        return b.Load(replacement)->Result();
+        core::ir::Instruction* texture_expression = replacement_var;
+        if (texture_path.index != nullptr) {
+            texture_expression =
+                b.Access(ty.ptr<handle>(tex->Type()), texture_expression, texture_path.index);
+        }
+        texture_expression = b.Load(texture_expression);
+
+        return texture_expression->Result();
     }
 
     // `textureDimensions` returns an unsigned scalar / vector in WGSL. `textureSize` and
