@@ -943,7 +943,7 @@ void TogglesInfo::EnsureToggleNameToEnumMapInitialized() {
 
     for (size_t index = 0; index < kToggleNameAndInfoList.size(); ++index) {
         const ToggleEnumAndInfo& toggleNameAndInfo = kToggleNameAndInfoList[index];
-        DAWN_ASSERT(index == static_cast<size_t>(toggleNameAndInfo.toggle));
+        DAWN_CHECK(index == static_cast<size_t>(toggleNameAndInfo.toggle));
         mToggleNameToEnumMap[toggleNameAndInfo.info.name] = toggleNameAndInfo.toggle;
     }
 
