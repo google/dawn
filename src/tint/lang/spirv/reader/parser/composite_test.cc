@@ -30,8 +30,7 @@
 namespace tint::spirv::reader {
 namespace {
 
-// TODO(426198644): Requires MatrixStride support
-TEST_F(SpirvParserTest, DISABLED_Matrix_ColMajor) {
+TEST_F(SpirvParserTest, Matrix_ColMajor) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -41,6 +40,8 @@ TEST_F(SpirvParserTest, DISABLED_Matrix_ColMajor) {
                OpMemberDecorate %str 0 Offset 0
                OpMemberDecorate %str 0 MatrixStride 48
                OpDecorate %str Block
+               OpDecorate %var DescriptorSet 1
+               OpDecorate %var Binding 2
        %void = OpTypeVoid
         %f32 = OpTypeFloat 32
       %vec3f = OpTypeVector %f32 3
@@ -55,15 +56,23 @@ TEST_F(SpirvParserTest, DISABLED_Matrix_ColMajor) {
                OpFunctionEnd
 )",
               R"(
-%main = func():void {
+tint_symbol_1 = struct @align(16) {
+  tint_symbol:mat4x3<f32> @offset(0), @matrix_stride(48)
+}
+
+$B1: {  # root
+  %1:ptr<uniform, tint_symbol_1, read> = var undef @binding_point(1, 2)
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     ret
   }
+}
 )");
 }
 
-// TODO(426198644): Requires MatrixStride support
-TEST_F(SpirvParserTest, DISABLED_Matrix_RowMajor) {
+TEST_F(SpirvParserTest, Matrix_RowMajor) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -73,6 +82,8 @@ TEST_F(SpirvParserTest, DISABLED_Matrix_RowMajor) {
                OpMemberDecorate %str 0 Offset 0
                OpMemberDecorate %str 0 MatrixStride 48
                OpDecorate %str Block
+               OpDecorate %var DescriptorSet 1
+               OpDecorate %var Binding 2
        %void = OpTypeVoid
         %f32 = OpTypeFloat 32
       %vec3f = OpTypeVector %f32 3
@@ -87,10 +98,19 @@ TEST_F(SpirvParserTest, DISABLED_Matrix_RowMajor) {
                OpFunctionEnd
 )",
               R"(
-%main = func():void {
+tint_symbol_1 = struct @align(16) {
+  tint_symbol:mat4x3<f32> @offset(0), @row_major, @matrix_stride(48)
+}
+
+$B1: {  # root
+  %1:ptr<uniform, tint_symbol_1, read> = var undef @binding_point(1, 2)
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     ret
   }
+}
 )");
 }
 

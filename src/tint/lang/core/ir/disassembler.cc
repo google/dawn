@@ -997,6 +997,13 @@ void Disassembler::EmitStructDecl(const core::type::Struct* str) {
             out_ << ", ";
             EmitBindingPoint(member->Attributes().binding_point.value());
         }
+        if (member->RowMajor()) {
+            out_ << ", " << StyleAttribute("@row_major");
+        }
+        if (member->HasMatrixStride()) {
+            out_ << ", " << StyleAttribute("@matrix_stride") << "("
+                 << StyleLiteral(member->MatrixStride()) << ")";
+        }
         EmitLine();
     }
     out_ << "}";

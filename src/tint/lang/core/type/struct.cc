@@ -252,6 +252,7 @@ StructMember* StructMember::Clone(CloneContext& ctx) const {
     if (is_row_major_) {
         member->SetRowMajor();
     }
+    member->SetMatrixStride(matrix_stride_);
     return member;
 }
 
