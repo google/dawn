@@ -114,6 +114,123 @@ $B1: {  # root
 )");
 }
 
+TEST_F(SpirvParserTest, StructMemberRelaxedPrecision) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpMemberDecorate %str 0 RelaxedPrecision
+               OpMemberDecorate %str 0 Offset 0
+               OpDecorate %str Block
+               OpDecorate %var DescriptorSet 1
+               OpDecorate %var Binding 2
+       %void = OpTypeVoid
+        %f32 = OpTypeFloat 32
+        %str = OpTypeStruct %f32
+        %ptr = OpTypePointer Uniform %str
+    %ep_type = OpTypeFunction %void
+        %var = OpVariable %ptr Uniform
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+tint_symbol_1 = struct @align(4) {
+  tint_symbol:f32 @offset(0)
+}
+
+$B1: {  # root
+  %1:ptr<uniform, tint_symbol_1, read> = var undef @binding_point(1, 2)
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, StructMemberNonWritable) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpMemberDecorate %str 0 NonWritable
+               OpMemberDecorate %str 0 Offset 0
+               OpDecorate %str Block
+               OpDecorate %var DescriptorSet 1
+               OpDecorate %var Binding 2
+       %void = OpTypeVoid
+        %f32 = OpTypeFloat 32
+        %str = OpTypeStruct %f32
+        %ptr = OpTypePointer Uniform %str
+    %ep_type = OpTypeFunction %void
+        %var = OpVariable %ptr Uniform
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+tint_symbol_1 = struct @align(4) {
+  tint_symbol:f32 @offset(0)
+}
+
+$B1: {  # root
+  %1:ptr<uniform, tint_symbol_1, read> = var undef @binding_point(1, 2)
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, StructMemberNonReadable) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpMemberDecorate %str 0 NonReadable
+               OpMemberDecorate %str 0 Offset 0
+               OpDecorate %str Block
+               OpDecorate %var DescriptorSet 1
+               OpDecorate %var Binding 2
+       %void = OpTypeVoid
+        %f32 = OpTypeFloat 32
+        %str = OpTypeStruct %f32
+        %ptr = OpTypePointer Uniform %str
+    %ep_type = OpTypeFunction %void
+        %var = OpVariable %ptr Uniform
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+tint_symbol_1 = struct @align(4) {
+  tint_symbol:f32 @offset(0)
+}
+
+$B1: {  # root
+  %1:ptr<uniform, tint_symbol_1, read> = var undef @binding_point(1, 2)
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    ret
+  }
+}
+)");
+}
+
 TEST_F(SpirvParserTest, CompositeConstruct_Vector) {
     EXPECT_IR(R"(
                OpCapability Shader

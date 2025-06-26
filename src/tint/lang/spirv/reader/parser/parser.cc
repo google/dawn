@@ -792,8 +792,10 @@ class Parser {
             if (struct_ty->element_decorations().count(i)) {
                 for (auto& deco : struct_ty->element_decorations().at(i)) {
                     switch (spv::Decoration(deco[0])) {
-                        case spv::Decoration::ColMajor:
-                            // Do nothing, WGSL is column major
+                        case spv::Decoration::ColMajor:          // Do nothing, WGSL is column major
+                        case spv::Decoration::NonReadable:       // Not supported in WGSL
+                        case spv::Decoration::NonWritable:       // Not supported in WGSL
+                        case spv::Decoration::RelaxedPrecision:  // Not supported in WGSL
                             break;
                         case spv::Decoration::RowMajor:
                             is_row_major = true;
