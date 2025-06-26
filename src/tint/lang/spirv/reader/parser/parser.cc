@@ -790,6 +790,9 @@ class Parser {
             if (struct_ty->element_decorations().count(i)) {
                 for (auto& deco : struct_ty->element_decorations().at(i)) {
                     switch (spv::Decoration(deco[0])) {
+                        case spv::Decoration::ColMajor:
+                            // Do nothing, WGSL is column major
+                            break;
                         case spv::Decoration::Offset:
                             offset = deco[1];
                             break;
