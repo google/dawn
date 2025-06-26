@@ -438,7 +438,6 @@ source_set("sources") {
   # In UWP, all available APIs are defined in WindowsApp.lib
   if (is_win && !dawn_is_winuwp) {
     libs += [
-      "onecore_apiset.lib",
       "user32.lib",
       "delayimp.lib",
     ]
