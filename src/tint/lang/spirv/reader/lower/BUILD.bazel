@@ -41,6 +41,7 @@ cc_library(
   srcs = [
     "atomics.cc",
     "builtins.cc",
+    "decompose_strided_array.cc",
     "lower.cc",
     "shader_io.cc",
     "texture.cc",
@@ -49,6 +50,7 @@ cc_library(
   hdrs = [
     "atomics.h",
     "builtins.h",
+    "decompose_strided_array.h",
     "lower.h",
     "shader_io.h",
     "texture.h",
@@ -87,6 +89,7 @@ cc_library(
   srcs = [
     "atomics_test.cc",
     "builtins_test.cc",
+    "decompose_strided_array_test.cc",
     "shader_io_test.cc",
     "texture_test.cc",
     "vector_element_pointer_test.cc",

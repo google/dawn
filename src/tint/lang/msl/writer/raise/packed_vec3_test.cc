@@ -2732,7 +2732,7 @@ TEST_F(MslWriter_PackedVec3Test, StorageVar_Struct_NonDefaultOffset) {
                 /* offset */ 64u, /* align */ 4u, /* size */ 16u, core::IOAttributes{}),
             ty.Get<core::type::StructMember>(
                 mod.symbols.Register("mat3"), ty.mat4x3<f32>(), /* index */ 3u,
-                /* offset */ 128u, /* align */ 16u, /* size */ 48u, core::IOAttributes{}),
+                /* offset */ 128u, /* align */ 16u, /* size */ 64u, core::IOAttributes{}),
             ty.Get<core::type::StructMember>(
                 mod.symbols.Register("mat2"), ty.mat3x2<f32>(), /* index */ 4u,
                 /* offset */ 256u, /* align */ 8u, /* size */ 24u, core::IOAttributes{}),

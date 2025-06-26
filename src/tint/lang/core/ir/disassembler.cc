@@ -966,6 +966,9 @@ void Disassembler::EmitStructDecl(const core::type::Struct* str) {
     for (auto* member : str->Members()) {
         out_ << "  " << StyleVariable(member->Name().Name()) << ":" << NameOf(member->Type());
         out_ << " " << StyleAttribute("@offset") << "(" << StyleLiteral(member->Offset()) << ")";
+        if (member->Size() != member->Type()->Size()) {
+            out_ << " " << StyleAttribute("@size") << "(" << StyleLiteral(member->Size()) << ")";
+        }
         if (member->Attributes().invariant) {
             out_ << ", " << StyleAttribute("@invariant");
         }

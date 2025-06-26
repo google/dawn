@@ -2770,7 +2770,7 @@ MyStruct = struct @align(4) {
 
 MyStruct_tint_explicit_layout = struct @align(4), @core.explicit_layout {
   i:u32 @offset(0)
-  arr:spirv.explicit_layout_array<u32, , stride=4> @offset(4)
+  arr:spirv.explicit_layout_array<u32, stride=4> @offset(4)
 }
 
 $B1: {  # root

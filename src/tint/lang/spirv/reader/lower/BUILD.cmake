@@ -43,6 +43,8 @@ tint_add_target(tint_lang_spirv_reader_lower lib
   lang/spirv/reader/lower/atomics.h
   lang/spirv/reader/lower/builtins.cc
   lang/spirv/reader/lower/builtins.h
+  lang/spirv/reader/lower/decompose_strided_array.cc
+  lang/spirv/reader/lower/decompose_strided_array.h
   lang/spirv/reader/lower/lower.cc
   lang/spirv/reader/lower/lower.h
   lang/spirv/reader/lower/shader_io.cc
@@ -88,6 +90,7 @@ tint_target_add_external_dependencies(tint_lang_spirv_reader_lower lib
 tint_add_target(tint_lang_spirv_reader_lower_test test
   lang/spirv/reader/lower/atomics_test.cc
   lang/spirv/reader/lower/builtins_test.cc
+  lang/spirv/reader/lower/decompose_strided_array_test.cc
   lang/spirv/reader/lower/shader_io_test.cc
   lang/spirv/reader/lower/texture_test.cc
   lang/spirv/reader/lower/vector_element_pointer_test.cc
