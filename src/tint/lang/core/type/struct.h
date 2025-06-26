@@ -33,8 +33,7 @@
 #include <string>
 #include <utility>
 
-#include "src/tint/lang/core/address_space.h"
-#include "src/tint/lang/core/builtin_value.h"
+#include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/core/interpolation.h"
 #include "src/tint/lang/core/io_attributes.h"
 #include "src/tint/lang/core/type/node.h"

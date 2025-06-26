@@ -30,8 +30,8 @@
 #include <string>
 #include <utility>
 
-#include "src/tint/lang/core/builtin_fn.h"
 #include "src/tint/lang/core/constant/splat.h"
+#include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/core/ir/access.h"
 #include "src/tint/lang/core/ir/bitcast.h"
 #include "src/tint/lang/core/ir/break_if.h"
@@ -64,7 +64,6 @@
 #include "src/tint/lang/core/ir/user_call.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/ir/var.h"
-#include "src/tint/lang/core/texel_format.h"
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/bool.h"
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"

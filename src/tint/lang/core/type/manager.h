@@ -30,11 +30,9 @@
 
 #include <utility>
 
-#include "src/tint/lang/core/access.h"
-#include "src/tint/lang/core/address_space.h"
+#include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/number.h"
-#include "src/tint/lang/core/texel_format.h"
 #include "src/tint/lang/core/type/atomic.h"
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
 #include "src/tint/lang/core/type/depth_texture.h"

@@ -30,7 +30,7 @@
 #include <cstdint>
 #include <utility>
 
-#include "src/tint/lang/core/address_space.h"
+#include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/function_param.h"
 #include "src/tint/lang/core/ir/module.h"

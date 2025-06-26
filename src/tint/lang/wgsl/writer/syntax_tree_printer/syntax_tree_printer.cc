@@ -27,7 +27,7 @@
 
 #include "src/tint/lang/wgsl/writer/syntax_tree_printer/syntax_tree_printer.h"
 
-#include "src/tint/lang/core/texel_format.h"
+#include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/wgsl/ast/alias.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
 #include "src/tint/lang/wgsl/ast/binary_expression.h"

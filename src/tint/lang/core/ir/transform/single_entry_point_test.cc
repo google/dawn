@@ -29,8 +29,7 @@
 
 #include <utility>
 
-#include "src/tint/lang/core/access.h"
-#include "src/tint/lang/core/address_space.h"
+#include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/core/ir/transform/helper_test.h"
 #include "src/tint/lang/core/ir/type/array_count.h"
 

@@ -1,6 +1,6 @@
 {{- /*
 --------------------------------------------------------------------------------
-Template file for use with tools/src/cmd/gen to generate builtin_fn.cc
+Template file for use with tools/src/cmd/gen to generate access.cc
 
 To update the generated file, run:
     ./tools/run gen
@@ -12,9 +12,61 @@ See:
 */ -}}
 
 {{- $I := LoadIntrinsics "src/tint/lang/core/core.def" -}}
-#include "src/tint/lang/core/builtin_fn.h"
+{{- Import "src/tint/utils/templates/enums.tmpl.inc" -}}
+{{- $access_enum := ($I.Sem.Enum "access") -}}
+{{- $addr_space_enum := ($I.Sem.Enum "address_space") -}}
+{{- $interpolation_sampling_enum := ($I.Sem.Enum "interpolation_sampling") -}}
+{{- $interpolation_type_enum := ($I.Sem.Enum "interpolation_type") -}}
+{{- $subgroup_matrix_kind_enum := ($I.Sem.Enum "subgroup_matrix_kind") -}}
+{{- $texel_format_enum := ($I.Sem.Enum "texel_format") -}}
+{{- $builtin_type_enum := ($I.Sem.Enum "builtin_type") -}}
+{{- $builtin_value_enum := ($I.Sem.Enum "builtin_value") -}}
+{{- $attribute_enum := ($I.Sem.Enum "attribute") -}}
+
+{{- Eval "OverrideEnumName" "Enum" $builtin_type_enum "Name" "BuiltinType" -}}
+
+#include "src/tint/lang/core/enums.h"
 
 namespace tint::core {
+
+{{ Eval "ParseEnum" $access_enum}}
+{{ Eval "EnumOStream" $access_enum}}
+
+{{ Eval "ParseEnum" $addr_space_enum}}
+{{ Eval "EnumOStream" $addr_space_enum}}
+
+{{ Eval "ParseEnum" $interpolation_sampling_enum}}
+{{ Eval "EnumOStream" $interpolation_sampling_enum}}
+
+{{ Eval "ParseEnum" $interpolation_type_enum}}
+{{ Eval "EnumOStream" $interpolation_type_enum}}
+
+{{ Eval "ParseEnum" $subgroup_matrix_kind_enum}}
+{{ Eval "EnumOStream" $subgroup_matrix_kind_enum}}
+
+{{ Eval "ParseEnum" $texel_format_enum}}
+{{ Eval "EnumOStream" $texel_format_enum}}
+
+{{ Eval "ParseEnum" $builtin_type_enum}}
+{{ Eval "EnumOStream" $builtin_type_enum}}
+
+{{ Eval "ParseEnum" $builtin_value_enum}}
+{{ Eval "EnumOStream" $builtin_value_enum}}
+
+{{ Eval "ParseEnum" $attribute_enum}}
+{{ Eval "EnumOStream" $attribute_enum}}
+
+std::string_view ToString(ParameterUsage usage) {
+    switch (usage) {
+        case ParameterUsage::kNone:
+            return "none";
+{{- range $I.Sem.UniqueParameterNames  }}
+        case ParameterUsage::k{{PascalCase .}}:
+            return "{{.}}";
+{{- end  }}
+    }
+    return "<unknown>";
+}
 
 BuiltinFn ParseBuiltinFn(std::string_view name) {
 {{- range $I.Sem.Builtins  }}

@@ -31,12 +31,10 @@
 #include <string>
 #include <utility>
 
-#include "src/tint/lang/core/builtin_fn.h"
-#include "src/tint/lang/core/builtin_type.h"
-#include "src/tint/lang/core/builtin_value.h"
 #include "src/tint/lang/core/constant/composite.h"
 #include "src/tint/lang/core/constant/scalar.h"
 #include "src/tint/lang/core/constant/splat.h"
+#include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/core/ir/access.h"
 #include "src/tint/lang/core/ir/bitcast.h"
 #include "src/tint/lang/core/ir/break_if.h"
@@ -67,7 +65,6 @@
 #include "src/tint/lang/core/ir/unreachable.h"
 #include "src/tint/lang/core/ir/user_call.h"
 #include "src/tint/lang/core/ir/var.h"
-#include "src/tint/lang/core/texel_format.h"
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/bool.h"

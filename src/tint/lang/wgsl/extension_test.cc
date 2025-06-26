@@ -47,16 +47,16 @@ namespace {
 
 namespace parse_print_tests {
 
-struct Case {
+struct ExtensionCase {
     const char* string;
     Extension value;
 };
 
-inline std::ostream& operator<<(std::ostream& out, Case c) {
+inline std::ostream& operator<<(std::ostream& out, ExtensionCase c) {
     return out << "'" << std::string(c.string) << "'";
 }
 
-static constexpr Case kValidCases[] = {
+static constexpr ExtensionCase kValidExtensionCases[] = {
     {"chromium_disable_uniformity_analysis", Extension::kChromiumDisableUniformityAnalysis},
     {"chromium_experimental_framebuffer_fetch", Extension::kChromiumExperimentalFramebufferFetch},
     {"chromium_experimental_immediate", Extension::kChromiumExperimentalImmediate},
@@ -70,7 +70,7 @@ static constexpr Case kValidCases[] = {
     {"subgroups", Extension::kSubgroups},
 };
 
-static constexpr Case kInvalidCases[] = {
+static constexpr ExtensionCase kInvalidExtensionCases[] = {
     {"chromium_disableuniformiccy_analysis", Extension::kUndefined},
     {"chromil3_disable_unifority_analss", Extension::kUndefined},
     {"chromium_disable_Vniformity_analysis", Extension::kUndefined},
@@ -106,7 +106,7 @@ static constexpr Case kInvalidCases[] = {
     {"subgroupXX", Extension::kUndefined},
 };
 
-using ExtensionParseTest = testing::TestWithParam<Case>;
+using ExtensionParseTest = testing::TestWithParam<ExtensionCase>;
 
 TEST_P(ExtensionParseTest, Parse) {
     const char* string = GetParam().string;
@@ -114,10 +114,14 @@ TEST_P(ExtensionParseTest, Parse) {
     EXPECT_EQ(expect, ParseExtension(string));
 }
 
-INSTANTIATE_TEST_SUITE_P(ValidCases, ExtensionParseTest, testing::ValuesIn(kValidCases));
-INSTANTIATE_TEST_SUITE_P(InvalidCases, ExtensionParseTest, testing::ValuesIn(kInvalidCases));
+INSTANTIATE_TEST_SUITE_P(ValidExtensionCases,
+                         ExtensionParseTest,
+                         testing::ValuesIn(kValidExtensionCases));
+INSTANTIATE_TEST_SUITE_P(InvalidExtensionCases,
+                         ExtensionParseTest,
+                         testing::ValuesIn(kInvalidExtensionCases));
 
-using ExtensionPrintTest = testing::TestWithParam<Case>;
+using ExtensionPrintTest = testing::TestWithParam<ExtensionCase>;
 
 TEST_P(ExtensionPrintTest, Print) {
     Extension value = GetParam().value;
@@ -125,7 +129,9 @@ TEST_P(ExtensionPrintTest, Print) {
     EXPECT_EQ(expect, ToString(value));
 }
 
-INSTANTIATE_TEST_SUITE_P(ValidCases, ExtensionPrintTest, testing::ValuesIn(kValidCases));
+INSTANTIATE_TEST_SUITE_P(ValidExtensionCases,
+                         ExtensionPrintTest,
+                         testing::ValuesIn(kValidExtensionCases));
 
 }  // namespace parse_print_tests
 

@@ -28,7 +28,7 @@
 #include "langsvr/lsp/comparators.h"
 #include "langsvr/lsp/lsp.h"
 #include "langsvr/lsp/primitives.h"
-#include "src/tint/lang/core/builtin_fn.h"
+#include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/wgsl/ast/identifier.h"
 #include "src/tint/lang/wgsl/ast/identifier_expression.h"
 #include "src/tint/lang/wgsl/ast/member_accessor_expression.h"

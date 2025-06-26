@@ -28,8 +28,7 @@
 #include <utility>
 
 #include "gtest/gtest.h"
-#include "src/tint/lang/core/access.h"
-#include "src/tint/lang/core/builtin_value.h"
+#include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/number.h"
 #include "src/tint/lang/core/type/struct.h"

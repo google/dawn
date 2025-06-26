@@ -30,10 +30,8 @@
 #include <unordered_set>
 #include <utility>
 
-#include "src/tint/lang/core/builtin_value.h"
+#include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/core/fluent_types.h"
-#include "src/tint/lang/core/interpolation_sampling.h"
-#include "src/tint/lang/core/interpolation_type.h"
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/bool.h"

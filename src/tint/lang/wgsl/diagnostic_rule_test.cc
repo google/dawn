@@ -48,21 +48,21 @@ namespace core_diagnostic_rule_tests {
 
 namespace parse_print_tests {
 
-struct Case {
+struct CoreDiagnosticRuleCase {
     const char* string;
     CoreDiagnosticRule value;
 };
 
-inline std::ostream& operator<<(std::ostream& out, Case c) {
+inline std::ostream& operator<<(std::ostream& out, CoreDiagnosticRuleCase c) {
     return out << "'" << std::string(c.string) << "'";
 }
 
-static constexpr Case kValidCases[] = {
+static constexpr CoreDiagnosticRuleCase kValidCoreDiagnosticRuleCases[] = {
     {"derivative_uniformity", CoreDiagnosticRule::kDerivativeUniformity},
     {"subgroup_uniformity", CoreDiagnosticRule::kSubgroupUniformity},
 };
 
-static constexpr Case kInvalidCases[] = {
+static constexpr CoreDiagnosticRuleCase kInvalidCoreDiagnosticRuleCases[] = {
     {"deriative_unccformity", CoreDiagnosticRule::kUndefined},
     {"dlivative_3iformiy", CoreDiagnosticRule::kUndefined},
     {"derivative_uniforVity", CoreDiagnosticRule::kUndefined},
@@ -71,7 +71,7 @@ static constexpr Case kInvalidCases[] = {
     {"sub77roup_ulliformity", CoreDiagnosticRule::kUndefined},
 };
 
-using CoreDiagnosticRuleParseTest = testing::TestWithParam<Case>;
+using CoreDiagnosticRuleParseTest = testing::TestWithParam<CoreDiagnosticRuleCase>;
 
 TEST_P(CoreDiagnosticRuleParseTest, Parse) {
     const char* string = GetParam().string;
@@ -79,12 +79,14 @@ TEST_P(CoreDiagnosticRuleParseTest, Parse) {
     EXPECT_EQ(expect, ParseCoreDiagnosticRule(string));
 }
 
-INSTANTIATE_TEST_SUITE_P(ValidCases, CoreDiagnosticRuleParseTest, testing::ValuesIn(kValidCases));
-INSTANTIATE_TEST_SUITE_P(InvalidCases,
+INSTANTIATE_TEST_SUITE_P(ValidCoreDiagnosticRuleCases,
                          CoreDiagnosticRuleParseTest,
-                         testing::ValuesIn(kInvalidCases));
+                         testing::ValuesIn(kValidCoreDiagnosticRuleCases));
+INSTANTIATE_TEST_SUITE_P(InvalidCoreDiagnosticRuleCases,
+                         CoreDiagnosticRuleParseTest,
+                         testing::ValuesIn(kInvalidCoreDiagnosticRuleCases));
 
-using CoreDiagnosticRulePrintTest = testing::TestWithParam<Case>;
+using CoreDiagnosticRulePrintTest = testing::TestWithParam<CoreDiagnosticRuleCase>;
 
 TEST_P(CoreDiagnosticRulePrintTest, Print) {
     CoreDiagnosticRule value = GetParam().value;
@@ -92,7 +94,9 @@ TEST_P(CoreDiagnosticRulePrintTest, Print) {
     EXPECT_EQ(expect, ToString(value));
 }
 
-INSTANTIATE_TEST_SUITE_P(ValidCases, CoreDiagnosticRulePrintTest, testing::ValuesIn(kValidCases));
+INSTANTIATE_TEST_SUITE_P(ValidCoreDiagnosticRuleCases,
+                         CoreDiagnosticRulePrintTest,
+                         testing::ValuesIn(kValidCoreDiagnosticRuleCases));
 
 }  // namespace parse_print_tests
 
@@ -102,21 +106,21 @@ namespace chromium_diagnostic_rule_tests {
 
 namespace parse_print_tests {
 
-struct Case {
+struct ChromiumDiagnosticRuleCase {
     const char* string;
     ChromiumDiagnosticRule value;
 };
 
-inline std::ostream& operator<<(std::ostream& out, Case c) {
+inline std::ostream& operator<<(std::ostream& out, ChromiumDiagnosticRuleCase c) {
     return out << "'" << std::string(c.string) << "'";
 }
 
-static constexpr Case kValidCases[] = {
+static constexpr ChromiumDiagnosticRuleCase kValidChromiumDiagnosticRuleCases[] = {
     {"subgroup_matrix_uniformity", ChromiumDiagnosticRule::kSubgroupMatrixUniformity},
     {"unreachable_code", ChromiumDiagnosticRule::kUnreachableCode},
 };
 
-static constexpr Case kInvalidCases[] = {
+static constexpr ChromiumDiagnosticRuleCase kInvalidChromiumDiagnosticRuleCases[] = {
     {"subgroppHp_matriqq_uiformity", ChromiumDiagnosticRule::kUndefined},
     {"subroup_matrcx_niformit", ChromiumDiagnosticRule::kUndefined},
     {"subroupGmatrbx_uniformity", ChromiumDiagnosticRule::kUndefined},
@@ -125,7 +129,7 @@ static constexpr Case kInvalidCases[] = {
     {"unreMchablxxcode", ChromiumDiagnosticRule::kUndefined},
 };
 
-using ChromiumDiagnosticRuleParseTest = testing::TestWithParam<Case>;
+using ChromiumDiagnosticRuleParseTest = testing::TestWithParam<ChromiumDiagnosticRuleCase>;
 
 TEST_P(ChromiumDiagnosticRuleParseTest, Parse) {
     const char* string = GetParam().string;
@@ -133,14 +137,14 @@ TEST_P(ChromiumDiagnosticRuleParseTest, Parse) {
     EXPECT_EQ(expect, ParseChromiumDiagnosticRule(string));
 }
 
-INSTANTIATE_TEST_SUITE_P(ValidCases,
+INSTANTIATE_TEST_SUITE_P(ValidChromiumDiagnosticRuleCases,
                          ChromiumDiagnosticRuleParseTest,
-                         testing::ValuesIn(kValidCases));
-INSTANTIATE_TEST_SUITE_P(InvalidCases,
+                         testing::ValuesIn(kValidChromiumDiagnosticRuleCases));
+INSTANTIATE_TEST_SUITE_P(InvalidChromiumDiagnosticRuleCases,
                          ChromiumDiagnosticRuleParseTest,
-                         testing::ValuesIn(kInvalidCases));
+                         testing::ValuesIn(kInvalidChromiumDiagnosticRuleCases));
 
-using ChromiumDiagnosticRulePrintTest = testing::TestWithParam<Case>;
+using ChromiumDiagnosticRulePrintTest = testing::TestWithParam<ChromiumDiagnosticRuleCase>;
 
 TEST_P(ChromiumDiagnosticRulePrintTest, Print) {
     ChromiumDiagnosticRule value = GetParam().value;
@@ -148,9 +152,9 @@ TEST_P(ChromiumDiagnosticRulePrintTest, Print) {
     EXPECT_EQ(expect, ToString(value));
 }
 
-INSTANTIATE_TEST_SUITE_P(ValidCases,
+INSTANTIATE_TEST_SUITE_P(ValidChromiumDiagnosticRuleCases,
                          ChromiumDiagnosticRulePrintTest,
-                         testing::ValuesIn(kValidCases));
+                         testing::ValuesIn(kValidChromiumDiagnosticRuleCases));
 
 }  // namespace parse_print_tests
 

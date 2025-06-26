@@ -1,6 +1,6 @@
 {{- /*
 --------------------------------------------------------------------------------
-Template file for use with tools/src/cmd/gen to generate builtin_fn.h
+Template file for use with tools/src/cmd/gen to generate access.h
 
 To update the generated file, run:
     ./tools/run gen
@@ -12,17 +12,86 @@ See:
 */ -}}
 
 {{- $I := LoadIntrinsics "src/tint/lang/core/core.def" -}}
+{{- Import "src/tint/utils/templates/enums.tmpl.inc" -}}
+{{- $access_enum := ($I.Sem.Enum "access") -}}
+{{- $addr_space_enum := ($I.Sem.Enum "address_space") -}}
+{{- $interpolation_sampling_enum := ($I.Sem.Enum "interpolation_sampling") -}}
+{{- $interpolation_type_enum := ($I.Sem.Enum "interpolation_type") -}}
+{{- $subgroup_matrix_kind_enum := ($I.Sem.Enum "subgroup_matrix_kind") -}}
+{{- $texel_format_enum := ($I.Sem.Enum "texel_format") -}}
+{{- $builtin_type_enum := ($I.Sem.Enum "builtin_type") -}}
+{{- $builtin_value_enum := ($I.Sem.Enum "builtin_value") -}}
+{{- $attribute_enum := ($I.Sem.Enum "attribute") -}}
 
-#ifndef SRC_TINT_LANG_CORE_BUILTIN_FN_H_
-#define SRC_TINT_LANG_CORE_BUILTIN_FN_H_
+{{- Eval "OverrideEnumName" "Enum" $builtin_type_enum "Name" "BuiltinType" -}}
+
+#ifndef SRC_TINT_LANG_CORE_ENUMS_H_
+#define SRC_TINT_LANG_CORE_ENUMS_H_
 
 #include <cstdint>
-#include <string>
 
+#include "src/tint/utils/reflection.h"
 #include "src/tint/utils/rtti/traits.h"
 
-// \cond DO_NOT_DOCUMENT
 namespace tint::core {
+
+/// Access of a given pointer.
+{{ Eval "DeclareEnum" $access_enum}}
+
+/// Address space of a given pointer.
+{{ Eval "DeclareEnum" $addr_space_enum}}
+
+/// @returns true if the AddressSpace is host-shareable
+/// @param address_space the AddressSpace
+/// @see https://gpuweb.github.io/gpuweb/wgsl.html#host-shareable
+inline bool IsHostShareable(AddressSpace address_space) {
+    return address_space == AddressSpace::kUniform ||
+           address_space == AddressSpace::kStorage ||
+           address_space == AddressSpace::kImmediate;
+}
+
+/// The interpolation sampling.
+{{ Eval "DeclareEnum" $interpolation_sampling_enum }}
+
+/// The interpolation type.
+{{ Eval "DeclareEnum" $interpolation_type_enum }}
+
+/// Address space of a given pointer.
+{{ Eval "DeclareEnum" $subgroup_matrix_kind_enum }}
+
+/// Enumerator of texel formats
+{{ Eval "DeclareEnum" $texel_format_enum}}
+
+/// An enumerator of builtin types.
+{{ Eval "DeclareEnum" $builtin_type_enum}}
+
+/// Builtin value defined with `@builtin(<name>)`.
+{{ Eval "DeclareEnum" $builtin_value_enum}}
+
+/// Address space of a given pointer.
+{{ Eval "DeclareEnum" $attribute_enum}}
+
+/// ParameterUsage is extra metadata for identifying a parameter based on its
+/// overload position
+enum class ParameterUsage : uint8_t {
+{{- range $I.Sem.UniqueParameterNames  }}
+    k{{PascalCase .}},
+{{- end  }}
+    kNone,
+};
+
+/// @param value the enum value
+/// @returns the string for the given enum value
+std::string_view ToString(ParameterUsage value);
+
+/// @param out the stream to write to
+/// @param value the ParameterUsage
+/// @returns @p out so calls can be chained
+template <typename STREAM>
+    requires(traits::IsOStream<STREAM>)
+auto& operator<<(STREAM& out, ParameterUsage value) {
+    return out << ToString(value);
+}
 
 /// Enumerator of all builtin functions
 enum class BuiltinFn : uint8_t {
@@ -126,6 +195,15 @@ bool IsSubgroup(BuiltinFn f);
 bool HasSideEffects(BuiltinFn f);
 
 }  // namespace tint::core
-// \endcond
 
-#endif  // SRC_TINT_LANG_CORE_BUILTIN_FN_H_
+namespace tint {
+
+/// Access reflection information
+TINT_REFLECT_ENUM_RANGE(core::{{ Eval "EnumName" $access_enum }}, {{Eval "EnumFirst" $access_enum }}, {{Eval "EnumLast" $access_enum}});
+
+/// SubgroupMatrixType reflection information
+TINT_REFLECT_ENUM_RANGE(core::{{ Eval "EnumName" $subgroup_matrix_kind_enum }}, {{Eval "EnumFirst" $subgroup_matrix_kind_enum }}, {{Eval "EnumLast" $subgroup_matrix_kind_enum}});
+
+}  // namespace tint
+
+#endif  // SRC_TINT_LANG_CORE_ENUMS_H_

@@ -30,7 +30,7 @@
 #include <algorithm>
 #include <string>
 
-#include "src/tint/lang/core/builtin_type.h"
+#include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/type/atomic.h"
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"

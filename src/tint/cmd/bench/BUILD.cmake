@@ -123,19 +123,12 @@ if(TINT_BUILD_WGSL_READER)
 # Condition: TINT_BUILD_WGSL_READER
 ################################################################################
 tint_add_target(tint_cmd_bench_bench bench
-  cmd/bench/access_bench.cc
-  cmd/bench/address_space_bench.cc
-  cmd/bench/attribute_bench.cc
   cmd/bench/bench.cc
   cmd/bench/bench.h
-  cmd/bench/builtin_type_bench.cc
-  cmd/bench/builtin_value_bench.cc
   cmd/bench/diagnostic_rule_bench.cc
   cmd/bench/diagnostic_severity_bench.cc
+  cmd/bench/enums_core_bench.cc
   cmd/bench/extension_bench.cc
-  cmd/bench/interpolation_sampling_bench.cc
-  cmd/bench/interpolation_type_bench.cc
-  cmd/bench/texel_format_bench.cc
   cmd/bench/validator_bench.cc
 )
 

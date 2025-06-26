@@ -27,7 +27,7 @@
 
 #include "src/tint/lang/spirv/writer/common/helper_test.h"
 
-#include "src/tint/lang/core/builtin_fn.h"
+#include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/core/type/builtin_structs.h"
 
 using namespace tint::core::number_suffixes;  // NOLINT

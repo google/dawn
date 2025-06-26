@@ -45,36 +45,16 @@ if (tint_build_unittests || tint_build_benchmarks) {
 
 libtint_source_set("core") {
   sources = [
-    "access.cc",
-    "access.h",
-    "address_space.cc",
-    "address_space.h",
-    "attribute.cc",
-    "attribute.h",
     "binary_op.cc",
     "binary_op.h",
-    "builtin_fn.cc",
-    "builtin_fn.h",
-    "builtin_type.cc",
-    "builtin_type.h",
-    "builtin_value.cc",
-    "builtin_value.h",
+    "enums.cc",
+    "enums.h",
     "evaluation_stage.h",
     "fluent_types.h",
     "interpolation.h",
-    "interpolation_sampling.cc",
-    "interpolation_sampling.h",
-    "interpolation_type.cc",
-    "interpolation_type.h",
     "io_attributes.h",
     "number.cc",
     "number.h",
-    "parameter_usage.cc",
-    "parameter_usage.h",
-    "subgroup_matrix_kind.cc",
-    "subgroup_matrix_kind.h",
-    "texel_format.cc",
-    "texel_format.h",
     "unary_op.cc",
     "unary_op.h",
   ]
@@ -94,15 +74,8 @@ libtint_source_set("core") {
 if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {
     sources = [
-      "access_test.cc",
-      "address_space_test.cc",
-      "attribute_test.cc",
-      "builtin_type_test.cc",
-      "builtin_value_test.cc",
-      "interpolation_sampling_test.cc",
-      "interpolation_type_test.cc",
+      "enums_test.cc",
       "number_test.cc",
-      "texel_format_test.cc",
     ]
     deps = [
       "${dawn_root}/src/utils:utils",

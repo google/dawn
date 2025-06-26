@@ -47,16 +47,16 @@ namespace {
 
 namespace parse_print_tests {
 
-struct Case {
+struct LanguageFeatureCase {
     const char* string;
     LanguageFeature value;
 };
 
-inline std::ostream& operator<<(std::ostream& out, Case c) {
+inline std::ostream& operator<<(std::ostream& out, LanguageFeatureCase c) {
     return out << "'" << std::string(c.string) << "'";
 }
 
-static constexpr Case kValidCases[] = {
+static constexpr LanguageFeatureCase kValidLanguageFeatureCases[] = {
     {"chromium_testing_experimental", LanguageFeature::kChromiumTestingExperimental},
     {"chromium_testing_shipped", LanguageFeature::kChromiumTestingShipped},
     {"chromium_testing_shipped_with_killswitch",
@@ -72,7 +72,7 @@ static constexpr Case kValidCases[] = {
     {"unrestricted_pointer_parameters", LanguageFeature::kUnrestrictedPointerParameters},
 };
 
-static constexpr Case kInvalidCases[] = {
+static constexpr LanguageFeatureCase kInvalidLanguageFeatureCases[] = {
     {"chccomium_esting_experimental", LanguageFeature::kUndefined},
     {"cr3mium_testlg_experimentl", LanguageFeature::kUndefined},
     {"cVromium_testing_experimental", LanguageFeature::kUndefined},
@@ -108,7 +108,7 @@ static constexpr Case kInvalidCases[] = {
     {"unraastrSScted_pointerHHrparameteYs", LanguageFeature::kUndefined},
 };
 
-using LanguageFeatureParseTest = testing::TestWithParam<Case>;
+using LanguageFeatureParseTest = testing::TestWithParam<LanguageFeatureCase>;
 
 TEST_P(LanguageFeatureParseTest, Parse) {
     const char* string = GetParam().string;
@@ -116,10 +116,14 @@ TEST_P(LanguageFeatureParseTest, Parse) {
     EXPECT_EQ(expect, ParseLanguageFeature(string));
 }
 
-INSTANTIATE_TEST_SUITE_P(ValidCases, LanguageFeatureParseTest, testing::ValuesIn(kValidCases));
-INSTANTIATE_TEST_SUITE_P(InvalidCases, LanguageFeatureParseTest, testing::ValuesIn(kInvalidCases));
+INSTANTIATE_TEST_SUITE_P(ValidLanguageFeatureCases,
+                         LanguageFeatureParseTest,
+                         testing::ValuesIn(kValidLanguageFeatureCases));
+INSTANTIATE_TEST_SUITE_P(InvalidLanguageFeatureCases,
+                         LanguageFeatureParseTest,
+                         testing::ValuesIn(kInvalidLanguageFeatureCases));
 
-using LanguageFeaturePrintTest = testing::TestWithParam<Case>;
+using LanguageFeaturePrintTest = testing::TestWithParam<LanguageFeatureCase>;
 
 TEST_P(LanguageFeaturePrintTest, Print) {
     LanguageFeature value = GetParam().value;
@@ -127,7 +131,9 @@ TEST_P(LanguageFeaturePrintTest, Print) {
     EXPECT_EQ(expect, ToString(value));
 }
 
-INSTANTIATE_TEST_SUITE_P(ValidCases, LanguageFeaturePrintTest, testing::ValuesIn(kValidCases));
+INSTANTIATE_TEST_SUITE_P(ValidLanguageFeatureCases,
+                         LanguageFeaturePrintTest,
+                         testing::ValuesIn(kValidLanguageFeatureCases));
 
 }  // namespace parse_print_tests
 

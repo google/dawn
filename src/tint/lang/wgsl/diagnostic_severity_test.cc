@@ -48,23 +48,23 @@ namespace diagnostic_severity_tests {
 
 namespace parse_print_tests {
 
-struct Case {
+struct DiagnosticSeverityCase {
     const char* string;
     DiagnosticSeverity value;
 };
 
-inline std::ostream& operator<<(std::ostream& out, Case c) {
+inline std::ostream& operator<<(std::ostream& out, DiagnosticSeverityCase c) {
     return out << "'" << std::string(c.string) << "'";
 }
 
-static constexpr Case kValidCases[] = {
+static constexpr DiagnosticSeverityCase kValidDiagnosticSeverityCases[] = {
     {"error", DiagnosticSeverity::kError},
     {"info", DiagnosticSeverity::kInfo},
     {"off", DiagnosticSeverity::kOff},
     {"warning", DiagnosticSeverity::kWarning},
 };
 
-static constexpr Case kInvalidCases[] = {
+static constexpr DiagnosticSeverityCase kInvalidDiagnosticSeverityCases[] = {
     {"erccr", DiagnosticSeverity::kUndefined},    {"3o", DiagnosticSeverity::kUndefined},
     {"eVror", DiagnosticSeverity::kUndefined},    {"1nfo", DiagnosticSeverity::kUndefined},
     {"iqfJ", DiagnosticSeverity::kUndefined},     {"illf77", DiagnosticSeverity::kUndefined},
@@ -73,7 +73,7 @@ static constexpr Case kInvalidCases[] = {
     {"8WWrning", DiagnosticSeverity::kUndefined}, {"wxxning", DiagnosticSeverity::kUndefined},
 };
 
-using DiagnosticSeverityParseTest = testing::TestWithParam<Case>;
+using DiagnosticSeverityParseTest = testing::TestWithParam<DiagnosticSeverityCase>;
 
 TEST_P(DiagnosticSeverityParseTest, Parse) {
     const char* string = GetParam().string;
@@ -81,12 +81,14 @@ TEST_P(DiagnosticSeverityParseTest, Parse) {
     EXPECT_EQ(expect, ParseDiagnosticSeverity(string));
 }
 
-INSTANTIATE_TEST_SUITE_P(ValidCases, DiagnosticSeverityParseTest, testing::ValuesIn(kValidCases));
-INSTANTIATE_TEST_SUITE_P(InvalidCases,
+INSTANTIATE_TEST_SUITE_P(ValidDiagnosticSeverityCases,
                          DiagnosticSeverityParseTest,
-                         testing::ValuesIn(kInvalidCases));
+                         testing::ValuesIn(kValidDiagnosticSeverityCases));
+INSTANTIATE_TEST_SUITE_P(InvalidDiagnosticSeverityCases,
+                         DiagnosticSeverityParseTest,
+                         testing::ValuesIn(kInvalidDiagnosticSeverityCases));
 
-using DiagnosticSeverityPrintTest = testing::TestWithParam<Case>;
+using DiagnosticSeverityPrintTest = testing::TestWithParam<DiagnosticSeverityCase>;
 
 TEST_P(DiagnosticSeverityPrintTest, Print) {
     DiagnosticSeverity value = GetParam().value;
@@ -94,7 +96,9 @@ TEST_P(DiagnosticSeverityPrintTest, Print) {
     EXPECT_EQ(expect, ToString(value));
 }
 
-INSTANTIATE_TEST_SUITE_P(ValidCases, DiagnosticSeverityPrintTest, testing::ValuesIn(kValidCases));
+INSTANTIATE_TEST_SUITE_P(ValidDiagnosticSeverityCases,
+                         DiagnosticSeverityPrintTest,
+                         testing::ValuesIn(kValidDiagnosticSeverityCases));
 
 }  // namespace parse_print_tests
 

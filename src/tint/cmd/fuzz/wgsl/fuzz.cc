@@ -32,8 +32,7 @@
 #include <string_view>
 #include <thread>
 
-#include "src/tint/lang/core/address_space.h"
-#include "src/tint/lang/core/builtin_type.h"
+#include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/wgsl/allowed_features.h"
 #include "src/tint/lang/wgsl/ast/alias.h"
 #include "src/tint/lang/wgsl/ast/function.h"

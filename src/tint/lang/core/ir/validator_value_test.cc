@@ -31,7 +31,7 @@
 
 #include "gtest/gtest.h"
 
-#include "src/tint/lang/core/address_space.h"
+#include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/number.h"

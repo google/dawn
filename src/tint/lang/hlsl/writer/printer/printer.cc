@@ -35,14 +35,10 @@
 #include <utility>
 #include <vector>
 
-#include "src/tint/lang/core/access.h"
-#include "src/tint/lang/core/address_space.h"
-#include "src/tint/lang/core/builtin_value.h"
 #include "src/tint/lang/core/constant/splat.h"
 #include "src/tint/lang/core/constant/value.h"
+#include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/core/fluent_types.h"
-#include "src/tint/lang/core/interpolation_sampling.h"
-#include "src/tint/lang/core/interpolation_type.h"
 #include "src/tint/lang/core/ir/access.h"
 #include "src/tint/lang/core/ir/bitcast.h"
 #include "src/tint/lang/core/ir/block.h"
@@ -79,7 +75,6 @@
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/ir/value.h"
 #include "src/tint/lang/core/ir/var.h"
-#include "src/tint/lang/core/texel_format.h"
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/array_count.h"
 #include "src/tint/lang/core/type/atomic.h"

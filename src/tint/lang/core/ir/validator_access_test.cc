@@ -32,10 +32,10 @@
 
 #include "gtest/gtest.h"
 
+#include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/number.h"
-#include "src/tint/lang/core/texel_format.h"
 #include "src/tint/lang/core/type/abstract_float.h"
 #include "src/tint/lang/core/type/abstract_int.h"
 #include "src/tint/lang/core/type/manager.h"

@@ -30,7 +30,7 @@
 #include <limits>
 #include <utility>
 
-#include "src/tint/lang/core/attribute.h"
+#include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/core/type/depth_texture.h"
 #include "src/tint/lang/core/type/external_texture.h"
 #include "src/tint/lang/core/type/multisampled_texture.h"

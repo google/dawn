@@ -32,10 +32,9 @@
 #include <string_view>
 #include <utility>
 
-#include "src/tint/lang/core/builtin_type.h"
 #include "src/tint/lang/core/constant/scalar.h"
+#include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/core/fluent_types.h"
-#include "src/tint/lang/core/texel_format.h"
 #include "src/tint/lang/core/type/abstract_float.h"
 #include "src/tint/lang/core/type/abstract_int.h"
 #include "src/tint/lang/core/type/array.h"
