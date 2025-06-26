@@ -79,6 +79,8 @@ enum class Capability : uint8_t {
     kAllowUnannotatedModuleIOVariables,
     /// Allows non-core types in the IR module
     kAllowNonCoreTypes,
+    /// Allows matrix annotations on structure members
+    kAllowStructMatrixDecorations,
 };
 
 /// Capabilities is a set of Capability

@@ -1843,6 +1843,23 @@ void Validator::CheckType(const core::type::Type* root,
 
         return tint::Switch(
             type,
+            [&](const core::type::Struct* str) {
+                if (capabilities_.Contains(Capability::kAllowStructMatrixDecorations)) {
+                    return true;
+                }
+
+                for (auto* member : str->Members()) {
+                    if (member->RowMajor()) {
+                        diag() << "Row major annotation now allowed on structures";
+                        return false;
+                    }
+                    if (member->HasMatrixStride()) {
+                        diag() << "Matrix stride annotation not allowed on structures";
+                        return false;
+                    }
+                }
+                return true;
+            },
             [&](const core::type::Reference* ref) {
                 if (ref->StoreType()->Is<core::type::Void>()) {
                     diag() << "references to void are not permitted";
