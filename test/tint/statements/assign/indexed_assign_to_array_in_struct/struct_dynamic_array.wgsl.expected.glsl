@@ -9,11 +9,11 @@ struct InnerS {
   int v;
 };
 
-layout(binding = 4, std140)
+layout(binding = 0, std140)
 uniform uniforms_block_1_ubo {
   Uniforms inner;
 } v_1;
-layout(binding = 0, std430)
+layout(binding = 1, std430)
 buffer OuterS_1_ssbo {
   InnerS a1[];
 } s1;

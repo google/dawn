@@ -22,7 +22,7 @@ struct main_out {
   vec4 glFragColor_1;
 };
 
-layout(binding = 9, std140)
+layout(binding = 0, std140)
 uniform f_x_20_block_ubo {
   LeftOver inner;
 } v;

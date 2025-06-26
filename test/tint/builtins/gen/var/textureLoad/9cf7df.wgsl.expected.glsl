@@ -9,7 +9,7 @@ layout(binding = 0, std430)
 buffer f_prevent_dce_block_ssbo {
   ivec4 inner;
 } v;
-layout(binding = 0, rg32i) uniform highp readonly iimage2DArray f_arg_0;
+layout(binding = 1, rg32i) uniform highp readonly iimage2DArray f_arg_0;
 ivec4 textureLoad_9cf7df() {
   ivec2 arg_1 = ivec2(1);
   uint arg_2 = 1u;
@@ -33,7 +33,7 @@ layout(binding = 0, std430)
 buffer prevent_dce_block_1_ssbo {
   ivec4 inner;
 } v;
-layout(binding = 0, rg32i) uniform highp readonly iimage2DArray arg_0;
+layout(binding = 1, rg32i) uniform highp readonly iimage2DArray arg_0;
 ivec4 textureLoad_9cf7df() {
   ivec2 arg_1 = ivec2(1);
   uint arg_2 = 1u;

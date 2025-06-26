@@ -9,7 +9,7 @@ layout(binding = 0, std430)
 buffer f_prevent_dce_block_ssbo {
   uint inner;
 } v;
-layout(binding = 0, rg32f) uniform highp readonly image2DArray f_arg_0;
+layout(binding = 1, rg32f) uniform highp readonly image2DArray f_arg_0;
 uint textureNumLayers_90b8cc() {
   uint res = uint(imageSize(f_arg_0).z);
   return res;
@@ -26,7 +26,7 @@ layout(binding = 0, std430)
 buffer prevent_dce_block_1_ssbo {
   uint inner;
 } v;
-layout(binding = 0, rg32f) uniform highp readonly image2DArray arg_0;
+layout(binding = 1, rg32f) uniform highp readonly image2DArray arg_0;
 uint textureNumLayers_90b8cc() {
   uint res = uint(imageSize(arg_0).z);
   return res;

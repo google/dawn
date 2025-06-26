@@ -68,7 +68,7 @@ buffer f_prevent_dce_block_ssbo {
 } v;
 uniform highp sampler2D f_arg_0_plane0;
 uniform highp sampler2D f_arg_0_plane1;
-layout(binding = 2, std140)
+layout(binding = 3, std140)
 uniform f_arg_0_params_block_std140_ubo {
   tint_ExternalTextureParams_std140 inner;
 } v_1;
@@ -152,7 +152,7 @@ buffer prevent_dce_block_1_ssbo {
 } v;
 uniform highp sampler2D arg_0_plane0;
 uniform highp sampler2D arg_0_plane1;
-layout(binding = 2, std140)
+layout(binding = 3, std140)
 uniform arg_0_params_block_std140_1_ubo {
   tint_ExternalTextureParams_std140 inner;
 } v_1;

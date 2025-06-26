@@ -17,7 +17,7 @@ layout(binding = 0, std140)
 uniform ubo_block_1_ubo {
   UBO inner;
 } v;
-layout(binding = 2, std430)
+layout(binding = 1, std430)
 buffer result_block_1_ssbo {
   Result inner;
 } v_1;

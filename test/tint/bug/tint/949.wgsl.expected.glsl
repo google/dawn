@@ -41,7 +41,7 @@ struct main_out {
 float u_Float = 0.0f;
 vec3 u_Color = vec3(0.0f);
 vec2 vMainuv = vec2(0.0f);
-layout(binding = 6, std140)
+layout(binding = 2, std140)
 uniform f_x_269_block_ubo {
   LeftOver inner;
 } v;

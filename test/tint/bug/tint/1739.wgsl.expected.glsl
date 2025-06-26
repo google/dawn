@@ -61,7 +61,7 @@ layout(binding = 3, std140)
 uniform t_params_block_std140_1_ubo {
   tint_ExternalTextureParams_std140 inner;
 } v_1;
-layout(binding = 1, rgba8) uniform highp writeonly image2D outImage;
+layout(binding = 0, rgba8) uniform highp writeonly image2D outImage;
 uniform highp sampler2D t_plane0;
 uniform highp sampler2D t_plane1;
 vec3 tint_GammaCorrection(vec3 v, tint_GammaTransferParams params) {

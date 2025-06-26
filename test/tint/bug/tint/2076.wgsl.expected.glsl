@@ -42,7 +42,7 @@ struct tint_ExternalTextureParams_std140 {
 
 uniform highp sampler2D randomTexture_plane0;
 uniform highp sampler2D randomTexture_plane1;
-layout(binding = 4, std140)
+layout(binding = 3, std140)
 uniform randomTexture_params_block_std140_1_ubo {
   tint_ExternalTextureParams_std140 inner;
 } v;

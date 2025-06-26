@@ -16,11 +16,11 @@ struct Simulation {
   uint i;
 };
 
-layout(binding = 3, std430)
+layout(binding = 0, std430)
 buffer Particles_1_ssbo {
   Particle p[];
 } particles;
-layout(binding = 4, std140)
+layout(binding = 1, std140)
 uniform sim_block_1_ubo {
   Simulation inner;
 } v;

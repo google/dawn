@@ -8,7 +8,7 @@ struct Light {
   uint tint_pad_1;
 };
 
-layout(binding = 1, std430)
+layout(binding = 0, std430)
 buffer Lights_1_ssbo {
   Light light[];
 } lights;

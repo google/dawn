@@ -2,11 +2,11 @@
 
 float p = 0.0f;
 shared float w;
-layout(binding = 1, std430)
+layout(binding = 0, std430)
 buffer uniforms_block_1_ssbo {
   vec2 inner;
 } v;
-layout(binding = 0, std430)
+layout(binding = 1, std430)
 buffer storages_block_1_ssbo {
   float inner[];
 } v_1;

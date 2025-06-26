@@ -1,7 +1,7 @@
 #version 310 es
 
 shared uint sh_atomic_failed;
-layout(binding = 4, std430)
+layout(binding = 0, std430)
 buffer output_block_1_ssbo {
   uint inner;
 } v;

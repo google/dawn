@@ -17,7 +17,7 @@ struct OuterS {
   S1 s2;
 };
 
-layout(binding = 4, std140)
+layout(binding = 0, std140)
 uniform uniforms_block_1_ubo {
   Uniforms inner;
 } v_1;

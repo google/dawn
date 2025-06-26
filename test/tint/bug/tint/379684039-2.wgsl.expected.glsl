@@ -9,7 +9,7 @@ struct FSUniformData {
 };
 
 uint idx = 0u;
-layout(binding = 2, std430)
+layout(binding = 0, std430)
 buffer FSUniforms_1_ssbo {
   FSUniformData fsUniformData[];
 } _storage;

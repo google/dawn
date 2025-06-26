@@ -1,7 +1,7 @@
 #version 310 es
 
 uint count = 0u;
-layout(binding = 1, std430)
+layout(binding = 0, std430)
 buffer Outputs_1_ssbo {
   uint data[];
 } outputs;

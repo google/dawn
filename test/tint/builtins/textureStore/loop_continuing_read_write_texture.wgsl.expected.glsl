@@ -1,6 +1,6 @@
 #version 310 es
 
-layout(binding = 2, r32i) uniform highp iimage2D tex;
+layout(binding = 0, r32i) uniform highp iimage2D tex;
 void foo() {
   {
     uvec2 tint_loop_idx = uvec2(4294967295u);

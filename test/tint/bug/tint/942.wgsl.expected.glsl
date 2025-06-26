@@ -14,8 +14,8 @@ layout(binding = 1, std140)
 uniform params_block_1_ubo {
   Params inner;
 } v;
-layout(binding = 2, rgba8) uniform highp writeonly image2D outputTex;
-layout(binding = 3, std140)
+layout(binding = 3, rgba8) uniform highp writeonly image2D outputTex;
+layout(binding = 4, std140)
 uniform flip_block_1_ubo {
   Flip inner;
 } v_1;

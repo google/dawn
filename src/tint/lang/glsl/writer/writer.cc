@@ -33,6 +33,7 @@
 #include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/storage_texture.h"
+#include "src/tint/lang/glsl/writer/common/option_helpers.h"
 #include "src/tint/lang/glsl/writer/printer/printer.h"
 #include "src/tint/lang/glsl/writer/raise/raise.h"
 
@@ -194,6 +195,13 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
         if (!check_immediate_offset(options.depth_range_offsets->max) ||
             !check_immediate_offset(options.depth_range_offsets->min)) {
             return Failure("invalid offsets for depth range immediate data");
+        }
+    }
+
+    {
+        auto res = ValidateBindingOptions(options);
+        if (res != Success) {
+            return res.Failure();
         }
     }
 

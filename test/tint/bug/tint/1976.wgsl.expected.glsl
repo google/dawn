@@ -5,7 +5,7 @@ struct Results {
   float colorSamples[4];
 };
 
-layout(binding = 2, std430)
+layout(binding = 1, std430)
 buffer results_block_1_ssbo {
   Results inner;
 } v;

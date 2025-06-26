@@ -9,7 +9,7 @@ struct OuterS {
   mat2x4 m1;
 };
 
-layout(binding = 4, std140)
+layout(binding = 0, std140)
 uniform uniforms_block_1_ubo {
   Uniforms inner;
 } v;

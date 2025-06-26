@@ -72,7 +72,7 @@ struct VertexInput {
   vec2 quad_pos;
 };
 
-layout(binding = 5, std140)
+layout(binding = 0, std140)
 uniform v_render_params_block_ubo {
   RenderParams inner;
 } v;
@@ -161,19 +161,19 @@ struct UBO {
   uint width;
 };
 
-layout(binding = 3, std140)
+layout(binding = 0, std140)
 uniform ubo_block_1_ubo {
   UBO inner;
 } v;
-layout(binding = 4, std430)
+layout(binding = 1, std430)
 buffer Buffer_1_ssbo {
   float weights[];
 } buf_in;
-layout(binding = 5, std430)
+layout(binding = 2, std430)
 buffer Buffer_2_ssbo {
   float weights[];
 } buf_out;
-layout(binding = 7, rgba8) uniform highp writeonly image2D tex_out;
+layout(binding = 3, rgba8) uniform highp writeonly image2D tex_out;
 float tint_float_modulo(float x, float y) {
   return (x - (y * trunc((x / y))));
 }

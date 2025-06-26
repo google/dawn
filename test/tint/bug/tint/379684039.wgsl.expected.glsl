@@ -1,6 +1,6 @@
 #version 310 es
 
-layout(binding = 2, std430)
+layout(binding = 0, std430)
 buffer _storage_block_1_ssbo {
   ivec2 inner;
 } v;

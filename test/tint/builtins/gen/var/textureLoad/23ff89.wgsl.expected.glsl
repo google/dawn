@@ -9,7 +9,7 @@ layout(binding = 0, std430)
 buffer f_prevent_dce_block_ssbo {
   uvec4 inner;
 } v;
-layout(binding = 0, rgba16ui) uniform highp readonly uimage2DArray f_arg_0;
+layout(binding = 1, rgba16ui) uniform highp readonly uimage2DArray f_arg_0;
 uvec4 textureLoad_23ff89() {
   uvec2 arg_1 = uvec2(1u);
   uint arg_2 = 1u;
@@ -32,7 +32,7 @@ layout(binding = 0, std430)
 buffer prevent_dce_block_1_ssbo {
   uvec4 inner;
 } v;
-layout(binding = 0, rgba16ui) uniform highp readonly uimage2DArray arg_0;
+layout(binding = 1, rgba16ui) uniform highp readonly uimage2DArray arg_0;
 uvec4 textureLoad_23ff89() {
   uvec2 arg_1 = uvec2(1u);
   uint arg_2 = 1u;

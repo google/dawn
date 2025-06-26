@@ -34,23 +34,23 @@ layout(binding = 0, std140)
 uniform uniforms_block_1_ubo {
   Uniforms inner;
 } v;
-layout(binding = 10, std430)
+layout(binding = 1, std430)
 buffer U32s_1_ssbo {
   uint values[];
 } indices;
-layout(binding = 11, std430)
+layout(binding = 2, std430)
 buffer F32s_1_ssbo {
   float values[];
 } positions;
-layout(binding = 20, std430)
+layout(binding = 3, std430)
 buffer AU32s_1_ssbo {
   uint values[];
 } counters;
-layout(binding = 21, std430)
+layout(binding = 4, std430)
 buffer AI32s_1_ssbo {
   int values[];
 } LUT;
-layout(binding = 50, std430)
+layout(binding = 5, std430)
 buffer dbg_block_1_ssbo {
   Dbg inner;
 } v_1;
@@ -168,23 +168,23 @@ layout(binding = 0, std140)
 uniform uniforms_block_1_ubo {
   Uniforms inner;
 } v;
-layout(binding = 10, std430)
+layout(binding = 1, std430)
 buffer U32s_1_ssbo {
   uint values[];
 } indices;
-layout(binding = 11, std430)
+layout(binding = 2, std430)
 buffer F32s_1_ssbo {
   float values[];
 } positions;
-layout(binding = 20, std430)
+layout(binding = 3, std430)
 buffer AU32s_1_ssbo {
   uint values[];
 } counters;
-layout(binding = 21, std430)
+layout(binding = 4, std430)
 buffer AI32s_1_ssbo {
   int values[];
 } LUT;
-layout(binding = 50, std430)
+layout(binding = 5, std430)
 buffer dbg_block_1_ssbo {
   Dbg inner;
 } v_1;
@@ -262,23 +262,23 @@ layout(binding = 0, std140)
 uniform uniforms_block_1_ubo {
   Uniforms inner;
 } v;
-layout(binding = 10, std430)
+layout(binding = 1, std430)
 buffer U32s_1_ssbo {
   uint values[];
 } indices;
-layout(binding = 11, std430)
+layout(binding = 2, std430)
 buffer F32s_1_ssbo {
   float values[];
 } positions;
-layout(binding = 20, std430)
+layout(binding = 3, std430)
 buffer AU32s_1_ssbo {
   uint values[];
 } counters;
-layout(binding = 21, std430)
+layout(binding = 4, std430)
 buffer AI32s_1_ssbo {
   int values[];
 } LUT;
-layout(binding = 50, std430)
+layout(binding = 5, std430)
 buffer dbg_block_1_ssbo {
   Dbg inner;
 } v_1;

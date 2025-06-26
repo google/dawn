@@ -9,7 +9,7 @@ layout(binding = 0, std430)
 buffer f_prevent_dce_block_ssbo {
   uvec4 inner;
 } v;
-layout(binding = 0, rgba8ui) uniform highp readonly uimage3D f_arg_0;
+layout(binding = 1, rgba8ui) uniform highp readonly uimage3D f_arg_0;
 uvec4 textureLoad_9a7c90() {
   ivec3 arg_1 = ivec3(1);
   ivec3 v_1 = arg_1;
@@ -29,7 +29,7 @@ layout(binding = 0, std430)
 buffer prevent_dce_block_1_ssbo {
   uvec4 inner;
 } v;
-layout(binding = 0, rgba8ui) uniform highp readonly uimage3D arg_0;
+layout(binding = 1, rgba8ui) uniform highp readonly uimage3D arg_0;
 uvec4 textureLoad_9a7c90() {
   ivec3 arg_1 = ivec3(1);
   ivec3 v_1 = arg_1;

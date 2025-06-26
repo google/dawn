@@ -43,14 +43,25 @@ namespace tint::glsl::writer {
 
 Bindings GenerateBindings(const core::ir::Module& module) {
     Bindings bindings{};
-
-    std::unordered_set<tint::BindingPoint> seen_binding_points;
-
-    // Set a binding point for the texture-builtins-from-uniform buffer.
+    // Set a next_binding point for the texture-builtins-from-uniform buffer.
     bindings.texture_builtins_from_uniform.ubo_binding = {0u};
 
-    // Collect next valid binding number per group
-    Hashmap<uint32_t, uint32_t, 4> group_to_next_binding_number;
+    // Track the next available GLSL binding number.
+    // NOTE: GLSL does not have a concept of groups, so the next GLSL binding number
+    // is a global value across all WGSL binding groups. The same WGSL binding point should map
+    // consistently to the same GLSL binding number though.
+    uint32_t next_binding = 0;
+    Hashmap<tint::BindingPoint, uint32_t, 4> wgsl_to_glsl_bindings;
+    auto get_binding = [&next_binding,
+                        &wgsl_to_glsl_bindings](const tint::BindingPoint& bp) -> uint32_t {
+        if (auto binding = wgsl_to_glsl_bindings.Get(bp)) {
+            return *binding;
+        }
+        auto binding = next_binding++;
+        wgsl_to_glsl_bindings.Add(bp, binding);
+        return binding;
+    };
+
     Vector<tint::BindingPoint, 4> ext_tex_bps;
     for (auto* inst : *module.root_block) {
         auto* var = inst->As<core::ir::Var>();
@@ -59,12 +70,6 @@ Bindings GenerateBindings(const core::ir::Module& module) {
         }
 
         if (auto bp = var->BindingPoint()) {
-            if (auto val = group_to_next_binding_number.Get(bp->group)) {
-                *val = std::max(*val, bp->binding + 1);
-            } else {
-                group_to_next_binding_number.Add(bp->group, bp->binding + 1);
-            }
-
             auto* ptr_type = var->Result()->Type()->As<core::type::Pointer>();
 
             // Store up the external textures, we'll add them in the next step
@@ -73,7 +78,7 @@ Bindings GenerateBindings(const core::ir::Module& module) {
                 continue;
             }
 
-            binding::BindingInfo info{bp->binding};
+            binding::BindingInfo info{get_binding(bp.value())};
             switch (ptr_type->AddressSpace()) {
                 case core::AddressSpace::kHandle:
                     Switch(
@@ -110,14 +115,9 @@ Bindings GenerateBindings(const core::ir::Module& module) {
     }
 
     for (auto bp : ext_tex_bps) {
-        uint32_t g = bp.group;
-        uint32_t& next_num = group_to_next_binding_number.GetOrAddZero(g);
-
-        binding::BindingInfo plane0{bp.binding};
-        binding::BindingInfo plane1{next_num++};
-        binding::BindingInfo metadata{next_num++};
-
-        group_to_next_binding_number.Replace(g, next_num);
+        binding::BindingInfo plane0{get_binding(bp)};
+        binding::BindingInfo plane1{next_binding++};
+        binding::BindingInfo metadata{next_binding++};
 
         bindings.external_texture.emplace(bp, binding::ExternalTexture{metadata, plane0, plane1});
     }

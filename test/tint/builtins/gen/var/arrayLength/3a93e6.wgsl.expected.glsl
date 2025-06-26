@@ -52,7 +52,7 @@ struct VertexOutput {
   uint prevent_dce;
 };
 
-layout(binding = 1, std430)
+layout(binding = 0, std430)
 buffer v_SB_RO_ssbo {
   float arg_0[];
 } sb_ro;

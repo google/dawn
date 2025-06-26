@@ -35,6 +35,7 @@
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/core/type/input_attachment.h"
 #include "src/tint/lang/core/type/pointer.h"
+#include "src/tint/lang/hlsl/writer/common/option_helpers.h"
 #include "src/tint/lang/hlsl/writer/printer/printer.h"
 #include "src/tint/lang/hlsl/writer/raise/raise.h"
 
@@ -85,6 +86,13 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
                     return Failure("subgroup_id is not yet supported by the HLSL backend");
                 }
             }
+        }
+    }
+
+    {
+        auto res = ValidateBindingOptions(options);
+        if (res != Success) {
+            return res.Failure();
         }
     }
 

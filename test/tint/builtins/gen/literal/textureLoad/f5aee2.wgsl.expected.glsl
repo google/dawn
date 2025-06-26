@@ -9,7 +9,7 @@ layout(binding = 0, std430)
 buffer f_prevent_dce_block_ssbo {
   vec4 inner;
 } v;
-layout(binding = 0, r8) uniform highp readonly image2D f_arg_0;
+layout(binding = 1, r8) uniform highp readonly image2D f_arg_0;
 vec4 textureLoad_f5aee2() {
   vec4 res = imageLoad(f_arg_0, ivec2(min(uvec2(1u), (uvec2(imageSize(f_arg_0)) - uvec2(1u)))));
   return res;
@@ -26,7 +26,7 @@ layout(binding = 0, std430)
 buffer prevent_dce_block_1_ssbo {
   vec4 inner;
 } v;
-layout(binding = 0, r8) uniform highp readonly image2D arg_0;
+layout(binding = 1, r8) uniform highp readonly image2D arg_0;
 vec4 textureLoad_f5aee2() {
   vec4 res = imageLoad(arg_0, ivec2(min(uvec2(1u), (uvec2(imageSize(arg_0)) - uvec2(1u)))));
   return res;

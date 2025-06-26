@@ -27,7 +27,7 @@ struct FSOut {
   vec4 sk_FragColor;
 };
 
-layout(binding = 2, std430)
+layout(binding = 0, std430)
 buffer f_FSUniforms_ssbo {
   FSUniformData fsUniformData[];
 } _storage1;

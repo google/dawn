@@ -5,7 +5,7 @@ struct DrawIndirectArgs {
   uint vertexCount;
 };
 
-layout(binding = 5, std430)
+layout(binding = 0, std430)
 buffer drawOut_block_1_ssbo {
   DrawIndirectArgs inner;
 } v;
