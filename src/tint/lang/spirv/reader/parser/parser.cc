@@ -607,7 +607,16 @@ class Parser {
                 }
                 case spvtools::opt::analysis::Type::kRuntimeArray: {
                     auto* arr_ty = type->AsRuntimeArray();
-                    return ty_.runtime_array(Type(arr_ty->element_type()));
+
+                    auto* elem_ty = Type(arr_ty->element_type());
+                    uint32_t implicit_stride = tint::RoundUp(elem_ty->Align(), elem_ty->Size());
+                    if (array_stride == 0 || array_stride == implicit_stride) {
+                        return ty_.runtime_array(elem_ty);
+                    }
+
+                    return ty_.Get<spirv::type::ExplicitLayoutArray>(
+                        elem_ty, ty_.Get<core::type::RuntimeArrayCount>(), elem_ty->Align(),
+                        static_cast<uint32_t>(array_stride), array_stride);
                 }
                 case spvtools::opt::analysis::Type::kStruct: {
                     const core::type::Struct* str_ty = EmitStruct(type->AsStruct());
