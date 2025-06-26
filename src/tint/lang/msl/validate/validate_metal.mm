@@ -33,7 +33,7 @@
 
 namespace tint::msl::validate {
 
-Result ValidateUsingMetal(const std::string& src, MslVersion version) {
+Result ValidateUsingMetal(const std::string& src_original, MslVersion version) {
     Result result;
 
     NSError* error = nil;
@@ -45,10 +45,18 @@ Result ValidateUsingMetal(const std::string& src, MslVersion version) {
         return result;
     }
 
-    NSString* source = [NSString stringWithCString:src.c_str() encoding:NSUTF8StringEncoding];
-
+    std::string src_modified = src_original;
     MTLCompileOptions* compileOptions = [MTLCompileOptions new];
-    compileOptions.fastMathEnabled = true;
+    if (@available(macOS 15.0, iOS 18.0, *)) {
+        // Use relaxed math where possible.
+        // See crbug.com/425650181
+        std::string("\n#pragma METAL fp math_mode(relaxed)\n") + src_original;
+    } else {
+        compileOptions.fastMathEnabled = true;
+    }
+    NSString* source = [NSString stringWithCString:src_modified.c_str()
+                                          encoding:NSUTF8StringEncoding];
+
     switch (version) {
         case MslVersion::kMsl_2_3:
             compileOptions.languageVersion = MTLLanguageVersion2_3;

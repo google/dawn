@@ -65,6 +65,7 @@ using SubstituteOverrideConfig = std::unordered_map<tint::OverrideId, double>;
     X(uint32_t, maxSubgroupSize)                                                     \
     X(std::string, entryPointName)                                                   \
     X(bool, usesSubgroupMatrix)                                                      \
+    X(bool, useStrictMath)                                                           \
     X(bool, disableSymbolRenaming)                                                   \
     X(tint::msl::writer::Options, tintOptions)                                       \
     X(UnsafeUnserializedValue<dawn::platform::Platform*>, platform)
@@ -221,7 +222,8 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
     ShaderModule::MetalFunctionData* out,
     uint32_t sampleMask,
     const RenderPipeline* renderPipeline,
-    const BindingInfoArray& moduleBindingInfo) {
+    const BindingInfoArray& moduleBindingInfo,
+    bool useStrictMath) {
     std::ostringstream errorStream;
     errorStream << "Tint MSL failure:\n";
 
@@ -278,6 +280,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
     req.disableSymbolRenaming = device->IsToggleEnabled(Toggle::DisableSymbolRenaming);
     req.usesSubgroupMatrix = programmableStage.metadata->usesSubgroupMatrix;
     req.platform = UnsafeUnserializedValue(device->GetPlatform());
+    req.useStrictMath = useStrictMath;
 
     req.tintOptions.strip_all_names = !req.disableSymbolRenaming;
     req.tintOptions.remapped_entry_point_name = device->GetIsolatedEntryPointName();
@@ -374,17 +377,28 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
                                     r.adapterSupportedLimits.UnsafeGetValue()));
             }
 
+            auto msl = std::move(result->msl);
+            // Metal supports math_mode as both compiler option and as a pragma. We add the
+            // math_mode here as a string conditional on OSx version as the compiler option only
+            // exists for MacOS after 15. See the Metal 4 spec for more information.
+            // Note: this math_mode takes precedence over global flags provide to the compiler
+            // (including the deprecated fastMathEnabled compiler option).
+            std::string math_mode_heading;
+            if (@available(macOS 15.0, iOS 18.0, *)) {
+                math_mode_heading = "\n#pragma METAL fp math_mode(";
+                math_mode_heading += r.useStrictMath ? "safe" : "relaxed";
+                math_mode_heading += +")\n";
+            }
             // Metal uses Clang to compile the shader as C++14. Disable everything in the -Wall
             // category. -Wunused-variable in particular comes up a lot in generated code, and
             // some (old?) Metal drivers accidentally treat it as a MTLLibraryErrorCompileError
             // instead of a warning.
-            auto msl = std::move(result->msl);
             msl = R"(
                     #ifdef __clang__
                     #pragma clang diagnostic ignored "-Wall"
                     #endif
                 )" +
-                  msl;
+                  math_mode_heading + msl;
 
             return MslCompilation{{
                 std::move(msl),
@@ -430,7 +444,8 @@ MaybeError ShaderModule::CreateFunction(SingleShaderStage stage,
     CacheResult<MslCompilation> mslCompilation;
     DAWN_TRY_ASSIGN(mslCompilation,
                     TranslateToMSL(GetDevice(), programmableStage, stage, layout, out, sampleMask,
-                                   renderPipeline, GetEntryPoint(entryPointName).bindings));
+                                   renderPipeline, GetEntryPoint(entryPointName).bindings,
+                                   GetStrictMath().value_or(false)));
 
     out->needsStorageBufferLength = mslCompilation->needsStorageBufferLength;
     out->workgroupAllocations = std::move(mslCompilation->workgroupAllocations);
@@ -446,7 +461,11 @@ MaybeError ShaderModule::CreateFunction(SingleShaderStage stage,
         (*compileOptions).preserveInvariance = true;
     }
 
-    (*compileOptions).fastMathEnabled = !GetStrictMath().value_or(false);
+    // If possible we will use relaxed math as a pragma in the source rather than this fast math
+    // global compiler option. See crbug.com/425650181
+    if (!@available(macOS 15.0, iOS 18.0, *)) {
+        (*compileOptions).fastMathEnabled = !GetStrictMath().value_or(false);
+    }
 
     auto mtlDevice = ToBackend(GetDevice())->GetMTLDevice();
     NSError* error = nullptr;
