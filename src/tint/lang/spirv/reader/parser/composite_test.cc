@@ -62,6 +62,38 @@ TEST_F(SpirvParserTest, DISABLED_Matrix_ColMajor) {
 )");
 }
 
+// TODO(426198644): Requires MatrixStride support
+TEST_F(SpirvParserTest, DISABLED_Matrix_RowMajor) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpMemberDecorate %str 0 RowMajor
+               OpMemberDecorate %str 0 Offset 0
+               OpMemberDecorate %str 0 MatrixStride 48
+               OpDecorate %str Block
+       %void = OpTypeVoid
+        %f32 = OpTypeFloat 32
+      %vec3f = OpTypeVector %f32 3
+     %mat4x3 = OpTypeMatrix %vec3f 4
+        %str = OpTypeStruct %mat4x3
+        %ptr = OpTypePointer Uniform %str
+    %ep_type = OpTypeFunction %void
+        %var = OpVariable %ptr Uniform
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = func():void {
+  $B2: {
+    ret
+  }
+)");
+}
+
 TEST_F(SpirvParserTest, CompositeConstruct_Vector) {
     EXPECT_IR(R"(
                OpCapability Shader

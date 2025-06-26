@@ -265,6 +265,11 @@ class StructMember : public Castable<StructMember, Node> {
     /// Resets the attributes to empty
     void ResetAttributes() { attributes_ = {}; }
 
+    /// Sets this member to be row major
+    void SetRowMajor() { is_row_major_ = true; }
+    /// Returns if this member is row major
+    bool RowMajor() const { return is_row_major_; }
+
     /// @param ctx the clone context
     /// @returns a clone of this struct member
     StructMember* Clone(CloneContext& ctx) const;
@@ -277,6 +282,7 @@ class StructMember : public Castable<StructMember, Node> {
     const uint32_t offset_;
     const uint32_t align_;
     const uint32_t size_;
+    bool is_row_major_ = false;
     IOAttributes attributes_;
 };
 

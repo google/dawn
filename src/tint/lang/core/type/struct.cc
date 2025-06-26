@@ -246,7 +246,13 @@ StructMember::~StructMember() = default;
 StructMember* StructMember::Clone(CloneContext& ctx) const {
     auto sym = ctx.dst.st->Register(name_.Name());
     auto* ty = type_->Clone(ctx);
-    return ctx.dst.mgr->Get<StructMember>(sym, ty, index_, offset_, align_, size_, attributes_);
+    auto* member =
+        ctx.dst.mgr->Get<StructMember>(sym, ty, index_, offset_, align_, size_, attributes_);
+
+    if (is_row_major_) {
+        member->SetRowMajor();
+    }
+    return member;
 }
 
 }  // namespace tint::core::type
