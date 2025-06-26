@@ -113,6 +113,7 @@ function(tint_default_compile_options TARGET)
     -Weverything
     -Wunsafe-buffer-usage
     -Wno-unsafe-buffer-usage-in-libc-call
+    -Wno-covered-switch-default
   )
 
   if(COMPILER_IS_GNU)
