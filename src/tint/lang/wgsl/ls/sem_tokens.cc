@@ -35,7 +35,7 @@
 #include "src/tint/lang/wgsl/ast/struct.h"
 #include "src/tint/lang/wgsl/ast/struct_member.h"
 #include "src/tint/lang/wgsl/ast/type.h"
-#include "src/tint/lang/wgsl/builtin_fn.h"
+#include "src/tint/lang/wgsl/enums.h"
 #include "src/tint/lang/wgsl/ls/sem_token.h"
 #include "src/tint/lang/wgsl/ls/server.h"
 #include "src/tint/lang/wgsl/ls/utils.h"

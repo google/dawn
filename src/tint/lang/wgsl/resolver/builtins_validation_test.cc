@@ -28,7 +28,7 @@
 #include <functional>
 #include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/wgsl/ast/call_statement.h"
-#include "src/tint/lang/wgsl/extension.h"
+#include "src/tint/lang/wgsl/enums.h"
 #include "src/tint/lang/wgsl/resolver/resolver_helper_test.h"
 #include "src/tint/utils/text/string_stream.h"
 

@@ -35,7 +35,7 @@
 #include "src/tint/lang/core/ir/load.h"
 #include "src/tint/lang/core/ir/transform/rename_conflicts.h"
 #include "src/tint/lang/core/type/pointer.h"
-#include "src/tint/lang/wgsl/builtin_fn.h"
+#include "src/tint/lang/wgsl/enums.h"
 #include "src/tint/lang/wgsl/ir/builtin_call.h"
 #include "src/tint/lang/wgsl/writer/raise/ptr_to_ref.h"
 #include "src/tint/lang/wgsl/writer/raise/value_to_let.h"

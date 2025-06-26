@@ -42,10 +42,8 @@ cc_library(
   srcs = [
     "bench.cc",
     "bench.h",
-    "diagnostic_rule_bench.cc",
-    "diagnostic_severity_bench.cc",
     "enums_core_bench.cc",
-    "extension_bench.cc",
+    "enums_wgsl_bench.cc",
     "validator_bench.cc",
   ],
   deps = [

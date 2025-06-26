@@ -29,7 +29,7 @@
 
 #include "src/tint/lang/core/ir/transform/helper_test.h"
 #include "src/tint/lang/core/type/struct.h"
-#include "src/tint/lang/wgsl/builtin_fn.h"
+#include "src/tint/lang/wgsl/enums.h"
 #include "src/tint/lang/wgsl/ir/builtin_call.h"
 #include "src/tint/lang/wgsl/reader/lower/lower.h"
 

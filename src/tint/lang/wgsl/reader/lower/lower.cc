@@ -33,7 +33,7 @@
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/core_builtin_call.h"
 #include "src/tint/lang/core/ir/validator.h"
-#include "src/tint/lang/wgsl/builtin_fn.h"
+#include "src/tint/lang/wgsl/enums.h"
 #include "src/tint/lang/wgsl/ir/builtin_call.h"
 #include "src/tint/utils/ice/ice.h"
 

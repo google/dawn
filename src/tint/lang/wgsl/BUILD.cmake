@@ -51,18 +51,10 @@ include(lang/wgsl/writer/BUILD.cmake)
 ################################################################################
 tint_add_target(tint_lang_wgsl lib
   lang/wgsl/allowed_features.h
-  lang/wgsl/builtin_fn.cc
-  lang/wgsl/builtin_fn.h
-  lang/wgsl/diagnostic_rule.cc
-  lang/wgsl/diagnostic_rule.h
-  lang/wgsl/diagnostic_severity.cc
-  lang/wgsl/diagnostic_severity.h
-  lang/wgsl/extension.cc
-  lang/wgsl/extension.h
+  lang/wgsl/enums.cc
+  lang/wgsl/enums.h
   lang/wgsl/feature_status.cc
   lang/wgsl/feature_status.h
-  lang/wgsl/language_feature.cc
-  lang/wgsl/language_feature.h
   lang/wgsl/reserved_words.cc
   lang/wgsl/reserved_words.h
 )
@@ -89,11 +81,8 @@ tint_target_add_external_dependencies(tint_lang_wgsl lib
 ################################################################################
 tint_add_target(tint_lang_wgsl_test test
   lang/wgsl/allowed_features_test.cc
-  lang/wgsl/diagnostic_rule_test.cc
-  lang/wgsl/diagnostic_severity_test.cc
-  lang/wgsl/extension_test.cc
+  lang/wgsl/enums_test.cc
   lang/wgsl/language_feature_status_test.cc
-  lang/wgsl/language_feature_test.cc
 )
 
 tint_target_add_dependencies(tint_lang_wgsl_test test

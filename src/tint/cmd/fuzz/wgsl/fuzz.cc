@@ -40,7 +40,7 @@
 #include "src/tint/lang/wgsl/ast/module.h"
 #include "src/tint/lang/wgsl/ast/struct.h"
 #include "src/tint/lang/wgsl/ast/variable.h"
-#include "src/tint/lang/wgsl/builtin_fn.h"
+#include "src/tint/lang/wgsl/enums.h"
 #include "src/tint/lang/wgsl/reader/options.h"
 #include "src/tint/lang/wgsl/reader/reader.h"
 #include "src/tint/utils/containers/vector.h"

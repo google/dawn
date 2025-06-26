@@ -32,7 +32,7 @@
 #include <optional>
 #include <utility>
 
-#include "src/tint/lang/wgsl/diagnostic_severity.h"
+#include "src/tint/lang/wgsl/enums.h"
 #include "src/tint/lang/wgsl/sem/call.h"
 #include "src/tint/utils/containers/unique_vector.h"
 #include "src/tint/utils/containers/vector.h"

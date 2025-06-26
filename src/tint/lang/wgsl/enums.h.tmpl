@@ -1,9 +1,6 @@
 {{- /*
 --------------------------------------------------------------------------------
-Template file for use with tools/src/cmd/gen to generate builtin_fn.h
-
-To update the generated file, run:
-    ./tools/run gen
+Template file for use with tools/src/cmd/gen to generate enums.h
 
 See:
 * tools/src/cmd/gen for structures used by this template
@@ -12,17 +9,67 @@ See:
 */ -}}
 
 {{- $I := LoadIntrinsics "src/tint/lang/wgsl/wgsl.def" -}}
+{{- Import "src/tint/utils/templates/enums.tmpl.inc" -}}
+{{- $extensions_enum := ($I.Sem.Enum "extension") -}}
+{{- $language_feature_enum := ($I.Sem.Enum "language_feature") -}}
 
-#ifndef SRC_TINT_LANG_WGSL_BUILTIN_FN_H_
-#define SRC_TINT_LANG_WGSL_BUILTIN_FN_H_
+#ifndef SRC_TINT_LANG_WGSL_ENUMS_H_
+#define SRC_TINT_LANG_WGSL_ENUMS_H_
 
 #include <cstdint>
 #include <string>
+#include <variant>
 
+#include "src/tint/utils/containers/hashmap.h"
+#include "src/tint/utils/containers/unique_vector.h"
+#include "src/tint/utils/diagnostic/diagnostic.h"
 #include "src/tint/utils/rtti/traits.h"
 
-// \cond DO_NOT_DOCUMENT
 namespace tint::wgsl {
+
+/// WGSL core diagnostic rules.
+{{ Eval "DeclareEnum" ($I.Sem.Enum "core_diagnostic_rule") }}
+
+/// Chromium-specific diagnostic rules.
+{{ Eval "DeclareEnum" ($I.Sem.Enum "chromium_diagnostic_rule") }}
+
+/// An enumerator of WGSL extensions
+/// @see src/tint/lang/wgsl/intrinsics.def for extension descriptions
+{{ Eval "DeclareEnum" $extensions_enum}}
+
+/// All extensions
+static constexpr Extension kAllExtensions[] = {
+{{-   range $entry := $extensions_enum.Entries }}
+    Extension::k{{PascalCase $entry.Name}},
+{{-   end }}
+};
+
+/// An enumerator of WGSL language features
+/// @see src/tint/lang/wgsl/wgsl.def for language feature descriptions
+{{ Eval "DeclareEnum" "Enum" $language_feature_enum "EmitOStream" false}}
+
+/// All features
+static constexpr LanguageFeature kAllLanguageFeatures[] = {
+{{-   range $entry := $language_feature_enum.Entries }}
+    LanguageFeature::k{{PascalCase $entry.Name}},
+{{-   end }}
+};
+
+/// A unique vector of extensions
+using Extensions = UniqueVector<Extension, 4>;
+
+/// All diagnostic rules understood by Tint.
+using DiagnosticRule = std::variant<CoreDiagnosticRule, ChromiumDiagnosticRule>;
+
+/// The diagnostic severity control.
+{{ Eval "DeclareEnum" ($I.Sem.Enum "diagnostic_severity") }}
+
+/// Convert a DiagnosticSeverity to the corresponding diag::Severity.
+diag::Severity ToSeverity(DiagnosticSeverity sc);
+
+/// DiagnosticRuleSeverities is a map from diagnostic rule to diagnostic severity.
+using DiagnosticRuleSeverities = Hashmap<DiagnosticRule, DiagnosticSeverity, 1>;
+
 
 /// Enumerator of all builtin functions
 enum class BuiltinFn : uint8_t {
@@ -136,6 +183,5 @@ bool IsQuadSwap(BuiltinFn f);
 bool HasSideEffects(BuiltinFn f);
 
 }  // namespace tint::wgsl
-// \endcond
 
-#endif  // SRC_TINT_LANG_WGSL_BUILTIN_FN_H_
+#endif  // SRC_TINT_LANG_WGSL_ENUMS_H_

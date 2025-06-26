@@ -1,9 +1,6 @@
 {{- /*
 --------------------------------------------------------------------------------
-Template file for use with tools/src/cmd/gen to generate builtin_fn.cc
-
-To update the generated file, run:
-    ./tools/run gen
+Template file for use with tools/src/cmd/gen to generate enums.cc
 
 See:
 * tools/src/cmd/gen for structures used by this template
@@ -12,9 +9,44 @@ See:
 */ -}}
 
 {{- $I := LoadIntrinsics "src/tint/lang/wgsl/wgsl.def" -}}
-#include "src/tint/lang/wgsl/builtin_fn.h"
+{{- Import "src/tint/utils/templates/enums.tmpl.inc" -}}
+
+#include "src/tint/lang/wgsl/enums.h"
+
+#include <string>
+
+#include "src/tint/utils/rtti/traits.h"
 
 namespace tint::wgsl {
+
+{{ Eval "ParseEnum" ($I.Sem.Enum "extension") }}
+{{ Eval "EnumOStream" ($I.Sem.Enum "extension") }}
+
+{{ Eval "ParseEnum" ($I.Sem.Enum "core_diagnostic_rule")}}
+{{ Eval "EnumOStream" ($I.Sem.Enum "core_diagnostic_rule")}}
+
+{{ Eval "ParseEnum" ($I.Sem.Enum "chromium_diagnostic_rule")}}
+{{ Eval "EnumOStream" ($I.Sem.Enum "chromium_diagnostic_rule")}}
+
+{{ Eval "ParseEnum" ($I.Sem.Enum "language_feature") }}
+{{ Eval "EnumOStream" ($I.Sem.Enum "language_feature") }}
+
+diag::Severity ToSeverity(DiagnosticSeverity sc) {
+    switch (sc) {
+        case DiagnosticSeverity::kError:
+            return diag::Severity::Error;
+        case DiagnosticSeverity::kWarning:
+            return diag::Severity::Warning;
+        case DiagnosticSeverity::kInfo:
+            return diag::Severity::Note;
+        default:
+            return diag::Severity::Error;
+    }
+}
+
+{{ Eval "ParseEnum" ($I.Sem.Enum "diagnostic_severity")}}
+{{ Eval "EnumOStream" ($I.Sem.Enum "diagnostic_severity")}}
+
 
 BuiltinFn ParseBuiltinFn(std::string_view name) {
 {{- range $I.Sem.Builtins  }}

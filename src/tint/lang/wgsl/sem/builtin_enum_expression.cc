@@ -28,7 +28,7 @@
 #include "src/tint/lang/wgsl/sem/builtin_enum_expression.h"
 
 #include "src/tint/lang/core/enums.h"
-#include "src/tint/lang/wgsl/builtin_fn.h"
+#include "src/tint/lang/wgsl/enums.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::BuiltinEnumExpressionBase);
 

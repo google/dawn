@@ -40,7 +40,7 @@
 #include "src/tint/lang/spirv/reader/ast_lower/transpose_row_major.h"
 #include "src/tint/lang/spirv/reader/ast_lower/unshadow.h"
 #include "src/tint/lang/spirv/reader/ast_parser/ast_parser.h"
-#include "src/tint/lang/wgsl/extension.h"
+#include "src/tint/lang/wgsl/enums.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/resolver/resolve.h"
 

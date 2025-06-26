@@ -32,7 +32,7 @@
 
 #include "src/tint/lang/spirv/reader/ast_lower/transform.h"
 #include "src/tint/lang/wgsl/ast/internal_attribute.h"
-#include "src/tint/lang/wgsl/builtin_fn.h"
+#include "src/tint/lang/wgsl/enums.h"
 
 namespace tint::spirv::reader {
 

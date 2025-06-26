@@ -27,7 +27,7 @@
 
 #include "src/tint/lang/wgsl/feature_status.h"
 
-#include "src/tint/lang/wgsl/language_feature.h"
+#include "src/tint/lang/wgsl/enums.h"
 
 namespace tint::wgsl {
 

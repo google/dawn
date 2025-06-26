@@ -27,7 +27,7 @@
 
 #include "src/tint/lang/wgsl/resolver/eval_test.h"
 
-#include "src/tint/lang/wgsl/builtin_fn.h"
+#include "src/tint/lang/wgsl/enums.h"
 #include "src/tint/utils/result.h"
 
 #if TINT_BUILD_WGSL_READER

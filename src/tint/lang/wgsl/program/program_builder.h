@@ -56,7 +56,7 @@
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/core/type/void.h"
 #include "src/tint/lang/wgsl/ast/builder.h"
-#include "src/tint/lang/wgsl/extension.h"
+#include "src/tint/lang/wgsl/enums.h"
 #include "src/tint/lang/wgsl/program/program.h"
 #include "src/tint/lang/wgsl/sem/array_count.h"
 #include "src/tint/lang/wgsl/sem/struct.h"
