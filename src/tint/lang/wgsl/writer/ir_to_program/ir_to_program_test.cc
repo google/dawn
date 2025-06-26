@@ -3414,6 +3414,36 @@ fn f() -> u32 {
 )");
 }
 
+TEST_F(IRToProgramTest, StructMemberOffset) {
+    auto* S = ty.Struct(mod.symbols.New("S"),
+                        Vector{
+                            ty.Get<core::type::StructMember>(mod.symbols.New("a"), ty.i32(), 0u, 0u,
+                                                             4u, 4u, core::IOAttributes{}),
+                            ty.Get<core::type::StructMember>(mod.symbols.New("b"), ty.u32(), 1u,
+                                                             64u, 4u, 4u, core::IOAttributes{}),
+                            ty.Get<core::type::StructMember>(mod.symbols.New("c"), ty.f32(), 2u,
+                                                             76u, 4u, 4u, core::IOAttributes{}),
+                        });
+
+    auto* fn = b.Function("f", ty.void_());
+    auto* x = b.FunctionParam("x", S);
+    fn->SetParams({x});
+    b.Append(fn->Block(), [&] { b.Return(fn); });
+
+    EXPECT_WGSL(R"(
+struct S {
+  @size(64u)
+  a : i32,
+  @size(12u)
+  b : u32,
+  c : f32,
+}
+
+fn f(x : S) {
+}
+)");
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // chromium_internal_graphite
 ////////////////////////////////////////////////////////////////////////////////
