@@ -288,6 +288,7 @@ class HashmapBase {
             }
             slots_[slot_idx].nodes = nullptr;
         }
+        count_ = 0;
     }
 
     /// Ensures that the map can hold @p n entries without heap reallocation or rehashing.
