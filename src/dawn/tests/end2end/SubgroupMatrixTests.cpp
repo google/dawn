@@ -334,6 +334,10 @@ TEST_P(SubgroupMatrix_MatrixMatrixArithmeticTest, MatrixMultiply) {
         auto& config = subgroupMatrixConfigs.configs[i];
         uint32_t resultComponentByteSize = ComponentTypeToByteSize(config.resultComponentType);
 
+        InfoLog() << "Testing " << config.M << "x" << config.N << "x" << config.K << " "
+                  << ComponentTypeToWgslType(config.componentType) << " -> "
+                  << ComponentTypeToWgslType(config.resultComponentType);
+
         // Generate a shader that performs a matrix multiplication that matches the config.
         std::ostringstream shader;
         shader << "enable chromium_experimental_subgroup_matrix;\n";
