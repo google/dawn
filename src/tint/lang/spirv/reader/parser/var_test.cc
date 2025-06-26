@@ -56,6 +56,33 @@ TEST_F(SpirvParserTest, FunctionVar) {
 )");
 }
 
+TEST_F(SpirvParserTest, FunctionVar_RelaxedPrecision) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpDecorate %var RelaxedPrecision
+       %void = OpTypeVoid
+        %u32 = OpTypeInt 32 0
+    %u32_ptr = OpTypePointer Function %u32
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+        %var = OpVariable %u32_ptr Function
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:ptr<function, u32, read_write> = var undef
+    ret
+  }
+}
+)");
+}
+
 TEST_F(SpirvParserTest, FunctionVar_Initializer) {
     EXPECT_IR(R"(
                OpCapability Shader
