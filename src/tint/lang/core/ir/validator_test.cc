@@ -191,6 +191,24 @@ TEST_F(IR_ValidatorTest, RootBlock_VarBlockMismatch) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Construct_Array_WrongArgType) {
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        b.Construct<array<u32, 4>>(1_u, 2_u, 3_i, 4_u);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:3:42 error: construct: type 'i32' of argument 2 does not match expected type 'u32'
+    %2:array<u32, 4> = construct 1u, 2u, 3i, 4u
+                                         ^^
+)")) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Construct_Struct_ZeroValue) {
     auto* str_ty = ty.Struct(mod.symbols.New("MyStruct"), {
                                                               {mod.symbols.New("a"), ty.i32()},
@@ -302,7 +320,7 @@ TEST_F(IR_ValidatorTest, Construct_Struct_WrongArgType) {
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(
-            R"(:8:33 error: construct: type 'i32' of argument 1 does not match type 'u32' of struct member
+            R"(:8:33 error: construct: type 'i32' of argument 1 does not match expected type 'u32'
     %2:MyStruct = construct 1i, 2i
                                 ^^
 )")) << res.Failure();
