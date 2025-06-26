@@ -1,33 +1,16 @@
-# "emdawnwebgpu" (Dawn's fork of Emscripten's WebGPU bindings)
+# Building Emdawnwebgpu
 
-"emdawnwebgpu" is Dawn's fork of the Emscripten WebGPU bindings
-(`library_webgpu.js` and friends). The forked files live in
-[`//third_party/emdawnwebgpu`](../third_party/emdawnwebgpu/)
-and the build targets in this directory produce the other files needed to build
-an Emscripten-based project using these bindings.
+**Emdawnwebgpu is easiest to use as a pre-built package from
+<https://github.com/google/dawn/releases>. For information on using those,
+and other general information, read [`pkg/README.md`](pkg/README.md) instead.**
 
-We keep the `webgpu.h` interface roughly in sync between Dawn and emdawnwebgpu,
-however we don't guarantee it will always be in sync - we don't have any
-automated testing for this, so we'll periodically fix
-it up as needed for import into other projects that use these bindings.
+This README discusses building the pre-packaged `emdawnwebgpu_pkg`, building the
+in-tree Dawn samples/tests for Wasm, and using our CMake or GN build files to
+link either Dawn (for native) or Emdawnwebgpu (for Wasm).
 
-Projects should use this fork (by compiling Dawn as instructed below) if they
-want the latest version, which is mostly compatible with the same version of Dawn
-Native. For the future of this fork, please see <https://crbug.com/371024051>.
+## Setting up a CMake project that automatically chooses Dawn or Emdawnwebgpu
 
-## Using emdawnwebgpu pre-built releases
-
-Pre-built releases are published at <https://github.com/google/dawn/releases>.
-
-**See the [included README](./pkg/README.md) on how to use them.**
-
-TODO(crbug.com/371024051): Link to a sample project in that README.
-
-Instructions are provided below on how to build the package yourself, as well as
-samples that exercise the bindings.
-
-If for any reason you don't want to use the package, it's also possible to
-build emdawnwebgpu as a subproject of a CMake or gn project.
+Please read <https://developer.chrome.com/docs/web-platform/webgpu/build-app>.
 
 ## Building emdawnwebgpu and emdawnwebgpu_pkg
 

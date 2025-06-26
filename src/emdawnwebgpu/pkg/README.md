@@ -7,6 +7,7 @@ and while it is maintained in Dawn, it works in any browser supporting WebGPU
 
 The package includes all of the necessary files to use
 `<webgpu/webgpu.h>` and the Dawn-style `<webgpu/webgpu_cpp.h>` with Emscripten.
+<!-- TODO(crbug.com/371024051): Link to a sample project. -->
 
 Find new versions of this package at <https://github.com/google/dawn/releases>.
 
