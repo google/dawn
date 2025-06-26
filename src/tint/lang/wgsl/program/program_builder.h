@@ -93,18 +93,6 @@ class ProgramBuilder : public ast::Builder {
     /// @return this builder
     ProgramBuilder& operator=(ProgramBuilder&& rhs);
 
-    /// Wrap returns a new ProgramBuilder wrapping the Program `program` without
-    /// making a deep clone of the Program contents.
-    /// ProgramBuilder returned by Wrap() is intended to temporarily extend an
-    /// existing immutable program.
-    /// As the returned ProgramBuilder wraps `program`, `program` must not be
-    /// destructed or assigned while using the returned ProgramBuilder.
-    /// TODO(crbug.com/tint/460) - Evaluate whether there are safer alternatives to this
-    /// function.
-    /// @param program the immutable Program to wrap
-    /// @return the ProgramBuilder that wraps `program`
-    static ProgramBuilder Wrap(const Program& program);
-
     /// @returns a reference to the program's types
     core::type::Manager& Types() {
         AssertNotMoved();
@@ -155,10 +143,9 @@ class ProgramBuilder : public ast::Builder {
     /// @param args the arguments to pass to the constructor
     /// @returns the node pointer
     template <typename T, typename... ARGS>
-    std::enable_if_t<tint::traits::IsTypeOrDerived<T, sem::Node> &&
-                         !tint::traits::IsTypeOrDerived<T, core::type::Node>,
-                     T>*
-    create(ARGS&&... args) {
+        requires(tint::traits::IsTypeOrDerived<T, sem::Node> &&
+                 !tint::traits::IsTypeOrDerived<T, core::type::Node>)
+    T* create(ARGS&&... args) {
         AssertNotMoved();
         return sem_nodes_.Create<T>(std::forward<ARGS>(args)...);
     }

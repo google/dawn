@@ -211,7 +211,7 @@ class Parameter final : public Castable<Parameter, Variable> {
     /// @param type the variable type
     /// @param usage the parameter usage
     Parameter(const ast::Parameter* declaration,
-              uint32_t index = 0,
+              uint32_t index,
               const core::type::Type* type = nullptr,
               core::ParameterUsage usage = core::ParameterUsage::kNone);
 
@@ -225,9 +225,6 @@ class Parameter final : public Castable<Parameter, Variable> {
 
     /// @return the index of the parameter in the function
     uint32_t Index() const { return index_; }
-
-    /// @param usage the semantic usage for the parameter
-    void SetUsage(core::ParameterUsage usage) { usage_ = usage; }
 
     /// @returns the semantic usage for the parameter
     core::ParameterUsage Usage() const { return usage_; }
@@ -286,24 +283,6 @@ class VariableUser final : public Castable<VariableUser, ValueExpression> {
     const sem::Variable* const variable_;
 };
 
-/// A pair of sem::Variables. Can be hashed.
-typedef std::pair<const Variable*, const Variable*> VariablePair;
-
 }  // namespace tint::sem
-
-namespace std {
-
-/// Custom std::hash specialization for VariablePair
-template <>
-class hash<tint::sem::VariablePair> {
-  public:
-    /// @param i the variable pair to create a hash for
-    /// @return the hash value
-    inline std::size_t operator()(const tint::sem::VariablePair& i) const {
-        return Hash(i.first, i.second);
-    }
-};
-
-}  // namespace std
 
 #endif  // SRC_TINT_LANG_WGSL_SEM_VARIABLE_H_
