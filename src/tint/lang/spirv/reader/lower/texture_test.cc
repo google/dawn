@@ -339,5 +339,70 @@ $B1: {  # root
     ASSERT_EQ(expect, str());
 }
 
+TEST_F(SpirvReader_TextureTest, UserCall) {
+    auto* img_ty = ty.Get<spirv::type::Image>(
+        ty.f32(), Dim::kD2, Depth::kNotDepth, Arrayed::kNonArrayed, Multisampled::kSingleSampled,
+        Sampled::kSamplingCompatible, core::TexelFormat::kUndefined, core::Access::kRead);
+
+    core::ir::Var* var = nullptr;
+    b.Append(mod.root_block, [&] {
+        var = b.Var("wg", ty.ptr(handle, img_ty, read));
+        var->SetBindingPoint(0, 0);
+    });
+
+    auto* ld = b.Function("load", ty.void_());
+    auto* pt = b.FunctionParam(img_ty);
+    ld->AppendParam(pt);
+    ld->Block()->Append(b.Return(ld));
+
+    auto* main = b.Function("main", ty.void_());
+    b.Append(main->Block(), [&] {
+        auto* tex = b.Load(var);
+        b.Call(ld, tex);
+        b.Return(main);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %wg:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read>, read> = var undef @binding_point(0, 0)
+}
+
+%load = func(%3:spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read>):void {
+  $B2: {
+    ret
+  }
+}
+%main = func():void {
+  $B3: {
+    %5:spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read> = load %wg
+    %6:void = call %load, %5
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+    Run(Texture);
+
+    auto* expect = R"(
+$B1: {  # root
+  %wg:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
+}
+
+%main = func():void {
+  $B2: {
+    %3:texture_2d<f32> = load %wg
+    %4:void = call %load, %3
+    ret
+  }
+}
+%load = func(%6:texture_2d<f32>):void {
+  $B3: {
+    ret
+  }
+}
+)";
+    ASSERT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader::lower
