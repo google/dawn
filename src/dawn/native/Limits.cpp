@@ -282,7 +282,7 @@ MaybeError ValidateAndUnpackLimitsIn(const Limits* chainedLimits,
     }
 
     if (unpacked.Get<DawnHostMappedPointerLimits>()) {
-        dawn::WarningLog() << "hostMappedPointerLimits is not supported in required limits";
+        dawn::WarningLog() << "DawnHostMappedPointerLimits is not supported in required limits";
     }
 
     return {};

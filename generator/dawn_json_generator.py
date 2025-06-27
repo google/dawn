@@ -317,8 +317,6 @@ class StructureType(Record, Type):
                 assert name.startswith('emscripten'), name
         else:
             assert not name.startswith('emscripten'), name
-        self.ifndef_emscripten = len(
-            tags) and 'emscripten' not in tags and 'compat' not in tags
 
         Record.__init__(self, name)
         json_data_override = {}
@@ -1409,14 +1407,18 @@ class MultiGeneratorFromDawnJSON(Generator):
                            frontend_params))
 
         if 'dawn_utils' in targets:
+            # Generate ComboLimits without any extensions so it works on
+            # all targets (and doesn't chain any experimental stuff like
+            # extensions that are output only and produce warnings on input).
+            params = parse_json(loaded_json, enabled_tags=['compat'])
             renders.append(
                 FileRender('dawn/utils/ComboLimits.h',
                            'src/dawn/utils/ComboLimits.h',
-                           [RENDER_PARAMS_BASE, params_all]))
+                           [RENDER_PARAMS_BASE, params]))
             renders.append(
                 FileRender('dawn/utils/ComboLimits.cpp',
                            'src/dawn/utils/ComboLimits.cpp',
-                           [RENDER_PARAMS_BASE, params_all]))
+                           [RENDER_PARAMS_BASE, params]))
 
         if 'wire' in targets:
             params_dawn_wire = parse_json(

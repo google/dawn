@@ -35,14 +35,9 @@ namespace dawn::utils {
 
 {% set limits_and_extensions = [types['limits']] + types['limits'].extensions %}
 class ComboLimits : public NonMovable
-    {% for type in limits_and_extensions if not type.ifndef_emscripten %}
+    {% for type in limits_and_extensions %}
             , private wgpu::{{as_cppType(type.name)}}
     {% endfor %}
-#ifndef __EMSCRIPTEN__
-    {% for type in limits_and_extensions if type.ifndef_emscripten %}
-            , private wgpu::{{as_cppType(type.name)}}
-    {% endfor %}
-#endif
     {
   public:
     ComboLimits();
@@ -52,21 +47,33 @@ class ComboLimits : public NonMovable
     void UnlinkedCopyTo(ComboLimits*) const;
 
     // Modify the ComboLimits in-place to link the extension structs correctly, and return the base
-    // struct. Use this (rather than &comboLimits) whenever passing a ComboLimits to the API.
-    wgpu::Limits* GetLinked();
+    // struct. Optionally accepts any number of additional structs to add to the
+    // end of the chain, e.g.: `comboLimits.GetLinked(&extension1, &extension2)`.
+    // Always use GetLinked (rather than `&comboLimits`) whenever passing a ComboLimits to the API.
+    template <typename... Extension>
+        requires (std::convertible_to<Extension, wgpu::ChainedStructOut*> && ...)
+    wgpu::Limits* GetLinked(Extension... extension) {
+        wgpu::ChainedStructOut* lastExtension = nullptr;
+        // Link all of the standard extensions.
+        {% for type in types['limits'].extensions %}
+            {% if loop.first %}
+                lastExtension = this->wgpu::Limits::nextInChain =
+            {% else %}
+                lastExtension = lastExtension->nextInChain =
+            {% endif %}
+                static_cast<wgpu::{{as_cppType(type.name)}}*>(this);
+        {% endfor %}
+        // Link any extensions passed by the caller.
+        ((lastExtension = lastExtension->nextInChain = extension), ...);
+        lastExtension->nextInChain = nullptr;
+        return this;
+    }
 
-    {% for type in limits_and_extensions if not type.ifndef_emscripten %}
+    {% for type in limits_and_extensions %}
         {% for member in type.members %}
             using wgpu::{{as_cppType(type.name)}}::{{as_varName(member.name)}};
         {% endfor %}
     {% endfor %}
-#ifndef __EMSCRIPTEN__
-    {% for type in limits_and_extensions if type.ifndef_emscripten %}
-        {% for member in type.members %}
-            using wgpu::{{as_cppType(type.name)}}::{{as_varName(member.name)}};
-        {% endfor %}
-    {% endfor %}
-#endif
 };
 
 }  // namespace dawn::utils

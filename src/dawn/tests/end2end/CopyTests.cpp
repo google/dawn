@@ -420,10 +420,9 @@ class CopyTests_WithFormatParam : public CopyTests,
         if (!device.HasFeature(wgpu::FeatureName::DawnTexelCopyBufferRowAlignment)) {
             return kTextureBytesPerRowAlignment;
         }
-        wgpu::Limits limits{};
+        dawn::utils::ComboLimits limits;
         wgpu::DawnTexelCopyBufferRowAlignmentLimits alignmentLimits{};
-        limits.nextInChain = &alignmentLimits;
-        device.GetLimits(&limits);
+        device.GetLimits(limits.GetLinked(&alignmentLimits));
         return alignmentLimits.minTexelCopyBufferRowAlignment;
     }
     BufferSpec MinimumBufferSpec(uint32_t width, uint32_t height, uint32_t depth = 1) {

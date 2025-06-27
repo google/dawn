@@ -51,10 +51,9 @@ void BufferHostMappedPointerTests::SetUp() {
     DawnTestWithParams<BufferHostMappedPointerTestParams>::SetUp();
     DAWN_TEST_UNSUPPORTED_IF(!SupportsFeatures({wgpu::FeatureName::HostMappedPointer}));
 
-    wgpu::Limits limits;
+    dawn::utils::ComboLimits limits;
     wgpu::DawnHostMappedPointerLimits hostAlignmentLimits;
-    limits.nextInChain = &hostAlignmentLimits;
-    device.GetLimits(&limits);
+    device.GetLimits(limits.GetLinked(&hostAlignmentLimits));
     ASSERT_TRUE(dawn::IsPowerOfTwo(hostAlignmentLimits.hostMappedPointerAlignment));
 
     mRequiredAlignment = hostAlignmentLimits.hostMappedPointerAlignment;
