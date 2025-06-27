@@ -1128,7 +1128,7 @@ struct State {
     /// @param builtin the builtin call instruction
     void SubgroupMatrixLoad(core::ir::CoreBuiltinCall* builtin) {
         b.InsertBefore(builtin, [&] {
-            auto* result_ty = builtin->Result()->Type();
+            auto* result_ty = builtin->Result()->Type()->As<core::type::SubgroupMatrix>();
             auto* p = builtin->Args()[0];
             auto* offset = builtin->Args()[1];
             auto* col_major = builtin->Args()[2]->As<core::ir::Constant>();
@@ -1146,9 +1146,21 @@ struct State {
                                               : SpvCooperativeMatrixLayoutRowMajorKHR));
             auto* memory_operand = Literal(u32(SpvMemoryAccessNonPrivatePointerMask));
 
+            // In SPIR-V `stride` is related to the type of the input pointer, while in WGSL
+            // `stride` means the number of elements between each row or column. When the subgroup
+            // matrix element type is `i8` or `u8`, and the input array type is `i32` or `u32`, we
+            // need to convert the `stride` in WGSL into the `stride` in SPIR-V by dividing the
+            // `stride` in WGSL with 4.
+            core::ir::Value* applied_stride = nullptr;
+            if (result_ty->Type()->Size() == 1u && arr->ElemType()->Size() == 4u) {
+                auto* binary = b.Binary(core::BinaryOp::kDivide, stride->Type(), stride, u32(4));
+                applied_stride = binary->Result()->As<core::ir::Value>();
+            } else {
+                applied_stride = stride;
+            }
             auto* call = b.CallWithResult<spirv::ir::BuiltinCall>(
                 builtin->DetachResult(), spirv::BuiltinFn::kCooperativeMatrixLoad, src, layout,
-                stride, memory_operand);
+                applied_stride, memory_operand);
             call->SetExplicitTemplateParams(Vector{result_ty});
         });
         builtin->Destroy();

@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 54
+; Bound: 55
 ; Schema: 0
                OpCapability Shader
                OpCapability VulkanMemoryModel
@@ -58,7 +58,7 @@
          %33 = OpConstantComposite %12 %uchar_0
 %_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
        %void = OpTypeVoid
-         %45 = OpTypeFunction %void
+         %46 = OpTypeFunction %void
 %_ptr_StorageBuffer__arr_uint_uint_1024 = OpTypePointer StorageBuffer %_arr_uint_uint_1024
 %_ptr_StorageBuffer_uint_0 = OpTypePointer StorageBuffer %uint
     %uint_64 = OpConstant %uint 64
@@ -77,8 +77,9 @@
                OpBranchConditional %29 %36 %35
          %36 = OpLabel
          %40 = OpAccessChain %_ptr_StorageBuffer_uint %19 %uint_1
-         %42 = OpCooperativeMatrixLoadKHR %12 %40 %uint_1 %uint_8 NonPrivatePointer
-               OpStore %31 %42 None
+         %42 = OpUDiv %uint %uint_8 %uint_4
+         %43 = OpCooperativeMatrixLoadKHR %12 %40 %uint_1 %42 NonPrivatePointer
+               OpStore %31 %43 None
                OpBranch %35
          %35 = OpLabel
          %37 = OpLoad %12 %31 None
@@ -86,11 +87,11 @@
          %39 = OpLoad %12 %res None
                OpReturnValue %39
                OpFunctionEnd
-%compute_main = OpFunction %void None %45
-         %46 = OpLabel
-         %47 = OpFunctionCall %12 %subgroupMatrixLoad_bcfcb6
-         %48 = OpAccessChain %_ptr_StorageBuffer__arr_uint_uint_1024 %1 %uint_0
-         %50 = OpAccessChain %_ptr_StorageBuffer_uint_0 %48 %uint_0
-               OpCooperativeMatrixStoreKHR %50 %47 %uint_0 %uint_64 NonPrivatePointer
+%compute_main = OpFunction %void None %46
+         %47 = OpLabel
+         %48 = OpFunctionCall %12 %subgroupMatrixLoad_bcfcb6
+         %49 = OpAccessChain %_ptr_StorageBuffer__arr_uint_uint_1024 %1 %uint_0
+         %51 = OpAccessChain %_ptr_StorageBuffer_uint_0 %49 %uint_0
+               OpCooperativeMatrixStoreKHR %51 %48 %uint_0 %uint_64 NonPrivatePointer
                OpReturn
                OpFunctionEnd

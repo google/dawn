@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 59
+; Bound: 61
 ; Schema: 0
                OpCapability Shader
                OpCapability VulkanMemoryModel
@@ -62,8 +62,9 @@
     %uchar_0 = OpConstant %uchar 0
          %38 = OpConstantComposite %12 %uchar_0
 %_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
+     %uint_4 = OpConstant %uint 4
        %void = OpTypeVoid
-         %50 = OpTypeFunction %void
+         %52 = OpTypeFunction %void
 %_ptr_StorageBuffer__arr_uint_uint_1024_0 = OpTypePointer StorageBuffer %_arr_uint_uint_1024
 %_ptr_StorageBuffer_uint_0 = OpTypePointer StorageBuffer %uint
     %uint_64 = OpConstant %uint 64
@@ -87,8 +88,9 @@
                OpBranchConditional %33 %41 %40
          %41 = OpLabel
          %45 = OpAccessChain %_ptr_StorageBuffer_uint %22 %25
-         %47 = OpCooperativeMatrixLoadKHR %12 %45 %uint_1 %27 NonPrivatePointer
-               OpStore %36 %47 None
+         %47 = OpUDiv %uint %27 %uint_4
+         %49 = OpCooperativeMatrixLoadKHR %12 %45 %uint_1 %47 NonPrivatePointer
+               OpStore %36 %49 None
                OpBranch %40
          %40 = OpLabel
          %42 = OpLoad %12 %36 None
@@ -96,11 +98,11 @@
          %44 = OpLoad %12 %res None
                OpReturnValue %44
                OpFunctionEnd
-%compute_main = OpFunction %void None %50
-         %51 = OpLabel
-         %52 = OpFunctionCall %12 %subgroupMatrixLoad_d72b92
-         %53 = OpAccessChain %_ptr_StorageBuffer__arr_uint_uint_1024_0 %1 %uint_0
-         %55 = OpAccessChain %_ptr_StorageBuffer_uint_0 %53 %uint_0
-               OpCooperativeMatrixStoreKHR %55 %52 %uint_0 %uint_64 NonPrivatePointer
+%compute_main = OpFunction %void None %52
+         %53 = OpLabel
+         %54 = OpFunctionCall %12 %subgroupMatrixLoad_d72b92
+         %55 = OpAccessChain %_ptr_StorageBuffer__arr_uint_uint_1024_0 %1 %uint_0
+         %57 = OpAccessChain %_ptr_StorageBuffer_uint_0 %55 %uint_0
+               OpCooperativeMatrixStoreKHR %57 %54 %uint_0 %uint_64 NonPrivatePointer
                OpReturn
                OpFunctionEnd
