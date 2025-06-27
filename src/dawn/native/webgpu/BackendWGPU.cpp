@@ -37,9 +37,21 @@ Backend::Backend(InstanceBase* instance, wgpu::BackendType backendType)
     : BackendConnection(instance, backendType) {
     mDawnProcs = dawn::native::GetProcs();
 
+    // Enable all instance features and limits.
     WGPUInstanceDescriptor instanceDesc = {};
-    instanceDesc.capabilities.timedWaitAnyEnable = true;
+
+    WGPUSupportedInstanceFeatures features{};
+    mDawnProcs.getInstanceFeatures(&features);
+    instanceDesc.requiredFeatureCount = features.featureCount;
+    instanceDesc.requiredFeatures = features.features;
+
+    WGPUInstanceLimits limits{};
+    mDawnProcs.getInstanceLimits(&limits);
+    instanceDesc.requiredLimits = &limits;
+
     mInnerInstance = mDawnProcs.createInstance(&instanceDesc);
+
+    mDawnProcs.supportedInstanceFeaturesFreeMembers(features);
 }
 
 Backend::~Backend() {

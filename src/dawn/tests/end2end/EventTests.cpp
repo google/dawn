@@ -159,7 +159,11 @@ class EventCompletionTests : public DawnTestWithParams<EventCompletionTestParams
 
     void UseSecondInstance() {
         wgpu::InstanceDescriptor desc;
-        desc.capabilities.timedWaitAnyEnable = !UsesWire();
+        if (!UsesWire()) {
+            static constexpr auto kTimedWaitAny = wgpu::InstanceFeatureName::TimedWaitAny;
+            desc.requiredFeatureCount = 1;
+            desc.requiredFeatures = &kTimedWaitAny;
+        }
         std::tie(testInstance, testDevice) = CreateExtraInstance(&desc);
         testQueue = testDevice.GetQueue();
     }
@@ -501,15 +505,14 @@ TEST_P(WaitAnyTests, UnsupportedTimeout) {
     wgpu::Device device2;
 
     if (UsesWire()) {
-        // The wire (currently) never supports timedWaitAnyEnable, so we can run this test on the
+        // The wire (currently) never supports TimedWaitAny, so we can run this test on the
         // default instance/device.
         instance2 = GetInstance();
         device2 = device;
     } else {
-        // When not using the wire, DawnTest will unconditionally set timedWaitAnyEnable since it's
+        // When not using the wire, DawnTest will unconditionally enable TimedWaitAny since it's
         // useful for other tests. For this test, we need it to be false to test validation.
         wgpu::InstanceDescriptor desc;
-        desc.capabilities.timedWaitAnyEnable = false;
         std::tie(instance2, device2) = CreateExtraInstance(&desc);
     }
 
@@ -540,14 +543,16 @@ TEST_P(WaitAnyTests, UnsupportedCount) {
     wgpu::Queue queue2;
 
     if (UsesWire()) {
-        // The wire (currently) never supports timedWaitAnyEnable, so we can run this test on the
+        // The wire (currently) never supports TimedWaitAny, so we can run this test on the
         // default instance/device.
         instance2 = GetInstance();
         device2 = device;
         queue2 = queue;
     } else {
         wgpu::InstanceDescriptor desc;
-        desc.capabilities.timedWaitAnyEnable = true;
+        static constexpr auto kTimedWaitAny = wgpu::InstanceFeatureName::TimedWaitAny;
+        desc.requiredFeatureCount = 1;
+        desc.requiredFeatures = &kTimedWaitAny;
         std::tie(instance2, device2) = CreateExtraInstance(&desc);
         queue2 = device2.GetQueue();
     }
@@ -586,7 +591,7 @@ TEST_P(WaitAnyTests, UnsupportedMixedSources) {
     wgpu::Queue queue3;
 
     if (UsesWire()) {
-        // The wire (currently) never supports timedWaitAnyEnable, so we can run this test on the
+        // The wire (currently) never supports TimedWaitAny, so we can run this test on the
         // default instance/device.
         instance2 = GetInstance();
         device2 = device;
@@ -595,7 +600,9 @@ TEST_P(WaitAnyTests, UnsupportedMixedSources) {
         queue3 = device3.GetQueue();
     } else {
         wgpu::InstanceDescriptor desc;
-        desc.capabilities.timedWaitAnyEnable = true;
+        static constexpr auto kTimedWaitAny = wgpu::InstanceFeatureName::TimedWaitAny;
+        desc.requiredFeatureCount = 1;
+        desc.requiredFeatures = &kTimedWaitAny;
         std::tie(instance2, device2) = CreateExtraInstance(&desc);
         queue2 = device2.GetQueue();
         device3 = CreateExtraDevice(instance2);

@@ -202,9 +202,17 @@ def get(ports, settings, shared):
         # include path via process_args(). The only thing we cache is the
         # compiled webgpu.cpp (which also includes webgpu/webgpu.h).
         includes = [_c_include_dir]
-        # Always use -g. The linker can remove debug symbols in release builds.
+
         (_, flags) = _compute_library_compile_flags(settings)
-        flags += ['-g', '-std=c++20', '-fno-exceptions']
+        flags += [
+            '-std=c++20',
+            '-fno-exceptions',
+            '-Wall',
+            '-Werror',
+            # Always use -g at compile time. In release builds, we can rely on
+            # the linker to remove debug symbols.
+            '-g',
+        ]
 
         # IMPORTANT: Keep `_files_affecting_port_build` in sync with this.
         ports.build_port(_src_dir,

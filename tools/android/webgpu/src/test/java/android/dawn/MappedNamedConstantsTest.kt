@@ -61,6 +61,7 @@ class MappedNamedConstantsTest {
         FilterMode::class,
         FrontFace::class,
         IndexFormat::class,
+        InstanceFeatureName::class,
         LoadOp::class,
         MapAsyncStatus::class,
         MapMode::class,

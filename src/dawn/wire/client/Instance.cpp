@@ -144,13 +144,19 @@ WireResult Instance::Initialize(const WGPUInstanceDescriptor* descriptor) {
         return WireResult::Success;
     }
 
-    if (descriptor->capabilities.timedWaitAnyEnable) {
-        dawn::ErrorLog() << "Wire client instance doesn't support timedWaitAnyEnable = true";
+    if (descriptor->requiredFeatureCount > 0) {
+        dawn::ErrorLog() << "Wire client doesn't support any WGPUInstanceFeatureName";
         return WireResult::FatalError;
     }
-    if (descriptor->capabilities.timedWaitAnyMaxCount > 0) {
-        dawn::ErrorLog() << "Wire client instance doesn't support non-zero timedWaitAnyMaxCount";
-        return WireResult::FatalError;
+    if (descriptor->requiredLimits) {
+        if (descriptor->requiredLimits->nextInChain != nullptr) {
+            dawn::ErrorLog() << "Wire client doesn't support any WGPUInstanceLimits extensions";
+            return WireResult::FatalError;
+        }
+        if (descriptor->requiredLimits->timedWaitAnyMaxCount > 0) {
+            dawn::ErrorLog() << "Wire client doesn't support non-zero timedWaitAnyMaxCount";
+            return WireResult::FatalError;
+        }
     }
 
     const WGPUDawnWireWGSLControl* wgslControl = nullptr;
@@ -313,19 +319,38 @@ void APIFreeMembers(WGPUSupportedWGSLLanguageFeatures supportedFeatures) {
     delete[] supportedFeatures.features;
 }
 
+void APIFreeMembers(WGPUSupportedInstanceFeatures supportedFeatures) {
+    // Nothing to do, supportedFeatures.features is statically allocated.
+}
+
 }  // namespace dawn::wire::client
 
 // Free-standing API functions
 
-DAWN_WIRE_EXPORT WGPUStatus
-wgpuDawnWireClientGetInstanceCapabilities(WGPUInstanceCapabilities* capabilities) {
-    if (capabilities->nextInChain != nullptr) {
+DAWN_WIRE_EXPORT WGPUStatus wgpuDawnWireClientGetInstanceLimits(WGPUInstanceLimits* limits) {
+    DAWN_ASSERT(limits != nullptr);
+    if (limits->nextInChain != nullptr) {
+        dawn::ErrorLog() << "Wire client doesn't support any WGPUInstanceLimits extensions";
         return WGPUStatus_Error;
     }
 
-    capabilities->timedWaitAnyEnable = static_cast<WGPUBool>(0);
-    capabilities->timedWaitAnyMaxCount = dawn::kTimedWaitAnyMaxCountDefault;
+    limits->timedWaitAnyMaxCount = dawn::kTimedWaitAnyMaxCountDefault;
     return WGPUStatus_Success;
+}
+
+static constexpr auto kSupportedFeatures = std::array<WGPUInstanceFeatureName, 0>{};
+
+DAWN_WIRE_EXPORT WGPUBool wgpuDawnWireClientHasInstanceFeature(WGPUInstanceFeatureName feature) {
+    return std::find(kSupportedFeatures.begin(), kSupportedFeatures.end(), feature) !=
+           kSupportedFeatures.end();
+}
+
+DAWN_WIRE_EXPORT void wgpuDawnWireClientGetInstanceFeatures(
+    WGPUSupportedInstanceFeatures* features) {
+    DAWN_ASSERT(features != nullptr);
+
+    features->featureCount = kSupportedFeatures.size();
+    features->features = kSupportedFeatures.data();
 }
 
 DAWN_WIRE_EXPORT WGPUInstance

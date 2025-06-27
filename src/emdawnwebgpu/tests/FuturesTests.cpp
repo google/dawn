@@ -44,8 +44,10 @@ class InstanceLevelTests : public testing::Test {
     void SetUp() override {
         wgpu::InstanceDescriptor descriptor = {};
         // The unit tests use wgpuInstanceWaitAny(WGPUFuture, timeoutNS) with timeoutNS > 0
-        // which requires the `timedWaitAnyEnable` property enabled on the instance capability.
-        descriptor.capabilities.timedWaitAnyEnable = true;
+        // which requires TimedWaitAny enabled on the instance.
+        static constexpr auto kTimedWaitAny = wgpu::InstanceFeatureName::TimedWaitAny;
+        descriptor.requiredFeatureCount = 1;
+        descriptor.requiredFeatures = &kTimedWaitAny;
         instance = wgpu::CreateInstance(&descriptor);
     }
 

@@ -74,18 +74,35 @@ TEST_P(BasicTests, QueueWriteBufferError) {
     ASSERT_DEVICE_ERROR(queue.WriteBuffer(buffer, 1000, &value, sizeof(value)));
 }
 
-TEST_P(BasicTests, GetInstanceCapabilities) {
-    wgpu::InstanceCapabilities instanceCapabilities{};
-    auto status = wgpu::GetInstanceCapabilities(&instanceCapabilities);
+TEST_P(BasicTests, GetInstanceLimits) {
+    wgpu::InstanceLimits out{};
+    auto status = wgpu::GetInstanceLimits(&out);
     EXPECT_EQ(status, wgpu::Status::Success);
-    EXPECT_EQ(instanceCapabilities.timedWaitAnyEnable, !UsesWire());
-    EXPECT_EQ(instanceCapabilities.timedWaitAnyMaxCount, kTimedWaitAnyMaxCountDefault);
-    EXPECT_EQ(instanceCapabilities.nextInChain, nullptr);
+    EXPECT_EQ(out.timedWaitAnyMaxCount, kTimedWaitAnyMaxCountDefault);
+    EXPECT_EQ(out.nextInChain, nullptr);
 
     wgpu::ChainedStructOut chained{};
-    instanceCapabilities.nextInChain = &chained;
-    status = wgpu::GetInstanceCapabilities(&instanceCapabilities);
+    out.nextInChain = &chained;
+    status = wgpu::GetInstanceLimits(&out);
     EXPECT_EQ(status, wgpu::Status::Error);
+    EXPECT_EQ(out.nextInChain, &chained);
+}
+
+TEST_P(BasicTests, GetInstanceFeatures) {
+    wgpu::SupportedInstanceFeatures out{};
+    wgpu::GetInstanceFeatures(&out);
+
+    auto features = std::span(out.features, out.featureCount);
+    EXPECT_EQ(UsesWire(), std::find(features.begin(), features.end(),
+                                    wgpu::InstanceFeatureName::TimedWaitAny) == features.end());
+
+    for (auto feature : features) {
+        EXPECT_TRUE(wgpu::HasInstanceFeature(feature));
+    }
+    if (UsesWire()) {
+        EXPECT_FALSE(wgpu::HasInstanceFeature(wgpu::InstanceFeatureName::TimedWaitAny));
+    }
+    EXPECT_FALSE(wgpu::HasInstanceFeature(wgpu::InstanceFeatureName(0)));
 }
 
 DAWN_INSTANTIATE_TEST(BasicTests,

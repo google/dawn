@@ -295,9 +295,18 @@ EventManager::~EventManager() {
 
 MaybeError EventManager::Initialize(const UnpackedPtr<InstanceDescriptor>& descriptor) {
     if (descriptor) {
-        mTimedWaitAnyEnable = descriptor->capabilities.timedWaitAnyEnable;
-        mTimedWaitAnyMaxCount =
-            std::max(kTimedWaitAnyMaxCountDefault, descriptor->capabilities.timedWaitAnyMaxCount);
+        for (auto feature :
+             std::span(descriptor->requiredFeatures, descriptor->requiredFeatureCount)) {
+            switch (feature) {
+                case wgpu::InstanceFeatureName::TimedWaitAny:
+                    mTimedWaitAnyEnable = true;
+                    break;
+            }
+        }
+        if (descriptor->requiredLimits) {
+            mTimedWaitAnyMaxCount = std::max(kTimedWaitAnyMaxCountDefault,
+                                             descriptor->requiredLimits->timedWaitAnyMaxCount);
+        }
     }
     if (mTimedWaitAnyMaxCount > kTimedWaitAnyMaxCountDefault) {
         // We don't yet support a higher timedWaitAnyMaxCount because it would be complicated

@@ -1630,6 +1630,14 @@
             {"name": "features", "type": "feature name", "annotation": "const*", "length": "feature count"}
         ]
     },
+    "supported instance features": {
+        "category": "structure",
+        "out": true,
+        "members": [
+            {"name": "feature count", "type": "size_t"},
+            {"name": "features", "type": "instance feature name", "annotation": "const*", "length": "feature count"}
+        ]
+    },
     "supported WGSL language features": {
         "category": "structure",
         "out": true,
@@ -2503,27 +2511,49 @@
             {"name": "completed", "type": "bool", "default": "false"}
         ]
     },
-    "instance capabilities": {
+    "instance limits": {
         "category": "structure",
         "extensible": "out",
-        "_comment": "TODO(crbug.com/374263404): Using 'out' for extensible even though this can be in/out until C++ gen is updated.",
         "members": [
-            {"name": "timed wait any enable", "type": "bool", "default": "false"},
             {"name": "timed wait any max count", "type": "size_t", "default": "0"}
+        ]
+    },
+    "instance feature name": {
+        "category": "enum",
+        "values": [
+            {"value": 1, "name": "timed wait any"},
+            {"value": 2, "name": "shader source SPIRV", "tags": ["upstream"]},
+            {"value": 3, "name": "multiple devices per adapter", "tags": ["upstream"]}
         ]
     },
     "instance descriptor": {
         "category": "structure",
         "extensible": "in",
         "members": [
-            {"name": "capabilities", "type": "instance capabilities"}
+            {"name": "required feature count", "type": "size_t", "default": 0},
+            {"name": "required features", "type": "instance feature name", "annotation": "const*", "length": "required feature count", "default": "nullptr"},
+            {"name": "required limits", "type": "instance limits", "annotation": "const*", "optional": true}
         ]
     },
-    "get instance capabilities": {
+    "get instance features": {
+        "category": "function",
+        "returns": "void",
+        "args": [
+            {"name": "features", "type": "supported instance features", "annotation": "*"}
+        ]
+    },
+    "has instance feature": {
+        "category": "function",
+        "returns": "bool",
+        "args": [
+            {"name": "feature", "type": "instance feature name"}
+        ]
+    },
+    "get instance limits": {
         "category": "function",
         "returns": "status",
         "args": [
-            {"name": "capabilities", "type": "instance capabilities", "annotation": "*"}
+            {"name": "limits", "type": "instance limits", "annotation": "*"}
         ]
     },
     "dawn wire WGSL control": {
