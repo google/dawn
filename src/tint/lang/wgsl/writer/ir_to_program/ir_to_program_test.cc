@@ -3386,6 +3386,29 @@ fn f() -> i32 {
 )");
 }
 
+TEST_F(IRToProgramTest, Override_UnaryInitializer) {
+    core::ir::Override* o;
+    b.Append(b.ir.root_block, [&] {
+        auto* lhs = b.Override("cond", true);
+        lhs->SetOverrideId(OverrideId{10});
+
+        o = b.Override("o", b.Not<bool>(lhs));
+    });
+
+    auto* fn = b.Function("f", ty.bool_());
+    b.Append(fn->Block(), [&] { b.Return(fn, o); });
+
+    EXPECT_WGSL(R"(
+@id(10) override cond : bool = true;
+
+override o : bool = !(cond);
+
+fn f() -> bool {
+  return o;
+}
+)");
+}
+
 TEST_F(IRToProgramTest, Override_BinaryInitializer) {
     core::ir::Override* o;
     b.Append(b.ir.root_block, [&] {
