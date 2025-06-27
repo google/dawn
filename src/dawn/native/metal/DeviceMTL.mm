@@ -56,8 +56,6 @@
 #include "dawn/platform/DawnPlatform.h"
 #include "dawn/platform/tracing/TraceEvent.h"
 
-#include <type_traits>
-
 namespace dawn::native::metal {
 
 struct KalmanInfo {

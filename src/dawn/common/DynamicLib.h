@@ -58,9 +58,9 @@ class DynamicLib {
     void* GetProc(const std::string& procName, std::string* error = nullptr) const;
 
     template <typename T>
+        requires std::is_function_v<T>
     bool GetProc(T** proc, const std::string& procName, std::string* error = nullptr) const {
         DAWN_ASSERT(proc != nullptr);
-        static_assert(std::is_function<T>::value);
 
         *proc = reinterpret_cast<T*>(GetProc(procName, error));
         return *proc != nullptr;

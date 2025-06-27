@@ -28,9 +28,6 @@
 #ifndef SRC_DAWN_NATIVE_ERRORINJECTOR_H_
 #define SRC_DAWN_NATIVE_ERRORINJECTOR_H_
 
-#include <stdint.h>
-#include <type_traits>
-
 namespace dawn::native {
 
 template <typename ErrorType>

@@ -33,6 +33,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <concepts>
 #include <cstdint>
 #include <limits>
 #include <optional>
@@ -89,9 +90,8 @@ using FrozenArray = std::vector<T>;
 // A wrapper class for integers that's as transparent as possible and is used to distinguish
 // that the type is tagged with the [Clamp] WebIDL attribute.
 template <typename T>
+    requires std::integral<T>
 struct ClampedInteger {
-    static_assert(std::is_integral_v<T>);
-
     using IntegerType = T;
     ClampedInteger() : value(0) {}
     // NOLINTNEXTLINE(runtime/explicit)
@@ -103,9 +103,8 @@ struct ClampedInteger {
 // A wrapper class for integers that's as transparent as possible and is used to distinguish
 // that the type is tagged with the [EnforceRange] WebIDL attribute.
 template <typename T>
+    requires std::integral<T>
 struct EnforceRangeInteger {
-    static_assert(std::is_integral_v<T>);
-
     using IntegerType = T;
     EnforceRangeInteger() : value(0) {}
     // NOLINTNEXTLINE(runtime/explicit)

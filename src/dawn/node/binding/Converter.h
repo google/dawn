@@ -30,6 +30,7 @@
 
 #include <webgpu/webgpu_cpp.h>
 
+#include <concepts>
 #include <functional>
 #include <string>
 #include <type_traits>
@@ -307,10 +308,8 @@ class Converter {
 
     // Floating point number conversion. IDL rules are that double/float that isn't "unrestricted"
     // must be finite.
-    template <typename OUT,
-              typename IN,
-              std::enable_if_t<std::is_floating_point_v<IN> && std::is_floating_point_v<OUT>,
-                               bool> = true>
+    template <typename OUT, typename IN>
+        requires std::floating_point<IN> && std::floating_point<OUT>
     [[nodiscard]] inline bool Convert(OUT& out, const IN& in) {
         out = in;
         if (!std::isfinite(out)) {
@@ -321,9 +320,8 @@ class Converter {
     }
 
     // Integral number conversion, with dynamic limit checking
-    template <typename OUT,
-              typename IN,
-              std::enable_if_t<std::is_integral_v<IN> && std::is_integral_v<OUT>, bool> = true>
+    template <typename OUT, typename IN>
+        requires std::integral<IN> && std::integral<OUT>
     [[nodiscard]] inline bool Convert(OUT& out, const IN& in) {
         out = static_cast<OUT>(in);
         if (static_cast<IN>(out) != in) {
@@ -366,9 +364,8 @@ class Converter {
     // std::optional -> T*
     // OUT* is assigned either a pointer to the converted value, or nullptr, depending on
     // whether 'in' has a value.
-    template <typename OUT,
-              typename IN,
-              typename _ = std::enable_if_t<!std::is_same_v<IN, std::string>>>
+    template <typename OUT, typename IN>
+        requires(!std::same_as<IN, std::string>)
     [[nodiscard]] inline bool Convert(OUT*& out, const std::optional<IN>& in) {
         if (in.has_value()) {
             auto* el = Allocate<std::remove_const_t<OUT>>();

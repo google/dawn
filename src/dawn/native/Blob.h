@@ -75,8 +75,10 @@ class Blob {
 
 Blob CreateBlob(size_t size);
 
-template <typename T, typename = std::enable_if_t<std::is_fundamental_v<T>>>
-Blob CreateBlob(std::vector<T> vec) {
+template <typename T>
+Blob CreateBlob(std::vector<T> vec)
+    requires std::is_fundamental_v<T>
+{
     uint8_t* data = reinterpret_cast<uint8_t*>(vec.data());
     size_t size = vec.size() * sizeof(T);
     // Move the vector into a new allocation so we can destruct it in the deleter.
