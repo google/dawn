@@ -44,7 +44,6 @@ namespace dawn::native::d3d12 {
 
 struct TextureCopySubresource {
     static constexpr unsigned int kMaxTextureCopyRegions = 4;
-
     struct CopyInfo {
         // The 512-byte aligned offset into buffer
         uint64_t alignedOffset = 0;
@@ -70,16 +69,16 @@ struct TextureCopySplits {
     std::array<TextureCopySubresource, kMaxTextureCopySubresources> copySubresources;
 };
 
-// This function is shared by 2D and 3D texture copy splitter. But it only knows how to handle
-// 2D non-arrayed textures correctly, and just forwards "copySize.depthOrArrayLayers". See
-// details in Compute{2D|3D}TextureCopySplits about how we generate copy regions for 2D array
-// and 3D textures based on this function.
-// The resulting copies triggered by API like CopyTextureRegion are equivalent to the copy
-// regions defined by the arguments of TextureCopySubresource returned by this function and its
-// counterparts. These arguments should strictly conform to particular invariants. Otherwise,
-// D3D12 driver may report validation errors when we call CopyTextureRegion. Some important
-// invariants are listed below. For more details
-// of these invariants, see src/dawn/tests/unittests/d3d12/CopySplitTests.cpp.
+// This function is shared by 2D and 3D texture copy splitter (when relaxedRowAndPitchOffset=false).
+// But it only knows how to handle 2D non-arrayed textures correctly, and just forwards
+// "copySize.depthOrArrayLayers". See details in Compute2DTextureCopySplits and
+// Compute3DTextureCopySubresource about how we generate copy regions for 2D array and 3D textures
+// based on this function. The resulting copies triggered by API like CopyTextureRegion are
+// equivalent to the copy regions defined by the arguments of TextureCopySubresource returned by
+// this function and its counterparts. These arguments should strictly conform to particular
+// invariants. Otherwise, D3D12 driver may report validation errors when we call CopyTextureRegion.
+// Some important invariants are listed below. For more details of these invariants, see
+// src/dawn/tests/unittests/d3d12/CopySplitTests.cpp.
 //   - Inside each copy region: 1) its buffer offset plus copy size should be less than its
 //     buffer size, 2) its buffer offset on y-axis should be less than copy format's
 //     blockInfo.height, 3) its buffer offset on z-axis should be 0.
@@ -96,8 +95,10 @@ TextureCopySubresource Compute2DTextureCopySubresource(BlockOrigin3D origin,
                                                        BlockExtent3D copySize,
                                                        const TypedTexelBlockInfo& blockInfo,
                                                        uint64_t offset,
-                                                       BlockCount blocksPerRow);
+                                                       BlockCount blocksPerRow,
+                                                       bool relaxedRowAndPitchOffset);
 
+// Use this for aligned (non-relaxed) 2D copies with multiple layers.
 TextureCopySplits Compute2DTextureCopySplits(BlockOrigin3D origin,
                                              BlockExtent3D copySize,
                                              const TypedTexelBlockInfo& blockInfo,
@@ -105,32 +106,13 @@ TextureCopySplits Compute2DTextureCopySplits(BlockOrigin3D origin,
                                              BlockCount blocksPerRow,
                                              BlockCount rowsPerImage);
 
-TextureCopySubresource Compute3DTextureCopySplits(BlockOrigin3D origin,
-                                                  BlockExtent3D copySize,
-                                                  const TypedTexelBlockInfo& blockInfo,
-                                                  uint64_t offset,
-                                                  BlockCount blocksPerRow,
-                                                  BlockCount rowsPerImage);
-
-// Compute the `TextureCopySubresource` for one subresource of a 2D texture with relaxed row pitch
-// and offset.
-TextureCopySubresource Compute2DTextureCopySubresourceWithRelaxedRowPitchAndOffset(
-    BlockOrigin3D origin,
-    BlockExtent3D copySize,
-    const TypedTexelBlockInfo& blockInfo,
-    uint64_t offset,
-    BlockCount blocksPerRow);
-
-// Compute the `TextureCopySubresource` for one subresource of a 3D texture with relaxed row pitch
-// and offset.
-TextureCopySubresource Compute3DTextureCopySubresourceWithRelaxedRowPitchAndOffset(
-    BlockOrigin3D origin,
-    BlockExtent3D copySize,
-    const TypedTexelBlockInfo& blockInfo,
-    uint64_t offset,
-    BlockCount blocksPerRow,
-    BlockCount rowsPerImage);
-
+TextureCopySubresource Compute3DTextureCopySubresource(BlockOrigin3D origin,
+                                                       BlockExtent3D copySize,
+                                                       const TypedTexelBlockInfo& blockInfo,
+                                                       uint64_t offset,
+                                                       BlockCount blocksPerRow,
+                                                       BlockCount rowsPerImage,
+                                                       bool relaxedRowAndPitchOffset);
 }  // namespace dawn::native::d3d12
 
 #endif  // SRC_DAWN_NATIVE_D3D12_TEXTURECOPYSPLITTER_H_

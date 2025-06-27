@@ -264,13 +264,13 @@ void Record2DBufferTextureCopyWithSplit(BufferTextureCopyDirection direction,
         const uint32_t splitIndex =
             static_cast<uint32_t>(copyLayer) % copySplits.copySubresources.size();
 
-        const TextureCopySubresource& copySplitPerLayerBase =
+        const TextureCopySubresource& copyResourcePerLayer =
             copySplits.copySubresources[splitIndex];
         const uint64_t bufferOffsetForNextLayer = bufferOffsetsForNextLayer[splitIndex];
         const BlockCount copyTextureLayer = copyLayer + blockInfo.ToBlock(textureCopy.origin).z;
 
         RecordBufferTextureCopyFromSplits(
-            direction, commandList, copySplitPerLayerBase, bufferResource, bufferOffsetForNextLayer,
+            direction, commandList, copyResourcePerLayer, bufferResource, bufferOffsetForNextLayer,
             blocksPerRow, blockInfo, textureCopy.texture.Get(), textureCopy.mipLevel,
             copyTextureLayer, textureCopy.aspect);
 
@@ -287,9 +287,8 @@ void Record2DBufferTextureCopyWithRelaxedOffsetAndPitch(BufferTextureCopyDirecti
                                                         const TextureCopy& textureCopy,
                                                         const TypedTexelBlockInfo& blockInfo,
                                                         const BlockExtent3D& copySize) {
-    TextureCopySubresource copySubresource =
-        Compute2DTextureCopySubresourceWithRelaxedRowPitchAndOffset(
-            blockInfo.ToBlock(textureCopy.origin), copySize, blockInfo, offset, blocksPerRow);
+    TextureCopySubresource copySubresource = Compute2DTextureCopySubresource(
+        blockInfo.ToBlock(textureCopy.origin), copySize, blockInfo, offset, blocksPerRow, true);
 
     const uint64_t bytesPerLayer = blockInfo.ToBytes(blocksPerRow * rowsPerImage);
     uint64_t bufferOffsetForNextLayer = 0;
@@ -332,16 +331,10 @@ void RecordBufferTextureCopyWithBufferHandle(BufferTextureCopyDirection directio
             // 1D textures copy splits are a subset of the single-layer 2D texture copy splits,
             // at least while 1D textures can only have a single array layer.
             DAWN_ASSERT(texture->GetArrayLayers() == 1);
-            TextureCopySubresource copyRegions;
-            if (useRelaxedRowPitchAndOffset) {
-                copyRegions = Compute2DTextureCopySubresourceWithRelaxedRowPitchAndOffset(
-                    origin, copySize, blockInfo, offset, blocksPerRow);
-            } else {
-                copyRegions = Compute2DTextureCopySubresource(origin, copySize, blockInfo, offset,
-                                                              blocksPerRow);
-            }
+            TextureCopySubresource copySubresource = Compute2DTextureCopySubresource(
+                origin, copySize, blockInfo, offset, blocksPerRow, useRelaxedRowPitchAndOffset);
             RecordBufferTextureCopyFromSplits(
-                direction, commandList, copyRegions, bufferResource, 0, blocksPerRow, blockInfo,
+                direction, commandList, copySubresource, bufferResource, 0, blocksPerRow, blockInfo,
                 texture, textureCopy.mipLevel, BlockCount{0}, textureCopy.aspect);
             break;
         }
@@ -363,17 +356,11 @@ void RecordBufferTextureCopyWithBufferHandle(BufferTextureCopyDirection directio
             break;
 
         case wgpu::TextureDimension::e3D: {
-            TextureCopySubresource copyRegions;
-            if (useRelaxedRowPitchAndOffset) {
-                copyRegions = Compute3DTextureCopySubresourceWithRelaxedRowPitchAndOffset(
-                    origin, copySize, blockInfo, offset, blocksPerRow, rowsPerImage);
-            } else {
-                // See comments in Compute3DTextureCopySplits() for more details.
-                copyRegions = Compute3DTextureCopySplits(origin, copySize, blockInfo, offset,
-                                                         blocksPerRow, rowsPerImage);
-            }
+            TextureCopySubresource copySubresource =
+                Compute3DTextureCopySubresource(origin, copySize, blockInfo, offset, blocksPerRow,
+                                                rowsPerImage, useRelaxedRowPitchAndOffset);
             RecordBufferTextureCopyFromSplits(
-                direction, commandList, copyRegions, bufferResource, 0, blocksPerRow, blockInfo,
+                direction, commandList, copySubresource, bufferResource, 0, blocksPerRow, blockInfo,
                 texture, textureCopy.mipLevel, BlockCount{0}, textureCopy.aspect);
             break;
         }
