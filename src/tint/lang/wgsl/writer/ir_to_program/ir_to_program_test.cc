@@ -3437,6 +3437,29 @@ fn f() -> u32 {
 )");
 }
 
+TEST_F(IRToProgramTest, Override_BitcastInitializer) {
+    core::ir::Override* o;
+    b.Append(b.ir.root_block, [&] {
+        auto* from = b.Override("from", 42_u);
+        from->SetOverrideId(OverrideId{10});
+
+        o = b.Override("o", b.Bitcast(ty.i32(), from));
+    });
+
+    auto* fn = b.Function("f", ty.i32());
+    b.Append(fn->Block(), [&] { b.Return(fn, o); });
+
+    EXPECT_WGSL(R"(
+@id(10) override v : u32 = 42u;
+
+override o : i32 = bitcast<i32>(v);
+
+fn f() -> i32 {
+  return o;
+}
+)");
+}
+
 TEST_F(IRToProgramTest, StructMemberOffset) {
     auto* S = ty.Struct(mod.symbols.New("S"),
                         Vector{
