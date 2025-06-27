@@ -1295,6 +1295,15 @@ void PhysicalDevice::PopulateBackendFormatCapabilities(
 void PhysicalDevice::PopulateSubgroupMatrixConfigs() {
     size_t configCount = mDeviceInfo.cooperativeMatrixConfigs.size();
     mSubgroupMatrixConfigs.reserve(configCount);
+
+    auto SupportComponentType = [&](wgpu::SubgroupMatrixComponentType componentType) {
+        if (componentType == wgpu::SubgroupMatrixComponentType::F16) {
+            TogglesState togglesState(ToggleStage::Adapter);
+            return IsFeatureSupportedWithToggles(wgpu::FeatureName::ShaderF16, togglesState);
+        }
+        return true;
+    };
+
     for (uint32_t i = 0; i < configCount; i++) {
         const VkCooperativeMatrixPropertiesKHR& p = mDeviceInfo.cooperativeMatrixConfigs[i];
 
@@ -1324,6 +1333,10 @@ void PhysicalDevice::PopulateSubgroupMatrixConfigs() {
             default:
                 continue;
         }
+        if (!SupportComponentType(config.componentType)) {
+            continue;
+        }
+
         switch (p.ResultType) {
             case VK_COMPONENT_TYPE_FLOAT32_KHR:
                 config.resultComponentType = wgpu::SubgroupMatrixComponentType::F32;
@@ -1339,6 +1352,9 @@ void PhysicalDevice::PopulateSubgroupMatrixConfigs() {
                 break;
             default:
                 continue;
+        }
+        if (!SupportComponentType(config.resultComponentType)) {
+            continue;
         }
 
         mSubgroupMatrixConfigs.push_back(config);
