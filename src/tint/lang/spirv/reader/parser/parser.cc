@@ -375,6 +375,9 @@ class Parser {
                                             Value(inst.GetSingleWordInOperand(1))),
                                  inst.result_id());
                             break;
+                        case spv::Op::OpSNegate:
+                            EmitSpirvExplicitBuiltinCall(inst, spirv::BuiltinFn::kSNegate, 3);
+                            break;
                         default:
                             TINT_ICE() << "Unknown spec constant operation: " << op;
                     }

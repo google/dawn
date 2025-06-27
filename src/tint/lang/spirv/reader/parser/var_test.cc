@@ -1344,6 +1344,40 @@ $B1: {  # root
 )");
 }
 
+TEST_F(SpirvParserTest, Var_OpSpecConstantOp_SNegate) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpCapability Float16
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %myconst "myconst"
+       %void = OpTypeVoid
+        %i32 = OpTypeInt 32 1
+        %one = OpConstant %i32 1
+    %myconst = OpSpecConstantOp %i32 SNegate %one
+     %voidfn = OpTypeFunction %void
+       %main = OpFunction %void None %voidfn
+ %main_entry = OpLabel
+          %1 = OpCopyObject %i32 %myconst
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %1:i32 = spirv.s_negate<i32> 1i
+  %myconst:i32 = override %1
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %4:i32 = let %myconst
+    ret
+  }
+}
+)");
+}
+
 // In the case of all literals, SPIR-V opt treats the `OpSpecConstantComposite` as an
 // `OpConstantComposite` so it appears in the constant manager already. This then needs no handling
 // on our side.
