@@ -265,7 +265,8 @@ void DoRender(WindowData* data) {
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
-    data->surface.Present();
+    wgpu::Status presentStatus = data->surface.Present();
+    DAWN_ASSERT(presentStatus == wgpu::Status::Success);
 }
 
 std::ostream& operator<<(std::ostream& o, const wgpu::SurfaceConfiguration& desc) {

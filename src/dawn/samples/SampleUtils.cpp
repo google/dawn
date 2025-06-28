@@ -279,7 +279,8 @@ int SampleBase::Run(unsigned int delay) {
 
     while (!glfwWindowShouldClose(sample->window)) {
         sample->FrameImpl();
-        sample->surface.Present();
+        wgpu::Status presentStatus = sample->surface.Present();
+        DAWN_ASSERT(presentStatus == wgpu::Status::Success);
         glfwPollEvents();
         if (delay) {
             dawn::utils::USleep(delay);

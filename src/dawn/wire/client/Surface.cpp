@@ -77,6 +77,21 @@ void Surface::APIConfigure(const WGPUSurfaceConfiguration* config) {
     GetClient()->SerializeCommand(cmd);
 }
 
+WGPUStatus Surface::APIPresent() {
+    if (mConfiguredDevice == nullptr) {
+        dawn::ErrorLog() << "Surface::Present on an unconfigured Surface.";
+        return WGPUStatus_Error;
+    }
+
+    SurfacePresentCmd cmd;
+    cmd.self = ToAPI(this);
+    GetClient()->SerializeCommand(cmd);
+
+    // The only synchronous error is if the surface isn't configured.
+    // Otherwise, we let the server report errors via the device.
+    return WGPUStatus_Success;
+}
+
 void Surface::APIUnconfigure() {
     mConfiguredDevice = nullptr;
 
@@ -86,7 +101,7 @@ void Surface::APIUnconfigure() {
 }
 
 WGPUTextureFormat Surface::APIGetPreferredFormat([[maybe_unused]] WGPUAdapter adapter) const {
-    dawn::ErrorLog() << "Surface::GetPreferrredFormat is deprecated, use "
+    dawn::ErrorLog() << "Surface::GetPreferredFormat is deprecated, use "
                         "Surface::GetCapabilities().formats[0] instead.";
     return mSupportedFormats[0];
 }

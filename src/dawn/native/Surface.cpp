@@ -458,10 +458,14 @@ uint32_t Surface::GetXWindow() const {
 }
 
 MaybeError Surface::Configure(const SurfaceConfiguration* configIn) {
-    DAWN_INVALID_IF(IsError(), "%s is invalid.", this);
-
     SurfaceConfiguration config = *configIn;
-    mCurrentDevice = config.device;  // next errors are routed to the new device
+    DAWN_CHECK(config.device);
+    // Configured-or-not is specified as a client-side state, so it must be
+    // maintained even on error surfaces.
+    mCurrentDevice = config.device;
+    // Any errors are routed to the new device.
+
+    DAWN_INVALID_IF(IsError(), "%s is invalid.", this);
 
     DAWN_TRY(mCapabilityCache->WithAdapterCapabilities(
         GetCurrentDevice()->GetAdapter(), this,
@@ -504,7 +508,12 @@ MaybeError Surface::Configure(const SurfaceConfiguration* configIn) {
 }
 
 MaybeError Surface::Unconfigure() {
-    DAWN_INVALID_IF(IsError(), "%s is invalid.", this);
+    if (IsError()) {
+        DAWN_ASSERT(mSwapChain == nullptr);
+        DAWN_ASSERT(mCurrentDevice == nullptr);
+        return DAWN_VALIDATION_ERROR("%s is invalid.", this);
+    }
+    mCurrentDevice = nullptr;
     DAWN_INVALID_IF(!mSwapChain.Get(), "%s is not configured.", this);
 
     if (mSwapChain != nullptr) {
@@ -568,16 +577,6 @@ MaybeError Surface::GetCurrentTexture(SurfaceTexture* surfaceTexture) const {
     return {};
 }
 
-MaybeError Surface::Present() {
-    DAWN_INVALID_IF(IsError(), "%s is invalid.", this);
-    DAWN_INVALID_IF(!mSwapChain.Get(), "%s is not configured.", this);
-
-    auto deviceLock(GetCurrentDevice()->GetScopedLock());
-    DAWN_TRY(mSwapChain->Present());
-
-    return {};
-}
-
 const std::string& Surface::GetLabel() const {
     return mLabel;
 }
@@ -616,13 +615,25 @@ void Surface::APIGetCurrentTexture(SurfaceTexture* surfaceTexture) const {
     }
 }
 
-void Surface::APIPresent() {
-    MaybeError maybeError = Present();
+wgpu::Status Surface::APIPresent() {
+    // Validation that the surface is configured. Note this is synchronous
+    // validation so it can't be skipped even if the surface is an error.
     if (!GetCurrentDevice()) {
-        [[maybe_unused]] bool error = mInstance->ConsumedError(std::move(maybeError));
-    } else {
-        [[maybe_unused]] bool error = GetCurrentDevice()->ConsumedError(std::move(maybeError));
+        [[maybe_unused]] bool error = mInstance->ConsumedError(
+            DAWN_VALIDATION_ERROR("%s is in the unconfigured state.", this));
+        return wgpu::Status::Error;
     }
+
+    [[maybe_unused]] bool error = GetCurrentDevice()->ConsumedError([&]() -> MaybeError {
+        DAWN_INVALID_IF(IsError(), "%s is invalid.", this);
+        DAWN_INVALID_IF(!mSwapChain.Get(), "%s is not successfully configured.", this);
+        {
+            auto deviceLock(GetCurrentDevice()->GetScopedLock());
+            DAWN_TRY(mSwapChain->Present());
+        }
+        return {};
+    }());
+    return wgpu::Status::Success;
 }
 
 void Surface::APIUnconfigure() {

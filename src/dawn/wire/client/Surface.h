@@ -49,6 +49,7 @@ class Surface final : public ObjectBase {
 
     // WebGPU API
     void APIConfigure(const WGPUSurfaceConfiguration* config);
+    WGPUStatus APIPresent();
     void APIUnconfigure();
     WGPUTextureFormat APIGetPreferredFormat(WGPUAdapter adapter) const;
     WGPUStatus APIGetCapabilities(WGPUAdapter adapter, WGPUSurfaceCapabilities* capabilities) const;
