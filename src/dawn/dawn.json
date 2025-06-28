@@ -2265,24 +2265,26 @@
     "feature name": {
         "category": "enum",
         "values": [
-            {"value": 1, "name": "depth clip control"},
-            {"value": 2, "name": "depth32 float stencil8"},
-            {"value": 3, "name": "timestamp query"},
+            {"value": 1, "name": "core features and limits"},
+            {"value": 2, "name": "depth clip control"},
+            {"value": 3, "name": "depth32 float stencil8"},
             {"value": 4, "name": "texture compression BC"},
             {"value": 5, "name": "texture compression BC sliced 3D"},
             {"value": 6, "name": "texture compression ETC2"},
             {"value": 7, "name": "texture compression ASTC"},
             {"value": 8, "name": "texture compression ASTC sliced 3D"},
-            {"value": 9, "name": "indirect first instance"},
-            {"value": 10, "name": "shader f16"},
-            {"value": 11, "name": "RG11B10 ufloat renderable"},
-            {"value": 12, "name": "BGRA8 unorm storage"},
-            {"value": 13, "name": "float32 filterable", "jsrepr": "'float32-filterable'"},
-            {"value": 14, "name": "float32 blendable", "jsrepr": "'float32-blendable'"},
-            {"value": 15, "name": "clip distances"},
-            {"value": 16, "name": "dual source blending"},
-            {"value": 17, "name": "subgroups"},
-            {"value": 18, "name": "core features and limits", "jsrepr": "'core-features-and-limits'"},
+            {"value": 9, "name": "timestamp query"},
+            {"value": 10, "name": "indirect first instance"},
+            {"value": 11, "name": "shader f16"},
+            {"value": 12, "name": "RG11B10 ufloat renderable"},
+            {"value": 13, "name": "BGRA8 unorm storage"},
+            {"value": 14, "name": "float32 filterable", "jsrepr": "'float32-filterable'"},
+            {"value": 15, "name": "float32 blendable", "jsrepr": "'float32-blendable'"},
+            {"value": 16, "name": "clip distances"},
+            {"value": 17, "name": "dual source blending"},
+            {"value": 18, "name": "subgroups"},
+            {"value": 19, "name": "texture formats tier1"},
+            {"value": 20, "name": "texture formats tier2", "tags": ["upstream"]},
 
             {"value": 0, "name": "dawn internal usages", "tags": ["dawn"]},
             {"value": 1, "name": "dawn multi planar formats", "tags": ["dawn"]},
@@ -2342,8 +2344,7 @@
             {"value": 54, "name": "flexible texture views", "tags": ["dawn"]},
             {"value": 55, "name": "chromium experimental subgroup matrix", "tags": ["dawn"]},
             {"value": 56, "name": "shared fence EGL sync", "tags": ["dawn", "native"]},
-            {"value": 57, "name": "dawn device allocator control", "tags": ["dawn"]},
-            {"value": 58, "name": "texture formats tier1", "tags": ["dawn"]}
+            {"value": 57, "name": "dawn device allocator control", "tags": ["dawn"]}
         ]
     },
     "filter mode": {
@@ -3078,7 +3079,8 @@
     },
     "render pass descriptor max draw count": {
         "category": "typedef",
-        "type": "render pass max draw count"
+        "type": "render pass max draw count",
+        "tags": ["dawn"]
     },
     "render pass max draw count": {
         "category": "structure",
@@ -3191,6 +3193,7 @@
             },
             {
                 "name": "multi draw indirect",
+                "tags": ["dawn", "emscripten"],
                 "args": [
                     {"name": "indirect buffer", "type": "buffer"},
                     {"name": "indirect offset", "type": "uint64_t"},
@@ -3202,6 +3205,7 @@
             },
             {
                 "name": "multi draw indexed indirect",
+                "tags": ["dawn", "emscripten"],
                 "args": [
                     {"name": "indirect buffer", "type": "buffer"},
                     {"name": "indirect offset", "type": "uint64_t"},
@@ -3534,7 +3538,8 @@
     },
     "shader module SPIRV descriptor": {
         "category": "typedef",
-        "type": "shader source SPIRV"
+        "type": "shader source SPIRV",
+        "tags": ["dawn"]
     },
     "shader source SPIRV": {
         "category": "structure",
@@ -3547,7 +3552,8 @@
     },
     "shader module WGSL descriptor": {
         "category": "typedef",
-        "type": "shader source WGSL"
+        "type": "shader source WGSL",
+        "tags": ["dawn"]
     },
     "shader source WGSL": {
         "category": "structure",
@@ -3663,7 +3669,7 @@
     "surface descriptor from android native window": {
         "category": "typedef",
         "type": "surface source android native window",
-        "tags": ["art", "native"]
+        "tags": ["art", "native", "dawn"]
     },
     "surface source android native window": {
         "category": "structure",
@@ -3686,7 +3692,7 @@
     "surface descriptor from metal layer": {
         "category": "typedef",
         "type": "surface source metal layer",
-        "tags": ["native"]
+        "tags": ["native", "dawn"]
     },
     "surface source metal layer": {
         "category": "structure",
@@ -3700,7 +3706,7 @@
     "surface descriptor from windows HWND": {
         "category": "typedef",
         "type": "surface source windows HWND",
-        "tags": ["native"]
+        "tags": ["native", "dawn"]
     },
     "surface source windows HWND": {
         "category": "structure",
@@ -3715,7 +3721,7 @@
     "surface descriptor from xcb window": {
         "category": "typedef",
         "type": "surface source XCB window",
-        "tags": ["native"]
+        "tags": ["native", "dawn"]
     },
     "surface source XCB window": {
         "category": "structure",
@@ -3730,7 +3736,7 @@
     "surface descriptor from xlib window": {
         "category": "typedef",
         "type": "surface source xlib window",
-        "tags": ["native"]
+        "tags": ["native", "dawn"]
     },
     "surface source xlib window": {
         "category": "structure",
@@ -3745,7 +3751,7 @@
     "surface descriptor from wayland surface": {
         "category": "typedef",
         "type": "surface source wayland surface",
-        "tags": ["native"]
+        "tags": ["native", "dawn"]
     },
     "surface source wayland surface": {
         "category": "structure",
@@ -4016,6 +4022,7 @@
         "category": "structure",
         "chained": "in",
         "chain roots": ["texture descriptor"],
+        "tags": ["compat"],
         "members": [
             {"name": "texture binding view dimension", "type": "texture view dimension"}
         ]
@@ -4280,8 +4287,8 @@
             {"value": 2, "name": "packed 4x8 integer dot product", "jsrepr": "'packed_4x8_integer_dot_product'"},
             {"value": 3, "name": "unrestricted pointer parameters", "jsrepr": "'unrestricted_pointer_parameters'"},
             {"value": 4, "name": "pointer composite access", "jsrepr": "'pointer_composite_access'"},
-            {"value": 5, "name": "sized binding array", "jsrepr": "'sized_binding_array'"},
-            {"value": 6, "name": "texel buffers", "jsrepr": "'texel_buffers'"},
+            {"value": 5, "name": "sized binding array", "jsrepr": "'sized_binding_array'", "tags": ["dawn"]},
+            {"value": 6, "name": "texel buffers", "jsrepr": "'texel_buffers'", "tags": ["dawn"]},
 
             {"value": 0, "name": "chromium testing unimplemented", "jsrepr": "'chromium_testing_unimplemented'", "tags": ["dawn"]},
             {"value": 1, "name": "chromium testing unsafe experimental", "jsrepr": "'chromium_testing_unsafe_experimental'", "tags": ["dawn"]},
@@ -4484,6 +4491,7 @@
     "subgroup matrix component type": {
         "category": "enum",
         "emscripten_no_enum_table": true,
+        "tags": ["dawn"],
         "values": [
             {"value": 1, "name": "f32"},
             {"value": 2, "name": "f16"},

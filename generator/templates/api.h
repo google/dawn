@@ -40,12 +40,16 @@
 //* -------------------------------------------------------------------------------------
 //* The follow block defines Dawn generator specific macros and #defines for migrations.
 //* -------------------------------------------------------------------------------------
-#define WGPU_BREAKING_CHANGE_STRING_VIEW_LABELS
-#define WGPU_BREAKING_CHANGE_STRING_VIEW_OUTPUT_STRUCTS
-#define WGPU_BREAKING_CHANGE_STRING_VIEW_CALLBACKS
-#define WGPU_BREAKING_CHANGE_QUEUE_WORK_DONE_CALLBACK_MESSAGE
-#define WGPU_BREAKING_CHANGE_COMPATIBILITY_MODE_LIMITS
-#define WGPU_BREAKING_CHANGE_INSTANCE_FEATURES_LIMITS
+{%- if 'upstream' not in enabled_tags %}
+
+    #define WGPU_BREAKING_CHANGE_STRING_VIEW_LABELS
+    #define WGPU_BREAKING_CHANGE_STRING_VIEW_OUTPUT_STRUCTS
+    #define WGPU_BREAKING_CHANGE_STRING_VIEW_CALLBACKS
+    #define WGPU_BREAKING_CHANGE_QUEUE_WORK_DONE_CALLBACK_MESSAGE
+    #define WGPU_BREAKING_CHANGE_COMPATIBILITY_MODE_LIMITS
+    #define WGPU_BREAKING_CHANGE_INSTANCE_FEATURES_LIMITS
+{% endif %}
+
 {% macro render_c_default_value(member) -%}
     {%- if member.annotation in ["*", "const*", "const*const*"] -%}
         //* Pointer types should always default to NULL.
@@ -336,13 +340,12 @@ extern "C" {
 #endif
 
 #if !defined({{API}}_SKIP_PROCS)
-
-// TODO(374150686): Remove these Emscripten specific declarations from the
-// header once they are fully deprecated.
-#ifdef __EMSCRIPTEN__
-{{API}}_EXPORT WGPUDevice emscripten_webgpu_get_device(void);
-#endif
-
+{% if 'emscripten' in enabled_tags %}
+    // TODO(374150686): Remove these Emscripten specific declarations from the
+    // header once they are fully deprecated.
+    {{API}}_EXPORT WGPUDevice emscripten_webgpu_get_device(void);
+{% endif %}
+// Global procs
 {% for function in by_category["function"] %}
     typedef {{as_cType(function.return_type.name)}} (*{{as_cProc(None, function.name)}})(
             {%- for arg in function.arguments -%}
@@ -364,11 +367,9 @@ extern "C" {
     {% endfor %}
 
 {% endfor %}
-
 #endif  // !defined({{API}}_SKIP_PROCS)
 
 #if !defined({{API}}_SKIP_DECLARATIONS)
-
 {% for function in by_category["function"] %}
     {{API}}_EXPORT {{as_cType(function.return_type.name)}} {{as_cMethod(None, function.name)}}(
             {%- for arg in function.arguments -%}
@@ -390,7 +391,6 @@ extern "C" {
     {% endfor %}
 
 {% endfor %}
-
 #endif  // !defined({{API}}_SKIP_DECLARATIONS)
 
 #ifdef __cplusplus
