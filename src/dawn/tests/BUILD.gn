@@ -142,12 +142,10 @@ if (build_with_chromium) {
 # Copy target for DXC
 ###############################################################################
 
-# When building with chromium under Windows, we need to copy the DXC from
-# Windows SDK into build folder, in order to ensure a DXC of version 1.6 is
-# available when running end-to-end tests in Chromium. Note that currently DXC
-# only provided for x86 and x64 in Windows SDK 20348.
-if (!dawn_use_built_dxc && build_with_chromium && is_win &&
-    (target_cpu == "x64" || target_cpu == "x86")) {
+# Chromium archive scripts are not able to determine whether dawn_built_dxc
+# is defined. Hence, we need to copy the DXC DLLs from the Windows SDK so the
+# scripts always have something to pick up.
+if (!dawn_use_built_dxc && build_with_chromium && is_win) {
   # The windows_sdk_path is acquired in visual_studio_version.gni.
   import("//build/config/win/visual_studio_version.gni")
 
@@ -162,7 +160,6 @@ if (!dawn_use_built_dxc && build_with_chromium && is_win &&
   # end-to-end test in Chromium.
   copy("copy_dxc_binary") {
     sources = [
-      "$windows_sdk_path/bin/$windows_sdk_version/$target_cpu/dxc.exe",
       "$windows_sdk_path/bin/$windows_sdk_version/$target_cpu/dxcompiler.dll",
       "$windows_sdk_path/bin/$windows_sdk_version/$target_cpu/dxil.dll",
     ]
@@ -196,15 +193,13 @@ template("dawn_test") {
 
     # Running Dawn tests within Chromium in Windows may require DXC, copy DXC
     # binary from Windows SDK.
-    if (build_with_chromium && is_win &&
-        (target_cpu == "x64" || target_cpu == "x86")) {
+    if (build_with_chromium && is_win) {
       if (dawn_use_built_dxc) {
         if (!defined(deps)) {
           deps = []
         }
         deps += [
           "$dawn_root/third_party/gn/dxc:copy_dxil_dll",
-          "$dawn_root/third_party/gn/dxc:dxc",
           "$dawn_root/third_party/gn/dxc:dxcompiler",
         ]
       } else {

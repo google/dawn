@@ -121,6 +121,10 @@ config("internal_config") {
     defines += [ "DAWN_ENABLE_ERROR_INJECTION" ]
   }
 
+  if (dawn_force_system_component_load) {
+    defines += [ "DAWN_FORCE_SYSTEM_COMPONENT_LOAD" ]
+  }
+
   # Only internal Dawn targets can use this config, this means only targets in
   # this BUILD.gn file and related subdirs.
   visibility = [
