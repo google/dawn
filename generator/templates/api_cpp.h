@@ -82,7 +82,7 @@ namespace {{metadata.namespace}} {
             UNHANDLED
         {%- endif -%}
     {%- else -%}
-        reinterpret_cast<{{decorate("", as_cType(arg.type.name), arg)}}>({{as_varName(arg.name)}})
+        reinterpret_cast<{{decorate(as_cType(arg.type.name), arg)}}>({{as_varName(arg.name)}})
     {%- endif -%}
 {%- endmacro -%}
 
@@ -380,7 +380,7 @@ class ObjectBase {
                     T userdata)
                 {%- endif -%},
               typename{{SfinaeArg}}>
-    {{as_cppType(method.return_type.name)}} {{MethodName}}(
+    {{as_annotated_cppType(method.returns)}} {{MethodName}}(
         {%- for arg in method.arguments if arg.type.category != "callback info" -%}
             {%- if arg.type.category == "object" and arg.annotation == "value" -%}
                 {{as_cppType(arg.type.name)}} const& {{as_varName(arg.name)}}{{ ", "}}
@@ -426,7 +426,7 @@ class ObjectBase {
                     )>
                 {%- endif -%},
               typename{{SfinaeArg}}>
-    {{as_cppType(method.return_type.name)}} {{MethodName}}(
+    {{as_annotated_cppType(method.returns)}} {{MethodName}}(
         {%- for arg in method.arguments if arg.type.category != "callback info" -%}
             {%- if arg.type.category == "object" and arg.annotation == "value" -%}
                 {{as_cppType(arg.type.name)}} const& {{as_varName(arg.name)}}{{ ", "}}
@@ -446,7 +446,7 @@ class ObjectBase {
     {% set OriginalMethodName = method.name.CamelCase() %}
     {% set MethodName = OriginalMethodName[:-1] if method.name.chunks[-1] == "f" or method.name.chunks[-1] == "2" else OriginalMethodName %}
     {% set MethodName = CppType + "::" + MethodName if dfn else MethodName %}
-    {{"ConvertibleStatus" if method.return_type.name.get() == "status" else as_cppType(method.return_type.name)}} {{MethodName}}(
+    {{"ConvertibleStatus" if method.returns and method.returns.type.name.get() == "status" else as_annotated_cppType(method.returns)}} {{MethodName}}(
         {%- for arg in method.arguments -%}
             {%- if not loop.first %}, {% endif -%}
             {%- if arg.type.category == "object" and arg.annotation == "value" -%}
@@ -565,7 +565,7 @@ struct CallbackTypeBase<std::tuple<Args...>, T> {
     using {{as_cppType(type.name)}} = typename detail::CallbackTypeBase<std::tuple<
         {%- for arg in type.arguments -%}
             {%- if not loop.first %}, {% endif -%}
-            {{decorate("", as_cppType(arg.type.name), arg)}}
+            {{decorate(as_cppType(arg.type.name), arg)}}
         {%- endfor -%}
     >, T...>::Callback;
 {% endfor %}
@@ -618,13 +618,13 @@ using UncapturedErrorCallback = typename detail::CallbackTypeBase<std::tuple<con
         }
         callbackInfo.userdata1 = reinterpret_cast<void*>(+callback);
         callbackInfo.userdata2 = reinterpret_cast<void*>(userdata);
-        {% if method.return_type.name.get() == "future" %}
+        {% if method.returns and method.returns.type.name.get() == "future" %}
             auto result = {{as_cMethodNamespaced(type.name, method.name, c_namespace)}}(Get(){{", "}}
                 {%- for arg in method.arguments if arg.type.category != "callback info" -%}
                     {{render_c_actual_arg(arg)}}{{", "}}
                 {%- endfor -%}
             callbackInfo);
-            return {{convert_cType_to_cppType(method.return_type, 'value', 'result') | indent(4)}};
+            return {{convert_cType_to_cppType(method.returns.type, 'value', 'result') | indent(4)}};
         {% else %}
             return {{as_cMethodNamespaced(type.name, method.name, c_namespace)}}(Get(){{", "}}
                 {%- for arg in method.arguments if arg.type.category != "callback info" -%}
@@ -684,13 +684,13 @@ using UncapturedErrorCallback = typename detail::CallbackTypeBase<std::tuple<con
             callbackInfo.userdata1 = reinterpret_cast<void*>(lambda);
             callbackInfo.userdata2 = nullptr;
         }
-        {% if method.return_type.name.get() == "future" %}
+        {% if method.returns and method.returns.type.name.get() == "future" %}
             auto result = {{as_cMethodNamespaced(type.name, method.name, c_namespace)}}(Get(){{", "}}
             {%- for arg in method.arguments if arg.type.category != "callback info" -%}
                 {{render_c_actual_arg(arg)}}{{", "}}
             {%- endfor -%}
             callbackInfo);
-            return {{convert_cType_to_cppType(method.return_type, 'value', 'result') | indent(8)}};
+            return {{convert_cType_to_cppType(method.returns.type, 'value', 'result') | indent(8)}};
         {% else %}
             return {{as_cMethodNamespaced(type.name, method.name, c_namespace)}}(Get(){{", "}}
             {%- for arg in method.arguments if arg.type.category != "callback info" -%}
@@ -706,11 +706,11 @@ using UncapturedErrorCallback = typename detail::CallbackTypeBase<std::tuple<con
         {% for arg in method.arguments if arg.type.has_free_members_function and arg.annotation == '*' %}
             *{{as_varName(arg.name)}} = {{as_cppType(arg.type.name)}}();
         {% endfor %}
-        {% if method.return_type.name.concatcase() == "void" %}
+        {% if not method.returns %}
             {{render_cpp_to_c_method_call(type, method)}};
         {% else %}
             auto result = {{render_cpp_to_c_method_call(type, method)}};
-            return {{convert_cType_to_cppType(method.return_type, 'value', 'result') | indent(8)}};
+            return {{convert_cType_to_cppType(method.returns.type, 'value', 'result') | indent(8)}};
         {% endif %}
     }
 {%- endmacro %}
@@ -804,7 +804,7 @@ static_assert(offsetof(ChainedStruct, sType) == offsetof({{c_prefix}}ChainedStru
             {% if type.chained and loop.first %}
                 //* Align the first member after ChainedStruct to match the C struct layout.
                 //* It has to be aligned both to its natural and ChainedStruct's alignment.
-                static constexpr size_t kFirstMemberAlignment = detail::ConstexprMax(alignof(ChainedStruct{{out}}), alignof({{decorate("", as_cppType(member.type.name), member)}}));
+                static constexpr size_t kFirstMemberAlignment = detail::ConstexprMax(alignof(ChainedStruct{{out}}), alignof({{decorate(as_cppType(member.type.name), member)}}));
                 alignas(kFirstMemberAlignment) {{member_declaration}};
             {% else %}
                 {{member_declaration}};
@@ -1153,17 +1153,17 @@ void {{CppType}}::SetUncapturedErrorCallback(L callback) {
     //* TODO(crbug.com/42241188): Remove "2" suffix when WGPUStringView changes complete.
     {% set OriginalFunctionName = as_cppType(function.name) %}
     {% set FunctionName = OriginalFunctionName[:-1] if function.name.chunks[-1] == "2" else OriginalFunctionName %}
-    static inline {{as_cppType(function.return_type.name)}} {{FunctionName}}(
+    static inline {{as_annotated_cppType(function.returns)}} {{FunctionName}}(
         {%- for arg in function.arguments -%}
             {%- if not loop.first %}, {% endif -%}
             {{as_annotated_cppType(arg)}}{{render_cpp_default_value(arg, False)}}
         {%- endfor -%}
     ) {
-        {% if function.return_type.name.concatcase() == "void" %}
+        {% if not function.returns %}
             {{render_function_call(function)}};
         {% else %}
             auto result = {{render_function_call(function)}};
-            return {{convert_cType_to_cppType(function.return_type, 'value', 'result')}};
+            return {{convert_cType_to_cppType(function.returns.type, 'value', 'result')}};
         {% endif %}
     }
 {% endfor %}

@@ -48,7 +48,7 @@ namespace {{native_namespace}} {
         {% for method in methods %}
             {% set suffix = as_MethodSuffix(type.name, method.name) %}
 
-            {{as_cType(method.return_type.name)}} Native{{suffix}}(
+            {{as_annotated_cType(method.returns)}} Native{{suffix}}(
                 {{-as_cType(type.name)}} cSelf
                 {%- for arg in method.arguments -%}
                     , {{as_annotated_cType(arg)}}
@@ -66,13 +66,13 @@ namespace {{native_namespace}} {
                     {% elif arg.type.category == "structure" and arg.annotation == "value" %}
                         auto {{varName}}_ = *reinterpret_cast<{{as_frontendType(arg.type)}}*>(&{{varName}});
                     {% elif arg.annotation != "value" or arg.type.category == "object" %}
-                        auto {{varName}}_ = reinterpret_cast<{{decorate("", as_frontendType(arg.type), arg)}}>({{varName}});
+                        auto {{varName}}_ = reinterpret_cast<{{decorate(as_frontendType(arg.type), arg)}}>({{varName}});
                     {% else %}
                         auto {{varName}}_ = {{as_varName(arg.name)}};
                     {% endif %}
                 {%- endfor-%}
 
-                {% if method.autolock and method.return_type.name.get() != 'future' %}
+                {% if method.autolock and not (method.returns and method.returns.type.name.get() == 'future') %}
                     {% if type.name.get() != "device" %}
                         auto device = self->GetDevice();
                     {% else %}
@@ -83,7 +83,7 @@ namespace {{native_namespace}} {
                     // This method is specified to not use AutoLock in json script or it returns a future.
                 {% endif %}
 
-                {% if method.return_type.name.canonical_case() != "void" %}
+                {% if method.returns %}
                     auto result =
                 {%- endif %}
                 {% if type.category == "object" %}
@@ -100,10 +100,10 @@ namespace {{native_namespace}} {
                         {%- endfor -%}
                     );
                 {% endif %}
-                {% if method.return_type.name.canonical_case() != "void" %}
-                    {% if method.return_type.category in ["object", "enum", "bitmask"] %}
+                {% if method.returns %}
+                    {% if method.returns.type.category in ["object", "enum", "bitmask"] %}
                         return ToAPI(result);
-                    {% elif method.return_type.category in ["structure"] %}
+                    {% elif method.returns.type.category in ["structure"] %}
                         return *ToAPI(&result);
                     {% else %}
                         return result;
@@ -114,7 +114,7 @@ namespace {{native_namespace}} {
     {% endfor %}
 
     {% for function in by_category["function"] if function.name.canonical_case() != "get proc address" and function.name.canonical_case() != "get proc address 2" %}
-        {{as_cType(function.return_type.name)}} Native{{function.name.CamelCase()}}(
+        {{as_annotated_cType(function.returns)}} Native{{function.name.CamelCase()}}(
             {%- for arg in function.arguments -%}
                 {%- if not loop.first %}, {% endif -%}
                 {{as_annotated_cType(arg)}}
@@ -125,13 +125,13 @@ namespace {{native_namespace}} {
                 {% if arg.type.category in ["enum", "bitmask"] and arg.annotation == "value" %}
                     auto {{varName}}_ = static_cast<{{as_frontendType(arg.type)}}>({{varName}});
                 {% elif arg.annotation != "value" or arg.type.category == "object" %}
-                    auto {{varName}}_ = reinterpret_cast<{{decorate("", as_frontendType(arg.type), arg)}}>({{varName}});
+                    auto {{varName}}_ = reinterpret_cast<{{decorate(as_frontendType(arg.type), arg)}}>({{varName}});
                 {% else %}
                     auto {{varName}}_ = {{as_varName(arg.name)}};
                 {% endif %}
             {%- endfor-%}
 
-            {% if function.return_type.name.canonical_case() != "void" %}
+            {% if function.returns %}
                 auto result =
             {%- endif %}
             API{{function.name.CamelCase()}}(
@@ -140,8 +140,8 @@ namespace {{native_namespace}} {
                     {{as_varName(arg.name)}}_
                 {%- endfor -%}
             );
-            {% if function.return_type.name.canonical_case() != "void" %}
-                {% if function.return_type.category in ["object", "enum", "bitmask"] %}
+            {% if function.returns %}
+                {% if function.returns.type.category in ["object", "enum", "bitmask"] %}
                     return ToAPI(result);
                 {% else %}
                     return result;

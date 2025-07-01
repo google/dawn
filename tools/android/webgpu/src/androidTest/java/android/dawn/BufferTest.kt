@@ -16,7 +16,7 @@ class BufferTest {
                     size = 1024,
                     mappedAtCreation = true
                 )
-            ).apply {
+            )!!.apply {
                 getMappedRange(size = size)
             }
         }
@@ -35,7 +35,7 @@ class BufferTest {
                         size = 1024,
                         mappedAtCreation = false
                     )
-                ).apply {
+                )!!.apply {
                     getMappedRange(size = size)
                 }
             }

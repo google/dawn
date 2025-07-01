@@ -32,7 +32,7 @@ namespace dawn::native {
 // This file should be kept in sync with generator/templates/dawn/native/ProcTable.cpp
 
 {% for function in by_category["function"] %}
-    extern {{as_cType(function.return_type.name)}} Native{{as_cppType(function.name)}}(
+    extern {{as_annotated_cType(function.returns)}} Native{{as_cppType(function.name)}}(
         {%- for arg in function.arguments -%}
             {% if not loop.first %}, {% endif %}{{as_annotated_cType(arg)}}
         {%- endfor -%}
@@ -40,7 +40,7 @@ namespace dawn::native {
 {% endfor %}
 {% for (type, methods) in c_methods_sorted_by_parent %}
     {% for method in methods %}
-        extern {{as_cType(method.return_type.name)}} Native{{as_MethodSuffix(type.name, method.name)}}(
+        extern {{as_annotated_cType(method.returns)}} Native{{as_MethodSuffix(type.name, method.name)}}(
             {{-as_cType(type.name)}} cSelf
             {%- for arg in method.arguments -%}
                 , {{as_annotated_cType(arg)}}
@@ -55,7 +55,7 @@ extern "C" {
     using namespace dawn::native;
 
     {% for function in by_category["function"] %}
-        {{as_cType(function.return_type.name)}} {{metadata.namespace}}{{as_cppType(function.name)}} (
+        {{as_annotated_cType(function.returns)}} {{metadata.namespace}}{{as_cppType(function.name)}} (
             {%- for arg in function.arguments -%}
                 {% if not loop.first %}, {% endif %}{{as_annotated_cType(arg)}}
             {%- endfor -%}
@@ -70,7 +70,7 @@ extern "C" {
 
     {% for (type, methods) in c_methods_sorted_by_parent %}
         {% for method in methods %}
-            {{as_cType(method.return_type.name)}} {{metadata.namespace}}{{as_MethodSuffix(type.name, method.name)}}(
+            {{as_annotated_cType(method.returns)}} {{metadata.namespace}}{{as_MethodSuffix(type.name, method.name)}}(
                 {{-as_cType(type.name)}} cSelf
                 {%- for arg in method.arguments -%}
                     , {{as_annotated_cType(arg)}}

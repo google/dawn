@@ -63,7 +63,7 @@ namespace dawn::wire::client {
     {% for method in methods %}
         {% set Suffix = as_MethodSuffix(type.name, method.name) %}
 
-        DAWN_WIRE_EXPORT {{as_cType(method.return_type.name)}} {{as_cMethodNamespaced(type.name, method.name, Name('dawn wire client'))}}(
+        DAWN_WIRE_EXPORT {{as_annotated_cType(method.returns)}} {{as_cMethodNamespaced(type.name, method.name, Name('dawn wire client'))}}(
             {{-cType}} cSelf
             {%- for arg in method.arguments -%}
                 , {{as_annotated_cType(arg)}}
@@ -78,8 +78,8 @@ namespace dawn::wire::client {
                 cmd.self = cSelf;
 
                 //* For object creation, store the object ID the client will use for the result.
-                {% if method.return_type.category == "object" %}
-                    {% set ReturnObj = "dawn::wire::client::" + method.return_type.name.CamelCase() %}
+                {% if method.returns and method.returns.type.category == "object" %}
+                    {% set ReturnObj = "dawn::wire::client::" + method.returns.type.name.CamelCase() %}
                     {{ReturnObj}}* returnObject = dawn::wire::client::Create<dawn::wire::client::{{as_wireType(type)}}, {{ReturnObj}}>(self
                         {%- for arg in method.arguments -%}
                                 , {{as_varName(arg.name)}}
@@ -97,7 +97,7 @@ namespace dawn::wire::client {
                 //* Allocate space to send the command and copy the value args over.
                 self->GetClient()->SerializeCommand(cmd);
 
-                {% if method.return_type.category == "object" %}
+                {% if method.returns and method.returns.type.category == "object" %}
                     return ToAPI(returnObject);
                 {% endif %}
             {% elif type.category == "object" %}

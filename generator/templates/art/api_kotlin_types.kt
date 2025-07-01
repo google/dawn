@@ -29,17 +29,16 @@
     {%- set type = arg.type %}
     {%- set optional = arg.optional %}
     {%- set default_value = arg.default_value %}
-    {%- if arg.type.name.get() == 'string view' -%}
+    {%- if arg == None -%}
+        Unit
+    {%- elif arg.type.name.get() == 'string view' -%}
         String{{ '?' if optional }}
         {%- if emit_defaults and optional-%}
             {{ ' ' }}= null
         {%- endif %}
     {% elif type.name.get() == 'void' %}
-        {%- if arg.length and arg.constant_length != 1 -%}  {# void with length is binary data #}
-            java.nio.ByteBuffer{{ ' = java.nio.ByteBuffer.allocateDirect(0)' if emit_defaults }}
-        {%- else -%}
-            Unit  {# raw void is C type for no return type; Kotlin equivalent is Unit #}
-        {%- endif -%}
+        {{- assert(arg.length and arg.constant_length != 1) -}}  {# void with length is binary data #}
+        java.nio.ByteBuffer{{ ' = java.nio.ByteBuffer.allocateDirect(0)' if emit_defaults }}
     {%- elif arg.length and arg.length != 'constant' %}
         {# * annotation can mean an array, e.g. an output argument #}
         {%- if type.category in ['bitmask', 'callback function', 'callback info', 'enum', 'function pointer', 'object', 'structure'] -%}

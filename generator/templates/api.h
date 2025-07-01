@@ -129,7 +129,7 @@
 {%- endmacro -%}
 
 {%- macro nullable_annotation(record) -%}
-    {% if record.optional and (record.type.category == "object" or record.annotation != "value") -%}
+    {% if record and record.optional and (record.type.category == "object" or record.annotation != "value") -%}
         {{API}}_NULLABLE{{" "}}
     {%- endif %}
 {%- endmacro -%}
@@ -277,7 +277,7 @@ typedef uint32_t {{API}}Bool;
 {% endfor -%}
 
 {% for type in by_category["function pointer"] %}
-    typedef {{as_cType(type.return_type.name)}} (*{{as_cType(type.name)}})(
+    typedef {{nullable_annotation(type.returns)}}{{as_annotated_cType(type.returns)}} (*{{as_cType(type.name)}})(
         {%- if type.arguments == [] -%}
             void
         {%- else -%}
@@ -291,9 +291,9 @@ typedef uint32_t {{API}}Bool;
 
 // Callback function pointers
 {% for type in by_category["callback function"] %}
-    typedef {{as_cType(type.return_type.name)}} (*{{as_cType(type.name)}})(
+    typedef {{nullable_annotation(type.returns)}}{{as_annotated_cType(type.returns)}} (*{{as_cType(type.name)}})(
         {%- for arg in type.arguments -%}
-        {% if arg.type.category == "structure" and arg.type.name.get() != "string view" %}struct {% endif %}{{as_annotated_cType(arg)}}{{", "}}
+            {% if arg.type.category == "structure" and arg.type.name.get() != "string view" %}struct {% endif %}{{as_annotated_cType(arg)}}{{", "}}
         {%- endfor -%}
     {{API}}_NULLABLE void* userdata1, {{API}}_NULLABLE void* userdata2) {{API}}_FUNCTION_ATTRIBUTE;
 
@@ -347,7 +347,7 @@ extern "C" {
 {% endif %}
 // Global procs
 {% for function in by_category["function"] %}
-    typedef {{as_cType(function.return_type.name)}} (*{{as_cProc(None, function.name)}})(
+    typedef {{nullable_annotation(function.returns)}}{{as_annotated_cType(function.returns)}} (*{{as_cProc(None, function.name)}})(
             {%- for arg in function.arguments -%}
                 {% if not loop.first %}, {% endif -%}
                 {{nullable_annotation(arg)}}{{as_annotated_cType(arg)}}
@@ -358,7 +358,7 @@ extern "C" {
 {% for (type, methods) in c_methods_sorted_by_parent %}
     // Procs of {{type.name.CamelCase()}}
     {% for method in methods %}
-        typedef {{as_cType(method.return_type.name)}} (*{{as_cProc(type.name, method.name)}})(
+        typedef {{nullable_annotation(method.returns)}}{{as_annotated_cType(method.returns)}} (*{{as_cProc(type.name, method.name)}})(
             {{-as_cType(type.name)}} {{as_varName(type.name)}}
             {%- for arg in method.arguments -%}
                 , {{nullable_annotation(arg)}}{{as_annotated_cType(arg)}}
@@ -371,7 +371,7 @@ extern "C" {
 
 #if !defined({{API}}_SKIP_DECLARATIONS)
 {% for function in by_category["function"] %}
-    {{API}}_EXPORT {{as_cType(function.return_type.name)}} {{as_cMethod(None, function.name)}}(
+    {{API}}_EXPORT {{nullable_annotation(function.returns)}}{{as_annotated_cType(function.returns)}} {{as_cMethod(None, function.name)}}(
             {%- for arg in function.arguments -%}
                 {% if not loop.first %}, {% endif -%}
                 {{nullable_annotation(arg)}}{{as_annotated_cType(arg)}}
@@ -382,7 +382,7 @@ extern "C" {
 {% for (type, methods) in c_methods_sorted_by_parent %}
     // Methods of {{type.name.CamelCase()}}
     {% for method in methods %}
-        {{API}}_EXPORT {{as_cType(method.return_type.name)}} {{as_cMethod(type.name, method.name)}}(
+        {{API}}_EXPORT {{nullable_annotation(method.returns)}}{{as_annotated_cType(method.returns)}} {{as_cMethod(type.name, method.name)}}(
             {{-as_cType(type.name)}} {{as_varName(type.name)}}
             {%- for arg in method.arguments -%}
                 , {{nullable_annotation(arg)}}{{as_annotated_cType(arg)}}

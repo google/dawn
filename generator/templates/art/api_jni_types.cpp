@@ -26,7 +26,9 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 {% macro arg_to_jni_type(arg) %}
-    {%- if arg.length and arg.length != 'constant' -%}
+    {%- if arg == None -%}
+        void
+    {%- elif arg.length and arg.length != 'constant' -%}
         {%- if arg.type.category in ['bitmask', 'callback function', 'enum', 'function pointer', 'object', 'callback info', 'structure'] -%}
             jobjectArray
         {%- elif arg.type.name.get() == 'void' -%}
