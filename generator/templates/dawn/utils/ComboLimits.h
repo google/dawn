@@ -29,6 +29,8 @@
 
 #include <webgpu/webgpu_cpp.h>
 
+#include <concepts>
+
 #include "dawn/common/NonMovable.h"
 
 namespace dawn::utils {
