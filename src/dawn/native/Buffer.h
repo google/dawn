@@ -189,36 +189,35 @@ class BufferBase : public SharedResource {
     const wgpu::BufferUsage mInternalUsage = wgpu::BufferUsage::None;
     bool mIsDataInitialized = false;
 
-    // Mutable state of the buffer w.r.t mapping. These are kept together in an anonymous struct
-    // since they are all loosely guarded by |mBufferState| by update ordering.
-    struct {
-        // Currently, our API relies on the fact that there is a device level lock that synchronizes
-        // everything. For API*MappedRange calls, however, it is more efficient to not acquire the
-        // device-wide lock since we cannot actually protect against racing w.r.t Unmap, i.e. a user
-        // can call an API*MappedRange function, save the pointer, call Unmap, and now the user is
-        // holding an invalid pointer. While a buffer state change is always guarded by the
-        // device-lock, we can implement the necessary validations for the API*MappedRange calls
-        // without acquiring the lock by ensuring that:
-        //   1) For MapAsync, we only set |mBufferState| = Mapped AFTER we update the other members.
-        //   2) For *MappedRange functions, we always check |mBufferState| = Mapped before checking
-        //      other members for validation.
-        // With those assumptions in place, we can guarantee that if *MappedRange is successful,
-        // that MapAsync must have succeeded. We cannot guarantee, however, that Unmap did not race
-        // with *MappedRange, but that is the responsibility of the caller.
-        std::atomic<BufferState> mState = BufferState::Unmapped;
+    // The following members are mutable state of the buffer w.r.t mapping. They are all loosely
+    // guarded by |mBufferState| by update ordering.
 
-        // A recursive buffer used to implement mappedAtCreation for buffers with non-mappable
-        // usage. It is transiently allocated and released when the mappedAtCreation-buffer is
-        // unmapped. Because this buffer itself is directly mappable, it will not create another
-        // staging buffer recursively.
-        Ref<BufferBase> mStagingBuffer = nullptr;
+    // Currently, our API relies on the fact that there is a device level lock that synchronizes
+    // everything. For API*MappedRange calls, however, it is more efficient to not acquire the
+    // device-wide lock since we cannot actually protect against racing w.r.t Unmap, i.e. a user
+    // can call an API*MappedRange function, save the pointer, call Unmap, and now the user is
+    // holding an invalid pointer. While a buffer state change is always guarded by the
+    // device-lock, we can implement the necessary validations for the API*MappedRange calls
+    // without acquiring the lock by ensuring that:
+    //   1) For MapAsync, we only set |mBufferState| = Mapped AFTER we update the other members.
+    //   2) For *MappedRange functions, we always check |mBufferState| = Mapped before checking
+    //      other members for validation.
+    // With those assumptions in place, we can guarantee that if *MappedRange is successful,
+    // that MapAsync must have succeeded. We cannot guarantee, however, that Unmap did not race
+    // with *MappedRange, but that is the responsibility of the caller.
+    std::atomic<BufferState> mState = BufferState::Unmapped;
 
-        // Mapping specific states.
-        wgpu::MapMode mMapMode = wgpu::MapMode::None;
-        size_t mMapOffset = 0;
-        size_t mMapSize = 0;
-        std::variant<void*, Ref<MapAsyncEvent>> mMapData;
-    };
+    // A recursive buffer used to implement mappedAtCreation for buffers with non-mappable
+    // usage. It is transiently allocated and released when the mappedAtCreation-buffer is
+    // unmapped. Because this buffer itself is directly mappable, it will not create another
+    // staging buffer recursively.
+    Ref<BufferBase> mStagingBuffer = nullptr;
+
+    // Mapping specific states.
+    wgpu::MapMode mMapMode = wgpu::MapMode::None;
+    size_t mMapOffset = 0;
+    size_t mMapSize = 0;
+    std::variant<void*, Ref<MapAsyncEvent>> mMapData;
 };
 
 }  // namespace dawn::native
