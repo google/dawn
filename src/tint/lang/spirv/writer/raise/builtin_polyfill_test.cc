@@ -4002,10 +4002,11 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Storage_ColMajor_I8) 
     auto* expect = R"(
 %foo = func(%p:ptr<storage, array<i32, 256>, read_write>):subgroup_matrix_result<i8, 8, 8> {
   $B1: {
-    %3:ptr<storage, i32, read_write> = access %p, 64u
-    %4:u32 = div 32u, 4u
-    %5:subgroup_matrix_result<i8, 8, 8> = spirv.cooperative_matrix_load<subgroup_matrix_result<i8, 8, 8>> %3, 1u, %4, 32u
-    ret %5
+    %3:u32 = div 32u, 4u
+    %4:u32 = div 64u, 4u
+    %5:ptr<storage, i32, read_write> = access %p, %4
+    %6:subgroup_matrix_result<i8, 8, 8> = spirv.cooperative_matrix_load<subgroup_matrix_result<i8, 8, 8>> %5, 1u, %3, 32u
+    ret %6
   }
 }
 )";
@@ -4040,10 +4041,11 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Workgroup_RowMajor_U8
     auto* expect = R"(
 %foo = func(%p:ptr<workgroup, array<u32, 256>, read_write>):subgroup_matrix_result<u8, 8, 8> {
   $B1: {
-    %3:ptr<workgroup, u32, read_write> = access %p, 64u
-    %4:u32 = div 32u, 4u
-    %5:subgroup_matrix_result<u8, 8, 8> = spirv.cooperative_matrix_load<subgroup_matrix_result<u8, 8, 8>> %3, 0u, %4, 32u
-    ret %5
+    %3:u32 = div 32u, 4u
+    %4:u32 = div 64u, 4u
+    %5:ptr<workgroup, u32, read_write> = access %p, %4
+    %6:subgroup_matrix_result<u8, 8, 8> = spirv.cooperative_matrix_load<subgroup_matrix_result<u8, 8, 8>> %5, 0u, %3, 32u
+    ret %6
   }
 }
 )";

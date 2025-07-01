@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 63
+; Bound: 64
 ; Schema: 0
                OpCapability Shader
                OpCapability VulkanMemoryModel
@@ -63,7 +63,7 @@
          %41 = OpConstantComposite %12 %uchar_0
 %_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
        %void = OpTypeVoid
-         %54 = OpTypeFunction %void
+         %55 = OpTypeFunction %void
 %_ptr_StorageBuffer__arr_uint_uint_1024 = OpTypePointer StorageBuffer %_arr_uint_uint_1024
 %_ptr_StorageBuffer_uint_0 = OpTypePointer StorageBuffer %uint
     %uint_64 = OpConstant %uint 64
@@ -88,10 +88,11 @@
                OpSelectionMerge %43 None
                OpBranchConditional %37 %44 %43
          %44 = OpLabel
-         %48 = OpAccessChain %_ptr_StorageBuffer_uint %23 %26
-         %50 = OpUDiv %uint %28 %uint_4
-         %51 = OpCooperativeMatrixLoadKHR %12 %48 %uint_1 %50 NonPrivatePointer
-               OpStore %39 %51 None
+         %48 = OpUDiv %uint %28 %uint_4
+         %49 = OpUDiv %uint %26 %uint_4
+         %50 = OpAccessChain %_ptr_StorageBuffer_uint %23 %49
+         %52 = OpCooperativeMatrixLoadKHR %12 %50 %uint_1 %48 NonPrivatePointer
+               OpStore %39 %52 None
                OpBranch %43
          %43 = OpLabel
          %45 = OpLoad %12 %39 None
@@ -99,11 +100,11 @@
          %47 = OpLoad %12 %res None
                OpReturnValue %47
                OpFunctionEnd
-%compute_main = OpFunction %void None %54
-         %55 = OpLabel
-         %56 = OpFunctionCall %12 %subgroupMatrixLoad_5e2602
-         %57 = OpAccessChain %_ptr_StorageBuffer__arr_uint_uint_1024 %1 %uint_0
-         %59 = OpAccessChain %_ptr_StorageBuffer_uint_0 %57 %uint_0
-               OpCooperativeMatrixStoreKHR %59 %56 %uint_0 %uint_64 NonPrivatePointer
+%compute_main = OpFunction %void None %55
+         %56 = OpLabel
+         %57 = OpFunctionCall %12 %subgroupMatrixLoad_5e2602
+         %58 = OpAccessChain %_ptr_StorageBuffer__arr_uint_uint_1024 %1 %uint_0
+         %60 = OpAccessChain %_ptr_StorageBuffer_uint_0 %58 %uint_0
+               OpCooperativeMatrixStoreKHR %60 %57 %uint_0 %uint_64 NonPrivatePointer
                OpReturn
                OpFunctionEnd
