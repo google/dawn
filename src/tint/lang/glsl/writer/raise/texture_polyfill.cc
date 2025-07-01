@@ -33,6 +33,7 @@
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
 #include "src/tint/lang/core/type/depth_texture.h"
 #include "src/tint/lang/core/type/multisampled_texture.h"
@@ -235,12 +236,12 @@ struct State {
     glsl::ir::CombinedTextureSamplerVar* MakeReplacement(binding::CombinedTextureSamplerPair& key,
                                                          core::ir::Var* tex,
                                                          core::ir::Var* sampler,
-                                                         const core::type::Pointer* tex_ty) {
+                                                         const core::type::Type* handle_type) {
         // Create a combined texture sampler variable and insert it into the root block.
         // TODO(411573957): Support binding_array<sampler> by expanding the result's type here to
         // be a binding_array<T, NTextures * NSamplers>.
         TINT_ASSERT(!sampler || sampler->Result()->Type()->UnwrapPtr()->Is<core::type::Sampler>());
-        auto* result = b.InstructionResult(tex_ty);
+        auto* result = b.InstructionResult(ty.ptr<handle>(handle_type));
         auto* var = ir.CreateInstruction<glsl::ir::CombinedTextureSamplerVar>(result, key.texture,
                                                                               key.sampler);
         ir.root_block->Append(var);
@@ -301,8 +302,7 @@ struct State {
 
             binding::CombinedTextureSamplerPair key{tex_bp, samp_bp};
             auto* replacement = texture_sampler_to_replacement_.GetOrAdd(key, [&] {
-                return MakeReplacement(key, tex, sampler,
-                                       tex->Result()->Type()->As<core::type::Pointer>());
+                return MakeReplacement(key, tex, sampler, tex->Result()->Type()->UnwrapPtr());
             });
 
             // Mark the texture+sampler replacement as a replacement for the texture on its own.
@@ -326,18 +326,29 @@ struct State {
                 continue;
             }
 
-            auto* tex_ty = tex->Result()->Type()->UnwrapPtr()->As<core::type::Texture>();
+            // Decompose the type into a base texture type and a potential binding_array size.
+            const core::type::Type* handle_type = tex->Result()->Type()->UnwrapPtr();
+            std::optional<uint32_t> binding_array_count = std::nullopt;
+            if (auto* ba = handle_type->As<core::type::BindingArray>()) {
+                handle_type = ba->ElemType();
+                binding_array_count = ba->Count()->As<core::type::ConstantArrayCount>()->value;
+            }
 
             // Storage textures don't need replacements so they are replaced with themselves.
-            if (tex_ty->Is<core::type::StorageTexture>()) {
+            if (handle_type->Is<core::type::StorageTexture>()) {
                 texture_to_replacement_.Add(tex, tex);
                 continue;
             }
 
             // Depth textures used without a sampler need to be replaced with f32 sampled textures.
-            auto* replacement_ty = ty.ptr<handle>(tex_ty);
-            if (tex_ty->Is<core::type::DepthTexture>()) {
-                replacement_ty = ty.ptr<handle>(ty.sampled_texture(tex_ty->Dim(), ty.f32()));
+            const core::type::Type* replacement_ty = handle_type;
+            if (auto* tex_type = handle_type->As<core::type::DepthTexture>()) {
+                replacement_ty = ty.sampled_texture(tex_type->Dim(), ty.f32());
+            }
+
+            // Re-wrap the handle type in a binding array for the replacement if needed.
+            if (binding_array_count.has_value()) {
+                replacement_ty = ty.binding_array(replacement_ty, binding_array_count.value());
             }
 
             binding::CombinedTextureSamplerPair key{tex->BindingPoint().value(),

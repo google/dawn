@@ -6089,5 +6089,62 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(GlslWriter_TexturePolyfillTest, BindingArray_Texture2d_UnsampledUse) {
+    auto* texture_type = ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32());
+    core::ir::Var* textures = nullptr;
+    b.Append(b.ir.root_block, [&] {
+        textures = b.Var("textures", ty.ptr<handle>(ty.binding_array(texture_type, 3u)));
+        textures->SetBindingPoint(0, 0);
+    });
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* textures_value = b.Load(textures);
+        auto* t = b.Access(texture_type, textures_value, 1_u);
+        auto* load_coords = b.Zero<vec2<i32>>();
+        auto* level = b.Zero<i32>();
+        b.Call<vec4<f32>>(core::BuiltinFn::kTextureLoad, t, load_coords, level);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %textures:ptr<handle, binding_array<texture_2d<f32>, 3>, read> = var undef @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:binding_array<texture_2d<f32>, 3> = load %textures
+    %4:texture_2d<f32> = access %3, 1u
+    %5:vec4<f32> = textureLoad %4, vec2<i32>(0i), 0i
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %textures:ptr<handle, binding_array<texture_2d<f32>, 3>, read> = combined_texture_sampler undef @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:ptr<handle, texture_2d<f32>, read> = access %textures, 1u
+    %4:texture_2d<f32> = load %3
+    %5:vec4<f32> = glsl.texelFetch %4, vec2<i32>(0i), 0i
+    ret
+  }
+}
+)";
+
+    TexturePolyfillConfig cfg;
+    cfg.placeholder_sampler_bind_point = {4, 0};
+    Run(TexturePolyfill, cfg);
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::glsl::writer::raise
