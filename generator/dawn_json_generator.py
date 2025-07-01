@@ -237,12 +237,14 @@ class AnnotatedTypedMember:
 # Methods and structures are both "records", so record members correspond to
 # method arguments or structure members.
 class RecordMember(AnnotatedTypedMember):
+
     def __init__(self,
                  name,
                  typ,
                  annotation,
                  json_data,
                  optional=False,
+                 array_element_optional=False,
                  is_return_value=False,
                  default_value=None,
                  skip_serialize=False):
@@ -250,6 +252,9 @@ class RecordMember(AnnotatedTypedMember):
         self.name = name
         self.length = None
         self.optional = optional
+        self.array_element_optional = array_element_optional
+        if array_element_optional:
+            assert annotation == 'const*', 'array_element_optional can only be used on array types'
         self.is_return_value = is_return_value
         self.handle_type = None
         self.id_type = None
@@ -440,6 +445,8 @@ def linked_record_members(json_data, types):
                               m.get('annotation', 'value'),
                               m,
                               optional=m.get('optional', False),
+                              array_element_optional=m.get(
+                                  'array_element_optional', False),
                               is_return_value=m.get('is_return_value', False),
                               default_value=m.get('default', None),
                               skip_serialize=m.get('skip_serialize', False))

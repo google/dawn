@@ -1,15 +1,6 @@
 --- webgpu_header
 +++ dawn_header
 @@
-     WGPUChainedStruct * nextInChain;
-     WGPUStringView label;
-     size_t bindGroupLayoutCount;
--    WGPUBindGroupLayout const * bindGroupLayouts;
-+    WGPU_NULLABLE WGPUBindGroupLayout const * bindGroupLayouts;
-     uint32_t immediateSize;
- } WGPUPipelineLayoutDescriptor WGPU_STRUCTURE_ATTRIBUTE;
- 
-@@
  typedef WGPUInstance (*WGPUProcCreateInstance)(WGPU_NULLABLE WGPUInstanceDescriptor const * descriptor) WGPU_FUNCTION_ATTRIBUTE;
  typedef void (*WGPUProcGetInstanceFeatures)(WGPUSupportedInstanceFeatures * features) WGPU_FUNCTION_ATTRIBUTE;
  typedef WGPUStatus (*WGPUProcGetInstanceLimits)(WGPUInstanceLimits * limits) WGPU_FUNCTION_ATTRIBUTE;

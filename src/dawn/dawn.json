@@ -2661,7 +2661,7 @@
         "members": [
             {"name": "label", "type": "string view", "optional": true},
             {"name": "bind group layout count", "type": "size_t"},
-            {"name": "bind group layouts", "type": "bind group layout", "annotation": "const*", "length": "bind group layout count", "optional": true},
+            {"name": "bind group layouts", "type": "bind group layout", "annotation": "const*", "length": "bind group layout count", "array_element_optional": true},
             {"name": "immediate size", "type": "uint32_t", "default": 0}
         ]
     },
