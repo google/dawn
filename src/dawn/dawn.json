@@ -2344,7 +2344,8 @@
             {"value": 54, "name": "flexible texture views", "tags": ["dawn"]},
             {"value": 55, "name": "chromium experimental subgroup matrix", "tags": ["dawn"]},
             {"value": 56, "name": "shared fence EGL sync", "tags": ["dawn", "native"]},
-            {"value": 57, "name": "dawn device allocator control", "tags": ["dawn"]}
+            {"value": 57, "name": "dawn device allocator control", "tags": ["dawn"]},
+            {"value": 58, "name": "texture component swizzle", "tags": ["dawn"]}
         ]
     },
     "filter mode": {
@@ -3915,7 +3916,8 @@
             {"value": 67, "name": "dawn host mapped pointer limits", "tags": ["dawn"]},
             {"value": 68, "name": "render pass descriptor resolve rect", "tags": ["dawn"]},
             {"value": 69, "name": "request adapter WebGPU backend options", "tags": ["dawn", "native"]},
-            {"value": 70, "name": "dawn fake device initialize error for testing", "tags": ["dawn"]}
+            {"value": 70, "name": "dawn fake device initialize error for testing", "tags": ["dawn"]},
+            {"value": 71, "name": "texture component swizzle descriptor", "tags": ["dawn"]}
         ]
     },
     "texture": {
@@ -4190,6 +4192,15 @@
             {"name": "usage", "type": "texture usage"}
         ]
     },
+    "texture component swizzle descriptor": {
+        "category": "structure",
+        "tags": ["dawn"],
+        "chained": "in",
+        "chain roots": ["texture view descriptor"],
+        "members": [
+            {"name": "swizzle", "type": "texture component swizzle"}
+        ]
+    },
     "texture view": {
         "category": "object",
         "methods": [
@@ -4212,6 +4223,30 @@
             {"value": 4, "name": "cube"},
             {"value": 5, "name": "cube array"},
             {"value": 6, "name": "3D"}
+        ]
+    },
+    "texture component swizzle": {
+        "category": "structure",
+        "tags": ["dawn"],
+        "extensible": false,
+        "members": [
+            {"name": "r", "type": "component swizzle", "default": "r"},
+            {"name": "g", "type": "component swizzle", "default": "g"},
+            {"name": "b", "type": "component swizzle", "default": "b"},
+            {"name": "a", "type": "component swizzle", "default": "a"}
+        ]
+    },
+    "component swizzle": {
+        "category": "enum",
+        "tags": ["dawn"],
+        "values": [
+            {"value": 0, "name": "undefined", "jsrepr": "undefined"},
+            {"value": 1, "name": "zero"},
+            {"value": 2, "name": "one"},
+            {"value": 3, "name": "r"},
+            {"value": 4, "name": "g"},
+            {"value": 5, "name": "b"},
+            {"value": 6, "name": "a"}
         ]
     },
     "y cb cr vk descriptor": {

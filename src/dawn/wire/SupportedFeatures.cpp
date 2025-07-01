@@ -119,6 +119,7 @@ bool IsFeatureSupported(WGPUFeatureName feature) {
         case WGPUFeatureName_CoreFeaturesAndLimits:
         case WGPUFeatureName_DawnDeviceAllocatorControl:
         case WGPUFeatureName_TextureFormatsTier1:
+        case WGPUFeatureName_TextureComponentSwizzle:
             return true;
     }
 

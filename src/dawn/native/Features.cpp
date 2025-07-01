@@ -386,6 +386,11 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
       "GPUStorageTextureAccesses ",
       "https://gpuweb.github.io/gpuweb/#texture-formats-tier1",
       FeatureInfo::FeatureState::Experimental}},
+    {Feature::TextureComponentSwizzle,
+     {"Texture component swizzle lets you to specify how the channels of a texture (red, green, "
+      "blue, and alpha) are mapped to the color components when accessed by a shader.",
+      "https://github.com/gpuweb/gpuweb/blob/main/proposals/texture-component-swizzle.md",
+      FeatureInfo::FeatureState::Experimental}},
     {Feature::CoreFeaturesAndLimits,
      {"Lifts all compatibility mode restrictions (features and limits) to core when enabled on a "
       "device.",

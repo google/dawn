@@ -481,6 +481,49 @@ wgpu::TextureUsage GetTextureViewUsage(wgpu::TextureUsage sourceTextureUsage,
                                                             : sourceTextureUsage;
 }
 
+MaybeError ValidateTextureComponentSwizzle(const DeviceBase* device,
+                                           const TextureBase* texture,
+                                           const UnpackedPtr<TextureViewDescriptor>& descriptor) {
+    auto* swizzleDesc = descriptor.Get<TextureComponentSwizzleDescriptor>();
+    if (!swizzleDesc) {
+        return {};
+    }
+
+    DAWN_INVALID_IF(!device->HasFeature(Feature::TextureComponentSwizzle),
+                    "swizzle used without the %s feature enabled.",
+                    wgpu::FeatureName::TextureComponentSwizzle);
+
+    wgpu::TextureUsage usage = GetTextureViewUsage(texture->GetUsage(), descriptor->usage);
+    if ((usage & (wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::StorageBinding)) ==
+        0) {
+        return {};
+    }
+
+    auto swizzle = swizzleDesc->swizzle.WithTrivialFrontendDefaults();
+    DAWN_INVALID_IF(swizzle.r != wgpu::ComponentSwizzle::R,
+                    "The texture view's component swizzle r (%s) must be %s when usage "
+                    "includes %s or %s.",
+                    swizzle.r, wgpu::ComponentSwizzle::R, wgpu::TextureUsage::RenderAttachment,
+                    wgpu::TextureUsage::StorageBinding);
+    DAWN_INVALID_IF(swizzle.g != wgpu::ComponentSwizzle::G,
+                    "The texture view's component swizzle g (%s) must be %s when usage "
+                    "includes %s or %s.",
+                    swizzle.g, wgpu::ComponentSwizzle::G, wgpu::TextureUsage::RenderAttachment,
+                    wgpu::TextureUsage::StorageBinding);
+    DAWN_INVALID_IF(swizzle.b != wgpu::ComponentSwizzle::B,
+                    "The texture view's component swizzle b (%s) must be %s when usage "
+                    "includes %s or %s.",
+                    swizzle.b, wgpu::ComponentSwizzle::B, wgpu::TextureUsage::RenderAttachment,
+                    wgpu::TextureUsage::StorageBinding);
+    DAWN_INVALID_IF(swizzle.a != wgpu::ComponentSwizzle::A,
+                    "The texture view's component swizzle a (%s) must be %s when usage "
+                    "includes %s or %s.",
+                    swizzle.a, wgpu::ComponentSwizzle::A, wgpu::TextureUsage::RenderAttachment,
+                    wgpu::TextureUsage::StorageBinding);
+
+    return {};
+}
+
 wgpu::TextureUsage RemoveInvalidViewUsages(wgpu::TextureUsage viewUsage, const Format* viewFormat) {
     wgpu::TextureUsage adjustedUsage = viewUsage;
     if (viewFormat->format == wgpu::TextureFormat::RGBA8UnormSrgb ||
@@ -827,6 +870,7 @@ MaybeError ValidateTextureViewDescriptor(const DeviceBase* device,
 
     DAWN_TRY(ValidateCanViewTextureAs(device, texture, *viewFormat, descriptor->aspect));
     DAWN_TRY(ValidateTextureViewDimensionCompatibility(device, texture, descriptor));
+    DAWN_TRY(ValidateTextureComponentSwizzle(device, texture, descriptor));
 
     return {};
 }
@@ -1464,6 +1508,14 @@ TextureViewQuery::TextureViewQuery(const UnpackedPtr<TextureViewDescriptor>& des
     arrayLayerCount = desc->arrayLayerCount;
     aspect = desc->aspect;
     usage = desc->usage;
+
+    if (auto* swizzleDesc = desc.Get<TextureComponentSwizzleDescriptor>()) {
+        auto swizzle = swizzleDesc->swizzle.WithTrivialFrontendDefaults();
+        swizzleRed = swizzle.r;
+        swizzleGreen = swizzle.g;
+        swizzleBlue = swizzle.b;
+        swizzleAlpha = swizzle.a;
+    }
 }
 
 // TextureViewCacheFuncs
@@ -1474,6 +1526,7 @@ size_t TextureViewCacheFuncs::operator()(const TextureViewQuery& desc) const {
     HashCombine(&hash, desc.dimension, desc.aspect, desc.usage);
     HashCombine(&hash, desc.baseMipLevel, desc.mipLevelCount, desc.baseArrayLayer,
                 desc.arrayLayerCount);
+    HashCombine(&hash, desc.swizzleRed, desc.swizzleGreen, desc.swizzleBlue, desc.swizzleAlpha);
 
     return hash;
 }
