@@ -51,6 +51,10 @@ interop::GPUSubgroupMatrixComponentType SubgroupMatrixComponentType(
             return interop::GPUSubgroupMatrixComponentType::kU32;
         case SubgroupMatrixComponentType::I32:
             return interop::GPUSubgroupMatrixComponentType::kI32;
+        case SubgroupMatrixComponentType::U8:
+            return interop::GPUSubgroupMatrixComponentType::kU8;
+        case SubgroupMatrixComponentType::I8:
+            return interop::GPUSubgroupMatrixComponentType::kI8;
     }
     assert(false);
     return interop::GPUSubgroupMatrixComponentType::kF32;

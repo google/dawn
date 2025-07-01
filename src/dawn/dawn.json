@@ -4496,7 +4496,9 @@
             {"value": 1, "name": "f32"},
             {"value": 2, "name": "f16"},
             {"value": 3, "name": "u32"},
-            {"value": 4, "name": "i32"}
+            {"value": 4, "name": "i32"},
+            {"value": 5, "name": "u8"},
+            {"value": 6, "name": "i8"}
         ]
     },
     "subgroup matrix config": {

@@ -46,6 +46,26 @@ const char* ComponentTypeToWgslType(wgpu::SubgroupMatrixComponentType c) {
             return "u32";
         case wgpu::SubgroupMatrixComponentType::I32:
             return "i32";
+        case wgpu::SubgroupMatrixComponentType::U8:
+            return "u8";
+        case wgpu::SubgroupMatrixComponentType::I8:
+            return "i8";
+    }
+    return "<invalid>";
+}
+
+const char* ComponentTypeToScalarShaderType(wgpu::SubgroupMatrixComponentType c) {
+    switch (c) {
+        case wgpu::SubgroupMatrixComponentType::F32:
+            return "f32";
+        case wgpu::SubgroupMatrixComponentType::F16:
+            return "f16";
+        case wgpu::SubgroupMatrixComponentType::U32:
+        case wgpu::SubgroupMatrixComponentType::U8:
+            return "u32";
+        case wgpu::SubgroupMatrixComponentType::I32:
+        case wgpu::SubgroupMatrixComponentType::I8:
+            return "i32";
     }
     return "<invalid>";
 }
@@ -58,6 +78,9 @@ uint32_t ComponentTypeToByteSize(wgpu::SubgroupMatrixComponentType c) {
             return 4;
         case wgpu::SubgroupMatrixComponentType::F16:
             return 2;
+        case wgpu::SubgroupMatrixComponentType::U8:
+        case wgpu::SubgroupMatrixComponentType::I8:
+            return 1;
     }
     return 0;
 }
@@ -101,9 +124,11 @@ struct Matrix {
                         SetFloat(kFloatValues[index], c, r);
                         break;
                     case wgpu::SubgroupMatrixComponentType::I32:
+                    case wgpu::SubgroupMatrixComponentType::I8:
                         SetInt(kSIntValues[index], c, r);
                         break;
                     case wgpu::SubgroupMatrixComponentType::U32:
+                    case wgpu::SubgroupMatrixComponentType::U8:
                         SetInt(kUIntValues[index], c, r);
                         break;
                 }
@@ -119,6 +144,10 @@ struct Matrix {
                 return GetValue<uint32_t>(c, r);
             case wgpu::SubgroupMatrixComponentType::I32:
                 return GetValue<int32_t>(c, r);
+            case wgpu::SubgroupMatrixComponentType::U8:
+                return GetValue<uint8_t>(c, r);
+            case wgpu::SubgroupMatrixComponentType::I8:
+                return GetValue<int8_t>(c, r);
             case wgpu::SubgroupMatrixComponentType::F32:
             case wgpu::SubgroupMatrixComponentType::F16:
                 break;
@@ -134,6 +163,8 @@ struct Matrix {
                 return Float16ToFloat32(GetValue<uint16_t>(c, r));
             case wgpu::SubgroupMatrixComponentType::U32:
             case wgpu::SubgroupMatrixComponentType::I32:
+            case wgpu::SubgroupMatrixComponentType::U8:
+            case wgpu::SubgroupMatrixComponentType::I8:
                 break;
         }
         abort();
@@ -146,6 +177,12 @@ struct Matrix {
                 return;
             case wgpu::SubgroupMatrixComponentType::I32:
                 SetValue(static_cast<int32_t>(value), c, r);
+                return;
+            case wgpu::SubgroupMatrixComponentType::U8:
+                SetValue(static_cast<uint8_t>(value), c, r);
+                return;
+            case wgpu::SubgroupMatrixComponentType::I8:
+                SetValue(static_cast<int8_t>(value), c, r);
                 return;
             case wgpu::SubgroupMatrixComponentType::F32:
             case wgpu::SubgroupMatrixComponentType::F16:
@@ -164,6 +201,8 @@ struct Matrix {
                 return;
             case wgpu::SubgroupMatrixComponentType::U32:
             case wgpu::SubgroupMatrixComponentType::I32:
+            case wgpu::SubgroupMatrixComponentType::U8:
+            case wgpu::SubgroupMatrixComponentType::I8:
                 break;
         }
         abort();
@@ -351,7 +390,7 @@ class SubgroupMatrix_MatrixMatrixArithmeticTest : public SubgroupMatrixArithmeti
         shader << "\n";
         shader << "alias ComponentType = " << ComponentTypeToWgslType(config.componentType)
                << ";\n";
-        shader << "alias InputArrayType = " << ComponentTypeToWgslType(config.componentType)
+        shader << "alias InputArrayType = " << ComponentTypeToScalarShaderType(config.componentType)
                << ";\n";
         shader << "alias ResultComponentType = "
                << ComponentTypeToWgslType(config.resultComponentType) << ";\n";
@@ -362,7 +401,14 @@ class SubgroupMatrix_MatrixMatrixArithmeticTest : public SubgroupMatrixArithmeti
         shader << "const M = " << config.M << ";\n";
         shader << "const N = " << config.N << ";\n";
         shader << "const K = " << config.K << ";\n";
-        shader << "const kInputArraySize = (K*M + N*K);\n";
+
+        shader << "const kInputArraySize = (K*M + N*K)";
+        if (config.componentType == wgpu::SubgroupMatrixComponentType::U8 ||
+            config.componentType == wgpu::SubgroupMatrixComponentType::I8) {
+            shader << "/4";
+        }
+        shader << ";\n";
+
         shader << "const kLoadOffset = K * M;\n";
         shader << "const SubgroupMaxSize = " << subgroupMaxSize << ";\n";
         shader << R"(
