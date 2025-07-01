@@ -480,7 +480,7 @@ MaybeError DeviceBase::Initialize(const UnpackedPtr<DeviceDescriptor>& descripto
     }
 
     if (HasFeature(Feature::ImplicitDeviceSynchronization)) {
-        mMutex = AcquireRef(new Mutex);
+        mMutex = AcquireRef(new RecursiveMutex);
     } else {
         mMutex = nullptr;
     }
@@ -703,6 +703,7 @@ void DeviceBase::HandleDeviceLost(wgpu::DeviceLostReason reason, std::string_vie
 void DeviceBase::HandleError(std::unique_ptr<ErrorData> error,
                              InternalErrorType additionalAllowedErrors,
                              wgpu::DeviceLostReason lostReason) {
+    auto deviceLock(GetScopedLock());
     AppendDebugLayerMessages(error.get());
 
     InternalErrorType type = error->GetType();
@@ -1248,9 +1249,6 @@ BufferBase* DeviceBase::APICreateBuffer(const BufferDescriptor* rawDescriptor) {
     // If there was a deferredError saved from earlier, surface it now.
     if (deferredError) {
         deferredError->AppendContext("calling %s.CreateBuffer(%s).", this, rawDescriptor);
-
-        // TODO(dawn:1662): Make error handling thread-safe.
-        auto deviceLock(GetScopedLock());
         ConsumeError(std::move(deferredError), InternalErrorType::OutOfMemory);
     }
     return ReturnToAPI(std::move(buffer));
@@ -1275,9 +1273,6 @@ ComputePipelineBase* DeviceBase::APICreateComputePipeline(
         return ReturnToAPI(resultOrError.AcquireSuccess());
     }
 
-    // Acquire the device lock for error handling.
-    // TODO(dawn:1662): Make error handling thread-safe.
-    auto deviceLock(GetScopedLock());
     Ref<ComputePipelineBase> result;
     if (ConsumedError(std::move(resultOrError), &result, InternalErrorType::Internal,
                       "calling %s.CreateComputePipeline(%s).", this, descriptor)) {
@@ -1418,9 +1413,6 @@ RenderPipelineBase* DeviceBase::APICreateRenderPipeline(
         return ReturnToAPI(resultOrError.AcquireSuccess());
     }
 
-    // Acquire the device lock for error handling.
-    // TODO(dawn:1662): Make error handling thread-safe.
-    auto deviceLock(GetScopedLock());
     Ref<RenderPipelineBase> result;
     if (ConsumedError(std::move(resultOrError), &result, InternalErrorType::Internal,
                       "calling %s.CreateRenderPipeline(%s).", this, descriptor)) {
@@ -2433,12 +2425,12 @@ MaybeError DeviceBase::CopyFromStagingToTexture(BufferBase* source,
     return {};
 }
 
-Mutex::AutoLockAndHoldRef DeviceBase::GetScopedLockSafeForDelete() {
-    return Mutex::AutoLockAndHoldRef(mMutex);
+RecursiveMutex::AutoLockAndHoldRef DeviceBase::GetScopedLockSafeForDelete() {
+    return RecursiveMutex::AutoLockAndHoldRef(mMutex);
 }
 
-Mutex::AutoLock DeviceBase::GetScopedLock() {
-    return Mutex::AutoLock(mMutex.Get());
+RecursiveMutex::AutoLock DeviceBase::GetScopedLock() {
+    return RecursiveMutex::AutoLock(mMutex.Get());
 }
 
 bool DeviceBase::IsLockedByCurrentThreadIfNeeded() const {

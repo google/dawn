@@ -407,10 +407,10 @@ class DeviceBase : public ErrorSink,
 
     // It is guaranteed that the wrapped mutex will outlive the Device (if the Device is deleted
     // before the AutoLockAndHoldRef).
-    [[nodiscard]] Mutex::AutoLockAndHoldRef GetScopedLockSafeForDelete();
+    [[nodiscard]] RecursiveMutex::AutoLockAndHoldRef GetScopedLockSafeForDelete();
     // This lock won't guarantee the wrapped mutex will be alive if the Device is deleted before the
     // AutoLock. It would crash if such thing happens.
-    [[nodiscard]] Mutex::AutoLock GetScopedLock();
+    [[nodiscard]] RecursiveMutex::AutoLock GetScopedLock();
 
     // This method returns true if Feature::ImplicitDeviceSynchronization is turned on and the
     // device is locked by current thread. This method is only enabled when DAWN_ENABLE_ASSERTS is
@@ -616,8 +616,10 @@ class DeviceBase : public ErrorSink,
     // We cache this toggle so that we can check it without locking the device.
     bool mIsImmediateErrorHandlingEnabled = false;
 
-    // This pointer is non-null if Feature::ImplicitDeviceSynchronization is turned on.
-    Ref<Mutex> mMutex = nullptr;
+    // This pointer is non-null if Feature::ImplicitDeviceSynchronization is turned on. Note that
+    // this is a currently a recursive lock, but should only really be used recursively for error
+    // handling.
+    Ref<RecursiveMutex> mMutex = nullptr;
 };
 
 ResultOrError<Ref<PipelineLayoutBase>> ValidateLayoutAndGetComputePipelineDescriptorWithDefaults(

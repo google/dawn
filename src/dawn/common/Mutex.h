@@ -40,47 +40,88 @@
 #include "dawn/common/RefCounted.h"
 
 namespace dawn {
-class Mutex : public RefCounted, NonCopyable {
+
+template <typename MutexT>
+class MutexBase : public RefCounted, NonCopyable {
   public:
     template <typename MutexRef>
     struct AutoLockBase : NonMovable {
         AutoLockBase() : mMutex(nullptr) {}
         explicit AutoLockBase(MutexRef mutex) : mMutex(std::move(mutex)) {
             if (mMutex != nullptr) {
+#if defined(DAWN_ENABLE_ASSERTS)
+                auto currentThread = std::this_thread::get_id();
+                if constexpr (!std::is_same_v<MutexT, std::recursive_mutex>) {
+                    DAWN_ASSERT(mMutex->mOwner.load(std::memory_order_acquire) != currentThread);
+                }
+#endif  // DAWN_ENABLE_ASSERTS
+
                 mMutex->Lock();
+
+#if defined(DAWN_ENABLE_ASSERTS)
+                if (mMutex->mOwner.exchange(currentThread, std::memory_order_release) ==
+                    std::thread::id()) {
+                    // This is the first time that the lock is being acquired in the stack.
+                    mThreadId = &mMutex->mOwner;
+                }
+#endif  // DAWN_ENABLE_ASSERTS
             }
         }
+
         ~AutoLockBase() {
             if (mMutex != nullptr) {
+#if defined(DAWN_ENABLE_ASSERTS)
+                DAWN_ASSERT(mMutex->IsLockedByCurrentThread());
+                if (mThreadId) {
+                    mThreadId->store(std::thread::id(), std::memory_order_release);
+                }
+#endif  // DAWN_ENABLE_ASSERTS
                 mMutex->Unlock();
             }
         }
 
       private:
         MutexRef mMutex;
+
+#if defined(DAWN_ENABLE_ASSERTS)
+        // Additional variables to help track the thread ids and to ensure that it works for
+        // recursive type locks.
+        std::atomic<std::thread::id>* mThreadId = nullptr;
+#endif  // DAWN_ENABLE_ASSERTS
     };
 
     // This scoped lock won't keep the mutex alive.
-    using AutoLock = AutoLockBase<Mutex*>;
+    using AutoLock = AutoLockBase<MutexBase<MutexT>*>;
     // This scoped lock will keep the mutex alive until out of scope.
-    using AutoLockAndHoldRef = AutoLockBase<Ref<Mutex>>;
+    using AutoLockAndHoldRef = AutoLockBase<Ref<MutexBase<MutexT>>>;
 
-    ~Mutex() override;
-
-    void Lock();
-    void Unlock();
+    ~MutexBase() override = default;
 
     // This method is only enabled when DAWN_ENABLE_ASSERTS is turned on.
     // Thus it should only be wrapped inside DAWN_ASSERT() macro.
     // i.e. DAWN_ASSERT(mutex.IsLockedByCurrentThread())
-    bool IsLockedByCurrentThread();
+    bool IsLockedByCurrentThread() {
+#if defined(DAWN_ENABLE_ASSERTS)
+        return mOwner.load(std::memory_order_acquire) == std::this_thread::get_id();
+#else
+        // This is not supported.
+        DAWN_CHECK(false);
+#endif
+    }
+
+  private:
+    void Lock() { mNativeMutex.lock(); }
+    void Unlock() { mNativeMutex.unlock(); }
 
   private:
 #if defined(DAWN_ENABLE_ASSERTS)
     std::atomic<std::thread::id> mOwner;
 #endif  // DAWN_ENABLE_ASSERTS
-    std::mutex mNativeMutex;
+    MutexT mNativeMutex;
 };
+
+using Mutex = MutexBase<std::mutex>;
+using RecursiveMutex = MutexBase<std::recursive_mutex>;
 
 }  // namespace dawn
 

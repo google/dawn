@@ -151,7 +151,6 @@ bool PollFutures(std::vector<TrackedFutureWaitInfo>& futures) {
 // source validation.
 using QueueWaitSerialsMap = absl::flat_hash_map<WeakRef<QueueBase>, ExecutionSerial>;
 void WaitQueueSerials(const QueueWaitSerialsMap& queueWaitSerials, Nanoseconds timeout) {
-    // TODO(dawn:1662): Make error handling thread-safe.
     // Poll/wait on queues up to the lowest wait serial, but do this once per queue instead of
     // per event so that events with same serial complete at the same time instead of racing.
     for (const auto& queueAndSerial : queueWaitSerials) {

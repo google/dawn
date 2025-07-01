@@ -117,7 +117,6 @@ set(sources
     "GPUInfo.cpp"
     "Log.cpp"
     "Math.cpp"
-    "Mutex.cpp"
     "RefCounted.cpp"
     "Result.cpp"
     "Sha3.cpp"

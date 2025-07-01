@@ -293,7 +293,6 @@ if (is_win || is_linux || is_chromeos || is_mac || is_fuchsia || is_android ||
       "MatchVariant.h",
       "Math.cpp",
       "Math.h",
-      "Mutex.cpp",
       "Mutex.h",
       "MutexProtected.h",
       "NSRef.h",
