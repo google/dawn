@@ -130,10 +130,16 @@ struct Bindings {
 };
 
 /// Supported SPIR-V binary versions.
+/// If a new version is added here, also add it to:
+/// * Writer::CanGenerate
+/// * Printer::Code
+/// Fully usable version will also need additions to:
+/// * --spir-version on the command line
+/// * Dawn in the Vulkan backend
 enum class SpvVersion : uint32_t {
-    kSpv13 = 0x10300u,  // SPIR-V 1.3
-    kSpv14 = 0x10400u,  // SPIR-V 1.4
-    kSpv15 = 0x10500u,  // SPIR-V 1.5, for testing purposes only
+    kSpv13,  // SPIR-V 1.3
+    kSpv14,  // SPIR-V 1.4
+    kSpv15,  // SPIR-V 1.5, for testing purposes only
 };
 
 /// Configuration options used for generating SPIR-V.

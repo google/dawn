@@ -42,6 +42,16 @@
 namespace tint::spirv::writer {
 
 Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& options) {
+    // The enum is accessible in the API so ensure we have a valid value.
+    switch (options.spirv_version) {
+        case SpvVersion::kSpv13:
+        case SpvVersion::kSpv14:
+        case SpvVersion::kSpv15:
+            break;
+        default:
+            return Failure("unsupported SPIR-V version");
+    }
+
     // Check optionally supported types against their required options.
     for (auto* ty : ir.Types()) {
         if (ty->Is<core::type::SubgroupMatrix>()) {

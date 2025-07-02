@@ -215,10 +215,24 @@ class Printer {
             return res.Failure();
         }
 
+        uint32_t version = 0u;
+        switch (options_.spirv_version) {
+            case SpvVersion::kSpv13:
+                version = 0x10300u;
+                break;
+            case SpvVersion::kSpv14:
+                version = 0x10400u;
+                break;
+            case SpvVersion::kSpv15:
+                version = 0x10500u;
+                break;
+            default:
+                TINT_ICE() << "unsupported SPIR-V version";
+        }
+
         // Serialize the module into binary SPIR-V.
         BinaryWriter writer;
-        writer.WriteHeader(module_.IdBound(), kWriterVersion,
-                           static_cast<uint32_t>(options_.spirv_version));
+        writer.WriteHeader(module_.IdBound(), kWriterVersion, version);
         writer.WriteModule(module_);
 
         output_.spirv = std::move(writer.Result());
