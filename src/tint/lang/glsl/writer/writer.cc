@@ -45,9 +45,6 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
         if (ty->Is<core::type::SubgroupMatrix>()) {
             return Failure("subgroup matrices are not supported by the GLSL backend");
         }
-        if (ty->Is<core::type::BindingArray>()) {
-            return Failure("binding_array are not supported by the GLSL backend");
-        }
     }
 
     // Make sure that every texture variable is in the texture_builtins_from_uniform binding list,
@@ -69,33 +66,47 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
             return Failure("pixel_local address space is not supported by the GLSL backend");
         }
 
-        // Check texture types that need metadata for texture_builtins_from_uniform.
-        if (ptr->StoreType()->Is<core::type::Texture>() &&
-            !ptr->StoreType()->IsAnyOf<core::type::StorageTexture, core::type::ExternalTexture>()) {
-            bool found = false;
-            auto binding = options.bindings.texture.at(var->BindingPoint().value());
-            for (auto& bp : options.bindings.texture_builtins_from_uniform.ubo_contents) {
-                if (bp.binding == binding) {
-                    found = true;
-                    break;
+        if (ptr->AddressSpace() == core::AddressSpace::kHandle) {
+            const core::type::Type* handle_type = ptr->StoreType();
+            uint32_t count = 1;
+            if (auto* ba = handle_type->As<core::type::BindingArray>()) {
+                handle_type = ba->ElemType();
+                count = ba->Count()->As<core::type::ConstantArrayCount>()->value;
+            }
+
+            // Check texture types that need metadata for texture_builtins_from_uniform.
+            if (handle_type->Is<core::type::Texture>() &&
+                !handle_type->IsAnyOf<core::type::StorageTexture, core::type::ExternalTexture>()) {
+                bool found = false;
+                auto binding = options.bindings.texture.at(var->BindingPoint().value());
+                for (auto& bp : options.bindings.texture_builtins_from_uniform.ubo_contents) {
+                    if (bp.binding == binding) {
+                        if (bp.count < count) {
+                            return Failure(
+                                "binding_array of textures doesn't have enough data in "
+                                "texture_builtins_from_uniform list");
+                        }
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    return Failure("texture missing from texture_builtins_from_uniform list");
                 }
             }
-            if (!found) {
-                return Failure("texture missing from texture_builtins_from_uniform list");
-            }
-        }
 
-        // Check texel formats for read-write storage textures when targeting ES.
-        if (options.version.IsES()) {
-            if (auto* st = ptr->StoreType()->As<core::type::StorageTexture>()) {
-                if (st->Access() == core::Access::kReadWrite) {
-                    switch (st->TexelFormat()) {
-                        case core::TexelFormat::kR32Float:
-                        case core::TexelFormat::kR32Sint:
-                        case core::TexelFormat::kR32Uint:
-                            break;
-                        default:
-                            return Failure("unsupported read-write storage texture format");
+            // Check texel formats for read-write storage textures when targeting ES.
+            if (options.version.IsES()) {
+                if (auto* st = handle_type->As<core::type::StorageTexture>()) {
+                    if (st->Access() == core::Access::kReadWrite) {
+                        switch (st->TexelFormat()) {
+                            case core::TexelFormat::kR32Float:
+                            case core::TexelFormat::kR32Sint:
+                            case core::TexelFormat::kR32Uint:
+                                break;
+                            default:
+                                return Failure("unsupported read-write storage texture format");
+                        }
                     }
                 }
             }
