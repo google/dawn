@@ -4371,10 +4371,12 @@
     },
     "void *": {
         "category": "native",
+        "is nullable pointer": true,
         "wasm type": "p"
     },
     "void const *": {
         "category": "native",
+        "is nullable pointer": true,
         "wasm type": "p"
     },
     "int": {

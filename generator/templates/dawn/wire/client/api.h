@@ -39,11 +39,10 @@ extern "C" {
 #endif
 
 {% for function in by_category["function"] %}
-    DAWN_WIRE_EXPORT {{as_annotated_cType(function.returns)}} {{as_cMethodNamespaced(None, function.name, Name('dawn wire client'))}}(
+    DAWN_WIRE_EXPORT {{as_nullability_annotated_cType(function.returns)}} {{as_cMethodNamespaced(None, function.name, Name('dawn wire client'))}}(
             {%- for arg in function.arguments -%}
                 {% if not loop.first %}, {% endif -%}
-                {%- if arg.optional %}{{API}}_NULLABLE {% endif -%}
-                {{as_annotated_cType(arg)}}
+                {{as_nullability_annotated_cType(arg)}}
             {%- endfor -%}
         ) {{API}}_FUNCTION_ATTRIBUTE;
 {% endfor %}
@@ -51,12 +50,10 @@ extern "C" {
 {% for (type, methods) in c_methods_sorted_by_parent %}
     // Methods of {{type.name.CamelCase()}}
     {% for method in methods %}
-        DAWN_WIRE_EXPORT {{as_annotated_cType(method.returns)}} {{as_cMethodNamespaced(type.name, method.name, Name('dawn wire client'))}}(
+        DAWN_WIRE_EXPORT {{as_nullability_annotated_cType(method.returns)}} {{as_cMethodNamespaced(type.name, method.name, Name('dawn wire client'))}}(
             {{-as_cType(type.name)}} {{as_varName(type.name)}}
             {%- for arg in method.arguments -%}
-                ,{{" "}}
-                {%- if arg.optional %}{{API}}_NULLABLE {% endif -%}
-                {{as_annotated_cType(arg)}}
+                , {{as_nullability_annotated_cType(arg)}}
             {%- endfor -%}
         ) {{API}}_FUNCTION_ATTRIBUTE;
     {% endfor %}
