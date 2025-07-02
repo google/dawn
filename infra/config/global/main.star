@@ -747,8 +747,8 @@ luci.builder(
 luci.builder(
     name = "cts-roller",
     bucket = "ci",
-    # Run at 5 UTC - which is 10pm PST
-    schedule = "0 5 * * *",
+    # Run at 5 UTC on weekdays - which is 10pm PST
+    schedule = "0 5 * * 1-5",
     executable = luci.recipe(
         name = "dawn/roll_cts",
         cipd_package = "infra/recipe_bundles/chromium.googlesource.com/chromium/tools/build",
