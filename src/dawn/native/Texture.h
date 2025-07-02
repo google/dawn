@@ -239,6 +239,8 @@ class TextureBase : public RefCountedWithExternalCount<SharedResource> {
 
     std::string GetSizeLabel() const;
 
+    ResultOrError<Ref<TextureViewBase>> GetOrCreateDefaultView();
+
     void WillAddFirstExternalRef() override;
     void WillDropLastExternalRef() override;
 
@@ -256,6 +258,7 @@ class TextureBase : public RefCountedWithExternalCount<SharedResource> {
     TextureState mState;
     wgpu::TextureFormat mFormatEnumForReflection;
 
+    Ref<TextureViewBase> mDefaultView;
     // Textures track texture views created from them so that they can be destroyed when the texture
     // is destroyed.
     ApiObjectList mTextureViews;

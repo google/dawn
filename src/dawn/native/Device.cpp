@@ -2259,6 +2259,11 @@ ResultOrError<Ref<TextureViewBase>> DeviceBase::CreateTextureView(
 
     TextureViewDescriptor desc;
     DAWN_TRY_ASSIGN(desc, GetTextureViewDescriptorWithDefaults(texture, descriptorOrig));
+    std::string generatedLabel;
+    if (descriptorOrig == nullptr) {
+        generatedLabel = absl::StrFormat("defaulted from %s", texture);
+        desc.label = {generatedLabel.data(), generatedLabel.length()};
+    }
 
     UnpackedPtr<TextureViewDescriptor> descriptor;
     if (IsValidationEnabled()) {
