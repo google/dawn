@@ -168,17 +168,6 @@ group("absl_component_deps") {
   if (is_component_build) {
     public_deps += [ ":absl_full_deps" ]
   }
-
-  # The following dependencies currently don't build with NaCl.
-  # TODO(https://crbug.com/1114625): Fix build errors and remove this section.
-  #
-  # Note: This target currently is not implemented in this file, so
-  # this logic is disabled, if :failure_signal_handler gets ported
-  # this will need to be re-enabled
-  # if (is_nacl) {
-  #   public_deps -=
-  #       [ "//third_party/abseil-cpp/absl/debugging:failure_signal_handler" ]
-  # }
 }
 
 # The 'absl_full' target is not implemented here, since it includes a
