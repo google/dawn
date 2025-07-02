@@ -57,7 +57,7 @@ class Name:
             self.chunks = name.split(' ')
 
     def __lt__(self, other):
-        return self.get() < other.get()
+        return self.concatcase().lower() < other.concatcase().lower()
 
     def get(self):
         return self.name
@@ -498,7 +498,7 @@ def link_object(obj, types):
         return method
 
     obj.methods = [make_method(m) for m in obj.json_data.get('methods', [])]
-    obj.methods.sort(key=lambda method: method.name.concatcase().lower())
+    obj.methods.sort(key=lambda method: method.name)
 
 def link_structure(struct, types):
     struct.members = linked_record_members(struct.json_data['members'], types)
@@ -642,10 +642,13 @@ def parse_json(json, enabled_tags, disabled_tags=None):
     for function in by_category['function']:
         link_function(function, types)
 
+    # Sort everything by name
     for category in by_category.keys():
-        by_category[category] = sorted(
-            by_category[category],
-            key=lambda typ: typ.name.concatcase().lower())
+        by_category[category] = sorted(by_category[category],
+                                       key=lambda typ: typ.name)
+    # Then sort GetProcAddress last
+    by_category['function'].sort(
+        key=lambda f: f.name.get() == 'get proc address')
 
     by_category['structure'] = topo_sort_structure(by_category['structure'])
 

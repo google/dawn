@@ -2435,7 +2435,7 @@
                 "returns": "wait status",
                 "args": [
                     {"name": "future count", "type": "size_t"},
-                    {"name": "futures", "type": "future wait info", "annotation": "*", "length": "future count"},
+                    {"name": "futures", "type": "future wait info", "annotation": "*", "length": "future count", "optional": true, "no_default": true},
                     {"name": "timeout NS", "type": "uint64_t"}
                 ]
             },
