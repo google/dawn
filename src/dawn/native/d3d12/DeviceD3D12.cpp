@@ -703,6 +703,7 @@ void Device::AppendDeviceLostMessage(ErrorData* error) {
         HRESULT result = mD3d12Device->GetDeviceRemovedReason();
         error->AppendBackendMessage("Device removed reason: %s (0x%08X)",
                                     d3d::HRESULTAsString(result), result);
+        RecordDeviceRemovedReason(result);
     }
 }
 
