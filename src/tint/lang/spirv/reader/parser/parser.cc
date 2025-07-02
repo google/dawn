@@ -378,6 +378,15 @@ class Parser {
                         case spv::Op::OpSNegate:
                             EmitSpirvExplicitBuiltinCall(inst, spirv::BuiltinFn::kSNegate, 3);
                             break;
+                        case spv::Op::OpIAdd:
+                            EmitSpirvExplicitBuiltinCall(inst, spirv::BuiltinFn::kAdd, 3);
+                            break;
+                        case spv::Op::OpISub:
+                            EmitSpirvExplicitBuiltinCall(inst, spirv::BuiltinFn::kSub, 3);
+                            break;
+                        case spv::Op::OpIMul:
+                            EmitSpirvExplicitBuiltinCall(inst, spirv::BuiltinFn::kMul, 3);
+                            break;
                         default:
                             TINT_ICE() << "Unknown spec constant operation: " << op;
                     }
@@ -3295,6 +3304,7 @@ class Parser {
         Emit(binary, inst.result_id());
     }
 
+    /// Emits the logical negation of the result of the given SPIR-V instruction.
     /// @param inst the SPIR-V instruction
     /// @param op the binary operator to use
     void EmitInvertedBinary(const spvtools::opt::Instruction& inst, core::BinaryOp op) {
