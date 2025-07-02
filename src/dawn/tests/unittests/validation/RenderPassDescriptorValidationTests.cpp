@@ -747,9 +747,7 @@ class TextureFormatsTier1RenderPassTest : public RenderPassDescriptorValidationT
 // Tests that R8Snorm, RG8Snorm, and RGBA8Snorm color attachments support multisampling and resolve
 // targets when TextureFormatsTier1 is enabled.
 TEST_F(TextureFormatsTier1RenderPassTest, MultisampledColorWithResolveTarget) {
-    const std::array kTestFormats = {wgpu::TextureFormat::R8Snorm, wgpu::TextureFormat::RG8Snorm,
-                                     wgpu::TextureFormat::RGBA8Snorm};
-    for (const auto format : kTestFormats) {
+    for (const auto format : utils::kTier1TestFormats8Bit) {
         static constexpr uint32_t kArrayLayers = 1;
         static constexpr uint32_t kLevelCount = 1;
         static constexpr uint32_t kSize = 32;
@@ -768,6 +766,30 @@ TEST_F(TextureFormatsTier1RenderPassTest, MultisampledColorWithResolveTarget) {
 
         utils::ComboRenderPassDescriptor renderPass({colorTextureView});
         renderPass.cColorAttachments[0].resolveTarget = resolveTargetTextureView;
+        AssertBeginRenderPassSuccess(&renderPass);
+    }
+}
+
+// Tests that r16unorm/r16snorm/rg16unorm/rg16snorm/rgba16unorm/rgba16snorm color attachments
+// support multisampling targets when TextureFormatsTier1 is enabled.
+TEST_F(TextureFormatsTier1RenderPassTest, MultisampledColorWithoutResolveTarget) {
+    for (const auto format : utils::kTier1TestFormats16Bit) {
+        static constexpr uint32_t kArrayLayers = 1;
+        static constexpr uint32_t kLevelCount = 1;
+        static constexpr uint32_t kSize = 32;
+        static constexpr uint32_t kMultiSampleCount = 4;
+        static constexpr uint32_t kSingleSampleCount = 1;
+        wgpu::TextureFormat kColorFormat = format;
+
+        wgpu::Texture colorTexture =
+            CreateTexture(device, wgpu::TextureDimension::e2D, kColorFormat, kSize, kSize,
+                          kArrayLayers, kLevelCount, kMultiSampleCount);
+        wgpu::Texture resolveTargetTexture =
+            CreateTexture(device, wgpu::TextureDimension::e2D, kColorFormat, kSize, kSize,
+                          kArrayLayers, kLevelCount, kSingleSampleCount);
+        wgpu::TextureView colorTextureView = colorTexture.CreateView();
+
+        utils::ComboRenderPassDescriptor renderPass({colorTextureView});
         AssertBeginRenderPassSuccess(&renderPass);
     }
 }

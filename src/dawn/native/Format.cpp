@@ -573,17 +573,32 @@ FormatTable BuildFormatTable(const DeviceBase* device) {
     AddColorFormat(wgpu::TextureFormat::RGBA32Float, Cap::Renderable | Cap::StorageROrW | float32BlendableCaps, ByteSize(16), sampleTypeFor32BitFloatFormats, ComponentCount(4), RenderTargetPixelByteCost(16), RenderTargetComponentAlignment(4));
 
     bool norm16TextureFormats = device->HasFeature(Feature::Norm16TextureFormats);
-    // Unorm16 color formats
-    auto unorm16Supported = (norm16TextureFormats || device->HasFeature(Feature::Unorm16TextureFormats)) ? Format::supported : RequiresFeature{wgpu::FeatureName::Unorm16TextureFormats};
-    AddConditionalColorFormat(wgpu::TextureFormat::R16Unorm, unorm16Supported, Cap::Renderable | Cap::Multisample | Cap::Resolve, ByteSize(2), kAnyFloat, ComponentCount(1), RenderTargetPixelByteCost(2), RenderTargetComponentAlignment(2));
-    AddConditionalColorFormat(wgpu::TextureFormat::RG16Unorm, unorm16Supported, Cap::Renderable | Cap::Multisample | Cap::Resolve, ByteSize(4), kAnyFloat, ComponentCount(2), RenderTargetPixelByteCost(4), RenderTargetComponentAlignment(2));
-    AddConditionalColorFormat(wgpu::TextureFormat::RGBA16Unorm, unorm16Supported, Cap::Renderable | Cap::Multisample | Cap::Resolve, ByteSize(8), kAnyFloat, ComponentCount(4), RenderTargetPixelByteCost(8), RenderTargetComponentAlignment(2));
+    bool textureFormatsTier1Enabled = device->HasFeature(Feature::TextureFormatsTier1);
+    UnsupportedReason unormColorFormatsSupportStatus;
+    Cap unormColorFormatsCapabilities;
+    if (textureFormatsTier1Enabled) {
+        unormColorFormatsSupportStatus = Format::supported;
+        unormColorFormatsCapabilities = Cap::Renderable | Cap::Blendable | Cap::Multisample | Cap::StorageROrW;
+    } else {
+        unormColorFormatsSupportStatus = (norm16TextureFormats || device->HasFeature(Feature::Unorm16TextureFormats)) ? Format::supported : RequiresFeature{wgpu::FeatureName::Unorm16TextureFormats};
+        unormColorFormatsCapabilities = Cap::Renderable | Cap::Multisample | Cap::Resolve;
+    }
+    AddConditionalColorFormat(wgpu::TextureFormat::R16Unorm, unormColorFormatsSupportStatus, unormColorFormatsCapabilities, ByteSize(2), kAnyFloat, ComponentCount(1),RenderTargetPixelByteCost(2), RenderTargetComponentAlignment(2));
+    AddConditionalColorFormat(wgpu::TextureFormat::RG16Unorm, unormColorFormatsSupportStatus, unormColorFormatsCapabilities, ByteSize(4), kAnyFloat, ComponentCount(2),RenderTargetPixelByteCost(4), RenderTargetComponentAlignment(2));
+    AddConditionalColorFormat(wgpu::TextureFormat::RGBA16Unorm, unormColorFormatsSupportStatus, unormColorFormatsCapabilities, ByteSize(8), kAnyFloat, ComponentCount(4),RenderTargetPixelByteCost(8), RenderTargetComponentAlignment(2));
 
-    // Snorm16 color formats
-    auto snorm16Supported = (norm16TextureFormats || device->HasFeature(Feature::Snorm16TextureFormats)) ? Format::supported : RequiresFeature{wgpu::FeatureName::Snorm16TextureFormats};
-    AddConditionalColorFormat(wgpu::TextureFormat::R16Snorm, snorm16Supported, Cap::Renderable | Cap::Multisample | Cap::Resolve, ByteSize(2), kAnyFloat, ComponentCount(1), RenderTargetPixelByteCost(2), RenderTargetComponentAlignment(2));
-    AddConditionalColorFormat(wgpu::TextureFormat::RG16Snorm, snorm16Supported, Cap::Renderable | Cap::Multisample | Cap::Resolve, ByteSize(4), kAnyFloat, ComponentCount(2), RenderTargetPixelByteCost(4), RenderTargetComponentAlignment(2));
-    AddConditionalColorFormat(wgpu::TextureFormat::RGBA16Snorm, snorm16Supported, Cap::Renderable | Cap::Multisample | Cap::Resolve, ByteSize(8), kAnyFloat, ComponentCount(4), RenderTargetPixelByteCost(8), RenderTargetComponentAlignment(2));
+    UnsupportedReason snormColorFormatsSupportStatus;
+    Cap snormColorFormatsCapabilities;
+    if (textureFormatsTier1Enabled) {
+        snormColorFormatsSupportStatus = Format::supported;
+        snormColorFormatsCapabilities = Cap::Renderable | Cap::Blendable | Cap::Multisample | Cap::StorageROrW;
+    } else {
+        snormColorFormatsSupportStatus = (norm16TextureFormats || device->HasFeature(Feature::Snorm16TextureFormats)) ? Format::supported : RequiresFeature{wgpu::FeatureName::Snorm16TextureFormats};
+        snormColorFormatsCapabilities = Cap::Renderable | Cap::Multisample | Cap::Resolve;
+    }
+    AddConditionalColorFormat(wgpu::TextureFormat::R16Snorm, snormColorFormatsSupportStatus, snormColorFormatsCapabilities, ByteSize(2), kAnyFloat, ComponentCount(1),RenderTargetPixelByteCost(2), RenderTargetComponentAlignment(2));
+    AddConditionalColorFormat(wgpu::TextureFormat::RG16Snorm, snormColorFormatsSupportStatus, snormColorFormatsCapabilities, ByteSize(4), kAnyFloat, ComponentCount(2),RenderTargetPixelByteCost(4), RenderTargetComponentAlignment(2));
+    AddConditionalColorFormat(wgpu::TextureFormat::RGBA16Snorm, snormColorFormatsSupportStatus, snormColorFormatsCapabilities, ByteSize(8), kAnyFloat, ComponentCount(4),RenderTargetPixelByteCost(8), RenderTargetComponentAlignment(2));
 
     // Depth-stencil formats
     AddStencilFormat(wgpu::TextureFormat::Stencil8, Format::supported);

@@ -271,6 +271,21 @@ static constexpr std::array<wgpu::TextureFormat, 2> kDepthAndStencilFormats = {
     wgpu::TextureFormat::Depth32FloatStencil8,
 };
 
+constexpr std::array<wgpu::TextureFormat, 3> kTier1TestFormats8Bit = {
+    wgpu::TextureFormat::R8Snorm, wgpu::TextureFormat::RG8Snorm, wgpu::TextureFormat::RGBA8Snorm};
+
+constexpr std::array<wgpu::TextureFormat, 6> kTier1TestFormats16Bit = {
+    wgpu::TextureFormat::R16Unorm,    wgpu::TextureFormat::R16Snorm,
+    wgpu::TextureFormat::RG16Unorm,   wgpu::TextureFormat::RG16Snorm,
+    wgpu::TextureFormat::RGBA16Unorm, wgpu::TextureFormat::RGBA16Snorm};
+
+constexpr std::array<wgpu::TextureFormat, 9> kTier1AdditionalRenderableFormats = {
+    wgpu::TextureFormat::R8Snorm,    wgpu::TextureFormat::RG8Snorm,
+    wgpu::TextureFormat::RGBA8Snorm, wgpu::TextureFormat::R16Unorm,
+    wgpu::TextureFormat::R16Snorm,   wgpu::TextureFormat::RG16Unorm,
+    wgpu::TextureFormat::RG16Snorm,  wgpu::TextureFormat::RGBA16Unorm,
+    wgpu::TextureFormat::RGBA16Snorm};
+
 class SubsamplingFactor {
   public:
     constexpr SubsamplingFactor(uint32_t horizontal, uint32_t vertical)
