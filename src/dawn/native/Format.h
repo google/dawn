@@ -141,7 +141,8 @@ struct Format {
     bool isBlendable = false;
     // A format can be known but not supported because it is part of a disabled extension.
     UnsupportedReason unsupportedReason;
-    bool supportsStorageUsage = false;
+    bool supportsReadOnlyStorageUsage = false;
+    bool supportsWriteOnlyStorageUsage = false;
     bool supportsReadWriteStorageUsage = false;
     bool supportsMultisample = false;
     bool supportsResolveTarget = false;

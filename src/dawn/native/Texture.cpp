@@ -423,7 +423,8 @@ MaybeError ValidateTextureUsage(const DeviceBase* device,
                     usage, wgpu::TextureUsage::RenderAttachment, textureDimension);
 
     DAWN_INVALID_IF(
-        !format->supportsStorageUsage && (usage & wgpu::TextureUsage::StorageBinding),
+        !(format->supportsReadOnlyStorageUsage || format->supportsWriteOnlyStorageUsage) &&
+            (usage & wgpu::TextureUsage::StorageBinding),
         "The texture usage (%s) includes %s, which is incompatible with the format (%s).", usage,
         wgpu::TextureUsage::StorageBinding, format->format);
 

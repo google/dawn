@@ -53,6 +53,20 @@
 namespace dawn::native {
 
 namespace {
+
+bool TextureFormatSupportStorageAccess(const Format& format, wgpu::StorageTextureAccess access) {
+    switch (access) {
+        case wgpu::StorageTextureAccess::ReadOnly:
+            return format.supportsReadOnlyStorageUsage;
+        case wgpu::StorageTextureAccess::WriteOnly:
+            return format.supportsWriteOnlyStorageUsage;
+        case wgpu::StorageTextureAccess::ReadWrite:
+            return format.supportsReadWriteStorageUsage;
+        default:
+            DAWN_UNREACHABLE();
+    }
+}
+
 MaybeError ValidateStorageTextureFormat(DeviceBase* device,
                                         wgpu::TextureFormat storageTextureFormat,
                                         wgpu::StorageTextureAccess access) {
@@ -60,14 +74,18 @@ MaybeError ValidateStorageTextureFormat(DeviceBase* device,
     DAWN_TRY_ASSIGN(format, device->GetInternalFormat(storageTextureFormat));
     DAWN_ASSERT(format != nullptr);
 
-    DAWN_INVALID_IF(!format->supportsStorageUsage,
-                    "Texture format (%s) does not support storage textures.", storageTextureFormat);
-
-    if (access == wgpu::StorageTextureAccess::ReadWrite) {
-        DAWN_INVALID_IF(!format->supportsReadWriteStorageUsage,
-                        "Texture format %s does not support storage texture access %s",
-                        storageTextureFormat, wgpu::StorageTextureAccess::ReadWrite);
+    // TODO(427681156): Remove this deprecation warning
+    if (storageTextureFormat == wgpu::TextureFormat::BGRA8Unorm &&
+        access == wgpu::StorageTextureAccess::ReadOnly) {
+        device->EmitWarningOnce(
+            "bgra8unorm with read-only access is deprecated. bgra8unorm only supports write-only "
+            "access. Note: allowing this usage was a bug in Chrome. The spec disallows it as it is "
+            "not portable.");
     }
+
+    DAWN_INVALID_IF(!TextureFormatSupportStorageAccess(*format, access),
+                    "Texture format %s does not support storage texture access %s.",
+                    storageTextureFormat, access);
 
     return {};
 }

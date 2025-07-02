@@ -43,10 +43,12 @@ enum class Cap : uint16_t {
     Multisample = 0x1,
     Renderable = 0x2,
     Resolve = 0x4,
-    StorageROrW = 0x8,  // Read Or Write, but not ReadWrite in the shader.
-    StorageRW = 0x10,   // Implies StorageROrW
-    PLS = 0x20,
-    Blendable = 0x40,
+    StorageR = 0x8,      // Read-Only.
+    StorageW = 0x10,     // Write-Only
+    StorageROrW = 0x18,  // Read Or Write, but not ReadWrite in the shader.
+    StorageRW = 0x20,    // Implies StorageR and StorageW
+    PLS = 0x40,
+    Blendable = 0x80,
 };
 }  // namespace dawn
 
@@ -254,8 +256,8 @@ FormatTable BuildFormatTable(const DeviceBase* device) {
             internalFormat.isBlendable = capabilities & Cap::Blendable;
             internalFormat.isCompressed = false;
             internalFormat.unsupportedReason = unsupportedReason;
-            internalFormat.supportsStorageUsage =
-                capabilities & (Cap::StorageROrW | Cap::StorageRW);
+            internalFormat.supportsReadOnlyStorageUsage = capabilities & Cap::StorageR;
+            internalFormat.supportsWriteOnlyStorageUsage = capabilities & Cap::StorageW;
             internalFormat.supportsReadWriteStorageUsage = capabilities & Cap::StorageRW;
 
             bool supportsMultisample = capabilities & Cap::Multisample;
@@ -336,7 +338,9 @@ FormatTable BuildFormatTable(const DeviceBase* device) {
         internalFormat.isBlendable = false;
         internalFormat.isCompressed = false;
         internalFormat.unsupportedReason = unsupportedReason;
-        internalFormat.supportsStorageUsage = false;
+        internalFormat.supportsReadOnlyStorageUsage = false;
+        internalFormat.supportsWriteOnlyStorageUsage = false;
+        internalFormat.supportsReadWriteStorageUsage = false;
         internalFormat.supportsMultisample = true;
         internalFormat.supportsResolveTarget = false;
         internalFormat.aspects = Aspect::Depth;
@@ -361,7 +365,9 @@ FormatTable BuildFormatTable(const DeviceBase* device) {
         internalFormat.isBlendable = false;
         internalFormat.isCompressed = false;
         internalFormat.unsupportedReason = unsupportedReason;
-        internalFormat.supportsStorageUsage = false;
+        internalFormat.supportsReadOnlyStorageUsage = false;
+        internalFormat.supportsWriteOnlyStorageUsage = false;
+        internalFormat.supportsReadWriteStorageUsage = false;
         internalFormat.supportsMultisample = true;
         internalFormat.supportsResolveTarget = false;
         internalFormat.aspects = Aspect::Stencil;
@@ -395,7 +401,9 @@ FormatTable BuildFormatTable(const DeviceBase* device) {
         internalFormat.isBlendable = false;
         internalFormat.isCompressed = true;
         internalFormat.unsupportedReason = unsupportedReason;
-        internalFormat.supportsStorageUsage = false;
+        internalFormat.supportsReadOnlyStorageUsage = false;
+        internalFormat.supportsWriteOnlyStorageUsage = false;
+        internalFormat.supportsReadWriteStorageUsage = false;
         internalFormat.supportsMultisample = false;
         internalFormat.supportsResolveTarget = false;
         internalFormat.aspects = Aspect::Color;
@@ -464,7 +472,9 @@ FormatTable BuildFormatTable(const DeviceBase* device) {
             internalFormat.isBlendable = false;
             internalFormat.isCompressed = false;
             internalFormat.unsupportedReason = unsupportedReason;
-            internalFormat.supportsStorageUsage = false;
+            internalFormat.supportsReadOnlyStorageUsage = false;
+            internalFormat.supportsWriteOnlyStorageUsage = false;
+            internalFormat.supportsReadWriteStorageUsage = false;
             internalFormat.supportsMultisample = capabilites & Cap::Multisample;
             internalFormat.supportsResolveTarget = false;
             internalFormat.aspects = aspects;
@@ -545,6 +555,7 @@ FormatTable BuildFormatTable(const DeviceBase* device) {
     const UnsupportedReason externalUnsupportedReason = device->HasFeature(Feature::YCbCrVulkanSamplers) ?  Format::supported : RequiresFeature{wgpu::FeatureName::YCbCrVulkanSamplers};
     AddConditionalColorFormat(wgpu::TextureFormat::External, externalUnsupportedReason, Cap::None, ByteSize(1), SampleTypeBit::External, ComponentCount(0));
 
+    // TODO(427681156): Change StorageROrW to StorageW as bgra8unorm is not supposed to support read-only access
     auto BGRA8UnormSupportsStorageUsage = device->HasFeature(Feature::BGRA8UnormStorage) ? Cap::StorageROrW : Cap::None;
     AddColorFormat(wgpu::TextureFormat::BGRA8Unorm, Cap::Renderable | BGRA8UnormSupportsStorageUsage | Cap::Multisample | Cap::Resolve | Cap::Blendable, ByteSize(4), kAnyFloat, ComponentCount(4), RenderTargetPixelByteCost(8), RenderTargetComponentAlignment(1));
     AddConditionalColorFormat(wgpu::TextureFormat::BGRA8UnormSrgb, device->IsCompatibilityMode() ? UnsupportedReason(CompatibilityMode{}) : Format::supported, Cap::Renderable |  Cap::Multisample | Cap::Resolve | Cap::Blendable, ByteSize(4), kAnyFloat, ComponentCount(4), RenderTargetPixelByteCost(8), RenderTargetComponentAlignment(1), wgpu::TextureFormat::BGRA8Unorm);
