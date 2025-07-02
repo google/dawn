@@ -6,14 +6,14 @@ buffer Result_1_ssbo {
 } result;
 layout(binding = 0, std140)
 uniform TintTextureUniformData_1_ubo {
-  uint tint_builtin_value_0;
+  uvec4 metadata[1];
 } v;
 uniform highp sampler2D tex;
 void main_inner(uvec3 GlobalInvocationId) {
   uint v_1 = min(((GlobalInvocationId.y * 128u) + GlobalInvocationId.x), (uint(result.values.length()) - 1u));
   int v_2 = int(GlobalInvocationId.x);
   ivec2 v_3 = ivec2(v_2, int(GlobalInvocationId.y));
-  uint v_4 = (v.tint_builtin_value_0 - 1u);
+  uint v_4 = (v.metadata[(0u / 4u)][(0u % 4u)] - 1u);
   uint v_5 = min(uint(0), v_4);
   uvec2 v_6 = (uvec2(textureSize(tex, int(v_5))) - uvec2(1u));
   ivec2 v_7 = ivec2(min(uvec2(v_3), v_6));

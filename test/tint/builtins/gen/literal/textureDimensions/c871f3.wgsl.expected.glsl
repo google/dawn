@@ -11,11 +11,11 @@ buffer f_prevent_dce_block_ssbo {
 } v;
 layout(binding = 0, std140)
 uniform f_TintTextureUniformData_ubo {
-  uint tint_builtin_value_0;
+  uvec4 metadata[1];
 } v_1;
 uniform highp isampler3D f_arg_0;
 uvec3 textureDimensions_c871f3() {
-  uvec3 res = uvec3(textureSize(f_arg_0, int(min(1u, (v_1.tint_builtin_value_0 - 1u)))));
+  uvec3 res = uvec3(textureSize(f_arg_0, int(min(1u, (v_1.metadata[(0u / 4u)][(0u % 4u)] - 1u)))));
   return res;
 }
 void main() {
@@ -32,11 +32,11 @@ buffer prevent_dce_block_1_ssbo {
 } v;
 layout(binding = 0, std140)
 uniform TintTextureUniformData_1_ubo {
-  uint tint_builtin_value_0;
+  uvec4 metadata[1];
 } v_1;
 uniform highp isampler3D arg_0;
 uvec3 textureDimensions_c871f3() {
-  uvec3 res = uvec3(textureSize(arg_0, int(min(1u, (v_1.tint_builtin_value_0 - 1u)))));
+  uvec3 res = uvec3(textureSize(arg_0, int(min(1u, (v_1.metadata[(0u / 4u)][(0u % 4u)] - 1u)))));
   return res;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -56,12 +56,12 @@ struct VertexOutput {
 
 layout(binding = 0, std140)
 uniform v_TintTextureUniformData_ubo {
-  uint tint_builtin_value_0;
+  uvec4 metadata[1];
 } v;
 uniform highp isampler3D v_arg_0;
 layout(location = 0) flat out uvec3 tint_interstage_location0;
 uvec3 textureDimensions_c871f3() {
-  uvec3 res = uvec3(textureSize(v_arg_0, int(min(1u, (v.tint_builtin_value_0 - 1u)))));
+  uvec3 res = uvec3(textureSize(v_arg_0, int(min(1u, (v.metadata[(0u / 4u)][(0u % 4u)] - 1u)))));
   return res;
 }
 VertexOutput vertex_main_inner() {

@@ -11,11 +11,11 @@ buffer f_prevent_dce_block_ssbo {
 } v;
 layout(binding = 0, std140)
 uniform f_TintTextureUniformData_ubo {
-  uint tint_builtin_value_0;
+  uvec4 metadata[1];
 } v_1;
 uniform highp sampler2D f_arg_0;
 vec4 textureLoad_439e2a() {
-  uint v_2 = (v_1.tint_builtin_value_0 - 1u);
+  uint v_2 = (v_1.metadata[(0u / 4u)][(0u % 4u)] - 1u);
   uint v_3 = min(uint(1), v_2);
   ivec2 v_4 = ivec2(min(uvec2(1u), (uvec2(textureSize(f_arg_0, int(v_3))) - uvec2(1u))));
   vec4 res = texelFetch(f_arg_0, v_4, int(v_3));
@@ -35,11 +35,11 @@ buffer prevent_dce_block_1_ssbo {
 } v;
 layout(binding = 0, std140)
 uniform TintTextureUniformData_1_ubo {
-  uint tint_builtin_value_0;
+  uvec4 metadata[1];
 } v_1;
 uniform highp sampler2D arg_0;
 vec4 textureLoad_439e2a() {
-  uint v_2 = (v_1.tint_builtin_value_0 - 1u);
+  uint v_2 = (v_1.metadata[(0u / 4u)][(0u % 4u)] - 1u);
   uint v_3 = min(uint(1), v_2);
   ivec2 v_4 = ivec2(min(uvec2(1u), (uvec2(textureSize(arg_0, int(v_3))) - uvec2(1u))));
   vec4 res = texelFetch(arg_0, v_4, int(v_3));
@@ -62,12 +62,12 @@ struct VertexOutput {
 
 layout(binding = 0, std140)
 uniform v_TintTextureUniformData_ubo {
-  uint tint_builtin_value_0;
+  uvec4 metadata[1];
 } v;
 uniform highp sampler2D v_arg_0;
 layout(location = 0) flat out vec4 tint_interstage_location0;
 vec4 textureLoad_439e2a() {
-  uint v_1 = (v.tint_builtin_value_0 - 1u);
+  uint v_1 = (v.metadata[(0u / 4u)][(0u % 4u)] - 1u);
   uint v_2 = min(uint(1), v_1);
   ivec2 v_3 = ivec2(min(uvec2(1u), (uvec2(textureSize(v_arg_0, int(v_2))) - uvec2(1u))));
   vec4 res = texelFetch(v_arg_0, v_3, int(v_2));

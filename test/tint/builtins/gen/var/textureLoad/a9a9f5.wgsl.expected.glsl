@@ -11,14 +11,14 @@ buffer f_prevent_dce_block_ssbo {
 } v;
 layout(binding = 0, std140)
 uniform f_TintTextureUniformData_ubo {
-  uint tint_builtin_value_0;
+  uvec4 metadata[1];
 } v_1;
 uniform highp usampler3D f_arg_0;
 uvec4 textureLoad_a9a9f5() {
   ivec3 arg_1 = ivec3(1);
   int arg_2 = 1;
   ivec3 v_2 = arg_1;
-  uint v_3 = (v_1.tint_builtin_value_0 - 1u);
+  uint v_3 = (v_1.metadata[(0u / 4u)][(0u % 4u)] - 1u);
   uint v_4 = min(uint(arg_2), v_3);
   uvec3 v_5 = (uvec3(textureSize(f_arg_0, int(v_4))) - uvec3(1u));
   ivec3 v_6 = ivec3(min(uvec3(v_2), v_5));
@@ -39,14 +39,14 @@ buffer prevent_dce_block_1_ssbo {
 } v;
 layout(binding = 0, std140)
 uniform TintTextureUniformData_1_ubo {
-  uint tint_builtin_value_0;
+  uvec4 metadata[1];
 } v_1;
 uniform highp usampler3D arg_0;
 uvec4 textureLoad_a9a9f5() {
   ivec3 arg_1 = ivec3(1);
   int arg_2 = 1;
   ivec3 v_2 = arg_1;
-  uint v_3 = (v_1.tint_builtin_value_0 - 1u);
+  uint v_3 = (v_1.metadata[(0u / 4u)][(0u % 4u)] - 1u);
   uint v_4 = min(uint(arg_2), v_3);
   uvec3 v_5 = (uvec3(textureSize(arg_0, int(v_4))) - uvec3(1u));
   ivec3 v_6 = ivec3(min(uvec3(v_2), v_5));
@@ -70,7 +70,7 @@ struct VertexOutput {
 
 layout(binding = 0, std140)
 uniform v_TintTextureUniformData_ubo {
-  uint tint_builtin_value_0;
+  uvec4 metadata[1];
 } v;
 uniform highp usampler3D v_arg_0;
 layout(location = 0) flat out uvec4 tint_interstage_location0;
@@ -78,7 +78,7 @@ uvec4 textureLoad_a9a9f5() {
   ivec3 arg_1 = ivec3(1);
   int arg_2 = 1;
   ivec3 v_1 = arg_1;
-  uint v_2 = (v.tint_builtin_value_0 - 1u);
+  uint v_2 = (v.metadata[(0u / 4u)][(0u % 4u)] - 1u);
   uint v_3 = min(uint(arg_2), v_2);
   uvec3 v_4 = (uvec3(textureSize(v_arg_0, int(v_3))) - uvec3(1u));
   ivec3 v_5 = ivec3(min(uvec3(v_1), v_4));

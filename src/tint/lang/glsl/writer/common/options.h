@@ -168,10 +168,17 @@ struct TextureBuiltinsFromUniformOptions {
 
     /// Ordered list of post-remapping bindings in the uniform buffer for polyfilling
     /// `textureNumSamples` and `textureNumLevels`.
-    std::vector<binding::Texture> ubo_bindingpoint_ordering = {};
+    struct EmulatedBuiltin {
+        uint32_t offset;
+        uint32_t count;
+        binding::Texture binding;
+
+        TINT_REFLECT(EmulatedBuiltin, offset, count, binding);
+    };
+    std::vector<EmulatedBuiltin> ubo_contents = {};
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
-    TINT_REFLECT(TextureBuiltinsFromUniformOptions, ubo_binding, ubo_bindingpoint_ordering);
+    TINT_REFLECT(TextureBuiltinsFromUniformOptions, ubo_binding, ubo_contents);
 };
 
 /// Options used to specify a mapping of binding points to indices into a UBO

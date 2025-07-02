@@ -27,6 +27,7 @@
 
 #include "src/tint/lang/glsl/writer/raise/texture_builtins_from_uniform.h"
 
+#include <algorithm>
 #include <utility>
 
 #include "src/tint/lang/core/fluent_types.h"  // IWYU pragma: export
@@ -57,11 +58,7 @@ struct State {
     core::ir::Var* texture_uniform_data_ = nullptr;
 
     /// Map from binding point to index into uniform structure
-    Hashmap<binding::BindingInfo, uint32_t, 2> binding_point_to_uniform_index_{};
-
-    /// Maps from a function parameter to the replacement function parameter for texture uniform
-    /// data
-    Hashmap<core::ir::FunctionParam*, core::ir::FunctionParam*, 2> texture_param_replacement_{};
+    Hashmap<binding::BindingInfo, uint32_t, 2> binding_point_to_uniform_offset_{};
 
     /// Process the module.
     void Process() {
@@ -80,6 +77,10 @@ struct State {
             }
         }
 
+        if (!call_worklist.IsEmpty()) {
+            AddTextureBuiltinUniform();
+        }
+
         // Replace the builtin calls that we found
         for (auto* call : call_worklist) {
             switch (call->Func()) {
@@ -93,20 +94,21 @@ struct State {
         }
     }
 
-    void MakeTextureUniformStructure() {
-        if (texture_uniform_data_ != nullptr) {
-            return;
+    void AddTextureBuiltinUniform() {
+        uint32_t required_size = 0;
+        for (auto builtin : cfg.ubo_contents) {
+            required_size = std::max(required_size, builtin.offset + builtin.count);
+            binding_point_to_uniform_offset_.Add(builtin.binding, builtin.offset);
         }
 
-        auto count = cfg.ubo_bindingpoint_ordering.size();
+        // The uniform buffer will contain packed u32s. The uniform buffer packing rules make
+        // array<u32> have a stride of 16, so instead we use an array<vec4> that will be indexed
+        // twice.
+        auto vec4_count = (required_size + 3) / 4;
 
-        Vector<core::type::Manager::StructMemberDesc, 2> members;
-        members.Reserve(count);
-        for (uint32_t i = 0; i < count; ++i) {
-            members.Push({ir.symbols.New("tint_builtin_value_" + std::to_string(i)), ty.u32()});
-            binding_point_to_uniform_index_.Add(cfg.ubo_bindingpoint_ordering[i], i);
-        }
-
+        // Wrap the array<vec4> in a struct as GLSL cannot have uniforms that are arrays directly.
+        Vector<core::type::Manager::StructMemberDesc, 1> members;
+        members.Push({ir.symbols.New("metadata"), ty.array(ty.vec4(ty.u32()), vec4_count)});
         auto* strct =
             ir.Types().Struct(ir.symbols.New("TintTextureUniformData"), std::move(members));
 
@@ -116,33 +118,61 @@ struct State {
         });
     }
 
-    // Note, assumes is called inside an insert block
-    core::ir::Value* FindSource(core::ir::Value* val) {
-        return tint::Switch(
+    // Get the module root var a texture value comes from.
+    struct TextureVariablePath {
+        /// The root module variable.
+        core::ir::Var* var = nullptr;
+        /// The index in the binding_array, nullptr if not a binding_array.
+        core::ir::Value* index = nullptr;
+    };
+    TextureVariablePath PathForTexture(core::ir::Value* val) const {
+        // Because DirectVariableAccess for handles ran prior to this transform, we know that the
+        // chain to get to the variable is a mix of loads and accesses (but don't have guarantees on
+        // their order). There is at most one load and one access so the recursion is bounded.
+        return Switch(
             val->As<core::ir::InstructionResult>()->Instruction(),
-            [&](core::ir::Var* v) { return v->Result(); },
-            [&](core::ir::Load* l) { return FindSource(l->From()); }, TINT_ICE_ON_NO_MATCH);
+            [&](core::ir::Var* var) -> TextureVariablePath { return {var}; },
+            [&](core::ir::Load* load) -> TextureVariablePath {
+                return PathForTexture(load->From());
+            },
+            [&](core::ir::Access* access) -> TextureVariablePath {
+                auto* binding_array = access->Object();
+                TINT_ASSERT(access->Indices().Length() == 1);
+                auto* index = access->Indices()[0];
+
+                TextureVariablePath path = PathForTexture(binding_array);
+                TINT_ASSERT(path.index == nullptr);
+                path.index = index;
+                return path;
+            },
+            TINT_ICE_ON_NO_MATCH);
     }
 
     // Note, assumes is called inside an insert block
     core::ir::Value* GetAccessFromUniform(core::ir::Value* arg) {
-        auto* src = FindSource(arg);
-        auto* inst = src->As<core::ir::InstructionResult>();
-        TINT_ASSERT(inst != nullptr);
-        auto* var = src->As<core::ir::InstructionResult>()->Instruction()->As<core::ir::Var>();
-        TINT_ASSERT(var != nullptr);
+        auto path = PathForTexture(arg);
 
-        binding::BindingInfo binding = {var->BindingPoint()->binding};
-        TINT_ASSERT(binding_point_to_uniform_index_.Contains(binding));
-        uint32_t idx = *binding_point_to_uniform_index_.Get(binding);
+        binding::BindingInfo binding = {path.var->BindingPoint()->binding};
+        uint32_t metadata_offset = *binding_point_to_uniform_offset_.Get(binding);
 
-        auto* value_ptr = b.Access(ty.ptr<uniform, u32, read>(), texture_uniform_data_, u32(idx));
-        return b.Load(value_ptr)->Result();
+        // Returns the u32 at `metadata_offset` + `path.index` (if present) in
+        // `texture_uniform_data`. Because it is a uniform buffer it contains an array of uvec4
+        // instead of an array of u32 so we need more complicated indexing logic.
+        core::ir::Value* offset = b.Constant(u32(metadata_offset));
+        if (path.index != nullptr) {
+            offset = b.Add(ty.u32(), offset, b.Construct(ty.u32(), path.index))->Result();
+        }
+        auto* index_in_array = b.Divide(ty.u32(), offset, u32(4));
+        auto* index_in_vector = b.Modulo(ty.u32(), offset, u32(4));
+
+        auto* vec4_ptr = b.Access(ty.ptr<uniform>(ty.vec4(ty.u32())), texture_uniform_data_, u32(0),
+                                  index_in_array);
+        auto* vec4_value = b.Load(vec4_ptr);
+        auto* u32_value = b.Access(ty.u32(), vec4_value, index_in_vector);
+        return u32_value->Result();
     }
 
     void TextureFromUniform(core::ir::BuiltinCall* call) {
-        MakeTextureUniformStructure();
-
         auto* src = call->Args()[0];
         b.InsertBefore(call, [&] {
             auto* val = GetAccessFromUniform(src);

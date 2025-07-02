@@ -74,9 +74,8 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
             !ptr->StoreType()->IsAnyOf<core::type::StorageTexture, core::type::ExternalTexture>()) {
             bool found = false;
             auto binding = options.bindings.texture.at(var->BindingPoint().value());
-            for (auto& bp :
-                 options.bindings.texture_builtins_from_uniform.ubo_bindingpoint_ordering) {
-                if (bp == binding) {
+            for (auto& bp : options.bindings.texture_builtins_from_uniform.ubo_contents) {
+                if (bp.binding == binding) {
                     found = true;
                     break;
                 }

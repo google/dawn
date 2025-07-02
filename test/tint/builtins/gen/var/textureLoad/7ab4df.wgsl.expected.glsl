@@ -11,7 +11,7 @@ buffer f_prevent_dce_block_ssbo {
 } v;
 layout(binding = 0, std140)
 uniform f_TintTextureUniformData_ubo {
-  uint tint_builtin_value_0;
+  uvec4 metadata[1];
 } v_1;
 uniform highp usampler2DArray f_arg_0;
 uvec4 textureLoad_7ab4df() {
@@ -22,7 +22,7 @@ uvec4 textureLoad_7ab4df() {
   uint v_3 = arg_2;
   int v_4 = arg_3;
   uint v_5 = min(v_3, (uint(textureSize(f_arg_0, 0).z) - 1u));
-  uint v_6 = (v_1.tint_builtin_value_0 - 1u);
+  uint v_6 = (v_1.metadata[(0u / 4u)][(0u % 4u)] - 1u);
   uint v_7 = min(uint(v_4), v_6);
   uvec2 v_8 = (uvec2(textureSize(f_arg_0, int(v_7)).xy) - uvec2(1u));
   ivec2 v_9 = ivec2(min(uvec2(v_2), v_8));
@@ -44,7 +44,7 @@ buffer prevent_dce_block_1_ssbo {
 } v;
 layout(binding = 0, std140)
 uniform TintTextureUniformData_1_ubo {
-  uint tint_builtin_value_0;
+  uvec4 metadata[1];
 } v_1;
 uniform highp usampler2DArray arg_0;
 uvec4 textureLoad_7ab4df() {
@@ -55,7 +55,7 @@ uvec4 textureLoad_7ab4df() {
   uint v_3 = arg_2;
   int v_4 = arg_3;
   uint v_5 = min(v_3, (uint(textureSize(arg_0, 0).z) - 1u));
-  uint v_6 = (v_1.tint_builtin_value_0 - 1u);
+  uint v_6 = (v_1.metadata[(0u / 4u)][(0u % 4u)] - 1u);
   uint v_7 = min(uint(v_4), v_6);
   uvec2 v_8 = (uvec2(textureSize(arg_0, int(v_7)).xy) - uvec2(1u));
   ivec2 v_9 = ivec2(min(uvec2(v_2), v_8));
@@ -80,7 +80,7 @@ struct VertexOutput {
 
 layout(binding = 0, std140)
 uniform v_TintTextureUniformData_ubo {
-  uint tint_builtin_value_0;
+  uvec4 metadata[1];
 } v;
 uniform highp usampler2DArray v_arg_0;
 layout(location = 0) flat out uvec4 tint_interstage_location0;
@@ -92,7 +92,7 @@ uvec4 textureLoad_7ab4df() {
   uint v_2 = arg_2;
   int v_3 = arg_3;
   uint v_4 = min(v_2, (uint(textureSize(v_arg_0, 0).z) - 1u));
-  uint v_5 = (v.tint_builtin_value_0 - 1u);
+  uint v_5 = (v.metadata[(0u / 4u)][(0u % 4u)] - 1u);
   uint v_6 = min(uint(v_3), v_5);
   uvec2 v_7 = (uvec2(textureSize(v_arg_0, int(v_6)).xy) - uvec2(1u));
   ivec2 v_8 = ivec2(min(uvec2(v_1), v_7));

@@ -11,10 +11,10 @@ buffer f_prevent_dce_block_ssbo {
 } v;
 layout(binding = 0, std140)
 uniform f_TintTextureUniformData_ubo {
-  uint tint_builtin_value_0;
+  uvec4 metadata[1];
 } v_1;
 uint textureNumLevels_1a3fa9() {
-  uint res = v_1.tint_builtin_value_0;
+  uint res = v_1.metadata[(0u / 4u)][(0u % 4u)];
   return res;
 }
 void main() {
@@ -31,10 +31,10 @@ buffer prevent_dce_block_1_ssbo {
 } v;
 layout(binding = 0, std140)
 uniform TintTextureUniformData_1_ubo {
-  uint tint_builtin_value_0;
+  uvec4 metadata[1];
 } v_1;
 uint textureNumLevels_1a3fa9() {
-  uint res = v_1.tint_builtin_value_0;
+  uint res = v_1.metadata[(0u / 4u)][(0u % 4u)];
   return res;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -54,11 +54,11 @@ struct VertexOutput {
 
 layout(binding = 0, std140)
 uniform v_TintTextureUniformData_ubo {
-  uint tint_builtin_value_0;
+  uvec4 metadata[1];
 } v;
 layout(location = 0) flat out uint tint_interstage_location0;
 uint textureNumLevels_1a3fa9() {
-  uint res = v.tint_builtin_value_0;
+  uint res = v.metadata[(0u / 4u)][(0u % 4u)];
   return res;
 }
 VertexOutput vertex_main_inner() {

@@ -213,7 +213,9 @@ void GenerateTextureBuiltinFromUniformData(
         } else {
             remappedBinding = bindings.storage_texture.at(wgslBindPoint);
         }
-        textureBuiltinsFromUniform->ubo_bindingpoint_ordering.emplace_back(remappedBinding);
+        uint32_t offset = textureBuiltinsFromUniform->ubo_contents.size();
+        textureBuiltinsFromUniform->ubo_contents.push_back(
+            {.offset = offset, .count = 1, .binding = remappedBinding});
 
         // Dawn uses (BindGroupIndex, BindingIndex) to know which builtin data needs to be passed as
         // uniform. Convert the WGSL bind point to that.

@@ -5,11 +5,11 @@
 
 layout(binding = 0, std140)
 uniform v_TintTextureUniformData_ubo {
-  uint tint_builtin_value_0;
+  uvec4 metadata[1];
 } v;
 uniform highp isampler2D v_arg_0;
 ivec4 textureLoad2d(ivec2 coords, int level) {
-  uint v_1 = (v.tint_builtin_value_0 - 1u);
+  uint v_1 = (v.metadata[(0u / 4u)][(0u % 4u)] - 1u);
   uint v_2 = min(uint(level), v_1);
   uvec2 v_3 = (uvec2(textureSize(v_arg_0, int(v_2))) - uvec2(1u));
   ivec2 v_4 = ivec2(min(uvec2(coords), v_3));
@@ -36,11 +36,11 @@ precision highp int;
 
 layout(binding = 0, std140)
 uniform f_TintTextureUniformData_ubo {
-  uint tint_builtin_value_0;
+  uvec4 metadata[1];
 } v;
 uniform highp isampler2D f_arg_0;
 ivec4 textureLoad2d(ivec2 coords, int level) {
-  uint v_1 = (v.tint_builtin_value_0 - 1u);
+  uint v_1 = (v.metadata[(0u / 4u)][(0u % 4u)] - 1u);
   uint v_2 = min(uint(level), v_1);
   uvec2 v_3 = (uvec2(textureSize(f_arg_0, int(v_2))) - uvec2(1u));
   ivec2 v_4 = ivec2(min(uvec2(coords), v_3));
@@ -59,11 +59,11 @@ void main() {
 
 layout(binding = 0, std140)
 uniform TintTextureUniformData_1_ubo {
-  uint tint_builtin_value_0;
+  uvec4 metadata[1];
 } v;
 uniform highp isampler2D arg_0;
 ivec4 textureLoad2d(ivec2 coords, int level) {
-  uint v_1 = (v.tint_builtin_value_0 - 1u);
+  uint v_1 = (v.metadata[(0u / 4u)][(0u % 4u)] - 1u);
   uint v_2 = min(uint(level), v_1);
   uvec2 v_3 = (uvec2(textureSize(arg_0, int(v_2))) - uvec2(1u));
   ivec2 v_4 = ivec2(min(uvec2(coords), v_3));

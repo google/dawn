@@ -179,7 +179,7 @@ struct State {
     HandleVariablePath PathForHandle(core::ir::Value* val) const {
         // Because DirectVariableAccess for handles ran prior to this transform, we know that the
         // chain to get to the variable is a mix of loads and accesses (but don't have guarantees on
-        // their order).
+        // their order). There is at most one load and one access so the recursion is bounded.
         return Switch(
             val->As<core::ir::InstructionResult>()->Instruction(),
             [&](core::ir::Var* var) -> HandleVariablePath { return {var}; },
