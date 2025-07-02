@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 46
+; Bound: 49
 ; Schema: 0
                OpCapability Shader
                OpCapability VulkanMemoryModel
@@ -52,8 +52,9 @@
        %void = OpTypeVoid
          %37 = OpTypeFunction %void
 %_ptr_StorageBuffer__arr_uint_uint_1024 = OpTypePointer StorageBuffer %_arr_uint_uint_1024
-%_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
     %uint_64 = OpConstant %uint 64
+     %uint_4 = OpConstant %uint 4
+%_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
 %subgroupMatrixMultiplyAccumulate_052cba = OpFunction %8 None %13
          %14 = OpLabel
       %arg_0 = OpVariable %_ptr_Function_16 Function
@@ -75,7 +76,9 @@
          %38 = OpLabel
          %39 = OpFunctionCall %8 %subgroupMatrixMultiplyAccumulate_052cba
          %40 = OpAccessChain %_ptr_StorageBuffer__arr_uint_uint_1024 %1 %uint_0
-         %42 = OpAccessChain %_ptr_StorageBuffer_uint %40 %uint_0
-               OpCooperativeMatrixStoreKHR %42 %39 %uint_0 %uint_64 NonPrivatePointer
+         %42 = OpUDiv %uint %uint_64 %uint_4
+         %45 = OpUDiv %uint %uint_0 %uint_4
+         %46 = OpAccessChain %_ptr_StorageBuffer_uint %40 %45
+               OpCooperativeMatrixStoreKHR %46 %39 %uint_0 %42 NonPrivatePointer
                OpReturn
                OpFunctionEnd

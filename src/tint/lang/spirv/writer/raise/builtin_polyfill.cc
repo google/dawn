@@ -1180,15 +1180,36 @@ struct State {
             auto* p = builtin->Args()[0];
             auto* offset = builtin->Args()[1];
             auto* value = builtin->Args()[2];
+            auto* value_type = value->Type()->As<core::type::SubgroupMatrix>();
+
             auto* col_major = builtin->Args()[3]->As<core::ir::Constant>();
             auto* stride = builtin->Args()[4];
 
             auto* ptr = p->Type()->As<core::type::Pointer>();
             auto* arr = ptr->StoreType()->As<core::type::Array>();
 
+            // In SPIR-V `stride` and `offset` are related to the type of the input pointer, while
+            // in WGSL they both mean the number of elements. When the subgroup matrix element type
+            // is `i8` or `u8`, and the input array type is `i32` or `u32`, we need to convert the
+            // `stride` and `offset` in WGSL into the ones in SPIR-V by dividing them with 4.
+            core::ir::Value* applied_stride = nullptr;
+            core::ir::Value* applied_offset = nullptr;
+            if (value_type->Type()->Size() == 1u && arr->ElemType()->Size() == 4u) {
+                auto* applied_stride_binary =
+                    b.Binary(core::BinaryOp::kDivide, stride->Type(), stride, u32(4));
+                applied_stride = applied_stride_binary->Result();
+
+                auto* applied_offset_binary =
+                    b.Binary(core::BinaryOp::kDivide, offset->Type(), offset, u32(4));
+                applied_offset = applied_offset_binary->Result();
+            } else {
+                applied_stride = stride;
+                applied_offset = offset;
+            }
+
             // Make a pointer to the first element of the array that we will write to.
             auto* elem_ptr = ty.ptr(ptr->AddressSpace(), arr->ElemType(), ptr->Access());
-            auto* dst = b.Access(elem_ptr, p, offset);
+            auto* dst = b.Access(elem_ptr, p, applied_offset);
 
             auto* layout = b.Constant(u32(col_major->Value()->ValueAs<bool>()
                                               ? SpvCooperativeMatrixLayoutColumnMajorKHR
@@ -1196,7 +1217,7 @@ struct State {
             auto* memory_operand = Literal(u32(SpvMemoryAccessNonPrivatePointerMask));
 
             b.Call<spirv::ir::BuiltinCall>(ty.void_(), spirv::BuiltinFn::kCooperativeMatrixStore,
-                                           dst, value, layout, stride, memory_operand);
+                                           dst, value, layout, applied_stride, memory_operand);
         });
         builtin->Destroy();
     }
