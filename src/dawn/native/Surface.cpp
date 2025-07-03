@@ -102,6 +102,10 @@ ResultOrError<UnpackedPtr<SurfaceDescriptor>> ValidateSurfaceDescriptor(
     UnpackedPtr<SurfaceDescriptor> descriptor;
     DAWN_TRY_ASSIGN(descriptor, ValidateAndUnpack(rawDescriptor));
 
+    if (descriptor.Get<SurfaceColorManagement>()) {
+        return DAWN_VALIDATION_ERROR("SurfaceColorManagement unsupported.");
+    }
+
     wgpu::SType type;
     DAWN_TRY_ASSIGN(
         type, (descriptor.ValidateBranches<

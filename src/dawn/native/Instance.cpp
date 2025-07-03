@@ -332,10 +332,6 @@ Future InstanceBase::APIRequestAdapter(const RequestAdapterOptions* options,
         }
     };
 
-    static constexpr RequestAdapterOptions kDefaultOptions = {};
-    if (options == nullptr) {
-        options = &kDefaultOptions;
-    }
     auto adapters = EnumerateAdapters(options);
 
     FutureID futureID = GetEventManager()->TrackEvent(AcquireRef(new RequestAdapterEvent(
@@ -377,11 +373,15 @@ std::vector<Ref<AdapterBase>> InstanceBase::EnumerateAdapters(
     if (options == nullptr) {
         // Default path that returns all WebGPU core adapters on the system with default
         // toggles.
-        return EnumerateAdapters(&kDefaultOptions);
+        options = &kDefaultOptions;
     }
 
     RequestAdapterOptions rawOptions = options->WithTrivialFrontendDefaults();
     UnpackedPtr<RequestAdapterOptions> unpacked = Unpack(&rawOptions);
+    if (unpacked.Get<RequestAdapterWebXROptions>()) {
+        ConsumedErrorAndWarnOnce(DAWN_VALIDATION_ERROR("RequestAdapterWebXROptions unsupported."));
+        return {};
+    }
     auto* togglesDesc = unpacked.Get<DawnTogglesDescriptor>();
 
     std::vector<Ref<AdapterBase>> adapters;
