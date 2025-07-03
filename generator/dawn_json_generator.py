@@ -818,13 +818,9 @@ def compute_kotlin_params(loaded_json, kotlin_json):
         if method.returns and method.returns.type.category == 'function pointer':
             # Kotlin doesn't support returning functions.
             return False
-        for argument in method.arguments:
-            # Any method that has unsupported structures as parameters is itself unsupported.
-            if argument.type.category == 'structure' and not include_structure(
-                    argument.type):
-                return False
         return True
 
+    # Whether to create structure converters (or use handwritten converters).
     def include_structure(structure):
         if structure.name.canonical_case() == "string view":
             return False
