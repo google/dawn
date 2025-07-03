@@ -2300,6 +2300,366 @@ $B1: {  # root
 )");
 }
 
+TEST_F(SpirvParserTest, Var_OpSpecConstantOp_IEqual) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %myconst "myconst"
+       %void = OpTypeVoid
+       %bool = OpTypeBool
+        %u32 = OpTypeInt 32 0
+        %i32 = OpTypeInt 32 1
+        %one = OpConstant %i32 1
+        %two = OpConstant %u32 2
+    %myconst = OpSpecConstantOp %bool IEqual %one %two
+     %voidfn = OpTypeFunction %void
+       %main = OpFunction %void None %voidfn
+ %main_entry = OpLabel
+          %1 = OpCopyObject %bool %myconst
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %1:bool = spirv.equal 1i, 2u
+  %myconst:bool = override %1
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %4:bool = let %myconst
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, Var_OpSpecConstantOp_INotEqual) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %myconst "myconst"
+       %void = OpTypeVoid
+       %bool = OpTypeBool
+        %u32 = OpTypeInt 32 0
+        %i32 = OpTypeInt 32 1
+        %one = OpConstant %i32 1
+        %two = OpConstant %u32 2
+    %myconst = OpSpecConstantOp %bool INotEqual %one %two
+     %voidfn = OpTypeFunction %void
+       %main = OpFunction %void None %voidfn
+ %main_entry = OpLabel
+          %1 = OpCopyObject %bool %myconst
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %1:bool = spirv.not_equal 1i, 2u
+  %myconst:bool = override %1
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %4:bool = let %myconst
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, Var_OpSpecConstantOp_SGreaterThan) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %myconst "myconst"
+       %void = OpTypeVoid
+       %bool = OpTypeBool
+        %u32 = OpTypeInt 32 0
+        %i32 = OpTypeInt 32 1
+        %one = OpConstant %i32 1
+        %two = OpConstant %u32 2
+    %myconst = OpSpecConstantOp %bool SGreaterThan %one %two
+     %voidfn = OpTypeFunction %void
+       %main = OpFunction %void None %voidfn
+ %main_entry = OpLabel
+          %1 = OpCopyObject %bool %myconst
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %1:bool = spirv.s_greater_than 1i, 2u
+  %myconst:bool = override %1
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %4:bool = let %myconst
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, Var_OpSpecConstantOp_SGreaterThanEqual) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %myconst "myconst"
+       %void = OpTypeVoid
+       %bool = OpTypeBool
+        %u32 = OpTypeInt 32 0
+        %i32 = OpTypeInt 32 1
+        %one = OpConstant %i32 1
+        %two = OpConstant %u32 2
+    %myconst = OpSpecConstantOp %bool SGreaterThanEqual %one %two
+     %voidfn = OpTypeFunction %void
+       %main = OpFunction %void None %voidfn
+ %main_entry = OpLabel
+          %1 = OpCopyObject %bool %myconst
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %1:bool = spirv.s_greater_than_equal 1i, 2u
+  %myconst:bool = override %1
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %4:bool = let %myconst
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, Var_OpSpecConstantOp_SLessThan) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %myconst "myconst"
+       %void = OpTypeVoid
+       %bool = OpTypeBool
+        %u32 = OpTypeInt 32 0
+        %i32 = OpTypeInt 32 1
+        %one = OpConstant %i32 1
+        %two = OpConstant %u32 2
+    %myconst = OpSpecConstantOp %bool SLessThan %one %two
+     %voidfn = OpTypeFunction %void
+       %main = OpFunction %void None %voidfn
+ %main_entry = OpLabel
+          %1 = OpCopyObject %bool %myconst
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %1:bool = spirv.s_less_than 1i, 2u
+  %myconst:bool = override %1
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %4:bool = let %myconst
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, Var_OpSpecConstantOp_SLessThanEqual) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %myconst "myconst"
+       %void = OpTypeVoid
+       %bool = OpTypeBool
+        %u32 = OpTypeInt 32 0
+        %i32 = OpTypeInt 32 1
+        %one = OpConstant %i32 1
+        %two = OpConstant %u32 2
+    %myconst = OpSpecConstantOp %bool SLessThanEqual %one %two
+     %voidfn = OpTypeFunction %void
+       %main = OpFunction %void None %voidfn
+ %main_entry = OpLabel
+          %1 = OpCopyObject %bool %myconst
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %1:bool = spirv.s_less_than_equal 1i, 2u
+  %myconst:bool = override %1
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %4:bool = let %myconst
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, Var_OpSpecConstantOp_UGreaterThan) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %myconst "myconst"
+       %void = OpTypeVoid
+       %bool = OpTypeBool
+        %u32 = OpTypeInt 32 0
+        %i32 = OpTypeInt 32 1
+        %one = OpConstant %i32 1
+        %two = OpConstant %u32 2
+    %myconst = OpSpecConstantOp %bool UGreaterThan %one %two
+     %voidfn = OpTypeFunction %void
+       %main = OpFunction %void None %voidfn
+ %main_entry = OpLabel
+          %1 = OpCopyObject %bool %myconst
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %1:bool = spirv.u_greater_than 1i, 2u
+  %myconst:bool = override %1
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %4:bool = let %myconst
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, Var_OpSpecConstantOp_UGreaterThanEqual) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %myconst "myconst"
+       %void = OpTypeVoid
+       %bool = OpTypeBool
+        %u32 = OpTypeInt 32 0
+        %i32 = OpTypeInt 32 1
+        %one = OpConstant %i32 1
+        %two = OpConstant %u32 2
+    %myconst = OpSpecConstantOp %bool UGreaterThanEqual %one %two
+     %voidfn = OpTypeFunction %void
+       %main = OpFunction %void None %voidfn
+ %main_entry = OpLabel
+          %1 = OpCopyObject %bool %myconst
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %1:bool = spirv.u_greater_than_equal 1i, 2u
+  %myconst:bool = override %1
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %4:bool = let %myconst
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, Var_OpSpecConstantOp_ULessThan) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %myconst "myconst"
+       %void = OpTypeVoid
+       %bool = OpTypeBool
+        %u32 = OpTypeInt 32 0
+        %i32 = OpTypeInt 32 1
+        %one = OpConstant %i32 1
+        %two = OpConstant %u32 2
+    %myconst = OpSpecConstantOp %bool ULessThan %one %two
+     %voidfn = OpTypeFunction %void
+       %main = OpFunction %void None %voidfn
+ %main_entry = OpLabel
+          %1 = OpCopyObject %bool %myconst
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %1:bool = spirv.u_less_than 1i, 2u
+  %myconst:bool = override %1
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %4:bool = let %myconst
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, Var_OpSpecConstantOp_ULessThanEqual) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %myconst "myconst"
+       %void = OpTypeVoid
+       %bool = OpTypeBool
+        %u32 = OpTypeInt 32 0
+        %i32 = OpTypeInt 32 1
+        %one = OpConstant %i32 1
+        %two = OpConstant %u32 2
+    %myconst = OpSpecConstantOp %bool ULessThanEqual %one %two
+     %voidfn = OpTypeFunction %void
+       %main = OpFunction %void None %voidfn
+ %main_entry = OpLabel
+          %1 = OpCopyObject %bool %myconst
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %1:bool = spirv.u_less_than_equal 1i, 2u
+  %myconst:bool = override %1
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %4:bool = let %myconst
+    ret
+  }
+}
+)");
+}
+
 // In the case of all literals, SPIR-V opt treats the `OpSpecConstantComposite` as an
 // `OpConstantComposite` so it appears in the constant manager already. This then needs no handling
 // on our side.

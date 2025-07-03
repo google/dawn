@@ -355,6 +355,36 @@ class Parser {
                         case spv::Op::OpBitwiseXor:
                             EmitSpirvExplicitBuiltinCall(inst, spirv::BuiltinFn::kBitwiseXor, 3);
                             break;
+                        case spv::Op::OpIEqual:
+                            EmitSpirvBuiltinCall(inst, spirv::BuiltinFn::kEqual, 3);
+                            break;
+                        case spv::Op::OpINotEqual:
+                            EmitSpirvBuiltinCall(inst, spirv::BuiltinFn::kNotEqual, 3);
+                            break;
+                        case spv::Op::OpSGreaterThan:
+                            EmitSpirvBuiltinCall(inst, spirv::BuiltinFn::kSGreaterThan, 3);
+                            break;
+                        case spv::Op::OpSGreaterThanEqual:
+                            EmitSpirvBuiltinCall(inst, spirv::BuiltinFn::kSGreaterThanEqual, 3);
+                            break;
+                        case spv::Op::OpSLessThan:
+                            EmitSpirvBuiltinCall(inst, spirv::BuiltinFn::kSLessThan, 3);
+                            break;
+                        case spv::Op::OpSLessThanEqual:
+                            EmitSpirvBuiltinCall(inst, spirv::BuiltinFn::kSLessThanEqual, 3);
+                            break;
+                        case spv::Op::OpUGreaterThan:
+                            EmitSpirvBuiltinCall(inst, spirv::BuiltinFn::kUGreaterThan, 3);
+                            break;
+                        case spv::Op::OpUGreaterThanEqual:
+                            EmitSpirvBuiltinCall(inst, spirv::BuiltinFn::kUGreaterThanEqual, 3);
+                            break;
+                        case spv::Op::OpULessThan:
+                            EmitSpirvBuiltinCall(inst, spirv::BuiltinFn::kULessThan, 3);
+                            break;
+                        case spv::Op::OpULessThanEqual:
+                            EmitSpirvBuiltinCall(inst, spirv::BuiltinFn::kULessThanEqual, 3);
+                            break;
                         case spv::Op::OpLogicalAnd:
                             EmitBinary(inst, core::BinaryOp::kAnd, 3);
                             break;
@@ -2958,8 +2988,11 @@ class Parser {
              inst.result_id());
     }
 
-    void EmitSpirvBuiltinCall(const spvtools::opt::Instruction& inst, spirv::BuiltinFn fn) {
-        Emit(b_.Call<spirv::ir::BuiltinCall>(Type(inst.type_id()), fn, Args(inst, 2)),
+    void EmitSpirvBuiltinCall(const spvtools::opt::Instruction& inst,
+                              spirv::BuiltinFn fn,
+                              uint32_t first_operand_idx = 2) {
+        Emit(b_.Call<spirv::ir::BuiltinCall>(Type(inst.type_id()), fn,
+                                             Args(inst, first_operand_idx)),
              inst.result_id());
     }
 
