@@ -922,6 +922,45 @@ fn f() {
 )");
 }
 
+TEST_F(IRToProgramTest, InvalidCharacters) {
+    auto* fn = b.Function("f", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+
+    b.Append(fn->Block(), [&] {
+        // Invalid
+        Var("_", true);
+        Var("__", true);
+        Var(" ", true);
+        Var("1", true);
+        Var("struct-a", true);
+        Var("struct a", true);
+
+        // Valid
+        Var("a", true);
+        Var("A", true);
+        Var("a_", true);
+        Var("a1", true);
+        Var("struct_a", true);
+        b.Return(fn);
+    });
+
+    EXPECT_WGSL(R"(
+@fragment
+fn f() {
+  var v : bool = true;
+  var v_1 : bool = true;
+  var v_2 : bool = true;
+  var v_3 : bool = true;
+  var v_4 : bool = true;
+  var v_5 : bool = true;
+  var a : bool = true;
+  var A : bool = true;
+  var a_ : bool = true;
+  var a1 : bool = true;
+  var struct_a : bool = true;
+}
+)");
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // Unary ops
 ////////////////////////////////////////////////////////////////////////////////
