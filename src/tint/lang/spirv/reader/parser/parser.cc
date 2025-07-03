@@ -439,6 +439,18 @@ class Parser {
                         case spv::Op::OpSRem:
                             EmitSpirvExplicitBuiltinCall(inst, spirv::BuiltinFn::kSMod, 3);
                             break;
+                        case spv::Op::OpShiftLeftLogical:
+                            EmitSpirvExplicitBuiltinCall(inst, spirv::BuiltinFn::kShiftLeftLogical,
+                                                         3);
+                            break;
+                        case spv::Op::OpShiftRightLogical:
+                            EmitSpirvExplicitBuiltinCall(inst, spirv::BuiltinFn::kShiftRightLogical,
+                                                         3);
+                            break;
+                        case spv::Op::OpShiftRightArithmetic:
+                            EmitSpirvExplicitBuiltinCall(
+                                inst, spirv::BuiltinFn::kShiftRightArithmetic, 3);
+                            break;
                         default:
                             TINT_ICE() << "Unknown spec constant operation: " << op;
                     }
