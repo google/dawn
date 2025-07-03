@@ -2195,6 +2195,111 @@ $B1: {  # root
 )");
 }
 
+TEST_F(SpirvParserTest, Var_OpSpecConstantOp_BitwiseAnd) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %myconst "myconst"
+       %void = OpTypeVoid
+        %u32 = OpTypeInt 32 0
+        %i32 = OpTypeInt 32 1
+        %one = OpConstant %i32 1
+        %two = OpConstant %u32 2
+    %myconst = OpSpecConstantOp %u32 BitwiseAnd %one %two
+     %voidfn = OpTypeFunction %void
+       %main = OpFunction %void None %voidfn
+ %main_entry = OpLabel
+          %1 = OpCopyObject %u32 %myconst
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %1:u32 = spirv.bitwise_and<u32> 1i, 2u
+  %myconst:u32 = override %1
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %4:u32 = let %myconst
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, Var_OpSpecConstantOp_BitwiseOr) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %myconst "myconst"
+       %void = OpTypeVoid
+        %u32 = OpTypeInt 32 0
+        %i32 = OpTypeInt 32 1
+        %one = OpConstant %i32 1
+        %two = OpConstant %u32 2
+    %myconst = OpSpecConstantOp %u32 BitwiseOr %one %two
+     %voidfn = OpTypeFunction %void
+       %main = OpFunction %void None %voidfn
+ %main_entry = OpLabel
+          %1 = OpCopyObject %u32 %myconst
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %1:u32 = spirv.bitwise_or<u32> 1i, 2u
+  %myconst:u32 = override %1
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %4:u32 = let %myconst
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, Var_OpSpecConstantOp_BitwiseXor) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %myconst "myconst"
+       %void = OpTypeVoid
+        %u32 = OpTypeInt 32 0
+        %i32 = OpTypeInt 32 1
+        %one = OpConstant %i32 1
+        %two = OpConstant %u32 2
+    %myconst = OpSpecConstantOp %u32 BitwiseXor %one %two
+     %voidfn = OpTypeFunction %void
+       %main = OpFunction %void None %voidfn
+ %main_entry = OpLabel
+          %1 = OpCopyObject %u32 %myconst
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %1:u32 = spirv.bitwise_xor<u32> 1i, 2u
+  %myconst:u32 = override %1
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %4:u32 = let %myconst
+    ret
+  }
+}
+)");
+}
+
 // In the case of all literals, SPIR-V opt treats the `OpSpecConstantComposite` as an
 // `OpConstantComposite` so it appears in the constant manager already. This then needs no handling
 // on our side.

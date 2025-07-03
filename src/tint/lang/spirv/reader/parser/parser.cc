@@ -346,6 +346,15 @@ class Parser {
                     }
 
                     switch (static_cast<spv::Op>(op)) {
+                        case spv::Op::OpBitwiseAnd:
+                            EmitSpirvExplicitBuiltinCall(inst, spirv::BuiltinFn::kBitwiseAnd, 3);
+                            break;
+                        case spv::Op::OpBitwiseOr:
+                            EmitSpirvExplicitBuiltinCall(inst, spirv::BuiltinFn::kBitwiseOr, 3);
+                            break;
+                        case spv::Op::OpBitwiseXor:
+                            EmitSpirvExplicitBuiltinCall(inst, spirv::BuiltinFn::kBitwiseXor, 3);
+                            break;
                         case spv::Op::OpLogicalAnd:
                             EmitBinary(inst, core::BinaryOp::kAnd, 3);
                             break;
