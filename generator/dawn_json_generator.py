@@ -815,8 +815,6 @@ def compute_kotlin_params(loaded_json, kotlin_json):
 
     # TODO(b/352047733): Replace methods that require special handling with an exceptions list.
     def include_method(method):
-        if method.name.canonical_case().endswith(" free members"):
-            return False
         if method.returns and method.returns.type.category == 'function pointer':
             # Kotlin doesn't support returning functions.
             return False
