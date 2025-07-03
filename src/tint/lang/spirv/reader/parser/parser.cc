@@ -393,6 +393,13 @@ class Parser {
                         case spv::Op::OpUDiv:
                             EmitBinary(inst, core::BinaryOp::kDivide, 3);
                             break;
+                        case spv::Op::OpUMod:
+                            EmitBinary(inst, core::BinaryOp::kModulo, 3);
+                            break;
+                        case spv::Op::OpSMod:
+                        case spv::Op::OpSRem:
+                            EmitSpirvExplicitBuiltinCall(inst, spirv::BuiltinFn::kSMod, 3);
+                            break;
                         default:
                             TINT_ICE() << "Unknown spec constant operation: " << op;
                     }
