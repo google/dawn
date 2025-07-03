@@ -113,7 +113,7 @@
             {{ unreachable_code('Unsupported native type: ' + type.name.get()) }}
         {%- endif -%}
         {%- if optional -%}
-            {%- set ns.type_name = ns.type_name + '?' -%}
+            {{ unreachable_code('Optional natives not supported: ' + type.name.get()) }}
         {%- endif -%}
         {{ ns.type_name }}
         {%- if ns.default_value not in [None, undefined] -%} {{ ' ' }}={{ ' ' }}
