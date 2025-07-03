@@ -3620,5 +3620,52 @@ TEST_F(TextureFormatsTier1PipelineTest, SNORMFormatsMultisampleSupportWithTier1)
     }
 }
 
+class RG11B10UfloatRenderablePipelineTest : public RenderPipelineValidationTest {
+  protected:
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        return {wgpu::FeatureName::RG11B10UfloatRenderable};
+    }
+};
+
+// Tests that rg11b10ufloat must be renderable when the feature RG11B10UfloatRenderable is enabled.
+TEST_F(RG11B10UfloatRenderablePipelineTest, RG11B10UfloatRenderableWithFeatureEnabled) {
+    const std::array kTestFormats = {wgpu::TextureFormat::RG11B10Ufloat};
+    for (const auto format : kTestFormats) {
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModule;
+        descriptor.cTargets[0].format = format;
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
+    }
+}
+
+// Tests that rg11b10ufloat must be blendable when the feature RG11B10UfloatRenderable is enabled.
+TEST_F(RG11B10UfloatRenderablePipelineTest, RG11B10UfloatBlendableWithFeatureEnabled) {
+    const std::array kTestFormats = {wgpu::TextureFormat::RG11B10Ufloat};
+    for (const auto format : kTestFormats) {
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModule;
+        descriptor.cTargets[0].blend = &descriptor.cBlends[0];
+        descriptor.cTargets[0].format = format;
+
+        device.CreateRenderPipeline(&descriptor);
+    }
+}
+
+// Tests that rg11b10ufloat must support multisampling when the RG11B10UfloatRenderable feature is
+// enabled.
+TEST_F(RG11B10UfloatRenderablePipelineTest, RG11B10UfloatMultisampleSupportWithTier1) {
+    const std::array kTestFormats = {wgpu::TextureFormat::RG11B10Ufloat};
+    for (const auto format : kTestFormats) {
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModule;
+        descriptor.cTargets[0].format = format;
+        descriptor.multisample.count = 4;
+        device.CreateRenderPipeline(&descriptor);
+    }
+}
+
 }  // anonymous namespace
 }  // namespace dawn

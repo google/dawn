@@ -794,6 +794,40 @@ TEST_F(TextureFormatsTier1RenderPassTest, MultisampledColorWithoutResolveTarget)
     }
 }
 
+class RG11B10UfloatRenderableRenderPassTest : public RenderPassDescriptorValidationTest {
+  protected:
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        return {wgpu::FeatureName::RG11B10UfloatRenderable};
+    }
+};
+
+// Tests that RG11B10Ufloat color attachment supports multisampling and resolve targets
+// when RG11B10UfloatRenderable is enabled.
+TEST_F(RG11B10UfloatRenderableRenderPassTest, MultisampledColorWithResolveTarget) {
+    const std::array kTestFormats = {wgpu::TextureFormat::RG11B10Ufloat};
+    for (const auto format : kTestFormats) {
+        static constexpr uint32_t kArrayLayers = 1;
+        static constexpr uint32_t kLevelCount = 1;
+        static constexpr uint32_t kSize = 32;
+        static constexpr uint32_t kMultiSampleCount = 4;
+        static constexpr uint32_t kSingleSampleCount = 1;
+        wgpu::TextureFormat kColorFormat = format;
+
+        wgpu::Texture colorTexture =
+            CreateTexture(device, wgpu::TextureDimension::e2D, kColorFormat, kSize, kSize,
+                          kArrayLayers, kLevelCount, kMultiSampleCount);
+        wgpu::Texture resolveTargetTexture =
+            CreateTexture(device, wgpu::TextureDimension::e2D, kColorFormat, kSize, kSize,
+                          kArrayLayers, kLevelCount, kSingleSampleCount);
+        wgpu::TextureView colorTextureView = colorTexture.CreateView();
+        wgpu::TextureView resolveTargetTextureView = resolveTargetTexture.CreateView();
+
+        utils::ComboRenderPassDescriptor renderPass({colorTextureView});
+        renderPass.cColorAttachments[0].resolveTarget = resolveTargetTextureView;
+        AssertBeginRenderPassSuccess(&renderPass);
+    }
+}
+
 // drawCount must not exceed maxDrawCount
 TEST_F(RenderPassDescriptorValidationTest, MaxDrawCount) {
     constexpr wgpu::TextureFormat kColorFormat = wgpu::TextureFormat::RGBA8Unorm;
