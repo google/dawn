@@ -175,11 +175,7 @@ class BufferBase : public SharedResource {
                                 WGPUMapAsyncStatus* status) const;
     MaybeError ValidateUnmap() const;
     bool CanGetMappedRange(bool writable, size_t offset, size_t size) const;
-
-    // Unmaps the buffer and returns a MapAsyncEvent that should be set to ready if the buffer had a
-    // pending map event.
-    ResultOrError<Ref<MapAsyncEvent>> UnmapInternal(WGPUMapAsyncStatus status,
-                                                    std::string_view message);
+    MaybeError UnmapInternal(WGPUMapAsyncStatus status, std::string_view message);
 
     // Updates internal state to reflect that the buffer is now mapped.
     void SetMapped(BufferState newState);

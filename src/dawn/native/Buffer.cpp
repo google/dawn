@@ -381,15 +381,13 @@ BufferBase::~BufferBase() {
 }
 
 void BufferBase::DestroyImpl() {
-    Ref<MapAsyncEvent> event;
-
     switch (mState.load(std::memory_order::acquire)) {
         case BufferState::Mapped:
         case BufferState::PendingMap: {
             [[maybe_unused]] bool hadError = GetDevice()->ConsumedError(
                 UnmapInternal(WGPUMapAsyncStatus_Aborted,
                               "Buffer was destroyed before mapping was resolved."),
-                &event, "calling %s.Destroy().", this);
+                "calling %s.Destroy().", this);
             break;
         }
         case BufferState::MappedAtCreation: {
@@ -399,7 +397,7 @@ void BufferBase::DestroyImpl() {
                 [[maybe_unused]] bool hadError = GetDevice()->ConsumedError(
                     UnmapInternal(WGPUMapAsyncStatus_Aborted,
                                   "Buffer was destroyed before mapping was resolved."),
-                    &event, "calling %s.Destroy().", this);
+                    "calling %s.Destroy().", this);
             }
             break;
         }
@@ -407,16 +405,6 @@ void BufferBase::DestroyImpl() {
             break;
     }
     mState.store(BufferState::Destroyed, std::memory_order::release);
-
-    // This is the error cases where re-entrant API calls, specifically Unmap will fail since
-    // this function is called in two places, via Buffer::APIDestroy and Device::Destroy, both which
-    // currently hold the device-wide lock which we don't yet have a way to circumvent and release
-    // before the callback is called (spontaneously). That said, this only happens if a user is
-    // calling Unmap in the MapAsync callback even though the callback was Aborted which is an
-    // invalid use case.
-    if (event) {
-        GetInstance()->GetEventManager()->SetFutureReady(event.Get());
-    }
 }
 
 // static
@@ -692,21 +680,13 @@ MaybeError BufferBase::CopyFromStagingBuffer() {
 }
 
 void BufferBase::APIUnmap() {
-    Ref<MapAsyncEvent> event;
-    {
-        auto deviceGuard = GetDevice()->GetGuard();
-        if (GetDevice()->ConsumedError(ValidateUnmap(), "calling %s.Unmap().", this)) {
-            return;
-        }
-        [[maybe_unused]] bool hadError = GetDevice()->ConsumedError(
-            UnmapInternal(WGPUMapAsyncStatus_Aborted,
-                          "Buffer was unmapped before mapping was resolved."),
-            &event, "calling %s.Unmap().", this);
+    if (GetDevice()->ConsumedError(ValidateUnmap(), "calling %s.Unmap().", this)) {
+        return;
     }
-
-    if (event) {
-        GetInstance()->GetEventManager()->SetFutureReady(event.Get());
-    }
+    [[maybe_unused]] bool hadError = GetDevice()->ConsumedError(
+        UnmapInternal(WGPUMapAsyncStatus_Aborted,
+                      "Buffer was unmapped before mapping was resolved."),
+        "calling %s.Unmap().", this);
 }
 
 MaybeError BufferBase::Unmap() {
@@ -736,31 +716,33 @@ MaybeError BufferBase::Unmap() {
     return {};
 }
 
-ResultOrError<Ref<BufferBase::MapAsyncEvent>> BufferBase::UnmapInternal(WGPUMapAsyncStatus status,
-                                                                        std::string_view message) {
-    Ref<MapAsyncEvent> event;
-
+MaybeError BufferBase::UnmapInternal(WGPUMapAsyncStatus status, std::string_view message) {
     BufferState state = mState.load(std::memory_order::acquire);
 
     // If the buffer is already destroyed, we don't need to do anything.
     if (state == BufferState::Destroyed) {
-        return nullptr;
+        return {};
     }
 
-    // For pending maps, set the pending event statuses, and return it. The caller is responsible
-    // for setting the event to be ready once we no longer are holding the device-wide lock.
     if (state == BufferState::PendingMap) {
         // For pending maps, we update the pending event, and only set it to ready after releasing
         // the buffer state lock so that spontaneous callbacks with re-entrant calls work properly.
-        event = std::get<Ref<MapAsyncEvent>>(std::exchange(mMapData, static_cast<void*>(nullptr)));
+        Ref<MapAsyncEvent> event =
+            std::get<Ref<MapAsyncEvent>>(std::exchange(mMapData, static_cast<void*>(nullptr)));
+
         event->UnmapEarly(status, message);
         UnmapImpl();
         mState.store(BufferState::Unmapped, std::memory_order::release);
-        return std::move(event);
+
+        GetDevice()->DeferIfLocked(
+            [eventManager = GetInstance()->GetEventManager(), mapEvent = std::move(event)]() {
+                eventManager->SetFutureReady(mapEvent.Get());
+            });
+        return {};
     }
 
     DAWN_TRY(Unmap());
-    return nullptr;
+    return {};
 }
 
 MaybeError BufferBase::ValidateMapAsync(wgpu::MapMode mode,
