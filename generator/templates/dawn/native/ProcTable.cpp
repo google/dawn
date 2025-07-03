@@ -78,7 +78,7 @@ namespace {{native_namespace}} {
                     {% else %}
                         auto device = self;
                     {% endif %}
-                    auto deviceLock(device->GetScopedLock());
+                    auto deviceGuard = device->GetGuard();
                 {% else %}
                     // This method is specified to not use AutoLock in json script or it returns a future.
                 {% endif %}

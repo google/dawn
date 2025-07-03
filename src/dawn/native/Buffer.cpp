@@ -584,7 +584,7 @@ Future BufferBase::APIMapAsync(wgpu::MapMode mode,
 
     Ref<MapAsyncEvent> event;
     {
-        auto deviceLock(GetDevice()->GetScopedLock());
+        auto deviceGuard = GetDevice()->GetGuard();
 
         // Handle the defaulting of size required by WebGPU, even if in webgpu_cpp.h it is not
         // possible to default the function argument (because there is the callback later in the
@@ -694,7 +694,7 @@ MaybeError BufferBase::CopyFromStagingBuffer() {
 void BufferBase::APIUnmap() {
     Ref<MapAsyncEvent> event;
     {
-        auto deviceLock(GetDevice()->GetScopedLock());
+        auto deviceGuard = GetDevice()->GetGuard();
         if (GetDevice()->ConsumedError(ValidateUnmap(), "calling %s.Unmap().", this)) {
             return;
         }

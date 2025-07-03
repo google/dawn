@@ -276,6 +276,8 @@ source_set("sources") {
     "CreatePipelineAsyncEvent.h",
     "Device.cpp",
     "Device.h",
+    "DeviceGuard.cpp",
+    "DeviceGuard.h",
     "DynamicUploader.cpp",
     "DynamicUploader.h",
     "EncodingContext.cpp",

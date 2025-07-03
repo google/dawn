@@ -320,7 +320,7 @@ ResultOrError<Ref<BufferBase>> CommandRecordingContext::CreateInternalUniformBuf
 
     Ref<BufferBase> uniformBuffer;
     // Lock the device to protect the clearing of the built-in uniform buffer.
-    auto deviceLock(device->GetScopedLock());
+    auto deviceGuard = device->GetGuard();
     return device->CreateBuffer(&descriptor);
 }
 

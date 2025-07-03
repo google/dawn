@@ -135,7 +135,7 @@ void ApiObjectBase::DeleteThis() {
 }
 
 void ApiObjectBase::LockAndDeleteThis() {
-    auto deviceLock(GetDevice()->GetScopedLockSafeForDelete());
+    auto deviceGuard = GetDevice()->GetGuardForDelete();
     DeleteThis();
 }
 

@@ -65,7 +65,7 @@ template <>
 void CreatePipelineAsyncEvent<ComputePipelineBase, WGPUCreateComputePipelineAsyncCallbackInfo>::
     AddOrGetCachedPipeline() {
     DeviceBase* device = mPipeline->GetDevice();
-    auto deviceLock(device->GetScopedLock());
+    auto deviceGuard = device->GetGuard();
     if (device->GetState() == DeviceBase::State::Alive) {
         mPipeline = device->AddOrGetCachedComputePipeline(std::move(mPipeline));
     }
@@ -85,7 +85,7 @@ template <>
 void CreatePipelineAsyncEvent<RenderPipelineBase,
                               WGPUCreateRenderPipelineAsyncCallbackInfo>::AddOrGetCachedPipeline() {
     DeviceBase* device = mPipeline->GetDevice();
-    auto deviceLock(device->GetScopedLock());
+    auto deviceGuard = device->GetGuard();
     if (device->GetState() == DeviceBase::State::Alive) {
         mPipeline = device->AddOrGetCachedRenderPipeline(std::move(mPipeline));
     }

@@ -228,7 +228,7 @@ Future QueueBase::APIOnSubmittedWorkDone(const WGPUQueueWorkDoneCallbackInfo& ca
     {
         // TODO(crbug.com/dawn/831) Manually acquire device lock instead of relying on code-gen for
         // re-entrancy.
-        auto deviceLock(GetDevice()->GetScopedLock());
+        auto deviceGuard = GetDevice()->GetGuard();
         if (GetDevice()->ConsumedError(GetDevice()->ValidateIsAlive())) {
             event = AcquireRef(
                 new WorkDoneEvent(callbackInfo, this, wgpu::QueueWorkDoneStatus::Success));

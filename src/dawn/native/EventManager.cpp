@@ -163,7 +163,7 @@ void WaitQueueSerials(const QueueWaitSerialsMap& queueWaitSerials, Nanoseconds t
 
         auto* device = queue->GetDevice();
         {
-            auto deviceLock(device->GetScopedLock());
+            auto deviceGuard = device->GetGuard();
             [[maybe_unused]] bool error = device->ConsumedError(
                 [&]() -> MaybeError {
                     if (waitSerial > queue->GetLastSubmittedCommandSerial()) {
