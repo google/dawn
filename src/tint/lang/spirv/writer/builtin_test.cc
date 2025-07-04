@@ -1287,11 +1287,20 @@ TEST_F(SpirvWriterTest, Builtin_Dot_vec2i) {
     EXPECT_INST(R"(
           %8 = OpCompositeExtract %int %arg1 0
           %9 = OpCompositeExtract %int %arg2 0
-         %10 = OpIMul %int %8 %9
-         %11 = OpCompositeExtract %int %arg1 1
-         %12 = OpCompositeExtract %int %arg2 1
-         %13 = OpIMul %int %11 %12
-     %result = OpIAdd %int %10 %13
+         %11 = OpBitcast %uint %8
+         %12 = OpBitcast %uint %9
+         %13 = OpIMul %uint %11 %12
+         %14 = OpBitcast %int %13
+         %15 = OpCompositeExtract %int %arg1 1
+         %16 = OpCompositeExtract %int %arg2 1
+         %17 = OpBitcast %uint %15
+         %18 = OpBitcast %uint %16
+         %19 = OpIMul %uint %17 %18
+         %20 = OpBitcast %int %19
+         %21 = OpBitcast %uint %14
+         %22 = OpBitcast %uint %20
+         %23 = OpIAdd %uint %21 %22
+         %24 = OpBitcast %int %23
 )");
 }
 

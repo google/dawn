@@ -20,7 +20,7 @@ buffer f_sb_rw_block_ssbo {
 } v_1;
 int atomicSub_051100() {
   int arg_1 = 1;
-  int res = atomicAdd(v_1.inner.arg_0, -(arg_1));
+  int res = atomicAdd(v_1.inner.arg_0, int((~(uint(arg_1)) + 1u)));
   return res;
 }
 void main() {
@@ -46,7 +46,7 @@ buffer sb_rw_block_1_ssbo {
 } v_1;
 int atomicSub_051100() {
   int arg_1 = 1;
-  int res = atomicAdd(v_1.inner.arg_0, -(arg_1));
+  int res = atomicAdd(v_1.inner.arg_0, int((~(uint(arg_1)) + 1u)));
   return res;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;

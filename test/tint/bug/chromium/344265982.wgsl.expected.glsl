@@ -31,12 +31,14 @@ void foo() {
       }
       if (tint_continue) {
         {
-          i = (i + 1);
+          uint v_3 = uint(i);
+          i = int((v_3 + uint(1)));
         }
         continue;
       }
       {
-        i = (i + 1);
+        uint v_3 = uint(i);
+        i = int((v_3 + uint(1)));
       }
       continue;
     }

@@ -46,6 +46,7 @@
 #include "src/tint/lang/core/ir/transform/remove_terminator_args.h"
 #include "src/tint/lang/core/ir/transform/rename_conflicts.h"
 #include "src/tint/lang/core/ir/transform/robustness.h"
+#include "src/tint/lang/core/ir/transform/signed_integer_polyfill.h"
 #include "src/tint/lang/core/ir/transform/std140.h"
 #include "src/tint/lang/core/ir/transform/value_to_let.h"
 #include "src/tint/lang/core/ir/transform/vectorize_scalar_matrix_constructors.h"
@@ -194,6 +195,11 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         tex_config.placeholder_sampler_bind_point = options.bindings.placeholder_sampler_bind_point;
         RUN_TRANSFORM(raise::TexturePolyfill, module, tex_config);
     }
+
+    // must come before 'BitcastPolyfill' as this adds bitcasts
+    core::ir::transform::SignedIntegerPolyfillConfig signed_integer_cfg{
+        .signed_negation = true, .signed_arithmetic = true, .signed_shiftleft = true};
+    RUN_TRANSFORM(core::ir::transform::SignedIntegerPolyfill, module, signed_integer_cfg);
 
     // Must come after BuiltinPolyfill as builtins can add bitcasts
     RUN_TRANSFORM(raise::BitcastPolyfill, module);

@@ -42,6 +42,7 @@
 #include "src/tint/lang/core/ir/transform/remove_terminator_args.h"
 #include "src/tint/lang/core/ir/transform/rename_conflicts.h"
 #include "src/tint/lang/core/ir/transform/robustness.h"
+#include "src/tint/lang/core/ir/transform/signed_integer_polyfill.h"
 #include "src/tint/lang/core/ir/transform/value_to_let.h"
 #include "src/tint/lang/core/ir/transform/vectorize_scalar_matrix_constructors.h"
 #include "src/tint/lang/core/ir/transform/vertex_pulling.h"
@@ -55,7 +56,6 @@
 #include "src/tint/lang/msl/writer/raise/packed_vec3.h"
 #include "src/tint/lang/msl/writer/raise/shader_io.h"
 #include "src/tint/lang/msl/writer/raise/simd_ballot.h"
-#include "src/tint/lang/msl/writer/raise/unary_polyfill.h"
 
 namespace tint::msl::writer {
 
@@ -157,9 +157,12 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
     }
     RUN_TRANSFORM(raise::ModuleScopeVars, module);
 
-    RUN_TRANSFORM(raise::UnaryPolyfill, module);
     RUN_TRANSFORM(raise::BinaryPolyfill, module);
     RUN_TRANSFORM(raise::BuiltinPolyfill, module);
+    // After 'BuiltinPolyfill' as that transform can introduce signed dot products.
+    core::ir::transform::SignedIntegerPolyfillConfig signed_integer_cfg{
+        .signed_negation = true, .signed_arithmetic = true, .signed_shiftleft = true};
+    RUN_TRANSFORM(core::ir::transform::SignedIntegerPolyfill, module, signed_integer_cfg);
 
     core::ir::transform::BuiltinScalarizeConfig scalarize_config{
         .scalarize_clamp = options.scalarize_max_min_clamp,

@@ -78,7 +78,10 @@ TEST_F(SpirvWriterTest, If_FalseEmpty) {
                OpSelectionMerge %5 None
                OpBranchConditional %true %6 %5
           %6 = OpLabel
-          %9 = OpIAdd %int %int_1 %int_1
+         %10 = OpBitcast %uint %int_1
+         %13 = OpBitcast %uint %int_1
+         %14 = OpIAdd %uint %10 %13
+         %15 = OpBitcast %int %14
                OpBranch %5
           %5 = OpLabel
                OpReturn
@@ -106,7 +109,10 @@ TEST_F(SpirvWriterTest, If_TrueEmpty) {
                OpSelectionMerge %5 None
                OpBranchConditional %true %5 %6
           %6 = OpLabel
-          %9 = OpIAdd %int %int_1 %int_1
+         %10 = OpBitcast %uint %int_1
+         %13 = OpBitcast %uint %int_1
+         %14 = OpIAdd %uint %10 %13
+         %15 = OpBitcast %int %14
                OpBranch %5
           %5 = OpLabel
                OpReturn

@@ -227,7 +227,8 @@ void main_1() {
         uint tint_carry = uint((tint_low_inc == 4294967295u));
         tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
         int x_304 = i;
-        i = (x_304 + 1);
+        uint v_6 = uint(x_304);
+        i = int((v_6 + uint(1)));
       }
       continue;
     }

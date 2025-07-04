@@ -33,12 +33,14 @@ void main() {
       }
       if (tint_continue) {
         {
-          i = (i + 1);
+          uint v = uint(i);
+          i = int((v + uint(1)));
         }
         continue;
       }
       {
-        i = (i + 1);
+        uint v = uint(i);
+        i = int((v + uint(1)));
       }
       continue;
     }

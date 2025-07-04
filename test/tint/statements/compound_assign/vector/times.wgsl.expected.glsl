@@ -10,7 +10,8 @@ buffer v_block_1_ssbo {
   S inner;
 } v_1;
 void foo() {
-  v_1.inner.a = (v_1.inner.a * ivec4(2));
+  uvec4 v_2 = uvec4(v_1.inner.a);
+  v_1.inner.a = ivec4((v_2 * uvec4(ivec4(2))));
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

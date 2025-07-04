@@ -4,7 +4,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 33
+; Bound: 36
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -26,7 +26,7 @@
        %void = OpTypeVoid
           %9 = OpTypeFunction %void
       %int_1 = OpConstant %int 1
-         %16 = OpTypeFunction %void %uint
+         %19 = OpTypeFunction %void %uint
      %uint_1 = OpConstant %uint 1
        %bool = OpTypeBool
      %uint_2 = OpConstant %uint 2
@@ -36,29 +36,32 @@
      %uses_a = OpFunction %void None %9
          %10 = OpLabel
          %11 = OpLoad %int %a None
-         %12 = OpIAdd %int %11 %int_1
-               OpStore %a %12 None
+         %12 = OpBitcast %uint %11
+         %13 = OpBitcast %uint %int_1
+         %15 = OpIAdd %uint %12 %13
+         %16 = OpBitcast %int %15
+               OpStore %a %16 None
                OpReturn
                OpFunctionEnd
-%main1_inner = OpFunction %void None %16
+%main1_inner = OpFunction %void None %19
 %tint_local_index = OpFunctionParameter %uint
-         %17 = OpLabel
-         %18 = OpULessThan %bool %tint_local_index %uint_1
-               OpSelectionMerge %21 None
-               OpBranchConditional %18 %22 %21
-         %22 = OpLabel
+         %20 = OpLabel
+         %21 = OpULessThan %bool %tint_local_index %uint_1
+               OpSelectionMerge %24 None
+               OpBranchConditional %21 %25 %24
+         %25 = OpLabel
                OpStore %a %int_0 None
-               OpBranch %21
-         %21 = OpLabel
+               OpBranch %24
+         %24 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
                OpStore %a %int_42 None
-         %27 = OpFunctionCall %void %uses_a
+         %30 = OpFunctionCall %void %uses_a
                OpReturn
                OpFunctionEnd
       %main1 = OpFunction %void None %9
-         %30 = OpLabel
-         %31 = OpLoad %uint %main1_local_invocation_index_Input None
-         %32 = OpFunctionCall %void %main1_inner %31
+         %33 = OpLabel
+         %34 = OpLoad %uint %main1_local_invocation_index_Input None
+         %35 = OpFunctionCall %void %main1_inner %34
                OpReturn
                OpFunctionEnd
 ;
@@ -67,7 +70,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 33
+; Bound: 36
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -89,7 +92,7 @@
        %void = OpTypeVoid
           %9 = OpTypeFunction %void
       %int_2 = OpConstant %int 2
-         %16 = OpTypeFunction %void %uint
+         %19 = OpTypeFunction %void %uint
      %uint_1 = OpConstant %uint 1
        %bool = OpTypeBool
      %uint_2 = OpConstant %uint 2
@@ -99,29 +102,32 @@
      %uses_b = OpFunction %void None %9
          %10 = OpLabel
          %11 = OpLoad %int %b None
-         %12 = OpIMul %int %11 %int_2
-               OpStore %b %12 None
+         %12 = OpBitcast %uint %11
+         %13 = OpBitcast %uint %int_2
+         %15 = OpIMul %uint %12 %13
+         %16 = OpBitcast %int %15
+               OpStore %b %16 None
                OpReturn
                OpFunctionEnd
-%main2_inner = OpFunction %void None %16
+%main2_inner = OpFunction %void None %19
 %tint_local_index = OpFunctionParameter %uint
-         %17 = OpLabel
-         %18 = OpULessThan %bool %tint_local_index %uint_1
-               OpSelectionMerge %21 None
-               OpBranchConditional %18 %22 %21
-         %22 = OpLabel
+         %20 = OpLabel
+         %21 = OpULessThan %bool %tint_local_index %uint_1
+               OpSelectionMerge %24 None
+               OpBranchConditional %21 %25 %24
+         %25 = OpLabel
                OpStore %b %int_0 None
-               OpBranch %21
-         %21 = OpLabel
+               OpBranch %24
+         %24 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
                OpStore %b %int_7 None
-         %27 = OpFunctionCall %void %uses_b
+         %30 = OpFunctionCall %void %uses_b
                OpReturn
                OpFunctionEnd
       %main2 = OpFunction %void None %9
-         %30 = OpLabel
-         %31 = OpLoad %uint %main2_local_invocation_index_Input None
-         %32 = OpFunctionCall %void %main2_inner %31
+         %33 = OpLabel
+         %34 = OpLoad %uint %main2_local_invocation_index_Input None
+         %35 = OpFunctionCall %void %main2_inner %34
                OpReturn
                OpFunctionEnd
 ;
@@ -130,7 +136,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 50
+; Bound: 56
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -160,7 +166,7 @@
       %int_1 = OpConstant %int 1
       %int_2 = OpConstant %int 2
       %int_0 = OpConstant %int 0
-         %34 = OpTypeFunction %void %uint
+         %40 = OpTypeFunction %void %uint
      %uint_1 = OpConstant %uint 1
        %bool = OpTypeBool
      %uint_2 = OpConstant %uint 2
@@ -168,56 +174,62 @@
      %uses_a = OpFunction %void None %10
          %11 = OpLabel
          %12 = OpLoad %int %a None
-         %13 = OpIAdd %int %12 %int_1
-               OpStore %a %13 None
+         %13 = OpBitcast %uint %12
+         %14 = OpBitcast %uint %int_1
+         %16 = OpIAdd %uint %13 %14
+         %17 = OpBitcast %int %16
+               OpStore %a %17 None
                OpReturn
                OpFunctionEnd
      %uses_b = OpFunction %void None %10
-         %16 = OpLabel
-         %17 = OpLoad %int %b None
-         %18 = OpIMul %int %17 %int_2
-               OpStore %b %18 None
+         %19 = OpLabel
+         %20 = OpLoad %int %b None
+         %21 = OpBitcast %uint %20
+         %22 = OpBitcast %uint %int_2
+         %24 = OpIMul %uint %21 %22
+         %25 = OpBitcast %int %24
+               OpStore %b %25 None
                OpReturn
                OpFunctionEnd
 %uses_a_and_b = OpFunction %void None %10
-         %21 = OpLabel
-         %22 = OpLoad %int %a None
-               OpStore %b %22 None
+         %27 = OpLabel
+         %28 = OpLoad %int %a None
+               OpStore %b %28 None
                OpReturn
                OpFunctionEnd
     %no_uses = OpFunction %void None %10
-         %24 = OpLabel
+         %30 = OpLabel
                OpReturn
                OpFunctionEnd
       %outer = OpFunction %void None %10
-         %26 = OpLabel
+         %32 = OpLabel
                OpStore %a %int_0 None
-         %28 = OpFunctionCall %void %uses_a
-         %29 = OpFunctionCall %void %uses_a_and_b
-         %30 = OpFunctionCall %void %uses_b
-         %31 = OpFunctionCall %void %no_uses
+         %34 = OpFunctionCall %void %uses_a
+         %35 = OpFunctionCall %void %uses_a_and_b
+         %36 = OpFunctionCall %void %uses_b
+         %37 = OpFunctionCall %void %no_uses
                OpReturn
                OpFunctionEnd
-%main3_inner = OpFunction %void None %34
+%main3_inner = OpFunction %void None %40
 %tint_local_index = OpFunctionParameter %uint
-         %35 = OpLabel
-         %36 = OpULessThan %bool %tint_local_index %uint_1
-               OpSelectionMerge %39 None
-               OpBranchConditional %36 %40 %39
-         %40 = OpLabel
+         %41 = OpLabel
+         %42 = OpULessThan %bool %tint_local_index %uint_1
+               OpSelectionMerge %45 None
+               OpBranchConditional %42 %46 %45
+         %46 = OpLabel
                OpStore %a %int_0 None
                OpStore %b %int_0 None
-               OpBranch %39
-         %39 = OpLabel
+               OpBranch %45
+         %45 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
-         %44 = OpFunctionCall %void %outer
-         %45 = OpFunctionCall %void %no_uses
+         %50 = OpFunctionCall %void %outer
+         %51 = OpFunctionCall %void %no_uses
                OpReturn
                OpFunctionEnd
       %main3 = OpFunction %void None %10
-         %47 = OpLabel
-         %48 = OpLoad %uint %main3_local_invocation_index_Input None
-         %49 = OpFunctionCall %void %main3_inner %48
+         %53 = OpLabel
+         %54 = OpLoad %uint %main3_local_invocation_index_Input None
+         %55 = OpFunctionCall %void %main3_inner %54
                OpReturn
                OpFunctionEnd
 ;

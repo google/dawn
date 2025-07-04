@@ -1,13 +1,13 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 40
+; Bound: 43
 ; Schema: 0
                OpCapability Shader
                OpCapability Float16
                OpCapability UniformAndStorageBuffer16BitAccess
                OpCapability StorageBuffer16BitAccess
-         %36 = OpExtInstImport "GLSL.std.450"
+         %39 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %f "f"
                OpExecutionMode %f LocalSize 1 1 1
@@ -35,11 +35,11 @@
       %int_0 = OpConstant %int 0
     %counter = OpVariable %_ptr_Private_int Private %int_0
          %11 = OpTypeFunction %int
+       %uint = OpTypeInt 32 0
       %int_1 = OpConstant %int 1
        %void = OpTypeVoid
-         %19 = OpTypeFunction %void
+         %23 = OpTypeFunction %void
 %_ptr_Uniform_v2half = OpTypePointer Uniform %v2half
-       %uint = OpTypeInt 32 0
      %uint_0 = OpConstant %uint 0
      %uint_1 = OpConstant %uint 1
  %mat2v2half = OpTypeMatrix %v2half 2
@@ -48,24 +48,27 @@
           %i = OpFunction %int None %11
          %12 = OpLabel
          %13 = OpLoad %int %counter None
-         %14 = OpIAdd %int %13 %int_1
-               OpStore %counter %14 None
-         %16 = OpLoad %int %counter None
-               OpReturnValue %16
+         %15 = OpBitcast %uint %13
+         %16 = OpBitcast %uint %int_1
+         %18 = OpIAdd %uint %15 %16
+         %19 = OpBitcast %int %18
+               OpStore %counter %19 None
+         %20 = OpLoad %int %counter None
+               OpReturnValue %20
                OpFunctionEnd
-          %f = OpFunction %void None %19
-         %20 = OpLabel
-         %31 = OpVariable %_ptr_Function_mat2v2half Function
-         %21 = OpAccessChain %_ptr_Uniform_v2half %1 %uint_0
-         %25 = OpLoad %v2half %21 None
-         %26 = OpAccessChain %_ptr_Uniform_v2half %1 %uint_1
-         %28 = OpLoad %v2half %26 None
-        %l_m = OpCompositeConstruct %mat2v2half %25 %28
-               OpStore %31 %l_m
-         %33 = OpFunctionCall %int %i
-         %34 = OpBitcast %uint %33
-         %35 = OpExtInst %uint %36 UMin %34 %uint_1
-         %37 = OpAccessChain %_ptr_Function_v2half %31 %35
-      %l_m_i = OpLoad %v2half %37 None
+          %f = OpFunction %void None %23
+         %24 = OpLabel
+         %34 = OpVariable %_ptr_Function_mat2v2half Function
+         %25 = OpAccessChain %_ptr_Uniform_v2half %1 %uint_0
+         %28 = OpLoad %v2half %25 None
+         %29 = OpAccessChain %_ptr_Uniform_v2half %1 %uint_1
+         %31 = OpLoad %v2half %29 None
+        %l_m = OpCompositeConstruct %mat2v2half %28 %31
+               OpStore %34 %l_m
+         %36 = OpFunctionCall %int %i
+         %37 = OpBitcast %uint %36
+         %38 = OpExtInst %uint %39 UMin %37 %uint_1
+         %40 = OpAccessChain %_ptr_Function_v2half %34 %38
+      %l_m_i = OpLoad %v2half %40 None
                OpReturn
                OpFunctionEnd

@@ -1,8 +1,10 @@
 #version 310 es
 
 void c(int z) {
-  int a = (1 + z);
-  a = (a + 2);
+  uint v = uint(1);
+  int a = int((v + uint(z)));
+  uint v_1 = uint(a);
+  a = int((v_1 + uint(2)));
 }
 void b() {
   c(2);

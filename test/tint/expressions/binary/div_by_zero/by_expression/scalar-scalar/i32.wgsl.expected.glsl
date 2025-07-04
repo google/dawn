@@ -10,5 +10,8 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   int a = 1;
   int b = 0;
-  int r = tint_div_i32(a, (b + b));
+  int v_3 = a;
+  int v_4 = b;
+  uint v_5 = uint(b);
+  int r = tint_div_i32(v_3, int((v_5 + uint(v_4))));
 }

@@ -103,12 +103,17 @@ void main_inner(uvec3 GlobalInvocationID) {
           } else {
             break;
           }
-          ivec2 tilePixel0Idx = ivec2((x * TILE_SIZE), (y * TILE_SIZE));
-          vec2 v_19 = (2.0f * vec2(tilePixel0Idx));
-          vec2 floorCoord = ((v_19 / v_2.inner.fullScreenSize.xy) - vec2(1.0f));
-          ivec2 v_20 = tilePixel0Idx;
-          vec2 v_21 = (2.0f * vec2((v_20 + ivec2(TILE_SIZE))));
-          vec2 ceilCoord = ((v_21 / v_2.inner.fullScreenSize.xy) - vec2(1.0f));
+          uint v_19 = uint(x);
+          int v_20 = int((v_19 * uint(TILE_SIZE)));
+          uint v_21 = uint(y);
+          ivec2 tilePixel0Idx = ivec2(v_20, int((v_21 * uint(TILE_SIZE))));
+          vec2 v_22 = (2.0f * vec2(tilePixel0Idx));
+          vec2 floorCoord = ((v_22 / v_2.inner.fullScreenSize.xy) - vec2(1.0f));
+          ivec2 v_23 = tilePixel0Idx;
+          ivec2 v_24 = ivec2(TILE_SIZE);
+          uvec2 v_25 = uvec2(v_23);
+          vec2 v_26 = (2.0f * vec2(ivec2((v_25 + uvec2(v_24)))));
+          vec2 ceilCoord = ((v_26 / v_2.inner.fullScreenSize.xy) - vec2(1.0f));
           vec2 viewFloorCoord = vec2((((-(viewNear) * floorCoord.x) - (M[2u].x * viewNear)) / M[0u].x), (((-(viewNear) * floorCoord.y) - (M[2u].y * viewNear)) / M[1u].y));
           vec2 viewCeilCoord = vec2((((-(viewNear) * ceilCoord.x) - (M[2u].x * viewNear)) / M[0u].x), (((-(viewNear) * ceilCoord.y) - (M[2u].y * viewNear)) / M[1u].y));
           frustumPlanes[0u] = vec4(1.0f, 0.0f, (-(viewFloorCoord.x) / viewNear), 0.0f);
@@ -124,29 +129,29 @@ void main_inner(uvec3 GlobalInvocationID) {
                 break;
               }
               vec4 p = vec4(0.0f);
-              uint v_22 = min(i, 5u);
-              if ((frustumPlanes[v_22].x > 0.0f)) {
+              uint v_27 = min(i, 5u);
+              if ((frustumPlanes[v_27].x > 0.0f)) {
                 p.x = boxMax.x;
               } else {
                 p.x = boxMin.x;
               }
-              uint v_23 = min(i, 5u);
-              if ((frustumPlanes[v_23].y > 0.0f)) {
+              uint v_28 = min(i, 5u);
+              if ((frustumPlanes[v_28].y > 0.0f)) {
                 p.y = boxMax.y;
               } else {
                 p.y = boxMin.y;
               }
-              uint v_24 = min(i, 5u);
-              if ((frustumPlanes[v_24].z > 0.0f)) {
+              uint v_29 = min(i, 5u);
+              if ((frustumPlanes[v_29].z > 0.0f)) {
                 p.z = boxMax.z;
               } else {
                 p.z = boxMin.z;
               }
               p.w = 1.0f;
-              float v_25 = dp;
-              vec4 v_26 = p;
-              uint v_27 = min(i, 5u);
-              dp = (v_25 + min(0.0f, dot(v_26, frustumPlanes[v_27])));
+              float v_30 = dp;
+              vec4 v_31 = p;
+              uint v_32 = min(i, 5u);
+              dp = (v_30 + min(0.0f, dot(v_31, frustumPlanes[v_32])));
               {
                 i = (i + 1u);
               }
@@ -154,39 +159,47 @@ void main_inner(uvec3 GlobalInvocationID) {
             }
           }
           if ((dp >= 0.0f)) {
-            uint tileId = uint((x + (y * TILE_COUNT_X)));
-            bool v_28 = false;
+            int v_33 = x;
+            uint v_34 = uint(y);
+            int v_35 = int((v_34 * uint(TILE_COUNT_X)));
+            uint v_36 = uint(v_33);
+            uint tileId = uint(int((v_36 + uint(v_35))));
+            bool v_37 = false;
             if ((tileId < 0u)) {
-              v_28 = true;
+              v_37 = true;
             } else {
-              v_28 = (tileId >= v_1.inner.numTiles);
+              v_37 = (tileId >= v_1.inner.numTiles);
             }
-            if (v_28) {
+            if (v_37) {
               {
-                x = (x + 1);
+                uint v_38 = uint(x);
+                x = int((v_38 + uint(1)));
               }
               continue;
             }
-            uint v_29 = min(tileId, 3u);
-            uint offset = atomicAdd(v.inner.data[v_29].count, 1u);
+            uint v_39 = min(tileId, 3u);
+            uint offset = atomicAdd(v.inner.data[v_39].count, 1u);
             if ((offset >= v_1.inner.numTileLightSlot)) {
               {
-                x = (x + 1);
+                uint v_38 = uint(x);
+                x = int((v_38 + uint(1)));
               }
               continue;
             }
-            uint v_30 = min(tileId, 3u);
-            uint v_31 = min(offset, 63u);
-            v.inner.data[v_30].lightId[v_31] = GlobalInvocationID.x;
+            uint v_40 = min(tileId, 3u);
+            uint v_41 = min(offset, 63u);
+            v.inner.data[v_40].lightId[v_41] = GlobalInvocationID.x;
           }
           {
-            x = (x + 1);
+            uint v_38 = uint(x);
+            x = int((v_38 + uint(1)));
           }
           continue;
         }
       }
       {
-        y = (y + 1);
+        uint v_42 = uint(y);
+        y = int((v_42 + uint(1)));
       }
       continue;
     }

@@ -10,5 +10,8 @@ void main() {
   int _A = 2;
   int B = A;
   int _B = _A;
-  v.inner = (((A + _A) + B) + _B);
+  uint v_1 = uint(A);
+  uint v_2 = uint(int((v_1 + uint(_A))));
+  uint v_3 = uint(int((v_2 + uint(B))));
+  v.inner = int((v_3 + uint(_B)));
 }

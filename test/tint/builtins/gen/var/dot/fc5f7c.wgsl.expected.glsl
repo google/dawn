@@ -10,7 +10,12 @@ buffer f_prevent_dce_block_ssbo {
   int inner;
 } v;
 int tint_int_dot(ivec2 x, ivec2 y) {
-  return ((x.x * y.x) + (x.y * y.y));
+  uint v_1 = uint(x.x);
+  int v_2 = int((v_1 * uint(y.x)));
+  uint v_3 = uint(x.y);
+  int v_4 = int((v_3 * uint(y.y)));
+  uint v_5 = uint(v_2);
+  return int((v_5 + uint(v_4)));
 }
 int dot_fc5f7c() {
   ivec2 arg_0 = ivec2(1);
@@ -31,7 +36,12 @@ buffer prevent_dce_block_1_ssbo {
   int inner;
 } v;
 int tint_int_dot(ivec2 x, ivec2 y) {
-  return ((x.x * y.x) + (x.y * y.y));
+  uint v_1 = uint(x.x);
+  int v_2 = int((v_1 * uint(y.x)));
+  uint v_3 = uint(x.y);
+  int v_4 = int((v_3 * uint(y.y)));
+  uint v_5 = uint(v_2);
+  return int((v_5 + uint(v_4)));
 }
 int dot_fc5f7c() {
   ivec2 arg_0 = ivec2(1);
@@ -56,7 +66,12 @@ struct VertexOutput {
 
 layout(location = 0) flat out int tint_interstage_location0;
 int tint_int_dot(ivec2 x, ivec2 y) {
-  return ((x.x * y.x) + (x.y * y.y));
+  uint v = uint(x.x);
+  int v_1 = int((v * uint(y.x)));
+  uint v_2 = uint(x.y);
+  int v_3 = int((v_2 * uint(y.y)));
+  uint v_4 = uint(v_1);
+  return int((v_4 + uint(v_3)));
 }
 int dot_fc5f7c() {
   ivec2 arg_0 = ivec2(1);
@@ -65,14 +80,14 @@ int dot_fc5f7c() {
   return res;
 }
 VertexOutput vertex_main_inner() {
-  VertexOutput v = VertexOutput(vec4(0.0f), 0);
-  v.pos = vec4(0.0f);
-  v.prevent_dce = dot_fc5f7c();
-  return v;
+  VertexOutput v_5 = VertexOutput(vec4(0.0f), 0);
+  v_5.pos = vec4(0.0f);
+  v_5.prevent_dce = dot_fc5f7c();
+  return v_5;
 }
 void main() {
-  VertexOutput v_1 = vertex_main_inner();
-  gl_Position = vec4(v_1.pos.x, -(v_1.pos.y), ((2.0f * v_1.pos.z) - v_1.pos.w), v_1.pos.w);
-  tint_interstage_location0 = v_1.prevent_dce;
+  VertexOutput v_6 = vertex_main_inner();
+  gl_Position = vec4(v_6.pos.x, -(v_6.pos.y), ((2.0f * v_6.pos.z) - v_6.pos.w), v_6.pos.w);
+  tint_interstage_location0 = v_6.prevent_dce;
   gl_PointSize = 1.0f;
 }

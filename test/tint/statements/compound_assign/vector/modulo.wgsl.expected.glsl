@@ -14,7 +14,10 @@ ivec4 tint_mod_v4i32(ivec4 lhs, ivec4 rhs) {
   bvec4 v_3 = bvec4((v_2 & uvec4(equal(rhs, ivec4(-1)))));
   uvec4 v_4 = uvec4(equal(rhs, ivec4(0)));
   ivec4 v_5 = mix(rhs, ivec4(1), bvec4((v_4 | uvec4(v_3))));
-  return (lhs - ((lhs / v_5) * v_5));
+  uvec4 v_6 = uvec4((lhs / v_5));
+  ivec4 v_7 = ivec4((v_6 * uvec4(v_5)));
+  uvec4 v_8 = uvec4(lhs);
+  return ivec4((v_8 - uvec4(v_7)));
 }
 void foo() {
   v_1.inner.a = tint_mod_v4i32(v_1.inner.a, ivec4(2));

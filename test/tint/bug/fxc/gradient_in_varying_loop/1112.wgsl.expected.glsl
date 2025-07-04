@@ -38,7 +38,8 @@ vec4 main_inner(vec2 vUV) {
         v_2 = (offset.y > 1.0f);
       }
       if (v_2) {
-        i = (i + 1);
+        uint v_3 = uint(i);
+        i = int((v_3 + uint(1)));
         {
           uint tint_low_inc = (tint_loop_idx.x - 1u);
           tint_loop_idx.x = tint_low_inc;
@@ -48,7 +49,8 @@ vec4 main_inner(vec2 vUV) {
         continue;
       }
       float sampleDepth = 0.0f;
-      i = (i + 1);
+      uint v_4 = uint(i);
+      i = int((v_4 + uint(1)));
       {
         uint tint_low_inc = (tint_loop_idx.x - 1u);
         tint_loop_idx.x = tint_low_inc;

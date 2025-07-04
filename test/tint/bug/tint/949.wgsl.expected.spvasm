@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 645
+; Bound: 648
 ; Schema: 0
                OpCapability Shader
          %83 = OpExtInstImport "GLSL.std.450"
@@ -475,7 +475,7 @@
 %_ptr_Function_uint = OpTypePointer Function %uint
       %int_1 = OpConstant %int 1
    %main_out = OpTypeStruct %v4float
-        %631 = OpTypeFunction %main_out %v2float %v4float %bool %v2float %v4float
+        %634 = OpTypeFunction %main_out %v2float %v4float %bool %v2float %v4float
 %cotangent_frame_vf3_vf3_vf2_vf2_ = OpFunction %mat3v3float None %60
 %normal_1_root = OpFunctionParameter %_ptr_Function_v3float
      %p_root = OpFunctionParameter %_ptr_Function_v3float
@@ -934,43 +934,43 @@
         %577 = OpLabel
       %x_406 = OpLoad %float %currSampledHeight None
       %x_407 = OpLoad %float %currRayHeight None
-        %595 = OpFSub %float %x_406 %x_407
-               OpStore %delta1 %595 None
+        %598 = OpFSub %float %x_406 %x_407
+               OpStore %delta1 %598 None
       %x_410 = OpLoad %float %currRayHeight None
       %x_411 = OpLoad %float %stepSize None
       %x_413 = OpLoad %float %lastSampledHeight None
-        %599 = OpFAdd %float %x_410 %x_411
-        %600 = OpFSub %float %599 %x_413
-               OpStore %delta2 %600 None
+        %602 = OpFAdd %float %x_410 %x_411
+        %603 = OpFSub %float %602 %x_413
+               OpStore %delta2 %603 None
       %x_416 = OpLoad %float %delta1 None
       %x_417 = OpLoad %float %delta1 None
       %x_418 = OpLoad %float %delta2 None
-        %604 = OpFAdd %float %x_417 %x_418
-        %605 = OpFDiv %float %x_416 %604
-               OpStore %ratio %605 None
+        %607 = OpFAdd %float %x_417 %x_418
+        %608 = OpFDiv %float %x_416 %607
+               OpStore %ratio %608 None
       %x_421 = OpLoad %float %ratio None
       %x_422 = OpLoad %v2float %vLastOffset None
       %x_424 = OpLoad %float %ratio None
       %x_426 = OpLoad %v2float %vCurrOffset None
-        %610 = OpVectorTimesScalar %v2float %x_422 %x_421
-        %611 = OpFSub %float %float_1 %x_424
-        %612 = OpVectorTimesScalar %v2float %x_426 %611
-        %613 = OpFAdd %v2float %610 %612
-               OpStore %vCurrOffset %613 None
+        %613 = OpVectorTimesScalar %v2float %x_422 %x_421
+        %614 = OpFSub %float %float_1 %x_424
+        %615 = OpVectorTimesScalar %v2float %x_426 %614
+        %616 = OpFAdd %v2float %613 %615
+               OpStore %vCurrOffset %616 None
                OpBranch %448
         %578 = OpLabel
       %x_431 = OpLoad %float %stepSize None
       %x_432 = OpLoad %float %currRayHeight None
-        %616 = OpFSub %float %x_432 %x_431
-               OpStore %currRayHeight %616 None
+        %619 = OpFSub %float %x_432 %x_431
+               OpStore %currRayHeight %619 None
       %x_434 = OpLoad %v2float %vCurrOffset None
                OpStore %vLastOffset %x_434 None
       %x_435 = OpLoad %float %stepSize None
       %x_436 = OpLoad %v2float %vMaxOffset None
       %x_438 = OpLoad %v2float %vCurrOffset None
-        %621 = OpVectorTimesScalar %v2float %x_436 %x_435
-        %622 = OpFAdd %v2float %x_438 %621
-               OpStore %vCurrOffset %622 None
+        %624 = OpVectorTimesScalar %v2float %x_436 %x_435
+        %625 = OpFAdd %v2float %x_438 %624
+               OpStore %vCurrOffset %625 None
       %x_440 = OpLoad %float %currSampledHeight None
                OpStore %lastSampledHeight %x_440 None
                OpBranch %576
@@ -990,8 +990,11 @@
         %589 = OpAccessChain %_ptr_Function_uint %tint_loop_idx %uint_1
                OpStore %589 %588 None
       %x_441 = OpLoad %int %i None
-        %591 = OpIAdd %int %x_441 %int_1
-               OpStore %i %591 None
+        %591 = OpBitcast %uint %x_441
+        %592 = OpBitcast %uint %int_1
+        %594 = OpIAdd %uint %591 %592
+        %595 = OpBitcast %int %594
+               OpStore %i %595 None
                OpBranch %447
         %448 = OpLabel
       %x_444 = OpLoad %v2float %vCurrOffset None
@@ -1125,32 +1128,32 @@
                OpStore %glFragColor %549 None
                OpReturn
                OpFunctionEnd
- %main_inner = OpFunction %main_out None %631
+ %main_inner = OpFunction %main_out None %634
 %vMainuv_param = OpFunctionParameter %v2float
 %v_output1_param = OpFunctionParameter %v4float
 %gl_FrontFacing_param = OpFunctionParameter %bool
  %v_uv_param = OpFunctionParameter %v2float
 %v_output2_param = OpFunctionParameter %v4float
-        %632 = OpLabel
+        %635 = OpLabel
                OpStore %vMainuv %vMainuv_param None
                OpStore %v_output1 %v_output1_param None
                OpStore %gl_FrontFacing %gl_FrontFacing_param None
                OpStore %v_uv %v_uv_param None
                OpStore %v_output2 %v_output2_param None
-        %633 = OpFunctionCall %void %main_1
-        %634 = OpLoad %v4float %glFragColor None
-        %635 = OpCompositeConstruct %main_out %634
-               OpReturnValue %635
+        %636 = OpFunctionCall %void %main_1
+        %637 = OpLoad %v4float %glFragColor None
+        %638 = OpCompositeConstruct %main_out %637
+               OpReturnValue %638
                OpFunctionEnd
        %main = OpFunction %void None %280
-        %637 = OpLabel
-        %638 = OpLoad %v2float %main_loc1_Input None
-        %639 = OpLoad %v4float %main_loc0_Input None
-        %640 = OpLoad %bool %main_front_facing_Input None
-        %641 = OpLoad %v2float %main_loc3_Input None
-        %642 = OpLoad %v4float %main_loc2_Input None
-        %643 = OpFunctionCall %main_out %main_inner %638 %639 %640 %641 %642
-        %644 = OpCompositeExtract %v4float %643 0
-               OpStore %main_loc0_Output %644 None
+        %640 = OpLabel
+        %641 = OpLoad %v2float %main_loc1_Input None
+        %642 = OpLoad %v4float %main_loc0_Input None
+        %643 = OpLoad %bool %main_front_facing_Input None
+        %644 = OpLoad %v2float %main_loc3_Input None
+        %645 = OpLoad %v4float %main_loc2_Input None
+        %646 = OpFunctionCall %main_out %main_inner %641 %642 %643 %644 %645
+        %647 = OpCompositeExtract %v4float %646 0
+               OpStore %main_loc0_Output %647 None
                OpReturn
                OpFunctionEnd

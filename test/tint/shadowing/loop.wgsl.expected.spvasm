@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 69
+; Bound: 72
 ; Schema: 0
                OpCapability Shader
          %40 = OpExtInstImport "GLSL.std.450"
@@ -98,11 +98,14 @@
                OpStore %x_0 %61
          %63 = OpLoad %int %x_0 None
          %64 = OpLoad %int %i None
-         %65 = OpIAdd %int %64 %63
-               OpStore %i %65 None
-         %66 = OpLoad %int %i None
-         %67 = OpSGreaterThan %bool %66 %int_10
-               OpBranchConditional %67 %19 %18
+         %65 = OpBitcast %uint %64
+         %66 = OpBitcast %uint %63
+         %67 = OpIAdd %uint %65 %66
+         %68 = OpBitcast %int %67
+               OpStore %i %68 None
+         %69 = OpLoad %int %i None
+         %70 = OpSGreaterThan %bool %69 %int_10
+               OpBranchConditional %70 %19 %18
          %19 = OpLabel
          %20 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0 %uint_0
          %23 = OpLoad %int %i None

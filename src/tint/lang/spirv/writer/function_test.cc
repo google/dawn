@@ -241,16 +241,26 @@ TEST_F(SpirvWriterTest, Function_Parameters) {
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
           %5 = OpTypeFunction %int %int %int
+       %uint = OpTypeInt 32 0
        %void = OpTypeVoid
-         %10 = OpTypeFunction %void
+         %14 = OpTypeFunction %void
 
                ; Function foo
         %foo = OpFunction %int None %5
           %x = OpFunctionParameter %int
           %y = OpFunctionParameter %int
           %6 = OpLabel
-          %7 = OpIAdd %int %x %y
-               OpReturnValue %7
+          %8 = OpBitcast %uint %x
+          %9 = OpBitcast %uint %y
+         %10 = OpIAdd %uint %8 %9
+         %11 = OpBitcast %int %10
+               OpReturnValue %11
+               OpFunctionEnd
+
+               ; Function unused_entry_point
+%unused_entry_point = OpFunction %void None %14
+         %15 = OpLabel
+               OpReturn
                OpFunctionEnd
 )");
 }

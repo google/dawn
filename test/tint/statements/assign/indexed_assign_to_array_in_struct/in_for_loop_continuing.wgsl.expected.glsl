@@ -32,14 +32,15 @@ void main() {
       } else {
         break;
       }
-      i = (i + 1);
+      uint v_2 = uint(i);
+      i = int((v_2 + uint(1)));
       {
         uint tint_low_inc = (tint_loop_idx.x - 1u);
         tint_loop_idx.x = tint_low_inc;
         uint tint_carry = uint((tint_low_inc == 4294967295u));
         tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
-        uint v_2 = min(v_1.inner.i, 7u);
-        s1.a1[v_2] = v;
+        uint v_3 = min(v_1.inner.i, 7u);
+        s1.a1[v_3] = v;
       }
       continue;
     }

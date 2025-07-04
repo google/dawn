@@ -10,6 +10,9 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   int a = 4;
   ivec3 b = ivec3(0, 2, 0);
-  ivec3 v_3 = (b + b);
-  ivec3 r = tint_div_v3i32(ivec3(a), v_3);
+  int v_3 = a;
+  ivec3 v_4 = b;
+  uvec3 v_5 = uvec3(b);
+  ivec3 v_6 = ivec3((v_5 + uvec3(v_4)));
+  ivec3 r = tint_div_v3i32(ivec3(v_3), v_6);
 }

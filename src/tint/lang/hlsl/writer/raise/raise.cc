@@ -46,6 +46,7 @@
 #include "src/tint/lang/core/ir/transform/remove_terminator_args.h"
 #include "src/tint/lang/core/ir/transform/rename_conflicts.h"
 #include "src/tint/lang/core/ir/transform/robustness.h"
+#include "src/tint/lang/core/ir/transform/signed_integer_polyfill.h"
 #include "src/tint/lang/core/ir/transform/value_to_let.h"
 #include "src/tint/lang/core/ir/transform/vectorize_scalar_matrix_constructors.h"
 #include "src/tint/lang/core/ir/transform/zero_init_workgroup_memory.h"
@@ -248,6 +249,15 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     }
 
     RUN_TRANSFORM(raise::BinaryPolyfill, module);
+
+    // TODO(crbug.com/429211395): Resolve unsigned/signed casting issues with DXC.
+    constexpr bool kEnableSignedIntegerPolyfill = false;
+    if (kEnableSignedIntegerPolyfill) {
+        core::ir::transform::SignedIntegerPolyfillConfig signed_integer_cfg{
+            .signed_negation = true, .signed_arithmetic = true, .signed_shiftleft = true};
+        RUN_TRANSFORM(core::ir::transform::SignedIntegerPolyfill, module, signed_integer_cfg);
+    }
+
     // BuiltinPolyfill must come after BinaryPolyfill and DecomposeStorageAccess as they add
     // builtins
     RUN_TRANSFORM(raise::BuiltinPolyfill, module);

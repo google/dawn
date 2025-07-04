@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 23
+; Bound: 30
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -16,31 +16,38 @@
           %3 = OpTypeFunction %int
 %_ptr_Function_int = OpTypePointer Function %int
       %int_1 = OpConstant %int 1
+       %uint = OpTypeInt 32 0
       %int_2 = OpConstant %int 2
        %void = OpTypeVoid
-         %14 = OpTypeFunction %void
+         %18 = OpTypeFunction %void
           %c = OpFunction %int None %3
           %4 = OpLabel
           %a = OpVariable %_ptr_Function_int Function
                OpStore %a %int_1
           %8 = OpLoad %int %a None
-          %9 = OpIAdd %int %8 %int_2
-               OpStore %a %9 None
-         %11 = OpLoad %int %a None
-               OpReturnValue %11
+         %10 = OpBitcast %uint %8
+         %11 = OpBitcast %uint %int_2
+         %13 = OpIAdd %uint %10 %11
+         %14 = OpBitcast %int %13
+               OpStore %a %14 None
+         %15 = OpLoad %int %a None
+               OpReturnValue %15
                OpFunctionEnd
-          %b = OpFunction %void None %14
-         %15 = OpLabel
+          %b = OpFunction %void None %18
+         %19 = OpLabel
         %b_0 = OpVariable %_ptr_Function_int Function
-         %16 = OpFunctionCall %int %c
-               OpStore %b_0 %16
-         %18 = OpFunctionCall %int %c
-         %19 = OpLoad %int %b_0 None
-         %20 = OpIAdd %int %19 %18
-               OpStore %b_0 %20 None
+         %20 = OpFunctionCall %int %c
+               OpStore %b_0 %20
+         %22 = OpFunctionCall %int %c
+         %23 = OpLoad %int %b_0 None
+         %24 = OpBitcast %uint %23
+         %25 = OpBitcast %uint %22
+         %26 = OpIAdd %uint %24 %25
+         %27 = OpBitcast %int %26
+               OpStore %b_0 %27 None
                OpReturn
                OpFunctionEnd
-%unused_entry_point = OpFunction %void None %14
-         %22 = OpLabel
+%unused_entry_point = OpFunction %void None %18
+         %29 = OpLabel
                OpReturn
                OpFunctionEnd

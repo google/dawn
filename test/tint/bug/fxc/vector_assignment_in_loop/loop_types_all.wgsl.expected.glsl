@@ -34,7 +34,8 @@ void main() {
       v3b[min(uint(i), 2u)] = true;
       v4b[min(uint(i), 3u)] = true;
       {
-        i = (i + 1);
+        uint v = uint(i);
+        i = int((v + uint(1)));
       }
       continue;
     }

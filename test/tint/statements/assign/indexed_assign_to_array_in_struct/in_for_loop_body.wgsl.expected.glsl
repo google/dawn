@@ -31,7 +31,8 @@ void main() {
       uint v_2 = min(v_1.inner.i, 7u);
       s1.a1[v_2] = v;
       {
-        i = (i + 1);
+        uint v_3 = uint(i);
+        i = int((v_3 + uint(1)));
       }
       continue;
     }

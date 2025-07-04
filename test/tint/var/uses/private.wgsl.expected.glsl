@@ -5,7 +5,8 @@
 
 int a = 0;
 void uses_a() {
-  a = (a + 1);
+  uint v = uint(a);
+  a = int((v + uint(1)));
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
@@ -19,7 +20,8 @@ void main() {
 
 int b = 0;
 void uses_b() {
-  b = (b * 2);
+  uint v = uint(b);
+  b = int((v * uint(2)));
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
@@ -34,10 +36,12 @@ void main() {
 int a = 0;
 int b = 0;
 void uses_a() {
-  a = (a + 1);
+  uint v = uint(a);
+  a = int((v + uint(1)));
 }
 void uses_b() {
-  b = (b * 2);
+  uint v_1 = uint(b);
+  b = int((v_1 * uint(2)));
 }
 void uses_a_and_b() {
   b = a;

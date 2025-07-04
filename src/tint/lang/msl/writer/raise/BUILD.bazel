@@ -48,7 +48,6 @@ cc_library(
     "raise.cc",
     "shader_io.cc",
     "simd_ballot.cc",
-    "unary_polyfill.cc",
   ],
   hdrs = [
     "argument_buffers.h",
@@ -60,7 +59,6 @@ cc_library(
     "raise.h",
     "shader_io.h",
     "simd_ballot.h",
-    "unary_polyfill.h",
   ],
   deps = [
     "//src/tint/api/common",
@@ -106,7 +104,6 @@ cc_library(
     "packed_vec3_test.cc",
     "shader_io_test.cc",
     "simd_ballot_test.cc",
-    "unary_polyfill_test.cc",
   ],
   deps = [
     "//src/tint/api/common",

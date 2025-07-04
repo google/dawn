@@ -2,7 +2,8 @@
 
 void c() {
   int a = 1;
-  a = (a + 2);
+  uint v = uint(a);
+  a = int((v + uint(2)));
 }
 void b() {
   c();

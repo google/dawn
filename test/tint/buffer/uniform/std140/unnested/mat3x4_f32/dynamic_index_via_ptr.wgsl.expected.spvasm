@@ -1,10 +1,10 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 35
+; Bound: 38
 ; Schema: 0
                OpCapability Shader
-         %29 = OpExtInstImport "GLSL.std.450"
+         %32 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %f "f"
                OpExecutionMode %f LocalSize 1 1 1
@@ -35,29 +35,32 @@
       %int_0 = OpConstant %int 0
     %counter = OpVariable %_ptr_Private_int Private %int_0
          %12 = OpTypeFunction %int
+       %uint = OpTypeInt 32 0
       %int_1 = OpConstant %int 1
        %void = OpTypeVoid
-         %20 = OpTypeFunction %void
+         %24 = OpTypeFunction %void
 %_ptr_Uniform_mat3v4float = OpTypePointer Uniform %mat3v4float
-       %uint = OpTypeInt 32 0
      %uint_0 = OpConstant %uint 0
      %uint_2 = OpConstant %uint 2
 %_ptr_Uniform_v4float = OpTypePointer Uniform %v4float
           %i = OpFunction %int None %12
          %13 = OpLabel
          %14 = OpLoad %int %counter None
-         %15 = OpIAdd %int %14 %int_1
-               OpStore %counter %15 None
-         %17 = OpLoad %int %counter None
-               OpReturnValue %17
+         %16 = OpBitcast %uint %14
+         %17 = OpBitcast %uint %int_1
+         %19 = OpIAdd %uint %16 %17
+         %20 = OpBitcast %int %19
+               OpStore %counter %20 None
+         %21 = OpLoad %int %counter None
+               OpReturnValue %21
                OpFunctionEnd
-          %f = OpFunction %void None %20
-         %21 = OpLabel
+          %f = OpFunction %void None %24
+         %25 = OpLabel
         %p_m = OpAccessChain %_ptr_Uniform_mat3v4float %1 %uint_0
-         %26 = OpFunctionCall %int %i
-         %27 = OpBitcast %uint %26
-         %28 = OpExtInst %uint %29 UMin %27 %uint_2
-      %p_m_i = OpAccessChain %_ptr_Uniform_v4float %p_m %28
+         %29 = OpFunctionCall %int %i
+         %30 = OpBitcast %uint %29
+         %31 = OpExtInst %uint %32 UMin %30 %uint_2
+      %p_m_i = OpAccessChain %_ptr_Uniform_v4float %p_m %31
         %l_m = OpLoad %mat3v4float %p_m None
       %l_m_i = OpLoad %v4float %p_m_i None
                OpReturn

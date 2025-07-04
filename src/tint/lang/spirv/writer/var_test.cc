@@ -148,7 +148,11 @@ TEST_F(SpirvWriterTest, PrivateVar_LoadAndStore) {
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%v = OpVariable %_ptr_Private_int Private %int_42");
     EXPECT_INST("%load = OpLoad %int %v");
-    EXPECT_INST("OpStore %v %add");
+    EXPECT_INST("OpBitcast %uint %load");
+    EXPECT_INST("OpBitcast %uint %int_1");
+    EXPECT_INST("OpIAdd %uint %11 %12");
+    EXPECT_INST("OpBitcast %int %14");
+    EXPECT_INST("OpStore %v %15 None");
 }
 
 TEST_F(SpirvWriterTest, WorkgroupVar) {
@@ -174,7 +178,11 @@ TEST_F(SpirvWriterTest, WorkgroupVar_LoadAndStore) {
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%v = OpVariable %_ptr_Workgroup_int Workgroup");
     EXPECT_INST("%load = OpLoad %int %v");
-    EXPECT_INST("OpStore %v %add");
+    EXPECT_INST("OpBitcast %uint %load");
+    EXPECT_INST("OpBitcast %uint %int_1");
+    EXPECT_INST("OpIAdd %uint %21 %22");
+    EXPECT_INST("OpBitcast %int %24");
+    EXPECT_INST("OpStore %v %25 None");
 }
 
 TEST_F(SpirvWriterTest, WorkgroupVar_ZeroInitializeWithExtension) {
@@ -232,9 +240,12 @@ TEST_F(SpirvWriterTest, StorageVar_LoadAndStore) {
     EXPECT_INST(R"(
           %9 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
        %load = OpLoad %int %9 None
-        %add = OpIAdd %int %load %int_1
-         %16 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
-               OpStore %16 %add None
+         %14 = OpBitcast %uint %load
+         %15 = OpBitcast %uint %int_1
+         %17 = OpIAdd %uint %14 %15
+         %18 = OpBitcast %int %17
+         %19 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
+               OpStore %19 %18 None
 )");
 }
 
@@ -270,7 +281,6 @@ TEST_F(SpirvWriterTest, StorageVar_WithVulkan) {
                OpName %v_block "v_block"            ; id %3
                OpName %foo "foo"                    ; id %5
                OpName %load "load"                  ; id %13
-               OpName %add "add"                    ; id %14
 
                ; Annotations
                OpMemberDecorate %v_block 0 Offset 0
@@ -295,9 +305,12 @@ TEST_F(SpirvWriterTest, StorageVar_WithVulkan) {
           %8 = OpLabel
           %9 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
        %load = OpLoad %int %9 NonPrivatePointer
-        %add = OpIAdd %int %load %int_1
-         %16 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
-               OpStore %16 %add NonPrivatePointer
+         %14 = OpBitcast %uint %load
+         %15 = OpBitcast %uint %int_1
+         %17 = OpIAdd %uint %14 %15
+         %18 = OpBitcast %int %17
+         %19 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
+               OpStore %19 %18 NonPrivatePointer
                OpReturn
                OpFunctionEnd)");
 }
@@ -334,8 +347,7 @@ TEST_F(SpirvWriterTest, StorageVar_Workgroup_WithVulkan) {
                OpName %foo_inner "foo_inner"                                                ; id %7
                OpName %tint_local_index "tint_local_index"                                  ; id %9
                OpName %load "load"                                                          ; id %20
-               OpName %add "add"                                                            ; id %21
-               OpName %foo "foo"                                                            ; id %24
+               OpName %foo "foo"                                                            ; id %27
 
                ; Annotations
                OpDecorate %foo_local_invocation_index_Input BuiltIn LocalInvocationIndex
@@ -355,7 +367,7 @@ TEST_F(SpirvWriterTest, StorageVar_Workgroup_WithVulkan) {
  %uint_24840 = OpConstant %uint 24840
       %int_1 = OpConstant %int 1
       %int_0 = OpConstant %int 0
-         %25 = OpTypeFunction %void
+         %28 = OpTypeFunction %void
 
                ; Function foo_inner
   %foo_inner = OpFunction %void None %10
@@ -370,16 +382,19 @@ TEST_F(SpirvWriterTest, StorageVar_Workgroup_WithVulkan) {
          %15 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_24840
        %load = OpLoad %int %v NonPrivatePointer
-        %add = OpIAdd %int %load %int_1
-               OpStore %v %add NonPrivatePointer
+         %21 = OpBitcast %uint %load
+         %22 = OpBitcast %uint %int_1
+         %24 = OpIAdd %uint %21 %22
+         %25 = OpBitcast %int %24
+               OpStore %v %25 NonPrivatePointer
                OpReturn
                OpFunctionEnd
 
                ; Function foo
-        %foo = OpFunction %void None %25
-         %26 = OpLabel
-         %27 = OpLoad %uint %foo_local_invocation_index_Input None
-         %28 = OpFunctionCall %void %foo_inner %27
+        %foo = OpFunction %void None %28
+         %29 = OpLabel
+         %30 = OpLoad %uint %foo_local_invocation_index_Input None
+         %31 = OpFunctionCall %void %foo_inner %30
                OpReturn
                OpFunctionEnd)");
 }

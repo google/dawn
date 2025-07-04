@@ -5,7 +5,8 @@
 
 shared int a;
 void uses_a() {
-  a = (a + 1);
+  uint v = uint(a);
+  a = int((v + uint(1)));
 }
 void main1_inner(uint tint_local_index) {
   if ((tint_local_index < 1u)) {
@@ -26,7 +27,8 @@ void main() {
 
 shared int b;
 void uses_b() {
-  b = (b * 2);
+  uint v = uint(b);
+  b = int((v * uint(2)));
 }
 void main2_inner(uint tint_local_index) {
   if ((tint_local_index < 1u)) {
@@ -48,10 +50,12 @@ void main() {
 shared int a;
 shared int b;
 void uses_a() {
-  a = (a + 1);
+  uint v = uint(a);
+  a = int((v + uint(1)));
 }
 void uses_b() {
-  b = (b * 2);
+  uint v_1 = uint(b);
+  b = int((v_1 * uint(2)));
 }
 void uses_a_and_b() {
   b = a;

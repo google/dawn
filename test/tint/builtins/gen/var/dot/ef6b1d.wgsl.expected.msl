@@ -9,7 +9,7 @@ struct tint_module_vars_struct {
 };
 
 int tint_dot(int4 lhs, int4 rhs) {
-  return ((((lhs * rhs).x + (lhs * rhs).y) + (lhs * rhs).z) + (lhs * rhs).w);
+  return as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(as_type<int4>((as_type<uint4>(lhs) * as_type<uint4>(rhs))).x) + as_type<uint>(as_type<int4>((as_type<uint4>(lhs) * as_type<uint4>(rhs))).y)))) + as_type<uint>(as_type<int4>((as_type<uint4>(lhs) * as_type<uint4>(rhs))).z)))) + as_type<uint>(as_type<int4>((as_type<uint4>(lhs) * as_type<uint4>(rhs))).w)));
 }
 
 int dot_ef6b1d() {
@@ -34,7 +34,7 @@ struct tint_module_vars_struct {
 };
 
 int tint_dot(int4 lhs, int4 rhs) {
-  return ((((lhs * rhs).x + (lhs * rhs).y) + (lhs * rhs).z) + (lhs * rhs).w);
+  return as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(as_type<int4>((as_type<uint4>(lhs) * as_type<uint4>(rhs))).x) + as_type<uint>(as_type<int4>((as_type<uint4>(lhs) * as_type<uint4>(rhs))).y)))) + as_type<uint>(as_type<int4>((as_type<uint4>(lhs) * as_type<uint4>(rhs))).z)))) + as_type<uint>(as_type<int4>((as_type<uint4>(lhs) * as_type<uint4>(rhs))).w)));
 }
 
 int dot_ef6b1d() {
@@ -65,7 +65,7 @@ struct vertex_main_outputs {
 };
 
 int tint_dot(int4 lhs, int4 rhs) {
-  return ((((lhs * rhs).x + (lhs * rhs).y) + (lhs * rhs).z) + (lhs * rhs).w);
+  return as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(as_type<int4>((as_type<uint4>(lhs) * as_type<uint4>(rhs))).x) + as_type<uint>(as_type<int4>((as_type<uint4>(lhs) * as_type<uint4>(rhs))).y)))) + as_type<uint>(as_type<int4>((as_type<uint4>(lhs) * as_type<uint4>(rhs))).z)))) + as_type<uint>(as_type<int4>((as_type<uint4>(lhs) * as_type<uint4>(rhs))).w)));
 }
 
 int dot_ef6b1d() {

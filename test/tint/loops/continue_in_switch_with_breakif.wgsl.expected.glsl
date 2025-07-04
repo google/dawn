@@ -27,7 +27,8 @@ void main() {
           tint_loop_idx.x = tint_low_inc;
           uint tint_carry = uint((tint_low_inc == 4294967295u));
           tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
-          i = (i + 1);
+          uint v = uint(i);
+          i = int((v + uint(1)));
           if ((i >= 4)) { break; }
         }
         continue;
@@ -37,7 +38,8 @@ void main() {
         tint_loop_idx.x = tint_low_inc;
         uint tint_carry = uint((tint_low_inc == 4294967295u));
         tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
-        i = (i + 1);
+        uint v = uint(i);
+        i = int((v + uint(1)));
         if ((i >= 4)) { break; }
       }
       continue;

@@ -44,6 +44,7 @@
 #include "src/tint/lang/core/ir/transform/preserve_padding.h"
 #include "src/tint/lang/core/ir/transform/prevent_infinite_loops.h"
 #include "src/tint/lang/core/ir/transform/robustness.h"
+#include "src/tint/lang/core/ir/transform/signed_integer_polyfill.h"
 #include "src/tint/lang/core/ir/transform/std140.h"
 #include "src/tint/lang/core/ir/transform/vectorize_scalar_matrix_constructors.h"
 #include "src/tint/lang/core/ir/transform/zero_init_workgroup_memory.h"
@@ -186,6 +187,10 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         .scalarize_max = options.scalarize_max_min_clamp,
         .scalarize_min = options.scalarize_max_min_clamp};
     RUN_TRANSFORM(core::ir::transform::BuiltinScalarize, module, scalarize_config);
+
+    core::ir::transform::SignedIntegerPolyfillConfig signed_integer_cfg{
+        .signed_negation = true, .signed_arithmetic = true, .signed_shiftleft = true};
+    RUN_TRANSFORM(core::ir::transform::SignedIntegerPolyfill, module, signed_integer_cfg);
 
     // kAllowAnyInputAttachmentIndexType required after ExpandImplicitSplats
     RUN_TRANSFORM(raise::HandleMatrixArithmetic, module);

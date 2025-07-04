@@ -12,7 +12,8 @@ void f() {
       }
       some_loop_body();
       {
-        i = (i + 1);
+        uint v = uint(i);
+        i = int((v + uint(1)));
       }
       continue;
     }

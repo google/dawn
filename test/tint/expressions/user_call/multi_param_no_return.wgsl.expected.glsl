@@ -1,8 +1,12 @@
 #version 310 es
 
 void c(int x, int y, int z) {
-  int a = (((1 + x) + y) + z);
-  a = (a + 2);
+  uint v = uint(1);
+  uint v_1 = uint(int((v + uint(x))));
+  uint v_2 = uint(int((v_1 + uint(y))));
+  int a = int((v_2 + uint(z)));
+  uint v_3 = uint(a);
+  a = int((v_3 + uint(2)));
 }
 void b() {
   c(1, 2, 3);

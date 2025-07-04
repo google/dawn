@@ -8,7 +8,8 @@ int f() {
       if (all(equal(tint_loop_idx, uvec2(0u)))) {
         break;
       }
-      i = (i + 1);
+      uint v = uint(i);
+      i = int((v + uint(1)));
       if ((i > 4)) {
         return i;
       }

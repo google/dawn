@@ -325,7 +325,7 @@ void foo_inner(uint tint_local_index) {
     atomicExchange(v.b, 0u);
   }
   barrier();
-  int x = atomicAdd(v.a, -(123));
+  int x = atomicAdd(v.a, int((~(uint(123)) + 1u)));
   uint y = atomicAdd(v.b, -(123u));
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -1492,7 +1492,20 @@ TEST_F(GlslWriterTest, DotI32) {
 precision highp int;
 
 int tint_int_dot(ivec4 x, ivec4 y) {
-  return ((((x.x * y.x) + (x.y * y.y)) + (x.z * y.z)) + (x.w * y.w));
+  uint v = uint(x.x);
+  int v_1 = int((v * uint(y.x)));
+  uint v_2 = uint(x.y);
+  int v_3 = int((v_2 * uint(y.y)));
+  uint v_4 = uint(v_1);
+  int v_5 = int((v_4 + uint(v_3)));
+  uint v_6 = uint(x.z);
+  int v_7 = int((v_6 * uint(y.z)));
+  uint v_8 = uint(v_5);
+  int v_9 = int((v_8 + uint(v_7)));
+  uint v_10 = uint(x.w);
+  int v_11 = int((v_10 * uint(y.w)));
+  uint v_12 = uint(v_9);
+  return int((v_12 + uint(v_11)));
 }
 void main() {
   ivec4 x = ivec4(2);

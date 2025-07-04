@@ -594,12 +594,15 @@ TEST_F(SpirvWriterTest, Loop_Phi_SingleValue) {
                OpLoopMerge %9 %7 None
                OpBranch %6
           %6 = OpLabel
-         %14 = OpIAdd %int %11 %int_1
+         %16 = OpBitcast %uint %11
+         %17 = OpBitcast %uint %int_1
+         %18 = OpIAdd %uint %16 %17
+         %14 = OpBitcast %int %18
                OpBranch %7
           %7 = OpLabel
          %13 = OpPhi %int %14 %6
-         %15 = OpSGreaterThan %bool %13 %int_5
-               OpBranchConditional %15 %9 %8
+         %19 = OpSGreaterThan %bool %13 %int_5
+               OpBranchConditional %19 %9 %8
           %9 = OpLabel
                OpReturn
                OpFunctionEnd
@@ -649,14 +652,17 @@ TEST_F(SpirvWriterTest, Loop_Phi_MultipleValue) {
                OpLoopMerge %9 %7 None
                OpBranch %6
           %6 = OpLabel
-         %18 = OpIAdd %int %11 %int_1
+         %21 = OpBitcast %uint %11
+         %22 = OpBitcast %uint %int_1
+         %23 = OpIAdd %uint %21 %22
+         %18 = OpBitcast %int %23
                OpBranch %7
           %7 = OpLabel
          %13 = OpPhi %int %18 %6
          %19 = OpPhi %bool %15 %6
-         %20 = OpSGreaterThan %bool %13 %int_5
+         %24 = OpSGreaterThan %bool %13 %int_5
          %17 = OpLogicalNot %bool %19
-               OpBranchConditional %20 %9 %8
+               OpBranchConditional %24 %9 %8
           %9 = OpLabel
                OpReturn
                OpFunctionEnd

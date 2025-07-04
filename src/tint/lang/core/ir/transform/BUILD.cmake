@@ -84,6 +84,8 @@ tint_add_target(tint_lang_core_ir_transform lib
   lang/core/ir/transform/robustness.h
   lang/core/ir/transform/shader_io.cc
   lang/core/ir/transform/shader_io.h
+  lang/core/ir/transform/signed_integer_polyfill.cc
+  lang/core/ir/transform/signed_integer_polyfill.h
   lang/core/ir/transform/single_entry_point.cc
   lang/core/ir/transform/single_entry_point.h
   lang/core/ir/transform/std140.cc
@@ -152,6 +154,7 @@ tint_add_target(tint_lang_core_ir_transform_test test
   lang/core/ir/transform/remove_terminator_args_test.cc
   lang/core/ir/transform/rename_conflicts_test.cc
   lang/core/ir/transform/robustness_test.cc
+  lang/core/ir/transform/signed_integer_polyfill_test.cc
   lang/core/ir/transform/single_entry_point_test.cc
   lang/core/ir/transform/std140_test.cc
   lang/core/ir/transform/substitute_overrides_test.cc

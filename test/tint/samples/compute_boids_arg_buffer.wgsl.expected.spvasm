@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 226
+; Bound: 232
 ; Schema: 0
                OpCapability Shader
          %36 = OpExtInstImport "GLSL.std.450"
@@ -112,7 +112,7 @@
      %uint_2 = OpConstant %uint 2
      %uint_3 = OpConstant %uint 3
       %int_1 = OpConstant %int 1
-        %222 = OpTypeFunction %void
+        %228 = OpTypeFunction %void
 %comp_main_inner = OpFunction %void None %24
 %gl_GlobalInvocationID = OpFunctionParameter %v3uint
          %25 = OpLabel
@@ -200,8 +200,11 @@
         %207 = OpFAdd %v2float %205 %206
                OpStore %cMass %207 None
         %208 = OpLoad %int %cMassCount None
-        %209 = OpIAdd %int %208 %int_1
-               OpStore %cMassCount %209 None
+        %209 = OpBitcast %uint %208
+        %210 = OpBitcast %uint %int_1
+        %212 = OpIAdd %uint %209 %210
+        %213 = OpBitcast %int %212
+               OpStore %cMassCount %213 None
                OpBranch %163
         %163 = OpLabel
         %165 = OpLoad %v2float %pos None
@@ -213,12 +216,12 @@
                OpSelectionMerge %172 None
                OpBranchConditional %171 %173 %172
         %173 = OpLabel
-        %211 = OpLoad %v2float %colVel None
-        %212 = OpLoad %v2float %pos None
-        %213 = OpLoad %v2float %vPos None
-        %214 = OpFSub %v2float %212 %213
-        %215 = OpFSub %v2float %211 %214
-               OpStore %colVel %215 None
+        %214 = OpLoad %v2float %colVel None
+        %215 = OpLoad %v2float %pos None
+        %216 = OpLoad %v2float %vPos None
+        %217 = OpFSub %v2float %215 %216
+        %218 = OpFSub %v2float %214 %217
+               OpStore %colVel %218 None
                OpBranch %172
         %172 = OpLabel
         %174 = OpLoad %v2float %pos None
@@ -230,13 +233,16 @@
                OpSelectionMerge %181 None
                OpBranchConditional %180 %182 %181
         %182 = OpLabel
-        %216 = OpLoad %v2float %cVel None
-        %217 = OpLoad %v2float %vel None
-        %218 = OpFAdd %v2float %216 %217
-               OpStore %cVel %218 None
-        %219 = OpLoad %int %cVelCount None
-        %220 = OpIAdd %int %219 %int_1
-               OpStore %cVelCount %220 None
+        %219 = OpLoad %v2float %cVel None
+        %220 = OpLoad %v2float %vel None
+        %221 = OpFAdd %v2float %219 %220
+               OpStore %cVel %221 None
+        %222 = OpLoad %int %cVelCount None
+        %223 = OpBitcast %uint %222
+        %224 = OpBitcast %uint %int_1
+        %225 = OpIAdd %uint %223 %224
+        %226 = OpBitcast %int %225
+               OpStore %cVelCount %226 None
                OpBranch %181
         %181 = OpLabel
                OpBranch %63
@@ -361,9 +367,9 @@
                OpStore %135 %136 None
                OpReturn
                OpFunctionEnd
-  %comp_main = OpFunction %void None %222
-        %223 = OpLabel
-        %224 = OpLoad %v3uint %comp_main_global_invocation_id_Input None
-        %225 = OpFunctionCall %void %comp_main_inner %224
+  %comp_main = OpFunction %void None %228
+        %229 = OpLabel
+        %230 = OpLoad %v3uint %comp_main_global_invocation_id_Input None
+        %231 = OpFunctionCall %void %comp_main_inner %230
                OpReturn
                OpFunctionEnd

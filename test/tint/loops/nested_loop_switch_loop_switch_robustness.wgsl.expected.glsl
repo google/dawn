@@ -46,7 +46,8 @@ void main() {
                   tint_loop_idx_1.x = tint_low_inc_1;
                   uint tint_carry_1 = uint((tint_low_inc_1 == 4294967295u));
                   tint_loop_idx_1.y = (tint_loop_idx_1.y - tint_carry_1);
-                  j = (j + 2);
+                  uint v = uint(j);
+                  j = int((v + uint(2)));
                 }
                 continue;
               }
@@ -55,7 +56,8 @@ void main() {
                 tint_loop_idx_1.x = tint_low_inc_1;
                 uint tint_carry_1 = uint((tint_low_inc_1 == 4294967295u));
                 tint_loop_idx_1.y = (tint_loop_idx_1.y - tint_carry_1);
-                j = (j + 2);
+                uint v = uint(j);
+                j = int((v + uint(2)));
               }
               continue;
             }
@@ -74,7 +76,8 @@ void main() {
           tint_loop_idx.x = tint_low_inc;
           uint tint_carry = uint((tint_low_inc == 4294967295u));
           tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
-          i = (i + 2);
+          uint v_1 = uint(i);
+          i = int((v_1 + uint(2)));
         }
         continue;
       }
@@ -83,7 +86,8 @@ void main() {
         tint_loop_idx.x = tint_low_inc;
         uint tint_carry = uint((tint_low_inc == 4294967295u));
         tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
-        i = (i + 2);
+        uint v_1 = uint(i);
+        i = int((v_1 + uint(2)));
       }
       continue;
     }

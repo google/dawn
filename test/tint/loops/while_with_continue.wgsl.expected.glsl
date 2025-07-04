@@ -12,7 +12,8 @@ int f() {
       } else {
         break;
       }
-      i = (i + 1);
+      uint v = uint(i);
+      i = int((v + uint(1)));
       {
         uint tint_low_inc = (tint_loop_idx.x - 1u);
         tint_loop_idx.x = tint_low_inc;

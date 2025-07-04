@@ -2354,9 +2354,10 @@ int g() {
 }
 void foo() {
   int arr[4] = int[4](0, 0, 0, 0);
-  uint v = min(uint((f() + 1)), 3u);
+  uint v = uint(f());
+  uint v_1 = min(uint(int((v + uint(1)))), 3u);
   int y = g();
-  int x = arr[v];
+  int x = arr[v_1];
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
