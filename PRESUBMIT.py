@@ -25,6 +25,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import hashlib
 import re
 import sys
 
@@ -271,6 +272,63 @@ def _HasNoStrayWhitespaceFilter(file):
     return file.LocalPath().replace('\\', '/') not in filter_list
 
 
+def _CheckCopyrightHeaders(input_api, output_api):
+    """Checks that newly added files have a correct copyright year and prompts when it finds a discrepancy"""
+    current_year = int(input_api.time.strftime('%Y'))
+    copyright_regex = re.compile(r'Copyright (\d{4})')
+
+    errors = []
+
+    added_files = []
+    # Use a list for deleted contents to handle multiple files with the same
+    # content being renamed.
+    deleted_files_hashes = []
+    for f in input_api.AffectedFiles(include_deletes=True):
+        if not (f.LocalPath().endswith(('.h', '.cc', '.cpp'))):
+            continue
+
+        if f.Action() == 'A':
+            added_files.append(f)
+        elif f.Action() == 'D':
+            deleted_files_hashes.append(
+                hashlib.sha256(''.join(
+                    f.OldContents()).encode('utf-8')).hexdigest())
+
+    for f in added_files:
+        new_contents_lines = list(f.NewContents())
+        new_content_hash = hashlib.sha256(
+            ''.join(new_contents_lines).encode('utf-8')).hexdigest()
+
+        # If the file is a rename, we don't check for the copyright.
+        # A rename is detected if a file with the same content is also
+        # deleted in the same changelist.
+        is_rename = False
+        if new_content_hash in deleted_files_hashes:
+            deleted_files_hashes.remove(new_content_hash)
+            is_rename = True
+
+        if is_rename:
+            continue
+
+        found_copyright = False
+        for line in new_contents_lines:
+            if match := copyright_regex.search(line):
+                found_copyright = True
+                year = int(match.group(1))
+                if year != current_year:
+                    errors.append(
+                        output_api.PresubmitPromptWarning(
+                            f'{f.LocalPath()}: Copyright year is {year}, should be {current_year} as this is a new file.'
+                        ))
+                break
+        if not found_copyright:
+            errors.append(
+                output_api.PresubmitPromptWarning(
+                    f'{f.LocalPath()}: No copyright header found.'))
+
+    return errors
+
+
 def CheckChange(input_api, output_api):
     results = []
     results.extend(
@@ -306,6 +364,7 @@ def CheckChange(input_api, output_api):
             input_api, output_api))
     results.extend(
         input_api.canned_checks.CheckDoNotSubmit(input_api, output_api))
+    results.extend(_CheckCopyrightHeaders(input_api, output_api))
     # Note, the verbose_level here should match what is set in tools/lint so
     # the same set of lint errors are reported on the CQ and Kokoro bots.
     results.extend(
