@@ -1081,10 +1081,19 @@ class State {
         }
 
         auto n = structs_.GetOrAdd(s, [&] {
-            uint32_t current_offset = 0;
-            TINT_ASSERT(s->Members().Length() > 0 && s->Members()[0]->Offset() == 0);
+            TINT_ASSERT(s->Members().Length() > 0);
+            uint32_t current_offset = s->Members()[0]->Offset();
 
             Vector<const ast::StructMember*, 8> members;
+
+            // Add padding before the first member if necessary.
+            if (current_offset > 0) {
+                TINT_ASSERT(current_offset % 4 == 0);
+                for (uint32_t i = 0; i < current_offset; i += 4) {
+                    members.Push(b.Member("tint_pad_" + std::to_string(i), b.ty.u32()));
+                }
+            }
+
             for (const auto* m : s->Members()) {
                 auto ty = Type(m->Type());
                 const auto& ir_attrs = m->Attributes();

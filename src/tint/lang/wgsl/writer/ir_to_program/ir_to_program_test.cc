@@ -3529,6 +3529,31 @@ fn f(x : S) {
 )");
 }
 
+TEST_F(IRToProgramTest, StructMemberOffset_FirstMember) {
+    auto* S = ty.Struct(mod.symbols.New("S"),
+                        Vector{
+                            ty.Get<core::type::StructMember>(mod.symbols.New("a"), ty.i32(), 0u,
+                                                             12u, 4u, 4u, core::IOAttributes{}),
+                        });
+
+    auto* fn = b.Function("f", ty.void_());
+    auto* x = b.FunctionParam("x", S);
+    fn->SetParams({x});
+    b.Append(fn->Block(), [&] { b.Return(fn); });
+
+    EXPECT_WGSL(R"(
+struct S {
+  tint_pad_0 : u32,
+  tint_pad_4 : u32,
+  tint_pad_8 : u32,
+  a : i32,
+}
+
+fn f(x : S) {
+}
+)");
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // chromium_internal_graphite
 ////////////////////////////////////////////////////////////////////////////////
