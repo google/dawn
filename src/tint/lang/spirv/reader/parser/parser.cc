@@ -451,6 +451,9 @@ class Parser {
                             EmitSpirvExplicitBuiltinCall(
                                 inst, spirv::BuiltinFn::kShiftRightArithmetic, 3);
                             break;
+                        case spv::Op::OpCompositeExtract:
+                            EmitCompositeExtract(inst, 3);
+                            break;
                         default:
                             TINT_ICE() << "Unknown spec constant operation: " << op;
                     }
@@ -3411,12 +3414,13 @@ class Parser {
     }
 
     /// @param inst the SPIR-V instruction for OpCompositeExtract
-    void EmitCompositeExtract(const spvtools::opt::Instruction& inst) {
+    void EmitCompositeExtract(const spvtools::opt::Instruction& inst,
+                              uint32_t composite_index = 2) {
         Vector<core::ir::Value*, 4> indices;
-        for (uint32_t i = 3; i < inst.NumOperandWords(); i++) {
+        for (uint32_t i = composite_index + 1; i < inst.NumOperandWords(); i++) {
             indices.Push(b_.Constant(u32(inst.GetSingleWordOperand(i))));
         }
-        auto* object = Value(inst.GetSingleWordOperand(2));
+        auto* object = Value(inst.GetSingleWordOperand(composite_index));
         auto* access = b_.Access(Type(inst.type_id()), object, std::move(indices));
         Emit(access, inst.result_id());
     }
