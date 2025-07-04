@@ -454,6 +454,14 @@ class Parser {
                         case spv::Op::OpCompositeExtract:
                             EmitCompositeExtract(inst, 3);
                             break;
+                        case spv::Op::OpCompositeInsert:
+                            TINT_ICE() << "can't translate OpSpecConstantOp with CompositeInsert: "
+                                          "OpSpecConstantOp maps to a WGSL override declaration, "
+                                          "but WGSL overrides must have scalar type";
+                        case spv::Op::OpVectorShuffle:
+                            TINT_ICE() << "can't translate OpSpecConstantOp with VectorShuffle: "
+                                          "OpSpecConstantOp maps to a WGSL override declaration, "
+                                          "but WGSL overrides must have scalar type";
                         default:
                             TINT_ICE() << "Unknown spec constant operation: " << op;
                     }
