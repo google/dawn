@@ -2802,6 +2802,47 @@ $B1: {  # root
 )");
 }
 
+TEST_F(SpirvParserTest, Var_OpSpecConstantOp_Select_CondScalar_ArgsScalar) {
+    // In SPIR-V the arg types must be the same as the result type.
+    // WGSL only supports overrides with scalar type, so only test the
+    // case where the result type is scalar.
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %myconst "myconst"
+       %void = OpTypeVoid
+       %bool = OpTypeBool
+        %u32 = OpTypeInt 32 0
+        %i32 = OpTypeInt 32 1
+       %true = OpConstantTrue %bool
+      %false = OpConstantFalse %bool
+        %one = OpConstant %i32 1
+        %two = OpConstant %i32 2
+    %myconst = OpSpecConstantOp %i32 Select %true %one %two
+     %voidfn = OpTypeFunction %void
+       %main = OpFunction %void None %voidfn
+ %main_entry = OpLabel
+          %1 = OpCopyObject %i32 %myconst
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %1:i32 = spirv.select true, 1i, 2i
+  %myconst:i32 = override %1
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %4:i32 = let %myconst
+    ret
+  }
+}
+)");
+}
+
 // In the case of all literals, SPIR-V opt treats the `OpSpecConstantComposite` as an
 // `OpConstantComposite` so it appears in the constant manager already. This then needs no handling
 // on our side.
