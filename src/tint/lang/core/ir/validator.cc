@@ -1857,6 +1857,13 @@ void Validator::CheckType(const core::type::Type* root,
                         diag() << "Matrix stride annotation not allowed on structures";
                         return false;
                     }
+                    if (member->Size() < member->Type()->Size()) {
+                        diag() << "struct member " << member->Index()
+                               << " with size=" << member->Size()
+                               << " must be at least as large as the type with size "
+                               << member->Type()->Size();
+                        return false;
+                    }
                 }
                 return true;
             },
