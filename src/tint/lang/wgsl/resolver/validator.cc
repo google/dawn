@@ -903,10 +903,6 @@ bool Validator::Const(const sem::Variable*) const {
 bool Validator::Parameter(const sem::Variable* var) const {
     auto* decl = var->Declaration();
 
-    if (IsValidationDisabled(decl->attributes, ast::DisabledValidation::kFunctionParameter)) {
-        return true;
-    }
-
     if (auto* ref = var->Type()->As<core::type::Pointer>()) {
         bool ok = false;
 

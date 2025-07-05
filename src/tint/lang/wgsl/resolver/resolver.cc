@@ -992,8 +992,6 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
 
     if (decl->IsEntryPoint()) {
         // Determine if the return type has a location
-        bool permissive = validator_.IsValidationDisabled(
-            decl->attributes, ast::DisabledValidation::kFunctionParameter);
         for (auto* attribute : decl->return_type_attributes) {
             Mark(attribute);
             enum Status { kSuccess, kErrored, kInvalid };
@@ -1007,17 +1005,6 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
                     func->SetReturnLocation(value.Get());
                     return kSuccess;
                 },
-                [&](const ast::BlendSrcAttribute* attr) {
-                    if (!permissive) {
-                        return kInvalid;
-                    }
-                    auto value = BlendSrcAttribute(attr);
-                    if (value != Success) {
-                        return kErrored;
-                    }
-                    func->SetReturnIndex(value.Get());
-                    return kSuccess;
-                },
                 [&](const ast::BuiltinAttribute*) { return kSuccess; },
                 [&](const ast::InternalAttribute* attr) {
                     return InternalAttribute(attr) ? kSuccess : kErrored;
@@ -1025,18 +1012,6 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
                 [&](const ast::InterpolateAttribute*) { return kSuccess; },
                 [&](const ast::InvariantAttribute* attr) {
                     return InvariantAttribute(attr) ? kSuccess : kErrored;
-                },
-                [&](const ast::BindingAttribute* attr) {
-                    if (!permissive) {
-                        return kInvalid;
-                    }
-                    return BindingAttribute(attr) == Success ? kSuccess : kErrored;
-                },
-                [&](const ast::GroupAttribute* attr) {
-                    if (!permissive) {
-                        return kInvalid;
-                    }
-                    return GroupAttribute(attr) == Success ? kSuccess : kErrored;
                 },
                 [&](Default) { return kInvalid; });
 
