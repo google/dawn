@@ -1548,12 +1548,8 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
         if (!bp) {
             continue;
         }
-        if (auto added = binding_points.Add(*bp, var_decl);
-            !added &&
-            IsValidationEnabled(decl->attributes,
-                                ast::DisabledValidation::kBindingPointCollision) &&
-            IsValidationEnabled(added.value->attributes,
-                                ast::DisabledValidation::kBindingPointCollision)) {
+        auto added = binding_points.Add(*bp, var_decl);
+        if (!added) {
             // https://gpuweb.github.io/gpuweb/wgsl/#resource-interface
             // Bindings must not alias within a shader stage: two different variables in the
             // resource interface of a given shader must not have the same group and binding values,

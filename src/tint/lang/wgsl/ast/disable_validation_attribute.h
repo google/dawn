@@ -41,8 +41,6 @@ enum class DisabledValidation {
     kFunctionHasNoBody,
     /// When applied to a module-scoped variable, the validator will not complain if two resource
     /// variables have the same binding points.
-    kBindingPointCollision,
-    /// When applied to a member attribute, a stride attribute may be applied to non-array types.
     kIgnoreStrideAttribute,
 };
 

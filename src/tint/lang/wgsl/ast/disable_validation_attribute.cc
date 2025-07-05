@@ -44,8 +44,6 @@ std::string DisableValidationAttribute::InternalName() const {
     switch (validation) {
         case DisabledValidation::kFunctionHasNoBody:
             return "disable_validation__function_has_no_body";
-        case DisabledValidation::kBindingPointCollision:
-            return "disable_validation__binding_point_collision";
         case DisabledValidation::kIgnoreStrideAttribute:
             return "disable_validation__ignore_stride";
     }
