@@ -329,21 +329,6 @@ crbug.com/373670502 [ android-pixel-6 ] webgpu:shader,execution,expression,call,
 # Triaged or Manually-Added Flakes and Failures
 ################################################################################
 
-# Compressed 3D textures with BC formats
-crbug.com/342840940 webgpu:api,validation,createTexture:dimension_type_and_format_compatibility:dimension="3d";format="bc1-rgba-unorm" [ Failure ]
-crbug.com/342840940 webgpu:api,validation,createTexture:dimension_type_and_format_compatibility:dimension="3d";format="bc1-rgba-unorm-srgb" [ Failure ]
-crbug.com/342840940 webgpu:api,validation,createTexture:dimension_type_and_format_compatibility:dimension="3d";format="bc2-rgba-unorm" [ Failure ]
-crbug.com/342840940 webgpu:api,validation,createTexture:dimension_type_and_format_compatibility:dimension="3d";format="bc2-rgba-unorm-srgb" [ Failure ]
-crbug.com/342840940 webgpu:api,validation,createTexture:dimension_type_and_format_compatibility:dimension="3d";format="bc3-rgba-unorm" [ Failure ]
-crbug.com/342840940 webgpu:api,validation,createTexture:dimension_type_and_format_compatibility:dimension="3d";format="bc3-rgba-unorm-srgb" [ Failure ]
-crbug.com/342840940 webgpu:api,validation,createTexture:dimension_type_and_format_compatibility:dimension="3d";format="bc4-r-snorm" [ Failure ]
-crbug.com/342840940 webgpu:api,validation,createTexture:dimension_type_and_format_compatibility:dimension="3d";format="bc4-r-unorm" [ Failure ]
-crbug.com/342840940 webgpu:api,validation,createTexture:dimension_type_and_format_compatibility:dimension="3d";format="bc5-rg-snorm" [ Failure ]
-crbug.com/342840940 webgpu:api,validation,createTexture:dimension_type_and_format_compatibility:dimension="3d";format="bc5-rg-unorm" [ Failure ]
-crbug.com/342840940 webgpu:api,validation,createTexture:dimension_type_and_format_compatibility:dimension="3d";format="bc6h-rgb-float" [ Failure ]
-crbug.com/342840940 webgpu:api,validation,createTexture:dimension_type_and_format_compatibility:dimension="3d";format="bc6h-rgb-ufloat" [ Failure ]
-crbug.com/342840940 webgpu:api,validation,createTexture:dimension_type_and_format_compatibility:dimension="3d";format="bc7-rgba-unorm" [ Failure ]
-crbug.com/342840940 webgpu:api,validation,createTexture:dimension_type_and_format_compatibility:dimension="3d";format="bc7-rgba-unorm-srgb" [ Failure ]
 
 # Generates GL_OUT_OF_MEMORY
 crbug.com/361372970 [ android arm ] webgpu:api,validation,image_copy,layout_related:copy_end_overflows_u64:method="WriteTexture" [ Failure ]
@@ -394,13 +379,11 @@ crbug.com/341282603 [ intel-0x4680 linux ] webgpu:api,operation,command_buffer,q
 crbug.com/341282605 [ intel-0x4680 linux ] webgpu:shader,execution,limits:switch_case_selectors: [ Failure ]
 crbug.com/341282605 [ intel-0x9bc5 ] webgpu:shader,execution,limits:switch_case_selectors: [ Failure ]
 
-crbug.com/341327472 [ intel-0x4680 linux ] webgpu:api,validation,state,device_lost,destroy:* [ Failure ]
 
-# Timeouts on error_scope
-crbug.com/367513506 [ android-14 arm ] webgpu:api,validation,error_scope:current_scope:errorFilter="validation";stackDepth=100000 [ Failure ]
 
 # sample_texture_combos test is failing on all Compat platforms
-crbug.com/402772749 webgpu:api,operation,sampling,sampler_texture:sample_texture_combos: [ Failure ]
+crbug.com/402772749 [ android android-chromium android-pixel-6 angle-opengles arm compat-default mobile ] webgpu:api,operation,sampling,sampler_texture:sample_texture_combos: [ Failure ]
+crbug.com/402772749 [ angle-opengl arch-x86_64 desktop display-server-x memory_ge_16gb nvidia-0x2184 nvidia_ge_31.0.15.4601 release ubuntu ] webgpu:api,operation,sampling,sampler_texture:sample_texture_combos: [ Failure ]
 
 ### This section represents tests which may require CTS changes.
 
@@ -569,7 +552,6 @@ crbug.com/329724358 [ android arm ] webgpu:web_platform,external_texture,video:i
 crbug.com/329724358 [ android arm ] webgpu:web_platform,external_texture,video:importExternalTexture,sampleWithVideoFrameWithVisibleRectParam:videoName="four-colors-vp9-bt709.webm";dstColorSpace="srgb" [ Failure ]
 
 # Derivative test failures on Pixel 6
-crbug.com/42251283 [ android-14 android-pixel-6 arm ] webgpu:shader,execution,expression,call,builtin,dpdxCoarse:f32:* [ Failure ]
 crbug.com/42251283 [ android arm ] webgpu:shader,execution,expression,call,builtin,dpdxFine:* [ Failure ]
 crbug.com/42251283 [ android arm ] webgpu:shader,execution,expression,call,builtin,dpdyFine:* [ Failure ]
 crbug.com/42251283 [ android arm ] webgpu:shader,execution,expression,call,builtin,fwidthFine:* [ Failure ]
@@ -728,41 +710,32 @@ crbug.com/407076123 [ android-14 android-pixel-6 ] webgpu:api,validation,createB
 crbug.com/407076123 [ linux nvidia ] webgpu:api,validation,createBindGroup:buffer,resource_binding_size:type="read-only-storage" [ Failure ]
 crbug.com/407076123 [ linux nvidia ] webgpu:api,validation,createBindGroup:buffer,resource_binding_size:type="storage" [ Failure ]
 
-# Test bug, tests require implementation to provide "core" but fails when not available
-crbug.com/366151404 [ android android-chromium android-pixel-6 angle-opengles arm compat-default mobile ] webgpu:api,operation,adapter,requestAdapter:requestAdapter_invalid_featureLevel:featureLevel="_undef_" [ Failure ]
-crbug.com/366151404 [ android android-chromium android-pixel-6 angle-opengles arm compat-default mobile ] webgpu:api,operation,adapter,requestAdapter:requestAdapter_invalid_featureLevel:featureLevel="core" [ Failure ]
 
 # Not implemented yet
-crbug.com/342840940 webgpu:api,validation,capability_checks,features,texture_formats:check_capability_guarantees: [ Failure ]
+crbug.com/342840940 [ angle-opengl arch-x86_64 compat-min-es31 desktop display-server-x memory_ge_16gb nvidia-0x2184 nvidia_ge_31.0.15.4601 release ubuntu ] webgpu:api,validation,capability_checks,features,texture_formats:check_capability_guarantees: [ Failure ]
 
-# Might actually be passing. If the next roll doesn't remove this, then triage.
-crbug.com/0000 [ android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,workgroupUniformLoad:types:type="atomic%3C*%3E";* [ Failure ]
 
 # tint needs to support new storage formats from texture-feature-tier1
-crbug.com/421948908 webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format="r16snorm";awaitLost=false [ Failure ]
-crbug.com/421948908 webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format="r16snorm";awaitLost=false [ Failure ]
-crbug.com/421948908 webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format="r16snorm";awaitLost=true [ Failure ]
-crbug.com/421948908 webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format="r16snorm";awaitLost=true [ Failure ]
+crbug.com/421948908 [ android android-chromium android-pixel-6 angle-opengles arm compat-default mobile ] webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format="r16snorm";awaitLost=false [ Failure ]
+crbug.com/421948908 [ angle-opengl arch-x86_64 compat-min-es31 desktop display-server-x memory_ge_16gb nvidia-0x2184 nvidia_ge_31.0.15.4601 release ubuntu ] webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format="r16snorm";awaitLost=false [ Failure ]
+crbug.com/421948908 [ android android-chromium android-pixel-6 angle-opengles arm compat-default mobile ] webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format="r16snorm";awaitLost=true [ Failure ]
+crbug.com/421948908 [ angle-opengl arch-x86_64 compat-min-es31 desktop display-server-x memory_ge_16gb nvidia-0x2184 nvidia_ge_31.0.15.4601 release ubuntu ] webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format="r16snorm";awaitLost=true [ Failure ]
 crbug.com/421948908 webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format="r16unorm";awaitLost=false [ Failure ]
-crbug.com/421948908 webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format="r16unorm";awaitLost=false [ Failure ]
-crbug.com/421948908 webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format="r16unorm";awaitLost=true [ Failure ]
-crbug.com/421948908 webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format="r16unorm";awaitLost=true [ Failure ]
-crbug.com/421948908 webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format="rg16snorm";awaitLost=false [ Failure ]
-crbug.com/421948908 webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format="rg16snorm";awaitLost=false [ Failure ]
+crbug.com/421948908 [ android android-chromium android-pixel-6 angle-opengles arm compat-default mobile ] webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format="r16unorm";awaitLost=true [ Failure ]
+crbug.com/421948908 [ angle-opengl arch-x86_64 compat-min-es31 desktop display-server-x memory_ge_16gb nvidia-0x2184 nvidia_ge_31.0.15.4601 release ubuntu ] webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format="r16unorm";awaitLost=true [ Failure ]
+crbug.com/421948908 [ android android-chromium android-pixel-6 angle-opengles arm compat-default mobile ] webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format="rg16snorm";awaitLost=false [ Failure ]
+crbug.com/421948908 [ angle-opengl arch-x86_64 compat-min-es31 desktop display-server-x memory_ge_16gb nvidia-0x2184 nvidia_ge_31.0.15.4601 release ubuntu ] webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format="rg16snorm";awaitLost=false [ Failure ]
 crbug.com/421948908 webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format="rg16snorm";awaitLost=true [ Failure ]
-crbug.com/421948908 webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format="rg16snorm";awaitLost=true [ Failure ]
-crbug.com/421948908 webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format="rg16unorm";awaitLost=false [ Failure ]
-crbug.com/421948908 webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format="rg16unorm";awaitLost=false [ Failure ]
-crbug.com/421948908 webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format="rg16unorm";awaitLost=true [ Failure ]
-crbug.com/421948908 webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format="rg16unorm";awaitLost=true [ Failure ]
-crbug.com/421948908 webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format="rgba16snorm";awaitLost=false [ Failure ]
-crbug.com/421948908 webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format="rgba16snorm";awaitLost=false [ Failure ]
-crbug.com/421948908 webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format="rgba16snorm";awaitLost=true [ Failure ]
+crbug.com/421948908 [ android android-chromium android-pixel-6 angle-opengles arm compat-default mobile ] webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format="rg16unorm";awaitLost=false [ Failure ]
+crbug.com/421948908 [ angle-opengl arch-x86_64 compat-min-es31 desktop display-server-x memory_ge_16gb nvidia-0x2184 nvidia_ge_31.0.15.4601 release ubuntu ] webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format="rg16unorm";awaitLost=false [ Failure ]
+crbug.com/421948908 [ android android-chromium android-pixel-6 angle-opengles arm compat-default mobile ] webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format="rg16unorm";awaitLost=true [ Failure ]
+crbug.com/421948908 [ angle-opengl arch-x86_64 compat-min-es31 desktop display-server-x memory_ge_16gb nvidia-0x2184 nvidia_ge_31.0.15.4601 release ubuntu ] webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format="rg16unorm";awaitLost=true [ Failure ]
+crbug.com/421948908 [ android android-chromium android-pixel-6 angle-opengles arm compat-default mobile ] webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format="rgba16snorm";awaitLost=false [ Failure ]
+crbug.com/421948908 [ angle-opengl arch-x86_64 compat-min-es31 desktop display-server-x memory_ge_16gb nvidia-0x2184 nvidia_ge_31.0.15.4601 release ubuntu ] webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format="rgba16snorm";awaitLost=false [ Failure ]
 crbug.com/421948908 webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format="rgba16snorm";awaitLost=true [ Failure ]
 crbug.com/421948908 webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format="rgba16unorm";awaitLost=false [ Failure ]
-crbug.com/421948908 webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format="rgba16unorm";awaitLost=false [ Failure ]
-crbug.com/421948908 webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format="rgba16unorm";awaitLost=true [ Failure ]
-crbug.com/421948908 webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format="rgba16unorm";awaitLost=true [ Failure ]
+crbug.com/421948908 [ android android-chromium android-pixel-6 angle-opengles arm compat-default mobile ] webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format="rgba16unorm";awaitLost=true [ Failure ]
+crbug.com/421948908 [ angle-opengl arch-x86_64 compat-min-es31 desktop display-server-x memory_ge_16gb nvidia-0x2184 nvidia_ge_31.0.15.4601 release ubuntu ] webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format="rgba16unorm";awaitLost=true [ Failure ]
 crbug.com/421948908 webgpu:shader,validation,expression,call,builtin,textureDimensions:return_type,storage:returnType="u32";textureType="texture_storage_1d" [ Failure ]
 crbug.com/421948908 webgpu:shader,validation,expression,call,builtin,textureDimensions:return_type,storage:returnType="vec2%3Cu32%3E";textureType="texture_storage_2d" [ Failure ]
 crbug.com/421948908 webgpu:shader,validation,expression,call,builtin,textureDimensions:return_type,storage:returnType="vec2%3Cu32%3E";textureType="texture_storage_2d_array" [ Failure ]
@@ -828,23 +801,15 @@ crbug.com/421948908 webgpu:shader,validation,types,textures:texel_formats:format
 crbug.com/0000 [ android-pixel-6 ] webgpu:api,operation,adapter,requestDevice:stale: [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:api,operation,adapter,requestDevice:stale: [ Failure ]
 crbug.com/0000 [ linux nvidia ] webgpu:api,operation,adapter,requestDevice:stale: [ Failure ]
-crbug.com/0000 [ intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rgba32float";dstFormat="rgba32float";dimension="3d" [ Failure ]
+crbug.com/0000 [ intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rgba32float";dstFormat="rgba32float";dimension="3d" [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:api,operation,compute,basic:large_dispatch:dispatchSize="maximum" [ Failure ]
 crbug.com/0000 [ linux nvidia ] webgpu:api,validation,buffer,create:limit: [ Failure ]
-crbug.com/0000 [ android-pixel-6 ] webgpu:api,validation,buffer,create:size:mappedAtCreation=true [ Failure ]
-crbug.com/0000 [ intel linux ] webgpu:api,validation,buffer,create:size:mappedAtCreation=true [ Failure ]
-crbug.com/0000 [ linux nvidia ] webgpu:api,validation,buffer,create:size:mappedAtCreation=true [ Failure ]
 crbug.com/0000 [ android arm ] webgpu:api,validation,error_scope:simple:errorType="validation";errorFilter="out-of-memory" [ Skip ]
 crbug.com/0000 [ linux nvidia ] webgpu:api,validation,queue,copyToTexture,CopyExternalImageToTexture:source_image,crossOrigin:sourceImage="canvas";isOriginClean=true [ Failure ]
-crbug.com/0000 [ linux nvidia ] webgpu:api,validation,state,device_lost,destroy:importExternalTexture:sourceType="VideoElement";awaitLost=true [ Failure ]
-crbug.com/0000 [ linux nvidia ] webgpu:api,validation,state,device_lost,destroy:importExternalTexture:sourceType="VideoFrame";awaitLost=true [ Failure ]
 crbug.com/0000 [ linux nvidia ] webgpu:api,validation,state,device_lost,destroy:queue,copyExternalImageToTexture,canvas:canvasType="offscreen";contextType="webgl2";awaitLost=false [ Failure ]
 crbug.com/0000 [ linux nvidia ] webgpu:api,validation,state,device_lost,destroy:queue,copyExternalImageToTexture,canvas:canvasType="onscreen";contextType="webgl";awaitLost=false [ Failure ]
-crbug.com/0000 [ intel linux ] webgpu:shader,execution,expression,access,array,index:runtime_sized:elementType="vec2u";indexType="u32" [ Failure ]
-crbug.com/0000 [ intel linux ] webgpu:shader,execution,expression,access,array,index:runtime_sized:elementType="vec3f";indexType="i32" [ Failure ]
-crbug.com/0000 [ android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_array_2d_coords:format="depth32float";filt="nearest";modeU="r";modeV="r";offset=true [ Failure ]
-crbug.com/0000 [ linux nvidia ] webgpu:shader,execution,expression,call,builtin,textureSampleBaseClampToEdge:2d_coords:stage="v";textureType="texture_external";filt="nearest";modeU="m";modeV="c" [ Failure ]
+crbug.com/0000 [ intel-0x4680 linux ] webgpu:shader,execution,expression,access,array,index:runtime_sized:elementType="vec2u";indexType="u32" [ Failure ]
+crbug.com/0000 [ intel-0x4680 linux ] webgpu:shader,execution,expression,access,array,index:runtime_sized:elementType="vec3f";indexType="i32" [ Failure ]
 crbug.com/0000 [ android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_array_2d_coords:stage="c";format="depth16unorm";filt="nearest";modeU="r";modeV="r";offset=true [ Failure ]
 crbug.com/0000 [ android-pixel-6 ] webgpu:shader,validation,shader_io,workgroup_size:workgroup_size:attr="override_expr" [ Failure ]
 crbug.com/0000 [ android-pixel-6 ] webgpu:web_platform,canvas,getCurrentTexture:multiple_frames:canvasType="onscreen" [ Failure ]
-crbug.com/0000 [ android-pixel-6 android-t ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:alpha="none";orientation="flipY";colorSpaceConversion="none";srcFlipYInCopy=true;dstFormat="rg16float";dstPremultiplied=false [ Failure ]
