@@ -46,9 +46,6 @@ enum class DisabledValidation {
     kFunctionParameter,
     /// When applied to a member attribute, a stride attribute may be applied to non-array types.
     kIgnoreStrideAttribute,
-    /// When applied to a struct member, validation of the type of the builtin `clip_distances` is
-    /// skipped.
-    kIgnoreClipDistancesType,
 };
 
 /// An internal attribute used to tell the validator to ignore specific

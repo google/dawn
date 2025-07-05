@@ -243,13 +243,11 @@ class Validator {
     /// @param storage_type the attribute storage type
     /// @param stage the current pipeline stage
     /// @param is_input true if this is an input attribute
-    /// @param ignore_clip_distances_type_validation true if ignore type check on clip_distances
     /// @returns true on success, false otherwise.
     bool BuiltinAttribute(const ast::BuiltinAttribute* attr,
                           const core::type::Type* storage_type,
                           ast::PipelineStage stage,
-                          const bool is_input,
-                          const bool ignore_clip_distances_type_validation = false) const;
+                          const bool is_input) const;
 
     /// Validates a continue statement
     /// @param stmt the continue statement to validate
