@@ -144,7 +144,7 @@ std::vector<const wchar_t*> GetDXCArguments(std::wstring_view entryPointNameW,
 ResultOrError<ComPtr<IDxcBlob>> CompileShaderDXC(const d3d::D3DBytecodeCompilationRequest& r,
                                                  const std::string& entryPointName,
                                                  const std::string& hlslSource,
-                                                 bool dumpShaders) {
+                                                 bool dumpShadersOnFailure) {
     DxcBuffer dxcBuffer;
     dxcBuffer.Ptr = hlslSource.c_str();
     dxcBuffer.Size = hlslSource.length();
@@ -170,7 +170,7 @@ ResultOrError<ComPtr<IDxcBlob>> CompileShaderDXC(const d3d::D3DBytecodeCompilati
         ComPtr<IDxcBlobEncoding> errors;
         DAWN_TRY(CheckHRESULT(result->GetErrorBuffer(&errors), "DXC get error buffer"));
 
-        if (dumpShaders) {
+        if (dumpShadersOnFailure) {
             return DAWN_VALIDATION_ERROR(
                 "DXC compile failed with error: %s msg: %s\n/* Generated HLSL: */\n%s\n",
                 hrAsString, static_cast<char*>(errors->GetBufferPointer()), hlslSource.c_str());
@@ -186,7 +186,7 @@ ResultOrError<ComPtr<IDxcBlob>> CompileShaderDXC(const d3d::D3DBytecodeCompilati
 ResultOrError<ComPtr<ID3DBlob>> CompileShaderFXC(const d3d::D3DBytecodeCompilationRequest& r,
                                                  const std::string& entryPointName,
                                                  const std::string& hlslSource,
-                                                 bool dumpShaders) {
+                                                 bool dumpShadersOnFailure) {
     ComPtr<ID3DBlob> compiledShader;
     ComPtr<ID3DBlob> errors;
 
@@ -196,7 +196,7 @@ ResultOrError<ComPtr<ID3DBlob>> CompileShaderFXC(const d3d::D3DBytecodeCompilati
 
     if (FAILED(result)) {
         const char* resultAsString = HRESULTAsString(result);
-        if (dumpShaders) {
+        if (dumpShadersOnFailure) {
             std::string errorMsg = errors ? static_cast<char*>(errors->GetBufferPointer()) : "";
             return DAWN_VALIDATION_ERROR(
                 "FXC compile failed with error: %s msg: %s\n/* Generated HLSL: */\n%s\n",
@@ -356,7 +356,7 @@ std::string CompileFlagsToString(uint32_t compileFlags) {
 
 ResultOrError<CompiledShader> CompileShader(d3d::D3DCompilationRequest r) {
     CompiledShader compiledShader;
-    bool dumpShaders = r.hlsl.dumpShaders;
+    bool dumpShadersOnFailure = r.hlsl.dumpShaders || r.hlsl.dumpShadersOnFailure;
     // Compile the source shader to HLSL.
     DAWN_TRY(TranslateToHLSL(std::move(r.hlsl), r.tracePlatform, &compiledShader));
 
@@ -367,7 +367,7 @@ ResultOrError<CompiledShader> CompileShader(d3d::D3DCompilationRequest r) {
             DAWN_TRY_ASSIGN(
                 compiledDXCShader,
                 CompileShaderDXC(r.bytecode, r.hlsl.tintOptions.remapped_entry_point_name,
-                                 compiledShader.hlslSource, dumpShaders));
+                                 compiledShader.hlslSource, dumpShadersOnFailure));
             compiledShader.shaderBlob = CreateBlob(std::move(compiledDXCShader));
             break;
         }
@@ -377,7 +377,7 @@ ResultOrError<CompiledShader> CompileShader(d3d::D3DCompilationRequest r) {
             DAWN_TRY_ASSIGN(
                 compiledFXCShader,
                 CompileShaderFXC(r.bytecode, r.hlsl.tintOptions.remapped_entry_point_name,
-                                 compiledShader.hlslSource, dumpShaders));
+                                 compiledShader.hlslSource, dumpShadersOnFailure));
             compiledShader.shaderBlob = CreateBlob(std::move(compiledFXCShader));
             break;
         }
@@ -385,7 +385,7 @@ ResultOrError<CompiledShader> CompileShader(d3d::D3DCompilationRequest r) {
 
     // If dumpShaders is false, we don't need the HLSL for logging. Clear the contents so it
     // isn't stored into the cache.
-    if (!dumpShaders) {
+    if (!r.hlsl.dumpShaders) {
         compiledShader.hlslSource = "";
     }
     return compiledShader;

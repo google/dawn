@@ -78,7 +78,8 @@ using SubstituteOverrideConfig = std::unordered_map<tint::OverrideId, double>;
     X(UnsafeUnserializedValue<LimitsForCompilationRequest>, adapterSupportedLimits)  \
     X(uint32_t, maxSubgroupSize)                                                     \
     X(bool, disableSymbolRenaming)                                                   \
-    X(bool, dumpShaders)
+    X(bool, dumpShaders)                                                             \
+    X(bool, dumpShadersOnFailure)
 
 #define D3D_BYTECODE_COMPILATION_REQUEST_MEMBERS(X)      \
     X(bool, hasShaderF16Feature)                         \

@@ -211,6 +211,11 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "Dump shaders for debugging purposes. Dumped shaders will be log via EmitLog, thus printed "
       "in Chrome console or consumed by user-defined callback function.",
       "https://crbug.com/dawn/792", ToggleStage::Device}},
+    {Toggle::DumpShadersOnFailure,
+     {"dump_shaders_on_failure",
+      "Dump shaders only on failure. Used for logging purposes. Dumped shaders will be log via "
+      "EmitLog, thus printed in Chrome console or consumed by user-defined callback function.",
+      "https://crbug.com/dawn/792", ToggleStage::Device}},
     {Toggle::DisableWorkgroupInit,
      {"disable_workgroup_init",
       "Disables the workgroup memory zero-initialization for compute shaders.",
