@@ -160,3 +160,6 @@ tint.dot
 
 ### The 'compile_commands' file can be generated at root
 compile_commands.json
+
+### Root user file for gemini cli
+GEMINI.md
