@@ -1532,7 +1532,7 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
     if (!func->ReturnType()->Is<core::type::Void>()) {
         if (!validate_entry_point_attributes(decl->return_type_attributes, func->ReturnType(),
                                              decl->source, ParamOrRetType::kReturnType,
-                                             func->ReturnLocation(), func->ReturnIndex(),
+                                             func->ReturnLocation(), /* blend_src */ std::nullopt,
                                              /* color */ std::nullopt)) {
             return false;
         }
