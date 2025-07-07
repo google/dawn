@@ -28,9 +28,6 @@
 #include "src/tint/lang/hlsl/writer/helpers/generate_bindings.h"
 
 #include <algorithm>
-#include <unordered_map>
-#include <unordered_set>
-#include <vector>
 
 #include "src/tint/api/common/binding_point.h"
 #include "src/tint/lang/core/ir/module.h"
@@ -38,9 +35,6 @@
 #include "src/tint/lang/core/type/external_texture.h"
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/storage_texture.h"
-#include "src/tint/lang/wgsl/ast/module.h"
-#include "src/tint/lang/wgsl/program/program.h"
-#include "src/tint/lang/wgsl/sem/variable.h"
 #include "src/tint/utils/containers/hashmap.h"
 #include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/rtti/switch.h"
