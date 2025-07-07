@@ -274,6 +274,7 @@ static constexpr std::array<wgpu::TextureFormat, 2> kDepthAndStencilFormats = {
 constexpr std::array<wgpu::TextureFormat, 3> kTier1TestFormats8Bit = {
     wgpu::TextureFormat::R8Snorm, wgpu::TextureFormat::RG8Snorm, wgpu::TextureFormat::RGBA8Snorm};
 
+#ifndef __EMSCRIPTEN__
 constexpr std::array<wgpu::TextureFormat, 6> kTier1TestFormats16Bit = {
     wgpu::TextureFormat::R16Unorm,    wgpu::TextureFormat::R16Snorm,
     wgpu::TextureFormat::RG16Unorm,   wgpu::TextureFormat::RG16Snorm,
@@ -285,6 +286,7 @@ constexpr std::array<wgpu::TextureFormat, 9> kTier1AdditionalRenderableFormats =
     wgpu::TextureFormat::R16Snorm,   wgpu::TextureFormat::RG16Unorm,
     wgpu::TextureFormat::RG16Snorm,  wgpu::TextureFormat::RGBA16Unorm,
     wgpu::TextureFormat::RGBA16Snorm};
+#endif  // __EMSCRIPTEN__
 
 class SubsamplingFactor {
   public:
