@@ -159,7 +159,7 @@ ResultOrError<RenderPassCache::RenderPassInfo> RenderPassCache::GetRenderPass(
 }
 
 ResultOrError<RenderPassCache::RenderPassInfo> RenderPassCache::CreateRenderPassForQuery(
-    const RenderPassCacheQuery& query) {
+    const RenderPassCacheQuery& query) const {
     // The Vulkan subpasses want to know the layout of the attachments with VkAttachmentRef.
     // Precompute them as they must be pointer-chained in VkSubpassDescription.
     // Note that both colorAttachmentRefs and resolveAttachmentRefs can be sparse with holes
@@ -323,7 +323,6 @@ ResultOrError<RenderPassCache::RenderPassInfo> RenderPassCache::CreateRenderPass
     // Create the render pass from the zillion parameters
     RenderPassInfo renderPassInfo;
     renderPassInfo.mainSubpass = subpassDescs.size() - 1;
-    renderPassInfo.uniqueId = nextRenderPassId++;
     DAWN_TRY(CheckVkSuccess(mDevice->fn.CreateRenderPass(mDevice->GetVkDevice(), &createInfo,
                                                          nullptr, &*renderPassInfo.renderPass),
                             "CreateRenderPass"));

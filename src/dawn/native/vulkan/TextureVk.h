@@ -308,7 +308,7 @@ class SharedTexture final : public ImportedTextureBase {
     SharedTextureMemoryObjects mSharedTextureMemoryObjects;
 };
 
-class TextureView final : public TextureViewBase, public WeakRefSupport<TextureView> {
+class TextureView final : public TextureViewBase {
   public:
     static ResultOrError<Ref<TextureView>> Create(
         TextureBase* texture,
@@ -322,7 +322,6 @@ class TextureView final : public TextureViewBase, public WeakRefSupport<TextureV
     YCbCrVkDescriptor GetYCbCrVkDescriptor() const override;
 
   private:
-    TextureView(TextureBase* texture, const UnpackedPtr<TextureViewDescriptor>& descriptor);
     ~TextureView() override;
     void DestroyImpl() override;
     using TextureViewBase::TextureViewBase;
