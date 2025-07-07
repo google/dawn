@@ -677,7 +677,7 @@ Options:
 TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 
 [[maybe_unused]] tint::diag::Result<tint::core::ir::transform::SubstituteOverridesConfig>
-CreateOverrideMap(Options& options, tint::inspector::Inspector& inspector) {
+CreateOverrideMap(const Options& options, tint::inspector::Inspector& inspector) {
     auto override_names = inspector.GetNamedOverrideIds();
 
     tint::core::ir::transform::SubstituteOverridesConfig cfg;
@@ -751,7 +751,7 @@ std::string Disassemble(const std::vector<uint32_t>& data) {
 /// @param ir the module to generate
 /// @returns true on success
 [[maybe_unused]]
-bool GenerateSpirv([[maybe_unused]] Options& options,
+bool GenerateSpirv([[maybe_unused]] const Options& options,
                    [[maybe_unused]] tint::inspector::Inspector& inspector,
                    [[maybe_unused]] tint::core::ir::Module& ir) {
 #if TINT_BUILD_SPV_WRITER
@@ -890,7 +890,7 @@ bool GenerateWgsl([[maybe_unused]] Options& options,
 /// @param ir the module to generate
 /// @returns true on success
 [[maybe_unused]]
-bool GenerateMsl([[maybe_unused]] Options& options,
+bool GenerateMsl([[maybe_unused]] const Options& options,
                  [[maybe_unused]] tint::inspector::Inspector& inspector,
                  [[maybe_unused]] tint::core::ir::Module& ir) {
 #if TINT_BUILD_MSL_WRITER
@@ -1003,7 +1003,7 @@ bool GenerateMsl([[maybe_unused]] Options& options,
 /// @param ir the module to generate
 /// @returns true on success
 [[maybe_unused]]
-bool GenerateHlsl([[maybe_unused]] Options& options,
+bool GenerateHlsl([[maybe_unused]] const Options& options,
                   [[maybe_unused]] tint::inspector::Inspector& inspector,
                   [[maybe_unused]] tint::core::ir::Module& ir) {
 #if TINT_BUILD_HLSL_WRITER
@@ -1129,7 +1129,7 @@ bool GenerateHlsl([[maybe_unused]] Options& options,
 /// @param ir the module to generate
 /// @returns true on success
 [[maybe_unused]]
-bool GenerateGlsl([[maybe_unused]] Options& options,
+bool GenerateGlsl([[maybe_unused]] const Options& options,
                   [[maybe_unused]] tint::inspector::Inspector& inspector,
                   [[maybe_unused]] tint::core::ir::Module& ir) {
 #if TINT_BUILD_GLSL_WRITER
@@ -1249,6 +1249,71 @@ bool DumpIR([[maybe_unused]] const tint::Program& program,
 #endif
 }
 
+/// Generate backend code for a program.
+/// @param options the options that Tint was invoked with
+/// @param inspector the inspector
+/// @param program the program to generate
+/// @returns true on success
+bool Generate([[maybe_unused]] const Options& options,
+              [[maybe_unused]] tint::inspector::Inspector& inspector,
+              [[maybe_unused]] const tint::Program& program) {
+#if TINT_BUILD_WGSL_READER
+    // Convert the AST program to an IR module.
+    auto ir = tint::wgsl::reader::ProgramToLoweredIR(program);
+    if (ir != tint::Success) {
+        std::cerr << "Failed to generate IR: " << ir << "\n";
+        return false;
+    }
+
+    // Strip the module down to a single entry point.
+    if (options.ep_name != "") {
+        auto singleEntryPointResult =
+            tint::core::ir::transform::SingleEntryPoint(ir.Get(), options.ep_name);
+        if (singleEntryPointResult != tint::Success) {
+            std::cerr << "SingleEntryPoint failed:\n" << singleEntryPointResult.Failure() << "\n";
+            return false;
+        }
+    }
+
+    // Run SubstituteOverrides to replace override instructions with constants.
+    // This needs to run after SingleEntryPoint which removes unused overrides.
+    auto substitute_override_cfg = CreateOverrideMap(options, inspector);
+    if (substitute_override_cfg != tint::Success) {
+        std::cerr << "Failed to create override map: " << substitute_override_cfg.Failure() << "\n";
+        return false;
+    }
+    auto substituteOverridesResult =
+        tint::core::ir::transform::SubstituteOverrides(ir.Get(), substitute_override_cfg.Get());
+    if (substituteOverridesResult != tint::Success) {
+        std::cerr << "SubstituteOverrides failed:\n" << substituteOverridesResult.Failure() << "\n";
+        return false;
+    }
+
+    switch (options.format) {
+        case Format::kSpirv:
+        case Format::kSpvAsm:
+            return GenerateSpirv(options, inspector, ir.Get());
+        case Format::kMsl:
+            return GenerateMsl(options, inspector, ir.Get());
+        case Format::kHlsl:
+        case Format::kHlslFxc:
+            return GenerateHlsl(options, inspector, ir.Get());
+        case Format::kGlsl:
+            return GenerateGlsl(options, inspector, ir.Get());
+        case Format::kWgsl:
+            TINT_UNREACHABLE();
+        case Format::kNone:
+            break;
+        default:
+            std::cerr << "Unknown output format specified\n";
+            break;
+    }
+#else
+    std::cerr << "Cannot convert WGSL programs to Tint IR without the WGSL reader\n";
+#endif  // TINT_BUILD_WGSL_READER
+    return false;
+}
+
 int Run(tint::VectorRef<std::string_view> arguments, ExeMode exe_mode) {
     Options options;
 
@@ -1317,67 +1382,8 @@ int Run(tint::VectorRef<std::string_view> arguments, ExeMode exe_mode) {
         return GenerateWgsl(options, inspector, info.program) ? 0 : 1;
     }
 
-#if TINT_BUILD_WGSL_READER
-    auto generate = [&]() {
-        // Convert the AST program to an IR module.
-        auto ir = tint::wgsl::reader::ProgramToLoweredIR(info.program);
-        if (ir != tint::Success) {
-            std::cerr << "Failed to generate IR: " << ir << "\n";
-            return false;
-        }
-
-        // Strip the module down to a single entry point.
-        if (options.ep_name != "") {
-            auto singleEntryPointResult =
-                tint::core::ir::transform::SingleEntryPoint(ir.Get(), options.ep_name);
-            if (singleEntryPointResult != tint::Success) {
-                std::cerr << "SingleEntryPoint failed:\n"
-                          << singleEntryPointResult.Failure() << "\n";
-                return false;
-            }
-        }
-
-        // Run SubstituteOverrides to replace override instructions with constants.
-        // This needs to run after SingleEntryPoint which removes unused overrides for the target
-        // entry point.
-        auto substitute_override_cfg = CreateOverrideMap(options, inspector);
-        if (substitute_override_cfg != tint::Success) {
-            std::cerr << "Failed to create override map: " << substitute_override_cfg.Failure()
-                      << "\n";
-            return false;
-        }
-        auto substituteOverridesResult =
-            tint::core::ir::transform::SubstituteOverrides(ir.Get(), substitute_override_cfg.Get());
-        if (substituteOverridesResult != tint::Success) {
-            std::cerr << "SubstituteOverrides failed:\n"
-                      << substituteOverridesResult.Failure() << "\n";
-            return false;
-        }
-
-        switch (options.format) {
-            case Format::kSpirv:
-            case Format::kSpvAsm:
-                return GenerateSpirv(options, inspector, ir.Get());
-            case Format::kMsl:
-                return GenerateMsl(options, inspector, ir.Get());
-            case Format::kHlsl:
-            case Format::kHlslFxc:
-                return GenerateHlsl(options, inspector, ir.Get());
-            case Format::kGlsl:
-                return GenerateGlsl(options, inspector, ir.Get());
-            case Format::kWgsl:
-                TINT_UNREACHABLE();
-            case Format::kNone:
-                break;
-            default:
-                std::cerr << "Unknown output format specified\n";
-                break;
-        }
-        return false;
-    };
-
     if (inspector.GetEntryPoints().empty()) {
-        return generate() ? 0 : 1;
+        return Generate(options, inspector, info.program) ? 0 : 1;
     }
 
     bool success = true;
@@ -1416,17 +1422,13 @@ int Run(tint::VectorRef<std::string_view> arguments, ExeMode exe_mode) {
         }
 
         options.ep_name = entry_point.name;
-        success &= generate();
+        success &= Generate(options, inspector, info.program);
 
         if (options.emit_single_entry_point) {
             break;
         }
     }
     return success ? 0 : 1;
-#else
-    std::cerr << "Cannot convert WGSL programs to Tint IR without the WGSL reader\n";
-    return false;
-#endif  // TINT_BUILD_WGSL_READER
 }
 
 /// Run a server that accepts arguments on stdin.
