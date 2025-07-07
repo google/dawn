@@ -64,6 +64,19 @@ struct ResourceBinding {
 
     /// Enumerator of texel image formats
     enum class TexelFormat : uint8_t {
+        kR8Snorm,
+        kR8Uint,
+        kR8Sint,
+        kRg8Unorm,
+        kRg8Snorm,
+        kRg8Uint,
+        kRg8Sint,
+        kR16Uint,
+        kR16Sint,
+        kR16Float,
+        kRg16Uint,
+        kRg16Sint,
+        kRg16Float,
         kBgra8Unorm,
         kRgba8Unorm,
         kRgba8Snorm,
@@ -82,6 +95,9 @@ struct ResourceBinding {
         kRgba32Sint,
         kRgba32Float,
         kR8Unorm,
+        kRgb10A2Uint,
+        kRgb10A2Unorm,
+        kRg11B10Ufloat,
         kNone,
     };
 

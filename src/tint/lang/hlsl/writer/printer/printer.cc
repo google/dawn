@@ -1781,21 +1781,37 @@ class Printer : public tint::TextGenerator {
     const char* ImageFormatToRWtextureType(core::TexelFormat image_format) {
         switch (image_format) {
             case core::TexelFormat::kR8Unorm:
+            case core::TexelFormat::kR8Snorm:
+            case core::TexelFormat::kRg8Unorm:
+            case core::TexelFormat::kRg8Snorm:
             case core::TexelFormat::kBgra8Unorm:
             case core::TexelFormat::kRgba8Unorm:
             case core::TexelFormat::kRgba8Snorm:
+            case core::TexelFormat::kR16Float:
+            case core::TexelFormat::kRg16Float:
             case core::TexelFormat::kRgba16Float:
             case core::TexelFormat::kR32Float:
             case core::TexelFormat::kRg32Float:
             case core::TexelFormat::kRgba32Float:
+            case core::TexelFormat::kRgb10A2Unorm:
+            case core::TexelFormat::kRg11B10Ufloat:
                 return "float4";
+            case core::TexelFormat::kR8Uint:
+            case core::TexelFormat::kRg8Uint:
+            case core::TexelFormat::kR16Uint:
+            case core::TexelFormat::kRg16Uint:
             case core::TexelFormat::kRgba8Uint:
             case core::TexelFormat::kRgba16Uint:
             case core::TexelFormat::kR32Uint:
             case core::TexelFormat::kRg32Uint:
             case core::TexelFormat::kRgba32Uint:
+            case core::TexelFormat::kRgb10A2Uint:
                 return "uint4";
+            case core::TexelFormat::kR8Sint:
+            case core::TexelFormat::kRg8Sint:
             case core::TexelFormat::kRgba8Sint:
+            case core::TexelFormat::kR16Sint:
+            case core::TexelFormat::kRg16Sint:
             case core::TexelFormat::kRgba16Sint:
             case core::TexelFormat::kR32Sint:
             case core::TexelFormat::kRg32Sint:

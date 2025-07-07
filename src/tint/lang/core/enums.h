@@ -222,13 +222,29 @@ constexpr std::string_view kSubgroupMatrixKindStrings[] = {
 enum class TexelFormat : uint8_t {
     kUndefined,
     kBgra8Unorm,
+    kR16Float,
+    kR16Sint,
+    kR16Uint,
     kR32Float,
     kR32Sint,
     kR32Uint,
+    kR8Sint,
+    kR8Snorm,
+    kR8Uint,
     kR8Unorm,
+    kRg11B10Ufloat,
+    kRg16Float,
+    kRg16Sint,
+    kRg16Uint,
     kRg32Float,
     kRg32Sint,
     kRg32Uint,
+    kRg8Sint,
+    kRg8Snorm,
+    kRg8Uint,
+    kRg8Unorm,
+    kRgb10A2Uint,
+    kRgb10A2Unorm,
     kRgba16Float,
     kRgba16Sint,
     kRgba16Uint,
@@ -260,9 +276,12 @@ auto& operator<<(STREAM& out, TexelFormat value) {
 TexelFormat ParseTexelFormat(std::string_view str);
 
 constexpr std::string_view kTexelFormatStrings[] = {
-    "bgra8unorm", "r32float",   "r32sint",     "r32uint",    "r8unorm",    "rg32float",
-    "rg32sint",   "rg32uint",   "rgba16float", "rgba16sint", "rgba16uint", "rgba32float",
-    "rgba32sint", "rgba32uint", "rgba8sint",   "rgba8snorm", "rgba8uint",  "rgba8unorm",
+    "bgra8unorm",  "r16float",   "r16sint",    "r16uint",     "r32float",    "r32sint",
+    "r32uint",     "r8sint",     "r8snorm",    "r8uint",      "r8unorm",     "rg11b10ufloat",
+    "rg16float",   "rg16sint",   "rg16uint",   "rg32float",   "rg32sint",    "rg32uint",
+    "rg8sint",     "rg8snorm",   "rg8uint",    "rg8unorm",    "rgb10a2uint", "rgb10a2unorm",
+    "rgba16float", "rgba16sint", "rgba16uint", "rgba32float", "rgba32sint",  "rgba32uint",
+    "rgba8sint",   "rgba8snorm", "rgba8uint",  "rgba8unorm",
 };
 
 /// An enumerator of builtin types.

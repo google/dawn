@@ -2821,6 +2821,45 @@ class Printer {
             case core::TexelFormat::kR8Unorm:
                 module_.PushCapability(SpvCapabilityStorageImageExtendedFormats);
                 return SpvImageFormatR8;
+            case core::TexelFormat::kR8Snorm:
+                module_.PushCapability(SpvCapabilityStorageImageExtendedFormats);
+                return SpvImageFormatR8Snorm;
+            case core::TexelFormat::kR8Uint:
+                module_.PushCapability(SpvCapabilityStorageImageExtendedFormats);
+                return SpvImageFormatR8ui;
+            case core::TexelFormat::kR8Sint:
+                module_.PushCapability(SpvCapabilityStorageImageExtendedFormats);
+                return SpvImageFormatR8i;
+            case core::TexelFormat::kRg8Unorm:
+                module_.PushCapability(SpvCapabilityStorageImageExtendedFormats);
+                return SpvImageFormatRg8;
+            case core::TexelFormat::kRg8Snorm:
+                module_.PushCapability(SpvCapabilityStorageImageExtendedFormats);
+                return SpvImageFormatRg8Snorm;
+            case core::TexelFormat::kRg8Uint:
+                module_.PushCapability(SpvCapabilityStorageImageExtendedFormats);
+                return SpvImageFormatRg8ui;
+            case core::TexelFormat::kRg8Sint:
+                module_.PushCapability(SpvCapabilityStorageImageExtendedFormats);
+                return SpvImageFormatRg8i;
+            case core::TexelFormat::kR16Uint:
+                module_.PushCapability(SpvCapabilityStorageImageExtendedFormats);
+                return SpvImageFormatR16ui;
+            case core::TexelFormat::kR16Sint:
+                module_.PushCapability(SpvCapabilityStorageImageExtendedFormats);
+                return SpvImageFormatR16i;
+            case core::TexelFormat::kR16Float:
+                module_.PushCapability(SpvCapabilityStorageImageExtendedFormats);
+                return SpvImageFormatR16f;
+            case core::TexelFormat::kRg16Uint:
+                module_.PushCapability(SpvCapabilityStorageImageExtendedFormats);
+                return SpvImageFormatRg16ui;
+            case core::TexelFormat::kRg16Sint:
+                module_.PushCapability(SpvCapabilityStorageImageExtendedFormats);
+                return SpvImageFormatRg16i;
+            case core::TexelFormat::kRg16Float:
+                module_.PushCapability(SpvCapabilityStorageImageExtendedFormats);
+                return SpvImageFormatRg16f;
             case core::TexelFormat::kR32Uint:
                 return SpvImageFormatR32ui;
             case core::TexelFormat::kR32Sint:
@@ -2856,6 +2895,15 @@ class Printer {
                 return SpvImageFormatRgba32i;
             case core::TexelFormat::kRgba32Float:
                 return SpvImageFormatRgba32f;
+            case core::TexelFormat::kRgb10A2Uint:
+                module_.PushCapability(SpvCapabilityStorageImageExtendedFormats);
+                return SpvImageFormatRgb10a2ui;
+            case core::TexelFormat::kRgb10A2Unorm:
+                module_.PushCapability(SpvCapabilityStorageImageExtendedFormats);
+                return SpvImageFormatRgb10A2;
+            case core::TexelFormat::kRg11B10Ufloat:
+                module_.PushCapability(SpvCapabilityStorageImageExtendedFormats);
+                return SpvImageFormatR11fG11fB10f;
             case core::TexelFormat::kUndefined:
                 return SpvImageFormatUnknown;
         }

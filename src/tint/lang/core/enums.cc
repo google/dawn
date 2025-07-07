@@ -227,6 +227,15 @@ TexelFormat ParseTexelFormat(std::string_view str) {
     if (str == "bgra8unorm") {
         return TexelFormat::kBgra8Unorm;
     }
+    if (str == "r16float") {
+        return TexelFormat::kR16Float;
+    }
+    if (str == "r16sint") {
+        return TexelFormat::kR16Sint;
+    }
+    if (str == "r16uint") {
+        return TexelFormat::kR16Uint;
+    }
     if (str == "r32float") {
         return TexelFormat::kR32Float;
     }
@@ -236,8 +245,29 @@ TexelFormat ParseTexelFormat(std::string_view str) {
     if (str == "r32uint") {
         return TexelFormat::kR32Uint;
     }
+    if (str == "r8sint") {
+        return TexelFormat::kR8Sint;
+    }
+    if (str == "r8snorm") {
+        return TexelFormat::kR8Snorm;
+    }
+    if (str == "r8uint") {
+        return TexelFormat::kR8Uint;
+    }
     if (str == "r8unorm") {
         return TexelFormat::kR8Unorm;
+    }
+    if (str == "rg11b10ufloat") {
+        return TexelFormat::kRg11B10Ufloat;
+    }
+    if (str == "rg16float") {
+        return TexelFormat::kRg16Float;
+    }
+    if (str == "rg16sint") {
+        return TexelFormat::kRg16Sint;
+    }
+    if (str == "rg16uint") {
+        return TexelFormat::kRg16Uint;
     }
     if (str == "rg32float") {
         return TexelFormat::kRg32Float;
@@ -247,6 +277,24 @@ TexelFormat ParseTexelFormat(std::string_view str) {
     }
     if (str == "rg32uint") {
         return TexelFormat::kRg32Uint;
+    }
+    if (str == "rg8sint") {
+        return TexelFormat::kRg8Sint;
+    }
+    if (str == "rg8snorm") {
+        return TexelFormat::kRg8Snorm;
+    }
+    if (str == "rg8uint") {
+        return TexelFormat::kRg8Uint;
+    }
+    if (str == "rg8unorm") {
+        return TexelFormat::kRg8Unorm;
+    }
+    if (str == "rgb10a2uint") {
+        return TexelFormat::kRgb10A2Uint;
+    }
+    if (str == "rgb10a2unorm") {
+        return TexelFormat::kRgb10A2Unorm;
     }
     if (str == "rgba16float") {
         return TexelFormat::kRgba16Float;
@@ -286,20 +334,52 @@ std::string_view ToString(TexelFormat value) {
             return "undefined";
         case TexelFormat::kBgra8Unorm:
             return "bgra8unorm";
+        case TexelFormat::kR16Float:
+            return "r16float";
+        case TexelFormat::kR16Sint:
+            return "r16sint";
+        case TexelFormat::kR16Uint:
+            return "r16uint";
         case TexelFormat::kR32Float:
             return "r32float";
         case TexelFormat::kR32Sint:
             return "r32sint";
         case TexelFormat::kR32Uint:
             return "r32uint";
+        case TexelFormat::kR8Sint:
+            return "r8sint";
+        case TexelFormat::kR8Snorm:
+            return "r8snorm";
+        case TexelFormat::kR8Uint:
+            return "r8uint";
         case TexelFormat::kR8Unorm:
             return "r8unorm";
+        case TexelFormat::kRg11B10Ufloat:
+            return "rg11b10ufloat";
+        case TexelFormat::kRg16Float:
+            return "rg16float";
+        case TexelFormat::kRg16Sint:
+            return "rg16sint";
+        case TexelFormat::kRg16Uint:
+            return "rg16uint";
         case TexelFormat::kRg32Float:
             return "rg32float";
         case TexelFormat::kRg32Sint:
             return "rg32sint";
         case TexelFormat::kRg32Uint:
             return "rg32uint";
+        case TexelFormat::kRg8Sint:
+            return "rg8sint";
+        case TexelFormat::kRg8Snorm:
+            return "rg8snorm";
+        case TexelFormat::kRg8Uint:
+            return "rg8uint";
+        case TexelFormat::kRg8Unorm:
+            return "rg8unorm";
+        case TexelFormat::kRgb10A2Uint:
+            return "rgb10a2uint";
+        case TexelFormat::kRgb10A2Unorm:
+            return "rgb10a2unorm";
         case TexelFormat::kRgba16Float:
             return "rgba16float";
         case TexelFormat::kRgba16Sint:

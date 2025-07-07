@@ -510,6 +510,22 @@ enum TexelFormat {
     rgba8_snorm = 15;
     rgba8_uint = 16;
     rgba8_unorm = 17;
+    r8_snorm = 18;
+    r8_uint = 19;
+    r8_sint = 20;
+    rg8_unorm = 21;
+    rg8_snorm = 22;
+    rg8_uint = 23;
+    rg8_sint = 24;
+    r16_uint = 25;
+    r16_sint = 26;
+    r16_float = 27;
+    rg16_uint = 28;
+    rg16_sint = 29;
+    rg16_float = 30;
+    rgb10a2_uint = 31;
+    rgb10a2_unorm = 32;
+    rg11b10_ufloat = 33;
 }
 
 enum SamplerKind {

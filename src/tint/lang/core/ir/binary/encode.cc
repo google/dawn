@@ -940,6 +940,38 @@ struct Encoder {
                 return pb::TexelFormat::rgba8_uint;
             case core::TexelFormat::kRgba8Unorm:
                 return pb::TexelFormat::rgba8_unorm;
+            case core::TexelFormat::kR8Snorm:
+                return pb::TexelFormat::r8_snorm;
+            case core::TexelFormat::kR8Uint:
+                return pb::TexelFormat::r8_uint;
+            case core::TexelFormat::kR8Sint:
+                return pb::TexelFormat::r8_sint;
+            case core::TexelFormat::kRg8Unorm:
+                return pb::TexelFormat::rg8_unorm;
+            case core::TexelFormat::kRg8Snorm:
+                return pb::TexelFormat::rg8_snorm;
+            case core::TexelFormat::kRg8Uint:
+                return pb::TexelFormat::rg8_uint;
+            case core::TexelFormat::kRg8Sint:
+                return pb::TexelFormat::rg8_sint;
+            case core::TexelFormat::kR16Uint:
+                return pb::TexelFormat::r16_uint;
+            case core::TexelFormat::kR16Sint:
+                return pb::TexelFormat::r16_sint;
+            case core::TexelFormat::kR16Float:
+                return pb::TexelFormat::r16_float;
+            case core::TexelFormat::kRg16Uint:
+                return pb::TexelFormat::rg16_uint;
+            case core::TexelFormat::kRg16Sint:
+                return pb::TexelFormat::rg16_sint;
+            case core::TexelFormat::kRg16Float:
+                return pb::TexelFormat::rg16_float;
+            case core::TexelFormat::kRgb10A2Uint:
+                return pb::TexelFormat::rgb10a2_uint;
+            case core::TexelFormat::kRgb10A2Unorm:
+                return pb::TexelFormat::rgb10a2_unorm;
+            case core::TexelFormat::kRg11B10Ufloat:
+                return pb::TexelFormat::rg11b10_ufloat;
             case core::TexelFormat::kUndefined:
                 break;
         }

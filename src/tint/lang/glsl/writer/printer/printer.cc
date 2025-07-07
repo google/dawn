@@ -1292,6 +1292,54 @@ class Printer : public tint::TextGenerator {
                 case core::TexelFormat::kR8Unorm:
                     out << "r8";
                     break;
+                case core::TexelFormat::kR8Uint:
+                    out << "r8ui";
+                    break;
+                case core::TexelFormat::kRg8Uint:
+                    out << "rg8ui";
+                    break;
+                case core::TexelFormat::kR16Uint:
+                    out << "r16ui";
+                    break;
+                case core::TexelFormat::kRg16Uint:
+                    out << "rg16ui";
+                    break;
+                case core::TexelFormat::kR8Sint:
+                    out << "r8i";
+                    break;
+                case core::TexelFormat::kRg8Sint:
+                    out << "rg8i";
+                    break;
+                case core::TexelFormat::kR16Sint:
+                    out << "r16i";
+                    break;
+                case core::TexelFormat::kRg16Sint:
+                    out << "rg16i";
+                    break;
+                case core::TexelFormat::kR8Snorm:
+                    out << "r8_snorm";
+                    break;
+                case core::TexelFormat::kRg8Unorm:
+                    out << "rg8";
+                    break;
+                case core::TexelFormat::kRg8Snorm:
+                    out << "rg8_snorm";
+                    break;
+                case core::TexelFormat::kR16Float:
+                    out << "r16f";
+                    break;
+                case core::TexelFormat::kRg16Float:
+                    out << "rg16f";
+                    break;
+                case core::TexelFormat::kRgb10A2Uint:
+                    out << "rgb10_a2ui";
+                    break;
+                case core::TexelFormat::kRgb10A2Unorm:
+                    out << "rgb10_a2";
+                    break;
+                case core::TexelFormat::kRg11B10Ufloat:
+                    out << "r11f_g11f_b10f";
+                    break;
                 case core::TexelFormat::kUndefined:
                     TINT_UNREACHABLE() << "invalid texel format";
             }
