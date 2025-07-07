@@ -41,7 +41,7 @@ BUILD_TYPE=""
 BUILD_ARCH=""
 FORCE=""
 VERBOSE=""
-REMOTEEXEC="1"
+SISO="1"
 SHARED=""
 INSTALL=""
 
@@ -66,7 +66,7 @@ function show_usage() {
   echo "  native        Target the machine you're running on"
   echo "  x86           Target a 32-bit x86 (adds -m32 to compiler flags)"
   echo "  local         Use local compilation instead of remote"
-  echo "  remoteexec    Use remoteexec to improve compile time (the default)"
+  echo "  remoteexec    Use siso to improve compile time (the default)"
   echo "  shared        Build shared libs (cmake only)"
   if [[ ! -z "$1" ]]; then
     echo
@@ -132,10 +132,10 @@ for arg in "$@"; do
       VERBOSE=1
     ;;
     "remoteexec")
-      REMOTEEXEC=1
+      SISO=1
     ;;
     "local")
-      REMOTEEXEC=
+      SISO=
     ;;
     "shared")
       SHARED=1
@@ -206,11 +206,11 @@ case $BUILD_SYSTEM in
         GN_ARGS+=" use_libfuzzer=true"
         GN_ARGS+=" tint_build_ir_binary=true"
     fi
-    if [[ -n "$REMOTEEXEC" ]]; then
-        GN_ARGS+=" use_remoteexec=true"
-        GN_ARGS+=" use_reclient=false"
+    if [[ -n "$SISO" ]]; then
+        GN_ARGS+=" use_siso=true"
+    else
+        GN_ARGS+=" use_siso=false"
     fi
-    GN_ARGS+=" use_siso=true"
     if grep 'dawn_node.*True' .gclient >/dev/null; then
         GN_ARGS+=" dawn_build_node_bindings=true"
     fi
