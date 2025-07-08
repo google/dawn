@@ -37,6 +37,7 @@
 #include "src/tint/lang/core/interpolation.h"
 #include "src/tint/lang/core/number.h"
 #include "src/tint/lang/core/type/sampler_kind.h"
+#include "src/tint/lang/core/type/texel_buffer.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
 #include "src/tint/lang/wgsl/ast/alias.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
@@ -1297,6 +1298,11 @@ class Builder {
 
         /// @returns the external texture
         ast::Type external_texture() const { return (*this)("texture_external"); }
+
+        /// @returns the texel buffer
+        ast::Type texel_buffer(core::TexelFormat format, core::Access access) const {
+            return (*this)("texel_buffer", format, access);
+        }
 
         /// @param subtype the texture subtype.
         /// @returns the input attachment

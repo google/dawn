@@ -612,6 +612,9 @@ BuiltinType ParseBuiltinType(std::string_view str) {
     if (str == "subgroup_matrix_right") {
         return BuiltinType::kSubgroupMatrixRight;
     }
+    if (str == "texel_buffer") {
+        return BuiltinType::kTexelBuffer;
+    }
     if (str == "texture_1d") {
         return BuiltinType::kTexture1D;
     }
@@ -856,6 +859,8 @@ std::string_view ToString(BuiltinType value) {
             return "subgroup_matrix_result";
         case BuiltinType::kSubgroupMatrixRight:
             return "subgroup_matrix_right";
+        case BuiltinType::kTexelBuffer:
+            return "texel_buffer";
         case BuiltinType::kTexture1D:
             return "texture_1d";
         case BuiltinType::kTexture2D:

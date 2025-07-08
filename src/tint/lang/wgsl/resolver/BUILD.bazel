@@ -152,6 +152,7 @@ cc_library(
     "struct_pipeline_stage_use_test.cc",
     "subgroup_matrix_test.cc",
     "subgroups_extension_test.cc",
+    "texel_buffer_test.cc",
     "type_validation_test.cc",
     "unresolved_identifier_test.cc",
     "validation_test.cc",

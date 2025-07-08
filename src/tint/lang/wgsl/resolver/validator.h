@@ -430,6 +430,12 @@ class Validator {
     /// @returns true on success, false otherwise
     bool StorageTexture(const core::type::StorageTexture* t, const Source& source) const;
 
+    /// Validates a texel buffer
+    /// @param t the texel buffer to validate
+    /// @param source the source of the texel buffer
+    /// @returns true on success, false otherwise
+    bool TexelBuffer(const core::type::TexelBuffer* t, const Source& source) const;
+
     /// Validates a sampled texture
     /// @param t the texture to validate
     /// @param source the source of the texture

@@ -502,6 +502,38 @@ bool Validator::SubgroupMatrix(const core::type::SubgroupMatrix* t, const Source
     return true;
 }
 
+bool Validator::TexelBuffer(const core::type::TexelBuffer* t, const Source& source) const {
+    if (!allowed_features_.features.count(wgsl::LanguageFeature::kTexelBuffers)) {
+        AddError(source) << "use of " << style::Type("texel_buffer")
+                         << " requires the texel_buffer language feature, which is not allowed "
+                            "in the current environment";
+        return false;
+    }
+
+    if (!IsValidStorageTextureTexelFormat(t->TexelFormat())) {
+        AddError(source) << "texel_buffer format must be one of the texel formats specified for "
+                            "texel buffers in https://gpuweb.github.io/gpuweb/wgsl/#texel-formats";
+        return false;
+    }
+
+    if (!t->Type()->IsAnyOf<core::type::F32, core::type::I32, core::type::U32>()) {
+        AddError(source) << "texel_buffer<format, access>: storage subtype must be f32, i32 or u32";
+        return false;
+    }
+
+    if (t->Dim() != core::type::TextureDimension::k1d) {
+        AddError(source) << "texel_buffer must be a 1d texture";
+        return false;
+    }
+
+    if (t->Access() != core::Access::kRead && t->Access() != core::Access::kReadWrite) {
+        AddError(source) << "texel_buffer access must be read or read_write";
+        return false;
+    }
+
+    return true;
+}
+
 bool Validator::Materialize(const core::type::Type* to,
                             const core::type::Type* from,
                             const Source& source) const {

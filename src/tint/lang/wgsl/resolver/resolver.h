@@ -226,6 +226,10 @@ class Resolver {
     const core::type::StorageTexture* StorageTexture(const ast::Identifier* ident,
                                                      core::type::TextureDimension dim);
 
+    /// @returns a texel buffer resolved from the templated identifier @p ident.
+    /// @param ident the identifier to resolve
+    const core::type::TexelBuffer* TexelBuffer(const ast::Identifier* ident);
+
     /// @returns an input attachment resolved from the templated identifier @p ident
     const core::type::InputAttachment* InputAttachment(const ast::Identifier* ident);
 
