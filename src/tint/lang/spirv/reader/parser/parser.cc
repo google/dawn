@@ -119,7 +119,8 @@ class Parser {
         for (const auto& ext : spirv_context_->extensions()) {
             auto name = ext.GetOperand(0).AsString();
             if (name != "SPV_KHR_storage_buffer_storage_class" &&
-                name != "SPV_KHR_non_semantic_info" &&  //
+                name != "SPV_KHR_non_semantic_info" &&     //
+                name != "SPV_KHR_terminate_invocation" &&  //
                 // TODO(423644565): We assume the barriers are correct. We should check for any
                 // operation that makes barrier assumptions that aren't consistent with WGSL and
                 // generate the needed barriers.
@@ -1749,6 +1750,7 @@ class Parser {
                     EmitWithoutResult(b_.Unreachable());
                     break;
                 case spv::Op::OpKill:
+                case spv::Op::OpTerminateInvocation:
                     EmitKill(inst);
                     break;
                 case spv::Op::OpDot:
@@ -3393,6 +3395,8 @@ class Parser {
     /// Note: This isn't technically correct, but there is no `kill` equivalent in WGSL. The closets
     /// we have is `discard` which maps to `OpDemoteToHelperInvocation` in SPIR-V.
     void EmitKill([[maybe_unused]] const spvtools::opt::Instruction& inst) {
+        // TODO(430084563): Log a warning that the `OpKill` or `OpTerminateInvocation` will not have
+        // the same semantics as the original SPIR-V.
         EmitWithoutResult(b_.Discard());
 
         // An `OpKill` is a terminator in SPIR-V. `discard` is not a terminator in WGSL. After the

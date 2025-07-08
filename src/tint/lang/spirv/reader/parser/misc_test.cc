@@ -378,6 +378,29 @@ TEST_F(SpirvParserTest, OpUnreachable_InNonVoidFunction) {
 )");
 }
 
+TEST_F(SpirvParserTest, OpTerminateInvocation) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpExtension "SPV_KHR_terminate_invocation"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main"
+               OpExecutionMode %main OriginUpperLeft
+       %void = OpTypeVoid
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+         %10 = OpLabel
+               OpTerminateInvocation
+               OpFunctionEnd)",
+              R"(
+%main = @fragment func():void {
+  $B1: {
+    discard
+    ret
+  }
+}
+)");
+}
+
 TEST_F(SpirvParserTest, OpKill_TopLevel) {
     EXPECT_IR(R"(
                OpCapability Shader
