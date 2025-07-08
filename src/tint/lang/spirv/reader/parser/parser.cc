@@ -2178,6 +2178,7 @@ class Parser {
         auto* type = Type(inst.type_id());
 
         auto* phi_spirv_block = spirv_context_->get_instr_block(&inst);
+        auto phi_blk_id = phi_spirv_block->id();
 
         // The merge target (which is the OpPhi SPIR-V block) is a walk stop block
         auto* loop = StopWalkingAt(phi_spirv_block->id())->As<core::ir::Loop>();
@@ -2191,9 +2192,34 @@ class Parser {
             auto value_id = inst.GetSingleWordInOperand(i);
             auto blk_id = inst.GetSingleWordInOperand(i + 1);
 
-            auto value_blk_iter = spirv_id_to_block_.find(blk_id);
-            auto* value_ir_blk = value_blk_iter->second;
-            auto* term = value_ir_blk->Terminator();
+            core::ir::Terminator* term = nullptr;
+
+            // If the basic block ends in a branch conditional, then we really need to update the
+            // branch which goes to the current block, not the terminator of the block we emitted
+            // into. This difference is because the merge block will _also_ end up in the same IR
+            // block and we can't tell the difference if we just get the terminator.
+            const auto& bb = current_spirv_function_->FindBlock(blk_id);
+            auto* terminator = (*bb).terminator();
+            if (terminator->opcode() == spv::Op::OpBranchConditional) {
+                uint32_t true_id = terminator->GetSingleWordInOperand(1);
+                uint32_t false_id = terminator->GetSingleWordInOperand(2);
+
+                auto iter = branch_conditional_to_if_.find(terminator);
+                if (iter != branch_conditional_to_if_.end()) {
+                    auto* if_ = iter->second;
+                    if (true_id == phi_blk_id) {
+                        term = if_->True()->Terminator();
+                    } else if (false_id == phi_blk_id) {
+                        term = if_->False()->Terminator();
+                    }
+                }
+            }
+
+            if (term == nullptr) {
+                auto value_blk_iter = spirv_id_to_block_.find(blk_id);
+                auto* value_ir_blk = value_blk_iter->second;
+                term = value_ir_blk->Terminator();
+            }
 
             if (term->Is<core::ir::Unreachable>()) {
                 default_value = value_id;
@@ -2496,25 +2522,54 @@ class Parser {
         core::ir::Switch* ctrl = nullptr;
         std::optional<core::ir::Value*> value_for_default_block = std::nullopt;
 
+        auto phi_blk_id = spirv_context_->get_instr_block(&inst)->id();
+
         for (uint32_t i = 0; i < inst.NumInOperands(); i += 2) {
             auto value_id = inst.GetSingleWordInOperand(i);
             auto blk_id = inst.GetSingleWordInOperand(i + 1);
 
-            auto value_blk_iter = spirv_id_to_block_.find(blk_id);
-            auto* value_ir_blk = value_blk_iter->second;
+            core::ir::Terminator* term = nullptr;
 
-            // In the case of a switch, the block can refer to the header of the switch, in this
-            // case it means we don't have a default block and we jump over the switch itself, so we
-            // need to insert this value into the terminator of the default block of the switch.
-            //
-            // We store this away as we may not know the switch yet, we need to wait until we get
-            // the control instruction and do the work later.
-            if (blk_id == header_id) {
-                value_for_default_block = Value(value_id);
-                continue;
+            // If the basic block ends in a branch conditional, then we really need to update the
+            // branch which goes to the current block, not the terminator of the block we emitted
+            // into. This difference is because the merge block will _also_ end up in the same IR
+            // block and we can't tell the difference if we just get the terminator.
+            const auto& bb = current_spirv_function_->FindBlock(blk_id);
+            auto* terminator = (*bb).terminator();
+            if (terminator->opcode() == spv::Op::OpBranchConditional) {
+                uint32_t true_id = terminator->GetSingleWordInOperand(1);
+                uint32_t false_id = terminator->GetSingleWordInOperand(2);
+
+                auto iter = branch_conditional_to_if_.find(terminator);
+                TINT_ASSERT(iter != branch_conditional_to_if_.end());
+
+                auto* if_ = iter->second;
+                if (true_id == phi_blk_id) {
+                    term = if_->True()->Terminator();
+                } else if (false_id == phi_blk_id) {
+                    term = if_->False()->Terminator();
+                }
             }
 
-            auto* term = value_ir_blk->Terminator();
+            if (term == nullptr) {
+                auto value_blk_iter = spirv_id_to_block_.find(blk_id);
+                auto* value_ir_blk = value_blk_iter->second;
+
+                // In the case of a switch, the block can refer to the header of the switch, in this
+                // case it means we don't have a default block and we jump over the switch itself,
+                // so we need to insert this value into the terminator of the default block of the
+                // switch.
+                //
+                // We store this away as we may not know the switch yet, we need to wait until we
+                // get the control instruction and do the work later.
+                if (blk_id == header_id) {
+                    value_for_default_block = Value(value_id);
+                    continue;
+                }
+
+                term = value_ir_blk->Terminator();
+            }
+
             // Push a placeholder for the operand value at this point. We'll store away the
             // terminator/index pair along with the required value and then fill it in at the end of
             // the block emission. This is because a PHI can refer to a value which is defined after
@@ -3120,6 +3175,8 @@ class Parser {
         auto* if_ = b_.If(cond);
         EmitWithoutResult(if_);
 
+        branch_conditional_to_if_.insert({&inst, if_});
+
         std::optional<uint32_t> merge_id = std::nullopt;
 
         auto* merge_inst = bb.GetMergeInst();
@@ -3146,7 +3203,6 @@ class Parser {
             premerge_if_ = b_.If(b_.Constant(true));
             walk_stop_blocks_.insert({premerge_start_id.value(), premerge_if_});
         }
-
         if (auto* ctrl = StopWalkingAt(true_id)) {
             auto* new_inst = EmitBranchStopBlock(ctrl, if_, if_->True(), true_id);
             inst_to_spirv_block_[new_inst] = bb.id();
@@ -4066,6 +4122,9 @@ class Parser {
     // Map of `var` to the access mode it was originally created with. This may be different from
     // the current mode if we needed to set a default mode.
     std::unordered_map<core::ir::Var*, core::Access> var_to_original_access_mode_;
+
+    // Map of spir-v branch conditional instructions to the related IR if instruction.
+    std::unordered_map<const spvtools::opt::Instruction*, core::ir::If*> branch_conditional_to_if_;
 };
 
 }  // namespace

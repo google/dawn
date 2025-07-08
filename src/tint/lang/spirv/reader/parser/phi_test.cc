@@ -308,6 +308,307 @@ TEST_F(SpirvParserTest, Phi_Switch) {
 )");
 }
 
+TEST_F(SpirvParserTest, Phi_Switch_FromIfBreak) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+          %3 = OpTypeFunction %void
+        %int = OpTypeInt 32 1
+       %bool = OpTypeBool
+      %int_0 = OpConstant %int 0
+      %int_1 = OpConstant %int 1
+      %int_2 = OpConstant %int 2
+      %int_3 = OpConstant %int 3
+       %true = OpConstantTrue %bool
+       %main = OpFunction %void None %3
+          %4 = OpLabel
+               OpSelectionMerge %13 None
+               OpSwitch %int_0 %10 0 %11 1 %12
+         %10 = OpLabel
+               OpBranch %13
+         %11 = OpLabel
+               OpBranch %13
+         %12 = OpLabel
+               OpSelectionMerge %20 None
+               OpBranchConditional %true %20 %21
+         %21 = OpLabel
+               OpBranch %13
+         %20 = OpLabel
+               OpBranch %13
+         %13 = OpLabel
+         %14 = OpPhi %int %int_0 %10 %int_1 %11 %int_2 %20 %int_3 %21
+         %15 = OpIAdd %int %14 %14
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = switch 0i [c: (default, $B2), c: (0i, $B3), c: (1i, $B4)] {  # switch_1
+      $B2: {  # case
+        exit_switch 0i  # switch_1
+      }
+      $B3: {  # case
+        exit_switch 1i  # switch_1
+      }
+      $B4: {  # case
+        if true [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_switch 3i  # switch_1
+          }
+        }
+        exit_switch 2i  # switch_1
+      }
+    }
+    %3:i32 = spirv.add<i32> %2, %2
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, Phi_Switch_FromIfBreak_InDefault) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main"
+               OpExecutionMode %main OriginUpperLeft
+               OpName %main "main"
+       %void = OpTypeVoid
+          %9 = OpTypeFunction %void
+      %float = OpTypeFloat 32
+       %bool = OpTypeBool
+    %float_7 = OpConstant %float 7
+    %float_8 = OpConstant %float 8
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+       %true = OpConstantTrue %bool
+       %main = OpFunction %void None %9
+         %45 = OpLabel
+               OpSelectionMerge %52 None
+               OpSwitch %uint_0 %53
+         %53 = OpLabel
+               OpBranch %54
+         %54 = OpLabel
+               OpSelectionMerge %84 None
+               OpBranchConditional %true %52 %84
+         %84 = OpLabel
+               OpBranch %52
+         %52 = OpLabel
+         %85 = OpPhi %float %float_7 %54 %float_8 %84
+        %100 = OpFAdd %float %85 %85
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @fragment func():void {
+  $B1: {
+    %2:f32 = switch 0u [c: (default, $B2)] {  # switch_1
+      $B2: {  # case
+        if true [t: $B3, f: $B4] {  # if_1
+          $B3: {  # true
+            exit_switch 7.0f  # switch_1
+          }
+          $B4: {  # false
+            exit_if  # if_1
+          }
+        }
+        exit_switch 8.0f  # switch_1
+      }
+    }
+    %3:f32 = add %2, %2
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, Phi_Switch_FromIf_BothJumpToMerge_InDefault) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main"
+               OpExecutionMode %main OriginUpperLeft
+               OpName %main "main"
+       %void = OpTypeVoid
+          %9 = OpTypeFunction %void
+      %float = OpTypeFloat 32
+       %bool = OpTypeBool
+    %float_7 = OpConstant %float 7
+    %float_8 = OpConstant %float 8
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+       %true = OpConstantTrue %bool
+       %main = OpFunction %void None %9
+         %45 = OpLabel
+               OpSelectionMerge %52 None
+               OpSwitch %uint_0 %53
+         %53 = OpLabel
+               OpBranch %54
+         %54 = OpLabel
+               OpSelectionMerge %84 None
+               OpBranchConditional %true %52 %52
+         %84 = OpLabel
+               OpBranch %52
+         %52 = OpLabel
+         %85 = OpPhi %float %float_7 %54 %float_8 %84
+        %100 = OpFAdd %float %85 %85
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @fragment func():void {
+  $B1: {
+    %2:f32 = switch 0u [c: (default, $B2)] {  # switch_1
+      $B2: {  # case
+        %3:bool = or true, true
+        if %3 [t: $B3, f: $B4] {  # if_1
+          $B3: {  # true
+            exit_switch 7.0f  # switch_1
+          }
+          $B4: {  # false
+            unreachable
+          }
+        }
+        exit_switch 8.0f  # switch_1
+      }
+    }
+    %4:f32 = add %2, %2
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, Phi_Switch_FromIfBreakBoth_InDefault) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main"
+               OpExecutionMode %main OriginUpperLeft
+               OpName %main "main"
+       %void = OpTypeVoid
+          %9 = OpTypeFunction %void
+      %float = OpTypeFloat 32
+       %bool = OpTypeBool
+    %float_7 = OpConstant %float 7
+    %float_8 = OpConstant %float 8
+    %float_9 = OpConstant %float 9
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+       %true = OpConstantTrue %bool
+       %main = OpFunction %void None %9
+         %45 = OpLabel
+               OpSelectionMerge %52 None
+               OpSwitch %uint_0 %53
+         %53 = OpLabel
+               OpBranch %54
+         %54 = OpLabel
+               OpSelectionMerge %84 None
+               OpBranchConditional %true %55 %56
+         %55 = OpLabel
+               OpBranch %52
+         %56 = OpLabel
+               OpBranch %52
+         %84 = OpLabel
+               OpBranch %52
+         %52 = OpLabel
+         %85 = OpPhi %float %float_7 %55 %float_8 %56 %float_9 %84
+        %100 = OpFAdd %float %85 %85
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @fragment func():void {
+  $B1: {
+    %2:f32 = switch 0u [c: (default, $B2)] {  # switch_1
+      $B2: {  # case
+        if true [t: $B3, f: $B4] {  # if_1
+          $B3: {  # true
+            exit_switch 7.0f  # switch_1
+          }
+          $B4: {  # false
+            exit_switch 8.0f  # switch_1
+          }
+        }
+        exit_switch 9.0f  # switch_1
+      }
+    }
+    %3:f32 = add %2, %2
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, Phi_Loop_FromIfBreak) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main"
+               OpExecutionMode %main OriginUpperLeft
+               OpName %main "main"
+       %void = OpTypeVoid
+          %9 = OpTypeFunction %void
+      %float = OpTypeFloat 32
+       %bool = OpTypeBool
+    %float_7 = OpConstant %float 7
+    %float_8 = OpConstant %float 8
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+       %true = OpConstantTrue %bool
+       %main = OpFunction %void None %9
+         %45 = OpLabel
+               OpBranch %50
+         %50 = OpLabel
+               OpLoopMerge %52 %55 None
+               OpBranch %60
+         %55 = OpLabel
+               OpBranch %50
+         %60 = OpLabel
+               OpSelectionMerge %84 None
+               OpBranchConditional %true %52 %84
+         %84 = OpLabel
+               OpBranch %52
+         %52 = OpLabel
+         %85 = OpPhi %float %float_7 %60 %float_8 %84
+        %100 = OpFAdd %float %85 %85
+               OpReturn
+               OpFunctionEnd
+
+)",
+              R"(
+%main = @fragment func():void {
+  $B1: {
+    %2:f32 = loop [b: $B2, c: $B3] {  # loop_1
+      $B2: {  # body
+        if true [t: $B4, f: $B5] {  # if_1
+          $B4: {  # true
+            exit_loop 7.0f  # loop_1
+          }
+          $B5: {  # false
+            exit_if  # if_1
+          }
+        }
+        exit_loop 8.0f  # loop_1
+      }
+      $B3: {  # continuing
+        next_iteration  # -> $B2
+      }
+    }
+    %3:f32 = add %2, %2
+    ret
+  }
+}
+)");
+}
+
 TEST_F(SpirvParserTest, Phi_Loop_ContinueIsHeader) {
     EXPECT_IR(R"(
                OpCapability Shader
