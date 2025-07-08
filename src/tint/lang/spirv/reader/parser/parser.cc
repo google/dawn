@@ -800,6 +800,8 @@ class Parser {
                 return core::TexelFormat::kRgba8Uint;
             case spv::ImageFormat::Rgba8i:
                 return core::TexelFormat::kRgba8Sint;
+            case spv::ImageFormat::R8:
+                return core::TexelFormat::kR8Unorm;
 
             // 16 bit channels
             case spv::ImageFormat::Rgba16ui:

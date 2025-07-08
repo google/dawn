@@ -392,6 +392,40 @@ $B1: {  # root
 )");
 }
 
+TEST_F(SpirvParserTest, Type_Image_TexelFormat_R8) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpCapability Sampled1D
+               OpCapability StorageImageExtendedFormats
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpDecorate %6 DescriptorSet 1
+               OpDecorate %6 Binding 2
+       %void = OpTypeVoid
+        %f32 = OpTypeFloat 32
+        %img = OpTypeImage %f32 1D 0 0 0 1 R8
+%_ptr_Uniform = OpTypePointer UniformConstant %img
+          %6 = OpVariable %_ptr_Uniform UniformConstant
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %1:ptr<handle, spirv.image<f32, 1d, not_depth, non_arrayed, single_sampled, sampling_compatible, r8unorm, read_write>, read> = var undef @binding_point(1, 2)
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    ret
+  }
+}
+)");
+}
+
 TEST_F(SpirvParserTest, Type_SampledImage) {
     options.sampler_mappings.insert({BindingPoint{1, 2}, BindingPoint{5, 6}});
 
