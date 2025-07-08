@@ -28,6 +28,7 @@
 #include <atomic>
 #include <mutex>
 #include <utility>
+#include <vector>
 
 #include "absl/strings/str_format.h"
 #include "dawn/native/Adapter.h"
@@ -73,16 +74,22 @@ bool ApiObjectList::Untrack(ApiObjectBase* object) {
 }
 
 void ApiObjectList::Destroy() {
-    LinkedList<ApiObjectBase> objects;
-    mObjects.Use([&objects, this](auto lockedObjects) {
+    std::vector<ApiObjectBase*> objectsToDestroy;
+    mObjects.Use([&objectsToDestroy, this](auto lockedObjects) {
         mMarkedDestroyed.store(true, std::memory_order_release);
-        lockedObjects->MoveInto(&objects);
+
+        // Remove objects from ApiObjectList while holding the lock. The objects become untracked
+        // so if another thread drops the last reference it won't also call DestroyImpl().
+        while (!lockedObjects->empty()) {
+            auto* head = lockedObjects->head();
+            bool removed = head->RemoveFromList();
+            DAWN_ASSERT(removed);
+            objectsToDestroy.push_back(head->value());
+        }
     });
-    while (!objects.empty()) {
-        auto* head = objects.head();
-        bool removed = head->RemoveFromList();
-        DAWN_ASSERT(removed);
-        head->value()->DestroyImpl();
+
+    for (ApiObjectBase* object : objectsToDestroy) {
+        object->DestroyImpl();
     }
 }
 
