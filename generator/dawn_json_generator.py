@@ -788,9 +788,9 @@ def compute_kotlin_params(loaded_json, kotlin_json):
             if member.name.get() == 'userdata':
                 continue
 
-            # Dawn uses 'annotation = *' for output parameters, for example to return arrays.
-            # We convert the return type and strip out the parameters.
-            if member.annotation == '*':
+            # Dawn sometimes uses 'annotation = *' for output parameters, for example to return
+            # arrays. We convert the return type and strip out the parameters.
+            if member.annotation == '*' and member.length == 'constant':
                 continue
 
             yield member
