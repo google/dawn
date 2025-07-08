@@ -295,10 +295,9 @@ MaybeError EventManager::Initialize(const UnpackedPtr<InstanceDescriptor>& descr
     if (descriptor) {
         for (auto feature :
              std::span(descriptor->requiredFeatures, descriptor->requiredFeatureCount)) {
-            switch (feature) {
-                case wgpu::InstanceFeatureName::TimedWaitAny:
-                    mTimedWaitAnyEnable = true;
-                    break;
+            if (feature == wgpu::InstanceFeatureName::TimedWaitAny) {
+                mTimedWaitAnyEnable = true;
+                break;
             }
         }
         if (descriptor->requiredLimits) {
