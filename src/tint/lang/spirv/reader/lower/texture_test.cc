@@ -222,7 +222,7 @@ $B1: {  # root
     ASSERT_EQ(expect, str());
 }
 
-TEST_F(SpirvReader_TextureTest, DISABLED_Type_Image_DepthUnknown) {
+TEST_F(SpirvReader_TextureTest, Type_Image_DepthUnknown) {
     b.Append(mod.root_block, [&] {
         auto* v = b.Var("wg", ty.ptr(handle,
                                      ty.Get<spirv::type::Image>(

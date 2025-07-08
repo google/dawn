@@ -127,8 +127,7 @@ TEST_F(SpirvParserTest, Import_VulkanMemoryModel_IgnoredImport) {
                   SPV_ENV_UNIVERSAL_1_3);
 }
 
-// TODO(dsinclair): internal compiler error: TINT_UNIMPLEMENTED unhandled SPIR-V type: [uint32]
-TEST_F(SpirvParserTest, DISABLED_Import_NonSemantic_IgnoredExtInsts) {
+TEST_F(SpirvParserTest, Import_NonSemantic_IgnoredExtInsts) {
     // This is the clspv-compiled output of this OpenCL C:
     //    kernel void foo(global int*A) { A=A; }
     // It emits NonSemantic.ClspvReflection.1 extended instructions.
@@ -184,8 +183,20 @@ TEST_F(SpirvParserTest, DISABLED_Import_NonSemantic_IgnoredExtInsts) {
          %28 = OpExtInst %void %20 SpecConstantWorkgroupSize %uint_0 %uint_1 %uint_2
 )",
               R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
-  $B1: {
+tint_symbol_1 = struct @align(4) {
+  tint_symbol:array<u32> @offset(0)
+}
+
+$B1: {  # root
+  %1:u32 = override 1u @id(0)
+  %2:u32 = override 1u @id(1)
+  %3:u32 = override 1u @id(2)
+  %4:ptr<storage, tint_symbol_1, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %6:ptr<storage, u32, read_write> = access %4, 0u, 0u
     ret
   }
 }
