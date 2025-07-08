@@ -137,6 +137,9 @@ config("internal_config") {
   if (is_clang) {
     # We use __builtin_assume liberally in DAWN_ASSERT, allow ignoring side-effects there.
     cflags += [ "-Wno-assume" ]
+
+    # Dawn doesn't have the annotations to work with this analysis.
+    cflags_cc = [ "-Wno-thread-safety" ]
   }
 
   # Enable more warnings that were found when using Dawn in other projects.
