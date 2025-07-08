@@ -3102,6 +3102,47 @@ $B1: {  # root
 )");
 }
 
+TEST_F(SpirvParserTest, Var_OpSpecConstantComposite_Extracted) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %1 "myconst"
+               OpDecorate %one SpecId 1
+               OpDecorate %two SpecId 2
+       %void = OpTypeVoid
+        %i32 = OpTypeInt 32 1
+        %v2i = OpTypeVector %i32 2
+        %one = OpSpecConstant %i32 1
+        %two = OpSpecConstant %i32 2
+          %1 = OpSpecConstantComposite %v2i %one %two
+        %foo = OpSpecConstantOp %i32 CompositeExtract %1 1
+     %voidfn = OpTypeFunction %void
+       %main = OpFunction %void None %voidfn
+ %main_entry = OpLabel
+           %3 = OpIAdd %i32 %foo %foo
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %1:i32 = override 1i @id(1)
+  %2:i32 = override 2i @id(2)
+  %3:vec2<i32> = construct %1, %2
+  %4:i32 = access %3, 1u
+  %5:i32 = override %4
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %7:i32 = spirv.add<i32> %5, %5
+    ret
+  }
+}
+)");
+}
+
 TEST_F(SpirvParserTest, InterpolationFlatNoLocation) {
     EXPECT_IR(R"(
              OpCapability Shader

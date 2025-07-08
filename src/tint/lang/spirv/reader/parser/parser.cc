@@ -1221,7 +1221,7 @@ class Parser {
 
             auto* construct = b_.Construct(iter->second.type, args);
             current_block_->Append(construct);
-            values_.Replace(id, construct->Result());
+            AddValue(id, construct->Result());
             return construct->Result();
         }
 
