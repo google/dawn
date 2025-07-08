@@ -189,6 +189,11 @@ class Parser {
             TINT_ASSERT(iter != var_to_original_access_mode_.end());
             auto access_mode = iter->second;
 
+            // Handle the case of the struct members all being marked as `NonWritable`
+            if (consider_non_writable_.contains(str)) {
+                access_mode = core::Access::kRead;
+            }
+
             var->Result()->SetType(ty_.ptr(core::AddressSpace::kStorage, str, access_mode));
             UpdateUsagesToStorageAddressSpace(var->Result(), access_mode);
         }
@@ -737,10 +742,15 @@ class Parser {
                 case spvtools::opt::analysis::Type::kPointer: {
                     auto* ptr_ty = type->AsPointer();
                     auto* subtype = Type(ptr_ty->pointee_type(), access_mode);
-                    // Handle is always a read pointer
-                    if (subtype->IsHandle()) {
+
+                    // In a few cases we need to adjust the access mode.
+                    //
+                    // 1. Handle is always a read pointer
+                    // 2. If the SPIR-V type should be considered NonWritable
+                    if (subtype->IsHandle() || consider_non_writable_.contains(subtype)) {
                         access_mode = core::Access::kRead;
                     }
+
                     return ty_.ptr(AddressSpace(ptr_ty->storage_class()), subtype, access_mode);
                 }
                 case spvtools::opt::analysis::Type::kSampler: {
@@ -911,8 +921,10 @@ class Parser {
 
         // Build a list of struct members.
         uint32_t current_size = 0u;
+        uint32_t member_count = static_cast<uint32_t>(struct_ty->NumberOfComponents());
+        uint32_t non_writable_members = 0;
         Vector<core::type::StructMember*, 4> members;
-        for (uint32_t i = 0; i < struct_ty->NumberOfComponents(); i++) {
+        for (uint32_t i = 0; i < member_count; i++) {
             auto* member_ty = Type(struct_ty->element_types()[i]);
             uint32_t align = std::max<uint32_t>(member_ty->Align(), 1u);
             uint32_t offset = tint::RoundUp(align, current_size);
@@ -933,9 +945,15 @@ class Parser {
             if (struct_ty->element_decorations().count(i)) {
                 for (auto& deco : struct_ty->element_decorations().at(i)) {
                     switch (spv::Decoration(deco[0])) {
+                        case spv::Decoration::NonWritable:
+                            // WGSL doesn't have a non-writable attribute on struct members, but, if
+                            // the SPIR-V structure has NonWritable on all members then we treat the
+                            // entire structure as non-writable.
+                            non_writable_members += 1;
+                            break;
+
                         case spv::Decoration::ColMajor:          // Do nothing, WGSL is column major
                         case spv::Decoration::NonReadable:       // Not supported in WGSL
-                        case spv::Decoration::NonWritable:       // Not supported in WGSL
                         case spv::Decoration::RelaxedPrecision:  // Not supported in WGSL
                             break;
                         case spv::Decoration::RowMajor:
@@ -1009,7 +1027,11 @@ class Parser {
         if (!name.IsValid()) {
             name = ir_.symbols.New();
         }
-        return ty_.Struct(name, std::move(members));
+        auto* strct = ty_.Struct(name, std::move(members));
+        if (non_writable_members == member_count) {
+            consider_non_writable_.insert(strct);
+        }
+        return strct;
     }
 
     Symbol GetUniqueSymbolFor(uint32_t id) {
@@ -4062,6 +4084,9 @@ class Parser {
     std::unordered_map<uint32_t, std::string> id_to_name_;
     // Map of SPIR-V Struct IDs to a list of member string names
     std::unordered_map<uint32_t, std::vector<std::string>> struct_to_member_names_;
+
+    // Set of types which should be considered `NonWritable` even if no decoration is present
+    std::unordered_set<const core::type::Type*> consider_non_writable_;
 
     // Set of SPIR-V block ids where we'll stop a `Branch` instruction walk. These could be merge
     // blocks, premerge blocks, continuing blocks, etc.
