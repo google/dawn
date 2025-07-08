@@ -370,6 +370,7 @@ enable chromium_internal_graphite;
 {{-   else if HasPrefix $name "texture" -}}handle
 {{-   else if HasPrefix $name "sampler" -}}handle
 {{-   else if HasPrefix $name "input_attachment" -}}handle
+{{-   else if HasPrefix $name "texel_buffer" -}}handle
 {{-   else if        eq $name "ptr"     -}}{{(index .TemplateArguments 0).Target.Name}}
 {{-   else                              -}}function
 {{-   end -}}
