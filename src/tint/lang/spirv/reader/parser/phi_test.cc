@@ -1534,5 +1534,47 @@ TEST_F(SpirvParserTest, Phi_UnreachableLoopMerge) {
 )");
 }
 
+TEST_F(SpirvParserTest, Phi_SwitchDefaultIsMerge) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+        %int = OpTypeInt 32 1
+      %int_1 = OpConstant %int 1
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+         %67 = OpLabel
+         %69 = OpIAdd %int %int_1 %int_1
+               OpSelectionMerge %70 None
+               OpSwitch %int_1 %70 0 %71
+         %71 = OpLabel
+         %82 = OpIAdd %int %69 %int_1
+               OpBranch %70
+         %70 = OpLabel
+         %64 = OpPhi %int %69 %67 %82 %71
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = spirv.add<i32> 1i, 1i
+    %3:i32 = switch 1i [c: (default, $B2), c: (0i, $B3)] {  # switch_1
+      $B2: {  # case
+        exit_switch %2  # switch_1
+      }
+      $B3: {  # case
+        %4:i32 = spirv.add<i32> %2, 1i
+        exit_switch %4  # switch_1
+      }
+    }
+    ret
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader

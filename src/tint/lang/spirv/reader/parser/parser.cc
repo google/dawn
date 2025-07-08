@@ -2199,22 +2199,34 @@ class Parser {
                 // terminator for the block.
 
                 if (!value_ir_blk->Terminator()) {
-                    auto* if_ = value_ir_blk->Back()->As<core::ir::If>();
-                    TINT_ASSERT(if_);
-                    // No block terminator means the block that the `phi` is referencing
-                    // isn't finished (in IR-land). This can only happen with an `if`
-                    // instruction where you've branched directly to the `phi` as either the
-                    // `then` or `else` clause.
+                    if (auto* if_ = value_ir_blk->Back()->As<core::ir::If>()) {
+                        TINT_ASSERT(if_);
+                        // No block terminator means the block that the `phi` is referencing
+                        // isn't finished (in IR-land). This can only happen with an `if`
+                        // instruction where you've branched directly to the `phi` as either the
+                        // `then` or `else` clause.
 
-                    TINT_ASSERT(!if_to_update_branch.has_value());
+                        TINT_ASSERT(!if_to_update_branch.has_value());
 
-                    auto* value = ValueNoPropagate(value_id);
-                    if_to_update_branch = IfBranchValue{
-                        .value = value,
-                        .if_ = if_,
-                    };
+                        auto* value = ValueNoPropagate(value_id);
+                        if_to_update_branch = IfBranchValue{
+                            .value = value,
+                            .if_ = if_,
+                        };
 
-                    continue;
+                        continue;
+                    } else if (auto* swtch = value_ir_blk->Back()->As<core::ir::Switch>()) {
+                        // In the case where the switch is currently the last instruction in the
+                        // value block then the switch default is the switch merge block and the
+                        // value is coming from the selection merge block which means we want to put
+                        // this value into the default block itself. So, pretend the `value_ir_blk`
+                        // is the switch default block.
+                        value_ir_blk = swtch->DefaultBlock();
+                        // We always generate a default block for the switch.
+                        TINT_ASSERT(value_ir_blk);
+                    } else {
+                        TINT_UNREACHABLE();
+                    }
                 }
                 term = value_ir_blk->Terminator();
             }
