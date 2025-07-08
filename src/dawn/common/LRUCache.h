@@ -134,7 +134,10 @@ class LRUCache {
     }
 
     void Clear() {
-        mCache.Use([](auto cache) {
+        mCache.Use([&](auto cache) {
+            for (auto [_, value] : cache->list) {
+                EvictedFromCache(value);
+            }
             cache->map.clear();
             cache->list.clear();
         });
