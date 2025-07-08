@@ -1,5 +1,8 @@
 SKIP: FAILED
 
+1:1: [VUID-StandaloneSpirv-Location-04916] Variable must be decorated with a location
+  %f_Input = OpVariable %_ptr_Input_v4float Input
+
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
@@ -22,7 +25,6 @@ SKIP: FAILED
                OpName %f "f"
                OpDecorate %f_position_Input BuiltIn FragCoord
                OpDecorate %f_position_Input Invariant
-               OpMemberDecorate %In 0 Offset 0
       %float = OpTypeFloat 32
     %v4float = OpTypeVector %float 4
 %_ptr_Input_v4float = OpTypePointer Input %v4float
@@ -56,6 +58,5 @@ SKIP: FAILED
          %27 = OpFunctionCall %void %f_inner %25 %26
                OpReturn
                OpFunctionEnd
-1:1: [VUID-StandaloneSpirv-Location-04916] Variable must be decorated with a location
-  %f_Input = OpVariable %_ptr_Input_v4float Input
 
+tint executable returned error: exit status 1

@@ -39,14 +39,8 @@ void main_inner(FragmentInputs0 inputs0, bool front_facing, uint loc1, uint samp
 }
 
 void main(main_inputs inputs) {
-  FragmentInputs0 v_1 = {float4(inputs.FragmentInputs0_position.xyz, (1.0f / inputs.FragmentInputs0_position[3u])), inputs.FragmentInputs0_loc0};
-  FragmentInputs0 v_2 = v_1;
-  FragmentInputs1 v_3 = {inputs.FragmentInputs1_loc3, inputs.FragmentInputs1_loc5, inputs.FragmentInputs1_sample_mask};
-  main_inner(v_2, inputs.front_facing, inputs.loc1, inputs.sample_index, v_3, inputs.loc2, inputs.loc4);
+  FragmentInputs0 v_1 = {float4(inputs.FragmentInputs0_position.xyz, (1.0f / inputs.FragmentInputs0_position.w)), inputs.FragmentInputs0_loc0};
+  FragmentInputs1 v_2 = {inputs.FragmentInputs1_loc3, inputs.FragmentInputs1_loc5, inputs.FragmentInputs1_sample_mask};
+  main_inner(v_1, inputs.front_facing, inputs.loc1, inputs.sample_index, v_2, inputs.loc2, inputs.loc4);
 }
 
-FXC validation failure:
-<scrubbed_path>(8,10-18): error X3000: syntax error: unexpected token 'float16_t'
-
-
-tint executable returned error: exit status 1

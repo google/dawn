@@ -6,12 +6,12 @@ cbuffer cbuffer_u : register(b0) {
 };
 RWByteAddressBuffer s : register(u1);
 static matrix<float16_t, 4, 3> p[4] = (matrix<float16_t, 4, 3>[4])0;
-vector<float16_t, 4> tint_bitcast_to_f16(uint4 src) {
-  uint4 v = src;
-  uint4 mask = (65535u).xxxx;
-  uint4 shift = (16u).xxxx;
-  float4 t_low = f16tof32((v & mask));
-  float4 t_high = f16tof32(((v >> shift) & mask));
+vector<float16_t, 4> tint_bitcast_to_f16(uint2 src) {
+  uint2 v = src;
+  uint2 mask = (65535u).xx;
+  uint2 shift = (16u).xx;
+  float2 t_low = f16tof32((v & mask));
+  float2 t_high = f16tof32(((v >> shift) & mask));
   float16_t v_1 = float16_t(t_low.x);
   float16_t v_2 = float16_t(t_high.x);
   float16_t v_3 = float16_t(t_low.y);
@@ -19,46 +19,45 @@ vector<float16_t, 4> tint_bitcast_to_f16(uint4 src) {
 }
 
 matrix<float16_t, 4, 3> v_4(uint start_byte_offset) {
-  vector<float16_t, 3> v_5 = tint_bitcast_to_f16(u[(start_byte_offset / 16u)]).xyz;
-  vector<float16_t, 3> v_6 = tint_bitcast_to_f16(u[((8u + start_byte_offset) / 16u)]).xyz;
-  vector<float16_t, 3> v_7 = tint_bitcast_to_f16(u[((16u + start_byte_offset) / 16u)]).xyz;
-  return matrix<float16_t, 4, 3>(v_5, v_6, v_7, tint_bitcast_to_f16(u[((24u + start_byte_offset) / 16u)]).xyz);
+  uint4 v_5 = u[(start_byte_offset / 16u)];
+  vector<float16_t, 3> v_6 = tint_bitcast_to_f16((((((start_byte_offset % 16u) / 4u) == 2u)) ? (v_5.zw) : (v_5.xy))).xyz;
+  uint4 v_7 = u[((8u + start_byte_offset) / 16u)];
+  vector<float16_t, 3> v_8 = tint_bitcast_to_f16(((((((8u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_7.zw) : (v_7.xy))).xyz;
+  uint4 v_9 = u[((16u + start_byte_offset) / 16u)];
+  vector<float16_t, 3> v_10 = tint_bitcast_to_f16(((((((16u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_9.zw) : (v_9.xy))).xyz;
+  uint4 v_11 = u[((24u + start_byte_offset) / 16u)];
+  return matrix<float16_t, 4, 3>(v_6, v_8, v_10, tint_bitcast_to_f16(((((((24u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_11.zw) : (v_11.xy))).xyz);
 }
 
 typedef matrix<float16_t, 4, 3> ary_ret[4];
-ary_ret v_8(uint start_byte_offset) {
+ary_ret v_12(uint start_byte_offset) {
   matrix<float16_t, 4, 3> a[4] = (matrix<float16_t, 4, 3>[4])0;
   {
-    uint v_9 = 0u;
-    v_9 = 0u;
+    uint v_13 = 0u;
+    v_13 = 0u;
     while(true) {
-      uint v_10 = v_9;
-      if ((v_10 >= 4u)) {
+      uint v_14 = v_13;
+      if ((v_14 >= 4u)) {
         break;
       }
-      a[v_10] = v_4((start_byte_offset + (v_10 * 32u)));
+      a[v_14] = v_4((start_byte_offset + (v_14 * 32u)));
       {
-        v_9 = (v_10 + 1u);
+        v_13 = (v_14 + 1u);
       }
       continue;
     }
   }
-  matrix<float16_t, 4, 3> v_11[4] = a;
-  return v_11;
+  matrix<float16_t, 4, 3> v_15[4] = a;
+  return v_15;
 }
 
 [numthreads(1, 1, 1)]
 void f() {
-  matrix<float16_t, 4, 3> v_12[4] = v_8(0u);
-  p = v_12;
-  p[int(1)] = v_4(64u);
-  p[int(1)][int(0)] = tint_bitcast_to_f16(u[0u]).xyz.zxy;
-  p[int(1)][int(0)][0u] = float16_t(f16tof32(u[0u].z));
-  s.Store<float16_t>(0u, p[int(1)][int(0)].x);
+  matrix<float16_t, 4, 3> v_16[4] = v_12(0u);
+  p = v_16;
+  p[1u] = v_4(64u);
+  p[1u][0u] = tint_bitcast_to_f16(u[0u].zw).xyz.zxy;
+  p[1u][0u].x = float16_t(f16tof32(u[0u].z));
+  s.Store<float16_t>(0u, p[1u][0u].x);
 }
 
-FXC validation failure:
-<scrubbed_path>(6,15-23): error X3000: syntax error: unexpected token 'float16_t'
-
-
-tint executable returned error: exit status 1

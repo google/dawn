@@ -23,8 +23,3 @@ void main(main_inputs inputs) {
   main_inner(inputs.loc0, inputs.loc1, inputs.loc2, inputs.loc3, inputs.loc4, inputs.loc5);
 }
 
-FXC validation failure:
-<scrubbed_path>(6,3-11): error X3000: unrecognized identifier 'float16_t'
-
-
-tint executable returned error: exit status 1

@@ -10,8 +10,3 @@ void f() {
 void unused_entry_point() {
 }
 
-FXC validation failure:
-<scrubbed_path>(2,15-23): error X3000: syntax error: unexpected token 'float16_t'
-
-
-tint executable returned error: exit status 1

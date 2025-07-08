@@ -16,7 +16,7 @@ float16_t workgroupUniformLoad_e07d08() {
 }
 
 void compute_main_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     arg_0 = float16_t(0.0h);
   }
   GroupMemoryBarrierWithGroupSync();
@@ -28,8 +28,3 @@ void compute_main(compute_main_inputs inputs) {
   compute_main_inner(inputs.tint_local_index);
 }
 
-FXC validation failure:
-<scrubbed_path>(7,13-21): error X3000: unrecognized identifier 'float16_t'
-
-
-tint executable returned error: exit status 1

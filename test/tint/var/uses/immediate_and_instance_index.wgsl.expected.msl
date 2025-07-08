@@ -1,5 +1,5 @@
 SKIP: FAILED
 
-immediate data are not supported by the MSL backend
+immediate data is not supported by the MSL backend
 
 tint executable returned error: exit status 1

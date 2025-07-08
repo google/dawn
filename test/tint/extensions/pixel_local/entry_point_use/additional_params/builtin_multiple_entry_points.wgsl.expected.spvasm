@@ -1,11 +1,16 @@
 SKIP: FAILED
 
-..\..\src\tint\lang\spirv\writer\printer\printer.cc:2367 internal compiler error: unimplemented variable address space pixel_local
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+pixel_local address space is not supported by the SPIR-V backend
+pixel_local address space is not supported by the SPIR-V backend
+pixel_local address space is not supported by the SPIR-V backend
+;
+; f
+;
+;
+; f2
+;
+;
+; f3
+;
 
-tint executable returned error: exit status 0xc000001d
+tint executable returned error: exit status 1

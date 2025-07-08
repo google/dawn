@@ -14,26 +14,17 @@ vector<float16_t, 2> tint_bitcast_to_f16(uint src) {
 }
 
 matrix<float16_t, 4, 2> v_2(uint start_byte_offset) {
-  uint4 v_3 = u[(start_byte_offset / 16u)];
-  vector<float16_t, 2> v_4 = tint_bitcast_to_f16((((((start_byte_offset % 16u) / 4u) == 2u)) ? (v_3.z) : (v_3.x)));
-  uint4 v_5 = u[((4u + start_byte_offset) / 16u)];
-  vector<float16_t, 2> v_6 = tint_bitcast_to_f16(((((((4u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_5.z) : (v_5.x)));
-  uint4 v_7 = u[((8u + start_byte_offset) / 16u)];
-  vector<float16_t, 2> v_8 = tint_bitcast_to_f16(((((((8u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_7.z) : (v_7.x)));
-  uint4 v_9 = u[((12u + start_byte_offset) / 16u)];
-  return matrix<float16_t, 4, 2>(v_4, v_6, v_8, tint_bitcast_to_f16(((((((12u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_9.z) : (v_9.x))));
+  vector<float16_t, 2> v_3 = tint_bitcast_to_f16(u[(start_byte_offset / 16u)][((start_byte_offset % 16u) / 4u)]);
+  vector<float16_t, 2> v_4 = tint_bitcast_to_f16(u[((4u + start_byte_offset) / 16u)][(((4u + start_byte_offset) % 16u) / 4u)]);
+  vector<float16_t, 2> v_5 = tint_bitcast_to_f16(u[((8u + start_byte_offset) / 16u)][(((8u + start_byte_offset) % 16u) / 4u)]);
+  return matrix<float16_t, 4, 2>(v_3, v_4, v_5, tint_bitcast_to_f16(u[((12u + start_byte_offset) / 16u)][(((12u + start_byte_offset) % 16u) / 4u)]));
 }
 
 [numthreads(1, 1, 1)]
 void f() {
   p = v_2(0u);
-  p[int(1)] = tint_bitcast_to_f16(u[0u].x);
-  p[int(1)] = tint_bitcast_to_f16(u[0u].x).yx;
-  p[int(0)][int(1)] = float16_t(f16tof32(u[0u].y));
+  p[1u] = tint_bitcast_to_f16(u[0u].x);
+  p[1u] = tint_bitcast_to_f16(u[0u].x).yx;
+  p[0u].y = float16_t(f16tof32(u[0u].y));
 }
 
-FXC validation failure:
-<scrubbed_path>(5,15-23): error X3000: syntax error: unexpected token 'float16_t'
-
-
-tint executable returned error: exit status 1

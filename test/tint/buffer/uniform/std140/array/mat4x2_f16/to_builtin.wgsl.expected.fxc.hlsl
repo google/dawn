@@ -14,27 +14,18 @@ vector<float16_t, 2> tint_bitcast_to_f16(uint src) {
 }
 
 matrix<float16_t, 4, 2> v_2(uint start_byte_offset) {
-  uint4 v_3 = u[(start_byte_offset / 16u)];
-  vector<float16_t, 2> v_4 = tint_bitcast_to_f16((((((start_byte_offset % 16u) / 4u) == 2u)) ? (v_3.z) : (v_3.x)));
-  uint4 v_5 = u[((4u + start_byte_offset) / 16u)];
-  vector<float16_t, 2> v_6 = tint_bitcast_to_f16(((((((4u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_5.z) : (v_5.x)));
-  uint4 v_7 = u[((8u + start_byte_offset) / 16u)];
-  vector<float16_t, 2> v_8 = tint_bitcast_to_f16(((((((8u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_7.z) : (v_7.x)));
-  uint4 v_9 = u[((12u + start_byte_offset) / 16u)];
-  return matrix<float16_t, 4, 2>(v_4, v_6, v_8, tint_bitcast_to_f16(((((((12u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_9.z) : (v_9.x))));
+  vector<float16_t, 2> v_3 = tint_bitcast_to_f16(u[(start_byte_offset / 16u)][((start_byte_offset % 16u) / 4u)]);
+  vector<float16_t, 2> v_4 = tint_bitcast_to_f16(u[((4u + start_byte_offset) / 16u)][(((4u + start_byte_offset) % 16u) / 4u)]);
+  vector<float16_t, 2> v_5 = tint_bitcast_to_f16(u[((8u + start_byte_offset) / 16u)][(((8u + start_byte_offset) % 16u) / 4u)]);
+  return matrix<float16_t, 4, 2>(v_3, v_4, v_5, tint_bitcast_to_f16(u[((12u + start_byte_offset) / 16u)][(((12u + start_byte_offset) % 16u) / 4u)]));
 }
 
 [numthreads(1, 1, 1)]
 void f() {
   matrix<float16_t, 2, 4> t = transpose(v_2(32u));
-  float16_t l = length(tint_bitcast_to_f16(u[0u].x).yx);
-  float16_t a = abs(tint_bitcast_to_f16(u[0u].x).yx[0u]);
-  float16_t v_10 = (t[int(0)][0u] + float16_t(l));
-  s.Store<float16_t>(0u, (v_10 + float16_t(a)));
+  float16_t l = length(tint_bitcast_to_f16(u[0u].y).yx);
+  float16_t a = abs(tint_bitcast_to_f16(u[0u].y).yx.x);
+  float16_t v_6 = (t[0u].x + float16_t(l));
+  s.Store<float16_t>(0u, (v_6 + float16_t(a)));
 }
 
-FXC validation failure:
-<scrubbed_path>(6,8-16): error X3000: syntax error: unexpected token 'float16_t'
-
-
-tint executable returned error: exit status 1

@@ -15,12 +15,12 @@ cbuffer cbuffer_u : register(b0) {
   uint4 u[32];
 };
 groupshared S w[4];
-vector<float16_t, 4> tint_bitcast_to_f16(uint4 src) {
-  uint4 v = src;
-  uint4 mask = (65535u).xxxx;
-  uint4 shift = (16u).xxxx;
-  float4 t_low = f16tof32((v & mask));
-  float4 t_high = f16tof32(((v >> shift) & mask));
+vector<float16_t, 4> tint_bitcast_to_f16(uint2 src) {
+  uint2 v = src;
+  uint2 mask = (65535u).xx;
+  uint2 shift = (16u).xx;
+  float2 t_low = f16tof32((v & mask));
+  float2 t_high = f16tof32(((v >> shift) & mask));
   float16_t v_1 = float16_t(t_low.x);
   float16_t v_2 = float16_t(t_high.x);
   float16_t v_3 = float16_t(t_low.y);
@@ -28,65 +28,68 @@ vector<float16_t, 4> tint_bitcast_to_f16(uint4 src) {
 }
 
 matrix<float16_t, 3, 4> v_4(uint start_byte_offset) {
-  vector<float16_t, 4> v_5 = tint_bitcast_to_f16(u[(start_byte_offset / 16u)]);
-  vector<float16_t, 4> v_6 = tint_bitcast_to_f16(u[((8u + start_byte_offset) / 16u)]);
-  return matrix<float16_t, 3, 4>(v_5, v_6, tint_bitcast_to_f16(u[((16u + start_byte_offset) / 16u)]));
+  uint4 v_5 = u[(start_byte_offset / 16u)];
+  vector<float16_t, 4> v_6 = tint_bitcast_to_f16((((((start_byte_offset % 16u) / 4u) == 2u)) ? (v_5.zw) : (v_5.xy)));
+  uint4 v_7 = u[((8u + start_byte_offset) / 16u)];
+  vector<float16_t, 4> v_8 = tint_bitcast_to_f16(((((((8u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_7.zw) : (v_7.xy)));
+  uint4 v_9 = u[((16u + start_byte_offset) / 16u)];
+  return matrix<float16_t, 3, 4>(v_6, v_8, tint_bitcast_to_f16(((((((16u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_9.zw) : (v_9.xy))));
 }
 
-S v_7(uint start_byte_offset) {
-  int v_8 = asint(u[(start_byte_offset / 16u)][((start_byte_offset % 16u) / 4u)]);
-  matrix<float16_t, 3, 4> v_9 = v_4((8u + start_byte_offset));
-  S v_10 = {v_8, v_9, asint(u[((64u + start_byte_offset) / 16u)][(((64u + start_byte_offset) % 16u) / 4u)])};
-  return v_10;
+S v_10(uint start_byte_offset) {
+  int v_11 = asint(u[(start_byte_offset / 16u)][((start_byte_offset % 16u) / 4u)]);
+  matrix<float16_t, 3, 4> v_12 = v_4((8u + start_byte_offset));
+  S v_13 = {v_11, v_12, asint(u[((64u + start_byte_offset) / 16u)][(((64u + start_byte_offset) % 16u) / 4u)])};
+  return v_13;
 }
 
 typedef S ary_ret[4];
-ary_ret v_11(uint start_byte_offset) {
+ary_ret v_14(uint start_byte_offset) {
   S a[4] = (S[4])0;
   {
-    uint v_12 = 0u;
-    v_12 = 0u;
+    uint v_15 = 0u;
+    v_15 = 0u;
     while(true) {
-      uint v_13 = v_12;
-      if ((v_13 >= 4u)) {
+      uint v_16 = v_15;
+      if ((v_16 >= 4u)) {
         break;
       }
-      S v_14 = v_7((start_byte_offset + (v_13 * 128u)));
-      a[v_13] = v_14;
+      S v_17 = v_10((start_byte_offset + (v_16 * 128u)));
+      a[v_16] = v_17;
       {
-        v_12 = (v_13 + 1u);
+        v_15 = (v_16 + 1u);
       }
       continue;
     }
   }
-  S v_15[4] = a;
-  return v_15;
+  S v_18[4] = a;
+  return v_18;
 }
 
 void f_inner(uint tint_local_index) {
   {
-    uint v_16 = 0u;
-    v_16 = tint_local_index;
+    uint v_19 = 0u;
+    v_19 = tint_local_index;
     while(true) {
-      uint v_17 = v_16;
-      if ((v_17 >= 4u)) {
+      uint v_20 = v_19;
+      if ((v_20 >= 4u)) {
         break;
       }
-      S v_18 = (S)0;
-      w[v_17] = v_18;
+      S v_21 = (S)0;
+      w[v_20] = v_21;
       {
-        v_16 = (v_17 + 1u);
+        v_19 = (v_20 + 1u);
       }
       continue;
     }
   }
   GroupMemoryBarrierWithGroupSync();
-  S v_19[4] = v_11(0u);
-  w = v_19;
-  S v_20 = v_7(256u);
-  w[int(1)] = v_20;
-  w[int(3)].m = v_4(264u);
-  w[int(1)].m[int(0)] = tint_bitcast_to_f16(u[1u]).ywxz;
+  S v_22[4] = v_14(0u);
+  w = v_22;
+  S v_23 = v_10(256u);
+  w[1u] = v_23;
+  w[3u].m = v_4(264u);
+  w[1u].m[0u] = tint_bitcast_to_f16(u[1u].xy).ywxz;
 }
 
 [numthreads(1, 1, 1)]
@@ -94,8 +97,3 @@ void f(f_inputs inputs) {
   f_inner(inputs.tint_local_index);
 }
 
-FXC validation failure:
-<scrubbed_path>(3,10-18): error X3000: syntax error: unexpected token 'float16_t'
-
-
-tint executable returned error: exit status 1

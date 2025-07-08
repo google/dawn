@@ -11,51 +11,44 @@ struct S {
 };
 
 
-ByteAddressBuffer tint_symbol : register(t0);
-RWByteAddressBuffer tint_symbol_1 : register(u1);
-void v(uint offset, matrix<float16_t, 2, 4> obj) {
-  tint_symbol_1.Store<vector<float16_t, 4> >((offset + 0u), obj[0u]);
-  tint_symbol_1.Store<vector<float16_t, 4> >((offset + 8u), obj[1u]);
+ByteAddressBuffer v : register(t0);
+RWByteAddressBuffer v_1 : register(u1);
+void v_2(uint offset, matrix<float16_t, 2, 4> obj) {
+  v_1.Store<vector<float16_t, 4> >((offset + 0u), obj[0u]);
+  v_1.Store<vector<float16_t, 4> >((offset + 8u), obj[1u]);
 }
 
-void v_1(uint offset, Inner obj) {
-  tint_symbol_1.Store<float16_t>((offset + 0u), obj.scalar_f16);
-  tint_symbol_1.Store<vector<float16_t, 3> >((offset + 8u), obj.vec3_f16);
-  v((offset + 16u), obj.mat2x4_f16);
+void v_3(uint offset, Inner obj) {
+  v_1.Store<float16_t>((offset + 0u), obj.scalar_f16);
+  v_1.Store<vector<float16_t, 3> >((offset + 8u), obj.vec3_f16);
+  v_2((offset + 16u), obj.mat2x4_f16);
 }
 
-void v_2(uint offset, S obj) {
-  Inner v_3 = obj.inner;
-  v_1((offset + 0u), v_3);
+void v_4(uint offset, S obj) {
+  Inner v_5 = obj.inner;
+  v_3((offset + 0u), v_5);
 }
 
-matrix<float16_t, 2, 4> v_4(uint offset) {
-  vector<float16_t, 4> v_5 = tint_symbol.Load<vector<float16_t, 4> >((offset + 0u));
-  return matrix<float16_t, 2, 4>(v_5, tint_symbol.Load<vector<float16_t, 4> >((offset + 8u)));
+matrix<float16_t, 2, 4> v_6(uint offset) {
+  return matrix<float16_t, 2, 4>(v.Load<vector<float16_t, 4> >((offset + 0u)), v.Load<vector<float16_t, 4> >((offset + 8u)));
 }
 
-Inner v_6(uint offset) {
-  float16_t v_7 = tint_symbol.Load<float16_t>((offset + 0u));
-  vector<float16_t, 3> v_8 = tint_symbol.Load<vector<float16_t, 3> >((offset + 8u));
-  Inner v_9 = {v_7, v_8, v_4((offset + 16u))};
-  return v_9;
+Inner v_7(uint offset) {
+  float16_t v_8 = v.Load<float16_t>((offset + 0u));
+  vector<float16_t, 3> v_9 = v.Load<vector<float16_t, 3> >((offset + 8u));
+  Inner v_10 = {v_8, v_9, v_6((offset + 16u))};
+  return v_10;
 }
 
-S v_10(uint offset) {
-  Inner v_11 = v_6((offset + 0u));
-  S v_12 = {v_11};
-  return v_12;
+S v_11(uint offset) {
+  Inner v_12 = v_7((offset + 0u));
+  S v_13 = {v_12};
+  return v_13;
 }
 
 [numthreads(1, 1, 1)]
 void main() {
-  S v_13 = v_10(0u);
-  S t = v_13;
-  v_2(0u, t);
+  S t = v_11(0u);
+  v_4(0u, t);
 }
 
-FXC validation failure:
-<scrubbed_path>(2,3-11): error X3000: unrecognized identifier 'float16_t'
-
-
-tint executable returned error: exit status 1

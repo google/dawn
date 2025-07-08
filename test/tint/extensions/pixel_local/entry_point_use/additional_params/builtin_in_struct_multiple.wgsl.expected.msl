@@ -1,11 +1,5 @@
 SKIP: FAILED
 
-..\..\src\tint\lang\msl\writer\raise\module_scope_vars.cc:239 internal compiler error: TINT_UNREACHABLE unhandled address space: pixel_local
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+pixel_local address space is not supported by the MSL backend
 
-tint executable returned error: exit status 0xc000001d
+tint executable returned error: exit status 1

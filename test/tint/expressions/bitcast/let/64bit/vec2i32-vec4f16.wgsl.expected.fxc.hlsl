@@ -19,8 +19,3 @@ void f() {
   vector<float16_t, 4> b = tint_bitcast_to_f16(a);
 }
 
-FXC validation failure:
-<scrubbed_path>(2,8-16): error X3000: syntax error: unexpected token 'float16_t'
-
-
-tint executable returned error: exit status 1

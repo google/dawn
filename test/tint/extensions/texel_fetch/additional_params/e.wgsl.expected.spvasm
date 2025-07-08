@@ -1,5 +1,8 @@
 SKIP: FAILED
 
+1:1: [VUID-StandaloneSpirv-Flat-04744] Fragment OpEntryPoint operand 1 with Input interfaces with integer or float type must have a Flat decoration for Entry Point id 23.
+  %f_Input = OpVariable %_ptr_Input_v4int Input
+
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
@@ -21,8 +24,6 @@ SKIP: FAILED
                OpName %in "in"
                OpName %f "f"
                OpDecorate %f_position_Input BuiltIn FragCoord
-               OpMemberDecorate %In 0 Offset 0
-               OpMemberDecorate %In 1 Offset 16
         %int = OpTypeInt 32 1
       %v4int = OpTypeVector %int 4
 %_ptr_Input_v4int = OpTypePointer Input %v4int
@@ -58,6 +59,5 @@ SKIP: FAILED
          %29 = OpFunctionCall %void %f_inner %28
                OpReturn
                OpFunctionEnd
-1:1: [VUID-StandaloneSpirv-Flat-04744] Fragment OpEntryPoint operand 1 with Input interfaces with integer or float type must have a Flat decoration for Entry Point id 23.
-  %f_Input = OpVariable %_ptr_Input_v4int Input
 
+tint executable returned error: exit status 1

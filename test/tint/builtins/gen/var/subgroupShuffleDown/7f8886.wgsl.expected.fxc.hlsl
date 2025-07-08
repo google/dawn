@@ -1,13 +1,14 @@
 SKIP: INVALID
 
+//
+// fragment_main
+//
 
 RWByteAddressBuffer prevent_dce : register(u0);
 float subgroupShuffleDown_7f8886() {
   float arg_0 = 1.0f;
   uint arg_1 = 1u;
-  float v = arg_0;
-  uint v_1 = arg_1;
-  float res = WaveReadLaneAt(v, (WaveGetLaneIndex() + v_1));
+  float res = WaveReadLaneAt(arg_0, (WaveGetLaneIndex() + arg_1));
   return res;
 }
 
@@ -15,13 +16,20 @@ void fragment_main() {
   prevent_dce.Store(0u, asuint(subgroupShuffleDown_7f8886()));
 }
 
+//
+// compute_main
+//
+
+RWByteAddressBuffer prevent_dce : register(u0);
+float subgroupShuffleDown_7f8886() {
+  float arg_0 = 1.0f;
+  uint arg_1 = 1u;
+  float res = WaveReadLaneAt(arg_0, (WaveGetLaneIndex() + arg_1));
+  return res;
+}
+
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store(0u, asuint(subgroupShuffleDown_7f8886()));
 }
 
-FXC validation failure:
-<scrubbed_path>(8,34-51): error X3004: undeclared identifier 'WaveGetLaneIndex'
-
-
-tint executable returned error: exit status 1

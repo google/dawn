@@ -39,8 +39,3 @@ main_outputs main(main_inputs inputs) {
   return v_2;
 }
 
-FXC validation failure:
-<scrubbed_path>(6,3-11): error X3000: unrecognized identifier 'float16_t'
-
-
-tint executable returned error: exit status 1

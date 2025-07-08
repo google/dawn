@@ -1,5 +1,8 @@
 SKIP: INVALID
 
+//
+// fragment_main
+//
 
 RWByteAddressBuffer prevent_dce : register(u0);
 uint3 subgroupAnd_ad0cd3() {
@@ -11,13 +14,18 @@ void fragment_main() {
   prevent_dce.Store3(0u, subgroupAnd_ad0cd3());
 }
 
+//
+// compute_main
+//
+
+RWByteAddressBuffer prevent_dce : register(u0);
+uint3 subgroupAnd_ad0cd3() {
+  uint3 res = WaveActiveBitAnd((1u).xxx);
+  return res;
+}
+
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store3(0u, subgroupAnd_ad0cd3());
 }
 
-FXC validation failure:
-<scrubbed_path>(4,15-40): error X3004: undeclared identifier 'WaveActiveBitAnd'
-
-
-tint executable returned error: exit status 1

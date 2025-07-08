@@ -31,12 +31,12 @@ void v_3(uint offset, S obj) {
   v_2((offset + 0u), v_4);
 }
 
-vector<float16_t, 4> tint_bitcast_to_f16(uint4 src) {
-  uint4 v = src;
-  uint4 mask = (65535u).xxxx;
-  uint4 shift = (16u).xxxx;
-  float4 t_low = f16tof32((v & mask));
-  float4 t_high = f16tof32(((v >> shift) & mask));
+vector<float16_t, 4> tint_bitcast_to_f16(uint2 src) {
+  uint2 v = src;
+  uint2 mask = (65535u).xx;
+  uint2 shift = (16u).xx;
+  float2 t_low = f16tof32((v & mask));
+  float2 t_high = f16tof32(((v >> shift) & mask));
   float16_t v_5 = float16_t(t_low.x);
   float16_t v_6 = float16_t(t_high.x);
   float16_t v_7 = float16_t(t_low.y);
@@ -44,33 +44,30 @@ vector<float16_t, 4> tint_bitcast_to_f16(uint4 src) {
 }
 
 matrix<float16_t, 2, 4> v_8(uint start_byte_offset) {
-  vector<float16_t, 4> v_9 = tint_bitcast_to_f16(u[(start_byte_offset / 16u)]);
-  return matrix<float16_t, 2, 4>(v_9, tint_bitcast_to_f16(u[((8u + start_byte_offset) / 16u)]));
+  uint4 v_9 = u[(start_byte_offset / 16u)];
+  vector<float16_t, 4> v_10 = tint_bitcast_to_f16((((((start_byte_offset % 16u) / 4u) == 2u)) ? (v_9.zw) : (v_9.xy)));
+  uint4 v_11 = u[((8u + start_byte_offset) / 16u)];
+  return matrix<float16_t, 2, 4>(v_10, tint_bitcast_to_f16(((((((8u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_11.zw) : (v_11.xy))));
 }
 
-Inner v_10(uint start_byte_offset) {
-  uint v_11 = u[(start_byte_offset / 16u)][((start_byte_offset % 16u) / 4u)];
-  float16_t v_12 = float16_t(f16tof32((v_11 >> ((((start_byte_offset % 4u) == 0u)) ? (0u) : (16u)))));
-  vector<float16_t, 3> v_13 = tint_bitcast_to_f16(u[((8u + start_byte_offset) / 16u)]).xyz;
-  Inner v_14 = {v_12, v_13, v_8((16u + start_byte_offset))};
-  return v_14;
-}
-
-S v_15(uint start_byte_offset) {
-  Inner v_16 = v_10(start_byte_offset);
-  S v_17 = {v_16};
+Inner v_12(uint start_byte_offset) {
+  uint v_13 = u[(start_byte_offset / 16u)][((start_byte_offset % 16u) / 4u)];
+  float16_t v_14 = float16_t(f16tof32((v_13 >> ((((start_byte_offset % 4u) == 0u)) ? (0u) : (16u)))));
+  uint4 v_15 = u[((8u + start_byte_offset) / 16u)];
+  vector<float16_t, 3> v_16 = tint_bitcast_to_f16(((((((8u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_15.zw) : (v_15.xy))).xyz;
+  Inner v_17 = {v_14, v_16, v_8((16u + start_byte_offset))};
   return v_17;
+}
+
+S v_18(uint start_byte_offset) {
+  Inner v_19 = v_12(start_byte_offset);
+  S v_20 = {v_19};
+  return v_20;
 }
 
 [numthreads(1, 1, 1)]
 void main() {
-  S v_18 = v_15(0u);
-  S x = v_18;
+  S x = v_18(0u);
   v_3(0u, x);
 }
 
-FXC validation failure:
-<scrubbed_path>(2,3-11): error X3000: unrecognized identifier 'float16_t'
-
-
-tint executable returned error: exit status 1

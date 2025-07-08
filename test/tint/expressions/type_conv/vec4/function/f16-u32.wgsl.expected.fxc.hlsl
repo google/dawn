@@ -8,7 +8,7 @@ vector<float16_t, 4> m() {
 }
 
 uint4 tint_v4f16_to_v4u32(vector<float16_t, 4> value) {
-  return (((value <= (float16_t(65504.0h)).xxxx)) ? ((((value >= (float16_t(0.0h)).xxxx)) ? (uint4(value)) : ((0u).xxxx))) : ((4294967295u).xxxx));
+  return uint4(clamp(value, (float16_t(0.0h)).xxxx, (float16_t(65504.0h)).xxxx));
 }
 
 void f() {
@@ -19,8 +19,3 @@ void f() {
 void unused_entry_point() {
 }
 
-FXC validation failure:
-<scrubbed_path>(2,8-16): error X3000: unrecognized identifier 'float16_t'
-
-
-tint executable returned error: exit status 1

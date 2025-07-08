@@ -1,5 +1,37 @@
 SKIP: INVALID
 
+//
+// fragment_main
+//
+
+RWByteAddressBuffer prevent_dce : register(u0);
+int transpose_faeb05() {
+  matrix<float16_t, 4, 2> res = matrix<float16_t, 4, 2>((float16_t(1.0h)).xx, (float16_t(1.0h)).xx, (float16_t(1.0h)).xx, (float16_t(1.0h)).xx);
+  return (((res[0u].x == float16_t(0.0h))) ? (int(1)) : (int(0)));
+}
+
+void fragment_main() {
+  prevent_dce.Store(0u, asuint(transpose_faeb05()));
+}
+
+//
+// compute_main
+//
+
+RWByteAddressBuffer prevent_dce : register(u0);
+int transpose_faeb05() {
+  matrix<float16_t, 4, 2> res = matrix<float16_t, 4, 2>((float16_t(1.0h)).xx, (float16_t(1.0h)).xx, (float16_t(1.0h)).xx, (float16_t(1.0h)).xx);
+  return (((res[0u].x == float16_t(0.0h))) ? (int(1)) : (int(0)));
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  prevent_dce.Store(0u, asuint(transpose_faeb05()));
+}
+
+//
+// vertex_main
+//
 struct VertexOutput {
   float4 pos;
   int prevent_dce;
@@ -11,40 +43,22 @@ struct vertex_main_outputs {
 };
 
 
-RWByteAddressBuffer prevent_dce : register(u0);
 int transpose_faeb05() {
   matrix<float16_t, 4, 2> res = matrix<float16_t, 4, 2>((float16_t(1.0h)).xx, (float16_t(1.0h)).xx, (float16_t(1.0h)).xx, (float16_t(1.0h)).xx);
-  return (((res[int(0)].x == float16_t(0.0h))) ? (int(1)) : (int(0)));
-}
-
-void fragment_main() {
-  prevent_dce.Store(0u, asuint(transpose_faeb05()));
-}
-
-[numthreads(1, 1, 1)]
-void compute_main() {
-  prevent_dce.Store(0u, asuint(transpose_faeb05()));
+  return (((res[0u].x == float16_t(0.0h))) ? (int(1)) : (int(0)));
 }
 
 VertexOutput vertex_main_inner() {
-  VertexOutput tint_symbol = (VertexOutput)0;
-  tint_symbol.pos = (0.0f).xxxx;
-  tint_symbol.prevent_dce = transpose_faeb05();
-  VertexOutput v = tint_symbol;
-  return v;
+  VertexOutput v = (VertexOutput)0;
+  v.pos = (0.0f).xxxx;
+  v.prevent_dce = transpose_faeb05();
+  VertexOutput v_1 = v;
+  return v_1;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_1 = vertex_main_inner();
-  VertexOutput v_2 = v_1;
-  VertexOutput v_3 = v_1;
-  vertex_main_outputs v_4 = {v_3.prevent_dce, v_2.pos};
-  return v_4;
+  VertexOutput v_2 = vertex_main_inner();
+  vertex_main_outputs v_3 = {v_2.prevent_dce, v_2.pos};
+  return v_3;
 }
 
-FXC validation failure:
-<scrubbed_path>(14,10-18): error X3000: syntax error: unexpected token 'float16_t'
-<scrubbed_path>(15,13-15): error X3004: undeclared identifier 'res'
-
-
-tint executable returned error: exit status 1

@@ -1,5 +1,6 @@
 SKIP: INVALID
 
+
 groupshared int a;
 void foo(uint v) {
   int4 x = unpack_s8s32(int8_t4_packed(v));
@@ -13,8 +14,3 @@ void foo(uint v) {
 void unused_entry_point() {
 }
 
-FXC validation failure:
-<scrubbed_path>(4,25-41): error X3004: undeclared identifier 'int8_t4_packed'
-
-
-tint executable returned error: exit status 1

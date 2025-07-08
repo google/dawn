@@ -40,14 +40,8 @@ float4 main_inner(VertexInputs0 inputs0, uint loc1, uint instance_index, VertexI
 
 main_outputs main(main_inputs inputs) {
   VertexInputs0 v_1 = {inputs.VertexInputs0_vertex_index, inputs.VertexInputs0_loc0};
-  VertexInputs0 v_2 = v_1;
-  VertexInputs1 v_3 = {inputs.VertexInputs1_loc2, inputs.VertexInputs1_loc3, inputs.VertexInputs1_loc5};
-  main_outputs v_4 = {main_inner(v_2, inputs.loc1, inputs.instance_index, v_3, inputs.loc4)};
-  return v_4;
+  VertexInputs1 v_2 = {inputs.VertexInputs1_loc2, inputs.VertexInputs1_loc3, inputs.VertexInputs1_loc5};
+  main_outputs v_3 = {main_inner(v_1, inputs.loc1, inputs.instance_index, v_2, inputs.loc4)};
+  return v_3;
 }
 
-FXC validation failure:
-<scrubbed_path>(9,10-18): error X3000: syntax error: unexpected token 'float16_t'
-
-
-tint executable returned error: exit status 1

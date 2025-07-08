@@ -22,7 +22,7 @@ cbuffer cbuffer_x_10 : register(b1) {
 static float4 gl_FragCoord = (0.0f).xxxx;
 static float4 x_GLF_color = (0.0f).xxxx;
 int tint_f32_to_i32(float value) {
-  return (((value <= 2147483520.0f)) ? ((((value >= -2147483648.0f)) ? (int(value)) : (int(-2147483648)))) : (int(2147483647)));
+  return int(clamp(value, -2147483648.0f, 2147483520.0f));
 }
 
 void main_1() {
@@ -46,7 +46,11 @@ void main_1() {
   int x_63 = asint(x_10[1u].x);
   i = x_63;
   {
+    uint2 tint_loop_idx = (4294967295u).xx;
     while(true) {
+      if (all((tint_loop_idx == (0u).xx))) {
+        break;
+      }
       bool x_82 = false;
       bool x_83_phi = false;
       int x_68 = i;
@@ -72,6 +76,10 @@ void main_1() {
       int x_86 = b;
       b = (x_86 + int(1));
       {
+        uint tint_low_inc = (tint_loop_idx.x - 1u);
+        tint_loop_idx.x = tint_low_inc;
+        uint tint_carry = uint((tint_low_inc == 4294967295u));
+        tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
         int x_88 = i;
         i = (x_88 + int(1));
       }
@@ -88,29 +96,28 @@ void main_1() {
     int x_107 = asint(x_10[2u].x);
     int x_110 = asint(x_10[2u].x);
     int x_113 = asint(x_10[1u].x);
-    int v_3 = min(max(x_97, x_99), x_101);
+    uint v_3 = min(uint(min(max(x_97, x_99), x_101)), 1u);
     float v_4 = float(x_104);
     float v_5 = float(x_107);
     float v_6 = float(x_110);
     data[v_3] = float4(v_4, v_5, v_6, float(x_113));
   }
   int x_118 = asint(x_10[1u].x);
-  float4 x_120 = data[x_118];
-  x_GLF_color = float4(x_120[0u], x_120[1u], x_120[2u], x_120[3u]);
+  uint v_7 = min(uint(x_118), 1u);
+  float4 x_120 = data[v_7];
+  x_GLF_color = float4(x_120.x, x_120.y, x_120.z, x_120.w);
 }
 
 main_out main_inner(float4 gl_FragCoord_param) {
   gl_FragCoord = gl_FragCoord_param;
   main_1();
-  main_out v_7 = {x_GLF_color};
-  return v_7;
+  main_out v_8 = {x_GLF_color};
+  return v_8;
 }
 
 main_outputs main(main_inputs inputs) {
-  main_out v_8 = main_inner(float4(inputs.gl_FragCoord_param.xyz, (1.0f / inputs.gl_FragCoord_param[3u])));
-  main_outputs v_9 = {v_8.x_GLF_color_1};
-  return v_9;
+  main_out v_9 = main_inner(float4(inputs.gl_FragCoord_param.xyz, (1.0f / inputs.gl_FragCoord_param.w)));
+  main_outputs v_10 = {v_9.x_GLF_color_1};
+  return v_10;
 }
 
-
-tint executable returned error: exit status 0xc00000fd

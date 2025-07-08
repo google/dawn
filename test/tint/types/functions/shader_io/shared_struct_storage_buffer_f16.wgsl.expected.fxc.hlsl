@@ -36,12 +36,7 @@ void frag_main_inner(S input) {
 }
 
 void frag_main(frag_main_inputs inputs) {
-  S v_2 = {inputs.S_f, inputs.S_u, float4(inputs.S_v.xyz, (1.0f / inputs.S_v[3u])), inputs.S_x, inputs.S_y};
+  S v_2 = {inputs.S_f, inputs.S_u, float4(inputs.S_v.xyz, (1.0f / inputs.S_v.w)), inputs.S_x, inputs.S_y};
   frag_main_inner(v_2);
 }
 
-FXC validation failure:
-<scrubbed_path>(5,3-11): error X3000: unrecognized identifier 'float16_t'
-
-
-tint executable returned error: exit status 1

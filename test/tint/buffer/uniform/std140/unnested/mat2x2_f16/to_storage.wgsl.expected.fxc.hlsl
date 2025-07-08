@@ -19,10 +19,8 @@ void v_2(uint offset, matrix<float16_t, 2, 2> obj) {
 }
 
 matrix<float16_t, 2, 2> v_3(uint start_byte_offset) {
-  uint4 v_4 = u[(start_byte_offset / 16u)];
-  vector<float16_t, 2> v_5 = tint_bitcast_to_f16((((((start_byte_offset % 16u) / 4u) == 2u)) ? (v_4.z) : (v_4.x)));
-  uint4 v_6 = u[((4u + start_byte_offset) / 16u)];
-  return matrix<float16_t, 2, 2>(v_5, tint_bitcast_to_f16(((((((4u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_6.z) : (v_6.x))));
+  vector<float16_t, 2> v_4 = tint_bitcast_to_f16(u[(start_byte_offset / 16u)][((start_byte_offset % 16u) / 4u)]);
+  return matrix<float16_t, 2, 2>(v_4, tint_bitcast_to_f16(u[((4u + start_byte_offset) / 16u)][(((4u + start_byte_offset) % 16u) / 4u)]));
 }
 
 [numthreads(1, 1, 1)]
@@ -33,8 +31,3 @@ void f() {
   s.Store<float16_t>(2u, float16_t(f16tof32(u[0u].y)));
 }
 
-FXC validation failure:
-<scrubbed_path>(6,8-16): error X3000: syntax error: unexpected token 'float16_t'
-
-
-tint executable returned error: exit status 1

@@ -3,7 +3,7 @@ SKIP: INVALID
 
 static vector<float16_t, 2> u = (float16_t(1.0h)).xx;
 uint2 tint_v2f16_to_v2u32(vector<float16_t, 2> value) {
-  return (((value <= (float16_t(65504.0h)).xx)) ? ((((value >= (float16_t(0.0h)).xx)) ? (uint2(value)) : ((0u).xx))) : ((4294967295u).xx));
+  return uint2(clamp(value, (float16_t(0.0h)).xx, (float16_t(65504.0h)).xx));
 }
 
 void f() {
@@ -14,8 +14,3 @@ void f() {
 void unused_entry_point() {
 }
 
-FXC validation failure:
-<scrubbed_path>(2,15-23): error X3000: syntax error: unexpected token 'float16_t'
-
-
-tint executable returned error: exit status 1
