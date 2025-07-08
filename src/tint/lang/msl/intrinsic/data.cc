@@ -1351,7 +1351,6 @@ constexpr MatcherIndex kMatcherIndices[] = {
   /* [196] */ MatcherIndex(40),
   /* [197] */ MatcherIndex(45),
   /* [198] */ MatcherIndex(46),
-  /* [199] */ MatcherIndex(47),
 };
 
 static_assert(MatcherIndicesIndex::CanIndex(kMatcherIndices),
@@ -3147,12 +3146,6 @@ constexpr TemplateInfo kTemplates[] = {
     /* [19] */
     /* name */ "T",
     /* matcher_indices */ MatcherIndicesIndex(198),
-    /* kind */ TemplateInfo::Kind::kType,
-  },
-  {
-    /* [20] */
-    /* name */ "T",
-    /* matcher_indices */ MatcherIndicesIndex(199),
     /* kind */ TemplateInfo::Kind::kType,
   },
 };
@@ -5218,17 +5211,6 @@ constexpr OverloadInfo kOverloads[] = {
     /* return_matcher_indices */ MatcherIndicesIndex(/* invalid */),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
-  {
-    /* [187] */
-    /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
-    /* num_parameters */ 2,
-    /* num_explicit_templates */ 0,
-    /* num_templates   */ 1,
-    /* templates */ TemplateIndex(20),
-    /* parameters */ ParameterIndex(319),
-    /* return_matcher_indices */ MatcherIndicesIndex(3),
-    /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
-  },
 };
 
 static_assert(OverloadIndex::CanIndex(kOverloads),
@@ -5629,23 +5611,6 @@ constexpr IntrinsicInfo kBuiltins[] = {
   },
 };
 
-constexpr IntrinsicInfo kBinaryOperators[] = {
-  {
-    /* [0] */
-    /* op +[T : iu8](T, T) -> T */
-    /* num overloads */ 1,
-    /* overloads */ OverloadIndex(187),
-  },
-  {
-    /* [1] */
-    /* op *[T : iu8](T, T) -> T */
-    /* num overloads */ 1,
-    /* overloads */ OverloadIndex(187),
-  },
-};
-constexpr uint8_t kBinaryOperatorPlus = 0;
-constexpr uint8_t kBinaryOperatorStar = 1;
-
 // clang-format on
 
 }  // anonymous namespace
@@ -5660,9 +5625,9 @@ const core::intrinsic::TableData Dialect::kData{
     /* const_eval_functions */ Empty,
     /* ctor_conv */ Empty,
     /* builtins */ kBuiltins,
-    /* binary '+' */ kBinaryOperators[kBinaryOperatorPlus],
+    /* binary '+' */ tint::core::intrinsic::kNoOverloads,
     /* binary '-' */ tint::core::intrinsic::kNoOverloads,
-    /* binary '*' */ kBinaryOperators[kBinaryOperatorStar],
+    /* binary '*' */ tint::core::intrinsic::kNoOverloads,
     /* binary '/' */ tint::core::intrinsic::kNoOverloads,
     /* binary '%' */ tint::core::intrinsic::kNoOverloads,
     /* binary '^' */ tint::core::intrinsic::kNoOverloads,

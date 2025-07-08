@@ -46,7 +46,6 @@
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/msl/barrier_type.h"
 #include "src/tint/lang/msl/builtin_fn.h"
-#include "src/tint/lang/msl/ir/binary.h"
 #include "src/tint/lang/msl/ir/builtin_call.h"
 #include "src/tint/lang/msl/ir/component.h"
 #include "src/tint/lang/msl/ir/member_builtin_call.h"

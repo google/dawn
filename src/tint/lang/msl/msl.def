@@ -393,8 +393,3 @@ fn convert(u32) -> u64
   subgroup_matrix<subgroup_matrix_kind_right, S, C, K>,
   subgroup_matrix<subgroup_matrix_kind_result, S, C, R>)
 
-////////////////////////////////////////////////////////////////////////////////
-// Binary Operators                                                           //
-////////////////////////////////////////////////////////////////////////////////
-implicit(T: iu8) op + (T, T) -> T
-implicit(T: iu8) op * (T, T) -> T
