@@ -31,14 +31,18 @@
 #include <functional>
 #include <vector>
 
-#include "dawn/common/NonMovable.h"
+#include "dawn/common/NonCopyable.h"
 #include "dawn/common/StackAllocated.h"
 
 namespace dawn {
 
 // Defer object runs series of cleanup functions when it's destructor is called.
-class Defer : public NonMovable, StackAllocated {
+class Defer : public NonCopyable, StackAllocated {
   public:
+    Defer() = default;
+    Defer(Defer&&) = default;
+    Defer& operator=(Defer&&) = default;
+
     ~Defer();
 
     void Append(std::function<void()> f);

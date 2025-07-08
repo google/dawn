@@ -34,7 +34,6 @@
 #include "dawn/common/Defer.h"
 #include "dawn/common/MutexProtected.h"
 #include "dawn/common/Ref.h"
-#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::native {
 
@@ -57,16 +56,18 @@ struct DeviceMutexTraits {
 // extending the Guard class to enforce the correct destructor ordering.
 class DeviceGuardBase {
   protected:
-    explicit DeviceGuardBase(std::optional<class Defer>* defer, RecursiveMutex* mutex = nullptr);
-    virtual ~DeviceGuardBase();
+    explicit DeviceGuardBase(RecursiveMutex* mutex = nullptr);
 
   protected:
     // Since guards are always stack allocated, they must be cleaned up in the reverse order of
     // creation. That said, the first guard to be created in a given stack will always be the guard
-    // to resolve the defers. This is a raw pointer because the Device is the one that actually owns
-    // the Defer. Note that this is set by the implementing class DeviceGuard to ensure that the
-    // Device lock has been acquired before any modifitcations to it.
-    raw_ptr<std::optional<class Defer>> mDefer = nullptr;
+    // to resolve the defers. The fields below are actually set by the implementing class
+    // DeviceGuard to ensure that the Device lock has been acquired before any modifitcations. The
+    // actual Defer object will be moved into mDefer if necessary by the ~DeviceGuard, again because
+    // we don't want to modify state without the lock, but we want to destroy the Defer object
+    // without the lock.
+    bool mHandleDefer = false;
+    std::optional<class Defer> mDefer = std::nullopt;
 
   private:
     // Optionally, this base class may hold a strong reference to the actual mutex. This is used
@@ -84,6 +85,7 @@ class DeviceGuard : public detail::DeviceGuardBase,
                     private ::dawn::detail::Guard<DeviceBase, detail::DeviceMutexTraits> {
   public:
     using GuardBase = ::dawn::detail::Guard<DeviceBase, detail::DeviceMutexTraits>;
+    ~DeviceGuard();
 
   private:
     friend class DeviceBase;
@@ -93,7 +95,6 @@ class DeviceGuard : public detail::DeviceGuardBase,
     using detail::DeviceGuardBase::mDefer;
 
     explicit DeviceGuard(DeviceBase* device,
-                         std::optional<class Defer>* defer,
                          RecursiveMutex* mutex = nullptr);
 };
 
