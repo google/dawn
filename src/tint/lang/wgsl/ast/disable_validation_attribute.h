@@ -39,8 +39,7 @@ namespace tint::ast {
 enum class DisabledValidation {
     /// When applied to a function, the validator will not complain there is no body to a function.
     kFunctionHasNoBody,
-    /// When applied to a module-scoped variable, the validator will not complain if two resource
-    /// variables have the same binding points.
+    /// When applied to a member attribute, a stride attribute may be applied to non-array types.
     kIgnoreStrideAttribute,
 };
 
