@@ -1570,6 +1570,122 @@ class Parser {
 
         spirv_id_to_block_.insert({src.id(), current_block_});
 
+        ProcessInstructions(src);
+
+        // The loop merge needs to be emitted if this was a loop block. It has
+        // to be emitted back into the original destination.
+        if (loop_merge_inst) {
+            auto* loop = StopWalkingAt(src.id())->As<core::ir::Loop>();
+            TINT_ASSERT(loop);
+
+            // Add the body terminator if necessary
+            if (!loop->Body()->Terminator()) {
+                loop->Body()->Append(b_.Unreachable());
+            }
+
+            // Push id stack entry for the continuing block. We don't use EmitBlockParent to do this
+            // because we need the scope to exist until after we process any `continue_blk_phis_`.
+            id_stack_.emplace_back();
+
+            auto continue_id = loop_merge_inst->GetSingleWordInOperand(1);
+
+            // We only need to emit the continuing block if:
+            //  a) It is not the loop header
+            //  b) It has inbound branches. This works around a case where you can have a continuing
+            //     where uses values which are very difficult to propagate, but the continuing is
+            //     never reached anyway, so the propagation is useless.
+            if (continue_id != src.id() &&
+                !loop->Continuing()->InboundSiblingBranches().IsEmpty()) {
+                const auto& bb_continue = current_spirv_function_->FindBlock(continue_id);
+
+                current_blocks_.insert(loop->Continuing());
+                // Emit the continuing block.
+                EmitBlock(loop->Continuing(), *bb_continue);
+
+                current_blocks_.erase(loop->Continuing());
+            }
+
+            if (!loop->Continuing()->Terminator()) {
+                loop->Continuing()->Append(b_.NextIteration(loop));
+            }
+
+            // If this continue block needs to pass any `phi` instructions back to
+            // the main loop body.
+            //
+            // We have to do this here because we need to have emitted the loop
+            // body before we can get the values used in the continue block.
+            auto phis = continue_blk_phis_.find(continue_id);
+            if (phis != continue_blk_phis_.end()) {
+                for (auto value_id : phis->second) {
+                    auto* value = Value(value_id);
+
+                    tint::Switch(
+                        loop->Continuing()->Terminator(),  //
+                        [&](core::ir::NextIteration* ni) { ni->PushOperand(value); },
+                        [&](core::ir::BreakIf* bi) {
+                            // TODO(dsinclair): Need to change the break-if insertion of there
+                            // happens to be exit values, but those are rare, so leave this for when
+                            // we have test case.
+                            TINT_ASSERT(bi->ExitValues().IsEmpty());
+
+                            auto len = bi->NextIterValues().Length();
+                            bi->PushOperand(value);
+                            bi->SetNumNextIterValues(len + 1);
+                        },
+                        TINT_ICE_ON_NO_MATCH);
+                }
+            }
+
+            id_stack_.pop_back();
+        }
+
+        // For any `OpPhi` values we saw, insert their `Value` now. We do this
+        // at the end of the loop because a phi can refer to instructions
+        // defined after it in the block.
+        auto replace = values_to_replace_.back();
+        for (auto& val : replace) {
+            auto* value = ValueNoPropagate(val.value_id);
+            val.terminator->SetOperand(val.idx, value);
+        }
+        values_to_replace_.pop_back();
+
+        if (loop_merge_inst) {
+            auto* loop = StopWalkingAt(src.id())->As<core::ir::Loop>();
+            TINT_ASSERT(loop);
+
+            current_blocks_.erase(loop->Body());
+            id_stack_.pop_back();
+
+            // If we added phi's to the continuing block, we may have exits from the body which
+            // aren't valid.
+            auto continuing_param_count = loop->Continuing()->Params().Length();
+            if (continuing_param_count > 0) {
+                for (auto incoming : loop->Continuing()->InboundSiblingBranches()) {
+                    TINT_ASSERT(incoming->Is<core::ir::Continue>());
+
+                    // Check if the block this instruction exists in has default phi result that we
+                    // can append.
+                    auto inst_to_blk_iter = inst_to_spirv_block_.find(incoming);
+                    if (inst_to_blk_iter != inst_to_spirv_block_.end()) {
+                        uint32_t spirv_blk = inst_to_blk_iter->second;
+                        auto phi_values_from_loop_header = block_phi_values_[spirv_blk];
+                        // If there were phi values, push them to this instruction
+                        for (auto value_id : phi_values_from_loop_header) {
+                            auto* value = Value(value_id);
+                            incoming->PushOperand(value);
+                        }
+                    }
+                }
+            }
+
+            // Emit the merge block
+            auto merge_id = loop_merge_inst->GetSingleWordInOperand(0);
+            const auto& merge_bb = current_spirv_function_->FindBlock(merge_id);
+            EmitBlock(dst, *merge_bb);
+        }
+    }
+
+    void ProcessInstructions(spvtools::opt::BasicBlock& src) {
         for (auto& inst : src) {
             switch (inst.opcode()) {
                 case spv::Op::OpNop:
@@ -2000,118 +2116,6 @@ class Parser {
                     TINT_UNIMPLEMENTED()
                         << "unhandled SPIR-V instruction: " << static_cast<uint32_t>(inst.opcode());
             }
-        }
-
-        // The loop merge needs to be emitted if this was a loop block. It has
-        // to be emitted back into the original destination.
-        if (loop_merge_inst) {
-            auto* loop = StopWalkingAt(src.id())->As<core::ir::Loop>();
-            TINT_ASSERT(loop);
-
-            // Add the body terminator if necessary
-            if (!loop->Body()->Terminator()) {
-                loop->Body()->Append(b_.Unreachable());
-            }
-
-            // Push id stack entry for the continuing block. We don't use EmitBlockParent to do this
-            // because we need the scope to exist until after we process any `continue_blk_phis_`.
-            id_stack_.emplace_back();
-
-            auto continue_id = loop_merge_inst->GetSingleWordInOperand(1);
-
-            // We only need to emit the continuing block if:
-            //  a) It is not the loop header
-            //  b) It has inbound branches. This works around a case where you can have a continuing
-            //     where uses values which are very difficult to propagate, but the continuing is
-            //     never reached anyway, so the propagation is useless.
-            if (continue_id != src.id() &&
-                !loop->Continuing()->InboundSiblingBranches().IsEmpty()) {
-                const auto& bb_continue = current_spirv_function_->FindBlock(continue_id);
-
-                current_blocks_.insert(loop->Continuing());
-                // Emit the continuing block.
-                EmitBlock(loop->Continuing(), *bb_continue);
-
-                current_blocks_.erase(loop->Continuing());
-            }
-
-            if (!loop->Continuing()->Terminator()) {
-                loop->Continuing()->Append(b_.NextIteration(loop));
-            }
-
-            // If this continue block needs to pass any `phi` instructions back to
-            // the main loop body.
-            //
-            // We have to do this here because we need to have emitted the loop
-            // body before we can get the values used in the continue block.
-            auto phis = continue_blk_phis_.find(continue_id);
-            if (phis != continue_blk_phis_.end()) {
-                for (auto value_id : phis->second) {
-                    auto* value = Value(value_id);
-
-                    tint::Switch(
-                        loop->Continuing()->Terminator(),  //
-                        [&](core::ir::NextIteration* ni) { ni->PushOperand(value); },
-                        [&](core::ir::BreakIf* bi) {
-                            // TODO(dsinclair): Need to change the break-if insertion of there
-                            // happens to be exit values, but those are rare, so leave this for when
-                            // we have test case.
-                            TINT_ASSERT(bi->ExitValues().IsEmpty());
-
-                            auto len = bi->NextIterValues().Length();
-                            bi->PushOperand(value);
-                            bi->SetNumNextIterValues(len + 1);
-                        },
-                        TINT_ICE_ON_NO_MATCH);
-                }
-            }
-
-            id_stack_.pop_back();
-        }
-
-        // For any `OpPhi` values we saw, insert their `Value` now. We do this
-        // at the end of the loop because a phi can refer to instructions
-        // defined after it in the block.
-        auto replace = values_to_replace_.back();
-        for (auto& val : replace) {
-            auto* value = ValueNoPropagate(val.value_id);
-            val.terminator->SetOperand(val.idx, value);
-        }
-        values_to_replace_.pop_back();
-
-        if (loop_merge_inst) {
-            auto* loop = StopWalkingAt(src.id())->As<core::ir::Loop>();
-            TINT_ASSERT(loop);
-
-            current_blocks_.erase(loop->Body());
-            id_stack_.pop_back();
-
-            // If we added phi's to the continuing block, we may have exits from the body which
-            // aren't valid.
-            auto continuing_param_count = loop->Continuing()->Params().Length();
-            if (continuing_param_count > 0) {
-                for (auto incoming : loop->Continuing()->InboundSiblingBranches()) {
-                    TINT_ASSERT(incoming->Is<core::ir::Continue>());
-
-                    // Check if the block this instruction exists in has default phi result that we
-                    // can append.
-                    auto inst_to_blk_iter = inst_to_spirv_block_.find(incoming);
-                    if (inst_to_blk_iter != inst_to_spirv_block_.end()) {
-                        uint32_t spirv_blk = inst_to_blk_iter->second;
-                        auto phi_values_from_loop_header = block_phi_values_[spirv_blk];
-                        // If there were phi values, push them to this instruction
-                        for (auto value_id : phi_values_from_loop_header) {
-                            auto* value = Value(value_id);
-                            incoming->PushOperand(value);
-                        }
-                    }
-                }
-            }
-
-            // Emit the merge block
-            auto merge_id = loop_merge_inst->GetSingleWordInOperand(0);
-            const auto& merge_bb = current_spirv_function_->FindBlock(merge_id);
-            EmitBlock(dst, *merge_bb);
         }
     }
 
