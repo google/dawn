@@ -447,6 +447,11 @@ func validate(fqn sem.FullyQualifiedName, uses *sem.StageUses) bool {
 		default:
 			return false
 		}
+	case "texel_buffer":
+		access := fqn.TemplateArguments[1].(sem.FullyQualifiedName).Target.(*sem.EnumEntry).Name
+		if access != "read_write" && access != "read" {
+			return false
+		}
 	}
 
 	for _, arg := range fqn.TemplateArguments {
