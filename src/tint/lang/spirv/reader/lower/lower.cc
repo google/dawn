@@ -33,6 +33,7 @@
 #include "src/tint/lang/spirv/reader/lower/atomics.h"
 #include "src/tint/lang/spirv/reader/lower/builtins.h"
 #include "src/tint/lang/spirv/reader/lower/decompose_strided_array.h"
+#include "src/tint/lang/spirv/reader/lower/decompose_strided_matrix.h"
 #include "src/tint/lang/spirv/reader/lower/shader_io.h"
 #include "src/tint/lang/spirv/reader/lower/texture.h"
 #include "src/tint/lang/spirv/reader/lower/vector_element_pointer.h"
@@ -52,6 +53,9 @@ Result<SuccessType> Lower(core::ir::Module& mod) {
     RUN_TRANSFORM(lower::VectorElementPointer, mod);
     RUN_TRANSFORM(lower::ShaderIO, mod);
     RUN_TRANSFORM(lower::Builtins, mod);
+    // DecomposeStridedMatrix must come before DecomposeStridedArray, as it introduces strided
+    // arrays that need to be replaced.
+    RUN_TRANSFORM(lower::DecomposeStridedMatrix, mod);
     RUN_TRANSFORM(lower::DecomposeStridedArray, mod);
     RUN_TRANSFORM(lower::Atomics, mod);
     RUN_TRANSFORM(lower::Texture, mod);

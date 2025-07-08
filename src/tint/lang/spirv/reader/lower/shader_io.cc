@@ -695,6 +695,7 @@ Result<SuccessType> ShaderIO(core::ir::Module& ir) {
                                               core::ir::Capability::kAllowOverrides,
                                               core::ir::Capability::kAllowPhonyInstructions,
                                               core::ir::Capability::kAllowNonCoreTypes,
+                                              core::ir::Capability::kAllowStructMatrixDecorations,
                                           });
     if (result != Success) {
         return result.Failure();

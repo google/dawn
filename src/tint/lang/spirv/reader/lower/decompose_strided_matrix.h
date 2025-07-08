@@ -25,10 +25,9 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_CORE_IR_TRANSFORM_DEAD_CODE_ELIMINATION_H_
-#define SRC_TINT_LANG_CORE_IR_TRANSFORM_DEAD_CODE_ELIMINATION_H_
+#ifndef SRC_TINT_LANG_SPIRV_READER_LOWER_DECOMPOSE_STRIDED_MATRIX_H_
+#define SRC_TINT_LANG_SPIRV_READER_LOWER_DECOMPOSE_STRIDED_MATRIX_H_
 
-#include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/utils/result.h"
 
 // Forward declarations.
@@ -36,28 +35,14 @@ namespace tint::core::ir {
 class Module;
 }
 
-namespace tint::core::ir::transform {
+namespace tint::spirv::reader::lower {
 
-/// The capabilities that the transform can support.
-const core::ir::Capabilities kDeadCodeEliminationCapabilities{
-    core::ir::Capability::kAllowOverrides,
-    core::ir::Capability::kAllowVectorElementPointer,
-    core::ir::Capability::kAllowPhonyInstructions,
-    core::ir::Capability::kAllowUnannotatedModuleIOVariables,
-    core::ir::Capability::kAllowNonCoreTypes,
-    core::ir::Capability::kAllowStructMatrixDecorations,
-};
-
-/// DeadCodeElimination is a transform that removes dead code from the given IR module.
-///
-/// Currently the eliminator will try to remove:
-///  * Unused functions.
-///  * Unused `private`, `__in` and `__out` module scoped variables.
-///
+/// DecomposeStridedMatrix is a transform that replaces structure members that have matrix stride
+/// attributes with arrays of vectors that have non-default strides.
 /// @param module the module to transform
 /// @returns success or failure
-Result<SuccessType> DeadCodeElimination(Module& module);
+Result<SuccessType> DecomposeStridedMatrix(core::ir::Module& module);
 
-}  // namespace tint::core::ir::transform
+}  // namespace tint::spirv::reader::lower
 
-#endif  // SRC_TINT_LANG_CORE_IR_TRANSFORM_DEAD_CODE_ELIMINATION_H_
+#endif  // SRC_TINT_LANG_SPIRV_READER_LOWER_DECOMPOSE_STRIDED_MATRIX_H_

@@ -1174,6 +1174,7 @@ Result<SuccessType> Builtins(core::ir::Module& ir) {
                                           core::ir::Capabilities{
                                               core::ir::Capability::kAllowOverrides,
                                               core::ir::Capability::kAllowNonCoreTypes,
+                                              core::ir::Capability::kAllowStructMatrixDecorations,
                                           });
     if (result != Success) {
         return result.Failure();
