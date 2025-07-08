@@ -1646,5 +1646,54 @@ TEST_F(SpirvParserTest, Phi_LoopWithIf) {
 )");
 }
 
+TEST_F(SpirvParserTest, Phi_InLoopBody) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main"
+               OpExecutionMode %main OriginUpperLeft
+               OpName %main "main"
+       %void = OpTypeVoid
+          %7 = OpTypeFunction %void
+       %bool = OpTypeBool
+      %float = OpTypeFloat 32
+    %float_1 = OpConstant %float 1
+    %float_0 = OpConstant %float 0
+       %main = OpFunction %void None %7
+         %29 = OpLabel
+               OpBranch %31
+         %31 = OpLabel
+               OpLoopMerge %35 %34 None
+               OpBranch %36
+         %36 = OpLabel
+         %33 = OpPhi %float %float_1 %31 %float_0 %37
+         %99 = OpFAdd %float %33 %33
+               OpReturn
+         %37 = OpLabel
+               OpBranch %36
+         %34 = OpLabel
+               OpBranch %31
+         %35 = OpLabel
+               OpUnreachable
+               OpFunctionEnd
+)",
+              R"(
+%main = @fragment func():void {
+  $B1: {
+    loop [b: $B2, c: $B3] {  # loop_1
+      $B2: {  # body
+        %2:f32 = add 1.0f, 1.0f
+        ret
+      }
+      $B3: {  # continuing
+        next_iteration  # -> $B2
+      }
+    }
+    unreachable
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader

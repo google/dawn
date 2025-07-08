@@ -2137,6 +2137,13 @@ class Parser {
     void EmitPhiInLoop(spvtools::opt::Instruction& inst) {
         auto* phi_containing_spirv_block = spirv_context_->get_instr_block(&inst);
 
+        auto iter = spirv_merge_id_to_header_id_.find(phi_containing_spirv_block->id());
+        // We're in the merge block for the loop
+        if (iter != spirv_merge_id_to_header_id_.end()) {
+            EmitPhiInLoopMerge(inst);
+            return;
+        }
+
         // The OpPhi is in the loop header, which means it's the body of the loop. The OpPhi can
         // receive values from the parent block, in which case we need to push them through the
         // initializer, or from the continuing block, which we will not have emitted yet.
@@ -2145,10 +2152,19 @@ class Parser {
             return;
         }
 
-        auto iter = spirv_merge_id_to_header_id_.find(phi_containing_spirv_block->id());
-        // We're in the merge block for the loop
-        if (iter != spirv_merge_id_to_header_id_.end()) {
-            EmitPhiInLoopMerge(inst);
+        auto containing_loop_header_id = spirv_context_->GetStructuredCFGAnalysis()->ContainingLoop(
+            phi_containing_spirv_block->id());
+        auto* loop_header_block = spirv_context_->get_instr_block(containing_loop_header_id);
+        TINT_ASSERT(loop_header_block);
+
+        auto* loop_merge_inst = loop_header_block->GetLoopMergeInst();
+        auto continue_id = loop_merge_inst->GetSingleWordInOperand(1);
+
+        // If the spirv-id to block table contains an entry for the continue id then we must have
+        // started emitting the continue.
+        bool has_continue_emitted = spirv_id_to_block_.contains(continue_id);
+        if (!has_continue_emitted) {
+            EmitPhiInLoopBody(inst, loop_merge_inst);
             return;
         }
 
@@ -2295,6 +2311,36 @@ class Parser {
                 });
             }
         }
+    }
+
+    void EmitPhiInLoopBody(spvtools::opt::Instruction& inst,
+                           spvtools::opt::Instruction* loop_merge_inst) {
+        auto continue_id = loop_merge_inst->GetSingleWordInOperand(1);
+
+        auto* loop_header_block = spirv_context_->get_instr_block(loop_merge_inst);
+
+        // The loop continue is a walk stop block. Since we're in the loop body itself we would have
+        // added the continue target to the stop blocks when processing the header loop merge.
+        auto* loop = StopWalkingAt(continue_id)->As<core::ir::Loop>();
+        TINT_ASSERT(loop);
+
+        // The only phi incoming block that makes sense on the body is from the loop header itself.
+        // Any other incoming branches must be from unreachable blocks, otherwise it would have had
+        // to have come from the loop header which is where the continue target will loop back too,
+        // not the body label directly.
+        std::optional<core::ir::Value*> value = std::nullopt;
+        for (uint32_t i = 0; i < inst.NumInOperands(); i += 2) {
+            auto value_id = inst.GetSingleWordInOperand(i);
+            auto blk_id = inst.GetSingleWordInOperand(i + 1);
+
+            if (blk_id != loop_header_block->id()) {
+                continue;
+            }
+
+            value = Value(value_id);
+        }
+        TINT_ASSERT(value.has_value());
+        AddValue(inst.result_id(), value.value());
     }
 
     void EmitPhiInLoopHeader(spvtools::opt::Instruction& inst,
