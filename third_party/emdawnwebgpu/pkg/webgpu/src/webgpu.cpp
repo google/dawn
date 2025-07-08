@@ -1655,6 +1655,11 @@ Ref<WGPUInstanceImpl> WGPUInstanceImpl::Create(
             instance->mTimedWaitAnyMaxCount = kTimedWaitAnyMaxCountDefault;
           }
           continue;
+        case WGPUInstanceFeatureName_MultipleDevicesPerAdapter:
+          DEBUG_PRINTF(
+              "MultipleDevicesPerAdapter requested, but not supported in "
+              "WASM.\n");
+          return {};
         case WGPUInstanceFeatureName_Force32:
           return {};
       }
