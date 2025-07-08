@@ -1576,5 +1576,75 @@ TEST_F(SpirvParserTest, Phi_SwitchDefaultIsMerge) {
 )");
 }
 
+TEST_F(SpirvParserTest, Phi_LoopWithIf) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main"
+               OpExecutionMode %main OriginUpperLeft
+               OpName %main "main"
+       %void = OpTypeVoid
+         %11 = OpTypeFunction %void
+      %float = OpTypeFloat 32
+       %bool = OpTypeBool
+    %float_0 = OpConstant %float 0
+    %float_1 = OpConstant %float 1
+    %float_2 = OpConstant %float 2
+       %true = OpConstantTrue %bool
+       %main = OpFunction %void None %11
+         %33 = OpLabel
+               OpBranch %40
+         %40 = OpLabel
+               OpLoopMerge %47 %43 None
+               OpBranchConditional %true %48 %47
+         %48 = OpLabel
+               OpBranch %49
+         %49 = OpLabel
+               OpSelectionMerge %59 None
+               OpBranchConditional %true %47 %59
+         %59 = OpLabel
+               OpBranch %43
+         %43 = OpLabel
+               OpBranchConditional %true %47 %40
+         %47 = OpLabel
+         %60 = OpPhi %float %float_0 %40 %float_1 %49 %float_2 %43
+         %61 = OpFAdd %float %60 %60
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @fragment func():void {
+  $B1: {
+    %2:f32 = loop [b: $B2, c: $B3] {  # loop_1
+      $B2: {  # body
+        if true [t: $B4, f: $B5] {  # if_1
+          $B4: {  # true
+            if true [t: $B6, f: $B7] {  # if_2
+              $B6: {  # true
+                exit_loop 1.0f  # loop_1
+              }
+              $B7: {  # false
+                exit_if  # if_2
+              }
+            }
+            continue  # -> $B3
+          }
+          $B5: {  # false
+            exit_loop 0.0f  # loop_1
+          }
+        }
+        unreachable
+      }
+      $B3: {  # continuing
+        break_if true exit_loop: [ 2.0f ]  # -> [t: exit_loop loop_1, f: $B2]
+      }
+    }
+    %3:f32 = add %2, %2
+    ret
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader
