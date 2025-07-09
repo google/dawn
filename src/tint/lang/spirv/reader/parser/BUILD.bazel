@@ -96,6 +96,7 @@ cc_library(
     "composite_test.cc",
     "constant_test.cc",
     "convert_test.cc",
+    "execution_mode_test.cc",
     "function_test.cc",
     "helper_test.h",
     "image_sampler_test.cc",

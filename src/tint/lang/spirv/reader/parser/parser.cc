@@ -1508,6 +1508,18 @@ class Parser {
                         b_.Constant(u32(execution_mode.GetSingleWordInOperand(3))),
                         b_.Constant(u32(execution_mode.GetSingleWordInOperand(4))));
                     break;
+                case spv::ExecutionMode::DepthGreater:
+                    TINT_ICE() << "ExecutionMode DepthGreater is not supported in WGSL";
+                    /* Ice aborts, so this doesn't fallthrough */
+                case spv::ExecutionMode::DepthLess:
+                    TINT_ICE() << "ExecutionMode DepthLess is not supported in WGSL";
+                    /* Ice aborts, so this doesn't fallthrough */
+                case spv::ExecutionMode::DepthUnchanged:
+                    TINT_ICE() << "ExecutionMode DepthUnchanged is not supported in WGSL";
+                    /* Ice aborts, so this doesn't fallthrough */
+                case spv::ExecutionMode::EarlyFragmentTests:
+                    TINT_ICE() << "ExecutionMode EarlyFragmentTests is not supported in WGSL";
+                    /* Ice aborts, so this doesn't fallthrough */
                 case spv::ExecutionMode::DepthReplacing:
                 case spv::ExecutionMode::OriginUpperLeft:
                     // These are ignored as they are implicitly supported by Tint IR.
