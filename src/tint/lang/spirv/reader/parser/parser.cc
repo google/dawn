@@ -1201,6 +1201,10 @@ class Parser {
         return src;
     }
 
+    // Returns true if the value is a constant value
+    bool IdIsConstant(uint32_t id) { return SpvConstant(id) || spec_composites_.contains(id); }
+
+    // Returns true if this value is currently in scope
     bool IdIsInScope(uint32_t id) {
         for (auto iter = id_stack_.rbegin(); iter != id_stack_.rend(); ++iter) {
             if (iter->count(id) > 0) {
@@ -2208,10 +2212,22 @@ class Parser {
         EmitPhiInLoopContinue(inst);
     }
 
-    // Push a placeholder for the operand value. We store away the terminator/index pair along with
-    // the required value and then fill it in at the end of the block emission. This is because a
-    // PHI can refer to a value which is defined after the PHI itself.
     void AddOperandToTerminator(core::ir::Terminator* term, uint32_t id) {
+        // If the ID is a constant, then we just directly emit it, it isn't an OpPhi value
+        if (IdIsConstant(id)) {
+            term->PushOperand(Value(id));
+            return;
+        }
+        // If we've already seen the value, and it's still in scope, then we can just emit as it
+        // isn't referencing a later value.
+        if (values_.Contains(id) && IdIsInScope(id)) {
+            term->PushOperand(Value(id));
+            return;
+        }
+
+        // Value isn't known, or isn't in scope, push a placeholder for the operand value. We store
+        // away the terminator/index pair along with the required value and then fill it in at the
+        // end of the block emission.
         auto operand_idx = term->PushOperand(nullptr);
         values_to_replace_.back().push_back(ReplacementValue{
             .terminator = term,
