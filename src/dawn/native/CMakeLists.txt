@@ -293,11 +293,14 @@ list(APPEND conditional_private_platform_depends
     ${CMAKE_DL_LIBS}
 )
 
-# Only win32 app needs to link with user32.lib
+# Only win32 app needs to link with user32.lib and onecore_apiset.lib
 # In UWP, all availiable APIs are defined in WindowsApp.lib
 # and is automatically linked when WINDOWS_STORE set
 if (WIN32 AND NOT WINDOWS_STORE)
-  list(APPEND conditional_private_platform_depends user32.lib)
+  list(APPEND conditional_private_platform_depends
+       user32.lib
+       onecore_apiset.lib
+  )
 endif()
 
 # DXGIGetDebugInterface1 is defined in dxgi.lib
