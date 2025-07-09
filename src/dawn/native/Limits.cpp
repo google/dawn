@@ -111,6 +111,11 @@
     X(v1, Maximum,                       maxTextureDimension3D,      1024,      2048,       2048) \
     X(v1, Maximum,                       maxTextureArrayLayers,       256,       256,       2048)
 
+// Tiered limits for immediate data sizes.
+//                                   compat  tier0  tier1
+#define LIMITS_IMMEDIATE_SIZE(X) \
+    X(v1, Maximum, maxImmediateSize,      0,     0,    16)
+
 // TODO(crbug.com/dawn/685):
 // These limits don't have tiers yet. Define two tiers with the same values since the macros
 // in this file expect more than one tier.
@@ -125,8 +130,7 @@
     X(v1,                              Maximum,                                  maxVertexBuffers,         8,         8,          8) \
     X(v1,                              Maximum,                               maxVertexAttributes,        16,        16,         30) \
     X(v1,                              Maximum,                        maxVertexBufferArrayStride,      2048,      2048,       2048) \
-    X(v1,                              Maximum,                               maxColorAttachments,         4,         8,          8) \
-    X(v1,                              Maximum,                               maxImmediateSize,            0,         0,         16)
+    X(v1,                              Maximum,                               maxColorAttachments,         4,         8,          8)
 
 // clang-format on
 
@@ -140,6 +144,7 @@
     X(LIMITS_ATTACHMENTS)                  \
     X(LIMITS_INTER_STAGE_SHADER_VARIABLES) \
     X(LIMITS_TEXTURE_DIMENSIONS)           \
+    X(LIMITS_IMMEDIATE_SIZE)               \
     X(LIMITS_OTHER)
 
 #define LIMITS(X)                          \
@@ -152,6 +157,7 @@
     LIMITS_ATTACHMENTS(X)                  \
     LIMITS_INTER_STAGE_SHADER_VARIABLES(X) \
     LIMITS_TEXTURE_DIMENSIONS(X)           \
+    LIMITS_IMMEDIATE_SIZE(X)               \
     LIMITS_OTHER(X)
 
 namespace dawn::native {
