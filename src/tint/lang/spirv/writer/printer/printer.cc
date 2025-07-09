@@ -2860,6 +2860,24 @@ class Printer {
             case core::TexelFormat::kRg16Float:
                 module_.PushCapability(SpvCapabilityStorageImageExtendedFormats);
                 return SpvImageFormatRg16f;
+            case core::TexelFormat::kR16Unorm:
+                module_.PushCapability(SpvCapabilityStorageImageExtendedFormats);
+                return SpvImageFormatR16;
+            case core::TexelFormat::kR16Snorm:
+                module_.PushCapability(SpvCapabilityStorageImageExtendedFormats);
+                return SpvImageFormatR16Snorm;
+            case core::TexelFormat::kRg16Unorm:
+                module_.PushCapability(SpvCapabilityStorageImageExtendedFormats);
+                return SpvImageFormatRg16;
+            case core::TexelFormat::kRg16Snorm:
+                module_.PushCapability(SpvCapabilityStorageImageExtendedFormats);
+                return SpvImageFormatRg16Snorm;
+            case core::TexelFormat::kRgba16Unorm:
+                module_.PushCapability(SpvCapabilityStorageImageExtendedFormats);
+                return SpvImageFormatRgba16;
+            case core::TexelFormat::kRgba16Snorm:
+                module_.PushCapability(SpvCapabilityStorageImageExtendedFormats);
+                return SpvImageFormatRgba16Snorm;
             case core::TexelFormat::kR32Uint:
                 return SpvImageFormatR32ui;
             case core::TexelFormat::kR32Sint:

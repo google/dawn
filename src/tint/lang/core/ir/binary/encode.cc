@@ -972,6 +972,18 @@ struct Encoder {
                 return pb::TexelFormat::rgb10a2_unorm;
             case core::TexelFormat::kRg11B10Ufloat:
                 return pb::TexelFormat::rg11b10_ufloat;
+            case core::TexelFormat::kR16Unorm:
+                return pb::TexelFormat::r16_unorm;
+            case core::TexelFormat::kR16Snorm:
+                return pb::TexelFormat::r16_snorm;
+            case core::TexelFormat::kRg16Unorm:
+                return pb::TexelFormat::rg16_unorm;
+            case core::TexelFormat::kRg16Snorm:
+                return pb::TexelFormat::rg16_snorm;
+            case core::TexelFormat::kRgba16Unorm:
+                return pb::TexelFormat::rgba16_unorm;
+            case core::TexelFormat::kRgba16Snorm:
+                return pb::TexelFormat::rgba16_snorm;
             case core::TexelFormat::kUndefined:
                 break;
         }

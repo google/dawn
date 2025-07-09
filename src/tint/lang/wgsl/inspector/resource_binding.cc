@@ -100,12 +100,20 @@ ResourceBinding::TexelFormat TypeTexelFormatToResourceBindingTexelFormat(
             return ResourceBinding::TexelFormat::kRg8Uint;
         case core::TexelFormat::kRg8Sint:
             return ResourceBinding::TexelFormat::kRg8Sint;
+        case core::TexelFormat::kR16Unorm:
+            return ResourceBinding::TexelFormat::kR16Unorm;
+        case core::TexelFormat::kR16Snorm:
+            return ResourceBinding::TexelFormat::kR16Snorm;
         case core::TexelFormat::kR16Uint:
             return ResourceBinding::TexelFormat::kR16Uint;
         case core::TexelFormat::kR16Sint:
             return ResourceBinding::TexelFormat::kR16Sint;
         case core::TexelFormat::kR16Float:
             return ResourceBinding::TexelFormat::kR16Float;
+        case core::TexelFormat::kRg16Unorm:
+            return ResourceBinding::TexelFormat::kRg16Unorm;
+        case core::TexelFormat::kRg16Snorm:
+            return ResourceBinding::TexelFormat::kRg16Snorm;
         case core::TexelFormat::kRg16Uint:
             return ResourceBinding::TexelFormat::kRg16Uint;
         case core::TexelFormat::kRg16Sint:
@@ -140,6 +148,10 @@ ResourceBinding::TexelFormat TypeTexelFormatToResourceBindingTexelFormat(
             return ResourceBinding::TexelFormat::kRg32Sint;
         case core::TexelFormat::kRg32Float:
             return ResourceBinding::TexelFormat::kRg32Float;
+        case core::TexelFormat::kRgba16Unorm:
+            return ResourceBinding::TexelFormat::kRgba16Unorm;
+        case core::TexelFormat::kRgba16Snorm:
+            return ResourceBinding::TexelFormat::kRgba16Snorm;
         case core::TexelFormat::kRgba16Uint:
             return ResourceBinding::TexelFormat::kRgba16Uint;
         case core::TexelFormat::kRgba16Sint:

@@ -1787,6 +1787,12 @@ class Printer : public tint::TextGenerator {
             case core::TexelFormat::kBgra8Unorm:
             case core::TexelFormat::kRgba8Unorm:
             case core::TexelFormat::kRgba8Snorm:
+            case core::TexelFormat::kR16Unorm:
+            case core::TexelFormat::kR16Snorm:
+            case core::TexelFormat::kRg16Unorm:
+            case core::TexelFormat::kRg16Snorm:
+            case core::TexelFormat::kRgba16Unorm:
+            case core::TexelFormat::kRgba16Snorm:
             case core::TexelFormat::kR16Float:
             case core::TexelFormat::kRg16Float:
             case core::TexelFormat::kRgba16Float:

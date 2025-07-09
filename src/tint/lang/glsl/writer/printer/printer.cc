@@ -1340,6 +1340,24 @@ class Printer : public tint::TextGenerator {
                 case core::TexelFormat::kRg11B10Ufloat:
                     out << "r11f_g11f_b10f";
                     break;
+                case core::TexelFormat::kR16Unorm:
+                    out << "r16";
+                    break;
+                case core::TexelFormat::kR16Snorm:
+                    out << "r16_snorm";
+                    break;
+                case core::TexelFormat::kRg16Unorm:
+                    out << "rg16";
+                    break;
+                case core::TexelFormat::kRg16Snorm:
+                    out << "rg16_snorm";
+                    break;
+                case core::TexelFormat::kRgba16Unorm:
+                    out << "rgba16";
+                    break;
+                case core::TexelFormat::kRgba16Snorm:
+                    out << "rgba16_snorm";
+                    break;
                 case core::TexelFormat::kUndefined:
                     TINT_UNREACHABLE() << "invalid texel format";
             }

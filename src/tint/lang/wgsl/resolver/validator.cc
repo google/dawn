@@ -130,9 +130,13 @@ bool IsValidStorageTextureTexelFormat(core::TexelFormat format) {
         case core::TexelFormat::kRg8Snorm:
         case core::TexelFormat::kRg8Uint:
         case core::TexelFormat::kRg8Sint:
+        case core::TexelFormat::kR16Unorm:
+        case core::TexelFormat::kR16Snorm:
         case core::TexelFormat::kR16Uint:
         case core::TexelFormat::kR16Sint:
         case core::TexelFormat::kR16Float:
+        case core::TexelFormat::kRg16Unorm:
+        case core::TexelFormat::kRg16Snorm:
         case core::TexelFormat::kRg16Uint:
         case core::TexelFormat::kRg16Sint:
         case core::TexelFormat::kRg16Float:
@@ -143,6 +147,8 @@ bool IsValidStorageTextureTexelFormat(core::TexelFormat format) {
         case core::TexelFormat::kRg32Float:
         case core::TexelFormat::kRg32Sint:
         case core::TexelFormat::kRg32Uint:
+        case core::TexelFormat::kRgba16Unorm:
+        case core::TexelFormat::kRgba16Snorm:
         case core::TexelFormat::kRgba16Float:
         case core::TexelFormat::kRgba16Sint:
         case core::TexelFormat::kRgba16Uint:

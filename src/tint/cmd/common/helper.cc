@@ -427,6 +427,10 @@ std::string TexelFormatToString(tint::inspector::ResourceBinding::TexelFormat fo
             return "Rg32Sint";
         case tint::inspector::ResourceBinding::TexelFormat::kRg32Float:
             return "Rg32Float";
+        case tint::inspector::ResourceBinding::TexelFormat::kRgba16Unorm:
+            return "Rgba16Unorm";
+        case tint::inspector::ResourceBinding::TexelFormat::kRgba16Snorm:
+            return "Rgba16Snorm";
         case tint::inspector::ResourceBinding::TexelFormat::kRgba16Uint:
             return "Rgba16Uint";
         case tint::inspector::ResourceBinding::TexelFormat::kRgba16Sint:
@@ -455,12 +459,20 @@ std::string TexelFormatToString(tint::inspector::ResourceBinding::TexelFormat fo
             return "Rg8Uint";
         case tint::inspector::ResourceBinding::TexelFormat::kRg8Sint:
             return "Rg8Sint";
+        case tint::inspector::ResourceBinding::TexelFormat::kR16Unorm:
+            return "R16Unorm";
+        case tint::inspector::ResourceBinding::TexelFormat::kR16Snorm:
+            return "R16Snorm";
         case tint::inspector::ResourceBinding::TexelFormat::kR16Uint:
             return "R16Uint";
         case tint::inspector::ResourceBinding::TexelFormat::kR16Sint:
             return "R16Sint";
         case tint::inspector::ResourceBinding::TexelFormat::kR16Float:
             return "R16Float";
+        case tint::inspector::ResourceBinding::TexelFormat::kRg16Unorm:
+            return "Rg16Unorm";
+        case tint::inspector::ResourceBinding::TexelFormat::kRg16Snorm:
+            return "Rg16Snorm";
         case tint::inspector::ResourceBinding::TexelFormat::kRg16Uint:
             return "Rg16Uint";
         case tint::inspector::ResourceBinding::TexelFormat::kRg16Sint:

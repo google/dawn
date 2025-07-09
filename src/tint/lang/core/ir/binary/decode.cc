@@ -1474,6 +1474,18 @@ struct Decoder {
                 return core::TexelFormat::kRgb10A2Unorm;
             case pb::TexelFormat::rg11b10_ufloat:
                 return core::TexelFormat::kRg11B10Ufloat;
+            case pb::TexelFormat::r16_unorm:
+                return core::TexelFormat::kR16Unorm;
+            case pb::TexelFormat::r16_snorm:
+                return core::TexelFormat::kR16Snorm;
+            case pb::TexelFormat::rg16_unorm:
+                return core::TexelFormat::kRg16Unorm;
+            case pb::TexelFormat::rg16_snorm:
+                return core::TexelFormat::kRg16Snorm;
+            case pb::TexelFormat::rgba16_unorm:
+                return core::TexelFormat::kRgba16Unorm;
+            case pb::TexelFormat::rgba16_snorm:
+                return core::TexelFormat::kRgba16Snorm;
 
             case pb::TexelFormat::TexelFormat_INT_MIN_SENTINEL_DO_NOT_USE_:
             case pb::TexelFormat::TexelFormat_INT_MAX_SENTINEL_DO_NOT_USE_:

@@ -233,8 +233,14 @@ TexelFormat ParseTexelFormat(std::string_view str) {
     if (str == "r16sint") {
         return TexelFormat::kR16Sint;
     }
+    if (str == "r16snorm") {
+        return TexelFormat::kR16Snorm;
+    }
     if (str == "r16uint") {
         return TexelFormat::kR16Uint;
+    }
+    if (str == "r16unorm") {
+        return TexelFormat::kR16Unorm;
     }
     if (str == "r32float") {
         return TexelFormat::kR32Float;
@@ -266,8 +272,14 @@ TexelFormat ParseTexelFormat(std::string_view str) {
     if (str == "rg16sint") {
         return TexelFormat::kRg16Sint;
     }
+    if (str == "rg16snorm") {
+        return TexelFormat::kRg16Snorm;
+    }
     if (str == "rg16uint") {
         return TexelFormat::kRg16Uint;
+    }
+    if (str == "rg16unorm") {
+        return TexelFormat::kRg16Unorm;
     }
     if (str == "rg32float") {
         return TexelFormat::kRg32Float;
@@ -302,8 +314,14 @@ TexelFormat ParseTexelFormat(std::string_view str) {
     if (str == "rgba16sint") {
         return TexelFormat::kRgba16Sint;
     }
+    if (str == "rgba16snorm") {
+        return TexelFormat::kRgba16Snorm;
+    }
     if (str == "rgba16uint") {
         return TexelFormat::kRgba16Uint;
+    }
+    if (str == "rgba16unorm") {
+        return TexelFormat::kRgba16Unorm;
     }
     if (str == "rgba32float") {
         return TexelFormat::kRgba32Float;
@@ -338,8 +356,12 @@ std::string_view ToString(TexelFormat value) {
             return "r16float";
         case TexelFormat::kR16Sint:
             return "r16sint";
+        case TexelFormat::kR16Snorm:
+            return "r16snorm";
         case TexelFormat::kR16Uint:
             return "r16uint";
+        case TexelFormat::kR16Unorm:
+            return "r16unorm";
         case TexelFormat::kR32Float:
             return "r32float";
         case TexelFormat::kR32Sint:
@@ -360,8 +382,12 @@ std::string_view ToString(TexelFormat value) {
             return "rg16float";
         case TexelFormat::kRg16Sint:
             return "rg16sint";
+        case TexelFormat::kRg16Snorm:
+            return "rg16snorm";
         case TexelFormat::kRg16Uint:
             return "rg16uint";
+        case TexelFormat::kRg16Unorm:
+            return "rg16unorm";
         case TexelFormat::kRg32Float:
             return "rg32float";
         case TexelFormat::kRg32Sint:
@@ -384,8 +410,12 @@ std::string_view ToString(TexelFormat value) {
             return "rgba16float";
         case TexelFormat::kRgba16Sint:
             return "rgba16sint";
+        case TexelFormat::kRgba16Snorm:
+            return "rgba16snorm";
         case TexelFormat::kRgba16Uint:
             return "rgba16uint";
+        case TexelFormat::kRgba16Unorm:
+            return "rgba16unorm";
         case TexelFormat::kRgba32Float:
             return "rgba32float";
         case TexelFormat::kRgba32Sint:

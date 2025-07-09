@@ -134,6 +134,12 @@ match f32_texel_format
   | texel_format.bgra8unorm
   | texel_format.rgba8unorm
   | texel_format.rgba8snorm
+  | texel_format.r16unorm
+  | texel_format.r16snorm
+  | texel_format.rg16unorm
+  | texel_format.rg16snorm
+  | texel_format.rgba16unorm
+  | texel_format.rgba16snorm
   | texel_format.r16float
   | texel_format.rg16float
   | texel_format.rgba16float
