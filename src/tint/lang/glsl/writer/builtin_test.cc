@@ -62,7 +62,7 @@ TEST_F(GlslWriterTest, BuiltinGeneric) {
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   int x = 1;
-  int w = abs(x);
+  int w = max(x, int((~(uint(x)) + 1u)));
 }
 )");
 }

@@ -144,7 +144,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         core_polyfills.dot_4x8_packed = true;
         core_polyfills.pack_unpack_4x8 = true;
         core_polyfills.pack_4xu8_clamp = true;
-
+        core_polyfills.abs_signed_int = true;
         RUN_TRANSFORM(core::ir::transform::BuiltinPolyfill, module, core_polyfills);
     }
 

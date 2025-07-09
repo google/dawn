@@ -26,7 +26,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <cstdint>
-#include <numeric>
+#include <limits>
 #include <string>
 #include <vector>
 
@@ -171,6 +171,61 @@ TEST_P(PolyfillBuiltinSimpleTests, ScalarizeMinMaxBuiltin) {
 
     queue.Submit(1, &commands);
     std::vector<uint32_t> expected = {3, 2};
+    EXPECT_BUFFER_U32_RANGE_EQ(expected.data(), output, 0, expected.size());
+}
+
+TEST_P(PolyfillBuiltinSimpleTests, AbsWithBranch) {
+    // Some backend compilers assume that return value of 'abs' is always positive. This is
+    // not true for one specific value of i32 (0x8000'0000).
+    // Operations on the value returned can prove that the compiler is assuming this value is
+    // positive. See crbug.com/426999765
+    std::string kShaderCode = R"(
+    struct Data { values: array<i32> };
+    @group(0) @binding(0) var<storage, read> input_data: Data;
+    @group(0) @binding(1) var<storage, read_write> output_data: Data;
+
+    @compute @workgroup_size(4)
+    fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
+        var result = input_data.values[global_id.x];
+        // Translates to SAbs ext instruction (spriv)
+        result = abs(result);
+        // Will translate to SMax ext instruction (spriv) and reproduce the bug.
+        // result = max(result, 3488);
+        // Another way to test the compiler is to use a conditional.
+        // The compiler incorrectly assumes 'result' is positive.
+        if(result < 0){
+            // This branch will (correctly) be taken iff original value was min i32.
+            result = 1543;
+        }
+        // try 2
+        output_data.values[global_id.x]  = result;
+    }
+    )";
+
+    wgpu::ComputePipeline pipeline = CreateComputePipeline(kShaderCode);
+    uint32_t kDefaultVal = 0;
+    std::vector<uint32_t> init_input = {uint32_t(std::numeric_limits<int32_t>::lowest()),
+                                        uint32_t(-15), 17, 123};
+
+    wgpu::Buffer input = CreateBuffer(init_input);
+    wgpu::Buffer output = CreateBuffer(4, kDefaultVal);
+    wgpu::BindGroup bindGroup =
+        utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0), {{0, input}, {1, output}});
+
+    wgpu::CommandBuffer commands;
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetPipeline(pipeline);
+        pass.SetBindGroup(0, bindGroup);
+        pass.DispatchWorkgroups(64);
+        pass.End();
+        commands = encoder.Finish();
+    }
+
+    queue.Submit(1, &commands);
+    std::vector<uint32_t> expected = {1543, 15, 17, 123};
+
     EXPECT_BUFFER_U32_RANGE_EQ(expected.data(), output, 0, expected.size());
 }
 

@@ -75,8 +75,7 @@ TEST_P(Builtin_1arg, Vector) {
 INSTANTIATE_TEST_SUITE_P(
     SpirvWriterTest,
     Builtin_1arg,
-    testing::Values(BuiltinTestCase{kI32, core::BuiltinFn::kAbs, "SAbs"},
-                    BuiltinTestCase{kF32, core::BuiltinFn::kAbs, "FAbs"},
+    testing::Values(BuiltinTestCase{kF32, core::BuiltinFn::kAbs, "FAbs"},
                     BuiltinTestCase{kF16, core::BuiltinFn::kAbs, "FAbs"},
                     BuiltinTestCase{kF32, core::BuiltinFn::kAcos, "Acos"},
                     BuiltinTestCase{kF16, core::BuiltinFn::kAcos, "Acos"},
@@ -162,6 +161,26 @@ TEST_F(SpirvWriterTest, Builtin_Abs_u32) {
           %4 = OpLabel
                OpReturnValue %arg
                OpFunctionEnd
+)");
+}
+
+// Test that abs of a signed integer is implemented as max(x,-x);
+TEST_F(SpirvWriterTest, Builtin_Abs_i32) {
+    auto* func = b.Function("foo", MakeScalarType(kI32));
+    b.Append(func->Block(), [&] {
+        auto* arg = MakeScalarValue(kI32);
+        auto* result = b.Call(MakeScalarType(kI32), core::BuiltinFn::kAbs, arg);
+        b.Return(func, result);
+        mod.SetName(arg, "arg");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+          %6 = OpBitcast %uint %arg
+          %8 = OpNot %uint %6
+          %9 = OpIAdd %uint %8 %uint_1
+         %11 = OpBitcast %int %9
+         %12 = OpExtInst %int %13 SMax %arg %11
 )");
 }
 

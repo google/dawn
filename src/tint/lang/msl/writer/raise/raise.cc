@@ -107,6 +107,7 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
         core_polyfills.pack_4xu8_clamp = true;
         core_polyfills.radians = true;
         core_polyfills.texture_sample_base_clamp_to_edge_2d_f32 = true;
+        core_polyfills.abs_signed_int = true;
         RUN_TRANSFORM(core::ir::transform::BuiltinPolyfill, module, core_polyfills);
     }
 

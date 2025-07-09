@@ -147,6 +147,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         core_polyfills.radians = true;
         core_polyfills.reflect_vec2_f32 = options.polyfill_reflect_vec2_f32;
         core_polyfills.texture_sample_base_clamp_to_edge_2d_f32 = true;
+        core_polyfills.abs_signed_int = true;
         RUN_TRANSFORM(core::ir::transform::BuiltinPolyfill, module, core_polyfills);
     }
 

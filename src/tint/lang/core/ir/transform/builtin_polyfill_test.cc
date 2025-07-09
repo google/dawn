@@ -2884,5 +2884,53 @@ TEST_F(IR_BuiltinPolyfillTest, Unpack4x8unorm) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(IR_BuiltinPolyfillTest, Absi32_NoPolyfill) {
+    Build(core::BuiltinFn::kAbs, ty.i32(), Vector{ty.i32()});
+    auto* src = R"(
+%foo = func(%arg:i32):i32 {
+  $B1: {
+    %result:i32 = abs %arg
+    ret %result
+  }
+}
+)";
+    auto* expect = src;
+
+    EXPECT_EQ(src, str());
+
+    BuiltinPolyfillConfig config;
+    config.abs_signed_int = false;
+    Run(BuiltinPolyfill, config);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillTest, Absi32_Enabled) {
+    Build(core::BuiltinFn::kAbs, ty.i32(), Vector{ty.i32()});
+    auto* src = R"(
+%foo = func(%arg:i32):i32 {
+  $B1: {
+    %result:i32 = abs %arg
+    ret %result
+  }
+}
+)";
+    auto* expect = R"(
+%foo = func(%arg:i32):i32 {
+  $B1: {
+    %3:i32 = negation %arg
+    %result:i32 = max %arg, %3
+    ret %result
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    BuiltinPolyfillConfig config;
+    config.abs_signed_int = true;
+    Run(BuiltinPolyfill, config);
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::core::ir::transform

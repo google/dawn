@@ -27,6 +27,7 @@
 
 #include "src/tint/lang/core/ir/transform/builtin_polyfill.h"
 
+#include "src/tint/lang/core/binary_op.h"
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/validator.h"
@@ -73,6 +74,12 @@ struct State {
                     case core::BuiltinFn::kClamp:
                         if (config.clamp_int &&
                             builtin->Result()->Type()->IsIntegerScalarOrVector()) {
+                            worklist.Push(builtin);
+                        }
+                        break;
+                    case core::BuiltinFn::kAbs:
+                        if (config.abs_signed_int &&
+                            builtin->Result()->Type()->IsSignedIntegerScalarOrVector()) {
                             worklist.Push(builtin);
                         }
                         break;
@@ -193,6 +200,9 @@ struct State {
             switch (builtin->Func()) {
                 case core::BuiltinFn::kClamp:
                     ClampInt(builtin);
+                    break;
+                case core::BuiltinFn::kAbs:
+                    AbsSignedInt(builtin);
                     break;
                 case core::BuiltinFn::kCountLeadingZeros:
                     CountLeadingZeros(builtin);
@@ -397,6 +407,17 @@ struct State {
         b.InsertBefore(call, [&] {
             auto* max = b.Call(type, core::BuiltinFn::kMax, e, low);
             b.CallWithResult(call->DetachResult(), core::BuiltinFn::kMin, max, high);
+        });
+        call->Destroy();
+    }
+
+    /// Polyfill a `abs()` builtin call for signed integers.
+    /// @param call the builtin call instruction
+    void AbsSignedInt(ir::CoreBuiltinCall* call) {
+        auto* type = call->Result()->Type();
+        auto* e = call->Args()[0];
+        b.InsertBefore(call, [&] {
+            b.CallWithResult(call->DetachResult(), core::BuiltinFn::kMax, e, b.Negation(type, e));
         });
         call->Destroy();
     }

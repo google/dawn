@@ -5,7 +5,8 @@
 RWByteAddressBuffer prevent_dce : register(u0);
 int abs_4ad288() {
   int arg_0 = int(1);
-  int res = abs(arg_0);
+  int v = arg_0;
+  int res = max(v, -(v));
   return res;
 }
 
@@ -20,7 +21,8 @@ void fragment_main() {
 RWByteAddressBuffer prevent_dce : register(u0);
 int abs_4ad288() {
   int arg_0 = int(1);
-  int res = abs(arg_0);
+  int v = arg_0;
+  int res = max(v, -(v));
   return res;
 }
 
@@ -45,21 +47,22 @@ struct vertex_main_outputs {
 
 int abs_4ad288() {
   int arg_0 = int(1);
-  int res = abs(arg_0);
+  int v = arg_0;
+  int res = max(v, -(v));
   return res;
 }
 
 VertexOutput vertex_main_inner() {
-  VertexOutput v = (VertexOutput)0;
-  v.pos = (0.0f).xxxx;
-  v.prevent_dce = abs_4ad288();
-  VertexOutput v_1 = v;
-  return v_1;
+  VertexOutput v_1 = (VertexOutput)0;
+  v_1.pos = (0.0f).xxxx;
+  v_1.prevent_dce = abs_4ad288();
+  VertexOutput v_2 = v_1;
+  return v_2;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_2 = vertex_main_inner();
-  vertex_main_outputs v_3 = {v_2.prevent_dce, v_2.pos};
-  return v_3;
+  VertexOutput v_3 = vertex_main_inner();
+  vertex_main_outputs v_4 = {v_3.prevent_dce, v_3.pos};
+  return v_4;
 }
 
