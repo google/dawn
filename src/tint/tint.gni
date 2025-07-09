@@ -163,9 +163,7 @@ if (tint_has_fuzzers) {
   import("//testing/libfuzzer/fuzzer_test.gni")
   fuzzer_corpus_dir = "${root_gen_dir}/fuzzers"
   fuzzer_corpus_wgsl_dir = "${fuzzer_corpus_dir}/wgsl_corpus"
-  fuzzer_corpus_wgsl_stamp = "${fuzzer_corpus_dir}/wgsl.stamp"
-  fuzzer_corpus_ir_dir = "${fuzzer_corpus_dir}/ir_corpus"
-  fuzzer_corpus_ir_stamp = "${fuzzer_corpus_dir}/ir.stamp"
+  fuzzer_corpus_wgsl_stamp = "${fuzzer_corpus_wgsl_dir}/wgsl.stamp"
 
   template("tint_fuzz_source_set") {
     source_set(target_name) {

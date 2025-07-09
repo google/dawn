@@ -52,45 +52,38 @@ positional arguments:
                         WGSL shader files, non-WGSL and '*.expected.wgsl` files
                         will be ignored
   output_dir            Output directory that the results directory should be
-                        placed in. The base WGSL fuzzer corpus is created, in
-                        '<output_dir>/wgsl_corpus'. Other corpus locations will
-                        be specified in their tool specific flags. If a
-                        directory already exists, it will be overwritten.
+                        placed in. If a directory already exists, it will be
+                        overwritten.
 
 options:
   -h, --help            show this help message and exit
   -v, --verbose         Enables verbose logging
-  --debug               Enables developer debug logging
+  --debug               Enables developer debug logging, very verbose
 
 tool flags:
   Flags for tool to use for generating the corpus. Which tool that is provided
-  determines which type of corpus is generated. If no tool is
-  provided the non-minimized WGSL fuzzer corpus will be generated. Only one
-  corpus will be generated per invocation, so these flags are mutually
-  exclusive.
+  determines which type of corpus is generated. If no tool is provided the non-
+  minimized WGSL fuzzer corpus will be generated. Only one corpus will be
+  generated per invocation, so these flags are mutually exclusive.
 
   --wgsl_fuzzer WGSL_FUZZER
-                        Instance of tint_wgsl_fuzzer to use for minimization, if
-                         provided a minimized WGSL corpus will be generated in
-                        '<output_dir>/wgsl_min_corpus'. (This can take over an
-                        hour to run). <input_dir> is expected to only contain
-                        .wgsl WGSL shader files, as would be generated for the
-                        non-minimized WGSL corpus.
-  --ir_as IR_AS         Instance of ir_fuzz_as to use for assembling IR binary
-                        test cases, if provided a non-minimized IR corpus will
-                        be generated in '<output_dir>/ir_corpus'. <input_dir> is
-                        expected to only contain .wgsl WGSL shader files, as
+                        Instance of tint_wgsl_fuzzer to use for minimization.
+                        (This can take over an hour to run). <input_dir> is
+                        expected to be only contain .wgsl WGSL shader files, as
                         would be generated for the non-minimized WGSL corpus.
+  --ir_as IR_AS         Instance of ir_fuzz_as to use for assembling IR binary
+                        test cases. <input_dir> is expected to be the same
+                        format as for the non-minimized WGSL corpus.
   --ir_fuzzer IR_FUZZER
-                        Instance of tint_ir_fuzzer to use for minimization, if
-                        provided a minimized corpus will be generated in
-                        '<output_dir>/ir_min_corpus'. (This can take over an
-                        hour to run). <input_dir> is expected to only contain
-                        .tirb IR binary test case files, as would be generated
-                        for the non-minimized IR corpus.
+                        Instance of tint_ir_fuzzer to use for minimization.
+                        (This can take over an hour to run). <input_dir> is
+                        expected to only contain .tirb IR binary test case
+                        files, as would be generated for the non-minimized IR
+                        corpus.
 """
 
 import argparse
+import tempfile
 from enum import Enum
 import logging
 import os
@@ -98,6 +91,9 @@ import pathlib
 import shutil
 import subprocess
 import sys
+
+
+logger = logging.getLogger(__name__)
 
 
 class Mode(Enum):
@@ -113,21 +109,13 @@ class Options:
     """Container of all the control options parsed from the command line args"""
 
     def __init__(self, mode, wgsl_fuzzer_bin, ir_as_bin, ir_fuzzer_bin,
-                 input_dir, output_dir, wgsl_corpus_dir, wgsl_min_corpus_dir,
-                 ir_corpus_dir, ir_min_corpus_dir):
+                 input_dir, output_dir):
         self.mode = mode
         self.wgsl_fuzzer_bin = wgsl_fuzzer_bin
         self.ir_as_bin = ir_as_bin
         self.ir_fuzzer_bin = ir_fuzzer_bin
         self.input_dir = input_dir
         self.output_dir = output_dir
-        self.wgsl_corpus_dir = wgsl_corpus_dir
-        self.wgsl_min_corpus_dir = wgsl_min_corpus_dir
-        self.ir_corpus_dir = ir_corpus_dir
-        self.ir_min_corpus_dir = ir_min_corpus_dir
-
-
-logger = logging.getLogger(__name__)
 
 
 def parse_args():
@@ -148,7 +136,7 @@ def parse_args():
     parser.add_argument(
         'output_dir',
         help=
-        "Output directory that the results directory should be placed in. The base WGSL fuzzer corpus is created, in '<output_dir>/wgsl_corpus'. Other corpus locations will be specified in their tool specific flags. If a directory already exists, it will be overwritten.",
+        "Output directory that the results directory should be placed in. If a directory already exists, it will be overwritten.",
         type=str)
     parser.add_argument('-v',
                         '--verbose',
@@ -157,7 +145,7 @@ def parse_args():
                         dest="loglevel",
                         const=logging.INFO)
     parser.add_argument('--debug',
-                        help="Enables developer debug logging",
+                        help="Enables developer debug logging, very verbose",
                         action="store_const",
                         dest="loglevel",
                         const=logging.DEBUG)
@@ -169,17 +157,17 @@ def parse_args():
     tool_group.add_argument(
         '--wgsl_fuzzer',
         help=
-        "Instance of tint_wgsl_fuzzer to use for minimization, if provided a minimized WGSL corpus will be generated in '<output_dir>/wgsl_min_corpus'. (This can take over an hour to  run). <input_dir> is expected to be only contain .wgsl WGSL shader files, as would be generated for the non-minimized WGSL corpus.",
+        "Instance of tint_wgsl_fuzzer to use for minimization. (This can take over an hour to  run). <input_dir> is expected to be only contain .wgsl WGSL shader files, as would be generated for the non-minimized WGSL corpus.",
         type=str)
     tool_group.add_argument(
         '--ir_as',
         help=
-        "Instance of ir_fuzz_as to use for assembling IR binary test cases, if provided a non-minimized IR corpus will be generated in '<output_dir>/ir_corpus'. <input_dir> is expected to only contain .wgsl WGSL shader files, as would be generated for the non-minimized WGSL corpus.",
+        "Instance of ir_fuzz_as to use for assembling IR binary test cases. <input_dir> is expected to be the same format as for the non-minimized WGSL corpus.",
         type=str)
     tool_group.add_argument(
         '--ir_fuzzer',
         help=
-        "Instance of tint_ir_fuzzer to use for minimization, if provided a minimized corpus will be generated in '<output_dir>/ir_min_corpus'. (This can take over an hour to  run). <input_dir> is expected to only contain .tirb IR binary test case files, as would be generated for the non-minimized IR corpus.",
+        "Instance of tint_ir_fuzzer to use for minimization. (This can take over an hour to  run). <input_dir> is expected to only contain .tirb IR binary test case files, as would be generated for the non-minimized IR corpus.",
         type=str)
     args = parser.parse_args()
     logging.basicConfig(level=args.loglevel)
@@ -213,12 +201,7 @@ def parse_args():
                    ir_as_bin=ir_as_bin,
                    ir_fuzzer_bin=ir_fuzzer_bin,
                    input_dir=os.path.abspath(args.input_dir.rstrip(os.sep)),
-                   output_dir=output_dir,
-                   wgsl_corpus_dir=os.path.join(output_dir, "wgsl_corpus"),
-                   wgsl_min_corpus_dir=os.path.join(output_dir,
-                                                    "wgsl_min_corpus"),
-                   ir_corpus_dir=os.path.join(output_dir, "ir_corpus"),
-                   ir_min_corpus_dir=os.path.join(output_dir, "ir_min_corpus"))
+                   output_dir=output_dir)
 
 
 def list_files_with_suffix(root_search_dir, suffix, excludes):
@@ -299,19 +282,34 @@ def touch_stamp_file(output_dir, task_name):
     pathlib.Path(stamp_file).touch(mode=0o644, exist_ok=True)
 
 
+def gather_wgsl_files(input_dir, output_dir):
+    """Collect all the .wgsl files (that are not .expected.wgsl files) in a
+    nested directory structure into a single flat directory.
+
+    File names are re-written based on their initial location to avoid
+    collisions.
+
+    Args:
+        input_dir (str): Directory to gather the files from
+        output_dir (str): Directory to place the files in
+    """
+    logger.info(f"Gathering .wgsl files from {input_dir} to {output_dir}")
+    create_clean_dir(output_dir)
+    for in_file in list_files_with_suffix(input_dir, ".wgsl",
+                                          [".expected.wgsl"]):
+        out_file = in_file[len(input_dir) + 1:].replace(os.sep, '_')
+        logger.debug("Copying " + in_file + " to " + out_file)
+        shutil.copy(in_file, os.path.join(output_dir, out_file))
+
+
 def generate_wgsl_corpus(options):
     """Generate non-minimized WGSL corpus
 
     Args:
         options (Options): Control options parsed from the command line.
     """
-    logger.info(f"Generating WGSL corpus to \'{options.wgsl_corpus_dir}\' ...")
-    create_clean_dir(options.wgsl_corpus_dir)
-    for in_file in list_files_with_suffix(options.input_dir, ".wgsl",
-                                          [".expected.wgsl"]):
-        out_file = in_file[len(options.input_dir) + 1:].replace(os.sep, '_')
-        logger.debug("Copying " + in_file + " to " + out_file)
-        shutil.copy(in_file, os.path.join(options.wgsl_corpus_dir, out_file))
+    logger.info(f"Generating WGSL corpus to \'{options.output_dir}\' ...")
+    gather_wgsl_files(options.input_dir, options.output_dir)
     touch_stamp_file(options.output_dir, "wgsl")
     logger.info("Finished generating WGSL corpus")
 
@@ -323,13 +321,13 @@ def generate_wgsl_minimized_corpus(options):
         options (Options): Control options parsed from the command line.
     """
     logger.info(
-        f"Minimizing WGSL corpus to \'{options.wgsl_min_corpus_dir}\' (this will take a while) ..."
+        f"Minimizing WGSL corpus to \'{options.output_dir}\' (this will take a while) ..."
     )
-    create_clean_dir(options.wgsl_min_corpus_dir)
+    create_clean_dir(options.output_dir)
 
     # libFuzzer uses TO FROM args for merging/minimization
     min_cmd = [
-        options.wgsl_fuzzer_bin, '-merge=1', options.wgsl_min_corpus_dir,
+        options.wgsl_fuzzer_bin, '-merge=1', options.output_dir,
         options.input_dir
     ]
     logger.info(f"Invoking \'{' '.join(min_cmd)}\'")
@@ -345,13 +343,23 @@ def generate_ir_corpus(options):
     Args:
         options (Options): Control options parsed from the command line.
     """
-    logger.info(f"Generating IR corpus to \'{options.ir_corpus_dir}\' ...")
-    create_clean_dir(options.ir_corpus_dir)
+    logger.info(f"Generating IR corpus to \'{options.output_dir}\' ...")
+    create_clean_dir(options.output_dir)
 
-    gen_env = os.environ.copy()
-    gen_cmd = [options.ir_as_bin, options.input_dir, options.ir_corpus_dir]
-    logger.info(f"Invoking \'{' '.join(gen_cmd)}\'")
-    subprocess.run(gen_cmd, env=gen_env)
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        gather_wgsl_files(options.input_dir, tmp_dir)
+        gen_env = os.environ.copy()
+        gen_cmd = [options.ir_as_bin, tmp_dir, options.output_dir]
+        logger.info(f"Invoking \'{' '.join(gen_cmd)}\'")
+        # This command is noisy, so only displaying the output when explicitly asked for
+        [
+            logger.debug(line)
+            for line in subprocess.run(gen_cmd,
+                                       env=gen_env,
+                                       stdout=subprocess.PIPE,
+                                       stderr=subprocess.STDOUT,
+                                       text=True).stdout.splitlines()
+        ]
 
     touch_stamp_file(options.output_dir, "ir")
     logger.info("Finished generating IR corpus")
@@ -364,13 +372,13 @@ def generated_ir_minimized_corpus(options):
         options (Options): Control options parsed from the command line.
     """
     logger.info(
-        f"Minimizing IR corpus to \'{options.ir_min_corpus_dir}\' (this will take a while) ..."
+        f"Minimizing IR corpus to \'{options.output_dir}\' (this will take a while) ..."
     )
-    create_clean_dir(options.ir_min_corpus_dir)
+    create_clean_dir(options.output_dir)
 
     # libFuzzer uses TO FROM args for merging/minimization
     min_cmd = [
-        options.ir_fuzzer_bin, '-merge=1', options.ir_min_corpus_dir,
+        options.ir_fuzzer_bin, '-merge=1', options.output_dir,
         options.input_dir
     ]
     logger.info(f"Invoking \'{' '.join(min_cmd)}\'")

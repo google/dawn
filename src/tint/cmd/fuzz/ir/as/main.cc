@@ -133,18 +133,21 @@ Options:
         return false;
     }
 
-    if (is_directory(std::filesystem::path{args[0]}) &&
-        is_directory(std::filesystem::path{args[1]})) {
+    bool is_arg0_dir = is_directory(std::filesystem::path{args[0]});
+    bool is_arg1_dir = is_directory(std::filesystem::path{args[1]});
+
+    if (is_arg0_dir && is_arg1_dir) {
         opts->input_dirname = args[0];
         opts->output_dirname = args[1];
         opts->batch_mode = true;
-    } else if ((!is_directory(std::filesystem::path{args[0]}) &&
-                !is_directory(std::filesystem::path{args[1]}))) {
+    } else if (!is_arg0_dir && !is_arg1_dir) {
         opts->input_filename = args[0];
         opts->output_filename = args[1];
         opts->batch_mode = false;
     } else {
-        std::cerr << "Expected args to either both be directories or both be files\n";
+        std::cerr << "Expected args to either both be directories or both be files ('" << args[0]
+                  << "' is " << (is_arg0_dir ? "DIR" : "FILE") << " and '" << args[1] << "' is "
+                  << (is_arg1_dir ? "DIR" : "FILE") << "\n";
         return false;
     }
 
