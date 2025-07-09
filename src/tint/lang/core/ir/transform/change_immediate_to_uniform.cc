@@ -25,13 +25,13 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/hlsl/writer/raise/change_immediate_to_uniform.h"
+#include "src/tint/lang/core/ir/transform/change_immediate_to_uniform.h"
 
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/validator.h"
 
-namespace tint::hlsl::writer::raise {
+namespace tint::core::ir::transform {
 namespace {
 
 /// PIMPL state for the transform.
@@ -70,9 +70,9 @@ struct State {
 
             auto* var_ty = var->Result()->Type()->As<core::type::Pointer>();
 
-            // DecomposeStorageAccess may have converted the var pointers into ByteAddressBuffer
-            // objects. Since they've been changed, then they're Storage buffers and we don't care
-            // about them here.
+            // In HLSL backend, DecomposeStorageAccess transform may have converted the var pointers
+            // into ByteAddressBuffer objects. Since they've been changed, then they're Storage
+            // buffers and we don't care about them here.
             if (!var_ty) {
                 continue;
             }
@@ -133,7 +133,7 @@ struct State {
 
 Result<SuccessType> ChangeImmediateToUniform(core::ir::Module& ir,
                                              const ChangeImmediateToUniformConfig& config) {
-    auto result = ValidateAndDumpIfNeeded(ir, "hlsl.ChangeImmediateToUniform",
+    auto result = ValidateAndDumpIfNeeded(ir, "core.ChangeImmediateToUniform",
                                           core::ir::Capabilities{
                                               core::ir::Capability::kAllowClipDistancesOnF32,
                                               core::ir::Capability::kAllowDuplicateBindings,
@@ -148,4 +148,4 @@ Result<SuccessType> ChangeImmediateToUniform(core::ir::Module& ir,
     return Success;
 }
 
-}  // namespace tint::hlsl::writer::raise
+}  // namespace tint::core::ir::transform

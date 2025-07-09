@@ -25,7 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/hlsl/writer/raise/change_immediate_to_uniform.h"
+#include "src/tint/lang/core/ir/transform/change_immediate_to_uniform.h"
 
 #include <gtest/gtest.h>
 
@@ -37,12 +37,12 @@
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
-namespace tint::hlsl::writer::raise {
+namespace tint::core::ir::transform {
 namespace {
 
-using HlslWriterChangeImmediateToUniformTest = core::ir::transform::TransformTest;
+using IRChangeImmediateToUniformTest = core::ir::transform::TransformTest;
 
-TEST_F(HlslWriterChangeImmediateToUniformTest, NoPushConstantVariable) {
+TEST_F(IRChangeImmediateToUniformTest, NoPushConstantVariable) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] { b.Return(func); });
 
@@ -62,7 +62,7 @@ TEST_F(HlslWriterChangeImmediateToUniformTest, NoPushConstantVariable) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(HlslWriterChangeImmediateToUniformTest, PushConstantAccessChain) {
+TEST_F(IRChangeImmediateToUniformTest, PushConstantAccessChain) {
     auto* Inner = ty.Struct(mod.symbols.New("Inner"), {
                                                           {mod.symbols.New("c"), ty.f32()},
                                                           {mod.symbols.New("d"), ty.u32()},
@@ -143,7 +143,7 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(HlslWriterChangeImmediateToUniformTest, PushConstantAccessChainFromLetAccessChain) {
+TEST_F(IRChangeImmediateToUniformTest, PushConstantAccessChainFromLetAccessChain) {
     auto* Inner = ty.Struct(mod.symbols.New("Inner"), {
                                                           {mod.symbols.New("c"), ty.f32()},
                                                       });
@@ -230,7 +230,7 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(HlslWriterChangeImmediateToUniformTest, PushConstantAccessVectorLoad) {
+TEST_F(IRChangeImmediateToUniformTest, PushConstantAccessVectorLoad) {
     auto* var = b.Var<immediate, vec4<f32>, core::Access::kRead>("v");
 
     b.ir.root_block->Append(var);
@@ -293,7 +293,7 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(HlslWriterChangeImmediateToUniformTest, PushConstantAccessMatrix) {
+TEST_F(IRChangeImmediateToUniformTest, PushConstantAccessMatrix) {
     auto* var = b.Var<immediate, mat4x4<f32>, core::Access::kRead>("v");
 
     b.ir.root_block->Append(var);
@@ -352,7 +352,7 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(HlslWriterChangeImmediateToUniformTest, PushConstantAccessStruct) {
+TEST_F(IRChangeImmediateToUniformTest, PushConstantAccessStruct) {
     auto* SB = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("a"), ty.i32()},
                                                     {mod.symbols.New("b"), ty.f32()},
@@ -417,7 +417,7 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(HlslWriterChangeImmediateToUniformTest, PushConstantStructNested) {
+TEST_F(IRChangeImmediateToUniformTest, PushConstantStructNested) {
     auto* Inner =
         ty.Struct(mod.symbols.New("Inner"), {
                                                 {mod.symbols.New("s"), ty.mat3x3<f32>()},
@@ -514,7 +514,7 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(HlslWriterChangeImmediateToUniformTest, PushConstantAccessChainReused) {
+TEST_F(IRChangeImmediateToUniformTest, PushConstantAccessChainReused) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("c"), ty.f32()},
                                                     {mod.symbols.New("d"), ty.vec3<f32>()},
@@ -581,7 +581,7 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(HlslWriterChangeImmediateToUniformTest, Determinism_MultipleUsesOfLetFromVar) {
+TEST_F(IRChangeImmediateToUniformTest, Determinism_MultipleUsesOfLetFromVar) {
     auto* sb =
         ty.Struct(mod.symbols.New("SB"), {
                                              {mod.symbols.New("a"), ty.array<vec4<f32>, 2>()},
@@ -658,4 +658,4 @@ $B1: {  # root
 }
 
 }  // namespace
-}  // namespace tint::hlsl::writer::raise
+}  // namespace tint::core::ir::transform

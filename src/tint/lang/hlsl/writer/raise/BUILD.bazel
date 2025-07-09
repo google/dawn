@@ -41,7 +41,6 @@ cc_library(
   srcs = [
     "binary_polyfill.cc",
     "builtin_polyfill.cc",
-    "change_immediate_to_uniform.cc",
     "decompose_storage_access.cc",
     "decompose_uniform_access.cc",
     "localize_struct_array_assignment.cc",
@@ -55,7 +54,6 @@ cc_library(
   hdrs = [
     "binary_polyfill.h",
     "builtin_polyfill.h",
-    "change_immediate_to_uniform.h",
     "decompose_storage_access.h",
     "decompose_uniform_access.h",
     "localize_struct_array_assignment.h",
@@ -100,7 +98,6 @@ cc_library(
   srcs = [
     "binary_polyfill_test.cc",
     "builtin_polyfill_test.cc",
-    "change_immediate_to_uniform_test.cc",
     "decompose_storage_access_test.cc",
     "decompose_uniform_access_test.cc",
     "localize_struct_array_assignment_test.cc",

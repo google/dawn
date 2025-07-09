@@ -43,8 +43,6 @@ tint_add_target(tint_lang_hlsl_writer_raise lib
   lang/hlsl/writer/raise/binary_polyfill.h
   lang/hlsl/writer/raise/builtin_polyfill.cc
   lang/hlsl/writer/raise/builtin_polyfill.h
-  lang/hlsl/writer/raise/change_immediate_to_uniform.cc
-  lang/hlsl/writer/raise/change_immediate_to_uniform.h
   lang/hlsl/writer/raise/decompose_storage_access.cc
   lang/hlsl/writer/raise/decompose_storage_access.h
   lang/hlsl/writer/raise/decompose_uniform_access.cc
@@ -101,7 +99,6 @@ tint_target_add_external_dependencies(tint_lang_hlsl_writer_raise lib
 tint_add_target(tint_lang_hlsl_writer_raise_test test
   lang/hlsl/writer/raise/binary_polyfill_test.cc
   lang/hlsl/writer/raise/builtin_polyfill_test.cc
-  lang/hlsl/writer/raise/change_immediate_to_uniform_test.cc
   lang/hlsl/writer/raise/decompose_storage_access_test.cc
   lang/hlsl/writer/raise/decompose_uniform_access_test.cc
   lang/hlsl/writer/raise/localize_struct_array_assignment_test.cc

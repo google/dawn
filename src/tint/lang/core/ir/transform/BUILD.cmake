@@ -55,6 +55,8 @@ tint_add_target(tint_lang_core_ir_transform lib
   lang/core/ir/transform/builtin_polyfill.h
   lang/core/ir/transform/builtin_scalarize.cc
   lang/core/ir/transform/builtin_scalarize.h
+  lang/core/ir/transform/change_immediate_to_uniform.cc
+  lang/core/ir/transform/change_immediate_to_uniform.h
   lang/core/ir/transform/combine_access_instructions.cc
   lang/core/ir/transform/combine_access_instructions.h
   lang/core/ir/transform/conversion_polyfill.cc
@@ -140,6 +142,7 @@ tint_add_target(tint_lang_core_ir_transform_test test
   lang/core/ir/transform/block_decorated_structs_test.cc
   lang/core/ir/transform/builtin_polyfill_test.cc
   lang/core/ir/transform/builtin_scalarize_test.cc
+  lang/core/ir/transform/change_immediate_to_uniform_test.cc
   lang/core/ir/transform/combine_access_instructions_test.cc
   lang/core/ir/transform/conversion_polyfill_test.cc
   lang/core/ir/transform/dead_code_elimination_test.cc

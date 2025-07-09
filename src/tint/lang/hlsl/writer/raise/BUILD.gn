@@ -49,8 +49,6 @@ libtint_source_set("raise") {
     "binary_polyfill.h",
     "builtin_polyfill.cc",
     "builtin_polyfill.h",
-    "change_immediate_to_uniform.cc",
-    "change_immediate_to_uniform.h",
     "decompose_storage_access.cc",
     "decompose_storage_access.h",
     "decompose_uniform_access.cc",
@@ -101,7 +99,6 @@ if (tint_build_unittests) {
     sources = [
       "binary_polyfill_test.cc",
       "builtin_polyfill_test.cc",
-      "change_immediate_to_uniform_test.cc",
       "decompose_storage_access_test.cc",
       "decompose_uniform_access_test.cc",
       "localize_struct_array_assignment_test.cc",
