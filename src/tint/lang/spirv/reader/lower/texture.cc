@@ -127,28 +127,12 @@ struct State {
             });
         }
 
-        Vector<spirv::ir::BuiltinCall*, 4> builtin_worklist;
         Vector<spirv::ir::BuiltinCall*, 4> depth_worklist;
         for (auto* inst : ir.Instructions()) {
             if (auto* builtin = inst->As<spirv::ir::BuiltinCall>()) {
                 switch (builtin->Func()) {
                     case spirv::BuiltinFn::kSampledImage:
                         SampledImage(builtin);
-                        break;
-                    case spirv::BuiltinFn::kImage:
-                    case spirv::BuiltinFn::kImageRead:
-                    case spirv::BuiltinFn::kImageFetch:
-                    case spirv::BuiltinFn::kImageGather:
-                    case spirv::BuiltinFn::kImageQueryLevels:
-                    case spirv::BuiltinFn::kImageQuerySamples:
-                    case spirv::BuiltinFn::kImageQuerySize:
-                    case spirv::BuiltinFn::kImageQuerySizeLod:
-                    case spirv::BuiltinFn::kImageSampleExplicitLod:
-                    case spirv::BuiltinFn::kImageSampleImplicitLod:
-                    case spirv::BuiltinFn::kImageSampleProjImplicitLod:
-                    case spirv::BuiltinFn::kImageSampleProjExplicitLod:
-                    case spirv::BuiltinFn::kImageWrite:
-                        builtin_worklist.Push(builtin);
                         break;
                     case spirv::BuiltinFn::kImageDrefGather:
                     case spirv::BuiltinFn::kImageSampleDrefImplicitLod:
@@ -158,7 +142,7 @@ struct State {
                         depth_worklist.Push(builtin);
                         break;
                     default:
-                        TINT_UNREACHABLE() << "unknown spirv builtin: " << builtin->Func();
+                        break;
                 }
             }
         }
@@ -192,6 +176,34 @@ struct State {
             ConvertVarToComparison(FindRootVarFor(tex));
         }
         UpdateValues();
+
+        Vector<spirv::ir::BuiltinCall*, 4> builtin_worklist;
+        for (auto* inst : ir.Instructions()) {
+            if (auto* builtin = inst->As<spirv::ir::BuiltinCall>()) {
+                switch (builtin->Func()) {
+                    case spirv::BuiltinFn::kSampledImage:
+                        // Handled above.
+                        break;
+                    case spirv::BuiltinFn::kImage:
+                    case spirv::BuiltinFn::kImageRead:
+                    case spirv::BuiltinFn::kImageFetch:
+                    case spirv::BuiltinFn::kImageGather:
+                    case spirv::BuiltinFn::kImageQueryLevels:
+                    case spirv::BuiltinFn::kImageQuerySamples:
+                    case spirv::BuiltinFn::kImageQuerySize:
+                    case spirv::BuiltinFn::kImageQuerySizeLod:
+                    case spirv::BuiltinFn::kImageSampleExplicitLod:
+                    case spirv::BuiltinFn::kImageSampleImplicitLod:
+                    case spirv::BuiltinFn::kImageSampleProjImplicitLod:
+                    case spirv::BuiltinFn::kImageSampleProjExplicitLod:
+                    case spirv::BuiltinFn::kImageWrite:
+                        builtin_worklist.Push(builtin);
+                        break;
+                    default:
+                        TINT_UNREACHABLE() << "unknown spirv builtin: " << builtin->Func();
+                }
+            }
+        }
 
         for (auto* builtin : builtin_worklist) {
             switch (builtin->Func()) {
