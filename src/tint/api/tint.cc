@@ -86,4 +86,23 @@ void Shutdown() {
     // Currently no-op, but may release tint resources in the future.
 }
 
+#if TINT_BUILD_SPV_READER && TINT_BUILD_WGSL_WRITER
+Result<std::string> SpirvToWgsl(const std::vector<uint32_t>& spirv,
+                                const wgsl::writer::ProgramOptions& wgsl_options) {
+    // Convert the SPIR-V program to an IR module.
+    auto ir_from_spirv = tint::spirv::reader::ReadIR(spirv);
+    if (ir_from_spirv != Success) {
+        return ir_from_spirv.Failure();
+    }
+
+    // Convert the IR module to WGSL.
+    auto wgsl_from_ir = tint::wgsl::writer::WgslFromIR(ir_from_spirv.Get(), wgsl_options);
+    if (wgsl_from_ir != Success) {
+        return wgsl_from_ir.Failure();
+    }
+
+    return wgsl_from_ir->wgsl;
+}
+#endif  // TINT_BUILD_SPV_READER && TINT_BUILD_WGSL_WRITER
+
 }  // namespace tint

@@ -58,6 +58,7 @@ if (tint_build_ir_binary && tint_build_wgsl_reader) {
       "${tint_src_dir}/lang/wgsl/inspector",
       "${tint_src_dir}/lang/wgsl/program",
       "${tint_src_dir}/lang/wgsl/sem",
+      "${tint_src_dir}/lang/wgsl/writer/ir_to_program",
       "${tint_src_dir}/utils",
       "${tint_src_dir}/utils/command",
       "${tint_src_dir}/utils/containers",
