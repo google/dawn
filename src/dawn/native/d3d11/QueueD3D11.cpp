@@ -120,6 +120,8 @@ class DelayFlushQueue final : public Queue {
 
     void MarkPendingQueriesAsComplete(size_t numCompletedQueries);
 
+    MaybeError BlockWaitForLastSubmittedSerial(const ScopedCommandRecordingContext* commandContext);
+
     struct EventQuery {
       public:
         EventQuery(ExecutionSerial serial, ComPtr<ID3D11Query> query)
@@ -532,7 +534,8 @@ ResultOrError<ExecutionSerial> SystemEventQueue::CheckAndUpdateCompletedSerials(
     DAWN_TRY(CheckAndMapReadyBuffers(completedSerial));
 
     if (!returnedReceivers.empty()) {
-        DAWN_TRY(ReturnSystemEventReceivers(std::move(returnedReceivers)));
+        DAWN_TRY(ReturnSystemEventReceivers(
+            std::span(returnedReceivers.data(), returnedReceivers.size())));
     }
 
     return completedSerial;
@@ -703,6 +706,14 @@ ResultOrError<bool> DelayFlushQueue::WaitForQueueSerial(ExecutionSerial serial,
 
     auto commandContext = GetScopedPendingCommandContext(SubmitMode::Passive);
 
+    if (uint64_t(timeout) == std::numeric_limits<uint64_t>::max() &&
+        serial == GetLastSubmittedCommandSerial()) {
+        // If user submits then waits immediately, we can do a small optimization here,
+        // Flush + enqueue SetEvent then wait on the event. This can avoid spinning wait below,
+        // wasting less CPU cycles.
+        DAWN_TRY(BlockWaitForLastSubmittedSerial(&commandContext));
+    }
+
     DAWN_ASSERT(!mPendingQueries.empty());
     DAWN_ASSERT(serial >= mPendingQueries.front().Serial());
     DAWN_ASSERT(serial <= mPendingQueries.back().Serial());
@@ -741,6 +752,22 @@ ResultOrError<bool> DelayFlushQueue::WaitForQueueSerial(ExecutionSerial serial,
     auto numCompletedQueries = std::distance(mPendingQueries.begin(), it) + 1;
     MarkPendingQueriesAsComplete(numCompletedQueries);
     return done;
+}
+
+MaybeError DelayFlushQueue::BlockWaitForLastSubmittedSerial(
+    const ScopedCommandRecordingContext* commandContext) {
+    TRACE_EVENT0(GetDevice()->GetPlatform(), General,
+                 "DelayFlushQueue::BlockWaitForLastSubmittedSerial");
+
+    SystemEventReceiver receiver;
+    DAWN_TRY_ASSIGN(receiver, GetSystemEventReceiver());
+    commandContext->Flush1(D3D11_CONTEXT_TYPE_ALL, receiver.GetPrimitive().Get());
+
+    DWORD result = WaitForSingleObject(receiver.GetPrimitive().Get(), INFINITE);
+    DAWN_INTERNAL_ERROR_IF(result != WAIT_OBJECT_0, "WaitForSingleObject() failed");
+
+    SystemEventReceiver returnedReceivers[] = {std::move(receiver)};
+    return ReturnSystemEventReceivers(returnedReceivers);
 }
 
 void DelayFlushQueue::SetEventOnCompletion(ExecutionSerial serial, HANDLE event) {

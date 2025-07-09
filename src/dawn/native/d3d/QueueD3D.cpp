@@ -59,7 +59,7 @@ ResultOrError<SystemEventReceiver> Queue::GetSystemEventReceiver() {
     return receiver;
 }
 
-MaybeError Queue::ReturnSystemEventReceivers(std::vector<SystemEventReceiver> receivers) {
+MaybeError Queue::ReturnSystemEventReceivers(std::span<SystemEventReceiver> receivers) {
     for (const auto& receiver : receivers) {
         if (!ResetEvent(receiver.GetPrimitive().Get())) {
             return DAWN_INTERNAL_ERROR("ResetEvent failed");
@@ -109,7 +109,7 @@ MaybeError Queue::RecycleSystemEventReceivers(ExecutionSerial completedSerial) {
         systemEventReceivers->ClearUpTo(completedSerial);
     });
 
-    DAWN_TRY(ReturnSystemEventReceivers(std::move(receivers)));
+    DAWN_TRY(ReturnSystemEventReceivers(std::span(receivers.data(), receivers.size())));
 
     return {};
 }
