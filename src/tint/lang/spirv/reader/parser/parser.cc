@@ -1540,27 +1540,6 @@ class Parser {
     void EmitBlock(core::ir::Block* dst, spvtools::opt::BasicBlock& src) {
         TINT_SCOPED_ASSIGNMENT(current_block_, dst);
 
-        values_to_replace_.push_back({});
-
-        auto* loop_merge_inst = src.GetLoopMergeInst();
-        // This is a loop merge block, so we need to treat it as a Loop.
-        if (loop_merge_inst) {
-            // Emit the loop into the current block.
-            EmitLoop(src);
-
-            // The loop header is a walk stop block, which was created in the
-            // emit loop method. Get the loop back so we can change the current
-            // insertion block.
-            auto* loop = StopWalkingAt(src.id())->As<core::ir::Loop>();
-            TINT_ASSERT(loop);
-
-            id_stack_.emplace_back();
-            current_blocks_.insert(loop->Body());
-
-            // Now emit the remainder of the block into the loop body.
-            current_block_ = loop->Body();
-        }
-
         // Register the merge if this is a header block
         auto* merge_inst = src.GetMergeInst();
         if (merge_inst) {
@@ -1568,121 +1547,138 @@ class Parser {
             spirv_merge_id_to_header_id_.insert({merge_id, src.id()});
         }
 
+        values_to_replace_.push_back({});
+
+        // If this is a loop merge block, so we need to treat it as a Loop.
+        auto* loop_merge_inst = src.GetLoopMergeInst();
+        core::ir::Loop* loop = nullptr;
+        if (loop_merge_inst) {
+            // Emit the loop instruction into the current block.
+            EmitLoop(src);
+
+            // The loop header is a walk stop block, which was created in the emit loop method. Get
+            // the loop back so we can change the current insertion block.
+            loop = StopWalkingAt(src.id())->As<core::ir::Loop>();
+            TINT_ASSERT(loop);
+
+            id_stack_.emplace_back();
+            current_blocks_.insert(loop->Body());
+
+            // Now emit the remainder of the block into the loop body. We do this now so the loop
+            // emitted above is in the parent block.
+            current_block_ = loop->Body();
+        }
+
+        // Note, this comes after the loop code since the current block is set to the loop body
         spirv_id_to_block_.insert({src.id(), current_block_});
 
         ProcessInstructions(src);
 
-        // The loop merge needs to be emitted if this was a loop block. It has
-        // to be emitted back into the original destination.
-        if (loop_merge_inst) {
-            auto* loop = StopWalkingAt(src.id())->As<core::ir::Loop>();
-            TINT_ASSERT(loop);
-
-            // Add the body terminator if necessary
-            if (!loop->Body()->Terminator()) {
-                loop->Body()->Append(b_.Unreachable());
-            }
-
-            // Push id stack entry for the continuing block. We don't use EmitBlockParent to do this
-            // because we need the scope to exist until after we process any `continue_blk_phis_`.
-            id_stack_.emplace_back();
-
-            auto continue_id = loop_merge_inst->GetSingleWordInOperand(1);
-
-            // We only need to emit the continuing block if:
-            //  a) It is not the loop header
-            //  b) It has inbound branches. This works around a case where you can have a continuing
-            //     where uses values which are very difficult to propagate, but the continuing is
-            //     never reached anyway, so the propagation is useless.
-            if (continue_id != src.id() &&
-                !loop->Continuing()->InboundSiblingBranches().IsEmpty()) {
-                const auto& bb_continue = current_spirv_function_->FindBlock(continue_id);
-
-                current_blocks_.insert(loop->Continuing());
-                // Emit the continuing block.
-                EmitBlock(loop->Continuing(), *bb_continue);
-
-                current_blocks_.erase(loop->Continuing());
-            }
-
-            if (!loop->Continuing()->Terminator()) {
-                loop->Continuing()->Append(b_.NextIteration(loop));
-            }
-
-            // If this continue block needs to pass any `phi` instructions back to
-            // the main loop body.
-            //
-            // We have to do this here because we need to have emitted the loop
-            // body before we can get the values used in the continue block.
-            auto phis = continue_blk_phis_.find(continue_id);
-            if (phis != continue_blk_phis_.end()) {
-                for (auto value_id : phis->second) {
-                    auto* value = Value(value_id);
-
-                    tint::Switch(
-                        loop->Continuing()->Terminator(),  //
-                        [&](core::ir::NextIteration* ni) { ni->PushOperand(value); },
-                        [&](core::ir::BreakIf* bi) {
-                            // TODO(dsinclair): Need to change the break-if insertion of there
-                            // happens to be exit values, but those are rare, so leave this for when
-                            // we have test case.
-                            TINT_ASSERT(bi->ExitValues().IsEmpty());
-
-                            auto len = bi->NextIterValues().Length();
-                            bi->PushOperand(value);
-                            bi->SetNumNextIterValues(len + 1);
-                        },
-                        TINT_ICE_ON_NO_MATCH);
-                }
-            }
-
-            id_stack_.pop_back();
+        // Add the body terminator if necessary
+        if (loop && !loop->Body()->Terminator()) {
+            loop->Body()->Append(b_.Unreachable());
         }
 
-        // For any `OpPhi` values we saw, insert their `Value` now. We do this
-        // at the end of the loop because a phi can refer to instructions
-        // defined after it in the block.
+        // For any `OpPhi` values we saw, insert their `Value` now. We do this at the end of the
+        // processing of instructions because a phi can refer to instructions defined after it
+        // in the block.
         auto replace = values_to_replace_.back();
         for (auto& val : replace) {
             auto* value = ValueNoPropagate(val.value_id);
             val.terminator->SetOperand(val.idx, value);
         }
+
         values_to_replace_.pop_back();
 
-        if (loop_merge_inst) {
-            auto* loop = StopWalkingAt(src.id())->As<core::ir::Loop>();
-            TINT_ASSERT(loop);
+        if (!loop) {
+            return;
+        }
 
-            current_blocks_.erase(loop->Body());
-            id_stack_.pop_back();
+        // Emit the continuing block. The continue block is within the scope of the body block,
+        // so we don't pop the id stack yet.
+        auto continue_id = loop_merge_inst->GetSingleWordInOperand(1);
+        EmitContinueBlock(src.id(), continue_id, loop);
 
-            // If we added phi's to the continuing block, we may have exits from the body which
-            // aren't valid.
-            auto continuing_param_count = loop->Continuing()->Params().Length();
-            if (continuing_param_count > 0) {
-                for (auto incoming : loop->Continuing()->InboundSiblingBranches()) {
-                    TINT_ASSERT(incoming->Is<core::ir::Continue>());
+        // Remove the body block id stack before emitting the merge block.
+        current_blocks_.erase(loop->Body());
+        id_stack_.pop_back();
 
-                    // Check if the block this instruction exists in has default phi result that we
-                    // can append.
-                    auto inst_to_blk_iter = inst_to_spirv_block_.find(incoming);
-                    if (inst_to_blk_iter != inst_to_spirv_block_.end()) {
-                        uint32_t spirv_blk = inst_to_blk_iter->second;
-                        auto phi_values_from_loop_header = block_phi_values_[spirv_blk];
-                        // If there were phi values, push them to this instruction
-                        for (auto value_id : phi_values_from_loop_header) {
-                            auto* value = Value(value_id);
-                            incoming->PushOperand(value);
-                        }
+        // If we added phi's to the continuing block, we may have exits from the body which
+        // aren't valid.
+        if (loop->Continuing()->Params().Length() > 0) {
+            for (auto incoming : loop->Continuing()->InboundSiblingBranches()) {
+                TINT_ASSERT(incoming->Is<core::ir::Continue>());
+
+                // Check if the block this instruction exists in has default phi result that we
+                // can append.
+                auto inst_to_blk_iter = inst_to_spirv_block_.find(incoming);
+                if (inst_to_blk_iter != inst_to_spirv_block_.end()) {
+                    uint32_t spirv_blk = inst_to_blk_iter->second;
+                    auto phi_values_from_loop_header = block_phi_values_[spirv_blk];
+                    // If there were phi values, push them to this instruction
+                    for (auto value_id : phi_values_from_loop_header) {
+                        auto* value = Value(value_id);
+                        incoming->PushOperand(value);
                     }
                 }
             }
-
-            // Emit the merge block
-            auto merge_id = loop_merge_inst->GetSingleWordInOperand(0);
-            const auto& merge_bb = current_spirv_function_->FindBlock(merge_id);
-            EmitBlock(dst, *merge_bb);
         }
+
+        // Emit the merge block
+        auto merge_id = loop_merge_inst->GetSingleWordInOperand(0);
+        const auto& merge_bb = current_spirv_function_->FindBlock(merge_id);
+        EmitBlock(dst, *merge_bb);
+    }
+
+    void EmitContinueBlock(uint32_t src_id, uint32_t continue_id, core::ir::Loop* loop) {
+        // Push id stack entry for the continuing block. We don't use EmitBlockParent to do this
+        // because we need the scope to exist until after we process any `continue_blk_phis_`.
+        id_stack_.emplace_back();
+
+        // We only need to emit the continuing block if:
+        //  a) It is not the loop header
+        //  b) It has inbound branches. This works around a case where you can have a continuing
+        //     where uses values which are very difficult to propagate, but the continuing is never
+        //     reached anyway, so the propagation is useless.
+        if (continue_id != src_id && !loop->Continuing()->InboundSiblingBranches().IsEmpty()) {
+            const auto& bb_continue = current_spirv_function_->FindBlock(continue_id);
+
+            current_blocks_.insert(loop->Continuing());
+            EmitBlock(loop->Continuing(), *bb_continue);
+            current_blocks_.erase(loop->Continuing());
+        }
+
+        if (!loop->Continuing()->Terminator()) {
+            loop->Continuing()->Append(b_.NextIteration(loop));
+        }
+
+        // If this continue block needs to pass any `phi` instructions back to the main loop body.
+        //
+        // We have to do this here because we need to have emitted the loop body before we can get
+        // the values used in the continue block.
+        auto phis = continue_blk_phis_.find(continue_id);
+        if (phis != continue_blk_phis_.end()) {
+            for (auto value_id : phis->second) {
+                auto* value = Value(value_id);
+
+                tint::Switch(
+                    loop->Continuing()->Terminator(),  //
+                    [&](core::ir::NextIteration* ni) { ni->PushOperand(value); },
+                    [&](core::ir::BreakIf* bi) {
+                        // TODO(dsinclair): Need to change the break-if insertion if there happens
+                        // to be exit values, but those are rare, so leave this for when we have
+                        // test case.
+                        TINT_ASSERT(bi->ExitValues().IsEmpty());
+
+                        auto len = bi->NextIterValues().Length();
+                        bi->PushOperand(value);
+                        bi->SetNumNextIterValues(len + 1);
+                    },
+                    TINT_ICE_ON_NO_MATCH);
+            }
+        }
+
+        id_stack_.pop_back();
     }
 
     void ProcessInstructions(spvtools::opt::BasicBlock& src) {
@@ -2200,6 +2196,18 @@ class Parser {
         EmitPhiInLoopContinue(inst);
     }
 
+    // Push a placeholder for the operand value. We store away the terminator/index pair along with
+    // the required value and then fill it in at the end of the block emission. This is because a
+    // PHI can refer to a value which is defined after the PHI itself.
+    void AddOperandToTerminator(core::ir::Terminator* term, uint32_t id) {
+        auto operand_idx = term->PushOperand(nullptr);
+        values_to_replace_.back().push_back(ReplacementValue{
+            .terminator = term,
+            .idx = operand_idx,
+            .value_id = id,
+        });
+    }
+
     void EmitPhiInLoopMerge(spvtools::opt::Instruction& inst) {
         // All of the source blocks should exist as they will either be the loop header, if we
         // happened to jump out early, the body if we break or the continuing if we break-if.
@@ -2268,12 +2276,7 @@ class Parser {
                 }
             }
 
-            auto operand_idx = term->PushOperand(nullptr);
-            values_to_replace_.back().push_back(ReplacementValue{
-                .terminator = term,
-                .idx = operand_idx,
-                .value_id = value_id,
-            });
+            AddOperandToTerminator(term, value_id);
         }
 
         auto* res = b_.InstructionResult(type);
@@ -2293,12 +2296,7 @@ class Parser {
                 auto* term = iter->As<core::ir::Terminator>();
                 TINT_ASSERT(term);
 
-                auto operand_idx = term->PushOperand(nullptr);
-                values_to_replace_.back().push_back(ReplacementValue{
-                    .terminator = term,
-                    .idx = operand_idx,
-                    .value_id = default_value.value(),
-                });
+                AddOperandToTerminator(term, default_value.value());
             }
         }
     }
@@ -2329,12 +2327,7 @@ class Parser {
                 continue;
             }
 
-            auto operand_idx = term->PushOperand(nullptr);
-            values_to_replace_.back().push_back(ReplacementValue{
-                .terminator = term,
-                .idx = operand_idx,
-                .value_id = value_id,
-            });
+            AddOperandToTerminator(term, value_id);
         }
 
         // Add the block param to the continuing block
@@ -2357,12 +2350,7 @@ class Parser {
                 auto* term = sibling->As<core::ir::Terminator>();
                 TINT_ASSERT(term);
 
-                auto operand_idx = term->PushOperand(nullptr);
-                values_to_replace_.back().push_back(ReplacementValue{
-                    .terminator = term,
-                    .idx = operand_idx,
-                    .value_id = default_value.value(),
-                });
+                AddOperandToTerminator(term, default_value.value());
             }
         }
     }
@@ -2455,12 +2443,7 @@ class Parser {
                 }
             }
 
-            auto operand_idx = term->PushOperand(nullptr);
-            values_to_replace_.back().push_back(ReplacementValue{
-                .terminator = term,
-                .idx = operand_idx,
-                .value_id = value_id,
-            });
+            AddOperandToTerminator(term, value_id);
         }
 
         // Add the block param to the body
@@ -2494,16 +2477,7 @@ class Parser {
             }
 
             auto* term = value_ir_blk->Terminator();
-            // Push a placeholder for the operand value at this point. We'll store away the
-            // terminator/index pair along with the required value and then fill it in at the end of
-            // the block emission. This is because a PHI can refer to a value which is defined after
-            // the PHI itself.
-            auto operand_idx = term->PushOperand(nullptr);
-            values_to_replace_.back().push_back(ReplacementValue{
-                .terminator = term,
-                .idx = operand_idx,
-                .value_id = value_id,
-            });
+            AddOperandToTerminator(term, value_id);
 
             if (auto* exit = term->As<core::ir::ExitIf>()) {
                 if (ctrl) {
@@ -2520,7 +2494,7 @@ class Parser {
         // can just ignore the if, if we have a default then assign it straight through.
         if (!ctrl) {
             if (value_for_default_block) {
-                values_.Replace(inst.result_id(), value_for_default_block.value());
+                AddValue(inst.result_id(), value_for_default_block.value());
             }
             return;
         }
@@ -2537,10 +2511,10 @@ class Parser {
             term->PushOperand(value_for_default_block.value());
         }
 
-        // Push the result into the switch
+        // Push the result into the parent
         auto* res = b_.InstructionResult(type);
         ctrl->AddResult(res);
-        values_.Replace(inst.result_id(), res);
+        AddValue(inst.result_id(), res);
     }
 
     // Emit an OpPhi which is inside the merge block for a switch.
@@ -2598,16 +2572,7 @@ class Parser {
                 term = value_ir_blk->Terminator();
             }
 
-            // Push a placeholder for the operand value at this point. We'll store away the
-            // terminator/index pair along with the required value and then fill it in at the end of
-            // the block emission. This is because a PHI can refer to a value which is defined after
-            // the PHI itself.
-            auto operand_idx = term->PushOperand(nullptr);
-            values_to_replace_.back().push_back(ReplacementValue{
-                .terminator = term,
-                .idx = operand_idx,
-                .value_id = value_id,
-            });
+            AddOperandToTerminator(term, value_id);
 
             if (auto* exit = term->As<core::ir::ExitSwitch>()) {
                 if (ctrl) {
@@ -2625,7 +2590,7 @@ class Parser {
         // have a default then assign it straight through.
         if (!ctrl) {
             if (value_for_default_block) {
-                values_.Replace(inst.result_id(), value_for_default_block.value());
+                AddValue(inst.result_id(), value_for_default_block.value());
             }
             return;
         }
@@ -2638,7 +2603,7 @@ class Parser {
         // Push the result into the switch
         auto* res = b_.InstructionResult(type);
         ctrl->AddResult(res);
-        values_.Replace(inst.result_id(), res);
+        AddValue(inst.result_id(), res);
     }
 
     void EmitImage(const spvtools::opt::Instruction& inst) {
