@@ -2066,6 +2066,15 @@
             {"name": "is swapchain", "type": "bool", "default": "false"}
         ]
     },
+    "shared texture memory D3D11 begin state": {
+        "category": "structure",
+        "chained": "in",
+        "chain roots": ["shared texture memory begin access descriptor"],
+        "tags": ["dawn", "native"],
+        "members": [
+            {"name": "requires end access fence", "type": "bool", "default": "true"}
+        ]
+    },
     "shared fence": {
         "category": "object",
         "tags": ["dawn", "native"],
@@ -3880,7 +3889,8 @@
             {"value": 68, "name": "render pass descriptor resolve rect", "tags": ["dawn"]},
             {"value": 69, "name": "request adapter WebGPU backend options", "tags": ["dawn", "native"]},
             {"value": 70, "name": "dawn fake device initialize error for testing", "tags": ["dawn"]},
-            {"value": 71, "name": "texture component swizzle descriptor", "tags": ["dawn"]}
+            {"value": 71, "name": "texture component swizzle descriptor", "tags": ["dawn"]},
+            {"value": 72, "name": "shared texture memory D3D11 begin state", "tags": ["dawn", "native"]}
         ]
     },
     "texture": {

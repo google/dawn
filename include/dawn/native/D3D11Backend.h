@@ -32,6 +32,7 @@
 #include <wrl/client.h>
 
 #include <memory>
+#include <optional>
 
 #include "dawn/native/D3DBackend.h"
 
@@ -61,9 +62,14 @@ struct DAWN_NATIVE_EXPORT SharedTextureMemoryD3D11Texture2DDescriptor : wgpu::Ch
     // If this flag is true, Dawn is required to signal a fence before EndAccess() and return it in
     // SharedTextureMemoryEndAccessState's fences list.
     // If it's false, no fence signaling is needed and EndAccess() might return empty fence list.
-    // Note: this flag is not relevant if the feature SharedFenceDXGISharedHandle is disabled/not
+    // Notes:
+    // - This flag is not relevant if the feature SharedFenceDXGISharedHandle is disabled/not
     // supported.
-    bool requiresEndAccessFence = true;
+    // - This flag if present will override the requiresEndAccessFence flag in
+    // SharedTextureMemoryD3D11BeginState
+    // TODO(chromium:335003893): This flag is deprecated. Remove it once clients are updated to use
+    // SharedTextureMemoryD3D11BeginState's requiresEndAccessFence.
+    std::optional<bool> requiresEndAccessFence;
 };
 
 }  // namespace dawn::native::d3d11

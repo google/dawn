@@ -175,11 +175,9 @@ ResultOrError<Ref<Texture>> Texture::CreateInternal(
 // static
 ResultOrError<Ref<Texture>> Texture::CreateFromSharedTextureMemory(
     SharedTextureMemory* memory,
-    const UnpackedPtr<TextureDescriptor>& descriptor,
-    bool requiresFenceSignal) {
+    const UnpackedPtr<TextureDescriptor>& descriptor) {
     Device* device = ToBackend(memory->GetDevice());
-    Ref<Texture> texture =
-        AcquireRef(new Texture(device, descriptor, Kind::Normal, requiresFenceSignal));
+    Ref<Texture> texture = AcquireRef(new Texture(device, descriptor, Kind::Normal));
     DAWN_TRY(
         texture->InitializeAsExternalTexture(memory->GetD3DResource(), memory->GetKeyedMutex()));
     texture->mSharedResourceMemoryContents = memory->GetContents();
@@ -305,11 +303,8 @@ MaybeError Texture::InitializeAsExternalTexture(ComPtr<IUnknown> d3dTexture,
     return {};
 }
 
-Texture::Texture(Device* device,
-                 const UnpackedPtr<TextureDescriptor>& descriptor,
-                 Kind kind,
-                 bool requiresFenceSignal)
-    : Base(device, descriptor), mKind(kind), mRequiresFenceSignal(requiresFenceSignal) {}
+Texture::Texture(Device* device, const UnpackedPtr<TextureDescriptor>& descriptor, Kind kind)
+    : Base(device, descriptor), mKind(kind) {}
 
 Texture::~Texture() = default;
 
@@ -424,7 +419,8 @@ ResultOrError<ComPtr<ID3D11DepthStencilView>> Texture::CreateD3D11DepthStencilVi
 
 MaybeError Texture::SynchronizeTextureBeforeUse(
     const ScopedCommandRecordingContext* commandContext) {
-    if (auto* contents = GetSharedResourceMemoryContents()) {
+    if (auto* contents =
+            static_cast<SharedTextureMemoryContentsD3D11*>(GetSharedResourceMemoryContents())) {
         const auto* device = ToBackend(GetDevice());
         const auto& queueFence = ToBackend(device->GetQueue())->GetSharedFence();
 
@@ -442,7 +438,9 @@ MaybeError Texture::SynchronizeTextureBeforeUse(
                 CheckHRESULT(commandContext->Wait(d3dFence->GetD3DFence(), fence.signaledValue),
                              "ID3D11DeviceContext4::Wait"));
         }
-        if (mRequiresFenceSignal && !device->IsToggleEnabled(Toggle::D3D11DisableFence)) {
+
+        const bool requiresFenceSignal = contents->RequiresFenceSignal();
+        if (requiresFenceSignal && !device->IsToggleEnabled(Toggle::D3D11DisableFence)) {
             commandContext->SetNeedsFence();
         }
     }

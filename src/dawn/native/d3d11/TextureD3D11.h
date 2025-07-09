@@ -64,8 +64,7 @@ class Texture final : public TextureBase {
                                               ComPtr<ID3D11Resource> d3d11Texture);
     static ResultOrError<Ref<Texture>> CreateFromSharedTextureMemory(
         SharedTextureMemory* memory,
-        const UnpackedPtr<TextureDescriptor>& descriptor,
-        bool requiresFenceSignal);
+        const UnpackedPtr<TextureDescriptor>& descriptor);
     ID3D11Resource* GetD3D11Resource() const;
 
     ResultOrError<ComPtr<ID3D11RenderTargetView1>> CreateD3D11RenderTargetView(
@@ -132,10 +131,7 @@ class Texture final : public TextureBase {
     static ResultOrError<Ref<Texture>>
     CreateInternal(Device* device, const UnpackedPtr<TextureDescriptor>& descriptor, Kind kind);
 
-    Texture(Device* device,
-            const UnpackedPtr<TextureDescriptor>& descriptor,
-            Kind kind,
-            bool requiresFenceSignal = false);
+    Texture(Device* device, const UnpackedPtr<TextureDescriptor>& descriptor, Kind kind);
     ~Texture() override;
 
     template <typename T>
@@ -198,7 +194,6 @@ class Texture final : public TextureBase {
     const Kind mKind = Kind::Normal;
     ComPtr<ID3D11Resource> mD3d11Resource;
     Ref<d3d::KeyedMutex> mKeyedMutex;
-    const bool mRequiresFenceSignal = false;
 
     // The internal 'R8Uint' texture for sampling stencil from depth-stencil textures.
     Ref<Texture> mTextureForStencilSampling;
